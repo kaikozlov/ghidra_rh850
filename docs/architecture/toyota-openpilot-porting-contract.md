@@ -162,11 +162,17 @@ notification that still executes command7, authenticated `0x00F` trip wrap clear
 linked B6 freshness slots, and command7 result0 commits pending freshness before PDU42
 is released to COM. CMAC mismatch neither commits freshness nor delivers the command.
 Signal261 is a separate authenticated application modulo-64 sequence; it is not the
-SecOC message counter. The remaining problem is therefore safe **sender-side**
-reproduction of a known EPS receiver contract — exact OEM signal255 unit naming,
-sender wall-clock cadence, secondary-field dynamics where safety-relevant, sender
-freshness-state/signing ownership, the slot-4 secret value or approved slot use,
-stock-source suppression, and the upstream payload/SecOC producer contract. Techstream now verifies the Corolla P5 module topology as `FRC_P5` 498 + category-435
+SecOC message counter. SECOC-073 now closes the **observable global sender freshness
+state** as well: `0x00F` directly carries `trip16||reset20`, advances reset at a nominal
+300 ms state cadence while the sync frame is repeated at ~10 Hz, and the exact H
+`current/current-1` reset-window algorithm reconstructs every retained D7 frame. Because
+a newer authenticated `(trip,reset)` seeds ordinary message8 from transmitted low2,
+a replacement B6 sender can re-anchor at a new sync epoch without knowing the previous
+B6 message8; D7's message8 remains independent and must not be copied. The remaining
+problem is therefore safe **sender-side** reproduction of a known EPS receiver contract
+— B6 wall-clock cadence and sender-specific message8 policy, secondary-field dynamics
+where safety-relevant, the slot-4 secret value or approved slot use, stock-source
+suppression, and the upstream payload/SecOC producer contract. Techstream now verifies the Corolla P5 module topology as `FRC_P5` 498 + category-435
 `ABS_P5`/Brake-EPB + `EMPS_P5` 405, but not a byte-level forwarding transform or
 SecOC signer — so the remaining work is not discovery of another steering message,
 its scale, request selector, or loss rule.
@@ -263,7 +269,7 @@ work must recover the second and fourth boxes for each new generation as well.
 | Longitudinal command | older SecOC DBC provides a useful comparator, not an EPS-local proof | route `0x183` is 64-byte CAN-FD and disproves old wire-shape transfer | locate ACC producer, target command, feedback, stock suppression, AEB coexistence |
 | Stock producer ownership | old openpilot architecture gives camera/radar replacement model | physical Toyota-B/network differences already observed | map FRC/radar/gateway ownership and safe duplicate blocking for each command family |
 | UI / alerts | older `0x412` is historical reference | old-camera U023A87 path is disabled residue in H | identify FRC/cluster LTA/LDA/LCA status and warning outputs |
-| Authentication | Sienna SecOC receiver and bypass paths deeply recovered | command carrier is secured B6; receiver-side FV4/CMAC28 trailer, 46-bit freshness reconstruction, reset/message candidate window, retry scopes, trip-wrap handling, exact 36-byte CMAC input, command7 result/commit ordering, and config/job0→ICU-S slot4 selection are closed; application signal261 sequence handling is a separate authenticated counter | recover **sender-side** freshness-state/signing ownership and a production-safe way to use/provision the slot-4 secret before actuation; do not confuse the application 6-bit sequence counter with SecOC freshness |
+| Authentication | Sienna SecOC receiver and bypass paths deeply recovered | command carrier is secured B6; receiver-side FV4/CMAC28 trailer, 46-bit freshness reconstruction, reset/message candidate window, retry scopes, trip-wrap handling, exact 36-byte CMAC input, command7 result/commit ordering, and config/job0→ICU-S slot4 selection are closed; SECOC-073 additionally proves live `00F` is the wire-visible `trip16||reset20` epoch and replays D7 rollover exactly, so a strictly newer authenticated epoch can re-anchor B6 without its prior message8; application signal261 remains a separate authenticated counter | recover B6-local sender cadence/message8 start policy and a production-safe way to use/provision slot4 before actuation; do not copy D7's message counter or confuse application signal261 with SecOC freshness |
 | Techstream producer probes | older diagnostic controls are only contextual | FRC fixed vibration routines and category-435 ABS/Brake Active Tests are cataloged; the latter are brake-actuator-only and expose no named steering setpoint writer. TMS-051 also finds no named FRC/ABS Target-Lateral/Target-Steering data-monitor carrier; TMS-052 independently joins two local CUWs to Toyota's 23TC01 Corolla FRC family and supplies the 24TC01 Brake acquisition CIDs | use these as capture/probe triggers only; current decoded-corpus sender search is exhausted. Acquire/decode `07B0` Brake using live F181/0105 plus the published Brake CID family; the 2023 Corolla `0792` generation package is already local but still needs decode/exact-target identity, or synchronized traffic |
 
 ### 4.1 Route-backed Corolla implementation readiness

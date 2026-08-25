@@ -98,6 +98,34 @@ state transitions, not just call a stateless CMAC helper. Separate protected
 PDUs need separate message-counter state, and a stale or unauthenticated sync
 must not silently replace the active sender epoch.
 
+#### H/F Corolla live synchronization behavior
+
+SECOC-073 now verifies the same synchronization geometry directly against exact
+H/F receiver code and retained Corolla traffic. Exact H/F `0x00F/8` has no
+application payload: B0:B1 are trip16, B2:B3:B4[7:4] are reset20, and the
+remaining 28 bits are CMAC. In Span's moving rlog complete reset states are normally
+sent three times at ~10 Hz while reset itself advances every ~300 ms. Exact H's
+ordinary reset-window algorithm maps every post-sync D7 frame: most use current
+reset, while exactly one final old-epoch D7 per Span reset transition maps to
+`current-1` under the stored CAN-array order; ~20 ms later D7 begins the new reset at
+message-low2 1. Every
+complete D7 epoch reconstructs full message8 `1..15`.
+
+For H/F B6 this closes the global freshness portion but **not** its local sender
+counter. `0x00F` reveals trip16/reset20 directly, so 36 of B6's 46 meaningful
+freshness bits are observable. D7 and B6 nevertheless have independent ordinary
+freshness slots. A replacement sender must not copy D7's message8. Exact H's
+new-epoch rule does provide a clean re-anchor: after stock B6 is suppressed and
+a strictly newer authenticated `0x00F` epoch is committed, the first B6 message8
+is seeded from its transmitted low2 and does not depend on the previous B6
+message8. Within the same epoch, the full B6 message counter is still needed for
+the CMAC.
+
+The tracked proof is
+`data/generated/corolla_hf_secoc_00f_freshness_bridge.json`. This does not
+recover the H/F slot-4 secret, prove the stock B6 producer's message-counter
+start schedule, or replace the need for safe stock-source suppression.
+
 ### 1.2 Direction and CAN-ID scope
 
 The pinned controller signs three output streams:

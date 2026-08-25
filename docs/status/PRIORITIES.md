@@ -144,9 +144,15 @@ selector4 machinery. B6 is a new Corolla PDU instantiated from the same 32-byte
 ordinary-FD SecOC class already used by Sienna `090/D7`. Do **not** copy Sienna's
 freshness IDs, ordinary-slot numbers, RAM addresses, or assume its slot-4 secret is the
 same: those are target-generated/provisioned state, and shared D7 itself moves from
-Sienna freshness ID6/slot4 to H/F ID1/slot0. Do not spend another pass rediscovering
-receiver freshness or MAC28 logic; the remaining SecOC problem is sender
-state/key-use/ownership and stock cadence/topology.
+Sienna freshness ID6/slot4 to H/F ID1/slot0. SECOC-073 now closes the live `0x00F`
+bridge too: the wire directly exposes global trip16/reset20, reset state advances at a
+nominal 300 ms cadence, and H's exact reset/message reconstruction replays all retained
+D7 traffic including the `current-1` rollover overlap. A strictly newer authenticated
+`00F` epoch removes the need to know the previous B6 message8, but B6's own sender
+counter-start/cadence policy remains unobserved and D7's message counter cannot be
+reused. Do not spend another pass rediscovering receiver freshness, global sync state,
+or MAC28 logic; the remaining SecOC problem is B6-local sender policy, slot-4
+key/approved-MAC use, stock suppression, and producer cadence/topology.
 TMS-042 makes the same acquisition the highest-value reprogramming target too: modern GTS+ proves the FRC `ReproMethod=07` path
 uploads the package routine with DFI `0x01` / `10F5`, then the compact
 `DeltaReproData` with DFI `0x21` / `10F6`, while the host treats `.datx` as

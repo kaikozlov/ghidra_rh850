@@ -1170,6 +1170,21 @@ paths = [
   "external-references.lock.json",
 ]
 
+[suite.corolla_hf_secoc_00f_freshness_bridge_external]
+tests = ["tests/verify_corolla_hf_secoc_00f_freshness_bridge_external.py"]
+oracle = "independent_external_artifact"
+modes = ["local"]
+paths = [
+  "tests/verify_corolla_hf_secoc_00f_freshness_bridge_external.py",
+  "tools/build_corolla_hf_secoc_00f_freshness_bridge.py",
+  "data/generated/corolla_hf_secoc_00f_freshness_bridge.json",
+  "data/generated/corolla_2023_public_route_opendbc_evidence.json",
+  "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
+  "community/albinoelephant/can_oracle.ndjson",
+  "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst",
+  "external-references.lock.json",
+]
+
 [suite.corolla_tss3_opendbc_readonly_external]
 tests = ["tests/verify_corolla_tss3_opendbc_readonly_external.py"]
 oracle = "independent_external_artifact"
@@ -1317,6 +1332,31 @@ paths = [
   "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
   "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
   "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+  "exploit/findings_coverage.json",
+]
+
+[suite.corolla_hf_secoc_00f_freshness_bridge]
+tests = ["tests/verify_corolla_hf_secoc_00f_freshness_bridge.py"]
+oracle = "generated_self_check"
+paths = [
+  "tests/verify_corolla_hf_secoc_00f_freshness_bridge.py",
+  "tools/build_corolla_hf_secoc_00f_freshness_bridge.py",
+  "data/generated/corolla_hf_secoc_00f_freshness_bridge.json",
+  "data/generated/corolla_8965H1202000_b6_secoc_verification.json",
+  "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json",
+  "data/generated/corolla_h_sienna_secoc_structural_comparison.json",
+  "data/generated/corolla_2023_public_route_opendbc_evidence.json",
+  "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
+  "community/albinoelephant/can_oracle.ndjson",
+  "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst",
+  "external-references.lock.json",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/security/secoc/sender-implementation.md",
+  "docs/architecture/toyota-openpilot-porting-contract.md",
   "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",

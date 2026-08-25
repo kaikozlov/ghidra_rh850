@@ -111,10 +111,15 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   slot-selector machinery. What does **not** transfer by number is equally important:
   shared D7 moves from Sienna freshness ID6/ordinary slot4 to H/F ID1/slot0, and B6 is
   H/F ID2/slot1; RAM addresses/profile counts are regenerated, and the same slot-4
-  selector does not prove the same provisioned secret. The remaining Corolla work is
-  therefore sender wall-clock cadence, exact secondary-field naming
-  where safety-relevant, H/F-native limits, **sender-side SecOC freshness-state ownership
-  and the slot-4 secret value or an available approved MAC operation**, stock-source
+  selector does not prove the same provisioned secret. SECOC-073 now closes the global
+  sender freshness state visible on the wire: `0x00F` is exactly trip16/reset20 + MAC28,
+  reset advances at a nominal 300 ms state cadence, and exact-H reset/message arithmetic
+  replays every retained D7 frame including the `current-1` rollover overlap. A strictly
+  newer authenticated sync epoch can therefore re-anchor a replacement B6 message8
+  without knowing its previous high bits; D7's own message8 remains independent. The
+  remaining Corolla work is therefore sender wall-clock cadence and **B6-local counter
+  start/policy**, exact secondary-field naming where safety-relevant, H/F-native limits,
+  the slot-4 secret value or an available approved MAC operation, stock-source
   suppression, and the upstream payload/SecOC producer contract. Static broad searching
   of this H EPS should not be repeated without a new concrete lead.
   TMS-040/041 close the `FRC_P5` diagnostic domain and fixed-routine probe surface;
@@ -129,8 +134,9 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   and ABS reference an Automated Driving System Interface module. The unresolved
   task is firmware/dynamic: acquire decoded `FRC_P5` plus category-435 `ABS_P5`
   firmware or synchronized stock-LTA traffic and join planner state to B6 bytes,
-  sender cadence, sender freshness-state/signing ownership, and stock-source
-  suppression. Receiver freshness/trailer reconstruction, candidate-window/retry
+  sender cadence/B6-local message-counter policy, signing ownership, and stock-source
+  suppression. Global `00F` trip/reset ownership is now externally observable and no
+  longer part of this blocker. Receiver freshness/trailer reconstruction, candidate-window/retry
   policy, command7 result handling, commit timing, authenticated trip-wrap behavior,
   signal261 separation, and ICU-S slot selection are no longer open; the slot-4 key
   value remains unknown. The read-only `AB/EB`

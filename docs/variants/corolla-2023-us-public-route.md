@@ -2623,11 +2623,12 @@ wire/application/SecOC contract transfers exactly to `8965F1208000`.
 
 What remains before production use is now **sender-side or control-policy work**, not
 another receiver-payload search: the literal signal255 OEM unit and exact names for
-secondary live fields, sender wall-clock cadence, sender freshness-state ownership,
-the slot-4 secret value, normal target/rate/driver limits, stock-source suppression,
-and the upstream byte-level producer/forwarding transform despite the now-closed
-FRC/`ABS_P5`/EPS module topology. Receiver freshness **format and reconstruction** are
-no longer open.
+secondary live fields, sender wall-clock cadence and B6-local message-counter policy,
+the slot-4 secret value or approved MAC operation, normal target/rate/driver limits,
+stock-source suppression, and the upstream byte-level producer/forwarding transform
+despite the now-closed FRC/`ABS_P5`/EPS module topology. SECOC-073 subsequently closes
+the wire-visible global freshness source (`0x00F` trip16/reset20) as well; receiver
+freshness **format, reconstruction, and live global epoch tracking** are no longer open.
 
 Machine-readable ownership:
 `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json`,
@@ -2945,6 +2946,104 @@ profile properties, byte-identical codec bodies, target-native freshness arithme
 state cardinality, sync-wrap behavior, CMAC construction, slot4/command7 selection,
 queue/retry ordering, and the transfer boundary.
 
+### 7.38 `0x00F` live freshness bridge: wire epoch, D7 rollover, and B6 re-anchoring
+
+The remaining sender-side freshness question can be narrowed substantially without a
+stock B6 capture because H/F gives `0x0D7` and `0x0B6` independent ordinary freshness
+slots under the **same authenticated `0x00F` trip/reset epoch**. D7 is therefore a live
+oracle for the receiver's global epoch arithmetic, while its message counter remains
+strictly D7-local and is never transferred to B6.
+
+Exact H fixes the entire eight-byte `0x00F` layout. The synchronization profile at
+`0x2572C` has no application payload, FV36 transmitted in full, and CMAC28. Target-native
+`sync_freshness_parse @ 0x89B46` and `sync_freshness_pack @ 0x899B4` give:
+
+```text
+B0:B1             = trip16, big-endian
+B2:B3:B4[7:4]     = reset20, big-endian
+B4[3:0]:B5:B6:B7  = CMAC_MSB28
+```
+
+The authenticated input is consequently exactly seven bytes:
+
+```text
+00 0F || trip16 || reset20 || 0000b
+```
+
+There is no hidden synchronization application field. `0x89F6E` stages only a strictly
+newer `(trip,reset)` state, apart from the already-recovered bounded trip-wrap rule;
+`0x8A130` commits that state only after successful authentication. Equal repeated sync
+state is not a new freshness candidate. Ordinary H/F D7/B6 then transmit FV4 as
+`message_low2 || reset_low2`, while their full freshness remains
+`trip16 || reset20 || message8 || reset_low2 || 00b`.
+
+Three retained Corolla sources now make the wire evolution concrete without merging
+their identities:
+
+| source | `0x00F` evidence | observed epoch behavior |
+|---|---|---|
+| Albino TSKM oracle from the same 2023 investigation as exact H | 1,232 sync-only rows, 616 identical payloads on each of Panda buses 0/2; trip `0x0D0D` | 206 states; 204 observed reset `+1` transitions; after one collection discontinuity, nominal state cadence is ~300 ms; repeated state payloads are byte-identical |
+| 2023 public route segment 0 | 588 incoming bus-1 `00F`, 2,943 D7; trip `0x0CE9` | sync frame ~100 ms; reset state ~300 ms; H reset/window algorithm maps every post-sync D7 |
+| Span 2025 moving Discord rlog | 600 incoming bus-1 `00F`, 3,000 D7; trip `0x162D` | exactly 200 reset `+1` transitions; all 199 inter-transition intervals are 280–320 ms; every complete D7 reset epoch is 15 frames |
+
+The Span capture is the cleanest rollover proof. All 2,997 D7 frames after the first
+visible sync map through H's exact reset-candidate search with **zero misses**: 2,797 use
+the current `0x00F` reset and exactly 200 use `current-1`. Every same-epoch reconstructed
+D7 message8 advances by exactly `+1`; all 199 complete epochs reconstruct
+`1,2,...,15`. At all 200 reset transitions the newly advanced `0x00F` and one final D7
+share a `logMonoTime`, and **the stored CAN-array order places the new `0x00F` before
+that D7 in all 200 cases**. The following D7 still carries the previous reset-low2 and
+message-low2 `3` (reconstructed old-epoch message15); no same-timestamp old-reset D7
+precedes the new sync in logged array order. The first D7 using the new reset appears
+19.06–20.46 ms later (median 20.18 ms) and starts at message-low2 `1`.
+
+Under the capture's logged receive order, this is direct dynamic evidence for the
+`current-1` overlap accepted by H. Physical sub-event timing inside one batched CAN
+publication is not independently reconstructed here. The independent public route
+reproduces the same receiver model: all 2,940
+post-sync D7 frames map with zero misses, 196 use `current-1`, every same-epoch message
+advance is `+1`, and all 194 complete epochs reconstruct `1..15`. Its two reset-timing
+outliers coincide with route collection gaps; 194/196 inter-transition intervals still
+fall in 280–320 ms.
+
+This closes the **observable global portion of B6 freshness**. A B6 observer/sender can
+read 36 of the 46 meaningful freshness bits directly from authenticated `0x00F`:
+`trip16||reset20`. What remains per B6 is its independent message8; D7's message counter
+must not be copied. More importantly, exact H's new-epoch rule means that if the stock
+B6 producer is suppressed before the EPS commits a strictly newer authenticated
+`0x00F` epoch, the first B6 under that new epoch is seeded directly from its transmitted
+message-low2 (`0..3`). It therefore does **not** require knowledge of the previous B6
+message8. Subsequent B6 frames can maintain their own message8 locally. Within an
+unchanged epoch, by contrast, the sender still needs the next full B6 message8 to build
+the correct CMAC.
+
+The rollover is not atomic on the wire. The live D7 overlap shows that a last old-reset
+ordinary frame can remain valid immediately after a new sync is visible. A replacement
+sender should therefore use the newly authenticated `0x00F` plus observed/new-epoch
+ordinary progression as the synchronization boundary rather than treating one CAN
+capture timestamp as an atomic cutover.
+
+This materially reduces, but does not eliminate, the B6 sender problem. Still open are
+the slot-4 secret or an approved slot-4 CMAC operation, physical stock-B6 suppression
+and relay-side ownership, B6's wall-clock cadence and complete application-payload
+policy, and a live B6 capture validating the stock sender's own message8 initialization.
+The latter is a **sender-policy** question; D7 proves the receiver arithmetic, not that
+the B6 producer chooses the same `1..15` schedule.
+
+The capture identity boundary remains explicit. Albino's sync oracle came from the same
+investigation as the H dump but not the same runtime job; the public and Span rlogs have
+no exact H/F F181 join. Their MAC28 values are therefore not independently
+cryptographically verified here because the Corolla slot-4 secret remains unavailable.
+The result is instead a byte-exact match between target-native H receiver arithmetic and
+three independent wire sources.
+
+Machine-readable proof:
+`data/generated/corolla_hf_secoc_00f_freshness_bridge.json`;
+`tests/verify_corolla_hf_secoc_00f_freshness_bridge.py` pins the static H/F mapping and
+all summarized live invariants, while
+`tests/verify_corolla_hf_secoc_00f_freshness_bridge_external.py` regenerates the JSON
+from all three retained raw sources through the pinned sibling openpilot LogReader.
+
 ## 8. Remaining evidence boundary
 
 ### Static closure criterion
@@ -3024,6 +3123,6 @@ analyzed positive example of the replacement protected-B6 target-angle architect
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [COM-012](../reference/index.md#finding-com-012), [SECOC-042](../reference/index.md#finding-secoc-042), [SECOC-045](../reference/index.md#finding-secoc-045), [SECOC-063](../reference/index.md#finding-secoc-063), [SECOC-071](../reference/index.md#finding-secoc-071), [SECOC-072](../reference/index.md#finding-secoc-072), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [VAR-004](../reference/index.md#finding-var-004), [VAR-005](../reference/index.md#finding-var-005), [VAR-007](../reference/index.md#finding-var-007), [VAR-008](../reference/index.md#finding-var-008), [VAR-009](../reference/index.md#finding-var-009), [VAR-010](../reference/index.md#finding-var-010), [VAR-011](../reference/index.md#finding-var-011), [VAR-012](../reference/index.md#finding-var-012), [VAR-013](../reference/index.md#finding-var-013), [VAR-014](../reference/index.md#finding-var-014), [VAR-015](../reference/index.md#finding-var-015), [VAR-016](../reference/index.md#finding-var-016), [VAR-017](../reference/index.md#finding-var-017), [VAR-018](../reference/index.md#finding-var-018), [VAR-019](../reference/index.md#finding-var-019), [VAR-020](../reference/index.md#finding-var-020), [VAR-021](../reference/index.md#finding-var-021), [VAR-022](../reference/index.md#finding-var-022), [VAR-023](../reference/index.md#finding-var-023), [VAR-024](../reference/index.md#finding-var-024), [VAR-025](../reference/index.md#finding-var-025), [VAR-026](../reference/index.md#finding-var-026), [VAR-027](../reference/index.md#finding-var-027), [VAR-028](../reference/index.md#finding-var-028), [VAR-029](../reference/index.md#finding-var-029), [VAR-030](../reference/index.md#finding-var-030), [VAR-031](../reference/index.md#finding-var-031), [VAR-032](../reference/index.md#finding-var-032), [VAR-033](../reference/index.md#finding-var-033), [VAR-034](../reference/index.md#finding-var-034), [VAR-035](../reference/index.md#finding-var-035), [VAR-036](../reference/index.md#finding-var-036), [VAR-037](../reference/index.md#finding-var-037), [VAR-038](../reference/index.md#finding-var-038), [VAR-040](../reference/index.md#finding-var-040)
+- Findings with this document as canonical home: [COM-012](../reference/index.md#finding-com-012), [SECOC-042](../reference/index.md#finding-secoc-042), [SECOC-045](../reference/index.md#finding-secoc-045), [SECOC-063](../reference/index.md#finding-secoc-063), [SECOC-071](../reference/index.md#finding-secoc-071), [SECOC-072](../reference/index.md#finding-secoc-072), [SECOC-073](../reference/index.md#finding-secoc-073), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [VAR-004](../reference/index.md#finding-var-004), [VAR-005](../reference/index.md#finding-var-005), [VAR-007](../reference/index.md#finding-var-007), [VAR-008](../reference/index.md#finding-var-008), [VAR-009](../reference/index.md#finding-var-009), [VAR-010](../reference/index.md#finding-var-010), [VAR-011](../reference/index.md#finding-var-011), [VAR-012](../reference/index.md#finding-var-012), [VAR-013](../reference/index.md#finding-var-013), [VAR-014](../reference/index.md#finding-var-014), [VAR-015](../reference/index.md#finding-var-015), [VAR-016](../reference/index.md#finding-var-016), [VAR-017](../reference/index.md#finding-var-017), [VAR-018](../reference/index.md#finding-var-018), [VAR-019](../reference/index.md#finding-var-019), [VAR-020](../reference/index.md#finding-var-020), [VAR-021](../reference/index.md#finding-var-021), [VAR-022](../reference/index.md#finding-var-022), [VAR-023](../reference/index.md#finding-var-023), [VAR-024](../reference/index.md#finding-var-024), [VAR-025](../reference/index.md#finding-var-025), [VAR-026](../reference/index.md#finding-var-026), [VAR-027](../reference/index.md#finding-var-027), [VAR-028](../reference/index.md#finding-var-028), [VAR-029](../reference/index.md#finding-var-029), [VAR-030](../reference/index.md#finding-var-030), [VAR-031](../reference/index.md#finding-var-031), [VAR-032](../reference/index.md#finding-var-032), [VAR-033](../reference/index.md#finding-var-033), [VAR-034](../reference/index.md#finding-var-034), [VAR-035](../reference/index.md#finding-var-035), [VAR-036](../reference/index.md#finding-var-036), [VAR-037](../reference/index.md#finding-var-037), [VAR-038](../reference/index.md#finding-var-038), [VAR-040](../reference/index.md#finding-var-040)
 - Corrections with this document as canonical home: [CORR-070](../reference/index.md#correction-corr-070), [CORR-073](../reference/index.md#correction-corr-073), [CORR-074](../reference/index.md#correction-corr-074), [CORR-075](../reference/index.md#correction-corr-075), [CORR-076](../reference/index.md#correction-corr-076), [CORR-077](../reference/index.md#correction-corr-077), [CORR-078](../reference/index.md#correction-corr-078), [CORR-105](../reference/index.md#correction-corr-105), [CORR-106](../reference/index.md#correction-corr-106), [CORR-107](../reference/index.md#correction-corr-107)
 <!-- knowledge-cross-references:end -->

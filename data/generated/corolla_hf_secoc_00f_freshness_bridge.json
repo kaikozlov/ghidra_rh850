@@ -1,0 +1,521 @@
+{
+  "b6_sender_implication": {
+    "new_epoch_reanchor": "If the stock B6 producer is suppressed before the EPS commits a strictly newer authenticated 0x00F trip/reset, the first B6 under that new epoch does not require knowledge of the previous B6 message8: H 0x89D58 seeds full message8 from transmitted message_low2 (0..3). Thereafter the replacement sender can maintain the B6-local message8 and FV4 itself.",
+    "same_epoch_boundary": "Without a new epoch, the receiver reconstructs the next message8 congruent with transmitted message_low2 (+1..+4 from committed B6), so the sender still needs the reconstructed full message8 to compute a correct CMAC.",
+    "still_blocking": [
+      "slot-4 secret value or approved slot-4 CMAC operation",
+      "stock B6 producer suppression / relay-side ownership",
+      "B6 sender cadence and complete application-payload policy",
+      "live B6 capture to validate the sender's own message8 initialization/cadence; D7 proves receiver arithmetic, not B6 sender policy"
+    ],
+    "transition_race": "H's current-1 reset candidate and the live D7 transition show that one old-reset ordinary frame can remain valid immediately after 0x00F advances. A replacement sender should therefore treat a visible new 0x00F plus subsequent ordinary new-reset traffic as the clean epoch boundary rather than assuming simultaneous bus timestamps imply atomic sender rollover.",
+    "what_00f_reveals": "36/46 meaningful B6 freshness bits directly: trip16 and reset20.",
+    "what_remains_per_b6": "message8 is B6-local state; FV4 additionally repeats reset_low2. D7's message8 must not be copied into B6."
+  },
+  "captures": {
+    "albino_2023_tskm_sync_oracle": {
+      "all_repeated_state_payloads_byte_identical": true,
+      "bus0_bus2_payload_sequences_identical": true,
+      "first_frames": [
+        {
+          "mac28": "0x286D644",
+          "payload": "0d0d0074c286d644",
+          "reset": 1868,
+          "trip": 3341
+        },
+        {
+          "mac28": "0xC0824FF",
+          "payload": "0d0d0074dc0824ff",
+          "reset": 1869,
+          "trip": 3341
+        },
+        {
+          "mac28": "0x64A8C50",
+          "payload": "0d0d0074e64a8c50",
+          "reset": 1870,
+          "trip": 3341
+        },
+        {
+          "mac28": "0x8383EAA",
+          "payload": "0d0d0074f8383eaa",
+          "reset": 1871,
+          "trip": 3341
+        },
+        {
+          "mac28": "0x5F3D097",
+          "payload": "0d0d007505f3d097",
+          "reset": 1872,
+          "trip": 3341
+        },
+        {
+          "mac28": "0x6E7EDB0",
+          "payload": "0d0d007516e7edb0",
+          "reset": 1873,
+          "trip": 3341
+        },
+        {
+          "mac28": "0x1552E3F",
+          "payload": "0d0d007c41552e3f",
+          "reset": 1988,
+          "trip": 3341
+        },
+        {
+          "mac28": "0xF9964DD",
+          "payload": "0d0d007c5f9964dd",
+          "reset": 1989,
+          "trip": 3341
+        }
+      ],
+      "initial_collection_gap": {
+        "interpretation": "The early 1873->1988 discontinuity occurs inside the TSKM collection artifact; later consecutive reset states resume at nominal ~300 ms cadence.",
+        "observed_reset_delta": 115
+      },
+      "reset_first": 1868,
+      "reset_last": 2187,
+      "reset_transition_deltas": {
+        "1": 204,
+        "115": 1
+      },
+      "rows": 1232,
+      "rows_per_bus": {
+        "0": 616,
+        "2": 616
+      },
+      "source": {
+        "identity_boundary": "Contributor-supplied TSKM 0x00F oracle from the same 2023 Corolla investigation as the exact-H dump corpus, but CAN collection and memory dumping were separate jobs; this is not a same-runtime-epoch CodeFlash-to-CAN proof.",
+        "path": "community/albinoelephant/can_oracle.ndjson",
+        "sha256": "8863398a98875a853e722a6ba83fc10563d5764cea33719c8af34225efa189a3"
+      },
+      "state_copy_counts": {
+        "2": 2,
+        "3": 204
+      },
+      "state_transition_interval_count": 205,
+      "state_transition_intervals_280_to_320ms": 198,
+      "state_transition_period_ns_median": 299944401,
+      "trip_values": [
+        3341
+      ],
+      "trip_values_hex": [
+        "0x0D0D"
+      ],
+      "unique_states": 206
+    },
+    "public_2023": {
+      "d7_receiver_model_replay": {
+        "candidate_delta_counts": {
+          "-1": 196,
+          "0": 2744
+        },
+        "complete_15_frame_epochs": 194,
+        "complete_epochs_exact_message8_1_through_15": 194,
+        "epoch_frame_counts": {
+          "1": 1,
+          "11": 1,
+          "12": 1,
+          "15": 194,
+          "6": 1
+        },
+        "epochs_observed": 198,
+        "multiple_reset_candidates_before_auth_retry": 0,
+        "non_initial_epoch_first_message_low2": {
+          "1": 197
+        },
+        "same_epoch_message8_delta_counts": {
+          "1": 2742
+        },
+        "unmapped_after_first_sync": 0
+      },
+      "source": {
+        "path": "REFERENCE/public_route_corolla_2023_segment0_rlog.zst",
+        "sha256": "d246a55988889253c8d155f04b132b1bb443fdd74f1e6bad68eef8879a5c477b"
+      },
+      "sync_00f": {
+        "all_repeated_state_mac28_identical": true,
+        "all_repeated_state_payloads_byte_identical": true,
+        "first_frames": [
+          {
+            "mac28": "0xB3E61D5",
+            "payload": "0ce9000e0b3e61d5",
+            "reset": 224,
+            "trip": 3305
+          },
+          {
+            "mac28": "0x79BB15E",
+            "payload": "0ce9000e179bb15e",
+            "reset": 225,
+            "trip": 3305
+          },
+          {
+            "mac28": "0x79BB15E",
+            "payload": "0ce9000e179bb15e",
+            "reset": 225,
+            "trip": 3305
+          },
+          {
+            "mac28": "0x79BB15E",
+            "payload": "0ce9000e179bb15e",
+            "reset": 225,
+            "trip": 3305
+          },
+          {
+            "mac28": "0x8C1AAFD",
+            "payload": "0ce9000e28c1aafd",
+            "reset": 226,
+            "trip": 3305
+          }
+        ],
+        "frame_period_ns_median": 100018385,
+        "reset_first": 224,
+        "reset_last": 428,
+        "reset_transition_deltas_same_trip": {
+          "1": 196,
+          "8": 1
+        },
+        "state_run_lengths": {
+          "1": 2,
+          "2": 2,
+          "3": 194
+        },
+        "state_transition_interval_count": 196,
+        "state_transition_intervals_280_to_320ms": 194,
+        "state_transition_period_ns_median": 299922188.0,
+        "trip_transition_deltas": {},
+        "trip_values": [
+          3305
+        ],
+        "trip_values_hex": [
+          "0x0CE9"
+        ],
+        "unique_mac28_count": 198,
+        "unique_states": 198
+      },
+      "transition_ordering": {
+        "d7_same_timestamp_after_sync_using_previous_reset_low2": 56,
+        "d7_same_timestamp_before_sync_using_previous_reset_low2": 0,
+        "exact_same_trip_reset_plus1_transitions": 196,
+        "first_d7_new_reset_delay_ns_max": 33779427,
+        "first_d7_new_reset_delay_ns_median": 29832656,
+        "first_d7_new_reset_delay_ns_min": 0,
+        "first_d7_new_reset_message_low2": {
+          "1": 197
+        },
+        "sync_state_transitions": 197,
+        "those_after_sync_previous_reset_frames_with_message_low2_3": 55
+      },
+      "wire_counts": {
+        "0x00F": 588,
+        "0x0D7": 2943,
+        "mapped_0x0D7_after_first_00F": 2940
+      }
+    },
+    "span_2025_discord": {
+      "d7_receiver_model_replay": {
+        "candidate_delta_counts": {
+          "-1": 200,
+          "0": 2797
+        },
+        "complete_15_frame_epochs": 199,
+        "complete_epochs_exact_message8_1_through_15": 199,
+        "epoch_frame_counts": {
+          "15": 199,
+          "6": 2
+        },
+        "epochs_observed": 201,
+        "multiple_reset_candidates_before_auth_retry": 0,
+        "non_initial_epoch_first_message_low2": {
+          "1": 200
+        },
+        "same_epoch_message8_delta_counts": {
+          "1": 2796
+        },
+        "unmapped_after_first_sync": 0
+      },
+      "source": {
+        "path": "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst",
+        "sha256": "f1ae7c40ad8e9ff8c462a3f5367d914873e93575d902ccb82f2c74984acd439f"
+      },
+      "sync_00f": {
+        "all_repeated_state_mac28_identical": true,
+        "all_repeated_state_payloads_byte_identical": true,
+        "first_frames": [
+          {
+            "mac28": "0x8A0A606",
+            "payload": "162d0040d8a0a606",
+            "reset": 1037,
+            "trip": 5677
+          },
+          {
+            "mac28": "0x9DFFCA3",
+            "payload": "162d0040e9dffca3",
+            "reset": 1038,
+            "trip": 5677
+          },
+          {
+            "mac28": "0x9DFFCA3",
+            "payload": "162d0040e9dffca3",
+            "reset": 1038,
+            "trip": 5677
+          },
+          {
+            "mac28": "0x9DFFCA3",
+            "payload": "162d0040e9dffca3",
+            "reset": 1038,
+            "trip": 5677
+          },
+          {
+            "mac28": "0xF5E5101",
+            "payload": "162d0040ff5e5101",
+            "reset": 1039,
+            "trip": 5677
+          }
+        ],
+        "frame_period_ns_median": 100073477,
+        "reset_first": 1037,
+        "reset_last": 1237,
+        "reset_transition_deltas_same_trip": {
+          "1": 200
+        },
+        "state_run_lengths": {
+          "1": 1,
+          "2": 1,
+          "3": 199
+        },
+        "state_transition_interval_count": 199,
+        "state_transition_intervals_280_to_320ms": 199,
+        "state_transition_period_ns_median": 299995609,
+        "trip_transition_deltas": {},
+        "trip_values": [
+          5677
+        ],
+        "trip_values_hex": [
+          "0x162D"
+        ],
+        "unique_mac28_count": 201,
+        "unique_states": 201
+      },
+      "transition_ordering": {
+        "d7_same_timestamp_after_sync_using_previous_reset_low2": 200,
+        "d7_same_timestamp_before_sync_using_previous_reset_low2": 0,
+        "exact_same_trip_reset_plus1_transitions": 200,
+        "first_d7_new_reset_delay_ns_max": 20462900,
+        "first_d7_new_reset_delay_ns_median": 20178195.5,
+        "first_d7_new_reset_delay_ns_min": 19057787,
+        "first_d7_new_reset_message_low2": {
+          "1": 200
+        },
+        "sync_state_transitions": 200,
+        "those_after_sync_previous_reset_frames_with_message_low2_3": 200
+      },
+      "wire_counts": {
+        "0x00F": 600,
+        "0x0D7": 3000,
+        "mapped_0x0D7_after_first_00F": 2997
+      }
+    }
+  },
+  "cross_capture_conclusions": {
+    "all_complete_d7_epochs_are_message8_1_through_15": true,
+    "interpretation": "The live D7 sequence exercises the exact H reset search/window model under logged receive order: in Span, every new 0x00F is stored before one same-logMonoTime old-reset D7, which therefore maps to current-1; the next new-reset D7 seeds a new ordinary epoch, and within an epoch message8 advances by one. Physical sub-event timing inside one batched CAN publication is not independently reconstructed.",
+    "observed_candidate_deltas": {
+      "public": {
+        "-1": 196,
+        "0": 2744
+      },
+      "span": {
+        "-1": 200,
+        "0": 2797
+      }
+    },
+    "observed_reset_state_period_nominal_ms": 300,
+    "observed_trip_counter_constant_inside_each_60s_capture": true,
+    "public_reset_transition_intervals_280_to_320ms": [
+      194,
+      196
+    ],
+    "receiver_reset_candidate_search_replays_all_post_sync_d7": true,
+    "span_logged_order_exercises_current_minus_1_overlap": true,
+    "span_reset_transition_intervals_280_to_320ms": [
+      199,
+      199
+    ],
+    "sync_wire_is_direct_epoch_oracle": true
+  },
+  "evidence_boundary": "Exact H/F firmware proves receiver-side 0x00F and D7/B6 freshness semantics. The two captures prove wire evolution but are not exact H/F firmware-identity joins and the slot-4 key is unavailable, so their MAC28 values are not independently cryptographically verified here. D7 is used as the live ordinary-PDU oracle because exact H/F puts D7 and B6 under the same authenticated 0x00F trip/reset state while retaining independent per-PDU message8 slots. No D7 message counter is transferred to B6.",
+  "prior_art_note": "Current comma/opendbc Toyota SecOC code independently treats 0x00F RESET_CNT changes as the event that resets per-PDU sender message counters. That is useful sender-side prior art, but the live H/F-family conclusion above is based on D7 wire evolution and exact H receiver code, not transferred from the older Toyota implementation.",
+  "schema": 1,
+  "static_h_f_receiver": {
+    "applies_to": {
+      "corolla": [
+        "8965H1202000",
+        "8965F1208000"
+      ],
+      "corolla_h_f_application_identical": true,
+      "sienna": "8965B4512000"
+    },
+    "decompiler_bindings": {
+      "authenticated_input_build": {
+        "body_sha256": "d1e16041f8e55bec3173a949a783c8dfe9742447c88a3c737fd23e253c4064eb",
+        "entry": "0x00087FC2"
+      },
+      "normal_reset_search": {
+        "body_sha256": "a3fc81b8d72524c1ca2751624089fd8dee8ce54954193868cef1d40ac13879ac",
+        "entry": "0x00089CDA"
+      },
+      "normal_window": {
+        "body_sha256": "c272f96cd668ccd0f7f07a29a3afae45c265e9ffa891d688d7b8b377a78ea444",
+        "entry": "0x00089D58"
+      },
+      "sync_commit": {
+        "body_sha256": "9510d235ca9a0677088d6933f10e6803b43bbb6b2af1057bd0a254ac00b4762b",
+        "entry": "0x0008A130"
+      },
+      "sync_pack": {
+        "body_sha256": "73ba74740845adad428b7a6f60297a45ecfa13f36ad942aa623fc11dfeb341b0",
+        "entry": "0x000899B4"
+      },
+      "sync_parse": {
+        "body_sha256": "5b3ed2f84e07b33dea18ac1931fa3410c1d5817e08a6fdb04c6c80bf1007b86b",
+        "entry": "0x00089B46"
+      },
+      "sync_reconstruct": {
+        "body_sha256": "cb4ccb9eb50927751a12fb6b53ead42fe8668adcdaeafe98dbb12626b6888362",
+        "entry": "0x00089F6E"
+      }
+    },
+    "ordinary_freshness": {
+      "b6_freshness_id": 2,
+      "d7_freshness_id": 1,
+      "full_freshness": "trip16 || reset20 || message8 || reset_low2 || 00b",
+      "independent_ordinary_slots": true,
+      "new_epoch_message_rule": "received_message_low2 (0..3)",
+      "reset_candidate_search": {
+        "base": "current authenticated 0x00F reset counter",
+        "domain": [
+          0,
+          1048575
+        ],
+        "examples": {
+          "reset_current_100_rx0_attempt0": [
+            0,
+            100
+          ],
+          "reset_current_100_rx1_attempt0": [
+            2,
+            101
+          ],
+          "reset_current_100_rx2_attempt0": [
+            3,
+            98
+          ],
+          "reset_current_100_rx2_attempt1": [
+            4,
+            102
+          ],
+          "reset_current_100_rx3_attempt0": [
+            1,
+            99
+          ]
+        },
+        "filter": "candidate_reset & 3 == transmitted reset_low2",
+        "function": "0x00089CDA",
+        "important_ambiguity": "Only current-2 and current+2 collide in the two-bit transmitted reset domain; attempt0 chooses -2 (trial3) and the one allowed same-PDU retry can choose +2 (trial4).",
+        "ordered_trials": [
+          "current",
+          "current-1",
+          "current+1",
+          "current-2",
+          "current+2"
+        ],
+        "ordinary_b6_retry_limit": 1,
+        "selection": "authentication_candidate_retry_counter selects the Nth matching trial"
+      },
+      "same_epoch_message_rule": {
+        "condition": "global_trip == committed_trip and candidate_reset == committed_reset",
+        "examples": {
+          "message_10_rx2": [
+            14,
+            false
+          ],
+          "message_10_rx3": [
+            11,
+            false
+          ],
+          "message_253_rx0": [
+            255,
+            true
+          ],
+          "message_254_rx3": [
+            255,
+            false
+          ]
+        },
+        "formula": "candidate=(committed_message & ~3)|received_message_low2; if received_low2 <= (committed_message & 3), candidate += 4",
+        "function": "0x00089D58",
+        "ordinary_forward_delta": [
+          1,
+          4
+        ],
+        "overflow_behavior": "If the next congruent value would exceed 0xFF, the candidate message is forced to 0xFF and outer 0x89E9A returns status 0x24. The same 0xFF/status0x24 boundary is also reached when the selected reset is already 0xFFFFF.",
+        "strictly_forward": true
+      },
+      "wire_fv4": {
+        "bits": 4,
+        "decode": {
+          "message_low2": "B28[7:6]",
+          "reset_low2": "B28[5:4]"
+        },
+        "full_bits": 46,
+        "full_freshness": "trip16 || reset20 || message8 || reset_low2 || 00b",
+        "packer": "0x00089876",
+        "parser": "0x00089A46",
+        "wire": "B28[7:4]"
+      }
+    },
+    "profile_record": {
+      "address": "0x0002572C",
+      "authentication_retry_limit": 0,
+      "cryptoif_busy_retry_limit": 0,
+      "data_id": "0x00F",
+      "freshness_id": 0,
+      "full_cmac_bits": 128,
+      "full_freshness_bits": 36,
+      "record_sha256": "372a51b5ab5a198b57bc346a037fbc6b3e15d0ad3ef2b0c23a184d2e9c2930b0",
+      "secured_pdu_length": 8,
+      "transmitted_cmac_bits": 28,
+      "transmitted_freshness_bits": 36
+    },
+    "ram_state": {
+      "commit": "0x0008A130",
+      "commit_only_after_authentication_success": true,
+      "current_state": [
+        "0xFEBE54AC",
+        "0xFEBE54B0"
+      ],
+      "reconstruct": "0x00089F6E",
+      "secured_sync_can_id": "0x00F",
+      "sync_freshness_id": 0,
+      "sync_full_and_transmitted_bits": 36
+    },
+    "sync_acceptance": {
+      "commit_function": "0x0008A130",
+      "equal_state_result": 1,
+      "reconstruct_function": "0x00089F6E",
+      "stage_then_commit_after_cmac": true,
+      "strict_forward": "new_trip > current_trip OR (new_trip == current_trip AND new_reset > current_reset)",
+      "trip_wrap_clears_b6_and_d7": true,
+      "trip_wrap_rule": "when current trip >= 0xFFFF-15, a nonzero new trip <=16 is treated as forward wrap by 0x89F6E",
+      "trip_wrap_threshold": 15
+    },
+    "wire_layout": {
+      "B0_B1": "trip16, big-endian",
+      "B2_B3_B4_7_4": "reset20, big-endian",
+      "B4_3_0_B5_B6_B7": "CMAC_MSB28",
+      "application_payload_bytes": 0,
+      "authenticated_input": "00 0F || trip16 || reset20 || 0000b",
+      "authenticated_input_bytes": 7,
+      "freshness36": "trip16 || reset20"
+    }
+  },
+  "title": "Corolla H/F 0x00F SecOC synchronization -> ordinary freshness bridge"
+}
