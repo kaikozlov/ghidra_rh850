@@ -1,0 +1,981 @@
+{
+  "acceptance_and_retry_reuse": {
+    "corolla_b6_matches_sienna_ordinary_retry_class": true,
+    "ordinary_profile_retry_class": {
+      "authentication_candidate_or_mac_mismatch": 1,
+      "cryptoif_submit_busy": 2
+    },
+    "queue_state_bytes": {
+      "freshness_failure": "A5",
+      "generic_failure": "96",
+      "idle": "E1",
+      "new": "D2",
+      "retry": "B4",
+      "verify": "C3"
+    },
+    "shared_queue_model": "new -> verify; freshness 0x22 hard-fails; 0x23 requests another freshness/auth candidate; 0x24 remains on the CMAC path; command7 result0 is match; only authenticated success commits freshness before upper-PDU delivery",
+    "sync_profile_retry_class": {
+      "authentication_candidate_or_mac_mismatch": 0,
+      "cryptoif_submit_busy": 0
+    },
+    "upper_engine_correspondence": {
+      "boundary": "Sienna supplies role anchors for the generic acceptance engine. The H functions occupy the same control roles near a +0x5A64 Sienna relocation but are not claimed byte-identical: raw differences include relocated calls, GP/table displacements, and generated-profile geometry. H freshness/window conclusions below must be recovered from the target-native H bodies rather than transferred from Sienna.",
+      "rows": [
+        {
+          "body_size": 66,
+          "different_byte_count": 8,
+          "different_offsets": [
+            10,
+            11,
+            14,
+            15,
+            46,
+            47,
+            56,
+            57
+          ],
+          "entry_delta": "0x5A64",
+          "h_entry": "0x00088702",
+          "h_sha256": "706072cfdd3f30f10684f5b63089048d2f0a3e12ee3fc54e01aa4199acd057c2",
+          "role": "secoc_new_or_retry_transition",
+          "sienna_entry": "0x0008E166",
+          "sienna_sha256": "36a81b38ac5106dee1068526e91b7c33aff0fd8e6df4540868229a0bb2b58dfc"
+        },
+        {
+          "body_size": 104,
+          "different_byte_count": 10,
+          "different_offsets": [
+            12,
+            13,
+            18,
+            19,
+            28,
+            29,
+            60,
+            61,
+            88,
+            89
+          ],
+          "entry_delta": "0x5A64",
+          "h_entry": "0x0008891E",
+          "h_sha256": "359f2f45e592be34e4b3c3c19fd7c7afe992ee5c34b1a05c9a8f3977fef39610",
+          "role": "authentication_candidate_retry",
+          "sienna_entry": "0x0008E382",
+          "sienna_sha256": "6d1250c3a12079c7de2ca965822e7c091c84ad0ba74db083bc3d918478d7ade2"
+        },
+        {
+          "body_size": 92,
+          "different_byte_count": 10,
+          "different_offsets": [
+            14,
+            15,
+            20,
+            21,
+            28,
+            29,
+            58,
+            59,
+            76,
+            77
+          ],
+          "entry_delta": "0x5A64",
+          "h_entry": "0x000889C2",
+          "h_sha256": "b8bf401aef55411cf005505e0955cf119e9ce97d2948f2e28db400783eede66e",
+          "role": "crypto_submit_retry",
+          "sienna_entry": "0x0008E426",
+          "sienna_sha256": "3562b9de405f3ae6069011d43fcef0349dbe072c62e7bce653fcb26c3e489046"
+        },
+        {
+          "body_size": 396,
+          "different_byte_count": 16,
+          "different_offsets": [
+            16,
+            17,
+            20,
+            21,
+            36,
+            37,
+            40,
+            41,
+            62,
+            63,
+            130,
+            131,
+            256,
+            257,
+            316,
+            317
+          ],
+          "entry_delta": "0x5A64",
+          "h_entry": "0x00088A56",
+          "h_sha256": "58ba4592f15a5c9b0bc13c96c7b9cd471c40d1ace55759ea7f477e0e8cef10ca",
+          "role": "secoc_verify_worker",
+          "sienna_entry": "0x0008E4BA",
+          "sienna_sha256": "db69bf24d3ce490afdfbcac2049ed054a0097227e4a3eea3f3749cedcb72ee2c"
+        },
+        {
+          "body_size": 52,
+          "different_byte_count": 4,
+          "different_offsets": [
+            14,
+            15,
+            18,
+            19
+          ],
+          "entry_delta": "0x5A64",
+          "h_entry": "0x00088BE2",
+          "h_sha256": "ea091ae5d5e376662bd636303ff499150f10576a8434d26c0fdf39c01683e7d2",
+          "role": "freshness_commit_callback_dispatch",
+          "sienna_entry": "0x0008E646",
+          "sienna_sha256": "7e4798c4acaf8f8ee9c2db52c526bcb2b4b6b471fa58f216f689b768715c78af"
+        },
+        {
+          "body_size": 134,
+          "different_byte_count": 8,
+          "different_offsets": [
+            14,
+            15,
+            24,
+            25,
+            28,
+            29,
+            38,
+            39
+          ],
+          "entry_delta": "0x5A64",
+          "h_entry": "0x00088C16",
+          "h_sha256": "0220bb150af7ed42ef5114a4ce66ad562a6a61481ce20a22b78ec7405e92f5ba",
+          "role": "post_cmac_acceptance_gate",
+          "sienna_entry": "0x0008E67A",
+          "sienna_sha256": "fbe3753387d3e9de73baee0496c2a3777b0ebe7b252ef3654ddb88f7bae402ff"
+        },
+        {
+          "body_size": 58,
+          "different_byte_count": 2,
+          "different_offsets": [
+            22,
+            23
+          ],
+          "entry_delta": "0x5A64",
+          "h_entry": "0x00088C9C",
+          "h_sha256": "f05b334c3f7b1a28cd80a4cd04acde7cd7d726a65ae427b2fd47c30d5108ed7b",
+          "role": "secoc_queue_dispatch",
+          "sienna_entry": "0x0008E700",
+          "sienna_sha256": "bc23c41b082715bae1f85434c08343d7c3566f2be983c304e2f25d020f7479af"
+        }
+      ]
+    }
+  },
+  "applies_to": {
+    "corolla": [
+      "8965H1202000",
+      "8965F1208000"
+    ],
+    "corolla_h_f_application_identical": true,
+    "sienna": "8965B4512000"
+  },
+  "evidence_boundary": "This comparison proves structural/protocol reuse between Sienna 8965B4512000 and application-identical Corolla H/F using raw profile/config bytes, exact relocated helper bodies, and independently recovered target-native H/F behavior. It does not infer that the ICU-S slot4 secret is shared, does not transfer generated freshness IDs or RAM slots by number, and does not identify the B6 sender, cadence, or physical producer topology.",
+  "freshness_state_geometry": {
+    "corolla_h_f": {
+      "b6_current": "0xFEBE54D4",
+      "b6_pending": "0xFEBE54EC",
+      "extra_linked_pair": {
+        "behavior": "initialized to zero and additionally cleared by 0x8A0AE when authenticated sync group0 wraps",
+        "current": "0xFEBE54F8",
+        "linkage_config": "TP+0x1AB4 (0x00025820), value0",
+        "pending": "0xFEBE5504",
+        "semantic_boundary": "This pair is outside the two ordinary receive-profile slots. Its consumer/producer role is not assigned here and is not needed for B6 slot1 verification."
+      },
+      "global_sync_current": {
+        "reset": "0xFEBE54B0",
+        "trip": "0xFEBE54AC"
+      },
+      "global_sync_pending": {
+        "reset": "0xFEBE54B8",
+        "trip": "0xFEBE54B4"
+      },
+      "ordinary_current_base": "0xFEBE54C8",
+      "ordinary_pending_base": "0xFEBE54E0",
+      "ordinary_slot_bytes": 12,
+      "ordinary_slot_count": 2,
+      "ordinary_slot_order": [
+        "0x0D7",
+        "0x0B6"
+      ],
+      "wrap_flag": "0xFEBE54C6"
+    },
+    "portable_rule": "State record shape (trip32, reset32, message16 plus auxiliary bytes) and current/pending commit discipline are shared. Absolute RAM addresses, ordinary slot index, and freshness ID are generated per image and must not be transferred by number.",
+    "sienna": {
+      "global_sync_current": {
+        "reset": "0xFEBE556C",
+        "trip": "0xFEBE5568"
+      },
+      "global_sync_pending": {
+        "reset": "0xFEBE5574",
+        "trip": "0xFEBE5570"
+      },
+      "ordinary_current_base": "0xFEBE5584",
+      "ordinary_pending_base": "0xFEBE55C0",
+      "ordinary_slot_bytes": 12,
+      "ordinary_slot_count": 5,
+      "ordinary_slot_order": [
+        "0x2E4",
+        "0x131",
+        "0x132",
+        "0x090",
+        "0x0D7"
+      ],
+      "wrap_flag": "0xFEBE5580"
+    }
+  },
+  "function_correspondence": {
+    "boundary": "Exact byte transfer is claimed only for the four raw-identical freshness pack/parse helpers. Other rows are target-native role correspondences whose bodies change because tables, state addresses, profile cardinality, or call targets differ.",
+    "exact_byte_transfer_count": 4,
+    "exact_byte_transfers": [
+      "full_freshness_pack",
+      "sync_freshness_pack",
+      "transmitted_freshness_parse",
+      "sync_freshness_parse"
+    ],
+    "rows": [
+      {
+        "body_size": 98,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "d1e16041f8e55bec3173a949a783c8dfe9742447c88a3c737fd23e253c4064eb",
+        "corolla_h_entry": "0x00087FC2",
+        "role": "authenticated_input_builder",
+        "sienna_body_sha256": "3e6536a49ffddd69ca993393437eacfb15e61708e49e915300e560f1ed1a3721",
+        "sienna_entry": "0x0008DB22",
+        "transfer_ledger_status": "unique-instruction-shape-candidate",
+        "transfer_ledger_target": "0x00087fc2"
+      },
+      {
+        "body_size": 156,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "40344f44b8b7f5a04a189fed3c44946c6c9815911ed737c70c400f1b2fdc7a85",
+        "corolla_h_entry": "0x00088744",
+        "role": "trailer_freshness_tag_split",
+        "sienna_body_sha256": "ac258bab3e2a0962da180cc5d37aa5e38e07ef9566d92a659756cfe238b23131",
+        "sienna_entry": "0x0008E1A8",
+        "transfer_ledger_status": "unique-instruction-shape-candidate",
+        "transfer_ledger_target": "0x00088744"
+      },
+      {
+        "body_size": 396,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "58ba4592f15a5c9b0bc13c96c7b9cd471c40d1ace55759ea7f477e0e8cef10ca",
+        "corolla_h_entry": "0x00088A56",
+        "role": "verify_worker",
+        "sienna_body_sha256": "db69bf24d3ce490afdfbcac2049ed054a0097227e4a3eea3f3749cedcb72ee2c",
+        "sienna_entry": "0x0008E4BA",
+        "transfer_ledger_status": "unique-instruction-shape-candidate",
+        "transfer_ledger_target": "0x00088a56"
+      },
+      {
+        "body_size": 134,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "0220bb150af7ed42ef5114a4ce66ad562a6a61481ce20a22b78ec7405e92f5ba",
+        "corolla_h_entry": "0x00088C16",
+        "role": "post_cmac_acceptance",
+        "sienna_body_sha256": "fbe3753387d3e9de73baee0496c2a3777b0ebe7b252ef3654ddb88f7bae402ff",
+        "sienna_entry": "0x0008E67A",
+        "transfer_ledger_status": null,
+        "transfer_ledger_target": null
+      },
+      {
+        "body_size": 104,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "9f0e8f5478810905c0911ad0f69dc662c6753f8269b9661f908110fd9521faa7",
+        "corolla_h_entry": "0x00089558",
+        "role": "freshness_profile_lookup",
+        "sienna_body_sha256": "8cb03307b1228e0fc9baf3c57dde6eeff031ef88d7d0289f28bd0e66f80b9267",
+        "sienna_entry": "0x0008E80A",
+        "transfer_ledger_status": "changed-or-unresolved",
+        "transfer_ledger_target": null
+      },
+      {
+        "body_size": 86,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "031775b45fb23dce7c0b12fe8ed8d8bb48db0c3390a98bfb7243783710246cd5",
+        "corolla_h_entry": "0x000896B0",
+        "role": "freshness_get_dispatch",
+        "sienna_body_sha256": "9323be2e446a8ad8b22f328f1f47f11492aefbdb4637a0152cfae1fc45ee9015",
+        "sienna_entry": "0x0008E8E6",
+        "transfer_ledger_status": "changed-or-unresolved",
+        "transfer_ledger_target": null
+      },
+      {
+        "body_size": 58,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "da3592af256b9d473ab9697f5642b95c4f1d6c47fe32b68479cc50aed958b63a",
+        "corolla_h_entry": "0x00089758",
+        "role": "freshness_commit_dispatch",
+        "sienna_body_sha256": "c31c46fdd12728fb003a578dcddeb0e0e40bf13df4b59cec1fe3152707a3e8a3",
+        "sienna_entry": "0x0008E942",
+        "transfer_ledger_status": "changed-or-unresolved",
+        "transfer_ledger_target": null
+      },
+      {
+        "body_size": 120,
+        "byte_identical": true,
+        "corolla_h_body_sha256": "5683f2780a5aeb96e677416e2cf2f7459a36d09b96713f7a1c50ea38fad484f8",
+        "corolla_h_entry": "0x00089876",
+        "role": "full_freshness_pack",
+        "sienna_body_sha256": "5683f2780a5aeb96e677416e2cf2f7459a36d09b96713f7a1c50ea38fad484f8",
+        "sienna_entry": "0x0008EA4C",
+        "transfer_ledger_status": "exact-byte-transfer",
+        "transfer_ledger_target": "0x00089876"
+      },
+      {
+        "body_size": 62,
+        "byte_identical": true,
+        "corolla_h_body_sha256": "73ba74740845adad428b7a6f60297a45ecfa13f36ad942aa623fc11dfeb341b0",
+        "corolla_h_entry": "0x000899B4",
+        "role": "sync_freshness_pack",
+        "sienna_body_sha256": "73ba74740845adad428b7a6f60297a45ecfa13f36ad942aa623fc11dfeb341b0",
+        "sienna_entry": "0x0008EB2C",
+        "transfer_ledger_status": null,
+        "transfer_ledger_target": null
+      },
+      {
+        "body_size": 116,
+        "byte_identical": true,
+        "corolla_h_body_sha256": "686f0eec344c1661f8074016e751e9021d50ca752f7368aabf1d003c040d7389",
+        "corolla_h_entry": "0x00089A46",
+        "role": "transmitted_freshness_parse",
+        "sienna_body_sha256": "686f0eec344c1661f8074016e751e9021d50ca752f7368aabf1d003c040d7389",
+        "sienna_entry": "0x0008EBC2",
+        "transfer_ledger_status": "exact-byte-transfer",
+        "transfer_ledger_target": "0x00089A46"
+      },
+      {
+        "body_size": 62,
+        "byte_identical": true,
+        "corolla_h_body_sha256": "5b3ed2f84e07b33dea18ac1931fa3410c1d5817e08a6fdb04c6c80bf1007b86b",
+        "corolla_h_entry": "0x00089B46",
+        "role": "sync_freshness_parse",
+        "sienna_body_sha256": "5b3ed2f84e07b33dea18ac1931fa3410c1d5817e08a6fdb04c6c80bf1007b86b",
+        "sienna_entry": "0x0008EC82",
+        "transfer_ledger_status": null,
+        "transfer_ledger_target": null
+      },
+      {
+        "body_size": 126,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "a3fc81b8d72524c1ca2751624089fd8dee8ce54954193868cef1d40ac13879ac",
+        "corolla_h_entry": "0x00089CDA",
+        "role": "reset_candidate_search",
+        "sienna_body_sha256": "479f0a55a2216ade4771865d819419b1369da7d6ac458055e5fa75d1da16b8a9",
+        "sienna_entry": "0x0008ED0A",
+        "transfer_ledger_status": null,
+        "transfer_ledger_target": null
+      },
+      {
+        "body_size": 212,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "c272f96cd668ccd0f7f07a29a3afae45c265e9ffa891d688d7b8b377a78ea444",
+        "corolla_h_entry": "0x00089D58",
+        "role": "normal_window_message_reconstruction",
+        "sienna_body_sha256": "5294ab2e9db51122c02792a848359cea280c3fd0a56214cad6757c506fd4bd56",
+        "sienna_entry": "0x0008ED88",
+        "transfer_ledger_status": null,
+        "transfer_ledger_target": null
+      },
+      {
+        "body_size": 110,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "dbd4204d0ce72af5e5ec85dd7d588cbbc6469ef4390da06911666c56a172d625",
+        "corolla_h_entry": "0x00089E2C",
+        "role": "normal_candidate_builder",
+        "sienna_body_sha256": "9cecc2dfbcb9d0bd00c2d20970e4329c117e73fab134501e310244adfbfb38b8",
+        "sienna_entry": "0x0008EE5C",
+        "transfer_ledger_status": null,
+        "transfer_ledger_target": null
+      },
+      {
+        "body_size": 212,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "b77e9159cd9ad6450e60423edb2752b3830e7ee6bc5aef7a41c5e684bdebc5ec",
+        "corolla_h_entry": "0x00089E9A",
+        "role": "normal_freshness_reconstruct",
+        "sienna_body_sha256": "333a700f5008a0e02a8a54a5f1d22e4dc2ee2b4a848b980715288064f3ad408b",
+        "sienna_entry": "0x0008EECA",
+        "transfer_ledger_status": "changed-or-unresolved",
+        "transfer_ledger_target": null
+      },
+      {
+        "body_size": 228,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "cb4ccb9eb50927751a12fb6b53ead42fe8668adcdaeafe98dbb12626b6888362",
+        "corolla_h_entry": "0x00089F6E",
+        "role": "sync_freshness_reconstruct",
+        "sienna_body_sha256": "0b0c4ce23e156ae4b1d621c86c0f4a5356d738ef6fdd2ed34187ff895bc5c596",
+        "sienna_entry": "0x0008EF9E",
+        "transfer_ledger_status": "changed-or-unresolved",
+        "transfer_ledger_target": null
+      },
+      {
+        "body_size": 52,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "bd4d87c592b4cefb63be86bf4b3c3a489c8ef95f7571a6892f6b5b04febaad57",
+        "corolla_h_entry": "0x0008A07A",
+        "role": "normal_freshness_commit",
+        "sienna_body_sha256": "33875674fcd01ee33ab0e408ff56e707f31c095f890bf01fbbd39663415a3d1d",
+        "sienna_entry": "0x0008F084",
+        "transfer_ledger_status": "changed-or-unresolved",
+        "transfer_ledger_target": null
+      },
+      {
+        "body_size": 130,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "3fb2a92135b7e8cb36722a114ca4f75e3bb2c73b23e4f1fc54a49253b60e3d1e",
+        "corolla_h_entry": "0x0008A0AE",
+        "role": "trip_wrap_ordinary_clear",
+        "sienna_body_sha256": "1ebe9985ec7bf059721ca9f1fee9b3a0a518f369f605492ef0bbfd727fee977f",
+        "sienna_entry": "0x0008F0B8",
+        "transfer_ledger_status": null,
+        "transfer_ledger_target": null
+      },
+      {
+        "body_size": 78,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "9510d235ca9a0677088d6933f10e6803b43bbb6b2af1057bd0a254ac00b4762b",
+        "corolla_h_entry": "0x0008A130",
+        "role": "sync_freshness_commit",
+        "sienna_body_sha256": "20a8b423835a4fb3c6730a1c4250ab190abc3ea78211068db453e7defe0b7776",
+        "sienna_entry": "0x0008F112",
+        "transfer_ledger_status": "changed-or-unresolved",
+        "transfer_ledger_target": null
+      },
+      {
+        "body_size": 172,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "15b846d700ccb8f1f83aa836b1e6ad4cbd4a788a8fc0bbc9bd17171ae85beff0",
+        "corolla_h_entry": "0x000822D0",
+        "role": "icus_cmac_verify_prepare",
+        "sienna_body_sha256": "885e8edb09d35f0cedea452efa003b4807344487e6394ba156b32491d6eaabd2",
+        "sienna_entry": "0x00087ED0",
+        "transfer_ledger_status": "unique-instruction-shape-candidate",
+        "transfer_ledger_target": "0x000822d0"
+      },
+      {
+        "body_size": 288,
+        "byte_identical": false,
+        "corolla_h_body_sha256": "5a1afc51cd2c28b360984d6ca54a731f75af1bb06100869f0b49535b512b7767",
+        "corolla_h_entry": "0x00083BF4",
+        "role": "icus_command7_driver",
+        "sienna_body_sha256": "ad36148a8155bb51a07a2e8aabc4086210526e717d9e4cb5a83553342240cd98",
+        "sienna_entry": "0x000897F4",
+        "transfer_ledger_status": "unique-instruction-shape-candidate",
+        "transfer_ledger_target": "0x00083bf4"
+      }
+    ]
+  },
+  "initialization_and_persistence": {
+    "corolla_h_f_state_clear": {
+      "action": "zero global sync current/pending state, reset wrap/control state, regenerate complements, zero 2x12-byte ordinary current plus 2x12-byte pending arrays, and zero one additional linked 12-byte current/pending pair",
+      "function": "0x00089812"
+    },
+    "persistence_boundary": "Initialization equivalence does not prove that no other module later restores freshness from NVM. Sienna-specific persistence conclusions must not be transferred to H/F without target-native restore-path evidence.",
+    "shared_semantic": "Both receiver implementations explicitly initialize freshness RAM to zero and maintain complement/control cells around authenticated sync state.",
+    "sienna_state_clear": {
+      "action": "zero global sync current/pending state, reset wrap/control state, regenerate complements, and zero 5x12-byte ordinary current plus 5x12-byte pending arrays",
+      "function": "0x0008E9FC"
+    }
+  },
+  "key_and_icus": {
+    "config_semantics": {
+      "command_word": "0x00040007",
+      "cryptoif_handle": 0,
+      "icus_command": 7,
+      "icus_slot_selector": 4,
+      "type": 1
+    },
+    "configs_byte_identical": true,
+    "corolla_h_f_config": {
+      "address": "0x0002570C",
+      "bytes": "0100000004000000000000000000000000000000"
+    },
+    "lower_driver_structural_reuse": {
+      "command7_driver": {
+        "body_size": 288,
+        "corolla_h_f": "0x00083BF4",
+        "sienna": "0x000897F4"
+      },
+      "meaning": "Both target-native bodies read the selector from config+4 and issue ICUSCMD=(selector<<16)|7 for CMAC verification; function geometry is structurally preserved while GP/register/data addresses relocate.",
+      "prepare": {
+        "body_size": 172,
+        "corolla_h_f": "0x000822D0",
+        "sienna": "0x00087ED0"
+      }
+    },
+    "sienna_config": {
+      "address": "0x00025950",
+      "bytes": "0100000004000000000000000000000000000000"
+    },
+    "slot_secret_transfer_boundary": "The selector is the same ICU-S slot index. This does not prove that the secret key material provisioned into slot4 is the same across ECUs/vehicles."
+  },
+  "mac28_and_authenticated_input": {
+    "algorithm": "AES-CMAC-128",
+    "b6_input": "00 B6 || B0..B27 || freshness48",
+    "corolla_fd_examples": [
+      "0x0D7",
+      "0x0B6"
+    ],
+    "generic_builder": "DataID big-endian u16 || authentic application bytes || reconstructed full freshness",
+    "ordinary_fd_authenticated_input_bytes": 36,
+    "ordinary_trailer": "first trailer byte high nibble=FV4; low nibble plus next 3 bytes=CMAC_MSB28",
+    "sienna_fd_examples": [
+      "0x090",
+      "0x0D7"
+    ],
+    "source_identifier_boundary": "Neither implementation adds a separate source/profile identifier to the CMAC input beyond the configured two-byte DataID; freshness ID selects receiver state rather than adding authenticated bytes.",
+    "sync_trailer": "FV36 plus CMAC28 fills the 8-byte secured 0x00F PDU",
+    "transmitted_tag": "MSB28"
+  },
+  "profile_tables": {
+    "b6_as_shared_fd_profile_class": {
+      "b6_specific": {
+        "data_id": "0x0B6",
+        "freshness_id": 2,
+        "ordinary_slot": 1,
+        "upper_pdu_id": 42
+      },
+      "compared_fields": [
+        "full_cmac_bits",
+        "transmitted_cmac_bits",
+        "sync_linkage",
+        "trailer_bytes",
+        "is_sync",
+        "authentication_retry_limit",
+        "full_freshness_bits",
+        "transmitted_freshness_bits",
+        "cryptoif_handle",
+        "secured_pdu_length",
+        "cryptoif_busy_retry_limit",
+        "secured_buffer_length",
+        "input_buffer_length"
+      ],
+      "matches_sienna_0d7_format_crypto_retry_class": true,
+      "meaning": "B6 is Corolla-specific as a protected PDU identity/application route, not as a cryptographic profile shape: it is instantiated from the same FD ordinary SecOC class already present as Sienna 0x0D7/0x090."
+    },
+    "corolla_h_f": {
+      "base": "0x0002572C",
+      "count": 3,
+      "records": [
+        {
+          "address": "0x0002572C",
+          "authentication_retry_limit": 0,
+          "commit_callback": "0x00089758",
+          "cryptoif_busy_retry_limit": 0,
+          "cryptoif_handle": 0,
+          "data_id": "0x00F",
+          "freshness_id": 0,
+          "full_cmac_bits": 128,
+          "full_freshness_bits": 36,
+          "get_freshness_callback": "0x000896B0",
+          "index": 0,
+          "input_buffer_length": 8,
+          "is_sync": true,
+          "record_sha256": "372a51b5ab5a198b57bc346a037fbc6b3e15d0ad3ef2b0c23a184d2e9c2930b0",
+          "secured_buffer_length": 8,
+          "secured_pdu_length": 8,
+          "sync_linkage": 0,
+          "trailer_bytes": 8,
+          "transmitted_cmac_bits": 28,
+          "transmitted_freshness_bits": 36,
+          "upper_callback": "0x000634BA",
+          "upper_pdu_id": 9
+        },
+        {
+          "address": "0x0002577C",
+          "authentication_retry_limit": 1,
+          "commit_callback": "0x00089758",
+          "cryptoif_busy_retry_limit": 2,
+          "cryptoif_handle": 0,
+          "data_id": "0x0D7",
+          "freshness_id": 1,
+          "full_cmac_bits": 128,
+          "full_freshness_bits": 46,
+          "get_freshness_callback": "0x000896B0",
+          "index": 1,
+          "input_buffer_length": 32,
+          "is_sync": false,
+          "record_sha256": "86cde39a96b9b043c835eab1d1b66c1f3233687ac83baca8ab41c401e112eee8",
+          "secured_buffer_length": 32,
+          "secured_pdu_length": 32,
+          "sync_linkage": 0,
+          "trailer_bytes": 4,
+          "transmitted_cmac_bits": 28,
+          "transmitted_freshness_bits": 4,
+          "upper_callback": "0x000634BA",
+          "upper_pdu_id": 40
+        },
+        {
+          "address": "0x000257CC",
+          "authentication_retry_limit": 1,
+          "commit_callback": "0x00089758",
+          "cryptoif_busy_retry_limit": 2,
+          "cryptoif_handle": 0,
+          "data_id": "0x0B6",
+          "freshness_id": 2,
+          "full_cmac_bits": 128,
+          "full_freshness_bits": 46,
+          "get_freshness_callback": "0x000896B0",
+          "index": 2,
+          "input_buffer_length": 32,
+          "is_sync": false,
+          "record_sha256": "9288b0204c446b86da49305daa55cba68085aa26655b06a2f5d149e509d19080",
+          "secured_buffer_length": 32,
+          "secured_pdu_length": 32,
+          "sync_linkage": 0,
+          "trailer_bytes": 4,
+          "transmitted_cmac_bits": 28,
+          "transmitted_freshness_bits": 4,
+          "upper_callback": "0x000634BA",
+          "upper_pdu_id": 42
+        }
+      ]
+    },
+    "freshness_id_to_state_slot": {
+      "corolla_h_f": {
+        "0": "sync",
+        "1": 0,
+        "2": 1
+      },
+      "rule": "Freshness ID is matched against the configured record; ordinary-state slot is a compact ordinal assigned while walking non-sync records. It is not the freshness ID used directly as an array index.",
+      "sienna": {
+        "0": "sync",
+        "1": 0,
+        "2": 1,
+        "4": 2,
+        "5": 3,
+        "6": 4
+      }
+    },
+    "protected_ids": {
+      "corolla_added": [
+        "0x0B6"
+      ],
+      "corolla_h_f": [
+        "0x00F",
+        "0x0D7",
+        "0x0B6"
+      ],
+      "shared": [
+        "0x00F",
+        "0x0D7"
+      ],
+      "sienna": [
+        "0x00F",
+        "0x2E4",
+        "0x131",
+        "0x132",
+        "0x090",
+        "0x0D7"
+      ],
+      "sienna_only": [
+        "0x2E4",
+        "0x131",
+        "0x132",
+        "0x090"
+      ]
+    },
+    "shared_00f": {
+      "differences": {
+        "callback_addresses": "relocated/generated per image",
+        "upper_pdu_id": {
+          "corolla_h_f": 9,
+          "sienna": 11
+        }
+      },
+      "format_and_crypto_fields_identical": true,
+      "identical_fields": [
+        "full_cmac_bits",
+        "transmitted_cmac_bits",
+        "sync_linkage",
+        "trailer_bytes",
+        "is_sync",
+        "authentication_retry_limit",
+        "full_freshness_bits",
+        "transmitted_freshness_bits",
+        "cryptoif_handle",
+        "secured_pdu_length",
+        "cryptoif_busy_retry_limit",
+        "secured_buffer_length",
+        "input_buffer_length"
+      ],
+      "meaning": "Both images configure 0x00F as the synchronization profile: 8-byte secured PDU, FV36 transmitted in full, CMAC28, freshness ID0, no ordinary retry budgets, CryptoIf handle0."
+    },
+    "shared_0d7": {
+      "differences": {
+        "callback_addresses": "relocated/generated per image",
+        "freshness_id": {
+          "corolla_h_f": 1,
+          "sienna": 6
+        },
+        "ordinary_slot": {
+          "corolla_h_f": 0,
+          "sienna": 4
+        },
+        "upper_pdu_id": {
+          "corolla_h_f": 40,
+          "sienna": 47
+        }
+      },
+      "fd_format_crypto_retry_fields_identical": true,
+      "identical_fields": [
+        "full_cmac_bits",
+        "transmitted_cmac_bits",
+        "sync_linkage",
+        "trailer_bytes",
+        "is_sync",
+        "authentication_retry_limit",
+        "full_freshness_bits",
+        "transmitted_freshness_bits",
+        "cryptoif_handle",
+        "secured_pdu_length",
+        "cryptoif_busy_retry_limit",
+        "secured_buffer_length",
+        "input_buffer_length"
+      ],
+      "meaning": "0x0D7 is a shared 32-byte ordinary SecOC profile with 28-byte application payload, FV46/FV4, CMAC28, auth retry1, CryptoIf-busy retry2, and handle0. Freshness ID/slot numbering is generated and is not portable across images."
+    },
+    "sienna": {
+      "base": "0x00025970",
+      "count": 6,
+      "records": [
+        {
+          "address": "0x00025970",
+          "authentication_retry_limit": 0,
+          "commit_callback": "0x0008E942",
+          "cryptoif_busy_retry_limit": 0,
+          "cryptoif_handle": 0,
+          "data_id": "0x00F",
+          "freshness_id": 0,
+          "full_cmac_bits": 128,
+          "full_freshness_bits": 36,
+          "get_freshness_callback": "0x0008E8E6",
+          "index": 0,
+          "input_buffer_length": 8,
+          "is_sync": true,
+          "record_sha256": "11cbe031d7310bf087e9788a99f9bc06c77286ad624fcc5042ab5765b6273dfe",
+          "secured_buffer_length": 8,
+          "secured_pdu_length": 8,
+          "sync_linkage": 0,
+          "trailer_bytes": 8,
+          "transmitted_cmac_bits": 28,
+          "transmitted_freshness_bits": 36,
+          "upper_callback": "0x00069182",
+          "upper_pdu_id": 11
+        },
+        {
+          "address": "0x000259C0",
+          "authentication_retry_limit": 1,
+          "commit_callback": "0x0008E942",
+          "cryptoif_busy_retry_limit": 2,
+          "cryptoif_handle": 0,
+          "data_id": "0x2E4",
+          "freshness_id": 1,
+          "full_cmac_bits": 128,
+          "full_freshness_bits": 46,
+          "get_freshness_callback": "0x0008E8E6",
+          "index": 1,
+          "input_buffer_length": 8,
+          "is_sync": false,
+          "record_sha256": "589812c8f1eb2ab1a21f8eea5188349493f3e684c7c95baa90389640814b31a9",
+          "secured_buffer_length": 8,
+          "secured_pdu_length": 8,
+          "sync_linkage": 0,
+          "trailer_bytes": 4,
+          "transmitted_cmac_bits": 28,
+          "transmitted_freshness_bits": 4,
+          "upper_callback": "0x00069182",
+          "upper_pdu_id": 6
+        },
+        {
+          "address": "0x00025A10",
+          "authentication_retry_limit": 1,
+          "commit_callback": "0x0008E942",
+          "cryptoif_busy_retry_limit": 2,
+          "cryptoif_handle": 0,
+          "data_id": "0x131",
+          "freshness_id": 2,
+          "full_cmac_bits": 128,
+          "full_freshness_bits": 46,
+          "get_freshness_callback": "0x0008E8E6",
+          "index": 2,
+          "input_buffer_length": 8,
+          "is_sync": false,
+          "record_sha256": "bfee72842f63968d01233d1a1420154147575884d3f964d7a9fc9cbd7303386e",
+          "secured_buffer_length": 8,
+          "secured_pdu_length": 8,
+          "sync_linkage": 0,
+          "trailer_bytes": 4,
+          "transmitted_cmac_bits": 28,
+          "transmitted_freshness_bits": 4,
+          "upper_callback": "0x00069182",
+          "upper_pdu_id": 26
+        },
+        {
+          "address": "0x00025A60",
+          "authentication_retry_limit": 1,
+          "commit_callback": "0x0008E942",
+          "cryptoif_busy_retry_limit": 2,
+          "cryptoif_handle": 0,
+          "data_id": "0x132",
+          "freshness_id": 4,
+          "full_cmac_bits": 128,
+          "full_freshness_bits": 46,
+          "get_freshness_callback": "0x0008E8E6",
+          "index": 3,
+          "input_buffer_length": 8,
+          "is_sync": false,
+          "record_sha256": "d5f00622ccd1a754ba52b6dceb5e1a3ea952e180cc6f25b9db276c2c02766cda",
+          "secured_buffer_length": 8,
+          "secured_pdu_length": 8,
+          "sync_linkage": 0,
+          "trailer_bytes": 4,
+          "transmitted_cmac_bits": 28,
+          "transmitted_freshness_bits": 4,
+          "upper_callback": "0x00069182",
+          "upper_pdu_id": 35
+        },
+        {
+          "address": "0x00025AB0",
+          "authentication_retry_limit": 1,
+          "commit_callback": "0x0008E942",
+          "cryptoif_busy_retry_limit": 2,
+          "cryptoif_handle": 0,
+          "data_id": "0x090",
+          "freshness_id": 5,
+          "full_cmac_bits": 128,
+          "full_freshness_bits": 46,
+          "get_freshness_callback": "0x0008E8E6",
+          "index": 4,
+          "input_buffer_length": 32,
+          "is_sync": false,
+          "record_sha256": "2fdb3753564057a80503fab8fbe6558e0e3b13de6fca5e6e1415971d406eaaeb",
+          "secured_buffer_length": 32,
+          "secured_pdu_length": 32,
+          "sync_linkage": 0,
+          "trailer_bytes": 4,
+          "transmitted_cmac_bits": 28,
+          "transmitted_freshness_bits": 4,
+          "upper_callback": "0x00069182",
+          "upper_pdu_id": 46
+        },
+        {
+          "address": "0x00025B00",
+          "authentication_retry_limit": 1,
+          "commit_callback": "0x0008E942",
+          "cryptoif_busy_retry_limit": 2,
+          "cryptoif_handle": 0,
+          "data_id": "0x0D7",
+          "freshness_id": 6,
+          "full_cmac_bits": 128,
+          "full_freshness_bits": 46,
+          "get_freshness_callback": "0x0008E8E6",
+          "index": 5,
+          "input_buffer_length": 32,
+          "is_sync": false,
+          "record_sha256": "79bb3085141de2f220aeda9e112684e3a656d1127d20e219b5c2420b4e585ad3",
+          "secured_buffer_length": 32,
+          "secured_pdu_length": 32,
+          "sync_linkage": 0,
+          "trailer_bytes": 4,
+          "transmitted_cmac_bits": 28,
+          "transmitted_freshness_bits": 4,
+          "upper_callback": "0x00069182",
+          "upper_pdu_id": 47
+        }
+      ]
+    }
+  },
+  "schema": "corolla-h-sienna-secoc-structural-comparison-v1",
+  "shared_freshness_semantics": {
+    "authenticated_wrap_commit": "successful 0x00F wrap commits sync current from pending and clears linked ordinary freshness windows",
+    "commit_rule": "candidate ordinary/sync freshness is staged before CMAC and committed only after authentication success",
+    "new_epoch_rule": "accept a strictly newer authenticated trip/reset epoch and seed message8 from received message_low2",
+    "ordinary_full_freshness": "46 meaningful bits: trip16||reset20||message8||reset_low2||00b",
+    "ordinary_transmitted_freshness": "FV4: message_low2||reset_low2",
+    "reset_candidate_order": [
+      "current",
+      "current-1",
+      "current+1",
+      "current-2",
+      "current+2"
+    ],
+    "same_epoch_message_rule": "next strictly-forward message8 congruent with received message_low2; ordinary forward delta 1..4",
+    "sync_profile": "0x00F uses FV36 and lexicographic forward trip/reset acceptance with threshold15 bounded trip-wrap handling",
+    "terminal_boundary": "message 0xFF/reset 0xFFFFF can return status0x24 while still proceeding to CMAC"
+  },
+  "sources": {
+    "corolla_f_application_source": {
+      "application_sha256": "2ccb79cda1e8689ec91c389d3d7e3921c010ddc9c9d917f23c1705916a0e0d7f",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
+    },
+    "corolla_h_codeflash": {
+      "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+    },
+    "h_b6_secoc_contract": {
+      "path": "data/generated/corolla_8965H1202000_b6_secoc_verification.json",
+      "sha256": "8f085c961ec71e5951a92b91c9f24b5efab55c4abd4bc8f4a3e6b70eed7e85ac"
+    },
+    "h_target_native_decompiler_evidence": {
+      "path": "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json",
+      "sha256": "eea6eab24adf08468d677c110fd95f5878b131fe28e7d893e56851ae1e4a0570"
+    },
+    "raw_function_transfer_ledger": {
+      "path": "data/generated/corolla_8965H1202000_named_function_transfer_ledger.json",
+      "sha256": "c4c3340ff8a4acdbe0a848492c4332a596bb1d69233b72b560dedda300e89858"
+    },
+    "sienna_codeflash": {
+      "path": "firmware/RH850_P1M-E_CodeFlash.bin",
+      "sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+    }
+  },
+  "static_conclusion": {
+    "b6_is_new_pdu_on_shared_fd_secoc_class": true,
+    "freshness_ids_portable_across_images": false,
+    "ram_slot_numbers_portable_across_images": false,
+    "same_00f_sync_algorithm": true,
+    "same_generated_secoc_framework": true,
+    "same_icus_slot_selector_and_command": true,
+    "same_mac28_construction_class": true,
+    "same_ordinary_fv46_fv4_algorithm": true,
+    "same_slot4_secret_proved": false,
+    "short_form": "H/F reuses the Sienna SecOC receiver architecture and freshness arithmetic; Corolla mainly regenerates the profile inventory/state geometry and adds B6 as an FD ordinary profile."
+  },
+  "synchronization_manager_config": {
+    "byte_identical": true,
+    "compared_bytes": 32,
+    "corolla_h_f_address": "0x00025720",
+    "corolla_h_f_bytes": "000000000000cc000f00000080001c000000080080010f000000000000000000",
+    "meaning": "The 32-byte generated synchronization-manager configuration immediately preceding the SecOC profile records is byte-identical after relocation, including the trip-wrap threshold 0x0F.",
+    "sienna_address": "0x00025964",
+    "sienna_bytes": "000000000000cc000f00000080001c000000080080010f000000000000000000",
+    "wrap_threshold": 15
+  },
+  "transferable_sienna_semantics": {
+    "must_remain_corolla_target_specific": [
+      "protected PDU inventory and upper PDU/callback routing",
+      "freshness ID and ordinary-slot numbering",
+      "absolute RAM addresses and generated array cardinality",
+      "the Corolla-only extra linked current/pending pair",
+      "B6 application payload semantics and independent signal261 sequence behavior",
+      "actual secret provisioned into ICU-S slot4",
+      "upstream sender ownership, sender freshness-state source, wall-clock cadence, and physical interception topology"
+    ],
+    "safe_to_transfer_to_h_f_b6": [
+      "SecOC profile-record field meanings and generic queue/verification stages",
+      "FV4/FV46 packing and parsing, including the exact four byte-identical helper bodies",
+      "reset-current/\u00b11/\u00b12 candidate search and forward message-low2 reconstruction",
+      "0x00F monotonic synchronization and threshold15 wrap semantics",
+      "staged freshness followed by authentication-only commit",
+      "DataID||payload||full-freshness CMAC domain construction",
+      "AES-CMAC-128 with MSB28 transmitted tag through CryptoIf handle0 and ICU-S command7 slot selector4"
+    ]
+  }
+}

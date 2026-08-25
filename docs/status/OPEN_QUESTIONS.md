@@ -104,8 +104,15 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   reconstruction accepts the next congruent forward value (+1..+4); `0x24` still
   proceeds to CMAC; authenticated trip wrap clears linked B6 state; command7 result0
   commits pending freshness before PDU42 delivery while mismatch neither commits nor
-  delivers; and application signal261 is a separate modulo-64 counter. The remaining
-  Corolla work is therefore sender wall-clock cadence, exact secondary-field naming
+  delivers; and application signal261 is a separate modulo-64 counter. SECOC-072 now
+  closes the Sienna-transfer boundary too: Sienna and H/F share the same generated
+  `00F` sync/wrap algorithm, ordinary FV46/FV4 arithmetic, MAC28 domain/trailer
+  construction, stage-before-CMAC/commit-after-match discipline, and ICU-S command7
+  slot-selector machinery. What does **not** transfer by number is equally important:
+  shared D7 moves from Sienna freshness ID6/ordinary slot4 to H/F ID1/slot0, and B6 is
+  H/F ID2/slot1; RAM addresses/profile counts are regenerated, and the same slot-4
+  selector does not prove the same provisioned secret. The remaining Corolla work is
+  therefore sender wall-clock cadence, exact secondary-field naming
   where safety-relevant, H/F-native limits, **sender-side SecOC freshness-state ownership
   and the slot-4 secret value or an available approved MAC operation**, stock-source
   suppression, and the upstream payload/SecOC producer contract. Static broad searching

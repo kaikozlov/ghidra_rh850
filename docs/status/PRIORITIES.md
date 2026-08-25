@@ -127,8 +127,17 @@ ownership changes. SECOC-071 now closes the EPS-side verification algorithm itse
 B6 freshness ID2/slot1 state, `00F`-anchored reset/message candidate window, retry
 scopes, `0x24` boundary behavior, trip-wrap reset, 36-byte CMAC input, ICU-S slot-4
 selection, result polarity, commit-before-delivery ordering, and separation from
-application signal261. Do not spend another pass rediscovering receiver freshness
-logic; the remaining SecOC problem is sender state/key-use/ownership.
+application signal261. SECOC-072 then closes the structural transfer question against
+Sienna `8965B4512000`: H/F uses the same generated SecOC receiver framework, including
+`00F` synchronization/wrap arithmetic, FV46/FV4 codecs, DataID+payload+freshness
+CMAC28 construction, staged/commit-after-auth freshness handling, and ICU-S command7
+selector4 machinery. B6 is a new Corolla PDU instantiated from the same 32-byte
+ordinary-FD SecOC class already used by Sienna `090/D7`. Do **not** copy Sienna's
+freshness IDs, ordinary-slot numbers, RAM addresses, or assume its slot-4 secret is the
+same: those are target-generated/provisioned state, and shared D7 itself moves from
+Sienna freshness ID6/slot4 to H/F ID1/slot0. Do not spend another pass rediscovering
+receiver freshness or MAC28 logic; the remaining SecOC problem is sender
+state/key-use/ownership and stock cadence/topology.
 TMS-042 makes the same acquisition the highest-value reprogramming target too: modern GTS+ proves the FRC `ReproMethod=07` path
 uploads the package routine with DFI `0x01` / `10F5`, then the compact
 `DeltaReproData` with DFI `0x21` / `10F6`, while the host treats `.datx` as

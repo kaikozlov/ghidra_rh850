@@ -2806,6 +2806,145 @@ the model and pins the H/F bytes, profile geometry, RAM slots, reset/message can
 arithmetic, `0x24` and trip-wrap edge cases, command-7 result polarity, retry scopes,
 commit-before-delivery ordering, slot-4 selector, and signal261 separation.
 
+### 7.37 H/F versus Sienna SecOC: shared generated engine, regenerated profile inventory
+
+The complete H/F B6 receiver path also permits a stricter question than the earlier
+one-way Sienna role comparison: **which Sienna SecOC semantics are genuinely the same
+protocol implementation and can therefore be reused as prior art?** Direct comparison
+against Sienna `8965B4512000` shows that H/F is a regenerated instance of the same
+Denso/Toyota receiver architecture, not a new Corolla-specific freshness or CMAC
+scheme. The differences that matter are overwhelmingly table inventory, state-array
+cardinality, and application routing.
+
+The profile tables make this visible immediately. Sienna has six 0x50-byte profiles at
+`0x25970`: `00F,2E4,131,132,090,D7`. H/F has three at `0x2572C`:
+`00F,D7,B6`. The shared `0x00F` record has the same protocol geometry in both images:
+8-byte synchronization PDU, freshness ID 0, full/transmitted freshness width 36 bits,
+AES-CMAC-128 with 28 transmitted bits, CryptoIf handle 0, and zero ordinary retry
+budgets. More strongly, the **32-byte synchronization-manager configuration block** at
+Sienna `0x25964` and H `0x25720` is byte-identical after relocation, including the
+trip-wrap threshold `0x0F`.
+
+Shared `0x0D7` is an even better ordinary-profile control. In both images it is a
+32-byte protected FD PDU with 28 authenticated application bytes, a four-byte trailer,
+FV46 reconstructed from FV4, CMAC28, auth/candidate retry limit 1, CryptoIf-busy retry
+limit 2, and CryptoIf handle 0. But its **generated identity binding changes**:
+Sienna assigns D7 freshness ID 6 / ordinary slot 4 / upper PDU 47, whereas H/F assigns
+freshness ID 1 / ordinary slot 0 / upper PDU 40. Therefore freshness IDs and RAM slot
+numbers are not cross-ECU protocol identifiers. They are generated indices into each
+image's configured profile set.
+
+B6 then fits the same ordinary-FD class exactly. Relative to Sienna D7, H/F B6 has the
+same CMAC widths, FV46/FV4 geometry, 32-byte secured length, retry limits, handle 0, and
+buffer geometry; what changes is the configured DataID (`0x00B6`), freshness ID 2,
+ordinary slot 1, upper PDU42, and callback/routing addresses. B6 is thus Corolla-specific
+as a **PDU/application contract**, but not as a SecOC cryptographic-profile shape.
+Sienna's `0x090` and `0x0D7` are already two instances of the same 32-byte ordinary-FD
+class that H/F uses for `0x0D7` and `0x0B6`.
+
+The freshness codecs provide raw function-body proof, not just decompiler resemblance.
+Four complete Sienna bodies are byte-identical at their relocated H entries:
+
+| role | Sienna | H/F | proof |
+|---|---:|---:|---|
+| full freshness pack | `0x8EA4C` | `0x89876` | 120 bytes exact |
+| sync freshness pack | `0x8EB2C` | `0x899B4` | 62 bytes exact |
+| transmitted freshness unpack | `0x8EBC2` | `0x89A46` | 116 bytes exact |
+| sync freshness unpack | `0x8EC82` | `0x89B46` | 62 bytes exact |
+
+The surrounding functions change bytes because GP/TP addresses, record counts, and call
+targets move, but their target-native control flow preserves the same arithmetic.
+Sienna `0x8ED0A` and H `0x89CDA` both search reset candidates in order
+`current,-1,+1,-2,+2` inside the 20-bit domain. Sienna `0x8ED88` and H `0x89D58`
+perform the same strictly-forward message reconstruction from transmitted low bits and
+the same `0xFF` terminal handling. Normal reconstruction and commit differ in the
+expected generated bound only: Sienna accepts five ordinary slots, H/F two.
+
+The synchronized state model is likewise preserved. Sienna maintains authenticated
+sync current trip/reset at `FEBE5568/556C`, pending at `FEBE5570/5574`, then five
+12-byte ordinary current slots at `FEBE5584` and five pending slots at `FEBE55C0`.
+H/F relocates that cluster to current sync `FEBE54AC/54B0`, pending
+`FEBE54B4/54B8`, two ordinary current slots at `FEBE54C8`, and two pending slots at
+`FEBE54E0`; B6 is current `FEBE54D4`, pending `FEBE54EC`. The 12-byte ordinary
+record shape and current/pending discipline are shared. H/F also initializes and
+wrap-clears an additional linked 12-byte current/pending pair at
+`FEBE54F8/FEBE5504`, controlled by a separate group-0 linkage field at `0x25820`.
+That pair lies outside the two ordinary receive-profile slots; no application meaning is
+assigned here, and B6 verification does not depend on naming it.
+
+`0x00F` synchronization arithmetic itself is the same target-native algorithm. Both
+sync reconstructors require FV36, reject stale/equal state through the same result
+classes, accept lexicographically forward trip/reset state, and use threshold 15 for the
+bounded 16-bit trip-wrap window. Authentication success copies pending sync state to
+current; an authenticated accepted wrap clears linked ordinary current/pending windows.
+Sienna's clear loop walks six configured profiles/five ordinary states; H/F walks three
+total profiles/two ordinary states and additionally clears the extra linked pair above.
+Thus the **Sienna `0x00F` freshness semantics transfer**, while the concrete profile
+inventory being reset does not.
+
+The CMAC side is equally reusable. Sienna `0x8DB22` and H `0x87FC2` are
+source-equivalent authenticated-input builders: big-endian 16-bit DataID, then authentic
+application payload, then reconstructed full freshness. Sienna's 32-byte ordinary FD
+profiles therefore build the same 36-byte domain class as B6. H/F B6 specializes it to
+`00 B6 || B0..B27 || freshness48`. Sienna `0x8E1A8` and H `0x88744` are likewise
+source-equivalent generic trailer splitters driven by profile widths: for ordinary FV4
+profiles, the first trailer-byte high nibble is freshness and its low nibble plus the
+next three bytes form CMAC_MSB28. Neither implementation adds a separately recovered
+source/profile word to the authenticated input beyond configured DataID.
+
+The key-selection path is structurally shared all the way into ICU-S. Sienna config at
+`0x25950` and H config at `0x2570C` are the same 20 bytes:
+`01 00 00 00 04 00 ...`, meaning type 1 / selector 4. Sienna
+`0x87ED0` and H `0x822D0` both take the selector from config+4; Sienna
+`0x897F4` and H `0x83BF4` both issue command 7 as
+`ICUSCMD=(selector<<16)|7`, giving `0x00040007` for SecOC. Both use CryptoIf handle
+0 and AES-CMAC-128/MSB28. This proves a shared **slot selector and hardware command
+contract**, not shared secret material: nothing here proves that Sienna and Corolla have
+the same key provisioned into slot 4.
+
+The upper receiver state machine also transfers structurally. Seven generic H/F stages
+have their Sienna counterparts at a consistent `+0x5A64` relocation: new/retry
+transition, auth-candidate retry, CryptoIf-busy retry, verify worker, freshness-commit
+dispatch, post-CMAC gate, and queue dispatch. Both use the same queue-state model and
+retry split: ordinary auth/freshness or MAC-mismatch retry limit 1, CryptoIf-busy retry
+limit 2, `0x22` hard freshness failure, `0x23` candidate retry, `0x24` still entering
+the CMAC path, result 0 as match, and freshness commit before upper-PDU delivery only
+on successful authentication. The generic upper bodies are not claimed byte-identical;
+the role/control correspondence is independently present in each target.
+
+Initialization has the same receiver-level intent but should not be overextended into an
+NvM claim. Sienna `0x8E9FC` explicitly clears sync current/pending state and its five
+ordinary current/pending arrays; H `0x89812` does the same for the smaller two-slot
+arrays plus the extra linked pair. That proves RAM initialization semantics. It does
+**not** prove that another H/F module cannot later restore state, so Sienna-specific NvM
+or persistence conclusions are not transferred without H/F restore-path evidence.
+
+The resulting transfer rule is narrow but useful:
+
+- **safe to reuse from Sienna:** profile-field meanings; FV4/FV46 packing; reset
+  current/±1/±2 search; forward message-low2 reconstruction; `0x00F` monotonic and
+  threshold-15 wrap behavior; stage-before-CMAC/commit-after-success ordering;
+  DataID+payload+full-freshness CMAC construction; AES-CMAC-128/MSB28; CryptoIf
+  handle0; and ICU-S command7 selector4 machinery;
+- **must remain H/F-specific:** protected-PDU inventory, DataID/application route,
+  freshness ID and ordinary-slot numbering, absolute RAM addresses and state-array
+  cardinality, the extra linked pair, B6 application fields/signal261, actual slot-4
+  secret material, sender-side freshness ownership/cadence, and physical producer or
+  interception topology.
+
+This materially changes how Sienna prior art should be used. We do **not** need to
+rediscover the generic freshness or MAC28 algorithm for every H/F protected PDU. B6 is a
+new application PDU on the same receiver framework. But copying Sienna's freshness ID,
+slot number, or assuming the same key would be incorrect.
+
+Machine-readable proof:
+`data/generated/corolla_h_sienna_secoc_structural_comparison.json`;
+`tests/verify_corolla_h_sienna_secoc_structural_comparison.py` regenerates the
+comparison and independently pins both raw profile tables, exact shared `00F`/`0D7`
+profile properties, byte-identical codec bodies, target-native freshness arithmetic,
+state cardinality, sync-wrap behavior, CMAC construction, slot4/command7 selection,
+queue/retry ordering, and the transfer boundary.
+
 ## 8. Remaining evidence boundary
 
 ### Static closure criterion
@@ -2885,6 +3024,6 @@ analyzed positive example of the replacement protected-B6 target-angle architect
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [COM-012](../reference/index.md#finding-com-012), [SECOC-042](../reference/index.md#finding-secoc-042), [SECOC-045](../reference/index.md#finding-secoc-045), [SECOC-063](../reference/index.md#finding-secoc-063), [SECOC-071](../reference/index.md#finding-secoc-071), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [VAR-004](../reference/index.md#finding-var-004), [VAR-005](../reference/index.md#finding-var-005), [VAR-007](../reference/index.md#finding-var-007), [VAR-008](../reference/index.md#finding-var-008), [VAR-009](../reference/index.md#finding-var-009), [VAR-010](../reference/index.md#finding-var-010), [VAR-011](../reference/index.md#finding-var-011), [VAR-012](../reference/index.md#finding-var-012), [VAR-013](../reference/index.md#finding-var-013), [VAR-014](../reference/index.md#finding-var-014), [VAR-015](../reference/index.md#finding-var-015), [VAR-016](../reference/index.md#finding-var-016), [VAR-017](../reference/index.md#finding-var-017), [VAR-018](../reference/index.md#finding-var-018), [VAR-019](../reference/index.md#finding-var-019), [VAR-020](../reference/index.md#finding-var-020), [VAR-021](../reference/index.md#finding-var-021), [VAR-022](../reference/index.md#finding-var-022), [VAR-023](../reference/index.md#finding-var-023), [VAR-024](../reference/index.md#finding-var-024), [VAR-025](../reference/index.md#finding-var-025), [VAR-026](../reference/index.md#finding-var-026), [VAR-027](../reference/index.md#finding-var-027), [VAR-028](../reference/index.md#finding-var-028), [VAR-029](../reference/index.md#finding-var-029), [VAR-030](../reference/index.md#finding-var-030), [VAR-031](../reference/index.md#finding-var-031), [VAR-032](../reference/index.md#finding-var-032), [VAR-033](../reference/index.md#finding-var-033), [VAR-034](../reference/index.md#finding-var-034), [VAR-035](../reference/index.md#finding-var-035), [VAR-036](../reference/index.md#finding-var-036), [VAR-037](../reference/index.md#finding-var-037), [VAR-038](../reference/index.md#finding-var-038), [VAR-040](../reference/index.md#finding-var-040)
+- Findings with this document as canonical home: [COM-012](../reference/index.md#finding-com-012), [SECOC-042](../reference/index.md#finding-secoc-042), [SECOC-045](../reference/index.md#finding-secoc-045), [SECOC-063](../reference/index.md#finding-secoc-063), [SECOC-071](../reference/index.md#finding-secoc-071), [SECOC-072](../reference/index.md#finding-secoc-072), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [VAR-004](../reference/index.md#finding-var-004), [VAR-005](../reference/index.md#finding-var-005), [VAR-007](../reference/index.md#finding-var-007), [VAR-008](../reference/index.md#finding-var-008), [VAR-009](../reference/index.md#finding-var-009), [VAR-010](../reference/index.md#finding-var-010), [VAR-011](../reference/index.md#finding-var-011), [VAR-012](../reference/index.md#finding-var-012), [VAR-013](../reference/index.md#finding-var-013), [VAR-014](../reference/index.md#finding-var-014), [VAR-015](../reference/index.md#finding-var-015), [VAR-016](../reference/index.md#finding-var-016), [VAR-017](../reference/index.md#finding-var-017), [VAR-018](../reference/index.md#finding-var-018), [VAR-019](../reference/index.md#finding-var-019), [VAR-020](../reference/index.md#finding-var-020), [VAR-021](../reference/index.md#finding-var-021), [VAR-022](../reference/index.md#finding-var-022), [VAR-023](../reference/index.md#finding-var-023), [VAR-024](../reference/index.md#finding-var-024), [VAR-025](../reference/index.md#finding-var-025), [VAR-026](../reference/index.md#finding-var-026), [VAR-027](../reference/index.md#finding-var-027), [VAR-028](../reference/index.md#finding-var-028), [VAR-029](../reference/index.md#finding-var-029), [VAR-030](../reference/index.md#finding-var-030), [VAR-031](../reference/index.md#finding-var-031), [VAR-032](../reference/index.md#finding-var-032), [VAR-033](../reference/index.md#finding-var-033), [VAR-034](../reference/index.md#finding-var-034), [VAR-035](../reference/index.md#finding-var-035), [VAR-036](../reference/index.md#finding-var-036), [VAR-037](../reference/index.md#finding-var-037), [VAR-038](../reference/index.md#finding-var-038), [VAR-040](../reference/index.md#finding-var-040)
 - Corrections with this document as canonical home: [CORR-070](../reference/index.md#correction-corr-070), [CORR-073](../reference/index.md#correction-corr-073), [CORR-074](../reference/index.md#correction-corr-074), [CORR-075](../reference/index.md#correction-corr-075), [CORR-076](../reference/index.md#correction-corr-076), [CORR-077](../reference/index.md#correction-corr-077), [CORR-078](../reference/index.md#correction-corr-078), [CORR-105](../reference/index.md#correction-corr-105), [CORR-106](../reference/index.md#correction-corr-106), [CORR-107](../reference/index.md#correction-corr-107)
 <!-- knowledge-cross-references:end -->

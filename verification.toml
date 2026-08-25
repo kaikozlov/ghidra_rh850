@@ -1302,6 +1302,28 @@ paths = [
   "exploit/findings_coverage.json",
 ]
 
+[suite.corolla_h_sienna_secoc_structural_comparison]
+tests = ["tests/verify_corolla_h_sienna_secoc_structural_comparison.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_corolla_h_sienna_secoc_structural_comparison.py",
+  "tools/build_corolla_h_sienna_secoc_structural_comparison.py",
+  "data/generated/corolla_h_sienna_secoc_structural_comparison.json",
+  "data/generated/corolla_8965H1202000_b6_secoc_verification.json",
+  "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_named_function_transfer_ledger.json",
+  "data/generated/decompilations.jsonl",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+  "exploit/findings_coverage.json",
+]
+
 [suite.corolla_h_openpilot_state_bridge]
 tests = ["tests/verify_corolla_8965H1202000_openpilot_state_bridge.py"]
 oracle = "raw_bytes"
