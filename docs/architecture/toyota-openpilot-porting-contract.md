@@ -526,10 +526,29 @@ accidentally be treated as completion of the TSS3 vehicle port.
 
 ### E. Recover the production safety envelope
 
-Measure or statically recover the TSS3 EPS/controller's own command bounds and
-fault thresholds: rate, magnitude, driver override, steering-rate behavior,
-message-loss timeout, mode-switch behavior, and recovery after invalid traffic.
-Comma's older values are useful experiment bounds, not TSS3 constants.
+The Corolla H/F EPS side is no longer a generic “limits unknown” problem. Exact
+H/F firmware now provides a **non-enabling candidate Panda contract** for LTA/LCA:
+Target Lateral ID 11 only for openpilot active control (ID 0 inactive), absolute
+B6 target `<=1745` raw (~99.993 deg), application-sequence modulo 64 with the EPS's
+gap-aware `78*gap` target-jump threshold, a stricter candidate Panda rule of exact
+`+1` sequence and `<=78` raw (~4.470 deg) change per active frame, B6 loss cutout
+after 7 foreground ticks, measured steering from `0x025`, and immediate candidate
+cutout above raw signed12 steering-rate magnitude 100. The EPS itself debounces the
+rate monitor; Panda should not need to wait for that persistent latch.
+
+The target-native inhibit chain is also bounded: target plausibility contributes
+`C269`, an internal command/response monitor contributes `C26B`, `CB22E` aggregates
+those as `C26A`, and the cooperative gates also require independent `C245` clear.
+Live `0x030` already supplies physical driver torque plus driver-torque-invalid and
+selected steering fault/inhibit gates, so the remaining **safety-policy numeric
+parameters** are narrowed to the driver override threshold and extended
+fault/actuator-response thresholds. Relay-side ownership/suppression, active-LTA
+secondary-B6 template, sender cadence and SecOC MAC/freshness construction remain
+integration blockers, not reasons to copy pre-TSS3 safety constants.
+
+Canonical candidate:
+`data/generated/corolla_hf_panda_lateral_safety_contract.json`. It remains explicitly
+non-enabling; the maintained TSS3 platform continues to use Panda `noOutput`.
 
 ### F. Encode support as a generation-specific platform contract
 

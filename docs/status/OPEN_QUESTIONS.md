@@ -521,15 +521,22 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   but the lack of repin does not itself make CAN1 traffic invisible. B6 remains
   absent in this no-stock-LTA-transition segment and is therefore only a bounded
   negative. The public route, old Span static capture, and moving Span rlog all
-  preserve the same 22-ID/DLC ADAS-FD geometry. The next decisive Corolla
-  discriminator is a **firmware-identified H/F-family capture with the target
-  network physically repinned onto the CAN0/CAN2 relay pair and stock LTA
-  exercised off→active→off**, with `carFw`/F181 preserved; also exercise cruise
-  and P/R/N/D so the remaining state contract can close. Family breadth beyond
-  Corolla (Camry, RAV4, etc.) still must close command, feedback/readiness,
-  producer/route, stock suppression, limits/faults, UI and authentication
-  independently. Canonical machine-readable state:
-  `data/generated/corolla_tss3_opendbc_readiness.json`. See
+  preserve the same 22-ID/DLC ADAS-FD geometry. COM-014 now closes the **candidate
+  H/F Panda numeric envelope** independently of a new capture: ID11-only candidate
+  active control, ±1745 raw (~100 deg) target, strict candidate +1 modulo64 sequence
+  with <=78-raw (~4.47 deg) target step, 7-foreground-tick EPS loss cutoff, and raw
+  `0x025` steering-rate cutout 100. The remaining safety-policy parameters are the
+  physical driver-override threshold plus extended fault/actuator-response policy;
+  sender template/cadence/SecOC and relay suppression remain deployment blockers.
+  The next decisive Corolla discriminator is therefore a **firmware-identified
+  H/F-family capture with the target network physically repinned onto the CAN0/CAN2
+  relay pair and stock LTA exercised off→active→off**, with `carFw`/F181 preserved;
+  also exercise cruise and P/R/N/D so the remaining state contract can close. Family
+  breadth beyond Corolla (Camry, RAV4, etc.) still must close command,
+  feedback/readiness, producer/route, stock suppression, limits/faults, UI and
+  authentication independently. Canonical machine-readable state:
+  `data/generated/corolla_tss3_opendbc_readiness.json`; candidate safety contract:
+  `data/generated/corolla_hf_panda_lateral_safety_contract.json`. See
   [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md)
   and [../variants/toyota-eps-variant-comparison.md](../variants/toyota-eps-variant-comparison.md).
 

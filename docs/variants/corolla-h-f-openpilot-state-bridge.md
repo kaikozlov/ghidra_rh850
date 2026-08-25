@@ -483,22 +483,103 @@ The receiver-side command carrier is now identified, so the decisive experiment 
 The command-side unknown is therefore upstream ownership and safe reproduction of a
 known EPS receiver contract, not discovery of another replacement `0x2E4`.
 
+### Candidate Panda lateral-safety contract (non-enabling)
+
+The H/F firmware now closes enough of the EPS-side safety envelope to replace the
+previous generic “Panda limits unknown” bucket with a concrete candidate contract.
+This is **not enabled** in opendbc: the TSS3 platform remains `dashcamOnly` with
+Panda `noOutput`, and the candidate deliberately separates the exact EPS envelope
+from a stricter policy we would allow a future openpilot sender to use.
+
+For protected CAN-FD `0x0B6/32`, exact H accepts active Target Lateral IDs
+`1/4/10/11/19 = PCS/LDA/Hands Off LTA/LTA-LCA/PDA`; `0` is No Request. A future
+openpilot lateral-only policy should be narrower: permit only **ID 11** while
+controls are allowed and ID 0 while inactive. The LTA/LCA target-angle envelope is
+now numeric rather than inferred from old Toyota Panda constants:
+
+- `CB46E/CB4F4` select an absolute signal255 threshold of **1745 raw counts** for
+  LTA/LCA. With the independently closed `1024/17870 deg/count` conversion, that is
+  **99.9933 deg**, effectively the EPS's ~100-degree LTA bound.
+- The same monitor selects **78 raw counts per effective sequence gap**
+  (**4.4696 deg**) as the target-jump threshold. The exact EPS application gap is
+  `(cur-prev) mod 64`, normalized to `1` for gaps 0/1 and otherwise capped at 8.
+  Below `abs(target)=87` raw (~4.985 deg), the firmware bypasses that delta check.
+- Because Panda controls its own sender, the candidate policy is intentionally
+  stricter: after the first active frame require signal261 to advance **exactly +1
+  mod 64** and allow at most **78 raw counts** of target change on every active
+  frame, without exploiting the EPS's tolerated gaps or low-angle bypass.
+- The independent C9E54 conditioner clamps the same LTA target to ±3490 in its
+  doubled internal domain (= ±1745 B6 raw). Its selected low/vehicle bank also
+  slews that internal target by 7 doubled-domain counts per steering-task call
+  (3.5 B6 counts, ~0.2006 deg); the compiled high/default bank uses 4. The exact
+  scheduler wall-clock period for this stage is not closed, so these per-task
+  steps are **not** promoted to a deg/s Panda limit.
+
+Measured steering supervision is target-native too. `0x025` signal184/185 remains
+`1.5 deg/count` coarse plus signed `0.1 deg/count` fraction, and signal186 is the
+signed12 steering-rate input consumed by the EPS. `CB2E0` selects a raw LTA rate
+threshold of **100**; the EPS debounces that over-rate condition for 79 low-bank
+(or 63 high/default-bank) cycles before the persistent latch. A candidate Panda
+policy should be conservative and stop active steering immediately when
+`abs(signal186) > 100`, rather than wait for the EPS debounce. Firmware proves the
+raw signed12 threshold; the current Toyota DBC's `1 deg/s/count` physical factor is
+useful prior art but is not promoted here as an independently OEM-named unit proof.
+
+The recovered internal gating also prevents over-reading those visible checks as
+the complete EPS decision. `CB4F4` contributes target-plausibility state `C269`;
+`CB59A` contributes an internal command/response latch `C26B`; `CB22E` forms
+`C26A = C269 || C26B`; and `CADE4/CAE18` require that aggregate plus the separate
+`C245` tracking gate clear before cooperative control survives. The observable
+Panda-side mapping is therefore:
+
+- require valid `0x025` measured angle/rate;
+- verify live `0x030`'s additive B7 rule before trusting its safety inputs;
+- require `0x030 DRIVER_TORQUE_INVALID` (B6[0]) clear;
+- require `0x030 STEERING_FAULT_INHIBIT_STATUS` (B6[2]) clear; and
+- apply a physical driver-override threshold to the already closed `0x030` torque
+  once that threshold is validated dynamically.
+
+The exact B6 receiver-loss guarantee remains **7 TAUJ0-CH3 foreground ticks**:
+successful PDU42 receipt reloads 7 and first expiry disables cooperative selection.
+The tick's wall-clock duration remains unsupported, so no milliseconds are invented.
+After a future host/sender lapse, Panda should discard previous sequence/desired-angle
+history and require a fresh inactive/reinitialization transition before allowing
+active steering again.
+
+This leaves only three bounded safety-policy parameter classes rather than an
+undefined Panda model: the physical `driver_override_abs_nm`, extended fault policy
+(`0x394`/Ready/DTC classes beyond the already-known immediate `0x030` gate), and an
+actuator-response/fault threshold for the statically decoded `0x4A3` Q-current path.
+Secondary B6 fields 258/260/262/263/264/265 are **not free safety parameters**:
+the receiver roles are bounded, but production TX must remain disabled until a
+stock active-LTA sender template is captured/recovered and then whitelisted.
+Likewise relay-side bus ownership/suppression, sender cadence and SecOC MAC/freshness
+construction are deployment blockers outside the numeric Panda envelope.
+
+All cited safety functions (`C9CEA/C9DB0/C9E54/CADE4/CAE18/CB14E/CB22E/CB246/CB2E0/
+CB394/CB46E/CB4F4/CB59A/CBD7E/CBE6E`) are byte-identical between H and F, and the
+cited calibration values are byte-identical as well. Machine-readable contract:
+`data/generated/corolla_hf_panda_lateral_safety_contract.json`; compact exact-H
+decompiler evidence:
+`data/generated/corolla_8965H1202000_panda_lateral_safety_decompiler_evidence.json`.
+
 ## 10. Production boundary
 
-These findings improve the roadmap but are not yet a Panda safety policy. Before a
-real H/F openpilot port, recover and validate:
+The candidate safety math is now substantially closed, but it still does not authorize
+actuation. Before a real H/F openpilot port, recover and validate:
 
 - a validated **driver-override threshold** for the now-closed `0x030` physical torque signal;
-- allowable Q-current actuator-response error/limits;
+- allowable Q-current actuator-response error/limits and extended fault-policy mapping;
 - a Tx join for Ready Status and dynamic temporary/permanent fault semantics;
-- sender wall-clock cadence, stock-source suppression, and dynamic confirmation of the statically closed 7-tick loss behavior;
-- actual H/F rate and magnitude limits;
-- fallback behavior when comma disappears;
-- coexistence with brake/AEB and stock LTA/LDA/LCA functions.
+- sender wall-clock cadence and the active-LTA template for the bounded secondary B6 fields;
+- relay-correct stock-source suppression and dynamic confirmation of the statically closed 7-tick loss behavior;
+- the approved SecOC slot4 MAC/freshness sender path; and
+- fallback/coexistence behavior with brake/AEB and stock LTA/LDA/LCA functions.
 
 The machine-readable evidence is
-`data/generated/corolla_8965H1202000_openpilot_state_bridge.json`, plus the dedicated
-`data/generated/corolla_8965H1202000_b6_receiver_contract.json`; their compact
+`data/generated/corolla_8965H1202000_openpilot_state_bridge.json`,
+`data/generated/corolla_8965H1202000_b6_receiver_contract.json`, and
+`data/generated/corolla_hf_panda_lateral_safety_contract.json`; their compact
 raw-body-bound decompiler evidence is tracked alongside each artifact.
 
 <!-- knowledge-cross-references:begin -->
@@ -507,6 +588,6 @@ raw-body-bound decompiler evidence is tracked alongside each artifact.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009), [COM-010](../reference/index.md#finding-com-010), [COM-011](../reference/index.md#finding-com-011)
+- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009), [COM-010](../reference/index.md#finding-com-010), [COM-011](../reference/index.md#finding-com-011), [COM-014](../reference/index.md#finding-com-014)
 - Corrections with this document as canonical home: [CORR-109](../reference/index.md#correction-corr-109)
 <!-- knowledge-cross-references:end -->

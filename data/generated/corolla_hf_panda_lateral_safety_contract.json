@@ -1,0 +1,364 @@
+{
+  "candidate_panda_subset": {
+    "enabled": false,
+    "rx_requirements": [
+      "Require valid 0x025 measured angle/rate before allowing an active B6 request.",
+      "Require valid 0x030 additive byte-7 rule before using driver torque/fault state.",
+      "Require DRIVER_TORQUE_INVALID == 0.",
+      "Require STEERING_FAULT_INHIBIT_STATUS == 0.",
+      "Require abs(raw 0x025 signal186) <= 100 while steering is active.",
+      "Apply parameterized physical driver-override threshold once validated."
+    ],
+    "scope": "future lateral-only Corolla H/F safety policy; deliberately stricter than the EPS receiver where Panda controls the sender",
+    "secondary_b6_fields": {
+      "boundary": "Signals258/260/262/263/264/265 have bounded receiver roles but no validated stock active-LTA sender template. Until that sender template is captured/recovered, production TX remains disabled; a future safety implementation should whitelist the validated template rather than permit arbitrary values.",
+      "policy": "not an unresolved Panda threshold"
+    },
+    "sender_lapse": {
+      "eps_guarantee": "The EPS primary receiver-loss cutout is 7 foreground ticks.",
+      "milliseconds": null,
+      "panda_state_action": "After a host/sender lapse, discard prior sequence/desired-angle history and require a fresh inactive/measurement-aligned reinitialization before permitting active steering again."
+    },
+    "tx_requirements": [
+      "Permit TARGET_LATERAL_ID 11 (LTA/LCA) only while controls are allowed; permit ID 0 only as inactive/no-request.",
+      "Reject all other EPS-supported request IDs (PCS/LDA/Hands-Off-LTA/PDA) from openpilot even though the EPS accepts them.",
+      "Require abs(TARGET_STEERING_ANGLE raw) <= 1745 (~100 deg).",
+      "After the first active frame, require application SEQUENCE to advance exactly +1 modulo 64.",
+      "For every active +1 sequence step, require abs(target - previous_target) <= 78 raw counts (~4.47 deg); this is stricter than the EPS's gap-aware/deadband behavior.",
+      "When controls are not allowed, require Target Lateral ID 0 and target angle 0 for the candidate sender.",
+      "Do not treat application SEQUENCE as SecOC freshness; signing/freshness must be supplied by the separate authenticated sender path."
+    ]
+  },
+  "cross_variant": {
+    "all_cited_safety_calibration_bytes_byte_identical": true,
+    "all_safety_function_windows_byte_identical": true,
+    "critical_lta_abs_and_delta_limits_bank_invariant": true,
+    "default_calibration_bank": "high/default 0x1A960",
+    "function_windows": [
+      {
+        "body_sha256": "4920539e4eda4c88c577e452f91f4b8dd4941bc5ac70e3c7c5e525aaaf07c156",
+        "body_size": 198,
+        "entry": "0x000C9CEA",
+        "h_f_byte_identical": true,
+        "role": "request-profile target limit selection"
+      },
+      {
+        "body_sha256": "dedf200a1bc237d02faa523b073f413e950692115d8590617787c9b99a847cb0",
+        "body_size": 164,
+        "entry": "0x000C9DB0",
+        "h_f_byte_identical": true,
+        "role": "signed16 B6 target ingress and doubled-domain saturation"
+      },
+      {
+        "body_sha256": "2bca339d004df138b45af59232ddad583a610a1692b7af6fb1eb72bccb7ebdf4",
+        "body_size": 124,
+        "entry": "0x000C9E54",
+        "h_f_byte_identical": true,
+        "role": "profile-specific target slew and absolute clamp"
+      },
+      {
+        "body_sha256": "86f477d7c15bfa976ad732ca15d5757d74baaa28080f81a30fab0be85c7e2569",
+        "body_size": 122,
+        "entry": "0x000CB14E",
+        "h_f_byte_identical": true,
+        "role": "additional target/measured tracking validity gate"
+      },
+      {
+        "body_sha256": "ecfde0fc80f39fc0965ef43aba0347e0f3b9c2fa3bfc0aa701cc765346fc00e3",
+        "body_size": 24,
+        "entry": "0x000CB22E",
+        "h_f_byte_identical": true,
+        "role": "target/internal-response plausibility aggregate"
+      },
+      {
+        "body_sha256": "a70f6921b1b896c51a38b0fbde8a5abedb33555c2afbb0fcb3b42bf076d5d8c2",
+        "body_size": 76,
+        "entry": "0x000CB246",
+        "h_f_byte_identical": true,
+        "role": "application sequence gap reconstruction"
+      },
+      {
+        "body_sha256": "f5283041756c0934d3e4e528438913ad1c14856eda856ceca22c9ef43802704e",
+        "body_size": 180,
+        "entry": "0x000CB2E0",
+        "h_f_byte_identical": true,
+        "role": "measured steering-rate plausibility monitor"
+      },
+      {
+        "body_sha256": "6df6e7adffc57dbbb7a2ea0a18d39f1c97ec17079834f0154d206ff409d62d19",
+        "body_size": 180,
+        "entry": "0x000CB394",
+        "h_f_byte_identical": true,
+        "role": "internal command-derived magnitude/debounce monitor"
+      },
+      {
+        "body_sha256": "2cd242c9ffd6160d3d8cc3b70ab3d762983199d5a10814cef424702b91e194a7",
+        "body_size": 134,
+        "entry": "0x000CB46E",
+        "h_f_byte_identical": true,
+        "role": "request-profile target plausibility threshold selection"
+      },
+      {
+        "body_sha256": "91be6a5696c70be2553e5e964fc31d76c53d98997709f077fc131a63f5143c4a",
+        "body_size": 142,
+        "entry": "0x000CB4F4",
+        "h_f_byte_identical": true,
+        "role": "target magnitude/delta plausibility monitor"
+      },
+      {
+        "body_sha256": "ba5e531fcd880afb8495dae89783c6c9be4b89cdea01b3e0e868ffabab4b1ae2",
+        "body_size": 202,
+        "entry": "0x000CB59A",
+        "h_f_byte_identical": true,
+        "role": "internal command-derived persistent inhibit monitor"
+      },
+      {
+        "body_sha256": "e933cf89ef424526096c82c81af343c40197f90b01417b021b1b3d442212631f",
+        "body_size": 240,
+        "entry": "0x000CBD7E",
+        "h_f_byte_identical": true,
+        "role": "measured angle/rate supervisory reconstruction"
+      },
+      {
+        "body_sha256": "ba528c9b2ed22a57c5bc519285dedbb1cd3d3ee52838adeadafbd01849359b41",
+        "body_size": 128,
+        "entry": "0x000CBE6E",
+        "h_f_byte_identical": true,
+        "role": "Target Lateral ID request decoder"
+      },
+      {
+        "body_sha256": "8bd1fae110318cbce4c8d60972b4af4f3b7361bde1cc95bf21c4b133928b1f0c",
+        "body_size": 52,
+        "entry": "0x000CADE4",
+        "h_f_byte_identical": true,
+        "role": "cooperative-control inhibit gate"
+      },
+      {
+        "body_sha256": "4c9e78d5202fb8c7dc9cc043cf79c121783e6e4dee50350a1aa358fdbc175d4e",
+        "body_size": 88,
+        "entry": "0x000CAE18",
+        "h_f_byte_identical": true,
+        "role": "cooperative-control inhibit gate"
+      }
+    ],
+    "runtime_calibration_bank": "low/vehicle 0x12960 in all retained H/Span LocalRAM captures",
+    "software_ids": [
+      "8965H1202000",
+      "8965F1208000"
+    ]
+  },
+  "deployment_integration_blockers": [
+    "Physical Toyota-B CAN0/CAN1 repin and relay-side B6 producer/suppression attribution.",
+    "Stock active-LTA B6 sender cadence and validated values/template for secondary application fields.",
+    "SecOC sender ownership and approved slot4 MAC/freshness operation; 0x00F closes epoch semantics but does not supply the secret/MAC operation by itself.",
+    "Firmware-identified active-LTA capture to validate the candidate envelope against real stock commands before enabling Panda output."
+  ],
+  "eps_hard_envelope": {
+    "accepted_active_target_lateral_ids": {
+      "1": "PCS",
+      "10": "Hands Off LTA",
+      "11": "LTA/LCA",
+      "19": "PDA",
+      "4": "LDA"
+    },
+    "communication_loss": {
+      "effect": "B6 health goes unhealthy and cooperative request selection is disabled through the recovered health gate",
+      "primary_cutout_after_foreground_ticks": 7,
+      "successful_receive_reload_ticks": 7,
+      "tick_domain": "TAUJ0 CH3 EIRF at 0xFFFFB111 bit 0x10",
+      "wall_clock_duration_known": false
+    },
+    "controller_error_clamp": {
+      "classification": "controller error saturation, not promoted to a Panda rejection threshold",
+      "internal_abs_limit": 18000
+    },
+    "inactive_label": "No Request (Manual Operation)",
+    "inactive_target_lateral_id": 0,
+    "internal_inhibit_chain": {
+      "additional_gate": "FEBEC245 from 0xCB14E is independently required clear by 0xCADE4/0xCAE18",
+      "aggregate": "0xCB22E sets FEBEC26A = (FEBEC269 == 1) || (FEBEC26B == 1)",
+      "cooperative_enable_consumers": [
+        "0x000CADE4",
+        "0x000CAE18"
+      ],
+      "internal_response_output": "0xCB59A -> FEBEC26B; persistent internal-command magnitude monitor, not directly available as a CAN measurement",
+      "panda_mapping": "Mirror the observable target/rate and 0x030 fault/validity gates now; keep internal response/tracking policy parameterized until live 0x4A3/0x394/Ready correlation closes an observable equivalent.",
+      "target_plausibility_output": "0xCB4F4 -> FEBEC269; target magnitude/delta violation or internal C268/C263 state can assert it"
+    },
+    "internal_target_conditioning": {
+      "default_high_bank_lta_slew_doubled_domain_per_steering_task": 4,
+      "reason": "The steering pipeline invocation is recovered in the per-tick dispatcher, but the exact scheduler/TAUJ wall-clock period for this stage is not statically closed. Do not convert this per-task slew to deg/s yet.",
+      "runtime_low_bank_equivalent_b6_raw_counts_per_task": 3.5,
+      "runtime_low_bank_equivalent_deg_per_task": 0.20055959709009513,
+      "runtime_low_bank_lta_slew_doubled_domain_per_steering_task": 7,
+      "wall_clock_rate_not_promoted": true
+    },
+    "lta_lca_request_id": 11,
+    "lta_target_abs_max_deg": 99.99328483491887,
+    "lta_target_abs_max_raw": 1745,
+    "lta_target_delta_max_deg_per_effective_gap": 4.469613878007834,
+    "lta_target_delta_max_raw_per_effective_gap": 78,
+    "measured_steering_rate_monitor": {
+      "lta_raw_abs_threshold": 100,
+      "panda_candidate_action": "cut active command immediately when abs(raw signal186) > 100; do not wait for the EPS persistent debounce",
+      "persistent_eps_debounce_cycles_high_bank": 63,
+      "persistent_eps_debounce_cycles_low_bank": 79,
+      "physical_unit_boundary": "Firmware proves the signed12 rate field and raw threshold 100. The current Toyota DBC uses 1 deg/s/count, but the historical DBC comment called the factor TBD; treat 100 deg/s as a prior-art physical interpretation, not a firmware-native unit proof.",
+      "source_can_id": "0x025",
+      "source_signal": 186,
+      "wire": "signed12 B4-area field (existing TSS3 DBC STEER_RATE)"
+    },
+    "sequence": {
+      "effective_gap": "1 when raw_delta <= 1, otherwise min(raw_delta, 8)",
+      "effective_gap_max": 8,
+      "effective_gap_min": 1,
+      "plausibility_relation": "when abs(target) > 87, abs(target - prior_target) <= 78 * effective_gap",
+      "raw_delta": "(current - previous) mod 64",
+      "strict_plus_one_required_by_eps": false
+    },
+    "target_delta_deadband_deg": 4.985338556239507,
+    "target_delta_deadband_raw": 87
+  },
+  "measured_inputs": {
+    "driver_torque": {
+      "can_id": "0x030",
+      "dlc": 32,
+      "invalid_gate": "0x030 B6[0] / DRIVER_TORQUE_INVALID must be 0",
+      "live_span_range_nm": {
+        "count": 6000,
+        "max": 2.8500000000000005,
+        "min": -8.23,
+        "unique_count": 536
+      },
+      "override_abs_threshold_nm": null,
+      "parameter_name": "driver_override_abs_nm",
+      "physical_relation": "torque_Nm = signed(signal10)*0.1 + signed4(signal31)*0.01"
+    },
+    "steering_angle": {
+      "can_id": "0x025",
+      "coarse_deg_per_count": 1.5,
+      "coarse_signal": 184,
+      "coarse_signed_bits": 12,
+      "dlc": 32,
+      "fraction_deg_per_count": 0.1,
+      "fraction_signal": 185,
+      "fraction_signed_bits": 4,
+      "physical_relation": "angle_deg = 1.5*signal184 + 0.1*signal185"
+    },
+    "steering_fault_inhibit": {
+      "boundary": "Selected steering fault/inhibit aggregate only; not an exhaustive temporary/permanent EPS fault class.",
+      "can_id": "0x030",
+      "candidate_action": "immediate controls cutout on nonzero",
+      "nominal_clear_value": 0,
+      "wire": "B6[2]"
+    },
+    "steering_rate": {
+      "can_id": "0x025",
+      "raw_lta_abs_cutout_candidate": 100,
+      "signal": 186,
+      "signed_bits": 12
+    }
+  },
+  "not_promoted_as_safety_limits": {
+    "controller_error_clamp_internal": 18000,
+    "legacy_toyota_lta_limits": "use only as prior art; do not transplant pre-TSS3 max angle/rate or torque thresholds",
+    "signed16_wire_range": "too broad; LTA-specific firmware limit is \u00b11745 raw",
+    "wide_target_conditioner": {
+      "abs_internal": 534,
+      "reason": "parallel/wider conditioning path is much looser than the LTA-specific plausibility envelope",
+      "step_internal": 10
+    }
+  },
+  "schema": "corolla-hf-panda-lateral-safety-contract-v1",
+  "sources": {
+    "decompiler_evidence": {
+      "path": "data/generated/corolla_8965H1202000_panda_lateral_safety_decompiler_evidence.json",
+      "sha256": "566c96c8371b3707985d17a329095c2e35f6d99e9cee4fa3b523789cf2c45b8b"
+    },
+    "f_codeflash": {
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+      "sha256": "b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d"
+    },
+    "full_receiver_contract": {
+      "path": "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
+      "sha256": "7dd3af51a5b169fc1a341aaf1916c0de1ce88fd2451929f86df50fe1b4e88563"
+    },
+    "h_codeflash": {
+      "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+    },
+    "receiver_contract": {
+      "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
+      "sha256": "123ba1a29f6e8247fca9432688a8a0d33c28949440f925d4f0d0dd7cea626c60"
+    },
+    "state_bridge": {
+      "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
+      "sha256": "180661a834618a74323ae6334c6dc045e3d57a03bda640c7e192ce07a3654014"
+    },
+    "target_angle_contract": {
+      "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
+      "sha256": "5755faced5efb0212ae195ed8bff30bee2c1765656a29ed974ced95082c00647"
+    }
+  },
+  "static_conclusion": {
+    "candidate_panda_contract_derived": true,
+    "core_command_numeric_limits_closed": true,
+    "driver_torque_signal_closed_but_override_threshold_open": true,
+    "eps_loss_cutout_closed_in_ticks": true,
+    "measured_angle_input_closed": true,
+    "measured_rate_raw_cutout_closed": true,
+    "production_enable_authorized": false,
+    "request_policy_closed_for_candidate_lta": true,
+    "selected_fault_inhibit_gate_closed_but_extended_fault_policy_open": true,
+    "sequence_policy_closed_for_candidate_lta": true,
+    "wall_clock_sender_cadence_open": true
+  },
+  "status": {
+    "classification": "candidate-non-enabling",
+    "panda_safety_enable_authorized": false,
+    "reason": "The H/F receiver-side command envelope and observable steering inputs are sufficiently closed to write a candidate safety contract, but the physical driver-override threshold, extended fault/actuator-response policy, relay-side stock-source suppression, and sender payload/cadence/authentication integration are not yet validated."
+  },
+  "unresolved_safety_parameters": {
+    "actuator_response_fault_threshold": {
+      "missing_evidence": "relay-correct dynamic 0x4A3 command/response correlation and safe response-error limit",
+      "source_available": "0x4A3 Q-current response is statically decoded; internal FEBEAE16 monitors are recovered",
+      "value": null
+    },
+    "driver_override_abs_nm": {
+      "missing_evidence": "validated stock-LTA driver override/disengagement transition",
+      "source_available": "live physical 0x030 Steering Wheel Torque",
+      "value": null
+    },
+    "extended_fault_policy": {
+      "known_immediate_gate": "0x030 STEERING_FAULT_INHIBIT_STATUS != 0 => disable",
+      "missing_evidence": "asserted 0x394/Ready/DTC transitions needed to map temporary/permanent or additional inhibit states",
+      "value": null
+    }
+  },
+  "wire_command": {
+    "application_region": "B0..B27",
+    "application_sequence": {
+      "modulus": 64,
+      "signal": 261,
+      "wire": "B7[5:0]"
+    },
+    "can_id": "0x0B6",
+    "dlc": 32,
+    "secoc_boundary": "Signal261 is application sequence state, not SecOC message8. SecOC authentication/freshness is a sender/transport prerequisite; this Panda contract does not claim to verify ICU-S slot4 or reconstruct CMAC itself.",
+    "secoc_trailer": "B28..B31",
+    "secured": true,
+    "target_angle": {
+      "controller_equivalent_deg_per_raw_count": 0.05730274202574147,
+      "exact_scale_fraction_deg": {
+        "denominator": 17870,
+        "numerator": 1024
+      },
+      "signal": 255,
+      "wire": "B4:B5 signed16"
+    },
+    "target_lateral_id": {
+      "signal": 254,
+      "wire": "B3[5:0]"
+    }
+  }
+}

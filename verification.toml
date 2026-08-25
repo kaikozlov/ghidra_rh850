@@ -1392,6 +1392,30 @@ paths = [
   "exploit/findings_coverage.json",
 ]
 
+[suite.corolla_hf_panda_lateral_safety_contract]
+tests = ["tests/verify_corolla_hf_panda_lateral_safety_contract.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_corolla_hf_panda_lateral_safety_contract.py",
+  "tools/build_corolla_hf_panda_lateral_safety_contract.py",
+  "data/generated/corolla_8965H1202000_panda_lateral_safety_decompiler_evidence.json",
+  "data/generated/corolla_hf_panda_lateral_safety_contract.json",
+  "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
+  "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
+  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
+  "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
+  "data/generated/corolla_8965F1208000_low_calibration_delta.json",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
+  "docs/architecture/toyota-openpilot-porting-contract.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+  "exploit/findings_coverage.json",
+]
+
 [suite.target_artifact_manifest]
 tests = ["tests/verify_target_artifact_manifest.py"]
 oracle = "documentation_lint"
