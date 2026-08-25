@@ -2672,3 +2672,50 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:** [../variants/toyota-eps-variant-comparison.md](../variants/toyota-eps-variant-comparison.md);
   [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md);
   `tests/verify_toyota_eps_variant_matrix.py`; COM-013.
+
+
+### CORR-109 — eleven H `0x030` fields were not default-only; GP-relative writers carry live torque and status
+
+- **Superseded wording:** the first H FD `0x030` producer census classified eleven
+  packed signals (`0,1,10,14,16,17,18,27,28,31,34`) as
+  `default-init-only-direct-writer-census` because no non-default named-symbol
+  assignment was found. The state-bridge roadmap consequently treated `0x4A3` as
+  the only usable H/F driver-torque carrier and left most `0x030` telemetry for a
+  later generic decode.
+- **Root cause:** the negative used a direct textual RAM-symbol census. H
+  `0x47188` and `0x47430` write these staging cells as constant offsets from the
+  fixed application GP base `0xFEBEB800`. As in CORR-107, those stores do not spell
+  the absolute RAM symbol in decompiler text, so the representation produced false
+  negatives.
+- **Exact correction:** `0x47188` writes signals `0/1/10/14/16/17/27/28/31/34`;
+  `0x47430` writes signal `18`. The FD-control artifact now carries a dedicated
+  `runtime-produced-gp-relative` class and exact-image-bound positive evidence for
+  all eleven. Across directly packed signal IDs `0..34`, **zero** fields remain in
+  the former default-init-only class. Four explicitly runtime-zero fields and the
+  computed B7 additive field remain separately classified.
+- **Driver-torque consequence:** signals `0/10/31` use the same native
+  `FEBE6554` source as Techstream DID `0x1035 Steering Wheel Torque` and `0x4A3`
+  B5. Firmware arithmetic plus the Techstream conversion closes
+  `torque_Nm = signed(B8)*0.1 + signed4(B17[3:0])*0.01`; B0 is a separate
+  truncation-toward-zero 0.1-N·m view. Span's tracked moving rlog exercises 6,000
+  frames, 536 reconstructed values, and -8.23..+2.85 N·m; the two coarse views
+  differ only by the expected `-1/0/+1` rounding count. Driver torque is therefore
+  a **live `0x030` state input**, not dependent on observing `0x4A3`.
+- **Other corrected fields:** signal34 is a runtime signed16 derivative of the
+  DID `0x1151 Motor Actual Current (Q Axis)` source, but its separate packet
+  calibration is not promoted to an engineering scale. The remaining corrected
+  bits are positively runtime-produced while their literal OEM meanings stay
+  bounded.
+- **Boundary:** this fixes eleven specific GP-relative false negatives. It does not
+  turn the old direct-reference census into a proof against arbitrary computed
+  aliases, DMA, or peripheral writers. It also does not justify a
+  temporary/permanent steering-fault mapping or a production driver-override
+  threshold.
+- **Canonical:**
+  `data/generated/corolla_8965H1202000_fd_control_interface.json` v2;
+  `data/generated/corolla_8965H1202000_openpilot_state_bridge.json` v7;
+  `data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json`;
+  `tests/verify_corolla_8965H1202000_fd_control.py`;
+  `tests/verify_corolla_8965H1202000_openpilot_state_bridge.py`;
+  `tests/verify_span_2025_discord_rlog_opendbc_evidence_external.py`;
+  [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) §6.

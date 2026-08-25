@@ -79,6 +79,11 @@ def unique(xs: list[Any]) -> list[Any]:
     return sorted(set(xs))
 
 
+def signed_n(value: int, bits: int) -> int:
+    sign = 1 << (bits - 1)
+    return value - (1 << bits) if value & sign else value
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--rlog", type=Path, default=DEFAULT_RLOG)
@@ -105,7 +110,9 @@ def main() -> int:
     h030_addend = int(m030.group(2), 16)
 
     sys.path.insert(0, str(args.openpilot_root.resolve()))
-    from openpilot.tools.lib.logreader import LogReader  # type: ignore[import-not-found]
+    from openpilot.tools.lib.logreader import (
+        LogReader,  # type: ignore[import-not-found]
+    )
 
     frames: dict[tuple[int, int, int], list[tuple[int, bytes]]] = collections.defaultdict(list)
     returned: collections.Counter[tuple[int, int, int]] = collections.Counter()
@@ -222,6 +229,22 @@ def main() -> int:
     cruise_active = [bool((dat[0] >> 5) & 1) for _, dat in cruise]
     cruise_state = [be_raw(dat, 31, 4) for _, dat in cruise]
     fd30 = rows(0x030, 32)
+    # Exact H/F firmware maps four single-bit steering-state fields into byte 6
+    # of the 0x030 EPS Tx PDU. Keep these direct masks separate from the generic
+    # Motorola decoder: these byte/bit positions are firmware-proved.
+    fd30_b6_bit3 = [((dat[6] >> 3) & 1) for _, dat in fd30]
+    fd30_steering_fault_inhibit_status = [((dat[6] >> 2) & 1) for _, dat in fd30]
+    fd30_b6_bit1 = [((dat[6] >> 1) & 1) for _, dat in fd30]
+    fd30_driver_torque_invalid = [(dat[6] & 1) for _, dat in fd30]
+    # 0x47188 proves signals 0/10/31 are three views of the same native
+    # Steering Wheel Torque intermediate. Signal0 is truncation-toward-zero at
+    # 0.1 N.m/count; signal10 is the rounded coarse component paired with the
+    # signed hundredths remainder in signal31 for exact reconstruction.
+    fd30_torque_coarse_dup = [signed_n(dat[0], 8) for _, dat in fd30]
+    fd30_torque_coarse = [signed_n(dat[8], 8) for _, dat in fd30]
+    fd30_torque_fine = [signed_n(dat[17] & 0xF, 4) for _, dat in fd30]
+    fd30_torque_nm = [coarse * 0.1 + fine * 0.01 for coarse, fine in zip(fd30_torque_coarse, fd30_torque_fine)]
+    fd30_byte16 = [dat[16] for _, dat in fd30]
     fd30_rule_matches = sum(
         dat[h030_rule["wire_byte"]] == ((sum(dat[: h030_last_data_byte + 1]) + h030_addend) & 0xFF)
         for _, dat in fd30
@@ -339,7 +362,53 @@ def main() -> int:
                 "exact_h_f_additive_rule": h030_rule,
                 "frame_count": len(fd30),
                 "rule_matches": fd30_rule_matches,
-                "boundary": "Every Span-rlog 0x030 frame matches the exact-H/F firmware-derived additive-byte rule; this strengthens format/producer-family continuity without creating an exact firmware identity join.",
+                "steering_state_bridge": {
+                    "b6_bit3": {
+                        "firmware_signal_id": 5,
+                        "firmware_source": "0xFEBE7E09",
+                        "wire": "B6[3]",
+                        "values": unique(fd30_b6_bit3),
+                        "classification": "runtime-produced status bit; exact steering semantic unresolved",
+                    },
+                    "steering_fault_inhibit_status": {
+                        "firmware_signal_id": 6,
+                        "firmware_source": "0xFEBE7DAE",
+                        "wire": "B6[2]",
+                        "values": unique(fd30_steering_fault_inhibit_status),
+                        "clear_frames": sum(x == 0 for x in fd30_steering_fault_inhibit_status),
+                        "classification": "H firmware selected steering fault/inhibit status aggregate duplicated into 0x4A3 B0[0]; not an exhaustive EPS-fault bitmap",
+                    },
+                    "b6_bit1": {
+                        "firmware_signal_id": 7,
+                        "firmware_source": "0xFEBE7DB3",
+                        "wire": "B6[1]",
+                        "values": unique(fd30_b6_bit1),
+                        "classification": "runtime-produced status bit; exact steering semantic unresolved",
+                    },
+                    "driver_torque_invalid": {
+                        "firmware_signal_id": 8,
+                        "firmware_source": "0xFEBE7DB2",
+                        "wire": "B6[0]",
+                        "values": unique(fd30_driver_torque_invalid),
+                        "clear_frames": sum(x == 0 for x in fd30_driver_torque_invalid),
+                        "classification": "H firmware driver-torque validity/inhibit gate; asserted state forces the native driver-torque intermediate to zero",
+                    },
+                    "steering_wheel_torque": {
+                        "firmware_signal_ids": [0, 10, 31],
+                        "wire": ["B0 signed8", "B8 signed8", "B17[3:0] signed4"],
+                        "coarse_duplicate_values": unique(fd30_torque_coarse_dup),
+                        "coarse_values": unique(fd30_torque_coarse),
+                        "fine_values": unique(fd30_torque_fine),
+                        "coarse_rounding_delta_values": unique([b - a for a, b in zip(fd30_torque_coarse_dup, fd30_torque_coarse)]),
+                        "coarse_rounding_delta_nonzero_frames": sum(a != b for a, b in zip(fd30_torque_coarse_dup, fd30_torque_coarse)),
+                        "reconstruction": "Steering Wheel Torque [N.m] = B8_signed * 0.1 + B17_low_signed4 * 0.01 exactly for the firmware intermediate; B0_signed is the independently saturated truncation-toward-zero 0.1 N.m view and can differ from B8 by one count due to rounding",
+                        "torque_nm": stats(fd30_torque_nm),
+                        "classification": "exact firmware/Techstream physical decode of live 0x030 driver steering torque; current capture supplies dynamic range but no independent torque transducer",
+                    },
+                    "byte16_values": unique(fd30_byte16),
+                    "boundary": "This nominal moving segment exercises only the clear state for B6[2] and B6[0]. It dynamically corroborates their normal-state polarity and 0x030 availability, but does not replace firmware-static asserted-state semantics or prove openpilot temporary/permanent fault classification.",
+                },
+                "boundary": "Every Span-rlog 0x030 frame matches the exact-H/F firmware-derived additive-byte rule; the firmware-proved selected steering fault/inhibit status and driver-torque-invalid bits are clear for all 6,000 frames. This strengthens format/producer-family continuity and nominal-state polarity without creating an exact firmware identity join or an induced-fault transition.",
             },
             "0x0AA": {
                 "wire": "classic 8-byte WHEEL_SPEEDS",

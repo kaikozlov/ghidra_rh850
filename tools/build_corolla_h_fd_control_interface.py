@@ -23,6 +23,7 @@ GP = 0xFEBEB800
 TX = struct.Struct("<IBBH")
 PDU = struct.Struct("<HBBHBB")
 TARGET_ANGLE = REPO / "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json"
+STATE_EVIDENCE = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json"
 
 
 def sha256(data: bytes) -> str:
@@ -131,6 +132,7 @@ def main() -> None:
     p.add_argument("--target", type=Path, default=REPO / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin")
     p.add_argument("--function-evidence", type=Path, default=REPO / "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json")
     p.add_argument("--reference-census", type=Path, default=REPO / "data/generated/corolla_8965H1202000_fd_control_reference_census.json")
+    p.add_argument("--state-bridge-evidence", type=Path, default=STATE_EVIDENCE)
     p.add_argument("--structural", type=Path, default=REPO / "data/generated/corolla_8965H1202000_structural_function_transfer.json")
     p.add_argument("--out", type=Path, default=REPO / "data/generated/corolla_8965H1202000_fd_control_interface.json")
     args = p.parse_args()
@@ -138,6 +140,9 @@ def main() -> None:
     s = load_codeflash(args.sienna)
     h = load_codeflash(args.target)
     fmeta, funcs = validate_function_evidence(args.function_evidence, h)
+    smeta, state_funcs = validate_function_evidence(args.state_bridge_evidence, h)
+    if smeta["schema"] != "corolla-h-openpilot-state-bridge-decompiler-evidence-v2":
+        raise ValueError("state-bridge evidence schema drift")
     census = validate_reference_census(args.reference_census, h)
     structural = json.loads(args.structural.read_text())
     target_angle = json.loads(TARGET_ANGLE.read_text())
@@ -209,9 +214,8 @@ def main() -> None:
         # The compact direct-reference census bounds dead/staged-only claims.
         stage_name = f"b6_sig{sig}_stage_abs"
         stage_refs = refs(census, stage_name)
-        if role.startswith("staged-only"):
-            if stage_refs != {0x5262C}:
-                raise ValueError(f"B6 signal {sig} gained direct stage consumers: {stage_refs}")
+        if role.startswith("staged-only") and stage_refs != {0x5262C}:
+            raise ValueError(f"B6 signal {sig} gained direct stage consumers: {stage_refs}")
         if sig == 254:
             mode = target_angle["mode_ingress"]
             if mode["snapshot_destination"] != "0xFEBEADB0" or mode["decoder"] != "0x000CBE6E":
@@ -311,6 +315,44 @@ def main() -> None:
     calls.sort(key=lambda row: row[0])
     need(c030, "FUN_0007636c(0,acStack_28);", "while (uVar2 < 7);", "cVar5 + '8'", "FUN_0007662e(9,7,8,0")
 
+    # The original direct textual-reference census missed GP-relative stores in
+    # 0x47188/0x47430. Pin those functions from the independent compact steering
+    # bridge evidence and explicitly recover all eleven affected PDU0 sources.
+    # These are positive writer proofs, not a broader claim that arbitrary
+    # computed-pointer writes cannot exist elsewhere.
+    c47188 = state_funcs[0x47188]["decompiled_c"]
+    c47430 = state_funcs[0x47430]["decompiled_c"]
+    need(c47188,
+         "*(undefined1 *)(iVar5 + -0x39fa) = auStack_11[0];",
+         "*(bool *)(iVar5 + -0x39f9) = bVar1;",
+         "*(char *)(iVar5 + -0x39f6) = (char)((iVar8 - iVar4) / 10);",
+         "*(bool *)(iVar5 + -0x39f4) = bVar1;",
+         "*(undefined1 *)(iVar5 + -0x39f2) = uVar6;",
+         "*(undefined1 *)(iVar5 + -0x39f1) = *(undefined1 *)(iVar5 + -0x45c3);",
+         "*(undefined1 *)(iVar5 + -0x39f0) = *(undefined1 *)(iVar5 + -0x3a49);",
+         "*(undefined1 *)(iVar5 + -0x39ef) = *(undefined1 *)(iVar5 + -0x3a4a);",
+         "*(char *)(iVar5 + -0x39ee) = (char)iVar4;",
+         "*(short *)(iVar5 + -0x39c4) =")
+    need(c47430, "*(undefined1 *)(iVar2 + -0x39b4) = uVar1;")
+
+    gp_relative_writers = {
+        0xFEBE7E06: (0x47188, "coarse signed driver-steering-torque encoding: saturating signed byte of trunc(native torque intermediate / 10)"),
+        0xFEBE7E07: (0x47188, "runtime boolean copied from FEBE6497 != 0; exact OEM meaning unresolved"),
+        0xFEBE7E0A: (0x47188, "second coarse driver-steering-torque encoding derived from the same native torque intermediate and decimal remainder"),
+        0xFEBE7E0C: (0x47188, "mirror of the FEBE6497-derived runtime boolean used by signal 1"),
+        0xFEBE7E0E: (0x47188, "runtime status derived from FEBE7D3C with local transition/debounce handling; exact OEM meaning unresolved"),
+        0xFEBE7E0F: (0x47188, "runtime status copied from FEBE723D; exact OEM meaning unresolved"),
+        0xFEBE7E4C: (0x47430, "2-bit internal status code produced by the 0x472F6/0x47334/0x47348/0x473DE decision family"),
+        0xFEBE7E10: (0x47188, "runtime status copied from FEBE7DB7; exact OEM meaning unresolved"),
+        0xFEBE7E11: (0x47188, "runtime status copied from FEBE7DB6; exact OEM meaning unresolved"),
+        0xFEBE7E12: (0x47188, "signed decimal remainder/units nibble for the same native driver-steering-torque intermediate used by signals 0 and 10"),
+        0xFEBE7E3C: (0x47188, "signed16 calibrated derivative of sign-inverted FEBE6592 Motor Actual Current (Q Axis); exact packet physical scale remains calibration-dependent"),
+    }
+    expected_gp_corrected_signals = {0, 1, 10, 14, 16, 17, 18, 27, 28, 31, 34}
+    actual_gp_corrected_signals = {sig for sig, _, _, _, _, source in calls if source in gp_relative_writers}
+    if actual_gp_corrected_signals != expected_gp_corrected_signals:
+        raise ValueError(f"0x030 GP-relative writer set drift: {sorted(actual_gp_corrected_signals)}")
+
     tx030_rows = []
     for sig, byteoff, bits, bitoff, temp, source in calls:
         if sig == 9:
@@ -322,13 +364,23 @@ def main() -> None:
             writers_raw = writes_for_term(census, name)
             dynamic = [row for row in writers_raw if int(row["entry"], 16) != 0x5316C]
             source_text = None if source is None else f"0x{source:08X}"
-            if not dynamic:
+            gp_writer = gp_relative_writers.get(source)
+            if gp_writer is not None:
+                writer_class = "runtime-produced-gp-relative"
+                writers = [f"0x{gp_writer[0]:08X}"]
+                semantic = gp_writer[1]
+            elif not dynamic:
                 writer_class = "default-init-only-direct-writer-census"
+                writers = []
+                semantic = None
             elif all(re.search(r"=\s*0;", row["line"]) for row in dynamic):
                 writer_class = "runtime-constant-zero-direct-writer-census"
+                writers = sorted({row["entry"] for row in dynamic})
+                semantic = None
             else:
                 writer_class = "runtime-produced"
-            writers = sorted({row["entry"] for row in dynamic})
+                writers = sorted({row["entry"] for row in dynamic})
+                semantic = None
         tx030_rows.append({
             "signal_id": sig,
             "wire_byte": byteoff,
@@ -337,11 +389,12 @@ def main() -> None:
             "source": source_text,
             "writer_class": writer_class,
             "nondefault_writer_functions": writers,
+            "recovered_semantic": semantic if sig != 9 else None,
         })
 
     # ---- final report ----
     report = {
-        "schema": "corolla-8965H1202000-fd-control-interface-v1",
+        "schema": "corolla-8965H1202000-fd-control-interface-v2",
         "evidence_boundary": (
             "Raw generated CAN/PDU/signal configuration is exact-image byte evidence. Consumer roles are target-native decompiler recovery. "
             "Negative no-consumer/no-writer statements remain bounded to the direct textual-reference census, while B6 signals254/255 are explicitly corrected by the exact fixed-map GP-relative audit in the canonical target-angle ingress artifact."
@@ -422,10 +475,19 @@ def main() -> None:
                 "boundary": "recovered exact code behavior; OEM checksum naming/formula lineage is not inferred from the constant alone",
             },
             "fields": tx030_rows,
+            "gp_relative_writer_correction": {
+                "affected_signal_ids": sorted(expected_gp_corrected_signals),
+                "affected_source_addresses": [f"0x{x:08X}" for x in sorted(gp_relative_writers)],
+                "writer_functions": ["0x00047188", "0x00047430"],
+                "correction": "Eleven fields previously classified as default-init-only by the direct textual-reference census have exact runtime GP-relative writers. The positive writers are now pinned from independent exact-image compact decompiler evidence.",
+                "boundary": "This correction closes these eleven specific false negatives; it does not upgrade the direct-reference census into a complete arbitrary computed-pointer writer proof.",
+            },
         },
         "evidence": {
             "function_evidence_sha256": sha256(args.function_evidence.read_bytes()),
             "function_count": fmeta["function_count"],
+            "state_bridge_evidence_sha256": sha256(args.state_bridge_evidence.read_bytes()),
+            "state_bridge_function_count": smeta["function_count"],
             "b6_target_angle_ingress_sha256": sha256(TARGET_ANGLE.read_bytes()),
             "reference_census_sha256": sha256(args.reference_census.read_bytes()),
             "reference_term_count": len(census["terms"]),

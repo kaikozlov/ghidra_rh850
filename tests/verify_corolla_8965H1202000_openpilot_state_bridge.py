@@ -2,108 +2,136 @@
 """Verify the H/F Corolla openpilot state-interface bridge."""
 from __future__ import annotations
 
-import hashlib,json,subprocess,sys,tempfile
+import hashlib
+import json
+import subprocess
+import sys
+import tempfile
 from pathlib import Path
 
-REPO=Path(__file__).resolve().parents[1]
-ART=REPO/'data/generated/corolla_8965H1202000_openpilot_state_bridge.json'
-EVID=REPO/'data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json'
-BUILD=REPO/'tools/build_corolla_h_openpilot_state_bridge.py'
-IMAGE=REPO/'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin'
-DOC=REPO/'docs/variants/corolla-h-f-openpilot-state-bridge.md'
-passed=failed=0
+REPO = Path(__file__).resolve().parents[1]
+ART = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge.json"
+EVID = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json"
+FD = REPO / "data/generated/corolla_8965H1202000_fd_control_interface.json"
+BUILD = REPO / "tools/build_corolla_h_openpilot_state_bridge.py"
+IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
+DOC = REPO / "docs/variants/corolla-h-f-openpilot-state-bridge.md"
+passed = failed = 0
 
-def sha(b:bytes)->str:return hashlib.sha256(b).hexdigest()
-def check(name:str,cond:object,detail:str='')->None:
- global passed,failed
- ok=bool(cond); passed+=int(ok);failed+=int(not ok)
- print(f"[{'PASS' if ok else 'FAIL'}][raw_bytes] {name}"+(f' ({detail})' if detail else ''))
 
-art=json.loads(ART.read_text()); evid=json.loads(EVID.read_text()); image=IMAGE.read_bytes()
-print('== deterministic artifacts ==')
+def sha(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def check(name: str, condition: object, detail: str = "") -> None:
+    global passed, failed
+    ok = bool(condition)
+    passed += int(ok)
+    failed += int(not ok)
+    suffix = f" ({detail})" if detail else ""
+    print(f"[{'PASS' if ok else 'FAIL'}][raw_bytes] {name}{suffix}")
+
+
+art = json.loads(ART.read_text())
+evid = json.loads(EVID.read_text())
+fd = json.loads(FD.read_text())
+image = IMAGE.read_bytes()
+
+print("== deterministic artifacts ==")
 with tempfile.TemporaryDirectory() as td:
- out=Path(td)/'bridge.json'
- r=subprocess.run([sys.executable,str(BUILD),'--out',str(out)],cwd=REPO,capture_output=True,text=True)
- check('bridge builder succeeds',r.returncode==0,r.stderr[-300:])
- check('bridge artifact regenerates exactly',r.returncode==0 and out.read_bytes()==ART.read_bytes())
-check('bridge schema v6',art['schema']=='corolla-8965H1202000-openpilot-state-bridge-v6')
-check('compact evidence schema v1',evid['schema']=='corolla-h-openpilot-state-bridge-decompiler-evidence-v1')
-check('exact H image identity',len(image)==0x100000 and sha(image)==art['images']['corolla_h']['sha256']==evid['image']['sha256'])
-check('H/F application identity carried forward',art['images']['corolla_f']['application_byte_identical_to_h'])
-check('promoted corpus identity exact',evid['source_corpus']['sha256']=='c3411eec57b9d55c004b0b0f328394bb152577c3398084dccc729dab5da54656' and evid['source_corpus']['function_count']==5478)
-check('nine compact functions promoted',evid['function_count']==9)
-for row in evid['functions']:
- a=int(row['entry'],16); n=row['body_size']; check(f"raw body {row['entry']}",sha(image[a:a+n])==row['body_sha256'])
+    out = Path(td) / "bridge.json"
+    proc = subprocess.run([sys.executable, str(BUILD), "--out", str(out)], cwd=REPO, capture_output=True, text=True, check=False)
+    check("bridge builder succeeds", proc.returncode == 0, proc.stderr[-300:])
+    check("bridge artifact regenerates exactly", proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
+check("bridge schema v7", art["schema"] == "corolla-8965H1202000-openpilot-state-bridge-v7")
+check("compact evidence schema v2", evid["schema"] == "corolla-h-openpilot-state-bridge-decompiler-evidence-v2")
+check("exact H image identity", len(image) == 0x100000 and sha(image) == art["images"]["corolla_h"]["sha256"] == evid["image"]["sha256"])
+check("H/F application identity carried forward", art["images"]["corolla_f"]["application_byte_identical_to_h"])
+check("promoted corpus identity exact", evid["source_corpus"]["sha256"] == "c3411eec57b9d55c004b0b0f328394bb152577c3398084dccc729dab5da54656" and evid["source_corpus"]["function_count"] == 5478)
+check("26 compact state functions promoted", evid["function_count"] == 26)
+for row in evid["functions"]:
+    start = int(row["entry"], 16)
+    check(f"raw body {row['entry']}", sha(image[start:start + row["body_size"]]) == row["body_sha256"])
 
-print('\n== exact H Tx carriers ==')
-pdus={x['can_id']:x for x in art['h_tx_pdu_descriptors']}
-check('new H Tx family exact',list(pdus)==['0x030','0x351','0x394','0x4A3','0x4C8'])
-check('0x030 is 32-byte PDU0',pdus['0x030']['pdu']==0 and pdus['0x030']['length']==32)
-check('0x351 is 4-byte PDU1',pdus['0x351']['pdu']==1 and pdus['0x351']['length']==4)
-check('0x394 is 3-byte PDU2',pdus['0x394']['pdu']==2 and pdus['0x394']['length']==3)
-check('0x4A3 is 8-byte PDU3',pdus['0x4A3']['pdu']==3 and pdus['0x4A3']['length']==8)
+print("\n== exact H Tx carriers ==")
+pdus = {x["can_id"]: x for x in art["h_tx_pdu_descriptors"]}
+check("new H Tx family exact", list(pdus) == ["0x030", "0x351", "0x394", "0x4A3", "0x4C8"])
+check("0x030 is 32-byte PDU0", pdus["0x030"]["pdu"] == 0 and pdus["0x030"]["length"] == 32)
+check("0x351 is 4-byte PDU1", pdus["0x351"]["pdu"] == 1 and pdus["0x351"]["length"] == 4)
+check("0x394 is 3-byte PDU2", pdus["0x394"]["pdu"] == 2 and pdus["0x394"]["length"] == 3)
+check("0x4A3 is 8-byte PDU3", pdus["0x4A3"]["pdu"] == 3 and pdus["0x4A3"]["length"] == 8)
 
-print('\n== 0x4A3 state bridge ==')
-b=art['state_bridge']['0x4A3']; fields={x['wire']:x for x in b['fields']}
-check('0x4A3 high-confidence classification','high-confidence' in b['classification'])
-check('B1:B2 mirrors FD025 angle','0x025 signal184' in fields['B1:B2']['source'])
-check('B3:B4 exact Techstream Steering Angle join','0x1037 Steering Angle' in fields['B3:B4']['semantic'] and fields['B3:B4']['source']=='FEBE7A46')
-check('B5 exact Steering Wheel Torque source join','0x1035 Steering Wheel Torque' in fields['B5']['semantic'] and 'FEBE6554' in fields['B5']['source'])
-check('B5 physical scaling remains bounded','exact physical B5 scaling not yet promoted' in fields['B5']['semantic'])
-check('B6:B7 is target-native Q-current response','0x1151 Motor Actual Current (Q Axis)' in fields['B6:B7']['semantic'] and 'not assumed old STEER_TORQUE_EPS' in fields['B6:B7']['semantic'])
+print("\n== 0x4A3 physical state bridge ==")
+b = art["state_bridge"]["0x4A3"]
+fields = {x["wire"]: x for x in b["fields"]}
+check("4A3 driver torque has official physical scale", fields["B5"]["semantic"] == "Steering Wheel Torque" and fields["B5"]["techstream_did"] == "0x1035" and fields["B5"]["unit"] == "Nm" and fields["B5"]["packet_scale"] == 0.1)
+check("4A3 Q-current is sign-inverted physical feedback", fields["B6:B7"]["semantic"] == "Motor Actual Current (Q Axis)" and fields["B6:B7"]["techstream_did"] == "0x1151" and fields["B6:B7"]["packet_scale"] == -0.01)
+check("4A3 carries selected steering fault/inhibit duplicate", fields["B0[0]"]["semantic"].startswith("selected steering fault/inhibit status") and "not an exhaustive EPS-fault state" in fields["B0[0]"]["semantic"])
+check("4A3 remains route-availability bounded", "zero 0x4A3 frames" in b["dynamic_boundary"])
 
-print('\n== 0x351 / 0x394 status families ==')
-s351=art['state_bridge']['0x351']; s394=art['state_bridge']['0x394']
-check('351 exact status/flag wire location',s351['wire']=='B2[7:5] = FEBE7DD0; B2[4] = FEBE7DD1')
-check('351 preserves seven-count architecture','seven-count' in s351['producer'])
-check('351 semantic transfer is bounded','not given an old OEM semantic name' in s351['boundary'])
-check('394 exact four packed status fields',s394['wire']=='B1[7:6]=7DD5; B1[5:3]=7DD6; B2[3:1]=7DD7; B2[0]=7DD9')
-check('394 internal state source is explicit','FEBE7F58' in s394['producer'])
-check('old LKA_STATE codes explicitly non-portable','old 0x262 LKA_STATE numeric values are unresolved/non-portable' in s394['boundary'])
+print("\n== 0x351 mixed status bridge ==")
+s351 = art["state_bridge"]["0x351"]
+check("351 is mixed status, not generic readiness", "mixed EPS status" in s351["classification"] and "C159B49-linked" in s351["classification"] and "does not name the whole packet" in s351["boundary"])
+check("351 exact C159B49 diagnostic join", s351["diagnostic_join"]["techstream_code"] == "C159B49" and s351["diagnostic_join"]["h_dtc_index"] == 54 and s351["diagnostic_join"]["enabled_word"] == 1)
+check("351 exact seven-count transition state", any("seven-count transition state" in x and "0x2B930 = 7" in x for x in s351["producer_chain"]))
+check("351 force-7 override is separate and exact", "separately forces code 7" in s351["wire_fields"][0]["semantic"] and "exact force-7 indicator" in s351["wire_fields"][1]["semantic"] and "(FEBE65E4 & 3) != 0" in s351["wire_fields"][1]["semantic"] and "FEBE7E13 != 0" in s351["wire_fields"][1]["semantic"] and any("force-writes code 7 plus FEBE7DD1=1" in x for x in s351["producer_chain"]))
+check("351 packet availability remains bounded", "zero 0x351 frames" in s351["dynamic_boundary"])
 
-print('\n== 0x030 reframed ==')
-s030=art['state_bridge']['0x030']
-check('030 stays mixed rather than monolithic','mixed 32-byte FD' in s030['classification'])
-check('030 configured signal set 0..36',s030['configured_signals']==list(range(37)))
-check('030 direct packed signals 0..34',s030['direct_packed_signals']==list(range(35)))
-check('030 additive byte7 exact formula',s030['additive_field']['wire_byte']==7 and 'sum(payload_bytes_0_through_6) + 0x38' in s030['additive_field']['formula'])
+print("\n== 0x394 classifier ==")
+s394 = art["state_bridge"]["0x394"]
+check("394 has exact 17-row classifier table", len(s394["state_table_rows"]) == 17 and s394["state_table_rows"][0] == [0, 0, 0, 0, 0])
+check("394 homolog table is byte-identical in Sienna", s394["sienna_table_byte_identical"] is True)
+check("394 state0 is deepest clear/normal path, not Ready", s394["classifier_states"]["0"]["role"] == "deepest clear/normal classifier path" and s394["openpilot_fault_mapping"]["classifier_deepest_clear_normal_state"] == 0 and "not sufficient to authorize actuation" in s394["openpilot_fault_mapping"]["conservative_clear_state_candidate"])
+cfg = s394["state0_final_branch_window"]
+check("394 state0 final gating is raw-instruction pinned", cfg["start"] == "0x0004BB16" and cfg["end_exclusive"] == "0x0004BB50" and cfg["sha256"] == "d3838fae94f6a5bdcf953ccabda64142bddeffd2470e4935af3c4a7374ba50c6" and "0x4BB48" in cfg["control_flow"] and "state 16" in cfg["control_flow"] and "not assign OEM names" in cfg["boundary"])
+check("394 special state15 remains bounded", s394["classifier_states"]["15"]["role"] == "special operating state" and "not safely nameable" in s394["classifier_states"]["15"]["boundary"])
+check("394 temp/permanent fault mapping is deliberately unresolved", s394["openpilot_fault_mapping"]["steerFaultTemporary"] == s394["openpilot_fault_mapping"]["steerFaultPermanent"] == "unresolved")
+check("394 packet availability remains bounded", "zero 0x394 frames" in s394["dynamic_boundary"])
 
-print('\n== command ingress closure ==')
-c=art['command_ingress_closure']
-check('complete scalar generated-COM census is 101',c['generated_scalar_rx_calls']==101)
-check('twenty-two external signals enter supervisor cone',c['supervisor_external_signals']==22)
-check('large ingress includes B6 target plus 025 sensors',c['supervisor_reaching_ge12bit_fields']==[{'can_id':'0x025','signal_id':184,'bits':12},{'can_id':'0x025','signal_id':186,'bits':12},{'can_id':'0x0B6','signal_id':255,'bits':16}])
-check('fixed-map correction recovered B6 target',c['fixed_map_correction_recovered_b6_target'] is True)
-check('D7 16-bit field is SP1 vehicle speed','CAN Vehicle Speed (SP1)' in c['protected_0x0D7'])
-check('Techstream B6 semantics defer to target-native proof','defers signal255 control semantics' in c['protected_0x0B6_techstream_boundary'])
-check('B6 target-angle command exact',c['b6_target_angle']['signal_id']==255 and c['b6_target_angle']['wire_byte']==4 and c['b6_target_angle']['bit_length']==16 and c['b6_target_angle']['signed'] and c['b6_target_angle']['snapshot']=='0xFEBEAE82')
-check('B6 mode/control ID exact',c['b6_target_angle']['mode_signal_id']==254 and c['b6_target_angle']['mode_wire_byte']==3 and set(c['b6_target_angle']['decoded_mode_values'])=={'1','4','10','11','19'})
-check('B6 target-vs-measured loop recovered','target-versus-measured-steering-angle' in c['b6_target_angle']['target_vs_measured_loop'] or 'target-vs-measured-steering-angle' in c['b6_target_angle']['target_vs_measured_loop'])
-check('B6 controller-equivalent physical scale is closed',c['b6_target_angle']['physical_scale_closed'] is True and abs(c['b6_target_angle']['controller_equivalent_deg_per_count']-(1024/17870))<1e-15 and abs(c['b6_target_angle']['controller_equivalent_mrad_per_count']-1.0001215187701138)<1e-12)
-check('B6 OEM unit label remains bounded',c['b6_target_angle']['oem_wire_unit_name_closed'] is False)
-check('B6 mode profiles select distinct calibrations','distinct calibration banks' in c['b6_target_angle']['mode_profile_semantics']['calibration_selection'])
-check('B6 mode profiles carry exact OEM labels',c['b6_target_angle']['mode_profile_semantics']['oem_feature_labels']=={'1':'PCS','4':'LDA','10':'Hands Off LTA','11':'LTA/LCA','19':'PDA'})
-check('B6 receiver request/loss/sequence contract carried into bridge',c['b6_target_angle']['request_selection_closed'] is True and c['b6_target_angle']['receiver_loss_cutout_ticks']==7 and c['b6_target_angle']['wall_clock_timeout_closed'] is False and c['b6_target_angle']['sequence_modulus']==64 and c['b6_target_angle']['sequence_gap_cap']==8)
-check('classic camera/IPM-A interface removal retained',all(x in c['old_camera_interface_removed'] for x in ('0x2E4','0x131','0x191','0x2FD','disabled/removed')))
-cr=c['computed_retained_branch']
-check('computed retained branch is live, not statically dead',cr['statically_dead'] is False and 'live' in cr['classification'])
-check('computed retained magnitude writer recovered',cr['magnitude_writer']=='0x000CAD62')
-check('computed retained mode-enable writer recovered',cr['mode_enable_writer']=='0x000CC7F8')
-check('B6 signals 262/263 are recovered modifiers',cr['b6_modulator_signal_ids']==[262,263])
-check('command-sized replacement wire scalar is recovered',cr['command_sized_wire_scalar_recovered'] is True and '0x0B6 signal255' in c['static_conclusion'])
+print("\n== live 0x030 state and torque ==")
+s030 = art["state_bridge"]["0x030"]
+check("030 configured signal set 0..36", s030["configured_signals"] == list(range(37)))
+check("030 direct packed signals 0..34", s030["direct_packed_signals"] == list(range(35)))
+check("030 additive byte7 exact formula", s030["additive_field"]["wire_byte"] == 7 and "sum(payload_bytes_0_through_6) + 0x38" in s030["additive_field"]["formula"])
+state_fields = {x["signal_id"]: x for x in s030["steering_state_fields"]}
+check("030 selected steering fault/inhibit status nominal polarity observed", state_fields[6]["wire"] == "B6[2]" and state_fields[6]["span_values"] == [0] and state_fields[6]["span_clear_frames"] == 6000)
+check("030 torque-validity gate nominal polarity observed", state_fields[8]["wire"] == "B6[0]" and state_fields[8]["span_values"] == [0] and state_fields[8]["span_clear_frames"] == 6000)
+check("030 neighboring status bit is live", state_fields[7]["span_values"] == [0, 1])
+torque = s030["driver_torque_encoding_family"]
+check("030 torque exact physical reconstruction promoted", torque["signal_ids"] == [0, 10, 31] and torque["physical_reconstruction"].startswith("Steering Wheel Torque [N.m] = signal10_signed * 0.1"))
+check("030 torque live dynamic range observed", torque["span_torque_nm"]["count"] == 6000 and torque["span_torque_nm"]["min"] < -8.0 and torque["span_torque_nm"]["max"] > 2.8 and torque["span_torque_nm"]["unique_count"] > 500)
+check("030 coarse rounding behavior exact", torque["coarse_rounding_delta_values"] == [-1, 0, 1])
+check("030 eleven GP-relative false negatives corrected", [x["signal_id"] for x in s030["gp_relative_runtime_fields"]] == [0, 1, 10, 14, 16, 17, 18, 27, 28, 31, 34])
+check("underlying FD artifact carries the GP correction", fd["schema"] == "corolla-8965H1202000-fd-control-interface-v2" and fd["fd_0x030_transmit"]["gp_relative_writer_correction"]["affected_signal_ids"] == [0, 1, 10, 14, 16, 17, 18, 27, 28, 31, 34])
+check("030 Q-current derivative remains scale-bounded", s030["q_current_derived_field"]["signal_id"] == 34 and "calibration-dependent" in s030["q_current_derived_field"]["classification"])
 
-print('\n== openpilot integration contract ==')
-r=art['pre_tss3_openpilot_requirements']
-check('old 260 roles retained',r['steer_torque_sensor_0x260_roles']==['driver steering torque','EPS steering torque','accurate steering angle','angle initialization'])
-check('old 262 readiness role retained',r['eps_status_0x262_roles']==['LKA readiness/fault state'])
-check('old fault codes explicitly marked nonportable',r['old_fault_states_are_not_portable']['temporary']==[0,9,11,21,25])
-check('three concrete next discriminators',len(art['next_discriminators'])==3 and 'FRC_P5' in art['next_discriminators'][1])
+print("\n== Ready Status diagnostic oracle ==")
+ready = art["state_bridge"]["techstream_ready_status_oracle"]
+check("Ready Status DID and exact source chain", ready["did"] == "0x1033" and ready["name"] == "Ready Status" and ready["source_chain"][:4] == ["0xFEBE7D1B", "0xFEBEF052", "0xFEBEB5A8", "0xFEBEE811"])
+check("Ready Status firmware chain verified", ready["firmware_chain_verified"] is True)
+check("Ready Status is not invented as Tx bit", "not yet joined" in ready["boundary"] and "do not invent a CAN ready bit" in ready["openpilot_consequence"])
 
-print('\n== documentation integration ==')
-doc=DOC.read_text() if DOC.exists() else ''
-for token in ('0x4A3','0x351','0x394','0x030','0x1035','0x1037','0x1151','101','0x2E4','0x0B6','262','263','0xCC7F8','0xCAD62','signal 255','0xFEBEAE82','Target Steering Angle','FRC_P5'):
- check(f'doc preserves {token}',token in doc)
-findings=(REPO/'docs/status/FINDINGS.md').read_text(); priorities=(REPO/'docs/status/PRIORITIES.md').read_text()
-check('COM-009 integrated','| COM-009 |' in findings and 'corolla-h-f-openpilot-state-bridge.md' in findings)
-check('priority consumes state bridge','corolla-h-f-openpilot-state-bridge.md' in priorities)
-print(f'\nResults: {passed} passed, {failed} failed'); raise SystemExit(1 if failed else 0)
+print("\n== CarState/Panda closure ==")
+closure = art["carstate_and_panda_input_closure"]
+check("driver torque is now live on 030", "closed and live on 0x030" in closure["driver_steering_torque"])
+check("motor response remains static 4A3", "0x4A3 B6:B7" in closure["motor_actuator_response"] and "current routes do not carry 0x4A3" in closure["motor_actuator_response"])
+check("fault gates are live but temp/permanent remains open", "live 0x030 B6[2]" in closure["steering_fault_inhibit_status"] and closure["temporary_vs_permanent_fault"].startswith("not closed"))
+check("production safety remains blocked", "do not authorize actuation" in closure["production_safety_boundary"])
+
+print("\n== command ingress continuity ==")
+c = art["command_ingress_closure"]
+check("large ingress includes B6 target plus 025 sensors", c["supervisor_reaching_ge12bit_fields"] == [{"can_id": "0x025", "signal_id": 184, "bits": 12}, {"can_id": "0x025", "signal_id": 186, "bits": 12}, {"can_id": "0x0B6", "signal_id": 255, "bits": 16}])
+check("B6 target-angle command remains exact", c["b6_target_angle"]["signal_id"] == 255 and c["b6_target_angle"]["wire_byte"] == 4 and c["b6_target_angle"]["signed"] and c["b6_target_angle"]["snapshot"] == "0xFEBEAE82")
+check("B6 receiver contract retained", c["b6_target_angle"]["request_selection_closed"] is True and c["b6_target_angle"]["receiver_loss_cutout_ticks"] == 7 and c["b6_target_angle"]["sequence_modulus"] == 64 and c["b6_target_angle"]["sequence_gap_cap"] == 8)
+
+print("\n== documentation integration ==")
+doc = DOC.read_text() if DOC.exists() else ""
+for token in ("0x4A3", "0x351", "0x394", "0x030", "0x1035", "0x1037", "0x1151", "0x0B6", "Target Steering Angle", "FRC_P5"):
+    check(f"doc preserves {token}", token in doc)
+findings = (REPO / "docs/status/FINDINGS.md").read_text()
+priorities = (REPO / "docs/status/PRIORITIES.md").read_text()
+check("COM-009 integrated", "| COM-009 |" in findings and "corolla-h-f-openpilot-state-bridge.md" in findings)
+check("priority consumes state bridge", "corolla-h-f-openpilot-state-bridge.md" in priorities)
+
+print(f"\nResults: {passed} passed, {failed} failed")
+raise SystemExit(1 if failed else 0)

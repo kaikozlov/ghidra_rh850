@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import csv
 import json
-import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -126,11 +125,15 @@ check("report explicitly separates TSS generation from SecOC/TSK", all(x in repo
 check(
     "report records the passive TSS3 implementation checkpoint",
     all(token in report for token in (
-        "200dfa78bbda4228f5e9bb1f7281659f5b6df8a6",
-        "bb786e2c29f1ad433b1e3d08c0129a0f769a6d91",
+        "6b124c546381350b8c7285980ffed3f14aef8f53",
+        "263b339480eabf8be242b486bd76f1df835241b2",
         "SafetyModel.noOutput",
         "5,900/5,900",
         "147-message CAN fingerprint",
+        "STEERING_FAULT_INHIBIT_STATUS",
+        "not an exhaustive EPS-fault",
+        "Steering Wheel Torque",
+        "-8.23..+2.85 N.m",
     )),
 )
 check("priority queue marks the read-only scaffold complete", "Read-only opendbc scaffold is complete" in priorities)

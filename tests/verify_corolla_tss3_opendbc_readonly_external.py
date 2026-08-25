@@ -15,8 +15,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 OPENPILOT = (REPO / "../kai-openpilot").resolve()
 OPENPILOT_PYTHON = OPENPILOT / ".venv/bin/python"
-OPENPILOT_COMMIT = "bb786e2c29f1ad433b1e3d08c0129a0f769a6d91"
-OPENDBC_COMMIT = "200dfa78bbda4228f5e9bb1f7281659f5b6df8a6"
+OPENPILOT_COMMIT = "263b339480eabf8be242b486bd76f1df835241b2"
+OPENDBC_COMMIT = "6b124c546381350b8c7285980ffed3f14aef8f53"
 RLOG = REPO / "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst"
 
 passed = failed = 0
@@ -34,7 +34,7 @@ def check(name: str, condition: object, detail: str = "") -> None:
 def is_ancestor(repo: Path, commit: str) -> bool:
     proc = subprocess.run(
         ["git", "-C", str(repo), "merge-base", "--is-ancestor", commit, "HEAD"],
-        capture_output=True, text=True,
+        capture_output=True, text=True, check=False,
     )
     return proc.returncode == 0
 
@@ -55,6 +55,7 @@ probe = textwrap.dedent(
     import json
     import sys
 
+    from opendbc.can import CANParser
     from opendbc.car import Bus, CanData, structs
     from opendbc.car.toyota.fingerprints import FINGERPRINTS
     from opendbc.car.toyota.interface import CarInterface
@@ -71,6 +72,8 @@ probe = textwrap.dedent(
     cp1 = CarInterface.get_params(CAR.TOYOTA_COROLLA_TSS3, fingerprint_on(1), [], False, False, False)
     cp0 = CarInterface.get_params(CAR.TOYOTA_COROLLA_TSS3, fingerprint_on(0), [], False, False, False)
     ci = CarInterface(cp1)
+    eps_parser = CANParser("toyota_tss3_pt_generated", [("TSS3_EPS_TELEMETRY", float("nan"))], 1)
+    eps_fields = eps_parser.vl["TSS3_EPS_TELEMETRY"]
 
     cc = structs.CarControl()
     cc.enabled = True
@@ -97,6 +100,7 @@ probe = textwrap.dedent(
       'bus1_detected': bool(cp1.flags & ToyotaFlags.TSS3_PT_BUS1),
       'bus0_default': not bool(cp0.flags & ToyotaFlags.TSS3_PT_BUS1),
       'dbc': DBC[CAR.TOYOTA_COROLLA_TSS3][Bus.pt],
+      'bounded_steering_status_name': 'STEERING_FAULT_INHIBIT_STATUS' in eps_fields and 'EPS_FAULT_INHIBIT' not in eps_fields,
       'dashcam_only': bool(cp1.dashcamOnly),
       'no_output': cp1.safetyConfigs[0].safetyModel == structs.CarParams.SafetyModel.noOutput,
       'radar_unavailable': bool(cp1.radarUnavailable),
@@ -116,6 +120,12 @@ probe = textwrap.dedent(
       'gas_values': sorted(set(bool(x.gasPressed) for x in post)),
       'gear_values': sorted(set(str(x.gearShifter) for x in post)),
       'cruise_enabled_values': sorted(set(bool(x.cruiseState.enabled) for x in post)),
+      'min_driver_torque_nm': min(float(x.steeringTorque) for x in post),
+      'max_driver_torque_nm': max(float(x.steeringTorque) for x in post),
+      'driver_torque_unique_2dp': len(set(round(float(x.steeringTorque), 2) for x in post)),
+      'steering_pressed_values': sorted(set(bool(x.steeringPressed) for x in post)),
+      'steer_fault_temporary_values': sorted(set(bool(x.steerFaultTemporary) for x in post)),
+      'steer_fault_permanent_values': sorted(set(bool(x.steerFaultPermanent) for x in post)),
     }
     print(json.dumps(out, sort_keys=True))
     """
@@ -130,6 +140,7 @@ proc = subprocess.run(
     capture_output=True,
     text=True,
     timeout=180,
+    check=False,
 )
 check("read-only platform/rlog probe succeeds", proc.returncode == 0, proc.stderr.strip()[:240])
 if proc.returncode == 0:
@@ -139,6 +150,7 @@ if proc.returncode == 0:
     check("TSS3 and SecOC remain orthogonal flags", result["tss3"] and result["secoc"] and result["not_tss2"])
     check("observed bus1 and relay-correct bus0 parser modes are distinct", result["bus1_detected"] and result["bus0_default"])
     check("dedicated TSS3 DBC is selected", result["dbc"] == "toyota_tss3_pt_generated")
+    check("steering status field name preserves the bounded semantics", result["bounded_steering_status_name"])
     check(
         "platform is passive at both CarParams and controller boundaries",
         result["dashcam_only"] and result["no_output"] and result["radar_unavailable"]
@@ -157,6 +169,17 @@ if proc.returncode == 0:
     check("brake and gas both transition", result["brake_values"] == [False, True] and result["gas_values"] == [False, True])
     check("only dynamically proven D gear is promoted", result["gear_values"] == ["drive"])
     check("cruise remains neutral without an engaged transition", result["cruise_enabled_values"] == [False])
+    check(
+        "live physical driver torque is promoted from 0x030",
+        result["min_driver_torque_nm"] < -8.0 and result["max_driver_torque_nm"] > 2.8
+        and result["driver_torque_unique_2dp"] == 482,
+        f"range={result['min_driver_torque_nm']:.2f}..{result['max_driver_torque_nm']:.2f} Nm unique={result['driver_torque_unique_2dp']}",
+    )
+    check("unvalidated driver override threshold remains disabled", result["steering_pressed_values"] == [False])
+    check(
+        "temporary/permanent steering fault classes remain deliberately neutral",
+        result["steer_fault_temporary_values"] == [False] and result["steer_fault_permanent_values"] == [False],
+    )
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 raise SystemExit(1 if failed else 0)

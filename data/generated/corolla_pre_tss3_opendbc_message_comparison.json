@@ -421,43 +421,62 @@
     {
       "classification": "old_eps_tx_removed_roles_split_across_newer_state_carriers",
       "corolla_h_f": {
-        "0x030_classification": "mixed 32-byte FD EPS telemetry/status/validity carrier; still requires field recovery",
+        "0x030_classification": "live generation-native EPS telemetry/status/validity carrier with driver torque and two safety-relevant gates closed",
         "0x4A3": {
-          "classification": "high-confidence newer Corolla openpilot state bridge",
+          "classification": "generation-native steering telemetry bridge; driver torque and actuator response closed statically",
+          "dynamic_boundary": "Span's moving route contains zero 0x4A3 frames, so the packet fields are firmware/Techstream-static rather than route-validated. The duplicated FEBE7DAE selected steering fault/inhibit status bit is dynamically nominal-clear through 0x030.",
           "fields": [
             {
-              "confidence": "recovered",
-              "semantic": "status/validity family; exact OEM bit meaning unresolved",
-              "source": "FEBE7DAE | 0x20",
-              "wire": "B0"
+              "confidence": "verified dataflow",
+              "semantic": "constant marker bit",
+              "source": "constant 1 from FEBE7DAE | 0x20",
+              "wire": "B0[5]"
             },
             {
-              "confidence": "verified dataflow",
+              "confidence": "verified dataflow + Span nominal polarity through duplicate 0x030 carrier",
+              "semantic": "selected steering fault/inhibit status aggregate; same source is 0x030 B6[2]; not an exhaustive EPS-fault state",
+              "source": "FEBE7DAE",
+              "wire": "B0[0]"
+            },
+            {
+              "confidence": "verified dataflow + Techstream angle conversion",
+              "physical_scale": "1.5 deg/count",
               "semantic": "mirror of the target-native signed-12 steering-angle sensor field",
               "source": "FEBE7D34 from FD 0x025 signal184",
               "wire": "B1:B2"
             },
             {
-              "confidence": "verified dataflow + official name",
+              "confidence": "verified dataflow + official name/conversion",
+              "physical_scale": "1.5 deg/count",
               "semantic": "same target-native signed-12 quantity exposed by Techstream DID 0x1037 Steering Angle",
               "source": "FEBE7A46",
               "wire": "B3:B4"
             },
             {
-              "confidence": "verified dataflow + official name",
-              "semantic": "same native source as Techstream DID 0x1035 Steering Wheel Torque; exact physical B5 scaling not yet promoted",
-              "source": "FEBE6554 -> *100/0x100 -> /10 -> signed-byte saturation",
+              "confidence": "verified dataflow + official name/conversion",
+              "packet_scale": 0.1,
+              "packet_scale_unit": "Nm/count",
+              "quantization": "two-stage truncation before signed-byte saturation; packet is the native torque source quantized to intended 0.1 N.m/count",
+              "semantic": "Steering Wheel Torque",
+              "source": "FEBE6554 -> trunc(*100/0x100) -> trunc(/10) -> signed-byte saturation",
+              "techstream_did": "0x1035",
+              "unit": "Nm",
               "wire": "B5"
             },
             {
-              "confidence": "verified dataflow + official name",
-              "semantic": "exact sign-inverted raw quantity used by DID 0x1151 Motor Actual Current (Q Axis), unit A; motor-current response, not assumed old STEER_TORQUE_EPS",
+              "confidence": "verified dataflow + official name/conversion",
+              "packet_scale": -0.01,
+              "packet_scale_unit": "A/count",
+              "semantic": "Motor Actual Current (Q Axis)",
+              "sign_note": "packet signed integer is the sign-inverted Techstream raw integer; Techstream uses two displayed decimals",
               "source": "FEBE6592 * -100 / 0x80, big-endian signed16",
+              "techstream_did": "0x1151",
+              "unit": "A",
               "wire": "B6:B7"
             }
           ],
           "length": 8,
-          "openpilot_consequence": "0x4A3 can supply generation-native angle, driver-torque-source, and motor-response observables before 0x030 is fully decoded; Panda limits/scales must be derived for this generation.",
+          "openpilot_consequence": "Generation-native driver torque and actuator-response observables are closed without old 0x260 semantics. They can feed a future Panda safety model once relay-correct routing/availability is captured; absence from the current route prevents using them as required CarState inputs today.",
           "pdu": 3
         },
         "generation_native_carriers": [
@@ -483,22 +502,233 @@
       "classification": "old_eps_status_tx_removed_status_roles_split_across_newer_carriers",
       "corolla_h_f": {
         "0x351": {
-          "boundary": "The H upstream boolean/state source is not given an old OEM semantic name solely from structural similarity.",
-          "classification": "structural continuity of EPS plausibility/debounce status carrier",
+          "boundary": "C159B49 names one upstream electrical-monitor path feeding 0x351; it does not name the whole packet or the separate force-7 condition. 0x351 is not a generic LKA/EPS-ready state, and its numeric status codes must not be transplanted into old 0x262 LKA_STATE meanings.",
+          "classification": "mixed EPS status carrier with a C159B49-linked motor-B electrical-monitor path plus a separate force-7 override",
+          "diagnostic_join": {
+            "base_dtc": "0x559B",
+            "dem_event": "0x0004",
+            "dem_event_raw_hex": "4310360b82000000",
+            "dem_event_record_address": "0x0002B9A8",
+            "enabled_word": 1,
+            "failure_type": "0x49",
+            "h_dtc_index": 54,
+            "h_raw_hex": "499b550001000000",
+            "h_record_address": "0x0002C738",
+            "packed_dtc": "0x559B49",
+            "techstream_code": "C159B49",
+            "techstream_description": "Power Steering Motor \"B\" Terminal Voltage Detect Circuit",
+            "techstream_failure": "Internal Electronic Failure",
+            "techstream_raw_sha256": "bb309a2468385bdafe9196b9d89d1049e57bdf00b8f625b1e18678bee87ad200"
+          },
+          "dynamic_boundary": "Span and the public TSS3 route contain zero 0x351 frames, so packet availability and asserted-state transitions remain uncaptured.",
           "length": 4,
-          "openpilot_consequence": "Useful readiness/inhibit candidate and dynamic correlation target; do not hard-code it as LKA_STATE yet.",
+          "openpilot_consequence": "Treat 0x351 as mixed generation-native status. Its C159B49-linked path and force-7 override must be correlated separately before either is used for safety; remove it from the generic readiness-candidate bucket.",
           "pdu": 1,
-          "producer": "0x46E62 forces status code 7 and flag 1 under its active gate; 0x46E0C retains the old seven-count hold/debounce architecture",
-          "wire": "B2[7:5] = FEBE7DD0; B2[4] = FEBE7DD1"
+          "producer_chain": [
+            "0xB87E8 computes the C159B49-linked electrical-monitor predicate, reports Dem event 4 on assertion, and stores its boolean at GP-0x2EC = FEBEB514",
+            "0xBBA48 copies FEBEB514 -> FEBEE82B; 0x46E0C propagates that monitor boolean while maintaining the exact seven-count transition state using calibration byte 0x2B930 = 7",
+            "independently, 0x3738C -> 0x472E0 supplies FEBE7E13 from its param_1 bit15 path",
+            "0x46E62 stages the mixed result: normally param_1 into FEBE7DD0, but force-writes code 7 plus FEBE7DD1=1 when (FEBE65E4 & 3) != 0 and FEBE7E13 != 0; 0x47BA2 packs B2[7:5]/B2[4]"
+          ],
+          "wire_fields": [
+            {
+              "semantic": "mixed status code: normally propagates the FEBEB514/FEBEE82B monitor boolean through 0x46E0C; 0x46E62 separately forces code 7 when (FEBE65E4 & 3) != 0 and FEBE7E13 != 0",
+              "source": "FEBE7DD0",
+              "wire": "B2[7:5]"
+            },
+            {
+              "semantic": "exact force-7 indicator: 1 iff (FEBE65E4 & 3) != 0 and FEBE7E13 != 0; otherwise 0",
+              "source": "FEBE7DD1",
+              "wire": "B2[4]"
+            }
+          ]
         },
         "0x394": {
-          "boundary": "Exact H code meanings and old 0x262 LKA_STATE numeric values are unresolved/non-portable.",
-          "classification": "strong EPS internal status/fault-family carrier",
+          "classification": "generation-native 17-state EPS fault/status classifier with a recovered deepest clear/normal state",
+          "classifier_entry": "0x0004B9AE",
+          "classifier_states": {
+            "0": {
+              "evidence": "deepest H classifier path leaves uVar18=0 only after the preceding aggregated fault-class branches are clear and additional operational predicates pass; this is not equivalent to a proved EPS Ready boolean",
+              "role": "deepest clear/normal classifier path"
+            },
+            "1": {
+              "role": "startup/settling hold A"
+            },
+            "15": {
+              "boundary": "selected by a distinct operational predicate, not safely nameable as ready or fault from static evidence alone",
+              "role": "special operating state"
+            },
+            "16": {
+              "role": "fallback/not-normal operational inhibit branch"
+            },
+            "2": {
+              "role": "startup/settling hold B"
+            },
+            "3": {
+              "role": "internal input invalid/unavailable branch"
+            },
+            "4": {
+              "role": "retained table row; not directly selected by the recovered H classifier body"
+            },
+            "5": {
+              "role": "retained table row; not directly selected by the recovered H classifier body"
+            },
+            "6-14": {
+              "role": "active fault/inhibit classifier branches sourced from the Dem event-class aggregate/latches"
+            }
+          },
+          "dem_class_aggregator": "0x4B692 accumulates event classes/counters consumed by 0x4B9AE; the branches cover real EPS processor, power, motor, sensor, communication, and compatibility fault families",
+          "dynamic_boundary": "Span and the public route contain zero 0x394 frames; the state-0 clear/normal path and fault branches are statically recovered but not observed on-vehicle in the available captures.",
           "length": 3,
-          "openpilot_consequence": "Primary candidate for generation-native steering readiness/fault state; correlate against Techstream DTCs and stock-LTA transitions.",
+          "openpilot_consequence": "This recovers a native deepest-clear/normal versus fault-family discriminator candidate, but not a Ready authorization bit or temporary/permanent CarState fault labels. A future relay-correct capture should correlate raw 0x394 states against EPS Ready Status, DTC transitions and stock LTA enable/disable.",
+          "openpilot_fault_mapping": {
+            "classifier_deepest_clear_normal_state": 0,
+            "conservative_clear_state_candidate": "state 0 only, pending packet routing plus Ready/LTA dynamic correlation; state 0 alone is not sufficient to authorize actuation",
+            "reason": "Firmware distinguishes startup, live/latched/aged fault classes and a special state 15, but no evidence maps those distinctions to openpilot's temporary/permanent fault contract. Guessing would be unsafe.",
+            "steerFaultPermanent": "unresolved",
+            "steerFaultTemporary": "unresolved"
+          },
           "pdu": 2,
-          "producer": "0x46E96 projects internal FEBE7F58 class plus FEBE7F65/62/63/64 staging state",
-          "wire": "B1[7:6]=7DD5; B1[5:3]=7DD6; B2[3:1]=7DD7; B2[0]=7DD9"
+          "projection_entry": "0x00046E96",
+          "sienna_homolog_table_address": "0x0002A33C",
+          "sienna_table_byte_identical": true,
+          "state0_final_branch_window": {
+            "boundary": "instruction-level proof of the state-0 gating only; it does not assign OEM names to the individual predicates or equate state 0 with Techstream Ready Status",
+            "control_flow": "state 15 branches directly to 0x4BB4C; each failed final state-0 operational predicate branches to 0x4BB48 where MOV 0x10,r1 selects state 16; only the fully passing path branches from 0x4BB46 to 0x4BB4C with r1 still 0",
+            "end_exclusive": "0x0004BB50",
+            "raw_hex": "a35f0300615aea051806a6ffb2050f0ab5151906a6ffea0d1706a6ffb20d1406a6ff820da35f01000b06a6ffb205e0a9b205200e1000e1f60500",
+            "sha256": "d3838fae94f6a5bdcf953ccabda64142bddeffd2470e4935af3c4a7374ba50c6",
+            "start": "0x0004BB16"
+          },
+          "state_table_address": "0x00029D54",
+          "state_table_rows": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              3,
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              7,
+              0,
+              0,
+              0
+            ],
+            [
+              5,
+              3,
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              3,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              3,
+              3,
+              2,
+              1,
+              2
+            ],
+            [
+              3,
+              3,
+              2,
+              1,
+              0
+            ],
+            [
+              6,
+              3,
+              3,
+              0,
+              2
+            ],
+            [
+              6,
+              3,
+              3,
+              0,
+              0
+            ],
+            [
+              3,
+              7,
+              1,
+              1,
+              1
+            ],
+            [
+              3,
+              7,
+              4,
+              1,
+              1
+            ],
+            [
+              6,
+              7,
+              7,
+              0,
+              1
+            ],
+            [
+              6,
+              7,
+              6,
+              0,
+              1
+            ],
+            [
+              6,
+              7,
+              5,
+              0,
+              1
+            ],
+            [
+              2,
+              2,
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              7,
+              0,
+              0,
+              0
+            ]
+          ],
+          "wire_projection": {
+            "B1[5:3]": "table column 1 via FEBE7F62 -> FEBE7DD6",
+            "B1[7:6]": "table column 4 via FEBE7F65 -> FEBE7DD5",
+            "B2[0]": "table column 3 via FEBE7F64 -> FEBE7DD9",
+            "B2[3:1]": "table column 2 via FEBE7F63 -> FEBE7DD7",
+            "not_on_0x394": "table column 0 is staged through FEBE7F66/FEBE7DD2; the separate coarse class FEBE7DDA is not packed by 0x47ADA"
+          }
         },
         "generation_native_candidates": [
           "0x351",

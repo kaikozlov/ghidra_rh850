@@ -18,8 +18,10 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.build_ephemeral_runtime_manifest import load_codeflash  # noqa: E402
-from tools.compare_variant_application_rx import find_normal_rx_descriptor_table  # noqa: E402
+from tools.build_ephemeral_runtime_manifest import load_codeflash
+from tools.compare_variant_application_rx import (
+    find_normal_rx_descriptor_table,
+)
 
 SCHEMA = "corolla-pre-tss3-opendbc-message-comparison-v5"
 TX = struct.Struct("<IBBH")
@@ -84,7 +86,7 @@ def build(args: argparse.Namespace) -> dict:
     lta = json.loads(args.lta_provenance.read_text())
     eq = json.loads(args.equivalence.read_text())
     bridge = json.loads(args.state_bridge.read_text())
-    if bridge["schema"] != "corolla-8965H1202000-openpilot-state-bridge-v6":
+    if bridge["schema"] != "corolla-8965H1202000-openpilot-state-bridge-v7":
         raise ValueError("openpilot state/command bridge schema drift")
 
     if len(h) != 0x100000 or len(f) != 0x100000:

@@ -205,9 +205,10 @@ relay pair, preserve `carFw`/F181, and log all buses while safely exercising:
    a safe diagnostic trigger exists.
 
 This capture should close B6 visibility/cadence and producer side, exact physical
-relay path, stock-source suppression, driver-torque/actuator-response scale,
-`0x351/0x394/0x030` readiness/fault semantics, remaining gear enums, missing
-cruise roles, and the correct Panda parser/safety bus. Current Toyota safety
+relay path, stock-source suppression, a physical driver-override threshold,
+`0x4A3` Q-current actuator-response limits, `0x351/0x394` plus DID `0x1033`
+Ready/fault transition mapping, remaining gear enums, missing cruise roles, and
+the correct Panda parser/safety bus. Current Toyota safety
 assumes checked state on logical bus 0; direct diagnostic/passive observation on
 bus 1 is not itself the production relay topology.
 
@@ -215,15 +216,16 @@ Machine-readable checklist: `data/generated/corolla_tss3_opendbc_readiness.json`
 This target runs in parallel with static `07B0` Brake + `0792` FRC acquisition;
 neither replaces the other.
 
-**Read-only opendbc scaffold is complete.** Opendbc `200dfa78bbda4228f5e9bb1f7281659f5b6df8a6`
-and kai-openpilot `bb786e2c29f1ad433b1e3d08c0129a0f769a6d91` now provide the dedicated TSS3
+**Read-only opendbc scaffold is complete.** Opendbc `6b124c546381350b8c7285980ffed3f14aef8f53`
+and kai-openpilot `263b339480eabf8be242b486bd76f1df835241b2` now provide the dedicated TSS3
 platform/DBC/CarState while remaining `dashcamOnly` + Panda `noOutput`; the TSS3 controller
 emits no CAN. The tracked Span rlog replays through that parser with 5,900/5,900 post-startup
 samples CAN-valid. Therefore **do not spend the next pass rebuilding basic state parsing**.
 Use the implementation as the dynamic measurement harness and focus the next evidence on:
 exact target/F181 binding, physical relay-correct stock-LTA transitions, B6 sender cadence
-and full payload, SecOC freshness/key/source ownership, producer-side suppression, and
-`0x4A3/0x351/0x394/0x030` driver-torque/readiness/fault/limit semantics. Gear values other
+and full payload, SecOC freshness/key/source ownership, producer-side suppression, a
+physical driver-override threshold for the now-live `0x030` torque, `0x4A3` Q-current
+response limits, and `0x351/0x394` + DID `0x1033` Ready/fault transitions. Gear values other
 than the observed `D` and cruise engagement remain deliberately neutral in the implementation
 until transition captures justify them.
 
@@ -371,14 +373,17 @@ coexistence frame. In H/F, `0x2E4` is gone while `0x025` survives as a 32-byte
 FD steering-sensor interface. Albino H and Span F are byte-identical over the
 full application region, so the split is common to both dumps.
 
-The deeper state recovery now corrects the earlier "decode `0x030` first"
-priority. H/F still transmit classic `0x4A3`, and target-native dataflow joins it
-to Techstream **Steering Angle**, **Steering Wheel Torque**, and **Motor Actual
-Current (Q Axis)** sources. `0x351` retains the old plausibility/debounce status
-architecture, while `0x394` remains a strong EPS internal status/fault-family
-carrier. `0x030` is a mixed 32-byte telemetry/status/validity message and should
-now fill remaining state gaps rather than be treated as a monolithic
-`0x260+0x262` replacement.
+The deeper state recovery now closes the most important current-route state hole.
+Live `0x030` carries exact physical **Steering Wheel Torque** through signals10+31
+(`0.1 N.m` coarse + signed `0.01 N.m` remainder), with 536 values from -8.23 to
++2.85 N.m in Span's 6,000-frame moving capture. Its B6[2] selected steering fault/inhibit status (not an exhaustive EPS-fault
+state) and B6[0] torque-invalid gates are nominal-clear in all 6,000 frames. A GP-relative
+writer correction also removes eleven false `default-init-only` classifications.
+`0x4A3` is now the alternate torque/Q-current bridge (0.1 N.m/count and -0.01
+A/count respectively); `0x351` is mixed status with a C159B49-linked motor-B
+electrical-monitor base path plus a separate force-7 override; and `0x394` has a recovered 17-state classifier whose state 0 is the
+deepest recovered clear/normal path, not a proved Ready boolean. DID `0x1033 Ready Status` is target-native but still lacks a Tx-field
+join. Do not redo driver-torque producer/scale recovery.
 
 COM-013 adds the whole-vehicle half that was previously missing. The public TSS3
 Corolla route preserves useful old-state structure in `0x0AA/0x101/0x116/0x176`
@@ -388,8 +393,9 @@ state fields, while `0x1D3/0x260/0x262/0x343/0x399` remain unresolved. Because n
 vehicle-level route has an exact F181 join and Span's harness was not physically
 repinned onto the relay pair, the state-side priority is now a **firmware-identified,
 relay-correct H/F capture with stock LTA transitions**, not another static EPS
-sweep: join `0x4A3/0x351/0x394/0x030` to driver torque, actual assist and
-readiness/fault transitions while closing cruise and remaining gear enums. See
+sweep: observe `0x4A3/0x351/0x394`, correlate DID `0x1033 Ready Status` and
+asserted fault states, derive a physical driver-override threshold from the already
+closed `0x030` torque signal, and close cruise and remaining gear enums. See
 `data/generated/corolla_tss3_opendbc_readiness.json`,
 [../variants/corolla-pre-tss3-openpilot-message-comparison.md](../variants/corolla-pre-tss3-openpilot-message-comparison.md),
 and [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).

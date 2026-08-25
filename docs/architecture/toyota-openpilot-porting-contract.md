@@ -244,7 +244,7 @@ work must recover the second and fourth boxes for each new generation as well.
 | Platform identity / generation | exact firmware identity and P1M-E profile known | exact H and Span corpora known | bind each candidate vehicle to FRC/EPS/gateway firmware and real bus topology |
 | Torque steering command | protected `0x2E4` request/torque path recovered | classic `0x2E4` absent; H/F instead receive protected B6 target-angle control | do not port torque limits/scales; derive H/F-native limits and finish SecOC sender/producer contract |
 | LTA/angle command | protected `0x131` path recovered and converges with torque mode | active queue lacks `0x131`; protected `0x0B6` signal255 is target angle, signal254 is the OEM request selector, receiver loss is 7 foreground ticks, and signal261 is modulo-64 sequence state | module topology is now `FRC_P5` 498 + `ABS_P5`/Brake-EPB 435 + `EMPS_P5` 405; recover sender wall-clock cadence, limits, byte-level producer/forwarding transform, and SecOC sender ownership; do not transplant old `0x131` wire scaling |
-| Steering feedback | `0x025`, `0x260`, `0x262` roles strongly mapped | H `0x025` is FD angle/rate; state roles split across `0x4A3/0x351/0x394/0x030` | derive H/F-native driver override, response, readiness/fault, and validity semantics |
+| Steering feedback | `0x025`, `0x260`, `0x262` roles strongly mapped | H `0x025` is FD angle/rate; live `0x030` now provides physical driver torque plus raw fault/validity gates; `0x4A3` supplies alternate torque/Q-current and `0x351/0x394` supply fault/status families | derive the physical driver-override threshold, Q-current response limits, DID `0x1033` Ready Tx join, and temporary/permanent fault transition mapping |
 | Longitudinal command | older SecOC DBC provides a useful comparator, not an EPS-local proof | route `0x183` is 64-byte CAN-FD and disproves old wire-shape transfer | locate ACC producer, target command, feedback, stock suppression, AEB coexistence |
 | Stock producer ownership | old openpilot architecture gives camera/radar replacement model | physical Toyota-B/network differences already observed | map FRC/radar/gateway ownership and safe duplicate blocking for each command family |
 | UI / alerts | older `0x412` is historical reference | old-camera U023A87 path is disabled residue in H | identify FRC/cluster LTA/LDA/LCA status and warning outputs |
@@ -317,10 +317,11 @@ What the exact segment-0 rlog *does* close is the old-openpilot role migration:
   existing additive checksum and the existing `GEAR_PACKET_HYBRID.GEAR` bitfield
   decodes raw `3 = D` throughout. That proves carrier, bit position, checksum and
   the D enum on this capture; P/R/N/B transitions remain untested. Exact H partially
-  closes the steering replacements (`0x4A3`, `0x351`, `0x394`, mixed FD `0x030`),
-  while cruise availability/set speed/fault/follow-distance, exact driver-torque
-  scale, and production readiness/fault semantics still require vehicle-level
-  evidence.
+  closes the physical driver-torque scale on live `0x030`, the `0x030` selected
+  steering fault/inhibit status plus torque-validity gate, the `0x351` C159B49-linked
+  base path plus its separate force-7 override, and the `0x394` deepest clear/normal classifier path. Cruise availability/set speed/fault/follow-distance,
+  a physical driver-override threshold, Q-current response limits, and production
+  Ready/temporary/permanent fault transitions still require vehicle-level evidence.
 - **Same ID is not enough for body/UI reuse.** `0x3B7`, `0x411`, `0x412`,
   `0x610`, `0x614`, `0x620`, and `0x622` remain 8-byte frames, but most relevant
   transitions are static in this segment. One concrete warning is `0x610`: the
@@ -383,10 +384,11 @@ point, and safe forwarding/transmit topology.
 
 **Read-only implementation checkpoint (2026-08-24):** the scaffold above is now
 implemented in the maintained forks rather than remaining a paper design. Opendbc commit
-`200dfa78bbda4228f5e9bb1f7281659f5b6df8a6` adds `TOYOTA_COROLLA_TSS3`, a dedicated
+`6b124c546381350b8c7285980ffed3f14aef8f53` adds `TOYOTA_COROLLA_TSS3`, a dedicated
 `toyota_tss3_pt_generated` DBC, an explicit `TSS3` generation flag independent from
-`SECOC`, a TSS3-specific `CarState`, and the exact H/F B6 receiver fields for inspection.
-Kai-openpilot commit `bb786e2c29f1ad433b1e3d08c0129a0f769a6d91` pins that submodule and records
+`SECOC`, a TSS3-specific `CarState`, the conservatively named
+`STEERING_FAULT_INHIBIT_STATUS` field, and the exact H/F B6 receiver fields for inspection.
+Kai-openpilot commit `263b339480eabf8be242b486bd76f1df835241b2` pins that submodule and records
 the operational gate. The implementation is deliberately **non-actuating**:
 `CarParams.dashcamOnly=True`, Panda uses `SafetyModel.noOutput`, radar and longitudinal
 control are disabled, and the TSS3 `CarController` returns zero CAN messages even when an
@@ -399,19 +401,26 @@ F181 identity record; no guessed `FW_VERSIONS` row was added. Startup `0x025/32`
 `0x0AA/8` on logical bus 1 selects the observed unmodified Toyota-B CAN1 topology; absent
 that exclusive bus-1 evidence, the parser defaults to bus 0 for the intended relay-correct
 placement. That choice affects observation only and does not claim producer-side ownership
-or stock-source suppression. `CarState` promotes the proved steering/wheel/brake/gas fields,
-promotes only the dynamically exercised `0x127` raw value `3=D` (all other gear values stay
-`unknown`), and deliberately holds cruise, driver torque, EPS torque and steering-fault
-semantics neutral until their target-native transitions are recovered.
+or stock-source suppression. `CarState` promotes the proved steering/wheel/brake/gas fields
+and now reconstructs live physical **Steering Wheel Torque** from `0x030` as
+`signed(B8)*0.1 + signed4(B17[3:0])*0.01 N.m`; the target-native torque-invalid gate
+suppresses invalid samples. It still promotes only the dynamically exercised `0x127` raw
+value `3=D`, and deliberately leaves cruise, EPS actuator torque/current, driver-override
+policy, Ready mapping and temporary/permanent steering-fault classes neutral. The decoded
+B6[2] `STEERING_FAULT_INHIBIT_STATUS` is explicitly a selected steering fault/inhibit
+aggregate, not an exhaustive EPS-fault state.
 
 As an independent integration check, the complete tracked Span rlog was replayed through the
 new parser: after the first 100 startup samples, **5,900/5,900** samples remained
 `canValid`; speed reached `6.576 m/s`, brake and gas both transitioned, steering covered
-`-511.1..122.4 deg` and `-700..800 deg/s`, gear remained `D`, and cruise remained neutral.
+`-511.1..122.4 deg` and `-700..800 deg/s`, gear remained `D`, cruise remained neutral,
+and physical driver torque spans `-8.23..+2.85 N.m` with 482 distinct post-startup
+hundredth-N.m values. `steeringPressed` and both openpilot steering-fault flags remain false
+by design because their policy mapping is not yet proved.
 `tests/verify_corolla_tss3_opendbc_readonly_external.py` reproduces this against the sibling
 maintained forks. What still cannot be made production-ready is the B6 sender/SecOC/safety
-contract, target-native driver-torque/readiness/fault limits, radar parsing, or longitudinal
-control. The readiness artifact continues to record those evidence blockers rather than
+contract, a validated driver-override threshold, Q-current response limits, Ready/fault
+transition mapping, radar parsing, or longitudinal control. The readiness artifact continues to record those evidence blockers rather than
 implementation state.
 
 ## 5. The concrete TSS3 investigation roadmap

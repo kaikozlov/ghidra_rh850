@@ -100,6 +100,19 @@ check("Q-axis current-limit observer chain is complete", all(x["recovered"] for 
 check("Q command chain explicitly passes through C3D2 -> C3D6 -> C3D4",
       b["q_axis_command_chain"][0]["entry"] == "0x000CD5DC" and b["q_axis_command_chain"][1]["entry"] == "0x000CD644")
 
+print("\n== steering-state diagnostic bridge ==")
+sb = d["steering_state_bridge_diagnostics"]
+tq = sb["steering_wheel_torque"]
+check("Steering Wheel Torque DID 1035 is signed Nm/3 decimals", tq["primary_data_id"] == "0x1035" and tq["name"] == "Steering Wheel Torque" and tq["signed"] and tq["unit"] == "Nm" and tq["decimal_point_count"] == 3 and tq["mul"] == tq["div"] == 1)
+ready = sb["ready_status_oracle"]
+check("Ready Status DID 1033 is exact boolean diagnostic oracle", ready["primary_data_id"] == "0x1033" and ready["name"] == "Ready Status" and ready["source_chain"] == ["0xFEBE7D1B", "0xFEBEF052", "0xFEBEB5A8", "0xFEBEE811", "DID 0x1033"] and ready["conversion"]["data_range"] == [0, 1])
+elec = sb["0x351_motor_b_terminal_voltage_monitor"]
+check("0x351 electrical monitor joins exact enabled C159B49", elec["dem_event"] == 4 and elec["dtc"]["h_dtc_index"] == 54 and elec["dtc"]["enabled_word"] == 1 and elec["dtc"]["techstream_code"] == "C159B49")
+check("C159B49 carries exact Toyota description/failure", elec["dtc"]["techstream_description"] == 'Power Steering Motor "B" Terminal Voltage Detect Circuit' and elec["dtc"]["techstream_failure"] == "Internal Electronic Failure")
+check("C159B49 path does not name whole 0x351 packet", "does not name the whole packet" in elec["interpretation"] and "force-7 override" in elec["interpretation"])
+qactual = b["techstream_monitors"]["251"]
+check("Q actual current conversion is signed A/2 decimals", qactual["primary_data_id"] == "0x1151" and qactual["signed"] and qactual["unit"] == "A" and qactual["decimal_point_count"] == 2 and qactual["mul"] == qactual["div"] == 1)
+
 print("\n== Techstream surface selection ==")
 ts = d["techstream_surface"]
 check("EMPS_P5 master route is category405 generation20", ts["na_master_category_id"] == 405 and ts["na_master_generation"] == 20)

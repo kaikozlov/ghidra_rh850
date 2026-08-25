@@ -2493,6 +2493,9 @@
       "pdu_id": 42,
       "dtc": {
         "base_dtc": "0xC129",
+        "dem_event": "0x0143",
+        "dem_event_raw_hex": "4200520000010000",
+        "dem_event_record_address": "0x0002C3A0",
         "enabled_word": 1,
         "failure_type": "0x87",
         "h_dtc_index": 82,

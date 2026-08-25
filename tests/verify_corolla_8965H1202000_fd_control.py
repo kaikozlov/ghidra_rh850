@@ -12,6 +12,7 @@ REPO = Path(__file__).resolve().parents[1]
 ART = REPO / "data/generated/corolla_8965H1202000_fd_control_interface.json"
 EVIDENCE = REPO / "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json"
 REFS = REPO / "data/generated/corolla_8965H1202000_fd_control_reference_census.json"
+STATE_EVIDENCE = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json"
 TOOL = REPO / "tools/build_corolla_h_fd_control_interface.py"
 passed = failed = 0
 
@@ -31,6 +32,7 @@ with tempfile.TemporaryDirectory() as td:
     check("tracked FD/control report regenerates exactly", out.read_bytes() == ART.read_bytes())
 
 d = json.loads(ART.read_text())
+check("FD/control schema v2", d["schema"] == "corolla-8965H1202000-fd-control-interface-v2")
 print("\n== FD receive generation ==")
 fd = d["fd_receive_generation"]
 check("Sienna FD Rx set is 025/090/D7", [x["can_id"] for x in fd["sienna_fd_rx"]] == ["0x025", "0x090", "0x0D7"])
@@ -87,13 +89,23 @@ check("configured signals35/36 have no recovered direct pack call", tx["configur
 check("signal9 is exact first-seven-byte additive field plus 0x38",
       tx["checksum_like_signal_9"]["formula"] == "sum(payload_bytes_0_through_6) + 0x38, low byte")
 classes = {row["writer_class"] for row in tx["fields"]}
-check("FD030 writer census distinguishes runtime/default/constant-zero/computed fields",
-      {"runtime-produced", "default-init-only-direct-writer-census", "runtime-constant-zero-direct-writer-census", "computed-first-seven-byte-additive-field-plus-0x38"} <= classes)
-
+check("FD030 writer census distinguishes direct, GP-relative, constant-zero and computed fields",
+      {"runtime-produced", "runtime-produced-gp-relative", "runtime-constant-zero-direct-writer-census", "computed-first-seven-byte-additive-field-plus-0x38"} <= classes)
+check("FD030 no longer has false default-init-only fields", "default-init-only-direct-writer-census" not in classes)
+gp = tx["gp_relative_writer_correction"]
+expected_gp = [0, 1, 10, 14, 16, 17, 18, 27, 28, 31, 34]
+check("FD030 GP-relative correction covers exact eleven signals", gp["affected_signal_ids"] == expected_gp)
+rows = {row["signal_id"]: row for row in tx["fields"]}
+check("all corrected signals have exact runtime GP-relative writers", all(rows[x]["writer_class"] == "runtime-produced-gp-relative" for x in expected_gp))
+check("signals 0/10/31 are the recovered driver-torque encoding family", all("driver-steering-torque" in rows[x]["recovered_semantic"] for x in (0, 10, 31)))
+check("signal34 is Q-current-derived", "Motor Actual Current (Q Axis)" in rows[34]["recovered_semantic"] and "calibration-dependent" in rows[34]["recovered_semantic"])
 print("\n== compact evidence binding ==")
-e = json.loads(EVIDENCE.read_text()); r = json.loads(REFS.read_text())
+e = json.loads(EVIDENCE.read_text()); r = json.loads(REFS.read_text()); se = json.loads(STATE_EVIDENCE.read_text())
 check("FD/control evidence is exact H image-bound", e["software_id"] == "8965H1202000" and e["image"]["sha256"] == d["images"]["corolla_h_sha256"])
 check("compact function evidence contains 56 target-native functions", e["function_count"] == 56)
+check("GP-relative writer evidence is exact H-bound steering evidence", se["schema"] == "corolla-h-openpilot-state-bridge-decompiler-evidence-v2" and se["function_count"] == 26 and {"0x00047188", "0x00047430"} <= {x["entry"] for x in se["functions"]})
+check("FD report pins steering evidence hash/count", d["evidence"]["state_bridge_function_count"] == 26)
+check("GP correction preserves arbitrary-computed-pointer boundary", "does not upgrade" in gp["boundary"] and "computed-pointer" in r["evidence_boundary"])
 check("direct-reference census records its computed-pointer boundary", "computed-pointer" in r["evidence_boundary"])
 check("reference census covers at least 70 explicit terms", len(r["terms"]) >= 70)
 

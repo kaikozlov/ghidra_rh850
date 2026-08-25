@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "techstream"))
-from parse_ddb import DDBParser  # noqa: E402
+from parse_ddb import DDBParser
 
 REPO = Path(__file__).resolve().parents[1]
 TECH = REPO / "data/generated/techstream_v18/priority_steering_ddb_semantics.json"
@@ -81,9 +81,17 @@ def decode_emps_monitor(parser: DDBParser, monitor_key: int) -> dict:
         "bit_width": struct.unpack_from("<H", monitor_raw, 0x2E)[0] - struct.unpack_from("<H", monitor_raw, 0x2C)[0] + 1,
         "physical_data_key": physical_key,
         "physical_record_index": physical_index,
+        "physical_raw_hex": physical_raw.hex(),
+        "mul": struct.unpack_from("<i", physical_raw, 0x00)[0],
+        "div": struct.unpack_from("<i", physical_raw, 0x04)[0],
+        "offset": struct.unpack_from("<i", physical_raw, 0x08)[0],
+        "signed": bool(physical_raw[0x14]),
+        "decimal_point_count": physical_raw[0x15],
         "unit_key": unit_key,
         "unit_record_index": unit_index,
         "unit": strings.get_string(unit_string_index) if unit_string_index else None,
+        "data_range": [struct.unpack_from("<i", monitor_raw, 0x10)[0], struct.unpack_from("<i", monitor_raw, 0x0C)[0]],
+        "graph_range": [struct.unpack_from("<i", monitor_raw, 0x08)[0], struct.unpack_from("<i", monitor_raw, 0x04)[0]],
         "raw_sha256": sha(monitor_raw),
     }
 
@@ -252,6 +260,12 @@ def main() -> int:
             "name": sem["name"],
             "unit": sem["unit"],
             "bit_width": sem["bit_width"],
+            "physical_data_key": sem["physical_data_key"],
+            "mul": sem["mul"],
+            "div": sem["div"],
+            "offset": sem["offset"],
+            "signed": sem["signed"],
+            "decimal_point_count": sem["decimal_point_count"],
             "primary_data_id": row["primary_data_id"],
             "alternate_data_id": row["alternate_data_id"],
             "h_callback": row["h_callback"],
@@ -372,7 +386,38 @@ def main() -> int:
     tech_dtc_entries = parser.extract_dtc_failure_entries(emps_db.sections[65])
 
     def scalar_signal_ids(text: str) -> list[int]:
-        return [int(m.group(1), 0) for m in re.finditer(r"FUN_0007643a\((0x[0-9a-f]+|\d+)\s*,", text, re.I)]
+        return [int(m.group(1), 0) for m in re.finditer(r"FUN_0007643a\((0x[0-9a-f]+|\d+)\s*,", text, re.IGNORECASE)]
+
+    def decode_h_event_dtc(dem_event: int) -> dict | None:
+        event_address = 0x2B988 + dem_event * 8
+        event_rec = codeflash[event_address:event_address + 8]
+        dtc_index = event_rec[2]
+        if not dtc_index:
+            return None
+        dtc_address = 0x2C588 + dtc_index * 8
+        dtc_raw = codeflash[dtc_address:dtc_address + 8]
+        failure_type, base_dtc, _pad, enabled = struct.unpack("<BHBI", dtc_raw)
+        packed = (base_dtc << 8) | failure_type
+        matches = [x for x in tech_dtc_entries if x.packed_dtc == packed]
+        if len(matches) != 1:
+            raise ValueError(f"packed H DTC 0x{packed:06X} has {len(matches)} EMPS_P5 matches")
+        te = matches[0]
+        return {
+            "dem_event": f"0x{dem_event:04X}",
+            "dem_event_record_address": f"0x{event_address:08X}",
+            "dem_event_raw_hex": event_rec.hex(),
+            "h_dtc_index": dtc_index,
+            "h_record_address": f"0x{dtc_address:08X}",
+            "h_raw_hex": dtc_raw.hex(),
+            "base_dtc": f"0x{base_dtc:04X}",
+            "failure_type": f"0x{failure_type:02X}",
+            "packed_dtc": f"0x{packed:06X}",
+            "enabled_word": enabled,
+            "techstream_code": te.code,
+            "techstream_description": emps_strings.get_string(te.description_string_index),
+            "techstream_failure": emps_strings.get_string(te.failure_string_index),
+            "techstream_raw_sha256": sha(te.raw),
+        }
 
     communication_rows = []
     for row_index in range(6):
@@ -395,29 +440,7 @@ def main() -> int:
         descriptor = descriptors[descriptor_index]
 
         event_rec = codeflash[0x2B988 + dem_event * 8:0x2B990 + dem_event * 8]
-        dtc_index = event_rec[2]
-        dtc = None
-        if dtc_index:
-            dtc_raw = codeflash[0x2C588 + dtc_index * 8:0x2C590 + dtc_index * 8]
-            failure_type, base_dtc, pad, enabled = struct.unpack("<BHBI", dtc_raw)
-            packed = (base_dtc << 8) | failure_type
-            matches = [x for x in tech_dtc_entries if x.packed_dtc == packed]
-            if len(matches) != 1:
-                raise ValueError(f"packed H DTC 0x{packed:06X} has {len(matches)} EMPS_P5 matches")
-            te = matches[0]
-            dtc = {
-                "h_dtc_index": dtc_index,
-                "h_record_address": f"0x{0x2C588 + dtc_index * 8:08X}",
-                "h_raw_hex": dtc_raw.hex(),
-                "base_dtc": f"0x{base_dtc:04X}",
-                "failure_type": f"0x{failure_type:02X}",
-                "packed_dtc": f"0x{packed:06X}",
-                "enabled_word": enabled,
-                "techstream_code": te.code,
-                "techstream_description": emps_strings.get_string(te.description_string_index),
-                "techstream_failure": emps_strings.get_string(te.failure_string_index),
-                "techstream_raw_sha256": sha(te.raw),
-            }
+        dtc = decode_h_event_dtc(dem_event)
         communication_rows.append({
             "row_index": row_index,
             "raw_hex": rec.hex(),
@@ -468,11 +491,60 @@ def main() -> int:
         ),
     }
 
+    steering_state_bridge_diagnostics = {
+        "0x351_motor_b_terminal_voltage_monitor": {
+            "dem_event": 4,
+            "dtc": decode_h_event_dtc(4),
+            "expected": {
+                "event_raw_hex": "4310360b82000000",
+                "dtc_index": 54,
+                "dtc_raw_hex": "499b550001000000",
+                "techstream_code": "C159B49",
+                "description": 'Power Steering Motor "B" Terminal Voltage Detect Circuit',
+                "failure": "Internal Electronic Failure",
+            },
+            "interpretation": (
+                "The H 0x351 upstream monitor reports Dem event 4 when its debounced electrical-fault predicate asserts. "
+                "Event 4 selects enabled H DTC index 54 / packed 0x559B49, which EMPS_P5 names C159B49 Power Steering Motor B Terminal Voltage Detect Circuit / Internal Electronic Failure. "
+                "This identifies the C159B49-linked upstream electrical-monitor path feeding 0x351. It does not name the whole packet: target-native 0x46E62 also has a separate force-7 override from FEBE65E4/FEBE7E13. 0x351 is not a generic LKA readiness state."
+            ),
+        },
+        "ready_status_oracle": {
+            "monitor_key": 13,
+            "primary_data_id": "0x1033",
+            "name": "Ready Status",
+            "h_callback": "0x487C8",
+            "source_chain": ["0xFEBE7D1B", "0xFEBEF052", "0xFEBEB5A8", "0xFEBEE811", "DID 0x1033"],
+            "boundary": "This target-native diagnostic ready observable is not yet joined to a field in 0x030/0x351/0x394/0x4A3, so it is a future live-correlation oracle rather than a current CarState bit.",
+        },
+    }
+    steering_state_bridge_diagnostics["steering_wheel_torque"] = {
+        **decode_emps_monitor(parser, 15),
+        "monitor_key": 15,
+        "primary_data_id": "0x1035",
+        "h_callback": "0x48820",
+        "interpretation": "Signed Nm with three displayed decimals; the H 0x4A3 producer quantizes the same native source to an intended 0.1 N.m/count signed byte with integer truncation and saturation.",
+    }
+    steering_state_bridge_diagnostics["ready_status_oracle"]["conversion"] = decode_emps_monitor(parser, 13)
+    d351 = steering_state_bridge_diagnostics["0x351_motor_b_terminal_voltage_monitor"]["dtc"]
+    expected351 = steering_state_bridge_diagnostics["0x351_motor_b_terminal_voltage_monitor"]["expected"]
+    if not (
+        d351 is not None
+        and d351["dem_event_raw_hex"] == expected351["event_raw_hex"]
+        and d351["h_dtc_index"] == expected351["dtc_index"]
+        and d351["h_raw_hex"] == expected351["dtc_raw_hex"]
+        and d351["techstream_code"] == expected351["techstream_code"]
+        and d351["techstream_description"] == expected351["description"]
+        and d351["techstream_failure"] == expected351["failure"]
+        and d351["enabled_word"] == 1
+    ):
+        raise ValueError(f"0x351 event-4/DTC join drift: {d351}")
+
     # The old camera/IPM-A DTC is a particularly useful cross-calibration control.
     # H still carries the DTC/event residue, but the active monitor rows that
     # Sienna used for 2E4/131/191/2FD are gone.
     h_ipm_dtc_raw = codeflash[0x2C588 + 93 * 8:0x2C590 + 93 * 8]
-    h_ipm_failure, h_ipm_base, h_ipm_pad, h_ipm_enabled = struct.unpack("<BHBI", h_ipm_dtc_raw)
+    h_ipm_failure, h_ipm_base, _h_ipm_pad, h_ipm_enabled = struct.unpack("<BHBI", h_ipm_dtc_raw)
     h_ipm_packed = (h_ipm_base << 8) | h_ipm_failure
     ipm_matches = [x for x in tech_dtc_entries if x.packed_dtc == h_ipm_packed]
     if len(ipm_matches) != 1:
@@ -506,7 +578,7 @@ def main() -> int:
     d7_scalar_calls = []
     for m in re.finditer(
         r"FUN_0007643a\((0x[0-9a-f]+|\d+)\s*,\s*(0x[0-9a-f]+|\d+)\s*,\s*(0x[0-9a-f]+|\d+)\s*,\s*(0x[0-9a-f]+|\d+)",
-        f468, re.I,
+        f468, re.IGNORECASE,
     ):
         d7_scalar_calls.append({
             "signal_id": int(m.group(1), 0),
@@ -635,6 +707,7 @@ def main() -> int:
         },
         "techstream_surface": techstream_surface,
         "communication_monitor_dtc": communication_monitor_dtc,
+        "steering_state_bridge_diagnostics": steering_state_bridge_diagnostics,
         "protected_brake_profile_semantics": protected_brake_profile_semantics,
         "camera_ipm_a_residue": camera_ipm_a_residue,
         "command_value_torque": command_chain,

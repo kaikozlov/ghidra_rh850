@@ -1,10 +1,12 @@
 {
   "evidence": {
-    "b6_target_angle_ingress_sha256": "ba27861f1ef85963269c4847e491aca6f81ce5f354258ff250b298b950fc01dd",
+    "b6_target_angle_ingress_sha256": "d0cd57b41ec556bd687c8019f5fe93862ee25ebdcc74af904495510ff46b41cb",
     "function_count": 56,
     "function_evidence_sha256": "b7bbc66d9c30b16c77938dc002f4a6f752497c228a0229aa3f5316970130eb17",
     "reference_census_sha256": "acbb28d5ff706377c8eed476de0eb675441a0db65058ea95fe9cebeede06de4d",
-    "reference_term_count": 74
+    "reference_term_count": 74,
+    "state_bridge_evidence_sha256": "a2051137624ec71bad0cf11e294d579da66a97f35cc72e416d958023f2c4eaea",
+    "state_bridge_function_count": 26
   },
   "evidence_boundary": "Raw generated CAN/PDU/signal configuration is exact-image byte evidence. Consumer roles are target-native decompiler recovery. Negative no-consumer/no-writer statements remain bounded to the direct textual-reference census, while B6 signals254/255 are explicitly corrected by the exact fixed-map GP-relative audit in the canonical target-angle ingress artifact.",
   "fd_0x030_transmit": {
@@ -105,20 +107,26 @@
       {
         "bit_length": 8,
         "bit_offset": 0,
-        "nondefault_writer_functions": [],
+        "nondefault_writer_functions": [
+          "0x00047188"
+        ],
+        "recovered_semantic": "coarse signed driver-steering-torque encoding: saturating signed byte of trunc(native torque intermediate / 10)",
         "signal_id": 0,
         "source": "0xFEBE7E06",
         "wire_byte": 0,
-        "writer_class": "default-init-only-direct-writer-census"
+        "writer_class": "runtime-produced-gp-relative"
       },
       {
         "bit_length": 1,
         "bit_offset": 0,
-        "nondefault_writer_functions": [],
+        "nondefault_writer_functions": [
+          "0x00047188"
+        ],
+        "recovered_semantic": "runtime boolean copied from FEBE6497 != 0; exact OEM meaning unresolved",
         "signal_id": 1,
         "source": "0xFEBE7E07",
         "wire_byte": 2,
-        "writer_class": "default-init-only-direct-writer-census"
+        "writer_class": "runtime-produced-gp-relative"
       },
       {
         "bit_length": 12,
@@ -126,6 +134,7 @@
         "nondefault_writer_functions": [
           "0x000470C6"
         ],
+        "recovered_semantic": null,
         "signal_id": 2,
         "source": "0xFEBE7E34",
         "wire_byte": 3,
@@ -137,6 +146,7 @@
         "nondefault_writer_functions": [
           "0x000470C6"
         ],
+        "recovered_semantic": null,
         "signal_id": 3,
         "source": "0xFEBE7E08",
         "wire_byte": 4,
@@ -148,6 +158,7 @@
         "nondefault_writer_functions": [
           "0x00047074"
         ],
+        "recovered_semantic": null,
         "signal_id": 4,
         "source": "0xFEBE7E36",
         "wire_byte": 5,
@@ -159,6 +170,7 @@
         "nondefault_writer_functions": [
           "0x000470C6"
         ],
+        "recovered_semantic": null,
         "signal_id": 5,
         "source": "0xFEBE7E09",
         "wire_byte": 6,
@@ -170,6 +182,7 @@
         "nondefault_writer_functions": [
           "0x00046C4C"
         ],
+        "recovered_semantic": null,
         "signal_id": 6,
         "source": "0xFEBE7DAE",
         "wire_byte": 6,
@@ -181,6 +194,7 @@
         "nondefault_writer_functions": [
           "0x00046EE0"
         ],
+        "recovered_semantic": null,
         "signal_id": 7,
         "source": "0xFEBE7DB3",
         "wire_byte": 6,
@@ -192,6 +206,7 @@
         "nondefault_writer_functions": [
           "0x00046C4C"
         ],
+        "recovered_semantic": null,
         "signal_id": 8,
         "source": "0xFEBE7DB2",
         "wire_byte": 6,
@@ -203,6 +218,7 @@
         "nondefault_writer_functions": [
           "0x4766A"
         ],
+        "recovered_semantic": null,
         "signal_id": 9,
         "source": null,
         "wire_byte": 7,
@@ -211,11 +227,14 @@
       {
         "bit_length": 8,
         "bit_offset": 0,
-        "nondefault_writer_functions": [],
+        "nondefault_writer_functions": [
+          "0x00047188"
+        ],
+        "recovered_semantic": "second coarse driver-steering-torque encoding derived from the same native torque intermediate and decimal remainder",
         "signal_id": 10,
         "source": "0xFEBE7E0A",
         "wire_byte": 8,
-        "writer_class": "default-init-only-direct-writer-census"
+        "writer_class": "runtime-produced-gp-relative"
       },
       {
         "bit_length": 12,
@@ -223,6 +242,7 @@
         "nondefault_writer_functions": [
           "0x000470C6"
         ],
+        "recovered_semantic": null,
         "signal_id": 11,
         "source": "0xFEBE7E38",
         "wire_byte": 9,
@@ -234,6 +254,7 @@
         "nondefault_writer_functions": [
           "0x000470C6"
         ],
+        "recovered_semantic": null,
         "signal_id": 12,
         "source": "0xFEBE7E0B",
         "wire_byte": 10,
@@ -245,6 +266,7 @@
         "nondefault_writer_functions": [
           "0x000470C6"
         ],
+        "recovered_semantic": null,
         "signal_id": 13,
         "source": "0xFEBE7E44",
         "wire_byte": 11,
@@ -253,11 +275,14 @@
       {
         "bit_length": 1,
         "bit_offset": 5,
-        "nondefault_writer_functions": [],
+        "nondefault_writer_functions": [
+          "0x00047188"
+        ],
+        "recovered_semantic": "mirror of the FEBE6497-derived runtime boolean used by signal 1",
         "signal_id": 14,
         "source": "0xFEBE7E0C",
         "wire_byte": 13,
-        "writer_class": "default-init-only-direct-writer-census"
+        "writer_class": "runtime-produced-gp-relative"
       },
       {
         "bit_length": 1,
@@ -265,6 +290,7 @@
         "nondefault_writer_functions": [
           "0x000470C6"
         ],
+        "recovered_semantic": null,
         "signal_id": 15,
         "source": "0xFEBE7E0D",
         "wire_byte": 13,
@@ -273,29 +299,38 @@
       {
         "bit_length": 1,
         "bit_offset": 3,
-        "nondefault_writer_functions": [],
+        "nondefault_writer_functions": [
+          "0x00047188"
+        ],
+        "recovered_semantic": "runtime status derived from FEBE7D3C with local transition/debounce handling; exact OEM meaning unresolved",
         "signal_id": 16,
         "source": "0xFEBE7E0E",
         "wire_byte": 13,
-        "writer_class": "default-init-only-direct-writer-census"
+        "writer_class": "runtime-produced-gp-relative"
       },
       {
         "bit_length": 1,
         "bit_offset": 2,
-        "nondefault_writer_functions": [],
+        "nondefault_writer_functions": [
+          "0x00047188"
+        ],
+        "recovered_semantic": "runtime status copied from FEBE723D; exact OEM meaning unresolved",
         "signal_id": 17,
         "source": "0xFEBE7E0F",
         "wire_byte": 13,
-        "writer_class": "default-init-only-direct-writer-census"
+        "writer_class": "runtime-produced-gp-relative"
       },
       {
         "bit_length": 2,
         "bit_offset": 0,
-        "nondefault_writer_functions": [],
+        "nondefault_writer_functions": [
+          "0x00047430"
+        ],
+        "recovered_semantic": "2-bit internal status code produced by the 0x472F6/0x47334/0x47348/0x473DE decision family",
         "signal_id": 18,
         "source": "0xFEBE7E4C",
         "wire_byte": 13,
-        "writer_class": "default-init-only-direct-writer-census"
+        "writer_class": "runtime-produced-gp-relative"
       },
       {
         "bit_length": 16,
@@ -303,6 +338,7 @@
         "nondefault_writer_functions": [
           "0x00047074"
         ],
+        "recovered_semantic": null,
         "signal_id": 19,
         "source": "0xFEBE7E3A",
         "wire_byte": 14,
@@ -314,6 +350,7 @@
         "nondefault_writer_functions": [
           "0x00046FD0"
         ],
+        "recovered_semantic": null,
         "signal_id": 20,
         "source": "0xFEBE7DC4",
         "wire_byte": 16,
@@ -325,6 +362,7 @@
         "nondefault_writer_functions": [
           "0x00046FD0"
         ],
+        "recovered_semantic": null,
         "signal_id": 21,
         "source": "0xFEBE7DBE",
         "wire_byte": 16,
@@ -336,6 +374,7 @@
         "nondefault_writer_functions": [
           "0x00046FD0"
         ],
+        "recovered_semantic": null,
         "signal_id": 22,
         "source": "0xFEBE7DC6",
         "wire_byte": 16,
@@ -347,6 +386,7 @@
         "nondefault_writer_functions": [
           "0x00046FD0"
         ],
+        "recovered_semantic": null,
         "signal_id": 23,
         "source": "0xFEBE7DC7",
         "wire_byte": 16,
@@ -358,6 +398,7 @@
         "nondefault_writer_functions": [
           "0x00046FD0"
         ],
+        "recovered_semantic": null,
         "signal_id": 24,
         "source": "0xFEBE7DC8",
         "wire_byte": 16,
@@ -369,6 +410,7 @@
         "nondefault_writer_functions": [
           "0x00046FD0"
         ],
+        "recovered_semantic": null,
         "signal_id": 25,
         "source": "0xFEBE7DC9",
         "wire_byte": 16,
@@ -380,6 +422,7 @@
         "nondefault_writer_functions": [
           "0x00046FD0"
         ],
+        "recovered_semantic": null,
         "signal_id": 26,
         "source": "0xFEBE7DBC",
         "wire_byte": 16,
@@ -388,20 +431,26 @@
       {
         "bit_length": 1,
         "bit_offset": 7,
-        "nondefault_writer_functions": [],
+        "nondefault_writer_functions": [
+          "0x00047188"
+        ],
+        "recovered_semantic": "runtime status copied from FEBE7DB7; exact OEM meaning unresolved",
         "signal_id": 27,
         "source": "0xFEBE7E10",
         "wire_byte": 17,
-        "writer_class": "default-init-only-direct-writer-census"
+        "writer_class": "runtime-produced-gp-relative"
       },
       {
         "bit_length": 1,
         "bit_offset": 6,
-        "nondefault_writer_functions": [],
+        "nondefault_writer_functions": [
+          "0x00047188"
+        ],
+        "recovered_semantic": "runtime status copied from FEBE7DB6; exact OEM meaning unresolved",
         "signal_id": 28,
         "source": "0xFEBE7E11",
         "wire_byte": 17,
-        "writer_class": "default-init-only-direct-writer-census"
+        "writer_class": "runtime-produced-gp-relative"
       },
       {
         "bit_length": 1,
@@ -409,6 +458,7 @@
         "nondefault_writer_functions": [
           "0x0004746A"
         ],
+        "recovered_semantic": null,
         "signal_id": 29,
         "source": "0xFEBE7E5E",
         "wire_byte": 17,
@@ -420,6 +470,7 @@
         "nondefault_writer_functions": [
           "0x0004746A"
         ],
+        "recovered_semantic": null,
         "signal_id": 30,
         "source": "0xFEBE7E5D",
         "wire_byte": 17,
@@ -428,11 +479,14 @@
       {
         "bit_length": 4,
         "bit_offset": 0,
-        "nondefault_writer_functions": [],
+        "nondefault_writer_functions": [
+          "0x00047188"
+        ],
+        "recovered_semantic": "signed decimal remainder/units nibble for the same native driver-steering-torque intermediate used by signals 0 and 10",
         "signal_id": 31,
         "source": "0xFEBE7E12",
         "wire_byte": 17,
-        "writer_class": "default-init-only-direct-writer-census"
+        "writer_class": "runtime-produced-gp-relative"
       },
       {
         "bit_length": 1,
@@ -440,6 +494,7 @@
         "nondefault_writer_functions": [
           "0x00046FD0"
         ],
+        "recovered_semantic": null,
         "signal_id": 32,
         "source": "0xFEBE7DB0",
         "wire_byte": 19,
@@ -451,6 +506,7 @@
         "nondefault_writer_functions": [
           "0x00046FD0"
         ],
+        "recovered_semantic": null,
         "signal_id": 33,
         "source": "0xFEBE7E26",
         "wire_byte": 20,
@@ -459,13 +515,50 @@
       {
         "bit_length": 16,
         "bit_offset": 0,
-        "nondefault_writer_functions": [],
+        "nondefault_writer_functions": [
+          "0x00047188"
+        ],
+        "recovered_semantic": "signed16 calibrated derivative of sign-inverted FEBE6592 Motor Actual Current (Q Axis); exact packet physical scale remains calibration-dependent",
         "signal_id": 34,
         "source": "0xFEBE7E3C",
         "wire_byte": 22,
-        "writer_class": "default-init-only-direct-writer-census"
+        "writer_class": "runtime-produced-gp-relative"
       }
     ],
+    "gp_relative_writer_correction": {
+      "affected_signal_ids": [
+        0,
+        1,
+        10,
+        14,
+        16,
+        17,
+        18,
+        27,
+        28,
+        31,
+        34
+      ],
+      "affected_source_addresses": [
+        "0xFEBE7E06",
+        "0xFEBE7E07",
+        "0xFEBE7E0A",
+        "0xFEBE7E0C",
+        "0xFEBE7E0E",
+        "0xFEBE7E0F",
+        "0xFEBE7E10",
+        "0xFEBE7E11",
+        "0xFEBE7E12",
+        "0xFEBE7E3C",
+        "0xFEBE7E4C"
+      ],
+      "boundary": "This correction closes these eleven specific false negatives; it does not upgrade the direct-reference census into a complete arbitrary computed-pointer writer proof.",
+      "correction": "Eleven fields previously classified as default-init-only by the direct textual-reference census have exact runtime GP-relative writers. The positive writers are now pinned from independent exact-image compact decompiler evidence.",
+      "writer_functions": [
+        "0x00047188",
+        "0x00047430"
+      ]
+    },
     "pdu0_descriptor": {
       "cycle_or_timeout": 2,
       "flags": 3,
@@ -551,7 +644,7 @@
     "corolla_h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
     "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
   },
-  "schema": "corolla-8965H1202000-fd-control-interface-v1",
+  "schema": "corolla-8965H1202000-fd-control-interface-v2",
   "secured_fd_0x0b6": {
     "buffer_offset": "0x1A7",
     "configured_signal_ids": [

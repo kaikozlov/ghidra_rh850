@@ -28,7 +28,7 @@ print("== reproducibility ==")
 check("schema is v1", ART["schema"] == "corolla-tss3-opendbc-readiness-v1")
 with tempfile.TemporaryDirectory(prefix="tss3-opendbc-") as td:
     out = Path(td) / "readiness.json"
-    proc = subprocess.run([sys.executable, str(REPO / "tools/build_corolla_tss3_opendbc_readiness.py"), "--output", str(out)], cwd=REPO, capture_output=True, text=True)
+    proc = subprocess.run([sys.executable, str(REPO / "tools/build_corolla_tss3_opendbc_readiness.py"), "--output", str(out)], cwd=REPO, capture_output=True, text=True, check=False)
     check("builder succeeds", proc.returncode == 0, proc.stderr.strip()[:200])
     if out.exists():
         check("tracked artifact is generator-drift free", json.loads(out.read_text()) == ART)
@@ -65,7 +65,7 @@ expected_status = {
     "gas pressed": "strong_reuse_candidate",
     "cruise engaged": "wire_reuse_dynamic_semantics_open",
     "steering angle / rate": "reusable_signal_layout_new_fd_pdu",
-    "driver steering torque / actuator response": "generation_native_replacement_partially_recovered",
+    "driver steering torque / actuator response": "driver_torque_closed_actuator_response_static",
     "EPS readiness / steering faults": "generation_native_replacement_open_dynamic_join",
     "gear": "strong_reuse_candidate_partial_dynamic",
     "cruise availability / set speed / ACC faults / follow distance": "missing_whole_vehicle_role",
@@ -75,7 +75,10 @@ expected_status = {
 for role, status in expected_status.items():
     check(f"{role} disposition", roles[role]["status"] == status)
 check("old 0x260 fault/torque interface is not transplanted", "0x260 is absent" in roles["driver steering torque / actuator response"]["tss3_corolla_evidence"])
-check("old 0x262 fault enums stay nonportable", "Old numeric fault enums are not portable" in roles["EPS readiness / steering faults"]["remaining_blocker"])
+check("driver torque is physically closed on live 0x030", all(x in roles["driver steering torque / actuator response"]["tss3_corolla_evidence"] for x in ("signals10+31", "-8.23", "+2.85", "0.1 N.m/count", "-0.01 A/count")))
+check("remaining driver-state blocker is threshold/Q-current rather than scale", all(x in roles["driver steering torque / actuator response"]["remaining_blocker"] for x in ("override threshold", "0x4A3 Q-current")))
+check("fault readiness role carries exact new closures", all(x in roles["EPS readiness / steering faults"]["tss3_corolla_evidence"] for x in ("B6[2]", "6000/6000", "C159B49", "force-7 override", "17-state", "deepest recovered clear/normal classifier path", "0x1033 Ready Status")))
+check("old 0x262 fault enums stay nonportable", "Old numeric fault enums" in roles["EPS readiness / steering faults"]["remaining_blocker"])
 check("gear reuse is bounded to observed D", all(x in roles["gear"]["tss3_corolla_evidence"] for x in ("3,662", "checksum", "raw 3='D'")) and all(x in roles["gear"]["remaining_blocker"] for x in ("P/R/N/B", "exact target")))
 check("lateral receiver contract is positive but sender remains open", roles["lateral command"]["status"] == "eps_receiver_contract_closed_sender_contract_open" and all(x in roles["lateral command"]["remaining_blocker"] for x in ("cadence", "SecOC", "physical CAN0/CAN1 repinning", "relay interception", "stock-LTA")))
 
