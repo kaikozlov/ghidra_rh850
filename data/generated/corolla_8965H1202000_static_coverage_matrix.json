@@ -3841,6 +3841,7 @@
       "coverage": "target-native-inspected-unique-shape",
       "coverage_basis": [
         "unique complete instruction-shape target",
+        "target-native:data/generated/corolla_8965H1202000_steering_limits_decompiler_evidence.json",
         "target-native:data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json",
         "target-native:data/generated/corolla_8965H1202000_techstream_steering_decompiler_evidence.json"
       ],
@@ -3853,6 +3854,7 @@
       "surface_recensus": [],
       "target_entry": "0x00033160",
       "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_steering_limits_decompiler_evidence.json",
         "data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json",
         "data/generated/corolla_8965H1202000_techstream_steering_decompiler_evidence.json"
       ],
@@ -21684,6 +21686,7 @@
       "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json": "31bc9f56f68d5b7d4c65cc84f4882e20470c1a0777a1296089bac024d2f7a6e1",
       "data/generated/corolla_8965H1202000_small_adapter_decompiler_evidence.json": "635491c1ed6dce699468acad5516ed5c53458c29b98ecbb9cd17b023c1a2f5bb",
       "data/generated/corolla_8965H1202000_small_adapters.json": "f82c7c3a801c883038e59e87bc28f6e15108fcf25dead4bb6b33d090f4057ed8",
+      "data/generated/corolla_8965H1202000_steering_limits_decompiler_evidence.json": "d21500056ed5cb84420ccfb1167e5e829caf4610694fd1e8e6d79ca5b80e3281",
       "data/generated/corolla_8965H1202000_steering_nested.json": "216734cbd422f9c6a296834523964d871c3226a5754b66d44fb6909f90c36529",
       "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json": "e396575c891ce7591a9812a6a49b7d52981b11fc2ec5026c00ad3f7b6a641592",
       "data/generated/corolla_8965H1202000_steering_supervisor_insertions_decompiler_evidence.json": "fd944ee95d637bf0f121d1d50905319f981cbd5bcda3fe658ff1b7ba7c60a3de",
@@ -21707,7 +21710,7 @@
       "verified-exact-body-transfer": 288
     },
     "genuinely_unresolved_count": 0,
-    "h_native_evidence_functions_without_unique_sienna_pair": 633,
+    "h_native_evidence_functions_without_unique_sienna_pair": 638,
     "named_function_count": 1113,
     "structural_candidate_only_count": 0,
     "surface_recensus_reference_function_count": 614,
@@ -21764,6 +21767,6 @@
         "verified-exact-body-transfer": 3
       }
     },
-    "target_native_inspected_reference_function_count": 204
+    "target_native_inspected_reference_function_count": 208
   }
 }

@@ -1,0 +1,628 @@
+{
+  "applies_to": [
+    "8965H1202000",
+    "8965F1208000"
+  ],
+  "command_limits": {
+    "b6_lta_absolute": {
+      "bank_invariant": true,
+      "classification": "hard LTA/LCA target plausibility limit",
+      "deg": 99.99328483491887,
+      "raw": 1745
+    },
+    "b6_lta_delta": {
+      "classification": "EPS target-jump plausibility limit",
+      "deg_per_effective_sequence_gap": 4.469613878007834,
+      "low_angle_deadband_deg": 4.985338556239507,
+      "low_angle_deadband_raw": 87,
+      "raw_per_effective_sequence_gap": 78
+    },
+    "doubled_domain_absolute_clamp": {
+      "all_profile_globals_equal": true,
+      "equivalent_b6_raw": 1745.0,
+      "equivalent_deg": 99.99328483491887,
+      "raw_internal": 3490
+    },
+    "internal_lta_slew": {
+      "boundary": "Firmware closes the per-steering-task slew, but not the exact wall-clock steering-task cadence; do not manufacture deg/s.",
+      "high_default_b6_counts_per_task": 2.0,
+      "high_default_deg_per_task": 0.11460548405148294,
+      "high_default_doubled_domain_per_steering_task": 4,
+      "selected_low_b6_counts_per_task": 3.5,
+      "selected_low_deg_per_task": 0.20055959709009513,
+      "selected_low_doubled_domain_per_steering_task": 7,
+      "wall_clock_deg_per_second": null
+    },
+    "measured_steering_rate": {
+      "high_default_persistence_cycles": 63,
+      "panda_boundary": "Exactly 100 is accepted by the recovered comparison. A future Panda can cut immediately above 100 instead of waiting for EPS persistence.",
+      "raw_abs_threshold": 100,
+      "selected_low_persistence_cycles": 79,
+      "violation_relation": "abs(rate_raw) > 100"
+    }
+  },
+  "cross_variant": {
+    "all_promoted_calibration_bytes_h_f_identical": true,
+    "all_promoted_function_bodies_h_f_identical": true,
+    "compiled_default_bank": "high/default 0x1A960 (selector 0)",
+    "runtime_selected_bank": "low/vehicle 0x12960 (selector 1 in all retained H/Span runtime captures)"
+  },
+  "driver_torque": {
+    "acquisition_clamp_abs_nm": 8.23828125,
+    "acquisition_clamp_raw": 2109,
+    "acquisition_raw_units_per_nm": 256,
+    "census_boundary": "Complete exact-substring census over the supplied target-native decompiler corpus; bounded to direct textual references and does not exclude computed-pointer or alias-only accesses.",
+    "observable": "live physical 0x030 Steering Wheel Torque; 0x4A3 B5 is a statically closed alternate",
+    "override_abs_threshold_nm": null,
+    "safety_boundary": "The ~8.238 N.m acquisition clamp and \u00b110.00 N.m telemetry saturation are representation limits, not driver-override thresholds. Do not use either as Panda override policy.",
+    "supervisor_numeric_override_comparator_recovered": false,
+    "telemetry_saturation_abs_centi_nm": 1000,
+    "telemetry_saturation_abs_nm": 10.0
+  },
+  "indexed_compensation": {
+    "boundary": "The map input is named only by its recovered RAM cell here. This artifact does not claim FEBEADF4 is SP1/vehicle speed without a separate provenance join.",
+    "entry": "0x000CBFCE",
+    "high_default_effect": "the four compiled fallback maps become nonzero beginning at axis 7680 and rise thereafter",
+    "index_input": "FEBEADF4",
+    "index_physical_identity": null,
+    "interpolator": "0x000CE6A2",
+    "maps": [
+      {
+        "h_f_byte_identical": true,
+        "high_default_first_nonzero_axis": 7680,
+        "high_default_points": [
+          {
+            "axis": 0,
+            "value": 0
+          },
+          {
+            "axis": 1280,
+            "value": 0
+          },
+          {
+            "axis": 2560,
+            "value": 0
+          },
+          {
+            "axis": 3840,
+            "value": 0
+          },
+          {
+            "axis": 5120,
+            "value": 0
+          },
+          {
+            "axis": 7680,
+            "value": 192
+          },
+          {
+            "axis": 10240,
+            "value": 256
+          },
+          {
+            "axis": 12800,
+            "value": 256
+          },
+          {
+            "axis": 15360,
+            "value": 320
+          },
+          {
+            "axis": 20480,
+            "value": 384
+          },
+          {
+            "axis": 25600,
+            "value": 448
+          },
+          {
+            "axis": 65535,
+            "value": 32767
+          }
+        ],
+        "index_input": "FEBEADF4",
+        "offset": "0x768",
+        "selected_low_all_real_values_zero": true,
+        "selected_low_vehicle_points": [
+          {
+            "axis": 0,
+            "value": 0
+          },
+          {
+            "axis": 1280,
+            "value": 0
+          },
+          {
+            "axis": 2560,
+            "value": 0
+          },
+          {
+            "axis": 3840,
+            "value": 0
+          },
+          {
+            "axis": 5120,
+            "value": 0
+          },
+          {
+            "axis": 7680,
+            "value": 0
+          },
+          {
+            "axis": 10240,
+            "value": 0
+          },
+          {
+            "axis": 12800,
+            "value": 0
+          },
+          {
+            "axis": 15360,
+            "value": 0
+          },
+          {
+            "axis": 20480,
+            "value": 0
+          },
+          {
+            "axis": 25600,
+            "value": 0
+          },
+          {
+            "axis": 65535,
+            "value": 32767
+          }
+        ]
+      },
+      {
+        "h_f_byte_identical": true,
+        "high_default_first_nonzero_axis": 7680,
+        "high_default_points": [
+          {
+            "axis": 0,
+            "value": 0
+          },
+          {
+            "axis": 1280,
+            "value": 0
+          },
+          {
+            "axis": 2560,
+            "value": 0
+          },
+          {
+            "axis": 3840,
+            "value": 0
+          },
+          {
+            "axis": 5120,
+            "value": 0
+          },
+          {
+            "axis": 7680,
+            "value": 192
+          },
+          {
+            "axis": 10240,
+            "value": 256
+          },
+          {
+            "axis": 12800,
+            "value": 256
+          },
+          {
+            "axis": 15360,
+            "value": 320
+          },
+          {
+            "axis": 20480,
+            "value": 384
+          },
+          {
+            "axis": 25600,
+            "value": 448
+          },
+          {
+            "axis": 65535,
+            "value": 32767
+          }
+        ],
+        "index_input": "FEBEADF4",
+        "offset": "0x798",
+        "selected_low_all_real_values_zero": true,
+        "selected_low_vehicle_points": [
+          {
+            "axis": 0,
+            "value": 0
+          },
+          {
+            "axis": 1280,
+            "value": 0
+          },
+          {
+            "axis": 2560,
+            "value": 0
+          },
+          {
+            "axis": 3840,
+            "value": 0
+          },
+          {
+            "axis": 5120,
+            "value": 0
+          },
+          {
+            "axis": 7680,
+            "value": 0
+          },
+          {
+            "axis": 10240,
+            "value": 0
+          },
+          {
+            "axis": 12800,
+            "value": 0
+          },
+          {
+            "axis": 15360,
+            "value": 0
+          },
+          {
+            "axis": 20480,
+            "value": 0
+          },
+          {
+            "axis": 25600,
+            "value": 0
+          },
+          {
+            "axis": 65535,
+            "value": 32767
+          }
+        ]
+      },
+      {
+        "h_f_byte_identical": true,
+        "high_default_first_nonzero_axis": 7680,
+        "high_default_points": [
+          {
+            "axis": 0,
+            "value": 0
+          },
+          {
+            "axis": 1280,
+            "value": 0
+          },
+          {
+            "axis": 2560,
+            "value": 0
+          },
+          {
+            "axis": 3840,
+            "value": 0
+          },
+          {
+            "axis": 5120,
+            "value": 0
+          },
+          {
+            "axis": 7680,
+            "value": 192
+          },
+          {
+            "axis": 10240,
+            "value": 256
+          },
+          {
+            "axis": 12800,
+            "value": 256
+          },
+          {
+            "axis": 15360,
+            "value": 320
+          },
+          {
+            "axis": 20480,
+            "value": 384
+          },
+          {
+            "axis": 25600,
+            "value": 448
+          },
+          {
+            "axis": 65535,
+            "value": 32767
+          }
+        ],
+        "index_input": "FEBEADF4",
+        "offset": "0x7C8",
+        "selected_low_all_real_values_zero": true,
+        "selected_low_vehicle_points": [
+          {
+            "axis": 0,
+            "value": 0
+          },
+          {
+            "axis": 1280,
+            "value": 0
+          },
+          {
+            "axis": 2560,
+            "value": 0
+          },
+          {
+            "axis": 3840,
+            "value": 0
+          },
+          {
+            "axis": 5120,
+            "value": 0
+          },
+          {
+            "axis": 7680,
+            "value": 0
+          },
+          {
+            "axis": 10240,
+            "value": 0
+          },
+          {
+            "axis": 12800,
+            "value": 0
+          },
+          {
+            "axis": 15360,
+            "value": 0
+          },
+          {
+            "axis": 20480,
+            "value": 0
+          },
+          {
+            "axis": 25600,
+            "value": 0
+          },
+          {
+            "axis": 65535,
+            "value": 32767
+          }
+        ]
+      },
+      {
+        "h_f_byte_identical": true,
+        "high_default_first_nonzero_axis": 7680,
+        "high_default_points": [
+          {
+            "axis": 0,
+            "value": 0
+          },
+          {
+            "axis": 1280,
+            "value": 0
+          },
+          {
+            "axis": 2560,
+            "value": 0
+          },
+          {
+            "axis": 3840,
+            "value": 0
+          },
+          {
+            "axis": 5120,
+            "value": 0
+          },
+          {
+            "axis": 7680,
+            "value": 192
+          },
+          {
+            "axis": 10240,
+            "value": 256
+          },
+          {
+            "axis": 12800,
+            "value": 256
+          },
+          {
+            "axis": 15360,
+            "value": 320
+          },
+          {
+            "axis": 20480,
+            "value": 384
+          },
+          {
+            "axis": 25600,
+            "value": 448
+          },
+          {
+            "axis": 65535,
+            "value": 32767
+          }
+        ],
+        "index_input": "FEBEADF4",
+        "offset": "0x7F8",
+        "selected_low_all_real_values_zero": true,
+        "selected_low_vehicle_points": [
+          {
+            "axis": 0,
+            "value": 0
+          },
+          {
+            "axis": 1280,
+            "value": 0
+          },
+          {
+            "axis": 2560,
+            "value": 0
+          },
+          {
+            "axis": 3840,
+            "value": 0
+          },
+          {
+            "axis": 5120,
+            "value": 0
+          },
+          {
+            "axis": 7680,
+            "value": 0
+          },
+          {
+            "axis": 10240,
+            "value": 0
+          },
+          {
+            "axis": 12800,
+            "value": 0
+          },
+          {
+            "axis": 15360,
+            "value": 0
+          },
+          {
+            "axis": 20480,
+            "value": 0
+          },
+          {
+            "axis": 25600,
+            "value": 0
+          },
+          {
+            "axis": 65535,
+            "value": 32767
+          }
+        ]
+      }
+    ],
+    "safety_conclusion": "No speed-dependent reduction of the hard \u00b11745 B6 LTA/LCA target ceiling is recovered. These are compensation maps, not a max-angle curve. Do not transplant pre-TSS3/TSS2 speed-angle limits.",
+    "selected_low_vehicle_effect": "all four promoted ADF4-indexed profile compensation maps are zero at every real interpolation point"
+  },
+  "internal_plausibility_and_fault_thresholds": {
+    "controller_error_saturation": {
+      "classification": "controller saturation, not Panda command-rejection limit",
+      "raw_internal": 18000
+    },
+    "extended_inhibit_counter": {
+      "entry": "0x000CAE18",
+      "threshold": 15,
+      "wall_clock_duration": null
+    },
+    "internal_command_instant_monitor": {
+      "entry": "0x000CB394",
+      "high_default_persistence_cycles": 59,
+      "lta_threshold_raw": 512,
+      "not_measured_q_current": true,
+      "selected_low_persistence_cycles": 79,
+      "signal": "FEBEAE16 internal command-derived state"
+    },
+    "internal_command_persistent_inhibit": {
+      "entry": "0x000CB59A",
+      "lta_threshold_raw": 1280,
+      "not_measured_q_current": true,
+      "persistence_cycles": 96,
+      "signal": "FEBEAE16 internal command-derived state"
+    },
+    "reconstruction_validity_bounds": {
+      "boundary": "The three internal domains are retained as raw firmware bounds; this artifact does not invent angle/current engineering units for them.",
+      "entry": "0x000CBD7E",
+      "physical_units": null,
+      "raw_bounds": [
+        80,
+        90,
+        512
+      ]
+    },
+    "torque_sensor_fault_calibration": {
+      "boundary": "These values participate in torque-sensor fault logic, but comparison directions/domains do not justify treating them as a driver-override threshold.",
+      "classification": "bounded internal torque-sensor/plausibility calibration",
+      "physical_driver_override_semantics": false,
+      "raw_constants": {
+        "0x0002B538": 2655,
+        "0x0002B53C": 4233,
+        "0x0002B546": 4091,
+        "0x0002B548": 3341,
+        "0x0002B54C": 1764
+      }
+    },
+    "tracking_consistency": {
+      "entry": "0x000CB14E",
+      "full_comparison_window_internal": 1048,
+      "half_window_internal": 524,
+      "persistence_cycles": 40,
+      "physical_units": null
+    }
+  },
+  "motor_q_current": {
+    "census_boundary": "Complete exact-substring census over the supplied target-native decompiler corpus; bounded to direct textual references and does not exclude computed-pointer or alias-only accesses.",
+    "cooperative_supervisor_measured_q_comparator_recovered": false,
+    "cooperative_supervisor_numeric_response_threshold": null,
+    "direct_reference_matches": [
+      "0x00046C4C",
+      "0x0005722E"
+    ],
+    "internal_monitors_are_q_current": false,
+    "observable": "FEBE6592 Motor Actual Current (Q Axis); 0x4A3 B6:B7 is sign-inverted -0.01 A/count",
+    "safety_boundary": "No measured-Q-current comparator is recovered in the cooperative B6 supervisor under the promoted exact-symbol census plus known packet bridge. CB394/CB59A monitor FEBEAE16 internal command state instead. A future Panda response limit must be a separately validated sender/live safety policy, not a fabricated OEM current threshold.",
+    "source_chain": "0x33160 builds/saturates FEBE6BAE; 0x5722E snapshots it to FEBE6592; 0x46C4C stages the 0x4A3 conversion"
+  },
+  "remaining_policy": {
+    "actuator_response_policy": "requires deliberate Panda/sender policy and relay-correct dynamic validation; no OEM measured-Q comparator recovered in the cooperative supervisor",
+    "driver_override_abs_nm": null,
+    "production_enable_authorized": false,
+    "temporary_vs_permanent_fault_mapping": null
+  },
+  "schema": "corolla-hf-steering-limits-v1",
+  "sources": {
+    "calibration_bank_evidence": {
+      "path": "data/generated/corolla_8965F1208000_low_calibration_delta.json",
+      "sha256": "73e9dfdf5db5de3235c4859331a704f97ab23288dbf9f9d6cd9d4be404d6b475"
+    },
+    "decompiler_evidence": {
+      "path": "data/generated/corolla_8965H1202000_steering_limits_decompiler_evidence.json",
+      "sha256": "d21500056ed5cb84420ccfb1167e5e829caf4610694fd1e8e6d79ca5b80e3281"
+    },
+    "f_codeflash": {
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+      "sha256": "b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d"
+    },
+    "h_codeflash": {
+      "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+    },
+    "panda_supervisor_evidence": {
+      "path": "data/generated/corolla_8965H1202000_panda_lateral_safety_decompiler_evidence.json",
+      "sha256": "566c96c8371b3707985d17a329095c2e35f6d99e9cee4fa3b523789cf2c45b8b"
+    },
+    "reference_census": {
+      "path": "data/generated/corolla_8965H1202000_steering_limits_reference_census.json",
+      "sha256": "74ff78ffeba379363089a17365e8175d524cb569913561f64bf4171b320ad8e7"
+    },
+    "state_bridge": {
+      "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
+      "sha256": "180661a834618a74323ae6334c6dc045e3d57a03bda640c7e192ce07a3654014"
+    },
+    "target_angle_contract": {
+      "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
+      "sha256": "5755faced5efb0212ae195ed8bff30bee2c1765656a29ed974ced95082c00647"
+    }
+  },
+  "static_conclusion": {
+    "absolute_angle_limit_closed": true,
+    "driver_torque_observable_closed_override_threshold_open": true,
+    "internal_fault_threshold_families_bounded": true,
+    "measured_q_observable_closed_oem_response_threshold_not_recovered": true,
+    "measured_rate_limit_closed": true,
+    "per_frame_delta_limit_closed": true,
+    "per_task_slew_closed_wall_clock_rate_open": true,
+    "production_enable_authorized": false,
+    "selected_vehicle_profile_compensation_maps_zero": true,
+    "speed_dependent_hard_angle_reduction_recovered": false
+  },
+  "status": {
+    "boundary": "Numeric firmware limits are separated from telemetry/acquisition saturation and from unresolved policy. Nothing in this artifact authorizes Panda output.",
+    "classification": "firmware-derived-safety-input-ledger",
+    "production_enable_authorized": false
+  }
+}

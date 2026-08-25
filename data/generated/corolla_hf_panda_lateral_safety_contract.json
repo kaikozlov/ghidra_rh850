@@ -181,8 +181,8 @@
         "0x000CADE4",
         "0x000CAE18"
       ],
-      "internal_response_output": "0xCB59A -> FEBEC26B; persistent internal-command magnitude monitor, not directly available as a CAN measurement",
-      "panda_mapping": "Mirror the observable target/rate and 0x030 fault/validity gates now; keep internal response/tracking policy parameterized until live 0x4A3/0x394/Ready correlation closes an observable equivalent.",
+      "internal_response_output": "0xCB59A -> FEBEC26B; persistent FEBEAE16 internal-command magnitude monitor, not measured motor Q-current and not directly available as a CAN measurement",
+      "panda_mapping": "Mirror the observable target/rate and 0x030 fault/validity gates now. Do not reinterpret FEBEAE16 thresholds as Q-current response limits; any Panda actuator-response policy must be validated separately from the OEM internal-command monitors.",
       "target_plausibility_output": "0xCB4F4 -> FEBEC269; target magnitude/delta violation or internal C268/C263 state can assert it"
     },
     "internal_target_conditioning": {
@@ -221,6 +221,8 @@
   },
   "measured_inputs": {
     "driver_torque": {
+      "acquisition_clamp_abs_nm": 8.23828125,
+      "acquisition_clamp_raw": 2109,
       "can_id": "0x030",
       "dlc": 32,
       "invalid_gate": "0x030 B6[0] / DRIVER_TORQUE_INVALID must be 0",
@@ -231,8 +233,10 @@
         "unique_count": 536
       },
       "override_abs_threshold_nm": null,
+      "override_boundary": "The firmware's ~8.238 N.m acquisition clamp and \u00b110 N.m telemetry saturation are representation limits, not driver-override thresholds.",
       "parameter_name": "driver_override_abs_nm",
-      "physical_relation": "torque_Nm = signed(signal10)*0.1 + signed4(signal31)*0.01"
+      "physical_relation": "torque_Nm = signed(signal10)*0.1 + signed4(signal31)*0.01",
+      "telemetry_saturation_abs_nm": 10.0
     },
     "steering_angle": {
       "can_id": "0x025",
@@ -261,7 +265,15 @@
   },
   "not_promoted_as_safety_limits": {
     "controller_error_clamp_internal": 18000,
-    "legacy_toyota_lta_limits": "use only as prior art; do not transplant pre-TSS3 max angle/rate or torque thresholds",
+    "driver_torque_acquisition_and_telemetry_clamps": {
+      "acquisition_clamp_abs_nm": 8.23828125,
+      "reason": "representation limits, not OEM driver-override thresholds",
+      "telemetry_saturation_abs_nm": 10.0
+    },
+    "legacy_toyota_lta_limits": "use only as prior art; do not transplant pre-TSS3 max angle/rate, speed-angle curves, torque, or current thresholds",
+    "measured_q_current": {
+      "reason": "physical Q-current is observable, but no cooperative-supervisor measured-Q comparator is recovered; internal FEBEAE16 thresholds are not Q-current"
+    },
     "signed16_wire_range": "too broad; LTA-specific firmware limit is \u00b11745 raw",
     "wide_target_conditioner": {
       "abs_internal": 534,
@@ -295,6 +307,10 @@
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
       "sha256": "180661a834618a74323ae6334c6dc045e3d57a03bda640c7e192ce07a3654014"
     },
+    "steering_limits": {
+      "path": "data/generated/corolla_hf_steering_limits.json",
+      "sha256": "cee6a3c3a87960c62c1060e79ac38157de77de9eb9668bb696257889a724dc81"
+    },
     "target_angle_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
       "sha256": "5755faced5efb0212ae195ed8bff30bee2c1765656a29ed974ced95082c00647"
@@ -306,22 +322,27 @@
     "driver_torque_signal_closed_but_override_threshold_open": true,
     "eps_loss_cutout_closed_in_ticks": true,
     "measured_angle_input_closed": true,
+    "measured_q_current_observable_closed_but_oem_response_threshold_not_recovered": true,
     "measured_rate_raw_cutout_closed": true,
     "production_enable_authorized": false,
     "request_policy_closed_for_candidate_lta": true,
     "selected_fault_inhibit_gate_closed_but_extended_fault_policy_open": true,
     "sequence_policy_closed_for_candidate_lta": true,
+    "speed_dependent_hard_angle_reduction_not_recovered": true,
     "wall_clock_sender_cadence_open": true
   },
   "status": {
     "classification": "candidate-non-enabling",
     "panda_safety_enable_authorized": false,
-    "reason": "The H/F receiver-side command envelope and observable steering inputs are sufficiently closed to write a candidate safety contract, but the physical driver-override threshold, extended fault/actuator-response policy, relay-side stock-source suppression, and sender payload/cadence/authentication integration are not yet validated."
+    "reason": "The H/F receiver-side command envelope and observable steering inputs are sufficiently closed to write a candidate safety contract, but the physical driver-override threshold, extended fault policy, deliberate actuator-response policy, relay-side stock-source suppression, and sender payload/cadence/authentication integration are not yet validated. Firmware recovery found no measured-Q-current comparator in the cooperative B6 supervisor."
   },
   "unresolved_safety_parameters": {
     "actuator_response_fault_threshold": {
-      "missing_evidence": "relay-correct dynamic 0x4A3 command/response correlation and safe response-error limit",
-      "source_available": "0x4A3 Q-current response is statically decoded; internal FEBEAE16 monitors are recovered",
+      "classification": "no-recovered-oem-measured-q-current-threshold",
+      "missing_evidence": "relay-correct dynamic command/response behavior needed to validate any future Panda/sender actuator-response policy",
+      "policy_boundary": "A Panda/sender actuator-response limit may still be desirable, but it must be chosen and validated as a separate safety policy rather than copied from an invented OEM Q-current threshold.",
+      "source_available": "0x4A3 Q-current response is statically decoded as an observable",
+      "static_firmware_result": "No measured-Q-current comparator is recovered in the cooperative B6 supervisor under the promoted exact-symbol census; CB394/CB59A monitor FEBEAE16 internal command state instead.",
       "value": null
     },
     "driver_override_abs_nm": {

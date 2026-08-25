@@ -236,15 +236,18 @@ relay pair, preserve `carFw`/F181, and log all buses while safely exercising:
    a safe diagnostic trigger exists.
 
 This capture should close B6 visibility/cadence and producer side, exact physical
-relay path, stock-source suppression, the remaining physical driver-override threshold,
-`0x4A3` Q-current actuator-response/fault limits, `0x351/0x394` plus DID `0x1033`
-Ready/fault transition mapping, remaining gear enums, missing cruise roles, and
-the correct Panda parser/safety bus. The **core H/F Panda command envelope itself is
-now statically derived** (COM-014): ID11-only candidate active control, ±1745 raw
-(~100 deg) target, strict candidate +1 sequence / <=78-raw target step, 7-tick EPS
-loss cutoff and raw steering-rate cutout 100. Do not spend another pass copying old
-Toyota angle limits; focus the live capture on the still-parameterized driver/fault
-policy and deployment topology. Current Toyota safety assumes checked state on logical
+relay path, stock-source suppression, the remaining physical driver-override policy,
+a deliberately chosen/validated `0x4A3` Q-current actuator-response policy,
+`0x351/0x394` plus DID `0x1033` Ready/fault transition mapping, remaining gear enums,
+missing cruise roles, and the correct Panda parser/safety bus. The **core H/F Panda
+command envelope itself is now statically derived** (COM-014/COM-015): ID11-only
+candidate active control, ±1745 raw (~100 deg) target, strict candidate +1 sequence /
+<=78-raw target step, 7-tick EPS loss cutoff, raw steering-rate cutout 100, and
+selected-bank per-task LTA slew. Static recovery also finds no measured-Q-current
+comparator in the cooperative supervisor and no speed-dependent reduction of the hard
+±1745 B6 ceiling. Do not spend another pass copying old Toyota angle/current limits;
+focus the live capture on still-parameterized driver/fault/response policy and
+deployment topology. Current Toyota safety assumes checked state on logical
 bus 0; direct diagnostic/passive observation on bus 1 is not itself the production
 relay topology.
 
@@ -260,11 +263,15 @@ samples CAN-valid. Therefore **do not spend the next pass rebuilding basic state
 Use the implementation as the dynamic measurement harness and focus the next evidence on:
 exact target/F181 binding, physical relay-correct stock-LTA transitions, B6 sender cadence
 and active-LTA secondary-field template, SecOC freshness/key/source ownership,
-producer-side suppression, the physical driver-override threshold for the now-live `0x030`
-torque, `0x4A3` Q-current response/fault threshold, and `0x351/0x394` + DID `0x1033`
-Ready/fault transitions. The numeric candidate Panda envelope is already tracked in
-`data/generated/corolla_hf_panda_lateral_safety_contract.json`; keep it disabled until
-those parameter/deployment blockers close. Gear values other than the observed `D` and
+producer-side suppression, the physical driver-override policy for the now-live `0x030`
+torque, a deliberately chosen/validated `0x4A3` Q-current response policy, and
+`0x351/0x394` + DID `0x1033` Ready/fault transitions. Static firmware recovery has
+already bounded the ~±8.238 N.m torque acquisition clamp and ±10 N.m telemetry
+saturation as representation limits—not override thresholds—and found no measured-Q
+comparator in the cooperative supervisor. The firmware limit ledger is tracked in
+`data/generated/corolla_hf_steering_limits.json`; the numeric candidate Panda envelope
+is `data/generated/corolla_hf_panda_lateral_safety_contract.json`. Keep it disabled
+until those policy/deployment blockers close. Gear values other than the observed `D` and
 cruise engagement remain deliberately neutral in the implementation until transition
 captures justify them.
 

@@ -89,6 +89,8 @@ check("measured rate is signal186", m["steering_rate"]["signal"] == 186 and m["s
 check("driver torque source physical and live", m["driver_torque"]["can_id"] == "0x030" and m["driver_torque"]["live_span_range_nm"]["count"] == 6000)
 check("driver torque invalid gate is required clear", "must be 0" in m["driver_torque"]["invalid_gate"])
 check("driver override numeric threshold deliberately open", m["driver_torque"]["override_abs_threshold_nm"] is None)
+check("driver torque acquisition clamp is not override", abs(m["driver_torque"]["acquisition_clamp_abs_nm"] - 8.23828125) < 1e-9 and "not driver-override thresholds" in m["driver_torque"]["override_boundary"])
+check("driver torque telemetry saturation is not override", m["driver_torque"]["telemetry_saturation_abs_nm"] == 10.0 and "not driver-override thresholds" in m["driver_torque"]["override_boundary"])
 check("selected fault/inhibit is immediate cutout candidate", m["steering_fault_inhibit"]["nominal_clear_value"] == 0 and "immediate controls cutout" in m["steering_fault_inhibit"]["candidate_action"])
 
 p = d["candidate_panda_subset"]
@@ -105,6 +107,8 @@ check("only three bounded safety-policy parameter classes remain", set(u) == {"d
 check("driver override parameter is intentionally unset", u["driver_override_abs_nm"]["value"] is None)
 check("extended fault policy is intentionally unset with immediate gate known", u["extended_fault_policy"]["value"] is None and "disable" in u["extended_fault_policy"]["known_immediate_gate"])
 check("actuator response threshold intentionally unset", u["actuator_response_fault_threshold"]["value"] is None)
+check("actuator response is reclassified as no recovered OEM measured-Q threshold", u["actuator_response_fault_threshold"]["classification"] == "no-recovered-oem-measured-q-current-threshold" and "FEBEAE16" in u["actuator_response_fault_threshold"]["static_firmware_result"])
+check("future actuator response remains deliberate Panda/sender policy", "separate safety policy" in u["actuator_response_fault_threshold"]["policy_boundary"])
 check("deployment blockers remain outside safety math", len(d["deployment_integration_blockers"]) == 4 and any("repin" in x for x in d["deployment_integration_blockers"]))
 
 # Edge behavior for the stricter future Panda subset.
@@ -123,6 +127,10 @@ check("reference policy supports future driver threshold parameter", not candida
 check("reference policy permits exact future driver threshold", candidate_tx_ok(controls_allowed=True, request_id=11, target_raw=100, seq=2, previous_target=90, previous_seq=1, steer_rate_raw=20, driver_torque_nm=-3.0, driver_override_abs_nm=3.0))
 check("inactive candidate accepts only zero request/target", candidate_tx_ok(controls_allowed=False, request_id=0, target_raw=0, seq=0, previous_target=None, previous_seq=None, steer_rate_raw=0))
 check("inactive candidate rejects stale target", not candidate_tx_ok(controls_allowed=False, request_id=0, target_raw=1, seq=0, previous_target=None, previous_seq=None, steer_rate_raw=0))
+check("steering-limit ledger is a tracked Panda input", "steering_limits" in d["sources"] and d["sources"]["steering_limits"]["path"] == "data/generated/corolla_hf_steering_limits.json")
+check("Panda does not transplant TSS2 speed-angle/current limits", "speed-angle curves" in d["not_promoted_as_safety_limits"]["legacy_toyota_lta_limits"] and "measured_q_current" in d["not_promoted_as_safety_limits"])
+check("static conclusion keeps Q-current OEM threshold negative", d["static_conclusion"]["measured_q_current_observable_closed_but_oem_response_threshold_not_recovered"])
+check("static conclusion keeps speed-dependent hard reduction negative", d["static_conclusion"]["speed_dependent_hard_angle_reduction_not_recovered"])
 
 # The builder must reproduce the committed artifact exactly from tracked evidence.
 with tempfile.TemporaryDirectory() as td:

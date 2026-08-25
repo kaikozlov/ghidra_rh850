@@ -537,17 +537,28 @@ cutout above raw signed12 steering-rate magnitude 100. The EPS itself debounces 
 rate monitor; Panda should not need to wait for that persistent latch.
 
 The target-native inhibit chain is also bounded: target plausibility contributes
-`C269`, an internal command/response monitor contributes `C26B`, `CB22E` aggregates
-those as `C26A`, and the cooperative gates also require independent `C245` clear.
-Live `0x030` already supplies physical driver torque plus driver-torque-invalid and
-selected steering fault/inhibit gates, so the remaining **safety-policy numeric
-parameters** are narrowed to the driver override threshold and extended
-fault/actuator-response thresholds. Relay-side ownership/suppression, active-LTA
-secondary-B6 template, sender cadence and SecOC MAC/freshness construction remain
-integration blockers, not reasons to copy pre-TSS3 safety constants.
+`C269`, a persistent `FEBEAE16` internal-command-state monitor contributes `C26B`,
+`CB22E` aggregates those as `C26A`, and the cooperative gates also require independent
+`C245` clear. A deeper calibration pass additionally proves that the hard ±1745 B6
+ceiling is bank-invariant; the runtime-selected low/vehicle `CBFCE` profile
+compensation LUTs are all zero-valued at their real points even though the compiled
+high/default copies are nonzero. No TSS2-style speed-dependent reduction of the hard
+B6 ceiling is therefore recovered.
 
-Canonical candidate:
-`data/generated/corolla_hf_panda_lateral_safety_contract.json`. It remains explicitly
+Live `0x030` supplies physical driver torque, but the firmware's ~±8.238 N.m native
+acquisition clamp and ±10 N.m telemetry saturation are representation limits, not an
+OEM override threshold. Physical `0x4A3` Q-current is also closed as an observable,
+but the recovered cooperative supervisor does not directly compare measured
+`FEBE6592`; `CB394/CB59A` monitor `FEBEAE16` instead. Thus driver override remains an
+explicit policy input and any Panda actuator-response limit must be deliberately
+chosen/validated rather than copied from an invented EPS Q-current threshold.
+Relay-side ownership/suppression, active-LTA secondary-B6 template, sender cadence and
+SecOC MAC/freshness construction remain integration blockers, not reasons to copy
+pre-TSS3 safety constants.
+
+Canonical artifacts:
+`data/generated/corolla_hf_steering_limits.json` and
+`data/generated/corolla_hf_panda_lateral_safety_contract.json`. They remain explicitly
 non-enabling; the maintained TSS3 platform continues to use Panda `noOutput`.
 
 ### F. Encode support as a generation-specific platform contract

@@ -27,6 +27,7 @@ FULL_RECEIVER = REPO / "data/generated/corolla_8965H1202000_b6_full_receiver_con
 TARGET = REPO / "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json"
 STATE = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge.json"
 CAL_DELTA = REPO / "data/generated/corolla_8965F1208000_low_calibration_delta.json"
+LIMITS = REPO / "data/generated/corolla_hf_steering_limits.json"
 DEFAULT_OUTPUT = REPO / "data/generated/corolla_hf_panda_lateral_safety_contract.json"
 
 FUNCTION_WINDOWS = {
@@ -86,12 +87,16 @@ def build() -> dict[str, Any]:
     target = loadj(TARGET)
     state = loadj(STATE)
     cal_delta = loadj(CAL_DELTA)
+    limits = loadj(LIMITS)
 
     need(decomp["software_id"] == "8965H1202000", "wrong H decompiler evidence")
     need(receiver["software_id"] == "8965H1202000", "wrong receiver contract")
     need(target["software_id"] == "8965H1202000", "wrong target-angle contract")
     need(full["applies_to"] == ["8965H1202000", "8965F1208000"] and full["cross_variant"]["h_f_application_identical"],
          "full receiver contract does not transfer to F")
+    need(limits["schema"] == "corolla-hf-steering-limits-v1" and limits["applies_to"] == ["8965H1202000", "8965F1208000"],
+         "wrong steering-limit ledger")
+    need(not limits["status"]["production_enable_authorized"], "steering-limit ledger unexpectedly enables output")
 
     decomp_by_entry = {int(row["entry"], 16): row for row in decomp["functions"]}
     function_evidence: list[dict[str, Any]] = []
@@ -159,6 +164,9 @@ def build() -> dict[str, Any]:
     need(global_values["sequence_wrap_max"] == 63 and global_values["sequence_gap_cap"] == 8,
          "unexpected sequence geometry")
     need(global_values["measured_rate_lta_raw"] == 100, "unexpected LTA measured-rate threshold")
+    need(limits["command_limits"]["b6_lta_absolute"]["raw"] == low_values["lta_abs_target_raw"], "steering-limit absolute target mismatch")
+    need(limits["command_limits"]["b6_lta_delta"]["raw_per_effective_sequence_gap"] == low_values["lta_delta_raw_per_effective_gap"], "steering-limit delta mismatch")
+    need(limits["command_limits"]["measured_steering_rate"]["raw_abs_threshold"] == global_values["measured_rate_lta_raw"], "steering-limit rate mismatch")
 
     accepted = receiver["request_contract"]["accepted_active_requests"]
     need(accepted == {"1": "PCS", "4": "LDA", "10": "Hands Off LTA", "11": "LTA/LCA", "19": "PDA"},
@@ -194,7 +202,7 @@ def build() -> dict[str, Any]:
             "panda_safety_enable_authorized": False,
             "reason": (
                 "The H/F receiver-side command envelope and observable steering inputs are sufficiently closed to write a candidate safety contract, "
-                "but the physical driver-override threshold, extended fault/actuator-response policy, relay-side stock-source suppression, and sender payload/cadence/authentication integration are not yet validated."
+                "but the physical driver-override threshold, extended fault policy, deliberate actuator-response policy, relay-side stock-source suppression, and sender payload/cadence/authentication integration are not yet validated. Firmware recovery found no measured-Q-current comparator in the cooperative B6 supervisor."
             ),
         },
         "sources": {
@@ -205,6 +213,7 @@ def build() -> dict[str, Any]:
             "full_receiver_contract": {"path": rel(FULL_RECEIVER), "sha256": sha256_file(FULL_RECEIVER)},
             "target_angle_contract": {"path": rel(TARGET), "sha256": sha256_file(TARGET)},
             "state_bridge": {"path": rel(STATE), "sha256": sha256_file(STATE)},
+            "steering_limits": {"path": rel(LIMITS), "sha256": sha256_file(LIMITS)},
         },
         "cross_variant": {
             "software_ids": ["8965H1202000", "8965F1208000"],
@@ -279,11 +288,11 @@ def build() -> dict[str, Any]:
             },
             "internal_inhibit_chain": {
                 "target_plausibility_output": "0xCB4F4 -> FEBEC269; target magnitude/delta violation or internal C268/C263 state can assert it",
-                "internal_response_output": "0xCB59A -> FEBEC26B; persistent internal-command magnitude monitor, not directly available as a CAN measurement",
+                "internal_response_output": "0xCB59A -> FEBEC26B; persistent FEBEAE16 internal-command magnitude monitor, not measured motor Q-current and not directly available as a CAN measurement",
                 "aggregate": "0xCB22E sets FEBEC26A = (FEBEC269 == 1) || (FEBEC26B == 1)",
                 "additional_gate": "FEBEC245 from 0xCB14E is independently required clear by 0xCADE4/0xCAE18",
                 "cooperative_enable_consumers": ["0x000CADE4", "0x000CAE18"],
-                "panda_mapping": "Mirror the observable target/rate and 0x030 fault/validity gates now; keep internal response/tracking policy parameterized until live 0x4A3/0x394/Ready correlation closes an observable equivalent.",
+                "panda_mapping": "Mirror the observable target/rate and 0x030 fault/validity gates now. Do not reinterpret FEBEAE16 thresholds as Q-current response limits; any Panda actuator-response policy must be validated separately from the OEM internal-command monitors.",
             },
             "controller_error_clamp": {
                 "internal_abs_limit": global_values["controller_error_clamp_internal"],
@@ -314,8 +323,12 @@ def build() -> dict[str, Any]:
                 "physical_relation": "torque_Nm = signed(signal10)*0.1 + signed4(signal31)*0.01",
                 "live_span_range_nm": bridge30["driver_torque_encoding_family"]["span_torque_nm"],
                 "invalid_gate": "0x030 B6[0] / DRIVER_TORQUE_INVALID must be 0",
+                "acquisition_clamp_raw": limits["driver_torque"]["acquisition_clamp_raw"],
+                "acquisition_clamp_abs_nm": limits["driver_torque"]["acquisition_clamp_abs_nm"],
+                "telemetry_saturation_abs_nm": limits["driver_torque"]["telemetry_saturation_abs_nm"],
                 "override_abs_threshold_nm": None,
                 "parameter_name": "driver_override_abs_nm",
+                "override_boundary": "The firmware's ~8.238 N.m acquisition clamp and ±10 N.m telemetry saturation are representation limits, not driver-override thresholds.",
             },
             "steering_fault_inhibit": {
                 "can_id": "0x030",
@@ -370,8 +383,11 @@ def build() -> dict[str, Any]:
             },
             "actuator_response_fault_threshold": {
                 "value": None,
-                "source_available": "0x4A3 Q-current response is statically decoded; internal FEBEAE16 monitors are recovered",
-                "missing_evidence": "relay-correct dynamic 0x4A3 command/response correlation and safe response-error limit",
+                "classification": "no-recovered-oem-measured-q-current-threshold",
+                "source_available": "0x4A3 Q-current response is statically decoded as an observable",
+                "static_firmware_result": "No measured-Q-current comparator is recovered in the cooperative B6 supervisor under the promoted exact-symbol census; CB394/CB59A monitor FEBEAE16 internal command state instead.",
+                "policy_boundary": "A Panda/sender actuator-response limit may still be desirable, but it must be chosen and validated as a separate safety policy rather than copied from an invented OEM Q-current threshold.",
+                "missing_evidence": "relay-correct dynamic command/response behavior needed to validate any future Panda/sender actuator-response policy",
             },
         },
         "deployment_integration_blockers": [
@@ -388,7 +404,15 @@ def build() -> dict[str, Any]:
                 "reason": "parallel/wider conditioning path is much looser than the LTA-specific plausibility envelope",
             },
             "controller_error_clamp_internal": global_values["controller_error_clamp_internal"],
-            "legacy_toyota_lta_limits": "use only as prior art; do not transplant pre-TSS3 max angle/rate or torque thresholds",
+            "driver_torque_acquisition_and_telemetry_clamps": {
+                "acquisition_clamp_abs_nm": limits["driver_torque"]["acquisition_clamp_abs_nm"],
+                "telemetry_saturation_abs_nm": limits["driver_torque"]["telemetry_saturation_abs_nm"],
+                "reason": "representation limits, not OEM driver-override thresholds",
+            },
+            "measured_q_current": {
+                "reason": "physical Q-current is observable, but no cooperative-supervisor measured-Q comparator is recovered; internal FEBEAE16 thresholds are not Q-current",
+            },
+            "legacy_toyota_lta_limits": "use only as prior art; do not transplant pre-TSS3 max angle/rate, speed-angle curves, torque, or current thresholds",
         },
         "static_conclusion": {
             "candidate_panda_contract_derived": True,
@@ -401,6 +425,8 @@ def build() -> dict[str, Any]:
             "measured_rate_raw_cutout_closed": True,
             "driver_torque_signal_closed_but_override_threshold_open": True,
             "selected_fault_inhibit_gate_closed_but_extended_fault_policy_open": True,
+            "measured_q_current_observable_closed_but_oem_response_threshold_not_recovered": True,
+            "speed_dependent_hard_angle_reduction_not_recovered": True,
             "wall_clock_sender_cadence_open": True,
         },
     }

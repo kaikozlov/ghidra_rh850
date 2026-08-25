@@ -525,8 +525,16 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   H/F Panda numeric envelope** independently of a new capture: ID11-only candidate
   active control, ±1745 raw (~100 deg) target, strict candidate +1 modulo64 sequence
   with <=78-raw (~4.47 deg) target step, 7-foreground-tick EPS loss cutoff, and raw
-  `0x025` steering-rate cutout 100. The remaining safety-policy parameters are the
-  physical driver-override threshold plus extended fault/actuator-response policy;
+  `0x025` steering-rate cutout 100. COM-015 further closes the firmware/calibration
+  limit families: selected-bank LTA slew is 7 doubled-domain units per steering task
+  (high/default 4), the hard ±1745 ceiling has no recovered speed-dependent reduction,
+  and the runtime-selected `CBFCE` compensation maps are zero-valued at every real
+  point. The physical driver-torque path's ~±8.238 N.m acquisition clamp and ±10 N.m
+  telemetry saturation are explicitly **not** override thresholds, so the driver
+  override policy remains open. Measured `0x4A3` Q-current is observable, but no
+  cooperative-supervisor measured-Q comparator is recovered; any actuator-response
+  limit is therefore a future Panda/sender policy to validate dynamically rather than
+  an OEM threshold still waiting to be copied. Extended fault mapping remains open;
   sender template/cadence/SecOC and relay suppression remain deployment blockers.
   The next decisive Corolla discriminator is therefore a **firmware-identified
   H/F-family capture with the target network physically repinned onto the CAN0/CAN2
@@ -535,7 +543,8 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   breadth beyond Corolla (Camry, RAV4, etc.) still must close command,
   feedback/readiness, producer/route, stock suppression, limits/faults, UI and
   authentication independently. Canonical machine-readable state:
-  `data/generated/corolla_tss3_opendbc_readiness.json`; candidate safety contract:
+  `data/generated/corolla_tss3_opendbc_readiness.json`; firmware steering-limit ledger:
+  `data/generated/corolla_hf_steering_limits.json`; candidate safety contract:
   `data/generated/corolla_hf_panda_lateral_safety_contract.json`. See
   [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md)
   and [../variants/toyota-eps-variant-comparison.md](../variants/toyota-eps-variant-comparison.md).

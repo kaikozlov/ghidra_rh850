@@ -1,0 +1,107 @@
+{
+  "evidence_boundary": "Complete exact-substring census over the supplied target-native decompiler corpus; bounded to direct textual references and does not exclude computed-pointer or alias-only accesses.",
+  "image": {
+    "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+    "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "size": 1048576
+  },
+  "schema": "rh850-variant-decompiler-direct-reference-census-v1",
+  "software_id": "8965H1202000",
+  "source_corpus": {
+    "path": "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
+    "sha256": "c3411eec57b9d55c004b0b0f328394bb152577c3398084dccc729dab5da54656"
+  },
+  "terms": {
+    "driver_torque": {
+      "match_count": 2,
+      "matches": [
+        {
+          "body_sha256": "2009ba909725b856201f2f84808ede2af941913c69666e4cacb6251523cc2275",
+          "body_size": 232,
+          "entry": "0x00046C4C",
+          "matching_lines": [
+            "sRamfebe7e22 = (short)((sRamfebe6554 * 100) / 0x100);"
+          ]
+        },
+        {
+          "body_sha256": "0984ca86bed4a15a8c30ffde433466482d8a6cb04f7fcdc75f829e6b7308f356",
+          "body_size": 252,
+          "entry": "0x00057692",
+          "matching_lines": [
+            "uRamfebe6554 = uRamfebe7b08;"
+          ]
+        }
+      ],
+      "substring": "febe6554"
+    },
+    "internal_command_state": {
+      "match_count": 5,
+      "matches": [
+        {
+          "body_sha256": "6cd85e2eb14595c00f3e55ef111d6271133ae2ec94c31246f0791c7ef63df1ea",
+          "body_size": 28,
+          "entry": "0x000C8F0A",
+          "matching_lines": [
+            "FUN_000ce7bc((int)sRamfebeae16);"
+          ]
+        },
+        {
+          "body_sha256": "957a3f3436301a5a3bfcdd094980a528b780acfa6569b8a1d99fc5c76a536e48",
+          "body_size": 78,
+          "entry": "0x000C9EE4",
+          "matching_lines": [
+            "sRamfebec15a = sRamfebeae16;",
+            "* (iVar1 + sRamfebeae16)) / 0x4000) +"
+          ]
+        },
+        {
+          "body_sha256": "6df6e7adffc57dbbb7a2ea0a18d39f1c97ec17079834f0154d206ff409d62d19",
+          "body_size": 180,
+          "entry": "0x000CB394",
+          "matching_lines": [
+            "iVar9 = FUN_000ce7bc((int)sRamfebeae16);"
+          ]
+        },
+        {
+          "body_sha256": "ba5e531fcd880afb8495dae89783c6c9be4b89cdea01b3e0e868ffabab4b1ae2",
+          "body_size": 202,
+          "entry": "0x000CB59A",
+          "matching_lines": [
+            "uVar11 = FUN_000ce7bc((int)sRamfebeae16);"
+          ]
+        },
+        {
+          "body_sha256": "e933cf89ef424526096c82c81af343c40197f90b01417b021b1b3d442212631f",
+          "body_size": 240,
+          "entry": "0x000CBD7E",
+          "matching_lines": [
+            "iVar10 = (int)sRamfebeae16;"
+          ]
+        }
+      ],
+      "substring": "febeae16"
+    },
+    "measured_q_current": {
+      "match_count": 2,
+      "matches": [
+        {
+          "body_sha256": "2009ba909725b856201f2f84808ede2af941913c69666e4cacb6251523cc2275",
+          "body_size": 232,
+          "entry": "0x00046C4C",
+          "matching_lines": [
+            "uRamfebe7e28 = (undefined2)((sRamfebe6592 * -100) / 0x80);"
+          ]
+        },
+        {
+          "body_sha256": "0b6c6d794a5a8d625d53e14ec7b33c11d377510c8a6fd966a8e64c8afc4f6463",
+          "body_size": 1124,
+          "entry": "0x0005722E",
+          "matching_lines": [
+            "uRamfebe6592 = uRamfebe6bae;"
+          ]
+        }
+      ],
+      "substring": "febe6592"
+    }
+  }
+}

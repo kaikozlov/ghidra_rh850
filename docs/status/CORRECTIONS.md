@@ -2719,3 +2719,35 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `tests/verify_corolla_8965H1202000_openpilot_state_bridge.py`;
   `tests/verify_span_2025_discord_rlog_opendbc_evidence_external.py`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) §6.
+
+
+### CORR-110 — `FEBEAE16` supervisor thresholds are internal command state, not measured Q-current response limits
+
+- **Superseded framing:** the first non-enabling Panda contract left an
+  `actuator_response_fault_threshold` open next to the statically decoded `0x4A3`
+  Q-current observable and the recovered `CB394/CB59A` thresholds. That wording
+  could be read as though the EPS's cooperative supervisor already contained a
+  measured-Q-current comparator whose numeric limit merely remained to be found.
+- **Exact correction:** the physical Q-current chain is
+  `0x33160: FEBE6BAE -> 0x5722E: FEBE6592 -> 0x46C4C: 0x4A3 B6:B7`.
+  A promoted complete exact-symbol census of the target-native H decompiler corpus
+  finds `FEBE6592` only at the snapshot and telemetry stages (`0x5722E`, `0x46C4C`).
+  The cooperative `CB394` and `CB59A` monitors instead consume `FEBEAE16`, an
+  internal command-derived state. Their 512/1280 thresholds are therefore **not
+  measured-Q-current limits**.
+- **Safety consequence:** no OEM measured-Q-current response threshold is recovered
+  in the cooperative B6 supervisor under the exact-symbol census boundary. A Panda
+  actuator-response limit may still be desirable, but it must be a separately
+  designed and relay-correctly validated safety policy rather than an EPS constant
+  transplanted by analogy. Likewise the recovered ~±8.238 N.m driver-torque
+  acquisition clamp and ±10 N.m telemetry saturation are representation limits,
+  not physical driver-override thresholds.
+- **Boundary:** the reference census is complete for direct textual symbol
+  references and explicitly does not exclude arbitrary computed-pointer/alias-only
+  accesses. The correction is therefore a bounded static negative, not a claim that
+  no other firmware layer or upstream sender can implement driver/response policy.
+- **Canonical:**
+  `data/generated/corolla_hf_steering_limits.json`;
+  `data/generated/corolla_8965H1202000_steering_limits_reference_census.json`;
+  `tests/verify_corolla_hf_steering_limits.py`;
+  [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).

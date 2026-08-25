@@ -527,9 +527,10 @@ useful prior art but is not promoted here as an independently OEM-named unit pro
 
 The recovered internal gating also prevents over-reading those visible checks as
 the complete EPS decision. `CB4F4` contributes target-plausibility state `C269`;
-`CB59A` contributes an internal command/response latch `C26B`; `CB22E` forms
-`C26A = C269 || C26B`; and `CADE4/CAE18` require that aggregate plus the separate
-`C245` tracking gate clear before cooperative control survives. The observable
+`CB59A` contributes a persistent **FEBEAE16 internal-command-state** latch `C26B`;
+`CB22E` forms `C26A = C269 || C26B`; and `CADE4/CAE18` require that aggregate plus
+the separate `C245` tracking gate clear before cooperative control survives. The
+`FEBEAE16` monitor is not measured motor Q-current. The observable
 Panda-side mapping is therefore:
 
 - require valid `0x025` measured angle/rate;
@@ -539,6 +540,43 @@ Panda-side mapping is therefore:
 - apply a physical driver-override threshold to the already closed `0x030` torque
   once that threshold is validated dynamically.
 
+#### Firmware/calibration limit recovery beyond the basic Panda envelope
+
+A deeper H/F supervisor/motor-control pass closes several additional distinctions
+that matter more than importing pre-TSS3 Toyota constants:
+
+- The hard LTA/LCA B6 ceiling remains **±1745 raw** in both calibration banks. The
+  `CBFCE` profile path does have four `FEBEADF4`-indexed compensation LUTs
+  (`bank+0x768/+0x798/+0x7C8/+0x7F8`), but every real point in the runtime-selected
+  low/vehicle bank has value **0**. The compiled high/default counterparts become
+  nonzero beginning at axis 7680. The physical identity of `FEBEADF4` is deliberately
+  not guessed here. These are compensation maps, not a maximum-angle curve, and no
+  speed-dependent reduction of the hard ±1745 B6 ceiling is recovered.
+- `CB14E` uses an internal tracking half-window of **524** (a 1048-unit full
+  comparison window) with persistence 40. `CB394` monitors `FEBEAE16` at **512**
+  with persistence 79 in the selected low bank / 59 high-default; `CB59A` has a
+  second `FEBEAE16` threshold **1280** with persistence 96. `CBD7E` retains raw
+  reconstruction-validity bounds **80/90/512**, and `CAE18` contains a separate
+  counter threshold 15. Their internal units are not promoted to fabricated
+  steering-angle/current engineering units.
+- The physical driver-torque path has a native acquisition clamp of **±2109** in
+  the N·m×256 domain (~**±8.2383 N·m**) and exported telemetry saturation at
+  **±10.00 N·m**. These explain representation behavior—including Span's -8.23 N·m
+  observed floor—but neither is a driver-override threshold. No numeric physical
+  driver-torque comparator is recovered in the cooperative B6 supervisor, so
+  `driver_override_abs_nm` remains a policy value requiring validation.
+- Physical motor Q-current remains closed as `FEBE6592` and `0x4A3 B6:B7`
+  (-0.01 A/count, sign-inverted relative to the Techstream raw value). A promoted
+  whole-corpus exact-symbol census finds that measured Q-current only in its
+  snapshot/telemetry bridge, while the cooperative `CB394/CB59A` monitors reference
+  `FEBEAE16` instead. Under that explicit direct-reference/computed-alias boundary,
+  **no OEM measured-Q-current response comparator is recovered**. A future Panda
+  response limit may still be desirable, but it is a separately designed and
+  relay-correctly validated safety policy—not a constant to copy from the EPS.
+- Additional torque-sensor fault calibrations (`2655/4233/4091/3341/1764`) are
+  retained as raw internal fault/plausibility constants only. Their comparison
+  domains do not justify relabeling them as physical driver-override thresholds.
+
 The exact B6 receiver-loss guarantee remains **7 TAUJ0-CH3 foreground ticks**:
 successful PDU42 receipt reloads 7 and first expiry disables cooperative selection.
 The tick's wall-clock duration remains unsupported, so no milliseconds are invented.
@@ -546,13 +584,14 @@ After a future host/sender lapse, Panda should discard previous sequence/desired
 history and require a fresh inactive/reinitialization transition before allowing
 active steering again.
 
-This leaves only three bounded safety-policy parameter classes rather than an
-undefined Panda model: the physical `driver_override_abs_nm`, extended fault policy
-(`0x394`/Ready/DTC classes beyond the already-known immediate `0x030` gate), and an
-actuator-response/fault threshold for the statically decoded `0x4A3` Q-current path.
-Secondary B6 fields 258/260/262/263/264/265 are **not free safety parameters**:
-the receiver roles are bounded, but production TX must remain disabled until a
-stock active-LTA sender template is captured/recovered and then whitelisted.
+This leaves three bounded **policy** classes rather than an undefined Panda model:
+physical `driver_override_abs_nm`, extended fault policy (`0x394`/Ready/DTC classes
+beyond the already-known immediate `0x030` gate), and a deliberately chosen
+actuator-response policy. The third is no longer framed as an undiscovered OEM
+Q-current threshold: static H/F evidence did not recover one in the cooperative
+supervisor. Secondary B6 fields 258/260/262/263/264/265 are **not free safety
+parameters**: the receiver roles are bounded, but production TX must remain disabled
+until a stock active-LTA sender template is captured/recovered and then whitelisted.
 Likewise relay-side bus ownership/suppression, sender cadence and SecOC MAC/freshness
 construction are deployment blockers outside the numeric Panda envelope.
 
@@ -569,7 +608,7 @@ The candidate safety math is now substantially closed, but it still does not aut
 actuation. Before a real H/F openpilot port, recover and validate:
 
 - a validated **driver-override threshold** for the now-closed `0x030` physical torque signal;
-- allowable Q-current actuator-response error/limits and extended fault-policy mapping;
+- a deliberate Panda/sender Q-current actuator-response policy validated against relay-correct dynamics, plus extended fault-policy mapping (the cooperative EPS supervisor exposes no recovered measured-Q-current comparator);
 - a Tx join for Ready Status and dynamic temporary/permanent fault semantics;
 - sender wall-clock cadence and the active-LTA template for the bounded secondary B6 fields;
 - relay-correct stock-source suppression and dynamic confirmation of the statically closed 7-tick loss behavior;
@@ -578,9 +617,10 @@ actuation. Before a real H/F openpilot port, recover and validate:
 
 The machine-readable evidence is
 `data/generated/corolla_8965H1202000_openpilot_state_bridge.json`,
-`data/generated/corolla_8965H1202000_b6_receiver_contract.json`, and
+`data/generated/corolla_8965H1202000_b6_receiver_contract.json`,
+`data/generated/corolla_hf_steering_limits.json`, and
 `data/generated/corolla_hf_panda_lateral_safety_contract.json`; their compact
-raw-body-bound decompiler evidence is tracked alongside each artifact.
+raw-body-bound decompiler/reference evidence is tracked alongside each artifact.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
@@ -588,6 +628,6 @@ raw-body-bound decompiler evidence is tracked alongside each artifact.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009), [COM-010](../reference/index.md#finding-com-010), [COM-011](../reference/index.md#finding-com-011), [COM-014](../reference/index.md#finding-com-014)
-- Corrections with this document as canonical home: [CORR-109](../reference/index.md#correction-corr-109)
+- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009), [COM-010](../reference/index.md#finding-com-010), [COM-011](../reference/index.md#finding-com-011), [COM-014](../reference/index.md#finding-com-014), [COM-015](../reference/index.md#finding-com-015)
+- Corrections with this document as canonical home: [CORR-109](../reference/index.md#correction-corr-109), [CORR-110](../reference/index.md#correction-corr-110)
 <!-- knowledge-cross-references:end -->
