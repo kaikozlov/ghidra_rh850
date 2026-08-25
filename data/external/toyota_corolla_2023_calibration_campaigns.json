@@ -1,0 +1,70 @@
+{
+  "schema": "toyota-corolla-2023-calibration-campaigns-v1",
+  "boundary": "Curated official-public calibration tables used only for acquisition correlation. The bulletin calibration IDs are not an exact VIN/ECU identity join to the albinoelephant H firmware, the Span F firmware, or any public route. Raw local CUW bytes remain authoritative for claims about packages actually present in this repository.",
+  "campaigns": {
+    "23TC01_front_recognition_camera": {
+      "campaign": "23TC01",
+      "title": "Toyota Safety Sense Inoperative Intermittently",
+      "applicability": [
+        "2023 Model Corolla",
+        "2023 Model Corolla Hatchback",
+        "2023 Model Corolla Hybrid"
+      ],
+      "system": "Front Recognition Camera",
+      "official_source": {
+        "provider": "NHTSA mirror of Toyota technical instructions",
+        "document_id": "MC-10242522-9999",
+        "url": "https://static.nhtsa.gov/odi/tsbs/2023/MC-10242522-9999.pdf",
+        "sha256": "3c275694a83825a98304068dce8c4c42666aba7ef3e528be7666b32426492bea"
+      },
+      "published_transitions": [
+        {
+          "current_calibration_id": "8646F1204300",
+          "new_calibration_id": "8646F1204500",
+          "published_file_size": "250MB"
+        },
+        {
+          "current_calibration_id": "8646F1204400",
+          "new_calibration_id": "8646F1204500",
+          "published_file_size": "250MB"
+        }
+      ]
+    },
+    "24TC01_brake_epb": {
+      "campaign": "24TC01",
+      "title": "Brake Actuator Assembly (Skid Control ECU) Software Update",
+      "applicability": [
+        "Certain 2023 Model Corolla"
+      ],
+      "system": "Brake/EPB",
+      "official_source": {
+        "provider": "NHTSA mirror of Toyota technical instructions",
+        "document_id": "MC-11005140-0001",
+        "url": "https://static.nhtsa.gov/odi/tsbs/2024/MC-11005140-0001.pdf",
+        "sha256": "b178aebd991ce065aea43172680cf735c66d370a0bbc4889b0beb31418ad2151"
+      },
+      "published_transitions": [
+        {
+          "current_calibration_id": "F152612A5100",
+          "new_calibration_id": "F152612A5400"
+        },
+        {
+          "current_calibration_id": "F152612A5200",
+          "new_calibration_id": "F152612A5400"
+        },
+        {
+          "current_calibration_id": "F152612A5300",
+          "new_calibration_id": "F152612A5400"
+        }
+      ],
+      "techinfo_acquisition_probe": {
+        "observed_date": "2026-08-25",
+        "candidate_url": "https://techinfo.toyota.com/t3Portal/calibration/F152612A5400",
+        "anonymous_result": "Toyota TechInfo authentication gateway preserved the requested calibration path as original_request_url; a nonsense control path behaved identically",
+        "package_availability_proven": false,
+        "boundary": "Anonymous redirect behavior proves neither CID recognition nor package availability because the auth gateway preserves arbitrary calibration-path suffixes. The candidate URL is retained only from Toyota's historically documented /t3Portal/calibration/<CID> grammar plus the independently published 24TC01 CID.",
+        "cid_recognition_proven": false
+      }
+    }
+  }
+}

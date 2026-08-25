@@ -151,8 +151,14 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   on the EMPS observer side. ADS DDR target-angle/angle-speed snapshots are signed
   32-bit rad/rad-s values with unity numeric conversion, while Brake DID `107E` is
   a separate `0.00025 rad/count` observer; neither has a proved B6 dataflow join.
-  The next static evidence is therefore a decoded matched `07B0` + `0792` pair,
-  not another broad scan of the existing corpus.
+  TMS-052 narrows that acquisition: raw `T-0058-23`/`T-0060-23` already match
+  Toyota 23TC01's 2023-Corolla `8646F1204300/4400→8646F1204500` FRC family,
+  while Toyota 24TC01 publishes the candidate Brake/EPB family
+  `F152612A5100/5200/5300→F152612A5400`; none of those Brake CIDs and no `07B0`
+  package is present locally. The next static evidence is therefore specifically
+  a decoded/exact-target `07B0` Brake application plus a decoder/exact identity
+  join for the already-owned `0792` family (or synchronized stock-LTA traffic),
+  not another broad FRC-package search.
   TMS-044 also closes the category-435 Techstream Active-Test catalog as a
   normal steering-writer lead: 20 direct tests and four routines are brake-actuator-
   only, and every routine has zero variable command/mask/button payloads. Those tests
@@ -680,8 +686,8 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   imports on the writer path), with the routine-area (`10 F5`, DFI `0x01`)
   then delta-data (`10 F6`, DFI `0x21`) RoutineControl framing — so any
   `.datx` grammar, the routine blob format, and `10F5/10F6` ECU semantics
-  now require **matching FRC/front-camera reprogramming firmware or a camera
-  dump** — not more host RE, and explicitly not the tracked Sienna/H EPS
+  now require **FRC bootloader/programming-decoder firmware or an executable camera
+  dump** — the 23TC01 Corolla update package itself is already local per TMS-052 — not more host RE, and explicitly not the tracked Sienna/H EPS
   (TMS-029 already proves standard ReproStd `10F5`/`10F6` are absent/rejected
   there). Bind the acquisition with the camera-special direct
   `0x792→0x79A` DID-`1FFF` SWIN response recovered from `GetSWINForFCM`, plus

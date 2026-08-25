@@ -1,0 +1,166 @@
+{
+  "acquisition_plan": {
+    "candidate_new_brake_cid": "F152612A5400",
+    "candidate_techinfo_url": "https://techinfo.toyota.com/t3Portal/calibration/F152612A5400",
+    "live_identity_reads": [
+      "Brake/EPB physical 0x7B0 DID F181 software-part list",
+      "Brake/EPB physical 0x7B0 DID 0x0105 ECU part number",
+      "FRC software identity/SWIN sufficient to choose between the local 23TC01 family and any later update family"
+    ],
+    "package_availability_proven": false,
+    "primary_static_target": "category-435 Brake/EPB DiagID 07B0 application",
+    "remaining_code_level_blocker": "Acquire/decode the 07B0 Brake application and either decode the already-owned 0792 FRC target representation or pair both modules with synchronized stock-LTA traffic.",
+    "what_is_already_owned": "Two raw 0792/P5-Unified CUWs exactly cover Toyota's published 23TC01 Corolla FRC source transitions to 8646F1204500; another generic 'find a 2023 Corolla FRC CUW' pass is unnecessary."
+  },
+  "brake_epb": {
+    "boundary": "24TC01 independently publishes a concrete 2023 Corolla Brake/EPB CID family. No package descriptor has DiagID 07B0 or any published Brake CID in the pinned 26-CUW local corpus. The campaign family is therefore an acquisition key set, not proof of the exact target Brake F181.",
+    "campaign": {
+      "applicability": [
+        "Certain 2023 Model Corolla"
+      ],
+      "campaign": "24TC01",
+      "official_source": {
+        "document_id": "MC-11005140-0001",
+        "provider": "NHTSA mirror of Toyota technical instructions",
+        "sha256": "b178aebd991ce065aea43172680cf735c66d370a0bbc4889b0beb31418ad2151",
+        "url": "https://static.nhtsa.gov/odi/tsbs/2024/MC-11005140-0001.pdf"
+      },
+      "published_transitions": [
+        {
+          "current_calibration_id": "F152612A5100",
+          "new_calibration_id": "F152612A5400"
+        },
+        {
+          "current_calibration_id": "F152612A5200",
+          "new_calibration_id": "F152612A5400"
+        },
+        {
+          "current_calibration_id": "F152612A5300",
+          "new_calibration_id": "F152612A5400"
+        }
+      ],
+      "system": "Brake/EPB",
+      "techinfo_acquisition_probe": {
+        "anonymous_result": "Toyota TechInfo authentication gateway preserved the requested calibration path as original_request_url; a nonsense control path behaved identically",
+        "boundary": "Anonymous redirect behavior proves neither CID recognition nor package availability because the auth gateway preserves arbitrary calibration-path suffixes. The candidate URL is retained only from Toyota's historically documented /t3Portal/calibration/<CID> grammar plus the independently published 24TC01 CID.",
+        "candidate_url": "https://techinfo.toyota.com/t3Portal/calibration/F152612A5400",
+        "cid_recognition_proven": false,
+        "observed_date": "2026-08-25",
+        "package_availability_proven": false
+      },
+      "title": "Brake Actuator Assembly (Skid Control ECU) Software Update"
+    },
+    "exact_target_vehicle_identity_joined": false,
+    "generation_model_acquisition_family_identified": true,
+    "local_published_cid_matches": [],
+    "local_reference_package_count": 26,
+    "local_target_diag_id_count": 0,
+    "local_target_diag_id_matches": [],
+    "package_bytes_available": false,
+    "published_calibration_ids": [
+      "F152612A5100",
+      "F152612A5200",
+      "F152612A5300",
+      "F152612A5400"
+    ],
+    "target_diag_id": "07B0"
+  },
+  "front_recognition_camera": {
+    "boundary": "T-0058-23 and T-0060-23 are raw-package matches to Toyota's published 23TC01 Corolla FRC transitions, so a 2023 Corolla P5 FRC update family is already present locally. This is not a VIN-level join to the albinoelephant or Span cars, and the 85,458,944-byte target representation remains high-entropy/opaque rather than decoded application code.",
+    "campaign": {
+      "applicability": [
+        "2023 Model Corolla",
+        "2023 Model Corolla Hatchback",
+        "2023 Model Corolla Hybrid"
+      ],
+      "campaign": "23TC01",
+      "official_source": {
+        "document_id": "MC-10242522-9999",
+        "provider": "NHTSA mirror of Toyota technical instructions",
+        "sha256": "3c275694a83825a98304068dce8c4c42666aba7ef3e528be7666b32426492bea",
+        "url": "https://static.nhtsa.gov/odi/tsbs/2023/MC-10242522-9999.pdf"
+      },
+      "published_transitions": [
+        {
+          "current_calibration_id": "8646F1204300",
+          "new_calibration_id": "8646F1204500",
+          "published_file_size": "250MB"
+        },
+        {
+          "current_calibration_id": "8646F1204400",
+          "new_calibration_id": "8646F1204500",
+          "published_file_size": "250MB"
+        }
+      ],
+      "system": "Front Recognition Camera",
+      "title": "Toyota Safety Sense Inoperative Intermittently"
+    },
+    "exact_target_vehicle_identity_joined": false,
+    "generation_model_match_identified": true,
+    "local_campaign_transition_matches": [
+      {
+        "contact_type": "P5-Unified",
+        "date_of_issue": "2022-12-01",
+        "diag_id": "0792",
+        "engine_type": "M##AFKS 2ZRFXE",
+        "filename": "T-0058-23.cuw",
+        "model_year": "2022/10-2022/11",
+        "new_calibration_id": "8646F1204500",
+        "repro_method": "07",
+        "required_spec_repro_ver": "04",
+        "routine_decoded_sha256": "161fd56df2bc3454184e63d92aaad43fc5baedd63c112da830bc99304d96cedb",
+        "sha256": "ac5015118d3c5541c62ac3b0626a2d676681b3c4dee2ce6cb84ad547d116fdd9",
+        "size": 256400446,
+        "source_calibration_id": "8646F1204300",
+        "vehicle_name": "COROLLA Series",
+        "vehicle_type": "MZEA1# ZWE21#",
+        "whole_image_entropy_bits_per_byte": 7.9999977,
+        "whole_image_length": 85458944,
+        "whole_image_sha256": "04b07fb4a817eaa340a7e34bb9e3d2a367989403671cf4f9968ee7c3b25c8dd3"
+      },
+      {
+        "contact_type": "P5-Unified",
+        "date_of_issue": "2022-12-01",
+        "diag_id": "0792",
+        "engine_type": "M##AFKS 2ZRFXE",
+        "filename": "T-0060-23.cuw",
+        "model_year": "2022/10-2022/11",
+        "new_calibration_id": "8646F1204500",
+        "repro_method": "07",
+        "required_spec_repro_ver": "04",
+        "routine_decoded_sha256": "161fd56df2bc3454184e63d92aaad43fc5baedd63c112da830bc99304d96cedb",
+        "sha256": "b3e4a7a951c74ef9985cf05f5151a36538e57bd84392da988d5f8102c652837f",
+        "size": 256399534,
+        "source_calibration_id": "8646F1204400",
+        "vehicle_name": "COROLLA Series",
+        "vehicle_type": "MZEA1# ZWE21#",
+        "whole_image_entropy_bits_per_byte": 7.9999977,
+        "whole_image_length": 85458944,
+        "whole_image_sha256": "04b07fb4a817eaa340a7e34bb9e3d2a367989403671cf4f9968ee7c3b25c8dd3"
+      }
+    ],
+    "local_match_count": 2,
+    "runtime_application_plaintext_available": false,
+    "target_image_sha256": "04b07fb4a817eaa340a7e34bb9e3d2a367989403671cf4f9968ee7c3b25c8dd3",
+    "target_image_shared": true
+  },
+  "schema_version": 1,
+  "sources": {
+    "data/external/toyota_corolla_2023_calibration_campaigns.json": {
+      "sha256": "08abdf76eedb6bc551e17685b580aaca3580ebf365951dd264eee9c643c7308c"
+    },
+    "data/generated/techstream_v18/cuw_frc_corpus.json": {
+      "sha256": "d8fc59bf36de75813265c12a2544f7b64bcc6f4a89628b1d96f6e8df1af54956"
+    }
+  },
+  "static_conclusion": {
+    "brake_package_present_locally": false,
+    "exact_albino_or_span_brake_cid_identified": false,
+    "exact_albino_or_span_frc_cid_identified": false,
+    "model_year_brake_calibration_family_publicly_identified": true,
+    "model_year_frc_package_family_already_present": true,
+    "priority_refinement": "The next acquisition target is specifically the 07B0 Brake/EPB application or exact live Brake identity, not an unspecified matched FRC package. The 2023 Corolla 0792 generation package family is already local but remains encoded.",
+    "tms051_sender_attribution_retracted": false
+  },
+  "title": "2023 Corolla FRC/Brake calibration acquisition correlation"
+}

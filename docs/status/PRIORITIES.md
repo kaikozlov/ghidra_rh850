@@ -117,19 +117,22 @@ Supply Change lookup, preserve the returned `resData`, and retain the `07B0`
 package if the service offers one.
 
 **Next software-analysis target:** TMS-051 closes what can be learned about B6
-sender attribution from the **current** CUW/P5 corpus. The immediate authenticated
-source family is Brake System Control / category-435 Brake/EPB, but the six local
-`0792` FRC CUWs are still opaque/high-entropy ReproMethod07 stored images and the
-current corpus contains no `07B0` Brake application. Do **not** spend another pass
-literal-searching those encoded FRC bodies for Tx descriptors or SecOC calls.
-Acquire a true-TSS3 CUW whose **`Node01/DiagID=07B0`** (category-435
-`ABS_P5`/Brake), ideally matched by vehicle/era to a `0792` FRC package, and decode
-both producer-side applications—or capture a synchronized stock-LTA session across
-those modules. Then recover the remaining **producer-side** contract: whether FRC,
-Brake, or another interface is the target originator/forwarder; the 32-byte B6 Tx
-builder; wall-clock cadence; CMAC/freshness ownership; authenticated-but-EPS-
-unconsumed byte values; and stock-source suppression. SECOC-071 now closes the
-EPS-side verification algorithm itself:
+sender attribution from the current decoded corpus; TMS-052 now narrows the
+acquisition blocker. Raw `T-0058-23.cuw` and `T-0060-23.cuw` exactly match Toyota
+23TC01's published 2023-Corolla FRC transitions `8646F1204300/4400 →
+8646F1204500`, so a generation/model-matched `0792` FRC family is **already
+owned**. Its runtime representation remains opaque. Toyota 24TC01 independently
+publishes the 2023-Corolla Brake/EPB family `F152612A5100/5200/5300 →
+F152612A5400`, while our 26-CUW corpus contains zero `07B0` packages and none of
+those Brake CIDs. Do **not** spend another pass searching for an unspecified 2023
+Corolla FRC package or literal-searching the encoded FRC bodies. Acquire/decode the
+category-435 **`Node01/DiagID=07B0`** Brake application—starting with live
+`7B0/F181`, `0105`, VIN and the 24TC01 CID family as search handles—and either
+decode/exactly identify the already-owned `0792` FRC family or capture synchronized
+stock-LTA traffic. Then recover the remaining **producer-side** contract: target
+originator/forwarder, 32-byte B6 Tx builder, wall-clock cadence, CMAC/freshness
+ownership, authenticated-but-EPS-unconsumed bytes, and stock-source suppression.
+SECOC-071 now closes the EPS-side verification algorithm itself:
 B6 freshness ID2/slot1 state, `00F`-anchored reset/message candidate window, retry
 scopes, `0x24` boundary behavior, trip-wrap reset, 36-byte CMAC input, ICU-S slot-4
 selection, result polarity, commit-before-delivery ordering, and separation from
@@ -147,8 +150,9 @@ state/key-use/ownership and stock cadence/topology.
 TMS-042 makes the same acquisition the highest-value reprogramming target too: modern GTS+ proves the FRC `ReproMethod=07` path
 uploads the package routine with DFI `0x01` / `10F5`, then the compact
 `DeltaReproData` with DFI `0x21` / `10F6`, while the host treats `.datx` as
-opaque bytes. A matching FRC boot/programming image is therefore the missing
-consumer that can explain both the routine/blob transform and the delta
+opaque bytes. TMS-052 proves the 23TC01 Corolla **package** is already local, so the
+missing consumer is now specifically FRC bootloader/programming-decoder firmware
+or an executable camera dump that can explain the routine/blob transform and delta
 representation; do not look for those handlers in the tracked Sienna/H EPS,
 where TMS-029 already closes standard ReproStd `10F5/10F6` as absent/rejected.
 The V18 Unified CID path now gives a concrete identity checklist for that

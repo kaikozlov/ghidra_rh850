@@ -1467,6 +1467,26 @@ paths = [
   "exploit/findings_coverage.json",
 ]
 
+[suite.corolla_2023_calibration_acquisition]
+tests = ["tests/verify_corolla_2023_calibration_acquisition.py"]
+requires_external = ["cuw_reference_corpus"]
+modes = ["local"]
+oracle = "independent_external_artifact"
+paths = [
+  "data/external/toyota_corolla_2023_calibration_campaigns.json",
+  "tools/techstream/build_corolla_2023_calibration_acquisition.py",
+  "tests/verify_corolla_2023_calibration_acquisition.py",
+  "data/generated/techstream_v18/corolla_2023_calibration_acquisition.json",
+  "data/generated/techstream_v18/cuw_frc_corpus.json",
+  "docs/tooling/techstream.md",
+  "docs/architecture/toyota-openpilot-porting-contract.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+  "exploit/findings_coverage.json",
+]
+
 [suite.techstream_searchcal]
 tests = ["tests/verify_techstream_searchcal.py"]
 requires_external = ["techstream_v18"]
