@@ -12,6 +12,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 RAW = REPO / "community/kai/camry-2026/raw-20260826"
 DEFAULT_OUT = REPO / "data/generated/camry_2026_tsk_baseline.json"
+BASELINE_SOURCE_NAMES = ("MANIFEST.txt", "can_oracle.ndjson.gz", "identity.json", "programming_probe.json", "xcp_probe.json")
 
 
 def sha256(path: Path) -> str:
@@ -193,8 +194,12 @@ def main() -> int:
       "boundary": "Vehicle/model attribution is operator context; F181, route, CAN, programming, and XCP facts below are direct tracked observations.",
     },
     "sources": {
-      p.name: {"path": str(p.relative_to(REPO)), "size": p.stat().st_size, "sha256": sha256(p)}
-      for p in sorted(RAW.iterdir()) if p.is_file()
+      name: {
+        "path": str((RAW / name).relative_to(REPO)),
+        "size": (RAW / name).stat().st_size,
+        "sha256": sha256(RAW / name),
+      }
+      for name in BASELINE_SOURCE_NAMES
     },
     "identity": {
       "f181_records": app_records,

@@ -64,3 +64,28 @@ The deterministic compact interpretation is
 
 Canonical interpretation lives in
 [`docs/variants/camry-2026-live-baseline.md`](../../../docs/variants/camry-2026-live-baseline.md).
+
+## NRTD P5/cruise follow-up
+
+A second stationary NRTD pass on 2026-08-26 closes two upstream module identities
+on the same normal-harness bus-1 route family:
+
+- FRC `0x792 -> 0x79A`: F181 `8646F3315000`, `0105=8646C06091`, serial
+  `TN69400026030404235J`, camera SWIN DID `1FFF=06000000000000000000`;
+- category-435 Brake/EPB `0x7B0 -> 0x7B8`: F181 `F152633K0000`,
+  `0105=8954147040`, serial `8954147040CFC1800985`.
+
+The Camry FRC accepts the current-GTS+ cruise Data-ID reads. Isolated MAIN,
+RES+, SET-, CANCEL, and following-distance inputs validate those diagnostics on
+the exact vehicle. A synchronized diagnostic/passive-CAN capture then joins the
+four momentary switches to bus-1 `0x0FE/32`; following-distance DID `0x1912`
+changes persistently and has `0x251/8` plus `0x5AF/32` as bounded CAN-state
+candidates pending a repeat/enum sweep.
+
+Brake DID `0x107E`, despite existing in the Corolla P5 diagnostic database,
+returns requestOutOfRange in both default and tested extended session on this
+Camry; `0x102F` is readable. This is an explicit cross-vehicle non-transfer.
+
+Raw files and hashes for this second evidence unit are pinned in
+`raw-20260826/NRTD_MANIFEST.txt`; deterministic interpretation is
+`data/generated/camry_2026_nrtd_p5.json`.

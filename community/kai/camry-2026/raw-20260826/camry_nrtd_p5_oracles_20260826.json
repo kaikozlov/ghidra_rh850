@@ -1,0 +1,60 @@
+{
+  "timestamp": 1787775849.6145406,
+  "elm327_param": 1,
+  "bus": 1,
+  "reads": [
+    {
+      "ecu": "FRC_P5",
+      "tx": "0x792",
+      "rx": "0x79A",
+      "did": "0x1901",
+      "status": "positive",
+      "hex": "0000000000000000",
+      "length": 8
+    },
+    {
+      "ecu": "FRC_P5",
+      "tx": "0x792",
+      "rx": "0x79A",
+      "did": "0x1905",
+      "status": "positive",
+      "hex": "8080",
+      "length": 2
+    },
+    {
+      "ecu": "FRC_P5",
+      "tx": "0x792",
+      "rx": "0x79A",
+      "did": "0x1906",
+      "status": "positive",
+      "hex": "e080e0008000",
+      "length": 6
+    },
+    {
+      "ecu": "FRC_P5",
+      "tx": "0x792",
+      "rx": "0x79A",
+      "did": "0x1912",
+      "status": "positive",
+      "hex": "02",
+      "length": 1
+    },
+    {
+      "ecu": "FRC_P5",
+      "tx": "0x792",
+      "rx": "0x79A",
+      "did": "0x1914",
+      "status": "positive",
+      "hex": "8000",
+      "length": 2
+    },
+    {
+      "ecu": "ABS_P5_Brake",
+      "tx": "0x7B0",
+      "rx": "0x7B8",
+      "did": "0x107E",
+      "status": "negative_or_timeout",
+      "error": "NegativeResponseError: READ_DATA_BY_IDENTIFIER - request out of range"
+    }
+  ]
+}

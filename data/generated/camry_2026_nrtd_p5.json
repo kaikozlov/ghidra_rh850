@@ -1,0 +1,491 @@
+{
+  "brake_read_only_oracles": {
+    "0x102F": {
+      "hex": "f700fd007c00a9000000",
+      "length": 10,
+      "status": "positive"
+    },
+    "0x107E_default": {
+      "error": "NegativeResponseError: READ_DATA_BY_IDENTIFIER - request out of range",
+      "status": "negative_or_timeout"
+    },
+    "0x107E_extended": {
+      "error": "NegativeResponseError: READ_DATA_BY_IDENTIFIER - request out of range",
+      "extended_session": "positive",
+      "returned_default": true,
+      "status": "negative_or_timeout"
+    },
+    "boundary": "The Corolla ABS_P5 0x107E monitor is not directly readable on this Camry Brake ECU in either tested default or extended session; 0x102F is readable. Do not transfer the 0x107E live-oracle assumption."
+  },
+  "frc_read_only_oracles": {
+    "0X1202": {
+      "hex": "febcf6d2",
+      "length": 4,
+      "status": "positive"
+    },
+    "0X1901": {
+      "hex": "0000000000000000",
+      "length": 8,
+      "status": "positive"
+    },
+    "0X1905": {
+      "hex": "8080",
+      "length": 2,
+      "status": "positive"
+    },
+    "0X1906": {
+      "hex": "e080e0008000",
+      "length": 6,
+      "status": "positive"
+    },
+    "0X1912": {
+      "hex": "02",
+      "length": 1,
+      "status": "positive"
+    },
+    "0X1914": {
+      "hex": "8000",
+      "length": 2,
+      "status": "positive"
+    },
+    "0X1918": {
+      "hex": "8000",
+      "length": 2,
+      "status": "positive"
+    },
+    "0X1928": {
+      "hex": "c0c0",
+      "length": 2,
+      "status": "positive"
+    }
+  },
+  "isolated_cruise_controls": {
+    "CANCEL": {
+      "sample_count": 372,
+      "transitions": [
+        {
+          "1905": "8080",
+          "1906": "e080e0008000",
+          "1912": "03",
+          "1914": "8000",
+          "seconds": 3e-06
+        },
+        {
+          "1905": "8080",
+          "1906": "e080e0208000",
+          "1912": "03",
+          "1914": "8000",
+          "seconds": 0.400493
+        },
+        {
+          "1905": "8080",
+          "1906": "e080e0008000",
+          "1912": "03",
+          "1914": "8000",
+          "seconds": 0.600623
+        }
+      ]
+    },
+    "DISTANCE": {
+      "sample_count": 372,
+      "transitions": [
+        {
+          "1905": "8080",
+          "1906": "e080e0008000",
+          "1912": "03",
+          "1914": "8000",
+          "seconds": 4e-06
+        },
+        {
+          "1905": "8080",
+          "1906": "e080e0008000",
+          "1912": "04",
+          "1914": "8000",
+          "seconds": 5.728599
+        }
+      ]
+    },
+    "MAIN": {
+      "sample_count": 373,
+      "transitions": [
+        {
+          "1905": "8080",
+          "1906": "e080e0008000",
+          "1912": "03",
+          "1914": "8000",
+          "seconds": 3e-06
+        },
+        {
+          "1905": "8080",
+          "1906": "e0c0e0008000",
+          "1912": "03",
+          "1914": "8000",
+          "seconds": 9.23457
+        },
+        {
+          "1905": "8080",
+          "1906": "e080e0008000",
+          "1912": "03",
+          "1914": "8000",
+          "seconds": 9.354161
+        }
+      ]
+    },
+    "RES+": {
+      "sample_count": 372,
+      "transitions": [
+        {
+          "1905": "8080",
+          "1906": "e080e0008000",
+          "1912": "03",
+          "1914": "8000",
+          "seconds": 4e-06
+        },
+        {
+          "1905": "8080",
+          "1906": "e080e0808000",
+          "1912": "03",
+          "1914": "8000",
+          "seconds": 4.761354
+        },
+        {
+          "1905": "8080",
+          "1906": "e0a0e0808000",
+          "1912": "03",
+          "1914": "8000",
+          "seconds": 4.802716
+        },
+        {
+          "1905": "8080",
+          "1906": "e080e0008000",
+          "1912": "03",
+          "1914": "8000",
+          "seconds": 4.961449
+        }
+      ]
+    },
+    "SET-": {
+      "sample_count": 372,
+      "transitions": [
+        {
+          "1905": "8080",
+          "1906": "e080e0008000",
+          "1912": "03",
+          "1914": "8000",
+          "seconds": 4e-06
+        },
+        {
+          "1905": "8080",
+          "1906": "e080e0408000",
+          "1912": "03",
+          "1914": "8000",
+          "seconds": 0.964079
+        },
+        {
+          "1905": "8080",
+          "1906": "e080e0008000",
+          "1912": "03",
+          "1914": "8000",
+          "seconds": 1.086858
+        }
+      ]
+    }
+  },
+  "module_identity": {
+    "Brake_EPB_category_435": {
+      "bus": 1,
+      "bus0_bus2_f181_timeout": true,
+      "ecu_part_0105": "8954147040",
+      "f181": "F152633K0000",
+      "f18c_serial": "8954147040CFC1800985",
+      "rx": "0x7B8",
+      "tx": "0x7B0"
+    },
+    "FRC_P5": {
+      "bus": 1,
+      "bus0_bus2_f181_timeout": true,
+      "ecu_part_0105": "8646C06091",
+      "f181": "8646F3315000",
+      "f18c_serial": "TN69400026030404235J",
+      "rx": "0x79A",
+      "swin_1fff": "06000000000000000000",
+      "tx": "0x792"
+    },
+    "elm327_param": 1
+  },
+  "production_boundary": "This NRTD pass closes identities and observation carriers only. It does not establish Camry B6 producer/signing ownership, authenticated steering control, cruise engagement while driving, or production safety policy.",
+  "schema": "camry-2026-nrtd-p5-v1",
+  "sources": {
+    "NRTD_MANIFEST.txt": {
+      "path": "community/kai/camry-2026/raw-20260826/NRTD_MANIFEST.txt",
+      "sha256": "1a284494187172f24f78a04905c0fb8727766dff22699d75edfe989c0a6c7d04",
+      "size": 3062
+    },
+    "camry_nrtd_brake_107e_extended_20260826.json": {
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_brake_107e_extended_20260826.json",
+      "sha256": "3475f1df52cf69fc56fea51cdaa85cc00797cd720e3583e29d0aaa7b1b80af2c",
+      "size": 281
+    },
+    "camry_nrtd_cruise_CANCEL_20260826.json": {
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_CANCEL_20260826.json",
+      "sha256": "432fc309de02bfdd4f5927af6928382cf0f0617f68258484eabac05f3fb06111",
+      "size": 35884
+    },
+    "camry_nrtd_cruise_DISTANCE_20260826.json": {
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_DISTANCE_20260826.json",
+      "sha256": "024f1df8b783da1b4d1485b824bf3092ea412c112efb2f12ad2ebdbf4cfddcdb",
+      "size": 35862
+    },
+    "camry_nrtd_cruise_MAIN_20260826.json": {
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_MAIN_20260826.json",
+      "sha256": "ca7c3911e402a763f23af00c92f449c75afa8c8b0e94b10293b710aad95d337b",
+      "size": 35980
+    },
+    "camry_nrtd_cruise_RESPLUS_20260826.json": {
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_RESPLUS_20260826.json",
+      "sha256": "1d176f20e9c2b11e46ebe6d069c1d653dd3026a3f4895dde85730f9742e1ce07",
+      "size": 35882
+    },
+    "camry_nrtd_cruise_SETMINUS_20260826.json": {
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_SETMINUS_20260826.json",
+      "sha256": "f9ea74fd5846222d38884183c12eb19ec20fd80c6730f21dc1bcd5a377efa9aa",
+      "size": 35881
+    },
+    "camry_nrtd_cruise_buttons_20260826.json": {
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_buttons_20260826.json",
+      "sha256": "1977d05439f632017369d761641726536b635cc95b66cd5d5079af8096f4877e",
+      "size": 72108
+    },
+    "camry_nrtd_cruise_can_sync_20260826.json.gz": {
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_can_sync_20260826.json.gz",
+      "sha256": "083435105745d928ceea5dea2a614b7a1fbd32341ba4c94987c73ef6287e87fa",
+      "size": 1103765
+    },
+    "camry_nrtd_module_identity_20260826.json": {
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_module_identity_20260826.json",
+      "sha256": "0ed09e5abec3a555d9e8b26c03a740747f04675859de8d12f49c8afb0eb53bdd",
+      "size": 5398
+    },
+    "camry_nrtd_p5_oracles_20260826.json": {
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_p5_oracles_20260826.json",
+      "sha256": "17d9870cc65f71c9890389a22fa3f0f9561ec3d4f2679cc9e61076ed6977bcba",
+      "size": 1179
+    },
+    "camry_nrtd_p5_oracles_extra_20260826.json": {
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_p5_oracles_extra_20260826.json",
+      "sha256": "4a59d82a2f027b5d6413bf6608905503975afa40ce87dfa350b36e8459da62f6",
+      "size": 586
+    }
+  },
+  "synchronized_capture": {
+    "0x0FE_momentary_switch_carrier": {
+      "address": "0x0FE",
+      "baseline_B3_B4_B6_B7": {
+        "B3": 63,
+        "B4": 0,
+        "B6": 195,
+        "B7": 98
+      },
+      "bus": 1,
+      "dlc": 32,
+      "events": {
+        "CANCEL": {
+          "baseline_B3_B4_B6_B7": {
+            "B3": 63,
+            "B4": 0,
+            "B6": 195,
+            "B7": 98
+          },
+          "event_B3_B4_B6_B7": {
+            "B3": 63,
+            "B4": 64,
+            "B6": 195,
+            "B7": 66
+          },
+          "oracle_end_s": 15.424571,
+          "oracle_start_s": 15.285071,
+          "xor": {
+            "B3": 0,
+            "B4": 64,
+            "B6": 0,
+            "B7": 32
+          }
+        },
+        "MAIN": {
+          "baseline_B3_B4_B6_B7": {
+            "B3": 63,
+            "B4": 0,
+            "B6": 195,
+            "B7": 98
+          },
+          "event_B3_B4_B6_B7": {
+            "B3": 63,
+            "B4": 0,
+            "B6": 195,
+            "B7": 102
+          },
+          "oracle_end_s": 10.084373,
+          "oracle_start_s": 9.884382,
+          "xor": {
+            "B3": 0,
+            "B4": 0,
+            "B6": 0,
+            "B7": 4
+          }
+        },
+        "RES+": {
+          "baseline_B3_B4_B6_B7": {
+            "B3": 63,
+            "B4": 0,
+            "B6": 195,
+            "B7": 98
+          },
+          "event_B3_B4_B6_B7": {
+            "B3": 191,
+            "B4": 0,
+            "B6": 67,
+            "B7": 98
+          },
+          "oracle_end_s": 11.884811,
+          "oracle_start_s": 11.7243,
+          "xor": {
+            "B3": 128,
+            "B4": 0,
+            "B6": 128,
+            "B7": 0
+          }
+        },
+        "SET-": {
+          "baseline_B3_B4_B6_B7": {
+            "B3": 63,
+            "B4": 0,
+            "B6": 195,
+            "B7": 98
+          },
+          "event_B3_B4_B6_B7": {
+            "B3": 63,
+            "B4": 128,
+            "B6": 195,
+            "B7": 34
+          },
+          "oracle_end_s": 13.784461,
+          "oracle_start_s": 13.624379,
+          "xor": {
+            "B3": 0,
+            "B4": 128,
+            "B6": 0,
+            "B7": 64
+          }
+        }
+      },
+      "interpretation": "The same bus1 0x0FE/32 data tuple changes and returns around each FRC 0x1906 momentary MAIN/RES+/SET-/CANCEL oracle event. Counter/integrity bytes elsewhere in the frame continue independently; the listed data-byte changes are the direct dynamic join.",
+      "rate_hz": 33.189
+    },
+    "can_frame_count": 90932,
+    "distance_state": {
+      "candidate_can_carriers": {
+        "0x251/8": {
+          "address": "0x251",
+          "after": 40,
+          "before": 136,
+          "boundary": "Temporal/state correlation candidate only; producer and Toyota signal name are not assigned from this capture alone.",
+          "bus": 1,
+          "byte_index": 5,
+          "change_time_s": 16.885741,
+          "dlc": 8,
+          "latency_from_1912_change_ms": 11.109,
+          "payload_after": "a00000488028a080",
+          "payload_before": "a00000488088a080",
+          "rate_hz": 1.076,
+          "xor": 160
+        },
+        "0x5AF/32": {
+          "address": "0x5AF",
+          "after": 228,
+          "before": 240,
+          "boundary": "Temporal/state correlation candidate only; producer and Toyota signal name are not assigned from this capture alone.",
+          "bus": 1,
+          "byte_index": 24,
+          "change_time_s": 16.886393,
+          "dlc": 32,
+          "latency_from_1912_change_ms": 11.76,
+          "payload_after": "03f80066800cf3650000fe0000000000008000646400000fe4fe000000000000",
+          "payload_before": "03f80066800cf3650000fe0000000000008000646400000ff0fe000000000000",
+          "rate_hz": 5.248,
+          "xor": 20
+        }
+      },
+      "frc_did": "0x1912",
+      "interpretation": "DID 0x1912 is directly validated as a persistent following-distance state by isolated operator input. 0x251 and 0x5AF change within ~12 ms in the synchronized capture and remain candidate ordinary-CAN state carriers pending an independent repeat/enum sweep.",
+      "isolated_transition": "03->04",
+      "synchronized_change_time_s": 16.874632,
+      "synchronized_transition": "04->01"
+    },
+    "event_times_s": {
+      "CANCEL": 15.285071,
+      "DISTANCE": 16.874632,
+      "MAIN": 9.884382,
+      "RES+": 11.7243,
+      "SET-": 13.624379
+    },
+    "oracle_sample_count": 1742,
+    "oracle_transitions": [
+      {
+        "1906": "e080e0008000",
+        "1912": "04",
+        "seconds": 3.8e-05
+      },
+      {
+        "1906": "e0c0e0008000",
+        "1912": "04",
+        "seconds": 9.884382
+      },
+      {
+        "1906": "e080e0008000",
+        "1912": "04",
+        "seconds": 10.084373
+      },
+      {
+        "1906": "e080e0808000",
+        "1912": "04",
+        "seconds": 11.7243
+      },
+      {
+        "1906": "e0a0e0808000",
+        "1912": "04",
+        "seconds": 11.784332
+      },
+      {
+        "1906": "e080e0008000",
+        "1912": "04",
+        "seconds": 11.884811
+      },
+      {
+        "1906": "e080e0408000",
+        "1912": "04",
+        "seconds": 13.624379
+      },
+      {
+        "1906": "e080e0008000",
+        "1912": "04",
+        "seconds": 13.784461
+      },
+      {
+        "1906": "e080e0208000",
+        "1912": "04",
+        "seconds": 15.285071
+      },
+      {
+        "1906": "e080e0008000",
+        "1912": "04",
+        "seconds": 15.424571
+      },
+      {
+        "1906": "e080e0008000",
+        "1912": "01",
+        "seconds": 16.874632
+      }
+    ]
+  },
+  "vehicle_state": "Not Ready to Drive; stationary; operator-triggered controls only"
+}

@@ -1,0 +1,12 @@
+{
+  "timestamp": 1787776215.9201896,
+  "bus": 1,
+  "tx": "0x7B0",
+  "rx": "0x7B8",
+  "extended": "positive",
+  "did_107e": {
+    "status": "negative_or_timeout",
+    "error": "NegativeResponseError: READ_DATA_BY_IDENTIFIER - request out of range"
+  },
+  "returned_default": true
+}

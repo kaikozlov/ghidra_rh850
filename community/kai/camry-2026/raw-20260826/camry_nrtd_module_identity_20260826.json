@@ -1,0 +1,189 @@
+{
+  "timestamp": 1787775818.4579449,
+  "elm327_param": 1,
+  "targets": [
+    {
+      "name": "FRC_P5_candidate",
+      "tx": 1938,
+      "rx": 1946,
+      "dids": [
+        61825,
+        61836,
+        261,
+        8191
+      ],
+      "routes": [
+        {
+          "bus": 1,
+          "reads": [
+            {
+              "did": "0xF181",
+              "status": "positive",
+              "hex": "0138363436463333313530303000000000",
+              "ascii": ".8646F3315000...."
+            },
+            {
+              "did": "0xF18C",
+              "status": "positive",
+              "hex": "544e36393430303032363033303430343233354a",
+              "ascii": "TN69400026030404235J"
+            },
+            {
+              "did": "0x0105",
+              "status": "positive",
+              "hex": "383634364330363039310000",
+              "ascii": "8646C06091.."
+            },
+            {
+              "did": "0x1FFF",
+              "status": "positive",
+              "hex": "3036303030303030303030303030303030303030",
+              "ascii": "06000000000000000000"
+            }
+          ]
+        },
+        {
+          "bus": 0,
+          "reads": [
+            {
+              "did": "0xF181",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            },
+            {
+              "did": "0xF18C",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            },
+            {
+              "did": "0x0105",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            },
+            {
+              "did": "0x1FFF",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            }
+          ]
+        },
+        {
+          "bus": 2,
+          "reads": [
+            {
+              "did": "0xF181",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            },
+            {
+              "did": "0xF18C",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            },
+            {
+              "did": "0x0105",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            },
+            {
+              "did": "0x1FFF",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ABS_P5_Brake_candidate",
+      "tx": 1968,
+      "rx": 1976,
+      "dids": [
+        61825,
+        61836,
+        261,
+        61831
+      ],
+      "routes": [
+        {
+          "bus": 1,
+          "reads": [
+            {
+              "did": "0xF181",
+              "status": "positive",
+              "hex": "01463135323633334b3030303000000000",
+              "ascii": ".F152633K0000...."
+            },
+            {
+              "did": "0xF18C",
+              "status": "positive",
+              "hex": "3839353431343730343043464331383030393835",
+              "ascii": "8954147040CFC1800985"
+            },
+            {
+              "did": "0x0105",
+              "status": "positive",
+              "hex": "383935343134373034300000",
+              "ascii": "8954147040.."
+            },
+            {
+              "did": "0xF187",
+              "status": "negative_or_timeout",
+              "error": "NegativeResponseError: READ_DATA_BY_IDENTIFIER - request out of range"
+            }
+          ]
+        },
+        {
+          "bus": 0,
+          "reads": [
+            {
+              "did": "0xF181",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            },
+            {
+              "did": "0xF18C",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            },
+            {
+              "did": "0x0105",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            },
+            {
+              "did": "0xF187",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            }
+          ]
+        },
+        {
+          "bus": 2,
+          "reads": [
+            {
+              "did": "0xF181",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            },
+            {
+              "did": "0xF18C",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            },
+            {
+              "did": "0x0105",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            },
+            {
+              "did": "0xF187",
+              "status": "negative_or_timeout",
+              "error": "MessageTimeoutError: timeout waiting for response"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

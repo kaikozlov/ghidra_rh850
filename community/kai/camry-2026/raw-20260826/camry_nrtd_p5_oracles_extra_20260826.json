@@ -1,0 +1,33 @@
+{
+  "timestamp": 1787775929.5463777,
+  "reads": [
+    {
+      "ecu": "FRC_P5",
+      "did": "0x1202",
+      "status": "positive",
+      "hex": "febcf6d2",
+      "length": 4
+    },
+    {
+      "ecu": "FRC_P5",
+      "did": "0x1918",
+      "status": "positive",
+      "hex": "8000",
+      "length": 2
+    },
+    {
+      "ecu": "FRC_P5",
+      "did": "0x1928",
+      "status": "positive",
+      "hex": "c0c0",
+      "length": 2
+    },
+    {
+      "ecu": "ABS_P5_Brake",
+      "did": "0x102F",
+      "status": "positive",
+      "hex": "f700fd007c00a9000000",
+      "length": 10
+    }
+  ]
+}

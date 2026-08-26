@@ -758,6 +758,102 @@
       "sha256": "b8d96ae5cb97f18d1138196e2a0cb95de5938ec0ff7e512ee9f752f86645e273",
       "provenance": "Privacy-minimized exact-value snapshot of TSK /api/xcp-observer-status after the read-only CONNECT probe.",
       "notes": "No usable 0x7F8 response on the identified EPS route; route/session negative only."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/NRTD_MANIFEST.txt",
+      "size": 3062,
+      "sha256": "1a284494187172f24f78a04905c0fb8727766dff22699d75edfe989c0a6c7d04",
+      "provenance": "Maintainer-generated provenance manifest pinning exact sizes/SHA-256 values and the observation-only NRTD operating boundary for the second Camry evidence unit.",
+      "notes": "Separate from the earlier READY/EPS MANIFEST.txt so each evidence unit remains independently reproducible."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_module_identity_20260826.json",
+      "size": 5398,
+      "sha256": "0ed09e5abec3a555d9e8b26c03a740747f04675859de8d12f49c8afb0eb53bdd",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_p5_oracles_20260826.json",
+      "size": 1179,
+      "sha256": "17d9870cc65f71c9890389a22fa3f0f9561ec3d4f2679cc9e61076ed6977bcba",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_p5_oracles_extra_20260826.json",
+      "size": 586,
+      "sha256": "4a59d82a2f027b5d6413bf6608905503975afa40ce87dfa350b36e8459da62f6",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_brake_107e_extended_20260826.json",
+      "size": 281,
+      "sha256": "3475f1df52cf69fc56fea51cdaa85cc00797cd720e3583e29d0aaa7b1b80af2c",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_buttons_20260826.json",
+      "size": 72108,
+      "sha256": "1977d05439f632017369d761641726536b635cc95b66cd5d5079af8096f4877e",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_MAIN_20260826.json",
+      "size": 35980,
+      "sha256": "ca7c3911e402a763f23af00c92f449c75afa8c8b0e94b10293b710aad95d337b",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_RESPLUS_20260826.json",
+      "size": 35882,
+      "sha256": "1d176f20e9c2b11e46ebe6d069c1d653dd3026a3f4895dde85730f9742e1ce07",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_SETMINUS_20260826.json",
+      "size": 35881,
+      "sha256": "f9ea74fd5846222d38884183c12eb19ec20fd80c6730f21dc1bcd5a377efa9aa",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_CANCEL_20260826.json",
+      "size": 35884,
+      "sha256": "432fc309de02bfdd4f5927af6928382cf0f0617f68258484eabac05f3fb06111",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_DISTANCE_20260826.json",
+      "size": 35862,
+      "sha256": "024f1df8b783da1b4d1485b824bf3092ea412c112efb2f12ad2ebdbf4cfddcdb",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_can_sync_20260826.json.gz",
+      "size": 1103765,
+      "sha256": "083435105745d928ceea5dea2a614b7a1fbd32341ba4c94987c73ef6287e87fa",
+      "provenance": "Deterministic gzip (mtime=0) of the exact single-Panda synchronized FRC diagnostic-oracle plus passive-CAN capture from the maintainer-operated vehicle.",
+      "notes": "Stationary NRTD; operator pressed MAIN, RES+, SET-, CANCEL, and following-distance sequentially. No vehicle-control transmission."
     }
   ],
   "public_routes": [

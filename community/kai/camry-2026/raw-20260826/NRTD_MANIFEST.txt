@@ -1,0 +1,67 @@
+Maintainer-operated 2026 Toyota Camry NRTD P5/cruise evidence
+Captured 2026-08-26
+
+The vehicle was stationary and Not Ready to Drive. Operations were diagnostic reads,
+bounded diagnostic-session selection for the 0x107E falsification check, and passive CAN
+observation. No SecurityAccess key, RoutineControl start, write, reset, download, or
+vehicle-control transmission was performed.
+
+This manifest is separate from MANIFEST.txt so the earlier READY/EPS baseline remains a
+stable, independently reproducible evidence unit.
+
+camry_nrtd_module_identity_20260826.json
+  size: 5398
+  sha256: 0ed09e5abec3a555d9e8b26c03a740747f04675859de8d12f49c8afb0eb53bdd
+  operation: read-only direct FRC 0x792/0x79A and Brake/EPB 0x7B0/0x7B8 identity/DID sweep across logical buses 1/0/2
+
+camry_nrtd_p5_oracles_20260826.json
+  size: 1179
+  sha256: 17d9870cc65f71c9890389a22fa3f0f9561ec3d4f2679cc9e61076ed6977bcba
+  operation: read-only FRC cruise-oracle baseline plus Brake DID 0x107E default-session probe
+
+camry_nrtd_p5_oracles_extra_20260826.json
+  size: 586
+  sha256: 4a59d82a2f027b5d6413bf6608905503975afa40ce87dfa350b36e8459da62f6
+  operation: read-only FRC installation/brake-control monitor reads plus Brake 0x102F read
+
+camry_nrtd_brake_107e_extended_20260826.json
+  size: 281
+  sha256: 3475f1df52cf69fc56fea51cdaa85cc00797cd720e3583e29d0aaa7b1b80af2c
+  operation: Brake EXTENDED-session 0x107E read attempt; requestOutOfRange; returned to DEFAULT
+
+camry_nrtd_cruise_buttons_20260826.json
+  size: 72108
+  sha256: 1977d05439f632017369d761641726536b635cc95b66cd5d5079af8096f4877e
+  operation: preliminary mixed NRTD cruise-button oracle capture; retained for provenance, not sole semantic attribution
+
+camry_nrtd_cruise_MAIN_20260826.json
+  size: 35980
+  sha256: ca7c3911e402a763f23af00c92f449c75afa8c8b0e94b10293b710aad95d337b
+  operation: isolated operator MAIN-button FRC oracle capture
+
+camry_nrtd_cruise_RESPLUS_20260826.json
+  size: 35882
+  sha256: 1d176f20e9c2b11e46ebe6d069c1d653dd3026a3f4895dde85730f9742e1ce07
+  operation: isolated operator RES+ FRC oracle capture
+
+camry_nrtd_cruise_SETMINUS_20260826.json
+  size: 35881
+  sha256: f9ea74fd5846222d38884183c12eb19ec20fd80c6730f21dc1bcd5a377efa9aa
+  operation: isolated operator SET- FRC oracle capture
+
+camry_nrtd_cruise_CANCEL_20260826.json
+  size: 35884
+  sha256: 432fc309de02bfdd4f5927af6928382cf0f0617f68258484eabac05f3fb06111
+  operation: isolated operator CANCEL FRC oracle capture
+
+camry_nrtd_cruise_DISTANCE_20260826.json
+  size: 35862
+  sha256: 024f1df8b783da1b4d1485b824bf3092ea412c112efb2f12ad2ebdbf4cfddcdb
+  operation: isolated operator following-distance FRC oracle capture
+
+camry_nrtd_cruise_can_sync_20260826.json.gz
+  compressed size: 1103765
+  compressed sha256: 083435105745d928ceea5dea2a614b7a1fbd32341ba4c94987c73ef6287e87fa
+  uncompressed size: 11845668
+  uncompressed sha256: 05c3109b04c722bb700e395e3ba721e700c38f266323576ebb386bcd6e830832
+  operation: single-Panda synchronized read-only FRC 0x1906/0x1912 oracle + passive all-CAN capture during MAIN/RES+/SET-/CANCEL/distance sequence
