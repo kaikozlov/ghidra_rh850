@@ -131,3 +131,30 @@ automatic cross-variant transfer.
 Exact source identities and acquisition boundaries are pinned in
 `raw-20260826/CODEFLASH_MANIFEST.txt`. Target-native static interpretation is
 `data/generated/camry_8965F3307000_codeflash.json`.
+
+## Exact SecOC DataFlash/RAM recovery follow-up
+
+A later NRTD pass used the exact-target authenticated range-reader path to retain
+physical DataFlash plus complete PE1 LocalRAM and GlobalRAM snapshots. The
+self-contained evidence unit is `raw-20260826/secoc-recovery/`; its manifest pins
+the exact payloads, acquisition runs, coverage maps, CAN oracle, and offline scan
+provenance.
+
+The DataFlash dump has SHA-256 `231fbdde4ef317931d8f1ff20ff131650f7d773c124a179b0ae3dc98bf8e4432`.
+Object 15 retains the known triplicate geometry but has zero valid copies, and
+all three 16-byte key-field locations (`FF206E14/FF206D14/FF206C14`) are zero.
+The LocalRAM and GlobalRAM reads both completed at 100% word coverage. LocalRAM
+also proves the old `FEBE6E34` legacy key-table interpretation is inapplicable to
+F33: none of its fourteen projected records satisfies the old checksum, while
+the exact application-SA root appears once at `FEBF7B80` as expected for this
+family. The LocalRAM payload necessarily clobbers `FEBF0000..FEBF0FFF`; that
+span is excluded from recovery conclusions.
+
+Against the retained healthy READY oracle, the generalized matcher exhaustively
+found zero candidate windows in all three stores: 32,753 DataFlash windows,
+126,946 eligible non-clobbered LocalRAM windows, and 65,521 GlobalRAM windows.
+This is a CPU-visible-store negative, not an ICU-S-slot negative: exact F33
+firmware and live protected `0x0D7` traffic independently establish an active
+slot-4 command-7 verification domain. Compact deterministic interpretation is
+`data/generated/camry_8965F3307000_secoc_recovery.json`; canonical conclusions
+are in `docs/variants/camry-2026-live-baseline.md` §10.

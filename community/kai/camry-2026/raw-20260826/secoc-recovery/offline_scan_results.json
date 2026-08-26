@@ -1,0 +1,77 @@
+{
+  "matcher": {
+    "commit": "2bfbef37fddbdf4e499a4adc55005474f3c5ffcf",
+    "module": "tsk.lib.matcher.find_key",
+    "note": "Raw key bytes are not retained. Each scan tested every eligible sliding 16-byte window against the parsed Camry CAN oracle; PE1 LocalRAM excludes the acquisition-clobbered FEBF0000..FEBF0FFF span.",
+    "repository": "kai-openpilot"
+  },
+  "oracle": {
+    "compressed_sha256": "e977f5f0dc3d86786af8ae576d785af46c8facc8e186c4598f692a38ecb95b73",
+    "malformed": 0,
+    "protected_sample_caps": {
+      "bus1:0x090": 250,
+      "bus1:0x0d7": 250,
+      "bus1:0x116": 250,
+      "bus1:0x24d": 63
+    },
+    "protected_samples": 813,
+    "sync_samples": 208,
+    "uncompressed_sha256": "823622ed360ee1b2c2c156c6196a17d001c845f4d53fbc56922a338a4a46e33c",
+    "uncompressed_size": 37552829
+  },
+  "scans": {
+    "dataflash": {
+      "base": "0xFF200000",
+      "coverage_known": false,
+      "domain": "unverified",
+      "dump_partial": false,
+      "malformed": 0,
+      "matches": 0,
+      "protected": "0/813",
+      "sha256": "231fbdde4ef317931d8f1ff20ff131650f7d773c124a179b0ae3dc98bf8e4432",
+      "size": 32768,
+      "status": "not_found",
+      "survivors": 0,
+      "sync": "0/208",
+      "windows_eligible": 32753,
+      "windows_scanned": 32753
+    },
+    "global_ram": {
+      "base": "0xFEEF8000",
+      "coverage_known": false,
+      "domain": "unverified",
+      "dump_partial": false,
+      "malformed": 0,
+      "matches": 0,
+      "protected": "0/813",
+      "sha256": "53c8370237c681d4105c513be5096461ac735ffcb9577995c7203216165006a4",
+      "size": 65536,
+      "status": "not_found",
+      "survivors": 0,
+      "sync": "0/208",
+      "windows_eligible": 65521,
+      "windows_scanned": 65521
+    },
+    "local_ram_pe1": {
+      "base": "0xFEBE0000",
+      "coverage_known": true,
+      "domain": "unverified",
+      "dump_partial": false,
+      "excluded_clobber": [
+        "0xFEBF0000",
+        "0xFEBF1000"
+      ],
+      "malformed": 0,
+      "matches": 0,
+      "protected": "0/813",
+      "sha256": "0ddef478b15bcf3241c56573463eda25ba018081629daf0042fcae1204c435a7",
+      "size": 131072,
+      "status": "not_found",
+      "survivors": 0,
+      "sync": "0/208",
+      "windows_eligible": 126946,
+      "windows_scanned": 131057
+    }
+  },
+  "schema": "camry-8965f3307000-secoc-offline-scan-v1"
+}

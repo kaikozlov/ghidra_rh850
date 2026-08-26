@@ -1,0 +1,101 @@
+Maintainer-operated 2026 Toyota Camry SecOC recovery evidence
+Captured/analyzed 2026-08-26
+
+Exact target: EPS F181 8965F3307000 / 8A3113303100; bus1 0x7A1 -> 0x7A9; ELM327 parameter 1.
+
+This unit preserves the exact physical DataFlash and post-handoff CPU-visible RAM
+reads used to test plaintext SecOC-key recovery. The range acquisitions are read-only
+memory payloads, but they enter PROGRAMMING, perform boot SecurityAccess, upload an
+authenticated 4-KiB FEBF0000 payload, pass RID 0x10F0, and invoke the FF00 callback.
+Both RAM runs required bus1 0x51E Ready=0 before PROGRAMMING.
+
+dataflash/dump_ff200000_ff208000.bin
+  size: 32768
+  sha256: 231fbdde4ef317931d8f1ff20ff131650f7d773c124a179b0ae3dc98bf8e4432
+  origin: /cache/tsk/dataflash/dump_ff200000_ff208000.bin
+
+can_oracle.ndjson.gz
+  size: 3248546
+  sha256: e977f5f0dc3d86786af8ae576d785af46c8facc8e186c4598f692a38ecb95b73
+  origin: /cache/tsk/can-messages/can_oracle.ndjson (deterministically gzip-compressed for retention)
+
+ram/local_ram_pe1.bin
+  size: 131072
+  sha256: 0ddef478b15bcf3241c56573463eda25ba018081629daf0042fcae1204c435a7
+  origin: /cache/tsk/camry-ram/camry_8965F3307000_local_ram_pe1_20260826T234203Z.bin
+
+ram/local_ram_pe1.coverage.bin
+  size: 32768
+  sha256: bfa5a24faa8ddf576edcc46f4f05e2459ee4a383b8dc14ff7dba0056b9c59ed0
+  origin: /cache/tsk/camry-ram/camry_8965F3307000_local_ram_pe1_20260826T234203Z.coverage.bin
+
+ram/local_ram_pe1.run.json
+  size: 11428
+  sha256: ccd6335b2d6f02dcb4dbd76dcb7f436493e34204dbcea7beec509efa3e326d57
+  origin: /cache/tsk/camry-ram/camry_8965F3307000_local_ram_pe1_20260826T234203Z.run.json
+
+ram/global_ram.bin
+  size: 65536
+  sha256: 53c8370237c681d4105c513be5096461ac735ffcb9577995c7203216165006a4
+  origin: /cache/tsk/camry-ram/camry_8965F3307000_global_ram_20260826T234457Z.bin
+
+ram/global_ram.coverage.bin
+  size: 16384
+  sha256: 111ce3c2a38d83a2e4706bde4abddd509d7f8248116c6832b06745bdc349e09f
+  origin: /cache/tsk/camry-ram/camry_8965F3307000_global_ram_20260826T234457Z.coverage.bin
+
+ram/global_ram.run.json
+  size: 11331
+  sha256: 0474343a39270fa6dfebd267cbc391ce9b6075c8343beafbf7fb1e6ceed52961
+  origin: /cache/tsk/camry-ram/camry_8965F3307000_global_ram_20260826T234457Z.run.json
+
+payloads/payload_dataflash_ff200000_ff208000.bin
+  size: 4096
+  sha256: d48988366b5e6d2ddd7438caca5e6f6f02daba9b650263c323a2ffd770a06e34
+  origin: kai-openpilot tsk/lib/payload_dataflash_ff200000_ff208000.bin
+
+payloads/payload_local_ram_pe1_febe0000_fec00000.bin
+  size: 4096
+  sha256: fbb1f5bd352c3f0bf416d6b1ef6a7696f97cad2b9f49570ca859207f3269e44f
+  origin: calvinpark-openpilot dump branch tsk/lib/payload_local_ram_pe1_febe0000_fec00000.bin
+
+payloads/payload_global_ram_feef8000_fef08000.bin
+  size: 4096
+  sha256: 43d00fdaf790c6deb230d3a4e7b8f8bd17e077a100fa53ebb194532f55c510fd
+  origin: calvinpark-openpilot dump branch tsk/lib/payload_global_ram_feef8000_fef08000.bin
+
+camry_ram_dump.py
+  size: 18962
+  sha256: ac40975761b1a13ca17cdf85131f69fb968934a75de9a3cfe313a231df87cbfe
+  origin: exact-target acquisition script deployed to /cache/tsk/camry-ram-tool/camry_ram_dump.py
+
+offline_scan_results.json
+  size: 2352
+  sha256: 431423358aa3387651f7b71d607256669d45f413fd2c3815b77f0de4151566d7
+  origin: offline matcher result; kai-openpilot commit 2bfbef37fddbdf4e499a4adc55005474f3c5ffcf
+
+CAN oracle uncompressed identity:
+  size: 37552829
+  sha256: 823622ed360ee1b2c2c156c6196a17d001c845f4d53fbc56922a338a4a46e33c
+
+Acquisition boundaries:
+  - DataFlash physical range is FF200000..FF207FFF (32 KiB).
+  - PE1 LocalRAM physical/read view is FEBE0000..FEBFFFFF (128 KiB).
+  - The LocalRAM payload itself occupies/clobbers FEBF0000..FEBF0FFF before the read;
+    those 4096 bytes are excluded from key-search conclusions.
+  - GlobalRAM physical/read range is FEEF8000..FEF07FFF (64 KiB).
+  - LocalRAM and GlobalRAM are post application->boot-handoff snapshots, not READY-mode
+    application-live snapshots. A transient application-only CPU-visible value could be
+    cleared before these reads.
+  - No CPU-visible match is not evidence that ICU-S slot 4 is empty; exact F33 firmware
+    and live protected 0x0D7 traffic independently prove the slot-4 verification domain.
+
+Offline scan provenance:
+  kai-openpilot commit 2bfbef37fddbdf4e499a4adc55005474f3c5ffcf
+  tsk.lib.matcher.find_key
+  oracle parser result: 208 sync + 813 protected samples, malformed=0
+  DataFlash: 32753/32753 eligible windows, zero survivors
+  PE1 LocalRAM: 126946 eligible windows after clobber exclusion, zero survivors
+  GlobalRAM: 65521/65521 eligible windows, zero survivors
+
+Raw key bytes are not printed or retained in the scan result. No candidate survived.

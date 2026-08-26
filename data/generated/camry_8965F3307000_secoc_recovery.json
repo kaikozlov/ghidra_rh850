@@ -1,0 +1,462 @@
+{
+  "boundaries": [
+    "The exhaustive scan result is retained tool output bound to exact input hashes; core verification does not rerun the expensive FD SecOC scan.",
+    "PE1 LocalRAM FEBF0000..FEBF0FFF is acquisition-clobbered by the authenticated 4 KiB payload and is excluded from the retained matcher scan.",
+    "The RAM snapshots are post-application-to-boot-handoff observations. A transient application-only CPU-visible value could be cleared before these reads.",
+    "No CPU-visible match does not imply an empty ICU-S slot 4: target-native firmware and live 0x0D7 traffic independently prove slot-4 command-7 verification is active."
+  ],
+  "dataflash": {
+    "object15": {
+      "all_decoded_copies_equal": false,
+      "copy_addresses": [
+        "0xFF206E00",
+        "0xFF206D00",
+        "0xFF206C00"
+      ],
+      "interpretation": "Object 15 retains the known triplicate geometry but has zero valid copies; all three 16-byte second/key-field locations are raw zero bytes.",
+      "key_field_addresses": [
+        "0xFF206E14",
+        "0xFF206D14",
+        "0xFF206C14"
+      ],
+      "key_fields_zero": [
+        true,
+        true,
+        true
+      ],
+      "valid_consensus": false,
+      "valid_copy_count": 0
+    },
+    "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/dataflash/dump_ff200000_ff208000.bin",
+    "sha256": "231fbdde4ef317931d8f1ff20ff131650f7d773c124a179b0ae3dc98bf8e4432",
+    "size": 32768,
+    "statistics": {
+      "bytes": 32768,
+      "distinct_byte_values": 247,
+      "ff_bytes": 8846,
+      "zero_bytes": 20340
+    }
+  },
+  "global_ram": {
+    "acquisition": {
+      "application_f181_exact": true,
+      "boot_f181_exact": true,
+      "clobber_range": null,
+      "conflicts": 0,
+      "coverage": {
+        "all_words_covered": true,
+        "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/ram/global_ram.coverage.bin",
+        "sha256": "111ce3c2a38d83a2e4706bde4abddd509d7f8248116c6832b06745bdc349e09f",
+        "size": 16384
+      },
+      "coverage_percent": 100.0,
+      "dump_sha256": "53c8370237c681d4105c513be5096461ac735ffcb9577995c7203216165006a4",
+      "duplicate_words": 0,
+      "expected_profile": "global_ram",
+      "expected_words": 16384,
+      "ff00_sent": true,
+      "nrt_ready_values": [
+        0
+      ],
+      "old_stack_zero_dids": true,
+      "profile": "global_ram",
+      "range": [
+        "0xfeef8000",
+        "0xfef08000"
+      ],
+      "run": {
+        "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/ram/global_ram.run.json",
+        "sha256": "0474343a39270fa6dfebd267cbc391ce9b6075c8343beafbf7fb1e6ceed52961",
+        "size": 11331
+      },
+      "schema": "camry-8965f3307000-ram-acquisition-v1",
+      "spi_errors": 0,
+      "status": "complete",
+      "unique_words": 16384,
+      "verify_10f0_accepted": true
+    },
+    "app_sa_root_hits": [],
+    "boot_sa_root_hits": [],
+    "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/ram/global_ram.bin",
+    "payload_build_root_hits": [],
+    "sha256": "53c8370237c681d4105c513be5096461ac735ffcb9577995c7203216165006a4",
+    "size": 65536,
+    "statistics": {
+      "bytes": 65536,
+      "distinct_byte_values": 60,
+      "ff_bytes": 23,
+      "zero_bytes": 63396
+    }
+  },
+  "local_ram_pe1": {
+    "acquisition": {
+      "application_f181_exact": true,
+      "boot_f181_exact": true,
+      "clobber_range": [
+        "0xfebf0000",
+        "0xfebf1000"
+      ],
+      "conflicts": 0,
+      "coverage": {
+        "all_words_covered": true,
+        "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.coverage.bin",
+        "sha256": "bfa5a24faa8ddf576edcc46f4f05e2459ee4a383b8dc14ff7dba0056b9c59ed0",
+        "size": 32768
+      },
+      "coverage_percent": 100.0,
+      "dump_sha256": "0ddef478b15bcf3241c56573463eda25ba018081629daf0042fcae1204c435a7",
+      "duplicate_words": 0,
+      "expected_profile": "local_ram_pe1",
+      "expected_words": 32768,
+      "ff00_sent": true,
+      "nrt_ready_values": [
+        0
+      ],
+      "old_stack_zero_dids": true,
+      "profile": "local_ram_pe1",
+      "range": [
+        "0xfebe0000",
+        "0xfec00000"
+      ],
+      "run": {
+        "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.run.json",
+        "sha256": "ccd6335b2d6f02dcb4dbd76dcb7f436493e34204dbcea7beec509efa3e326d57",
+        "size": 11428
+      },
+      "schema": "camry-8965f3307000-ram-acquisition-v1",
+      "spi_errors": 0,
+      "status": "complete",
+      "unique_words": 32768,
+      "verify_10f0_accepted": true
+    },
+    "app_sa_root_hits": [
+      "0xFEBF7B80"
+    ],
+    "boot_sa_root_hits": [],
+    "clobber_range": [
+      "0xFEBF0000",
+      "0xFEBF1000"
+    ],
+    "legacy_key_table": {
+      "interpretation": "The old FEBE6E34 0x20-byte key-table contract does not transfer to F33: none of the 14 candidate records satisfies its own checksum rule.",
+      "old_extractor_key_1": {
+        "checksum_valid": false,
+        "index": 1,
+        "key_field_address": "0xFEBE6E60",
+        "key_field_sha256": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+        "key_field_zero": true,
+        "record_address": "0xFEBE6E54"
+      },
+      "old_extractor_key_4": {
+        "checksum_valid": false,
+        "index": 4,
+        "key_field_address": "0xFEBE6EC0",
+        "key_field_sha256": "dd1a54b2874fa540b8be66b567afbe12a61b6d7092621dbd4adc5fd77f81cfcd",
+        "key_field_zero": false,
+        "record_address": "0xFEBE6EB4"
+      },
+      "old_factory_record_0xFEBF42E0_zero": true,
+      "range": [
+        "0xFEBE6E34",
+        "0xFEBE6FF4"
+      ],
+      "record_count": 14,
+      "record_size": 32,
+      "records": [
+        {
+          "checksum_valid": false,
+          "index": 0,
+          "key_field_address": "0xFEBE6E40",
+          "key_field_sha256": "258fbec828b7b443859e92b2190f895502b717801e725a81e1f40e5684dfd509",
+          "key_field_zero": false,
+          "record_address": "0xFEBE6E34"
+        },
+        {
+          "checksum_valid": false,
+          "index": 1,
+          "key_field_address": "0xFEBE6E60",
+          "key_field_sha256": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+          "key_field_zero": true,
+          "record_address": "0xFEBE6E54"
+        },
+        {
+          "checksum_valid": false,
+          "index": 2,
+          "key_field_address": "0xFEBE6E80",
+          "key_field_sha256": "046c9eb0672b0dd52768c6fa8508441e43150ffa8beeff23bc235682ec8c0f8a",
+          "key_field_zero": false,
+          "record_address": "0xFEBE6E74"
+        },
+        {
+          "checksum_valid": false,
+          "index": 3,
+          "key_field_address": "0xFEBE6EA0",
+          "key_field_sha256": "4158870292692088408da0732fc0708f4e55228896ddbf7d933c084a1aabe39d",
+          "key_field_zero": false,
+          "record_address": "0xFEBE6E94"
+        },
+        {
+          "checksum_valid": false,
+          "index": 4,
+          "key_field_address": "0xFEBE6EC0",
+          "key_field_sha256": "dd1a54b2874fa540b8be66b567afbe12a61b6d7092621dbd4adc5fd77f81cfcd",
+          "key_field_zero": false,
+          "record_address": "0xFEBE6EB4"
+        },
+        {
+          "checksum_valid": false,
+          "index": 5,
+          "key_field_address": "0xFEBE6EE0",
+          "key_field_sha256": "19140c5799a096844ba655ef822227d82aa77f719be50787ba0efb81497ed674",
+          "key_field_zero": false,
+          "record_address": "0xFEBE6ED4"
+        },
+        {
+          "checksum_valid": false,
+          "index": 6,
+          "key_field_address": "0xFEBE6F00",
+          "key_field_sha256": "19201a720b6039507d5a00d940275e91a83f7770dd51d4fbb6c62111741aa325",
+          "key_field_zero": false,
+          "record_address": "0xFEBE6EF4"
+        },
+        {
+          "checksum_valid": false,
+          "index": 7,
+          "key_field_address": "0xFEBE6F20",
+          "key_field_sha256": "652d60b660f594ae41e9babb55bb8aada8b6daa76616d2a1b34911101eae9148",
+          "key_field_zero": false,
+          "record_address": "0xFEBE6F14"
+        },
+        {
+          "checksum_valid": false,
+          "index": 8,
+          "key_field_address": "0xFEBE6F40",
+          "key_field_sha256": "0e689482e6b7fbb891e9af87dfc6057eb9a93f185d705d69127a7f60fdd8aadb",
+          "key_field_zero": false,
+          "record_address": "0xFEBE6F34"
+        },
+        {
+          "checksum_valid": false,
+          "index": 9,
+          "key_field_address": "0xFEBE6F60",
+          "key_field_sha256": "aab80c1b032b51adbef9aa312fc93c0f71e97f8bfced2f45b3cccd62adb64e00",
+          "key_field_zero": false,
+          "record_address": "0xFEBE6F54"
+        },
+        {
+          "checksum_valid": false,
+          "index": 10,
+          "key_field_address": "0xFEBE6F80",
+          "key_field_sha256": "b713abf2fcbae428ec7b5ccdef6f569a2929a5ae0ae2f2c877b8725e855c43b1",
+          "key_field_zero": false,
+          "record_address": "0xFEBE6F74"
+        },
+        {
+          "checksum_valid": false,
+          "index": 11,
+          "key_field_address": "0xFEBE6FA0",
+          "key_field_sha256": "3e5ad097d85e63f81bbc9831b0d5c019c14e2cb1e6bcd2d827890def1245ffae",
+          "key_field_zero": false,
+          "record_address": "0xFEBE6F94"
+        },
+        {
+          "checksum_valid": false,
+          "index": 12,
+          "key_field_address": "0xFEBE6FC0",
+          "key_field_sha256": "0dd788b5011cf4817eb9992bb83af5b5a29f1644934df40490923cb8d60fce24",
+          "key_field_zero": false,
+          "record_address": "0xFEBE6FB4"
+        },
+        {
+          "checksum_valid": false,
+          "index": 13,
+          "key_field_address": "0xFEBE6FE0",
+          "key_field_sha256": "e52d8d4e8e275b088c6da57ad760425e01a21d24e803a657a37a07a4a169a721",
+          "key_field_zero": false,
+          "record_address": "0xFEBE6FD4"
+        }
+      ],
+      "valid_checksum_count": 0
+    },
+    "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin",
+    "payload_build_root_hits": [],
+    "sha256": "0ddef478b15bcf3241c56573463eda25ba018081629daf0042fcae1204c435a7",
+    "size": 131072,
+    "statistics": {
+      "bytes": 131072,
+      "distinct_byte_values": 256,
+      "ff_bytes": 4672,
+      "zero_bytes": 100234
+    }
+  },
+  "offline_key_scan": {
+    "matcher": {
+      "commit": "2bfbef37fddbdf4e499a4adc55005474f3c5ffcf",
+      "module": "tsk.lib.matcher.find_key",
+      "note": "Raw key bytes are not retained. Each scan tested every eligible sliding 16-byte window against the parsed Camry CAN oracle; PE1 LocalRAM excludes the acquisition-clobbered FEBF0000..FEBF0FFF span.",
+      "repository": "kai-openpilot"
+    },
+    "oracle": {
+      "compressed_sha256": "e977f5f0dc3d86786af8ae576d785af46c8facc8e186c4598f692a38ecb95b73",
+      "malformed": 0,
+      "protected_sample_caps": {
+        "bus1:0x090": 250,
+        "bus1:0x0d7": 250,
+        "bus1:0x116": 250,
+        "bus1:0x24d": 63
+      },
+      "protected_samples": 813,
+      "sync_samples": 208,
+      "uncompressed_sha256": "823622ed360ee1b2c2c156c6196a17d001c845f4d53fbc56922a338a4a46e33c",
+      "uncompressed_size": 37552829
+    },
+    "scans": {
+      "dataflash": {
+        "base": "0xFF200000",
+        "coverage_known": false,
+        "domain": "unverified",
+        "dump_partial": false,
+        "malformed": 0,
+        "matches": 0,
+        "protected": "0/813",
+        "sha256": "231fbdde4ef317931d8f1ff20ff131650f7d773c124a179b0ae3dc98bf8e4432",
+        "size": 32768,
+        "status": "not_found",
+        "survivors": 0,
+        "sync": "0/208",
+        "windows_eligible": 32753,
+        "windows_scanned": 32753
+      },
+      "global_ram": {
+        "base": "0xFEEF8000",
+        "coverage_known": false,
+        "domain": "unverified",
+        "dump_partial": false,
+        "malformed": 0,
+        "matches": 0,
+        "protected": "0/813",
+        "sha256": "53c8370237c681d4105c513be5096461ac735ffcb9577995c7203216165006a4",
+        "size": 65536,
+        "status": "not_found",
+        "survivors": 0,
+        "sync": "0/208",
+        "windows_eligible": 65521,
+        "windows_scanned": 65521
+      },
+      "local_ram_pe1": {
+        "base": "0xFEBE0000",
+        "coverage_known": true,
+        "domain": "unverified",
+        "dump_partial": false,
+        "excluded_clobber": [
+          "0xFEBF0000",
+          "0xFEBF1000"
+        ],
+        "malformed": 0,
+        "matches": 0,
+        "protected": "0/813",
+        "sha256": "0ddef478b15bcf3241c56573463eda25ba018081629daf0042fcae1204c435a7",
+        "size": 131072,
+        "status": "not_found",
+        "survivors": 0,
+        "sync": "0/208",
+        "windows_eligible": 126946,
+        "windows_scanned": 131057
+      }
+    },
+    "schema": "camry-8965f3307000-secoc-offline-scan-v1"
+  },
+  "oracle": {
+    "all_stream_count": 197,
+    "compressed_sha256": "e977f5f0dc3d86786af8ae576d785af46c8facc8e186c4598f692a38ecb95b73",
+    "compressed_size": 3248546,
+    "duration_ms": 59982.392607,
+    "event_counts": {
+      "can": 134903,
+      "run_end": 1,
+      "run_start": 1
+    },
+    "focus_bus1_streams": {
+      "0x00F": {
+        "count": 618,
+        "length_counts": {
+          "8": 618
+        }
+      },
+      "0x090": {
+        "count": 6190,
+        "length_counts": {
+          "32": 6190
+        }
+      },
+      "0x0B6": {
+        "count": 0,
+        "length_counts": {}
+      },
+      "0x0D7": {
+        "count": 3095,
+        "length_counts": {
+          "32": 3095
+        }
+      },
+      "0x116": {
+        "count": 2629,
+        "length_counts": {
+          "8": 2629
+        }
+      },
+      "0x24D": {
+        "count": 63,
+        "length_counts": {
+          "8": 63
+        }
+      }
+    },
+    "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/can_oracle.ndjson.gz",
+    "uncompressed_sha256": "823622ed360ee1b2c2c156c6196a17d001c845f4d53fbc56922a338a4a46e33c",
+    "uncompressed_size": 37552829
+  },
+  "payloads": {
+    "dataflash": {
+      "callback_address": "0xFEBF0000",
+      "cmac_valid": true,
+      "crc_residue": "0xFFFFFFFF",
+      "descriptor_address": "0xFEBF0000",
+      "descriptor_length": 4080,
+      "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/payloads/payload_dataflash_ff200000_ff208000.bin",
+      "sha256": "d48988366b5e6d2ddd7438caca5e6f6f02daba9b650263c323a2ffd770a06e34",
+      "size": 4096
+    },
+    "global_ram": {
+      "callback_address": "0xFEBF0000",
+      "cmac_valid": true,
+      "crc_residue": "0xFFFFFFFF",
+      "descriptor_address": "0xFEBF0000",
+      "descriptor_length": 4080,
+      "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/payloads/payload_global_ram_feef8000_fef08000.bin",
+      "sha256": "43d00fdaf790c6deb230d3a4e7b8f8bd17e077a100fa53ebb194532f55c510fd",
+      "size": 4096
+    },
+    "local_ram_pe1": {
+      "callback_address": "0xFEBF0000",
+      "cmac_valid": true,
+      "crc_residue": "0xFFFFFFFF",
+      "descriptor_address": "0xFEBF0000",
+      "descriptor_length": 4080,
+      "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/payloads/payload_local_ram_pe1_febe0000_fec00000.bin",
+      "sha256": "fbb1f5bd352c3f0bf416d6b1ef6a7696f97cad2b9f49570ca859207f3269e44f",
+      "size": 4096
+    }
+  },
+  "schema": "camry-8965f3307000-secoc-recovery-v1",
+  "target": {
+    "diagnostic_route": {
+      "bus": 1,
+      "elm327_param": 1,
+      "rx": "0x7A9",
+      "tx": "0x7A1"
+    },
+    "f181": "8965F3307000",
+    "secondary_identity": "8A3113303100"
+  }
+}

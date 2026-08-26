@@ -386,7 +386,83 @@ bound to exact target-native decompiler bodies in
 checked by `tests/verify_camry_8965F3307000_codeflash.py`. Raw acquisition
 provenance is retained in `raw-20260826/CODEFLASH_MANIFEST.txt`.
 
-## 10. What this changes for openpilot work
+## 10. Exact DataFlash + CPU-visible RAM SecOC-key recovery result
+
+A fifth exact-target NRTD experiment used the already-proven F33 authenticated
+`FEBF0000/0x1000 -> 0x10F0 -> 0xFF00` range-reader family to collect the
+physical 32-KiB DataFlash, the complete 128-KiB PE1 LocalRAM view, and the
+complete 64-KiB GlobalRAM view. Every acquisition was identity-bound to
+`8965F3307000 / 8A3113303100`, required bus-1 `0x51E` Ready=0 before the
+PROGRAMMING handoff, re-observed the exact boot placeholder, used the old-stack
+zero-`0201/0202` authenticated payload contract, and completed with zero range
+conflicts. The retained hashes are:
+
+- DataFlash `FF200000..FF207FFF`:
+  `231fbdde4ef317931d8f1ff20ff131650f7d773c124a179b0ae3dc98bf8e4432`;
+- PE1 LocalRAM `FEBE0000..FEBFFFFF` / 128 KiB:
+  `0ddef478b15bcf3241c56573463eda25ba018081629daf0042fcae1204c435a7`;
+- GlobalRAM `FEEF8000..FEF07FFF` / 64 KiB:
+  `53c8370237c681d4105c513be5096461ac735ffcb9577995c7203216165006a4`.
+
+The DataFlash storage result is unambiguous at the already-recovered NvM
+geometry. Object 15 occupies the familiar raw/xor55/xoraa records at
+`0xFF206E00/0xFF206D00/0xFF206C00`, but **all three copies are invalid** and
+there is no valid decoded consensus. More specifically, the corresponding
+16-byte second/key fields at **`0xFF206E14`, `0xFF206D14`, and `0xFF206C14`
+are all raw zero bytes**. Thus the 4514000-era plaintext-object-15 result does
+not transfer to this exact F33 ECU.
+
+The PE1 LocalRAM snapshot independently validates why the generic legacy
+extractor correctly refused F33 instead of projecting the old `FEBE6E34`
+layout. Interpreting `FEBE6E34..FEBE6FF3` as fourteen 0x20-byte legacy key
+records gives **0/14 valid record checksums**. The old KEY_1 field at
+`0xFEBE6E60` is zero; the old KEY_4 field at `0xFEBE6EC0` belongs to a
+checksum-invalid record; and the old `0xFEBF42E0` factory-key record is zero.
+Conversely, the exact F33 application-SecurityAccess root
+`893e08418c741ffa2a9c044bffa55813` appears exactly once at **`0xFEBF7B80`**,
+matching the H/F startup-mirror position and demonstrating that the LocalRAM
+stream is structured target state rather than an empty/broken acquisition.
+Neither the payload-build root nor the boot-SA root appears as a raw 16-byte
+LocalRAM or GlobalRAM value.
+
+One acquisition caveat is explicit: the LocalRAM range reader itself is loaded
+at `FEBF0000..FEBF0FFF`, so those 4096 bytes are overwritten before the range
+is read. They are excluded from key-search conclusions. The rest of PE1
+LocalRAM had 100% word coverage (32,768/32,768); GlobalRAM likewise had 100%
+coverage (16,384/16,384), with zero conflicts, duplicates, or stream-time SPI
+errors in both retained runs.
+
+The READY oracle collected alongside this experiment is healthy and directly
+contains the F33-native protected domain: bus 1 has 618 `0x00F/8`, 6,190
+`0x090/32`, 3,095 **`0x0D7/32`**, 2,629 `0x116/8`, and 63 `0x24D/8` frames
+over about 59.98 seconds. `0x0B6` was not exercised in this stationary
+capture. `kai-openpilot` matcher commit
+`2bfbef37fddbdf4e499a4adc55005474f3c5ffcf` parsed 208 sync samples plus 813
+protected samples (including capped `0x0D7` FD samples) and exhaustively tested
+every eligible sliding 16-byte window:
+
+- DataFlash: **32,753 / 32,753**, zero survivors;
+- PE1 LocalRAM: **126,946** eligible windows after excluding the payload span,
+  zero survivors;
+- GlobalRAM: **65,521 / 65,521**, zero survivors.
+
+This closes the simple CPU-visible-key hypothesis for the retained post-handoff
+memories: **no raw 16-byte window in the complete DataFlash, non-clobbered PE1
+LocalRAM, or GlobalRAM authenticates the captured Camry SecOC traffic under the
+recovered Toyota CMAC formats.** It does *not* imply that ICU-S slot 4 is empty.
+Exact F33 firmware already proves command-7 verification selects slot 4, and the
+live `0x0D7` stream demonstrates an operational protected domain. The natural
+interpretation is therefore that the active slot-4 secret is not present as a
+raw CPU-visible value in these retained stores. A transient application-only
+RAM value could also be cleared by the application-to-boot handoff, so the RAM
+negative is scoped to the post-handoff snapshots rather than every instant of
+application runtime.
+
+Raw acquisition, payload, oracle, and retained matcher provenance live under
+`community/kai/camry-2026/raw-20260826/secoc-recovery/`; deterministic compact
+interpretation is `data/generated/camry_8965F3307000_secoc_recovery.json`.
+
+## 11. What this changes for openpilot work
 
 The exact Camry image removes the largest firmware-transfer uncertainty from the
 lateral path. `0x025`, B6, the protected `00F/D7/B6` set, ICU-S slot-4 receive
@@ -406,9 +482,10 @@ The remaining blockers are narrower and concrete:
    before constructing production Panda limits. Seven receive ticks are known;
    H's 5-ms period and H/F limit constants are not silently transferred;
 3. prove target-native operational signing capability/latency and any required
-   application-retention carrier before relying on ICU-S command 5. Boot RAM
-   execution is now proven on F33, but boot execution is not the same thing as a
-   retained application-context signer;
+   application-retention carrier before relying on ICU-S command 5. The complete
+   DataFlash + post-handoff LocalRAM/GlobalRAM sweep found no raw authenticating
+   key, so a retained application-context ICU-S command-5 path is now the primary
+   signing direction rather than plaintext-key recovery;
 4. synchronize actual cruise engage/cancel with FRC `0x1905/0x1914`, and repeat
    following-distance if production CarState needs that ordinary-CAN field;
 5. perform relay-correct interception testing before any lateral output. Passive
@@ -424,6 +501,6 @@ remaining work, but it does not by itself authorize steering transmission.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054)
+- Findings with this document as canonical home: [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055)
 - Corrections with this document as canonical home: —
 <!-- knowledge-cross-references:end -->

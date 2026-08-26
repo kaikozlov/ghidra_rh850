@@ -1185,6 +1185,19 @@ paths = [
   "exploit/findings_coverage.json",
 ]
 
+[suite.camry_8965f3307000_secoc_recovery]
+tests = ["tests/verify_camry_8965F3307000_secoc_recovery.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_camry_8965F3307000_secoc_recovery.py",
+  "tools/analyze_camry_8965F3307000_secoc_recovery.py",
+  "data/generated/camry_8965F3307000_secoc_recovery.json",
+  "community/kai/camry-2026/raw-20260826/secoc-recovery/",
+  "community/kai/camry-2026/README.md",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/FINDINGS.md",
+]
+
 [suite.span_2025_discord_rlog_opendbc_evidence]
 tests = ["tests/verify_span_2025_discord_rlog_opendbc_evidence.py"]
 oracle = "generated_self_check"
