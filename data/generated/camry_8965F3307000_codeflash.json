@@ -1,0 +1,555 @@
+{
+  "acquisition": {
+    "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "boot_read_memory_by_address": {
+      "nrc": "0x7f",
+      "status": "rejected"
+    },
+    "boundary": "The recovered artifact is read-only CodeFlash output, but acquisition uses the authenticated boot-RAM payload path and an FF00 callback trigger; it is not a stock UDS memory-read service.",
+    "callback_ff00": "3101ff004500000e000000008000",
+    "did_0201_0202": "zero16",
+    "did_0203": "0000000000",
+    "nrt_ready_values": [
+      0
+    ],
+    "payload": {
+      "codeflash_range": [
+        "0x00000000",
+        "0x00200000"
+      ],
+      "sha256": "860f8a3418d23ccfd0861a97efdb9e1d23a8854c3a629b8d7b6821eb93d0b588",
+      "size": 4096,
+      "source": "calvinpark-openpilot dump branch payload_codeflash_00000000_00200000.bin"
+    },
+    "request_download": "01460100febf000000001000",
+    "result": {
+      "codeflash_end": "0x00200000",
+      "codeflash_start": "0x00000000",
+      "conflicts": 0,
+      "coverage_path": "/cache/tsk/camry-codeflash/camry_8965F3307000_codeflash_20260826T213719Z.coverage.bin",
+      "coverage_percent": 100.0,
+      "dump_path": "/cache/tsk/camry-codeflash/camry_8965F3307000_codeflash_20260826T213719Z.bin",
+      "dump_size": 2097152,
+      "duplicate_words": 0,
+      "elapsed_s": 194.895,
+      "expected_words": 524288,
+      "raw_rx_frames": 524289,
+      "sha256": "b588c7258699beee77669d1f5f09bb17ef8b189b941b46f344a07378c3aaa727",
+      "spi_errors": 0,
+      "status": "complete",
+      "unique_words": 524288
+    },
+    "route": {
+      "application_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+      "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+      "bus": 1,
+      "elm327_param": 1,
+      "rx": "0x7a9",
+      "semantic_path": "normal-harness",
+      "tx": "0x7a1"
+    },
+    "schema": "camry-8965f3307000-codeflash-acquisition-v1",
+    "uds_variant": "old",
+    "verify_10f0": "4500febf000000001000"
+  },
+  "application_rx": {
+    "camry_descriptor_count": 43,
+    "camry_table_start": "0x00021FE8",
+    "interpretation": "All 40 Corolla-H normal application Rx descriptors are present on Camry; Camry adds 0x116/8, 0x0D8/8, and 0x1DA/8. This is target-native configuration continuity, not a blanket semantic-equivalence claim.",
+    "vs_corolla_h": {
+      "added": [
+        {
+          "can_fd": false,
+          "can_id": "0x116",
+          "index": 22,
+          "length": 8,
+          "software_id": "0x00000116"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x0D8",
+          "index": 37,
+          "length": 8,
+          "software_id": "0x000000D8"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x1DA",
+          "index": 42,
+          "length": 8,
+          "software_id": "0x000001DA"
+        }
+      ],
+      "added_descriptor_count": 3,
+      "removed": [],
+      "removed_descriptor_count": 0,
+      "shared_descriptor_count": 40
+    },
+    "vs_sienna_b4512000": {
+      "added": [
+        {
+          "can_fd": false,
+          "can_id": "0x116",
+          "index": 22,
+          "length": 8,
+          "software_id": "0x00000116"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x0D8",
+          "index": 37,
+          "length": 8,
+          "software_id": "0x000000D8"
+        },
+        {
+          "can_fd": true,
+          "can_id": "0x0B6",
+          "index": 39,
+          "length": 32,
+          "software_id": "0x400000B6"
+        }
+      ],
+      "added_descriptor_count": 3,
+      "removed": [
+        {
+          "can_fd": false,
+          "can_id": "0x2E4",
+          "index": 0,
+          "length": 8,
+          "software_id": "0x000002E4"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x191",
+          "index": 19,
+          "length": 8,
+          "software_id": "0x00000191"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x131",
+          "index": 20,
+          "length": 8,
+          "software_id": "0x00000131"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x2FD",
+          "index": 21,
+          "length": 8,
+          "software_id": "0x000002FD"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x132",
+          "index": 29,
+          "length": 8,
+          "software_id": "0x00000132"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x423",
+          "index": 35,
+          "length": 1,
+          "software_id": "0x00000423"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x020",
+          "index": 43,
+          "length": 8,
+          "software_id": "0x00000020"
+        }
+      ],
+      "removed_descriptor_count": 7,
+      "shared_descriptor_count": 40
+    }
+  },
+  "b6_com": {
+    "boundary": "Seven foreground ticks are target-native; this pass does not transfer Corolla H's 5 ms tick period to Camry without a Camry timer proof.",
+    "deadline_descriptor": {
+      "configured_value": 6,
+      "successful_receive_reload_ticks": 7,
+      "tick_period_ms": null
+    },
+    "non_scalar_bookends": [
+      259,
+      260,
+      274,
+      275
+    ],
+    "pdu44_buffer_offset": "0x1B7",
+    "pdu44_descriptor_hex": "060000002000000c",
+    "pdu44_signal_ids": [
+      259,
+      260,
+      261,
+      262,
+      263,
+      264,
+      265,
+      266,
+      267,
+      268,
+      269,
+      270,
+      271,
+      272,
+      273,
+      274,
+      275
+    ],
+    "pdu_buffer_offset_table": "0x00022840",
+    "pdu_count": 48,
+    "pdu_table": "0x000226C0",
+    "scalar_signal_ids": [
+      261,
+      262,
+      263,
+      264,
+      265,
+      266,
+      267,
+      268,
+      269,
+      270,
+      271,
+      272,
+      273
+    ],
+    "signal_count": 284,
+    "signal_to_pdu_table": "0x00022488",
+    "tp": "0x00023DFC",
+    "wire_fields": [
+      {
+        "absolute_buffer_offset": "0x1BA",
+        "bit_length": 6,
+        "bit_start": 0,
+        "byte_offset": 3,
+        "raw_destination": "gp-0x3744",
+        "signal_id": 261,
+        "signed": false
+      },
+      {
+        "absolute_buffer_offset": "0x1BB",
+        "bit_length": 16,
+        "bit_start": 0,
+        "byte_offset": 4,
+        "raw_destination": "gp-0x3748",
+        "signal_id": 262,
+        "signed": true
+      },
+      {
+        "absolute_buffer_offset": "0x1BD",
+        "bit_length": 1,
+        "bit_start": 7,
+        "byte_offset": 6,
+        "raw_destination": "gp-0x3735",
+        "signal_id": 263,
+        "signed": false
+      },
+      {
+        "absolute_buffer_offset": "0x1BD",
+        "bit_length": 3,
+        "bit_start": 4,
+        "byte_offset": 6,
+        "raw_destination": "gp-0x3742",
+        "signal_id": 264,
+        "signed": false
+      },
+      {
+        "absolute_buffer_offset": "0x1BD",
+        "bit_length": 1,
+        "bit_start": 2,
+        "byte_offset": 6,
+        "raw_destination": "gp-0x3740",
+        "signal_id": 265,
+        "signed": false
+      },
+      {
+        "absolute_buffer_offset": "0x1BD",
+        "bit_length": 2,
+        "bit_start": 0,
+        "byte_offset": 6,
+        "raw_destination": "gp-0x373f",
+        "signal_id": 266,
+        "signed": false
+      },
+      {
+        "absolute_buffer_offset": "0x1BE",
+        "bit_length": 2,
+        "bit_start": 6,
+        "byte_offset": 7,
+        "raw_destination": "gp-0x373e",
+        "signal_id": 267,
+        "signed": false
+      },
+      {
+        "absolute_buffer_offset": "0x1BE",
+        "bit_length": 6,
+        "bit_start": 0,
+        "byte_offset": 7,
+        "raw_destination": "gp-0x373d",
+        "signal_id": 268,
+        "signed": false
+      },
+      {
+        "absolute_buffer_offset": "0x1BF",
+        "bit_length": 8,
+        "bit_start": 0,
+        "byte_offset": 8,
+        "raw_destination": "gp-0x373c",
+        "signal_id": 269,
+        "signed": false
+      },
+      {
+        "absolute_buffer_offset": "0x1C0",
+        "bit_length": 8,
+        "bit_start": 0,
+        "byte_offset": 9,
+        "raw_destination": "gp-0x373b",
+        "signal_id": 270,
+        "signed": false
+      },
+      {
+        "absolute_buffer_offset": "0x1C1",
+        "bit_length": 1,
+        "bit_start": 7,
+        "byte_offset": 10,
+        "raw_destination": "gp-0x373a",
+        "signal_id": 271,
+        "signed": false
+      },
+      {
+        "absolute_buffer_offset": "0x1C1",
+        "bit_length": 1,
+        "bit_start": 5,
+        "byte_offset": 10,
+        "raw_destination": "gp-0x3734",
+        "signal_id": 272,
+        "signed": false
+      },
+      {
+        "absolute_buffer_offset": "0x1C1",
+        "bit_length": 3,
+        "bit_start": 0,
+        "byte_offset": 10,
+        "raw_destination": "gp-0x3736",
+        "signal_id": 273,
+        "signed": false
+      }
+    ]
+  },
+  "b6_steering_command": {
+    "clamp": {
+      "entry": "0x000CCFB6",
+      "role": "mode-dependent delta/absolute clamp of the preprocessed target-angle domain"
+    },
+    "classification": "target-native protected B6 Target Lateral ID plus signed16 target steering angle command, closed by the Camry 0x025/DID1037 measured-angle feedback and same-gain target-minus-measured comparator.",
+    "controller_equivalent_scale": {
+      "boundary": "This is the exact linearized controller-equivalent relation implied by target-native integer gains plus the Techstream 0x1037 Steering Angle scale. Integer truncation/saturation apply, and firmware does not literally name the B6 wire engineering unit as milliradians.",
+      "deg_per_b6_count": 0.05730274202574147,
+      "difference_from_exact_1_mrad_percent": 0.01215187701137932,
+      "fraction_deg_per_b6_count": {
+        "denominator": 17870,
+        "numerator": 1024
+      },
+      "mrad_per_b6_count": 1.0001215187701138
+    },
+    "independent_plausibility_consumer": {
+      "entry": "0x000CEE80",
+      "role": "target-angle magnitude/threshold plausibility path",
+      "source": "gp-0x970"
+    },
+    "measured_steering_angle_feedback": {
+      "buffer_offset": "0x127",
+      "can_id": "0x025",
+      "coarse_signal": {
+        "raw": "gp-0x37B8",
+        "scale_deg_per_count": 1.5,
+        "signal_id": 187,
+        "techstream_did": "0x1037",
+        "techstream_name": "Steering Angle",
+        "wire": "B0..B1 signed12"
+      },
+      "did1037_row": {
+        "address": "0x000293AC",
+        "callback": "0x0004DBF8",
+        "raw_hex": "37100200f8db04000000000000000000"
+      },
+      "fraction_signal": {
+        "raw": "gp-0x37B1",
+        "scale_deg_per_count": 0.1,
+        "signal_id": 188,
+        "wire": "B2[7:4] signed4"
+      },
+      "pdu_id": 35,
+      "reconstruction": "0xB3B06: 15*coarse + signed_fraction; 0xCE9EA: reconstructed_tenths_deg * 0x6FB / 0x200; 0xCEADA republishes the valid measured-angle domain into a voted triple."
+    },
+    "preprocessor": {
+      "entry": "0x000CCF0E",
+      "operation": "saturate(2 * signed16(B4:B5)) followed by interpolation/history"
+    },
+    "selector_signal": {
+      "accepted_controller_values": {
+        "1": "PCS",
+        "10": "Hands Off LTA",
+        "11": "LTA/LCA",
+        "18": "SDG",
+        "19": "PDA",
+        "4": "LDA"
+      },
+      "additional_target_native_value": {
+        "49": "Self-Propelled Transport"
+      },
+      "join_proof": "Camry 0xCEFFC consumes the protected B3 snapshot and recognizes exactly 1/4/10/11/18/19; Toyota P5 Target Lateral ID assigns those values PCS/LDA/Hands Off LTA/LTA-LCA/SDG/PDA. Camry 0xCB73A separately recognizes raw 49, matching Self-Propelled Transport.",
+      "oem_name": "Target Lateral ID",
+      "raw": "gp-0x3744",
+      "signal_id": 261,
+      "snapshot": "gp-0xA50",
+      "staged": "gp+0x3930",
+      "target_native_decoder": "0x000CEFFC",
+      "wire": "B3[5:0]"
+    },
+    "signed_target_signal": {
+      "classification": "target steering angle command",
+      "raw": "gp-0x3748",
+      "signal_id": 262,
+      "snapshot": "gp-0x970",
+      "staged": "gp+0x39FA",
+      "wire": "B4:B5 signed16"
+    },
+    "target_minus_measured_comparator": {
+      "entry": "0x000CD128",
+      "gain": "0xB76/0x400 applied identically to target and measured domains before subtraction",
+      "measured_inputs": [
+        "DAT_000012D2",
+        "DAT_000012D4",
+        "DAT_000012D6"
+      ],
+      "relation": "scaled_target - scaled_measured",
+      "target_inputs": [
+        "DAT_000010B8",
+        "DAT_000011A0",
+        "DAT_000011CC"
+      ]
+    }
+  },
+  "cross_variant_boundary": "The exact Camry image now replaces prior H/F inference for Rx/SecOC/B6 wire, Target Lateral ID, target steering-angle ingress, and measured-angle feedback/comparator facts. Corolla-only wall-clock timing, steering limits, fault thresholds, and final motor-control constants must still be revalidated target-natively before production actuation.",
+  "decompiler_evidence": {
+    "function_count": 27,
+    "path": "data/generated/camry_8965F3307000_decompiler_evidence.json",
+    "sha256": "19d91b4d9359fa699d6bce5f4ce1e5bae5dfb49475e52874198b38a8c9ce70ce"
+  },
+  "schema": "camry-8965f3307000-codeflash-static-v1",
+  "secoc_receive": {
+    "command7_function": "0x0008A8E4",
+    "interpretation": "Camry protects exactly 0x00F, 0x0D7, and 0x0B6 in the recovered three-record receive table. B6 is PDU44 with 28 application bytes + FV4/MAC28 trailer and selects crypto handle 0; the shared key config selects ICU-S slot 4 and target-native code programs command 7.",
+    "key_config_address": "0x00025828",
+    "key_config_raw_hex": "0100000004000000000000000000000000000000",
+    "profile_base": "0x00025848",
+    "profile_count": 3,
+    "profiles": [
+      {
+        "address": "0x00025848",
+        "application_bytes": 0,
+        "application_pdu_id": 9,
+        "commit_callback": "0x00090448",
+        "cryptoif_handle": 0,
+        "data_id": "0x00F",
+        "freshness_id": 0,
+        "full_cmac_bits": 128,
+        "full_freshness_bits": 36,
+        "get_freshness_callback": "0x000903A0",
+        "index": 0,
+        "input_buffer_length": 8,
+        "is_sync": true,
+        "record_sha256": "f8d175c55392bfc11d4373a7fefb42fe3b48c7c331c3402127f070c0a906246f",
+        "secured_buffer_length": 8,
+        "secured_pdu_length": 8,
+        "sync_linkage": 0,
+        "trailer_bytes_configured": 8,
+        "transmitted_cmac_bits": 28,
+        "transmitted_freshness_bits": 36,
+        "upper_callback": "0x0006A218",
+        "upper_route_id": 9
+      },
+      {
+        "address": "0x00025898",
+        "application_bytes": 28,
+        "application_pdu_id": 41,
+        "commit_callback": "0x00090448",
+        "cryptoif_handle": 0,
+        "data_id": "0x0D7",
+        "freshness_id": 1,
+        "full_cmac_bits": 128,
+        "full_freshness_bits": 46,
+        "get_freshness_callback": "0x000903A0",
+        "index": 1,
+        "input_buffer_length": 32,
+        "is_sync": false,
+        "record_sha256": "d464251aea4fa31391d8a4ede9279723bf16e6f874261e02ee2242fd6bc0fed5",
+        "secured_buffer_length": 32,
+        "secured_pdu_length": 32,
+        "sync_linkage": 0,
+        "trailer_bytes_configured": 4,
+        "transmitted_cmac_bits": 28,
+        "transmitted_freshness_bits": 4,
+        "upper_callback": "0x0006A218",
+        "upper_route_id": 41
+      },
+      {
+        "address": "0x000258E8",
+        "application_bytes": 28,
+        "application_pdu_id": 44,
+        "commit_callback": "0x00090448",
+        "cryptoif_handle": 0,
+        "data_id": "0x0B6",
+        "freshness_id": 2,
+        "full_cmac_bits": 128,
+        "full_freshness_bits": 46,
+        "get_freshness_callback": "0x000903A0",
+        "index": 2,
+        "input_buffer_length": 32,
+        "is_sync": false,
+        "record_sha256": "4d13e79de0f4fcbf64bb4e6211e3f19a493b8c84770b62841397114d456dc143",
+        "secured_buffer_length": 32,
+        "secured_pdu_length": 32,
+        "sync_linkage": 0,
+        "trailer_bytes_configured": 4,
+        "transmitted_cmac_bits": 28,
+        "transmitted_freshness_bits": 4,
+        "upper_callback": "0x0006A218",
+        "upper_route_id": 44
+      }
+    ],
+    "selector": 4,
+    "selector_type": 1,
+    "worker_chain": [
+      "0x0008EE7C RxIndication",
+      "0x0008F2B0 3-record lookup",
+      "0x0008F34A secured-PDU queue",
+      "0x0008F746 verify worker",
+      "0x0008F434 freshness split",
+      "0x0008ECB2 auth-input builder",
+      "0x0008F676 CMAC submit"
+    ]
+  },
+  "target": {
+    "application_f181": [
+      "8965F3307000",
+      "8A3113303100"
+    ],
+    "boot_info_area": {
+      "address": "0x00000180",
+      "raw_ascii": "BOOT INFO AREA  R7F701381       72116350"
+    },
+    "mcu": "Renesas RH850/P1M-E R7F701381",
+    "normalized_codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "populated_codeflash_size": 1048576,
+    "raw_transport_dump_sha256": "b588c7258699beee77669d1f5f09bb17ef8b189b941b46f344a07378c3aaa727",
+    "raw_transport_dump_size": 2097152,
+    "upper_transport_half_erased_ff": true,
+    "vehicle": "2026 Toyota Camry"
+  }
+}

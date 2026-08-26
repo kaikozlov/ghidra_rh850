@@ -1,0 +1,43 @@
+Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition
+Captured 2026-08-26 while stationary / Not Ready to Drive
+Application F181: 8965F3307000 / 8A3113303100
+Diagnostic route: ELM327 parameter 1, logical bus 1, 0x7A1 -> 0x7A9
+
+The acquisition is identity-guarded and NRTD-guarded. The stock bootloader's
+SID 0x23 CodeFlash read was tested first and rejected. The retained tool then
+used the target-accepted old-stack authenticated 4-KiB RAM payload path to stream
+the configured 0x00000000..0x001FFFFF transport range. The successful pass
+returned every expected word exactly once with zero conflicts, zero duplicates,
+and zero SPI errors. The lower 1 MiB is populated CodeFlash; the upper 1 MiB is
+erased 0xFF and is retained as transport-range provenance rather than treated as
+additional populated flash.
+
+camry_codeflash_dump.py
+  size: 17796
+  sha256: 0e2f78b156de7938e7d4069b3cd27cb16b819dd4c9fe046de0e6b7690147fb03
+  operation: identity/NRTD-guarded authenticated boot-RAM CodeFlash collector used for the successful pass.
+
+calvin_payload_codeflash_00000000_00200000.bin
+  size: 4096
+  sha256: 860f8a3418d23ccfd0861a97efdb9e1d23a8854c3a629b8d7b6821eb93d0b588
+  operation: exact 4-KiB payload envelope used by the collector for the 0x00000000..0x001FFFFF transport range.
+
+codeflash/camry_8965F3307000_codeflash_20260826T213719Z.bin
+  size: 2097152
+  sha256: b588c7258699beee77669d1f5f09bb17ef8b189b941b46f344a07378c3aaa727
+  operation: exact successful raw 2-MiB transport-range dump; 524288/524288 words, 100% coverage, zero conflicts/duplicates/SPI errors.
+
+codeflash/camry_8965F3307000_codeflash_20260826T213719Z.coverage.bin
+  size: 524288
+  sha256: 33a150bceb13c1a992231e65b4fad16815212fc06cdb408996d32eeb2cef9ebb
+  operation: one-byte-per-word coverage bitmap from the successful pass; every byte is 0x01.
+
+codeflash/camry_8965F3307000_codeflash_20260826T213719Z.run.json
+  size: 11233
+  sha256: 0d0fae44ba6c309f5ecb35a90435eb5b47bbbd3465c5d36ac1b15ff9d96fa265
+  operation: exact acquisition transcript/metadata for the successful pass, including application/boot identities, NRTD guard, accepted old-stack bootstrap, and final coverage counters.
+
+community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin
+  size: 1048576
+  sha256: 42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7
+  operation: deterministic normalized image = exact lower 1 MiB of the raw transport dump; upper 1 MiB of raw transport dump is all 0xFF.

@@ -24,11 +24,12 @@ The EPS identifies as a new calibration not previously present in this repositor
 `F181 = 02 || 8965F3307000 || 8A3113303100`. The same normal-harness route uses
 physical request/response `0x7A1/0x7A9`. DEFAULT -> EXTENDED -> PROGRAMMING
 succeeds and the diagnostic endpoint reappears on the same route; bootloader
-F181 becomes the familiar `02 || 32*0x21` placeholder. These observations put the
-Camry in the same broad Denso/P1M-E diagnostic family as the tracked Corolla/Sienna
-specimens, but they do **not** establish the Camry's SecurityAccess secret,
-authenticated RequestDownload geometry, `0x10F0` contract, RAM-exec window, or
-ciphertext portability.
+F181 becomes the familiar `02 || 32*0x21` placeholder. At this initial baseline these observations only put the Camry in the same broad
+Denso/P1M-E diagnostic family as the tracked Corolla/Sienna specimens; they did
+**not yet** establish SecurityAccess, authenticated RequestDownload, `0x10F0`, or
+RAM execution. The later exact CodeFlash acquisition section below supersedes
+that bootstrap boundary with direct F33 evidence while keeping application-
+retention and operational-signing portability separate.
 
 The READY CAN capture is similarly close to the H/F Corolla vehicle architecture.
 Logical bus 1 carries `0x00F/8`, `0x025/32`, `0x030/32`, `0x090/32`, `0x0D7/32`,
@@ -106,3 +107,27 @@ The exact passive capture scripts are retained alongside the deterministic gzip
 captures and contain `can_recv()` only; there is no CAN transmit or UDS path.
 Provenance is pinned in `raw-20260826/READY_GEAR_MANIFEST.txt`; deterministic
 interpretation is `data/generated/camry_2026_ready_gear.json`.
+
+## Exact EPS CodeFlash acquisition
+
+A fourth NRTD pass acquired the exact `8965F3307000` EPS CodeFlash. The
+successful identity-guarded collector streamed the full 2-MiB transport range
+with 524,288/524,288 unique words, zero conflicts, zero duplicates, and zero SPI
+errors. The raw transport dump SHA-256 is
+`b588c7258699beee77669d1f5f09bb17ef8b189b941b46f344a07378c3aaa727`.
+Only the lower 1 MiB is populated; the upper half is erased `0xFF`. The normalized
+1-MiB CodeFlash is therefore the exact lower half, SHA-256
+`42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`.
+
+The same run closes the previously bounded boot path on this target: boot
+SecurityAccess succeeds, DID `0x0203` identifies the old stack, zero `0x0201` and
+`0x0202` records are accepted, RequestDownload to `FEBF0000/0x1000` succeeds,
+`0x10F0` accepts the authenticated envelope, and `0xFF00` starts the retained
+read-only range payload. Stock boot SID `0x23` CodeFlash access was attempted
+first and rejected. This proves the acquisition/bootstrap facts on F33 itself;
+it does not make H/F application-retention or operational SecOC permission an
+automatic cross-variant transfer.
+
+Exact source identities and acquisition boundaries are pinned in
+`raw-20260826/CODEFLASH_MANIFEST.txt`. Target-native static interpretation is
+`data/generated/camry_8965F3307000_codeflash.json`.

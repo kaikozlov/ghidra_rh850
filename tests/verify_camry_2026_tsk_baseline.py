@@ -106,7 +106,7 @@ print("\n== documentation ==")
 doc = (REPO / "docs/variants/camry-2026-live-baseline.md").read_text()
 for token in ("8965F3307000", "8A3113303100", "0x7A1", "0x7A9", "0x030", "0x51E", "0x0B6", "Ready Status"):
   check(f"variant report preserves {token}", token in doc)
-check("report preserves firmware-transfer boundary", "not a Camry CodeFlash analysis" in doc and "production output remains disabled" in doc)
+check("report preserves firmware-transfer boundary", "not a Camry CodeFlash analysis" in doc and "Production output remains disabled" in doc)
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

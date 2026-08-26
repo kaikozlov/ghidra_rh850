@@ -9,11 +9,7 @@ evidence is retained under `community/kai/camry-2026/raw-20260826/`; the
 reproducible compact analysis is
 `data/generated/camry_2026_tsk_baseline.json`.
 
-This is **dynamic field evidence**, not a Camry CodeFlash analysis. Corolla H/F
-names are used below only where the wire behavior itself strongly transfers.
-Anything that depends on code, calibration constants, SecOC slot configuration,
-or authenticated RAM execution remains untransferred until `8965F3307000`
-CodeFlash or an independent Camry-native oracle closes it.
+Sections 1–8 preserve the original **dynamic field evidence**, not a Camry CodeFlash analysis. Corolla H/F names there are used only where the wire behavior itself strongly transfers. Section 9 adds the subsequently acquired exact `8965F3307000` CodeFlash and replaces the firmware-transfer boundary only for facts proved target-natively there; remaining timing/limit/signer questions stay explicit.
 
 ## 1. Exact EPS identity and route
 
@@ -32,7 +28,7 @@ No prior tracked source in this repository contains exact F181
 `8965F3307000`, so no firmware-static Corolla/Sienna result is promoted by
 identity alone.
 
-## 2. PROGRAMMING transfer: family-positive, bootstrap still unknown
+## 2. Initial PROGRAMMING handoff — bootstrap boundary later superseded by §9
 
 The bounded DEFAULT -> EXTENDED -> PROGRAMMING probe succeeds and the diagnostic
 endpoint reappears on the same explicit route. Bootloader F181 is exactly
@@ -40,12 +36,13 @@ endpoint reappears on the same explicit route. Bootloader F181 is exactly
 Denso EPS family. Functional `0x777` also receives a session-control response
 around the handoff.
 
-That is useful family evidence, but the boundary is important. This session did
-**not** prove Camry boot SecurityAccess, DID `0201/0202/0203` semantics,
-RequestDownload address/length/memory-ID geometry, routine `0x10F0`, callback
-`0xFF00`, or application-retained executable RAM. The TSK recovery gate correctly
-stops at exact-F181 RAM-exec geometry instead of copying `FEBF0000` from H/F or
-Sienna.
+For this **initial** baseline, that was useful family evidence but intentionally
+stopped short of boot SecurityAccess, DID `0201/0202/0203`, RequestDownload,
+`0x10F0`, `0xFF00`, or RAM-exec claims; the TSK recovery gate correctly refused
+to copy H/F/Sienna geometry by family resemblance. Section 9 later supersedes
+that acquisition boundary with direct F33 evidence: the exact old-stack
+authenticated bootstrap and read-only RAM payload path are now proven. The
+application-retention/operational-signer boundary remains separate.
 
 ## 3. Vehicle CAN topology is strongly TSS3-like
 
@@ -283,30 +280,143 @@ by `tools/analyze_camry_2026_ready_gear.py` and checked by
 operator-sequence correction are pinned in
 `community/kai/camry-2026/raw-20260826/READY_GEAR_MANIFEST.txt`.
 
-## 9. What this changes for openpilot work
+## 9. Exact `8965F3307000` CodeFlash and target-native steering contract
 
-The initial read-only Corolla TSS3 DBC is a useful **measurement scaffold** for
-this Camry: `0x025`, `0x030`, `0x0AA`, `0x101`, `0x116`, `0x127`, and `0x51E`
-all have strong continuity evidence. It is not yet a production Camry platform.
-The exact EPS F181 differs, H/F's additional EPS Tx `0x351/0x394/0x4A3/0x4C8`
-are absent from this segment, and no stock B6 transition has yet been captured.
+The fourth stationary/NRTD pass acquired the exact EPS CodeFlash rather than
+continuing to transfer H/F firmware semantics. The successful identity- and
+Ready-guarded collector returned the complete configured 2-MiB transport range:
+524,288/524,288 unique words, zero conflicts, zero duplicates, and zero SPI
+errors. The raw dump SHA-256 is
+`b588c7258699beee77669d1f5f09bb17ef8b189b941b46f344a07378c3aaa727`.
+The lower 1 MiB is populated while the upper 1 MiB is entirely erased `0xFF`, so
+the deterministic normalized CodeFlash is the exact lower half, SHA-256
+`42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`.
 
-Highest-value next evidence is therefore targeted rather than broad. The FRC and
-Brake/EPB identities, NRTD cruise-button oracles, and the `0x0FE` momentary switch
-carrier are now closed dynamically. What remains is:
+The acquisition also replaces VAR-051's boot-family boundary with direct F33
+evidence. Stock boot SID `0x23` CodeFlash access rejects the read, but boot
+SecurityAccess succeeds; DID `0x0203` returns the old-stack selector, zero
+`0x0201/0x0202` records are accepted, RequestDownload accepts
+`FEBF0000/0x1000`, `0x10F0` accepts the authenticated envelope, and `0xFF00`
+starts the retained read-only range payload. These are exact Camry bootstrap
+facts. They do **not** prove that a Corolla H/F application-retention carrier or
+operational command-5 permission survives unchanged after boot-to-application
+handoff.
+
+### 9.1 Application Rx continuity and target-native SecOC
+
+The generated normal-Rx descriptor table is at `0x21FE8` with 43 descriptors.
+Every one of the 40 Corolla-H descriptors exists on this target; Camry adds only
+`0x116/8`, `0x0D8/8`, and `0x1DA/8`. Relative to the older Sienna image, Camry
+removes the old `2E4/191/131/2FD/132/423/020` receive set and adds
+`116/D8/B6`. This is configuration continuity, not a blanket semantic-transfer
+claim.
+
+The exact three-record protected receive table is at **`0x25848`** and contains
+only `0x00F`, `0x0D7`, and `0x0B6`. The shared crypto configuration immediately
+before it selects `{type=1, selector=4}`; target-native `0x8A8E4` programs ICU-S
+**command 7**. B6 is regenerated as **PDU44**: 32 secured bytes, 28 application
+bytes plus an FV4/CMAC28 trailer, full FV46, full CMAC128, freshness ID 2, and
+crypto handle 0. Thus the earlier H/F conclusion that B6 belongs to the same
+slot-4 authenticated receive family as `00F/D7` is now independently true for
+F33 itself.
+
+### 9.2 B6 wire layout: Target Lateral ID + target steering angle
+
+Camry's COM scalar extractor is at `0x7D12A`; target-native code fixes TP at
+`0x23DFC`, signal-to-PDU table `0x22488`, PDU table `0x226C0`, and PDU-buffer
+offset table `0x22840`. PDU44 begins at COM offset `0x1B7` and owns configured
+signals 259..275. Its scalar unpacker `0x4BD46` recovers, among the companion
+fields:
+
+- **signal 261 = B3[5:0]**, unsigned six-bit selector;
+- **signal 262 = B4:B5**, signed 16-bit steering target;
+- signals 263..273 occupy B6..B10;
+- B28..B31 remain the SecOC trailer rather than application fields.
+
+Signal 261 is now nameable rather than merely structurally analogous to H.
+`0x58074` stages B3 and `0xBCD66` snapshots it; target-native `0xCEFFC` consumes
+that snapshot and recognizes values `1/4/10/11/18/19`. Toyota's P5 EMPS
+**Target Lateral ID** dictionary assigns those exact values
+`PCS/LDA/Hands Off LTA/LTA-LCA/SDG/PDA`. A second target-native consumer
+`0xCB73A` recognizes raw 49, which the same Toyota dictionary names
+`Self-Propelled Transport`. The numeric/consumer join therefore closes B3 as
+**Target Lateral ID** on this Camry.
+
+Signal 262 is staged `gp-0x3748 -> gp+0x39FA -> gp-0x970` and consumed by
+**`0xCCF0E`**, which computes a saturated `2 * signed16(B4:B5)` target followed
+by interpolation/history; `0xCCFB6` applies mode-dependent target limits and
+`0xCEE80` independently supervises the same target snapshot. The remaining
+question was whether this target quantity was specifically steering angle or a
+more generic steering-domain scalar. The Camry's own feedback path closes that
+question.
+
+### 9.3 Camry-native `0x025` measured Steering Angle closes signal 262
+
+CAN-FD `0x025` is target-native PDU35 at COM offset `0x127`. Its unpacker
+`0x4B59E` extracts signal 187 as signed12 coarse angle and signal 188 as signed4
+fraction. `0x47AE0` consumes the exact coarse field, and the target's own DID
+`0x1037` table row at `0x293AC` points to callback `0x4DBF8`, which consumes that
+same value. Toyota P5 names DID `0x1037` **Steering Angle** and gives the coarse
+raw value a `1.5 deg/count` conversion.
+
+The normal control path independently reconstructs the same feedback:
+`0xB3B06` forms `15*coarse + signed_fraction`, and `0xCE9EA` converts it through
+`*0x6FB/0x200`; the signed nibble therefore supplies the `0.1 deg` fraction of
+the coarse 1.5-degree representation. `0xCEADA` republishes the valid measured
+angle into a redundant triple. The corrected complete comparator at `0xCD128`
+then votes the B6-derived target triple and the `0x025`-derived measured-angle
+triple, applies the **same `0xB76/0x400` gain to each, and subtracts measured
+from target**. This target-native closed loop is direct evidence that B6
+**signal 262 / B4:B5 is the target steering-angle command**.
+
+The integer gains also give an exact linearized controller-equivalent scale:
+one B6 count corresponds to `1024/17870 deg`, approximately `0.0573027 deg` or
+`1.0001215 mrad`. That is a derived relation between the two target-native
+controller domains, including Toyota's DID `0x1037` degree scale; the firmware
+does not literally label B6's wire engineering unit "mrad", and integer
+truncation/saturation still applies.
+
+PDU44's target-native receive supervision reloads to **seven foreground ticks**.
+This pass does not copy H's 5-ms foreground period onto Camry, so a 35-ms
+wall-clock timeout is not yet claimed for F33.
+
+The compact artifact is `data/generated/camry_8965F3307000_codeflash.json`,
+bound to exact target-native decompiler bodies in
+`data/generated/camry_8965F3307000_decompiler_evidence.json` and independently
+checked by `tests/verify_camry_8965F3307000_codeflash.py`. Raw acquisition
+provenance is retained in `raw-20260826/CODEFLASH_MANIFEST.txt`.
+
+## 10. What this changes for openpilot work
+
+The exact Camry image removes the largest firmware-transfer uncertainty from the
+lateral path. `0x025`, B6, the protected `00F/D7/B6` set, ICU-S slot-4 receive
+verification, Target Lateral ID, and the target-vs-measured steering-angle loop
+are now F33-native facts rather than Corolla assumptions. The earlier read-only
+CarState evidence (`0x030` torque, `0x51E` Ready, `0x127` gear, FRC cruise
+oracles) remains complementary live evidence.
+
+The remaining blockers are narrower and concrete:
 
 1. capture stock LTA `off -> active -> off` on this exact car while retaining all
-   buses; if B6 appears, measure stock cadence, secondary bytes, freshness, and
-   physical side-of-relay visibility;
-2. while READY, synchronize cruise main plus actual engage/cancel with `0x1905`
-   permission and `0x1914` ACC-control-in-operation;
-3. repeat/cycle following-distance if production CarState needs its ordinary-CAN
-   carrier, to distinguish `0x251` from `0x5AF` and close the enum;
-4. acquire exact `8965F3307000` CodeFlash before transferring H/F boot-RAM,
-   command-5, steering-limit, SecOC-receiver, or Panda-safety conclusions as
-   firmware facts.
+   buses. Firmware proves the B6 receiver, but live traffic is still needed for
+   stock sender cadence, companion-field template, freshness evolution, and
+   side-of-relay producer/suppression behavior;
+2. recover the **Camry** foreground timer period, steering limits/rate limits,
+   fault thresholds/status outputs, and final motor-control safety constants
+   before constructing production Panda limits. Seven receive ticks are known;
+   H's 5-ms period and H/F limit constants are not silently transferred;
+3. prove target-native operational signing capability/latency and any required
+   application-retention carrier before relying on ICU-S command 5. Boot RAM
+   execution is now proven on F33, but boot execution is not the same thing as a
+   retained application-context signer;
+4. synchronize actual cruise engage/cancel with FRC `0x1905/0x1914`, and repeat
+   following-distance if production CarState needs that ordinary-CAN field;
+5. perform relay-correct interception testing before any lateral output. Passive
+   bus-1 observation does not establish exclusive B6 authority or safe stock
+   sender suppression.
 
-Until those are closed, production output remains disabled.
+Production output remains disabled. The exact firmware substantially reduces the
+remaining work, but it does not by itself authorize steering transmission.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
@@ -314,6 +424,6 @@ Until those are closed, production output remains disabled.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053)
+- Findings with this document as canonical home: [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054)
 - Corrections with this document as canonical home: —
 <!-- knowledge-cross-references:end -->

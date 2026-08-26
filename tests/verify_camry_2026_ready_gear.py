@@ -102,7 +102,7 @@ print("\n== documentation ==")
 doc = (REPO / "docs/variants/camry-2026-live-baseline.md").read_text()
 for token in ("VAR-053", "P=0", "R=1", "N=2", "D=3", "B=4", "5.213083", "9.480908"):
   check(f"Camry report preserves {token}", token in doc)
-check("production boundary remains read-only", "production output remains disabled" in doc and "does not authorize" in doc)
+check("production boundary remains read-only", "Production output remains disabled" in doc and "does not authorize" in doc)
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

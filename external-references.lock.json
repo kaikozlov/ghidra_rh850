@@ -894,6 +894,62 @@
       "sha256": "7bae994dea1caff06d8f31f58558f67d646da38bd9531557875858eb33fa4db3",
       "provenance": "Deterministic gzip (mtime=0) emitted on the maintainer-operated comma by the tracked passive B capture script.",
       "notes": "58,712 passive CAN frames over 25.000072204 s; exact 0x127 D/B/D transition closes raw value 4=B on the exact Camry."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/CODEFLASH_MANIFEST.txt",
+      "size": 2463,
+      "sha256": "d78299293eb996f3ebe35eb36428b54e7a6243e22a6ef639054cf61991144ed8",
+      "provenance": "Maintainer-generated provenance manifest for the exact F33 CodeFlash acquisition.",
+      "notes": "Pins source hashes, identity/NRTD guard, full-range completeness, and normalization boundary."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_codeflash_dump.py",
+      "size": 17796,
+      "sha256": "0e2f78b156de7938e7d4069b3cd27cb16b819dd4c9fe046de0e6b7690147fb03",
+      "provenance": "Exact identity/NRTD-guarded collector used on the maintainer-operated comma.",
+      "notes": "Authenticated old-stack boot-RAM range streamer; retained for acquisition reproducibility, not as production vehicle-control tooling."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/calvin_payload_codeflash_00000000_00200000.bin",
+      "size": 4096,
+      "sha256": "860f8a3418d23ccfd0861a97efdb9e1d23a8854c3a629b8d7b6821eb93d0b588",
+      "provenance": "Exact 4-KiB authenticated payload envelope used by the successful CodeFlash collector.",
+      "notes": "Payload is bound to the retained acquisition transcript and configured 0x00000000..0x001FFFFF range."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/codeflash/camry_8965F3307000_codeflash_20260826T213719Z.bin",
+      "size": 2097152,
+      "sha256": "b588c7258699beee77669d1f5f09bb17ef8b189b941b46f344a07378c3aaa727",
+      "provenance": "Exact successful raw CodeFlash transport-range dump copied from the maintainer-operated comma.",
+      "notes": "2 MiB transport range; 524,288/524,288 words; lower 1 MiB populated, upper 1 MiB erased FF."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/codeflash/camry_8965F3307000_codeflash_20260826T213719Z.coverage.bin",
+      "size": 524288,
+      "sha256": "33a150bceb13c1a992231e65b4fad16815212fc06cdb408996d32eeb2cef9ebb",
+      "provenance": "Exact one-byte-per-word coverage bitmap emitted by the successful collector.",
+      "notes": "524,288 bytes, all 0x01; zero missing words in the retained run."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/codeflash/camry_8965F3307000_codeflash_20260826T213719Z.run.json",
+      "size": 11233,
+      "sha256": "0d0fae44ba6c309f5ecb35a90435eb5b47bbbd3465c5d36ac1b15ff9d96fa265",
+      "provenance": "Exact JSON acquisition transcript emitted by the successful collector.",
+      "notes": "Retains identities, NRTD guard, old-stack bootstrap stages, hashes, coverage, conflict/duplicate/SPI counters."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26",
+      "path": "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+      "size": 1048576,
+      "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+      "provenance": "Deterministic normalized target image equal to the exact populated lower 1 MiB of the raw transport dump.",
+      "notes": "Target-native 8965F3307000 static-analysis authority; upper raw transport half is erased and intentionally excluded."
     }
   ],
   "public_routes": [

@@ -1158,6 +1158,33 @@ paths = [
   "exploit/findings_coverage.json",
 ]
 
+[suite.camry_8965f3307000_codeflash]
+tests = ["tests/verify_camry_8965F3307000_codeflash.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_camry_8965F3307000_codeflash.py",
+  "tools/analyze_camry_8965F3307000_codeflash.py",
+  "tools/extract_camry_8965F3307000_decompiler_evidence.py",
+  "tools/compare_variant_application_rx.py",
+  "data/generated/camry_8965F3307000_codeflash.json",
+  "data/generated/camry_8965F3307000_decompiler_evidence.json",
+  "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+  "community/kai/camry-2026/raw-20260826/CODEFLASH_MANIFEST.txt",
+  "community/kai/camry-2026/raw-20260826/camry_codeflash_dump.py",
+  "community/kai/camry-2026/raw-20260826/calvin_payload_codeflash_00000000_00200000.bin",
+  "community/kai/camry-2026/raw-20260826/codeflash/",
+  "community/kai/camry-2026/README.md",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "data/generated/techstream_v18/p5_lateral_control_semantics.json",
+  "data/toyota_eps_variant_matrix.csv",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/PRIORITIES.md",
+  "external-references.lock.json",
+  "exploit/findings_coverage.json",
+]
+
 [suite.span_2025_discord_rlog_opendbc_evidence]
 tests = ["tests/verify_span_2025_discord_rlog_opendbc_evidence.py"]
 oracle = "generated_self_check"
