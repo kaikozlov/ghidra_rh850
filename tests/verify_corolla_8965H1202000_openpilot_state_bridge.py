@@ -71,7 +71,8 @@ check("4A3 remains route-availability bounded", "zero 0x4A3 frames" in b["dynami
 
 print("\n== 0x351 mixed status bridge ==")
 s351 = art["state_bridge"]["0x351"]
-check("351 is mixed status, not generic readiness", "mixed EPS status" in s351["classification"] and "C159B49-linked" in s351["classification"] and "does not name the whole packet" in s351["boundary"])
+check("351 is mixed status, not generic readiness", "mixed EPS status" in s351["classification"] and "C159B49-linked" in s351["classification"] and "not a generic LKA/EPS-ready state" in s351["boundary"] and "no unique Toyota/DTC display names" in s351["boundary"])
+check("351 force7 topology is fully source-bounded", s351["force7_static_contract"]["condition"] == "(FEBE65E4 & 0x0003) != 0 AND FEBE7E13 != 0" and s351["force7_static_contract"]["record_aggregate_side"]["record_count"] == 24 and s351["force7_static_contract"]["record_aggregate_side"]["bit_used"] == 15)
 check("351 exact C159B49 diagnostic join", s351["diagnostic_join"]["techstream_code"] == "C159B49" and s351["diagnostic_join"]["h_dtc_index"] == 54 and s351["diagnostic_join"]["enabled_word"] == 1)
 check("351 exact seven-count transition state", any("seven-count transition state" in x and "0x2B930 = 7" in x for x in s351["producer_chain"]))
 check("351 force-7 override is separate and exact", "separately forces code 7" in s351["wire_fields"][0]["semantic"] and "exact force-7 indicator" in s351["wire_fields"][1]["semantic"] and "(FEBE65E4 & 3) != 0" in s351["wire_fields"][1]["semantic"] and "FEBE7E13 != 0" in s351["wire_fields"][1]["semantic"] and any("force-writes code 7 plus FEBE7DD1=1" in x for x in s351["producer_chain"]))
@@ -86,6 +87,7 @@ cfg = s394["state0_final_branch_window"]
 check("394 state0 final gating is raw-instruction pinned", cfg["start"] == "0x0004BB16" and cfg["end_exclusive"] == "0x0004BB50" and cfg["sha256"] == "d3838fae94f6a5bdcf953ccabda64142bddeffd2470e4935af3c4a7374ba50c6" and "0x4BB48" in cfg["control_flow"] and "state 16" in cfg["control_flow"] and "not assign OEM names" in cfg["boundary"])
 check("394 special state15 remains bounded", s394["classifier_states"]["15"]["role"] == "special operating state" and "not safely nameable" in s394["classifier_states"]["15"]["boundary"])
 check("394 temp/permanent fault mapping is deliberately unresolved", s394["openpilot_fault_mapping"]["steerFaultTemporary"] == s394["openpilot_fault_mapping"]["steerFaultPermanent"] == "unresolved")
+check("394 complete DEM class partition is embedded", sum(s394["fault_state_contract"]["dem"]["class_counts"].values()) == 242 and s394["classifier_states"]["6"]["role"].startswith("class-0x02") and s394["classifier_states"]["10"]["role"].startswith("class-0x10") and s394["fault_state_contract"]["aging"]["class2_class4_secondary_age"] == 600)
 check("394 packet availability remains bounded", "zero 0x394 frames" in s394["dynamic_boundary"])
 
 print("\n== live 0x030 state and torque ==")
@@ -97,6 +99,7 @@ state_fields = {x["signal_id"]: x for x in s030["steering_state_fields"]}
 check("030 selected steering fault/inhibit status nominal polarity observed", state_fields[6]["wire"] == "B6[2]" and state_fields[6]["span_values"] == [0] and state_fields[6]["span_clear_frames"] == 6000)
 check("030 torque-validity gate nominal polarity observed", state_fields[8]["wire"] == "B6[0]" and state_fields[8]["span_values"] == [0] and state_fields[8]["span_clear_frames"] == 6000)
 check("030 neighboring status bit is live", state_fields[7]["span_values"] == [0, 1])
+check("030 B6[1] source/calibration is statically closed", "Q-axis actual-current-derived" in state_fields[7]["semantic"] and state_fields[7]["static_contract"]["calibration"]["feature_flag"] == 0x5A and "calibration-disabled" in state_fields[7]["static_contract"]["classification"])
 torque = s030["driver_torque_encoding_family"]
 check("030 torque exact physical reconstruction promoted", torque["signal_ids"] == [0, 10, 31] and torque["physical_reconstruction"].startswith("Steering Wheel Torque [N.m] = signal10_signed * 0.1"))
 check("030 torque live dynamic range observed", torque["span_torque_nm"]["count"] == 6000 and torque["span_torque_nm"]["min"] < -8.0 and torque["span_torque_nm"]["max"] > 2.8 and torque["span_torque_nm"]["unique_count"] > 500)

@@ -473,13 +473,19 @@ Live `0x030` carries exact physical **Steering Wheel Torque** through signals10+
 state) and B6[0] torque-invalid gates are nominal-clear in all 6,000 frames. A GP-relative
 writer correction also removes eleven false `default-init-only` classifications.
 `0x4A3` is now the alternate torque/Q-current bridge (0.1 N.m/count and -0.01
-A/count respectively); `0x351` is mixed status with a C159B49-linked motor-B
-electrical-monitor base path plus a separate force-7 override; and `0x394` has a recovered 17-state classifier whose state 0 is the
-deepest recovered clear/normal path, not a Ready boolean. Ready itself is now closed
+A/count respectively). TMS-059 closes `0x030 B6[1]` to a Q-axis-current threshold/
+debounce chain whose exact-H detector is calibration-disabled, and closes `0x351`'s
+separate force-7 override to status-bitmap bits0/1 AND bit15 of a 24-record aggregate.
+TMS-058 closes `0x394` substantially farther: all 242 populated-class DEM events are
+partitioned into exact class/state families, named Toyota DTC families are joined where
+present, and states 6/7 and 8/9 have exact 200/600-count latch-aging structure. State 0
+remains the deepest clear/normal path, not a Ready boolean. Ready itself is now closed
 on the **incoming** side: exact H `0x51E B0[7] -> FEBE7D1B -> FEBEF052 -> FEBEB5A8 ->
 FEBEE811 -> DID 0x1033 Ready Status`, corroborated as value1 in both operational
 routes. No EPS-Tx Ready duplicate is required for observation. Do not redo driver-torque
-producer/scale or Ready-wire recovery.
+producer/scale, Ready-wire recovery, broad `0x394` class mapping, `0x030 B6[1]` source
+tracing, or `0x351` force-7 source tracing. The remaining fault work is live policy
+validation, not another static sweep.
 
 COM-013 adds the whole-vehicle half that was previously missing. The public TSS3
 Corolla route preserves useful old-state structure in `0x0AA/0x101/0x116/0x176`

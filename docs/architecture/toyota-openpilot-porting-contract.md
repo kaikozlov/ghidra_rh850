@@ -279,7 +279,7 @@ work must recover the second and fourth boxes for each new generation as well.
 | Platform identity / generation | exact firmware identity and P1M-E profile known | exact H and Span corpora known | bind each candidate vehicle to FRC/EPS/gateway firmware and real bus topology |
 | Torque steering command | protected `0x2E4` request/torque path recovered | classic `0x2E4` absent; H/F instead receive protected B6 target-angle control | do not port torque limits/scales; derive H/F-native limits and finish SecOC sender/producer contract |
 | LTA/angle command | protected `0x131` path recovered and converges with torque mode | active queue lacks `0x131`; protected `0x0B6` signal255 is target angle, signal254 is the OEM request selector, receiver loss is nominal 35 ms (7 steady 5-ms ticks), and signal261 is modulo-64 sequence state | module topology is `FRC_P5` 498 + `ABS_P5`/Brake-EPB 435 + `EMPS_P5` 405; TMS-051 identifies Brake System Control/category-435 as the immediate authenticated B6 source family; TMS-052 proves the 23TC01 `8646F1204500` 2023-Corolla `0792` FRC family is already local but encoded and publishes the 24TC01 Brake candidate family `F152612A51/52/53→A54`, while no `07B0` Brake image is local. Code-level origin/forwarding and **stock** cadence/signing ownership still require decoded producer firmware or synchronized stock-LTA traffic, but TMS-053 closes replacement-sender message8 re-anchoring from authenticated `0x00F`; do not transplant old `0x131` wire scaling |
-| Steering feedback | `0x025`, `0x260`, `0x262` roles strongly mapped | H `0x025` is FD angle/rate; live `0x030` now provides physical driver torque plus raw fault/validity gates; `0x4A3` supplies alternate torque/Q-current and `0x351/0x394` supply fault/status families | choose and dynamically validate a conservative Panda driver-override policy; validate Q-current response policy, Ready=0/fault transitions, and temporary/permanent fault mapping. Static H finds no physical driver-torque comparator in the recovered target-to-motor control cone |
+| Steering feedback | `0x025`, `0x260`, `0x262` roles strongly mapped | H `0x025` is FD angle/rate; live `0x030` provides physical driver torque plus fault/validity gates; B6[1] is Q-axis-current-derived with its exact-H threshold detector calibration-disabled; `0x4A3` supplies alternate torque/Q-current; `0x351` force-7 source topology and `0x394`'s 242-event DEM-class/DTC families are statically closed | choose and dynamically validate a conservative Panda driver-override/Q-current-response policy; validate Ready=0 plus recoverable-vs-latched fault transitions before assigning openpilot temporary/permanent policy. Static H finds no physical driver-torque comparator in the recovered target-to-motor control cone |
 | Longitudinal command | older SecOC DBC provides a useful comparator, not an EPS-local proof | route `0x183` is 64-byte CAN-FD and disproves old wire-shape transfer | locate ACC producer, target command, feedback, stock suppression, AEB coexistence |
 | Stock producer ownership | old openpilot architecture gives camera/radar replacement model | physical Toyota-B/network differences already observed | map FRC/radar/gateway ownership and safe duplicate blocking for each command family |
 | UI / alerts | older `0x412` is historical reference | old-camera U023A87 path is disabled residue in H | identify FRC/cluster LTA/LDA/LCA status and warning outputs |
@@ -389,14 +389,21 @@ What the exact segment-0 rlog *does* close is the old-openpilot role migration:
   that mapping.
 - Exact H closes the physical driver-torque scale on live `0x030`, the
   `0x030` selected steering fault/inhibit status plus torque-validity gate, the
-  `0x351` C159B49-linked base path plus its separate force-7 override, and the
-  `0x394` deepest clear/normal classifier path. TMS-053's expanded exact-H
+  `0x351` C159B49-linked base path plus its separate force-7 override. TMS-059
+  now closes that force-7 topology to status-bitmap bits0/1 AND a 24-record
+  aggregate bit15, and closes `0x030 B6[1]` to a Q-axis-current-derived detector
+  whose exact-H threshold path is calibration-disabled. TMS-058 closes `0x394`
+  beyond the deepest clear/normal path: all 242 populated-class DEM events are
+  partitioned into native class/state families with Toyota DTC joins where present,
+  including exact 200/600-count aging for the class-2/class-4 paired states.
+  TMS-053's expanded exact-H
   named/fixed-GP census finds **zero** physical driver-torque source/snapshot
   references in the recovered C8xxx–CExxx target-to-motor control cone. The
   remaining driver-override threshold is therefore a conservative Panda/openpilot
   policy to choose and validate dynamically, not an OEM comparator to recover.
-  Q-current response policy and production temporary/permanent fault transitions
-  still require vehicle-level evidence.
+  Q-current response policy and the final openpilot temporary/permanent mapping
+  still require vehicle-level evidence; the broad static fault-family mapping itself
+  is no longer open.
 - **Same ID is not enough for body/UI reuse.** `0x3B7`, `0x411`, `0x412`,
   `0x610`, `0x614`, `0x620`, and `0x622` remain 8-byte frames, but most relevant
   transitions are static in this segment. One concrete warning is `0x610`: the

@@ -132,6 +132,16 @@ check("B6 monitor is row5 slot18 PDU42", b6["row_index"] == 5 and b6["status_slo
 check("B6 maps event0143 to H DTC index82 C12987", b6["dem_event"] == "0x0143" and b6["dtc"]["h_dtc_index"] == 82 and b6["dtc"]["packed_dtc"] == "0xC12987")
 check("Techstream names B6 source as brake-system missing message", b6["dtc"]["techstream_code"] == "U012987" and b6["dtc"]["techstream_description"] == "Lost Communication with Brake System Control Module" and b6["dtc"]["techstream_failure"] == "Missing Message")
 
+print("\n== complete H DEM event-class/DTC catalog ==")
+fc = d["fault_event_class_catalog"]
+check("242 populated-class DEM events are exhaustively classified", sum(fc["class_counts"].values()) == 242 and fc["event_count_scanned"] == 0x180)
+check("exact class histogram is pinned", fc["class_counts"] == {"0x01":8,"0x02":34,"0x04":1,"0x08":1,"0x0F":1,"0x10":173,"0x20":16,"0x40":1,"0x80":7})
+check("class 0x02 mostly carries named DTCs", fc["classes"]["0x02"]["dtc_indexed_count"] == 32)
+check("class 0x10 is the dominant named fault family", fc["classes"]["0x10"]["dtc_indexed_count"] == 169)
+check("class 0x20 has six named DTC events", fc["classes"]["0x20"]["dtc_indexed_count"] == 6)
+check("internal-only classes retain zero-DTC boundary", all(fc["classes"][x]["dtc_indexed_count"] == 0 for x in ("0x04","0x08","0x0F","0x40","0x80")))
+check("fault catalog does not invent openpilot policy", "do not by themselves define openpilot" in fc["boundary"])
+
 print("\n== protected brake-profile field semantics ==")
 pb = d["protected_brake_profile_semantics"]
 check("D7 configured/scalar split is 240..247 versus 240/243/246", pb["d7"]["configured_signal_ids"] == list(range(240,248)) and [x["signal_id"] for x in pb["d7"]["scalar_calls"]] == [240,243,246])

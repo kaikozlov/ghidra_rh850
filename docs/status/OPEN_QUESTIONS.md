@@ -565,7 +565,14 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   validate dynamically. Measured `0x4A3` Q-current is observable, but no
   cooperative-supervisor measured-Q comparator is recovered; any actuator-response
   limit is likewise a future Panda/sender policy rather than an OEM threshold still
-  waiting to be copied. Extended fault mapping remains open.
+  waiting to be copied. TMS-058 now closes the extended **static** `0x394`
+  mapping: 242 populated-class DEM events are exhaustively partitioned into the
+  native class/state families, named Toyota DTC families are joined where present,
+  and the class-2/class-4 paired states have exact 200/600-count aging structure.
+  TMS-059 additionally closes `0x030 B6[1]` to a Q-axis-current-derived detector
+  (calibration-disabled on exact H) and the `0x351` force-7 source topology. What
+  remains is operational policy: Ready=0 plus recoverable/latched fault transitions
+  are still required before assigning openpilot temporary/permanent classes.
   COM-016 now closes **receiver-side competing-B6 arbitration**: there is no recovered
   sender identity or Target-Lateral-ID priority; one pending SecOC slot coalesces
   arrivals, in-flight arrivals are ignored, one shared freshness state rejects replay

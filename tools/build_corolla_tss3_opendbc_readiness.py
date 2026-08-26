@@ -39,6 +39,8 @@ SPAN_RLOG = REPO / "data/generated/corolla_2025_span_discord_rlog_opendbc_eviden
 ENGAGEMENT = REPO / "data/generated/corolla_hf_nonsteering_engagement_state.json"
 POWER_GATE = REPO / "data/generated/corolla_8965H1202000_power_supply_monitor_gate.json"
 AUTH_WIRE = REPO / "data/generated/corolla_hf_cooperative_authority_wire_visibility.json"
+FAULT_STATE = REPO / "data/generated/corolla_hf_fault_state_contract.json"
+REMAINING_STATUS = REPO / "data/generated/corolla_hf_remaining_status_contract.json"
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -151,6 +153,8 @@ def main() -> int:
     span = span_capture()
     span_rlog = json.loads(SPAN_RLOG.read_text())
     engagement = json.loads(ENGAGEMENT.read_text())
+    fault_state = json.loads(FAULT_STATE.read_text())
+    remaining_status = json.loads(REMAINING_STATUS.read_text())
     power_gate = json.loads(POWER_GATE.read_text())
     auth_wire = json.loads(AUTH_WIRE.read_text())
     if carrier["schema"] != "corolla-hf-command5-runtime-carrier-v1" or not carrier["boundary"]["static_target_native_carrier_candidate_closed"]:
@@ -159,6 +163,8 @@ def main() -> int:
         raise ValueError("static carrier artifact must not claim live closure")
     if engagement["schema"] != "corolla-hf-nonsteering-engagement-state-v1":
         raise ValueError("non-steering engagement contract schema drift")
+    if fault_state["schema"] != "corolla-hf-0x394-fault-state-contract-v1" or remaining_status["schema"] != "corolla-hf-remaining-status-contract-v1":
+        raise ValueError("remaining H/F static-state contract drift")
     if not (engagement["ready_status"]["can_id"] == "0x51E" and engagement["ready_status"]["wire"] == "B0[7]"):
         raise ValueError("Ready Status engagement-contract drift")
     if power_gate["schema"] != "corolla-8965H1202000-power-supply-monitor-gate-v1":
@@ -247,9 +253,9 @@ def main() -> int:
             "EPS readiness / steering faults",
             "generation_native_replacement_open_dynamic_join",
             f"Older Toyota uses 0x262 LKA/LTA states; temporary={old_temp}, permanent={old_perm}",
-            "0x262 is absent from the TSS3 routes. Exact H closes 0x030 B6[2] as a live selected steering fault/inhibit status aggregate (nominal-clear 6000/6000; not an exhaustive EPS-fault state), 0x351 as a mixed status carrier with a C159B49-linked motor-B electrical-monitor base path plus a separate force-7 override, and 0x394 as a lossy 17-state fault/status projection whose state 0 is the deepest recovered clear/normal classifier path, not a proved Ready boolean. Exact H now also closes incoming 0x51E B0[7] as DID 0x1033 Ready Status; both retained operational routes show Ready=1, while Ready=0 remains uncaptured. Separately, FEBE7C58->FEBEF000->FEBEACBD is a graded power-supply receive-validity/freeze gate, distinct from B6 loss, and the related 0x030 B6[3]/B10[3]/B13[4] path carries only a coarse raw-mode<2 aggregate that provably cannot represent exact cooperative authority.",
+            "0x262 is absent from the TSS3 routes. Exact H closes 0x030 B6[2] as a live selected steering fault/inhibit status aggregate (nominal-clear 6000/6000; not exhaustive), and now closes B6[1] to a Motor Actual Current (Q Axis)-derived threshold/debounce chain whose exact-H detector is calibration-disabled. 0x351 is a mixed carrier with a C159B49-linked base path plus a separate force-7 override now traced to status-bitmap bits0/1 AND bit15 of a 24-record aggregate. 0x394 is a 17-state projection whose 242 populated-class DEM events are exhaustively partitioned: class 0x02 -> states 6/7, class 0x04 -> 8/9, class 0x10 -> 10, class 0x20/F0-compatible aggregate -> 11, class 0x40 -> 12, class 0x08 -> 13, class 0x0F -> 14, with exact 200/600-count latch-aging structure; named Toyota DTC families are joined where H carries a DTC index. State 0 remains the deepest clear/normal path, not a Ready boolean. Incoming 0x51E B0[7] is DID 0x1033 Ready Status; retained operational routes show Ready=1, while Ready=0 remains uncaptured. Separately, FEBE7C58->FEBEF000->FEBEACBD is a graded power-supply receive-validity/freeze gate, distinct from B6 loss, and the related 0x030 B6[3]/B10[3]/B13[4] path carries only a coarse raw-mode<2 aggregate that cannot represent exact cooperative authority.",
             "exact H state bridge + non-steering engagement contract + Techstream DTC/DID joins + Span moving-rlog 0x030 polarity",
-            "Correlate both 0x351 paths (C159B49-linked base status and force-7 override), 0x394, and a 0x51E Ready 1->0->1 transition against standby, stock LTA active, message loss, temporary fault and latched fault. Old numeric fault enums and temporary/permanent classes are not portable.",
+            "Static class/DTC/source mapping is now closed; remaining work is operational policy. Capture 0x351/0x394 plus a 0x51E Ready 1->0->1 transition during recoverable versus latched faults and stock-LTA disable/recovery to decide openpilot temporary/permanent policy. Old numeric fault enums are not portable.",
         ),
         row(
             "gear",
@@ -396,6 +402,16 @@ def main() -> int:
                 "exact_authority_negative": auth_wire["exact_authority_negative"],
                 "five_pdu_boundary": auth_wire["five_pdu_boundary"],
             },
+            "fault_state_contract": {
+                "class_counts": fault_state["dem"]["class_counts"],
+                "class_to_state": fault_state["dem"]["class_to_state"],
+                "aging": fault_state["aging"],
+                "openpilot_boundary": fault_state["openpilot_boundary"],
+            },
+            "remaining_status_contract": {
+                "can_0x030_b6_bit1": remaining_status["can_0x030_b6_bit1"],
+                "can_0x351_force7": remaining_status["can_0x351_force7"],
+            },
             "critical_warning": "Do not attribute exact H/F Tx/Rx state carriers to the public 2023 route: that route has no carFw, exposes 0x00F/0x0D7 but not B6 from H/F's three-PDU SecOC Rx set, and contains only 0x030 from H/F's five-PDU Tx set. It is not evidence of a complete exact-H/F EPS-bus mirror.",
         },
         "role_readiness": readiness,
@@ -413,7 +429,7 @@ def main() -> int:
             "can_scaffold_now": [
                 "Add an explicit TSS3 control-generation axis independent of the existing SECOC security flag.",
                 "Define a TSS3 0x025/32 DBC PDU carrying the firmware-proved steering angle/fraction/rate fields.",
-                "Decode live 0x030 physical Steering Wheel Torque and its raw fault/validity gates without importing the legacy override threshold or 0x262 fault classes.",
+                "Decode live 0x030 physical Steering Wheel Torque and its raw fault/validity gates; B6[1] is additionally bounded to a Q-axis-current monitor whose exact-H threshold detector is calibration-disabled. Do not import legacy override thresholds or 0x262 fault classes.",
                 "Carry forward 0x0AA/0x101/0x116/0x176 only behind generation-specific validation; do not copy the entire old DBC, and do not relabel 0x176 B0[3] as cruise state.",
                 "Expose incoming 0x51E B0[7] as target-native Ready Status for read-only observation without yet mapping Ready=0 to an openpilot fault/engagement policy.",
                 "Treat the recovered 0x030 B6[3]/B10[3]/B13[4] bits only as coarse system-mode diagnostics; do not use them as exact cooperative-authority feedback because raw modes 0 and 1 collapse in that path while FEBEACBD distinguishes them.",
@@ -425,12 +441,12 @@ def main() -> int:
                 "Firmware-identified H/F-family capture with the Toyota-B CAN0/CAN1 network physically relay-correct and stock LTA exercised off -> active -> off.",
                 "B6 stock/minimal secondary-field cross-ECU validation, stock sender cadence/physical route, and a working slot-4 signing path: key or the audited 462-byte H/F command-5 proxy after the 332-byte inert carrier canary proves live retention and selector-4 permission/latency is measured.",
                 "Stock-source suppression/interception point on Toyota-B topology.",
-                "Conservative Panda/openpilot driver-override policy dynamic validation, Q-current actuator-response policy if desired, Ready/fault transition mapping, and final relay-correct actuator validation. No Toyota EPS physical-driver-torque comparator remains to recover under the promoted static census.",
+                "Conservative Panda/openpilot driver-override policy dynamic validation, Q-current actuator-response policy if desired, Ready/fault recovery-to-openpilot temporary/permanent policy mapping, and final relay-correct actuator validation. Exact 0x394 DEM class/DTC families and 0x351 force-7 source topology are already statically closed; no Toyota EPS physical-driver-torque comparator remains to recover under the promoted static census.",
             ],
             "blocks_normal_carstate": [
                 "Validate P/R/N/B transitions on the retained 0x127 GEAR_PACKET_HYBRID carrier and bind them to the exact target.",
                 "Cruise CAN-field mapping for available/enabled/set speed/follow distance/ACC not-available state; exact FRC_P5 Data-ID semantics and their direct SID-0x22 polling transport are already recovered.",
-                "Generation-native steering fault/readiness mapping; driver-torque physical scaling is already closed.",
+                "Operational steering-fault/readiness policy mapping: static 0x394 class/DTC families are closed, but Ready=0 and recoverable-vs-latched transitions must define the final openpilot temporary/permanent policy. Driver-torque physical scaling is already closed.",
                 "Dynamic validation of retained body/UI fields used by openpilot.",
             ],
             "blocks_radar": [

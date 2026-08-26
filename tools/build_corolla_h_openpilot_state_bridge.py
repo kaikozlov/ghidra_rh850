@@ -22,6 +22,8 @@ LTA = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance.json"
 TARGET = REPO / "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json"
 STRUCT = REPO / "data/generated/corolla_8965H1202000_structural_function_transfer.json"
 EQ = REPO / "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json"
+FAULT_STATE = REPO / "data/generated/corolla_hf_fault_state_contract.json"
+REMAINING_STATUS = REPO / "data/generated/corolla_hf_remaining_status_contract.json"
 OLD = REPO / "data/external/opendbc/toyota_corolla_pre_tss3_contract.json"
 OUT = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge.json"
 PDU = struct.Struct("<HBBHBB")
@@ -63,6 +65,8 @@ def build() -> dict:
     target = json.loads(TARGET.read_text())
     struct = json.loads(STRUCT.read_text())
     eq = json.loads(EQ.read_text())
+    fault_state = json.loads(FAULT_STATE.read_text())
+    remaining_status = json.loads(REMAINING_STATUS.read_text())
     old = json.loads(OLD.read_text())
     if len(image) != 0x100000 or sha(image) != evid["image"]["sha256"]:
         raise ValueError("H image/evidence identity drift")
@@ -78,6 +82,12 @@ def build() -> dict:
         raise ValueError("H non-steering engagement compact evidence schema/count drift")
     if eng_evid["image"]["sha256"] != sha(image):
         raise ValueError("H non-steering engagement evidence image drift")
+    if fault_state["schema"] != "corolla-hf-0x394-fault-state-contract-v1":
+        raise ValueError("H/F fault-state contract schema drift")
+    if remaining_status["schema"] != "corolla-hf-remaining-status-contract-v1":
+        raise ValueError("H/F remaining-status contract schema drift")
+    if fault_state["sources"]["h_codeflash"]["sha256"] != sha(image) or remaining_status["sources"]["h_codeflash"]["sha256"] != sha(image):
+        raise ValueError("H/F static status contract image drift")
 
     f = fnmap(evid)
     ef = fnmap(eng_evid)
@@ -249,6 +259,8 @@ def build() -> dict:
       "evidence_sources": {
         "state_corpus": {"path": str(EVID.relative_to(REPO)), "sha256": sha(EVID.read_bytes())},
         "did_0x1035_callback": {"path": str(DIAG_EVID.relative_to(REPO)), "sha256": sha(DIAG_EVID.read_bytes()), "entry": "0x00048820"},
+        "fault_state_contract": {"path": str(FAULT_STATE.relative_to(REPO)), "sha256": sha(FAULT_STATE.read_bytes())},
+        "remaining_status_contract": {"path": str(REMAINING_STATUS.relative_to(REPO)), "sha256": sha(REMAINING_STATUS.read_bytes())},
       },
       "images": {
         "corolla_h":{"software_id":"8965H1202000","sha256":sha(image)},
@@ -290,13 +302,14 @@ def build() -> dict:
           "producer_chain":[
             "0xB87E8 computes the C159B49-linked electrical-monitor predicate, reports Dem event 4 on assertion, and stores its boolean at GP-0x2EC = FEBEB514",
             "0xBBA48 copies FEBEB514 -> FEBEE82B; 0x46E0C propagates that monitor boolean while maintaining the exact seven-count transition state using calibration byte 0x2B930 = 7",
-            "independently, 0x3738C -> 0x472E0 supplies FEBE7E13 from its param_1 bit15 path",
-            "0x46E62 stages the mixed result: normally param_1 into FEBE7DD0, but force-writes code 7 plus FEBE7DD1=1 when (FEBE65E4 & 3) != 0 and FEBE7E13 != 0; 0x47BA2 packs B2[7:5]/B2[4]",
+            "independently, the recovered 24-record status-bank aggregate ORs each valid record's +6 ushort and 0x3738C selects its bit15 into 0x472E0 -> FEBE7E13",
+            "0x36BBE/0x36AAA maintain the independent 16-bit status bitmap at FEBE6FB4 and 0x5778E copies it to FEBE65E4; 0x46E62 force-writes code 7 plus FEBE7DD1=1 iff (FEBE65E4 & 3) != 0 and FEBE7E13 != 0; 0x47BA2 packs B2[7:5]/B2[4]",
           ],
           "diagnostic_join":d351,
-          "boundary":"C159B49 names one upstream electrical-monitor path feeding 0x351; it does not name the whole packet or the separate force-7 condition. 0x351 is not a generic LKA/EPS-ready state, and its numeric status codes must not be transplanted into old 0x262 LKA_STATE meanings.",
+          "force7_static_contract":remaining_status["can_0x351_force7"],
+          "boundary":"C159B49 names one upstream electrical-monitor path feeding 0x351; the separate force-7 source topology is now closed to status-bitmap bits0/1 AND a 24-record aggregate bit15, but those internal bits still have no unique Toyota/DTC display names. 0x351 is not a generic LKA/EPS-ready state, and its numeric status codes must not be transplanted into old 0x262 LKA_STATE meanings.",
           "dynamic_boundary":"Span and the public TSS3 route contain zero 0x351 frames, so packet availability and asserted-state transitions remain uncaptured.",
-          "openpilot_consequence":"Treat 0x351 as mixed generation-native status. Its C159B49-linked path and force-7 override must be correlated separately before either is used for safety; remove it from the generic readiness-candidate bucket.",
+          "openpilot_consequence":"Treat 0x351 as mixed generation-native status. The C159B49-linked base path and force-7 source topology are statically separated; live asserted/recovery transitions still need correlation before either is assigned an openpilot fault policy. Remove it from the generic readiness-candidate bucket.",
         },
         "0x394": {
           "classification":"generation-native 17-state EPS fault/status classifier with a recovered deepest clear/normal state",
@@ -329,20 +342,29 @@ def build() -> dict:
             "3":{"role":"internal input invalid/unavailable branch"},
             "4":{"role":"retained table row; not directly selected by the recovered H classifier body"},
             "5":{"role":"retained table row; not directly selected by the recovered H classifier body"},
-            "6-14":{"role":"active fault/inhibit classifier branches sourced from the Dem event-class aggregate/latches"},
+            "6":{"role":"class-0x02 fault branch with secondary latch active"},
+            "7":{"role":"class-0x02 fault branch after secondary-latch state clears"},
+            "8":{"role":"class-0x04 internal fault branch with secondary latch active"},
+            "9":{"role":"class-0x04 internal fault branch after secondary-latch state clears"},
+            "10":{"role":"class-0x10 dominant hardware/electrical/current/sensor/communication fault family"},
+            "11":{"role":"class-0x20/F0-compatible aggregate branch plus independent internal 0x20-bit source"},
+            "12":{"role":"class-0x40 internal fault branch"},
+            "13":{"role":"class-0x08 internal fault branch when its additional classifier condition permits"},
+            "14":{"role":"class-0x0F internal fault branch when its additional classifier condition permits"},
             "15":{"role":"special operating state","boundary":"selected by a distinct operational predicate, not safely nameable as ready or fault from static evidence alone"},
             "16":{"role":"fallback/not-normal operational inhibit branch"},
           },
-          "dem_class_aggregator":"0x4B692 accumulates event classes/counters consumed by 0x4B9AE; the branches cover real EPS processor, power, motor, sensor, communication, and compatibility fault families",
+          "dem_class_aggregator":"0x4B692 accumulates event classes/counters consumed by 0x4B9AE; the complete 384-entry H event-table census now maps the populated classes to exact Toyota DTC families where a DTC index exists",
+          "fault_state_contract":fault_state,
           "openpilot_fault_mapping":{
             "classifier_deepest_clear_normal_state":0,
             "conservative_clear_state_candidate":"state 0 only, pending packet routing plus Ready/LTA dynamic correlation; state 0 alone is not sufficient to authorize actuation",
             "steerFaultTemporary":"unresolved",
             "steerFaultPermanent":"unresolved",
-            "reason":"Firmware distinguishes startup, live/latched/aged fault classes and a special state 15, but no evidence maps those distinctions to openpilot's temporary/permanent fault contract. Guessing would be unsafe.",
+            "reason":"Firmware now closes exact DEM class-to-state families and 200/600-count latch-aging structure, but Toyota's internal class/latch distinctions still do not define openpilot's temporary/permanent fault contract. Guessing would be unsafe.",
           },
           "dynamic_boundary":"Span and the public route contain zero 0x394 frames; the state-0 clear/normal path and fault branches are statically recovered but not observed on-vehicle in the available captures.",
-          "openpilot_consequence":"This recovers a native deepest-clear/normal versus fault-family discriminator candidate, but not a Ready authorization bit or temporary/permanent CarState fault labels. A future relay-correct capture should correlate raw 0x394 states against EPS Ready Status, DTC transitions and stock LTA enable/disable.",
+          "openpilot_consequence":"The native state now carries a statically closed DEM-class/DTC-family partition for states 6-14, including exact latch-aging structure for 6/7 and 8/9. It still does not provide a Ready authorization bit or a justified openpilot temporary/permanent policy split; a future relay-correct fault/recovery capture should validate that policy mapping.",
         },
         "0x030": {
           "classification":"live generation-native EPS telemetry/status/validity carrier with driver torque and two safety-relevant gates closed",
@@ -353,7 +375,7 @@ def build() -> dict:
           "steering_state_fields":[
             {"signal_id":6,"wire":"B6[2]","source":"FEBE7DAE","semantic":"selected steering fault/inhibit status aggregate; duplicated as 0x4A3 B0[0]; not an exhaustive EPS-fault state","span_values":span030_bridge["steering_fault_inhibit_status"]["values"],"span_clear_frames":span030_bridge["steering_fault_inhibit_status"]["clear_frames"]},
             {"signal_id":8,"wire":"B6[0]","source":"FEBE7DB2","semantic":"driver-torque invalid/inhibit gate; the same producer condition forces FEBE7E22 driver torque to zero","span_values":span030_bridge["driver_torque_invalid"]["values"],"span_clear_frames":span030_bridge["driver_torque_invalid"]["clear_frames"]},
-            {"signal_id":7,"wire":"B6[1]","source":"FEBE7DB3 <- FEBEE848","semantic":"live status bit; exact steering meaning unresolved","span_values":span030_bridge["b6_bit1"]["values"]},
+            {"signal_id":7,"wire":"B6[1]","source":"FEBE6BAE Q-axis actual current -> FEBEEC0C/FEBEAFC4 -> threshold/debounce -> FEBEE848 -> FEBE7DB3","semantic":"Q-axis actual-current-derived debounced status; exact H's threshold detector is calibration-disabled","span_values":span030_bridge["b6_bit1"]["values"],"static_contract":remaining_status["can_0x030_b6_bit1"]},
             {"signal_id":5,"wire":"B6[3]","source":"FEBE7E09","semantic":"runtime status bit; exact steering meaning unresolved","span_values":span030_bridge["b6_bit3"]["values"]},
           ],
           "gp_relative_runtime_fields":[
@@ -374,7 +396,7 @@ def build() -> dict:
             "classification":"runtime signed16 calibrated derivative with sign inversion; source semantics are closed but exact packet engineering scale remains calibration-dependent",
           },
           "span_dynamic":{"frame_count":span030["frame_count"],"additive_rule_matches":span030["rule_matches"],"byte16_values":span030_bridge["byte16_values"]},
-          "boundary":"The available moving log proves 0x030 is live and both safety-relevant gates are clear in all 6,000 nominal frames. The prior direct-reference writer census was incomplete: eleven additional fields have exact GP-relative runtime writers, including a redundant driver-torque representation and a Q-current-derived field. It contains no induced fault or stock-LTA transition, so asserted-state operational consequences remain firmware-static and temporary/permanent fault semantics remain unresolved.",
+          "boundary":"The available moving log proves 0x030 is live and both safety-relevant gates are clear in all 6,000 nominal frames. Exact H now additionally closes B6[1] to a Q-axis-actual-current threshold/debounce chain whose detector is disabled by the exact-H calibration. Span's 0/1 B6[1] behavior remains cross-specimen evidence because that rlog is not exact-F181-joined. No induced fault or stock-LTA transition is present, so asserted-state operational consequences and temporary/permanent policy remain dynamic.",
           "openpilot_consequence":"0x030 can immediately supply physical driver steering torque, nominal selected steering fault/inhibit status, and driver-torque-validity state to the read-only measurement harness without making unseen 0x4A3/0x394/0x351 mandatory for CAN validity.",
         },
         "ready_status_input_0x51E":{

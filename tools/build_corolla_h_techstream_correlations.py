@@ -419,6 +419,49 @@ def main() -> int:
             "techstream_raw_sha256": sha(te.raw),
         }
 
+    # Complete H DEM event-class catalog. The event-table class byte (+1) is
+    # consumed by the target-native 0x4B692 class accumulator that feeds the
+    # 0x394 17-state classifier. Join every populated class record to H's own
+    # DTC table and the pinned EMPS_P5 Toyota DTC vocabulary when a DTC index
+    # exists. Keep class semantics separate from openpilot temporary/permanent
+    # policy: this is an OEM fault-family/lifetime join, not an openpilot label.
+    fault_event_classes: dict[str, list[dict]] = {}
+    for dem_event in range(0x180):
+        event_address = 0x2B988 + dem_event * 8
+        event_rec = codeflash[event_address:event_address + 8]
+        class_code = event_rec[1]
+        if class_code == 0:
+            continue
+        dtc = decode_h_event_dtc(dem_event)
+        fault_event_classes.setdefault(f"0x{class_code:02X}", []).append({
+            "dem_event": f"0x{dem_event:04X}",
+            "event_record_address": f"0x{event_address:08X}",
+            "event_raw_hex": event_rec.hex(),
+            "dtc_index": event_rec[2],
+            "dtc": dtc,
+        })
+    fault_event_class_catalog = {
+        "event_table": "0x0002B988",
+        "event_count_scanned": 0x180,
+        "class_byte_offset": 1,
+        "dtc_index_offset": 2,
+        "classes": {
+            class_code: {
+                "event_count": len(rows),
+                "dtc_indexed_count": sum(row["dtc"] is not None for row in rows),
+                "events": rows,
+            }
+            for class_code, rows in sorted(fault_event_classes.items())
+        },
+        "class_counts": {class_code: len(rows) for class_code, rows in sorted(fault_event_classes.items())},
+        "boundary": (
+            "The event class byte and H DTC index are exact CodeFlash table fields. Toyota DTC names are joined "
+            "through the pinned NA EMPS_P5 failure table. Class 0x01 is populated in H but is not consumed by "
+            "the recovered 0x4B692 accumulator; classes with DTC index 0 remain internal/no-named-DTC events. "
+            "These class families do not by themselves define openpilot steerFaultTemporary/steerFaultPermanent."
+        ),
+    }
+
     communication_rows = []
     for row_index in range(6):
         rec = codeflash[0x27F68 + row_index * 8:0x27F70 + row_index * 8]
@@ -707,6 +750,7 @@ def main() -> int:
         },
         "techstream_surface": techstream_surface,
         "communication_monitor_dtc": communication_monitor_dtc,
+        "fault_event_class_catalog": fault_event_class_catalog,
         "steering_state_bridge_diagnostics": steering_state_bridge_diagnostics,
         "protected_brake_profile_semantics": protected_brake_profile_semantics,
         "camera_ipm_a_residue": camera_ipm_a_residue,

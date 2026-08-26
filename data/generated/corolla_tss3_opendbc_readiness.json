@@ -76,14 +76,14 @@
     "blocks_normal_carstate": [
       "Validate P/R/N/B transitions on the retained 0x127 GEAR_PACKET_HYBRID carrier and bind them to the exact target.",
       "Cruise CAN-field mapping for available/enabled/set speed/follow distance/ACC not-available state; exact FRC_P5 Data-ID semantics and their direct SID-0x22 polling transport are already recovered.",
-      "Generation-native steering fault/readiness mapping; driver-torque physical scaling is already closed.",
+      "Operational steering-fault/readiness policy mapping: static 0x394 class/DTC families are closed, but Ready=0 and recoverable-vs-latched transitions must define the final openpilot temporary/permanent policy. Driver-torque physical scaling is already closed.",
       "Dynamic validation of retained body/UI fields used by openpilot."
     ],
     "blocks_production_lateral": [
       "Firmware-identified H/F-family capture with the Toyota-B CAN0/CAN1 network physically relay-correct and stock LTA exercised off -> active -> off.",
       "B6 stock/minimal secondary-field cross-ECU validation, stock sender cadence/physical route, and a working slot-4 signing path: key or the audited 462-byte H/F command-5 proxy after the 332-byte inert carrier canary proves live retention and selector-4 permission/latency is measured.",
       "Stock-source suppression/interception point on Toyota-B topology.",
-      "Conservative Panda/openpilot driver-override policy dynamic validation, Q-current actuator-response policy if desired, Ready/fault transition mapping, and final relay-correct actuator validation. No Toyota EPS physical-driver-torque comparator remains to recover under the promoted static census."
+      "Conservative Panda/openpilot driver-override policy dynamic validation, Q-current actuator-response policy if desired, Ready/fault recovery-to-openpilot temporary/permanent policy mapping, and final relay-correct actuator validation. Exact 0x394 DEM class/DTC families and 0x351 force-7 source topology are already statically closed; no Toyota EPS physical-driver-torque comparator remains to recover under the promoted static census."
     ],
     "blocks_radar": [
       "TSS3 0x123/16 and 0x180-family FD field semantics, validity/status and object association."
@@ -91,7 +91,7 @@
     "can_scaffold_now": [
       "Add an explicit TSS3 control-generation axis independent of the existing SECOC security flag.",
       "Define a TSS3 0x025/32 DBC PDU carrying the firmware-proved steering angle/fraction/rate fields.",
-      "Decode live 0x030 physical Steering Wheel Torque and its raw fault/validity gates without importing the legacy override threshold or 0x262 fault classes.",
+      "Decode live 0x030 physical Steering Wheel Torque and its raw fault/validity gates; B6[1] is additionally bounded to a Q-axis-current monitor whose exact-H threshold detector is calibration-disabled. Do not import legacy override thresholds or 0x262 fault classes.",
       "Carry forward 0x0AA/0x101/0x116/0x176 only behind generation-specific validation; do not copy the entire old DBC, and do not relabel 0x176 B0[3] as cruise state.",
       "Expose incoming 0x51E B0[7] as target-native Ready Status for read-only observation without yet mapping Ready=0 to an openpilot fault/engagement policy.",
       "Treat the recovered 0x030 B6[3]/B10[3]/B13[4] bits only as coarse system-mode diagnostics; do not use them as exact cooperative-authority feedback because raw modes 0 and 1 collapse in that path while FEBEACBD distinguishes them.",
@@ -160,10 +160,10 @@
     {
       "evidence": "exact H state bridge + non-steering engagement contract + Techstream DTC/DID joins + Span moving-rlog 0x030 polarity",
       "older_toyota_contract": "Older Toyota uses 0x262 LKA/LTA states; temporary=[0, 9, 11, 21, 25], permanent=[3, 17]",
-      "remaining_blocker": "Correlate both 0x351 paths (C159B49-linked base status and force-7 override), 0x394, and a 0x51E Ready 1->0->1 transition against standby, stock LTA active, message loss, temporary fault and latched fault. Old numeric fault enums and temporary/permanent classes are not portable.",
+      "remaining_blocker": "Static class/DTC/source mapping is now closed; remaining work is operational policy. Capture 0x351/0x394 plus a 0x51E Ready 1->0->1 transition during recoverable versus latched faults and stock-LTA disable/recovery to decide openpilot temporary/permanent policy. Old numeric fault enums are not portable.",
       "role": "EPS readiness / steering faults",
       "status": "generation_native_replacement_open_dynamic_join",
-      "tss3_corolla_evidence": "0x262 is absent from the TSS3 routes. Exact H closes 0x030 B6[2] as a live selected steering fault/inhibit status aggregate (nominal-clear 6000/6000; not an exhaustive EPS-fault state), 0x351 as a mixed status carrier with a C159B49-linked motor-B electrical-monitor base path plus a separate force-7 override, and 0x394 as a lossy 17-state fault/status projection whose state 0 is the deepest recovered clear/normal classifier path, not a proved Ready boolean. Exact H now also closes incoming 0x51E B0[7] as DID 0x1033 Ready Status; both retained operational routes show Ready=1, while Ready=0 remains uncaptured. Separately, FEBE7C58->FEBEF000->FEBEACBD is a graded power-supply receive-validity/freeze gate, distinct from B6 loss, and the related 0x030 B6[3]/B10[3]/B13[4] path carries only a coarse raw-mode<2 aggregate that provably cannot represent exact cooperative authority."
+      "tss3_corolla_evidence": "0x262 is absent from the TSS3 routes. Exact H closes 0x030 B6[2] as a live selected steering fault/inhibit status aggregate (nominal-clear 6000/6000; not exhaustive), and now closes B6[1] to a Motor Actual Current (Q Axis)-derived threshold/debounce chain whose exact-H detector is calibration-disabled. 0x351 is a mixed carrier with a C159B49-linked base path plus a separate force-7 override now traced to status-bitmap bits0/1 AND bit15 of a 24-record aggregate. 0x394 is a 17-state projection whose 242 populated-class DEM events are exhaustively partitioned: class 0x02 -> states 6/7, class 0x04 -> 8/9, class 0x10 -> 10, class 0x20/F0-compatible aggregate -> 11, class 0x40 -> 12, class 0x08 -> 13, class 0x0F -> 14, with exact 200/600-count latch-aging structure; named Toyota DTC families are joined where H carries a DTC index. State 0 remains the deepest clear/normal path, not a Ready boolean. Incoming 0x51E B0[7] is DID 0x1033 Ready Status; retained operational routes show Ready=1, while Ready=0 remains uncaptured. Separately, FEBE7C58->FEBEF000->FEBEACBD is a graded power-supply receive-validity/freeze gate, distinct from B6 loss, and the related 0x030 B6[3]/B10[3]/B13[4] path carries only a coarse raw-mode<2 aggregate that cannot represent exact cooperative authority."
     },
     {
       "evidence": "Span moving rlog raw bytes + exact H receive layout + current opendbc prior art",
@@ -470,6 +470,99 @@
         8
       ]
     ],
+    "fault_state_contract": {
+      "aging": {
+        "boundary": "These are exact classifier/latch counter thresholds. Counter wall-clock meaning is not asserted here, and the paired states are not renamed temporary/permanent.",
+        "calibration_address": "0x0002CB8C",
+        "class2_class4_secondary_age": 600,
+        "class2_primary_age": 200,
+        "class4_primary_age": 200,
+        "primary_clear_enable_age": 17736,
+        "startup_hold_a": 200,
+        "startup_hold_b": 200
+      },
+      "class_counts": {
+        "0x01": 8,
+        "0x02": 34,
+        "0x04": 1,
+        "0x08": 1,
+        "0x0F": 1,
+        "0x10": 173,
+        "0x20": 16,
+        "0x40": 1,
+        "0x80": 7
+      },
+      "class_to_state": {
+        "0x01": {
+          "selection": "populated in the exact-H event table but not consumed by recovered accumulator 0x4B692",
+          "states": []
+        },
+        "0x02": {
+          "lifetime": "primary latch uses calibration 200 and additionally requires FEBEE8B0 >= 17736 before clearing; secondary latch uses calibration 600",
+          "selection": "class-2 primary active => state 6 while secondary bit FEBE7F5D[0] is set, else state 7",
+          "states": [
+            6,
+            7
+          ]
+        },
+        "0x04": {
+          "lifetime": "primary latch uses calibration 200 and additionally requires FEBEE8B0 >= 17736 before clearing; shared secondary latch uses calibration 600",
+          "selection": "class-4 primary active => state 8 while secondary bit FEBE7F5D[1] is set, else state 9",
+          "states": [
+            8,
+            9
+          ]
+        },
+        "0x08": {
+          "selection": "class-0x08 counter/bit selects state 13 when the additional 0x4B7AA condition permits; otherwise the classifier can fall through to state 16",
+          "states": [
+            13
+          ]
+        },
+        "0x0F": {
+          "selection": "class-0x0F counter/bit selects state 14 when the additional 0x4B7AA condition permits; otherwise the classifier can fall through to state 16",
+          "states": [
+            14
+          ]
+        },
+        "0x10": {
+          "selection": "dedicated class-0x10 counter/bit branch",
+          "states": [
+            10
+          ]
+        },
+        "0x20": {
+          "selection": "class-0x20 counter/aggregate bit is one direct state-11 cause",
+          "states": [
+            11
+          ]
+        },
+        "0x40": {
+          "selection": "dedicated class-0x40 counter/bit branch",
+          "states": [
+            12
+          ]
+        },
+        "0x80": {
+          "selection": "class-0x80 counter blocks the deepest state-0 normal path; state 16 is a general fallback and is not unique to class 0x80",
+          "states": [
+            16
+          ]
+        },
+        "0xF0": {
+          "selection": "supported by 0x4B692 and the state-11 branch, but no exact-H event-table row currently carries class 0xF0",
+          "states": [
+            11
+          ]
+        }
+      },
+      "openpilot_boundary": {
+        "reason": "Toyota's internal class/latch distinction does not define openpilot's temporary/permanent contract. A live induced-fault/recovery sequence or an independently proved policy mapping is still required before assigning those labels.",
+        "static_closure": "states 6-14 are now partitioned by exact DEM class family and named Toyota DTC families where the H event has a DTC index; states 6/7 and 8/9 also have exact latch-selection/aging structure",
+        "steerFaultPermanent": "unresolved policy mapping",
+        "steerFaultTemporary": "unresolved policy mapping"
+      }
+    },
     "h_f_application_contract_same": true,
     "nonsteering_engagement_contract": {
       "cruise_diagnostic_transport_boundary": "Current GTS+ proves the selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. For an independent capture, require the matching 0x62||DID positive prefix before decoding. A named outer DiagnosticSessionControl or SecurityAccess prerequisite is not statically proved.",
@@ -690,6 +783,70 @@
         "0x394/3": 0,
         "0x4A3/8": 0,
         "0x4C8/8": 0
+      }
+    },
+    "remaining_status_contract": {
+      "can_0x030_b6_bit1": {
+        "calibration": {
+          "address": "0x000AEED8",
+          "debounce_count": 0,
+          "feature_flag": 90,
+          "threshold_a": 5120,
+          "threshold_b": 2560
+        },
+        "chain": [
+          "FEBE6BAE Motor Actual Current (Q Axis)",
+          "0x5258A -> FEBEEC0C",
+          "0xBBFE6/0xBD50C -> FEBEAFC4",
+          "0xBB8F6 + 0xCF070 -> FEBEB64D absolute-current threshold detector",
+          "0xBB942 -> FEBEB64C debounced status",
+          "0xBBA48 -> FEBEE848",
+          "0x46EE0 -> FEBE7DB3",
+          "0x030 B6[1]"
+        ],
+        "classification": "Q-axis actual-current-derived debounced status; exact H's threshold detector is calibration-disabled",
+        "exact_h_calibration_effect": "feature flag 0x5A makes the BB8F6 detector's enabled-only set branch unreachable and forces its raw detector output FEBEB64D to zero on each execution; debounce calibration is zero. This closes the physical source family and detector-disable state, not an OEM display name for the final debounced bit.",
+        "openpilot_consequence": "Do not treat B6[1] as a generic steering-ready/authority bit. Its source is motor Q-current monitoring and its exact-H detector is disabled by calibration.",
+        "signal_id": 7,
+        "span_observation": {
+          "boundary": "Span's moving rlog is not exact-F181-joined and therefore cannot override exact-H calibration identity; its 0/1 variation is useful cross-specimen evidence only.",
+          "values": [
+            0,
+            1
+          ]
+        },
+        "wire": "0x030 B6[1]"
+      },
+      "can_0x351_force7": {
+        "classification": "independent severe/special status override, distinct from the C159B49-linked 0x351 base electrical-monitor code path",
+        "condition": "(FEBE65E4 & 0x0003) != 0 AND FEBE7E13 != 0",
+        "openpilot_consequence": "Treat the force-7 indication as a distinct conservative fault/status input if 0x351 becomes available, but do not rename it C159B49 or map it to temporary/permanent without dynamic policy evidence.",
+        "record_aggregate_side": {
+          "aggregate": "0x36CEC ORs each valid record's +6 ushort into one aggregate (plus FEBE720E under its recovered gate)",
+          "bit_used": 15,
+          "boundary": "The exact source geometry and bit are closed; an OEM/DTC name for record +6 bit15 is not recovered from the current corpus.",
+          "chain": [
+            "0x36CEC aggregate bit15",
+            "0x3738C -> 0x472E0(0x5A/0)",
+            "FEBE7E13",
+            "0x46E62 force-7"
+          ],
+          "mode_table": "FEBE6F94[24] selects one of two 12-byte record banks rooted at FEBE6FC8 or FEBE70E8",
+          "record_count": 24
+        },
+        "status_bitmap_side": {
+          "bits_used": [
+            0,
+            1
+          ],
+          "boundary": "FEBE6FB4 is a broad internally consumed 16-bit status bitmap; current static evidence does not assign Toyota names to bits0/1.",
+          "chain": [
+            "0x36BBE resolves/merges the current 16-bit status value",
+            "0x36AAA stores it at FEBE6FB4 with XOR-redundant mirrors FEBE6ED0/FEBE6ED2",
+            "0x5778E copies FEBE6FB4 -> FEBE65E4"
+          ]
+        },
+        "wire_effect": "0x46E62 forces the 0x351 status code to 7 and sets FEBE7DD1=1"
       }
     },
     "span_moving_rlog": {

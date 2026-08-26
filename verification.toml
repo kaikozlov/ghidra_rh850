@@ -1137,6 +1137,8 @@ paths = [
   "data/generated/techstream_v18/tss3_cruise_live_transport.json",
   "data/generated/corolla_8965H1202000_power_supply_monitor_gate.json",
   "data/generated/corolla_hf_cooperative_authority_wire_visibility.json",
+  "data/generated/corolla_hf_fault_state_contract.json",
+  "data/generated/corolla_hf_remaining_status_contract.json",
   "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
   "data/generated/corolla_8965H1202000_b6_secoc_verification.json",
   "data/generated/corolla_hf_steering_limits.json",
@@ -1494,6 +1496,46 @@ paths = [
   "exploit/findings_coverage.json",
 ]
 
+[suite.corolla_hf_fault_state_contract]
+tests = ["tests/verify_corolla_hf_fault_state_contract.py"]
+oracle = "generated_self_check"
+paths = [
+  "tests/verify_corolla_hf_fault_state_contract.py",
+  "tools/build_corolla_hf_fault_state_contract.py",
+  "tools/build_corolla_h_techstream_correlations.py",
+  "data/generated/corolla_hf_fault_state_contract.json",
+  "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_techstream_correlations.json",
+  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "exploit/findings_coverage.json",
+]
+
+[suite.corolla_hf_remaining_status_contract]
+tests = ["tests/verify_corolla_hf_remaining_status_contract.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_corolla_hf_remaining_status_contract.py",
+  "tools/extract_corolla_h_remaining_status_evidence.py",
+  "tools/build_corolla_hf_remaining_status_contract.py",
+  "data/generated/corolla_8965H1202000_remaining_status_decompiler_evidence.json",
+  "data/generated/corolla_hf_remaining_status_contract.json",
+  "data/generated/corolla_8965H1202000_fd_control_interface.json",
+  "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
+  "data/generated/corolla_8965H1202000_techstream_correlations.json",
+  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "exploit/findings_coverage.json",
+]
+
 [suite.corolla_h_openpilot_state_bridge]
 tests = ["tests/verify_corolla_8965H1202000_openpilot_state_bridge.py"]
 oracle = "raw_bytes"
@@ -1503,6 +1545,8 @@ paths = [
   "tools/build_corolla_h_openpilot_state_bridge.py",
   "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
+  "data/generated/corolla_hf_fault_state_contract.json",
+  "data/generated/corolla_hf_remaining_status_contract.json",
   "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_fd_control_interface.json",
   "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
@@ -3030,6 +3074,7 @@ paths = [
   "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_cooperative_authority_wire_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_power_supply_monitor_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_remaining_status_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_b6_full_receiver_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json",

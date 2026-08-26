@@ -120,6 +120,14 @@
       "path": "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json",
       "sha256": "2600eceba5a96a9b1dbe8cf4978c241bf4b85830fab6d169eca755ff880999a6"
     },
+    "fault_state_contract": {
+      "path": "data/generated/corolla_hf_fault_state_contract.json",
+      "sha256": "eb2272320151f1ac65a4631b3d3bc77883da3c3f133ecdde8e45ced7296525a3"
+    },
+    "remaining_status_contract": {
+      "path": "data/generated/corolla_hf_remaining_status_contract.json",
+      "sha256": "40be8dca5a68b8532a51f8ff70a336fd5ec9d2216ddf921475e0d03e5c4ef6e9"
+    },
     "state_corpus": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json",
       "sha256": "a2051137624ec71bad0cf11e294d579da66a97f35cc72e416d958023f2c4eaea"
@@ -270,7 +278,7 @@
         "formula": "sum(payload_bytes_0_through_6) + 0x38, low byte",
         "wire_byte": 7
       },
-      "boundary": "The available moving log proves 0x030 is live and both safety-relevant gates are clear in all 6,000 nominal frames. The prior direct-reference writer census was incomplete: eleven additional fields have exact GP-relative runtime writers, including a redundant driver-torque representation and a Q-current-derived field. It contains no induced fault or stock-LTA transition, so asserted-state operational consequences remain firmware-static and temporary/permanent fault semantics remain unresolved.",
+      "boundary": "The available moving log proves 0x030 is live and both safety-relevant gates are clear in all 6,000 nominal frames. Exact H now additionally closes B6[1] to a Q-axis-actual-current threshold/debounce chain whose detector is disabled by the exact-H calibration. Span's 0/1 B6[1] behavior remains cross-specimen evidence because that rlog is not exact-F181-joined. No induced fault or stock-LTA transition is present, so asserted-state operational consequences and temporary/permanent policy remain dynamic.",
       "classification": "live generation-native EPS telemetry/status/validity carrier with driver torque and two safety-relevant gates closed",
       "configured_signals": [
         0,
@@ -485,13 +493,44 @@
           "wire": "B6[0]"
         },
         {
-          "semantic": "live status bit; exact steering meaning unresolved",
+          "semantic": "Q-axis actual-current-derived debounced status; exact H's threshold detector is calibration-disabled",
           "signal_id": 7,
-          "source": "FEBE7DB3 <- FEBEE848",
+          "source": "FEBE6BAE Q-axis actual current -> FEBEEC0C/FEBEAFC4 -> threshold/debounce -> FEBEE848 -> FEBE7DB3",
           "span_values": [
             0,
             1
           ],
+          "static_contract": {
+            "calibration": {
+              "address": "0x000AEED8",
+              "debounce_count": 0,
+              "feature_flag": 90,
+              "threshold_a": 5120,
+              "threshold_b": 2560
+            },
+            "chain": [
+              "FEBE6BAE Motor Actual Current (Q Axis)",
+              "0x5258A -> FEBEEC0C",
+              "0xBBFE6/0xBD50C -> FEBEAFC4",
+              "0xBB8F6 + 0xCF070 -> FEBEB64D absolute-current threshold detector",
+              "0xBB942 -> FEBEB64C debounced status",
+              "0xBBA48 -> FEBEE848",
+              "0x46EE0 -> FEBE7DB3",
+              "0x030 B6[1]"
+            ],
+            "classification": "Q-axis actual-current-derived debounced status; exact H's threshold detector is calibration-disabled",
+            "exact_h_calibration_effect": "feature flag 0x5A makes the BB8F6 detector's enabled-only set branch unreachable and forces its raw detector output FEBEB64D to zero on each execution; debounce calibration is zero. This closes the physical source family and detector-disable state, not an OEM display name for the final debounced bit.",
+            "openpilot_consequence": "Do not treat B6[1] as a generic steering-ready/authority bit. Its source is motor Q-current monitoring and its exact-H detector is disabled by calibration.",
+            "signal_id": 7,
+            "span_observation": {
+              "boundary": "Span's moving rlog is not exact-F181-joined and therefore cannot override exact-H calibration identity; its 0/1 variation is useful cross-specimen evidence only.",
+              "values": [
+                0,
+                1
+              ]
+            },
+            "wire": "0x030 B6[1]"
+          },
           "wire": "B6[1]"
         },
         {
@@ -506,7 +545,7 @@
       ]
     },
     "0x351": {
-      "boundary": "C159B49 names one upstream electrical-monitor path feeding 0x351; it does not name the whole packet or the separate force-7 condition. 0x351 is not a generic LKA/EPS-ready state, and its numeric status codes must not be transplanted into old 0x262 LKA_STATE meanings.",
+      "boundary": "C159B49 names one upstream electrical-monitor path feeding 0x351; the separate force-7 source topology is now closed to status-bitmap bits0/1 AND a 24-record aggregate bit15, but those internal bits still have no unique Toyota/DTC display names. 0x351 is not a generic LKA/EPS-ready state, and its numeric status codes must not be transplanted into old 0x262 LKA_STATE meanings.",
       "classification": "mixed EPS status carrier with a C159B49-linked motor-B electrical-monitor path plus a separate force-7 override",
       "diagnostic_join": {
         "base_dtc": "0x559B",
@@ -525,14 +564,45 @@
         "techstream_raw_sha256": "bb309a2468385bdafe9196b9d89d1049e57bdf00b8f625b1e18678bee87ad200"
       },
       "dynamic_boundary": "Span and the public TSS3 route contain zero 0x351 frames, so packet availability and asserted-state transitions remain uncaptured.",
+      "force7_static_contract": {
+        "classification": "independent severe/special status override, distinct from the C159B49-linked 0x351 base electrical-monitor code path",
+        "condition": "(FEBE65E4 & 0x0003) != 0 AND FEBE7E13 != 0",
+        "openpilot_consequence": "Treat the force-7 indication as a distinct conservative fault/status input if 0x351 becomes available, but do not rename it C159B49 or map it to temporary/permanent without dynamic policy evidence.",
+        "record_aggregate_side": {
+          "aggregate": "0x36CEC ORs each valid record's +6 ushort into one aggregate (plus FEBE720E under its recovered gate)",
+          "bit_used": 15,
+          "boundary": "The exact source geometry and bit are closed; an OEM/DTC name for record +6 bit15 is not recovered from the current corpus.",
+          "chain": [
+            "0x36CEC aggregate bit15",
+            "0x3738C -> 0x472E0(0x5A/0)",
+            "FEBE7E13",
+            "0x46E62 force-7"
+          ],
+          "mode_table": "FEBE6F94[24] selects one of two 12-byte record banks rooted at FEBE6FC8 or FEBE70E8",
+          "record_count": 24
+        },
+        "status_bitmap_side": {
+          "bits_used": [
+            0,
+            1
+          ],
+          "boundary": "FEBE6FB4 is a broad internally consumed 16-bit status bitmap; current static evidence does not assign Toyota names to bits0/1.",
+          "chain": [
+            "0x36BBE resolves/merges the current 16-bit status value",
+            "0x36AAA stores it at FEBE6FB4 with XOR-redundant mirrors FEBE6ED0/FEBE6ED2",
+            "0x5778E copies FEBE6FB4 -> FEBE65E4"
+          ]
+        },
+        "wire_effect": "0x46E62 forces the 0x351 status code to 7 and sets FEBE7DD1=1"
+      },
       "length": 4,
-      "openpilot_consequence": "Treat 0x351 as mixed generation-native status. Its C159B49-linked path and force-7 override must be correlated separately before either is used for safety; remove it from the generic readiness-candidate bucket.",
+      "openpilot_consequence": "Treat 0x351 as mixed generation-native status. The C159B49-linked base path and force-7 source topology are statically separated; live asserted/recovery transitions still need correlation before either is assigned an openpilot fault policy. Remove it from the generic readiness-candidate bucket.",
       "pdu": 1,
       "producer_chain": [
         "0xB87E8 computes the C159B49-linked electrical-monitor predicate, reports Dem event 4 on assertion, and stores its boolean at GP-0x2EC = FEBEB514",
         "0xBBA48 copies FEBEB514 -> FEBEE82B; 0x46E0C propagates that monitor boolean while maintaining the exact seven-count transition state using calibration byte 0x2B930 = 7",
-        "independently, 0x3738C -> 0x472E0 supplies FEBE7E13 from its param_1 bit15 path",
-        "0x46E62 stages the mixed result: normally param_1 into FEBE7DD0, but force-writes code 7 plus FEBE7DD1=1 when (FEBE65E4 & 3) != 0 and FEBE7E13 != 0; 0x47BA2 packs B2[7:5]/B2[4]"
+        "independently, the recovered 24-record status-bank aggregate ORs each valid record's +6 ushort and 0x3738C selects its bit15 into 0x472E0 -> FEBE7E13",
+        "0x36BBE/0x36AAA maintain the independent 16-bit status bitmap at FEBE6FB4 and 0x5778E copies it to FEBE65E4; 0x46E62 force-writes code 7 plus FEBE7DD1=1 iff (FEBE65E4 & 3) != 0 and FEBE7E13 != 0; 0x47BA2 packs B2[7:5]/B2[4]"
       ],
       "wire_fields": [
         {
@@ -558,6 +628,21 @@
         "1": {
           "role": "startup/settling hold A"
         },
+        "10": {
+          "role": "class-0x10 dominant hardware/electrical/current/sensor/communication fault family"
+        },
+        "11": {
+          "role": "class-0x20/F0-compatible aggregate branch plus independent internal 0x20-bit source"
+        },
+        "12": {
+          "role": "class-0x40 internal fault branch"
+        },
+        "13": {
+          "role": "class-0x08 internal fault branch when its additional classifier condition permits"
+        },
+        "14": {
+          "role": "class-0x0F internal fault branch when its additional classifier condition permits"
+        },
         "15": {
           "boundary": "selected by a distinct operational predicate, not safely nameable as ready or fault from static evidence alone",
           "role": "special operating state"
@@ -577,18 +662,691 @@
         "5": {
           "role": "retained table row; not directly selected by the recovered H classifier body"
         },
-        "6-14": {
-          "role": "active fault/inhibit classifier branches sourced from the Dem event-class aggregate/latches"
+        "6": {
+          "role": "class-0x02 fault branch with secondary latch active"
+        },
+        "7": {
+          "role": "class-0x02 fault branch after secondary-latch state clears"
+        },
+        "8": {
+          "role": "class-0x04 internal fault branch with secondary latch active"
+        },
+        "9": {
+          "role": "class-0x04 internal fault branch after secondary-latch state clears"
         }
       },
-      "dem_class_aggregator": "0x4B692 accumulates event classes/counters consumed by 0x4B9AE; the branches cover real EPS processor, power, motor, sensor, communication, and compatibility fault families",
+      "dem_class_aggregator": "0x4B692 accumulates event classes/counters consumed by 0x4B9AE; the complete 384-entry H event-table census now maps the populated classes to exact Toyota DTC families where a DTC index exists",
       "dynamic_boundary": "Span and the public route contain zero 0x394 frames; the state-0 clear/normal path and fault branches are statically recovered but not observed on-vehicle in the available captures.",
+      "fault_state_contract": {
+        "aging": {
+          "boundary": "These are exact classifier/latch counter thresholds. Counter wall-clock meaning is not asserted here, and the paired states are not renamed temporary/permanent.",
+          "calibration_address": "0x0002CB8C",
+          "class2_class4_secondary_age": 600,
+          "class2_primary_age": 200,
+          "class4_primary_age": 200,
+          "primary_clear_enable_age": 17736,
+          "startup_hold_a": 200,
+          "startup_hold_b": 200
+        },
+        "dem": {
+          "class2_additional_injection": "0x4B780 injects class 0x02 when FEBE65E4 bit15 is set",
+          "class_accumulator": "0x0004B692",
+          "class_counts": {
+            "0x01": 8,
+            "0x02": 34,
+            "0x04": 1,
+            "0x08": 1,
+            "0x0F": 1,
+            "0x10": 173,
+            "0x20": 16,
+            "0x40": 1,
+            "0x80": 7
+          },
+          "class_to_state": {
+            "0x01": {
+              "selection": "populated in the exact-H event table but not consumed by recovered accumulator 0x4B692",
+              "states": []
+            },
+            "0x02": {
+              "lifetime": "primary latch uses calibration 200 and additionally requires FEBEE8B0 >= 17736 before clearing; secondary latch uses calibration 600",
+              "selection": "class-2 primary active => state 6 while secondary bit FEBE7F5D[0] is set, else state 7",
+              "states": [
+                6,
+                7
+              ]
+            },
+            "0x04": {
+              "lifetime": "primary latch uses calibration 200 and additionally requires FEBEE8B0 >= 17736 before clearing; shared secondary latch uses calibration 600",
+              "selection": "class-4 primary active => state 8 while secondary bit FEBE7F5D[1] is set, else state 9",
+              "states": [
+                8,
+                9
+              ]
+            },
+            "0x08": {
+              "selection": "class-0x08 counter/bit selects state 13 when the additional 0x4B7AA condition permits; otherwise the classifier can fall through to state 16",
+              "states": [
+                13
+              ]
+            },
+            "0x0F": {
+              "selection": "class-0x0F counter/bit selects state 14 when the additional 0x4B7AA condition permits; otherwise the classifier can fall through to state 16",
+              "states": [
+                14
+              ]
+            },
+            "0x10": {
+              "selection": "dedicated class-0x10 counter/bit branch",
+              "states": [
+                10
+              ]
+            },
+            "0x20": {
+              "selection": "class-0x20 counter/aggregate bit is one direct state-11 cause",
+              "states": [
+                11
+              ]
+            },
+            "0x40": {
+              "selection": "dedicated class-0x40 counter/bit branch",
+              "states": [
+                12
+              ]
+            },
+            "0x80": {
+              "selection": "class-0x80 counter blocks the deepest state-0 normal path; state 16 is a general fallback and is not unique to class 0x80",
+              "states": [
+                16
+              ]
+            },
+            "0xF0": {
+              "selection": "supported by 0x4B692 and the state-11 branch, but no exact-H event-table row currently carries class 0xF0",
+              "states": [
+                11
+              ]
+            }
+          },
+          "event_count_scanned": 384,
+          "event_table": "0x0002B988",
+          "state11_additional_source": "0x4B930 can set the shared 0x20 aggregate bit from three internal 0x22-valued conditions; state 11 is therefore not exclusively class-0x20/F0 DTC events"
+        },
+        "evidence_boundary": "All class/state selection logic and aging constants are exact-H firmware-static and transfer byte-for-byte to F. Toyota DTC names come from the pinned EMPS_P5 Techstream table via the committed Corolla Techstream correlation catalog. Classes with DTC index 0 remain internal/no-named-DTC. State 16 is a general fallback, not a unique class-0x80 code.",
+        "internal_only_classes": {
+          "0x04": {
+            "dtc_indexed_count": 0,
+            "event_count": 1
+          },
+          "0x08": {
+            "dtc_indexed_count": 0,
+            "event_count": 1
+          },
+          "0x0F": {
+            "dtc_indexed_count": 0,
+            "event_count": 1
+          },
+          "0x40": {
+            "dtc_indexed_count": 0,
+            "event_count": 1
+          },
+          "0x80": {
+            "dtc_indexed_count": 0,
+            "event_count": 7
+          }
+        },
+        "named_dtc_families": {
+          "class_0x01_no_direct_394_accumulator_effect": [
+            {
+              "code": "C151551",
+              "description": "Power Steering Torque Sensor Missing Calibration",
+              "failure": "Not Programmed"
+            },
+            {
+              "code": "U031951",
+              "description": "Software Incompatibility with Steering Effort Control Module",
+              "failure": "Not Programmed"
+            },
+            {
+              "code": "C151554",
+              "description": "Power Steering Torque Sensor Adjustment",
+              "failure": "Missing Calibration"
+            },
+            {
+              "code": "C158151",
+              "description": "Assist Map",
+              "failure": "Not Programmed"
+            },
+            {
+              "code": "U030051",
+              "description": "Internal Control Module Software Incompatibility",
+              "failure": "Not Programmed"
+            },
+            {
+              "code": "U130651",
+              "description": "Software Incompatibility with Power Steering Control Module Rear",
+              "failure": "Not Programmed"
+            }
+          ],
+          "class_0x02_states_6_7": [
+            {
+              "code": "C155A16",
+              "description": "Power Steering Motor \"A\" Supply Voltage",
+              "failure": "Circuit Voltage Below Threshold"
+            },
+            {
+              "code": "C155B16",
+              "description": "Power Steering Motor \"B\" Supply Voltage",
+              "failure": "Circuit Voltage Below Threshold"
+            },
+            {
+              "code": "C123A17",
+              "description": "Supply Voltage Circuit",
+              "failure": "Circuit Voltage Above Threshold"
+            },
+            {
+              "code": "C05D604",
+              "description": "Power Steering Control Module Processor",
+              "failure": "System Internal Failure"
+            },
+            {
+              "code": "C155A17",
+              "description": "Power Steering Motor \"A\" Supply Voltage",
+              "failure": "Circuit Voltage Above Threshold"
+            },
+            {
+              "code": "C155B17",
+              "description": "Power Steering Motor \"B\" Supply Voltage",
+              "failure": "Circuit Voltage Above Threshold"
+            },
+            {
+              "code": "C05D649",
+              "description": "Power Steering Control Module Processor",
+              "failure": "Internal Electronic Failure"
+            },
+            {
+              "code": "C05D646",
+              "description": "Power Steering Control Module Processor",
+              "failure": "Calibration / Parameter Memory Failure"
+            },
+            {
+              "code": "C15D262",
+              "description": "Power Steering Motor Position Sensor \"B\"",
+              "failure": "Signal Compare Failure"
+            },
+            {
+              "code": "C15D362",
+              "description": "Power Steering Motor Position Sensor \"C\"",
+              "failure": "Signal Compare Failure"
+            },
+            {
+              "code": "C15D162",
+              "description": "Power Steering Motor Position Sensor \"A\"",
+              "failure": "Signal Compare Failure"
+            }
+          ],
+          "class_0x10_state_10": [
+            {
+              "code": "C159A49",
+              "description": "Power Steering Motor \"A\" Terminal Voltage Detect Circuit",
+              "failure": "Internal Electronic Failure"
+            },
+            {
+              "code": "C159B49",
+              "description": "Power Steering Motor \"B\" Terminal Voltage Detect Circuit",
+              "failure": "Internal Electronic Failure"
+            },
+            {
+              "code": "C156A9F",
+              "description": "Power Steering Motor \"A\" Shut Down Relay",
+              "failure": "Stuck Off"
+            },
+            {
+              "code": "C156B9F",
+              "description": "Power Steering Motor \"B\" Shut Down Relay",
+              "failure": "Stuck Off"
+            },
+            {
+              "code": "C156A9E",
+              "description": "Power Steering Motor \"A\" Shut Down Relay",
+              "failure": "Stuck On"
+            },
+            {
+              "code": "C156B9E",
+              "description": "Power Steering Motor \"B\" Shut Down Relay",
+              "failure": "Stuck On"
+            },
+            {
+              "code": "C05D604",
+              "description": "Power Steering Control Module Processor",
+              "failure": "System Internal Failure"
+            },
+            {
+              "code": "C152B19",
+              "description": "Power Steering Motor \"B\"",
+              "failure": "Circuit Current Above Threshold"
+            },
+            {
+              "code": "C15D704",
+              "description": "Power Steering Control Module Processor (System 2)",
+              "failure": "System Internal Failure"
+            },
+            {
+              "code": "C157B62",
+              "description": "Power Steering Motor \"B\" Current Sensor",
+              "failure": "Signal Compare Failure"
+            },
+            {
+              "code": "C152B18",
+              "description": "Power Steering Motor \"B\"",
+              "failure": "Circuit Current Below Threshold"
+            },
+            {
+              "code": "C15D162",
+              "description": "Power Steering Motor Position Sensor \"A\"",
+              "failure": "Signal Compare Failure"
+            },
+            {
+              "code": "C15D262",
+              "description": "Power Steering Motor Position Sensor \"B\"",
+              "failure": "Signal Compare Failure"
+            },
+            {
+              "code": "C153B19",
+              "description": "Power Steering Motor \"B\" Inverter",
+              "failure": "Circuit Current Above Threshold"
+            },
+            {
+              "code": "C152A19",
+              "description": "Power Steering Motor \"A\"",
+              "failure": "Circuit Current Above Threshold"
+            },
+            {
+              "code": "C157A62",
+              "description": "Power Steering Motor \"A\" Current Sensor",
+              "failure": "Signal Compare Failure"
+            },
+            {
+              "code": "C152A18",
+              "description": "Power Steering Motor \"A\"",
+              "failure": "Circuit Current Below Threshold"
+            },
+            {
+              "code": "C15D187",
+              "description": "Power Steering Motor Position Sensor \"A\"",
+              "failure": "Missing Message"
+            },
+            {
+              "code": "C153A19",
+              "description": "Power Steering Motor \"A\" Inverter",
+              "failure": "Circuit Current Above Threshold"
+            },
+            {
+              "code": "C05D649",
+              "description": "Power Steering Control Module Processor",
+              "failure": "Internal Electronic Failure"
+            },
+            {
+              "code": "C157A11",
+              "description": "Power Steering Motor \"A\" Current Sensor",
+              "failure": "Circuit Short to Ground"
+            },
+            {
+              "code": "C154A7F",
+              "description": "Power Supply & Contrary Connection Protection Relay \"A\"",
+              "failure": "Actuator Stuck Off"
+            },
+            {
+              "code": "C156D49",
+              "description": "Power Steering Motor \"B\" Shut Down Relay Monitoring Circuit",
+              "failure": "Internal Electronic Failure"
+            },
+            {
+              "code": "C156C49",
+              "description": "Power Steering Motor \"A\" Shut Down Relay Monitoring Circuit",
+              "failure": "Internal Electronic Failure"
+            },
+            {
+              "code": "C153A00",
+              "description": "Malfunction of Power Steering Motor \"A\" Inverter Pre-Driver",
+              "failure": null
+            },
+            {
+              "code": "C153B00",
+              "description": "Malfunction of Power Steering Motor \"B\" Inverter Pre-Driver",
+              "failure": null
+            },
+            {
+              "code": "C10051C",
+              "description": "Control Module Internal Temperature Sensor \"B\"",
+              "failure": "Circuit Voltage Out of Range"
+            },
+            {
+              "code": "C10001C",
+              "description": "Control Module Internal Temperature Sensor \"A\"",
+              "failure": "Circuit Voltage Out of Range"
+            },
+            {
+              "code": "C15E3A2",
+              "description": "Power Steering Control Module Processor (System 2)",
+              "failure": "System Voltage Low"
+            },
+            {
+              "code": "C154A7E",
+              "description": "Power Supply & Contrary Connection Protection Relay \"A\"",
+              "failure": "Actuator Stuck On"
+            },
+            {
+              "code": "C155A17",
+              "description": "Power Steering Motor \"A\" Supply Voltage",
+              "failure": "Circuit Voltage Above Threshold"
+            },
+            {
+              "code": "C155A16",
+              "description": "Power Steering Motor \"A\" Supply Voltage",
+              "failure": "Circuit Voltage Below Threshold"
+            },
+            {
+              "code": "C155B17",
+              "description": "Power Steering Motor \"B\" Supply Voltage",
+              "failure": "Circuit Voltage Above Threshold"
+            },
+            {
+              "code": "C155B16",
+              "description": "Power Steering Motor \"B\" Supply Voltage",
+              "failure": "Circuit Voltage Below Threshold"
+            },
+            {
+              "code": "U012987",
+              "description": "Lost Communication with Brake System Control Module",
+              "failure": "Missing Message"
+            },
+            {
+              "code": "C154B7F",
+              "description": "Power Supply & Contrary Connection Protection Relay \"B\"",
+              "failure": "Actuator Stuck Off"
+            },
+            {
+              "code": "C154B7E",
+              "description": "Power Supply & Contrary Connection Protection Relay \"B\"",
+              "failure": "Actuator Stuck On"
+            },
+            {
+              "code": "C157B11",
+              "description": "Power Steering Motor \"B\" Current Sensor",
+              "failure": "Circuit Short to Ground"
+            },
+            {
+              "code": "C15D287",
+              "description": "Power Steering Motor Position Sensor \"B\"",
+              "failure": "Missing Message"
+            },
+            {
+              "code": "C15D11C",
+              "description": "Power Steering Motor Position Sensor \"A\"",
+              "failure": "Circuit Voltage Out of Range"
+            },
+            {
+              "code": "C15D21C",
+              "description": "Power Steering Motor Position Sensor \"B\"",
+              "failure": "Circuit Voltage Out of Range"
+            },
+            {
+              "code": "C15D31C",
+              "description": "Power Steering Motor Position Sensor \"C\"",
+              "failure": "Circuit Voltage Out of Range"
+            },
+            {
+              "code": "C05D646",
+              "description": "Power Steering Control Module Processor",
+              "failure": "Calibration / Parameter Memory Failure"
+            },
+            {
+              "code": "C15D362",
+              "description": "Power Steering Motor Position Sensor \"C\"",
+              "failure": "Signal Compare Failure"
+            },
+            {
+              "code": "C151187",
+              "description": "Power Steering Torque Sensor \"A\"",
+              "failure": "Missing Message"
+            },
+            {
+              "code": "C151287",
+              "description": "Power Steering Torque Sensor \"B\"",
+              "failure": "Missing Message"
+            },
+            {
+              "code": "C151162",
+              "description": "Power Steering Torque Sensor \"A\"",
+              "failure": "Signal Compare Failure"
+            },
+            {
+              "code": "C151262",
+              "description": "Power Steering Torque Sensor \"B\"",
+              "failure": "Signal Compare Failure"
+            },
+            {
+              "code": "C151A17",
+              "description": "Power Steering Torque Sensor \"A\" Supply Voltage",
+              "failure": "Circuit Voltage Above Threshold"
+            },
+            {
+              "code": "C151B17",
+              "description": "Power Steering Torque Sensor \"B\" Supply Voltage",
+              "failure": "Circuit Voltage Above Threshold"
+            }
+          ],
+          "class_0x20_state_11": [
+            {
+              "code": "U031957",
+              "description": "Software Incompatibility with Steering Effort Control Module",
+              "failure": "Invalid / Incompatible Software Component"
+            },
+            {
+              "code": "C123A17",
+              "description": "Supply Voltage Circuit",
+              "failure": "Circuit Voltage Above Threshold"
+            },
+            {
+              "code": "U030057",
+              "description": "Internal Control Module Software Incompatibility",
+              "failure": "Invalid / Incompatible Software Component"
+            },
+            {
+              "code": "U032857",
+              "description": "Software Incompatibility with Steering Angle Sensor Module",
+              "failure": "Invalid / Incompatible Software Component"
+            },
+            {
+              "code": "U130657",
+              "description": "Software Incompatibility with Power Steering Control Module Rear",
+              "failure": "Invalid / Incompatible Software Component"
+            },
+            {
+              "code": "U012687",
+              "description": "Lost Communication with Steering Angle Sensor Module",
+              "failure": "Missing Message"
+            }
+          ]
+        },
+        "openpilot_boundary": {
+          "reason": "Toyota's internal class/latch distinction does not define openpilot's temporary/permanent contract. A live induced-fault/recovery sequence or an independently proved policy mapping is still required before assigning those labels.",
+          "static_closure": "states 6-14 are now partitioned by exact DEM class family and named Toyota DTC families where the H event has a DTC index; states 6/7 and 8/9 also have exact latch-selection/aging structure",
+          "steerFaultPermanent": "unresolved policy mapping",
+          "steerFaultTemporary": "unresolved policy mapping"
+        },
+        "schema": "corolla-hf-0x394-fault-state-contract-v1",
+        "software_ids": [
+          "8965H1202000",
+          "8965F1208000"
+        ],
+        "sources": {
+          "h_codeflash": {
+            "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+            "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+          },
+          "hf_application_equivalence": {
+            "application": {
+              "baseline_sha256": "2ccb79cda1e8689ec91c389d3d7e3921c010ddc9c9d917f23c1705916a0e0d7f",
+              "different_bytes": 0,
+              "end_exclusive": "0x100000",
+              "identical": true,
+              "size": 917504,
+              "start": "0x20000",
+              "target_sha256": "2ccb79cda1e8689ec91c389d3d7e3921c010ddc9c9d917f23c1705916a0e0d7f"
+            },
+            "path": "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
+            "sha256": "a1c28ae4787a131ad1cc46310a73e11649b5cf92985b79eefa13aae71d519e7c"
+          },
+          "state_bridge_decompiler_evidence": {
+            "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json",
+            "sha256": "a2051137624ec71bad0cf11e294d579da66a97f35cc72e416d958023f2c4eaea"
+          },
+          "techstream_correlations": {
+            "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
+            "sha256": "7deef976bf507db35170006ffd64e95fb5a6add23b3c30740eb6914016006794"
+          }
+        },
+        "wire": {
+          "can_id": "0x394",
+          "classifier_entry": "0x0004B9AE",
+          "length": 3,
+          "projection": {
+            "B1[5:3]": "table column 1 via FEBE7F62 -> FEBE7DD6",
+            "B1[7:6]": "table column 4 via FEBE7F65 -> FEBE7DD5",
+            "B2[0]": "table column 3 via FEBE7F64 -> FEBE7DD9",
+            "B2[3:1]": "table column 2 via FEBE7F63 -> FEBE7DD7",
+            "not_on_0x394": "table column 0 is staged through FEBE7F66/FEBE7DD2; FEBE7DDA is separate"
+          },
+          "state_table": "0x00029D54",
+          "state_table_rows": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              3,
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              7,
+              0,
+              0,
+              0
+            ],
+            [
+              5,
+              3,
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              3,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              3,
+              3,
+              2,
+              1,
+              2
+            ],
+            [
+              3,
+              3,
+              2,
+              1,
+              0
+            ],
+            [
+              6,
+              3,
+              3,
+              0,
+              2
+            ],
+            [
+              6,
+              3,
+              3,
+              0,
+              0
+            ],
+            [
+              3,
+              7,
+              1,
+              1,
+              1
+            ],
+            [
+              3,
+              7,
+              4,
+              1,
+              1
+            ],
+            [
+              6,
+              7,
+              7,
+              0,
+              1
+            ],
+            [
+              6,
+              7,
+              6,
+              0,
+              1
+            ],
+            [
+              6,
+              7,
+              5,
+              0,
+              1
+            ],
+            [
+              2,
+              2,
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              7,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      },
       "length": 3,
-      "openpilot_consequence": "This recovers a native deepest-clear/normal versus fault-family discriminator candidate, but not a Ready authorization bit or temporary/permanent CarState fault labels. A future relay-correct capture should correlate raw 0x394 states against EPS Ready Status, DTC transitions and stock LTA enable/disable.",
+      "openpilot_consequence": "The native state now carries a statically closed DEM-class/DTC-family partition for states 6-14, including exact latch-aging structure for 6/7 and 8/9. It still does not provide a Ready authorization bit or a justified openpilot temporary/permanent policy split; a future relay-correct fault/recovery capture should validate that policy mapping.",
       "openpilot_fault_mapping": {
         "classifier_deepest_clear_normal_state": 0,
         "conservative_clear_state_candidate": "state 0 only, pending packet routing plus Ready/LTA dynamic correlation; state 0 alone is not sufficient to authorize actuation",
-        "reason": "Firmware distinguishes startup, live/latched/aged fault classes and a special state 15, but no evidence maps those distinctions to openpilot's temporary/permanent fault contract. Guessing would be unsafe.",
+        "reason": "Firmware now closes exact DEM class-to-state families and 200/600-count latch-aging structure, but Toyota's internal class/latch distinctions still do not define openpilot's temporary/permanent fault contract. Guessing would be unsafe.",
         "steerFaultPermanent": "unresolved",
         "steerFaultTemporary": "unresolved"
       },

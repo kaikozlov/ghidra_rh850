@@ -650,7 +650,7 @@
     },
     "state_bridge": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-      "sha256": "0a934ca1d274776c7a41b266b4c104910c14a61d2874700aa3f1afab00fd1beb"
+      "sha256": "bde7c9af473594821183e8811f74a286d1d01973b3ee4ba4392778991f43570b"
     },
     "techstream_cruise": {
       "path": "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json",
@@ -662,7 +662,7 @@
     },
     "techstream_ready": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-      "sha256": "f22b1e99cf5ef38c03932ff105e6abbe2d2c6eb9d1262afa3f7fdf137102457f"
+      "sha256": "7deef976bf507db35170006ffd64e95fb5a6add23b3c30740eb6914016006794"
     }
   },
   "gear": {

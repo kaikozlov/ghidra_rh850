@@ -205,11 +205,19 @@ polarity:
   same producer condition suppresses the `0x4A3` driver-torque staging value.
   Span: `0` in 6,000/6,000 frames.
 
-B6[1] is independently live (`0/1`) but its exact steering semantic is still open;
-B6[3] is runtime-produced and remains zero in this segment. Signal 34 is a signed16
-calibrated derivative of the DID `0x1151` Q-current source. Its source role is
-closed, but this report does not promote a physical packet scale because its
-calibration factor is separate from the direct `0x4A3` conversion.
+B6[1] is independently live (`0/1`) in Span, and its exact-H source is now closed:
+`FEBE6BAE` **Motor Actual Current (Q Axis)** is snapshotted through
+`FEBEEC0C/FEBEAFC4`, absolute-valued by `0xCF070`, thresholded at `0xBB8F6`,
+debounced at `0xBB942`, then copied `FEBEB64C -> FEBEE848 -> FEBE7DB3 -> 0x030
+B6[1]`. Exact H calibration `0xAEED8..0xAEEDF` is `5A 00 00 14 00 0A 00 00`:
+feature flag `0x5A`, thresholds 5120/2560, debounce count 0. Under that calibration
+the detector's enabled-only set branch is unreachable and its raw detector output is
+forced clear each execution. Thus B6[1] is a **Q-axis-current-derived debounced status
+whose exact-H threshold detector is calibration-disabled**, not a generic Ready or
+authority bit. Span's 0/1 behavior remains cross-specimen evidence because its rlog is
+not exact-F181-joined. B6[3] is runtime-produced and remains zero in that segment.
+Signal 34 is separately a signed16 calibrated derivative of the same DID `0x1151`
+Q-current source; its packet scale remains calibration-dependent.
 
 The capture contains no induced EPS fault and no stock-LTA off→active→off
 transition. Therefore the asserted operational consequences of B6[2]/B6[0] remain
@@ -297,6 +305,65 @@ Machine-readable evidence:
 `data/generated/corolla_hf_cooperative_authority_wire_visibility.json` and
 `data/generated/corolla_8965H1202000_cooperative_authority_wire_decompiler_evidence.json`;
 deterministic verifier: `tests/verify_corolla_hf_cooperative_authority_wire_visibility.py`.
+
+### 6.7 `0x394` states 6–14 now have exact DEM-class/DTC-family provenance
+
+The 17-state `0x394` classifier is no longer merely a generic “fault family” bucket.
+A complete scan of all **384** exact-H DEM event records at `0x2B988` finds **242**
+records with a populated class byte. Their exact class histogram is:
+
+- `0x01`: 8 events; populated but not consumed by `0x4B692`;
+- `0x02`: 34 events -> classifier states **6/7**;
+- `0x04`: 1 internal/no-named-DTC event -> states **8/9**;
+- `0x08`: 1 internal event -> state **13** when its additional classifier gate permits;
+- `0x0F`: 1 internal event -> state **14** under the corresponding gate;
+- `0x10`: 173 events -> state **10**, the dominant hardware/electrical/current/sensor/communication family;
+- `0x20`: 16 events -> state **11**;
+- `0x40`: 1 internal event -> state **12**; and
+- `0x80`: 7 internal events contributing to the general state-16 fallback.
+
+`0x4B692` also implements class `0xF0`, but the exact-H event table contains no
+`0xF0` row. State 11 also has a separate internal `0x20`-aggregate source, so it is
+not uniquely synonymous with class `0x20`. Where H's event record carries a DTC
+index, the exact H DTC table joins to pinned `EMPS_P5` Toyota names. Class `0x10`,
+for example, includes motor terminal-voltage/current/inverter/relay/sensor/processor
+faults and `U012987 Lost Communication with Brake System Control Module`; class
+`0x20` includes software-incompatibility and steering-angle-sensor communication
+families.
+
+The paired class-2/class-4 states have exact internal aging structure rather than an
+uninterpreted duplicate: primary latches use calibration **200**, the shared secondary
+latch uses **600**, and primary clear is additionally gated on `FEBEE8B0 >= 17736`.
+Those are Toyota classifier/latch mechanics. They are **not** renamed
+`steerFaultTemporary`/`steerFaultPermanent`: openpilot's policy distinction still needs
+a recoverable-versus-latched live fault/recovery sequence or another independent policy
+join.
+
+Machine-readable contract: `data/generated/corolla_hf_fault_state_contract.json`;
+deterministic verifier: `tests/verify_corolla_hf_fault_state_contract.py`.
+
+### 6.8 The `0x351` force-7 override source topology is closed
+
+The C159B49-linked base status and the force-7 path are now structurally separable all
+the way to their sources. The force condition at `0x46E62` is exactly:
+
+`(FEBE65E4 & 0x0003) != 0 && FEBE7E13 != 0`.
+
+The first side is a broad redundant 16-bit status bitmap maintained at `FEBE6FB4` by
+`0x36AAA/0x36BBE` and copied to `FEBE65E4` by `0x5778E`; force-7 consumes bits 0/1.
+The second side comes from `0x36CEC`, which walks **24** status records selected from
+two 12-byte record banks, ORs each valid record's `+6` ushort (plus one gated extra
+source), and passes aggregate bit **15** through `0x3738C -> 0x472E0 -> FEBE7E13`.
+When both sides assert, `0x46E62` forces status code 7 and `FEBE7DD1=1`.
+
+This closes topology and gating, not Toyota display names: the current corpus has no
+unique OEM/DTC semantic label for status-bitmap bits0/1 or record `+6` bit15. Therefore
+the force-7 path is a distinct conservative severe/special status input, **not** another
+name for C159B49 and not yet an openpilot temporary/permanent classifier.
+
+Machine-readable contract: `data/generated/corolla_hf_remaining_status_contract.json`;
+raw-body evidence: `data/generated/corolla_8965H1202000_remaining_status_decompiler_evidence.json`;
+deterministic verifier: `tests/verify_corolla_hf_remaining_status_contract.py`.
 
 ## 7. Command ingress: what the complete generated-COM census says
 
@@ -892,6 +959,6 @@ raw-body-bound decompiler/reference evidence is tracked alongside each artifact.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009), [COM-010](../reference/index.md#finding-com-010), [COM-011](../reference/index.md#finding-com-011), [COM-014](../reference/index.md#finding-com-014), [COM-015](../reference/index.md#finding-com-015), [COM-016](../reference/index.md#finding-com-016), [COM-017](../reference/index.md#finding-com-017), [TMS-053](../reference/index.md#finding-tms-053), [TMS-054](../reference/index.md#finding-tms-054), [TMS-055](../reference/index.md#finding-tms-055), [TMS-056](../reference/index.md#finding-tms-056)
+- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009), [COM-010](../reference/index.md#finding-com-010), [COM-011](../reference/index.md#finding-com-011), [COM-014](../reference/index.md#finding-com-014), [COM-015](../reference/index.md#finding-com-015), [COM-016](../reference/index.md#finding-com-016), [COM-017](../reference/index.md#finding-com-017), [TMS-053](../reference/index.md#finding-tms-053), [TMS-054](../reference/index.md#finding-tms-054), [TMS-055](../reference/index.md#finding-tms-055), [TMS-056](../reference/index.md#finding-tms-056), [TMS-058](../reference/index.md#finding-tms-058), [TMS-059](../reference/index.md#finding-tms-059)
 - Corrections with this document as canonical home: [CORR-109](../reference/index.md#correction-corr-109), [CORR-110](../reference/index.md#correction-corr-110), [CORR-111](../reference/index.md#correction-corr-111), [CORR-112](../reference/index.md#correction-corr-112), [CORR-113](../reference/index.md#correction-corr-113), [CORR-114](../reference/index.md#correction-corr-114), [CORR-115](../reference/index.md#correction-corr-115), [CORR-116](../reference/index.md#correction-corr-116)
 <!-- knowledge-cross-references:end -->

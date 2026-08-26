@@ -1,6 +1,6 @@
 {
   "evidence": {
-    "b6_target_angle_ingress_sha256": "a80442a2198033f0e71fb887189a07794ab23ae6031b50a6f63ed85fd0e5080a",
+    "b6_target_angle_ingress_sha256": "9697f6d03def168d37bf96183dd3663c6b930a4eb5993846a2055d0fc9bce4dd",
     "function_count": 56,
     "function_evidence_sha256": "b7bbc66d9c30b16c77938dc002f4a6f752497c228a0229aa3f5316970130eb17",
     "reference_census_sha256": "acbb28d5ff706377c8eed476de0eb675441a0db65058ea95fe9cebeede06de4d",
