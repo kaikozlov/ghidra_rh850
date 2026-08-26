@@ -35,6 +35,6 @@ art = json.loads(original)
 rows = {x["name"]: x for x in art["frc_p5"]["monitors"]}
 check("FRC permission/main/operation oracles exist", all(x in rows for x in ("Cruise Control Permission Flag", "Main Switch Recognition Flag", "ACC Control in Operation Flag")))
 check("FRC memory speed oracle is km/h", rows["Memory Vehicle Speed"]["primary_data_id"] == "0x1901" and rows["Memory Vehicle Speed"]["bit_range"] == [32, 63] and rows["Memory Vehicle Speed"]["conversion"]["unit"] == "km/h")
-check("P5 Data IDs are not mislabeled as direct UDS DIDs", all(x in art["frc_p5"]["boundary"] for x in ("primary Data IDs", "not automatically UDS ReadDataByIdentifier DIDs", "diagnostic transport service")))
+check("P5 DDB/transport boundary reflects host closure", all(x in art["frc_p5"]["boundary"] for x in ("DDB rows alone", "current-GTS+ host evidence", "SID 0x22 ReadDataByIdentifier", "outer diagnostic-session prerequisite")))
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 raise SystemExit(1 if failed else 0)

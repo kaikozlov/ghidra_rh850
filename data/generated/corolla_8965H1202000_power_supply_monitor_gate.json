@@ -1,0 +1,226 @@
+{
+  "applies_to": [
+    "8965H1202000",
+    "8965F1208000"
+  ],
+  "classification": {
+    "distinct_from_b6_loss": "B6 missing-message loss remains the separate FEBEADB9 -> FEBEC26D path.",
+    "firmware_effect": "Native values 2/3 suppress ordinary generated receive-unpacker updates under the direct textual census; downstream cooperative selection requires FEBEACBD == 0.",
+    "not_established": [
+      "literal OEM name for any of the three state bytes",
+      "physical units of the raw supply cells",
+      "wall-clock debounce durations",
+      "a wire-visible FEBEACBD feedback field",
+      "arbitrary computed-pointer aliases outside the census"
+    ],
+    "recovered": "FEBE7C58 is a shared graded power-supply receive-validity/freeze state; FEBEF000 is its scheduler snapshot; FEBEACBD is its normalized downstream gate code."
+  },
+  "diagnostic_input_join": {
+    "0xFEBE63A6": {
+      "producers": [
+        "0x00048918",
+        "0x00048CFC"
+      ],
+      "rows": [
+        {
+          "did": "0x1062",
+          "name": "PIG Power Supply"
+        },
+        {
+          "did": "0x1068",
+          "name": "PIG Power Supply (System 2)"
+        },
+        {
+          "did": "0x10CA",
+          "name": "Motor 1 Power Supply"
+        }
+      ]
+    },
+    "0xFEBE63A8": {
+      "producer": "0x00048E90",
+      "rows": [
+        {
+          "did": "0x10FA",
+          "name": "Motor 2 Power Supply"
+        }
+      ]
+    },
+    "0xFEBE63B0": {
+      "producer": "0x000488E6",
+      "rows": [
+        {
+          "did": "0x1061",
+          "name": "IG Power Supply"
+        },
+        {
+          "did": "0x1067",
+          "name": "IG Power Supply (System 2)"
+        }
+      ]
+    },
+    "boundary": "The exact diagnostic producers identify a power-supply-monitor subsystem. FEBE63A6 is exposed under both PIG and Motor 1 labels, so the artifact does not choose one as its unique variable name. No OEM names are assigned to FEBE63A4, FEBE65E4, FEBE7C5F, the three local monitor states, FEBE7C58, FEBEF000, or FEBEACBD."
+  },
+  "monitor_dispatch": {
+    "calibration": {
+      "address": "0x0002B69A",
+      "raw_hex": "00100009001000090500c8000000c8000500c80000000500c8000000",
+      "u16_le": [
+        4096,
+        2304,
+        4096,
+        2304,
+        5,
+        200,
+        0,
+        200,
+        5,
+        200,
+        0,
+        5,
+        200,
+        0
+      ]
+    },
+    "channels": [
+      {
+        "classifier": "0x0004516A",
+        "local_state": "0xFEBE7C5C",
+        "monitor": "0x00044D84",
+        "predicate_boundary": "common IG-window condition plus both A6 and A8 below the low threshold or both above the high threshold; also gated by FEBE63A4, FEBE65E4 bits[1:0], and FEBE7C5F",
+        "supply_inputs": [
+          "0xFEBE63B0",
+          "0xFEBE63A6",
+          "0xFEBE63A8"
+        ],
+        "terminal_marker": "0xFEBE7C59"
+      },
+      {
+        "classifier": "0x000451C4",
+        "local_state": "0xFEBE7C5D",
+        "monitor": "0x00044EC2",
+        "predicate_boundary": "common IG-window condition plus A6 outside the low/high window; also gated by FEBE63A4, FEBE65E4 bit1, and FEBE7C5F",
+        "supply_inputs": [
+          "0xFEBE63B0",
+          "0xFEBE63A6"
+        ],
+        "terminal_marker": "0xFEBE7C5A"
+      },
+      {
+        "classifier": "0x00045212",
+        "local_state": "0xFEBE7C5E",
+        "monitor": "0x00044FC4",
+        "predicate_boundary": "common IG-window condition plus A8 outside the low/high window; also gated by FEBE63A4, FEBE65E4 bit0, and FEBE7C5F",
+        "supply_inputs": [
+          "0xFEBE63B0",
+          "0xFEBE63A8"
+        ],
+        "terminal_marker": "0xFEBE7C5B"
+      }
+    ],
+    "classifier_codes": {
+      "0x11": "non-fault classifier result",
+      "0x22": "out-of-window classifier result",
+      "0x44": "disabled/not-ready classifier result"
+    },
+    "entry": "0x000450FC",
+    "feature_bytes": {
+      "address": "0x0002B864",
+      "meaning": "zero selects each monitor; 0x5A bypasses and clears the shared state",
+      "raw_hex": "000000"
+    },
+    "shared_state_writes": {
+      "0": "0x00045268",
+      "1": "0x00045260",
+      "2": "0x00045272",
+      "3": [
+        "0x0004527A",
+        "0x0004528A",
+        "0x0004529A"
+      ]
+    }
+  },
+  "schema": "corolla-8965H1202000-power-supply-monitor-gate-v1",
+  "software_id": "8965H1202000",
+  "sources": {
+    "codeflash": {
+      "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+    },
+    "decompiler_evidence": {
+      "function_count": 14,
+      "path": "data/generated/corolla_8965H1202000_power_supply_monitor_decompiler_evidence.json",
+      "sha256": "a9920af5068c7a3c5c26dacc164e80d44c9a08225db4cb332e54a89cc40cc3c9"
+    },
+    "hf_application_equivalence": {
+      "path": "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
+      "region": {
+        "baseline_sha256": "2ccb79cda1e8689ec91c389d3d7e3921c010ddc9c9d917f23c1705916a0e0d7f",
+        "different_bytes": 0,
+        "end_exclusive": "0x100000",
+        "identical": true,
+        "size": 917504,
+        "start": "0x20000",
+        "target_sha256": "2ccb79cda1e8689ec91c389d3d7e3921c010ddc9c9d917f23c1705916a0e0d7f"
+      },
+      "sha256": "a1c28ae4787a131ad1cc46310a73e11649b5cf92985b79eefa13aae71d519e7c"
+    },
+    "techstream_correlations": {
+      "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
+      "sha256": "f22b1e99cf5ef38c03932ff105e6abbe2d2c6eb9d1262afa3f7fdf137102457f"
+    },
+    "tms053_followup_evidence": {
+      "path": "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json",
+      "sha256": "4afbd5568b61016161b147d23239011f579a2511d3497e628b69c2bdde60b200"
+    }
+  },
+  "state_chain": {
+    "direct_text_reference_census": {
+      "native_state": {
+        "address": "0xFEBE7C58",
+        "match_count": 47,
+        "terms": [
+          "febe7c58",
+          "-0x3ba8"
+        ]
+      },
+      "normalized_state": {
+        "address": "0xFEBEACBD",
+        "match_count": 21,
+        "terms": [
+          "febeacbd",
+          "-0xb43"
+        ]
+      },
+      "snapshot_state": {
+        "address": "0xFEBEF000",
+        "match_count": 31,
+        "terms": [
+          "febef000",
+          "+ 0x3800"
+        ]
+      }
+    },
+    "exact_fixed_gp_arithmetic": {
+      "gp": "0xFEBEB800",
+      "native": "GP-0x3BA8",
+      "normalized": "GP-0x0B43",
+      "snapshot": "GP+0x3800"
+    },
+    "mapping": {
+      "0": 0,
+      "2": 2,
+      "3": 4,
+      "other_nonzero": 1
+    },
+    "native_state": "0xFEBE7C58",
+    "normalized_output": "0xFEBEACBD",
+    "normalizer": {
+      "entry": "0x000B8EE4",
+      "tracked_body_continuation": "0x000B8EEC"
+    },
+    "snapshot_copy": {
+      "destination": "0xFEBEF000",
+      "entry": "0x0005262C"
+    }
+  }
+}

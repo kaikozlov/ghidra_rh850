@@ -1,0 +1,239 @@
+{
+  "capture_recipe": {
+    "poll": [
+      "221901",
+      "221905",
+      "221906",
+      "221912",
+      "221914"
+    ],
+    "purpose": "synchronize exact Toyota cruise permission/main/operation/set-speed/follow-distance diagnostic truth with all-bus CAN during the next firmware-identified target capture",
+    "validate": "accept only 0x62 followed by the same requested two-byte Data ID, then decode the existing FRC_P5 monitor bit ranges"
+  },
+  "conclusion": "For these five FRC_P5 cruise Data IDs, current GTS+ does use ordinary UDS ReadDataByIdentifier wire requests. The Phase-5-specific machinery is the monitor selection/scheduling/buffering layer around SID 0x22, not a different live data service. CAN-field mapping and any outer diagnostic-session prerequisite remain open/dynamic.",
+  "raw_function_evidence": {
+    "check_rcv_frame": {
+      "sha256": "932e5eee05d5605f13611e35bf9aad62fbb3dc3f86a8b444da5200f6a5d8a54e",
+      "size": 577,
+      "va": "0x10038FD0"
+    },
+    "dataid_setup": {
+      "sha256": "4e08f6fcf01fd9d5511b73783c2bf5af9670360d3e856e866252b19aa5fc7ec6",
+      "size": 486,
+      "va": "0x100393D0"
+    }
+  },
+  "raw_instruction_anchors": {
+    "request_did_hi_load": {
+      "bytes": "0fb6445801",
+      "va": "0x100394EF"
+    },
+    "request_did_hi_store": {
+      "bytes": "884101",
+      "va": "0x100394F4"
+    },
+    "request_did_lo_load": {
+      "bytes": "0fb60458",
+      "va": "0x100394FC"
+    },
+    "request_did_lo_store": {
+      "bytes": "884102",
+      "va": "0x10039500"
+    },
+    "request_length_3": {
+      "bytes": "c7460403000000",
+      "va": "0x10039515"
+    },
+    "request_service_22": {
+      "bytes": "c60022",
+      "va": "0x100394E7"
+    },
+    "response_expected_length_lookup": {
+      "bytes": "0fb70448",
+      "va": "0x10039021"
+    },
+    "response_length_cap_compare": {
+      "bytes": "663bc3",
+      "va": "0x10039028"
+    },
+    "response_length_minus_three": {
+      "bytes": "83c0fd",
+      "va": "0x10039013"
+    },
+    "response_mode_is_22": {
+      "bytes": "80f922",
+      "va": "0x10038FF1"
+    },
+    "response_positive_service_62": {
+      "bytes": "3c62",
+      "va": "0x10038FF6"
+    },
+    "response_skip_three_bytes": {
+      "bytes": "83c203",
+      "va": "0x1003900C"
+    }
+  },
+  "schema": "techstream-gtsplus-p5-cruise-live-dataid-transport-v1",
+  "scope": {
+    "category_id": 498,
+    "database": "FRC_P5.ddb",
+    "ecu_name": "Front Recognition Camera 2",
+    "physical_request_address": "0x792"
+  },
+  "selected_cruise_oracles": [
+    {
+      "data_id": "0x1901",
+      "minimum_payload_bytes_from_monitored_bits": 8,
+      "monitor_rows": [
+        {
+          "bit_range": [
+            0,
+            31
+          ],
+          "monitor_key": 217,
+          "monitor_record_sha256": "8b2857017a472f26076f0f9ad5d1a1eeeffc1a4f26dd414f0ecb907f47cf977d",
+          "name": "Current Vehicle Speed"
+        },
+        {
+          "bit_range": [
+            32,
+            63
+          ],
+          "monitor_key": 218,
+          "monitor_record_sha256": "1e1358e15ffd535570fbb7dd21fb5c2fa1fd47cffc71e1c21d782bd69536fd8a",
+          "name": "Memory Vehicle Speed"
+        }
+      ],
+      "request": "221901",
+      "strict_capture_positive_prefix": "621901"
+    },
+    {
+      "data_id": "0x1905",
+      "minimum_payload_bytes_from_monitored_bits": 2,
+      "monitor_rows": [
+        {
+          "bit_range": [
+            8,
+            8
+          ],
+          "monitor_key": 94,
+          "monitor_record_sha256": "1e340405866db340d60b09d55fa5f961d7333052d5d28accf734b1d1296e0339",
+          "name": "Cruise Control Permission Flag"
+        }
+      ],
+      "request": "221905",
+      "strict_capture_positive_prefix": "621905"
+    },
+    {
+      "data_id": "0x1906",
+      "minimum_payload_bytes_from_monitored_bits": 6,
+      "monitor_rows": [
+        {
+          "bit_range": [
+            8,
+            8
+          ],
+          "monitor_key": 95,
+          "monitor_record_sha256": "1d305b4ae9323616d117a356d9df771d66b411f16276ba11e11e7668d8a94c8c",
+          "name": "Main Switch Recognition Flag"
+        },
+        {
+          "bit_range": [
+            9,
+            9
+          ],
+          "monitor_key": 96,
+          "monitor_record_sha256": "b0b131d9c59d947146e0074b2dd7f889fb77e1619977f7ad8fd6c32efc60a0ac",
+          "name": "Set Cancel Switch Condition"
+        },
+        {
+          "bit_range": [
+            40,
+            40
+          ],
+          "monitor_key": 101,
+          "monitor_record_sha256": "490e6bf6f3992c4a98779f0d0d46a16ba2b7c8a3c38e7855dbd13b4319f312e2",
+          "name": "ACC Not Available Icon Lighting Request Flag"
+        }
+      ],
+      "request": "221906",
+      "strict_capture_positive_prefix": "621906"
+    },
+    {
+      "data_id": "0x1912",
+      "minimum_payload_bytes_from_monitored_bits": 1,
+      "monitor_rows": [
+        {
+          "bit_range": [
+            0,
+            7
+          ],
+          "monitor_key": 201,
+          "monitor_record_sha256": "b85d0f5b9a5892e822c275853b18bd908c6277d4051d878a8605799be3d016a7",
+          "name": "Set Vehicle Interval Time"
+        }
+      ],
+      "request": "221912",
+      "strict_capture_positive_prefix": "621912"
+    },
+    {
+      "data_id": "0x1914",
+      "minimum_payload_bytes_from_monitored_bits": 2,
+      "monitor_rows": [
+        {
+          "bit_range": [
+            8,
+            8
+          ],
+          "monitor_key": 102,
+          "monitor_record_sha256": "35d60bdb7b98000664de7919591430eb122e1669a9e74e6713982bf24d7ea097",
+          "name": "ACC Control in Operation Flag"
+        }
+      ],
+      "request": "221914",
+      "strict_capture_positive_prefix": "621914"
+    }
+  ],
+  "sources": {
+    "cruise_semantics": {
+      "path": "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json",
+      "sha256": "f3a56b5249ec9b7329fa9a2b0761ac458ef810b16cc4f81eb85f1b8bb5636a19"
+    },
+    "data_list_if": {
+      "sha256": "cce3ecd1203f81914c51d5b2599ee68eb4f7faafa8cbd9bb24fd7390b54d651d",
+      "size": 507920
+    },
+    "gtsplus_archive": {
+      "member": "gtsplus/Toyota Diagnostics/GTSPlus/bin/DataListIF.dll",
+      "path": "REFERENCE/gtsplus.7z"
+    },
+    "p5_lateral_control_semantics": {
+      "frc_vds_anchor": {
+        "address": "792",
+        "database": "FRC_P5",
+        "ecu_no": 498,
+        "page_index_zero_based": 20,
+        "phase": 5,
+        "raw40_sha256": "8e0b4d4c25d6f9aa5a960d745b735a8b77f097b57ca7a3832900c8b03a10970a",
+        "row_layout": {
+          "address": "3-byte ASCII after FF FE marker at +0x1A",
+          "column_count": "u16 +0x00",
+          "ecu_no": "u32 +0x02",
+          "phase": "u32 +0x06"
+        },
+        "row_offset": 3026,
+        "slot": 24
+      },
+      "path": "data/generated/techstream_v18/p5_lateral_control_semantics.json",
+      "sha256": "d86dc9c016dd94cbbc3f4435d09eadc0796192bfd258c8ea264722a163e6b86b"
+    }
+  },
+  "transport": {
+    "outer_session_boundary": "The narrowed current-GTS+ Phase-5 live-monitor path proves the SID-0x22 transactions but does not prove a named outer UDS DiagnosticSessionControl prerequisite. Do not infer 0x10 01/03 or a SecurityAccess requirement from the monitor-internal state machine alone.",
+    "payload_copy": "advance response pointer by 3 bytes and copy min(received_length-3, runtime_expected_data_id_length)",
+    "positive_response_gate": "the Phase-5 receive worker requires service byte 0x62 for a queued 0x22 request",
+    "request": "one 3-byte request per selected Data ID: 0x22 || DID_hi || DID_lo",
+    "returned_did_validation_boundary": "CCommEventPhase5DM::CheckRcvFrame does not compare response bytes 1/2 with the queued DID before stripping the first three bytes. For an independent capture probe, require the stricter conventional 0x62||DID_hi||DID_lo prefix before treating payload as the requested oracle.",
+    "runtime_expected_length_source": "caller-provided per-Data-ID length array; DataMonitorPhase5 obtains this from the supported-ECU DataIdLengthList cache rather than from the FRC_P5 type-62 monitor bit range"
+  }
+}

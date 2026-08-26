@@ -2905,3 +2905,25 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `data/generated/corolla_hf_steering_limits.json`;
   `tests/verify_corolla_hf_steering_limits.py`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
+
+
+### CORR-117 — The selected FRC_P5 cruise Data IDs are direct SID-0x22 RDBI requests in current GTS+
+
+- **Superseded framing:** the first non-steering engagement closure correctly treated
+  `0x1901/0x1905/0x1906/0x1912/0x1914` as exact P5 diagnostic Data-ID oracles but
+  left their live service mapping bounded and therefore instructed captures to use
+  the Techstream/GTS+ data-monitor UI unless direct `0x22` support was separately
+  recovered.
+- **Exact correction:** current GTS+ `DataListIF.dll` now byte-proves
+  `CCommEventPhase5DM::DataidSetup` constructs `22 || DID_hi || DID_lo` for each
+  selected Data ID. `CheckRcvFrame` requires positive service `0x62`, strips the
+  first three response bytes, and copies the remaining data up to the runtime
+  expected DID length. The five cruise oracles can therefore be polled directly as
+  `22 19 01/05/06/12/14`.
+- **Capture boundary:** the GTS+ receive worker does not itself compare returned DID
+  bytes 1/2 with the queued DID before stripping them. Independent tooling should
+  require `62 || requested_DID` before decoding. No named outer DiagnosticSessionControl
+  or SecurityAccess prerequisite is inferred from this path.
+- **Canonical:** `data/generated/techstream_v18/tss3_cruise_live_transport.json`;
+  `tests/verify_tss3_cruise_live_transport_external.py`;
+  [../tooling/techstream.md](../tooling/techstream.md) §6.3.

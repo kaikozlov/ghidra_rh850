@@ -377,10 +377,12 @@ What the exact segment-0 rlog *does* close is the old-openpilot role migration:
   `0x1906` **Main Switch Recognition Flag**, **Set Cancel Switch Condition**, and
   **ACC Not Available Icon Lighting Request Flag**; Data ID `0x1914` **ACC Control
   in Operation Flag**; Data ID `0x1901` **Current Vehicle Speed** and **Memory
-  Vehicle Speed**; and Data ID `0x1912` **Set Vehicle Interval Time**. These are
-  P5 diagnostic Data IDs, not automatically UDS RDBI DIDs; use Techstream/GTS+
-  data-monitor access unless the FRC service mapping is separately recovered.
-  Those names/Data IDs/bits define what future CAN candidates must correlate with,
+  Vehicle Speed**; and Data ID `0x1912` **Set Vehicle Interval Time**. Current
+  GTS+ host code now independently proves those selected Data IDs are ordinary
+  SID `0x22` RDBI requests (`22 19 01/05/06/12/14`); independent capture tooling
+  should require the matching `62 19 xx` prefix. The outer diagnostic session
+  prerequisite remains bounded. Those names/Data IDs/bits define what future CAN
+  candidates must correlate with,
   but they do not by themselves identify the wire fields. Production
   `cruiseState.available/enabled/speed` must
   remain neutral until a synchronized transition or producer-firmware join closes

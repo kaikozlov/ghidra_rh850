@@ -16,6 +16,7 @@ ENG_EVID = REPO / "data/generated/corolla_8965H1202000_nonsteering_engagement_de
 STATE = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge.json"
 TECH_READY = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
 TECH_CRUISE = REPO / "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json"
+TECH_CRUISE_TRANSPORT = REPO / "data/generated/techstream_v18/tss3_cruise_live_transport.json"
 PUBLIC = REPO / "data/generated/corolla_2023_public_route_opendbc_evidence.json"
 SPAN = REPO / "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json"
 EQ = REPO / "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json"
@@ -56,6 +57,7 @@ def main() -> int:
     state = load(STATE)
     tech_ready = load(TECH_READY)
     tech_cruise = load(TECH_CRUISE)
+    tech_cruise_transport = load(TECH_CRUISE_TRANSPORT)
     public = load(PUBLIC)
     span = load(SPAN)
     eq = load(EQ)
@@ -113,8 +115,14 @@ def main() -> int:
         raise ValueError("state-bridge Ready Status wire join drift")
 
     frc_boundary = tech_cruise["frc_p5"]["boundary"]
-    if not all(x in frc_boundary for x in ("primary Data IDs", "not automatically UDS ReadDataByIdentifier DIDs", "diagnostic transport service")):
+    if not all(x in frc_boundary for x in ("DDB rows alone", "current-GTS+ host evidence", "SID 0x22 ReadDataByIdentifier")):
         raise ValueError("FRC P5 Data-ID/UDS transport boundary drift")
+    transport_rows = {x["data_id"]: x for x in tech_cruise_transport["selected_cruise_oracles"]}
+    if set(transport_rows) != {"0x1901", "0x1905", "0x1906", "0x1912", "0x1914"}:
+        raise ValueError("FRC live-transport selected Data-ID set drift")
+    for did, row in transport_rows.items():
+        if row["request"] != "22" + did[2:] or row["strict_capture_positive_prefix"] != "62" + did[2:]:
+            raise ValueError(f"FRC live-transport request/response drift: {did}")
     frc_rows = {x["name"]: x for x in tech_cruise["frc_p5"]["monitors"]}
     required_oracles = {
         "Cruise Control Permission Flag": ("0x1905", [8, 8]),
@@ -238,13 +246,13 @@ def main() -> int:
                 "follow_distance": "open: diagnose against Set Vehicle Interval Time",
             },
             "capture_recipe": [
-                "Use Techstream/GTS+ FRC_P5 Data ID 0x1905 (Cruise Control Permission Flag) while toggling cruise main and engagement.",
-                "Use Techstream/GTS+ FRC_P5 Data ID 0x1906 (Main Switch Recognition Flag, Set Cancel Switch Condition, ACC Not Available Icon Lighting Request Flag) synchronized with all-bus CAN.",
-                "Use Techstream/GTS+ FRC_P5 Data ID 0x1914 (ACC Control in Operation Flag) through disengaged -> engaged -> cancelled transitions.",
-                "Use Techstream/GTS+ FRC_P5 Data ID 0x1901 (Current Vehicle Speed, Memory Vehicle Speed) while changing set speed.",
-                "Use Techstream/GTS+ FRC_P5 Data ID 0x1912 (Set Vehicle Interval Time) while cycling following distance.",
+                "Poll FRC_P5 0x1905 directly with UDS 22 19 05 and require 62 19 05 before decoding Cruise Control Permission Flag while toggling cruise main and engagement.",
+                "Poll FRC_P5 0x1906 directly with UDS 22 19 06 and require 62 19 06 before decoding Main Switch Recognition / Set-Cancel / ACC Not Available synchronized with all-bus CAN.",
+                "Poll FRC_P5 0x1914 directly with UDS 22 19 14 and require 62 19 14 before decoding ACC Control in Operation through disengaged -> engaged -> cancelled transitions.",
+                "Poll FRC_P5 0x1901 directly with UDS 22 19 01 and require 62 19 01 before decoding Current/Memory Vehicle Speed while changing set speed.",
+                "Poll FRC_P5 0x1912 directly with UDS 22 19 12 and require 62 19 12 before decoding Set Vehicle Interval Time while cycling following distance.",
             ],
-            "diagnostic_transport_boundary": "The 0x19xx values above are P5 diagnostic Data IDs from FRC_P5, not automatically UDS ReadDataByIdentifier DIDs. Use Techstream/GTS+ data-monitor access unless a separate FRC service mapping proves direct 0x22 support.",
+            "diagnostic_transport_boundary": "Current GTS+ proves the selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. For an independent capture, require the matching 0x62||DID positive prefix before decoding. A named outer DiagnosticSessionControl or SecurityAccess prerequisite is not statically proved.",
             "boundary": "Neither retained route supplies an independent cruise-main/engagement oracle. Exact Toyota diagnostics now define what each missing semantic must correlate with, but no CAN field may be promoted to available/enabled/set-speed/fault until a wire-to-oracle transition is observed or statically recovered from the producer firmware.",
         },
         "implementation_consequence": {
@@ -252,7 +260,7 @@ def main() -> int:
                 "Add/inspect 0x51E B0[7] as target-native Ready Status input.",
                 "The current read-only parser may retain prior-art raw3->D decoding as an observation aid, but do not call D target-native validated; preserve P/R/N/B as unvalidated prior-art enums.",
                 "Keep TSS3 cruiseState.available/enabled/set-speed neutral in production CarState.",
-                "Use the exact FRC P5 Data-ID oracle set through Techstream/GTS+ for the next synchronized capture instead of guessing replacement CAN bits.",
+                "Poll the exact FRC P5 cruise Data-ID oracle set directly with the recovered SID 0x22 requests during the next synchronized capture instead of guessing replacement CAN bits.",
             ],
             "not_safe_yet": [
                 "Treat 0x176 B0[3] as cruise main/active state.",
@@ -267,6 +275,7 @@ def main() -> int:
             "state_bridge": {"path": str(STATE.relative_to(REPO)), "sha256": sha(STATE.read_bytes())},
             "techstream_ready": {"path": str(TECH_READY.relative_to(REPO)), "sha256": sha(TECH_READY.read_bytes())},
             "techstream_cruise": {"path": str(TECH_CRUISE.relative_to(REPO)), "sha256": sha(TECH_CRUISE.read_bytes())},
+            "techstream_cruise_live_transport": {"path": str(TECH_CRUISE_TRANSPORT.relative_to(REPO)), "sha256": sha(TECH_CRUISE_TRANSPORT.read_bytes())},
             "public_route": {"path": str(PUBLIC.relative_to(REPO)), "sha256": sha(PUBLIC.read_bytes())},
             "span_route": {"path": str(SPAN.relative_to(REPO)), "sha256": sha(SPAN.read_bytes())},
         },

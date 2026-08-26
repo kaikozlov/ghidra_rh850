@@ -1,0 +1,408 @@
+{
+  "evidence_boundary": "The five configured normal H/F Tx PDUs were checked at their packers for direct cooperative-root reads; the missed raw-mode route was followed through fixed-GP copies and computed aliases; and all raw absolute pointer materializations of the exact/profile roots were enumerated, with the profile pointers resolved through both fixed CodeFlash table families to internal gain consumers. This proves no exact discrete cooperative-authority bit under those direct, fixed-GP, simple computed-alias, and fixed-CodeFlash-pointer-table surfaces. It does not exclude arbitrary mutable runtime pointers, DMA/peripheral mutation, physical actuator-response inference, or another ECU assigning a different meaning to the coarse 0x030 bits. No live authority transition is claimed.",
+  "exact_authority_negative": {
+    "distinguishing_pair": {
+      "raw_mode_0": "FEBEF000<2 is true and B8EEC emits FEBEACBD=0, permitting CBE6E when the health gate is 1",
+      "raw_mode_1": "FEBEF000<2 is also true but B8EEC emits FEBEACBD=1, preventing CBE6E"
+    },
+    "exact_wire_visible_cooperative_authority_bit_recovered": false,
+    "proof": "The recovered 0x030 path cannot encode exact FEBEACBD authority because its mode predicate maps two raw values with opposite exact-gate outcomes to the same branch input; the aggregate also depends on five other conditions."
+  },
+  "exact_cooperative_gate": {
+    "acceptance_condition": "FEBEACBD == 0 AND FEBEC26D == 1",
+    "acceptance_decoder": "0x000CBE6E",
+    "normalization": {
+      "0": 0,
+      "1": 1,
+      "2": 2,
+      "3": 4,
+      "other_nonzero": 1
+    },
+    "normalized_mode": "0xFEBEACBD",
+    "normalizer": "0x000B8EEC",
+    "outputs": [
+      "0xFEBEC26E",
+      "0xFEBEC26F",
+      "0xFEBEC270",
+      "0xFEBEC271",
+      "0xFEBEC272",
+      "0xFEBEC273"
+    ],
+    "raw_mode_source": "0xFEBE7C58",
+    "raw_mode_stage": "0xFEBEF000",
+    "stage_copy": "0x0005262C"
+  },
+  "five_pdu_boundary": [
+    {
+      "can_id": "0x030",
+      "classification": "three duplicated coarse aggregate-status bits are recovered; they are not exact cooperative authority",
+      "descriptor": [
+        2,
+        0,
+        0,
+        32,
+        0,
+        3
+      ],
+      "direct_cooperative_root_references": [],
+      "exact_wire_visible_cooperative_authority_bit_recovered": false,
+      "packer": "0x0004766A",
+      "pdu": 0
+    },
+    {
+      "can_id": "0x351",
+      "classification": "mixed electrical-monitor status and a separate force-7 path; no exact cooperative-authority bit recovered",
+      "descriptor": [
+        200,
+        0,
+        0,
+        4,
+        0,
+        3
+      ],
+      "direct_cooperative_root_references": [],
+      "exact_wire_visible_cooperative_authority_bit_recovered": false,
+      "packer": "0x00047BA2",
+      "pdu": 1
+    },
+    {
+      "can_id": "0x394",
+      "classification": "17-state fault/status classifier; no exact cooperative-authority bit recovered",
+      "descriptor": [
+        60,
+        0,
+        0,
+        3,
+        0,
+        3
+      ],
+      "direct_cooperative_root_references": [],
+      "exact_wire_visible_cooperative_authority_bit_recovered": false,
+      "packer": "0x00047ADA",
+      "pdu": 2
+    },
+    {
+      "can_id": "0x4A3",
+      "classification": "telemetry/status including measured angle, torque, and Q-current; no exact cooperative-authority bit recovered",
+      "descriptor": [
+        100,
+        0,
+        0,
+        8,
+        0,
+        3
+      ],
+      "direct_cooperative_root_references": [],
+      "exact_wire_visible_cooperative_authority_bit_recovered": false,
+      "packer": "0x0004749A",
+      "pdu": 3
+    },
+    {
+      "can_id": "0x4C8",
+      "classification": "packer sources are fixed to 9, 0, and 0; no exact cooperative-authority bit recovered",
+      "descriptor": [
+        196,
+        0,
+        0,
+        8,
+        0,
+        3
+      ],
+      "direct_cooperative_root_references": [],
+      "exact_wire_visible_cooperative_authority_bit_recovered": false,
+      "packer": "0x000475D0",
+      "pdu": 4
+    }
+  ],
+  "indirect_profile_flag_consumers": {
+    "absolute_pointer_occurrences": {
+      "aggregate_snapshot": [],
+      "aggregate_stage": [],
+      "common_active": [],
+      "health_gate": [],
+      "normalized_mode": [],
+      "profile_1": [
+        "0x000D0E24",
+        "0x000D0E60",
+        "0x000D1124",
+        "0x000D1160"
+      ],
+      "profile_10": [
+        "0x000D0E3C",
+        "0x000D0E78",
+        "0x000D113C",
+        "0x000D1178"
+      ],
+      "profile_11_or_19": [
+        "0x000D0E48",
+        "0x000D0E84",
+        "0x000D1148",
+        "0x000D1184"
+      ],
+      "profile_1_mirror": [],
+      "profile_4": [
+        "0x000D0E30",
+        "0x000D0E6C",
+        "0x000D1130",
+        "0x000D116C"
+      ],
+      "raw_mode": [],
+      "wire_source_signal_12": [],
+      "wire_source_signal_15": [],
+      "wire_source_signal_5": []
+    },
+    "classification": "fixed CodeFlash pointer-table use of profile flags as internal gain selectors, not discrete Tx fields",
+    "consumer_chain": [
+      "0xD0E18/0xD0E54 -> 0xC5156 -> 0xCAF84 -> FEBEBC52 -> 0xC51EA internal gain product",
+      "0xD1118/0xD1154 -> 0xC6D16 -> 0xCAF84 -> FEBEBE28 -> 0xC6DAA internal gain product"
+    ],
+    "tables": [
+      {
+        "banks": [
+          {
+            "bank": 0,
+            "base": "0x000D0E18",
+            "rows": [
+              {
+                "address": "0x000D0E18",
+                "flag_pointer": null,
+                "index": 0,
+                "lower_calibration_pointer": null,
+                "upper_calibration_pointer": null
+              },
+              {
+                "address": "0x000D0E24",
+                "flag_pointer": "0xFEBEC26E",
+                "index": 1,
+                "lower_calibration_pointer": "0x0001B5BA",
+                "upper_calibration_pointer": "0x0001B5C4"
+              },
+              {
+                "address": "0x000D0E30",
+                "flag_pointer": "0xFEBEC26F",
+                "index": 2,
+                "lower_calibration_pointer": "0x0001B5BC",
+                "upper_calibration_pointer": "0x0001B5E8"
+              },
+              {
+                "address": "0x000D0E3C",
+                "flag_pointer": "0xFEBEC270",
+                "index": 3,
+                "lower_calibration_pointer": "0x0001B5BC",
+                "upper_calibration_pointer": "0x0001B5E8"
+              },
+              {
+                "address": "0x000D0E48",
+                "flag_pointer": "0xFEBEC271",
+                "index": 4,
+                "lower_calibration_pointer": "0x0001B5C0",
+                "upper_calibration_pointer": "0x0001B60C"
+              }
+            ]
+          },
+          {
+            "bank": 1,
+            "base": "0x000D0E54",
+            "rows": [
+              {
+                "address": "0x000D0E54",
+                "flag_pointer": null,
+                "index": 0,
+                "lower_calibration_pointer": null,
+                "upper_calibration_pointer": null
+              },
+              {
+                "address": "0x000D0E60",
+                "flag_pointer": "0xFEBEC26E",
+                "index": 1,
+                "lower_calibration_pointer": "0x000135BA",
+                "upper_calibration_pointer": "0x000135C4"
+              },
+              {
+                "address": "0x000D0E6C",
+                "flag_pointer": "0xFEBEC26F",
+                "index": 2,
+                "lower_calibration_pointer": "0x000135BC",
+                "upper_calibration_pointer": "0x000135E8"
+              },
+              {
+                "address": "0x000D0E78",
+                "flag_pointer": "0xFEBEC270",
+                "index": 3,
+                "lower_calibration_pointer": "0x000135BC",
+                "upper_calibration_pointer": "0x000135E8"
+              },
+              {
+                "address": "0x000D0E84",
+                "flag_pointer": "0xFEBEC271",
+                "index": 4,
+                "lower_calibration_pointer": "0x000135C0",
+                "upper_calibration_pointer": "0x0001360C"
+              }
+            ]
+          }
+        ],
+        "base": "0x000D0E18"
+      },
+      {
+        "banks": [
+          {
+            "bank": 0,
+            "base": "0x000D1118",
+            "rows": [
+              {
+                "address": "0x000D1118",
+                "flag_pointer": null,
+                "index": 0,
+                "lower_calibration_pointer": null,
+                "upper_calibration_pointer": null
+              },
+              {
+                "address": "0x000D1124",
+                "flag_pointer": "0xFEBEC26E",
+                "index": 1,
+                "lower_calibration_pointer": "0x0001B65A",
+                "upper_calibration_pointer": "0x0001B664"
+              },
+              {
+                "address": "0x000D1130",
+                "flag_pointer": "0xFEBEC26F",
+                "index": 2,
+                "lower_calibration_pointer": "0x0001B65C",
+                "upper_calibration_pointer": "0x0001B688"
+              },
+              {
+                "address": "0x000D113C",
+                "flag_pointer": "0xFEBEC270",
+                "index": 3,
+                "lower_calibration_pointer": "0x0001B65C",
+                "upper_calibration_pointer": "0x0001B688"
+              },
+              {
+                "address": "0x000D1148",
+                "flag_pointer": "0xFEBEC271",
+                "index": 4,
+                "lower_calibration_pointer": "0x0001B660",
+                "upper_calibration_pointer": "0x0001B6AC"
+              }
+            ]
+          },
+          {
+            "bank": 1,
+            "base": "0x000D1154",
+            "rows": [
+              {
+                "address": "0x000D1154",
+                "flag_pointer": null,
+                "index": 0,
+                "lower_calibration_pointer": null,
+                "upper_calibration_pointer": null
+              },
+              {
+                "address": "0x000D1160",
+                "flag_pointer": "0xFEBEC26E",
+                "index": 1,
+                "lower_calibration_pointer": "0x0001365A",
+                "upper_calibration_pointer": "0x00013664"
+              },
+              {
+                "address": "0x000D116C",
+                "flag_pointer": "0xFEBEC26F",
+                "index": 2,
+                "lower_calibration_pointer": "0x0001365C",
+                "upper_calibration_pointer": "0x00013688"
+              },
+              {
+                "address": "0x000D1178",
+                "flag_pointer": "0xFEBEC270",
+                "index": 3,
+                "lower_calibration_pointer": "0x0001365C",
+                "upper_calibration_pointer": "0x00013688"
+              },
+              {
+                "address": "0x000D1184",
+                "flag_pointer": "0xFEBEC271",
+                "index": 4,
+                "lower_calibration_pointer": "0x00013660",
+                "upper_calibration_pointer": "0x000136AC"
+              }
+            ]
+          }
+        ],
+        "base": "0x000D1118"
+      }
+    ]
+  },
+  "positive_coarse_mode_wire_path": {
+    "asserted_value": "0x5A is propagated through FEBEB118/FEBEE887 and compared at 0x470C6",
+    "classification": "wire-visible coarse aggregate system-mode status influenced by raw mode; not an exact authority or authority-loss indicator",
+    "path": [
+      "FEBE7C58",
+      "0x0005262C",
+      "FEBEF000",
+      "0x000B23A2",
+      "FEBEB118",
+      "0x000BBA48",
+      "FEBEE887",
+      "0x000470C6",
+      "FEBE7E09/FEBE7E0B/FEBE7E0D",
+      "0x0004766A",
+      "CAN 0x030"
+    ],
+    "predicate_role": "one conjunct in a larger aggregate predicate also using FEBEF146, FEBEF069, FEBEB13E, FEBEB054, and a calibrated residual threshold",
+    "raw_mode_predicate": "FEBEF000 < 2",
+    "wire_bits": [
+      {
+        "signal_id": 5,
+        "source": "0xFEBE7E09",
+        "wire": "B6[3]"
+      },
+      {
+        "signal_id": 12,
+        "source": "0xFEBE7E0B",
+        "wire": "B10[3]"
+      },
+      {
+        "signal_id": 15,
+        "source": "0xFEBE7E0D",
+        "wire": "B13[4]"
+      }
+    ]
+  },
+  "schema": "corolla-hf-cooperative-authority-wire-visibility-v1",
+  "software_ids": [
+    "8965H1202000",
+    "8965F1208000"
+  ],
+  "sources": {
+    "decompiler_evidence": {
+      "function_count": 16,
+      "path": "data/generated/corolla_8965H1202000_cooperative_authority_wire_decompiler_evidence.json",
+      "sha256": "5f50ec79dcef6ec4586b10d5d5fa1b4f7f34bccbbb2eb9410881c78d8661ea48"
+    },
+    "fd_control_interface": {
+      "path": "data/generated/corolla_8965H1202000_fd_control_interface.json",
+      "sha256": "f9ab62583441e145b7339d82406e68506dc18d9e4c7271f1f5c9f292a18579b1"
+    },
+    "h_codeflash": {
+      "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+    },
+    "h_f_equivalence": {
+      "application_sha256": "2ccb79cda1e8689ec91c389d3d7e3921c010ddc9c9d917f23c1705916a0e0d7f",
+      "path": "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
+      "sha256": "a1c28ae4787a131ad1cc46310a73e11649b5cf92985b79eefa13aae71d519e7c"
+    },
+    "openpilot_state_bridge": {
+      "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
+      "sha256": "0a934ca1d274776c7a41b266b4c104910c14a61d2874700aa3f1afab00fd1beb"
+    }
+  },
+  "static_conclusion": {
+    "coarse_mode_aggregate_bits_recovered": true,
+    "coarse_mode_wire_can_id": "0x030",
+    "confidence": "verified raw structure and recovered interpretation",
+    "exact_wire_visible_cooperative_authority_bit_recovered": false,
+    "transfer_to_8965F1208000": "exact: all cited code and tables lie in the byte-identical 0x20000..0x0FFFFF application range"
+  }
+}

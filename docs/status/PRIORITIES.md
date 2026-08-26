@@ -234,11 +234,11 @@ physically repin Toyota-B CAN0/CAN1 so the target network lands on the CAN0/CAN2
 relay pair, preserve `carFw`/F181, and log all buses while safely exercising:
 
 1. stock LTA off → active → off plus ordinary driver steering;
-2. cruise main, engage/cancel and standstill where safe while observing FRC P5
+2. cruise main, engage/cancel and standstill where safe while directly polling FRC P5
    Data IDs `0x1905` (Cruise Control Permission), `0x1906` (Main Switch Recognition /
    Set-Cancel / not-available icon), `0x1914` (ACC Control in Operation), `0x1901`
-   (Current/Memory Vehicle Speed), and `0x1912` (Set Vehicle Interval Time) through
-   Techstream/GTS+ data monitor; these P5 Data IDs are not automatically direct UDS RDBI DIDs;
+   (Current/Memory Vehicle Speed), and `0x1912` (Set Vehicle Interval Time) with the
+   recovered `22 19 xx` RDBI requests and matching `62 19 xx` response-prefix checks;
 3. brake and gas transitions;
 4. stationary P/R/N/D transitions with an independent gear-state oracle (`0x127` raw 3 is only prior-art-compatible with D today); and
 5. lane/LTA UI state changes and one recoverable message-loss/fault condition if

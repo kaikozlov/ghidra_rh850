@@ -593,9 +593,10 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   replacement from these captures; without an independent cruise oracle it is not
   categorically disproved as every possible cruise-related meaning. FRC_P5 Data IDs
   `1905/1906/1914/1901/1912` provide exact OEM
-  permission/main/operation/set-speed/interval correlation oracles. Those are P5
-  diagnostic Data IDs, not automatically direct UDS RDBI DIDs, so use Techstream/GTS+
-  data monitor unless the FRC service mapping is separately recovered. The next decisive
+  permission/main/operation/set-speed/interval correlation oracles. Current GTS+ now
+  proves direct `22 19 05/06/14/01/12` RDBI requests; require the matching `62 19 xx`
+  prefix in independent tooling. The outer diagnostic-session prerequisite remains
+  bounded. The next decisive
   Corolla discriminator is therefore a **firmware-identified H/F-family capture with the
   target network physically repinned onto the CAN0/CAN2 relay pair and stock LTA
   exercised off→active→off**, with `carFw`/F181 preserved; also exercise cruise and

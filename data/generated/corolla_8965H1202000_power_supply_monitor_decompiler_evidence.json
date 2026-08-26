@@ -1,0 +1,1269 @@
+{
+  "boundary": "Exact-H raw-body-bound decompilations plus a complete-corpus textual census for named and simple fixed-GP spellings. The census does not exclude arbitrary computed-pointer aliases. Diagnostic names are joined separately and do not name FEBE63A4, FEBE65E4, or FEBE7C5F.",
+  "direct_text_reference_census": {
+    "native_state": {
+      "address": "0xFEBE7C58",
+      "match_count": 47,
+      "matches": [
+        {
+          "body_sha256": "78433b7645917350d2987ed606010499086cb69fdd31c1b256fad1946676aa40",
+          "body_size": 152,
+          "entry": "0x00037A8C",
+          "matching_lines": [
+            "cVar1 = cRamfebe7c58;"
+          ]
+        },
+        {
+          "body_sha256": "74fd35a908ca3445e8c80c171afc2fff865238f19e3edfcbf023da47eb87d44d",
+          "body_size": 76,
+          "entry": "0x00044AC8",
+          "matching_lines": [
+            "if (((cRamfebe7c46 == 'Z') || (1 < bRamfebe7c58)) || (cRamfebe7d2a != '\\0')) {"
+          ]
+        },
+        {
+          "body_sha256": "3239e1ff08ed68cf61edcb6303dfb0333037d124b3b28b4e245420e8836ed9b6",
+          "body_size": 76,
+          "entry": "0x00044B14",
+          "matching_lines": [
+            "if (((cRamfebe7c49 == 'Z') || (1 < bRamfebe7c58)) || (cRamfebe7d06 != '\\0')) {"
+          ]
+        },
+        {
+          "body_sha256": "f155a79cb6d39db2f26d4b8072343567c643ca4f9d3a8c8b561687aa94c82ffe",
+          "body_size": 78,
+          "entry": "0x00044B60",
+          "matching_lines": [
+            "if (((cRamfebe7c4c == 'Z') || (1 < bRamfebe7c58)) || (cRamfebe7cf9 != '\\0')) {"
+          ]
+        },
+        {
+          "body_sha256": "5605c1c8cea6ef3ca954c4c1c19740897c7e1d95971639e966de4c5c9e80bc89",
+          "body_size": 32,
+          "entry": "0x00044D62",
+          "matching_lines": [
+            "*(undefined1 *)(iVar1 + -0x3ba8) = 0;"
+          ]
+        },
+        {
+          "body_sha256": "24d318b4261b9402abec190cfa3fa785f4c5241b09d58c6f7da16c83566c5a09",
+          "body_size": 318,
+          "entry": "0x00044D84",
+          "matching_lines": [
+            "iVar4 = iVar3 + -0x3ba8;",
+            "iVar4 = iVar3 + -0x3ba8;",
+            "iVar4 = iVar3 + -0x3ba8;"
+          ]
+        },
+        {
+          "body_sha256": "0fadde4be67ee1b03d91ed80ca7271df48e0c6c8e85f60193c3f447810f26ce7",
+          "body_size": 46,
+          "entry": "0x000450CE",
+          "matching_lines": [
+            "(cRamfebe7c58 == '\\x02' || cRamfebe7c58 == '\\x03')) {"
+          ]
+        },
+        {
+          "body_sha256": "c397f3c8ac5377bb369cde2a12265fb0d736fd45d34d644d3499ddd3027265f2",
+          "body_size": 110,
+          "entry": "0x000450FC",
+          "matching_lines": [
+            "*(undefined1 *)(iVar1 + -0x3ba8) = 0;",
+            "*(undefined1 *)(iVar1 + -0x3ba8) = 0;",
+            "*(undefined1 *)(iVar1 + -0x3ba8) = 0;"
+          ]
+        },
+        {
+          "body_sha256": "e9cce3824b2d95277fbe639831f1b63ddde6da0ad38648acd8d2dc2ddd6b21a0",
+          "body_size": 8,
+          "entry": "0x00045260",
+          "matching_lines": [
+            "uRamfebe7c58 = 1;"
+          ]
+        },
+        {
+          "body_sha256": "a33b1e6c4af9aa572adf128987fcc4ddb08216b5ca14fc16551f3a3d5272d998",
+          "body_size": 10,
+          "entry": "0x00045268",
+          "matching_lines": [
+            "uRamfebe7c58 = 0;"
+          ]
+        },
+        {
+          "body_sha256": "efe5a0f7c237533832796b5210953d9a2fa48bd5726d9d012ef19e9c9951cdc9",
+          "body_size": 8,
+          "entry": "0x00045272",
+          "matching_lines": [
+            "uRamfebe7c58 = 2;"
+          ]
+        },
+        {
+          "body_sha256": "6f87602e07191768046b50bbd4b7fb45c5e4d54e0d36cf2655961e94b09ce5ca",
+          "body_size": 16,
+          "entry": "0x0004527A",
+          "matching_lines": [
+            "uRamfebe7c58 = 3;"
+          ]
+        },
+        {
+          "body_sha256": "9791e99d18a03bf0e746948e3f9db16c304f08b39a277fb134acdf38c3155d1d",
+          "body_size": 16,
+          "entry": "0x0004528A",
+          "matching_lines": [
+            "uRamfebe7c58 = 3;"
+          ]
+        },
+        {
+          "body_sha256": "ea58ffcdc167f4e9650380a734bafa3ec09783b21206fc56210ee03fa4a63e83",
+          "body_size": 16,
+          "entry": "0x0004529A",
+          "matching_lines": [
+            "uRamfebe7c58 = 3;"
+          ]
+        },
+        {
+          "body_sha256": "9ffd7b244ae4cb840c93f2d92f09d187ac4c4098f0b3d79422c6c5d7b89c6456",
+          "body_size": 58,
+          "entry": "0x00045B92",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d0b == '\\0')) {"
+          ]
+        },
+        {
+          "body_sha256": "2f7ce14d870467cd438bc7dd57639f7f4dd61322fda4a4ce99f3ef7487e64d6c",
+          "body_size": 58,
+          "entry": "0x00045BCC",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d59 == '\\0')) {"
+          ]
+        },
+        {
+          "body_sha256": "8df6f89e4b51cbc5ed89e35e5208a449c530954599d8db2245e58385c9ebe666",
+          "body_size": 68,
+          "entry": "0x00045C8E",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7ce1 != cRamfebe5229)) {"
+          ]
+        },
+        {
+          "body_sha256": "3d7fe2769fce29f42d401402f306809daac3045318fd9bf42d0d8c9803faedad",
+          "body_size": 96,
+          "entry": "0x00045CD6",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7cea != cRamfebe522a)) {"
+          ]
+        },
+        {
+          "body_sha256": "fafddcc2cc222134fed7109129492840da7520cb78fda7637c7077450baa512c",
+          "body_size": 146,
+          "entry": "0x00045D3A",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7cf0 != cRamfebe522b)) {"
+          ]
+        },
+        {
+          "body_sha256": "92e0414b5f17aae1b26aeb72afa6b509f376803e8d11216a31bda6578aa68d50",
+          "body_size": 66,
+          "entry": "0x00045DD0",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7cf4 != cRamfebe522c)) {"
+          ]
+        },
+        {
+          "body_sha256": "922736489a671a69545d3a141946bb1dcb54f74201af8a7cd5c9159baa04ca6a",
+          "body_size": 94,
+          "entry": "0x00045E34",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7cf7 != cRamfebe523b)) {"
+          ]
+        },
+        {
+          "body_sha256": "98e4638a6b0e4b1c22e8074c4e81a3e052fab5bf554c7b5d577febf5f1231fa3",
+          "body_size": 68,
+          "entry": "0x00045E96",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7cfa != cRamfebe523c)) {"
+          ]
+        },
+        {
+          "body_sha256": "d01b6b5dcb68874af2ef71760ef6cd9beee61ab9c7f2b4c103c71732e790b820",
+          "body_size": 122,
+          "entry": "0x00045EDE",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7cff != cRamfebe523d)) {"
+          ]
+        },
+        {
+          "body_sha256": "9a79a50597850b72e3c29bbaff603ae162a16e1b220f07ce1eaaa069935c8fbe",
+          "body_size": 98,
+          "entry": "0x00045F5C",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d05 != cRamfebe523e)) {"
+          ]
+        },
+        {
+          "body_sha256": "20257873a20ad34aba04e493f906f695afaa20f306464dee27245f5cf3627e30",
+          "body_size": 72,
+          "entry": "0x00045FC2",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d0a != cRamfebe523f)) {"
+          ]
+        },
+        {
+          "body_sha256": "a78dc44c73c9942d7ae9b50cc6d3f33c4d687550a44f18b03a4a27b883f55087",
+          "body_size": 306,
+          "entry": "0x0004600E",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d16 != cRamfebe5240)) {"
+          ]
+        },
+        {
+          "body_sha256": "26948891469bca2c3a62e3f80d033d2d1049453f761ee3292e3dc17e2303303c",
+          "body_size": 146,
+          "entry": "0x00046144",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d18 != cRamfebe5241)) {"
+          ]
+        },
+        {
+          "body_sha256": "53b8825f2af01e97f068f83c6351e1fc6b46fe8aafcfffabef6823760350ae42",
+          "body_size": 96,
+          "entry": "0x000461DA",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d25 != cRamfebe5242)) {"
+          ]
+        },
+        {
+          "body_sha256": "5e8a7f82edb7cf561abbf8bef0a5ba70558c2a353bc69b81305b26a8df9448a7",
+          "body_size": 94,
+          "entry": "0x0004623E",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d29 != cRamfebe5243)) {"
+          ]
+        },
+        {
+          "body_sha256": "f3cc536f736e19a8a001ecf6df2a6daa4be4c7468db9c005ecae18148d76939f",
+          "body_size": 198,
+          "entry": "0x000462A0",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d31 != cRamfebe5244)) {"
+          ]
+        },
+        {
+          "body_sha256": "eafcd511ed972fd830621291bb2a7a98054687b274d3529319f2a104a85c2f66",
+          "body_size": 232,
+          "entry": "0x0004636A",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d3d != cRamfebe5246)) {"
+          ]
+        },
+        {
+          "body_sha256": "b9c98ee7acdaa83aa7031bdcc0958146df8bf51ad3ad4635d3eb081e55444923",
+          "body_size": 328,
+          "entry": "0x00046456",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d54 != cRamfebe5247)) {"
+          ]
+        },
+        {
+          "body_sha256": "d8ed5160f56dc69a05cf2e998a80bcddc28570932a1e71b6f3119d96a81aa527",
+          "body_size": 96,
+          "entry": "0x000465A2",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d58 != cRamfebe5248)) {"
+          ]
+        },
+        {
+          "body_sha256": "dfc7112612109dde43e499bebdb12ddd11166055ba38c243727fb23c467c4a7e",
+          "body_size": 130,
+          "entry": "0x00046606",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d5f != cRamfebe5249)) {"
+          ]
+        },
+        {
+          "body_sha256": "f966abf75a955b05d09ad9741976424a5b25be0ea2600a9617fe93c2adb64c2d",
+          "body_size": 252,
+          "entry": "0x0004668C",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d68 != cRamfebe524a)) {"
+          ]
+        },
+        {
+          "body_sha256": "909912975ee324e5cce6c1cc2a05d87a6026ad579bbb1f6750959e0655460a88",
+          "body_size": 362,
+          "entry": "0x0004678C",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d7f != cRamfebe524b)) {"
+          ]
+        },
+        {
+          "body_sha256": "e012cce67286446c27283b4c82f51d3b8f8e8026766b76a32bbf94741162e6ec",
+          "body_size": 140,
+          "entry": "0x000468FA",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d86 != cRamfebe524c)) {"
+          ]
+        },
+        {
+          "body_sha256": "5733c38d2b2a53a701017cc4b0c28fb47be25c0cc9f18af8557064f8ed8f938f",
+          "body_size": 130,
+          "entry": "0x0004698A",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d91 != cRamfebe524d)) {"
+          ]
+        },
+        {
+          "body_sha256": "776295d290b45a2f2704a3336c37cfbf1788c00250db64a51e95bb18691c6a63",
+          "body_size": 364,
+          "entry": "0x00046A10",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7d9f != cRamfebe524e)) {"
+          ]
+        },
+        {
+          "body_sha256": "307fedd9cd368ede0c76a864a6646cfaa5fbd363d15779a94feabf1c4736d93d",
+          "body_size": 122,
+          "entry": "0x00046B80",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7da5 != cRamfebe524f)) {"
+          ]
+        },
+        {
+          "body_sha256": "dd01ffb726dde8691fd99e6bff4561f24729d72758f5a5191d2698ccd02d50c0",
+          "body_size": 70,
+          "entry": "0x00046BFE",
+          "matching_lines": [
+            "if ((bRamfebe7c58 < 2) && (cRamfebe7da9 != cRamfebe5250)) {"
+          ]
+        },
+        {
+          "body_sha256": "710c72f338aa6ce9eeec50669a163ec3228e78fc4faa2be1c6625a332583ffc8",
+          "body_size": 256,
+          "entry": "0x00047188",
+          "matching_lines": [
+            "(1 < *(byte *)(iVar5 + -0x3ba8))) {"
+          ]
+        },
+        {
+          "body_sha256": "18c4ce3891bc8e30435539c140da78c045b52537a18c36bd094acbf686a0b636",
+          "body_size": 150,
+          "entry": "0x00047348",
+          "matching_lines": [
+            "cVar3 = cRamfebe7c58;"
+          ]
+        },
+        {
+          "body_sha256": "35b1f7fa7e708f725d71e84a95a89dc88f0fbb04e6fa8bf02a1045060365e651",
+          "body_size": 1704,
+          "entry": "0x0005262C",
+          "matching_lines": [
+            "uRamfebef000 = uRamfebe7c58;"
+          ]
+        },
+        {
+          "body_sha256": "cbec3874ddc4885cc45e7d3168967c742fdcaf6912e0d6067db654e78dfb4d03",
+          "body_size": 12278,
+          "entry": "0x0005389C",
+          "matching_lines": [
+            "*(undefined1 *)(iVar41 + -0x3ba8) = 0;"
+          ]
+        },
+        {
+          "body_sha256": "72f62b7e6236884687f7bc866b1caae867fc46f6fb27bf2d2c6d914841011258",
+          "body_size": 78,
+          "entry": "0x000FCC4E",
+          "matching_lines": [
+            "uRamfebef300 = uRamfebe7c58;"
+          ]
+        },
+        {
+          "body_sha256": "9e8b9b7d4616adfce2cb134520a135244bd426f8ecdc8174beb0aba9aa07d9ed",
+          "body_size": 50,
+          "entry": "0x000FCC9C",
+          "matching_lines": [
+            "uRamfebef380 = uRamfebe7c58;"
+          ]
+        }
+      ],
+      "terms": [
+        "febe7c58",
+        "-0x3ba8"
+      ]
+    },
+    "normalized_state": {
+      "address": "0xFEBEACBD",
+      "match_count": 21,
+      "matches": [
+        {
+          "body_sha256": "18bf2de0e74a874851c520eea9b71209ae1f33e39ff8886328ca5fe3ff639dff",
+          "body_size": 8,
+          "entry": "0x000B8EE4",
+          "matching_lines": [
+            "*(char *)(iVar38 + -0xb43) = cVar44;"
+          ]
+        },
+        {
+          "body_sha256": "38a01549d27cae861373ad1bff9b2b7c78cfb1834a36819e421f35c4bb9eadec",
+          "body_size": 2646,
+          "entry": "0x000B8EEC",
+          "matching_lines": [
+            "*(char *)(iVar15 + -0xb43) = cVar21;"
+          ]
+        },
+        {
+          "body_sha256": "72644fd94b0eb7c477f71c9ff9b2c09285c665b7c77446dd5da24edda42e6120",
+          "body_size": 66,
+          "entry": "0x000BBFE6",
+          "matching_lines": [
+            "*(undefined1 *)(iVar4 + -0xb43) = 0;"
+          ]
+        },
+        {
+          "body_sha256": "a09fd1d236f73a15b45dc165105f7cd8702b344b08fd8887064d169fffbc9955",
+          "body_size": 4970,
+          "entry": "0x000BC028",
+          "matching_lines": [
+            "*(undefined1 *)(iVar4 + -0xb43) = 0;"
+          ]
+        },
+        {
+          "body_sha256": "84eca1d9883e38193986fbaa99c5b71270bc6ea4429d50d9a38e5605be37c784",
+          "body_size": 52,
+          "entry": "0x000BE668",
+          "matching_lines": [
+            "if ((((cRamfebeb680 == '\\0') && (bRamfebeacbd < 2)) && (cRamfebeacc4 == '\\0')) &&"
+          ]
+        },
+        {
+          "body_sha256": "43664676f8f7f9d1c4f976c64ecca860de0569f8c572e969262136f702db2b32",
+          "body_size": 44,
+          "entry": "0x000BE69C",
+          "matching_lines": [
+            "if ((((cRamfebeb681 == '\\0') && (bRamfebeacbd < 2)) && (cRamfebeacc4 == '\\0')) &&"
+          ]
+        },
+        {
+          "body_sha256": "8b65462d967ab738bae74a4de2cd90fd2f3dc1d679ee6239e2c267fee1d60ea1",
+          "body_size": 96,
+          "entry": "0x000BE77A",
+          "matching_lines": [
+            "if ((1 < bRamfebeacbd) || (cRamfebeb6a8 != '\\x11')) {"
+          ]
+        },
+        {
+          "body_sha256": "514a0a4d053f80b417281d9bdbece067e844aa709dfd7e42fa9ddddb419e2f8d",
+          "body_size": 202,
+          "entry": "0x000BEA0C",
+          "matching_lines": [
+            "uVar1 = uRamfebeacbd;"
+          ]
+        },
+        {
+          "body_sha256": "6258a8384f057f730e2acd1ca4dfe78a53350b850914c9b74cd475e4ce1aa3d5",
+          "body_size": 322,
+          "entry": "0x000C2296",
+          "matching_lines": [
+            "bVar2 = bRamfebeacbd;"
+          ]
+        },
+        {
+          "body_sha256": "e45f2c91ed48819a5f6ed903b6816b2c851455e167c2843d921ab087b242d93c",
+          "body_size": 100,
+          "entry": "0x000C5A34",
+          "matching_lines": [
+            "if ((cRamfebeacd4 == '\\0') && (cRamfebeacbd == '\\0')) {"
+          ]
+        },
+        {
+          "body_sha256": "a442e5fabc273837ad9c59d1fe7875a3b9820c06b323aced2d143ab2d5db16dc",
+          "body_size": 234,
+          "entry": "0x000C72C6",
+          "matching_lines": [
+            "((cRamfebeacbd == '\\0' &&"
+          ]
+        },
+        {
+          "body_sha256": "756fb61a9cabbb5c440f43cd3d58e1bd7e302aaf18af13782781644610a4a535",
+          "body_size": 216,
+          "entry": "0x000C73B0",
+          "matching_lines": [
+            "((cRamfebeaccd == '\\0' && (cVar2 = cRamfebeacbd == '\\0', cVar1 = cVar2, !(bool)cVar2)))))) {",
+            "((cRamfebeaccd == '\\x01' || (cRamfebeacbd != '\\0')))) {"
+          ]
+        },
+        {
+          "body_sha256": "26f0f7bcf358cd6c7db9f7b9c7246d377955b87f59c6ef42e6ed85ccc3f6025f",
+          "body_size": 36,
+          "entry": "0x000C7C70",
+          "matching_lines": [
+            "bRamfebebf59 = cRamfebeacbd == '\\0';"
+          ]
+        },
+        {
+          "body_sha256": "a0713dc655be07072b481487c9e2346ccffbc553423fd71f0c190e84a5cd3055",
+          "body_size": 374,
+          "entry": "0x000C8FAC",
+          "matching_lines": [
+            "((cRamfebeacbd == '\\0' && ((bRamfebeacfd == 0 && (cRamfebec017 == '\\0')))))))) &&",
+            "(cRamfebeacbd != '\\0')) ||"
+          ]
+        },
+        {
+          "body_sha256": "01147179ab2f4a2d4d65b1d268022c5306f76fe43651e19d7f2c485abc49b434",
+          "body_size": 148,
+          "entry": "0x000C93D2",
+          "matching_lines": [
+            "if (((cRamfebeacbe == '\\x01') && (cRamfebeacbd == '\\0')) &&"
+          ]
+        },
+        {
+          "body_sha256": "aa397145bf2579b18c7745aa71bab5d1d5ff08ee6753ec09dbf63540512168af",
+          "body_size": 36,
+          "entry": "0x000CB058",
+          "matching_lines": [
+            "bRamfebec242 = cRamfebeacbd == '\\0';"
+          ]
+        },
+        {
+          "body_sha256": "55e8b4cad287f5fa2541e71e3657f74569182c3086d4f37f550ba84da185ac50",
+          "body_size": 26,
+          "entry": "0x000CB07C",
+          "matching_lines": [
+            "bRamfebec226 = cRamfebec26d == '\\x01' && cRamfebeacbd == '\\0';"
+          ]
+        },
+        {
+          "body_sha256": "ba528c9b2ed22a57c5bc519285dedbb1cd3d3ee52838adeadafbd01849359b41",
+          "body_size": 128,
+          "entry": "0x000CBE6E",
+          "matching_lines": [
+            "if ((cRamfebeacbd == '\\0') && (cRamfebec26d == '\\x01')) {"
+          ]
+        },
+        {
+          "body_sha256": "3201866175e7ac2b1d59c67c39fe8cf4a96dbdda1ac64423a5b8657fc041740d",
+          "body_size": 64,
+          "entry": "0x000CCF8C",
+          "matching_lines": [
+            "if (((cRamfebeadbf == '\\x02' || cRamfebeadbf == '\\x03') || (cRamfebeacbd != '\\0')) ||"
+          ]
+        },
+        {
+          "body_sha256": "ed1e365915a05ef4bc08a912e677acdb2061bccdd34ffebe98505d64e7039cbf",
+          "body_size": 160,
+          "entry": "0x000CE3BE",
+          "matching_lines": [
+            "if ((((bRamfebeacbd < 2) && (cRamfebeaccc == '\\0')) && (cRamfebead32 == '\\0')) &&"
+          ]
+        },
+        {
+          "body_sha256": "8ab4adc2ff15e6e959b47c4c0f6e51e27ee53d17061f92a71c0616bcfeb01417",
+          "body_size": 160,
+          "entry": "0x000CE45E",
+          "matching_lines": [
+            "if ((((bRamfebeacbd < 2) && (cRamfebeaccc == '\\0')) && (cRamfebead32 == '\\0')) &&"
+          ]
+        }
+      ],
+      "terms": [
+        "febeacbd",
+        "-0xb43"
+      ]
+    },
+    "snapshot_state": {
+      "address": "0xFEBEF000",
+      "match_count": 31,
+      "matches": [
+        {
+          "body_sha256": "35b1f7fa7e708f725d71e84a95a89dc88f0fbb04e6fa8bf02a1045060365e651",
+          "body_size": 1704,
+          "entry": "0x0005262C",
+          "matching_lines": [
+            "uRamfebef000 = uRamfebe7c58;"
+          ]
+        },
+        {
+          "body_sha256": "cbec3874ddc4885cc45e7d3168967c742fdcaf6912e0d6067db654e78dfb4d03",
+          "body_size": 12278,
+          "entry": "0x0005389C",
+          "matching_lines": [
+            "puVar39 = (undefined1 *)(iVar41 + 0x3800);"
+          ]
+        },
+        {
+          "body_sha256": "f09bac436db4807c5932b916bc52ba05416d9432dac871707061182d10da9396",
+          "body_size": 164,
+          "entry": "0x000B1FBE",
+          "matching_lines": [
+            "if (((((iVar7 == 0 && iVar8 == 0) && (*(char *)(iVar6 + 0x3800) == '\\0')) &&"
+          ]
+        },
+        {
+          "body_sha256": "9c524ff1fb5c94f40ae0d942b8e8a87df1063f7a9631b4356744ad5873724a55",
+          "body_size": 100,
+          "entry": "0x000B2062",
+          "matching_lines": [
+            "if ((((iVar4 == 0) && (*(char *)(iVar3 + 0x3800) == '\\0')) && (*(char *)(iVar3 + 0x384f) == '\\0'))"
+          ]
+        },
+        {
+          "body_sha256": "8cfd92215cf04644271da73896a9a95de86c9f9f9581a40b6e8fad68858619d2",
+          "body_size": 164,
+          "entry": "0x000B20C6",
+          "matching_lines": [
+            "if (((((iVar7 == 0 && iVar8 == 0) && (*(char *)(iVar6 + 0x3800) == '\\0')) &&"
+          ]
+        },
+        {
+          "body_sha256": "0f3cd443a120914439c0b15165fb0d8e0da7034ceafa0ef63cbcefbf1c48fb2a",
+          "body_size": 106,
+          "entry": "0x000B23A2",
+          "matching_lines": [
+            "bVar3 = bRamfebef000;"
+          ]
+        },
+        {
+          "body_sha256": "b561999366a4942c8e3c3197769e16fbb373643facc204e9be1ea6ebb1b969a8",
+          "body_size": 46,
+          "entry": "0x000B24A2",
+          "matching_lines": [
+            "(bRamfebef000 < 2)) {"
+          ]
+        },
+        {
+          "body_sha256": "fb226710a72cdaa5b0e2b6668b5c1c288713f83342f1c52545aad8eb980ce1fb",
+          "body_size": 40,
+          "entry": "0x000B24D0",
+          "matching_lines": [
+            "if ((cRamfebef069 == '\\0') && (bRamfebef000 < 2)) {"
+          ]
+        },
+        {
+          "body_sha256": "708ae1650e664e86c35662092e87b51c5ca51935b6833ce2248b4d2eccce5761",
+          "body_size": 532,
+          "entry": "0x000B290E",
+          "matching_lines": [
+            "if ((*(byte *)(iVar9 + 0x3800) < 2) && (cRamfebeb169 != cStack_4e)) {"
+          ]
+        },
+        {
+          "body_sha256": "2bea2f9be18362349bbda5216f54faccbe6311070588f9c9da033b048cc26730",
+          "body_size": 394,
+          "entry": "0x000B2F10",
+          "matching_lines": [
+            "((((cRamfebeb1e2 == '\\0' || (cRamfebeb1e2 == '3')) && (bRamfebef000 < 2)) &&"
+          ]
+        },
+        {
+          "body_sha256": "411b25f11d8a632d5e1006f361bacdea96d446b68b6cd563444f113ac2261abf",
+          "body_size": 50,
+          "entry": "0x000B31C6",
+          "matching_lines": [
+            "if ((((cRamfebef000 != '\\x03') && ((bRamfebef093 & 2) == 0)) && (cRamfebef013 != '\\x02')) &&"
+          ]
+        },
+        {
+          "body_sha256": "954a831ca293e4c7660d08994e4f0e2588977c37f25b54d14547cc5bc29585ea",
+          "body_size": 106,
+          "entry": "0x000B4CEA",
+          "matching_lines": [
+            "if ((cRamfebeb2a8 == '\\x11') && (cRamfebef000 == '\\0')) {",
+            "(((cRamfebeb22b != '\\0' || (cRamfebeb19d != 'Z')) || (cRamfebef000 != '\\0'))))"
+          ]
+        },
+        {
+          "body_sha256": "322839c79d1418f7f6a6efadb6f243d049ad49d02642ebb6013b043d565cf0d0",
+          "body_size": 72,
+          "entry": "0x000B53E0",
+          "matching_lines": [
+            "else if ((bRamfebeb2d0 < 2) && (bRamfebef000 < 2)) {"
+          ]
+        },
+        {
+          "body_sha256": "3c174f5bf5b8f6d2de06d3e34056c772802a2e58355fca7d9ff8439e12c66379",
+          "body_size": 114,
+          "entry": "0x000B55F4",
+          "matching_lines": [
+            "(1 < bRamfebef000)) {"
+          ]
+        },
+        {
+          "body_sha256": "ca39bed54f5c070011dc378dfdee2ba4056e656fc15cba4ab64c1d1f3670d27d",
+          "body_size": 38,
+          "entry": "0x000B5A80",
+          "matching_lines": [
+            "if ((DAT_000aeeaa < uRamfebeb60e) || (1 < bRamfebef000)) {"
+          ]
+        },
+        {
+          "body_sha256": "e4f6c3ba90073ed9a451ccfbd63e03f9c11ade1d08b654c3bece97bf23dbc667",
+          "body_size": 204,
+          "entry": "0x000B7B62",
+          "matching_lines": [
+            "if ((((sRamfebef1be != 0) || (1 < bRamfebef000)) || (cRamfebeb588 != '\\0')) ||"
+          ]
+        },
+        {
+          "body_sha256": "29eaf49e284552729c7e3977098df7c4c2c792d87b960ec671769cadc7ea92cd",
+          "body_size": 154,
+          "entry": "0x000B7E8C",
+          "matching_lines": [
+            "if ((((((cRamfebeb484 == '\\0') || (sRamfebef1be != 0)) || (1 < bRamfebef000)) ||"
+          ]
+        },
+        {
+          "body_sha256": "6a0ef5e3bfd2cf8e0df53c49cd6d57bbc25b05e647eb13be2df7b19a7bdba498",
+          "body_size": 138,
+          "entry": "0x000B7F26",
+          "matching_lines": [
+            "if (((bRamfebef000 < 2) && (cRamfebeb5b9 == '\\0')) && (bRamfebef053 < 2)) {"
+          ]
+        },
+        {
+          "body_sha256": "18bf2de0e74a874851c520eea9b71209ae1f33e39ff8886328ca5fe3ff639dff",
+          "body_size": 8,
+          "entry": "0x000B8EE4",
+          "matching_lines": [
+            "cVar1 = *(char *)(iVar38 + 0x3800);"
+          ]
+        },
+        {
+          "body_sha256": "38a01549d27cae861373ad1bff9b2b7c78cfb1834a36819e421f35c4bb9eadec",
+          "body_size": 2646,
+          "entry": "0x000B8EEC",
+          "matching_lines": [
+            "cVar1 = *(char *)(iVar15 + 0x3800);"
+          ]
+        },
+        {
+          "body_sha256": "f8d3c8e56409fa42fafee4b6e2a07f7d8b4dd8308827da020956ba3237cf62ad",
+          "body_size": 118,
+          "entry": "0x000BA8FA",
+          "matching_lines": [
+            "(bRamfebef000 < 2)) {"
+          ]
+        },
+        {
+          "body_sha256": "b13d5720cc7e4361f20d7036ead630c20006df26dc077607d6ad73fe5a95f379",
+          "body_size": 106,
+          "entry": "0x000BA970",
+          "matching_lines": [
+            "(((cRamfebef066 != cRamfebeb593 && (bRamfebef000 < 2)) &&"
+          ]
+        },
+        {
+          "body_sha256": "5d94e9a82bac0c5e3bd5647b00f73f959997db784359bc487811d0d7e41f5585",
+          "body_size": 232,
+          "entry": "0x000BA9F8",
+          "matching_lines": [
+            "if ((cRamfebef0f5 != cRamfebeb59c) && (bRamfebef000 < 2)) {"
+          ]
+        },
+        {
+          "body_sha256": "fb35f258cacda25f54669cd6b9f983f03afb768e6314cafc23a914d54128e2ed",
+          "body_size": 78,
+          "entry": "0x000BAF8C",
+          "matching_lines": [
+            "if (bRamfebef000 < 2) {"
+          ]
+        },
+        {
+          "body_sha256": "2a27a5ad3529e1f2b29a6879ad1c0016d16496f05da26ae5a9798832484c9d62",
+          "body_size": 86,
+          "entry": "0x000BAFDA",
+          "matching_lines": [
+            "if (((bRamfebef000 < 2) && (cRamfebef028 == '\\0')) && (cRamfebef02b == '\\x01')) {"
+          ]
+        },
+        {
+          "body_sha256": "ab98224d9808bfe246146c23f0f87e70eb10f1cd2fec60be53cc1ce670fd7b7c",
+          "body_size": 78,
+          "entry": "0x000BB030",
+          "matching_lines": [
+            "if ((bRamfebef000 < 2) && (cRamfebef060 == '\\0')) {"
+          ]
+        },
+        {
+          "body_sha256": "d30503cc45d9e9292d2dde68d28fffd61dbb809bdb72827fdae4b7bb31e8b8b2",
+          "body_size": 78,
+          "entry": "0x000BB07E",
+          "matching_lines": [
+            "if ((bRamfebef000 < 2) && (cRamfebef069 == '\\0')) {"
+          ]
+        },
+        {
+          "body_sha256": "98617b83704d6a19db2467980ff6c878d8aa5283d764b795a51edad373ce02da",
+          "body_size": 78,
+          "entry": "0x000BB0CC",
+          "matching_lines": [
+            "if ((bRamfebef000 < 2) && (cRamfebef04c == '\\0')) {"
+          ]
+        },
+        {
+          "body_sha256": "471b5eff102d6415b569002566b4d8f6ee5bf71506d909acd40b00c58d49d2d2",
+          "body_size": 86,
+          "entry": "0x000BB15A",
+          "matching_lines": [
+            "if ((bRamfebef000 < 2) && ((cRamfebef13c == '\\0' || (cRamfebef13d == '\\0')))) {"
+          ]
+        },
+        {
+          "body_sha256": "ce13a25b732628427fcfaae6d3a5b27307ff852acef5c48b0afa88a6b5484c97",
+          "body_size": 36,
+          "entry": "0x000BB206",
+          "matching_lines": [
+            "if (((bRamfebef000 < 2) && (cRamfebef093 == '\\0')) && (cRamfebef013 == '\\0')) {"
+          ]
+        },
+        {
+          "body_sha256": "1f7acd442844b974587dbc48dca6a1d94eb45c0be102e6fa12e7789078ac3b9a",
+          "body_size": 156,
+          "entry": "0x000BB22A",
+          "matching_lines": [
+            "((cRamfebef000 != '\\x03' && ((bRamfebef093 & 2) == 0)))) &&"
+          ]
+        }
+      ],
+      "terms": [
+        "febef000",
+        "+ 0x3800"
+      ]
+    }
+  },
+  "function_count": 14,
+  "functions": [
+    {
+      "body_sha256": "24d318b4261b9402abec190cfa3fa785f4c5241b09d58c6f7da16c83566c5a09",
+      "body_size": 318,
+      "data_references": [
+        {
+          "from_addr": "0x00044dea",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b6a2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00044e1c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b6a4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00044e52",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b6a6",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00044e9c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b6a8",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_00044d84(void)\n\n{\n  ushort uVar1;\n  ushort uVar2;\n  int iVar3;\n  int iVar4;\n  \n  iVar3 = -0x1414800;\n  iVar4 = -0x1414800;\n  if (cRamfebe7c5c == '\\0') {\n    iVar3 = FUN_0004516a();\n    if (iVar3 != 0x22) {\n      return;\n    }\n    uVar2 = *(short *)(iVar4 + -0x3b9e) + 1;\n    *(ushort *)(iVar4 + -0x3b9e) = uVar2;\n    if (*(ushort *)(iVar4 + -0x3b9c) < uVar2) {\n      *(ushort *)(iVar4 + -0x3b9c) = uVar2;\n    }\n    *(undefined1 *)(iVar4 + -0x3ba4) = 0x11;\n    FUN_00045260();\n    return;\n  }\n  if (cRamfebe7c5c == '\\x11') {\n    iVar4 = FUN_0004516a();\n    if (iVar4 == 0x22) {\n      uVar2 = *(ushort *)(iVar3 + -0x3b9e);\n      if (DAT_0002b6a2 <= uVar2) {\n        *(undefined1 *)(iVar3 + -0x3ba4) = 0x22;\n        FUN_00045272();\n        return;\n      }\n      *(ushort *)(iVar3 + -0x3b9e) = uVar2 + 1;\n      if ((ushort)(uVar2 + 1) <= *(ushort *)(iVar3 + -0x3b9c)) {\n        return;\n      }\n      *(ushort *)(iVar3 + -0x3b9c) = uVar2 + 1;\n      return;\n    }\n    iVar4 = iVar3 + -0x3ba8;\n    *(undefined2 *)(iVar3 + -0x3b9e) = 0;\n  }\n  else if (cRamfebe7c5c == '\\\"') {\n    iVar4 = FUN_0004516a();\n    uVar1 = DAT_0002b6a6;\n    uVar2 = DAT_0002b6a4;\n    if (iVar4 == 0x22) {\n      uVar1 = *(ushort *)(iVar3 + -0x3b98);\n      *(undefined2 *)(iVar3 + -0x3b9a) = 0;\n      if (uVar2 <= uVar1) {\n        *(undefined1 *)(iVar3 + -0x3ba4) = 0x44;\n        FUN_0004527a();\n        return;\n      }\n      *(ushort *)(iVar3 + -0x3b98) = uVar1 + 1;\n      if ((ushort)(uVar1 + 1) <= *(ushort *)(iVar3 + -0x3b96)) {\n        return;\n      }\n      *(ushort *)(iVar3 + -0x3b96) = uVar1 + 1;\n      return;\n    }\n    if (iVar4 != 0x11) {\n      if (iVar4 != 0x44) {\n        return;\n      }\n      *(undefined2 *)(iVar3 + -0x3b98) = 0;\n      *(undefined2 *)(iVar3 + -0x3b9a) = 0;\n      return;\n    }\n    iVar4 = iVar3 + -0x3ba8;\n    *(undefined2 *)(iVar3 + -0x3b98) = 0;\n    if (*(ushort *)(iVar3 + -0x3b9a) < uVar1) {\n      *(ushort *)(iVar3 + -0x3b9a) = *(ushort *)(iVar3 + -0x3b9a) + 1;\n      return;\n    }\n    *(undefined2 *)(iVar3 + -0x3b9e) = 0;\n    *(undefined2 *)(iVar3 + -0x3b9a) = 0;\n  }\n  else {\n    if (cRamfebe7c5c != 'D') {\n      return;\n    }\n    iVar4 = FUN_0004516a();\n    if (iVar4 != 0x11) {\n      *(undefined2 *)(iVar3 + -0x3b94) = 0;\n      return;\n    }\n    if (*(ushort *)(iVar3 + -0x3b94) < DAT_0002b6a8) {\n      *(ushort *)(iVar3 + -0x3b94) = *(ushort *)(iVar3 + -0x3b94) + 1;\n      return;\n    }\n    iVar4 = iVar3 + -0x3ba8;\n    *(undefined2 *)(iVar3 + -0x3b9e) = 0;\n    *(undefined2 *)(iVar3 + -0x3b9a) = 0;\n    *(undefined2 *)(iVar3 + -0x3b98) = 0;\n    *(undefined2 *)(iVar3 + -0x3b94) = 0;\n  }\n  *(undefined1 *)(iVar4 + 4) = 0;\n  FUN_00045268();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "f828bfc50846cda55e855c4c2aac62512e88d6f9677b032190e078433b9e10f4",
+      "entry": "0x00044D84"
+    },
+    {
+      "body_sha256": "baf0f25c55bd301a977a561432ff5c2ed9838c14de6fc37fe07bfc0d57353256",
+      "body_size": 258,
+      "data_references": [
+        {
+          "from_addr": "0x00044f1e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b6aa",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00044f58",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b6ac",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00044f8e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b6ae",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_00044ec2(void)\n\n{\n  ushort uVar1;\n  ushort uVar2;\n  int iVar3;\n  int iVar4;\n  \n  iVar3 = -0x1414800;\n  iVar4 = -0x1414800;\n  if (cRamfebe7c5d == '\\0') {\n    iVar3 = FUN_000451c4();\n    if (iVar3 != 0x22) {\n      return;\n    }\n    uVar2 = *(short *)(iVar4 + -0x3b92) + 1;\n    *(ushort *)(iVar4 + -0x3b92) = uVar2;\n    if (*(ushort *)(iVar4 + -0x3b90) < uVar2) {\n      *(ushort *)(iVar4 + -0x3b90) = uVar2;\n    }\n    *(undefined1 *)(iVar4 + -0x3ba3) = 0x11;\n    FUN_00045260();\n    return;\n  }\n  if (cRamfebe7c5d == '\\x11') {\n    iVar4 = FUN_000451c4();\n    if (iVar4 == 0x22) {\n      uVar2 = *(ushort *)(iVar3 + -0x3b92);\n      if (DAT_0002b6aa <= uVar2) {\n        *(undefined1 *)(iVar3 + -0x3ba3) = 0x22;\n        FUN_00045272();\n        return;\n      }\n      *(ushort *)(iVar3 + -0x3b92) = uVar2 + 1;\n      if ((ushort)(uVar2 + 1) <= *(ushort *)(iVar3 + -0x3b90)) {\n        return;\n      }\n      *(ushort *)(iVar3 + -0x3b90) = uVar2 + 1;\n      return;\n    }\n    *(undefined2 *)(iVar3 + -0x3b92) = 0;\n  }\n  else {\n    if (cRamfebe7c5d != '\\\"') {\n      return;\n    }\n    iVar4 = FUN_000451c4();\n    uVar1 = DAT_0002b6ae;\n    uVar2 = DAT_0002b6ac;\n    if (iVar4 == 0x22) {\n      uVar1 = *(ushort *)(iVar3 + -0x3b8c);\n      *(undefined2 *)(iVar3 + -0x3b8e) = 0;\n      if (uVar2 <= uVar1) {\n        *(undefined1 *)(iVar3 + -0x3ba3) = 0x44;\n        FUN_0004528a();\n        return;\n      }\n      *(ushort *)(iVar3 + -0x3b8c) = uVar1 + 1;\n      if ((ushort)(uVar1 + 1) <= *(ushort *)(iVar3 + -0x3b8a)) {\n        return;\n      }\n      *(ushort *)(iVar3 + -0x3b8a) = uVar1 + 1;\n      return;\n    }\n    if (iVar4 != 0x11) {\n      if (iVar4 != 0x44) {\n        return;\n      }\n      *(undefined2 *)(iVar3 + -0x3b8c) = 0;\n      *(undefined2 *)(iVar3 + -0x3b8e) = 0;\n      return;\n    }\n    *(undefined2 *)(iVar3 + -0x3b8c) = 0;\n    if (*(ushort *)(iVar3 + -0x3b8e) < uVar1) {\n      *(ushort *)(iVar3 + -0x3b8e) = *(ushort *)(iVar3 + -0x3b8e) + 1;\n      return;\n    }\n    *(undefined2 *)(iVar3 + -0x3b92) = 0;\n    *(undefined2 *)(iVar3 + -0x3b8e) = 0;\n  }\n  *(undefined1 *)(iVar3 + -0x3ba3) = 0;\n  FUN_00045268();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "044a037f2f0373a913b4756e37a0df5a9ba9546e51fe0dd734d83a71dca2e65b",
+      "entry": "0x00044EC2"
+    },
+    {
+      "body_sha256": "7f7d4250fe2f17507559317e6f26a2c684927ebb7d91a84612374f3c52fc6b44",
+      "body_size": 266,
+      "data_references": [
+        {
+          "from_addr": "0x00045020",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b6b0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004505a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b6b2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00045094",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b6b4",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_00044fc4(void)\n\n{\n  ushort uVar1;\n  ushort uVar2;\n  int iVar3;\n  int iVar4;\n  \n  iVar3 = -0x1414800;\n  if (cRamfebe7c5e == '\\0') {\n    iVar4 = FUN_00045212();\n    if (iVar4 != 0x22) {\n      return;\n    }\n    uVar2 = *(ushort *)(iVar3 + -0x3b88) + 1;\n    *(ushort *)(iVar3 + -0x3b88) = uVar2;\n    if (*(ushort *)(iVar3 + -0x3b86) < uVar2) {\n      *(ushort *)(iVar3 + -0x3b86) = uVar2;\n    }\n    *(undefined1 *)(iVar3 + -0x3ba2) = 0x11;\n    FUN_00045260();\n    return;\n  }\n  if (cRamfebe7c5e == '\\x11') {\n    iVar3 = -0x1414800;\n    iVar4 = FUN_00045212();\n    if (iVar4 == 0x22) {\n      uVar2 = *(ushort *)(iVar3 + -0x3b88);\n      if (DAT_0002b6b0 <= uVar2) {\n        *(undefined1 *)(iVar3 + -0x3ba2) = 0x22;\n        FUN_00045272();\n        return;\n      }\n      *(ushort *)(iVar3 + -0x3b88) = uVar2 + 1;\n      if ((ushort)(uVar2 + 1) <= *(ushort *)(iVar3 + -0x3b86)) {\n        return;\n      }\n      *(ushort *)(iVar3 + -0x3b86) = uVar2 + 1;\n      return;\n    }\n    *(undefined2 *)(iVar3 + -0x3b88) = 0;\n  }\n  else {\n    if (cRamfebe7c5e != '\\\"') {\n      return;\n    }\n    iVar4 = FUN_00045212();\n    uVar1 = DAT_0002b6b4;\n    uVar2 = DAT_0002b6b2;\n    if (iVar4 == 0x22) {\n      uVar1 = *(ushort *)(iVar3 + -0x3b82);\n      *(undefined2 *)(iVar3 + -0x3b84) = 0;\n      if (uVar2 <= uVar1) {\n        *(undefined1 *)(iVar3 + -0x3ba2) = 0x44;\n        FUN_0004529a();\n        return;\n      }\n      *(ushort *)(iVar3 + -0x3b82) = uVar1 + 1;\n      if ((ushort)(uVar1 + 1) <= *(ushort *)(iVar3 + -0x3b80)) {\n        return;\n      }\n      *(ushort *)(iVar3 + -0x3b80) = uVar1 + 1;\n      return;\n    }\n    if (iVar4 != 0x11) {\n      if (iVar4 != 0x44) {\n        return;\n      }\n      *(undefined2 *)(iVar3 + -0x3b82) = 0;\n      *(undefined2 *)(iVar3 + -0x3b84) = 0;\n      return;\n    }\n    *(undefined2 *)(iVar3 + -0x3b82) = 0;\n    if (*(ushort *)(iVar3 + -0x3b84) < uVar1) {\n      *(ushort *)(iVar3 + -0x3b84) = *(ushort *)(iVar3 + -0x3b84) + 1;\n      return;\n    }\n    *(undefined2 *)(iVar3 + -0x3b88) = 0;\n    *(undefined2 *)(iVar3 + -0x3b84) = 0;\n  }\n  *(undefined1 *)(iVar3 + -0x3ba2) = 0;\n  FUN_00045268();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "8e8755a877424f9f5c1b811af567db0083a6e3769d060cdf7498d3959ad023c8",
+      "entry": "0x00044FC4"
+    },
+    {
+      "body_sha256": "c397f3c8ac5377bb369cde2a12265fb0d736fd45d34d644d3499ddd3027265f2",
+      "body_size": 110,
+      "data_references": [
+        {
+          "from_addr": "0x00045116",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002b864",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00045132",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002b865",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004514a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b866",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_000450fc(void)\n\n{\n  int iVar1;\n  \n  iVar1 = -0x1414800;\n  uRamfebe7c5f = 0;\n  if (cRamfebe7c1c == '\\x01' || cRamfebe7c1c == '\\x02') {\n    uRamfebe7c5f = 0x5a;\n  }\n  if (DAT_0002b864 == 'Z') {\n    FUN_00044d2a();\n    *(undefined1 *)(iVar1 + -0x3ba8) = 0;\n  }\n  else {\n    FUN_00044d84();\n  }\n  if (DAT_0002b865 == 'Z') {\n    FUN_00044d3e();\n    *(undefined1 *)(iVar1 + -0x3ba8) = 0;\n  }\n  else {\n    FUN_00044ec2();\n  }\n  if (DAT_0002b866 == 'Z') {\n    FUN_00044d50();\n    *(undefined1 *)(iVar1 + -0x3ba8) = 0;\n  }\n  else {\n    FUN_00044fc4();\n  }\n  FUN_000450ce();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "926b84eb5107a9f4d4f8eb6af74791fbfa8e5154601551349ea4758272dc3622",
+      "entry": "0x000450FC"
+    },
+    {
+      "body_sha256": "f3ee751eff0005e4f3aca1ea90b5ed2382f3823bfb47185c3d9b90cd372624e5",
+      "body_size": 90,
+      "data_references": [
+        {
+          "from_addr": "0x00045192",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b69c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00045198",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002b69a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004519e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b6a0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000451a8",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b69e",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nundefined4 FUN_0004516a(void)\n\n{\n  if (((uRamfebe65e4 & 3) != 0) || (cRamfebe7c5f != 'Z')) {\n    return 0x44;\n  }\n  if (((cRamfebe63a4 != '\\0') && ((uRamfebe63b0 < DAT_0002b69c || (DAT_0002b69a < uRamfebe63b0))))\n     && (((uRamfebe63a6 < DAT_0002b6a0 && (uRamfebe63a8 < DAT_0002b6a0)) ||\n         ((DAT_0002b69e < uRamfebe63a6 && (DAT_0002b69e < uRamfebe63a8)))))) {\n    return 0x22;\n  }\n  return 0x11;\n}\n\n",
+      "decompiled_c_sha256": "f24246975a7ab2441b387fe4d84c365ce0c369232852d7fa5569e592a7df3a07",
+      "entry": "0x0004516A"
+    },
+    {
+      "body_sha256": "fad56fcadea9b7cc48892ecef43b5b8ad621fd101ce87a43fd3b6f85355fe72f",
+      "body_size": 78,
+      "data_references": [
+        {
+          "from_addr": "0x000451e8",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b69c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000451ee",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002b69a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000451f4",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b6a0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000451fa",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b69e",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nundefined4 FUN_000451c4(void)\n\n{\n  if (((bRamfebe65e4 & 2) == 0) || (cRamfebe7c5f != 'Z')) {\n    return 0x44;\n  }\n  if (((cRamfebe63a4 != '\\0') && ((uRamfebe63b0 < DAT_0002b69c || (DAT_0002b69a < uRamfebe63b0))))\n     && ((uRamfebe63a6 < DAT_0002b6a0 || (DAT_0002b69e < uRamfebe63a6)))) {\n    return 0x22;\n  }\n  return 0x11;\n}\n\n",
+      "decompiled_c_sha256": "284a76140aef904306d639ed265f5d6704b9d23a4bec657ddb160db2f6041282",
+      "entry": "0x000451C4"
+    },
+    {
+      "body_sha256": "0087c3dc2d06858b10998e568ab58a4eca25c22930b56cda1ddd9cd0f63ce57f",
+      "body_size": 78,
+      "data_references": [
+        {
+          "from_addr": "0x00045236",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b69c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004523c",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002b69a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00045242",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b6a0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00045248",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b69e",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nundefined4 FUN_00045212(void)\n\n{\n  if (((bRamfebe65e4 & 1) == 0) || (cRamfebe7c5f != 'Z')) {\n    return 0x44;\n  }\n  if (((cRamfebe63a4 != '\\0') && ((uRamfebe63b0 < DAT_0002b69c || (DAT_0002b69a < uRamfebe63b0))))\n     && ((uRamfebe63a8 < DAT_0002b6a0 || (DAT_0002b69e < uRamfebe63a8)))) {\n    return 0x22;\n  }\n  return 0x11;\n}\n\n",
+      "decompiled_c_sha256": "553c795b74c15ab25a3d303aea98846053bf9e279508520a020b15737ca354bd",
+      "entry": "0x00045212"
+    },
+    {
+      "body_sha256": "e9cce3824b2d95277fbe639831f1b63ddde6da0ad38648acd8d2dc2ddd6b21a0",
+      "body_size": 8,
+      "data_references": [],
+      "decompiled_c": "\nvoid FUN_00045260(void)\n\n{\n  uRamfebe7c58 = 1;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "7f958f157cc30e3dd01990df7980f13aac9c680243a9e66f17dd9a6575434a62",
+      "entry": "0x00045260"
+    },
+    {
+      "body_sha256": "a33b1e6c4af9aa572adf128987fcc4ddb08216b5ca14fc16551f3a3d5272d998",
+      "body_size": 10,
+      "data_references": [],
+      "decompiled_c": "\nvoid FUN_00045268(void)\n\n{\n  uRamfebe7c58 = 0;\n  uRamfebe7c59 = 0;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "c224e54a6b8e96e16933c70e80f163e5565e6a1d6e9d50ae5ab99b4e457b33df",
+      "entry": "0x00045268"
+    },
+    {
+      "body_sha256": "efe5a0f7c237533832796b5210953d9a2fa48bd5726d9d012ef19e9c9951cdc9",
+      "body_size": 8,
+      "data_references": [],
+      "decompiled_c": "\nvoid FUN_00045272(void)\n\n{\n  uRamfebe7c58 = 2;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "189f5f48c253acf01e33f66e5b79f43c1232378049c08a624c34f766b556ed59",
+      "entry": "0x00045272"
+    },
+    {
+      "body_sha256": "6f87602e07191768046b50bbd4b7fb45c5e4d54e0d36cf2655961e94b09ce5ca",
+      "body_size": 16,
+      "data_references": [],
+      "decompiled_c": "\nvoid FUN_0004527a(void)\n\n{\n  uRamfebe7c58 = 3;\n  uRamfebe7c59 = 0x5a;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "4ffd3ba6a2ada193e23a26067aa75b81e744c44155d3ec21141ba784674008e1",
+      "entry": "0x0004527A"
+    },
+    {
+      "body_sha256": "9791e99d18a03bf0e746948e3f9db16c304f08b39a277fb134acdf38c3155d1d",
+      "body_size": 16,
+      "data_references": [],
+      "decompiled_c": "\nvoid FUN_0004528a(void)\n\n{\n  uRamfebe7c58 = 3;\n  uRamfebe7c5a = 0x5a;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "fef8db6c02042dcbc4a8ac1b2d269670333b777d064be524ae82b6d9cd6c9fb0",
+      "entry": "0x0004528A"
+    },
+    {
+      "body_sha256": "ea58ffcdc167f4e9650380a734bafa3ec09783b21206fc56210ee03fa4a63e83",
+      "body_size": 16,
+      "data_references": [],
+      "decompiled_c": "\nvoid FUN_0004529a(void)\n\n{\n  uRamfebe7c58 = 3;\n  uRamfebe7c5b = 0x5a;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "c5b4832195785805d3dd896e43de7e673d0f71e5fec7662b6f60fa34f7b101be",
+      "entry": "0x0004529A"
+    },
+    {
+      "body_sha256": "38a01549d27cae861373ad1bff9b2b7c78cfb1834a36819e421f35c4bb9eadec",
+      "body_size": 2646,
+      "data_references": [
+        {
+          "from_addr": "0x000b8ef0",
+          "operand_index": 0,
+          "ref_type": "PARAM",
+          "to_addr": "0x00000200",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b8f8e",
+          "operand_index": 0,
+          "ref_type": "PARAM",
+          "to_addr": "0x000003e8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b8fa2",
+          "operand_index": 0,
+          "ref_type": "PARAM",
+          "to_addr": "0x000003e8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b921e",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0x00003950",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b9264",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0x000039ce",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b9272",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0x000039fc",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b939a",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0x0000397c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b941e",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0x0000398a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b9698",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0x000039d0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b971a",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0x000039ba",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b9722",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0x000039bc",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b97d0",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0x000039cc",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b9832",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0x000039c8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b9838",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0x000039ca",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b984a",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0x000039c2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b985c",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0x000039c0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b986e",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0x000039c4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000b9874",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0x000039c6",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_000b8eec(undefined4 param_1)\n\n{\n  char cVar1;\n  char cVar2;\n  undefined1 uVar3;\n  char cVar4;\n  undefined1 uVar5;\n  undefined1 uVar6;\n  char cVar7;\n  undefined1 uVar8;\n  undefined1 uVar9;\n  undefined1 uVar10;\n  undefined1 uVar11;\n  char cVar12;\n  short sVar13;\n  short sVar14;\n  int iVar15;\n  undefined1 uVar16;\n  int iVar17;\n  undefined1 uVar18;\n  undefined1 uVar19;\n  undefined1 uVar20;\n  char cVar21;\n  undefined1 uStack00000002;\n  undefined1 uStack00000003;\n  undefined1 uStack00000005;\n  code cStack00000006;\n  undefined1 uStack00000007;\n  undefined1 uStack00000009;\n  undefined1 uStack0000000a;\n  undefined1 uStack0000000b;\n  undefined1 uStack0000000d;\n  undefined1 uStack0000000e;\n  undefined1 uStack0000000f;\n  undefined1 uStack00000011;\n  undefined1 uStack00000012;\n  undefined1 uStack00000013;\n  undefined1 uStack00000015;\n  undefined1 uStack00000016;\n  undefined1 uStack00000017;\n  undefined1 uStack00000019;\n  undefined1 uStack0000001a;\n  undefined1 uStack0000001b;\n  undefined1 uStack0000001d;\n  undefined1 uStack0000001e;\n  undefined1 uStack0000001f;\n  undefined4 in_stack_00000020;\n  undefined4 in_stack_00000024;\n  undefined4 in_stack_00000028;\n  undefined4 in_stack_0000002c;\n  undefined4 in_stack_00000030;\n  undefined4 in_stack_00000034;\n  undefined2 uStack00000038;\n  undefined2 uStack0000003a;\n  undefined2 uStack0000003c;\n  undefined2 uStack0000003e;\n  \n  iVar15 = -0x1414800;\n  FUN_000cf16a(param_1,0x2d,0x200,&stack0x00000020);\n  sVar14 = *(short *)(iVar15 + -0x83e);\n  FUN_000cf12a((int)sVar14,0x168,0x80,(int)&stack0x00000024 + 2);\n  FUN_000cf16a((int)*(short *)(iVar15 + 0x398e),0x80,100,&stack0x00000028);\n  FUN_000cf16a((int)*(short *)(iVar15 + 0x398c),0x80,100,&stack0x0000002c);\n  FUN_000cf16a((int)*(short *)(iVar15 + 0x3992),0x80,100,&stack0x00000030);\n  FUN_000cf16a((int)*(short *)(iVar15 + 0x3990),0x80,100,&stack0x00000034);\n  FUN_000cf12a((int)*(short *)(iVar15 + 0x3966),0x100,100,&stack0x00000038);\n  FUN_000cf12a((int)*(short *)(iVar15 + 0x397a),0x100,100,(int)&stack0x00000038 + 2);\n  FUN_000cf12a((int)*(char *)(iVar15 + 0x3880),1000,0x32,&stack0x0000003c);\n  FUN_000cf12a((int)*(char *)(iVar15 + 0x3881),1000,0x32,(int)&stack0x0000003c + 2);\n  cVar1 = *(char *)(iVar15 + 0x3800);\n  cVar21 = cVar1;\n  if ((cVar1 != '\\0') && (cVar1 != '\\x02')) {\n    if (cVar1 == '\\x03') {\n      cVar21 = '\\x04';\n    }\n    else {\n      cVar21 = '\\x01';\n    }\n  }\n  cVar2 = *(char *)(iVar15 + -0x688);\n  if ((*(char *)(iVar15 + -0x847) == 'Z') || (*(char *)(iVar15 + -0x846) == 'Z')) {\n    uVar18 = 0x5a;\n  }\n  else {\n    uVar18 = 0;\n  }\n  uStack00000002 = *(undefined1 *)(iVar15 + 0x3869);\n  uStack00000011 = *(undefined1 *)(iVar15 + 0x382e);\n  uStack00000003 = *(undefined1 *)(iVar15 + 0x3870);\n  uVar3 = *(undefined1 *)(iVar15 + 0x3890);\n  uStack00000016 = *(char *)(iVar15 + -0x1d6) == 'Z';\n  uStack0000000b = *(undefined1 *)(iVar15 + 0x388a);\n  uStack00000007 = *(undefined1 *)(iVar15 + 0x3893);\n  uStack00000017 = *(char *)(iVar15 + -0x1d5) == 'Z';\n  cVar4 = *(char *)(iVar15 + -0x1d8);\n  uVar5 = *(undefined1 *)(iVar15 + 0x3887);\n  uStack00000009 = *(undefined1 *)(iVar15 + 0x38a7);\n  uStack0000000a = *(undefined1 *)(iVar15 + 0x38a6);\n  uStack0000000f = *(undefined1 *)(iVar15 + 0x38a1);\n  uVar6 = *(undefined1 *)(iVar15 + 0x3849);\n  uStack00000019 = *(char *)(iVar15 + -0x1d7) == 'Z';\n  uStack0000001a = *(char *)(iVar15 + -0x1d4) == 'Z';\n  uStack0000001b = *(char *)(iVar15 + -0x23e) == 'Z';\n  cVar7 = *(char *)(iVar15 + -0x23d);\n  uStack00000012 = *(undefined1 *)(iVar15 + 0x387a);\n  uVar8 = *(undefined1 *)(iVar15 + 0x389d);\n  uStack0000000d = *(undefined1 *)(iVar15 + 0x3882);\n  uStack00000013 = *(undefined1 *)(iVar15 + 0x383a);\n  uStack0000001d = *(char *)(iVar15 + -0x240) == 'Z';\n  uVar9 = *(undefined1 *)(iVar15 + 0x38f8);\n  uStack00000015 = *(undefined1 *)(iVar15 + 0x3846);\n  uStack0000000e = *(undefined1 *)(iVar15 + 0x388b);\n  uStack0000001e = *(char *)(iVar15 + -0x23f) == 'Z';\n  uStack00000005 = *(undefined1 *)(iVar15 + 0x3859);\n  cStack00000006 = FUN_000038ec[iVar15 + 2];\n  uVar10 = *(undefined1 *)(iVar15 + 0x3828);\n  uStack0000001f = *(char *)(iVar15 + -0x23c) == 'Z';\n  uVar11 = *(undefined1 *)(iVar15 + 0x3860);\n  cVar12 = *(char *)(iVar15 + 0x3899);\n  iVar17 = thunk_FUN_00044cfc(0x15);\n  sVar13 = *(short *)(iVar15 + -0x70e);\n  uVar20 = *(undefined1 *)(iVar15 + -0xb40);\n  if (((sVar13 == 0x400) && (iVar17 != 0x5a)) && (uVar20 = 0, cVar12 == '\\0')) {\n    uVar20 = cVar1 == '\\0';\n  }\n  if ((*(char *)(iVar15 + -0x7d8) == 'Z') || (*(char *)(iVar15 + -0x2b4) == 'Z')) {\n    uVar19 = 0x5a;\n  }\n  else {\n    uVar19 = 0;\n  }\n  uVar16 = FUN_000fefe8();\n  *(undefined1 *)(iVar15 + -0xb44) = uVar16;\n  *(short *)(iVar15 + -0xa14) = sVar13;\n  *(undefined4 *)(iVar15 + -0x930) = in_stack_00000020;\n  *(undefined4 *)(iVar15 + -0x934) = *(undefined4 *)(iVar15 + -0x830);\n  *(short *)(iVar15 + -0x9d0) = sVar14;\n  *(undefined2 *)(iVar15 + -0xa1e) = in_stack_00000024._2_2_;\n  *(undefined2 *)(iVar15 + -0xa1c) = *(undefined2 *)(iVar15 + -2000);\n  *(undefined2 *)(iVar15 + -0xa1a) = *(undefined2 *)(iVar15 + -0x1ec);\n  *(undefined2 *)(iVar15 + -0xa18) = *(undefined2 *)(iVar15 + -0x1ee);\n  *(char *)(iVar15 + -0xb43) = cVar21;\n  *(bool *)(iVar15 + -0xb42) = cVar2 == '\\x11';\n  *(undefined1 *)(iVar15 + -0xb40) = uVar20;\n  *(undefined1 *)(iVar15 + -0xae7) = *(undefined1 *)(iVar15 + 0x3814);\n  *(undefined1 *)(iVar15 + -0xb06) = uVar18;\n  *(undefined1 *)(iVar15 + -0xaa1) = *(undefined1 *)(iVar15 + -0x707);\n  *(undefined1 *)(iVar15 + -0xae8) = *(undefined1 *)(iVar15 + -0x1e0);\n  *(undefined1 *)(iVar15 + -0xace) = *(undefined1 *)(iVar15 + 0x3813);\n  *(undefined2 *)(iVar15 + -0xa16) = *(undefined2 *)(iVar15 + -0x7a4);\n  *(undefined2 *)(iVar15 + -0xa12) = *(undefined2 *)(iVar15 + -0x7a2);\n  *(undefined1 *)(iVar15 + -0xb41) = *(undefined1 *)(iVar15 + -0x716);\n  *(undefined1 *)(iVar15 + -0xb07) = *(undefined1 *)(iVar15 + -0x237);\n  *(undefined1 *)(iVar15 + -0xb05) = *(undefined1 *)(iVar15 + -0x685);\n  *(undefined1 *)(iVar15 + -0xb04) = *(undefined1 *)(iVar15 + -0x2e3);\n  *(undefined2 *)(iVar15 + -0x9ea) = uStack0000003a;\n  *(undefined2 *)(iVar15 + -0x9e8) = *(undefined2 *)(iVar15 + -0x84c);\n  *(undefined2 *)(iVar15 + -0x9f6) = *(undefined2 *)(iVar15 + -0x420);\n  *(undefined2 *)(iVar15 + -0x9f4) = *(undefined2 *)(iVar15 + -0x40e);\n  *(undefined2 *)(iVar15 + -0x9f2) = *(undefined2 *)(iVar15 + -0x332);\n  *(undefined2 *)(iVar15 + -0x9f0) = *(undefined2 *)(iVar15 + -0x81a);\n  *(undefined1 *)(iVar15 + -0xaee) = *(undefined1 *)(iVar15 + -0x236);\n  *(undefined1 *)(iVar15 + -0xaf8) = *(undefined1 *)(iVar15 + 0x385d);\n  *(undefined2 *)(iVar15 + -0x9e0) = *(undefined2 *)(iVar15 + 0x3956);\n  *(undefined2 *)(iVar15 + -0x9de) = *(undefined2 *)(iVar15 + 0x394e);\n  *(undefined2 *)(iVar15 + -0x9dc) = *(undefined2 *)(FUN_00003950 + iVar15);\n  *(undefined2 *)(iVar15 + -0x9da) = *(undefined2 *)(iVar15 + 0x3952);\n  *(undefined1 *)(iVar15 + -0xaed) = *(undefined1 *)(iVar15 + -0x1c0);\n  *(undefined1 *)(iVar15 + -0xacf) = *(undefined1 *)(iVar15 + -0x1bf);\n  *(undefined1 *)(iVar15 + -0xac5) = *(undefined1 *)(iVar15 + 0x385c);\n  *(undefined1 *)(iVar15 + -0xac6) = *(undefined1 *)(iVar15 + -0x8d8);\n  *(undefined2 *)(iVar15 + -0x9b4) = *(undefined2 *)(iVar15 + -0x6ee);\n  *(undefined1 *)(iVar15 + -0xabf) = *(undefined1 *)(iVar15 + -0x65e);\n  *(undefined1 *)(iVar15 + -0xa68) = *(undefined1 *)(iVar15 + -0x218);\n  *(undefined1 *)(iVar15 + -0xa41) = *(undefined1 *)(iVar15 + 0x3939);\n  *(undefined2 *)(iVar15 + -0x96e) = *(undefined2 *)(&DAT_000039ce + iVar15);\n  *(undefined1 *)(iVar15 + -0xa40) = *(undefined1 *)(iVar15 + 0x393a);\n  *(undefined4 *)(iVar15 + -0x8fc) = *(undefined4 *)(FUN_000039fc + iVar15);\n  *(undefined2 *)(iVar15 + -0x9c4) = *(undefined2 *)(iVar15 + -0x350);\n  *(undefined2 *)(iVar15 + -0x9b0) = *(undefined2 *)(iVar15 + -0x42a);\n  *(undefined1 *)(iVar15 + -0xab4) = *(undefined1 *)(iVar15 + -0x42c);\n  *(undefined1 *)(iVar15 + -0xaa3) = *(undefined1 *)(iVar15 + -0x231);\n  *(undefined1 *)(iVar15 + -0xaa2) = *(undefined1 *)(iVar15 + -0x230);\n  *(undefined1 *)(iVar15 + -0xab3) = *(undefined1 *)(iVar15 + -0x7c0);\n  *(undefined1 *)(iVar15 + -0xb03) = uVar10;\n  *(undefined1 *)(iVar15 + -0xb02) = *(undefined1 *)(iVar15 + 0x3829);\n  *(undefined1 *)(iVar15 + -0xb01) = *(undefined1 *)(iVar15 + 0x382a);\n  *(undefined2 *)(iVar15 + -0x9ee) = uStack00000038;\n  *(undefined1 *)(iVar15 + -0xa28) = *(undefined1 *)(iVar15 + 0x3940);\n  *(undefined1 *)(iVar15 + -0xae6) = uStack00000011;\n  *(undefined1 *)(iVar15 + -0xae5) = *(undefined1 *)(iVar15 + 0x3833);\n  *(undefined1 *)(iVar15 + -0xae4) = *(undefined1 *)(iVar15 + 0x3832);\n  *(undefined2 *)(iVar15 + -0x9ce) = *(undefined2 *)(iVar15 + 0x396a);\n  *(undefined1 *)(iVar15 + -0xae3) = *(undefined1 *)(iVar15 + 0x3835);\n  *(undefined1 *)(iVar15 + -0xae2) = *(undefined1 *)(iVar15 + 0x3831);\n  *(undefined1 *)(iVar15 + -0xae1) = *(undefined1 *)(iVar15 + 0x3830);\n  *(undefined1 *)(iVar15 + -0xae0) = *(undefined1 *)(iVar15 + 0x3834);\n  *(undefined2 *)(iVar15 + -0x9cc) = *(undefined2 *)(iVar15 + 0x3968);\n  *(undefined1 *)(iVar15 + -0xadf) = *(undefined1 *)(iVar15 + 0x3836);\n  *(undefined1 *)(iVar15 + -0xade) = *(undefined1 *)(iVar15 + 0x3837);\n  *(undefined1 *)(iVar15 + -0xab2) = uStack00000013;\n  *(undefined1 *)(iVar15 + -0xab1) = *(undefined1 *)(iVar15 + 0x3841);\n  *(undefined1 *)(iVar15 + -0xab0) = *(undefined1 *)(iVar15 + 0x3844);\n  *(undefined2 *)(iVar15 + -0x9ae) = *(undefined2 *)(iVar15 + 0x396e);\n  *(undefined1 *)(iVar15 + -0xaaf) = *(undefined1 *)(iVar15 + 0x3843);\n  *(undefined1 *)(iVar15 + -0xaae) = *(undefined1 *)(iVar15 + 0x3840);\n  *(undefined1 *)(iVar15 + -0xaad) = *(undefined1 *)(iVar15 + 0x383b);\n  *(undefined1 *)(iVar15 + -0xaac) = *(undefined1 *)(iVar15 + 0x383f);\n  *(undefined1 *)(iVar15 + -0xaab) = *(undefined1 *)(iVar15 + 0x383c);\n  *(undefined2 *)(iVar15 + -0x9ac) = *(undefined2 *)(iVar15 + -0x27a);\n  *(undefined2 *)(iVar15 + -0x9aa) = *(undefined2 *)(iVar15 + -0x27c);\n  *(undefined1 *)(iVar15 + -0xa64) = uVar9;\n  *(undefined1 *)(iVar15 + -0xaaa) = uStack00000015;\n  *(undefined2 *)(iVar15 + -0x9a8) = *(undefined2 *)(iVar15 + 0x3970);\n  *(undefined2 *)(iVar15 + -0x9a6) = *(undefined2 *)(iVar15 + 0x3972);\n  *(undefined1 *)(iVar15 + -0xaa9) = *(undefined1 *)(iVar15 + 0x3848);\n  *(undefined1 *)(iVar15 + -0xaa8) = *(undefined1 *)(iVar15 + 0x3847);\n  *(undefined1 *)(iVar15 + -0xafd) = uVar11;\n  *(undefined1 *)(iVar15 + -0xafc) = *(undefined1 *)(iVar15 + 0x3861);\n  *(undefined1 *)(iVar15 + -0xafb) = *(undefined1 *)(iVar15 + 0x3862);\n  *(undefined2 *)(iVar15 + -0x9e6) = *(undefined2 *)(iVar15 + 0x397e);\n  *(undefined1 *)(iVar15 + -0xafa) = *(undefined1 *)(iVar15 + 0x3864);\n  *(undefined2 *)(iVar15 + -0x9e4) = *(undefined2 *)(FUN_0000397c + iVar15);\n  *(undefined1 *)(iVar15 + -0xaf9) = *(undefined1 *)(iVar15 + 0x3863);\n  *(undefined1 *)(iVar15 + -0xb3f) = uStack00000002;\n  *(undefined1 *)(iVar15 + -0xb3e) = *(undefined1 *)(iVar15 + 0x386d);\n  *(undefined1 *)(iVar15 + -0xb3d) = *(undefined1 *)(iVar15 + 0x3868);\n  *(undefined1 *)(iVar15 + -0xb3c) = *(undefined1 *)(iVar15 + 0x386b);\n  *(undefined1 *)(iVar15 + -0xb3a) = *(undefined1 *)(iVar15 + 0x386c);\n  *(undefined2 *)(iVar15 + -0xa10) = *(undefined2 *)(iVar15 + 0x3982);\n  *(undefined1 *)(iVar15 + -0xb3b) = *(undefined1 *)(iVar15 + 0x386f);\n  *(undefined2 *)(iVar15 + -0xa0e) = *(undefined2 *)(iVar15 + 0x3984);\n  *(undefined2 *)(iVar15 + -0x9ec) = *(undefined2 *)(iVar15 + 0x3980);\n  *(undefined1 *)(iVar15 + -0xaa5) = *(undefined1 *)(iVar15 + 0x386a);\n  *(undefined1 *)(iVar15 + -0xadd) = uStack00000003;\n  *(undefined1 *)(iVar15 + -0xadc) = *(undefined1 *)(iVar15 + 0x3872);\n  *(undefined1 *)(iVar15 + -0xadb) = uStack00000012;\n  *(undefined1 *)(iVar15 + -0xada) = *(undefined1 *)(iVar15 + 0x387f);\n  *(undefined1 *)(iVar15 + -0xad8) = *(undefined1 *)(iVar15 + 0x3875);\n  *(undefined2 *)(iVar15 + -0x9ca) = *(undefined2 *)(iVar15 + 0x3988);\n  *(undefined1 *)(iVar15 + -0xad7) = *(undefined1 *)(iVar15 + 0x387d);\n  *(undefined1 *)(iVar15 + -0xad6) = *(undefined1 *)(iVar15 + 0x387e);\n  *(undefined2 *)(iVar15 + -0x9c8) = *(undefined2 *)(FUN_0000398a + iVar15);\n  *(undefined1 *)(iVar15 + -0xad5) = *(undefined1 *)(iVar15 + 0x3878);\n  *(undefined1 *)(iVar15 + -0xad4) = *(undefined1 *)(iVar15 + 0x3877);\n  *(undefined1 *)(iVar15 + -0xad3) = *(undefined1 *)(iVar15 + 0x3879);\n  *(undefined1 *)(iVar15 + -0xad2) = *(undefined1 *)(iVar15 + 0x3873);\n  *(undefined2 *)(iVar15 + -0x9c6) = *(undefined2 *)(iVar15 + 0x3986);\n  *(undefined1 *)(iVar15 + -0xad1) = *(undefined1 *)(iVar15 + 0x387c);\n  *(undefined1 *)(iVar15 + -0xad0) = *(undefined1 *)(iVar15 + 0x3874);\n  *(undefined1 *)(iVar15 + -0xad9) = *(undefined1 *)(iVar15 + 0x3876);\n  *(undefined1 *)(iVar15 + -0xb39) = uVar5;\n  *(undefined4 *)(iVar15 + -0x92c) = in_stack_00000028;\n  *(undefined4 *)(iVar15 + -0x928) = in_stack_0000002c;\n  *(undefined4 *)(iVar15 + -0x924) = in_stack_00000030;\n  *(undefined4 *)(iVar15 + -0x920) = in_stack_00000034;\n  *(undefined1 *)(iVar15 + -0xb38) = *(undefined1 *)(iVar15 + 0x3884);\n  *(undefined1 *)(iVar15 + -0xb37) = *(undefined1 *)(iVar15 + 0x3883);\n  *(undefined1 *)(iVar15 + -0xb36) = *(undefined1 *)(iVar15 + 0x3886);\n  *(undefined1 *)(iVar15 + -0xb35) = *(undefined1 *)(iVar15 + 0x3885);\n  *(undefined1 *)(iVar15 + -0xb34) = uStack00000007;\n  *(undefined2 *)(iVar15 + -0xa0c) = *(undefined2 *)(iVar15 + -0x1f2);\n  *(undefined1 *)(iVar15 + -0xb33) = *(undefined1 *)(iVar15 + 0x3894);\n  *(undefined1 *)(iVar15 + -0xb32) = *(undefined1 *)(iVar15 + 0x3895);\n  sVar14 = *(short *)(iVar15 + 0x399a);\n  iVar17 = (int)sVar14;\n  if (iVar17 + 0x7fff < 0 != (-1 < iVar17 && iVar17 + 0x7fff < 0) || iVar17 == -0x7fff) {\n    sVar14 = -0x7fff;\n  }\n  *(short *)(iVar15 + -0xa0a) = sVar14;\n  sVar14 = *(short *)(iVar15 + 0x399c);\n  iVar17 = (int)sVar14;\n  if (iVar17 + 0x7fff < 0 != (-1 < iVar17 && iVar17 + 0x7fff < 0) || iVar17 == -0x7fff) {\n    sVar14 = -0x7fff;\n  }\n  *(short *)(iVar15 + -0xa08) = sVar14;\n  *(undefined1 *)(iVar15 + -0xb2c) = uVar3;\n  *(undefined1 *)(iVar15 + -0xb2b) = *(undefined1 *)(iVar15 + 0x3892);\n  *(undefined1 *)(iVar15 + -0xb2a) = *(undefined1 *)(iVar15 + 0x3891);\n  *(undefined1 *)(iVar15 + -0xb29) = *(undefined1 *)(iVar15 + 0x388e);\n  *(undefined1 *)(iVar15 + -0xb28) = *(undefined1 *)(iVar15 + 0x388f);\n  *(undefined1 *)(iVar15 + -0xb1b) = uStack00000005;\n  sVar14 = *(short *)(iVar15 + 0x3978);\n  iVar17 = (int)sVar14;\n  if (iVar17 + 0x7fff < 0 != (-1 < iVar17 && iVar17 + 0x7fff < 0) || iVar17 == -0x7fff) {\n    sVar14 = -0x7fff;\n  }\n  *(short *)(iVar15 + -0xa06) = sVar14;\n  *(code *)(iVar15 + -0xb1a) = cStack00000006;\n  sVar14 = *(short *)(iVar15 + 0x3974);\n  iVar17 = (int)sVar14;\n  if (iVar17 + 0x7fff < 0 != (-1 < iVar17 && iVar17 + 0x7fff < 0) || iVar17 == -0x7fff) {\n    sVar14 = -0x7fff;\n  }\n  *(short *)(iVar15 + -0xa04) = sVar14;\n  *(char *)(iVar15 + -0xb27) = cVar12;\n  *(undefined1 *)(iVar15 + -0xb26) = uStack00000009;\n  *(undefined1 *)(iVar15 + -0xb22) = uStack00000017;\n  *(undefined1 *)(iVar15 + -0xb24) = uStack00000016;\n  *(undefined1 *)(iVar15 + -0xb23) = uStack0000001a;\n  *(undefined1 *)(iVar15 + -0xb25) = uStack0000000a;\n  *(undefined1 *)(iVar15 + -0xb21) = uStack0000001b;\n  *(bool *)(iVar15 + -0xb20) = cVar7 == 'Z';\n  *(undefined1 *)(iVar15 + -0xb1f) = uStack0000001f;\n  *(undefined1 *)(iVar15 + -0xa8f) = *(undefined1 *)(iVar15 + 0x38a4);\n  *(undefined1 *)(iVar15 + -0xa8e) = *(undefined1 *)(iVar15 + 0x38a5);\n  *(undefined1 *)(iVar15 + -0xb31) = uStack0000000f;\n  *(undefined1 *)(iVar15 + -0xb30) = *(undefined1 *)(iVar15 + 0x38a0);\n  *(undefined1 *)(iVar15 + -0xb2f) = uVar6;\n  *(undefined1 *)(iVar15 + -0xb2d) = *(undefined1 *)(iVar15 + 0x384a);\n  *(undefined1 *)(iVar15 + -0xb2e) = *(undefined1 *)(iVar15 + 0x384b);\n  *(undefined1 *)(iVar15 + -0xb19) = uStack0000001d;\n  *(undefined1 *)(iVar15 + -0xb18) = uStack0000001e;\n  *(undefined2 *)(iVar15 + -0xa02) = *(undefined2 *)(iVar15 + -0x23a);\n  *(undefined1 *)(iVar15 + -0xb1e) = *(undefined1 *)(iVar15 + 0x3898);\n  *(bool *)(iVar15 + -0xb17) = cVar4 == 'Z';\n  *(undefined1 *)(iVar15 + -0xb16) = uStack00000019;\n  *(undefined4 *)(iVar15 + -0x91c) = *(undefined4 *)(iVar15 + -0x1d0);\n  *(undefined1 *)(iVar15 + -0xb1d) = *(undefined1 *)(iVar15 + 0x389b);\n  *(undefined1 *)(iVar15 + -0xb1c) = *(undefined1 *)(iVar15 + 0x389c);\n  *(undefined2 *)(iVar15 + -0x9d6) = *(undefined2 *)(iVar15 + -0x6f4);\n  *(undefined2 *)(iVar15 + -0x9d4) = *(undefined2 *)(iVar15 + -0x6f2);\n  *(undefined2 *)(iVar15 + -0x9d2) = *(undefined2 *)(iVar15 + -0x6ec);\n  *(undefined4 *)(iVar15 + -0x910) = *(undefined4 *)(iVar15 + -0x520);\n  *(undefined4 *)(iVar15 + -0x914) = *(undefined4 *)(iVar15 + -0x1fc);\n  *(undefined1 *)(iVar15 + -0xacc) = uStack0000000b;\n  sVar14 = *(short *)(iVar15 + 0x3994);\n  iVar17 = (int)sVar14;\n  if (iVar17 + 0x7fff < 0 != (-1 < iVar17 && iVar17 + 0x7fff < 0) || iVar17 == -0x7fff) {\n    sVar14 = -0x7fff;\n  }\n  *(short *)(iVar15 + -0x9c2) = sVar14;\n  *(undefined1 *)(iVar15 + -0xac9) = *(undefined1 *)(iVar15 + 0x3888);\n  *(undefined1 *)(iVar15 + -0xac8) = *(undefined1 *)(iVar15 + 0x3889);\n  sVar14 = *(short *)(iVar15 + 0x3996);\n  iVar17 = (int)sVar14;\n  if (iVar17 + 0x7fff < 0 != (-1 < iVar17 && iVar17 + 0x7fff < 0) || iVar17 == -0x7fff) {\n    sVar14 = -0x7fff;\n  }\n  *(short *)(iVar15 + -0x9c0) = sVar14;\n  *(undefined1 *)(iVar15 + -0xacb) = uVar8;\n  sVar14 = *(short *)(iVar15 + 0x39a0);\n  iVar17 = (int)sVar14;\n  if (iVar17 + 0x7fff < 0 != (-1 < iVar17 && iVar17 + 0x7fff < 0) || iVar17 == -0x7fff) {\n    sVar14 = -0x7fff;\n  }\n  *(short *)(iVar15 + -0x9be) = sVar14;\n  sVar14 = *(short *)(iVar15 + 0x39a2);\n  iVar17 = (int)sVar14;\n  if (iVar17 + 0x7fff < 0 != (-1 < iVar17 && iVar17 + 0x7fff < 0) || iVar17 == -0x7fff) {\n    sVar14 = -0x7fff;\n  }\n  *(short *)(iVar15 + -0x9bc) = sVar14;\n  *(undefined1 *)(iVar15 + -0xaca) = uStack0000000d;\n  *(undefined2 *)(iVar15 + -0x9ba) = uStack0000003c;\n  *(undefined2 *)(iVar15 + -0x9b8) = uStack0000003e;\n  *(undefined1 *)(iVar15 + -0xaa7) = uStack0000000e;\n  *(undefined1 *)(iVar15 + -0xaa6) = *(undefined1 *)(iVar15 + 0x388d);\n  *(undefined1 *)(iVar15 + -0xac4) = *(undefined1 *)(iVar15 + -0x482);\n  *(undefined1 *)(iVar15 + -0xac2) = *(undefined1 *)(iVar15 + -0x480);\n  *(undefined1 *)(iVar15 + -0xac3) = *(undefined1 *)(iVar15 + -0x481);\n  *(undefined1 *)(iVar15 + -0xac1) = *(undefined1 *)(iVar15 + -0x47c);\n  *(undefined1 *)(iVar15 + -0xaa4) = *(undefined1 *)(iVar15 + -0x47a);\n  *(undefined1 *)(iVar15 + -0xac0) = *(undefined1 *)(iVar15 + -0x47b);\n  *(undefined1 *)(iVar15 + -0xa92) = *(undefined1 *)(iVar15 + 0x38be);\n  *(undefined2 *)(iVar15 + -0x93c) = *(undefined2 *)(&DAT_000039d0 + iVar15);\n  *(undefined1 *)(iVar15 + -0xa24) = *(undefined1 *)(iVar15 + 0x3946);\n  *(undefined1 *)(iVar15 + -0xa91) = *(undefined1 *)(iVar15 + 0x38bf);\n  *(undefined1 *)(iVar15 + -0xa90) = *(undefined1 *)(iVar15 + 0x38c0);\n  *(undefined2 *)(iVar15 + -0x99e) = *(undefined2 *)(iVar15 + 0x39b4);\n  *(undefined2 *)(iVar15 + -0x99c) = *(undefined2 *)(iVar15 + 0x39b6);\n  *(undefined1 *)(iVar15 + -0xa8d) = *(undefined1 *)(iVar15 + 0x38d4);\n  *(undefined1 *)(iVar15 + -0xa8c) = *(undefined1 *)(iVar15 + 0x38d5);\n  *(undefined1 *)(iVar15 + -0xa8b) = *(undefined1 *)(iVar15 + 0x38d6);\n  *(undefined1 *)(iVar15 + -0xa8a) = *(undefined1 *)(iVar15 + 0x38d7);\n  *(undefined1 *)(iVar15 + -0xa89) = *(undefined1 *)(iVar15 + 0x38da);\n  *(undefined1 *)(iVar15 + -0xa88) = *(undefined1 *)(iVar15 + 0x38db);\n  *(undefined1 *)(iVar15 + -0xa87) = *(undefined1 *)(iVar15 + 0x38dc);\n  *(undefined1 *)(iVar15 + -0xa86) = *(undefined1 *)(iVar15 + 0x38dd);\n  *(undefined1 *)(iVar15 + -0xa85) = *(undefined1 *)(iVar15 + 0x38de);\n  *(undefined1 *)(iVar15 + -0xa84) = *(undefined1 *)(iVar15 + 0x38e0);\n  *(undefined2 *)(iVar15 + -0x99a) = *(undefined2 *)(iVar15 + 0x39b8);\n  *(undefined1 *)(iVar15 + -0xa83) = *(undefined1 *)(iVar15 + 0x38e2);\n  *(undefined1 *)(iVar15 + -0xa58) = *(undefined1 *)(iVar15 + 0x38e3);\n  *(undefined1 *)(iVar15 + -0xa59) = *(undefined1 *)(iVar15 + 0x38df);\n  *(undefined2 *)(iVar15 + -0x998) = *(undefined2 *)(&DAT_000039ba + iVar15);\n  *(undefined2 *)(iVar15 + -0x982) = *(undefined2 *)(&DAT_000039bc + iVar15);\n  *(undefined1 *)(iVar15 + -0xa82) = *(undefined1 *)(iVar15 + 0x38e6);\n  *(undefined1 *)(iVar15 + -0xa81) = *(undefined1 *)(iVar15 + 0x38e8);\n  *(undefined1 *)(iVar15 + -0xa80) = *(undefined1 *)(iVar15 + 0x38eb);\n  *(undefined2 *)(iVar15 + -0x996) = *(undefined2 *)(FUN_000039a4 + iVar15 + 6);\n  *(undefined2 *)(iVar15 + -0x994) = *(undefined2 *)(iVar15 + 0x39ac);\n  *(undefined1 *)(iVar15 + -0xa7f) = *(undefined1 *)(iVar15 + 0x38c4);\n  *(undefined1 *)(iVar15 + -0xa7e) = *(undefined1 *)(iVar15 + 0x38c2);\n  *(undefined1 *)(iVar15 + -0xa7d) = *(undefined1 *)(iVar15 + 0x38c7);\n  *(undefined1 *)(iVar15 + -0xa7c) = *(undefined1 *)(iVar15 + 0x38c6);\n  *(undefined1 *)(iVar15 + -0xa7b) = *(undefined1 *)(iVar15 + 0x38c3);\n  *(undefined1 *)(iVar15 + -0xa7a) = *(undefined1 *)(iVar15 + 0x38c5);\n  *(undefined1 *)(iVar15 + -0xa79) = *(undefined1 *)(iVar15 + 0x38cb);\n  *(undefined1 *)(iVar15 + -0xa78) = *(undefined1 *)(iVar15 + 0x38c8);\n  *(undefined1 *)(iVar15 + -0xa77) = *(undefined1 *)(iVar15 + 0x38ca);\n  *(undefined2 *)(iVar15 + -0x992) = *(undefined2 *)(iVar15 + 0x39ae);\n  *(undefined1 *)(iVar15 + -0xa76) = *(undefined1 *)(iVar15 + 0x38c1);\n  *(undefined2 *)(iVar15 + -0x990) = *(undefined2 *)(iVar15 + 0x39b0);\n  *(undefined2 *)(iVar15 + -0x984) = *(undefined2 *)(iVar15 + 0x39b2);\n  *(undefined1 *)(iVar15 + -0xa75) = *(undefined1 *)(iVar15 + 0x38cc);\n  *(undefined1 *)(iVar15 + -0xa74) = *(undefined1 *)(iVar15 + 0x38ce);\n  *(undefined1 *)(iVar15 + -0xa73) = *(undefined1 *)(iVar15 + 0x38cf);\n  *(undefined1 *)(iVar15 + -0xa5a) = *(undefined1 *)(iVar15 + 0x38d0);\n  *(undefined1 *)(iVar15 + -0xa5b) = *(undefined1 *)(iVar15 + 0x38c9);\n  *(undefined1 *)(iVar15 + -0xa72) = *(undefined1 *)(iVar15 + 0x38d1);\n  *(undefined1 *)(iVar15 + -0xa47) = *(undefined1 *)(iVar15 + 0x3932);\n  *(undefined2 *)(iVar15 + -0x97e) = *(undefined2 *)(&DAT_000039cc + iVar15);\n  *(undefined1 *)(iVar15 + -0xa23) = *(undefined1 *)(iVar15 + 0x3947);\n  *(undefined1 *)(iVar15 + -0xa51) = *(undefined1 *)(iVar15 + 0x3930);\n  *(code *)(iVar15 + -0xa50) = FUN_00003926[iVar15 + 1];\n  *(undefined1 *)(iVar15 + -0xa4f) = *(undefined1 *)(iVar15 + 0x3928);\n  *(undefined1 *)(iVar15 + -0xa45) = *(undefined1 *)(iVar15 + 0x3929);\n  *(undefined1 *)(iVar15 + -0xa44) = *(undefined1 *)(iVar15 + 0x392c);\n  *(undefined1 *)(iVar15 + -0xa43) = *(undefined1 *)(iVar15 + 0x392d);\n  *(undefined1 *)(iVar15 + -0xa42) = *(undefined1 *)(iVar15 + 0x392e);\n  *(undefined1 *)(iVar15 + -0xa3f) = *(undefined1 *)(iVar15 + 0x392f);\n  *(undefined1 *)(iVar15 + -0xa3e) = *(undefined1 *)(iVar15 + 0x392b);\n  *(undefined1 *)(iVar15 + -0xa27) = *(undefined1 *)(iVar15 + 0x3941);\n  *(undefined1 *)(iVar15 + -0xa20) = *(undefined1 *)(iVar15 + 0x394a);\n  *(undefined1 *)(iVar15 + -0xa46) = *(undefined1 *)(iVar15 + 0x3919);\n  *(undefined2 *)(iVar15 + -0x970) = *(undefined2 *)(iVar15 + 0x3998);\n  *(undefined1 *)(iVar15 + -0xa26) = *(undefined1 *)(iVar15 + 0x3942);\n  *(undefined2 *)(iVar15 + -0x97c) = *(undefined2 *)(&DAT_000039c8 + iVar15);\n  *(undefined2 *)(iVar15 + -0x97a) = *(undefined2 *)(&DAT_000039ca + iVar15);\n  *(undefined1 *)(iVar15 + -0xa4e) = *(undefined1 *)(iVar15 + 0x3923);\n  *(undefined1 *)(iVar15 + -0xa4d) = *(undefined1 *)(iVar15 + 0x3924);\n  *(undefined2 *)(iVar15 + -0x978) = *(undefined2 *)(&DAT_000039c2 + iVar15);\n  *(undefined1 *)(iVar15 + -0xa4c) = *(undefined1 *)(iVar15 + 0x391b);\n  *(undefined1 *)(iVar15 + -0xa4b) = *(undefined1 *)(iVar15 + 0x391c);\n  *(undefined2 *)(iVar15 + -0x976) = *(undefined2 *)(&DAT_000039c0 + iVar15);\n  *(undefined1 *)(iVar15 + -0xa4a) = *(undefined1 *)(iVar15 + 0x391a);\n  *(undefined1 *)(iVar15 + -0xa25) = *(undefined1 *)(iVar15 + 0x3943);\n  *(undefined2 *)(iVar15 + -0x974) = *(undefined2 *)(&DAT_000039c4 + iVar15);\n  *(undefined2 *)(iVar15 + -0x972) = *(undefined2 *)(&DAT_000039c6 + iVar15);\n  *(undefined1 *)(iVar15 + -0xa49) = *(undefined1 *)(iVar15 + 0x391f);\n  *(undefined1 *)(iVar15 + -0xa48) = *(undefined1 *)(iVar15 + 0x3920);\n  *(undefined1 *)(iVar15 + -0xa66) = *(undefined1 *)(iVar15 + -0x848);\n  *(undefined1 *)(iVar15 + -0xa65) = *(undefined1 *)(iVar15 + -0x7aa);\n  *(undefined1 *)(iVar15 + -0xa63) = *(undefined1 *)(iVar15 + -0x7ac);\n  *(undefined2 *)(iVar15 + -0x986) = *(undefined2 *)(iVar15 + -0x7a0);\n  *(undefined1 *)(iVar15 + -0xa5e) = *(undefined1 *)(iVar15 + -0x7d7);\n  *(undefined1 *)(iVar15 + -0xa5d) = *(undefined1 *)(iVar15 + -0x2ce);\n  *(undefined1 *)(iVar15 + -0xa5c) = *(undefined1 *)(iVar15 + -0x2cd);\n  *(undefined1 *)(iVar15 + -0xa54) = *(undefined1 *)(iVar15 + -0x2cc);\n  *(undefined1 *)(iVar15 + -0xa56) = uVar19;\n  *(undefined1 *)(iVar15 + -0xa53) = *(undefined1 *)(iVar15 + -0x2cb);\n  *(undefined1 *)(iVar15 + -0xa52) = *(undefined1 *)(iVar15 + 0x390a);\n  *(undefined2 *)(iVar15 + -0x96c) = *(undefined2 *)(iVar15 + 0x394c);\n  *(undefined1 *)(iVar15 + -0xa3d) = *(undefined1 *)(iVar15 + -0x7e4);\n  *(undefined1 *)(iVar15 + -0xa3c) = *(undefined1 *)(iVar15 + -0x7e3);\n  *(undefined2 *)(iVar15 + -0x96a) = *(undefined2 *)(iVar15 + -0x838);\n  *(undefined4 *)(iVar15 + -0x8f8) = *(undefined4 *)(iVar15 + -0x834);\n  *(undefined1 *)(iVar15 + -0xa2c) = *(undefined1 *)(iVar15 + 0x393b);\n  *(undefined1 *)(iVar15 + -0xa2e) = *(undefined1 *)(iVar15 + -0x4d0);\n  *(undefined1 *)(iVar15 + -0xa2f) = *(undefined1 *)(iVar15 + -0x4cf);\n  *(undefined4 *)(iVar15 + -0x8f4) = *(undefined4 *)(iVar15 + -0x4c4);\n  *(undefined1 *)(iVar15 + -0xa2b) = *(undefined1 *)(iVar15 + -0x4ce);\n  *(undefined1 *)(iVar15 + -0xa3b) = *(undefined1 *)(iVar15 + -0x1cc);\n  *(undefined1 *)(iVar15 + -0xa3a) = *(undefined1 *)(iVar15 + -0x1cb);\n  *(undefined2 *)(iVar15 + -0x944) = *(undefined2 *)(iVar15 + -0x4ca);\n  *(undefined2 *)(iVar15 + -0x942) = *(undefined2 *)(iVar15 + -0x4c8);\n  FUN_000cf028();\n  FUN_000b8eb8();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "a80505e0155b9841ee55e759f92de3b27f6711371b2387b8e9bdffadfe5fefe6",
+      "entry": "0x000B8EEC"
+    }
+  ],
+  "image": {
+    "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+    "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "size": 1048576
+  },
+  "schema": "corolla-h-power-supply-monitor-decompiler-evidence-v1",
+  "software_id": "8965H1202000",
+  "source_corpus": {
+    "path": "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
+    "sha256": "c3411eec57b9d55c004b0b0f328394bb152577c3398084dccc729dab5da54656"
+  }
+}

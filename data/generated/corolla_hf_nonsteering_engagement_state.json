@@ -2,14 +2,14 @@
   "cruise": {
     "boundary": "Neither retained route supplies an independent cruise-main/engagement oracle. Exact Toyota diagnostics now define what each missing semantic must correlate with, but no CAN field may be promoted to available/enabled/set-speed/fault until a wire-to-oracle transition is observed or statically recovered from the producer firmware.",
     "capture_recipe": [
-      "Use Techstream/GTS+ FRC_P5 Data ID 0x1905 (Cruise Control Permission Flag) while toggling cruise main and engagement.",
-      "Use Techstream/GTS+ FRC_P5 Data ID 0x1906 (Main Switch Recognition Flag, Set Cancel Switch Condition, ACC Not Available Icon Lighting Request Flag) synchronized with all-bus CAN.",
-      "Use Techstream/GTS+ FRC_P5 Data ID 0x1914 (ACC Control in Operation Flag) through disengaged -> engaged -> cancelled transitions.",
-      "Use Techstream/GTS+ FRC_P5 Data ID 0x1901 (Current Vehicle Speed, Memory Vehicle Speed) while changing set speed.",
-      "Use Techstream/GTS+ FRC_P5 Data ID 0x1912 (Set Vehicle Interval Time) while cycling following distance."
+      "Poll FRC_P5 0x1905 directly with UDS 22 19 05 and require 62 19 05 before decoding Cruise Control Permission Flag while toggling cruise main and engagement.",
+      "Poll FRC_P5 0x1906 directly with UDS 22 19 06 and require 62 19 06 before decoding Main Switch Recognition / Set-Cancel / ACC Not Available synchronized with all-bus CAN.",
+      "Poll FRC_P5 0x1914 directly with UDS 22 19 14 and require 62 19 14 before decoding ACC Control in Operation through disengaged -> engaged -> cancelled transitions.",
+      "Poll FRC_P5 0x1901 directly with UDS 22 19 01 and require 62 19 01 before decoding Current/Memory Vehicle Speed while changing set speed.",
+      "Poll FRC_P5 0x1912 directly with UDS 22 19 12 and require 62 19 12 before decoding Set Vehicle Interval Time while cycling following distance."
     ],
     "classification": "diagnostic semantics narrowed; live CAN mapping not closed",
-    "diagnostic_transport_boundary": "The 0x19xx values above are P5 diagnostic Data IDs from FRC_P5, not automatically UDS ReadDataByIdentifier DIDs. Use Techstream/GTS+ data-monitor access unless a separate FRC service mapping proves direct 0x22 support.",
+    "diagnostic_transport_boundary": "Current GTS+ proves the selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. For an independent capture, require the matching 0x62||DID positive prefix before decoding. A named outer DiagnosticSessionControl or SecurityAccess prerequisite is not statically proved.",
     "legacy_ids_absent_in_both_captures": [
       "0x177",
       "0x1A2",
@@ -654,7 +654,11 @@
     },
     "techstream_cruise": {
       "path": "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json",
-      "sha256": "cddc1d2916e4632a8df30a12f3fb6645df5346935063acb183894f978ad8e2d8"
+      "sha256": "f3a56b5249ec9b7329fa9a2b0761ac458ef810b16cc4f81eb85f1b8bb5636a19"
+    },
+    "techstream_cruise_live_transport": {
+      "path": "data/generated/techstream_v18/tss3_cruise_live_transport.json",
+      "sha256": "8a32399b078ecd52c03992c21f7090f26de9e30574dbcffb0d20e02ed589a140"
     },
     "techstream_ready": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
@@ -730,7 +734,7 @@
       "Add/inspect 0x51E B0[7] as target-native Ready Status input.",
       "The current read-only parser may retain prior-art raw3->D decoding as an observation aid, but do not call D target-native validated; preserve P/R/N/B as unvalidated prior-art enums.",
       "Keep TSS3 cruiseState.available/enabled/set-speed neutral in production CarState.",
-      "Use the exact FRC P5 Data-ID oracle set through Techstream/GTS+ for the next synchronized capture instead of guessing replacement CAN bits."
+      "Poll the exact FRC P5 cruise Data-ID oracle set directly with the recovered SID 0x22 requests during the next synchronized capture instead of guessing replacement CAN bits."
     ]
   },
   "ready_status": {

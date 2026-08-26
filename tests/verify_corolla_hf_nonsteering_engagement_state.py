@@ -100,8 +100,8 @@ check("Ready input is safe for inspection", any("0x51E B0[7]" in x for x in safe
 check("production cruise remains neutral", any("cruiseState.available/enabled/set-speed neutral" in x for x in safe))
 check("B0[3] promotion explicitly prohibited", any("0x176 B0[3]" in x for x in unsafe))
 check("P/R/N/B promotion explicitly prohibited", any("P/R/N/B" in x for x in unsafe))
-check("capture recipe is concrete and P5-Data-ID addressed", all(any(data_id in x for x in cruise["capture_recipe"]) for data_id in ("0x1905", "0x1906", "0x1914", "0x1901", "0x1912")) and all("Data ID" in x for x in cruise["capture_recipe"]))
-check("P5 Data IDs are not mislabeled as direct UDS DIDs", all(x in cruise["diagnostic_transport_boundary"] for x in ("P5 diagnostic Data IDs", "not automatically UDS", "Techstream/GTS+", "0x22")))
+check("capture recipe is concrete and directly pollable", all(any(data_id in x for x in cruise["capture_recipe"]) for data_id in ("0x1905", "0x1906", "0x1914", "0x1901", "0x1912")) and all("UDS 22" in x and "require 62" in x for x in cruise["capture_recipe"]))
+check("P5 selected Data IDs are proved as direct UDS RDBI", all(x in cruise["diagnostic_transport_boundary"] for x in ("ordinary SID 0x22 ReadDataByIdentifier", "matching 0x62", "outer DiagnosticSessionControl", "not statically proved")))
 
 print("\n== documentation/status integration ==")
 doc = DOC.read_text() if DOC.exists() else ""

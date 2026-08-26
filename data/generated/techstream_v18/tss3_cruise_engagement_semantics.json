@@ -1,6 +1,6 @@
 {
   "frc_p5": {
-    "boundary": "These are exact Toyota P5 diagnostic monitor names, primary Data IDs, bit ranges, conversions, and display dictionaries. The Data IDs are not automatically UDS ReadDataByIdentifier DIDs; they define validation oracles for cruise/engagement semantics but do not identify the corresponding CAN wire fields or diagnostic transport service.",
+    "boundary": "These are exact Toyota P5 diagnostic monitor names, primary Data IDs, bit ranges, conversions, and display dictionaries. The DDB rows alone do not establish their live diagnostic transport. Separate current-GTS+ host evidence now proves the selected 0x1901/0x1905/0x1906/0x1912/0x1914 cruise Data IDs are issued as SID 0x22 ReadDataByIdentifier requests; CAN wire fields and any outer diagnostic-session prerequisite remain separate.",
     "database": "FRC_P5.ddb",
     "monitors": [
       {
