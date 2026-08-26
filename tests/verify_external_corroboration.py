@@ -167,6 +167,15 @@ def main() -> int:
         "does not yet establish the exact calculation" in optskug_readme,
     )
     check(
+        "optskug records vehicle-domain rekey propagation across SecOC parts",
+        "Instead of applying the existing key to the bumper, they replace the key on all parts of the car." in optskug_readme
+        and "The same goes for many other parts with SecOC components." in optskug_readme,
+    )
+    check(
+        "optskug records that every rekey operation changes the vehicle key",
+        "Every time a rekey operation is done the key changes." in optskug_readme,
+    )
+    check(
         "optskug records physical Toyota-B CAN0/CAN1 swap anomaly",
         "after physically swapping CAN 0 and CAN 1 at the harness, they were able to dump the firmware" in optskug_readme,
     )
@@ -1467,6 +1476,12 @@ def main() -> int:
         "Toyota controller signs three independent output streams",
         opendbc_toyota_controller.count("add_mac(self.secoc_key") == 3,
     )
+    check(
+        "one SecOCKey signs steering LKA, steering LTA, and secured longitudinal streams",
+        "steer_command = add_mac(self.secoc_key" in opendbc_toyota_controller
+        and "lta_steer_2 = add_mac(self.secoc_key" in opendbc_toyota_controller
+        and "acc_cmd_2 = add_mac(self.secoc_key" in opendbc_toyota_controller,
+    )
     for counter in (
         "secoc_lka_message_counter",
         "secoc_lta_message_counter",
@@ -1609,6 +1624,10 @@ def main() -> int:
         check(f"pinned legacy CAN 0x344 block contains PCS signal {signal}", signal in legacy_344)
 
     print("\n== pinned Vance 8965B4514000 field report ==")
+    check(
+        "Vance EPS-recovered candidate crosses steering and pre-collision protected domains",
+        all(token in vance_final for token in ("`226/226`", "`225/225`", "`112/113`", "0xff206e14")),
+    )
     for token, label in (
         ("8965b4514000", "application software ID"),
         ("0xff200000 - 0xff208000", "32 KiB DataFlash range"),

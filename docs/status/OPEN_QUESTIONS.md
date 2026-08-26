@@ -329,11 +329,13 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   analysis, then test it as a peer key-recovery target. OpenDBC's inherited
   `DS1`/`DSU` logical node is not physical-source proof; a gateway mirror must
   be excluded.
-- **OQ-016 — SecOC key uniqueness across vehicles/calibrations.** Collect hash-only
-  records with vehicle/sample pseudonym, software ID, region/build, validated
-  CAN IDs, match counts, and source. One `4514000` partner observation cannot
-  distinguish a per-vehicle key from calibration-, model-, region-, or
-  fleet-shared provisioning.
+- **OQ-016 — SecOC key uniqueness across vehicles/calibrations.** This question is
+  explicitly **cross-vehicle**: SECOC-076 closes the recoverable-family
+  intra-vehicle model as one operational SecOC key shared across participating
+  protected-message/ECU domains. Collect hash-only records with vehicle/sample
+  pseudonym, software ID, region/build, validated CAN IDs, match counts, and
+  source. One `4514000` partner observation cannot distinguish a per-vehicle key
+  from calibration-, model-, region-, or fleet-shared provisioning across cars.
 - **OQ-017 — Command-7 power/EM leakage.** FD IDs `0x090`/`0x0D7` provide 14 chosen bytes
   in CMAC's first AES block. Run fixed-vs-random leakage detection, establish a
   stable trigger, attempt CPA for key bytes 2..15, and complete the two fixed

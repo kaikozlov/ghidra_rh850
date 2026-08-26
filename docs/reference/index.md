@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 317 · Corrections: 117 · Open questions: 52 · Docs: 99 · Suites: 219
+Findings: 318 · Corrections: 117 · Open questions: 52 · Docs: 99 · Suites: 219
 
 ## Reading this index
 
@@ -216,6 +216,7 @@ Findings: 317 · Corrections: 117 · Open questions: 52 · Docs: 99 · Suites: 2
 | <a id="finding-secoc-072"></a>**SECOC-072** | [docs/variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_corolla_h_sienna_secoc_structural_comparison.py` | OQ-005 |
 | <a id="finding-secoc-073"></a>**SECOC-073** | [docs/variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) | [toyota-openpilot-porting-contract](../architecture/toyota-openpilot-porting-contract.md), [sender-implementation](../security/secoc/sender-implementation.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_corolla_hf_secoc_00f_freshness_bridge.py`, `tests/verify_corolla_hf_secoc_00f_freshness_bridge_external.py` | OQ-005 |
 | <a id="finding-secoc-075"></a>**SECOC-075** | [docs/variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) | — | `tests/verify_corolla_2023_albino_secoc_default_key_probe.py` | — |
+| <a id="finding-secoc-076"></a>**SECOC-076** | [docs/security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) | `tests/verify_external_corroboration.py`, `tests/verify_techstream_mackey.py` | OQ-016 |
 | <a id="finding-store-001"></a>**STORE-001** | [docs/storage/dataflash.md](../storage/dataflash.md) | — | `tests/verify_dataflash_layout.py` | — |
 | <a id="finding-store-002"></a>**STORE-002** | [docs/storage/dataflash.md](../storage/dataflash.md) | — | `tests/verify_dataflash_layout.py` | — |
 | <a id="finding-store-003"></a>**STORE-003** | [docs/storage/dataflash.md](../storage/dataflash.md) | — | `tests/verify_dataflash_semantics.py` | — |
@@ -356,7 +357,7 @@ Findings: 317 · Corrections: 117 · Open questions: 52 · Docs: 99 · Suites: 2
 | <a id="open-question-oq-013"></a>**OQ-013** | Command 13 vendor semantics | SecOC | SECOC-025 |
 | <a id="open-question-oq-014"></a>**OQ-014** | `8965B4514000` runtime object-15 key path | SecOC | — |
 | <a id="open-question-oq-015"></a>**OQ-015** | Same-vehicle `0x344` producer and key storage | SecOC | — |
-| <a id="open-question-oq-016"></a>**OQ-016** | SecOC key uniqueness across vehicles/calibrations | SecOC | — |
+| <a id="open-question-oq-016"></a>**OQ-016** | SecOC key uniqueness across vehicles/calibrations | SecOC | SECOC-076 |
 | <a id="open-question-oq-017"></a>**OQ-017** | Command-7 power/EM leakage | SecOC | — |
 | <a id="open-question-oq-018"></a>**OQ-018** | Physical power topology | SecOC | — |
 | <a id="open-question-oq-019"></a>**OQ-019** | Protected-tail serial read | SecOC | — |
