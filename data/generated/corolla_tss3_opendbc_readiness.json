@@ -63,6 +63,7 @@
     "sample_count": 5639
   },
   "highest_value_next_evidence": [
+    "On an isolated exact-H/F bench target, run the audited 332-byte inert carrier canary first and require FEBFFB80 heartbeat progression before exposing the 462-byte fixed-36-byte command-5 proxy; then test live slot-4 permission and latency without vehicle actuation.",
     "Capture an exact H/F-family vehicle with carFw/F181 preserved, the Toyota-B CAN0/CAN1 network physically repinned onto the CAN0/CAN2 relay pair, and all buses logged during stock LTA off->active->off, steering input, cruise main/engage, brake/gas and P/R/N/D transitions; simultaneously record 0x51E Ready and the exact FRC_P5 Data-ID oracles through Techstream/GTS+.",
     "Acquire matched category-435 07B0 Brake/EPB firmware and 0792 FRC_P5 firmware; join planner state -> upstream FD traffic -> protected B6 -> EPS response and signer/freshness ownership.",
     "Use that firmware-identified relay-correct capture to choose TSS3 CarState/Panda input buses, validate 0x127 gear enums, and recover the missing 0x1D3/0x399/0x260/0x262 roles before implementing production safety.",
@@ -80,7 +81,7 @@
     ],
     "blocks_production_lateral": [
       "Firmware-identified H/F-family capture with the Toyota-B CAN0/CAN1 network physically relay-correct and stock LTA exercised off -> active -> off.",
-      "B6 stock/minimal secondary-field cross-ECU validation, stock sender cadence/physical route, and a working slot-4 signing path: key or target-native H/F command-5 carrier with live selector-4 permission/latency.",
+      "B6 stock/minimal secondary-field cross-ECU validation, stock sender cadence/physical route, and a working slot-4 signing path: key or the audited 462-byte H/F command-5 proxy after the 332-byte inert carrier canary proves live retention and selector-4 permission/latency is measured.",
       "Stock-source suppression/interception point on Toyota-B topology.",
       "Conservative Panda/openpilot driver-override policy dynamic validation, Q-current actuator-response policy if desired, Ready/fault transition mapping, and final relay-correct actuator validation. No Toyota EPS physical-driver-torque comparator remains to recover under the promoted static census."
     ],
@@ -212,11 +213,11 @@
       "tss3_corolla_evidence": "All four IDs/8-byte shapes remain present. 0x614 decodes left/none and 0x620 parking brake toggles, but 0x610 old UNITS decodes value 7 outside its old 1..4 domain and many other fields are static."
     },
     {
-      "evidence": "exact H/F firmware + Techstream",
+      "evidence": "exact H/F firmware + Techstream + audited static H/F command-5 carrier",
       "older_toyota_contract": "Pre-TSS3 Corolla uses 0x2E4 torque; secure Sienna prior art provides 0x2E4/0x131 protected command examples",
-      "remaining_blocker": "Still required for production: validate the minimal/stock B6 secondary-field template and cross-ECU effects, obtain a slot-4 signing primitive/key (or finish the H/F command-5 runtime carrier), establish stock sender cadence/physical route, and suppress the stock source on the relay-correct topology. Receiver-valid replacement freshness and H/F-native numeric limits are no longer static blockers. The public 2023 route is not an exact H/F join. Span's moving rlog sees 0x00F/0x0D7 but no B6; B6 absence remains only a no-stock-LTA-transition segment-level negative.",
+      "remaining_blocker": "Still required for production: validate the minimal/stock B6 secondary-field template and cross-ECU effects, obtain a slot-4 signing primitive/key or live-validate the audited H/F command-5 carrier (inert canary first, then selector-4 permission/latency), establish stock sender cadence/physical route, and suppress the stock source on the relay-correct topology. Receiver-valid replacement freshness and H/F-native numeric limits are no longer static blockers. The public 2023 route is not an exact H/F join. Span's moving rlog sees 0x00F/0x0D7 but no B6; B6 absence remains only a no-stock-LTA-transition segment-level negative.",
       "role": "lateral command",
-      "status": "eps_receiver_and_replacement_freshness_closed_signer_runtime_open",
+      "status": "eps_receiver_replacement_freshness_and_static_carrier_closed_live_signer_open",
       "tss3_corolla_evidence": "Exact H/F replace them with protected FD 0x0B6: signal254 Target Lateral ID, signal255 signed target angle, signal261 modulo-64 sequence. Accepted active request IDs are {'1': 'PCS', '10': 'Hands Off LTA', '11': 'LTA/LCA', '19': 'PDA', '4': 'LDA'}; receiver loss cuts out after 7 foreground ticks / nominal 35 ms. An EPS-consumer minimal ID11 companion candidate and authenticated-0x00F replacement freshness state machine are now statically closed."
     },
     {
@@ -238,6 +239,62 @@
   ],
   "schema": "corolla-tss3-opendbc-readiness-v1",
   "specimen_boundaries": {
+    "command5_runtime_carrier": {
+      "boundary": {
+        "command5_latency_jitter_closed": false,
+        "interpretation": "Static H/F carrier geometry and executable fit are now closed enough to define a concrete live canary experiment. This is not proof that FEBF0000..01CF remains unmodified in a running ECU, that slot4 permits command5, or that signing meets B6 timing. Those remain dynamic gates.",
+        "live_retention_closed": false,
+        "live_slot4_permission_closed": false,
+        "production_b6_signer_closed": false,
+        "static_target_native_carrier_candidate_closed": true,
+        "vehicle_actuation_authorized": false,
+        "verified_variant_ram_exec_requirement_promoted": false
+      },
+      "canary": {
+        "binary": "exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin",
+        "entry_offset": 0,
+        "headroom": 132,
+        "heartbeat_address": "0xFEBFFB80",
+        "purpose": "validate boot-to-application handoff, scheduler ownership, executable retention, and observation-cell lifetime before any command-5 request",
+        "relocations": 0,
+        "sha256": "a32baf46dd8e0599021b5c174763887513b3ba903d40ebe284f19d31c97424f4",
+        "size": 332
+      },
+      "proxy": {
+        "binary": "exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin",
+        "busy_behavior": "shared-driver busy result 2 leaves request_state=1 so the next foreground iteration retries; no command-7 abort primitive is called",
+        "dispatcher": "0x00082750",
+        "done_flag": "0xFEBF1280",
+        "driver_record": 0,
+        "entry_offset": 0,
+        "headroom": 2,
+        "input_length": 36,
+        "key_selector": 4,
+        "relocations": 0,
+        "sha256": "9b9b055c65246bb4e25bc512753772bbe474c0ba5847ecb253e4147fd1db8dbf",
+        "size": 462,
+        "status_flag": "0xFEBF1281"
+      },
+      "static_candidate": {
+        "base": "0xFEBF0000",
+        "end_exclusive": "0xFEBF01D0",
+        "end_inclusive": "0xFEBF01CF",
+        "first_recovered_normalized_reference": "0xFEBF01D0",
+        "mpat_contexts": [
+          "0x000000B8",
+          "0x000000B8"
+        ],
+        "mpu_bounds": [
+          "0xFEBEF400",
+          "0xFEBF33FC"
+        ],
+        "mpu_region_index": 5,
+        "normalized_direct_reference_count_inside": 0,
+        "permissions": "supervisor-read-write-execute in both recovered application contexts; no user permissions",
+        "size": 464,
+        "static_negative_boundary": "This is a negative census of recovered direct references and simple GP-offset aliases only. Arbitrary computed aliases, DMA ownership and undocumented hardware writers are outside the static proof; live canary validation is required before treating the pocket as retained/free."
+      }
+    },
     "critical_warning": "Do not attribute exact H/F Tx/Rx state carriers to the public 2023 route: that route has no carFw, exposes 0x00F/0x0D7 but not B6 from H/F's three-PDU SecOC Rx set, and contains only 0x030 from H/F's five-PDU Tx set. It is not evidence of a complete exact-H/F EPS-bus mirror.",
     "exact_f": {
       "application_byte_identical_to_h": true,

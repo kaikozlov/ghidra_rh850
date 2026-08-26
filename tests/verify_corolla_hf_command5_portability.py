@@ -34,13 +34,13 @@ check('H/F application command5 path byte-identical',core['h_f_application_byte_
 rb=art['resident_runtime_boundary']
 check('Sienna resident geometry explicitly does not transfer',rb['sienna_single_stage_geometry_transfers'] is False and rb['h_f_verified_ram_exec_requirement_entry_present'] is False)
 check('H startup clear ranges exact',rb['h_startup_clear_ranges_inclusive']==[['0xFEBF05CC','0xFEBF09CB'],['0xFEBF0B4C','0xFEBF0F4B']])
-check('naive FEBF0000 Sienna proxy rejected', 'do not build or link the Sienna 546-byte proxy' in rb['interpretation'])
+check('naive FEBF0000 Sienna proxy rejected', 'does not authorize the Sienna 546-byte proxy' in rb['interpretation'] and 'TMS-054' in rb['interpretation'])
 two=art['two_stage_candidate']
-check('two-stage shadow idea remains hypothesis only',two['status']=='hypothesis-not-verified-carrier' and two['xcp_write_shadow_bounds']==['0xFEBF7C00','0xFEBFFBFF'] and 'does not prove' in two['interpretation'])
+check('TMS053 two-stage shadow idea retained as historical bounded hypothesis',two['status'].startswith('historical-tms053') and two['xcp_write_shadow_bounds']==['0xFEBF7C00','0xFEBFFBFF'] and 'TMS-054' in two['interpretation'] and 'Neither artifact proves' in two['interpretation'])
 con=art['static_conclusion']
 check('software machinery transfer closed',con['h_f_command5_software_machinery_transfers'] and con['b6_36_byte_input_supported'])
 check('resident signer and live policy remain open',not con['h_f_resident_signer_runtime_closed'] and not con['slot4_live_permission_closed'] and not con['signing_latency_closed'])
-check('evidence boundary rejects working-oracle overclaim','does not claim a working H/F' in art['evidence_boundary'])
+check('evidence boundary rejects working-oracle overclaim','working H/F' in art['evidence_boundary'] and 'still requires live carrier retention' in art['evidence_boundary'])
 with tempfile.TemporaryDirectory(prefix='hf-command5-port-') as td:
  out=Path(td)/'a.json'
  p=subprocess.run([sys.executable,str(BUILDER),'--out',str(out)],cwd=REPO,capture_output=True,text=True)

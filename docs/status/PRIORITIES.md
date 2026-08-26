@@ -303,48 +303,65 @@ captures justify them. Static/non-active engagement closure is machine-readable 
 
 ## P0 — highest information gain
 
-### 1. Live slot-4 command-5 permission
+### 1. Inert H/F carrier canary, then live slot-4 command-5 permission
 
-**Question:** does provisioned ICU-S slot 4 actually permit command 5 MAC
-generation in initialized application context?
+**Question:** does the exact-H/F target-native carrier actually survive the
+boot-to-application transition and normal foreground scheduling, and only after
+that, does provisioned ICU-S slot 4 permit command-5 MAC generation with usable
+latency?
 
-Why this matters: SECOC-070 removes the remaining software-call problem on the
-verified Sienna runtime. A 546-byte RAM-only application runtime invokes serialized
-command-5 driver record 0 with fixed selector 4 and caller-chosen `0..80` byte input,
-including the exact 7/12/36-byte SecOC domains. TMS-053 now proves the **software
-machinery** transfers structurally to Corolla H/F as well: H record0/dispatcher/
-prepare/lower-engine accepts the 36-byte B6 domain and the relevant application bytes
-are identical on F. But the verified Sienna resident-RAM **placement does not
-transfer**: H startup clears `FEBF05CC..FEBF09CB` and `FEBF0B4C..FEBF0F4B`, so H/F
-still needs a separately audited target-native carrier (the XCP shadow is only a
-hypothesis) before a command-5 signer can be called resident there. A positive hardware
-result would therefore validate the cryptographic permission assumption; it would not
-by itself validate H/F runtime placement.
+Why this matters: TMS-054 closes the remaining **static carrier-construction**
+problem without pretending it is a live result. Exact H has a 464-byte candidate
+pocket at `FEBF0000..FEBF01CF`: the first recovered normalized direct/simple-GP
+reference is exactly `FEBF01D0`, MPU region 5 covers the pocket with supervisor
+R/W/X (`0xB8`) in both recovered application contexts, and all listed
+startup/MPU/command-5 prerequisites transfer byte-for-byte to F. A fixed B6-only
+command-5 runtime links to **462 bytes** with entry zero / zero relocations, leaving
+only **2 bytes** headroom. A separate **332-byte** inert scheduler canary uses
+`FEBFFB80` as an observation heartbeat and never calls command 5. The corresponding
+60-byte signer mailbox `FEBFFB80..FEBFFBBB` is above H's startup shadow-copy end
+and has zero recovered normalized direct references under the same bounded census.
+Computed aliases, DMA/hardware ownership, and runtime lifetime remain outside that
+static proof, so `data/variant_ram_exec_requirements.json` intentionally still has
+no verified H/F entry.
+
+The live order is therefore fixed. First run the **inert H/F carrier canary** on
+an isolated, firmware-identified H/F target and require `FEBFFB80` heartbeat
+progression together with normal application health and reset-to-stock behavior.
+Do not expose the signer if the canary fails or its observation cell is unstable.
+Second, on a fresh isolated run, use the audited 462-byte fixed-36-byte proxy to
+test selector-4 command-5 permission against a known input. Third, require
+independent MAC agreement. Fourth, measure completion latency/jitter while normal
+command-7 verification traffic is present and show that the resulting sender
+schedule fits the B6 timing contract. None of these stages authorizes vehicle
+actuation.
 
 Ready now:
 
-- low-risk fixed-16 stock permission experiment under `exploit/command5/`;
-- deterministic 546-byte RAM proxy under `exploit/ephemeral_runtime/`;
-- variable-length XCP mailbox planner / guarded live client in
-  `exploit/command5/ram_proxy.py`;
-- clean driver record 0 completion path, fixed slot 4, and busy/defer arbitration;
-- exact 7/12/36-byte inputs once the RAM proxy and XCP route are live.
+- audited H/F inert canary:
+  `exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin`
+  (332 bytes, SHA-256 `a32baf46...97424f4`);
+- audited H/F fixed-B6 signer:
+  `exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin`
+  (462 bytes, SHA-256 `9b9b055c...1db8dbf`);
+- deterministic target-native builder with compiler-equivalence protection:
+  `exploit/ephemeral_runtime/build_corolla_hf_command5_carrier.py`;
+- static geometry/build contract:
+  `data/generated/corolla_hf_command5_runtime_carrier.json`;
+- low-risk fixed-16 stock permission experiment under `exploit/command5/` remains
+  useful as an independent policy control.
 
-Stage-1 positive criterion: current-run generated output changes from the
-pre-stimulus baseline under selector 4 / mode 1. A DTC-only negative does not
-separate command failure from expected-result mismatch. On a separate fresh
-boot, selector 4 / mode 0 is the expected-negative raw-AES policy control, but
-it needs its own result-source observer (`FEBE519A`; the command-5 observer points
-at `FEBE51AA`) or equivalent status instrumentation; the DTC alone is ambiguous.
-Only after stage 1 succeeds, the preferred exact-domain test is the RAM proxy
-with a known 12-byte classic authenticated input; compare its first 28 generated
-bits against an independently known classic SecOC tag. The older `0x68B8A`
-`16→12` CodeFlash adaptation remains a fallback experiment, not the preferred
-path.
+A DTC-only negative still does not separate command failure from expected-result
+mismatch. On a separate fresh boot, selector 4 / mode 0 is the expected-negative
+raw-AES policy control, but it needs its own result-source observer (`FEBE519A`;
+the command-5 observer points at `FEBE51AA`) or equivalent status instrumentation.
+The preferred positive exact-domain check is now the target-native proxy with a
+known 36-byte B6-domain input after canary success; 7/12-byte cross-checks remain
+useful for independently known SecOC vectors.
 
 Canonical:
+[../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) ·
 [../security/secoc/command5-oracle-assessment.md](../security/secoc/command5-oracle-assessment.md) ·
-[../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md) ·
 [../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md).
 
 ### 2. XCP physical reachability
@@ -528,9 +545,11 @@ the next epoch after sender restart; Toyota's B6-local counter-start policy is n
 Capture protected `0x0B6` during stock steering to validate **stock** sender wall-clock
 cadence, secondary-field dynamics where needed, and normal target/rate bounds—not to
 rediscover the receiver envelope, replacement freshness state machine, or verification
-logic. In parallel, recover signing ownership and the slot-4 key value or prove live
-command-5 permission plus a separately audited H/F runtime carrier (the Sienna resident
-RAM geometry does not transfer); receiver freshness extraction/window/retry/commit,
+logic. In parallel, recover signing ownership and the slot-4 key value or live-validate
+the audited TMS-054 H/F carrier path: 332-byte inert canary first, then the 462-byte
+fixed-B6 command-5 proxy for selector-4 permission and latency. The Sienna resident
+RAM geometry still does not transfer, and the H/F static pocket is not yet a verified
+`variant_ram_exec_requirements` entry; receiver freshness extraction/window/retry/commit,
 replacement message8 state, and key-slot selection are now closed. A category-435 CUW with
 `Node01/DiagID=07B0` plus the matched `FRC_P5` image is now the primary software
 target for the **remaining payload transform, sender cadence,

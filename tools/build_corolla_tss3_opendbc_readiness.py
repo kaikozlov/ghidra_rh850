@@ -31,6 +31,7 @@ B6 = REPO / "data/generated/corolla_8965H1202000_b6_receiver_contract.json"
 B6_SECOC = REPO / "data/generated/corolla_8965H1202000_b6_secoc_verification.json"
 LIMITS = REPO / "data/generated/corolla_hf_steering_limits.json"
 CMD5 = REPO / "data/generated/corolla_hf_command5_portability.json"
+CARRIER = REPO / "data/generated/corolla_hf_command5_runtime_carrier.json"
 H_RUNTIME = REPO / "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json"
 SPAN_ZIP = REPO / "community/spanconstant/spanconstant_tsk.zip"
 SPAN_MEMBER = "tsk/uds-sweep/ready_capture.ndjson"
@@ -143,10 +144,15 @@ def main() -> int:
     b6_secoc = json.loads(B6_SECOC.read_text())
     limits = json.loads(LIMITS.read_text())
     cmd5 = json.loads(CMD5.read_text())
+    carrier = json.loads(CARRIER.read_text())
     h_runtime = json.loads(H_RUNTIME.read_text())
     span = span_capture()
     span_rlog = json.loads(SPAN_RLOG.read_text())
     engagement = json.loads(ENGAGEMENT.read_text())
+    if carrier["schema"] != "corolla-hf-command5-runtime-carrier-v1" or not carrier["boundary"]["static_target_native_carrier_candidate_closed"]:
+        raise ValueError("H/F command5 carrier contract drift")
+    if carrier["boundary"]["live_retention_closed"] or carrier["boundary"]["live_slot4_permission_closed"]:
+        raise ValueError("static carrier artifact must not claim live closure")
     if engagement["schema"] != "corolla-hf-nonsteering-engagement-state-v1":
         raise ValueError("non-steering engagement contract schema drift")
     if not (engagement["ready_status"]["can_id"] == "0x51E" and engagement["ready_status"]["wire"] == "B0[7]"):
@@ -283,11 +289,11 @@ def main() -> int:
         ),
         row(
             "lateral command",
-            "eps_receiver_and_replacement_freshness_closed_signer_runtime_open",
+            "eps_receiver_replacement_freshness_and_static_carrier_closed_live_signer_open",
             "Pre-TSS3 Corolla uses 0x2E4 torque; secure Sienna prior art provides 0x2E4/0x131 protected command examples",
             f"Exact H/F replace them with protected FD 0x0B6: signal254 Target Lateral ID, signal255 signed target angle, signal261 modulo-64 sequence. Accepted active request IDs are {b6_request['accepted_active_requests']}; receiver loss cuts out after 7 foreground ticks / nominal 35 ms. An EPS-consumer minimal ID11 companion candidate and authenticated-0x00F replacement freshness state machine are now statically closed.",
-            "exact H/F firmware + Techstream",
-            "Still required for production: validate the minimal/stock B6 secondary-field template and cross-ECU effects, obtain a slot-4 signing primitive/key (or finish the H/F command-5 runtime carrier), establish stock sender cadence/physical route, and suppress the stock source on the relay-correct topology. Receiver-valid replacement freshness and H/F-native numeric limits are no longer static blockers. The public 2023 route is not an exact H/F join. Span's moving rlog sees 0x00F/0x0D7 but no B6; B6 absence remains only a no-stock-LTA-transition segment-level negative.",
+            "exact H/F firmware + Techstream + audited static H/F command-5 carrier",
+            "Still required for production: validate the minimal/stock B6 secondary-field template and cross-ECU effects, obtain a slot-4 signing primitive/key or live-validate the audited H/F command-5 carrier (inert canary first, then selector-4 permission/latency), establish stock sender cadence/physical route, and suppress the stock source on the relay-correct topology. Receiver-valid replacement freshness and H/F-native numeric limits are no longer static blockers. The public 2023 route is not an exact H/F join. Span's moving rlog sees 0x00F/0x0D7 but no B6; B6 absence remains only a no-stock-LTA-transition segment-level negative.",
         ),
         row(
             "radar / object state",
@@ -357,6 +363,12 @@ def main() -> int:
                 "harness_observation_boundary": span_rlog["harness_observation_boundary"],
                 "exact_h_f_visibility": span_rlog["exact_h_f_visibility"],
             },
+            "command5_runtime_carrier": {
+                "static_candidate": carrier["carrier_geometry"],
+                "canary": carrier["runtime_candidates"]["inert_canary"],
+                "proxy": carrier["runtime_candidates"]["fixed_b6_command5_proxy"],
+                "boundary": carrier["boundary"],
+            },
             "nonsteering_engagement_contract": {
                 "ready_status": engagement["ready_status"],
                 "gear": engagement["gear"],
@@ -389,7 +401,7 @@ def main() -> int:
             ],
             "blocks_production_lateral": [
                 "Firmware-identified H/F-family capture with the Toyota-B CAN0/CAN1 network physically relay-correct and stock LTA exercised off -> active -> off.",
-                "B6 stock/minimal secondary-field cross-ECU validation, stock sender cadence/physical route, and a working slot-4 signing path: key or target-native H/F command-5 carrier with live selector-4 permission/latency.",
+                "B6 stock/minimal secondary-field cross-ECU validation, stock sender cadence/physical route, and a working slot-4 signing path: key or the audited 462-byte H/F command-5 proxy after the 332-byte inert carrier canary proves live retention and selector-4 permission/latency is measured.",
                 "Stock-source suppression/interception point on Toyota-B topology.",
                 "Conservative Panda/openpilot driver-override policy dynamic validation, Q-current actuator-response policy if desired, Ready/fault transition mapping, and final relay-correct actuator validation. No Toyota EPS physical-driver-torque comparator remains to recover under the promoted static census.",
             ],
@@ -407,6 +419,7 @@ def main() -> int:
             ],
         },
         "highest_value_next_evidence": [
+            "On an isolated exact-H/F bench target, run the audited 332-byte inert carrier canary first and require FEBFFB80 heartbeat progression before exposing the 462-byte fixed-36-byte command-5 proxy; then test live slot-4 permission and latency without vehicle actuation.",
             "Capture an exact H/F-family vehicle with carFw/F181 preserved, the Toyota-B CAN0/CAN1 network physically repinned onto the CAN0/CAN2 relay pair, and all buses logged during stock LTA off->active->off, steering input, cruise main/engage, brake/gas and P/R/N/D transitions; simultaneously record 0x51E Ready and the exact FRC_P5 Data-ID oracles through Techstream/GTS+.",
             "Acquire matched category-435 07B0 Brake/EPB firmware and 0792 FRC_P5 firmware; join planner state -> upstream FD traffic -> protected B6 -> EPS response and signer/freshness ownership.",
             "Use that firmware-identified relay-correct capture to choose TSS3 CarState/Panda input buses, validate 0x127 gear enums, and recover the missing 0x1D3/0x399/0x260/0x262 roles before implementing production safety.",

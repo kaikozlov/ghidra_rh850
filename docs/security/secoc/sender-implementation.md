@@ -365,6 +365,34 @@ live client. It fixes record 0 and selector 4, defaults to the configured
 authenticated-domain lengths `7/12/36`, and uses existing XCP SET_MTA/DOWNLOAD
 and SHORT_UPLOAD rather than inventing a new CAN protocol.
 
+#### Corolla H/F target-native carrier candidate
+
+The Sienna 546-byte runtime and its verified 776-byte retention interval are
+**not** a portable address contract. Exact Corolla H/F startup clears parts of
+that page. TMS-054 therefore builds a separate target-native static carrier
+candidate instead of reusing the Sienna manifest: `FEBF0000..FEBF01CF` is a
+464-byte lower-page interval with zero recovered absolute/simple-GP references,
+and exact H MPU region 5 gives it supervisor R/W/X (`MPAT=0xB8`) in both
+recovered application contexts. The first recovered normalized reference is
+exactly `FEBF01D0`. Relevant startup/MPU/command-5 bytes transfer exactly to F.
+
+The H/F executable pair is deliberately split. The inert canary is **332 bytes**
+and only advances heartbeat `FEBFFB80`; the fixed-B6 command-5 proxy is
+**462 bytes**, leaves **2 bytes** headroom, fixes input length to 36 bytes, and
+uses H/F dispatcher `0x82750`, record 0, selector 4, and completion cells
+`FEBF1280/FEBF1281`. Both are entry-zero and relocation-free. The 60-byte H/F
+mailbox `FEBFFB80..FEBFFBBB` is above the startup shadow-copy end and has zero
+recovered normalized direct references under the same bounded census.
+
+This is still **not verified RAM geometry**. The negative census does not exclude
+computed aliases, DMA/hardware writers, or live lifetime conflicts, so H/F remain
+absent from `data/variant_ram_exec_requirements.json` and the Sienna
+`live_installer.py` is not generalized by this finding. Hardware validation must
+run the 332-byte canary first and prove heartbeat progression/application health
+before exposing the 462-byte proxy; live slot-4 permission, independent CMAC
+agreement, and signing latency/jitter then remain separate gates. Machine-readable
+contract: `data/generated/corolla_hf_command5_runtime_carrier.json`.
+
 ### 5.4 Freshness state for `0x2E4` and `0x131`
 
 A stateful proxy cannot sign arbitrary payloads with a stateless CMAC call. It
@@ -425,10 +453,10 @@ timeout cases.
 
 ### Evidence boundary
 
-The addresses, call shapes, scheduler placement, arbitration, and existing Tx
-route are firmware-static. Slot-4 command-5 permission, timing, actual vehicle
-freshness cadence, and safe production use of any Tx route are not established
-statically.
+The Sienna addresses/call shapes/scheduler placement and the H/F TMS-054 static
+carrier geometry/build fit are firmware-static. H/F carrier **live retention**,
+slot-4 command-5 permission, timing, actual vehicle freshness cadence, and safe
+production use of any Tx route are not established statically.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

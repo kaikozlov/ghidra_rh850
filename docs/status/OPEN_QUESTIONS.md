@@ -349,36 +349,40 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   public P1M-E fault injection proves ordinary flash readout, not key-array
   access.
 - **OQ-020 — Bank-0 command-8 production role and safe dynamic confirmation (SECOC-047/048).** Static firmware closes the CAN `0x13..0x1A` assembly and completion-misattribution mechanics. What remains useful is dynamic provenance, not random stimulation: determine whether RID `0x100E`/those CAN IDs occur during legitimate provisioning, whether any external monitor exposes bank-0 terminal state, and whether dealer tooling treats RID `0x1010` status `02` with zero proof as success. Reproduce the race only on a disposable/matching unit with a legitimately captured authenticated update package and complete recovery plan; preserve F181, route, M1–M5 hashes, timing, DTCs, and post-run key state. Do not synthesize command-8 packages on the only original ECU.
-- **OQ-021 — Application command-5 signing capability — only hardware permission/timing remain dynamic.**
+- **OQ-021 — Application command-5 signing capability — static H/F carrier candidate closed; live retention/permission/timing remain dynamic.**
   Stock RoutineControl `31 01 10 0F` still supplies a fixed-16 diagnostic test,
-  but SECOC-070 closes the alternate-caller problem: a 546-byte RAM-only runtime
-  now invokes serialized dispatcher `0x88350` through clean driver record 0 with
-  fixed selector 4 and caller-chosen `0..80` byte length. Its `FEBFFB80..FEBFFBFF`
-  mailbox is reachable through the existing no-application-SA XCP read/write
-  path; record-0 completion publishes the generated result without the stock
-  diagnostic 16-byte comparer. Installation still requires the already-solved
-  authenticated bootloader-RAM/MEM-SAFE-001 foothold, but no persistent CodeFlash
-  hook or per-request application SecurityAccess is needed. The remaining
-  command-5 questions are therefore genuinely dynamic: does live provisioned
-  slot 4 accept command 5, what latency/jitter does it have under real command-7
-  verification load, and do 7/12/36-byte results match independently known
-  CMACs? The runtime retries shared-driver busy rather than aborting command 7.
-  Sender freshness remains a separate protocol-state requirement. For H/F Corolla,
-  TMS-053 narrows this further: exact H record0/dispatcher/prepare/engine machinery
-  is structurally sufficient for caller-selected 36-byte command-5 input and is
-  byte-identical on F, but the **Sienna resident runtime placement is not portable**.
-  H startup `0x6149A` clears `FEBF05CC..FEBF09CB` and
-  `FEBF0B4C..FEBF0F4B`, and lower-page H structures already occupy the region used
-  by the Sienna single-stage proxy. Therefore no H/F
-  `data/variant_ram_exec_requirements.json` verified entry exists yet; a target-native
-  H/F carrier (the recovered XCP shadow is only a two-stage hypothesis) must be
-  audited separately if command 5 is used. The older stock-bank stimulus remains
-  useful as a low-risk permission/control experiment, while `command5/ram_proxy.py`
-  is the Sienna variable-length planner / guarded live client after its verified RAM
-  runtime is installed. Production H/F Tx integration still requires live slot4
-  permission plus that target-native carrier or another approved MAC path.
+  and SECOC-070 closes the generic alternate-caller problem on Sienna with the
+  546-byte variable-length proxy. TMS-053 then proved that exact H/F record0 /
+  dispatcher / prepare / lower-engine software accepts the 36-byte B6 domain but
+  that Sienna's full retained-page geometry cannot be copied. TMS-054 now closes
+  the next static step: exact H has a **464-byte** candidate carrier at
+  `FEBF0000..FEBF01CF`, the first recovered normalized direct/simple-GP reference
+  is exactly `FEBF01D0`, and MPU region 5 (`FEBEF400..FEBF33FC`) assigns
+  supervisor R/W/X `0xB8` in both recovered application contexts. The relevant
+  startup/MPU/command-5 ranges are byte-identical on F. A separate
+  `FEBFFB80..FEBFFBBB` 60-byte mailbox/observation window has zero recovered
+  normalized direct references and begins above the startup shadow-copy end.
+
+  Two target-native executables are now audited: a **332-byte** inert canary and
+  a **462-byte** fixed-36-byte command-5 proxy, both entry-zero and relocation-
+  free. The proxy leaves only **2 bytes** of carrier headroom, uses H/F dispatcher
+  `0x82750`, record 0, selector 4, and completion cells `FEBF1280/FEBF1281`, and
+  retries shared-driver busy without aborting command 7. The canary never invokes
+  command 5 and exposes heartbeat at `FEBFFB80`.
+
+  The remaining questions are now strictly dynamic. First prove **live retention**
+  and scheduler health with the inert canary, including heartbeat progression and
+  reset-to-stock behavior. Only then test whether the provisioned slot 4 accepts
+  command 5, whether 7/12/36-byte outputs agree with independent CMAC vectors,
+  and what completion latency/jitter looks like under ordinary command-7
+  verification load. `data/variant_ram_exec_requirements.json` deliberately still
+  has no verified H/F row because the static reference census cannot exclude
+  arbitrary computed aliases, DMA/hardware writers, or live lifetime conflicts.
+  The existing Sienna `live_installer.py` is therefore not silently generalized
+  to H/F. Production H/F B6 Tx still requires those dynamic results or another
+  approved MAC path, plus the separately tracked stock-sender/suppression work.
   See
-  [../security/secoc/command5-oracle-assessment.md](../security/secoc/command5-oracle-assessment.md) and
+  [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) and
   [../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md) §5.
 - **OQ-022 — Object-15 producer.** No static producer exists in this calibration.
   Where a provisioned unit writes object 15 from is unknown (dealer tool path

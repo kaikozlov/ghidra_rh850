@@ -1,0 +1,641 @@
+{
+  "application_mpu": {
+    "bounds_table": "0x0002D1E4",
+    "carrier_permission_conclusion": "Region 5 is supervisor read/write/execute (MPAT 0xB8) in both recovered H application MPU contexts and has no user permissions.",
+    "carrier_region": {
+      "ctx0_mpat": "0x000000B8",
+      "ctx0_permissions": {
+        "supervisor_execute": true,
+        "supervisor_read": true,
+        "supervisor_write": true,
+        "user_execute": false,
+        "user_read": false,
+        "user_write": false
+      },
+      "ctx1_mpat": "0x000000B8",
+      "ctx1_permissions": {
+        "supervisor_execute": true,
+        "supervisor_read": true,
+        "supervisor_write": true,
+        "user_execute": false,
+        "user_read": false,
+        "user_write": false
+      },
+      "index": 5,
+      "lower": "0xFEBEF400",
+      "upper_inclusive": "0xFEBF33FC"
+    },
+    "carrier_region_index": 5,
+    "ctx0_attr_table": "0x0002D264",
+    "ctx1_attr_table": "0x0002D2A4",
+    "loader_entry": "0x0005EB14",
+    "mpat_bit_semantics": {
+      "bit0": "UR",
+      "bit1": "UW",
+      "bit2": "UX",
+      "bit3": "SR",
+      "bit4": "SW",
+      "bit5": "SX"
+    },
+    "regions": [
+      {
+        "ctx0_mpat": "0x000000B8",
+        "ctx0_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": true,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x000000B8",
+        "ctx1_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": true,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 0,
+        "lower": "0x00000000",
+        "upper_inclusive": "0xFEBDFFFC"
+      },
+      {
+        "ctx0_mpat": "0x000000B8",
+        "ctx0_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": true,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x000000A8",
+        "ctx1_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 1,
+        "lower": "0xFEBF7C00",
+        "upper_inclusive": "0xFEBFFBFC"
+      },
+      {
+        "ctx0_mpat": "0x000000B8",
+        "ctx0_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": true,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x000000A8",
+        "ctx1_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 2,
+        "lower": "0xFEBE0000",
+        "upper_inclusive": "0xFEBE1FFC"
+      },
+      {
+        "ctx0_mpat": "0x000000B8",
+        "ctx0_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": true,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x000000B8",
+        "ctx1_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": true,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 3,
+        "lower": "0xFEBE2000",
+        "upper_inclusive": "0xFEBE37FC"
+      },
+      {
+        "ctx0_mpat": "0x000000B8",
+        "ctx0_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": true,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x000000A8",
+        "ctx1_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 4,
+        "lower": "0xFEBE3800",
+        "upper_inclusive": "0xFEBEF3FC"
+      },
+      {
+        "ctx0_mpat": "0x000000B8",
+        "ctx0_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": true,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x000000B8",
+        "ctx1_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": true,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 5,
+        "lower": "0xFEBEF400",
+        "upper_inclusive": "0xFEBF33FC"
+      },
+      {
+        "ctx0_mpat": "0x000000A8",
+        "ctx0_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x000000A8",
+        "ctx1_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 6,
+        "lower": "0xFEBF3400",
+        "upper_inclusive": "0xFEBF37FC"
+      },
+      {
+        "ctx0_mpat": "0x000000B8",
+        "ctx0_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": true,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x000000A8",
+        "ctx1_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 7,
+        "lower": "0xFEBF3800",
+        "upper_inclusive": "0xFEBF5FFC"
+      },
+      {
+        "ctx0_mpat": "0x000000B8",
+        "ctx0_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": true,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x000000B8",
+        "ctx1_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": true,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 8,
+        "lower": "0xFEBF6000",
+        "upper_inclusive": "0xFEBF7BFC"
+      },
+      {
+        "ctx0_mpat": "0x00000040",
+        "ctx0_permissions": {
+          "supervisor_execute": false,
+          "supervisor_read": false,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x00000040",
+        "ctx1_permissions": {
+          "supervisor_execute": false,
+          "supervisor_read": false,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 9,
+        "lower": "0x00000000",
+        "upper_inclusive": "0x00000000"
+      },
+      {
+        "ctx0_mpat": "0x00000040",
+        "ctx0_permissions": {
+          "supervisor_execute": false,
+          "supervisor_read": false,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x00000040",
+        "ctx1_permissions": {
+          "supervisor_execute": false,
+          "supervisor_read": false,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 10,
+        "lower": "0x00000000",
+        "upper_inclusive": "0x00000000"
+      },
+      {
+        "ctx0_mpat": "0x000000B8",
+        "ctx0_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": true,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x000000A8",
+        "ctx1_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 11,
+        "lower": "0xFEBFFC00",
+        "upper_inclusive": "0xFEBFFFFC"
+      },
+      {
+        "ctx0_mpat": "0x000000B8",
+        "ctx0_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": true,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x000000B8",
+        "ctx1_permissions": {
+          "supervisor_execute": true,
+          "supervisor_read": true,
+          "supervisor_write": true,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 12,
+        "lower": "0xFEC00000",
+        "upper_inclusive": "0xFFFFFFFC"
+      },
+      {
+        "ctx0_mpat": "0x00000040",
+        "ctx0_permissions": {
+          "supervisor_execute": false,
+          "supervisor_read": false,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x00000040",
+        "ctx1_permissions": {
+          "supervisor_execute": false,
+          "supervisor_read": false,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 13,
+        "lower": "0x00000000",
+        "upper_inclusive": "0x00000000"
+      },
+      {
+        "ctx0_mpat": "0x00000040",
+        "ctx0_permissions": {
+          "supervisor_execute": false,
+          "supervisor_read": false,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x00000040",
+        "ctx1_permissions": {
+          "supervisor_execute": false,
+          "supervisor_read": false,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 14,
+        "lower": "0x00000000",
+        "upper_inclusive": "0x00000000"
+      },
+      {
+        "ctx0_mpat": "0x00000040",
+        "ctx0_permissions": {
+          "supervisor_execute": false,
+          "supervisor_read": false,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "ctx1_mpat": "0x00000040",
+        "ctx1_permissions": {
+          "supervisor_execute": false,
+          "supervisor_read": false,
+          "supervisor_write": false,
+          "user_execute": false,
+          "user_read": false,
+          "user_write": false
+        },
+        "index": 15,
+        "lower": "0x00000000",
+        "upper_inclusive": "0x00000000"
+      }
+    ]
+  },
+  "carrier_candidate": {
+    "end_exclusive": "0xFEBF01D0",
+    "end_inclusive": "0xFEBF01CF",
+    "first_normalized_direct_reference": "0xFEBF01D0",
+    "normalization": {
+      "application_gp": "0xFEBEB800",
+      "boundary": "This is a negative census of recovered direct references and simple GP-offset aliases only. Arbitrary computed aliases, DMA ownership and undocumented hardware writers are outside the static proof; live canary validation is required before treating the pocket as retained/free.",
+      "covered_forms": [
+        "absolute FEBFxxxx references",
+        "simple GP offsets 0x4800..0x57FF"
+      ]
+    },
+    "normalized_direct_reference_count_inside": 0,
+    "size": 464,
+    "start": "0xFEBF0000"
+  },
+  "generator": {
+    "path": "tools/extract_corolla_hf_command5_runtime_carrier_evidence.py",
+    "sha256": "c8ecdbe22520fc375889e4cbb3653b2252f71810b098dd5cae9134175148e1ab"
+  },
+  "h_f_exact_transfer": {
+    "all_ranges_byte_equal": true,
+    "boundary": "Only the listed H/F code/data ranges are transferred by exact byte equality. This does not assert whole-image identity or live RAM-state identity.",
+    "ranges": [
+      {
+        "byte_equal": true,
+        "f_sha256": "00ac0477dccb677f06f494f01cd749f5938fd564980110541c05250968edae6d",
+        "h_sha256": "00ac0477dccb677f06f494f01cd749f5938fd564980110541c05250968edae6d",
+        "name": "application_cpu_context_init",
+        "size": 44,
+        "start": "0x0006A8C4"
+      },
+      {
+        "byte_equal": true,
+        "f_sha256": "783e8a3519e75cacffae2489a5e42e1a69cf05a989d2aeb3a3af3352f591dbf9",
+        "h_sha256": "783e8a3519e75cacffae2489a5e42e1a69cf05a989d2aeb3a3af3352f591dbf9",
+        "name": "startup_coordinator",
+        "size": 98,
+        "start": "0x0005CAAC"
+      },
+      {
+        "byte_equal": true,
+        "f_sha256": "8523abe266d3ab1bff71e143f600a76a4e60b922b8332157ccc7c174e20cb156",
+        "h_sha256": "8523abe266d3ab1bff71e143f600a76a4e60b922b8332157ccc7c174e20cb156",
+        "name": "foreground_scheduler",
+        "size": 92,
+        "start": "0x0005F30C"
+      },
+      {
+        "byte_equal": true,
+        "f_sha256": "98a9e52cc6a83062071b53786190625b46d8bcf68aa15549adeda2a009565dc7",
+        "h_sha256": "98a9e52cc6a83062071b53786190625b46d8bcf68aa15549adeda2a009565dc7",
+        "name": "application_mpu_loader",
+        "size": 244,
+        "start": "0x0005EB14"
+      },
+      {
+        "byte_equal": true,
+        "f_sha256": "41f9ab0cf792bb169d4a5e59f0317a27b47d223f2478959790c085e5c6587142",
+        "h_sha256": "41f9ab0cf792bb169d4a5e59f0317a27b47d223f2478959790c085e5c6587142",
+        "name": "application_mpu_tables",
+        "size": 256,
+        "start": "0x0002D1E4"
+      },
+      {
+        "byte_equal": true,
+        "f_sha256": "6c6750e291f7f47140718c2e2c7eeef7e14baea66a89840fce9893376f2f1268",
+        "h_sha256": "6c6750e291f7f47140718c2e2c7eeef7e14baea66a89840fce9893376f2f1268",
+        "name": "localram_initializer",
+        "size": 222,
+        "start": "0x0006149A"
+      },
+      {
+        "byte_equal": true,
+        "f_sha256": "05fb1fdaa3736e90c215c1eeaf6af37651d34115b097cf8d2e099e4d94deacc1",
+        "h_sha256": "05fb1fdaa3736e90c215c1eeaf6af37651d34115b097cf8d2e099e4d94deacc1",
+        "name": "command5_dispatcher",
+        "size": 150,
+        "start": "0x00082750"
+      },
+      {
+        "byte_equal": true,
+        "f_sha256": "ca20f0aea7bf714c260e82df6720e13b41c7898f77ff5acbdd50d57d34fa7a51",
+        "h_sha256": "ca20f0aea7bf714c260e82df6720e13b41c7898f77ff5acbdd50d57d34fa7a51",
+        "name": "command5_variable_length_prepare",
+        "size": 178,
+        "start": "0x00081E94"
+      }
+    ]
+  },
+  "schema": "corolla-hf-command5-runtime-carrier-evidence-v1",
+  "schema_version": 1,
+  "selected_functions": [
+    {
+      "body_sha256": "00ac0477dccb677f06f494f01cd749f5938fd564980110541c05250968edae6d",
+      "body_size": 44,
+      "data_reference_count": 0,
+      "decompiled_c_sha256": "54f7cf9387bb60b9ab0f124d8cd4d64759929b3200c986c0717b17c07531a602",
+      "entry": "0x0006A8C4",
+      "h_f_body_equal": true,
+      "role": "application_cpu_context_init"
+    },
+    {
+      "body_sha256": "783e8a3519e75cacffae2489a5e42e1a69cf05a989d2aeb3a3af3352f591dbf9",
+      "body_size": 98,
+      "data_reference_count": 0,
+      "decompiled_c_sha256": "8209777d5d24b4598db6cc4460035240955afb07d2d94ed2755f1297db00d474",
+      "entry": "0x0005CAAC",
+      "h_f_body_equal": true,
+      "role": "startup_coordinator"
+    },
+    {
+      "body_sha256": "8523abe266d3ab1bff71e143f600a76a4e60b922b8332157ccc7c174e20cb156",
+      "body_size": 92,
+      "data_reference_count": 3,
+      "decompiled_c_sha256": "e87e0ba79239cf1d0adc14cab6ae0503777140dfc1d7cf9446bcb5df6151dc8d",
+      "entry": "0x0005F30C",
+      "h_f_body_equal": true,
+      "role": "foreground_scheduler"
+    },
+    {
+      "body_sha256": "98a9e52cc6a83062071b53786190625b46d8bcf68aa15549adeda2a009565dc7",
+      "body_size": 244,
+      "data_reference_count": 34,
+      "decompiled_c_sha256": "5a74b7ef75be4eb844cf1fa6a9373520673b3fcb4bfec6b59862b0fa494deb56",
+      "entry": "0x0005EB14",
+      "h_f_body_equal": true,
+      "role": "application_mpu_loader"
+    },
+    {
+      "body_sha256": "924d059854fa8d5dbb9828ab878020f9f134a1cff52285dbf63ef2d3f1a849b4",
+      "body_size": 32,
+      "data_reference_count": 0,
+      "decompiled_c_sha256": "1067c82b6551c0e5aa1c63ebffe1be905c5cfae3eecf97ef9490bc1931fff637",
+      "entry": "0x0005C586",
+      "h_f_body_equal": true,
+      "role": "application_mpu_startup_caller"
+    },
+    {
+      "body_sha256": "6c6750e291f7f47140718c2e2c7eeef7e14baea66a89840fce9893376f2f1268",
+      "body_size": 222,
+      "data_reference_count": 23,
+      "decompiled_c_sha256": "2f23014f02827015d19999ebdcdb906d268f82110f66676e33cd95c6c5f29be9",
+      "entry": "0x0006149A",
+      "h_f_body_equal": true,
+      "role": "localram_initializer"
+    },
+    {
+      "body_sha256": "64addaa64d2f21560f074665eee0c7665249b3e171d97249146aeca603e19809",
+      "body_size": 134,
+      "data_reference_count": 16,
+      "decompiled_c_sha256": "ec88c95e67bbd72065db62b767b745c593d38bed6c8147528e1d0df4fe44979f",
+      "entry": "0x00060562",
+      "h_f_body_equal": true,
+      "role": "first_live_pocket_neighbor_consumer"
+    },
+    {
+      "body_sha256": "05fb1fdaa3736e90c215c1eeaf6af37651d34115b097cf8d2e099e4d94deacc1",
+      "body_size": 150,
+      "data_reference_count": 0,
+      "decompiled_c_sha256": "74df02aaed11b33d541735569a6d8218ef541572de3f6f26d9144ffced0156b6",
+      "entry": "0x00082750",
+      "h_f_body_equal": true,
+      "role": "command5_dispatcher"
+    },
+    {
+      "body_sha256": "ca20f0aea7bf714c260e82df6720e13b41c7898f77ff5acbdd50d57d34fa7a51",
+      "body_size": 178,
+      "data_reference_count": 9,
+      "decompiled_c_sha256": "b751923a79e369e04884ce2bef7b6af16e584a50910389c44697c85da052debe",
+      "entry": "0x00081E94",
+      "h_f_body_equal": true,
+      "role": "command5_variable_length_prepare"
+    }
+  ],
+  "sources": {
+    "f_normalized_first_mib": {
+      "normalization": "first 1 MiB of 2-MiB range dump; upper half is not used as H/F code-equality evidence",
+      "sha256": "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6",
+      "size": 1048576
+    },
+    "f_source_range_dump": {
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+      "sha256": "b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d",
+      "size": 2097152
+    },
+    "h_corrected_decompiler_corpus": {
+      "path": "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
+      "sha256": "c3411eec57b9d55c004b0b0f328394bb152577c3398084dccc729dab5da54656"
+    },
+    "h_normalized_codeflash": {
+      "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+      "size": 1048576
+    }
+  },
+  "startup_scheduler_contract": {
+    "application_context_init": "0x0006A8C4",
+    "foreground_scheduler": "0x0005F30C",
+    "foreground_tick_counter": "0xFEBE38EF",
+    "startup_coordinator": "0x0005CAAC",
+    "startup_final_init": "0x000694FA",
+    "startup_jarl_after": "0x0005CAFC",
+    "startup_jarl_count": 18,
+    "startup_jarl_first": "0x0005CAB4"
+  },
+  "static_conclusion": {
+    "carrier_candidate_size": 464,
+    "carrier_retention_live_verified": false,
+    "carrier_supervisor_rwx_both_contexts": true,
+    "carrier_zero_normalized_direct_refs": true,
+    "h_f_prerequisites_transfer_byte_exact": true,
+    "live_canary_required": true,
+    "mailbox_zero_normalized_direct_refs": true,
+    "target_native_carrier_candidate_identified": true,
+    "vehicle_actuation_authorized": false
+  },
+  "title": "Corolla H/F target-native command-5 runtime carrier static evidence",
+  "xcp_mailbox_candidate": {
+    "boundary": "Zero recovered normalized direct references does not prove the mailbox is free of computed/DMA ownership; it is a staging/observation candidate for isolated live validation.",
+    "end_exclusive": "0xFEBFFBBC",
+    "normalized_direct_reference_count_inside": 0,
+    "size": 60,
+    "start": "0xFEBFFB80",
+    "startup_shadow_copy_end_inclusive": "0xFEBFF9EF",
+    "xcp_shadow_write_window": [
+      "0xFEBF7C00",
+      "0xFEBFFBFF"
+    ]
+  }
+}

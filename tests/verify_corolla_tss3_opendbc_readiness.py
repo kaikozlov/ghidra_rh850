@@ -81,7 +81,7 @@ check("fault readiness role carries exact new closures", all(x in roles["EPS rea
 check("old 0x262 fault enums stay nonportable", "Old numeric fault enums" in roles["EPS readiness / steering faults"]["remaining_blocker"])
 check("gear reuse is bounded to raw3 plus prior-art-D compatibility", all(x in roles["gear"]["tss3_corolla_evidence"] for x in ("3,662", "checksum", "raw value 3", "prior-art GEAR enum", "MOCK", "does not consume the legacy B5[3:0]")) and all(x in roles["gear"]["remaining_blocker"] for x in ("independent gear-state oracle", "P/R/N/B", "exact target")))
 check("cruise role has exact P5 Data-ID oracles but no CAN join", all(x in roles["cruise availability / set speed / ACC faults / follow distance"]["tss3_corolla_evidence"] for x in ("0x1905", "0x1906", "0x1914", "0x1901", "0x1912", "not automatically direct UDS RDBI DIDs")) and "Techstream/GTS+" in roles["cruise availability / set speed / ACC faults / follow distance"]["remaining_blocker"])
-check("lateral receiver/replacement freshness closed while signer/topology remain open", roles["lateral command"]["status"] == "eps_receiver_and_replacement_freshness_closed_signer_runtime_open" and all(x in roles["lateral command"]["tss3_corolla_evidence"] for x in ("35 ms", "minimal ID11", "replacement freshness")) and all(x in roles["lateral command"]["remaining_blocker"] for x in ("slot-4 signing", "command-5 runtime carrier", "stock sender cadence", "stock source")))
+check("lateral receiver/replacement freshness closed while signer/topology remain open", roles["lateral command"]["status"] == "eps_receiver_replacement_freshness_and_static_carrier_closed_live_signer_open" and all(x in roles["lateral command"]["tss3_corolla_evidence"] for x in ("35 ms", "minimal ID11", "replacement freshness")) and all(x in roles["lateral command"]["remaining_blocker"] for x in ("slot-4 signing", "live-validate", "inert canary", "stock sender cadence", "stock source")))
 
 print("\n== cross-year TSS3 FD network ==")
 fd = ART["tss3_fd_network"]
@@ -113,9 +113,12 @@ check("missing physical repin limits suppression, not passive visibility", all(x
 impl = ART["implementation_readiness"]
 check("TSS3 scaffold requires separate control-generation axis", any("TSS3 control-generation axis" in x and "SECOC" in x for x in impl["can_scaffold_now"]))
 check("production lateral requires firmware identity plus relay-correct LTA transition", any(all(tok in x for tok in ("Firmware-identified", "physically relay-correct", "LTA", "off -> active -> off")) for x in impl["blocks_production_lateral"]))
-check("production lateral now blocks on signer/runtime and policy validation, not receiver freshness/OEM torque recovery", any("slot-4 signing path" in x and "command-5 carrier" in x for x in impl["blocks_production_lateral"]) and any("No Toyota EPS physical-driver-torque comparator remains" in x for x in impl["blocks_production_lateral"]))
+check("production lateral now blocks on signer/runtime and policy validation, not receiver freshness/OEM torque recovery", any("slot-4 signing path" in x and "462-byte" in x and "332-byte" in x for x in impl["blocks_production_lateral"]) and any("No Toyota EPS physical-driver-torque comparator remains" in x for x in impl["blocks_production_lateral"]))
 check("normal CarState blocker narrows gear to enum transitions", any("P/R/N/B" in x and "0x127" in x for x in impl["blocks_normal_carstate"]) and any("Cruise CAN-field mapping" in x and "FRC_P5 Data-ID" in x for x in impl["blocks_normal_carstate"]))
 check("read-only scaffold can expose Ready without inventing policy", any("0x51E B0[7]" in x and "read-only observation" in x for x in impl["can_scaffold_now"]))
+
+check("readiness carries static H/F carrier candidate without live overclaim", ART["specimen_boundaries"]["command5_runtime_carrier"]["static_candidate"]["size"] == 464 and ART["specimen_boundaries"]["command5_runtime_carrier"]["proxy"]["size"] == 462 and ART["specimen_boundaries"]["command5_runtime_carrier"]["canary"]["size"] == 332 and not ART["specimen_boundaries"]["command5_runtime_carrier"]["boundary"]["live_retention_closed"])
+check("highest-value evidence starts with inert H/F canary", "332-byte inert carrier canary" in ART["highest_value_next_evidence"][0] and "FEBFFB80" in ART["highest_value_next_evidence"][0] and "without vehicle actuation" in ART["highest_value_next_evidence"][0])
 check("radar requires new FD semantics", any("0x123/16" in x for x in impl["blocks_radar"]))
 check("longitudinal remains OQ-052", any("OQ-052" in x for x in impl["blocks_longitudinal"]))
 

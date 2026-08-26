@@ -522,8 +522,9 @@ The receiver-side command carrier is now identified, so the decisive experiment 
   requirements. Exact H/F command-5 software machinery accepts the required 36-byte
   B6 authenticated input, but the Sienna single-stage resident proxy geometry does
   **not** transfer: H startup clears `FEBF05CC..FEBF09CB` and
-  `FEBF0B4C..FEBF0F4B`. A target-native H/F application-context carrier plus live
-  selector-4 permission/latency remains required; and
+  `FEBF0B4C..FEBF0F4B`. TMS-054 now supplies a separately audited **static** H/F
+  carrier candidate (332-byte inert canary / 462-byte fixed-B6 signer); what remains
+  is live canary retention/health followed by selector-4 permission and latency; and
 - acquire/analyze true-TSS3 `FRC_P5` plus category-435 `ABS_P5`/Brake firmware,
   or synchronized FRC/Brake/EPS captures, to explain the still-open byte-level target
   transformation and SecOC sender/key/freshness ownership.
@@ -741,25 +742,63 @@ cited calibration values are byte-identical as well. Machine-readable contract:
 decompiler evidence:
 `data/generated/corolla_8965H1202000_panda_lateral_safety_decompiler_evidence.json`.
 
-### H/F command-5 portability boundary
+### H/F command-5 portability and target-native carrier candidate
 
 The useful **software** part of the Sienna command-5 signing work transfers to
-H/F, but its resident-RAM placement does not. Exact H record 0 at `0x27C88`
-selects completion `0x82F5C`, adapter `0x820CC`, worker `0x821D0`, and config
-`0x27C84`; serialized dispatcher `0x82750` reaches the same generated lower
-command-5 family, and `0x81E94` accepts caller lengths below `0x51`, which covers
-the 36-byte B6 authenticated input. These application bytes are identical on F.
+H/F. Exact H record 0 at `0x27C88` selects completion `0x82F5C`, adapter
+`0x820CC`, worker `0x821D0`, and config `0x27C84`; serialized dispatcher
+`0x82750` reaches the same generated lower command-5 family, and `0x81E94`
+accepts caller lengths below `0x51`, which covers the 36-byte B6 authenticated
+input. These application bytes are identical on F.
 
-The prior Sienna single-stage resident proxy must **not** be copied by address.
+The prior Sienna **546-byte** resident proxy still must not be copied blindly.
 H startup `0x6149A` clears `FEBF05CC..FEBF09CB` and
-`FEBF0B4C..FEBF0F4B`, while H-owned structures already occupy the lower
-`FEBF0xxx` page. The independently recovered H XCP shadow
-`FEBF7C00..FEBFFBFF` remains a promising two-stage carrier area, but no target-
-native H/F execution route into that shadow is yet verified. Accordingly,
-`data/variant_ram_exec_requirements.json` gains **no** H/F verified runtime entry
-from this work. Production signing still requires live confirmation that the
-provisioned slot4 permits command 5 and a separately audited H/F runtime carrier
-(or another approved MAC path). Machine-readable boundary:
+`FEBF0B4C..FEBF0F4B`, disproving transfer of Sienna's full
+`FEBF0000..FEBF0307` free-space assumption. A target-native census now narrows
+the lower page further instead of abandoning it: after normalizing both absolute
+`FEBFxxxx` references and simple `GP=FEBEB800` offsets, the exact H corpus has
+**zero recovered references in `FEBF0000..FEBF01CF`**; the first recovered
+normalized reference is exactly `FEBF01D0`. This is a bounded negative — arbitrary
+computed aliases, DMA/hardware writers, and live lifetime are not statically
+excluded.
+
+Exact H's application MPU independently places that 464-byte pocket inside
+region 5, `FEBEF400..FEBF33FC`. Both recovered MPU contexts assign MPAT
+`0xB8`, i.e. supervisor read/write/execute and no user permissions. The relevant
+MPU tables/loader, CPU-context transition, startup coordinator, foreground
+scheduler, RAM initializer, command-5 dispatcher, and variable-length prepare
+ranges are byte-identical on F. The selected 60-byte observation/mailbox region
+`FEBFFB80..FEBFFBBB` is above the startup shadow-copy end `FEBFF9EF`, inside the
+known XCP shadow window, and has zero recovered normalized direct references under
+the same bounded census.
+
+A dedicated fixed-B6 runtime now proves the machine-code fit rather than merely
+estimating it. The audited command-5 proxy is **462 bytes**, entry offset zero,
+zero ELF relocations, SHA-256 `9b9b055c...1db8dbf`, and therefore leaves only
+**2 bytes** of headroom in `FEBF0000..FEBF01CF`. It keeps the stock application
+scheduler, uses H/F dispatcher `0x82750`, clean record 0, slot selector 4,
+completion cells `FEBF1280/FEBF1281`, and a fixed 36-byte B6 authenticated input.
+Shared-driver busy result 2 leaves the request pending for a later foreground
+retry rather than aborting an in-flight command-7 operation. The installer must
+initialize the mailbox request-state byte to zero before launch.
+
+The required first live payload is deliberately smaller and inert: a **332-byte**
+canary, also entry-zero and relocation-free, reproduces the same boot ->
+application-context -> startup -> foreground transition but never calls command 5.
+Its sole extra behavior is heartbeat progression at `FEBFFB80`. A hardware run
+must establish that heartbeat progression, normal application health, and reset-
+to-stock behavior before the 462-byte signer is exposed. Only after that should a
+known-input selector-4 experiment establish live generation permission, followed
+by independent MAC agreement and command-5 latency/jitter under normal command-7
+verification load.
+
+This closes the **static target-native carrier candidate**, not the live runtime.
+`data/variant_ram_exec_requirements.json` therefore still gains **no** H/F verified
+entry. Live retention/lifetime, provisioned slot-4 command-5 permission, signing
+latency, and production B6 timing remain dynamic blockers, and nothing here
+authorizes vehicle actuation. Machine-readable evidence:
+`data/generated/corolla_hf_command5_runtime_carrier_evidence.json`,
+`data/generated/corolla_hf_command5_runtime_carrier.json`, and the earlier
 `data/generated/corolla_hf_command5_portability.json`.
 
 ## 10. Production boundary
@@ -774,7 +813,7 @@ actuation. Before a real H/F openpilot port, recover and validate:
   duplicate is required for basic observation;
 - stock B6 wall-clock cadence and the active-LTA template for the bounded secondary B6 fields. The replacement sender's SecOC message8 start/progression is statically closed by `0x00F` re-anchoring and no longer requires recovery of Toyota's B6-local counter-start policy;
 - relay-correct **physical stock-B6 producer isolation/suppression point** and dynamic confirmation of the statically closed nominal **35 ms** seven-tick loss behavior (receiver-side competing-stream arbitration is already closed above);
-- live confirmation that provisioned slot4 permits command 5, plus a target-native H/F runtime carrier or the slot4 secret/another approved MAC path; and
+- live proof that the audited 332-byte H/F carrier canary survives into healthy application scheduling, then confirmation that provisioned slot4 permits command 5 with acceptable latency using the audited 462-byte signer (or recover the slot4 secret/another approved MAC path); and
 - fallback/coexistence behavior with brake/AEB and stock LTA/LDA/LCA functions.
 
 The machine-readable evidence is
@@ -784,7 +823,8 @@ The machine-readable evidence is
 `data/generated/corolla_hf_b6_competing_sender_arbitration.json`,
 `data/generated/corolla_hf_steering_limits.json`,
 `data/generated/corolla_hf_panda_lateral_safety_contract.json`, and
-`data/generated/corolla_hf_command5_portability.json`; their compact
+`data/generated/corolla_hf_command5_portability.json`, and
+`data/generated/corolla_hf_command5_runtime_carrier.json`; their compact
 raw-body-bound decompiler/reference evidence is tracked alongside each artifact.
 
 <!-- knowledge-cross-references:begin -->
@@ -793,6 +833,6 @@ raw-body-bound decompiler/reference evidence is tracked alongside each artifact.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009), [COM-010](../reference/index.md#finding-com-010), [COM-011](../reference/index.md#finding-com-011), [COM-014](../reference/index.md#finding-com-014), [COM-015](../reference/index.md#finding-com-015), [COM-016](../reference/index.md#finding-com-016), [COM-017](../reference/index.md#finding-com-017), [TMS-053](../reference/index.md#finding-tms-053)
+- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009), [COM-010](../reference/index.md#finding-com-010), [COM-011](../reference/index.md#finding-com-011), [COM-014](../reference/index.md#finding-com-014), [COM-015](../reference/index.md#finding-com-015), [COM-016](../reference/index.md#finding-com-016), [COM-017](../reference/index.md#finding-com-017), [TMS-053](../reference/index.md#finding-tms-053), [TMS-054](../reference/index.md#finding-tms-054)
 - Corrections with this document as canonical home: [CORR-109](../reference/index.md#correction-corr-109), [CORR-110](../reference/index.md#correction-corr-110), [CORR-111](../reference/index.md#correction-corr-111), [CORR-112](../reference/index.md#correction-corr-112), [CORR-113](../reference/index.md#correction-corr-113), [CORR-114](../reference/index.md#correction-corr-114), [CORR-115](../reference/index.md#correction-corr-115), [CORR-116](../reference/index.md#correction-corr-116)
 <!-- knowledge-cross-references:end -->

@@ -134,16 +134,16 @@ def build() -> dict:
             "h_startup_clear_ranges_inclusive": [[f"0x{a:08X}", f"0x{b:08X}"] for a,b in clear_ranges],
             "lower_page_also_contains_live_h_application_structures": True,
             "h_f_verified_ram_exec_requirement_entry_present": False,
-            "interpretation": "The ICU-S command-5 software machinery transfers, but the Sienna resident-code placement contract does not. H/F need a target-native application-context carrier; do not build or link the Sienna 546-byte proxy at FEBF0000 as if FEBF0000..0307 were retained free code space.",
+            "interpretation": "The ICU-S command-5 software machinery transfers, but the Sienna resident-code placement contract does not. This TMS-053 artifact therefore does not authorize the Sienna 546-byte proxy at FEBF0000 as if FEBF0000..0307 were retained free code space; TMS-054 separately identifies a smaller target-native static carrier candidate without upgrading live retention.",
         },
         "two_stage_candidate": {
-            "status": "hypothesis-not-verified-carrier",
+            "status": "historical-tms053-two-stage-hypothesis-not-required-by-tms054-static-candidate",
             "xcp_write_shadow_bounds": ["0xFEBF7C00", "0xFEBFFBFF"],
             "xcp_application_write_architecture_recovered": True,
-            "interpretation": "The existing no-XCP-SA H shadow-write architecture is a plausible staging component for a future target-native two-stage signer, but this artifact does not prove a post-start control transfer into it, lifetime safety, or live selector-4 permission/latency.",
+            "interpretation": "At TMS-053 the no-XCP-SA H shadow-write architecture was a plausible two-stage carrier component. TMS-054 later identified a smaller direct lower-page static carrier candidate, so this two-stage idea is no longer required for executable fit. Neither artifact proves live lifetime safety or selector-4 permission/latency.",
         },
         "remaining_dynamic_or_runtime_work": [
-            "recover/validate a target-native H/F resident or re-enterable application-context carrier",
+            "live-validate the TMS-054 target-native H/F static carrier candidate with the inert canary",
             "exercise live ICU-S command5 selector4 permission on H/F",
             "measure command5 signing latency/jitter against the B6 transmit deadline",
             "validate mailbox/control-flow lifetime under normal steering application execution",
@@ -156,7 +156,7 @@ def build() -> dict:
             "slot4_live_permission_closed": False,
             "signing_latency_closed": False,
         },
-        "evidence_boundary": "This closes exact-H/F command-5 software portability and disproves the naive Sienna resident-page port. It does not claim a working H/F in-application signing oracle until target-native carrier placement/control-flow plus live slot-4 permission and latency are validated.",
+        "evidence_boundary": "This closes exact-H/F command-5 software portability and disproves the naive Sienna resident-page port. TMS-054 separately closes a smaller target-native carrier as a static candidate; a working H/F in-application signing oracle still requires live carrier retention/control-flow plus slot-4 permission and latency validation.",
     }
 
 

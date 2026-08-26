@@ -1,0 +1,143 @@
+{
+  "applies_to": [
+    "8965H1202000",
+    "8965F1208000"
+  ],
+  "boundary": {
+    "command5_latency_jitter_closed": false,
+    "interpretation": "Static H/F carrier geometry and executable fit are now closed enough to define a concrete live canary experiment. This is not proof that FEBF0000..01CF remains unmodified in a running ECU, that slot4 permits command5, or that signing meets B6 timing. Those remain dynamic gates.",
+    "live_retention_closed": false,
+    "live_slot4_permission_closed": false,
+    "production_b6_signer_closed": false,
+    "static_target_native_carrier_candidate_closed": true,
+    "vehicle_actuation_authorized": false,
+    "verified_variant_ram_exec_requirement_promoted": false
+  },
+  "carrier_geometry": {
+    "base": "0xFEBF0000",
+    "end_exclusive": "0xFEBF01D0",
+    "end_inclusive": "0xFEBF01CF",
+    "first_recovered_normalized_reference": "0xFEBF01D0",
+    "mpat_contexts": [
+      "0x000000B8",
+      "0x000000B8"
+    ],
+    "mpu_bounds": [
+      "0xFEBEF400",
+      "0xFEBF33FC"
+    ],
+    "mpu_region_index": 5,
+    "normalized_direct_reference_count_inside": 0,
+    "permissions": "supervisor-read-write-execute in both recovered application contexts; no user permissions",
+    "size": 464,
+    "static_negative_boundary": "This is a negative census of recovered direct references and simple GP-offset aliases only. Arbitrary computed aliases, DMA ownership and undocumented hardware writers are outside the static proof; live canary validation is required before treating the pocket as retained/free."
+  },
+  "mailbox_geometry": {
+    "base": "0xFEBFFB80",
+    "end_exclusive": "0xFEBFFBBC",
+    "normalized_direct_reference_count_inside": 0,
+    "request_state_precondition": "installer must initialize mailbox request_state byte to 0 before launching the command5 proxy",
+    "size": 60,
+    "startup_shadow_copy_end_inclusive": "0xFEBFF9EF",
+    "static_negative_boundary": "Zero recovered normalized direct references does not prove the mailbox is free of computed/DMA ownership; it is a staging/observation candidate for isolated live validation.",
+    "xcp_shadow_window": [
+      "0xFEBF7C00",
+      "0xFEBFFBFF"
+    ]
+  },
+  "runtime_candidates": {
+    "fixed_b6_command5_proxy": {
+      "binary": "exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin",
+      "busy_behavior": "shared-driver busy result 2 leaves request_state=1 so the next foreground iteration retries; no command-7 abort primitive is called",
+      "dispatcher": "0x00082750",
+      "done_flag": "0xFEBF1280",
+      "driver_record": 0,
+      "entry_offset": 0,
+      "headroom": 2,
+      "input_length": 36,
+      "key_selector": 4,
+      "relocations": 0,
+      "sha256": "9b9b055c65246bb4e25bc512753772bbe474c0ba5847ecb253e4147fd1db8dbf",
+      "size": 462,
+      "status_flag": "0xFEBF1281"
+    },
+    "inert_canary": {
+      "binary": "exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin",
+      "entry_offset": 0,
+      "headroom": 132,
+      "heartbeat_address": "0xFEBFFB80",
+      "purpose": "validate boot-to-application handoff, scheduler ownership, executable retention, and observation-cell lifetime before any command-5 request",
+      "relocations": 0,
+      "sha256": "a32baf46dd8e0599021b5c174763887513b3ba903d40ebe284f19d31c97424f4",
+      "size": 332
+    }
+  },
+  "scheduler_transfer": {
+    "application_context_init": "0x0006A8C4",
+    "foreground_scheduler": "0x0005F30C",
+    "foreground_tick_counter": "0xFEBE38EF",
+    "h_f_listed_prerequisites_byte_identical": true,
+    "startup_final_init": "0x000694FA",
+    "startup_jarl_after": "0x0005CAFC",
+    "startup_jarl_count": 18,
+    "startup_jarl_first": "0x0005CAB4"
+  },
+  "schema": "corolla-hf-command5-runtime-carrier-v1",
+  "sources": {
+    "canary_audit": {
+      "path": "exploit/ephemeral_runtime/audited_corolla_hf_canary_build.json",
+      "sha256": "a34f756d7148eb69fedf8a70f8460b73b5dcafccf17ca26fac1549ed8dc4c5c3"
+    },
+    "command5_portability": {
+      "path": "data/generated/corolla_hf_command5_portability.json",
+      "sha256": "cc85320d2901e0a99a92554ccf560e6c49038734a85aea997c87c36986130bff"
+    },
+    "proxy_audit": {
+      "path": "exploit/ephemeral_runtime/audited_corolla_hf_command5_proxy_build.json",
+      "sha256": "97fa1b9bcad5204253ce81cc70aa17efe1d4578f318cb5eac77b9edd3b40b1a5"
+    },
+    "ram_exec_requirements": {
+      "path": "data/variant_ram_exec_requirements.json",
+      "sha256": "391f070e967293ca1076be8723645ba86addf3a9f3dd73cf7a1a801a5f56093f"
+    },
+    "runtime_builder": {
+      "path": "exploit/ephemeral_runtime/build_corolla_hf_command5_carrier.py",
+      "sha256": "cc553df848ac6b28a480220a809636d1c986cbbf651d11bfcb803669a1872f24"
+    },
+    "static_evidence": {
+      "path": "data/generated/corolla_hf_command5_runtime_carrier_evidence.json",
+      "sha256": "c72e1aac04802294a8027fbea47d79aa2a75113ed80d724fea720ad90baaf547"
+    }
+  },
+  "toolchain_reproducibility": {
+    "canonical_sienna_proxy_sha256": "273202dc591810b2f587ab8fac044599b57b4e07a24ff61d36b7131b97c00660",
+    "noncanonical_image_acceptance_rule": "accepted only after byte-exact reproduction of the canonical audited Sienna 546-byte proxy",
+    "selected_build_reproduced_canonical_reference": true
+  },
+  "validation_sequence": [
+    {
+      "criterion": "heartbeat at FEBFFB80 changes after the boot-to-application transition while normal application scheduling remains healthy",
+      "name": "inert carrier canary",
+      "purpose": "close retention/lifetime/control-flow before exposing command-5",
+      "stage": 1
+    },
+    {
+      "criterion": "on a fresh isolated bench run, a known authenticated-domain input produces a stable current-run result under selector4 without scheduler failure",
+      "name": "known-input slot4 command5 permission",
+      "purpose": "close live slot4 generation permission independently of vehicle actuation",
+      "stage": 2
+    },
+    {
+      "criterion": "7/12/36-byte generated results agree with independently known CMAC vectors for the same live key/domain where such vectors are available",
+      "name": "independent MAC agreement",
+      "purpose": "validate semantic output, not merely command completion",
+      "stage": 3
+    },
+    {
+      "criterion": "measure completion latency/jitter under ordinary command-7 verification load and demonstrate a sender schedule compatible with the B6 cadence/deadline",
+      "name": "latency and contention characterization",
+      "purpose": "close production timing before any lateral Tx enablement",
+      "stage": 4
+    }
+  ]
+}
