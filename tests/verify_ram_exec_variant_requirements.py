@@ -174,6 +174,46 @@ deploy_source = (ROOT / "exploit/patcher/deploy.py").read_text().lower()
 build_source = (ROOT / "exploit/patcher/build_payload.py").read_text().lower()
 check("RAM-exec implementation retains 120s caller-configurable timeout", "timeout: float = 120.0" in source)
 check("RAM-exec UDS client handles response-pending separately", "response_pending_timeout=1.0" in source)
+check("RAM-exec host guard covers both modern pandad and legacy boardd", "selfdrive\\.pandad\\.pandad" in source and '"pidof", "pandad"' in source and '"pidof", "boardd"' in source)
+
+original_run = ram_exec.subprocess.run
+seen_process_checks = []
+class _Proc:
+    def __init__(self, returncode=1, stdout=""):
+        self.returncode = returncode
+        self.stdout = stdout
+
+def _fake_pandad_running(argv, **kwargs):
+    seen_process_checks.append(tuple(argv))
+    if argv[:2] == ["pgrep", "-f"]:
+        return _Proc(0, "1234\n")
+    return _Proc()
+
+ram_exec.subprocess.run = _fake_pandad_running
+try:
+    ram_exec.ensure_boardd_stopped()
+except ram_exec.RamExecError as exc:
+    pandad_blocked = "boardd/pandad is running" in str(exc)
+else:
+    pandad_blocked = False
+finally:
+    ram_exec.subprocess.run = original_run
+check("modern pandad ownership blocks direct Panda access", pandad_blocked and seen_process_checks == [("pgrep", "-f", r"selfdrive\.pandad\.pandad")])
+
+seen_process_checks = []
+def _fake_no_owner(argv, **kwargs):
+    seen_process_checks.append(tuple(argv))
+    return _Proc()
+
+ram_exec.subprocess.run = _fake_no_owner
+try:
+    ram_exec.ensure_boardd_stopped()
+    no_owner_allowed = True
+except ram_exec.RamExecError:
+    no_owner_allowed = False
+finally:
+    ram_exec.subprocess.run = original_run
+check("host guard allows direct access only after checking all known owners", no_owner_allowed and seen_process_checks == [("pgrep", "-f", r"selfdrive\.pandad\.pandad"), ("pidof", "pandad"), ("pidof", "boardd")])
 check("deployer exposes explicit RAM-load hook", "--ram-load-addr" in deploy_source)
 check(
     "deployer requires provenance for non-default RAM geometry",

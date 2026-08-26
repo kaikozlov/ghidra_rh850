@@ -34,7 +34,7 @@ check(
     "normalized CodeFlash SHA-256 is pinned 8965H1202000 image",
     hashlib.sha256(H).hexdigest() == "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
 )
-check("live application software ID is 8965H1202000", H[0x17D80:0x17D8C] == b"8965H1202000")
+check("auxiliary DID2032 identity record is 8965H1202000", H[0x17D80:0x17D8C] == b"8965H1202000")
 
 print("\n== boot diagnostic controller/routing ==")
 # Foreign TP is 0x867c. These are the same CanIf/RSCFD roots recovered for the

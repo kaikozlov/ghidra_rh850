@@ -555,6 +555,129 @@ def main() -> int:
         and "previously\nreviewed GCC 13.2.0/binutils 2.41 artifacts" in migration_report
         and "mechanically\nmigrated patch-era sources" in migration_report,
     )
+    telescope_transport = (roots["lochuan_eps_telescope"] / "eps_probe/transport.py").read_text(encoding="utf-8")
+    telescope_payload = (roots["lochuan_eps_telescope"] / "eps_probe/payload.py").read_text(encoding="utf-8")
+    telescope_cli = (roots["lochuan_eps_telescope"] / "eps_probe/cli.py").read_text(encoding="utf-8")
+    check(
+        "pinned eps-telescope reads application F181 before the session ladder and boot F181 after it",
+        "app = bytes(uds.read_data_by_identifier(DID_APPLICATION))" in telescope_transport
+        and "self.session_ladder()" in telescope_transport
+        and "boot = bytes(uds.read_data_by_identifier(DID_APPLICATION))" in telescope_transport
+        and telescope_transport.find("app = bytes(uds.read_data_by_identifier(DID_APPLICATION))") < telescope_transport.find("self.session_ladder()") < telescope_transport.find("boot = bytes(uds.read_data_by_identifier(DID_APPLICATION))"),
+    )
+    check(
+        "pinned eps-telescope fixes the exact single-ladder timing used by the H/F canary",
+        "SESSION_SLEEP = (0.5, 0.7, 1.0)" in telescope_transport
+        and "(bindings.session_default, SESSION_SLEEP[0])" in telescope_transport
+        and "(bindings.session_extended, SESSION_SLEEP[1])" in telescope_transport
+        and "(bindings.session_programming, SESSION_SLEEP[2])" in telescope_transport,
+    )
+    check(
+        "pinned eps-telescope fixes the exact old-stack upload and FF00 geometry used by the H/F canary",
+        "RAM_ADDRESS = 0xFEBF0000" in telescope_transport
+        and "ENVELOPE_LENGTH = 0x1000" in telescope_transport
+        and "CHUNK_SIZE = 0x400" in telescope_transport
+        and "TRIGGER_BASE = 0xE0000" in telescope_transport
+        and "TRIGGER_LENGTH = 0x8000" in telescope_transport
+        and r'request = b"\x01\x46\x01\x00" + struct.pack("!II", RAM_ADDRESS, len(data))' in telescope_transport
+        and r'magic = b"\x45\x01" if new_uds else b"\x45\x00"' in telescope_transport
+        and r'frame = b"\x31\x01\xff\x00" + magic + struct.pack(' in telescope_transport,
+    )
+    check(
+        "pinned eps-telescope uses the recovered boot-SA and payload-build secrets",
+        'SEED_KEY_SECRET = bytes.fromhex("f05f36b7d78c03e24ab4faef2a57d044")' in telescope_transport
+        and 'PAYLOAD_BUILD_SECRET = bytes.fromhex("ba052435f8843f985fd1329d2b6117b0")' in telescope_payload,
+    )
+    check(
+        "pinned eps-telescope uses zero DID0201/0202 for the deep-probe envelope",
+        r'shellcode, request_block, b"\x00" * 16, b"\x00" * 16' in (roots["lochuan_eps_telescope"] / "eps_probe/deep_probe.py").read_text(encoding="utf-8")
+        and 'uds.write_data_by_identifier(0x201, bytes(16))' in telescope_transport
+        and 'uds.write_data_by_identifier(0x202, bytes(16))' in telescope_transport,
+    )
+    # Rebuild the exact default deep-probe envelope from the pinned upstream
+    # shellcode/request geometry and compare its terminal authentication state
+    # with Albino's retained live RAM/DCRA snapshot.  The probe JSON does not
+    # retain the envelope bytes themselves, so this is deliberately an external
+    # provenance join rather than a core tracked-only assertion.
+    telescope_shellcode_path = roots["lochuan_eps_telescope"].joinpath("shellcode", "build", "deep_probe.bin")
+    telescope_shellcode = telescope_shellcode_path.read_bytes()
+    check(
+        "pinned eps-telescope deep-probe shellcode identity",
+        len(telescope_shellcode) == 1964
+        and hashlib.sha256(telescope_shellcode).hexdigest() == "52a47a3fab27a479b051453c11fdab05a6088c2df7fa8f2d924178e4b31337eb",
+    )
+    telescope_request = bytes.fromhex(
+        "50524f4203040008e6a0010000000000000ffde000400000000000017d80004000000000febf2cf8010000000000"
+    )
+    telescope_plain = bytearray(telescope_shellcode)
+    telescope_plain.extend(bytes(0xF00 - len(telescope_plain)))
+    telescope_plain.extend(telescope_request)
+    telescope_plain.extend(bytes(0xFD0 - len(telescope_plain)))
+    telescope_plain.extend(struct.pack("<I", 0xFEBF0000))
+    telescope_plain.extend(bytes(0xFE0 - len(telescope_plain)))
+    telescope_plain.extend(struct.pack("<I", 0xFEBF0000))
+    telescope_plain.extend(struct.pack("<I", 0xFF0))
+    telescope_plain.extend(bytes(4))
+    telescope_crc_fixup = binascii.crc32(telescope_plain) ^ 0xFFFFFFFF
+    telescope_plain.extend(struct.pack("<I", telescope_crc_fixup & 0xFFFFFFFF))
+    telescope_derived_key = AES.new(
+        bytes.fromhex("ba052435f8843f985fd1329d2b6117b0"), AES.MODE_ECB
+    ).encrypt(bytes(16))
+    telescope_cmac = CMAC.new(telescope_derived_key, ciphermod=AES)
+    telescope_cmac.update(bytes(16) + telescope_plain)
+    telescope_tag = telescope_cmac.digest()
+    telescope_plain.extend(telescope_tag)
+    telescope_envelope = AES.new(
+        telescope_derived_key, AES.MODE_CBC, iv=bytes(16)
+    ).encrypt(bytes(telescope_plain))
+    telescope_probe = json.loads((REPO / "community/albinoelephant/telescope/probe.json").read_text(encoding="utf-8"))
+    telescope_live_ram = bytes.fromhex(telescope_probe["layer3"]["regions"][str(0xFEBF2CF8)])
+    check(
+        "pinned eps-telescope default envelope reconstructs exactly",
+        len(telescope_plain) == len(telescope_envelope) == 0x1000
+        and hashlib.sha256(telescope_envelope).hexdigest() == "e1d2ddcaa1a8b0cba0a5c4407bd2872619e14b81dc08dc50df8772de06a35910"
+        and binascii.crc32(telescope_plain[:0xFF0]) & 0xFFFFFFFF == 0xFFFFFFFF,
+    )
+    check(
+        "Albino live CMAC work buffer is the exact pinned deep-probe envelope tag",
+        telescope_tag.hex() == "a5ebde539a7147cd61f21b4a5b222e1f"
+        and telescope_live_ram[0x30:0x40] == telescope_tag,
+    )
+    check(
+        "Albino live DCRA CIN is the exact pinned deep-probe CRC fixup word",
+        telescope_crc_fixup == 0x6DAAE993
+        and telescope_probe["layer3"]["registers"]["DCRA1CIN"] == telescope_crc_fixup
+        and telescope_probe["layer3"]["registers"]["DCRA1COUT"] == 0xFFFFFFFF,
+    )
+    corolla_canary = (REPO / "exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin").read_bytes()
+    telescope_canary_plain = bytearray(corolla_canary)
+    telescope_canary_plain.extend(bytes(0xFD0 - len(telescope_canary_plain)))
+    telescope_canary_plain.extend(struct.pack("<I", 0xFEBF0000))
+    telescope_canary_plain.extend(bytes(0xFE0 - len(telescope_canary_plain)))
+    telescope_canary_plain.extend(struct.pack("<I", 0xFEBF0000))
+    telescope_canary_plain.extend(struct.pack("<I", 0xFF0))
+    telescope_canary_plain.extend(bytes(4))
+    telescope_canary_crc = binascii.crc32(telescope_canary_plain) ^ 0xFFFFFFFF
+    telescope_canary_plain.extend(struct.pack("<I", telescope_canary_crc & 0xFFFFFFFF))
+    telescope_canary_cmac = CMAC.new(telescope_derived_key, ciphermod=AES)
+    telescope_canary_cmac.update(bytes(16) + telescope_canary_plain)
+    telescope_canary_plain.extend(telescope_canary_cmac.digest())
+    telescope_canary_envelope = AES.new(
+        telescope_derived_key, AES.MODE_CBC, iv=bytes(16)
+    ).encrypt(bytes(telescope_canary_plain))
+    check(
+        "pinned eps-telescope envelope algorithm reproduces the direct H/F canary package identity",
+        len(telescope_canary_envelope) == 0x1000
+        and hashlib.sha256(telescope_canary_envelope).hexdigest() == "313d1bb70fe6147c179e4b5a35e4556e536f062a80d53d85af3d4292b0b29d84"
+        and binascii.crc32(telescope_canary_plain[:0xFF0]) & 0xFFFFFFFF == 0xFFFFFFFF,
+    )
+    check(
+        "pinned eps-telescope vehicle-fingerprint failure is isolated after the EPS deep-probe path",
+        'layer1["vehicle"] = runner(transport)' in telescope_cli
+        and 'except Exception as exc:' in telescope_cli
+        and 'layer1["vehicle"] = {"error": str(exc)}' in telescope_cli,
+    )
+
     telescope_design = git_show(
         roots["lochuan_eps_telescope"],
         "99b98f0a42fdb519f9a2fb6c47e71d75e906f6d2:docs/superpowers/specs/2026-08-19-rh850-eps-probe-design.md",

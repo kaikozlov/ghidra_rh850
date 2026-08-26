@@ -900,13 +900,18 @@ the same bounded census.
 
 A dedicated fixed-B6 runtime now proves the machine-code fit rather than merely
 estimating it. The audited command-5 proxy is **462 bytes**, entry offset zero,
-zero ELF relocations, SHA-256 `9b9b055c...1db8dbf`, and therefore leaves only
+zero ELF relocations, SHA-256 `3bb96eef...609f8d3`, and therefore leaves only
 **2 bytes** of headroom in `FEBF0000..FEBF01CF`. It keeps the stock application
 scheduler, uses H/F dispatcher `0x82750`, clean record 0, slot selector 4,
 completion cells `FEBF1280/FEBF1281`, and a fixed 36-byte B6 authenticated input.
 Shared-driver busy result 2 leaves the request pending for a later foreground
-retry rather than aborting an in-flight command-7 operation. The installer must
-initialize the mailbox request-state byte to zero before launch.
+retry rather than aborting an in-flight command-7 operation. The hardened proxy no
+longer relies on installer preinitialization: after stock final init and before `ei`
+it writes mailbox `request_state=0`, then samples one host-committed state per
+foreground tick. Completion callback bytes `FEBF1280/FEBF1281` are adjacent, so the
+proxy reads them as one halfword after done=1 and mirrors status into mailbox byte
+`FEBFFB81`; immediate non-busy dispatcher errors are mirrored there too. This keeps
+all host-visible request/result state inside the XCP-readable 60-byte mailbox.
 
 The required first live payload is deliberately smaller and inert: a **332-byte**
 canary, also entry-zero and relocation-free, reproduces the same boot ->
@@ -918,13 +923,37 @@ known-input selector-4 experiment establish live generation permission, followed
 by independent MAC agreement and command-5 latency/jitter under normal command-7
 verification load.
 
+Albino's same-car `eps-telescope` replay now makes that first experiment directly
+operational instead of leaving the bootstrap implicit. The exact specimen reports
+application F181 `8965F1208000 / 8A3111202000`, boot F181 `02 || 32*0x21`, and
+successful boot SecurityAccess plus `0x10F0` authentication of a zero-0201/0202
+4-KiB `FEBF0000` envelope. `exploit/ephemeral_runtime/corolla_hf_direct_canary.py`
+therefore packages the audited 332-byte canary directly under the target's
+payload-build secret into deterministic ciphertext SHA-256
+`313d1bb70fe6147c179e4b5a35e4556e536f062a80d53d85af3d4292b0b29d84`,
+replays the exact single old-stack ladder and zero `0203/0201/0202` writes, uses
+`01 46 01 00 FEBF0000 1000` + `10F0/45 00` + raw `FF00`, and performs **no**
+post-`10F0` RAM substitution. Live mode is double-gated (`--execute` plus
+`--bench-isolated`), pins both application and boot F181, rejects any package
+hash drift, requires the `FEBFFB80` canary signature to advance after application
+F181 reappears, and does not expose the command-5 proxy. Reset-to-stock still has
+to be observed separately after a successful canary run. The subsequent guarded
+`corolla_hf_direct_command5.py` path requires that successful canary result plus an
+explicit reset confirmation before live mode, packages the audited proxy directly
+(SHA-256 `a9497970...e9d5a58`), commits mailbox state last, and requires mirrored
+status zero with a 16-byte non-sentinel result; it does not emit B6 or write flash.
+The same-car bootstrap provenance is retained in
+`data/generated/corolla_2023_albino_telescope_analysis.json` and the specimen
+report [corolla-2023-us-public-route.md](corolla-2023-us-public-route.md) §7.39.
+
 This closes the **static target-native carrier candidate**, not the live runtime.
 `data/variant_ram_exec_requirements.json` therefore still gains **no** H/F verified
 entry. Live retention/lifetime, provisioned slot-4 command-5 permission, signing
 latency, and production B6 timing remain dynamic blockers, and nothing here
 authorizes vehicle actuation. Machine-readable evidence:
 `data/generated/corolla_hf_command5_runtime_carrier_evidence.json`,
-`data/generated/corolla_hf_command5_runtime_carrier.json`, and the earlier
+`data/generated/corolla_hf_command5_runtime_carrier.json`, the exact same-car
+`data/generated/corolla_2023_albino_telescope_analysis.json`, and the earlier
 `data/generated/corolla_hf_command5_portability.json`.
 
 ## 10. Production boundary
@@ -949,8 +978,9 @@ The machine-readable evidence is
 `data/generated/corolla_hf_b6_competing_sender_arbitration.json`,
 `data/generated/corolla_hf_steering_limits.json`,
 `data/generated/corolla_hf_panda_lateral_safety_contract.json`, and
-`data/generated/corolla_hf_command5_portability.json`, and
-`data/generated/corolla_hf_command5_runtime_carrier.json`; their compact
+`data/generated/corolla_hf_command5_portability.json`,
+`data/generated/corolla_hf_command5_runtime_carrier.json`, and
+`data/generated/corolla_2023_albino_telescope_analysis.json`; their compact
 raw-body-bound decompiler/reference evidence is tracked alongside each artifact.
 
 <!-- knowledge-cross-references:begin -->

@@ -43,9 +43,9 @@ check("Sienna row present", any("Sienna" in v for v in vehicles))
 check("Corolla row present", any("Corolla" in v for v in vehicles))
 check("matrix contains only evidence-backed rows", len(rows) == 4 and all(r["application_software_id"] != "unknown" for r in rows))
 check("matrix models ADAS and security as separate columns", all("adas_generation" in r and "security_architecture" in r for r in rows))
-check("all three tracked dump families are SecOC/TSK", all(
-    next(r for r in rows if r["application_software_id"] == sw)["security_architecture"].startswith("SecOC/TSK")
-    for sw in ("8965B4512000", "8965H1202000", "8965F1208000")
+check("all three tracked dump specimens are SecOC/TSK", all(
+    r["security_architecture"].startswith("SecOC/TSK") for r in rows
+    if r["application_software_id"] == "8965B4512000" or "Corolla" in r["vehicle"]
 ))
 
 sienna_4512000 = next(
@@ -56,8 +56,8 @@ sienna_4514000 = next(
     (r for r in rows if r["application_software_id"] == "8965B4514000"),
     None,
 )
-corolla = next((r for r in rows if r["application_software_id"] == "8965F1208000"), None)
-corolla_h = next((r for r in rows if r["application_software_id"] == "8965H1202000"), None)
+corolla = next((r for r in rows if r["vehicle"].startswith("2025 Toyota Corolla")), None)
+corolla_h = next((r for r in rows if r["vehicle"].startswith("2023 US Toyota Corolla")), None)
 
 check("Sienna 4512000 ADAS generation is not inferred from security", sienna_4512000 is not None and "not established" in sienna_4512000["adas_generation"] and "do not infer from SecOC" in sienna_4512000["adas_generation"])
 check("Sienna 4514000 external TSS3 label is independent of SecOC evidence", sienna_4514000 is not None and "reported TSS3" in sienna_4514000["adas_generation"] and "independent of SecOC" in sienna_4514000["adas_generation"])
@@ -163,25 +163,27 @@ if corolla:
     check("Span Corolla source points at persisted corpus",
           "community/spanconstant/raw-20260821/MANIFEST.txt" in corolla["source"] and "matching ECU serial" in corolla["source"])
 
-# ── 2023 Corolla 8965H1202000: tracked CodeFlash evidence ───────
-check("Corolla 8965H1202000 row present", corolla_h is not None)
+# ── 2023 Albino Corolla: direct F181 + tracked CodeFlash evidence ───────
+check("Albino Corolla row present", corolla_h is not None)
 if corolla_h:
-    check("8965H1202000 firmware artifact is locally available", corolla_h["firmware_available"].startswith("yes"))
-    check("8965H1202000 MCU is exact R7F701383", "R7F701383" in corolla_h["mcu"] and "RH850" in corolla_h["mcu"])
-    check("8965H1202000 secondary software ID is exact", corolla_h["secondary_software_id"] == "8A3111202000")
-    check("8965H1202000 identity does not promote embedded F1208000 table entry",
-          "table entry" in corolla_h["application_dids"] and "not unit identity" in corolla_h["application_dids"])
-    check("8965H1202000 Gate-2 secured IDs are D7/B6",
+    check("Albino Corolla firmware artifact is locally available", corolla_h["firmware_available"].startswith("yes"))
+    check("Albino Corolla MCU is exact R7F701383", "R7F701383" in corolla_h["mcu"] and "RH850" in corolla_h["mcu"])
+    check("Albino Corolla direct F181 primary/secondary are exact",
+          corolla_h["application_software_id"] == "8965F1208000" and corolla_h["secondary_software_id"] == "8A3111202000")
+    check("Albino Corolla separates F181 from auxiliary H1202000 DID2032 identity",
+          all(token in corolla_h["application_dids"] for token in ("F181=8965F1208000+8A3111202000", "0x4A328", "0x20860", "0x17DC0", "DID2032", "8965H1202000 @0x17D80")))
+    check("Albino Corolla boot F181 is now direct", "02 || 32*0x21" in corolla_h["bootloader_f181_observed"] and "2026-08-26" in corolla_h["bootloader_f181_observed"])
+    check("Albino Corolla Gate-2 secured IDs are D7/B6",
           "0x0D7" in corolla_h["secured_can_ids"] and "0x0B6" in corolla_h["secured_can_ids"])
-    check("8965H1202000 does not claim 2E4/131 Gate-2 profiles",
+    check("Albino Corolla does not claim 2E4/131 Gate-2 profiles",
           "no 0x2E4/0x131" in corolla_h["secured_can_ids"] and "0x2E4;" not in corolla_h["secured_can_ids"])
-    check("8965H1202000 exact crypto-root transfer is documented",
-          all(token in corolla_h["security_levels"] for token in ("0xBFD8", "0xBFE8", "0x20840", "byte-identical")))
-    check("8965H1202000 Toyota-B route distinguishes relay topology from direct diagnostics",
+    check("Albino Corolla exact crypto-root transfer and live boot SA are documented",
+          all(token in corolla_h["security_levels"] for token in ("0xBFD8", "0xBFE8", "0x20840", "byte-identical", "live-accepted")))
+    check("Albino Corolla Toyota-B route distinguishes relay topology from direct diagnostics",
           all(token in corolla_h["diagnostic_bus"] for token in ("CAN0/CAN2", "CAN1", "ELM param1", "logical bus1")))
-    check("8965H1202000 programming row pins application/boot channel continuity and async reset",
-          all(token in corolla_h["programming_observation"] for token in ("RSCFD channel1", "0x7A1/0x777->0x7A9", "async kind2", "0x0180", "0x0A00", "50 02")))
-    check("8965H1202000 source is the tracked raw corpus", "raw-20260818" in corolla_h["source"])
+    check("Albino Corolla programming row pins channel continuity, async reset, and telescope RAM exec",
+          all(token in corolla_h["programming_observation"] for token in ("RSCFD channel1", "0x7A1/0x777->0x7A9", "async kind2", "0x0180", "0x0A00", "50 02", "10F0 FEBF0000", "0x88C62")))
+    check("Albino Corolla source includes raw corpus and telescope probe", "raw-20260818" in corolla_h["source"] and "telescope/probe.json" in corolla_h["source"])
 
 # ── Global structural checks ────────────────────────────────────
 required_cols = {

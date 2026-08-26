@@ -1,0 +1,195 @@
+{
+  "authenticated_ram_bootstrap": {
+    "all_boot_sa_seed_snapshots_unique": true,
+    "all_observed_boot_sa_seed_snapshots": [
+      "ae4b8a0c096f87c55b8b0c61363c3b4d",
+      "155a677e38cf341a1afef186fbba2e45",
+      "b9319efe4cc887b64ae9b96dce920384",
+      "ef309a63a0572b7a147b7062aa1073a3"
+    ],
+    "boot_sa_expected_response_for_snapshot": "1c673fae8a534600c6d529143ed25ce7",
+    "boot_sa_secret_source": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin@0xBFE8",
+    "boot_sa_seed_snapshot": "ef309a63a0572b7a147b7062aa1073a3",
+    "boot_sa_zero_record_stage1_key": "f18878ad2a00e3bf78992beb90684f9f",
+    "derived_payload_key_expected": "80d221a05622b4f9d4f287922e6c78d1",
+    "derived_payload_key_matches": true,
+    "derived_payload_key_observed": "80d221a05622b4f9d4f287922e6c78d1",
+    "did_0201_key_material": "00000000000000000000000000000000",
+    "did_0202_iv": "00000000000000000000000000000000",
+    "envelope_auth_ok": true,
+    "payload_build_secret_source": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin@0xBFD8",
+    "payload_cmac_work_buffer": "a5ebde539a7147cd61f21b4a5b222e1f",
+    "prior_retained_ram_snapshots": [
+      {
+        "boot_sa_seed_snapshot": "ae4b8a0c096f87c55b8b0c61363c3b4d",
+        "derived_payload_key": "80d221a05622b4f9d4f287922e6c78d1",
+        "did_0201_key_material": "00000000000000000000000000000000",
+        "did_0202_iv": "00000000000000000000000000000000",
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-002502.bin",
+        "payload_cmac_work_buffer": "91181d04863af55b5a8ef7adbeceec4c",
+        "sha256": "2631d6d290cf3ee1adfe62e81798be67479c9f7c0a58dfeb6d097a2558eb4e53"
+      },
+      {
+        "boot_sa_seed_snapshot": "155a677e38cf341a1afef186fbba2e45",
+        "derived_payload_key": "80d221a05622b4f9d4f287922e6c78d1",
+        "did_0201_key_material": "00000000000000000000000000000000",
+        "did_0202_iv": "00000000000000000000000000000000",
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-004452.bin",
+        "payload_cmac_work_buffer": "91181d04863af55b5a8ef7adbeceec4c",
+        "sha256": "5cff0226c1228dc06f8e0edb9908ab4078e557b54abc48666eecebd29bf41e09"
+      },
+      {
+        "boot_sa_seed_snapshot": "b9319efe4cc887b64ae9b96dce920384",
+        "derived_payload_key": "80d221a05622b4f9d4f287922e6c78d1",
+        "did_0201_key_material": "00000000000000000000000000000000",
+        "did_0202_iv": "00000000000000000000000000000000",
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-005055.bin",
+        "payload_cmac_work_buffer": "91181d04863af55b5a8ef7adbeceec4c",
+        "sha256": "f27514c621ba56b127058341f6730c96900347e72d7c54e101875ee4fb3f46ce"
+      }
+    ],
+    "ram_window_base": "0xFEBF2CF8",
+    "region_crc_failures": [],
+    "security_access_ok": true,
+    "stream_valid": true
+  },
+  "boot_integrity": {
+    "live_adjust_word": "0xAD59D70C",
+    "live_dcra1cin": "0x6DAAE993",
+    "live_dcra1cout": "0xFFFFFFFF",
+    "live_dcra1ctl": "0x00000000",
+    "telescope_stock_classifier_boundary": "telescope's Sienna-specific adjust-word classifier reports unknown; the target-native tracked image independently proves 0xAD59D70C and CRC32 residue 0xFFFFFFFF are stock-valid for this Corolla image",
+    "tracked_adjust_word": "0xAD59D70C",
+    "tracked_crc32": "0xFFFFFFFF",
+    "tracked_crc_range": [
+      "0x18000",
+      "0xFFDF0"
+    ]
+  },
+  "boundaries": [
+    "This probe independently replays the bootloader authenticated-RAM execution path already required by the earlier range-dump acquisition; it does not prove application-context resident-code retention.",
+    "The FEBF2CF8 window contains boot SecurityAccess and payload-build crypto state; it is not evidence that the operational SecOC/ICU-S slot-4 key is CPU-readable.",
+    "The probe never invokes ICU-S command 5, so provisioned slot-4 generate permission and latency remain live tests.",
+    "The live egg scan proves the 8-byte signature at 0x88C62; the exact 64-byte surrounding-window equality comes from the separately retained CodeFlash image."
+  ],
+  "gate2": {
+    "candidate_is_exact": true,
+    "egg_signature_hex": "e0d19a0d1a38bfff",
+    "expected_candidate": "0x88C62",
+    "live_egg_candidates": [
+      "0x88C62"
+    ],
+    "matches_pinned_sienna_window_sha256": true,
+    "patch_word": {
+      "address": "0x88C62",
+      "original": "e0d1",
+      "replacement": "e001"
+    },
+    "probe_candidate_window_boundary": "NO_DATA means telescope found the live 8-byte egg but did not stream the relocated 64-byte candidate window; the 64-byte match above is from the separately tracked dump",
+    "probe_candidate_window_status": "NO_DATA",
+    "tracked_64b_window_base": "0x88C43",
+    "tracked_64b_window_sha256": "50d793a2942716dcf0582238edfe6c2d72378eea8bd4e1bf575a8539cd497350",
+    "tracked_candidate_bytes": "e0d19a0d1a38bfff"
+  },
+  "identity": {
+    "application_f181": {
+      "count": 2,
+      "raw_hex": "023839363546313230383030300000000038413331313132303230303000000000",
+      "records": [
+        {
+          "ascii": "8965F1208000",
+          "index": 1,
+          "raw_hex": "38393635463132303830303000000000"
+        },
+        {
+          "ascii": "8A3111202000",
+          "index": 2,
+          "raw_hex": "38413331313132303230303000000000"
+        }
+      ]
+    },
+    "application_f181_record_sources": [
+      "0x20860",
+      "0x17DC0"
+    ],
+    "auxiliary_single_record_identity": {
+      "ascii": "8965H1202000",
+      "did": "0x2032",
+      "source": "0x17D80"
+    },
+    "boot_f181": {
+      "count": 2,
+      "raw_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+      "records": [
+        {
+          "ascii": "!!!!!!!!!!!!!!!!",
+          "index": 1,
+          "raw_hex": "21212121212121212121212121212121"
+        },
+        {
+          "ascii": "!!!!!!!!!!!!!!!!",
+          "index": 2,
+          "raw_hex": "21212121212121212121212121212121"
+        }
+      ]
+    },
+    "boot_f181_is_two_bang_placeholders": true,
+    "prdname_ascii": "R7F701383"
+  },
+  "live_codeflash_sample_join": {
+    "all_exact": true,
+    "samples": [
+      {
+        "address": "0x8E6A0",
+        "exact_match": true,
+        "length": 256,
+        "live_sha256": "ee4d1693c5ba39aa39cb75d47d368dfb6838d3b7e11515153fb0ddc7d20380fa",
+        "tracked_sha256": "ee4d1693c5ba39aa39cb75d47d368dfb6838d3b7e11515153fb0ddc7d20380fa"
+      },
+      {
+        "address": "0xFFDE0",
+        "exact_match": true,
+        "length": 64,
+        "live_sha256": "470d347a803e6a748b285b3ecdc9cd19ae943e0745b360064c96fe3d9e2b2a2c",
+        "tracked_sha256": "470d347a803e6a748b285b3ecdc9cd19ae943e0745b360064c96fe3d9e2b2a2c"
+      },
+      {
+        "address": "0x17D80",
+        "exact_match": true,
+        "length": 64,
+        "live_sha256": "835a05bfb60159bfeb254325a59965aa5a7e12cc2e7cd7b634376612a2f24179",
+        "tracked_sha256": "835a05bfb60159bfeb254325a59965aa5a7e12cc2e7cd7b634376612a2f24179"
+      }
+    ],
+    "total_live_bytes_compared": 384,
+    "tracked_codeflash": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+    "tracked_codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+  },
+  "live_registers": {
+    "boundary": "register values are retained as observations; SELFIDST is the self-programming ID-authentication status, not proof that the OCD debugger ID or ICU-S key store is unlocked",
+    "fastat": "0x00",
+    "fentryr": "0x0000",
+    "fhve15": "0x00000000",
+    "fhve3": "0x00000000",
+    "fpm_on": "0x80",
+    "fstatr": "0x00008000",
+    "selfid": [
+      "0xFFFFFFFF",
+      "0xFFFFFFFF",
+      "0xFFFFFFFF",
+      "0xFFFFFFFF"
+    ],
+    "selfidst": "0x00000000"
+  },
+  "schema": "corolla-2023-albino-telescope-analysis-v1",
+  "source": {
+    "attribution": "albinoelephant, contributor-stated same 2023 US Corolla",
+    "depth": "shellcode",
+    "diagnostic_address": "0x7A1",
+    "probe_json": "community/albinoelephant/telescope/probe.json",
+    "probe_json_sha256": "0a5e318a9c6e8e2278633ea9f4e6f60a8721a666c06fe605993a7447b584733e",
+    "probe_md": "community/albinoelephant/telescope/probe.md",
+    "probe_md_sha256": "30e537b6f3e38772201519ab4ed2ead36ae05a3e91910f0dd382c72cff69ec86",
+    "timestamp": "2026-08-26T01:49:18Z"
+  }
+}

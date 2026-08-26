@@ -179,16 +179,17 @@ provenance link remains an inference.
 
 ## `albinoelephant/`
 
-**Contributor:** albinoelephant, comma Discord, 2026-08-12
+**Contributor:** albinoelephant, comma Discord, 2026-08-12 through 2026-08-26
 
-**Vehicle attribution:** reported 2023 US Corolla. The later tracked CodeFlash
-identifies the firmware artifact as `8965H1202000` / `8A3111202000` on
-`R7F701383`; a direct UDS F181 transcript is still not retained.
+**Vehicle attribution:** reported 2023 US Corolla. The 2026-08-26 same-car
+`eps-telescope` probe directly captures application F181 as
+`8965F1208000 / 8A3111202000` on `R7F701383`; `8965H1202000` is the
+separate one-record DID `0x2032` identity retained as the historical corpus label.
 
 This directory preserves the contributor's complete 2026-08-18 memory corpus
 under `albinoelephant/raw-20260818/` (CodeFlash, DataFlash, global/local RAM,
-and the earlier TSKM oracle), plus a compact CAN-only oracle derived from the
-already-pinned public route. The contributor-supplied `MANIFEST.txt` pins every
+and the earlier TSKM oracle), the 2026-08-26 `eps-telescope` probe, plus a compact
+CAN-only oracle derived from the already-pinned public route. The contributor-supplied `MANIFEST.txt` pins every
 raw file hash and acquisition note; the artifacts are immutable evidence inputs
 rather than tooling.
 

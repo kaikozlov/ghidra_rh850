@@ -1643,6 +1643,11 @@ the mistakes are not re-made.
   `TOYOTA_COROLLA_TSS2`, so the route-to-image/model-year join is contributor
   attribution rather than route-contained identity.
 
+**Later supersession:** CORR-118 preserves CORR-070's acquisition/CodeFlash
+closure but supersedes its identity interpretation and missing-F181 boundary: direct
+same-car telescope F181 is `8965F1208000 / 8A3111202000`, while
+`8965H1202000` is DID `0x2032`'s separate one-record identity.
+
 Checked by `tests/verify_albinoelephant_corolla_codeflash.py`; canonical report:
 [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-public-route.md).
 
@@ -2927,3 +2932,32 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:** `data/generated/techstream_v18/tss3_cruise_live_transport.json`;
   `tests/verify_tss3_cruise_live_transport_external.py`;
   [../tooling/techstream.md](../tooling/techstream.md) §6.3.
+
+### CORR-118 — `8965H1202000` is not Albino's application-F181 primary
+
+- **Wrong:** the retained 2026-08-18 corpus was described as having live software
+  IDs `8965H1202000 / 8A3111202000`, while `8965F1208000 @ 0x20860` was called
+  only a table entry and not the unit's live identity. CORR-070 inherited that
+  wording from the contributor manifest before a direct F181 transcript existed.
+- **Right:** Albino's same-car 2026-08-26 eps-telescope probe directly reads
+  application F181 as count `2` with records `8965F1208000` and
+  `8A3111202000`. Exact target-native callback `0x4A328` independently copies
+  those records from CodeFlash `0x20860` and `0x17DC0`. The distinct
+  `8965H1202000 @ 0x17D80` record is returned by callback `0x4A2E0`, configured
+  for the separate one-record DID `0x2032` path.
+- **Consequence:** Albino and Span share application-F181 primary
+  `8965F1208000`; they remain distinct physical/calibration specimens through
+  the F181 secondary and auxiliary identities (`8A3111202000` /
+  `8965H1202000` versus `8A3111213000` / `8965H1213000`) and their low
+  calibration data. Existing filenames and generated artifact IDs containing
+  `8965H1202000` are retained as stable historical corpus labels rather than
+  mechanically renamed.
+- **Provenance boundary:** the contributor-supplied 2026-08-18 `MANIFEST.txt`
+  remains immutable even though its identity interpretation is superseded. The
+  public comma route still has forced old `carParams` and no passive `carFw`, so
+  this correction joins the later telescope run to the tracked firmware, not the
+  route itself.
+- **Canonical:**
+  `data/generated/corolla_2023_albino_telescope_analysis.json`;
+  `tests/verify_albinoelephant_telescope_probe.py`;
+  [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.39.

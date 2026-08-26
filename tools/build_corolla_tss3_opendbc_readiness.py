@@ -17,6 +17,7 @@ import argparse
 import collections
 import hashlib
 import json
+import runpy
 import zipfile
 from pathlib import Path
 from typing import Any
@@ -32,6 +33,8 @@ B6_SECOC = REPO / "data/generated/corolla_8965H1202000_b6_secoc_verification.jso
 LIMITS = REPO / "data/generated/corolla_hf_steering_limits.json"
 CMD5 = REPO / "data/generated/corolla_hf_command5_portability.json"
 CARRIER = REPO / "data/generated/corolla_hf_command5_runtime_carrier.json"
+DIRECT_CANARY = REPO / "exploit/ephemeral_runtime/corolla_hf_direct_canary.py"
+DIRECT_COMMAND5 = REPO / "exploit/ephemeral_runtime/corolla_hf_direct_command5.py"
 H_RUNTIME = REPO / "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json"
 SPAN_ZIP = REPO / "community/spanconstant/spanconstant_tsk.zip"
 SPAN_MEMBER = "tsk/uds-sweep/ready_capture.ndjson"
@@ -149,6 +152,10 @@ def main() -> int:
     limits = json.loads(LIMITS.read_text())
     cmd5 = json.loads(CMD5.read_text())
     carrier = json.loads(CARRIER.read_text())
+    direct_canary_ns = runpy.run_path(str(DIRECT_CANARY))
+    direct_canary = direct_canary_ns["build_plan"]()
+    direct_command5_ns = runpy.run_path(str(DIRECT_COMMAND5))
+    direct_command5 = direct_command5_ns["build_plan"]()
     h_runtime = json.loads(H_RUNTIME.read_text())
     span = span_capture()
     span_rlog = json.loads(SPAN_RLOG.read_text())
@@ -161,6 +168,18 @@ def main() -> int:
         raise ValueError("H/F command5 carrier contract drift")
     if carrier["boundary"]["live_retention_closed"] or carrier["boundary"]["live_slot4_permission_closed"]:
         raise ValueError("static carrier artifact must not claim live closure")
+    if direct_canary["schema"] != "corolla-hf-direct-canary-v1" or direct_canary["mode"] != "plan":
+        raise ValueError("H/F direct-canary plan schema drift")
+    if direct_canary["package"]["payload_sha256"] != "313d1bb70fe6147c179e4b5a35e4556e536f062a80d53d85af3d4292b0b29d84":
+        raise ValueError("H/F direct-canary package drift")
+    if direct_canary["success_gate"]["command5_proxy_authorized_by_this_plan"] is not False:
+        raise ValueError("H/F direct-canary must not authorize command5")
+    if direct_command5["schema"] != "corolla-hf-direct-command5-v1" or direct_command5["mode"] != "plan":
+        raise ValueError("H/F direct-command5 plan schema drift")
+    if direct_command5["package"]["payload_sha256"] != "a94979704010758dd09acc0e137977c8eed5003822eababa39eb8a7e5e9d5a58":
+        raise ValueError("H/F direct-command5 package drift")
+    if not direct_command5["live_guards"]["successful_canary_result_required"] or not direct_command5["live_guards"]["reset_to_stock_confirmation_required"]:
+        raise ValueError("H/F direct-command5 must remain gated behind canary/reset proof")
     if engagement["schema"] != "corolla-hf-nonsteering-engagement-state-v1":
         raise ValueError("non-steering engagement contract schema drift")
     if fault_state["schema"] != "corolla-hf-0x394-fault-state-contract-v1" or remaining_status["schema"] != "corolla-hf-remaining-status-contract-v1":
@@ -385,6 +404,21 @@ def main() -> int:
                 "static_candidate": carrier["carrier_geometry"],
                 "canary": carrier["runtime_candidates"]["inert_canary"],
                 "proxy": carrier["runtime_candidates"]["fixed_b6_command5_proxy"],
+                "direct_canary": {
+                    "tool": str(DIRECT_CANARY.relative_to(REPO)),
+                    "target": direct_canary["target"],
+                    "package": direct_canary["package"],
+                    "field_proven_bootstrap": direct_canary["field_proven_bootstrap"],
+                    "success_gate": direct_canary["success_gate"],
+                    "boundary": direct_canary["boundary"],
+                },
+                "direct_command5": {
+                    "tool": str(DIRECT_COMMAND5.relative_to(REPO)),
+                    "target": direct_command5["target"],
+                    "package": direct_command5["package"],
+                    "probe": direct_command5["probe"],
+                    "live_guards": direct_command5["live_guards"],
+                },
                 "boundary": carrier["boundary"],
             },
             "nonsteering_engagement_contract": {
@@ -439,7 +473,7 @@ def main() -> int:
             ],
             "blocks_production_lateral": [
                 "Firmware-identified H/F-family capture with the Toyota-B CAN0/CAN1 network physically relay-correct and stock LTA exercised off -> active -> off.",
-                "B6 stock/minimal secondary-field cross-ECU validation, stock sender cadence/physical route, and a working slot-4 signing path: key or the audited 462-byte H/F command-5 proxy after the 332-byte inert carrier canary proves live retention and selector-4 permission/latency is measured.",
+                "B6 stock/minimal secondary-field cross-ECU validation, stock sender cadence/physical route, and a working slot-4 signing path: key or the audited 462-byte H/F command-5 proxy after the exact same-car direct 332-byte canary tool proves live retention and selector-4 permission/latency is measured.",
                 "Stock-source suppression/interception point on Toyota-B topology.",
                 "Conservative Panda/openpilot driver-override policy dynamic validation, Q-current actuator-response policy if desired, Ready/fault recovery-to-openpilot temporary/permanent policy mapping, and final relay-correct actuator validation. Exact 0x394 DEM class/DTC families and 0x351 force-7 source topology are already statically closed; no Toyota EPS physical-driver-torque comparator remains to recover under the promoted static census.",
             ],
@@ -457,7 +491,7 @@ def main() -> int:
             ],
         },
         "highest_value_next_evidence": [
-            "On an isolated exact-H/F bench target, run the audited 332-byte inert carrier canary first and require FEBFFB80 heartbeat progression before exposing the 462-byte fixed-36-byte command-5 proxy; then test live slot-4 permission and latency without vehicle actuation.",
+            "On the isolated exact Albino H/F specimen, run exploit/ephemeral_runtime/corolla_hf_direct_canary.py first: it replays the same-car telescope-proven zero-DID FEBF0000 bootstrap, pins both application/boot F181, and requires FEBFFB80 heartbeat progression. After reset-to-stock is separately confirmed, use exploit/ephemeral_runtime/corolla_hf_direct_command5.py for the guarded 462-byte fixed-36-byte selector-4 probe; only then measure slot-4 latency, still without vehicle actuation.",
             "Capture an exact H/F-family vehicle with carFw/F181 preserved, the Toyota-B CAN0/CAN1 network physically repinned onto the CAN0/CAN2 relay pair, and all buses logged during stock LTA off->active->off, steering input, cruise main/engage, brake/gas and P/R/N/D transitions; simultaneously record 0x51E Ready and directly poll the exact FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 SID-0x22 oracles.",
             "Acquire matched category-435 07B0 Brake/EPB firmware and 0792 FRC_P5 firmware; join planner state -> upstream FD traffic -> protected B6 -> EPS response and signer/freshness ownership.",
             "Use that firmware-identified relay-correct capture to choose TSS3 CarState/Panda input buses, validate 0x127 gear enums, and recover the missing 0x1D3/0x399/0x260/0x262 roles before implementing production safety.",

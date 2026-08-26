@@ -76,10 +76,10 @@ check("contributor manifest identifies no-glitch owner-side acquisition", "No gl
 print("\n== embedded ECU identity ==")
 check("MCU boot-info string is exact", codeflash[0x180:0x180 + 40] == b"BOOT INFO AREA  R7F701383       72114350")
 check("ECU serial is exact", codeflash[0xA4DC:0xA4DC + 20] == b"8965012N50A05G310920")
-check("live primary software ID is exact", codeflash[0x17D80:0x17D80 + 12] == b"8965H1202000")
-check("live secondary software ID is exact", codeflash[0x17DC0:0x17DC0 + 12] == b"8A3111202000")
-check("8965F1208000 exists only as a distinct embedded table entry", codeflash[0x20860:0x20860 + 12] == b"8965F1208000")
-check("H1202000 and F1208000 identities are not conflated", codeflash[0x17D80:0x17D8C] != codeflash[0x20860:0x2086C])
+check("application F181 primary record source is exact", codeflash[0x20860:0x20860 + 12] == b"8965F1208000")
+check("application F181 secondary record source is exact", codeflash[0x17DC0:0x17DC0 + 12] == b"8A3111202000")
+check("auxiliary one-record DID2032 identity is exact", codeflash[0x17D80:0x17D80 + 12] == b"8965H1202000")
+check("auxiliary H1202000 identity stays distinct from F181 primary", codeflash[0x17D80:0x17D8C] != codeflash[0x20860:0x2086C])
 
 print("\n== cross-calibration crypto roots ==")
 for address, label in (

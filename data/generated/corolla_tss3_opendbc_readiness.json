@@ -63,7 +63,7 @@
     "sample_count": 5639
   },
   "highest_value_next_evidence": [
-    "On an isolated exact-H/F bench target, run the audited 332-byte inert carrier canary first and require FEBFFB80 heartbeat progression before exposing the 462-byte fixed-36-byte command-5 proxy; then test live slot-4 permission and latency without vehicle actuation.",
+    "On the isolated exact Albino H/F specimen, run exploit/ephemeral_runtime/corolla_hf_direct_canary.py first: it replays the same-car telescope-proven zero-DID FEBF0000 bootstrap, pins both application/boot F181, and requires FEBFFB80 heartbeat progression. After reset-to-stock is separately confirmed, use exploit/ephemeral_runtime/corolla_hf_direct_command5.py for the guarded 462-byte fixed-36-byte selector-4 probe; only then measure slot-4 latency, still without vehicle actuation.",
     "Capture an exact H/F-family vehicle with carFw/F181 preserved, the Toyota-B CAN0/CAN1 network physically repinned onto the CAN0/CAN2 relay pair, and all buses logged during stock LTA off->active->off, steering input, cruise main/engage, brake/gas and P/R/N/D transitions; simultaneously record 0x51E Ready and directly poll the exact FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 SID-0x22 oracles.",
     "Acquire matched category-435 07B0 Brake/EPB firmware and 0792 FRC_P5 firmware; join planner state -> upstream FD traffic -> protected B6 -> EPS response and signer/freshness ownership.",
     "Use that firmware-identified relay-correct capture to choose TSS3 CarState/Panda input buses, validate 0x127 gear enums, and recover the missing 0x1D3/0x399/0x260/0x262 roles before implementing production safety.",
@@ -81,7 +81,7 @@
     ],
     "blocks_production_lateral": [
       "Firmware-identified H/F-family capture with the Toyota-B CAN0/CAN1 network physically relay-correct and stock LTA exercised off -> active -> off.",
-      "B6 stock/minimal secondary-field cross-ECU validation, stock sender cadence/physical route, and a working slot-4 signing path: key or the audited 462-byte H/F command-5 proxy after the 332-byte inert carrier canary proves live retention and selector-4 permission/latency is measured.",
+      "B6 stock/minimal secondary-field cross-ECU validation, stock sender cadence/physical route, and a working slot-4 signing path: key or the audited 462-byte H/F command-5 proxy after the exact same-car direct 332-byte canary tool proves live retention and selector-4 permission/latency is measured.",
       "Stock-source suppression/interception point on Toyota-B topology.",
       "Conservative Panda/openpilot driver-override policy dynamic validation, Q-current actuator-response policy if desired, Ready/fault recovery-to-openpilot temporary/permanent policy mapping, and final relay-correct actuator validation. Exact 0x394 DEM class/DTC families and 0x351 force-7 source topology are already statically closed; no Toyota EPS physical-driver-torque comparator remains to recover under the promoted static census."
     ],
@@ -261,6 +261,112 @@
         "sha256": "a32baf46dd8e0599021b5c174763887513b3ba903d40ebe284f19d31c97424f4",
         "size": 332
       },
+      "direct_canary": {
+        "boundary": "The earlier range dump already proved boot-RAM execution; telescope independently replays the exact zero-DID package path, not application retention. A successful inert canary is the required dynamic evidence before promoting H/F RAM-exec geometry or exposing command 5.",
+        "field_proven_bootstrap": {
+          "boot_security_access_required": true,
+          "did_0201": "00000000000000000000000000000000",
+          "did_0202": "00000000000000000000000000000000",
+          "did_0203": "0000000000",
+          "ff00_request": "3101ff004500000e000000008000",
+          "post_10f0_ram_substitution_required": false,
+          "request_download": "01460100febf000000001000",
+          "transfer_block_size": 1024,
+          "transfer_blocks": 4,
+          "verify_option": "4500febf000000001000",
+          "verify_routine": "0x10F0"
+        },
+        "package": {
+          "callback_address": "0xFEBF0000",
+          "cmac_valid": true,
+          "crc_descriptor_address": "0xFEBF0000",
+          "crc_descriptor_length": 4080,
+          "crc_fixup": "0x35D8FE60",
+          "crc_residue": "0xFFFFFFFF",
+          "payload_build_secret_source": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin@0xBFD8",
+          "payload_build_secret_value_recorded": false,
+          "payload_sha256": "313d1bb70fe6147c179e4b5a35e4556e536f062a80d53d85af3d4292b0b29d84",
+          "payload_size": 4096,
+          "shellcode_path": "exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin",
+          "shellcode_sha256": "a32baf46dd8e0599021b5c174763887513b3ba903d40ebe284f19d31c97424f4",
+          "shellcode_size": 332
+        },
+        "success_gate": {
+          "application_f181_must_reappear": "023839363546313230383030300000000038413331313132303230303000000000",
+          "command5_proxy_authorized_by_this_plan": false,
+          "heartbeat_address": "0xFEBFFB80",
+          "heartbeat_must_advance": true,
+          "reset_to_stock_must_be_checked_separately": true
+        },
+        "target": {
+          "dynamic_bootstrap_evidence": "community/albinoelephant/telescope/probe.json",
+          "physical_specimen": "albinoelephant reported 2023 US Corolla",
+          "required_application_f181_hex": "023839363546313230383030300000000038413331313132303230303000000000",
+          "required_boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+          "tracked_codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+        },
+        "tool": "exploit/ephemeral_runtime/corolla_hf_direct_canary.py"
+      },
+      "direct_command5": {
+        "live_guards": {
+          "execute_and_bench_isolated_required": true,
+          "flash_write_used": false,
+          "reset_to_stock_confirmation_required": true,
+          "steering_can_transmit_used": false,
+          "successful_canary_result_required": true
+        },
+        "package": {
+          "callback_address": "0xFEBF0000",
+          "cmac_valid": true,
+          "crc_descriptor_address": "0xFEBF0000",
+          "crc_descriptor_length": 4080,
+          "crc_fixup": "0xB711D947",
+          "crc_residue": "0xFFFFFFFF",
+          "payload_build_secret_source": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin@0xBFD8",
+          "payload_build_secret_value_recorded": false,
+          "payload_sha256": "a94979704010758dd09acc0e137977c8eed5003822eababa39eb8a7e5e9d5a58",
+          "payload_size": 4096,
+          "shellcode_path": "exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin",
+          "shellcode_sha256": "3bb96eefae06005c99a0ac52b7f0c64cc5d52e2b0b1fcbb73e0b4ec69609f8d3",
+          "shellcode_size": 462
+        },
+        "probe": {
+          "boundary": "This proves the local application-context command-5/slot-4 generation path only. It does not establish a shared cross-vehicle key, B6 sender timing, or vehicle actuation.",
+          "command5": {
+            "driver_record": 0,
+            "expected_output_length": 16,
+            "input_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20212223",
+            "input_length": 36,
+            "input_sha256": "5d7e2d9b1dcbc85e7c890036a2cf2f9fe7b66554f2df08cec6aa9c0a25c99c21",
+            "key_selector": 4
+          },
+          "host_commit_order": [
+            "write input[36]",
+            "write output sentinel a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+            "write result_status sentinel 0xFE",
+            "write request_state=1 last"
+          ],
+          "mailbox": {
+            "address": "0xFEBFFB80",
+            "input_offset": 8,
+            "output_length_offset": 4,
+            "output_offset": 44,
+            "request_state_offset": 0,
+            "result_status_offset": 1,
+            "size": 60
+          },
+          "terminal_success": "request_state returns 0, result_status changes from FE to 00, output_length is 16, and output differs from the host sentinel; state 2 may be observed while queued",
+          "xcp_request_can_id": "0x7F7",
+          "xcp_response_can_id": "0x7F8"
+        },
+        "target": {
+          "physical_specimen": "albinoelephant reported 2023 US Corolla",
+          "prior_live_gate": "successful corolla_hf_direct_canary result + explicit reset-to-stock confirmation",
+          "required_application_f181_hex": "023839363546313230383030300000000038413331313132303230303000000000",
+          "required_boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121"
+        },
+        "tool": "exploit/ephemeral_runtime/corolla_hf_direct_command5.py"
+      },
       "proxy": {
         "binary": "exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin",
         "busy_behavior": "shared-driver busy result 2 leaves request_state=1 so the next foreground iteration retries; no command-7 abort primitive is called",
@@ -272,7 +378,7 @@
         "input_length": 36,
         "key_selector": 4,
         "relocations": 0,
-        "sha256": "9b9b055c65246bb4e25bc512753772bbe474c0ba5847ecb253e4147fd1db8dbf",
+        "sha256": "3bb96eefae06005c99a0ac52b7f0c64cc5d52e2b0b1fcbb73e0b4ec69609f8d3",
         "size": 462,
         "status_flag": "0xFEBF1281"
       },

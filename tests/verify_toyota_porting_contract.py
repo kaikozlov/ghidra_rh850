@@ -117,8 +117,8 @@ check("pinned SecOC LTA2 actuation is safety-blocked", "rejects any STEERING_LTA
 
 with MATRIX.open(newline="", encoding="utf-8") as fh:
     rows = list(csv.DictReader(fh))
-corolla_h = next(r for r in rows if r["application_software_id"] == "8965H1202000")
-check("tracked Corolla H remains a direct old-steering-ID counterexample", "no 0x2E4/0x131" in corolla_h["secured_can_ids"])
+corolla_h = next(r for r in rows if "albinoelephant" in r["vehicle"].lower())
+check("tracked historical-H Corolla remains a direct old-steering-ID counterexample", corolla_h["application_software_id"] == "8965F1208000" and "8965H-12020" in corolla_h["eps_part_number"] and "no 0x2E4/0x131" in corolla_h["secured_can_ids"])
 check("variant matrix separates ADAS and security axes", all(k in corolla_h for k in ("adas_generation", "security_architecture")) and "SecOC/TSK" in corolla_h["security_architecture"])
 check("report explicitly separates TSS generation from SecOC/TSK", all(x in report for x in ("Two orthogonal axes", "TSS generation", "SecOC/TSK")))
 

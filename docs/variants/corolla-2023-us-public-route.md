@@ -3,33 +3,35 @@
 > **Scope:** public comma route `a74eba85c97eaf67|00000004--555953f500`,
 > discussed as a 2023 US Corolla in comma `#toyota-security`
 >
-> **Firmware identity from tracked CodeFlash:** `8965H1202000` / `8A3111202000`,
-> MCU `R7F701383`, serial `8965012N50A05G310920`
+> **Direct application F181:** `8965F1208000` / `8A3111202000` from the
+> contributor's retained 2026-08-26 eps-telescope probe
 >
-> **Direct UDS F181 transcript:** not retained; the live-ID blocks above are
-> firmware-static evidence from the acquired image
+> **Auxiliary one-record identity:** `8965H1202000` from DID `0x2032` /
+> CodeFlash `0x17D80`; MCU `R7F701383`, serial `8965012N50A05G310920`
 >
-> **Status:** route evidence + complete contributor memory corpus acquired;
-> CodeFlash semantics now independently analyzed
+> **Status:** route evidence + complete contributor memory corpus + same-car
+> eps-telescope live probe acquired; CodeFlash semantics independently analyzed
 >
 > **Evidence source:** public logged route + pinned Panda/opendbc source +
 > contributor-supplied TSKM/CodeFlash/DataFlash/RAM artifacts + external Discord
 > vehicle attribution
 >
 > **Machine-readable summaries:**
-> `data/generated/corolla_2023_public_route_summary.json` and
-> `data/generated/corolla_2023_albino_dataflash_analysis.json`
+> `data/generated/corolla_2023_public_route_summary.json`,
+> `data/generated/corolla_2023_albino_dataflash_analysis.json`, and
+> `data/generated/corolla_2023_albino_telescope_analysis.json`
 
-This specimen must remain separate from the earlier
-[`8965F1208000`](corolla-8965F1208000.md) Corolla investigation. The earlier
-variant has an exact application software ID from direct field probing. This
-public route still does **not** identify its physical EPS: its logged software
-was deliberately forced to an old `TOYOTA_COROLLA_TSS2` fingerprint and contains
-no `carFw` inventory. The later contributor memory corpus independently closes
-the firmware side for this specimen: its CodeFlash live-ID blocks identify
-`8965H1202000` / `8A3111202000`. An embedded `8965F1208000` string at
-CodeFlash `0x20860` is a table entry and must not be mistaken for Span's distinct
-`8965F1208000` ECU.
+This physical specimen must remain separate from Span's
+[`8965F1208000`](corolla-8965F1208000.md) Corolla even though the two ECUs now
+prove to share the same first application-F181 record. The public route still
+does **not** identify its physical EPS: its logged software was deliberately
+forced to an old `TOYOTA_COROLLA_TSS2` fingerprint and contains no `carFw`
+inventory. The later same-car telescope probe closes the diagnostic identity:
+application F181 is count `2`, sourced by the target-native `0x4A328` producer
+from `8965F1208000 @ 0x20860` and `8A3111202000 @ 0x17DC0`.
+`8965H1202000 @ 0x17D80` is instead the separate one-record DID `0x2032`
+identity. Existing `8965H1202000` artifact filenames are retained as stable
+historical corpus labels.
 
 The public route is nevertheless highly useful because it resolves which CAN
 traffic was genuinely received from the vehicle and which apparent steering
@@ -351,13 +353,17 @@ source range dump SHA-256: 97f9d42d936b97a99e7ab3d3ef20c6fb4c1fc3cc2ba199f6b1586
 normalized CodeFlash SHA-256: 0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f
 MCU boot-info: R7F701383 / 72114350
 ECU serial: 8965012N50A05G310920
-live software IDs: 8965H1202000 / 8A3111202000
+direct application F181: 8965F1208000 / 8A3111202000
+auxiliary DID 0x2032 identity: 8965H1202000
 ```
 
-The image also contains `8965F1208000` at `0x20860`, but the primary live-ID
-block is `8965H1202000` at `0x17D80`; the contributor manifest independently
-records the same distinction. This closes the old calibration-unknown statement
-for the firmware artifact without rewriting the route's still-forced identity.
+The 2026-08-18 contributor manifest predated a direct diagnostic identity capture
+and treated `8965H1202000 @0x17D80` as the live primary. The later same-car
+`telescope` transcript corrects that interpretation: F181 producer `0x4A328`
+reads `8965F1208000 @0x20860` plus `8A3111202000 @0x17DC0`, while
+`8965H1202000 @0x17D80` belongs to DID `0x2032`. CORR-118 preserves the raw
+manifest as immutable provenance while superseding its identity interpretation.
+The public route itself still retains its deliberately forced old fingerprint.
 
 ### 7.1 Security roots transfer exactly
 
@@ -3072,6 +3078,92 @@ all summarized live invariants, while
 `tests/verify_corolla_hf_secoc_00f_freshness_bridge_external.py` regenerates the JSON
 from all three retained raw sources through the pinned sibling openpilot LogReader.
 
+
+### 7.39 Same-car eps-telescope probe closes F181/live Gate-2 and exactly replays the boot-RAM path
+
+The contributor's 2026-08-26 `eps-telescope` output is the first retained direct
+application-F181 transcript for this specimen. `read_identity()` captured
+`02 || 8965F1208000[16] || 8A3111202000[16]` before the application-to-boot
+session ladder, then bootloader F181 returned its independently recovered
+`02 || 32*0x21` placeholder. This resolves an earlier naming mistake: target-native
+application callback `0x4A328` reads F181 record 1 from CodeFlash `0x20860` and
+record 2 from `0x17DC0`; the `8965H1202000` record at `0x17D80` is produced by
+the separate one-record callback `0x4A2E0`, configured for DID `0x2032`.
+Albino and Span therefore share F181 primary `8965F1208000` but have different
+secondary/auxiliary calibration identities (`8A3111202000`/`8965H1202000` versus
+`8A3111213000`/`8965H1213000`).
+
+The probe also gives an unusually strong live-to-static join. Its streamed
+CodeFlash windows at `0x8E6A0` (256 B), `0xFFDE0` (64 B), and `0x17D80` (64 B)
+are all byte-identical to the tracked normalized image: 384/384 live bytes match.
+The hardware product-name registers decode to `R7F701383`. The flash-wide live
+egg scan reports one candidate, exactly `0x88C62`, independently confirming the
+H/F Gate-2 relocation recovered from the firmware. Telescope did not request the
+relocated candidate's surrounding 64-byte window and correctly reports its
+candidate status as `NO_DATA`; separately, the tracked CodeFlash window
+`0x88C43..0x88C82` hashes to
+`50d793a2942716dcf0582238edfe6c2d72378eea8bd4e1bf575a8539cd497350`,
+byte-identical to the pinned Sienna Gate-2 fingerprint, with the exact H/F patch
+word `e0d1 -> e001` at `0x88C62`. These two evidence legs must remain distinct:
+the live scan proves the egg address/signature, while the retained dump proves the
+full relocated function window.
+
+Boot integrity is likewise target-native rather than telescope's Sienna-specific
+classifier. The probe reads `0xFFDEC=AD59D70C`; that 64-byte live region exactly
+matches the tracked image, and software CRC32 over target range
+`[0x18000,0xFFDF0)` is `0xFFFFFFFF`. Live DCRA state concurrently reports
+`DCRA1COUT=FFFFFFFF` and `DCRA1CTL=0`. Therefore telescope's textual
+`boot_integrity=unknown` means only that its hardcoded Sienna adjust-word table does
+not know this Corolla fixup; it is not evidence of invalid target integrity.
+
+For live experimentation, the run provides a clean independent replay of the
+authenticated bootloader RAM-execution chain that the August-18 range-dump acquisition
+had already demonstrated in practice. Boot SecurityAccess succeeded, the `0x10F0`
+authenticated `FEBF0000` envelope was accepted, and the shellcode stream completed
+with no region CRC failures. The streamed RAM window
+`FEBF2CF8..FEBF2DF7` can now be interpreted against the recovered bootloader:
+
+- `FEBF2CF8..2D07` = zero DID `0x0202` IV;
+- `FEBF2D08..2D17` = zero DID `0x0201` key material;
+- `FEBF2D18..2D27` = `80d221a05622b4f9d4f287922e6c78d1`, exactly
+  `AES-128-ECB-ENC(PAYLOAD_BUILD_SECRET, 0^128)`;
+- `FEBF2D28..2D37` = the payload-CMAC work/output buffer for this telescope
+  envelope (`a5ebde539a7147cd61f21b4a5b222e1f`). Optional reconstruction against
+  pinned `eps-telescope@2bb94a5` proves this is exactly the default deep-probe
+  envelope's final CMAC tag; the same reconstruction yields envelope SHA-256
+  `e1d2ddcaa1a8b0cba0a5c4407bd2872619e14b81dc08dc50df8772de06a35910`;
+- `FEBF2D38..2D47` = `ef309a63a0572b7a147b7062aa1073a3`, the retained boot
+  SecurityAccess seed snapshot. `0x6F22` has the unique boot request-seed write to
+  this RAM field; the three earlier range-dump snapshots carry three different
+  values there, so all four retained seed snapshots are distinct.
+
+The pinned deep-probe reconstruction also yields plaintext CRC fixup
+`0x6DAAE993`, exactly the live `DCRA1CIN`, while `DCRA1COUT=FFFFFFFF` is the
+terminal valid CRC residue. Together with the matching 128-bit CMAC tag this strongly
+binds the retained run to the pinned default telescope payload/request geometry.
+
+For the observed telescope seed and the verified zero-record boot algorithm, the
+recovered computation gives stage-1 key
+`f18878ad2a00e3bf78992beb90684f9f` and expected response
+`1c673fae8a534600c6d529143ed25ce7`. This is a useful same-car boot-SA known-answer
+vector, but none of these CPU-visible boot/payload values is the operational
+SecOC key. The application profiles still select protected ICU-S slot 4, and this
+probe never invokes command 5 or exports that slot.
+
+The practical consequence is improved exact provenance, not a newly discovered
+bootstrap: arbitrary authenticated **bootloader-context** RAM shellcode was already
+implicit in the successful August-18 range dump. Telescope independently replays that
+capability while directly binding F181, image bytes, and the precise authenticated
+payload state. What remains is specifically the application-context carrier
+transition/retention and then provisioned slot-4 command-5 permission plus latency.
+The telescope run does not itself prove either of those later stages.
+
+Machine-readable correlation:
+`data/generated/corolla_2023_albino_telescope_analysis.json`;
+`tests/verify_albinoelephant_telescope_probe.py` regenerates the result and pins the
+identity, sampled-image joins, Gate-2 boundary, boot-integrity state, KDF, seed
+snapshot, and dynamic-execution gates.
+
 ## 8. Remaining evidence boundary
 
 ### Static closure criterion
@@ -3097,7 +3189,6 @@ coverage of this image. The corpus still does **not** provide:
   target/rate bounds;
 - proof of the upstream feature producer and route that causes the Brake System
   Control Module to emit the recovered B6 target-angle command;
-- a direct UDS `F181` transcript from the same acquisition;
 - a stock passive `carFw` inventory joining the public route to the firmware;
 - proof of where the selected slot-4 key value is physically stored or internally derived inside ICU-S;
 - same-runtime-epoch proof between the CAN oracles and any DataFlash read;
@@ -3134,16 +3225,17 @@ needed for a safe openpilot/Panda implementation.
 
 For the separate key/provisioning question, retain the controlled paired capture:
 full-bus synchronization/protected CAN immediately before the programming/range-
-dump transition, then repeat after recovery/reset and retain the corresponding
-memory snapshot plus a direct `F181` response. That resolves runtime-key
-continuity without assuming it across separate jobs.
+dump transition, then repeat after recovery/reset and retain the corresponding memory snapshot.
+The direct application F181 identity is now available from the telescope probe;
+the remaining paired-capture objective is runtime-key continuity, not ECU identity.
 
 For Sienna-style steering-bridge portability, the higher-value next EPS CodeFlash
-is still a foreign calibration whose Gate-2 queue actually contains classic
-`0x2E4/0x131` records—for example Span's distinct `8965F1208000` if that image
-becomes available. The `8965H1202000` corpus has now served two purposes: it is a
-negative-capability regression for the classic `0x2E4/0x131` bridge **and** a fully
-analyzed positive example of the replacement protected-B6 target-angle architecture.
+is a foreign calibration whose Gate-2 queue actually contains classic
+`0x2E4/0x131` records. Span's `8965F1208000` image is already retained and independently
+repeats the H/F `00F/D7/B6` queue, so it is not such a candidate. The historical
+`8965H1202000`-labelled corpus has now served as both a negative-capability regression
+for the classic `0x2E4/0x131` bridge and a fully analyzed positive example of the
+replacement protected-B6 target-angle architecture.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
@@ -3151,6 +3243,6 @@ analyzed positive example of the replacement protected-B6 target-angle architect
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [COM-012](../reference/index.md#finding-com-012), [SECOC-042](../reference/index.md#finding-secoc-042), [SECOC-045](../reference/index.md#finding-secoc-045), [SECOC-063](../reference/index.md#finding-secoc-063), [SECOC-071](../reference/index.md#finding-secoc-071), [SECOC-072](../reference/index.md#finding-secoc-072), [SECOC-073](../reference/index.md#finding-secoc-073), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [VAR-004](../reference/index.md#finding-var-004), [VAR-005](../reference/index.md#finding-var-005), [VAR-007](../reference/index.md#finding-var-007), [VAR-008](../reference/index.md#finding-var-008), [VAR-009](../reference/index.md#finding-var-009), [VAR-010](../reference/index.md#finding-var-010), [VAR-011](../reference/index.md#finding-var-011), [VAR-012](../reference/index.md#finding-var-012), [VAR-013](../reference/index.md#finding-var-013), [VAR-014](../reference/index.md#finding-var-014), [VAR-015](../reference/index.md#finding-var-015), [VAR-016](../reference/index.md#finding-var-016), [VAR-017](../reference/index.md#finding-var-017), [VAR-018](../reference/index.md#finding-var-018), [VAR-019](../reference/index.md#finding-var-019), [VAR-020](../reference/index.md#finding-var-020), [VAR-021](../reference/index.md#finding-var-021), [VAR-022](../reference/index.md#finding-var-022), [VAR-023](../reference/index.md#finding-var-023), [VAR-024](../reference/index.md#finding-var-024), [VAR-025](../reference/index.md#finding-var-025), [VAR-026](../reference/index.md#finding-var-026), [VAR-027](../reference/index.md#finding-var-027), [VAR-028](../reference/index.md#finding-var-028), [VAR-029](../reference/index.md#finding-var-029), [VAR-030](../reference/index.md#finding-var-030), [VAR-031](../reference/index.md#finding-var-031), [VAR-032](../reference/index.md#finding-var-032), [VAR-033](../reference/index.md#finding-var-033), [VAR-034](../reference/index.md#finding-var-034), [VAR-035](../reference/index.md#finding-var-035), [VAR-036](../reference/index.md#finding-var-036), [VAR-037](../reference/index.md#finding-var-037), [VAR-038](../reference/index.md#finding-var-038), [VAR-040](../reference/index.md#finding-var-040)
-- Corrections with this document as canonical home: [CORR-070](../reference/index.md#correction-corr-070), [CORR-073](../reference/index.md#correction-corr-073), [CORR-074](../reference/index.md#correction-corr-074), [CORR-075](../reference/index.md#correction-corr-075), [CORR-076](../reference/index.md#correction-corr-076), [CORR-077](../reference/index.md#correction-corr-077), [CORR-078](../reference/index.md#correction-corr-078), [CORR-105](../reference/index.md#correction-corr-105), [CORR-106](../reference/index.md#correction-corr-106), [CORR-107](../reference/index.md#correction-corr-107), [CORR-111](../reference/index.md#correction-corr-111)
+- Findings with this document as canonical home: [COM-012](../reference/index.md#finding-com-012), [SECOC-042](../reference/index.md#finding-secoc-042), [SECOC-045](../reference/index.md#finding-secoc-045), [SECOC-063](../reference/index.md#finding-secoc-063), [SECOC-071](../reference/index.md#finding-secoc-071), [SECOC-072](../reference/index.md#finding-secoc-072), [SECOC-073](../reference/index.md#finding-secoc-073), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [VAR-004](../reference/index.md#finding-var-004), [VAR-005](../reference/index.md#finding-var-005), [VAR-007](../reference/index.md#finding-var-007), [VAR-008](../reference/index.md#finding-var-008), [VAR-009](../reference/index.md#finding-var-009), [VAR-010](../reference/index.md#finding-var-010), [VAR-011](../reference/index.md#finding-var-011), [VAR-012](../reference/index.md#finding-var-012), [VAR-013](../reference/index.md#finding-var-013), [VAR-014](../reference/index.md#finding-var-014), [VAR-015](../reference/index.md#finding-var-015), [VAR-016](../reference/index.md#finding-var-016), [VAR-017](../reference/index.md#finding-var-017), [VAR-018](../reference/index.md#finding-var-018), [VAR-019](../reference/index.md#finding-var-019), [VAR-020](../reference/index.md#finding-var-020), [VAR-021](../reference/index.md#finding-var-021), [VAR-022](../reference/index.md#finding-var-022), [VAR-023](../reference/index.md#finding-var-023), [VAR-024](../reference/index.md#finding-var-024), [VAR-025](../reference/index.md#finding-var-025), [VAR-026](../reference/index.md#finding-var-026), [VAR-027](../reference/index.md#finding-var-027), [VAR-028](../reference/index.md#finding-var-028), [VAR-029](../reference/index.md#finding-var-029), [VAR-030](../reference/index.md#finding-var-030), [VAR-031](../reference/index.md#finding-var-031), [VAR-032](../reference/index.md#finding-var-032), [VAR-033](../reference/index.md#finding-var-033), [VAR-034](../reference/index.md#finding-var-034), [VAR-035](../reference/index.md#finding-var-035), [VAR-036](../reference/index.md#finding-var-036), [VAR-037](../reference/index.md#finding-var-037), [VAR-038](../reference/index.md#finding-var-038), [VAR-040](../reference/index.md#finding-var-040), [VAR-049](../reference/index.md#finding-var-049), [VAR-050](../reference/index.md#finding-var-050)
+- Corrections with this document as canonical home: [CORR-070](../reference/index.md#correction-corr-070), [CORR-073](../reference/index.md#correction-corr-073), [CORR-074](../reference/index.md#correction-corr-074), [CORR-075](../reference/index.md#correction-corr-075), [CORR-076](../reference/index.md#correction-corr-076), [CORR-077](../reference/index.md#correction-corr-077), [CORR-078](../reference/index.md#correction-corr-078), [CORR-105](../reference/index.md#correction-corr-105), [CORR-106](../reference/index.md#correction-corr-106), [CORR-107](../reference/index.md#correction-corr-107), [CORR-111](../reference/index.md#correction-corr-111), [CORR-118](../reference/index.md#correction-corr-118)
 <!-- knowledge-cross-references:end -->

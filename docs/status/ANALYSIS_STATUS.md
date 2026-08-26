@@ -62,7 +62,7 @@ artifact is absent and `required-external` converts that absence to failure.
 | Priority steering master routes recovered | 3 named families | `EPS_P4DK3` record 294/category 317, `EMPS_P5` record 374/category 405/generation 20, `EPS_CAN_P4DK` record 496/category 581; exact DLL/function/detail joins in `toyota_master_routes.json` |
 | Targeted application-interface correlations | 1 accepted / 1 ambiguous / 1 rejected-direct-name | `application_interface_correlations.json`: monitor 402 `Command Value Torque` accepted for command-domain corroboration; monitor 60 ambiguous; monitor 403 rejected as a direct CAN-field name |
 | Live official Techstream↔`8965B4512000` flows captured | 0 | Matching vehicle/calibration session unavailable; static host/firmware intersections are bounded, not a transcript |
-| Exact cross-variant/target-generation transfers verified | 2 tracked foreign CodeFlash regressions (`8965H1202000`, Span 2026-08-21) | `8965H1202000` independently transfers the Gate-2 semantic/CRC resolver, crypto roots, boot-SA shape, runtime control discovery, CAN1 continuity, and asynchronous PROGRAMMING architecture while correctly failing the Sienna steering-profile capability check. Span's persisted third specimen independently verifies the no-auth XCP high-LocalRAM write geometry plus live application→boot retention path and corrected direct `(bus1,param1)` PROGRAMMING acquisition. `4514000` and newer F3/F4 targets remain artifact/evidence bounded |
+| Exact cross-variant/target-generation transfers verified | 2 tracked foreign CodeFlash regressions (`8965H1202000`, Span 2026-08-21) | the Albino corpus (historically labelled `8965H1202000`, direct app F181 `8965F1208000/8A3111202000`) independently transfers the Gate-2 semantic/CRC resolver, crypto roots, boot-SA shape, runtime control discovery, CAN1 continuity, and asynchronous PROGRAMMING architecture while correctly failing the Sienna steering-profile capability check; its 2026-08-26 telescope run independently replays the already field-observed boot SA/authenticated-RAM path while directly closing F181, PRDNAME, exact payload terminal state and Gate-2 relocation. Span's persisted third specimen independently verifies the no-auth XCP high-LocalRAM write geometry plus live application→boot retention path and corrected direct `(bus1,param1)` PROGRAMMING acquisition. `4514000` and newer F3/F4 targets remain artifact/evidence bounded |
 
 ## Interpretation
 
@@ -74,6 +74,8 @@ Techstream and DDB coverage is broad and reproducible when the pinned corpus is
 available. One command-domain correlation now exceeds family-name similarity by
 matching master route, 16-bit width, `Nm` unit, public DBC geometry, and recovered
 firmware data flow; it remains external corroboration rather than a live target
-transcript. Exact live target transcripts remain absent, but exact static transfer is no longer
-zero: tracked `8965H1202000` is the first foreign CodeFlash regression. A second
+transcript. A direct same-car application/boot F181 transcript and authenticated-RAM probe are
+now retained for the Albino specimen; live Techstream monitor/session transcripts
+remain absent. Exact static transfer is also no longer zero: the tracked historical
+`8965H1202000` corpus remains the first foreign CodeFlash regression. A second
 foreign target with applicable `0x2E4/0x131` steering profiles is still missing.

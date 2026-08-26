@@ -81,7 +81,7 @@ def build() -> dict:
     need(mailbox["normalized_direct_reference_count_inside"] == 0, "mailbox direct-reference boundary drift")
     need(static["h_f_prerequisites_transfer_byte_exact"] and ev["h_f_exact_transfer"]["all_ranges_byte_equal"], "H/F prerequisite transfer drift")
 
-    validate_build(proxy, PROXY_BIN, PROXY_SOURCE, "command5-proxy", 462, 2, "9b9b055c65246bb4e25bc512753772bbe474c0ba5847ecb253e4147fd1db8dbf")
+    validate_build(proxy, PROXY_BIN, PROXY_SOURCE, "command5-proxy", 462, 2, "3bb96eefae06005c99a0ac52b7f0c64cc5d52e2b0b1fcbb73e0b4ec69609f8d3")
     validate_build(canary, CANARY_BIN, CANARY_SOURCE, "runtime-canary", 332, 132, "a32baf46dd8e0599021b5c174763887513b3ba903d40ebe284f19d31c97424f4")
 
     variants = {row["id"] for row in req["variants"]}
@@ -124,7 +124,9 @@ def build() -> dict:
             "normalized_direct_reference_count_inside": 0,
             "xcp_shadow_window": mailbox["xcp_shadow_write_window"],
             "startup_shadow_copy_end_inclusive": mailbox["startup_shadow_copy_end_inclusive"],
-            "request_state_precondition": "installer must initialize mailbox request_state byte to 0 before launching the command5 proxy",
+            "request_state_initialization": "proxy initializes mailbox request_state to 0 after stock application startup and before enabling interrupts; host state 1 is a committed request and is sampled once per foreground tick",
+            "result_status_offset": 1,
+            "result_status_protocol": "proxy mirrors stock completion status from adjacent FEBF1280/FEBF1281 done/status bytes into mailbox byte +1 before publishing request_state=0; immediate non-busy dispatcher errors are mirrored directly",
             "static_negative_boundary": mailbox["boundary"],
         },
         "runtime_candidates": {
@@ -142,7 +144,7 @@ def build() -> dict:
                 "binary": str(PROXY_BIN.relative_to(REPO)),
                 "size": 462,
                 "headroom": 2,
-                "sha256": "9b9b055c65246bb4e25bc512753772bbe474c0ba5847ecb253e4147fd1db8dbf",
+                "sha256": "3bb96eefae06005c99a0ac52b7f0c64cc5d52e2b0b1fcbb73e0b4ec69609f8d3",
                 "entry_offset": 0,
                 "relocations": 0,
                 "input_length": 36,

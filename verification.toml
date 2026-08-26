@@ -1145,6 +1145,9 @@ paths = [
   "data/generated/corolla_hf_command5_portability.json",
   "data/generated/corolla_hf_command5_runtime_carrier.json",
   "data/generated/corolla_hf_command5_runtime_carrier_evidence.json",
+  "data/generated/corolla_2023_albino_telescope_analysis.json",
+  "exploit/ephemeral_runtime/corolla_hf_direct_canary.py",
+  "exploit/ephemeral_runtime/corolla_hf_direct_command5.py",
   "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json",
   "data/toyota_eps_variant_matrix.csv",
   "community/spanconstant/spanconstant_tsk.zip",
@@ -1641,6 +1644,46 @@ paths = [
   "docs/status/PRIORITIES.md",
   "docs/reference/generated-artifacts.md",
   "exploit/findings_coverage.json",
+]
+
+
+[suite.corolla_hf_direct_canary]
+tests = ["tests/verify_corolla_hf_direct_canary.py"]
+paths = [
+  "tests/verify_corolla_hf_direct_canary.py",
+  "exploit/ephemeral_runtime/corolla_hf_direct_canary.py",
+  "exploit/ephemeral_runtime/corolla_hf_canary.c",
+  "exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin",
+  "exploit/ephemeral_runtime/audited_corolla_hf_canary_build.json",
+  "exploit/common/payload_package.py",
+  "community/albinoelephant/telescope/probe.json",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "exploit/ephemeral_runtime/README.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+]
+oracle = "dynamic_trace"
+
+[suite.corolla_hf_direct_command5]
+tests = ["tests/verify_corolla_hf_direct_command5.py"]
+oracle = "dynamic_trace"
+paths = [
+  "tests/verify_corolla_hf_direct_command5.py",
+  "exploit/ephemeral_runtime/corolla_hf_direct_command5.py",
+  "exploit/ephemeral_runtime/corolla_hf_direct_canary.py",
+  "exploit/ephemeral_runtime/corolla_hf_command5_proxy.c",
+  "exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin",
+  "exploit/ephemeral_runtime/audited_corolla_hf_command5_proxy_build.json",
+  "exploit/common/payload_package.py",
+  "exploit/followups/xcp_read_probe.py",
+  "exploit/followups/xcp_shadow_write_plan.py",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "data/generated/corolla_hf_command5_runtime_carrier.json",
+  "exploit/ephemeral_runtime/README.md",
+  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
 ]
 
 [suite.corolla_hf_command5_runtime_carrier]
@@ -2481,6 +2524,26 @@ paths = [
   "external-references.lock.json",
 ]
 oracle = "raw_bytes"
+
+
+[suite.albinoelephant_telescope_probe]
+tests = ["tests/verify_albinoelephant_telescope_probe.py"]
+paths = [
+  "tests/verify_albinoelephant_telescope_probe.py",
+  "tools/analyze_albino_telescope_probe.py",
+  "community/albinoelephant/telescope/",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "community/albinoelephant/raw-20260818/",
+  "data/generated/corolla_2023_albino_telescope_analysis.json",
+  "data/generated/corolla_8965H1202000_application_diagnostics_diff.json",
+  "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json",
+  "data/generated/secoc_gate_resolution_8965H1202000_minimal.json",
+  "data/toyota_eps_variant_matrix.csv",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+]
+oracle = "dynamic_trace"
 
 [suite.albinoelephant_corolla_repeatability]
 tests = ["tests/verify_albinoelephant_corolla_repeatability.py"]

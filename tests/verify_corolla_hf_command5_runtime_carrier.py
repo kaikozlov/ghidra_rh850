@@ -74,18 +74,23 @@ m = a["mailbox_geometry"]
 check("mailbox geometry exact", m["base"] == "0xFEBFFB80" and m["end_exclusive"] == "0xFEBFFBBC" and m["size"] == 60)
 check("mailbox has zero recovered normalized direct refs", m["normalized_direct_reference_count_inside"] == 0)
 check("mailbox stays in H XCP shadow and above startup copy", m["xcp_shadow_window"] == ["0xFEBF7C00", "0xFEBFFBFF"] and m["startup_shadow_copy_end_inclusive"] == "0xFEBFF9EF")
-check("proxy precondition explicitly initializes request byte", "request_state" in m["request_state_precondition"] and "0" in m["request_state_precondition"])
+check("proxy self-initializes request byte before interrupts", all(x in m["request_state_initialization"] for x in ("proxy initializes", "request_state", "0", "before enabling interrupts", "sampled once per foreground tick")))
+check("proxy mirrors driver status into host-readable mailbox", m["result_status_offset"] == 1 and all(x in m["result_status_protocol"] for x in ("FEBF1280/FEBF1281", "mailbox byte +1", "request_state=0", "immediate non-busy")))
 
 print("\n== audited executable candidates ==")
 canary = a["runtime_candidates"]["inert_canary"]
 proxy = a["runtime_candidates"]["fixed_b6_command5_proxy"]
 check("canary exact audited bytes", canary["size"] == CANARY_BIN.stat().st_size == 332 and canary["headroom"] == 132 and canary["sha256"] == sha(CANARY_BIN.read_bytes()) == "a32baf46dd8e0599021b5c174763887513b3ba903d40ebe284f19d31c97424f4")
-check("proxy exact audited bytes", proxy["size"] == PROXY_BIN.stat().st_size == 462 and proxy["headroom"] == 2 and proxy["sha256"] == sha(PROXY_BIN.read_bytes()) == "9b9b055c65246bb4e25bc512753772bbe474c0ba5847ecb253e4147fd1db8dbf")
+check("proxy exact audited bytes", proxy["size"] == PROXY_BIN.stat().st_size == 462 and proxy["headroom"] == 2 and proxy["sha256"] == sha(PROXY_BIN.read_bytes()) == "3bb96eefae06005c99a0ac52b7f0c64cc5d52e2b0b1fcbb73e0b4ec69609f8d3")
 check("both executables entry0/no relocations", canary["entry_offset"] == proxy["entry_offset"] == 0 and canary["relocations"] == proxy["relocations"] == 0)
 check("proxy exact B6 command5 contract", proxy["input_length"] == 36 and proxy["driver_record"] == 0 and proxy["key_selector"] == 4 and proxy["dispatcher"] == "0x00082750" and proxy["done_flag"] == "0xFEBF1280" and proxy["status_flag"] == "0xFEBF1281")
 check("proxy shared-driver busy retry semantics", "busy result 2" in proxy["busy_behavior"] and "retries" in proxy["busy_behavior"] and "no command-7 abort" in proxy["busy_behavior"])
 check("proxy source fixes input length at 36", "(void *)m->input" in PROXY_SOURCE.read_text() and "36u" in PROXY_SOURCE.read_text())
 check("proxy source leaves busy request pending", "else if (rc != 2)" in PROXY_SOURCE.read_text())
+check("proxy source self-initializes mailbox after startup before interrupts", "m->request_state = 0u;\n  __asm__ volatile(\"ei\");" in PROXY_SOURCE.read_text())
+check("proxy caches host request state once per foreground tick", "unsigned char request_state = m->request_state;" in PROXY_SOURCE.read_text() and "else if (request_state == 1u)" in PROXY_SOURCE.read_text())
+check("proxy atomically samples adjacent done/status and mirrors both completion paths", "volatile unsigned short *completion" in PROXY_SOURCE.read_text() and "unsigned short completion_state = *completion;" in PROXY_SOURCE.read_text() and "m->result_status = (unsigned char)(completion_state >> 8);" in PROXY_SOURCE.read_text() and "m->result_status = (unsigned char)rc;" in PROXY_SOURCE.read_text())
+check("H completion callback raw body is pinned before halfword sampling", H.read_bytes()[0x82F5C:0x82F5C+14].hex() == "4437815a010a440f805a00527f00")
 check("canary source is inert wrt command5", "TARGET_COMMAND5_DISPATCH" not in CANARY_SOURCE.read_text() and "TARGET_CANARY_HEARTBEAT" in CANARY_SOURCE.read_text())
 
 print("\n== audit/toolchain trust ==")

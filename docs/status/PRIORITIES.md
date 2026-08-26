@@ -155,8 +155,8 @@ restart wait for the next authenticated sync epoch rather than guessing or persi
 Toyota's prior message8. D7's message counter remains independent and must not be
 reused. Do not spend another pass rediscovering receiver freshness, global sync state,
 MAC28 logic, or Toyota B6 counter-start policy for the replacement sender. The remaining
-SecOC problem is slot-4 key/approved-MAC use (or live command-5 capability plus a
-H/F-native runtime carrier), **stock** sender cadence/secondary-field template, stock
+SecOC problem is slot-4 key/approved-MAC use (or live command-5 capability after
+validating the already-built H/F-native application carrier), **stock** sender cadence/secondary-field template, stock
 suppression, and producer topology.
 TMS-042 makes the same acquisition the highest-value reprogramming target too: modern GTS+ proves the FRC `ReproMethod=07` path
 uploads the package routine with DFI `0x01` / `10F5`, then the compact
@@ -317,21 +317,32 @@ reference is exactly `FEBF01D0`, MPU region 5 covers the pocket with supervisor
 R/W/X (`0xB8`) in both recovered application contexts, and all listed
 startup/MPU/command-5 prerequisites transfer byte-for-byte to F. A fixed B6-only
 command-5 runtime links to **462 bytes** with entry zero / zero relocations, leaving
-only **2 bytes** headroom. A separate **332-byte** inert scheduler canary uses
+**2 bytes** headroom. A separate **332-byte** inert scheduler canary uses
 `FEBFFB80` as an observation heartbeat and never calls command 5. The corresponding
 60-byte signer mailbox `FEBFFB80..FEBFFBBB` is above H's startup shadow-copy end
 and has zero recovered normalized direct references under the same bounded census.
 Computed aliases, DMA/hardware ownership, and runtime lifetime remain outside that
 static proof, so `data/variant_ram_exec_requirements.json` intentionally still has
-no verified H/F entry.
+no verified H/F entry. The August-18 range-dump acquisition had already established
+working authenticated boot-RAM execution on Albino's car. VAR-049 adds a clean
+same-car replay with direct F181 binding, exact zero-0201/0202 state, and terminal
+CRC/CMAC state that reconstructs against pinned eps-telescope. Telescope still resets
+from boot context afterward, so it does not answer the application-retention question
+the canary is designed to test.
 
 The live order is therefore fixed. First run the **inert H/F carrier canary** on
-an isolated, firmware-identified H/F target and require `FEBFFB80` heartbeat
-progression together with normal application health and reset-to-stock behavior.
+an isolated, firmware-identified H/F target and require `FEBFFB80` canary-signature/heartbeat
+progression plus application F181 reappearance; then separately verify reset-to-stock
+and ordinary application health before treating the carrier as usable.
 Do not expose the signer if the canary fails or its observation cell is unstable.
-Second, on a fresh isolated run, use the audited 462-byte fixed-36-byte proxy to
-test selector-4 command-5 permission against a known input. Third, require
-independent MAC agreement. Fourth, measure completion latency/jitter while normal
+Second, on a fresh isolated run, use
+`exploit/ephemeral_runtime/corolla_hf_direct_command5.py`: it accepts live mode only
+after a retained successful direct-canary result plus explicit reset-to-stock
+confirmation, then installs the audited 462-byte fixed-36-byte proxy and tests
+selector-4 command-5 permission against a known input without vehicle actuation.
+The proxy self-initializes its request byte after stock startup/before `ei` and
+mirrors the stock completion status into mailbox byte `+1`, eliminating the prior
+installer-preinitialization/status-observability gap. Third, require independent MAC agreement. Fourth, measure completion latency/jitter while normal
 command-7 verification traffic is present and show that the resulting sender
 schedule fits the B6 timing contract. None of these stages authorizes vehicle
 actuation.
@@ -343,11 +354,24 @@ Ready now:
   (332 bytes, SHA-256 `a32baf46...97424f4`);
 - audited H/F fixed-B6 signer:
   `exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin`
-  (462 bytes, SHA-256 `9b9b055c...1db8dbf`);
+  (462 bytes, SHA-256 `3bb96eef...609f8d3`);
 - deterministic target-native builder with compiler-equivalence protection:
   `exploit/ephemeral_runtime/build_corolla_hf_command5_carrier.py`;
 - static geometry/build contract:
   `data/generated/corolla_hf_command5_runtime_carrier.json`;
+- same-car authenticated boot-RAM execution was already implied by the retained
+  August-18 range-dump acquisition; `community/albinoelephant/telescope/probe.json` /
+  VAR-049 independently replays it with exact F181 and terminal payload-state joins;
+- the first inert live test is now operationalized by
+  `exploit/ephemeral_runtime/corolla_hf_direct_canary.py` / VAR-050. It builds the
+  exact audited 4-KiB canary envelope (SHA-256 `313d1bb7...b0b29d84`), reproduces
+  the telescope-observed old-stack bootstrap without post-auth substitution, and
+  refuses to expose command 5;
+- the second-stage slot-4 probe is now operationalized but remains hardware-gated:
+  `exploit/ephemeral_runtime/corolla_hf_direct_command5.py` packages the hardened
+  proxy into exact envelope SHA-256 `a9497970...e9d5a58`, requires the successful
+  canary-result token plus reset-to-stock confirmation, commits mailbox state last,
+  and requires mirrored status 0 / 16-byte non-sentinel output; it does not send B6;
 - low-risk fixed-16 stock permission experiment under `exploit/command5/` remains
   useful as an independent policy control.
 

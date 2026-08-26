@@ -36,7 +36,9 @@
     "base": "0xFEBFFB80",
     "end_exclusive": "0xFEBFFBBC",
     "normalized_direct_reference_count_inside": 0,
-    "request_state_precondition": "installer must initialize mailbox request_state byte to 0 before launching the command5 proxy",
+    "request_state_initialization": "proxy initializes mailbox request_state to 0 after stock application startup and before enabling interrupts; host state 1 is a committed request and is sampled once per foreground tick",
+    "result_status_offset": 1,
+    "result_status_protocol": "proxy mirrors stock completion status from adjacent FEBF1280/FEBF1281 done/status bytes into mailbox byte +1 before publishing request_state=0; immediate non-busy dispatcher errors are mirrored directly",
     "size": 60,
     "startup_shadow_copy_end_inclusive": "0xFEBFF9EF",
     "static_negative_boundary": "Zero recovered normalized direct references does not prove the mailbox is free of computed/DMA ownership; it is a staging/observation candidate for isolated live validation.",
@@ -57,7 +59,7 @@
       "input_length": 36,
       "key_selector": 4,
       "relocations": 0,
-      "sha256": "9b9b055c65246bb4e25bc512753772bbe474c0ba5847ecb253e4147fd1db8dbf",
+      "sha256": "3bb96eefae06005c99a0ac52b7f0c64cc5d52e2b0b1fcbb73e0b4ec69609f8d3",
       "size": 462,
       "status_flag": "0xFEBF1281"
     },
@@ -94,7 +96,7 @@
     },
     "proxy_audit": {
       "path": "exploit/ephemeral_runtime/audited_corolla_hf_command5_proxy_build.json",
-      "sha256": "97fa1b9bcad5204253ce81cc70aa17efe1d4578f318cb5eac77b9edd3b40b1a5"
+      "sha256": "f5c303ef5ff757fa9d2f4f5b0743a3294333e853ccce5e1a77260a1786e786af"
     },
     "ram_exec_requirements": {
       "path": "data/variant_ram_exec_requirements.json",

@@ -365,15 +365,32 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
   Two target-native executables are now audited: a **332-byte** inert canary and
   a **462-byte** fixed-36-byte command-5 proxy, both entry-zero and relocation-
-  free. The proxy leaves only **2 bytes** of carrier headroom, uses H/F dispatcher
+  free. The proxy leaves **2 bytes** of carrier headroom, uses H/F dispatcher
   `0x82750`, record 0, selector 4, and completion cells `FEBF1280/FEBF1281`, and
-  retries shared-driver busy without aborting command 7. The canary never invokes
-  command 5 and exposes heartbeat at `FEBFFB80`.
+  retries shared-driver busy without aborting command 7. The current audited proxy
+  also self-initializes `request_state=0` after stock final init/before `ei`, samples
+  the adjacent done/status cells as one halfword, and mirrors terminal status into
+  host-readable mailbox byte `FEBFFB81`; the host therefore no longer depends on
+  preserving a preinitialized mailbox across the programming transition. The canary
+  never invokes command 5 and exposes heartbeat at `FEBFFB80`.
+
+  Albino's August-18 range-dump acquisition already demonstrated that the H/F
+  authenticated boot-RAM architecture works on this physical specimen. VAR-049
+  adds a cleaner same-car replay with direct F181 binding and exact zero-0201/0202
+  state: boot SecurityAccess succeeds, `0x10F0` authenticates a `FEBF0000` envelope,
+  and read-only shellcode returns a valid stream. Optional reconstruction of the
+  pinned telescope payload also matches live `DCRA1CIN` and the live CMAC tag.
+  None of that proves the candidate `FEBF0000..FEBF01CF` bytes survive the
+  boot-to-application transition, because telescope resets after its own payload.
 
   The remaining questions are now strictly dynamic. First prove **live retention**
   and scheduler health with the inert canary, including heartbeat progression and
-  reset-to-stock behavior. Only then test whether the provisioned slot 4 accepts
-  command 5, whether 7/12/36-byte outputs agree with independent CMAC vectors,
+  reset-to-stock behavior. Only then use the guarded
+  `corolla_hf_direct_command5.py` second stage (successful canary result + explicit
+  reset confirmation required) to test whether provisioned slot 4 accepts command 5;
+  the tool performs no steering-CAN transmission and requires status-zero plus a
+  16-byte non-sentinel mailbox result. Then establish whether outputs agree with
+  independent CMAC vectors,
   and what completion latency/jitter looks like under ordinary command-7
   verification load. `data/variant_ram_exec_requirements.json` deliberately still
   has no verified H/F row because the static reference census cannot exclude
@@ -448,10 +465,12 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   all-zero staging seeds — not differing compiled model-year constants; factory
   vs service origin is not distinguished. See
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
-- **OQ-029 — Separate 2023 US Corolla / tracked `8965H1202000` specimen.** The complete
-  memory corpus is now retained. CodeFlash internally identifies
-  `8965H1202000/8A3111202000`, `R7F701383`, and serial
-  `8965012N50A05G310920`; all three Sienna crypto roots transfer byte-for-byte,
+- **OQ-029 — Separate 2023 US Corolla / historical-`8965H1202000` corpus.** The complete
+  memory corpus and same-car telescope probe are now retained. Direct application
+  F181 is `8965F1208000/8A3111202000`; `8965H1202000 @0x17D80` is the
+  separate one-record DID `0x2032` identity retained in historical corpus naming.
+  Live PRDNAME is `R7F701383`, the retained unit serial is
+  `8965012N50A05G310920`, and all three Sienna crypto roots transfer byte-for-byte,
   Gate-2/CRC resolution transfers, and the target's actual queue is exactly
   `00F/D7/B6` with no `2E4/131`. The Toyota-B pin-swap's **physical function is
   also closed statically**: official comma hardware makes CAN0/CAN2 the
@@ -524,9 +543,10 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   well. Further H-static work should therefore be driven by concrete semantic,
   exploit, runtime-reachability, or target-architecture questions rather than
   denominator completion;
-  generic DAQ/XCP callbacks remain optional unless such a hypothesis needs them. If revisited
-  dynamically, record
-  direct F181 plus full-bus and Panda health on both normal-CAN1 and OBD routes
+  generic DAQ/XCP callbacks remain optional unless such a hypothesis needs them. The
+  direct F181 is now closed by VAR-049; boot-RAM execution was already established by
+  the earlier range-dump acquisition and is now independently replayed/payload-bound by VAR-049. If revisited
+  dynamically, record full-bus and Panda health on both normal-CAN1 and OBD routes
   immediately around the programming transition, then repeat the memory/capture
   epoch join. Route metadata remains forced `TOYOTA_COROLLA_TSS2` with no `carFw`,
   so the route-to-image/model-year join remains contributor attribution. See

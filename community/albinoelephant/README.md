@@ -1,25 +1,63 @@
 # albinoelephant Corolla field artifacts
 
 **Contributor:** albinoelephant (`@albinoelephant`, comma Discord)
-**Received:** initial DataFlash/oracle 2026-08-12; complete memory corpus 2026-08-18
+**Received:** initial DataFlash/oracle 2026-08-12; complete memory corpus 2026-08-18; eps-telescope probe 2026-08-26
 **Vehicle attribution:** reported by the contributor as a 2023 US Toyota Corolla
-**Firmware-static live software IDs:** `8965H1202000` / `8A3111202000`
+**Direct application F181:** `8965F1208000` / `8A3111202000` (retained eps-telescope transcript)
+**Auxiliary one-record identity:** `8965H1202000` (DID `0x2032`, CodeFlash `0x17D80`)
 **MCU / serial:** RH850/P1M-E `R7F701383`; `8965012N50A05G310920`
-**Direct UDS F181 transcript:** not retained
 
 This directory preserves the raw field artifacts supplied from the contributor's
-TSK Manager investigation, plus one repository-derived CAN-only oracle from the
-contributor's already-public comma route. The complete 2026-08-18 bundle is
-preserved byte-for-byte under `raw-20260818/`, including its contributor-supplied
-`MANIFEST.txt`.
+TSK Manager investigation, the contributor-supplied `eps-telescope` output under
+`telescope/`, plus one repository-derived CAN-only oracle from the contributor's
+already-public comma route. The complete 2026-08-18 bundle is preserved byte-for-byte
+under `raw-20260818/`, including its contributor-supplied `MANIFEST.txt`.
 
 The model-year/vehicle attribution remains external field evidence. The public
 route itself was run with a forced `TOYOTA_COROLLA_TSS2` fingerprint and contains
-no `carFw`, so the route alone still does not identify its physical EPS. The
-later CodeFlash does identify the firmware artifact itself: its live-ID blocks are
-`8965H1202000` / `8A3111202000`. A separate `8965F1208000` string at CodeFlash
-`0x20860` is a table entry, not this unit's live identity. Keep this specimen
-separate from Span's exact `8965F1208000` Corolla.
+no `carFw`, so the route alone still does not identify its physical EPS. The later
+same-car telescope probe closes the diagnostic identity instead: application F181
+returns count `2` with `8965F1208000` from CodeFlash `0x20860` and
+`8A3111202000` from `0x17DC0`. `8965H1202000` at `0x17D80` belongs to the
+separate one-record DID `0x2032` path. The historic `8965H1202000` filenames are
+kept as stable corpus labels, not as a claim about the wire-visible F181 primary.
+This remains a distinct physical specimen from Span's Corolla despite sharing the
+same F181 primary software record.
+
+
+## 2026-08-26 eps-telescope live probe
+
+`community/albinoelephant/telescope/probe.json` and `probe.md` were sent by the
+contributor from this car and are direct outputs of the pinned
+`lochuan/eps-telescope` workflow. The probe is unusually valuable because it joins
+the previously retained static corpus to a later live bootloader session:
+
+- application F181 is directly captured as `8965F1208000 / 8A3111202000`; boot
+  F181 is the expected `02 || 32*0x21` placeholder;
+- live `PRDNAME1..4` decodes to `R7F701383`;
+- all 384 streamed CodeFlash bytes at `0x8E6A0`, `0xFFDE0`, and `0x17D80`
+  match the tracked normalized image exactly;
+- boot SecurityAccess succeeds, RoutineControl `0x10F0` accepts the authenticated
+  `FEBF0000` envelope, and the shellcode stream validates end-to-end. This is an
+  independent clean replay of the boot-RAM execution already required by the
+  contributor's earlier range-dump acquisition, not its first demonstration;
+- the live flash-wide scan finds the SecOC Gate-2 egg at `0x88C62`. Telescope did
+  not stream the relocated candidate's 64-byte context (`NO_DATA`), but the tracked
+  image independently shows that `0x88C43..0x88C82` has the exact pinned Sienna
+  Gate-2 fingerprint SHA-256 `50d793a2...7350`, including `e0d1` at `0x88C62`;
+- live `0xFFDEC=AD59D70C` joins the tracked stock-valid CRC image, whose
+  `[0x18000,0xFFDF0)` CRC32 residue is `0xFFFFFFFF`;
+- the streamed `FEBF2CF8..FEBF2DF7` window exposes zero DID `0202`, zero DID
+  `0201`, the expected derived payload key `80d221a0...e6c78d1`, the payload-CMAC
+  work/tag buffer, and a fresh boot SecurityAccess seed snapshot. Optional replay
+  against pinned eps-telescope reconstructs the exact tag as
+  `a5ebde539a7147cd61f21b4a5b222e1f` and CRC fixup `0x6DAAE993`, matching live
+  `FEBF2D28` and `DCRA1CIN`. These are boot/payload crypto values, **not** the
+  operational SecOC slot-4 key.
+
+The deterministic correlation is generated in
+`data/generated/corolla_2023_albino_telescope_analysis.json` and verified by
+`tests/verify_albinoelephant_telescope_probe.py`.
 
 
 ## Complete 2026-08-18 memory corpus
