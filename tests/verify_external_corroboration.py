@@ -775,8 +775,10 @@ def main() -> int:
         print(f"\n== RESULT: {passed} passed, {failed} failed ==")
         return 1
 
+    icanhack_readme = (roots["icanhack_secoc"] / "README.md").read_text(encoding="utf-8")
     extract = (roots["icanhack_secoc"] / "extract_keys.py").read_text(encoding="utf-8")
     extract_lower = extract.lower()
+    check("pinned I-CAN-hack README publishes the legacy KEY_4 example used by the Corolla falsification", "SecOC Key (KEY_4) c5fc900668d068ec39695d9a8885be2d" in icanhack_readme)
     shellcode = (roots["icanhack_secoc"] / "shellcode/main.c").read_text(encoding="utf-8").lower()
     dump_step = (
         roots["toyota_dataflash_secoc_setup"] / "steps/step_dump_dataflash.py"

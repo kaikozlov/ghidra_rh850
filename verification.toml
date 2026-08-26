@@ -3310,3 +3310,20 @@ paths = [
   "verification.toml",
 ]
 oracle = "documentation_lint"
+
+[suite.corolla_2023_albino_secoc_default_key_probe]
+tests = ["tests/verify_corolla_2023_albino_secoc_default_key_probe.py"]
+oracle = "generated_self_check"
+paths = [
+  "tests/verify_corolla_2023_albino_secoc_default_key_probe.py",
+  "tools/build_corolla_2023_albino_secoc_default_key_probe.py",
+  "data/generated/corolla_2023_albino_secoc_default_key_probe.json",
+  "tools/toyota_secoc_oracle.py",
+  "tools/toyota_secoc_signer.py",
+  "community/albinoelephant/",
+  "external-references.lock.json",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/reference/generated-artifacts.md",
+  "exploit/findings_coverage.json",
+]

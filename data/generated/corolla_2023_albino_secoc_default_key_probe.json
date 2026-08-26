@@ -1,0 +1,226 @@
+{
+  "conclusions": {
+    "classic_secoc_is_observed": true,
+    "legacy_public_example_key4_disproved_for_retained_albino_oracles": true,
+    "raw_static_key_absent_from_retained_cpu_visible_corpus_under_oracle_epoch_assumptions": true,
+    "service_boundary": "Absence of a technician-visible re-key step during ECU replacement does not establish absence of SecOC or establish a universal/default key.",
+    "still_plausible": [
+      "a Corolla/platform-specific pre-provisioned key not present as a raw CPU-visible 16-byte value in the retained corpus",
+      "a vehicle-specific pre-provisioned key",
+      "automatic provisioning or key update not exposed as a technician-visible replacement step",
+      "an ICU-S slot-4 key or derivation that remains opaque to CPU-visible memory",
+      "key changes between the retained CAN and memory-acquisition epochs"
+    ],
+    "two_byte_periodic_default_key_family_disproved": true
+  },
+  "legacy_public_example_key4": {
+    "conclusion": "The pinned public older-family KEY_4 example authenticates none of the retained Albino synchronization/protected samples.",
+    "key_sha256": "b78f0b127aead747322d13f7923e233edc42a29adcf5ad004feb442c32275f0c",
+    "local_tskm_verification": {
+      "protected": {},
+      "sync": {
+        "matches": 0,
+        "total": 1232
+      }
+    },
+    "public_route_verification": {
+      "protected": {
+        "0x116": {
+          "matches": 0,
+          "total": 2496
+        },
+        "0x24D": {
+          "matches": 0,
+          "total": 59
+        }
+      },
+      "sync": {
+        "matches": 0,
+        "total": 588
+      }
+    },
+    "source_commit": "4ce19cc31ff560b697bcd59cc3db55711f50b7b3",
+    "source_readme_sha256": "3f40cddb47ff954cb4f2c30b2c2ea6764ae62f32d111a63ba1c4f05b3c08cb60",
+    "source_repository": "I-CAN-hack/secoc"
+  },
+  "low_complexity_key_family": {
+    "candidate_count": 65536,
+    "construction": "every 16-byte key formed by repeating one big-endian u16 eight times",
+    "includes_all_ff": true,
+    "includes_all_repeated_single_byte_keys": true,
+    "includes_all_zero": true,
+    "local_tskm_first_sync_hits": [],
+    "public_route_first_sync_hits": []
+  },
+  "oracles": {
+    "local_tskm": {
+      "first_sync_decoded": {
+        "authenticator28": 42391108,
+        "reset": 1868,
+        "trip": 3341
+      },
+      "identity_boundary": "Same contributor TSKM investigation as the H dump corpus, but CAN capture and memory dump are separate jobs/runtime epochs.",
+      "path": "community/albinoelephant/can_oracle.ndjson",
+      "protected_samples": 0,
+      "sha256": "8863398a98875a853e722a6ba83fc10563d5764cea33719c8af34225efa189a3",
+      "summary": {
+        "buses_with_sync": [
+          0,
+          2
+        ],
+        "counts": {
+          "bus0:0x00F": 616,
+          "bus2:0x00F": 616
+        },
+        "orphan_protected": {}
+      },
+      "sync_samples": 1232,
+      "trip_values": [
+        3341
+      ]
+    },
+    "public_route": {
+      "first_sync_decoded": {
+        "authenticator28": 188637653,
+        "reset": 224,
+        "trip": 3305
+      },
+      "identity_boundary": "Contributor-supplied public route; no carFw/F181 join to exact H firmware.",
+      "path": "community/albinoelephant/public_route_secoc_oracle.ndjson",
+      "protected_samples": 2555,
+      "sha256": "a9bf3f279001b8b77e96acfc186944a962c59cc7bedf739d902d971ff4b03f15",
+      "summary": {
+        "buses_with_sync": [
+          1
+        ],
+        "counts": {
+          "bus1:0x00F": 588,
+          "bus1:0x116": 2499,
+          "bus1:0x24D": 59
+        },
+        "orphan_protected": {
+          "bus1:0x116": 3
+        }
+      },
+      "sync_samples": 588,
+      "trip_values": [
+        3305
+      ]
+    }
+  },
+  "retained_cpu_visible_raw_key_scan": {
+    "dataflash_boundary": "Only FF200000..FF207FFF (first 0x8000 bytes) of each 64-KiB host range is treated as R7F701383 physical DataFlash.",
+    "files": [
+      {
+        "considered_size": 1048576,
+        "new_unique_16byte_windows": 587112,
+        "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+        "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+        "source_size": 1048576
+      },
+      {
+        "considered_size": 32768,
+        "new_unique_16byte_windows": 23317,
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_dataflash_ff200000_ff210000_20260814-002328.bin",
+        "sha256": "06992af443f2aa0e0559202a7fcd0dfdc040ce91843956807d8b902abdf8b486",
+        "source_size": 65536
+      },
+      {
+        "considered_size": 32768,
+        "new_unique_16byte_windows": 17205,
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_dataflash_ff200000_ff210000_20260814-002403.bin",
+        "sha256": "462065968d2f2da2cb88d62d63b6cf78c9242e801a7e66d31b1733ab1e860f53",
+        "source_size": 65536
+      },
+      {
+        "considered_size": 32768,
+        "new_unique_16byte_windows": 16455,
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_dataflash_ff200000_ff210000_20260814-003232.bin",
+        "sha256": "5c91da76ef352b1171eef49df853dcb486c88f44abc0958b1c9df23376e805ec",
+        "source_size": 65536
+      },
+      {
+        "considered_size": 32768,
+        "new_unique_16byte_windows": 15019,
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_dataflash_ff200000_ff210000_20260814-004424.bin",
+        "sha256": "f638954406e240250c99c52ce251afd4103eeec39586676102b297e0a51357be",
+        "source_size": 65536
+      },
+      {
+        "considered_size": 32768,
+        "new_unique_16byte_windows": 13927,
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_dataflash_ff200000_ff210000_20260814-004957.bin",
+        "sha256": "8fef0fd1a7869d9faad4516493d600d3ec02d62a69f73299981746b3bcb19990",
+        "source_size": 65536
+      },
+      {
+        "considered_size": 49152,
+        "new_unique_16byte_windows": 42,
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_extended_codeflash_01000000_0100c000_20260814-002640.bin",
+        "sha256": "90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7",
+        "source_size": 49152
+      },
+      {
+        "considered_size": 49152,
+        "new_unique_16byte_windows": 0,
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_extended_codeflash_01000000_0100c000_20260814-004606.bin",
+        "sha256": "90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7",
+        "source_size": 49152
+      },
+      {
+        "considered_size": 49152,
+        "new_unique_16byte_windows": 0,
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_extended_codeflash_01000000_0100c000_20260814-005156.bin",
+        "sha256": "90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7",
+        "source_size": 49152
+      },
+      {
+        "considered_size": 65536,
+        "new_unique_16byte_windows": 1185,
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_global_ram_feef8000_fef08000_20260814-002555.bin",
+        "sha256": "1904a16d8cfbc1a0e3ec399b94e3eb9626f981473870aa50772e21b56e651f88",
+        "source_size": 65536
+      },
+      {
+        "considered_size": 65536,
+        "new_unique_16byte_windows": 482,
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_global_ram_feef8000_fef08000_20260814-004529.bin",
+        "sha256": "52daca8a7d913fd727e42723ec50e731c09d413b5c359ac8914c874817414b77",
+        "source_size": 65536
+      },
+      {
+        "considered_size": 65536,
+        "new_unique_16byte_windows": 416,
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_global_ram_feef8000_fef08000_20260814-005127.bin",
+        "sha256": "63f7470eba1625b4ee2db5a2fb721922a574dbd477021aa83936b6e3cadb9420",
+        "source_size": 65536
+      },
+      {
+        "considered_size": 131072,
+        "new_unique_16byte_windows": 18802,
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-002502.bin",
+        "sha256": "2631d6d290cf3ee1adfe62e81798be67479c9f7c0a58dfeb6d097a2558eb4e53",
+        "source_size": 131072
+      },
+      {
+        "considered_size": 131072,
+        "new_unique_16byte_windows": 8613,
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-004452.bin",
+        "sha256": "5cff0226c1228dc06f8e0edb9908ab4078e557b54abc48666eecebd29bf41e09",
+        "source_size": 131072
+      },
+      {
+        "considered_size": 131072,
+        "new_unique_16byte_windows": 8704,
+        "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-005055.bin",
+        "sha256": "f27514c621ba56b127058341f6730c96900347e72d7c54e101875ee4fb3f46ce",
+        "source_size": 131072
+      }
+    ],
+    "local_tskm_first_sync_hits": [],
+    "public_route_first_sync_hits": [],
+    "unique_16byte_windows_tested": 711279
+  },
+  "schema": "corolla-2023-albino-secoc-default-key-probe-v1",
+  "title": "2023 Corolla SecOC obvious/default/static-key falsification"
+}

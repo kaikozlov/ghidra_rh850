@@ -100,6 +100,12 @@
     },
     {
       "repository": "icanhack_secoc",
+      "path": "README.md",
+      "size": 2526,
+      "sha256": "3f40cddb47ff954cb4f2c30b2c2ea6764ae62f32d111a63ba1c4f05b3c08cb60"
+    },
+    {
+      "repository": "icanhack_secoc",
       "path": "payload.bin",
       "size": 4096,
       "sha256": "d972d4bf432685217591768600a9abd7820d35b04a72270edc87074365356be2",
