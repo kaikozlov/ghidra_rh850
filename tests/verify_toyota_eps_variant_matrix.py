@@ -41,7 +41,7 @@ check("matrix has at least Sienna and Corolla rows", len(rows) >= 2)
 vehicles = [r["vehicle"] for r in rows]
 check("Sienna row present", any("Sienna" in v for v in vehicles))
 check("Corolla row present", any("Corolla" in v for v in vehicles))
-check("matrix contains only evidence-backed rows", len(rows) == 4 and all(r["application_software_id"] != "unknown" for r in rows))
+check("matrix contains only evidence-backed rows", len(rows) == 5 and all(r["application_software_id"] != "unknown" for r in rows))
 check("matrix models ADAS and security as separate columns", all("adas_generation" in r and "security_architecture" in r for r in rows))
 check("all three tracked dump specimens are SecOC/TSK", all(
     r["security_architecture"].startswith("SecOC/TSK") for r in rows
@@ -58,6 +58,7 @@ sienna_4514000 = next(
 )
 corolla = next((r for r in rows if r["vehicle"].startswith("2025 Toyota Corolla")), None)
 corolla_h = next((r for r in rows if r["vehicle"].startswith("2023 US Toyota Corolla")), None)
+camry = next((r for r in rows if r["vehicle"].startswith("2026 Toyota Camry")), None)
 
 check("Sienna 4512000 ADAS generation is not inferred from security", sienna_4512000 is not None and "not established" in sienna_4512000["adas_generation"] and "do not infer from SecOC" in sienna_4512000["adas_generation"])
 check("Sienna 4514000 external TSS3 label is independent of SecOC evidence", sienna_4514000 is not None and "reported TSS3" in sienna_4514000["adas_generation"] and "independent of SecOC" in sienna_4514000["adas_generation"])
@@ -184,6 +185,18 @@ if corolla_h:
     check("Albino Corolla programming row pins channel continuity, async reset, and telescope RAM exec",
           all(token in corolla_h["programming_observation"] for token in ("RSCFD channel1", "0x7A1/0x777->0x7A9", "async kind2", "0x0180", "0x0A00", "50 02", "10F0 FEBF0000", "0x88C62")))
     check("Albino Corolla source includes raw corpus and telescope probe", "raw-20260818" in corolla_h["source"] and "telescope/probe.json" in corolla_h["source"])
+
+# ── Maintainer 2026 Camry: identity-bound dynamic baseline ─────────
+check("Camry row present", camry is not None)
+if camry:
+    check("Camry exact F181 pair is preserved", camry["application_software_id"] == "8965F3307000" and camry["secondary_software_id"] == "8A3113303100")
+    check("Camry normal-harness direct route is bus1 param1", all(x in camry["diagnostic_bus"] for x in ("CAN-FD", "param 1", "bus 1")) and camry["physical_request"] == "0x7A1" and camry["physical_response"] == "0x7A9")
+    check("Camry boot F181 placeholder is direct", "02 || 32*0x21" in camry["bootloader_f181_observed"] and "2026-08-26" in camry["bootloader_f181_observed"])
+    check("Camry programming handoff is direct but RAM execution unclaimed", all(x in camry["programming_observation"] for x in ("bus1,param1", "PROGRAMMING succeeded", "preserved route", "no boot SecurityAccess", "authenticated RAM execution")))
+    check("Camry does not transfer SecurityAccess secrets", "not tested" in camry["security_levels"] and "do not transfer" in camry["security_levels"] and "unestablished" in camry["bootloader_routines"])
+    check("Camry SecOC row is a vehicle-capture observation not firmware census", all(x in camry["secured_can_ids"] for x in ("0x090/32", "0x0D7/32", "0x0B6/32 absent", "no firmware RX census")))
+    check("Camry exact CodeFlash is explicitly unavailable", camry["firmware_available"].startswith("no") and "8965F3307000" in camry["firmware_available"] and camry["mcu"].startswith("unknown"))
+    check("Camry source points at tracked baseline", "community/kai/camry-2026/raw-20260826" in camry["source"] and "camry_2026_tsk_baseline.json" in camry["source"])
 
 # ── Global structural checks ────────────────────────────────────
 required_cols = {

@@ -1,0 +1,387 @@
+{
+  "can_capture": {
+    "b6_absence_boundary": "The retained READY segment did not exercise a stock-LTA off->active->off transition, so zero B6 frames is only a segment-level negative.",
+    "b6_absent_in_stationary_ready_segment": true,
+    "bus0_bus2_payload_sequence_unequal": [
+      "0x189/64"
+    ],
+    "bus0_bus2_same_id_dlc_set": true,
+    "bus0_bus2_stream_count": 22,
+    "duration_s": 59.983697,
+    "legacy_steering_commands_absent": true,
+    "legacy_steering_counts": {
+      "0x131/8": 0,
+      "0x2E4/8": 0
+    },
+    "run_id": "oracle-20260826T193959Z-689fa16f",
+    "selected_streams": {
+      "0x00F/8": {
+        "bus": 1,
+        "count": 619,
+        "rate_hz": 10.307,
+        "unique_payloads": 208
+      },
+      "0x025/32": {
+        "bus": 1,
+        "count": 6188,
+        "rate_hz": 103.146,
+        "unique_payloads": 6188
+      },
+      "0x030/32": {
+        "bus": 1,
+        "count": 6188,
+        "rate_hz": 103.145,
+        "unique_payloads": 6188
+      },
+      "0x090/32": {
+        "bus": 1,
+        "count": 6187,
+        "rate_hz": 103.144,
+        "unique_payloads": 6187
+      },
+      "0x0AA/8": {
+        "bus": 1,
+        "count": 6187,
+        "rate_hz": 103.129,
+        "unique_payloads": 1
+      },
+      "0x0B6/32": {
+        "bus": 1,
+        "count": 0,
+        "rate_hz": null,
+        "unique_payloads": 0
+      },
+      "0x0D7/32": {
+        "bus": 1,
+        "count": 3094,
+        "rate_hz": 51.565,
+        "unique_payloads": 3094
+      },
+      "0x101/8": {
+        "bus": 1,
+        "count": 3095,
+        "rate_hz": 51.581,
+        "unique_payloads": 1
+      },
+      "0x116/8": {
+        "bus": 1,
+        "count": 2627,
+        "rate_hz": 43.79,
+        "unique_payloads": 2627
+      },
+      "0x127/8": {
+        "bus": 1,
+        "count": 3777,
+        "rate_hz": 62.965,
+        "unique_payloads": 1
+      },
+      "0x176/8": {
+        "bus": 1,
+        "count": 1949,
+        "rate_hz": 32.48,
+        "unique_payloads": 1
+      },
+      "0x24D/8": {
+        "bus": 1,
+        "count": 62,
+        "rate_hz": 1.031,
+        "unique_payloads": 62
+      },
+      "0x351/4": {
+        "bus": 1,
+        "count": 0,
+        "rate_hz": null,
+        "unique_payloads": 0
+      },
+      "0x394/3": {
+        "bus": 1,
+        "count": 0,
+        "rate_hz": null,
+        "unique_payloads": 0
+      },
+      "0x4A3/8": {
+        "bus": 1,
+        "count": 0,
+        "rate_hz": null,
+        "unique_payloads": 0
+      },
+      "0x4C8/8": {
+        "bus": 1,
+        "count": 0,
+        "rate_hz": null,
+        "unique_payloads": 0
+      },
+      "0x51E/8": {
+        "bus": 1,
+        "count": 61,
+        "rate_hz": 1.017,
+        "unique_payloads": 3
+      }
+    },
+    "start_utc": "2026-08-26T19:39:59.106877+00:00",
+    "stream_count_by_bus": {
+      "0": 22,
+      "1": 179,
+      "2": 22
+    },
+    "total_can_rows": 134989
+  },
+  "hf_transfer_observations": {
+    "0x025": {
+      "boundary": "Bit layout/scale is the existing H/F-derived TSS3 DBC interpretation and decodes coherently on this stationary Camry segment; Camry firmware-static confirmation remains open.",
+      "frame_count": 6188,
+      "steering_angle_deg": {
+        "count": 6188,
+        "max": 19.5,
+        "min": -12.0,
+        "unique_count": 22
+      },
+      "steering_fraction_deg": {
+        "count": 6188,
+        "max": 0.7000000000000001,
+        "min": -0.7000000000000001,
+        "unique_count": 15
+      },
+      "steering_rate_raw_or_prior_art_deg_s": {
+        "count": 6188,
+        "max": 70,
+        "min": -80,
+        "unique_count": 52
+      }
+    },
+    "0x030": {
+      "additive_rule": "B7 = low8(sum(B0..B6) + 0x38)",
+      "additive_rule_matches": 6188,
+      "b6_status_transitions": {
+        "b6_bit0": [
+          {
+            "seconds": 0.01764,
+            "value": 1
+          },
+          {
+            "seconds": 0.201959,
+            "value": 0
+          }
+        ],
+        "b6_bit1": [
+          {
+            "seconds": 0.01764,
+            "value": 0
+          },
+          {
+            "seconds": 4.88691,
+            "value": 1
+          },
+          {
+            "seconds": 5.081708,
+            "value": 0
+          },
+          {
+            "seconds": 5.586604,
+            "value": 1
+          },
+          {
+            "seconds": 5.781113,
+            "value": 0
+          }
+        ],
+        "b6_bit2": [
+          {
+            "seconds": 0.01764,
+            "value": 0
+          }
+        ],
+        "b6_bit3": [
+          {
+            "seconds": 0.01764,
+            "value": 0
+          }
+        ]
+      },
+      "b6_status_values": {
+        "b6_bit0": [
+          0,
+          1
+        ],
+        "b6_bit1": [
+          0,
+          1
+        ],
+        "b6_bit2": [
+          0
+        ],
+        "b6_bit3": [
+          0
+        ]
+      },
+      "boundary": "The exact H/F additive rule transfers perfectly and the H/F torque encoding is physically plausible/dynamic. B6 status meanings remain H/F-derived candidates until Camry firmware or independent diagnostics join them.",
+      "frame_count": 6188,
+      "steering_wheel_torque_nm": {
+        "count": 6188,
+        "max": 1.8,
+        "min": -1.75,
+        "unique_count": 143
+      },
+      "steering_wheel_torque_trunc_nm": {
+        "count": 6188,
+        "max": 1.8,
+        "min": -1.7000000000000002,
+        "unique_count": 35
+      }
+    },
+    "0x127": {
+      "frame_count": 3777,
+      "gear_raw_values": [
+        0
+      ],
+      "interpretation": "Raw 0 is directly observed while the vehicle is stationary in the operator-described READY baseline and is prior-art-compatible with P. P/R/N/D/B transition validation remains required before production use.",
+      "prior_art_candidate_decode": {
+        "0": "P",
+        "1": "R",
+        "2": "N",
+        "3": "D",
+        "4": "B"
+      }
+    },
+    "0x51E": {
+      "frame_count": 61,
+      "interpretation": "B0[7] transitions 0->1 during the captured READY startup, strongly corroborating the H/F + Techstream Ready Status wire join on this Camry family. Exact causal timing relative to the vehicle's physical READY action is not independently recorded.",
+      "ready_values": [
+        0,
+        1
+      ],
+      "transition_timeline": [
+        {
+          "payload": "0000610000000000",
+          "seconds": 0.01764,
+          "value": 0
+        },
+        {
+          "payload": "8000610000000000",
+          "seconds": 0.994317,
+          "value": 1
+        },
+        {
+          "payload": "8000620000000000",
+          "seconds": 16.004232,
+          "value": 1
+        }
+      ]
+    },
+    "classification": "strong wire-format transfer evidence; exact Camry firmware semantics remain unproved without CodeFlash",
+    "legacy_checksum_carriers": {
+      "0x101": {
+        "checksum_matches": 3095,
+        "frames": 3095
+      },
+      "0x127": {
+        "checksum_matches": 3777,
+        "frames": 3777
+      },
+      "0x176": {
+        "checksum_matches": 1949,
+        "frames": 1949
+      }
+    }
+  },
+  "identity": {
+    "ecu_serial": "8965033K9011J2740743",
+    "exact_f181_known_in_prior_repo_corpus": false,
+    "f181_records": [
+      "8965F3307000",
+      "8A3113303100"
+    ],
+    "primary_software_id": "8965F3307000",
+    "route": {
+      "elm327_param": 1,
+      "eps_bus": 1,
+      "eps_rx": "0x7a9",
+      "eps_rx_bus": 1,
+      "eps_tx": "0x7a1",
+      "semantic_path": "normal-harness"
+    },
+    "secondary_software_id": "8A3113303100",
+    "services_answering_probe": [
+      "0x10 session control",
+      "0x22 read data by id",
+      "0x23 read memory",
+      "0x27 security access",
+      "0x3e tester present",
+      "0x19 read DTC info"
+    ]
+  },
+  "next_evidence": [
+    "Read the Camry Brake/EPB and FRC software identities through their target diagnostic routes before assuming Corolla producer ownership/addressing transfers.",
+    "Capture the same exact vehicle with stock LTA off->active->off while all buses are logged; use any observed 0x0B6 to recover stock cadence and compare secondary fields/freshness against the H/F receiver contract.",
+    "Capture stationary P/R/N/D transitions to validate 0x127 enums on this target; B remains optional if the vehicle/trim exposes it.",
+    "Synchronize cruise main/engage/cancel with target-native diagnostic oracles rather than promoting inactive 0x176 fields by prior art.",
+    "Acquire exact 8965F3307000 CodeFlash before transferring H/F boot-RAM, SecOC receiver, steering-limit, command-5 carrier, or safety conclusions as firmware facts."
+  ],
+  "programming": {
+    "bootloader_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "bootloader_f181_is_two_bang_placeholders": true,
+    "boundary": "PROGRAMMING handoff and bootloader-family behavior are observed. Boot SecurityAccess, RequestDownload, 0x10F0, RAM-exec geometry, and ciphertext portability were not established and must not be inferred from H/F or Sienna.",
+    "functional_0x777": {
+      "after": {
+        "address": "0x777",
+        "body": "5001003201f4",
+        "observed": true,
+        "rx": "0x7a9",
+        "rx_bus": 1
+      },
+      "before": {
+        "address": "0x777",
+        "body": "5001003201f4",
+        "observed": true,
+        "rx": "0x7aa",
+        "rx_bus": 1
+      }
+    },
+    "handoff_switched": true,
+    "programming_response_timeout": false,
+    "route_preserved": true,
+    "status": "entered"
+  },
+  "schema": "camry-2026-tsk-baseline-v1",
+  "sources": {
+    "MANIFEST.txt": {
+      "path": "community/kai/camry-2026/raw-20260826/MANIFEST.txt",
+      "sha256": "bf9a282ab683aeef35cda370558f84ea16bbf80c74244227cf8bbbe5ad6ea908",
+      "size": 1440
+    },
+    "can_oracle.ndjson.gz": {
+      "path": "community/kai/camry-2026/raw-20260826/can_oracle.ndjson.gz",
+      "sha256": "db47d483016c409b5c3a1ecdf58310f68ca8105a4c16eae54185016a6eaf3f41",
+      "size": 3265598
+    },
+    "identity.json": {
+      "path": "community/kai/camry-2026/raw-20260826/identity.json",
+      "sha256": "5feffa176a0a0293de53fee91486788c577d603ad72cc6e93064dd3710cad234",
+      "size": 1559
+    },
+    "programming_probe.json": {
+      "path": "community/kai/camry-2026/raw-20260826/programming_probe.json",
+      "sha256": "c8dec4197585622a511a03a629e44b2b69369ce3b5b7978a584dfa5e4fa27817",
+      "size": 2135
+    },
+    "xcp_probe.json": {
+      "path": "community/kai/camry-2026/raw-20260826/xcp_probe.json",
+      "sha256": "b8d96ae5cb97f18d1138196e2a0cb95de5938ec0ff7e512ee9f752f86645e273",
+      "size": 702
+    }
+  },
+  "vehicle_attribution": {
+    "boundary": "Vehicle/model attribution is operator context; F181, route, CAN, programming, and XCP facts below are direct tracked observations.",
+    "date": "2026-08-26",
+    "source": "maintainer-operated vehicle session",
+    "vehicle": "2026 Toyota Camry"
+  },
+  "xcp": {
+    "boundary": "No usable 0x7F8 CONNECT response was observed on the tested EPS normal-harness route; this is a route/session observation, not a universal physical absence proof.",
+    "connect_response": "",
+    "message": "No usable XCP CONNECT response on the EPS route: timed out waiting for connect response on 0x7F8",
+    "request_id": "0x7f7",
+    "response_id": "0x7f8",
+    "status": "unreachable"
+  }
+}

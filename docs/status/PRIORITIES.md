@@ -205,6 +205,8 @@ Canonical: [../tooling/techstream.md](../tooling/techstream.md) §6.2.2 ·
 
 ## Parallel integration target — firmware-identified, relay-correct TSS3 capture
 
+**Current exact live target (VAR-051):** the maintainer's 2026 Camry now provides direct EPS F181 `8965F3307000 / 8A3113303100` on normal-harness `(bus1,param1)`, a successful same-route PROGRAMMING handoff, and a retained stationary READY CAN baseline. Its bus1 `00F/025/030/090/D7/0AA/101/116/127/176/51E` geometry is strongly H/F-like; `0x030` satisfies the exact H/F additive rule on 6,188/6,188 frames, and `0x51E B0[7]` supplies the first retained Ready `0->1` transition. **Do not run the H/F canary or transfer H/F boot-SA/RAM-exec geometry to this F181:** exact `8965F3307000` CodeFlash is still absent. While this car is available, the highest-value safe NRTD work is target-native identity acquisition for its FRC and Brake/EPB domains. The next READY capture should deliberately exercise stock LTA off→active→off plus stationary gear transitions; the existing zero-B6 segment did not exercise LTA and is only a bounded negative. XCP `0x7F7/0x7F8` is already negative on the tested EPS route/session and should not be blindly repeated. Canonical baseline: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md).
+
 COM-013 closes much more of the whole-vehicle side than the earlier EPS-only
 roadmap. TSS generation and SecOC/TSK are **orthogonal** (CORR-108). The public
 2023 route already proved partial state continuity; Span's newly retained July-29

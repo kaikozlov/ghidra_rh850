@@ -1,0 +1,76 @@
+{
+  "application_f181": {
+    "ascii": ".8965F3307000....8A3113303100....",
+    "hex": "023839363546333330373030300000000038413331313333303331303000000000"
+  },
+  "attempts": [
+    {
+      "detail": "{'eps_bus': 1, 'eps_rx_bus': 1, 'eps_tx': '0x7a1', 'eps_rx': '0x7a9', 'elm327_param': 1, 'semantic_path': 'normal-harness'}",
+      "name": "route discovery",
+      "ok": true,
+      "programming": false
+    },
+    {
+      "detail": "endpoint reappeared on preserved route",
+      "ms": 828,
+      "name": "DEFAULT -> EXTENDED -> PROGRAMMING",
+      "ok": true,
+      "programming": true
+    }
+  ],
+  "bootloader_f181": {
+    "ascii": ".!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "hex": "022121212121212121212121212121212121212121212121212121212121212121"
+  },
+  "did_it_take": {
+    "evidence": "diagnostic endpoint reappeared on preserved route after application PROGRAMMING reset",
+    "response_timeout": false,
+    "switched": true
+  },
+  "functional_0x777": {
+    "after": {
+      "address": "0x777",
+      "body": "5001003201f4",
+      "observed": true,
+      "rx": "0x7a9",
+      "rx_bus": 1
+    },
+    "before": {
+      "address": "0x777",
+      "body": "5001003201f4",
+      "observed": true,
+      "rx": "0x7aa",
+      "rx_bus": 1
+    }
+  },
+  "message": "Programming handoff completed: the EPS reappeared on the same explicit Panda physical route. A missing final 0x50 0x02 is therefore not treated as failure. Export the evidence bundle.",
+  "programming_handoff": {
+    "programming_response_timeout": false,
+    "route_after": {
+      "elm327_param": 1,
+      "eps_bus": 1,
+      "eps_rx": "0x7a9",
+      "eps_rx_bus": 1,
+      "eps_tx": "0x7a1",
+      "semantic_path": "normal-harness"
+    },
+    "route_before": {
+      "elm327_param": 1,
+      "eps_bus": 1,
+      "eps_rx": "0x7a9",
+      "eps_rx_bus": 1,
+      "eps_tx": "0x7a1",
+      "semantic_path": "normal-harness"
+    }
+  },
+  "route": {
+    "elm327_param": 1,
+    "eps_bus": 1,
+    "eps_rx": "0x7a9",
+    "eps_rx_bus": 1,
+    "eps_tx": "0x7a1",
+    "semantic_path": "normal-harness"
+  },
+  "schema": "camry-2026-eps-programming-probe-v1",
+  "status": "entered"
+}

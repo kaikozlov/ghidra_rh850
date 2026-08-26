@@ -1107,6 +1107,20 @@ paths = [
 ]
 
 
+[suite.camry_2026_tsk_baseline]
+tests = ["tests/verify_camry_2026_tsk_baseline.py"]
+oracle = "dynamic_trace"
+paths = [
+  "tests/verify_camry_2026_tsk_baseline.py",
+  "tools/analyze_camry_2026_baseline.py",
+  "data/generated/camry_2026_tsk_baseline.json",
+  "community/kai/camry-2026/",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/FINDINGS.md",
+  "data/toyota_eps_variant_matrix.csv",
+  "external-references.lock.json",
+]
+
 [suite.span_2025_discord_rlog_opendbc_evidence]
 tests = ["tests/verify_span_2025_discord_rlog_opendbc_evidence.py"]
 oracle = "generated_self_check"

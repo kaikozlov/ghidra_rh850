@@ -1,0 +1,22 @@
+{
+  "connect_response": "",
+  "f181": ".8965F3307000....8A3113303100....",
+  "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+  "last": "CAN 0x7F7 CONNECT",
+  "message": "No usable XCP CONNECT response on the EPS route: timed out waiting for connect response on 0x7F8",
+  "route": {
+    "elm327_param": 1,
+    "eps_bus": 1,
+    "eps_rx": "0x7a9",
+    "eps_rx_bus": 1,
+    "eps_tx": "0x7a1",
+    "semantic_path": "normal-harness"
+  },
+  "schema": "camry-2026-eps-xcp-probe-v1",
+  "source_memory_writes_implemented": false,
+  "status": "unreachable",
+  "step": "connect",
+  "write_commands_implemented": false,
+  "xcp_request_id": "0x7f7",
+  "xcp_response_id": "0x7f8"
+}

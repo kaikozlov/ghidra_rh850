@@ -211,6 +211,20 @@ actual dump against all three observed domains offline. See
 [`docs/variants/corolla-2023-us-public-route.md`](../docs/variants/corolla-2023-us-public-route.md).
 
 
+
+## `kai/camry-2026/`
+
+**Specimen:** maintainer-operated 2026 Toyota Camry
+**Captured:** 2026-08-26
+
+This directory preserves a privacy-minimized identity-bound TSK baseline for a new
+EPS application F181, `8965F3307000 / 8A3113303100`. It includes the exact raw
+CAN oracle (deterministic gzip) plus compact identity, PROGRAMMING-handoff, and
+CONNECT-only XCP results. The Camry strongly reproduces the H/F TSS3 wire family
+on bus 1, including exact `0x030` additive framing and the first retained
+`0x51E B0[7]` Ready `0->1` transition, while exact Camry CodeFlash and B6/LTA
+traffic remain unacquired. See [`kai/camry-2026/README.md`](kai/camry-2026/README.md).
+
 ## `spanconstant/`
 
 **Contributor/specimen:** Span, 2025 Toyota Corolla Hybrid investigation

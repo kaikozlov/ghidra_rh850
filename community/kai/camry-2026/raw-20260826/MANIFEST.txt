@@ -1,0 +1,31 @@
+Maintainer-operated 2026 Toyota Camry TSK baseline
+Captured 2026-08-26
+
+Tracked evidence is a privacy-minimized exact subset of the TSK session. The full
+TSK evidence wrapper is intentionally not committed because it contains unrelated
+device/network metadata. The CAN payload/timestamps are preserved byte-for-byte
+inside deterministic gzip; diagnostic snapshots retain exact target/route/protocol
+results while omitting Panda serial and health/network telemetry.
+
+can_oracle.ndjson.gz
+  compressed size: 3265598
+  compressed sha256: db47d483016c409b5c3a1ecdf58310f68ca8105a4c16eae54185016a6eaf3f41
+  uncompressed size: 37628790
+  uncompressed sha256: 7c7b72b11a7a76f3059d63fba5b34f7a6177f8b9d51229e6209df7304b364147
+  origin: /cache/tsk/can-messages/can_oracle.ndjson
+  operation: roughly 60-second stationary READY CAN oracle collection
+
+identity.json
+  size: 1559
+  sha256: 5feffa176a0a0293de53fee91486788c577d603ad72cc6e93064dd3710cad234
+  origin: TSK /api/ident-map-status after the 2026-08-26 Not Ready to Drive identity map
+
+programming_probe.json
+  size: 2135
+  sha256: c8dec4197585622a511a03a629e44b2b69369ce3b5b7978a584dfa5e4fa27817
+  origin: TSK /api/prog-probe-status after the bounded 2026-08-26 Not Ready to Drive handoff probe
+
+xcp_probe.json
+  size: 702
+  sha256: b8d96ae5cb97f18d1138196e2a0cb95de5938ec0ff7e512ee9f752f86645e273
+  origin: TSK /api/xcp-observer-status after CONNECT-only profile on the identified EPS route

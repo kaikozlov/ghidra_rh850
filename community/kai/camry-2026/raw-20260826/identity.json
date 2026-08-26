@@ -1,0 +1,65 @@
+{
+  "identity": [
+    {
+      "ascii": ".8965F3307000....8A3113303100....",
+      "did": "0xf181",
+      "hex": "023839363546333330373030300000000038413331313333303331303000000000",
+      "name": "app_sw_id"
+    },
+    {
+      "ascii": ".",
+      "did": "0xf186",
+      "hex": "03",
+      "name": "active_session"
+    },
+    {
+      "ascii": "8965033K9011J2740743",
+      "did": "0xf18c",
+      "hex": "383936353033334b393031314a32373430373433",
+      "name": "ecu_serial"
+    }
+  ],
+  "message": "Read 3 identity field(s); 6 of 6 probed services answered. Export the evidence bundle before continuing.",
+  "route": {
+    "elm327_param": 1,
+    "eps_bus": 1,
+    "eps_rx": "0x7a9",
+    "eps_rx_bus": 1,
+    "eps_tx": "0x7a1",
+    "semantic_path": "normal-harness"
+  },
+  "schema": "camry-2026-eps-identity-v1",
+  "services": [
+    {
+      "detail": "supported",
+      "name": "0x10 session control",
+      "supported": true
+    },
+    {
+      "detail": "supported",
+      "name": "0x22 read data by id",
+      "supported": true
+    },
+    {
+      "detail": "supported (NRC 0x31 request out of range)",
+      "name": "0x23 read memory",
+      "supported": true
+    },
+    {
+      "detail": "supported (NRC 0x7e sub-function not supported in active session)",
+      "name": "0x27 security access",
+      "supported": true
+    },
+    {
+      "detail": "supported",
+      "name": "0x3e tester present",
+      "supported": true
+    },
+    {
+      "detail": "supported",
+      "name": "0x19 read DTC info",
+      "supported": true
+    }
+  ],
+  "status": "mapped"
+}
