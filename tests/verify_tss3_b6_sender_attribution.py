@@ -85,7 +85,7 @@ check("request dictionary remains observer-side", "observer DID 0x1CEE/0x1CEF" i
 
 time = axes["timing_deadline_constants"]
 check("receiver timeout remains seven scheduler ticks", time["receiver_primary_cutout_foreground_ticks"] == 7)
-check("wall-clock sender cadence still open", time["wall_clock_timeout_identified"] is False and time["sender_wall_clock_cadence_identified"] is False)
+check("receiver wall-clock timeout closed while stock sender cadence remains open", time["status"] == "receiver_timeout_closed_sender_cadence_open" and time["wall_clock_timeout_identified"] is True and time["sender_wall_clock_cadence_identified"] is False)
 check("flashing timing not transferred", "CUW flashing P4/retry timing is unrelated" in time["boundary"])
 
 angle = axes["steering_angle_constants"]

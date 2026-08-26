@@ -815,7 +815,7 @@
           "signed": true,
           "snapshot": "0xFEBEAE82",
           "target_vs_measured_loop": "independent-target-versus-measured-steering-angle-control-loop",
-          "wall_clock_timeout_closed": false,
+          "wall_clock_timeout_closed": true,
           "wire_byte": 4
         },
         "secured_profiles": [

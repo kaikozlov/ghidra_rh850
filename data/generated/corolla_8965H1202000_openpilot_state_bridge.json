@@ -73,7 +73,7 @@
       "signed": true,
       "snapshot": "0xFEBEAE82",
       "target_vs_measured_loop": "independent-target-versus-measured-steering-angle-control-loop",
-      "wall_clock_timeout_closed": false,
+      "wall_clock_timeout_closed": true,
       "wire_byte": 4
     },
     "brake_domain_conclusion": "D7's 16-bit field is exactly SP1 vehicle speed. B6 is independently tied to the Brake System Control Module by U012987, but this Techstream-only join does not classify B6 signal255; computed target-native provenance owns that semantic question.",

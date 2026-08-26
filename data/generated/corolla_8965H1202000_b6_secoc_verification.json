@@ -131,7 +131,7 @@
       "0x100000"
     ]
   },
-  "evidence_boundary": "This closes the H/F EPS receiver-side SecOC verification algorithm for protected 0x0B6, including exact freshness state, candidate/window rules, retry scopes, CMAC input/slot selection, commit timing, generated verification-failure forwarding policy, and application-sequence separation. It does not recover the protected slot-4 secret, sender-side ownership of live freshness state, stock sender cadence, or the upstream FRC/Brake payload/signing producer.",
+  "evidence_boundary": "This closes the H/F EPS receiver-side SecOC verification algorithm for protected 0x0B6, including exact freshness state, candidate/window rules, retry scopes, CMAC input/slot selection, commit timing, generated verification-failure forwarding policy, and application-sequence separation. It does not recover the protected slot-4 secret, Toyota's stock sender implementation/cadence, or the upstream FRC/Brake payload/signing producer. For an exclusive replacement sender, however, the receiver algorithm plus authenticated 0x00F closes a deterministic re-anchor/message8 state machine without discovering the stock B6 counter policy.",
   "freshness_acceptance": {
     "epoch_transition": {
       "new_epoch_message": "received_message_low2 (0..3)",
@@ -291,14 +291,35 @@
   "sender_recipe": {
     "cryptographic_blocker": "The exact receiver selector is closed, but the slot-4 secret value remains opaque to mapped CPU/application code. A sender still needs that secret or an approved/available ICU-S operation that can produce the required tag.",
     "receiver_required_steps": [
-      "Maintain a full freshness tuple consistent with the receiver's authenticated 0x00F trip/reset epoch and B6 message8 progression.",
+      "Track only authenticated/committed 0x00F trip16/reset20 as the global epoch source; do not re-anchor on an unauthenticated sync candidate.",
+      "Maintain B6 message8 locally and independently of D7 or signal261.",
       "Encode FV4 in B28[7:4] as message_low2||reset_low2.",
       "Build freshness48 as trip16||reset20||message8||reset_low2||00b.",
       "Compute AES-CMAC-128 over 00 B6 || B0..B27 || freshness48 using the key selected by protected ICU-S slot4.",
       "Transmit CMAC_MSB28 in B28[3:0],B29,B30,B31.",
       "Independently maintain application signal261 in B7[5:0] for steering sequence/plausibility semantics."
     ],
-    "runtime_state_blocker": "The receiver algorithm is closed, but sender ownership/source of the live trip/reset/message state and stock wall-clock cadence remain outside this EPS receiver image."
+    "replacement_sender_state_machine": {
+      "application_sequence261": "Maintain signal261 separately modulo 64. A conservative openpilot policy can require exactly +1 per active transmitted frame even though the EPS itself tolerates a wider effective-gap rule.",
+      "message_saturation": "If an epoch ever reaches committed message8=0xFF, do not wrap sender CMAC computation to 0x00: the receiver clamps the next congruent candidate to 0xFF/status0x24. Normal observed reset epochs are far shorter than 255 B6 transmissions at expected steering cadences.",
+      "new_epoch": "When authenticated trip/reset advances beyond the B6 committed epoch, choose the first B6 message8 low2 explicitly (0 is the conservative implementation choice); the receiver's new-epoch branch seeds full message8 directly from the received low2.",
+      "power_cycle_persistence": "No sender-side message8 persistence is required across full vehicle/sender power cycles when startup always waits for a newer authenticated 0x00F epoch before B6 transmission.",
+      "reanchor_delay_boundary": "The replacement state machine needs the next authenticated 0x00F epoch after local message8 loss. The wall-clock wait is deliberately not encoded here; observed 0x00F cadence is maintained in the separate freshness-bridge artifact so this receiver builder remains acyclic.",
+      "requires_exclusive_b6_authority": true,
+      "requires_stock_sender_counter_discovery": false,
+      "reset_transition_overlap": "At a reset advance, an immediately preceding old-reset frame remains reconstructible through current-1 because its reset_low2 uniquely selects that trial; switching immediately to the new reset also works. A replacement implementation should choose one deterministic transition policy rather than race both.",
+      "same_epoch": "For every subsequently accepted/transmitted B6 in the same trip/reset epoch, advance local message8 monotonically. Normal +1 is simplest; the receiver reconstructs the next congruent forward candidate and accepts deltas +1..+4.",
+      "sender_restart_mid_epoch": "If the sender process loses its local message8 while the receiver remains in the same authenticated reset epoch, do not guess/replay. Wait for the next authenticated reset/trip advance and re-anchor through the new-epoch rule.",
+      "startup": "After sender start, observe a strictly newer authenticated 0x00F trip/reset epoch before transmitting B6. This provides a clean receiver re-anchor instead of guessing a pre-existing B6 message8.",
+      "state_to_persist_while_running": [
+        "trip16",
+        "reset20",
+        "message8",
+        "signal261"
+      ],
+      "trip_wrap": "Authenticated 0x00F trip wrap invokes the receiver's ordinary-slot clear; reinitialize the replacement B6 epoch from the committed wrapped sync state."
+    },
+    "runtime_state_blocker": "Toyota's stock B6 sender ownership/cadence/initial-message policy remains outside this EPS image, but it is no longer required to construct receiver-valid freshness for an exclusive replacement sender. Physical stock-source suppression and a signing primitive/key remain deployment blockers."
   },
   "sienna_prior_art": {
     "boundary": "Sienna supplies role anchors for the generic acceptance engine. The H functions occupy the same control roles near a +0x5A64 Sienna relocation but are not claimed byte-identical: raw differences include relocated calls, GP/table displacements, and generated-profile geometry. H freshness/window conclusions below must be recovered from the target-native H bodies rather than transferred from Sienna.",
@@ -451,7 +472,7 @@
   "sources": {
     "base_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-      "sha256": "123ba1a29f6e8247fca9432688a8a0d33c28949440f925d4f0d0dd7cea626c60"
+      "sha256": "eac0b8dbc9d18014b42836e8363d49e53a5c3c691b896aaab749959930d53da5"
     },
     "codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -464,7 +485,7 @@
     },
     "full_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
-      "sha256": "7dd3af51a5b169fc1a341aaf1916c0de1ce88fd2451929f86df50fe1b4e88563"
+      "sha256": "d98afcb1cae3b7b9f158da8317e75b09f8185dcc0261e84205c6c9fb81b1291e"
     },
     "hf_equivalence": {
       "path": "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
@@ -486,10 +507,12 @@
     "b6_profile_identifiers_closed": true,
     "b6_sequence_relation_closed": true,
     "b6_verification_failure_delivery_policy_closed": true,
-    "sender_freshness_state_ownership_closed": false,
+    "replacement_sender_freshness_state_machine_closed": true,
+    "replacement_sender_requires_stock_counter_discovery": false,
     "sender_wall_clock_cadence_closed": false,
     "short_form": "FV4 reconstructs against authenticated 00F state; candidate is staged and command7 verifies CMAC28 with slot4. Only result0 commits freshness, but generated failure-forwarding can still deliver an uncommitted queued B6 during the bounded grace/global-override modes; post-grace normal mode routes only verified success.",
     "slot4_secret_value_closed": false,
+    "stock_sender_freshness_state_ownership_closed": false,
     "upstream_producer_closed": false
   },
   "transmitted_freshness": {

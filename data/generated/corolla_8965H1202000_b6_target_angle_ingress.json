@@ -1,5 +1,5 @@
 {
-  "evidence_boundary": "The H target-angle role and controller-equivalent physical scale are firmware-primary: B6 signed16 becomes target state, is compared against independently reconstructed 0x025 measured steering angle with matched gain, and enters the steering controller. Techstream closes the 0x025 coarse-angle physical scale through DID1037 and the byte-anchored P5 conversion plugin, independently names B6 loss as Brake System Control Module loss, and closes H signal254 feature labels through the exact Target Lateral ID numeric dictionary. The dedicated receiver contract additionally closes signal254 request selection, the seven-foreground-tick primary loss cutout, and modulo-64 sequence handling with gap cap 8. The OEM engineering-unit label for B6 signal255, wall-clock cadence, exact secondary-field names, and the upstream FRC/Brake producer route remain unresolved.",
+  "evidence_boundary": "The H target-angle role and controller-equivalent physical scale are firmware-primary: B6 signed16 becomes target state, is compared against independently reconstructed 0x025 measured steering angle with matched gain, and enters the steering controller. Techstream closes the 0x025 coarse-angle physical scale through DID1037 and the byte-anchored P5 conversion plugin, independently names B6 loss as Brake System Control Module loss, and closes H signal254 feature labels through the exact Target Lateral ID numeric dictionary. The dedicated receiver contract additionally closes signal254 request selection, the seven-foreground-tick / nominal-35-ms primary loss cutout, and modulo-64 sequence handling with gap cap 8. The OEM engineering-unit label for B6 signal255, Toyota stock B6 transmit cadence/template, exact secondary-field names, and the upstream FRC/Brake producer route remain unresolved; exclusive replacement freshness progression is closed separately.",
   "final_command_bridge": {
     "boundary": "Signal255 is one conditional contributor to the general EPS command composition; the final torque/current chain also contains local assist/control terms and gating.",
     "local_chain": "C2A8 -> CD3CC:C3B8 -> CD440:C3BC -> CD496:C3BE -> CD53E:C3D0 -> CD55A:C3C0 -> CD5DC:C3D2 -> CE928:AC56",
@@ -142,7 +142,7 @@
   "sources": {
     "b6_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-      "sha256": "123ba1a29f6e8247fca9432688a8a0d33c28949440f925d4f0d0dd7cea626c60"
+      "sha256": "eac0b8dbc9d18014b42836e8363d49e53a5c3c691b896aaab749959930d53da5"
     },
     "codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -169,7 +169,7 @@
     "immediate_sender_relationship": "Brake System Control Module",
     "ingress": "protected CAN-FD 0x0B6 signal255 signed16 B4:B5",
     "mode_ingress": "protected CAN-FD 0x0B6 signal254 6-bit B3",
-    "next_static_target": "recover upstream FRC_P5 -> Brake/EPB producer/transport and SecOC sender/freshness behavior; wall-clock cadence and exact secondary B6 field names remain bounded",
+    "next_static_target": "recover upstream FRC_P5 -> Brake/EPB producer/transport, stock B6 cadence/secondary-field template, and a production signing/suppression path; replacement freshness re-anchoring and the EPS scheduler timeout are already closed",
     "oem_wire_unit_name_identified": false,
     "physical_scale_identified": true,
     "reaches_command_value_torque_and_q_current": true,
@@ -188,7 +188,7 @@
     },
     "torque_command": false,
     "upstream_feature_producer_identified": false,
-    "wall_clock_timeout_identified": false
+    "wall_clock_timeout_identified": true
   },
   "target_angle_pipeline": [
     {

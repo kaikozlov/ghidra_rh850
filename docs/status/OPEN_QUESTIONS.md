@@ -92,8 +92,12 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `0=No Request` and labels active signal254 IDs `1/4/10/11/19` as
   `PCS/LDA/Hands Off LTA/LTA-LCA/PDA`; PDU42 reloads to **7 TAUJ0-CH3 foreground
   ticks** and first expiry disables cooperative selection through slot18/`ADB9`;
-  signal261 is a modulo-64 sequence counter with effective-gap cap `8`. The absolute
-  CH3 tick period remains unsupported. The receiver-side 32-byte envelope is now
+  signal261 is a modulo-64 sequence counter with effective-gap cap `8`. TMS-053 now
+  closes the timer domain too: H starts CH3 with `(400000+8000)-1` for a one-time
+  **5.1 ms** first interval and then reloads `400000-1` for a steady **5.0 ms**
+  foreground tick, making the primary B6 loss cutoff nominally **35 ms**. Span's
+  moving `0x030` traffic independently corroborates two ticks at 10.000012 ms mean.
+  The receiver-side 32-byte envelope is now
   separately exhausted: B0..B27 are authenticated application data, B28..B31 are
   exact FV4+CMAC28, full freshness is `trip16||reset20||message8||reset_low2||00b`,
   and the CMAC input is `00 B6 || B0..B27 || freshness[6]` through ICU-S slot 4.
@@ -103,8 +107,11 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   the one same-PDU retry resolving the `±2` modulo-4 ambiguity; same-epoch message8
   reconstruction accepts the next congruent forward value (+1..+4); `0x24` still
   proceeds to CMAC; authenticated trip wrap clears linked B6 state; command7 result0
-  commits pending freshness before PDU42 delivery while mismatch neither commits nor
-  delivers; and application signal261 is a separate modulo-64 counter. SECOC-072 now
+  commits pending freshness before normal verified PDU42 delivery; and application
+  signal261 is a separate modulo-64 counter. CORR-111 adds the bounded exception:
+  verification failure never commits freshness, but hard-freshness failure or
+  retry-exhausted CMAC mismatch can still be forwarded to COM while `FEBE5408 < 204`
+  or a separate global D2 override is active. SECOC-072 now
   closes the Sienna-transfer boundary too: Sienna and H/F share the same generated
   `00F` sync/wrap algorithm, ordinary FV46/FV4 arithmetic, MAC28 domain/trailer
   construction, stage-before-CMAC/commit-after-match discipline, and ICU-S command7
@@ -116,11 +123,15 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   reset advances at a nominal 300 ms state cadence, and exact-H reset/message arithmetic
   replays every retained D7 frame including the `current-1` rollover overlap. A strictly
   newer authenticated sync epoch can therefore re-anchor a replacement B6 message8
-  without knowing its previous high bits; D7's own message8 remains independent. The
-  remaining Corolla work is therefore sender wall-clock cadence and **B6-local counter
-  start/policy**, exact secondary-field naming where safety-relevant, H/F-native limits,
-  the slot-4 secret value or an available approved MAC operation, stock-source
-  suppression, and the upstream payload/SecOC producer contract. Static broad searching
+  without knowing its previous high bits; D7's own message8 remains independent.
+  TMS-053 closes the replacement-side state machine from that point: an exclusive
+  replacement sender can own B6 message8 locally, advance normally inside the +1..+4
+  receiver window, keep application signal261 separate, and after sender restart wait
+  for the next authenticated `0x00F` epoch instead of guessing or persisting Toyota's
+  prior B6 message8. The remaining Corolla work is therefore **stock** sender wall-clock
+  cadence/secondary-field template, the slot-4 secret value or an available approved
+  MAC operation, stock-source suppression, and the upstream payload/SecOC producer
+  contract. Static broad searching
   of this H EPS should not be repeated without a new concrete lead.
   TMS-040/041 close the `FRC_P5` diagnostic domain and fixed-routine probe surface;
   TMS-043 now closes the **module-dependency topology**: Corolla P5 installs
@@ -134,8 +145,9 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   and ABS reference an Automated Driving System Interface module. The unresolved
   task is firmware/dynamic: acquire decoded `FRC_P5` plus category-435 `ABS_P5`
   firmware or synchronized stock-LTA traffic and join planner state to B6 bytes,
-  sender cadence/B6-local message-counter policy, signing ownership, and stock-source
-  suppression. Global `00F` trip/reset ownership is now externally observable and no
+  **stock** sender cadence/secondary-field behavior, signing ownership, and stock-source
+  suppression. Replacement message8 re-anchoring/progression is already closed and
+  does not require producer-policy recovery. Global `00F` trip/reset ownership is now externally observable and no
   longer part of this blocker. Receiver freshness/trailer reconstruction, candidate-window/retry
   policy, command7 result handling, commit timing, authenticated trip-wrap behavior,
   signal261 separation, and ICU-S slot selection are no longer open; the slot-4 key
@@ -351,11 +363,20 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   slot 4 accept command 5, what latency/jitter does it have under real command-7
   verification load, and do 7/12/36-byte results match independently known
   CMACs? The runtime retries shared-driver busy rather than aborting command 7.
-  Sender freshness remains a separate protocol-state requirement. The older
-  stock-bank stimulus remains useful as a low-risk permission/control experiment,
-  while `command5/ram_proxy.py` is the variable-length planner / guarded live
-  client after the RAM runtime is installed. Production Tx integration still
-  requires a new audited route because stock CanIf has no `0x2E4/0x131` Tx entry.
+  Sender freshness remains a separate protocol-state requirement. For H/F Corolla,
+  TMS-053 narrows this further: exact H record0/dispatcher/prepare/engine machinery
+  is structurally sufficient for caller-selected 36-byte command-5 input and is
+  byte-identical on F, but the **Sienna resident runtime placement is not portable**.
+  H startup `0x6149A` clears `FEBF05CC..FEBF09CB` and
+  `FEBF0B4C..FEBF0F4B`, and lower-page H structures already occupy the region used
+  by the Sienna single-stage proxy. Therefore no H/F
+  `data/variant_ram_exec_requirements.json` verified entry exists yet; a target-native
+  H/F carrier (the recovered XCP shadow is only a two-stage hypothesis) must be
+  audited separately if command 5 is used. The older stock-bank stimulus remains
+  useful as a low-risk permission/control experiment, while `command5/ram_proxy.py`
+  is the Sienna variable-length planner / guarded live client after its verified RAM
+  runtime is installed. Production H/F Tx integration still requires live slot4
+  permission plus that target-native carrier or another approved MAC path.
   See
   [../security/secoc/command5-oracle-assessment.md](../security/secoc/command5-oracle-assessment.md) and
   [../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md) §5.
@@ -531,11 +552,16 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   (high/default 4), the hard ±1745 ceiling has no recovered speed-dependent reduction,
   and the runtime-selected `CBFCE` compensation maps are zero-valued at every real
   point. The physical driver-torque path's ~±8.238 N.m acquisition clamp and ±10 N.m
-  telemetry saturation are explicitly **not** override thresholds, so the driver
-  override policy remains open. Measured `0x4A3` Q-current is observable, but no
+  telemetry saturation are explicitly **not** override thresholds. TMS-053 expands
+  the physical torque census beyond the earlier exact-symbol pass: 13 direct
+  named/fixed-GP source/snapshot references are recovered and **zero** occur in the
+  C8xxx–CExxx target-to-motor control cone. Under that explicit static boundary,
+  there is no Toyota physical driver-torque comparator left to recover; the numeric
+  driver-override threshold is a conservative Panda/openpilot policy to choose and
+  validate dynamically. Measured `0x4A3` Q-current is observable, but no
   cooperative-supervisor measured-Q comparator is recovered; any actuator-response
-  limit is therefore a future Panda/sender policy to validate dynamically rather than
-  an OEM threshold still waiting to be copied. Extended fault mapping remains open.
+  limit is likewise a future Panda/sender policy rather than an OEM threshold still
+  waiting to be copied. Extended fault mapping remains open.
   COM-016 now closes **receiver-side competing-B6 arbitration**: there is no recovered
   sender identity or Target-Lateral-ID priority; one pending SecOC slot coalesces
   arrivals, in-flight arrivals are ignored, one shared freshness state rejects replay
@@ -543,12 +569,18 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   tolerated rather than used as a duplicate filter. CORR-111 further closes a bounded
   generated fail-open mode: B6 verification failures can still reach COM without
   freshness commit while `FEBE5408 < 204` or a separate global D2 override is active.
-  Deterministic lateral authority
-  therefore requires exclusive B6 control. The remaining suppression question is
-  physical/deployment-specific: identify the producer side and validate the relay-side
-  isolation point; do not use freshness racing as coexistence. Sender template/cadence,
-  slot4 MAC capability/key policy and that physical suppression implementation remain
-  deployment blockers. COM-017 independently narrows the **non-steering engagement
+  Deterministic lateral authority therefore requires exclusive B6 control. TMS-053
+  additionally closes the exact H steady TAUJ0-CH3 period at **5.0 ms** (one initial
+  5.1-ms interval), so the seven-tick primary loss cutoff is nominally **35 ms**;
+  Span `0x030` timing corroborates the same period. It also closes the replacement
+  sender's freshness restart/progression recipe: re-anchor only on a newer
+  authenticated `0x00F` epoch, own B6 message8 locally, keep signal261 independent,
+  and wait for the next epoch after restart instead of guessing/persisting Toyota's
+  message8. The remaining suppression question is physical/deployment-specific:
+  identify the producer side and validate the relay-side isolation point; do not use
+  freshness racing as coexistence. **Stock** sender template/cadence, slot4 MAC
+  capability/key policy or an audited H/F signer route, and that physical suppression
+  implementation remain deployment blockers. COM-017 independently narrows the **non-steering engagement
   state**: exact H receives `0x51E B0[7]` as the source of DID `0x1033 Ready Status`,
   both retained operational routes show Ready=1, and Span observes checksum-valid `0x127`
   raw `3`, compatible with the retained prior-art D enum but not independently gear-oracled;

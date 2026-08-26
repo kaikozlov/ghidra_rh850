@@ -146,8 +146,13 @@ defines `0=No Request (Manual Operation)` and closes the accepted H active reque
 as `1=PCS`, `4=LDA`, `10=Hands Off LTA`, `11=LTA/LCA`, and `19=PDA`; PDU42's
 receive deadline reloads to **7 TAUJ0-CH3 foreground ticks**, first expiry disables
 cooperative selection through the slot-18 receive-status path, and signal261 is a
-modulo-64 rolling sequence counter with effective-gap cap `8`. The CH3 wall-clock
-period is not statically known. The 32-byte receiver envelope is now exhausted as
+modulo-64 rolling sequence counter with effective-gap cap `8`. Exact H timer
+configuration now closes the steady CH3 foreground period at **5.0 ms**: startup
+loads `(400000+8000)-1` for the first **5.1 ms** interval, then `0x5F812` reloads
+`400000-1` for each steady tick. Thus the primary seven-tick B6 loss cutoff is
+nominally **35 ms** after steady-state reception. Span's moving `0x030` traffic
+independently corroborates the same timing with a 10.000012-ms mean two-tick period.
+The 32-byte receiver envelope is now exhausted as
 well: B0..B27 are authenticated application data; recovered EPS semantics occupy 51
 bits concentrated in B3..B10; 6 more bits are extracted without a recovered downstream
 consumer; and 167 authenticated application bits have no recovered consumer under the
@@ -160,19 +165,28 @@ the `±2` low-two-bit ambiguity. Same-epoch message8 reconstruction chooses the 
 strictly-forward congruent value (+1..+4). Freshness result `0x24` is a boundary
 notification that still executes command7, authenticated `0x00F` trip wrap clears the
 linked B6 freshness slots, and command7 result0 commits pending freshness before PDU42
-is released to COM. CMAC mismatch neither commits freshness nor delivers the command.
-Signal261 is a separate authenticated application modulo-64 sequence; it is not the
-SecOC message counter. SECOC-073 now closes the **observable global sender freshness
+is released to COM. Verification failure never commits pending freshness, but
+CORR-111 proves a bounded generated fail-open forwarding mode: hard freshness failure
+or retry-exhausted CMAC mismatch can still route the queued PDU42 to COM while
+`FEBE5408 < 204` or a separate global D2 override is active. Signal261 is a separate
+authenticated application modulo-64 sequence; it is not the SecOC message counter.
+SECOC-073 now closes the **observable global sender freshness
 state** as well: `0x00F` directly carries `trip16||reset20`, advances reset at a nominal
 300 ms state cadence while the sync frame is repeated at ~10 Hz, and the exact H
 `current/current-1` reset-window algorithm reconstructs every retained D7 frame. Because
 a newer authenticated `(trip,reset)` seeds ordinary message8 from transmitted low2,
 a replacement B6 sender can re-anchor at a new sync epoch without knowing the previous
-B6 message8; D7's message8 remains independent and must not be copied. The remaining
-problem is therefore safe **sender-side** reproduction of a known EPS receiver contract
-— B6 wall-clock cadence and sender-specific message8 policy, secondary-field dynamics
-where safety-relevant, the slot-4 secret value or approved slot use, stock-source
-suppression, and the upstream payload/SecOC producer contract. Techstream now verifies the Corolla P5 module topology as `FRC_P5` 498 + category-435
+B6 message8; D7's message8 remains independent and must not be copied. TMS-053 closes
+the replacement-sender progression completely enough for implementation: after a
+newer authenticated `0x00F` epoch, own B6 message8 locally, advance it normally in the
+receiver's +1..+4 same-epoch acceptance window, keep application signal261 as a
+separate modulo-64 counter, and after sender restart wait for the next authenticated
+sync epoch rather than guessing prior message8. No cross-power B6-message8 persistence
+or recovery of Toyota's B6 counter-start policy is required for an **exclusive
+replacement sender**. The remaining problem is therefore safe sender deployment of a
+known EPS receiver contract — **stock** B6 wall-clock cadence and secondary-field
+dynamics where safety-relevant, the slot-4 secret value or approved/live command-5 use,
+stock-source suppression, and the upstream payload/SecOC producer contract. Techstream now verifies the Corolla P5 module topology as `FRC_P5` 498 + category-435
 `ABS_P5`/Brake-EPB + `EMPS_P5` 405, but not a byte-level forwarding transform or
 SecOC signer — so the remaining work is not discovery of another steering message,
 its scale, request selector, or loss rule.
@@ -264,12 +278,12 @@ work must recover the second and fourth boxes for each new generation as well.
 |---|---|---|---|
 | Platform identity / generation | exact firmware identity and P1M-E profile known | exact H and Span corpora known | bind each candidate vehicle to FRC/EPS/gateway firmware and real bus topology |
 | Torque steering command | protected `0x2E4` request/torque path recovered | classic `0x2E4` absent; H/F instead receive protected B6 target-angle control | do not port torque limits/scales; derive H/F-native limits and finish SecOC sender/producer contract |
-| LTA/angle command | protected `0x131` path recovered and converges with torque mode | active queue lacks `0x131`; protected `0x0B6` signal255 is target angle, signal254 is the OEM request selector, receiver loss is 7 foreground ticks, and signal261 is modulo-64 sequence state | module topology is `FRC_P5` 498 + `ABS_P5`/Brake-EPB 435 + `EMPS_P5` 405; TMS-051 identifies Brake System Control/category-435 as the immediate authenticated B6 source family; TMS-052 proves the 23TC01 `8646F1204500` 2023-Corolla `0792` FRC family is already local but encoded and publishes the 24TC01 Brake candidate family `F152612A51/52/53→A54`, while no `07B0` Brake image is local. Code-level origin/forwarding, cadence and SecOC signing/freshness ownership therefore require the decoded Brake application plus FRC decode/exact identity or synchronized stock-LTA traffic; do not transplant old `0x131` wire scaling |
-| Steering feedback | `0x025`, `0x260`, `0x262` roles strongly mapped | H `0x025` is FD angle/rate; live `0x030` now provides physical driver torque plus raw fault/validity gates; `0x4A3` supplies alternate torque/Q-current and `0x351/0x394` supply fault/status families | derive the physical driver-override threshold, Q-current response limits, DID `0x1033` Ready Tx join, and temporary/permanent fault transition mapping |
+| LTA/angle command | protected `0x131` path recovered and converges with torque mode | active queue lacks `0x131`; protected `0x0B6` signal255 is target angle, signal254 is the OEM request selector, receiver loss is nominal 35 ms (7 steady 5-ms ticks), and signal261 is modulo-64 sequence state | module topology is `FRC_P5` 498 + `ABS_P5`/Brake-EPB 435 + `EMPS_P5` 405; TMS-051 identifies Brake System Control/category-435 as the immediate authenticated B6 source family; TMS-052 proves the 23TC01 `8646F1204500` 2023-Corolla `0792` FRC family is already local but encoded and publishes the 24TC01 Brake candidate family `F152612A51/52/53→A54`, while no `07B0` Brake image is local. Code-level origin/forwarding and **stock** cadence/signing ownership still require decoded producer firmware or synchronized stock-LTA traffic, but TMS-053 closes replacement-sender message8 re-anchoring from authenticated `0x00F`; do not transplant old `0x131` wire scaling |
+| Steering feedback | `0x025`, `0x260`, `0x262` roles strongly mapped | H `0x025` is FD angle/rate; live `0x030` now provides physical driver torque plus raw fault/validity gates; `0x4A3` supplies alternate torque/Q-current and `0x351/0x394` supply fault/status families | choose and dynamically validate a conservative Panda driver-override policy; validate Q-current response policy, Ready=0/fault transitions, and temporary/permanent fault mapping. Static H finds no physical driver-torque comparator in the recovered target-to-motor control cone |
 | Longitudinal command | older SecOC DBC provides a useful comparator, not an EPS-local proof | route `0x183` is 64-byte CAN-FD and disproves old wire-shape transfer | locate ACC producer, target command, feedback, stock suppression, AEB coexistence |
 | Stock producer ownership | old openpilot architecture gives camera/radar replacement model | physical Toyota-B/network differences already observed | map FRC/radar/gateway ownership and safe duplicate blocking for each command family |
 | UI / alerts | older `0x412` is historical reference | old-camera U023A87 path is disabled residue in H | identify FRC/cluster LTA/LDA/LCA status and warning outputs |
-| Authentication | Sienna SecOC receiver and bypass paths deeply recovered | command carrier is secured B6; receiver-side FV4/CMAC28 trailer, 46-bit freshness reconstruction, reset/message candidate window, retry scopes, trip-wrap handling, exact 36-byte CMAC input, command7 result/commit ordering, and config/job0→ICU-S slot4 selection are closed; SECOC-073 additionally proves live `00F` is the wire-visible `trip16||reset20` epoch and replays D7 rollover exactly, so a strictly newer authenticated epoch can re-anchor B6 without its prior message8; application signal261 remains a separate authenticated counter | recover B6-local sender cadence/message8 start policy and a production-safe way to use/provision slot4 before actuation; do not copy D7's message counter or confuse application signal261 with SecOC freshness |
+| Authentication | Sienna SecOC receiver and bypass paths deeply recovered | command carrier is secured B6; receiver-side FV4/CMAC28 trailer, 46-bit freshness reconstruction, reset/message candidate window, retry scopes, trip-wrap handling, exact 36-byte CMAC input, command7 result/commit ordering, and config/job0→ICU-S slot4 selection are closed; authenticated `00F` is the wire-visible `trip16||reset20` epoch, and TMS-053 closes exclusive replacement-sender re-anchoring/progression without prior B6 message8 persistence; application signal261 remains a separate authenticated counter | recover **stock** sender cadence/secondary-field template and a production-safe way to use/provision slot4 before actuation; do not copy D7's message counter or confuse application signal261 with SecOC freshness. H/F command-5 software supports the 36-byte input, but the verified Sienna resident-RAM geometry does not transfer |
 | Techstream producer probes | older diagnostic controls are only contextual | FRC fixed vibration routines and category-435 ABS/Brake Active Tests are cataloged; the latter are brake-actuator-only and expose no named steering setpoint writer. TMS-051 also finds no named FRC/ABS Target-Lateral/Target-Steering data-monitor carrier; TMS-052 independently joins two local CUWs to Toyota's 23TC01 Corolla FRC family and supplies the 24TC01 Brake acquisition CIDs | use these as capture/probe triggers only; current decoded-corpus sender search is exhausted. Acquire/decode `07B0` Brake using live F181/0105 plus the published Brake CID family; the 2023 Corolla `0792` generation package is already local but still needs decode/exact-target identity, or synchronized traffic |
 
 ### 4.1 Route-backed Corolla implementation readiness
@@ -371,11 +385,15 @@ What the exact segment-0 rlog *does* close is the old-openpilot role migration:
   `cruiseState.available/enabled/speed` must
   remain neutral until a synchronized transition or producer-firmware join closes
   that mapping.
-- Exact H partially closes the physical driver-torque scale on live `0x030`, the
+- Exact H closes the physical driver-torque scale on live `0x030`, the
   `0x030` selected steering fault/inhibit status plus torque-validity gate, the
   `0x351` C159B49-linked base path plus its separate force-7 override, and the
-  `0x394` deepest clear/normal classifier path. A physical driver-override threshold,
-  Q-current response limits, and production temporary/permanent fault transitions
+  `0x394` deepest clear/normal classifier path. TMS-053's expanded exact-H
+  named/fixed-GP census finds **zero** physical driver-torque source/snapshot
+  references in the recovered C8xxx–CExxx target-to-motor control cone. The
+  remaining driver-override threshold is therefore a conservative Panda/openpilot
+  policy to choose and validate dynamically, not an OEM comparator to recover.
+  Q-current response policy and production temporary/permanent fault transitions
   still require vehicle-level evidence.
 - **Same ID is not enough for body/UI reuse.** `0x3B7`, `0x411`, `0x412`,
   `0x610`, `0x614`, `0x620`, and `0x622` remain 8-byte frames, but most relevant
@@ -491,10 +509,7 @@ all 60 observed `0x51E` samples decoded Ready=1, and physical driver torque span
 hundredth-N.m values. `steeringPressed` and both openpilot steering-fault flags remain false
 by design because their policy mapping is not yet proved.
 `tests/verify_corolla_tss3_opendbc_readonly_external.py` reproduces this against the sibling
-maintained forks. What still cannot be made production-ready is the B6 sender/SecOC/safety
-contract, a validated driver-override threshold, Q-current response limits, Ready/fault
-transition mapping, radar parsing, or longitudinal control. The readiness artifact continues to record those evidence blockers rather than
-implementation state.
+maintained forks. What still cannot be made production-ready is the **deployment** side of the B6 sender contract (live slot4 MAC capability or equivalent signer, target-native H/F runtime carrier if command 5 is used, stock payload/cadence template, and relay-correct suppression topology), a deliberately chosen/validated Panda driver-override policy, Q-current response policy, Ready/fault transition mapping, radar parsing, or longitudinal control. Receiver freshness/message8 re-anchoring and the nominal 35-ms loss cutoff are already static closures, not remaining blockers. The readiness artifact continues to record those evidence blockers rather than implementation state.
 
 ## 5. The concrete TSS3 investigation roadmap
 

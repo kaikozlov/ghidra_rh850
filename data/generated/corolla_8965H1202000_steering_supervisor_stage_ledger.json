@@ -4,7 +4,7 @@
     "canonical_proof": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
     "classic_131": "normal Rx/SecOC descriptor absent on H and Sienna lta_angle_command_smoothing 0xC8DE0 is order-unpaired",
     "classic_2e4": "normal Rx descriptor absent on H and retained torque-clamp input remains independently proven zero-fed",
-    "replacement_command": "protected FD 0x0B6 signal255 signed16 B4:B5 is the target-steering-angle command; signal254 B3 is the Target Lateral ID request/profile selector. Controller-equivalent scale is 1024/17870 deg/count (~1.000121519 mrad/count); accepted profiles are PCS/LDA/Hands Off LTA/LTA-LCA/PDA; signal254 request selection, the 7-foreground-tick primary receiver cutoff, and signal261 modulo-64 sequence handling are closed. The literal OEM signal255 unit, wall-clock sender cadence, exact secondary B6 names, and upstream producer/SecOC sender contract remain bounded."
+    "replacement_command": "protected FD 0x0B6 signal255 signed16 B4:B5 is the target-steering-angle command; signal254 B3 is the Target Lateral ID request/profile selector. Controller-equivalent scale is 1024/17870 deg/count (~1.000121519 mrad/count); accepted profiles are PCS/LDA/Hands Off LTA/LTA-LCA/PDA; signal254 request selection, the 7-foreground-tick / nominal-35-ms primary receiver cutoff, and signal261 modulo-64 sequence handling are closed. The literal OEM signal255 unit, stock wall-clock sender cadence/template, exact secondary B6 names, and upstream producer/SecOC signing contract remain bounded; exclusive replacement freshness progression is closed separately."
   },
   "h_order_unpaired": [
     {

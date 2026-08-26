@@ -74,10 +74,10 @@ check("target delta threshold exact", e["lta_target_delta_max_raw_per_effective_
 check("target delta physical threshold approximately 4.47 deg", 4.46 < e["lta_target_delta_max_deg_per_effective_gap"] < 4.48)
 check("EPS sequence gap formula and cap", e["sequence"]["effective_gap_min"] == 1 and e["sequence"]["effective_gap_max"] == 8 and not e["sequence"]["strict_plus_one_required_by_eps"])
 check("seven-tick B6 receiver cutout", e["communication_loss"]["successful_receive_reload_ticks"] == 7 and e["communication_loss"]["primary_cutout_after_foreground_ticks"] == 7)
-check("seven-tick wall clock remains bounded", not e["communication_loss"]["wall_clock_duration_known"])
+check("seven-tick wall clock closed at nominal 35 ms", e["communication_loss"]["wall_clock_duration_known"] and e["communication_loss"]["nominal_wall_clock_ms"] == 35.0)
 check("LTA measured steering-rate raw threshold", e["measured_steering_rate_monitor"]["lta_raw_abs_threshold"] == 100)
 check("measured-rate persistent debounce remains bank-specific", e["measured_steering_rate_monitor"]["persistent_eps_debounce_cycles_low_bank"] == 79 and e["measured_steering_rate_monitor"]["persistent_eps_debounce_cycles_high_bank"] == 63)
-check("per-task target slew retained without fake deg/s", e["internal_target_conditioning"]["runtime_low_bank_lta_slew_doubled_domain_per_steering_task"] == 7 and e["internal_target_conditioning"]["default_high_bank_lta_slew_doubled_domain_per_steering_task"] == 4 and e["internal_target_conditioning"]["wall_clock_rate_not_promoted"])
+check("per-task target slew retained with conditional 5ms rate", e["internal_target_conditioning"]["runtime_low_bank_lta_slew_doubled_domain_per_steering_task"] == 7 and e["internal_target_conditioning"]["default_high_bank_lta_slew_doubled_domain_per_steering_task"] == 4 and e["internal_target_conditioning"]["foreground_tick_nominal_ms"] == 5.0 and not e["internal_target_conditioning"]["wall_clock_rate_unconditional"] and 40.0 < e["internal_target_conditioning"]["runtime_low_bank_deg_per_second_if_once_per_foreground_tick"] < 40.2)
 check("internal target/response inhibit aggregation exact", "FEBEC269" in e["internal_inhibit_chain"]["aggregate"] and "FEBEC26B" in e["internal_inhibit_chain"]["aggregate"] and "FEBEC26A" in e["internal_inhibit_chain"]["aggregate"])
 check("additional C245 cooperative gate retained", "FEBEC245" in e["internal_inhibit_chain"]["additional_gate"])
 check("controller error saturation not promoted as rejection", e["controller_error_clamp"]["classification"] == "controller error saturation, not promoted to a Panda rejection threshold")
@@ -88,7 +88,7 @@ check("measured angle scales exact", m["steering_angle"]["coarse_deg_per_count"]
 check("measured rate is signal186", m["steering_rate"]["signal"] == 186 and m["steering_rate"]["signed_bits"] == 12)
 check("driver torque source physical and live", m["driver_torque"]["can_id"] == "0x030" and m["driver_torque"]["live_span_range_nm"]["count"] == 6000)
 check("driver torque invalid gate is required clear", "must be 0" in m["driver_torque"]["invalid_gate"])
-check("driver override numeric threshold deliberately open", m["driver_torque"]["override_abs_threshold_nm"] is None)
+check("driver override numeric threshold deliberately open as Panda policy", m["driver_torque"]["override_abs_threshold_nm"] is None and "Panda/openpilot" in m["driver_torque"]["override_policy_source"])
 check("driver torque acquisition clamp is not override", abs(m["driver_torque"]["acquisition_clamp_abs_nm"] - 8.23828125) < 1e-9 and "not driver-override thresholds" in m["driver_torque"]["override_boundary"])
 check("driver torque telemetry saturation is not override", m["driver_torque"]["telemetry_saturation_abs_nm"] == 10.0 and "not driver-override thresholds" in m["driver_torque"]["override_boundary"])
 check("selected fault/inhibit is immediate cutout candidate", m["steering_fault_inhibit"]["nominal_clear_value"] == 0 and "immediate controls cutout" in m["steering_fault_inhibit"]["candidate_action"])
@@ -100,11 +100,12 @@ check("candidate rejects other EPS request profiles", any("Reject all other" in 
 check("candidate requires strict +1 sequence", any("exactly +1 modulo 64" in x for x in p["tx_requirements"]))
 check("candidate applies single-step 78-count delta", any("<= 78 raw counts" in x for x in p["tx_requirements"]))
 check("candidate inactive command is ID0/target0", any("ID 0 and target angle 0" in x for x in p["tx_requirements"]))
-check("secondary B6 values are a template blocker not free parameters", p["secondary_b6_fields"]["policy"] == "not an unresolved Panda threshold" and "whitelist" in p["secondary_b6_fields"]["boundary"])
+check("secondary B6 values have bounded minimal candidate but still require validation", p["secondary_b6_fields"]["policy"] == "not an unresolved Panda threshold" and "258=1" in p["secondary_b6_fields"]["boundary"] and "cross-ECU" in p["secondary_b6_fields"]["boundary"] and "whitelist" in p["secondary_b6_fields"]["boundary"])
+check("sender lapse now records nominal 35 ms EPS cutout", p["sender_lapse"]["milliseconds"] == 35.0)
 
 u = d["unresolved_safety_parameters"]
 check("only three bounded safety-policy parameter classes remain", set(u) == {"driver_override_abs_nm", "extended_fault_policy", "actuator_response_fault_threshold"})
-check("driver override parameter is intentionally unset", u["driver_override_abs_nm"]["value"] is None)
+check("driver override parameter is intentionally unset policy not OEM recovery", u["driver_override_abs_nm"]["value"] is None and u["driver_override_abs_nm"]["classification"] == "deliberate-panda-policy-not-unrecovered-oem-comparator" and "no Toyota EPS" in u["driver_override_abs_nm"]["missing_evidence"])
 check("extended fault policy is intentionally unset with immediate gate known", u["extended_fault_policy"]["value"] is None and "disable" in u["extended_fault_policy"]["known_immediate_gate"])
 check("actuator response threshold intentionally unset", u["actuator_response_fault_threshold"]["value"] is None)
 check("actuator response is reclassified as no recovered OEM measured-Q threshold", u["actuator_response_fault_threshold"]["classification"] == "no-recovered-oem-measured-q-current-threshold" and "FEBEAE16" in u["actuator_response_fault_threshold"]["static_firmware_result"])
@@ -131,6 +132,9 @@ check("steering-limit ledger is a tracked Panda input", "steering_limits" in d["
 check("Panda does not transplant TSS2 speed-angle/current limits", "speed-angle curves" in d["not_promoted_as_safety_limits"]["legacy_toyota_lta_limits"] and "measured_q_current" in d["not_promoted_as_safety_limits"])
 check("static conclusion keeps Q-current OEM threshold negative", d["static_conclusion"]["measured_q_current_observable_closed_but_oem_response_threshold_not_recovered"])
 check("static conclusion keeps speed-dependent hard reduction negative", d["static_conclusion"]["speed_dependent_hard_angle_reduction_not_recovered"])
+check("static conclusion closes nominal 35ms loss cutout", d["static_conclusion"]["eps_loss_cutout_nominal_wall_clock_ms"] == 35.0)
+check("static conclusion reclassifies driver override as Panda policy", d["static_conclusion"]["driver_torque_signal_closed"] and d["static_conclusion"]["driver_override_is_panda_policy_not_eps_static_recovery_blocker"])
+check("static conclusion separates stock cadence from replacement freshness", d["static_conclusion"]["wall_clock_sender_cadence_open"] and d["static_conclusion"]["replacement_sender_freshness_policy_closed_independently_of_stock_cadence"])
 
 # The builder must reproduce the committed artifact exactly from tracked evidence.
 with tempfile.TemporaryDirectory() as td:

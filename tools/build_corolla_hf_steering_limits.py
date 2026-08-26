@@ -25,6 +25,8 @@ PANDA_DECOMP = REPO / "data/generated/corolla_8965H1202000_panda_lateral_safety_
 TARGET = REPO / "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json"
 STATE = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge.json"
 CAL_DELTA = REPO / "data/generated/corolla_8965F1208000_low_calibration_delta.json"
+FOLLOWUP = REPO / "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json"
+RECEIVER = REPO / "data/generated/corolla_8965H1202000_b6_receiver_contract.json"
 DEFAULT_OUTPUT = REPO / "data/generated/corolla_hf_steering_limits.json"
 
 LOW_BANK = 0x12960
@@ -105,6 +107,8 @@ def build() -> dict[str, Any]:
     target = loadj(TARGET)
     state = loadj(STATE)
     cal_delta = loadj(CAL_DELTA)
+    followup = loadj(FOLLOWUP)
+    receiver = loadj(RECEIVER)
 
     need(len(h) == 0x100000, "unexpected H CodeFlash size")
     need(len(f) >= len(h), "unexpected F CodeFlash size")
@@ -139,6 +143,15 @@ def build() -> dict[str, Any]:
     need([x["entry"] for x in q_refs["matches"]] == ["0x00046C4C", "0x0005722E"], "measured-Q direct-reference census drift")
     need("0x000CB394" in [x["entry"] for x in cmd_refs["matches"]] and "0x000CB59A" in [x["entry"] for x in cmd_refs["matches"]], "internal-command census drift")
     need([x["entry"] for x in torque_refs["matches"]] == ["0x00046C4C", "0x00057692"], "driver-torque direct-reference census drift")
+    follow_driver = followup["driver_torque_direct_reference_union"]
+    expected_driver_entries = [
+        "0x00030384", "0x000434D6", "0x000434DC", "0x00046C4C", "0x00047188",
+        "0x0004D372", "0x0004E6B2", "0x0004E8F4", "0x00050B7A", "0x000525E6",
+        "0x0005389C", "0x0005701E", "0x00057692",
+    ]
+    need(follow_driver["entries"] == expected_driver_entries, "expanded driver-torque source/snapshot census drift")
+    need(follow_driver["entries_inside_control_cone"] == [], "physical driver torque unexpectedly appears in C8xxx-CExxx target-to-motor cone")
+    need(receiver["static_conclusion"]["wall_clock_timeout_closed"] is True and receiver["static_conclusion"]["foreground_tick_nominal_ms"] == 5.0, "foreground timing contract drift")
 
     need(u32(h, 0xB024C) == HIGH_BANK and u32(h, 0xB0250) == LOW_BANK, "calibration bank pointer order drift")
     need(h[0xB024C:0xB0254] == f[0xB024C:0xB0254], "H/F calibration pointer table differs")
@@ -258,6 +271,8 @@ def build() -> dict[str, Any]:
             "target_angle_contract": {"path": rel(TARGET), "sha256": sha256_file(TARGET)},
             "state_bridge": {"path": rel(STATE), "sha256": sha256_file(STATE)},
             "calibration_bank_evidence": {"path": rel(CAL_DELTA), "sha256": sha256_file(CAL_DELTA)},
+            "tms053_followup_decompiler_evidence": {"path": rel(FOLLOWUP), "sha256": sha256_file(FOLLOWUP)},
+            "b6_receiver_timing_contract": {"path": rel(RECEIVER), "sha256": sha256_file(RECEIVER)},
         },
         "cross_variant": {
             "all_promoted_function_bodies_h_f_identical": True,
@@ -286,8 +301,11 @@ def build() -> dict[str, Any]:
                 "high_default_doubled_domain_per_steering_task": high_values["lta_slew_doubled_per_task"],
                 "high_default_b6_counts_per_task": high_values["lta_slew_doubled_per_task"] / 2,
                 "high_default_deg_per_task": (high_values["lta_slew_doubled_per_task"] / 2) * scale,
-                "wall_clock_deg_per_second": None,
-                "boundary": "Firmware closes the per-steering-task slew, but not the exact wall-clock steering-task cadence; do not manufacture deg/s.",
+                "foreground_tick_nominal_ms": receiver["static_conclusion"]["foreground_tick_nominal_ms"],
+                "selected_low_deg_per_second_if_called_each_foreground_tick": ((low_values["lta_slew_doubled_per_task"] / 2) * scale) / (receiver["static_conclusion"]["foreground_tick_nominal_ms"] / 1000.0),
+                "high_default_deg_per_second_if_called_each_foreground_tick": ((high_values["lta_slew_doubled_per_task"] / 2) * scale) / (receiver["static_conclusion"]["foreground_tick_nominal_ms"] / 1000.0),
+                "wall_clock_rate_unconditional": False,
+                "boundary": "The foreground scheduler period is now closed at nominal 5 ms. The displayed deg/s values are conditional on this conditioner running once per foreground cycle; the per-call firmware limits remain the unconditional safety facts.",
             },
             "doubled_domain_absolute_clamp": {
                 "raw_internal": gv["target_clamp_lta"],
@@ -368,8 +386,12 @@ def build() -> dict[str, Any]:
             "telemetry_saturation_abs_nm": 10.0,
             "override_abs_threshold_nm": None,
             "supervisor_numeric_override_comparator_recovered": False,
-            "safety_boundary": "The ~8.238 N.m acquisition clamp and ±10.00 N.m telemetry saturation are representation limits, not driver-override thresholds. Do not use either as Panda override policy.",
-            "census_boundary": census["evidence_boundary"],
+            "target_to_motor_physical_torque_comparator_recovered": False,
+            "direct_source_snapshot_reference_entries": follow_driver["entries"],
+            "direct_source_snapshot_refs_inside_c8xxx_cexxx_control_cone": follow_driver["entries_inside_control_cone"],
+            "policy_classification": "Panda/openpilot driver-override policy requiring dynamic validation; not an unrecovered Toyota EPS cooperative-control comparator",
+            "safety_boundary": "The ~8.238 N.m acquisition clamp and ±10.00 N.m telemetry saturation are representation limits, not driver-override thresholds. The expanded exact-H named/fixed-GP census finds the physical FEBE7B08->FEBE6554 chain only in acquisition/telemetry/copy code and zero direct references in the C8xxx-CExxx target-to-motor control cone. This does not prove every computed alias is absent, but it removes an OEM override comparator from the recovered static blocker list.",
+            "census_boundary": "Expanded TMS-053 named-symbol plus fixed-GP textual census over the exact-H corrected-context whole-image corpus; value-set/computed-pointer aliases and DMA remain outside the negative proof.",
         },
         "motor_q_current": {
             "observable": "FEBE6592 Motor Actual Current (Q Axis); 0x4A3 B6:B7 is sign-inverted -0.01 A/count",
@@ -383,6 +405,7 @@ def build() -> dict[str, Any]:
         },
         "remaining_policy": {
             "driver_override_abs_nm": None,
+            "driver_override_source": "Panda/openpilot policy to be chosen conservatively and validated dynamically; no recovered Toyota EPS physical-driver-torque actuation comparator to copy",
             "temporary_vs_permanent_fault_mapping": None,
             "actuator_response_policy": "requires deliberate Panda/sender policy and relay-correct dynamic validation; no OEM measured-Q comparator recovered in the cooperative supervisor",
             "production_enable_authorized": False,
@@ -390,11 +413,15 @@ def build() -> dict[str, Any]:
         "static_conclusion": {
             "absolute_angle_limit_closed": True,
             "per_frame_delta_limit_closed": True,
-            "per_task_slew_closed_wall_clock_rate_open": True,
+            "per_task_slew_closed": True,
+            "foreground_tick_wall_clock_closed": True,
+            "slew_deg_per_second_only_conditional_on_once_per_foreground_call": True,
             "measured_rate_limit_closed": True,
             "speed_dependent_hard_angle_reduction_recovered": False,
             "selected_vehicle_profile_compensation_maps_zero": True,
-            "driver_torque_observable_closed_override_threshold_open": True,
+            "driver_torque_observable_closed": True,
+            "physical_driver_torque_comparator_absent_under_promoted_census_boundary": True,
+            "driver_override_is_panda_policy_not_static_eps_recovery_blocker": True,
             "measured_q_observable_closed_oem_response_threshold_not_recovered": True,
             "internal_fault_threshold_families_bounded": True,
             "production_enable_authorized": False,

@@ -214,7 +214,7 @@
       "immediate_sender_relationship": "Brake System Control Module",
       "ingress": "protected CAN-FD 0x0B6 signal255 signed16 B4:B5",
       "mode_ingress": "protected CAN-FD 0x0B6 signal254 6-bit B3",
-      "next_static_target": "recover upstream FRC_P5 -> Brake/EPB producer/transport and SecOC sender/freshness behavior; wall-clock cadence and exact secondary B6 field names remain bounded",
+      "next_static_target": "recover upstream FRC_P5 -> Brake/EPB producer/transport, stock B6 cadence/secondary-field template, and a production signing/suppression path; replacement freshness re-anchoring and the EPS scheduler timeout are already closed",
       "oem_wire_unit_name_identified": false,
       "physical_scale_identified": true,
       "reaches_command_value_torque_and_q_current": true,
@@ -233,7 +233,7 @@
       },
       "torque_command": false,
       "upstream_feature_producer_identified": false,
-      "wall_clock_timeout_identified": false
+      "wall_clock_timeout_identified": true
     },
     "target_angle_pipeline": [
       {
@@ -906,16 +906,16 @@
       19
     ],
     "upstream_feature_producer_identified": false,
-    "wall_clock_timeout_identified": false
+    "wall_clock_timeout_identified": true
   },
   "supporting_inputs": {
     "b6_target_angle_ingress": {
       "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-      "sha256": "5755faced5efb0212ae195ed8bff30bee2c1765656a29ed974ced95082c00647"
+      "sha256": "a80442a2198033f0e71fb887189a07794ab23ae6031b50a6f63ed85fd0e5080a"
     },
     "fd_control_interface": {
       "path": "data/generated/corolla_8965H1202000_fd_control_interface.json",
-      "sha256": "743180f8d6d1267eb6709fcf3bbac905b015267bc2136de49ca5ba71e479b65d"
+      "sha256": "f9ab62583441e145b7339d82406e68506dc18d9e4c7271f1f5c9f292a18579b1"
     },
     "supervisor_external_ingress_census": {
       "path": "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",

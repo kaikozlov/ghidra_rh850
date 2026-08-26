@@ -34,7 +34,7 @@ check('authenticated 131 smoothing C8DE0 is order-unpaired',removed['0xC8DE0']['
 replacement=d['explicit_command_mode_boundary']['replacement_command']
 check('replacement command is protected B6 target angle','0x0B6 signal255' in replacement and 'signal254' in replacement)
 check('replacement command carries current closed B6 semantics','1024/17870 deg/count' in replacement and 'PCS/LDA/Hands Off LTA/LTA-LCA/PDA' in replacement and '7-foreground-tick' in replacement and 'modulo-64' in replacement)
-check('replacement command preserves remaining boundaries','literal OEM signal255 unit' in replacement and 'wall-clock sender cadence' in replacement and 'upstream producer/SecOC sender contract remain bounded' in replacement and 'Physical scale and exact OEM mode names remain open' not in replacement)
+check('replacement command preserves remaining boundaries','literal OEM signal255 unit' in replacement and 'stock wall-clock sender cadence/template' in replacement and 'upstream producer/SecOC signing contract remain bounded' in replacement and 'exclusive replacement freshness progression is closed separately' in replacement and 'Physical scale and exact OEM mode names remain open' not in replacement)
 check('replacement command proof linked',d['explicit_command_mode_boundary']['canonical_proof']=='data/generated/corolla_8965H1202000_b6_target_angle_ingress.json')
 print('\n== H expansion classification ==')
 roles=s['h_unpaired_role_counts']

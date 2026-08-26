@@ -298,6 +298,11 @@ def main() -> int:
         dat[h030_rule["wire_byte"]] == ((sum(dat[: h030_last_data_byte + 1]) + h030_addend) & 0xFF)
         for _, dat in fd30
     )
+    fd30_intervals_ms = [(b[0] - a[0]) / 1e6 for a, b in zip(fd30, fd30[1:])]
+    fd30_mean_interval_ms = (
+        (fd30[-1][0] - fd30[0][0]) / 1e6 / (len(fd30) - 1)
+        if len(fd30) > 1 else None
+    )
 
     role_inventory = []
     for addr, name in ROLE_IDS.items():
@@ -411,6 +416,15 @@ def main() -> int:
                 "exact_h_f_additive_rule": h030_rule,
                 "frame_count": len(fd30),
                 "rule_matches": fd30_rule_matches,
+                "cadence": {
+                    "interval_count": len(fd30_intervals_ms),
+                    "mean_interval_ms": fd30_mean_interval_ms,
+                    "min_interval_ms": min(fd30_intervals_ms) if fd30_intervals_ms else None,
+                    "max_interval_ms": max(fd30_intervals_ms) if fd30_intervals_ms else None,
+                    "descriptor_cycle_ticks": next(x["cycle_or_timeout_raw"] for x in h_state["h_tx_pdu_descriptors"] if x["can_id"] == "0x030"),
+                    "derived_foreground_tick_ms": (fd30_mean_interval_ms / 2) if fd30_mean_interval_ms is not None else None,
+                    "boundary": "Observed 0x030 cadence corroborates the exact-H/F descriptor's two-foreground-tick period; it does not identify stock B6 sender cadence.",
+                },
                 "steering_state_bridge": {
                     "b6_bit3": {
                         "firmware_signal_id": 5,

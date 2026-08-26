@@ -23,6 +23,15 @@
     },
     "0x030": {
       "boundary": "Every Span-rlog 0x030 frame matches the exact-H/F firmware-derived additive-byte rule; the firmware-proved selected steering fault/inhibit status and driver-torque-invalid bits are clear for all 6,000 frames. This strengthens format/producer-family continuity and nominal-state polarity without creating an exact firmware identity join or an induced-fault transition.",
+      "cadence": {
+        "boundary": "Observed 0x030 cadence corroborates the exact-H/F descriptor's two-foreground-tick period; it does not identify stock B6 sender cadence.",
+        "derived_foreground_tick_ms": 5.00000605734289,
+        "descriptor_cycle_ticks": 2,
+        "interval_count": 5999,
+        "max_interval_ms": 21.286832,
+        "mean_interval_ms": 10.00001211468578,
+        "min_interval_ms": 0.0
+      },
       "exact_h_f_additive_rule": {
         "boundary": "recovered exact code behavior; OEM checksum naming/formula lineage is not inferred from the constant alone",
         "formula": "sum(payload_bytes_0_through_6) + 0x38, low byte",

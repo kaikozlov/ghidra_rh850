@@ -11,12 +11,12 @@
     ],
     "scope": "future lateral-only Corolla H/F safety policy; deliberately stricter than the EPS receiver where Panda controls the sender",
     "secondary_b6_fields": {
-      "boundary": "Signals258/260/262/263/264/265 have bounded receiver roles but no validated stock active-LTA sender template. Until that sender template is captured/recovered, production TX remains disabled; a future safety implementation should whitelist the validated template rather than permit arbitrary values.",
+      "boundary": "Signals258/260/262/263/264/265 now have an EPS-consumer-derived minimal ID11 candidate (258=1, 260=0, 262=0, 263=0, 264=0, 265=0), but cross-ECU effects and stock active-LTA values are not validated. Production TX remains disabled until the candidate/template is validated on the isolated relay-correct topology; safety should whitelist the validated result rather than permit arbitrary values.",
       "policy": "not an unresolved Panda threshold"
     },
     "sender_lapse": {
       "eps_guarantee": "The EPS primary receiver-loss cutout is 7 foreground ticks.",
-      "milliseconds": null,
+      "milliseconds": 35.0,
       "panda_state_action": "After a host/sender lapse, discard prior sequence/desired-angle history and require a fresh inactive/measurement-aligned reinitialization before permitting active steering again."
     },
     "tx_requirements": [
@@ -163,10 +163,11 @@
     },
     "communication_loss": {
       "effect": "B6 health goes unhealthy and cooperative request selection is disabled through the recovered health gate",
+      "nominal_wall_clock_ms": 35.0,
       "primary_cutout_after_foreground_ticks": 7,
       "successful_receive_reload_ticks": 7,
       "tick_domain": "TAUJ0 CH3 EIRF at 0xFFFFB111 bit 0x10",
-      "wall_clock_duration_known": false
+      "wall_clock_duration_known": true
     },
     "controller_error_clamp": {
       "classification": "controller error saturation, not promoted to a Panda rejection threshold",
@@ -187,11 +188,13 @@
     },
     "internal_target_conditioning": {
       "default_high_bank_lta_slew_doubled_domain_per_steering_task": 4,
-      "reason": "The steering pipeline invocation is recovered in the per-tick dispatcher, but the exact scheduler/TAUJ wall-clock period for this stage is not statically closed. Do not convert this per-task slew to deg/s yet.",
+      "foreground_tick_nominal_ms": 5.0,
+      "reason": "TAUJ0-CH3 is now closed at nominal 5 ms. The deg/s value is still conditional on this conditioner executing exactly once per foreground cycle; enforce the per-call limit as the unconditional firmware fact.",
+      "runtime_low_bank_deg_per_second_if_once_per_foreground_tick": 40.11191941801903,
       "runtime_low_bank_equivalent_b6_raw_counts_per_task": 3.5,
       "runtime_low_bank_equivalent_deg_per_task": 0.20055959709009513,
       "runtime_low_bank_lta_slew_doubled_domain_per_steering_task": 7,
-      "wall_clock_rate_not_promoted": true
+      "wall_clock_rate_unconditional": false
     },
     "lta_lca_request_id": 11,
     "lta_target_abs_max_deg": 99.99328483491887,
@@ -233,7 +236,8 @@
         "unique_count": 536
       },
       "override_abs_threshold_nm": null,
-      "override_boundary": "The firmware's ~8.238 N.m acquisition clamp and \u00b110 N.m telemetry saturation are representation limits, not driver-override thresholds.",
+      "override_boundary": "The firmware's ~8.238 N.m acquisition clamp and \u00b110 N.m telemetry saturation are representation limits, not driver-override thresholds. The promoted exact-H census finds no physical-driver-torque comparator in the target-to-motor control cone, so this threshold is a Panda/openpilot policy to choose conservatively and validate dynamically.",
+      "override_policy_source": "Panda/openpilot driver-override policy requiring dynamic validation; not an unrecovered Toyota EPS cooperative-control comparator",
       "parameter_name": "driver_override_abs_nm",
       "physical_relation": "torque_Nm = signed(signal10)*0.1 + signed4(signal31)*0.01",
       "telemetry_saturation_abs_nm": 10.0
@@ -293,7 +297,7 @@
     },
     "full_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
-      "sha256": "7dd3af51a5b169fc1a341aaf1916c0de1ce88fd2451929f86df50fe1b4e88563"
+      "sha256": "d98afcb1cae3b7b9f158da8317e75b09f8185dcc0261e84205c6c9fb81b1291e"
     },
     "h_codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -301,30 +305,33 @@
     },
     "receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-      "sha256": "123ba1a29f6e8247fca9432688a8a0d33c28949440f925d4f0d0dd7cea626c60"
+      "sha256": "eac0b8dbc9d18014b42836e8363d49e53a5c3c691b896aaab749959930d53da5"
     },
     "state_bridge": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-      "sha256": "1b7dbab547765c6971119ebc3d2412a74a515e6f35050d4a48a6bb5abe06192a"
+      "sha256": "0a934ca1d274776c7a41b266b4c104910c14a61d2874700aa3f1afab00fd1beb"
     },
     "steering_limits": {
       "path": "data/generated/corolla_hf_steering_limits.json",
-      "sha256": "11a852f2abd43078b8cc299ef7a72af0cf9d790fbc8137c06a03a7a97375b876"
+      "sha256": "cfc922b452f563b97ed606d12ef74bf6408e0f577b90e7555390600b1c378ea9"
     },
     "target_angle_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-      "sha256": "5755faced5efb0212ae195ed8bff30bee2c1765656a29ed974ced95082c00647"
+      "sha256": "a80442a2198033f0e71fb887189a07794ab23ae6031b50a6f63ed85fd0e5080a"
     }
   },
   "static_conclusion": {
     "candidate_panda_contract_derived": true,
     "core_command_numeric_limits_closed": true,
-    "driver_torque_signal_closed_but_override_threshold_open": true,
+    "driver_override_is_panda_policy_not_eps_static_recovery_blocker": true,
+    "driver_torque_signal_closed": true,
     "eps_loss_cutout_closed_in_ticks": true,
+    "eps_loss_cutout_nominal_wall_clock_ms": 35.0,
     "measured_angle_input_closed": true,
     "measured_q_current_observable_closed_but_oem_response_threshold_not_recovered": true,
     "measured_rate_raw_cutout_closed": true,
     "production_enable_authorized": false,
+    "replacement_sender_freshness_policy_closed_independently_of_stock_cadence": true,
     "request_policy_closed_for_candidate_lta": true,
     "selected_fault_inhibit_gate_closed_but_extended_fault_policy_open": true,
     "sequence_policy_closed_for_candidate_lta": true,
@@ -346,7 +353,8 @@
       "value": null
     },
     "driver_override_abs_nm": {
-      "missing_evidence": "validated stock-LTA driver override/disengagement transition",
+      "classification": "deliberate-panda-policy-not-unrecovered-oem-comparator",
+      "missing_evidence": "choose a conservative openpilot driver-override threshold and validate driver interaction/release behavior dynamically; no Toyota EPS physical-torque authority comparator remains to recover under the promoted census boundary",
       "source_available": "live physical 0x030 Steering Wheel Torque",
       "value": null
     },

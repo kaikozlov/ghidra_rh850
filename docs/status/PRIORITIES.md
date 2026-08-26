@@ -147,12 +147,17 @@ same: those are target-generated/provisioned state, and shared D7 itself moves f
 Sienna freshness ID6/slot4 to H/F ID1/slot0. SECOC-073 now closes the live `0x00F`
 bridge too: the wire directly exposes global trip16/reset20, reset state advances at a
 nominal 300 ms cadence, and H's exact reset/message reconstruction replays all retained
-D7 traffic including the `current-1` rollover overlap. A strictly newer authenticated
-`00F` epoch removes the need to know the previous B6 message8, but B6's own sender
-counter-start/cadence policy remains unobserved and D7's message counter cannot be
+D7 traffic including the `current-1` rollover overlap. TMS-053 closes the replacement
+sender state machine from a strictly newer authenticated `00F` epoch: no previous B6
+message8 is required; own message8 locally, advance normally inside the receiver's
++1..+4 same-epoch window, keep application signal261 independent, and after sender
+restart wait for the next authenticated sync epoch rather than guessing or persisting
+Toyota's prior message8. D7's message counter remains independent and must not be
 reused. Do not spend another pass rediscovering receiver freshness, global sync state,
-or MAC28 logic; the remaining SecOC problem is B6-local sender policy, slot-4
-key/approved-MAC use, stock suppression, and producer cadence/topology.
+MAC28 logic, or Toyota B6 counter-start policy for the replacement sender. The remaining
+SecOC problem is slot-4 key/approved-MAC use (or live command-5 capability plus a
+H/F-native runtime carrier), **stock** sender cadence/secondary-field template, stock
+suppression, and producer topology.
 TMS-042 makes the same acquisition the highest-value reprogramming target too: modern GTS+ proves the FRC `ReproMethod=07` path
 uploads the package routine with DFI `0x01` / `10F5`, then the compact
 `DeltaReproData` with DFI `0x21` / `10F6`, while the host treats `.datx` as
@@ -239,9 +244,9 @@ relay pair, preserve `carFw`/F181, and log all buses while safely exercising:
 5. lane/LTA UI state changes and one recoverable message-loss/fault condition if
    a safe diagnostic trigger exists.
 
-This capture should close B6 visibility/cadence and producer side, exact physical
+This capture should close B6 visibility/**stock** cadence and producer side, exact physical
 relay path and the concrete stock-source suppression/isolation point, the remaining
-physical driver-override policy, a deliberately chosen/validated `0x4A3` Q-current actuator-response policy,
+conservative Panda/openpilot driver-override policy calibration/validation, a deliberately chosen/validated `0x4A3` Q-current actuator-response policy,
 `0x351/0x394` fault transitions plus the now-wire-closed `0x51E B0[7] -> DID 0x1033`
 Ready Status transition, remaining gear enums, the CAN fields that correspond to the
 now-exact FRC cruise diagnostic oracles, and the correct Panda parser/safety bus. The **core H/F Panda
@@ -277,9 +282,9 @@ advances that submodule revision. The platform remains `dashcamOnly` + Panda `no
 the TSS3 controller emits no CAN and Ready has no fault/engagement policy. The tracked Span
 rlog replays through that parser with 5,900/5,900 post-startup samples CAN-valid. Therefore **do not spend the next pass rebuilding basic state parsing**.
 Use the implementation as the dynamic measurement harness and focus the next evidence on:
-exact target/F181 binding, physical relay-correct stock-LTA transitions, B6 sender cadence
-and active-LTA secondary-field template, SecOC freshness/key ownership,
-the physical producer side plus suppression/isolation implementation, the physical driver-override policy for the now-live `0x030`
+exact target/F181 binding, physical relay-correct stock-LTA transitions, **stock** B6 cadence
+and active-LTA secondary-field template, slot4 MAC/key or live command-5 capability plus a target-native signer route,
+the physical producer side plus suppression/isolation implementation, conservative driver-override policy calibration for the now-live `0x030`
 torque, a deliberately chosen/validated `0x4A3` Q-current response policy, and
 `0x351/0x394` fault transitions plus a `0x51E B0[7]` Ready `1->0->1` transition.
 Ready's incoming wire source is no longer open; cruise availability/main/enabled/set-speed
@@ -303,14 +308,18 @@ captures justify them. Static/non-active engagement closure is machine-readable 
 **Question:** does provisioned ICU-S slot 4 actually permit command 5 MAC
 generation in initialized application context?
 
-Why this matters: SECOC-070 removes the remaining software-call problem. A
-546-byte RAM-only application runtime now invokes serialized command-5 driver
-record 0 with fixed selector 4 and caller-chosen `0..80` byte input, including
-the exact 7/12/36-byte SecOC domains. It needs no persistent CodeFlash hook or
-per-request application SecurityAccess; only the already-solved authenticated
-bootloader-RAM foothold is required to install it. A positive hardware result
-would therefore validate the final cryptographic permission assumption for the
-resident signer.
+Why this matters: SECOC-070 removes the remaining software-call problem on the
+verified Sienna runtime. A 546-byte RAM-only application runtime invokes serialized
+command-5 driver record 0 with fixed selector 4 and caller-chosen `0..80` byte input,
+including the exact 7/12/36-byte SecOC domains. TMS-053 now proves the **software
+machinery** transfers structurally to Corolla H/F as well: H record0/dispatcher/
+prepare/lower-engine accepts the 36-byte B6 domain and the relevant application bytes
+are identical on F. But the verified Sienna resident-RAM **placement does not
+transfer**: H startup clears `FEBF05CC..FEBF09CB` and `FEBF0B4C..FEBF0F4B`, so H/F
+still needs a separately audited target-native carrier (the XCP shadow is only a
+hypothesis) before a command-5 signer can be called resident there. A positive hardware
+result would therefore validate the cryptographic permission assumption; it would not
+by itself validate H/F runtime placement.
 
 Ready now:
 
@@ -467,8 +476,9 @@ F181 join and Span's harness was not physically repinned onto the relay pair, th
 state-side priority is now a **firmware-identified, relay-correct H/F capture with stock
 LTA and cruise transitions**, not another static EPS sweep: observe `0x4A3/0x351/0x394`,
 exercise `0x51E Ready Status` through value0, synchronize the FRC P5 cruise **Data IDs** with
-CAN, derive a physical driver-override threshold from the already closed `0x030` torque
-signal, and obtain an independent gear-state oracle plus P/R/N/B transitions. See
+CAN, choose and validate a conservative Panda/openpilot driver-override policy from the
+already closed `0x030` torque signal (TMS-053 finds no physical torque comparator in the
+recovered target-to-motor control cone), and obtain an independent gear-state oracle plus P/R/N/B transitions. See
 `data/generated/corolla_tss3_opendbc_readiness.json`,
 [../variants/corolla-pre-tss3-openpilot-message-comparison.md](../variants/corolla-pre-tss3-openpilot-message-comparison.md),
 and [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
@@ -494,7 +504,10 @@ dictionary defines `0=No Request` and closes H's active signal254 IDs as
 `PCS/LDA/Hands Off LTA/LTA-LCA/PDA`; H-special IDs `25/27` are `AP/Remote Parking`.
 The dedicated receiver contract now also proves PDU42 reload/expiry at **7 TAUJ0-CH3
 foreground ticks**, immediate cooperative cutout through slot18→`FEBEADB9`→`C26D`,
-and B6 signal261 as a modulo-64 sequence counter with effective-gap cap `8`. The full
+and B6 signal261 as a modulo-64 sequence counter with effective-gap cap `8`. TMS-053
+closes CH3 at a steady **5.0 ms** after one 5.1-ms startup interval, so the primary B6
+loss cutoff is nominally **35 ms**; Span's two-tick `0x030` cadence corroborates the
+same timer. The full
 receiver envelope is now exhausted too: B0..B27 are all authenticated, recovered EPS
 application semantics occupy only 51 bits concentrated in B3..B10, another six bits
 are extracted without a recovered downstream consumer, and the remaining 167
@@ -506,16 +519,19 @@ now closes the remaining receiver policy too: reset trials are `current,-1,+1,-2
 B6's one same-PDU retry resolves the `±2` low-two-bit ambiguity, same-epoch message8
 advances to the next congruent value by 1..4, `0x24` still proceeds to CMAC, authenticated
 trip wrap clears linked B6 freshness state, and only command7 result0 commits pending
-freshness before PDU42 delivery. Signal261 is a separate application modulo-64 counter.
-The CH3 wall-clock period remains unknown, so sender cadence still needs capture/producer
-evidence rather than a guessed millisecond value.
+freshness before normal verified PDU42 delivery. Signal261 is a separate application
+modulo-64 counter. CORR-111 retains the bounded failure-forwarding exception without
+freshness commit. TMS-053 also closes the exclusive replacement-sender restart/progression
+recipe: re-anchor on a newer authenticated `0x00F`, own B6 message8 locally, and wait for
+the next epoch after sender restart; Toyota's B6-local counter-start policy is not needed.
 
-Capture protected `0x0B6` during stock steering to validate sender wall-clock cadence,
-secondary-field dynamics where needed, and normal target/rate bounds—not to rediscover
-the receiver envelope or verification state machine. In parallel, recover **sender-side**
-freshness-state/signing ownership and the slot-4 key value or an approved way to use
-the slot; receiver freshness extraction/window/retry/commit and key-slot selection are
-now closed. A category-435 CUW with
+Capture protected `0x0B6` during stock steering to validate **stock** sender wall-clock
+cadence, secondary-field dynamics where needed, and normal target/rate bounds—not to
+rediscover the receiver envelope, replacement freshness state machine, or verification
+logic. In parallel, recover signing ownership and the slot-4 key value or prove live
+command-5 permission plus a separately audited H/F runtime carrier (the Sienna resident
+RAM geometry does not transfer); receiver freshness extraction/window/retry/commit,
+replacement message8 state, and key-slot selection are now closed. A category-435 CUW with
 `Node01/DiagID=07B0` plus the matched `FRC_P5` image is now the primary software
 target for the **remaining payload transform, sender cadence,
 and routing/authentication ownership**, not for discovering the EPS setpoint/request/

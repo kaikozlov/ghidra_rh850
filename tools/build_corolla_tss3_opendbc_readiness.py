@@ -28,6 +28,9 @@ PRIOR = REPO / "data/external/opendbc/toyota_porting_contract.json"
 COROLLA_PRIOR = REPO / "data/external/opendbc/toyota_corolla_pre_tss3_contract.json"
 STATE = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge.json"
 B6 = REPO / "data/generated/corolla_8965H1202000_b6_receiver_contract.json"
+B6_SECOC = REPO / "data/generated/corolla_8965H1202000_b6_secoc_verification.json"
+LIMITS = REPO / "data/generated/corolla_hf_steering_limits.json"
+CMD5 = REPO / "data/generated/corolla_hf_command5_portability.json"
 H_RUNTIME = REPO / "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json"
 SPAN_ZIP = REPO / "community/spanconstant/spanconstant_tsk.zip"
 SPAN_MEMBER = "tsk/uds-sweep/ready_capture.ndjson"
@@ -137,6 +140,9 @@ def main() -> int:
     corolla_prior = json.loads(COROLLA_PRIOR.read_text())
     state = json.loads(STATE.read_text())
     b6 = json.loads(B6.read_text())
+    b6_secoc = json.loads(B6_SECOC.read_text())
+    limits = json.loads(LIMITS.read_text())
+    cmd5 = json.loads(CMD5.read_text())
     h_runtime = json.loads(H_RUNTIME.read_text())
     span = span_capture()
     span_rlog = json.loads(SPAN_RLOG.read_text())
@@ -169,7 +175,7 @@ def main() -> int:
             "0x00F trip/reset/authenticator synchronization for Toyota SecOC profiles",
             "Public 2023 route carries 0x00F/8 on logical bus 1 at ~9.6 Hz; exact H/F SecOC queue contains 0x00F/8, 0x0D7/32 and 0x0B6/32. The route also exposes 0x0D7/32 but no 0x0B6 sample, without an exact H/F identity join.",
             "public route + exact H/F firmware",
-            "Key/freshness ownership for B6 still must be recovered. SecOC presence says nothing about TSS generation.",
+            "Protected slot-4 signing access/key and upstream stock ownership remain open. The EPS receiver plus authenticated 0x00F now close a deterministic exclusive replacement-sender message8/re-anchor state machine, so Toyota's stock B6 counter policy is no longer required for receiver-valid freshness. SecOC presence says nothing about TSS generation.",
         ),
         row(
             "vehicle speed / wheel validity",
@@ -217,7 +223,7 @@ def main() -> int:
             "Older Toyota uses 0x260 for driver torque, EPS torque, accurate angle and initialization; Panda torque safety samples it at 50 Hz",
             "0x260 is absent from the TSS3 routes. Exact H plus Techstream close live physical Steering Wheel Torque on 0x030 signals10+31; Span exercises 6000 frames and 536 values from -8.23 to +2.85 N.m. Exact H also closes 0x4A3 B5 as a 0.1 N.m/count alternate torque carrier and B6:B7 as -0.01 A/count Motor Actual Current (Q Axis), but current routes do not carry 0x4A3.",
             "exact H state bridge + Techstream physical conversion + Span moving-rlog 0x030 decode",
-            "Derive a generation-native physical driver-override threshold and capture 0x4A3 Q-current response under assist/control before Panda safety can be finalized.",
+            "The expanded exact-H physical-torque census finds no driver-torque comparator in the target-to-motor control cone; choose a conservative Panda/openpilot driver-override policy and validate it dynamically. Capture 0x4A3 Q-current response under assist/control before finalizing any separate actuator-response policy.",
         ),
         row(
             "EPS readiness / steering faults",
@@ -277,11 +283,11 @@ def main() -> int:
         ),
         row(
             "lateral command",
-            "eps_receiver_contract_closed_sender_contract_open",
+            "eps_receiver_and_replacement_freshness_closed_signer_runtime_open",
             "Pre-TSS3 Corolla uses 0x2E4 torque; secure Sienna prior art provides 0x2E4/0x131 protected command examples",
-            f"Exact H/F replace them with protected FD 0x0B6: signal254 Target Lateral ID, signal255 signed target angle, signal261 modulo-64 sequence. Accepted active request IDs are {b6_request['accepted_active_requests']}; receiver loss cuts out after 7 foreground ticks.",
+            f"Exact H/F replace them with protected FD 0x0B6: signal254 Target Lateral ID, signal255 signed target angle, signal261 modulo-64 sequence. Accepted active request IDs are {b6_request['accepted_active_requests']}; receiver loss cuts out after 7 foreground ticks / nominal 35 ms. An EPS-consumer minimal ID11 companion candidate and authenticated-0x00F replacement freshness state machine are now statically closed.",
             "exact H/F firmware + Techstream",
-            "Recover full stock B6 payload behavior, sender wall-clock cadence, SecOC freshness/key/source ownership, H/F-native limits, physical route and stock-source suppression. The public 2023 route is not an exact H/F join. Span's moving rlog likewise sees 0x00F/0x0D7 but no B6; all 599 Panda-state samples are ELM327 param=1, so logical bus 1 was directly observing the normal harness CAN1 wires. The reported lack of physical CAN0/CAN1 repinning blocks relay interception/side attribution, not passive CAN1 observation. B6 absence remains only a no-stock-LTA-transition, no-F181 segment-level negative.",
+            "Still required for production: validate the minimal/stock B6 secondary-field template and cross-ECU effects, obtain a slot-4 signing primitive/key (or finish the H/F command-5 runtime carrier), establish stock sender cadence/physical route, and suppress the stock source on the relay-correct topology. Receiver-valid replacement freshness and H/F-native numeric limits are no longer static blockers. The public 2023 route is not an exact H/F join. Span's moving rlog sees 0x00F/0x0D7 but no B6; B6 absence remains only a no-stock-LTA-transition segment-level negative.",
         ),
         row(
             "radar / object state",
@@ -378,14 +384,14 @@ def main() -> int:
                 "Carry forward 0x0AA/0x101/0x116/0x176 only behind generation-specific validation; do not copy the entire old DBC, and do not relabel 0x176 B0[3] as cruise state.",
                 "Expose incoming 0x51E B0[7] as target-native Ready Status for read-only observation without yet mapping Ready=0 to an openpilot fault/engagement policy.",
                 "Scaffold 0x127 GEAR_PACKET_HYBRID only as a read-only reuse candidate: carrier/checksum/raw3 are observed and raw3 is prior-art-compatible with D, while target-native gear semantics remain gated on an independent oracle/transitions.",
-                "Model exact H/F B6 signal254/255/261 receiver requirements in analysis/tests without enabling live actuation.",
+                "Model exact H/F B6 signal254/255/261 receiver requirements, nominal 35-ms loss cutout, the EPS-consumer minimal ID11 companion candidate, and the authenticated-0x00F replacement freshness state machine without enabling live actuation.",
                 "Create a new TSS3 radar/CAN-FD namespace rather than extending the old 8-byte TSS2 radar DBC by ID.",
             ],
             "blocks_production_lateral": [
                 "Firmware-identified H/F-family capture with the Toyota-B CAN0/CAN1 network physically relay-correct and stock LTA exercised off -> active -> off.",
-                "B6 full-PDU sender cadence, secondary-field semantics needed for safety, SecOC freshness/key/source ownership and physical route.",
+                "B6 stock/minimal secondary-field cross-ECU validation, stock sender cadence/physical route, and a working slot-4 signing path: key or target-native H/F command-5 carrier with live selector-4 permission/latency.",
                 "Stock-source suppression/interception point on Toyota-B topology.",
-                "Generation-native physical driver-override threshold, Q-current actuator-response limits, Ready/fault transition mapping and actuator limits for Panda safety.",
+                "Conservative Panda/openpilot driver-override policy dynamic validation, Q-current actuator-response policy if desired, Ready/fault transition mapping, and final relay-correct actuator validation. No Toyota EPS physical-driver-torque comparator remains to recover under the promoted static census.",
             ],
             "blocks_normal_carstate": [
                 "Validate P/R/N/B transitions on the retained 0x127 GEAR_PACKET_HYBRID carrier and bind them to the exact target.",

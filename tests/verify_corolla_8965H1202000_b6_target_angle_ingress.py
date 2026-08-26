@@ -103,6 +103,6 @@ check('upstream feature producer still open',c['upstream_feature_producer_identi
 check('physical controller-equivalent scale identified',c['physical_scale_identified'] is True and abs(c['controller_equivalent_deg_per_count']-(1024/17870))<1e-15)
 check('OEM wire unit name remains open',c['oem_wire_unit_name_identified'] is False)
 check('signal254 feature labels are identified',c['signal254_feature_labels_identified'] is True and c['signal254_profile_labels']=={'1':'PCS','4':'LDA','10':'Hands Off LTA','11':'LTA/LCA','19':'PDA'})
-check('receiver request/loss/sequence contract promoted',c['request_selection_identified'] is True and c['receiver_loss_cutout_ticks']==7 and c['wall_clock_timeout_identified'] is False and c['sequence_counter_identified'] is True and c['sequence_modulus']==64 and c['sequence_gap_cap']==8)
-check('next target is upstream producer and sender freshness','FRC_P5 -> Brake/EPB' in c['next_static_target'] and 'SecOC sender/freshness' in c['next_static_target'] and 'wall-clock cadence' in c['next_static_target'])
+check('receiver request/loss/sequence contract promoted',c['request_selection_identified'] is True and c['receiver_loss_cutout_ticks']==7 and c['wall_clock_timeout_identified'] is True and c['sequence_counter_identified'] is True and c['sequence_modulus']==64 and c['sequence_gap_cap']==8)
+check('next target is upstream producer, stock template and signing path','FRC_P5 -> Brake/EPB' in c['next_static_target'] and 'stock B6 cadence' in c['next_static_target'] and 'production signing/suppression path' in c['next_static_target'] and 'replacement freshness' in c['next_static_target'])
 print(f'\nResults: {p} passed, {f} failed');raise SystemExit(1 if f else 0)

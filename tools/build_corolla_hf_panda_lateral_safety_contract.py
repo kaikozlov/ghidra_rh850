@@ -174,7 +174,7 @@ def build() -> dict[str, Any]:
     seq = receiver["companion_fields"]["261"]
     loss = receiver["communication_supervision"]["deadline_expiry"]
     need(seq["modulus"] == 64 and seq["gap_cap"] == 8, "unexpected receiver sequence contract")
-    need(loss["primary_cutout_after_foreground_ticks"] == 7 and not loss["absolute_time_supported"],
+    need(loss["primary_cutout_after_foreground_ticks"] == 7 and loss["absolute_time_supported"] and loss["nominal_primary_cutout_ms"] == 35.0,
          "unexpected B6 loss contract")
 
     scale = float(target["scaling"]["controller_equivalent_deg_per_b6_count"])
@@ -265,7 +265,8 @@ def build() -> dict[str, Any]:
                 "successful_receive_reload_ticks": 7,
                 "primary_cutout_after_foreground_ticks": 7,
                 "tick_domain": receiver["communication_supervision"]["scheduler"]["tick_source"],
-                "wall_clock_duration_known": False,
+                "wall_clock_duration_known": True,
+                "nominal_wall_clock_ms": receiver["communication_supervision"]["deadline_expiry"]["nominal_primary_cutout_ms"],
                 "effect": "B6 health goes unhealthy and cooperative request selection is disabled through the recovered health gate",
             },
             "measured_steering_rate_monitor": {
@@ -283,8 +284,10 @@ def build() -> dict[str, Any]:
                 "default_high_bank_lta_slew_doubled_domain_per_steering_task": high_values["lta_internal_slew_doubled_domain"],
                 "runtime_low_bank_equivalent_b6_raw_counts_per_task": low_values["lta_internal_slew_doubled_domain"] / 2,
                 "runtime_low_bank_equivalent_deg_per_task": (low_values["lta_internal_slew_doubled_domain"] / 2) * scale,
-                "wall_clock_rate_not_promoted": True,
-                "reason": "The steering pipeline invocation is recovered in the per-tick dispatcher, but the exact scheduler/TAUJ wall-clock period for this stage is not statically closed. Do not convert this per-task slew to deg/s yet.",
+                "foreground_tick_nominal_ms": limits["command_limits"]["internal_lta_slew"]["foreground_tick_nominal_ms"],
+                "runtime_low_bank_deg_per_second_if_once_per_foreground_tick": limits["command_limits"]["internal_lta_slew"]["selected_low_deg_per_second_if_called_each_foreground_tick"],
+                "wall_clock_rate_unconditional": False,
+                "reason": "TAUJ0-CH3 is now closed at nominal 5 ms. The deg/s value is still conditional on this conditioner executing exactly once per foreground cycle; enforce the per-call limit as the unconditional firmware fact.",
             },
             "internal_inhibit_chain": {
                 "target_plausibility_output": "0xCB4F4 -> FEBEC269; target magnitude/delta violation or internal C268/C263 state can assert it",
@@ -328,7 +331,8 @@ def build() -> dict[str, Any]:
                 "telemetry_saturation_abs_nm": limits["driver_torque"]["telemetry_saturation_abs_nm"],
                 "override_abs_threshold_nm": None,
                 "parameter_name": "driver_override_abs_nm",
-                "override_boundary": "The firmware's ~8.238 N.m acquisition clamp and ±10 N.m telemetry saturation are representation limits, not driver-override thresholds.",
+                "override_policy_source": limits["driver_torque"]["policy_classification"],
+                "override_boundary": "The firmware's ~8.238 N.m acquisition clamp and ±10 N.m telemetry saturation are representation limits, not driver-override thresholds. The promoted exact-H census finds no physical-driver-torque comparator in the target-to-motor control cone, so this threshold is a Panda/openpilot policy to choose conservatively and validate dynamically.",
             },
             "steering_fault_inhibit": {
                 "can_id": "0x030",
@@ -361,20 +365,21 @@ def build() -> dict[str, Any]:
             "secondary_b6_fields": {
                 "policy": "not an unresolved Panda threshold",
                 "boundary": (
-                    "Signals258/260/262/263/264/265 have bounded receiver roles but no validated stock active-LTA sender template. Until that sender template is captured/recovered, production TX remains disabled; a future safety implementation should whitelist the validated template rather than permit arbitrary values."
+                    "Signals258/260/262/263/264/265 now have an EPS-consumer-derived minimal ID11 candidate (258=1, 260=0, 262=0, 263=0, 264=0, 265=0), but cross-ECU effects and stock active-LTA values are not validated. Production TX remains disabled until the candidate/template is validated on the isolated relay-correct topology; safety should whitelist the validated result rather than permit arbitrary values."
                 ),
             },
             "sender_lapse": {
                 "eps_guarantee": "The EPS primary receiver-loss cutout is 7 foreground ticks.",
                 "panda_state_action": "After a host/sender lapse, discard prior sequence/desired-angle history and require a fresh inactive/measurement-aligned reinitialization before permitting active steering again.",
-                "milliseconds": None,
+                "milliseconds": receiver["communication_supervision"]["deadline_expiry"]["nominal_primary_cutout_ms"],
             },
         },
         "unresolved_safety_parameters": {
             "driver_override_abs_nm": {
                 "value": None,
                 "source_available": "live physical 0x030 Steering Wheel Torque",
-                "missing_evidence": "validated stock-LTA driver override/disengagement transition",
+                "classification": "deliberate-panda-policy-not-unrecovered-oem-comparator",
+                "missing_evidence": "choose a conservative openpilot driver-override threshold and validate driver interaction/release behavior dynamically; no Toyota EPS physical-torque authority comparator remains to recover under the promoted census boundary",
             },
             "extended_fault_policy": {
                 "value": None,
@@ -421,13 +426,16 @@ def build() -> dict[str, Any]:
             "request_policy_closed_for_candidate_lta": True,
             "sequence_policy_closed_for_candidate_lta": True,
             "eps_loss_cutout_closed_in_ticks": True,
+            "eps_loss_cutout_nominal_wall_clock_ms": receiver["communication_supervision"]["deadline_expiry"]["nominal_primary_cutout_ms"],
             "measured_angle_input_closed": True,
             "measured_rate_raw_cutout_closed": True,
-            "driver_torque_signal_closed_but_override_threshold_open": True,
+            "driver_torque_signal_closed": True,
+            "driver_override_is_panda_policy_not_eps_static_recovery_blocker": True,
             "selected_fault_inhibit_gate_closed_but_extended_fault_policy_open": True,
             "measured_q_current_observable_closed_but_oem_response_threshold_not_recovered": True,
             "speed_dependent_hard_angle_reduction_not_recovered": True,
             "wall_clock_sender_cadence_open": True,
+            "replacement_sender_freshness_policy_closed_independently_of_stock_cadence": True,
         },
     }
 

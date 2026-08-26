@@ -225,11 +225,11 @@
       "status": "observer_dictionary_identified_producer_field_not_identified"
     },
     "timing_deadline_constants": {
-      "boundary": "The TAUJ0-CH3 foreground tick source is known but its period is not; CUW flashing P4/retry timing is unrelated to runtime B6 cadence and is not transferred.",
+      "boundary": "The EPS receiver's TAUJ0-CH3 timing is closed by the exact-H receiver analysis, but that does not identify the stock B6 sender's own transmit cadence. CUW flashing P4/retry timing is unrelated to runtime B6 cadence and is not transferred.",
       "receiver_primary_cutout_foreground_ticks": 7,
       "sender_wall_clock_cadence_identified": false,
-      "status": "receiver_deadline_only",
-      "wall_clock_timeout_identified": false
+      "status": "receiver_timeout_closed_sender_cadence_open",
+      "wall_clock_timeout_identified": true
     }
   },
   "schema_version": 1,
@@ -249,10 +249,10 @@
       "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
     },
     "data/generated/corolla_8965H1202000_b6_secoc_verification.json": {
-      "sha256": "a7f8dccfb146e78381ef894d2da2d42570951e77fc0821a35b4922a6793c0a3f"
+      "sha256": "edbf9c3583c4f38ac9d0f59d9623badd039d7ddc3214073d85a518ef42fc072c"
     },
     "data/generated/corolla_8965H1202000_lta_command_provenance.json": {
-      "sha256": "341155ae436e02024f5346931c42d01f5badbd18019aa5feea85f658076e467e"
+      "sha256": "782e4db2d1b43d680b213e184676c4a5b276d44ae732ceaf8d1149423a4d98c1"
     },
     "data/generated/corolla_8965H1202000_secoc_key_provenance.json": {
       "sha256": "80a8f926d5db6172d3edb8ba3dc1d79708166af8c4c1d5379142188cf153f43e"

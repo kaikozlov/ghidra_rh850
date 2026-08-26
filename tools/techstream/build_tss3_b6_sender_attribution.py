@@ -214,11 +214,11 @@ def build() -> dict[str, Any]:
                 "boundary": "The numeric request vocabulary is exact, but no FRC/ABS P5 data-monitor row exposes the producer-side field carrying it.",
             },
             "timing_deadline_constants": {
-                "status": "receiver_deadline_only",
+                "status": "receiver_timeout_closed_sender_cadence_open",
                 "receiver_primary_cutout_foreground_ticks": b6_static["receiver_loss_cutout_ticks"],
                 "wall_clock_timeout_identified": b6_static["wall_clock_timeout_identified"],
                 "sender_wall_clock_cadence_identified": False,
-                "boundary": "The TAUJ0-CH3 foreground tick source is known but its period is not; CUW flashing P4/retry timing is unrelated to runtime B6 cadence and is not transferred.",
+                "boundary": "The EPS receiver's TAUJ0-CH3 timing is closed by the exact-H receiver analysis, but that does not identify the stock B6 sender's own transmit cadence. CUW flashing P4/retry timing is unrelated to runtime B6 cadence and is not transferred.",
             },
             "steering_angle_constants": {
                 "h_b6_controller_equivalent_rad_per_count": b6_rad_per_count,

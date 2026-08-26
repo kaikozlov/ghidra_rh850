@@ -205,16 +205,24 @@ check("seven Sienna upper-engine role anchors", len(prior["rows"]) == 7)
 check("Sienna comparison uses consistent +0x5A64 role relocation", all(row["entry_delta"] == "0x5A64" for row in prior["rows"]))
 check("H/Sienna upper engine not falsely byte-identical", all(row["different_byte_count"] > 0 for row in prior["rows"]) and "not claimed byte-identical" in prior["boundary"])
 recipe = art["sender_recipe"]
-check("receiver-required sender envelope enumerated", len(recipe["receiver_required_steps"]) == 6 and "AES-CMAC-128" in recipe["receiver_required_steps"][3])
+check("receiver-required sender envelope enumerated", len(recipe["receiver_required_steps"]) == 7 and "AES-CMAC-128" in recipe["receiver_required_steps"][4] and "authenticated/committed 0x00F" in recipe["receiver_required_steps"][0])
 check("slot4 secret remains true cryptographic blocker", "slot-4 secret value remains opaque" in recipe["cryptographic_blocker"])
-check("sender state/cadence remain outside receiver image", "sender ownership" in recipe["runtime_state_blocker"] and "cadence" in recipe["runtime_state_blocker"])
+replacement = recipe["replacement_sender_state_machine"]
+check("replacement sender re-anchors on authenticated newer 0x00F epoch", "strictly newer authenticated 0x00F" in replacement["startup"] and "seeds full message8" in replacement["new_epoch"])
+check("same-epoch replacement progression matches receiver +1..+4 window", "+1 is simplest" in replacement["same_epoch"] and "+1..+4" in replacement["same_epoch"])
+check("sender restart waits for next epoch instead of guessing message8", "do not guess/replay" in replacement["sender_restart_mid_epoch"] and "next authenticated reset/trip advance" in replacement["sender_restart_mid_epoch"])
+check("replacement sender needs no cross-power message8 persistence", "No sender-side message8 persistence is required" in replacement["power_cycle_persistence"])
+check("replacement sender keeps signal261 separate", "separately modulo 64" in replacement["application_sequence261"] and replacement["state_to_persist_while_running"] == ["trip16", "reset20", "message8", "signal261"])
+check("replacement re-anchor delay stays outside acyclic receiver artifact", "separate freshness-bridge artifact" in replacement["reanchor_delay_boundary"] and "remains acyclic" in replacement["reanchor_delay_boundary"])
+check("replacement freshness no longer requires stock counter discovery", replacement["requires_stock_sender_counter_discovery"] is False and replacement["requires_exclusive_b6_authority"] is True and "no longer required" in recipe["runtime_state_blocker"])
 con = art["static_conclusion"]
 check("all receiver verification dimensions closed", all(con[k] is True for k in (
     "b6_freshness_extraction_closed", "b6_freshness_window_closed", "b6_mac_input_closed",
     "b6_key_slot_selection_closed", "b6_profile_identifiers_closed", "b6_sequence_relation_closed",
     "b6_accept_reject_state_machine_closed", "b6_commit_timing_closed", "b6_verification_failure_delivery_policy_closed", "b6_h_f_receiver_verification_identical")))
-check("true sender/key boundaries remain open", con["slot4_secret_value_closed"] is False and con["sender_freshness_state_ownership_closed"] is False and con["sender_wall_clock_cadence_closed"] is False and con["upstream_producer_closed"] is False)
-check("evidence boundary rejects sender/key overclaim", "does not recover the protected slot-4 secret" in art["evidence_boundary"] and "upstream FRC/Brake" in art["evidence_boundary"])
+check("replacement sender freshness state machine is closed", con["replacement_sender_freshness_state_machine_closed"] is True and con["replacement_sender_requires_stock_counter_discovery"] is False)
+check("true stock sender/key boundaries remain open", con["slot4_secret_value_closed"] is False and con["stock_sender_freshness_state_ownership_closed"] is False and con["sender_wall_clock_cadence_closed"] is False and con["upstream_producer_closed"] is False)
+check("evidence boundary rejects stock sender/key overclaim but closes replacement re-anchor", "does not recover the protected slot-4 secret" in art["evidence_boundary"] and "upstream FRC/Brake" in art["evidence_boundary"] and "exclusive replacement sender" in art["evidence_boundary"])
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

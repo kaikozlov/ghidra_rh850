@@ -44,7 +44,8 @@ check("target delta physical", 4.46 < c["b6_lta_delta"]["deg_per_effective_seque
 check("target low-angle deadband exact", c["b6_lta_delta"]["low_angle_deadband_raw"] == 87)
 check("low selected per-task slew exact", c["internal_lta_slew"]["selected_low_doubled_domain_per_steering_task"] == 7 and c["internal_lta_slew"]["selected_low_b6_counts_per_task"] == 3.5)
 check("high default per-task slew exact", c["internal_lta_slew"]["high_default_doubled_domain_per_steering_task"] == 4 and c["internal_lta_slew"]["high_default_b6_counts_per_task"] == 2.0)
-check("per-task slew not fabricated into deg/s", c["internal_lta_slew"]["wall_clock_deg_per_second"] is None)
+check("foreground tick now attached to per-task slew", c["internal_lta_slew"]["foreground_tick_nominal_ms"] == 5.0 and c["internal_lta_slew"]["wall_clock_rate_unconditional"] is False)
+check("conditional once-per-foreground slew rates are explicit", 40.0 < c["internal_lta_slew"]["selected_low_deg_per_second_if_called_each_foreground_tick"] < 40.2 and 22.8 < c["internal_lta_slew"]["high_default_deg_per_second_if_called_each_foreground_tick"] < 23.0 and "conditional" in c["internal_lta_slew"]["boundary"])
 check("doubled target clamp equals B6 envelope", c["doubled_domain_absolute_clamp"]["raw_internal"] == 3490 and c["doubled_domain_absolute_clamp"]["equivalent_b6_raw"] == 1745.0)
 check("measured rate violation is strictly above 100", c["measured_steering_rate"]["raw_abs_threshold"] == 100 and c["measured_steering_rate"]["violation_relation"] == "abs(rate_raw) > 100")
 check("rate persistence bank split", c["measured_steering_rate"]["selected_low_persistence_cycles"] == 79 and c["measured_steering_rate"]["high_default_persistence_cycles"] == 63)
@@ -75,8 +76,9 @@ t = d["driver_torque"]
 check("driver torque acquisition clamp exact", t["acquisition_clamp_raw"] == 2109 and t["acquisition_raw_units_per_nm"] == 256)
 check("driver torque acquisition clamp physical", abs(t["acquisition_clamp_abs_nm"] - 8.23828125) < 1e-9)
 check("driver torque telemetry saturation exact", t["telemetry_saturation_abs_centi_nm"] == 1000 and t["telemetry_saturation_abs_nm"] == 10.0)
-check("driver torque override remains unset", t["override_abs_threshold_nm"] is None and not t["supervisor_numeric_override_comparator_recovered"])
-check("torque clamps explicitly not override", "not driver-override thresholds" in t["safety_boundary"])
+check("driver torque override remains unset as Panda policy", t["override_abs_threshold_nm"] is None and not t["supervisor_numeric_override_comparator_recovered"] and not t["target_to_motor_physical_torque_comparator_recovered"] and "Panda/openpilot" in t["policy_classification"])
+check("expanded physical torque census has zero C8xxx-CExxx consumers", len(t["direct_source_snapshot_reference_entries"]) == 13 and t["direct_source_snapshot_refs_inside_c8xxx_cexxx_control_cone"] == [] and "fixed-GP" in t["census_boundary"])
+check("torque clamps explicitly not override", "not driver-override thresholds" in t["safety_boundary"] and "removes an OEM override comparator" in t["safety_boundary"])
 
 q = d["motor_q_current"]
 check("Q current physical observable closed", "Motor Actual Current (Q Axis)" in q["observable"] and "-0.01 A/count" in q["observable"])
@@ -86,14 +88,14 @@ check("internal command monitors not Q current", not q["internal_monitors_are_q_
 check("Q negative remains census-bounded", "exact-substring census" in q["census_boundary"] and "computed-pointer" in q["census_boundary"])
 
 r = d["remaining_policy"]
-check("remaining driver override policy open", r["driver_override_abs_nm"] is None)
+check("remaining driver override is deliberate Panda policy", r["driver_override_abs_nm"] is None and "Panda/openpilot policy" in r["driver_override_source"] and "no recovered Toyota EPS" in r["driver_override_source"])
 check("temporary/permanent fault mapping open", r["temporary_vs_permanent_fault_mapping"] is None)
 check("actuator response now deliberate policy, not fake OEM threshold", "no OEM measured-Q comparator recovered" in r["actuator_response_policy"])
 
 s = d["static_conclusion"]
 check("core steering limits closed", s["absolute_angle_limit_closed"] and s["per_frame_delta_limit_closed"] and s["measured_rate_limit_closed"])
-check("slew closed only per task", s["per_task_slew_closed_wall_clock_rate_open"])
-check("driver torque policy boundary preserved", s["driver_torque_observable_closed_override_threshold_open"])
+check("slew/tick distinction explicit", s["per_task_slew_closed"] and s["foreground_tick_wall_clock_closed"] and s["slew_deg_per_second_only_conditional_on_once_per_foreground_call"])
+check("driver torque policy reclassified from OEM recovery blocker", s["driver_torque_observable_closed"] and s["physical_driver_torque_comparator_absent_under_promoted_census_boundary"] and s["driver_override_is_panda_policy_not_static_eps_recovery_blocker"])
 check("Q observable/threshold boundary preserved", s["measured_q_observable_closed_oem_response_threshold_not_recovered"])
 
 # Once the Panda contract is updated, it must remain consistent with this ledger.

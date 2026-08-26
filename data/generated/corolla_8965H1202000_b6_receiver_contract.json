@@ -1,11 +1,29 @@
 {
   "communication_supervision": {
     "can_id": "0x0B6",
+    "cooperative_system_mode_gate": {
+      "b6_loss_path_is_separate": "B6 loss propagates through FEBEADB9 -> FEBEC26D",
+      "classification": "graded internal steering/system mode-or-inhibit code; not a synonym for B6 communication loss",
+      "cooperative_acceptance": "CBE6E requires FEBEACBD == 0 AND FEBEC26D == 1 before asserting an active cooperative profile",
+      "direct_reference_count": 21,
+      "direct_tx_packer_refs": [],
+      "normalization": {
+        "0": 0,
+        "2": 2,
+        "3": 4,
+        "other_nonzero": 1
+      },
+      "normalized_output": "0xFEBEACBD",
+      "producer": "0x000B8EE4",
+      "source_state": "0xFEBEF000",
+      "wire_feedback_boundary": "The promoted named/fixed-GP direct-reference census has no FEBEACBD consumer in the H 0x46xxx/0x47xxx Tx-packer window. This does not exclude an indirect/computed alias, so no native wire-visible cooperative-authority-loss bit is promoted."
+    },
     "deadline_expiry": {
-      "absolute_time_boundary": "Both paths run from the TAUJ0-CH3 foreground cyclic tick, but the CH3 timer prescaler/TDR is not statically recoverable from this image; do not convert the 7-tick receiver deadline to milliseconds.",
-      "absolute_time_supported": false,
+      "absolute_time_boundary": "The steady TAUJ0-CH3 foreground tick is nominally 5.0 ms, so seven scheduler ticks are 35.0 ms. Arrival phase still quantizes the externally observed gate transition to the foreground scheduler, and the one startup interval is 5.1 ms rather than 5.0 ms.",
+      "absolute_time_supported": true,
       "countdown": "0x0007683C",
       "expiry_action": "0x87AA0(pdu) sets activity[pdu] to 0x5A",
+      "nominal_primary_cutout_ms": 35.0,
       "primary_cutout_after_foreground_ticks": 7
     },
     "pdu_descriptor": {
@@ -19,10 +37,34 @@
     },
     "pdu_id": 42,
     "scheduler": {
+      "dynamic_corroboration": {
+        "can_id": "0x030",
+        "capture": "Span 2025 moving rlog",
+        "derived_foreground_tick_ms": 5.00000605734289,
+        "descriptor_cycle_ticks": 2,
+        "frames": 6000,
+        "interpretation": "6000 live 0x030 frames independently corroborate the firmware descriptor's two-tick period at ~10 ms; this closes the foreground tick without claiming stock B6 transmit cadence.",
+        "mean_interval_ms": 10.00001211468578
+      },
       "foreground_loop": "0x0005F30C",
       "lower_deadline_chain": "5F30C -> 5FAF2 -> 73564 -> 7683C",
       "same_tick_domain": true,
       "status_chain": "5F30C -> 5FAF2 -> 53030 -> (58BBC transition | 59574 steady) -> 446EC/46A10/5262C",
+      "tauj0_config": {
+        "brs": 0,
+        "ch3_base_counts": 400000,
+        "ch3_initial_cdr": 407999,
+        "ch3_initial_counts": 408000,
+        "ch3_startup_offset_counts": 8000,
+        "ch3_steady_cdr": 399999,
+        "ch3_steady_counts": 400000,
+        "cmor3": 0,
+        "init_entry": "0x0005F660",
+        "nominal_initial_interval_ms": 5.1,
+        "nominal_steady_tick_ms": 5.0,
+        "steady_reload_entry": "0x0005F812",
+        "tps": 0
+      },
       "tick_source": "TAUJ0 CH3 EIRF at 0xFFFFB111 bit 0x10"
     },
     "status_dataflow": {
@@ -38,6 +80,7 @@
       "config_address": "0x00028D8C",
       "configured_extended_threshold_ticks": 440,
       "extended_state_condition": "0x445C0 emits state 0x22 only after its counter exceeds 440 while activity[PDU42] remains 0x5A; 0x44658 exposes bit/value 2 for that extended state",
+      "nominal_extended_threshold_ms": 2200.0,
       "pdu_id": 42,
       "primary_cutout_precedes_extended_state": true,
       "raw_hex": "2a00000bb8010200"
@@ -70,20 +113,24 @@
   "companion_fields": {
     "258": {
       "boundary": "The P5 diagnostic family exposes this OEM name, but exact H lacks DID 0x1CEE and static evidence does not prove signal258 is that diagnostic field.",
+      "candidate_boundary": "Value 1 is the conservative minimal-sender choice for this recovered consumer because it suppresses the extra additive term; that does not prove Toyota's stock ID11 value or neutralize unrelated ECUs' interpretations.",
+      "candidate_id11_value": 1,
       "consumer": "0x000CBEEE",
       "family_vocabulary_candidate": "Cooperative Control in Progress Flag",
       "oem_name_identified": false,
-      "semantics": "profile-dependent cooperative-control contribution gate; value 1 is required for one B6/profile-dependent controller contribution when profile flags are active",
+      "semantics": "profile-dependent additive-contribution suppressor/filter: with a cooperative profile active, the CE864 add path requires signal258 != 1 AND the staged mode/sign mismatch predicate; signal258 == 1 suppresses that add regardless of the staged mode/sign value",
       "snapshot": "0xFEBEADBB",
       "wire": "B6 bit2"
     },
     "260": {
+      "candidate_boundary": "0 is the simplest replacement-sender value. 0 and 3 are not asserted globally equivalent because C8D42 retains prior-mode/change history and unrecovered consumers outside this bounded direct set are not excluded.",
+      "candidate_id11_value": 0,
       "consumers": [
         "0x000C89D2",
         "0x000C8D42"
       ],
       "oem_name_identified": false,
-      "semantics": "four-state controller mode/transition selector with distinct behavior for 0/1/2/3",
+      "semantics": "four-state controller mode/transition selector; values 0 and 3 share the recovered steady direct-consumer families, while values 1/2 select the special branch family and value 2 has an additional interpolation path",
       "snapshot": "0xFEBEADC2",
       "wire": "B7 bits7:6"
     },
@@ -101,23 +148,46 @@
       "wire": "B7 bits5:0",
       "wrap_max": 63
     },
+    "262": {
+      "candidate_boundary": "For the ordinary path, zero removes this percentage-scaled contribution. This is an EPS-consumer result, not proof that every network receiver treats B8=0 as neutral.",
+      "candidate_id11_value": 0,
+      "consumer": "0x000CC442",
+      "oem_name_identified": false,
+      "semantics": "percentage-like modifier of an internal steering contributor; ordinary values scale the contributor by signal262/100, while 0xC9/0xCA/0xCB select calibrated special cases",
+      "snapshot": "0xFEBEADBD",
+      "wire": "B8"
+    },
+    "263": {
+      "candidate_boundary": "Zero removes this recovered percentage-scaled term. This is an EPS-consumer result, not proof that every network receiver treats B9=0 as neutral.",
+      "candidate_id11_value": 0,
+      "consumer": "0x000CBFCE",
+      "oem_name_identified": false,
+      "semantics": "percentage-like modifier of the active profile's internal contribution; the computed term is multiplied by signal263/100",
+      "snapshot": "0xFEBEADBE",
+      "wire": "B9"
+    },
     "264": {
+      "candidate_id11_value": 0,
       "consumer": "0x000C819E",
       "oem_name_identified": false,
-      "scope_boundary": "C825A uses that latch around AP/Remote Parking IDs 25/27, so this must not be generalized as the primary LTA request bit.",
+      "scope_boundary": "C825A uses that latch around AP/Remote Parking IDs 25/27, so zero is the ordinary non-special-control candidate for ID11 but must not be generalized as the primary LTA request bit or a cross-ECU neutral.",
       "semantics": "special-control validity/inhibit input; zero is required to enter/retain the C819E latch and nonzero clears it",
       "snapshot": "0xFEBEADC1",
       "wire": "B10 bit7"
     },
     "265": {
+      "candidate_boundary": "Zero is the initialized/no-mode candidate; the stock ID11 value remains uncaptured and other network consumers are outside this EPS-only proof.",
+      "candidate_id11_value": 0,
       "consumer": "0x000CCF58",
+      "downstream_consumer": "0x000CCF8C",
+      "initial_default_value": 0,
       "oem_name_identified": false,
-      "semantics": "mode/status value republished only while B6 receive status is healthy",
+      "semantics": "mode/status value republished only while B6 receive status is healthy; downstream accepts modes 1/2/3 and normalizes other values to 0",
       "snapshot": "0xFEBEADD9",
       "wire": "B10 bits2:0"
     }
   },
-  "evidence_boundary": "This closes the H/F EPS receiver-side request and communication-loss contract in scheduler ticks: signal254 selects the active Target Lateral ID, PDU42 is reloaded to 7 foreground ticks on successful reception, expiry marks B6 unhealthy and disables cooperative selection through ADB9/C26D, and signal261 is a modulo-64 rolling sequence counter with an 8-gap cap. It does not infer milliseconds, sender cadence, sender implementation, SecOC freshness/key behavior, or exact OEM names for the secondary B6 fields.",
+  "evidence_boundary": "This closes the H/F EPS receiver-side request and communication-loss contract in both scheduler and nominal wall-clock terms: signal254 selects the active Target Lateral ID, PDU42 is reloaded to 7 foreground ticks, the steady TAUJ0-CH3 tick is 5.0 ms (35.0 ms nominal primary cutout) with one 5.1-ms startup interval, and signal261 is a modulo-64 rolling sequence counter with an 8-gap cap. It also bounds an EPS-side minimal ID11 companion-field candidate. It does not infer stock B6 transmit cadence, prove stock companion values/cross-ECU neutrality, recover the slot-4 secret, or identify exact OEM names for the secondary B6 fields.",
   "request_contract": {
     "accepted_active_requests": {
       "1": "PCS",
@@ -165,14 +235,27 @@
       "path": "data/generated/techstream_v18/p5_lateral_control_semantics.json",
       "sha256": "d86dc9c016dd94cbbc3f4435d09eadc0796192bfd258c8ea264722a163e6b86b"
     },
+    "span_moving_rlog_evidence": {
+      "frame_count_0x030": 6000,
+      "path": "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
+      "sha256": "28d017590f327964c26b825d1f2de51a61fce241636b6bfcfc054ec4592d8d17"
+    },
     "techstream_correlations": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
       "sha256": "f22b1e99cf5ef38c03932ff105e6abbe2d2c6eb9d1262afa3f7fdf137102457f"
+    },
+    "tms053_followup_decompiler_evidence": {
+      "function_count": 29,
+      "path": "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json",
+      "sha256": "4afbd5568b61016161b147d23239011f579a2511d3497e628b69c2bdde60b200"
     }
   },
   "static_conclusion": {
-    "next_static_target": "recover the upstream FRC_P5/Brake producer and SecOC sender/freshness contract; exact signal258/260/264/265 OEM names remain bounded unless an independent producer/diagnostic join appears",
+    "foreground_tick_nominal_ms": 5.0,
+    "minimal_id11_companion_candidate_closed_for_eps_consumers": true,
+    "next_static_target": "recover/validate the upstream FRC_P5/Brake stock template and cross-ECU effects; exact signal258/260/262/263/264/265 OEM names remain bounded unless an independent producer/diagnostic join appears",
     "primary_loss_cutout_closed_in_ticks": true,
+    "primary_loss_cutout_nominal_ms": 35.0,
     "primary_loss_cutout_ticks": 7,
     "request_selection_closed": true,
     "secondary_field_names_closed": false,
@@ -180,6 +263,6 @@
     "sequence_gap_cap": 8,
     "sequence_modulus": 64,
     "upstream_producer_closed": false,
-    "wall_clock_timeout_closed": false
+    "wall_clock_timeout_closed": true
   }
 }

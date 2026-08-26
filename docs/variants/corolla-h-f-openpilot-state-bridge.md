@@ -326,24 +326,39 @@ activity[PDU42] `0x5A` on expiry. The same TAUJ0-CH3 foreground tick runs the
 higher status path, so that first expiry makes `ADB9` nonzero and disables
 cooperative selection immediately. The separate slot-18 status record
 `2a00000bb8010200` carries a slower threshold of `440` ticks and can expose the
-extended status bit `0x02`; it is not the primary steering cutout. The CH3 timer's
-absolute period is not statically recoverable here, so **7 ticks must not be
-restated as milliseconds**.
+extended status bit `0x02`; it is not the primary steering cutout. TMS-053 closes
+the CH3 timing that was previously missing: `0x5F660` configures TAUJ0 CH3 in
+interval mode with a one-time `(400000+8000)`-count first interval, while `0x5F812`
+rewrites CDR3 to `400000-1` for steady operation. Span's 6,000 live `0x030` frames
+independently average `10.000012 ms` for the exact-H/F two-tick Tx descriptor.
+Therefore the steady foreground tick is nominally **5.0 ms** (first interval
+**5.1 ms**) and the seven-tick primary B6 cutout is nominally **35 ms**, subject to
+normal foreground-phase quantization.
 
 B6 signal261 (B7[5:0]) is independently closed as a 6-bit rolling sequence
 counter. `CB246` computes `(current-previous) mod 64`; deltas `0/1` normalize to an
 effective gap of `1`, while larger gaps are retained up to a cap of `8`. The capped
-gap reaches `CB4F4` plausibility/supervision. Signal258 (B6 bit2) gates one
-profile-dependent controller contribution when equal to `1`; signal260 (B7[7:6])
-is a four-state controller selector; signal264 (B10 bit7) is a special-control
-validity/inhibit input used around the AP/Remote-Parking state machine; and
-signal265 (B10[2:0]) is republished only while B6 communication is healthy. Their
-literal OEM field names remain bounded; in particular, Techstream's
-`Cooperative Control in Progress Flag` is family vocabulary, not a proved
-one-to-one name for signal258.
+gap reaches `CB4F4` plausibility/supervision. TMS-053 corrects the earlier
+signal258 polarity summary: in the exact `CBEEE` consumer, with a cooperative
+profile active, the extra `CE864` add path requires **signal258 != 1** together
+with the staged mode/sign mismatch predicate. Thus `258=1` suppresses that added
+contribution; it is not required to enable it. Signal260 (B7[7:6]) has recovered
+steady direct-consumer equivalence for values `0` and `3` aside from mode-change
+history, while `1/2` select the special branch family and `2` has an additional
+interpolation path. Signal264 (B10 bit7) is a special-control validity/inhibit
+input used around the AP/Remote-Parking state machine; signal265 (B10[2:0]) is
+republished only while B6 communication is healthy and downstream accepts modes
+1/2/3 while normalizing other values to 0. Their literal OEM names remain bounded;
+Techstream's `Cooperative Control in Progress Flag` is family vocabulary, not a
+proved one-to-one name for signal258.
 
 Signals 262 and 263 remain important companion modifiers: B8/B9 feed `0xCC442` and
 `0xCBFCE` as percentage-like scaling inputs to internal steering contributors.
+For their ordinary recovered paths, value `0` removes those percentage-scaled
+terms. Consequently an EPS-consumer-derived minimal ID11 candidate is now
+`258=1, 260=0, 262=0, 263=0, 264=0, 265=0`. This is **not** promoted as Toyota's
+stock template or as cross-ECU-neutral; those properties still need isolated,
+relay-correct validation.
 The four configured nonscalar B6 IDs `252/253/266/267` still have no recovered
 block/group/full-PDU consumer.
 
@@ -442,11 +457,19 @@ Receiver request selection, the 7-tick primary loss cutoff, modulo-64 sequence
 handling, and the **entire 32-byte receiver envelope** are closed. B0..B27 are the
 authenticated application region; only selected B3..B10 bits have recovered EPS
 semantics; B28..B31 are FV4+CMAC28; full freshness and the exact 36-byte CMAC input
-are reconstructed; and config/job0 selects ICU-S slot4. The remaining command-side
-unknowns are therefore **sender-side** wall-clock cadence, freshness-state/signing
-ownership, the slot-4 secret value or approved slot use, stock-source suppression,
-exact OEM names for the secondary live B6 fields, and the upstream **payload/SecOC
-producer contract**. Techstream now closes the module-level topology more tightly:
+are reconstructed; and config/job0 selects ICU-S slot4. The receiver freshness
+algorithm plus authenticated `0x00F` now also close a deterministic **exclusive
+replacement-sender** state machine: re-anchor on a strictly newer authenticated
+trip/reset epoch, seed B6 message8 from the transmitted low2 on a new epoch,
+advance message8 locally (normally +1; receiver window +1..+4), keep signal261 as a
+separate modulo-64 application counter, and after a sender restart mid-epoch wait
+for the next authenticated reset rather than guessing the committed message8.
+No cross-power message8 persistence is needed under that startup rule. Toyota's
+**stock** B6 cadence/initial-message policy remains unknown, but it is no longer
+required to construct receiver-valid replacement freshness. Remaining command-side
+unknowns are the slot-4 signing primitive/key, stock sender cadence/template and
+cross-ECU secondary-field effects, stock-source suppression, and the upstream
+**payload/SecOC producer contract**. Techstream now closes the module-level topology more tightly:
 Corolla P5 pairs `FRC_P5` 498 with category 435 **`ABS_P5` = Brake/EPB** and
 `EMPS_P5` 405; FRC has X216E `Front Recognition Camera => BRK Communication
 Invalid`, ABS monitors EPS communication, and H maps B6 loss to U012987 Brake
@@ -474,8 +497,11 @@ next state work is now:
    availability without inventing temporary/permanent classes;
 3. correlate `0x4A3` B6:B7 Q-current with command-current DIDs and derive allowable
    actuator-response error/limits; and
-4. derive a generation-native physical driver-override threshold using the live
-   `0x030` torque signal before enabling `steeringPressed` or Panda torque policy.
+4. choose a conservative openpilot/Panda physical driver-override policy using the
+   live `0x030` torque signal and validate driver interaction/release dynamically.
+   TMS-053's expanded exact-H source/snapshot census finds no physical-driver-torque
+   comparator in the recovered C8xxx-CExxx target-to-motor control cone, so there is
+   no Toyota EPS override constant left to recover under that census boundary.
 
 ### Command side
 
@@ -488,11 +514,16 @@ The receiver-side command carrier is now identified, so the decisive experiment 
 - treat signal254 request selection, the 7-foreground-tick receiver deadline,
   signal261 modulo-64/gap-cap-8 sequence rule, the complete B0..B31 receiver
   partition, FV4/CMAC28 trailer, full-freshness packing, CMAC input, and slot4
-  selection as closed receiver requirements; use a stock capture to recover **sender
-  wall-clock cadence**, exact secondary-field dynamics, and normal target/rate bounds
-  before any injection attempt;
-- recover sender freshness-state/signing ownership, a production-safe key/slot4 use
-  path, and stock-source suppression requirements; and
+  selection as closed receiver requirements; use the authenticated-0x00F replacement
+  state machine for receiver-valid message8 freshness, while a stock capture remains
+  valuable for **stock sender wall-clock cadence**, secondary-field dynamics/cross-ECU
+  behavior, and normal target/rate context before production actuation;
+- recover a production-safe key/slot4 signing path and stock-source suppression
+  requirements. Exact H/F command-5 software machinery accepts the required 36-byte
+  B6 authenticated input, but the Sienna single-stage resident proxy geometry does
+  **not** transfer: H startup clears `FEBF05CC..FEBF09CB` and
+  `FEBF0B4C..FEBF0F4B`. A target-native H/F application-context carrier plus live
+  selector-4 permission/latency remains required; and
 - acquire/analyze true-TSS3 `FRC_P5` plus category-435 `ABS_P5`/Brake firmware,
   or synchronized FRC/Brake/EPS captures, to explain the still-open byte-level target
   transformation and SecOC sender/key/freshness ownership.
@@ -528,9 +559,12 @@ now numeric rather than inferred from old Toyota Panda constants:
 - The independent C9E54 conditioner clamps the same LTA target to ±3490 in its
   doubled internal domain (= ±1745 B6 raw). Its selected low/vehicle bank also
   slews that internal target by 7 doubled-domain counts per steering-task call
-  (3.5 B6 counts, ~0.2006 deg); the compiled high/default bank uses 4. The exact
-  scheduler wall-clock period for this stage is not closed, so these per-task
-  steps are **not** promoted to a deg/s Panda limit.
+  (3.5 B6 counts, ~0.2006 deg); the compiled high/default bank uses 4. The
+  foreground scheduler is now closed at nominal **5 ms**. If this conditioner is
+  invoked exactly once per foreground cycle, those steps correspond to ~40.1 deg/s
+  (selected low/vehicle) and ~22.9 deg/s (high/default). That once-per-cycle call
+  relation remains the condition; the per-call limits are the unconditional firmware
+  facts.
 
 Measured steering supervision is target-native too. `0x025` signal184/185 remains
 `1.5 deg/count` coarse plus signed `0.1 deg/count` fraction, and signal186 is the
@@ -579,9 +613,13 @@ that matter more than importing pre-TSS3 Toyota constants:
 - The physical driver-torque path has a native acquisition clamp of **±2109** in
   the N·m×256 domain (~**±8.2383 N·m**) and exported telemetry saturation at
   **±10.00 N·m**. These explain representation behavior—including Span's -8.23 N·m
-  observed floor—but neither is a driver-override threshold. No numeric physical
-  driver-torque comparator is recovered in the cooperative B6 supervisor, so
-  `driver_override_abs_nm` remains a policy value requiring validation.
+  observed floor—but neither is a driver-override threshold. TMS-053 expands the
+  census to the full direct named/fixed-GP physical source/snapshot family
+  `FEBE7B08 -> FEBE6554`: 13 exact-H functions consume/copy/export that family and
+  **zero** fall inside the recovered C8xxx-CExxx target-to-motor control cone.
+  Under that explicit negative boundary there is no Toyota EPS physical-driver-torque
+  authority comparator left to recover; `driver_override_abs_nm` is an
+  openpilot/Panda policy value to choose conservatively and validate dynamically.
 - Physical motor Q-current remains closed as `FEBE6592` and `0x4A3 B6:B7`
   (-0.01 A/count, sign-inverted relative to the Techstream raw value). A promoted
   whole-corpus exact-symbol census finds that measured Q-current only in its
@@ -596,10 +634,11 @@ that matter more than importing pre-TSS3 Toyota constants:
 
 The exact B6 receiver-loss guarantee remains **7 TAUJ0-CH3 foreground ticks**:
 successful PDU42 receipt reloads 7 and first expiry disables cooperative selection.
-The tick's wall-clock duration remains unsupported, so no milliseconds are invented.
-After a future host/sender lapse, Panda should discard previous sequence/desired-angle
-history and require a fresh inactive/reinitialization transition before allowing
-active steering again.
+TMS-053 closes the steady tick at nominal **5 ms**, so this is a nominal **35 ms**
+primary cutout (with normal scheduler-phase quantization and one 5.1-ms startup
+interval). After a future host/sender lapse, Panda should discard previous
+sequence/desired-angle history and require a fresh inactive/reinitialization
+transition before allowing active steering again.
 
 This leaves three bounded **policy** classes rather than an undefined Panda model:
 physical `driver_override_abs_nm`, extended fault policy (`0x394`/Ready/DTC classes
@@ -607,10 +646,13 @@ beyond the already-known immediate `0x030` gate), and a deliberately chosen
 actuator-response policy. The third is no longer framed as an undiscovered OEM
 Q-current threshold: static H/F evidence did not recover one in the cooperative
 supervisor. Secondary B6 fields 258/260/262/263/264/265 are **not free safety
-parameters**: the receiver roles are bounded, but production TX must remain disabled
-until a stock active-LTA sender template is captured/recovered and then whitelisted.
-Likewise relay-side bus ownership/suppression, sender cadence and SecOC MAC/freshness
-construction are deployment blockers outside the numeric Panda envelope.
+parameters**: the EPS-consumer-derived minimal ID11 candidate is
+`1/0/0/0/0/0`, but production TX remains disabled until its cross-ECU effects and
+stock-LTA behavior are validated on the isolated relay-correct path and the result is
+whitelisted. Relay-side ownership/suppression and stock sender cadence remain open.
+Receiver-valid replacement freshness construction is now closed; the remaining SecOC
+deployment blocker is the actual slot-4 signing primitive/key (or a completed H/F
+command-5 runtime carrier with live permission/latency).
 
 #### Competing valid B6 senders: receiver arbitration and suppression requirement
 
@@ -699,27 +741,50 @@ cited calibration values are byte-identical as well. Machine-readable contract:
 decompiler evidence:
 `data/generated/corolla_8965H1202000_panda_lateral_safety_decompiler_evidence.json`.
 
+### H/F command-5 portability boundary
+
+The useful **software** part of the Sienna command-5 signing work transfers to
+H/F, but its resident-RAM placement does not. Exact H record 0 at `0x27C88`
+selects completion `0x82F5C`, adapter `0x820CC`, worker `0x821D0`, and config
+`0x27C84`; serialized dispatcher `0x82750` reaches the same generated lower
+command-5 family, and `0x81E94` accepts caller lengths below `0x51`, which covers
+the 36-byte B6 authenticated input. These application bytes are identical on F.
+
+The prior Sienna single-stage resident proxy must **not** be copied by address.
+H startup `0x6149A` clears `FEBF05CC..FEBF09CB` and
+`FEBF0B4C..FEBF0F4B`, while H-owned structures already occupy the lower
+`FEBF0xxx` page. The independently recovered H XCP shadow
+`FEBF7C00..FEBFFBFF` remains a promising two-stage carrier area, but no target-
+native H/F execution route into that shadow is yet verified. Accordingly,
+`data/variant_ram_exec_requirements.json` gains **no** H/F verified runtime entry
+from this work. Production signing still requires live confirmation that the
+provisioned slot4 permits command 5 and a separately audited H/F runtime carrier
+(or another approved MAC path). Machine-readable boundary:
+`data/generated/corolla_hf_command5_portability.json`.
+
 ## 10. Production boundary
 
 The candidate safety math is now substantially closed, but it still does not authorize
 actuation. Before a real H/F openpilot port, recover and validate:
 
-- a validated **driver-override threshold** for the now-closed `0x030` physical torque signal;
+- a deliberately chosen conservative **Panda/openpilot driver-override policy** for the now-closed `0x030` physical torque signal. The expanded exact-H static census found no physical driver-torque comparator in the recovered target-to-motor control cone; this is no longer an OEM-threshold-recovery blocker;
 - a deliberate Panda/sender Q-current actuator-response policy validated against relay-correct dynamics, plus extended fault-policy mapping (the cooperative EPS supervisor exposes no recovered measured-Q-current comparator);
 - dynamic validation of the now-closed incoming `0x51E B0[7]` Ready Status through
   value `0`, plus temporary/permanent steering-fault semantics; no EPS-Tx Ready
   duplicate is required for basic observation;
-- sender wall-clock cadence and the active-LTA template for the bounded secondary B6 fields;
-- relay-correct **physical stock-B6 producer isolation/suppression point** and dynamic confirmation of the statically closed 7-tick loss behavior (receiver-side competing-stream arbitration is already closed above);
-- the approved SecOC slot4 MAC/freshness sender path; and
+- stock B6 wall-clock cadence and the active-LTA template for the bounded secondary B6 fields. The replacement sender's SecOC message8 start/progression is statically closed by `0x00F` re-anchoring and no longer requires recovery of Toyota's B6-local counter-start policy;
+- relay-correct **physical stock-B6 producer isolation/suppression point** and dynamic confirmation of the statically closed nominal **35 ms** seven-tick loss behavior (receiver-side competing-stream arbitration is already closed above);
+- live confirmation that provisioned slot4 permits command 5, plus a target-native H/F runtime carrier or the slot4 secret/another approved MAC path; and
 - fallback/coexistence behavior with brake/AEB and stock LTA/LDA/LCA functions.
 
 The machine-readable evidence is
 `data/generated/corolla_8965H1202000_openpilot_state_bridge.json`,
 `data/generated/corolla_8965H1202000_b6_receiver_contract.json`,
+`data/generated/corolla_8965H1202000_b6_secoc_verification.json`,
 `data/generated/corolla_hf_b6_competing_sender_arbitration.json`,
-`data/generated/corolla_hf_steering_limits.json`, and
-`data/generated/corolla_hf_panda_lateral_safety_contract.json`; their compact
+`data/generated/corolla_hf_steering_limits.json`,
+`data/generated/corolla_hf_panda_lateral_safety_contract.json`, and
+`data/generated/corolla_hf_command5_portability.json`; their compact
 raw-body-bound decompiler/reference evidence is tracked alongside each artifact.
 
 <!-- knowledge-cross-references:begin -->
@@ -728,6 +793,6 @@ raw-body-bound decompiler/reference evidence is tracked alongside each artifact.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009), [COM-010](../reference/index.md#finding-com-010), [COM-011](../reference/index.md#finding-com-011), [COM-014](../reference/index.md#finding-com-014), [COM-015](../reference/index.md#finding-com-015), [COM-016](../reference/index.md#finding-com-016), [COM-017](../reference/index.md#finding-com-017)
-- Corrections with this document as canonical home: [CORR-109](../reference/index.md#correction-corr-109), [CORR-110](../reference/index.md#correction-corr-110), [CORR-111](../reference/index.md#correction-corr-111), [CORR-112](../reference/index.md#correction-corr-112)
+- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009), [COM-010](../reference/index.md#finding-com-010), [COM-011](../reference/index.md#finding-com-011), [COM-014](../reference/index.md#finding-com-014), [COM-015](../reference/index.md#finding-com-015), [COM-016](../reference/index.md#finding-com-016), [COM-017](../reference/index.md#finding-com-017), [TMS-053](../reference/index.md#finding-tms-053)
+- Corrections with this document as canonical home: [CORR-109](../reference/index.md#correction-corr-109), [CORR-110](../reference/index.md#correction-corr-110), [CORR-111](../reference/index.md#correction-corr-111), [CORR-112](../reference/index.md#correction-corr-112), [CORR-113](../reference/index.md#correction-corr-113), [CORR-114](../reference/index.md#correction-corr-114), [CORR-115](../reference/index.md#correction-corr-115), [CORR-116](../reference/index.md#correction-corr-116)
 <!-- knowledge-cross-references:end -->

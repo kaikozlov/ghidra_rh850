@@ -10,6 +10,8 @@ EVID = REPO / "data/generated/corolla_8965H1202000_b6_receiver_contract_decompil
 CAN_EVID = REPO / "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json"
 TECH = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
 P5 = REPO / "data/generated/techstream_v18/p5_lateral_control_semantics.json"
+SPAN = REPO / "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json"
+FOLLOWUP = REPO / "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json"
 OUT = REPO / "data/generated/corolla_8965H1202000_b6_receiver_contract.json"
 
 GP = 0xFEBEB800
@@ -38,11 +40,14 @@ def main() -> int:
     can_ev = json.loads(CAN_EVID.read_text())
     tech = json.loads(TECH.read_text())
     p5 = json.loads(P5.read_text())
+    span = json.loads(SPAN.read_text())
+    followup = json.loads(FOLLOWUP.read_text())
     if len(image) != 0x100000 or sha(image) != ev["image"]["sha256"]:
         raise ValueError("H image/evidence identity drift")
-    if ev["function_count"] != 33:
+    if ev["function_count"] != 33 or followup["function_count"] != 29:
         raise ValueError("B6 receiver evidence count drift")
     funcs = {int(x["entry"], 16): x["decompiled_c"] for x in ev["functions"]}
+    follow_funcs = {int(x["entry"], 16): x["decompiled_c"] for x in followup["functions"]}
     can_funcs = {int(x["entry"], 16): x["decompiled_c"] for x in can_ev["functions"]}
     rx = can_funcs[0x76A3C]
 
@@ -87,6 +92,30 @@ def main() -> int:
     need(funcs[0x58BBC], "FUN_000446ec();", "FUN_00046a10();", "FUN_0005262c();")
     need(funcs[0x59574], "FUN_000446ec();", "FUN_00046a10();", "FUN_0005262c();")
 
+    # Exact H TAUJ0-CH3 period.  5F660 programs all four TAUJ0 channels in
+    # interval mode with TPS/BRS zero and gives CH3 one startup phase offset;
+    # 5F812 then rewrites CDR3 to the steady 400000-count value every foreground
+    # cycle.  The tracked Span moving-rlog independently observes the exact-H/F
+    # 0x030 Tx descriptor (2 foreground ticks) at 10.000012 ms mean cadence.
+    need(follow_funcs[0x5F660], "Ramffe50090 = 0;", "DAT_ffe50094 = 0;", "Ramffe5008c = 0;", "Ramffe5000c = PTR_LAB_0002cb54 + (int)PTR_FUN_0002cb50 + -1;")
+    need(follow_funcs[0x5F812], "Ramffe5000c = PTR_FUN_0002cb50 + -1;", "FUN_000694fa(uVar3);")
+    timer_terms = [struct.unpack_from("<I", image, addr)[0] for addr in (0x2CB38, 0x2CB3C, 0x2CB40, 0x2CB44, 0x2CB48, 0x2CB4C, 0x2CB50, 0x2CB54)]
+    if timer_terms != [16000, 2116, 32000, 6800, 80000, 7600, 400000, 8000]:
+        raise ValueError(f"TAUJ0 timing constants drift: {timer_terms!r}")
+    ch3_initial_counts = timer_terms[6] + timer_terms[7]
+    ch3_steady_counts = timer_terms[6]
+    cadence = span["direct_reuse_evidence"]["0x030"]["cadence"]
+    if not (
+        span["direct_reuse_evidence"]["0x030"]["frame_count"] == 6000
+        and cadence["interval_count"] == 5999
+        and cadence["descriptor_cycle_ticks"] == 2
+        and abs(cadence["mean_interval_ms"] - 10.00001211468578) < 1e-9
+        and abs(cadence["derived_foreground_tick_ms"] - 5.00000605734289) < 1e-9
+    ):
+        raise ValueError("Span 0x030 cadence evidence drift")
+    foreground_tick_nominal_ms = 5.0
+    ch3_initial_interval_nominal_ms = foreground_tick_nominal_ms * ch3_initial_counts / ch3_steady_counts
+
     # Status chain: B6 slot18 -> generated raw status -> staging -> snapshot ADB9.
     need(funcs[0x46A10], "FUN_00044744(0x18);", "unaff_gp + -0x3a60")
     need(funcs[0x5262C], "*(undefined1 *)(unaff_gp + 0x3932) = *(undefined1 *)(unaff_gp + -0x3a60);")
@@ -110,22 +139,31 @@ def main() -> int:
          "FUN_0007643a(0x102,0x1ad,1,2,0,unaff_gp + -0x3a68);",
          "FUN_0007643a(0x104,0x1ae,2,6,0,unaff_gp + -0x3a66);",
          "FUN_0007643a(0x105,0x1ae,6,0,0,unaff_gp + -0x3a65);",
+         "FUN_0007643a(0x106,0x1af,8,0,0,unaff_gp + -0x3a64);",
+         "FUN_0007643a(0x107,0x1b0,8,0,0,unaff_gp + -0x3a63);",
          "FUN_0007643a(0x108,0x1b1,1,7,0,unaff_gp + -0x3a62);",
          "FUN_0007643a(0x109,0x1b1,3,0,0,unaff_gp + -0x3a5f);")
 
     # Companion B6 scalar fields and sequence semantics.
     need(funcs[0x5262C], "0x3929) = *(undefined1 *)(unaff_gp + -0x3a68)", "0x392b) = *(undefined1 *)(unaff_gp + -0x3a66)", "0x392c) = *(undefined1 *)(unaff_gp + -0x3a65)", "0x392f) = *(undefined1 *)(unaff_gp + -0x3a62)", "0x3941) = *(undefined1 *)(unaff_gp + -0x3a5f)")
     need(funcs[0xB8EE4], "-0xa45) = *(undefined1 *)(unaff_gp + 0x3929)", "-0xa3e) = *(undefined1 *)(unaff_gp + 0x392b)", "-0xa44) = *(undefined1 *)(unaff_gp + 0x392c)", "-0xa3f) = *(undefined1 *)(unaff_gp + 0x392f)", "-0xa27) = *(undefined1 *)(unaff_gp + 0x3941)")
+    need(follow_funcs[0x5262C], "uRamfebef12d = uRamfebe7d9c;", "uRamfebef12e = uRamfebe7d9d;")
+    need(follow_funcs[0xB8EE4], "-0xa43) = *(undefined1 *)(iVar38 + 0x392d)", "-0xa42) = *(undefined1 *)(iVar38 + 0x392e)")
     if struct.unpack_from("<H", image, 0xAFCE8)[0] != 63 or struct.unpack_from("<H", image, 0xAFCEA)[0] != 8:
         raise ValueError("B6 sequence constants drift")
     need(funcs[0xCB246], "-0xa44", "DAT_000afce8", "DAT_000afcea", "+ 0xa48", "+ 0xa4a", "+ 0xa4c")
     need(funcs[0xCB4F4], "+ 0xa4c")
     need(funcs[0xCBEEE], "-0xa45) != '\\x01'", "+ 0xa6e", "+ 0xa6f", "+ 0xa70", "+ 0xa71")
+    need(follow_funcs[0xCBEEE], "cRamfebeadbb != '\\x01'", "cRamfebec26e", "cRamfebec26f", "cRamfebec270", "cRamfebec271", "cRamfebec210", "FUN_000ce864")
+    need(follow_funcs[0xCC442], "bRamfebeadbd", "iRamfebec1b8 * uVar2", "/ 100")
+    need(follow_funcs[0xCBFCE], "bRamfebeadbe", "iVar6 * uVar12", "/ 100")
     need(funcs[0xC89D2], "-0xa3e", "cVar2 == '\\0'", "cVar2 == '\\x03'", "cVar2 == '\\x01' || cVar2 == '\\x02'")
     need(funcs[0xC8D42], "-0xa3e", "cVar3 == '\\x02'")
     need(funcs[0xC819E], "-0xa47) == 0", "-0xa3f) == '\\0'", "-0xa3f) != '\\0'", "-0xa47) & 2")
     need(funcs[0xC825A], "-0xa50", "\\x19", "\\x1b", "+ 0x779")
+    need(follow_funcs[0xCCF40], "uRamfebec363 = 0;", "uRamfebec364 = 1;", "uRamfebec362 = 0;")
     need(funcs[0xCCF58], "FUN_000ba090(0x18)", "-0xa47) != '\\0'", "-0xa27")
+    need(follow_funcs[0xCCF8C], "cRamfebeacbd != '\\0'", "cRamfebec362 != '\\x01'", "cRamfebec362 != '\\x02'", "cRamfebec362 != '\\x03'")
 
     # Exact OEM missing-message join.
     b6row = next(x for x in tech["communication_monitor_dtc"]["rows"] if x["can_id"] == "0x0B6")
@@ -141,6 +179,8 @@ def main() -> int:
             "can_com_evidence": {"path": str(CAN_EVID.relative_to(REPO)), "sha256": sha(CAN_EVID.read_bytes()), "rx_indication": "0x00076A3C"},
             "techstream_correlations": {"path": str(TECH.relative_to(REPO)), "sha256": sha(TECH.read_bytes())},
             "p5_lateral_semantics": {"path": str(P5.relative_to(REPO)), "sha256": sha(P5.read_bytes())},
+            "span_moving_rlog_evidence": {"path": str(SPAN.relative_to(REPO)), "sha256": sha(SPAN.read_bytes()), "frame_count_0x030": span["direct_reuse_evidence"]["0x030"]["frame_count"]},
+            "tms053_followup_decompiler_evidence": {"path": str(FOLLOWUP.relative_to(REPO)), "sha256": sha(FOLLOWUP.read_bytes()), "function_count": followup["function_count"]},
         },
         "request_contract": {
             "signal_id": 254,
@@ -177,14 +217,16 @@ def main() -> int:
                 "countdown": "0x0007683C",
                 "expiry_action": "0x87AA0(pdu) sets activity[pdu] to 0x5A",
                 "primary_cutout_after_foreground_ticks": pdu[0] + 1,
-                "absolute_time_supported": False,
-                "absolute_time_boundary": "Both paths run from the TAUJ0-CH3 foreground cyclic tick, but the CH3 timer prescaler/TDR is not statically recoverable from this image; do not convert the 7-tick receiver deadline to milliseconds.",
+                "nominal_primary_cutout_ms": (pdu[0] + 1) * foreground_tick_nominal_ms,
+                "absolute_time_supported": True,
+                "absolute_time_boundary": "The steady TAUJ0-CH3 foreground tick is nominally 5.0 ms, so seven scheduler ticks are 35.0 ms. Arrival phase still quantizes the externally observed gate transition to the foreground scheduler, and the one startup interval is 5.1 ms rather than 5.0 ms.",
             },
             "status_qualifier": {
                 "config_address": f"0x{status_addr:08X}",
                 "raw_hex": status_raw.hex(),
                 "pdu_id": status_raw[0],
                 "configured_extended_threshold_ticks": status_threshold,
+                "nominal_extended_threshold_ms": status_threshold * foreground_tick_nominal_ms,
                 "extended_state_condition": "0x445C0 emits state 0x22 only after its counter exceeds 440 while activity[PDU42] remains 0x5A; 0x44658 exposes bit/value 2 for that extended state",
                 "primary_cutout_precedes_extended_state": True,
             },
@@ -204,9 +246,45 @@ def main() -> int:
                 "condition": "combined slot health is not 0x5A and B6 receive-status snapshot 0xFEBEADB9 == 0",
                 "effect": "CBE6E cannot assert any cooperative profile/common-active flag when this gate is false",
             },
+            "cooperative_system_mode_gate": {
+                "source_state": "0xFEBEF000",
+                "producer": "0x000B8EE4",
+                "normalized_output": "0xFEBEACBD",
+                "normalization": {"0": 0, "2": 2, "3": 4, "other_nonzero": 1},
+                "cooperative_acceptance": "CBE6E requires FEBEACBD == 0 AND FEBEC26D == 1 before asserting an active cooperative profile",
+                "classification": "graded internal steering/system mode-or-inhibit code; not a synonym for B6 communication loss",
+                "b6_loss_path_is_separate": "B6 loss propagates through FEBEADB9 -> FEBEC26D",
+                "direct_reference_count": followup["cooperative_system_mode_direct_reference_union"]["match_count"],
+                "direct_tx_packer_refs": followup["cooperative_system_mode_direct_reference_union"]["entries_inside_tx_packer_window"],
+                "wire_feedback_boundary": "The promoted named/fixed-GP direct-reference census has no FEBEACBD consumer in the H 0x46xxx/0x47xxx Tx-packer window. This does not exclude an indirect/computed alias, so no native wire-visible cooperative-authority-loss bit is promoted.",
+            },
             "scheduler": {
                 "foreground_loop": "0x0005F30C",
                 "tick_source": "TAUJ0 CH3 EIRF at 0xFFFFB111 bit 0x10",
+                "tauj0_config": {
+                    "init_entry": "0x0005F660",
+                    "steady_reload_entry": "0x0005F812",
+                    "tps": 0,
+                    "brs": 0,
+                    "cmor3": 0,
+                    "ch3_base_counts": ch3_steady_counts,
+                    "ch3_startup_offset_counts": timer_terms[7],
+                    "ch3_initial_cdr": ch3_initial_counts - 1,
+                    "ch3_steady_cdr": ch3_steady_counts - 1,
+                    "ch3_initial_counts": ch3_initial_counts,
+                    "ch3_steady_counts": ch3_steady_counts,
+                    "nominal_steady_tick_ms": foreground_tick_nominal_ms,
+                    "nominal_initial_interval_ms": ch3_initial_interval_nominal_ms,
+                },
+                "dynamic_corroboration": {
+                    "capture": "Span 2025 moving rlog",
+                    "can_id": "0x030",
+                    "frames": span["direct_reuse_evidence"]["0x030"]["frame_count"],
+                    "descriptor_cycle_ticks": cadence["descriptor_cycle_ticks"],
+                    "mean_interval_ms": cadence["mean_interval_ms"],
+                    "derived_foreground_tick_ms": cadence["derived_foreground_tick_ms"],
+                    "interpretation": "6000 live 0x030 frames independently corroborate the firmware descriptor's two-tick period at ~10 ms; this closes the foreground tick without claiming stock B6 transmit cadence.",
+                },
                 "lower_deadline_chain": "5F30C -> 5FAF2 -> 73564 -> 7683C",
                 "status_chain": "5F30C -> 5FAF2 -> 53030 -> (58BBC transition | 59574 steady) -> 446EC/46A10/5262C",
                 "same_tick_domain": True,
@@ -223,7 +301,9 @@ def main() -> int:
                 "wire": "B6 bit2",
                 "snapshot": "0xFEBEADBB",
                 "consumer": "0x000CBEEE",
-                "semantics": "profile-dependent cooperative-control contribution gate; value 1 is required for one B6/profile-dependent controller contribution when profile flags are active",
+                "semantics": "profile-dependent additive-contribution suppressor/filter: with a cooperative profile active, the CE864 add path requires signal258 != 1 AND the staged mode/sign mismatch predicate; signal258 == 1 suppresses that add regardless of the staged mode/sign value",
+                "candidate_id11_value": 1,
+                "candidate_boundary": "Value 1 is the conservative minimal-sender choice for this recovered consumer because it suppresses the extra additive term; that does not prove Toyota's stock ID11 value or neutralize unrelated ECUs' interpretations.",
                 "oem_name_identified": False,
                 "family_vocabulary_candidate": "Cooperative Control in Progress Flag",
                 "boundary": "The P5 diagnostic family exposes this OEM name, but exact H lacks DID 0x1CEE and static evidence does not prove signal258 is that diagnostic field."
@@ -232,7 +312,9 @@ def main() -> int:
                 "wire": "B7 bits7:6",
                 "snapshot": "0xFEBEADC2",
                 "consumers": ["0x000C89D2", "0x000C8D42"],
-                "semantics": "four-state controller mode/transition selector with distinct behavior for 0/1/2/3",
+                "semantics": "four-state controller mode/transition selector; values 0 and 3 share the recovered steady direct-consumer families, while values 1/2 select the special branch family and value 2 has an additional interpolation path",
+                "candidate_id11_value": 0,
+                "candidate_boundary": "0 is the simplest replacement-sender value. 0 and 3 are not asserted globally equivalent because C8D42 retains prior-mode/change history and unrecovered consumers outside this bounded direct set are not excluded.",
                 "oem_name_identified": False,
             },
             "261": {
@@ -249,19 +331,42 @@ def main() -> int:
                 "downstream": "raw delta and capped effective gap are stored at GP+0xA4A/GP+0xA4C; CB4F4 consumes the capped gap in target plausibility/supervision",
                 "strict_plus_one_required": False,
             },
+            "262": {
+                "wire": "B8",
+                "snapshot": "0xFEBEADBD",
+                "consumer": "0x000CC442",
+                "semantics": "percentage-like modifier of an internal steering contributor; ordinary values scale the contributor by signal262/100, while 0xC9/0xCA/0xCB select calibrated special cases",
+                "candidate_id11_value": 0,
+                "candidate_boundary": "For the ordinary path, zero removes this percentage-scaled contribution. This is an EPS-consumer result, not proof that every network receiver treats B8=0 as neutral.",
+                "oem_name_identified": False,
+            },
+            "263": {
+                "wire": "B9",
+                "snapshot": "0xFEBEADBE",
+                "consumer": "0x000CBFCE",
+                "semantics": "percentage-like modifier of the active profile's internal contribution; the computed term is multiplied by signal263/100",
+                "candidate_id11_value": 0,
+                "candidate_boundary": "Zero removes this recovered percentage-scaled term. This is an EPS-consumer result, not proof that every network receiver treats B9=0 as neutral.",
+                "oem_name_identified": False,
+            },
             "264": {
                 "wire": "B10 bit7",
                 "snapshot": "0xFEBEADC1",
                 "consumer": "0x000C819E",
                 "semantics": "special-control validity/inhibit input; zero is required to enter/retain the C819E latch and nonzero clears it",
-                "scope_boundary": "C825A uses that latch around AP/Remote Parking IDs 25/27, so this must not be generalized as the primary LTA request bit.",
+                "candidate_id11_value": 0,
+                "scope_boundary": "C825A uses that latch around AP/Remote Parking IDs 25/27, so zero is the ordinary non-special-control candidate for ID11 but must not be generalized as the primary LTA request bit or a cross-ECU neutral.",
                 "oem_name_identified": False,
             },
             "265": {
                 "wire": "B10 bits2:0",
                 "snapshot": "0xFEBEADD9",
                 "consumer": "0x000CCF58",
-                "semantics": "mode/status value republished only while B6 receive status is healthy",
+                "downstream_consumer": "0x000CCF8C",
+                "semantics": "mode/status value republished only while B6 receive status is healthy; downstream accepts modes 1/2/3 and normalizes other values to 0",
+                "initial_default_value": 0,
+                "candidate_id11_value": 0,
+                "candidate_boundary": "Zero is the initialized/no-mode candidate; the stock ID11 value remains uncaptured and other network consumers are outside this EPS-only proof.",
                 "oem_name_identified": False,
             },
         },
@@ -269,17 +374,20 @@ def main() -> int:
             "request_selection_closed": True,
             "primary_loss_cutout_closed_in_ticks": True,
             "primary_loss_cutout_ticks": pdu[0] + 1,
-            "wall_clock_timeout_closed": False,
+            "wall_clock_timeout_closed": True,
+            "foreground_tick_nominal_ms": foreground_tick_nominal_ms,
+            "primary_loss_cutout_nominal_ms": (pdu[0] + 1) * foreground_tick_nominal_ms,
             "sequence_counter_closed": True,
             "sequence_modulus": 64,
             "sequence_gap_cap": 8,
             "secondary_field_names_closed": False,
             "upstream_producer_closed": False,
-            "next_static_target": "recover the upstream FRC_P5/Brake producer and SecOC sender/freshness contract; exact signal258/260/264/265 OEM names remain bounded unless an independent producer/diagnostic join appears",
+            "minimal_id11_companion_candidate_closed_for_eps_consumers": True,
+            "next_static_target": "recover/validate the upstream FRC_P5/Brake stock template and cross-ECU effects; exact signal258/260/262/263/264/265 OEM names remain bounded unless an independent producer/diagnostic join appears",
         },
         "evidence_boundary": (
-            "This closes the H/F EPS receiver-side request and communication-loss contract in scheduler ticks: signal254 selects the active Target Lateral ID, PDU42 is reloaded to 7 foreground ticks on successful reception, expiry marks B6 unhealthy and disables cooperative selection through ADB9/C26D, and signal261 is a modulo-64 rolling sequence counter with an 8-gap cap. "
-            "It does not infer milliseconds, sender cadence, sender implementation, SecOC freshness/key behavior, or exact OEM names for the secondary B6 fields."
+            "This closes the H/F EPS receiver-side request and communication-loss contract in both scheduler and nominal wall-clock terms: signal254 selects the active Target Lateral ID, PDU42 is reloaded to 7 foreground ticks, the steady TAUJ0-CH3 tick is 5.0 ms (35.0 ms nominal primary cutout) with one 5.1-ms startup interval, and signal261 is a modulo-64 rolling sequence counter with an 8-gap cap. "
+            "It also bounds an EPS-side minimal ID11 companion-field candidate. It does not infer stock B6 transmit cadence, prove stock companion values/cross-ECU neutrality, recover the slot-4 secret, or identify exact OEM names for the secondary B6 fields."
         ),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

@@ -155,7 +155,7 @@ check("upstream feature producer remains open", s["upstream_feature_producer_ide
 check("physical B6 scale is promoted", s["physical_scale_identified"] is True and abs(s["controller_equivalent_deg_per_count"]-(1024/17870))<1e-15)
 check("OEM B6 wire-unit label remains open", s["oem_wire_unit_name_identified"] is False)
 check("signal254 accepted profiles and OEM labels recovered", s["signal254_profile_values_recovered"] == [1,4,10,11,19] and s["signal254_exact_feature_labels_identified"] is True and s["signal254_profile_labels"] == {'1':'PCS','4':'LDA','10':'Hands Off LTA','11':'LTA/LCA','19':'PDA'})
-check("B6 receiver request/loss/sequence contract promoted", s["request_selection_identified"] is True and s["receiver_loss_cutout_ticks"] == 7 and s["wall_clock_timeout_identified"] is False and s["sequence_counter_identified"] is True and s["sequence_modulus"] == 64 and s["sequence_gap_cap"] == 8)
+check("B6 receiver request/loss/sequence contract promoted", s["request_selection_identified"] is True and s["receiver_loss_cutout_ticks"] == 7 and s["wall_clock_timeout_identified"] is True and s["sequence_counter_identified"] is True and s["sequence_modulus"] == 64 and s["sequence_gap_cap"] == 8)
 check("broad static search remains closed", s["broad_static_search_closed"] is True)
 
 print("\n== correction/documentation integration ==")

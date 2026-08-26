@@ -2811,3 +2811,97 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `data/generated/corolla_8965H1202000_openpilot_state_bridge.json`;
   `tests/verify_corolla_hf_nonsteering_engagement_state.py`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) §6.4.
+
+
+### CORR-113 — H/F TAUJ0-CH3 is a 5-ms steady foreground tick; B6's seven-tick cutout is nominally 35 ms
+
+- **Superseded framing:** the first H/F B6 receiver and Panda contracts correctly
+  proved a seven-foreground-tick primary loss cutoff but stated that the TAUJ0-CH3
+  wall-clock period could not be recovered and therefore prohibited a millisecond
+  conversion.
+- **Exact correction:** exact H timer initialization `0x5F660` loads CH3 from the
+  table pair `400000 + 8000 - 1`, producing a one-time 5.1-ms first interval, while
+  steady foreground path `0x5F812` rewrites CH3 to `400000 - 1`. The recovered
+  timer clock therefore yields a **5.0-ms steady foreground tick**. PDU42 reloads
+  its deadline to seven ticks after each successful B6 reception, so the primary
+  steady-state loss cutoff is nominally **35 ms**.
+- **Dynamic corroboration:** Span's moving rlog contains 6,000 exact-H/F `0x030`
+  frames. Its mean inter-frame period is `10.0000121147 ms`; the exact H/F Tx
+  descriptor uses two foreground ticks, independently yielding
+  `5.0000060573 ms/tick`. Zero/minimum timestamp deltas caused by batched logging
+  are not used as the cadence estimator.
+- **Boundary:** this closes the EPS foreground scheduler period and receiver timeout,
+  not Toyota's stock B6 transmit cadence.
+- **Canonical:**
+  `data/generated/corolla_8965H1202000_b6_receiver_contract.json`;
+  `data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json`;
+  `tests/verify_corolla_8965H1202000_b6_receiver_contract.py`;
+  [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
+
+
+### CORR-114 — B6 signal258=1 suppresses the recovered CBEEE additive term; it does not enable it
+
+- **Superseded framing:** the first B6 companion-field summary described signal258
+  (`B6 bit2`, snapshot `FEBEADBB`) as requiring value 1 for a profile-dependent
+  controller contribution.
+- **Exact correction:** exact H `CBEEE` calls the recovered additive contribution
+  only when an active profile exists **and** `signal258 != 1` **and** the staged
+  direction/mode condition mismatches. Therefore `signal258=1` unconditionally
+  suppresses that recovered extra term; value 1 is not an enable value for this
+  consumer.
+- **Related bounded defaults:** exact consumers also make signal260 values 0 and 3
+  equivalent in the recovered selector family; zero 262/263 removes their recovered
+  percentage contributions; 264=0 and 265=0 are conservative EPS-consumer candidate
+  values. These are not promoted to a proven stock active-LTA payload template.
+- **Boundary:** the P5 phrase `Cooperative Control in Progress Flag` remains family
+  vocabulary only; no literal OEM field-name join for signal258 is claimed.
+- **Canonical:**
+  `data/generated/corolla_8965H1202000_b6_receiver_contract.json`;
+  `tests/verify_corolla_8965H1202000_b6_receiver_contract.py`;
+  [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
+
+
+### CORR-115 — Sienna command-5 software semantics transfer to H/F; its verified resident-RAM geometry does not
+
+- **Superseded framing:** the existence of a working Sienna command-5 RAM proxy and
+  strong H/F software homology could be read as though the same single-stage
+  `FEBF0xxx` resident placement were portable to Corolla H/F.
+- **Exact correction:** exact H record0 at `0x27C88` points to completion
+  `0x82F5C`, adapter `0x820CC`, worker `0x821D0`, and config `0x27C84`; dispatcher
+  `0x82750`, variable-length prepare `0x81E94`, and lower command-5 engine `0x83A30`
+  provide the software machinery for a caller-selected 36-byte B6 authenticated
+  input, and the relevant application bytes are identical on F. However H startup
+  `0x6149A` clears `FEBF05CC..FEBF09CB` and `FEBF0B4C..FEBF0F4B`, while H-owned
+  structures occupy the lower page. The verified Sienna resident placement must
+  therefore **not** be copied by address.
+- **Consequence:** no H/F verified row is added to
+  `data/variant_ram_exec_requirements.json`. The recovered H XCP shadow
+  `FEBF7C00..FEBFFBFF` is only a two-stage carrier hypothesis until a target-native
+  execution route is proved. Live provisioned-slot4 command-5 permission also remains
+  a hardware test.
+- **Canonical:**
+  `data/generated/corolla_hf_command5_portability.json`;
+  `tests/verify_corolla_hf_command5_portability.py`;
+  [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
+
+
+### CORR-116 — H/F driver override is now a Panda/openpilot policy problem, not an unrecovered Toyota comparator
+
+- **Superseded framing:** after the physical `0x030` torque carrier was decoded, the
+  remaining safety checklist still described a generation-native physical
+  driver-override **threshold** as something to recover from the H/F cooperative
+  steering supervisor.
+- **Exact correction:** TMS-053 expands the exact-H census to named and fixed-GP
+  references for the physical `FEBE7B08 -> FEBE6554` torque source/snapshot family.
+  Thirteen direct source/snapshot references are recovered and **zero** lie inside
+  the C8xxx–CExxx target-to-motor control cone. The previously recovered ±2109
+  acquisition clamp (~8.2383 N.m) and ±10.00 N.m telemetry saturation remain
+  representation limits, not override comparators.
+- **Boundary:** this is a bounded static negative over direct named/fixed-GP textual
+  references; arbitrary computed-pointer/value-set aliases and DMA are outside the
+  proof. It does not prescribe a numeric openpilot threshold. A conservative Panda/
+  openpilot driver-override policy must still be chosen and dynamically validated.
+- **Canonical:**
+  `data/generated/corolla_hf_steering_limits.json`;
+  `tests/verify_corolla_hf_steering_limits.py`;
+  [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).

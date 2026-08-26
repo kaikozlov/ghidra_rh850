@@ -24,14 +24,17 @@
       "raw_internal": 3490
     },
     "internal_lta_slew": {
-      "boundary": "Firmware closes the per-steering-task slew, but not the exact wall-clock steering-task cadence; do not manufacture deg/s.",
+      "boundary": "The foreground scheduler period is now closed at nominal 5 ms. The displayed deg/s values are conditional on this conditioner running once per foreground cycle; the per-call firmware limits remain the unconditional safety facts.",
+      "foreground_tick_nominal_ms": 5.0,
       "high_default_b6_counts_per_task": 2.0,
+      "high_default_deg_per_second_if_called_each_foreground_tick": 22.921096810296586,
       "high_default_deg_per_task": 0.11460548405148294,
       "high_default_doubled_domain_per_steering_task": 4,
       "selected_low_b6_counts_per_task": 3.5,
+      "selected_low_deg_per_second_if_called_each_foreground_tick": 40.11191941801903,
       "selected_low_deg_per_task": 0.20055959709009513,
       "selected_low_doubled_domain_per_steering_task": 7,
-      "wall_clock_deg_per_second": null
+      "wall_clock_rate_unconditional": false
     },
     "measured_steering_rate": {
       "high_default_persistence_cycles": 63,
@@ -51,11 +54,29 @@
     "acquisition_clamp_abs_nm": 8.23828125,
     "acquisition_clamp_raw": 2109,
     "acquisition_raw_units_per_nm": 256,
-    "census_boundary": "Complete exact-substring census over the supplied target-native decompiler corpus; bounded to direct textual references and does not exclude computed-pointer or alias-only accesses.",
+    "census_boundary": "Expanded TMS-053 named-symbol plus fixed-GP textual census over the exact-H corrected-context whole-image corpus; value-set/computed-pointer aliases and DMA remain outside the negative proof.",
+    "direct_source_snapshot_reference_entries": [
+      "0x00030384",
+      "0x000434D6",
+      "0x000434DC",
+      "0x00046C4C",
+      "0x00047188",
+      "0x0004D372",
+      "0x0004E6B2",
+      "0x0004E8F4",
+      "0x00050B7A",
+      "0x000525E6",
+      "0x0005389C",
+      "0x0005701E",
+      "0x00057692"
+    ],
+    "direct_source_snapshot_refs_inside_c8xxx_cexxx_control_cone": [],
     "observable": "live physical 0x030 Steering Wheel Torque; 0x4A3 B5 is a statically closed alternate",
     "override_abs_threshold_nm": null,
-    "safety_boundary": "The ~8.238 N.m acquisition clamp and \u00b110.00 N.m telemetry saturation are representation limits, not driver-override thresholds. Do not use either as Panda override policy.",
+    "policy_classification": "Panda/openpilot driver-override policy requiring dynamic validation; not an unrecovered Toyota EPS cooperative-control comparator",
+    "safety_boundary": "The ~8.238 N.m acquisition clamp and \u00b110.00 N.m telemetry saturation are representation limits, not driver-override thresholds. The expanded exact-H named/fixed-GP census finds the physical FEBE7B08->FEBE6554 chain only in acquisition/telemetry/copy code and zero direct references in the C8xxx-CExxx target-to-motor control cone. This does not prove every computed alias is absent, but it removes an OEM override comparator from the recovered static blocker list.",
     "supervisor_numeric_override_comparator_recovered": false,
+    "target_to_motor_physical_torque_comparator_recovered": false,
     "telemetry_saturation_abs_centi_nm": 1000,
     "telemetry_saturation_abs_nm": 10.0
   },
@@ -570,11 +591,16 @@
   "remaining_policy": {
     "actuator_response_policy": "requires deliberate Panda/sender policy and relay-correct dynamic validation; no OEM measured-Q comparator recovered in the cooperative supervisor",
     "driver_override_abs_nm": null,
+    "driver_override_source": "Panda/openpilot policy to be chosen conservatively and validated dynamically; no recovered Toyota EPS physical-driver-torque actuation comparator to copy",
     "production_enable_authorized": false,
     "temporary_vs_permanent_fault_mapping": null
   },
   "schema": "corolla-hf-steering-limits-v1",
   "sources": {
+    "b6_receiver_timing_contract": {
+      "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
+      "sha256": "eac0b8dbc9d18014b42836e8363d49e53a5c3c691b896aaab749959930d53da5"
+    },
     "calibration_bank_evidence": {
       "path": "data/generated/corolla_8965F1208000_low_calibration_delta.json",
       "sha256": "73e9dfdf5db5de3235c4859331a704f97ab23288dbf9f9d6cd9d4be404d6b475"
@@ -601,23 +627,31 @@
     },
     "state_bridge": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-      "sha256": "1b7dbab547765c6971119ebc3d2412a74a515e6f35050d4a48a6bb5abe06192a"
+      "sha256": "0a934ca1d274776c7a41b266b4c104910c14a61d2874700aa3f1afab00fd1beb"
     },
     "target_angle_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-      "sha256": "5755faced5efb0212ae195ed8bff30bee2c1765656a29ed974ced95082c00647"
+      "sha256": "a80442a2198033f0e71fb887189a07794ab23ae6031b50a6f63ed85fd0e5080a"
+    },
+    "tms053_followup_decompiler_evidence": {
+      "path": "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json",
+      "sha256": "4afbd5568b61016161b147d23239011f579a2511d3497e628b69c2bdde60b200"
     }
   },
   "static_conclusion": {
     "absolute_angle_limit_closed": true,
-    "driver_torque_observable_closed_override_threshold_open": true,
+    "driver_override_is_panda_policy_not_static_eps_recovery_blocker": true,
+    "driver_torque_observable_closed": true,
+    "foreground_tick_wall_clock_closed": true,
     "internal_fault_threshold_families_bounded": true,
     "measured_q_observable_closed_oem_response_threshold_not_recovered": true,
     "measured_rate_limit_closed": true,
     "per_frame_delta_limit_closed": true,
-    "per_task_slew_closed_wall_clock_rate_open": true,
+    "per_task_slew_closed": true,
+    "physical_driver_torque_comparator_absent_under_promoted_census_boundary": true,
     "production_enable_authorized": false,
     "selected_vehicle_profile_compensation_maps_zero": true,
+    "slew_deg_per_second_only_conditional_on_once_per_foreground_call": true,
     "speed_dependent_hard_angle_reduction_recovered": false
   },
   "status": {

@@ -2623,12 +2623,15 @@ wire/application/SecOC contract transfers exactly to `8965F1208000`.
 
 What remains before production use is now **sender-side or control-policy work**, not
 another receiver-payload search: the literal signal255 OEM unit and exact names for
-secondary live fields, sender wall-clock cadence and B6-local message-counter policy,
-the slot-4 secret value or approved MAC operation, normal target/rate/driver limits,
-stock-source suppression, and the upstream byte-level producer/forwarding transform
-despite the now-closed FRC/`ABS_P5`/EPS module topology. SECOC-073 subsequently closes
-the wire-visible global freshness source (`0x00F` trip16/reset20) as well; receiver
-freshness **format, reconstruction, and live global epoch tracking** are no longer open.
+secondary live fields, **stock** sender wall-clock cadence/template, the slot-4 secret
+value or approved/live MAC operation plus an H/F-native signer route, conservative
+Panda/openpilot driver and actuator-response policy, stock-source suppression, and the
+upstream byte-level producer/forwarding transform despite the now-closed
+FRC/`ABS_P5`/EPS module topology. SECOC-073 closes the wire-visible global freshness
+source (`0x00F` trip16/reset20), and TMS-053 closes exclusive replacement-sender B6
+message8 re-anchoring/progression from a newer authenticated epoch; receiver freshness
+**format, reconstruction, live global epoch tracking, and replacement counter start**
+are no longer open.
 
 Machine-readable ownership:
 `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json`,
