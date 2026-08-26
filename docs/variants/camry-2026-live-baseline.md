@@ -109,9 +109,9 @@ The ordinary Toyota checksum validates every retained `0x101` (3,095/3,095),
 all H/F-compatible wheel-speed fields decode zero with clear wheel-fault bits,
 brake/gas remain inactive, and the `0x127` gear field is raw `0` throughout.
 Raw `0` is prior-art-compatible with `P`; the same repository previously observed
-raw `3` while a Corolla was driving and treated it as D. This Camry result makes
-P/D reuse substantially stronger, but P/R/N/D/B must still be captured on this
-exact target before production CarState uses the complete enum.
+raw `3` while a Corolla was driving and treated it as D. The later controlled
+Camry READY/selector pass in §8 supersedes this initial bound and directly closes
+all five values `P=0, R=1, N=2, D=3, B=4` on this exact vehicle.
 
 ## 5. `0x51E B0[7]` Ready transition
 
@@ -127,9 +127,10 @@ statically in H/F to Techstream DID `0x1033 Ready Status`:
 Thus this Camry starts the retained READY segment with the bit clear and then
 asserts it about one second later. This strongly corroborates `0x51E B0[7]` as a
 cross-vehicle TSS3 Ready-status carrier and supplies the first retained `0 -> 1`
-transition in this repository. The exact causal alignment to the operator's
-physical READY action was not independently timestamped, so a later controlled
-READY/Not-Ready transition capture is still useful for policy.
+transition in this repository. The later controlled NRTD→READY pass in §8
+independently reproduces the transition with the passive logger already active
+before the operator is told to enter READY, closing the remaining causal ambiguity
+for state decoding while still bounding exact button-to-frame latency.
 
 ## 6. XCP is negative on the tested route
 
@@ -217,7 +218,72 @@ The deterministic interpretation is
 in `community/kai/camry-2026/raw-20260826/NRTD_MANIFEST.txt` so VAR-051's READY
 baseline remains independently reproducible.
 
-## 8. What this changes for openpilot work
+## 8. Controlled NRTD→READY and complete `0x127` gear enum
+
+A third passive field pass was started while the vehicle was stationary and
+**Not Ready to Drive**. Only `Panda.can_recv()` was used after route/safety-mode
+configuration; the retained capture scripts contain no CAN transmit call, UDS,
+SecurityAccess, RoutineControl, reset, download, or vehicle-control path. After
+the logger was confirmed running, the operator was explicitly told to enter
+READY and then exercise the selector while holding the brake.
+
+### 8.1 `0x51E B0[7]` is now controlled NRTD→READY evidence
+
+The first 60-second capture directly records:
+
+| capture time | B0[7] | payload |
+|---:|---:|---|
+| `0.070314 s` | 0 | `0000640000000000` |
+| `5.213083 s` | 1 | `80006e0000000000` |
+
+Because the logger was already active in NRTD before the READY instruction, this
+is stronger causal evidence than VAR-051's earlier startup segment: `0x51E B0[7]`
+is directly suitable as the Camry Ready-state carrier. The operator's physical
+button press itself was not machine-timestamped, so exact action→frame latency is
+still not claimed.
+
+### 8.2 `0x127` closes `P=0, R=1, N=2, D=3, B=4`
+
+The first selector run was intended to include B, but the operator immediately
+reported afterward that B had been missed. The wire sequence therefore provides
+a clean reversible P/R/N/D round trip rather than an inferred missing event:
+
+| time | raw `0x127` gear | operator state | representative payload |
+|---:|---:|---|---|
+| `0.016697 s` | 0 | P | `00100000000ebe0c` |
+| `12.560082 s` | 1 | R | `00100000001e8deb` |
+| `14.443866 s` | 2 | N | `00100000002e8dfb` |
+| `17.525321 s` | 3 | D | `00100000003e8d0b` |
+| `21.129039 s` | 2 | N | `00100000002e8dfb` |
+| `23.014504 s` | 1 | R | `00100000001e8deb` |
+| `25.192386 s` | 0 | P | `00100000000e8edc` |
+
+A second 25-second READY/stationary capture was then started specifically for B.
+After its initial P baseline, the operator performed D→B→D:
+
+| time | raw `0x127` gear | operator state | representative payload |
+|---:|---:|---|---|
+| `5.107709 s` | 3 | D | `00100000003e8d0b` |
+| `9.480908 s` | 4 | B | `00100000004e8d1b` |
+| `13.626834 s` | 3 | D | `00100000003e8d0b` |
+
+The Toyota checksum validates **3,777/3,777** first-run `0x127` frames and
+**1,634/1,634** B-run frames. Bus-1 `0x0AA` is also byte-identical at
+`1a6f1a6f1a6f1a6f` for all 6,187 + 2,677 retained frames, matching the earlier
+zero-motion Camry baseline and independently supporting the stationary condition.
+
+Therefore the complete prior-art enum is now **directly validated on this exact
+Camry**: `P=0`, `R=1`, `N=2`, `D=3`, `B=4`. This closes the Camry read-only gear
+measurement boundary. It does not authorize transmitting any frame or automatically
+transfer the validation to a different Toyota platform.
+
+The deterministic artifact is `data/generated/camry_2026_ready_gear.json`, built
+by `tools/analyze_camry_2026_ready_gear.py` and checked by
+`tests/verify_camry_2026_ready_gear.py`. Exact capture/script hashes and the
+operator-sequence correction are pinned in
+`community/kai/camry-2026/raw-20260826/READY_GEAR_MANIFEST.txt`.
+
+## 9. What this changes for openpilot work
 
 The initial read-only Corolla TSS3 DBC is a useful **measurement scaffold** for
 this Camry: `0x025`, `0x030`, `0x0AA`, `0x101`, `0x116`, `0x127`, and `0x51E`
@@ -232,12 +298,11 @@ carrier are now closed dynamically. What remains is:
 1. capture stock LTA `off -> active -> off` on this exact car while retaining all
    buses; if B6 appears, measure stock cadence, secondary bytes, freshness, and
    physical side-of-relay visibility;
-2. capture stationary P/R/N/D transitions to close the target gear enum;
-3. while READY, synchronize cruise main plus actual engage/cancel with `0x1905`
+2. while READY, synchronize cruise main plus actual engage/cancel with `0x1905`
    permission and `0x1914` ACC-control-in-operation;
-4. repeat/cycle following-distance if production CarState needs its ordinary-CAN
+3. repeat/cycle following-distance if production CarState needs its ordinary-CAN
    carrier, to distinguish `0x251` from `0x5AF` and close the enum;
-5. acquire exact `8965F3307000` CodeFlash before transferring H/F boot-RAM,
+4. acquire exact `8965F3307000` CodeFlash before transferring H/F boot-RAM,
    command-5, steering-limit, SecOC-receiver, or Panda-safety conclusions as
    firmware facts.
 
@@ -249,6 +314,6 @@ Until those are closed, production output remains disabled.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052)
+- Findings with this document as canonical home: [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053)
 - Corrections with this document as canonical home: —
 <!-- knowledge-cross-references:end -->

@@ -1,0 +1,30 @@
+Maintainer-operated 2026 Toyota Camry READY/gear evidence
+Captured 2026-08-26
+
+The vehicle was stationary. The first logger was started while Not Ready to Drive before the operator was explicitly told to enter READY; the first requested selector sequence was P/R/N/D/B/D/N/R/P, but the operator later reported that B had been missed. The observed first-run sequence is therefore P/R/N/D/N/R/P. A second READY capture deliberately exercised D/B/D and closes raw gear value 4.
+
+Both capture scripts only configure the Panda route and call Panda.can_recv(). They contain no can_send/can_send_many, UDS client, SecurityAccess, RoutineControl, reset, download, or vehicle-control transmission.
+
+camry_ready_gear_capture.py
+  size: 774
+  sha256: b79857ffa38f7ad94030313a5c5609cbd3e35178c31f8d72fa72a912c20740fb
+  operation: Passive 60-second Panda can_recv-only logger; capture begins NRTD, then operator changes vehicle to READY and performs stationary P/R/N/D/N/R/P sequence. B was not selected in this first run.
+
+camry_ready_gear_20260826.json.gz
+  size: 1660906
+  sha256: 379ec28fba65191d2898ebb156fe83e2e8e59c38bbf5fcfb7166ec9ff32c3889
+  operation: Deterministic gzip (mtime=0) emitted by camry_ready_gear_capture.py; 135866 passive CAN frames over 60.000313470 s.
+  uncompressed_size: 16814179
+  uncompressed_sha256: c03524036e531c22d60646be65c57b85fb1e9fb0c8b5d2c50e4b3055dbecef52
+
+camry_b_capture.py
+  size: 755
+  sha256: 2d72ec4ace3ab01ecae440d8d4f8324e3d7166a15f9bdd868d6a5c2d2a2ae153
+  operation: Passive 25-second Panda can_recv-only logger; vehicle remains READY/stationary and operator performs D/B/D after a short initial P baseline.
+
+camry_ready_b_20260826.json.gz
+  size: 715102
+  sha256: 7bae994dea1caff06d8f31f58558f67d646da38bd9531557875858eb33fa4db3
+  operation: Deterministic gzip (mtime=0) emitted by camry_b_capture.py; 58712 passive CAN frames over 25.000072204 s.
+  uncompressed_size: 7278095
+  uncompressed_sha256: 733b7a6fe9aa2f12401077489d662657a5abd20588c1d53a600ffbeec41b40f2

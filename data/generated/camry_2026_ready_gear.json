@@ -1,0 +1,295 @@
+{
+  "capture_boundary": {
+    "first_run_operator_context": "logger started in NRTD before explicit READY instruction; requested P/R/N/D/B/D/N/R/P, but operator later reported B was missed; observed sequence is P/R/N/D/N/R/P",
+    "machine_timestamp_boundary": "operator button/selector actions were instructed interactively but are not independently machine-timestamped; the exact wire transitions below are directly timestamped by the retained captures",
+    "no_vehicle_control_transmission": true,
+    "operation": "passive Panda CAN receive only after route/safety-mode configuration",
+    "second_run_operator_context": "vehicle READY/stationary; dedicated D/B/D sequence after initial P baseline"
+  },
+  "captures": {
+    "nrtd_to_ready_gear": {
+      "0x0AA_stationary_corroboration": {
+        "frame_count": 6187,
+        "interpretation": "The wheel-speed carrier remains at the same single zero-motion payload used in the earlier stationary Camry baseline; this supports the operator-reported stationary condition without assigning new firmware semantics.",
+        "unique_payloads": [
+          "1a6f1a6f1a6f1a6f"
+        ]
+      },
+      "0x127": {
+        "checksum_matches": 3777,
+        "frame_count": 3777,
+        "raw_values": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "transition_timeline": [
+          {
+            "payload": "00100000000ebe0c",
+            "seconds": 0.016697,
+            "value": 0
+          },
+          {
+            "payload": "00100000001e8deb",
+            "seconds": 12.560082,
+            "value": 1
+          },
+          {
+            "payload": "00100000002e8dfb",
+            "seconds": 14.443866,
+            "value": 2
+          },
+          {
+            "payload": "00100000003e8d0b",
+            "seconds": 17.525321,
+            "value": 3
+          },
+          {
+            "payload": "00100000002e8dfb",
+            "seconds": 21.129039,
+            "value": 2
+          },
+          {
+            "payload": "00100000001e8deb",
+            "seconds": 23.014504,
+            "value": 1
+          },
+          {
+            "payload": "00100000000e8edc",
+            "seconds": 25.192386,
+            "value": 0
+          }
+        ]
+      },
+      "0x51E": {
+        "frame_count": 66,
+        "ready_values": [
+          0,
+          1
+        ],
+        "transition_timeline": [
+          {
+            "payload": "0000640000000000",
+            "seconds": 0.070314,
+            "value": 0
+          },
+          {
+            "payload": "80006e0000000000",
+            "seconds": 5.213083,
+            "value": 1
+          }
+        ]
+      },
+      "duration_s": 60.00031347,
+      "label": "2026 Camry NRTD->READY + stationary gear sequence",
+      "total_frames": 135866
+    },
+    "ready_b": {
+      "0x0AA_stationary_corroboration": {
+        "frame_count": 2677,
+        "interpretation": "The wheel-speed carrier remains at the same single zero-motion payload used in the earlier stationary Camry baseline; this supports the operator-reported stationary condition without assigning new firmware semantics.",
+        "unique_payloads": [
+          "1a6f1a6f1a6f1a6f"
+        ]
+      },
+      "0x127": {
+        "checksum_matches": 1634,
+        "frame_count": 1634,
+        "raw_values": [
+          0,
+          3,
+          4
+        ],
+        "transition_timeline": [
+          {
+            "payload": "00100000000eb806",
+            "seconds": 0.020694,
+            "value": 0
+          },
+          {
+            "payload": "00100000003e8d0b",
+            "seconds": 5.107709,
+            "value": 3
+          },
+          {
+            "payload": "00100000004e8d1b",
+            "seconds": 9.480908,
+            "value": 4
+          },
+          {
+            "payload": "00100000003e8d0b",
+            "seconds": 13.626834,
+            "value": 3
+          }
+        ]
+      },
+      "0x51E": {
+        "frame_count": 27,
+        "ready_values": [
+          1
+        ],
+        "transition_timeline": [
+          {
+            "payload": "80006f0000000000",
+            "seconds": 0.020694,
+            "value": 1
+          }
+        ]
+      },
+      "duration_s": 25.000072204,
+      "label": "2026 Camry READY stationary D-B-D",
+      "total_frames": 58712
+    }
+  },
+  "date": "2026-08-26",
+  "gear": {
+    "carrier": "0x127/8 bus1",
+    "checksum": {
+      "b_run": {
+        "frames": 1634,
+        "matches": 1634
+      },
+      "first_run": {
+        "frames": 3777,
+        "matches": 3777
+      }
+    },
+    "evidence": {
+      "B_roundtrip": [
+        {
+          "payload": "00100000000eb806",
+          "seconds": 0.020694,
+          "value": 0
+        },
+        {
+          "payload": "00100000003e8d0b",
+          "seconds": 5.107709,
+          "value": 3
+        },
+        {
+          "payload": "00100000004e8d1b",
+          "seconds": 9.480908,
+          "value": 4
+        },
+        {
+          "payload": "00100000003e8d0b",
+          "seconds": 13.626834,
+          "value": 3
+        }
+      ],
+      "P_R_N_D_roundtrip": [
+        {
+          "payload": "00100000000ebe0c",
+          "seconds": 0.016697,
+          "value": 0
+        },
+        {
+          "payload": "00100000001e8deb",
+          "seconds": 12.560082,
+          "value": 1
+        },
+        {
+          "payload": "00100000002e8dfb",
+          "seconds": 14.443866,
+          "value": 2
+        },
+        {
+          "payload": "00100000003e8d0b",
+          "seconds": 17.525321,
+          "value": 3
+        },
+        {
+          "payload": "00100000002e8dfb",
+          "seconds": 21.129039,
+          "value": 2
+        },
+        {
+          "payload": "00100000001e8deb",
+          "seconds": 23.014504,
+          "value": 1
+        },
+        {
+          "payload": "00100000000e8edc",
+          "seconds": 25.192386,
+          "value": 0
+        }
+      ]
+    },
+    "field": "DBC 47|4 Motorola",
+    "first_run_sequence": [
+      0,
+      1,
+      2,
+      3,
+      2,
+      1,
+      0
+    ],
+    "interpretation": "The complete prior-art enum is now directly validated on this exact Camry by reversible stationary selector transitions: P=0, R=1, N=2, D=3, B=4. This closes the Camry gear-state measurement boundary; cross-model production use still follows each platform's evidence policy.",
+    "second_run_sequence": [
+      0,
+      3,
+      4,
+      3
+    ],
+    "validated_enum": {
+      "0": "P",
+      "1": "R",
+      "2": "N",
+      "3": "D",
+      "4": "B"
+    }
+  },
+  "production_boundary": "This evidence validates read-only Ready/gear state decoding only. It does not establish Camry steering actuation, B6 producer/signing ownership, cruise engagement policy, or Panda actuation safety.",
+  "ready_status": {
+    "carrier": "0x51E/8 bus1",
+    "field": "B0[7]",
+    "first_run_sequence": [
+      0,
+      1
+    ],
+    "interpretation": "Because the passive logger was already running in NRTD before the operator was explicitly told to enter READY, the directly observed B0[7] 0->1 transition is stronger causal evidence for the previously recovered Techstream Ready Status wire join. Exact physical-button-to-frame latency remains bounded because the operator action itself was not machine-timestamped.",
+    "transition": [
+      {
+        "payload": "0000640000000000",
+        "seconds": 0.070314,
+        "value": 0
+      },
+      {
+        "payload": "80006e0000000000",
+        "seconds": 5.213083,
+        "value": 1
+      }
+    ]
+  },
+  "schema": "camry-2026-ready-gear-v1",
+  "sources": {
+    "READY_GEAR_MANIFEST.txt": {
+      "path": "community/kai/camry-2026/raw-20260826/READY_GEAR_MANIFEST.txt",
+      "sha256": "9f3ff22ed739aa2f4c87d4e99f6eddb33202ea6d4d6de5f40c280ebb20cc95a5",
+      "size": 2002
+    },
+    "camry_b_capture.py": {
+      "path": "community/kai/camry-2026/raw-20260826/camry_b_capture.py",
+      "sha256": "2d72ec4ace3ab01ecae440d8d4f8324e3d7166a15f9bdd868d6a5c2d2a2ae153",
+      "size": 755
+    },
+    "camry_ready_b_20260826.json.gz": {
+      "path": "community/kai/camry-2026/raw-20260826/camry_ready_b_20260826.json.gz",
+      "sha256": "7bae994dea1caff06d8f31f58558f67d646da38bd9531557875858eb33fa4db3",
+      "size": 715102
+    },
+    "camry_ready_gear_20260826.json.gz": {
+      "path": "community/kai/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz",
+      "sha256": "379ec28fba65191d2898ebb156fe83e2e8e59c38bbf5fcfb7166ec9ff32c3889",
+      "size": 1660906
+    },
+    "camry_ready_gear_capture.py": {
+      "path": "community/kai/camry-2026/raw-20260826/camry_ready_gear_capture.py",
+      "sha256": "b79857ffa38f7ad94030313a5c5609cbd3e35178c31f8d72fa72a912c20740fb",
+      "size": 774
+    }
+  },
+  "vehicle": "maintainer-operated 2026 Toyota Camry"
+}

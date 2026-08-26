@@ -1138,6 +1138,26 @@ paths = [
   "exploit/findings_coverage.json",
 ]
 
+[suite.camry_2026_ready_gear]
+tests = ["tests/verify_camry_2026_ready_gear.py"]
+oracle = "dynamic_trace"
+paths = [
+  "tests/verify_camry_2026_ready_gear.py",
+  "tools/analyze_camry_2026_ready_gear.py",
+  "data/generated/camry_2026_ready_gear.json",
+  "community/kai/camry-2026/raw-20260826/READY_GEAR_MANIFEST.txt",
+  "community/kai/camry-2026/raw-20260826/camry_ready_gear_capture.py",
+  "community/kai/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz",
+  "community/kai/camry-2026/raw-20260826/camry_b_capture.py",
+  "community/kai/camry-2026/raw-20260826/camry_ready_b_20260826.json.gz",
+  "community/kai/camry-2026/README.md",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/PRIORITIES.md",
+  "external-references.lock.json",
+  "exploit/findings_coverage.json",
+]
+
 [suite.span_2025_discord_rlog_opendbc_evidence]
 tests = ["tests/verify_span_2025_discord_rlog_opendbc_evidence.py"]
 oracle = "generated_self_check"

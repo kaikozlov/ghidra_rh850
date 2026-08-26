@@ -223,9 +223,10 @@ CAN oracle (deterministic gzip) plus compact identity, PROGRAMMING-handoff, and
 CONNECT-only XCP results. A separate NRTD evidence unit additionally identifies
 FRC `8646F3315000` at `0x792` and Brake/EPB `F152633K0000` at `0x7B0`, validates
 the FRC cruise Data-ID oracles, and synchronizes MAIN/RES+/SET-/CANCEL to the
-bus-1 `0x0FE/32` carrier. The Camry strongly reproduces the H/F TSS3 wire family,
-including exact `0x030` additive framing and the first retained `0x51E B0[7]`
-Ready `0->1` transition, while exact Camry CodeFlash and B6/LTA traffic remain
+bus-1 `0x0FE/32` carrier. A third passive controlled pass starts the logger in
+NRTD, reproduces `0x51E B0[7]` Ready `0->1`, and directly validates the full
+`0x127` selector enum `P=0/R=1/N=2/D=3/B=4`. The Camry strongly reproduces the
+H/F TSS3 wire family, while exact Camry CodeFlash and B6/LTA traffic remain
 unacquired. See [`kai/camry-2026/README.md`](kai/camry-2026/README.md).
 
 ## `spanconstant/`

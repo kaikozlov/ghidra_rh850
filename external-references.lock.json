@@ -854,6 +854,46 @@
       "sha256": "083435105745d928ceea5dea2a614b7a1fbd32341ba4c94987c73ef6287e87fa",
       "provenance": "Deterministic gzip (mtime=0) of the exact single-Panda synchronized FRC diagnostic-oracle plus passive-CAN capture from the maintainer-operated vehicle.",
       "notes": "Stationary NRTD; operator pressed MAIN, RES+, SET-, CANCEL, and following-distance sequentially. No vehicle-control transmission."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry READY/gear session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/READY_GEAR_MANIFEST.txt",
+      "size": 2002,
+      "sha256": "9f3ff22ed739aa2f4c87d4e99f6eddb33202ea6d4d6de5f40c280ebb20cc95a5",
+      "provenance": "Maintainer-generated provenance manifest pinning the exact passive capture scripts/captures, operator correction, and observation-only boundary.",
+      "notes": "Separates the controlled READY/gear evidence from prior Camry baseline and NRTD P5 evidence units."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry READY/gear session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_ready_gear_capture.py",
+      "size": 774,
+      "sha256": "b79857ffa38f7ad94030313a5c5609cbd3e35178c31f8d72fa72a912c20740fb",
+      "provenance": "Exact passive Panda capture script copied from the maintainer-operated comma after the run.",
+      "notes": "60-second NRTD-to-READY and selector capture; script calls can_recv only after route configuration and contains no CAN transmit/UDS path."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry READY/gear session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz",
+      "size": 1660906,
+      "sha256": "379ec28fba65191d2898ebb156fe83e2e8e59c38bbf5fcfb7166ec9ff32c3889",
+      "provenance": "Deterministic gzip (mtime=0) emitted on the maintainer-operated comma by the tracked passive capture script.",
+      "notes": "135,866 passive CAN frames over 60.000313470 s; observed selector sequence P/R/N/D/N/R/P because B was missed in the first operator run."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry READY/gear session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_b_capture.py",
+      "size": 755,
+      "sha256": "2d72ec4ace3ab01ecae440d8d4f8324e3d7166a15f9bdd868d6a5c2d2a2ae153",
+      "provenance": "Exact passive Panda capture script copied from the maintainer-operated comma after the run.",
+      "notes": "25-second dedicated READY/stationary D/B/D follow-up; script calls can_recv only after route configuration and contains no CAN transmit/UDS path."
+    },
+    {
+      "source": "Maintainer-operated 2026 Toyota Camry READY/gear session, 2026-08-26",
+      "path": "community/kai/camry-2026/raw-20260826/camry_ready_b_20260826.json.gz",
+      "size": 715102,
+      "sha256": "7bae994dea1caff06d8f31f58558f67d646da38bd9531557875858eb33fa4db3",
+      "provenance": "Deterministic gzip (mtime=0) emitted on the maintainer-operated comma by the tracked passive B capture script.",
+      "notes": "58,712 passive CAN frames over 25.000072204 s; exact 0x127 D/B/D transition closes raw value 4=B on the exact Camry."
     }
   ],
   "public_routes": [

@@ -89,3 +89,20 @@ Camry; `0x102F` is readable. This is an explicit cross-vehicle non-transfer.
 Raw files and hashes for this second evidence unit are pinned in
 `raw-20260826/NRTD_MANIFEST.txt`; deterministic interpretation is
 `data/generated/camry_2026_nrtd_p5.json`.
+
+## Controlled READY/gear follow-up
+
+A third passive pass starts with the logger already active in NRTD, then records
+the operator entering READY and exercising the stationary selector with the brake
+held. `0x51E B0[7]` changes `0 -> 1` at capture time `5.213083 s`, independently
+strengthening the Ready Status join. The first selector run directly records
+`0x127` raw `0 -> 1 -> 2 -> 3 -> 2 -> 1 -> 0`; the operator reported immediately
+that B had been missed. A dedicated READY D/B/D repeat then records raw
+`3 -> 4 -> 3`, closing the complete Camry enum `P=0, R=1, N=2, D=3, B=4`.
+Every retained `0x127` frame passes the Toyota checksum (3,777/3,777 and
+1,634/1,634), while `0x0AA` stays at the same zero-motion payload in both runs.
+
+The exact passive capture scripts are retained alongside the deterministic gzip
+captures and contain `can_recv()` only; there is no CAN transmit or UDS path.
+Provenance is pinned in `raw-20260826/READY_GEAR_MANIFEST.txt`; deterministic
+interpretation is `data/generated/camry_2026_ready_gear.json`.
