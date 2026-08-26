@@ -2927,3 +2927,35 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:** `data/generated/techstream_v18/tss3_cruise_live_transport.json`;
   `tests/verify_tss3_cruise_live_transport_external.py`;
   [../tooling/techstream.md](../tooling/techstream.md) §6.3.
+
+
+### CORR-118 — Toyota-B repin is required for exclusive interception, not for arbitrary direct CAN1 transmission
+
+- **Over-broad reading of the prior conclusion:** CORR-072 correctly proved that
+  `ELM param=1 + logical bus 1` does not recreate the CAN0/CAN2 intercept-relay
+  topology. Read without the safety-policy dimension, that could imply that the
+  physical CAN0/CAN1 repin is also required merely to transmit a non-diagnostic
+  frame onto stock CAN1.
+- **Exact correction:** Panda `SAFETY_ALLOUTPUT` takes `set_safety_mode()`'s
+  default board branch, which selects `CAN_MODE_NORMAL`; logical bus 1/FDCAN2 is
+  therefore attached to the normal harness CAN1 route. Unlike ELM327, whose TX
+  hook requires 8-byte ISO-15765 diagnostic traffic, allOutput allows arbitrary
+  CAN transmission. The Panda safety/routing layer can consequently admit a
+  32-byte TSS3 `0x0B6` CAN-FD transmit toward the stock CAN1 wires without
+  repinning, provided target CAN-FD timing/mode is configured. This is a static
+  path result, not a retained live-B6 transmission result.
+- **What remains unchanged:** CAN1 is still physically unsplit. allOutput does not
+  isolate a stock B6 producer and its generic forwarding path only maps bus0↔2.
+  Exact H/F competing-sender arbitration proves that parallel stock+openpilot B6
+  is source-agnostic and timing-dependent, so deterministic production replacement
+  still requires exclusive B6 authority through a relay-correct repin/adapter or
+  another physical isolation mechanism.
+- **allOutput parameter boundary:** param0 disables generic 0↔2 software
+  forwarding while allOutput has driven the intercept relay; param1 enables the
+  generic 0↔2 passthrough. Neither parameter remaps/splits CAN1. allOutput is
+  registered only under `ALLOW_DEBUG`; release firmware rejects the mode and
+  falls back to SILENT. This is a custom/debug bring-up/direct-injection
+  technique rather than a production Panda safety model.
+- **Canonical:** [../tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md)
+  §8.1; [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md);
+  optional `tests/verify_external_corroboration.py`; COM-016.

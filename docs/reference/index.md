@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 316 · Corrections: 117 · Open questions: 52 · Docs: 99 · Suites: 218
+Findings: 317 · Corrections: 118 · Open questions: 52 · Docs: 99 · Suites: 218
 
 ## Reading this index
 
@@ -50,7 +50,7 @@ Findings: 316 · Corrections: 117 · Open questions: 52 · Docs: 99 · Suites: 2
 | <a id="finding-com-013"></a>**COM-013** | [docs/architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_corolla_2023_public_route_opendbc_evidence.py`, `tests/verify_span_2025_discord_rlog_opendbc_evidence.py`, `tests/verify_corolla_tss3_opendbc_readiness.py` | OQ-030 |
 | <a id="finding-com-014"></a>**COM-014** | [docs/variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_corolla_hf_panda_lateral_safety_contract.py` | OQ-030 |
 | <a id="finding-com-015"></a>**COM-015** | [docs/variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_corolla_hf_steering_limits.py`, `tests/verify_corolla_hf_panda_lateral_safety_contract.py` | OQ-030 |
-| <a id="finding-com-016"></a>**COM-016** | [docs/variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_corolla_hf_b6_competing_sender_arbitration.py` | OQ-030 |
+| <a id="finding-com-016"></a>**COM-016** | [docs/variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_corolla_hf_b6_competing_sender_arbitration.py` | OQ-030 |
 | <a id="finding-com-017"></a>**COM-017** | [docs/architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md), [docs/variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) | `tests/verify_corolla_hf_nonsteering_engagement_state.py` | OQ-030 |
 | <a id="finding-diag-app-001"></a>**DIAG-APP-001** | [docs/diagnostics/application.md](../diagnostics/application.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) | `tests/verify_application_diagnostics.py`, `tests/verify_application_routine_control_surface.py`, `tests/verify_application_wdbi_surface.py` | OQ-036 |
 | <a id="finding-diag-app-002"></a>**DIAG-APP-002** | [docs/diagnostics/application.md](../diagnostics/application.md) | — | `tests/verify_application_diagnostics.py` | — |
@@ -215,6 +215,7 @@ Findings: 316 · Corrections: 117 · Open questions: 52 · Docs: 99 · Suites: 2
 | <a id="finding-secoc-071"></a>**SECOC-071** | [docs/variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) | [toyota-openpilot-porting-contract](../architecture/toyota-openpilot-porting-contract.md), [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | — | OQ-005 |
 | <a id="finding-secoc-072"></a>**SECOC-072** | [docs/variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_corolla_h_sienna_secoc_structural_comparison.py` | OQ-005 |
 | <a id="finding-secoc-073"></a>**SECOC-073** | [docs/variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) | [toyota-openpilot-porting-contract](../architecture/toyota-openpilot-porting-contract.md), [sender-implementation](../security/secoc/sender-implementation.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_corolla_hf_secoc_00f_freshness_bridge.py`, `tests/verify_corolla_hf_secoc_00f_freshness_bridge_external.py` | OQ-005 |
+| <a id="finding-secoc-074"></a>**SECOC-074** | [docs/tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md) | — | `tests/verify_external_corroboration.py`, `tests/verify_corolla_hf_b6_competing_sender_arbitration.py` | — |
 | <a id="finding-store-001"></a>**STORE-001** | [docs/storage/dataflash.md](../storage/dataflash.md) | — | `tests/verify_dataflash_layout.py` | — |
 | <a id="finding-store-002"></a>**STORE-002** | [docs/storage/dataflash.md](../storage/dataflash.md) | — | `tests/verify_dataflash_layout.py` | — |
 | <a id="finding-store-003"></a>**STORE-003** | [docs/storage/dataflash.md](../storage/dataflash.md) | — | `tests/verify_dataflash_semantics.py` | — |
@@ -514,6 +515,7 @@ Findings: 316 · Corrections: 117 · Open questions: 52 · Docs: 99 · Suites: 2
 | <a id="correction-corr-115"></a>**CORR-115** | [docs/variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) | yes |
 | <a id="correction-corr-116"></a>**CORR-116** | [docs/variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) | yes |
 | <a id="correction-corr-117"></a>**CORR-117** | [docs/tooling/techstream.md](../tooling/techstream.md) | yes |
+| <a id="correction-corr-118"></a>**CORR-118** | [docs/tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md), [docs/architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md) | yes |
 
 ## Document registry
 

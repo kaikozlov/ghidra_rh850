@@ -1106,6 +1106,64 @@ def main() -> int:
         "while multiplexing between buses 1 and 3 we are getting ACK errors" in panda_fdcan
         and "can_clear_send(FDCANx, can_number);" in panda_fdcan,
     )
+
+    # YC's allOutput observation closes a separate axis from ELM routing.  ELM
+    # can attach FDCAN2 to stock CAN1 with param=1, but its hook remains an
+    # 8-byte diagnostic whitelist. allOutput uses the normal physical route and
+    # removes that TX-policy restriction; it does not split/forward CAN1.
+    alloutput_init = default_safety.split("static safety_config alloutput_init", 1)[1].split("const safety_hooks alloutput_hooks", 1)[0]
+    mode_switch = panda_main.split("switch (mode_copy)", 1)[1].split("can_init_all();", 1)[0]
+    default_mode = mode_switch.split("default:", 1)[1]
+    check(
+        "allOutput safety permits arbitrary CAN transmission",
+        "controls_allowed = true;" in alloutput_init
+        and "static bool alloutput_tx_hook" in alloutput_init
+        and "return true;" in alloutput_init
+        and "current_safety_mode == SAFETY_ALLOUTPUT" in calvin_safety_core,
+    )
+    check(
+        "allOutput takes Panda normal CAN routing while driving the intercept relay",
+        "set_intercept_relay(true, false);" in default_mode
+        and "current_board->set_can_mode(CAN_MODE_NORMAL);" in default_mode,
+    )
+    check(
+        "Panda transport and FDCAN driver support the 32-byte B6 CAN-FD geometry once FD timing is configured",
+        "CAN FD, up to 64 bytes" in panda_can_comms
+        and "DLC_TO_LEN = [0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 20, 24, 32, 48, 64]" in panda_python
+        and "def can_send(self, addr, dat, bus, *, fd=False" in panda_python
+        and "header[0] = (data_len_code << 4) | (bus << 1) | int(fd)" in panda_python
+        and "bool fd = bus_config[can_number].canfd_auto" in panda_fdcan
+        and "to_send.fd > 0U" in panda_fdcan
+        and "to_send.data_len_code << 16" in panda_fdcan,
+    )
+    check(
+        "ELM rejects a 32-byte B6 control PDU independently of its physical route",
+        "if (len != 8)" in elm327_safety
+        and "((msg->addr & 0x1fffff00u) != 0x600u)" in elm327_safety.lower()
+        and "((msg->addr & 0x1fffff00u) != 0x700u)" in elm327_safety.lower(),
+    )
+    check(
+        "allOutput param1 enables only generic bus0-bus2 passthrough while param0 disables it",
+        "ALLOUTPUT_PARAM_PASSTHROUGH = 1" in alloutput_init
+        and "!alloutput_passthrough" in alloutput_init
+        and "if (bus_num == 0)" in calvin_safety_core
+        and "destination_bus = 2;" in calvin_safety_core
+        and "else if (bus_num == 2)" in calvin_safety_core
+        and "destination_bus = 0;" in calvin_safety_core
+        and "destination_bus = -1;" in calvin_safety_core,
+    )
+    registry_debug = calvin_safety_core.split("#ifdef ALLOW_DEBUG", 1)[1].split("#endif", 1)[0]
+    check(
+        "allOutput is debug-only rather than a release production safety mode",
+        "{SAFETY_ALLOUTPUT, &alloutput_hooks}" in registry_debug,
+    )
+    check(
+        "an unavailable safety mode falls back to SILENT rather than enabling output",
+        "if (err == -1)" in panda_main
+        and 'Falling back to SILENT' in panda_main
+        and "mode_copy = SAFETY_SILENT;" in panda_main,
+    )
+
     check("dump shellcode transmits CAN 0x7A9", "= 0x7a9;" in shellcode)
     for address in (
         "0xffd20250", "0xffd202d0", "0xffd24000", "0xffd24004",

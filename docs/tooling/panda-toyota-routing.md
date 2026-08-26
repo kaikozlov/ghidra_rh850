@@ -317,6 +317,71 @@ This also means a successful ELM diagnostic test on bus 1 does not prove that th
 same wiring is suitable for normal openpilot interception. The latter needs the
 network on the relay-backed 0/2 topology or an equivalent hardware redesign.
 
+### 8.1 `allOutput` closes a different gap: arbitrary direct CAN1 transmission
+
+YC's later observation that an unmodified harness can work with Panda
+`allOutput` is correct for a narrower operation than relay interception. In the
+pinned Panda firmware, `SAFETY_ALLOUTPUT` is not one of the explicit
+SILENT/NOOUTPUT/ELM cases in `set_safety_mode()`. It therefore takes the default
+branch:
+
+```text
+set_intercept_relay(true, false)
+set_can_mode(CAN_MODE_NORMAL)
+can_silent = false
+```
+
+The normal board mode puts logical bus 1 / FDCAN2 on the normal harness CAN1
+physical route, exactly as ELM `param=1` does. The important difference is the
+safety policy. ELM's transmit hook accepts only 8-byte ISO-15765 diagnostic
+address families (plus the named GM exception), so a 32-byte TSS3 `0x0B6` frame
+is rejected even when ELM is physically routed to CAN1. `allOutput` instead sets
+`controls_allowed=true`, special-cases the global transmit whitelist, and its
+transmit hook returns true for arbitrary valid CAN IDs and lengths. Consequently
+the Panda safety/routing layer will **admit a direct
+`0x0B6/32` transmit on logical bus 1 toward the stock Toyota-B CAN1 wires without
+a CAN0/CAN1 repin**. The send path supports CAN-FD payloads through 64 bytes, but
+a real B6 trial still requires bus 1 to be configured for the vehicle's nominal
+and data bit rates / CAN-FD mode. This cleanly explains why traffic rejected by
+ELM can work under `allOutput`; it is not itself a retained live-B6 proof.
+
+That result does **not** overturn the relay-topology conclusion. `allOutput` does
+not create a second side of CAN1 and does not move CAN1 through the harness-box
+CAN0/CAN2 relay. The stock CAN1 producer remains electrically on the same unsplit
+network. Therefore `allOutput + bus1` is useful for direct injection/probing, but
+it cannot deterministically suppress or replace a stock B6 sender. Exact H/F B6
+receiver analysis makes parallel injection unsuitable as a production fallback:
+there is one source-agnostic freshness state, one coalescing pending slot, and no
+source-priority arbitration. Production openpilot still needs exclusive B6
+authority through a relay-correct physical topology or another hardware mechanism
+that actually isolates the stock producer.
+
+`allOutput` also has a second, orthogonal parameter behavior in opendbc safety:
+
+```text
+allOutput param 0 -> disable generic software forwarding
+allOutput param 1 -> enable generic bus0 <-> bus2 passthrough forwarding
+```
+
+This parameter does not remap logical bus 1; both values still use
+`CAN_MODE_NORMAL`. Because `set_safety_mode(allOutput, ...)` drives the physical
+intercept relay, **param 0 can interrupt the normal CAN0/CAN2 path while the mode
+is active**, whereas param 1 restores generic 0↔2 software passthrough. For an
+in-vehicle direct-CAN1 experiment that must leave unrelated CAN0/CAN2 traffic
+flowing, param 1 is therefore the less disruptive allOutput configuration. Both
+parameters still open the physical 0/2 intercept relay; param 1 substitutes
+software store-and-forward, so it is not electrically/timing-equivalent to leaving
+the relay untouched. It still does not forward, split, or suppress CAN1.
+
+Finally, `SAFETY_ALLOUTPUT` is registered only under `ALLOW_DEBUG`; stock release
+safety firmware intentionally does not expose it. On a release Panda, requesting
+that mode fails `set_safety_hooks()` and `set_safety_mode()` explicitly falls back
+to `SAFETY_SILENT`. YC's experiment therefore assumes a debug/custom Panda safety
+build. It is an experimental bring-up mode, not a candidate production safety
+architecture. The maintained TSS3 fork correctly remains `SafetyModel.noOutput`
+with a hard-noop controller until a target-specific safety model and
+exclusive-sender topology are ready.
+
 ## 9. Why the old community "software swap" was not direct CAN1
 
 The pinned Bk2ol workflow couples:
@@ -513,6 +578,8 @@ change these speed/supply gates, or select a different lower handoff primitive.
 | old `BUS=1` test directly exercised Toyota-B CAN1 | **Eliminated** | implicit ELM param 0 routes FDCAN2 to OBD path |
 | physical swap corrects the network's placement relative to the CAN0/CAN2 intercept relay | **Supported directly** | official harness schematics + pinned field report that relay ended up on bus 1 instead of 0/2 |
 | `param=1,bus=1` can directly attach diagnostics to stock CAN1 | **Supported statically; live programming confirmation pending** | Panda FDCAN2 mux truth table + Toyota-B wiring |
+| `allOutput + bus=1` admits arbitrary control frames such as `0x0B6/32` toward stock CAN1 | **Supported statically; live B6 transmission unproved** | allOutput takes `CAN_MODE_NORMAL`; its TX hook permits arbitrary IDs/lengths and Panda supports CAN-FD payloads, unlike ELM's 8-byte diagnostic-only hook; target FD bit-rate/mode setup remains required |
+| `allOutput + bus=1` can suppress a stock CAN1 B6 sender or recreate relay interception | **Eliminated** | CAN1 remains one unsplit physical network; allOutput's optional forwarding is only bus0↔2 |
 | `param=1,bus=1` is fully equivalent to repinning for normal openpilot interception | **Eliminated** | it leaves the vehicle network on unsplit CAN1 rather than the relay-backed CAN0/CAN2 pair |
 | OBD/gateway path stops forwarding during/reset after `10 02` | **Survives; unproved** | consistent with topology, but no gateway firmware or dual-segment transition capture is pinned |
 | indirect OBD path loses ACK / bus-off stability during transition | **Survives; unproved** | Panda explicitly handles FDCAN2 mux-related ACK errors; no field health trace binds this to the event |
@@ -621,9 +688,17 @@ Can diagnostics avoid the physical swap?
     which attaches FDCAN2 directly to stock harness CAN1. Live confirmation
     remains useful, but this is the correct electrical diagnostic experiment.
 
+Can an unmodified harness transmit a TSS3 control frame directly on CAN1?
+    Statically, yes at the Panda safety/routing layer. `SafetyModel.allOutput`
+    uses CAN_MODE_NORMAL and permits arbitrary TX, so logical bus 1 can carry a
+    32-byte 0x0B6 CAN-FD request toward stock CAN1 once the target FD timing is
+    configured. YC's observation adds this capability beyond ELM; live B6 is
+    still a separate bench/vehicle discriminator.
+
 Can software alone make stock CAN1 equivalent to the 0/2 relay topology?
-    No. Direct diagnostic access and harness interception are different
-    problems. The relay topology still requires the network to be on CAN0/CAN2.
+    No. Direct diagnostics/direct injection and harness interception are
+    different problems. allOutput cannot isolate the stock CAN1 producer, so
+    deterministic B6 replacement still requires exclusive physical authority.
 ```
 
 The only unresolved part is the exact vehicle-side reason the **indirect OBD
@@ -637,6 +712,6 @@ itself is no longer mysterious.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [SECOC-033](../reference/index.md#finding-secoc-033), [VAR-006](../reference/index.md#finding-var-006), [VAR-039](../reference/index.md#finding-var-039)
-- Corrections with this document as canonical home: [CORR-032](../reference/index.md#correction-corr-032), [CORR-072](../reference/index.md#correction-corr-072)
+- Findings with this document as canonical home: [SECOC-033](../reference/index.md#finding-secoc-033), [SECOC-074](../reference/index.md#finding-secoc-074), [VAR-006](../reference/index.md#finding-var-006), [VAR-039](../reference/index.md#finding-var-039)
+- Corrections with this document as canonical home: [CORR-032](../reference/index.md#correction-corr-032), [CORR-072](../reference/index.md#correction-corr-072), [CORR-118](../reference/index.md#correction-corr-118)
 <!-- knowledge-cross-references:end -->
