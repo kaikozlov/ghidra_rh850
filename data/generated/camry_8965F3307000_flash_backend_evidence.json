@@ -1,0 +1,48 @@
+{
+  "boundary": "Exact F33 boot flash-control functions. Raw body hashes bind the decompiler observations to 8965F3307000; function names remain structural.",
+  "functions": [
+    {
+      "body_sha256": "10f5ff712d5cf65cc5ee1e9c59b9c4c333a3934395839773d6969503b65c1808",
+      "body_size": 24,
+      "decompiled_c": "\nuint FUN_00078bfa(void)\n\n{\n  uint uVar1;\n  \n  uVar1 = FUN_00078ae0(&DAT_ffa10080);\n  return (uVar1 & 0x8000) >> 0xf;\n}\n\n",
+      "decompiled_c_sha256": "59610bf8778f74c8d10716c2d3be5d0063b42d50b8ee302b1170e660a1ee3c06",
+      "entry": "0x00078BFA"
+    },
+    {
+      "body_sha256": "9dc2414c3ac3d85e55cedab651706faceaaa039ad11b7e5c046358cee75c482e",
+      "body_size": 64,
+      "decompiled_c": "\nvoid FUN_00078c30(void)\n\n{\n  uint uVar1;\n  int iVar2;\n  \n  uVar1 = FUN_00078ae0(&DAT_ffa10080);\n  if (((uVar1 & 0x4000) == 0x4000) && (iVar2 = FUN_00078ad4(0xffa10010), iVar2 != 0x10)) {\n    FUN_00078ae6();\n  }\n  FUN_00078ae6(0xffa20000,0x50);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "9c358bb7b66c6bb647017c826827c031c166b329b0cefe907ea34a389324beb8",
+      "entry": "0x00078C30"
+    },
+    {
+      "body_sha256": "39ff2311bc5dc8a0c65bd8bc34bae3af734551d3e612f75b113a13c1493edbf3",
+      "body_size": 88,
+      "decompiled_c": "\nundefined4 FUN_00078ce6(void)\n\n{\n  uint uVar1;\n  int iVar2;\n  undefined4 uVar3;\n  \n  uVar1 = FUN_00078ae0(&DAT_ffa10080);\n  if (((uVar1 & 0x4000) == 0x4000) && (iVar2 = FUN_00078ad4(0xffa10010), iVar2 != 0x10)) {\n    FUN_00078ae6();\n  }\n  FUN_00078ae6(0xffa20000,0xb3);\n  uVar1 = FUN_000793f0(&DAT_ffa10080,0x8000,0x8000,0xe5);\n  if (uVar1 < 2) {\n    uVar3 = 0;\n  }\n  else {\n    uVar3 = 8;\n  }\n  return uVar3;\n}\n\n",
+      "decompiled_c_sha256": "38cced88343bb4874e29c9a2b49afe11a4cab236ec88282547c79c951f18cfa7",
+      "entry": "0x00078CE6"
+    },
+    {
+      "body_sha256": "8cbe165c9d26667a81437ae449bf6ecf9277c2055d21bc1f31a656424a3432af",
+      "body_size": 156,
+      "decompiled_c": "\nint FUN_00078e2a(undefined4 *param_1,undefined4 param_2,uint param_3)\n\n{\n  undefined4 uVar1;\n  int extraout_r6;\n  int extraout_r7;\n  uint uVar2;\n  int iVar3;\n  uint uVar4;\n  uint uVar5;\n  undefined2 local_20 [6];\n  \n  uVar4 = 0;\n  FUN_00078e10();\n  FUN_00078af2(0xffa10030,param_2);\n  FUN_00078af2(extraout_r6 + 4,extraout_r7 + param_3 + -1);\n  FUN_00078ae6(0xffa20000,0xe8);\n  FUN_00078ae6();\n  do {\n    uVar1 = *param_1;\n    param_1 = param_1 + 1;\n    local_20[0] = (short)uVar1;\n    uVar4 = uVar4 + 1;\n    local_20[1] = (short)((uint)uVar1 >> 0x10);\n    for (uVar5 = 0; uVar5 < param_3 >> 1; uVar5 = uVar5 + 1) {\n      FUN_00078aec(0xffa20000,local_20[uVar5]);\n      uVar2 = FUN_00078ae0(&DAT_ffa10080);\n      if ((uVar2 & 0x400) != 0) {\n        return 7;\n      }\n    }\n  } while (uVar4 < param_3 >> 2);\n  iVar3 = FUN_00078de2();\n  if (iVar3 == 1) {\n    FUN_00078ae6(0xffa20000,0xd0);\n  }\n  return iVar3;\n}\n\n",
+      "decompiled_c_sha256": "f05489aee9d410744497d387a1f9fd3e701ff91f3ee3579dd5c8ac6867bccb82",
+      "entry": "0x00078E2A"
+    },
+    {
+      "body_sha256": "23be382d165381abc31f070ce16c72776de7cd84371978a0f19ce2fbe5f939b3",
+      "body_size": 30,
+      "decompiled_c": "\nundefined4 FUN_00079026(void)\n\n{\n  uint uVar1;\n  undefined4 uVar2;\n  \n  uVar1 = FUN_00078ae0(&DAT_ffa10080);\n  if ((uVar1 & 0x24068) == 0) {\n    uVar2 = 0;\n  }\n  else {\n    uVar2 = 7;\n  }\n  return uVar2;\n}\n\n",
+      "decompiled_c_sha256": "76f9ae222a710cb1654e09be96abab2a0ef0b3a57b15d78bd1b715d55a5b16dd",
+      "entry": "0x00079026"
+    }
+  ],
+  "image": {
+    "path": "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+    "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "size": 1048576
+  },
+  "schema": "camry-8965f3307000-flash-backend-evidence-v1",
+  "software_id": "8965F3307000",
+  "source_corpus_sha256": "ebf63026b10f4e1ce12675b12a328cd22ef408b95ed89bb2589ebb71bd1214e7"
+}

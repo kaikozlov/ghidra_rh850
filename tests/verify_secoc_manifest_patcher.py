@@ -264,10 +264,13 @@ check("FCU command completion checks timeout, status-mask, and command-lock stat
       and "faci_err_status" in flash_c
       and "fastat_cmdlk_mask" in flash_c
       and "fstatr_error_mask         0x00007040u" in flash_c)
-check("program data pacing uses corrected bounded FSTATR bit-11 poll",
-      "fstatr_program_pace_mask  0x00000800u" in flash_c
-      and "while ((faci_fstatr & fstatr_program_pace_mask) != 0u)" in flash_c
+check("program data pacing uses manufacturer-proven post-write FSTATR DBFULL bit-10 poll",
+      "fstatr_dbfull_mask" in flash_c and "0x00000400u" in flash_c
+      and "while ((faci_fstatr & fstatr_dbfull_mask) != 0u)" in flash_c
+      and flash_c.index("faci_fdata = word") < flash_c.index("while ((faci_fstatr & fstatr_dbfull_mask) != 0u)")
       and "unsigned short timeout = 0xffffu" in flash_c
+      and "fstatr_program_pace_mask" not in flash_c
+      and "0x00000800u" not in flash_c
       and "1u << 21" not in flash_c
       and "0x00200000" not in flash_c)
 check("FCU cleanup has both Forced Stop and Status Clear",
@@ -565,7 +568,8 @@ check("bootstrap takes SecurityAccess secret from environment/file", "toyota_eps
 check("bootstrap takes separate payload-build secret from environment/file", "toyota_eps_payload_secret_hex" in ram_exec_source and "payload-secret-file" in deploy_source)
 check("bootstrap requires explicit UDS variant", "uds variant must be explicitly 'old' or 'new'" in ram_exec_source)
 check("deployer requires explicit route or recorded session", "--session-dir or explicit --bus and --elm327-param" in deploy_source)
-check("deployer binds APPLY to prior F181 before RAM upload", "expected_f181_hex=preflight.get(\"f181_hex\")" in deploy_source)
+check("deployer binds APPLY to prior F181 before RAM upload", "expected_f181_hex = preflight.get(\"f181_hex\")" in deploy_source and "expected_f181_hex=expected_f181_hex" in deploy_source)
+check("deployer requires explicit F181 on first live preflight", "first live validate-only execution requires --expected-f181-hex" in deploy_source and "expected_f181_hex=expected_f181_hex" in deploy_source)
 check("deployer does not equate payload completion with SecOC proof", "it is not evidence that secoc authentication is bypassed" in deploy_source)
 
 print("\n== deploy CLI fail-closed APPLY gate ==")

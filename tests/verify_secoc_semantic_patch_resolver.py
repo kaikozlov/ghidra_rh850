@@ -68,6 +68,26 @@ for token, label in (
     check(f"resolver implements {label}", token in java)
 check("resolver is read-only", "saveprogram" not in java and "setname(" not in java and "createfunction(" not in java)
 
+seeder_path = REPO / "ghidra" / "scripts" / "investigate" / "SeedSecocAcceptanceGateCandidates.java"
+seeder = seeder_path.read_text(encoding="utf-8").lower()
+for forbidden, label in (("8e6c6", "Sienna Gate-2 VA"), ("88c62", "H/F Gate-2 VA"), ("8f952", "F33 Gate-2 VA")):
+    check(f"candidate seeder does not embed {label}", forbidden not in seeder)
+check("candidate seeder uses a machine anchor only to recover function ownership",
+      "gate_anchor" in seeder and "gate_offset_from_owner" in seeder and "createfunction(" in seeder)
+check("candidate seeder fails closed on ambiguous anchors", "hits.size() != 1" in seeder and "fail_closed" in seeder)
+
+anchor = bytes.fromhex("e0d19a0d1a38bfff")
+anchor_fixtures = (
+    (cf_path, 0x8E6C6, "Sienna 8965B4512000"),
+    (REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin", 0x88C62, "Corolla H"),
+    (REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin", 0x88C62, "Corolla F"),
+    (REPO / "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin", 0x8F952, "Camry F33"),
+)
+for path, expected, label in anchor_fixtures:
+    blob = path.read_bytes()[:P1M_E_CODEFLASH_SIZE]
+    hits = [off for off in range(len(blob)) if blob.startswith(anchor, off)]
+    check(f"Gate-2 machine anchor is unique on retained {label}", hits == [expected])
+
 print("\n== committed semantic result ==")
 check("semantic scan resolved exactly one candidate", resolution["candidate_count"] == 1 and resolution["resolution"] == "unique")
 check("fixture independently rediscovered known Gate-2 VA", int(resolution["patch"]["address"], 0) == 0x8E6C6)
@@ -91,6 +111,9 @@ print("\n== arbitrary-image workflow contract ==")
 image_wrapper = (REPO / "tools" / "resolve_secoc_patch_image.sh").read_text(encoding="utf-8")
 check("arbitrary-image workflow uses a disposable build workspace", "build/work/secoc-targets" in image_wrapper)
 check("arbitrary-image workflow performs a raw RH850/P1M-E import", "-import \"$IMAGE\"" in image_wrapper and "v850e3:LE:32:default" in image_wrapper)
+check("arbitrary-image workflow seeds undiscovered Gate-2 owners before semantic resolution",
+      "SeedSecocAcceptanceGateCandidates.java" in image_wrapper
+      and image_wrapper.index("SeedSecocAcceptanceGateCandidates.java") < image_wrapper.index("ResolveSecocAcceptanceGate.java"))
 check("arbitrary-image workflow runs the semantic resolver", "ResolveSecocAcceptanceGate.java" in image_wrapper)
 check("arbitrary-image workflow opts into investigate scripts explicitly", "--with-investigate" in image_wrapper)
 check("arbitrary-image workflow contains no input-image write primitive", "dd " not in image_wrapper and "ghidra patch" not in image_wrapper.lower() and '> "$IMAGE"' not in image_wrapper)

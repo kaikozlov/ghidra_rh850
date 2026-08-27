@@ -1,0 +1,47 @@
+{
+  "boolean_materialization": {
+    "meaning": "verify-result-nonzero",
+    "register": "r26",
+    "site": "0x0008f930"
+  },
+  "candidate_count": 1,
+  "control_flow": {
+    "bne": "0x0008f954",
+    "bne_bytes": "9a0d",
+    "gate_cmp": "0x0008f952",
+    "join": "0x0008f96e",
+    "mismatch_branch_calls": 1,
+    "mismatch_branch_target": "0x0008f966",
+    "verified_delivery_fallthrough": "0x0008f956",
+    "verified_fallthrough_calls": 2
+  },
+  "function": {
+    "entry": "0x0008f906",
+    "name": "FUN_0008f906"
+  },
+  "invariants": [
+    "byte-result-load-structurally-resolved-global-unmapped",
+    "zero-test-and-cmovne-materialize-result-nonzero-boolean",
+    "same-boolean-survives-through-pre-gate-call",
+    "bne-taken-means-result-nonzero-fallthrough-means-result-zero",
+    "verified-and-mismatch-arms-both-call-and-converge",
+    "patch-neutralizes-cmp-registers-and-preserves-bne"
+  ],
+  "mac_result_source": {
+    "address": null,
+    "load_site": "0x0008f92a",
+    "passed_by_address_elsewhere": false,
+    "resolution": "unmapped-on-current-import"
+  },
+  "patch": {
+    "address": "0x0008f952",
+    "operation": "cmp-second-register-to-first-force-fallthrough",
+    "original": "e0d1",
+    "replacement": "e001"
+  },
+  "pre_gate_state_call": "0x0008f94c",
+  "program_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+  "resolution": "unique",
+  "schema": "toyota-secoc-semantic-target-v2",
+  "verify_result_polarity": "zero-is-verified-ok-nonzero-is-not-verified"
+}

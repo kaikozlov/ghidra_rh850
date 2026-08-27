@@ -197,7 +197,7 @@
   "sources": {
     "cruise_semantics": {
       "path": "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json",
-      "sha256": "f3a56b5249ec9b7329fa9a2b0761ac458ef810b16cc4f81eb85f1b8bb5636a19"
+      "sha256": "1c58b8bac66a3195e34a6b2817d8e6e0ec8faccf272a98f14f2d9bced3beb52e"
     },
     "data_list_if": {
       "sha256": "cce3ecd1203f81914c51d5b2599ee68eb4f7faafa8cbd9bb24fd7390b54d651d",

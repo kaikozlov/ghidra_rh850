@@ -284,21 +284,23 @@ manufacturer-shaped FACI sequence: FSTATR-ready at `0xFFA10080/0x8000`, FASTAT
 command-lock at `0xFFA10010/0x10`, `FENTRYR=0xAA01`, the
 `FHVE15/FHVE3/FAREASELC/FPROTR` entry sequence, `FPSADDR/FSADDR` erase
 `0x20,0xD0`, and page program `0xE8,0x80,...,0xD0`. Its symbolic register names
-are shifted, and two important semantics are wrong/incomplete: it polls reserved
-FSTATR bit 21 instead of Toyota's bit 11/SUSRDY (`0x800`) per halfword, and it
-omits the manufacturer `0x7040` FSTATR error mask / Status Clear `0x50` recovery.
-This pattern is consistent with raw behavior reconstructed from disassembly
-without a correct symbolic register map. Combined with the April-21 extractor statement, a CUW-informed FACI origin is
-**plausible and worth pursuing**, but the inherited F340 target identity does not
-strengthen authorship provenance and line-level derivation remains unproved until the actual
-`T-0035-22.cuw` or plaintext manufacturer `*_erase.pt.bin` is acquired and
-diffed. The full provenance/semantic matrix is in `community/README.md`.
-The retained extractor also does not implement the V18 outer
-`\0CALIBRATION\0` magic/CRC/size/member validation recovered later in
-`tools/techstream/parse_cuw_container.py`; it opportunistically scans its input
-for INI/S-record content. Until a real T-0035 specimen is available, whether it
-expects the raw package or an exposed inner/package-specific layer remains
-specimen-bound. Preserve and validate the raw CUW before applying it.
+are shifted, and the old bit-21 pacing was wrong. The now-retained exact
+`T-0035-22.cuw` closes the manufacturer side directly: both CMAC-valid Toyota
+F340 erase routines write each halfword and then wait on **FSTATR bit10 /
+`0x400` (DBFULL)**, not bit11/SUSRDY. They also recover the `0x7040` FSTATR error
+family and B3 Forced Stop. Exact F33 boot code independently uses the same
+post-write `0x400` condition and additionally provides stock Status Clear `0x50`.
+Thus CUW-informed provenance is no longer merely an acquisition lead, although
+the historical question of whether blurbdust's April writer was line-for-line
+derived from this exact package remains unproved. Canonical secret-free evidence
+is `data/generated/techstream_v18/t0035_faci_backend_evidence.json`; see
+SECOC-074/CORR-121 and `community/README.md`.
+
+The retained extractor remains payload-oriented rather than a general outer-CUW
+validator, but the raw T-0035 specimen is now pinned in `software/locks/` and its
+CPUImage/EraseRoutine streams decrypt and CMAC-check successfully. The canonical
+analysis path preserves/hashes the raw package and emits only secret-free derived
+evidence; plaintext manufacturer payloads remain ignored workspace material.
 
 The import still splits cleanly into two functional layers: infrastructure that
 transfers strongly, and an exploit signature that does not transfer to this

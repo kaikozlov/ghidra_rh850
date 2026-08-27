@@ -1327,6 +1327,46 @@ the routine blob's transform/format, `10F5`/`10F6` ECU-side semantics, or any
 other ECU behavior, and none of it is EPS-specific (Corolla front camera,
 not the tracked Sienna/Corolla-H EPS Unified routes of TMS-032/TMS-036).
 
+#### 5.2.2 Retained Toyota F340 manufacturer erase/program payload
+
+The canonical CUW corpus now also closes a previously external-only EPS flash
+control reference. `T-0035-22.cuw` is pinned at SHA-256
+`9882b1b6dd6acda2d142a2825eda396b0a425e41c13f822b9a18e022d4c43e81`
+(5,725,237 bytes). Its descriptor is MY22 Tundra, `ContactType=P5-Unified`,
+`Node01/DiagID=07A1`, with two CPU records targeting/new IDs
+`8965F3401100→8965F3401200` and `8965F3402100→8965F3402200`. Both use
+`ReproMethod=00`, `SecurityProperty2=98`; both declare a 4-KiB
+`EraseRoutine` at `FEBF0000`.
+
+`tools/techstream/analyze_t0035_faci_backend.py` performs a secret-free
+reproduction of the retained extractor grammar: it derives the package working
+key from the already-recovered payload-build root, decrypts CPUImage and
+EraseRoutine regions in memory, validates CMAC, and emits only source/plaintext
+hashes plus Ghidra-reviewed function-body identities. It never records SeedKey,
+Nonce, the derived key, or plaintext payload bytes. Both CPU body and erase
+regions validate.
+
+`ghidra/scripts/investigate/SeedLoadedImageDirectCalls.java` closes the direct-call
+graph inside each disposable loaded-RAM import before review. Disposable RH850
+imports of the two CMAC-valid erase routines recover the same
+manufacturer FACI contract: FRDY=`FSTATR&0x8000`, FASTAT command-lock `0x10`,
+FSTATR error family `0x7040`, `FENTRYR=AA01/AA00`,
+`FHVE15/FHVE3`, `FAREASELC=3B00`, `FPROTR=5501/5500`, erase `20,D0`, and
+page program `E8,80`, 128 halfwords, `D0`. Crucially, each halfword is written
+first and then the routine tests/waits while **FSTATR `0x400` (bit10 / DBFULL)**
+is nonzero. The manufacturer payload does not use bit11/`0x800` as the
+per-halfword pacing condition. It uses Forced Stop `B3`; its extracted cleanup
+does not itself issue FCMD Status Clear `50`.
+
+Exact Camry `8965F3307000` boot code independently corroborates the same
+post-write `0x400` program condition at `0x78E2A` and supplies stock Status
+Clear `0x50` / Forced Stop `0xB3` helpers. This is why the generic patcher now
+uses bounded post-write DBFULL polling while retaining `0x50` as exact-target
+recovery behavior. T-0035 remains a Tundra F340 package, not an exact F33 Camry
+CUW and not an OEM full-image restore package for `8965F3307000`. Canonical
+evidence: `data/generated/techstream_v18/t0035_faci_backend_evidence.json`;
+SECOC-074/CORR-121.
+
 ### 5.3 Reprogramming-key authorization (RKS / TIS portal) — Layer A
 
 The reflash passes through two independent authorization layers that never

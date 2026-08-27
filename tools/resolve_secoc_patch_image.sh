@@ -92,6 +92,7 @@ mkdir -p "$PROJECT_DIR"
   -- \
   -import "$IMAGE" \
   -processor v850e3:LE:32:default \
+  -postScript SeedSecocAcceptanceGateCandidates.java \
   -postScript ResolveSecocAcceptanceGate.java "$RESOLUTION" \
   -commit "Disposable SecOC semantic target analysis"
 

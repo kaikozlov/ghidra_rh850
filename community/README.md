@@ -78,8 +78,8 @@ later documented by Lochuan:
 | HV/protection entry | `FFF8A430=1`, `FFF82410=1`, `FFA10020=3B00`, `FFA10088=5501` | `FHVE15/FHVE3/FAREASELC/FPROTR`, same operations |
 | erase | `FFA100E0=1`, `FSADDR`, `20,D0` | `FPSADDR`, `FSADDR`, erase + execute, same sequence |
 | program | `FSADDR`, `E8,80`, 128 halfwords, `D0` | same page-program sequence |
-| halfword pacing | polls bit 21 | **wrong**; Toyota CUW uses FSTATR bit 11 / `0x800` (`SUSRDY`) |
-| status/recovery | ready + command-lock only; `B3` cleanup | **incomplete**; Toyota path also uses FSTATR `0x7040`, Status Clear `0x50`, and bounded Forced Stop |
+| halfword pacing | polls bit 21 | **wrong**; exact Toyota T-0035 writes first, then waits on FSTATR bit 10 / `0x400` (`DBFULL`) |
+| status/recovery | ready + command-lock only; `B3` cleanup | **incomplete**; exact T-0035 recovers FSTATR `0x7040` + bounded B3 Forced Stop; exact F33/Sienna stock code additionally supplies Status Clear `0x50` |
 
 That pattern matters: the writer had the right raw register addresses, magic
 values, and command sequence while several register *names* were shifted and
@@ -89,8 +89,11 @@ April-21 extractor statement, it makes CUW-informed FACI reconstruction
 **plausible and worth investigating**; the inherited F340 target identity adds
 context, not independent provenance evidence. It does not prove that
 `main_flash_patch.c` was translated from Toyota's erase payload line-for-line.
-The actual `T-0035-22.cuw`/plaintext `*_erase.pt.bin` remains necessary for that
-comparison.
+That comparison is now locally reproducible from pinned `T-0035-22.cuw`; the
+plaintext `*_erase.pt.bin` files remain ignored workspace intermediates, while
+secret-free hashes/function identities are tracked in
+`data/generated/techstream_v18/t0035_faci_backend_evidence.json`. CORR-121 records
+the resulting `0x800 -> 0x400/DBFULL` correction.
 
 There is also a useful parser-layer boundary that our later Techstream work makes
 explicit. `decrypt.T-0035-22.py` is a **payload-oriented extractor**: it scans

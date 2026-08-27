@@ -1,0 +1,200 @@
+{
+  "cpus": [
+    {
+      "body": {
+        "cmac_valid": true,
+        "load_address": "0x00018000",
+        "sha256": "e1f7ecb6df0721438c10bc5d5e42771e1c59dc37441305753428093b3bd1f150",
+        "size": 949760
+      },
+      "cid": "8965F3401200",
+      "cpu_section": "CPU11",
+      "erase": {
+        "cmac_valid": true,
+        "load_address": "0xFEBF0000",
+        "sha256": "2d7f71a990f44fdec7072a11ec4de24dbb1b78d325d820641c39ecf1c0e5de81",
+        "size": 4096
+      },
+      "functions": {
+        "cmdlk": {
+          "body_sha256": "cde8a35090ddccbb180d01c073c535155908645c6c4ce613602cb6871aa0571e",
+          "load_address": "0xFEBF01C6",
+          "offset": "0x1C6",
+          "size": 14
+        },
+        "erase_block": {
+          "body_sha256": "5a98f2843d733a6041222e690b1438e52eff54a9d25643148926dfc2c315fe97",
+          "load_address": "0xFEBF0382",
+          "offset": "0x382",
+          "size": 32
+        },
+        "fentry_enter": {
+          "body_sha256": "ac1c1ccfa9f8ed7e70291de5651457e6227c48c229e156a0f5b58c75e2e1c6e2",
+          "load_address": "0xFEBF0162",
+          "offset": "0x162",
+          "size": 100
+        },
+        "fentry_exit": {
+          "body_sha256": "7b922ba97f39a63cb60f693d249c3278a9be902d49aaac238d5e3e13f8a8e404",
+          "load_address": "0xFEBF040A",
+          "offset": "0x40A",
+          "size": 92
+        },
+        "forced_stop_cleanup": {
+          "body_sha256": "935ff789738025d6063c4c41f72cef893a21341b8564d3c10a09fa6e770e5ec0",
+          "load_address": "0xFEBF01E2",
+          "offset": "0x1E2",
+          "size": 126
+        },
+        "frdy": {
+          "body_sha256": "eaf6aa0cfcf015753526ebc7e6b2b6ff03529ba0d074333cb78c224f21586e53",
+          "load_address": "0xFEBF0154",
+          "offset": "0x154",
+          "size": 14
+        },
+        "fstatr_error": {
+          "body_sha256": "b9a26b0bd07fc49107cba2f4a4fe97576c08518ac721170f013e14984fa53b04",
+          "load_address": "0xFEBF01D4",
+          "offset": "0x1D4",
+          "size": 14
+        },
+        "operation_poll": {
+          "body_sha256": "b41cffef8880ef5932a874c75ca9d9e2b6ae8b6721f840c14607a576e191fa08",
+          "load_address": "0xFEBF0478",
+          "offset": "0x478",
+          "size": 88
+        },
+        "pe_mode": {
+          "body_sha256": "8a75805ccc111d5ed5843828cec0c6b10b9cf8ea165603cd40c0221d0bf4f885",
+          "load_address": "0xFEBF0260",
+          "offset": "0x260",
+          "size": 92
+        },
+        "program_256b": {
+          "body_sha256": "f55822835a6e20340b58b3cea46ad52c29f4fcf5c0bffdbcb971b0069df63aa8",
+          "load_address": "0xFEBF02BC",
+          "offset": "0x2BC",
+          "size": 128
+        }
+      },
+      "offset_address": "0100000000",
+      "repro_method": "00",
+      "security_property2": "98",
+      "target_calibration": "8965F3401100"
+    },
+    {
+      "body": {
+        "cmac_valid": true,
+        "load_address": "0x00018000",
+        "sha256": "6ddcb7e7a6a015168be6bc1a33948372ccac5d8d1045b9e2fc811e4fd43aafbe",
+        "size": 949760
+      },
+      "cid": "8965F3402200",
+      "cpu_section": "CPU12",
+      "erase": {
+        "cmac_valid": true,
+        "load_address": "0xFEBF0000",
+        "sha256": "da015b63967baf772f0794ac207656a62b3796eb6ac2805d996dd35bbeb30b3f",
+        "size": 4096
+      },
+      "functions": {
+        "cmdlk": {
+          "body_sha256": "cde8a35090ddccbb180d01c073c535155908645c6c4ce613602cb6871aa0571e",
+          "load_address": "0xFEBF01D6",
+          "offset": "0x1D6",
+          "size": 14
+        },
+        "erase_block": {
+          "body_sha256": "5a98f2843d733a6041222e690b1438e52eff54a9d25643148926dfc2c315fe97",
+          "load_address": "0xFEBF0392",
+          "offset": "0x392",
+          "size": 32
+        },
+        "fentry_enter": {
+          "body_sha256": "64e4eecab24385371c8ea17d6f0b9fbc97def82f4d23d64d01c6c0a14ebb9a1d",
+          "load_address": "0xFEBF0172",
+          "offset": "0x172",
+          "size": 100
+        },
+        "fentry_exit": {
+          "body_sha256": "3edeecb57346aa7beef58a753e28794402d41753d58fa829957900113432b1b3",
+          "load_address": "0xFEBF041A",
+          "offset": "0x41A",
+          "size": 92
+        },
+        "forced_stop_cleanup": {
+          "body_sha256": "f0f19472fc029f830a1eb7623523b6e1acf23faaa841da47452b1926e2e10cc7",
+          "load_address": "0xFEBF01F2",
+          "offset": "0x1F2",
+          "size": 126
+        },
+        "frdy": {
+          "body_sha256": "eaf6aa0cfcf015753526ebc7e6b2b6ff03529ba0d074333cb78c224f21586e53",
+          "load_address": "0xFEBF0164",
+          "offset": "0x164",
+          "size": 14
+        },
+        "fstatr_error": {
+          "body_sha256": "b9a26b0bd07fc49107cba2f4a4fe97576c08518ac721170f013e14984fa53b04",
+          "load_address": "0xFEBF01E4",
+          "offset": "0x1E4",
+          "size": 14
+        },
+        "operation_poll": {
+          "body_sha256": "b1b9f4020c92c8aac438c21295712e7d13b767d7fa95f657fbc13e5e6dd751c2",
+          "load_address": "0xFEBF0488",
+          "offset": "0x488",
+          "size": 88
+        },
+        "pe_mode": {
+          "body_sha256": "8a75805ccc111d5ed5843828cec0c6b10b9cf8ea165603cd40c0221d0bf4f885",
+          "load_address": "0xFEBF0270",
+          "offset": "0x270",
+          "size": 92
+        },
+        "program_256b": {
+          "body_sha256": "3e031dfa78e0b89343594b07c1e4900b45bd9f4f8b64fceb7b60fe7899d2608a",
+          "load_address": "0xFEBF02CC",
+          "offset": "0x2CC",
+          "size": 128
+        }
+      },
+      "offset_address": "0000000000",
+      "repro_method": "00",
+      "security_property2": "98",
+      "target_calibration": "8965F3402100"
+    }
+  ],
+  "crypto_provenance": {
+    "payload_build_root_offset": "0xBFD8",
+    "payload_build_root_sha256": "2aea015ddae7f99590918290d6b6fa05e975af9125096f2e27274674d3504d11",
+    "reference_image": "firmware/RH850_P1M-E_CodeFlash.bin",
+    "secret_values_recorded": false
+  },
+  "package": {
+    "contact_type": "P5-Unified",
+    "diag_id": "07A1",
+    "model_year": "22",
+    "required_spec_repro_ver": "02",
+    "vehicle": "TUNDRA"
+  },
+  "recovered_faci_semantics": {
+    "command_lock_mask": "FASTAT 0x10",
+    "erase_payload_load": "0xFEBF0000/0x1000 on both CPUs",
+    "erase_sequence": "FPSADDR=1; FSADDR; 0x20; D0",
+    "forced_stop": "0xB3 with ready wait; exact extracted routine does not issue FCMD 0x50",
+    "frdy_mask": "0x00008000",
+    "fstatr_error_mask": "0x00007040",
+    "pe_entry": "FENTRYR=AA01; FHVE15=1; FHVE3=1; FAREASELC=3B00; FPROTR=5501",
+    "pe_exit": "FHVE15=0; FHVE3=0; FPROTR=5500; FENTRYR=AA00",
+    "program_pacing_boundary": "The manufacturer routines use FSTATR bit10/0x400 after each halfword write. They do not use bit11/0x800 for this pacing loop.",
+    "program_sequence": "FSADDR; E8; 0x80 halfword-count; write 128 halfwords; after each write wait while FSTATR 0x00000400 (DBFULL); D0"
+  },
+  "schema": "toyota-t0035-faci-backend-evidence-v1",
+  "scope_boundary": "Exact Toyota Tundra 8965F3401200/8965F3402200 manufacturer CUW evidence. It verifies P1M-E/F3-family flash-control behavior but is not an exact 8965F3307000 Camry calibration package.",
+  "source": {
+    "filename": "T-0035-22.cuw",
+    "sha256": "9882b1b6dd6acda2d142a2825eda396b0a425e41c13f822b9a18e022d4c43e81",
+    "size": 5725237
+  }
+}

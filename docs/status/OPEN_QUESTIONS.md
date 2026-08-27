@@ -927,7 +927,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md) §4.1/§5D and
   `data/generated/corolla_tss3_opendbc_readiness.json`.
 
-- **OQ-053 — F33 non-disruptive application-mode RAM execution pivot.** Exact
+- **OQ-053 — F33 non-disruptive application-mode RAM execution pivot.** **Production-only ordering note:** VAR-060 now closes an exact persistent F33 Gate-2 development patch and deterministic restore, so this question no longer blocks first development lateral. It remains open because the production goal is still a non-persistent signer/control path. Exact
   `8965F3307000` has the desired volatile carrier and the placement half of the
   production loader: live evidence proves `FEBFF9F0..FEBFFBFB` (524 bytes)
   survives the real stock application startup byte-for-byte and executes, while

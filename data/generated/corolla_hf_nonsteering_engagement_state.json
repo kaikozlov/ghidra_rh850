@@ -658,7 +658,7 @@
     },
     "techstream_cruise_live_transport": {
       "path": "data/generated/techstream_v18/tss3_cruise_live_transport.json",
-      "sha256": "ecc45d4bda511f13b11ede766fd6b80ecdc158f45dfd3b45566d37fb50e7d73e"
+      "sha256": "a1c111c2851e40ed562fa229ab1aafbd021f6a8d23a7b70b992eda8e68f8e5d1"
     },
     "techstream_ready": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",

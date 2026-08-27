@@ -1713,67 +1713,61 @@ with exact idle snapshots, bounded polling, candidate intents,
 source/candidate identity pins, separate target/CRC writers, full readback
 streaming, durable recovery state, and fail-closed destructive transitions.
 
-A later upstream correction matters to our own deployment code. Commit
-`390ddb730ca24265c7935989e251f45545909d65` renames the FACI registers to the
-manufacturer convention (`FSTATR=FFA10080`, `FASTAT=FFA10010`,
-`FENTRYR=FFA10084`, `FPROTR=FFA10088`), changes per-halfword pacing from the old
-FSTATR bit-21 poll to bounded bit-11 (`0x00000800`) polling, and checks FSTATR
-error mask `0x00007040` in addition to FASTAT command-lock. It also explicitly
-uses Forced Stop `0xB3` and Status Clear `0x50` during failure cleanup. Lochuan's
-README attributes these details to a register-by-register comparison against a
-Toyota CUW `8965F3... *_erase.pt.bin`.
+A later upstream correction originally mattered to our own deployment code, but the
+newly retained manufacturer input now **supersedes one part of that external
+interpretation**. Lochuan commit `390ddb730ca24265c7935989e251f45545909d65`
+correctly pointed to the FACI register family (`FSTATR=FFA10080`,
+`FASTAT=FFA10010`, `FENTRYR=FFA10084`, `FPROTR=FFA10088`), FSTATR error mask
+`0x00007040`, and stronger failure recovery, while attributing per-halfword
+program pacing to bit 11 / `0x800` (`SUSRDY`) in an `8965F3... *_erase.pt.bin`.
+That pacing claim is now disproved by the exact local Toyota artifact; see
+CORR-121.
 
-The source-package chain is now bounded more tightly. The pinned community
-chronology records a concrete Toyota TSB `T-SB-0069-22` source:
-`T-0035-22.cuw` for the dual-CPU Tundra EPS `8965F3401200/8965F3402200`, and the
-retained `decrypt.T-0035-22.py` maps each CUW `EraseRoutineN` region to a
-plaintext `{NewCID}_erase.pt.bin`. The official bulletin carries TechInfo
-calibration links for those IDs; anonymous requests now reach the Toyota
-TechInfo login gate. Lochuan states only that his comparison used an
-`8965F3... *_erase.pt.bin`; he does not identify the exact CUW filename, say
-whether it came directly through TIS or the community, or say that he used the
-retained decryptor. Thus `T-0035-22.cuw` is the best concrete acquisition lead,
-not proved personal provenance for Lochuan. The exact `.cuw`/erase payload is
-still **not** in our retained corpus, so byte-for-byte CUW parity remains
-external-source.
+The canonical CUW corpus contains **`T-0035-22.cuw`** (SHA-256
+`9882b1b6dd6acda2d142a2825eda396b0a425e41c13f822b9a18e022d4c43e81`,
+5,725,237 bytes), the TSB-linked MY22 Tundra P5-Unified EPS package for DiagID
+`07A1` and CPUs `8965F3401200/8965F3402200`. The retained package grammar plus
+the already-recovered payload-build root decrypt both CPUImage/EraseRoutine
+regions in memory; both body and erase outputs pass CMAC. The two erase routines
+are each exactly `0x1000` bytes loaded at `FEBF0000`. Tracked evidence stores
+only source/plaintext hashes, selected function-body hashes, and recovered
+semantics—no package seed, nonce, derived key, or plaintext near-copy.
 
-The blurbdust lineage now makes that acquisition lead more than a generic family
-match. Public `blurbdust/secoc` is an `I-CAN-hack/secoc` fork; his 2026-04-21
-Discord message says he already had a TechInfo CUW flash-driver extractor that
-computes `0x201/0x202`, and his first public persistent-writer commit follows on
-2026-04-28. The exact F3401200/2200 target record and part of the new-UDS host
-plumbing already existed in Willem's pinned 2025 `tundra` branch, so those are
-inherited context rather than CUW-authorship evidence. The retained Discord `main.c` is
-byte-identical to that public writer, while retained `decrypt.T-0035-22.py`
-performs the exact `EraseRoutineN -> *_erase.pt.bin` extraction he described.
-The first writer's raw FACI sequence also substantially matches the later
-manufacturer-corrected sequence despite shifted symbolic names; its known gaps
-are precisely the later CUW-derived bit-11 pacing and `0x7040`/Status-Clear
-semantics. This is strong **circumstantial** evidence that the CUW work informed
-the persistent writer, not proof of source translation; see SECOC-028/CORR-087
-and `community/README.md`.
+Independent disposable Ghidra imports of both CMAC-valid manufacturer erase
+routines recover the same FACI contract:
 
-Git archaeology strengthens the comparison provenance without recovering the
-bytes. Commit `390ddb730ca24265c7935989e251f45545909d65` itself says the
-manufacturer CUW flash-programming shellcode was from the **`8965F3` series and
-was imported into Ghidra**; its message specifically attributes the program
-loop's FSTATR bit-11/SUSRDY pacing and `andi 0x7040` error mask to that
-manufacturer code. Conversely, Lochuan's `eps-telescope` design commit
-`99b98f0a42fdb519f9a2fb6c47e71d75e906f6d2` from the previous day already
-lists the corrected FACI register identities and explicitly derives them from
-the RH850/P1M-E hardware manual. The cleanest chronology is therefore: manual
-for the register map/name cleanup, then manufacturer CUW disassembly for the
-bit-11 pacing and `0x7040` status semantics.
+- FRDY is `FSTATR & 0x8000`; FASTAT command lock is `0x10`;
+- the FSTATR error family is `0x7040`;
+- P/E entry uses `FENTRYR=AA01`, `FHVE15=1`, `FHVE3=1`,
+  `FAREASELC=3B00`, `FPROTR=5501`; exit returns protection/high-voltage state
+  and drives `FENTRYR=AA00`;
+- erase is `FPSADDR=1`, `FSADDR`, `0x20`, `0xD0`;
+- page program is `FSADDR`, `0xE8`, halfword count `0x80`, 128 halfword writes,
+  then `0xD0`;
+- **after each halfword write**, the manufacturer routine tests/waits while
+  `FSTATR & 0x400` is nonzero. This is bit 10 / DBFULL, not bit 11 / `0x800`;
+- the extracted routine uses Forced Stop `0xB3`; it does not itself issue FCMD
+  Status Clear `0x50` on that path.
 
-The update nevertheless exposed a local implementation defect: our
-`exploit/patcher/flash_backend.c` had inherited the older bit-21 pacing loop and
-command-lock-only completion check. The local Sienna firmware independently
-supports the need for richer FACI handling: `FUN_00077B6A` reads FSTATR bit 15
-as ready; `FUN_00077BA0/FUN_00077C56` use Status Clear `0x50` and Forced Stop
-`0xB3`; and the programming/status helpers at `0x77D9A/0x77F96` test low FSTATR
-status/error bits rather than bit 21. CORR-086 therefore refreshes our backend
-to the CUW-correlated bit-11/mask sequence while keeping the exact manufacturer
-comparison explicitly external.
+The exact Camry `8965F3307000` bootloader independently closes the target-specific
+half of this correction. Native `0x78E2A` writes each program halfword and then
+tests `FSTATR & 0x400`; `0x78BFA` uses FRDY `0x8000`; `0x78C30` supplies stock
+Status Clear `0x50`; `0x78CE6` supplies Forced Stop `0xB3`; and `0x79026` tests
+its broader `0x24068` status mask. Thus the generic patcher now uses a bounded
+**post-write `FSTATR_DBFULL_MASK=0x400` wait**. It retains Status Clear `0x50`
+because exact F33/Sienna stock code supports that recovery operation, not because
+T-0035 is claimed byte-identical to the patcher.
+
+This closes the manufacturer-input acquisition and the pacing ambiguity. It does
+**not** make T-0035 an exact Camry package: F3401200/2200 is a Tundra F3/P1M-E
+manufacturer reference, while F33's own boot code supplies the exact-target
+corroboration. Nor does T-0035 provide an OEM full-image restore package for
+`8965F3307000`; the Camry patch workflow still relies on its exact stock dump,
+manifest-bound narrow block RMW, CRC repair, and inverse restore. Canonical
+secret-free evidence is
+`data/generated/techstream_v18/t0035_faci_backend_evidence.json` plus
+`data/generated/camry_8965F3307000_flash_backend_evidence.json`; see SECOC-074
+and CORR-121.
 
 This is not merely similarity inferred after the fact. The first public payload
 commit, `8d0f29fbe506e36de37a912930f6c68c10a75c42`, says the Task-4 payloads were
@@ -1920,6 +1914,6 @@ This experiment proves the Gate-2 authentication-bypass effect only. It does not
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [ARCH-012](../../reference/index.md#finding-arch-012), [SEC-EXP-002](../../reference/index.md#finding-sec-exp-002), [SECOC-001](../../reference/index.md#finding-secoc-001), [SECOC-002](../../reference/index.md#finding-secoc-002), [SECOC-004](../../reference/index.md#finding-secoc-004), [SECOC-006](../../reference/index.md#finding-secoc-006), [SECOC-007](../../reference/index.md#finding-secoc-007), [SECOC-008](../../reference/index.md#finding-secoc-008), [SECOC-011](../../reference/index.md#finding-secoc-011), [SECOC-012](../../reference/index.md#finding-secoc-012), [SECOC-013](../../reference/index.md#finding-secoc-013), [SECOC-014](../../reference/index.md#finding-secoc-014), [SECOC-029](../../reference/index.md#finding-secoc-029), [SECOC-043](../../reference/index.md#finding-secoc-043), [SECOC-044](../../reference/index.md#finding-secoc-044), [SECOC-046](../../reference/index.md#finding-secoc-046), [SECOC-047](../../reference/index.md#finding-secoc-047), [SECOC-048](../../reference/index.md#finding-secoc-048), [SECOC-049](../../reference/index.md#finding-secoc-049), [SECOC-050](../../reference/index.md#finding-secoc-050), [SECOC-051](../../reference/index.md#finding-secoc-051), [SECOC-052](../../reference/index.md#finding-secoc-052), [SECOC-053](../../reference/index.md#finding-secoc-053), [SECOC-054](../../reference/index.md#finding-secoc-054), [SECOC-055](../../reference/index.md#finding-secoc-055), [SECOC-056](../../reference/index.md#finding-secoc-056), [SECOC-057](../../reference/index.md#finding-secoc-057), [SECOC-058](../../reference/index.md#finding-secoc-058), [SECOC-059](../../reference/index.md#finding-secoc-059), [SECOC-065](../../reference/index.md#finding-secoc-065), [SECOC-066](../../reference/index.md#finding-secoc-066), [SECOC-068](../../reference/index.md#finding-secoc-068)
-- Corrections with this document as canonical home: [CORR-009](../../reference/index.md#correction-corr-009), [CORR-012](../../reference/index.md#correction-corr-012), [CORR-042](../../reference/index.md#correction-corr-042), [CORR-047](../../reference/index.md#correction-corr-047), [CORR-052](../../reference/index.md#correction-corr-052), [CORR-061](../../reference/index.md#correction-corr-061), [CORR-062](../../reference/index.md#correction-corr-062), [CORR-064](../../reference/index.md#correction-corr-064), [CORR-066](../../reference/index.md#correction-corr-066), [CORR-086](../../reference/index.md#correction-corr-086), [CORR-090](../../reference/index.md#correction-corr-090)
+- Findings with this document as canonical home: [ARCH-012](../../reference/index.md#finding-arch-012), [SEC-EXP-002](../../reference/index.md#finding-sec-exp-002), [SECOC-001](../../reference/index.md#finding-secoc-001), [SECOC-002](../../reference/index.md#finding-secoc-002), [SECOC-004](../../reference/index.md#finding-secoc-004), [SECOC-006](../../reference/index.md#finding-secoc-006), [SECOC-007](../../reference/index.md#finding-secoc-007), [SECOC-008](../../reference/index.md#finding-secoc-008), [SECOC-011](../../reference/index.md#finding-secoc-011), [SECOC-012](../../reference/index.md#finding-secoc-012), [SECOC-013](../../reference/index.md#finding-secoc-013), [SECOC-014](../../reference/index.md#finding-secoc-014), [SECOC-029](../../reference/index.md#finding-secoc-029), [SECOC-043](../../reference/index.md#finding-secoc-043), [SECOC-044](../../reference/index.md#finding-secoc-044), [SECOC-046](../../reference/index.md#finding-secoc-046), [SECOC-047](../../reference/index.md#finding-secoc-047), [SECOC-048](../../reference/index.md#finding-secoc-048), [SECOC-049](../../reference/index.md#finding-secoc-049), [SECOC-050](../../reference/index.md#finding-secoc-050), [SECOC-051](../../reference/index.md#finding-secoc-051), [SECOC-052](../../reference/index.md#finding-secoc-052), [SECOC-053](../../reference/index.md#finding-secoc-053), [SECOC-054](../../reference/index.md#finding-secoc-054), [SECOC-055](../../reference/index.md#finding-secoc-055), [SECOC-056](../../reference/index.md#finding-secoc-056), [SECOC-057](../../reference/index.md#finding-secoc-057), [SECOC-058](../../reference/index.md#finding-secoc-058), [SECOC-059](../../reference/index.md#finding-secoc-059), [SECOC-065](../../reference/index.md#finding-secoc-065), [SECOC-066](../../reference/index.md#finding-secoc-066), [SECOC-068](../../reference/index.md#finding-secoc-068), [SECOC-074](../../reference/index.md#finding-secoc-074)
+- Corrections with this document as canonical home: [CORR-009](../../reference/index.md#correction-corr-009), [CORR-012](../../reference/index.md#correction-corr-012), [CORR-042](../../reference/index.md#correction-corr-042), [CORR-047](../../reference/index.md#correction-corr-047), [CORR-052](../../reference/index.md#correction-corr-052), [CORR-061](../../reference/index.md#correction-corr-061), [CORR-062](../../reference/index.md#correction-corr-062), [CORR-064](../../reference/index.md#correction-corr-064), [CORR-066](../../reference/index.md#correction-corr-066), [CORR-086](../../reference/index.md#correction-corr-086), [CORR-090](../../reference/index.md#correction-corr-090), [CORR-121](../../reference/index.md#correction-corr-121)
 <!-- knowledge-cross-references:end -->

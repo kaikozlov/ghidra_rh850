@@ -2074,11 +2074,13 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   and `FUN_00077F96` tests mask `0x24068`. These do not prove Lochuan's exact CUW
   mask, but they do prove that the old local abstraction omitted relevant FSTATR
   state.
-- **Correct implementation:** the backend now uses the corrected register names,
-  bounded bit-11 pacing, `0x7040` FSTATR status checking, FASTAT command-lock,
-  Forced Stop/Status Clear recovery, and a checked P/E exit even after partial
-  entry failure. `tests/verify_secoc_manifest_patcher.py` pins those source-level
-  invariants and rejects the old bit-21 poll.
+- **Superseded implementation note:** this 2026-08-20 correction initially changed
+  the backend to bounded bit-11/`0x800` pacing based on the external report.
+  **CORR-121 supersedes that pacing detail** using the now-retained manufacturer
+  T-0035 payload plus exact F33 boot code: the current backend writes each
+  halfword first, then waits on bit10/`0x400` (DBFULL). The `0x7040` FSTATR
+  family, FASTAT command-lock, Forced Stop/Status Clear recovery, and checked P/E
+  exit remain current.
 - **Canonical:** `exploit/patcher/flash_backend.c`;
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
   §9.7; `tests/verify_secoc_manifest_patcher.py`.
@@ -3017,3 +3019,13 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md);
   `data/generated/camry_8965F3307000_tss3_opendbc_port.json`;
   `tests/verify_camry_8965F3307000_tss3_opendbc_port.py`.
+
+### CORR-121 — Toyota's retained F340 flash driver uses DBFULL bit 10, not SUSRDY bit 11, for per-halfword pacing
+
+- **Superseded claim:** CORR-086 accepted an external `8965F3` CUW comparison that described the page-program pacing condition as FSTATR bit 11 / `0x800` (`SUSRDY`). At that time the claimed manufacturer `*_erase.pt.bin` was not locally available. The generic patcher was changed from the older bit-21 poll to `0x800` on that basis.
+- **New manufacturer evidence:** the canonical external CUW corpus now contains exact Toyota `T-0035-22.cuw` (SHA-256 `9882b1b6dd6acda2d142a2825eda396b0a425e41c13f822b9a18e022d4c43e81`), the TSB-linked dual-CPU Tundra EPS package for `8965F3401200/8965F3402200`. The retained extractor grammar decrypts both `EraseRoutine` regions under the already-recovered payload-build root; both body and erase regions pass CMAC. Each erase payload is exactly `0x1000` bytes loaded at `FEBF0000`.
+- **Exact control-flow correction:** independent disposable Ghidra imports of both CMAC-valid manufacturer erase routines recover the same program sequence: set `FSADDR`, issue `E8` then halfword-count `0x80`, write a halfword to `FFA20000`, then test/wait while `FSTATR & 0x400`, repeated for 128 halfwords, followed by `D0`. Thus the pacing condition is **bit 10 / `0x400` (DBFULL), after the data write**. The same routines independently recover FRDY `0x8000`, FASTAT command-lock `0x10`, FSTATR `0x7040`, P/E entry/protection registers, erase `20,D0`, and Forced Stop `B3`. The exact extracted T-0035 cleanup does not itself issue FCMD `0x50`.
+- **Exact F33 cross-check:** Camry `8965F3307000` native program routine `0x78E2A` writes each halfword and immediately checks `FSTATR & 0x400`; its target-native helpers `0x78C30/0x78CE6` independently provide Status Clear `0x50` and Forced Stop `0xB3`. This makes the DBFULL correction exact-target firmware-static as well as manufacturer-CUW-backed.
+- **Implementation consequence:** `exploit/patcher/flash_backend.c` now writes each halfword first and performs a bounded `FSTATR_DBFULL_MASK=0x00000400` wait afterward. The `0x800` pacing interpretation is rejected by regression tests. The backend retains `0x50` cleanup because exact F33/Sienna stock code supports it; no byte-identical T-0035 implementation claim is made. The rebuilt generic template remains within the fixed `0xFD0` code boundary (`0xF6E` raw text).
+- **Scope:** T-0035 validates Toyota F3/P1M-E manufacturer flash-control behavior; it is not an exact Camry F33 CUW and does not replace the exact stock F33 dump/restore artifact.
+- **Canonical:** `data/generated/techstream_v18/t0035_faci_backend_evidence.json`; `data/generated/camry_8965F3307000_flash_backend_evidence.json`; `tests/verify_camry_8965F3307000_flash_backend.py`; local `tests/verify_t0035_faci_backend_external.py`; [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9.7.
