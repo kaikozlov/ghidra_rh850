@@ -36,7 +36,7 @@ decompiling is slop. Verify claims from firmware gate code, not spec knowledge.
   CodeFlash VA = file offset − `0x8000`.
 - **Never point a rebuild at committed `project/` or `projects/`.** Promote only with
   `make snapshot-project`.
-- **`build/` is workspace state, never evidence authority.** Core `make verify`
+- **`build/` is workspace state, never evidence authority.** Portable verification
   must pass without it. Use only `build/cache/`, `build/work/`, `build/out/`,
   `build/logs/`, and `build/tmp/`; promote any input that verification depends on
   into a tracked repository location first.
@@ -59,10 +59,16 @@ signatures, types, and overlays. Only the designated integration task updates
 
 ```bash
 uv sync --locked          # one-time environment
-make verify               # fast tracked-only edit-loop gate, no Ghidra — run this first
+tools/test                # change-aware edit-loop gate, no Ghidra — run this first
+tools/test control_partition # exact suite; prefixes select families
+tools/test list [query]   # discover suites/families, test counts, and modes
+tools/test plan [changed|query] # show selection without executing
+tools/test core           # deliberate broad gate; also full or local
+make verify               # alias for tools/test
+make verify-core          # deliberate portable core gate
 make verify-full          # exhaustive portable tracked-repository gate
-make verify-one SUITE=control_partition  # one subsystem suite (fast iteration)
-make verify-changed       # suites matching git changes, regardless of tier
+make verify-one SUITE=control_partition  # compatibility exact-suite entry point
+make verify-changed       # alias for the change-aware default
 make verify-local         # full + locally available external/live suites
 make verify-agent         # core gate with compact JSON summary
 make verify-required-external # require the pinned Techstream corpus
@@ -76,6 +82,26 @@ make clean-build          # safe cleanup: build/logs + build/tmp only
 # Explicit legacy quarantine (dry-run first):
 uv run --locked python tools/build_layout.py migrate-legacy
 ```
+
+## Tool discovery
+
+Remember the task-oriented entry points, not individual implementation files:
+`tools/test` selects deterministic verification; `tools/g` queries the Sienna
+working project; `tools/gtarget` (and target wrappers such as `tools/gcamry`)
+query other configured targets; and `tools/pseudo` searches the persisted
+whole-image corpus. Evidence compaction, cross-variant extraction, and
+working-project exports expose their own discovery commands:
+
+```bash
+uv run --locked python tools/extract_corolla_h_evidence.py list
+uv run --locked python tools/extract_variant_evidence.py list
+tools/export_ghidra_project.sh list
+```
+
+The 200+ scripts in `tests/` and the subsystem-specific builders/extractors in
+`tools/` remain granular proof and implementation units. They are intentionally
+not a command surface agents must memorize, and semantically distinct proofs
+must not be merged merely to reduce file count.
 
 ### Interactive Ghidra via tools/g
 

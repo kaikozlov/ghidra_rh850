@@ -31,6 +31,22 @@ Prefer a task-oriented entry point when several analyses share the same
 mechanics. Do not add another one-file wrapper merely to bake in a different
 address list.
 
+The small command surface to remember is:
+
+| Task | Entry point |
+|---|---|
+| Select, discover, plan, or run deterministic tests | `tools/test`, `tools/test list [query]` |
+| Query the Sienna working project | `tools/g` |
+| Query another configured target | `tools/gtarget` (or a target wrapper such as `tools/gcamry`) |
+| Search persisted whole-image pseudocode and references | `tools/pseudo` |
+| Discover Corolla-H evidence-compaction profiles | `uv run --locked python tools/extract_corolla_h_evidence.py list` |
+| Discover cross-variant evidence modes | `uv run --locked python tools/extract_variant_evidence.py list` |
+| Discover working-project export profiles | `tools/export_ghidra_project.sh list` |
+
+The 200+ `tests/verify_*.py` files and subsystem-specific builders/extractors
+are implementation and proof units, not commands users or agents must memorize.
+They stay granular where their semantics or evidence boundaries differ.
+
 The repeated Corolla-H corpus-compaction scripts are consolidated behind one
 profile-driven command:
 

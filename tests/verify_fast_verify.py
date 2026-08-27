@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -11,6 +12,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 RUNNER = REPO / "tools/fast_verify.py"
+TEST_COMMAND = REPO / "tools/test"
 MANIFEST = REPO / "verification.toml"
 MAKEFILE = REPO / "Makefile"
 ALLOWED_ORACLES = {
@@ -46,6 +48,8 @@ check("every gate has exactly one owner",
       str({test: owners for test, owners in ownership.items() if len(owners) != 1}))
 check("changed-suite routing includes owned test paths",
       '*entry.get("tests", [])' in RUNNER.read_text(encoding="utf-8"))
+check("canonical tools/test command is executable", TEST_COMMAND.is_file()
+      and bool(TEST_COMMAND.stat().st_mode & 0o111))
 for required in (
     "tests/verify_techstream_rks.py",
     "tests/verify_techstream_layerb.py",
@@ -87,13 +91,18 @@ check(
     str(missing_manifest_paths[:10]),
 )
 tracked_paths = set(subprocess.check_output(["git", "ls-files"], cwd=REPO, text=True).splitlines())
+pending_paths = set(subprocess.check_output(
+    ["git", "ls-files", "--others", "--exclude-standard"], cwd=REPO, text=True
+).splitlines())
+repository_paths = tracked_paths | pending_paths
 untracked_manifest_paths = [
     (suite_name, kind, value)
     for suite_name, kind, value in manifest_paths
-    if not (any(path.startswith(value) for path in tracked_paths) if value.endswith("/") else value in tracked_paths)
+    if not (any(path.startswith(value) for path in repository_paths)
+            if value.endswith("/") else value in repository_paths)
 ]
 check(
-    "every manifest change-routing path is tracked repository state",
+    "every manifest change-routing path is tracked or a pending addition",
     not untracked_manifest_paths,
     str(untracked_manifest_paths[:10]),
 )
@@ -108,22 +117,39 @@ check("every external Techstream suite declares its prerequisite",
 
 makefile = MAKEFILE.read_text(encoding="utf-8")
 check("Makefile has no duplicate VERIFY_SUITES manifest", "VERIFY_SUITES" not in makefile)
+for target, command in (
+    ("verify", "tools/test\n"),
+    ("verify-core", "tools/test core"),
+    ("verify-full", "tools/test full"),
+    ("verify-local", "tools/test local"),
+    ("verify-changed", "tools/test\n"),
+):
+    check(f"Make target {target} delegates to canonical tools/test command",
+          f"{target}:" in makefile and command in makefile)
 for target, mode in (
-    ("verify-core", "--core"),
-    ("verify-full", "--full"),
-    ("verify-local", "--local"),
-    ("verify-changed", "--changed"),
     ("verify-agent", "--agent"),
     ("verify-required-external", "--required-external"),
 ):
     check(f"Make target {target} delegates to manifest runner",
           f"{target}:" in makefile and f"tools/fast_verify.py {mode}" in makefile)
+check("Make verify-one preserves exact legacy suite selection",
+      'tools/test --suite "$(SUITE)"' in makefile)
 
 
 print("\n== isolated runner behavior ==")
 with tempfile.TemporaryDirectory(prefix="verify-runner-") as directory:
     root = Path(directory)
-    (root / "tests").mkdir()
+    for subdir in ("tests", "docs/status", "docs/family", "data", "firmware", "scratch"):
+        (root / subdir).mkdir(parents=True, exist_ok=True)
+    outside = root / "outside"
+    outside.mkdir()
+    wrapper_plan = subprocess.run(
+        [str(TEST_COMMAND), "plan", "fast_verify"],
+        cwd=outside, capture_output=True, text=True,
+    )
+    check("tools/test works outside the repository directory",
+          wrapper_plan.returncode == 0 and "fast_verify" in wrapper_plan.stdout,
+          wrapper_plan.stderr.strip())
     (root / "tests/pass.py").write_text(
         "print('[PASS][raw_bytes] pinned record')\n"
         "print('[PASS][identity_hash] body hash')\n",
@@ -157,6 +183,54 @@ with tempfile.TemporaryDirectory(prefix="verify-runner-") as directory:
         "raise SystemExit(0 if ok else 1)\n",
         encoding="utf-8",
     )
+    for name in (
+        "verify_alpha.py", "verify_beta.py", "verify_camry_one.py",
+        "verify_camry_two.py", "verify_analysis_status.py", "verify_doc_links.py",
+        "verify_knowledge_index.py", "verify_full_only.py", "verify_local_only.py",
+        "verify_status_wide.py",
+    ):
+        (root / "tests" / name).write_text(
+            "print('[PASS][raw_bytes] synthetic route')\n", encoding="utf-8"
+        )
+    text_files = {
+        "docs/ahead.md": "baseline\n",
+        "docs/dirty.md": "baseline\n",
+        "scratch/rename_source.md": "rename baseline\n",
+        "docs/alpha.md": "FIND-001 OQ-001\n",
+        "docs/beta.md": "CORR-001\n",
+        "docs/family/item.md": "baseline\n",
+        "data/foo.json": "{}\n",
+        "data/foo.json.backup": "{}\n",
+        "firmware/input.bin": "firmware\n",
+        "pyproject.toml": "[project]\nname='synthetic'\nversion='0'\n",
+        "uv.lock": "version = 1\n",
+        "docs/status/FINDINGS.md": (
+            "| ID | Claim | Scope | Grade | Checked by | Canonical report |\n"
+            "|---|---|---|---|---|---|\n"
+            "| FIND-001 | alpha old | scope | verified | `verify_alpha.py` | alpha |\n"
+            "| FIND-002 | beta old | scope | verified | `verify_beta.py` | beta |\n"
+        ),
+        "docs/status/OPEN_QUESTIONS.md": (
+            "## Synthetic questions\n\n"
+            "- **OQ-001 — Alpha old.** First line.\n"
+            "  Continuation old OQ detail.\n"
+            "  Cross-reference CORR-001 has old OQ wording.\n"
+        ),
+        "docs/status/CORRECTIONS.md": (
+            "## Evidence-grade: disproved\n\n"
+            "### CORR-001 — Beta old\n\n"
+            "- **Wrong:** old statement.\n"
+            "- **Right:** Continuation old CORR detail.\n"
+            "- **Boundary:** OQ-001 has old CORR wording.\n"
+        ),
+        "docs/status/PRIORITIES.md": (
+            "## Synthetic priority\n\n"
+            "OQ-001 alpha old priority starts here and\n"
+            "continues with old priority detail.\n"
+        ),
+    }
+    for relative, content in text_files.items():
+        (root / relative).write_text(content, encoding="utf-8")
     synthetic_manifest = root / "verification.toml"
     synthetic_manifest.write_text(
         """[verification]
@@ -164,6 +238,7 @@ default_oracle = "raw_bytes"
 skip_exit_code = 77
 gate_glob = "tests/*.py"
 default_modes = ["core", "full", "local"]
+aggregate_infrastructure_suites = ["analysis_status", "doc_links", "knowledge_index"]
 
 [external.techstream_v18]
 path = "missing-techstream"
@@ -214,6 +289,48 @@ paths = ["external/"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 oracle = "independent_external_artifact"
+
+[suite.alpha]
+tests = ["tests/verify_alpha.py"]
+paths = ["docs/ahead.md", "docs/alpha.md", "data/foo.json", "docs/status/FINDINGS.md", "docs/status/OPEN_QUESTIONS.md", "docs/status/CORRECTIONS.md", "docs/status/PRIORITIES.md"]
+
+[suite.beta]
+tests = ["tests/verify_beta.py"]
+paths = ["docs/dirty.md", "docs/renamed.md", "data/foo.json.backup", "docs/beta.md", "docs/status/FINDINGS.md", "docs/status/OPEN_QUESTIONS.md", "docs/status/CORRECTIONS.md", "docs/status/PRIORITIES.md"]
+
+[suite.camry_one]
+tests = ["tests/verify_camry_one.py"]
+paths = ["docs/untracked.md"]
+
+[suite.camry_two]
+tests = ["tests/verify_camry_two.py"]
+paths = ["docs/family/"]
+
+[suite.analysis_status]
+tests = ["tests/verify_analysis_status.py"]
+paths = ["docs/status/FINDINGS.md", "docs/status/OPEN_QUESTIONS.md"]
+
+[suite.doc_links]
+tests = ["tests/verify_doc_links.py"]
+paths = ["docs/"]
+
+[suite.knowledge_index]
+tests = ["tests/verify_knowledge_index.py"]
+paths = ["docs/status/FINDINGS.md", "docs/status/OPEN_QUESTIONS.md", "docs/status/CORRECTIONS.md"]
+
+[suite.status_wide]
+tests = ["tests/verify_status_wide.py"]
+paths = ["docs/status/"]
+
+[suite.full_only]
+tests = ["tests/verify_full_only.py"]
+paths = ["tests/verify_full_only.py"]
+modes = ["full", "local"]
+
+[suite.local_only]
+tests = ["tests/verify_local_only.py"]
+paths = ["tests/verify_local_only.py"]
+modes = ["local"]
 """,
         encoding="utf-8",
     )
@@ -224,6 +341,23 @@ oracle = "independent_external_artifact"
              "--manifest", str(synthetic_manifest)],
             capture_output=True, text=True,
         )
+
+    def selected_from_plan(proc: subprocess.CompletedProcess[str]) -> set[str]:
+        return set(re.findall(r"^  ([a-z0-9_]+): \d+ test\(s\)", proc.stdout, re.MULTILINE))
+
+    listed = run("list", "camry")
+    check("list discovers a suite-prefix family with counts and modes",
+          listed.returncode == 0
+          and "Prefix 'camry': 2 suite(s), 2 test(s)" in listed.stdout
+          and "camry_one: 1 test(s) modes=core,full,local" in listed.stdout)
+    planned_family = run("plan", "camry")
+    check("plan resolves a prefix without executing its tests",
+          planned_family.returncode == 0
+          and selected_from_plan(planned_family) == {"camry_one", "camry_two"}
+          and "[PASS]" not in planned_family.stdout)
+    planned_exact = run("plan", "alpha")
+    check("exact suite ownership wins over prefix expansion",
+          planned_exact.returncode == 0 and selected_from_plan(planned_exact) == {"alpha"})
 
     core_missing = run("--core")
     check("repository-only mode succeeds with absent optional source", core_missing.returncode == 0)
@@ -241,6 +375,14 @@ oracle = "independent_external_artifact"
     check("required-external mode fails for the same missing source",
           required_missing.returncode == 1
           and "Required external prerequisite missing" in required_missing.stderr)
+    explicit_external_missing = run("external")
+    check("explicit external suite fails closed when its prerequisite is missing",
+          explicit_external_missing.returncode == 1
+          and "Required external prerequisite missing" in explicit_external_missing.stderr)
+    explicit_external_skip = run("external", "--allow-skips")
+    check("explicit allow-skips restores optional external skip behavior",
+          explicit_external_skip.returncode == 0
+          and "[SKIP] external: tests/pass.py" in explicit_external_skip.stdout)
 
     external_root = root / "pinned-techstream"
     external_root.mkdir()
@@ -280,6 +422,10 @@ oracle = "independent_external_artifact"
     legacy = run("--suite", "legacy")
     check("legacy PASS: assertions are counted with the declared oracle",
           legacy.returncode == 0 and '"raw_bytes": 1' in legacy.stdout)
+    legacy_prefix = run("--suite", "camry")
+    check("legacy --suite preserves exact-only semantics",
+          legacy_prefix.returncode == 2
+          and "Unknown suite: camry" in legacy_prefix.stderr)
 
     printed_fail = run("--suite", "printed_fail")
     check("printed FAIL assertion overrides a zero process exit",
@@ -292,6 +438,189 @@ oracle = "independent_external_artifact"
     check("required mode rejects a test-level exit-77 skip",
           required_late_skip.returncode == 1
           and "required external suite reported skip" in required_late_skip.stderr)
+
+    def git(*args: str) -> str:
+        return subprocess.check_output(["git", *args], cwd=root, text=True).strip()
+
+    git("init", "-q")
+    git("config", "user.name", "Verifier Test")
+    git("config", "user.email", "verifier@example.invalid")
+    git("add", ".")
+    git("commit", "-qm", "baseline")
+    branch = git("branch", "--show-current")
+    git("branch", "upstream-base")
+    git("config", f"branch.{branch}.remote", ".")
+    git("config", f"branch.{branch}.merge", "refs/heads/upstream-base")
+
+    (root / "docs/ahead.md").write_text("ahead commit\n", encoding="utf-8")
+    git("add", "docs/ahead.md")
+    git("commit", "-qm", "local ahead work")
+
+    git("config", "--unset", f"branch.{branch}.remote")
+    git("config", "--unset", f"branch.{branch}.merge")
+    no_upstream = run("plan", "changed")
+    check("branch without upstream requires an explicit committed-change base",
+          no_upstream.returncode == 1
+          and "has no configured upstream" in no_upstream.stderr
+          and "--base <ref>" in no_upstream.stderr)
+    git("config", f"branch.{branch}.remote", ".")
+    git("config", f"branch.{branch}.merge", "refs/heads/upstream-base")
+
+    git("checkout", "-q", "--detach", "HEAD")
+    detached = run("plan", "changed")
+    check("detached HEAD requires an explicit committed-change base",
+          detached.returncode == 1
+          and "detached HEAD" in detached.stderr
+          and "--base <ref>" in detached.stderr)
+    git("checkout", "-q", branch)
+
+    (root / "docs/dirty.md").write_text("dirty worktree\n", encoding="utf-8")
+    (root / "docs/untracked.md").write_text("untracked worktree\n", encoding="utf-8")
+
+    ahead_and_dirty = run("plan", "changed")
+    ahead_and_dirty_names = selected_from_plan(ahead_and_dirty)
+    check("default changed detection includes ahead commit, dirty file, and untracked file",
+          ahead_and_dirty.returncode == 0
+          and {"alpha", "beta", "camry_one"} <= ahead_and_dirty_names
+          and "merge-base with upstream-base" in ahead_and_dirty.stdout,
+          str(sorted(ahead_and_dirty_names)))
+    explicit_head = run("plan", "changed", "--base", "HEAD")
+    explicit_head_names = selected_from_plan(explicit_head)
+    check("explicit --base overrides upstream merge-base selection",
+          explicit_head.returncode == 0
+          and "alpha" not in explicit_head_names
+          and {"beta", "camry_one"} <= explicit_head_names,
+          str(sorted(explicit_head_names)))
+
+    (root / "docs/dirty.md").write_text("baseline\n", encoding="utf-8")
+    (root / "docs/untracked.md").unlink()
+    no_changes = run("plan", "changed", "--base", "HEAD")
+    check("clean explicit-base plan is fast and reports zero selection",
+          no_changes.returncode == 0 and "0 suites / 0 tests selected" in no_changes.stdout)
+
+    (root / "docs/dirty.md").write_text("mapped change\n", encoding="utf-8")
+    (root / "scratch/unowned.txt").write_text("unowned\n", encoding="utf-8")
+    (root / "tests/verify_unowned_new.py").write_text(
+        "print('[PASS][raw_bytes] should be manifest-owned')\n", encoding="utf-8"
+    )
+    mixed_unowned = run("plan", "changed", "--base", "HEAD")
+    check("mixed owned and unowned changes fail closed",
+          mixed_unowned.returncode == 2
+          and "scratch/unowned.txt" in mixed_unowned.stderr
+          and "tests/verify_unowned_new.py" in mixed_unowned.stderr)
+    (root / "docs/dirty.md").write_text("baseline\n", encoding="utf-8")
+    (root / "scratch/unowned.txt").unlink()
+    (root / "tests/verify_unowned_new.py").unlink()
+
+    (root / "scratch/rename_source.md").rename(root / "docs/renamed.md")
+    renamed = run("plan", "changed", "--base", "HEAD")
+    check("rename detection retains an unowned source path",
+          renamed.returncode == 2
+          and "scratch/rename_source.md" in renamed.stderr)
+    (root / "docs/renamed.md").rename(root / "scratch/rename_source.md")
+
+    (root / "external").mkdir(exist_ok=True)
+    (root / "external/input.bin").write_text("external change\n", encoding="utf-8")
+    changed_external = run("--changed", "--base", "HEAD")
+    check("changed external-backed suites fail closed on missing prerequisites",
+          changed_external.returncode == 1
+          and "Required external prerequisite missing" in changed_external.stderr)
+    changed_external_skips = run("--changed", "--base", "HEAD", "--allow-skips")
+    check("changed mode permits missing external prerequisites only with allow-skips",
+          changed_external_skips.returncode == 0
+          and "[SKIP] external:" in changed_external_skips.stdout
+          and "[SKIP] external_late_skip:" in changed_external_skips.stdout)
+    (root / "external/input.bin").unlink()
+
+    (root / "data/foo.json.backup").write_text('{"changed": true}\n', encoding="utf-8")
+    exact_file = run("plan", "changed", "--base", "HEAD")
+    check("exact file patterns do not match longer backup names",
+          exact_file.returncode == 0
+          and selected_from_plan(exact_file) == {"beta"},
+          str(sorted(selected_from_plan(exact_file))))
+    (root / "data/foo.json.backup").write_text("{}\n", encoding="utf-8")
+
+    (root / "docs/family/item.md").write_text("directory change\n", encoding="utf-8")
+    directory_match = run("plan", "changed", "--base", "HEAD")
+    check("trailing-slash directory patterns match descendants",
+          directory_match.returncode == 0
+          and {"camry_two", "doc_links"} <= selected_from_plan(directory_match))
+    (root / "docs/family/item.md").write_text("baseline\n", encoding="utf-8")
+
+    for invalidator in ("firmware/input.bin", "verification.toml", "pyproject.toml", "uv.lock"):
+        path = root / invalidator
+        original = path.read_text(encoding="utf-8")
+        path.write_text(original + "# changed\n", encoding="utf-8")
+        broad = run("plan", "changed", "--base", "HEAD")
+        broad_names = selected_from_plan(broad)
+        check(f"{invalidator} is a portable full invalidator",
+              broad.returncode == 0
+              and "full_only" in broad_names
+              and "local_only" not in broad_names
+              and "external" not in broad_names,
+              str(sorted(broad_names)))
+        path.write_text(original, encoding="utf-8")
+
+    findings = root / "docs/status/FINDINGS.md"
+    findings_original = findings.read_text(encoding="utf-8")
+    findings.write_text(findings_original.replace("beta old", "beta new"), encoding="utf-8")
+    findings_plan = run("plan", "changed", "--base", "HEAD")
+    findings_names = selected_from_plan(findings_plan)
+    check("FINDINGS changed-row routing uses Checked-by ownership narrowly",
+          findings_plan.returncode == 0
+          and findings_names == {"analysis_status", "beta", "doc_links", "knowledge_index"}
+          and "content-aware stable-ID/test routing" in findings_plan.stdout,
+          str(sorted(findings_names)))
+    check("aggregate ledgers reached through a directory are excluded from ID scans",
+          "status_wide" not in findings_names)
+    findings.write_text(findings_original, encoding="utf-8")
+
+    aggregate_cases = (
+        ("OPEN_QUESTIONS.md", "Continuation old OQ detail", "Continuation new OQ detail", "alpha"),
+        ("CORRECTIONS.md", "Continuation old CORR detail", "Continuation new CORR detail", "beta"),
+        ("PRIORITIES.md", "old priority detail", "new priority detail", "alpha"),
+    )
+    for filename, old, new, owner in aggregate_cases:
+        path = root / "docs/status" / filename
+        original = path.read_text(encoding="utf-8")
+        path.write_text(original.replace(old, new), encoding="utf-8")
+        routed = run("plan", "changed", "--base", "HEAD")
+        routed_names = selected_from_plan(routed)
+        check(f"{filename} multiline edit inherits its enclosing stable ID",
+              routed.returncode == 0
+              and routed_names == {"analysis_status", owner, "doc_links", "knowledge_index"},
+              str(sorted(routed_names)))
+        path.write_text(original, encoding="utf-8")
+
+    cross_reference_cases = (
+        ("OPEN_QUESTIONS.md", "old OQ wording", "new OQ wording"),
+        ("CORRECTIONS.md", "old CORR wording", "new CORR wording"),
+    )
+    for filename, old, new in cross_reference_cases:
+        path = root / "docs/status" / filename
+        original = path.read_text(encoding="utf-8")
+        path.write_text(original.replace(old, new), encoding="utf-8")
+        routed = run("plan", "changed", "--base", "HEAD")
+        routed_names = selected_from_plan(routed)
+        check(f"{filename} cross-reference unions direct and enclosing IDs",
+              routed.returncode == 0
+              and routed_names == {
+                  "alpha", "analysis_status", "beta", "doc_links", "knowledge_index"
+              },
+              str(sorted(routed_names)))
+        path.write_text(original, encoding="utf-8")
+
+    findings.write_text(findings_original + "\n## Structural heading\n", encoding="utf-8")
+    structural = run("plan", "changed", "--base", "HEAD")
+    structural_names = selected_from_plan(structural)
+    check("structural aggregate-ledger edits fall back to broad path routing",
+          structural.returncode == 0
+          and {"alpha", "beta", "analysis_status", "doc_links", "knowledge_index"}
+          <= structural_names
+          and "status_wide" in structural_names
+          and "broad fallback (structural change)" in structural.stdout,
+          str(sorted(structural_names)))
+    findings.write_text(findings_original, encoding="utf-8")
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

@@ -324,17 +324,23 @@ pointers and collapses disassembly.
 ## Verification
 
 ```bash
-uv sync --locked              # one-time
-make verify                   # fast tracked-only edit-loop gate
-make verify-full              # exhaustive portable/tracked-repository gate
-make verify-changed           # suites owning the current git diff, regardless of tier
-make verify-local             # full + available proprietary/external + live-project suites
-make verify-required-external # require every pinned external prerequisite
-make verify-agent             # fast core as compact JSON with timings/oracle counts
-make verify-sleigh            # SLEIGH compile + isolated install
-make verify-processor         # fixtures + working-project audits
-make verify-project-parity    # exact working-project inventory vs baseline
-make verify-ghidra            # portable full + Ghidra gates
+uv sync --locked                  # one-time
+tools/test                        # change-aware edit-loop gate
+tools/test <suite-or-prefix>      # exact suite or prefix family
+tools/test list [query]           # discover suites/families, counts, and modes
+tools/test plan [changed|query]   # preview without execution
+tools/test core                   # deliberate broad gate; also full or local
+make verify                       # alias for tools/test
+make verify-core                  # explicit portable core tier
+make verify-full                  # exhaustive portable/tracked-repository gate
+make verify-changed               # alias for the change-aware default
+make verify-local                 # full + available proprietary/external + live-project suites
+make verify-required-external     # require every pinned external prerequisite
+make verify-agent                 # fast core as compact JSON with timings/oracle counts
+make verify-sleigh                # SLEIGH compile + isolated install
+make verify-processor             # fixtures + working-project audits
+make verify-project-parity        # exact working-project inventory vs baseline
+make verify-ghidra                # portable full + Ghidra gates
 ```
 
 `verification.toml` is the sole suite manifest. It owns each
@@ -345,6 +351,35 @@ tracked exhaustive checks can be `full`/`local`; suites backed by ignored or
 proprietary corpora are `local` only. `--required-external` selects every suite
 with a declared external prerequisite independently of tier.
 
+The normal edit loop is selective. It combines uncommitted and untracked paths
+with committed local work since the configured upstream merge-base whenever the
+branch is ahead; `tools/test ... --base <ref>` is the explicit override. A clean
+tree with no local-ahead work reports zero selected suites and exits immediately.
+If HEAD is detached or the current branch has no configured upstream, changed
+mode refuses to guess a committed-work base and requires `--base <ref>`.
+File patterns match exactly, while manifest paths ending in `/` match directory
+descendants. Rename detection retains both the old and new paths. Every changed
+path must have a suite owner (or a declared broad-invalidator policy); a mixed
+owned/unowned diff fails instead of running a partial plan. Changes under
+`firmware/`, or to `verification.toml`,
+`pyproject.toml`, or `uv.lock`, invalidate the complete portable `full` tier.
+
+The aggregate status ledgers use content-aware routing instead of treating each
+whole file as a subsystem input. Changed FINDINGS rows route through their
+`Checked by` verifier references and stable finding IDs; OPEN_QUESTIONS,
+CORRECTIONS, and PRIORITIES entries route through stable IDs found in suite-owned
+tests and documents. Ledger/document infrastructure suites are always included.
+If a changed header or other structural text lacks a stable ID, selection falls
+back to the prior broad file routing. This is a selection optimization only:
+execution remains serial because suites may share `build/work/` and Ghidra state.
+
+An explicitly requested external suite or prefix fails when its declared input
+is absent. The same fail-closed prerequisite rule applies when changed-mode
+routing selects an external-backed suite. Use `--allow-skips` only when an
+intentional optional result is desired; `local` mode retains its normal
+optional-prerequisite behavior. Positional `tools/test <query>` supports prefix
+families; compatibility `--suite` and `make verify-one SUITE=...` remain exact.
+
 The core and full modes deliberately set `RH850_VERIFY_EXTERNAL=0` in verifier
 children. This prevents a nominally portable gate from silently doing extra work
 just because an ignored `software/` corpus happens to exist on one developer
@@ -354,11 +389,11 @@ code; required-external mode turns the same absence into a concise failure.
 Runner summaries keep pass/fail/skip separate, report assertion counts by
 evidence oracle, and print the slowest test durations.
 
-The edit-loop tier is intentionally broad but not exhaustive. In particular, the
-32-KiB Corolla DataFlash all-window cryptographic domain scan remains in
-`full`/`local`: it tests 23,277 unique 16-byte candidates and is valuable evidence,
+The explicit core tier is intentionally broad but not exhaustive. In
+particular, the 32-KiB Corolla DataFlash all-window cryptographic domain scan
+remains in `full`/`local`: it tests 23,277 unique 16-byte candidates and is valuable evidence,
 but recomputing millions of CMAC probes after unrelated edits is not useful.
-`make verify-changed` still routes directly to that suite when its owned inputs or
+The change-aware default still routes directly to that suite when its owned inputs or
 verifier change, so tiering does not hide relevant failures during focused work.
 
 The machine summary keeps `identity_hash`, `documentation_lint`, and

@@ -64,8 +64,11 @@ Quick verification:
 
 ```bash
 uv sync --locked
-make verify       # fast tracked-only edit-loop gate
-make verify-full  # exhaustive portable gate (also used by CI)
+tools/test                 # change-aware edit-loop gate
+tools/test list [query]    # discover suites and prefix families
+tools/test plan changed    # preview selection
+tools/test core            # explicit broad gate; also full or local
+make verify-full           # exhaustive portable gate (also used by CI)
 ```
 
 Explore the committed analysis safely:

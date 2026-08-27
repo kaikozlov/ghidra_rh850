@@ -1,6 +1,9 @@
 # Verification ownership map.
 #
 # Maps subsystem suites to the files that own them, enabling:
+#   tools/test                     — run suites affected by local changes
+#   tools/test <suite-or-prefix>   — run one suite or a prefix family
+#   tools/test list [query]        — discover suite ownership and modes
 #   make verify-one SUITE=<name>    — run a single suite
 #   make verify-changed             — run suites affected by git changes
 #   make verify-agent               — compact JSON summary, full logs on failure
@@ -12,6 +15,7 @@ default_oracle = "raw_bytes"
 skip_exit_code = 77
 gate_glob = "tests/verify_*.py"
 default_modes = ["core", "full", "local"]
+aggregate_infrastructure_suites = ["analysis_status", "doc_links", "knowledge_index"]
 
 [external.techstream_v18]
 path = "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
@@ -3579,7 +3583,7 @@ paths = [
 
 [suite.fast_verify]
 tests = ["tests/verify_fast_verify.py"]
-paths = ["tools/fast_verify.py", "verification.toml", "Makefile"]
+paths = ["tools/fast_verify.py", "tools/test", "verification.toml", "Makefile"]
 oracle = "raw_bytes"
 
 [suite.icus_register_footprint]

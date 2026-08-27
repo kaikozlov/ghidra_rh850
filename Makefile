@@ -71,26 +71,27 @@ test-ghidra-cli:
 	cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --bin ghidra
 	cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --test batch_tests
 
-verify: verify-core
+verify:
+	tools/test
 
 verify-core:
-	$(PYTHON) tools/fast_verify.py --core
+	tools/test core
 
 # Exhaustive portable gate: all tracked repository evidence, no ignored/external corpora.
 verify-full:
-	$(PYTHON) tools/fast_verify.py --full
+	tools/test full
 
 # Local superset: portable full + available proprietary/external + live-project suites.
 verify-local:
-	$(PYTHON) tools/fast_verify.py --local
+	tools/test local
 
 # Fast verification targets (see verification.toml for ownership map).
 verify-one:
 	@if [ -z "$(SUITE)" ]; then echo "Usage: make verify-one SUITE=<name>" >&2; exit 2; fi
-	$(PYTHON) tools/fast_verify.py --suite "$(SUITE)"
+	tools/test --suite "$(SUITE)"
 
 verify-changed:
-	$(PYTHON) tools/fast_verify.py --changed
+	tools/test
 
 verify-agent:
 	$(PYTHON) tools/fast_verify.py --agent
