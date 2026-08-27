@@ -10,7 +10,7 @@
 >
 > **Canonical artifacts:** `data/dataflash_nvm_records.csv`
 >
-> **Verification:** `tests/verify_secoc_nvm.py`, `tests/verify_icus_key_update.py`
+> **Verification:** `tests/verify_secoc.py`, `tests/verify_icus_key_update.py`
 >
 > **Related:** [application-chain](application-chain.md), [dataflash](../../storage/dataflash.md)
 
@@ -29,7 +29,7 @@ known-answer vector, command-5 generation family, command-8 authenticated key
 update, and provisioned-unit experiment are in
 `../../security/secoc/application-chain.md`.
 
-`../tests/verify_secoc_nvm.py` verifies the original NvM correction. The broader 16-object
+`../tests/verify_secoc.py` verifies the original NvM correction. The broader 16-object
 map and key-location correction are checked by `../tests/verify_dataflash_layout.py`.
 
 ## Executive conclusion

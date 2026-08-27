@@ -13,9 +13,11 @@ import os
 import re
 import subprocess
 import sys
+import threading
 import time
 import tomllib
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -52,9 +54,6 @@ AGGREGATE_LEDGERS = {
 }
 PORTABLE_BROAD_INVALIDATORS = (
     "firmware/",
-    "verification.toml",
-    "pyproject.toml",
-    "uv.lock",
 )
 
 
@@ -314,17 +313,25 @@ def _run_git(root: Path, args: list[str]) -> tuple[str | None, str | None]:
     return proc.stdout.strip(), None
 
 
-def resolve_change_base(root: Path, override: str | None) -> tuple[str | None, str | None, str | None]:
+def resolve_change_base(
+    root: Path, override: str | None, *, branch: bool = False
+) -> tuple[str | None, str | None, str | None]:
     if override:
         resolved, error = _run_git(root, ["rev-parse", "--verify", override])
         if error:
             return None, None, error
         return override, f"explicit base {override} ({resolved[:12]})", None
 
-    branch, error = _run_git(root, ["rev-parse", "--abbrev-ref", "HEAD"])
+    if not branch:
+        head, error = _run_git(root, ["rev-parse", "--verify", "HEAD"])
+        if error:
+            return None, None, error
+        return "HEAD", f"working tree against HEAD ({head[:12]})", None
+
+    branch_name, error = _run_git(root, ["rev-parse", "--abbrev-ref", "HEAD"])
     if error:
         return None, None, error
-    if branch == "HEAD":
+    if branch_name == "HEAD":
         return None, None, (
             "Cannot infer committed change base from detached HEAD; "
             "pass --base <ref> explicitly."
@@ -335,7 +342,7 @@ def resolve_change_base(root: Path, override: str | None) -> tuple[str | None, s
     )
     if error or not upstream:
         return None, None, (
-            f"Cannot infer committed change base: branch {branch!r} has no configured "
+            f"Cannot infer committed change base: branch {branch_name!r} has no configured "
             "upstream; pass --base <ref> explicitly."
         )
     ahead_text, error = _run_git(root, ["rev-list", "--count", f"{upstream}..HEAD"])
@@ -352,8 +359,10 @@ def resolve_change_base(root: Path, override: str | None) -> tuple[str | None, s
     return "HEAD", f"working tree against HEAD ({head[:12]})", None
 
 
-def changed_paths(root: Path, base_override: str | None) -> tuple[ChangeSet | None, str | None]:
-    base, description, error = resolve_change_base(root, base_override)
+def changed_paths(
+    root: Path, base_override: str | None, *, branch: bool = False
+) -> tuple[ChangeSet | None, str | None]:
+    base, description, error = resolve_change_base(root, base_override, branch=branch)
     if error:
         return None, error
     diff, error = _run_git(root, ["diff", "--name-only", "--no-renames", base, "--"])
@@ -628,6 +637,17 @@ def plan_changed_suites(
             "portable full invalidator(s): " + ", ".join(sorted(invalidators))
         )
     unmatched = sorted(ordinary_paths - matched_paths - invalidators)
+    retired = [
+        path
+        for path in unmatched
+        if path.startswith("tests/verify_")
+        and path.endswith(".py")
+        and not (root / path).exists()
+    ]
+    if retired:
+        retired_set = set(retired)
+        unmatched = [path for path in unmatched if path not in retired_set]
+        notes.append("retired test file(s): " + ", ".join(retired))
 
     for path in sorted(aggregate_paths):
         routed, note, warning = route_aggregate_ledger(root, manifest, changes, path)
@@ -688,34 +708,72 @@ def summarize(results: list[dict], mode: str) -> dict:
     }
 
 
+def suite_is_serial(name: str, entry: dict) -> bool:
+    """Live Ghidra, external-corpus, and explicitly serial suites stay off the pool."""
+    if entry.get("serial") or entry.get("requires_external"):
+        return True
+    if "_live" in name:
+        return True
+    return any("_live" in Path(test).name for test in entry.get("tests", []))
+
+
+def _report_result(result: dict, *, compact: bool, root: Path,
+                   out_dir: Path | None, print_lock: threading.Lock) -> None:
+    with print_lock:
+        if not compact:
+            print(f"[{result['status'].upper()}] {result['suite']}: {result['test']}")
+            if result.get("detail"):
+                print(f"  {result['detail']}")
+        if result["status"] == "fail":
+            write_failure_log(root, result, out_dir)
+
+
 def execute_suites(root: Path, manifest: dict, suite_names: list[str], *,
                    mode: str, require_external: bool = False,
                    external_root: Path | None = None,
                    out_dir: Path | None = None, compact: bool = False,
-                   allow_optional_external: bool = False) -> int:
+                   allow_optional_external: bool = False,
+                   jobs: int = 0) -> int:
     started = time.monotonic()
-    results = []
+    results: list[dict] = []
     suites = manifest.get("suite", {})
+    print_lock = threading.Lock()
+    workers = jobs if jobs > 0 else (os.cpu_count() or 1)
+
+    def run_one(suite_name: str, test: str, entry: dict) -> dict:
+        suite_allows_external = allow_optional_external
+        if mode in {"changed", "suite", "branch"} and not entry.get("requires_external"):
+            suite_allows_external = False
+        result = run_test(
+            root, test, entry, manifest,
+            require_external=require_external,
+            external_root=external_root,
+            allow_optional_external=suite_allows_external,
+        )
+        result["suite"] = suite_name
+        _report_result(
+            result, compact=compact, root=root, out_dir=out_dir, print_lock=print_lock
+        )
+        return result
+
+    parallel: list[tuple[str, str, dict]] = []
+    serial: list[tuple[str, str, dict]] = []
     for suite_name in suite_names:
         entry = suites[suite_name]
-        suite_allows_external = allow_optional_external
-        if mode in {"changed", "suite"} and not entry.get("requires_external"):
-            suite_allows_external = False
+        bucket = serial if suite_is_serial(suite_name, entry) or workers == 1 else parallel
         for test in entry.get("tests", []):
-            result = run_test(
-                root, test, entry, manifest,
-                require_external=require_external,
-                external_root=external_root,
-                allow_optional_external=suite_allows_external,
-            )
-            result["suite"] = suite_name
-            results.append(result)
-            if not compact:
-                print(f"[{result['status'].upper()}] {suite_name}: {test}")
-                if result.get("detail"):
-                    print(f"  {result['detail']}")
-            if result["status"] == "fail":
-                write_failure_log(root, result, out_dir)
+            bucket.append((suite_name, test, entry))
+
+    if parallel:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = [
+                pool.submit(run_one, suite_name, test, entry)
+                for suite_name, test, entry in parallel
+            ]
+            for future in as_completed(futures):
+                results.append(future.result())
+    for suite_name, test, entry in serial:
+        results.append(run_one(suite_name, test, entry))
 
     summary = summarize(results, mode)
     if compact:
@@ -743,22 +801,42 @@ def execute_suites(root: Path, manifest: dict, suite_names: list[str], *,
     return 1 if summary["failed"] else 0
 
 
+def _dedupe_names(names: list[str]) -> list[str]:
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for name in names:
+        if name in seen:
+            continue
+        seen.add(name)
+        ordered.append(name)
+    return ordered
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Authoritative verification runner")
     parser.add_argument(
         "command", nargs="?",
-        help="suite/prefix, list [query], plan [changed|query], or core/full/local",
+        help="suite/prefix, list [query], plan [changed|branch|query], "
+        "core/full/local/branch, or additional suite names",
     )
-    parser.add_argument("query", nargs="?")
+    parser.add_argument(
+        "query", nargs="*",
+        help="list/plan argument, or extra suite/prefix names",
+    )
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--suite")
     group.add_argument("--changed", action="store_true")
+    group.add_argument("--branch", action="store_true")
     group.add_argument("--core", action="store_true")
     group.add_argument("--full", action="store_true")
     group.add_argument("--local", action="store_true")
     group.add_argument("--required-external", action="store_true")
     group.add_argument("--agent", action="store_true")
     parser.add_argument("--base")
+    parser.add_argument(
+        "--jobs", type=int, default=0,
+        help="portable worker count (0 = CPU count; 1 = serial)",
+    )
     parser.add_argument(
         "--allow-skips", action="store_true",
         help="allow explicitly requested external suites to skip missing prerequisites",
@@ -775,39 +853,54 @@ def main() -> int:
     suites = manifest.get("suite", {})
 
     legacy_selected = any((
-        args.suite, args.changed, args.core, args.full, args.local,
+        args.suite, args.changed, args.branch, args.core, args.full, args.local,
         args.required_external, args.agent,
     ))
     if args.command and legacy_selected:
         parser.error("positional commands cannot be combined with legacy mode flags")
-    if args.query and args.command not in {"list", "plan"}:
-        parser.error("a second positional argument is only valid after list or plan")
 
     command = args.command
+    extra = list(args.query)
     if command == "list":
-        return print_suite_listing(manifest, args.query)
+        if len(extra) > 1:
+            parser.error("list takes at most one query")
+        return print_suite_listing(manifest, extra[0] if extra else None)
 
     plan_only = command == "plan"
-    plan_query = (args.query or "changed") if plan_only else None
-    explicit_query = None
+    plan_query = (extra[0] if extra else "changed") if plan_only else None
+    if plan_only and len(extra) > 1:
+        parser.error("plan takes at most one query")
+    explicit_queries: list[str] = []
     explicit_suite_selected = False
     changed_request = False
+    branch_mode = False
+    names: list[str] = []
+    mode = "changed"
+    required = False
+    compact = False
 
     if plan_only:
         if plan_query == "changed":
             changed_request = True
+        elif plan_query == "branch":
+            changed_request = True
+            branch_mode = True
         elif plan_query in {"core", "full", "local"}:
             names = selected_suites(manifest, plan_query)
             print_plan(manifest, names, label=plan_query)
             return 0
         else:
-            explicit_query = plan_query
+            explicit_queries = [plan_query]
     elif command in {"core", "full", "local"}:
+        if extra:
+            parser.error(f"{command} does not take extra suite names")
         mode = command
         names = selected_suites(manifest, mode)
-        required, compact = False, False
+    elif command == "branch" or args.branch:
+        changed_request = True
+        branch_mode = True
     elif command:
-        explicit_query = command
+        explicit_queries = [command, *extra]
     elif args.suite:
         if args.suite not in suites:
             print(f"Unknown suite: {args.suite}", file=sys.stderr)
@@ -816,32 +909,35 @@ def main() -> int:
         explicit_suite_selected = True
         mode = "suite"
         required = bool(suites[args.suite].get("requires_external")) and not args.allow_skips
-        compact = False
     elif args.changed or not legacy_selected:
         changed_request = True
     elif args.required_external:
-        names, mode, required, compact = (
-            selected_suites(manifest, "required-external"), "required-external", True, False
+        names, mode, required = (
+            selected_suites(manifest, "required-external"), "required-external", True
         )
     elif args.agent:
-        names, mode, required, compact = selected_suites(manifest, "core"), "core", False, True
+        names, mode, compact = selected_suites(manifest, "core"), "core", True
     else:
         mode = "core" if args.core else "full" if args.full else "local"
-        names, required, compact = selected_suites(manifest, mode), False, False
+        names = selected_suites(manifest, mode)
 
-    if explicit_query is not None:
-        names = resolve_query(manifest, explicit_query)
-        if not names:
-            print(f"No suite or suite-prefix matches: {explicit_query}", file=sys.stderr)
-            return 2
+    if explicit_queries:
+        names = []
+        for query in explicit_queries:
+            resolved = resolve_query(manifest, query)
+            if not resolved:
+                print(f"No suite or suite-prefix matches: {query}", file=sys.stderr)
+                return 2
+            names.extend(resolved)
+        names = _dedupe_names(names)
         if plan_only:
-            print_plan(manifest, names, label=f"query {explicit_query!r}")
+            print_plan(manifest, names, label=f"query {explicit_queries[0]!r}")
             return 0
         explicit_external = any(suites[name].get("requires_external") for name in names)
-        mode, required, compact = "suite", explicit_external and not args.allow_skips, False
+        mode, required = "suite", explicit_external and not args.allow_skips
 
     if changed_request:
-        changes, error = changed_paths(root, args.base)
+        changes, error = changed_paths(root, args.base, branch=branch_mode)
         if error:
             print(error, file=sys.stderr)
             return 1
@@ -870,17 +966,17 @@ def main() -> int:
         if plan_only:
             print_plan(
                 manifest, names,
-                label=f"changed; {changes.base_description}", notes=notes,
+                label=f"{'branch' if branch_mode else 'changed'}; {changes.base_description}",
+                notes=notes,
             )
             return 0
         for note in notes:
             print(f"Selection: {note}")
-        mode = "changed"
+        mode = "branch" if branch_mode else "changed"
         required = (
             any(suites[name].get("requires_external") for name in names)
             and not args.allow_skips
         )
-        compact = False
 
     if required:
         missing = {
@@ -896,14 +992,16 @@ def main() -> int:
             return 1
 
     allow_optional_external = mode in {"local", "required-external"} or required
-    if (explicit_query is not None or explicit_suite_selected) and args.allow_skips:
+    if (explicit_queries or explicit_suite_selected) and args.allow_skips:
         allow_optional_external = True
-    if mode == "changed" and any(suites[name].get("requires_external") for name in names):
+    if mode in {"changed", "branch"} and any(
+        suites[name].get("requires_external") for name in names
+    ):
         allow_optional_external = True
     return execute_suites(
         root, manifest, names, mode=mode, require_external=required,
         external_root=args.external_root, out_dir=args.out_dir, compact=compact,
-        allow_optional_external=allow_optional_external,
+        allow_optional_external=allow_optional_external, jobs=args.jobs,
     )
 
 

@@ -275,7 +275,7 @@ application region, so this contract transfers exactly to `8965F1208000`.
 Machine-readable evidence:
 `data/generated/corolla_8965H1202000_power_supply_monitor_gate.json` and
 `data/generated/corolla_8965H1202000_power_supply_monitor_decompiler_evidence.json`;
-deterministic verifier: `tests/verify_corolla_8965H1202000_power_supply_monitor_gate.py`.
+deterministic verifier: `tests/verify_corolla_h.py`.
 
 ### 6.6 Normal H/F Tx exposes a coarse system-mode derivative, not exact cooperative authority
 
@@ -304,7 +304,7 @@ inference, or another ECU assigning additional meaning to the coarse `0x030` bit
 Machine-readable evidence:
 `data/generated/corolla_hf_cooperative_authority_wire_visibility.json` and
 `data/generated/corolla_8965H1202000_cooperative_authority_wire_decompiler_evidence.json`;
-deterministic verifier: `tests/verify_corolla_hf_cooperative_authority_wire_visibility.py`.
+deterministic verifier: `tests/verify_corolla_hf.py`.
 
 ### 6.7 `0x394` states 6–14 now have exact DEM-class/DTC-family provenance
 
@@ -340,7 +340,7 @@ a recoverable-versus-latched live fault/recovery sequence or another independent
 join.
 
 Machine-readable contract: `data/generated/corolla_hf_fault_state_contract.json`;
-deterministic verifier: `tests/verify_corolla_hf_fault_state_contract.py`.
+deterministic verifier: `tests/verify_corolla_hf.py`.
 
 ### 6.8 The `0x351` force-7 override source topology is closed
 
@@ -363,7 +363,7 @@ name for C159B49 and not yet an openpilot temporary/permanent classifier.
 
 Machine-readable contract: `data/generated/corolla_hf_remaining_status_contract.json`;
 raw-body evidence: `data/generated/corolla_8965H1202000_remaining_status_decompiler_evidence.json`;
-deterministic verifier: `tests/verify_corolla_hf_remaining_status_contract.py`.
+deterministic verifier: `tests/verify_corolla_hf.py`.
 
 ## 7. Command ingress: what the complete generated-COM census says
 

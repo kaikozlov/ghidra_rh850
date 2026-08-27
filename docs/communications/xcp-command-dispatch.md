@@ -14,8 +14,8 @@
 > **Canonical artifact:** `data/recovered_callback_tables.csv`
 >
 > **Verification:** `tests/verify_function_discovery.py`,
-> `tests/verify_xcp_security.py`, `tests/verify_xcp_shadow_write_live.py`,
-> `tests/verify_xcp_window_mpu_permissions.py`,
+> `tests/verify_xcp.py`, `tests/verify_xcp_shadow_write_live.py`,
+> `tests/verify_xcp.py`,
 > `tests/verify_exploit_followups.py`, `AssertXcpShadowWriteBoundary.java`,
 > `AssertRecoveredCallbackTables.java`, `AssertFunctionDiscoveryFloor.java`
 
@@ -236,7 +236,7 @@ to `FEBF7C00..FEBFFBFF` immediately before the programming transition remains
 resident in the boot programming runtime. This strengthens COM-005 from
 "post-init application storage" to **cross-application/boot retained executable
 storage**, but still does not supply the missing PC-redirection consumer. See
-SEC-BOOT-012 and `tests/verify_xcp_boot_handoff_retention.py`.
+SEC-BOOT-012 and `tests/verify_xcp.py`.
 
 The same composition is now independently verified in Span's persisted
 2026-08-21 Corolla CodeFlash (`SHA-256

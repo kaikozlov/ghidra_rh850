@@ -261,7 +261,7 @@ Signal 9 is intentionally absent from `application_pack_can_260`: after the
 packed eight-byte buffer reaches CanIf, PDU-0 route flag `1` selects
 `0x800D2 -> 0x7FEAC`, which overwrites the final byte with the additive checksum
 described in §4.7. `AssertApplicationTransmitSemantics.java` pins the live
-reference/call graph, while `verify_application_tx_260_semantics.py` derives
+reference/call graph, while `verify_application_tx.py` derives
 the decisive predicates, scaling instructions, thresholds, and zero stores
 independently from raw CodeFlash.
 
@@ -328,7 +328,7 @@ writes `0xFF` to the signal-35 and signal-36 staging bytes every cycle, so B5
 and B6 are constant `FF` in the recovered normal producer.
 
 Signal 37 remains the CanIf additive checksum at B7. The raw verifier
-`verify_application_tx_262_semantics.py` pins the producer instructions and the
+`verify_application_tx.py` pins the producer instructions and the
 public field geometry, while `AssertApplicationTransmitSemantics.java` now
 locks all 25 RAM-backed `0x262` staging-reference sets plus the decisive
 state-source relationships against the live Ghidra project.

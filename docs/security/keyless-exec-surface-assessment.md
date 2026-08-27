@@ -22,8 +22,7 @@
 > specific searches remain valid work; CORR-101 records the correction after a
 > fresh re-audit found additional unaudited application transport and formatter
 > surfaces. Deterministic regressions are
-> `tests/verify_keyless_exec_surface.py`,
-> `tests/verify_keyless_boot_variant_residuals.py`, and
+> `tests/verify_keyless.py` and
 > `tests/verify_keyless_live_handoff_dma.py`; the fuller Sienna no-auth control-
 > flow audit remains in
 > [bootloader-noauth-pc-pivot-assessment.md](bootloader-noauth-pc-pivot-assessment.md).
@@ -206,7 +205,7 @@ an unknown application-SA key as a dumping/glitching requirement. This result
 does **not** recover the boot-SA root at `0xBFE8`, does not set boot SA state
 `FEBF2B0F`, and does not make boot `0x34`/execution RoutineControl keyless.
 
-Deterministic proof is in `tests/verify_keyless_exec_surface.py`
+Deterministic proof is in `tests/verify_keyless.py`
 (`KEYLESS-006`). The Sienna subsystem-level interpretation is also recorded in
 [application-security-access.md](application-security-access.md).
 
@@ -326,7 +325,7 @@ in the same PSW/TP values plus direct call `0x148E -> 0x1472`.
 
 None of the 18 introduces a request parser, tester-derived pointer, new DMA
 endpoint, retained vector base, credential reader, or alternate boot entry.
-`tests/verify_keyless_boot_variant_residuals.py` pins the raw-byte closure
+`tests/verify_keyless.py` pins the raw-byte closure
 (`KEYLESS-011`).
 
 ## 14. Recovering application SA mainly unlocks BA F7, not boot execution
@@ -400,7 +399,7 @@ area, and the remainder are auto-analysis gaps/data or target-specific callback
 fragments. None of their target-definition chains reads the XCP window. The
 real CALLT concern is independently closed by §10: CTBP is fixed to zero.
 Configured H XCP/async callback tables are separately raw-byte pinned by
-`verify_corolla_8965H1202000_application_callback_tables.py`.
+`tests/verify_corolla_h.py`.
 
 The result is therefore a **bounded target-native negative**, not a claim that
 Ghidra has perfect function ownership for every H byte: no recovered H computed
@@ -444,7 +443,7 @@ view `FEBE0000..FEBFFFFF` and self view `FEDE0000..FEDFFFFF` are same-offset
 aliases separated by `0x200000`; XCP address `FEBF7C00` therefore aliases
 `FEDF7C00`, not a lower `FEBE...` stack or `FEBF7704`. Span's paired PE1/self
 RAM captures are consistent with this same-offset mapping. These facts are
-pinned by `tests/verify_keyless_application_pc_surfaces.py` (`KEYLESS-015`).
+pinned by `tests/verify_keyless.py` (`KEYLESS-015`).
 
 ## 18. Complete configured XCP composition does not escape the write window
 
@@ -468,7 +467,7 @@ Page selection is not fed into a destination calculation. Arithmetic edge
 cases were also checked: multi-byte XCP writes reject interval overflow, and
 the word-aligned `MODIFY_BITS` case cannot wrap `0xFFFFFFFC + 3` through zero.
 
-`tests/verify_keyless_xcp_composition.py` pins this closure (`KEYLESS-016`).
+`tests/verify_keyless.py` pins this closure (`KEYLESS-016`).
 It materially narrows the remaining application-RCE search: a useful future
 primitive must come from a different writer/corruption path, not from reversing
 DAQ direction or composing the currently configured XCP commands.
@@ -496,7 +495,7 @@ alternate ROM monitor, serial/bootstrap entry, or attacker-selected reset PC.
 This is intentionally a **bounded** static conclusion (`KEYLESS-017`): boot-pin
 straps, undocumented on-chip ROM behavior, and fault-injection-only entry modes
 are outside the CodeFlash model. The software facts are pinned by
-`tests/verify_keyless_reset_entry.py`.
+`tests/verify_keyless.py`.
 
 ## 20. Authenticated RAM execution is functional architecture across all three dumps
 
@@ -515,7 +514,7 @@ range-payload execution as observed. Span's retained `security_access_log.json`
 records accepted `send_key` operations for CodeFlash, LocalRAM, and DataFlash
 range dumps, while the same bootstrap profile records the observed target-built
 `FEBF0000/0x1000 -> 10F0 -> FF00` range-payload architecture.
-`tests/verify_keyless_exec_portability.py` pins both the raw body transfer and
+`tests/verify_keyless.py` pins both the raw body transfer and
 this retained field provenance (`KEYLESS-018`).
 
 The portability conclusion is deliberately precise: **the authenticated RAM-
@@ -549,7 +548,7 @@ Thus ordinary segmented application diagnostics do not provide a pre-SID
 buffer overflow on this image. The important methodological result is that this
 was a **new static avenue**, not something implied by KEYLESS-015/016. It is
 pinned as `KEYLESS-019` by
-`tests/verify_keyless_application_diagnostic_transport.py`.
+`tests/verify_keyless.py`.
 
 ## 20.2 The event snapshot formatter is structurally unchecked but configuration-safe on S/H/F
 
@@ -582,7 +581,7 @@ dependent rather than structural**. A future or alternate calibration that
 changes event-mask membership, descriptor count/length, or staging capacity can
 invalidate the arithmetic without changing the unchecked formatter itself.
 This is `KEYLESS-020`, pinned by
-`tests/verify_keyless_application_event_formatter.py` and the compact H-native
+`tests/verify_keyless.py` and the compact H-native
 artifact
 `data/generated/corolla_8965H1202000_keyless_event_formatter_decompiler_evidence.json`.
 

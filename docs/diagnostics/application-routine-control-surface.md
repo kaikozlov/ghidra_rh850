@@ -414,12 +414,12 @@ separate.
 
 ## 9. Verification
 
-- `tests/verify_application_routine_control_surface.py` pins the 19-entry policy, control type,
+- `tests/verify_application_routine_control.py` pins the 19-entry policy, control type,
   descriptor-width, callback, corrected outer SID-0x31 session gate, contrasting
   per-RID speed gates, live lifecycle-reinit bodies, one-shot writes, scheduler
   gate, service-mode chain, and termination structure directly from firmware
   bytes.
-- `tests/verify_application_routine_control_1004_event_history.py` pins the
+- `tests/verify_application_routine_control.py` pins the
   no-speed `FF FF` request, operation-5 coalescing, forced dirty flags, exact
   persistent object set `17/18/19/20/21/23`, completion ordering, repeatability,
   and direct-actuation negative.
@@ -427,7 +427,7 @@ separate.
   `AssertApplicationRoutine1004EventHistory.java` against the accepted project
   to pin op5/event-persistence ownership, selector-3 topology, and the live
   direct-state boundary.
-- `tests/verify_application_routine_control_remaining_controls.py` pins the
+- `tests/verify_application_routine_control.py` pins the
   generated classifications and the `1001/1002/1103/1106/1108/1109` bodies,
   start gates, completion selectors, operation-2 checkpoint set, operation-6
   coalescing, and bounded direct-actuation negative.

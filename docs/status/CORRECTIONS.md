@@ -28,7 +28,7 @@ the mistakes are not re-made.
   raw/XOR55/XORAA objects; `0x758A0/0x785D2` are NvM/DataFlash service
   machinery. Not a key lifecycle at all.
 - **Canonical:** [../security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md);
-  `tests/verify_secoc_nvm.py`.
+  `tests/verify_secoc.py`.
 
 ### CORR-003 — Application GP work-buffer root
 
@@ -93,7 +93,7 @@ the mistakes are not re-made.
   be incompatible with a personalized nonvolatile slot; compiling it out is
   consistent with either personalized or unprovisioned hardware state.
 - **Canonical:** [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
-  §"Compiled-out slot-4 known-answer check"; `tests/verify_secoc_application.py`.
+  §"Compiled-out slot-4 known-answer check"; `tests/verify_secoc.py`.
 
 ### CORR-010 — No SHE key-update path exists in the application
 
@@ -143,7 +143,7 @@ the mistakes are not re-made.
   accept physical DLC 48/64, and are then clamped to 32; the suffix is ignored
   rather than delivered as stale authenticated payload.
 - **Canonical:** [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
-  §"DLC canonicalization"; `tests/verify_secoc_security_properties.py`.
+  §"DLC canonicalization"; `tests/verify_secoc.py`.
 
 ### CORR-013 — `0x6922C` as command-13 key-export completion
 
@@ -252,7 +252,7 @@ the mistakes are not re-made.
   non-standard Renesas restriction, not standard SHE policy.
 - **Canonical:**
   [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md)
-  §1.3; `tests/verify_secoc_application.py`;
+  §1.3; `tests/verify_secoc.py`;
   `build/reference-text/AUTOSAR_TR_SecureHardwareExtensions.txt` §4.4.1.5/§4.4.2.4.
 
 ### CORR-018 — Techstream online portal as an "immobilizer/MAC" path
@@ -777,7 +777,7 @@ the mistakes are not re-made.
 - **Canonical:** [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md) §1.7;
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9.6;
   `tests/verify_codeflash_crc_reconstruction.py`; `tests/verify_community_tooling.py`;
-  `tests/verify_secoc_bypass_patch_point.py`.
+  `tests/verify_secoc.py`.
 
 ### CORR-043 — Runtime patch config was injected into the final 4 KiB upload artifact
 
@@ -1051,7 +1051,7 @@ the mistakes are not re-made.
   [../diagnostics/application-routine-control-surface.md](../diagnostics/application-routine-control-surface.md);
   [../security/application-security-access.md](../security/application-security-access.md);
   `tests/verify_application_diagnostics.py`;
-  `tests/verify_application_routine_control_surface.py`;
+  `tests/verify_application_routine_control.py`;
   `tests/verify_icus_key_update.py`;
   `tests/verify_secoc_command5_experiment.py`.
 
@@ -1099,7 +1099,7 @@ the mistakes are not re-made.
   oracle for DID `1CF4` is unchanged.
 - **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
   [../security/application-security-access.md](../security/application-security-access.md);
-  `tests/verify_application_rdbi_stale_response.py`;
+  `tests/verify_application_rdbi.py`;
   `exploit/followups/application_rdbi_stale_probe.py`.
 
 
@@ -1129,8 +1129,8 @@ the mistakes are not re-made.
   DIAG-APP-016 records the corrected WDBI security surface.
 - **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
   [../security/application-security-access.md](../security/application-security-access.md);
-  `data/application_wdbi_surface.csv`; `tests/verify_application_wdbi_surface.py`;
-  `tests/verify_application_wdbi_callbacks.py`.
+  `data/application_wdbi_surface.csv`; `tests/verify_application_wdbi.py`;
+  `tests/verify_application_wdbi.py`.
 
 ### CORR-057 — WDBI DID `0x2010` writes diagnostic residue, not live runtime command state
 
@@ -1155,7 +1155,7 @@ the mistakes are not re-made.
 - **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
   [../security/application-security-access.md](../security/application-security-access.md);
   `data/application_wdbi_surface.csv`;
-  `tests/verify_application_wdbi_2010_dead_state.py`;
+  `tests/verify_application_wdbi.py`;
   `tests/verify_application_wdbi_2010_dead_state_live.py`.
 
 
@@ -1207,7 +1207,7 @@ the mistakes are not re-made.
 - **Dynamic boundary:** external forwarding of CAN `0x7F7/0x7F8` remains
   unobserved; the default live probe stays read-only.
 - **Canonical:** [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md);
-  `tests/verify_xcp_security.py`; `tests/verify_xcp_shadow_write_live.py`;
+  `tests/verify_xcp.py`; `tests/verify_xcp_shadow_write_live.py`;
   `AssertXcpShadowWriteBoundary.java`.
 
 ### CORR-060 — The XCP write window is supervisor-executable by hardware MPU configuration; "non-executable" was Ghidra analysis metadata
@@ -1239,13 +1239,13 @@ the mistakes are not re-made.
   statement is: the window is attacker-writable
   **supervisor-executable** RAM with **no recovered control-transfer
   consumer** — write capability verified, execution path not recovered.
-- **Deterministic check:** `tests/verify_xcp_window_mpu_permissions.py` pins
+- **Deterministic check:** `tests/verify_xcp.py` pins
   hardware MPU permissions; `AssertXcpShadowWriteBoundary.java` additionally
   pins direct-reference topology, all four recovered write-window base
   materializers, and the bounded-below `FEBF7BB0..FEBF7BEF` adjacent loop.
 - **Canonical:** [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md);
   [FINDINGS.md](FINDINGS.md) COM-005;
-  `tests/verify_xcp_window_mpu_permissions.py`.
+  `tests/verify_xcp.py`.
 
 ### CORR-061 — Command-5 bank output bytes remain private, but the terminal negative state is stock-DTC observable
 
@@ -1361,9 +1361,7 @@ the mistakes are not re-made.
   masquerading as CMP neutralization.
 - **Canonical:** [FINDINGS.md](FINDINGS.md) SECOC-029/043/045/049;
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9;
-  `tests/verify_secoc_acceptance_gate.py`;
-  `tests/verify_secoc_bypass_patch_point.py`;
-  `tests/verify_secoc_semantic_patch_resolver.py`.
+  `tests/verify_secoc.py`; `tests/verify_secoc_semantic_patch_resolver.py`.
 
 ### CORR-065 — RSCFD Tx completion result polarity was still reversed
 
@@ -1790,7 +1788,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   evidence. This does not imply the entire EPS motor/assist system is inactive.
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
-  §7.11; `tests/verify_corolla_8965H1202000_fd_control.py`.
+  §7.11; `tests/verify_corolla_h.py`.
 
 ### CORR-106 — H `0xCEDAE` is 534 bytes, not 533
 
@@ -1804,7 +1802,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   invariant.
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
-  §7.12; `tests/verify_corolla_8965H1202000_steering_supervisor.py`.
+  §7.12; `tests/verify_corolla_h.py`.
 
 ### CORR-075 — H `00F/D7/B6` do not select three independent SecOC keys
 
@@ -1821,7 +1819,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   negatives retain their capture-epoch caveat.
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
-  §7.13; `tests/verify_corolla_8965H1202000_secoc_key_provenance.py`.
+  §7.13; `tests/verify_corolla_h.py`.
 
 
 ### CORR-076 — Techstream monitor 402 is an internal commanded-torque observable, not intrinsically the external `0x2E4` field
@@ -1848,7 +1846,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   torque field.
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
-  §7.34; `tests/verify_corolla_8965H1202000_techstream_correlations.py`.
+  §7.34; `tests/verify_corolla_h.py`.
 
 ### CORR-077 — H's internal Command Value Torque reaches the closed-loop Q-current controller
 
@@ -1871,7 +1869,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   LTA-specific.
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
-  §7.34; `tests/verify_corolla_8965H1202000_techstream_correlations.py`.
+  §7.34; `tests/verify_corolla_h.py`.
 
 ### CORR-079 — CUW routine IDs were displayed in x86 immediate order; standard is not a Sienna-compatible route
 
@@ -2050,7 +2048,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   ingress** despite retaining downstream steering framework.
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
-  §7.35; `tests/verify_corolla_8965H1202000_lta_command_provenance.py`.
+  §7.35; `tests/verify_corolla_h.py`.
 
 ### CORR-086 — the persistent patcher's FACI pacing/status model inherited obsolete community code
 
@@ -2207,7 +2205,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   guesses are not throttled across frames because admission resets the retry
   counters.
 - **Canonical:** [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
-  §5.7; `tests/verify_findings.py`; `tests/verify_secoc_acceptance_gate.py`.
+  §5.7; `tests/verify_findings.py`; `tests/verify_secoc.py`.
 
 ### CORR-091 — NeoNK AES-256 result stands; the prior PKCS#7-gate description did not
 
@@ -2294,7 +2292,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   complete RCE. A separate boot control-transfer primitive is still required.
 - **Canonical:**
   [../architecture/boot-validity-and-flash-lifecycle.md](../architecture/boot-validity-and-flash-lifecycle.md) §4.1;
-  `tests/verify_xcp_boot_handoff_retention.py`; SEC-BOOT-012.
+  `tests/verify_xcp.py`; SEC-BOOT-012.
 
 ### CORR-095 — Span direct PROGRAMMING was no longer unmeasured after the corrected 2026-08-21 preflight
 
@@ -2480,9 +2478,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   statement about reviewed rows only, not global static coverage.
 - **Canonical:**
   [../security/keyless-exec-surface-assessment.md](../security/keyless-exec-surface-assessment.md)
-  §§20.1–20.3; `tests/verify_keyless_application_diagnostic_transport.py`;
-  `tests/verify_keyless_application_event_formatter.py`;
-  `tests/verify_exploit_interest_reviewed_candidates.py`.
+  §§20.1–20.3; `tests/verify_keyless.py`; `tests/verify_exploit_interest_reviewed_candidates.py`.
 
 ### CORR-102 — the legacy CUW software password was not one generic value with an unknown wire consumer
 
@@ -2644,9 +2640,9 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json` v4;
   `data/generated/corolla_8965H1202000_b6_receiver_contract.json` v1;
   `data/generated/corolla_8965H1202000_lta_command_provenance.json` v8;
-  `tests/verify_corolla_8965H1202000_b6_target_angle_ingress.py`;
-  `tests/verify_corolla_8965H1202000_b6_receiver_contract.py`;
-  `tests/verify_corolla_8965H1202000_lta_command_provenance.py`;
+  `tests/verify_corolla_h.py`;
+  `tests/verify_corolla_h.py`;
+  `tests/verify_corolla_h.py`;
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
   §§7.11, 7.14, 7.35.
 
@@ -2722,8 +2718,8 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `data/generated/corolla_8965H1202000_fd_control_interface.json` v2;
   `data/generated/corolla_8965H1202000_openpilot_state_bridge.json` v7;
   `data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json`;
-  `tests/verify_corolla_8965H1202000_fd_control.py`;
-  `tests/verify_corolla_8965H1202000_openpilot_state_bridge.py`;
+  `tests/verify_corolla_h.py`;
+  `tests/verify_corolla_h.py`;
   `tests/verify_span_2025_discord_rlog_opendbc_evidence_external.py`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) §6.
 
@@ -2756,7 +2752,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   `data/generated/corolla_hf_steering_limits.json`;
   `data/generated/corolla_8965H1202000_steering_limits_reference_census.json`;
-  `tests/verify_corolla_hf_steering_limits.py`;
+  `tests/verify_corolla_hf.py`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
 
 
@@ -2788,8 +2784,8 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   `data/generated/corolla_8965H1202000_b6_secoc_verification.json`;
   `data/generated/corolla_hf_b6_competing_sender_arbitration.json`;
-  `tests/verify_corolla_8965H1202000_b6_secoc_verification.py`;
-  `tests/verify_corolla_hf_b6_competing_sender_arbitration.py`;
+  `tests/verify_corolla_h.py`;
+  `tests/verify_corolla_hf.py`;
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.36;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
 
@@ -2816,7 +2812,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   `data/generated/corolla_hf_nonsteering_engagement_state.json`;
   `data/generated/corolla_8965H1202000_openpilot_state_bridge.json`;
-  `tests/verify_corolla_hf_nonsteering_engagement_state.py`;
+  `tests/verify_corolla_hf.py`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) §6.4.
 
 
@@ -2842,7 +2838,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   `data/generated/corolla_8965H1202000_b6_receiver_contract.json`;
   `data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json`;
-  `tests/verify_corolla_8965H1202000_b6_receiver_contract.py`;
+  `tests/verify_corolla_h.py`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
 
 
@@ -2864,7 +2860,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   vocabulary only; no literal OEM field-name join for signal258 is claimed.
 - **Canonical:**
   `data/generated/corolla_8965H1202000_b6_receiver_contract.json`;
-  `tests/verify_corolla_8965H1202000_b6_receiver_contract.py`;
+  `tests/verify_corolla_h.py`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
 
 
@@ -2888,7 +2884,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   a hardware test.
 - **Canonical:**
   `data/generated/corolla_hf_command5_portability.json`;
-  `tests/verify_corolla_hf_command5_portability.py`;
+  `tests/verify_corolla_hf.py`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
 
 
@@ -2910,7 +2906,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   openpilot driver-override policy must still be chosen and dynamically validated.
 - **Canonical:**
   `data/generated/corolla_hf_steering_limits.json`;
-  `tests/verify_corolla_hf_steering_limits.py`;
+  `tests/verify_corolla_hf.py`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
 
 

@@ -72,8 +72,12 @@ check("every external requirement resolves to manifest metadata",
 check("external-backed suites are local-only",
       all(entry.get("modes") == ["local"]
           for entry in suites.values() if entry.get("requires_external")))
-check("exhaustive Corolla DataFlash scan is outside the edit-loop core",
-      suites["albinoelephant_corolla_dataflash"].get("modes") == ["full", "local"])
+check("FINDINGS.md is only a path on ledger infrastructure suites",
+      all("docs/status/FINDINGS.md" not in entry.get("paths", [])
+          or name in {"analysis_status", "knowledge_index"}
+          for name, entry in suites.items()))
+check("lifecycle Ghidra-adjacent suite is serial",
+      suites.get("lifecycle", {}).get("serial") is True)
 manifest_paths = [
     (suite_name, kind, value)
     for suite_name, entry in suites.items()
@@ -123,17 +127,25 @@ for target, command in (
     ("verify-full", "tools/test full"),
     ("verify-local", "tools/test local"),
     ("verify-changed", "tools/test\n"),
+    ("verify-agent", "tools/test --agent"),
+    ("verify-required-external", "tools/test --required-external"),
 ):
     check(f"Make target {target} delegates to canonical tools/test command",
           f"{target}:" in makefile and command in makefile)
-for target, mode in (
-    ("verify-agent", "--agent"),
-    ("verify-required-external", "--required-external"),
-):
-    check(f"Make target {target} delegates to manifest runner",
-          f"{target}:" in makefile and f"tools/fast_verify.py {mode}" in makefile)
 check("Make verify-one preserves exact legacy suite selection",
       'tools/test --suite "$(SUITE)"' in makefile)
+check("Make verify-exploit is one tools/test invocation",
+      "tools/test exploit_surface" in makefile
+      and "tools/fast_verify.py --suite" not in makefile)
+src = RUNNER.read_text(encoding="utf-8")
+check("firmware is the only portable full invalidator",
+      '"firmware/"' in src.split("PORTABLE_BROAD_INVALIDATORS", 1)[1].split(")", 1)[0]
+      and "verification.toml" not in src.split("PORTABLE_BROAD_INVALIDATORS", 1)[1].split(")", 1)[0]
+      and "pyproject.toml" not in src.split("PORTABLE_BROAD_INVALIDATORS", 1)[1].split(")", 1)[0])
+check("portable tests may run concurrently", "ThreadPoolExecutor" in src)
+check("live and external suites stay serial", "def suite_is_serial" in src)
+check("default changed mode diffs working tree against HEAD",
+      "working tree against HEAD" in src and "branch: bool = False" in src)
 
 
 print("\n== isolated runner behavior ==")
@@ -327,10 +339,15 @@ tests = ["tests/verify_full_only.py"]
 paths = ["tests/verify_full_only.py"]
 modes = ["full", "local"]
 
-[suite.local_only]
+[suite.fast_verify]
+tests = ["tests/pass.py"]
+paths = ["verification.toml", "pyproject.toml", "uv.lock"]
+
+[suite.ghidra_live]
 tests = ["tests/verify_local_only.py"]
 paths = ["tests/verify_local_only.py"]
 modes = ["local"]
+serial = true
 """,
         encoding="utf-8",
     )
@@ -459,19 +476,25 @@ modes = ["local"]
     git("config", "--unset", f"branch.{branch}.remote")
     git("config", "--unset", f"branch.{branch}.merge")
     no_upstream = run("plan", "changed")
-    check("branch without upstream requires an explicit committed-change base",
-          no_upstream.returncode == 1
-          and "has no configured upstream" in no_upstream.stderr
-          and "--base <ref>" in no_upstream.stderr)
+    check("working-tree changed mode does not require upstream",
+          no_upstream.returncode == 0)
+    branch_no_upstream = run("plan", "branch")
+    check("branch mode without upstream requires an explicit committed-change base",
+          branch_no_upstream.returncode == 1
+          and "has no configured upstream" in branch_no_upstream.stderr
+          and "--base <ref>" in branch_no_upstream.stderr)
     git("config", f"branch.{branch}.remote", ".")
     git("config", f"branch.{branch}.merge", "refs/heads/upstream-base")
 
     git("checkout", "-q", "--detach", "HEAD")
     detached = run("plan", "changed")
-    check("detached HEAD requires an explicit committed-change base",
-          detached.returncode == 1
-          and "detached HEAD" in detached.stderr
-          and "--base <ref>" in detached.stderr)
+    check("working-tree changed mode works on detached HEAD",
+          detached.returncode == 0)
+    detached_branch = run("plan", "branch")
+    check("branch mode on detached HEAD requires an explicit committed-change base",
+          detached_branch.returncode == 1
+          and "detached HEAD" in detached_branch.stderr
+          and "--base <ref>" in detached_branch.stderr)
     git("checkout", "-q", branch)
 
     (root / "docs/dirty.md").write_text("dirty worktree\n", encoding="utf-8")
@@ -479,14 +502,22 @@ modes = ["local"]
 
     ahead_and_dirty = run("plan", "changed")
     ahead_and_dirty_names = selected_from_plan(ahead_and_dirty)
-    check("default changed detection includes ahead commit, dirty file, and untracked file",
+    check("default changed detection is working tree against HEAD",
           ahead_and_dirty.returncode == 0
-          and {"alpha", "beta", "camry_one"} <= ahead_and_dirty_names
-          and "merge-base with upstream-base" in ahead_and_dirty.stdout,
+          and "alpha" not in ahead_and_dirty_names
+          and {"beta", "camry_one"} <= ahead_and_dirty_names
+          and "working tree against HEAD" in ahead_and_dirty.stdout,
           str(sorted(ahead_and_dirty_names)))
+    branch_plan = run("plan", "branch")
+    branch_names = selected_from_plan(branch_plan)
+    check("branch mode includes ahead commit, dirty file, and untracked file",
+          branch_plan.returncode == 0
+          and {"alpha", "beta", "camry_one"} <= branch_names
+          and "merge-base with upstream-base" in branch_plan.stdout,
+          str(sorted(branch_names)))
     explicit_head = run("plan", "changed", "--base", "HEAD")
     explicit_head_names = selected_from_plan(explicit_head)
-    check("explicit --base overrides upstream merge-base selection",
+    check("explicit --base HEAD matches the working-tree default",
           explicit_head.returncode == 0
           and "alpha" not in explicit_head_names
           and {"beta", "camry_one"} <= explicit_head_names,
@@ -511,6 +542,28 @@ modes = ["local"]
     (root / "docs/dirty.md").write_text("baseline\n", encoding="utf-8")
     (root / "scratch/unowned.txt").unlink()
     (root / "tests/verify_unowned_new.py").unlink()
+
+    (root / "tests/verify_alpha.py").unlink()
+    toml_path = root / "verification.toml"
+    toml_original = toml_path.read_text(encoding="utf-8")
+    toml_path.write_text(
+        toml_original.replace('tests = ["tests/verify_alpha.py"]\n', 'tests = ["tests/pass.py"]\n')
+        .replace('paths = ["docs/ahead.md", "docs/alpha.md", "data/foo.json", "docs/status/FINDINGS.md", "docs/status/OPEN_QUESTIONS.md", "docs/status/CORRECTIONS.md", "docs/status/PRIORITIES.md"]\n',
+                 'paths = ["docs/ahead.md", "docs/alpha.md", "data/foo.json"]\n'),
+        encoding="utf-8",
+    )
+    (root / "docs/dirty.md").write_text("mapped after retirement\n", encoding="utf-8")
+    retired_plan = run("plan", "changed", "--base", "HEAD")
+    check("retired verify_*.py deletions are not ownership misses",
+          retired_plan.returncode == 0
+          and "tests/verify_alpha.py" not in retired_plan.stderr
+          and "retired test file(s): tests/verify_alpha.py" in retired_plan.stdout,
+          retired_plan.stderr.strip() or retired_plan.stdout[-400:])
+    (root / "docs/dirty.md").write_text("baseline\n", encoding="utf-8")
+    toml_path.write_text(toml_original, encoding="utf-8")
+    (root / "tests/verify_alpha.py").write_text(
+        "print('[PASS][raw_bytes] synthetic route')\n", encoding="utf-8"
+    )
 
     (root / "scratch/rename_source.md").rename(root / "docs/renamed.md")
     renamed = run("plan", "changed", "--base", "HEAD")
@@ -547,19 +600,44 @@ modes = ["local"]
           and {"camry_two", "doc_links"} <= selected_from_plan(directory_match))
     (root / "docs/family/item.md").write_text("baseline\n", encoding="utf-8")
 
-    for invalidator in ("firmware/input.bin", "verification.toml", "pyproject.toml", "uv.lock"):
-        path = root / invalidator
+    firmware = root / "firmware/input.bin"
+    firmware_original = firmware.read_text(encoding="utf-8")
+    firmware.write_text(firmware_original + "# changed\n", encoding="utf-8")
+    broad = run("plan", "changed", "--base", "HEAD")
+    broad_names = selected_from_plan(broad)
+    check("firmware/ is a portable full invalidator",
+          broad.returncode == 0
+          and "full_only" in broad_names
+          and "local_only" not in broad_names
+          and "external" not in broad_names,
+          str(sorted(broad_names)))
+    firmware.write_text(firmware_original, encoding="utf-8")
+
+    for owned in ("verification.toml", "pyproject.toml", "uv.lock"):
+        path = root / owned
         original = path.read_text(encoding="utf-8")
         path.write_text(original + "# changed\n", encoding="utf-8")
-        broad = run("plan", "changed", "--base", "HEAD")
-        broad_names = selected_from_plan(broad)
-        check(f"{invalidator} is a portable full invalidator",
-              broad.returncode == 0
-              and "full_only" in broad_names
-              and "local_only" not in broad_names
-              and "external" not in broad_names,
-              str(sorted(broad_names)))
+        mapped = run("plan", "changed", "--base", "HEAD")
+        mapped_names = selected_from_plan(mapped)
+        check(f"{owned} owns fast_verify rather than the full tier",
+              mapped.returncode == 0
+              and mapped_names == {"fast_verify"}
+              and "full_only" not in mapped_names,
+              str(sorted(mapped_names)))
         path.write_text(original, encoding="utf-8")
+
+    unioned = run("plan", "alpha")
+    check("exact suite ownership still plans a single suite",
+          unioned.returncode == 0 and selected_from_plan(unioned) == {"alpha"})
+    unioned_run = run("identity", "legacy")
+    check("multiple suite names are unioned in one invocation",
+          unioned_run.returncode == 0
+          and "[PASS] identity:" in unioned_run.stdout
+          and "[PASS] legacy:" in unioned_run.stdout)
+
+    serial_src = RUNNER.read_text(encoding="utf-8")
+    check("explicit serial flag is honored",
+          "entry.get(\"serial\")" in serial_src or "entry.get('serial')" in serial_src)
 
     findings = root / "docs/status/FINDINGS.md"
     findings_original = findings.read_text(encoding="utf-8")

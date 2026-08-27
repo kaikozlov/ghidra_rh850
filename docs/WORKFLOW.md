@@ -325,15 +325,16 @@ pointers and collapses disassembly.
 
 ```bash
 uv sync --locked                  # one-time
-tools/test                        # change-aware edit-loop gate
+tools/test                        # dirty + untracked vs HEAD; clean tree exits 0
+tools/test branch                 # PR-shaped: all work since upstream merge-base
 tools/test <suite-or-prefix>      # exact suite or prefix family
 tools/test list [query]           # discover suites/families, counts, and modes
-tools/test plan [changed|query]   # preview without execution
+tools/test plan [changed|branch|query] # preview without execution
 tools/test core                   # deliberate broad gate; also full or local
 make verify                       # alias for tools/test
 make verify-core                  # explicit portable core tier
 make verify-full                  # exhaustive portable/tracked-repository gate
-make verify-changed               # alias for the change-aware default
+make verify-changed               # alias for the working-tree default
 make verify-local                 # full + available proprietary/external + live-project suites
 make verify-required-external     # require every pinned external prerequisite
 make verify-agent                 # fast core as compact JSON with timings/oracle counts
@@ -351,18 +352,21 @@ tracked exhaustive checks can be `full`/`local`; suites backed by ignored or
 proprietary corpora are `local` only. `--required-external` selects every suite
 with a declared external prerequisite independently of tier.
 
-The normal edit loop is selective. It combines uncommitted and untracked paths
-with committed local work since the configured upstream merge-base whenever the
-branch is ahead; `tools/test ... --base <ref>` is the explicit override. A clean
-tree with no local-ahead work reports zero selected suites and exits immediately.
-If HEAD is detached or the current branch has no configured upstream, changed
-mode refuses to guess a committed-work base and requires `--base <ref>`.
+The normal edit loop is the working tree versus HEAD: dirty and untracked
+paths only. A clean tree reports zero selected suites and exits 0. No
+upstream is required; detached HEAD is fine. `tools/test branch` is the
+PR-shaped gate (merge-base with the configured upstream). `tools/test ...
+--base <ref>` remains the explicit override. If `branch` cannot find an
+upstream, it refuses to guess and requires `--base <ref>`.
 File patterns match exactly, while manifest paths ending in `/` match directory
 descendants. Rename detection retains both the old and new paths. Every changed
-path must have a suite owner (or a declared broad-invalidator policy); a mixed
-owned/unowned diff fails instead of running a partial plan. Changes under
-`firmware/`, or to `verification.toml`,
-`pyproject.toml`, or `uv.lock`, invalidate the complete portable `full` tier.
+path that still exists must have a suite owner (or a declared broad-invalidator
+policy); a mixed owned/unowned diff fails instead of running a partial plan.
+Deleted `tests/verify_*.py` files that left the manifest are treated as retired
+gates, not ownership misses. Changes under
+`firmware/` invalidate the complete portable `full` tier.
+`verification.toml`, `pyproject.toml`, and `uv.lock` own only
+`[suite.fast_verify]`.
 
 The aggregate status ledgers use content-aware routing instead of treating each
 whole file as a subsystem input. Changed FINDINGS rows route through their
@@ -370,8 +374,10 @@ whole file as a subsystem input. Changed FINDINGS rows route through their
 CORRECTIONS, and PRIORITIES entries route through stable IDs found in suite-owned
 tests and documents. Ledger/document infrastructure suites are always included.
 If a changed header or other structural text lacks a stable ID, selection falls
-back to the prior broad file routing. This is a selection optimization only:
-execution remains serial because suites may share `build/work/` and Ghidra state.
+back to the prior broad file routing. This is a selection optimization only.
+Portable tests run concurrently (default: CPU count). Live Ghidra,
+`requires_external`, and explicitly `serial` suites stay serial so they cannot
+share `build/work/` or poison the pool.
 
 An explicitly requested external suite or prefix fails when its declared input
 is absent. The same fail-closed prerequisite rule applies when changed-mode
@@ -393,8 +399,9 @@ The explicit core tier is intentionally broad but not exhaustive. In
 particular, the 32-KiB Corolla DataFlash all-window cryptographic domain scan
 remains in `full`/`local`: it tests 23,277 unique 16-byte candidates and is valuable evidence,
 but recomputing millions of CMAC probes after unrelated edits is not useful.
-The change-aware default still routes directly to that suite when its owned inputs or
+The working-tree default still routes directly to that suite when its owned inputs or
 verifier change, so tiering does not hide relevant failures during focused work.
+`tools/test core` is a deliberate broad button, not the edit loop.
 
 The machine summary keeps `identity_hash`, `documentation_lint`, and
 `generated_self_check` counts separate from `raw_bytes`, `instruction_semantics`,

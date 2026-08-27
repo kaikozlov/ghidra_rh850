@@ -59,16 +59,16 @@ signatures, types, and overlays. Only the designated integration task updates
 
 ```bash
 uv sync --locked          # one-time environment
-tools/test                # change-aware edit-loop gate, no Ghidra — run this first
-tools/test control_partition # exact suite; prefixes select families
+tools/test                # dirty + untracked vs HEAD; clean tree exits 0
+tools/test branch         # PR-shaped: all work since upstream merge-base
 tools/test list [query]   # discover suites/families, test counts, and modes
-tools/test plan [changed|query] # show selection without executing
+tools/test plan [changed|branch|query] # show selection without executing
 tools/test core           # deliberate broad gate; also full or local
 make verify               # alias for tools/test
 make verify-core          # deliberate portable core gate
 make verify-full          # exhaustive portable tracked-repository gate
 make verify-one SUITE=control_partition  # compatibility exact-suite entry point
-make verify-changed       # alias for the change-aware default
+make verify-changed       # alias for the working-tree default
 make verify-local         # full + locally available external/live suites
 make verify-agent         # core gate with compact JSON summary
 make verify-required-external # require the pinned Techstream corpus
@@ -85,12 +85,18 @@ uv run --locked python tools/build_layout.py migrate-legacy
 
 ## Tool discovery
 
-Remember the task-oriented entry points, not individual implementation files:
-`tools/test` selects deterministic verification; `tools/g` queries the Sienna
-working project; `tools/gtarget` (and target wrappers such as `tools/gcamry`)
-query other configured targets; and `tools/pseudo` searches the persisted
-whole-image corpus. Evidence compaction, cross-variant extraction, and
-working-project exports expose their own discovery commands:
+Remember four task commands, not individual implementation files:
+
+| Task | Command |
+|---|---|
+| Edit-loop tests | `tools/test` |
+| Discover / preview | `tools/test list [word]`, `tools/test plan` |
+| Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
+| Broad gates | `tools/test core` / `full` / `branch` |
+
+`tools/gtarget` (and wrappers such as `tools/gcamry`) query other configured
+targets. Evidence compaction, cross-variant extraction, and working-project
+exports expose their own discovery commands:
 
 ```bash
 uv run --locked python tools/extract_corolla_h_evidence.py list
@@ -98,10 +104,11 @@ uv run --locked python tools/extract_variant_evidence.py list
 tools/export_ghidra_project.sh list
 ```
 
-The 200+ scripts in `tests/` and the subsystem-specific builders/extractors in
-`tools/` remain granular proof and implementation units. They are intentionally
-not a command surface agents must memorize, and semantically distinct proofs
-must not be merged merely to reduce file count.
+Portable proofs that share a family, mode, and oracle live in one module
+(`tests/verify_application_wdbi.py`, `tests/verify_corolla_h.py`, and so on).
+Prefix queries are the memory: `tools/test list application` / `corolla` /
+`techstream`. Merge same-mode same-family portable proofs; keep live,
+external, and distinct safety pipelines as separate files.
 
 ### Interactive Ghidra via tools/g
 

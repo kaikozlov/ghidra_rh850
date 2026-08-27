@@ -377,9 +377,9 @@ length overrun in this calibration. This upgrades MEM-SAFE-006 to a verified
 negative for the configured RDBI length-mismatch class while retaining the known
 48 stale-response DIDs and making no general claim about other Dcm services.
 Generation and verification are in `tools/generate_rdbi_emitted_write_audit.py`
-and `tests/verify_application_rdbi_emitted_write_audit.py`.
+and `tests/verify_application_rdbi.py`.
 
-Verified by `tests/verify_application_rdbi_preflight_bounds.py`.
+Verified by `tests/verify_application_rdbi.py`.
 
 #### Generalized response-disclosure audit (DIAG-APP-025)
 

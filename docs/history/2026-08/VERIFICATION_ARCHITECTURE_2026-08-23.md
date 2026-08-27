@@ -47,7 +47,7 @@ must request `make verify-local` explicitly.
 The runner sets `RH850_VERIFY_EXTERNAL=0` for core/full children and enables it
 only for local/required-external execution.  Three hybrid tests that contain both
 portable assertions and optional raw Techstream corroboration honor that switch:
-`verify_diagnostic_vocabulary.py`, `verify_secoc_fd_sensor_correlations.py`, and
+`verify_diagnostic_vocabulary.py`, `verify_secoc.py`, and
 `verify_techstream_ptshim.py`.
 
 ## Performance after tiering

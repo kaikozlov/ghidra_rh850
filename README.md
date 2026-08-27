@@ -64,9 +64,10 @@ Quick verification:
 
 ```bash
 uv sync --locked
-tools/test                 # change-aware edit-loop gate
+tools/test                 # dirty + untracked vs HEAD; clean tree exits 0
+tools/test branch          # PR-shaped merge-base gate
 tools/test list [query]    # discover suites and prefix families
-tools/test plan changed    # preview selection
+tools/test plan            # preview the working-tree selection
 tools/test core            # explicit broad gate; also full or local
 make verify-full           # exhaustive portable gate (also used by CI)
 ```

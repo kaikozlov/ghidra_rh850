@@ -424,7 +424,7 @@ runtime. Its usefulness is therefore:
 - a convenient command mailbox for a future resident shim;
 - not, by itself, code execution.
 
-See SEC-BOOT-012 and `tests/verify_xcp_boot_handoff_retention.py`.
+See SEC-BOOT-012 and `tests/verify_xcp.py`.
 
 ### 6.3 No independent application relocation loader recovered
 

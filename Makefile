@@ -94,23 +94,16 @@ verify-changed:
 	tools/test
 
 verify-agent:
-	$(PYTHON) tools/fast_verify.py --agent
+	tools/test --agent
 
 verify-exploit:
-	$(PYTHON) tools/fast_verify.py --suite exploit_surface
-	$(PYTHON) tools/fast_verify.py --suite exploit_predicate_semantics
-	$(PYTHON) tools/fast_verify.py --suite secoc_manifest_patcher
-	$(PYTHON) tools/fast_verify.py --suite codeflash_dumper
-	$(PYTHON) tools/fast_verify.py --suite ephemeral_runtime
-	$(PYTHON) tools/fast_verify.py --suite ephemeral_runtime_live_installer
-	$(PYTHON) tools/fast_verify.py --suite ephemeral_runtime_resolver
-	$(PYTHON) tools/fast_verify.py --suite secoc_command5_experiment
-	$(PYTHON) tools/fast_verify.py --suite secoc_mac28_behavioral_proof
-	$(PYTHON) tools/fast_verify.py --suite exploit_followups
-	$(PYTHON) tools/fast_verify.py --suite variant_acquisition_readiness
+	tools/test exploit_surface exploit_predicate_semantics secoc_manifest_patcher \
+		codeflash_dumper ephemeral_runtime ephemeral_runtime_live_installer \
+		ephemeral_runtime_resolver secoc_command5_experiment \
+		secoc_mac28_behavioral_proof exploit_followups variant_acquisition_readiness
 
 verify-required-external:
-	$(PYTHON) tools/fast_verify.py --required-external
+	tools/test --required-external
 
 verify-external verify-corroboration:
 	$(PYTHON) tests/verify_external_corroboration.py --repos-dir "$(EXTERNAL_REPOS_DIR)"

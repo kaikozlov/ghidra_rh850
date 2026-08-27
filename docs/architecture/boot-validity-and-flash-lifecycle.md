@@ -214,7 +214,7 @@ re-derivation against raw bytes; split-CodeFlash file offset == VA):
    into the XCP window immediately before `10 02` remain resident across the
    normal application-to-boot transition. This is a **retention primitive, not
    code execution**: no boot control-transfer consumer into that window is
-   established here. `tests/verify_xcp_boot_handoff_retention.py` pins this
+   established here. `tests/verify_xcp.py` pins this
    composition directly from raw CodeFlash.
 
    A third calibration now independently verifies the same lifetime property.

@@ -54,6 +54,8 @@ for raw in tracked:
     if not any(rel == prefix or rel.startswith(prefix) for prefix in scan_prefixes):
         continue
     path = REPO / rel
+    if not path.is_file():
+        continue
     try:
         text = path.read_text()
     except UnicodeDecodeError:

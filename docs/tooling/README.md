@@ -35,17 +35,19 @@ The small command surface to remember is:
 
 | Task | Entry point |
 |---|---|
-| Select, discover, plan, or run deterministic tests | `tools/test`, `tools/test list [query]` |
-| Query the Sienna working project | `tools/g` |
+| Edit-loop tests | `tools/test` |
+| Discover / preview | `tools/test list [word]`, `tools/test plan` |
+| Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
+| Broad gates | `tools/test core` / `full` / `branch` |
 | Query another configured target | `tools/gtarget` (or a target wrapper such as `tools/gcamry`) |
-| Search persisted whole-image pseudocode and references | `tools/pseudo` |
 | Discover Corolla-H evidence-compaction profiles | `uv run --locked python tools/extract_corolla_h_evidence.py list` |
 | Discover cross-variant evidence modes | `uv run --locked python tools/extract_variant_evidence.py list` |
 | Discover working-project export profiles | `tools/export_ghidra_project.sh list` |
 
-The 200+ `tests/verify_*.py` files and subsystem-specific builders/extractors
-are implementation and proof units, not commands users or agents must memorize.
-They stay granular where their semantics or evidence boundaries differ.
+Family modules (`tests/verify_application_wdbi.py`, `tests/verify_corolla_h.py`,
+and so on) group same-mode same-family portable proofs. Prefix queries are the
+memory: `tools/test list application` / `corolla` / `techstream`. Keep live,
+external, and distinct safety pipelines as separate files.
 
 The repeated Corolla-H corpus-compaction scripts are consolidated behind one
 profile-driven command:

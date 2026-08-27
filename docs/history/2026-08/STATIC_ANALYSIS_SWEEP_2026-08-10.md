@@ -1597,7 +1597,7 @@ Final gate after commit `5fa9ba3`:
   failures
 - live semantic-coverage regeneration -> exact tracked parity
 - normalized project inventory -> exact tracked parity
-- `verify_secoc_fd_sensor_correlations.py` -> 23/23
+- `verify_secoc.py` -> 23/23
 
 ### Remaining boundary after the follow-up
 

@@ -12,8 +12,8 @@
 > interpretation, and untested physical-attack hypotheses are kept separate
 >
 > **Verification:** `tests/verify_icus_key_recovery_surface.py`,
-> `tests/verify_icus_software_paths.py`, `tests/verify_secoc_application.py`,
-> `tests/verify_secoc_security_properties.py`
+> `tests/verify_icus_software_paths.py`, `tests/verify_secoc.py`,
+> `tests/verify_secoc.py`
 >
 > **Related:** [software-path assessment](software-path-assessment.md),
 > [application chain](application-chain.md),

@@ -1,11 +1,12 @@
 # Verification ownership map.
 #
 # Maps subsystem suites to the files that own them, enabling:
-#   tools/test                     — run suites affected by local changes
+#   tools/test                     — dirty + untracked vs HEAD
+#   tools/test branch              — PR-shaped: merge-base with upstream
 #   tools/test <suite-or-prefix>   — run one suite or a prefix family
 #   tools/test list [query]        — discover suite ownership and modes
 #   make verify-one SUITE=<name>    — run a single suite
-#   make verify-changed             — run suites affected by git changes
+#   make verify-changed             — alias for tools/test
 #   make verify-agent               — compact JSON summary, full logs on failure
 #
 # This is the authoritative suite manifest. Add each gate exactly once.
@@ -96,7 +97,6 @@ paths = [
   "data/p1me_product_memory.json",
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/tooling/community-dataflash-secoc.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
 ]
 oracle = "raw_bytes"
@@ -124,7 +124,6 @@ tests = ["tests/verify_deadline_monitor_dispatch_tables.py"]
 paths = [
   "tests/verify_deadline_monitor_dispatch_tables.py",
   "docs/communications/application-rx.md",
-  "docs/status/FINDINGS.md",
   "ghidra/scripts/seed/SeedDispatchProvenFunctionTables.java",
   "ghidra/scripts/verify/AssertFunctionDiscoveryFloor.java",
 ]
@@ -181,7 +180,6 @@ paths = [
   "docs/security/secoc/software-path-assessment.md",
   "docs/tooling/community-patch-target-analysis.md",
   "community/README.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
 ]
 
@@ -194,7 +192,6 @@ paths = [
   "data/application_proprietary_ba_surface.csv",
   "docs/diagnostics/application-proprietary-ba.md",
   "docs/security/application-security-access.md",
-  "docs/status/FINDINGS.md",
 ]
 
 [suite.application_diagnostics]
@@ -205,39 +202,26 @@ paths = [
   "tools/generate_application_diagnostic_map.py",
 ]
 
-[suite.application_routine_control_surface]
-tests = ["tests/verify_application_routine_control_surface.py"]
-paths = [
-  "docs/diagnostics/application-routine-control-surface.md",
-  "docs/diagnostics/application.md",
-  "docs/security/application-security-access.md",
-  "data/application_routine_control_surface.csv",
-  "tools/generate_application_routine_control_surface.py",
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-]
-
-[suite.application_routine_control_1004_event_history]
-tests = [
-  "tests/verify_application_routine_control_1004_event_history.py",
-]
+[suite.application_routine_control]
+tests = ["tests/verify_application_routine_control.py"]
 oracle = "cfg_dataflow"
 paths = [
-  "tools/generate_application_routine_control_surface.py",
-  "data/application_routine_control_surface.csv",
-  "data/checkpoint_payload_map.csv",
-  "data/object15_reachability.csv",
-  "tests/verify_application_routine_control_1004_event_history.py",
-  "ghidra/scripts/verify/AssertApplicationRoutine1004EventHistory.java",
-  "tests/verify_motor_actuation_boundary.py",
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
   "docs/diagnostics/application-routine-control-surface.md",
   "docs/diagnostics/application.md",
   "docs/security/application-security-access.md",
   "docs/storage/dataflash.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
   "docs/status/ANALYSIS_STATUS.md",
+  "data/application_routine_control_surface.csv",
+  "data/checkpoint_payload_map.csv",
+  "data/object15_reachability.csv",
+  "tools/generate_application_routine_control_surface.py",
+  "tests/verify_application_routine_control.py",
+  "tests/verify_motor_actuation_boundary.py",
+  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
+  "ghidra/scripts/verify/AssertApplicationRoutine1004EventHistory.java",
+  "ghidra/scripts/verify/AssertApplicationRoutineRemainingControls.java",
 ]
 
 [suite.application_routine_control_1004_event_history_live]
@@ -250,7 +234,7 @@ paths = [
   "data/application_routine_control_surface.csv",
   "data/checkpoint_payload_map.csv",
   "data/object15_reachability.csv",
-  "tests/verify_application_routine_control_1004_event_history.py",
+  "tests/verify_application_routine_control.py",
   "ghidra/scripts/verify/AssertApplicationRoutine1004EventHistory.java",
   "tests/verify_motor_actuation_boundary.py",
   "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
@@ -258,30 +242,6 @@ paths = [
   "docs/diagnostics/application.md",
   "docs/security/application-security-access.md",
   "docs/storage/dataflash.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
-  "docs/status/ANALYSIS_STATUS.md",
-]
-
-[suite.application_routine_control_remaining_controls]
-tests = [
-  "tests/verify_application_routine_control_remaining_controls.py",
-]
-oracle = "cfg_dataflow"
-paths = [
-  "tools/generate_application_routine_control_surface.py",
-  "data/application_routine_control_surface.csv",
-  "data/object15_reachability.csv",
-  "tests/verify_application_routine_control_remaining_controls.py",
-  "ghidra/scripts/verify/AssertApplicationRoutineRemainingControls.java",
-  "tests/verify_motor_actuation_boundary.py",
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-  "docs/diagnostics/application-routine-control-surface.md",
-  "docs/diagnostics/application.md",
-  "docs/security/application-security-access.md",
-  "docs/storage/dataflash.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
   "docs/status/ANALYSIS_STATUS.md",
@@ -296,7 +256,7 @@ paths = [
   "tools/generate_application_routine_control_surface.py",
   "data/application_routine_control_surface.csv",
   "data/object15_reachability.csv",
-  "tests/verify_application_routine_control_remaining_controls.py",
+  "tests/verify_application_routine_control.py",
   "ghidra/scripts/verify/AssertApplicationRoutineRemainingControls.java",
   "tests/verify_motor_actuation_boundary.py",
   "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
@@ -304,7 +264,6 @@ paths = [
   "docs/diagnostics/application.md",
   "docs/security/application-security-access.md",
   "docs/storage/dataflash.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
   "docs/status/ANALYSIS_STATUS.md",
@@ -322,7 +281,6 @@ paths = [
   "docs/diagnostics/application-async-operation-queue.md",
   "docs/diagnostics/application.md",
   "docs/diagnostics/README.md",
-  "docs/status/FINDINGS.md",
   "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
   "docs/status/ANALYSIS_STATUS.md",
 ]
@@ -339,7 +297,6 @@ paths = [
   "docs/diagnostics/application-async-operation-queue.md",
   "docs/diagnostics/application.md",
   "docs/diagnostics/README.md",
-  "docs/status/FINDINGS.md",
   "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
   "docs/status/ANALYSIS_STATUS.md",
 ]
@@ -350,7 +307,6 @@ paths = [
   "tests/verify_application_read_memory_by_address.py",
   "docs/diagnostics/application.md",
   "docs/security/secoc/software-path-assessment.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "exploit/followups/application_rmba_probe.py",
 ]
@@ -363,7 +319,6 @@ paths = [
   "data/generated/decompilations.jsonl",
   "docs/diagnostics/application.md",
   "docs/security/secoc/software-path-assessment.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
 ]
@@ -408,38 +363,39 @@ paths = [
   "ghidra/scripts/annotate/AnnotateApplicationReceive.java",
 ]
 
-[suite.application_wdbi_callbacks]
-tests = ["tests/verify_application_wdbi_callbacks.py"]
-paths = [
-  "data/application_wdbi_callbacks.csv",
-  "tests/verify_application_wdbi_callbacks.py",
-  "docs/diagnostics/application.md",
-  "docs/security/application-security-access.md",
-  "docs/status/CORRECTIONS.md",
-]
-
-[suite.application_wdbi_surface]
-tests = [
-  "tests/verify_application_wdbi_surface.py",
-]
+[suite.application_wdbi]
+tests = ["tests/verify_application_wdbi.py"]
 oracle = "cfg_dataflow"
 paths = [
+  "data/application_wdbi_callbacks.csv",
   "data/application_wdbi_surface.csv",
-  "tests/verify_application_wdbi_surface.py",
+  "data/object15_reachability.csv",
+  "data/application_routine_control_surface.csv",
+  "data/application_diagnostic_map.csv",
+  "data/generated/21140bbd65e530a9/diagnostic_vocabulary.json",
+  "tests/verify_application_wdbi.py",
+  "tests/verify_motor_actuation_boundary.py",
+  "tests/verify_application_routine_control.py",
   "ghidra/scripts/verify/AssertApplicationWdbiSurface.java",
+  "ghidra/scripts/verify/AssertApplicationWdbi0204Maintenance.java",
+  "ghidra/scripts/verify/AssertApplicationWdbi2010DeadState.java",
+  "ghidra/scripts/verify/AssertApplicationWdbi2012Lifecycle.java",
+  "ghidra/scripts/verify/AssertApplicationWdbi2013And2014Controls.java",
+  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
+  "ghidra/scripts/verify/AssertProjectInvariants.java",
   "ghidra/scripts/annotate/AnnotateApplicationDiagnostics.java",
   "ghidra/scripts/seed/SeedApplicationDiagnosticFunctions.java",
-  "ghidra/scripts/verify/AssertProjectInvariants.java",
   "tools/generate_application_diagnostic_map.py",
   "tools/diagnostics/firmware_tables.py",
   "tools/diagnostics/correlate_vocabulary.py",
-  "data/application_diagnostic_map.csv",
-  "data/generated/21140bbd65e530a9/diagnostic_vocabulary.json",
   "docs/diagnostics/application.md",
+  "docs/diagnostics/application-routine-control-surface.md",
   "docs/security/application-security-access.md",
-  "docs/status/FINDINGS.md",
+  "docs/storage/dataflash.md",
   "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/status/ANALYSIS_STATUS.md",
 ]
 
 [suite.application_wdbi_surface_live]
@@ -449,7 +405,7 @@ oracle = "cfg_dataflow"
 paths = [
   "tests/verify_application_wdbi_surface_live.py",
   "data/application_wdbi_surface.csv",
-  "tests/verify_application_wdbi_surface.py",
+  "tests/verify_application_wdbi.py",
   "ghidra/scripts/verify/AssertApplicationWdbiSurface.java",
   "ghidra/scripts/annotate/AnnotateApplicationDiagnostics.java",
   "ghidra/scripts/seed/SeedApplicationDiagnosticFunctions.java",
@@ -461,30 +417,8 @@ paths = [
   "data/generated/21140bbd65e530a9/diagnostic_vocabulary.json",
   "docs/diagnostics/application.md",
   "docs/security/application-security-access.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
-]
-
-[suite.application_wdbi_0204_maintenance]
-tests = [
-  "tests/verify_application_wdbi_0204_maintenance.py",
-]
-oracle = "cfg_dataflow"
-paths = [
-  "data/application_wdbi_surface.csv",
-  "data/object15_reachability.csv",
-  "tests/verify_application_wdbi_0204_maintenance.py",
-  "ghidra/scripts/verify/AssertApplicationWdbi0204Maintenance.java",
-  "tests/verify_motor_actuation_boundary.py",
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-  "docs/diagnostics/application.md",
-  "docs/security/application-security-access.md",
-  "docs/storage/dataflash.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
-  "docs/status/ANALYSIS_STATUS.md",
 ]
 
 [suite.application_wdbi_0204_maintenance_live]
@@ -495,34 +429,14 @@ paths = [
   "tests/verify_application_wdbi_0204_maintenance_live.py",
   "data/application_wdbi_surface.csv",
   "data/object15_reachability.csv",
-  "tests/verify_application_wdbi_0204_maintenance.py",
+  "tests/verify_application_wdbi.py",
   "ghidra/scripts/verify/AssertApplicationWdbi0204Maintenance.java",
   "tests/verify_motor_actuation_boundary.py",
   "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
   "docs/diagnostics/application.md",
   "docs/security/application-security-access.md",
   "docs/storage/dataflash.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
-  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
-  "docs/status/ANALYSIS_STATUS.md",
-]
-
-[suite.application_wdbi_2010_dead_state]
-tests = [
-  "tests/verify_application_wdbi_2010_dead_state.py",
-]
-oracle = "cfg_dataflow"
-paths = [
-  "data/application_wdbi_surface.csv",
-  "tests/verify_application_wdbi_2010_dead_state.py",
-  "ghidra/scripts/verify/AssertApplicationWdbi2010DeadState.java",
-  "tests/verify_motor_actuation_boundary.py",
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-  "docs/diagnostics/application.md",
-  "docs/security/application-security-access.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
   "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
   "docs/status/ANALYSIS_STATUS.md",
 ]
@@ -534,34 +448,15 @@ oracle = "cfg_dataflow"
 paths = [
   "tests/verify_application_wdbi_2010_dead_state_live.py",
   "data/application_wdbi_surface.csv",
-  "tests/verify_application_wdbi_2010_dead_state.py",
+  "tests/verify_application_wdbi.py",
   "ghidra/scripts/verify/AssertApplicationWdbi2010DeadState.java",
   "tests/verify_motor_actuation_boundary.py",
   "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
   "docs/diagnostics/application.md",
   "docs/security/application-security-access.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
   "docs/status/ANALYSIS_STATUS.md",
-]
-
-[suite.application_wdbi_2012_lifecycle]
-tests = [
-  "tests/verify_application_wdbi_2012_lifecycle.py",
-]
-oracle = "cfg_dataflow"
-paths = [
-  "data/application_wdbi_surface.csv",
-  "tests/verify_application_wdbi_2012_lifecycle.py",
-  "ghidra/scripts/verify/AssertApplicationWdbi2012Lifecycle.java",
-  "tests/verify_motor_actuation_boundary.py",
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-  "docs/diagnostics/application.md",
-  "docs/security/application-security-access.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
 
 [suite.application_wdbi_2012_lifecycle_live]
@@ -571,34 +466,12 @@ oracle = "cfg_dataflow"
 paths = [
   "tests/verify_application_wdbi_2012_lifecycle_live.py",
   "data/application_wdbi_surface.csv",
-  "tests/verify_application_wdbi_2012_lifecycle.py",
+  "tests/verify_application_wdbi.py",
   "ghidra/scripts/verify/AssertApplicationWdbi2012Lifecycle.java",
   "tests/verify_motor_actuation_boundary.py",
   "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
   "docs/diagnostics/application.md",
   "docs/security/application-security-access.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
-]
-
-[suite.application_wdbi_2013_2014_controls]
-tests = [
-  "tests/verify_application_wdbi_2013_2014_controls.py",
-]
-oracle = "cfg_dataflow"
-paths = [
-  "data/application_wdbi_surface.csv",
-  "data/application_routine_control_surface.csv",
-  "tests/verify_application_wdbi_2013_2014_controls.py",
-  "ghidra/scripts/verify/AssertApplicationWdbi2013And2014Controls.java",
-  "tests/verify_motor_actuation_boundary.py",
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-  "tests/verify_application_routine_control_surface.py",
-  "docs/diagnostics/application.md",
-  "docs/diagnostics/application-routine-control-surface.md",
-  "docs/security/application-security-access.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
@@ -611,15 +484,14 @@ paths = [
   "tests/verify_application_wdbi_2013_2014_controls_live.py",
   "data/application_wdbi_surface.csv",
   "data/application_routine_control_surface.csv",
-  "tests/verify_application_wdbi_2013_2014_controls.py",
+  "tests/verify_application_wdbi.py",
   "ghidra/scripts/verify/AssertApplicationWdbi2013And2014Controls.java",
   "tests/verify_motor_actuation_boundary.py",
   "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-  "tests/verify_application_routine_control_surface.py",
+  "tests/verify_application_routine_control.py",
   "docs/diagnostics/application.md",
   "docs/diagnostics/application-routine-control-surface.md",
   "docs/security/application-security-access.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
@@ -653,70 +525,16 @@ paths = [
   "docs/communications/application-tx.md",
   "docs/tooling/techstream.md",
   "docs/tooling/techstream-ddb-pipeline.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
 ]
 
-[suite.corolla_8965h_techstream_correlations]
-tests = ["tests/verify_corolla_8965H1202000_techstream_correlations.py"]
-requires_external = ["techstream_v18"]
-modes = ["local"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_corolla_8965H1202000_techstream_correlations.py",
-  "tools/extract_corolla_h_techstream_steering_evidence.py",
-  "tools/build_corolla_h_techstream_correlations.py",
-  "data/generated/corolla_8965H1202000_techstream_steering_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_techstream_correlations.json",
-  "data/generated/corolla_8965H1202000_application_diagnostics_diff.json",
-  "data/generated/corolla_8965H1202000_application_rx_diff.json",
-  "data/generated/techstream_v18/priority_steering_ddb_semantics.json",
-  "data/generated/techstream_v18/application_interface_correlations.json",
-  "data/generated/techstream_v18/toyota_master_routes.json",
-  "data/generated/u023a87_monitor_map.json",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/tooling/techstream.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
 
-[suite.corolla_8965h_lta_command_provenance]
-tests = ["tests/verify_corolla_8965H1202000_lta_command_provenance.py"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_corolla_8965H1202000_lta_command_provenance.py",
-  "tools/extract_corolla_h_lta_command_provenance_evidence.py",
-  "tools/build_corolla_h_lta_command_provenance.py",
-  "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_lta_command_provenance.json",
-  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-  "data/generated/corolla_8965H1202000_fd_control_interface.json",
-  "data/generated/corolla_8965H1202000_steering_nested.json",
-  "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",
-  "data/external/opendbc/toyota_dbc_facts.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "tools/extract_corolla_h_lta_census.py",
-  "data/generated/corolla_8965H1202000_lta_command_provenance_census.json",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/reference/generated-artifacts.md",
-]
 
 [suite.application_transmit]
 tests = [
   "tests/verify_application_transmit.py",
   "tests/verify_application_tx_producer_evidence.py",
-  "tests/verify_application_tx_260_semantics.py",
-  "tests/verify_application_tx_262_semantics.py",
-  "tests/verify_application_tx_remaining_semantics.py",
+  "tests/verify_application_tx.py",
 ]
 paths = [
   "docs/communications/application-tx.md",
@@ -746,7 +564,6 @@ paths = ["docs/security/secoc/"]
 tests = ["tests/verify_icus_stage7_static.py"]
 paths = [
   "docs/security/secoc/",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "ghidra/scripts/verify/AssertIcusStage7Static.java",
 ]
@@ -809,7 +626,6 @@ tests = [
 ]
 paths = [
   "docs/security/memory-safety-audit.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "data/memory_safety_proof_matrix.csv",
   "tools/memory_safety_semantics.py",
@@ -825,7 +641,6 @@ paths = [
   "docs/security/ephemeral-secoc-bypass.md",
   "docs/security/README.md",
   "docs/communications/xcp-command-dispatch.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
@@ -853,7 +668,6 @@ paths = [
   "exploit/README.md",
   "docs/security/ephemeral-secoc-bypass.md",
   "docs/security/README.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
@@ -882,7 +696,6 @@ paths = [
   "exploit/ephemeral_runtime/",
   "docs/security/ephemeral-secoc-bypass.md",
   "docs/tooling/ephemeral-runtime-semantic-resolver.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
 ]
@@ -1004,22 +817,20 @@ paths = [
   "tests/verify_application_rdbi_disclosure_boundary.py",
   "docs/diagnostics/application.md",
   "docs/security/application-security-access.md",
-  "docs/status/FINDINGS.md",
 ]
 
-[suite.application_rdbi_stale_response]
-tests = [
-  "tests/verify_application_rdbi_stale_response.py",
-]
+[suite.application_rdbi]
+tests = ["tests/verify_application_rdbi.py"]
 oracle = "cfg_dataflow"
 paths = [
-  "tests/verify_application_rdbi_stale_response.py",
+  "tests/verify_application_rdbi.py",
   "ghidra/scripts/verify/AssertApplicationRdbiStaleResponse.java",
   "exploit/followups/application_rdbi_stale_probe.py",
   "exploit/followups/README.md",
+  "tools/generate_rdbi_emitted_write_audit.py",
+  "data/generated/rdbi_emitted_write_audit.json",
   "docs/diagnostics/application.md",
   "docs/security/application-security-access.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/CORRECTIONS.md",
 ]
@@ -1030,28 +841,31 @@ modes = ["local"]
 oracle = "cfg_dataflow"
 paths = [
   "tests/verify_application_rdbi_stale_response_live.py",
-  "tests/verify_application_rdbi_stale_response.py",
+  "tests/verify_application_rdbi.py",
   "ghidra/scripts/verify/AssertApplicationRdbiStaleResponse.java",
   "exploit/followups/application_rdbi_stale_probe.py",
   "exploit/followups/README.md",
   "docs/diagnostics/application.md",
   "docs/security/application-security-access.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/CORRECTIONS.md",
 ]
 
-[suite.xcp_security]
-tests = ["tests/verify_xcp_security.py"]
-oracle = "cfg_dataflow"
+[suite.xcp]
+tests = ['tests/verify_xcp.py']
+oracle = 'cfg_dataflow'
 paths = [
-  "docs/communications/xcp-command-dispatch.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/CORRECTIONS.md",
-  "tests/verify_xcp_security.py",
+  'docs/communications/xcp-command-dispatch.md',
+  'docs/status/OPEN_QUESTIONS.md',
+  'docs/status/CORRECTIONS.md',
+  'tests/verify_xcp.py',
+  'docs/architecture/boot-validity-and-flash-lifecycle.md',
+  'docs/security/ephemeral-secoc-bypass.md',
+  'exploit/followups/xcp_shadow_write_plan.py',
+  'tests/verify_xcp_shadow_write_live.py',
+  'exploit/followups/README.md',
+  'exploit/followups/',
 ]
-
 [suite.xcp_shadow_write_live]
 tests = ["tests/verify_xcp_shadow_write_live.py"]
 oracle = "cfg_dataflow"
@@ -1060,34 +874,25 @@ paths = [
   "tests/verify_xcp_shadow_write_live.py",
   "ghidra/scripts/verify/AssertXcpShadowWriteBoundary.java",
   "docs/communications/xcp-command-dispatch.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/CORRECTIONS.md",
 ]
 
-[suite.secoc_application]
-tests = [
-  "tests/verify_secoc_application.py",
-  "tests/verify_secoc_rx_control_surface.py",
-  "tests/verify_secoc_fd_sensor_correlations.py",
-]
+[suite.secoc]
+tests = ['tests/verify_secoc.py']
+oracle = 'raw_bytes'
 paths = [
-  "docs/security/secoc/application-chain.md",
-  "docs/communications/application-rx.md",
-  "data/secoc_rx_control_surface.csv",
-  "data/generated/techstream_v18/secoc_fd_sensor_correlations.json",
-  "tools/techstream/extract_secoc_fd_sensor_correlations.py",
-  "ghidra/scripts/verify/AssertSecocRxControlSurface.java",
+  'docs/security/secoc/application-chain.md',
+  'docs/communications/application-rx.md',
+  'data/secoc_rx_control_surface.csv',
+  'data/generated/techstream_v18/secoc_fd_sensor_correlations.json',
+  'tools/techstream/extract_secoc_fd_sensor_correlations.py',
+  'ghidra/scripts/verify/AssertSecocRxControlSurface.java',
+  'tests/verify_secoc.py',
+  'docs/security/secoc/key-storage-and-lifecycle.md',
+  'docs/security/secoc/',
+  'firmware/',
 ]
-
-[suite.secoc_nvm]
-tests = ["tests/verify_secoc_nvm.py"]
-paths = ["docs/security/secoc/key-storage-and-lifecycle.md"]
-
-[suite.secoc_security_properties]
-tests = ["tests/verify_secoc_security_properties.py"]
-paths = ["docs/security/secoc/"]
-
 [suite.security_consumers]
 tests = ["tests/verify_security_consumers.py"]
 paths = ["data/application_security_consumers.csv"]
@@ -1108,7 +913,6 @@ paths = [
   "data/external/opendbc/toyota_porting_contract.json",
   "docs/architecture/toyota-openpilot-porting-contract.md",
   "docs/architecture/README.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
   "data/toyota_eps_variant_matrix.csv",
@@ -1128,9 +932,7 @@ paths = [
   "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json",
   "external-references.lock.json",
   "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/status/FINDINGS.md",
 ]
-
 
 [suite.analysis_targets]
 tests = ["tests/verify_analysis_targets.py"]
@@ -1177,7 +979,6 @@ paths = [
   "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin",
   "software/locks/gtsplus.json",
   "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/FINDINGS.md",
 ]
 
 [suite.camry_8965f3307000_gtsplus_external]
@@ -1196,57 +997,31 @@ paths = [
   "software/locks/gtsplus.json",
 ]
 
-[suite.camry_2026_tsk_baseline]
-tests = ["tests/verify_camry_2026_tsk_baseline.py"]
-oracle = "dynamic_trace"
+[suite.camry_2026]
+tests = ['tests/verify_camry_2026.py']
+oracle = 'raw_bytes'
 paths = [
-  "tests/verify_camry_2026_tsk_baseline.py",
-  "tools/analyze_camry_2026_baseline.py",
-  "data/generated/camry_2026_tsk_baseline.json",
-  "targets/camry-2026/",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/FINDINGS.md",
-  "data/toyota_eps_variant_matrix.csv",
-  "external-references.lock.json",
+  'tests/verify_camry_2026.py',
+  'tools/analyze_camry_2026_baseline.py',
+  'data/generated/camry_2026_tsk_baseline.json',
+  'targets/camry-2026/',
+  'docs/variants/camry-2026-live-baseline.md',
+  'data/toyota_eps_variant_matrix.csv',
+  'external-references.lock.json',
+  'tools/analyze_camry_2026_nrtd_p5.py',
+  'data/generated/camry_2026_nrtd_p5.json',
+  'targets/camry-2026/raw-20260826/NRTD_MANIFEST.txt',
+  'targets/camry-2026/README.md',
+  'docs/status/PRIORITIES.md',
+  'exploit/findings_coverage.json',
+  'tools/analyze_camry_2026_ready_gear.py',
+  'data/generated/camry_2026_ready_gear.json',
+  'targets/camry-2026/raw-20260826/READY_GEAR_MANIFEST.txt',
+  'targets/camry-2026/raw-20260826/camry_ready_gear_capture.py',
+  'targets/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz',
+  'targets/camry-2026/raw-20260826/camry_b_capture.py',
+  'targets/camry-2026/raw-20260826/camry_ready_b_20260826.json.gz',
 ]
-
-[suite.camry_2026_nrtd_p5]
-tests = ["tests/verify_camry_2026_nrtd_p5.py"]
-oracle = "dynamic_trace"
-paths = [
-  "tests/verify_camry_2026_nrtd_p5.py",
-  "tools/analyze_camry_2026_nrtd_p5.py",
-  "data/generated/camry_2026_nrtd_p5.json",
-  "targets/camry-2026/raw-20260826/NRTD_MANIFEST.txt",
-  "targets/camry-2026/",
-  "targets/camry-2026/README.md",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/PRIORITIES.md",
-  "external-references.lock.json",
-  "exploit/findings_coverage.json",
-]
-
-[suite.camry_2026_ready_gear]
-tests = ["tests/verify_camry_2026_ready_gear.py"]
-oracle = "dynamic_trace"
-paths = [
-  "tests/verify_camry_2026_ready_gear.py",
-  "tools/analyze_camry_2026_ready_gear.py",
-  "data/generated/camry_2026_ready_gear.json",
-  "targets/camry-2026/raw-20260826/READY_GEAR_MANIFEST.txt",
-  "targets/camry-2026/raw-20260826/camry_ready_gear_capture.py",
-  "targets/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz",
-  "targets/camry-2026/raw-20260826/camry_b_capture.py",
-  "targets/camry-2026/raw-20260826/camry_ready_b_20260826.json.gz",
-  "targets/camry-2026/README.md",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/PRIORITIES.md",
-  "external-references.lock.json",
-  "exploit/findings_coverage.json",
-]
-
 [suite.camry_8965f3307000_codeflash]
 tests = ["tests/verify_camry_8965F3307000_codeflash.py"]
 oracle = "raw_bytes"
@@ -1270,7 +1045,6 @@ paths = [
   "data/generated/techstream_v18/p5_lateral_control_semantics.json",
   "data/toyota_eps_variant_matrix.csv",
   "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/FINDINGS.md",
   "docs/status/PRIORITIES.md",
   "external-references.lock.json",
   "exploit/findings_coverage.json",
@@ -1291,7 +1065,6 @@ paths = [
   "exploit/patcher/README.md",
   "software/locks/toyota-cuw-corpus.json",
   "docs/security/secoc/application-chain.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "community/README.md",
 ]
@@ -1326,7 +1099,6 @@ paths = [
   "firmware/RH850_P1M-E_CodeFlash.bin",
   "exploit/patcher/",
   "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/FINDINGS.md",
   "docs/status/PRIORITIES.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/reference/generated-artifacts.md",
@@ -1350,7 +1122,6 @@ paths = [
   "data/p1me_product_memory.json",
   "data/generated/corolla_8965H1202000_techstream_correlations.json",
   "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/FINDINGS.md",
   "docs/status/PRIORITIES.md",
   "exploit/findings_coverage.json",
 ]
@@ -1368,7 +1139,6 @@ paths = [
   "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json",
   "firmware/camry-8965F3307000/CodeFlash.bin",
   "docs/variants/camry-2026-tss3-opendbc-port.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/status/PRIORITIES.md",
   "docs/reference/generated-artifacts.md",
@@ -1392,7 +1162,6 @@ paths = [
   "data/generated/corolla_8965H1202000_techstream_correlations.json",
   "docs/variants/camry-2026-tss3-fault-status.md",
   "docs/variants/README.md",
-  "docs/status/FINDINGS.md",
   "docs/status/PRIORITIES.md",
   "docs/reference/generated-artifacts.md",
   "exploit/findings_coverage.json",
@@ -1408,7 +1177,6 @@ paths = [
   "targets/camry-2026/raw-20260826/secoc-recovery/",
   "targets/camry-2026/README.md",
   "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/FINDINGS.md",
 ]
 
 [suite.camry_8965f3307000_command5_runtime_carrier]
@@ -1434,7 +1202,6 @@ paths = [
   "data/variant_ram_exec_requirements.json",
   "docs/variants/camry-2026-live-baseline.md",
   "exploit/ephemeral_runtime/README.md",
-  "docs/status/FINDINGS.md",
   "docs/status/PRIORITIES.md",
 ]
 
@@ -1458,7 +1225,6 @@ paths = [
   "data/variant_ram_exec_requirements.json",
   "docs/variants/camry-2026-live-baseline.md",
   "docs/variants/README.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
@@ -1477,7 +1243,6 @@ paths = [
   "community/spanconstant/README.md",
   "community/README.md",
   "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/status/FINDINGS.md",
 ]
 
 [suite.corolla_tss3_opendbc_readiness]
@@ -1510,86 +1275,103 @@ paths = [
   "community/spanconstant/spanconstant_tsk.zip",
   "docs/architecture/toyota-openpilot-porting-contract.md",
   "docs/variants/toyota-eps-variant-comparison.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
   "exploit/findings_coverage.json",
 ]
 
-[suite.corolla_hf_nonsteering_engagement_state]
-tests = ["tests/verify_corolla_hf_nonsteering_engagement_state.py"]
-oracle = "generated_self_check"
+[suite.corolla_hf]
+tests = ['tests/verify_corolla_hf.py']
+oracle = 'raw_bytes'
 paths = [
-  "tests/verify_corolla_hf_nonsteering_engagement_state.py",
-  "tools/build_corolla_hf_nonsteering_engagement_state.py",
-  "tools/extract_corolla_h_nonsteering_engagement_evidence.py",
-  "tools/techstream/extract_tss3_cruise_engagement_semantics.py",
-  "tools/techstream/extract_tss3_cruise_live_transport.py",
-  "data/generated/corolla_hf_nonsteering_engagement_state.json",
-  "data/generated/corolla_8965H1202000_nonsteering_engagement_decompiler_evidence.json",
-  "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json",
-  "data/generated/techstream_v18/tss3_cruise_live_transport.json",
-  "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-  "data/generated/corolla_8965H1202000_application_rx_diff.json",
-  "data/generated/corolla_8965H1202000_techstream_correlations.json",
-  "data/generated/corolla_2023_public_route_opendbc_evidence.json",
-  "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
-  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
-
-
-[suite.corolla_8965h_power_supply_monitor_gate]
-tests = ["tests/verify_corolla_8965H1202000_power_supply_monitor_gate.py"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_corolla_8965H1202000_power_supply_monitor_gate.py",
-  "tools/extract_corolla_h_power_supply_monitor_evidence.py",
-  "tools/build_corolla_h_power_supply_monitor_gate.py",
-  "data/generated/corolla_8965H1202000_power_supply_monitor_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_power_supply_monitor_gate.json",
-  "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_techstream_correlations.json",
-  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-  "exploit/findings_coverage.json",
-]
-
-[suite.corolla_hf_cooperative_authority_wire_visibility]
-tests = ["tests/verify_corolla_hf_cooperative_authority_wire_visibility.py"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_corolla_hf_cooperative_authority_wire_visibility.py",
-  "tools/extract_corolla_h_cooperative_authority_wire_evidence.py",
-  "tools/build_corolla_hf_cooperative_authority_wire_visibility.py",
-  "data/generated/corolla_8965H1202000_cooperative_authority_wire_decompiler_evidence.json",
-  "data/generated/corolla_hf_cooperative_authority_wire_visibility.json",
-  "data/generated/corolla_8965H1202000_fd_control_interface.json",
-  "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
-  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-  "exploit/findings_coverage.json",
+  'tests/verify_corolla_hf.py',
+  'tools/build_corolla_hf_nonsteering_engagement_state.py',
+  'tools/extract_corolla_h_nonsteering_engagement_evidence.py',
+  'tools/techstream/extract_tss3_cruise_engagement_semantics.py',
+  'tools/techstream/extract_tss3_cruise_live_transport.py',
+  'data/generated/corolla_hf_nonsteering_engagement_state.json',
+  'data/generated/corolla_8965H1202000_nonsteering_engagement_decompiler_evidence.json',
+  'data/generated/techstream_v18/tss3_cruise_engagement_semantics.json',
+  'data/generated/techstream_v18/tss3_cruise_live_transport.json',
+  'data/generated/corolla_8965H1202000_openpilot_state_bridge.json',
+  'data/generated/corolla_8965H1202000_application_rx_diff.json',
+  'data/generated/corolla_8965H1202000_techstream_correlations.json',
+  'data/generated/corolla_2023_public_route_opendbc_evidence.json',
+  'data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json',
+  'data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json',
+  'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin',
+  'docs/architecture/toyota-openpilot-porting-contract.md',
+  'docs/variants/corolla-h-f-openpilot-state-bridge.md',
+  'docs/status/CORRECTIONS.md',
+  'docs/status/OPEN_QUESTIONS.md',
+  'docs/status/PRIORITIES.md',
+  'tools/extract_corolla_h_cooperative_authority_wire_evidence.py',
+  'tools/build_corolla_hf_cooperative_authority_wire_visibility.py',
+  'data/generated/corolla_8965H1202000_cooperative_authority_wire_decompiler_evidence.json',
+  'data/generated/corolla_hf_cooperative_authority_wire_visibility.json',
+  'data/generated/corolla_8965H1202000_fd_control_interface.json',
+  'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin',
+  'community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin',
+  'docs/reference/generated-artifacts.md',
+  'exploit/findings_coverage.json',
+  'tools/build_corolla_hf_secoc_00f_freshness_bridge.py',
+  'data/generated/corolla_hf_secoc_00f_freshness_bridge.json',
+  'data/generated/corolla_8965H1202000_b6_secoc_verification.json',
+  'data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json',
+  'data/generated/corolla_h_sienna_secoc_structural_comparison.json',
+  'community/albinoelephant/can_oracle.ndjson',
+  'community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst',
+  'external-references.lock.json',
+  'docs/variants/corolla-2023-us-public-route.md',
+  'docs/security/secoc/sender-implementation.md',
+  'tools/build_corolla_hf_fault_state_contract.py',
+  'tools/build_corolla_h_techstream_correlations.py',
+  'data/generated/corolla_hf_fault_state_contract.json',
+  'data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json',
+  'tools/extract_corolla_h_remaining_status_evidence.py',
+  'tools/build_corolla_hf_remaining_status_contract.py',
+  'data/generated/corolla_8965H1202000_remaining_status_decompiler_evidence.json',
+  'data/generated/corolla_hf_remaining_status_contract.json',
+  'tools/build_corolla_hf_steering_limits.py',
+  'tools/extract_corolla_h_tms053_followup_evidence.py',
+  'data/generated/corolla_8965H1202000_steering_limits_decompiler_evidence.json',
+  'data/generated/corolla_8965H1202000_steering_limits_reference_census.json',
+  'data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json',
+  'data/generated/corolla_hf_steering_limits.json',
+  'data/generated/corolla_8965H1202000_panda_lateral_safety_decompiler_evidence.json',
+  'data/generated/corolla_8965H1202000_b6_target_angle_ingress.json',
+  'data/generated/corolla_8965F1208000_low_calibration_delta.json',
+  'tools/extract_corolla_h_b6_competing_sender_evidence.py',
+  'tools/build_corolla_hf_b6_competing_sender_arbitration.py',
+  'data/generated/corolla_8965H1202000_b6_competing_sender_decompiler_evidence.json',
+  'data/generated/corolla_hf_b6_competing_sender_arbitration.json',
+  'data/generated/corolla_8965H1202000_b6_full_receiver_contract.json',
+  'data/generated/corolla_8965H1202000_b6_receiver_contract.json',
+  'tools/build_corolla_hf_command5_portability.py',
+  'data/generated/corolla_hf_command5_portability.json',
+  'data/generated/corolla_8965H1202000_xcp.json',
+  'data/variant_ram_exec_requirements.json',
+  'exploit/ephemeral_runtime/corolla_hf_direct_canary.py',
+  'exploit/ephemeral_runtime/corolla_hf_canary.c',
+  'exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin',
+  'exploit/ephemeral_runtime/audited_corolla_hf_canary_build.json',
+  'exploit/common/payload_package.py',
+  'community/albinoelephant/telescope/probe.json',
+  'exploit/ephemeral_runtime/README.md',
+  'exploit/ephemeral_runtime/corolla_hf_direct_command5.py',
+  'exploit/ephemeral_runtime/corolla_hf_command5_proxy.c',
+  'exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin',
+  'exploit/ephemeral_runtime/audited_corolla_hf_command5_proxy_build.json',
+  'exploit/followups/xcp_read_probe.py',
+  'exploit/followups/xcp_shadow_write_plan.py',
+  'data/generated/corolla_hf_command5_runtime_carrier.json',
+  'tools/extract_corolla_hf_command5_runtime_carrier_evidence.py',
+  'data/generated/corolla_hf_command5_runtime_carrier_evidence.json',
+  'tools/build_corolla_hf_command5_runtime_carrier.py',
+  'exploit/ephemeral_runtime/build_corolla_hf_command5_carrier.py',
+  'tools/build_corolla_hf_panda_lateral_safety_contract.py',
+  'data/generated/corolla_hf_panda_lateral_safety_contract.json',
 ]
 
 [suite.tss3_cruise_live_transport_external]
@@ -1605,7 +1387,6 @@ paths = [
   "data/generated/techstream_v18/p5_lateral_control_semantics.json",
   "docs/tooling/techstream.md",
   "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
@@ -1658,6 +1439,32 @@ paths = [
   "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json",
 ]
 
+[suite.corolla_hf_regen]
+tests = ["tests/verify_corolla_hf_regen.py"]
+modes = ["full", "local"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_corolla_hf_regen.py",
+  "tools/build_corolla_hf_command5_runtime_carrier.py",
+  "data/generated/corolla_hf_command5_runtime_carrier.json",
+  "tools/build_corolla_hf_steering_limits.py",
+  "data/generated/corolla_hf_steering_limits.json",
+  "tools/build_corolla_hf_nonsteering_engagement_state.py",
+  "data/generated/corolla_hf_nonsteering_engagement_state.json",
+  "tools/build_corolla_hf_cooperative_authority_wire_visibility.py",
+  "data/generated/corolla_hf_cooperative_authority_wire_visibility.json",
+  "tools/build_corolla_hf_b6_competing_sender_arbitration.py",
+  "data/generated/corolla_hf_b6_competing_sender_arbitration.json",
+  "tools/build_corolla_hf_fault_state_contract.py",
+  "data/generated/corolla_hf_fault_state_contract.json",
+  "tools/build_corolla_hf_panda_lateral_safety_contract.py",
+  "data/generated/corolla_hf_panda_lateral_safety_contract.json",
+  "tools/build_corolla_hf_remaining_status_contract.py",
+  "data/generated/corolla_hf_remaining_status_contract.json",
+  "tools/build_corolla_hf_command5_portability.py",
+  "data/generated/corolla_hf_command5_portability.json",
+]
+
 [suite.corolla_hf_secoc_00f_freshness_bridge_external]
 tests = ["tests/verify_corolla_hf_secoc_00f_freshness_bridge_external.py"]
 oracle = "independent_external_artifact"
@@ -1681,7 +1488,6 @@ paths = [
   "tests/verify_corolla_tss3_opendbc_readonly_external.py",
   "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst",
   "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/status/FINDINGS.md",
   "docs/status/PRIORITIES.md",
 ]
 
@@ -1695,7 +1501,6 @@ paths = [
   "data/generated/corolla_pre_tss3_opendbc_message_comparison.json",
   "docs/variants/corolla-pre-tss3-openpilot-message-comparison.md",
   "docs/variants/README.md",
-  "docs/status/FINDINGS.md",
   "docs/status/PRIORITIES.md",
   "exploit/findings_coverage.json",
   "data/generated/corolla_8965H1202000_fd_control_interface.json",
@@ -1706,108 +1511,9 @@ paths = [
   "external-references.lock.json",
 ]
 
-[suite.corolla_8965h_b6_target_angle_ingress]
-tests = ["tests/verify_corolla_8965H1202000_b6_target_angle_ingress.py"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_corolla_8965H1202000_b6_target_angle_ingress.py",
-  "tools/extract_corolla_h_b6_target_angle_evidence.py",
-  "tools/build_corolla_h_b6_target_angle_ingress.py",
-  "data/generated/corolla_8965H1202000_b6_target_angle_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-  "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-  "data/generated/corolla_8965H1202000_techstream_correlations.json",
-  "data/generated/techstream_v18/p5_lateral_control_semantics.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
-  "docs/variants/corolla-pre-tss3-openpilot-message-comparison.md",
-  "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "exploit/findings_coverage.json",
-]
 
-[suite.corolla_8965h_b6_receiver_contract]
-tests = ["tests/verify_corolla_8965H1202000_b6_receiver_contract.py"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_corolla_8965H1202000_b6_receiver_contract.py",
-  "tools/extract_corolla_h_b6_receiver_contract_evidence.py",
-  "tools/extract_corolla_h_tms053_followup_evidence.py",
-  "tools/build_corolla_h_b6_receiver_contract.py",
-  "data/generated/corolla_8965H1202000_b6_receiver_contract_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-  "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
-  "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_techstream_correlations.json",
-  "data/generated/techstream_v18/p5_lateral_control_semantics.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
-  "docs/variants/corolla-pre-tss3-openpilot-message-comparison.md",
-  "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-  "exploit/findings_coverage.json",
-]
 
-[suite.corolla_8965h_b6_full_receiver_contract]
-tests = ["tests/verify_corolla_8965H1202000_b6_full_receiver_contract.py"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_corolla_8965H1202000_b6_full_receiver_contract.py",
-  "tools/extract_corolla_h_b6_full_receiver_evidence.py",
-  "tools/build_corolla_h_b6_full_receiver_contract.py",
-  "data/generated/corolla_8965H1202000_b6_full_receiver_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
-  "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-  "data/generated/corolla_8965H1202000_fd_control_interface.json",
-  "data/generated/corolla_8965H1202000_lta_command_provenance.json",
-  "data/generated/corolla_8965H1202000_lta_command_provenance_census.json",
-  "data/generated/corolla_8965H1202000_secoc_key_provenance.json",
-  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
-  "docs/variants/corolla-pre-tss3-openpilot-message-comparison.md",
-  "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-  "exploit/findings_coverage.json",
-]
 
-[suite.corolla_8965h_b6_secoc_verification]
-tests = ["tests/verify_corolla_8965H1202000_b6_secoc_verification.py"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_corolla_8965H1202000_b6_secoc_verification.py",
-  "tools/extract_corolla_h_b6_secoc_verification_evidence.py",
-  "tools/build_corolla_h_b6_secoc_verification.py",
-  "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_b6_secoc_verification.json",
-  "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
-  "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-  "data/generated/corolla_8965H1202000_secoc_key_provenance.json",
-  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-  "exploit/findings_coverage.json",
-]
 
 [suite.corolla_h_sienna_secoc_structural_comparison]
 tests = ["tests/verify_corolla_h_sienna_secoc_structural_comparison.py"]
@@ -1824,280 +1530,12 @@ paths = [
   "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
   "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
   "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
   "docs/reference/generated-artifacts.md",
   "exploit/findings_coverage.json",
 ]
 
-[suite.corolla_hf_secoc_00f_freshness_bridge]
-tests = ["tests/verify_corolla_hf_secoc_00f_freshness_bridge.py"]
-oracle = "generated_self_check"
-paths = [
-  "tests/verify_corolla_hf_secoc_00f_freshness_bridge.py",
-  "tools/build_corolla_hf_secoc_00f_freshness_bridge.py",
-  "data/generated/corolla_hf_secoc_00f_freshness_bridge.json",
-  "data/generated/corolla_8965H1202000_b6_secoc_verification.json",
-  "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json",
-  "data/generated/corolla_h_sienna_secoc_structural_comparison.json",
-  "data/generated/corolla_2023_public_route_opendbc_evidence.json",
-  "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
-  "community/albinoelephant/can_oracle.ndjson",
-  "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst",
-  "external-references.lock.json",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/security/secoc/sender-implementation.md",
-  "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-  "exploit/findings_coverage.json",
-]
-
-[suite.corolla_hf_fault_state_contract]
-tests = ["tests/verify_corolla_hf_fault_state_contract.py"]
-oracle = "generated_self_check"
-paths = [
-  "tests/verify_corolla_hf_fault_state_contract.py",
-  "tools/build_corolla_hf_fault_state_contract.py",
-  "tools/build_corolla_h_techstream_correlations.py",
-  "data/generated/corolla_hf_fault_state_contract.json",
-  "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_techstream_correlations.json",
-  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "exploit/findings_coverage.json",
-]
-
-[suite.corolla_hf_remaining_status_contract]
-tests = ["tests/verify_corolla_hf_remaining_status_contract.py"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_corolla_hf_remaining_status_contract.py",
-  "tools/extract_corolla_h_remaining_status_evidence.py",
-  "tools/build_corolla_hf_remaining_status_contract.py",
-  "data/generated/corolla_8965H1202000_remaining_status_decompiler_evidence.json",
-  "data/generated/corolla_hf_remaining_status_contract.json",
-  "data/generated/corolla_8965H1202000_fd_control_interface.json",
-  "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
-  "data/generated/corolla_8965H1202000_techstream_correlations.json",
-  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "exploit/findings_coverage.json",
-]
-
-[suite.corolla_h_openpilot_state_bridge]
-tests = ["tests/verify_corolla_8965H1202000_openpilot_state_bridge.py"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_corolla_8965H1202000_openpilot_state_bridge.py",
-  "tools/extract_corolla_h_openpilot_state_bridge_evidence.py",
-  "tools/build_corolla_h_openpilot_state_bridge.py",
-  "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-  "data/generated/corolla_hf_fault_state_contract.json",
-  "data/generated/corolla_hf_remaining_status_contract.json",
-  "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_fd_control_interface.json",
-  "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
-  "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",
-  "data/generated/corolla_8965H1202000_lta_command_provenance.json",
-  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-  "data/generated/corolla_8965H1202000_techstream_correlations.json",
-  "data/generated/corolla_8965H1202000_structural_function_transfer.json",
-  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
-  "data/external/opendbc/toyota_corolla_pre_tss3_contract.json",
-  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
-  "docs/variants/corolla-pre-tss3-openpilot-message-comparison.md",
-  "docs/variants/README.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "exploit/findings_coverage.json",
-]
-
-[suite.corolla_hf_steering_limits]
-tests = ["tests/verify_corolla_hf_steering_limits.py"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_corolla_hf_steering_limits.py",
-  "tools/build_corolla_hf_steering_limits.py",
-  "tools/extract_corolla_h_tms053_followup_evidence.py",
-  "data/generated/corolla_8965H1202000_steering_limits_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_steering_limits_reference_census.json",
-  "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json",
-  "data/generated/corolla_hf_steering_limits.json",
-  "data/generated/corolla_8965H1202000_panda_lateral_safety_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-  "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-  "data/generated/corolla_8965F1208000_low_calibration_delta.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
-  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
-  "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-  "exploit/findings_coverage.json",
-]
-
-[suite.corolla_hf_b6_competing_sender_arbitration]
-tests = ["tests/verify_corolla_hf_b6_competing_sender_arbitration.py"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_corolla_hf_b6_competing_sender_arbitration.py",
-  "tools/extract_corolla_h_b6_competing_sender_evidence.py",
-  "tools/build_corolla_hf_b6_competing_sender_arbitration.py",
-  "data/generated/corolla_8965H1202000_b6_competing_sender_decompiler_evidence.json",
-  "data/generated/corolla_hf_b6_competing_sender_arbitration.json",
-  "data/generated/corolla_8965H1202000_b6_secoc_verification.json",
-  "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
-  "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-  "data/generated/corolla_hf_steering_limits.json",
-  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
-  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
-  "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-  "exploit/findings_coverage.json",
-]
-
-[suite.corolla_hf_command5_portability]
-tests = ["tests/verify_corolla_hf_command5_portability.py"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_corolla_hf_command5_portability.py",
-  "tools/build_corolla_hf_command5_portability.py",
-  "tools/extract_corolla_h_tms053_followup_evidence.py",
-  "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json",
-  "data/generated/corolla_hf_command5_portability.json",
-  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
-  "data/generated/corolla_8965H1202000_xcp.json",
-  "data/variant_ram_exec_requirements.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
-  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
-  "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-  "exploit/findings_coverage.json",
-]
-
-
-[suite.corolla_hf_direct_canary]
-tests = ["tests/verify_corolla_hf_direct_canary.py"]
-paths = [
-  "tests/verify_corolla_hf_direct_canary.py",
-  "exploit/ephemeral_runtime/corolla_hf_direct_canary.py",
-  "exploit/ephemeral_runtime/corolla_hf_canary.c",
-  "exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin",
-  "exploit/ephemeral_runtime/audited_corolla_hf_canary_build.json",
-  "exploit/common/payload_package.py",
-  "community/albinoelephant/telescope/probe.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "exploit/ephemeral_runtime/README.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
-oracle = "dynamic_trace"
-
-[suite.corolla_hf_direct_command5]
-tests = ["tests/verify_corolla_hf_direct_command5.py"]
-oracle = "dynamic_trace"
-paths = [
-  "tests/verify_corolla_hf_direct_command5.py",
-  "exploit/ephemeral_runtime/corolla_hf_direct_command5.py",
-  "exploit/ephemeral_runtime/corolla_hf_direct_canary.py",
-  "exploit/ephemeral_runtime/corolla_hf_command5_proxy.c",
-  "exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin",
-  "exploit/ephemeral_runtime/audited_corolla_hf_command5_proxy_build.json",
-  "exploit/common/payload_package.py",
-  "exploit/followups/xcp_read_probe.py",
-  "exploit/followups/xcp_shadow_write_plan.py",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "data/generated/corolla_hf_command5_runtime_carrier.json",
-  "exploit/ephemeral_runtime/README.md",
-  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
-
-[suite.corolla_hf_command5_runtime_carrier]
-tests = ["tests/verify_corolla_hf_command5_runtime_carrier.py"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_corolla_hf_command5_runtime_carrier.py",
-  "tools/extract_corolla_hf_command5_runtime_carrier_evidence.py",
-  "data/generated/corolla_hf_command5_runtime_carrier_evidence.json",
-  "tools/build_corolla_hf_command5_runtime_carrier.py",
-  "data/generated/corolla_hf_command5_runtime_carrier.json",
-  "exploit/ephemeral_runtime/build_corolla_hf_command5_carrier.py",
-  "exploit/ephemeral_runtime/corolla_hf_command5_proxy.c",
-  "exploit/ephemeral_runtime/corolla_hf_canary.c",
-  "exploit/ephemeral_runtime/audited_corolla_hf_command5_proxy_build.json",
-  "exploit/ephemeral_runtime/audited_corolla_hf_canary_build.json",
-  "exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin",
-  "exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin",
-  "data/generated/corolla_hf_command5_portability.json",
-  "data/variant_ram_exec_requirements.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
-  "exploit/ephemeral_runtime/README.md",
-  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
-  "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/security/secoc/sender-implementation.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-  "exploit/findings_coverage.json",
-]
-
-[suite.corolla_hf_panda_lateral_safety_contract]
-tests = ["tests/verify_corolla_hf_panda_lateral_safety_contract.py"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_corolla_hf_panda_lateral_safety_contract.py",
-  "tools/build_corolla_hf_panda_lateral_safety_contract.py",
-  "data/generated/corolla_8965H1202000_panda_lateral_safety_decompiler_evidence.json",
-  "data/generated/corolla_hf_panda_lateral_safety_contract.json",
-  "data/generated/corolla_hf_steering_limits.json",
-  "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-  "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
-  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-  "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-  "data/generated/corolla_8965F1208000_low_calibration_delta.json",
-  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
-  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
-  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
-  "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-  "exploit/findings_coverage.json",
-]
 
 [suite.target_artifact_manifest]
 tests = ["tests/verify_target_artifact_manifest.py"]
@@ -2193,7 +1631,6 @@ paths = [
   "data/generated/corolla_8965H1202000_techstream_correlations.json",
   "docs/tooling/techstream.md",
   "docs/reference/generated-artifacts.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
   "exploit/findings_coverage.json",
@@ -2215,7 +1652,6 @@ paths = [
   "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
   "docs/tooling/techstream.md",
   "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
   "docs/reference/generated-artifacts.md",
@@ -2235,7 +1671,6 @@ paths = [
   "data/generated/techstream_v18/cuw_frc_corpus.json",
   "docs/tooling/techstream.md",
   "docs/architecture/toyota-openpilot-porting-contract.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
   "docs/reference/generated-artifacts.md",
@@ -2250,7 +1685,6 @@ oracle = "independent_external_artifact"
 paths = [
   "tests/verify_techstream_searchcal.py",
   "docs/tooling/techstream.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
   "exploit/findings_coverage.json",
@@ -2264,7 +1698,6 @@ oracle = "independent_external_artifact"
 paths = [
   "tests/verify_techstream_tis_calibration_acquisition.py",
   "docs/tooling/techstream.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
   "exploit/findings_coverage.json",
@@ -2278,7 +1711,6 @@ oracle = "independent_external_artifact"
 paths = [
   "tests/verify_techstream_tis_calibration_selection.py",
   "docs/tooling/techstream.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
   "exploit/findings_coverage.json",
@@ -2295,7 +1727,6 @@ paths = [
   "data/generated/techstream_v18/dtc_failure_types.json",
   "tests/fixtures/techstream/ddb/emps_p5_u023a87_record.hex",
   "docs/tooling/techstream-ddb-pipeline.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
 ]
 
@@ -2317,7 +1748,6 @@ paths = [
   "tools/techstream/generate_crypto_inventory.py",
   "data/generated/techstream_v18/crypto_inventory.json",
   "docs/tooling/techstream.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "software/locks/techstream-v18.json",
 ]
@@ -2328,7 +1758,6 @@ paths = [
   "tests/verify_techstream_srp.py",
   "tools/techstream/decode_srp.py",
   "docs/tooling/techstream.md",
-  "docs/status/FINDINGS.md",
 ]
 requires_external = ["techstream_v18"]
 modes = ["local"]
@@ -2381,7 +1810,6 @@ paths = [
   "data/generated/techstream_v18/rks_client_state.json",
   "docs/tooling/techstream.md",
   "docs/tooling/techstream-capture-procedure.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
@@ -2399,7 +1827,6 @@ paths = [
   "data/generated/techstream_v18/cuw_t0087_17_specimen.json",
   "docs/tooling/techstream.md",
   "docs/history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
 ]
 
@@ -2416,7 +1843,6 @@ paths = [
   "data/generated/techstream_v18/cuw_t0011_21_04c21_specimen.json",
   "docs/tooling/techstream.md",
   "docs/history/2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
 ]
@@ -2435,7 +1861,6 @@ paths = [
   "data/generated/techstream_v18/cuw_tacoma_vforest_corpus.json",
   "docs/tooling/techstream.md",
   "docs/history/2026-08/TACOMA_VFOREST_CUW_CORPUS_ANALYSIS_2026-08-23.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "exploit/findings_coverage.json",
 ]
@@ -2451,7 +1876,6 @@ paths = [
   "tests/verify_techstream_cuw_frc_corpus.py",
   "data/generated/techstream_v18/cuw_frc_corpus.json",
   "docs/tooling/techstream.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
 ]
 
@@ -2464,7 +1888,6 @@ paths = [
   "tools/techstream/cuw_security_up.py",
   "tests/verify_techstream_cuw_security_up.py",
   "docs/tooling/techstream.md",
-  "docs/status/FINDINGS.md",
   "software/locks/techstream-v18.json",
 ]
 
@@ -2487,20 +1910,12 @@ paths = ["community/", "external-references.lock.json"]
 # SECOC-024/028/044, including live CRC resigning. Verifies SHA-256 integrity
 # of committed artifacts.
 
-[suite.secoc_acceptance_gate]
-tests = [
-  "tests/verify_secoc_acceptance_gate.py",
-  "tests/verify_secoc_bypass_patch_point.py",
-]
-paths = ["docs/security/secoc/application-chain.md", "firmware/"]
-
 [suite.lochuan_patch_semantics]
 tests = ["tests/verify_lochuan_patch_semantics.py"]
 oracle = "raw_bytes"
 paths = [
   "tests/verify_lochuan_patch_semantics.py",
   "docs/security/secoc/application-chain.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "community/README.md",
   "docs/tooling/community-patch-target-analysis.md",
@@ -2526,7 +1941,6 @@ paths = [
   "docs/tooling/community-patch-target-analysis.md",
   "docs/tooling/README.md",
   "docs/reference/generated-artifacts.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
 ]
 
@@ -2547,7 +1961,6 @@ paths = [
   "data/application_async_operation_queue.csv",
   "data/application_wdbi_callbacks.csv",
   "data/application_routine_control_surface.csv",
-  "docs/status/FINDINGS.md",
 ]
 
 [suite.exploit_interest_reviewed_candidates]
@@ -2560,7 +1973,6 @@ paths = [
   "data/generated/exploit_interest_cohorts.json",
   "firmware/RH850_P1M-E_CodeFlash.bin",
   "docs/tooling/exploit-interest-ranking.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
 ]
 
@@ -2573,7 +1985,6 @@ paths = [
   "data/generated/security_state_composition.json",
   "data/generated/security_state_composition.csv",
   "docs/security/application-security-access.md",
-  "docs/status/FINDINGS.md",
 ]
 
 [suite.response_disclosure_audit]
@@ -2588,7 +1999,6 @@ paths = [
   "data/application_wdbi_callbacks.csv",
   "data/recovered_callback_tables.csv",
   "docs/diagnostics/application.md",
-  "docs/status/FINDINGS.md",
 ]
 
 [suite.boot_noauth_pc_pivot_assessment]
@@ -2597,55 +2007,9 @@ paths = [
   "tests/verify_boot_noauth_pc_pivot_assessment.py",
   "docs/security/bootloader-noauth-pc-pivot-assessment.md",
   "docs/security/README.md",
-  "docs/status/FINDINGS.md",
   "exploit/findings_coverage.json",
 ]
 oracle = "raw_bytes"
-
-[suite.xcp_boot_handoff_retention]
-tests = ["tests/verify_xcp_boot_handoff_retention.py"]
-paths = [
-  "tests/verify_xcp_boot_handoff_retention.py",
-  "docs/architecture/boot-validity-and-flash-lifecycle.md",
-  "docs/communications/xcp-command-dispatch.md",
-  "docs/security/ephemeral-secoc-bypass.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-]
-oracle = "raw_bytes"
-
-[suite.xcp_window_mpu]
-tests = ["tests/verify_xcp_window_mpu_permissions.py"]
-paths = [
-  "tests/verify_xcp_window_mpu_permissions.py",
-  "docs/communications/xcp-command-dispatch.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-  "exploit/followups/xcp_shadow_write_plan.py",
-  "tests/verify_xcp_shadow_write_plan.py",
-  "tests/verify_xcp_shadow_write_live.py",
-  "exploit/followups/README.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
-
-[suite.application_rdbi_preflight]
-tests = ["tests/verify_application_rdbi_preflight_bounds.py"]
-paths = [
-  "tests/verify_application_rdbi_preflight_bounds.py",
-  "docs/diagnostics/application.md",
-  "docs/status/FINDINGS.md",
-]
-
-[suite.application_rdbi_emitted_write]
-tests = ["tests/verify_application_rdbi_emitted_write_audit.py"]
-paths = [
-  "tools/generate_rdbi_emitted_write_audit.py",
-  "tests/verify_application_rdbi_emitted_write_audit.py",
-  "data/generated/rdbi_emitted_write_audit.json",
-  "docs/diagnostics/application.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.codeflash_structure_scanner]
 tests = ["tests/verify_rh850_codeflash_structure_scanner.py"]
@@ -2671,7 +2035,6 @@ tests = ["tests/verify_exploit_surface.py"]
 oracle = "generated_self_check"
 paths = [
   "exploit/",
-  "docs/status/FINDINGS.md",
   "tests/verify_exploit_surface.py",
   "Makefile",
 ]
@@ -2687,7 +2050,6 @@ paths = [
   "tools/analyze_secoc_patch_target.py",
   "docs/tooling/exploit-predicate-semantics.md",
   "docs/communications/diagnostic-transport.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
 ]
 
@@ -2719,7 +2081,6 @@ paths = [
   "firmware/RH850_P1M-E_CodeFlash.bin",
   "docs/security/secoc/application-chain.md",
   "docs/security/secoc/key-storage-and-lifecycle.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
 ]
@@ -2733,7 +2094,6 @@ paths = [
   "docs/security/secoc/software-path-assessment.md",
   "docs/security/secoc/sender-implementation.md",
   "docs/status/CORRECTIONS.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
   "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
@@ -2753,7 +2113,6 @@ paths = [
   "docs/security/secoc/key-recovery-assessment.md",
   "docs/security/secoc/sender-implementation.md",
   "docs/security/memory-safety-audit.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
@@ -2774,7 +2133,6 @@ paths = [
   "tests/verify_secoc_command5_ram_proxy.py",
   "docs/security/secoc/command5-oracle-assessment.md",
   "docs/security/secoc/sender-implementation.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "exploit/findings_coverage.json",
 ]
@@ -2791,7 +2149,6 @@ paths = [
   "data/generated/decompilations.jsonl",
   "docs/security/secoc/application-chain.md",
   "docs/security/secoc/software-path-assessment.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "exploit/findings_coverage.json",
@@ -2803,7 +2160,6 @@ paths = [
   "exploit/behavioral_proof/",
   "tests/verify_secoc_mac28_behavioral_proof.py",
   "docs/security/secoc/application-chain.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
   "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
@@ -2812,18 +2168,15 @@ paths = [
 [suite.exploit_followups]
 tests = [
   "tests/verify_exploit_followups.py",
-  "tests/verify_secoc_freshness_trials.py",
-  "tests/verify_xcp_daq_probe.py",
-  "tests/verify_xcp_reachability.py",
-  "tests/verify_xcp_shadow_write_plan.py",
 ]
 paths = [
+  "tests/verify_secoc.py",
+  "tests/verify_xcp.py",
   "exploit/followups/",
   "tests/verify_exploit_followups.py",
   "docs/communications/xcp-command-dispatch.md",
   "docs/security/memory-safety-audit.md",
   "docs/security/application-security-access.md",
-  "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
   "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
@@ -2842,6 +2195,7 @@ paths = [
 ]
 
 [suite.lifecycle]
+serial = true
 tests = [
   "tests/verify_lifecycle.py",
   "tests/verify_project_layout.py",
@@ -2894,7 +2248,6 @@ paths = [
 ]
 oracle = "raw_bytes"
 
-
 [suite.albinoelephant_telescope_probe]
 tests = ["tests/verify_albinoelephant_telescope_probe.py"]
 paths = [
@@ -2909,7 +2262,6 @@ paths = [
   "data/generated/secoc_gate_resolution_8965H1202000_minimal.json",
   "data/toyota_eps_variant_matrix.csv",
   "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
 ]
 oracle = "dynamic_trace"
@@ -2921,7 +2273,6 @@ paths = [
   "community/albinoelephant/raw-20260818/",
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/tooling/community-dataflash-secoc.md",
-  "docs/status/FINDINGS.md",
 ]
 
 [suite.albinoelephant_corolla_codeflash]
@@ -2950,13 +2301,11 @@ paths = [
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/tooling/ephemeral-runtime-semantic-resolver.md",
   "docs/tooling/secoc-semantic-patch-resolver.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "community/README.md",
   "external-references.lock.json",
 ]
 oracle = "raw_bytes"
-
 
 [suite.spanconstant_corolla_codeflash]
 tests = [
@@ -2996,7 +2345,6 @@ paths = [
   "docs/variants/corolla-8965F1208000.md",
   "docs/architecture/boot-validity-and-flash-lifecycle.md",
   "docs/communications/xcp-command-dispatch.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/reference/generated-artifacts.md",
   "external-references.lock.json",
@@ -3005,544 +2353,30 @@ paths = [
 oracle = "raw_bytes"
 
 
-[suite.corolla_8965h_application_diagnostics]
-tests = ["tests/verify_corolla_8965H1202000_application_diagnostics.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_application_diagnostics.py",
-  "tools/extract_variant_evidence.py",
-  "tools/compare_variant_application_diagnostics.py",
-  "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_application_diagnostics_diff.json",
-  "data/generated/response_disclosure_audit.json",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
 
 
-[suite.corolla_8965h_fd_control]
-tests = ["tests/verify_corolla_8965H1202000_fd_control.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_fd_control.py",
-  "tools/extract_variant_evidence.py",
-  "tools/build_corolla_h_fd_control_interface.py",
-  "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_fd_control_reference_census.json",
-  "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_fd_control_interface.json",
-  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-  "data/generated/corolla_8965H1202000_structural_function_transfer.json",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
 
 
-[suite.corolla_8965h_steering_supervisor]
-tests = ["tests/verify_corolla_8965H1202000_steering_supervisor.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_steering_supervisor.py",
-  "tools/extract_variant_evidence.py",
-  "tools/build_corolla_h_steering_supervisor_stage_ledger.py",
-  "data/generated/sienna_8965B4512000_steering_supervisor_structural_evidence.json",
-  "data/generated/corolla_8965H1202000_steering_supervisor_structural_evidence.json",
-  "data/generated/corolla_8965H1202000_steering_supervisor_insertions_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_steering_supervisor_stage_ledger.json",
-  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-  "data/generated/corolla_8965H1202000_structural_function_transfer.json",
-  "data/generated/decompilations.jsonl",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
 
 
-[suite.corolla_8965h_secoc_key_provenance]
-tests = ["tests/verify_corolla_8965H1202000_secoc_key_provenance.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_secoc_key_provenance.py",
-  "tools/build_corolla_h_secoc_key_provenance.py",
-  "tools/extract_variant_evidence.py",
-  "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_secoc_key_provenance.json",
-  "data/generated/corolla_2023_albino_dataflash_analysis.json",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
 
 
-[suite.corolla_8965h_supervisor_external_ingress]
-tests = ["tests/verify_corolla_8965H1202000_supervisor_external_ingress.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_supervisor_external_ingress.py",
-  "tools/extract_corolla_h_supervisor_external_ingress_census.py",
-  "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",
-  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-  "data/generated/corolla_8965H1202000_fd_control_interface.json",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
 
 
-[suite.corolla_8965h_system_orchestration]
-tests = ["tests/verify_corolla_8965H1202000_system_orchestration.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_system_orchestration.py",
-  "tools/extract_corolla_h_system_orchestration_evidence.py",
-  "tools/build_corolla_h_system_orchestration.py",
-  "data/generated/corolla_8965H1202000_system_orchestration_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_system_orchestration.json",
-  "data/generated/decompilations.jsonl",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
 
 
-[suite.corolla_8965h_can_com]
-tests = ["tests/verify_corolla_8965H1202000_can_com.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_can_com.py",
-  "tools/extract_corolla_h_evidence.py",
-  "tools/build_corolla_h_can_com.py",
-  "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_can_com.json",
-  "data/generated/decompilations.jsonl",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
 
 
-[suite.corolla_8965h_storage_nvm]
-tests = ["tests/verify_corolla_8965H1202000_storage_nvm.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_storage_nvm.py",
-  "tools/extract_corolla_h_evidence.py",
-  "tools/build_corolla_h_storage_nvm.py",
-  "data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_storage_nvm.json",
-  "data/generated/corolla_2023_albino_dataflash_analysis.json",
-  "data/generated/decompilations.jsonl",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/security/secoc/key-storage-and-lifecycle.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
 
 
-[suite.corolla_8965h_xcp]
-tests = ["tests/verify_corolla_8965H1202000_xcp.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_xcp.py",
-  "tools/extract_corolla_h_evidence.py",
-  "tools/build_corolla_h_xcp.py",
-  "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_xcp.json",
-  "data/generated/decompilations.jsonl",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/",
-  "docs/communications/xcp-command-dispatch.md",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
 
 
-[suite.corolla_8965h_motor_control]
-tests = ["tests/verify_corolla_8965H1202000_motor_control.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_motor_control.py",
-  "tools/extract_corolla_h_evidence.py",
-  "tools/build_corolla_h_motor_control.py",
-  "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_motor_control.json",
-  "data/generated/decompilations.jsonl",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/",
-  "docs/architecture/control-partition.md",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
 
 
-[suite.corolla_8965h_crypto_residue]
-tests = ["tests/verify_corolla_8965H1202000_crypto_residue.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_crypto_residue.py",
-  "tools/build_corolla_h_crypto_residue.py",
-  "tools/extract_corolla_h_evidence.py",
-  "data/generated/corolla_8965H1202000_crypto_residue.json",
-  "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json",
-  "data/generated/decompilations.jsonl",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
-
-[suite.corolla_8965h_secoc_surface]
-tests = ["tests/verify_corolla_8965H1202000_secoc_surface.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_secoc_surface.py",
-  "tools/build_corolla_h_secoc_surface.py",
-  "tools/extract_corolla_h_secoc_surface_evidence.py",
-  "data/generated/corolla_8965H1202000_secoc_surface.json",
-  "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_secoc_key_provenance.json",
-  "data/generated/corolla_8965H1202000_fd_control_interface.json",
-  "data/generated/decompilations.jsonl",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
 
 
-[suite.corolla_8965h_steering_nested]
-tests = ["tests/verify_corolla_8965H1202000_steering_nested.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_steering_nested.py",
-  "tools/build_corolla_h_steering_nested.py",
-  "tools/extract_corolla_h_evidence.py",
-  "data/generated/corolla_8965H1202000_steering_nested.json",
-  "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_steering_supervisor_stage_ledger.json",
-  "data/generated/decompilations.jsonl",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
 
-[suite.corolla_8965h_diagnostic_residue]
-tests = ["tests/verify_corolla_8965H1202000_diagnostic_residue.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_diagnostic_residue.py",
-  "tools/build_corolla_h_diagnostic_residue.py",
-  "tools/extract_corolla_h_diagnostic_residue_evidence.py",
-  "data/generated/corolla_8965H1202000_diagnostic_residue.json",
-  "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_application_diagnostics_diff.json",
-  "data/generated/decompilations.jsonl",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
 
-[suite.corolla_8965h_deadline_monitor_surface]
-tests = ["tests/verify_corolla_8965H1202000_deadline_monitor_surface.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_deadline_monitor_surface.py",
-  "tools/build_corolla_h_deadline_monitor_surface.py",
-  "tools/extract_corolla_h_deadline_monitor_surface_evidence.py",
-  "data/generated/corolla_8965H1202000_deadline_monitor_surface.json",
-  "data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json",
-  "tests/verify_deadline_monitor_dispatch_tables.py",
-  "data/generated/corolla_8965H1202000_structural_function_transfer.json",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
-
-[suite.corolla_8965h_plausibility_monitor]
-tests = ["tests/verify_corolla_8965H1202000_plausibility_monitor.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_plausibility_monitor.py",
-  "tools/build_corolla_h_plausibility_monitor.py",
-  "tools/extract_corolla_h_evidence.py",
-  "data/generated/corolla_8965H1202000_plausibility_monitor.json",
-  "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json",
-  "data/generated/decompilations.jsonl",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
-
-[suite.corolla_8965h_small_adapters]
-tests = ["tests/verify_corolla_8965H1202000_small_adapters.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_small_adapters.py",
-  "tools/build_corolla_h_small_adapters.py",
-  "tools/extract_corolla_h_evidence.py",
-  "data/generated/corolla_8965H1202000_small_adapters.json",
-  "data/generated/corolla_8965H1202000_application_callback_tables.json",
-  "data/generated/corolla_8965H1202000_veneer_bank.json",
-  "data/generated/corolla_8965H1202000_application_transport_residue.json",
-  "data/generated/corolla_8965H1202000_application_transport_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_application_interrupt_vectors.json",
-  "data/generated/corolla_8965H1202000_application_interrupt_bodies.json",
-  "data/generated/corolla_8965H1202000_application_interrupt_body_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_direct_call_surface.json",
-  "data/generated/corolla_8965H1202000_direct_call_surface_evidence.json",
-  "data/generated/corolla_8965H1202000_final_named_residue.json",
-  "data/generated/corolla_8965H1202000_final_named_residue_evidence.json",
-  "data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_small_adapter_decompiler_evidence.json",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
-
-[suite.corolla_8965h_application_callback_tables]
-tests = ["tests/verify_corolla_8965H1202000_application_callback_tables.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_application_callback_tables.py",
-  "tools/build_corolla_h_application_callback_tables.py",
-  "data/generated/corolla_8965H1202000_application_callback_tables.json",
-  "data/generated/corolla_8965H1202000_structural_function_transfer.json",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
-
-[suite.corolla_8965h_veneer_bank]
-tests = ["tests/verify_corolla_8965H1202000_veneer_bank.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_veneer_bank.py",
-  "tools/build_corolla_h_veneer_bank.py",
-  "data/generated/corolla_8965H1202000_application_callback_tables.json",
-  "data/generated/corolla_8965H1202000_veneer_bank.json",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
-
-[suite.corolla_8965h_application_transport_residue]
-tests = ["tests/verify_corolla_8965H1202000_application_transport_residue.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_application_transport_residue.py",
-  "tools/build_corolla_h_application_transport_residue.py",
-  "tools/extract_corolla_h_evidence.py",
-  "data/generated/corolla_8965H1202000_application_transport_residue.json",
-  "data/generated/corolla_8965H1202000_application_transport_decompiler_evidence.json",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-]
-oracle = "raw_bytes"
-
-[suite.corolla_8965h_application_interrupt_vectors]
-tests = ["tests/verify_corolla_8965H1202000_application_interrupt_vectors.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_application_interrupt_vectors.py",
-  "tools/build_corolla_h_application_interrupt_vectors.py",
-  "data/generated/corolla_8965H1202000_application_interrupt_vectors.json",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-]
-oracle = "raw_bytes"
-
-[suite.corolla_8965h_application_interrupt_bodies]
-tests = ["tests/verify_corolla_8965H1202000_application_interrupt_bodies.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_application_interrupt_bodies.py",
-  "tools/build_corolla_h_application_interrupt_bodies.py",
-  "tools/extract_corolla_h_evidence.py",
-  "data/generated/corolla_8965H1202000_application_interrupt_bodies.json",
-  "data/generated/corolla_8965H1202000_application_interrupt_body_decompiler_evidence.json",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-]
-oracle = "raw_bytes"
-
-[suite.corolla_8965h_direct_call_surface]
-tests = ["tests/verify_corolla_8965H1202000_direct_call_surface.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_direct_call_surface.py",
-  "tools/build_corolla_h_direct_call_surface.py",
-  "tools/extract_corolla_h_direct_call_surface_evidence.py",
-  "data/generated/corolla_8965H1202000_direct_call_surface.json",
-  "data/generated/corolla_8965H1202000_direct_call_surface_evidence.json",
-  "data/semantic_coverage_ledger.csv",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-]
-oracle = "raw_bytes"
-
-[suite.corolla_8965h_final_named_residue]
-tests = ["tests/verify_corolla_8965H1202000_final_named_residue.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_final_named_residue.py",
-  "tools/build_corolla_h_final_named_residue.py",
-  "tools/extract_corolla_h_final_named_residue_evidence.py",
-  "data/generated/corolla_8965H1202000_final_named_residue.json",
-  "data/generated/corolla_8965H1202000_final_named_residue_evidence.json",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
-
-[suite.corolla_8965h_structural_residue_inspection]
-tests = ["tests/verify_corolla_8965H1202000_structural_residue_inspection.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_structural_residue_inspection.py",
-  "tools/extract_corolla_h_structural_residue_evidence.py",
-  "data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_structural_function_transfer.json",
-  "data/generated/corolla_8965H1202000_static_coverage_matrix.json",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
-
-[suite.corolla_8965h_static_coverage]
-tests = ["tests/verify_corolla_8965H1202000_static_coverage.py"]
-paths = [
-  "tests/verify_corolla_8965H1202000_static_coverage.py",
-  "tools/build_corolla_h_static_coverage_matrix.py",
-  "data/generated/corolla_8965H1202000_static_coverage_matrix.json",
-  "data/generated/corolla_8965H1202000_named_function_transfer_ledger.json",
-  "data/generated/corolla_8965H1202000_structural_function_transfer.json",
-  "data/generated/corolla_8965H1202000_application_diagnostics_diff.json",
-  "data/generated/corolla_8965H1202000_steering_supervisor_stage_ledger.json",
-  "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_cooperative_authority_wire_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_power_supply_monitor_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_remaining_status_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_b6_full_receiver_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_steering_supervisor_insertions_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_steering_limits_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_system_orchestration_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_system_orchestration.json",
-  "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_can_com.json",
-  "data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_storage_nvm.json",
-  "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_xcp.json",
-  "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_motor_control.json",
-  "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_secoc_surface.json",
-  "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_crypto_residue.json",
-  "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_steering_nested.json",
-  "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_diagnostic_residue.json",
-  "data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_deadline_monitor_surface.json",
-  "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_plausibility_monitor.json",
-  "data/generated/corolla_8965H1202000_small_adapter_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_small_adapters.json",
-  "data/generated/corolla_8965H1202000_application_callback_tables.json",
-  "data/generated/corolla_8965H1202000_veneer_bank.json",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/reference/generated-artifacts.md",
-]
-oracle = "raw_bytes"
 
 [suite.external_corroboration]
 tests = ["tests/verify_external_corroboration.py"]
@@ -3581,9 +2415,192 @@ paths = [
   "docs/WORKFLOW.md",
 ]
 
+
+[suite.corolla_h]
+tests = ["tests/verify_corolla_h.py"]
+oracle = "raw_bytes"
+paths = [
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "community/albinoelephant/raw-20260818/",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+  "data/external/opendbc/toyota_corolla_pre_tss3_contract.json",
+  "data/external/opendbc/toyota_dbc_facts.json",
+  "data/generated/corolla_2023_albino_dataflash_analysis.json",
+  "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
+  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
+  "data/generated/corolla_8965H1202000_application_callback_tables.json",
+  "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_application_diagnostics_diff.json",
+  "data/generated/corolla_8965H1202000_application_interrupt_bodies.json",
+  "data/generated/corolla_8965H1202000_application_interrupt_body_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_application_interrupt_vectors.json",
+  "data/generated/corolla_8965H1202000_application_rx_diff.json",
+  "data/generated/corolla_8965H1202000_application_transport_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_application_transport_residue.json",
+  "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
+  "data/generated/corolla_8965H1202000_b6_full_receiver_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
+  "data/generated/corolla_8965H1202000_b6_receiver_contract_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_b6_secoc_verification.json",
+  "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_b6_target_angle_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
+  "data/generated/corolla_8965H1202000_can_com.json",
+  "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_cooperative_authority_wire_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_crypto_residue.json",
+  "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_deadline_monitor_surface.json",
+  "data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+  "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_direct_call_surface.json",
+  "data/generated/corolla_8965H1202000_direct_call_surface_evidence.json",
+  "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_fd_control_interface.json",
+  "data/generated/corolla_8965H1202000_fd_control_reference_census.json",
+  "data/generated/corolla_8965H1202000_final_named_residue.json",
+  "data/generated/corolla_8965H1202000_final_named_residue_evidence.json",
+  "data/generated/corolla_8965H1202000_lta_command_provenance.json",
+  "data/generated/corolla_8965H1202000_lta_command_provenance_census.json",
+  "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_motor_control.json",
+  "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_named_function_transfer_ledger.json",
+  "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
+  "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_plausibility_monitor.json",
+  "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_power_supply_monitor_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_power_supply_monitor_gate.json",
+  "data/generated/corolla_8965H1202000_remaining_status_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_secoc_key_provenance.json",
+  "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_secoc_surface.json",
+  "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_small_adapter_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_small_adapters.json",
+  "data/generated/corolla_8965H1202000_static_coverage_matrix.json",
+  "data/generated/corolla_8965H1202000_steering_limits_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_steering_nested.json",
+  "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_steering_supervisor_insertions_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_steering_supervisor_stage_ledger.json",
+  "data/generated/corolla_8965H1202000_steering_supervisor_structural_evidence.json",
+  "data/generated/corolla_8965H1202000_storage_nvm.json",
+  "data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_structural_function_transfer.json",
+  "data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",
+  "data/generated/corolla_8965H1202000_system_orchestration.json",
+  "data/generated/corolla_8965H1202000_system_orchestration_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_techstream_correlations.json",
+  "data/generated/corolla_8965H1202000_techstream_steering_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_veneer_bank.json",
+  "data/generated/corolla_8965H1202000_xcp.json",
+  "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json",
+  "data/generated/corolla_hf_fault_state_contract.json",
+  "data/generated/corolla_hf_remaining_status_contract.json",
+  "data/generated/decompilations.jsonl",
+  "data/generated/response_disclosure_audit.json",
+  "data/generated/sienna_8965B4512000_steering_supervisor_structural_evidence.json",
+  "data/generated/techstream_v18/application_interface_correlations.json",
+  "data/generated/techstream_v18/p5_lateral_control_semantics.json",
+  "data/generated/techstream_v18/priority_steering_ddb_semantics.json",
+  "data/generated/techstream_v18/toyota_master_routes.json",
+  "data/generated/u023a87_monitor_map.json",
+  "data/semantic_coverage_ledger.csv",
+  "docs/architecture/control-partition.md",
+  "docs/architecture/toyota-openpilot-porting-contract.md",
+  "docs/communications/xcp-command-dispatch.md",
+  "docs/reference/generated-artifacts.md",
+  "docs/security/secoc/key-storage-and-lifecycle.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/tooling/techstream.md",
+  "docs/variants/README.md",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
+  "docs/variants/corolla-pre-tss3-openpilot-message-comparison.md",
+  "exploit/findings_coverage.json",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "tests/verify_corolla_h.py",
+  "tests/verify_deadline_monitor_dispatch_tables.py",
+  "tools/extract_corolla_h_b6_full_receiver_evidence.py",
+  "tools/extract_corolla_h_b6_receiver_contract_evidence.py",
+  "tools/extract_corolla_h_b6_secoc_verification_evidence.py",
+  "tools/extract_corolla_h_b6_target_angle_evidence.py",
+  "tools/extract_corolla_h_deadline_monitor_surface_evidence.py",
+  "tools/extract_corolla_h_diagnostic_residue_evidence.py",
+  "tools/extract_corolla_h_direct_call_surface_evidence.py",
+  "tools/extract_corolla_h_evidence.py",
+  "tools/extract_corolla_h_final_named_residue_evidence.py",
+  "tools/extract_corolla_h_lta_census.py",
+  "tools/extract_corolla_h_lta_command_provenance_evidence.py",
+  "tools/extract_corolla_h_openpilot_state_bridge_evidence.py",
+  "tools/extract_corolla_h_power_supply_monitor_evidence.py",
+  "tools/extract_corolla_h_secoc_surface_evidence.py",
+  "tools/extract_corolla_h_structural_residue_evidence.py",
+  "tools/extract_corolla_h_supervisor_external_ingress_census.py",
+  "tools/extract_corolla_h_system_orchestration_evidence.py",
+  "tools/extract_corolla_h_techstream_steering_evidence.py",
+  "tools/extract_corolla_h_tms053_followup_evidence.py",
+  "tools/extract_variant_evidence.py",
+]
+
+[suite.corolla_h_regen]
+tests = ["tests/verify_corolla_h_regen.py"]
+modes = ["full", "local"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_corolla_h_regen.py",
+  "tools/build_corolla_h_application_callback_tables.py",
+  "tools/build_corolla_h_application_interrupt_bodies.py",
+  "tools/build_corolla_h_application_interrupt_vectors.py",
+  "tools/build_corolla_h_application_transport_residue.py",
+  "tools/build_corolla_h_b6_full_receiver_contract.py",
+  "tools/build_corolla_h_b6_receiver_contract.py",
+  "tools/build_corolla_h_b6_secoc_verification.py",
+  "tools/build_corolla_h_b6_target_angle_ingress.py",
+  "tools/build_corolla_h_can_com.py",
+  "tools/build_corolla_h_crypto_residue.py",
+  "tools/build_corolla_h_deadline_monitor_surface.py",
+  "tools/build_corolla_h_diagnostic_residue.py",
+  "tools/build_corolla_h_direct_call_surface.py",
+  "tools/build_corolla_h_fd_control_interface.py",
+  "tools/build_corolla_h_final_named_residue.py",
+  "tools/build_corolla_h_lta_command_provenance.py",
+  "tools/build_corolla_h_motor_control.py",
+  "tools/build_corolla_h_openpilot_state_bridge.py",
+  "tools/build_corolla_h_plausibility_monitor.py",
+  "tools/build_corolla_h_power_supply_monitor_gate.py",
+  "tools/build_corolla_h_secoc_key_provenance.py",
+  "tools/build_corolla_h_secoc_surface.py",
+  "tools/build_corolla_h_small_adapters.py",
+  "tools/build_corolla_h_static_coverage_matrix.py",
+  "tools/build_corolla_h_steering_nested.py",
+  "tools/build_corolla_h_steering_supervisor_stage_ledger.py",
+  "tools/build_corolla_h_storage_nvm.py",
+  "tools/build_corolla_h_system_orchestration.py",
+  "tools/build_corolla_h_techstream_correlations.py",
+  "tools/build_corolla_h_veneer_bank.py",
+  "tools/build_corolla_h_xcp.py",
+  "tools/compare_variant_application_diagnostics.py",
+]
+
 [suite.fast_verify]
 tests = ["tests/verify_fast_verify.py"]
-paths = ["tools/fast_verify.py", "tools/test", "verification.toml", "Makefile"]
+paths = [
+  "tools/fast_verify.py",
+  "tools/test",
+  "verification.toml",
+  "Makefile",
+  "pyproject.toml",
+  "uv.lock",
+]
 oracle = "raw_bytes"
 
 [suite.icus_register_footprint]
@@ -3605,7 +2622,6 @@ paths = [
   "community/albinoelephant/raw-20260818/",
   "docs/tooling/panda-toyota-routing.md",
   "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "external-references.lock.json",
@@ -3628,18 +2644,29 @@ paths = ["tools/toyota_secoc_session.py", "tests/fixtures/"]
 tests = ["tests/verify_u023a87_monitor_map.py"]
 paths = ["data/generated/u023a87_monitor_map.json", "docs/"]
 
-[suite.keyless_boot_variant_residuals]
-tests = ["tests/verify_keyless_boot_variant_residuals.py"]
+[suite.keyless]
+tests = ['tests/verify_keyless.py']
+oracle = 'cfg_dataflow'
 paths = [
-  "tests/verify_keyless_boot_variant_residuals.py",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
-  "docs/security/keyless-exec-surface-assessment.md",
-  "docs/status/FINDINGS.md",
+  'tests/verify_keyless.py',
+  'firmware/RH850_P1M-E_CodeFlash.bin',
+  'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin',
+  'community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin',
+  'docs/security/keyless-exec-surface-assessment.md',
+  'data/generated/decompilations.jsonl',
+  'docs/security/bootloader-noauth-pc-pivot-assessment.md',
+  'ghidra/scripts/investigate/FindExceptionAndXcpFlowOps.java',
+  'ghidra/scripts/investigate/FindStackPointerOps.java',
+  'community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/security_access_log.json',
+  'community/albinoelephant/raw-20260818/MANIFEST.txt',
+  'community/spanconstant/raw-20260821/MANIFEST.txt',
+  'data/variant_bootstrap_profiles.json',
+  'docs/status/CORRECTIONS.md',
+  'data/generated/corolla_8965H1202000_keyless_event_formatter_decompiler_evidence.json',
+  'data/generated/corolla_8965H1202000_keyless_event_formatter.json',
+  'tools/extract_corolla_h_evidence.py',
+  'tools/build_corolla_h_keyless_event_formatter.py',
 ]
-oracle = "raw_bytes"
-
 [suite.keyless_live_handoff_dma]
 tests = ["tests/verify_keyless_live_handoff_dma.py"]
 paths = [
@@ -3647,100 +2674,6 @@ paths = [
   "firmware/RH850_P1M-E_CodeFlash.bin",
   "data/generated/decompilations.jsonl",
   "docs/security/keyless-exec-surface-assessment.md",
-  "docs/status/FINDINGS.md",
-]
-oracle = "cfg_dataflow"
-
-[suite.keyless_exec_surface]
-tests = ["tests/verify_keyless_exec_surface.py"]
-paths = [
-  "tests/verify_keyless_exec_surface.py",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
-  "data/generated/decompilations.jsonl",
-  "docs/security/keyless-exec-surface-assessment.md",
-  "docs/security/bootloader-noauth-pc-pivot-assessment.md",
-]
-oracle = "cfg_dataflow"
-
-[suite.keyless_application_pc_surfaces]
-tests = ["tests/verify_keyless_application_pc_surfaces.py"]
-paths = [
-  "tests/verify_keyless_application_pc_surfaces.py",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "data/generated/decompilations.jsonl",
-  "ghidra/scripts/investigate/FindExceptionAndXcpFlowOps.java",
-  "ghidra/scripts/investigate/FindStackPointerOps.java",
-  "docs/security/keyless-exec-surface-assessment.md",
-  "docs/status/FINDINGS.md",
-]
-oracle = "cfg_dataflow"
-
-[suite.keyless_xcp_composition]
-tests = ["tests/verify_keyless_xcp_composition.py"]
-paths = [
-  "tests/verify_keyless_xcp_composition.py",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "docs/security/keyless-exec-surface-assessment.md",
-  "docs/status/FINDINGS.md",
-]
-oracle = "raw_bytes"
-
-[suite.keyless_exec_portability]
-tests = ["tests/verify_keyless_exec_portability.py"]
-paths = [
-  "tests/verify_keyless_exec_portability.py",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
-  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/security_access_log.json",
-  "community/albinoelephant/raw-20260818/MANIFEST.txt",
-  "community/spanconstant/raw-20260821/MANIFEST.txt",
-  "data/variant_bootstrap_profiles.json",
-  "docs/security/keyless-exec-surface-assessment.md",
-  "docs/status/FINDINGS.md",
-]
-oracle = "raw_bytes"
-
-[suite.keyless_reset_entry]
-tests = ["tests/verify_keyless_reset_entry.py"]
-paths = [
-  "tests/verify_keyless_reset_entry.py",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "data/generated/decompilations.jsonl",
-  "docs/security/keyless-exec-surface-assessment.md",
-  "docs/status/FINDINGS.md",
-]
-oracle = "cfg_dataflow"
-
-[suite.keyless_application_diagnostic_transport]
-tests = ["tests/verify_keyless_application_diagnostic_transport.py"]
-paths = [
-  "tests/verify_keyless_application_diagnostic_transport.py",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "data/generated/decompilations.jsonl",
-  "docs/security/keyless-exec-surface-assessment.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
-]
-oracle = "cfg_dataflow"
-
-[suite.keyless_application_event_formatter]
-tests = ["tests/verify_keyless_application_event_formatter.py"]
-paths = [
-  "tests/verify_keyless_application_event_formatter.py",
-  "firmware/RH850_P1M-E_CodeFlash.bin",
-  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
-  "data/generated/decompilations.jsonl",
-  "data/generated/corolla_8965H1202000_keyless_event_formatter_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_keyless_event_formatter.json",
-  "tools/extract_corolla_h_evidence.py",
-  "tools/build_corolla_h_keyless_event_formatter.py",
-  "docs/security/keyless-exec-surface-assessment.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
 ]
 oracle = "cfg_dataflow"
 

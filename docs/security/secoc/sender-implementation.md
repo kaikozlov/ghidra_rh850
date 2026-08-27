@@ -258,7 +258,7 @@ DataFlash verifier, it does not assume steering IDs or Panda buses 0/2. It:
 
 | Claim | Source | Confidence |
 |---|---|---|
-| This Sienna EPS accepts the documented classic authenticated-input and trailer format | firmware-static | verified by `verify_secoc_application.py` |
+| This Sienna EPS accepts the documented classic authenticated-input and trailer format | firmware-static | verified by `verify_secoc.py` |
 | Pinned opendbc independently implements the same ordinary and sync formulas | external-source | recovered from pinned source; hashes checked by optional external verification |
 | The local signer reproduces fixed ordinary and sync known answers | generated-artifact | verified by `verify_toyota_secoc_signer.py` |
 | The pinned DBC defines eight ordinary classic protected IDs (`0x116/0x131/0x177/0x183/0x24D/0x283/0x2E4/0x344`) with the same trailer field family | external-source | verified by optional pinned-source checks |

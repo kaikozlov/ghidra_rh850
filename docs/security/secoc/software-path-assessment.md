@@ -13,7 +13,7 @@
 > analysis in `build/work/project/`; existing reports are navigation aids, not proof
 >
 > **Verification:** `tests/verify_icus_software_paths.py`,
-> `tests/verify_payload_gate.py`, `tests/verify_secoc_application.py`
+> `tests/verify_payload_gate.py`, `tests/verify_secoc.py`
 
 ## Methodological boundary
 

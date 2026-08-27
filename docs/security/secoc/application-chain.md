@@ -10,7 +10,7 @@
 >
 > **Canonical artifacts:** —
 >
-> **Verification:** `tests/verify_secoc_application.py`, `tests/verify_secoc_security_properties.py`
+> **Verification:** `tests/verify_secoc.py`
 >
 > **Related:** [key-storage](key-storage-and-lifecycle.md), [dataflash](../../storage/dataflash.md)
 
@@ -46,7 +46,7 @@ exposes serialized command-5 plumbing and a foreground hook architecture for a
 minimum signing proxy (SECOC-041). Static analysis still does not establish
 live slot-4 command-5 permission or runtime performance.
 
-`../tests/verify_secoc_application.py` checks the configuration, routing,
+`../tests/verify_secoc.py` checks the configuration, routing,
 disabled KAT gate, command-5/command-7 driver families, selector validation,
 dormant test inputs, key-slot selection, freshness/MAC profile, and object-15
 state directly from the committed images.
@@ -589,7 +589,7 @@ cannot exploit an error-code inversion in the recovered chain. Any bypass must
 instead compromise the key/use boundary, modify application code/state, exploit
 a separate parser/control-flow defect, or find an ICU-S policy failure.
 
-`tests/verify_secoc_security_properties.py` pins the relevant worker bodies and
+`tests/verify_secoc.py` pins the relevant worker bodies and
 exact result-branch instructions.
 
 ## 5.6 Volatile freshness creates a reset-window replay boundary
@@ -1120,9 +1120,9 @@ establish that Toyota's dealer backend uses DID `0x1010`.
 
 ## 9. SecOC acceptance-gate recovery (SECOC-029)
 
-> **Verification:** `tests/verify_secoc_acceptance_gate.py`,
-> `tests/verify_secoc_bypass_patch_point.py`, and
-> `tests/verify_secoc_security_properties.py`.
+> **Verification:** `tests/verify_secoc.py`,
+> `tests/verify_secoc.py`, and
+> `tests/verify_secoc.py`.
 >
 > **Evidence grade:** verified firmware structure for result polarity, local gate
 > direction, PduR/COM delivery reachability, and exact Sienna patch encoding;
@@ -1154,7 +1154,7 @@ Gate 2 @ 0x8E69E..0x8E6C8
 The zero-is-success polarity is not inferred from naming. The compiled-out
 synchronous slot-4 command-7 KAT at `0x680F8` preinitializes its result cell to
 `1`, passes that cell to `cryptoif_job_finish`, and reports KAT pass only when
-the returned result cell compares equal to zero. `verify_secoc_acceptance_gate.py`
+the returned result cell compares equal to zero. `verify_secoc.py`
 pins those instructions and the call target from raw CodeFlash.
 
 `cryptoif_job_finish @ 0x88BA8` still has a separate return status used by Gate
