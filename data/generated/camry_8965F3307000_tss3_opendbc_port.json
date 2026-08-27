@@ -1,0 +1,281 @@
+{
+  "boundary": "The F33 Tx/status carrier geometry and passive software integration are closed at the stated evidence grades. This artifact does not authorize steering CAN transmission or claim that the still-unobserved status carriers are available on the production relay-correct route.",
+  "census_correction": {
+    "control_cone_conclusion_changed": false,
+    "driver_torque_direct_fixed_gp_entries": [
+      "0x00035A06",
+      "0x0004C000",
+      "0x0004DB70",
+      "0x00054244",
+      "0x000564CE"
+    ],
+    "new_entry": "0x0004C000",
+    "new_recovered_count": 5,
+    "old_recovered_count": 4,
+    "reason": "The newly forced/recovered 0x4C000 function is the target-native 0x4A3 telemetry producer. It reads GP-0x5158 directly, but it is outside the cooperative C8xxx-D1xxx target-to-motor control cone, so the earlier bounded no-direct-control-cone-reference conclusion remains intact.",
+    "supersedes": "VAR-056 recovered-function-corpus direct/fixed-GP torque-source count"
+  },
+  "generated_com_tx": {
+    "first_five": [
+      {
+        "can_fd": true,
+        "can_id": "0x030",
+        "flags": 0,
+        "length_field": 0,
+        "period_field": 0
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x351",
+        "flags": 1,
+        "length_field": 0,
+        "period_field": 0
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x394",
+        "flags": 1,
+        "length_field": 0,
+        "period_field": 0
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x4A3",
+        "flags": 1,
+        "length_field": 0,
+        "period_field": 0
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x4C8",
+        "flags": 1,
+        "length_field": 0,
+        "period_field": 0
+      }
+    ],
+    "pdu_descriptors": {
+      "0": [
+        2,
+        0,
+        0,
+        32,
+        0,
+        3
+      ],
+      "1": [
+        200,
+        0,
+        0,
+        4,
+        0,
+        3
+      ],
+      "2": [
+        60,
+        0,
+        0,
+        3,
+        0,
+        3
+      ],
+      "3": [
+        100,
+        0,
+        0,
+        8,
+        0,
+        3
+      ],
+      "4": [
+        196,
+        0,
+        0,
+        8,
+        0,
+        3
+      ]
+    },
+    "pdu_table": "0x000226C0",
+    "signal_allocations": {
+      "0": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        283
+      ],
+      "1": [
+        38,
+        39
+      ],
+      "2": [
+        40,
+        41,
+        42,
+        43
+      ],
+      "3": [
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51
+      ],
+      "4": [
+        52,
+        53,
+        54,
+        55
+      ]
+    },
+    "signal_count": 284,
+    "signal_to_pdu_table": "0x00022488",
+    "tx_table": "0x00021F58"
+  },
+  "passive_opendbc_integration": {
+    "b6_shadow": "28-byte application template + exact known scalar fields + FV46/FV4 + CMAC128/MSB28 signer interface and authenticated-0x00F replacement freshness state",
+    "can_census": "179-ID source-real Camry census retained separately from legacy fingerprinting because the current 147-ID Corolla TSS3 fingerprint is a strict subset",
+    "carstate_replay": [
+      "0x025",
+      "0x030",
+      "0x127 P/R/N/D/B",
+      "0x51E Ready 0/1"
+    ],
+    "controller_boundary": "computes a shadow B6 application/safety decision but returns zero CAN",
+    "exact_platform": "TOYOTA_CAMRY_TSS3",
+    "identity_binding": "byte-exact EPS F181 02||8965F3307000[16]||8A3113303100[16], with present FRC/Brake identities required not to conflict",
+    "nested_opendbc_commit": "ab60fd95d8a7b566e10ed1cf59738292f3498932",
+    "panda_boundary": "F33 C candidate helper is ALLOW_DEBUG-only, not called from toyota_tx_hook, 0x0B6 is absent from Toyota TX whitelists, and CarParams remains SafetyModel.noOutput",
+    "parent_kai_openpilot_commit": "d7d7dfd7e49961e9d35eb7a7681e8756ceee8d04",
+    "production_output_authorized": false,
+    "remaining_live_gates": [
+      "stock B6 cadence/template/freshness",
+      "exclusive relay/source suppression",
+      "slot-4 command-5 generation permission and latency/contention",
+      "driver override and motor-current response policy",
+      "live 0x351/0x394/0x4A3 availability and fault-policy transitions"
+    ],
+    "static_presence_bounded_carstate": [
+      "0x4A3",
+      "0x351",
+      "0x394"
+    ]
+  },
+  "schema": "camry-8965f3307000-tss3-opendbc-port-v1",
+  "sources": {
+    "codeflash": {
+      "path": "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+      "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+    },
+    "decompiler_evidence": {
+      "path": "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json",
+      "sha256": "c37f8fd956a9e4287f4a026b44447480e7966cbe97157dc5b37c86933d0295e6"
+    }
+  },
+  "status_carriers": {
+    "0x351": {
+      "debounce": "0x0004C1C0",
+      "fields": [
+        "B2[7:5] status code",
+        "B2[4] companion/force flag"
+      ],
+      "length": 4,
+      "packer": "0x0004CED0",
+      "pdu": 1,
+      "policy_boundary": "Exact wire projection only; no openpilot temporary/permanent fault mapping is inferred.",
+      "producer": "0x0004C216"
+    },
+    "0x394": {
+      "fields": [
+        "B1[7:6] table column 4",
+        "B1[5:3] table column 1",
+        "B2[3:1] table column 2",
+        "B2[0] table column 3"
+      ],
+      "length": 3,
+      "packer": "0x0004CE08",
+      "pdu": 2,
+      "policy_boundary": "Exact lossy state-table projection only; state 0 is not promoted to Ready or an openpilot fault class.",
+      "projection": "0x0004C24A"
+    },
+    "0x4A3": {
+      "current_semantic_boundary": "F33 0x4A3 uses GP-0x50E8, while target-native DID 0x1151 Motor Actual Current (Q Axis) uses GP-0x50F2. The packet field must therefore remain structurally named until an F33 source join or live correlation closes equivalence.",
+      "fields": [
+        {
+          "role": "marker bit from staged status byte OR 0x20",
+          "wire": "B0[5]"
+        },
+        {
+          "role": "selected steering fault/inhibit status bit",
+          "wire": "B0[0]"
+        },
+        {
+          "role": "signed12 coarse steering-angle source",
+          "scale": "1.5 deg/count",
+          "wire": "B1[3:0]:B2"
+        },
+        {
+          "role": "signed12 filtered/voted steering-angle quantity",
+          "scale": "1.5 deg/count",
+          "wire": "B3[3:0]:B4"
+        },
+        {
+          "role": "Steering Wheel Torque telemetry",
+          "scale": "0.1 N.m/count after source staging",
+          "wire": "B5"
+        },
+        {
+          "formula": "signed16 = (GP-0x50E8 * -100) / 0x80",
+          "role": "alternate motor-current telemetry source",
+          "wire": "B6:B7"
+        }
+      ],
+      "length": 8,
+      "packer": "0x0004C7AA",
+      "pdu": 3,
+      "source_preparation": "0x0004C000",
+      "staging": "0x0004C14E"
+    }
+  },
+  "target": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "software_id": "8965F3307000"
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "fixed_gp_census": {
+    "alternate_4a3_current_source_gp_minus_0x50e8": [
+      {
+        "body_sha256": "4d8127f58162bb45284e319fa9840e94a1eee1b52daab885c2ce9fda72049d06",
+        "body_size": 232,
+        "entry": "0x0004C000"
+      }
+    ],
+    "boundary": "Whole recovered-function-corpus textual census of direct/fixed-GP references only. Computed aliases, value-set pointer recovery, DMA, and functions not recovered in this corpus are outside the negative proof.",
+    "did1151_q_current_source_gp_minus_0x50f2": [
+      {
+        "body_sha256": "e92077a509f7f0e6e3e5a6708f0c83688d380765f9da85c6069cfe21cad89221",
+        "body_size": 60,
+        "entry": "0x0004E394"
+      },
+      {
+        "body_sha256": "ffe7c14fce24f0f9c311497e97d54e7de8aece9ea8a20d672959fed439557df3",
+        "body_size": 578,
+        "entry": "0x00054244"
+      },
+      {
+        "body_sha256": "da005fcdb6828b091c0b79131ad7005b60cf1e028a7767c1720d95ac9d840f45",
+        "body_size": 292,
+        "entry": "0x000564CE"
+      }
+    ],
+    "driver_torque_source_gp_minus_0x5158": [
+      {
+        "body_sha256": "da7c87a019e5a153750d320b534355451906235571d1c208792c1c6c9f510ca3",
+        "body_size": 98,
+        "entry": "0x00035A06"
+      },
+      {
+        "body_sha256": "4d8127f58162bb45284e319fa9840e94a1eee1b52daab885c2ce9fda72049d06",
+        "body_size": 232,
+        "entry": "0x0004C000"
+      },
+      {
+        "body_sha256": "0d28b911913e2fa8fd962ef257822c958be7ebd42c8ed3c61020064c5f77d0c3",
+        "body_size": 76,
+        "entry": "0x0004DB70"
+      },
+      {
+        "body_sha256": "ffe7c14fce24f0f9c311497e97d54e7de8aece9ea8a20d672959fed439557df3",
+        "body_size": 578,
+        "entry": "0x00054244"
+      },
+      {
+        "body_sha256": "da005fcdb6828b091c0b79131ad7005b60cf1e028a7767c1720d95ac9d840f45",
+        "body_size": 292,
+        "entry": "0x000564CE"
+      }
+    ]
+  },
+  "function_count": 11,
+  "functions": [
+    {
+      "body_sha256": "4d8127f58162bb45284e319fa9840e94a1eee1b52daab885c2ce9fda72049d06",
+      "body_size": 232,
+      "decompiled_c": "\nvoid FUN_0004c000(void)\n\n{\n  char cVar1;\n  char cVar2;\n  char cVar3;\n  char cVar4;\n  char cVar5;\n  ushort uVar6;\n  ushort uVar7;\n  short sVar8;\n  undefined2 uVar9;\n  int unaff_gp;\n  ushort uVar11;\n  bool bVar12;\n  int iVar10;\n  \n  cVar1 = (&DAT_00003057)[unaff_gp];\n  uVar7 = *(ushort *)(&DAT_000030cc + unaff_gp) & 0xff00;\n  cVar2 = (&DAT_00003058)[unaff_gp];\n  cVar3 = (&DAT_00003059)[unaff_gp];\n  cVar4 = (&DAT_0000301f)[unaff_gp];\n  cVar5 = (&DAT_00003087)[unaff_gp];\n  uVar6 = *(ushort *)(unaff_gp + -0x509c);\n  *(undefined1 *)(unaff_gp + -0x3723) = 0;\n  if (((uVar7 != 0x400) && ((uVar7 != 0x500 || (cVar4 != '\\x11')))) ||\n     (uVar11 = uVar6 & 0x1ff, (uVar6 & 0x1ff) != 0)) {\n    uVar11 = 1;\n  }\n  *(char *)(unaff_gp + -0x371f) = (char)uVar11;\n  if (((uVar7 != 0x400) && ((uVar7 != 0x500 || (cVar4 != '\\x11')))) ||\n     ((cVar5 != '\\0' || (uVar7 = uVar6 & 0x1ff, (uVar6 & 0x1ff) != 0)))) {\n    uVar7 = 1;\n  }\n  *(char *)(unaff_gp + -0x371e) = (char)uVar7;\n  if ((((*(short *)(unaff_gp + -0x3546) == 0) && (*(short *)(unaff_gp + -0x353e) == 0)) &&\n      (*(short *)(unaff_gp + -0x353c) == 0)) && ((cVar1 != '\\\"' && (cVar2 != '\\\"')))) {\n    bVar12 = cVar3 == '\\\"';\n  }\n  else {\n    bVar12 = true;\n  }\n  *(bool *)(unaff_gp + -0x3722) = bVar12;\n  if (uVar7 == 1) {\n    sVar8 = 0;\n  }\n  else {\n    sVar8 = (short)((*(short *)(unaff_gp + -0x5158) * 100) / 0x100);\n    iVar10 = (int)sVar8;\n    if (iVar10 + -1000 < 0 == (iVar10 < 0 && -1 < iVar10 + -1000) && iVar10 != 1000) {\n      sVar8 = 1000;\n    }\n    else if (iVar10 + 1000 < 0 != (-1 < iVar10 && iVar10 + 1000 < 0)) {\n      sVar8 = -1000;\n    }\n  }\n  *(short *)(unaff_gp + -0x36ae) = sVar8;\n  uVar9 = 0;\n  if (uVar11 != 1) {\n    uVar9 = (undefined2)((*(short *)(unaff_gp + -0x50e8) * -100) / 0x80);\n  }\n  *(undefined2 *)(unaff_gp + -0x36a8) = uVar9;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "20ba4b41d9026d2d838dee2dea3c46ccf3e04c6016656eac5a2cb84304ea27f4",
+      "entry": "0x0004C000"
+    },
+    {
+      "body_sha256": "52ccb54f695a37261aedbb2256cead348d001aeb5c0d7a9f675d97280867395f",
+      "body_size": 114,
+      "decompiled_c": "\nvoid FUN_0004c14e(void)\n\n{\n  int unaff_gp;\n  undefined1 uStack_7;\n  undefined1 auStack_6 [6];\n  \n  *(char *)(unaff_gp + -0x36f3) = (char)*(undefined2 *)(unaff_gp + -0x37b8);\n  *(byte *)(unaff_gp + -0x36f5) = *(byte *)(unaff_gp + -0x3722) | 0x20;\n  *(byte *)(unaff_gp + -0x36f4) = (byte)((ushort)*(undefined2 *)(unaff_gp + -0x37b8) >> 8) & 0xf;\n  FUN_00070110((int)*(short *)(unaff_gp + -0x3aba),0x7ff,0xfffff800,auStack_6);\n  *(char *)(unaff_gp + -0x36f1) = (char)auStack_6._0_2_;\n  *(byte *)(unaff_gp + -0x36f2) = SUB21(auStack_6._0_2_,1) & 0xf;\n  func_0x0006a5cc((int)(*(short *)(unaff_gp + -0x36ae) / 10),&uStack_7);\n  *(undefined1 *)(unaff_gp + -0x36f0) = uStack_7;\n  *(char *)(unaff_gp + -0x36ef) = (char)((ushort)*(undefined2 *)(unaff_gp + -0x36a8) >> 8);\n  *(char *)(unaff_gp + -0x36ee) = (char)*(undefined2 *)(unaff_gp + -0x36a8);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "b58ae28c36140c4373cfbdf6b0ddc4dfb46ff84b8c311c3f1b95357c1e313f41",
+      "entry": "0x0004C14E"
+    },
+    {
+      "body_sha256": "a407bb69d9cc9c4f3734817afe2384ce49cec07d8cc4caf484382d7d6f1cb5c6",
+      "body_size": 86,
+      "decompiled_c": "\nchar FUN_0004c1c0(void)\n\n{\n  byte bVar1;\n  int unaff_gp;\n  char cVar2;\n  char cVar3;\n  char cVar4;\n  \n  cVar2 = *(char *)(unaff_gp + -0x3700);\n  cVar3 = (&DAT_0000302b)[unaff_gp];\n  bVar1 = *(byte *)(unaff_gp + -0x36d5);\n  cVar4 = *(char *)(unaff_gp + -0x36d4);\n  if ((cVar2 == '\\x01') && (cVar3 == '\\0')) {\n    cVar4 = 'Z';\n    bVar1 = 0;\n    cVar2 = cVar3;\n  }\n  else if (cVar4 != 'Z') goto LAB_0004c20a;\n  if ((bVar1 < bRam0002fbf8) && (*(char *)(unaff_gp + -0x36d6) == *(char *)(unaff_gp + -0x64c7))) {\n    bVar1 = bVar1 + 1;\n    cVar3 = cVar2;\n  }\n  else {\n    bVar1 = 0;\n    cVar4 = '\\0';\n  }\nLAB_0004c20a:\n  *(char *)(unaff_gp + -0x36d6) = *(char *)(unaff_gp + -0x64c7);\n  *(byte *)(unaff_gp + -0x36d5) = bVar1;\n  *(char *)(unaff_gp + -0x36d4) = cVar4;\n  return cVar3;\n}\n\n",
+      "decompiled_c_sha256": "ac1edc1171634ddbe56b684e10f42293950628dd030d362d3a3363a61ef28ce7",
+      "entry": "0x0004C1C0"
+    },
+    {
+      "body_sha256": "51bc613235b0b5f869d7312482c0dff0bafc5baae3787eb95a7c29a41fa4f3f1",
+      "body_size": 34,
+      "decompiled_c": "\nvoid FUN_0004c216(undefined1 param_1)\n\n{\n  undefined1 uVar1;\n  int unaff_gp;\n  \n  if (((*(ushort *)(unaff_gp + -0x509c) & 3) == 0) || (*(char *)(unaff_gp + -0x36bd) == '\\0')) {\n    uVar1 = 0;\n  }\n  else {\n    param_1 = 7;\n    uVar1 = 1;\n  }\n  *(undefined1 *)(unaff_gp + -0x3700) = param_1;\n  *(undefined1 *)(unaff_gp + -0x36ff) = uVar1;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "6bc61bcc46e87d08704d0e530b3addc1b8904320d1d36955e26bb27b96878390",
+      "entry": "0x0004C216"
+    },
+    {
+      "body_sha256": "4ff458a30a73d1c2b903fb368a47c0312020e58b8086da918b5044978cefc541",
+      "body_size": 74,
+      "decompiled_c": "\nvoid FUN_0004c24a(void)\n\n{\n  uint uVar1;\n  undefined1 uVar2;\n  int unaff_gp;\n  \n  uVar1 = *(byte *)(unaff_gp + -0x3560) - 1;\n  if (3 < uVar1) {\n    if (uVar1 == 4) {\n      uVar2 = 1;\n      goto LAB_0004c26e;\n    }\n    if (0xd < uVar1) {\n      if (uVar1 == 0xe) {\n        uVar2 = 2;\n        goto LAB_0004c26e;\n      }\n      if (uVar1 != 0xf) {\n        uVar2 = 0;\n        goto LAB_0004c26e;\n      }\n    }\n  }\n  uVar2 = 3;\nLAB_0004c26e:\n  *(undefined1 *)(unaff_gp + -0x36f6) = uVar2;\n  *(undefined1 *)(unaff_gp + -0x36fe) = *(undefined1 *)(unaff_gp + -0x3552);\n  *(undefined1 *)(unaff_gp + -0x36fb) = *(undefined1 *)(unaff_gp + -0x3553);\n  *(undefined1 *)(unaff_gp + -0x36fa) = *(undefined1 *)(unaff_gp + -0x3556);\n  *(undefined1 *)(unaff_gp + -0x36f9) = *(undefined1 *)(unaff_gp + -0x3555);\n  *(undefined1 *)(unaff_gp + -0x36f7) = *(undefined1 *)(unaff_gp + -0x3554);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "472166c0fb5c4ca66fba615a37ccbe502f57b80f8d68b773ee9d0c9b4c63b8c8",
+      "entry": "0x0004C24A"
+    },
+    {
+      "body_sha256": "3f5f932f82613a3d19c5d53cd681cc9f064b3620a014e6efcad72e5089b8cece",
+      "body_size": 306,
+      "decompiled_c": "\nuint FUN_0004c7aa(void)\n\n{\n  char cVar1;\n  int unaff_gp;\n  uint uVar2;\n  uint uVar3;\n  \n  *(undefined1 *)(unaff_gp + -0x2bad) = *(undefined1 *)(unaff_gp + -0x36f5);\n  *(undefined1 *)(unaff_gp + -0x2bac) = *(undefined1 *)(unaff_gp + -0x36f4);\n  *(undefined1 *)(unaff_gp + -0x2bab) = *(undefined1 *)(unaff_gp + -0x36f3);\n  *(undefined1 *)(unaff_gp + -0x2baa) = *(undefined1 *)(unaff_gp + -0x36f2);\n  *(undefined1 *)(unaff_gp + -0x2ba9) = *(undefined1 *)(unaff_gp + -0x36f1);\n  *(undefined1 *)(unaff_gp + -0x2ba8) = *(undefined1 *)(unaff_gp + -0x36f0);\n  *(undefined1 *)(unaff_gp + -0x2ba7) = *(undefined1 *)(unaff_gp + -0x36ef);\n  *(undefined1 *)(unaff_gp + -0x2ba6) = *(undefined1 *)(unaff_gp + -0x36ee);\n  FUN_0007d31e(0x2c,0x27,8,0,unaff_gp + -0x2bad);\n  FUN_0007d31e(0x2d,0x28,8,0,unaff_gp + -0x2bac);\n  FUN_0007d31e(0x2e,0x29,8,0,unaff_gp + -0x2bab);\n  FUN_0007d31e(0x2f,0x2a,8,0,unaff_gp + -0x2baa);\n  FUN_0007d31e(0x30,0x2b,8,0,unaff_gp + -0x2ba9);\n  FUN_0007d31e(0x31,0x2c,8,0,unaff_gp + -0x2ba8);\n  FUN_0007d31e(0x32,0x2d,8,0,unaff_gp + -0x2ba7);\n  FUN_0007d31e(0x33,0x2e,8,0,unaff_gp + -0x2ba6);\n  cVar1 = *(char *)(unaff_gp + -0x386a);\n  uVar2 = FUN_0007d0ea(3);\n  if ((cVar1 == 'Z') && ((uVar2 & 0x10) == 0)) {\n    uVar3 = func_0x0007e612(3);\n  }\n  else {\n    uVar3 = uVar2;\n    if ((cVar1 == '\\0') && (uVar3 = uVar2 >> 5, (uVar2 & 0x10) != 0)) {\n      func_0x0007e46a(3,0x40);\n      uVar3 = func_0x0007e696(3);\n    }\n  }\n  return uVar3;\n}\n\n",
+      "decompiled_c_sha256": "99717bb4eac29cb0427f0e1f0825106d0d283f55fda2fb45e984ebb7addb2cc6",
+      "entry": "0x0004C7AA"
+    },
+    {
+      "body_sha256": "a7e61c32f0c25a88fcf6a587ed6c60c756f8bdaa5360087f05f5bec9f1327075",
+      "body_size": 196,
+      "decompiled_c": "\nuint FUN_0004ce08(void)\n\n{\n  char cVar1;\n  int unaff_gp;\n  uint uVar2;\n  uint uVar3;\n  \n  *(undefined1 *)(unaff_gp + -0x2bb1) = *(undefined1 *)(unaff_gp + -0x36fb);\n  *(undefined1 *)(unaff_gp + -0x2bb0) = *(undefined1 *)(unaff_gp + -0x36fa);\n  *(undefined1 *)(unaff_gp + -0x2baf) = *(undefined1 *)(unaff_gp + -0x36f9);\n  *(undefined1 *)(unaff_gp + -0x2bae) = *(undefined1 *)(unaff_gp + -0x36f7);\n  FUN_0007d1dc(0x28,0x25,2,6,unaff_gp + -0x2bb1);\n  FUN_0007d1dc(0x29,0x25,3,3,unaff_gp + -0x2bb0);\n  FUN_0007d1dc(0x2a,0x26,3,1,unaff_gp + -0x2baf);\n  FUN_0007d1dc(0x2b,0x26,1,0,unaff_gp + -0x2bae);\n  cVar1 = *(char *)(unaff_gp + -0x386a);\n  uVar2 = FUN_0007d0ea(2);\n  if ((cVar1 == 'Z') && ((uVar2 & 0x10) == 0)) {\n    uVar3 = func_0x0007e612(2);\n  }\n  else {\n    uVar3 = uVar2;\n    if ((cVar1 == '\\0') && (uVar3 = uVar2 >> 5, (uVar2 & 0x10) != 0)) {\n      func_0x0007e46a(2,0x40);\n      func_0x0007e46a(2,0x80);\n      uVar3 = func_0x0007e696(2);\n    }\n  }\n  return uVar3;\n}\n\n",
+      "decompiled_c_sha256": "e3c7b3fd17878e25c6e373ebb3c654d1e17a1356ce72c48419f2f7af0a8421af",
+      "entry": "0x0004CE08"
+    },
+    {
+      "body_sha256": "1d9e2ca12fc3a772efff684d1244929bd9258b38e20125e57082f3b0165556eb",
+      "body_size": 136,
+      "decompiled_c": "\nuint FUN_0004ced0(void)\n\n{\n  char cVar1;\n  int unaff_gp;\n  uint uVar2;\n  uint uVar3;\n  \n  *(undefined1 *)(unaff_gp + -0x2ba5) = *(undefined1 *)(unaff_gp + -0x3700);\n  *(undefined1 *)(unaff_gp + -0x2ba4) = *(undefined1 *)(unaff_gp + -0x36ff);\n  FUN_0007d1dc(0x26,0x22,3,5,unaff_gp + -0x2ba5);\n  FUN_0007d1dc(0x27,0x22,1,4,unaff_gp + -0x2ba4);\n  cVar1 = *(char *)(unaff_gp + -0x386a);\n  uVar2 = FUN_0007d0ea(1);\n  if ((cVar1 == 'Z') && ((uVar2 & 0x10) == 0)) {\n    uVar3 = func_0x0007e612(1);\n  }\n  else {\n    uVar3 = uVar2;\n    if ((cVar1 == '\\0') && (uVar3 = uVar2 >> 5, (uVar2 & 0x10) != 0)) {\n      func_0x0007e46a(1,0x40);\n      func_0x0007e46a(1,0x80);\n      uVar3 = func_0x0007e696(1);\n    }\n  }\n  return uVar3;\n}\n\n",
+      "decompiled_c_sha256": "292f8d3e0f80d028d9bf959cd79d9ff0dcbe074cd38d59b455dcdb598d0af1e6",
+      "entry": "0x0004CED0"
+    },
+    {
+      "body_sha256": "afc8f5575964c28eaf2317beadb89ea7629a06adb3f658642df0b4a131bf88a4",
+      "body_size": 64,
+      "decompiled_c": "\nbyte FUN_0007d0ea(uint param_1)\n\n{\n  int iVar1;\n  int unaff_gp;\n  int unaff_tp;\n  byte bVar2;\n  \n  param_1 = param_1 & 0xffff;\n  bVar2 = *(byte *)(param_1 + unaff_gp + -0x6ec2) & 0x33;\n  if (param_1 < *(ushort *)(unaff_tp + -0x21a6)) {\n    iVar1 = unaff_gp + -0x6dc4;\n  }\n  else {\n    iVar1 = unaff_gp + -0x6dbe;\n  }\n  if ((*(byte *)(param_1 + unaff_tp + -0x1cb4) &\n      *(byte *)((uint)*(byte *)(param_1 * 8 + unaff_tp + -0x173a) + iVar1)) != 0) {\n    bVar2 = bVar2 | 0x80;\n  }\n  return bVar2;\n}\n\n",
+      "decompiled_c_sha256": "3dd62f17a23fe46b6b38808e49d9fa2278a7f0b68a3bcec4017f43da46a78145",
+      "entry": "0x0007D0EA"
+    },
+    {
+      "body_sha256": "add6ee2f95cb8816f2fcaebacd22be5a8bf792333ed789817220ef49634d5958",
+      "body_size": 322,
+      "decompiled_c": "\nundefined4 FUN_0007d1dc(uint param_1,uint param_2,uint param_3,uint param_4,uint *param_5)\n\n{\n  byte *pbVar1;\n  char cVar2;\n  byte bVar3;\n  uint uVar4;\n  int unaff_gp;\n  int unaff_tp;\n  undefined4 uVar5;\n  char cVar6;\n  uint uVar7;\n  uint uVar8;\n  uint uVar9;\n  uint uVar10;\n  \n  param_4 = param_4 & 0xff;\n  param_3 = param_3 & 0xff;\n  uVar8 = 0xffffffff;\n  uVar7 = (uint)*(ushort *)((param_1 & 0xffff) * 2 + unaff_tp + -0x1974);\n  cVar2 = *(char *)((param_1 & 0xffff) + unaff_tp + -0x1a90);\n  if (param_3 < 0x20) {\n    uVar8 = (1 << param_3) - 1;\n  }\n  if (param_3 < 9) {\n    uVar10 = (uint)(byte)*param_5;\n  }\n  else if (param_3 < 0x11) {\n    uVar10 = (uint)(ushort)*param_5;\n  }\n  else {\n    uVar10 = *param_5;\n  }\n  uVar5 = FUN_0007a2da();\n  if (param_3 == 1) {\n    pbVar1 = (byte *)((param_2 & 0xffff) + unaff_gp + -0x6db8);\n    uVar10 = (uint)*pbVar1;\n    uVar8 = (uVar8 & 0xff) << param_4 & 0xff;\n    if ((*param_5 & 1) == 0) {\n      cVar6 = '\\x02';\n      uVar8 = (uVar8 ^ 0xff) & uVar10;\n    }\n    else {\n      uVar8 = uVar8 | uVar10;\n      cVar6 = '\\x01';\n    }\n    *pbVar1 = (byte)uVar8;\n    if ((cVar2 != '\\x04') && ((uVar10 == uVar8 || ((cVar2 != cVar6 && (cVar2 != '\\x03'))))))\n    goto LAB_0007d304;\n  }\n  else {\n    uVar4 = (param_4 - (param_4 + param_3 + 7 & 0xf8)) + 0x20 & 0xff;\n    uVar9 = uVar8 << uVar4;\n    uVar4 = (uVar10 & uVar8) << uVar4;\n    uVar8 = ~uVar9;\n    pbVar1 = (byte *)((param_2 & 0xffff) + unaff_gp + -0x6db8);\n    if ((cVar2 == '\\x03') &&\n       ((uVar9 & ((uint)pbVar1[3] |\n                 (uint)pbVar1[2] << 8 | (uint)pbVar1[1] << 0x10 | (uint)*pbVar1 << 0x18)) == uVar4))\n    goto LAB_0007d304;\n    *pbVar1 = *pbVar1 & (byte)(uVar8 >> 0x18) | (byte)(uVar4 >> 0x18);\n    pbVar1[1] = pbVar1[1] & (byte)(uVar8 >> 0x10) | (byte)(uVar4 >> 0x10);\n    pbVar1[2] = pbVar1[2] & (byte)(uVar8 >> 8) | (byte)(uVar4 >> 8);\n    pbVar1[3] = pbVar1[3] & (byte)uVar8 | (byte)uVar4;\n  }\n  func_0x0007e196(uVar7,0x80);\nLAB_0007d304:\n  bVar3 = *(byte *)(uVar7 + unaff_gp + -0x6ec2);\n  FUN_0007a2e8(uVar5);\n  uVar5 = 0x20;\n  if ((bVar3 & 0x80) != 0) {\n    uVar5 = 0;\n  }\n  return uVar5;\n}\n\n",
+      "decompiled_c_sha256": "cffca6343da1bd00fbadc278d0836007a435042e4d181f9cfc63e366ef8d3c27",
+      "entry": "0x0007D1DC"
+    },
+    {
+      "body_sha256": "f351fc451fcfa5fe13ccbf665639c6bcbcf5df22de100cd1e25f220e63216742",
+      "body_size": 184,
+      "decompiled_c": "\nundefined4 FUN_0007d31e(uint param_1,uint param_2,uint param_3,int param_4,uint *param_5)\n\n{\n  byte *pbVar1;\n  byte bVar2;\n  uint uVar3;\n  int unaff_gp;\n  int unaff_tp;\n  undefined4 uVar4;\n  uint uVar5;\n  uint uVar6;\n  int iVar7;\n  \n  param_3 = param_3 & 0xff;\n  uVar3 = 0xffffffff;\n  if (param_3 < 0x20) {\n    uVar3 = (1 << param_3) - 1;\n  }\n  if (param_3 < 9) {\n    uVar6 = (uint)(byte)*param_5;\n  }\n  else if (param_3 < 0x11) {\n    uVar6 = (uint)(ushort)*param_5;\n  }\n  else {\n    uVar6 = *param_5;\n  }\n  uVar5 = (param_4 - (param_4 + param_3 + 7 & 0xf8)) + 0x20 & 0xff;\n  iVar7 = (uVar6 & uVar3) << uVar5;\n  uVar3 = ~(uVar3 << uVar5);\n  uVar4 = FUN_0007a2da();\n  pbVar1 = (byte *)(unaff_gp + -0x6db8 + (param_2 & 0xffff));\n  *pbVar1 = *pbVar1 & (byte)(uVar3 >> 0x18) | (byte)((uint)iVar7 >> 0x18);\n  pbVar1[1] = pbVar1[1] & (byte)(uVar3 >> 0x10) | (byte)((uint)iVar7 >> 0x10);\n  pbVar1[2] = pbVar1[2] & (byte)(uVar3 >> 8) | (byte)((uint)iVar7 >> 8);\n  pbVar1[3] = pbVar1[3] & (byte)uVar3 | (byte)iVar7;\n  bVar2 = *(byte *)((uint)*(ushort *)((param_1 & 0xffff) * 2 + unaff_tp + -0x1974) + unaff_gp +\n                   -0x6ec2);\n  FUN_0007a2e8(uVar4);\n  uVar4 = 0x20;\n  if ((bVar2 & 0x80) != 0) {\n    uVar4 = 0;\n  }\n  return uVar4;\n}\n\n",
+      "decompiled_c_sha256": "7e6742af3413708614763f80ffc3956ac2e932670074f336e6e5c3eb744e72f0",
+      "entry": "0x0007D31E"
+    }
+  ],
+  "image": {
+    "path": "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+    "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "size": 1048576
+  },
+  "schema": "camry-8965f3307000-tss3-tx-decompiler-evidence-v1",
+  "software_id": "8965F3307000",
+  "source_corpus": {
+    "boundary": "Disposable Ghidra corpus used only to recover the selected functions and a bounded direct/fixed-GP reference census. Every promoted row is independently body-hash-bound to the exact normalized F33 image.",
+    "function_count": 3276,
+    "path": "build/tmp/f33-tx-native3.79FFyV/out3.jsonl",
+    "sha256": "af43b71720855d27fa31b5d3a75f661c66e2d00cc3167534265d0e3478c3f441"
+  }
+}
