@@ -40,11 +40,33 @@ The small command surface to remember is:
 | Discover / preview | `tools/test list [word]`, `tools/test plan` |
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
 | GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
+| Generated artifacts / producers / owning suites | `tools/artifact list`, `show`, `regen`, `check` |
 | Broad gates | `tools/test core` / `full` / `branch` |
-| Query another configured target | `tools/gtarget` (or a target wrapper such as `tools/gcamry`) |
+| Discover/query configured targets | `tools/gtarget list`, `tools/gtarget show TARGET`, `tools/gtarget TARGET ...` |
 | Discover Corolla-H evidence-compaction profiles | `uv run --locked python tools/extract_corolla_h_evidence.py list` |
 | Discover cross-variant evidence modes | `uv run --locked python tools/extract_variant_evidence.py list` |
 | Discover working-project export profiles | `tools/export_ghidra_project.sh list` |
+
+Generated artifacts are discoverable without remembering their implementation filenames:
+
+```bash
+tools/artifact list camry
+tools/artifact show camry_8965F3307000_fault_status.json
+tools/artifact regen camry_8965F3307000_fault_status.json
+tools/artifact check camry_8965F3307000_fault_status.json
+```
+
+The catalog is derived from tracked artifact paths, exact path references in `tools/`, and verification dependencies; it is not another manually maintained builder registry. `regen` exposes the selected producer before execution and requires an explicit `--producer` when discovery is ambiguous.
+
+Configured firmware targets likewise have one registry-backed discovery surface:
+
+```bash
+tools/gtarget list
+tools/gtarget show camry-8965F3307000
+tools/gtarget camry-8965F3307000 stats
+```
+
+Generic rebuild/snapshot tooling resolves target-specific seed tables and Ghidra stage scripts from `data/analysis_targets.json`; adding a target must not require editing the generic shell scripts.
 
 Family modules (`tests/verify_application_wdbi.py`, `tests/verify_corolla_h.py`,
 and so on) group same-mode same-family portable proofs. Prefix queries are the

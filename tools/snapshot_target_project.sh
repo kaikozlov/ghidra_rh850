@@ -15,8 +15,7 @@ while (($#)); do case "$1" in
 esac; done
 [[ -n "$TARGET" && -n "$PROJECT_DIR" ]] || { usage >&2; exit 2; }
 field(){ python3 "$ROOT/tools/analysis_target.py" "$TARGET" --field "$1"; }
-[[ "$(field rebuild_profile)" == "camry_f33_v1" ]] || { echo "unsupported target profile" >&2; exit 2; }
-PN=$(field project_name); PROG=$(field program_name); SNAP="$ROOT/$(field snapshot_dir)"; BASE="$ROOT/$(field inventory_baseline)"; CORPUS="$ROOT/$(field decompiler_corpus)"
+PN=$(field project_name); SNAP="$ROOT/$(field snapshot_dir)"; BASE="$ROOT/$(field inventory_baseline)"; CORPUS="$ROOT/$(field decompiler_corpus)"
 canon_work(){ python3 - "$1" "$BUILD_WORK" <<'PY'
 from pathlib import Path
 import sys

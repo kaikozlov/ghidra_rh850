@@ -68,6 +68,12 @@ Live-project assertions are `local` verification suites. Core verification uses
 tracked firmware/evidence only; external proprietary/public source trees are
 owned through explicit `requires_external` gates rather than `REFERENCE/` paths.
 
+### Artifact and target discovery
+
+Use `tools/artifact list/show` instead of grepping for generator filenames. `tools/artifact regen` runs a derived producer and `tools/artifact check` runs the verification suite(s) that own the artifact. The catalog is derived from tracked repository references and `verification.toml`, so adding a generated artifact does not require maintaining a second command registry.
+
+Use `tools/gtarget list` / `tools/gtarget show TARGET` before target-specific work. `data/analysis_targets.json` owns registered image identities, work/snapshot/corpus paths, function seeds, and target-specific rebuild stage scripts. The generic target rebuild/snapshot drivers consume those fields and intentionally contain no Camry-specific path/profile switch.
+
 ### External software corpus layout
 
 Proprietary software distributions used as reverse-engineering inputs live only

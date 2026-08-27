@@ -68,6 +68,9 @@ check("snapshot roots unique and non-nested", len(set(resolved_snaps)) == len(re
 
 camry = targets["camry-8965F3307000"]
 check("Camry is first-class", camry["status"] == "first_class" and camry["capture_root"] == "targets/camry-2026")
+for field in ("function_seeds", "device_profile_script", "entry_seed_script", "diagnostic_seed_script", "recovered_seed_script"):
+    check(f"Camry target rebuild metadata has {field}", bool(camry.get(field)))
+check("Camry registered function seeds exist", (ROOT / camry["function_seeds"]).is_file())
 raw_cf = ROOT / "targets/camry-2026/raw-20260826/codeflash/camry_8965F3307000_codeflash_20260826T213719Z.bin"
 check("Camry canonical CodeFlash equals acquired lower MiB", raw_cf.is_file() and raw_cf.read_bytes()[:0x100000] == (ROOT / camry["codeflash"]).read_bytes())
 raw_df = ROOT / "targets/camry-2026/raw-20260826/secoc-recovery/dataflash/dump_ff200000_ff208000.bin"
@@ -90,11 +93,17 @@ for target, snap in [("sienna-8965B4512000", ROOT / "project"), ("camry-8965F330
 
 rebuild = (ROOT / "tools/rebuild_target_project.sh").read_text()
 check("Camry rebuild preserves four-stage analysis", all(x in rebuild for x in ("1/4", "2/4", "3/4", "4/4", "4b")))
-check("Camry rebuild uses target-native profile", "ApplyCamryF33DeviceProfile.java" in rebuild and "SeedCamryF33Diagnostics.java" in rebuild)
+check("target rebuild resolves registered stage scripts", all(token in rebuild for token in ("field function_seeds", "field device_profile_script", "field entry_seed_script", "field diagnostic_seed_script", "field recovered_seed_script")))
+check("target rebuild has no Camry path/profile coupling", "data/targets/camry-8965F3307000" not in rebuild and "camry_f33_v1" not in rebuild)
 check("Camry destructive rebuild is build/work bounded", "refusing target rebuild destination outside dedicated build/work descendant" in rebuild and "is_symlink" in rebuild)
 snapshot = (ROOT / "tools/snapshot_target_project.sh").read_text()
 check("first promotion requires independent parity build", "first target promotion requires --parity-project-dir" in snapshot and "independent target rebuild inventories differ" in snapshot)
 check("canonical corpus rechecks tracked baseline", "generate_target_decompiler_corpus.py" in snapshot)
+check("target snapshot has no Camry profile coupling", "camry_f33_v1" not in snapshot)
+r = subprocess.run([str(ROOT / "tools/gtarget"), "list"], cwd=ROOT, capture_output=True, text=True)
+check("gtarget lists configured targets", r.returncode == 0 and "camry-8965F3307000" in r.stdout and "sienna-8965B4512000" in r.stdout)
+r = subprocess.run([str(ROOT / "tools/gtarget"), "show", "camry-8965F3307000"], cwd=ROOT, capture_output=True, text=True)
+check("gtarget shows registry metadata", r.returncode == 0 and json.loads(r.stdout)["function_seeds"] == camry["function_seeds"])
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

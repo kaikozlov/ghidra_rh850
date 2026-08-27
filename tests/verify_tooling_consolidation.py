@@ -97,6 +97,24 @@ with tempfile.TemporaryDirectory(prefix="gts-wrapper-cwd-") as td:
         proc.returncode != 0 and "truncated CUW header" in proc.stderr,
         "GTS+ query wrapper preserves caller-relative artifact paths",
     )
+artifact_tool = ROOT / "tools/artifact"
+artifact_catalog = ROOT / "tools/artifact_catalog.py"
+check(artifact_tool.is_file() and os.access(artifact_tool, os.X_OK), "artifact catalog is an executable task entry point")
+check(artifact_catalog.is_file(), "artifact producer/owner catalog lives in one shared module")
+proc = subprocess.run(
+    [str(artifact_tool), "show", "camry_8965F3307000_fault_status.json", "--json"],
+    cwd=ROOT, text=True, capture_output=True,
+)
+artifact_row = json.loads(proc.stdout) if proc.returncode == 0 else {}
+check(
+    proc.returncode == 0
+    and artifact_row.get("producers") == ["tools/build_camry_8965F3307000_fault_status.py"]
+    and "camry_8965f3307000_fault_status" in artifact_row.get("suites", []),
+    "artifact catalog derives producer and verification owner without a hand-maintained builder list",
+)
+proc = subprocess.run([str(artifact_tool), "list", "fault_status"], cwd=ROOT, text=True, capture_output=True)
+check(proc.returncode == 0 and "camry_8965F3307000_fault_status.json" in proc.stdout, "artifact catalog provides substring discovery")
+
 check(
     (ROOT / "tools/__init__.py").read_text(encoding="utf-8")
     == '"""Repository tooling modules used by deterministic verification tests."""\n',

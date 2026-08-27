@@ -15,12 +15,14 @@ while (($#)); do case "$1" in
 esac; done
 [[ -n "$TARGET" ]] || { usage >&2; exit 2; }
 field(){ python3 "$ROOT/tools/analysis_target.py" "$TARGET" --field "$1"; }
-PROFILE=$(field rebuild_profile)
-[[ "$PROFILE" == "camry_f33_v1" ]] || { echo "target $TARGET is not supported by this target rebuild profile: $PROFILE" >&2; exit 2; }
 PROJECT_NAME=$(field project_name); PROGRAM_NAME=$(field program_name)
 REGISTERED_WORK="$ROOT/$(field work_dir)"; PROJECT_DIR=${PROJECT_DIR_OVERRIDE:-$REGISTERED_WORK}
 CODEFLASH="$ROOT/$(field codeflash)"; DATAFLASH="$ROOT/$(field dataflash)"; EXPECTED_SHA=$(field codeflash_sha256); PROCESSOR=$(field processor)
-SEEDS="$ROOT/data/targets/camry-8965F3307000/function_seeds.csv"
+SEEDS="$ROOT/$(field function_seeds)"
+DEVICE_PROFILE_SCRIPT=$(field device_profile_script)
+ENTRY_SEED_SCRIPT=$(field entry_seed_script)
+DIAGNOSTIC_SEED_SCRIPT=$(field diagnostic_seed_script)
+RECOVERED_SEED_SCRIPT=$(field recovered_seed_script)
 # Canonicalize before any recursive delete and enforce the same build/work boundary as the primary rebuild.
 PROJECT_DIR=$(python3 - "$PROJECT_DIR" "$BUILD_WORK" <<'PY'
 from pathlib import Path
@@ -56,20 +58,20 @@ source "$ROOT/tools/lib/ghidra_env.sh" full
 "$ROOT/tools/install_findcrypt_extension.sh" >/dev/null
 if pgrep -f "AnalyzeHeadless.*${PROJECT_NAME}" >/dev/null 2>&1; then echo "target AnalyzeHeadless already running" >&2; exit 1; fi
 runh(){ local stage=$1; shift; "$ROOT/tools/run_headless" --project-dir "$PROJECT_DIR" --project "$PROJECT_NAME" --label "$TARGET-$stage" --log "$BUILD_LOGS/targets/$TARGET/$stage.log" --quiet -- "$@"; }
-echo "[$TARGET 1/4] import exact F33 CodeFlash/DataFlash and target-native device profile"
+echo "[$TARGET 1/4] import registered CodeFlash/DataFlash and target-native device profile"
 runh import -import "$CODEFLASH" -processor "$PROCESSOR" -noanalysis \
   -postScript AddDataFlash.java "$DATAFLASH" \
-  -postScript ApplyCamryF33DeviceProfile.java \
-  -commit "Import exact F33 images and target-native context"
-echo "[$TARGET 2/4] seed exact application roots and run base analysis"
-runh entries -process "$PROGRAM_NAME" -preScript SeedCamryF33Entries.java \
-  -commit "Seed exact F33 application roots"
-echo "[$TARGET 3/4] seed exact RDBI table callbacks and re-run analysis"
-runh diagnostics -process "$PROGRAM_NAME" -preScript SeedCamryF33Diagnostics.java \
-  -commit "Seed exact F33 RDBI callbacks"
-echo "[$TARGET 4/4] seed promoted exact-F33 functions and analyze"
-runh recovered -process "$PROGRAM_NAME" -preScript SeedCamryF33RecoveredFunctions.java "$SEEDS" \
-  -commit "Seed evidence-backed F33 recovered functions"
+  -postScript "$DEVICE_PROFILE_SCRIPT" \
+  -commit "Import registered target images and target-native context"
+echo "[$TARGET 2/4] seed registered application roots and run base analysis"
+runh entries -process "$PROGRAM_NAME" -preScript "$ENTRY_SEED_SCRIPT" \
+  -commit "Seed registered target application roots"
+echo "[$TARGET 3/4] seed registered diagnostic callbacks and re-run analysis"
+runh diagnostics -process "$PROGRAM_NAME" -preScript "$DIAGNOSTIC_SEED_SCRIPT" \
+  -commit "Seed registered target diagnostic callbacks"
+echo "[$TARGET 4/4] seed promoted registered-target functions and analyze"
+runh recovered -process "$PROGRAM_NAME" -preScript "$RECOVERED_SEED_SCRIPT" "$SEEDS" \
+  -commit "Seed evidence-backed registered-target recovered functions"
 echo "[$TARGET 4b] finalize calling conventions without analysis"
 runh conventions -process "$PROGRAM_NAME" -noanalysis -postScript ApplyCallingConventions.java \
   -commit "Finalize target calling conventions"

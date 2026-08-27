@@ -46,7 +46,12 @@
       "dataflash_size": 32768,
       "dataflash_base": "0xFF200000",
       "mcu": "R7F701381",
-      "processor": "v850e3:LE:32:default"
+      "processor": "v850e3:LE:32:default",
+      "function_seeds": "data/targets/camry-8965F3307000/function_seeds.csv",
+      "device_profile_script": "ApplyCamryF33DeviceProfile.java",
+      "entry_seed_script": "SeedCamryF33Entries.java",
+      "diagnostic_seed_script": "SeedCamryF33Diagnostics.java",
+      "recovered_seed_script": "SeedCamryF33RecoveredFunctions.java"
     }
   }
 }
