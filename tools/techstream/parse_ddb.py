@@ -43,12 +43,19 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import BinaryIO
 
-# First 6 bytes are constant across all regions. Bytes 6-7 vary by region
-# (NA: 00 39, JP: 01 1b, EU: 00 14) — they carry a region/version tag or
-# checksum, not a format identifier.
-MAGIC_PREFIX = bytes.fromhex("40 00 0c 16 0c 08")
-U_MAGIC_PREFIX = bytes.fromhex("39 00 0c 16 0b 15 0f")
-U_LANGUAGE_TAGS = frozenset(range(0x16, 0x1B))
+# Header families observed in the pinned Techstream V18 and GTS+ corpora.
+# The date/build bytes changed between the 2022 Techstream generation and the
+# 2026 GTS+ generation; region/language bytes remain outside these family keys.
+STANDARD_HEADER_PREFIXES = frozenset({
+    bytes.fromhex("40 00 0c 16 0c 08"),  # Techstream V18 regional DBs
+    bytes.fromhex("40 00 0c 1a 06 10"),  # GTS+ Gen regional DBs
+    bytes.fromhex("49 00 0c 1a 03 11"),  # GTS+ Spe regional DBs
+    bytes.fromhex("01 02 0a 1a 06 10"),  # GTS+ Gen P6/P6F ECU DBs
+})
+U_HEADER_FAMILIES = {
+    bytes.fromhex("39 00 0c 16 0b 15 0f"): frozenset(range(0x16, 0x1B)),
+    bytes.fromhex("48 00 0c 1a 05 12 0b"): frozenset(range(0x09, 0x0E)),
+}
 SIGNATURE = b"DiagTool DataCtrl\x00"
 
 # Table identities recovered from the two KgpDataCtrl.dll factories selected
@@ -637,20 +644,18 @@ class DDBParser:
     def _validate_header(data: bytes) -> None:
         if len(data) < 0x30:
             raise ValueError("file too short for .ddb header")
-        # Format 0x06 has a distinct seven-byte prefix followed by a language
-        # tag (0x16 English through 0x1A Turkish in the pinned corpus).
-        # Standard files share six prefix bytes while bytes 6-7 vary by region.
         if data[8] == 0x06:
-            valid_magic = (
-                data[0:7] == U_MAGIC_PREFIX and data[7] in U_LANGUAGE_TAGS
-            )
+            tags = U_HEADER_FAMILIES.get(data[0:7])
+            valid_magic = tags is not None and data[7] in tags
         else:
-            valid_magic = data[0:6] == MAGIC_PREFIX
+            valid_magic = data[0:6] in STANDARD_HEADER_PREFIXES
         if not valid_magic:
             raise ValueError(f"bad magic prefix: {data[0:8].hex()}")
         sig_end = data.find(b"\x00", 0x0A)
+        if sig_end < 0:
+            raise ValueError("unterminated .ddb signature")
         sig = data[0x0A:sig_end]
-        if sig != b"DiagTool DataCtrl":
+        if sig != SIGNATURE[:-1]:
             raise ValueError(f"bad signature: {sig!r}")
 
     # ── Section-type decoders ─────────────────────────────────────────────────

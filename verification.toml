@@ -2049,6 +2049,14 @@ paths = ["docs/tooling/techstream.md", "tools/techstream/parse_ptshim_log.py", "
 # Synthetic fixtures always exercise the parser; binary body/path/timestamp
 # locks are additionally checked when the gitignored Techstream tree is present.
 
+[suite.techstream_ddb_header_families]
+tests = ["tests/verify_techstream_ddb_header_families.py"]
+oracle = "raw_bytes"
+paths = [
+  "tools/techstream/parse_ddb.py",
+  "tests/verify_techstream_ddb_header_families.py",
+]
+
 [suite.techstream_ddb_residuals]
 tests = ["tests/verify_techstream_ddb_residuals.py"]
 requires_external = ["techstream_v18"]
