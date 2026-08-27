@@ -158,3 +158,34 @@ firmware and live protected `0x0D7` traffic independently establish an active
 slot-4 command-7 verification domain. Compact deterministic interpretation is
 `data/generated/camry_8965F3307000_secoc_recovery.json`; canonical conclusions
 are in `docs/variants/camry-2026-live-baseline.md` §10.
+
+## Stock-startup RAM retention / high-tail follow-up
+
+A later exact-F33 NRTD experiment separates authenticated boot staging from a
+true stock-application resident carrier. The real stock application startup
+**overwrites the earlier `FEBF0000` candidate**; the retained result records
+`prefix_648_byte_exact=false` and `shell_retained=false`.
+
+The directed high-tail experiment instead proves
+`FEBFF9F0..FEBFFBFB` (**524 bytes**) is executable and survives the real stock
+application startup byte-for-byte. The retained bytes hash to
+`89ffed31c24e746a57171e6f3e22f99d1e78d57b63bccb8778c7fe715d18800c`;
+stock application F181 reappears and Panda `safety_tx_blocked_delta=0`.
+
+The four exact live evidence files are tracked unchanged from
+`/Users/kai/dev/f33-live-evidence-20260826/`; provenance and interpretation
+boundaries are pinned in `raw-20260826/RAM_RETENTION_MANIFEST.txt`:
+
+- `raw-20260826/high-tail-20260826.json` SHA-256
+  `7fe390354d24e4d0c582d57d726935256eb620f60b3b4f247e6509ec4d9989f0`;
+- `raw-20260826/stock-retention-20260826.json` SHA-256
+  `a920ecd5cfaa96986be2ac7dd0257cac842edf9c456f37aabd157a47a6fa3845`;
+- `raw-20260826/stock-handoff-20260826.json` SHA-256
+  `bc1bfdde15a5506ca9d87df93c18514aada4fca9815ec541cc2006ec3e95b308`;
+- `raw-20260826/poststartup-canary-20260826.json` SHA-256
+  `e0d12ae6ec806cf4fd5ac5347e2471c4552e624b122e53050a7e7bd50719ef54`.
+
+Exact firmware analysis then identifies the stock application XCP placement
+surface and the remaining execution-pivot boundary. Canonical interpretation is
+`data/generated/camry_8965F3307000_application_ram_loader_assessment.json` and
+`docs/variants/camry-2026-live-baseline.md` §13.

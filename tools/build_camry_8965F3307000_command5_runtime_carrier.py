@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Build the exact-8965F3307000 static command-5 runtime-carrier contract.
 
-This is deliberately a *static* carrier artifact.  It binds the exact Camry
-CodeFlash, audited compiler-reproduced canary/proxy binaries, target-native
-startup/foreground/MPU geometry, and exact ICU-S command-5 record/dispatcher
-addresses.  It does not promote the Camry into the verified live-retention table;
-that remains gated on the inert on-car canary.
+This artifact preserves the original low-RAM static carrier analysis and the
+audited compiler-reproduced canary/proxy binaries, then joins the later live
+result that disproves FEBF0000 as a retained post-startup carrier and verifies
+the separate high tail FEBFF9F0..FEBFFBFB as retained/executable.  The audited
+low-linked binaries remain historical static construction evidence; they are not
+a production post-startup loader.
 """
 from __future__ import annotations
 
@@ -27,6 +28,8 @@ CANARY_AUDIT = REPO / "exploit/ephemeral_runtime/audited_camry_f33_runtime_canar
 PROXY_BIN = REPO / "exploit/ephemeral_runtime/audited/camry_f33_command5_proxy.bin"
 CANARY_BIN = REPO / "exploit/ephemeral_runtime/audited/camry_f33_runtime_canary.bin"
 RAMREQ = REPO / "data/variant_ram_exec_requirements.json"
+HIGH_TAIL = REPO / "community/kai/camry-2026/raw-20260826/high-tail-20260826.json"
+LOW_RETENTION = REPO / "community/kai/camry-2026/raw-20260826/stock-retention-20260826.json"
 OUT = REPO / "data/generated/camry_8965F3307000_command5_runtime_carrier.json"
 
 EXPECTED_APP_F181_HEX = "023839363546333330373030300000000038413331313333303331303000000000"
@@ -120,6 +123,8 @@ def build() -> dict:
     proxy = load(PROXY_AUDIT)
     canary = load(CANARY_AUDIT)
     ramreq = load(RAMREQ)
+    high_tail = load(HIGH_TAIL)
+    low_retention = load(LOW_RETENTION)
 
     route = codeflash["acquisition"]["route"]
     need(route["application_f181_hex"] == EXPECTED_APP_F181_HEX, "application F181 evidence drift")
@@ -159,8 +164,14 @@ def build() -> dict:
     need(runtime["command5_done_flag"] == "0xFEBF13BC" and runtime["command5_status_flag"] == "0xFEBF13BD", "F33 command5 completion cells drift")
     need(runtime["fixed_command5_input_length"] == 36 and runtime["mailbox_address"] == "0xFEBFFB80" and runtime["mailbox_size"] == 60, "F33 fixed-36/mailbox contract drift")
 
-    variants = {str(row.get("id", "")) for row in ramreq.get("variants", [])}
-    need(not any("8965f3307000" in variant.lower() for variant in variants), "F33 must not be promoted as live-retention-verified before canary")
+    need(high_tail["schema"] == "camry-f33-high-tail-exec-retention-v1", "F33 high-tail evidence schema drift")
+    need(high_tail["result"]["tail_524_byte_exact"] is True and high_tail["result"]["tail_marker_executed"] is True, "F33 high-tail live result drift")
+    need(high_tail["result"]["retained_sha256"] == "89ffed31c24e746a57171e6f3e22f99d1e78d57b63bccb8778c7fe715d18800c", "F33 high-tail retained bytes drift")
+    need(low_retention["result"]["prefix_648_byte_exact"] is False and low_retention["result"]["shell_retained"] is False, "F33 low-carrier live rejection drift")
+    f33_rows = [row for row in ramreq.get("variants", []) if row.get("id") == "camry-2026-8965f3307000-high-tail"]
+    need(len(f33_rows) == 1, "F33 verified high-tail geometry row missing")
+    f33 = f33_rows[0]
+    need(f33["retained_application_rwx_base"] == "0xFEBFF9F0" and f33["retained_application_rwx_end_exclusive"] == "0xFEBFFBFC", "F33 verified high-tail geometry drift")
 
     return {
         "schema": "camry-8965f3307000-command5-runtime-carrier-v1",
@@ -178,6 +189,8 @@ def build() -> dict:
             "canary_audit": {"path": str(CANARY_AUDIT.relative_to(REPO)), "sha256": sha_file(CANARY_AUDIT)},
             "proxy_audit": {"path": str(PROXY_AUDIT.relative_to(REPO)), "sha256": sha_file(PROXY_AUDIT)},
             "ram_exec_requirements": {"path": str(RAMREQ.relative_to(REPO)), "sha256": sha_file(RAMREQ)},
+            "high_tail_live_evidence": {"path": str(HIGH_TAIL.relative_to(REPO)), "sha256": sha_file(HIGH_TAIL)},
+            "low_retention_live_evidence": {"path": str(LOW_RETENTION.relative_to(REPO)), "sha256": sha_file(LOW_RETENTION)},
             "raw_function_ranges": ranges,
         },
         "bootstrap_contract": {
@@ -193,7 +206,7 @@ def build() -> dict:
             "boot_security_access_root_source": "exact CodeFlash @ 0x0000BFE8",
             "secret_values_recorded_in_artifact": False,
         },
-        "carrier_geometry": {
+        "static_low_carrier_geometry": {
             "base": "0xFEBF0000",
             "end_inclusive": "0xFEBF0307",
             "end_exclusive": "0xFEBF0308",
@@ -204,7 +217,23 @@ def build() -> dict:
             "ctx0_mpat": "0x000000B8",
             "ctx1_mpat": "0x000000B8",
             "permissions": "supervisor read/write/execute in both recovered application contexts",
-            "static_boundary": "The first normalized direct/simple-GP reference is FEBF0308; computed aliases/DMA remain a dynamic-retention boundary closed only by the inert live canary.",
+            "static_boundary": "The first normalized direct/simple-GP reference is FEBF0308, but the real stock application startup live test overwrites this pocket; it is not a retained production carrier.",
+        },
+        "verified_high_tail_carrier": {
+            "base": "0xFEBFF9F0",
+            "end_inclusive": "0xFEBFFBFB",
+            "end_exclusive": "0xFEBFFBFC",
+            "size": 524,
+            "retained_sha256": "89ffed31c24e746a57171e6f3e22f99d1e78d57b63bccb8778c7fe715d18800c",
+            "live_exact_after_stock_startup": True,
+            "live_execution_proven": True,
+            "stock_application_reappeared": True,
+            "safety_tx_blocked_delta": 0,
+            "mpu_region_index": 1,
+            "mpu_bounds": ["0xFEBF7C00", "0xFEBFFBFC"],
+            "ctx0_mpat": "0x000000B8",
+            "ctx1_mpat": "0x000000A8",
+            "production_boundary": "Carrier lifetime/execution is closed; application-mode byte placement and control transfer are assessed separately by camry_8965F3307000_application_ram_loader_assessment.json.",
         },
         "mailbox_geometry": {
             "base": "0xFEBFFB80",
@@ -218,6 +247,8 @@ def build() -> dict:
             "ctx1_mpat": "0x000000A8",
             "intended_write_context": "ctx0; target-native foreground sequence returns through 0x71398 before canary/signer insertion",
             "host_read_transport": "application SID 0x23 ALFID 0x15 memory-id 1; Camry XCP 0x7F7/0x7F8 is not assumed",
+            "historical_only": True,
+            "production_note": "This mailbox was paired with low-linked startup-replay candidates. A post-startup high-tail service must allocate its own non-overlapping mailbox layout.",
         },
         "scheduler_transfer": {
             "boot_transition_calls": ["0x00000C9A", "0x00000E54", "0x00000F80", "0x000010C6"],
@@ -259,6 +290,7 @@ def build() -> dict:
                 "relocations": 0,
                 "heartbeat_address": "0xFEBFFB80",
                 "command5_calls": False,
+                "production_poststartup_usable": False,
             },
             "fixed_36_command5_proxy": {
                 "binary": str(PROXY_BIN.relative_to(REPO)),
@@ -269,24 +301,26 @@ def build() -> dict:
                 "relocations": 0,
                 "input_length": 36,
                 "key_selector": 4,
+                "production_poststartup_usable": False,
             },
         },
-        "live_sequence": [
-            {"stage": 1, "name": "inert application-retention canary", "requires": ["exact F181", "bus1/ELM1 route", "Ready=0"], "success": "application F181 reappears and FEBFFB80 heartbeat advances through SID 0x23 reads"},
-            {"stage": 2, "name": "power-cycle/reset-to-stock confirmation", "success": "stock application F181/normal behavior return before any command-5 payload"},
-            {"stage": 3, "name": "single fixed-36 selector-4 command5 probe", "requires": ["successful stage-1 artifact", "explicit reset-to-stock confirmation"], "success": "command5 completes and returns a changed 16-byte result without Panda TX blocks"},
-            {"stage": 4, "name": "latency/contention characterization", "success": "measure command-5 completion under normal command-7 load before any production sender work"},
+        "historical_low_carrier_live_sequence": [
+            {"stage": 1, "name": "low-pocket application-retention canary", "result": "superseded/disproved: real stock startup overwrites FEBF0000"},
+            {"stage": 2, "name": "high-tail retention marker", "result": "closed: FEBFF9F0..FEBFFBFB retained byte-for-byte and executed before stock application return"},
         ],
         "boundary": {
-            "static_target_native_carrier_candidate_closed": True,
-            "live_retention_closed": False,
+            "static_low_carrier_candidate_closed": True,
+            "low_carrier_live_retention_closed": False,
+            "low_carrier_disproved": True,
+            "verified_high_tail_live_retention_closed": True,
             "live_slot4_command5_permission_closed": False,
             "command5_latency_jitter_closed": False,
             "production_b6_signer_closed": False,
             "vehicle_actuation_authorized": False,
             "flash_write_used": False,
             "steering_can_transmit_used": False,
-            "verified_variant_ram_exec_requirement_promoted": False,
+            "verified_variant_ram_exec_requirement_promoted": True,
+            "application_mode_execution_pivot_closed": False,
         },
     }
 

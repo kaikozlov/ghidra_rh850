@@ -93,14 +93,18 @@
   },
   "runtime_readiness": {
     "application_context_init": "0x000715B4",
+    "application_mode_execution_pivot_closed": false,
     "command5_latency_closed": false,
     "foreground_loop": "0x00066062",
-    "live_retention_closed": false,
+    "high_tail_base": "0xFEBFF9F0",
+    "high_tail_end_exclusive": "0xFEBFFBFC",
+    "high_tail_live_retention_closed": true,
     "live_slot4_permission_closed": false,
+    "low_carrier_disproved": true,
     "startup_coordinator": "0x000637EE",
     "startup_final_init": "0x000701EA",
-    "static_carrier_constructed": true,
-    "static_command5_carrier_artifact": "data/generated/camry_8965F3307000_command5_runtime_carrier.json"
+    "static_command5_carrier_artifact": "data/generated/camry_8965F3307000_command5_runtime_carrier.json",
+    "static_low_carrier_constructed": true
   },
   "schema": "camry-8965f3307000-lateral-static-v1",
   "secondary_b6_fields": {
@@ -146,7 +150,7 @@
     },
     "runtime_carrier": {
       "path": "data/generated/camry_8965F3307000_command5_runtime_carrier.json",
-      "sha256": "b94aae801ca072528098ee332122f5e230f588ea3a817fed9db94a74d9147009"
+      "sha256": "d5d7a9c70ee964105a50cc187c08b485ec4bda94b2b7c675678cb327fe7dd20e"
     },
     "techstream_correlations": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",

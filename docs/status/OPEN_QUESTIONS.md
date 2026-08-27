@@ -927,6 +927,28 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md) §4.1/§5D and
   `data/generated/corolla_tss3_opendbc_readiness.json`.
 
+- **OQ-053 — F33 non-disruptive application-mode RAM execution pivot.** Exact
+  `8965F3307000` now has the desired volatile carrier and the placement half of
+  the production loader: live evidence proves `FEBFF9F0..FEBFFBFB` (524 bytes)
+  survives the real stock application startup byte-for-byte and executes, while
+  the former `FEBF0000` carrier is disproved by that same startup. Target-native
+  XCP `SET_MTA 0x82C62` + `DOWNLOAD 0x81FFE` can statically write arbitrary tester
+  bytes throughout `FEBF7C00..FEBFFBFF`; GET_SEED/UNLOCK are unconfigured. The
+  packed `0x7F7/0x7F8` endpoint is present in CodeFlash, but CONNECT timed out on
+  the tested normal bus1/ELM1 route. The remaining architectural blocker is a
+  safe already-running-application control-transfer object into the tail. A
+  312-site computed-call audit (305 application) plus direct-reference and raw-u32
+  pointer censuses recover no XCP-writable scheduler/diagnostic/CAN/PDU/CryptoIf/
+  ICU-S/interrupt/OS callback or saved-PC cell; the only fixed LocalRAM call pointer
+  is boot-only `FEBF0FD0`. Seven recovered F33 fixed DMAC descriptor families
+  add 22 records / 88 endpoint fields, with zero endpoints in the XCP window,
+  closing the obvious fixed-DMA composition. This is still a bounded negative:
+  synthesized/computed pointers, a separate undiscovered DMA/hardware path,
+  unenumerated nonzero CTBP writers, and undiscovered code remain open.
+  Minimum next live discriminator is non-executing: locate a reachable physical
+  `0x7F7/0x7F8` route, then (only if reachable) perform bounded high-tail
+  DOWNLOAD+readback. Do not guess a PC write. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 

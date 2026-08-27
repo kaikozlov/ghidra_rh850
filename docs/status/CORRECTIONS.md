@@ -2962,6 +2962,38 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `tests/verify_albinoelephant_telescope_probe.py`;
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.39.
 
+### CORR-119 — F33 `FEBF0000` is not a retained stock-application carrier
+
+- **Wrong:** VAR-056 / the original exact-F33 runtime-carrier artifact treated
+  `FEBF0000..FEBF0307` as the best production resident carrier candidate because
+  the static direct/simple-GP census did not find a consumer before `FEBF0308`.
+  The associated audited canary/proxy were therefore linked against that low
+  pocket and retention was left as an untested live gate.
+- **Right:** the real stock application startup live probe overwrites the low
+  pocket (`prefix_648_byte_exact=false`, `shell_retained=false`). A separate
+  exact-target live probe proves **`FEBFF9F0..FEBFFBFB` (524 bytes)** survives
+  stock startup byte-for-byte, executes, and returns to stock application F181;
+  retained SHA-256 is
+  `89ffed31c24e746a57171e6f3e22f99d1e78d57b63bccb8778c7fe715d18800c`
+  and Panda `safety_tx_blocked_delta=0`.
+- **Consequence:** `FEBF0000` remains valid authenticated **boot staging** but is
+  no longer a production application-resident VMA. Exact F33 geometry is promoted
+  in `data/variant_ram_exec_requirements.json` with retained VMA
+  `FEBFF9F0..FEBFFBFC`. The old low-linked audited binaries remain reproducible
+  historical/static construction evidence only.
+- **Additional closure:** target-native application XCP maps SET_MTA `0x82C62`
+  and DOWNLOAD `0x81FFE` into the configured `FEBF7C00..FEBFFBFF` software write
+  window, so the verified high tail has a stock application-mode placement
+  primitive if the `0x7F7/0x7F8` transport can be reached. A target-native
+  22-record / 88-endpoint fixed-DMAC census has zero endpoints in the XCP window,
+  closing the obvious recovered DMA composition as a hidden pivot. The remaining
+  production blocker is a safe already-running-application control-transfer pivot,
+  not RAM lifetime.
+- **Canonical:**
+  `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`;
+  `tests/verify_camry_8965F3307000_application_ram_loader.py`;
+  [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§12.6–13.
+
 ### CORR-120 — VAR-056's four-user F33 torque-source census was incomplete; `0x4C000` is the fifth recovered direct user
 
 - **Superseded framing:** VAR-056's then-recovered whole-function corpus reported

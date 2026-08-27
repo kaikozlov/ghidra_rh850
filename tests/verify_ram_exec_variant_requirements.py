@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Keep verified Sienna RAM-exec geometry separate from newer-target field metadata."""
+"""Verify per-target RAM-exec geometry without cross-variant inheritance."""
 from __future__ import annotations
 
 import json
@@ -28,6 +28,7 @@ def check(name: str, cond: object, detail: str = "") -> None:
 obj = json.loads((ROOT / "data/variant_ram_exec_requirements.json").read_text())
 rows = {row["id"]: row for row in obj["variants"]}
 sienna = rows["sienna-8965b4512000"]
+camry = rows["camry-2026-8965f3307000-high-tail"]
 newer = rows["yc-newer-toyota-field-report-2026-08-16"]
 
 print("== evidence boundary ==")
@@ -37,6 +38,30 @@ check("executable bootstrap default remains Sienna FEBF0000", ram_exec.RAM_LOAD_
 check(
     "Sienna authenticated window remains 4 KiB",
     ram_exec.RAM_LOAD_SIZE == 0x1000 and sienna["authenticated_download_size"] == "0x1000",
+)
+check(
+    "Camry high-tail is exact-target live-verified geometry",
+    camry["evidence"] == "dynamic-probe-verified"
+    and camry["codeflash_sha256"] == "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+    and camry["retained_application_rwx_base"] == "0xFEBFF9F0"
+    and camry["retained_application_rwx_end_exclusive"] == "0xFEBFFBFC"
+    and camry["retained_application_rwx_size"] == "0x20C"
+    and camry["shellcode_link_vma"] == "0xFEBFF9F0",
+)
+check(
+    "Camry boot staging is distinct from retained high-tail VMA",
+    camry["authenticated_download_base"] == "0xFEBF0000"
+    and camry["payload_callback_cell"] == "0xFEBF0FD0"
+    and camry["authenticated_download_base"] != camry["retained_application_rwx_base"],
+)
+check(
+    "Camry command5 anchors are exact but production mailbox remains intentionally unassigned",
+    camry["command5_dispatch_address"] == "0x89440"
+    and camry["command5_driver_record"] == 0
+    and camry["command5_key_selector"] == 4
+    and camry["command5_done_flag"] == "0xFEBF13BC"
+    and camry["command5_status_flag"] == "0xFEBF13BD"
+    and camry["command5_mailbox_address"] is None,
 )
 check(
     "newer-target FEBE0000 is explicitly external evidence",

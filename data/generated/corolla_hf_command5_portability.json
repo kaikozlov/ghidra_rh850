@@ -77,7 +77,7 @@
     },
     "ram_exec_requirements": {
       "path": "data/variant_ram_exec_requirements.json",
-      "sha256": "391f070e967293ca1076be8723645ba86addf3a9f3dd73cf7a1a801a5f56093f"
+      "sha256": "b511b8f98f155469c8cd208d1dcb03da75298174f8fe52c4937290ef3cb004f8"
     },
     "xcp": {
       "path": "data/generated/corolla_8965H1202000_xcp.json",

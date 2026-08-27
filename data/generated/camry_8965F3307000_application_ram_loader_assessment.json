@@ -1,0 +1,771 @@
+{
+  "application_uds": {
+    "configured_sids": [
+      "0x10",
+      "0x11",
+      "0x14",
+      "0x19",
+      "0x22",
+      "0x23",
+      "0x27",
+      "0x28",
+      "0x2E",
+      "0x31",
+      "0x34",
+      "0x36",
+      "0x37",
+      "0x3E",
+      "0x85",
+      "0xAB",
+      "0xBA"
+    ],
+    "programming_session_is_disruptive_handoff": true,
+    "read_memory_by_address": {
+      "callback": "0x000965C0",
+      "sessions": [
+        3
+      ],
+      "sid": "0x23"
+    },
+    "request_download": {
+      "application_download_context_recovered": false,
+      "callback": null,
+      "sessions": [
+        2
+      ],
+      "sid": "0x34"
+    },
+    "request_transfer_exit": {
+      "application_transfer_context_recovered": false,
+      "callback": null,
+      "sessions": [
+        2
+      ],
+      "sid": "0x37"
+    },
+    "service_table": "0x00025C54",
+    "transfer_data": {
+      "application_transfer_context_recovered": false,
+      "callback": null,
+      "sessions": [
+        2
+      ],
+      "sid": "0x36"
+    },
+    "write_data_by_identifier": {
+      "arbitrary_memory_writer": false,
+      "callback": "0x00095978",
+      "sessions": [
+        2,
+        3
+      ],
+      "sid": "0x2E"
+    },
+    "write_memory_by_address_0x3d_configured": false
+  },
+  "application_xcp": {
+    "download": "0x00081FFE",
+    "get_seed_configured": false,
+    "high_tail_fully_inside_write_window": true,
+    "modify_bits": "0x000820C4",
+    "normal_route_live_result": {
+      "elm327_param": 1,
+      "source": "community/kai/camry-2026/raw-20260826/xcp_probe.json",
+      "source_sha256": "b8d96ae5cb97f18d1138196e2a0cb95de5938ec0ff7e512ee9f752f86645e273",
+      "status": "no_response_timeout",
+      "tested_bus": 1
+    },
+    "packed_descriptor_hits": {
+      "request": [
+        "0x021F50",
+        "0x023398"
+      ],
+      "response": [
+        "0x021F48"
+      ]
+    },
+    "placement_static_verdict": "proven: generic XCP DOWNLOAD can directly store tester-controlled bytes into the live-proven high tail while the application handler is executing",
+    "reachability_boundary": "firmware endpoint exists; only the normal bus1/ELM1 route has been dynamically falsified. Physical/special routing elsewhere remains unobserved.",
+    "request_can_id": "0x7F7",
+    "response_can_id": "0x7F8",
+    "rx_adapter": "0x0008312E",
+    "set_mta": "0x00082C62",
+    "short_upload": "0x00082B1A",
+    "software_write_window": [
+      "0xFEBF7C00",
+      "0xFEBFFBFF"
+    ],
+    "standard_callback_table": "0x00022B50",
+    "standard_opcode_map": "0x00022B24",
+    "unlock_configured": false,
+    "write_validator": "0x00098F2C"
+  },
+  "architectures": [
+    {
+      "diagnostic_side_effects": "XCP connected/MTA state only under recovered software semantics; no flash/NvM write in DOWNLOAD path. Physical transport route and any gateway diagnostics remain unobserved.",
+      "exact_surface": {
+        "download": "0x00081FFE",
+        "request": "0x7F7",
+        "response": "0x7F8",
+        "set_mta": "0x00082C62",
+        "write_validator": "0x00098F2C"
+      },
+      "execution": "not recovered; requires a separate already-running-application callback/continuation pivot",
+      "lifetime": "volatile LocalRAM only; power loss removes payload/state",
+      "name": "stock application XCP DOWNLOAD + separate volatile execution pivot",
+      "network_visibility": "no application->PROGRAMMING handoff is inherent; handler executes in the stock application, so no ECU disappearance is expected from the mechanism itself",
+      "placement": "proven statically: tester bytes -> MTA -> direct byte stores in FEBF7C00..FEBFFBFF, including the full high tail",
+      "privilege_mpu_context": "high tail is MPU region1; ctx0 supervisor R/W/X, ctx1 supervisor R/X. Live execution from the tail is independently proven. Actual XCP handler context must still be confirmed dynamically by a harmless write/readback.",
+      "rank": 1,
+      "remaining_unknowns": [
+        "reachable physical path to packed 0x7F7/0x7F8 endpoint",
+        "safe mutable control-transfer object",
+        "runtime write context/latency on the live route"
+      ],
+      "verdict": "best architecture but incomplete"
+    },
+    {
+      "diagnostic_side_effects": "starts the stock asynchronous crypto test state machine; exact Toyota-facing semantic name/result exposure is not recovered",
+      "exact_surface": {
+        "action": "0x0008B872",
+        "command5_dispatcher": "0x00089440",
+        "rid": "0x100F",
+        "state_machine": "0x0006A0AE/0x00069C58/0x00069BD8"
+      },
+      "execution": "stock application code; no RAM payload required",
+      "lifetime": "routine state is volatile under recovered path; no persistent modification recovered",
+      "name": "stock RID 0x100F command-5 service",
+      "network_visibility": "application remains online; ordinary RoutineControl path",
+      "placement": "not applicable: stock routine uses its own lower-RAM buffers",
+      "privilege_mpu_context": "stock diagnostic/crypto task context; no high-tail MPU dependency",
+      "rank": 2,
+      "remaining_unknowns": [
+        "exact internal selector/config value under all states",
+        "whether any unobserved result-read routine exposes the generated 16 bytes"
+      ],
+      "verdict": "usable command-5 permission/oracle surface only; fixed 16-byte/private result prevents direct 0x00F/0x0D7/0x0B6 signer use"
+    },
+    {
+      "diagnostic_side_effects": "known ECU disappearance/communication-fault risk during PROGRAMMING transition",
+      "exact_surface": {
+        "request_download": "0x34",
+        "request_transfer_exit": "0x37",
+        "service_table": "0x00025C54",
+        "transfer_data": "0x36"
+      },
+      "execution": "real loader requires session-2 PROGRAMMING handoff into bootloader",
+      "lifetime": "payload may be volatile, but the transition itself is unacceptable",
+      "name": "application UDS 0x34/0x36/0x37",
+      "network_visibility": "PROGRAMMING handoff is disruptive and makes the EPS temporarily disappear; violates production requirement",
+      "placement": "no application transfer state recovered; all three service objects have null direct callbacks",
+      "privilege_mpu_context": "bootloader/application handoff, not an already-running stock-application mechanism",
+      "rank": 3,
+      "remaining_unknowns": [],
+      "verdict": "rejected for production"
+    }
+  ],
+  "control_transfer_audit": {
+    "audit_scripts": {
+      "computed_calls": {
+        "path": "ghidra/scripts/investigate/ClassifyComputedCallTargets.java",
+        "sha256": "d24cf59484e59497f5487882684c5cfaf8d0754e1264c8028d3fdf81fcf5050a"
+      },
+      "range_references": {
+        "path": "ghidra/scripts/investigate/InspectRangeReferences.java",
+        "sha256": "26d9d2a94ae9b676e794d15be731a40e4b1b96c957574938fd14c183ce91ff8c"
+      }
+    },
+    "bounded_negative": "No recovered scheduler/task/diagnostic/CAN/CryptoIf/ICU-S/OS/interrupt/PDU callback pointer or saved-PC cell lies in the XCP-writable window. The recovered fixed F33 DMAC descriptor families are separately closed and have zero endpoints in that window. Arbitrary computed aliases, a separate undiscovered DMA programmer/hardware mutation path, nonzero CTBP writers, and undiscovered code remain outside this static negative.",
+    "computed_call_sites_reviewed_application": 305,
+    "computed_call_sites_reviewed_total": 312,
+    "ctbp_supporting_fact": {
+      "all_ctbp_writers_census_closed": false,
+      "hits": [
+        "0x0000025E"
+      ],
+      "ldsr_r0_ctbp_opcode": "e0a72000",
+      "only_reset_zero_instruction_proven": true
+    },
+    "fixed_dmac_descriptor_audit": {
+      "boundary": "All recovered F33 fixed CodeFlash DMAC descriptor families and their endpoint fields are target-natively enumerated. A separate undiscovered DMA programmer, computed descriptor source, or hardware-owned mutation path remains outside this proof.",
+      "descriptor_apply": "0x00060A6A",
+      "endpoint_count": 88,
+      "endpoint_field_offsets": [
+        "+0x08",
+        "+0x0C",
+        "+0x18",
+        "+0x1C"
+      ],
+      "endpoints_in_xcp_window": [],
+      "fixed_descriptor_paths_closed": true,
+      "recovered_fixed_table_callers": [
+        "0x00060462",
+        "0x00060C20",
+        "0x00061B90",
+        "0x000628B2"
+      ],
+      "tables": [
+        {
+          "base": "0x000310A8",
+          "count": 10,
+          "raw_pointer_hits": [
+            "0x0605D8"
+          ],
+          "record_size": 40,
+          "rows": [
+            {
+              "address": "0x000310A8",
+              "endpoints": [
+                "0xFFF91200",
+                "0xFEEF90E0",
+                "0xFFF91200",
+                "0xFEEF90E0"
+              ],
+              "index": 0
+            },
+            {
+              "address": "0x000310D0",
+              "endpoints": [
+                "0xFFF91210",
+                "0xFEEF80A0",
+                "0xFFF91210",
+                "0xFEEF80A0"
+              ],
+              "index": 1
+            },
+            {
+              "address": "0x000310F8",
+              "endpoints": [
+                "0xFFF91200",
+                "0xFEEF90E4",
+                "0xFFF91200",
+                "0xFEEF90E4"
+              ],
+              "index": 2
+            },
+            {
+              "address": "0x00031120",
+              "endpoints": [
+                "0xFFF91200",
+                "0xFEEF81E0",
+                "0xFFF91200",
+                "0xFEEF81E0"
+              ],
+              "index": 3
+            },
+            {
+              "address": "0x00031148",
+              "endpoints": [
+                "0xFFF91200",
+                "0xFEEF90E8",
+                "0xFFF91200",
+                "0xFEEF90E8"
+              ],
+              "index": 4
+            },
+            {
+              "address": "0x00031170",
+              "endpoints": [
+                "0xFFF92200",
+                "0xFEEF90EC",
+                "0xFFF92200",
+                "0xFEEF90EC"
+              ],
+              "index": 5
+            },
+            {
+              "address": "0x00031198",
+              "endpoints": [
+                "0xFFF92210",
+                "0xFEEF88A0",
+                "0xFFF92210",
+                "0xFEEF88A0"
+              ],
+              "index": 6
+            },
+            {
+              "address": "0x000311C0",
+              "endpoints": [
+                "0xFFF92200",
+                "0xFEEF90F0",
+                "0xFFF92200",
+                "0xFEEF90F0"
+              ],
+              "index": 7
+            },
+            {
+              "address": "0x000311E8",
+              "endpoints": [
+                "0xFFF92200",
+                "0xFEEF8A20",
+                "0xFFF92200",
+                "0xFEEF8A20"
+              ],
+              "index": 8
+            },
+            {
+              "address": "0x00031210",
+              "endpoints": [
+                "0xFFF92200",
+                "0xFEEF90F4",
+                "0xFFF92200",
+                "0xFEEF90F4"
+              ],
+              "index": 9
+            }
+          ],
+          "sha256": "389fe2a8f41285dd2ed267bc1e8729bffad11805d2b92f221e6d953c48a0b324"
+        },
+        {
+          "base": "0x0003125C",
+          "count": 2,
+          "raw_pointer_hits": [
+            "0x060C38",
+            "0x062B40"
+          ],
+          "record_size": 40,
+          "rows": [
+            {
+              "address": "0x0003125C",
+              "endpoints": [
+                "0xFFE05030",
+                "0xFEEF90F8",
+                "0xFFE05030",
+                "0xFEEF90F8"
+              ],
+              "index": 0
+            },
+            {
+              "address": "0x00031284",
+              "endpoints": [
+                "0xFFE06030",
+                "0xFEEF9128",
+                "0xFFE06030",
+                "0xFEEF9128"
+              ],
+              "index": 1
+            }
+          ],
+          "sha256": "47a68294ea24488048010160dd508d7e3b00bbaad21c35879a3138813013b7d8"
+        },
+        {
+          "base": "0x000312AC",
+          "count": 2,
+          "raw_pointer_hits": [
+            "0x060C4C"
+          ],
+          "record_size": 40,
+          "rows": [
+            {
+              "address": "0x000312AC",
+              "endpoints": [
+                "0x00031250",
+                "0xFFE05020",
+                "0x00031250",
+                "0xFFE05020"
+              ],
+              "index": 0
+            },
+            {
+              "address": "0x000312D4",
+              "endpoints": [
+                "0x00031254",
+                "0xFFE06020",
+                "0x00031254",
+                "0xFFE06020"
+              ],
+              "index": 1
+            }
+          ],
+          "sha256": "2abcfe2f189216a8a07166a5a17c8210306a1dbdd11e9a4fa751be899af74a7d"
+        },
+        {
+          "base": "0x000314AC",
+          "count": 2,
+          "raw_pointer_hits": [
+            "0x062922"
+          ],
+          "record_size": 40,
+          "rows": [
+            {
+              "address": "0x000314AC",
+              "endpoints": [
+                "0x00031404",
+                "0xFFD85004",
+                "0x00031404",
+                "0xFFD85004"
+              ],
+              "index": 0
+            },
+            {
+              "address": "0x000314D4",
+              "endpoints": [
+                "0x00031408",
+                "0xFFD87004",
+                "0x00031408",
+                "0xFFD87004"
+              ],
+              "index": 1
+            }
+          ],
+          "sha256": "1d5008b873b3c1b85d2e81ed7eee2e4f89b1b89884811ea6adc45101c53f30f3"
+        },
+        {
+          "base": "0x000314FC",
+          "count": 2,
+          "raw_pointer_hits": [
+            "0x06292E"
+          ],
+          "record_size": 40,
+          "rows": [
+            {
+              "address": "0x000314FC",
+              "endpoints": [
+                "0xFEEF8000",
+                "0xFFD85008",
+                "0xFEEF8000",
+                "0xFFD85008"
+              ],
+              "index": 0
+            },
+            {
+              "address": "0x00031524",
+              "endpoints": [
+                "0xFEEF8028",
+                "0xFFD87008",
+                "0xFEEF8028",
+                "0xFFD87008"
+              ],
+              "index": 1
+            }
+          ],
+          "sha256": "f7148ee26c36962b06afe5bddb306099755281c1c39d770075b877ef13af38e0"
+        },
+        {
+          "base": "0x0003154C",
+          "count": 2,
+          "raw_pointer_hits": [
+            "0x06293A"
+          ],
+          "record_size": 40,
+          "rows": [
+            {
+              "address": "0x0003154C",
+              "endpoints": [
+                "0xFFD85014",
+                "0xFEEF8050",
+                "0xFFD85014",
+                "0xFEEF8050"
+              ],
+              "index": 0
+            },
+            {
+              "address": "0x00031574",
+              "endpoints": [
+                "0xFFD87014",
+                "0xFEEF8078",
+                "0xFFD87014",
+                "0xFEEF8078"
+              ],
+              "index": 1
+            }
+          ],
+          "sha256": "33429f1ed54ed419082075b301b57b885b7218e82f7f81943359070cfd91d67c"
+        },
+        {
+          "base": "0x0003161C",
+          "count": 2,
+          "raw_pointer_hits": [
+            "0x061C22"
+          ],
+          "record_size": 40,
+          "rows": [
+            {
+              "address": "0x0003161C",
+              "endpoints": [
+                "0xFEBE38B0",
+                "0xFFE71180",
+                "0xFEBE38B0",
+                "0xFFE71180"
+              ],
+              "index": 0
+            },
+            {
+              "address": "0x00031644",
+              "endpoints": [
+                "0xFEBE38BC",
+                "0xFFE70180",
+                "0xFEBE38BC",
+                "0xFFE70180"
+              ],
+              "index": 1
+            }
+          ],
+          "sha256": "b34e78417870d0774c8fd053475ff25e7eea52e03199e80ec18e2bc4860b9013"
+        }
+      ]
+    },
+    "fixed_localram_pointer_consumers": [
+      "0x0000435E",
+      "0x0000437C",
+      "0x0000440E"
+    ],
+    "fixed_pointer_inside_xcp_write_window": false,
+    "fixed_pointer_is_boot_region": true,
+    "high_tail_function_entries": 0,
+    "only_recovered_computed_call_with_fixed_localram_pointer": "0xFEBF0FD0",
+    "raw_codeflash_u32_pointers_into_high_tail": [],
+    "recovered_static_references_into_xcp_write_window": 0
+  },
+  "custom_xcp": {
+    "arbitrary_high_tail_writer": false,
+    "e4_copy": {
+      "destination": [
+        "0xFEBF7C00",
+        "0xFEBFF9EF"
+      ],
+      "handler": "0x00099414",
+      "source": [
+        "0x00010000",
+        "0x00017DEF"
+      ]
+    },
+    "handlers": [
+      "0x00098FBA",
+      "0x0009901A",
+      "0x00099152",
+      "0x00099266",
+      "0x0009930E",
+      "0x00099388",
+      "0x00099414"
+    ],
+    "residual_tail_starts_exactly_after_e4_copy": true,
+    "selectors": [
+      "0xFB",
+      "0xFA",
+      "0xF5",
+      "0xF3",
+      "0xEB",
+      "0xEA",
+      "0xE4"
+    ],
+    "table": "0x0002B250"
+  },
+  "function_evidence": {
+    "crypto_bank0_activate": {
+      "address": "0x0006A028",
+      "sha256": "ecb160156d319b1524ef16c9da2cba78e60d6ab221c3d4fcf40fe13c1312524f",
+      "size": 48
+    },
+    "crypto_bank1_activate": {
+      "address": "0x0006A0AE",
+      "sha256": "e6b1c4dbd1fff1a807f4f1cc2d693f41a2cd5e714f3a038e136a2f38f69fe3a8",
+      "size": 42
+    },
+    "crypto_bank1_complete": {
+      "address": "0x0006A300",
+      "sha256": "668d483de8a3005469d08678f1b2d155df73a6f2f0c0260432713fa52979707b",
+      "size": 26
+    },
+    "crypto_bank1_step": {
+      "address": "0x00069C58",
+      "sha256": "18cd09a08713679113856921b1c43a111373d30b6882c08e24377d70244c0c2d",
+      "size": 74
+    },
+    "crypto_bank_submit": {
+      "address": "0x00069BD8",
+      "sha256": "abc4d5fc3214238014c03ca1533486f35cae88dfe388e1fa127680c953b915f3",
+      "size": 128
+    },
+    "dmac_descriptor_apply": {
+      "address": "0x00060A6A",
+      "sha256": "434536acdce138f2b08407b8c38c19227b9b7cde3a7db014a5127f282c64b23b",
+      "size": 62
+    },
+    "dmac_pair_table_caller": {
+      "address": "0x00060C20",
+      "sha256": "76ad3e79f24b67da0d1728bc3287ea1a25d4f96e2ea5a8441fa10983dfd9bdd8",
+      "size": 64
+    },
+    "dmac_primary_table_caller": {
+      "address": "0x00060462",
+      "sha256": "8f3319ccf077efb5061e6f270a3768ad4a59726bbd304ba4db36bf381a40c568",
+      "size": 432
+    },
+    "dmac_small_table_caller": {
+      "address": "0x00061B90",
+      "sha256": "27d66c6339bdb867194fae88449c0b08c57b5e564343ca535b463b092b94e180",
+      "size": 176
+    },
+    "dmac_three_table_caller": {
+      "address": "0x000628B2",
+      "sha256": "52cbdb5d2b6ab4c70437aa1bb33d8c941bd23a7b3ff4db36ca72d7f023c8c4d7",
+      "size": 156
+    },
+    "rid100e_action": {
+      "address": "0x0008B864",
+      "sha256": "9146e9352147cbe6700e963e525c5cc9368477ab0e1bee4d9e987034746ba50c",
+      "size": 14
+    },
+    "rid100f_action": {
+      "address": "0x0008B872",
+      "sha256": "03a6801ea225a9427f89e76b7584c1adbf82b6b6b9d2db49274e1cd53f7db20f",
+      "size": 14
+    },
+    "rid100f_precondition": {
+      "address": "0x0008B858",
+      "sha256": "dfac33733e8cadab3a1f90e1bb9cce317cfae3e809bb401602a7b05f72d6876c",
+      "size": 12
+    },
+    "xcp_can_rx_adapter": {
+      "address": "0x0008312E",
+      "sha256": "fa43c5695d69f92cc770d4d81a9be566a1a66a23bc77b8291befeb1013bf497c",
+      "size": 40
+    },
+    "xcp_custom_dispatcher": {
+      "address": "0x00098E80",
+      "sha256": "9abe28c874bd5187a00ec5f663114ecb41cca444afb11f047f36152dbc86094e",
+      "size": 110
+    },
+    "xcp_custom_e4": {
+      "address": "0x00099414",
+      "sha256": "14367502c37c230022c4c3d55fded0377095e663d89fbe83efc0834efa84050b",
+      "size": 106
+    },
+    "xcp_custom_ea": {
+      "address": "0x00099388",
+      "sha256": "87f871160bd508df72f736210dacec083730a45403788d0cea4d76082b0b7923",
+      "size": 104
+    },
+    "xcp_custom_eb": {
+      "address": "0x0009930E",
+      "sha256": "d41160a43e5e76c36ff75675f53da5ba78912caae371973997760c06c6a2370b",
+      "size": 122
+    },
+    "xcp_custom_f3": {
+      "address": "0x00099266",
+      "sha256": "8931f1c77b2df68fdc6633ac1981978e82675d29ad91c6e8472349e2327569bd",
+      "size": 168
+    },
+    "xcp_custom_f5": {
+      "address": "0x00099152",
+      "sha256": "9408ed82510985279521923fa92a79c492661acbe8e487f28ffa51bd0fb6f89e",
+      "size": 100
+    },
+    "xcp_custom_fa": {
+      "address": "0x0009901A",
+      "sha256": "c3875456a35d50fdd1fb2791a8f989d151a8065fe26b7ce9f8faf05ee8595f51",
+      "size": 96
+    },
+    "xcp_custom_fb": {
+      "address": "0x00098FBA",
+      "sha256": "65e792f96dc7cd1e08df9ced0309109b115144e3797b9ed9014afed4a23f6cf9",
+      "size": 74
+    },
+    "xcp_custom_range_validator": {
+      "address": "0x0009907A",
+      "sha256": "75ad549642ded380807a40e8aa9959029b5289bca28e9759461275abecd60284",
+      "size": 172
+    },
+    "xcp_download": {
+      "address": "0x00081FFE",
+      "sha256": "f3613623e5efa233ad8efae23b047fcde6389822c5828f8ce7ead4f5089a88fd",
+      "size": 198
+    },
+    "xcp_modify_bits": {
+      "address": "0x000820C4",
+      "sha256": "1483cd6c21500222dbfad1111e2c2c95f6fee74d33b4170dacb3585beb32c025",
+      "size": 162
+    },
+    "xcp_read_range_validator": {
+      "address": "0x00098EF2",
+      "sha256": "b6ee1f7409da646a7b7de61950f5765bc7cb5183ab34a89e46800d3fb89e765c",
+      "size": 58
+    },
+    "xcp_set_mta": {
+      "address": "0x00082C62",
+      "sha256": "5317d2d72b3d7b53d6bdc1f70f8102102fb9397c8d17afbf1e2b645a40a06734",
+      "size": 60
+    },
+    "xcp_short_upload": {
+      "address": "0x00082B1A",
+      "sha256": "aae466f7119d249039aba6275df9aecbf23ba189238f2ed8cc8256b90707430c",
+      "size": 184
+    },
+    "xcp_write_range_validator": {
+      "address": "0x00098F2C",
+      "sha256": "72c0c9458c91187f17087247ba220211e69d3294aa429d58b3ee84689827db9e",
+      "size": 32
+    }
+  },
+  "implementation_readiness": {
+    "complete_non_disruptive_loader_and_execution_path": false,
+    "reason": "The exact application-mode byte-placement primitive is closed, but no application-mode control-transfer primitive into the high tail is statically recovered; emitting a vehicle execution PoC would therefore invent an unproved pivot.",
+    "safe_inert_vehicle_poc_built": false
+  },
+  "live_runtime_carrier": {
+    "base": "0xFEBFF9F0",
+    "end_inclusive": "0xFEBFFBFB",
+    "exact_after_stock_startup": true,
+    "executed_live": true,
+    "low_febf0000_carrier_rejected": true,
+    "poststartup_direct_canary_result": "negative/no application reappearance; retained as a failed architecture probe, not evidence against the proven high-tail carrier",
+    "retained_sha256": "89ffed31c24e746a57171e6f3e22f99d1e78d57b63bccb8778c7fe715d18800c",
+    "safety_tx_blocked_delta": 0,
+    "size": 524,
+    "source_files": {
+      "RAM_RETENTION_MANIFEST.txt": "01706eb4446fdfbdb928a1299968fec54d2fdd5626bf707fe89e6fb186877bc4",
+      "high-tail-20260826.json": "7fe390354d24e4d0c582d57d726935256eb620f60b3b4f247e6509ec4d9989f0",
+      "poststartup-canary-20260826.json": "e0d12ae6ec806cf4fd5ac5347e2471c4552e624b122e53050a7e7bd50719ef54",
+      "stock-handoff-20260826.json": "bc1bfdde15a5506ca9d87df93c18514aada4fca9815ec541cc2006ec3e95b308",
+      "stock-retention-20260826.json": "a920ecd5cfaa96986be2ac7dd0257cac842edf9c456f37aabd157a47a6fa3845"
+    },
+    "stock_application_reappeared": true
+  },
+  "minimum_next_observations": [
+    "Resolve whether the stock 0x7F7/0x7F8 endpoint is physically reachable from any Panda-visible CAN path other than the already-falsified normal bus1/ELM1 route; CONNECT-only is sufficient.",
+    "If and only if XCP is reachable, a bounded application-mode DOWNLOAD + SHORT_UPLOAD readback inside the already-live-proven high tail would close transport-to-writer reachability without executing the bytes.",
+    "No safe execution live test is defined until static work recovers a concrete mutable control-transfer object or stock callback registration path; do not probe arbitrary PC writes."
+  ],
+  "mpu": {
+    "bounds": [
+      "0xFEBF7C00",
+      "0xFEBFFBFC"
+    ],
+    "ctx0": "supervisor R/W/X",
+    "ctx0_mpat": "0x000000B8",
+    "ctx1": "supervisor R/X",
+    "ctx1_mpat": "0x000000A8",
+    "live_execution_in_high_tail_proven": true,
+    "region_index": 1
+  },
+  "production_answer": "Not yet. F33 has a target-native, unauthenticated application XCP writer that can place arbitrary bytes in FEBFF9F0..FEBFFBFB without a programming handoff, and that tail is live-proven retained/executable. Current static evidence does not provide the second half: a non-disruptive application-mode transfer of control to those bytes.",
+  "schema": "camry-8965f3307000-application-ram-loader-assessment-v1",
+  "stock_command5_routine": {
+    "action": "0x0008B872",
+    "callback_table": "0x000256DC",
+    "chain": [
+      "0x0008B872",
+      "0x0006A0AE",
+      "0x00069C58",
+      "0x00069BD8",
+      "0x00089440"
+    ],
+    "command5_dispatcher": "0x00089440",
+    "input": "0xFEBE5186",
+    "input_length": 16,
+    "output": "0xFEBE51B6",
+    "output_exposed_to_tester": false,
+    "precondition": "0x0008B858",
+    "rid": "0x100F",
+    "routine_table": "0x00026918",
+    "verdict": "real no-service-SA stock command-5 test path, but not a direct SecOC signer API: fixed 16-byte input and local/private result path",
+    "xcp_can_rewrite_input_or_output": false
+  },
+  "target": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "mcu": "R7F701381",
+    "secondary": "8A3113303100",
+    "software_id": "8965F3307000"
+  }
+}

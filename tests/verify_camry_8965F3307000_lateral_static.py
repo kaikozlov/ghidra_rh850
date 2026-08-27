@@ -120,8 +120,9 @@ check("negative census boundary explicit", "computed aliases" in evid["fixed_gp_
 print("\n== runtime/static-live boundary ==")
 rr = art["runtime_readiness"]
 check("runtime anchors exact", rr["application_context_init"] == "0x000715B4" and rr["startup_coordinator"] == "0x000637EE" and rr["startup_final_init"] == "0x000701EA" and rr["foreground_loop"] == "0x00066062")
-check("runtime carrier linked/static constructed", rr["static_carrier_constructed"] is True and rr["static_command5_carrier_artifact"] == "data/generated/camry_8965F3307000_command5_runtime_carrier.json" and runtime["boundary"]["static_target_native_carrier_candidate_closed"] is True)
-check("live signer gates remain open", rr["live_retention_closed"] is False and rr["live_slot4_permission_closed"] is False and rr["command5_latency_closed"] is False)
+check("runtime low carrier construction is retained only as disproved history", rr["static_low_carrier_constructed"] is True and rr["low_carrier_disproved"] is True and rr["static_command5_carrier_artifact"] == "data/generated/camry_8965F3307000_command5_runtime_carrier.json" and runtime["boundary"]["static_low_carrier_candidate_closed"] is True)
+check("verified high-tail retention is joined exactly", rr["high_tail_live_retention_closed"] is True and rr["high_tail_base"] == "0xFEBFF9F0" and rr["high_tail_end_exclusive"] == "0xFEBFFBFC" and runtime["boundary"]["verified_high_tail_live_retention_closed"] is True)
+check("signer permission/latency/application pivot remain open", rr["live_slot4_permission_closed"] is False and rr["command5_latency_closed"] is False and rr["application_mode_execution_pivot_closed"] is False)
 b = art["boundary"]
 check("static envelope/timing/rate closed", b["target_native_mode2_envelope_closed"] and b["target_native_rate_monitor_closed"] and b["target_native_timing_closed"])
 check("override/current response not invented", not b["driver_override_numeric_threshold_closed"] and not b["motor_current_response_threshold_closed"])

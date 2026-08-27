@@ -407,6 +407,37 @@ permission, independent CMAC agreement, and signing latency/jitter remain separa
 gates. Machine-readable contract:
 `data/generated/corolla_hf_command5_runtime_carrier.json`.
 
+#### Camry F33 post-startup production carrier
+
+The exact `8965F3307000` target now has a different and stronger deployment
+contract than the boot-owned Sienna/H/F foreground runtimes above. Live evidence
+**disproves** the former low `FEBF0000` resident assumption: real stock startup
+overwrites it. Instead `FEBFF9F0..FEBFFBFB` is a verified 524-byte executable
+carrier that survives stock startup byte-for-byte. It is inside MPU region 1
+(`FEBF7C00..FEBFFBFC`; ctx0 supervisor R/W/X, ctx1 supervisor R/X).
+
+Crucially, the already-running F33 application contains a stock arbitrary-byte
+placement surface into that carrier. The standard XCP map resolves SET_MTA
+`0x82C62`, DOWNLOAD `0x81FFE`, MODIFY_BITS `0x820C4`, and SHORT_UPLOAD
+`0x82B1A`, with software write bounds `FEBF7C00..FEBFFBFF` and no configured
+GET_SEED/UNLOCK callbacks. Packed descriptors identify `0x7F7` request and
+`0x7F8` response endpoints. The retained live CONNECT-only probe timed out on the
+normal bus1/ELM1 route, so physical reachability is still open.
+
+The missing half is **control transfer from the already-running stock application**.
+A target-native computed-call/reference census has not recovered a writable
+scheduler/diagnostic/CAN/PDU/CryptoIf/ICU-S/interrupt callback or saved-PC cell
+inside the XCP window; fixed LocalRAM pointer `FEBF0FD0` belongs to boot-region
+execution. Seven recovered F33 fixed DMAC descriptor families add 22 records / 88
+endpoint fields and have zero endpoints in the XCP window, closing the obvious
+fixed-DMA composition. The remaining negative is bounded against computed aliases,
+a separate undiscovered DMA/hardware path, unenumerated nonzero CTBP writers, and
+undiscovered code. Therefore no F33 production signer should replay the boot/application startup
+sequence or guess a PC field. The preferred architecture remains
+`stock application -> XCP place high-tail service -> future volatile callback hook
+-> command5 -> original callback`, all lost on power-off. Canonical target report:
+`../variants/camry-2026-live-baseline.md` §13 / VAR-057.
+
 ### 5.4 Freshness state for `0x2E4` and `0x131`
 
 A stateful proxy cannot sign arbitrary payloads with a stateless CMAC call. It

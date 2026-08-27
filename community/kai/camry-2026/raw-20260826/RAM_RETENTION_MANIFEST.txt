@@ -1,0 +1,25 @@
+2026-08-26 maintainer 2026 Camry F33 EPS stock-startup RAM-retention evidence
+
+Target application F181:
+  primary   8965F3307000
+  secondary 8A3113303100
+Normalized CodeFlash SHA256:
+  42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7
+Normal diagnostic route:
+  logical bus 1, ELM327 parameter 1, 0x7A1 -> 0x7A9
+
+Source directory before repository promotion:
+  /Users/kai/dev/f33-live-evidence-20260826/
+
+Tracked files are byte-identical to that source directory:
+  7fe390354d24e4d0c582d57d726935256eb620f60b3b4f247e6509ec4d9989f0  high-tail-20260826.json
+  a920ecd5cfaa96986be2ac7dd0257cac842edf9c456f37aabd157a47a6fa3845  stock-retention-20260826.json
+  bc1bfdde15a5506ca9d87df93c18514aada4fca9815ec541cc2006ec3e95b308  stock-handoff-20260826.json
+  e0d12ae6ec806cf4fd5ac5347e2471c4552e624b122e53050a7e7bd50719ef54  poststartup-canary-20260826.json
+
+Interpretation boundary:
+- stock-retention-20260826.json disproves FEBF0000 as a retained carrier under the real stock application startup;
+- high-tail-20260826.json proves FEBFF9F0..FEBFFBFB (524 bytes) survives the real stock startup byte-for-byte and that the marker executed;
+- stock-handoff-20260826.json independently records stock application reappearance;
+- poststartup-canary-20260826.json is a failed/negative architecture probe and must not be treated as evidence against the separately proven high-tail retention result;
+- no file in this evidence unit proves application-mode XCP physical reachability or a non-disruptive application-mode PC pivot.

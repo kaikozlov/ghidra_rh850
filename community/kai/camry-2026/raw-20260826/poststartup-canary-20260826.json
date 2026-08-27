@@ -1,0 +1,288 @@
+{
+  "finished_at": "2026-08-27T00:41:04.068+00:00",
+  "payload": {
+    "command5_calls": false,
+    "flash_write": false,
+    "reset_time_boot_init_replayed": false,
+    "sha256": "874570bf43305d0abf86d7984703057d55387806b835ebcd72a0b96ed6e4b30c",
+    "shellcode_sha256": "45ae78190393275733bdd531122b4eca9135b938d05beec041b30aa063993984",
+    "size": 4096,
+    "steering_can_transmit": false
+  },
+  "result": {
+    "application_reappeared": false,
+    "last_error": "MessageTimeoutError: timeout waiting for response",
+    "poststartup_marker_observed": false
+  },
+  "schema": "camry-f33-poststartup-canary-live-v1",
+  "stages": [
+    {
+      "at": "2026-08-27T00:40:51.494+00:00",
+      "name": "application identity",
+      "observed_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+      "status": "accepted"
+    },
+    {
+      "at": "2026-08-27T00:40:52.319+00:00",
+      "name": "NRTD Ready-status guard",
+      "ready_values": [
+        0
+      ],
+      "status": "accepted"
+    },
+    {
+      "at": "2026-08-27T00:40:52.368+00:00",
+      "name": "application SID23 mailbox preflight",
+      "observed_hex": "00000000",
+      "status": "accepted"
+    },
+    {
+      "at": "2026-08-27T00:40:53.195+00:00",
+      "handoff": {
+        "health_after_reappearance": {
+          "bus": 1,
+          "can_health": {
+            "brs_enabled": 1,
+            "bus_off": 0,
+            "bus_off_cnt": 0,
+            "can_core_reset_count": 17,
+            "can_data_speed": 2000,
+            "can_speed": 500,
+            "canfd_enabled": 1,
+            "canfd_non_iso": 0,
+            "error_passive": 0,
+            "error_warning": 0,
+            "irq0_call_rate": 0,
+            "irq1_call_rate": 0,
+            "irq2_call_rate": 0,
+            "last_data_error": "No error",
+            "last_data_stored_error": "Stuff error",
+            "last_error": "No error",
+            "last_stored_error": "Form error",
+            "receive_error_cnt": 0,
+            "total_error_cnt": 2,
+            "total_fwd_cnt": 0,
+            "total_rx_cnt": 339872,
+            "total_rx_lost_cnt": 1,
+            "total_tx_checksum_error_cnt": 0,
+            "total_tx_cnt": 1444,
+            "total_tx_lost_cnt": 0,
+            "transmit_error_cnt": 0
+          },
+          "health": {
+            "alternative_experience": 0,
+            "car_harness_status": 1,
+            "controls_allowed": 0,
+            "current": 234,
+            "fan_power": 30,
+            "fault_status": 0,
+            "faults": 0,
+            "heartbeat_lost": 0,
+            "ignition_can": 0,
+            "ignition_line": 1,
+            "interrupt_load": 0.055756114423274994,
+            "power_save_enabled": 0,
+            "rx_buffer_overflow": 292302,
+            "safety_mode": 3,
+            "safety_param": 1,
+            "safety_rx_checks_invalid": 0,
+            "safety_rx_invalid": 0,
+            "safety_tx_blocked": 0,
+            "sbu1_voltage_mV": 307,
+            "sbu2_voltage_mV": 91,
+            "som_reset_triggered": 0,
+            "sound_output_level": 1,
+            "spi_error_count": 119,
+            "temperature": 39.703636169433594,
+            "tx_buffer_overflow": 0,
+            "uptime": 1263,
+            "voltage": 11781
+          }
+        },
+        "health_after_request": {
+          "bus": 1,
+          "can_health": {
+            "brs_enabled": 1,
+            "bus_off": 0,
+            "bus_off_cnt": 0,
+            "can_core_reset_count": 16,
+            "can_data_speed": 2000,
+            "can_speed": 500,
+            "canfd_enabled": 1,
+            "canfd_non_iso": 0,
+            "error_passive": 0,
+            "error_warning": 0,
+            "irq0_call_rate": 1395,
+            "irq1_call_rate": 6,
+            "irq2_call_rate": 0,
+            "last_data_error": "No error",
+            "last_data_stored_error": "Stuff error",
+            "last_error": "No error",
+            "last_stored_error": "Form error",
+            "receive_error_cnt": 0,
+            "total_error_cnt": 2,
+            "total_fwd_cnt": 0,
+            "total_rx_cnt": 339811,
+            "total_rx_lost_cnt": 1,
+            "total_tx_checksum_error_cnt": 0,
+            "total_tx_cnt": 1439,
+            "total_tx_lost_cnt": 0,
+            "transmit_error_cnt": 0
+          },
+          "health": {
+            "alternative_experience": 0,
+            "car_harness_status": 1,
+            "controls_allowed": 0,
+            "current": 236,
+            "fan_power": 30,
+            "fault_status": 0,
+            "faults": 0,
+            "heartbeat_lost": 0,
+            "ignition_can": 0,
+            "ignition_line": 1,
+            "interrupt_load": 0.055756114423274994,
+            "power_save_enabled": 0,
+            "rx_buffer_overflow": 292302,
+            "safety_mode": 3,
+            "safety_param": 1,
+            "safety_rx_checks_invalid": 0,
+            "safety_rx_invalid": 0,
+            "safety_tx_blocked": 0,
+            "sbu1_voltage_mV": 307,
+            "sbu2_voltage_mV": 90,
+            "som_reset_triggered": 0,
+            "sound_output_level": 1,
+            "spi_error_count": 116,
+            "temperature": 39.994483947753906,
+            "tx_buffer_overflow": 0,
+            "uptime": 1263,
+            "voltage": 11759
+          }
+        },
+        "health_before": {
+          "bus": 1,
+          "can_health": {
+            "brs_enabled": 1,
+            "bus_off": 0,
+            "bus_off_cnt": 0,
+            "can_core_reset_count": 16,
+            "can_data_speed": 2000,
+            "can_speed": 500,
+            "canfd_enabled": 1,
+            "canfd_non_iso": 0,
+            "error_passive": 0,
+            "error_warning": 0,
+            "irq0_call_rate": 1188,
+            "irq1_call_rate": 3,
+            "irq2_call_rate": 0,
+            "last_data_error": "No error",
+            "last_data_stored_error": "Stuff error",
+            "last_error": "No error",
+            "last_stored_error": "Form error",
+            "receive_error_cnt": 0,
+            "total_error_cnt": 2,
+            "total_fwd_cnt": 0,
+            "total_rx_cnt": 338735,
+            "total_rx_lost_cnt": 1,
+            "total_tx_checksum_error_cnt": 0,
+            "total_tx_cnt": 1436,
+            "total_tx_lost_cnt": 0,
+            "transmit_error_cnt": 0
+          },
+          "health": {
+            "alternative_experience": 0,
+            "car_harness_status": 1,
+            "controls_allowed": 0,
+            "current": 236,
+            "fan_power": 30,
+            "fault_status": 0,
+            "faults": 0,
+            "heartbeat_lost": 0,
+            "ignition_can": 0,
+            "ignition_line": 1,
+            "interrupt_load": 0.14350765943527222,
+            "power_save_enabled": 0,
+            "rx_buffer_overflow": 292302,
+            "safety_mode": 3,
+            "safety_param": 1,
+            "safety_rx_checks_invalid": 0,
+            "safety_rx_invalid": 0,
+            "safety_tx_blocked": 0,
+            "sbu1_voltage_mV": 309,
+            "sbu2_voltage_mV": 92,
+            "som_reset_triggered": 0,
+            "sound_output_level": 1,
+            "spi_error_count": 116,
+            "temperature": 39.703636169433594,
+            "tx_buffer_overflow": 0,
+            "uptime": 1262,
+            "voltage": 11748
+          }
+        },
+        "programming_response_timeout": false,
+        "route_after": {
+          "elm327_param": 1,
+          "eps_bus": 1,
+          "eps_rx": "0x7a9",
+          "eps_rx_bus": 1,
+          "eps_tx": "0x7a1",
+          "semantic_path": "normal-harness"
+        },
+        "route_before": {
+          "elm327_param": 1,
+          "eps_bus": 1,
+          "eps_rx": "0x7a9",
+          "eps_rx_bus": 1,
+          "eps_tx": "0x7a1",
+          "semantic_path": "normal-harness"
+        }
+      },
+      "name": "programming handoff",
+      "status": "accepted"
+    },
+    {
+      "at": "2026-08-27T00:40:53.206+00:00",
+      "name": "boot identity",
+      "observed_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+      "status": "accepted"
+    },
+    {
+      "at": "2026-08-27T00:40:53.247+00:00",
+      "name": "boot SecurityAccess",
+      "seed_length": 16,
+      "status": "accepted"
+    },
+    {
+      "at": "2026-08-27T00:40:53.273+00:00",
+      "name": "zero DID0203/0201/0202",
+      "status": "accepted"
+    },
+    {
+      "at": "2026-08-27T00:40:53.748+00:00",
+      "blocks": 4,
+      "name": "authenticated RAM payload",
+      "status": "accepted"
+    },
+    {
+      "at": "2026-08-27T00:40:53.765+00:00",
+      "name": "FF00 application-startup trigger",
+      "status": "sent"
+    },
+    {
+      "at": "2026-08-27T00:41:04.066+00:00",
+      "last_error": "MessageTimeoutError: timeout waiting for response",
+      "name": "post-startup attestation",
+      "observed_f181_hex": [],
+      "status": "failed"
+    }
+  ],
+  "started_at": "2026-08-27T00:40:48.828+00:00",
+  "target": {
+    "application_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+    "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "bus": 1,
+    "elm327_param": 1,
+    "rx": "0x7a9",
+    "tx": "0x7a1"
+  }
+}

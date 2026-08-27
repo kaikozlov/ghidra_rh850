@@ -163,8 +163,9 @@ def build() -> dict:
     need(runtime["scheduler_transfer"]["startup_jarl_first"] == "0x000637F6", "runtime startup window drift")
     need(runtime["scheduler_transfer"]["foreground_loop"] == "0x00066062", "runtime foreground drift")
     rb = runtime["boundary"]
-    need(rb["static_target_native_carrier_candidate_closed"] is True, "runtime static carrier not closed")
-    need(not rb["live_retention_closed"] and not rb["live_slot4_command5_permission_closed"] and not rb["command5_latency_jitter_closed"], "runtime live gates unexpectedly closed")
+    need(rb["static_low_carrier_candidate_closed"] is True and rb["low_carrier_disproved"] is True, "runtime low-carrier correction not closed")
+    need(rb["verified_high_tail_live_retention_closed"] is True and rb["verified_variant_ram_exec_requirement_promoted"] is True, "runtime high-tail retention not promoted")
+    need(not rb["live_slot4_command5_permission_closed"] and not rb["command5_latency_jitter_closed"] and not rb["application_mode_execution_pivot_closed"], "runtime signer/pivot gates unexpectedly closed")
     need(not rb["vehicle_actuation_authorized"] and not rb["steering_can_transmit_used"], "runtime actuation boundary drift")
 
     out = {
@@ -244,13 +245,17 @@ def build() -> dict:
         },
         "runtime_readiness": {
             "application_context_init": runtime["scheduler_transfer"]["application_context_init"],
+            "application_mode_execution_pivot_closed": rb["application_mode_execution_pivot_closed"],
             "command5_latency_closed": rb["command5_latency_jitter_closed"],
             "foreground_loop": runtime["scheduler_transfer"]["foreground_loop"],
-            "live_retention_closed": rb["live_retention_closed"],
+            "high_tail_live_retention_closed": rb["verified_high_tail_live_retention_closed"],
+            "high_tail_base": runtime["verified_high_tail_carrier"]["base"],
+            "high_tail_end_exclusive": runtime["verified_high_tail_carrier"]["end_exclusive"],
             "live_slot4_permission_closed": rb["live_slot4_command5_permission_closed"],
+            "low_carrier_disproved": rb["low_carrier_disproved"],
             "startup_coordinator": "0x000637EE",
             "startup_final_init": runtime["scheduler_transfer"]["startup_final_init"],
-            "static_carrier_constructed": rb["static_target_native_carrier_candidate_closed"],
+            "static_low_carrier_constructed": rb["static_low_carrier_candidate_closed"],
             "static_command5_carrier_artifact": str(RUNTIME.relative_to(REPO)),
         },
         "schema": "camry-8965f3307000-lateral-static-v1",

@@ -1253,6 +1253,8 @@ paths = [
   "exploit/ephemeral_runtime/corolla_hf_canary.c",
   "exploit/ephemeral_runtime/corolla_hf_command5_proxy.c",
   "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+  "community/kai/camry-2026/raw-20260826/high-tail-20260826.json",
+  "community/kai/camry-2026/raw-20260826/stock-retention-20260826.json",
   "data/generated/camry_8965F3307000_codeflash.json",
   "data/variant_ram_exec_requirements.json",
   "docs/variants/camry-2026-live-baseline.md",
@@ -1260,6 +1262,33 @@ paths = [
   "docs/status/FINDINGS.md",
   "docs/status/PRIORITIES.md",
 ]
+
+[suite.camry_8965f3307000_application_ram_loader]
+tests = ["tests/verify_camry_8965F3307000_application_ram_loader.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_camry_8965F3307000_application_ram_loader.py",
+  "tools/build_camry_8965F3307000_application_ram_loader_assessment.py",
+  "data/generated/camry_8965F3307000_application_ram_loader_assessment.json",
+  "ghidra/scripts/investigate/InspectRangeReferences.java",
+  "ghidra/scripts/investigate/ClassifyComputedCallTargets.java",
+  "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+  "community/kai/camry-2026/raw-20260826/high-tail-20260826.json",
+  "community/kai/camry-2026/raw-20260826/stock-retention-20260826.json",
+  "community/kai/camry-2026/raw-20260826/stock-handoff-20260826.json",
+  "community/kai/camry-2026/raw-20260826/poststartup-canary-20260826.json",
+  "community/kai/camry-2026/raw-20260826/RAM_RETENTION_MANIFEST.txt",
+  "community/kai/camry-2026/raw-20260826/xcp_probe.json",
+  "community/kai/camry-2026/README.md",
+  "data/variant_ram_exec_requirements.json",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/variants/README.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+]
+
 [suite.span_2025_discord_rlog_opendbc_evidence]
 tests = ["tests/verify_span_2025_discord_rlog_opendbc_evidence.py"]
 oracle = "generated_self_check"

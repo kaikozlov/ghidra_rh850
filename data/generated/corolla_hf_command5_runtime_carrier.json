@@ -92,7 +92,7 @@
     },
     "command5_portability": {
       "path": "data/generated/corolla_hf_command5_portability.json",
-      "sha256": "cc85320d2901e0a99a92554ccf560e6c49038734a85aea997c87c36986130bff"
+      "sha256": "04ccb290562ce1ccb4372ddf372f8951ea73088f237d0aa6b328d240c6113e55"
     },
     "proxy_audit": {
       "path": "exploit/ephemeral_runtime/audited_corolla_hf_command5_proxy_build.json",
@@ -100,7 +100,7 @@
     },
     "ram_exec_requirements": {
       "path": "data/variant_ram_exec_requirements.json",
-      "sha256": "391f070e967293ca1076be8723645ba86addf3a9f3dd73cf7a1a801a5f56093f"
+      "sha256": "b511b8f98f155469c8cd208d1dcb03da75298174f8fe52c4937290ef3cb004f8"
     },
     "runtime_builder": {
       "path": "exploit/ephemeral_runtime/build_corolla_hf_command5_carrier.py",

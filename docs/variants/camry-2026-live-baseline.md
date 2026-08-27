@@ -572,43 +572,191 @@ For runtime construction against this exact image:
   final call `0x701EA(0)`, then `ei`, then foreground `0x66062`;
 - boot calls C9A/E54/F80/10C6, validity 119E.
 
-### 12.6 Static carrier geometry; live gates; artifact status
+### 12.6 Live carrier correction: `FEBF0000` rejected, high tail verified
 
-The static carrier census over the retained image bounds the F33 RAM pocket:
+The later live startup-retention probes supersede the static low-pocket carrier
+assumption from VAR-056. The real stock application startup **overwrites** the
+`FEBF0000..FEBF0307` candidate; `stock-retention-20260826.json` has
+`prefix_648_byte_exact=false` and `shell_retained=false`. That pocket remains
+useful as authenticated boot staging, but it is not a production resident
+application carrier.
 
-- `FEBF0000..FEBF0307` is the **776-byte supervisor-RWX pocket**; the first
-  recovered normalized direct/simple-GP reference is exactly `FEBF0308`;
-- the 60-byte mailbox `FEBFFB80..FEBFFBBB` has **zero normalized
-  direct/simple-GP references** and is covered by MPU region 1, writable in
-  context 0.
+A separate high-tail probe closes the actual retained executable geometry on this
+exact F33:
 
-The exact-F33 audited executables and static-carrier contract have landed:
+- **`FEBFF9F0..FEBFFBFB`**, exactly **524 bytes**;
+- live marker execution from the tail succeeded;
+- after the real stock application startup, all 524 bytes survived byte-for-byte;
+- retained SHA-256
+  `89ffed31c24e746a57171e6f3e22f99d1e78d57b63bccb8778c7fe715d18800c`;
+- application F181 `8965F3307000 / 8A3113303100` reappeared normally;
+- Panda `safety_tx_blocked_delta=0`.
 
-- inert canary `exploit/ephemeral_runtime/audited/camry_f33_runtime_canary.bin`
-  — 334 bytes, headroom 442, zero relocations, SHA-256
-  `facd4f59…89bdbb0`; never calls command 5, heartbeat at `FEBFFB80`;
-- fixed-36-byte command-5 proxy
-  `exploit/ephemeral_runtime/audited/camry_f33_command5_proxy.bin` — 464
-  bytes, headroom 312, zero relocations, SHA-256 `0ea9b9d4…69db94d3`;
-- compact static-carrier contract
-  `data/generated/camry_8965F3307000_command5_runtime_carrier.json`, bound to
-  the §9 normalized CodeFlash and the audited build transcripts
-  (`audited_camry_f33_runtime_canary_build.json` /
-  `audited_camry_f33_command5_proxy_build.json`).
+This tail is inside MPU region 1 `FEBF7C00..FEBFFBFC`: context 0 MPAT `0xB8`
+(supervisor R/W/X), context 1 MPAT `0xA8` (supervisor R/X). It is now recorded as
+exact-target dynamic evidence in `data/variant_ram_exec_requirements.json`. The
+old audited low-linked canary/proxy binaries remain reproducible static build
+evidence only and must not be treated as post-startup production residents.
 
-These are static-carrier candidates, not retention proof. The deterministic runtime-carrier contract records `live_retention_closed=false`, `live_slot4_command5_permission_closed=false`, and `command5_latency_jitter_closed=false`; F33 therefore stays absent from `data/variant_ram_exec_requirements.json`. The separate target-native lateral contract `data/generated/camry_8965F3307000_lateral_static.json` is locked by `tests/verify_camry_8965F3307000_lateral_static.py`, while `tests/verify_camry_8965F3307000_command5_runtime_carrier.py` locks the executable-carrier side.
+The live evidence is pinned under `community/kai/camry-2026/raw-20260826/`;
+`tests/verify_camry_8965F3307000_application_ram_loader.py` and the corrected
+`tests/verify_camry_8965F3307000_command5_runtime_carrier.py` prevent regression.
 
-Remaining live gates — unchanged by static closure:
+## 13. Non-persistent application-mode signer installation
 
-- **retention** of the carrier across the boot→application transition;
-- **slot-4 command-5 permission** under ICU-S provisioning;
-- **completion latency/contention** while live command-7 verification traffic
-  is present, and whether the resulting sender schedule fits the §12.1 timing
-  contract;
-- stock B6 **cadence/template/freshness** and **relay suppression** (items 1
-  and 5 above).
+The production question is narrower after the high-tail result: can stock F33,
+already online in the application, accept arbitrary bytes into that tail and then
+transfer control there without the PROGRAMMING handoff? Exact firmware closes the
+**placement** half and leaves the **control-transfer** half open.
 
-Production output remains disabled.
+### 13.1 Rank 1 — stock application XCP `DOWNLOAD` plus a separate volatile pivot
+
+F33 contains the standard XCP command map at `0x22B24` and callback table at
+`0x22B50`. Exact target-native callbacks include:
+
+- `SET_MTA` `0x82C62`;
+- `DOWNLOAD` `0x81FFE`;
+- `MODIFY_BITS` `0x820C4`;
+- `SHORT_UPLOAD` `0x82B1A`;
+- write-range validator `0x98F2C`;
+- CAN receive adapter `0x8312E`.
+
+`DOWNLOAD @ 0x81FFE` obtains the current MTA, validates the transfer, enters its
+critical section, performs direct byte stores from tester request data, and advances
+the MTA. F33's configured software window is exactly
+**`FEBF7C00..FEBFFBFF`** (`0x2B21C/0x2B220`), so the full live-proven high tail is
+inside the stock writer. The map has no configured GET_SEED (`0xF8`) or UNLOCK
+(`0xF7`) callback. This is therefore the strongest available application-mode
+loader primitive: if its transport is reachable, bytes can be placed while the
+stock application handler is executing, without `10 02`, a reset, or persistent
+flash modification.
+
+The physical endpoint also exists in F33. Toyota/Denso stores it in packed CAN
+descriptors rather than plain u32 IDs:
+
+- request `0x7F7`: packed `0x9FDC0002` at `0x21F50` and `0x23398`;
+- response `0x7F8`: packed `0x9FE00002` at `0x21F48`.
+
+The retained live CONNECT-only probe timed out on the normal EPS
+**bus-1 / ELM-param-1** route. That is only a physical-route/session negative; it
+does not negate the firmware endpoint. Production viability of this architecture
+therefore has two remaining gates: locate a reachable path to the endpoint, and
+recover a safe application-mode control-transfer object.
+
+### 13.2 Why the tail begins exactly at `FEBFF9F0`
+
+The seven-selector custom calibration/XCP family at `0x2B250` maps
+`FB/FA/F5/F3/EB/EA/E4` to
+`0x98FBA/0x9901A/0x99152/0x99266/0x9930E/0x99388/0x99414`. Its E4 handler invokes
+`0x993F0`, which copies CodeFlash `0x10000..0x17DEF` to
+LocalRAM `FEBF7C00..FEBFF9EF`. The verified carrier begins on the very next byte:
+
+```text
+FEBF7C00 + 0x7DF0 = FEBFF9F0
+```
+
+Thus the 524-byte region is the residual tail above the stock calibration shadow
+and immediately below the MPU-region-1 upper bound, not an arbitrary guessed hole.
+
+### 13.3 Rank 2 — stock RID `0x100F` really reaches command 5, but is not a signer API
+
+The exact application RoutineControl table at `0x26918` contains RID `0x100F`.
+Its row in callback table `0x256DC` is
+`{0x100F, precondition 0x8B858, action 0x8B872}`. The action reaches the stock
+crypto state machine:
+
+```text
+0x8B872 -> 0x6A0AE -> 0x69C58 -> 0x69BD8 -> command-5 dispatcher 0x89440
+```
+
+This is a real stock application command-5 path and is valuable as a permission /
+hardware oracle. It does **not** expose a general SecOC signing service. The
+command-5 arm at `0x69BD8` uses a fixed **16-byte** internal input at
+`FEBE5186` and private result at `FEBE51B6`; neither cell is inside the XCP write
+window and the result is not returned as an arbitrary tester-controlled MAC API.
+It therefore cannot directly sign the 7-byte `0x00F` authenticated input or the
+36-byte protected-FD inputs needed by `0x0D7/0x0B6`.
+
+### 13.4 Ordinary application UDS does not supply an alternative loader
+
+The exact application service table at `0x25C54` configures
+`10/11/14/19/22/23/27/28/2E/31/34/36/37/3E/85/AB/BA`. There is no SID `0x3D`
+WriteMemoryByAddress. SID `0x23` is the bounded RMBA reader; SID `0x2E` is the
+configured DID-write engine rather than arbitrary memory access. SIDs `0x34/0x36/0x37`
+have null direct application callbacks and are admitted only in session 2; the real
+download state belongs to the already-known disruptive PROGRAMMING path. No
+Techstream engineering/calibration operation recovered to date improves this
+bound. The current Techstream/GTS+ host corpus also supplies no OEM-facing name
+that turns F33 RID `0x100F` into a general signer service. Its relevant `0x7F7`
+host evidence is instead bounded to Unified CUW/reset choreography: after ECU
+reset an EachArea writer emits raw `0x7F7 || FE 10 81` as one post-reset tail
+frame. That proves Toyota tooling knows the route family, but not that Techstream
+exposes the application's arbitrary XCP `DOWNLOAD` as a normal runtime engineering
+function; the F33 firmware bytes above remain the authority for that write path.
+
+### 13.5 Control-transfer audit: the missing primitive
+
+The exact-F33 indirect-call audit reviewed **312** recovered computed-call sites,
+**305** in application CodeFlash. The only recovered computed call whose defining
+load points at a fixed LocalRAM function-pointer cell uses **`FEBF0FD0`**, consumed
+by boot-region code at `0x435E/0x437C/0x440E`; it is outside the XCP window and is
+not an already-running-application pivot.
+
+A separate Ghidra reference census finds no recovered static reference into
+`FEBF7C00..FEBFFBFF`, and a raw whole-CodeFlash u32 census finds **zero embedded
+pointers into `FEBFF9F0..FEBFFBFB`**. In particular, no recovered scheduler/task,
+diagnostic, CAN Tx/Rx, PDU, CryptoIf/ICU-S, OS, interrupt/vector, or saved-PC cell
+inside the XCP-writable region is currently available to hook as
+`original -> RAM trampoline -> signer -> original`.
+
+The obvious DMA composition is now closed target-natively as well. Seven fixed
+F33 application DMAC descriptor families (22 total 0x28-byte records, **88 endpoint
+fields**) are consumed by the recovered setup callers around
+`0x60462/0x60C20/0x61B90/0x628B2` and descriptor apply helper `0x60A6A`; **zero**
+of those endpoint fields enters `FEBF7C00..FEBFFBFF`. Thus the recovered fixed-DMA
+paths cannot be repurposed to synthesize a callback/PC object in the XCP window.
+The reset image also contains the pinned `ldsr r0,CTBP` encoding exactly once at
+`0x25E`, retained only as a supporting fact; a complete census of all possible
+nonzero CTBP writers is not claimed.
+
+This remains a **bounded negative**, not a proof of architectural absence:
+synthesized/computed pointer aliases, a separate undiscovered DMA programmer or
+hardware-owned mutation path, unenumerated CTBP writers, and undiscovered code
+remain outside the static census. The repository therefore does not emit an
+execution PoC that guesses a branch target.
+
+### 13.6 Concrete production disposition and minimum next observations
+
+Ranked disposition:
+
+1. **Application XCP `DOWNLOAD` + future volatile callback pivot** — best design.
+   Byte placement, tail retention/execution, MPU geometry, and zero-persistence
+   lifetime are closed; XCP transport reachability and PC transfer remain open.
+2. **RID `0x100F` stock command-5 path** — real and non-disruptive, but only an
+   internal fixed-16-byte crypto test/oracle, not a general SecOC signing API.
+3. **UDS `34/36/37` / programming loader** — rejected for production because it
+   requires the network-visible PROGRAMMING transition.
+4. **Persistent flash hook** — fallback only; current evidence does not justify
+   taking it while the application-mode XCP placement surface remains promising.
+
+We do **not** yet have enough static evidence to implement the complete installer,
+because the execution half is missing. The minimum useful live discriminator is
+therefore deliberately non-executing:
+
+1. probe only whether `0x7F7/0x7F8` is reachable from another Panda-visible physical
+   route; CONNECT is sufficient;
+2. if reachable, use a bounded `SET_MTA + DOWNLOAD + SHORT_UPLOAD` readback inside
+   the already-proven high tail to close actual application-context write reachability;
+3. do not attempt an arbitrary PC write or RAM execution until static work identifies
+   a concrete mutable callback/continuation object with known invocation and restore
+   semantics.
+
+The deterministic assessment is
+`data/generated/camry_8965F3307000_application_ram_loader_assessment.json`, generated
+by `tools/build_camry_8965F3307000_application_ram_loader_assessment.py` and locked
+by `tests/verify_camry_8965F3307000_application_ram_loader.py`.
+
+Production steering output remains disabled.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
@@ -616,6 +764,6 @@ Production output remains disabled.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056)
-- Corrections with this document as canonical home: —
+- Findings with this document as canonical home: [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119)
 <!-- knowledge-cross-references:end -->

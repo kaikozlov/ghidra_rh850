@@ -16,31 +16,18 @@
     "verify_routine": "0x10F0"
   },
   "boundary": {
+    "application_mode_execution_pivot_closed": false,
     "command5_latency_jitter_closed": false,
     "flash_write_used": false,
-    "live_retention_closed": false,
     "live_slot4_command5_permission_closed": false,
+    "low_carrier_disproved": true,
+    "low_carrier_live_retention_closed": false,
     "production_b6_signer_closed": false,
-    "static_target_native_carrier_candidate_closed": true,
+    "static_low_carrier_candidate_closed": true,
     "steering_can_transmit_used": false,
     "vehicle_actuation_authorized": false,
-    "verified_variant_ram_exec_requirement_promoted": false
-  },
-  "carrier_geometry": {
-    "base": "0xFEBF0000",
-    "ctx0_mpat": "0x000000B8",
-    "ctx1_mpat": "0x000000B8",
-    "end_exclusive": "0xFEBF0308",
-    "end_inclusive": "0xFEBF0307",
-    "first_recovered_normalized_direct_or_simple_gp_reference": "0xFEBF0308",
-    "mpu_bounds": [
-      "0xFEBEF400",
-      "0xFEBF33FC"
-    ],
-    "mpu_region_index": 5,
-    "permissions": "supervisor read/write/execute in both recovered application contexts",
-    "size": 776,
-    "static_boundary": "The first normalized direct/simple-GP reference is FEBF0308; computed aliases/DMA remain a dynamic-retention boundary closed only by the inert live canary."
+    "verified_high_tail_live_retention_closed": true,
+    "verified_variant_ram_exec_requirement_promoted": true
   },
   "command5_contract": {
     "adapter": "0x00088DBC",
@@ -58,6 +45,18 @@
     "status_flag": "0xFEBF13BD",
     "worker": "0x00088EC0"
   },
+  "historical_low_carrier_live_sequence": [
+    {
+      "name": "low-pocket application-retention canary",
+      "result": "superseded/disproved: real stock startup overwrites FEBF0000",
+      "stage": 1
+    },
+    {
+      "name": "high-tail retention marker",
+      "result": "closed: FEBFF9F0..FEBFFBFB retained byte-for-byte and executed before stock application return",
+      "stage": 2
+    }
+  ],
   "identity": {
     "application_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
     "application_records": [
@@ -74,43 +73,13 @@
       "uds_variant": "old"
     }
   },
-  "live_sequence": [
-    {
-      "name": "inert application-retention canary",
-      "requires": [
-        "exact F181",
-        "bus1/ELM1 route",
-        "Ready=0"
-      ],
-      "stage": 1,
-      "success": "application F181 reappears and FEBFFB80 heartbeat advances through SID 0x23 reads"
-    },
-    {
-      "name": "power-cycle/reset-to-stock confirmation",
-      "stage": 2,
-      "success": "stock application F181/normal behavior return before any command-5 payload"
-    },
-    {
-      "name": "single fixed-36 selector-4 command5 probe",
-      "requires": [
-        "successful stage-1 artifact",
-        "explicit reset-to-stock confirmation"
-      ],
-      "stage": 3,
-      "success": "command5 completes and returns a changed 16-byte result without Panda TX blocks"
-    },
-    {
-      "name": "latency/contention characterization",
-      "stage": 4,
-      "success": "measure command-5 completion under normal command-7 load before any production sender work"
-    }
-  ],
   "mailbox_geometry": {
     "base": "0xFEBFFB80",
     "ctx0_mpat": "0x000000B8",
     "ctx1_mpat": "0x000000A8",
     "end_exclusive": "0xFEBFFBBC",
     "end_inclusive": "0xFEBFFBBB",
+    "historical_only": true,
     "host_read_transport": "application SID 0x23 ALFID 0x15 memory-id 1; Camry XCP 0x7F7/0x7F8 is not assumed",
     "intended_write_context": "ctx0; target-native foreground sequence returns through 0x71398 before canary/signer insertion",
     "mpu_bounds": [
@@ -119,6 +88,7 @@
     ],
     "mpu_region_index": 1,
     "normalized_direct_or_simple_gp_reference_count": 0,
+    "production_note": "This mailbox was paired with low-linked startup-replay candidates. A post-startup high-tail service must allocate its own non-overlapping mailbox layout.",
     "size": 60
   },
   "runtime_candidates": {
@@ -128,6 +98,7 @@
       "headroom": 312,
       "input_length": 36,
       "key_selector": 4,
+      "production_poststartup_usable": false,
       "relocations": 0,
       "sha256": "0ea9b9d460c3678ad4341817ae606d720bb2a13f4d14ec7dc1e0c8f569db94d3",
       "size": 464
@@ -138,6 +109,7 @@
       "entry_offset": 0,
       "headroom": 442,
       "heartbeat_address": "0xFEBFFB80",
+      "production_poststartup_usable": false,
       "relocations": 0,
       "sha256": "facd4f590581f7422dab0fc4fcea21f6d73e4c361b1f4d54960d7001e89bdbb0",
       "size": 334
@@ -189,13 +161,21 @@
       "path": "data/generated/camry_8965F3307000_codeflash.json",
       "sha256": "857e06d621052261add565475d438ac84b02e83f16598e0234d3cf1c8ba71e30"
     },
+    "high_tail_live_evidence": {
+      "path": "community/kai/camry-2026/raw-20260826/high-tail-20260826.json",
+      "sha256": "7fe390354d24e4d0c582d57d726935256eb620f60b3b4f247e6509ec4d9989f0"
+    },
+    "low_retention_live_evidence": {
+      "path": "community/kai/camry-2026/raw-20260826/stock-retention-20260826.json",
+      "sha256": "a920ecd5cfaa96986be2ac7dd0257cac842edf9c456f37aabd157a47a6fa3845"
+    },
     "proxy_audit": {
       "path": "exploit/ephemeral_runtime/audited_camry_f33_command5_proxy_build.json",
       "sha256": "3cb604c9826c5970285cdcb69834da816ba8ce2dd62dc421cef401ddd564c041"
     },
     "ram_exec_requirements": {
       "path": "data/variant_ram_exec_requirements.json",
-      "sha256": "391f070e967293ca1076be8723645ba86addf3a9f3dd73cf7a1a801a5f56093f"
+      "sha256": "b511b8f98f155469c8cd208d1dcb03da75298174f8fe52c4937290ef3cb004f8"
     },
     "raw_function_ranges": {
       "application_context_init_window": {
@@ -283,5 +263,40 @@
       "path": "exploit/ephemeral_runtime/build_camry_f33_command5_carrier.py",
       "sha256": "a023ae3a47ef08bdcd9f538e2b6f73122690ce07802f027cf9dfeefef0f3c6d8"
     }
+  },
+  "static_low_carrier_geometry": {
+    "base": "0xFEBF0000",
+    "ctx0_mpat": "0x000000B8",
+    "ctx1_mpat": "0x000000B8",
+    "end_exclusive": "0xFEBF0308",
+    "end_inclusive": "0xFEBF0307",
+    "first_recovered_normalized_direct_or_simple_gp_reference": "0xFEBF0308",
+    "mpu_bounds": [
+      "0xFEBEF400",
+      "0xFEBF33FC"
+    ],
+    "mpu_region_index": 5,
+    "permissions": "supervisor read/write/execute in both recovered application contexts",
+    "size": 776,
+    "static_boundary": "The first normalized direct/simple-GP reference is FEBF0308, but the real stock application startup live test overwrites this pocket; it is not a retained production carrier."
+  },
+  "verified_high_tail_carrier": {
+    "base": "0xFEBFF9F0",
+    "ctx0_mpat": "0x000000B8",
+    "ctx1_mpat": "0x000000A8",
+    "end_exclusive": "0xFEBFFBFC",
+    "end_inclusive": "0xFEBFFBFB",
+    "live_exact_after_stock_startup": true,
+    "live_execution_proven": true,
+    "mpu_bounds": [
+      "0xFEBF7C00",
+      "0xFEBFFBFC"
+    ],
+    "mpu_region_index": 1,
+    "production_boundary": "Carrier lifetime/execution is closed; application-mode byte placement and control transfer are assessed separately by camry_8965F3307000_application_ram_loader_assessment.json.",
+    "retained_sha256": "89ffed31c24e746a57171e6f3e22f99d1e78d57b63bccb8778c7fe715d18800c",
+    "safety_tx_blocked_delta": 0,
+    "size": 524,
+    "stock_application_reappeared": true
   }
 }
