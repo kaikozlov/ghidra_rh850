@@ -32,7 +32,7 @@ override PROJECT_INVENTORY := $(BUILD_OUT)/targets/$(TARGET)/project_inventory.j
 override PROJECT_INVENTORY_BASELINE := $(CURDIR)/$(TARGET_INVENTORY_BASELINE)
 endif
 
-.PHONY: sync knowledge-index verify verify-core verify-full verify-local verify-one verify-changed verify-agent verify-exploit verify-required-external verify-external verify-corroboration verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
+.PHONY: sync knowledge-index verify verify-core verify-full verify-local verify-agent verify-required-external verify-external verify-corroboration verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
 	ghidra-cli test-ghidra-cli \
 	generate-dataflash generate-application-diagnostics generate-diagnostic-vocabulary generate-techstream-corpus \
 	generate-application-receive-evidence generate-application-receive generate-application-transmit \
@@ -85,22 +85,8 @@ verify-full:
 verify-local:
 	tools/test local
 
-# Fast verification targets (see verification.toml for ownership map).
-verify-one:
-	@if [ -z "$(SUITE)" ]; then echo "Usage: make verify-one SUITE=<name>" >&2; exit 2; fi
-	tools/test --suite "$(SUITE)"
-
-verify-changed:
-	tools/test
-
 verify-agent:
 	tools/test --agent
-
-verify-exploit:
-	tools/test exploit_surface exploit_predicate_semantics secoc_manifest_patcher \
-		codeflash_dumper ephemeral_runtime ephemeral_runtime_live_installer \
-		ephemeral_runtime_resolver secoc_command5_experiment \
-		secoc_mac28_behavioral_proof exploit_followups variant_acquisition_readiness
 
 verify-required-external:
 	tools/test --required-external

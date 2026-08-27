@@ -20,6 +20,12 @@ mkdir -p "$BUILD_CACHE" "$BUILD_WORK" "$BUILD_OUT" "$BUILD_LOGS" "$BUILD_TMP"
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/ghidra_env.sh" full
 
+if ! cmp -s "$ROOT/data/processor_manifest.baseline.json" "$PROCESSOR_MANIFEST"; then
+  echo "processor manifest baseline mismatch:" >&2
+  diff -u "$ROOT/data/processor_manifest.baseline.json" "$PROCESSOR_MANIFEST" >&2 || true
+  exit 1
+fi
+
 python3 "$ROOT/tools/build_processor_fixture.py" --out-dir "$FIXTURE_DIR"
 MANIFEST="$FIXTURE_DIR/manifest.json"
 BINARY="$FIXTURE_DIR/rh850_semantic_fixture.bin"
@@ -59,9 +65,10 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
     echo "NOTE: no processor_manifest.json beside working project yet"
   fi
 
-  INV_OUT="$ROOT/data/instruction_inventory.csv"
+  INV_OUT="$BUILD_OUT/instruction_inventory.csv"
+  SWITCH_OUT="$BUILD_OUT/switch_table_inventory.csv"
   DECOMPILER_REPORT="$BUILD_OUT/decompiler-signatures.txt"
-  mkdir -p "$(dirname "$INV_OUT")"
+  mkdir -p "$BUILD_OUT"
   PROJECT_LOG="$BUILD_LOGS/verify-processor-project.log"
 
   # Use durable headless -process so GHIDRA_JAVA_OPTIONS/-Duser.home applies.
@@ -71,6 +78,7 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
     --label processor-project-audits \
     --log "$PROJECT_LOG" \
     --quiet \
+    --with-investigate \
     -- \
     -process "$PROGRAM_NAME" \
     -noanalysis \
@@ -89,6 +97,7 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
     -postScript AssertMotorActuationBoundary.java \
     -postScript AssertIcusStage7Static.java \
     -postScript AssertSwitchTables.java \
+    -postScript InventorySwitchTables.java "$SWITCH_OUT" \
     -postScript AssertDecompilerInvariants.java "$DECOMPILER_REPORT" \
     -postScript InventoryUsedInstructions.java "$INV_OUT" "$ROOT/data/processor_unimpl_allowlist.txt"
   if ! cmp -s "$ROOT/data/decompiler_signatures.baseline.csv" "$DECOMPILER_REPORT"; then
@@ -96,8 +105,19 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
     diff -u "$ROOT/data/decompiler_signatures.baseline.csv" "$DECOMPILER_REPORT" >&2 || true
     exit 1
   fi
+  if ! cmp -s "$ROOT/data/instruction_inventory.csv" "$INV_OUT"; then
+    echo "instruction inventory baseline mismatch:" >&2
+    diff -u "$ROOT/data/instruction_inventory.csv" "$INV_OUT" >&2 || true
+    exit 1
+  fi
+  if ! cmp -s "$ROOT/data/switch_table_inventory.csv" "$SWITCH_OUT"; then
+    echo "switch-table inventory baseline mismatch:" >&2
+    diff -u "$ROOT/data/switch_table_inventory.csv" "$SWITCH_OUT" >&2 || true
+    exit 1
+  fi
 
-  echo "Wrote instruction inventory: $INV_OUT"
+  echo "Verified instruction inventory: $INV_OUT"
+  echo "Verified switch-table inventory: $SWITCH_OUT"
   grep -E 'ASSERT (processor-fixture|undefined-in-functions|system-register-ops|project-invariants|application-rx-map|secoc-rx-surface|application-tx-semantics|application-interface-joins|function-discovery-floor|reviewed-pointer-clusters|memory-safety-paths|motor-actuation-boundary|icus-stage7|switch-tables|decompiler-invariants|processor-userops)|AssertRecoveredCallbackTables: PASS' \
     "$FIXTURE_LOG" "$PROJECT_LOG" || true
 else

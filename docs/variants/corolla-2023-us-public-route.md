@@ -2456,9 +2456,10 @@ dealer steering-command primitive for this calibration.
 
 Machine-readable ownership:
 `data/generated/corolla_8965H1202000_techstream_correlations.json` and
-`data/generated/corolla_8965H1202000_techstream_steering_decompiler_evidence.json`;
-`tests/verify_corolla_h.py` regenerates the
-join and raw-binds all cited H functions and Techstream databases.
+`data/generated/corolla_8965H1202000_techstream_steering_decompiler_evidence.json`.
+Portable `tests/verify_corolla_h.py` pins the committed join, source identities,
+and all cited H raw bodies; local `tests/verify_corolla_h_techstream_external.py`
+raw-binds the pinned Techstream DDBs and regenerates the join exactly.
 
 ### 7.35 Autonomous-lateral command closure: protected B6 carries target steering angle
 

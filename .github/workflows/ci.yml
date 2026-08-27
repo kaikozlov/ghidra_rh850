@@ -65,6 +65,8 @@ jobs:
               - 'data/processor_unimpl_allowlist.txt'
               - 'data/processor_manifest.baseline.json'
               - 'data/decompiler_signatures.baseline.csv'
+              - 'data/instruction_inventory.csv'
+              - 'data/switch_table_inventory.csv'
               - 'data/ghidra_project_inventory.baseline.jsonl'
               - 'project/**'
             cli:
@@ -143,8 +145,9 @@ jobs:
             build/out/processor_manifest.json
             build/logs/verify-processor-*.log
             build/out/decompiler-signatures.txt
+            build/out/instruction_inventory.csv
+            build/out/switch_table_inventory.csv
             build/out/ghidra_project_inventory.jsonl
-            data/instruction_inventory.csv
             tests/fixtures/processor/
           if-no-files-found: ignore
 

@@ -8,16 +8,20 @@ The repository accepts no organization-debt baseline.  This test requires:
 * no structural generator errors or warnings; and
 * the primary navigation documents to link to the knowledge index.
 
-Run via ``make verify-one SUITE=knowledge_index``.
+Run via ``tools/test knowledge_index``.
 """
 from __future__ import annotations
 
 import json
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO / "tools"))
+from verification_deps import path_matches_pattern, repository_paths, suite_dependency_map  # noqa: E402
+
 GENERATOR = REPO / "tools/build_knowledge_index.py"
 INDEX = REPO / "docs/reference/index.md"
 ARTIFACTS = REPO / "docs/reference/generated-artifacts.md"
@@ -114,8 +118,16 @@ def main() -> int:
     check("docs/README.md links knowledge index", "reference/index.md" in docs_readme)
     check("docs/reference/README.md links knowledge index", "index.md" in ref_readme)
     check("root README.md links knowledge index", "docs/reference/index.md" in root_readme)
-    check("knowledge index suite-owned",
-          "docs/reference/index.md" in (REPO / "verification.toml").read_text(encoding="utf-8"))
+    manifest = tomllib.loads((REPO / "verification.toml").read_text(encoding="utf-8"))
+    mechanical = suite_dependency_map(REPO, manifest, repository_paths(REPO))
+    ownership = [
+        *manifest["suite"]["knowledge_index"].get("paths", []),
+        *mechanical.get("knowledge_index", set()),
+    ]
+    check(
+        "knowledge index suite-owned",
+        any(path_matches_pattern("docs/reference/index.md", pattern) for pattern in ownership),
+    )
 
     print(f"\n{passed} passed, {failed} failed")
     return 1 if failed else 0

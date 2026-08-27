@@ -328,16 +328,16 @@ uv sync --locked                  # one-time
 tools/test                        # dirty + untracked vs HEAD; clean tree exits 0
 tools/test branch                 # PR-shaped: all work since upstream merge-base
 tools/test <suite-or-prefix>      # exact suite or prefix family
-tools/test list [query]           # discover suites/families, counts, and modes
+tools/test @exploit               # manifest-defined cross-family bundle
+tools/test list [query]           # discover suites/families/groups, counts, and modes
 tools/test plan [changed|branch|query] # preview without execution
-tools/test core                   # deliberate broad gate; also full or local
+tools/test core                   # fast repository-integrity smoke; also full or local
 make verify                       # alias for tools/test
-make verify-core                  # explicit portable core tier
+make verify-core                  # fast repository-integrity smoke
 make verify-full                  # exhaustive portable/tracked-repository gate
-make verify-changed               # alias for the working-tree default
 make verify-local                 # full + available proprietary/external + live-project suites
 make verify-required-external     # require every pinned external prerequisite
-make verify-agent                 # fast core as compact JSON with timings/oracle counts
+make verify-agent                 # core smoke as compact JSON with timings/oracle counts
 make verify-sleigh                # SLEIGH compile + isolated install
 make verify-processor             # fixtures + working-project audits
 make verify-project-parity        # exact working-project inventory vs baseline
@@ -346,11 +346,21 @@ make verify-ghidra                # portable full + Ghidra gates
 
 `verification.toml` is the sole suite manifest. It owns each
 `tests/verify_*.py` gate exactly once, records changed-file routing, suite tier,
-external prerequisites, and the default evidence-oracle class. Suites without
-an explicit `modes` entry are in `core`, `full`, and `local`. Expensive but fully
-tracked exhaustive checks can be `full`/`local`; suites backed by ignored or
-proprietary corpora are `local` only. `--required-external` selects every suite
-with a declared external prerequisite independently of tier.
+external prerequisites, and the default evidence-oracle class. Statically resolvable
+Python file dependencies are not copied into the manifest: `tools/verification_deps.py`
+derives repository `Path` reads, literal glob roots, local imports, and executed
+Python helpers (including exact transitive helper inputs) directly from verifier
+source. `suite.*.paths` is reserved for non-obvious semantic/dynamic invalidators
+and dependencies hidden behind string tables, shell indirection, or other forms that
+source inspection intentionally does not infer. Portable suites without an explicit `modes`
+entry default to `full` and `local`; the deliberately small
+`verification.core_suites` list names the repository-integrity smoke tier.
+A suite does not need to be in `core` to run during focused work: changed-file
+routing selects its actual owners directly. Cross-family deliberate bundles live in
+`verification.groups` and are invoked as `tools/test @name`, keeping Make free of
+hand-maintained suite lists. Suites backed by ignored or proprietary corpora are
+`local` only. `--required-external` selects every suite with a declared external
+prerequisite independently of tier.
 
 The normal edit loop is the working tree versus HEAD: dirty and untracked
 paths only. A clean tree reports zero selected suites and exits 0. No
@@ -363,10 +373,18 @@ descendants. Rename detection retains both the old and new paths. Every changed
 path that still exists must have a suite owner (or a declared broad-invalidator
 policy); a mixed owned/unowned diff fails instead of running a partial plan.
 Deleted `tests/verify_*.py` files that left the manifest are treated as retired
-gates, not ownership misses. Changes under
-`firmware/` invalidate the complete portable `full` tier.
-`verification.toml`, `pyproject.toml`, and `uv.lock` own only
-`[suite.fast_verify]`.
+gates, not ownership misses. Changes under `firmware/` invalidate the complete portable `full` tier. Changes to
+the verification control plane (`tools/fast_verify.py`,
+`tools/verification_deps.py`, `tools/test`, `verification.toml`, `pyproject.toml`,
+or `uv.lock`) also invalidate the complete portable tier: those files can change
+test selection or execution itself, so narrow changed-file routing would be
+unsound. Ordinary RE/data/document edits remain strictly owner-routed. Mechanical
+Python dependencies are derived automatically; explicit `suite.*.paths` therefore
+means "can invalidate this gate but is not mechanically obvious from the verifier,"
+not merely "is related to this evidence." Tracked data artifacts checked outside
+`tools/test` use top-level `catalog.*` entries instead; a catalog-only edit exits the
+runner cleanly with the external gate it requires (for example `make verify-processor`)
+rather than inventing a suite dependency or failing as unowned.
 
 The aggregate status ledgers use content-aware routing instead of treating each
 whole file as a subsystem input. Changed FINDINGS rows route through their
@@ -384,7 +402,8 @@ is absent. The same fail-closed prerequisite rule applies when changed-mode
 routing selects an external-backed suite. Use `--allow-skips` only when an
 intentional optional result is desired; `local` mode retains its normal
 optional-prerequisite behavior. Positional `tools/test <query>` supports prefix
-families; compatibility `--suite` and `make verify-one SUITE=...` remain exact.
+families; compatibility `--suite` remains exact. The Makefile intentionally does
+not duplicate `tools/test` with changed/single-suite/family aliases.
 
 The core and full modes deliberately set `RH850_VERIFY_EXTERNAL=0` in verifier
 children. This prevents a nominally portable gate from silently doing extra work
@@ -395,13 +414,15 @@ code; required-external mode turns the same absence into a concise failure.
 Runner summaries keep pass/fail/skip separate, report assertion counts by
 evidence oracle, and print the slowest test durations.
 
-The explicit core tier is intentionally broad but not exhaustive. In
-particular, the 32-KiB Corolla DataFlash all-window cryptographic domain scan
-remains in `full`/`local`: it tests 23,277 unique 16-byte candidates and is valuable evidence,
-but recomputing millions of CMAC probes after unrelated edits is not useful.
-The working-tree default still routes directly to that suite when its owned inputs or
-verifier change, so tiering does not hide relevant failures during focused work.
-`tools/test core` is a deliberate broad button, not the edit loop.
+The explicit core tier is intentionally small: it checks repository structure,
+manifest/runner behavior, documentation/index integrity, analysis-target layout, and
+other control-plane invariants. Expensive domain proofs stay in `full`/`local`; for
+example, the 32-KiB Corolla DataFlash all-window cryptographic scan tests 23,277
+unique 16-byte candidates and is useful evidence, but it should not run after
+unrelated edits. The working-tree default still routes directly to any such suite
+when an owned input or verifier changes, so tiering does not hide relevant failures
+during focused work. `tools/test core` is a fast smoke button, not the edit loop or a
+substitute for CI's exhaustive `full` gate.
 
 The machine summary keeps `identity_hash`, `documentation_lint`, and
 `generated_self_check` counts separate from `raw_bytes`, `instruction_semantics`,

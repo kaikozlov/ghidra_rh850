@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import struct
 import sys
@@ -24,7 +25,13 @@ U023A = REPO / "data/generated/u023a87_monitor_map.json"
 SIENNA = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
 RAW = REPO / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
 DEFAULT_OUT = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
-TECHROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
+TECHSTREAM_DIAGNOSTICS_ROOT = Path(
+    os.environ.get(
+        "TECHSTREAM_UNPACKED_ROOT",
+        REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics",
+    )
+)
+TECHROOT = TECHSTREAM_DIAGNOSTICS_ROOT / "Techstream"
 
 
 def sha(data: bytes) -> str:

@@ -15,6 +15,14 @@ RUNNER = REPO / "tools/fast_verify.py"
 TEST_COMMAND = REPO / "tools/test"
 MANIFEST = REPO / "verification.toml"
 MAKEFILE = REPO / "Makefile"
+CI_WORKFLOW = REPO / ".github/workflows/ci.yml"
+sys.path.insert(0, str(REPO / "tools"))
+from verification_deps import (  # noqa: E402
+    path_matches_pattern,
+    repository_paths as discover_repository_paths,
+    suite_dependency_map,
+)
+
 ALLOWED_ORACLES = {
     "identity_hash", "documentation_lint", "generated_self_check", "raw_bytes",
     "instruction_semantics", "cfg_dataflow", "dynamic_trace",
@@ -59,8 +67,12 @@ for required in (
 
 default_oracle = manifest["verification"]["default_oracle"]
 default_modes = manifest["verification"]["default_modes"]
+core_suites = manifest["verification"].get("core_suites", [])
 check("manifest default oracle is valid", default_oracle in ALLOWED_ORACLES)
-check("manifest default modes define core/full/local tiers", default_modes == ["core", "full", "local"])
+check("portable suites default to exhaustive full/local tiers", default_modes == ["full", "local"])
+check("core smoke tier is explicit, nonempty, and manifest-owned",
+      bool(core_suites) and len(core_suites) == len(set(core_suites))
+      and set(core_suites) <= set(suites))
 check("all explicit suite modes are known",
       all(set(entry.get("modes", default_modes)) <= {"core", "full", "local"}
           for entry in suites.values()))
@@ -83,6 +95,12 @@ manifest_paths = [
     for suite_name, entry in suites.items()
     for kind in ("tests", "paths")
     for value in entry.get(kind, [])
+]
+catalogs = manifest.get("catalog", {})
+catalog_paths = [
+    (catalog_name, value)
+    for catalog_name, entry in catalogs.items()
+    for value in entry.get("paths", [])
 ]
 missing_manifest_paths = [
     (suite_name, kind, value)
@@ -110,13 +128,155 @@ check(
     not untracked_manifest_paths,
     str(untracked_manifest_paths[:10]),
 )
+missing_catalog_paths = [
+    (catalog_name, value)
+    for catalog_name, value in catalog_paths
+    if not (REPO / value.rstrip("/")).exists()
+]
+check("every catalog path exists", not missing_catalog_paths, str(missing_catalog_paths[:10]))
+untracked_catalog_paths = [
+    (catalog_name, value)
+    for catalog_name, value in catalog_paths
+    if not (any(path.startswith(value) for path in repository_paths)
+            if value.endswith("/") else value in repository_paths)
+]
+check(
+    "every catalog path is tracked or a pending addition",
+    not untracked_catalog_paths,
+    str(untracked_catalog_paths[:10]),
+)
+check(
+    "catalog ownership is data-only and names an explicit non-tools/test gate",
+    bool(catalogs)
+    and all(value.startswith("data/") for _, value in catalog_paths)
+    and all(str(entry.get("gate", "")).strip() for entry in catalogs.values()),
+)
+check(
+    "catalog paths are not duplicated into suite invalidation ownership",
+    all(
+        not any(
+            (value.startswith(pattern) if pattern.endswith("/") else value == pattern)
+            for entry in suites.values()
+            for pattern in entry.get("paths", [])
+        )
+        for _, value in catalog_paths
+    ),
+)
+mechanical = suite_dependency_map(REPO, manifest, discover_repository_paths(REPO))
+
+def pattern_covers_pattern(cover: str, target: str) -> bool:
+    """Whether every path matched by *target* is also matched by *cover*."""
+    return target.startswith(cover) if cover.endswith("/") else target == cover
+
+
+def patterns_overlap(left: str, right: str) -> bool:
+    if left.endswith("/"):
+        return right.startswith(left) or (right.endswith("/") and left.startswith(right))
+    if right.endswith("/"):
+        return left.startswith(right)
+    return left == right
+
+
+check(
+    "pattern-coverage helper distinguishes directory coverage from child-file overlap",
+    pattern_covers_pattern("docs/", "docs/reference/index.md")
+    and pattern_covers_pattern("docs/", "docs/reference/")
+    and not pattern_covers_pattern("docs/reference/index.md", "docs/"),
+)
+check(
+    "pattern-overlap helper detects exact/directory intersections",
+    patterns_overlap("data/generated/", "data/generated/example.json")
+    and patterns_overlap("data/generated/example.json", "data/generated/")
+    and not patterns_overlap("data/generated/", "docs/generated/"),
+)
+
+
+redundant_explicit_paths = [
+    (name, path, auto_path)
+    for name, entry in suites.items()
+    for path in entry.get("paths", [])
+    for auto_path in mechanical.get(name, set())
+    if pattern_covers_pattern(auto_path, path)
+]
+check(
+    "mechanically derived paths are not duplicated in the manifest",
+    not redundant_explicit_paths,
+    str(redundant_explicit_paths[:10]),
+)
+catalog_mechanical_conflicts = [
+    (catalog_name, catalog_path, suite_name, auto_path)
+    for catalog_name, catalog_path in catalog_paths
+    for suite_name, auto_paths in mechanical.items()
+    for auto_path in auto_paths
+    if patterns_overlap(auto_path, catalog_path)
+]
+check(
+    "catalog-only paths have no mechanically inferred suite owner",
+    not catalog_mechanical_conflicts,
+    str(catalog_mechanical_conflicts[:10]),
+)
+
+def has_effective_owner(path: str) -> bool:
+    suite_owned = any(
+        path_matches_pattern(path, pattern)
+        for name, entry in suites.items()
+        for pattern in (
+            *entry.get("tests", []),
+            *entry.get("paths", []),
+            *mechanical.get(name, set()),
+        )
+    )
+    catalog_owned = any(
+        path_matches_pattern(path, pattern)
+        for entry in catalogs.values()
+        for pattern in entry.get("paths", [])
+    )
+    return suite_owned or catalog_owned
+
+
+unowned_operational_paths = sorted(
+    path
+    for path in repository_paths
+    if path.startswith(("tools/", "tests/", "data/"))
+    and not has_effective_owner(path)
+)
+check(
+    "every tracked operational tool/test/data path has effective ownership",
+    not unowned_operational_paths,
+    str(unowned_operational_paths[:20]),
+)
+check(
+    "known fixture-directory dependency is mechanically derived",
+    "tests/fixtures/payloads/" in mechanical.get("icus_software_paths", set()),
+)
+ci_workflow = CI_WORKFLOW.read_text(encoding="utf-8")
+check(
+    "catalog-only artifacts trigger their CI verification job",
+    all(value in ci_workflow for _, value in catalog_paths),
+    str([value for _, value in catalog_paths if value not in ci_workflow]),
+)
+check(
+    "suite test files are not redundantly repeated in paths",
+    all(not (set(entry.get("tests", [])) & set(entry.get("paths", [])))
+        for entry in suites.values()),
+)
+check(
+    "firmware invalidation is centralized instead of repeated per suite",
+    all(not any(path.startswith("firmware/") for path in entry.get("paths", []))
+        for entry in suites.values()),
+)
+check(
+    "root data/tools prefixes are not used as catch-all ownership",
+    all(not ({"data/", "tools/"} & set(entry.get("paths", [])))
+        for entry in suites.values()),
+)
 check("every external Techstream suite declares its prerequisite",
       all("techstream_v18" in suites[name].get("requires_external", []) for name in (
           "techstream_rks", "techstream_layerb", "techstream_ddb_residuals",
           "techstream_master_routes", "techstream_priority_ddb_semantics",
           "techstream_dtc_failure_types", "techstream_mackey",
           "techstream_crypto_inventory", "techstream_artifact_lock",
-          "techstream_cuw_writer_routes",
+          "techstream_cuw_writer_routes", "corolla_h_techstream_external",
       )))
 
 makefile = MAKEFILE.read_text(encoding="utf-8")
@@ -126,22 +286,27 @@ for target, command in (
     ("verify-core", "tools/test core"),
     ("verify-full", "tools/test full"),
     ("verify-local", "tools/test local"),
-    ("verify-changed", "tools/test\n"),
     ("verify-agent", "tools/test --agent"),
     ("verify-required-external", "tools/test --required-external"),
 ):
     check(f"Make target {target} delegates to canonical tools/test command",
           f"{target}:" in makefile and command in makefile)
-check("Make verify-one preserves exact legacy suite selection",
-      'tools/test --suite "$(SUITE)"' in makefile)
-check("Make verify-exploit is one tools/test invocation",
-      "tools/test exploit_surface" in makefile
-      and "tools/fast_verify.py --suite" not in makefile)
+check(
+    "redundant Make verification aliases are gone",
+    all(f"{target}:" not in makefile for target in ("verify-one", "verify-changed", "verify-exploit")),
+)
 src = RUNNER.read_text(encoding="utf-8")
-check("firmware is the only portable full invalidator",
-      '"firmware/"' in src.split("PORTABLE_BROAD_INVALIDATORS", 1)[1].split(")", 1)[0]
-      and "verification.toml" not in src.split("PORTABLE_BROAD_INVALIDATORS", 1)[1].split(")", 1)[0]
-      and "pyproject.toml" not in src.split("PORTABLE_BROAD_INVALIDATORS", 1)[1].split(")", 1)[0])
+invalidator_block = src.split("PORTABLE_BROAD_INVALIDATORS", 1)[1].split(")", 1)[0]
+check(
+    "firmware and verification infrastructure are portable full invalidators",
+    all(
+        f'"{path}"' in invalidator_block
+        for path in (
+            "firmware/", "tools/fast_verify.py", "tools/verification_deps.py",
+            "tools/test", "verification.toml", "pyproject.toml", "uv.lock",
+        )
+    ),
+)
 check("portable tests may run concurrently", "ThreadPoolExecutor" in src)
 check("live and external suites stay serial", "def suite_is_serial" in src)
 check("default changed mode diffs working tree against HEAD",
@@ -151,7 +316,10 @@ check("default changed mode diffs working tree against HEAD",
 print("\n== isolated runner behavior ==")
 with tempfile.TemporaryDirectory(prefix="verify-runner-") as directory:
     root = Path(directory)
-    for subdir in ("tests", "docs/status", "docs/family", "data", "firmware", "scratch"):
+    for subdir in (
+        "tests", "tests/fixtures/payloads", "tools", "docs/status", "docs/family",
+        "data", "firmware", "scratch",
+    ):
         (root / subdir).mkdir(parents=True, exist_ok=True)
     outside = root / "outside"
     outside.mkdir()
@@ -204,6 +372,26 @@ with tempfile.TemporaryDirectory(prefix="verify-runner-") as directory:
         (root / "tests" / name).write_text(
             "print('[PASS][raw_bytes] synthetic route')\n", encoding="utf-8"
         )
+    (root / "tools/helper.py").write_text(
+        "from pathlib import Path\n"
+        "ROOT = Path(__file__).resolve().parents[1]\n"
+        "assert (ROOT / 'data/helper.json').read_text()\n",
+        encoding="utf-8",
+    )
+    (root / "tests/verify_mechanical.py").write_text(
+        "from pathlib import Path\n"
+        "import subprocess, sys\n"
+        "ROOT = Path(__file__).resolve().parents[1]\n"
+        "MENTION_ONLY = 'scratch/mentioned.txt'\n"
+        "assert (ROOT / 'data/mechanical.txt').read_text()\n"
+        "assert list((ROOT / 'tests/fixtures/payloads').glob('*.bin'))\n"
+        "TABLE = [('a', ROOT / 'data/container-a.bin'), ('b', ROOT / 'data/container-b.bin')]\n"
+        "for _, path in TABLE:\n"
+        "    assert path.read_text()\n"
+        "subprocess.run([sys.executable, str(ROOT / 'tools/helper.py')], check=True)\n"
+        "print('[PASS][raw_bytes] automatic mechanical dependency routing')\n",
+        encoding="utf-8",
+    )
     text_files = {
         "docs/ahead.md": "baseline\n",
         "docs/dirty.md": "baseline\n",
@@ -213,6 +401,13 @@ with tempfile.TemporaryDirectory(prefix="verify-runner-") as directory:
         "docs/family/item.md": "baseline\n",
         "data/foo.json": "{}\n",
         "data/foo.json.backup": "{}\n",
+        "data/mechanical.txt": "mechanical baseline\n",
+        "data/helper.json": "{}\n",
+        "data/container-a.bin": "container a\n",
+        "data/container-b.bin": "container b\n",
+        "data/processor.baseline": "processor baseline\n",
+        "tests/fixtures/payloads/a.bin": "fixture\n",
+        "scratch/mentioned.txt": "mention baseline\n",
         "firmware/input.bin": "firmware\n",
         "pyproject.toml": "[project]\nname='synthetic'\nversion='0'\n",
         "uv.lock": "version = 1\n",
@@ -251,6 +446,13 @@ skip_exit_code = 77
 gate_glob = "tests/*.py"
 default_modes = ["core", "full", "local"]
 aggregate_infrastructure_suites = ["analysis_status", "doc_links", "knowledge_index"]
+
+[verification.groups]
+bundle = ["alpha", "camry"]
+
+[catalog.processor]
+gate = "make verify-processor"
+paths = ["data/processor.baseline"]
 
 [external.techstream_v18]
 path = "missing-techstream"
@@ -339,6 +541,9 @@ tests = ["tests/verify_full_only.py"]
 paths = ["tests/verify_full_only.py"]
 modes = ["full", "local"]
 
+[suite.mechanical]
+tests = ["tests/verify_mechanical.py"]
+
 [suite.fast_verify]
 tests = ["tests/pass.py"]
 paths = ["verification.toml", "pyproject.toml", "uv.lock"]
@@ -375,6 +580,20 @@ serial = true
     planned_exact = run("plan", "alpha")
     check("exact suite ownership wins over prefix expansion",
           planned_exact.returncode == 0 and selected_from_plan(planned_exact) == {"alpha"})
+    listed_group = run("list", "@bundle")
+    check(
+        "manifest groups compose exact suites and prefix families",
+        listed_group.returncode == 0
+        and "Group '@bundle': 3 suite(s), 3 test(s)" in listed_group.stdout
+        and all(name in listed_group.stdout for name in ("alpha:", "camry_one:", "camry_two:")),
+    )
+    planned_group = run("plan", "@bundle")
+    check(
+        "plan resolves a manifest group without executing tests",
+        planned_group.returncode == 0
+        and selected_from_plan(planned_group) == {"alpha", "camry_one", "camry_two"}
+        and "[PASS]" not in planned_group.stdout,
+    )
 
     core_missing = run("--core")
     check("repository-only mode succeeds with absent optional source", core_missing.returncode == 0)
@@ -529,6 +748,86 @@ serial = true
     check("clean explicit-base plan is fast and reports zero selection",
           no_changes.returncode == 0 and "0 suites / 0 tests selected" in no_changes.stdout)
 
+    mechanical_path = root / "data/mechanical.txt"
+    mechanical_path.write_text("mechanical changed\n", encoding="utf-8")
+    mechanical_plan = run("plan", "changed", "--base", "HEAD")
+    check(
+        "direct verifier file reads create automatic changed-file ownership",
+        mechanical_plan.returncode == 0
+        and selected_from_plan(mechanical_plan) == {"mechanical"},
+        mechanical_plan.stderr.strip() or mechanical_plan.stdout[-400:],
+    )
+    mechanical_path.write_text("mechanical baseline\n", encoding="utf-8")
+
+    helper_input = root / "data/helper.json"
+    helper_input.write_text('{"changed": true}\n', encoding="utf-8")
+    helper_plan = run("plan", "changed", "--base", "HEAD")
+    check(
+        "executed Python helpers contribute transitive exact dependencies",
+        helper_plan.returncode == 0
+        and selected_from_plan(helper_plan) == {"mechanical"},
+        helper_plan.stderr.strip() or helper_plan.stdout[-400:],
+    )
+    helper_input.write_text("{}\n", encoding="utf-8")
+
+    helper_source = root / "tools/helper.py"
+    helper_source_original = helper_source.read_text(encoding="utf-8")
+    helper_source.write_text(helper_source_original + "# changed\n", encoding="utf-8")
+    helper_source_plan = run("plan", "changed", "--base", "HEAD")
+    check(
+        "executed Python helper source changes rerun their callers",
+        helper_source_plan.returncode == 0
+        and selected_from_plan(helper_source_plan) == {"mechanical"},
+        helper_source_plan.stderr.strip() or helper_source_plan.stdout[-400:],
+    )
+    helper_source.write_text(helper_source_original, encoding="utf-8")
+
+    container_input = root / "data/container-b.bin"
+    container_input.write_text("container b changed\n", encoding="utf-8")
+    container_plan = run("plan", "changed", "--base", "HEAD")
+    check(
+        "literal Path tables propagate loop aliases into mechanical ownership",
+        container_plan.returncode == 0
+        and selected_from_plan(container_plan) == {"mechanical"},
+        container_plan.stderr.strip() or container_plan.stdout[-400:],
+    )
+    container_input.write_text("container b\n", encoding="utf-8")
+
+    fixture = root / "tests/fixtures/payloads/a.bin"
+    fixture.write_text("fixture changed\n", encoding="utf-8")
+    fixture_plan = run("plan", "changed", "--base", "HEAD")
+    check(
+        "literal verifier glob roots create automatic directory ownership",
+        fixture_plan.returncode == 0
+        and selected_from_plan(fixture_plan) == {"mechanical"},
+        fixture_plan.stderr.strip() or fixture_plan.stdout[-400:],
+    )
+    fixture.write_text("fixture\n", encoding="utf-8")
+
+    mentioned = root / "scratch/mentioned.txt"
+    mentioned.write_text("mention changed\n", encoding="utf-8")
+    mention_plan = run("plan", "changed", "--base", "HEAD")
+    check(
+        "arbitrary path-like strings do not become inferred dependencies",
+        mention_plan.returncode == 2
+        and "scratch/mentioned.txt" in mention_plan.stderr,
+        mention_plan.stderr.strip() or mention_plan.stdout[-400:],
+    )
+    mentioned.write_text("mention baseline\n", encoding="utf-8")
+
+    catalog_path = root / "data/processor.baseline"
+    catalog_path.write_text("changed processor baseline\n", encoding="utf-8")
+    catalog_only = run("plan", "changed", "--base", "HEAD")
+    check(
+        "catalog-only artifacts are recognized without selecting tools/test suites",
+        catalog_only.returncode == 0
+        and not selected_from_plan(catalog_only)
+        and "processor (make verify-processor)" in catalog_only.stdout
+        and "catalog-only/retired changes" in catalog_only.stdout,
+        catalog_only.stderr.strip() or catalog_only.stdout[-400:],
+    )
+    catalog_path.write_text("processor baseline\n", encoding="utf-8")
+
     (root / "docs/dirty.md").write_text("mapped change\n", encoding="utf-8")
     (root / "scratch/unowned.txt").write_text("unowned\n", encoding="utf-8")
     (root / "tests/verify_unowned_new.py").write_text(
@@ -619,10 +918,10 @@ serial = true
         path.write_text(original + "# changed\n", encoding="utf-8")
         mapped = run("plan", "changed", "--base", "HEAD")
         mapped_names = selected_from_plan(mapped)
-        check(f"{owned} owns fast_verify rather than the full tier",
+        check(f"{owned} invalidates the complete portable tier",
               mapped.returncode == 0
-              and mapped_names == {"fast_verify"}
-              and "full_only" not in mapped_names,
+              and {"fast_verify", "full_only"} <= mapped_names
+              and "external" not in mapped_names,
               str(sorted(mapped_names)))
         path.write_text(original, encoding="utf-8")
 

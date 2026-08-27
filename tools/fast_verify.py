@@ -21,6 +21,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 
+from verification_deps import repository_paths, suite_dependency_map
+
 DEFAULT_ROOT = Path(__file__).resolve().parent.parent
 SKIP_EXIT_CODE = 77
 ORACLE_CLASSES = {
@@ -54,6 +56,12 @@ AGGREGATE_LEDGERS = {
 }
 PORTABLE_BROAD_INVALIDATORS = (
     "firmware/",
+    "tools/fast_verify.py",
+    "tools/verification_deps.py",
+    "tools/test",
+    "verification.toml",
+    "pyproject.toml",
+    "uv.lock",
 )
 
 
@@ -237,28 +245,48 @@ def write_failure_log(root: Path, result: dict, out_dir: Path | None = None) -> 
     )
 
 
+def core_suite_names(manifest: dict) -> set[str]:
+    """Return the centralized fast smoke tier."""
+    configured = manifest.get("verification", {}).get("core_suites", [])
+    return set(configured) & set(manifest.get("suite", {}))
+
+
 def selected_suites(manifest: dict, mode: str) -> list[str]:
     suites = manifest.get("suite", {})
     if mode == "required-external":
         return sorted(name for name, entry in suites.items() if entry.get("requires_external"))
     default_modes = manifest.get("verification", {}).get(
-        "default_modes", ["core", "full", "local"]
+        "default_modes", ["full", "local"]
     )
+    core = core_suite_names(manifest)
     return sorted(
         name for name, entry in suites.items()
-        if mode in entry.get("modes", default_modes)
+        if mode in entry.get("modes", default_modes) or (mode == "core" and name in core)
     )
 
 
-def suite_modes(manifest: dict, entry: dict) -> list[str]:
-    return entry.get(
+def suite_modes(manifest: dict, name: str, entry: dict) -> list[str]:
+    modes = list(entry.get(
         "modes",
-        manifest.get("verification", {}).get("default_modes", ["core", "full", "local"]),
-    )
+        manifest.get("verification", {}).get("default_modes", ["full", "local"]),
+    ))
+    if name in core_suite_names(manifest) and "core" not in modes:
+        modes.insert(0, "core")
+    return modes
 
 
 def resolve_query(manifest: dict, query: str) -> list[str]:
     suites = manifest.get("suite", {})
+    if query.startswith("@"):
+        group = manifest.get("verification", {}).get("groups", {}).get(query[1:])
+        if not group:
+            return []
+        names: list[str] = []
+        for member in group:
+            if str(member).startswith("@"):
+                return []
+            names.extend(resolve_query(manifest, str(member)))
+        return _dedupe_names(names)
     if query in suites:
         return [query]
     return sorted(name for name in suites if name.startswith(query))
@@ -267,18 +295,21 @@ def resolve_query(manifest: dict, query: str) -> list[str]:
 def print_suite_listing(manifest: dict, query: str | None = None) -> int:
     names = resolve_query(manifest, query) if query else sorted(manifest.get("suite", {}))
     if not names:
-        print(f"No suite or suite-prefix matches: {query}", file=sys.stderr)
+        print(f"No suite, prefix, or @group matches: {query}", file=sys.stderr)
         return 2
     suites = manifest["suite"]
     test_count = sum(len(suites[name].get("tests", [])) for name in names)
-    label = f"Prefix {query!r}" if query and query not in suites else (
-        f"Suite {query!r}" if query else "All suites"
-    )
+    if query and query.startswith("@"):
+        label = f"Group {query!r}"
+    else:
+        label = f"Prefix {query!r}" if query and query not in suites else (
+            f"Suite {query!r}" if query else "All suites"
+        )
     print(f"{label}: {len(names)} suite(s), {test_count} test(s)")
-    print("Any leading suite-name prefix can be used as a family query.")
+    print("Use a suite name, leading family prefix, or manifest group such as @exploit.")
     for name in names:
         entry = suites[name]
-        modes = ",".join(suite_modes(manifest, entry)) or "explicit-only"
+        modes = ",".join(suite_modes(manifest, name, entry)) or "explicit-only"
         external = ",".join(entry.get("requires_external", []))
         suffix = f" external={external}" if external else ""
         print(f"  {name}: {len(entry.get('tests', []))} test(s) modes={modes}{suffix}")
@@ -290,16 +321,34 @@ def path_matches_pattern(path: str, pattern: str) -> bool:
     return path.startswith(pattern) if pattern.endswith("/") else path == pattern
 
 
-def suites_matching_paths(manifest: dict, changed: set[str]) -> set[str]:
+def suites_matching_paths(
+    manifest: dict,
+    changed: set[str],
+    mechanical: dict[str, set[str]] | None = None,
+) -> set[str]:
+    mechanical = mechanical or {}
     return {
         name
         for name, entry in manifest.get("suite", {}).items()
         if any(
             path_matches_pattern(path, pattern)
-            for pattern in (*entry.get("paths", []), *entry.get("tests", []))
+            for pattern in (
+                *entry.get("paths", []),
+                *entry.get("tests", []),
+                *mechanical.get(name, set()),
+            )
             for path in changed
         )
     }
+
+
+def catalogs_matching_path(manifest: dict, path: str) -> list[tuple[str, str]]:
+    """Return non-routing artifact catalogs that intentionally own *path*."""
+    matches: list[tuple[str, str]] = []
+    for name, entry in manifest.get("catalog", {}).items():
+        if any(path_matches_pattern(path, pattern) for pattern in entry.get("paths", [])):
+            matches.append((name, str(entry.get("gate", "")).strip()))
+    return matches
 
 
 def _run_git(root: Path, args: list[str]) -> tuple[str | None, str | None]:
@@ -618,13 +667,21 @@ def plan_changed_suites(
     warnings: list[str] = []
     aggregate_paths = set(AGGREGATE_LEDGERS) & changes.paths
     ordinary_paths = changes.paths - aggregate_paths
+    mechanical = suite_dependency_map(root, manifest, repository_paths(root))
     names: set[str] = set()
     matched_paths: set[str] = set()
     for path in ordinary_paths:
-        owners = suites_matching_paths(manifest, {path})
+        owners = suites_matching_paths(manifest, {path}, mechanical)
         if owners:
             matched_paths.add(path)
             names |= owners
+        catalogs = catalogs_matching_path(manifest, path)
+        if catalogs:
+            matched_paths.add(path)
+            rendered = ", ".join(
+                f"{name} ({gate})" if gate else name for name, gate in catalogs
+            )
+            notes.append(f"{path}: catalog-only ownership -> {rendered}")
 
     invalidators = {
         path
@@ -668,7 +725,7 @@ def print_plan(
         print(f"  note: {note}")
     for name in names:
         entry = suites[name]
-        modes = ",".join(suite_modes(manifest, entry)) or "explicit-only"
+        modes = ",".join(suite_modes(manifest, name, entry)) or "explicit-only"
         external = ",".join(entry.get("requires_external", []))
         suffix = f" external={external}" if external else ""
         print(f"  {name}: {len(entry.get('tests', []))} test(s) modes={modes}{suffix}")
@@ -816,12 +873,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Authoritative verification runner")
     parser.add_argument(
         "command", nargs="?",
-        help="suite/prefix, list [query], plan [changed|branch|query], "
-        "core/full/local/branch, or additional suite names",
+        help="suite/prefix/@group, list [query], plan [changed|branch|query], "
+        "core/full/local/branch, or additional queries",
     )
     parser.add_argument(
         "query", nargs="*",
-        help="list/plan argument, or extra suite/prefix names",
+        help="list/plan argument, or extra suite/prefix/@group queries",
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--suite")
@@ -926,7 +983,7 @@ def main() -> int:
         for query in explicit_queries:
             resolved = resolve_query(manifest, query)
             if not resolved:
-                print(f"No suite or suite-prefix matches: {query}", file=sys.stderr)
+                print(f"No suite, prefix, or @group matches: {query}", file=sys.stderr)
                 return 2
             names.extend(resolved)
         names = _dedupe_names(names)
@@ -958,11 +1015,13 @@ def main() -> int:
             )
             return 2
         if not names:
+            for note in notes:
+                print(f"Selection: {note}")
             print(
-                "No suites matched changed files: " + ", ".join(sorted(changes.paths)),
-                file=sys.stderr,
+                f"No tools/test suites selected ({changes.base_description}) — "
+                "catalog-only/retired changes use their documented gate."
             )
-            return 2
+            return 0
         if plan_only:
             print_plan(
                 manifest, names,

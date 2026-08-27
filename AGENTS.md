@@ -61,16 +61,15 @@ signatures, types, and overlays. Only the designated integration task updates
 uv sync --locked          # one-time environment
 tools/test                # dirty + untracked vs HEAD; clean tree exits 0
 tools/test branch         # PR-shaped: all work since upstream merge-base
-tools/test list [query]   # discover suites/families, test counts, and modes
+tools/test @exploit       # manifest-defined cross-family bundle
+tools/test list [query]   # discover suites/families/groups, test counts, and modes
 tools/test plan [changed|branch|query] # show selection without executing
-tools/test core           # deliberate broad gate; also full or local
+tools/test core           # fast repository-integrity smoke; also full or local
 make verify               # alias for tools/test
-make verify-core          # deliberate portable core gate
+make verify-core          # fast repository-integrity smoke
 make verify-full          # exhaustive portable tracked-repository gate
-make verify-one SUITE=control_partition  # compatibility exact-suite entry point
-make verify-changed       # alias for the working-tree default
 make verify-local         # full + locally available external/live suites
-make verify-agent         # core gate with compact JSON summary
+make verify-agent         # core smoke with compact JSON summary
 make verify-required-external # require the pinned Techstream corpus
 make ghidra-cli           # build the vendored ghidra CLI into build/cache/ghidra-cli/
 make verify-sleigh        # SLEIGH compile + isolated install
@@ -92,7 +91,7 @@ Remember four task commands, not individual implementation files:
 | Edit-loop tests | `tools/test` |
 | Discover / preview | `tools/test list [word]`, `tools/test plan` |
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
-| Broad gates | `tools/test core` / `full` / `branch` |
+| Deliberate gates | `tools/test core` / `full` / `branch` |
 
 `tools/gtarget` (and wrappers such as `tools/gcamry`) query other configured
 targets. Evidence compaction, cross-variant extraction, and working-project
@@ -104,11 +103,17 @@ uv run --locked python tools/extract_variant_evidence.py list
 tools/export_ghidra_project.sh list
 ```
 
-Portable proofs that share a family, mode, and oracle live in one module
-(`tests/verify_application_wdbi.py`, `tests/verify_corolla_h.py`, and so on).
+Portable proofs that share a family, mode, and compatible evidence class live in one
+module (`tests/verify_application_wdbi.py`, `tests/verify_corolla_h.py`, and so on).
 Prefix queries are the memory: `tools/test list application` / `corolla` /
-`techstream`. Merge same-mode same-family portable proofs; keep live,
-external, and distinct safety pipelines as separate files.
+`techstream`. Cross-family deliberate bundles are manifest groups such as
+`tools/test @exploit`; do not recreate them as Make wrappers. Statically resolvable
+Python file/import/subprocess dependencies are derived by `tools/verification_deps.py`;
+keep `verification.toml` `paths` for non-obvious semantic/dynamic invalidators and
+for dependencies hidden behind string tables or shell indirection, not paths the
+verifier already exposes as resolvable `Path` expressions. Merge same-mode same-family portable
+proofs only when the merged module can preserve conservative oracle labeling; keep
+live, external, and distinct safety pipelines separate.
 
 ### Interactive Ghidra via tools/g
 

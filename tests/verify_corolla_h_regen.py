@@ -48,7 +48,6 @@ BUILDERS = [
     ('steering supervisor', 'tools/build_corolla_h_steering_supervisor_stage_ledger.py', 'data/generated/corolla_8965H1202000_steering_supervisor_stage_ledger.json'),
     ('storage nvm', 'tools/build_corolla_h_storage_nvm.py', 'data/generated/corolla_8965H1202000_storage_nvm.json'),
     ('system orchestration', 'tools/build_corolla_h_system_orchestration.py', 'data/generated/corolla_8965H1202000_system_orchestration.json'),
-    ('techstream correlations', 'tools/build_corolla_h_techstream_correlations.py', 'data/generated/corolla_8965H1202000_techstream_correlations.json'),
     ('veneer bank', 'tools/build_corolla_h_veneer_bank.py', 'data/generated/corolla_8965H1202000_veneer_bank.json'),
     ('xcp', 'tools/build_corolla_h_xcp.py', 'data/generated/corolla_8965H1202000_xcp.json'),
 ]

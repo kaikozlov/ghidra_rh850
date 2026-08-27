@@ -47,6 +47,7 @@ switch_addr,in_function,function_addr,table_base,bound_kind,bound_size,validate_
 00056d88,Y,00056d74,00056d8a,cmp+bh,4,Y,
 0005e948,Y,0005e938,0005e94a,cmp+bh,4,Y,
 0008d606,Y,0008d5fc,0008d608,cmp+bh,12,Y,
+00094736,Y,000946fa,00094738,cmp+bh,4,Y,
 00096604,Y,000965ce,00096606,addi+bc,19,Y,
 0009677a,Y,00096764,0009677c,addi+bc,19,Y,
 000b0a20,Y,000b0a10,000b0a22,cmp+bh,4,Y,

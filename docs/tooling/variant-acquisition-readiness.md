@@ -16,7 +16,7 @@
 > **Tool:** `tools/check_variant_acquisition.py`
 >
 > **Verification:** `tests/verify_variant_acquisition_readiness.py`
-> (`make verify-one SUITE=variant_acquisition_readiness`)
+> (`tools/test variant_acquisition_readiness`)
 
 ## Purpose
 

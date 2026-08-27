@@ -25,7 +25,7 @@ def _section_application_callback_tables():
     print('== application callback tables ==')
     import hashlib,json
     from pathlib import Path
-    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_application_callback_tables.json';TOOL=ROOT/'tools/build_corolla_h_application_callback_tables.py';SRAW=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_application_callback_tables.json';SRAW=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());S=SRAW.read_bytes();H=HRAW.read_bytes()[:0x100000]
     check('image hashes pinned',d['images']['sienna_sha256']==sha(S) and d['images']['h_sha256']==sha(H))
     c=d['command_table'];check('command tables are 18 entries',c['count']==18 and len(c['rows'])==18)
@@ -51,7 +51,6 @@ def _section_application_diagnostics():
     REPO = Path(__file__).resolve().parents[1]
     ARTIFACT = REPO / "data/generated/corolla_8965H1202000_application_diagnostics_diff.json"
     EVIDENCE = REPO / "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json"
-    TOOL = REPO / "tools/compare_variant_application_diagnostics.py"
 
 
 
@@ -110,7 +109,7 @@ def _section_application_interrupt_bodies():
     print('== application interrupt bodies ==')
     import hashlib,json
     from pathlib import Path
-    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_application_interrupt_bodies.json';TOOL=ROOT/'tools/build_corolla_h_application_interrupt_bodies.py';EVID=ROOT/'data/generated/corolla_8965H1202000_application_interrupt_body_decompiler_evidence.json';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';p=f=0
+    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_application_interrupt_bodies.json';EVID=ROOT/'data/generated/corolla_8965H1202000_application_interrupt_body_decompiler_evidence.json';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';p=f=0
     d=json.loads(ART.read_text());e=json.loads(EVID.read_text());h=HRAW.read_bytes()[:0x100000]
     check('seven evidence bodies raw-bound',len(e['functions'])==7 and all(sha(h[int(r['entry'],16):int(r['entry'],16)+r['body_size']])==r['body_sha256'] for r in e['functions']))
     exp={'application_tauj0_ch0_body':'0x0005F258','application_tauj0_ch1_body':'0x0005F294','application_tauj0_ch2_body':'0x0005F2D0','application_can1_rx_interrupt_body':'0x0007D240','application_can1_tx_interrupt_body':'0x0007EB4E'}
@@ -125,7 +124,7 @@ def _section_application_interrupt_vectors():
     print('== application interrupt vectors ==')
     import json
     from pathlib import Path
-    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_application_interrupt_vectors.json';TOOL=ROOT/'tools/build_corolla_h_application_interrupt_vectors.py';p=f=0
+    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_application_interrupt_vectors.json';p=f=0
     d=json.loads(ART.read_text());check('EIINT table is 384 entries at 20200',d['table']['base']=='0x00020200' and d['table']['count']==384)
     exp={8:'0x0006ADF4',133:'0x0006A6C0',134:'0x0006A76A',135:'0x0006A816',187:'0x0005F3AA',188:'0x0005F368',379:'0x0005F470'}
     check('seven channel targets exact',{x['channel']:x['h_target'] for x in d['rows']}==exp)
@@ -138,7 +137,7 @@ def _section_application_transport_residue():
     print('== application transport residue ==')
     import hashlib,json
     from pathlib import Path
-    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_application_transport_residue.json';TOOL=ROOT/'tools/build_corolla_h_application_transport_residue.py';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';HEV=ROOT/'data/generated/corolla_8965H1202000_application_transport_decompiler_evidence.json'
+    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_application_transport_residue.json';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';HEV=ROOT/'data/generated/corolla_8965H1202000_application_transport_decompiler_evidence.json'
     d=json.loads(ART.read_text());h=HRAW.read_bytes()[:0x100000];ev=json.loads(HEV.read_text())
     check('H evidence image hash pinned',ev['image']['codeflash_sha256']==sha(h))
     check('five H evidence bodies raw-bound',all(sha(h[int(r['entry'],16):int(r['entry'],16)+r['body_size']])==r['body_sha256'] and sha(r['decompiled_c'].encode())==r['decompiled_c_sha256'] for r in ev['functions']))
@@ -170,7 +169,6 @@ def _section_b6_full_receiver_contract():
     F_RAW = REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
     LTA = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance.json"
     KEYS = REPO / "data/generated/corolla_8965H1202000_secoc_key_provenance.json"
-    TOOL = REPO / "tools/build_corolla_h_b6_full_receiver_contract.py"
     EXTRACTOR = REPO / "tools/extract_corolla_h_b6_full_receiver_evidence.py"
 
 
@@ -308,7 +306,6 @@ def _section_b6_receiver_contract():
     FOLLOWUP = REPO / "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json"
     CAN_EVID = REPO / "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json"
     RAW = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
-    TOOL = REPO / "tools/build_corolla_h_b6_receiver_contract.py"
 
     art = json.loads(ART.read_text())
     ev = json.loads(EVID.read_text())
@@ -420,7 +417,6 @@ def _section_b6_secoc_verification():
     FULL = REPO / "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json"
     BASE = REPO / "data/generated/corolla_8965H1202000_b6_receiver_contract.json"
     KEYS = REPO / "data/generated/corolla_8965H1202000_secoc_key_provenance.json"
-    TOOL = REPO / "tools/build_corolla_h_b6_secoc_verification.py"
     EXTRACTOR = REPO / "tools/extract_corolla_h_b6_secoc_verification_evidence.py"
 
 
@@ -613,7 +609,6 @@ def _section_b6_target_angle_ingress():
     REPO=Path(__file__).resolve().parents[1]
     ART=REPO/'data/generated/corolla_8965H1202000_b6_target_angle_ingress.json'
     EVID=REPO/'data/generated/corolla_8965H1202000_b6_target_angle_decompiler_evidence.json'
-    TOOL=REPO/'tools/build_corolla_h_b6_target_angle_ingress.py'
     RAW=REPO/'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin'
     d=json.loads(ART.read_text()); e=json.loads(EVID.read_text()); raw=RAW.read_bytes()
     print('\n== source identity ==')
@@ -711,7 +706,7 @@ def _section_can_com():
     import hashlib,json,struct
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]
-    ART=ROOT/'data/generated/corolla_8965H1202000_can_com.json';EV=ROOT/'data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json';BUILD=ROOT/'tools/build_corolla_h_can_com.py'
+    ART=ROOT/'data/generated/corolla_8965H1202000_can_com.json';EV=ROOT/'data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json'
     HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';SIMG=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin'
     a=json.loads(ART.read_text());e=json.loads(EV.read_text());H=HRAW.read_bytes()[:0x100000];S=SIMG.read_bytes()
     print('== deterministic artifact ==')
@@ -747,7 +742,7 @@ def _section_crypto_residue():
     import hashlib,json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]
-    ART=ROOT/'data/generated/corolla_8965H1202000_crypto_residue.json';EV=ROOT/'data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json';BUILD=ROOT/'tools/build_corolla_h_crypto_residue.py';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+    ART=ROOT/'data/generated/corolla_8965H1202000_crypto_residue.json';EV=ROOT/'data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     a=json.loads(ART.read_text());e=json.loads(EV.read_text());H=HRAW.read_bytes()[:0x100000];by={int(x['target_entry'],16):x for x in e['functions']}
     check('H image hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256']);check('seven crypto roles compacted',e['function_count']==7==len(e['functions'])==a['crypto_role_closure_count']);check('all raw H bodies validate',all(sha(H[int(x['target_entry'],16):int(x['target_entry'],16)+x['target_reported_body_size']])==x['body_sha256'] for x in e['functions']));check('all decompiler hashes validate',all(sha(x['decompiled_c'].encode())==x['decompiled_c_sha256'] for x in e['functions']))
     exp={'0x000070FC':'0x000070E0','0x00068F0C':'0x00063244','0x00068F92':'0x000632CA','0x00068FC2':'0x000632FA','0x00069018':'0x00063350','0x00088302':'0x00082702','0x00088508':'0x00082908'};check('all seven role mappings exact', {x['reference_entry']:x['target_entry'] for x in a['crypto_role_closure']}==exp)
@@ -762,7 +757,7 @@ def _section_deadline_monitor_surface():
     """Verify complete target-surface closure of Corolla-H deadline-monitor callbacks."""
     import hashlib,json
     from pathlib import Path
-    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_deadline_monitor_surface.json';EV=ROOT/'data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json';TOOL=ROOT/'tools/build_corolla_h_deadline_monitor_surface.py';RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_deadline_monitor_surface.json';EV=ROOT/'data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json';RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());e=json.loads(EV.read_text());raw=RAW.read_bytes()[:0x100000]
     check('H image hash pinned',sha(raw)==e['image']['codeflash_sha256'])
     check('91 H functions compacted: 88 callbacks + 3 support',e['function_count']==91 and e['callback_count']==88 and e['support_count']==3)
@@ -791,7 +786,7 @@ def _section_diagnostic_residue():
     """Verify closure of the remaining Corolla-H named diagnostic residue."""
     import hashlib,json
     from pathlib import Path
-    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_diagnostic_residue.json';EV=ROOT/'data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json';TOOL=ROOT/'tools/build_corolla_h_diagnostic_residue.py';RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_diagnostic_residue.json';EV=ROOT/'data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json';RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());e=json.loads(EV.read_text());raw=RAW.read_bytes()[:0x100000];by={int(r['entry'],16):r for r in e['functions']}
     check('H image hash pinned',sha(raw)==e['image']['codeflash_sha256'])
     check('53 target-native functions compacted',e['function_count']==53==len(e['functions']))
@@ -825,7 +820,7 @@ def _section_direct_call_surface():
     print('== direct call surface ==')
     import csv,hashlib,json,subprocess,sys,tempfile
     from pathlib import Path
-    ROOT=Path(__file__).resolve().parents[1];EVID=ROOT/'data/generated/corolla_8965H1202000_direct_call_surface_evidence.json';ART=ROOT/'data/generated/corolla_8965H1202000_direct_call_surface.json';TOOL=ROOT/'tools/build_corolla_h_direct_call_surface.py';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';LEDGER=ROOT/'data/semantic_coverage_ledger.csv';p=f=0
+    ROOT=Path(__file__).resolve().parents[1];EVID=ROOT/'data/generated/corolla_8965H1202000_direct_call_surface_evidence.json';ART=ROOT/'data/generated/corolla_8965H1202000_direct_call_surface.json';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';LEDGER=ROOT/'data/semantic_coverage_ledger.csv';p=f=0
     e=json.loads(EVID.read_text());d=json.loads(ART.read_text());h=HRAW.read_bytes()[:0x100000]
     check('evidence image hash pinned',e['image']['codeflash_sha256']==sha(h))
     check('clean H corpus cardinality pinned',e['summary']['function_count']==5425 and e['summary']['instruction_count']==159192)
@@ -851,7 +846,6 @@ def _section_fd_control():
     EVIDENCE = REPO / "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json"
     REFS = REPO / "data/generated/corolla_8965H1202000_fd_control_reference_census.json"
     STATE_EVIDENCE = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json"
-    TOOL = REPO / "tools/build_corolla_h_fd_control_interface.py"
 
 
     d = json.loads(ART.read_text())
@@ -940,7 +934,6 @@ def _section_final_named_residue():
     ROOT=Path(__file__).resolve().parents[1]
     ART=ROOT/'data/generated/corolla_8965H1202000_final_named_residue.json'
     EVID=ROOT/'data/generated/corolla_8965H1202000_final_named_residue_evidence.json'
-    TOOL=ROOT/'tools/build_corolla_h_final_named_residue.py'
     SRAW=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin'
     HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());e=json.loads(EVID.read_text());s=SRAW.read_bytes();h=HRAW.read_bytes()[:0x100000]
@@ -977,7 +970,6 @@ def _section_lta_command_provenance():
     REPO = Path(__file__).resolve().parents[1]
     ART = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance.json"
     EVID = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json"
-    TOOL = REPO / "tools/build_corolla_h_lta_command_provenance.py"
     IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
 
 
@@ -1126,7 +1118,7 @@ def _section_motor_control():
     import hashlib,json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]
-    ART=ROOT/'data/generated/corolla_8965H1202000_motor_control.json';EV=ROOT/'data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json';BUILD=ROOT/'tools/build_corolla_h_motor_control.py';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+    ART=ROOT/'data/generated/corolla_8965H1202000_motor_control.json';EV=ROOT/'data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     a=json.loads(ART.read_text());e=json.loads(EV.read_text());H=HRAW.read_bytes()[:0x100000];by={int(x['entry'],16):x for x in e['functions']}
     print('== deterministic artifact ==')
     print('\n== compact evidence ==')
@@ -1157,7 +1149,6 @@ def _section_openpilot_state_bridge():
     ART = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge.json"
     EVID = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json"
     FD = REPO / "data/generated/corolla_8965H1202000_fd_control_interface.json"
-    BUILD = REPO / "tools/build_corolla_h_openpilot_state_bridge.py"
     IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
     DOC = REPO / "docs/variants/corolla-h-f-openpilot-state-bridge.md"
 
@@ -1268,7 +1259,7 @@ def _section_plausibility_monitor():
     """Verify the target-native nine-channel plausibility-monitor mapping."""
     import hashlib,json
     from pathlib import Path
-    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_plausibility_monitor.json';EV=ROOT/'data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json';TOOL=ROOT/'tools/build_corolla_h_plausibility_monitor.py';RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_plausibility_monitor.json';EV=ROOT/'data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json';RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());e=json.loads(EV.read_text());raw=RAW.read_bytes()[:0x100000];by={int(r['entry'],16):r for r in e['functions']}
     check('H image hash pinned',sha(raw)==e['image']['codeflash_sha256'])
     check('12 H functions compacted',e['function_count']==12)
@@ -1299,7 +1290,6 @@ def _section_power_supply_monitor_gate():
     RAW = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
     EVID = REPO / "data/generated/corolla_8965H1202000_power_supply_monitor_decompiler_evidence.json"
     ART = REPO / "data/generated/corolla_8965H1202000_power_supply_monitor_gate.json"
-    TOOL = REPO / "tools/build_corolla_h_power_supply_monitor_gate.py"
 
 
     raw = RAW.read_bytes()
@@ -1359,7 +1349,6 @@ def _section_secoc_key_provenance():
     REPO = Path(__file__).resolve().parents[1]
     ART = REPO / "data/generated/corolla_8965H1202000_secoc_key_provenance.json"
     EVIDENCE = REPO / "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json"
-    BUILDER = REPO / "tools/build_corolla_h_secoc_key_provenance.py"
     HRAW = REPO / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
     SIMG = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
     DF = REPO / "data/generated/corolla_2023_albino_dataflash_analysis.json"
@@ -1434,7 +1423,7 @@ def _section_secoc_surface():
     import hashlib,json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]
-    ART=ROOT/'data/generated/corolla_8965H1202000_secoc_surface.json';EV=ROOT/'data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json';BUILD=ROOT/'tools/build_corolla_h_secoc_surface.py';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+    ART=ROOT/'data/generated/corolla_8965H1202000_secoc_surface.json';EV=ROOT/'data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     a=json.loads(ART.read_text());e=json.loads(EV.read_text());H=HRAW.read_bytes()[:0x100000];byh={int(x['target_entry'],16):x for x in e['functions']}
     print('== deterministic artifact ==')
     print('\n== compact evidence ==')
@@ -1458,7 +1447,7 @@ def _section_small_adapters():
     """Verify generated bounded-API, packet-selector, and record-operation adapter mappings."""
     import hashlib,json
     from pathlib import Path
-    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_small_adapters.json';EV=ROOT/'data/generated/corolla_8965H1202000_small_adapter_decompiler_evidence.json';TOOL=ROOT/'tools/build_corolla_h_small_adapters.py';RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_small_adapters.json';EV=ROOT/'data/generated/corolla_8965H1202000_small_adapter_decompiler_evidence.json';RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());e=json.loads(EV.read_text());raw=RAW.read_bytes()[:0x100000];by={int(r['entry'],16):r for r in e['functions']}
     check('H image hash pinned',sha(raw)==e['image']['codeflash_sha256'])
     check('18 H adapter functions compacted',e['function_count']==18)
@@ -1483,7 +1472,6 @@ def _section_static_coverage():
     from pathlib import Path
     REPO=Path(__file__).resolve().parents[1]
     ART=REPO/'data/generated/corolla_8965H1202000_static_coverage_matrix.json'
-    TOOL=REPO/'tools/build_corolla_h_static_coverage_matrix.py'
     d=json.loads(ART.read_text());s=d['summary'];rows=d['functions']
     print('\n== denominator ==')
     check('matrix covers all 1113 named canonical functions',s['named_function_count']==1113==len(rows))
@@ -1531,7 +1519,7 @@ def _section_steering_nested():
     import hashlib,json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]
-    ART=ROOT/'data/generated/corolla_8965H1202000_steering_nested.json'; EV=ROOT/'data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json'; TOOL=ROOT/'tools/build_corolla_h_steering_nested.py'; RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+    ART=ROOT/'data/generated/corolla_8965H1202000_steering_nested.json'; EV=ROOT/'data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json'; RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());e=json.loads(EV.read_text());raw=RAW.read_bytes()[:0x100000]
     check('H image hash pinned',sha(raw)==e['image']['codeflash_sha256'])
     check('14 target-native functions compacted',e['function_count']==14==len(e['functions']))
@@ -1568,7 +1556,6 @@ def _section_steering_supervisor():
     from pathlib import Path
     REPO=Path(__file__).resolve().parents[1]
     ART=REPO/'data/generated/corolla_8965H1202000_steering_supervisor_stage_ledger.json'
-    TOOL=REPO/'tools/build_corolla_h_steering_supervisor_stage_ledger.py'
     d=json.loads(ART.read_text());r=d['roots'];s=d['summary']
     print('\n== stage denominator ==')
     check('Sienna root is CB86E / 424 bytes',r['sienna']=='0xCB86E' and r['sienna_body_size']==424)
@@ -1607,7 +1594,7 @@ def _section_storage_nvm():
     import hashlib,json,struct
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]
-    ART=ROOT/'data/generated/corolla_8965H1202000_storage_nvm.json';EV=ROOT/'data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json';BUILD=ROOT/'tools/build_corolla_h_storage_nvm.py';DF=ROOT/'data/generated/corolla_2023_albino_dataflash_analysis.json'
+    ART=ROOT/'data/generated/corolla_8965H1202000_storage_nvm.json';EV=ROOT/'data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json';DF=ROOT/'data/generated/corolla_2023_albino_dataflash_analysis.json'
     HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';SI=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin'
     a=json.loads(ART.read_text());e=json.loads(EV.read_text());df=json.loads(DF.read_text());H=HRAW.read_bytes()[:0x100000];S=SI.read_bytes();by={int(x['entry'],16):x for x in e['functions']}
     print('== deterministic artifact ==')
@@ -1722,7 +1709,6 @@ def _section_system_orchestration():
     ROOT = Path(__file__).resolve().parents[1]
     ART = ROOT / "data/generated/corolla_8965H1202000_system_orchestration.json"
     EVIDENCE = ROOT / "data/generated/corolla_8965H1202000_system_orchestration_decompiler_evidence.json"
-    BUILDER = ROOT / "tools/build_corolla_h_system_orchestration.py"
     HRAW = ROOT / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
 
 
@@ -1823,9 +1809,7 @@ def _section_techstream_correlations():
     REPO = Path(__file__).resolve().parents[1]
     ART = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
     EVID = REPO / "data/generated/corolla_8965H1202000_techstream_steering_decompiler_evidence.json"
-    TOOL = REPO / "tools/build_corolla_h_techstream_correlations.py"
     RAW = REPO / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
-    TECHROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 
 
     d = json.loads(ART.read_text())
@@ -1835,9 +1819,20 @@ def _section_techstream_correlations():
     print("\n== source identity ==")
     check("tracked raw Corolla dump is 2 MiB", len(raw) == 0x200000)
     check("report binds raw Corolla dump", sha(raw) == d["sources"]["corolla_codeflash"]["sha256"])
-    for key, rel in (("na_emps_p5", "NA/DB/EMPS_P5.ddb"), ("na_emps2_p5", "NA/DB/EMPS2_P5.ddb")):
-        src = TECHROOT / rel
-        check(f"{rel} hash matches pinned semantics", sha(src.read_bytes()) == d["sources"][key]["sha256"])
+    check(
+        "report pins EMPS_P5 external source identity",
+        d["sources"]["na_emps_p5"] == {
+            "relative_path": "NA/DB/EMPS_P5.ddb",
+            "sha256": "1e5ffc4f998570458fa86dd0d563949006f9e0781f15d118d01e80656fadd199",
+        },
+    )
+    check(
+        "report pins EMPS2_P5 external source identity",
+        d["sources"]["na_emps2_p5"] == {
+            "relative_path": "NA/DB/EMPS2_P5.ddb",
+            "sha256": "e80d722f3b80077e3f7bdc4b815c2035b21a51cefb6cd26dc6de3ada20939312",
+        },
+    )
 
     print("\n== compact target-native evidence ==")
     check("40 H functions support the Techstream steering/current/DTC joins", e["function_count"] == 40)
@@ -1976,7 +1971,7 @@ def _section_veneer_bank():
     print('== veneer bank ==')
     import hashlib,json
     from pathlib import Path
-    ROOT=Path(__file__).resolve().parents[1]; ART=ROOT/'data/generated/corolla_8965H1202000_veneer_bank.json'; TOOL=ROOT/'tools/build_corolla_h_veneer_bank.py'; SRAW=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin'; HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+    ROOT=Path(__file__).resolve().parents[1]; ART=ROOT/'data/generated/corolla_8965H1202000_veneer_bank.json'; SRAW=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin'; HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());S=SRAW.read_bytes();H=HRAW.read_bytes()[:0x100000]
     check('image hashes pinned',d['images']['sienna_sha256']==sha(S) and d['images']['h_sha256']==sha(H))
     b=d['bank'];check('fixed bank is 60 slots at 0x14 stride',b['slot_count']==60 and b['stride']==0x14 and b['start']=='0x000FDE08' and b['end']=='0x000FE2A4')
@@ -1998,7 +1993,7 @@ def _section_xcp():
     """Verify target-native H XCP command residuals."""
     import hashlib,json,struct
     from pathlib import Path
-    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_xcp.json';EV=ROOT/'data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json';BUILD=ROOT/'tools/build_corolla_h_xcp.py';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+    ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_xcp.json';EV=ROOT/'data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     a=json.loads(ART.read_text());e=json.loads(EV.read_text());H=HRAW.read_bytes()[:0x100000];by={int(x['entry'],16):x for x in e['functions']}
     check('H hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256']);check('11 H XCP functions compacted',e['function_count']==11==len(e['functions']));check('all raw bodies validate',all(sha(H[int(x['entry'],16):int(x['entry'],16)+x['body_size']])==x['body_sha256'] for x in e['functions']));check('all decompiler hashes validate',all(sha(x['decompiled_c'].encode())==x['decompiled_c_sha256'] for x in e['functions']))
     exp={'0x000972FA':'0x0009232A','0x00097432':'0x00092462','0x000975EE':'0x0009261E','0x00097668':'0x00092698'};check('four XCP residual roles recovered',a['xcp_role_closure_count']==4 and {x['reference_entry']:x['target_entry'] for x in a['xcp_role_closure']}==exp)

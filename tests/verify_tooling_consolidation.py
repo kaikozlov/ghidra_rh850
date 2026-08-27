@@ -64,6 +64,24 @@ check(
     "CLI reports tracked default outputs",
 )
 
+# Keep the small set of deliberately distinct top-level tooling entry points
+# discoverable and pinned rather than hiding them behind a tools/ catch-all.
+pe_tool = ROOT / "tools/pe"
+pe_source = pe_tool.read_text(encoding="utf-8")
+check(pe_tool.is_file() and os.access(pe_tool, os.X_OK), "PE analysis wrapper is an executable task entry point")
+check(
+    'source "$ROOT/tools/lib/build_paths.sh"' in pe_source
+    and 'PROJECT_DIR="$BUILD_WORK/pe-project"' in pe_source
+    and '"$ROOT/tools/resolve_ghidra_home.sh"' in pe_source
+    and 'exec "$GHIDRA_CLI"' in pe_source,
+    "PE analysis wrapper preserves isolated build and Ghidra routing",
+)
+check(
+    (ROOT / "tools/__init__.py").read_text(encoding="utf-8")
+    == '"""Repository tooling modules used by deterministic verification tests."""\n',
+    "tools package marker remains side-effect free",
+)
+
 # Preserve the old extractors' distinction between whole JSONL corpora and
 # Ghidra function-only corpora. A later non-function record with the same entry
 # must not overwrite the function record when the profile requests filtering.

@@ -27,6 +27,12 @@ from pathlib import Path
 import sys
 
 REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO / "tools"))
+from sienna_application_sa_keygen import (  # noqa: E402
+    APPLICATION_LEVEL2_SA_SECRET,
+    derive_application_sa_key,
+)
+
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 
 GP = 0xFEBF9800                       # set by reset handler 0x1F2 (ARCH-001)
@@ -97,6 +103,25 @@ print("\n== Gated service: ECUReset (SID 0x11) ==")
 check("ECUReset loads 0xFEBF2B0F @0x610c", CF[0x610C:0x6110] == bytes.fromhex("a40f0f93"), CF[0x610C:0x6110].hex())
 check("ECUReset rejects with NRC 0x33 unless == 2",
       CF[0x6110:0x6118] == bytes.fromhex("620ac205") + REJECT, CF[0x6110:0x6118].hex())
+
+print("\n== Application SecurityAccess standalone key generator ==")
+check(
+    "application level-2 SA secret remains byte-exact",
+    APPLICATION_LEVEL2_SA_SECRET.hex() == "893e08418c741ffa2a9c044bffa55813",
+)
+check(
+    "application SA zero-record known-answer vector",
+    derive_application_sa_key(
+        bytes.fromhex("00112233445566778899aabbccddeeff"), bytes(16)
+    ).hex() == "9112f86dad79b9ad61186a4a15d78cda",
+)
+check(
+    "application SA chosen-record known-answer vector",
+    derive_application_sa_key(
+        bytes.fromhex("ffeeddccbbaa99887766554433221100"),
+        bytes.fromhex("deadbeef000000000000000000000000"),
+    ).hex() == "43b3af5a1cab4eda81d12df6329f6a62",
+)
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 sys.exit(1 if failed else 0)

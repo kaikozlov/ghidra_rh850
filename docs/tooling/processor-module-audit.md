@@ -224,8 +224,8 @@ proves three things each run:
   collisions, not an assumption: none carries the range check a real compiler
   switch requires.
 
-Re-run the measurement anytime with
-`ghidra ... -postScript InventorySwitchTables.java <out.csv>` (read-only).
+`make verify-processor` reruns this measurement read-only into `build/out/` and
+compares it with the committed `data/switch_table_inventory.csv` baseline.
 
 ## Accepted unimplemented ops
 
@@ -248,12 +248,14 @@ clean `analyzeHeadless` subprocess proves that the isolated language resolves.
 Rebuilds write `processor_manifest.json` beside `build/work/project/`.
 `make work-project` performs a Ghidra-free source check. Processor audits and
 `make snapshot-project` require source files, compiled SLA hash, Ghidra version,
-and CLI version all to match the project manifest. A committed full baseline lives at
-`data/processor_manifest.baseline.json`.
+and CLI version all to match the project manifest. The committed full baseline is
+`data/processor_manifest.baseline.json`; `make verify-processor` compares it with
+the freshly built processor manifest before running project audits.
 
 Instruction inventory for this firmware is committed as
-`data/instruction_inventory.csv` (regenerate via
-`InventoryUsedInstructions.java` after a rebuild if coverage changes).
+`data/instruction_inventory.csv`. `make verify-processor` emits a temporary fresh
+inventory under `build/out/` with `InventoryUsedInstructions.java` and compares it
+byte-for-byte with the committed baseline instead of mutating tracked evidence.
 
 ### Ghidra 12.1.3 migration
 
