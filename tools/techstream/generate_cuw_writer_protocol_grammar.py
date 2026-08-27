@@ -15,7 +15,7 @@ import sys
 
 REPO=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(REPO))
-from tools.techstream.generate_cuw_writer_inventory import decode_parameter_ini, factory_routes
+from tools.techstream.cuw_parameter import decode_parameter_ini, factory_routes_from_ini_root
 
 ROOT=REPO/'software/Techstream/v18/unpacked/toyota/Toyota Diagnostics'
 CUW=ROOT/'Calibration Update Wizard'
@@ -342,7 +342,7 @@ def route_verdict(p:str,f:str)->tuple[str,str]:
 
 def main():
  ap=argparse.ArgumentParser(); ap.add_argument('--root',type=Path,default=ROOT); ap.add_argument('--output',type=Path,default=OUT); a=ap.parse_args()
- routes,_=factory_routes(a.root.resolve()); pairs=collections.Counter((r['prepare_writer'],r['flash_writer']) for r in routes)
+ routes,_=factory_routes_from_ini_root(a.root.resolve()/'Calibration Update Wizard'/'Ini'); pairs=collections.Counter((r['prepare_writer'],r['flash_writer']) for r in routes)
  parameter_rows=factory_parameter_rows(a.root.resolve())
  by_pair=collections.defaultdict(list)
  for row in parameter_rows:

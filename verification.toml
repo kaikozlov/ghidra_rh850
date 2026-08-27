@@ -804,6 +804,19 @@ requires_external = ["techstream_v18", "gtsplus"]
 modes = ["local"]
 oracle = "independent_external_artifact"
 
+[suite.gts_query_cli]
+tests = ["tests/verify_gts_query_cli.py"]
+requires_external = ["gtsplus", "cuw_reference_corpus"]
+modes = ["local"]
+oracle = "independent_external_artifact"
+paths = [
+  "tools/gts",
+  "docs/tooling/gts-query-cli.md",
+  "docs/tooling/README.md",
+  "docs/WORKFLOW.md",
+  "AGENTS.md",
+]
+
 [suite.camry_2026]
 tests = ['tests/verify_camry_2026.py']
 oracle = 'dynamic_trace'

@@ -16,7 +16,7 @@ REPO = Path(__file__).resolve().parents[1]
 ROOT = REPO / 'software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard'
 EVIDENCE = REPO / 'data/generated/techstream_v18/cuw_t0087_17_specimen.json'
 sys.path.insert(0, str(REPO / 'tools/techstream'))
-from generate_cuw_writer_inventory import decode_parameter_ini
+from cuw_parameter import decode_parameter_ini
 from inspect_cuw_legacy import (
     decode_legacy_target_data, legacy_check_id_payloads, legacy_seed_key,
     summarize_repeated_word, summarize_srec,

@@ -23,7 +23,7 @@ import pefile
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
-from tools.techstream.generate_cuw_writer_inventory import factory_routes  # noqa: E402
+from tools.techstream.cuw_parameter import factory_routes_from_ini_root  # noqa: E402
 from tools.techstream.generate_cuw_writer_protocol_grammar import route_verdict  # noqa: E402
 ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
 OUT = REPO / "data/generated/techstream_v18/cuw_calibration_schema.json"
@@ -218,7 +218,7 @@ def generate(root: Path) -> dict[str, Any]:
             funcs.append({"artifact": filename, "va": va, "size": size, "role": role,
                           "sha256": digest, "expected_sha256": EXPECTED_HASHES[(filename, va)]})
 
-    routes, _ = factory_routes(root.parent)
+    routes, _ = factory_routes_from_ini_root(root / "Ini")
     pairs = collections.Counter((row["prepare_writer"], row["flash_writer"]) for row in routes)
     route_relevance = []
     for (prepare, flash), count in sorted(pairs.items()):

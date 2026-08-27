@@ -30,6 +30,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "dncil" },
     { name = "dnfile" },
+    { name = "pefile" },
     { name = "pycryptodome" },
 ]
 
@@ -37,6 +38,7 @@ dependencies = [
 requires-dist = [
     { name = "dncil", specifier = "==1.0.2" },
     { name = "dnfile", specifier = "==0.18.0" },
+    { name = "pefile", specifier = "==2024.8.26" },
     { name = "pycryptodome", specifier = "==3.23.0" },
 ]
 

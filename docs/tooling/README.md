@@ -9,6 +9,7 @@ The analysis toolchain: processor module, scripts, verification.
 | [techstream.md](techstream.md) | External-source recovery of Toyota Techstream V18.00.003 (installer 18.00.008): J2534 diagnostic architecture, SecurityAccess implementations, CUW reflash flow, and the ptshim32 CAN traffic logger |
 | [techstream-capture-procedure.md](techstream-capture-procedure.md) | Isolated-bench capture, hashing, normalization, redaction, and evidence labeling for official J2534 traces |
 | [techstream-ddb-pipeline.md](techstream-ddb-pipeline.md) | `.ddb` binary format reverse-engineering: LZSS decompression, section parsing, OEM string resolution, and the generated diagnostic catalog pipeline |
+| [gts-query-cli.md](gts-query-cli.md) | `tools/gts`: unified read-only discovery across current GTS+ DDB semantics, CUW descriptors/writer routes, and DLL/EXE metadata/strings |
 | [community-dataflash-secoc.md](community-dataflash-secoc.md) | Static audit of the pinned community DataFlash/SecOC extractor, its Sienna-specific bus/ID assumptions, and the repository-local generic Toyota classic-SecOC oracle |
 | [community-patch-target-analysis.md](community-patch-target-analysis.md) | Fail-closed raw/Ghidra workflow for classifying the blurbdust/yc persistent patch target on future F3/F4 firmware |
 | [secoc-semantic-patch-resolver.md](secoc-semantic-patch-resolver.md) | Calibration-independent host-side resolver for the SecOC authenticated-delivery branch plus dynamic boot-CRC geometry and patch-manifest generation |
@@ -38,6 +39,7 @@ The small command surface to remember is:
 | Edit-loop tests | `tools/test` |
 | Discover / preview | `tools/test list [word]`, `tools/test plan` |
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
+| GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
 | Broad gates | `tools/test core` / `full` / `branch` |
 | Query another configured target | `tools/gtarget` (or a target wrapper such as `tools/gcamry`) |
 | Discover Corolla-H evidence-compaction profiles | `uv run --locked python tools/extract_corolla_h_evidence.py list` |
@@ -103,11 +105,15 @@ incidental boilerplate, not one operation. Each of these carries distinct proof
 logic, fail-closed boundaries, or safety contracts that a shared runner would
 hide:
 
-- **Techstream CUW inspectors and writer generators.** `parse_cuw_container.py`
-  already packages the shared container parser; `inspect_cuw_legacy.py` exports
-  the shared legacy attach/parameter decoders used by the other inspectors, and
-  `generate_cuw_writer_inventory.py` exports the shared parameter-INI decoder
-  and factory-route table consumed by the writer-analysis tools. The remaining
+- **Techstream CUW inspectors and writer generators.** `tools/gts` now provides
+  one interactive discovery surface over their shared parsers (including CUW
+  descriptor -> current GTS+ writer-route lookup), but it intentionally does
+  not merge their proof logic. `parse_cuw_container.py` already packages the
+  shared container parser; `inspect_cuw_legacy.py` exports the shared legacy
+  attach/parameter decoders used by the other inspectors,
+  `tools/techstream/cuw_parameter.py` owns both the common parameter-INI decoder
+  and contact-type -> writer route extraction. `generate_cuw_writer_inventory.py`
+  keeps only its tracked inventory-schema adapter. The remaining
   per-tool code encodes distinct evidence boundaries and proof outputs
   (whole-repro vs delta corpus invariants, per-family route verdicts, timing
   recovery, calibration schema), each pinned by its own deterministic test

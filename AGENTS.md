@@ -91,6 +91,7 @@ Remember four task commands, not individual implementation files:
 | Edit-loop tests | `tools/test` |
 | Discover / preview | `tools/test list [word]`, `tools/test plan` |
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
+| GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
 | Deliberate gates | `tools/test core` / `full` / `branch` |
 
 `tools/gtarget` (and wrappers such as `tools/gcamry`) query other configured

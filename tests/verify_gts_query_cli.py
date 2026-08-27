@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+"""Verify the unified read-only GTS+ query surface against pinned external artifacts."""
+from __future__ import annotations
+
+import sys
+import tempfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tools" / "techstream"))
+
+import gts_cli  # noqa: E402
+from parse_ddb import DDBParser  # noqa: E402
+
+
+def check(condition: bool, message: str) -> None:
+    if not condition:
+        raise AssertionError(message)
+    print(f"[PASS] {message}")
+
+
+gts = gts_cli._resolve_gts_root()
+db_root = gts_cli._db_root(gts)
+cuwplus = gts_cli._resolve_cuwplus_root(gts)
+corpus = gts_cli._resolve_cuw_corpus()
+
+check((db_root / "EMPS_P5.ddb").is_file(), "current GTS+ EMPS_P5 database is available")
+check((db_root / "M_English.ddb").is_file(), "current GTS+ English OEM string database is available")
+check((cuwplus / "Ini/P5-Unified04.ini").is_file(), "current CUWPlus P5-Unified04 route is available")
+check((corpus / "T-0051-26.cuw").is_file(), "pinned Camry CUW is available")
+
+with tempfile.TemporaryDirectory(prefix="gts-cache-prune-") as td:
+    cache_root = Path(td)
+    current_cache = cache_root / "M_English-current.bin"
+    current_cache.write_bytes(b"current")
+    for index in range(6):
+        (cache_root / f"M_English-old{index}.bin").write_bytes(bytes([index]))
+    gts_cli._prune_string_cache(current_cache)
+    remaining = list(cache_root.glob("M_English-*.bin"))
+    check(current_cache in remaining, "string-cache pruning always preserves the current decode")
+    check(
+        len(remaining) == gts_cli._STRING_CACHE_GENERATIONS_TO_KEEP,
+        "string-cache pruning keeps a bounded multi-release working set",
+    )
+
+with tempfile.TemporaryDirectory(prefix="gts-root-routing-") as td:
+    fixture = Path(td)
+    selected_gts = fixture / "release/unpacked/gtsplus/Toyota Diagnostics/GTSPlus"
+    adjacent_cuwplus = fixture / "release/cuwplus/CUWPlus"
+    explicit_cuwplus = fixture / "explicit/CUWPlus"
+    selected_gts.mkdir(parents=True)
+    adjacent_cuwplus.mkdir(parents=True)
+    explicit_cuwplus.mkdir(parents=True)
+    check(
+        gts_cli._resolve_cuwplus_root(selected_gts) == adjacent_cuwplus.resolve(),
+        "selected GTS+ tree prefers its adjacent CUWPlus routes over repository defaults",
+    )
+    check(
+        gts_cli._resolve_cuwplus_root(selected_gts, explicit_cuwplus) == explicit_cuwplus.resolve(),
+        "explicit CUWPlus root overrides adjacent/default route trees",
+    )
+    adjacent_cuwplus.rmdir()
+    unresolved = gts_cli._resolve_cuwplus_root(selected_gts)
+    check(
+        not unresolved.exists() and unresolved != cuwplus,
+        "alternate GTS+ tree without CUWPlus never borrows repository-default writer routes",
+    )
+
+parser = DDBParser()
+strings = gts_cli._english_strings(parser, db_root)
+emps = parser.parse_ecu_db(db_root / "EMPS_P5.ddb")
+rows = gts_cli._monitor_rows(emps, strings, "EMPS_P5.ddb")
+rows_1cee = [row for row in rows if row["primary_did"] == 0x1CEE]
+names_1cee = {row["name"] for row in rows_1cee}
+check("Advanced Drive Target Steering Angle" in names_1cee, "DID 0x1CEE resolves Advanced Drive Target Steering Angle")
+check("Target Steering Angle After Output Compensation" in names_1cee, "DID 0x1CEE retains the second Toyota interpretation")
+check(
+    len({(row["name"], row["primary_did"], row["alternate_did"]) for row in rows}) == len(rows),
+    "overlapping current Data List table aliases are deduplicated",
+)
+
+routes = gts_cli._route_rows(cuwplus)
+route04 = [row for row in routes if row["contact_type"] == "P5-Unified04"]
+check(len(route04) == 1, "P5-Unified04 resolves one current CUWPlus route")
+check(route04[0]["cid_getter"] == "TCUWCanUnifiedCIDGetter.dll", "P5-Unified04 resolves Unified CID getter")
+check(route04[0]["prepare_writer"] == "TCUWCanReproStdPrepareWriter.dll", "P5-Unified04 resolves ReproStd prepare writer")
+check(route04[0]["flash_writer"] == "TCUWCanReproStdFlashWriter.dll", "P5-Unified04 resolves ReproStd flash writer")
+check(gts_cli._route_match("P5-Unified04", route04[0]), "route matcher searches semantic route values")
+check(
+    not gts_cli._route_match("DLLFileNameForPrepareWrite", route04[0]),
+    "route matcher does not leak raw CSV header names into search results",
+)
+
+fast_outer, fast_descriptor = gts_cli._cuw_descriptor_fast(corpus / "T-0051-26.cuw")
+check(fast_outer["format_type"] == 0x67, "fast CUW header path resolves format 0x67 without reading flash members")
+check(fast_outer["validation"] == "header-and-first-member-only", "fast CUW path labels its bounded validation level")
+check(fast_descriptor["Vehicle"]["ContactType"] == "P5-Unified", "fast CUW descriptor path resolves contact type")
+
+outer, descriptor = gts_cli._cuw_descriptor(corpus / "T-0051-26.cuw")
+check(outer["format_type"] == 0x67, "fully validated Camry CUW outer format remains 0x67")
+check(outer["validation"] == "full-container", "full CUW path labels full-container validation")
+check(descriptor["Vehicle"]["VehicleName"] == "CAMRY", "Camry CUW OEM vehicle name resolves")
+check(descriptor["Vehicle"]["ContactType"] == "P5-Unified", "Camry CUW contact type resolves")
+check(descriptor["Node01"]["DiagID"] == "0724", "Camry CUW diagnostic ID resolves")
+check(
+    gts_cli._new_cids(descriptor) == ["8A2810602100", "8A2910601100", "8A2A10602100"],
+    "Camry CUW logical-block NewCIDs resolve",
+)
+check(
+    gts_cli._target_calibrations(descriptor) == ["8A2810602000", "8A2910601000", "8A2A10602000"],
+    "Camry CUW target calibrations resolve",
+)
+
+p5_route = [row for row in routes if row["contact_type"] == "P5-Unified"]
+check(len(p5_route) == 1, "Camry P5-Unified contact type resolves one current route")
+check(p5_route[0]["prepare_writer"] == "TCUWCanUnifiedPrepareWriter.dll", "Camry CUW resolves current Unified prepare writer")
+check(p5_route[0]["flash_writer"] == "TCUWCanUnifiedFlashWriter.dll", "Camry CUW resolves current Unified flash writer")
+
+kgp = gts_cli._resolve_pe(gts, cuwplus, "KgpDataCtrl.dll")
+check(kgp.is_file(), "PE resolver finds current KgpDataCtrl.dll")
+strings_in_kgp = gts_cli._binary_strings(kgp.read_bytes())
+check(any("CDbDatamonitorP5Table" in value for value in strings_in_kgp), "PE string surface exposes current Data Monitor implementation class")
+
+print("verified unified GTS+ DDB/CUW/PE query surface")

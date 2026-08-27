@@ -8,9 +8,7 @@ TCUWControlCommPhase.dll's LoadLibrary/GetProcAddress paths.
 from __future__ import annotations
 
 import argparse
-import csv
 import hashlib
-import io
 import json
 import re
 import struct
@@ -18,6 +16,11 @@ from pathlib import Path
 from typing import Any
 
 import pefile
+
+try:  # direct script and package imports are both repository-supported
+    from .cuw_parameter import decode_parameter_ini, factory_routes_from_ini_root
+except ImportError:
+    from cuw_parameter import decode_parameter_ini, factory_routes_from_ini_root
 
 REPO = Path(__file__).resolve().parents[2]
 DEFAULT_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
@@ -127,16 +130,6 @@ def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def decode_parameter_ini(data: bytes) -> bytes:
-    if len(data) % 2:
-        raise ValueError("encoded CUW parameter file has odd length")
-    decoded = bytes(
-        (((((a & 0xF) >> 2) + (a >> 4) * 4) * 4 + (b >> 4) + 0x1E) * 4 + ((b & 0xF) >> 2)) & 0xFF
-        for a, b in zip(data[::2], data[1::2])
-    )
-    return decoded.rstrip(b"\xff")
-
-
 def pe_inventory(path: Path) -> dict[str, Any]:
     data = path.read_bytes()
     pe = pefile.PE(data=data)
@@ -187,38 +180,14 @@ def pe_inventory(path: Path) -> dict[str, Any]:
 
 
 def factory_routes(root: Path) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    ini_root = root / "Calibration Update Wizard/Ini"
-    routes: list[dict[str, Any]] = []
-    decoded_files = 0
-    for path in sorted(ini_root.glob("*.ini"), key=lambda p: p.name.lower()):
-        encoded = path.read_bytes()
-        try:
-            decoded = decode_parameter_ini(encoded)
-            rows = list(csv.reader(io.StringIO(decoded.decode("latin1"))))
-        except (ValueError, UnicodeError, csv.Error):
-            continue
-        decoded_files += 1
-        if len(rows) < 2 or "DLLFileNameForPrepareWrite" not in rows[0]:
-            continue
-        header = rows[0]
-        for row_index, row in enumerate(rows[1:], 1):
-            row += [""] * (len(header) - len(row))
-            item = dict(zip(header, row))
-            routes.append({
-                "parameter_file": path.name,
-                "encoded_sha256": digest(encoded),
-                "decoded_sha256": digest(decoded),
-                "row_index": row_index,
-                "factory_identifier": item.get("ParamFileKeySystemProtocolMicon", ""),
-                "cid_getter": item.get("DLLFileNameForGetCID", ""),
-                "prepare_writer": item.get("DLLFileNameForPrepareWrite", ""),
-                "flash_writer": item.get("DLLFileNameForFlashWrite", ""),
-                "get_can_id_prepare": item.get("GetCANIDFunctionNameForPrepareWrite", ""),
-                "get_can_id_flash": item.get("GetCANIDFunctionNameForFlashWrite", ""),
-                "version_contract": item.get("EnableDLLVersionInformation", ""),
-            })
-    routes.sort(key=lambda item: (item["factory_identifier"], item["parameter_file"], item["row_index"]))
-    return routes, {"encoded_ini_files_decoded": decoded_files, "factory_rows": len(routes)}
+    """Compatibility wrapper preserving the tracked writer-inventory schema."""
+    shared, stats = factory_routes_from_ini_root(root / "Calibration Update Wizard/Ini")
+    keys = (
+        "parameter_file", "encoded_sha256", "decoded_sha256", "row_index",
+        "factory_identifier", "cid_getter", "prepare_writer", "flash_writer",
+        "get_can_id_prepare", "get_can_id_flash", "version_contract",
+    )
+    return [{key: row[key] for key in keys} for row in shared], stats
 
 
 def generate(root: Path) -> dict[str, Any]:

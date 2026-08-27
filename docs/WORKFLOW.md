@@ -260,9 +260,9 @@ rg 'nvm_object_15' build/out/pseudocode
 
 ## Task-oriented tooling discovery
 
-Before writing a new one-file-per-surface script, check the three consolidated
-entry points — several earlier one-off extractors and export wrappers are now
-profiles or subcommands behind them, and new variants of the same operation
+Before writing a new one-file-per-surface script, check the consolidated
+entry points below — several earlier one-off extractors and export wrappers are
+now profiles or subcommands behind them, and new variants of the same operation
 belong there rather than in a new top-level file:
 
 | Operation | Entry point |
@@ -270,12 +270,15 @@ belong there rather than in a new top-level file:
 | Corolla-H surface evidence compaction (fixed known targets, one/two JSONL corpora) | `uv run --locked python tools/extract_corolla_h_evidence.py list` |
 | Read-only exports from `build/work/project` (signals/consumers/producers/coverage/inventory) | `tools/export_ghidra_project.sh list` |
 | Cross-variant image-bound evidence (structural fingerprints, decompilation, callback-table selection, substring census) | `uv run --locked python tools/extract_variant_evidence.py list` |
+| Interactive GTS+ OEM vocabulary / DID / DTC / CUW route / PE lookup | `tools/gts` |
 
-All three expose a `list` discovery command. The Corolla-H runner reports its
-profile inputs and tracked outputs; the argument-driven variant runner reports
-mode purpose/input/selection semantics; the exporter lists its profile names,
-with defaults documented in the tooling guide. Their scope boundaries — which
-extractors stay separate and why — are documented in
+The three evidence/export runners expose a `list` discovery command. The
+Corolla-H runner reports its profile inputs and tracked outputs; the
+argument-driven variant runner reports mode purpose/input/selection semantics;
+the exporter lists its profile names. `tools/gts` instead exposes task-shaped
+subcommands (`search`, `did`, `dtc`, `cuw`, `route`, `pe`) because it is a
+read-only query surface, not a proof generator. Defaults and scope boundaries —
+including which extractors stay separate and why — are documented in
 [tooling/README.md](tooling/README.md#task-oriented-entry-points).
 
 The `.c` tree is intentionally ignored; it can be reproduced from the tracked

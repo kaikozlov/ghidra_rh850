@@ -76,6 +76,27 @@ check(
     and 'exec "$GHIDRA_CLI"' in pe_source,
     "PE analysis wrapper preserves isolated build and Ghidra routing",
 )
+gts_tool = ROOT / "tools/gts"
+gts_source = gts_tool.read_text(encoding="utf-8")
+check(gts_tool.is_file() and os.access(gts_tool, os.X_OK), "GTS+ query wrapper is an executable task entry point")
+check(
+    'uv run --project "$ROOT" --locked python "$ROOT/tools/techstream/gts_cli.py" "$@"' in gts_source,
+    "GTS+ query wrapper bootstraps the locked repository environment from any cwd",
+)
+with tempfile.TemporaryDirectory(prefix="gts-wrapper-cwd-") as td:
+    proc = subprocess.run(
+        [str(gts_tool), "--help"], cwd=td, text=True, capture_output=True,
+    )
+    check(proc.returncode == 0 and "GTS+/Techstream" in proc.stdout, "GTS+ query wrapper is location-independent")
+    local_cuw = Path(td) / "local.cuw"
+    local_cuw.write_bytes(b"x")
+    proc = subprocess.run(
+        [str(gts_tool), "cuw", "./local.cuw"], cwd=td, text=True, capture_output=True,
+    )
+    check(
+        proc.returncode != 0 and "truncated CUW header" in proc.stderr,
+        "GTS+ query wrapper preserves caller-relative artifact paths",
+    )
 check(
     (ROOT / "tools/__init__.py").read_text(encoding="utf-8")
     == '"""Repository tooling modules used by deterministic verification tests."""\n',

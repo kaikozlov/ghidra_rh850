@@ -19,7 +19,7 @@ from typing import Any
 
 import pefile
 
-from generate_cuw_writer_inventory import decode_parameter_ini
+from cuw_parameter import decode_parameter_ini
 
 REPO = Path(__file__).resolve().parents[2]
 TECH = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
