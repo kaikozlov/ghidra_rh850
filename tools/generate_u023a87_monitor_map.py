@@ -14,8 +14,13 @@ import csv
 import json
 from pathlib import Path
 
+try:
+    from .sienna_target import CODEFLASH as SIENNA_CODEFLASH
+except ImportError:  # direct script execution
+    from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+
 REPO = Path(__file__).resolve().parents[1]
-CF_PATH = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
+CF_PATH = SIENNA_CODEFLASH
 RX_MAP_PATH = REPO / "data/application_rx_map.csv"
 OUTPUT = REPO / "data/generated/u023a87_monitor_map.json"
 

@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
-from camry_f33_corpus import CORPUS, body_bytes, display_path
+from camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, body_bytes, display_path
+from decompiler_evidence import bind_entries, bind_function, load_function_corpus, require_function, sha256_bytes
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
 OUT = REPO / "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json"
-IMAGE_SHA256 = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
 ENTRIES = [
     0x4C000,  # 0x4A3 source preparation
     0x4C14E,  # 0x4A3 staging
@@ -28,7 +26,7 @@ ENTRIES = [
 
 
 def sha(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
+    return sha256_bytes(data)
 
 
 def main() -> int:
@@ -41,30 +39,8 @@ def main() -> int:
     if len(image) != 0x100000 or sha(image) != IMAGE_SHA256:
         raise SystemExit("exact F33 image identity drift")
 
-    rows: dict[int, dict] = {}
-    total = 0
-    for line in args.corpus.open(encoding="utf-8"):
-        row = json.loads(line)
-        if row.get("record") == "function":
-            total += 1
-            rows[int(row["entry_addr"], 16)] = row
-
-    functions = []
-    for entry in ENTRIES:
-        row = rows.get(entry)
-        if not row or not row.get("decompile_completed") or not row.get("decompiled_c"):
-            raise SystemExit(f"missing complete decompile 0x{entry:08X}")
-        size = int(row["body_size"])
-        text = row["decompiled_c"]
-        functions.append({
-            "entry": f"0x{entry:08X}",
-            "body_size": size,
-            "body_ranges": row.get("body_ranges", []),
-            "data_references": row.get("data_references", []),
-            "body_sha256": sha(body_bytes(image, row)),
-            "decompiled_c_sha256": sha(text.encode()),
-            "decompiled_c": text,
-        })
+    rows, total = load_function_corpus(args.corpus)
+    functions = bind_entries(image, rows, ENTRIES)
 
     def refs(address: int) -> list[dict]:
         found = []

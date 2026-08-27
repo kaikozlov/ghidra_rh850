@@ -7,9 +7,10 @@ import hashlib
 import json
 import struct
 from pathlib import Path
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
+IMAGE = H_CODEFLASH
 EVIDENCE = REPO / "data/generated/corolla_8965H1202000_power_supply_monitor_decompiler_evidence.json"
 FOLLOWUP = REPO / "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json"
 TECH = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"

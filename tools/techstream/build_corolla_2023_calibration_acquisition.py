@@ -14,9 +14,11 @@ import json
 import struct
 import zlib
 from pathlib import Path
+
+from techstream_paths import CUW_CORPUS_ROOT
 from typing import Any
 
-from inspect_cuw_legacy import parse_attach_bytes
+from cuw_attach import parse_attach_bytes
 
 REPO = Path(__file__).resolve().parents[2]
 CAMPAIGNS = REPO / "data/external/toyota_corolla_2023_calibration_campaigns.json"
@@ -78,7 +80,7 @@ def build() -> dict[str, Any]:
         edge = (d["source_target_calibration_1"], d["new_cid"])
         if edge not in transitions:
             continue
-        raw_path = REPO / "software/Techstream/cuw" / pkg["filename"]
+        raw_path = CUW_CORPUS_ROOT / pkg["filename"]
         if not raw_path.is_file():
             raise FileNotFoundError(f"required pinned CUW unavailable: {raw_path}")
         if raw_path.stat().st_size != pkg["size"] or sha256_file(raw_path) != pkg["sha256"]:
@@ -123,7 +125,7 @@ def build() -> dict[str, Any]:
         for r in brake_campaign["published_transitions"]
         for x in (r["current_calibration_id"], r["new_calibration_id"])
     }
-    raw_paths = sorted((REPO / "software/Techstream/cuw").glob("*.cuw"), key=lambda path: path.name)
+    raw_paths = sorted(CUW_CORPUS_ROOT.glob("*.cuw"), key=lambda path: path.name)
     local_07b0_matches: list[str] = []
     local_brake_cid_matches: list[dict[str, Any]] = []
     for raw_path in raw_paths:

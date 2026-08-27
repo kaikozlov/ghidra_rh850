@@ -11,11 +11,9 @@ import sys
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
-from tools.camry_f33_corpus import body_bytes  # noqa: E402
-IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
+from tools.camry_f33_corpus import IMAGE, IMAGE_SHA256, body_bytes  # noqa: E402
 EVID = REPO / "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json"
 OUT = REPO / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
-IMAGE_SHA256 = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
 NESTED_OPENDDBC_COMMIT = "ab60fd95d8a7b566e10ed1cf59738292f3498932"
 PARENT_OPENPILOT_COMMIT = "d7d7dfd7e49961e9d35eb7a7681e8756ceee8d04"
 TX = struct.Struct("<IBBH")

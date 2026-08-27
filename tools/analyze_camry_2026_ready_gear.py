@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import argparse
 import gzip
-import hashlib
 import json
 from pathlib import Path
+
+from toyota_route_opendbc_common import be_signal, sha256, toyota_checksum
 
 REPO = Path(__file__).resolve().parents[1]
 RAW = REPO / "targets/camry-2026/raw-20260826"
@@ -18,10 +19,6 @@ SOURCE_NAMES = (
   "camry_b_capture.py",
   "camry_ready_b_20260826.json.gz",
 )
-
-
-def sha256(path: Path) -> str:
-  return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def load_gzip_json(name: str) -> dict:

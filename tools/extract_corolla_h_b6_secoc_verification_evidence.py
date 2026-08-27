@@ -6,11 +6,13 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 REPO = Path(__file__).resolve().parents[1]
 GENERATOR = Path(__file__).resolve()
-IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
-SIENNA = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
+IMAGE = H_CODEFLASH
+SIENNA = SIENNA_CODEFLASH
 OUT = REPO / "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json"
 
 # These are target-native H functions needed beyond the earlier byte-complete

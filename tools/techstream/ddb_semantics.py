@@ -1,0 +1,161 @@
+#!/usr/bin/env python3
+"""Canonical semantic record grammar for Toyota P5/P6 DDB monitor/behavior rows."""
+from __future__ import annotations
+
+import struct
+from dataclasses import dataclass
+from typing import Any, Iterable
+
+from parse_ddb import DDBParser
+
+
+def records(section: Any) -> Iterable[bytes]:
+    size = section.decoded_record_size
+    data = section.decoded_data
+    for index in range(section.header.record_count):
+        raw = data[index * size:(index + 1) * size]
+        if len(raw) != size:
+            raise ValueError(
+                f"truncated DDB table {section.header.table_type} record {index}: "
+                f"{len(raw)} != {size}"
+            )
+        yield raw
+
+
+@dataclass(frozen=True)
+class MonitorRecord:
+    table: int
+    index: int
+    name_string_index: int
+    monitor_key: int
+    physical_data_key: int
+    bit_start: int
+    bit_end: int
+    pattern_display_key: int
+    primary_did: int
+    alternate_did: int
+    raw: bytes
+
+
+@dataclass(frozen=True)
+class BehaviorRecord:
+    table: int
+    index: int
+    signature: str
+    name_string_index: int
+    comment_string_index: int
+    raw: bytes
+
+
+def extract_monitor_records(section: Any) -> list[MonitorRecord]:
+    table = int(section.header.table_type)
+    if table not in {62, 157}:
+        raise ValueError(f"expected monitor table 62/157, got {table}")
+    size = int(section.decoded_record_size)
+    shift = 0x10 if size >= 0x50 else 0
+    if size < 0x3A + shift:
+        raise ValueError(f"monitor table {table} record size too small: 0x{size:X}")
+    out = []
+    for index, raw in enumerate(records(section)):
+        u16 = lambda off: struct.unpack_from("<H", raw, off)[0]
+        u32 = lambda off: struct.unpack_from("<I", raw, off)[0]
+        out.append(MonitorRecord(
+            table=table,
+            index=index,
+            name_string_index=u32(0x18 + shift),
+            monitor_key=u16(0x24 + shift),
+            physical_data_key=u16(0x2A + shift),
+            bit_start=u16(0x2C + shift),
+            bit_end=u16(0x2E + shift),
+            pattern_display_key=u16(0x32 + shift),
+            primary_did=u16(0x36 + shift),
+            alternate_did=u16(0x38 + shift),
+            raw=raw,
+        ))
+    return out
+
+
+def extract_behavior_records(section: Any) -> list[BehaviorRecord]:
+    table = int(section.header.table_type)
+    if table != 87 or section.decoded_record_size < 20:
+        raise ValueError(f"expected behavior table 87 with >=20-byte rows, got {table}/{section.decoded_record_size}")
+    out = []
+    for index, raw in enumerate(records(section)):
+        out.append(BehaviorRecord(
+            table=87,
+            index=index,
+            signature=raw[:12].decode("utf-16-le", errors="replace").split("\x00", 1)[0],
+            name_string_index=struct.unpack_from("<I", raw, 0x0C)[0],
+            comment_string_index=struct.unpack_from("<I", raw, 0x10)[0],
+            raw=raw,
+        ))
+    return out
+
+
+def monitor_rows(db: Any, strings: Any, source: str, *, deduplicate: bool = True) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for table in (62, 157):
+        section = db.sections.get(table)
+        if section is None:
+            continue
+        for record in extract_monitor_records(section):
+            rows.append({
+                "kind": "did",
+                "source": source,
+                "table": table,
+                "tables": [table],
+                "record": record.index,
+                "name": strings.get_string(record.name_string_index),
+                "monitor_key": record.monitor_key,
+                "physical_data_key": record.physical_data_key,
+                "bit_start": record.bit_start,
+                "bit_end": record.bit_end,
+                "pattern_display_key": record.pattern_display_key,
+                "primary_did": record.primary_did,
+                "alternate_did": record.alternate_did,
+                "raw": record.raw,
+            })
+    if not deduplicate:
+        return rows
+    by_identity: dict[tuple[Any, ...], dict[str, Any]] = {}
+    for row in rows:
+        identity = (row["name"], row["primary_did"], row["alternate_did"])
+        existing = by_identity.get(identity)
+        if existing is None:
+            by_identity[identity] = row
+        elif row["table"] not in existing["tables"]:
+            existing["tables"].append(row["table"])
+    return list(by_identity.values())
+
+
+def dtc_rows(parser: DDBParser, db: Any, strings: Any, source: str) -> list[dict[str, Any]]:
+    section = db.sections.get(65)
+    if section is None:
+        return []
+    return [{
+        "kind": "dtc",
+        "source": source,
+        "table": 65,
+        "record": index,
+        "code": entry.code,
+        "packed_dtc": f"0x{entry.packed_dtc:06X}",
+        "description": strings.get_string(entry.description_string_index),
+        "failure": strings.get_string(entry.failure_string_index),
+        "raw": entry.raw,
+    } for index, entry in enumerate(parser.extract_dtc_failure_entries(section))]
+
+
+def behavior_rows(db: Any, strings: Any, source: str) -> list[dict[str, Any]]:
+    section = db.sections.get(87)
+    if section is None:
+        return []
+    return [{
+        "kind": "behavior",
+        "source": source,
+        "table": 87,
+        "record": record.index,
+        "signature": record.signature,
+        "name": strings.get_string(record.name_string_index),
+        "comment": strings.get_string(record.comment_string_index),
+        "raw": record.raw,
+    } for record in extract_behavior_records(section)]

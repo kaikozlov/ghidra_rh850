@@ -24,10 +24,14 @@ from collections import Counter
 from pathlib import Path
 
 import pefile
+from pe_utils import imports as pe_imports
 from parse_ddb import DDBParser
+from ddb_semantics import records as semantic_records
+from ddb_strings import load_string_db
+from techstream_paths import V18_TECHSTREAM_ROOT
 
 REPO = Path(__file__).resolve().parents[2]
-TECHROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
+TECHROOT = V18_TECHSTREAM_ROOT
 FACTORY = REPO / "data/generated/techstream_v18/ddb_factory_table_map.json"
 H_CORR = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
 DEFAULT_OUT = REPO / "data/generated/techstream_v18/p5_lateral_control_semantics.json"
@@ -158,9 +162,7 @@ def sha256(data: bytes) -> str:
 
 
 def records(section) -> list[bytes]:
-    size = section.decoded_record_size
-    data = section.decoded_data
-    return [data[i * size : (i + 1) * size] for i in range(section.header.record_count)]
+    return list(semantic_records(section))
 
 
 def u16(raw: bytes, off: int) -> int:
@@ -394,7 +396,7 @@ def vds_setting_table_evidence(root: Path) -> dict:
 
 def master_categories(parser: DDBParser, root: Path, region: str) -> dict[str, dict]:
     master = parser.parse_master_db(root / region / "DB/Toyota.ddb")
-    strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+    strings = load_string_db(parser, root / region / "DB/M_English.ddb")
     categories = parser.extract_master_ecu_categories(master.sections[16])
     out: dict[str, dict] = {}
     for target in TARGET_DATABASES:
@@ -497,7 +499,7 @@ def installing_ecu_list(parser: DDBParser, root: Path, region: str) -> dict:
     names. The +0x06 field is the ECU category.
     """
     master = parser.parse_master_db(root / region / "DB/Toyota.ddb")
-    strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+    strings = load_string_db(parser, root / region / "DB/M_English.ddb")
     section = master.sections[44]
     if section.decoded_record_size != 24:
         raise ValueError(
@@ -580,7 +582,7 @@ COROLLA_MODEL_INSTALL_SETS = (
 def corolla_model_install_sets(parser: DDBParser, root: Path) -> dict:
     """NA type-43/type-5/type-44 join for Corolla-family FRC_P5 chassis."""
     master = parser.parse_master_db(root / "NA/DB/Toyota.ddb")
-    strings = parser.load_string_db(root / "NA/DB/M_English.ddb")
+    strings = load_string_db(parser, root / "NA/DB/M_English.ddb")
     vnames = vehicle_names(master, strings)
     vid_sets = vehicle_install_sets(master)
     set_cats: dict[int, set[int]] = {}
@@ -628,7 +630,7 @@ def corolla_model_install_sets(parser: DDBParser, root: Path) -> dict:
 
 def frc_did_rows(parser: DDBParser, root: Path, region: str) -> list[dict]:
     db = parser.parse_ecu_db(root / region / "DB/FRC_P5.ddb")
-    strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+    strings = load_string_db(parser, root / region / "DB/M_English.ddb")
     wanted = {(did, start, end, name) for did, start, end, name in FRC_DID_ROWS}
     out = []
     for index, raw in enumerate(records(db.sections[62])):
@@ -656,7 +658,7 @@ def frc_did_rows(parser: DDBParser, root: Path, region: str) -> list[dict]:
 
 def frc_behavior_rows(parser: DDBParser, root: Path) -> list[dict]:
     db = parser.parse_ecu_db(root / "NA/DB/FRC_P5.ddb")
-    strings = parser.load_string_db(root / "NA/DB/M_English.ddb")
+    strings = load_string_db(parser, root / "NA/DB/M_English.ddb")
     out = []
     for index, row in enumerate(parser.extract_priority_records(db.sections[87])):
         sig = row.fields.get("behavior_signature")
@@ -676,7 +678,7 @@ def frc_behavior_rows(parser: DDBParser, root: Path) -> list[dict]:
 
 def frc_target_steering_negative(parser: DDBParser, root: Path, region: str) -> dict:
     db = parser.parse_ecu_db(root / region / "DB/FRC_P5.ddb")
-    strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+    strings = load_string_db(parser, root / region / "DB/M_English.ddb")
     hits: list[dict] = []
     for table_type in (62, 88):
         for index, raw in enumerate(records(db.sections[table_type])):
@@ -735,7 +737,7 @@ def emps_target_lateral_id_semantics(parser: DDBParser, root: Path) -> dict:
     }
     regions: dict[str, dict] = {}
     for region in REGIONS:
-        strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+        strings = load_string_db(parser, root / region / "DB/M_English.ddb")
         region_rows: dict[str, dict] = {}
         for database in ("EMPS_P5.ddb", "EMPS2_P5.ddb"):
             db = parser.parse_ecu_db(root / region / "DB" / database)
@@ -838,7 +840,7 @@ def abs_p5_active_test_surface(parser: DDBParser, root: Path) -> dict:
     canonical_routine_hashes = None
     for region in REGIONS:
         db = parser.parse_ecu_db(root / region / "DB/ABS_P5.ddb")
-        strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+        strings = load_string_db(parser, root / region / "DB/M_English.ddb")
         if not (
             db.sections[68].decoded_record_size == 64
             and db.sections[68].header.record_count == 20
@@ -1036,7 +1038,7 @@ def p5_upstream_lateral_route(parser: DDBParser, root: Path) -> dict:
 
     region_rows: dict[str, dict] = {}
     for region in REGIONS:
-        strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+        strings = load_string_db(parser, root / region / "DB/M_English.ddb")
         master = parser.parse_master_db(root / region / "DB/Toyota.ddb")
         categories = parser.extract_master_ecu_categories(master.sections[16])
         abs_category = [row for row in categories if row.category_id == 435]
@@ -1281,7 +1283,7 @@ def p5_upstream_lateral_route(parser: DDBParser, root: Path) -> dict:
     for database, (category_id, ecu_name) in brake_family_specs.items():
         per_region: dict[str, dict] = {}
         for region in REGIONS:
-            strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+            strings = load_string_db(parser, root / region / "DB/M_English.ddb")
             master = parser.parse_master_db(root / region / "DB/Toyota.ddb")
             categories = parser.extract_master_ecu_categories(master.sections[16])
             cat_hits = [row for row in categories if row.database_name == database]
@@ -1486,7 +1488,7 @@ def p5_upstream_lateral_route(parser: DDBParser, root: Path) -> dict:
 def frc_security_state(parser: DDBParser, root: Path, region: str) -> dict:
     """Pin the FRC_P5 ECU-security-key registration-state diagnostic row."""
     db = parser.parse_ecu_db(root / region / "DB/FRC_P5.ddb")
-    strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+    strings = load_string_db(parser, root / region / "DB/M_English.ddb")
     incomplete = None
     for index, raw in enumerate(records(db.sections[62])):
         if u16(raw, 0x36) != 0x10AF:
@@ -1570,15 +1572,8 @@ class PE:
 
     def imports(self) -> set[str]:
         pe = pefile.PE(str(self.path), fast_load=True)
-        pe.parse_data_directories(
-            directories=[pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_IMPORT"]]
-        )
-        names = set()
-        for entry in pe.DIRECTORY_ENTRY_IMPORT:
-            for imp in entry.imports:
-                if imp.name:
-                    names.add(imp.name.decode())
-        return names
+        pe.parse_data_directories(directories=[pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_IMPORT"]])
+        return {row["name"] for row in pe_imports(pe) if not row["name"].startswith("ordinal:")}
 
 
 def tss3_operation_protocol(root: Path) -> dict:
@@ -1932,7 +1927,7 @@ def ads_ddr_tables(root: Path) -> dict:
 
 def ads_ddr_rows(parser: DDBParser, root: Path) -> dict:
     db = parser.parse_ecu_db(root / "NA/DB/ADS_Eth_P5.ddb")
-    strings = parser.load_string_db(root / "NA/DB/M_English.ddb")
+    strings = load_string_db(parser, root / "NA/DB/M_English.ddb")
     phy = {
         u16(raw, 0x0C): {
             "mul": struct.unpack_from("<i", raw, 0x00)[0],
@@ -2032,7 +2027,7 @@ def emps_angle_conversion(parser: DDBParser, root: Path) -> dict:
     the conversion direction. This keeps the UI conversion separate from the
     H firmware's wire/controller proof.
     """
-    names = parser.load_string_db(root / "NA/DB/M_English.ddb")
+    names = load_string_db(parser, root / "NA/DB/M_English.ddb")
 
     def db_rows(region: str) -> dict:
         db = parser.parse_ecu_db(root / f"{region}/DB/EMPS_P5.ddb")
@@ -2183,7 +2178,7 @@ def ads_ddr_protocol(root: Path) -> dict:
 
 def behavior_code_rows(parser: DDBParser, root: Path) -> list[dict]:
     db = parser.parse_ecu_db(root / "NA/DB/LDA_P5.ddb")
-    strings = parser.load_string_db(root / "NA/DB/M_English.ddb")
+    strings = load_string_db(parser, root / "NA/DB/M_English.ddb")
     out = []
     for index, row in enumerate(parser.extract_priority_records(db.sections[87])):
         if row.fields.get("behavior_signature") not in LDA_SIGNATURES:
@@ -2202,7 +2197,7 @@ def behavior_code_rows(parser: DDBParser, root: Path) -> list[dict]:
 
 def emps_rows(parser: DDBParser, root: Path, database: str) -> list[dict]:
     db = parser.parse_ecu_db(root / "NA/DB" / database)
-    strings = parser.load_string_db(root / "NA/DB/M_English.ddb")
+    strings = load_string_db(parser, root / "NA/DB/M_English.ddb")
     out = []
     for index, raw in enumerate(records(db.sections[62])):
         monitor_key = u16(raw, 0x24)
@@ -2313,7 +2308,7 @@ def _master_comm_frame(
 
 def _frc_routine_rows(parser: DDBParser, root: Path, region: str) -> list[dict]:
     db = parser.parse_ecu_db(root / region / "DB/FRC_P5.ddb")
-    strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+    strings = load_string_db(parser, root / region / "DB/M_English.ddb")
     section = db.sections[71]
     if section.decoded_record_size != 64:
         raise ValueError(f"{region} FRC_P5 type-71 size {section.decoded_record_size}")

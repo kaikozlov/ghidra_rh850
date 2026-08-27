@@ -3,8 +3,9 @@
 from __future__ import annotations
 import hashlib,json
 from pathlib import Path
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 ROOT=Path(__file__).resolve().parents[1]
-RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+RAW=H_RAW_DUMP
 SRC=ROOT/'build/work/corpora/h_clean_function_structural_fingerprints.jsonl'
 OUT=ROOT/'data/generated/corolla_8965H1202000_direct_call_surface_evidence.json'
 def sha(b):return hashlib.sha256(b).hexdigest()

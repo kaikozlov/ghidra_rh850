@@ -16,16 +16,19 @@ import json
 import re
 import sys
 from pathlib import Path
+
+from techstream_paths import V18_DIAGNOSTICS_ROOT
 from typing import Any
 
 import pefile
+from pe_utils import exports as pe_exports, imports as pe_imports
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 from tools.techstream.generate_cuw_writer_inventory import COMMANDS, factory_routes  # noqa: E402
 from tools.techstream.generate_cuw_writer_protocol_grammar import route_verdict  # noqa: E402
 
-DEFAULT_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
+DEFAULT_ROOT = V18_DIAGNOSTICS_ROOT
 DEFAULT_OUT = REPO / "data/generated/techstream_v18/cuw_writer_family_matrix.json"
 CUW_SUBDIR = Path("Calibration Update Wizard")
 
@@ -140,15 +143,8 @@ def target_disposition(name: str, tags: list[str]) -> dict[str, str]:
 def inspect_writer(path: Path, roles: set[str], route_rows: list[dict[str, Any]]) -> dict[str, Any]:
     data = path.read_bytes()
     pe = pefile.PE(data=data)
-    imports: list[dict[str, str]] = []
-    exports: list[dict[str, Any]] = []
-    for lib in getattr(pe, "DIRECTORY_ENTRY_IMPORT", []):
-        dll = lib.dll.decode("latin1")
-        for sym in lib.imports:
-            name = sym.name.decode("latin1") if sym.name else f"ordinal:{sym.ordinal}"
-            imports.append({"dll": dll, "name": name})
-    for sym in getattr(pe, "DIRECTORY_ENTRY_EXPORT", ()).symbols if hasattr(pe, "DIRECTORY_ENTRY_EXPORT") else ():
-        exports.append({"name": sym.name.decode("latin1") if sym.name else None, "rva": sym.address})
+    imports = pe_imports(pe)
+    exports = pe_exports(pe, unnamed_none=True)
 
     calibration = []
     categorized: dict[str, list[str]] = {value: [] for value in COMMON_DLLS.values()}

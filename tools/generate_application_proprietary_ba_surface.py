@@ -3,8 +3,9 @@
 from __future__ import annotations
 import argparse,csv,struct
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
 ROOT=Path(__file__).resolve().parents[1]
-CF=(ROOT/'firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
+CF=(SIENNA_CODEFLASH).read_bytes()
 TABLE=0x28098
 COUNT_ADDR=0x28094
 # Semantics are bounded by deterministic firmware verifiers. Raw table fields are always derived.

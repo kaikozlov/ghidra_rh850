@@ -6,9 +6,10 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
+IMAGE = H_CODEFLASH
 OUT = REPO / "data/generated/corolla_8965H1202000_power_supply_monitor_decompiler_evidence.json"
 ENTRIES = (
     0x44D84, 0x44EC2, 0x44FC4, 0x450FC,

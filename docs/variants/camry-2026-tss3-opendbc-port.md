@@ -191,7 +191,7 @@ This port intentionally stops before actuation. The remaining production gates a
 
 - `data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json`
 - `data/generated/camry_8965F3307000_tss3_opendbc_port.json`
-- `tests/verify_camry_8965F3307000_tss3_opendbc_port.py`
+- `tests/verify_camry_8965F3307000.py`
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

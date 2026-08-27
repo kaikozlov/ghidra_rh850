@@ -9,14 +9,16 @@ fails closed unless the only changed command-sized field is B6 signal255.
 """
 import argparse,json,re,struct,hashlib
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 REPO=Path(__file__).resolve().parents[1]
 GP=0xFEBEB800
 ap=argparse.ArgumentParser(description=__doc__)
 ap.add_argument('--h-corpus',type=Path,required=True,help='disposable corrected-context H decompiler corpus JSONL')
 ap.add_argument('--out',type=Path,default=REPO/'data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json')
 ARGS=ap.parse_args()
-SIMG=(REPO/'firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
-HIMG=(REPO/'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin').read_bytes()
+SIMG=(SIENNA_CODEFLASH).read_bytes()
+HIMG=(H_CODEFLASH).read_bytes()
 
 def load_corpus(path):
  d={}

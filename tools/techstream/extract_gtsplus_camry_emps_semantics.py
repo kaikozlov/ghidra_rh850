@@ -6,19 +6,27 @@ import argparse
 import hashlib
 import json
 import struct
+import sys
 from collections import defaultdict
 from pathlib import Path
 
 from parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES
+from ddb_semantics import extract_behavior_records, extract_monitor_records, records
+from ddb_strings import load_string_db
+from techstream_paths import GTSPLUS_EXTERNAL_ROOT, V18_TECHSTREAM_ROOT, resolve_gts_root
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_GTS = REPO / "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus"
-DEFAULT_V18 = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
-IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
+sys.path.insert(0, str(REPO / "tools"))
+from analysis_target import target, verified_file  # noqa: E402
+
+DEFAULT_GTS = resolve_gts_root(GTSPLUS_EXTERNAL_ROOT)
+DEFAULT_V18 = V18_TECHSTREAM_ROOT
+_, F33_TARGET = target("camry-8965F3307000")
+IMAGE = verified_file("camry-8965F3307000", "codeflash")
 RAM = REPO / "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin"
 DECOMP = REPO / "data/generated/camry_8965F3307000_gtsplus_decompiler_evidence.json"
 OUT = REPO / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
-IMAGE_SHA = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+IMAGE_SHA = F33_TARGET["codeflash_sha256"]
 RDBI_OFFSET = 0x2928C
 RDBI_COUNT = 241
 
@@ -35,45 +43,36 @@ def u32(data: bytes, off: int) -> int:
     return struct.unpack_from("<I", data, off)[0]
 
 
-def records(section) -> list[bytes]:
-    size = section.decoded_record_size
-    return [section.decoded_data[i * size : (i + 1) * size] for i in range(section.header.record_count)]
-
-
 def monitor_rows(db, strings, *, current: bool) -> list[dict]:
-    shift = 0x10 if current else 0
+    # ``current`` is retained as a proof-schema input, while record layout is
+    # resolved canonically from each section's actual record size.
     out = []
-    for index, raw in enumerate(records(db.sections[62])):
-        out.append(
-            {
-                "record_index": index,
-                "monitor_key": u16(raw, 0x24 + shift),
-                "name": strings.get_string(u32(raw, 0x18 + shift)),
-                "physical_data_key": u16(raw, 0x2A + shift),
-                "bit_range": [u16(raw, 0x2C + shift), u16(raw, 0x2E + shift)],
-                "pattern_display_key": u16(raw, 0x32 + shift),
-                "primary_data_id": u16(raw, 0x36 + shift),
-                "alternate_data_id": u16(raw, 0x38 + shift),
-                "raw_sha256": hashlib.sha256(raw).hexdigest(),
-            }
-        )
+    for record in extract_monitor_records(db.sections[62]):
+        out.append({
+            "record_index": record.index,
+            "monitor_key": record.monitor_key,
+            "name": strings.get_string(record.name_string_index),
+            "physical_data_key": record.physical_data_key,
+            "bit_range": [record.bit_start, record.bit_end],
+            "pattern_display_key": record.pattern_display_key,
+            "primary_data_id": record.primary_did,
+            "alternate_data_id": record.alternate_did,
+            "raw_sha256": hashlib.sha256(record.raw).hexdigest(),
+        })
     return out
-
 
 def behavior_rows(db, strings) -> dict[str, dict]:
     out = {}
-    for index, raw in enumerate(records(db.sections[87])):
-        sig = raw[:12].decode("utf-16-le").split("\x00", 1)[0]
-        out[sig] = {
-            "record_index": index,
-            "signature": sig,
-            "name": strings.get_string(u32(raw, 0x0C)),
-            "comment": strings.get_string(u32(raw, 0x10)),
-            "raw_hex": raw.hex(),
-            "raw_sha256": hashlib.sha256(raw).hexdigest(),
+    for record in extract_behavior_records(db.sections[87]):
+        out[record.signature] = {
+            "record_index": record.index,
+            "signature": record.signature,
+            "name": strings.get_string(record.name_string_index),
+            "comment": strings.get_string(record.comment_string_index),
+            "raw_hex": record.raw.hex(),
+            "raw_sha256": hashlib.sha256(record.raw).hexdigest(),
         }
     return out
-
 
 def dtc_rows(parser: DDBParser, db, strings) -> dict[str, tuple]:
     out = {}
@@ -125,8 +124,8 @@ def main() -> int:
 
     g_emps = parser.parse_ecu_db(source_paths["gts_emps"])
     v_emps = parser.parse_ecu_db(source_paths["v18_emps"])
-    g_strings = parser.load_string_db(source_paths["gts_strings"])
-    v_strings = parser.load_string_db(source_paths["v18_strings"])
+    g_strings = load_string_db(parser, source_paths["gts_strings"])
+    v_strings = load_string_db(parser, source_paths["v18_strings"])
     g_master = parser.parse_master_db(source_paths["gts_master"])
     v_master = parser.parse_master_db(source_paths["v18_master"])
 

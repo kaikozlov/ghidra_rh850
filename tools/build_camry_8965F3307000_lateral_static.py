@@ -16,8 +16,7 @@ import sys
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
-from tools.camry_f33_corpus import body_bytes  # noqa: E402
-IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
+from tools.camry_f33_corpus import IMAGE, IMAGE_SHA256, body_bytes  # noqa: E402
 EVID = REPO / "data/generated/camry_8965F3307000_lateral_decompiler_evidence.json"
 CODEFLASH = REPO / "data/generated/camry_8965F3307000_codeflash.json"
 PRODUCT = REPO / "data/p1me_product_memory.json"
@@ -25,7 +24,6 @@ RUNTIME = REPO / "data/generated/camry_8965F3307000_command5_runtime_carrier.jso
 TECH = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
 OUT = REPO / "data/generated/camry_8965F3307000_lateral_static.json"
 
-IMAGE_SHA256 = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
 
 
 def sha(data: bytes) -> str:

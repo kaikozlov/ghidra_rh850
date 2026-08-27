@@ -13,16 +13,16 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-RAW = ROOT / (
-    "community/albinoelephant/raw-20260818/"
-    "albinoelephant-corolla-2023.20260814-0023/"
-    "dump_codeflash_00000000_00200000_20260814-025814.bin"
-)
+sys.path.insert(0, str(ROOT / "tools"))
+from corolla_h_constants import RAW_DUMP, XCP_ROLE_MAP  # noqa: E402
+
+RAW = RAW_DUMP
 
 
 @dataclass(frozen=True)
@@ -229,7 +229,7 @@ PROFILES: dict[str, Profile] = {
             "commands": Source("build/work/corpora/h_8965H1202000_xcp_decompilations.jsonl"),
             "helpers": Source("build/work/corpora/h_8965H1202000_xcp_helpers_decompilations.jsonl"),
         },
-        selections=_selections([0x9232A, 0x92462, 0x9261E, 0x92698], "commands")
+        selections=_selections([row[2] for row in XCP_ROLE_MAP], "commands")
         + _selections([0x9227E, 0x92314, 0x9238A, 0x92436, 0x7C390, 0x7C39C, 0x92724], "helpers"),
         include_name=True,
         source_format="list",

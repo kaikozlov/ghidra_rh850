@@ -7,16 +7,18 @@ import hashlib
 import json
 import struct
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
+IMAGE = H_CODEFLASH
 EVID = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json"
 ENG_EVID = REPO / "data/generated/corolla_8965H1202000_nonsteering_engagement_decompiler_evidence.json"
 TECH = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
 FD = REPO / "data/generated/corolla_8965H1202000_fd_control_interface.json"
 DIAG_EVID = REPO / "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json"
 SPAN = REPO / "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json"
-SIENNA = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
+SIENNA = SIENNA_CODEFLASH
 INGRESS = REPO / "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json"
 LTA = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance.json"
 TARGET = REPO / "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json"

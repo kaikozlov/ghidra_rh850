@@ -27,7 +27,7 @@ print("== canonical build namespaces ==")
 make = (REPO / "Makefile").read_text()
 for name in ("BUILD_ROOT", "BUILD_CACHE", "BUILD_WORK", "BUILD_OUT", "BUILD_LOGS", "BUILD_TMP"):
     check(f"Makefile defines {name}", f"{name} ?=" in make)
-check("working Ghidra project lives under BUILD_WORK", "PROJECT_DIR ?= $(BUILD_WORK)/project" in make)
+check("working Ghidra project lives under BUILD_WORK", "TARGET_WORK_SUFFIX := $(patsubst build/work/%,%,$(TARGET_WORK_DIR))" in make and "PROJECT_DIR ?= $(BUILD_WORK)/$(TARGET_WORK_SUFFIX)" in make)
 check("safe clean target only removes logs/tmp", "tools/build_layout.py clean logs tmp" in make)
 
 build_cli = (REPO / "tools/build_ghidra_cli.sh").read_text(encoding="utf-8")

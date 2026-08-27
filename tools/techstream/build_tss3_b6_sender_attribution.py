@@ -16,10 +16,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
 REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / "tools"))
+from corolla_h_constants import CODEFLASH as H_CODE  # noqa: E402
+
 DEFAULT_OUT = REPO / "data/generated/techstream_v18/tss3_b6_sender_attribution.json"
 P5 = REPO / "data/generated/techstream_v18/p5_lateral_control_semantics.json"
 CUW = REPO / "data/generated/techstream_v18/cuw_frc_corpus.json"
@@ -27,7 +31,6 @@ H_CORR = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.jso
 H_KEY = REPO / "data/generated/corolla_8965H1202000_secoc_key_provenance.json"
 H_B6 = REPO / "data/generated/corolla_8965H1202000_b6_secoc_verification.json"
 H_PROV = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance.json"
-H_CODE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
 
 
 def sha256_file(path: Path) -> str:

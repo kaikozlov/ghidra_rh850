@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
+
+from decompiler_evidence import bind_entries, load_function_corpus, sha256_bytes
 
 REPO = Path(__file__).resolve().parents[1]
 GENERATOR = Path(__file__).resolve()
-IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
+IMAGE = H_CODEFLASH
 OUT = REPO / "data/generated/corolla_8965H1202000_b6_competing_sender_decompiler_evidence.json"
 
 # These functions close the generic one-slot queue/coalescing behavior and the
@@ -32,7 +34,7 @@ ENTRIES = {
 
 
 def sha(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
+    return sha256_bytes(data)
 
 
 def rel(path: Path) -> str:
@@ -55,30 +57,11 @@ def main() -> int:
     if len(image) != 0x100000:
         raise SystemExit(f"expected 1 MiB H CodeFlash, got {len(image):#x}")
 
-    rows: dict[int, dict] = {}
-    for line in args.corpus.open():
-        row = json.loads(line)
-        if row.get("record") == "function":
-            rows[int(row["entry_addr"], 16)] = row
-
-    functions = []
-    for entry, role in ENTRIES.items():
-        row = rows.get(entry)
-        if not row or not row.get("decompile_completed") or not row.get("decompiled_c"):
-            raise SystemExit(f"missing complete decompile 0x{entry:X}")
-        size = int(row["body_size"])
-        body = image[entry:entry + size]
-        if len(body) != size:
-            raise SystemExit(f"function body outside image 0x{entry:X}")
-        text = row["decompiled_c"]
-        functions.append({
-            "entry": f"0x{entry:08X}",
-            "role": role,
-            "body_size": size,
-            "body_sha256": sha(body),
-            "decompiled_c_sha256": sha(text.encode()),
-            "decompiled_c": text,
-        })
+    rows, _ = load_function_corpus(args.corpus)
+    functions = bind_entries(
+        image, rows, ENTRIES, include_data_references=False,
+        include_body_ranges=False, honor_body_ranges=False,
+    )
 
     out = {
         "schema": "corolla-h-b6-competing-sender-decompiler-evidence-v1",

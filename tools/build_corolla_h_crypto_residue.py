@@ -3,8 +3,10 @@
 from __future__ import annotations
 import argparse,hashlib,json,struct
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 ROOT=Path(__file__).resolve().parents[1]
-EV=ROOT/'data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json';SC=ROOT/'data/generated/decompilations.jsonl';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';SI=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin';OUT=ROOT/'data/generated/corolla_8965H1202000_crypto_residue.json'
+EV=ROOT/'data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json';SC=ROOT/'data/generated/decompilations.jsonl';HRAW=H_RAW_DUMP;SI=SIENNA_CODEFLASH;OUT=ROOT/'data/generated/corolla_8965H1202000_crypto_residue.json'
 ROLES=[
  (0x70fc,'payload_crypto_finalize',0x70e0,'exact-ambiguous-body-role-recovered'),
  (0x68f0c,'crypto_test_bank0_update_counter_snapshot',0x63244,'target-native-role-recovered'),

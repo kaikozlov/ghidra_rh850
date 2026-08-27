@@ -2989,7 +2989,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   not RAM lifetime.
 - **Canonical:**
   `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`;
-  `tests/verify_camry_8965F3307000_application_ram_loader.py`;
+  `tests/verify_camry_8965F3307000.py`;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§12.6–13.
 
 ### CORR-120 — VAR-056's four-user F33 torque-source census was incomplete; `0x4C000` is the fifth recovered direct user
@@ -3014,7 +3014,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md);
   `data/generated/camry_8965F3307000_tss3_opendbc_port.json`;
-  `tests/verify_camry_8965F3307000_tss3_opendbc_port.py`.
+  `tests/verify_camry_8965F3307000.py`.
 
 ### CORR-121 — Toyota's retained F340 flash driver uses DBFULL bit 10, not SUSRDY bit 11, for per-halfword pacing
 
@@ -3024,7 +3024,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact F33 cross-check:** Camry `8965F3307000` native program routine `0x78E2A` writes each halfword and immediately checks `FSTATR & 0x400`; its target-native helpers `0x78C30/0x78CE6` independently provide Status Clear `0x50` and Forced Stop `0xB3`. This makes the DBFULL correction exact-target firmware-static as well as manufacturer-CUW-backed.
 - **Implementation consequence:** `exploit/patcher/flash_backend.c` now writes each halfword first and performs a bounded `FSTATR_DBFULL_MASK=0x00000400` wait afterward. The `0x800` pacing interpretation is rejected by regression tests. The backend retains `0x50` cleanup because exact F33/Sienna stock code supports it; no byte-identical T-0035 implementation claim is made. The rebuilt generic template remains within the fixed `0xFD0` code boundary (`0xF6E` raw text).
 - **Scope:** T-0035 validates Toyota F3/P1M-E manufacturer flash-control behavior; it is not an exact Camry F33 CUW and does not replace the exact stock F33 dump/restore artifact.
-- **Canonical:** `data/generated/techstream_v18/t0035_faci_backend_evidence.json`; `data/generated/camry_8965F3307000_flash_backend_evidence.json`; `tests/verify_camry_8965F3307000_flash_backend.py`; local `tests/verify_t0035_faci_backend_external.py`; [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9.7.
+- **Canonical:** `data/generated/techstream_v18/t0035_faci_backend_evidence.json`; `data/generated/camry_8965F3307000_flash_backend_evidence.json`; `tests/verify_camry_8965F3307000.py`; local `tests/verify_t0035_faci_backend_external.py`; [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9.7.
 
 ### CORR-122 — the F33 4→5 fixed-GP census was still incomplete; the first-class 6,065-function graph finds 9 torque and 6 Q-current direct references
 
@@ -3032,4 +3032,4 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Root cause:** the first-class F33 project now seeds the exact application `GP=FEBEB800` recovered from `0x715B4`. Ghidra therefore resolves many former `unaff_gp±offset` expressions to absolute LocalRAM symbols, and the canonical 6,065-function corpus exports its data-reference graph. Text search is neither complete nor stable under that improvement.
 - **Exact correction:** `GP-0x5158 = FEBE66A8` has **9** direct Ghidra-reference owners: readers `0x35A06, 0x4C000, 0x4C490, 0x4DB70, 0x52CA0, 0x54244, 0x564CE` and writers `0x59448, 0x5D5E0`. DID1151 Q-current `GP-0x50F2 = FEBE670E` has **6**: readers `0x4E394, 0x52CA0, 0x54244, 0x564CE` and writers `0x59448, 0x5D12C`. The distinct `0x4A3` source `GP-0x50E8 = FEBE6718` has four direct refs: readers `0x4C000/0x4C490`, writers `0x59448/0x5D12C`.
 - **Safety consequence:** the prior bounded control-cone conclusion survives the stronger census: neither `FEBE66A8` nor `FEBE670E` has a direct Ghidra data reference in the cooperative `C8xxx–D1xxx` target-to-motor cone. Computed aliases without a recovered data reference, DMA/hardware mutation, and unrecovered code remain outside the negative proof.
-- **Canonical:** `data/generated/camry-8965F3307000/decompilations.jsonl`; `data/generated/camry_8965F3307000_lateral_decompiler_evidence.json`; `data/generated/camry_8965F3307000_lateral_static.json`; `tests/verify_camry_8965F3307000_lateral_static.py`; [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §2.
+- **Canonical:** `data/generated/camry-8965F3307000/decompilations.jsonl`; `data/generated/camry_8965F3307000_lateral_decompiler_evidence.json`; `data/generated/camry_8965F3307000_lateral_static.json`; `tests/verify_camry_8965F3307000.py`; [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §2.

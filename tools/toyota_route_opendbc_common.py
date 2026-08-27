@@ -20,6 +20,8 @@ def be_raw(dat: bytes, start_bit: int, size: int, signed: bool = False) -> int:
     be_bits = [j + i * 8 for i in range(len(dat)) for j in range(7, -1, -1)]
     idx = be_bits.index(start_bit)
     bits = be_bits[idx:idx + size]
+    if len(bits) != size:
+        raise ValueError(f"signal {start_bit}|{size} exceeds payload")
     value = 0
     for bit in bits:
         byte_i, bit_i = divmod(bit, 8)
@@ -27,6 +29,11 @@ def be_raw(dat: bytes, start_bit: int, size: int, signed: bool = False) -> int:
     if signed and value & (1 << (size - 1)):
         value -= 1 << size
     return value
+
+
+def be_signal(dat: bytes, start_bit: int, size: int, *, is_signed: bool = False) -> int:
+    """Compatibility spelling used by capture analyzers."""
+    return be_raw(dat, start_bit, size, signed=is_signed)
 
 
 def toyota_checksum(addr: int, dat: bytes) -> int:

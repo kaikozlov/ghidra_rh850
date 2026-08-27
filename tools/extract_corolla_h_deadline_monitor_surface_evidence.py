@@ -3,11 +3,12 @@
 from __future__ import annotations
 import hashlib,json,struct
 from pathlib import Path
+from corolla_h_constants import H_DEADLINE_TABLES, RAW_DUMP
 ROOT=Path(__file__).resolve().parents[1]
-RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+RAW=RAW_DUMP
 SRC=ROOT/'build/work/corpora/h_deadline_forced.jsonl'
 OUT=ROOT/'data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json'
-TABLES=((0x280B4,1,52,tuple(range(0,52,4))),(0x280E8,28,12,(0,4,8)),(0x28260,1,52,tuple(range(0,52,4))))
+TABLES=tuple((base,count,stride,offs) for _name,base,count,stride,offs in H_DEADLINE_TABLES)
 SUPPORT=(0x387E4,0x639CA,0x6462A)
 def sha(b):return hashlib.sha256(b).hexdigest()
 def callbacks(raw):

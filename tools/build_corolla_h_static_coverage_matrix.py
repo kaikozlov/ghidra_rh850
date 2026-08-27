@@ -22,6 +22,7 @@ import re
 import struct
 from collections import Counter, defaultdict
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
 
 REPO = Path(__file__).resolve().parents[1]
 DID = struct.Struct("<HHIII")
@@ -81,7 +82,7 @@ def main() -> None:
     ap.add_argument(
         "--sienna-image",
         type=Path,
-        default=REPO / "firmware/RH850_P1M-E_CodeFlash.bin",
+        default=SIENNA_CODEFLASH,
     )
     ap.add_argument(
         "--out",

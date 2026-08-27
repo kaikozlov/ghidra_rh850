@@ -40,6 +40,7 @@ The small command surface to remember is:
 | Discover / preview | `tools/test list [word]`, `tools/test plan` |
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
 | GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
+| Repository knowledge / findings / corrections / open questions | `tools/know QUERY` |
 | Generated artifacts / producers / owning suites | `tools/artifact list`, `show`, `regen`, `check` |
 | Broad gates | `tools/test core` / `full` / `branch` |
 | Discover/query configured targets | `tools/gtarget list`, `tools/gtarget show TARGET`, `tools/gtarget TARGET ...` |
@@ -58,6 +59,17 @@ tools/artifact check camry_8965F3307000_fault_status.json
 
 The catalog is derived from tracked artifact paths, exact path references in `tools/`, and verification dependencies; it is not another manually maintained builder registry. `regen` exposes the selected producer before execution and requires an explicit `--producer` when discovery is ambiguous.
 
+Repository memory has the same task-shaped surface:
+
+```bash
+tools/know COM-017
+tools/know "Target Lateral ID" --kind finding --kind open
+tools/know fault_status --kind artifact --kind suite
+tools/know TMS-060 --json
+```
+
+`tools/know` reads the authoritative findings/corrections/open-question ledgers, the derived artifact catalog, `verification.toml`, and tracked docs directly. It is navigation, not an evidence oracle: use the returned canonical report/test to continue, and return to firmware/Ghidra for primary proof.
+
 Configured firmware targets likewise have one registry-backed discovery surface:
 
 ```bash
@@ -69,9 +81,13 @@ tools/gtarget camry-8965F3307000 stats
 Generic rebuild/snapshot tooling resolves target-specific seed tables and Ghidra stage scripts from `data/analysis_targets.json`; adding a target must not require editing the generic shell scripts.
 
 Family modules (`tests/verify_application_wdbi.py`, `tests/verify_corolla_h.py`,
-and so on) group same-mode same-family portable proofs. Prefix queries are the
-memory: `tools/test list application` / `corolla` / `techstream`. Keep live,
-external, and distinct safety pipelines as separate files.
+and so on) group same-mode same-family portable proofs. Exact F33 portable proofs
+use `tests/verify_camry_8965F3307000.py` with per-suite `--section` dispatch;
+`tools/verification_deps.py` scans only the requested section, so one physical
+family module does not turn an edit to fault-status evidence into all nine F33
+proofs. Prefix queries are the memory: `tools/test list application` / `corolla` /
+`camry_8965f3307000` / `techstream`. Keep live, external, and distinct safety
+pipelines as separate files.
 
 The repeated Corolla-H corpus-compaction scripts are consolidated behind one
 profile-driven command:
@@ -130,9 +146,9 @@ hide:
 - **Techstream CUW inspectors and writer generators.** `tools/gts` now provides
   one interactive discovery surface over their shared parsers (including CUW
   descriptor -> current GTS+ writer-route lookup), but it intentionally does
-  not merge their proof logic. `parse_cuw_container.py` already packages the
-  shared container parser; `inspect_cuw_legacy.py` exports the shared legacy
-  attach/parameter decoders used by the other inspectors,
+  not merge their proof logic. `parse_cuw_container.py` owns both full-container
+  validation and the bounded streaming first-member fast path;
+  `tools/techstream/cuw_attach.py` owns the shared attach grammar;
   `tools/techstream/cuw_parameter.py` owns both the common parameter-INI decoder
   and contact-type -> writer route extraction. `generate_cuw_writer_inventory.py`
   keeps only its tracked inventory-schema adapter. The remaining

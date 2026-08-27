@@ -20,10 +20,12 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from parse_ddb import DDBParser  # noqa: E402
+from ddb_strings import load_string_db
+from techstream_paths import V18_TECHSTREAM_ROOT  # noqa: E402
 
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
+DEFAULT_ROOT = V18_TECHSTREAM_ROOT
 DEFAULT_OUTPUT = REPO / "data/generated/techstream_v18/application_interface_correlations.json"
 SIGNAL_INFO_DLL = DEFAULT_ROOT / "bin/GetDatMonSignalInfoP5_DT.dll"
 KGP_DLL = DEFAULT_ROOT / "bin/KgpDataCtrl.dll"
@@ -60,7 +62,7 @@ def find_u16_record(records: list[bytes], offset: int, key: int) -> tuple[int, b
 def decode_monitor(parser: DDBParser, root: Path, region: str, monitor_key: int) -> dict:
     db_path = root / region / "DB/EMPS_P5.ddb"
     db = parser.parse_ecu_db(db_path)
-    strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+    strings = load_string_db(parser, root / region / "DB/M_English.ddb")
 
     monitor_index, monitor_raw = find_u16_record(section_records(db, 62), 0x24, monitor_key)
     name_index = struct.unpack_from("<I", monitor_raw, 0x18)[0]
@@ -166,7 +168,7 @@ def decode_monitor(parser: DDBParser, root: Path, region: str, monitor_key: int)
 def master_route(parser: DDBParser, root: Path, region: str) -> dict:
     master_path = root / region / "DB/Toyota.ddb"
     master = parser.parse_master_db(master_path)
-    strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+    strings = load_string_db(parser, root / region / "DB/M_English.ddb")
     categories = parser.extract_master_ecu_categories(master.sections[16])
     matches = [(index, row) for index, row in enumerate(categories) if row.database_name == "EMPS_P5.ddb"]
     if len(matches) != 1:

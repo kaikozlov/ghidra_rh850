@@ -383,7 +383,7 @@ closed target-natively in §12.1; the H 5-ms figure is no longer transferred.
 The compact artifact is `data/generated/camry_8965F3307000_codeflash.json`,
 bound to exact target-native decompiler bodies in
 `data/generated/camry_8965F3307000_decompiler_evidence.json` and independently
-checked by `tests/verify_camry_8965F3307000_codeflash.py`. Raw acquisition
+checked by `tests/verify_camry_8965F3307000.py`. Raw acquisition
 provenance is retained in `raw-20260826/CODEFLASH_MANIFEST.txt`.
 
 ## 10. Exact DataFlash + CPU-visible RAM SecOC-key recovery result
@@ -602,8 +602,8 @@ old audited low-linked canary/proxy binaries remain reproducible static build
 evidence only and must not be treated as post-startup production residents.
 
 The live evidence is pinned under `targets/camry-2026/raw-20260826/`;
-`tests/verify_camry_8965F3307000_application_ram_loader.py` and the corrected
-`tests/verify_camry_8965F3307000_command5_runtime_carrier.py` prevent regression.
+`tests/verify_camry_8965F3307000.py` and the corrected
+`tests/verify_camry_8965F3307000.py` prevent regression.
 
 ## 13. Non-persistent application-mode signer installation
 
@@ -858,7 +858,7 @@ but it cannot by itself solve the execution half.
 The deterministic assessment is
 `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`, generated
 by `tools/build_camry_8965F3307000_application_ram_loader_assessment.py` and locked
-by `tests/verify_camry_8965F3307000_application_ram_loader.py`.
+by `tests/verify_camry_8965F3307000.py`.
 
 Production steering output remains disabled.
 

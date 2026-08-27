@@ -53,7 +53,7 @@
   ],
   "generator": {
     "path": "tools/extract_corolla_h_nonsteering_engagement_evidence.py",
-    "sha256": "eba0e85c6b4909f4a4747c936ed392434ab2e9084bb60350bf416b9dfbe95f20"
+    "sha256": "3cb5e4e43a7026e39c605dba73079179abb815953d6741e13c6d95cb15278882"
   },
   "image": {
     "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",

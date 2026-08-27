@@ -16,11 +16,11 @@ import struct
 from pathlib import Path
 
 from parse_ddb import DDBParser, ECUDataBase, StringDataBase
+from ddb_strings import load_string_db
+from techstream_paths import V18_TECHSTREAM_ROOT
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-TECHSTREAM_ROOT = (
-    REPO_ROOT / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
-)
+TECHSTREAM_ROOT = V18_TECHSTREAM_ROOT
 OUTPUT_PATH = (
     REPO_ROOT
     / "data/generated/techstream_v18/steering_diagnostic_corpus.json"
@@ -141,7 +141,7 @@ def extract_monitors(db: ECUDataBase, strings: StringDataBase) -> list[dict]:
 
 def build_steering_corpus() -> dict:
     parser = DDBParser()
-    strings = parser.load_string_db(TECHSTREAM_ROOT / "NA/DB/M_English.ddb")
+    strings = load_string_db(parser, TECHSTREAM_ROOT / "NA/DB/M_English.ddb")
     source_paths = sorted(
         path
         for path in TECHSTREAM_ROOT.glob("*/DB/*.ddb")

@@ -8,6 +8,8 @@ import tempfile
 from pathlib import Path
 
 ROOT = REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tools"))
+from artifact_catalog import suite_builder_pairs  # noqa: E402
 passed = failed = 0
 
 
@@ -21,16 +23,10 @@ def check(name, cond, detail=""):
 
 
 BUILDERS = [
-    ("command5 runtime carrier", "tools/build_corolla_hf_command5_runtime_carrier.py", "data/generated/corolla_hf_command5_runtime_carrier.json"),
-    ("steering limits", "tools/build_corolla_hf_steering_limits.py", "data/generated/corolla_hf_steering_limits.json"),
-    ("nonsteering engagement state", "tools/build_corolla_hf_nonsteering_engagement_state.py", "data/generated/corolla_hf_nonsteering_engagement_state.json"),
-    ("cooperative authority wire visibility", "tools/build_corolla_hf_cooperative_authority_wire_visibility.py", "data/generated/corolla_hf_cooperative_authority_wire_visibility.json"),
-    ("B6 competing sender arbitration", "tools/build_corolla_hf_b6_competing_sender_arbitration.py", "data/generated/corolla_hf_b6_competing_sender_arbitration.json"),
-    ("fault state contract", "tools/build_corolla_hf_fault_state_contract.py", "data/generated/corolla_hf_fault_state_contract.json"),
-    ("panda lateral safety contract", "tools/build_corolla_hf_panda_lateral_safety_contract.py", "data/generated/corolla_hf_panda_lateral_safety_contract.json"),
-    ("remaining status contract", "tools/build_corolla_hf_remaining_status_contract.py", "data/generated/corolla_hf_remaining_status_contract.json"),
-    ("command5 portability", "tools/build_corolla_hf_command5_portability.py", "data/generated/corolla_hf_command5_portability.json"),
+    (Path(artifact).stem, builder, artifact)
+    for builder, artifact in suite_builder_pairs("corolla_hf_regen")
 ]
+
 
 for title, builder, artifact in BUILDERS:
     print(f"== {title} regen ==")

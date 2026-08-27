@@ -16,6 +16,8 @@ import struct
 import sys
 from collections import deque
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
@@ -128,8 +130,8 @@ def writes_for_term(census: dict, name: str) -> list[dict]:
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--sienna", type=Path, default=REPO / "firmware/RH850_P1M-E_CodeFlash.bin")
-    p.add_argument("--target", type=Path, default=REPO / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin")
+    p.add_argument("--sienna", type=Path, default=SIENNA_CODEFLASH)
+    p.add_argument("--target", type=Path, default=H_RAW_DUMP)
     p.add_argument("--function-evidence", type=Path, default=REPO / "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json")
     p.add_argument("--reference-census", type=Path, default=REPO / "data/generated/corolla_8965H1202000_fd_control_reference_census.json")
     p.add_argument("--state-bridge-evidence", type=Path, default=STATE_EVIDENCE)

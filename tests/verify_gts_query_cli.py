@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools" / "techstream"))
 
 import gts_cli  # noqa: E402
+import ddb_strings  # noqa: E402
 from parse_ddb import DDBParser  # noqa: E402
 
 
@@ -35,11 +36,11 @@ with tempfile.TemporaryDirectory(prefix="gts-cache-prune-") as td:
     current_cache.write_bytes(b"current")
     for index in range(6):
         (cache_root / f"M_English-old{index}.bin").write_bytes(bytes([index]))
-    gts_cli._prune_string_cache(current_cache)
+    ddb_strings._prune(current_cache)
     remaining = list(cache_root.glob("M_English-*.bin"))
     check(current_cache in remaining, "string-cache pruning always preserves the current decode")
     check(
-        len(remaining) == gts_cli._STRING_CACHE_GENERATIONS_TO_KEEP,
+        len(remaining) == ddb_strings.CACHE_GENERATIONS_TO_KEEP,
         "string-cache pruning keeps a bounded multi-release working set",
     )
 

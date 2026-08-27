@@ -297,7 +297,7 @@
     },
     "full_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
-      "sha256": "162f3bbfe525b7c94d40716f1d34aec3998d83d503563ff73eb8af2d2b0b984f"
+      "sha256": "ff9c88fc02191335a0010d38eb977f418479b1bf5441937adc49d6fe56327a33"
     },
     "h_codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",

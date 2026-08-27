@@ -3,11 +3,13 @@
 from __future__ import annotations
 import argparse,difflib,hashlib,json,re,struct
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 ROOT=Path(__file__).resolve().parents[1]
 EVP=ROOT/'data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json'
 SCORP=ROOT/'data/generated/decompilations.jsonl'
-HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
-SIMG=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin'
+HRAW=H_RAW_DUMP
+SIMG=SIENNA_CODEFLASH
 OUT=ROOT/'data/generated/corolla_8965H1202000_can_com.json'
 MAP=[
 (0x5D3CE,'autosar_com_rx_dispatch_group_b',0x58450),(0x5DB6E,'autosar_com_rx_dispatch_group_a',0x58BBC),(0x69DEC,'com_signal_deadline_monitor_c',0x6418C),(0x7C640,'application_com_rx_indication',0x76A3C),(0x7E30C,'application_pdur_tx_confirmation_router',0x78708),(0x7E5F2,'application_canif_get_tx_can_id',0x789EE),(0x7F002,'application_canif_tx_confirmation',0x793FE),(0x80992,'application_pdur_com_transmit',0x7AD8E),(0x84710,'application_rscfd_tx_confirmation_dispatch',0x7EB10)]

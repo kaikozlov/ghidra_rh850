@@ -8,9 +8,10 @@ import json
 import re
 import struct
 from pathlib import Path
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
+IMAGE = H_CODEFLASH
 RX_DIFF = REPO / "data/generated/corolla_8965H1202000_application_rx_diff.json"
 ENG_EVID = REPO / "data/generated/corolla_8965H1202000_nonsteering_engagement_decompiler_evidence.json"
 STATE = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge.json"

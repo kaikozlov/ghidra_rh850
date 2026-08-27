@@ -3,8 +3,10 @@
 from __future__ import annotations
 import argparse,hashlib,json,struct
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 ROOT=Path(__file__).resolve().parents[1]
-EV=ROOT/'data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json'; HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'; SRAW=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin'; OUT=ROOT/'data/generated/corolla_8965H1202000_diagnostic_residue.json'
+EV=ROOT/'data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json'; HRAW=H_RAW_DUMP; SRAW=SIENNA_CODEFLASH; OUT=ROOT/'data/generated/corolla_8965H1202000_diagnostic_residue.json'
 ROLE_MAP=[
  (0x4C942,'application_session_transition_policy',0x4826A),(0x80114,'application_can_diagnostic_rx_demux',0x7A510),(0x8A27E,'application_session_transition_check_adapter',0x8467E),(0x8B144,'application_clear_diagnostic_information_request_start',0x85544),
  (0x936AA,'application_wdbi_class_0201_write',0x8E6D0),(0x936D6,'application_wdbi_class_2001_write',0x8E6FC),(0x93B56,'application_wdbi_request_start',0x8EB7C),(0x93C62,'application_wdbi_callback',0x8EC88),

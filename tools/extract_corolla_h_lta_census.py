@@ -8,10 +8,11 @@ result is what repository verification consumes.
 from __future__ import annotations
 import argparse, hashlib, json, struct, sys
 from pathlib import Path
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
-IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
+IMAGE = H_CODEFLASH
 DEFAULT_OUT = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance_census.json"
 
 # Import the exact extraction helpers used by the report builder.

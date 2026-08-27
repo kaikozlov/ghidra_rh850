@@ -481,11 +481,11 @@
     "decompiler_evidence": {
       "function_count": 44,
       "path": "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json",
-      "sha256": "72f802e03cc1a77278299cbd2f1a7ff9fb0688620f34000062de9b20337c8c9c"
+      "sha256": "0052de353bb42ce50e3fdb8cc51b0e790b11363efd3b42ebfd8474519459c3c2"
     },
     "full_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
-      "sha256": "162f3bbfe525b7c94d40716f1d34aec3998d83d503563ff73eb8af2d2b0b984f"
+      "sha256": "ff9c88fc02191335a0010d38eb977f418479b1bf5441937adc49d6fe56327a33"
     },
     "hf_equivalence": {
       "path": "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",

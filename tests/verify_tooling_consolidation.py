@@ -115,6 +115,61 @@ check(
 proc = subprocess.run([str(artifact_tool), "list", "fault_status"], cwd=ROOT, text=True, capture_output=True)
 check(proc.returncode == 0 and "camry_8965F3307000_fault_status.json" in proc.stdout, "artifact catalog provides substring discovery")
 
+know_tool = ROOT / "tools/know"
+check(know_tool.is_file() and os.access(know_tool, os.X_OK), "repository knowledge query is an executable task entry point")
+proc = subprocess.run(
+    [str(know_tool), "COM-017", "--kind", "finding", "--json"],
+    cwd=ROOT, text=True, capture_output=True,
+)
+know_rows = json.loads(proc.stdout) if proc.returncode == 0 else []
+check(
+    proc.returncode == 0
+    and len(know_rows) == 1
+    and know_rows[0].get("id") == "COM-017"
+    and "exact raw H receive/dataflow" in know_rows[0].get("source", "")
+    and "Ready wire input closed" in know_rows[0].get("grade", ""),
+    "knowledge query preserves newer findings Source/Grade columns",
+)
+proc = subprocess.run(
+    [str(know_tool), "fault_status", "--kind", "artifact", "--json"],
+    cwd=ROOT, text=True, capture_output=True,
+)
+know_artifacts = json.loads(proc.stdout) if proc.returncode == 0 else []
+check(
+    proc.returncode == 0
+    and any(
+        row.get("artifact") == "data/generated/camry_8965F3307000_fault_status.json"
+        and row.get("producers") == ["tools/build_camry_8965F3307000_fault_status.py"]
+        for row in know_artifacts
+    ),
+    "knowledge query reuses the derived artifact producer catalog",
+)
+
+# Shared mechanics should have one clear owner while subsystem proof logic
+# remains in its existing producer/verifier. Pin the ownership modules and the
+# critical consumers so copy-paste implementations cannot silently return.
+shared_modules = {
+    "tools/decompiler_evidence.py",
+    "tools/corolla_h_constants.py",
+    "tools/sienna_target.py",
+    "tools/techstream/techstream_paths.py",
+    "tools/techstream/ddb_strings.py",
+    "tools/techstream/ddb_semantics.py",
+    "tools/techstream/pe_utils.py",
+    "tools/techstream/cuw_attach.py",
+}
+check(all((ROOT / path).is_file() for path in shared_modules), "shared evidence/target/Techstream mechanics have canonical modules")
+gts_cli_source = (ROOT / "tools/techstream/gts_cli.py").read_text(encoding="utf-8")
+check(
+    all(token in gts_cli_source for token in ("from ddb_semantics import", "from ddb_strings import", "from pe_utils import", "from techstream_paths import", "from cuw_attach import")),
+    "GTS+ discovery consumes shared DDB/string/PE/path/CUW mechanics",
+)
+check(
+    'resolve_ghidra_cli.sh' in pe_source
+    and 'resolve_ghidra_cli.sh' in (ROOT / "tools/g").read_text(encoding="utf-8"),
+    "RH850 and PE wrappers share one vendored Ghidra CLI resolver",
+)
+
 check(
     (ROOT / "tools/__init__.py").read_text(encoding="utf-8")
     == '"""Repository tooling modules used by deterministic verification tests."""\n',

@@ -27,6 +27,11 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Iterable
 
+try:
+    from .sienna_target import DATAFLASH as SIENNA_DATAFLASH
+except ImportError:  # direct script execution
+    from sienna_target import DATAFLASH as SIENNA_DATAFLASH
+
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
@@ -43,7 +48,7 @@ from tools.toyota_secoc_oracle import (  # noqa: E402
 DEFAULT_BASE = 0xFF200000
 LAYOUT_CSV = REPO / "data/dataflash_nvm_records.csv"
 CHECKPOINT_PAYLOAD_CSV = REPO / "data/checkpoint_payload_map.csv"
-REFERENCE_DUMP = REPO / "firmware/RH850_P1M-E_DataFlash.bin"
+REFERENCE_DUMP = SIENNA_DATAFLASH
 REFERENCE_OUTPUT = REPO / "data/generated/dataflash_structural_analysis_4512000.json"
 OBJECT15_RELATED_VARIANT_ADDRESS = 0xFF206E14
 OBJECT15_RELATED_VARIANT_SHA256_PREFIX = "1d1c53a6d634016a"

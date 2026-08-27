@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import argparse
 import gzip
-import hashlib
 import json
 from collections import Counter
 from pathlib import Path
+
+from toyota_route_opendbc_common import sha256
 
 REPO = Path(__file__).resolve().parents[1]
 RAW = REPO / "targets/camry-2026/raw-20260826"
@@ -34,10 +35,6 @@ def load(name: str):
     with gzip.open(path, "rt") as f:
       return json.load(f)
   return json.loads(path.read_text())
-
-
-def sha256(path: Path) -> str:
-  return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def strip_ascii(raw_hex: str, *, counted_16: bool = False) -> str:

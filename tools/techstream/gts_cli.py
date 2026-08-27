@@ -9,9 +9,7 @@ inspection) without merging the subsystem-specific deterministic generators.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
-import os
 import re
 import struct
 import sys
@@ -25,69 +23,35 @@ TECHSTREAM_TOOLS = ROOT / "tools" / "techstream"
 sys.path.insert(0, str(TECHSTREAM_TOOLS))
 
 from cuw_parameter import factory_routes_from_ini_root  # noqa: E402
-from inspect_cuw_legacy import first_member_payload, parse_attach_bytes  # noqa: E402
-from parse_cuw_container import FIRST_MEMBER_OFFSET, MAGIC, parse as parse_cuw_container  # noqa: E402
+from cuw_attach import parse_attach_bytes  # noqa: E402
+from parse_cuw_container import first_member_payload, parse as parse_cuw_container, read_first_member  # noqa: E402
 from parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES, StringDataBase  # noqa: E402
+from ddb_semantics import behavior_rows as semantic_behavior_rows, dtc_rows as semantic_dtc_rows, monitor_rows as semantic_monitor_rows  # noqa: E402
+from ddb_strings import load_string_db as cached_string_db  # noqa: E402
+from pe_utils import binary_strings as pe_binary_strings, exports as pe_exports, imports as pe_imports  # noqa: E402
+from techstream_paths import (  # noqa: E402
+    GTSPLUS_EXTERNAL_ROOT, CUW_CORPUS_ROOT, gts_db_root,
+    resolve_cuw_corpus, resolve_cuwplus_root, resolve_gts_root,
+)
 
-DEFAULT_GTS_EXTERNAL = ROOT / "software/Techstream/gtsplus"
-DEFAULT_CUW_CORPUS = ROOT / "software/Techstream/cuw"
+DEFAULT_GTS_EXTERNAL = GTSPLUS_EXTERNAL_ROOT
+DEFAULT_CUW_CORPUS = CUW_CORPUS_ROOT
 
 
 def _resolve_gts_root(value: str | Path | None = None) -> Path:
-    base = Path(value or os.environ.get("GTSPLUS_ROOT", DEFAULT_GTS_EXTERNAL)).expanduser()
-    candidates = [
-        base,
-        base / "unpacked/gtsplus/Toyota Diagnostics/GTSPlus",
-        base / "Toyota Diagnostics/GTSPlus",
-    ]
-    for candidate in candidates:
-        if (candidate / "NA/DB/Gen").is_dir():
-            return candidate.resolve()
-    return candidates[0].resolve()
+    return resolve_gts_root(value)
 
 
 def _resolve_cuwplus_root(gts_root: Path, value: str | Path | None = None) -> Path:
-    override = value or os.environ.get("GTSPLUS_CUW_ROOT")
-    if override:
-        return Path(override).expanduser().resolve()
-    # Prefer the CUWPlus tree adjacent to the selected GTS+ artifact. This
-    # prevents --gtsplus-root from silently mixing one release's DDBs with the
-    # repository-default release's writer routes.
-    for parent in (gts_root, *gts_root.parents):
-        candidate = parent / "cuwplus/CUWPlus"
-        if candidate.is_dir():
-            return candidate.resolve()
-    external = ROOT / "software/Techstream/gtsplus/cuwplus/CUWPlus"
-    if gts_root == _resolve_gts_root(DEFAULT_GTS_EXTERNAL):
-        return external.resolve()
-    # An explicitly selected alternate GTS+ tree must never borrow the repo
-    # pin's CUWPlus routes. Returning a missing path keeps DDB/PE queries usable
-    # while route/CUW joins correctly report no current route data; callers can
-    # pair a separate reconstruction explicitly with --cuwplus-root.
-    return (gts_root / "__missing_cuwplus__").resolve()
+    return resolve_cuwplus_root(gts_root, value)
 
 
 def _resolve_cuw_corpus(value: str | Path | None = None) -> Path:
-    return Path(value or os.environ.get("TOYOTA_CUW_CORPUS_ROOT", DEFAULT_CUW_CORPUS)).expanduser().resolve()
+    return resolve_cuw_corpus(value)
 
 
 def _db_root(gts_root: Path, region: str = "NA", family: str = "Gen") -> Path:
-    return gts_root / region / "DB" / family
-
-
-def _records(section: Any) -> Iterable[bytes]:
-    size = section.decoded_record_size
-    data = section.decoded_data
-    for index in range(section.header.record_count):
-        yield data[index * size : (index + 1) * size]
-
-
-def _u16(data: bytes, off: int) -> int:
-    return struct.unpack_from("<H", data, off)[0]
-
-
-def _u32(data: bytes, off: int) -> int:
-    return struct.unpack_from("<I", data, off)[0]
+    return gts_db_root(gts_root, region, family)
 
 
 def _normalize_did(value: str) -> int | None:
@@ -107,75 +71,8 @@ def _fold_match(query: str, *values: Any) -> bool:
     return any(value is not None and needle in str(value).casefold() for value in values)
 
 
-_STRING_CACHE_MAGIC = b"GTSSTR1\0"
-_STRING_CACHE_ROOT = ROOT / "build/cache/gts/string-dbs"
-_STRING_CACHE_GENERATIONS_TO_KEEP = 4
-
-
-def _prune_string_cache(cache_path: Path) -> None:
-    """Bound cache growth without defeating side-by-side GTS+ release work."""
-    prefix = cache_path.stem.rsplit("-", 1)[0]
-    others = [
-        candidate
-        for candidate in cache_path.parent.glob(f"{prefix}-*.bin")
-        if candidate != cache_path
-    ]
-    others.sort(key=lambda path: path.stat().st_mtime_ns, reverse=True)
-    keep_other = max(0, _STRING_CACHE_GENERATIONS_TO_KEEP - 1)
-    for stale in others[keep_other:]:
-        stale.unlink(missing_ok=True)
-
-
 def _load_string_db(parser: DDBParser, path: Path) -> StringDataBase:
-    """Load M/V string DBs through a source-hash-keyed local decode cache.
-
-    Pure-Python LZSS expansion of M_English is the dominant cost of otherwise
-    tiny interactive queries. The cache contains only the already-decoded bytes
-    under ignored ``build/cache`` and is keyed by the source DDB plus parser
-    implementation, so copied/new releases or parser changes cannot reuse stale
-    content. U_English is kept on
-    the canonical parser path because its parallel metadata table matters to
-    callers that use more than full-text search.
-    """
-    if path.name.startswith("U_"):
-        return parser.load_string_db(path)
-    source = path.read_bytes()
-    cache_identity = hashlib.sha256()
-    cache_identity.update(_STRING_CACHE_MAGIC)
-    cache_identity.update(source)
-    cache_identity.update((TECHSTREAM_TOOLS / "parse_ddb.py").read_bytes())
-    digest = cache_identity.hexdigest()
-    cache_path = _STRING_CACHE_ROOT / f"{path.stem}-{digest}.bin"
-    try:
-        cached = cache_path.read_bytes()
-        if len(cached) >= 16 and cached[:8] == _STRING_CACHE_MAGIC:
-            entry_count, pool_offset = struct.unpack_from("<II", cached, 8)
-            decompressed = cached[16:]
-            if pool_offset == entry_count * 6 and pool_offset <= len(decompressed):
-                return StringDataBase(
-                    path=path,
-                    entry_count=entry_count,
-                    decompressed=decompressed,
-                    pool_offset=pool_offset,
-                    metadata=None,
-                )
-    except OSError:
-        pass
-
-    db = parser.load_string_db(path)
-    payload = _STRING_CACHE_MAGIC + struct.pack("<II", db.entry_count, db.pool_offset) + db.decompressed
-    temporary = cache_path.with_name(f".{cache_path.name}.tmp.{os.getpid()}")
-    try:
-        cache_path.parent.mkdir(parents=True, exist_ok=True)
-        temporary.write_bytes(payload)
-        os.replace(temporary, cache_path)
-        _prune_string_cache(cache_path)
-    except OSError:
-        try:
-            temporary.unlink(missing_ok=True)
-        except OSError:
-            pass
-    return db
+    return cached_string_db(parser, path)
 
 
 def _english_strings(parser: DDBParser, db_root: Path):
@@ -215,82 +112,20 @@ def _resolve_ecu(db_root: Path, query: str) -> Path:
     raise SystemExit("ambiguous ECU database; matches:\n" + "\n".join(f"  {p.name}" for p in matches[:40]))
 
 
+def _without_raw(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [{key: value for key, value in row.items() if key != "raw"} for row in rows]
+
+
 def _monitor_rows(db: Any, strings: Any, source: str) -> list[dict[str, Any]]:
-    by_identity: dict[tuple[Any, ...], dict[str, Any]] = {}
-    for table_id in (62, 157):
-        section = db.sections.get(table_id)
-        if section is None:
-            continue
-        size = section.decoded_record_size
-        # Current GTS+ P5/P6 rows are 0x50 bytes. V18's older P5 rows were
-        # 0x40; accepting both keeps this query helper useful on copied files.
-        shift = 0x10 if size >= 0x50 else 0
-        if size < 0x3A + shift:
-            continue
-        for index, raw in enumerate(_records(section)):
-            row = {
-                "kind": "did",
-                "source": source,
-                "table": table_id,
-                "tables": [table_id],
-                "record": index,
-                "name": strings.get_string(_u32(raw, 0x18 + shift)),
-                "monitor_key": _u16(raw, 0x24 + shift),
-                "physical_data_key": _u16(raw, 0x2A + shift),
-                "bit_start": _u16(raw, 0x2C + shift),
-                "bit_end": _u16(raw, 0x2E + shift),
-                "primary_did": _u16(raw, 0x36 + shift),
-                "alternate_did": _u16(raw, 0x38 + shift),
-            }
-            # The current corpus can carry the same display signal in both
-            # table 62/157 generations and, occasionally, with different
-            # internal monitor keys. Interactive lookup is about the Toyota
-            # name <-> DID relation, so collapse those implementation aliases.
-            identity = (row["name"], row["primary_did"], row["alternate_did"])
-            existing = by_identity.get(identity)
-            if existing is None:
-                by_identity[identity] = row
-            elif table_id not in existing["tables"]:
-                existing["tables"].append(table_id)
-    return list(by_identity.values())
+    return _without_raw(semantic_monitor_rows(db, strings, source, deduplicate=True))
 
 
 def _dtc_rows(parser: DDBParser, db: Any, strings: Any, source: str) -> list[dict[str, Any]]:
-    section = db.sections.get(65)
-    if section is None:
-        return []
-    out = []
-    for index, entry in enumerate(parser.extract_dtc_failure_entries(section)):
-        out.append({
-            "kind": "dtc",
-            "source": source,
-            "table": 65,
-            "record": index,
-            "code": entry.code,
-            "packed_dtc": f"0x{entry.packed_dtc:06X}",
-            "description": strings.get_string(entry.description_string_index),
-            "failure": strings.get_string(entry.failure_string_index),
-        })
-    return out
+    return _without_raw(semantic_dtc_rows(parser, db, strings, source))
 
 
 def _behavior_rows(db: Any, strings: Any, source: str) -> list[dict[str, Any]]:
-    section = db.sections.get(87)
-    if section is None or section.decoded_record_size < 20:
-        return []
-    out = []
-    for index, raw in enumerate(_records(section)):
-        signature = raw[:12].decode("utf-16-le", errors="replace").split("\x00", 1)[0]
-        out.append({
-            "kind": "behavior",
-            "source": source,
-            "table": 87,
-            "record": index,
-            "signature": signature,
-            "name": strings.get_string(_u32(raw, 0x0C)),
-            "comment": strings.get_string(_u32(raw, 0x10)),
-        })
-    return out
+    return _without_raw(semantic_behavior_rows(db, strings, source))
 
 
 def _format_row(row: dict[str, Any]) -> str:
@@ -565,45 +400,7 @@ def _cuw_descriptor(path: Path) -> tuple[dict[str, Any], dict[str, dict[str, str
 
 
 def _cuw_first_member_fast(path: Path) -> tuple[dict[str, Any], bytes]:
-    """Read the CUW outer header and first member without streaming its tail."""
-    with path.open("rb") as stream:
-        prefix = stream.read(FIRST_MEMBER_OFFSET)
-        if len(prefix) != FIRST_MEMBER_OFFSET:
-            raise ValueError(f"truncated CUW header: {len(prefix)} bytes")
-        if prefix[: len(MAGIC)] != MAGIC:
-            raise ValueError("bad CUW magic")
-        format_type = prefix[13]
-        name_len_raw = stream.read(2)
-        if len(name_len_raw) != 2:
-            raise ValueError("truncated first-member name length")
-        name_len = struct.unpack(">H", name_len_raw)[0]
-        name = stream.read(name_len)
-        if len(name) != name_len:
-            raise ValueError("truncated first-member name")
-        size_crc = stream.read(8)
-        if len(size_crc) != 8:
-            raise ValueError("truncated first-member size/CRC")
-        payload_len, payload_crc = struct.unpack(">II", size_crc)
-        if payload_len > 8 * 1024 * 1024:
-            raise ValueError(f"implausibly large first-member descriptor: {payload_len} bytes")
-        payload = stream.read(payload_len)
-        if len(payload) != payload_len:
-            raise ValueError("truncated first-member payload")
-    try:
-        member_name = name.decode("ascii")
-    except UnicodeDecodeError:
-        member_name = name.hex()
-    if member_name != "attach.att":
-        raise ValueError(f"unexpected first CUW member {member_name!r}")
-    return ({
-        "format_type": format_type,
-        "file_size": path.stat().st_size,
-        "name": member_name,
-        "payload_length": payload_len,
-        "payload_crc32": payload_crc,
-        "validation": "header-and-first-member-only",
-    }, payload)
-
+    return read_first_member(path)
 
 def _cuw_descriptor_fast(path: Path) -> tuple[dict[str, Any], dict[str, dict[str, str]]]:
     """Read only the CUW header + first attach member for interactive lookup.
@@ -747,10 +544,7 @@ def _resolve_pe(gts_root: Path, cuwplus_root: Path, query: str) -> Path:
 
 
 def _binary_strings(data: bytes, minimum: int = 5) -> list[str]:
-    ascii_strings = [m.group().decode("latin1") for m in re.finditer(rb"[ -~]{%d,}" % minimum, data)]
-    wide_re = re.compile(rb"(?:[ -~]\x00){%d,}" % minimum)
-    wide_strings = [m.group().decode("utf-16-le", errors="replace") for m in wide_re.finditer(data)]
-    return ascii_strings + wide_strings
+    return pe_binary_strings(data, minimum)
 
 
 def cmd_pe(args: argparse.Namespace) -> int:
@@ -762,21 +556,8 @@ def cmd_pe(args: argparse.Namespace) -> int:
         pe = pefile.PE(data=data, fast_load=False)
     except pefile.PEFormatError as exc:
         raise SystemExit(f"not a parseable PE: {path}: {exc}") from exc
-    exports = []
-    if hasattr(pe, "DIRECTORY_ENTRY_EXPORT"):
-        for symbol in pe.DIRECTORY_ENTRY_EXPORT.symbols:
-            exports.append({
-                "name": symbol.name.decode("latin1", errors="replace") if symbol.name else f"ordinal:{symbol.ordinal}",
-                "rva": symbol.address,
-            })
-    imports = []
-    for library in getattr(pe, "DIRECTORY_ENTRY_IMPORT", []):
-        dll = library.dll.decode("latin1", errors="replace")
-        for symbol in library.imports:
-            imports.append({
-                "dll": dll,
-                "name": symbol.name.decode("latin1", errors="replace") if symbol.name else f"ordinal:{symbol.ordinal}",
-            })
+    exports = pe_exports(pe)
+    imports = pe_imports(pe)
     strings = _binary_strings(data, args.min_string)
     if args.query:
         exports = [e for e in exports if _fold_match(args.query, e["name"])]

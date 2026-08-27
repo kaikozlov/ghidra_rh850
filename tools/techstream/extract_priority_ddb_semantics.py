@@ -11,10 +11,12 @@ from pathlib import Path
 import pefile
 
 from parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES
+from ddb_strings import load_string_db
+from techstream_paths import V18_TECHSTREAM_ROOT
 
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
+DEFAULT_ROOT = V18_TECHSTREAM_ROOT
 DEFAULT_PE = DEFAULT_ROOT / "bin/KgpDataCtrl.dll"
 DEFAULT_OUTPUT = REPO / "data/generated/techstream_v18/priority_steering_ddb_semantics.json"
 PRIORITY_TYPES = (6, 11, 12, 61, 62, 63, 80, 87, 88, 90, 91)
@@ -167,7 +169,7 @@ def build(root: Path, pe_path: Path) -> dict:
         if not selected:
             continue
         region = path.relative_to(root).parts[0]
-        strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+        strings = load_string_db(parser, root / region / "DB/M_English.ddb")
         sections = {}
         for table_type in selected:
             section = db.sections[table_type]

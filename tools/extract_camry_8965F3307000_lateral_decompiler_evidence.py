@@ -1,35 +1,26 @@
 #!/usr/bin/env python3
 """Promote exact-F33 decompiler evidence needed by the static lateral contract."""
 from __future__ import annotations
-import argparse, hashlib, json
+import argparse, json
 from pathlib import Path
-from camry_f33_corpus import CORPUS, body_bytes, display_path
+from camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, body_bytes, display_path
+from decompiler_evidence import bind_entries, bind_function, load_function_corpus, require_function, sha256_bytes
 REPO=Path(__file__).resolve().parents[1]
-IMAGE=REPO/'firmware/camry-8965F3307000/CodeFlash.bin'
 OUT=REPO/'data/generated/camry_8965F3307000_lateral_decompiler_evidence.json'
 ENTRIES=[
   0x34C56,0x35A06,0x46994,0x47AE0,0x484D2,0x48684,0x4B59E,0x4BD46,0x4DB70,0x4DBBC,0x4E394,0x54244,0x564CE,0x58074,
   0x66062,0x6639C,0x66512,0xBCD66,0xCDA20,0xCCF0E,0xCCFB6,0xCDFF8,0xCE3AA,
   0xCEC8A,0xCED28,0xCEDA4,0xCEE20,0xCEE46,0xCEE80,0xCEF26,0xCEFFC,
 ]
-IMAGE_SHA='42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7'
+IMAGE_SHA=IMAGE_SHA256
 
-def sha(b:bytes)->str:return hashlib.sha256(b).hexdigest()
+def sha(b:bytes)->str:return sha256_bytes(b)
 def main()->int:
  ap=argparse.ArgumentParser(description=__doc__); ap.add_argument('--corpus',type=Path,default=CORPUS); ap.add_argument('--out',type=Path,default=OUT); a=ap.parse_args()
  image=IMAGE.read_bytes()
  if len(image)!=0x100000 or sha(image)!=IMAGE_SHA: raise SystemExit('exact F33 image identity drift')
- rows={}; total=0
- for line in a.corpus.open(encoding='utf-8'):
-  r=json.loads(line)
-  if r.get('record')=='function':
-   total+=1; rows[int(r['entry_addr'],16)]=r
- funcs=[]
- for entry in ENTRIES:
-  r=rows.get(entry)
-  if not r or not r.get('decompile_completed') or not r.get('decompiled_c'): raise SystemExit(f'missing complete decompile 0x{entry:X}')
-  n=int(r['body_size']); body=body_bytes(image,r); text=r['decompiled_c']
-  funcs.append({'entry':f'0x{entry:08X}','body_size':n,'body_ranges':r.get('body_ranges',[]),'data_references':r.get('data_references',[]),'body_sha256':sha(body),'decompiled_c_sha256':sha(text.encode()),'decompiled_c':text})
+ rows,total=load_function_corpus(a.corpus)
+ funcs=bind_entries(image,rows,ENTRIES)
  def refs(address:int):
   out=[]
   for entry,r in rows.items():

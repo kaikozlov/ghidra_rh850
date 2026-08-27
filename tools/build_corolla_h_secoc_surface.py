@@ -3,10 +3,12 @@
 from __future__ import annotations
 import argparse,hashlib,json,re,struct
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 ROOT=Path(__file__).resolve().parents[1]
 EV=ROOT/'data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json'
-HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
-SIMG=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin'
+HRAW=H_RAW_DUMP
+SIMG=SIENNA_CODEFLASH
 OUT=ROOT/'data/generated/corolla_8965H1202000_secoc_surface.json'
 CORE_REFS=[0x8704c,0x870a8,0x871a0,0x87610,0x87636,0x8783c,0x87b46,0x87bba,0x87c14,0x87c70,0x87ccc,0x87dd0,0x88028,0x88080,0x880dc,0x881dc,0x888fa,0x889cc,0x88b5c,0x88b6a,0x88b9c,0x88c0a,0x89448,0x894be,0x89510]
 def sha(b):return hashlib.sha256(b).hexdigest()

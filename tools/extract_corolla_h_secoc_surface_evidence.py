@@ -3,8 +3,9 @@
 from __future__ import annotations
 import hashlib,json
 from pathlib import Path
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 ROOT=Path(__file__).resolve().parents[1]
-RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+RAW=H_RAW_DUMP
 SC=ROOT/'data/generated/decompilations.jsonl'
 SOURCES={
  'core':ROOT/'build/work/corpora/h_8965H1202000_secoc_core_decompilations.jsonl',

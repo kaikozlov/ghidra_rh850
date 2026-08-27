@@ -17,7 +17,7 @@ BUILDER = REPO / "tools/techstream/build_corolla_2023_calibration_acquisition.py
 CUW_CORPUS = REPO / "software/Techstream/cuw"
 sys.path.insert(0, str(REPO / "tools/techstream"))
 
-from inspect_cuw_legacy import parse_attach_bytes
+from cuw_attach import parse_attach_bytes
 
 passed = failed = 0
 oracle = "generated_self_check+independent_external_artifact"

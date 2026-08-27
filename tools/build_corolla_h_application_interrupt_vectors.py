@@ -3,7 +3,9 @@
 from __future__ import annotations
 import argparse,hashlib,json,struct
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1];SRAW=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';OUT=ROOT/'data/generated/corolla_8965H1202000_application_interrupt_vectors.json';BASE=0x20200;COUNT=384
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
+ROOT=Path(__file__).resolve().parents[1];SRAW=SIENNA_CODEFLASH;HRAW=H_RAW_DUMP;OUT=ROOT/'data/generated/corolla_8965H1202000_application_interrupt_vectors.json';BASE=0x20200;COUNT=384
 ROLES={8:(0x70A54,'application_ecm_maskable_isr'),133:(0x70320,'application_tauj0_ch0_isr'),134:(0x703CA,'application_tauj0_ch1_isr'),135:(0x70476,'application_tauj0_ch2_isr'),187:(0x6506A,'application_can1_rx_isr'),188:(0x65028,'application_can1_tx_isr'),379:(0x65130,'application_flash_end_isr')}
 def sha(b):return hashlib.sha256(b).hexdigest()
 def main():

@@ -3,9 +3,11 @@
 from __future__ import annotations
 import argparse,hashlib,json,struct
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 ROOT=Path(__file__).resolve().parents[1]
 EV=ROOT/'data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json';SC=ROOT/'data/generated/decompilations.jsonl';DF=ROOT/'data/generated/corolla_2023_albino_dataflash_analysis.json'
-HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';SI=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin';OUT=ROOT/'data/generated/corolla_8965H1202000_storage_nvm.json'
+HRAW=H_RAW_DUMP;SI=SIENNA_CODEFLASH;OUT=ROOT/'data/generated/corolla_8965H1202000_storage_nvm.json'
 MAP=[(0x4EAD8,'application_dataflash_range_allowed',0x4A534),(0x65C84,'secoc_nvm_restore_request',0x5FFBC),(0x66DB2,'secoc_nvm_queue_restore',0x610EA)]
 def sha(b):return hashlib.sha256(b).hexdigest()
 def load_s():

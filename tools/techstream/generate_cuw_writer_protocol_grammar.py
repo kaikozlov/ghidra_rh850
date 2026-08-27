@@ -9,15 +9,18 @@ pinned by deterministic tests or existing firmware-static findings.
 from __future__ import annotations
 import argparse, collections, csv, hashlib, io, json, struct
 from pathlib import Path
+
+from techstream_paths import V18_DIAGNOSTICS_ROOT
 from typing import Any
 import pefile
+from pe_utils import imports as pe_imports
 import sys
 
 REPO=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(REPO))
 from tools.techstream.cuw_parameter import decode_parameter_ini, factory_routes_from_ini_root
 
-ROOT=REPO/'software/Techstream/v18/unpacked/toyota/Toyota Diagnostics'
+ROOT=V18_DIAGNOSTICS_ROOT
 CUW=ROOT/'Calibration Update Wizard'
 OUT=REPO/'data/generated/techstream_v18/cuw_writer_protocol_grammar.json'
 
@@ -98,11 +101,7 @@ def scan(path:Path)->dict[str,Any]:
  for disp,bb,rvas in chains(events(pe)):
   raw=bytes(bb); k='uds-request' if raw[0] in UDS else 'uds-positive-response' if raw[0] in POS else 'other'
   if k!='other' or len(raw)>=3: ts.append({'rva':rvas[0],'bytes':raw.hex(' '),'length':len(raw),'kind':k})
- imports=[]
- for lib in getattr(pe,'DIRECTORY_ENTRY_IMPORT',[]):
-  dll=lib.dll.decode('latin1')
-  for s in lib.imports:
-   imports.append({'dll':dll,'name':s.name.decode('latin1') if s.name else f'ordinal:{s.ordinal}'})
+ imports=pe_imports(pe)
  return {'name':path.name,'sha256':hashlib.sha256(data).hexdigest(),'templates':ts,'imports':imports}
 
 # Ghidra-derived function extents for decisive formerly-bounded families.  The

@@ -6,10 +6,12 @@ import hashlib
 import importlib.util
 import json
 import struct
+import sys
 import zlib
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO / "tools"))
 BASELINE = REPO / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
 TARGET = REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
 ARTIFACT = REPO / "data/generated/corolla_8965F1208000_low_calibration_delta.json"

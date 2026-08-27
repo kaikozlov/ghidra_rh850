@@ -92,6 +92,7 @@ Remember four task commands, not individual implementation files:
 | Discover / preview | `tools/test list [word]`, `tools/test plan` |
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
 | GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
+| Repository knowledge / findings / open questions | `tools/know QUERY` |
 | Generated artifacts / producers / owners | `tools/artifact` |
 | Registered analysis targets | `tools/gtarget list`, `tools/gtarget show TARGET` |
 | Deliberate gates | `tools/test core` / `full` / `branch` |
@@ -99,6 +100,8 @@ Remember four task commands, not individual implementation files:
 `tools/gtarget list` and `tools/gtarget show TARGET` are the target discovery surface; `tools/gtarget TARGET ...` (and wrappers such as `tools/gcamry`) run Ghidra commands against a configured target. Registered rebuild inputs, stage scripts, image identities, and corpus paths live in `data/analysis_targets.json`; generic target shell tooling must not bake in vehicle-specific paths.
 
 `tools/artifact list/show/regen/check` is the generated-artifact discovery surface. It derives producer candidates from tracked tool references and verification ownership from `verification.toml`; do not recreate builder→artifact tables in new regen wrappers.
+
+`tools/know QUERY` searches the authoritative findings, corrections, open-question ledgers, generated-artifact catalog, verification suites, and tracked docs. Use it for repository-memory questions before grepping individual ledgers; it does not replace firmware/Ghidra as evidence authority.
 
 Evidence compaction, cross-variant extraction, and working-project exports expose their own discovery commands: Evidence compaction, cross-variant extraction, and working-project
 exports expose their own discovery commands:

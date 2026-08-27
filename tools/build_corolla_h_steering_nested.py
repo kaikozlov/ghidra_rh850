@@ -3,11 +3,13 @@
 from __future__ import annotations
 import argparse,hashlib,json,re
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 ROOT=Path(__file__).resolve().parents[1]
 EV=ROOT/'data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json'
 SDEC=ROOT/'data/generated/decompilations.jsonl'
-HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
-SRAW=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin'
+HRAW=H_RAW_DUMP
+SRAW=SIENNA_CODEFLASH
 OUT=ROOT/'data/generated/corolla_8965H1202000_steering_nested.json'
 ROLE_MAP=[
  (0xC8D62,'lta_internal_command_rate_limit',0xC9C16),

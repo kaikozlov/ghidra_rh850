@@ -767,7 +767,6 @@ paths = [
 tests = ["tests/verify_analysis_targets.py"]
 oracle = "generated_self_check"
 paths = [
-  "tools/gtarget",
   "tools/gcamry",
   "tools/generate_target_decompiler_corpus.py",
   "tools/export_ghidra_project.sh",
@@ -780,7 +779,6 @@ paths = [
   "data/generated/camry-8965F3307000/decompilations.jsonl",
   "projects/",
   "targets/camry-2026/",
-  "Makefile",
   "docs/WORKFLOW.md",
   "AGENTS.md",
 ]
@@ -831,7 +829,8 @@ paths = [
   'targets/camry-2026/raw-20260826/camry_ready_b_20260826.json.gz',
 ]
 [suite.camry_8965f3307000_codeflash]
-tests = ["tests/verify_camry_8965F3307000_codeflash.py"]
+tests = ["tests/verify_camry_8965F3307000.py"]
+args = ["--section", "codeflash"]
 oracle = "raw_bytes"
 paths = [
   "data/generated/camry-8965F3307000/decompilations.jsonl",
@@ -845,7 +844,8 @@ paths = [
 ]
 
 [suite.camry_8965f3307000_flash_backend]
-tests = ["tests/verify_camry_8965F3307000_flash_backend.py"]
+tests = ["tests/verify_camry_8965F3307000.py"]
+args = ["--section", "flash_backend"]
 oracle = "raw_bytes"
 paths = [
   "tools/camry_f33_corpus.py",
@@ -868,7 +868,8 @@ paths = [
 ]
 
 [suite.camry_8965f3307000_secoc_patch]
-tests = ["tests/verify_camry_8965F3307000_secoc_patch.py"]
+tests = ["tests/verify_camry_8965F3307000.py"]
+args = ["--section", "secoc_patch"]
 oracle = "raw_bytes"
 paths = [
   "ghidra/scripts/investigate/SeedSecocAcceptanceGateCandidates.java",
@@ -880,7 +881,8 @@ paths = [
 ]
 
 [suite.camry_8965f3307000_lateral_static]
-tests = ["tests/verify_camry_8965F3307000_lateral_static.py"]
+tests = ["tests/verify_camry_8965F3307000.py"]
+args = ["--section", "lateral_static"]
 oracle = "raw_bytes"
 paths = [
   "data/generated/camry-8965F3307000/decompilations.jsonl",
@@ -889,7 +891,8 @@ paths = [
 ]
 
 [suite.camry_8965f3307000_tss3_opendbc_port]
-tests = ["tests/verify_camry_8965F3307000_tss3_opendbc_port.py"]
+tests = ["tests/verify_camry_8965F3307000.py"]
+args = ["--section", "tss3_opendbc_port"]
 oracle = "raw_bytes"
 paths = [
   "data/generated/camry-8965F3307000/decompilations.jsonl",
@@ -899,10 +902,10 @@ paths = [
 ]
 
 [suite.camry_8965f3307000_fault_status]
-tests = ["tests/verify_camry_8965F3307000_fault_status.py"]
+tests = ["tests/verify_camry_8965F3307000.py"]
+args = ["--section", "fault_status"]
 oracle = "raw_bytes"
 paths = [
-  "tools/camry_f33_corpus.py",
   "data/generated/camry-8965F3307000/decompilations.jsonl",
   "tools/extract_camry_8965F3307000_fault_status_decompiler_evidence.py",
   "docs/variants/README.md",
@@ -910,16 +913,16 @@ paths = [
 ]
 
 [suite.camry_8965f3307000_secoc_recovery]
-tests = ["tests/verify_camry_8965F3307000_secoc_recovery.py"]
+tests = ["tests/verify_camry_8965F3307000.py"]
+args = ["--section", "secoc_recovery"]
 oracle = "raw_bytes"
 paths = [
   "targets/camry-2026/raw-20260826/secoc-recovery/",
 ]
 
 [suite.camry_8965f3307000_command5_runtime_carrier]
-tests = [
-  "tests/verify_camry_8965F3307000_command5_runtime_carrier.py",
-]
+tests = ["tests/verify_camry_8965F3307000.py"]
+args = ["--section", "command5_runtime_carrier"]
 oracle = "raw_bytes"
 paths = [
   "docs/variants/camry-2026-live-baseline.md",
@@ -928,7 +931,8 @@ paths = [
 ]
 
 [suite.camry_8965f3307000_application_ram_loader]
-tests = ["tests/verify_camry_8965F3307000_application_ram_loader.py"]
+tests = ["tests/verify_camry_8965F3307000.py"]
+args = ["--section", "application_ram_loader"]
 oracle = "raw_bytes"
 paths = [
   "targets/camry-2026/raw-20260826/RAM_RETENTION_MANIFEST.txt",
@@ -1874,7 +1878,17 @@ oracle = "cfg_dataflow"
 tests = ["tests/verify_tooling_consolidation.py"]
 oracle = "generated_self_check"
 paths = [
+  "tools/decompiler_evidence.py",
+  "tools/sienna_target.py",
+  "tools/techstream/techstream_paths.py",
+  "tools/techstream/ddb_strings.py",
+  "tools/techstream/ddb_semantics.py",
+  "tools/techstream/pe_utils.py",
+  "tools/techstream/cuw_attach.py",
+  "tools/resolve_ghidra_cli.sh",
   "docs/tooling/README.md",
+  "docs/WORKFLOW.md",
+  "AGENTS.md",
 ]
 
 [suite.annotation_ledger]

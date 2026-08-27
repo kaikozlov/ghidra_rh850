@@ -49,6 +49,7 @@ ANALYSIS_TARGET="${GHIDRA_ANALYSIS_TARGET:-$(python3 -c 'import json,sys; print(
 TARGET_FIELD() { python3 "$ROOT/tools/analysis_target.py" "$ANALYSIS_TARGET" --field "$1"; }
 PROJECT_NAME=$(TARGET_FIELD project_name)
 PROGRAM_NAME=$(TARGET_FIELD program_name)
+CODEFLASH="$ROOT/$(TARGET_FIELD codeflash)"
 PROJECT_DIR="${PROJECT_DIR:-$ROOT/$(TARGET_FIELD work_dir)}"
 
 resolve_path() {
@@ -184,7 +185,7 @@ case "$PROFILE" in
     python3 "$ROOT/tools/apply_function_discovery_adjudications.py" \
       --candidates "$PRIMARY_OUT" \
       --reviews "$ROOT/data/function_discovery_reviewed_clusters.csv" \
-      --firmware "$ROOT/firmware/RH850_P1M-E_CodeFlash.bin"
+      --firmware "$CODEFLASH"
     python3 - "$PRIMARY_OUT" "$SECONDARY_OUT" <<'PY'
 import csv
 import json

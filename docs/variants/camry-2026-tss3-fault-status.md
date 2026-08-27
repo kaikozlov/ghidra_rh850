@@ -10,7 +10,7 @@ Canonical machine-readable evidence:
 
 - `data/generated/camry_8965F3307000_fault_status_decompiler_evidence.json`
 - `data/generated/camry_8965F3307000_fault_status.json`
-- `tests/verify_camry_8965F3307000_fault_status.py`
+- `tests/verify_camry_8965F3307000.py`
 
 The normalized target remains exact `8965F3307000`, SHA-256
 `42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`.

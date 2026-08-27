@@ -13,13 +13,14 @@ import hashlib
 import json
 import struct
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
 
 from Crypto.Cipher import AES
 from Crypto.Hash import CMAC
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CODEFLASH = ROOT / "firmware/RH850_P1M-E_CodeFlash.bin"
+CODEFLASH = SIENNA_CODEFLASH
 STANDARD = ROOT / "tests/fixtures/payloads/dataflash_dump_payload.bin"
 CANDIDATE = ROOT / "tests/fixtures/payloads/candidate_f05_dataflash_payload.bin"
 DEFAULT_OUTPUT = ROOT / "data/generated/candidate_f05_payload.json"

@@ -7,12 +7,15 @@ import hashlib
 import json
 import struct
 from pathlib import Path
+
+from techstream_paths import V18_DIAGNOSTICS_ROOT
 from typing import Any
 
 import pefile
+from pe_utils import exports as pe_exports
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
+DEFAULT_ROOT = V18_DIAGNOSTICS_ROOT
 DEFAULT_OUT = REPO / "data/generated/techstream_v18/crypto_inventory.json"
 
 VALUES = {
@@ -90,11 +93,7 @@ def pe_context(path: Path, data: bytes) -> tuple[pefile.PE | None, list[dict[str
         pe = pefile.PE(data=data, fast_load=False)
     except pefile.PEFormatError:
         return None, []
-    exports: list[dict[str, Any]] = []
-    if hasattr(pe, "DIRECTORY_ENTRY_EXPORT"):
-        for symbol in pe.DIRECTORY_ENTRY_EXPORT.symbols:
-            if symbol.name:
-                exports.append({"name": symbol.name.decode("ascii", "replace"), "rva": symbol.address})
+    exports = [row for row in pe_exports(pe, unnamed_none=True) if row["name"] is not None]
     exports.sort(key=lambda item: item["rva"])
     return pe, exports
 

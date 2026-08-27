@@ -13,7 +13,8 @@ CORPUS = REPO / "software/Techstream/cuw"
 ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
 sys.path.insert(0, str(REPO / "tools/techstream"))
 
-from inspect_cuw_legacy import first_member_payload, parse_attach_bytes
+from cuw_attach import parse_attach_bytes
+from parse_cuw_container import first_member_payload
 from inspect_cuw_vforest import decode_ascii_hex_payload, parse_zv_lzf_stream
 from parse_cuw_container import parse as parse_container
 

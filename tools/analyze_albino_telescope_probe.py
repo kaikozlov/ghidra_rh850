@@ -12,13 +12,14 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 from Crypto.Cipher import AES
 
 REPO = Path(__file__).resolve().parents[1]
 PROBE = REPO / "community/albinoelephant/telescope/probe.json"
 PROBE_MD = REPO / "community/albinoelephant/telescope/probe.md"
-CODEFLASH = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
+CODEFLASH = H_CODEFLASH
 RAW_RAM_DIR = (
     REPO
     / "community/albinoelephant/raw-20260818"

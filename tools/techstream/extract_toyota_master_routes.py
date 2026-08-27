@@ -10,10 +10,12 @@ import struct
 from pathlib import Path
 
 from parse_ddb import DDBParser
+from ddb_strings import load_string_db
+from techstream_paths import V18_TECHSTREAM_ROOT
 
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
+DEFAULT_ROOT = V18_TECHSTREAM_ROOT
 DEFAULT_OUTPUT = REPO / "data/generated/techstream_v18/toyota_master_routes.json"
 TARGET_DATABASES = ("EPS_P4DK3.ddb", "EPS_CAN_P4DK.ddb", "EMPS_P5.ddb")
 
@@ -77,7 +79,7 @@ def region_routes(root: Path, region: str) -> dict:
     db_path = root / region / "DB/Toyota.ddb"
     string_path = root / region / "DB/M_English.ddb"
     master = parser.parse_master_db(db_path)
-    strings = parser.load_string_db(string_path)
+    strings = load_string_db(parser, string_path)
     categories = parser.extract_master_ecu_categories(master.sections[16])
     dlls = parser.extract_master_dlls(master.sections[19])
     functions = parser.extract_master_functions(master.sections[26])

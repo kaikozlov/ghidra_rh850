@@ -9,10 +9,12 @@ import math
 import re
 import struct
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 REPO = Path(__file__).resolve().parents[1]
-H_IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
-S_IMAGE = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
+H_IMAGE = H_CODEFLASH
+S_IMAGE = SIENNA_CODEFLASH
 H_CENSUS = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance_census.json"
 S_CORPUS = REPO / "data/generated/decompilations.jsonl"
 EVIDENCE = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json"

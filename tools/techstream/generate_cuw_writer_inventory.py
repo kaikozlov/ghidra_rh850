@@ -13,9 +13,12 @@ import json
 import re
 import struct
 from pathlib import Path
+
+from techstream_paths import V18_DIAGNOSTICS_ROOT
 from typing import Any
 
 import pefile
+from pe_utils import binary_strings, exports as pe_exports, imports as pe_imports
 
 try:  # direct script and package imports are both repository-supported
     from .cuw_parameter import decode_parameter_ini, factory_routes_from_ini_root
@@ -23,7 +26,7 @@ except ImportError:
     from cuw_parameter import decode_parameter_ini, factory_routes_from_ini_root
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
+DEFAULT_ROOT = V18_DIAGNOSTICS_ROOT
 DEFAULT_OUT = REPO / "data/generated/techstream_v18/cuw_writer_inventory.json"
 
 ARTIFACTS = [
@@ -133,18 +136,10 @@ def digest(data: bytes) -> str:
 def pe_inventory(path: Path) -> dict[str, Any]:
     data = path.read_bytes()
     pe = pefile.PE(data=data)
-    exports = []
-    for symbol in getattr(pe, "DIRECTORY_ENTRY_EXPORT", ()).symbols if hasattr(pe, "DIRECTORY_ENTRY_EXPORT") else ():
-        exports.append({"name": symbol.name.decode("latin1") if symbol.name else None, "rva": symbol.address})
-    imports = []
-    iat: dict[int, str] = {}
-    for library in getattr(pe, "DIRECTORY_ENTRY_IMPORT", []):
-        dll = library.dll.decode("latin1")
-        for symbol in library.imports:
-            name = symbol.name.decode("latin1") if symbol.name else f"ordinal:{symbol.ordinal}"
-            imports.append({"dll": dll, "name": name, "iat_va": symbol.address})
-            iat[symbol.address] = f"{dll}!{name}"
-    strings = [m.group().decode("latin1") for m in re.finditer(rb"[ -~]{6,}", data)]
+    exports = pe_exports(pe, unnamed_none=True)
+    imports = pe_imports(pe, include_iat=True)
+    iat: dict[int, str] = {item["iat_va"]: f"{item['dll']}!{item['name']}" for item in imports}
+    strings = binary_strings(data, 6, include_wide=False)
     classes = sorted({
         match.group(0)
         for value in strings

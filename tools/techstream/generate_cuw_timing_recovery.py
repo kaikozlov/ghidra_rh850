@@ -15,14 +15,17 @@ import io
 import json
 from collections import Counter
 from pathlib import Path
+
+from techstream_paths import V18_DIAGNOSTICS_ROOT
 from typing import Any
 
 import pefile
+from pe_utils import exports as pe_export_rows
 
 from cuw_parameter import decode_parameter_ini
 
 REPO = Path(__file__).resolve().parents[2]
-TECH = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
+TECH = V18_DIAGNOSTICS_ROOT
 CUW = TECH / "Calibration Update Wizard"
 INI = CUW / "Ini"
 DDB_ART = REPO / "data/generated/techstream_v18/priority_steering_ddb_semantics.json"
@@ -259,15 +262,8 @@ def recovery_string_records() -> list[dict[str, Any]]:
 
 
 def pe_exports(path: Path) -> list[str]:
-    data = path.read_bytes()
-    pe = pefile.PE(data=data)
-    if not hasattr(pe, "DIRECTORY_ENTRY_EXPORT"):
-        return []
-    out: list[str] = []
-    for symbol in pe.DIRECTORY_ENTRY_EXPORT.symbols:
-        if symbol.name is not None:
-            out.append(symbol.name.decode("ascii", "replace"))
-    return sorted(out)
+    pe = pefile.PE(data=path.read_bytes())
+    return sorted(row["name"] for row in pe_export_rows(pe, unnamed_none=True) if row["name"] is not None)
 
 
 def target_unified_recovery() -> dict[str, Any]:

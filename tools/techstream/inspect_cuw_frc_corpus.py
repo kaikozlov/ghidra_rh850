@@ -34,15 +34,17 @@ import math
 import sys
 from collections import Counter
 from pathlib import Path
+
+from techstream_paths import CUW_CORPUS_ROOT
 from typing import Any
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from inspect_cuw_legacy import parse_attach_bytes
+from cuw_attach import parse_attach_bytes
 from parse_cuw_container import parse as parse_container
 
-DEFAULT_CORPUS = REPO / "software/Techstream/cuw"
+DEFAULT_CORPUS = CUW_CORPUS_ROOT
 
 # Pinned FRC corpus (DiagID 0792 / ReproMethod 07) and pinned whole-repro
 # contrast set (ReproMethod 01).  The remaining corpus files are summarized in

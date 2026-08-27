@@ -10,26 +10,22 @@ BUILD_TMP ?= $(BUILD_ROOT)/tmp
 export BUILD_ROOT BUILD_CACHE BUILD_WORK BUILD_OUT BUILD_LOGS BUILD_TMP
 TARGET ?= sienna-8965B4512000
 DEFAULT_TARGET := sienna-8965B4512000
-ifeq ($(TARGET),$(DEFAULT_TARGET))
-PROJECT_DIR ?= $(BUILD_WORK)/project
-SNAPSHOT_DIR ?= $(CURDIR)/project
-PROJECT_NAME := rh850_p1me_mapped
-PROGRAM_NAME := RH850_P1M-E_CodeFlash.bin
-# Canonical parity paths are not command-line overrides: allowing the current
-# output to alias the tracked baseline would turn verification into self-compare.
-override PROJECT_INVENTORY := $(BUILD_OUT)/ghidra_project_inventory.jsonl
-override PROJECT_INVENTORY_BASELINE := $(CURDIR)/data/ghidra_project_inventory.baseline.jsonl
-else
 TARGET_WORK_DIR := $(shell python3 tools/analysis_target.py "$(TARGET)" --field work_dir)
 TARGET_SNAPSHOT_DIR := $(shell python3 tools/analysis_target.py "$(TARGET)" --field snapshot_dir)
 TARGET_INVENTORY_BASELINE := $(shell python3 tools/analysis_target.py "$(TARGET)" --field inventory_baseline)
 TARGET_DECOMPILER_CORPUS := $(shell python3 tools/analysis_target.py "$(TARGET)" --field decompiler_corpus)
 PROJECT_NAME := $(shell python3 tools/analysis_target.py "$(TARGET)" --field project_name)
 PROGRAM_NAME := $(shell python3 tools/analysis_target.py "$(TARGET)" --field program_name)
-PROJECT_DIR ?= $(CURDIR)/$(TARGET_WORK_DIR)
+TARGET_WORK_SUFFIX := $(patsubst build/work/%,%,$(TARGET_WORK_DIR))
+PROJECT_DIR ?= $(BUILD_WORK)/$(TARGET_WORK_SUFFIX)
 SNAPSHOT_DIR ?= $(CURDIR)/$(TARGET_SNAPSHOT_DIR)
-override PROJECT_INVENTORY := $(BUILD_OUT)/targets/$(TARGET)/project_inventory.jsonl
+# Canonical parity paths are not command-line overrides: allowing the current
+# output to alias the tracked baseline would turn verification into self-compare.
 override PROJECT_INVENTORY_BASELINE := $(CURDIR)/$(TARGET_INVENTORY_BASELINE)
+ifeq ($(TARGET),$(DEFAULT_TARGET))
+override PROJECT_INVENTORY := $(BUILD_OUT)/ghidra_project_inventory.jsonl
+else
+override PROJECT_INVENTORY := $(BUILD_OUT)/targets/$(TARGET)/project_inventory.jsonl
 endif
 
 .PHONY: sync knowledge-index verify verify-core verify-full verify-local verify-agent verify-required-external verify-external verify-corroboration verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \

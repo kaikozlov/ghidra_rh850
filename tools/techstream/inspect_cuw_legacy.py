@@ -9,37 +9,27 @@ those legacy values as modern Unified/RH850 credentials.
 from __future__ import annotations
 
 import argparse
-import configparser
 import csv
 import hashlib
 import io
 import json
 from pathlib import Path
+
+from techstream_paths import V18_CUW_ROOT
 from typing import Any
 
 import pefile
 
-from parse_cuw_container import FIRST_MEMBER_OFFSET, parse as parse_container
+from cuw_attach import parse_attach_bytes
+from parse_cuw_container import first_member_payload, parse as parse_container
 from cuw_parameter import decode_parameter_ini
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_TECHSTREAM_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
+DEFAULT_TECHSTREAM_ROOT = V18_CUW_ROOT
 
 
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
-
-
-def first_member_payload(data: bytes, parsed: dict[str, Any]) -> bytes:
-    end = int(parsed["first_member_end"])
-    return data[end - int(parsed["payload_length"]):end]
-
-
-def parse_attach_bytes(raw: bytes) -> dict[str, dict[str, str]]:
-    cp = configparser.RawConfigParser(interpolation=None, strict=False, delimiters=("=",))
-    cp.optionxform = str
-    cp.read_string(raw.decode("latin1"))
-    return {section: dict(cp.items(section, raw=True)) for section in cp.sections()}
 
 
 def srec_record(line: bytes) -> tuple[str, int | None, bytes, int | None]:

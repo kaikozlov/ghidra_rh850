@@ -68,9 +68,11 @@ Live-project assertions are `local` verification suites. Core verification uses
 tracked firmware/evidence only; external proprietary/public source trees are
 owned through explicit `requires_external` gates rather than `REFERENCE/` paths.
 
-### Artifact and target discovery
+### Artifact, target, and repository-memory discovery
 
 Use `tools/artifact list/show` instead of grepping for generator filenames. `tools/artifact regen` runs a derived producer and `tools/artifact check` runs the verification suite(s) that own the artifact. The catalog is derived from tracked repository references and `verification.toml`, so adding a generated artifact does not require maintaining a second command registry.
+
+Use `tools/know QUERY` when the question is "what did we already establish?" or "where is this owned?" It searches findings, corrections, open questions, generated artifacts, suites, and tracked docs in one pass. It is only a navigation layer; firmware/Ghidra and deterministic verification remain the evidence authority.
 
 Use `tools/gtarget list` / `tools/gtarget show TARGET` before target-specific work. `data/analysis_targets.json` owns registered image identities, work/snapshot/corpus paths, function seeds, and target-specific rebuild stage scripts. The generic target rebuild/snapshot drivers consume those fields and intentionally contain no Camry-specific path/profile switch.
 
@@ -277,14 +279,18 @@ belong there rather than in a new top-level file:
 | Read-only exports from `build/work/project` (signals/consumers/producers/coverage/inventory) | `tools/export_ghidra_project.sh list` |
 | Cross-variant image-bound evidence (structural fingerprints, decompilation, callback-table selection, substring census) | `uv run --locked python tools/extract_variant_evidence.py list` |
 | Interactive GTS+ OEM vocabulary / DID / DTC / CUW route / PE lookup | `tools/gts` |
+| Repository knowledge across findings/corrections/OQs/artifacts/suites/docs | `tools/know QUERY` |
 
 The three evidence/export runners expose a `list` discovery command. The
 Corolla-H runner reports its profile inputs and tracked outputs; the
 argument-driven variant runner reports mode purpose/input/selection semantics;
 the exporter lists its profile names. `tools/gts` instead exposes task-shaped
 subcommands (`search`, `did`, `dtc`, `cuw`, `route`, `pe`) because it is a
-read-only query surface, not a proof generator. Defaults and scope boundaries —
-including which extractors stay separate and why — are documented in
+read-only query surface, not a proof generator. The portable exact-F33 verifier
+is one family module (`tests/verify_camry_8965F3307000.py`) with manifest-owned
+`--section` dispatch; dependency routing is section-aware so changed-path tests
+remain narrow. Defaults and scope boundaries — including which extractors stay
+separate and why — are documented in
 [tooling/README.md](tooling/README.md#task-oriented-entry-points).
 
 The `.c` tree is intentionally ignored; it can be reproduced from the tracked

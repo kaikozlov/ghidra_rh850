@@ -13,6 +13,8 @@ import hashlib
 import json
 import struct
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 
 REPO = Path(__file__).resolve().parents[1]
 H_CONFIG = bytes.fromhex("0100000004000000000000000000000000000000")
@@ -62,8 +64,8 @@ def need(code: str, *needles: str) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--sienna", type=Path, default=REPO / "firmware/RH850_P1M-E_CodeFlash.bin")
-    ap.add_argument("--target", type=Path, default=REPO / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin")
+    ap.add_argument("--sienna", type=Path, default=SIENNA_CODEFLASH)
+    ap.add_argument("--target", type=Path, default=H_RAW_DUMP)
     ap.add_argument("--evidence", type=Path, default=REPO / "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json")
     ap.add_argument("--dataflash-analysis", type=Path, default=REPO / "data/generated/corolla_2023_albino_dataflash_analysis.json")
     ap.add_argument("--out", type=Path, default=REPO / "data/generated/corolla_8965H1202000_secoc_key_provenance.json")

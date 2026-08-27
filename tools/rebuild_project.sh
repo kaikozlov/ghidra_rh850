@@ -6,10 +6,14 @@ ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/build_paths.sh"
 mkdir -p "$BUILD_CACHE" "$BUILD_WORK" "$BUILD_OUT" "$BUILD_LOGS" "$BUILD_TMP"
-PROJECT_DIR="$BUILD_WORK/project"
-PROJECT_NAME="rh850_p1me_mapped"
-PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
-PROCESSOR="v850e3:LE:32:default"
+TARGET="sienna-8965B4512000"
+TARGET_FIELD() { python3 "$ROOT/tools/analysis_target.py" "$TARGET" --field "$1"; }
+PROJECT_DIR="$ROOT/$(TARGET_FIELD work_dir)"
+PROJECT_NAME=$(TARGET_FIELD project_name)
+PROGRAM_NAME=$(TARGET_FIELD program_name)
+PROCESSOR=$(TARGET_FIELD processor)
+CODEFLASH="$ROOT/$(TARGET_FIELD codeflash)"
+DATAFLASH="$ROOT/$(TARGET_FIELD dataflash)"
 FORCE=0
 REFRESH_DIAGNOSTIC_VOCABULARY=0
 
@@ -123,8 +127,6 @@ cat >"$PROJECT_DIR/.gitignore" <<'EOF'
 **/~journal*
 EOF
 
-CODEFLASH="$ROOT/firmware/RH850_P1M-E_CodeFlash.bin"
-DATAFLASH="$ROOT/firmware/RH850_P1M-E_DataFlash.bin"
 run_headless() {
   local stage=$1
   shift
@@ -189,7 +191,7 @@ echo "[4/4] Seed missed functions, analyze, and apply every annotation"
 # Generate the Techstream diagnostic vocabulary before annotation so that
 # ApplyDiagnosticVocabulary.java can consume it during this stage.
 VOCAB_PATH=""
-FW_SHA=$(shasum -a 256 "$ROOT/firmware/RH850_P1M-E_CodeFlash.bin" | cut -d' ' -f1)
+FW_SHA=$(TARGET_FIELD codeflash_sha256)
 TRACKED_VOCAB="$ROOT/data/generated/${FW_SHA:0:16}/diagnostic_vocabulary.json"
 TECHSTREAM_SENTINEL="$ROOT/software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/EPS_P4DK3.ddb"
 if ((REFRESH_DIAGNOSTIC_VOCABULARY)); then

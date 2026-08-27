@@ -7,10 +7,11 @@ import hashlib
 import json
 import re
 from pathlib import Path
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 REPO = Path(__file__).resolve().parents[1]
 GENERATOR = Path(__file__).resolve()
-IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
+IMAGE = H_CODEFLASH
 OUT = REPO / "data/generated/corolla_8965H1202000_b6_full_receiver_decompiler_evidence.json"
 
 # These functions close the paths deliberately outside the earlier request/loss

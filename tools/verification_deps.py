@@ -62,15 +62,18 @@ _SUBPROCESS_METHODS = {
 
 def repository_paths(root: Path) -> set[str]:
     """Return tracked plus pending additions, excluding ignored external state."""
-    tracked = subprocess.check_output(
+    tracked = set(subprocess.check_output(
         ["git", "ls-files"], cwd=root, text=True
-    ).splitlines()
-    pending = subprocess.check_output(
+    ).splitlines())
+    deleted = set(subprocess.check_output(
+        ["git", "ls-files", "--deleted"], cwd=root, text=True
+    ).splitlines())
+    pending = set(subprocess.check_output(
         ["git", "ls-files", "--others", "--exclude-standard"],
         cwd=root,
         text=True,
-    ).splitlines()
-    return {path for path in (*tracked, *pending) if path}
+    ).splitlines())
+    return {path for path in ((tracked - deleted) | pending) if path}
 
 
 def path_matches_pattern(path: str, pattern: str) -> bool:
@@ -437,6 +440,7 @@ def scan_python_source(
     repo_paths: set[str],
     *,
     include_globs: bool = True,
+    function_name: str | None = None,
 ) -> SourceDependencies:
     path = root / source
     try:
@@ -444,7 +448,18 @@ def scan_python_source(
     except (OSError, UnicodeError, SyntaxError):
         return SourceDependencies(frozenset(), frozenset())
     scanner = _SourceScanner(root, path, repo_paths, include_globs=include_globs)
-    scanner.visit(tree)
+    if function_name is None:
+        scanner.visit(tree)
+    else:
+        matches = [
+            node
+            for node in tree.body
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == function_name
+        ]
+        # Section-specific dependency routing is an optimization, never a
+        # correctness boundary. If the requested entry point is missing or
+        # ambiguous, scan the whole verifier rather than silently under-route.
+        scanner.visit(matches[0] if len(matches) == 1 else tree)
     return scanner.result()
 
 
@@ -453,7 +468,8 @@ def transitive_python_dependencies(
     sources: Iterable[str],
     repo_paths: set[str] | None = None,
     *,
-    cache: dict[tuple[str, bool], SourceDependencies] | None = None,
+    root_functions: dict[str, str] | None = None,
+    cache: dict[tuple[str, bool, str | None], SourceDependencies] | None = None,
 ) -> set[str]:
     """Return mechanical repository dependencies for Python verifier sources."""
     known = repo_paths if repo_paths is not None else repository_paths(root)
@@ -473,11 +489,12 @@ def transitive_python_dependencies(
         # recreates the broad false-fanout problem.  A helper whose globbed contents
         # are semantically relevant must declare that directory in suite.paths.
         include_globs = source in roots
-        cache_key = (source, include_globs)
+        function_name = (root_functions or {}).get(source) if source in roots else None
+        cache_key = (source, include_globs, function_name)
         result = source_cache.get(cache_key)
         if result is None:
             result = scan_python_source(
-                root, source, known, include_globs=include_globs
+                root, source, known, include_globs=include_globs, function_name=function_name
             )
             source_cache[cache_key] = result
         dependencies.update(result.paths)
@@ -489,6 +506,23 @@ def transitive_python_dependencies(
     return dependencies
 
 
+def _section_function(entry: dict) -> str | None:
+    """Resolve the conventional ``--section NAME`` verifier entry point."""
+    args = [str(value) for value in entry.get("args", [])]
+    section: str | None = None
+    for index, value in enumerate(args):
+        if value == "--section" and index + 1 < len(args):
+            section = args[index + 1]
+            break
+        if value.startswith("--section="):
+            section = value.split("=", 1)[1]
+            break
+    if not section:
+        return None
+    normalized = section.replace("-", "_")
+    return f"section_{normalized}"
+
+
 def suite_dependency_map(
     root: Path,
     manifest: dict,
@@ -497,10 +531,14 @@ def suite_dependency_map(
     """Derive mechanical dependencies for every manifest suite."""
     known = repo_paths if repo_paths is not None else repository_paths(root)
     result: dict[str, set[str]] = {}
-    cache: dict[tuple[str, bool], SourceDependencies] = {}
+    cache: dict[tuple[str, bool, str | None], SourceDependencies] = {}
     for name, entry in manifest.get("suite", {}).items():
         tests = [str(path) for path in entry.get("tests", [])]
-        deps = transitive_python_dependencies(root, tests, known, cache=cache)
+        function_name = _section_function(entry)
+        root_functions = {test: function_name for test in tests} if function_name else None
+        deps = transitive_python_dependencies(
+            root, tests, known, root_functions=root_functions, cache=cache
+        )
         deps.difference_update(tests)
         result[name] = deps
     return result

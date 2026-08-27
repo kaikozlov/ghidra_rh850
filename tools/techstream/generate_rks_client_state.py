@@ -18,10 +18,12 @@ server-side signing algorithm/private key.  Nothing else is inferred.
 from __future__ import annotations
 import argparse, hashlib, json, struct
 from pathlib import Path
+
+from techstream_paths import V18_CUW_ROOT
 import pefile
 
 REPO=Path(__file__).resolve().parents[2]
-CUW=REPO/'software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard'
+CUW=V18_CUW_ROOT
 OUT=REPO/'data/generated/techstream_v18/rks_client_state.json'
 
 HANDLERS={

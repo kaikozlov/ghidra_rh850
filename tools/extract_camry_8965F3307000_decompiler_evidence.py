@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Promote exact 8965F3307000 target-native decompiler evidence."""
 from __future__ import annotations
-import argparse, hashlib, json
+import argparse, json
 from pathlib import Path
-from camry_f33_corpus import CORPUS, body_bytes, display_path
+from camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, body_bytes, display_path
+from decompiler_evidence import bind_entries, bind_function, load_function_corpus, require_function, sha256_bytes
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
 OUT = REPO / "data/generated/camry_8965F3307000_decompiler_evidence.json"
 ENTRIES = [
     # Target-native COM/diagnostic steering-angle ingress.
@@ -18,7 +18,7 @@ ENTRIES = [
 ]
 
 def sha(b: bytes) -> str:
-    return hashlib.sha256(b).hexdigest()
+    return sha256_bytes(b)
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
@@ -29,30 +29,8 @@ def main() -> int:
     image = a.image.read_bytes()
     if len(image) != 0x100000:
         raise SystemExit(f'expected 1 MiB normalized CodeFlash, got {len(image):#x}')
-    rows = {}
-    for line in a.corpus.open(encoding='utf-8'):
-        r = json.loads(line)
-        if r.get('record') == 'function':
-            rows[int(r['entry_addr'], 16)] = r
-    funcs = []
-    for entry in ENTRIES:
-        r = rows.get(entry)
-        if not r or not r.get('decompile_completed') or not r.get('decompiled_c'):
-            raise SystemExit(f'missing complete decompile 0x{entry:X}')
-        size = int(r['body_size'])
-        body = body_bytes(image, r)
-        text = r['decompiled_c']
-        if len(body) != size:
-            raise SystemExit(f'body outside image 0x{entry:X}')
-        funcs.append({
-            'entry': f'0x{entry:08X}',
-            'body_size': size,
-            'body_ranges': r.get('body_ranges', []),
-            'body_sha256': sha(body),
-            'data_references': r.get('data_references', []),
-            'decompiled_c_sha256': sha(text.encode()),
-            'decompiled_c': text,
-        })
+    rows, _ = load_function_corpus(a.corpus)
+    funcs = bind_entries(image, rows, ENTRIES)
     out = {
         'schema': 'camry-8965f3307000-decompiler-evidence-v1',
         'software_id': '8965F3307000',

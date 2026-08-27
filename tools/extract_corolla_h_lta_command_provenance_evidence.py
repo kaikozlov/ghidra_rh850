@@ -11,9 +11,10 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 REPO = Path(__file__).resolve().parents[1]
-DEFAULT_IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
+DEFAULT_IMAGE = H_CODEFLASH
 DEFAULT_OUT = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json"
 
 # Initialization / retained LTA command path / final command composition / COM APIs.

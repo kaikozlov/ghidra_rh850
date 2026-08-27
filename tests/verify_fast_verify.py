@@ -51,9 +51,34 @@ discovered = {path.relative_to(REPO).as_posix() for path in REPO.glob(gate_glob)
 print("== authoritative ownership ==")
 check("every verify gate is manifest-owned", discovered == set(ownership),
       f"missing={sorted(discovered - set(ownership))} stale={sorted(set(ownership) - discovered)}")
-check("every gate has exactly one owner",
-      all(len(owners) == 1 for owners in ownership.values()),
-      str({test: owners for test, owners in ownership.items() if len(owners) != 1}))
+def section_arg(entry: dict) -> str | None:
+    args = [str(value) for value in entry.get("args", [])]
+    for index, value in enumerate(args):
+        if value == "--section" and index + 1 < len(args):
+            return args[index + 1]
+        if value.startswith("--section="):
+            return value.split("=", 1)[1]
+    return None
+
+
+multi_owner_errors: dict[str, list[str]] = {}
+for test, owners in ownership.items():
+    if len(owners) <= 1:
+        continue
+    sections = [section_arg(suites[owner]) for owner in owners]
+    source = (REPO / test).read_text(encoding="utf-8") if (REPO / test).is_file() else ""
+    valid = (
+        all(sections)
+        and len(set(sections)) == len(sections)
+        and all(f"def section_{str(section).replace('-', '_')}" in source for section in sections)
+    )
+    if not valid:
+        multi_owner_errors[test] = owners
+check(
+    "every gate has one owner or unique section owners",
+    not multi_owner_errors,
+    str(multi_owner_errors),
+)
 check("changed-suite routing includes owned test paths",
       '*entry.get("tests", [])' in RUNNER.read_text(encoding="utf-8"))
 check("canonical tools/test command is executable", TEST_COMMAND.is_file()
@@ -113,10 +138,11 @@ check(
     str(missing_manifest_paths[:10]),
 )
 tracked_paths = set(subprocess.check_output(["git", "ls-files"], cwd=REPO, text=True).splitlines())
+deleted_paths = set(subprocess.check_output(["git", "ls-files", "--deleted"], cwd=REPO, text=True).splitlines())
 pending_paths = set(subprocess.check_output(
     ["git", "ls-files", "--others", "--exclude-standard"], cwd=REPO, text=True
 ).splitlines())
-repository_paths = tracked_paths | pending_paths
+repository_paths = (tracked_paths - deleted_paths) | pending_paths
 untracked_manifest_paths = [
     (suite_name, kind, value)
     for suite_name, kind, value in manifest_paths
@@ -392,6 +418,23 @@ with tempfile.TemporaryDirectory(prefix="verify-runner-") as directory:
         "print('[PASS][raw_bytes] automatic mechanical dependency routing')\n",
         encoding="utf-8",
     )
+    (root / "tests/verify_sectioned.py").write_text(
+        "import argparse\n"
+        "from pathlib import Path\n"
+        "def section_one():\n"
+        "    root = Path(__file__).resolve().parents[1]\n"
+        "    assert (root / 'data/section-one.txt').read_text()\n"
+        "    print('[PASS][raw_bytes] section one')\n"
+        "def section_two():\n"
+        "    root = Path(__file__).resolve().parents[1]\n"
+        "    assert (root / 'data/section-two.txt').read_text()\n"
+        "    print('[PASS][raw_bytes] section two')\n"
+        "ap = argparse.ArgumentParser()\n"
+        "ap.add_argument('--section', choices=('one', 'two'), required=True)\n"
+        "args = ap.parse_args()\n"
+        "{'one': section_one, 'two': section_two}[args.section]()\n",
+        encoding="utf-8",
+    )
     text_files = {
         "docs/ahead.md": "baseline\n",
         "docs/dirty.md": "baseline\n",
@@ -403,6 +446,8 @@ with tempfile.TemporaryDirectory(prefix="verify-runner-") as directory:
         "data/foo.json.backup": "{}\n",
         "data/mechanical.txt": "mechanical baseline\n",
         "data/helper.json": "{}\n",
+        "data/section-one.txt": "section one baseline\n",
+        "data/section-two.txt": "section two baseline\n",
         "data/container-a.bin": "container a\n",
         "data/container-b.bin": "container b\n",
         "data/processor.baseline": "processor baseline\n",
@@ -543,6 +588,14 @@ modes = ["full", "local"]
 
 [suite.mechanical]
 tests = ["tests/verify_mechanical.py"]
+
+[suite.section_one]
+tests = ["tests/verify_sectioned.py"]
+args = ["--section", "one"]
+
+[suite.section_two]
+tests = ["tests/verify_sectioned.py"]
+args = ["--section=two"]
 
 [suite.fast_verify]
 tests = ["tests/pass.py"]
@@ -781,6 +834,28 @@ serial = true
         helper_source_plan.stderr.strip() or helper_source_plan.stdout[-400:],
     )
     helper_source.write_text(helper_source_original, encoding="utf-8")
+
+    section_one_input = root / "data/section-one.txt"
+    section_one_input.write_text("section one changed\n", encoding="utf-8")
+    section_one_plan = run("plan", "changed", "--base", "HEAD")
+    check(
+        "--section verifier routing owns only the selected function inputs",
+        section_one_plan.returncode == 0
+        and selected_from_plan(section_one_plan) == {"section_one"},
+        section_one_plan.stderr.strip() or section_one_plan.stdout[-400:],
+    )
+    section_one_input.write_text("section one baseline\n", encoding="utf-8")
+
+    section_two_input = root / "data/section-two.txt"
+    section_two_input.write_text("section two changed\n", encoding="utf-8")
+    section_two_plan = run("plan", "changed", "--base", "HEAD")
+    check(
+        "--section=NAME routing preserves sibling-section invalidation isolation",
+        section_two_plan.returncode == 0
+        and selected_from_plan(section_two_plan) == {"section_two"},
+        section_two_plan.stderr.strip() or section_two_plan.stdout[-400:],
+    )
+    section_two_input.write_text("section two baseline\n", encoding="utf-8")
 
     container_input = root / "data/container-b.bin"
     container_input.write_text("container b changed\n", encoding="utf-8")

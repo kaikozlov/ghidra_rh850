@@ -31,11 +31,13 @@ import struct
 from pathlib import Path
 
 from parse_ddb import DDBParser
+from ddb_strings import load_string_db
+from techstream_paths import V18_TECHSTREAM_ROOT
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-TECHSTREAM_DB = REPO_ROOT / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
+TECHSTREAM_DB = V18_TECHSTREAM_ROOT
 
 # P4DK4 is JP-only. String DBs are region-independent (same OEM tables).
 P4DK4_PATH = "JP/DB/EPS_P4DK4.ddb"
@@ -139,7 +141,7 @@ def build_p4dk4_catalog() -> dict:
     dbs = {}
     for sdb_path in STRING_DBS:
         name = Path(sdb_path).stem
-        dbs[name] = parser.load_string_db(TECHSTREAM_DB / sdb_path)
+        dbs[name] = load_string_db(parser, TECHSTREAM_DB / sdb_path)
 
     # Parse P4DK4
     db = parser.parse_ecu_db(TECHSTREAM_DB / P4DK4_PATH)

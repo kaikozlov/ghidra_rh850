@@ -7,12 +7,13 @@ import hashlib
 import json
 import struct
 from pathlib import Path
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 from typing import Any
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_CORPUS = REPO / "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl"
 DEFAULT_OUTPUT = REPO / "data/generated/corolla_hf_command5_runtime_carrier_evidence.json"
-H_CODE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
+H_CODE = H_CODEFLASH
 F_SOURCE = REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
 
 H_SHA256 = "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"

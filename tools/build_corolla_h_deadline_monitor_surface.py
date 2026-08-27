@@ -3,10 +3,12 @@
 from __future__ import annotations
 import argparse,hashlib,json,struct
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import H_DEADLINE_TABLES, RAW_DUMP, SIENNA_DEADLINE_TABLES
 ROOT=Path(__file__).resolve().parents[1]
-HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'; SRAW=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin'; EV=ROOT/'data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json'; COVER=ROOT/'data/generated/corolla_8965H1202000_static_coverage_matrix.json'; OUT=ROOT/'data/generated/corolla_8965H1202000_deadline_monitor_surface.json'
-S_TABLES=(('variant_d_a',0x28524,1,52,tuple(range(0,52,4))),('simple',0x28558,28,12,(0,4,8)),('variant_d_b',0x286D0,1,52,tuple(range(0,52,4))))
-H_TABLES=(('variant_d_a',0x280B4,1,52,tuple(range(0,52,4))),('simple',0x280E8,28,12,(0,4,8)),('variant_d_b',0x28260,1,52,tuple(range(0,52,4))))
+HRAW=RAW_DUMP; SRAW=SIENNA_CODEFLASH; EV=ROOT/'data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json'; COVER=ROOT/'data/generated/corolla_8965H1202000_static_coverage_matrix.json'; OUT=ROOT/'data/generated/corolla_8965H1202000_deadline_monitor_surface.json'
+S_TABLES=SIENNA_DEADLINE_TABLES
+H_TABLES=H_DEADLINE_TABLES
 def sha(b):return hashlib.sha256(b).hexdigest()
 def table(raw,spec):
  name,base,count,stride,offs=spec; rows=[];vals=[]

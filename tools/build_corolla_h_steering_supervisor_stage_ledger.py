@@ -10,6 +10,8 @@ in this ordered supervisor alignment, not globally absent from the other image.
 from __future__ import annotations
 import argparse, difflib, hashlib, json, re
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 REPO=Path(__file__).resolve().parents[1]
 GAP=-0.22
@@ -120,8 +122,8 @@ def align(S,H,Sf,Hf):
 
 def main():
  ap=argparse.ArgumentParser(description=__doc__)
- ap.add_argument('--sienna-image',type=Path,default=REPO/'firmware/RH850_P1M-E_CodeFlash.bin')
- ap.add_argument('--h-image',type=Path,default=REPO/'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin')
+ ap.add_argument('--sienna-image',type=Path,default=SIENNA_CODEFLASH)
+ ap.add_argument('--h-image',type=Path,default=H_CODEFLASH)
  ap.add_argument('--sienna-struct',type=Path,default=REPO/'data/generated/sienna_8965B4512000_steering_supervisor_structural_evidence.json')
  ap.add_argument('--h-struct',type=Path,default=REPO/'data/generated/corolla_8965H1202000_steering_supervisor_structural_evidence.json')
  ap.add_argument('--h-insertions',type=Path,default=REPO/'data/generated/corolla_8965H1202000_steering_supervisor_insertions_decompiler_evidence.json')

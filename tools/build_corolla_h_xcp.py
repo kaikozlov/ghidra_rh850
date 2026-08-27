@@ -3,8 +3,10 @@
 from __future__ import annotations
 import argparse,hashlib,json,struct
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1];EV=ROOT/'data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json';SC=ROOT/'data/generated/decompilations.jsonl';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';SI=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin';OUT=ROOT/'data/generated/corolla_8965H1202000_xcp.json'
-MAP=[(0x972FA,'xcp_command_fa_handler',0x9232A,0xFA),(0x97432,'xcp_command_f5_handler',0x92462,0xF5),(0x975EE,'xcp_command_eb_handler',0x9261E,0xEB),(0x97668,'xcp_command_ea_handler',0x92698,0xEA)]
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import RAW_DUMP, XCP_ROLE_MAP
+ROOT=Path(__file__).resolve().parents[1];EV=ROOT/'data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json';SC=ROOT/'data/generated/decompilations.jsonl';HRAW=RAW_DUMP;SI=SIENNA_CODEFLASH;OUT=ROOT/'data/generated/corolla_8965H1202000_xcp.json'
+MAP=XCP_ROLE_MAP
 def sha(b):return hashlib.sha256(b).hexdigest()
 def u32(b,a):return struct.unpack_from('<I',b,a)[0]
 def main():

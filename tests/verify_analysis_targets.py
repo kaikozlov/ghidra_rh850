@@ -77,11 +77,12 @@ raw_df = ROOT / "targets/camry-2026/raw-20260826/secoc-recovery/dataflash/dump_f
 check("Camry canonical DataFlash equals acquired evidence", raw_df.is_file() and raw_df.read_bytes() == (ROOT / camry["dataflash"]).read_bytes())
 check("Camry identity pair embedded", (ROOT / camry["codeflash"]).read_bytes()[0x20860:0x2086C] == b"8965F3307000" and (ROOT / camry["codeflash"]).read_bytes()[0x17DC0:0x17DCC] == b"8A3113303100")
 
-# Resolver owns project/program/snapshot identity. --shell may select the target
-# and its registered disposable work path, but must not export identity overrides.
-r = subprocess.run([sys.executable, str(RESOLVER), "camry-8965F3307000", "--shell"], cwd=ROOT, capture_output=True, text=True)
-check("resolver shell succeeds", r.returncode == 0)
-check("resolver shell exposes no identity-authority overrides", "GHIDRA_PROJECT_NAME" not in r.stdout and "GHIDRA_PROGRAM_NAME" not in r.stdout and "GHIDRA_SNAPSHOT_DIR" not in r.stdout)
+# Resolver owns registry lookup only. Runtime wrappers select their target via
+# GHIDRA_ANALYSIS_TARGET and resolve individual fields; there is no second shell-
+# export API carrying overlapping project identity.
+r = subprocess.run([sys.executable, str(RESOLVER), "camry-8965F3307000", "--json"], cwd=ROOT, capture_output=True, text=True)
+check("resolver JSON succeeds", r.returncode == 0 and json.loads(r.stdout)["name"] == "camry-8965F3307000")
+check("resolver retired shell-export API", "--shell" not in subprocess.check_output([sys.executable, str(RESOLVER), "--help"], cwd=ROOT, text=True))
 r = subprocess.run([sys.executable, str(RESOLVER), "definitely-not-a-target", "--json"], cwd=ROOT, capture_output=True, text=True)
 check("unknown target fails closed", r.returncode != 0 and "unknown analysis target" in (r.stderr + r.stdout))
 
@@ -100,6 +101,16 @@ snapshot = (ROOT / "tools/snapshot_target_project.sh").read_text()
 check("first promotion requires independent parity build", "first target promotion requires --parity-project-dir" in snapshot and "independent target rebuild inventories differ" in snapshot)
 check("canonical corpus rechecks tracked baseline", "generate_target_decompiler_corpus.py" in snapshot)
 check("target snapshot has no Camry profile coupling", "camry_f33_v1" not in snapshot)
+makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+check(
+    "Makefile target identity is registry-backed for default and non-default targets",
+    all(
+        f'--field {field}' in makefile
+        for field in ("work_dir", "snapshot_dir", "inventory_baseline", "decompiler_corpus", "project_name", "program_name")
+    )
+    and 'PROJECT_NAME := rh850_p1me_mapped' not in makefile
+    and 'PROGRAM_NAME := RH850_P1M-E_CodeFlash.bin' not in makefile,
+)
 r = subprocess.run([str(ROOT / "tools/gtarget"), "list"], cwd=ROOT, capture_output=True, text=True)
 check("gtarget lists configured targets", r.returncode == 0 and "camry-8965F3307000" in r.stdout and "sienna-8965B4512000" in r.stdout)
 r = subprocess.run([str(ROOT / "tools/gtarget"), "show", "camry-8965F3307000"], cwd=ROOT, capture_output=True, text=True)

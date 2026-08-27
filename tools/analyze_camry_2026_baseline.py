@@ -4,47 +4,16 @@ from __future__ import annotations
 
 import argparse
 import gzip
-import hashlib
 import json
 from collections import defaultdict
 from pathlib import Path
+
+from toyota_route_opendbc_common import be_signal, sha256, toyota_checksum
 
 REPO = Path(__file__).resolve().parents[1]
 RAW = REPO / "targets/camry-2026/raw-20260826"
 DEFAULT_OUT = REPO / "data/generated/camry_2026_tsk_baseline.json"
 BASELINE_SOURCE_NAMES = ("MANIFEST.txt", "can_oracle.ndjson.gz", "identity.json", "programming_probe.json", "xcp_probe.json")
-
-
-def sha256(path: Path) -> str:
-  return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def signed(value: int, bits: int) -> int:
-  sign = 1 << (bits - 1)
-  return value - (1 << bits) if value & sign else value
-
-
-def be_signal(data: bytes, start_bit: int, size: int, *, is_signed: bool = False) -> int:
-  """Extract a Motorola/DBC signal using opendbc's bit-numbering convention."""
-  be_bits = [j + i * 8 for i in range(len(data)) for j in range(7, -1, -1)]
-  idx = be_bits.index(start_bit)
-  positions = be_bits[idx:idx + size]
-  if len(positions) != size:
-    raise ValueError(f"signal {start_bit}|{size} exceeds payload")
-  value = 0
-  for pos in positions:
-    value = (value << 1) | ((data[pos // 8] >> (pos % 8)) & 1)
-  return signed(value, size) if is_signed else value
-
-
-def toyota_checksum(address: int, data: bytes) -> int:
-  total = len(data)
-  addr = address
-  while addr:
-    total += addr & 0xFF
-    addr >>= 8
-  total += sum(data[:-1])
-  return total & 0xFF
 
 
 def load_json(name: str) -> dict:

@@ -63,7 +63,8 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH, TARGET as SIENNA_TARGET
+CF = SIENNA_CODEFLASH.read_bytes()
 CORPUS = REPO / "data" / "generated" / "decompilations.jsonl"
 OUT = REPO / "data" / "generated" / "rdbi_emitted_write_audit.json"
 
@@ -359,7 +360,7 @@ def main() -> int:
         ],
         "callbacks": entries,
         "provenance": {
-            "firmware": "firmware/RH850_P1M-E_CodeFlash.bin",
+            "firmware": SIENNA_TARGET["codeflash"],
             "corpus": "data/generated/decompilations.jsonl",
             "corpus_function_count": metadata["function_count"],
             "corpus_executable_sha256": metadata["executable_sha256"],

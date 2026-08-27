@@ -3,20 +3,19 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
-from camry_f33_corpus import CORPUS, body_bytes, display_path
+from camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, body_bytes, display_path
+from decompiler_evidence import bind_entries, bind_function, load_function_corpus, require_function, sha256_bytes
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
 OUT = REPO / "data/generated/camry_8965F3307000_gtsplus_decompiler_evidence.json"
-IMAGE_SHA = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+IMAGE_SHA = IMAGE_SHA256
 ENTRY = 0x4E848
 
 
 def sha(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
+    return sha256_bytes(data)
 
 
 def main() -> int:
@@ -29,19 +28,13 @@ def main() -> int:
     if len(image) != 0x100000 or sha(image) != IMAGE_SHA:
         raise SystemExit("exact F33 image identity drift")
 
-    row = None
-    total = 0
-    for line in args.corpus.open(encoding="utf-8"):
-        obj = json.loads(line)
-        if obj.get("record") != "function":
-            continue
-        total += 1
-        if int(obj["entry_addr"], 16) == ENTRY:
-            row = obj
-    if not row or not row.get("decompile_completed") or not row.get("decompiled_c"):
-        raise SystemExit("missing complete decompile for 0x4E848")
-
-    body_size = int(row["body_size"])
+    rows, total = load_function_corpus(args.corpus)
+    try:
+        row = require_function(rows, ENTRY)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
+    callback = bind_function(image, row)
+    body_size = callback["body_size"]
     body = body_bytes(image, row)
     text = row["decompiled_c"]
     refs = {int(ref["to_addr"], 16) for ref in row.get("data_references", [])}

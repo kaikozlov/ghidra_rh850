@@ -15,12 +15,13 @@ import json
 import struct
 import zlib
 from pathlib import Path
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 
 from Crypto.Cipher import AES
 from Crypto.Hash import CMAC
 
 ROOT = Path(__file__).resolve().parents[1]
-H_DEFAULT = ROOT / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
+H_DEFAULT = H_RAW_DUMP
 SPAN_DEFAULT = ROOT / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
 OUT_DEFAULT = ROOT / "data/generated/corolla_8965F1208000_low_calibration_delta.json"
 

@@ -3,8 +3,10 @@
 from __future__ import annotations
 import argparse,hashlib,json,re
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 ROOT=Path(__file__).resolve().parents[1]
-EV=ROOT/'data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json';SC=ROOT/'data/generated/decompilations.jsonl';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';SI=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin';OUT=ROOT/'data/generated/corolla_8965H1202000_motor_control.json'
+EV=ROOT/'data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json';SC=ROOT/'data/generated/decompilations.jsonl';HRAW=H_RAW_DUMP;SI=SIENNA_CODEFLASH;OUT=ROOT/'data/generated/corolla_8965H1202000_motor_control.json'
 MAP=[
 (0x32B80,'motor_coord_transform_calib_handler',0x2E780),
 (0x36A44,'dq_current_pi_axis_b',0x32616),

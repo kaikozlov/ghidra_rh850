@@ -30,20 +30,7 @@ PROJECT_NAME="${PE_PROJECT:-pe_dlls}"
 PROJECT_DIR="$BUILD_WORK/pe-project"
 mkdir -p "$PROJECT_DIR"
 
-VENDOR_SRC="$ROOT/ghidra/ghidra-cli/src"
-VENDOR_BIN="$BUILD_CACHE/ghidra-cli/ghidra"
-
-if [[ ! -x "$VENDOR_BIN" ]]; then
-  if [[ -x "$ROOT/tools/build_ghidra_cli.sh" ]] && command -v cargo >/dev/null 2>&1; then
-    echo "Vendored ghidra CLI not found — rebuilding..." >&2
-    "$ROOT/tools/build_ghidra_cli.sh" >&2
-  else
-    echo "ghidra CLI not found. Run 'make ghidra-cli'." >&2
-    exit 1
-  fi
-fi
-
-GHIDRA_CLI="$VENDOR_BIN"
+GHIDRA_CLI=$("$ROOT/tools/resolve_ghidra_cli.sh" --ensure-vendored)
 
 # --- Subcommand dispatch ------------------------------------------------------
 #

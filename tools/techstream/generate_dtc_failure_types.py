@@ -19,14 +19,16 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "tools" / "techstream"))
 
 from parse_ddb import DDBParser  # noqa: E402
+from ddb_strings import load_string_db
+from techstream_paths import V18_DB_ROOT  # noqa: E402
 
-DEFAULT_DB_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
+DEFAULT_DB_ROOT = V18_DB_ROOT
 DEFAULT_OUTPUT = REPO / "data/generated/techstream_v18/dtc_failure_types.json"
 
 
 def build(db_root: Path) -> dict:
     parser = DDBParser()
-    strings = parser.load_string_db(db_root / "M_English.ddb")
+    strings = load_string_db(parser, db_root / "M_English.ddb")
     suffix_map: dict[int, Counter[tuple[int, str | None]]] = defaultdict(Counter)
     u023a_records: list[dict] = []
     databases = records = nonzero_tail_records = 0

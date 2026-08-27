@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Promote exact H decompiler evidence for the protected-B6 receiver contract."""
 from __future__ import annotations
-import argparse, hashlib, json
+import argparse, json
 from pathlib import Path
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
+
+from decompiler_evidence import bind_entries, load_function_corpus, sha256_bytes
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
+IMAGE = H_CODEFLASH
 OUT = REPO / "data/generated/corolla_8965H1202000_b6_receiver_contract_decompiler_evidence.json"
 ENTRIES = [
     0x44538, 0x4456C, 0x445C0, 0x4460C, 0x44640, 0x44658, 0x446EC, 0x44744,
@@ -18,7 +21,7 @@ ENTRIES = [
 ]
 
 def sha(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
+    return sha256_bytes(data)
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
@@ -29,28 +32,12 @@ def main() -> int:
     image = args.image.read_bytes()
     if len(image) != 0x100000:
         raise SystemExit(f"expected 1 MiB H CodeFlash, got {len(image):#x}")
-    rows: dict[int, dict] = {}
-    for line in args.corpus.open():
-        row = json.loads(line)
-        if row.get("record") == "function":
-            rows[int(row["entry_addr"], 16)] = row
-    funcs = []
-    for entry in ENTRIES:
-        row = rows.get(entry)
-        if not row or not row.get("decompile_completed") or not row.get("decompiled_c"):
-            raise SystemExit(f"missing complete decompile 0x{entry:X}")
-        size = int(row["body_size"])
-        body = image[entry:entry + size]
-        text = row["decompiled_c"]
-        if len(body) != size:
-            raise SystemExit(f"function body outside image 0x{entry:X}")
-        funcs.append({
-            "entry": f"0x{entry:08X}",
-            "body_size": size,
-            "body_sha256": sha(body),
-            "decompiled_c_sha256": sha(text.encode()),
-            "decompiled_c": text,
-        })
+    rows, _ = load_function_corpus(args.corpus)
+    funcs = bind_entries(
+        image, rows, ENTRIES, include_data_references=False,
+        include_body_ranges=False, honor_body_ranges=False,
+    )
+
     rel_image = str(args.image.resolve().relative_to(REPO.resolve())) if args.image.resolve().is_relative_to(REPO.resolve()) else str(args.image)
     rel_corpus = str(args.corpus.resolve().relative_to(REPO.resolve())) if args.corpus.resolve().is_relative_to(REPO.resolve()) else str(args.corpus)
     out = {

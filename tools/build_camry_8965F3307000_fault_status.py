@@ -8,15 +8,16 @@ import hashlib
 import json
 import struct
 from pathlib import Path
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
+
+from camry_f33_corpus import IMAGE, IMAGE_SHA256
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
 EVID = REPO / "data/generated/camry_8965F3307000_fault_status_decompiler_evidence.json"
 TX = REPO / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
 H_TECH = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
-H_IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
+H_IMAGE = H_CODEFLASH
 OUT = REPO / "data/generated/camry_8965F3307000_fault_status.json"
-IMAGE_SHA256 = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
 H_IMAGE_SHA256 = "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
 STATE_TABLE = 0x2A19C
 EVENT_TABLE = 0x2FC50

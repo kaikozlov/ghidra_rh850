@@ -14,6 +14,7 @@ import json
 import struct
 import sys
 from pathlib import Path
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
@@ -27,7 +28,7 @@ SCHEMA = "corolla-pre-tss3-opendbc-message-comparison-v5"
 TX = struct.Struct("<IBBH")
 PDU = struct.Struct("<HBBHBB")
 
-DEFAULT_H = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
+DEFAULT_H = H_CODEFLASH
 DEFAULT_F = REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
 DEFAULT_CONTRACT = REPO / "data/external/opendbc/toyota_corolla_pre_tss3_contract.json"
 DEFAULT_FD = REPO / "data/generated/corolla_8965H1202000_fd_control_interface.json"

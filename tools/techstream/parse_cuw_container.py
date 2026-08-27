@@ -312,6 +312,61 @@ def parse(data: bytes) -> dict[str, Any]:
     return res
 
 
+
+def first_member_payload(data: bytes, parsed: dict[str, Any]) -> bytes:
+    """Return the first member payload from a fully parsed in-memory container."""
+    end = parsed.get("first_member_end")
+    length = parsed.get("payload_length")
+    if end is None or length is None:
+        raise ValueError("container has no complete first member")
+    return data[int(end) - int(length):int(end)]
+
+
+def read_first_member(path: Path, *, max_payload: int = 8 * 1024 * 1024) -> tuple[dict[str, Any], bytes]:
+    """Read only the CUW header + first member without streaming the package tail.
+
+    This is a discovery fast path, not a full container integrity check. It owns
+    the same member framing constants as ``parse`` so callers do not reimplement
+    CUW header geometry.
+    """
+    with path.open("rb") as stream:
+        prefix = stream.read(FIRST_MEMBER_OFFSET)
+        if len(prefix) != FIRST_MEMBER_OFFSET:
+            raise ValueError(f"truncated CUW header: {len(prefix)} bytes")
+        if prefix[:TYPE_OFFSET] != MAGIC:
+            raise ValueError("bad CUW magic")
+        format_type = prefix[TYPE_OFFSET]
+        if format_type not in KNOWN_FORMAT_TYPES:
+            raise ValueError(f"unknown CUW format type 0x{format_type:02X}")
+        name_len_raw = stream.read(2)
+        if len(name_len_raw) != 2:
+            raise ValueError("truncated first-member name length")
+        name_len = struct.unpack(">H", name_len_raw)[0]
+        name_raw = stream.read(name_len)
+        if len(name_raw) != name_len:
+            raise ValueError("truncated first-member name")
+        size_crc = stream.read(8)
+        if len(size_crc) != 8:
+            raise ValueError("truncated first-member size/CRC")
+        payload_len, payload_crc = struct.unpack(">II", size_crc)
+        if payload_len > max_payload:
+            raise ValueError(f"implausibly large first-member descriptor: {payload_len} bytes")
+        payload = stream.read(payload_len)
+        if len(payload) != payload_len:
+            raise ValueError("truncated first-member payload")
+    try:
+        name = name_raw.decode("ascii")
+    except UnicodeDecodeError:
+        name = name_raw.hex()
+    return ({
+        "format_type": format_type,
+        "file_size": path.stat().st_size,
+        "name": name,
+        "payload_length": payload_len,
+        "payload_crc32": payload_crc,
+        "validation": "header-and-first-member-only",
+    }, payload)
+
 def build_synthetic(payload: bytes, name: bytes = b"attach.att", fmt: int = 0x03,
                     tail: bytes = b"\x00" * 8) -> bytes:
     """Assemble a container byte-exactly per the statically recovered grammar.

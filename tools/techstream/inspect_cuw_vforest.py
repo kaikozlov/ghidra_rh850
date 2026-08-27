@@ -13,22 +13,25 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+
+from techstream_paths import V18_CUW_ROOT
 from typing import Any
 
 import pefile
+
+from cuw_attach import parse_attach_bytes
+from parse_cuw_container import first_member_payload
 
 from inspect_cuw_legacy import (
     decode_legacy_target_data,
     decode_parameter_rows,
     exported_value_labels,
-    first_member_payload,
     legacy_check_id_payloads,
-    parse_attach_bytes,
 )
 from parse_cuw_container import parse as parse_container
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_TECHSTREAM_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
+DEFAULT_TECHSTREAM_ROOT = V18_CUW_ROOT
 
 
 def sha256(data: bytes) -> str:

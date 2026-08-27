@@ -3,22 +3,23 @@
 from __future__ import annotations
 import argparse, hashlib, json, math, struct, sys
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 from tools.compare_variant_application_rx import compare as compare_rx  # noqa: E402
-from tools.camry_f33_corpus import body_bytes  # noqa: E402
+from tools.camry_f33_corpus import IMAGE as NORMALIZED, body_bytes  # noqa: E402
 
 RAW_DIR = REPO / 'targets/camry-2026/raw-20260826/codeflash'
 RAW = RAW_DIR / 'camry_8965F3307000_codeflash_20260826T213719Z.bin'
 RUN = RAW_DIR / 'camry_8965F3307000_codeflash_20260826T213719Z.run.json'
 COVERAGE = RAW_DIR / 'camry_8965F3307000_codeflash_20260826T213719Z.coverage.bin'
-NORMALIZED = REPO / 'firmware/camry-8965F3307000/CodeFlash.bin'
 PAYLOAD = REPO / 'targets/camry-2026/raw-20260826/calvin_payload_codeflash_00000000_00200000.bin'
 EVIDENCE = REPO / 'data/generated/camry_8965F3307000_decompiler_evidence.json'
 P5 = REPO / 'data/generated/techstream_v18/p5_lateral_control_semantics.json'
-H = REPO / 'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin'
-SIENNA = REPO / 'firmware/RH850_P1M-E_CodeFlash.bin'
+H = H_CODEFLASH
+SIENNA = SIENNA_CODEFLASH
 OUT = REPO / 'data/generated/camry_8965F3307000_codeflash.json'
 
 PROFILE_BASE = 0x25848

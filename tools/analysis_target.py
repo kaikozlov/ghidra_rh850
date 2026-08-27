@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Resolve first-class analysis-target metadata from data/analysis_targets.json."""
 from __future__ import annotations
-import argparse, json, shlex
+import argparse, json
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -49,7 +49,6 @@ def main() -> int:
     ap.add_argument("target", nargs="?")
     ap.add_argument("--list", action="store_true", help="list configured analysis targets")
     ap.add_argument("--json", action="store_true")
-    ap.add_argument("--shell", action="store_true", help="emit shell exports for tools/g")
     ap.add_argument("--field")
     args=ap.parse_args()
     if args.list:
@@ -65,13 +64,6 @@ def main() -> int:
         value=row.get(args.field)
         if value is None: raise SystemExit(f"target {name} has no field {args.field}")
         print(value); return 0
-    if args.shell:
-        vals={
-            "GHIDRA_ANALYSIS_TARGET": name,
-            "GHIDRA_PROJECT": str(REPO / row["work_dir"]),
-        }
-        for k,v in vals.items(): print(f"export {k}={shlex.quote(v)}")
-        return 0
     print(json.dumps({"name":name, **row},indent=2,sort_keys=True))
     return 0
 if __name__ == "__main__": raise SystemExit(main())

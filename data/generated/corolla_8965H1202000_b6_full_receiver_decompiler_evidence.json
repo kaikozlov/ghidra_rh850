@@ -121,7 +121,7 @@
   ],
   "generator": {
     "path": "tools/extract_corolla_h_b6_full_receiver_evidence.py",
-    "sha256": "d550d9a696185171c3ed86a2c641d486d03602b400e5346701e40b5352fa0d97"
+    "sha256": "b24ae5be01cb8cbdb3b4550909543ad5d07f4926ab21f336ed9c61e5d981a5b3"
   },
   "image": {
     "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",

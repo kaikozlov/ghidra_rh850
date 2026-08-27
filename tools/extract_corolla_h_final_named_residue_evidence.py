@@ -3,9 +3,11 @@
 from __future__ import annotations
 import hashlib,json
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 ROOT=Path(__file__).resolve().parents[1]
-SRAW=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin'
-HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+SRAW=SIENNA_CODEFLASH
+HRAW=H_RAW_DUMP
 SFP=ROOT/'build/work/corpora/sienna_function_structural_fingerprints.jsonl'
 HFP=ROOT/'build/work/corpora/h_clean_function_structural_fingerprints.jsonl'
 HDC=ROOT/'build/work/corpora/h_small_adapters_forced.jsonl'

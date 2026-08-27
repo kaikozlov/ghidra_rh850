@@ -8,12 +8,14 @@ import hashlib
 import json
 import re
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "data/generated/corolla_8965H1202000_system_orchestration_decompiler_evidence.json"
 SIENNA_CORPUS = ROOT / "data/generated/decompilations.jsonl"
-H_RAW = ROOT / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
-SIENNA_IMAGE = ROOT / "firmware/RH850_P1M-E_CodeFlash.bin"
+H_RAW = H_RAW_DUMP
+SIENNA_IMAGE = SIENNA_CODEFLASH
 DEFAULT_OUT = ROOT / "data/generated/corolla_8965H1202000_system_orchestration.json"
 
 CLOSURE = [

@@ -16,9 +16,9 @@ import json
 import struct
 from pathlib import Path
 
+from camry_f33_corpus import IMAGE, IMAGE_SHA256
+
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
-IMAGE_SHA256 = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
 CODEFLASH_ART = REPO / "data/generated/camry_8965F3307000_codeflash.json"
 RUNTIME_BUILDER = REPO / "exploit/ephemeral_runtime/build_camry_f33_command5_carrier.py"
 PROXY_SOURCE = REPO / "exploit/ephemeral_runtime/corolla_hf_command5_proxy.c"

@@ -17,12 +17,15 @@ from pathlib import Path
 HERE = Path(__file__).resolve()
 REPO = HERE.parents[2]
 sys.path.insert(0, str(HERE.parent))
+sys.path.insert(0, str(REPO / "tools"))
 from parse_ddb import DDBParser  # noqa: E402
+from ddb_strings import load_string_db
+from techstream_paths import V18_TECHSTREAM_ROOT  # noqa: E402
+from sienna_target import CODEFLASH as FW  # noqa: E402
 
-ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
+ROOT = V18_TECHSTREAM_ROOT
 OUT = REPO / "data/generated/techstream_v18/secoc_fd_sensor_correlations.json"
 RXMAP = REPO / "data/application_rx_map.csv"
-FW = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
 REGIONS = ("NA", "EU", "JP")
 MONITORS = {
     303: "CAN Vehicle Speed (Speed Sensor RR)",
@@ -55,7 +58,7 @@ def decode_region(parser: DDBParser, region: str) -> dict:
     db_path = ROOT / region / "DB/EMPS2_P5.ddb"
     string_path = ROOT / region / "DB/M_English.ddb"
     db = parser.parse_ecu_db(db_path)
-    strings = parser.load_string_db(string_path)
+    strings = load_string_db(parser, string_path)
     result = {}
     for key, expected_name in MONITORS.items():
         index, mon = find_u16(records(db, 62), 0x24, key)

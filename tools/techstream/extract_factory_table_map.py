@@ -17,13 +17,12 @@ import struct
 from pathlib import Path
 
 import pefile
+from techstream_paths import V18_TECHSTREAM_ROOT
 
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_PE = (
-    REPO
-    / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/bin/KgpDataCtrl.dll"
-)
+DEFAULT_PE = V18_TECHSTREAM_ROOT / "bin/KgpDataCtrl.dll"
+
 DEFAULT_OUTPUT = REPO / "data/generated/techstream_v18/ddb_factory_table_map.json"
 
 FACTORIES = (

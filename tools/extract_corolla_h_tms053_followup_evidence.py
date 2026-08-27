@@ -6,9 +6,10 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
+IMAGE = H_CODEFLASH
 OUT = REPO / "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json"
 ENTRIES = [
     # TAUJ0 foreground timing / H LocalRAM initialization

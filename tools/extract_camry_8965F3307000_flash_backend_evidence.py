@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """Promote exact F33 boot flash-control decompiler evidence."""
 from __future__ import annotations
-import argparse, hashlib, json
+import argparse, json
 from pathlib import Path
-from camry_f33_corpus import CORPUS, body_bytes, display_path
+from camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, body_bytes, display_path
+from decompiler_evidence import bind_entries, bind_function, load_function_corpus, require_function, sha256_bytes
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
 OUT = REPO / "data/generated/camry_8965F3307000_flash_backend_evidence.json"
 ENTRIES = [0x78BFA, 0x78C30, 0x78CE6, 0x78E2A, 0x79026]
 
 
 def sha(b: bytes) -> str:
-    return hashlib.sha256(b).hexdigest()
+    return sha256_bytes(b)
 
 
 def main() -> int:
@@ -24,30 +24,8 @@ def main() -> int:
     image = a.image.read_bytes()
     if len(image) != 0x100000:
         raise SystemExit(f'expected 1 MiB CodeFlash, got {len(image):#x}')
-    rows = {}
-    for line in a.corpus.open(encoding='utf-8'):
-        row = json.loads(line)
-        if row.get('record') == 'function':
-            rows[int(row['entry_addr'], 16)] = row
-    funcs = []
-    for entry in ENTRIES:
-        row = rows.get(entry)
-        if not row or not row.get('decompile_completed') or not row.get('decompiled_c'):
-            raise SystemExit(f'missing complete decompile 0x{entry:X}')
-        size = int(row['body_size'])
-        body = body_bytes(image, row)
-        if len(body) != size:
-            raise SystemExit(f'function outside image 0x{entry:X}')
-        text = row['decompiled_c']
-        funcs.append({
-            'entry': f'0x{entry:08X}',
-            'body_size': size,
-            'body_ranges': row.get('body_ranges', []),
-            'data_references': row.get('data_references', []),
-            'body_sha256': sha(body),
-            'decompiled_c_sha256': sha(text.encode()),
-            'decompiled_c': text,
-        })
+    rows, _ = load_function_corpus(a.corpus)
+    funcs = bind_entries(image, rows, ENTRIES)
     out = {
         'schema': 'camry-8965f3307000-flash-backend-evidence-v1',
         'software_id': '8965F3307000',

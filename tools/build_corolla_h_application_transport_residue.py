@@ -3,9 +3,11 @@
 from __future__ import annotations
 import argparse,hashlib,json,re,struct,sys
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from tools.compare_variant_application_rx import find_normal_rx_descriptor_table
-SRAW=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';HEV=ROOT/'data/generated/corolla_8965H1202000_application_transport_decompiler_evidence.json';OUT=ROOT/'data/generated/corolla_8965H1202000_application_transport_residue.json'
+SRAW=SIENNA_CODEFLASH;HRAW=H_RAW_DUMP;HEV=ROOT/'data/generated/corolla_8965H1202000_application_transport_decompiler_evidence.json';OUT=ROOT/'data/generated/corolla_8965H1202000_application_transport_residue.json'
 TX=struct.Struct('<IBBH')
 ROLES=[(0x7FF86,'application_can_special_rx_demux',0x7A382),(0x80006,'application_can_normal_rx_demux',0x7A402),(0x809C6,'application_pdu_transmit_router',0x7ADC2),(0x80C44,'application_pdu_rx_router',0x7B040),(0x4C158,'application_pack_can_394',0x47ADA)]
 REMOVED=[(0x4A244,'application_unpack_can_2e4','H complete normal-Rx descriptor table has no CAN 0x2E4'),(0x4BCEE,'application_pack_can_260','H complete Tx descriptor run has no CAN 0x260'),(0x4BE24,'application_pack_can_262','H complete Tx descriptor run has no CAN 0x262')]

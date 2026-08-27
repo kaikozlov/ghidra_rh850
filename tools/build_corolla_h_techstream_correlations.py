@@ -10,6 +10,8 @@ import re
 import struct
 import sys
 from pathlib import Path
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "techstream"))
 from parse_ddb import DDBParser
@@ -22,8 +24,8 @@ EVID = REPO / "data/generated/corolla_8965H1202000_techstream_steering_decompile
 MASTER = REPO / "data/generated/techstream_v18/toyota_master_routes.json"
 APP_RX = REPO / "data/generated/corolla_8965H1202000_application_rx_diff.json"
 U023A = REPO / "data/generated/u023a87_monitor_map.json"
-SIENNA = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
-RAW = REPO / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
+SIENNA = SIENNA_CODEFLASH
+RAW = H_RAW_DUMP
 DEFAULT_OUT = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
 TECHSTREAM_DIAGNOSTICS_ROOT = Path(
     os.environ.get(

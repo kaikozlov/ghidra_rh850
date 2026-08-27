@@ -25,11 +25,13 @@ import hashlib
 from pathlib import Path
 
 from parse_ddb import DDBParser, ECUDataBase, StringDataBase
+from ddb_strings import load_string_db
+from techstream_paths import V18_DB_ROOT
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-TECHSTREAM_DB = REPO_ROOT / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
+TECHSTREAM_DB = V18_DB_ROOT
 
 CODEFLASH_SHA256 = (
     "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
@@ -227,7 +229,7 @@ def build_catalog() -> dict:
     for fname in STRING_DBS:
         path = TECHSTREAM_DB / fname
         name = fname.replace(".ddb", "")
-        dbs[name] = parser.load_string_db(path)
+        dbs[name] = load_string_db(parser, path)
 
     # Load all EPS databases
     eps_dbs = []

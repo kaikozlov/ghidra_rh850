@@ -13,14 +13,23 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 from pathlib import Path
+
+try:
+    from .techstream_paths import CUW_CORPUS_ROOT
+except ImportError:  # direct script execution
+    from techstream_paths import CUW_CORPUS_ROOT
 
 from Crypto.Cipher import AES
 from Crypto.Hash import CMAC
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_CUW = REPO / "software/Techstream/cuw/T-0035-22.cuw"
-DEFAULT_REFERENCE = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
+sys.path.insert(0, str(REPO / "tools"))
+from sienna_target import CODEFLASH as SIENNA_CODEFLASH  # noqa: E402
+
+DEFAULT_CUW = CUW_CORPUS_ROOT / "T-0035-22.cuw"
+DEFAULT_REFERENCE = SIENNA_CODEFLASH
 DEFAULT_OUT = REPO / "data/generated/techstream_v18/t0035_faci_backend_evidence.json"
 PAYLOAD_BUILD_ROOT_OFFSET = 0xBFD8
 EXPECTED_CUW_SHA256 = "9882b1b6dd6acda2d142a2825eda396b0a425e41c13f822b9a18e022d4c43e81"

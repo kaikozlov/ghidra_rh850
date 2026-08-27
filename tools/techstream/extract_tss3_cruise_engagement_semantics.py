@@ -10,10 +10,13 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
 OUT = REPO / "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from parse_ddb import DDBParser  # noqa: E402
+from ddb_strings import load_string_db  # noqa: E402
+from techstream_paths import V18_DB_ROOT  # noqa: E402
+
+ROOT = V18_DB_ROOT
 
 FRC_MONITORS = {
     23: "ACC Installation Availability",
@@ -117,7 +120,7 @@ def main() -> int:
     args = ap.parse_args()
     parser = DDBParser()
     strings_path = ROOT / "M_English.ddb"
-    strings = parser.load_string_db(strings_path)
+    strings = load_string_db(parser, strings_path)
 
     frc_path = ROOT / "FRC_P5.ddb"
     frc = [decode_monitor(parser, strings, frc_path, k, name) for k, name in FRC_MONITORS.items()]
