@@ -4,7 +4,7 @@
     "call_surface": "data/generated/corolla_8965H1202000_direct_call_surface_evidence.json",
     "call_surface_sha256": "a11a78fe1639b5d64526c727ee7b0b5c6364ad4eee36502c1a861a97dfddb389",
     "canonical_ledger": "data/semantic_coverage_ledger.csv",
-    "canonical_ledger_sha256": "593853a78d2e97c43122b15777a5d3856c684ad34b7ad7c3588ebf3475ba61d3"
+    "canonical_ledger_sha256": "fb3b9185a35a4b4725f10933f985284396c7bd4e13a7f628fc0bb29f2a143643"
   },
   "h_surface_summary": {
     "closed": true,
