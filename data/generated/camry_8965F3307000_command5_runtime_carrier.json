@@ -151,27 +151,27 @@
   "sources": {
     "canary_audit": {
       "path": "exploit/ephemeral_runtime/audited_camry_f33_runtime_canary_build.json",
-      "sha256": "0abbb29a790aaf091b1a09693bde508f8ea20806c69823f3ac8d8f7c07c8230a"
+      "sha256": "03aa5677789140711ac0b1cfcebb72e4bf54ab8206073d3968ac9267876b0577"
     },
     "codeflash": {
-      "path": "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+      "path": "firmware/camry-8965F3307000/CodeFlash.bin",
       "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
     },
     "codeflash_analysis": {
       "path": "data/generated/camry_8965F3307000_codeflash.json",
-      "sha256": "857e06d621052261add565475d438ac84b02e83f16598e0234d3cf1c8ba71e30"
+      "sha256": "34ed0a4d47e0e9e52f412d0d823b3b84dcd1bef267fca18207c8d137abfe10c2"
     },
     "high_tail_live_evidence": {
-      "path": "community/kai/camry-2026/raw-20260826/high-tail-20260826.json",
+      "path": "targets/camry-2026/raw-20260826/high-tail-20260826.json",
       "sha256": "7fe390354d24e4d0c582d57d726935256eb620f60b3b4f247e6509ec4d9989f0"
     },
     "low_retention_live_evidence": {
-      "path": "community/kai/camry-2026/raw-20260826/stock-retention-20260826.json",
+      "path": "targets/camry-2026/raw-20260826/stock-retention-20260826.json",
       "sha256": "a920ecd5cfaa96986be2ac7dd0257cac842edf9c456f37aabd157a47a6fa3845"
     },
     "proxy_audit": {
       "path": "exploit/ephemeral_runtime/audited_camry_f33_command5_proxy_build.json",
-      "sha256": "3cb604c9826c5970285cdcb69834da816ba8ce2dd62dc421cef401ddd564c041"
+      "sha256": "ddbd300c08f7c3a65c4e19835d6bc8ea4211b70b3e845b2956e904e4ae8f741b"
     },
     "ram_exec_requirements": {
       "path": "data/variant_ram_exec_requirements.json",
@@ -261,7 +261,7 @@
     },
     "runtime_builder": {
       "path": "exploit/ephemeral_runtime/build_camry_f33_command5_carrier.py",
-      "sha256": "a023ae3a47ef08bdcd9f538e2b6f73122690ce07802f027cf9dfeefef0f3c6d8"
+      "sha256": "f7f6c58e01e689b1772e1b45cea73cf1a9ba1b14585ff21b436cfcbf06335787"
     }
   },
   "static_low_carrier_geometry": {

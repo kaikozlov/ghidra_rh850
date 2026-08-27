@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-IMAGE = ROOT / "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin"
+IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 EVID = ROOT / "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json"
 ART = ROOT / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
 BUILD = ROOT / "tools/build_camry_8965F3307000_tss3_opendbc_port.py"
@@ -24,6 +24,16 @@ p = f = 0
 
 def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def body_bytes(image: bytes, row: dict) -> bytes:
+    ranges=row.get("body_ranges") or []
+    if not ranges:
+        e=int(row["entry"],16); return image[e:e+int(row["body_size"])]
+    out=bytearray()
+    for r in ranges:
+        lo=int(r["min"],16); hi=int(r["max"],16); out.extend(image[lo:hi+1])
+    return bytes(out)
 
 
 def check(name: str, ok: object) -> None:
@@ -44,7 +54,7 @@ check("artifact schema/target", art["schema"] == "camry-8965f3307000-tss3-opendb
 check("exact image hash", sha(img) == evid["image"]["sha256"] == art["target"]["codeflash_sha256"] == "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7")
 check("compact evidence exact", evid["schema"] == "camry-8965f3307000-tss3-tx-decompiler-evidence-v1" and evid["function_count"] == len(funcs) == 11)
 for entry, row in sorted(funcs.items()):
-    check(f"0x{entry:08X} body hash", sha(img[entry:entry + row["body_size"]]) == row["body_sha256"])
+    check(f"0x{entry:08X} body hash", sha(body_bytes(img,row)) == row["body_sha256"])
 with tempfile.TemporaryDirectory(prefix="camry-f33-tss3-port-") as td:
     out = Path(td) / "port.json"
     r = subprocess.run([sys.executable, str(BUILD), "--out", str(out)], cwd=ROOT, capture_output=True, text=True)
@@ -63,7 +73,7 @@ check("PDU descriptors exact", tx["pdu_descriptors"] == {
 check("0x351 signal allocation exact", tx["signal_allocations"]["1"] == [38, 39])
 check("0x394 signal allocation exact", tx["signal_allocations"]["2"] == [40, 41, 42, 43])
 check("0x4A3 signal allocation exact", tx["signal_allocations"]["3"] == list(range(44, 52)))
-check("generic scalar packer target-native", "unaff_tp + -0x1974" in funcs[0x7D1DC]["decompiled_c"])
+check("generic scalar packer target-native", "&DAT_00022488 + (param_1 & 0xffff) * 2" in funcs[0x7D1DC]["decompiled_c"])
 
 print("\n== exact F33 status carrier packers ==")
 s = art["status_carriers"]
@@ -76,18 +86,18 @@ check("394 exact packing", all(tok in funcs[0x4CE08]["decompiled_c"] for tok in 
 check("394 policy remains bounded", "not promoted to Ready" in s["0x394"]["policy_boundary"])
 check("4A3 exact functions", s["0x4A3"]["source_preparation"] == "0x0004C000" and s["0x4A3"]["staging"] == "0x0004C14E" and s["0x4A3"]["packer"] == "0x0004C7AA")
 check("4A3 packs signals44..51", "FUN_0007d31e(0x2c,0x27,8,0" in funcs[0x4C7AA]["decompiled_c"] and "FUN_0007d31e(0x33,0x2e,8,0" in funcs[0x4C7AA]["decompiled_c"])
-check("4A3 signed12 angle staging exact", all(tok in funcs[0x4C14E]["decompiled_c"] for tok in ("unaff_gp + -0x37b8", ">> 8) & 0xf", "unaff_gp + -0x3aba", "0x7ff", "0xfffff800")))
-check("4A3 torque staging exact", "unaff_gp + -0x5158" in funcs[0x4C000]["decompiled_c"] and "* 100) / 0x100" in funcs[0x4C000]["decompiled_c"] and "unaff_gp + -0x36ae) / 10" in funcs[0x4C14E]["decompiled_c"])
-check("4A3 alternate current source exact", "unaff_gp + -0x50e8" in funcs[0x4C000]["decompiled_c"] and "* -100) / 0x80" in funcs[0x4C000]["decompiled_c"])
+check("4A3 signed12 angle staging exact", all(tok in funcs[0x4C14E]["decompiled_c"] for tok in ("DAT_febe8048", ">> 8) & 0xf", "DAT_febe7d46", "0x7ff", "0xfffff800")))
+check("4A3 torque staging exact", "DAT_febe66a8" in funcs[0x4C000]["decompiled_c"] and "* 100) / 0x100" in funcs[0x4C000]["decompiled_c"] and "puVar1 + -0x36ae" in funcs[0x4C14E]["decompiled_c"])
+check("4A3 alternate current source exact", "DAT_febe6718" in funcs[0x4C000]["decompiled_c"] and "* -100) / 0x80" in funcs[0x4C000]["decompiled_c"])
 check("4A3 current is not mislabeled DID1151", "GP-0x50E8" in s["0x4A3"]["current_semantic_boundary"] and "GP-0x50F2" in s["0x4A3"]["current_semantic_boundary"])
 
 print("\n== VAR-056 bounded-census correction ==")
 c = art["census_correction"]
-check("torque direct-reference count corrected 4->5", c["old_recovered_count"] == 4 and c["new_recovered_count"] == 5 and c["new_entry"] == "0x0004C000")
-check("updated torque entries exact", c["driver_torque_direct_fixed_gp_entries"] == ["0x00035A06", "0x0004C000", "0x0004DB70", "0x00054244", "0x000564CE"])
-check("control-cone conclusion unchanged", c["control_cone_conclusion_changed"] is False and "outside the cooperative C8xxx-D1xxx" in c["reason"])
-check("alternate-current census distinct", [x["entry"] for x in evid["fixed_gp_census"]["alternate_4a3_current_source_gp_minus_0x50e8"]] == ["0x0004C000"])
-check("DID1151 source census remains distinct", [x["entry"] for x in evid["fixed_gp_census"]["did1151_q_current_source_gp_minus_0x50f2"]] == ["0x0004E394", "0x00054244", "0x000564CE"])
+check("canonical torque census supersedes scratch 4->5 count", c["old_recovered_count"] == 5 and c["new_recovered_count"] == 9 and c["new_read_count"] == 7 and c["new_write_count"] == 2 and c["new_entry"] == "0x0004C490")
+check("updated torque entries exact", c["driver_torque_direct_fixed_gp_entries"] == ["0x00035A06", "0x0004C000", "0x0004C490", "0x0004DB70", "0x00052CA0", "0x00054244", "0x000564CE", "0x00059448", "0x0005D5E0"])
+check("control-cone conclusion unchanged", c["control_cone_conclusion_changed"] is False and "zero direct references inside the cooperative C8xxx-D1xxx" in c["reason"])
+check("alternate-current census distinct", [x["entry"] for x in evid["fixed_gp_census"]["alternate_4a3_current_source_gp_minus_0x50e8"]] == ["0x0004C000", "0x0004C490", "0x00059448", "0x0005D12C"])
+check("DID1151 source census remains distinct", [x["entry"] for x in evid["fixed_gp_census"]["did1151_q_current_source_gp_minus_0x50f2"]] == ["0x0004E394", "0x00052CA0", "0x00054244", "0x000564CE", "0x00059448", "0x0005D12C"])
 check("negative census boundary retained", "computed aliases" in evid["fixed_gp_census"]["boundary"].lower() and "dma" in evid["fixed_gp_census"]["boundary"].lower())
 
 print("\n== passive opendbc integration boundary ==")
@@ -108,7 +118,8 @@ priorities = PRIORITIES.read_text(encoding="utf-8")
 for token in ("ab60fd95", "d7d7dfd7e", "0x4C000", "0x4C7AA", "0x4CED0", "0x4CE08", "SafetyModel.noOutput", "179-ID", "147-ID"):
     check(f"dedicated port report contains {token}", token in report)
 check("VAR-058 registered", "| VAR-058 |" in findings and "8965F3307000" in findings and "ab60fd95" in findings)
-check("CORR-120 registered", "### CORR-120" in corrections and "0x4C000" in corrections and "VAR-056" in corrections and "five" in corrections.lower())
+check("CORR-120 historical step retained", "### CORR-120" in corrections and "0x4C000" in corrections and "VAR-056" in corrections and "five" in corrections.lower())
+check("CORR-122 canonical census registered", "### CORR-122" in corrections and "6,065" in corrections and "FEBE66A8" in corrections and "FEBE670E" in corrections and "9" in corrections)
 check("priorities record passive port", "ab60fd95" in priorities and "production output remains disabled" in priorities.lower())
 
 print(f"\nResults: {p} passed, {f} failed")

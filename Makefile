@@ -8,12 +8,29 @@ BUILD_OUT ?= $(BUILD_ROOT)/out
 BUILD_LOGS ?= $(BUILD_ROOT)/logs
 BUILD_TMP ?= $(BUILD_ROOT)/tmp
 export BUILD_ROOT BUILD_CACHE BUILD_WORK BUILD_OUT BUILD_LOGS BUILD_TMP
+TARGET ?= sienna-8965B4512000
+DEFAULT_TARGET := sienna-8965B4512000
+ifeq ($(TARGET),$(DEFAULT_TARGET))
 PROJECT_DIR ?= $(BUILD_WORK)/project
 SNAPSHOT_DIR ?= $(CURDIR)/project
+PROJECT_NAME := rh850_p1me_mapped
+PROGRAM_NAME := RH850_P1M-E_CodeFlash.bin
 # Canonical parity paths are not command-line overrides: allowing the current
 # output to alias the tracked baseline would turn verification into self-compare.
 override PROJECT_INVENTORY := $(BUILD_OUT)/ghidra_project_inventory.jsonl
 override PROJECT_INVENTORY_BASELINE := $(CURDIR)/data/ghidra_project_inventory.baseline.jsonl
+else
+TARGET_WORK_DIR := $(shell python3 tools/analysis_target.py "$(TARGET)" --field work_dir)
+TARGET_SNAPSHOT_DIR := $(shell python3 tools/analysis_target.py "$(TARGET)" --field snapshot_dir)
+TARGET_INVENTORY_BASELINE := $(shell python3 tools/analysis_target.py "$(TARGET)" --field inventory_baseline)
+TARGET_DECOMPILER_CORPUS := $(shell python3 tools/analysis_target.py "$(TARGET)" --field decompiler_corpus)
+PROJECT_NAME := $(shell python3 tools/analysis_target.py "$(TARGET)" --field project_name)
+PROGRAM_NAME := $(shell python3 tools/analysis_target.py "$(TARGET)" --field program_name)
+PROJECT_DIR ?= $(CURDIR)/$(TARGET_WORK_DIR)
+SNAPSHOT_DIR ?= $(CURDIR)/$(TARGET_SNAPSHOT_DIR)
+override PROJECT_INVENTORY := $(BUILD_OUT)/targets/$(TARGET)/project_inventory.jsonl
+override PROJECT_INVENTORY_BASELINE := $(CURDIR)/$(TARGET_INVENTORY_BASELINE)
+endif
 
 .PHONY: sync knowledge-index verify verify-core verify-full verify-local verify-one verify-changed verify-agent verify-exploit verify-required-external verify-external verify-corroboration verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
 	ghidra-cli test-ghidra-cli \
@@ -154,18 +171,30 @@ generate-semantic-sweep:
 	$(PYTHON) tools/generate_semantic_sweep.py --project-dir "$(PROJECT_DIR)"
 
 generate-decompiler-corpus:
+ifeq ($(TARGET),$(DEFAULT_TARGET))
 	$(PYTHON) tools/generate_decompiler_corpus.py --project-dir "$(PROJECT_DIR)"
+else
+	$(PYTHON) tools/generate_target_decompiler_corpus.py --target "$(TARGET)" --project-dir "$(PROJECT_DIR)" --output "$(CURDIR)/$(TARGET_DECOMPILER_CORPUS)"
+endif
 
 pseudocode:
 	$(PYTHON) tools/pseudo --materialize
 
 generate-project-inventory:
+ifeq ($(TARGET),$(DEFAULT_TARGET))
 	tools/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
+else
+	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR)" tools/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
+endif
 
 # Exact normalized parity: aggregate floors remain the fast collapse detector;
 # this catches substitutions and metadata drift that equal totals cannot.
 verify-project-parity:
+ifeq ($(TARGET),$(DEFAULT_TARGET))
 	tools/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
+else
+	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR)" tools/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
+endif
 	$(PYTHON) tools/project_inventory.py compare \
 		"$(PROJECT_INVENTORY_BASELINE)" "$(PROJECT_INVENTORY)"
 
@@ -173,7 +202,7 @@ verify-project-parity:
 # when two independently rebuilt projects export byte-identical inventories.
 update-project-baseline:
 	@if [ -z "$(PROJECT_DIR_A)" ] || [ -z "$(PROJECT_DIR_B)" ]; then \
-		echo "Usage: make update-project-baseline PROJECT_DIR_A=/abs/rebuild-a PROJECT_DIR_B=/abs/rebuild-b" >&2; \
+		echo "Usage: make update-project-baseline TARGET=$(TARGET) PROJECT_DIR_A=/abs/rebuild-a PROJECT_DIR_B=/abs/rebuild-b" >&2; \
 		exit 2; \
 	fi
 	@if [ "$$($(PYTHON) -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).resolve())' "$(PROJECT_DIR_A)")" = \
@@ -181,6 +210,7 @@ update-project-baseline:
 		echo "PROJECT_DIR_A and PROJECT_DIR_B must be independent rebuilds" >&2; \
 		exit 2; \
 	fi
+ifeq ($(TARGET),$(DEFAULT_TARGET))
 	PROJECT_DIR="$(PROJECT_DIR_A)" tools/export_ghidra_project.sh project-inventory \
 		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-a.jsonl"
 	PROJECT_DIR="$(PROJECT_DIR_B)" tools/export_ghidra_project.sh project-inventory \
@@ -189,25 +219,38 @@ update-project-baseline:
 		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-a.jsonl" \
 		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-b.jsonl" \
 		"$(PROJECT_INVENTORY_BASELINE)"
-	@echo "Updated $(PROJECT_INVENTORY_BASELINE); review with:"
-	@echo "  git diff -- data/ghidra_project_inventory.baseline.jsonl"
+else
+	@mkdir -p "$(BUILD_OUT)/targets/$(TARGET)"
+	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR_A)" tools/export_ghidra_project.sh project-inventory \
+		"$(BUILD_OUT)/targets/$(TARGET)/project_inventory.rebuild-a.jsonl"
+	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR_B)" tools/export_ghidra_project.sh project-inventory \
+		"$(BUILD_OUT)/targets/$(TARGET)/project_inventory.rebuild-b.jsonl"
+	$(PYTHON) tools/project_inventory.py update \
+		"$(BUILD_OUT)/targets/$(TARGET)/project_inventory.rebuild-a.jsonl" \
+		"$(BUILD_OUT)/targets/$(TARGET)/project_inventory.rebuild-b.jsonl" \
+		"$(PROJECT_INVENTORY_BASELINE)"
+endif
+	@echo "Updated $(PROJECT_INVENTORY_BASELINE); review before committing."
 
 rebuild-project:
+ifeq ($(TARGET),$(DEFAULT_TARGET))
 	tools/rebuild_project.sh --project-dir "$(PROJECT_DIR)"
+else
+	tools/rebuild_target_project.sh --target "$(TARGET)" --project-dir "$(PROJECT_DIR)"
+endif
 
-# Materialize the gitignored working project (build/work/project) from the committed
-# snapshot (project/) if it does not already exist. Fast local copy (~2s). All
-# interactive `ghidra` CLI work targets build/work/project/ so the committed snapshot
-# is never daemon-opened (any open compacts its DB and churns the tree).
+# Materialize a gitignored working project from the registered committed snapshot.
+# TARGET defaults to the canonical Sienna; non-default first-class targets resolve
+# project/snapshot names through data/analysis_targets.json.
 work-project:
-	@if [ -d "$(PROJECT_DIR)/rh850_p1me_mapped.rep" ]; then \
+	@if [ -d "$(PROJECT_DIR)/$(PROJECT_NAME).rep" ]; then \
 		echo "Working project already exists: $(PROJECT_DIR)"; \
 	else \
-		echo "Materializing working project from committed snapshot..."; \
+		echo "Materializing $(TARGET) working project from committed snapshot..."; \
 		$(PYTHON) tools/project_layout.py materialize \
 			--snapshot-dir "$(SNAPSHOT_DIR)" \
 			--project-dir "$(PROJECT_DIR)" \
-			--project-name rh850_p1me_mapped; \
+			--project-name "$(PROJECT_NAME)"; \
 		echo "Ready: $(PROJECT_DIR)"; \
 	fi
 	@if [ -f "$(PROJECT_DIR)/processor_manifest.json" ]; then \
@@ -218,16 +261,20 @@ work-project:
 		echo "NOTE: no processor_manifest.json yet; run rebuild-project to create one"; \
 	fi
 
-# Push the working project (build/work/project) into the committed snapshot
-# (project/) and stage it. The ONLY path that mutates the committed project/.
-# Verifies exact stats first and refuses if a daemon is still running.
 snapshot-project:
+ifeq ($(TARGET),$(DEFAULT_TARGET))
 	tools/snapshot_project.sh --project-dir "$(PROJECT_DIR)" --snapshot-dir "$(SNAPSHOT_DIR)"
+else
+	tools/snapshot_target_project.sh --target "$(TARGET)" --project-dir "$(PROJECT_DIR)" $(if $(PARITY_PROJECT_DIR),--parity-project-dir "$(PARITY_PROJECT_DIR)",)
+endif
 
-# Deliberate end-of-session promotion: stops the daemon, waits for exit,
-# verifies the working project, invokes the snapshot path, and prints the
-# staged diff. Distinct from `tools/g stop` (which only persists working-copy
-# edits) and from `snapshot-project` (which promotes without orchestrating an
-# existing interactive daemon lifecycle).
+# Deliberate end-of-session promotion. The default Sienna preserves the mature
+# orchestration path; registered non-default targets stop their own daemon and
+# then run target parity/corpus/snapshot promotion.
 finalize-project:
+ifeq ($(TARGET),$(DEFAULT_TARGET))
 	tools/finalize_project.sh
+else
+	GHIDRA_ANALYSIS_TARGET="$(TARGET)" GHIDRA_PROJECT="$(PROJECT_DIR)" tools/g stop || true
+	tools/snapshot_target_project.sh --target "$(TARGET)" --project-dir "$(PROJECT_DIR)" $(if $(PARITY_PROJECT_DIR),--parity-project-dir "$(PARITY_PROJECT_DIR)",)
+endif

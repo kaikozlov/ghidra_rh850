@@ -1,0 +1,55 @@
+{
+  "callback": {
+    "body_ranges": [
+      {
+        "max": "0x0004e869",
+        "min": "0x0004e848",
+        "space": "ram"
+      }
+    ],
+    "body_sha256": "45a056d0c72aa0c056d0219b739d6668bfb1cc1056ef59109aeef145f147ad5f",
+    "body_size": 34,
+    "data_references": [
+      {
+        "from_addr": "0x0004e850",
+        "operand_index": 2,
+        "ref_type": "READ",
+        "to_addr": "0xfebe8298",
+        "to_space": "ram"
+      },
+      {
+        "from_addr": "0x0004e858",
+        "operand_index": 2,
+        "ref_type": "READ",
+        "to_addr": "0xfebe829c",
+        "to_space": "ram"
+      }
+    ],
+    "decompiled_c": "\nundefined4 did_1c05_1c0c_asic_state_information(int param_1)\n\n{\n  undefined *puVar1;\n  \n  puVar1 = &LAB_febeb800;\n  FUN_0006a55c(DAT_febe8298,param_1);\n  FUN_0006a55c(*(undefined4 *)(puVar1 + -0x3564),param_1 + 4);\n  return 0;\n}\n\n",
+    "decompiled_c_sha256": "a3dbe40fe1f3b33e659b83aa15441850df772f3f45ebb0d05b3925025e7c65d2",
+    "entry": "0x0004E848",
+    "fixed_gp_offsets": [
+      "-0x3568",
+      "-0x3564"
+    ],
+    "gp_value_from_exact_f33_runtime_model": "0xFEBEB800",
+    "output_bytes": 8,
+    "resolved_sources": [
+      "0xFEBE8298",
+      "0xFEBE829C"
+    ]
+  },
+  "image": {
+    "path": "firmware/camry-8965F3307000/CodeFlash.bin",
+    "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "size": 1048576
+  },
+  "schema": "camry-8965f3307000-gtsplus-decompiler-evidence-v1",
+  "software_id": "8965F3307000",
+  "source_corpus": {
+    "boundary": "Tracked first-class exact-F33 Ghidra corpus; promoted function body and canonical data references remain independently image-bound.",
+    "function_count": 6065,
+    "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
+    "sha256": "f33efdbecac7d2d8ee8589ae8492d828451f5f1523aa43c72f672597c77fa8d1"
+  }
+}

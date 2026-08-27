@@ -4033,12 +4033,12 @@
   "schema": "camry-8965f3307000-fault-status-v1",
   "sources": {
     "codeflash": {
-      "path": "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+      "path": "firmware/camry-8965F3307000/CodeFlash.bin",
       "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
     },
     "decompiler_evidence": {
       "path": "data/generated/camry_8965F3307000_fault_status_decompiler_evidence.json",
-      "sha256": "92fb59d48202cbf33080522932a06616a928bd15fc6df5c52810487904e79f7d"
+      "sha256": "ed3e94c8f4772cd1fe4291dae57e86de8f8522ae21b5fac91e0bc6967d1052eb"
     },
     "h_techstream_vocabulary": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
@@ -4046,7 +4046,7 @@
     },
     "tx_contract": {
       "path": "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
-      "sha256": "314a148e9a0450615a02fac5aa6f0a55dd9470863a29e344dca761ba82a4ad76"
+      "sha256": "9c0dbc1b9aed10ea5e290834ce2505c7110a14fd88cfeddd222a0efe66dea4fc"
     }
   },
   "target": {

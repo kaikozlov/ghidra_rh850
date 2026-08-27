@@ -7,13 +7,14 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 from tools.compare_variant_application_rx import compare as compare_rx  # noqa: E402
+from tools.camry_f33_corpus import body_bytes  # noqa: E402
 
-RAW_DIR = REPO / 'community/kai/camry-2026/raw-20260826/codeflash'
+RAW_DIR = REPO / 'targets/camry-2026/raw-20260826/codeflash'
 RAW = RAW_DIR / 'camry_8965F3307000_codeflash_20260826T213719Z.bin'
 RUN = RAW_DIR / 'camry_8965F3307000_codeflash_20260826T213719Z.run.json'
 COVERAGE = RAW_DIR / 'camry_8965F3307000_codeflash_20260826T213719Z.coverage.bin'
-NORMALIZED = REPO / 'community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin'
-PAYLOAD = REPO / 'community/kai/camry-2026/raw-20260826/calvin_payload_codeflash_00000000_00200000.bin'
+NORMALIZED = REPO / 'firmware/camry-8965F3307000/CodeFlash.bin'
+PAYLOAD = REPO / 'targets/camry-2026/raw-20260826/calvin_payload_codeflash_00000000_00200000.bin'
 EVIDENCE = REPO / 'data/generated/camry_8965F3307000_decompiler_evidence.json'
 P5 = REPO / 'data/generated/techstream_v18/p5_lateral_control_semantics.json'
 H = REPO / 'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin'
@@ -100,7 +101,7 @@ def main() -> int:
         raise ValueError('target-native decompiler evidence identity drift')
     funcs = {int(row['entry'], 16): row for row in evid['functions']}
     for entry, row in funcs.items():
-        body = image[entry:entry + row['body_size']]
+        body = body_bytes(image, row)
         if sha(body) != row['body_sha256']:
             raise ValueError(f'decompiler body hash drift 0x{entry:X}')
 
@@ -132,9 +133,15 @@ def main() -> int:
             b6['full_freshness_bits'] == 46 and b6['transmitted_freshness_bits'] == 4 and b6['cryptoif_handle'] == 0):
         raise ValueError('Camry protected B6 profile geometry drift')
 
-    # COM geometry: target code pins TP-0x1974 and TP-0x173C; table gap yields 284 signal IDs.
-    scalar = funcs[0x7D12A]['decompiled_c']
-    need(scalar, '* 2 + unaff_tp + -0x1974', 'param_3 - 1', '*(short *)param_6')
+    # COM geometry: the target-native context resolves TP-0x1974 to absolute
+    # CodeFlash 0x22488.  Prefer the canonical Ghidra data-reference graph over
+    # decompiler-local `unaff_tp` spelling, which disappears once TP is seeded.
+    scalar_row = funcs[0x7D12A]
+    scalar = scalar_row['decompiled_c']
+    scalar_refs = {int(r['to_addr'], 16) for r in scalar_row.get('data_references', [])}
+    if 0x22488 not in scalar_refs:
+        raise ValueError('Camry signal-to-PDU table reference drift')
+    need(scalar, 'param_3 - 1', '*(short *)param_6')
     signal_count = (PDU_TABLE - SIGNAL_TO_PDU) // 2
     signal_to_pdu = [u16(image, SIGNAL_TO_PDU + i * 2) for i in range(signal_count)]
     pdu44_signals = [i for i, pdu_id in enumerate(signal_to_pdu) if pdu_id == 44]
@@ -163,22 +170,22 @@ def main() -> int:
     for sid, off, bits, start, signed, _ in extracts:
         token = f'FUN_0007d12a(0x{sid:x},0x{off:x},'
         need(unpack, token)
-    need(unpack, 'FUN_0007d12a(0x105,0x1ba,6,0,0,unaff_gp + -0x3744);',
-         'FUN_0007d12a(0x106,0x1bb,0x10,0,1,unaff_gp + -0x3748);')
+    unpack_refs = {int(r['to_addr'], 16) for r in funcs[0x4BD46].get('data_references', [])}
+    if not {0xFEBE80BC, 0xFEBE80B8}.issubset(unpack_refs):
+        raise ValueError('Camry B6 signal 261/262 destination reference drift')
 
     # Raw -> staging -> snapshot -> target-conditioning/plausibility consumers.
     stage = funcs[0x58074]['decompiled_c']; snap = funcs[0xBCD66]['decompiled_c']
     preprocess = funcs[0xCCF0E]['decompiled_c']; clamp = funcs[0xCCFB6]['decompiled_c']; plaus = funcs[0xCEE80]['decompiled_c']
     selector_decode = funcs[0xCEFFC]['decompiled_c']; selector_aux = funcs[0xCB73A]['decompiled_c']
-    need(stage, 'uVar6 = *(undefined1 *)(unaff_gp + -0x3744);', '(&DAT_00003930)[unaff_gp] = uVar6;',
-         'uVar3 = *(undefined2 *)(unaff_gp + -0x3748);', 'unaff_gp + 0x39fa) = uVar3')
-    need(snap, 'unaff_gp + -0x970) = *(undefined2 *)(unaff_gp + 0x39fa)',
-         'unaff_gp + -0xa50) = (&DAT_00003930)[unaff_gp]')
-    need(preprocess, '*(short *)(unaff_gp + -0x970) * 2', '0x7fff', '-0x7fff', '&DAT_000010b4')
-    need(clamp, '&DAT_000010b4', '&DAT_000011fe', '&DAT_00001200', '&DAT_000010b8')
-    need(plaus, 'sVar3 = *(short *)(unaff_gp + -0x970)', 'FUN_000d0970((int)sVar3)')
-    need(selector_decode, "cVar1 = *(char *)(unaff_gp + -0xa50)", "cVar1 == '\\x01'", "cVar1 == '\\x04'", "cVar1 == '\\n'", "cVar1 == '\\v'", "cVar1 == '\\x12'", "cVar1 == '\\x13'")
-    need(selector_aux, "cVar1 = *(char *)(unaff_gp + -0xa50)", "cVar1 == '1'")
+    need(stage, 'DAT_febef130 = DAT_febe80bc;', 'DAT_febef1fa = DAT_febe80b8;')
+    need(snap, '*(undefined2 *)(puVar15 + -0x970) = *(undefined2 *)(puVar15 + 0x39fa);',
+         'puVar15[-0xa50] = puVar15[0x3930];')
+    need(preprocess, 'iVar1 = DAT_febeae90 * 2;', '0x7fff', '-0x7fff', 'DAT_febec8b4')
+    need(clamp, 'DAT_febec8b4', 'DAT_febec9fe', 'DAT_febeca00', 'DAT_febec8b8')
+    need(plaus, 'sVar3 = *(short *)(puVar11 + -0x970);', 'FUN_000d0970((int)sVar3)')
+    need(selector_decode, "DAT_febeadb0 == '\\x01'", "DAT_febeadb0 == '\\x04'", "DAT_febeadb0 == '\\n'", "DAT_febeadb0 == '\\v'", "DAT_febeadb0 == '\\x12'", "DAT_febeadb0 == '\\x13'")
+    need(selector_aux, "DAT_febeadb0 == '1'")
 
     # Target-native 0x025 measured steering-angle feedback and exact target-vs-measured comparator.
     pdu35_signals = [i for i, pdu_id in enumerate(signal_to_pdu) if pdu_id == 35]
@@ -193,27 +200,27 @@ def main() -> int:
     measured_condition = funcs[0xCE9EA]['decompiled_c']; measured_vote = funcs[0xCEADA]['decompiled_c']
     comparator = funcs[0xCD128]['decompiled_c']
     need(measured_unpack,
-         'FUN_0007d12a(0xbb,0x127,0xc,0,1,unaff_gp + -0x37b8);',
-         'FUN_0007d12a(0xbc,299,4,4,1,unaff_gp + -0x37b1);')
-    need(measured_stage, 'FUN_0006a5fa((int)*(short *)(unaff_gp + -0x37b8),auStack_e);',
-         '*(undefined2 *)(unaff_gp + -0x3aba) = auStack_e[0];')
+         'FUN_0007d12a(0xbb,0x127,0xc,0,1,&DAT_febe8048);',
+         'FUN_0007d12a(0xbc,299,4,4,1,puVar2 + -0x37b1);')
+    need(measured_stage, 'FUN_0006a5fa((int)DAT_febe8048,auStack_e);',
+         '*(undefined2 *)(puVar5 + -0x3aba) = auStack_e[0];')
     did1037_row = image[0x293AC:0x293BC]
     if did1037_row != bytes.fromhex('37100200f8db04000000000000000000'):
         raise ValueError('Camry DID1037 row drift')
-    need(did1037, 'asStack_a[0] = *(short *)(unaff_gp + -0x3aba);', 'FUN_00070110', 'FUN_0006a5ac')
-    need(stage,
-         'uVar3 = *(undefined2 *)(unaff_gp + -0x37b8);', '*(undefined2 *)(&DAT_000039a0 + unaff_gp) = uVar3;',
-         'uVar5 = *(undefined1 *)(unaff_gp + -0x37b1);', '(&DAT_0000386f)[unaff_gp] = uVar5;')
+    need(did1037, 'asStack_a[0] = DAT_febe7d46;', 'FUN_00070110', 'FUN_0006a5ac')
+    need(stage, 'DAT_febef1a0 = DAT_febe8048;', 'DAT_febef06f = DAT_febe804f;')
     need(snap,
-         'unaff_gp + -0xa02) = *(undefined2 *)(&DAT_000039a0 + unaff_gp)',
-         'unaff_gp + -0xb3b) = (&DAT_0000386f)[unaff_gp]')
-    need(measured_combine, '*(short *)(&DAT_000039a0 + unaff_gp) * 0xf', "(short)(char)(&DAT_0000386f)[unaff_gp]")
-    need(measured_condition, '*(char *)(unaff_gp + -0xb3b) + *(short *)(unaff_gp + -0xa02) * 0xf', '* 0x6fb)', '0x200;', 'sVar1 * 2 - iVar7')
-    need(measured_vote, '*(short *)(unaff_gp + -0x9a2) * 2 - iVar4', '&DAT_000012d2', '&DAT_000012d4', '&DAT_000012d6')
+         '*(undefined2 *)(puVar15 + -0xa02) = *(undefined2 *)(puVar15 + 0x39a0);',
+         'puVar15[-0xb3b] = puVar15[0x386f];')
+    need(measured_combine, 'DAT_febeb16c = DAT_febef1a0 * 0xf + (short)DAT_febef06f;')
+    need(measured_condition, '((int)DAT_febeacc5 + DAT_febeadfe * 0xf) * 0x6fb) / 0x200;',
+         'iVar13 = iVar12 * 2 - iVar1;')
+    need(measured_vote, 'iVar2 = DAT_febeae5e * 2 - iVar2;', 'DAT_febecad2', 'DAT_febecad4', 'DAT_febecad6')
     need(comparator,
-         '&DAT_000010b8', '&DAT_000011a0', '&DAT_000011cc',
-         '&DAT_000012d2', '&DAT_000012d4', '&DAT_000012d6',
-         'iVar1 = (iVar5 * 0xb76) / 0x400;', 'iVar12 = (iVar12 * 0xb76) / 0x400;', 'iVar5 = iVar1 - iVar12;')
+         'DAT_febec8b8', 'DAT_febec9a0', 'DAT_febec9cc',
+         'DAT_febecad2', 'DAT_febecad4', 'DAT_febecad6',
+         'iVar1 = (iVar1 * 0xb76) / 0x400;', 'DAT_febec8dc = (iVar2 * 0xb76) / 0x400;',
+         'DAT_febec8e0 = iVar1 - DAT_febec8dc;')
     # B6 raw target and 0x025 measured feedback share the comparator domain.  The
     # measured coarse field is Techstream's 1.5-deg Steering Angle and the signed
     # nibble supplies the 0.1-deg fraction used by the 15*coarse+fraction reconstruction.
@@ -223,9 +230,9 @@ def main() -> int:
     # Target-native SecOC worker chain and command-7 ICU job programming.
     rx_ind = funcs[0x8EE7C]['decompiled_c']; lookup = funcs[0x8F2B0]['decompiled_c']; verify = funcs[0x8F746]['decompiled_c']; cmd7 = funcs[0x8A8E4]['decompiled_c']
     need(rx_ind, 'FUN_0008f2b0', 'FUN_0008f34a')
-    need(lookup, '* 0x50', 'if (2 < uVar1)', 'uVar1 < 3')
-    need(verify, 'FUN_0008f434', 'FUN_0008ecb2', 'FUN_0008f676', 'unaff_gp + -0x62d8) = 0x24')
-    need(cmd7, 'Ramffc5d000 = uVar9 << 0x10 | 7;')
+    need(lookup, '(&DAT_0002587c)[(short)uVar1 * 0x28]', 'if (2 < uVar1)', 'uVar1 < 3')
+    need(verify, 'FUN_0008f434', 'FUN_0008ecb2', 'FUN_0008f676', '*(undefined4 *)(puVar1 + -0x62d8) = 0x24;')
+    need(cmd7, 'DAT_ffc5d000 = puVar2[4] << 0x10 | 7;')
 
     stages = {row['name']: row for row in run['stages']}
     out = {

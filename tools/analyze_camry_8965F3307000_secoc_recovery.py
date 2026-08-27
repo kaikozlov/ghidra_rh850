@@ -26,7 +26,7 @@ sys.path.insert(0, str(REPO))
 from exploit.common.payload_package import inspect_payload
 from tools.analyze_toyota_dataflash import analyze_triplicate_objects
 
-ROOT = REPO / "community/kai/camry-2026/raw-20260826/secoc-recovery"
+ROOT = REPO / "targets/camry-2026/raw-20260826/secoc-recovery"
 DATAFLASH = ROOT / "dataflash/dump_ff200000_ff208000.bin"
 ORACLE_GZ = ROOT / "can_oracle.ndjson.gz"
 LOCAL_RAM = ROOT / "ram/local_ram_pe1.bin"

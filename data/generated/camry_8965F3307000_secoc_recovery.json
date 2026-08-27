@@ -27,7 +27,7 @@
       "valid_consensus": false,
       "valid_copy_count": 0
     },
-    "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/dataflash/dump_ff200000_ff208000.bin",
+    "path": "targets/camry-2026/raw-20260826/secoc-recovery/dataflash/dump_ff200000_ff208000.bin",
     "sha256": "231fbdde4ef317931d8f1ff20ff131650f7d773c124a179b0ae3dc98bf8e4432",
     "size": 32768,
     "statistics": {
@@ -45,7 +45,7 @@
       "conflicts": 0,
       "coverage": {
         "all_words_covered": true,
-        "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/ram/global_ram.coverage.bin",
+        "path": "targets/camry-2026/raw-20260826/secoc-recovery/ram/global_ram.coverage.bin",
         "sha256": "111ce3c2a38d83a2e4706bde4abddd509d7f8248116c6832b06745bdc349e09f",
         "size": 16384
       },
@@ -65,7 +65,7 @@
         "0xfef08000"
       ],
       "run": {
-        "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/ram/global_ram.run.json",
+        "path": "targets/camry-2026/raw-20260826/secoc-recovery/ram/global_ram.run.json",
         "sha256": "0474343a39270fa6dfebd267cbc391ce9b6075c8343beafbf7fb1e6ceed52961",
         "size": 11331
       },
@@ -77,7 +77,7 @@
     },
     "app_sa_root_hits": [],
     "boot_sa_root_hits": [],
-    "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/ram/global_ram.bin",
+    "path": "targets/camry-2026/raw-20260826/secoc-recovery/ram/global_ram.bin",
     "payload_build_root_hits": [],
     "sha256": "53c8370237c681d4105c513be5096461ac735ffcb9577995c7203216165006a4",
     "size": 65536,
@@ -99,7 +99,7 @@
       "conflicts": 0,
       "coverage": {
         "all_words_covered": true,
-        "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.coverage.bin",
+        "path": "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.coverage.bin",
         "sha256": "bfa5a24faa8ddf576edcc46f4f05e2459ee4a383b8dc14ff7dba0056b9c59ed0",
         "size": 32768
       },
@@ -119,7 +119,7 @@
         "0xfec00000"
       ],
       "run": {
-        "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.run.json",
+        "path": "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.run.json",
         "sha256": "ccd6335b2d6f02dcb4dbd76dcb7f436493e34204dbcea7beec509efa3e326d57",
         "size": 11428
       },
@@ -278,7 +278,7 @@
       ],
       "valid_checksum_count": 0
     },
-    "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin",
+    "path": "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin",
     "payload_build_root_hits": [],
     "sha256": "0ddef478b15bcf3241c56573463eda25ba018081629daf0042fcae1204c435a7",
     "size": 131072,
@@ -412,7 +412,7 @@
         }
       }
     },
-    "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/can_oracle.ndjson.gz",
+    "path": "targets/camry-2026/raw-20260826/secoc-recovery/can_oracle.ndjson.gz",
     "uncompressed_sha256": "823622ed360ee1b2c2c156c6196a17d001c845f4d53fbc56922a338a4a46e33c",
     "uncompressed_size": 37552829
   },
@@ -423,7 +423,7 @@
       "crc_residue": "0xFFFFFFFF",
       "descriptor_address": "0xFEBF0000",
       "descriptor_length": 4080,
-      "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/payloads/payload_dataflash_ff200000_ff208000.bin",
+      "path": "targets/camry-2026/raw-20260826/secoc-recovery/payloads/payload_dataflash_ff200000_ff208000.bin",
       "sha256": "d48988366b5e6d2ddd7438caca5e6f6f02daba9b650263c323a2ffd770a06e34",
       "size": 4096
     },
@@ -433,7 +433,7 @@
       "crc_residue": "0xFFFFFFFF",
       "descriptor_address": "0xFEBF0000",
       "descriptor_length": 4080,
-      "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/payloads/payload_global_ram_feef8000_fef08000.bin",
+      "path": "targets/camry-2026/raw-20260826/secoc-recovery/payloads/payload_global_ram_feef8000_fef08000.bin",
       "sha256": "43d00fdaf790c6deb230d3a4e7b8f8bd17e077a100fa53ebb194532f55c510fd",
       "size": 4096
     },
@@ -443,7 +443,7 @@
       "crc_residue": "0xFFFFFFFF",
       "descriptor_address": "0xFEBF0000",
       "descriptor_length": 4080,
-      "path": "community/kai/camry-2026/raw-20260826/secoc-recovery/payloads/payload_local_ram_pe1_febe0000_fec00000.bin",
+      "path": "targets/camry-2026/raw-20260826/secoc-recovery/payloads/payload_local_ram_pe1_febe0000_fec00000.bin",
       "sha256": "fbb1f5bd352c3f0bf416d6b1ef6a7696f97cad2b9f49570ca859207f3269e44f",
       "size": 4096
     }

@@ -3,9 +3,10 @@
 from __future__ import annotations
 import argparse, hashlib, json
 from pathlib import Path
+from camry_f33_corpus import CORPUS, body_bytes, display_path
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin"
+IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
 OUT = REPO / "data/generated/camry_8965F3307000_flash_backend_evidence.json"
 ENTRIES = [0x78BFA, 0x78C30, 0x78CE6, 0x78E2A, 0x79026]
 
@@ -17,7 +18,7 @@ def sha(b: bytes) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--image', type=Path, default=IMAGE)
-    ap.add_argument('--corpus', type=Path, required=True)
+    ap.add_argument('--corpus', type=Path, default=CORPUS)
     ap.add_argument('--out', type=Path, default=OUT)
     a = ap.parse_args()
     image = a.image.read_bytes()
@@ -34,13 +35,15 @@ def main() -> int:
         if not row or not row.get('decompile_completed') or not row.get('decompiled_c'):
             raise SystemExit(f'missing complete decompile 0x{entry:X}')
         size = int(row['body_size'])
-        body = image[entry:entry + size]
+        body = body_bytes(image, row)
         if len(body) != size:
             raise SystemExit(f'function outside image 0x{entry:X}')
         text = row['decompiled_c']
         funcs.append({
             'entry': f'0x{entry:08X}',
             'body_size': size,
+            'body_ranges': row.get('body_ranges', []),
+            'data_references': row.get('data_references', []),
             'body_sha256': sha(body),
             'decompiled_c_sha256': sha(text.encode()),
             'decompiled_c': text,

@@ -12,9 +12,12 @@ import json
 import math
 import struct
 from pathlib import Path
+import sys
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin"
+sys.path.insert(0, str(REPO))
+from tools.camry_f33_corpus import body_bytes  # noqa: E402
+IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
 EVID = REPO / "data/generated/camry_8965F3307000_lateral_decompiler_evidence.json"
 CODEFLASH = REPO / "data/generated/camry_8965F3307000_codeflash.json"
 PRODUCT = REPO / "data/p1me_product_memory.json"
@@ -88,14 +91,14 @@ def build() -> dict:
     functions = {int(row["entry"], 16): row for row in evidence["functions"]}
     need(len(functions) == 31, "duplicate/missing lateral evidence entries")
     for entry, row in functions.items():
-        need(sha(image[entry:entry + row["body_size"]]) == row["body_sha256"], f"body hash drift 0x{entry:08X}")
+        need(sha(body_bytes(image, row)) == row["body_sha256"], f"body hash drift 0x{entry:08X}")
 
     # Timer: 0x6639C clears TAUJ0 TPS/BRS/CMOR and loads the first TDR values;
     # 0x66512 reloads channel 3 with the steady value. The product record binds
     # R7F701381 and the official 80-MHz P-Bus/TAUJ domain.
-    require_tokens(functions, 0x66062, "Ramffffb111", "(bVar1 & 0x10) == 0", "Ramffffb111 = bVar1 & 0xef;")
-    require_tokens(functions, 0x6639C, "Ramffe50090 = 0;", "Ramffe50080 = 0;", "Ramffe5000c = iRam00030e0c + iRam00030e08 + -1;")
-    require_tokens(functions, 0x66512, "Ramffe5000c = iRam00030e08 + -1;", "FUN_000701ea(uVar3);")
+    require_tokens(functions, 0x66062, "DAT_ffffb110._1_1_", "(bVar1 & 0x10) == 0", "DAT_ffffb110._1_1_ = bVar1 & 0xef;")
+    require_tokens(functions, 0x6639C, "Ramffe50090 = 0;", "Ramffe50080 = 0;", "Ramffe5000c = PTR_LAB_0000270e_2_00030e0c + DAT_00030e08 + -1;")
+    require_tokens(functions, 0x66512, "Ramffe5000c = DAT_00030e08 + -1;", "FUN_000701ea(uVar3);")
     timer_terms = [u32(image, 0x30DF0 + i * 4) for i in range(8)]
     need(timer_terms == [16000, 800, 32000, 9200, 80000, 9600, 400000, 10000], "F33 TAUJ0 timer terms drift")
     p_bus_hz = product["timer"]["p_bus_hz"]
@@ -107,11 +110,11 @@ def build() -> dict:
     steady_counts = timer_terms[6]
 
     # Exact mode-2 command envelope and application-sequence behavior.
-    require_tokens(functions, 0xCEFFC, "cVar1 == '\\v'", "uVar2 = 2;")
-    require_tokens(functions, 0xCEC8A, "unaff_gp + -0xa44", "DAT_000b0620", "DAT_000b0622")
-    require_tokens(functions, 0xCEE80, "LAB_000012de", "LAB_000012ec")
+    require_tokens(functions, 0xCEFFC, "DAT_febeadb0 == '\\v'", "DAT_febecb00 = 2;")
+    require_tokens(functions, 0xCEC8A, "DAT_febeadbc", "DAT_000b0620", "DAT_000b0622")
+    require_tokens(functions, 0xCEE80, "puVar11 + 0x12de", "puVar11 + 0x12ec")
     require_tokens(functions, 0xCCF0E, "* 2")
-    require_tokens(functions, 0xCCFB6, "DAT_000010b4", "DAT_000011fe", "DAT_00001200")
+    require_tokens(functions, 0xCCFB6, "DAT_febec8b4", "DAT_febec9fe", "DAT_febeca00")
     for off in (0x12978, 0x1A978):
         need(u16(image, off) == 1745 and u16(image, off + 2) == 78, f"mode2 envelope calibration drift at 0x{off:X}")
     need(u16(image, 0xB061C) == 87, "target delta deadband drift")
@@ -124,14 +127,14 @@ def build() -> dict:
     deg_per_count = 1024 / 17870
 
     # Secondary fields: retain consumer behavior, not guessed OEM names.
-    require_tokens(functions, 0xCDA20, "unaff_gp + -0xa45", "FUN_000d0a06")
-    require_tokens(functions, 0xCE3AA, "unaff_gp + -0xa43", ") / 100")
-    require_tokens(functions, 0xCDFF8, "unaff_gp + -0xa42", ") / 100")
+    require_tokens(functions, 0xCDA20, "DAT_febeadbb", "FUN_000d0a06")
+    require_tokens(functions, 0xCE3AA, "DAT_febeadbd", ") / 100")
+    require_tokens(functions, 0xCDFF8, "DAT_febeadbe", ") / 100")
 
     # Steering-rate monitor / diagnostic joins.
-    require_tokens(functions, 0x4B59E, "FUN_0007d12a(0xbd,299,0xc,0,1,unaff_gp + -0x37b6)")
-    require_tokens(functions, 0x4DBBC, "unaff_gp + -0x515c", "* 0x168) / 0x400")
-    require_tokens(functions, 0xCED28, "unaff_gp + -0x9de", "uVar7 + 1")
+    require_tokens(functions, 0x4B59E, "FUN_0007d12a(0xbd,299,0xc,0,1,puVar2 + -0x37b6)")
+    require_tokens(functions, 0x4DBBC, "DAT_febe66a4", "* 0x168) / 0x400")
+    require_tokens(functions, 0xCED28, "DAT_febeae22", "uVar7 + 1")
     need(u16(image, 0x2939C) == 0x1036 and u32(image, 0x293A0) == 0x4DBBC, "DID1036 row drift")
     need(tech_name(tech, "0x1036") == "Steering Angle Velocity", "DID1036 Techstream name drift")
     need(u16(image, 0xB066E) == 100, "mode2 steering-rate threshold drift")
@@ -139,21 +142,27 @@ def build() -> dict:
 
     # Driver torque diagnostic source and acquisition saturation.
     require_tokens(functions, 0x484D2, "DAT_00030e52")
-    require_tokens(functions, 0x4DB70, "unaff_gp + -0x4d10) == -0x5aa5a55b", "unaff_gp + -0x5158", "* 1000) / 0x100", "25000")
+    require_tokens(functions, 0x4DB70, "DAT_febe6af0 == -0x5aa5a55b", "DAT_febe66a8", "* 1000) / 0x100", "&LAB_000061a8")
     need(u16(image, 0x2938C) == 0x1035 and u32(image, 0x29390) == 0x4DB70, "DID1035 row drift")
     need(u16(image, 0x30E52) == 2109, "normalized F33 torque acquisition saturation drift")
     need(tech_name(tech, "0x1035") == "Steering Wheel Torque", "DID1035 Techstream name drift")
 
     # Q-axis current diagnostic source.
-    require_tokens(functions, 0x4E394, "unaff_gp + -0x50f2", "* 100) / 0x80")
+    require_tokens(functions, 0x4E394, "DAT_febe670e", "* 100) / 0x80")
     need(u16(image, 0x2979C) == 0x1151 and u32(image, 0x297A0) == 0x4E394, "DID1151 row drift")
     need(tech_name(tech, "0x1151") == "Motor Actual Current (Q Axis)", "DID1151 Techstream name drift")
 
     census = evidence["fixed_gp_census"]
     torque_entries = [row["entry"] for row in census["driver_torque_source"]["entries"]]
+    torque_reads = [row["entry"] for row in census["driver_torque_source"]["read_entries"]]
+    torque_writes = [row["entry"] for row in census["driver_torque_source"]["write_entries"]]
     q_entries = [row["entry"] for row in census["q_current_source"]["entries"]]
-    need(torque_entries == ["0x00035A06", "0x0004DB70", "0x00054244", "0x000564CE"], "torque direct/fixed-GP census drift")
-    need(q_entries == ["0x0004E394", "0x00054244", "0x000564CE"], "Q-current direct/fixed-GP census drift")
+    q_reads = [row["entry"] for row in census["q_current_source"]["read_entries"]]
+    q_writes = [row["entry"] for row in census["q_current_source"]["write_entries"]]
+    need(torque_entries == ["0x00035A06", "0x0004C000", "0x0004C490", "0x0004DB70", "0x00052CA0", "0x00054244", "0x000564CE", "0x00059448", "0x0005D5E0"], "torque canonical data-reference census drift")
+    need(torque_reads == torque_entries[:7] and torque_writes == torque_entries[7:], "torque read/write census drift")
+    need(q_entries == ["0x0004E394", "0x00052CA0", "0x00054244", "0x000564CE", "0x00059448", "0x0005D12C"], "Q-current canonical data-reference census drift")
+    need(q_reads == q_entries[:4] and q_writes == q_entries[4:], "Q-current read/write census drift")
     need(census["driver_torque_source"]["cooperative_c8_d1_intersection"] == [], "torque cooperative-cone census drift")
     need(census["q_current_source"]["cooperative_c8_d1_intersection"] == [], "Q-current cooperative-cone census drift")
 
@@ -181,12 +190,15 @@ def build() -> dict:
             "target_native_timing_closed": True,
         },
         "driver_torque": {
-            "boundary": "The 2109-raw acquisition/representation saturation is not a driver-override threshold. The negative control-cone result covers direct/fixed-GP references only; computed aliases and DMA remain outside the census.",
+            "boundary": "The 2109-raw acquisition/representation saturation is not a driver-override threshold. The canonical whole-project data-reference census includes both readers and writers of FEBE66A8; the negative control-cone result remains empty. Computed aliases without a Ghidra data reference and DMA remain outside the census.",
             "callback": "0x0004DB70",
             "cooperative_c8_d1_direct_fixed_gp_intersection": census["driver_torque_source"]["cooperative_c8_d1_intersection"],
             "diagnostic_display_clamp_nm": 25.0,
             "did": "0x1035",
             "direct_fixed_gp_reference_entries": torque_entries,
+            "read_reference_entries": torque_reads,
+            "write_reference_entries": torque_writes,
+            "resolved_source_address": census["driver_torque_source"]["resolved_address"],
             "override_threshold_recovered": False,
             "physical_formula": "N.m = raw / 256",
             "raw_source": "gp-0x5158",
@@ -232,12 +244,15 @@ def build() -> dict:
             "target_lateral_id": 11,
         },
         "q_current": {
-            "boundary": "No target-native measured-Q-current-vs-command comparator is recovered through direct/fixed-GP references in the cooperative cone. Numeric representation limits are not a motor-response safety threshold.",
+            "boundary": "No target-native measured-Q-current-vs-command comparator is recovered through canonical direct data references in the cooperative cone. The whole-project census includes readers and writers of FEBE670E; numeric representation limits are not a motor-response safety threshold.",
             "callback": "0x0004E394",
             "cooperative_c8_d1_direct_fixed_gp_intersection": census["q_current_source"]["cooperative_c8_d1_intersection"],
             "diagnostic_formula": "displayed centi-A = (raw * 100) / 0x80",
             "did": "0x1151",
             "direct_fixed_gp_reference_entries": q_entries,
+            "read_reference_entries": q_reads,
+            "write_reference_entries": q_writes,
+            "resolved_source_address": census["q_current_source"]["resolved_address"],
             "physical_formula": "A = raw / 128",
             "raw_source": "gp-0x50F2",
             "response_threshold_recovered": False,

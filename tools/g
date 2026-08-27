@@ -23,6 +23,7 @@
 # Environment:
 #   GHIDRA_AGENT=1            Force compact JSON output (for scripted/agent consumption).
 #   GHIDRA_PROJECT            Override the working project directory (default: build/work/project).
+#   GHIDRA_ANALYSIS_TARGET   Registered analysis target; omitted means registry default.
 #   GHIDRA_ALLOW_SYSTEM_CLI=1 Allow falling back to a system-installed ghidra binary.
 #   GHIDRA_NO_BOOTSTRAP=1     Skip processor env bootstrap (assumes env already sourced).
 set -euo pipefail
@@ -30,11 +31,14 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/build_paths.sh"
-PROJECT_NAME="rh850_p1me_mapped"
-PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
-SNAPSHOT_DIR="$ROOT/project"
-PROJECT_DIR="${GHIDRA_PROJECT:-$BUILD_WORK/project}"
-DAEMON_RE='AnalyzeHeadless.*rh850_p1me_mapped'
+ANALYSIS_TARGET="${GHIDRA_ANALYSIS_TARGET:-$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["default_target"])' "$ROOT/data/analysis_targets.json")}"
+TARGET_FIELD() { python3 "$ROOT/tools/analysis_target.py" "$ANALYSIS_TARGET" --field "$1"; }
+PROJECT_NAME=$(TARGET_FIELD project_name)
+PROGRAM_NAME=$(TARGET_FIELD program_name)
+SNAPSHOT_DIR="$ROOT/$(TARGET_FIELD snapshot_dir)"
+DEFAULT_PROJECT_DIR="$ROOT/$(TARGET_FIELD work_dir)"
+PROJECT_DIR="${GHIDRA_PROJECT:-$DEFAULT_PROJECT_DIR}"
+DAEMON_RE="AnalyzeHeadless.*${PROJECT_NAME}"
 
 # --- Canonicalize PROJECT_DIR -------------------------------------------------
 
@@ -45,6 +49,24 @@ import sys
 print(Path(sys.argv[1]).expanduser().resolve(strict=False))
 PY
 )
+SNAPSHOT_DIR=$(python3 - "$SNAPSHOT_DIR" <<'PY'
+from pathlib import Path
+import sys
+print(Path(sys.argv[1]).expanduser().resolve(strict=False))
+PY
+)
+COMMITTED_PROJECT_ROOT=$(python3 - "$ROOT/project" <<'PY'
+from pathlib import Path
+import sys
+print(Path(sys.argv[1]).resolve(strict=False))
+PY
+)
+COMMITTED_PROJECTS_ROOT=$(python3 - "$ROOT/projects" <<'PY'
+from pathlib import Path
+import sys
+print(Path(sys.argv[1]).resolve(strict=False))
+PY
+)
 
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/project_marker.sh"
@@ -53,9 +75,9 @@ MUTATION_MARKER=$(project_mutation_marker "$ROOT" "$ABS_PROJECT_DIR")
 # --- Guard against committed project/ -----------------------------------------
 
 case "$ABS_PROJECT_DIR" in
-  "$SNAPSHOT_DIR"|"$SNAPSHOT_DIR"/*)
-    echo "REFUSING: working project resolves inside committed snapshot ($SNAPSHOT_DIR)." >&2
-    echo "Use build/work/project (the default) or set GHIDRA_PROJECT to a disposable path." >&2
+  "$COMMITTED_PROJECT_ROOT"|"$COMMITTED_PROJECT_ROOT"/*|"$COMMITTED_PROJECTS_ROOT"|"$COMMITTED_PROJECTS_ROOT"/*)
+    echo "REFUSING: working project resolves inside a committed project snapshot namespace." >&2
+    echo "Use the registered build/work target path or set GHIDRA_PROJECT to a disposable path." >&2
     exit 1
     ;;
 esac

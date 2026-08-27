@@ -345,27 +345,27 @@
   "schema": "camry-2026-tsk-baseline-v1",
   "sources": {
     "MANIFEST.txt": {
-      "path": "community/kai/camry-2026/raw-20260826/MANIFEST.txt",
+      "path": "targets/camry-2026/raw-20260826/MANIFEST.txt",
       "sha256": "bf9a282ab683aeef35cda370558f84ea16bbf80c74244227cf8bbbe5ad6ea908",
       "size": 1440
     },
     "can_oracle.ndjson.gz": {
-      "path": "community/kai/camry-2026/raw-20260826/can_oracle.ndjson.gz",
+      "path": "targets/camry-2026/raw-20260826/can_oracle.ndjson.gz",
       "sha256": "db47d483016c409b5c3a1ecdf58310f68ca8105a4c16eae54185016a6eaf3f41",
       "size": 3265598
     },
     "identity.json": {
-      "path": "community/kai/camry-2026/raw-20260826/identity.json",
+      "path": "targets/camry-2026/raw-20260826/identity.json",
       "sha256": "5feffa176a0a0293de53fee91486788c577d603ad72cc6e93064dd3710cad234",
       "size": 1559
     },
     "programming_probe.json": {
-      "path": "community/kai/camry-2026/raw-20260826/programming_probe.json",
+      "path": "targets/camry-2026/raw-20260826/programming_probe.json",
       "sha256": "c8dec4197585622a511a03a629e44b2b69369ce3b5b7978a584dfa5e4fa27817",
       "size": 2135
     },
     "xcp_probe.json": {
-      "path": "community/kai/camry-2026/raw-20260826/xcp_probe.json",
+      "path": "targets/camry-2026/raw-20260826/xcp_probe.json",
       "sha256": "b8d96ae5cb97f18d1138196e2a0cb95de5938ec0ff7e512ee9f752f86645e273",
       "size": 702
     }

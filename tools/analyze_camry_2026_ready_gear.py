@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-RAW = REPO / "community/kai/camry-2026/raw-20260826"
+RAW = REPO / "targets/camry-2026/raw-20260826"
 DEFAULT_OUT = REPO / "data/generated/camry_2026_ready_gear.json"
 SOURCE_NAMES = (
   "READY_GEAR_MANIFEST.txt",

@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-ROOT = REPO / "community/kai/camry-2026/raw-20260826/secoc-recovery"
+ROOT = REPO / "targets/camry-2026/raw-20260826/secoc-recovery"
 ART = REPO / "data/generated/camry_8965F3307000_secoc_recovery.json"
 BUILD = REPO / "tools/analyze_camry_8965F3307000_secoc_recovery.py"
 
@@ -123,7 +123,7 @@ check("LocalRAM matcher excluded the payload span", scan["scans"]["local_ram_pe1
 print("\n== documentation ==")
 doc = (REPO / "docs/variants/camry-2026-live-baseline.md").read_text()
 findings = (REPO / "docs/status/FINDINGS.md").read_text()
-readme = (REPO / "community/kai/camry-2026/README.md").read_text()
+readme = (REPO / "targets/camry-2026/README.md").read_text()
 for token in ("231fbdde4ef31793", "0xFF206E14", "0xFEBF7B80", "126,946", "65,521"):
     check(f"canonical report contains {token}", token in doc)
 check("VAR-055 retained", "| VAR-055 |" in findings and "8965F3307000" in findings)

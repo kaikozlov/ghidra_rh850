@@ -6,6 +6,12 @@
 **ECU serial:** `8965033K9011J2740743`
 **Diagnostic route:** ELM327 parameter 1, logical bus 1, `0x7A1 -> 0x7A9`
 
+**Project status:** first-class maintained analysis target `camry-8965F3307000`
+**Canonical CodeFlash:** `../../firmware/camry-8965F3307000/CodeFlash.bin`
+**Canonical DataFlash:** `../../firmware/camry-8965F3307000/DataFlash.bin`
+**Canonical Ghidra snapshot:** `../../projects/camry-8965F3307000/`
+**Canonical decompiler corpus:** `../../data/generated/camry-8965F3307000/decompilations.jsonl`
+
 This directory preserves the first identity-bound field baseline from the
 maintainer's 2026 Camry. The source TSK session ran the observation-oriented
 identity map while Not Ready to Drive, retained a roughly 60-second stationary

@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 ART=ROOT/'data/generated/camry_8965F3307000_command5_runtime_carrier.json'
 BUILD=ROOT/'tools/build_camry_8965F3307000_command5_runtime_carrier.py'
-IMAGE=ROOT/'community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin'
+IMAGE=ROOT/'firmware/camry-8965F3307000/CodeFlash.bin'
 RUNTIME_BUILDER=ROOT/'exploit/ephemeral_runtime/build_camry_f33_command5_carrier.py'
 PROXY_AUDIT=ROOT/'exploit/ephemeral_runtime/audited_camry_f33_command5_proxy_build.json'
 CANARY_AUDIT=ROOT/'exploit/ephemeral_runtime/audited_camry_f33_runtime_canary_build.json'

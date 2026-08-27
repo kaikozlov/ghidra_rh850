@@ -426,7 +426,7 @@
     "modify_bits": "0x000820C4",
     "normal_route_live_result": {
       "elm327_param": 1,
-      "source": "community/kai/camry-2026/raw-20260826/xcp_probe.json",
+      "source": "targets/camry-2026/raw-20260826/xcp_probe.json",
       "source_sha256": "b8d96ae5cb97f18d1138196e2a0cb95de5938ec0ff7e512ee9f752f86645e273",
       "status": "no_response_timeout",
       "tested_bus": 1

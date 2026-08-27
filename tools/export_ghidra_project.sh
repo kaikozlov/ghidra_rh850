@@ -45,9 +45,11 @@ shift
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/build_paths.sh"
 mkdir -p "$BUILD_CACHE" "$BUILD_WORK" "$BUILD_OUT" "$BUILD_LOGS" "$BUILD_TMP"
-PROJECT_DIR="${PROJECT_DIR:-$BUILD_WORK/project}"
-PROJECT_NAME="rh850_p1me_mapped"
-PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
+ANALYSIS_TARGET="${GHIDRA_ANALYSIS_TARGET:-$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["default_target"])' "$ROOT/data/analysis_targets.json")}"
+TARGET_FIELD() { python3 "$ROOT/tools/analysis_target.py" "$ANALYSIS_TARGET" --field "$1"; }
+PROJECT_NAME=$(TARGET_FIELD project_name)
+PROGRAM_NAME=$(TARGET_FIELD program_name)
+PROJECT_DIR="${PROJECT_DIR:-$ROOT/$(TARGET_FIELD work_dir)}"
 
 resolve_path() {
   python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).expanduser().resolve())' "$1"

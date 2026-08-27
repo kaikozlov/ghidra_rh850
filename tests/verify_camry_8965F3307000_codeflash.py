@@ -5,12 +5,12 @@ import hashlib, json, subprocess, sys, tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-RAW_DIR = REPO / 'community/kai/camry-2026/raw-20260826/codeflash'
+RAW_DIR = REPO / 'targets/camry-2026/raw-20260826/codeflash'
 RAW = RAW_DIR / 'camry_8965F3307000_codeflash_20260826T213719Z.bin'
 COV = RAW_DIR / 'camry_8965F3307000_codeflash_20260826T213719Z.coverage.bin'
 RUN = RAW_DIR / 'camry_8965F3307000_codeflash_20260826T213719Z.run.json'
-NORM = REPO / 'community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin'
-PAYLOAD = REPO / 'community/kai/camry-2026/raw-20260826/calvin_payload_codeflash_00000000_00200000.bin'
+NORM = REPO / 'firmware/camry-8965F3307000/CodeFlash.bin'
+PAYLOAD = REPO / 'targets/camry-2026/raw-20260826/calvin_payload_codeflash_00000000_00200000.bin'
 EVID = REPO / 'data/generated/camry_8965F3307000_decompiler_evidence.json'
 ART = REPO / 'data/generated/camry_8965F3307000_codeflash.json'
 BUILD = REPO / 'tools/analyze_camry_8965F3307000_codeflash.py'
@@ -27,6 +27,17 @@ def sha(path: Path) -> str:
 
 def fnmap(e):
     return {int(row['entry'], 16): row for row in e['functions']}
+
+def body_bytes(image: bytes, row: dict) -> bytes:
+    ranges = row.get("body_ranges") or []
+    if not ranges:
+        entry = int(row["entry"], 16)
+        return image[entry:entry + int(row["body_size"])]
+    out = bytearray()
+    for r in ranges:
+        lo = int(r["min"], 16); hi = int(r["max"], 16)
+        out.extend(image[lo:hi + 1])
+    return bytes(out)
 
 art = json.loads(ART.read_text()); evid = json.loads(EVID.read_text()); run = json.loads(RUN.read_text())
 print('== exact acquisition ==')
@@ -63,7 +74,7 @@ check('static schema exact', art['schema'] == 'camry-8965f3307000-codeflash-stat
 check('decompiler evidence schema exact', evid['schema'] == 'camry-8965f3307000-decompiler-evidence-v1' and evid['function_count'] == 27)
 funcs = fnmap(evid)
 for entry, row in funcs.items():
-    check(f'0x{entry:05X} body hash binds exact image', hashlib.sha256(norm[entry:entry+row['body_size']]).hexdigest() == row['body_sha256'])
+    check(f'0x{entry:05X} body hash binds exact image', hashlib.sha256(body_bytes(norm, row)).hexdigest() == row['body_sha256'])
 
 print('\n== normal application Rx configuration ==')
 rx = art['application_rx']
@@ -82,10 +93,10 @@ check('B6 profile is PDU44', b6['application_pdu_id'] == b6['upper_route_id'] ==
 check('B6 profile is 32-byte FV4/MAC28', b6['secured_pdu_length'] == 32 and b6['application_bytes'] == 28 and b6['transmitted_freshness_bits'] == 4 and b6['transmitted_cmac_bits'] == 28)
 check('B6 full freshness/CMAC domains exact', b6['full_freshness_bits'] == 46 and b6['full_cmac_bits'] == 128)
 check('B6 crypto handle is zero', b6['cryptoif_handle'] == 0)
-check('target ICU code programs command 7', 'Ramffc5d000 = uVar9 << 0x10 | 7;' in funcs[0x8A8E4]['decompiled_c'])
+check('target ICU code programs command 7', 'DAT_ffc5d000 = puVar2[4] << 0x10 | 7;' in funcs[0x8A8E4]['decompiled_c'])
 check('RxIndication enters 3-profile secured queue', 'FUN_0008f2b0' in funcs[0x8EE7C]['decompiled_c'] and 'FUN_0008f34a' in funcs[0x8EE7C]['decompiled_c'])
-check('SecOC lookup has exactly three records', '* 0x50' in funcs[0x8F2B0]['decompiled_c'] and 'if (2 < uVar1)' in funcs[0x8F2B0]['decompiled_c'])
-check('verify worker composes 36-byte auth input', 'unaff_gp + -0x62d8) = 0x24' in funcs[0x8F746]['decompiled_c'] and all(x in funcs[0x8F746]['decompiled_c'] for x in ('FUN_0008f434','FUN_0008ecb2','FUN_0008f676')))
+check('SecOC lookup has exactly three records', '(&DAT_0002587c)[(short)uVar1 * 0x28]' in funcs[0x8F2B0]['decompiled_c'] and 'if (2 < uVar1)' in funcs[0x8F2B0]['decompiled_c'])
+check('verify worker composes 36-byte auth input', '*(undefined4 *)(puVar1 + -0x62d8) = 0x24;' in funcs[0x8F746]['decompiled_c'] and all(x in funcs[0x8F746]['decompiled_c'] for x in ('FUN_0008f434','FUN_0008ecb2','FUN_0008f676')))
 
 print('\n== B6 COM and steering-target ingress ==')
 com = art['b6_com']
@@ -97,30 +108,30 @@ check('Camry deadline is seven foreground ticks only', com['deadline_descriptor'
 fields = {x['signal_id']: x for x in com['wire_fields']}
 check('signal261 is B3 low6', fields[261]['byte_offset'] == 3 and fields[261]['bit_length'] == 6 and fields[261]['bit_start'] == 0 and not fields[261]['signed'])
 check('signal262 is signed B4:B5', fields[262]['byte_offset'] == 4 and fields[262]['bit_length'] == 16 and fields[262]['bit_start'] == 0 and fields[262]['signed'])
-check('B6 unpacker target-native calls exact selector extraction', 'FUN_0007d12a(0x105,0x1ba,6,0,0,unaff_gp + -0x3744);' in funcs[0x4BD46]['decompiled_c'])
-check('B6 unpacker target-native calls exact signed16 extraction', 'FUN_0007d12a(0x106,0x1bb,0x10,0,1,unaff_gp + -0x3748);' in funcs[0x4BD46]['decompiled_c'])
-check('signed16 raw -> staging', 'uVar3 = *(undefined2 *)(unaff_gp + -0x3748)' in funcs[0x58074]['decompiled_c'] and 'unaff_gp + 0x39fa) = uVar3' in funcs[0x58074]['decompiled_c'])
-check('signed16 staging -> snapshot', 'unaff_gp + -0x970) = *(undefined2 *)(unaff_gp + 0x39fa)' in funcs[0xBCD66]['decompiled_c'])
-check('selector raw -> staging -> snapshot', 'uVar6 = *(undefined1 *)(unaff_gp + -0x3744);' in funcs[0x58074]['decompiled_c'] and '(&DAT_00003930)[unaff_gp] = uVar6;' in funcs[0x58074]['decompiled_c'] and 'unaff_gp + -0xa50) = (&DAT_00003930)[unaff_gp]' in funcs[0xBCD66]['decompiled_c'])
-check('signed target doubles in target conditioner', '*(short *)(unaff_gp + -0x970) * 2' in funcs[0xCCF0E]['decompiled_c'])
+check('B6 unpacker target-native calls exact selector extraction', 'FUN_0007d12a(0x105,0x1ba,6,0,0,&DAT_febe80bc);' in funcs[0x4BD46]['decompiled_c'])
+check('B6 unpacker target-native calls exact signed16 extraction', 'FUN_0007d12a(0x106,0x1bb,0x10,0,1,puVar2 + -0x3748);' in funcs[0x4BD46]['decompiled_c'])
+check('signed16 raw -> staging', 'DAT_febef1fa = DAT_febe80b8;' in funcs[0x58074]['decompiled_c'])
+check('signed16 staging -> snapshot', '*(undefined2 *)(puVar15 + -0x970) = *(undefined2 *)(puVar15 + 0x39fa);' in funcs[0xBCD66]['decompiled_c'])
+check('selector raw -> staging -> snapshot', 'DAT_febef130 = DAT_febe80bc;' in funcs[0x58074]['decompiled_c'] and 'puVar15[-0xa50] = puVar15[0x3930];' in funcs[0xBCD66]['decompiled_c'])
+check('signed target doubles in target conditioner', 'iVar1 = DAT_febeae90 * 2;' in funcs[0xCCF0E]['decompiled_c'])
 check('target conditioner saturates symmetric int16 domain', '0x7fff' in funcs[0xCCF0E]['decompiled_c'] and '-0x7fff' in funcs[0xCCF0E]['decompiled_c'])
-check('independent plausibility path consumes same snapshot', 'sVar3 = *(short *)(unaff_gp + -0x970)' in funcs[0xCEE80]['decompiled_c'] and 'FUN_000d0970((int)sVar3)' in funcs[0xCEE80]['decompiled_c'])
+check('independent plausibility path consumes same snapshot', 'sVar3 = *(short *)(puVar11 + -0x970);' in funcs[0xCEE80]['decompiled_c'] and 'FUN_000d0970((int)sVar3)' in funcs[0xCEE80]['decompiled_c'])
 cmd = art['b6_steering_command']
 check('B3 closes as Toyota Target Lateral ID', cmd['selector_signal']['oem_name'] == 'Target Lateral ID' and cmd['selector_signal']['accepted_controller_values'] == {'1':'PCS','4':'LDA','10':'Hands Off LTA','11':'LTA/LCA','18':'SDG','19':'PDA'} and cmd['selector_signal']['additional_target_native_value'] == {'49':'Self-Propelled Transport'})
-check('target-native selector decoder consumes B3 snapshot', all(tok in funcs[0xCEFFC]['decompiled_c'] for tok in ("unaff_gp + -0xa50", "cVar1 == '\\x01'", "cVar1 == '\\x04'", "cVar1 == '\\n'", "cVar1 == '\\v'", "cVar1 == '\\x12'", "cVar1 == '\\x13'")))
-check('auxiliary selector consumer recognizes value49', "cVar1 == '1'" in funcs[0xCB73A]['decompiled_c'])
+check('target-native selector decoder consumes B3 snapshot', all(tok in funcs[0xCEFFC]['decompiled_c'] for tok in ("DAT_febeadb0", "DAT_febeadb0 == '\\x01'", "DAT_febeadb0 == '\\x04'", "DAT_febeadb0 == '\\n'", "DAT_febeadb0 == '\\v'", "DAT_febeadb0 == '\\x12'", "DAT_febeadb0 == '\\x13'")))
+check('auxiliary selector consumer recognizes value49', "DAT_febeadb0 == '1'" in funcs[0xCB73A]['decompiled_c'])
 
 print('\n== Camry-native measured steering angle / target comparator ==')
 feedback = cmd['measured_steering_angle_feedback']
 check('025 is target-native PDU35 at buffer 0x127', feedback['can_id'] == '0x025' and feedback['pdu_id'] == 35 and feedback['buffer_offset'] == '0x127')
 check('025 coarse field is signed12 signal187', feedback['coarse_signal']['signal_id'] == 187 and feedback['coarse_signal']['wire'] == 'B0..B1 signed12' and feedback['coarse_signal']['techstream_did'] == '0x1037' and feedback['coarse_signal']['techstream_name'] == 'Steering Angle' and feedback['coarse_signal']['scale_deg_per_count'] == 1.5)
 check('025 fractional field is signed4 signal188', feedback['fraction_signal']['signal_id'] == 188 and feedback['fraction_signal']['wire'] == 'B2[7:4] signed4' and feedback['fraction_signal']['scale_deg_per_count'] == 0.1)
-check('025 unpacker extracts exact coarse/fraction fields', all(tok in funcs[0x4B59E]['decompiled_c'] for tok in ('FUN_0007d12a(0xbb,0x127,0xc,0,1,unaff_gp + -0x37b8);','FUN_0007d12a(0xbc,299,4,4,1,unaff_gp + -0x37b1);')))
-check('Camry DID1037 row binds callback 4DBF8', feedback['did1037_row'] == {'address':'0x000293AC','callback':'0x0004DBF8','raw_hex':'37100200f8db04000000000000000000'} and 'unaff_gp + -0x3aba' in funcs[0x4DBF8]['decompiled_c'])
-check('measured angle reconstruction is target native', '* 0xf' in funcs[0xB3B06]['decompiled_c'] and '* 0x6fb' in funcs[0xCE9EA]['decompiled_c'] and '0x200' in funcs[0xCE9EA]['decompiled_c'] and all(tok in funcs[0xCEADA]['decompiled_c'] for tok in ('&DAT_000012d2','&DAT_000012d4','&DAT_000012d6')))
+check('025 unpacker extracts exact coarse/fraction fields', all(tok in funcs[0x4B59E]['decompiled_c'] for tok in ('FUN_0007d12a(0xbb,0x127,0xc,0,1,&DAT_febe8048);','FUN_0007d12a(0xbc,299,4,4,1,puVar2 + -0x37b1);')))
+check('Camry DID1037 row binds callback 4DBF8', feedback['did1037_row'] == {'address':'0x000293AC','callback':'0x0004DBF8','raw_hex':'37100200f8db04000000000000000000'} and 'DAT_febe7d46' in funcs[0x4DBF8]['decompiled_c'])
+check('measured angle reconstruction is target native', '* 0xf' in funcs[0xB3B06]['decompiled_c'] and '* 0x6fb' in funcs[0xCE9EA]['decompiled_c'] and '0x200' in funcs[0xCE9EA]['decompiled_c'] and all(tok in funcs[0xCEADA]['decompiled_c'] for tok in ('DAT_febecad2','DAT_febecad4','DAT_febecad6')))
 cmp = cmd['target_minus_measured_comparator']
 check('clean comparator is 0xCD128', cmp['entry'] == '0x000CD128' and funcs[0xCD128]['body_size'] == 376)
-check('same gain is applied before target-minus-measured subtraction', all(tok in funcs[0xCD128]['decompiled_c'] for tok in ('iVar1 = (iVar5 * 0xb76) / 0x400;','iVar12 = (iVar12 * 0xb76) / 0x400;','iVar5 = iVar1 - iVar12;')))
+check('same gain is applied before target-minus-measured subtraction', all(tok in funcs[0xCD128]['decompiled_c'] for tok in ('iVar1 = (iVar1 * 0xb76) / 0x400;','DAT_febec8dc = (iVar2 * 0xb76) / 0x400;','DAT_febec8e0 = iVar1 - DAT_febec8dc;')))
 check('B6 signal262 is target steering angle', cmd['signed_target_signal']['classification'] == 'target steering angle command' and 'target steering angle' in cmd['classification'])
 scale = cmd['controller_equivalent_scale']
 check('controller-equivalent B6 scale exact fraction', scale['fraction_deg_per_b6_count'] == {'numerator':1024,'denominator':17870})

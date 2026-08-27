@@ -1,0 +1,52 @@
+{
+  "schema": "ghidra-rh850-analysis-targets-v1",
+  "default_target": "sienna-8965B4512000",
+  "targets": {
+    "sienna-8965B4512000": {
+      "status": "primary",
+      "vehicle": "Toyota Sienna",
+      "software_id": "8965B4512000",
+      "codeflash": "firmware/RH850_P1M-E_CodeFlash.bin",
+      "codeflash_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+      "dataflash": "firmware/RH850_P1M-E_DataFlash.bin",
+      "project_name": "rh850_p1me_mapped",
+      "program_name": "RH850_P1M-E_CodeFlash.bin",
+      "snapshot_dir": "project",
+      "work_dir": "build/work/project",
+      "inventory_baseline": "data/ghidra_project_inventory.baseline.jsonl",
+      "decompiler_corpus": "data/generated/decompilations.jsonl",
+      "rebuild_profile": "sienna_full",
+      "codeflash_size": 1048576,
+      "codeflash_base": "0x00000000",
+      "dataflash_sha256": "81d87b678784bb2a07b1fdcb3d43dd40767d4f5ca1b56867b6575cd652a9ecb8",
+      "dataflash_size": 32768,
+      "dataflash_base": "0xFF200000",
+      "mcu": "R7F701381",
+      "processor": "v850e3:LE:32:default"
+    },
+    "camry-8965F3307000": {
+      "status": "first_class",
+      "vehicle": "2026 Toyota Camry Hybrid",
+      "software_id": "8965F3307000",
+      "secondary_id": "8A3113303100",
+      "codeflash": "firmware/camry-8965F3307000/CodeFlash.bin",
+      "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+      "dataflash": "firmware/camry-8965F3307000/DataFlash.bin",
+      "dataflash_sha256": "231fbdde4ef317931d8f1ff20ff131650f7d773c124a179b0ae3dc98bf8e4432",
+      "capture_root": "targets/camry-2026",
+      "project_name": "camry_8965F3307000",
+      "program_name": "CodeFlash.bin",
+      "snapshot_dir": "projects/camry-8965F3307000",
+      "work_dir": "build/work/targets/camry-8965F3307000/project",
+      "inventory_baseline": "data/targets/camry-8965F3307000/ghidra_project_inventory.baseline.jsonl",
+      "decompiler_corpus": "data/generated/camry-8965F3307000/decompilations.jsonl",
+      "rebuild_profile": "camry_f33_v1",
+      "codeflash_size": 1048576,
+      "codeflash_base": "0x00000000",
+      "dataflash_size": 32768,
+      "dataflash_base": "0xFF200000",
+      "mcu": "R7F701381",
+      "processor": "v850e3:LE:32:default"
+    }
+  }
+}

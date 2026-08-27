@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-IMAGE = ROOT / "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin"
+IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 EVID = ROOT / "data/generated/camry_8965F3307000_fault_status_decompiler_evidence.json"
 ART = ROOT / "data/generated/camry_8965F3307000_fault_status.json"
 BUILD = ROOT / "tools/build_camry_8965F3307000_fault_status.py"

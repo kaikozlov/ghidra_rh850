@@ -17,7 +17,7 @@ import struct
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin"
+IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
 IMAGE_SHA256 = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
 CODEFLASH_ART = REPO / "data/generated/camry_8965F3307000_codeflash.json"
 RUNTIME_BUILDER = REPO / "exploit/ephemeral_runtime/build_camry_f33_command5_carrier.py"
@@ -28,8 +28,8 @@ CANARY_AUDIT = REPO / "exploit/ephemeral_runtime/audited_camry_f33_runtime_canar
 PROXY_BIN = REPO / "exploit/ephemeral_runtime/audited/camry_f33_command5_proxy.bin"
 CANARY_BIN = REPO / "exploit/ephemeral_runtime/audited/camry_f33_runtime_canary.bin"
 RAMREQ = REPO / "data/variant_ram_exec_requirements.json"
-HIGH_TAIL = REPO / "community/kai/camry-2026/raw-20260826/high-tail-20260826.json"
-LOW_RETENTION = REPO / "community/kai/camry-2026/raw-20260826/stock-retention-20260826.json"
+HIGH_TAIL = REPO / "targets/camry-2026/raw-20260826/high-tail-20260826.json"
+LOW_RETENTION = REPO / "targets/camry-2026/raw-20260826/stock-retention-20260826.json"
 OUT = REPO / "data/generated/camry_8965F3307000_command5_runtime_carrier.json"
 
 EXPECTED_APP_F181_HEX = "023839363546333330373030300000000038413331313333303331303000000000"

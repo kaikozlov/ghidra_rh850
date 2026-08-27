@@ -1,0 +1,3423 @@
+{
+  "asic_state_join": {
+    "f33_callback_evidence": {
+      "gp": "0xFEBEB800",
+      "path": "data/generated/camry_8965F3307000_gtsplus_decompiler_evidence.json",
+      "resolved_sources": [
+        "0xFEBE8298",
+        "0xFEBE829C"
+      ],
+      "sha256": "115445b503e8ab63ea9aa7f61cc4f4e75066daa081a76819025fdf97cde26f5c"
+    },
+    "gtsplus_rows": [
+      {
+        "bit_range": [
+          0,
+          31
+        ],
+        "data_id": "0x1C05",
+        "f33_callback": "0x0004E848",
+        "f33_payload_size": 8,
+        "f33_record_offset": "0x029A6C",
+        "f33_selector": 0,
+        "monitor_key": 405,
+        "name": "ASIC State Information"
+      },
+      {
+        "bit_range": [
+          32,
+          63
+        ],
+        "data_id": "0x1C05",
+        "f33_callback": "0x0004E848",
+        "f33_payload_size": 8,
+        "f33_record_offset": "0x029A6C",
+        "f33_selector": 0,
+        "monitor_key": 410,
+        "name": "ASIC State Information 2"
+      },
+      {
+        "bit_range": [
+          0,
+          31
+        ],
+        "data_id": "0x1C0C",
+        "f33_callback": "0x0004E848",
+        "f33_payload_size": 8,
+        "f33_record_offset": "0x029ABC",
+        "f33_selector": 1,
+        "monitor_key": 1412,
+        "name": "ASIC State Information (System 2)"
+      },
+      {
+        "bit_range": [
+          32,
+          63
+        ],
+        "data_id": "0x1C0C",
+        "f33_callback": "0x0004E848",
+        "f33_payload_size": 8,
+        "f33_record_offset": "0x029ABC",
+        "f33_selector": 1,
+        "monitor_key": 1413,
+        "name": "ASIC State Information 2 (System 2)"
+      }
+    ],
+    "interpretation": "GTS+ splits each exact 8-byte F33 RDBI into bits 0..31 'ASIC State Information' and bits 32..63 'ASIC State Information 2'.",
+    "ram_snapshot": {
+      "address": "0xFEBE8298",
+      "base": "0xFEBE0000",
+      "high_u32_le": "0x00000000",
+      "low_u32_le": "0x00C00040",
+      "path": "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin",
+      "raw_hex": "4000c00000000000",
+      "state_boundary": "Captured after application-to-boot handoff; this names an observed RAM snapshot but does not establish READY-mode bit semantics."
+    },
+    "remaining_unknown": "Toyota's bit-level meanings inside the two 32-bit ASIC state words are not resolved by the current EMPS_P5 monitor database."
+  },
+  "current_master_join": {
+    "boundary": "Current GTS+ statically binds these Camry/Camry HV vehicle-type entries to category 405 EMPS_P5. Vehicle-type numeric ordering is not itself asserted to be a model-year field, and no VIN-specific vehicle-type selection is claimed here.",
+    "category": {
+      "category_id": 405,
+      "database": "EMPS_P5.ddb",
+      "ecu_name": "EMPS",
+      "generation": 20
+    },
+    "gtsplus_camry_vehicle_type_count": 211,
+    "gtsplus_new_camry_vehicle_types": [
+      {
+        "name": "Camry",
+        "uses_emps_p5": false,
+        "vehicle_type": 12602
+      },
+      {
+        "name": "Camry",
+        "uses_emps_p5": false,
+        "vehicle_type": 12603
+      },
+      {
+        "name": "Camry",
+        "uses_emps_p5": false,
+        "vehicle_type": 12604
+      },
+      {
+        "name": "Camry",
+        "uses_emps_p5": false,
+        "vehicle_type": 12605
+      },
+      {
+        "name": "Camry",
+        "uses_emps_p5": false,
+        "vehicle_type": 12606
+      },
+      {
+        "name": "Camry HV",
+        "uses_emps_p5": false,
+        "vehicle_type": 12607
+      },
+      {
+        "name": "Camry HV",
+        "uses_emps_p5": false,
+        "vehicle_type": 12608
+      },
+      {
+        "name": "Camry HV",
+        "uses_emps_p5": true,
+        "vehicle_type": 12704
+      },
+      {
+        "name": "Camry HV",
+        "uses_emps_p5": true,
+        "vehicle_type": 12862
+      },
+      {
+        "name": "Camry HV",
+        "uses_emps_p5": true,
+        "vehicle_type": 12984
+      }
+    ],
+    "new_camry_vehicle_types_using_emps_p5": [
+      {
+        "name": "Camry HV",
+        "subsystem_rows": [
+          {
+            "raw_hex": "9501000000000000a000000004000007a0310000",
+            "record_index": 215608
+          },
+          {
+            "raw_hex": "9501442d673d0100d401000004000007a0310000",
+            "record_index": 215609
+          },
+          {
+            "raw_hex": "9501402d683d0100d101000004000007a0310000",
+            "record_index": 215610
+          },
+          {
+            "raw_hex": "9501ae2fb9430100d201000004000007a0310000",
+            "record_index": 215611
+          },
+          {
+            "raw_hex": "9501af2f03440100d301000004000007a0310000",
+            "record_index": 215612
+          }
+        ],
+        "vehicle_type": 12704
+      },
+      {
+        "name": "Camry HV",
+        "subsystem_rows": [
+          {
+            "raw_hex": "9501000000000000a0000000040000073e320000",
+            "record_index": 245536
+          },
+          {
+            "raw_hex": "9501442d673d0100d4010000040000073e320000",
+            "record_index": 245537
+          },
+          {
+            "raw_hex": "9501402d683d0100d1010000040000073e320000",
+            "record_index": 245538
+          },
+          {
+            "raw_hex": "9501ae2fb9430100d2010000040000073e320000",
+            "record_index": 245539
+          },
+          {
+            "raw_hex": "9501af2f03440100d3010000040000073e320000",
+            "record_index": 245540
+          }
+        ],
+        "vehicle_type": 12862
+      },
+      {
+        "name": "Camry HV",
+        "subsystem_rows": [
+          {
+            "raw_hex": "9501000000000000a000000004000007b8320000",
+            "record_index": 269936
+          },
+          {
+            "raw_hex": "9501442d673d0100d401000004000007b8320000",
+            "record_index": 269937
+          },
+          {
+            "raw_hex": "9501402d683d0100d101000004000007b8320000",
+            "record_index": 269938
+          },
+          {
+            "raw_hex": "9501ae2fb9430100d201000004000007b8320000",
+            "record_index": 269939
+          },
+          {
+            "raw_hex": "9501af2f03440100d301000004000007b8320000",
+            "record_index": 269940
+          }
+        ],
+        "vehicle_type": 12984
+      }
+    ],
+    "table_semantics": {
+      "subsystem": "type 23 CDbSubSystemTable: category u16 +0x00; vehicle type u16/u32 +0x10",
+      "vehicle_name": "type 43 CDbVehicleNameTable: name string u32 +0x00; vehicle type u32 +0x04"
+    },
+    "v18_camry_vehicle_type_count": 201,
+    "v18_max_camry_vehicle_type": 12507
+  },
+  "emps_p5_schema_delta": {
+    "changed_monitor_rows": [
+      {
+        "changes": {
+          "alternate_data_id": [
+            12591,
+            0
+          ]
+        },
+        "monitor_key": 215,
+        "name": "Status of Learned Left/Right End Position for End Torque Limit Control"
+      },
+      {
+        "changes": {
+          "alternate_data_id": [
+            12591,
+            0
+          ]
+        },
+        "monitor_key": 216,
+        "name": "Learned End Current Position for End Torque Limit Control"
+      },
+      {
+        "changes": {
+          "alternate_data_id": [
+            12591,
+            0
+          ]
+        },
+        "monitor_key": 217,
+        "name": "Learned Left End Position for End Torque Limit Control"
+      },
+      {
+        "changes": {
+          "alternate_data_id": [
+            12591,
+            0
+          ]
+        },
+        "monitor_key": 218,
+        "name": "Learned Right End Position for End Torque Limit Control"
+      },
+      {
+        "changes": {
+          "alternate_data_id": [
+            12592,
+            0
+          ]
+        },
+        "monitor_key": 219,
+        "name": "Super High Speed Steering Angle Speed Abnormality Number of Times"
+      },
+      {
+        "changes": {
+          "bit_range": [
+            [
+              0,
+              15
+            ],
+            [
+              0,
+              31
+            ]
+          ]
+        },
+        "monitor_key": 405,
+        "name": "ASIC State Information"
+      },
+      {
+        "changes": {
+          "bit_range": [
+            [
+              0,
+              15
+            ],
+            [
+              0,
+              31
+            ]
+          ]
+        },
+        "monitor_key": 1412,
+        "name": "ASIC State Information (System 2)"
+      },
+      {
+        "changes": {
+          "pattern_display_key": [
+            40,
+            41
+          ]
+        },
+        "monitor_key": 2021,
+        "name": "System Priority"
+      },
+      {
+        "changes": {
+          "pattern_display_key": [
+            40,
+            41
+          ]
+        },
+        "monitor_key": 2022,
+        "name": "System Priority of Other System"
+      },
+      {
+        "changes": {
+          "pattern_display_key": [
+            33,
+            42
+          ]
+        },
+        "monitor_key": 2023,
+        "name": "Steering Protection Mode"
+      },
+      {
+        "changes": {
+          "pattern_display_key": [
+            40,
+            41
+          ]
+        },
+        "monitor_key": 2043,
+        "name": "System Priority (System 2)"
+      },
+      {
+        "changes": {
+          "pattern_display_key": [
+            40,
+            41
+          ]
+        },
+        "monitor_key": 2044,
+        "name": "System Priority of Other System (System 2)"
+      },
+      {
+        "changes": {
+          "pattern_display_key": [
+            33,
+            42
+          ]
+        },
+        "monitor_key": 2051,
+        "name": "Steering Protection Mode (System 2)"
+      },
+      {
+        "changes": {
+          "physical_data_key": [
+            10017,
+            10015
+          ]
+        },
+        "monitor_key": 9923,
+        "name": "IG-ON Elapsed Time"
+      }
+    ],
+    "current_only_behavior_codes": [
+      {
+        "comment": null,
+        "name": "Beta Cooperative Control Transmission Counter Malfunction",
+        "raw_hex": "58003200340033003600000030d50200000000003624000000010000",
+        "raw_sha256": "2da733ba28652fb917e52f01cfa021ebd789dc0fb8fcaec38d2f8848e38300d3",
+        "record_index": 39,
+        "signature": "X2436"
+      }
+    ],
+    "current_only_monitor_rows": [
+      {
+        "alternate_data_id": "0x0000",
+        "bit_range": [
+          0,
+          7
+        ],
+        "monitor_key": 223,
+        "name": "Status of End of Learning for End Torque Limit Control",
+        "pattern_display_key": 23,
+        "physical_data_key": 1,
+        "primary_data_id": "0x1134",
+        "raw_sha256": "06a9a6c278774ec56392f60690cd49f7f9a64c603ffaf995d3cc065092b74b69",
+        "record_index": 75
+      },
+      {
+        "alternate_data_id": "0x0000",
+        "bit_range": [
+          8,
+          23
+        ],
+        "monitor_key": 224,
+        "name": "Position of Learned Right Rack End for End Torque Limit Control",
+        "pattern_display_key": 24,
+        "physical_data_key": 25,
+        "primary_data_id": "0x1134",
+        "raw_sha256": "2fc384c7c149e55ef15fb1111e049978369f3f00cbdf7e28aae0ec3fe93233ac",
+        "record_index": 76
+      },
+      {
+        "alternate_data_id": "0x0000",
+        "bit_range": [
+          24,
+          39
+        ],
+        "monitor_key": 225,
+        "name": "Position of Learned Left Rack End for End Torque Limit Control",
+        "pattern_display_key": 24,
+        "physical_data_key": 25,
+        "primary_data_id": "0x1134",
+        "raw_sha256": "f46ea94b6cc7454f3abf606abb69be38e9cece8768b9ac1d45f45ca48a78ba1b",
+        "record_index": 77
+      },
+      {
+        "alternate_data_id": "0x0000",
+        "bit_range": [
+          40,
+          55
+        ],
+        "monitor_key": 226,
+        "name": "Offset Correction Value of Steering Angle for End Torque Limit Control",
+        "pattern_display_key": 24,
+        "physical_data_key": 25,
+        "primary_data_id": "0x1134",
+        "raw_sha256": "482a9df275277dad3a130c5e93172332b515f160119a9946eadcccb62674ea16",
+        "record_index": 78
+      },
+      {
+        "alternate_data_id": "0x0000",
+        "bit_range": [
+          0,
+          7
+        ],
+        "monitor_key": 227,
+        "name": "Excessive Reverse Input Excessive Output for End Torque Limit Control Count",
+        "pattern_display_key": 0,
+        "physical_data_key": 20,
+        "primary_data_id": "0x1135",
+        "raw_sha256": "8a98d26cb0794a77836d8b84f50924badf5b35602e5bb725fc896e1b9973ae8c",
+        "record_index": 79
+      },
+      {
+        "alternate_data_id": "0x0000",
+        "bit_range": [
+          0,
+          7
+        ],
+        "monitor_key": 228,
+        "name": "Position of Learned Rack End Clear Count",
+        "pattern_display_key": 0,
+        "physical_data_key": 20,
+        "primary_data_id": "0x1136",
+        "raw_sha256": "ab6a4ee5d2c5662bf58d3af9e03612c7799afe7c7305498107865ea4c62df600",
+        "record_index": 80
+      },
+      {
+        "alternate_data_id": "0x3C05",
+        "bit_range": [
+          32,
+          63
+        ],
+        "monitor_key": 410,
+        "name": "ASIC State Information 2",
+        "pattern_display_key": 0,
+        "physical_data_key": 1,
+        "primary_data_id": "0x1C05",
+        "raw_sha256": "988f7d035e11035a21099bb0b8e5ef2e573d76bf8ef97af058d841203ddc5fb7",
+        "record_index": 112
+      },
+      {
+        "alternate_data_id": "0x3C0C",
+        "bit_range": [
+          32,
+          63
+        ],
+        "monitor_key": 1413,
+        "name": "ASIC State Information 2 (System 2)",
+        "pattern_display_key": 0,
+        "physical_data_key": 1,
+        "primary_data_id": "0x1C0C",
+        "raw_sha256": "687edfeccd1e36216d1f1c7980c4d5d6fdadb51b9ca9aa7f52278dd19b4d854b",
+        "record_index": 144
+      }
+    ],
+    "gtsplus_file_size": 85846,
+    "gtsplus_type62": {
+      "record_count": 230,
+      "record_size": 80
+    },
+    "mirrored_current_tables": [
+      {
+        "class_name": "CDbDataIdForRobTable",
+        "record_count": 92,
+        "record_size": 8,
+        "table_id": 151
+      },
+      {
+        "class_name": "CDbBehaviorDataRecordP5Table",
+        "record_count": 123,
+        "record_size": 72,
+        "table_id": 153
+      },
+      {
+        "class_name": "CDbDataIdForDmTable",
+        "record_count": 333,
+        "record_size": 8,
+        "table_id": 156
+      },
+      {
+        "class_name": "CDbDatamonitorP5Table",
+        "record_count": 214,
+        "record_size": 80,
+        "table_id": 157
+      }
+    ],
+    "type157_subset_of_type62": {
+      "common_key_count": 214,
+      "type157_key_count": 214,
+      "type62_key_count": 230,
+      "type62_only_keys": [
+        9900,
+        9901,
+        9904,
+        9905,
+        9906,
+        9907,
+        9908,
+        9909,
+        9910,
+        9911,
+        9912,
+        9920,
+        9921,
+        9922,
+        9923,
+        9924
+      ]
+    },
+    "type65_dtc_delta": "none; all 166 type-65 DTC/failure rows semantically unchanged",
+    "v18_file_size": 49042,
+    "v18_type62": {
+      "record_count": 222,
+      "record_size": 64
+    }
+  },
+  "evidence_boundary": "OEM names/database membership come from pinned external Toyota GTS+/Techstream artifacts; RDBI dispatch and RAM sources are exact-target firmware-static evidence; RAM value is a tracked live snapshot. No static GTS+ row is treated as proof of CAN/CAN-FD producer ownership or SecOC signer/key/freshness semantics.",
+  "f33_rdbi_join": {
+    "direct_current_improvements_on_f33_supported_dids": [
+      {
+        "alternate_data_id": "0x3C05",
+        "bit_range": [
+          32,
+          63
+        ],
+        "monitor_key": 410,
+        "name": "ASIC State Information 2",
+        "pattern_display_key": 0,
+        "physical_data_key": 1,
+        "primary_data_id": "0x1C05",
+        "raw_sha256": "988f7d035e11035a21099bb0b8e5ef2e573d76bf8ef97af058d841203ddc5fb7",
+        "record_index": 112
+      },
+      {
+        "alternate_data_id": "0x3C0C",
+        "bit_range": [
+          32,
+          63
+        ],
+        "monitor_key": 1413,
+        "name": "ASIC State Information 2 (System 2)",
+        "pattern_display_key": 0,
+        "physical_data_key": 1,
+        "primary_data_id": "0x1C0C",
+        "raw_sha256": "687edfeccd1e36216d1f1c7980c4d5d6fdadb51b9ca9aa7f52278dd19b4d854b",
+        "record_index": 144
+      }
+    ],
+    "f33_total_data_ids": 241,
+    "gtsplus_named_f33_data_ids": 121,
+    "named_data_ids": [
+      {
+        "callback": "0x0004D874",
+        "data_id": "0x0102",
+        "payload_size": 7,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0402",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 9900,
+            "name": "Key Cycle",
+            "pattern_display_key": 0,
+            "physical_data_key": 10004,
+            "raw_sha256": "c6026bed967f5f5d8f8969f011b0e8272971f766e16d8db035c26f370a997d5f",
+            "record_index": 214
+          },
+          {
+            "alternate_data_id": "0x0402",
+            "bit_range": [
+              16,
+              47
+            ],
+            "monitor_key": 9901,
+            "name": "IG-ON Elapsed Time",
+            "pattern_display_key": 0,
+            "physical_data_key": 10005,
+            "raw_sha256": "d35a4fb109eff1421e2fc9702b6ef61a479451b0a046e985da2c035ad992da42",
+            "record_index": 215
+          },
+          {
+            "alternate_data_id": "0x0402",
+            "bit_range": [
+              48,
+              55
+            ],
+            "monitor_key": 9904,
+            "name": "Master Sync Information",
+            "pattern_display_key": 0,
+            "physical_data_key": 10001,
+            "raw_sha256": "e845acf1af326930c3043610ac39a01d0918cd080ffbef6d94622673796d3d94",
+            "record_index": 216
+          }
+        ]
+      },
+      {
+        "callback": "0x0004D8EE",
+        "data_id": "0x0103",
+        "payload_size": 4,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0403",
+            "bit_range": [
+              8,
+              31
+            ],
+            "monitor_key": 1,
+            "name": "Total Distance Traveled",
+            "pattern_display_key": 0,
+            "physical_data_key": 1,
+            "raw_sha256": "d0786ec544ed56eacf1c09a095b09486498da8f09a338ec41f94b99ff667ec4b",
+            "record_index": 0
+          },
+          {
+            "alternate_data_id": "0x0403",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 2,
+            "name": "Total Distance Traveled - Unit",
+            "pattern_display_key": 15,
+            "physical_data_key": 1,
+            "raw_sha256": "b0ed1e0d80a1d126b47db1627a6aa9d45e9ef5fa71e445fe3e5dbff548478e30",
+            "record_index": 1
+          },
+          {
+            "alternate_data_id": "0x0403",
+            "bit_range": [
+              8,
+              31
+            ],
+            "monitor_key": 9905,
+            "name": "Total Distance Traveled",
+            "pattern_display_key": 0,
+            "physical_data_key": 10002,
+            "raw_sha256": "1b35c5cf0ae77342fd7f8b097e05cd1c2c6dd748b82f94e84001ead045803f8e",
+            "record_index": 217
+          },
+          {
+            "alternate_data_id": "0x0403",
+            "bit_range": [
+              8,
+              31
+            ],
+            "monitor_key": 9906,
+            "name": "Total Distance Traveled",
+            "pattern_display_key": 0,
+            "physical_data_key": 10003,
+            "raw_sha256": "a41e2ce7369c917aedf9b1d36710e08fdbf71720602efc4e97b94d834d41832d",
+            "record_index": 218
+          }
+        ]
+      },
+      {
+        "callback": "0x0004D9B0",
+        "data_id": "0x0109",
+        "payload_size": 6,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0409",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 9907,
+            "name": "Absolute Value Time (Year)",
+            "pattern_display_key": 0,
+            "physical_data_key": 10008,
+            "raw_sha256": "319fc775a33143bf99dfc35c75f13fedbe5e83038cc194f3c38ac9296453af3a",
+            "record_index": 219
+          },
+          {
+            "alternate_data_id": "0x0409",
+            "bit_range": [
+              8,
+              15
+            ],
+            "monitor_key": 9908,
+            "name": "Absolute Value Time (Month)",
+            "pattern_display_key": 0,
+            "physical_data_key": 10009,
+            "raw_sha256": "95b61f91982c8c4e330cecfdbfcfb27d19949410fb188abbbe544c7b49c4c9ff",
+            "record_index": 220
+          },
+          {
+            "alternate_data_id": "0x0409",
+            "bit_range": [
+              16,
+              23
+            ],
+            "monitor_key": 9909,
+            "name": "Absolute Value Time (Day)",
+            "pattern_display_key": 0,
+            "physical_data_key": 10010,
+            "raw_sha256": "43882d71d325da3de4aeeb7a53a8dc5880eead29ea8f2350915a20b5460e4b3c",
+            "record_index": 221
+          },
+          {
+            "alternate_data_id": "0x0409",
+            "bit_range": [
+              24,
+              31
+            ],
+            "monitor_key": 9910,
+            "name": "Absolute Value Time (Hour)",
+            "pattern_display_key": 0,
+            "physical_data_key": 10014,
+            "raw_sha256": "523851474ffefa9ad60e197914bef5429fa2c2a61c508aba2d4100ff4847c151",
+            "record_index": 222
+          },
+          {
+            "alternate_data_id": "0x0409",
+            "bit_range": [
+              32,
+              39
+            ],
+            "monitor_key": 9911,
+            "name": "Absolute Value Time (Minute)",
+            "pattern_display_key": 0,
+            "physical_data_key": 10012,
+            "raw_sha256": "c635d24387ecfa00079f92b0f2fcafd7a80cba9a574bfdf0c651ebbe63da817e",
+            "record_index": 223
+          },
+          {
+            "alternate_data_id": "0x0409",
+            "bit_range": [
+              40,
+              47
+            ],
+            "monitor_key": 9912,
+            "name": "Absolute Value Time (Second)",
+            "pattern_display_key": 0,
+            "physical_data_key": 10013,
+            "raw_sha256": "50f148d3b61d970414a43287f39342d4a0fd15d8a21f4f44e85467448d18e2d9",
+            "record_index": 224
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DABC",
+        "data_id": "0x1031",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3031",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 11,
+            "name": "Vehicle Speed",
+            "pattern_display_key": 0,
+            "physical_data_key": 8,
+            "raw_sha256": "cfa6219483d3198e848e5e63ab8f6f667dac53f4721fdf88c212366579346b0c",
+            "record_index": 2
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DAEE",
+        "data_id": "0x1032",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3032",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 12,
+            "name": "Engine Revolution",
+            "pattern_display_key": 0,
+            "physical_data_key": 9,
+            "raw_sha256": "c94436e94cc45dd05ff70bf1b51890cce8d10d1f953f133e50c04f75e1599f9c",
+            "record_index": 3
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DB18",
+        "data_id": "0x1033",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3033",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 13,
+            "name": "Ready Status",
+            "pattern_display_key": 3,
+            "physical_data_key": 1,
+            "raw_sha256": "eea5324c71259a2fc0d9b8a98f051cdf84262f6c6b03e2dcd1b093f9c3c186d4",
+            "record_index": 4
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DB3E",
+        "data_id": "0x1034",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3034",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 14,
+            "name": "Battery Voltage",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "e3a84a300ff7b23b50b9eb8dc69ff0daf937443c3740f49b7d5724301f6b3f6b",
+            "record_index": 5
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DB70",
+        "data_id": "0x1035",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3035",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 15,
+            "name": "Steering Wheel Torque",
+            "pattern_display_key": 16,
+            "physical_data_key": 11,
+            "raw_sha256": "f324738c24d0cae9d94bd9102c4f0205161dac1f2036ffaea67836f9c19fbbeb",
+            "record_index": 6
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DBBC",
+        "data_id": "0x1036",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3036",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 16,
+            "name": "Steering Angle Velocity",
+            "pattern_display_key": 0,
+            "physical_data_key": 12,
+            "raw_sha256": "d11048eb67d4b5ba4cc08e6ec7f34868809043c44cd5851b1cd70f2ccffd2e88",
+            "record_index": 7
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DBF8",
+        "data_id": "0x1037",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3037",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 17,
+            "name": "Steering Angle",
+            "pattern_display_key": 0,
+            "physical_data_key": 3,
+            "raw_sha256": "332e139f6d77c7146d40518ecdaf9ac85151e06495d90d4cabcb7eb96e855dd7",
+            "record_index": 8
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DC26",
+        "data_id": "0x1038",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3038",
+            "bit_range": [
+              4,
+              4
+            ],
+            "monitor_key": 22,
+            "name": "Status of Vehicle Power (IGP PT2)",
+            "pattern_display_key": 3,
+            "physical_data_key": 1,
+            "raw_sha256": "1f150f8ffa6a3738a2eaeb12e65bc35b439187787e9e30f65bbff4992f543cc8",
+            "record_index": 9
+          },
+          {
+            "alternate_data_id": "0x3038",
+            "bit_range": [
+              5,
+              5
+            ],
+            "monitor_key": 23,
+            "name": "Status of Vehicle Power (IGP PT1)",
+            "pattern_display_key": 3,
+            "physical_data_key": 1,
+            "raw_sha256": "992576b0f5a2dccd6dfa6ac2c7a6c422d6f2b5cbdf13c0c9ca7167ea2ba44da0",
+            "record_index": 10
+          },
+          {
+            "alternate_data_id": "0x3038",
+            "bit_range": [
+              6,
+              6
+            ],
+            "monitor_key": 24,
+            "name": "Status of Vehicle Power (IGP PDC)",
+            "pattern_display_key": 3,
+            "physical_data_key": 1,
+            "raw_sha256": "f82e0cf0b15936e80119c2116c449aec3e3a323306a774454636f8744df89c64",
+            "record_index": 11
+          },
+          {
+            "alternate_data_id": "0x3038",
+            "bit_range": [
+              7,
+              7
+            ],
+            "monitor_key": 25,
+            "name": "Status of Vehicle Power (IGR PDC)",
+            "pattern_display_key": 3,
+            "physical_data_key": 1,
+            "raw_sha256": "3c59297530f2ec1da3ec7d4f5df8caf6a083d99c754e795446569a6a3452c931",
+            "record_index": 12
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DB3E",
+        "data_id": "0x1039",
+        "payload_size": 2,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x3039",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 1026,
+            "name": "Battery Voltage (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "e2acd7c156453f2a98456cdd113a5143471abe87d537004d8464aa0b1e9dd19f",
+            "record_index": 120
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DC36",
+        "data_id": "0x1061",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3061",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 51,
+            "name": "IG Power Supply",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "5c936b1b8195c64efb50369989f0e74d7297a44f04d543b28ab91470543d165d",
+            "record_index": 13
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DC68",
+        "data_id": "0x1062",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3062",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 52,
+            "name": "PIG Power Supply",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "5f9b0ae53460dedb7f95f2e75853f2a6f75791676b126f4ca191e8f546600165",
+            "record_index": 14
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DC9A",
+        "data_id": "0x1063",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3063",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 53,
+            "name": "Thermistor Temperature",
+            "pattern_display_key": 0,
+            "physical_data_key": 13,
+            "raw_sha256": "377c47daf3d69665ce68e2687f70d01f4344ff0fa484ad826429b9d1ac590044",
+            "record_index": 15
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DCD6",
+        "data_id": "0x1064",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3064",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 54,
+            "name": "Power Source",
+            "pattern_display_key": 4,
+            "physical_data_key": 1,
+            "raw_sha256": "9664d16e64a011b7d3dc584cd962592396fe4e6111617b24dbcd60fcc23d26d2",
+            "record_index": 16
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DCFC",
+        "data_id": "0x1065",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3065",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 55,
+            "name": "PS Assist Signal",
+            "pattern_display_key": 5,
+            "physical_data_key": 1,
+            "raw_sha256": "bcb8ea52b4766b516181a3a24b6ca4c0b3714fe7f29c4faf77785855c474deb6",
+            "record_index": 17
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DD28",
+        "data_id": "0x1066",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3066",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 56,
+            "name": "Synchronization Status of PWM",
+            "pattern_display_key": 21,
+            "physical_data_key": 1,
+            "raw_sha256": "19b8f679f2194ad765ed32935536a9806c6c66d1577aa510365a267bedf43bda",
+            "record_index": 18
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DC36",
+        "data_id": "0x1067",
+        "payload_size": 2,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x3067",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 1057,
+            "name": "IG Power Supply (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "2e308ae032bee292e61a75cddd4913e41cddddc89ec424ba1d57f04cf69adb5a",
+            "record_index": 121
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DC68",
+        "data_id": "0x1068",
+        "payload_size": 2,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x3068",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 1058,
+            "name": "PIG Power Supply (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "50e699b910ba02616caa1fa5e07f16d05f0cb7c1553bb64ab06bd9b1ef20e0a5",
+            "record_index": 122
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DC9A",
+        "data_id": "0x1069",
+        "payload_size": 2,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x3069",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 1059,
+            "name": "Thermistor Temperature (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 13,
+            "raw_sha256": "3f08a924d93722bde82c41ec685600b153dbf6c82e78991269f81c267d02420c",
+            "record_index": 123
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DD2C",
+        "data_id": "0x106A",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x306A",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 60,
+            "name": "Cooperation Control State",
+            "pattern_display_key": 22,
+            "physical_data_key": 1,
+            "raw_sha256": "36efe1f91e2d68fc19659aad35ef0859d899db44ea6937ccdf20c1352e1d9447",
+            "record_index": 19
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DD30",
+        "data_id": "0x106B",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x306B",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 61,
+            "name": "Middle Voltage of Other Systems",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "63581d87dc478c1c271acd3ff0b7b4946134fb7e97a7a9ead5f3b349a162d4c1",
+            "record_index": 20
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DD30",
+        "data_id": "0x106C",
+        "payload_size": 2,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x306C",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 1062,
+            "name": "Middle Voltage of Other Systems (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "97a3c67e4a34edc3c81b018d095c09176f78c220f76c781fd7ca34510b2be7b9",
+            "record_index": 124
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DD62",
+        "data_id": "0x1091",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3091",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 81,
+            "name": "Torque Sensor 1 Output",
+            "pattern_display_key": 0,
+            "physical_data_key": 11,
+            "raw_sha256": "8c43e86d3d445c3343a94d32e88533bfd6a2d90579e4e7df9c5db5cf6fddd969",
+            "record_index": 21
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DD9A",
+        "data_id": "0x1092",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3092",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 82,
+            "name": "Torque Sensor 2 Output",
+            "pattern_display_key": 0,
+            "physical_data_key": 11,
+            "raw_sha256": "e8e5d0663f7b561cba21098e62fb49f4b5ec73a60e0a5e6d6717cd843ead69a2",
+            "record_index": 22
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DDD2",
+        "data_id": "0x1093",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3093",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 83,
+            "name": "Torque Sensor 3 Output",
+            "pattern_display_key": 0,
+            "physical_data_key": 11,
+            "raw_sha256": "68b4b76c282f0ca9497c82b28fe18bff08bbbc01077d37ce9efac93929785a1f",
+            "record_index": 23
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DE0A",
+        "data_id": "0x1094",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3094",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 84,
+            "name": "Torque Sensor 4 Output",
+            "pattern_display_key": 0,
+            "physical_data_key": 11,
+            "raw_sha256": "f4a422d892deabb097c642accd371bb0a8a81532a81463abc9d1476dffd719b4",
+            "record_index": 24
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DE42",
+        "data_id": "0x1095",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 85,
+            "name": "Torque Sensor 1 Zero Point Value",
+            "pattern_display_key": 0,
+            "physical_data_key": 1,
+            "raw_sha256": "2802e2c88af038ec81d8ad396bd2be2c72bbe2233f666ccfed29f1d4f925f24e",
+            "record_index": 25
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DE6C",
+        "data_id": "0x1096",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 86,
+            "name": "Torque Sensor 2 Zero Point Value",
+            "pattern_display_key": 0,
+            "physical_data_key": 1,
+            "raw_sha256": "82fa7093146fda0ee26629ada55608a84c157c0ed97bc4f5bd3633fba9c9fb5e",
+            "record_index": 26
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DE96",
+        "data_id": "0x1097",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 87,
+            "name": "Torque Sensor 3 Zero Point Value",
+            "pattern_display_key": 0,
+            "physical_data_key": 1,
+            "raw_sha256": "58388bb82a85e3319b27f61ca0139d1cba7ef53d1feefeaf5e2ab9f35992ba6b",
+            "record_index": 27
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DEC0",
+        "data_id": "0x1098",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 88,
+            "name": "Torque Sensor 4 Zero Point Value",
+            "pattern_display_key": 0,
+            "physical_data_key": 1,
+            "raw_sha256": "0a908f8275d93ec837d684ca512f8c9b9200c8253415a877378bcac684187b05",
+            "record_index": 28
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DEEA",
+        "data_id": "0x10C1",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30C1",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 121,
+            "name": "Motor 1 U Phase Current",
+            "pattern_display_key": 0,
+            "physical_data_key": 14,
+            "raw_sha256": "44f076b4ef480065d7fc979f55558d7b9253c88cc3f886360d05f1ed1aa3e5a6",
+            "record_index": 33
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DF26",
+        "data_id": "0x10C2",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30C2",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 122,
+            "name": "Motor 1 V Phase Current",
+            "pattern_display_key": 0,
+            "physical_data_key": 14,
+            "raw_sha256": "6c6d26d1801d2de3e93105880cae9d55e456a64346fa219c4157260ae4b4f650",
+            "record_index": 34
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DF62",
+        "data_id": "0x10C3",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30C3",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 123,
+            "name": "Motor 1 W Phase Current",
+            "pattern_display_key": 0,
+            "physical_data_key": 14,
+            "raw_sha256": "98a0e8fae6cb432bd8ced5bb628f9609d7a688b7dbae84fe22ec6b618edc440e",
+            "record_index": 35
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DF9E",
+        "data_id": "0x10C4",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30C4",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 124,
+            "name": "Motor 1 U Phase Duty",
+            "pattern_display_key": 0,
+            "physical_data_key": 15,
+            "raw_sha256": "2aa7193cc9b9c307ee17e499347bca212afec9b75ef055f622bfe9f3d459098b",
+            "record_index": 36
+          }
+        ]
+      },
+      {
+        "callback": "0x0004DFD4",
+        "data_id": "0x10C5",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30C5",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 125,
+            "name": "Motor 1 V Phase Duty",
+            "pattern_display_key": 0,
+            "physical_data_key": 15,
+            "raw_sha256": "f8da8d510b884d9ce3bf0a59244f8745ee4b9ac25c6c8a19af799ee6d2e8a737",
+            "record_index": 37
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E00A",
+        "data_id": "0x10C6",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30C6",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 126,
+            "name": "Motor 1 W Phase Duty",
+            "pattern_display_key": 0,
+            "physical_data_key": 15,
+            "raw_sha256": "179996470f69119c82912601cc9356f392b1d0f1fdbd2ed5a58656b2aa758fe0",
+            "record_index": 38
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E040",
+        "data_id": "0x10C7",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30C7",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 127,
+            "name": "Motor 1 U Phase Terminal Voltage",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "be556e7cfc449c83b81432d5a62bc9222ea9d45b8ce7221d74ca51aa7d4b0021",
+            "record_index": 39
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E044",
+        "data_id": "0x10C8",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30C8",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 128,
+            "name": "Motor 1 V Phase Terminal Voltage",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "606f09923718402ff7452fd8e29fc6bdd3565a6aaf3ba3a28842f37dc71ea8dd",
+            "record_index": 40
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E048",
+        "data_id": "0x10C9",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30C9",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 129,
+            "name": "Motor 1 W Phase Terminal Voltage",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "3f0b4bcf5c5a8727562c3b444ef9b360b2b6f7eb5a849ee2e00ab0af7b5d472f",
+            "record_index": 41
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E04C",
+        "data_id": "0x10CA",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30CA",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 130,
+            "name": "Motor 1 Power Supply",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "da2a3412790d5d3020ca4b0b9850bb0ac1930455f7bb04e4ab68475e8375ff46",
+            "record_index": 42
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E07E",
+        "data_id": "0x10F1",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30F1",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 151,
+            "name": "Motor 2 U Phase Current",
+            "pattern_display_key": 0,
+            "physical_data_key": 14,
+            "raw_sha256": "a1fa51e0497f3c100922957a5c014ef846aca902cb37ec406ec4d51654855d60",
+            "record_index": 43
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E0BA",
+        "data_id": "0x10F2",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30F2",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 152,
+            "name": "Motor 2 V Phase Current",
+            "pattern_display_key": 0,
+            "physical_data_key": 14,
+            "raw_sha256": "23e7ab03224ddf96138143f9a501a9bc716cc5fa017db267d550fed88ddf2b2a",
+            "record_index": 44
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E0F6",
+        "data_id": "0x10F3",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30F3",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 153,
+            "name": "Motor 2 W Phase Current",
+            "pattern_display_key": 0,
+            "physical_data_key": 14,
+            "raw_sha256": "17f45e6d648792784aecb2777d930cb86f8c4e5cd97607e007e0d0992f88af9d",
+            "record_index": 45
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E132",
+        "data_id": "0x10F4",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30F4",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 154,
+            "name": "Motor 2 U Phase Duty",
+            "pattern_display_key": 0,
+            "physical_data_key": 15,
+            "raw_sha256": "14bf2b9a6d108fe12d4fb4835d832484789478ca2dc8808e3f9b75d7a7858ab8",
+            "record_index": 46
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E168",
+        "data_id": "0x10F5",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30F5",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 155,
+            "name": "Motor 2 V Phase Duty",
+            "pattern_display_key": 0,
+            "physical_data_key": 15,
+            "raw_sha256": "aad9dae92fb9ccbe4ea8bdbb20884037ff1078828dd260607ffef1aefc0a6d10",
+            "record_index": 47
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E19E",
+        "data_id": "0x10F6",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30F6",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 156,
+            "name": "Motor 2 W Phase Duty",
+            "pattern_display_key": 0,
+            "physical_data_key": 15,
+            "raw_sha256": "cba34fac27f313be6576414186279d2b71a658778e78834fc01649830c259b31",
+            "record_index": 48
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E1D4",
+        "data_id": "0x10F7",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30F7",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 157,
+            "name": "Motor 2 U Phase Terminal Voltage",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "7c495e26c3f03933ce2d27b3e6475effbd2f238ba439f7284998e89e0affcee8",
+            "record_index": 49
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E1D8",
+        "data_id": "0x10F8",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30F8",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 158,
+            "name": "Motor 2 V Phase Terminal Voltage",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "704d2a4e1cab424b2550c2931f74d7e2fc0df882808374c485c16f59a9eb4cbc",
+            "record_index": 50
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E1DC",
+        "data_id": "0x10F9",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30F9",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 159,
+            "name": "Motor 2 W Phase Terminal Voltage",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "a3c1a5968a925cf82110bc9a054075bc87a760290bd77bdf92d868e355277ffc",
+            "record_index": 51
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E1E0",
+        "data_id": "0x10FA",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x30FA",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 160,
+            "name": "Motor 2 Power Supply",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "78161c48f14c5e1c6e2fc713c22eb8a192a285857eda1c18648d33feba9e780e",
+            "record_index": 52
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E212",
+        "data_id": "0x1121",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3121",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 201,
+            "name": "Motor Rotation Angle 1",
+            "pattern_display_key": 11,
+            "physical_data_key": 16,
+            "raw_sha256": "6e1f9351ba7d740c4f80d83b53f01a098b864f1c4f971c72a46b2809b971044f",
+            "record_index": 53
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E246",
+        "data_id": "0x1122",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3122",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 202,
+            "name": "Motor Rotation Angle 2",
+            "pattern_display_key": 11,
+            "physical_data_key": 16,
+            "raw_sha256": "f875961ddbf9444d124f2f3d4381cc18d7e48b1615a5ab00a88b4d0b594bebfd",
+            "record_index": 54
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E212",
+        "data_id": "0x1123",
+        "payload_size": 2,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x3123",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 203,
+            "name": "Motor Rotation Angle 3",
+            "pattern_display_key": 11,
+            "physical_data_key": 16,
+            "raw_sha256": "0cef5838f09f84fbed3ae50d5617f00bd3fa8bd4fc273390bb3df7ebdd20eb6d",
+            "record_index": 55
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E27A",
+        "data_id": "0x1124",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3124",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 204,
+            "name": "Motor Rotation Angle Sensor 1 Sin Voltage",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "a80d61cf0cd2d8ebdb7b1c6c4cd39b70e6cc7a0fea7935f1b454538a1ad52f31",
+            "record_index": 56
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E27E",
+        "data_id": "0x1125",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3125",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 205,
+            "name": "Motor Rotation Angle Sensor 1 Cos Voltage",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "f1db69fde4cad093bfd95accf72a7472692836fd50c59dde8fd2fdd3afa94b6e",
+            "record_index": 57
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E282",
+        "data_id": "0x1126",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3126",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 206,
+            "name": "Motor Rotation Angle Sensor 2 Sin Voltage",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "4dde1883d98f68b993e55c7ea3e474c9f833f5f254d6931929429d4415fa764c",
+            "record_index": 58
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E286",
+        "data_id": "0x1127",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3127",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 207,
+            "name": "Motor Rotation Angle Sensor 2 Cos Voltage",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "515dedcd44df1cc01e930ac83d3ba810ea8249af05741d369199d990afa42d71",
+            "record_index": 59
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E28A",
+        "data_id": "0x1128",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3128",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 208,
+            "name": "Motor Rotation Angle Sensor 3 Sin Voltage",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "38f9ef080fe9fe006b5e11f961791d871b3f905756a43b420235f7fa7082e820",
+            "record_index": 60
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E28E",
+        "data_id": "0x1129",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3129",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 209,
+            "name": "Motor Rotation Angle Sensor 3 Cos Voltage",
+            "pattern_display_key": 0,
+            "physical_data_key": 10,
+            "raw_sha256": "284f62c45bdb4f0147a7f16333f4e5f826daa80bbfaf72593f52e19c9cdd5062",
+            "record_index": 61
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E246",
+        "data_id": "0x112A",
+        "payload_size": 2,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x312A",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 210,
+            "name": "Motor Rotation Angle 4",
+            "pattern_display_key": 11,
+            "physical_data_key": 16,
+            "raw_sha256": "263d7ff7004017793f969c511d2ee5c8c2ee7c00ca00cfd7003e225870fe501f",
+            "record_index": 62
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E292",
+        "data_id": "0x112B",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x312B",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 211,
+            "name": "Turn Counter 1",
+            "pattern_display_key": 0,
+            "physical_data_key": 23,
+            "raw_sha256": "6baad50fab322b22900be0c541651e0619e9e361301790edb4ae545e61541352",
+            "record_index": 63
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E292",
+        "data_id": "0x112C",
+        "payload_size": 2,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x312C",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 212,
+            "name": "Turn Counter 2",
+            "pattern_display_key": 0,
+            "physical_data_key": 23,
+            "raw_sha256": "d73ac828ae2672cd2cb32511aa79f66783abe7c8bfb2f612b735ac1c8d16abca",
+            "record_index": 64
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E2BC",
+        "data_id": "0x112D",
+        "payload_size": 4,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x312D",
+            "bit_range": [
+              0,
+              31
+            ],
+            "monitor_key": 213,
+            "name": "Absolute Angle (Pinion Angle)",
+            "pattern_display_key": 0,
+            "physical_data_key": 24,
+            "raw_sha256": "07d4e92877f385a2ddb4be00be74ecaaa90fef072fc9150515cb2386f1553b60",
+            "record_index": 65
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E2F8",
+        "data_id": "0x112E",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x312E",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 214,
+            "name": "Steering Angle for the Steering Assembly",
+            "pattern_display_key": 19,
+            "physical_data_key": 25,
+            "raw_sha256": "1a83380ca9867d3cd00edf96a5118643350a4e09bd8ad997332854fa7c1d85dd",
+            "record_index": 66
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E338",
+        "data_id": "0x112F",
+        "payload_size": 7,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 215,
+            "name": "Status of Learned Left/Right End Position for End Torque Limit Control",
+            "pattern_display_key": 23,
+            "physical_data_key": 1,
+            "raw_sha256": "36264fb05aa35c51debb4359abb7ec44a7d15de915aaa83bdc55397c123b5708",
+            "record_index": 67
+          },
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              8,
+              23
+            ],
+            "monitor_key": 216,
+            "name": "Learned End Current Position for End Torque Limit Control",
+            "pattern_display_key": 24,
+            "physical_data_key": 25,
+            "raw_sha256": "0ec113a0015b6a189d57aa56da73f395a5ecb85c3ca8c0faa151a61e8998442c",
+            "record_index": 68
+          },
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              24,
+              39
+            ],
+            "monitor_key": 217,
+            "name": "Learned Left End Position for End Torque Limit Control",
+            "pattern_display_key": 24,
+            "physical_data_key": 25,
+            "raw_sha256": "9f9cde6c54d3f4ee672cfca078d2ea3c3c850fe3981df1397cc319a61e07f785",
+            "record_index": 69
+          },
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              40,
+              55
+            ],
+            "monitor_key": 218,
+            "name": "Learned Right End Position for End Torque Limit Control",
+            "pattern_display_key": 24,
+            "physical_data_key": 25,
+            "raw_sha256": "853c659b61c7f089aa7d972f99ba78532dd425d95718fa3ab28aeda4f62fe559",
+            "record_index": 70
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E33C",
+        "data_id": "0x1130",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 219,
+            "name": "Super High Speed Steering Angle Speed Abnormality Number of Times",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "60116fe92107a8f4d430748280434ee04498f4750efcec5f1f5583cece1eeb94",
+            "record_index": 71
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E340",
+        "data_id": "0x1131",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 220,
+            "name": "Number of Learned End Position Resets",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "c0d9a324ddd6a10447923105c3a4ab05ac9fc24e29f4e7e90dfe4fd86f625f6c",
+            "record_index": 72
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E344",
+        "data_id": "0x1132",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 221,
+            "name": "Rack Stroke",
+            "pattern_display_key": 0,
+            "physical_data_key": 27,
+            "raw_sha256": "1b2804d8151135862b639854c33877fffa4555d937ff3dbd7b887ed53eba3f00",
+            "record_index": 73
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E36E",
+        "data_id": "0x1133",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 222,
+            "name": "Manual Learning of Gear Middle Point (Right and Left End Hit Against Completed Status)",
+            "pattern_display_key": 25,
+            "physical_data_key": 1,
+            "raw_sha256": "568d2938ae715bb37bb6487bb70fc211f41b6c1d9243327818e89489f1a033ce",
+            "record_index": 74
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E394",
+        "data_id": "0x1151",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3151",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 251,
+            "name": "Motor Actual Current (Q Axis)",
+            "pattern_display_key": 0,
+            "physical_data_key": 14,
+            "raw_sha256": "a7b581fabb81d3ef6493ab3abc7ecbd5c17d3de10ce7ab10fc4fe8c47745d3a9",
+            "record_index": 81
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E3D0",
+        "data_id": "0x1152",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3152",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 252,
+            "name": "Command Value Current (Q Axis)",
+            "pattern_display_key": 0,
+            "physical_data_key": 14,
+            "raw_sha256": "95dbfe07884815eb0576e326557fe0f637e6190559867ab598bc880ba48e2b10",
+            "record_index": 82
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E40C",
+        "data_id": "0x1153",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3153",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 253,
+            "name": "Motor Actual Current 2 (D Axis)",
+            "pattern_display_key": 0,
+            "physical_data_key": 14,
+            "raw_sha256": "b35ec8b14169946897382dd92d3357225f0b89bcdedfd1188dc8411c8321276e",
+            "record_index": 83
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E448",
+        "data_id": "0x1154",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3154",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 254,
+            "name": "Command Value Current 2 (D Axis)",
+            "pattern_display_key": 0,
+            "physical_data_key": 14,
+            "raw_sha256": "911c7e2a50ebd2e4eaf7bd4d8bb0243c43e2c9c4ece0b319d43870d852c21470",
+            "record_index": 84
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E484",
+        "data_id": "0x1155",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3155",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 255,
+            "name": "Motor Rotation Angle",
+            "pattern_display_key": 11,
+            "physical_data_key": 16,
+            "raw_sha256": "d2bff76753e0657686775ef7c525d71fe9ae77469cf2f368616b59b9b3309907",
+            "record_index": 85
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E4CE",
+        "data_id": "0x1156",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3156",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 256,
+            "name": "Final Motor Current Limited (Q Axis)",
+            "pattern_display_key": 0,
+            "physical_data_key": 17,
+            "raw_sha256": "d59456505d45901df16f1b57515f8bbf3fd0ab10b3fd83f561cc513eb0bc1e4b",
+            "record_index": 86
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E394",
+        "data_id": "0x1157",
+        "payload_size": 2,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x3157",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 1257,
+            "name": "Motor Actual Current (Q Axis) (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 14,
+            "raw_sha256": "7bd37fcc12dbeedfe137a5d5dda2b1954dd0886f3c28ebbfe08acd379abee1e5",
+            "record_index": 125
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E3D0",
+        "data_id": "0x1158",
+        "payload_size": 2,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x3158",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 1258,
+            "name": "Command Value Current (Q Axis) (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 14,
+            "raw_sha256": "f862c27707d1d110757f349b110fdb41a1db65a27651c8d313495884645a5e1f",
+            "record_index": 126
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E40C",
+        "data_id": "0x1159",
+        "payload_size": 2,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x3159",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 1259,
+            "name": "Motor Actual Current 2 (D Axis) (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 14,
+            "raw_sha256": "3c6e4ce9476abc31d9dc70e3c7652a13d93e3c53b1a7f54033dee6b3f9d0b3a3",
+            "record_index": 127
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E448",
+        "data_id": "0x115A",
+        "payload_size": 2,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x315A",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 1260,
+            "name": "Command Value Current 2 (D Axis) (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 14,
+            "raw_sha256": "025e77232430d970e03d79ab34777017fe22819cc785447937e0871cd94443c3",
+            "record_index": 128
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E484",
+        "data_id": "0x115B",
+        "payload_size": 2,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x315B",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 1261,
+            "name": "Motor Rotation Angle (System 2)",
+            "pattern_display_key": 11,
+            "physical_data_key": 16,
+            "raw_sha256": "70c8e3ca0b56259292b33eded6432807c0024fffff7e6f95daa04b96d6cad4c4",
+            "record_index": 129
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E4CE",
+        "data_id": "0x115C",
+        "payload_size": 2,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x315C",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 1262,
+            "name": "Final Motor Current Limited (Q Axis) (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 17,
+            "raw_sha256": "ca932498d284aff8ed86dea35e29b056a1ee6d0de8aecdfc8e19a96db41d0e05",
+            "record_index": 130
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E508",
+        "data_id": "0x1181",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3181",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 301,
+            "name": "Steering Angle Sensor Signal State",
+            "pattern_display_key": 6,
+            "physical_data_key": 1,
+            "raw_sha256": "3bba25e755924ccd703005def6a6542d0b0e1c60ff2a9e8b4912a70fda62d1bd",
+            "record_index": 87
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E52E",
+        "data_id": "0x1182",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3182",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 302,
+            "name": "Eco-Run Control Mode",
+            "pattern_display_key": 7,
+            "physical_data_key": 1,
+            "raw_sha256": "5eeeaa30f4ed72935e3629a40d854db1e1df1d74a023ac7ba701cd840b5a2dfc",
+            "record_index": 88
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E540",
+        "data_id": "0x1183",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3183",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 303,
+            "name": "CAN Vehicle Speed (Speed Sensor RR)",
+            "pattern_display_key": 0,
+            "physical_data_key": 18,
+            "raw_sha256": "ddc81d7f00fc0cae8acd323bdf558ec4e1862b1e08f35431071613a1b3b618a3",
+            "record_index": 89
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E574",
+        "data_id": "0x1184",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3184",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 304,
+            "name": "CAN Vehicle Speed (Speed Sensor RL)",
+            "pattern_display_key": 0,
+            "physical_data_key": 18,
+            "raw_sha256": "649880dd4fc9652af48805130c60a082aa9618fb03755c3a33186e7c2e2c0e6c",
+            "record_index": 90
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E5A8",
+        "data_id": "0x1185",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3185",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 305,
+            "name": "CAN Vehicle Speed (SP1)",
+            "pattern_display_key": 0,
+            "physical_data_key": 19,
+            "raw_sha256": "36cab6e58270906c2217d85c8b87d45d4d3d7de35d77650f5c1c1d742a6ad5b9",
+            "record_index": 91
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E5D2",
+        "data_id": "0x1186",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3186",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 306,
+            "name": "CAN Steering Angle Speed (SSAV)",
+            "pattern_display_key": 0,
+            "physical_data_key": 12,
+            "raw_sha256": "82c3cf35a67fe99c32faba5658436760fdc3d864dd6dfe4f54238a824da5ceb3",
+            "record_index": 92
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E600",
+        "data_id": "0x11B1",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 351,
+            "name": "Battery Voltage Drop History",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "2185312e2dae5295b6290825485904a868e78d2bc355f5d671ea4505cb08f48f",
+            "record_index": 93
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E62C",
+        "data_id": "0x11B3",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 353,
+            "name": "Engine Revolution Ready Signal Communication Failure History",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "c85a0c2c583dc9a81f3dd2297d95aa1b9de69b731f269899352a894d96e77031",
+            "record_index": 94
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E658",
+        "data_id": "0x11B4",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 354,
+            "name": "Steering Angle Sensor Signal Communication Failure History",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "94588c5038c56b9ee8fe617cf14a5e8ea33875956deba4eb718d21986ff82f63",
+            "record_index": 95
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E684",
+        "data_id": "0x11B5",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 355,
+            "name": "Vehicle Speed Signal Invalid History",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "8d0c97dcb4fd2453429ca4086ce33eeae343a84ee11858168cce521349bdadd8",
+            "record_index": 96
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E6B0",
+        "data_id": "0x11B6",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 356,
+            "name": "Overheat Prevention Control History",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "6fc0fe70ded1d646768b4e8f922b53c666a5fc15123e0119d781bcf9316359ca",
+            "record_index": 97
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E6DE",
+        "data_id": "0x11B7",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 357,
+            "name": "Power Supply Voltage Drop Control History",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "8c87703f6c03a862633b95e90af518464f5f0d4babd18581fd30a18b838b1949",
+            "record_index": 98
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E706",
+        "data_id": "0x11B8",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 358,
+            "name": "Power Supply Voltage Drop Restraint Control History",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "0656f9162b75fe368068e48e5ba8830b6d3f4bb8c6638e2460852a804dbb36e8",
+            "record_index": 99
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E72E",
+        "data_id": "0x11B9",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 359,
+            "name": "Engine Stall/READY OFF Control History",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "2820382e27c664f398c4dd70fd70f956b505ea005cc6dc12f820f0fa16e35171",
+            "record_index": 100
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E756",
+        "data_id": "0x11BA",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 360,
+            "name": "High Load Continuous Control Number of Times",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "c68ec8ebfa7e7149b0e75347461b465bfdf60f37d15d73eb682a31beeda4a1df",
+            "record_index": 101
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E77E",
+        "data_id": "0x11BB",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 361,
+            "name": "Vehicle Speed Signal Fault Control History",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "fb1e15ce04f62ac13c4d78d664f24c4b5dff2e1956625e34df52527b5ac7a017",
+            "record_index": 102
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E7A6",
+        "data_id": "0x11BC",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 362,
+            "name": "Chassis Power Supply Management EPS Control History",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "e080ecb464f2e1751d4fbaadbbda3d326fb5febebe9739402a000be31c24d23e",
+            "record_index": 103
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E7AA",
+        "data_id": "0x11BD",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 363,
+            "name": "Load Control History",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "4cf844f4e7b4152f97be68f414986142bfe0fcb5a61ad24ba7388aebe49f550e",
+            "record_index": 104
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E600",
+        "data_id": "0x11BE",
+        "payload_size": 1,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 1364,
+            "name": "Battery Voltage Drop History (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "34e20eec3d62e2103324064d1fcde6d7d278584982661572a360f9f19dfdbb00",
+            "record_index": 131
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E62C",
+        "data_id": "0x11BF",
+        "payload_size": 1,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 1365,
+            "name": "Engine Revolution Ready Signal Communication Failure History (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "fc3582fe6206de1104c4ae5262d70620cca9b8bbe3253c0d756bf4afd35bd280",
+            "record_index": 132
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E658",
+        "data_id": "0x11C0",
+        "payload_size": 1,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 1366,
+            "name": "Steering Angle Sensor Signal Communication Failure History (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "9353cf59acf96267a574cdd52835f08ff3e5ba2b8c382ed67b3b823bcd1a4ef2",
+            "record_index": 133
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E684",
+        "data_id": "0x11C1",
+        "payload_size": 1,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 1367,
+            "name": "Vehicle Speed Signal Invalid History (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "1decc913723ac63d389b3ce4270c8d5e294ea665bbd391a3b02db7ab36b6098f",
+            "record_index": 134
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E6B0",
+        "data_id": "0x11C2",
+        "payload_size": 1,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 1368,
+            "name": "Overheat Prevention Control History (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "95664fdce74232ad359bd94e285952991152a1c94831fc285359975081a32c21",
+            "record_index": 135
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E6DE",
+        "data_id": "0x11C3",
+        "payload_size": 1,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 1369,
+            "name": "Power Supply Voltage Drop Control History (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "4932e52f53a97a37ce0a5aa72db2b35c6d094198b04c4277e47e034de9c7c6ac",
+            "record_index": 136
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E706",
+        "data_id": "0x11C4",
+        "payload_size": 1,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 1370,
+            "name": "Power Supply Voltage Drop Restraint Control History (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "1c63c8b7fe2cb880af2345076aaea9863103bf7a5b83802a966fa89d55a0dac7",
+            "record_index": 137
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E72E",
+        "data_id": "0x11C5",
+        "payload_size": 1,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 1371,
+            "name": "Engine Stall/READY OFF Control History (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "d1021a224a508892fd26539b365c7d89278c483618ba2cb582ae4b25aa22f6cb",
+            "record_index": 138
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E756",
+        "data_id": "0x11C6",
+        "payload_size": 1,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 1372,
+            "name": "High Load Continuous Control Number of Times (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "01ebc10c96adb3bbee3d367bdfef3207acb4fd61f670d181db33171e5ba6f1a3",
+            "record_index": 139
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E77E",
+        "data_id": "0x11C7",
+        "payload_size": 1,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 1373,
+            "name": "Vehicle Speed Signal Fault Control History (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "0edb51e96d5106a683c5c34557a62b8ea1f6ec02a38aea7f138124847eda9509",
+            "record_index": 140
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E7A6",
+        "data_id": "0x11C8",
+        "payload_size": 1,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 1374,
+            "name": "Chassis Power Supply Management EPS Control History (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "ce433bab74554ea3dc57a2351649bca6efef983bd2a99c4bdae4fbb3837e51c4",
+            "record_index": 141
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E7AA",
+        "data_id": "0x11C9",
+        "payload_size": 1,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x0000",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 1375,
+            "name": "Load Control History (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 20,
+            "raw_sha256": "996c0515f00a0665dd7da5419266b99fbdd352860d0cc903c4c115e977616272",
+            "record_index": 142
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E7D6",
+        "data_id": "0x1C02",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3C02",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 402,
+            "name": "Command Value Torque",
+            "pattern_display_key": 0,
+            "physical_data_key": 21,
+            "raw_sha256": "371f2a4e8226c4055d2838a35f6a71d4a49ddff8f6c628be6036499a1e870403",
+            "record_index": 105
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E81E",
+        "data_id": "0x1C03",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3C03",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 403,
+            "name": "Control State Information",
+            "pattern_display_key": 0,
+            "physical_data_key": 1,
+            "raw_sha256": "26691ba1e8966db749359a3e899db0504af12066f0a2e905866c9877f844d5b6",
+            "record_index": 106
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E848",
+        "data_id": "0x1C05",
+        "payload_size": 8,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3C05",
+            "bit_range": [
+              0,
+              31
+            ],
+            "monitor_key": 405,
+            "name": "ASIC State Information",
+            "pattern_display_key": 0,
+            "physical_data_key": 1,
+            "raw_sha256": "15d957581563a084065432e2238e326f20b07a6774e5425e9f0b7dfbc1cf37d7",
+            "record_index": 107
+          },
+          {
+            "alternate_data_id": "0x3C05",
+            "bit_range": [
+              32,
+              63
+            ],
+            "monitor_key": 410,
+            "name": "ASIC State Information 2",
+            "pattern_display_key": 0,
+            "physical_data_key": 1,
+            "raw_sha256": "988f7d035e11035a21099bb0b8e5ef2e573d76bf8ef97af058d841203ddc5fb7",
+            "record_index": 112
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E86A",
+        "data_id": "0x1C06",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3C06",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 406,
+            "name": "ECU Estimate Temperature of Overheat Prevention Part",
+            "pattern_display_key": 12,
+            "physical_data_key": 13,
+            "raw_sha256": "5869bcd3b14c9c62c6d242b324ae4e1dd65946d377e7b338d3d59a327ecbc806",
+            "record_index": 108
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E8B8",
+        "data_id": "0x1C07",
+        "payload_size": 2,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3C07",
+            "bit_range": [
+              0,
+              15
+            ],
+            "monitor_key": 407,
+            "name": "Motor Estimate Temperature of Overheat Prevention Part",
+            "pattern_display_key": 12,
+            "physical_data_key": 13,
+            "raw_sha256": "8abd1b34d317ec2b2dabc7f4e3ceedeb35a04f53805f0d3fa44dc0cda8350b60",
+            "record_index": 109
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E906",
+        "data_id": "0x1C08",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3C08",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 408,
+            "name": "ECU Overheat Prevention Part",
+            "pattern_display_key": 13,
+            "physical_data_key": 1,
+            "raw_sha256": "e46f4c3ef7785f0daed3c210a69b7fcb98ecd510a4c7e500a94b819ecfc697bf",
+            "record_index": 110
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E92E",
+        "data_id": "0x1C09",
+        "payload_size": 1,
+        "selector": 0,
+        "signals": [
+          {
+            "alternate_data_id": "0x3C09",
+            "bit_range": [
+              0,
+              7
+            ],
+            "monitor_key": 409,
+            "name": "Motor Overheat Prevention Part",
+            "pattern_display_key": 14,
+            "physical_data_key": 1,
+            "raw_sha256": "fb024e29e871a9778448a9fe307734584fa2be238cbdd99eb9cb47f4adf5c7cb",
+            "record_index": 111
+          }
+        ]
+      },
+      {
+        "callback": "0x0004E848",
+        "data_id": "0x1C0C",
+        "payload_size": 8,
+        "selector": 1,
+        "signals": [
+          {
+            "alternate_data_id": "0x3C0C",
+            "bit_range": [
+              0,
+              31
+            ],
+            "monitor_key": 1412,
+            "name": "ASIC State Information (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 1,
+            "raw_sha256": "c10537625e26de25e4bcc1de6671aacd1ed53ca1afc49e7b6800cd99a087766d",
+            "record_index": 143
+          },
+          {
+            "alternate_data_id": "0x3C0C",
+            "bit_range": [
+              32,
+              63
+            ],
+            "monitor_key": 1413,
+            "name": "ASIC State Information 2 (System 2)",
+            "pattern_display_key": 0,
+            "physical_data_key": 1,
+            "raw_sha256": "687edfeccd1e36216d1f1c7980c4d5d6fdadb51b9ca9aa7f52278dd19b4d854b",
+            "record_index": 144
+          }
+        ]
+      }
+    ]
+  },
+  "schema": "gtsplus-2026-camry-8965f3307000-emps-semantics-v1",
+  "sources": {
+    "gts_emps": {
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/EMPS_P5.ddb",
+      "sha256": "fb7933228bc2f1c5788d1f896c008c5c590ede45ec2e650c07123f94764e329e",
+      "size": 85846
+    },
+    "gts_kgp": {
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/KgpDataCtrl.dll",
+      "sha256": "19e709e12e53f485a84ccfbf6b226922b88502206c34b767db543c7f3df101f8",
+      "size": 1824784
+    },
+    "gts_master": {
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/Toyota.ddb",
+      "sha256": "f11e820968ac383a8fc5105b65322f0b9c3673df2c8dac46c9847e3d691b39b1",
+      "size": 18967903
+    },
+    "gts_strings": {
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/M_English.ddb",
+      "sha256": "458a7039851fc66dc2385fff2efa910337218b8b23985b3c1afc0db7bc5f8014",
+      "size": 4254372
+    },
+    "v18_emps": {
+      "path": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/EMPS_P5.ddb",
+      "sha256": "1e5ffc4f998570458fa86dd0d563949006f9e0781f15d118d01e80656fadd199",
+      "size": 49042
+    },
+    "v18_master": {
+      "path": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/Toyota.ddb",
+      "sha256": "63ee18391421a7b02996eef282bc8ea3251889981d9cf9e1722e89f4952cb19e",
+      "size": 13646849
+    },
+    "v18_strings": {
+      "path": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/M_English.ddb",
+      "sha256": "d88b131e2f56c71cdb60b353f410f877e0889635ec2b5df0becf4e0002aebf96",
+      "size": 3003919
+    }
+  },
+  "target": {
+    "codeflash_path": "firmware/camry-8965F3307000/CodeFlash.bin",
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "rdbi_record_count": 241,
+    "rdbi_table_offset": "0x02928C",
+    "software_id": "8965F3307000"
+  }
+}

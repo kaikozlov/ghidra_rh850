@@ -1128,6 +1128,70 @@ paths = [
 ]
 
 
+[suite.analysis_targets]
+tests = ["tests/verify_analysis_targets.py"]
+oracle = "generated_self_check"
+paths = [
+  "tests/verify_analysis_targets.py",
+  "data/analysis_targets.json",
+  "tools/analysis_target.py",
+  "tools/g",
+  "tools/gtarget",
+  "tools/gcamry",
+  "tools/rebuild_target_project.sh",
+  "tools/snapshot_target_project.sh",
+  "tools/generate_target_decompiler_corpus.py",
+  "tools/export_ghidra_project.sh",
+  "tools/camry_f33_corpus.py",
+  "ghidra/scripts/import/ApplyCamryF33DeviceProfile.java",
+  "ghidra/scripts/seed/SeedCamryF33Entries.java",
+  "ghidra/scripts/seed/SeedCamryF33Diagnostics.java",
+  "ghidra/scripts/seed/SeedCamryF33RecoveredFunctions.java",
+  "data/targets/camry-8965F3307000/",
+  "data/generated/camry-8965F3307000/decompilations.jsonl",
+  "projects/",
+  "firmware/camry-8965F3307000/",
+  "targets/camry-2026/",
+  "Makefile",
+  "docs/WORKFLOW.md",
+  "AGENTS.md",
+]
+
+[suite.camry_8965f3307000_gtsplus_semantics]
+tests = ["tests/verify_camry_8965F3307000_gtsplus_semantics.py"]
+oracle = "generated_self_check"
+paths = [
+  "tests/verify_camry_8965F3307000_gtsplus_semantics.py",
+  "tools/techstream/extract_gtsplus_camry_emps_semantics.py",
+  "tools/extract_camry_8965F3307000_gtsplus_decompiler_evidence.py",
+  "tools/techstream/parse_ddb.py",
+  "tools/camry_f33_corpus.py",
+  "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
+  "data/generated/camry_8965F3307000_gtsplus_decompiler_evidence.json",
+  "data/generated/camry-8965F3307000/decompilations.jsonl",
+  "firmware/camry-8965F3307000/CodeFlash.bin",
+  "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin",
+  "software/locks/gtsplus.json",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/FINDINGS.md",
+]
+
+[suite.camry_8965f3307000_gtsplus_external]
+tests = ["tests/verify_camry_8965F3307000_gtsplus_external.py"]
+requires_external = ["techstream_v18", "gtsplus"]
+modes = ["local"]
+oracle = "independent_external_artifact"
+paths = [
+  "tests/verify_camry_8965F3307000_gtsplus_external.py",
+  "tools/techstream/extract_gtsplus_camry_emps_semantics.py",
+  "tools/techstream/parse_ddb.py",
+  "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
+  "data/generated/camry_8965F3307000_gtsplus_decompiler_evidence.json",
+  "firmware/camry-8965F3307000/CodeFlash.bin",
+  "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin",
+  "software/locks/gtsplus.json",
+]
+
 [suite.camry_2026_tsk_baseline]
 tests = ["tests/verify_camry_2026_tsk_baseline.py"]
 oracle = "dynamic_trace"
@@ -1135,7 +1199,7 @@ paths = [
   "tests/verify_camry_2026_tsk_baseline.py",
   "tools/analyze_camry_2026_baseline.py",
   "data/generated/camry_2026_tsk_baseline.json",
-  "community/kai/camry-2026/",
+  "targets/camry-2026/",
   "docs/variants/camry-2026-live-baseline.md",
   "docs/status/FINDINGS.md",
   "data/toyota_eps_variant_matrix.csv",
@@ -1149,9 +1213,9 @@ paths = [
   "tests/verify_camry_2026_nrtd_p5.py",
   "tools/analyze_camry_2026_nrtd_p5.py",
   "data/generated/camry_2026_nrtd_p5.json",
-  "community/kai/camry-2026/raw-20260826/NRTD_MANIFEST.txt",
-  "community/kai/camry-2026/",
-  "community/kai/camry-2026/README.md",
+  "targets/camry-2026/raw-20260826/NRTD_MANIFEST.txt",
+  "targets/camry-2026/",
+  "targets/camry-2026/README.md",
   "docs/variants/camry-2026-live-baseline.md",
   "docs/status/FINDINGS.md",
   "docs/status/PRIORITIES.md",
@@ -1166,12 +1230,12 @@ paths = [
   "tests/verify_camry_2026_ready_gear.py",
   "tools/analyze_camry_2026_ready_gear.py",
   "data/generated/camry_2026_ready_gear.json",
-  "community/kai/camry-2026/raw-20260826/READY_GEAR_MANIFEST.txt",
-  "community/kai/camry-2026/raw-20260826/camry_ready_gear_capture.py",
-  "community/kai/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz",
-  "community/kai/camry-2026/raw-20260826/camry_b_capture.py",
-  "community/kai/camry-2026/raw-20260826/camry_ready_b_20260826.json.gz",
-  "community/kai/camry-2026/README.md",
+  "targets/camry-2026/raw-20260826/READY_GEAR_MANIFEST.txt",
+  "targets/camry-2026/raw-20260826/camry_ready_gear_capture.py",
+  "targets/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz",
+  "targets/camry-2026/raw-20260826/camry_b_capture.py",
+  "targets/camry-2026/raw-20260826/camry_ready_b_20260826.json.gz",
+  "targets/camry-2026/README.md",
   "docs/variants/camry-2026-live-baseline.md",
   "docs/status/FINDINGS.md",
   "docs/status/PRIORITIES.md",
@@ -1183,18 +1247,20 @@ paths = [
 tests = ["tests/verify_camry_8965F3307000_codeflash.py"]
 oracle = "raw_bytes"
 paths = [
+  "tools/camry_f33_corpus.py",
+  "data/generated/camry-8965F3307000/decompilations.jsonl",
   "tests/verify_camry_8965F3307000_codeflash.py",
   "tools/analyze_camry_8965F3307000_codeflash.py",
   "tools/extract_camry_8965F3307000_decompiler_evidence.py",
   "tools/compare_variant_application_rx.py",
   "data/generated/camry_8965F3307000_codeflash.json",
   "data/generated/camry_8965F3307000_decompiler_evidence.json",
-  "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
-  "community/kai/camry-2026/raw-20260826/CODEFLASH_MANIFEST.txt",
-  "community/kai/camry-2026/raw-20260826/camry_codeflash_dump.py",
-  "community/kai/camry-2026/raw-20260826/calvin_payload_codeflash_00000000_00200000.bin",
-  "community/kai/camry-2026/raw-20260826/codeflash/",
-  "community/kai/camry-2026/README.md",
+  "firmware/camry-8965F3307000/CodeFlash.bin",
+  "targets/camry-2026/raw-20260826/CODEFLASH_MANIFEST.txt",
+  "targets/camry-2026/raw-20260826/camry_codeflash_dump.py",
+  "targets/camry-2026/raw-20260826/calvin_payload_codeflash_00000000_00200000.bin",
+  "targets/camry-2026/raw-20260826/codeflash/",
+  "targets/camry-2026/README.md",
   "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
   "firmware/RH850_P1M-E_CodeFlash.bin",
   "data/generated/techstream_v18/p5_lateral_control_semantics.json",
@@ -1210,11 +1276,13 @@ paths = [
 tests = ["tests/verify_camry_8965F3307000_flash_backend.py"]
 oracle = "raw_bytes"
 paths = [
+  "tools/camry_f33_corpus.py",
+  "data/generated/camry-8965F3307000/decompilations.jsonl",
   "tests/verify_camry_8965F3307000_flash_backend.py",
   "tools/extract_camry_8965F3307000_flash_backend_evidence.py",
   "data/generated/camry_8965F3307000_flash_backend_evidence.json",
   "data/generated/techstream_v18/t0035_faci_backend_evidence.json",
-  "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+  "firmware/camry-8965F3307000/CodeFlash.bin",
   "exploit/patcher/flash_backend.c",
   "exploit/patcher/README.md",
   "software/locks/toyota-cuw-corpus.json",
@@ -1250,7 +1318,7 @@ paths = [
   "ghidra/scripts/investigate/ResolveSecocAcceptanceGate.java",
   "data/generated/secoc_gate_resolution_8965F3307000_minimal.json",
   "data/generated/secoc_patch_manifest_8965F3307000.json",
-  "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+  "firmware/camry-8965F3307000/CodeFlash.bin",
   "firmware/RH850_P1M-E_CodeFlash.bin",
   "exploit/patcher/",
   "docs/variants/camry-2026-live-baseline.md",
@@ -1265,6 +1333,8 @@ paths = [
 tests = ["tests/verify_camry_8965F3307000_lateral_static.py"]
 oracle = "raw_bytes"
 paths = [
+  "tools/camry_f33_corpus.py",
+  "data/generated/camry-8965F3307000/decompilations.jsonl",
   "tests/verify_camry_8965F3307000_lateral_static.py",
   "tools/build_camry_8965F3307000_lateral_static.py",
   "tools/extract_camry_8965F3307000_lateral_decompiler_evidence.py",
@@ -1272,7 +1342,7 @@ paths = [
   "data/generated/camry_8965F3307000_lateral_decompiler_evidence.json",
   "data/generated/camry_8965F3307000_codeflash.json",
   "data/generated/camry_8965F3307000_command5_runtime_carrier.json",
-  "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+  "firmware/camry-8965F3307000/CodeFlash.bin",
   "data/p1me_product_memory.json",
   "data/generated/corolla_8965H1202000_techstream_correlations.json",
   "docs/variants/camry-2026-live-baseline.md",
@@ -1285,12 +1355,14 @@ paths = [
 tests = ["tests/verify_camry_8965F3307000_tss3_opendbc_port.py"]
 oracle = "raw_bytes"
 paths = [
+  "tools/camry_f33_corpus.py",
+  "data/generated/camry-8965F3307000/decompilations.jsonl",
   "tests/verify_camry_8965F3307000_tss3_opendbc_port.py",
   "tools/build_camry_8965F3307000_tss3_opendbc_port.py",
   "tools/extract_camry_8965F3307000_tss3_tx_decompiler_evidence.py",
   "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
   "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json",
-  "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+  "firmware/camry-8965F3307000/CodeFlash.bin",
   "docs/variants/camry-2026-tss3-opendbc-port.md",
   "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
@@ -1303,13 +1375,15 @@ paths = [
 tests = ["tests/verify_camry_8965F3307000_fault_status.py"]
 oracle = "raw_bytes"
 paths = [
+  "tools/camry_f33_corpus.py",
+  "data/generated/camry-8965F3307000/decompilations.jsonl",
   "tests/verify_camry_8965F3307000_fault_status.py",
   "tools/build_camry_8965F3307000_fault_status.py",
   "tools/extract_camry_8965F3307000_fault_status_decompiler_evidence.py",
   "data/generated/camry_8965F3307000_fault_status.json",
   "data/generated/camry_8965F3307000_fault_status_decompiler_evidence.json",
   "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
-  "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+  "firmware/camry-8965F3307000/CodeFlash.bin",
   "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
   "data/generated/corolla_8965H1202000_techstream_correlations.json",
   "docs/variants/camry-2026-tss3-fault-status.md",
@@ -1327,8 +1401,8 @@ paths = [
   "tests/verify_camry_8965F3307000_secoc_recovery.py",
   "tools/analyze_camry_8965F3307000_secoc_recovery.py",
   "data/generated/camry_8965F3307000_secoc_recovery.json",
-  "community/kai/camry-2026/raw-20260826/secoc-recovery/",
-  "community/kai/camry-2026/README.md",
+  "targets/camry-2026/raw-20260826/secoc-recovery/",
+  "targets/camry-2026/README.md",
   "docs/variants/camry-2026-live-baseline.md",
   "docs/status/FINDINGS.md",
 ]
@@ -1349,9 +1423,9 @@ paths = [
   "exploit/ephemeral_runtime/audited/camry_f33_command5_proxy.bin",
   "exploit/ephemeral_runtime/corolla_hf_canary.c",
   "exploit/ephemeral_runtime/corolla_hf_command5_proxy.c",
-  "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
-  "community/kai/camry-2026/raw-20260826/high-tail-20260826.json",
-  "community/kai/camry-2026/raw-20260826/stock-retention-20260826.json",
+  "firmware/camry-8965F3307000/CodeFlash.bin",
+  "targets/camry-2026/raw-20260826/high-tail-20260826.json",
+  "targets/camry-2026/raw-20260826/stock-retention-20260826.json",
   "data/generated/camry_8965F3307000_codeflash.json",
   "data/variant_ram_exec_requirements.json",
   "docs/variants/camry-2026-live-baseline.md",
@@ -1369,14 +1443,14 @@ paths = [
   "data/generated/camry_8965F3307000_application_ram_loader_assessment.json",
   "ghidra/scripts/investigate/InspectRangeReferences.java",
   "ghidra/scripts/investigate/ClassifyComputedCallTargets.java",
-  "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
-  "community/kai/camry-2026/raw-20260826/high-tail-20260826.json",
-  "community/kai/camry-2026/raw-20260826/stock-retention-20260826.json",
-  "community/kai/camry-2026/raw-20260826/stock-handoff-20260826.json",
-  "community/kai/camry-2026/raw-20260826/poststartup-canary-20260826.json",
-  "community/kai/camry-2026/raw-20260826/RAM_RETENTION_MANIFEST.txt",
-  "community/kai/camry-2026/raw-20260826/xcp_probe.json",
-  "community/kai/camry-2026/README.md",
+  "firmware/camry-8965F3307000/CodeFlash.bin",
+  "targets/camry-2026/raw-20260826/high-tail-20260826.json",
+  "targets/camry-2026/raw-20260826/stock-retention-20260826.json",
+  "targets/camry-2026/raw-20260826/stock-handoff-20260826.json",
+  "targets/camry-2026/raw-20260826/poststartup-canary-20260826.json",
+  "targets/camry-2026/raw-20260826/RAM_RETENTION_MANIFEST.txt",
+  "targets/camry-2026/raw-20260826/xcp_probe.json",
+  "targets/camry-2026/README.md",
   "data/variant_ram_exec_requirements.json",
   "docs/variants/camry-2026-live-baseline.md",
   "docs/variants/README.md",
@@ -2438,7 +2512,7 @@ paths = [
   "tools/resolve_secoc_patch.sh",
   "tools/resolve_secoc_patch_image.sh",
   "tools/run_headless",
-  "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+  "firmware/camry-8965F3307000/CodeFlash.bin",
   "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
   "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
   "data/generated/secoc_gate_resolution_4512000.json",

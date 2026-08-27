@@ -10,7 +10,7 @@ import struct
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin"
+IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
 EVID = REPO / "data/generated/camry_8965F3307000_fault_status_decompiler_evidence.json"
 TX = REPO / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
 H_TECH = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
@@ -86,15 +86,15 @@ def build() -> dict:
         need(sha(image[entry:entry + int(row["body_size"])]) == row["body_sha256"], f"body hash drift 0x{entry:08X}")
 
     # Target-native classifier and aging topology.
-    token(funcs, 0x50FC8, "unaff_gp + -0x3546", "unaff_gp + -0x3544", "unaff_gp + -0x3542",
-          "unaff_gp + -0x3540", "unaff_gp + -0x353e", "unaff_gp + -0x353c",
-          "unaff_gp + -0x353a", "unaff_gp + -0x3538", "unaff_gp + -0x3530")
-    token(funcs, 0x510B6, "unaff_gp + -0x509c", "& 0x8000", "FUN_00050fc8(2)")
-    token(funcs, 0x5110A, "DAT_000030b0", "uRam00030e46 <= uVar1", "param_4 < uVar2")
-    token(funcs, 0x5116C, "DAT_00030e44", "unaff_gp + -0x3532")
+    token(funcs, 0x50FC8, "puVar1 + -0x3546", "puVar1 + -0x3544", "puVar1 + -0x3542",
+          "puVar1 + -0x3540", "puVar1 + -0x353e", "puVar1 + -0x353c",
+          "puVar1 + -0x353a", "puVar1 + -0x3538", "puVar1 + -0x3530")
+    token(funcs, 0x510B6, "DAT_febe6764", "& 0x8000", "FUN_00050fc8(2)")
+    token(funcs, 0x5110A, "DAT_febee8b0", "DAT_00030e46 <= uVar1", "param_4 < uVar2")
+    token(funcs, 0x5116C, "DAT_00030e44", "puVar3 + -0x3532")
     token(funcs, 0x511B6, "DAT_00030e40", "DAT_00030e42", "FUN_0005116c")
-    classifier = token(funcs, 0x512E4, "FUN_000510b6", "FUN_00051266", "uRam00030e48", "uRam00030e4a",
-                       "iVar20 + 0x2a19c", "unaff_gp + -0x3560", "uVar18 = 6", "uVar18 = 7",
+    classifier = token(funcs, 0x512E4, "FUN_000510b6", "FUN_00051266", "DAT_00030e48", "DAT_00030e4a",
+                       "(&DAT_0002a19c)[iVar21]", "puVar19[-0x3560]", "uVar18 = 6", "uVar18 = 7",
                        "uVar18 = 8", "uVar18 = 9", "uVar18 = 10", "uVar18 = 0xb", "uVar18 = 0xc",
                        "uVar18 = 0xd", "uVar18 = 0xe", "uVar18 = 0xf", "uVar18 = 0x10")
     need("uVar18 = 0;" not in classifier, "unexpected explicit state-0 assignment; deepest fallthrough semantics changed")

@@ -24,7 +24,7 @@ decompiling is slop. Verify claims from firmware gate code, not spec knowledge.
 
 ## Non-negotiable repository hazards
 
-- **Never open committed `project/` with a `ghidra` daemon.** Any open
+- **Never open committed `project/` or `projects/` snapshots with a `ghidra` daemon.** Any open
   compacts its DB and dirties the tree even with no analysis change. Use
   `build/work/project/` (via `make work-project`).
 - **Always `ghidra ... stop` before copying or committing the working
@@ -34,7 +34,7 @@ decompiling is slop. Verify claims from firmware gate code, not spec knowledge.
   `tmp*` files.
 - **Never infer CodeFlash VA without accounting for the DataFlash prefix.**
   CodeFlash VA = file offset − `0x8000`.
-- **Never point a rebuild at committed `project/`.** Promote only with
+- **Never point a rebuild at committed `project/` or `projects/`.** Promote only with
   `make snapshot-project`.
 - **`build/` is workspace state, never evidence authority.** Core `make verify`
   must pass without it. Use only `build/cache/`, `build/work/`, `build/out/`,
@@ -99,7 +99,7 @@ tools/g stop
 (processor extension, Java options, fingerprint check), materializes the
 working project if absent, selects the pinned CLI binary, and injects
 `--projects-dir/--project/--program`. It refuses to operate against committed
-`project/`. Set `GHIDRA_AGENT=1` for compact JSON output.
+`project/` and `projects/` snapshot namespaces. Set `GHIDRA_AGENT=1` for compact JSON output.
 
 `tools/g session-status` reports daemon state, project path, processor
 fingerprint, mutation marker, and snapshot diff — useful before deciding

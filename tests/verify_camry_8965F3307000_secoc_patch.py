@@ -14,7 +14,7 @@ from exploit.patcher.build_payload import make_restore_config, simulate_apply  #
 from exploit.patcher.patch_config import config_from_manifest  # noqa: E402
 from tools.build_secoc_patch_manifest import build_manifest, crc32  # noqa: E402
 
-IMAGE = REPO / "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin"
+IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
 SIENNA = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
 GATE = REPO / "data/generated/secoc_gate_resolution_8965F3307000_minimal.json"
 MANIFEST = REPO / "data/generated/secoc_patch_manifest_8965F3307000.json"

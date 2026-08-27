@@ -2,78 +2,1568 @@
   "function_count": 10,
   "functions": [
     {
+      "body_ranges": [
+        {
+          "max": "0x000510b5",
+          "min": "0x00050fc8",
+          "space": "ram"
+        }
+      ],
       "body_sha256": "d7ef4ec47ee3b2b2dcbb8a23540961d4e62078a61a3a9f63378363390b476d42",
       "body_size": 238,
-      "decompiled_c": "\nvoid FUN_00050fc8(char param_1)\n\n{\n  int unaff_gp;\n  undefined4 uVar1;\n  \n  uVar1 = FUN_000701c4();\n  if (param_1 == '\\x02') {\n    *(byte *)(unaff_gp + -0x355d) = *(byte *)(unaff_gp + -0x355d) | 1;\n    *(byte *)(unaff_gp + -0x355b) = *(byte *)(unaff_gp + -0x355b) | 1;\n    *(short *)(unaff_gp + -0x3546) = *(short *)(unaff_gp + -0x3546) + 1;\n  }\n  else {\n    if (param_1 != '\\x04') {\n      if (param_1 == '\\b') {\n        *(byte *)(unaff_gp + -0x355c) = *(byte *)(unaff_gp + -0x355c) | 8;\n        *(short *)(unaff_gp + -0x3542) = *(short *)(unaff_gp + -0x3542) + 1;\n      }\n      else if (param_1 == '\\x0f') {\n        *(byte *)(unaff_gp + -0x355c) = *(byte *)(unaff_gp + -0x355c) | 4;\n        *(short *)(unaff_gp + -0x3540) = *(short *)(unaff_gp + -0x3540) + 1;\n      }\n      else if (param_1 == '\\x10') {\n        *(byte *)(unaff_gp + -0x355c) = *(byte *)(unaff_gp + -0x355c) | 0x10;\n        *(short *)(unaff_gp + -0x353e) = *(short *)(unaff_gp + -0x353e) + 1;\n      }\n      else {\n        if (param_1 == ' ') {\n          *(short *)(unaff_gp + -0x353c) = *(short *)(unaff_gp + -0x353c) + 1;\n        }\n        else {\n          if (param_1 == '@') {\n            *(byte *)(unaff_gp + -0x355c) = *(byte *)(unaff_gp + -0x355c) | 0x40;\n            *(short *)(unaff_gp + -0x353a) = *(short *)(unaff_gp + -0x353a) + 1;\n            goto LAB_0005107a;\n          }\n          if (param_1 == -0x80) {\n            *(short *)(unaff_gp + -0x3538) = *(short *)(unaff_gp + -0x3538) + 1;\n            goto LAB_000510ac;\n          }\n          if (param_1 != -0x10) goto LAB_000510ac;\n          *(short *)(unaff_gp + -0x3530) = *(short *)(unaff_gp + -0x3530) + 1;\n        }\n        *(byte *)(unaff_gp + -0x355c) = *(byte *)(unaff_gp + -0x355c) | 0x20;\n      }\nLAB_0005107a:\n      *(undefined1 *)(unaff_gp + -0x3559) = 0x5a;\n      goto LAB_000510ac;\n    }\n    *(byte *)(unaff_gp + -0x355d) = *(byte *)(unaff_gp + -0x355d) | 2;\n    *(byte *)(unaff_gp + -0x355b) = *(byte *)(unaff_gp + -0x355b) | 2;\n    *(short *)(unaff_gp + -0x3544) = *(short *)(unaff_gp + -0x3544) + 1;\n  }\n  *(undefined1 *)(unaff_gp + -0x355a) = 0x5a;\n  *(undefined1 *)(unaff_gp + -0x3558) = 0x5a;\nLAB_000510ac:\n  FUN_000701ea(uVar1);\n  return;\n}\n\n",
-      "decompiled_c_sha256": "334b73b658e72f16efa99133bf0db2add9543f051ab869032d7c0ef50a5ff36b",
+      "data_references": [
+        {
+          "from_addr": "0x00050fd0",
+          "operand_index": 0,
+          "ref_type": "PARAM",
+          "to_addr": "0x0000ff00",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051006",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82d0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051010",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82d0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051012",
+          "operand_index": 2,
+          "ref_type": "READ_WRITE",
+          "to_addr": "0xfebe82a4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005101c",
+          "operand_index": 2,
+          "ref_type": "READ_WRITE",
+          "to_addr": "0xfebe82a3",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051020",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82ba",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051024",
+          "operand_index": 2,
+          "ref_type": "READ_WRITE",
+          "to_addr": "0xfebe82a5",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051028",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82ba",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051030",
+          "operand_index": 2,
+          "ref_type": "READ_WRITE",
+          "to_addr": "0xfebe82a3",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051034",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82bc",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051038",
+          "operand_index": 2,
+          "ref_type": "READ_WRITE",
+          "to_addr": "0xfebe82a5",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005103c",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82bc",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051042",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82a6",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051044",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82a8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005104c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82be",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051050",
+          "operand_index": 2,
+          "ref_type": "READ_WRITE",
+          "to_addr": "0xfebe82a4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051054",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82be",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051058",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82c2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051062",
+          "operand_index": 2,
+          "ref_type": "READ_WRITE",
+          "to_addr": "0xfebe82a4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051066",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82c2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005106a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82c0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051074",
+          "operand_index": 2,
+          "ref_type": "READ_WRITE",
+          "to_addr": "0xfebe82a4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051078",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82c0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005107e",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82a7",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051082",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82c4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005108c",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82c4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051090",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82c6",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005109a",
+          "operand_index": 2,
+          "ref_type": "READ_WRITE",
+          "to_addr": "0xfebe82a4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005109e",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82c6",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000510a6",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82c8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000510aa",
+          "operand_index": 1,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82c8",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_00050fc8(char param_1)\n\n{\n  undefined *puVar1;\n  undefined4 uVar2;\n  \n  puVar1 = &LAB_febeb800;\n  uVar2 = FUN_000701c4();\n  if (param_1 == '\\x02') {\n    puVar1[-0x355d] = puVar1[-0x355d] | 1;\n    puVar1[-0x355b] = puVar1[-0x355b] | 1;\n    *(short *)(puVar1 + -0x3546) = *(short *)(puVar1 + -0x3546) + 1;\n  }\n  else {\n    if (param_1 != '\\x04') {\n      if (param_1 == '\\b') {\n        puVar1[-0x355c] = puVar1[-0x355c] | 8;\n        *(short *)(puVar1 + -0x3542) = *(short *)(puVar1 + -0x3542) + 1;\n      }\n      else if (param_1 == '\\x0f') {\n        puVar1[-0x355c] = puVar1[-0x355c] | 4;\n        *(short *)(puVar1 + -0x3540) = *(short *)(puVar1 + -0x3540) + 1;\n      }\n      else if (param_1 == '\\x10') {\n        puVar1[-0x355c] = puVar1[-0x355c] | 0x10;\n        *(short *)(puVar1 + -0x353e) = *(short *)(puVar1 + -0x353e) + 1;\n      }\n      else {\n        if (param_1 == ' ') {\n          *(short *)(puVar1 + -0x353c) = *(short *)(puVar1 + -0x353c) + 1;\n        }\n        else {\n          if (param_1 == '@') {\n            puVar1[-0x355c] = puVar1[-0x355c] | 0x40;\n            *(short *)(puVar1 + -0x353a) = *(short *)(puVar1 + -0x353a) + 1;\n            goto LAB_0005107a;\n          }\n          if (param_1 == -0x80) {\n            *(short *)(puVar1 + -0x3538) = *(short *)(puVar1 + -0x3538) + 1;\n            goto LAB_000510ac;\n          }\n          if (param_1 != -0x10) goto LAB_000510ac;\n          *(short *)(puVar1 + -0x3530) = *(short *)(puVar1 + -0x3530) + 1;\n        }\n        puVar1[-0x355c] = puVar1[-0x355c] | 0x20;\n      }\nLAB_0005107a:\n      puVar1[-0x3559] = 0x5a;\n      goto LAB_000510ac;\n    }\n    puVar1[-0x355d] = puVar1[-0x355d] | 2;\n    puVar1[-0x355b] = puVar1[-0x355b] | 2;\n    *(short *)(puVar1 + -0x3544) = *(short *)(puVar1 + -0x3544) + 1;\n  }\n  puVar1[-0x355a] = 0x5a;\n  puVar1[-0x3558] = 0x5a;\nLAB_000510ac:\n  FUN_000701ea(uVar2);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "1d38996fe31c93e94653140fc1f7fb633cd168610308e743fd8fa336ad08aba3",
       "entry": "0x00050FC8"
     },
     {
+      "body_ranges": [
+        {
+          "max": "0x000510df",
+          "min": "0x000510b6",
+          "space": "ram"
+        }
+      ],
       "body_sha256": "2c12c17db88195b05e26d612bde3f81abdef6f7e45bb8eeed089246d316b0daa",
       "body_size": 42,
-      "decompiled_c": "\nvoid FUN_000510b6(void)\n\n{\n  char cVar1;\n  int unaff_gp;\n  \n  cVar1 = *(char *)(unaff_gp + -0x3551);\n  if ((cVar1 != 'Z') && (cVar1 = '\\0', (*(ushort *)(unaff_gp + -0x509c) & 0x8000) != 0)) {\n    FUN_00050fc8(2);\n    cVar1 = 'Z';\n  }\n  *(char *)(unaff_gp + -0x3551) = cVar1;\n  return;\n}\n\n",
-      "decompiled_c_sha256": "b3f0d71bc5f10a78bdf0a040637ad379ae4e38053f5c2f4770198dc77e1007bc",
+      "data_references": [
+        {
+          "from_addr": "0x000510ba",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82af",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000510c4",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe6764",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000510d8",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82af",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_000510b6(void)\n\n{\n  char cVar1;\n  undefined *puVar2;\n  \n  puVar2 = &LAB_febeb800;\n  cVar1 = DAT_febe82af;\n  if ((DAT_febe82af != 'Z') && (cVar1 = '\\0', (DAT_febe6764 & 0x8000) != 0)) {\n    puVar2 = &LAB_febeb800;\n    FUN_00050fc8(2);\n    cVar1 = 'Z';\n  }\n  puVar2[-0x3551] = cVar1;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "f35515833188e43449bef3e003e7eee64cb367204e48b82edec5582e4145545f",
       "entry": "0x000510B6"
     },
     {
+      "body_ranges": [
+        {
+          "max": "0x00051109",
+          "min": "0x000510e0",
+          "space": "ram"
+        }
+      ],
       "body_sha256": "2a986b783e3bfe6b971d046809447a25b2af43589fa5c101cc3fbe2026b9ea90",
       "body_size": 42,
-      "decompiled_c": "\nvoid FUN_000510e0(void)\n\n{\n  int unaff_gp;\n  char cVar1;\n  \n  cVar1 = *(char *)(unaff_gp + -0x354c);\n  if (cVar1 == '\\0') {\n    if (*(char *)(unaff_gp + -0x38af) == 'Z') {\n      cVar1 = 'Z';\n    }\n    else {\n      cVar1 = '\\0';\n    }\n  }\n  else if ((*(char *)(unaff_gp + -0x38af) == '\\0') && ((&DAT_00003027)[unaff_gp] == '\\0')) {\n    cVar1 = '\\0';\n  }\n  *(char *)(unaff_gp + -0x354c) = cVar1;\n  return;\n}\n\n",
-      "decompiled_c_sha256": "082925dbc5c061b73d851160f42d48f50dac137a811d1b6f6d3d34a24d9e6b7e",
+      "data_references": [
+        {
+          "from_addr": "0x000510e0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82b4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000510e4",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe7f51",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000510f6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebee827",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051104",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82b4",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_000510e0(void)\n\n{\n  if (DAT_febe82b4 == '\\0') {\n    if (DAT_febe7f51 == 'Z') {\n      DAT_febe82b4 = 'Z';\n    }\n    else {\n      DAT_febe82b4 = '\\0';\n    }\n  }\n  else if ((DAT_febe7f51 == '\\0') && (DAT_febee827 == '\\0')) {\n    DAT_febe82b4 = '\\0';\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "4ea13a092bfdd27c947bae204ff8de433c2e2a7862c55ec22391a96cbe953586",
       "entry": "0x000510E0"
     },
     {
+      "body_ranges": [
+        {
+          "max": "0x0005116b",
+          "min": "0x0005110a",
+          "space": "ram"
+        }
+      ],
       "body_sha256": "496f2e598550753d5d2f099469ca293b742675f36a58ff04883f6cc6b3e1c89a",
       "body_size": 98,
-      "decompiled_c": "\nvoid FUN_0005110a(undefined1 *param_1,char *param_2,ushort *param_3,ushort param_4)\n\n{\n  ushort uVar1;\n  ushort uVar2;\n  int unaff_gp;\n  undefined4 uVar3;\n  undefined1 uVar4;\n  char cVar5;\n  \n  uVar1 = *(ushort *)(&DAT_000030b0 + unaff_gp);\n  uVar3 = FUN_000701c4();\n  cVar5 = *param_2;\n  uVar2 = *param_3;\n  uVar4 = *param_1;\n  if (cVar5 == 'Z') {\n    cVar5 = '\\0';\n    uVar2 = 0;\n  }\n  if (((param_4 < uVar2) || (uVar2 = uVar2 + 1, param_4 < uVar2)) && (uRam00030e46 <= uVar1)) {\n    uVar4 = 0;\n  }\n  *param_1 = uVar4;\n  *param_2 = cVar5;\n  *param_3 = uVar2;\n  FUN_000701ea(uVar3);\n  return;\n}\n\n",
-      "decompiled_c_sha256": "2ba5d14eee685f17fa7e935a812218a10558825b757366185573a77410098175",
+      "data_references": [
+        {
+          "from_addr": "0x00051118",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebee8b0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005111c",
+          "operand_index": 0,
+          "ref_type": "PARAM",
+          "to_addr": "0x0000ff00",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005114e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x00030e46",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_0005110a(undefined1 *param_1,char *param_2,ushort *param_3,ushort param_4)\n\n{\n  ushort uVar1;\n  ushort uVar2;\n  undefined4 uVar3;\n  undefined1 uVar4;\n  char cVar5;\n  \n  uVar1 = DAT_febee8b0;\n  uVar3 = FUN_000701c4();\n  cVar5 = *param_2;\n  uVar2 = *param_3;\n  uVar4 = *param_1;\n  if (cVar5 == 'Z') {\n    cVar5 = '\\0';\n    uVar2 = 0;\n  }\n  if (((param_4 < uVar2) || (uVar2 = uVar2 + 1, param_4 < uVar2)) && (DAT_00030e46 <= uVar1)) {\n    uVar4 = 0;\n  }\n  *param_1 = uVar4;\n  *param_2 = cVar5;\n  *param_3 = uVar2;\n  FUN_000701ea(uVar3);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "a87ff11a52146758d2080aa690293e21afc680350c570e971c2243019199a68c",
       "entry": "0x0005110A"
     },
     {
+      "body_ranges": [
+        {
+          "max": "0x000511b5",
+          "min": "0x0005116c",
+          "space": "ram"
+        }
+      ],
       "body_sha256": "885a0b58aff9ed207b41b1ac7210f0973bef0b9ca36bf23ea1466cc040d0f95b",
       "body_size": 74,
-      "decompiled_c": "\nvoid FUN_0005116c(void)\n\n{\n  ushort uVar1;\n  ushort uVar2;\n  int unaff_gp;\n  undefined4 uVar3;\n  undefined1 uVar4;\n  char cVar5;\n  \n  uVar1 = DAT_00030e44;\n  uVar3 = FUN_000701c4();\n  uVar2 = *(ushort *)(unaff_gp + -0x3532);\n  cVar5 = *(char *)(unaff_gp + -0x3558);\n  uVar4 = *(undefined1 *)(unaff_gp + -0x355b);\n  if (cVar5 == 'Z') {\n    cVar5 = '\\0';\n    uVar2 = 0;\n  }\n  if ((uVar1 < uVar2) || (uVar2 = uVar2 + 1, uVar1 < uVar2)) {\n    uVar4 = 0;\n  }\n  *(undefined1 *)(unaff_gp + -0x355b) = uVar4;\n  *(char *)(unaff_gp + -0x3558) = cVar5;\n  *(ushort *)(unaff_gp + -0x3532) = uVar2;\n  FUN_000701ea(uVar3);\n  return;\n}\n\n",
-      "decompiled_c_sha256": "5c845b2bc5e1473f9b2eead3e81a78500c5f6782759e52ee689115b31f171b18",
+      "data_references": [
+        {
+          "from_addr": "0x00051174",
+          "operand_index": 0,
+          "ref_type": "PARAM",
+          "to_addr": "0x0000ff00",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051178",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x00030e44",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051180",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82ce",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051188",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82a8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005118c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82a5",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000511a8",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82a5",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000511aa",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82a8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000511ac",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82ce",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_0005116c(void)\n\n{\n  ushort uVar1;\n  ushort uVar2;\n  undefined *puVar3;\n  undefined4 uVar4;\n  undefined1 uVar5;\n  char cVar6;\n  \n  uVar1 = DAT_00030e44;\n  puVar3 = &LAB_febeb800;\n  uVar4 = FUN_000701c4();\n  uVar2 = *(ushort *)(puVar3 + -0x3532);\n  cVar6 = puVar3[-0x3558];\n  uVar5 = puVar3[-0x355b];\n  if (cVar6 == 'Z') {\n    cVar6 = '\\0';\n    uVar2 = 0;\n  }\n  if ((uVar1 < uVar2) || (uVar2 = uVar2 + 1, uVar1 < uVar2)) {\n    uVar5 = 0;\n  }\n  puVar3[-0x355b] = uVar5;\n  puVar3[-0x3558] = cVar6;\n  *(ushort *)(puVar3 + -0x3532) = uVar2;\n  FUN_000701ea(uVar4);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "0283c42436be1ef60ea4eab22695329ccfdcc1818570ff55717512754c01ab77",
       "entry": "0x0005116C"
     },
     {
+      "body_ranges": [
+        {
+          "max": "0x00051207",
+          "min": "0x000511b6",
+          "space": "ram"
+        }
+      ],
       "body_sha256": "0260c09451b85960822a4926a4e4fe3baa40e46504fe9b2722a05f498a077e52",
       "body_size": 82,
-      "decompiled_c": "\nvoid FUN_000511b6(void)\n\n{\n  char cVar1;\n  char cVar2;\n  int unaff_gp;\n  \n  cVar1 = *(char *)(unaff_gp + -0x355c);\n  cVar2 = *(char *)(unaff_gp + -0x355b);\n  if (*(char *)(unaff_gp + -0x355d) != '\\0') {\n    FUN_0005110a(unaff_gp + -0x355d,unaff_gp + -0x355a,unaff_gp + -0x3536,DAT_00030e40);\n  }\n  if (cVar2 != '\\0') {\n    FUN_0005116c();\n  }\n  if (cVar1 != '\\0') {\n    FUN_0005110a(unaff_gp + -0x355c,unaff_gp + -0x3559,unaff_gp + -0x3534,DAT_00030e42);\n  }\n  return;\n}\n\n",
-      "decompiled_c_sha256": "1505a4b8fe53efc2d4ae52ca2cd1d35b08755dd471c22252a6b021014fbc5421",
+      "data_references": [
+        {
+          "from_addr": "0x000511c0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82a3",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000511c2",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82a4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000511c4",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82a5",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000511d0",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x00030e40",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000511d4",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xfebe82a3",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000511d8",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xfebe82a6",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000511dc",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xfebe82ca",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000511f0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x00030e42",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000511f4",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xfebe82a4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000511f8",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xfebe82a7",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000511fc",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xfebe82cc",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_000511b6(void)\n\n{\n  char cVar1;\n  char cVar2;\n  \n  cVar2 = DAT_febe82a5;\n  cVar1 = DAT_febe82a4;\n  if (DAT_febe82a3 != '\\0') {\n    FUN_0005110a(&DAT_febe82a3,&DAT_febe82a6,&DAT_febe82ca,DAT_00030e40);\n  }\n  if (cVar2 != '\\0') {\n    FUN_0005116c();\n  }\n  if (cVar1 != '\\0') {\n    FUN_0005110a(&DAT_febe82a4,&DAT_febe82a7,&DAT_febe82cc,DAT_00030e42);\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "32fd4a0fe4dcaac10c8d6581d3ef6c53c849fa2e942d214e4275712a968ae309",
       "entry": "0x000511B6"
     },
     {
+      "body_ranges": [
+        {
+          "max": "0x00051265",
+          "min": "0x00051208",
+          "space": "ram"
+        }
+      ],
       "body_sha256": "54f4336a425809e0dd1ec5a6d7486e0046286c72057eee881759d56fe4c8cdf0",
       "body_size": 94,
-      "decompiled_c": "\nundefined4 FUN_00051208(void)\n\n{\n  char cVar1;\n  char cVar2;\n  char cVar3;\n  int unaff_gp;\n  int iVar4;\n  undefined4 uVar5;\n  int iVar6;\n  int iVar7;\n  int iVar8;\n  int iVar9;\n  \n  iVar9 = *(int *)(unaff_gp + -0x4d10);\n  cVar1 = (&DAT_00003053)[unaff_gp];\n  cVar2 = (&DAT_00003054)[unaff_gp];\n  cVar3 = (&DAT_00003055)[unaff_gp];\n  iVar8 = *(int *)(&DAT_0000311c + unaff_gp);\n  iVar7 = *(int *)(&DAT_00003124 + unaff_gp);\n  iVar6 = *(int *)(&DAT_0000312c + unaff_gp);\n  iVar4 = FUN_00062e12();\n  if (((((iVar9 == 0) || (cVar1 == '\\x03' || cVar1 == '\\x04')) || (cVar2 == -1)) ||\n      ((cVar3 == '\\x11' || (iVar8 == 0x33333333)))) ||\n     ((iVar7 == 0x33333333 || ((iVar6 == 0x33333333 || (iVar4 == -0x5aa55aa6)))))) {\n    uVar5 = 0x5a;\n  }\n  else {\n    uVar5 = 0;\n  }\n  return uVar5;\n}\n\n",
-      "decompiled_c_sha256": "d64b901be8d450f58051b1a17302eedce1da2d97a81e2ad5c37407197f4c21aa",
+      "data_references": [
+        {
+          "from_addr": "0x0005120c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe6af0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051214",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0xfebee853",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051216",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebee854",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051218",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebee855",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005121e",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0xfebee91c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051220",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebee924",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051222",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebee92c",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nundefined4 FUN_00051208(void)\n\n{\n  int iVar1;\n  char cVar2;\n  char cVar3;\n  char cVar4;\n  int iVar5;\n  int iVar6;\n  int iVar7;\n  int iVar8;\n  undefined4 uVar9;\n  \n  iVar7 = DAT_febee92c;\n  iVar6 = DAT_febee924;\n  iVar5 = DAT_febee91c;\n  cVar4 = DAT_febee855;\n  cVar3 = DAT_febee854;\n  cVar2 = DAT_febee853;\n  iVar1 = DAT_febe6af0;\n  iVar8 = FUN_00062e12();\n  if (((((iVar1 == 0) || (cVar2 == '\\x03' || cVar2 == '\\x04')) || (cVar3 == -1)) ||\n      ((cVar4 == '\\x11' || (iVar5 == 0x33333333)))) ||\n     ((iVar6 == 0x33333333 || ((iVar7 == 0x33333333 || (iVar8 == -0x5aa55aa6)))))) {\n    uVar9 = 0x5a;\n  }\n  else {\n    uVar9 = 0;\n  }\n  return uVar9;\n}\n\n",
+      "decompiled_c_sha256": "ee87066e6f461c674e72a335ced2cc011c9b788d44edf38c5d3d252e213e3c01",
       "entry": "0x00051208"
     },
     {
+      "body_ranges": [
+        {
+          "max": "0x000512e3",
+          "min": "0x00051266",
+          "space": "ram"
+        }
+      ],
       "body_sha256": "1746b384bc51f9f7dc86ac085418dbaac4ba0974f6f1ad154e7ef1a88435e17b",
       "body_size": 126,
-      "decompiled_c": "\nundefined4 FUN_00051266(void)\n\n{\n  char cVar1;\n  char cVar2;\n  char cVar3;\n  int unaff_gp;\n  undefined4 uVar4;\n  char cVar5;\n  char cVar6;\n  \n  cVar6 = *(char *)(unaff_gp + -0x354e);\n  cVar1 = (&DAT_00003058)[unaff_gp];\n  cVar2 = (&DAT_00003059)[unaff_gp];\n  cVar5 = *(char *)(unaff_gp + -0x354d);\n  if ((&DAT_00003057)[unaff_gp] == '\\\"') {\n    cVar3 = *(char *)(unaff_gp + -0x354f);\n    if (cVar3 == '\\0') {\n      cVar3 = 'Z';\n      *(byte *)(unaff_gp + -0x355c) = *(byte *)(unaff_gp + -0x355c) | 0x20;\n      *(undefined1 *)(unaff_gp + -0x3559) = 0x5a;\n    }\n    uVar4 = 0x5a;\n  }\n  else {\n    uVar4 = 0;\n    cVar3 = '\\0';\n  }\n  if (cVar1 == '\\\"') {\n    if (cVar6 == '\\0') {\n      cVar6 = 'Z';\n      *(byte *)(unaff_gp + -0x355c) = *(byte *)(unaff_gp + -0x355c) | 0x20;\n      *(undefined1 *)(unaff_gp + -0x3559) = 0x5a;\n    }\n    uVar4 = 0x5a;\n  }\n  else {\n    cVar6 = '\\0';\n  }\n  if (cVar2 == '\\\"') {\n    if (cVar5 == '\\0') {\n      cVar5 = 'Z';\n      *(byte *)(unaff_gp + -0x355c) = *(byte *)(unaff_gp + -0x355c) | 0x20;\n      *(undefined1 *)(unaff_gp + -0x3559) = 0x5a;\n    }\n    uVar4 = 0x5a;\n  }\n  else {\n    cVar5 = '\\0';\n  }\n  *(char *)(unaff_gp + -0x354f) = cVar3;\n  *(char *)(unaff_gp + -0x354e) = cVar6;\n  *(char *)(unaff_gp + -0x354d) = cVar5;\n  return uVar4;\n}\n\n",
-      "decompiled_c_sha256": "3a63759e0d5417ed8329bd784a4f79843360037d43a0011e39a4182635a20809",
+      "data_references": [
+        {
+          "from_addr": "0x00051266",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82b2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005126e",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0xfebee857",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051270",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebee858",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051272",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebee859",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051274",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82b3",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005127e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82b1",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005128a",
+          "operand_index": 2,
+          "ref_type": "READ_WRITE",
+          "to_addr": "0xfebe82a4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005128e",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82a7",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000512aa",
+          "operand_index": 2,
+          "ref_type": "READ_WRITE",
+          "to_addr": "0xfebe82a4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000512ae",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82a7",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000512c8",
+          "operand_index": 2,
+          "ref_type": "READ_WRITE",
+          "to_addr": "0xfebe82a4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000512cc",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82a7",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000512dc",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82b1",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000512de",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82b2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000512e0",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82b3",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nundefined4 FUN_00051266(void)\n\n{\n  undefined4 uVar1;\n  \n  if (DAT_febee857 == '\\\"') {\n    if (DAT_febe82b1 == '\\0') {\n      DAT_febe82b1 = 'Z';\n      DAT_febe82a4 = DAT_febe82a4 | 0x20;\n      DAT_febe82a7 = 0x5a;\n    }\n    uVar1 = 0x5a;\n  }\n  else {\n    uVar1 = 0;\n    DAT_febe82b1 = '\\0';\n  }\n  if (DAT_febee858 == '\\\"') {\n    if (DAT_febe82b2 == '\\0') {\n      DAT_febe82b2 = 'Z';\n      DAT_febe82a4 = DAT_febe82a4 | 0x20;\n      DAT_febe82a7 = 0x5a;\n    }\n    uVar1 = 0x5a;\n  }\n  else {\n    DAT_febe82b2 = '\\0';\n  }\n  if (DAT_febee859 == '\\\"') {\n    if (DAT_febe82b3 == '\\0') {\n      DAT_febe82b3 = 'Z';\n      DAT_febe82a4 = DAT_febe82a4 | 0x20;\n      DAT_febe82a7 = 0x5a;\n    }\n    uVar1 = 0x5a;\n  }\n  else {\n    DAT_febe82b3 = '\\0';\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "e7352d86e496c64d9226be37b973b59682ed3ca418a1f3d5afef001224299842",
       "entry": "0x00051266"
     },
     {
+      "body_ranges": [
+        {
+          "max": "0x000514bb",
+          "min": "0x000512e4",
+          "space": "ram"
+        }
+      ],
       "body_sha256": "ffdc4c2c2e25f4ca0c1715dad06ced9e2267d7500d37f63a80e381b25b625120",
       "body_size": 472,
-      "decompiled_c": "\nvoid FUN_000512e4(void)\n\n{\n  char cVar1;\n  byte bVar2;\n  undefined1 uVar3;\n  short sVar4;\n  short sVar5;\n  short sVar6;\n  char cVar7;\n  char cVar8;\n  char cVar9;\n  char cVar10;\n  char cVar11;\n  short sVar12;\n  short sVar13;\n  short sVar14;\n  short sVar15;\n  short sVar16;\n  short sVar17;\n  ushort uVar18;\n  int unaff_gp;\n  char cVar19;\n  int iVar20;\n  int iVar21;\n  char cVar22;\n  char cVar23;\n  ushort uVar24;\n  ushort uVar25;\n  \n  FUN_000510b6();\n  sVar12 = *(short *)(unaff_gp + -0x3540);\n  sVar4 = *(short *)(unaff_gp + -0x3546);\n  sVar5 = *(short *)(unaff_gp + -0x3544);\n  sVar6 = *(short *)(unaff_gp + -0x3542);\n  sVar13 = *(short *)(unaff_gp + -0x353e);\n  sVar14 = *(short *)(unaff_gp + -0x353c);\n  sVar15 = *(short *)(unaff_gp + -0x3530);\n  sVar16 = *(short *)(unaff_gp + -0x353a);\n  cVar7 = (&DAT_0000301a)[unaff_gp];\n  cVar8 = (&DAT_0000301d)[unaff_gp];\n  cVar1 = *(char *)(unaff_gp + -0x3557);\n  cVar23 = *(char *)(unaff_gp + -0x355e);\n  cVar22 = *(char *)(unaff_gp + -0x355f);\n  uVar25 = *(ushort *)(unaff_gp + -0x3548);\n  uVar24 = *(ushort *)(unaff_gp + -0x354a);\n  cVar9 = *(char *)(unaff_gp + -0x3550);\n  sVar17 = *(short *)(unaff_gp + -0x3538);\n  cVar10 = (&DAT_0000301b)[unaff_gp];\n  cVar11 = (&DAT_0000301c)[unaff_gp];\n  cVar19 = FUN_000510e0();\n  FUN_000511b6();\n  iVar20 = FUN_00051208();\n  iVar21 = FUN_00051266();\n  if (cVar23 == 'Z') {\n    if (cVar22 == 'Z') {\n      uVar24 = uVar24 + 1;\n      uVar18 = 1;\n      if (uRam00030e48 < uVar24) {\n        cVar22 = '\\0';\n      }\n    }\n    else {\n      uVar25 = uVar25 + 1;\n      uVar18 = 2;\n      if (uRam00030e4a <= uVar25) {\n        cVar23 = '\\0';\n      }\n    }\n  }\n  else {\n    bVar2 = *(byte *)(unaff_gp + -0x355c);\n    if (iVar20 == 0x5a) {\n      uVar18 = 3;\n    }\n    else if ((sVar4 == 0) && ((*(byte *)(unaff_gp + -0x355d) & 1) == 0)) {\n      if ((sVar5 == 0) && ((*(byte *)(unaff_gp + -0x355d) & 2) == 0)) {\n        if ((sVar13 == 0) && ((bVar2 & 0x10) == 0)) {\n          if ((((sVar14 == 0) && (sVar15 == 0)) && (iVar21 != 0x5a)) && ((bVar2 & 0x20) == 0)) {\n            if ((sVar16 == 0) && ((bVar2 & 0x40) == 0)) {\n              if ((sVar12 == 0) && ((bVar2 & 4) == 0)) {\n                if ((sVar6 == 0) && (uVar18 = bVar2 & 8, (bVar2 & 8) == 0)) {\n                  if ((cVar7 == '\\x01') && (cVar9 != 'Z')) {\n                    uVar18 = 0xf;\n                    goto LAB_00051482;\n                  }\n                  if ((((cVar1 == 'Z') && (cVar10 != 'Z')) && (cVar11 != 'Z')) &&\n                     ((cVar8 != 'Z' && (sVar17 == 0)))) goto LAB_00051482;\n                }\n                else if (cVar19 == '\\0') {\n                  uVar18 = 0xd;\n                  goto LAB_00051482;\n                }\n              }\n              else if (cVar19 == '\\0') {\n                uVar18 = 0xe;\n                goto LAB_00051482;\n              }\n              uVar18 = 0x10;\n            }\n            else {\n              uVar18 = 0xc;\n            }\n          }\n          else {\n            uVar18 = 0xb;\n          }\n        }\n        else {\n          uVar18 = 10;\n        }\n      }\n      else if ((*(byte *)(unaff_gp + -0x355b) & 2) == 0) {\n        uVar18 = 9;\n      }\n      else {\n        uVar18 = 8;\n      }\n    }\n    else if ((*(byte *)(unaff_gp + -0x355b) & 1) == 0) {\n      uVar18 = 7;\n    }\n    else {\n      uVar18 = 6;\n    }\n  }\nLAB_00051482:\n  iVar20 = (short)uVar18 * 5;\n  *(undefined1 *)(unaff_gp + -0x3552) = *(undefined1 *)(iVar20 + 0x2a19c);\n  *(undefined1 *)(unaff_gp + -0x3556) = *(undefined1 *)(iVar20 + 0x2a19d);\n  *(undefined1 *)(unaff_gp + -0x3555) = *(undefined1 *)(iVar20 + 0x2a19e);\n  *(undefined1 *)(unaff_gp + -0x3554) = *(undefined1 *)(iVar20 + 0x2a19f);\n  uVar3 = *(undefined1 *)(iVar20 + 0x2a1a0);\n  *(char *)(unaff_gp + -0x3560) = (char)uVar18;\n  *(char *)(unaff_gp + -0x355e) = cVar23;\n  *(undefined1 *)(unaff_gp + -0x3553) = uVar3;\n  *(char *)(unaff_gp + -0x355f) = cVar22;\n  *(ushort *)(unaff_gp + -0x3548) = uVar25;\n  *(ushort *)(unaff_gp + -0x354a) = uVar24;\n  return;\n}\n\n",
-      "decompiled_c_sha256": "bf31a53f6fdb23909246880a85c515bd46fd600bfa03cec7ae6eac95b3e4014b",
+      "data_references": [
+        {
+          "from_addr": "0x000512ec",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82c0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000512f4",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82ba",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000512f6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82bc",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000512f8",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82be",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000512fa",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82c2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000512fe",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82c4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051302",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82d0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051306",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82c6",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005130a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebee81a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005130e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebee81d",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051312",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82a9",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051314",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82a2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051316",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82a1",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051318",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82b8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005131a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82b6",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005131c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82b0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051322",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82c8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005133e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebee81b",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051342",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebee81c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051370",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x00030e48",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051382",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x00030e4a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005139a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82a3",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005139c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82a4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005139e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe82a5",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005148e",
+          "operand_index": 2,
+          "ref_type": "DATA",
+          "to_addr": "0x0002a19c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005148e",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1a1",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005148e",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1a6",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005148e",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1ab",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005148e",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1bf",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005148e",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1c9",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005148e",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1ce",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005148e",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1d3",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005148e",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1d8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005148e",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1dd",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005148e",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1e2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005148e",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1e7",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005148e",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1ec",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051490",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82ae",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051494",
+          "operand_index": 2,
+          "ref_type": "DATA",
+          "to_addr": "0x0002a19d",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051494",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1a2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051494",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1a7",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051494",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1ac",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051494",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1c0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051494",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1ca",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051494",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1cf",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051494",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1d4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051494",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1d9",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051494",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1de",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051494",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1e3",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051494",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1e8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051494",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1ed",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051496",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82aa",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005149a",
+          "operand_index": 2,
+          "ref_type": "DATA",
+          "to_addr": "0x0002a19e",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005149a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1a3",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005149a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1a8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005149a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1ad",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005149a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1c1",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005149a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1cb",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005149a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1d0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005149a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1d5",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005149a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1da",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005149a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1df",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005149a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1e4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005149a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1e9",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005149a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1ee",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005149c",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82ab",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a0",
+          "operand_index": 2,
+          "ref_type": "DATA",
+          "to_addr": "0x0002a19f",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1a4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1a9",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1ae",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1c2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1cc",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1d1",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1d6",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1db",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1e0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1e5",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1ea",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1ef",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a2",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82ac",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a6",
+          "operand_index": 2,
+          "ref_type": "DATA",
+          "to_addr": "0x0002a1a0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1a5",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1aa",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1af",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1c3",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1cd",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1d2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1d7",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1dc",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1e1",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1e6",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1eb",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514a6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002a1f0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514ac",
+          "operand_index": 1,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82a0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514ae",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82a2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514b0",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82ad",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514b2",
+          "operand_index": 1,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82a1",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514b4",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82b8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000514b6",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82b6",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_000512e4(void)\n\n{\n  char cVar1;\n  byte bVar2;\n  undefined1 uVar3;\n  short sVar4;\n  short sVar5;\n  short sVar6;\n  char cVar7;\n  char cVar8;\n  char cVar9;\n  char cVar10;\n  char cVar11;\n  short sVar12;\n  short sVar13;\n  short sVar14;\n  short sVar15;\n  short sVar16;\n  short sVar17;\n  ushort uVar18;\n  undefined *puVar19;\n  char cVar20;\n  int iVar21;\n  int iVar22;\n  char cVar23;\n  char cVar24;\n  ushort uVar25;\n  ushort uVar26;\n  \n  puVar19 = &LAB_febeb800;\n  FUN_000510b6();\n  sVar12 = *(short *)(puVar19 + -0x3540);\n  sVar4 = *(short *)(puVar19 + -0x3546);\n  sVar5 = *(short *)(puVar19 + -0x3544);\n  sVar6 = *(short *)(puVar19 + -0x3542);\n  sVar13 = *(short *)(puVar19 + -0x353e);\n  sVar14 = *(short *)(puVar19 + -0x353c);\n  sVar15 = *(short *)(puVar19 + -0x3530);\n  sVar16 = *(short *)(puVar19 + -0x353a);\n  cVar7 = puVar19[0x301a];\n  cVar8 = puVar19[0x301d];\n  cVar1 = puVar19[-0x3557];\n  cVar24 = puVar19[-0x355e];\n  cVar23 = puVar19[-0x355f];\n  uVar26 = *(ushort *)(puVar19 + -0x3548);\n  uVar25 = *(ushort *)(puVar19 + -0x354a);\n  cVar9 = puVar19[-0x3550];\n  sVar17 = *(short *)(puVar19 + -0x3538);\n  cVar10 = puVar19[0x301b];\n  cVar11 = puVar19[0x301c];\n  cVar20 = FUN_000510e0();\n  FUN_000511b6();\n  iVar21 = FUN_00051208();\n  iVar22 = FUN_00051266();\n  if (cVar24 == 'Z') {\n    if (cVar23 == 'Z') {\n      uVar25 = uVar25 + 1;\n      uVar18 = 1;\n      if (DAT_00030e48 < uVar25) {\n        cVar23 = '\\0';\n      }\n    }\n    else {\n      uVar26 = uVar26 + 1;\n      uVar18 = 2;\n      if (DAT_00030e4a <= uVar26) {\n        cVar24 = '\\0';\n      }\n    }\n  }\n  else {\n    bVar2 = puVar19[-0x355c];\n    if (iVar21 == 0x5a) {\n      uVar18 = 3;\n    }\n    else if ((sVar4 == 0) && ((puVar19[-0x355d] & 1) == 0)) {\n      if ((sVar5 == 0) && ((puVar19[-0x355d] & 2) == 0)) {\n        if ((sVar13 == 0) && ((bVar2 & 0x10) == 0)) {\n          if ((((sVar14 == 0) && (sVar15 == 0)) && (iVar22 != 0x5a)) && ((bVar2 & 0x20) == 0)) {\n            if ((sVar16 == 0) && ((bVar2 & 0x40) == 0)) {\n              if ((sVar12 == 0) && ((bVar2 & 4) == 0)) {\n                if ((sVar6 == 0) && (uVar18 = bVar2 & 8, (bVar2 & 8) == 0)) {\n                  if ((cVar7 == '\\x01') && (cVar9 != 'Z')) {\n                    uVar18 = 0xf;\n                    goto LAB_00051482;\n                  }\n                  if ((((cVar1 == 'Z') && (cVar10 != 'Z')) && (cVar11 != 'Z')) &&\n                     ((cVar8 != 'Z' && (sVar17 == 0)))) goto LAB_00051482;\n                }\n                else if (cVar20 == '\\0') {\n                  uVar18 = 0xd;\n                  goto LAB_00051482;\n                }\n              }\n              else if (cVar20 == '\\0') {\n                uVar18 = 0xe;\n                goto LAB_00051482;\n              }\n              uVar18 = 0x10;\n            }\n            else {\n              uVar18 = 0xc;\n            }\n          }\n          else {\n            uVar18 = 0xb;\n          }\n        }\n        else {\n          uVar18 = 10;\n        }\n      }\n      else if ((puVar19[-0x355b] & 2) == 0) {\n        uVar18 = 9;\n      }\n      else {\n        uVar18 = 8;\n      }\n    }\n    else if ((puVar19[-0x355b] & 1) == 0) {\n      uVar18 = 7;\n    }\n    else {\n      uVar18 = 6;\n    }\n  }\nLAB_00051482:\n  iVar21 = (short)uVar18 * 5;\n  puVar19[-0x3552] = (&DAT_0002a19c)[iVar21];\n  puVar19[-0x3556] = (&DAT_0002a19d)[iVar21];\n  puVar19[-0x3555] = (&DAT_0002a19e)[iVar21];\n  puVar19[-0x3554] = (&DAT_0002a19f)[iVar21];\n  uVar3 = (&DAT_0002a1a0)[iVar21];\n  puVar19[-0x3560] = (char)uVar18;\n  puVar19[-0x355e] = cVar24;\n  puVar19[-0x3553] = uVar3;\n  puVar19[-0x355f] = cVar23;\n  *(ushort *)(puVar19 + -0x3548) = uVar26;\n  *(ushort *)(puVar19 + -0x354a) = uVar25;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "aafb794eb223ea77fc43b89df5bf2bc5bc6d75ef914d33a67605e3a77b8352a0",
       "entry": "0x000512E4"
     },
     {
+      "body_ranges": [
+        {
+          "max": "0x000515c9",
+          "min": "0x00051592",
+          "space": "ram"
+        }
+      ],
       "body_sha256": "5a0cc7d91264136020ac8494b0eec487d10b0c345957e1e86313d269996f4c35",
       "body_size": 56,
-      "decompiled_c": "\nvoid FUN_00051592(void)\n\n{\n  undefined2 uVar1;\n  int unaff_gp;\n  \n  *(undefined2 *)(unaff_gp + -0x3546) = 0;\n  *(undefined2 *)(unaff_gp + -0x3544) = 0;\n  *(undefined2 *)(unaff_gp + -0x3540) = 0;\n  *(undefined2 *)(unaff_gp + -0x3542) = 0;\n  *(undefined2 *)(unaff_gp + -0x353e) = 0;\n  *(undefined2 *)(unaff_gp + -0x353c) = 0;\n  *(undefined2 *)(unaff_gp + -0x3530) = 0;\n  *(undefined2 *)(unaff_gp + -0x353a) = 0;\n  *(undefined2 *)(unaff_gp + -0x3538) = 0;\n  *(undefined2 *)(unaff_gp + -0x3536) = DAT_00030e40;\n  *(undefined2 *)(unaff_gp + -0x3534) = DAT_00030e42;\n  uVar1 = DAT_00030e44;\n  *(undefined1 *)(unaff_gp + -0x355d) = 0;\n  *(undefined1 *)(unaff_gp + -0x355c) = 0;\n  *(undefined2 *)(unaff_gp + -0x3532) = uVar1;\n  *(undefined1 *)(unaff_gp + -0x355b) = 0;\n  return;\n}\n\n",
-      "decompiled_c_sha256": "ea7fdcf4d46397eb4ac4fe4c854dc02f23f3f2a166a0c4432e87c6498fc2f220",
+      "data_references": [
+        {
+          "from_addr": "0x00051596",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82ba",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00051598",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82bc",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005159a",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82c0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005159c",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82be",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0005159e",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82c2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000515a0",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82c4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000515a2",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82d0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000515a4",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82c6",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000515a6",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82c8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000515ae",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x00030e40",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000515b0",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82ca",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000515b4",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x00030e42",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000515b6",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82cc",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000515ba",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x00030e44",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000515c0",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82a3",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000515c2",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82a4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000515c4",
+          "operand_index": 2,
+          "ref_type": "DATA",
+          "to_addr": "0x00000258",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000515c4",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82ce",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000515c6",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe82a5",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_00051592(void)\n\n{\n  DAT_febe82ba = 0;\n  DAT_febe82bc = 0;\n  DAT_febe82c0 = 0;\n  DAT_febe82be = 0;\n  DAT_febe82c2 = 0;\n  DAT_febe82c4 = 0;\n  DAT_febe82d0 = 0;\n  DAT_febe82c6 = 0;\n  DAT_febe82c8 = 0;\n  DAT_febe82ca = DAT_00030e40;\n  DAT_febe82cc = DAT_00030e42;\n  DAT_febe82a3 = 0;\n  DAT_febe82a4 = 0;\n  DAT_febe82ce = DAT_00030e44;\n  DAT_febe82a5 = 0;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "99eae1cb1b8d888107821ed99647f56836bcb03ee5364d25b4409fecc10e22e2",
       "entry": "0x00051592"
     }
   ],
   "image": {
-    "path": "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+    "path": "firmware/camry-8965F3307000/CodeFlash.bin",
     "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "size": 1048576
   },
@@ -81,8 +1571,8 @@
   "software_id": "8965F3307000",
   "source_corpus": {
     "boundary": "Disposable exact-F33 Ghidra corpus. Promoted functions are independently raw-body-hash-bound to the normalized 8965F3307000 image; the disposable project/corpus is not required at verification time.",
-    "function_count": 3273,
-    "path": "build/tmp/f33-status-corpus3.jsonl",
-    "sha256": "e330732ec364a732deb9c68a80b95ce5ef29f8fb0eda571ea79c03effbf84bed"
+    "function_count": 6065,
+    "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
+    "sha256": "f33efdbecac7d2d8ee8589ae8492d828451f5f1523aa43c72f672597c77fa8d1"
   }
 }

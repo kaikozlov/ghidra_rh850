@@ -117,19 +117,27 @@ durable on disk until the daemon shuts down cleanly**.
 
 ## Working copy vs. committed snapshot
 
-`project/` is a **committed snapshot** — a durable annotated reference. Its
-database is physically stored as `rh850_p1me_mapped.gpr.snapshot` and
-`rh850_p1me_mapped.rep.snapshot`; raw Ghidra cannot recognize those names.
-`make verify-sleigh` asserts that a direct `analyzeHeadless` open fails. All
-interactive work happens in the gitignored working copy at `build/work/project/`:
+The legacy primary Sienna lives in committed snapshot `project/`. Additional
+first-class targets live in independent committed `projects/<target>/` snapshots;
+this separation is intentional because Sienna snapshot promotion uses an exact
+`rsync --delete` mirror. Every snapshot stores `.gpr.snapshot` / `.rep.snapshot`
+non-live names that raw Ghidra cannot recognize. `tools/g` refuses both committed
+snapshot namespaces. All interactive work happens under registered gitignored
+`build/work/` paths:
 
-- `make work-project` — materialize live `.gpr` / `.rep` names under
-  `build/work/project/` from the committed non-live snapshot.
-- `make rebuild-project` — fresh from-scratch rebuild into `build/work/project/`.
-- `make snapshot-project` — the **only** path that mutates committed
-  `project/`. Verifies floors, processor fingerprint, and exact normalized
-  inventory; packs the working project back to non-live snapshot names; stages
-  it.
+- `make work-project` — materialize the default Sienna into `build/work/project/`;
+  add `TARGET=camry-8965F3307000` (or another registered target) to materialize
+  that target's registered work path and snapshot.
+- `make rebuild-project` — fresh from-scratch rebuild using the selected target's
+  staged rebuild profile.
+- `make verify-project-parity` — export the selected live project and compare it
+  byte-for-byte to that target's tracked normalized inventory baseline.
+- `make generate-decompiler-corpus` — regenerate the selected target's canonical
+  corpus only after live inventory parity succeeds.
+- `make snapshot-project` — the **only** path that promotes the selected working
+  project into its committed non-live snapshot. Non-default first promotions
+  require `PARITY_PROJECT_DIR` from an independent rebuild; later promotions
+  compare directly to the tracked target baseline.
 - `make finalize-project` — orchestrated end-of-session promotion: stops the
   daemon, waits for exit, verifies the working project, invokes the snapshot
   path, and prints the staged project diff summary. This is an explicit
@@ -153,10 +161,18 @@ only when missing or stale — you never need to source
 `build/cache/ghidra-processor.env`.
 
 ```bash
-make work-project   # one-time: copy snapshot -> build/work/project
+# Legacy/default Sienna
+make work-project
 tools/g decompile 0x8db22
-tools/g x-ref to 0x8db22
-# e.g. ... stats | decompile 0x6fec | x-ref to 0xbfe8 | symbol list
+
+# First-class Camry F33
+make work-project TARGET=camry-8965F3307000
+tools/gcamry decompile 0x4e848
+make verify-project-parity TARGET=camry-8965F3307000
+make generate-decompiler-corpus TARGET=camry-8965F3307000
+
+# Generic registered-target spelling
+tools/gtarget camry-8965F3307000 x-ref to 0xfebe66a8
 ```
 
 For the common multi-command read paths, prefer the compound CLI operations:

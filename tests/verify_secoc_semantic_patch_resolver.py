@@ -81,7 +81,7 @@ anchor_fixtures = (
     (cf_path, 0x8E6C6, "Sienna 8965B4512000"),
     (REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin", 0x88C62, "Corolla H"),
     (REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin", 0x88C62, "Corolla F"),
-    (REPO / "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin", 0x8F952, "Camry F33"),
+    (REPO / "firmware/camry-8965F3307000/CodeFlash.bin", 0x8F952, "Camry F33"),
 )
 for path, expected, label in anchor_fixtures:
     blob = path.read_bytes()[:P1M_E_CODEFLASH_SIZE]

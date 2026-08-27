@@ -37,7 +37,7 @@ codeflash/camry_8965F3307000_codeflash_20260826T213719Z.run.json
   sha256: 0d0fae44ba6c309f5ecb35a90435eb5b47bbbd3465c5d36ac1b15ff9d96fa265
   operation: exact acquisition transcript/metadata for the successful pass, including application/boot identities, NRTD guard, accepted old-stack bootstrap, and final coverage counters.
 
-community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin
+firmware/camry-8965F3307000/CodeFlash.bin
   size: 1048576
   sha256: 42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7
   operation: deterministic normalized image = exact lower 1 MiB of the raw transport dump; upper 1 MiB of raw transport dump is all 0xFF.

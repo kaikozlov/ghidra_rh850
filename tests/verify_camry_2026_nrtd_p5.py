@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-RAW = REPO / "community/kai/camry-2026/raw-20260826"
+RAW = REPO / "targets/camry-2026/raw-20260826"
 ART = REPO / "data/generated/camry_2026_nrtd_p5.json"
 BUILD = REPO / "tools/analyze_camry_2026_nrtd_p5.py"
 passed = failed = 0

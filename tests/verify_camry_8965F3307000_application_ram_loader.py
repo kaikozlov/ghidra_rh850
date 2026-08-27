@@ -13,8 +13,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "data/generated/camry_8965F3307000_application_ram_loader_assessment.json"
 BUILD = ROOT / "tools/build_camry_8965F3307000_application_ram_loader_assessment.py"
-IMAGE = ROOT / "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin"
-RAW = ROOT / "community/kai/camry-2026/raw-20260826"
+IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
+RAW = ROOT / "targets/camry-2026/raw-20260826"
 RAMREQ = ROOT / "data/variant_ram_exec_requirements.json"
 
 passed = failed = 0

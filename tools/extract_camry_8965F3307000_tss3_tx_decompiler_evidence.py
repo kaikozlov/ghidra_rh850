@@ -6,9 +6,10 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from camry_f33_corpus import CORPUS, body_bytes, display_path
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin"
+IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
 OUT = REPO / "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json"
 IMAGE_SHA256 = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
 ENTRIES = [
@@ -32,7 +33,7 @@ def sha(data: bytes) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--corpus", type=Path, required=True)
+    ap.add_argument("--corpus", type=Path, default=CORPUS)
     ap.add_argument("--out", type=Path, default=OUT)
     args = ap.parse_args()
 
@@ -58,21 +59,26 @@ def main() -> int:
         functions.append({
             "entry": f"0x{entry:08X}",
             "body_size": size,
-            "body_sha256": sha(image[entry:entry + size]),
+            "body_ranges": row.get("body_ranges", []),
+            "data_references": row.get("data_references", []),
+            "body_sha256": sha(body_bytes(image, row)),
             "decompiled_c_sha256": sha(text.encode()),
             "decompiled_c": text,
         })
 
-    def refs(token: str) -> list[dict]:
+    def refs(address: int) -> list[dict]:
         found = []
         for entry, row in rows.items():
-            text = row.get("decompiled_c", "")
-            if token in text:
+            matched = [ref for ref in row.get("data_references", []) if int(ref["to_addr"], 16) == address]
+            if matched:
                 size = int(row["body_size"])
                 found.append({
                     "entry": f"0x{entry:08X}",
                     "body_size": size,
-                    "body_sha256": sha(image[entry:entry + size]),
+                    "body_ranges": row.get("body_ranges", []),
+                    "body_sha256": sha(body_bytes(image, row)),
+                    "reference_types": sorted({ref["ref_type"] for ref in matched}),
+                    "reference_sites": [ref["from_addr"] for ref in matched],
                 })
         return sorted(found, key=lambda item: item["entry"])
 
@@ -85,7 +91,7 @@ def main() -> int:
             "sha256": IMAGE_SHA256,
         },
         "source_corpus": {
-            "path": str(args.corpus),
+            "path": display_path(args.corpus),
             "sha256": sha(args.corpus.read_bytes()),
             "function_count": total,
             "boundary": (
@@ -96,12 +102,12 @@ def main() -> int:
         "function_count": len(functions),
         "functions": functions,
         "fixed_gp_census": {
-            "driver_torque_source_gp_minus_0x5158": refs("-0x5158"),
-            "alternate_4a3_current_source_gp_minus_0x50e8": refs("-0x50e8"),
-            "did1151_q_current_source_gp_minus_0x50f2": refs("-0x50f2"),
+            "driver_torque_source_gp_minus_0x5158": refs(0xFEBE66A8),
+            "alternate_4a3_current_source_gp_minus_0x50e8": refs(0xFEBE6718),
+            "did1151_q_current_source_gp_minus_0x50f2": refs(0xFEBE670E),
             "boundary": (
-                "Whole recovered-function-corpus textual census of direct/fixed-GP references only. Computed aliases, "
-                "value-set pointer recovery, DMA, and functions not recovered in this corpus are outside the negative proof."
+                "Whole 6,065-function canonical Ghidra data-reference census to exact GP-resolved RAM addresses. Computed aliases "
+                "without a Ghidra data reference, value-set pointer recovery, DMA, and unrecovered code remain outside the negative proof."
             ),
         },
     }

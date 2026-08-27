@@ -195,7 +195,7 @@ if camry:
     check("Camry authenticated old-stack boot RAM execution is direct", all(x in camry["programming_observation"] for x in ("bus1,param1", "PROGRAMMING", "boot SecurityAccess succeeded", "DID0203", "zero 0201/0202", "FEBF0000/0x1000", "10F0", "FF00")))
     check("Camry SecurityAccess boundary distinguishes boot from application", "boot programming SecurityAccess directly accepted" in camry["security_levels"] and "application SecurityAccess" in camry["security_levels"] and "not established" in camry["security_levels"])
     check("Camry target-native secured receive set is exactly 00F/D7/B6", all(x in camry["secured_can_ids"] for x in ("0x00F", "0x0D7", "0x0B6", "@0x25848", "PDU44", "selector4", "command7")) and "0x2E4" not in camry["secured_can_ids"])
-    check("Camry exact CodeFlash is available", camry["firmware_available"].startswith("yes") and "8965F3307000_CodeFlash.bin" in camry["firmware_available"])
+    check("Camry exact CodeFlash is available", camry["firmware_available"].startswith("yes") and "firmware/camry-8965F3307000/CodeFlash.bin" in camry["firmware_available"])
     check("Camry exact MCU is R7F701381", "RH850/P1M-E" in camry["mcu"] and "R7F701381" in camry["mcu"] and "0x180" in camry["mcu"])
     check("Camry boot routines are direct and stock RMBA is rejected", all(x in camry["bootloader_routines"] for x in ("10F0", "FEBF0000/0x1000", "FF00", "SID23", "rejected")))
     check("Camry source points at exact CodeFlash evidence", all(x in camry["source"] for x in ("CODEFLASH_MANIFEST.txt", "8965F3307000_codeflash.json", "normalized CodeFlash")))

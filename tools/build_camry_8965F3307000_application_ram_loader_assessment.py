@@ -14,9 +14,9 @@ import struct
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-IMAGE = ROOT / "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin"
+IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 IMAGE_SHA = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
-RAW = ROOT / "community/kai/camry-2026/raw-20260826"
+RAW = ROOT / "targets/camry-2026/raw-20260826"
 HIGH = RAW / "high-tail-20260826.json"
 LOW = RAW / "stock-retention-20260826.json"
 STOCK_HANDOFF = RAW / "stock-handoff-20260826.json"

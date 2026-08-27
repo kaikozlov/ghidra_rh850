@@ -1,961 +1,893 @@
 {
-  "schema_version": 1,
-  "repositories": {
-    "rh850_p1me_original": {
-      "url": "https://github.com/lochuan/RH850_P1m-E.git",
-      "directory": "RH850_P1m-E",
-      "commit": "b8c6bcf6b84763a9c5288fc8fa6766ebfe66ce4a"
-    },
-    "lochuan_b4512000_fw_patch": {
-      "url": "https://github.com/lochuan/8965B4512000-FW-PATCH.git",
-      "directory": "8965B4512000-FW-PATCH",
-      "commit": "9eed2b4ac871b1944e686769cc3e0a43fd7198c3"
-    },
-    "lochuan_eps_telescope": {
-      "url": "https://github.com/lochuan/eps-telescope.git",
-      "directory": "eps-telescope",
-      "commit": "2bb94a5411f88bcda47c8f70cab66e768b35cb6b"
-    },
-    "icanhack_secoc": {
-      "url": "https://github.com/I-CAN-hack/secoc.git",
-      "directory": "secoc",
-      "commit": "4ce19cc31ff560b697bcd59cc3db55711f50b7b3"
-    },
-    "icanhack_secoc_tundra": {
-      "url": "https://github.com/I-CAN-hack/secoc.git",
-      "directory": "secoc-tundra",
-      "commit": "b80d9104a14bdf59d236a6a0de2a4a5c929a9d76"
-    },
-    "blurbdust_secoc": {
-      "url": "https://github.com/blurbdust/secoc.git",
-      "directory": "blurbdust-secoc",
-      "commit": "47d282428d2ad504e79120c35d492d1211142da6"
-    },
-    "calvinpark_openpilot": {
-      "url": "https://github.com/calvinpark/openpilot.git",
-      "directory": "calvinpark-openpilot",
-      "commit": "eeb87f4f9cbcba2ee9c358c8d93015a513c1f822"
-    },
-    "calvinpark_openpilot_dump": {
-      "url": "https://github.com/calvinpark/openpilot.git",
-      "directory": "calvinpark-openpilot-dump",
-      "commit": "42d1120395877e96ed440646a765157a0ad7646b"
-    },
-    "commaai_hardware": {
-      "url": "https://github.com/commaai/hardware.git",
-      "directory": "comma-hardware",
-      "commit": "530b7da136b6a6d4b0d37b95bdb3472c59f672f4"
-    },
-    "toyota_dataflash_secoc_setup": {
-      "url": "https://github.com/Bk2ol/tsk_extraction_by_can_log.git",
-      "directory": "tsk_extraction_by_can_log",
-      "commit": "db453752beeb7cdd024a1a9c38c6711c981e75ad"
-    },
-    "opendbc": {
-      "url": "https://github.com/commaai/opendbc.git",
-      "directory": "opendbc",
-      "commit": "c9b31d21bc396e8958891e271936bdbdf1a6ca93"
-    },
-    "vance_sienna_2024": {
-      "url": "https://github.com/Vance425/ToyotaSienna2024OpenpilotAnalysis-_Note.git",
-      "directory": "ToyotaSienna2024OpenpilotAnalysis-_Note",
-      "commit": "3333453f10c09a27df265156458ce976cc9ce25a"
-    },
-    "optskug_docs": {
-      "url": "https://github.com/optskug/docs.git",
-      "directory": "optskug-docs",
-      "commit": "2c7184122d3f1644dfc9f32e98daaa45df653098"
-    }
-  },
   "artifacts": [
     {
-      "repository": "rh850_p1me_original",
       "path": "RH850_P1M-E_Firmware.bin",
-      "size": 1081344,
-      "sha256": "0bba74d0e443f9dd3da33e3a28c3511ec31e35e8303acef7e0117fbdc91d5a86"
-    },
-    {
       "repository": "rh850_p1me_original",
+      "sha256": "0bba74d0e443f9dd3da33e3a28c3511ec31e35e8303acef7e0117fbdc91d5a86",
+      "size": 1081344
+    },
+    {
       "path": "RESEARCH_REPORT_EN.md",
-      "size": 42627,
-      "sha256": "9e9fb350a93610f938353a03d9b4d6fe87d3a974bf237f89c12b4e5c83b2e18d"
+      "repository": "rh850_p1me_original",
+      "sha256": "9e9fb350a93610f938353a03d9b4d6fe87d3a974bf237f89c12b4e5c83b2e18d",
+      "size": 42627
     },
     {
-      "repository": "lochuan_b4512000_fw_patch",
       "path": "README.md",
-      "size": 68239,
-      "sha256": "ccccd0c396e34fbd4495d5d36b3a511e50d2471c3f3e0b7f0dbe66f431c0e1cf"
+      "repository": "lochuan_b4512000_fw_patch",
+      "sha256": "ccccd0c396e34fbd4495d5d36b3a511e50d2471c3f3e0b7f0dbe66f431c0e1cf",
+      "size": 68239
     },
     {
-      "repository": "lochuan_b4512000_fw_patch",
       "path": "eps_patch/manifest.py",
-      "size": 7754,
-      "sha256": "099ce5d24cf2b28f6b3fdbfcb89cdc53401375a8d07b250e9615bee974435efe"
-    },
-    {
       "repository": "lochuan_b4512000_fw_patch",
+      "sha256": "099ce5d24cf2b28f6b3fdbfcb89cdc53401375a8d07b250e9615bee974435efe",
+      "size": 7754
+    },
+    {
       "path": "payload/faci_dual.h",
-      "size": 5352,
-      "sha256": "67554bbb1181f9798c509f3358f8d8f9bd0ed94870f34f419b69b130fab33c1d"
+      "repository": "lochuan_b4512000_fw_patch",
+      "sha256": "67554bbb1181f9798c509f3358f8d8f9bd0ed94870f34f419b69b130fab33c1d",
+      "size": 5352
     },
     {
-      "repository": "icanhack_secoc",
+      "fixture": "tests/fixtures/payloads/ram_dump_payload.bin",
       "path": "payload.bin",
-      "size": 4096,
-      "sha256": "d972d4bf432685217591768600a9abd7820d35b04a72270edc87074365356be2",
-      "fixture": "tests/fixtures/payloads/ram_dump_payload.bin"
-    },
-    {
-      "repository": "calvinpark_openpilot",
-      "path": "tsk/lib/payload.bin",
-      "size": 4096,
-      "sha256": "d972d4bf432685217591768600a9abd7820d35b04a72270edc87074365356be2",
-      "fixture": "tests/fixtures/payloads/ram_dump_payload.bin"
-    },
-    {
-      "repository": "calvinpark_openpilot",
-      "path": "tsk/lib/payload_dataflash_ff200000_ff208000.bin",
-      "size": 4096,
-      "sha256": "d48988366b5e6d2ddd7438caca5e6f6f02daba9b650263c323a2ffd770a06e34",
-      "fixture": "tests/fixtures/payloads/dataflash_dump_payload.bin"
-    },
-    {
-      "repository": "toyota_dataflash_secoc_setup",
-      "path": "payload_dataflash_ff200000_ff208000.bin",
-      "size": 4096,
-      "sha256": "d48988366b5e6d2ddd7438caca5e6f6f02daba9b650263c323a2ffd770a06e34",
-      "fixture": "tests/fixtures/payloads/dataflash_dump_payload.bin"
-    },
-    {
       "repository": "icanhack_secoc",
+      "sha256": "d972d4bf432685217591768600a9abd7820d35b04a72270edc87074365356be2",
+      "size": 4096
+    },
+    {
+      "fixture": "tests/fixtures/payloads/ram_dump_payload.bin",
+      "path": "tsk/lib/payload.bin",
+      "repository": "calvinpark_openpilot",
+      "sha256": "d972d4bf432685217591768600a9abd7820d35b04a72270edc87074365356be2",
+      "size": 4096
+    },
+    {
+      "fixture": "tests/fixtures/payloads/dataflash_dump_payload.bin",
+      "path": "tsk/lib/payload_dataflash_ff200000_ff208000.bin",
+      "repository": "calvinpark_openpilot",
+      "sha256": "d48988366b5e6d2ddd7438caca5e6f6f02daba9b650263c323a2ffd770a06e34",
+      "size": 4096
+    },
+    {
+      "fixture": "tests/fixtures/payloads/dataflash_dump_payload.bin",
+      "path": "payload_dataflash_ff200000_ff208000.bin",
+      "repository": "toyota_dataflash_secoc_setup",
+      "sha256": "d48988366b5e6d2ddd7438caca5e6f6f02daba9b650263c323a2ffd770a06e34",
+      "size": 4096
+    },
+    {
       "path": "extract_keys.py",
+      "repository": "icanhack_secoc",
       "sha256": "a4927044cdc944e496ff7b56d8241f1353278e651a0e51eb3961f55c2f89d96b"
     },
     {
-      "repository": "icanhack_secoc",
       "path": "shellcode/main.c",
+      "repository": "icanhack_secoc",
       "sha256": "bfa673dda68292505ee6be6e34f8ddf5b3f3c7595529400543ad66d64869eea7"
     },
     {
-      "repository": "icanhack_secoc_tundra",
       "path": "extract_keys.py",
-      "size": 7323,
-      "sha256": "c5a538b99489b1b39d434ff516cf16ad87327a0117894bb1bea8cbb22ca8535b"
-    },
-    {
       "repository": "icanhack_secoc_tundra",
+      "sha256": "c5a538b99489b1b39d434ff516cf16ad87327a0117894bb1bea8cbb22ca8535b",
+      "size": 7323
+    },
+    {
       "path": "shellcode/main.c",
-      "size": 1393,
-      "sha256": "c273e3d9d83da14ee51db9c78205d752df6ec95fdf853e459ae7d9069dceccd1"
+      "repository": "icanhack_secoc_tundra",
+      "sha256": "c273e3d9d83da14ee51db9c78205d752df6ec95fdf853e459ae7d9069dceccd1",
+      "size": 1393
     },
     {
-      "repository": "blurbdust_secoc",
       "path": "flash_patcher.py",
-      "size": 9955,
-      "sha256": "d6ccab187b0cd0ea50c99d75e3911c90e540cb9ed21ccced24704e4e40010f9f"
-    },
-    {
       "repository": "blurbdust_secoc",
+      "sha256": "d6ccab187b0cd0ea50c99d75e3911c90e540cb9ed21ccced24704e4e40010f9f",
+      "size": 9955
+    },
+    {
       "path": "shellcode/main_flash_patch.c",
-      "size": 10228,
-      "sha256": "5fa6ef897e928e3f9cacc13a5eac59a5708791a0ae1a32f17a6cf2a7781f505a"
+      "repository": "blurbdust_secoc",
+      "sha256": "5fa6ef897e928e3f9cacc13a5eac59a5708791a0ae1a32f17a6cf2a7781f505a",
+      "size": 10228
     },
     {
-      "repository": "calvinpark_openpilot",
       "path": "tsk/COROLLA_INVESTIGATION.md",
-      "size": 85587,
-      "sha256": "b05fa2fd29ead90426cb5d31d7d077984c66a2657f2124db10f812a9476dce2e"
+      "repository": "calvinpark_openpilot",
+      "sha256": "b05fa2fd29ead90426cb5d31d7d077984c66a2657f2124db10f812a9476dce2e",
+      "size": 85587
     },
     {
-      "repository": "calvinpark_openpilot",
       "path": "opendbc_repo/opendbc/car/uds.py",
+      "repository": "calvinpark_openpilot",
       "sha256": "688f9af41c7dbf48bace98d683a67ac9d69cd74af270c58a034a00da391e65de"
     },
     {
-      "repository": "calvinpark_openpilot",
       "path": "panda/board/main.c",
-      "size": 11530,
-      "sha256": "6afdb8a8ef1b78717ac4f3b724d59f11adf8d9fc778164638387c7740903bd6d"
+      "repository": "calvinpark_openpilot",
+      "sha256": "6afdb8a8ef1b78717ac4f3b724d59f11adf8d9fc778164638387c7740903bd6d",
+      "size": 11530
     },
     {
-      "repository": "calvinpark_openpilot",
       "path": "panda/board/boards/tres.h",
-      "size": 5102,
-      "sha256": "64f2cbe98c8262635053ddf8049337958f1e79d9977dace1fd2148aa4f2ea70d"
+      "repository": "calvinpark_openpilot",
+      "sha256": "64f2cbe98c8262635053ddf8049337958f1e79d9977dace1fd2148aa4f2ea70d",
+      "size": 5102
     },
     {
-      "repository": "calvinpark_openpilot",
       "path": "panda/board/drivers/can_common.h",
-      "size": 6117,
-      "sha256": "d67254ba8bce391ce3ebb6c7e80a409eb4421600772c7a2c25539984ca4ba700"
+      "repository": "calvinpark_openpilot",
+      "sha256": "d67254ba8bce391ce3ebb6c7e80a409eb4421600772c7a2c25539984ca4ba700",
+      "size": 6117
     },
     {
-      "repository": "calvinpark_openpilot",
       "path": "panda/examples/query_fw_versions.py",
-      "size": 4794,
-      "sha256": "dce58977ffda566dd1041c2d0d33d3cd04e958e0865525a7db95250cca0f5669"
+      "repository": "calvinpark_openpilot",
+      "sha256": "dce58977ffda566dd1041c2d0d33d3cd04e958e0865525a7db95250cca0f5669",
+      "size": 4794
     },
     {
-      "repository": "calvinpark_openpilot",
       "path": "panda/python/__init__.py",
-      "size": 26572,
-      "sha256": "e80ee3e6271bfafb6b63bf5aeb1f1e5ca4dde8f0d822812e8637ade5cea06c4b"
+      "repository": "calvinpark_openpilot",
+      "sha256": "e80ee3e6271bfafb6b63bf5aeb1f1e5ca4dde8f0d822812e8637ade5cea06c4b",
+      "size": 26572
     },
     {
-      "repository": "calvinpark_openpilot",
       "path": "openpilot/selfdrive/pandad/panda.h",
-      "size": 2853,
-      "sha256": "325fbcc720a9af7988ec8098a32568f85ed923f55508e829c6a5fe3d3ca210af"
+      "repository": "calvinpark_openpilot",
+      "sha256": "325fbcc720a9af7988ec8098a32568f85ed923f55508e829c6a5fe3d3ca210af",
+      "size": 2853
     },
     {
-      "repository": "calvinpark_openpilot",
       "path": "openpilot/selfdrive/pandad/panda.cc",
-      "size": 8185,
-      "sha256": "b5a198a30ff5a193e5c71e2c0bc2b2649a5d6737ae13bee4ec7bbba471eec9b9"
+      "repository": "calvinpark_openpilot",
+      "sha256": "b5a198a30ff5a193e5c71e2c0bc2b2649a5d6737ae13bee4ec7bbba471eec9b9",
+      "size": 8185
     },
     {
-      "repository": "calvinpark_openpilot",
       "path": "opendbc_repo/opendbc/safety/modes/elm327.h",
-      "size": 1158,
-      "sha256": "aeb7c7a763d422cad072d1982585dab190a97593cc729cb528ac3e669241925e"
+      "repository": "calvinpark_openpilot",
+      "sha256": "aeb7c7a763d422cad072d1982585dab190a97593cc729cb528ac3e669241925e",
+      "size": 1158
     },
     {
-      "repository": "calvinpark_openpilot",
       "path": "opendbc_repo/opendbc/safety/modes/toyota.h",
-      "size": 17034,
-      "sha256": "5f248ef75fc269b087282e6434a63c2918a2e4ae350741796f40365576d6ac34"
-    },
-    {
       "repository": "calvinpark_openpilot",
-      "path": "opendbc_repo/opendbc/safety/safety.h",
-      "size": 19112,
-      "sha256": "d36c69ec9b0f5634726aa327cd8be69d48e69ad0fa851d49c24c3888bbdce8c0"
+      "sha256": "5f248ef75fc269b087282e6434a63c2918a2e4ae350741796f40365576d6ac34",
+      "size": 17034
     },
     {
-      "repository": "toyota_dataflash_secoc_setup",
+      "path": "opendbc_repo/opendbc/safety/safety.h",
+      "repository": "calvinpark_openpilot",
+      "sha256": "d36c69ec9b0f5634726aa327cd8be69d48e69ad0fa851d49c24c3888bbdce8c0",
+      "size": 19112
+    },
+    {
       "path": "steps/step_dump_dataflash.py",
+      "repository": "toyota_dataflash_secoc_setup",
       "sha256": "ddf902816d4f5dcb978857f2d17c9fb23baa83dbfad2da3eb4d4a17bb4d102d8"
     },
     {
-      "repository": "toyota_dataflash_secoc_setup",
       "path": "steps/step_eps_probe.py",
-      "size": 3828,
-      "sha256": "3f534c4bea4a09255ef7ae425ea3b0d1a7f1834f5b8db81b46cb2a39bce0f4e5"
+      "repository": "toyota_dataflash_secoc_setup",
+      "sha256": "3f534c4bea4a09255ef7ae425ea3b0d1a7f1834f5b8db81b46cb2a39bce0f4e5",
+      "size": 3828
     },
     {
-      "repository": "toyota_dataflash_secoc_setup",
       "path": "steps/step_extract_verify_key.py",
-      "size": 11998,
-      "sha256": "76973ee7ead61e87d9ad04e56d763ce975690bbbb797d5d1bc268cded3d7701f"
+      "repository": "toyota_dataflash_secoc_setup",
+      "sha256": "76973ee7ead61e87d9ad04e56d763ce975690bbbb797d5d1bc268cded3d7701f",
+      "size": 11998
     },
     {
-      "repository": "toyota_dataflash_secoc_setup",
       "path": "steps/step_collect_can.py",
-      "size": 5286,
-      "sha256": "ebe713d83dc5148490cc36148aa3d2526e42eb63f820a176c2c70e99ddd893ea"
+      "repository": "toyota_dataflash_secoc_setup",
+      "sha256": "ebe713d83dc5148490cc36148aa3d2526e42eb63f820a176c2c70e99ddd893ea",
+      "size": 5286
     },
     {
-      "repository": "toyota_dataflash_secoc_setup",
       "path": "payload_source/shellcode/main_ff1ff000_ff209000.c",
+      "repository": "toyota_dataflash_secoc_setup",
       "sha256": "2564a97342dd269f2113b53ed58ca1d74bc5ded7e2219b75003212c37b848431"
     },
     {
-      "repository": "opendbc",
       "path": "opendbc/dbc/generator/toyota/_toyota_2017.dbc",
+      "repository": "opendbc",
       "sha256": "818872b1c1034983f61a51460a9b175b4bfe01f3d34f537c3d21f420991a8a48"
     },
     {
-      "repository": "opendbc",
       "path": "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc",
+      "repository": "opendbc",
       "sha256": "2d680b1b73102d1c88bd735da7683f9379c98f39e1ad608618b94bf037c76119"
     },
     {
-      "repository": "opendbc",
       "path": "opendbc/car/secoc.py",
+      "repository": "opendbc",
       "sha256": "62ce41680ab05db11807d73370806372ad0623015e2f23b41d7167d00280b13c"
     },
     {
-      "repository": "opendbc",
       "path": "opendbc/car/toyota/carcontroller.py",
+      "repository": "opendbc",
       "sha256": "57cc1cb138b7d257128b33b17e45e4bbda119610f8827c676b5c56125785dc95"
     },
     {
-      "repository": "opendbc",
       "path": "opendbc/car/toyota/toyotacan.py",
+      "repository": "opendbc",
       "sha256": "aac2d2fe4785f337c9b412a2a358082c57907091522bf092d336735a08dc89b2"
     },
     {
-      "repository": "opendbc",
       "path": "opendbc/car/toyota/values.py",
+      "repository": "opendbc",
       "sha256": "acef77680fdfb8ea58396f66d834556b7f8049ecdb91c4050950bf7c6ef3a7af"
     },
     {
-      "repository": "vance_sienna_2024",
       "path": "docs/tss3-secoc-key-recovery-20260608-zh.md",
-      "size": 8374,
-      "sha256": "da61dae7cdf6497abfc454a5d942afb41b7bfb7dc59b754bc5e4512ede1ac8f6"
+      "repository": "vance_sienna_2024",
+      "sha256": "da61dae7cdf6497abfc454a5d942afb41b7bfb7dc59b754bc5e4512ede1ac8f6",
+      "size": 8374
     },
     {
-      "repository": "vance_sienna_2024",
       "path": "docs/secoc-key-final-analysis-method-zh.md",
-      "size": 8231,
-      "sha256": "fac21f12a35ebff5a9424dfa876fad56e67946827107990a79480f6c058cf259"
+      "repository": "vance_sienna_2024",
+      "sha256": "fac21f12a35ebff5a9424dfa876fad56e67946827107990a79480f6c058cf259",
+      "size": 8231
     },
     {
-      "repository": "vance_sienna_2024",
       "path": "docs/secoc-20260522-steering-lka-key-validation-full-zh.md",
-      "size": 12077,
-      "sha256": "38bf9c1198cb34d6a2758d5cfd1f109e7746ea7685424451969de2d8f91de3bd"
+      "repository": "vance_sienna_2024",
+      "sha256": "38bf9c1198cb34d6a2758d5cfd1f109e7746ea7685424451969de2d8f91de3bd",
+      "size": 12077
     },
     {
-      "repository": "vance_sienna_2024",
       "path": "docs/post-secoc-key-remaining-checklist-zh.md",
-      "size": 7468,
-      "sha256": "8488180ea543881bf84604036be19de859567aa99a9bdbfebe0cfb0c87538869"
+      "repository": "vance_sienna_2024",
+      "sha256": "8488180ea543881bf84604036be19de859567aa99a9bdbfebe0cfb0c87538869",
+      "size": 7468
     },
     {
-      "repository": "vance_sienna_2024",
       "path": "scripts/secoc/20260531_othersienna_secoc_bundle.zip",
-      "size": 27578,
-      "sha256": "0f1708717331caf76f0201acdc28ed45a21439919b93354479dd54b63688378a"
+      "repository": "vance_sienna_2024",
+      "sha256": "0f1708717331caf76f0201acdc28ed45a21439919b93354479dd54b63688378a",
+      "size": 27578
     },
     {
-      "repository": "vance_sienna_2024",
       "path": "scripts/secoc/20260531_othersienna_secoc_bundle_v2.zip",
-      "size": 27745,
-      "sha256": "6d6d552fc28933d5e20c4e7340208946079041d9d4a9627eb62c814332f2a93d"
+      "repository": "vance_sienna_2024",
+      "sha256": "6d6d552fc28933d5e20c4e7340208946079041d9d4a9627eb62c814332f2a93d",
+      "size": 27745
     },
     {
-      "repository": "vance_sienna_2024",
       "path": "scripts/secoc/20260531_othersienna_secoc_bundle_v3.zip",
-      "size": 29707,
-      "sha256": "dea6d6e0b242f287725b117231d39dcddbc8823680cbc628ab17cd2bbdb3e4e4"
-    },
-    {
       "repository": "vance_sienna_2024",
+      "sha256": "dea6d6e0b242f287725b117231d39dcddbc8823680cbc628ab17cd2bbdb3e4e4",
+      "size": 29707
+    },
+    {
       "path": "scripts/secoc/TSS3_Capture_20260601.zip",
-      "size": 9117,
-      "sha256": "16a5c483333f6304beb028f7a8a26132996905b1baa7879b941f2c9d8b609762"
+      "repository": "vance_sienna_2024",
+      "sha256": "16a5c483333f6304beb028f7a8a26132996905b1baa7879b941f2c9d8b609762",
+      "size": 9117
     },
     {
-      "repository": "optskug_docs",
       "path": "README.md",
-      "size": 195395,
-      "sha256": "ffd48e30cf430083cdeca522a1455b1a0ff5d77c3af3a5176d15830db5c7886a"
+      "repository": "optskug_docs",
+      "sha256": "ffd48e30cf430083cdeca522a1455b1a0ff5d77c3af3a5176d15830db5c7886a",
+      "size": 195395
     },
     {
-      "repository": "calvinpark_openpilot_dump",
       "path": "CLAUDE.md",
-      "size": 130954,
-      "sha256": "7e5a2504d928170add432dbf1ec68772b5f4e47d40714883b5acf4374bf38e8a"
+      "repository": "calvinpark_openpilot_dump",
+      "sha256": "7e5a2504d928170add432dbf1ec68772b5f4e47d40714883b5acf4374bf38e8a",
+      "size": 130954
     },
     {
-      "repository": "calvinpark_openpilot_dump",
       "path": "tsk/lib/dump_range.py",
-      "size": 21088,
-      "sha256": "21fce761351861d811be82a8628cd6c0a3d04a87d2ed95f5beeba814c63ab26b"
+      "repository": "calvinpark_openpilot_dump",
+      "sha256": "21fce761351861d811be82a8628cd6c0a3d04a87d2ed95f5beeba814c63ab26b",
+      "size": 21088
     },
     {
-      "repository": "calvinpark_openpilot_dump",
       "path": "tsk/lib/preflight.py",
-      "size": 33127,
-      "sha256": "714bac321cbf9cf0aa2247782bdf28d427f3283fa8447692cb981c66dcb16ee7"
+      "repository": "calvinpark_openpilot_dump",
+      "sha256": "714bac321cbf9cf0aa2247782bdf28d427f3283fa8447692cb981c66dcb16ee7",
+      "size": 33127
     },
     {
-      "repository": "calvinpark_openpilot_dump",
       "path": "tsk/lib/preflight_store.py",
-      "size": 13114,
-      "sha256": "59e200a92549afc3c09ce2a2e698d8de0788bef2ec053ad8467cf8bdd1d217b6"
+      "repository": "calvinpark_openpilot_dump",
+      "sha256": "59e200a92549afc3c09ce2a2e698d8de0788bef2ec053ad8467cf8bdd1d217b6",
+      "size": 13114
     },
     {
-      "repository": "calvinpark_openpilot_dump",
       "path": "tsk/lib/payload_codeflash_00000000_00200000.bin",
-      "size": 4096,
-      "sha256": "860f8a3418d23ccfd0861a97efdb9e1d23a8854c3a629b8d7b6821eb93d0b588"
+      "repository": "calvinpark_openpilot_dump",
+      "sha256": "860f8a3418d23ccfd0861a97efdb9e1d23a8854c3a629b8d7b6821eb93d0b588",
+      "size": 4096
     },
     {
-      "repository": "calvinpark_openpilot_dump",
       "path": "tsk/lib/payload_dataflash_ff200000_ff210000.bin",
-      "size": 4096,
-      "sha256": "9545c4192797a4800d675c454892a787f1df88683522eefb6b47915cf9c7a4eb"
+      "repository": "calvinpark_openpilot_dump",
+      "sha256": "9545c4192797a4800d675c454892a787f1df88683522eefb6b47915cf9c7a4eb",
+      "size": 4096
     },
     {
-      "repository": "calvinpark_openpilot_dump",
       "path": "tsk/lib/payload_extended_codeflash_01000000_0100c000.bin",
-      "size": 4096,
-      "sha256": "9882860dffe746217f776ef69d93f40bc4405c62bc009f156f87c6a444ae7b2c"
+      "repository": "calvinpark_openpilot_dump",
+      "sha256": "9882860dffe746217f776ef69d93f40bc4405c62bc009f156f87c6a444ae7b2c",
+      "size": 4096
     },
     {
-      "repository": "calvinpark_openpilot_dump",
       "path": "tsk/lib/payload_global_ram_feef8000_fef08000.bin",
-      "size": 4096,
-      "sha256": "43d00fdaf790c6deb230d3a4e7b8f8bd17e077a100fa53ebb194532f55c510fd"
+      "repository": "calvinpark_openpilot_dump",
+      "sha256": "43d00fdaf790c6deb230d3a4e7b8f8bd17e077a100fa53ebb194532f55c510fd",
+      "size": 4096
     },
     {
-      "repository": "calvinpark_openpilot_dump",
       "path": "tsk/lib/payload_local_ram_pe1_febe0000_fec00000.bin",
-      "size": 4096,
-      "sha256": "fbb1f5bd352c3f0bf416d6b1ef6a7696f97cad2b9f49570ca859207f3269e44f"
-    },
-    {
       "repository": "calvinpark_openpilot_dump",
+      "sha256": "fbb1f5bd352c3f0bf416d6b1ef6a7696f97cad2b9f49570ca859207f3269e44f",
+      "size": 4096
+    },
+    {
       "path": "tsk/lib/payload_local_ram_self_fede0000_fee00000.bin",
-      "size": 4096,
-      "sha256": "fba7950a62939f75d7b06e08fc1fe4ceea5fd2109b8fe4677494a3777543a35d"
+      "repository": "calvinpark_openpilot_dump",
+      "sha256": "fba7950a62939f75d7b06e08fc1fe4ceea5fd2109b8fe4677494a3777543a35d",
+      "size": 4096
     },
     {
-      "repository": "commaai_hardware",
       "path": "harness/v3/Toyota_B_Harness.pdf",
-      "size": 32357,
-      "sha256": "39126557ad6ae4400dd0ac44080437e860cb3a6923a42b0ab523a78f456a8fb6"
+      "repository": "commaai_hardware",
+      "sha256": "39126557ad6ae4400dd0ac44080437e860cb3a6923a42b0ab523a78f456a8fb6",
+      "size": 32357
     },
     {
-      "repository": "commaai_hardware",
       "path": "harness/v3/Harness_Box.pdf",
-      "size": 22319,
-      "sha256": "36dc9e55ff193a98c74ea7db9f0d63f0f7ea75f6cd2d5eb3ccd763a686585562"
+      "repository": "commaai_hardware",
+      "sha256": "36dc9e55ff193a98c74ea7db9f0d63f0f7ea75f6cd2d5eb3ccd763a686585562",
+      "size": 22319
     },
     {
-      "repository": "commaai_hardware",
       "path": "harness/OBD-C.sch.pdf",
-      "size": 41427,
-      "sha256": "3450700e3711643c097374a1d71d20e4d6004ac9946534e052e23c0417401008"
+      "repository": "commaai_hardware",
+      "sha256": "3450700e3711643c097374a1d71d20e4d6004ac9946534e052e23c0417401008",
+      "size": 41427
     }
   ],
   "community_artifacts": [
     {
-      "source": "blurbdust (@yc), comma Discord, 2026-08-01",
+      "notes": "SecOC flash patcher host tool; public Git history begins with blurbdust commit dbfd991 on 2026-04-28 and cross-validates SEC-BOOT-002..007/SECOC-024",
       "path": "community/blurbdust_secoc_flash_patcher/flash_patcher.py",
-      "size": 9955,
-      "sha256": "8a56f3dc833dd059f79117c0c0f2a2efce504354728e88e3b68530196b34f19c",
       "provenance": "Discord attachment; public ancestor/counterpart is blurbdust/secoc @ 47d2824, whose flash_patcher.py differs only in the two decode_frame struct.unpack endian format strings (<I in the attachment, >I in public Git)",
-      "notes": "SecOC flash patcher host tool; public Git history begins with blurbdust commit dbfd991 on 2026-04-28 and cross-validates SEC-BOOT-002..007/SECOC-024"
+      "sha256": "8a56f3dc833dd059f79117c0c0f2a2efce504354728e88e3b68530196b34f19c",
+      "size": 9955,
+      "source": "blurbdust (@yc), comma Discord, 2026-08-01"
     },
     {
-      "source": "blurbdust (@yc), comma Discord, 2026-08-01",
+      "notes": "Blurbdust-authored egg-hunter shellcode for persistent CodeFlash MAC-verify bypass via FCU; first added in dbfd991 on 2026-04-28",
       "path": "community/blurbdust_secoc_flash_patcher/main.c",
-      "size": 10228,
-      "sha256": "5fa6ef897e928e3f9cacc13a5eac59a5708791a0ae1a32f17a6cf2a7781f505a",
       "provenance": "Discord attachment; byte-identical to blurbdust/secoc @ 47d2824 shellcode/main_flash_patch.c",
-      "notes": "Blurbdust-authored egg-hunter shellcode for persistent CodeFlash MAC-verify bypass via FCU; first added in dbfd991 on 2026-04-28"
+      "sha256": "5fa6ef897e928e3f9cacc13a5eac59a5708791a0ae1a32f17a6cf2a7781f505a",
+      "size": 10228,
+      "source": "blurbdust (@yc), comma Discord, 2026-08-01"
     },
     {
-      "source": "blurbdust (@yc), comma Discord, 2026-08-01",
+      "notes": "CUW SeedKey/Nonce deobfuscation and payload decryption; behavior and filename match blurbdust's 2026-04-21 public statement that he had a TechInfo CUW flash-driver extractor computing 0x201/0x202, but no April attachment hash survives to prove byte identity",
       "path": "community/blurbdust_secoc_flash_patcher/decrypt.T-0035-22.py",
-      "size": 6172,
-      "sha256": "86b628b5cf75ac39c200edcc099f9604d82a2d2efff2df02b48f4d29ebd5cae2",
       "provenance": "Discord attachment, no canonical git source",
-      "notes": "CUW SeedKey/Nonce deobfuscation and payload decryption; behavior and filename match blurbdust's 2026-04-21 public statement that he had a TechInfo CUW flash-driver extractor computing 0x201/0x202, but no April attachment hash survives to prove byte identity"
+      "sha256": "86b628b5cf75ac39c200edcc099f9604d82a2d2efff2df02b48f4d29ebd5cae2",
+      "size": 6172,
+      "source": "blurbdust (@yc), comma Discord, 2026-08-01"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-12",
+      "notes": "Complete 0xFF200000..0xFF207FFF DataFlash dump; later tracked 2026-08-18 CodeFlash corpus identifies the firmware artifact as 8965H1202000.",
       "path": "community/albinoelephant/dump_ff200000_ff208000.bin",
-      "size": 32768,
-      "sha256": "8ac2a6beecb4ca2e6caf695eebffe440478171b4e093a1b2a36ab4e4ff313299",
       "provenance": "Discord attachment; TSKM /cache/tsk/dataflash output from reported 2023 US Corolla investigation",
-      "notes": "Complete 0xFF200000..0xFF207FFF DataFlash dump; later tracked 2026-08-18 CodeFlash corpus identifies the firmware artifact as 8965H1202000."
-    },
-    {
-      "source": "albinoelephant, comma Discord, 2026-08-12",
-      "path": "community/albinoelephant/can_oracle.ndjson",
-      "size": 97768,
-      "sha256": "8863398a98875a853e722a6ba83fc10563d5764cea33719c8af34225efa189a3",
-      "provenance": "Discord attachment; TSKM /cache/tsk/can-messages/can_oracle.ndjson from same investigation",
-      "notes": "1232 sync-only CAN 0x00F rows: 616 each on Panda buses 0 and 2; no protected-message rows"
-    },
-    {
-      "source": "public comma route supplied by albinoelephant in comma Discord; repository-derived 2026-08-12",
-      "path": "community/albinoelephant/public_route_secoc_oracle.ndjson",
-      "size": 212536,
-      "sha256": "a9bf3f279001b8b77e96acfc186944a962c59cc7bedf739d902d971ff4b03f15",
-      "provenance": "CAN-only extraction from pinned public-route segment-0 rlog d246a55988889253c8d155f04b132b1bb443fdd74f1e6bad68eef8879a5c477b",
-      "notes": "Genuine bus-1 classic SecOC-family rows only: 0x00F=588, 0x116=2499, 0x24D=59; no route metadata retained"
-    },
-    {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
-      "path": "community/albinoelephant/raw-20260818/MANIFEST.txt",
-      "size": 4835,
-      "sha256": "b0999bbe4761d5dffaa6bd82263751ae80ef073458a8ccd8087414b23724065c",
-      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "Contributor-supplied manifest describing vehicle attribution, ECU identity, memory ranges, and hashes for the preserved corpus."
-    },
-    {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
-      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260812-1050/can_oracle.ndjson",
-      "size": 97768,
-      "sha256": "8863398a98875a853e722a6ba83fc10563d5764cea33719c8af34225efa189a3",
-      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
-    },
-    {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
-      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260812-1050/dump_ff200000_ff208000.bin",
-      "size": 32768,
       "sha256": "8ac2a6beecb4ca2e6caf695eebffe440478171b4e093a1b2a36ab4e4ff313299",
-      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "size": 32768,
+      "source": "albinoelephant, comma Discord, 2026-08-12"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "notes": "1232 sync-only CAN 0x00F rows: 616 each on Panda buses 0 and 2; no protected-message rows",
+      "path": "community/albinoelephant/can_oracle.ndjson",
+      "provenance": "Discord attachment; TSKM /cache/tsk/can-messages/can_oracle.ndjson from same investigation",
+      "sha256": "8863398a98875a853e722a6ba83fc10563d5764cea33719c8af34225efa189a3",
+      "size": 97768,
+      "source": "albinoelephant, comma Discord, 2026-08-12"
+    },
+    {
+      "notes": "Genuine bus-1 classic SecOC-family rows only: 0x00F=588, 0x116=2499, 0x24D=59; no route metadata retained",
+      "path": "community/albinoelephant/public_route_secoc_oracle.ndjson",
+      "provenance": "CAN-only extraction from pinned public-route segment-0 rlog d246a55988889253c8d155f04b132b1bb443fdd74f1e6bad68eef8879a5c477b",
+      "sha256": "a9bf3f279001b8b77e96acfc186944a962c59cc7bedf739d902d971ff4b03f15",
+      "size": 212536,
+      "source": "public comma route supplied by albinoelephant in comma Discord; repository-derived 2026-08-12"
+    },
+    {
+      "notes": "Contributor-supplied manifest describing vehicle attribution, ECU identity, memory ranges, and hashes for the preserved corpus.",
+      "path": "community/albinoelephant/raw-20260818/MANIFEST.txt",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "sha256": "b0999bbe4761d5dffaa6bd82263751ae80ef073458a8ccd8087414b23724065c",
+      "size": 4835,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
+    },
+    {
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260812-1050/can_oracle.ndjson",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "sha256": "8863398a98875a853e722a6ba83fc10563d5764cea33719c8af34225efa189a3",
+      "size": 97768,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
+    },
+    {
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260812-1050/dump_ff200000_ff208000.bin",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "sha256": "8ac2a6beecb4ca2e6caf695eebffe440478171b4e093a1b2a36ab4e4ff313299",
+      "size": 32768,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
+    },
+    {
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
-      "size": 2097152,
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
       "sha256": "97f9d42d936b97a99e7ab3d3ef20c6fb4c1fc3cc2ba199f6b158675a1709aee6",
-      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "size": 2097152,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_dataflash_ff200000_ff210000_20260814-002328.bin",
-      "size": 65536,
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
       "sha256": "06992af443f2aa0e0559202a7fcd0dfdc040ce91843956807d8b902abdf8b486",
-      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "size": 65536,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_dataflash_ff200000_ff210000_20260814-002403.bin",
-      "size": 65536,
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
       "sha256": "462065968d2f2da2cb88d62d63b6cf78c9242e801a7e66d31b1733ab1e860f53",
-      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "size": 65536,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_dataflash_ff200000_ff210000_20260814-003232.bin",
-      "size": 65536,
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
       "sha256": "5c91da76ef352b1171eef49df853dcb486c88f44abc0958b1c9df23376e805ec",
-      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "size": 65536,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_dataflash_ff200000_ff210000_20260814-004424.bin",
-      "size": 65536,
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
       "sha256": "f638954406e240250c99c52ce251afd4103eeec39586676102b297e0a51357be",
-      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "size": 65536,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_dataflash_ff200000_ff210000_20260814-004957.bin",
-      "size": 65536,
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
       "sha256": "8fef0fd1a7869d9faad4516493d600d3ec02d62a69f73299981746b3bcb19990",
-      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "size": 65536,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_extended_codeflash_01000000_0100c000_20260814-002640.bin",
-      "size": 49152,
-      "sha256": "90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7",
       "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "sha256": "90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7",
+      "size": 49152,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_extended_codeflash_01000000_0100c000_20260814-004606.bin",
-      "size": 49152,
-      "sha256": "90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7",
       "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "sha256": "90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7",
+      "size": 49152,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_extended_codeflash_01000000_0100c000_20260814-005156.bin",
-      "size": 49152,
-      "sha256": "90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7",
       "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "sha256": "90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7",
+      "size": 49152,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_global_ram_feef8000_fef08000_20260814-002555.bin",
-      "size": 65536,
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
       "sha256": "1904a16d8cfbc1a0e3ec399b94e3eb9626f981473870aa50772e21b56e651f88",
-      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "size": 65536,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_global_ram_feef8000_fef08000_20260814-004529.bin",
-      "size": 65536,
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
       "sha256": "52daca8a7d913fd727e42723ec50e731c09d413b5c359ac8914c874817414b77",
-      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "size": 65536,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_global_ram_feef8000_fef08000_20260814-005127.bin",
-      "size": 65536,
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
       "sha256": "63f7470eba1625b4ee2db5a2fb721922a574dbd477021aa83936b6e3cadb9420",
-      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "size": 65536,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-002502.bin",
-      "size": 131072,
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
       "sha256": "2631d6d290cf3ee1adfe62e81798be67479c9f7c0a58dfeb6d097a2558eb4e53",
-      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "size": 131072,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-004452.bin",
-      "size": 131072,
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
       "sha256": "5cff0226c1228dc06f8e0edb9908ab4078e557b54abc48666eecebd29bf41e09",
-      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "size": 131072,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
-      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation.",
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-005055.bin",
-      "size": 131072,
-      "sha256": "f27514c621ba56b127058341f6730c96900347e72d7c54e101875ee4fb3f46ce",
       "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
-      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+      "sha256": "f27514c621ba56b127058341f6730c96900347e72d7c54e101875ee4fb3f46ce",
+      "size": 131072,
+      "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
-      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "notes": "Full source bundle including macOS metadata and large UDS sweep captures; normalized analysis subset is under community/spanconstant/raw-20260821.",
       "path": "community/spanconstant/spanconstant_tsk.zip",
-      "size": 1754757,
-      "sha256": "a5744b4c4627d3e5c20d590bb882d25b9b40c0679cbc3e9660140c7f2ef5262b",
       "provenance": "Original Span TSKM acquisition bundle; retained byte-for-byte before normalization",
-      "notes": "Full source bundle including macOS metadata and large UDS sweep captures; normalized analysis subset is under community/spanconstant/raw-20260821."
+      "sha256": "a5744b4c4627d3e5c20d590bb882d25b9b40c0679cbc3e9660140c7f2ef5262b",
+      "size": 1754757,
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21"
     },
     {
-      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "notes": "Pins source ZIP, extracted member paths/hashes, CodeFlash identity, and repeatability observations.",
       "path": "community/spanconstant/raw-20260821/MANIFEST.txt",
-      "size": 4350,
-      "sha256": "ff691183dc81da9a7f232b4028ab4d9c48799f8866fd6b7ace90562ce9d5e29d",
       "provenance": "Repository-authored normalization manifest for the retained Span 2026-08-21 source bundle",
-      "notes": "Pins source ZIP, extracted member paths/hashes, CodeFlash identity, and repeatability observations."
+      "sha256": "ff691183dc81da9a7f232b4028ab4d9c48799f8866fd6b7ace90562ce9d5e29d",
+      "size": 4350,
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21"
     },
     {
-      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt.",
       "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
-      "size": 2097152,
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
       "sha256": "b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d",
-      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
-      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
-    },
-    {
-      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
-      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_dataflash_ff200000_ff210000_20260821-151200.bin",
-      "size": 65536,
-      "sha256": "85d76a96436e99e246b0695938e2dd046b8878e7d0e68f2ba7cd79f285f468a2",
-      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
-      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
-    },
-    {
-      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
-      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_dataflash_ff200000_ff210000_20260821-151612.bin",
-      "size": 65536,
-      "sha256": "7f64ae2e66af7d8367e1926a7f2137f8255e0b92b82a77e55cedde4eee418137",
-      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
-      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
-    },
-    {
-      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
-      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_dataflash_ff200000_ff210000_20260821-151743.bin",
-      "size": 65536,
-      "sha256": "c90903073c483d6743e35ff4ab6aa6bbcb78756b0a025c620027f910568cd271",
-      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
-      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
-    },
-    {
-      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
-      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_extended_codeflash_01000000_0100c000_20260821-151952.bin",
-      "size": 49152,
-      "sha256": "90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7",
-      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
-      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
-    },
-    {
-      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
-      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_global_ram_feef8000_fef08000_20260821-151923.bin",
-      "size": 65536,
-      "sha256": "aedfa4def81ca249cc93154f04c8c017d75d5cf45b8e4a707399266f3c4e0713",
-      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
-      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
-    },
-    {
-      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
-      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_local_ram_pe1_febe0000_fec00000_20260821-151834.bin",
-      "size": 131072,
-      "sha256": "255e167643e297fcc6e7458d3372e3df53eed08bd21e2b55714451aac4ee4e38",
-      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
-      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
-    },
-    {
-      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
-      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_local_ram_self_fede0000_fee00000_20260821-152418.bin",
-      "size": 131072,
-      "sha256": "7668da24f9baceb6329221be8ad0fabae16650df80a234e6ef76decc4f6c0e44",
-      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
-      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
-    },
-    {
-      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
-      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/preflight_8965012N50E12H030731_20260821-151149.json",
-      "size": 3436,
-      "sha256": "a069f155695dd10a19834afb2a3f7b35daaac52d52fc0be66f56d213cda57285",
-      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
-      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
-    },
-    {
-      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
-      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/route.json",
-      "size": 159,
-      "sha256": "c6fcb2b72b9ce447f6d62af119e93de7ca3ee6f10affa95ea98a15d2e435d4aa",
-      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
-      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
-    },
-    {
-      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
-      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/security_access_log.json",
-      "size": 2173,
-      "sha256": "9db9eaf86eb3faf524c550dc8628f14b8f2ecea40920dc9b18c0779d32760c35",
-      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
-      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
-    },
-    {
-      "source": "Span / spanconstant, comma Discord; rlog recorded 2026-07-29 and imported 2026-08-24",
-      "path": "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst",
-      "size": 11365866,
-      "sha256": "f1ae7c40ad8e9ff8c462a3f5367d914873e93575d902ccb82f2c74984acd439f",
-      "provenance": "Rlog file supplied by Span in comma Discord and added to the repository by the maintainer. Embedded initData independently records dongle 67fd5b833889fedf, spanconstant5/openpilot branch tskdash, commit 7e78a9d89728c4bd106838d40b5891ce3931de43, version 0.11.2, and mici hardware; no Discord message permalink is retained.",
-      "notes": "Moving/driving whole-vehicle CAN evidence. Embedded carParams is MOCK/noOutput and does not contain an F181 identity join; this rlog must not be equated byte-for-byte with the separate 2026-08-21 8965F1208000 TSKM dump solely from contributor attribution. Maintainer field context: Span had not physically repinned the Toyota-B CAN0/CAN1 pairs for this capture; Panda harnessStatus=flipped is a separate orientation state."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry TSK session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/can_oracle.ndjson.gz",
-      "size": 3265598,
-      "sha256": "db47d483016c409b5c3a1ecdf58310f68ca8105a4c16eae54185016a6eaf3f41",
-      "provenance": "Deterministic gzip (mtime=0) of the exact /cache/tsk/can-messages/can_oracle.ndjson captured on the maintainer-operated vehicle; uncompressed identity is pinned in MANIFEST.txt.",
-      "notes": "Approximately 60-second stationary READY capture. Vehicle attribution is maintainer/operator context; wire bytes/timestamps are direct evidence."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry TSK session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/identity.json",
-      "size": 1559,
-      "sha256": "5feffa176a0a0293de53fee91486788c577d603ad72cc6e93064dd3710cad234",
-      "provenance": "Privacy-minimized exact-value snapshot of TSK /api/ident-map-status after the Not Ready to Drive identity map.",
-      "notes": "Retains target F181/F186/F18C, route, and bounded service-probe results; omits unrelated Panda/network telemetry."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry TSK session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/programming_probe.json",
-      "size": 2135,
-      "sha256": "c8dec4197585622a511a03a629e44b2b69369ce3b5b7978a584dfa5e4fa27817",
-      "provenance": "Privacy-minimized exact-value snapshot of TSK /api/prog-probe-status after the bounded Not Ready to Drive PROGRAMMING handoff probe.",
-      "notes": "Retains application/boot F181, route, 0x777 observation, and handoff result; omits unrelated Panda health telemetry."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry TSK session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/xcp_probe.json",
-      "size": 702,
-      "sha256": "b8d96ae5cb97f18d1138196e2a0cb95de5938ec0ff7e512ee9f752f86645e273",
-      "provenance": "Privacy-minimized exact-value snapshot of TSK /api/xcp-observer-status after the read-only CONNECT probe.",
-      "notes": "No usable 0x7F8 response on the identified EPS route; route/session negative only."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/NRTD_MANIFEST.txt",
-      "size": 3062,
-      "sha256": "1a284494187172f24f78a04905c0fb8727766dff22699d75edfe989c0a6c7d04",
-      "provenance": "Maintainer-generated provenance manifest pinning exact sizes/SHA-256 values and the observation-only NRTD operating boundary for the second Camry evidence unit.",
-      "notes": "Separate from the earlier READY/EPS MANIFEST.txt so each evidence unit remains independently reproducible."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_module_identity_20260826.json",
-      "size": 5398,
-      "sha256": "0ed09e5abec3a555d9e8b26c03a740747f04675859de8d12f49c8afb0eb53bdd",
-      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
-      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_p5_oracles_20260826.json",
-      "size": 1179,
-      "sha256": "17d9870cc65f71c9890389a22fa3f0f9561ec3d4f2679cc9e61076ed6977bcba",
-      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
-      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_p5_oracles_extra_20260826.json",
-      "size": 586,
-      "sha256": "4a59d82a2f027b5d6413bf6608905503975afa40ce87dfa350b36e8459da62f6",
-      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
-      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_brake_107e_extended_20260826.json",
-      "size": 281,
-      "sha256": "3475f1df52cf69fc56fea51cdaa85cc00797cd720e3583e29d0aaa7b1b80af2c",
-      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
-      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_buttons_20260826.json",
-      "size": 72108,
-      "sha256": "1977d05439f632017369d761641726536b635cc95b66cd5d5079af8096f4877e",
-      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
-      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_MAIN_20260826.json",
-      "size": 35980,
-      "sha256": "ca7c3911e402a763f23af00c92f449c75afa8c8b0e94b10293b710aad95d337b",
-      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
-      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_RESPLUS_20260826.json",
-      "size": 35882,
-      "sha256": "1d176f20e9c2b11e46ebe6d069c1d653dd3026a3f4895dde85730f9742e1ce07",
-      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
-      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_SETMINUS_20260826.json",
-      "size": 35881,
-      "sha256": "f9ea74fd5846222d38884183c12eb19ec20fd80c6730f21dc1bcd5a377efa9aa",
-      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
-      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_CANCEL_20260826.json",
-      "size": 35884,
-      "sha256": "432fc309de02bfdd4f5927af6928382cf0f0617f68258484eabac05f3fb06111",
-      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
-      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_DISTANCE_20260826.json",
-      "size": 35862,
-      "sha256": "024f1df8b783da1b4d1485b824bf3092ea412c112efb2f12ad2ebdbf4cfddcdb",
-      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
-      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_nrtd_cruise_can_sync_20260826.json.gz",
-      "size": 1103765,
-      "sha256": "083435105745d928ceea5dea2a614b7a1fbd32341ba4c94987c73ef6287e87fa",
-      "provenance": "Deterministic gzip (mtime=0) of the exact single-Panda synchronized FRC diagnostic-oracle plus passive-CAN capture from the maintainer-operated vehicle.",
-      "notes": "Stationary NRTD; operator pressed MAIN, RES+, SET-, CANCEL, and following-distance sequentially. No vehicle-control transmission."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry READY/gear session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/READY_GEAR_MANIFEST.txt",
-      "size": 2002,
-      "sha256": "9f3ff22ed739aa2f4c87d4e99f6eddb33202ea6d4d6de5f40c280ebb20cc95a5",
-      "provenance": "Maintainer-generated provenance manifest pinning the exact passive capture scripts/captures, operator correction, and observation-only boundary.",
-      "notes": "Separates the controlled READY/gear evidence from prior Camry baseline and NRTD P5 evidence units."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry READY/gear session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_ready_gear_capture.py",
-      "size": 774,
-      "sha256": "b79857ffa38f7ad94030313a5c5609cbd3e35178c31f8d72fa72a912c20740fb",
-      "provenance": "Exact passive Panda capture script copied from the maintainer-operated comma after the run.",
-      "notes": "60-second NRTD-to-READY and selector capture; script calls can_recv only after route configuration and contains no CAN transmit/UDS path."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry READY/gear session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz",
-      "size": 1660906,
-      "sha256": "379ec28fba65191d2898ebb156fe83e2e8e59c38bbf5fcfb7166ec9ff32c3889",
-      "provenance": "Deterministic gzip (mtime=0) emitted on the maintainer-operated comma by the tracked passive capture script.",
-      "notes": "135,866 passive CAN frames over 60.000313470 s; observed selector sequence P/R/N/D/N/R/P because B was missed in the first operator run."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry READY/gear session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_b_capture.py",
-      "size": 755,
-      "sha256": "2d72ec4ace3ab01ecae440d8d4f8324e3d7166a15f9bdd868d6a5c2d2a2ae153",
-      "provenance": "Exact passive Panda capture script copied from the maintainer-operated comma after the run.",
-      "notes": "25-second dedicated READY/stationary D/B/D follow-up; script calls can_recv only after route configuration and contains no CAN transmit/UDS path."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry READY/gear session, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_ready_b_20260826.json.gz",
-      "size": 715102,
-      "sha256": "7bae994dea1caff06d8f31f58558f67d646da38bd9531557875858eb33fa4db3",
-      "provenance": "Deterministic gzip (mtime=0) emitted on the maintainer-operated comma by the tracked passive B capture script.",
-      "notes": "58,712 passive CAN frames over 25.000072204 s; exact 0x127 D/B/D transition closes raw value 4=B on the exact Camry."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/CODEFLASH_MANIFEST.txt",
-      "size": 2463,
-      "sha256": "d78299293eb996f3ebe35eb36428b54e7a6243e22a6ef639054cf61991144ed8",
-      "provenance": "Maintainer-generated provenance manifest for the exact F33 CodeFlash acquisition.",
-      "notes": "Pins source hashes, identity/NRTD guard, full-range completeness, and normalization boundary."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/camry_codeflash_dump.py",
-      "size": 17796,
-      "sha256": "0e2f78b156de7938e7d4069b3cd27cb16b819dd4c9fe046de0e6b7690147fb03",
-      "provenance": "Exact identity/NRTD-guarded collector used on the maintainer-operated comma.",
-      "notes": "Authenticated old-stack boot-RAM range streamer; retained for acquisition reproducibility, not as production vehicle-control tooling."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/calvin_payload_codeflash_00000000_00200000.bin",
-      "size": 4096,
-      "sha256": "860f8a3418d23ccfd0861a97efdb9e1d23a8854c3a629b8d7b6821eb93d0b588",
-      "provenance": "Exact 4-KiB authenticated payload envelope used by the successful CodeFlash collector.",
-      "notes": "Payload is bound to the retained acquisition transcript and configured 0x00000000..0x001FFFFF range."
-    },
-    {
-      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/codeflash/camry_8965F3307000_codeflash_20260826T213719Z.bin",
       "size": 2097152,
-      "sha256": "b588c7258699beee77669d1f5f09bb17ef8b189b941b46f344a07378c3aaa727",
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21"
+    },
+    {
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt.",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_dataflash_ff200000_ff210000_20260821-151200.bin",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "sha256": "85d76a96436e99e246b0695938e2dd046b8878e7d0e68f2ba7cd79f285f468a2",
+      "size": 65536,
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21"
+    },
+    {
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt.",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_dataflash_ff200000_ff210000_20260821-151612.bin",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "sha256": "7f64ae2e66af7d8367e1926a7f2137f8255e0b92b82a77e55cedde4eee418137",
+      "size": 65536,
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21"
+    },
+    {
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt.",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_dataflash_ff200000_ff210000_20260821-151743.bin",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "sha256": "c90903073c483d6743e35ff4ab6aa6bbcb78756b0a025c620027f910568cd271",
+      "size": 65536,
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21"
+    },
+    {
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt.",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_extended_codeflash_01000000_0100c000_20260821-151952.bin",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "sha256": "90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7",
+      "size": 49152,
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21"
+    },
+    {
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt.",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_global_ram_feef8000_fef08000_20260821-151923.bin",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "sha256": "aedfa4def81ca249cc93154f04c8c017d75d5cf45b8e4a707399266f3c4e0713",
+      "size": 65536,
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21"
+    },
+    {
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt.",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_local_ram_pe1_febe0000_fec00000_20260821-151834.bin",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "sha256": "255e167643e297fcc6e7458d3372e3df53eed08bd21e2b55714451aac4ee4e38",
+      "size": 131072,
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21"
+    },
+    {
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt.",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_local_ram_self_fede0000_fee00000_20260821-152418.bin",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "sha256": "7668da24f9baceb6329221be8ad0fabae16650df80a234e6ef76decc4f6c0e44",
+      "size": 131072,
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21"
+    },
+    {
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt.",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/preflight_8965012N50E12H030731_20260821-151149.json",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "sha256": "a069f155695dd10a19834afb2a3f7b35daaac52d52fc0be66f56d213cda57285",
+      "size": 3436,
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21"
+    },
+    {
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt.",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/route.json",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "sha256": "c6fcb2b72b9ce447f6d62af119e93de7ca3ee6f10affa95ea98a15d2e435d4aa",
+      "size": 159,
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21"
+    },
+    {
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt.",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/security_access_log.json",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "sha256": "9db9eaf86eb3faf524c550dc8628f14b8f2ecea40920dc9b18c0779d32760c35",
+      "size": 2173,
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21"
+    },
+    {
+      "notes": "Moving/driving whole-vehicle CAN evidence. Embedded carParams is MOCK/noOutput and does not contain an F181 identity join; this rlog must not be equated byte-for-byte with the separate 2026-08-21 8965F1208000 TSKM dump solely from contributor attribution. Maintainer field context: Span had not physically repinned the Toyota-B CAN0/CAN1 pairs for this capture; Panda harnessStatus=flipped is a separate orientation state.",
+      "path": "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst",
+      "provenance": "Rlog file supplied by Span in comma Discord and added to the repository by the maintainer. Embedded initData independently records dongle 67fd5b833889fedf, spanconstant5/openpilot branch tskdash, commit 7e78a9d89728c4bd106838d40b5891ce3931de43, version 0.11.2, and mici hardware; no Discord message permalink is retained.",
+      "sha256": "f1ae7c40ad8e9ff8c462a3f5367d914873e93575d902ccb82f2c74984acd439f",
+      "size": 11365866,
+      "source": "Span / spanconstant, comma Discord; rlog recorded 2026-07-29 and imported 2026-08-24"
+    },
+    {
+      "notes": "Approximately 60-second stationary READY capture. Vehicle attribution is maintainer/operator context; wire bytes/timestamps are direct evidence.",
+      "path": "targets/camry-2026/raw-20260826/can_oracle.ndjson.gz",
+      "provenance": "Deterministic gzip (mtime=0) of the exact /cache/tsk/can-messages/can_oracle.ndjson captured on the maintainer-operated vehicle; uncompressed identity is pinned in MANIFEST.txt.",
+      "sha256": "db47d483016c409b5c3a1ecdf58310f68ca8105a4c16eae54185016a6eaf3f41",
+      "size": 3265598,
+      "source": "Maintainer-operated 2026 Toyota Camry TSK session, 2026-08-26"
+    },
+    {
+      "notes": "Retains target F181/F186/F18C, route, and bounded service-probe results; omits unrelated Panda/network telemetry.",
+      "path": "targets/camry-2026/raw-20260826/identity.json",
+      "provenance": "Privacy-minimized exact-value snapshot of TSK /api/ident-map-status after the Not Ready to Drive identity map.",
+      "sha256": "5feffa176a0a0293de53fee91486788c577d603ad72cc6e93064dd3710cad234",
+      "size": 1559,
+      "source": "Maintainer-operated 2026 Toyota Camry TSK session, 2026-08-26"
+    },
+    {
+      "notes": "Retains application/boot F181, route, 0x777 observation, and handoff result; omits unrelated Panda health telemetry.",
+      "path": "targets/camry-2026/raw-20260826/programming_probe.json",
+      "provenance": "Privacy-minimized exact-value snapshot of TSK /api/prog-probe-status after the bounded Not Ready to Drive PROGRAMMING handoff probe.",
+      "sha256": "c8dec4197585622a511a03a629e44b2b69369ce3b5b7978a584dfa5e4fa27817",
+      "size": 2135,
+      "source": "Maintainer-operated 2026 Toyota Camry TSK session, 2026-08-26"
+    },
+    {
+      "notes": "No usable 0x7F8 response on the identified EPS route; route/session negative only.",
+      "path": "targets/camry-2026/raw-20260826/xcp_probe.json",
+      "provenance": "Privacy-minimized exact-value snapshot of TSK /api/xcp-observer-status after the read-only CONNECT probe.",
+      "sha256": "b8d96ae5cb97f18d1138196e2a0cb95de5938ec0ff7e512ee9f752f86645e273",
+      "size": 702,
+      "source": "Maintainer-operated 2026 Toyota Camry TSK session, 2026-08-26"
+    },
+    {
+      "notes": "Separate from the earlier READY/EPS MANIFEST.txt so each evidence unit remains independently reproducible.",
+      "path": "targets/camry-2026/raw-20260826/NRTD_MANIFEST.txt",
+      "provenance": "Maintainer-generated provenance manifest pinning exact sizes/SHA-256 values and the observation-only NRTD operating boundary for the second Camry evidence unit.",
+      "sha256": "1a284494187172f24f78a04905c0fb8727766dff22699d75edfe989c0a6c7d04",
+      "size": 3062,
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26"
+    },
+    {
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt.",
+      "path": "targets/camry-2026/raw-20260826/camry_nrtd_module_identity_20260826.json",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "sha256": "0ed09e5abec3a555d9e8b26c03a740747f04675859de8d12f49c8afb0eb53bdd",
+      "size": 5398,
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26"
+    },
+    {
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt.",
+      "path": "targets/camry-2026/raw-20260826/camry_nrtd_p5_oracles_20260826.json",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "sha256": "17d9870cc65f71c9890389a22fa3f0f9561ec3d4f2679cc9e61076ed6977bcba",
+      "size": 1179,
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26"
+    },
+    {
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt.",
+      "path": "targets/camry-2026/raw-20260826/camry_nrtd_p5_oracles_extra_20260826.json",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "sha256": "4a59d82a2f027b5d6413bf6608905503975afa40ce87dfa350b36e8459da62f6",
+      "size": 586,
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26"
+    },
+    {
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt.",
+      "path": "targets/camry-2026/raw-20260826/camry_nrtd_brake_107e_extended_20260826.json",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "sha256": "3475f1df52cf69fc56fea51cdaa85cc00797cd720e3583e29d0aaa7b1b80af2c",
+      "size": 281,
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26"
+    },
+    {
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt.",
+      "path": "targets/camry-2026/raw-20260826/camry_nrtd_cruise_buttons_20260826.json",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "sha256": "1977d05439f632017369d761641726536b635cc95b66cd5d5079af8096f4877e",
+      "size": 72108,
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26"
+    },
+    {
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt.",
+      "path": "targets/camry-2026/raw-20260826/camry_nrtd_cruise_MAIN_20260826.json",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "sha256": "ca7c3911e402a763f23af00c92f449c75afa8c8b0e94b10293b710aad95d337b",
+      "size": 35980,
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26"
+    },
+    {
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt.",
+      "path": "targets/camry-2026/raw-20260826/camry_nrtd_cruise_RESPLUS_20260826.json",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "sha256": "1d176f20e9c2b11e46ebe6d069c1d653dd3026a3f4895dde85730f9742e1ce07",
+      "size": 35882,
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26"
+    },
+    {
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt.",
+      "path": "targets/camry-2026/raw-20260826/camry_nrtd_cruise_SETMINUS_20260826.json",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "sha256": "f9ea74fd5846222d38884183c12eb19ec20fd80c6730f21dc1bcd5a377efa9aa",
+      "size": 35881,
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26"
+    },
+    {
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt.",
+      "path": "targets/camry-2026/raw-20260826/camry_nrtd_cruise_CANCEL_20260826.json",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "sha256": "432fc309de02bfdd4f5927af6928382cf0f0617f68258484eabac05f3fb06111",
+      "size": 35884,
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26"
+    },
+    {
+      "notes": "Stationary NRTD diagnostic observation/operator-input evidence; operation details and exact source identity are pinned in NRTD_MANIFEST.txt.",
+      "path": "targets/camry-2026/raw-20260826/camry_nrtd_cruise_DISTANCE_20260826.json",
+      "provenance": "Exact JSON emitted by the read-only maintainer-operated Camry NRTD P5/cruise probe and copied from /cache/tsk without semantic rewriting.",
+      "sha256": "024f1df8b783da1b4d1485b824bf3092ea412c112efb2f12ad2ebdbf4cfddcdb",
+      "size": 35862,
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26"
+    },
+    {
+      "notes": "Stationary NRTD; operator pressed MAIN, RES+, SET-, CANCEL, and following-distance sequentially. No vehicle-control transmission.",
+      "path": "targets/camry-2026/raw-20260826/camry_nrtd_cruise_can_sync_20260826.json.gz",
+      "provenance": "Deterministic gzip (mtime=0) of the exact single-Panda synchronized FRC diagnostic-oracle plus passive-CAN capture from the maintainer-operated vehicle.",
+      "sha256": "083435105745d928ceea5dea2a614b7a1fbd32341ba4c94987c73ef6287e87fa",
+      "size": 1103765,
+      "source": "Maintainer-operated 2026 Toyota Camry NRTD P5/cruise session, 2026-08-26"
+    },
+    {
+      "notes": "Separates the controlled READY/gear evidence from prior Camry baseline and NRTD P5 evidence units.",
+      "path": "targets/camry-2026/raw-20260826/READY_GEAR_MANIFEST.txt",
+      "provenance": "Maintainer-generated provenance manifest pinning the exact passive capture scripts/captures, operator correction, and observation-only boundary.",
+      "sha256": "9f3ff22ed739aa2f4c87d4e99f6eddb33202ea6d4d6de5f40c280ebb20cc95a5",
+      "size": 2002,
+      "source": "Maintainer-operated 2026 Toyota Camry READY/gear session, 2026-08-26"
+    },
+    {
+      "notes": "60-second NRTD-to-READY and selector capture; script calls can_recv only after route configuration and contains no CAN transmit/UDS path.",
+      "path": "targets/camry-2026/raw-20260826/camry_ready_gear_capture.py",
+      "provenance": "Exact passive Panda capture script copied from the maintainer-operated comma after the run.",
+      "sha256": "b79857ffa38f7ad94030313a5c5609cbd3e35178c31f8d72fa72a912c20740fb",
+      "size": 774,
+      "source": "Maintainer-operated 2026 Toyota Camry READY/gear session, 2026-08-26"
+    },
+    {
+      "notes": "135,866 passive CAN frames over 60.000313470 s; observed selector sequence P/R/N/D/N/R/P because B was missed in the first operator run.",
+      "path": "targets/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz",
+      "provenance": "Deterministic gzip (mtime=0) emitted on the maintainer-operated comma by the tracked passive capture script.",
+      "sha256": "379ec28fba65191d2898ebb156fe83e2e8e59c38bbf5fcfb7166ec9ff32c3889",
+      "size": 1660906,
+      "source": "Maintainer-operated 2026 Toyota Camry READY/gear session, 2026-08-26"
+    },
+    {
+      "notes": "25-second dedicated READY/stationary D/B/D follow-up; script calls can_recv only after route configuration and contains no CAN transmit/UDS path.",
+      "path": "targets/camry-2026/raw-20260826/camry_b_capture.py",
+      "provenance": "Exact passive Panda capture script copied from the maintainer-operated comma after the run.",
+      "sha256": "2d72ec4ace3ab01ecae440d8d4f8324e3d7166a15f9bdd868d6a5c2d2a2ae153",
+      "size": 755,
+      "source": "Maintainer-operated 2026 Toyota Camry READY/gear session, 2026-08-26"
+    },
+    {
+      "notes": "58,712 passive CAN frames over 25.000072204 s; exact 0x127 D/B/D transition closes raw value 4=B on the exact Camry.",
+      "path": "targets/camry-2026/raw-20260826/camry_ready_b_20260826.json.gz",
+      "provenance": "Deterministic gzip (mtime=0) emitted on the maintainer-operated comma by the tracked passive B capture script.",
+      "sha256": "7bae994dea1caff06d8f31f58558f67d646da38bd9531557875858eb33fa4db3",
+      "size": 715102,
+      "source": "Maintainer-operated 2026 Toyota Camry READY/gear session, 2026-08-26"
+    },
+    {
+      "notes": "Pins source hashes, identity/NRTD guard, full-range completeness, and normalization boundary.",
+      "path": "targets/camry-2026/raw-20260826/CODEFLASH_MANIFEST.txt",
+      "provenance": "Maintainer-generated provenance manifest for the exact F33 CodeFlash acquisition.",
+      "sha256": "3a46ba2da27b3650e47ac02ff5abe3f2ca9f0cfff4dabd4e28a0fa933a5aab7b",
+      "size": 2442,
+      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26"
+    },
+    {
+      "notes": "Authenticated old-stack boot-RAM range streamer; retained for acquisition reproducibility, not as production vehicle-control tooling.",
+      "path": "targets/camry-2026/raw-20260826/camry_codeflash_dump.py",
+      "provenance": "Exact identity/NRTD-guarded collector used on the maintainer-operated comma.",
+      "sha256": "0e2f78b156de7938e7d4069b3cd27cb16b819dd4c9fe046de0e6b7690147fb03",
+      "size": 17796,
+      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26"
+    },
+    {
+      "notes": "Payload is bound to the retained acquisition transcript and configured 0x00000000..0x001FFFFF range.",
+      "path": "targets/camry-2026/raw-20260826/calvin_payload_codeflash_00000000_00200000.bin",
+      "provenance": "Exact 4-KiB authenticated payload envelope used by the successful CodeFlash collector.",
+      "sha256": "860f8a3418d23ccfd0861a97efdb9e1d23a8854c3a629b8d7b6821eb93d0b588",
+      "size": 4096,
+      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26"
+    },
+    {
+      "notes": "2 MiB transport range; 524,288/524,288 words; lower 1 MiB populated, upper 1 MiB erased FF.",
+      "path": "targets/camry-2026/raw-20260826/codeflash/camry_8965F3307000_codeflash_20260826T213719Z.bin",
       "provenance": "Exact successful raw CodeFlash transport-range dump copied from the maintainer-operated comma.",
-      "notes": "2 MiB transport range; 524,288/524,288 words; lower 1 MiB populated, upper 1 MiB erased FF."
+      "sha256": "b588c7258699beee77669d1f5f09bb17ef8b189b941b46f344a07378c3aaa727",
+      "size": 2097152,
+      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26"
     },
     {
-      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/codeflash/camry_8965F3307000_codeflash_20260826T213719Z.coverage.bin",
-      "size": 524288,
-      "sha256": "33a150bceb13c1a992231e65b4fad16815212fc06cdb408996d32eeb2cef9ebb",
+      "notes": "524,288 bytes, all 0x01; zero missing words in the retained run.",
+      "path": "targets/camry-2026/raw-20260826/codeflash/camry_8965F3307000_codeflash_20260826T213719Z.coverage.bin",
       "provenance": "Exact one-byte-per-word coverage bitmap emitted by the successful collector.",
-      "notes": "524,288 bytes, all 0x01; zero missing words in the retained run."
+      "sha256": "33a150bceb13c1a992231e65b4fad16815212fc06cdb408996d32eeb2cef9ebb",
+      "size": 524288,
+      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26"
     },
     {
-      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26",
-      "path": "community/kai/camry-2026/raw-20260826/codeflash/camry_8965F3307000_codeflash_20260826T213719Z.run.json",
-      "size": 11233,
-      "sha256": "0d0fae44ba6c309f5ecb35a90435eb5b47bbbd3465c5d36ac1b15ff9d96fa265",
+      "notes": "Retains identities, NRTD guard, old-stack bootstrap stages, hashes, coverage, conflict/duplicate/SPI counters.",
+      "path": "targets/camry-2026/raw-20260826/codeflash/camry_8965F3307000_codeflash_20260826T213719Z.run.json",
       "provenance": "Exact JSON acquisition transcript emitted by the successful collector.",
-      "notes": "Retains identities, NRTD guard, old-stack bootstrap stages, hashes, coverage, conflict/duplicate/SPI counters."
+      "sha256": "0d0fae44ba6c309f5ecb35a90435eb5b47bbbd3465c5d36ac1b15ff9d96fa265",
+      "size": 11233,
+      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26"
     },
     {
-      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26",
-      "path": "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
-      "size": 1048576,
-      "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+      "notes": "Target-native 8965F3307000 static-analysis authority; upper raw transport half is erased and intentionally excluded.",
+      "path": "firmware/camry-8965F3307000/CodeFlash.bin",
       "provenance": "Deterministic normalized target image equal to the exact populated lower 1 MiB of the raw transport dump.",
-      "notes": "Target-native 8965F3307000 static-analysis authority; upper raw transport half is erased and intentionally excluded."
+      "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+      "size": 1048576,
+      "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26"
     }
   ],
   "public_routes": [
     {
-      "route": "a74eba85c97eaf67|00000004--555953f500",
       "api_template": "https://api.commadotai.com/v1/route/{route}/files",
+      "note": "Public route ID supplied in comma #toyota-security discussion; signed download URLs intentionally not retained. carParams is fixed TOYOTA_COROLLA_TSS2 with no carFw, so physical EPS identity is not established by route metadata.",
       "observed_file_inventory": {
         "cameras": 28,
         "dcameras": 27,
@@ -963,12 +895,6 @@
         "qcameras": 29,
         "qlogs": 29,
         "rlogs": 29
-      },
-      "software_provenance": {
-        "branch": "release-mici",
-        "commit": "af744c85e7c971e7bfbc8e6ee9e2bd75452a6f00",
-        "remote": "https://github.com/sunnypilot/openpilot.git",
-        "version": "2026.002.001"
       },
       "qlogs": [
         {
@@ -1124,7 +1050,81 @@
           "size": 9125881
         }
       ],
-      "note": "Public route ID supplied in comma #toyota-security discussion; signed download URLs intentionally not retained. carParams is fixed TOYOTA_COROLLA_TSS2 with no carFw, so physical EPS identity is not established by route metadata."
+      "route": "a74eba85c97eaf67|00000004--555953f500",
+      "software_provenance": {
+        "branch": "release-mici",
+        "commit": "af744c85e7c971e7bfbc8e6ee9e2bd75452a6f00",
+        "remote": "https://github.com/sunnypilot/openpilot.git",
+        "version": "2026.002.001"
+      }
     }
-  ]
+  ],
+  "repositories": {
+    "blurbdust_secoc": {
+      "commit": "47d282428d2ad504e79120c35d492d1211142da6",
+      "directory": "blurbdust-secoc",
+      "url": "https://github.com/blurbdust/secoc.git"
+    },
+    "calvinpark_openpilot": {
+      "commit": "eeb87f4f9cbcba2ee9c358c8d93015a513c1f822",
+      "directory": "calvinpark-openpilot",
+      "url": "https://github.com/calvinpark/openpilot.git"
+    },
+    "calvinpark_openpilot_dump": {
+      "commit": "42d1120395877e96ed440646a765157a0ad7646b",
+      "directory": "calvinpark-openpilot-dump",
+      "url": "https://github.com/calvinpark/openpilot.git"
+    },
+    "commaai_hardware": {
+      "commit": "530b7da136b6a6d4b0d37b95bdb3472c59f672f4",
+      "directory": "comma-hardware",
+      "url": "https://github.com/commaai/hardware.git"
+    },
+    "icanhack_secoc": {
+      "commit": "4ce19cc31ff560b697bcd59cc3db55711f50b7b3",
+      "directory": "secoc",
+      "url": "https://github.com/I-CAN-hack/secoc.git"
+    },
+    "icanhack_secoc_tundra": {
+      "commit": "b80d9104a14bdf59d236a6a0de2a4a5c929a9d76",
+      "directory": "secoc-tundra",
+      "url": "https://github.com/I-CAN-hack/secoc.git"
+    },
+    "lochuan_b4512000_fw_patch": {
+      "commit": "9eed2b4ac871b1944e686769cc3e0a43fd7198c3",
+      "directory": "8965B4512000-FW-PATCH",
+      "url": "https://github.com/lochuan/8965B4512000-FW-PATCH.git"
+    },
+    "lochuan_eps_telescope": {
+      "commit": "2bb94a5411f88bcda47c8f70cab66e768b35cb6b",
+      "directory": "eps-telescope",
+      "url": "https://github.com/lochuan/eps-telescope.git"
+    },
+    "opendbc": {
+      "commit": "c9b31d21bc396e8958891e271936bdbdf1a6ca93",
+      "directory": "opendbc",
+      "url": "https://github.com/commaai/opendbc.git"
+    },
+    "optskug_docs": {
+      "commit": "2c7184122d3f1644dfc9f32e98daaa45df653098",
+      "directory": "optskug-docs",
+      "url": "https://github.com/optskug/docs.git"
+    },
+    "rh850_p1me_original": {
+      "commit": "b8c6bcf6b84763a9c5288fc8fa6766ebfe66ce4a",
+      "directory": "RH850_P1m-E",
+      "url": "https://github.com/lochuan/RH850_P1m-E.git"
+    },
+    "toyota_dataflash_secoc_setup": {
+      "commit": "db453752beeb7cdd024a1a9c38c6711c981e75ad",
+      "directory": "tsk_extraction_by_can_log",
+      "url": "https://github.com/Bk2ol/tsk_extraction_by_can_log.git"
+    },
+    "vance_sienna_2024": {
+      "commit": "3333453f10c09a27df265156458ce976cc9ce25a",
+      "directory": "ToyotaSienna2024OpenpilotAnalysis-_Note",
+      "url": "https://github.com/Vance425/ToyotaSienna2024OpenpilotAnalysis-_Note.git"
+    }
+  },
+  "schema_version": 1
 }

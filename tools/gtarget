@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+TARGET=${1:?usage: tools/gtarget TARGET <ghidra-command...>}
+shift
+python3 "$ROOT/tools/analysis_target.py" "$TARGET" --field project_name >/dev/null
+export GHIDRA_ANALYSIS_TARGET="$TARGET"
+exec "$ROOT/tools/g" "$@"

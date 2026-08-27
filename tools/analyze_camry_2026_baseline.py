@@ -10,7 +10,7 @@ from collections import defaultdict
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-RAW = REPO / "community/kai/camry-2026/raw-20260826"
+RAW = REPO / "targets/camry-2026/raw-20260826"
 DEFAULT_OUT = REPO / "data/generated/camry_2026_tsk_baseline.json"
 BASELINE_SOURCE_NAMES = ("MANIFEST.txt", "can_oracle.ndjson.gz", "identity.json", "programming_probe.json", "xcp_probe.json")
 

@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+# Deterministic staged rebuild for registered first-class non-default analysis targets.
+set -euo pipefail
+ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
+TARGET=""; FORCE=0; PROJECT_DIR_OVERRIDE=""
+usage(){ echo "Usage: tools/rebuild_target_project.sh --target TARGET [--project-dir DIR] [--force]"; }
+while (($#)); do case "$1" in
+  --target) TARGET=${2:?missing target}; shift 2;;
+  --project-dir) PROJECT_DIR_OVERRIDE=${2:?missing project dir}; shift 2;;
+  --force) FORCE=1; shift;;
+  -h|--help) usage; exit 0;;
+  *) echo "unknown argument: $1" >&2; usage >&2; exit 2;;
+esac; done
+[[ -n "$TARGET" ]] || { usage >&2; exit 2; }
+field(){ python3 "$ROOT/tools/analysis_target.py" "$TARGET" --field "$1"; }
+PROFILE=$(field rebuild_profile)
+[[ "$PROFILE" == "camry_f33_v1" ]] || { echo "target $TARGET is not supported by this target rebuild profile: $PROFILE" >&2; exit 2; }
+PROJECT_NAME=$(field project_name); PROGRAM_NAME=$(field program_name)
+REGISTERED_WORK="$ROOT/$(field work_dir)"; PROJECT_DIR=${PROJECT_DIR_OVERRIDE:-$REGISTERED_WORK}
+CODEFLASH="$ROOT/$(field codeflash)"; DATAFLASH="$ROOT/$(field dataflash)"; EXPECTED_SHA=$(field codeflash_sha256); PROCESSOR=$(field processor)
+SEEDS="$ROOT/data/targets/camry-8965F3307000/function_seeds.csv"
+# Canonicalize before any recursive delete and enforce the same build/work boundary as the primary rebuild.
+PROJECT_DIR=$(python3 - "$PROJECT_DIR" "$BUILD_WORK" <<'PY'
+from pathlib import Path
+import sys
+p=Path(sys.argv[1]).expanduser().resolve(strict=False); w=Path(sys.argv[2]).resolve(strict=False)
+if p==w or w not in p.parents: raise SystemExit(f"refusing target rebuild destination outside dedicated build/work descendant: {p}")
+if any(part.startswith('.') for part in p.parts if part not in ('.','..')): raise SystemExit(f"Ghidra rejects dot-prefixed path: {p}")
+# Existing symlink components are forbidden for a destructive rebuild destination.
+q=Path('/')
+for part in p.parts[1:]:
+    q=q/part
+    if q.exists() and q.is_symlink(): raise SystemExit(f"refusing symlinked rebuild path component: {q}")
+print(p)
+PY
+)
+[[ "$(shasum -a 256 "$CODEFLASH" | cut -d' ' -f1)" == "$EXPECTED_SHA" ]] || { echo "CodeFlash identity drift" >&2; exit 1; }
+[[ "$(python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).stat().st_size)' "$CODEFLASH")" == "$(field codeflash_size)" ]] || { echo "CodeFlash size drift" >&2; exit 1; }
+[[ "$(shasum -a 256 "$DATAFLASH" | cut -d' ' -f1)" == "$(field dataflash_sha256)" ]] || { echo "DataFlash identity drift" >&2; exit 1; }
+[[ "$(python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).stat().st_size)' "$DATAFLASH")" == "$(field dataflash_size)" ]] || { echo "DataFlash size drift" >&2; exit 1; }
+if [[ -e "$PROJECT_DIR/$PROJECT_NAME.gpr" || -e "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
+  ((FORCE)) || { echo "target project exists: $PROJECT_DIR (use --force)" >&2; exit 1; }
+  rm -rf "$PROJECT_DIR"
+fi
+mkdir -p "$PROJECT_DIR" "$BUILD_OUT/targets/$TARGET" "$BUILD_LOGS/targets/$TARGET"
+cat > "$PROJECT_DIR/.gitignore" <<'EOF'
+*.lock
+*.lock~
+**/tmp*
+**/~journal*
+EOF
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/ghidra_env.sh" full
+"$ROOT/tools/install_findcrypt_extension.sh" >/dev/null
+if pgrep -f "AnalyzeHeadless.*${PROJECT_NAME}" >/dev/null 2>&1; then echo "target AnalyzeHeadless already running" >&2; exit 1; fi
+runh(){ local stage=$1; shift; "$ROOT/tools/run_headless" --project-dir "$PROJECT_DIR" --project "$PROJECT_NAME" --label "$TARGET-$stage" --log "$BUILD_LOGS/targets/$TARGET/$stage.log" --quiet -- "$@"; }
+echo "[$TARGET 1/4] import exact F33 CodeFlash/DataFlash and target-native device profile"
+runh import -import "$CODEFLASH" -processor "$PROCESSOR" -noanalysis \
+  -postScript AddDataFlash.java "$DATAFLASH" \
+  -postScript ApplyCamryF33DeviceProfile.java \
+  -commit "Import exact F33 images and target-native context"
+echo "[$TARGET 2/4] seed exact application roots and run base analysis"
+runh entries -process "$PROGRAM_NAME" -preScript SeedCamryF33Entries.java \
+  -commit "Seed exact F33 application roots"
+echo "[$TARGET 3/4] seed exact RDBI table callbacks and re-run analysis"
+runh diagnostics -process "$PROGRAM_NAME" -preScript SeedCamryF33Diagnostics.java \
+  -commit "Seed exact F33 RDBI callbacks"
+echo "[$TARGET 4/4] seed promoted exact-F33 functions and analyze"
+runh recovered -process "$PROGRAM_NAME" -preScript SeedCamryF33RecoveredFunctions.java "$SEEDS" \
+  -commit "Seed evidence-backed F33 recovered functions"
+echo "[$TARGET 4b] finalize calling conventions without analysis"
+runh conventions -process "$PROGRAM_NAME" -noanalysis -postScript ApplyCallingConventions.java \
+  -commit "Finalize target calling conventions"
+cp "$PROCESSOR_MANIFEST" "$PROJECT_DIR/processor_manifest.json"
+# Export only the normalized inventory here. The canonical corpus is generated by
+# tools/generate_decompiler_corpus.py after two-build inventory parity is established.
+GHIDRA_ANALYSIS_TARGET="$TARGET" PROJECT_DIR="$PROJECT_DIR" \
+  "$ROOT/tools/export_ghidra_project.sh" project-inventory "$BUILD_OUT/targets/$TARGET/project_inventory.jsonl"
+STATS=$(GHIDRA_ANALYSIS_TARGET="$TARGET" GHIDRA_PROJECT="$PROJECT_DIR" GHIDRA_AGENT=1 "$ROOT/tools/g" stats)
+GHIDRA_ANALYSIS_TARGET="$TARGET" GHIDRA_PROJECT="$PROJECT_DIR" "$ROOT/tools/g" stop >/dev/null 2>&1 || true
+printf '%s\n' "$STATS" > "$BUILD_OUT/targets/$TARGET/stats.json"
+python3 - "$BUILD_OUT/targets/$TARGET/stats.json" <<'PY'
+import json,sys
+x=json.load(open(sys.argv[1])); x=x[0] if isinstance(x,list) else x; x=x.get('stats',x); n=int(x.get('functions',0))
+if n<3000: raise SystemExit(f"unexpectedly low function count: {n}")
+print(f"verified target function floor: {n}")
+PY
+echo "Built $PROJECT_DIR/$PROJECT_NAME.gpr"
+echo "Inventory: $BUILD_OUT/targets/$TARGET/project_inventory.jsonl"

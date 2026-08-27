@@ -5,7 +5,7 @@ import hashlib, json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-IMAGE = ROOT / 'community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin'
+IMAGE = ROOT / 'firmware/camry-8965F3307000/CodeFlash.bin'
 F33 = ROOT / 'data/generated/camry_8965F3307000_flash_backend_evidence.json'
 T0035 = ROOT / 'data/generated/techstream_v18/t0035_faci_backend_evidence.json'
 FLASH = ROOT / 'exploit/patcher/flash_backend.c'

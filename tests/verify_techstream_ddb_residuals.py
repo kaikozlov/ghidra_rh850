@@ -121,8 +121,14 @@ check("raw factories resolve all 89 format-1 and 151 format-2 cases",
       len(raw_master_map) == 89 and len(raw_ecu_map) == 151)
 check("parser master names are a strict match to executable constructors",
       all(raw_master_map[key] == value for key, value in MASTER_TABLE_CLASS_NAMES.items()))
-check("parser ECU names are a strict match to executable constructors",
-      all(raw_ecu_map[key] == value for key, value in ECU_TABLE_CLASS_NAMES.items()))
+v18_parser_ecu_map = {
+    key: value for key, value in ECU_TABLE_CLASS_NAMES.items() if key in raw_ecu_map
+}
+current_only_parser_ids = set(ECU_TABLE_CLASS_NAMES) - set(raw_ecu_map)
+check("parser V18 ECU names are a strict match to executable constructors",
+      all(raw_ecu_map[key] == value for key, value in v18_parser_ecu_map.items()))
+check("current GTS+ ECU aliases are outside the pinned V18 factory domain",
+      current_only_parser_ids == set(range(151, 172)))
 artifact_maps = {
     factory["format_version"]: {
         row["table_type"]: row["class_name"]

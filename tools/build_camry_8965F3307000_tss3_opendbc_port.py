@@ -7,9 +7,12 @@ import hashlib
 import json
 import struct
 from pathlib import Path
+import sys
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin"
+sys.path.insert(0, str(REPO))
+from tools.camry_f33_corpus import body_bytes  # noqa: E402
+IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
 EVID = REPO / "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json"
 OUT = REPO / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
 IMAGE_SHA256 = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
@@ -51,7 +54,7 @@ def build() -> dict:
     funcs = {int(row["entry"], 16): row for row in evid["functions"]}
     need(len(funcs) == 11, "duplicate/missing Tx evidence functions")
     for entry, row in funcs.items():
-        need(sha(image[entry:entry + row["body_size"]]) == row["body_sha256"], f"body hash drift 0x{entry:08X}")
+        need(sha(body_bytes(image, row)) == row["body_sha256"], f"body hash drift 0x{entry:08X}")
 
     # Exact F33 generated-COM transmit table and PDU allocation.
     tx_rows = [TX.unpack_from(image, TX_TABLE + i * TX.size) for i in range(5)]
@@ -84,7 +87,7 @@ def build() -> dict:
     need(allocations[4] == list(range(52, 56)), "F33 PDU4/0x4C8 signal allocation drift")
 
     # Target-native generated pack helpers and exact carrier fields.
-    need_tokens(funcs, 0x7D1DC, "unaff_tp + -0x1974", "param_3 < 0x11", "unaff_gp + -0x6db8")
+    need_tokens(funcs, 0x7D1DC, "&DAT_00022488 + (param_1 & 0xffff) * 2", "param_3 < 0x11", "(param_2 & 0xffff) - 0x6db8")
     need_tokens(funcs, 0x4CED0,
                 "FUN_0007d1dc(0x26,0x22,3,5", "FUN_0007d1dc(0x27,0x22,1,4", "FUN_0007d0ea(1)")
     need_tokens(funcs, 0x4CE08,
@@ -94,25 +97,25 @@ def build() -> dict:
                 "FUN_0007d31e(0x2c,0x27,8,0", "FUN_0007d31e(0x33,0x2e,8,0", "FUN_0007d0ea(3)")
 
     source = need_tokens(funcs, 0x4C000,
-                         "unaff_gp + -0x5158", "* 100) / 0x100", "sVar8 = 1000", "sVar8 = -1000",
-                         "unaff_gp + -0x50e8", "* -100) / 0x80")
+                         "DAT_febe66a8", "* 100) / 0x100", "DAT_febe8152 = 1000", "DAT_febe8152 = -1000",
+                         "DAT_febe6718", "* -100) / 0x80")
     stage = need_tokens(funcs, 0x4C14E,
-                        "unaff_gp + -0x37b8", ">> 8) & 0xf", "unaff_gp + -0x3aba", "0x7ff", "0xfffff800",
-                        "unaff_gp + -0x36ae) / 10", "unaff_gp + -0x36a8")
-    need("unaff_gp + -0x5158" in source and "unaff_gp + -0x50e8" in source, "0x4A3 source-stage drift")
-    need("unaff_gp + -0x37b8" in stage and "unaff_gp + -0x3aba" in stage, "0x4A3 angle-stage drift")
+                        "DAT_febe8048", ">> 8) & 0xf", "DAT_febe7d46", "0x7ff", "0xfffff800",
+                        "puVar1 + -0x36ae", "puVar1 + -0x36a8")
+    need("DAT_febe66a8" in source and "DAT_febe6718" in source, "0x4A3 source-stage drift")
+    need("DAT_febe8048" in stage and "DAT_febe7d46" in stage, "0x4A3 angle-stage drift")
 
-    need_tokens(funcs, 0x4C1C0, "unaff_gp + -0x3700", "bRam0002fbf8")
-    need_tokens(funcs, 0x4C216, "param_1 = 7;", "unaff_gp + -0x3700", "unaff_gp + -0x36ff")
-    need_tokens(funcs, 0x4C24A, "uVar1 = *(byte *)(unaff_gp + -0x3560) - 1", "unaff_gp + -0x36f6", "unaff_gp + -0x36fe")
+    need_tokens(funcs, 0x4C1C0, "DAT_febe8100", "DAT_0002fbf8")
+    need_tokens(funcs, 0x4C216, "param_1 = 7;", "DAT_febe8100", "DAT_febe8101")
+    need_tokens(funcs, 0x4C24A, "uVar1 = DAT_febe82a0 - 1", "DAT_febe810a", "DAT_febe8102")
 
     census = evid["fixed_gp_census"]
     torque_refs = [row["entry"] for row in census["driver_torque_source_gp_minus_0x5158"]]
     current_alt_refs = [row["entry"] for row in census["alternate_4a3_current_source_gp_minus_0x50e8"]]
     did1151_refs = [row["entry"] for row in census["did1151_q_current_source_gp_minus_0x50f2"]]
-    need(torque_refs == ["0x00035A06", "0x0004C000", "0x0004DB70", "0x00054244", "0x000564CE"], "updated torque census drift")
-    need(current_alt_refs == ["0x0004C000"], "0x4A3 alternate-current census drift")
-    need(did1151_refs == ["0x0004E394", "0x00054244", "0x000564CE"], "DID1151 Q-current census drift")
+    need(torque_refs == ["0x00035A06", "0x0004C000", "0x0004C490", "0x0004DB70", "0x00052CA0", "0x00054244", "0x000564CE", "0x00059448", "0x0005D5E0"], "canonical torque census drift")
+    need(current_alt_refs == ["0x0004C000", "0x0004C490", "0x00059448", "0x0005D12C"], "0x4A3 alternate-current census drift")
+    need(did1151_refs == ["0x0004E394", "0x00052CA0", "0x00054244", "0x000564CE", "0x00059448", "0x0005D12C"], "DID1151 Q-current census drift")
 
     return {
         "schema": "camry-8965f3307000-tss3-opendbc-port-v1",
@@ -171,15 +174,16 @@ def build() -> dict:
             },
         },
         "census_correction": {
-            "supersedes": "VAR-056 recovered-function-corpus direct/fixed-GP torque-source count",
-            "old_recovered_count": 4,
-            "new_recovered_count": 5,
-            "new_entry": "0x0004C000",
+            "supersedes": "VAR-056/VAR-058 scratch-corpus direct/fixed-GP torque-source counts",
+            "old_recovered_count": 5,
+            "new_recovered_count": 9,
+            "new_read_count": 7,
+            "new_write_count": 2,
+            "new_entry": "0x0004C490",
             "driver_torque_direct_fixed_gp_entries": torque_refs,
             "control_cone_conclusion_changed": False,
             "reason": (
-                "The newly forced/recovered 0x4C000 function is the target-native 0x4A3 telemetry producer. It reads GP-0x5158 directly, "
-                "but it is outside the cooperative C8xxx-D1xxx target-to-motor control cone, so the earlier bounded no-direct-control-cone-reference conclusion remains intact."
+                "The first-class 6,065-function project resolves GP and exposes a canonical Ghidra data-reference graph. It finds seven readers and two writers of FEBE66A8, including previously unrecovered 0x4C490/0x52CA0 and source writers, while preserving zero direct references inside the cooperative C8xxx-D1xxx control cone."
             ),
         },
         "passive_opendbc_integration": {

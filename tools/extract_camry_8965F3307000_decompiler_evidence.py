@@ -3,9 +3,10 @@
 from __future__ import annotations
 import argparse, hashlib, json
 from pathlib import Path
+from camry_f33_corpus import CORPUS, body_bytes, display_path
 
 REPO = Path(__file__).resolve().parents[1]
-IMAGE = REPO / "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin"
+IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
 OUT = REPO / "data/generated/camry_8965F3307000_decompiler_evidence.json"
 ENTRIES = [
     # Target-native COM/diagnostic steering-angle ingress.
@@ -22,7 +23,7 @@ def sha(b: bytes) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--image', type=Path, default=IMAGE)
-    ap.add_argument('--corpus', type=Path, required=True, help='disposable target-native Ghidra decompiler corpus JSONL')
+    ap.add_argument('--corpus', type=Path, default=CORPUS, help='first-class exact-F33 canonical decompiler corpus')
     ap.add_argument('--out', type=Path, default=OUT)
     a = ap.parse_args()
     image = a.image.read_bytes()
@@ -39,14 +40,16 @@ def main() -> int:
         if not r or not r.get('decompile_completed') or not r.get('decompiled_c'):
             raise SystemExit(f'missing complete decompile 0x{entry:X}')
         size = int(r['body_size'])
-        body = image[entry:entry + size]
+        body = body_bytes(image, r)
         text = r['decompiled_c']
         if len(body) != size:
             raise SystemExit(f'body outside image 0x{entry:X}')
         funcs.append({
             'entry': f'0x{entry:08X}',
             'body_size': size,
+            'body_ranges': r.get('body_ranges', []),
             'body_sha256': sha(body),
+            'data_references': r.get('data_references', []),
             'decompiled_c_sha256': sha(text.encode()),
             'decompiled_c': text,
         })
@@ -59,7 +62,7 @@ def main() -> int:
             'sha256': sha(image),
         },
         'source_corpus': {
-            'path': str(a.corpus.resolve().relative_to(REPO.resolve())) if a.corpus.resolve().is_relative_to(REPO.resolve()) else str(a.corpus),
+            'path': display_path(a.corpus),
             'sha256': sha(a.corpus.read_bytes()),
         },
         'function_count': len(funcs),

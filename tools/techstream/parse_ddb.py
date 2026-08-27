@@ -104,6 +104,30 @@ ECU_TABLE_CLASS_NAMES = {
     88: "CDbBehaviorDataRecordP5Table",
     90: "CDbDataIdForRobTable",
     91: "CDbBehaviorSignalCheckTable",
+    # Current GTS+ format-2 factory aliases/extensions, recovered from the
+    # KgpDataCtrl.dll MakeTable jump table. Several intentionally mirror older
+    # table classes at new IDs for the current Gen/P6 database families.
+    151: "CDbDataIdForRobTable",
+    152: "CDbBehaviorSignalCheckTable",
+    153: "CDbBehaviorDataRecordP5Table",
+    154: "CDbSignalGroupTable",
+    155: "CDbSignalCheckTable",
+    156: "CDbDataIdForDmTable",
+    157: "CDbDatamonitorP5Table",
+    158: "CDbTableBase",
+    159: "CDbTableBase",
+    160: "CDbMonitorStatus_J1979_2_3_Table",
+    161: "CDbMonitorResultCan_J1979_2_3_Table",
+    162: "CDbDetailLink_J1979_2_3_Table",
+    163: "CDbRoBDiagCodeTable",
+    164: "CDbRoBFreezeFrameTable",
+    165: "CDbDDRDiagCodeTable",
+    166: "CDbDataIdForDdrTable",
+    167: "CDbDDRFreezeFrameTable",
+    168: "CDbDDRInvalidConditionTable",
+    169: "CDbTableBase",
+    170: "CDbScaling_J1979_2_3_Table",
+    171: "CDbPreFFDVehicleTypePIDIDTable",
 }
 
 MASTER_TABLE_CLASS_NAMES = {

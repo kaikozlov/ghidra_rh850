@@ -11,25 +11,44 @@
     "target_native_timing_closed": true
   },
   "driver_torque": {
-    "boundary": "The 2109-raw acquisition/representation saturation is not a driver-override threshold. The negative control-cone result covers direct/fixed-GP references only; computed aliases and DMA remain outside the census.",
+    "boundary": "The 2109-raw acquisition/representation saturation is not a driver-override threshold. The canonical whole-project data-reference census includes both readers and writers of FEBE66A8; the negative control-cone result remains empty. Computed aliases without a Ghidra data reference and DMA remain outside the census.",
     "callback": "0x0004DB70",
     "cooperative_c8_d1_direct_fixed_gp_intersection": [],
     "diagnostic_display_clamp_nm": 25.0,
     "did": "0x1035",
     "direct_fixed_gp_reference_entries": [
       "0x00035A06",
+      "0x0004C000",
+      "0x0004C490",
       "0x0004DB70",
+      "0x00052CA0",
       "0x00054244",
-      "0x000564CE"
+      "0x000564CE",
+      "0x00059448",
+      "0x0005D5E0"
     ],
     "override_threshold_recovered": false,
     "physical_formula": "N.m = raw / 256",
     "raw_source": "gp-0x5158",
+    "read_reference_entries": [
+      "0x00035A06",
+      "0x0004C000",
+      "0x0004C490",
+      "0x0004DB70",
+      "0x00052CA0",
+      "0x00054244",
+      "0x000564CE"
+    ],
+    "resolved_source_address": "0xFEBE66A8",
     "sensor_acquisition_saturation_calibration": "normalized CodeFlash 0x00030E52",
     "sensor_acquisition_saturation_nm": 8.23828125,
     "sensor_acquisition_saturation_raw": 2109,
     "techstream_name": "Steering Wheel Torque",
-    "validity_magic": "0xA5AA5AA5"
+    "validity_magic": "0xA5AA5AA5",
+    "write_reference_entries": [
+      "0x00059448",
+      "0x0005D5E0"
+    ]
   },
   "foreground_timing": {
     "b6_nominal_steady_timeout_ms": 35.0,
@@ -76,20 +95,34 @@
     "target_lateral_id": 11
   },
   "q_current": {
-    "boundary": "No target-native measured-Q-current-vs-command comparator is recovered through direct/fixed-GP references in the cooperative cone. Numeric representation limits are not a motor-response safety threshold.",
+    "boundary": "No target-native measured-Q-current-vs-command comparator is recovered through canonical direct data references in the cooperative cone. The whole-project census includes readers and writers of FEBE670E; numeric representation limits are not a motor-response safety threshold.",
     "callback": "0x0004E394",
     "cooperative_c8_d1_direct_fixed_gp_intersection": [],
     "diagnostic_formula": "displayed centi-A = (raw * 100) / 0x80",
     "did": "0x1151",
     "direct_fixed_gp_reference_entries": [
       "0x0004E394",
+      "0x00052CA0",
       "0x00054244",
-      "0x000564CE"
+      "0x000564CE",
+      "0x00059448",
+      "0x0005D12C"
     ],
     "physical_formula": "A = raw / 128",
     "raw_source": "gp-0x50F2",
+    "read_reference_entries": [
+      "0x0004E394",
+      "0x00052CA0",
+      "0x00054244",
+      "0x000564CE"
+    ],
+    "resolved_source_address": "0xFEBE670E",
     "response_threshold_recovered": false,
-    "techstream_name": "Motor Actual Current (Q Axis)"
+    "techstream_name": "Motor Actual Current (Q Axis)",
+    "write_reference_entries": [
+      "0x00059448",
+      "0x0005D12C"
+    ]
   },
   "runtime_readiness": {
     "application_context_init": "0x000715B4",
@@ -133,16 +166,16 @@
   },
   "sources": {
     "codeflash": {
-      "path": "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+      "path": "firmware/camry-8965F3307000/CodeFlash.bin",
       "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
     },
     "codeflash_contract": {
       "path": "data/generated/camry_8965F3307000_codeflash.json",
-      "sha256": "857e06d621052261add565475d438ac84b02e83f16598e0234d3cf1c8ba71e30"
+      "sha256": "34ed0a4d47e0e9e52f412d0d823b3b84dcd1bef267fca18207c8d137abfe10c2"
     },
     "decompiler_evidence": {
       "path": "data/generated/camry_8965F3307000_lateral_decompiler_evidence.json",
-      "sha256": "420fd7fbee8e1afc6df6cd27516c95f92be8fc8da2f845b4305d832f23f5df5d"
+      "sha256": "28a14e8b5021a960d4864351f3f632acbba7c81a80b316e920f03f28fc890a53"
     },
     "p1me_product_memory": {
       "path": "data/p1me_product_memory.json",
@@ -150,7 +183,7 @@
     },
     "runtime_carrier": {
       "path": "data/generated/camry_8965F3307000_command5_runtime_carrier.json",
-      "sha256": "d5d7a9c70ee964105a50cc187c08b485ec4bda94b2b7c675678cb327fe7dd20e"
+      "sha256": "739b46326b17f2ed4f002cb9a9c6a1e3c63c87b416dad4f48f9612f0a27bc9ed"
     },
     "techstream_correlations": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
