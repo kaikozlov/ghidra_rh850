@@ -928,40 +928,49 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `data/generated/corolla_tss3_opendbc_readiness.json`.
 
 - **OQ-053 — F33 non-disruptive application-mode RAM execution pivot.** Exact
-  `8965F3307000` now has the desired volatile carrier and the placement half of
-  the production loader: live evidence proves `FEBFF9F0..FEBFFBFB` (524 bytes)
+  `8965F3307000` has the desired volatile carrier and the placement half of the
+  production loader: live evidence proves `FEBFF9F0..FEBFFBFB` (524 bytes)
   survives the real stock application startup byte-for-byte and executes, while
   the former `FEBF0000` carrier is disproved by that same startup. Target-native
   XCP `SET_MTA 0x82C62` + `DOWNLOAD 0x81FFE` can statically write arbitrary tester
   bytes throughout `FEBF7C00..FEBFFBFF`; GET_SEED/UNLOCK are unconfigured. The
   packed `0x7F7/0x7F8` endpoint is present in CodeFlash, but CONNECT timed out on
   the tested normal bus1/ELM1 route. The remaining architectural blocker is a
-  safe already-running-application control-transfer object into the tail.
+  safe already-running-application control transfer into the tail.
 
-  The tempting lower-window execution composition is now closed: normal startup
-  `0x20880 -> 0x637EE -> 0x63822 -> 0x636D4` and XCP COPY_CAL_PAGE
-  `0x99414 -> 0x993F0` use byte-identical loops to copy calibration data
-  `0x10000..0x17DEF` to `FEBF7C00..FEBFF9EF`. Standard SET/GET_CAL_PAGE state at
-  `FEBE5EC4/5EC5` and translator `0x991D2` are recovered only in calibration/checksum
-  data paths; there are zero recovered functions/function-owned flows in the source
-  page and zero recovered flow edges into its RAM shadow. It is not a recovered
-  instruction overlay.
+  The **recovered stock pivot surface is now statically exhausted**, rather than
+  merely missing an obvious callback. The calibration-page shadow is data-only;
+  the four locally unresolved computed calls resolve to guarded lower-RAM fixed-
+  CodeFlash callbacks; eight exception-return paths save PCs on lower `FEBE`
+  stacks; seven fixed DMAC families cover 22 records / 88 endpoint fields with
+  zero XCP-window endpoints and `0x60A6A` as the only recovered application channel
+  programmer; the whole-image CTBP census finds only reset's `ldsr r0,CTBP @ 0x25E`;
+  application context setup writes fixed `INTBP=0x20200` and `EBASE=0x20000`;
+  and full configured XCP DAQ is measurement/readback-only (`WRITE_DAQ 0x82510`
+  supplies a read source consumed by `0x82368`, not a write/call target).
 
-  The control-transfer negative is also materially tighter. The four computed-call
-  sites not closed by the local backtracker resolve to guarded callback cells
-  `FEBF117C/FEBF1180/FEBF131C/FEBF1320/FEBF1324`, all below the XCP window and
-  populated only with fixed CodeFlash targets. Eight exact exception returns save/
-  restore PCs through lower `FEBE` stacks; no saved-PC frame enters the XCP window.
-  Seven fixed DMAC descriptor families add 22 records / 88 endpoint fields with zero
-  XCP-window endpoints, and `0x60A6A` is the only recovered application channel
-  programmer. Finally, a whole-image 2-byte-aligned LDSR census finds exactly one
-  CTBP writer, `ldsr r0,CTBP @ 0x25E`, so CALLT-base retargeting is closed.
+  The diagnostic/factory-test classes are closed target-natively too. SID `0x11`
+  ECUReset is session-2-only with null callback and no subfunctions. WDBI resolves
+  exactly 13 DIDs (`0204, 2001, 2002, 2005, 2006, 2007, 2008, 2009, 200D, 2010,
+  2012, 2013, 2014`) to fixed CodeFlash maintenance setters. All 19 RoutineControl
+  rows use fixed CodeFlash callbacks (RID `0x1010` is null/null; `0x100F` remains
+  only the fixed-16/private-result command-5 oracle). SID `0xBA` has ten fixed
+  operation records / 20 fixed start-finish callbacks, and SID `0xAB` has three
+  fixed selectors plus a 51-populated-entry event-ID/type catalogue; neither
+  interprets request bytes as an executable address.
 
-  This is still a bounded negative against synthesized/computed aliases, a separate
-  undiscovered DMA/hardware mutation path, and undiscovered code. Minimum next live
-  discriminator is non-executing: locate a reachable physical `0x7F7/0x7F8` route,
-  then (only if reachable) perform bounded high-tail DOWNLOAD+readback. Do not guess
-  a PC write. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.
+  Therefore more broad static searching of known stock services has diminishing
+  value. The remaining bounded classes are synthesized/computed aliases not present
+  in recovered references, a memory-safety bug outside the recovered CFG/dataflow,
+  a separate undiscovered DMA/hardware mutation mechanism, or undiscovered code.
+  The next live work should remain non-executing: first locate a reachable physical
+  `0x7F7/0x7F8` route and, if reachable, close placement with bounded high-tail
+  DOWNLOAD+SHORT_UPLOAD readback. For the **execution** blocker, collect a targeted
+  runtime RAM/control-flow discriminator (for example before/after lower-RAM state
+  plus registration/control-flow trace around benign stock diagnostic/task activity)
+  to identify a concrete mutable continuation/callback/task object or unrecovered
+  trigger. Do not guess an arbitrary PC write. Canonical:
+  [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

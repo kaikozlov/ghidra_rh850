@@ -705,9 +705,40 @@ The exact application service table at `0x25C54` configures
 WriteMemoryByAddress. SID `0x23` is the bounded RMBA reader; SID `0x2E` is the
 configured DID-write engine rather than arbitrary memory access. SIDs `0x34/0x36/0x37`
 have null direct application callbacks and are admitted only in session 2; the real
-download state belongs to the already-known disruptive PROGRAMMING path. No
-Techstream engineering/calibration operation recovered to date improves this
-bound. The current Techstream/GTS+ host corpus also supplies no OEM-facing name
+download state belongs to the already-known disruptive PROGRAMMING path. SID `0x11`
+ECUReset is weaker still in this exact calibration: its service object has a null
+direct callback, session-2-only policy, no subfunction table, and zero subfunctions,
+so there is no ordinary application reset worker to compose with retained RAM.
+
+The remaining application diagnostic classes have now been enumerated target-natively
+for the PC-pivot question rather than dismissed by service name:
+
+- **WDBI `0x2E`** resolves through a six-class static table and then an exact
+  13-entry DID table at `0x25640`: `0204, 2001, 2002, 2005, 2006, 2007, 2008,
+  2009, 200D, 2010, 2012, 2013, 2014`. Every precondition/write callback is a fixed
+  CodeFlash target; the generic lower worker caps its internal payload staging at
+  `<8` bytes. None of the 13 write callbacks treats payload bytes as an address or
+  performs request-derived indirect control flow.
+- **RoutineControl `0x31`** has all 19 F33 rows reconstructed from `0x256DC`.
+  Every non-null precondition/action is fixed CodeFlash; RID `0x1010` is null/null.
+  RID `0x100F` remains the crypto oracle described above, but no RID accepts a tester
+  PC/address or installs a callback.
+- **Proprietary SID `0xBA`** copies at most 64 request bytes into fixed state, then
+  dispatches through exactly ten 16-byte CodeFlash operation records at `0x27EC4`
+  (`F1/F3/F4/F5/F6/F7/F8/F9/FA/FB`). All 20 start/finish callbacks are fixed
+  CodeFlash functions; none reinterprets request bytes as an executable address.
+- **Proprietary SID `0xAB`** has three fixed selector callbacks at `0x25AFC` and a
+  64-slot event catalogue at `0x2AB70`, with exactly 51 populated IDs and type bytes
+  `11/22/33/44/55`. Request state lives at `FEBF45D0..FEBF45E3`, below the XCP
+  writer. The selectors format/read bounded event IDs and merge event-data buffers
+  into the DCM response; the catalogue is not a function-pointer/address table.
+
+Thus every **recovered configured application diagnostic class with plausible
+write/control semantics** is now bounded away from a tester-chosen PC transfer.
+This is not a general memory-safety proof of undiscovered code, but there is no
+remaining known UDS/proprietary/factory-test service to mine for a straightforward
+runtime call primitive. No Techstream engineering/calibration operation recovered
+to date improves this bound. The current Techstream/GTS+ host corpus also supplies no OEM-facing name
 that turns F33 RID `0x100F` into a general signer service. Its relevant `0x7F7`
 host evidence is instead bounded to Unified CUW/reset choreography: after ECU
 reset an EachArea writer emits raw `0x7F7 || FE 10 81` as one post-reset tail
@@ -759,10 +790,32 @@ aligned image offset finds exactly one CTBP writer: `ldsr r0,CTBP @ 0x25E`. It s
 CTBP to zero. There is no nonzero CTBP writer in the image, so CALLT cannot be turned
 into an XCP-RAM dispatch table by application/tester state.
 
-This remains a **bounded negative**, not a proof of architectural absence:
-synthesized/computed pointer aliases, a separate undiscovered DMA programmer or
-hardware-owned mutation path, and undiscovered code remain outside the static census.
-The repository therefore does not emit an execution PoC that guesses a branch target.
+The other CPU-routing-register composition is closed too. Application context setup
+at `0x715B4..0x715E3` loads the **fixed immediate** `0x20200` into `INTBP` at
+`0x715BC`, the **fixed immediate** `0x20000` into `EBASE` at `0x715C8`, then installs
+fixed `GP=FEBEB800`, `TP=0x23DFC`, and `SP=FEBE2000`. It is not a parameterized
+vector-base setter. Raw FEPC-like opcode patterns found in undiscovered/data bytes
+were not promoted because they are absent from the recovered instruction stream.
+
+Finally, the **entire configured standard XCP DAQ bank** has been decompiled. The
+configured DAQ commands are `E3/E2/E1/E0/DE/DD/DA/D9/D8/D7`; `WRITE_DAQ @ 0x82510`
+stores a tester-selected *measurement source address* in lower-RAM ODT state, while
+`0x82368` later dereferences that source and copies one byte into DTO staging.
+`SET_DAQ_LIST_MODE @ 0x82616` rejects the recovered STIM/direction mode bits. There
+is no recovered write-through, callback installation, or branch through a DAQ address.
+The potentially useful standard commands `SET_REQUEST`, `USER_CMD`,
+`TRANSPORT_LAYER_CMD`, `DOWNLOAD_NEXT`, `DOWNLOAD_MAX`, and `SHORT_DOWNLOAD` are
+unmapped in this F33 command map.
+
+At this point the **recovered stock application pivot classes are statically
+exhausted**: direct/indirect callbacks, exception saved PCs, CALLT/CTBP, EBASE/INTBP,
+fixed DMA, calibration paging, full XCP/DAQ, ECUReset, WDBI, all RoutineControl RIDs,
+and proprietary `AB/BA` have no route from tester-controlled state to the high-tail
+PC. The remaining negative is deliberately narrower: synthesized/computed aliases
+not represented by recovered references, a memory-safety bug not represented by the
+recovered CFG/dataflow, a separate undiscovered DMA/hardware mutation mechanism, or
+undiscovered code. The repository therefore does not emit an execution PoC that
+guesses a branch target.
 
 ### 13.6 Concrete production disposition and minimum next observations
 
@@ -778,17 +831,26 @@ Ranked disposition:
 4. **Persistent flash hook** — fallback only; current evidence does not justify
    taking it while the application-mode XCP placement surface remains promising.
 
-We do **not** yet have enough static evidence to implement the complete installer,
-because the execution half is missing. The minimum useful live discriminator is
-therefore deliberately non-executing:
+We do **not** yet have enough evidence to implement the complete installer,
+because the execution half is missing. The recovered static stock surface no longer
+contains an obvious next pivot candidate, so the minimum useful live work separates
+**placement** from **execution discovery**:
 
 1. probe only whether `0x7F7/0x7F8` is reachable from another Panda-visible physical
    route; CONNECT is sufficient;
 2. if reachable, use a bounded `SET_MTA + DOWNLOAD + SHORT_UPLOAD` readback inside
    the already-proven high tail to close actual application-context write reachability;
-3. do not attempt an arbitrary PC write or RAM execution until static work identifies
-   a concrete mutable callback/continuation object with known invocation and restore
-   semantics.
+3. for the execution blocker, collect a non-executing runtime RAM/control-flow
+   discriminator capable of exposing a mutable continuation/callback/task object or
+   a previously unrecovered hardware/software trigger. A useful observation is a
+   before/after RAM snapshot plus control-flow/registration trace around benign stock
+   diagnostic/task activity, with special attention to lower-RAM callback/task state;
+4. do **not** attempt an arbitrary PC write or RAM execution until such a concrete
+   mutable object has a known setter, invocation condition, and restore semantics.
+
+In other words, additional broad static searching is now lower-value than a targeted
+runtime discriminator. XCP reachability/readback can close the placement transport,
+but it cannot by itself solve the execution half.
 
 The deterministic assessment is
 `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`, generated

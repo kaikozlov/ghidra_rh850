@@ -1,4 +1,326 @@
 {
+  "application_diagnostic_pivot_audit": {
+    "ecu_reset": {
+      "application_reset_action_recovered": false,
+      "callback": null,
+      "has_subfunctions": false,
+      "service": "0x11",
+      "sessions": [
+        2
+      ],
+      "verdict": "ordinary application ECUReset supplies no reset worker/pivot in this calibration"
+    },
+    "routine_control": {
+      "all_nonnull_callbacks_fixed_codeflash": true,
+      "callback_table": "0x000256DC",
+      "request_derived_indirect_pc_target_recovered": false,
+      "rid_1010_null": true,
+      "row_count": 19,
+      "rows": [
+        {
+          "action": "0x00050104",
+          "precondition": "0x000500F8",
+          "rid": "0x1000"
+        },
+        {
+          "action": "0x000500AE",
+          "precondition": "0x000500A2",
+          "rid": "0x1001"
+        },
+        {
+          "action": "0x0005018E",
+          "precondition": "0x00050152",
+          "rid": "0x1002"
+        },
+        {
+          "action": "0x00050214",
+          "precondition": "0x000501D0",
+          "rid": "0x1004"
+        },
+        {
+          "action": "0x0005028E",
+          "precondition": "0x00050258",
+          "rid": "0x1007"
+        },
+        {
+          "action": "0x00050300",
+          "precondition": "0x000502CA",
+          "rid": "0x1008"
+        },
+        {
+          "action": "0x00050366",
+          "precondition": "0x0005033A",
+          "rid": "0x1009"
+        },
+        {
+          "action": "0x0008B864",
+          "precondition": "0x0008B858",
+          "rid": "0x100E"
+        },
+        {
+          "action": "0x0008B872",
+          "precondition": "0x0008B858",
+          "rid": "0x100F"
+        },
+        {
+          "action": null,
+          "precondition": null,
+          "rid": "0x1010"
+        },
+        {
+          "action": "0x000503AC",
+          "precondition": "0x000503A0",
+          "rid": "0x1100"
+        },
+        {
+          "action": "0x0005043E",
+          "precondition": "0x000503FA",
+          "rid": "0x1103"
+        },
+        {
+          "action": "0x000504BC",
+          "precondition": "0x0005047E",
+          "rid": "0x1106"
+        },
+        {
+          "action": "0x00050524",
+          "precondition": "0x000504F6",
+          "rid": "0x1108"
+        },
+        {
+          "action": "0x000505D8",
+          "precondition": "0x00050568",
+          "rid": "0x1109"
+        },
+        {
+          "action": "0x00050698",
+          "precondition": "0x0005062C",
+          "rid": "0x110A"
+        },
+        {
+          "action": "0x00050706",
+          "precondition": "0x00050702",
+          "rid": "0x110B"
+        },
+        {
+          "action": "0x0005076A",
+          "precondition": "0x0005070A",
+          "rid": "0x110C"
+        },
+        {
+          "action": "0x00050820",
+          "precondition": "0x000507B2",
+          "rid": "0x110D"
+        }
+      ],
+      "verdict": "all configured RIDs enter fixed CodeFlash wrappers; no tester address/call target is accepted"
+    },
+    "sid_ab": {
+      "event_catalogue": "0x0002AB70",
+      "event_types": [
+        "0x11",
+        "0x22",
+        "0x33",
+        "0x44",
+        "0x55"
+      ],
+      "populated_slots": 51,
+      "populated_span": "1..51",
+      "request_derived_indirect_pc_target_recovered": false,
+      "request_semantics": "bounded event IDs/selectors only; response workers copy/merge event data into the DCM response",
+      "request_state": "0xFEBF45D0..0xFEBF45E3",
+      "request_state_inside_xcp_write_window": false,
+      "selectors": [
+        {
+          "callback": "0x0009874A",
+          "policy": "0x000259A4",
+          "selector": "0x01"
+        },
+        {
+          "callback": "0x0009876C",
+          "policy": "0x000259A6",
+          "selector": "0x02"
+        },
+        {
+          "callback": "0x0009878E",
+          "policy": "0x000259A8",
+          "selector": "0x03"
+        }
+      ],
+      "service_table": "0x00025C54",
+      "slots": 64,
+      "subfunction_table": "0x00025AFC",
+      "verdict": "event-record read/format path, not an address/call primitive"
+    },
+    "sid_ba": {
+      "all_callbacks_fixed_codeflash": true,
+      "operation_count": 10,
+      "operation_table": "0x00027EC4",
+      "operations": [
+        {
+          "command": "0xF1",
+          "finish": "0x000350BA",
+          "mode": "0x06",
+          "start": "0x00035094"
+        },
+        {
+          "command": "0xF3",
+          "finish": "0x00035114",
+          "mode": "0x06",
+          "start": "0x000350C8"
+        },
+        {
+          "command": "0xF4",
+          "finish": "0x00035196",
+          "mode": "0x06",
+          "start": "0x00035170"
+        },
+        {
+          "command": "0xF5",
+          "finish": "0x000351CA",
+          "mode": "0x06",
+          "start": "0x000351A4"
+        },
+        {
+          "command": "0xF6",
+          "finish": "0x0003526E",
+          "mode": "0x06",
+          "start": "0x000351D8"
+        },
+        {
+          "command": "0xF7",
+          "finish": "0x0003538C",
+          "mode": "0x06",
+          "start": "0x000352CE"
+        },
+        {
+          "command": "0xF8",
+          "finish": "0x00035428",
+          "mode": "0x06",
+          "start": "0x000353E0"
+        },
+        {
+          "command": "0xF9",
+          "finish": "0x00035460",
+          "mode": "0x06",
+          "start": "0x0003543A"
+        },
+        {
+          "command": "0xFA",
+          "finish": "0x000354A0",
+          "mode": "0x06",
+          "start": "0x0003546E"
+        },
+        {
+          "command": "0xFB",
+          "finish": "0x000354CA",
+          "mode": "0x06",
+          "start": "0x000354B0"
+        }
+      ],
+      "request_copy_cap_bytes": 64,
+      "request_derived_indirect_pc_target_recovered": false,
+      "service_callback": "0x0008E434",
+      "verdict": "fixed maintenance/test operation dispatch, not an arbitrary address/call primitive"
+    },
+    "summary": "All configured application diagnostic classes with plausible write/control semantics (WDBI, RoutineControl, SID AB, SID BA, ECUReset, and 0x34/0x36/0x37) are now target-natively bounded away from a tester-chosen PC transfer. This is a recovered-surface negative, not a memory-safety proof of undiscovered code.",
+    "wdbi": {
+      "all_callbacks_fixed_codeflash": true,
+      "class_count": 6,
+      "class_table": "0x0002603C",
+      "did_count": 13,
+      "did_table": "0x00025640",
+      "dids": [
+        "0x0204",
+        "0x2001",
+        "0x2002",
+        "0x2005",
+        "0x2006",
+        "0x2007",
+        "0x2008",
+        "0x2009",
+        "0x200D",
+        "0x2010",
+        "0x2012",
+        "0x2013",
+        "0x2014"
+      ],
+      "internal_payload_stage_cap_bytes": 8,
+      "payload_interpreted_as_address": false,
+      "payload_worker": "0x0008B632",
+      "request_derived_indirect_pc_target_recovered": false,
+      "resolver": "0x0008E4BC",
+      "rows": [
+        {
+          "did": "0x0204",
+          "precondition": "0x0004FD88",
+          "write": "0x0004FD9C"
+        },
+        {
+          "did": "0x2001",
+          "precondition": "0x0004FDB8",
+          "write": "0x0004FDCC"
+        },
+        {
+          "did": "0x2002",
+          "precondition": "0x0004FE02",
+          "write": "0x0004FE16"
+        },
+        {
+          "did": "0x2005",
+          "precondition": "0x0004FE5E",
+          "write": "0x0004FE72"
+        },
+        {
+          "did": "0x2006",
+          "precondition": "0x0004FE8E",
+          "write": "0x0004FEA2"
+        },
+        {
+          "did": "0x2007",
+          "precondition": "0x0004FEBE",
+          "write": "0x0004FED2"
+        },
+        {
+          "did": "0x2008",
+          "precondition": "0x0004FEEE",
+          "write": "0x0004FF02"
+        },
+        {
+          "did": "0x2009",
+          "precondition": "0x0004FF1E",
+          "write": "0x0004FF32"
+        },
+        {
+          "did": "0x200D",
+          "precondition": "0x0004FF56",
+          "write": "0x0004FF6A"
+        },
+        {
+          "did": "0x2010",
+          "precondition": "0x0004FF86",
+          "write": "0x0004FF9A"
+        },
+        {
+          "did": "0x2012",
+          "precondition": "0x0004FFE0",
+          "write": "0x0004FFE4"
+        },
+        {
+          "did": "0x2013",
+          "precondition": "0x0004FFFE",
+          "write": "0x00050026"
+        },
+        {
+          "did": "0x2014",
+          "precondition": "0x00050042",
+          "write": "0x0005006A"
+        }
+      ],
+      "verdict": "DID-bounded maintenance setters only; no arbitrary memory or call target",
+      "write_dispatch": "0x0008E506"
+    }
+  },
   "application_uds": {
     "configured_sids": [
       "0x10",
@@ -19,6 +341,17 @@
       "0xAB",
       "0xBA"
     ],
+    "ecu_reset": {
+      "application_reset_action_recovered": false,
+      "callback": null,
+      "has_subfunctions": false,
+      "sessions": [
+        2
+      ],
+      "sid": "0x11",
+      "subfunction_count": 0,
+      "verdict": "no application ECUReset worker exists to compose with the retained tail"
+    },
     "programming_session_is_disruptive_handoff": true,
     "read_memory_by_address": {
       "callback": "0x000965C0",
@@ -64,6 +397,29 @@
     "write_memory_by_address_0x3d_configured": false
   },
   "application_xcp": {
+    "configured_daq_commands": {
+      "0xD7": "0x000829CE",
+      "0xD8": "0x00082910",
+      "0xD9": "0x0008299A",
+      "0xDA": "0x0008295C",
+      "0xDD": "0x000827B4",
+      "0xDE": "0x000826D6",
+      "0xE0": "0x00082616",
+      "0xE1": "0x00082510",
+      "0xE2": "0x000824B8",
+      "0xE3": "0x00082880"
+    },
+    "daq_boundary": {
+      "event_dispatch": "0x000823E2",
+      "odt_address_state": "0xFEBE4CFC family",
+      "odt_reader": "0x00082368",
+      "odt_state_inside_xcp_write_window": false,
+      "set_daq_list_mode": "0x00082616",
+      "stim_or_direction_mode_recovered": false,
+      "tester_selected_address_use": "read one measurement byte into DTO staging",
+      "verdict": "configured DAQ is measurement/readback only; no recovered DAQ path writes through the configured address or treats it as a PC target",
+      "write_daq": "0x00082510"
+    },
     "download": "0x00081FFE",
     "get_seed_configured": false,
     "high_tail_fully_inside_write_window": true,
@@ -97,6 +453,18 @@
     ],
     "standard_callback_table": "0x00022B50",
     "standard_opcode_map": "0x00022B24",
+    "unconfigured_control_or_transfer_commands": [
+      "0xF9 SET_REQUEST",
+      "0xF5 UPLOAD",
+      "0xF3 BUILD_CHECKSUM (standard)",
+      "0xF2 TRANSPORT_LAYER_CMD",
+      "0xF1 USER_CMD",
+      "0xEF DOWNLOAD_NEXT",
+      "0xEE DOWNLOAD_MAX",
+      "0xED SHORT_DOWNLOAD",
+      "0xDC GET_DAQ_CLOCK",
+      "0xDB READ_DAQ"
+    ],
     "unlock_configured": false,
     "write_validator": "0x00098F2C"
   },
@@ -183,7 +551,7 @@
         "sha256": "21d7e88f038bb22a350374a291b9496150d4527391f74adeae3c228d4d04880e"
       }
     },
-    "bounded_negative": "No recovered scheduler/task/diagnostic/CAN/CryptoIf/ICU-S/OS/interrupt/PDU callback pointer or saved-PC cell lies in the XCP-writable window. The four residual computed-call sites resolve to guarded lower-RAM callbacks, the exact whole-image CTBP-writer census closes CALLT-base retargeting, and the recovered fixed F33 DMAC families have zero endpoints in the window. Arbitrary synthesized/computed aliases, a separate undiscovered DMA programmer/hardware mutation path, and undiscovered code remain outside this static negative.",
+    "bounded_negative": "No recovered scheduler/task/diagnostic/CAN/CryptoIf/ICU-S/OS/interrupt/PDU callback pointer or saved-PC cell lies in the XCP-writable window. The four residual computed-call sites resolve to guarded lower-RAM callbacks; CTBP/CALLT and fixed EBASE/INTBP vector-base compositions are closed; recovered XCP DAQ is measurement-only; all configured write/proprietary/routine/reset diagnostics resolve to fixed-code/bounded-data semantics; and the recovered fixed F33 DMAC families have zero endpoints in the window. Arbitrary synthesized/computed aliases, a memory-safety bug not represented by recovered control/data-flow, a separate undiscovered DMA/hardware mutation path, and undiscovered code remain outside this static negative.",
     "computed_call_sites_reviewed_application": 305,
     "computed_call_sites_reviewed_total": 312,
     "ctbp_writer_census": {
@@ -566,6 +934,17 @@
     ],
     "fixed_pointer_inside_xcp_write_window": false,
     "fixed_pointer_is_boot_region": true,
+    "fixed_vector_base_setup": {
+      "context_setup_range": "0x000715B4..0x000715E3",
+      "ebase": "0x00020000",
+      "ebase_write": "0x000715C8",
+      "intbp": "0x00020200",
+      "intbp_write": "0x000715BC",
+      "source_register": "r11",
+      "tester_controlled_vector_base_recovered": false,
+      "values_are_fixed_immediates": true,
+      "verdict": "application context setup writes fixed CodeFlash vector bases before fixed GP/TP/SP; it is not a parameterized vector-base setter"
+    },
     "high_tail_function_entries": 0,
     "only_recovered_computed_call_with_fixed_localram_pointer": "0xFEBF0FD0",
     "raw_codeflash_u32_pointers_into_high_tail": [],
@@ -671,6 +1050,46 @@
     "table": "0x0002B250"
   },
   "function_evidence": {
+    "ab_event_response_worker": {
+      "address": "0x0008E074",
+      "sha256": "3cc5dac06bbcfb018475c44912f97105cc8619483986f6787cb01e1834973b2c",
+      "size": 364
+    },
+    "ab_event_state_setter": {
+      "address": "0x0008DE98",
+      "sha256": "9e2b9f429dab25440b21846eda8b45483ac5c5d4457769cad4a90460e389fb99",
+      "size": 38
+    },
+    "ab_request_worker": {
+      "address": "0x0009862E",
+      "sha256": "6ab09487e5dba8bf423b215f1858a73c0e886457929defb67b62ec710b8c4034",
+      "size": 228
+    },
+    "ab_selector1_catalogue": {
+      "address": "0x000557C4",
+      "sha256": "85a5735a8579adb9e6ea689ed80e7ce0de8343d5bf3eb249c480a5e126aeedcc",
+      "size": 114
+    },
+    "ab_selector2_resolver": {
+      "address": "0x0005592C",
+      "sha256": "951a79ee54f38b78e22a0016f7be2b875f9eb65bb1707d421d8382efd196dcbd",
+      "size": 96
+    },
+    "ab_selector3_resolver": {
+      "address": "0x00055C6E",
+      "sha256": "daee3d145feb6dad0abb00d0886afae4dd8e2f0727d7cd901fbcc573d1945294",
+      "size": 114
+    },
+    "ba_request_stage": {
+      "address": "0x0008E20E",
+      "sha256": "4057f69c50bae46c2b6c57a33592dcdd79ef347cc129d42b5546a520001184af",
+      "size": 208
+    },
+    "ba_static_dispatch": {
+      "address": "0x00034DD4",
+      "sha256": "73c51e7a0335fb2e5ab2e8793cc1cd799e0c47130661349add7bd45b2933c133",
+      "size": 146
+    },
     "crypto_bank0_activate": {
       "address": "0x0006A028",
       "sha256": "ecb160156d319b1524ef16c9da2cba78e60d6ab221c3d4fcf40fe13c1312524f",
@@ -736,6 +1155,21 @@
       "sha256": "dfac33733e8cadab3a1f90e1bb9cce317cfae3e809bb401602a7b05f72d6876c",
       "size": 12
     },
+    "wdbi_did_resolver": {
+      "address": "0x0008E4BC",
+      "sha256": "678cb86ebd28b64156fd7a3b9a4768796830c5cdbdc7b76344d58fc5b192b4dc",
+      "size": 74
+    },
+    "wdbi_payload_worker": {
+      "address": "0x0008B632",
+      "sha256": "a275ad8c514a7f916674f9c29004f8cd8f70e160d90ed3a0c9b23fad4d23e3f7",
+      "size": 238
+    },
+    "wdbi_write_dispatch": {
+      "address": "0x0008E506",
+      "sha256": "3a2b5ff3c37261647ddb37ea4220d192acd89bf23b461fdfcdc64e4a07acd8e5",
+      "size": 92
+    },
     "xcp_can_rx_adapter": {
       "address": "0x0008312E",
       "sha256": "fa43c5695d69f92cc770d4d81a9be566a1a66a23bc77b8291befeb1013bf497c",
@@ -786,6 +1220,16 @@
       "sha256": "75ad549642ded380807a40e8aa9959029b5289bca28e9759461275abecd60284",
       "size": 172
     },
+    "xcp_daq_event_dispatch": {
+      "address": "0x000823E2",
+      "sha256": "59b866ff24d47d762c7bea027a50435200af5d8e4be2804f9ef57189a3258a12",
+      "size": 98
+    },
+    "xcp_daq_odt_reader": {
+      "address": "0x00082368",
+      "sha256": "e3ac88d2ba7cc4a690a894471f8ba5d0ae70e0eb84140edc9e8eabf356b55771",
+      "size": 122
+    },
     "xcp_download": {
       "address": "0x00081FFE",
       "sha256": "f3613623e5efa233ad8efae23b047fcde6389822c5828f8ce7ead4f5089a88fd",
@@ -801,6 +1245,11 @@
       "sha256": "b6ee1f7409da646a7b7de61950f5765bc7cb5183ab34a89e46800d3fb89e765c",
       "size": 58
     },
+    "xcp_set_daq_list_mode": {
+      "address": "0x00082616",
+      "sha256": "6c25c08b7ff75beca97643cac81c1b19df9a68ea943065e2639ce08d1945e379",
+      "size": 118
+    },
     "xcp_set_mta": {
       "address": "0x00082C62",
       "sha256": "5317d2d72b3d7b53d6bdc1f70f8102102fb9397c8d17afbf1e2b645a40a06734",
@@ -811,6 +1260,11 @@
       "sha256": "aae466f7119d249039aba6275df9aecbf23ba189238f2ed8cc8256b90707430c",
       "size": 184
     },
+    "xcp_write_daq": {
+      "address": "0x00082510",
+      "sha256": "f1435814f81a1f20db7bafecc5fbe962bef943f4d4dca79d4302b8df4cdb7025",
+      "size": 262
+    },
     "xcp_write_range_validator": {
       "address": "0x00098F2C",
       "sha256": "72c0c9458c91187f17087247ba220211e69d3294aa429d58b3ee84689827db9e",
@@ -819,7 +1273,7 @@
   },
   "implementation_readiness": {
     "complete_non_disruptive_loader_and_execution_path": false,
-    "reason": "The exact application-mode byte-placement primitive is closed, but no application-mode control-transfer primitive into the high tail is statically recovered; emitting a vehicle execution PoC would therefore invent an unproved pivot.",
+    "reason": "The exact application-mode byte-placement primitive is closed, and the recovered stock execution-pivot classes have been exhausted across callbacks, exception state, CTBP/CALLT, EBASE/INTBP, fixed DMA, calibration paging, full XCP/DAQ, ECUReset, RoutineControl, WDBI, and proprietary AB/BA. No application-mode control-transfer primitive into the high tail is recovered; emitting a vehicle execution PoC would therefore invent an unproved pivot.",
     "safe_inert_vehicle_poc_built": false
   },
   "live_runtime_carrier": {
@@ -844,7 +1298,7 @@
   "minimum_next_observations": [
     "Resolve whether the stock 0x7F7/0x7F8 endpoint is physically reachable from any Panda-visible CAN path other than the already-falsified normal bus1/ELM1 route; CONNECT-only is sufficient.",
     "If and only if XCP is reachable, a bounded application-mode DOWNLOAD + SHORT_UPLOAD readback inside the already-live-proven high tail would close transport-to-writer reachability without executing the bytes.",
-    "No safe execution live test is defined until static work recovers a concrete mutable control-transfer object or stock callback registration path; do not probe arbitrary PC writes."
+    "Static analysis has exhausted the recovered stock pivot classes. The next execution-specific observation should be a dynamic RAM/control-flow discriminator that identifies a mutable control-transfer object or a previously unrecovered hardware/software trigger; do not probe arbitrary PC writes without that object."
   ],
   "mpu": {
     "bounds": [
@@ -858,17 +1312,42 @@
     "live_execution_in_high_tail_proven": true,
     "region_index": 1
   },
-  "production_answer": "Not yet. F33 has a target-native, unauthenticated application XCP writer that can place arbitrary bytes in FEBFF9F0..FEBFFBFB without a programming handoff, and that tail is live-proven retained/executable. Current static evidence does not provide the second half: a non-disruptive application-mode transfer of control to those bytes.",
+  "production_answer": "Not yet. F33 has a target-native application XCP writer that can place arbitrary bytes in FEBFF9F0..FEBFFBFB without a programming handoff, and that tail is live-proven retained/executable. The recovered static execution-pivot classes are now exhausted\u2014including full XCP/DAQ, fixed vector bases, all configured RoutineControl/WDBI/AB/BA/reset surfaces, callback/exception/DMA/CALLT/calibration compositions\u2014and none transfers PC to tester-controlled RAM. A complete non-disruptive signer therefore still requires a new runtime control-transfer primitive not present in the recovered static surface.",
   "raw_range_evidence": {
+    "ab_event_catalogue": {
+      "address": "0x0002AB70",
+      "sha256": "eb0d9c3c36fc877ae2f42c8d0844338f31e6f43b22594767f86c7909a5df1025",
+      "size": 512
+    },
+    "ab_subfunction_table": {
+      "address": "0x00025AFC",
+      "sha256": "6dfe40175960277b00c3fbc852d1ef77b687fe05591a920095e91c04673c64cd",
+      "size": 48
+    },
     "application_entry_wrapper": {
       "address": "0x00020880",
       "sha256": "e8f5ceae08d8f49cbed117749e2c048bf1fb446f48665d4921fd098ab8072ae5",
       "size": 12
     },
+    "application_fixed_vector_bases": {
+      "address": "0x000715B4",
+      "sha256": "de3254271cb740099eec58a46cb47476c58d14a54fabb7444d0e46e7b2cac733",
+      "size": 48
+    },
+    "ba_operation_table": {
+      "address": "0x00027EC0",
+      "sha256": "df1a52415a78fcda407cf9af84c002c31023ae9af4678393425b970d2b414c2a",
+      "size": 164
+    },
     "calibration_source_page": {
       "address": "0x00010000",
       "sha256": "675e9f5f360277c6eb27ef73bb021e40861a88d99dd283adb2d7062506d246b6",
       "size": 32240
+    },
+    "routine_callback_table": {
+      "address": "0x000256DC",
+      "sha256": "502bd9c42ada7fb14fdd5493c0ef45cef913c480c75742f2da26b2dd0facad86",
+      "size": 228
     },
     "startup_calibration_shadow_copy": {
       "address": "0x000636D4",
@@ -879,6 +1358,11 @@
       "address": "0x000637EE",
       "sha256": "699b5fba4d401cbe090e5344beeb22161af0cbbd23041b93aed92dc90166972a",
       "size": 112
+    },
+    "wdbi_did_callback_table": {
+      "address": "0x00025640",
+      "sha256": "8bb5e8a6c0207a279b66fd07cea9767e43557b610b3828140eccb4e50da1f9cb",
+      "size": 156
     },
     "xcp_build_checksum_worker": {
       "address": "0x00099226",
@@ -894,6 +1378,11 @@
       "address": "0x000993F0",
       "sha256": "969ee65ec1d2a2523c1bd97a317de7923bc05a7e5ca3785760e5cb78296dc8b2",
       "size": 36
+    },
+    "xcp_standard_map_and_callbacks": {
+      "address": "0x00022B24",
+      "sha256": "e7bd7ee389848c5330983314d1ab6edbc1db1307c1c7dca691d649e02cfa5fa1",
+      "size": 116
     }
   },
   "schema": "camry-8965f3307000-application-ram-loader-assessment-v1",

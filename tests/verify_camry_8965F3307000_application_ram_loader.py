@@ -75,6 +75,11 @@ check("GET_SEED/UNLOCK are unconfigured", x["get_seed_configured"] is False and 
 check("SET_MTA maps to exact F33 callback", x["set_mta"] == "0x00082C62" and callbacks[opmap[0xFF-0xF6]] == 0x82C62)
 check("DOWNLOAD maps to exact F33 callback", x["download"] == "0x00081FFE" and callbacks[opmap[0xFF-0xF0]] == 0x81FFE)
 check("MODIFY_BITS/SHORT_UPLOAD remain configured", x["modify_bits"] == "0x000820C4" and x["short_upload"] == "0x00082B1A" and callbacks[opmap[0xFF-0xEC]] == 0x820C4 and callbacks[opmap[0xFF-0xF4]] == 0x82B1A)
+expected_daq={"0xE3":"0x00082880","0xE2":"0x000824B8","0xE1":"0x00082510","0xE0":"0x00082616","0xDE":"0x000826D6","0xDD":"0x000827B4","0xDA":"0x0008295C","0xD9":"0x0008299A","0xD8":"0x00082910","0xD7":"0x000829CE"}
+check("full configured XCP DAQ bank is exact", x["configured_daq_commands"] == expected_daq and all(callbacks[opmap[0xFF-int(cmd,16)]] == int(target,16) for cmd,target in expected_daq.items()))
+check("XCP DAQ is measurement-only, not a PC/write pivot", x["daq_boundary"]["write_daq"] == "0x00082510" and x["daq_boundary"]["odt_reader"] == "0x00082368" and x["daq_boundary"]["odt_state_inside_xcp_write_window"] is False and x["daq_boundary"]["tester_selected_address_use"] == "read one measurement byte into DTO staging" and x["daq_boundary"]["stim_or_direction_mode_recovered"] is False)
+for cmd in (0xF9,0xF5,0xF3,0xF2,0xF1,0xEF,0xEE,0xED,0xDC,0xDB):
+    check(f"standard XCP command 0x{cmd:02X} remains unmapped", opmap[0xFF-cmd] == 0)
 check("software write window exactly covers high tail", x["software_write_window"] == ["0xFEBF7C00", "0xFEBFFBFF"] and struct.unpack_from("<II", img, 0x2B21C) == (0xFEBF7C00, 0xFEBFFBFF) and x["high_tail_fully_inside_write_window"])
 check("normal bus1/ELM1 route is only a reachability negative", x["normal_route_live_result"]["status"] == "no_response_timeout" and x["normal_route_live_result"]["tested_bus"] == 1 and x["normal_route_live_result"]["elm327_param"] == 1 and "only" in x["reachability_boundary"])
 
@@ -98,6 +103,36 @@ for sid, key in [(0x34,"request_download"),(0x36,"transfer_data"),(0x37,"request
     row = u[key]
     check(f"SID 0x{sid:02X} has no application transfer callback and requires session 2", row["callback"] is None and row["sessions"] == [2] and row[[k for k in row if k.endswith("context_recovered")][0]] is False)
 check("programming session remains the disruptive handoff", u["programming_session_is_disruptive_handoff"] is True)
+reset=u["ecu_reset"]
+check("application ECUReset has no worker or subfunction path", reset == {"sid":"0x11","callback":None,"sessions":[2],"has_subfunctions":False,"subfunction_count":0,"application_reset_action_recovered":False,"verdict":"no application ECUReset worker exists to compose with the retained tail"} and img[0x25C6C:0x25C84] == bytes.fromhex("0000000000000000bc590200000000001100000100000000"))
+
+print("\n== application diagnostic pivot exhaustion ==")
+dp=a["application_diagnostic_pivot_audit"]
+ab=dp["sid_ab"]
+raw_ab=[]
+for i in range(3):
+    off=0x25AFC+i*0x10
+    raw_ab.append((img[off+0xC],struct.unpack_from("<I",img,off)[0],struct.unpack_from("<I",img,off+8)[0]))
+check("SID AB has three fixed selector callbacks", raw_ab == [(1,0x9874A,0x259A4),(2,0x9876C,0x259A6),(3,0x9878E,0x259A8)] and [(r["selector"],r["callback"],r["policy"]) for r in ab["selectors"]] == [("0x01","0x0009874A","0x000259A4"),("0x02","0x0009876C","0x000259A6"),("0x03","0x0009878E","0x000259A8")])
+ab_events=[(struct.unpack_from("<I",img,0x2AB70+i*8)[0],img[0x2AB70+i*8+4],img[0x2AB70+i*8+5]) for i in range(64)]
+pop=[(i,row) for i,row in enumerate(ab_events) if row[0]]
+check("SID AB event catalogue is IDs/types, not an address table", len(pop) == 51 and [i for i,_ in pop] == list(range(1,52)) and {row[1] for _,row in pop} == {0x11,0x22,0x33,0x44,0x55} and ab["request_derived_indirect_pc_target_recovered"] is False and ab["request_state_inside_xcp_write_window"] is False)
+ba=dp["sid_ba"]
+raw_ba=[]
+for i in range(struct.unpack_from("<I",img,0x27EC0)[0]):
+    off=0x27EC4+i*0x10
+    raw_ba.append((img[off],img[off+1],struct.unpack_from("<I",img,off+8)[0],struct.unpack_from("<I",img,off+12)[0]))
+check("SID BA ten-operation table is fixed CodeFlash dispatch", len(raw_ba) == ba["operation_count"] == 10 and all(0 < x < len(img) for row in raw_ba for x in row[2:]) and ba["all_callbacks_fixed_codeflash"] and ba["request_derived_indirect_pc_target_recovered"] is False and ba["request_copy_cap_bytes"] == 64)
+rc=dp["routine_control"]
+raw_routines=[struct.unpack_from("<III",img,0x256DC+i*12) for i in range(19)]
+check("all 19 RoutineControl rows use fixed CodeFlash callbacks", len(raw_routines) == rc["row_count"] == 19 and raw_routines[8] == (0x100F,0x8B858,0x8B872) and raw_routines[9] == (0x1010,0,0) and all((pre==0 or pre < len(img)) and (act==0 or act < len(img)) for _,pre,act in raw_routines) and rc["request_derived_indirect_pc_target_recovered"] is False)
+w=dp["wdbi"]
+raw_wdbi=[]
+for i in range(13):
+    off=0x25640+i*12
+    did,flags=struct.unpack_from("<HH",img,off); raw_wdbi.append((did,flags,struct.unpack_from("<I",img,off+4)[0],struct.unpack_from("<I",img,off+8)[0]))
+check("WDBI exact DID set is fixed-callback maintenance only", [r[0] for r in raw_wdbi] == [0x0204,0x2001,0x2002,0x2005,0x2006,0x2007,0x2008,0x2009,0x200D,0x2010,0x2012,0x2013,0x2014] and all(r[1] == 0 and 0 < r[2] < len(img) and 0 < r[3] < len(img) for r in raw_wdbi) and w["all_callbacks_fixed_codeflash"] and w["payload_interpreted_as_address"] is False and w["request_derived_indirect_pc_target_recovered"] is False and w["internal_payload_stage_cap_bytes"] == 8)
+check("diagnostic pivot audit closes recovered write/proprietary/reset classes", all(dp[k]["request_derived_indirect_pc_target_recovered"] is False for k in ("sid_ab","sid_ba","routine_control","wdbi")) and dp["ecu_reset"]["application_reset_action_recovered"] is False)
 
 print("\n== stock command-5 routine ==")
 c = a["stock_command5_routine"]
@@ -128,7 +163,9 @@ check("only one recovered application DMAC channel programmer remains", dma["rec
 ctbp=ct["ctbp_writer_census"]
 raw_ctbp=find_ldsr_writers(img,20,0)
 check("whole-image CTBP writer census closes CALLT-base retargeting", raw_ctbp == [(0x25E,0,bytes.fromhex("e0a72000"))] and ctbp["writers"] == [{"address":"0x0000025E","bytes":"e0a72000","source_register":"r0"}] and ctbp["all_ctbp_writers_census_closed"] and ctbp["only_writer_sets_zero"])
-check("negative is explicitly bounded after residual closure", all(word in ct["bounded_negative"].lower() for word in ("computed", "dma", "ctbp", "undiscovered")))
+vec=ct["fixed_vector_base_setup"]
+check("application INTBP/EBASE setup uses fixed CodeFlash bases", img[0x715B4:0x715E4] == bytes.fromhex("2b06000202000000eb2720082b06000002000000eb1f2008240600b8befe2506fc3d020023060020befe7f002c0682e9") and vec["intbp"] == "0x00020200" and vec["ebase"] == "0x00020000" and vec["values_are_fixed_immediates"] and vec["tester_controlled_vector_base_recovered"] is False)
+check("negative is explicitly bounded after static-pivot exhaustion", all(word in ct["bounded_negative"].lower() for word in ("computed", "dma", "memory-safety", "undiscovered")) and "xcp daq" in ct["bounded_negative"].lower() and "diagnostics" in ct["bounded_negative"].lower())
 check("no complete non-disruptive loader+exec path claimed", a["implementation_readiness"]["complete_non_disruptive_loader_and_execution_path"] is False and a["implementation_readiness"]["safe_inert_vehicle_poc_built"] is False)
 arch = a["architectures"]
 check("ranked architecture disposition is complete", [row["rank"] for row in arch] == [1,2,3] and "0x00081FFE" in arch[0]["exact_surface"].values() and arch[0]["lifetime"].startswith("volatile") and "PROGRAMMING" in arch[2]["network_visibility"] and arch[2]["remaining_unknowns"] == [])
