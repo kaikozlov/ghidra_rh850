@@ -11,9 +11,9 @@ from pathlib import Path
 import pefile
 
 REPO = Path(__file__).resolve().parents[1]
-ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
+ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
 EVIDENCE = REPO / "data/generated/techstream_v18/cuw_t0011_21_04c21_specimen.json"
-PACKAGE = REPO / "REFERENCE/cuw/T-0011-21 - 04C21.cuw"
+PACKAGE = REPO / "software/Techstream/cuw/T-0011-21 - 04C21.cuw"
 sys.path.insert(0, str(REPO / "tools/techstream"))
 
 from inspect_cuw_legacy import decode_legacy_target_data, legacy_check_id_payloads

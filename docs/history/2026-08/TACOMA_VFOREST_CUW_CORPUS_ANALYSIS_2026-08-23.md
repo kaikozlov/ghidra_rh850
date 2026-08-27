@@ -2,7 +2,7 @@
 
 ## Scope
 
-This pass analyzes the complete local Tacoma CUW corpus under `REFERENCE/cuw/`
+This pass analyzes the complete local Tacoma CUW corpus under `software/Techstream/cuw/`
 using the recovered Toyota Techstream V18 CUW semantics. Raw CUWs remain ignored
 external specimens. The tracked artifact
 `data/generated/techstream_v18/cuw_tacoma_vforest_corpus.json` is generated
@@ -304,7 +304,7 @@ value missing artifact.
 
 ```bash
 PYTHONPATH=tools/techstream uv run --locked python \
-  tools/techstream/inspect_cuw_vforest_corpus.py REFERENCE/cuw \
+  tools/techstream/inspect_cuw_vforest_corpus.py software/Techstream/cuw \
   --output /tmp/cuw_tacoma_vforest_corpus.json
 
 PYTHONPATH=tools/techstream uv run --locked python \

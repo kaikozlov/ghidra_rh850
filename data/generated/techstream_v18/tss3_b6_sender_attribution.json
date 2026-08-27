@@ -91,7 +91,7 @@
       }
     ],
     "frc_runtime_code_searchable": false,
-    "why_brake_not_searchable": "No current REFERENCE/cuw package has Node01/DiagID=07B0. This is a local-corpus absence only.",
+    "why_brake_not_searchable": "No current software/Techstream/cuw package has Node01/DiagID=07B0. This is a local-corpus absence only.",
     "why_frc_not_searchable": "Motorola S-record framing only; decoded flash data is high-entropy and its exact encoding is unknown (no plaintext claim)."
   },
   "immediate_b6_sender_domain": {
@@ -249,19 +249,19 @@
       "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
     },
     "data/generated/corolla_8965H1202000_b6_secoc_verification.json": {
-      "sha256": "56aa33fbaa449e263909ee6f3d1e7da91a52758dfe66e0f6453aa2a4d0dc1982"
+      "sha256": "9c9eacfe724a429a37f818078497d1d950bc8bcc06d984f6f6d10404f0669668"
     },
     "data/generated/corolla_8965H1202000_lta_command_provenance.json": {
-      "sha256": "d3c8690107e431e6f16c0ccb37729d0a9d2dfa4be04b1306688fe9f20ab8fd98"
+      "sha256": "d7f1d2d857feb5fbbbe31ec65f70ad7909d724ea0596f922a0382c3f771e93dc"
     },
     "data/generated/corolla_8965H1202000_secoc_key_provenance.json": {
       "sha256": "80a8f926d5db6172d3edb8ba3dc1d79708166af8c4c1d5379142188cf153f43e"
     },
     "data/generated/corolla_8965H1202000_techstream_correlations.json": {
-      "sha256": "7deef976bf507db35170006ffd64e95fb5a6add23b3c30740eb6914016006794"
+      "sha256": "5e4eac747a29080dcb5a700070655dccb7814434cc810f204080512416aa8e3a"
     },
     "data/generated/techstream_v18/cuw_frc_corpus.json": {
-      "sha256": "d8fc59bf36de75813265c12a2544f7b64bcc6f4a89628b1d96f6e8df1af54956"
+      "sha256": "8e83dc0c3a48eb6ab95637447f74b6b87698f23ae0d325db5935d9bdfd40475d"
     },
     "data/generated/techstream_v18/p5_lateral_control_semantics.json": {
       "sha256": "d86dc9c016dd94cbbc3f4435d09eadc0796192bfd258c8ea264722a163e6b86b"

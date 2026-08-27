@@ -74,7 +74,7 @@
     },
     "fd_control_interface": {
       "path": "data/generated/corolla_8965H1202000_fd_control_interface.json",
-      "sha256": "5b2f47da9a527c93127ead41aad83d1dd0a122bbd364b9242359fee7ef91f21d"
+      "sha256": "281c1d5040f0a5308221e65d290d32678c9a522bf5a28bc219e9a21d9a90b829"
     },
     "h_codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -99,7 +99,7 @@
     },
     "techstream_correlations": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-      "sha256": "7deef976bf507db35170006ffd64e95fb5a6add23b3c30740eb6914016006794"
+      "sha256": "5e4eac747a29080dcb5a700070655dccb7814434cc810f204080512416aa8e3a"
     }
   },
   "static_exhaustion": {

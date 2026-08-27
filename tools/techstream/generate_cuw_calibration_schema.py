@@ -25,7 +25,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 from tools.techstream.generate_cuw_writer_inventory import factory_routes  # noqa: E402
 from tools.techstream.generate_cuw_writer_protocol_grammar import route_verdict  # noqa: E402
-ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
+ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
 OUT = REPO / "data/generated/techstream_v18/cuw_calibration_schema.json"
 
 FUNCTIONS = {

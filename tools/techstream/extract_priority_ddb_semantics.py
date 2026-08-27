@@ -14,7 +14,7 @@ from parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES
 
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+DEFAULT_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 DEFAULT_PE = DEFAULT_ROOT / "bin/KgpDataCtrl.dll"
 DEFAULT_OUTPUT = REPO / "data/generated/techstream_v18/priority_steering_ddb_semantics.json"
 PRIORITY_TYPES = (6, 11, 12, 61, 62, 63, 80, 87, 88, 90, 91)

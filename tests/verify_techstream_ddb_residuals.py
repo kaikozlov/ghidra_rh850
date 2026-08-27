@@ -21,7 +21,7 @@ from parse_ddb import (  # noqa: E402
     MASTER_TABLE_CLASS_NAMES,
 )
 
-ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 BIN = ROOT / "bin"
 FACTORY_ARTIFACT = REPO / "data/generated/techstream_v18/ddb_factory_table_map.json"
 

@@ -184,7 +184,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   TMS-045 makes the firmware acquisition blocker exact: the category-435 P5 VDS
   request address is `7B0` in NA/EU/JP, legacy SUW independently maps VSC/ABS/ECB
   to `7B0`, and modern Unified routing takes CAN IDs from the package CAN-ID table.
-  The complete current 26-package `REFERENCE/cuw` inventory has six `0792` FRC
+  The complete current 26-package `software/Techstream/cuw` inventory has six `0792` FRC
   and three `07A1` EPS packages but no `07B0` package. Obtain a true-TSS3 CUW
   whose `Node01/DiagID=07B0`; local absence does not imply Toyota/TIS absence.
   TMS-046 closes the second VDS token as Toyota's exact `FuncAddress=7E5`; TMS-047

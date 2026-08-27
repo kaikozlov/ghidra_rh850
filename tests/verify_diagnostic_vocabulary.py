@@ -536,7 +536,7 @@ from parse_ddb import (  # noqa: E402
     lzss_decompress,
 )
 
-DB_PATH = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
+DB_PATH = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
 parser = DDBParser()
 
 # Verify DTC section 5 records: name index at offset 12 must be u32
@@ -571,7 +571,7 @@ check("selected EPS_CAN_P4DK database has no CDbDidTable section",
 
 # Walk the raw directory independently of DDBParser. Directory slot N is
 # section type N and extends to the first section pointer (0x280 in V18).
-steering_root = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+steering_root = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 raw_section_types: dict[str, set[int]] = {}
 for source in sorted(
     path for path in steering_root.glob("*/DB/*.ddb")
@@ -786,8 +786,8 @@ check("former 146 DID rows are classified as supported-PID records",
 check("regional corpus recovers 1257 monitor records",
       summary["monitor_records"] == 1257)
 raw_sources = sorted(
-    path.relative_to(REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream").as_posix()
-    for path in (REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream").glob("*/DB/*.ddb")
+    path.relative_to(REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream").as_posix()
+    for path in (REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream").glob("*/DB/*.ddb")
     if path.stem.startswith(("EPS", "EMPS"))
 )
 check("corpus source list equals raw filesystem discovery",

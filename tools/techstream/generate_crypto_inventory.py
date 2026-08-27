@@ -12,7 +12,7 @@ from typing import Any
 import pefile
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics"
+DEFAULT_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
 DEFAULT_OUT = REPO / "data/generated/techstream_v18/crypto_inventory.json"
 
 VALUES = {
@@ -299,7 +299,7 @@ def generate(root: Path) -> dict[str, Any]:
         "source": "external-source",
         "distribution": "Toyota Techstream V18.00.003",
         "scan_boundary": {
-            "root": "Techstream/unpacked/toyota/Toyota Diagnostics",
+            "root": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics",
             "file_count": len(files),
             "pe_file_count": pe_count,
             "representations": sorted(next(iter({name: representations(value) for name, value in VALUES.items()}.values())).keys()),

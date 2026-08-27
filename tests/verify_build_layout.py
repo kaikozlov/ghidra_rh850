@@ -73,7 +73,7 @@ for name, entry in manifest["suite"].items():
     if "core" not in entry.get("modes", ["core", "local"]):
         continue
     for path in entry.get("paths", []):
-        if path.startswith(("build/", "REFERENCE/", "Techstream/unpacked/")):
+        if path.startswith(("build/", "REFERENCE/", "software/Techstream/v18/", "software/Techstream/gtsplus/", "software/Techstream/cuw/", "software/Renesas/")):
             core_external_paths.append(f"{name}:{path}")
 check("core suite ownership paths are tracked-repository paths", not core_external_paths, repr(core_external_paths))
 

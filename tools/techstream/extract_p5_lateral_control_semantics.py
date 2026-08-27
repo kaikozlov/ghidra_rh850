@@ -27,7 +27,7 @@ import pefile
 from parse_ddb import DDBParser
 
 REPO = Path(__file__).resolve().parents[2]
-TECHROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+TECHROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 FACTORY = REPO / "data/generated/techstream_v18/ddb_factory_table_map.json"
 H_CORR = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
 DEFAULT_OUT = REPO / "data/generated/techstream_v18/p5_lateral_control_semantics.json"

@@ -20,7 +20,7 @@ A timed baseline on the normal development checkout was:
   protected samples, many candidate message counters per window.
 
 The previous arrangement was also semantically undesirable: several portable
-verifiers opportunistically opened `Techstream/unpacked/` when it happened to be
+verifiers opportunistically opened `software/Techstream/v18/unpacked/` when it happened to be
 present, so identical tracked commits did not execute identical `make verify`
 workloads on different machines.
 

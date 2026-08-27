@@ -3,11 +3,11 @@
   "source": "Techstream V18.00.003 + pinned Toyota opendbc",
   "artifacts": {
     "kgp_data_ctrl": {
-      "relative_path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/KgpDataCtrl.dll",
+      "relative_path": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/bin/KgpDataCtrl.dll",
       "sha256": "e5235bc0c241c6a450fe461031eed0915675032b1db994bd54d98818fac88aa9"
     },
     "p5_signal_info": {
-      "relative_path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/GetDatMonSignalInfoP5_DT.dll",
+      "relative_path": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/bin/GetDatMonSignalInfoP5_DT.dll",
       "sha256": "8f9e6149fca5e4fe6d9827f394f43019e6ee415c6f0ffc3b381ce6ca4c298f2a"
     }
   },

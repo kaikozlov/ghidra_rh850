@@ -15,7 +15,7 @@ from pathlib import Path
 import pefile
 
 REPO = Path(__file__).resolve().parents[1]
-CUW = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
+CUW = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
 ART = REPO / "data/generated/techstream_v18/cuw_timing_recovery.json"
 DDB_ART = REPO / "data/generated/techstream_v18/priority_steering_ddb_semantics.json"
 

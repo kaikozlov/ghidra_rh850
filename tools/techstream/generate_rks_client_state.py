@@ -21,7 +21,7 @@ from pathlib import Path
 import pefile
 
 REPO=Path(__file__).resolve().parents[2]
-CUW=REPO/'Techstream/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard'
+CUW=REPO/'software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard'
 OUT=REPO/'data/generated/techstream_v18/rks_client_state.json'
 
 HANDLERS={

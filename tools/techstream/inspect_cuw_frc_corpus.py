@@ -9,7 +9,7 @@ each container, decodes the attach descriptor (including the index-obfuscated
 the Motorola S-record *framing* of the ``.xx`` members, and records corpus
 invariants.  Five further format-0x67 camera packages with ``ReproMethod=01``
 are recorded as the whole-repro contrast set. A lightweight identity/descriptor
-inventory of every ``REFERENCE/cuw/*.cuw`` package is also emitted so acquisition
+inventory of every ``software/Techstream/cuw/*.cuw`` package is also emitted so acquisition
 targets can be tested against the complete local corpus without deep-decoding every
 payload.
 
@@ -42,7 +42,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from inspect_cuw_legacy import parse_attach_bytes
 from parse_cuw_container import parse as parse_container
 
-DEFAULT_CORPUS = REPO / "REFERENCE/cuw"
+DEFAULT_CORPUS = REPO / "software/Techstream/cuw"
 
 # Pinned FRC corpus (DiagID 0792 / ReproMethod 07) and pinned whole-repro
 # contrast set (ReproMethod 01).  The remaining corpus files are summarized in
@@ -498,7 +498,7 @@ def main() -> int:
                     "power_steering_07A1": diag_counts.get("07A1", 0),
                 },
                 "boundary": (
-                    "Local REFERENCE/cuw inventory only. An empty 07B0 match list proves that the "
+                    "Local software/Techstream/cuw inventory only. An empty 07B0 match list proves that the "
                     "currently pinned local corpus lacks a category-435 candidate package; it does "
                     "not prove Toyota/TIS has no such calibration package."
                 ),

@@ -7,7 +7,7 @@
     "package_version": "V3.24.00",
     "release_date": "1 July 2026",
     "platform": "macos-arm64",
-    "default_path": "Renesas/renesas_flash_programmer_macos-arm64"
+    "default_path": "software/Renesas/renesas_flash_programmer_macos-arm64"
   },
   "artifacts": {
     "libRFP.dylib": {

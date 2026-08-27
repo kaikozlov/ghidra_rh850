@@ -20,7 +20,7 @@ from typing import Any
 import pefile
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics"
+DEFAULT_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
 DEFAULT_OUT = REPO / "data/generated/techstream_v18/cuw_writer_inventory.json"
 
 ARTIFACTS = [

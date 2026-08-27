@@ -17,10 +17,10 @@ sys.path.insert(0, str(REPO / "tools" / "techstream"))
 from generate_dtc_failure_types import build  # noqa: E402
 from parse_ddb import DDBParser  # noqa: E402
 
-DB_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
+DB_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
 ARTIFACT = REPO / "data/generated/techstream_v18/dtc_failure_types.json"
 FIXTURE = REPO / "tests/fixtures/techstream/ddb/emps_p5_u023a87_record.hex"
-KGP = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/KgpDataCtrl.dll"
+KGP = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/bin/KgpDataCtrl.dll"
 
 if not DB_ROOT.is_dir() or not KGP.is_file():
     print("[SKIP] pinned Techstream V18 tree is unavailable")

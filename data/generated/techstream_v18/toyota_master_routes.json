@@ -64,7 +64,7 @@
     {
       "region": "NA",
       "source": {
-        "relative_path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/Toyota.ddb",
+        "relative_path": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/Toyota.ddb",
         "size": 13646849,
         "sha256": "63ee18391421a7b02996eef282bc8ea3251889981d9cf9e1722e89f4952cb19e"
       },
@@ -1107,7 +1107,7 @@
     {
       "region": "EU",
       "source": {
-        "relative_path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/EU/DB/Toyota.ddb",
+        "relative_path": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/EU/DB/Toyota.ddb",
         "size": 7841216,
         "sha256": "284041de59b6932e2ab1e5b299bb22f7f006463760379566fabc46c7107b309b"
       },
@@ -2150,7 +2150,7 @@
     {
       "region": "JP",
       "source": {
-        "relative_path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/JP/DB/Toyota.ddb",
+        "relative_path": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/JP/DB/Toyota.ddb",
         "size": 11044987,
         "sha256": "0440d1f062eb3ba687d9e67fa2d4f964fff730a53fd9d7a4adc62e9c31321a86"
       },

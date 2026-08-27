@@ -16,7 +16,7 @@ import tempfile
 import pefile
 
 REPO = Path(__file__).resolve().parents[1]
-ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 ARTIFACT = REPO / "data/generated/techstream_v18/application_interface_correlations.json"
 GENERATOR = REPO / "tools/techstream/extract_application_interface_correlations.py"
 RX_MAP = REPO / "data/application_rx_map.csv"

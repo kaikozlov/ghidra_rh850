@@ -1,0 +1,110 @@
+{
+  "cuwplus": {
+    "artifacts": {
+      "CUW.dll._": {
+        "kind": "shipped-protected-container",
+        "sha256": "e6df4960f678a6d2841cebfa06ac7bf4695bc4dd097abc64ba4fb0fbd2f2ff2a",
+        "size": 507840
+      },
+      "Ini/P5-Unified.ini": {
+        "kind": "shipped-obfuscated-ini",
+        "sha256": "2789ecd836750e5ad57b70f9f066bc797df4e48a3be15a7ce4988d2bec41d5e1",
+        "size": 4992
+      },
+      "Ini/P5-Unified03.ini": {
+        "kind": "shipped-obfuscated-ini",
+        "sha256": "7c056bafedf8807a253a96b3589c75c2251dbbdcaa6a205cb1d1040f4bae180e",
+        "size": 4994
+      },
+      "Ini/P5-Unified04.ini": {
+        "kind": "shipped-obfuscated-ini",
+        "sha256": "e0c9cca0793161c3e9d6cf78ab5ce0004dd6185ba3367de92642044e6f8a7048",
+        "size": 4994
+      },
+      "Ini/P5-Unified10.ini": {
+        "kind": "shipped-obfuscated-ini",
+        "sha256": "331030b4aa02a572c67c4fbee4ebe58dc03a32c8fbcb2c9297d2a3cf68f2faf3",
+        "size": 5012
+      },
+      "Ini/RKS.ini": {
+        "kind": "shipped-obfuscated-ini",
+        "sha256": "c871393b214e7a032d96cf08e265007846a707c361dc05dfeea08677ac79ba82",
+        "size": 1644
+      },
+      "TCUWCalibrationFile.dll._": {
+        "kind": "shipped-protected-container",
+        "sha256": "2780d8931918b5d3a6f18c46656ab4240f562544e1274e71aac99afd4f6efe68",
+        "size": 141248
+      },
+      "TCUWCanCommonPrepareWriter.dll._": {
+        "kind": "shipped-protected-container",
+        "sha256": "1e6cfcf52d4983febca3267476dbfce2b9f3aa69d2d133530f57e1fdb8a6caf7",
+        "size": 128272
+      },
+      "TCUWCanReproStdFlashWriter.dll._": {
+        "kind": "shipped-protected-container",
+        "sha256": "96aa20f226df4a12698151ab9fe6fa83a24fd8f38d2e0a7078a35b78c74f3882",
+        "size": 138144
+      },
+      "TCUWCanReproStdPrepareWriter.dll._": {
+        "kind": "shipped-protected-container",
+        "sha256": "fecd0a829068ddf1912c375059b641c65efd3e3a0547bd3175ce4caa9d014e4f",
+        "size": 135984
+      },
+      "TCUWP6CanReprostdFlashWriter.dll._": {
+        "kind": "shipped-protected-container",
+        "sha256": "384f7a97d5a69383bea85eac272c20365a6ae33df1047e89503d80311843f986",
+        "size": 147312
+      },
+      "unpack/CUW.unpack.dll": {
+        "kind": "reconstructed-pe",
+        "sha256": "89f7e7d24f2ead1788b9713a030ba6fde90895ae0f584e104c71ec1dabbf9f70",
+        "size": 736768
+      },
+      "unpack/TCUWCalibrationFile.unpack.dll": {
+        "kind": "reconstructed-pe",
+        "sha256": "23832182d1fbcc5836c487e5a9c6ba98e497b0f778c2fc6d24f3b70847913366",
+        "size": 190976
+      },
+      "unpack/TCUWCanCommonPrepareWriter.unpack.dll": {
+        "kind": "reconstructed-pe",
+        "sha256": "9fd1f92196e096326787732145886465232334635271d25edca6b5ee88bc8629",
+        "size": 157184
+      },
+      "unpack/TCUWCanReproStdFlashWriter.unpack.dll": {
+        "kind": "reconstructed-pe",
+        "sha256": "207ee08c45a5bd377fba8fe8a468586c600d5c8d35d087ce73d2f96966f7bd6a",
+        "size": 211968
+      },
+      "unpack/TCUWCanReproStdPrepareWriter.unpack.dll": {
+        "kind": "reconstructed-pe",
+        "sha256": "585be216333f3e68c55eb25ce3171f91b1cf35d1922a275bfd3fa217240cfaa9",
+        "size": 165888
+      },
+      "unpack/TCUWP6CanReprostdFlashWriter.unpack.dll": {
+        "kind": "reconstructed-pe",
+        "sha256": "2d69d9aaf43f1518ec982db66ef10a01ba52e50e05b54c6fec3a7a7ad8c487ad",
+        "size": 207360
+      }
+    },
+    "image_base": "0x10000000",
+    "reconstruction": {
+      "local_adaptation": "Toyota PE32 adaptation in src/unpacker/exe.rs",
+      "method": "static reconstruction of Toyota Crackproof-style ._ containers",
+      "senbei_base_commit": "ef13419"
+    },
+    "root": "cuwplus/CUWPlus"
+  },
+  "distribution": {
+    "acquisition_date": "2026-06-18",
+    "name": "Toyota GTS+ (Global TechStream Plus)",
+    "note": "Vendor archive/containers and reconstructed PE images remain local and untracked. The reconstructed PEs are deterministic analysis intermediates, not redistributed source artifacts.",
+    "root": "software/Techstream/gtsplus",
+    "source_archive": {
+      "path": "gtsplus.7z",
+      "sha256": "d35adc4786513a4a4080d63aeb3dc66d8d9b93680a4e02b05f835a50565cd124",
+      "size": 1104562624
+    }
+  },
+  "schema_version": 1
+}

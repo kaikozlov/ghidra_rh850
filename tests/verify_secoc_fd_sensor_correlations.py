@@ -40,7 +40,7 @@ check('SSAV distinct 0x3E77/0x100 transform',t['steering_angle_speed']['signal']
 check('firmware contains BC484 raw-clamp constant',struct.unpack_from('<H',FW,0xbc490)[0] in (30000,0x7530) or b'\x30\x75' in FW[0xbc480:0xbc520])
 
 # If proprietary V18 inputs are locally available, regenerate in memory and demand exact artifact equality.
-tech=ROOT/'Techstream/unpacked/toyota/Toyota Diagnostics/Techstream'
+tech=ROOT/'software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream'
 if os.environ.get("RH850_VERIFY_EXTERNAL") == "1" and tech.is_dir():
  spec=importlib.util.spec_from_file_location('fdcorr',ROOT/'tools/techstream/extract_secoc_fd_sensor_correlations.py')
  mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)

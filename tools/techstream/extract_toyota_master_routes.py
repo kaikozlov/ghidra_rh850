@@ -13,7 +13,7 @@ from parse_ddb import DDBParser
 
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+DEFAULT_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 DEFAULT_OUTPUT = REPO / "data/generated/techstream_v18/toyota_master_routes.json"
 TARGET_DATABASES = ("EPS_P4DK3.ddb", "EPS_CAN_P4DK.ddb", "EMPS_P5.ddb")
 

@@ -29,7 +29,7 @@ from parse_ddb import DDBParser, ECUDataBase, StringDataBase
 # ── Constants ─────────────────────────────────────────────────────────────────
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-TECHSTREAM_DB = REPO_ROOT / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
+TECHSTREAM_DB = REPO_ROOT / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
 
 CODEFLASH_SHA256 = (
     "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"

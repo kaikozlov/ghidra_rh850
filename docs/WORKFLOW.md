@@ -68,6 +68,25 @@ Live-project assertions are `local` verification suites. Core verification uses
 tracked firmware/evidence only; external proprietary/public source trees are
 owned through explicit `requires_external` gates rather than `REFERENCE/` paths.
 
+### External software corpus layout
+
+Proprietary software distributions used as reverse-engineering inputs live only
+under ignored `software/` corpus roots:
+
+```text
+software/Techstream/v18/       # Techstream V18 distribution
+software/Techstream/gtsplus/   # current GTS+ distribution and local PE reconstructions
+software/Techstream/cuw/       # Toyota CUW specimen corpus
+software/Renesas/              # Renesas Flash Programmer distribution
+```
+
+Tracked source identities/provenance live under `software/locks/`. Our analysis
+products remain normal repository content under `tools/`, `tests/`, `docs/`, and
+`data/generated/`. Never commit a vendor archive, DLL/EXE, calibration package,
+or reconstructed near-copy of one simply to make a verifier portable. Portable
+verification consumes the tracked derived evidence; `local` / `required-external`
+verification rechecks it against the ignored source corpus.
+
 ## The durability trap (read this first)
 
 The `ghidra` CLI runs a long-lived bridge (TCP server inside Ghidra) that keeps
@@ -312,8 +331,8 @@ with a declared external prerequisite independently of tier.
 
 The core and full modes deliberately set `RH850_VERIFY_EXTERNAL=0` in verifier
 children. This prevents a nominally portable gate from silently doing extra work
-just because `Techstream/unpacked/` or another ignored corpus happens to exist on
-one developer machine. Local and required-external modes enable those optional
+just because an ignored `software/` corpus happens to exist on one developer
+machine. Local and required-external modes enable those optional
 raw-source cross-checks. Exit code 77 remains the explicit artifact-level skip
 code; required-external mode turns the same absence into a concise failure.
 Runner summaries keep pass/fail/skip separate, report assertion counts by

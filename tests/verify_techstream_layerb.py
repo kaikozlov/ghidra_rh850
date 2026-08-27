@@ -21,13 +21,13 @@ flash-writer side, not the PrepareWriter's CalcSeedKey. Specifically:
 This test verifies those claims directly from the binaries. It is stdlib-only.
 The Techstream distribution tree is NOT committed (gitignored); if absent the
 suite SKIPs (exit 77) so the aggregate verifier reports it honestly. Run on
-a machine where Techstream/unpacked/ is populated.
+a machine where software/Techstream/v18/unpacked/ is populated.
 """
 import struct, sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-UNPACKED = REPO / "Techstream" / "unpacked" / "toyota" / "Toyota Diagnostics"
+UNPACKED = REPO / "software" / "Techstream" / "v18" / "unpacked" / "toyota" / "Toyota Diagnostics"
 CUW = UNPACKED / "Calibration Update Wizard"
 BIN = UNPACKED / "Techstream" / "bin"
 
@@ -54,7 +54,7 @@ def check(name, cond, detail=""):
 if not COMMON_FLASH.exists():
     print(f"SKIP: Techstream tree not present (looked for "
           f"{COMMON_FLASH.relative_to(REPO)}).")
-    print("      This suite verifies TMS-010 only where Techstream/unpacked/ "
+    print("      This suite verifies TMS-010 only where software/Techstream/v18/unpacked/ "
           "is populated; no action on a clean checkout.")
     sys.exit(77)
 

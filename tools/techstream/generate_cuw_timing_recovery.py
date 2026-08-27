@@ -22,7 +22,7 @@ import pefile
 from generate_cuw_writer_inventory import decode_parameter_ini
 
 REPO = Path(__file__).resolve().parents[2]
-TECH = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics"
+TECH = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
 CUW = TECH / "Calibration Update Wizard"
 INI = CUW / "Ini"
 DDB_ART = REPO / "data/generated/techstream_v18/priority_steering_ddb_semantics.json"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Inspect the local Toyota Tacoma VFOREST CUW corpus comparatively.
 
-This tool treats the ignored files under REFERENCE/cuw as external specimens.
+This tool treats the ignored files under software/Techstream/cuw as external specimens.
 It validates each Format-4 package, maps archive members to CPU descriptors in
 archive/CPU order, expands ASCII-hex ZV/LZF payloads, joins each CPU to the
 pinned Techstream V18 Parameter.ini route, and reports corpus-level invariants
@@ -27,8 +27,8 @@ from inspect_cuw_vforest import decode_ascii_hex_payload, parse_zv_lzf_stream
 from parse_cuw_container import parse as parse_container
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_CORPUS = REPO / "REFERENCE/cuw"
-DEFAULT_TECHSTREAM_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
+DEFAULT_CORPUS = REPO / "software/Techstream/cuw"
+DEFAULT_TECHSTREAM_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
 FILL_WORD = bytes.fromhex("E203F133")
 FOOTER_MAGIC = bytes.fromhex("B270AD78E88F32B558FEEB58D03B3B1D")
 METADATA_MARKER = bytes.fromhex("9E5D123A")
@@ -410,7 +410,7 @@ def main() -> int:
     result = {
         "schema_version": 1,
         "corpus": {
-            "directory": "REFERENCE/cuw",
+            "directory": "software/Techstream/cuw",
             "package_count": len(packages),
             "logical_image_count": len(images),
             "cpu_types": type_summary,

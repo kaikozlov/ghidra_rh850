@@ -191,7 +191,7 @@ echo "[4/4] Seed missed functions, analyze, and apply every annotation"
 VOCAB_PATH=""
 FW_SHA=$(shasum -a 256 "$ROOT/firmware/RH850_P1M-E_CodeFlash.bin" | cut -d' ' -f1)
 TRACKED_VOCAB="$ROOT/data/generated/${FW_SHA:0:16}/diagnostic_vocabulary.json"
-TECHSTREAM_SENTINEL="$ROOT/Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/EPS_P4DK3.ddb"
+TECHSTREAM_SENTINEL="$ROOT/software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/EPS_P4DK3.ddb"
 if ((REFRESH_DIAGNOSTIC_VOCABULARY)); then
   [[ -f "$TECHSTREAM_SENTINEL" ]] || {
     echo "--refresh-diagnostic-vocabulary requires the local Techstream source tree" >&2

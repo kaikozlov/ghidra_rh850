@@ -10,7 +10,7 @@ import subprocess
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-ARCHIVE = REPO / "REFERENCE/gtsplus.7z"
+ARCHIVE = REPO / "software/Techstream/gtsplus/gtsplus.7z"
 MEMBER = "gtsplus/Toyota Diagnostics/GTSPlus/bin/DataListIF.dll"
 SEMANTICS = REPO / "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json"
 P5 = REPO / "data/generated/techstream_v18/p5_lateral_control_semantics.json"

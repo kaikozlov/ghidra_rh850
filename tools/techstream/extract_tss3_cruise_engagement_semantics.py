@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
+ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
 OUT = REPO / "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from parse_ddb import DDBParser  # noqa: E402

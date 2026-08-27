@@ -9,7 +9,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-DB = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/FRC_P5.ddb"
+DB = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/FRC_P5.ddb"
 TOOL = REPO / "tools/techstream/extract_tss3_cruise_engagement_semantics.py"
 TRACKED = REPO / "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json"
 passed = failed = 0

@@ -572,7 +572,7 @@
       "utf16le_hex_upper",
       "utf16le_plaintext"
     ],
-    "root": "Techstream/unpacked/toyota/Toyota Diagnostics",
+    "root": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics",
     "x86_immediates": "known constructed byte-immediate sequences plus direct imm32 references to discovered constants"
   },
   "schema_version": 1,

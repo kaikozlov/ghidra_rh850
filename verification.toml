@@ -14,17 +14,38 @@ gate_glob = "tests/verify_*.py"
 default_modes = ["core", "full", "local"]
 
 [external.techstream_v18]
-path = "Techstream/unpacked/toyota/Toyota Diagnostics"
+path = "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
 env = "TECHSTREAM_UNPACKED_ROOT"
 description = "Pinned proprietary Techstream V18 extracted distribution"
 
 [external.cuw_reference_corpus]
-path = "REFERENCE/cuw"
+path = "software/Techstream/cuw"
+env = "TOYOTA_CUW_CORPUS_ROOT"
 description = "Pinned external Toyota CUW specimen corpus"
 
-[external.gtsplus_cuwplus]
-path = "REFERENCE/gtsplus_cuwplus/CUWPlus"
-description = "Pinned GTS+ CUWPlus distribution and statically unpacked evidence images"
+[external.gtsplus]
+path = "software/Techstream/gtsplus"
+env = "GTSPLUS_ROOT"
+description = "Pinned proprietary GTS+ distribution and derived local reconstruction corpus"
+
+[suite.software_layout]
+tests = ["tests/verify_software_layout.py"]
+oracle = "documentation_lint"
+paths = [".gitignore", "software/README.md", "software/locks/", "verification.toml"]
+
+[suite.gtsplus_artifact_lock]
+tests = ["tests/verify_gtsplus_artifact_lock.py"]
+paths = ["software/README.md", "software/locks/gtsplus.json"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+oracle = "identity_hash"
+
+[suite.toyota_cuw_corpus_lock]
+tests = ["tests/verify_toyota_cuw_corpus_lock.py"]
+paths = ["software/README.md", "software/locks/toyota-cuw-corpus.json"]
+requires_external = ["cuw_reference_corpus"]
+modes = ["local"]
+oracle = "identity_hash"
 
 [suite.architecture]
 tests = ["tests/verify_architecture.py"]
@@ -50,7 +71,7 @@ paths = [
   "data/semantic_coverage_summary.json",
   "data/generated/semantic_interest_ranking.csv",
   "data/generated/techstream_v18/priority_steering_ddb_semantics.json",
-  "techstream.lock.json",
+  "software/locks/techstream-v18.json",
 ]
 
 [suite.boot_trust]
@@ -872,7 +893,7 @@ paths = [
   "docs/tooling/renesas-rfp-rv40f.md",
   "data/renesas_rfp_rv40f_commands.csv",
   "data/renesas_rfp_rv40f_capabilities.csv",
-  "renesas-rfp.lock.json",
+  "software/locks/renesas-rfp.json",
 ]
 
 [suite.scheduler_timing]
@@ -1958,18 +1979,18 @@ paths = [
 
 [suite.techstream_rks]
 tests = ["tests/verify_techstream_rks.py"]
-paths = ["docs/tooling/techstream.md", "techstream.lock.json"]
+paths = ["docs/tooling/techstream.md", "software/locks/techstream-v18.json"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 oracle = "cfg_dataflow"
 # External-tree suite: verifies TMS-009 (CUW RKS / two-layer reflash
 # authorization). SKIPs cleanly (exit 0) when the gitignored Techstream/
 # unpacked tree is absent (exit 77), so core reports a skip. Run on a host
-# where Techstream/unpacked/ is populated, or via: make verify-one SUITE=techstream_rks
+# where software/Techstream/v18/unpacked/ is populated, or via: make verify-one SUITE=techstream_rks
 
 [suite.techstream_ptshim]
 tests = ["tests/verify_techstream_ptshim.py"]
-paths = ["docs/tooling/techstream.md", "tools/techstream/parse_ptshim_log.py", "tests/fixtures/techstream/", "techstream.lock.json"]
+paths = ["docs/tooling/techstream.md", "tools/techstream/parse_ptshim_log.py", "tests/fixtures/techstream/", "software/locks/techstream-v18.json"]
 # Synthetic fixtures always exercise the parser; binary body/path/timestamp
 # locks are additionally checked when the gitignored Techstream tree is present.
 
@@ -1984,7 +2005,7 @@ paths = [
   "tools/techstream/parse_ddb.py",
   "tools/techstream/extract_factory_table_map.py",
   "data/generated/techstream_v18/ddb_factory_table_map.json",
-  "techstream.lock.json",
+  "software/locks/techstream-v18.json",
 ]
 # Bounded current-state audit: Security_P4 high-value unknowns plus the separate
 # Toyota.ddb type-1 master-enumeration schema. SKIPs when the external tree is absent.
@@ -2144,7 +2165,7 @@ requires_external = ["techstream_v18"]
 modes = ["local"]
 oracle = "cfg_dataflow"
 # External-tree suite: verifies TMS-011 against native exports/imports and the
-# managed IT3UtilityRevNK IL. Exits 77 when Techstream/unpacked is absent.
+# managed IT3UtilityRevNK IL. Exits 77 when software/Techstream/v18/unpacked is absent.
 
 [suite.techstream_crypto_inventory]
 tests = ["tests/verify_techstream_crypto_inventory.py"]
@@ -2157,7 +2178,7 @@ paths = [
   "docs/tooling/techstream.md",
   "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
-  "techstream.lock.json",
+  "software/locks/techstream-v18.json",
 ]
 
 [suite.techstream_srp]
@@ -2174,7 +2195,7 @@ oracle = "independent_external_artifact"
 
 [suite.techstream_artifact_lock]
 tests = ["tests/verify_techstream_artifact_lock.py"]
-paths = ["techstream.lock.json"]
+paths = ["software/locks/techstream-v18.json"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 oracle = "identity_hash"
@@ -2188,7 +2209,7 @@ paths = [
   "tools/techstream/generate_cuw_writer_inventory.py",
   "data/generated/techstream_v18/cuw_writer_inventory.json",
   "tests/verify_techstream_cuw_writer_routes.py",
-  "techstream.lock.json",
+  "software/locks/techstream-v18.json",
 ]
 
 [suite.techstream_pre_gts_static_closure]
@@ -2280,7 +2301,7 @@ paths = [
 
 [suite.techstream_cuw_frc_corpus]
 tests = ["tests/verify_techstream_cuw_frc_corpus.py"]
-requires_external = ["techstream_v18", "cuw_reference_corpus", "gtsplus_cuwplus"]
+requires_external = ["techstream_v18", "cuw_reference_corpus", "gtsplus"]
 modes = ["local"]
 oracle = "independent_external_artifact"
 paths = [
@@ -2303,7 +2324,7 @@ paths = [
   "tests/verify_techstream_cuw_security_up.py",
   "docs/tooling/techstream.md",
   "docs/status/FINDINGS.md",
-  "techstream.lock.json",
+  "software/locks/techstream-v18.json",
 ]
 
 [suite.techstream_layerb]
@@ -2314,7 +2335,7 @@ modes = ["local"]
 oracle = "instruction_semantics"
 # External-tree suite: verifies TMS-010 (VFOREST flash-writer SA transmission /
 # SendNonceAndSeedKey; no static AES in the CUW reflash toolchain). SKIPs
-# cleanly (exit 77) when the gitignored Techstream/unpacked tree is absent, so
+# cleanly (exit 77) when the gitignored software/Techstream/v18/unpacked tree is absent, so
 # core reports a skip. Run via: make verify-one SUITE=techstream_layerb
 
 [suite.community_tooling]

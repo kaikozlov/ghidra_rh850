@@ -17,7 +17,7 @@ from pathlib import Path
 import pefile
 
 REPO = Path(__file__).resolve().parents[1]
-ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 BIN = ROOT / "bin"
 TECH = BIN / "Techstream.exe"
 

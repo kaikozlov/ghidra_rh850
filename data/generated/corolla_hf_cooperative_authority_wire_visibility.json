@@ -382,7 +382,7 @@
     },
     "fd_control_interface": {
       "path": "data/generated/corolla_8965H1202000_fd_control_interface.json",
-      "sha256": "5b2f47da9a527c93127ead41aad83d1dd0a122bbd364b9242359fee7ef91f21d"
+      "sha256": "281c1d5040f0a5308221e65d290d32678c9a522bf5a28bc219e9a21d9a90b829"
     },
     "h_codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -395,7 +395,7 @@
     },
     "openpilot_state_bridge": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-      "sha256": "bde7c9af473594821183e8811f74a286d1d01973b3ee4ba4392778991f43570b"
+      "sha256": "5d3d98da91f36da0fb9a82ae297623672fe8a198486dc303d8d9be000ac80b1a"
     }
   },
   "static_conclusion": {

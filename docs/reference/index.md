@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 329 · Corrections: 120 · Open questions: 53 · Docs: 103 · Suites: 233
+Findings: 329 · Corrections: 120 · Open questions: 53 · Docs: 103 · Suites: 236
 
 ## Reading this index
 

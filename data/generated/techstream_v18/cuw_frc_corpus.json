@@ -501,7 +501,7 @@
       "security_property2": "98"
     },
     "contrast_format67_package_count": 5,
-    "directory": "REFERENCE/cuw",
+    "directory": "software/Techstream/cuw",
     "frc_descriptor_signature": {
       "contact_type": "P5-Unified",
       "diag_id": "0792",
@@ -1646,7 +1646,7 @@
   ],
   "reference_inventory": {
     "category_435_acquisition": {
-      "boundary": "Local REFERENCE/cuw inventory only. An empty 07B0 match list proves that the currently pinned local corpus lacks a category-435 candidate package; it does not prove Toyota/TIS has no such calibration package.",
+      "boundary": "Local software/Techstream/cuw inventory only. An empty 07B0 match list proves that the currently pinned local corpus lacks a category-435 candidate package; it does not prove Toyota/TIS has no such calibration package.",
       "matching_packages": [],
       "positive_controls": {
         "front_recognition_camera_0792": 6,

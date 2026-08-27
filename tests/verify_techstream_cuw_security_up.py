@@ -9,7 +9,7 @@ import pefile
 from Crypto.Cipher import AES
 
 REPO = Path(__file__).resolve().parents[1]
-ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
+ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
 sys.path.insert(0, str(REPO / "tools/techstream"))
 from cuw_security_up import (  # noqa: E402
     SECURITY_UP_WRAP_KEY,

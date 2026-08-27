@@ -53,7 +53,9 @@ artifact is absent and `required-external` converts that absence to failure.
 
 | Dimension | Current value | Evidence boundary and source |
 |---|---:|---|
-| Techstream artifacts pinned/analyzed | 45 | `techstream.lock.json`, distribution V18.00.003; proprietary files remain ignored and are never committed |
+| Techstream artifacts pinned/analyzed | 45 | `software/locks/techstream-v18.json`, distribution V18.00.003; proprietary files remain ignored and are never committed |
+| GTS+ source/reconstruction anchors pinned | 17 CUWPlus artifacts + source archive | `software/locks/gtsplus.json`; vendor archive/containers and reconstructed PE intermediates remain ignored, while derived evidence is tracked |
+| Toyota CUW external corpus pinned | 26 packages | `software/locks/toyota-cuw-corpus.json`; package bytes remain ignored, generated corpus analysis is tracked under `data/generated/techstream_v18/` |
 | DDB directories structurally parsed | 3 regional type-1 master directories: 67 NA / 67 EU / 76 JP sections | `parse_master_db()` boundary in `docs/tooling/techstream-ddb-pipeline.md` |
 | ECU DDB sections structurally parsed | 25,361 sections across 1,368 format-2 databases | Complete type-2 directory walk; structural parsing does not name every field |
 | Steering corpus structurally inventoried | 35 files / 25 structural payload variants | `data/generated/techstream_v18/steering_diagnostic_corpus.json`; “variant” is raw structural identity, not semantic identity |

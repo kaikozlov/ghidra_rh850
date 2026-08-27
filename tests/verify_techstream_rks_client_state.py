@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib,json,struct,subprocess,sys,tempfile
 from pathlib import Path
 import pefile
-REPO=Path(__file__).resolve().parents[1]; CUW=REPO/'Techstream/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard'; ART=REPO/'data/generated/techstream_v18/rks_client_state.json'
+REPO=Path(__file__).resolve().parents[1]; CUW=REPO/'software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard'; ART=REPO/'data/generated/techstream_v18/rks_client_state.json'
 p=f=0; oracle='raw_bytes'
 def check(n,c,d=''):
  global p,f

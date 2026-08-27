@@ -144,8 +144,12 @@ check("priority semantic denominator", len(priority["schemas"]) == 11
           "steering_files_with_priority_sections": 32,
           "section_instances": 76, "decoded_records": 6521,
       })
-lock = json.loads((REPO / "techstream.lock.json").read_text())
+lock = json.loads((REPO / "software/locks/techstream-v18.json").read_text())
 check("Techstream locked denominator", len(lock["artifacts"]) == 45)
+gts_lock = json.loads((REPO / "software/locks/gtsplus.json").read_text())
+check("GTS+ locked denominator", len(gts_lock["cuwplus"]["artifacts"]) == 17)
+cuw_lock = json.loads((REPO / "software/locks/toyota-cuw-corpus.json").read_text())
+check("Toyota CUW locked denominator", cuw_lock["corpus"]["artifact_count"] == len(cuw_lock["artifacts"]) == 26)
 
 verified_findings = []
 observed_findings = []

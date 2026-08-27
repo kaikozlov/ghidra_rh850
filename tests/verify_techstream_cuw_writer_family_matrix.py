@@ -15,7 +15,7 @@ from pathlib import Path
 import pefile
 
 REPO = Path(__file__).resolve().parents[1]
-ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics"
+ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
 CUW = ROOT / "Calibration Update Wizard"
 MATRIX = REPO / "data/generated/techstream_v18/cuw_writer_family_matrix.json"
 passed = failed = 0

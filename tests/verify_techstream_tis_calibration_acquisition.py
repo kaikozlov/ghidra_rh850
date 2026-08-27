@@ -19,7 +19,7 @@ import pefile
 from dncil.cil.body import CilMethodBody
 
 REPO = Path(__file__).resolve().parents[1]
-ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 BIN = ROOT / "bin"
 sys.path.insert(0, str(REPO / "tools/techstream"))
 from inspect_dotnet_il import MethodBodyReader, format_operand  # noqa: E402

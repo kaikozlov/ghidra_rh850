@@ -9,7 +9,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-ARCHIVE = REPO / "REFERENCE/gtsplus.7z"
+ARCHIVE = REPO / "software/Techstream/gtsplus/gtsplus.7z"
 TOOL = REPO / "tools/techstream/extract_tss3_cruise_live_transport.py"
 ART = REPO / "data/generated/techstream_v18/tss3_cruise_live_transport.json"
 SEM = REPO / "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json"

@@ -14,7 +14,7 @@ ART = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
 EVID = REPO / "data/generated/corolla_8965H1202000_techstream_steering_decompiler_evidence.json"
 TOOL = REPO / "tools/build_corolla_h_techstream_correlations.py"
 RAW = REPO / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
-TECHROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+TECHROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 passed = failed = 0
 
 

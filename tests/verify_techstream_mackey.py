@@ -19,7 +19,7 @@ from dncil.cil.body import CilMethodBody
 REPO = Path(__file__).resolve().parents[1]
 BIN = (
     REPO
-    / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin"
+    / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/bin"
 )
 if not (BIN / "IT3UtilityRevNK.dll").exists():
     print("[SKIP] Techstream unpacked tree is not present")

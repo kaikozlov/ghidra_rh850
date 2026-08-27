@@ -2,11 +2,11 @@
 """Verify the FRC CUW corpus (format 0x67 / ReproMethod 07) evidence.
 
 Part A recomputes every corpus claim from the raw `.cuw` bytes in
-REFERENCE/cuw: container grammar, descriptor fields, S-record framing,
+software/Techstream/cuw: container grammar, descriptor fields, S-record framing,
 cross-package invariants, and the whole-repro/delta boundary.
 
 Part B byte-checks the modern GTS+ CUWPlus host anchors against the pinned
-binaries in REFERENCE/gtsplus_cuwplus (unpacked images + shipped INIs):
+binaries in software/Techstream/gtsplus/cuwplus (unpacked images + shipped INIs):
 descriptor parser (IsControlledBySCC semantics), CLogicalBlockInfo area
 layout, ReproMethod enum, the ReproStd writer's RequestDownload grammar and
 compact DFI 0x21 selector, JudgeReproGWNodeForP4AndP5, and the RKS 27 21/22
@@ -33,9 +33,9 @@ from collections import Counter
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-CORPUS = REPO / "REFERENCE/cuw"
-GTS = REPO / "REFERENCE/gtsplus_cuwplus/CUWPlus"
-V18_CUW = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
+CORPUS = REPO / "software/Techstream/cuw"
+GTS = REPO / "software/Techstream/gtsplus/cuwplus/CUWPlus"
+V18_CUW = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
 ARTIFACT = REPO / "data/generated/techstream_v18/cuw_frc_corpus.json"
 sys.path.insert(0, str(REPO / "tools/techstream"))
 
@@ -478,7 +478,7 @@ else:
 # ---------------------------------------------------------------- Part B
 print("\n== modern GTS+ CUWPlus host anchors ==")
 if not GTS.is_dir():
-    print("[SKIP] REFERENCE/gtsplus_cuwplus unavailable (modern host anchors not checked)")
+    print("[SKIP] software/Techstream/gtsplus/cuwplus unavailable (modern host anchors not checked)")
 else:
     import pefile
 

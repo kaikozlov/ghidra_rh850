@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-LOCK_PATH = REPO / "renesas-rfp.lock.json"
+LOCK_PATH = REPO / "software/locks/renesas-rfp.json"
 COMMANDS_PATH = REPO / "data" / "renesas_rfp_rv40f_commands.csv"
 CAPABILITIES_PATH = REPO / "data" / "renesas_rfp_rv40f_capabilities.csv"
 

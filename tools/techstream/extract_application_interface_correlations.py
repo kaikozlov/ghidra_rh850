@@ -23,7 +23,7 @@ from parse_ddb import DDBParser  # noqa: E402
 
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+DEFAULT_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 DEFAULT_OUTPUT = REPO / "data/generated/techstream_v18/application_interface_correlations.json"
 SIGNAL_INFO_DLL = DEFAULT_ROOT / "bin/GetDatMonSignalInfoP5_DT.dll"
 KGP_DLL = DEFAULT_ROOT / "bin/KgpDataCtrl.dll"

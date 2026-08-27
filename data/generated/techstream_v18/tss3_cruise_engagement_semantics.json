@@ -302,27 +302,27 @@
   "schema": "techstream-p5-tss3-cruise-engagement-semantics-v1",
   "sources": [
     {
-      "path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/M_English.ddb",
+      "path": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/M_English.ddb",
       "sha256": "d88b131e2f56c71cdb60b353f410f877e0889635ec2b5df0becf4e0002aebf96",
       "size": 3003919
     },
     {
-      "path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/FRC_P5.ddb",
+      "path": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/FRC_P5.ddb",
       "sha256": "63307a9b8a6bcafdc5ee4b3a04f67abdc2501ba296a2779e5edc7dbff846fe42",
       "size": 49806
     },
     {
-      "path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/Engine_P5.ddb",
+      "path": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/Engine_P5.ddb",
       "sha256": "82b8e6faab24dffd2fc9c910f0193f98d22a70355186a46ddb8e183e8dfcbc81",
       "size": 392124
     },
     {
-      "path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/ECT_P5.ddb",
+      "path": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/ECT_P5.ddb",
       "sha256": "3ccede15a89f13d08378ae56ff8518ad570e4b3521073d48ff67324a22223fbb",
       "size": 373934
     },
     {
-      "path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/Meter_P5.ddb",
+      "path": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/Meter_P5.ddb",
       "sha256": "4d32101a403e7d05377757675193585fa28f2513a87b807b30ab0d86fbe1e868",
       "size": 107016
     }

@@ -23,7 +23,7 @@ from parse_cuw_container import FIRST_MEMBER_OFFSET, parse as parse_container
 from generate_cuw_writer_inventory import decode_parameter_ini
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_TECHSTREAM_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
+DEFAULT_TECHSTREAM_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
 
 
 def sha256(data: bytes) -> str:

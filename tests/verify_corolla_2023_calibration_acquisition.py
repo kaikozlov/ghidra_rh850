@@ -14,7 +14,7 @@ REPO = Path(__file__).resolve().parents[1]
 ARTIFACT = REPO / "data/generated/techstream_v18/corolla_2023_calibration_acquisition.json"
 CAMPAIGNS = REPO / "data/external/toyota_corolla_2023_calibration_campaigns.json"
 BUILDER = REPO / "tools/techstream/build_corolla_2023_calibration_acquisition.py"
-CUW_CORPUS = REPO / "REFERENCE/cuw"
+CUW_CORPUS = REPO / "software/Techstream/cuw"
 sys.path.insert(0, str(REPO / "tools/techstream"))
 
 from inspect_cuw_legacy import parse_attach_bytes

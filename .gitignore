@@ -7,16 +7,13 @@ build/
 .hermes
 .DS_Store
 
-# Locally installed Renesas Flash Programmer distribution.  Keep the licensed
-# vendor package out of Git; renesas-rfp.lock.json pins the analyzed artifacts.
-Renesas/
-
-# Ignore Techstream distribution (proprietary installer + unpacked contents)
-Techstream/unpacked/
-Techstream/unpacked.7z
-Techstream/extracted/
-Techstream/decoded/
-Techstream/*.exe
+# Local proprietary/vendor software corpora. Only tracked lock manifests and
+# derived analysis belong in Git; never redistribute these source distributions.
+/software/Techstream/v18/
+/software/Techstream/gtsplus/
+/software/Techstream/cuw/
+/software/Renesas/
 
 # Local reference corpus/handoffs. Context only; not repository truth.
+# Proprietary software corpora used by canonical verification belong in software/.
 /REFERENCE/

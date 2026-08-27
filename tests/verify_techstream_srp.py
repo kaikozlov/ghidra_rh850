@@ -8,7 +8,7 @@ from collections import Counter
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/CONF"
+ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/CONF"
 sys.path.insert(0, str(REPO / "tools/techstream"))
 from decode_srp import SRP_AES_KEY, SRP_WRAPPER, decrypt_srp  # noqa: E402
 

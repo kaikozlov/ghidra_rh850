@@ -9,8 +9,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 EVIDENCE = REPO / "data/generated/techstream_v18/cuw_tacoma_vforest_corpus.json"
-CORPUS = REPO / "REFERENCE/cuw"
-ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
+CORPUS = REPO / "software/Techstream/cuw"
+ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
 sys.path.insert(0, str(REPO / "tools/techstream"))
 
 from inspect_cuw_legacy import first_member_payload, parse_attach_bytes

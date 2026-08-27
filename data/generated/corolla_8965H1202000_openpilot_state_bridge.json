@@ -122,11 +122,11 @@
     },
     "fault_state_contract": {
       "path": "data/generated/corolla_hf_fault_state_contract.json",
-      "sha256": "eb2272320151f1ac65a4631b3d3bc77883da3c3f133ecdde8e45ced7296525a3"
+      "sha256": "74020856ecae4167eaa7cb7c4b33729ddb243487033018805b5b4c8f04fc17a3"
     },
     "remaining_status_contract": {
       "path": "data/generated/corolla_hf_remaining_status_contract.json",
-      "sha256": "40be8dca5a68b8532a51f8ff70a336fd5ec9d2216ddf921475e0d03e5c4ef6e9"
+      "sha256": "997b58b2a4dfb882011878fced3a908329386baebb80a40f6338e80cd9ff89b2"
     },
     "state_corpus": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json",
@@ -1203,7 +1203,7 @@
           },
           "techstream_correlations": {
             "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-            "sha256": "7deef976bf507db35170006ffd64e95fb5a6add23b3c30740eb6914016006794"
+            "sha256": "5e4eac747a29080dcb5a700070655dccb7814434cc810f204080512416aa8e3a"
           }
         },
         "wire": {

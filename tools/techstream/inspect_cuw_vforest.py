@@ -28,7 +28,7 @@ from inspect_cuw_legacy import (
 from parse_cuw_container import parse as parse_container
 
 REPO = Path(__file__).resolve().parents[2]
-DEFAULT_TECHSTREAM_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
+DEFAULT_TECHSTREAM_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
 
 
 def sha256(data: bytes) -> str:

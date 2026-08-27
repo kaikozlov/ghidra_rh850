@@ -333,7 +333,7 @@ def correlate_monitors(
     import struct
     from parse_ddb import DDBParser
 
-    DB = REPO_ROOT / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
+    DB = REPO_ROOT / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
     parser = DDBParser()
     strings = parser.load_string_db(DB / "M_English.ddb")
 

@@ -1,11 +1,11 @@
-# Toyota Techstream diagnostic software
+# Toyota Techstream / GTS+ diagnostic software
 
-> **Scope:** Toyota Techstream V18.00.003 (DENSO) — internal module version
-> from `VerApp.ini`/`VerCmd.ini` (dated 2022-11-22 / 2022-12-08). The
-> installer filename says V18.00.008, but the "008" is the Flexera IS
-> wrapper build number, not the application version. DDB files are dated
-> 2022-12-07/08. Model-year coverage extends to 2022 (VehicleData.ini last
-> modified 2022/10/07).
+> **Scope:** Toyota Techstream V18.00.003 (DENSO) plus the 2026-06-18 GTS+
+> distribution used for current-generation P5/CUWPlus analysis. V18's internal
+> module version comes from `VerApp.ini`/`VerCmd.ini` (dated 2022-11-22 /
+> 2022-12-08); its installer filename says V18.00.008, but the "008" is the
+> Flexera IS wrapper build number, not the application version. V18 DDB files
+> are dated 2022-12-07/08 and its VehicleData coverage extends through 2022.
 >
 > **Document type:** external-source reverse engineering
 >
@@ -13,13 +13,17 @@
 >
 > **Evidence source:** external-source
 >
-> **Evidence profile:** recovered/bounded — each claim is scoped to the pinned
-> Techstream distribution, not the Sienna firmware or a live vehicle session
+> **Evidence profile:** recovered/bounded — each claim is scoped to its pinned
+> Techstream/GTS+ source corpus, not the Sienna firmware or a live vehicle session
 >
-> **Canonical artifacts:** `techstream.lock.json`,
-> `Techstream/unpacked.7z`
+> **Canonical tracked artifacts:** `software/locks/techstream-v18.json`,
+> `software/locks/gtsplus.json`, `software/locks/toyota-cuw-corpus.json`, and
+> derived evidence under `data/generated/techstream_v18/`
 >
-> **Verification:** lock-file hash comparison (future: `make verify-techstream`)
+> **Ignored source corpora:** `software/Techstream/v18/`,
+> `software/Techstream/gtsplus/`, and `software/Techstream/cuw/`
+>
+> **Verification:** external-source lock/hash gates plus deterministic generated-artifact tests
 >
 > **Related:** [workflow](../WORKFLOW.md),
 > [Application SecurityAccess](../security/application-security-access.md),
@@ -71,7 +75,7 @@ product version 18.0.8.0
 ```
 
 The installer (`Techstream_Setup_V18.00.008.exe`, 259 MiB) is an InstallScript
-archive. The unpacked tree (`Techstream/unpacked.7z`, 6703 files, 580 MiB
+archive. The unpacked tree (`software/Techstream/v18/unpacked.7z`, 6703 files, 580 MiB
 uncompressed) contains the full installation:
 
 ```text
@@ -86,7 +90,7 @@ Toyota Diagnostics/
 ```
 
 Exact hashes, sizes, and descriptions for all analyzed artifacts are in
-`techstream.lock.json`.
+`software/locks/techstream-v18.json`.
 
 ## 2. Communication architecture
 
@@ -135,7 +139,7 @@ decoded[i] = 0xFF − encoded[i]
 
 This is not encryption — it is byte-level inversion. Files whose first bytes
 are printable ASCII (`;`, `[`, etc.) are stored in plaintext and do not
-require decoding. The decoded INIs are stored under `Techstream/decoded/`
+require decoding. The decoded INIs are stored under `software/Techstream/v18/decoded/`
 during analysis.
 
 The obfuscation was identified by matching encoded byte `0xF2` to plaintext
@@ -1202,8 +1206,8 @@ packages (Tundra/Crown/Camry/GH, DiagID `07D2/07506D/07500F/0724`) carry
 sections — the pinned whole-repro contrast set.
 
 **Modern host (recovered, from the statically unpacked GTS+ CUWPlus
-binaries in `REFERENCE/gtsplus_cuwplus`; provenance and sha256 pins in its
-README).**  The shipped 2026-06-18 native DLLs are Crackproof-style stubs;
+binaries in `software/Techstream/gtsplus/cuwplus`; provenance and SHA-256 pins are
+tracked in `software/locks/gtsplus.json`).**  The shipped 2026-06-18 native DLLs are Crackproof-style stubs;
 the evidence images are statically reconstructed (adapted Senbei PE32
 unpacker) and every anchor below is byte-checked by the test against those
 pinned images (image base `0x10000000`):
@@ -2370,7 +2374,7 @@ Decoded `P5-Unified04.ini` selects the Unified CID getter and ReproStd prepare/
 flash writers while all three CAN-ID callbacks are `GetCanIDsFromCANIDTable`;
 its explicit `CanIDForGetCID`/prepare fields are blank. The package descriptor's
 `Node01/DiagID` is therefore the concrete local acquisition discriminator. A
-complete identity/descriptor inventory of the **26** current `REFERENCE/cuw`
+complete identity/descriptor inventory of the **26** current `software/Techstream/cuw`
 packages contains six `0792` FRC packages and three `07A1` EPS packages but
 **zero `07B0` packages**. That is a local-corpus absence only; it does not prove
 Toyota/TIS lacks a category-435 package.

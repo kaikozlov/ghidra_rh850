@@ -19,7 +19,7 @@ from parse_ddb import DDBParser, ECUDataBase, StringDataBase
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TECHSTREAM_ROOT = (
-    REPO_ROOT / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+    REPO_ROOT / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 )
 OUTPUT_PATH = (
     REPO_ROOT

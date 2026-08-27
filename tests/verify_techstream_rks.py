@@ -20,7 +20,7 @@ the #Strings (ASCII identifiers) and #US (UTF-16LE literals) heaps.
 
 The Techstream distribution tree is NOT committed (gitignored). If it is
 absent the suite SKIPs (exit 77) so `make verify` can report the prerequisite
-checkout. Run on a machine where Techstream/unpacked/ is populated.
+checkout. Run on a machine where software/Techstream/v18/unpacked/ is populated.
 """
 import hashlib
 import struct, subprocess, sys
@@ -29,7 +29,7 @@ from pathlib import Path
 import pefile
 
 REPO = Path(__file__).resolve().parents[1]
-UNPACKED = REPO / "Techstream" / "unpacked" / "toyota" / "Toyota Diagnostics"
+UNPACKED = REPO / "software" / "Techstream" / "v18" / "unpacked" / "toyota" / "Toyota Diagnostics"
 CUW = UNPACKED / "Calibration Update Wizard"
 BIN = UNPACKED / "Techstream" / "bin"
 
@@ -53,7 +53,7 @@ def check(name, cond, detail="", oracle_class="cfg_dataflow"):
 if not RKS.exists():
     print("SKIP: Techstream tree not present "
           f"(looked for {RKS.relative_to(REPO)}).")
-    print("      This suite verifies TMS-009 only where Techstream/unpacked/ "
+    print("      This suite verifies TMS-009 only where software/Techstream/v18/unpacked/ "
           "is populated; no action on a clean checkout.")
     sys.exit(77)
 

@@ -205,7 +205,7 @@
     },
     "gtsplus_archive": {
       "member": "gtsplus/Toyota Diagnostics/GTSPlus/bin/DataListIF.dll",
-      "path": "REFERENCE/gtsplus.7z"
+      "path": "software/Techstream/gtsplus/gtsplus.7z"
     },
     "p5_lateral_control_semantics": {
       "frc_vds_anchor": {

@@ -20,7 +20,7 @@ sys.path.insert(0, str(REPO / "tools" / "techstream"))
 
 from parse_ddb import DDBParser  # noqa: E402
 
-DEFAULT_DB_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
+DEFAULT_DB_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
 DEFAULT_OUTPUT = REPO / "data/generated/techstream_v18/dtc_failure_types.json"
 
 
@@ -79,7 +79,7 @@ def build(db_root: Path) -> dict:
     return {
         "schema_version": 2,
         "source": {
-            "db_root": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB",
+            "db_root": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB",
             "string_database": "M_English.ddb",
             "section_type": 65,
             "record_size": 68,

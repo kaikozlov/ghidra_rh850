@@ -155,7 +155,7 @@ def build() -> dict[str, Any]:
             "frc_runtime_code_searchable": False,
             "brake_runtime_code_available": False,
             "why_frc_not_searchable": cuw["transform_boundary"]["xx_members"],
-            "why_brake_not_searchable": "No current REFERENCE/cuw package has Node01/DiagID=07B0. This is a local-corpus absence only.",
+            "why_brake_not_searchable": "No current software/Techstream/cuw package has Node01/DiagID=07B0. This is a local-corpus absence only.",
             "consequence": "The requested 32-byte Tx-descriptor and SecOC-generation-call searches cannot be performed honestly against decoded producer code in the current corpus. Re-scanning the six 0792 stored images for literals would treat an unknown high-entropy representation as executable plaintext.",
         },
         "immediate_b6_sender_domain": {

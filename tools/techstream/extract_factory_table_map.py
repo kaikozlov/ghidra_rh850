@@ -22,7 +22,7 @@ import pefile
 REPO = Path(__file__).resolve().parents[2]
 DEFAULT_PE = (
     REPO
-    / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/KgpDataCtrl.dll"
+    / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/bin/KgpDataCtrl.dll"
 )
 DEFAULT_OUTPUT = REPO / "data/generated/techstream_v18/ddb_factory_table_map.json"
 

@@ -14,7 +14,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 
 ARTIFACT = REPO / "data/generated/techstream_v18/toyota_master_routes.json"
-TECHSTREAM_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+TECHSTREAM_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 
 if not TECHSTREAM_ROOT.is_dir():
     print("[SKIP] pinned Techstream V18 tree is unavailable")

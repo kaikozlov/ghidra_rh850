@@ -15,7 +15,7 @@ sys.path.insert(0, str(REPO / "tools/techstream"))
 from parse_ptshim_log import parse_bytes  # noqa: E402
 
 FIXTURES = REPO / "tests/fixtures/techstream"
-BIN = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin"
+BIN = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/bin"
 J2534_CTRL = BIN / "J2534Ctrl.dll"
 
 passed = 0

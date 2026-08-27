@@ -22,7 +22,7 @@ from pathlib import Path
 import pefile
 
 REPO = Path(__file__).resolve().parents[1]
-ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 ARTIFACT = REPO / "data/generated/techstream_v18/p5_lateral_control_semantics.json"
 H_CORR = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
 FACTORY = REPO / "data/generated/techstream_v18/ddb_factory_table_map.json"

@@ -25,7 +25,7 @@ sys.path.insert(0, str(REPO))
 from tools.techstream.generate_cuw_writer_inventory import COMMANDS, factory_routes  # noqa: E402
 from tools.techstream.generate_cuw_writer_protocol_grammar import route_verdict  # noqa: E402
 
-DEFAULT_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics"
+DEFAULT_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
 DEFAULT_OUT = REPO / "data/generated/techstream_v18/cuw_writer_family_matrix.json"
 CUW_SUBDIR = Path("Calibration Update Wizard")
 

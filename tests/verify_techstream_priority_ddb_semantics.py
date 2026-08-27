@@ -14,7 +14,7 @@ from pathlib import Path
 import pefile
 
 REPO = Path(__file__).resolve().parents[1]
-ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 ARTIFACT = REPO / "data/generated/techstream_v18/priority_steering_ddb_semantics.json"
 
 if not ROOT.is_dir():

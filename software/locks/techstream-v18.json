@@ -17,14 +17,14 @@
     },
     "note": "Installer filename is V18.00.008 but internal module versions are 18.00.003. The '008' is the Flexera IS installer wrapper build number, not the Techstream application version. The previously-recorded '2015-09-14' build_date was the Flexera IS toolchain version, not the software build date.",
     "installer": {
-      "filename": "Techstream/Techstream_Setup_V18.00.008.exe",
+      "filename": "software/Techstream/v18/Techstream_Setup_V18.00.008.exe",
       "size": 271533864,
       "sha256": "3a799de327e9ef46dffae8a066ad000ee899a0e1bbedbd9bd090dd690186bc46",
       "format": "InstallScript Setup Launcher Unicode (Flexera IS 22.0.330)",
       "product_version": "18.0.8.0"
     },
     "unpacked_archive": {
-      "filename": "Techstream/unpacked.7z",
+      "filename": "software/Techstream/v18/unpacked.7z",
       "sha256": "dcd71b4c74fad554f2eadb1fa704421cddca02b7b1457991e4ce24f4321520c6",
       "file_count": 6703,
       "uncompressed_size": 608220263

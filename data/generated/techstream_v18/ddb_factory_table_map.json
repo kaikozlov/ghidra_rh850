@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source": "Techstream V18.00.003",
   "artifact": {
-    "relative_path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/KgpDataCtrl.dll",
+    "relative_path": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/bin/KgpDataCtrl.dll",
     "size": 721008,
     "sha256": "e5235bc0c241c6a450fe461031eed0915675032b1db994bd54d98818fac88aa9"
   },

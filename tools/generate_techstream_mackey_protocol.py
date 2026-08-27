@@ -21,7 +21,7 @@ import pefile
 
 
 REPO = Path(__file__).resolve().parents[1]
-BIN = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin"
+BIN = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/bin"
 OUT_DIR = REPO / "data/generated/techstream_v18"
 
 CLASS_STATES = {

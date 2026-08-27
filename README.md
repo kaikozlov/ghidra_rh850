@@ -97,13 +97,16 @@ The top level is intentionally split by evidence role:
 | `exploit/` | Bounded host/live tooling derived from established findings |
 | `docs/` | Human-readable current documentation and historical research journals |
 | `community/` | In-tree community artifacts/tooling with provenance |
+| `software/` | Tracked external-software provenance/locks plus ignored local vendor corpora |
 | `REFERENCE/` | External/reference material; context only, not project truth |
 | `legacy/` | Superseded analysis retained only for history |
 
-Large licensed/local corpora are intentionally outside the tracked source tree:
-`Techstream/` is pinned by `techstream.lock.json`, `Renesas/` by
-`renesas-rfp.lock.json`, and the optional local `REFERENCE/` tree is ignored
-context material. `external-references.lock.json` pins public/community inputs.
+Large licensed/local corpora live under ignored subtrees of `software/`: Techstream
+V18, GTS+, Toyota CUW packages, and Renesas RFP. Their analyzed source identities are
+pinned by tracked manifests under `software/locks/`; our derived parsers, decompilation
+evidence, generated tables, tests, and conclusions remain first-class tracked content.
+The optional local `REFERENCE/` tree is ignored context material.
+`external-references.lock.json` pins public/community inputs.
 
 Generated scratch/output belongs in ignored `build/`, not in the committed
 analysis tree.

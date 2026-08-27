@@ -362,7 +362,7 @@ the mistakes are not re-made.
   bracket the Corolla. It does not — both vehicles postdate it.
 - **Canonical:**
   [../tooling/techstream.md](../tooling/techstream.md) §1;
-  `techstream.lock.json` `version_provenance`.
+  `software/locks/techstream-v18.json` `version_provenance`.
 
 ### CORR-023 — Techstream DDB pipeline coverage and U_English ownership
 

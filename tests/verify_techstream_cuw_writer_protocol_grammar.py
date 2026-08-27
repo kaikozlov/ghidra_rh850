@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib,json,subprocess,sys,tempfile
 from pathlib import Path
 import pefile
-REPO=Path(__file__).resolve().parents[1]; ROOT=REPO/'Techstream/unpacked/toyota/Toyota Diagnostics'; CUW=ROOT/'Calibration Update Wizard'; ART=REPO/'data/generated/techstream_v18/cuw_writer_protocol_grammar.json'; FW=(REPO/'firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
+REPO=Path(__file__).resolve().parents[1]; ROOT=REPO/'software/Techstream/v18/unpacked/toyota/Toyota Diagnostics'; CUW=ROOT/'Calibration Update Wizard'; ART=REPO/'data/generated/techstream_v18/cuw_writer_protocol_grammar.json'; FW=(REPO/'firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
 p=f=0; oracle='raw_bytes'
 def check(n,c,d=''):
  global p,f

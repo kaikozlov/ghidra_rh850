@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-TREE = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics"
+TREE = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
 ARTIFACT = REPO / "data/generated/techstream_v18/crypto_inventory.json"
 inventory = json.loads(ARTIFACT.read_text(encoding="utf-8"))
 passed = failed = 0

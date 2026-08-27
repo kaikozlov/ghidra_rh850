@@ -8,7 +8,7 @@
 >
 > **Evidence source:** pinned `libRFP.dylib` and package resources
 >
-> **Canonical artifacts:** `renesas-rfp.lock.json`,
+> **Canonical artifacts:** `software/locks/renesas-rfp.json`,
 > `data/renesas_rfp_rv40f_commands.csv`,
 > `data/renesas_rfp_rv40f_capabilities.csv`
 >
@@ -75,7 +75,7 @@ platform macos-arm64
 
 Exact package hashes, function virtual addresses/body hashes, embedded-data
 prefixes, and the completed analysis scope are pinned by
-`renesas-rfp.lock.json`. Verify the local licensed package with:
+`software/locks/renesas-rfp.json`. Verify the local licensed package with:
 
 ```bash
 make verify-rfp

@@ -19,7 +19,7 @@ REPO = HERE.parents[2]
 sys.path.insert(0, str(HERE.parent))
 from parse_ddb import DDBParser  # noqa: E402
 
-ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
 OUT = REPO / "data/generated/techstream_v18/secoc_fd_sensor_correlations.json"
 RXMAP = REPO / "data/application_rx_map.csv"
 FW = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"

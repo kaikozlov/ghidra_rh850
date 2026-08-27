@@ -8,8 +8,8 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics"
-lock = json.loads((REPO / "techstream.lock.json").read_text(encoding="utf-8"))
+ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
+lock = json.loads((REPO / "software/locks/techstream-v18.json").read_text(encoding="utf-8"))
 artifacts = lock["artifacts"]
 passed = failed = 0
 

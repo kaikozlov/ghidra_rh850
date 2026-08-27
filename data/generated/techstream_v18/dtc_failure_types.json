@@ -2403,7 +2403,7 @@
   },
   "schema_version": 2,
   "source": {
-    "db_root": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB",
+    "db_root": "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB",
     "field_offsets": {
       "code_utf16": "0x00..0x2B",
       "description_string_index": "0x30",
