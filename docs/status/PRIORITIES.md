@@ -207,6 +207,28 @@ Canonical: [../tooling/techstream.md](../tooling/techstream.md) §6.2.2 ·
 
 **Current exact live target (VAR-051/052/053/054/055/056):** the maintainer's 2026 Camry now has both identity-bound live evidence and exact target-native EPS firmware. EPS F181 is `8965F3307000 / 8A3113303100` on normal-harness `(bus1,param1)`; FRC is `0x792→0x79A / 8646F3315000`; Brake/EPB is `0x7B0→0x7B8 / F152633K0000`. VAR-053 closes `0x51E` Ready plus the complete `0x127` enum **P=0, R=1, N=2, D=3, B=4**. VAR-054 supersedes the former no-CodeFlash/no-bootstrap boundary: exact F33 CodeFlash is retained, boot SecurityAccess + old-stack zero-0201/0202 authenticated `FEBF0000/0x1000` RAM execution is directly proven, and target-native firmware closes the `00F/D7/B6` SecOC receive family, ICU-S slot-4 command-7 verification, B6 PDU44 layout, B3 **Target Lateral ID**, and B4:B5 signed16 **target steering angle** against the Camry's own `0x025`/DID1037 measured-Steering-Angle feedback/comparator. VAR-056 then closes the remaining F33 lateral/runtime **static** work target-natively: TAUJ0 CH3 (`0x66062`) steady **5.000-ms** foreground period after one 5.125-ms first interval → nominal **35-ms** seven-tick B6 timeout; Target Lateral ID **11 selects supervisor mode2** with exact **±1745 B6 counts (~100 deg)** / **78 counts (~4.47 deg) per capped-8 modulo-64 sequence-gap** calibration; signal265-suppression, signals269/270 /100-percentage, signal268 application-sequence semantics; DID1036 `0x025` signal189 Steering-Angle-Velocity monitor (>100, 79-cycle), DID1035 torque raw/256 with ±2109 acquisition clamp, DID1151 Q-current formulas; runtime anchors (`0x715B4`, `0x637EE`/`0x701EA(0)`, `ei`, `0x66062`); and the 776-byte supervisor-RWX pocket `FEBF0000..FEBF0307` + unreferenced 60-byte `FEBFFB80` mailbox (no direct/fixed-GP driver-torque or Q-current comparator recovered in the cooperative cone — bounded census, not absence). **The Camry 5-ms timing, limits, and app-context/carrier analysis are no longer static work — they are closed; what remains is live validation.** Do **not** treat boot RAM execution as proof of an application-retained command-5 signer. Highest-value next vehicle work: stock LTA off→active→off with all buses (validate the now-closed constants against stock sender cadence/template/freshness and relay suppression), actual cruise engage/cancel synchronized to FRC `0x1905/0x1914`, and the carrier live gates — retention, slot-4 command-5 permission, and command-5 latency/contention the audited canary/proxy are now built and deterministic; execute them only through the staged live validation sequence. Production output remains disabled. Canonical baseline: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §12.
 
+
+### Passive exact-F33 openpilot port — implemented, deliberately non-enabling (VAR-058)
+
+The exact Camry software side is now implemented in nested opendbc commit
+`ab60fd95d8a7b566e10ed1cf59738292f3498932` (parent `kai-openpilot`
+`d7d7dfd7e49961e9d35eb7a7681e8756ceee8d04`). It binds the Camry by byte-exact
+EPS F181 on the relay-correct Toyota bus-0 UDS F181 query, retains the 179-ID
+normal-harness census separately because Corolla's 147-ID TSS3 fingerprint is a
+strict subset, replays same-car `0x025/0x030/0x127/0x51E` state, constructs the
+known B6/FV46/FV4/CMAC28 candidate in shadow, and encodes the F33 static limits in
+a debug-only C helper. **Controller output is zero CAN, `0x0B6` is not whitelisted,
+and CarParams remains `SafetyModel.noOutput`; production output remains disabled.**
+
+Static F33 Tx closure also removes the need to transfer `0x351/0x394/0x4A3` wire
+geometry from H/F. Highest-value remaining work is live: stock B6 off→active→off
+cadence/template/freshness on a relay-correct exact-F181 car, exclusive source
+suppression, slot-4 command-5 generation permission plus latency/contention, and
+normal/asserted/recovery correlations for the F33 status carriers. Driver override
+and current-response thresholds remain policy choices requiring conservative dynamic
+validation, not values to infer from representation clamps. Canonical port report:
+[../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md).
+
 COM-013 closes much more of the whole-vehicle side than the earlier EPS-only
 roadmap. TSS generation and SecOC/TSK are **orthogonal** (CORR-108). The public
 2023 route already proved partial state continuity; Span's newly retained July-29

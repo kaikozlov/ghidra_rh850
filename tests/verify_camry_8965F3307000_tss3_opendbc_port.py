@@ -15,6 +15,9 @@ EVID = ROOT / "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.jso
 ART = ROOT / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
 BUILD = ROOT / "tools/build_camry_8965F3307000_tss3_opendbc_port.py"
 REPORT = ROOT / "docs/variants/camry-2026-tss3-opendbc-port.md"
+FINDINGS = ROOT / "docs/status/FINDINGS.md"
+CORRECTIONS = ROOT / "docs/status/CORRECTIONS.md"
+PRIORITIES = ROOT / "docs/status/PRIORITIES.md"
 
 p = f = 0
 
@@ -99,8 +102,14 @@ check("production output remains unauthorized", o["production_output_authorized"
 
 print("\n== canonical documentation ==")
 report = REPORT.read_text(encoding="utf-8")
+findings = FINDINGS.read_text(encoding="utf-8")
+corrections = CORRECTIONS.read_text(encoding="utf-8")
+priorities = PRIORITIES.read_text(encoding="utf-8")
 for token in ("ab60fd95", "d7d7dfd7e", "0x4C000", "0x4C7AA", "0x4CED0", "0x4CE08", "SafetyModel.noOutput", "179-ID", "147-ID"):
     check(f"dedicated port report contains {token}", token in report)
+check("VAR-058 registered", "| VAR-058 |" in findings and "8965F3307000" in findings and "ab60fd95" in findings)
+check("CORR-120 registered", "### CORR-120" in corrections and "0x4C000" in corrections and "VAR-056" in corrections and "five" in corrections.lower())
+check("priorities record passive port", "ab60fd95" in priorities and "production output remains disabled" in priorities.lower())
 
 print(f"\nResults: {p} passed, {f} failed")
 raise SystemExit(1 if f else 0)

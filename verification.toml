@@ -1205,6 +1205,24 @@ paths = [
   "exploit/findings_coverage.json",
 ]
 
+[suite.camry_8965f3307000_tss3_opendbc_port]
+tests = ["tests/verify_camry_8965F3307000_tss3_opendbc_port.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_camry_8965F3307000_tss3_opendbc_port.py",
+  "tools/build_camry_8965F3307000_tss3_opendbc_port.py",
+  "tools/extract_camry_8965F3307000_tss3_tx_decompiler_evidence.py",
+  "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
+  "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json",
+  "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+  "docs/variants/camry-2026-tss3-opendbc-port.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+  "exploit/findings_coverage.json",
+]
+
 [suite.camry_8965f3307000_secoc_recovery]
 tests = ["tests/verify_camry_8965F3307000_secoc_recovery.py"]
 oracle = "raw_bytes"

@@ -2961,3 +2961,27 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `data/generated/corolla_2023_albino_telescope_analysis.json`;
   `tests/verify_albinoelephant_telescope_probe.py`;
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.39.
+
+### CORR-120 — VAR-056's four-user F33 torque-source census was incomplete; `0x4C000` is the fifth recovered direct user
+
+- **Superseded framing:** VAR-056's then-recovered whole-function corpus reported
+  four direct/fixed-GP users of the F33 physical driver-torque source `GP-0x5158`:
+  `0x35A06`, `0x4DB70`, `0x54244`, and `0x564CE`.
+- **Exact correction:** forcing the exact F33 generated-COM status/telemetry island
+  recovers `0x4C000`, the native `0x4A3` source producer. It directly reads
+  `GP-0x5158`, bringing the recovered direct/fixed-GP set to **five**:
+  `0x35A06`, `0x4C000`, `0x4DB70`, `0x54244`, `0x564CE`.
+- **Consequence:** the safety-relevant bounded negative is unchanged. `0x4C000` is
+  a generated telemetry Tx producer outside the cooperative `C8xxx–D1xxx`
+  target-to-motor control cone. The census still recovers zero direct/fixed-GP
+  torque-source users inside that cone; computed aliases, DMA, and unrecovered
+  functions remain outside the proof.
+- **Related F33 correction:** the same target-native `0x4A3` producer uses
+  `GP-0x50E8` for its B6:B7 current-like packed integer, while exact DID `0x1151`
+  Motor Actual Current (Q Axis) reads `GP-0x50F2`. The passive DBC therefore keeps
+  the F33 packet field structurally named `MOTOR_CURRENT_ALT_RAW` with no physical
+  unit instead of transferring the H/F Q-current name.
+- **Canonical:**
+  [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md);
+  `data/generated/camry_8965F3307000_tss3_opendbc_port.json`;
+  `tests/verify_camry_8965F3307000_tss3_opendbc_port.py`.
