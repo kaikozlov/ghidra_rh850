@@ -1,0 +1,175 @@
+{
+  "boundary": {
+    "driver_override_numeric_threshold_closed": false,
+    "interpretation": "The exact F33 static command envelope, wall-clock receive timeout, sequence semantics, steering-rate monitor, diagnostic torque/current sources, and runtime construction prerequisites are closed at their stated evidence grades. Driver override policy, motor-current response policy, stock sender/template behavior, live signer gates, and relay-correct actuation remain dynamic/open.",
+    "motor_current_response_threshold_closed": false,
+    "production_lateral_output_authorized": false,
+    "relay_suppression_live_closed": false,
+    "stock_b6_cadence_template_freshness_closed": false,
+    "target_native_mode2_envelope_closed": true,
+    "target_native_rate_monitor_closed": true,
+    "target_native_timing_closed": true
+  },
+  "driver_torque": {
+    "boundary": "The 2109-raw acquisition/representation saturation is not a driver-override threshold. The negative control-cone result covers direct/fixed-GP references only; computed aliases and DMA remain outside the census.",
+    "callback": "0x0004DB70",
+    "cooperative_c8_d1_direct_fixed_gp_intersection": [],
+    "diagnostic_display_clamp_nm": 25.0,
+    "did": "0x1035",
+    "direct_fixed_gp_reference_entries": [
+      "0x00035A06",
+      "0x0004DB70",
+      "0x00054244",
+      "0x000564CE"
+    ],
+    "override_threshold_recovered": false,
+    "physical_formula": "N.m = raw / 256",
+    "raw_source": "gp-0x5158",
+    "sensor_acquisition_saturation_calibration": "normalized CodeFlash 0x00030E52",
+    "sensor_acquisition_saturation_nm": 8.23828125,
+    "sensor_acquisition_saturation_raw": 2109,
+    "techstream_name": "Steering Wheel Torque",
+    "validity_magic": "0xA5AA5AA5"
+  },
+  "foreground_timing": {
+    "b6_nominal_steady_timeout_ms": 35.0,
+    "b6_successful_receive_reload_ticks": 7,
+    "boundary": "The wall-clock conversion is target-native: exact R7F701381 uses TAUJ on the P1M-E 80-MHz P-Bus and F33 programs TPS/BRS/CMOR=0. This supersedes the prior H-timing transfer boundary.",
+    "brs": 0,
+    "cmor_ch3": 0,
+    "initial_counts": 410000,
+    "initial_period_ms": 5.125,
+    "loop": "0x00066062",
+    "p_bus_hz": 80000000,
+    "steady_counts": 400000,
+    "steady_period_ms": 5.0,
+    "tick_flag": "FFFFB111 bit4",
+    "timer": "TAUJ0 channel 3",
+    "timer_init": "0x0006639C",
+    "timer_reload": "0x00066512",
+    "tps": 0
+  },
+  "lta_lca_mode2_envelope": {
+    "absolute_target_deg_controller_equivalent": 99.99328483491887,
+    "absolute_target_raw": 1745,
+    "b6_scale": {
+      "boundary": "This is the exact linearized controller-equivalent relation implied by target-native integer gains plus the Techstream 0x1037 Steering Angle scale. Integer truncation/saturation apply, and firmware does not literally name the B6 wire engineering unit as milliradians.",
+      "deg_per_b6_count": 0.05730274202574147,
+      "difference_from_exact_1_mrad_percent": 0.01215187701137932,
+      "fraction_deg_per_b6_count": {
+        "denominator": 17870,
+        "numerator": 1024
+      },
+      "mrad_per_b6_count": 1.0001215187701138
+    },
+    "conditioned_absolute_doubled_domain": 3490,
+    "conditioned_per_call_doubled_domain": 7,
+    "delta_deadband_raw": 87,
+    "internal_mode": 2,
+    "max_relaxed_gap_delta_raw": 624,
+    "oem_name": "LTA/LCA",
+    "panda_boundary": "The ECU tolerates repeated/skipped application counters by widening the delta window up to 8x. A Panda implementation should instead require exact modulo-64 +1 and should not use the ECU gap relaxation as a sender allowance.",
+    "per_effective_sequence_gap_deg_controller_equivalent": 4.469613878007834,
+    "per_effective_sequence_gap_raw": 78,
+    "sequence_gap_cap": 8,
+    "sequence_modulus": 64,
+    "target_lateral_id": 11
+  },
+  "q_current": {
+    "boundary": "No target-native measured-Q-current-vs-command comparator is recovered through direct/fixed-GP references in the cooperative cone. Numeric representation limits are not a motor-response safety threshold.",
+    "callback": "0x0004E394",
+    "cooperative_c8_d1_direct_fixed_gp_intersection": [],
+    "diagnostic_formula": "displayed centi-A = (raw * 100) / 0x80",
+    "did": "0x1151",
+    "direct_fixed_gp_reference_entries": [
+      "0x0004E394",
+      "0x00054244",
+      "0x000564CE"
+    ],
+    "physical_formula": "A = raw / 128",
+    "raw_source": "gp-0x50F2",
+    "response_threshold_recovered": false,
+    "techstream_name": "Motor Actual Current (Q Axis)"
+  },
+  "runtime_readiness": {
+    "application_context_init": "0x000715B4",
+    "command5_latency_closed": false,
+    "foreground_loop": "0x00066062",
+    "live_retention_closed": false,
+    "live_slot4_permission_closed": false,
+    "startup_coordinator": "0x000637EE",
+    "startup_final_init": "0x000701EA",
+    "static_carrier_constructed": true,
+    "static_command5_carrier_artifact": "data/generated/camry_8965F3307000_command5_runtime_carrier.json"
+  },
+  "schema": "camry-8965f3307000-lateral-static-v1",
+  "secondary_b6_fields": {
+    "boundary": "Only consumer behavior is named. Remaining protected B6 secondary fields stay unnamed without an exact Toyota engineering label.",
+    "signal265": {
+      "exact_oem_name": null,
+      "role": "when 1, suppress one additive controller contribution",
+      "wire": "B6[2]"
+    },
+    "signal268": {
+      "exact_oem_name": null,
+      "role": "application modulo-64 sequence",
+      "wire": "B7[5:0]"
+    },
+    "signal269": {
+      "exact_oem_name": null,
+      "role": "percentage contribution divided by 100; zero eliminates that contribution",
+      "special_values": "201/202/203 select calibration-specific alternate behavior",
+      "wire": "B8"
+    },
+    "signal270": {
+      "exact_oem_name": null,
+      "role": "percentage contribution divided by 100; zero eliminates that contribution",
+      "wire": "B9"
+    }
+  },
+  "sources": {
+    "codeflash": {
+      "path": "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+      "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+    },
+    "codeflash_contract": {
+      "path": "data/generated/camry_8965F3307000_codeflash.json",
+      "sha256": "857e06d621052261add565475d438ac84b02e83f16598e0234d3cf1c8ba71e30"
+    },
+    "decompiler_evidence": {
+      "path": "data/generated/camry_8965F3307000_lateral_decompiler_evidence.json",
+      "sha256": "420fd7fbee8e1afc6df6cd27516c95f92be8fc8da2f845b4305d832f23f5df5d"
+    },
+    "p1me_product_memory": {
+      "path": "data/p1me_product_memory.json",
+      "sha256": "0dafd0db0fa26f7aa77698cf457c201e995b212ff187d39c875fedcffc5b10b0"
+    },
+    "runtime_carrier": {
+      "path": "data/generated/camry_8965F3307000_command5_runtime_carrier.json",
+      "sha256": "b94aae801ca072528098ee332122f5e230f588ea3a817fed9db94a74d9147009"
+    },
+    "techstream_correlations": {
+      "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
+      "sha256": "7deef976bf507db35170006ffd64e95fb5a6add23b3c30740eb6914016006794"
+    }
+  },
+  "steering_rate_monitor": {
+    "boundary": "The raw threshold and 79-cycle persistence are firmware facts. The diagnostic callback independently names this measurement Steering Angle Velocity; production Panda policy may trip immediately above the raw threshold instead of reproducing EPS persistence.",
+    "callback": "0x0004DBBC",
+    "can_id": "0x025",
+    "did": "0x1036",
+    "mode2_abs_raw_threshold": 100,
+    "mode2_persistence_cycles": 79,
+    "monitor_entry": "0x000CED28",
+    "raw_destination": "gp-0x37B6",
+    "signal_id": 189,
+    "steady_persistence_time_ms_if_continuously_violating": 395.0,
+    "techstream_name": "Steering Angle Velocity",
+    "wire": "signed12 at COM offset 0x12B"
+  },
+  "target": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "mcu": "R7F701381",
+    "software_id": "8965F3307000"
+  }
+}

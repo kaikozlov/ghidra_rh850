@@ -377,8 +377,8 @@ does not literally label B6's wire engineering unit "mrad", and integer
 truncation/saturation still applies.
 
 PDU44's target-native receive supervision reloads to **seven foreground ticks**.
-This pass does not copy H's 5-ms foreground period onto Camry, so a 35-ms
-wall-clock timeout is not yet claimed for F33.
+The exact F33 TAUJ0 CH3 tick period and the resulting wall-clock timeout are now
+closed target-natively in §12.1; the H 5-ms figure is no longer transferred.
 
 The compact artifact is `data/generated/camry_8965F3307000_codeflash.json`,
 bound to exact target-native decompiler bodies in
@@ -467,25 +467,30 @@ interpretation is `data/generated/camry_8965F3307000_secoc_recovery.json`.
 The exact Camry image removes the largest firmware-transfer uncertainty from the
 lateral path. `0x025`, B6, the protected `00F/D7/B6` set, ICU-S slot-4 receive
 verification, Target Lateral ID, and the target-vs-measured steering-angle loop
-are now F33-native facts rather than Corolla assumptions. The earlier read-only
-CarState evidence (`0x030` torque, `0x51E` Ready, `0x127` gear, FRC cruise
-oracles) remains complementary live evidence.
+are now F33-native facts rather than Corolla assumptions. Section 12
+subsequently closes the exact F33 lateral/runtime prerequisites statically: the
+5.000-ms foreground tick, the mode2 limit calibration, the companion control
+fields, the monitor/torque/current feedback oracles, the application runtime
+anchors, and the static carrier geometry. The earlier read-only CarState
+evidence (`0x030` torque, `0x51E` Ready, `0x127` gear, FRC cruise oracles)
+remains complementary live evidence.
 
 The remaining blockers are narrower and concrete:
 
 1. capture stock LTA `off -> active -> off` on this exact car while retaining all
-   buses. Firmware proves the B6 receiver, but live traffic is still needed for
-   stock sender cadence, companion-field template, freshness evolution, and
+   buses — the still-open producer-side facts are stock sender cadence, the
+   active-LTA secondary-field template, freshness evolution, and
    side-of-relay producer/suppression behavior;
-2. recover the **Camry** foreground timer period, steering limits/rate limits,
-   fault thresholds/status outputs, and final motor-control safety constants
-   before constructing production Panda limits. Seven receive ticks are known;
-   H's 5-ms period and H/F limit constants are not silently transferred;
+2. live validation, not another static pass, of the now-closed F33 constants
+   (tick period, mode2 limits, sequence-gap cap, monitor thresholds) against
+   observed stock behavior before constructing production Panda limits;
 3. prove target-native operational signing capability/latency and any required
    application-retention carrier before relying on ICU-S command 5. The complete
    DataFlash + post-handoff LocalRAM/GlobalRAM sweep found no raw authenticating
    key, so a retained application-context ICU-S command-5 path is now the primary
-   signing direction rather than plaintext-key recovery;
+   signing direction rather than plaintext-key recovery. Retention, slot-4
+   command-5 permission, and completion latency/contention under live
+   command-7 traffic remain live gates (§12.6);
 4. synchronize actual cruise engage/cancel with FRC `0x1905/0x1914`, and repeat
    following-distance if production CarState needs that ordinary-CAN field;
 5. perform relay-correct interception testing before any lateral output. Passive
@@ -495,12 +500,122 @@ The remaining blockers are narrower and concrete:
 Production output remains disabled. The exact firmware substantially reduces the
 remaining work, but it does not by itself authorize steering transmission.
 
+## 12. Exact F33 static lateral/runtime prerequisite closure
+
+This section is the canonical home for the target-native static closure of the
+remaining F33 lateral prerequisites (ledger: **VAR-056**): foreground timing,
+the B6 mode2 limit calibration, companion control fields, feedback monitors,
+application runtime anchors, and the static carrier geometry. All claims are
+exact `8965F3307000` firmware-static results on the retained CodeFlash from
+§9; none is transferred from Corolla H/F or Sienna. Static closure does not
+authorize transmitting any frame.
+
+### 12.1 Foreground timing: TAUJ0 CH3 steady 5.000 ms
+
+Foreground timer `0x66062` (TAUJ0 channel 3) is configured for a **steady
+5.000-ms period after one 5.125-ms first interval**. The startup interval is a
+deliberate first-reload artifact, not jitter. PDU44's seven-tick receive
+supervision (§9.2/§9.3) therefore expires at a **nominal 35 ms** after the last
+authenticated B6 delivery. This is the exact-F33 replacement for the H/F timing
+boundary and is the number the live stock-sender cadence capture must confirm
+before any sender schedule is fixed.
+
+### 12.2 Target Lateral ID 11 selects supervisor mode2; exact mode2 calibration
+
+Target Lateral ID (signal 261, §9.2) directly selects the steering supervisor's
+**mode2** control family: value `11` (LTA-LCA) is consumed as the mode2
+selector. The exact mode2 limit calibration is:
+
+- **±1745 B6 counts (~±100 deg)** absolute target limit;
+- **78 counts (~4.47 deg)** per effective modulo-64 sequence gap;
+- the effective sequence gap is **capped at 8**.
+
+These are target-native constants, not H/F transfers; the H/F ±1745/78 figures
+are now independently corroborated as the exact-F33 values rather than copied.
+
+### 12.3 Companion B6 control fields
+
+The companion-field semantics recovered in the mode2 consumers are:
+
+- **signal 265 = 1** suppresses one additive contribution term;
+- **signals 269/270** are `/100` percentage contributions; **zero removes**
+  the term entirely;
+- **signal 268** is the application-side modulo-64 sequence counter (the
+  receiver-side sequence state was already closed in §9);
+- the remaining secondary fields stay **unnamed** — no OEM field name is
+  assigned without firmware or diagnostic evidence.
+
+### 12.4 Feedback oracles: angle-velocity monitor, torque, and Q current
+
+Exact F33 diagnostic joins close the feedback side:
+
+- `0x025` **signal 189 is Steering Angle Velocity**, via the exact DID1036
+  callback `0x4DBBC`. The LTA/LCA monitor uses **abs(raw) > 100** with
+  **79-cycle persistence**.
+- DID1035 **Steering Wheel Torque** callback `0x4DB70` scales **raw/256 N.m**
+  with validity magic `0xA5AA5AA5`. The **±2109 raw (~±8.238 N.m)** bound is an
+  **acquisition/representation clamp, not an override threshold**.
+- DID1151 **Motor Actual Current Q Axis** callback `0x4E394` computes
+  **(raw*100)/0x80**. **No direct/fixed-GP driver-torque comparator and no
+  direct/fixed-GP Q-current comparator is recovered in the cooperative B6
+  control cone.** These are bounded census negatives under the direct/simple-GP
+  reference methodology, not proof of absence of any comparator (computed
+  aliases and DMA-routed references remain outside that census).
+
+### 12.5 Application runtime anchors
+
+For runtime construction against this exact image:
+
+- context init `0x715B4` loads EBASE=`20000`, INTBP=`20200`, GP=`FEBEB800`,
+  TP=`23DFC`, SP=`FEBE2000`;
+- coordinator `0x637EE` performs 21 startup calls `0x637F6..0x63846`, with the
+  final call `0x701EA(0)`, then `ei`, then foreground `0x66062`;
+- boot calls C9A/E54/F80/10C6, validity 119E.
+
+### 12.6 Static carrier geometry; live gates; artifact status
+
+The static carrier census over the retained image bounds the F33 RAM pocket:
+
+- `FEBF0000..FEBF0307` is the **776-byte supervisor-RWX pocket**; the first
+  recovered normalized direct/simple-GP reference is exactly `FEBF0308`;
+- the 60-byte mailbox `FEBFFB80..FEBFFBBB` has **zero normalized
+  direct/simple-GP references** and is covered by MPU region 1, writable in
+  context 0.
+
+The exact-F33 audited executables and static-carrier contract have landed:
+
+- inert canary `exploit/ephemeral_runtime/audited/camry_f33_runtime_canary.bin`
+  — 334 bytes, headroom 442, zero relocations, SHA-256
+  `facd4f59…89bdbb0`; never calls command 5, heartbeat at `FEBFFB80`;
+- fixed-36-byte command-5 proxy
+  `exploit/ephemeral_runtime/audited/camry_f33_command5_proxy.bin` — 464
+  bytes, headroom 312, zero relocations, SHA-256 `0ea9b9d4…69db94d3`;
+- compact static-carrier contract
+  `data/generated/camry_8965F3307000_command5_runtime_carrier.json`, bound to
+  the §9 normalized CodeFlash and the audited build transcripts
+  (`audited_camry_f33_runtime_canary_build.json` /
+  `audited_camry_f33_command5_proxy_build.json`).
+
+These are static-carrier candidates, not retention proof. The deterministic runtime-carrier contract records `live_retention_closed=false`, `live_slot4_command5_permission_closed=false`, and `command5_latency_jitter_closed=false`; F33 therefore stays absent from `data/variant_ram_exec_requirements.json`. The separate target-native lateral contract `data/generated/camry_8965F3307000_lateral_static.json` is locked by `tests/verify_camry_8965F3307000_lateral_static.py`, while `tests/verify_camry_8965F3307000_command5_runtime_carrier.py` locks the executable-carrier side.
+
+Remaining live gates — unchanged by static closure:
+
+- **retention** of the carrier across the boot→application transition;
+- **slot-4 command-5 permission** under ICU-S provisioning;
+- **completion latency/contention** while live command-7 verification traffic
+  is present, and whether the resulting sender schedule fits the §12.1 timing
+  contract;
+- stock B6 **cadence/template/freshness** and **relay suppression** (items 1
+  and 5 above).
+
+Production output remains disabled.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055)
+- Findings with this document as canonical home: [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056)
 - Corrections with this document as canonical home: —
 <!-- knowledge-cross-references:end -->

@@ -1,0 +1,287 @@
+{
+  "applies_to": [
+    "8965F3307000"
+  ],
+  "bootstrap_contract": {
+    "boot_security_access_root_source": "exact CodeFlash @ 0x0000BFE8",
+    "callback_base": "0xFEBF0000",
+    "callback_routine": "0xFF00",
+    "did_0201": "00000000000000000000000000000000",
+    "did_0202": "00000000000000000000000000000000",
+    "did_0203": "0000000000",
+    "download_base": "0xFEBF0000",
+    "download_size": 4096,
+    "payload_build_root_source": "exact CodeFlash @ 0x0000BFD8",
+    "secret_values_recorded_in_artifact": false,
+    "verify_routine": "0x10F0"
+  },
+  "boundary": {
+    "command5_latency_jitter_closed": false,
+    "flash_write_used": false,
+    "live_retention_closed": false,
+    "live_slot4_command5_permission_closed": false,
+    "production_b6_signer_closed": false,
+    "static_target_native_carrier_candidate_closed": true,
+    "steering_can_transmit_used": false,
+    "vehicle_actuation_authorized": false,
+    "verified_variant_ram_exec_requirement_promoted": false
+  },
+  "carrier_geometry": {
+    "base": "0xFEBF0000",
+    "ctx0_mpat": "0x000000B8",
+    "ctx1_mpat": "0x000000B8",
+    "end_exclusive": "0xFEBF0308",
+    "end_inclusive": "0xFEBF0307",
+    "first_recovered_normalized_direct_or_simple_gp_reference": "0xFEBF0308",
+    "mpu_bounds": [
+      "0xFEBEF400",
+      "0xFEBF33FC"
+    ],
+    "mpu_region_index": 5,
+    "permissions": "supervisor read/write/execute in both recovered application contexts",
+    "size": 776,
+    "static_boundary": "The first normalized direct/simple-GP reference is FEBF0308; computed aliases/DMA remain a dynamic-retention boundary closed only by the inert live canary."
+  },
+  "command5_contract": {
+    "adapter": "0x00088DBC",
+    "busy_behavior": "dispatcher result 2 is defer/retry; proxy never uses the command-7 abort path",
+    "completion_callback": "0x00089C4C",
+    "dispatcher": "0x00089440",
+    "done_flag": "0xFEBF13BC",
+    "driver_record": 0,
+    "driver_record_table": "0x00027DA4",
+    "fixed_input_length": 36,
+    "key_selector": 4,
+    "lower_engine": "0x0008A720",
+    "output_length": 16,
+    "serialized_with_command7": true,
+    "status_flag": "0xFEBF13BD",
+    "worker": "0x00088EC0"
+  },
+  "identity": {
+    "application_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+    "application_records": [
+      "8965F3307000",
+      "8A3113303100"
+    ],
+    "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "route": {
+      "bus": 1,
+      "cpu_index": 0,
+      "elm327_param": 1,
+      "rx": "0x7A9",
+      "tx": "0x7A1",
+      "uds_variant": "old"
+    }
+  },
+  "live_sequence": [
+    {
+      "name": "inert application-retention canary",
+      "requires": [
+        "exact F181",
+        "bus1/ELM1 route",
+        "Ready=0"
+      ],
+      "stage": 1,
+      "success": "application F181 reappears and FEBFFB80 heartbeat advances through SID 0x23 reads"
+    },
+    {
+      "name": "power-cycle/reset-to-stock confirmation",
+      "stage": 2,
+      "success": "stock application F181/normal behavior return before any command-5 payload"
+    },
+    {
+      "name": "single fixed-36 selector-4 command5 probe",
+      "requires": [
+        "successful stage-1 artifact",
+        "explicit reset-to-stock confirmation"
+      ],
+      "stage": 3,
+      "success": "command5 completes and returns a changed 16-byte result without Panda TX blocks"
+    },
+    {
+      "name": "latency/contention characterization",
+      "stage": 4,
+      "success": "measure command-5 completion under normal command-7 load before any production sender work"
+    }
+  ],
+  "mailbox_geometry": {
+    "base": "0xFEBFFB80",
+    "ctx0_mpat": "0x000000B8",
+    "ctx1_mpat": "0x000000A8",
+    "end_exclusive": "0xFEBFFBBC",
+    "end_inclusive": "0xFEBFFBBB",
+    "host_read_transport": "application SID 0x23 ALFID 0x15 memory-id 1; Camry XCP 0x7F7/0x7F8 is not assumed",
+    "intended_write_context": "ctx0; target-native foreground sequence returns through 0x71398 before canary/signer insertion",
+    "mpu_bounds": [
+      "0xFEBF7C00",
+      "0xFEBFFBFC"
+    ],
+    "mpu_region_index": 1,
+    "normalized_direct_or_simple_gp_reference_count": 0,
+    "size": 60
+  },
+  "runtime_candidates": {
+    "fixed_36_command5_proxy": {
+      "binary": "exploit/ephemeral_runtime/audited/camry_f33_command5_proxy.bin",
+      "entry_offset": 0,
+      "headroom": 312,
+      "input_length": 36,
+      "key_selector": 4,
+      "relocations": 0,
+      "sha256": "0ea9b9d460c3678ad4341817ae606d720bb2a13f4d14ec7dc1e0c8f569db94d3",
+      "size": 464
+    },
+    "inert_canary": {
+      "binary": "exploit/ephemeral_runtime/audited/camry_f33_runtime_canary.bin",
+      "command5_calls": false,
+      "entry_offset": 0,
+      "headroom": 442,
+      "heartbeat_address": "0xFEBFFB80",
+      "relocations": 0,
+      "sha256": "facd4f590581f7422dab0fc4fcea21f6d73e4c361b1f4d54960d7001e89bdbb0",
+      "size": 334
+    }
+  },
+  "scheduler_transfer": {
+    "application_context_init": "0x000715B4",
+    "boot_transition_calls": [
+      "0x00000C9A",
+      "0x00000E54",
+      "0x00000F80",
+      "0x000010C6"
+    ],
+    "boot_validity_check": "0x0000119E",
+    "foreground_calls": [
+      "0x00065442",
+      "0x00071378",
+      "0x00066FF2",
+      "0x00071398",
+      "0x000667E6",
+      "0x00071378",
+      "0x00066CF6",
+      "0x00071398"
+    ],
+    "foreground_loop": "0x00066062",
+    "foreground_tick_counter": "0xFEBE39DB",
+    "startup_final_init": "0x000701EA",
+    "startup_jarl_after": "0x0006384A",
+    "startup_jarl_count": 21,
+    "startup_jarl_first": "0x000637F6",
+    "tick_poll": {
+      "address": "0xFFFFB111",
+      "bit": 4,
+      "clear_mask": "0xEF"
+    },
+    "timing_flag": "0x00031910"
+  },
+  "schema": "camry-8965f3307000-command5-runtime-carrier-v1",
+  "sources": {
+    "canary_audit": {
+      "path": "exploit/ephemeral_runtime/audited_camry_f33_runtime_canary_build.json",
+      "sha256": "0abbb29a790aaf091b1a09693bde508f8ea20806c69823f3ac8d8f7c07c8230a"
+    },
+    "codeflash": {
+      "path": "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+      "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+    },
+    "codeflash_analysis": {
+      "path": "data/generated/camry_8965F3307000_codeflash.json",
+      "sha256": "857e06d621052261add565475d438ac84b02e83f16598e0234d3cf1c8ba71e30"
+    },
+    "proxy_audit": {
+      "path": "exploit/ephemeral_runtime/audited_camry_f33_command5_proxy_build.json",
+      "sha256": "3cb604c9826c5970285cdcb69834da816ba8ce2dd62dc421cef401ddd564c041"
+    },
+    "ram_exec_requirements": {
+      "path": "data/variant_ram_exec_requirements.json",
+      "sha256": "391f070e967293ca1076be8723645ba86addf3a9f3dd73cf7a1a801a5f56093f"
+    },
+    "raw_function_ranges": {
+      "application_context_init_window": {
+        "address": "0x000715B4",
+        "sha256": "5a90237343869ccc5095e706aeda223a6987e84ec93d85bf1651c2b1768d1554",
+        "size": 128
+      },
+      "application_mpu_table": {
+        "address": "0x00031688",
+        "sha256": "41f9ab0cf792bb169d4a5e59f0317a27b47d223f2478959790c085e5c6587142",
+        "size": 256
+      },
+      "boot_init_0": {
+        "address": "0x00000C9A",
+        "sha256": "cb996af672e23393a6a1311d2c98c33922d44726e5b0b1197cf9fca5546aa293",
+        "size": 64
+      },
+      "boot_init_1": {
+        "address": "0x00000E54",
+        "sha256": "74a17a539f17fa7b26162ad15a908100725c2f3b0d5a03d3f55011f3ea793dd6",
+        "size": 64
+      },
+      "boot_init_2": {
+        "address": "0x00000F80",
+        "sha256": "9a55cbac5d39c176f86ed3bb14c086cf118dafd42a4718647bde9618364e4017",
+        "size": 64
+      },
+      "boot_init_3": {
+        "address": "0x000010C6",
+        "sha256": "e14419b0de73fa89e0c2f3ff5bd84751743a88d18f8ac928aaa7b8f3967b1451",
+        "size": 64
+      },
+      "boot_validity_check": {
+        "address": "0x0000119E",
+        "sha256": "4c6428f5b1a5fa68e9e34cf2a86f93a2de1af91a9aac8778394f744c3a002cf1",
+        "size": 128
+      },
+      "command5_adapter": {
+        "address": "0x00088DBC",
+        "sha256": "42456c97c69c6646f851c80ab90f090e7d598a53c1e5f803132732bb6f346a2e",
+        "size": 260
+      },
+      "command5_callback": {
+        "address": "0x00089C4C",
+        "sha256": "ad851b94e1d4e5d1addd4211a68fdc70401832071161bd779b00f957001085f6",
+        "size": 14
+      },
+      "command5_dispatcher": {
+        "address": "0x00089440",
+        "sha256": "dca5252efba4bfee3cc2a509050d088b280771ce58b1d4134d3ead290545d4e4",
+        "size": 150
+      },
+      "command5_lower": {
+        "address": "0x0008A720",
+        "sha256": "501ee449dd5e92408f288114572445e7d0619a2408309845c402091e61914d67",
+        "size": 274
+      },
+      "command5_record0": {
+        "address": "0x00027DA4",
+        "sha256": "195635fcd081cfc253d3e69b6c7b39688bd5b1e17f6118b26c317637ce62b07e",
+        "size": 32
+      },
+      "command5_worker": {
+        "address": "0x00088EC0",
+        "sha256": "ed65ceae78ed91987a3b27847dffaba9118143e0f94734ffc9aedca5fc9c45f9",
+        "size": 186
+      },
+      "foreground_loop": {
+        "address": "0x00066062",
+        "sha256": "b08f13a1f1d02c86eb0f461268b1ffd0ee6196907e31201c4b045bf8990f83dc",
+        "size": 92
+      },
+      "startup_final_init": {
+        "address": "0x000701EA",
+        "sha256": "1da9533414b05ccbcdb6a10f67dfd5f7a89a21e0bf055568539401ee3d4e7d08",
+        "size": 30
+      },
+      "startup_jarl_region": {
+        "address": "0x000637F6",
+        "sha256": "955f380b52dfd46171c5db106aa3f7b6f3e7c9a7c7896e30c5da1a318f8a1826",
+        "size": 84
+      }
+    },
+    "runtime_builder": {
+      "path": "exploit/ephemeral_runtime/build_camry_f33_command5_carrier.py",
+      "sha256": "a023ae3a47ef08bdcd9f538e2b6f73122690ce07802f027cf9dfeefef0f3c6d8"
+    }
+  }
+}

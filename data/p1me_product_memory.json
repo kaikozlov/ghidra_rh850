@@ -8,8 +8,8 @@
       "revision": "R01DS0505ED0100 Rev.1.00",
       "date": "2025-09-30",
       "references": [
-        "Table 1.1, page 2: R7F701383 is a DPS 1-MB product; Local RAM 128 KB; Global RAM 64 KB; DATA Flash 64 KB*1 / 32 KB*2, where note 2 applies to 1-MB devices",
-        "Figure 1.3, page 6: Peripheral IP Group 1 / P-Bus domain 80 MHz"
+        "Table 1.1, page 2: R7F701381 and R7F701383 are DPS 1-MB products; Local RAM 128 KB; Global RAM 64 KB; DATA Flash 64 KB*1 / 32 KB*2, where note 2 applies to 1-MB devices",
+        "Figure 1.3, page 6: TAUJ is on Peripheral IP Group 1 / P-Bus domain 80 MHz"
       ]
     },
     "hardware_manual": {
@@ -24,6 +24,13 @@
     }
   },
   "products": {
+    "R7F701381": {
+      "regulator": "DPS",
+      "codeflash_bytes": 1048576,
+      "dataflash_bytes": 32768,
+      "local_ram_bytes": 131072,
+      "global_ram_bytes": 65536
+    },
     "R7F701383": {
       "regulator": "DPS",
       "codeflash_bytes": 1048576,
