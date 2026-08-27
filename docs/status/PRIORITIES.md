@@ -220,7 +220,13 @@ a debug-only C helper. **Controller output is zero CAN, `0x0B6` is not whitelist
 and CarParams remains `SafetyModel.noOutput`; production output remains disabled.**
 
 Static F33 Tx closure also removes the need to transfer `0x351/0x394/0x4A3` wire
-geometry from H/F. Highest-value remaining work is live: stock B6 off→active→off
+geometry from H/F. **VAR-059 now also closes the F33 `0x394` classifier statically:**
+`0x512E4`, state table `0x2A19C`, DEM table `0x2FC50`, DTC table `0x30850`,
+240 classified events, target-specific 200/200/600/22,170 aging, and the exact lossy
+wire→state-candidate map are all target-native. Do not redo that static sweep or copy H's
+17,736 clear age. The remaining `0x394` work is relay-correct **asserted/recovery**
+correlation to choose openpilot `steerFaultTemporary`/`steerFaultPermanent`; state0 is an
+OEM internal clear/normal classifier state, not independently a Ready authorization bit. Highest-value remaining work is live: stock B6 off→active→off
 cadence/template/freshness on a relay-correct exact-F181 car, exclusive source
 suppression, slot-4 command-5 generation permission plus latency/contention, and
 normal/asserted/recovery correlations for the F33 status carriers. Driver override

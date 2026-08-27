@@ -1,0 +1,4279 @@
+{
+  "aging": {
+    "aggregate_latch_bank_355c_age": 200,
+    "boundary": "These are exact classifier/latch counter thresholds. No wall-clock or openpilot temporary/permanent meaning is inferred from the counters alone.",
+    "calibration_address": "0x00030E40",
+    "class2_class4_secondary_latch_age": 600,
+    "comparison_to_h": {
+      "f33_primary_clear_enable_age": 22170,
+      "h_primary_clear_enable_age": 17736
+    },
+    "primary_clear_enable_age": 22170,
+    "primary_latch_bank_355d_age": 200,
+    "raw_u16": [
+      200,
+      200,
+      600,
+      22170,
+      200,
+      200,
+      1000
+    ],
+    "startup_hold_a": 200,
+    "startup_hold_b": 200,
+    "unnamed_following_word": 1000
+  },
+  "boundary": "Exact-F33 firmware closes 0x394 classifier structure, wire-state candidate mapping, DEM class census, DTC-record join, and aging constants. It does not convert those OEM internal states into openpilot temporary/permanent faults or prove 0x394 availability on the final relay-correct route.",
+  "classifier": {
+    "class2_additional_injection": "0x000510B6",
+    "class_accumulator": "0x00050FC8",
+    "entry": "0x000512E4",
+    "init": "0x00051592",
+    "invalid_unavailable_predicate": "0x00051208",
+    "operational_helper": "0x000510E0",
+    "state11_additional_source": "0x00051266",
+    "state_roles": {
+      "0": "deepest clear/normal classifier path after all recovered class/operational predicates pass",
+      "1": "startup/settling hold A",
+      "10": "class-0x10 fault family",
+      "11": "class-0x20/F0-compatible aggregate branch plus independent internal source",
+      "12": "class-0x40 fault branch",
+      "13": "class-0x08 branch when operational helper permits",
+      "14": "class-0x0F branch when operational helper permits",
+      "15": "special operating state selected by distinct operational predicate",
+      "16": "fallback/not-normal operational inhibit branch; class-0x80 blocks deepest state0 path",
+      "2": "startup/settling hold B",
+      "3": "internal input invalid/unavailable predicate",
+      "4": "retained table row; not directly selected by recovered classifier body",
+      "5": "retained table row; not directly selected by recovered classifier body",
+      "6": "class-0x02 primary active with secondary latch bit0 set",
+      "7": "class-0x02 primary active after secondary latch bit0 clears",
+      "8": "class-0x04 primary active with secondary latch bit1 set",
+      "9": "class-0x04 primary active after secondary latch bit1 clears"
+    },
+    "state_table": "0x0002A19C",
+    "state_table_rows": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        3,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        7,
+        0,
+        0,
+        0
+      ],
+      [
+        5,
+        3,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        3,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        3,
+        2,
+        1,
+        2
+      ],
+      [
+        3,
+        3,
+        2,
+        1,
+        0
+      ],
+      [
+        6,
+        3,
+        3,
+        0,
+        2
+      ],
+      [
+        6,
+        3,
+        3,
+        0,
+        0
+      ],
+      [
+        3,
+        7,
+        1,
+        1,
+        1
+      ],
+      [
+        3,
+        7,
+        4,
+        1,
+        1
+      ],
+      [
+        6,
+        7,
+        7,
+        0,
+        1
+      ],
+      [
+        6,
+        7,
+        6,
+        0,
+        1
+      ],
+      [
+        6,
+        7,
+        5,
+        0,
+        1
+      ],
+      [
+        2,
+        2,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        7,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  "dem": {
+    "class_byte_offset": 1,
+    "class_counts": {
+      "0x01": 8,
+      "0x02": 34,
+      "0x04": 1,
+      "0x08": 1,
+      "0x0F": 1,
+      "0x10": 171,
+      "0x20": 16,
+      "0x40": 1,
+      "0x80": 7
+    },
+    "classes": {
+      "0x01": {
+        "dtc_indexed_count": 8,
+        "event_count": 8,
+        "events": [
+          {
+            "dtc": {
+              "dtc_index": 14,
+              "packed_dtc": "0x551551",
+              "raw_hex": "5115550001000000",
+              "record_address": "0x000308C0",
+              "techstream_code": "C151551",
+              "techstream_description": "Power Steering Torque Sensor Missing Calibration",
+              "techstream_failure": "Not Programmed"
+            },
+            "dtc_index": 14,
+            "event": "0x000E",
+            "event_raw_hex": "40010e0440000000",
+            "event_record_address": "0x0002FCC0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 106,
+              "packed_dtc": "0xC31951",
+              "raw_hex": "5119c30001000000",
+              "record_address": "0x00030BA0",
+              "techstream_code": "U031951",
+              "techstream_description": "Software Incompatibility with Steering Effort Control Module",
+              "techstream_failure": "Not Programmed"
+            },
+            "dtc_index": 106,
+            "event": "0x0020",
+            "event_raw_hex": "40016a0c40000000",
+            "event_record_address": "0x0002FD50"
+          },
+          {
+            "dtc": {
+              "dtc_index": 15,
+              "packed_dtc": "0x551554",
+              "raw_hex": "5415550001000000",
+              "record_address": "0x000308C8",
+              "techstream_code": "C151554",
+              "techstream_description": "Power Steering Torque Sensor Adjustment",
+              "techstream_failure": "Missing Calibration"
+            },
+            "dtc_index": 15,
+            "event": "0x0030",
+            "event_raw_hex": "41010f0500000000",
+            "event_record_address": "0x0002FDD0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 15,
+              "packed_dtc": "0x551554",
+              "raw_hex": "5415550001000000",
+              "record_address": "0x000308C8",
+              "techstream_code": "C151554",
+              "techstream_description": "Power Steering Torque Sensor Adjustment",
+              "techstream_failure": "Missing Calibration"
+            },
+            "dtc_index": 15,
+            "event": "0x0031",
+            "event_raw_hex": "41010f0500000000",
+            "event_record_address": "0x0002FDD8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 15,
+              "packed_dtc": "0x551554",
+              "raw_hex": "5415550001000000",
+              "record_address": "0x000308C8",
+              "techstream_code": "C151554",
+              "techstream_description": "Power Steering Torque Sensor Adjustment",
+              "techstream_failure": "Missing Calibration"
+            },
+            "dtc_index": 15,
+            "event": "0x0032",
+            "event_raw_hex": "41010f0500000000",
+            "event_record_address": "0x0002FDE0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 51,
+              "packed_dtc": "0x558151",
+              "raw_hex": "5181550001000000",
+              "record_address": "0x000309E8",
+              "techstream_code": "C158151",
+              "techstream_description": "Assist Map",
+              "techstream_failure": "Not Programmed"
+            },
+            "dtc_index": 51,
+            "event": "0x00BE",
+            "event_raw_hex": "4001330c40000000",
+            "event_record_address": "0x00030240"
+          },
+          {
+            "dtc": {
+              "dtc_index": 100,
+              "packed_dtc": "0xC30051",
+              "raw_hex": "5100c30001000000",
+              "record_address": "0x00030B70",
+              "techstream_code": "U030051",
+              "techstream_description": "Internal Control Module Software Incompatibility",
+              "techstream_failure": "Not Programmed"
+            },
+            "dtc_index": 100,
+            "event": "0x00FF",
+            "event_raw_hex": "4001640c40000000",
+            "event_record_address": "0x00030448"
+          },
+          {
+            "dtc": {
+              "dtc_index": 131,
+              "packed_dtc": "0xD30651",
+              "raw_hex": "5106d30001000000",
+              "record_address": "0x00030C68",
+              "techstream_code": "U130651",
+              "techstream_description": "Software Incompatibility with Power Steering Control Module Rear",
+              "techstream_failure": "Not Programmed"
+            },
+            "dtc_index": 131,
+            "event": "0x0120",
+            "event_raw_hex": "4001830c40000000",
+            "event_record_address": "0x00030550"
+          }
+        ]
+      },
+      "0x02": {
+        "dtc_indexed_count": 32,
+        "event_count": 34,
+        "events": [
+          {
+            "dtc": {
+              "dtc_index": 37,
+              "packed_dtc": "0x555A16",
+              "raw_hex": "165a550001000000",
+              "record_address": "0x00030978",
+              "techstream_code": "C155A16",
+              "techstream_description": "Power Steering Motor \"A\" Supply Voltage",
+              "techstream_failure": "Circuit Voltage Below Threshold"
+            },
+            "dtc_index": 37,
+            "event": "0x0060",
+            "event_raw_hex": "4302250800010000",
+            "event_record_address": "0x0002FF50"
+          },
+          {
+            "dtc": {
+              "dtc_index": 39,
+              "packed_dtc": "0x555B16",
+              "raw_hex": "165b550001000000",
+              "record_address": "0x00030988",
+              "techstream_code": "C155B16",
+              "techstream_description": "Power Steering Motor \"B\" Supply Voltage",
+              "techstream_failure": "Circuit Voltage Below Threshold"
+            },
+            "dtc_index": 39,
+            "event": "0x0061",
+            "event_raw_hex": "4302270800010000",
+            "event_record_address": "0x0002FF58"
+          },
+          {
+            "dtc": {
+              "dtc_index": 37,
+              "packed_dtc": "0x555A16",
+              "raw_hex": "165a550001000000",
+              "record_address": "0x00030978",
+              "techstream_code": "C155A16",
+              "techstream_description": "Power Steering Motor \"A\" Supply Voltage",
+              "techstream_failure": "Circuit Voltage Below Threshold"
+            },
+            "dtc_index": 37,
+            "event": "0x0062",
+            "event_raw_hex": "4302250800010000",
+            "event_record_address": "0x0002FF60"
+          },
+          {
+            "dtc": {
+              "dtc_index": 39,
+              "packed_dtc": "0x555B16",
+              "raw_hex": "165b550001000000",
+              "record_address": "0x00030988",
+              "techstream_code": "C155B16",
+              "techstream_description": "Power Steering Motor \"B\" Supply Voltage",
+              "techstream_failure": "Circuit Voltage Below Threshold"
+            },
+            "dtc_index": 39,
+            "event": "0x0063",
+            "event_raw_hex": "4302270800010000",
+            "event_record_address": "0x0002FF68"
+          },
+          {
+            "dtc": {
+              "dtc_index": 8,
+              "packed_dtc": "0x523A17",
+              "raw_hex": "173a520001000000",
+              "record_address": "0x00030890",
+              "techstream_code": "C123A17",
+              "techstream_description": "Supply Voltage Circuit",
+              "techstream_failure": "Circuit Voltage Above Threshold"
+            },
+            "dtc_index": 8,
+            "event": "0x009E",
+            "event_raw_hex": "4302080b00000000",
+            "event_record_address": "0x00030140"
+          },
+          {
+            "dtc": {
+              "dtc_index": 8,
+              "packed_dtc": "0x523A17",
+              "raw_hex": "173a520001000000",
+              "record_address": "0x00030890",
+              "techstream_code": "C123A17",
+              "techstream_description": "Supply Voltage Circuit",
+              "techstream_failure": "Circuit Voltage Above Threshold"
+            },
+            "dtc_index": 8,
+            "event": "0x009F",
+            "event_raw_hex": "4302080b00000000",
+            "event_record_address": "0x00030148"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x00B4",
+            "event_raw_hex": "4502000000010000",
+            "event_record_address": "0x000301F0"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x00B9",
+            "event_raw_hex": "4502000000010000",
+            "event_record_address": "0x00030218"
+          },
+          {
+            "dtc": {
+              "dtc_index": 2,
+              "packed_dtc": "0x45D604",
+              "raw_hex": "04d6450001000000",
+              "record_address": "0x00030860",
+              "techstream_code": "C05D604",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "System Internal Failure"
+            },
+            "dtc_index": 2,
+            "event": "0x00D3",
+            "event_raw_hex": "4302020b00010000",
+            "event_record_address": "0x000302E8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 2,
+              "packed_dtc": "0x45D604",
+              "raw_hex": "04d6450001000000",
+              "record_address": "0x00030860",
+              "techstream_code": "C05D604",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "System Internal Failure"
+            },
+            "dtc_index": 2,
+            "event": "0x00D4",
+            "event_raw_hex": "4302020b00010000",
+            "event_record_address": "0x000302F0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 2,
+              "packed_dtc": "0x45D604",
+              "raw_hex": "04d6450001000000",
+              "record_address": "0x00030860",
+              "techstream_code": "C05D604",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "System Internal Failure"
+            },
+            "dtc_index": 2,
+            "event": "0x00D6",
+            "event_raw_hex": "4302020b00010000",
+            "event_record_address": "0x00030300"
+          },
+          {
+            "dtc": {
+              "dtc_index": 2,
+              "packed_dtc": "0x45D604",
+              "raw_hex": "04d6450001000000",
+              "record_address": "0x00030860",
+              "techstream_code": "C05D604",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "System Internal Failure"
+            },
+            "dtc_index": 2,
+            "event": "0x00D7",
+            "event_raw_hex": "4302020b00010000",
+            "event_record_address": "0x00030308"
+          },
+          {
+            "dtc": {
+              "dtc_index": 38,
+              "packed_dtc": "0x555A17",
+              "raw_hex": "175a550001000000",
+              "record_address": "0x00030980",
+              "techstream_code": "C155A17",
+              "techstream_description": "Power Steering Motor \"A\" Supply Voltage",
+              "techstream_failure": "Circuit Voltage Above Threshold"
+            },
+            "dtc_index": 38,
+            "event": "0x00E2",
+            "event_raw_hex": "4302260800010000",
+            "event_record_address": "0x00030360"
+          },
+          {
+            "dtc": {
+              "dtc_index": 40,
+              "packed_dtc": "0x555B17",
+              "raw_hex": "175b550001000000",
+              "record_address": "0x00030990",
+              "techstream_code": "C155B17",
+              "techstream_description": "Power Steering Motor \"B\" Supply Voltage",
+              "techstream_failure": "Circuit Voltage Above Threshold"
+            },
+            "dtc_index": 40,
+            "event": "0x00E3",
+            "event_raw_hex": "4302280800010000",
+            "event_record_address": "0x00030368"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x00EC",
+            "event_raw_hex": "4302040b00010000",
+            "event_record_address": "0x000303B0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x00F3",
+            "event_raw_hex": "4302040b00010000",
+            "event_record_address": "0x000303E8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 2,
+              "packed_dtc": "0x45D604",
+              "raw_hex": "04d6450001000000",
+              "record_address": "0x00030860",
+              "techstream_code": "C05D604",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "System Internal Failure"
+            },
+            "dtc_index": 2,
+            "event": "0x012E",
+            "event_raw_hex": "4302020b00010000",
+            "event_record_address": "0x000305C0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 3,
+              "packed_dtc": "0x45D646",
+              "raw_hex": "46d6450001000000",
+              "record_address": "0x00030868",
+              "techstream_code": "C05D646",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Calibration / Parameter Memory Failure"
+            },
+            "dtc_index": 3,
+            "event": "0x0130",
+            "event_raw_hex": "4302030b00000000",
+            "event_record_address": "0x000305D0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 3,
+              "packed_dtc": "0x45D646",
+              "raw_hex": "46d6450001000000",
+              "record_address": "0x00030868",
+              "techstream_code": "C05D646",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Calibration / Parameter Memory Failure"
+            },
+            "dtc_index": 3,
+            "event": "0x0131",
+            "event_raw_hex": "4302030b00000000",
+            "event_record_address": "0x000305D8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 3,
+              "packed_dtc": "0x45D646",
+              "raw_hex": "46d6450001000000",
+              "record_address": "0x00030868",
+              "techstream_code": "C05D646",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Calibration / Parameter Memory Failure"
+            },
+            "dtc_index": 3,
+            "event": "0x0132",
+            "event_raw_hex": "4302030b00000000",
+            "event_record_address": "0x000305E0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 3,
+              "packed_dtc": "0x45D646",
+              "raw_hex": "46d6450001000000",
+              "record_address": "0x00030868",
+              "techstream_code": "C05D646",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Calibration / Parameter Memory Failure"
+            },
+            "dtc_index": 3,
+            "event": "0x0133",
+            "event_raw_hex": "4302030b00000000",
+            "event_record_address": "0x000305E8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 63,
+              "packed_dtc": "0x55D262",
+              "raw_hex": "62d2550001000000",
+              "record_address": "0x00030A48",
+              "techstream_code": "C15D262",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 63,
+            "event": "0x0171",
+            "event_raw_hex": "43023f0200000000",
+            "event_record_address": "0x000307D8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 63,
+              "packed_dtc": "0x55D262",
+              "raw_hex": "62d2550001000000",
+              "record_address": "0x00030A48",
+              "techstream_code": "C15D262",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 63,
+            "event": "0x0172",
+            "event_raw_hex": "43023f0200000000",
+            "event_record_address": "0x000307E0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 66,
+              "packed_dtc": "0x55D362",
+              "raw_hex": "62d3550001000000",
+              "record_address": "0x00030A60",
+              "techstream_code": "C15D362",
+              "techstream_description": "Power Steering Motor Position Sensor \"C\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 66,
+            "event": "0x0173",
+            "event_raw_hex": "4302420200000000",
+            "event_record_address": "0x000307E8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 66,
+              "packed_dtc": "0x55D362",
+              "raw_hex": "62d3550001000000",
+              "record_address": "0x00030A60",
+              "techstream_code": "C15D362",
+              "techstream_description": "Power Steering Motor Position Sensor \"C\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 66,
+            "event": "0x0174",
+            "event_raw_hex": "4302420200000000",
+            "event_record_address": "0x000307F0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 58,
+              "packed_dtc": "0x55D162",
+              "raw_hex": "62d1550001000000",
+              "record_address": "0x00030A20",
+              "techstream_code": "C15D162",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 58,
+            "event": "0x0175",
+            "event_raw_hex": "43023a0200000000",
+            "event_record_address": "0x000307F8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 58,
+              "packed_dtc": "0x55D162",
+              "raw_hex": "62d1550001000000",
+              "record_address": "0x00030A20",
+              "techstream_code": "C15D162",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 58,
+            "event": "0x0176",
+            "event_raw_hex": "43023a0200000000",
+            "event_record_address": "0x00030800"
+          },
+          {
+            "dtc": {
+              "dtc_index": 66,
+              "packed_dtc": "0x55D362",
+              "raw_hex": "62d3550001000000",
+              "record_address": "0x00030A60",
+              "techstream_code": "C15D362",
+              "techstream_description": "Power Steering Motor Position Sensor \"C\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 66,
+            "event": "0x0177",
+            "event_raw_hex": "4302420200000000",
+            "event_record_address": "0x00030808"
+          },
+          {
+            "dtc": {
+              "dtc_index": 66,
+              "packed_dtc": "0x55D362",
+              "raw_hex": "62d3550001000000",
+              "record_address": "0x00030A60",
+              "techstream_code": "C15D362",
+              "techstream_description": "Power Steering Motor Position Sensor \"C\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 66,
+            "event": "0x0178",
+            "event_raw_hex": "4302420200000000",
+            "event_record_address": "0x00030810"
+          },
+          {
+            "dtc": {
+              "dtc_index": 58,
+              "packed_dtc": "0x55D162",
+              "raw_hex": "62d1550001000000",
+              "record_address": "0x00030A20",
+              "techstream_code": "C15D162",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 58,
+            "event": "0x0179",
+            "event_raw_hex": "43023a0200000000",
+            "event_record_address": "0x00030818"
+          },
+          {
+            "dtc": {
+              "dtc_index": 58,
+              "packed_dtc": "0x55D162",
+              "raw_hex": "62d1550001000000",
+              "record_address": "0x00030A20",
+              "techstream_code": "C15D162",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 58,
+            "event": "0x017A",
+            "event_raw_hex": "43023a0200000000",
+            "event_record_address": "0x00030820"
+          },
+          {
+            "dtc": {
+              "dtc_index": 63,
+              "packed_dtc": "0x55D262",
+              "raw_hex": "62d2550001000000",
+              "record_address": "0x00030A48",
+              "techstream_code": "C15D262",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 63,
+            "event": "0x017B",
+            "event_raw_hex": "43023f0200000000",
+            "event_record_address": "0x00030828"
+          },
+          {
+            "dtc": {
+              "dtc_index": 63,
+              "packed_dtc": "0x55D262",
+              "raw_hex": "62d2550001000000",
+              "record_address": "0x00030A48",
+              "techstream_code": "C15D262",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 63,
+            "event": "0x017C",
+            "event_raw_hex": "43023f0200000000",
+            "event_record_address": "0x00030830"
+          },
+          {
+            "dtc": {
+              "dtc_index": 3,
+              "packed_dtc": "0x45D646",
+              "raw_hex": "46d6450001000000",
+              "record_address": "0x00030868",
+              "techstream_code": "C05D646",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Calibration / Parameter Memory Failure"
+            },
+            "dtc_index": 3,
+            "event": "0x017E",
+            "event_raw_hex": "4302030b00000000",
+            "event_record_address": "0x00030840"
+          }
+        ]
+      },
+      "0x04": {
+        "dtc_indexed_count": 0,
+        "event_count": 1,
+        "events": [
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x00A1",
+            "event_raw_hex": "0104000000010000",
+            "event_record_address": "0x00030158"
+          }
+        ]
+      },
+      "0x08": {
+        "dtc_indexed_count": 0,
+        "event_count": 1,
+        "events": [
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0101",
+            "event_raw_hex": "0108000000010000",
+            "event_record_address": "0x00030458"
+          }
+        ]
+      },
+      "0x0F": {
+        "dtc_indexed_count": 0,
+        "event_count": 1,
+        "events": [
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0099",
+            "event_raw_hex": "010f000000010000",
+            "event_record_address": "0x00030118"
+          }
+        ]
+      },
+      "0x10": {
+        "dtc_indexed_count": 167,
+        "event_count": 171,
+        "events": [
+          {
+            "dtc": {
+              "dtc_index": 53,
+              "packed_dtc": "0x559A49",
+              "raw_hex": "499a550001000000",
+              "record_address": "0x000309F8",
+              "techstream_code": "C159A49",
+              "techstream_description": "Power Steering Motor \"A\" Terminal Voltage Detect Circuit",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 53,
+            "event": "0x0001",
+            "event_raw_hex": "4310350b81000000",
+            "event_record_address": "0x0002FC58"
+          },
+          {
+            "dtc": {
+              "dtc_index": 53,
+              "packed_dtc": "0x559A49",
+              "raw_hex": "499a550001000000",
+              "record_address": "0x000309F8",
+              "techstream_code": "C159A49",
+              "techstream_description": "Power Steering Motor \"A\" Terminal Voltage Detect Circuit",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 53,
+            "event": "0x0002",
+            "event_raw_hex": "4310350b81000000",
+            "event_record_address": "0x0002FC60"
+          },
+          {
+            "dtc": {
+              "dtc_index": 53,
+              "packed_dtc": "0x559A49",
+              "raw_hex": "499a550001000000",
+              "record_address": "0x000309F8",
+              "techstream_code": "C159A49",
+              "techstream_description": "Power Steering Motor \"A\" Terminal Voltage Detect Circuit",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 53,
+            "event": "0x0003",
+            "event_raw_hex": "4310350b81000000",
+            "event_record_address": "0x0002FC68"
+          },
+          {
+            "dtc": {
+              "dtc_index": 54,
+              "packed_dtc": "0x559B49",
+              "raw_hex": "499b550001000000",
+              "record_address": "0x00030A00",
+              "techstream_code": "C159B49",
+              "techstream_description": "Power Steering Motor \"B\" Terminal Voltage Detect Circuit",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 54,
+            "event": "0x0004",
+            "event_raw_hex": "4310360b82000000",
+            "event_record_address": "0x0002FC70"
+          },
+          {
+            "dtc": {
+              "dtc_index": 54,
+              "packed_dtc": "0x559B49",
+              "raw_hex": "499b550001000000",
+              "record_address": "0x00030A00",
+              "techstream_code": "C159B49",
+              "techstream_description": "Power Steering Motor \"B\" Terminal Voltage Detect Circuit",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 54,
+            "event": "0x0005",
+            "event_raw_hex": "4310360b82000000",
+            "event_record_address": "0x0002FC78"
+          },
+          {
+            "dtc": {
+              "dtc_index": 54,
+              "packed_dtc": "0x559B49",
+              "raw_hex": "499b550001000000",
+              "record_address": "0x00030A00",
+              "techstream_code": "C159B49",
+              "techstream_description": "Power Steering Motor \"B\" Terminal Voltage Detect Circuit",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 54,
+            "event": "0x0006",
+            "event_raw_hex": "4310360b82000000",
+            "event_record_address": "0x0002FC80"
+          },
+          {
+            "dtc": {
+              "dtc_index": 42,
+              "packed_dtc": "0x556A9F",
+              "raw_hex": "9f6a550001000000",
+              "record_address": "0x000309A0",
+              "techstream_code": "C156A9F",
+              "techstream_description": "Power Steering Motor \"A\" Shut Down Relay",
+              "techstream_failure": "Stuck Off"
+            },
+            "dtc_index": 42,
+            "event": "0x0007",
+            "event_raw_hex": "43102a0b81000000",
+            "event_record_address": "0x0002FC88"
+          },
+          {
+            "dtc": {
+              "dtc_index": 42,
+              "packed_dtc": "0x556A9F",
+              "raw_hex": "9f6a550001000000",
+              "record_address": "0x000309A0",
+              "techstream_code": "C156A9F",
+              "techstream_description": "Power Steering Motor \"A\" Shut Down Relay",
+              "techstream_failure": "Stuck Off"
+            },
+            "dtc_index": 42,
+            "event": "0x0008",
+            "event_raw_hex": "43102a0b81000000",
+            "event_record_address": "0x0002FC90"
+          },
+          {
+            "dtc": {
+              "dtc_index": 42,
+              "packed_dtc": "0x556A9F",
+              "raw_hex": "9f6a550001000000",
+              "record_address": "0x000309A0",
+              "techstream_code": "C156A9F",
+              "techstream_description": "Power Steering Motor \"A\" Shut Down Relay",
+              "techstream_failure": "Stuck Off"
+            },
+            "dtc_index": 42,
+            "event": "0x0009",
+            "event_raw_hex": "43102a0b81000000",
+            "event_record_address": "0x0002FC98"
+          },
+          {
+            "dtc": {
+              "dtc_index": 44,
+              "packed_dtc": "0x556B9F",
+              "raw_hex": "9f6b550001000000",
+              "record_address": "0x000309B0",
+              "techstream_code": "C156B9F",
+              "techstream_description": "Power Steering Motor \"B\" Shut Down Relay",
+              "techstream_failure": "Stuck Off"
+            },
+            "dtc_index": 44,
+            "event": "0x000A",
+            "event_raw_hex": "43102c0b82000000",
+            "event_record_address": "0x0002FCA0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 44,
+              "packed_dtc": "0x556B9F",
+              "raw_hex": "9f6b550001000000",
+              "record_address": "0x000309B0",
+              "techstream_code": "C156B9F",
+              "techstream_description": "Power Steering Motor \"B\" Shut Down Relay",
+              "techstream_failure": "Stuck Off"
+            },
+            "dtc_index": 44,
+            "event": "0x000B",
+            "event_raw_hex": "43102c0b82000000",
+            "event_record_address": "0x0002FCA8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 44,
+              "packed_dtc": "0x556B9F",
+              "raw_hex": "9f6b550001000000",
+              "record_address": "0x000309B0",
+              "techstream_code": "C156B9F",
+              "techstream_description": "Power Steering Motor \"B\" Shut Down Relay",
+              "techstream_failure": "Stuck Off"
+            },
+            "dtc_index": 44,
+            "event": "0x000C",
+            "event_raw_hex": "43102c0b82000000",
+            "event_record_address": "0x0002FCB0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 41,
+              "packed_dtc": "0x556A9E",
+              "raw_hex": "9e6a550001000000",
+              "record_address": "0x00030998",
+              "techstream_code": "C156A9E",
+              "techstream_description": "Power Steering Motor \"A\" Shut Down Relay",
+              "techstream_failure": "Stuck On"
+            },
+            "dtc_index": 41,
+            "event": "0x000F",
+            "event_raw_hex": "4310290b81000000",
+            "event_record_address": "0x0002FCC8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 41,
+              "packed_dtc": "0x556A9E",
+              "raw_hex": "9e6a550001000000",
+              "record_address": "0x00030998",
+              "techstream_code": "C156A9E",
+              "techstream_description": "Power Steering Motor \"A\" Shut Down Relay",
+              "techstream_failure": "Stuck On"
+            },
+            "dtc_index": 41,
+            "event": "0x0010",
+            "event_raw_hex": "4310290b81000000",
+            "event_record_address": "0x0002FCD0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 41,
+              "packed_dtc": "0x556A9E",
+              "raw_hex": "9e6a550001000000",
+              "record_address": "0x00030998",
+              "techstream_code": "C156A9E",
+              "techstream_description": "Power Steering Motor \"A\" Shut Down Relay",
+              "techstream_failure": "Stuck On"
+            },
+            "dtc_index": 41,
+            "event": "0x0011",
+            "event_raw_hex": "4310290b81000000",
+            "event_record_address": "0x0002FCD8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 43,
+              "packed_dtc": "0x556B9E",
+              "raw_hex": "9e6b550001000000",
+              "record_address": "0x000309A8",
+              "techstream_code": "C156B9E",
+              "techstream_description": "Power Steering Motor \"B\" Shut Down Relay",
+              "techstream_failure": "Stuck On"
+            },
+            "dtc_index": 43,
+            "event": "0x0012",
+            "event_raw_hex": "43102b0b82000000",
+            "event_record_address": "0x0002FCE0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 43,
+              "packed_dtc": "0x556B9E",
+              "raw_hex": "9e6b550001000000",
+              "record_address": "0x000309A8",
+              "techstream_code": "C156B9E",
+              "techstream_description": "Power Steering Motor \"B\" Shut Down Relay",
+              "techstream_failure": "Stuck On"
+            },
+            "dtc_index": 43,
+            "event": "0x0013",
+            "event_raw_hex": "43102b0b82000000",
+            "event_record_address": "0x0002FCE8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 43,
+              "packed_dtc": "0x556B9E",
+              "raw_hex": "9e6b550001000000",
+              "record_address": "0x000309A8",
+              "techstream_code": "C156B9E",
+              "techstream_description": "Power Steering Motor \"B\" Shut Down Relay",
+              "techstream_failure": "Stuck On"
+            },
+            "dtc_index": 43,
+            "event": "0x0014",
+            "event_raw_hex": "43102b0b82000000",
+            "event_record_address": "0x0002FCF0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 2,
+              "packed_dtc": "0x45D604",
+              "raw_hex": "04d6450001000000",
+              "record_address": "0x00030860",
+              "techstream_code": "C05D604",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "System Internal Failure"
+            },
+            "dtc_index": 2,
+            "event": "0x0015",
+            "event_raw_hex": "4310020000000000",
+            "event_record_address": "0x0002FCF8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 2,
+              "packed_dtc": "0x45D604",
+              "raw_hex": "04d6450001000000",
+              "record_address": "0x00030860",
+              "techstream_code": "C05D604",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "System Internal Failure"
+            },
+            "dtc_index": 2,
+            "event": "0x0016",
+            "event_raw_hex": "4310020000000000",
+            "event_record_address": "0x0002FD00"
+          },
+          {
+            "dtc": {
+              "dtc_index": 2,
+              "packed_dtc": "0x45D604",
+              "raw_hex": "04d6450001000000",
+              "record_address": "0x00030860",
+              "techstream_code": "C05D604",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "System Internal Failure"
+            },
+            "dtc_index": 2,
+            "event": "0x0017",
+            "event_raw_hex": "4310020000000000",
+            "event_record_address": "0x0002FD08"
+          },
+          {
+            "dtc": {
+              "dtc_index": 2,
+              "packed_dtc": "0x45D604",
+              "raw_hex": "04d6450001000000",
+              "record_address": "0x00030860",
+              "techstream_code": "C05D604",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "System Internal Failure"
+            },
+            "dtc_index": 2,
+            "event": "0x0018",
+            "event_raw_hex": "4310020000000000",
+            "event_record_address": "0x0002FD10"
+          },
+          {
+            "dtc": {
+              "dtc_index": 25,
+              "packed_dtc": "0x552B19",
+              "raw_hex": "192b550001000000",
+              "record_address": "0x00030918",
+              "techstream_code": "C152B19",
+              "techstream_description": "Power Steering Motor \"B\"",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 25,
+            "event": "0x0019",
+            "event_raw_hex": "4310190a82010000",
+            "event_record_address": "0x0002FD18"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x001A",
+            "event_raw_hex": "4310000000000000",
+            "event_record_address": "0x0002FD20"
+          },
+          {
+            "dtc": {
+              "dtc_index": 25,
+              "packed_dtc": "0x552B19",
+              "raw_hex": "192b550001000000",
+              "record_address": "0x00030918",
+              "techstream_code": "C152B19",
+              "techstream_description": "Power Steering Motor \"B\"",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 25,
+            "event": "0x001B",
+            "event_raw_hex": "4310190a82010000",
+            "event_record_address": "0x0002FD28"
+          },
+          {
+            "dtc": {
+              "dtc_index": 25,
+              "packed_dtc": "0x552B19",
+              "raw_hex": "192b550001000000",
+              "record_address": "0x00030918",
+              "techstream_code": "C152B19",
+              "techstream_description": "Power Steering Motor \"B\"",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 25,
+            "event": "0x001C",
+            "event_raw_hex": "4310190a82010000",
+            "event_record_address": "0x0002FD30"
+          },
+          {
+            "dtc": {
+              "dtc_index": 25,
+              "packed_dtc": "0x552B19",
+              "raw_hex": "192b550001000000",
+              "record_address": "0x00030918",
+              "techstream_code": "C152B19",
+              "techstream_description": "Power Steering Motor \"B\"",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 25,
+            "event": "0x001D",
+            "event_raw_hex": "4310190a82010000",
+            "event_record_address": "0x0002FD38"
+          },
+          {
+            "dtc": {
+              "dtc_index": 2,
+              "packed_dtc": "0x45D604",
+              "raw_hex": "04d6450001000000",
+              "record_address": "0x00030860",
+              "techstream_code": "C05D604",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "System Internal Failure"
+            },
+            "dtc_index": 2,
+            "event": "0x001E",
+            "event_raw_hex": "4310020000000000",
+            "event_record_address": "0x0002FD40"
+          },
+          {
+            "dtc": {
+              "dtc_index": 67,
+              "packed_dtc": "0x55D704",
+              "raw_hex": "04d7550001000000",
+              "record_address": "0x00030A68",
+              "techstream_code": "C15D704",
+              "techstream_description": "Power Steering Control Module Processor (System 2)",
+              "techstream_failure": "System Internal Failure"
+            },
+            "dtc_index": 67,
+            "event": "0x001F",
+            "event_raw_hex": "4310430000000000",
+            "event_record_address": "0x0002FD48"
+          },
+          {
+            "dtc": {
+              "dtc_index": 50,
+              "packed_dtc": "0x557B62",
+              "raw_hex": "627b550001000000",
+              "record_address": "0x000309E0",
+              "techstream_code": "C157B62",
+              "techstream_description": "Power Steering Motor \"B\" Current Sensor",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 50,
+            "event": "0x0024",
+            "event_raw_hex": "4310320a82010000",
+            "event_record_address": "0x0002FD70"
+          },
+          {
+            "dtc": {
+              "dtc_index": 24,
+              "packed_dtc": "0x552B18",
+              "raw_hex": "182b550001000000",
+              "record_address": "0x00030910",
+              "techstream_code": "C152B18",
+              "techstream_description": "Power Steering Motor \"B\"",
+              "techstream_failure": "Circuit Current Below Threshold"
+            },
+            "dtc_index": 24,
+            "event": "0x0026",
+            "event_raw_hex": "4310180a82010000",
+            "event_record_address": "0x0002FD80"
+          },
+          {
+            "dtc": {
+              "dtc_index": 24,
+              "packed_dtc": "0x552B18",
+              "raw_hex": "182b550001000000",
+              "record_address": "0x00030910",
+              "techstream_code": "C152B18",
+              "techstream_description": "Power Steering Motor \"B\"",
+              "techstream_failure": "Circuit Current Below Threshold"
+            },
+            "dtc_index": 24,
+            "event": "0x0027",
+            "event_raw_hex": "4310180a82010000",
+            "event_record_address": "0x0002FD88"
+          },
+          {
+            "dtc": {
+              "dtc_index": 24,
+              "packed_dtc": "0x552B18",
+              "raw_hex": "182b550001000000",
+              "record_address": "0x00030910",
+              "techstream_code": "C152B18",
+              "techstream_description": "Power Steering Motor \"B\"",
+              "techstream_failure": "Circuit Current Below Threshold"
+            },
+            "dtc_index": 24,
+            "event": "0x0028",
+            "event_raw_hex": "4310180a82010000",
+            "event_record_address": "0x0002FD90"
+          },
+          {
+            "dtc": {
+              "dtc_index": 58,
+              "packed_dtc": "0x55D162",
+              "raw_hex": "62d1550001000000",
+              "record_address": "0x00030A20",
+              "techstream_code": "C15D162",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 58,
+            "event": "0x0029",
+            "event_raw_hex": "43103a008b010000",
+            "event_record_address": "0x0002FD98"
+          },
+          {
+            "dtc": {
+              "dtc_index": 58,
+              "packed_dtc": "0x55D162",
+              "raw_hex": "62d1550001000000",
+              "record_address": "0x00030A20",
+              "techstream_code": "C15D162",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 58,
+            "event": "0x002A",
+            "event_raw_hex": "43103a008b010000",
+            "event_record_address": "0x0002FDA0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 63,
+              "packed_dtc": "0x55D262",
+              "raw_hex": "62d2550001000000",
+              "record_address": "0x00030A48",
+              "techstream_code": "C15D262",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 63,
+            "event": "0x002B",
+            "event_raw_hex": "43103f008c010000",
+            "event_record_address": "0x0002FDA8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 63,
+              "packed_dtc": "0x55D262",
+              "raw_hex": "62d2550001000000",
+              "record_address": "0x00030A48",
+              "techstream_code": "C15D262",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 63,
+            "event": "0x002C",
+            "event_raw_hex": "43103f008c010000",
+            "event_record_address": "0x0002FDB0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 30,
+              "packed_dtc": "0x553B19",
+              "raw_hex": "193b550001000000",
+              "record_address": "0x00030940",
+              "techstream_code": "C153B19",
+              "techstream_description": "Power Steering Motor \"B\" Inverter",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 30,
+            "event": "0x002D",
+            "event_raw_hex": "43101e0b82010000",
+            "event_record_address": "0x0002FDB8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 30,
+              "packed_dtc": "0x553B19",
+              "raw_hex": "193b550001000000",
+              "record_address": "0x00030940",
+              "techstream_code": "C153B19",
+              "techstream_description": "Power Steering Motor \"B\" Inverter",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 30,
+            "event": "0x002E",
+            "event_raw_hex": "43101e0b82010000",
+            "event_record_address": "0x0002FDC0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 30,
+              "packed_dtc": "0x553B19",
+              "raw_hex": "193b550001000000",
+              "record_address": "0x00030940",
+              "techstream_code": "C153B19",
+              "techstream_description": "Power Steering Motor \"B\" Inverter",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 30,
+            "event": "0x002F",
+            "event_raw_hex": "43101e0b82010000",
+            "event_record_address": "0x0002FDC8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 23,
+              "packed_dtc": "0x552A19",
+              "raw_hex": "192a550001000000",
+              "record_address": "0x00030908",
+              "techstream_code": "C152A19",
+              "techstream_description": "Power Steering Motor \"A\"",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 23,
+            "event": "0x0036",
+            "event_raw_hex": "4310170a81010000",
+            "event_record_address": "0x0002FE00"
+          },
+          {
+            "dtc": {
+              "dtc_index": 23,
+              "packed_dtc": "0x552A19",
+              "raw_hex": "192a550001000000",
+              "record_address": "0x00030908",
+              "techstream_code": "C152A19",
+              "techstream_description": "Power Steering Motor \"A\"",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 23,
+            "event": "0x0038",
+            "event_raw_hex": "4310170a81010000",
+            "event_record_address": "0x0002FE10"
+          },
+          {
+            "dtc": {
+              "dtc_index": 23,
+              "packed_dtc": "0x552A19",
+              "raw_hex": "192a550001000000",
+              "record_address": "0x00030908",
+              "techstream_code": "C152A19",
+              "techstream_description": "Power Steering Motor \"A\"",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 23,
+            "event": "0x0039",
+            "event_raw_hex": "4310170a81010000",
+            "event_record_address": "0x0002FE18"
+          },
+          {
+            "dtc": {
+              "dtc_index": 23,
+              "packed_dtc": "0x552A19",
+              "raw_hex": "192a550001000000",
+              "record_address": "0x00030908",
+              "techstream_code": "C152A19",
+              "techstream_description": "Power Steering Motor \"A\"",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 23,
+            "event": "0x003A",
+            "event_raw_hex": "4310170a81010000",
+            "event_record_address": "0x0002FE20"
+          },
+          {
+            "dtc": {
+              "dtc_index": 53,
+              "packed_dtc": "0x559A49",
+              "raw_hex": "499a550001000000",
+              "record_address": "0x000309F8",
+              "techstream_code": "C159A49",
+              "techstream_description": "Power Steering Motor \"A\" Terminal Voltage Detect Circuit",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 53,
+            "event": "0x003B",
+            "event_raw_hex": "4310350b81000000",
+            "event_record_address": "0x0002FE28"
+          },
+          {
+            "dtc": {
+              "dtc_index": 53,
+              "packed_dtc": "0x559A49",
+              "raw_hex": "499a550001000000",
+              "record_address": "0x000309F8",
+              "techstream_code": "C159A49",
+              "techstream_description": "Power Steering Motor \"A\" Terminal Voltage Detect Circuit",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 53,
+            "event": "0x003C",
+            "event_raw_hex": "4310350b81000000",
+            "event_record_address": "0x0002FE30"
+          },
+          {
+            "dtc": {
+              "dtc_index": 53,
+              "packed_dtc": "0x559A49",
+              "raw_hex": "499a550001000000",
+              "record_address": "0x000309F8",
+              "techstream_code": "C159A49",
+              "techstream_description": "Power Steering Motor \"A\" Terminal Voltage Detect Circuit",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 53,
+            "event": "0x003D",
+            "event_raw_hex": "4310350b81000000",
+            "event_record_address": "0x0002FE38"
+          },
+          {
+            "dtc": {
+              "dtc_index": 54,
+              "packed_dtc": "0x559B49",
+              "raw_hex": "499b550001000000",
+              "record_address": "0x00030A00",
+              "techstream_code": "C159B49",
+              "techstream_description": "Power Steering Motor \"B\" Terminal Voltage Detect Circuit",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 54,
+            "event": "0x003E",
+            "event_raw_hex": "4310360b82000000",
+            "event_record_address": "0x0002FE40"
+          },
+          {
+            "dtc": {
+              "dtc_index": 54,
+              "packed_dtc": "0x559B49",
+              "raw_hex": "499b550001000000",
+              "record_address": "0x00030A00",
+              "techstream_code": "C159B49",
+              "techstream_description": "Power Steering Motor \"B\" Terminal Voltage Detect Circuit",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 54,
+            "event": "0x003F",
+            "event_raw_hex": "4310360b82000000",
+            "event_record_address": "0x0002FE48"
+          },
+          {
+            "dtc": {
+              "dtc_index": 54,
+              "packed_dtc": "0x559B49",
+              "raw_hex": "499b550001000000",
+              "record_address": "0x00030A00",
+              "techstream_code": "C159B49",
+              "techstream_description": "Power Steering Motor \"B\" Terminal Voltage Detect Circuit",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 54,
+            "event": "0x0040",
+            "event_raw_hex": "4310360b82000000",
+            "event_record_address": "0x0002FE50"
+          },
+          {
+            "dtc": {
+              "dtc_index": 48,
+              "packed_dtc": "0x557A62",
+              "raw_hex": "627a550001000000",
+              "record_address": "0x000309D0",
+              "techstream_code": "C157A62",
+              "techstream_description": "Power Steering Motor \"A\" Current Sensor",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 48,
+            "event": "0x0041",
+            "event_raw_hex": "4310300a81010000",
+            "event_record_address": "0x0002FE58"
+          },
+          {
+            "dtc": {
+              "dtc_index": 22,
+              "packed_dtc": "0x552A18",
+              "raw_hex": "182a550001000000",
+              "record_address": "0x00030900",
+              "techstream_code": "C152A18",
+              "techstream_description": "Power Steering Motor \"A\"",
+              "techstream_failure": "Circuit Current Below Threshold"
+            },
+            "dtc_index": 22,
+            "event": "0x0043",
+            "event_raw_hex": "4310160a81010000",
+            "event_record_address": "0x0002FE68"
+          },
+          {
+            "dtc": {
+              "dtc_index": 22,
+              "packed_dtc": "0x552A18",
+              "raw_hex": "182a550001000000",
+              "record_address": "0x00030900",
+              "techstream_code": "C152A18",
+              "techstream_description": "Power Steering Motor \"A\"",
+              "techstream_failure": "Circuit Current Below Threshold"
+            },
+            "dtc_index": 22,
+            "event": "0x0044",
+            "event_raw_hex": "4310160a81010000",
+            "event_record_address": "0x0002FE70"
+          },
+          {
+            "dtc": {
+              "dtc_index": 22,
+              "packed_dtc": "0x552A18",
+              "raw_hex": "182a550001000000",
+              "record_address": "0x00030900",
+              "techstream_code": "C152A18",
+              "techstream_description": "Power Steering Motor \"A\"",
+              "techstream_failure": "Circuit Current Below Threshold"
+            },
+            "dtc_index": 22,
+            "event": "0x0045",
+            "event_raw_hex": "4310160a81010000",
+            "event_record_address": "0x0002FE78"
+          },
+          {
+            "dtc": {
+              "dtc_index": 59,
+              "packed_dtc": "0x55D187",
+              "raw_hex": "87d1550001000000",
+              "record_address": "0x00030A28",
+              "techstream_code": "C15D187",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Missing Message"
+            },
+            "dtc_index": 59,
+            "event": "0x0046",
+            "event_raw_hex": "43103b008b010000",
+            "event_record_address": "0x0002FE80"
+          },
+          {
+            "dtc": {
+              "dtc_index": 59,
+              "packed_dtc": "0x55D187",
+              "raw_hex": "87d1550001000000",
+              "record_address": "0x00030A28",
+              "techstream_code": "C15D187",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Missing Message"
+            },
+            "dtc_index": 59,
+            "event": "0x0047",
+            "event_raw_hex": "43103b008b010000",
+            "event_record_address": "0x0002FE88"
+          },
+          {
+            "dtc": {
+              "dtc_index": 59,
+              "packed_dtc": "0x55D187",
+              "raw_hex": "87d1550001000000",
+              "record_address": "0x00030A28",
+              "techstream_code": "C15D187",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Missing Message"
+            },
+            "dtc_index": 59,
+            "event": "0x0048",
+            "event_raw_hex": "43103b008b010000",
+            "event_record_address": "0x0002FE90"
+          },
+          {
+            "dtc": {
+              "dtc_index": 59,
+              "packed_dtc": "0x55D187",
+              "raw_hex": "87d1550001000000",
+              "record_address": "0x00030A28",
+              "techstream_code": "C15D187",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Missing Message"
+            },
+            "dtc_index": 59,
+            "event": "0x0049",
+            "event_raw_hex": "43103b008b010000",
+            "event_record_address": "0x0002FE98"
+          },
+          {
+            "dtc": {
+              "dtc_index": 27,
+              "packed_dtc": "0x553A19",
+              "raw_hex": "193a550001000000",
+              "record_address": "0x00030928",
+              "techstream_code": "C153A19",
+              "techstream_description": "Power Steering Motor \"A\" Inverter",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 27,
+            "event": "0x004A",
+            "event_raw_hex": "43101b0b81010000",
+            "event_record_address": "0x0002FEA0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 27,
+              "packed_dtc": "0x553A19",
+              "raw_hex": "193a550001000000",
+              "record_address": "0x00030928",
+              "techstream_code": "C153A19",
+              "techstream_description": "Power Steering Motor \"A\" Inverter",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 27,
+            "event": "0x004B",
+            "event_raw_hex": "43101b0b81010000",
+            "event_record_address": "0x0002FEA8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 27,
+              "packed_dtc": "0x553A19",
+              "raw_hex": "193a550001000000",
+              "record_address": "0x00030928",
+              "techstream_code": "C153A19",
+              "techstream_description": "Power Steering Motor \"A\" Inverter",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 27,
+            "event": "0x004C",
+            "event_raw_hex": "43101b0b81010000",
+            "event_record_address": "0x0002FEB0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 59,
+              "packed_dtc": "0x55D187",
+              "raw_hex": "87d1550001000000",
+              "record_address": "0x00030A28",
+              "techstream_code": "C15D187",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Missing Message"
+            },
+            "dtc_index": 59,
+            "event": "0x004D",
+            "event_raw_hex": "43103b008b010000",
+            "event_record_address": "0x0002FEB8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 58,
+              "packed_dtc": "0x55D162",
+              "raw_hex": "62d1550001000000",
+              "record_address": "0x00030A20",
+              "techstream_code": "C15D162",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 58,
+            "event": "0x004E",
+            "event_raw_hex": "43103a008b000000",
+            "event_record_address": "0x0002FEC0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x0054",
+            "event_raw_hex": "4310040b81010000",
+            "event_record_address": "0x0002FEF0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x0055",
+            "event_raw_hex": "4310040b81010000",
+            "event_record_address": "0x0002FEF8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x0056",
+            "event_raw_hex": "4310040b81010000",
+            "event_record_address": "0x0002FF00"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x0057",
+            "event_raw_hex": "4310040b81010000",
+            "event_record_address": "0x0002FF08"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x0058",
+            "event_raw_hex": "4310040b81010000",
+            "event_record_address": "0x0002FF10"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x0059",
+            "event_raw_hex": "4310040b81010000",
+            "event_record_address": "0x0002FF18"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x005A",
+            "event_raw_hex": "4310040b82010000",
+            "event_record_address": "0x0002FF20"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x005B",
+            "event_raw_hex": "4310040b82010000",
+            "event_record_address": "0x0002FF28"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x005C",
+            "event_raw_hex": "4310040b82010000",
+            "event_record_address": "0x0002FF30"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x005D",
+            "event_raw_hex": "4310040b82010000",
+            "event_record_address": "0x0002FF38"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x005E",
+            "event_raw_hex": "4310040b82010000",
+            "event_record_address": "0x0002FF40"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x005F",
+            "event_raw_hex": "4310040b82010000",
+            "event_record_address": "0x0002FF48"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0064",
+            "event_raw_hex": "4310000081000000",
+            "event_record_address": "0x0002FF70"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0065",
+            "event_raw_hex": "4310000082000000",
+            "event_record_address": "0x0002FF78"
+          },
+          {
+            "dtc": {
+              "dtc_index": 47,
+              "packed_dtc": "0x557A11",
+              "raw_hex": "117a550001000000",
+              "record_address": "0x000309C8",
+              "techstream_code": "C157A11",
+              "techstream_description": "Power Steering Motor \"A\" Current Sensor",
+              "techstream_failure": "Circuit Short to Ground"
+            },
+            "dtc_index": 47,
+            "event": "0x0066",
+            "event_raw_hex": "43102f0b81010000",
+            "event_record_address": "0x0002FF80"
+          },
+          {
+            "dtc": {
+              "dtc_index": 47,
+              "packed_dtc": "0x557A11",
+              "raw_hex": "117a550001000000",
+              "record_address": "0x000309C8",
+              "techstream_code": "C157A11",
+              "techstream_description": "Power Steering Motor \"A\" Current Sensor",
+              "techstream_failure": "Circuit Short to Ground"
+            },
+            "dtc_index": 47,
+            "event": "0x0067",
+            "event_raw_hex": "43102f0b81010000",
+            "event_record_address": "0x0002FF88"
+          },
+          {
+            "dtc": {
+              "dtc_index": 47,
+              "packed_dtc": "0x557A11",
+              "raw_hex": "117a550001000000",
+              "record_address": "0x000309C8",
+              "techstream_code": "C157A11",
+              "techstream_description": "Power Steering Motor \"A\" Current Sensor",
+              "techstream_failure": "Circuit Short to Ground"
+            },
+            "dtc_index": 47,
+            "event": "0x0068",
+            "event_raw_hex": "43102f0b81010000",
+            "event_record_address": "0x0002FF90"
+          },
+          {
+            "dtc": {
+              "dtc_index": 47,
+              "packed_dtc": "0x557A11",
+              "raw_hex": "117a550001000000",
+              "record_address": "0x000309C8",
+              "techstream_code": "C157A11",
+              "techstream_description": "Power Steering Motor \"A\" Current Sensor",
+              "techstream_failure": "Circuit Short to Ground"
+            },
+            "dtc_index": 47,
+            "event": "0x0069",
+            "event_raw_hex": "43102f0b81010000",
+            "event_record_address": "0x0002FF98"
+          },
+          {
+            "dtc": {
+              "dtc_index": 47,
+              "packed_dtc": "0x557A11",
+              "raw_hex": "117a550001000000",
+              "record_address": "0x000309C8",
+              "techstream_code": "C157A11",
+              "techstream_description": "Power Steering Motor \"A\" Current Sensor",
+              "techstream_failure": "Circuit Short to Ground"
+            },
+            "dtc_index": 47,
+            "event": "0x006A",
+            "event_raw_hex": "43102f0b81010000",
+            "event_record_address": "0x0002FFA0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 47,
+              "packed_dtc": "0x557A11",
+              "raw_hex": "117a550001000000",
+              "record_address": "0x000309C8",
+              "techstream_code": "C157A11",
+              "techstream_description": "Power Steering Motor \"A\" Current Sensor",
+              "techstream_failure": "Circuit Short to Ground"
+            },
+            "dtc_index": 47,
+            "event": "0x006B",
+            "event_raw_hex": "43102f0b81010000",
+            "event_record_address": "0x0002FFA8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x0073",
+            "event_raw_hex": "4310040982010000",
+            "event_record_address": "0x0002FFE8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x0074",
+            "event_raw_hex": "4310040b81010000",
+            "event_record_address": "0x0002FFF0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x0075",
+            "event_raw_hex": "4310040b82010000",
+            "event_record_address": "0x0002FFF8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 2,
+              "packed_dtc": "0x45D604",
+              "raw_hex": "04d6450001000000",
+              "record_address": "0x00030860",
+              "techstream_code": "C05D604",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "System Internal Failure"
+            },
+            "dtc_index": 2,
+            "event": "0x0076",
+            "event_raw_hex": "4310020b40010000",
+            "event_record_address": "0x00030000"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x0077",
+            "event_raw_hex": "4310040981010000",
+            "event_record_address": "0x00030008"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x0078",
+            "event_raw_hex": "4310040981010000",
+            "event_record_address": "0x00030010"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x0079",
+            "event_raw_hex": "4310040b81010000",
+            "event_record_address": "0x00030018"
+          },
+          {
+            "dtc": {
+              "dtc_index": 34,
+              "packed_dtc": "0x554A7F",
+              "raw_hex": "7f4a550001000000",
+              "record_address": "0x00030960",
+              "techstream_code": "C154A7F",
+              "techstream_description": "Power Supply & Contrary Connection Protection Relay \"A\"",
+              "techstream_failure": "Actuator Stuck Off"
+            },
+            "dtc_index": 34,
+            "event": "0x007B",
+            "event_raw_hex": "4310220981010000",
+            "event_record_address": "0x00030028"
+          },
+          {
+            "dtc": {
+              "dtc_index": 46,
+              "packed_dtc": "0x556D49",
+              "raw_hex": "496d550001000000",
+              "record_address": "0x000309C0",
+              "techstream_code": "C156D49",
+              "techstream_description": "Power Steering Motor \"B\" Shut Down Relay Monitoring Circuit",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 46,
+            "event": "0x007C",
+            "event_raw_hex": "43102e0081000000",
+            "event_record_address": "0x00030030"
+          },
+          {
+            "dtc": {
+              "dtc_index": 45,
+              "packed_dtc": "0x556C49",
+              "raw_hex": "496c550001000000",
+              "record_address": "0x000309B8",
+              "techstream_code": "C156C49",
+              "techstream_description": "Power Steering Motor \"A\" Shut Down Relay Monitoring Circuit",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 45,
+            "event": "0x007D",
+            "event_raw_hex": "43102d0082000000",
+            "event_record_address": "0x00030038"
+          },
+          {
+            "dtc": {
+              "dtc_index": 26,
+              "packed_dtc": "0x553A00",
+              "raw_hex": "003a550001000000",
+              "record_address": "0x00030920",
+              "techstream_code": "C153A00",
+              "techstream_description": "Malfunction of Power Steering Motor \"A\" Inverter Pre-Driver",
+              "techstream_failure": null
+            },
+            "dtc_index": 26,
+            "event": "0x007F",
+            "event_raw_hex": "43101a0b81010000",
+            "event_record_address": "0x00030048"
+          },
+          {
+            "dtc": {
+              "dtc_index": 26,
+              "packed_dtc": "0x553A00",
+              "raw_hex": "003a550001000000",
+              "record_address": "0x00030920",
+              "techstream_code": "C153A00",
+              "techstream_description": "Malfunction of Power Steering Motor \"A\" Inverter Pre-Driver",
+              "techstream_failure": null
+            },
+            "dtc_index": 26,
+            "event": "0x0080",
+            "event_raw_hex": "43101a0b81010000",
+            "event_record_address": "0x00030050"
+          },
+          {
+            "dtc": {
+              "dtc_index": 26,
+              "packed_dtc": "0x553A00",
+              "raw_hex": "003a550001000000",
+              "record_address": "0x00030920",
+              "techstream_code": "C153A00",
+              "techstream_description": "Malfunction of Power Steering Motor \"A\" Inverter Pre-Driver",
+              "techstream_failure": null
+            },
+            "dtc_index": 26,
+            "event": "0x0081",
+            "event_raw_hex": "43101a0b81010000",
+            "event_record_address": "0x00030058"
+          },
+          {
+            "dtc": {
+              "dtc_index": 29,
+              "packed_dtc": "0x553B00",
+              "raw_hex": "003b550001000000",
+              "record_address": "0x00030938",
+              "techstream_code": "C153B00",
+              "techstream_description": "Malfunction of Power Steering Motor \"B\" Inverter Pre-Driver",
+              "techstream_failure": null
+            },
+            "dtc_index": 29,
+            "event": "0x0082",
+            "event_raw_hex": "43101d0b82010000",
+            "event_record_address": "0x00030060"
+          },
+          {
+            "dtc": {
+              "dtc_index": 29,
+              "packed_dtc": "0x553B00",
+              "raw_hex": "003b550001000000",
+              "record_address": "0x00030938",
+              "techstream_code": "C153B00",
+              "techstream_description": "Malfunction of Power Steering Motor \"B\" Inverter Pre-Driver",
+              "techstream_failure": null
+            },
+            "dtc_index": 29,
+            "event": "0x0083",
+            "event_raw_hex": "43101d0b82010000",
+            "event_record_address": "0x00030068"
+          },
+          {
+            "dtc": {
+              "dtc_index": 29,
+              "packed_dtc": "0x553B00",
+              "raw_hex": "003b550001000000",
+              "record_address": "0x00030938",
+              "techstream_code": "C153B00",
+              "techstream_description": "Malfunction of Power Steering Motor \"B\" Inverter Pre-Driver",
+              "techstream_failure": null
+            },
+            "dtc_index": 29,
+            "event": "0x0084",
+            "event_raw_hex": "43101d0b82010000",
+            "event_record_address": "0x00030070"
+          },
+          {
+            "dtc": {
+              "dtc_index": 26,
+              "packed_dtc": "0x553A00",
+              "raw_hex": "003a550001000000",
+              "record_address": "0x00030920",
+              "techstream_code": "C153A00",
+              "techstream_description": "Malfunction of Power Steering Motor \"A\" Inverter Pre-Driver",
+              "techstream_failure": null
+            },
+            "dtc_index": 26,
+            "event": "0x0086",
+            "event_raw_hex": "43101a0b81010000",
+            "event_record_address": "0x00030080"
+          },
+          {
+            "dtc": {
+              "dtc_index": 29,
+              "packed_dtc": "0x553B00",
+              "raw_hex": "003b550001000000",
+              "record_address": "0x00030938",
+              "techstream_code": "C153B00",
+              "techstream_description": "Malfunction of Power Steering Motor \"B\" Inverter Pre-Driver",
+              "techstream_failure": null
+            },
+            "dtc_index": 29,
+            "event": "0x0087",
+            "event_raw_hex": "43101d0b82010000",
+            "event_record_address": "0x00030088"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x0089",
+            "event_raw_hex": "4310040b81010000",
+            "event_record_address": "0x00030098"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x008A",
+            "event_raw_hex": "4310040b82010000",
+            "event_record_address": "0x000300A0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 27,
+              "packed_dtc": "0x553A19",
+              "raw_hex": "193a550001000000",
+              "record_address": "0x00030928",
+              "techstream_code": "C153A19",
+              "techstream_description": "Power Steering Motor \"A\" Inverter",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 27,
+            "event": "0x008B",
+            "event_raw_hex": "43101b0881010000",
+            "event_record_address": "0x000300A8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 30,
+              "packed_dtc": "0x553B19",
+              "raw_hex": "193b550001000000",
+              "record_address": "0x00030940",
+              "techstream_code": "C153B19",
+              "techstream_description": "Power Steering Motor \"B\" Inverter",
+              "techstream_failure": "Circuit Current Above Threshold"
+            },
+            "dtc_index": 30,
+            "event": "0x008C",
+            "event_raw_hex": "43101e0882010000",
+            "event_record_address": "0x000300B0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x008E",
+            "event_raw_hex": "4310040b81010000",
+            "event_record_address": "0x000300C0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x008F",
+            "event_raw_hex": "4310040b82010000",
+            "event_record_address": "0x000300C8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 72,
+              "packed_dtc": "0x55E3A2",
+              "raw_hex": "a2e3550001000000",
+              "record_address": "0x00030A90",
+              "techstream_code": "C15E3A2",
+              "techstream_description": "Power Steering Control Module Processor (System 2)",
+              "techstream_failure": "System Voltage Low"
+            },
+            "dtc_index": 72,
+            "event": "0x0091",
+            "event_raw_hex": "4310480000000000",
+            "event_record_address": "0x000300D8"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0098",
+            "event_raw_hex": "0110000000010000",
+            "event_record_address": "0x00030110"
+          },
+          {
+            "dtc": {
+              "dtc_index": 33,
+              "packed_dtc": "0x554A7E",
+              "raw_hex": "7e4a550001000000",
+              "record_address": "0x00030958",
+              "techstream_code": "C154A7E",
+              "techstream_description": "Power Supply & Contrary Connection Protection Relay \"A\"",
+              "techstream_failure": "Actuator Stuck On"
+            },
+            "dtc_index": 33,
+            "event": "0x009C",
+            "event_raw_hex": "4310210981010000",
+            "event_record_address": "0x00030130"
+          },
+          {
+            "dtc": {
+              "dtc_index": 34,
+              "packed_dtc": "0x554A7F",
+              "raw_hex": "7f4a550001000000",
+              "record_address": "0x00030960",
+              "techstream_code": "C154A7F",
+              "techstream_description": "Power Supply & Contrary Connection Protection Relay \"A\"",
+              "techstream_failure": "Actuator Stuck Off"
+            },
+            "dtc_index": 34,
+            "event": "0x009D",
+            "event_raw_hex": "4310220981010000",
+            "event_record_address": "0x00030138"
+          },
+          {
+            "dtc": {
+              "dtc_index": 38,
+              "packed_dtc": "0x555A17",
+              "raw_hex": "175a550001000000",
+              "record_address": "0x00030980",
+              "techstream_code": "C155A17",
+              "techstream_description": "Power Steering Motor \"A\" Supply Voltage",
+              "techstream_failure": "Circuit Voltage Above Threshold"
+            },
+            "dtc_index": 38,
+            "event": "0x00A3",
+            "event_raw_hex": "4310260881010000",
+            "event_record_address": "0x00030168"
+          },
+          {
+            "dtc": {
+              "dtc_index": 37,
+              "packed_dtc": "0x555A16",
+              "raw_hex": "165a550001000000",
+              "record_address": "0x00030978",
+              "techstream_code": "C155A16",
+              "techstream_description": "Power Steering Motor \"A\" Supply Voltage",
+              "techstream_failure": "Circuit Voltage Below Threshold"
+            },
+            "dtc_index": 37,
+            "event": "0x00A4",
+            "event_raw_hex": "4310250881010000",
+            "event_record_address": "0x00030170"
+          },
+          {
+            "dtc": {
+              "dtc_index": 40,
+              "packed_dtc": "0x555B17",
+              "raw_hex": "175b550001000000",
+              "record_address": "0x00030990",
+              "techstream_code": "C155B17",
+              "techstream_description": "Power Steering Motor \"B\" Supply Voltage",
+              "techstream_failure": "Circuit Voltage Above Threshold"
+            },
+            "dtc_index": 40,
+            "event": "0x00A6",
+            "event_raw_hex": "4310280882010000",
+            "event_record_address": "0x00030180"
+          },
+          {
+            "dtc": {
+              "dtc_index": 39,
+              "packed_dtc": "0x555B16",
+              "raw_hex": "165b550001000000",
+              "record_address": "0x00030988",
+              "techstream_code": "C155B16",
+              "techstream_description": "Power Steering Motor \"B\" Supply Voltage",
+              "techstream_failure": "Circuit Voltage Below Threshold"
+            },
+            "dtc_index": 39,
+            "event": "0x00A7",
+            "event_raw_hex": "4310270882010000",
+            "event_record_address": "0x00030188"
+          },
+          {
+            "dtc": {
+              "dtc_index": 82,
+              "packed_dtc": "0xC12987",
+              "raw_hex": "8729c10001000000",
+              "record_address": "0x00030AE0",
+              "techstream_code": "U012987",
+              "techstream_description": "Lost Communication with Brake System Control Module",
+              "techstream_failure": "Missing Message"
+            },
+            "dtc_index": 82,
+            "event": "0x00AA",
+            "event_raw_hex": "4310520f40010000",
+            "event_record_address": "0x000301A0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x00B8",
+            "event_raw_hex": "4310040b82010000",
+            "event_record_address": "0x00030210"
+          },
+          {
+            "dtc": {
+              "dtc_index": 36,
+              "packed_dtc": "0x554B7F",
+              "raw_hex": "7f4b550001000000",
+              "record_address": "0x00030970",
+              "techstream_code": "C154B7F",
+              "techstream_description": "Power Supply & Contrary Connection Protection Relay \"B\"",
+              "techstream_failure": "Actuator Stuck Off"
+            },
+            "dtc_index": 36,
+            "event": "0x00BA",
+            "event_raw_hex": "4310240982010000",
+            "event_record_address": "0x00030220"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x00C4",
+            "event_raw_hex": "4310040982010000",
+            "event_record_address": "0x00030270"
+          },
+          {
+            "dtc": {
+              "dtc_index": 35,
+              "packed_dtc": "0x554B7E",
+              "raw_hex": "7e4b550001000000",
+              "record_address": "0x00030968",
+              "techstream_code": "C154B7E",
+              "techstream_description": "Power Supply & Contrary Connection Protection Relay \"B\"",
+              "techstream_failure": "Actuator Stuck On"
+            },
+            "dtc_index": 35,
+            "event": "0x00C6",
+            "event_raw_hex": "4310230982010000",
+            "event_record_address": "0x00030280"
+          },
+          {
+            "dtc": {
+              "dtc_index": 36,
+              "packed_dtc": "0x554B7F",
+              "raw_hex": "7f4b550001000000",
+              "record_address": "0x00030970",
+              "techstream_code": "C154B7F",
+              "techstream_description": "Power Supply & Contrary Connection Protection Relay \"B\"",
+              "techstream_failure": "Actuator Stuck Off"
+            },
+            "dtc_index": 36,
+            "event": "0x00C7",
+            "event_raw_hex": "4310240982010000",
+            "event_record_address": "0x00030288"
+          },
+          {
+            "dtc": {
+              "dtc_index": 26,
+              "packed_dtc": "0x553A00",
+              "raw_hex": "003a550001000000",
+              "record_address": "0x00030920",
+              "techstream_code": "C153A00",
+              "techstream_description": "Malfunction of Power Steering Motor \"A\" Inverter Pre-Driver",
+              "techstream_failure": null
+            },
+            "dtc_index": 26,
+            "event": "0x00CE",
+            "event_raw_hex": "43101a0b81010000",
+            "event_record_address": "0x000302C0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 26,
+              "packed_dtc": "0x553A00",
+              "raw_hex": "003a550001000000",
+              "record_address": "0x00030920",
+              "techstream_code": "C153A00",
+              "techstream_description": "Malfunction of Power Steering Motor \"A\" Inverter Pre-Driver",
+              "techstream_failure": null
+            },
+            "dtc_index": 26,
+            "event": "0x00CF",
+            "event_raw_hex": "43101a0b81010000",
+            "event_record_address": "0x000302C8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 26,
+              "packed_dtc": "0x553A00",
+              "raw_hex": "003a550001000000",
+              "record_address": "0x00030920",
+              "techstream_code": "C153A00",
+              "techstream_description": "Malfunction of Power Steering Motor \"A\" Inverter Pre-Driver",
+              "techstream_failure": null
+            },
+            "dtc_index": 26,
+            "event": "0x00D0",
+            "event_raw_hex": "43101a0b81010000",
+            "event_record_address": "0x000302D0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 29,
+              "packed_dtc": "0x553B00",
+              "raw_hex": "003b550001000000",
+              "record_address": "0x00030938",
+              "techstream_code": "C153B00",
+              "techstream_description": "Malfunction of Power Steering Motor \"B\" Inverter Pre-Driver",
+              "techstream_failure": null
+            },
+            "dtc_index": 29,
+            "event": "0x00DB",
+            "event_raw_hex": "43101d0b82010000",
+            "event_record_address": "0x00030328"
+          },
+          {
+            "dtc": {
+              "dtc_index": 29,
+              "packed_dtc": "0x553B00",
+              "raw_hex": "003b550001000000",
+              "record_address": "0x00030938",
+              "techstream_code": "C153B00",
+              "techstream_description": "Malfunction of Power Steering Motor \"B\" Inverter Pre-Driver",
+              "techstream_failure": null
+            },
+            "dtc_index": 29,
+            "event": "0x00DC",
+            "event_raw_hex": "43101d0b82010000",
+            "event_record_address": "0x00030330"
+          },
+          {
+            "dtc": {
+              "dtc_index": 29,
+              "packed_dtc": "0x553B00",
+              "raw_hex": "003b550001000000",
+              "record_address": "0x00030938",
+              "techstream_code": "C153B00",
+              "techstream_description": "Malfunction of Power Steering Motor \"B\" Inverter Pre-Driver",
+              "techstream_failure": null
+            },
+            "dtc_index": 29,
+            "event": "0x00DD",
+            "event_raw_hex": "43101d0b82010000",
+            "event_record_address": "0x00030338"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x00EF",
+            "event_raw_hex": "4310040b81010000",
+            "event_record_address": "0x000303C8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 4,
+              "packed_dtc": "0x45D649",
+              "raw_hex": "49d6450001000000",
+              "record_address": "0x00030870",
+              "techstream_code": "C05D649",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Internal Electronic Failure"
+            },
+            "dtc_index": 4,
+            "event": "0x00F0",
+            "event_raw_hex": "4310040b82010000",
+            "event_record_address": "0x000303D0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 49,
+              "packed_dtc": "0x557B11",
+              "raw_hex": "117b550001000000",
+              "record_address": "0x000309D8",
+              "techstream_code": "C157B11",
+              "techstream_description": "Power Steering Motor \"B\" Current Sensor",
+              "techstream_failure": "Circuit Short to Ground"
+            },
+            "dtc_index": 49,
+            "event": "0x00F5",
+            "event_raw_hex": "4310310b82010000",
+            "event_record_address": "0x000303F8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 49,
+              "packed_dtc": "0x557B11",
+              "raw_hex": "117b550001000000",
+              "record_address": "0x000309D8",
+              "techstream_code": "C157B11",
+              "techstream_description": "Power Steering Motor \"B\" Current Sensor",
+              "techstream_failure": "Circuit Short to Ground"
+            },
+            "dtc_index": 49,
+            "event": "0x00F6",
+            "event_raw_hex": "4310310b82010000",
+            "event_record_address": "0x00030400"
+          },
+          {
+            "dtc": {
+              "dtc_index": 49,
+              "packed_dtc": "0x557B11",
+              "raw_hex": "117b550001000000",
+              "record_address": "0x000309D8",
+              "techstream_code": "C157B11",
+              "techstream_description": "Power Steering Motor \"B\" Current Sensor",
+              "techstream_failure": "Circuit Short to Ground"
+            },
+            "dtc_index": 49,
+            "event": "0x00F7",
+            "event_raw_hex": "4310310b82010000",
+            "event_record_address": "0x00030408"
+          },
+          {
+            "dtc": {
+              "dtc_index": 49,
+              "packed_dtc": "0x557B11",
+              "raw_hex": "117b550001000000",
+              "record_address": "0x000309D8",
+              "techstream_code": "C157B11",
+              "techstream_description": "Power Steering Motor \"B\" Current Sensor",
+              "techstream_failure": "Circuit Short to Ground"
+            },
+            "dtc_index": 49,
+            "event": "0x00F8",
+            "event_raw_hex": "4310310b82010000",
+            "event_record_address": "0x00030410"
+          },
+          {
+            "dtc": {
+              "dtc_index": 49,
+              "packed_dtc": "0x557B11",
+              "raw_hex": "117b550001000000",
+              "record_address": "0x000309D8",
+              "techstream_code": "C157B11",
+              "techstream_description": "Power Steering Motor \"B\" Current Sensor",
+              "techstream_failure": "Circuit Short to Ground"
+            },
+            "dtc_index": 49,
+            "event": "0x00F9",
+            "event_raw_hex": "4310310b82010000",
+            "event_record_address": "0x00030418"
+          },
+          {
+            "dtc": {
+              "dtc_index": 49,
+              "packed_dtc": "0x557B11",
+              "raw_hex": "117b550001000000",
+              "record_address": "0x000309D8",
+              "techstream_code": "C157B11",
+              "techstream_description": "Power Steering Motor \"B\" Current Sensor",
+              "techstream_failure": "Circuit Short to Ground"
+            },
+            "dtc_index": 49,
+            "event": "0x00FA",
+            "event_raw_hex": "4310310b82010000",
+            "event_record_address": "0x00030420"
+          },
+          {
+            "dtc": {
+              "dtc_index": 64,
+              "packed_dtc": "0x55D287",
+              "raw_hex": "87d2550001000000",
+              "record_address": "0x00030A50",
+              "techstream_code": "C15D287",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Missing Message"
+            },
+            "dtc_index": 64,
+            "event": "0x00FB",
+            "event_raw_hex": "431040008c010000",
+            "event_record_address": "0x00030428"
+          },
+          {
+            "dtc": {
+              "dtc_index": 64,
+              "packed_dtc": "0x55D287",
+              "raw_hex": "87d2550001000000",
+              "record_address": "0x00030A50",
+              "techstream_code": "C15D287",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Missing Message"
+            },
+            "dtc_index": 64,
+            "event": "0x00FC",
+            "event_raw_hex": "431040008c010000",
+            "event_record_address": "0x00030430"
+          },
+          {
+            "dtc": {
+              "dtc_index": 64,
+              "packed_dtc": "0x55D287",
+              "raw_hex": "87d2550001000000",
+              "record_address": "0x00030A50",
+              "techstream_code": "C15D287",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Missing Message"
+            },
+            "dtc_index": 64,
+            "event": "0x00FD",
+            "event_raw_hex": "431040008c010000",
+            "event_record_address": "0x00030438"
+          },
+          {
+            "dtc": {
+              "dtc_index": 64,
+              "packed_dtc": "0x55D287",
+              "raw_hex": "87d2550001000000",
+              "record_address": "0x00030A50",
+              "techstream_code": "C15D287",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Missing Message"
+            },
+            "dtc_index": 64,
+            "event": "0x00FE",
+            "event_raw_hex": "431040008c010000",
+            "event_record_address": "0x00030440"
+          },
+          {
+            "dtc": {
+              "dtc_index": 64,
+              "packed_dtc": "0x55D287",
+              "raw_hex": "87d2550001000000",
+              "record_address": "0x00030A50",
+              "techstream_code": "C15D287",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Missing Message"
+            },
+            "dtc_index": 64,
+            "event": "0x0112",
+            "event_raw_hex": "431040008c010000",
+            "event_record_address": "0x000304E0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 63,
+              "packed_dtc": "0x55D262",
+              "raw_hex": "62d2550001000000",
+              "record_address": "0x00030A48",
+              "techstream_code": "C15D262",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 63,
+            "event": "0x0113",
+            "event_raw_hex": "43103f008c000000",
+            "event_record_address": "0x000304E8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 56,
+              "packed_dtc": "0x55D11C",
+              "raw_hex": "1cd1550001000000",
+              "record_address": "0x00030A10",
+              "techstream_code": "C15D11C",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Circuit Voltage Out of Range"
+            },
+            "dtc_index": 56,
+            "event": "0x011A",
+            "event_raw_hex": "4310380288000000",
+            "event_record_address": "0x00030520"
+          },
+          {
+            "dtc": {
+              "dtc_index": 56,
+              "packed_dtc": "0x55D11C",
+              "raw_hex": "1cd1550001000000",
+              "record_address": "0x00030A10",
+              "techstream_code": "C15D11C",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Circuit Voltage Out of Range"
+            },
+            "dtc_index": 56,
+            "event": "0x011B",
+            "event_raw_hex": "4310380288000000",
+            "event_record_address": "0x00030528"
+          },
+          {
+            "dtc": {
+              "dtc_index": 61,
+              "packed_dtc": "0x55D21C",
+              "raw_hex": "1cd2550001000000",
+              "record_address": "0x00030A38",
+              "techstream_code": "C15D21C",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Circuit Voltage Out of Range"
+            },
+            "dtc_index": 61,
+            "event": "0x011C",
+            "event_raw_hex": "43103d0289000000",
+            "event_record_address": "0x00030530"
+          },
+          {
+            "dtc": {
+              "dtc_index": 61,
+              "packed_dtc": "0x55D21C",
+              "raw_hex": "1cd2550001000000",
+              "record_address": "0x00030A38",
+              "techstream_code": "C15D21C",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Circuit Voltage Out of Range"
+            },
+            "dtc_index": 61,
+            "event": "0x011D",
+            "event_raw_hex": "43103d0289000000",
+            "event_record_address": "0x00030538"
+          },
+          {
+            "dtc": {
+              "dtc_index": 65,
+              "packed_dtc": "0x55D31C",
+              "raw_hex": "1cd3550001000000",
+              "record_address": "0x00030A58",
+              "techstream_code": "C15D31C",
+              "techstream_description": "Power Steering Motor Position Sensor \"C\"",
+              "techstream_failure": "Circuit Voltage Out of Range"
+            },
+            "dtc_index": 65,
+            "event": "0x011E",
+            "event_raw_hex": "431041028a000000",
+            "event_record_address": "0x00030540"
+          },
+          {
+            "dtc": {
+              "dtc_index": 65,
+              "packed_dtc": "0x55D31C",
+              "raw_hex": "1cd3550001000000",
+              "record_address": "0x00030A58",
+              "techstream_code": "C15D31C",
+              "techstream_description": "Power Steering Motor Position Sensor \"C\"",
+              "techstream_failure": "Circuit Voltage Out of Range"
+            },
+            "dtc_index": 65,
+            "event": "0x011F",
+            "event_raw_hex": "431041028a000000",
+            "event_record_address": "0x00030548"
+          },
+          {
+            "dtc": {
+              "dtc_index": 3,
+              "packed_dtc": "0x45D646",
+              "raw_hex": "46d6450001000000",
+              "record_address": "0x00030868",
+              "techstream_code": "C05D646",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Calibration / Parameter Memory Failure"
+            },
+            "dtc_index": 3,
+            "event": "0x0123",
+            "event_raw_hex": "4310030b40010000",
+            "event_record_address": "0x00030568"
+          },
+          {
+            "dtc": {
+              "dtc_index": 3,
+              "packed_dtc": "0x45D646",
+              "raw_hex": "46d6450001000000",
+              "record_address": "0x00030868",
+              "techstream_code": "C05D646",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Calibration / Parameter Memory Failure"
+            },
+            "dtc_index": 3,
+            "event": "0x0124",
+            "event_raw_hex": "4310030b40010000",
+            "event_record_address": "0x00030570"
+          },
+          {
+            "dtc": {
+              "dtc_index": 3,
+              "packed_dtc": "0x45D646",
+              "raw_hex": "46d6450001000000",
+              "record_address": "0x00030868",
+              "techstream_code": "C05D646",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Calibration / Parameter Memory Failure"
+            },
+            "dtc_index": 3,
+            "event": "0x0125",
+            "event_raw_hex": "4310030b40010000",
+            "event_record_address": "0x00030578"
+          },
+          {
+            "dtc": {
+              "dtc_index": 3,
+              "packed_dtc": "0x45D646",
+              "raw_hex": "46d6450001000000",
+              "record_address": "0x00030868",
+              "techstream_code": "C05D646",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Calibration / Parameter Memory Failure"
+            },
+            "dtc_index": 3,
+            "event": "0x0126",
+            "event_raw_hex": "4310030b40010000",
+            "event_record_address": "0x00030580"
+          },
+          {
+            "dtc": {
+              "dtc_index": 3,
+              "packed_dtc": "0x45D646",
+              "raw_hex": "46d6450001000000",
+              "record_address": "0x00030868",
+              "techstream_code": "C05D646",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Calibration / Parameter Memory Failure"
+            },
+            "dtc_index": 3,
+            "event": "0x0127",
+            "event_raw_hex": "4310030b40000000",
+            "event_record_address": "0x00030588"
+          },
+          {
+            "dtc": {
+              "dtc_index": 3,
+              "packed_dtc": "0x45D646",
+              "raw_hex": "46d6450001000000",
+              "record_address": "0x00030868",
+              "techstream_code": "C05D646",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Calibration / Parameter Memory Failure"
+            },
+            "dtc_index": 3,
+            "event": "0x0128",
+            "event_raw_hex": "4310030b40010000",
+            "event_record_address": "0x00030590"
+          },
+          {
+            "dtc": {
+              "dtc_index": 3,
+              "packed_dtc": "0x45D646",
+              "raw_hex": "46d6450001000000",
+              "record_address": "0x00030868",
+              "techstream_code": "C05D646",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Calibration / Parameter Memory Failure"
+            },
+            "dtc_index": 3,
+            "event": "0x0129",
+            "event_raw_hex": "4310030b40010000",
+            "event_record_address": "0x00030598"
+          },
+          {
+            "dtc": {
+              "dtc_index": 3,
+              "packed_dtc": "0x45D646",
+              "raw_hex": "46d6450001000000",
+              "record_address": "0x00030868",
+              "techstream_code": "C05D646",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Calibration / Parameter Memory Failure"
+            },
+            "dtc_index": 3,
+            "event": "0x012A",
+            "event_raw_hex": "4310030b40010000",
+            "event_record_address": "0x000305A0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 3,
+              "packed_dtc": "0x45D646",
+              "raw_hex": "46d6450001000000",
+              "record_address": "0x00030868",
+              "techstream_code": "C05D646",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Calibration / Parameter Memory Failure"
+            },
+            "dtc_index": 3,
+            "event": "0x012B",
+            "event_raw_hex": "4310030b40010000",
+            "event_record_address": "0x000305A8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 47,
+              "packed_dtc": "0x557A11",
+              "raw_hex": "117a550001000000",
+              "record_address": "0x000309C8",
+              "techstream_code": "C157A11",
+              "techstream_description": "Power Steering Motor \"A\" Current Sensor",
+              "techstream_failure": "Circuit Short to Ground"
+            },
+            "dtc_index": 47,
+            "event": "0x0136",
+            "event_raw_hex": "43102f0a81010000",
+            "event_record_address": "0x00030600"
+          },
+          {
+            "dtc": {
+              "dtc_index": 49,
+              "packed_dtc": "0x557B11",
+              "raw_hex": "117b550001000000",
+              "record_address": "0x000309D8",
+              "techstream_code": "C157B11",
+              "techstream_description": "Power Steering Motor \"B\" Current Sensor",
+              "techstream_failure": "Circuit Short to Ground"
+            },
+            "dtc_index": 49,
+            "event": "0x0139",
+            "event_raw_hex": "4310310a82010000",
+            "event_record_address": "0x00030618"
+          },
+          {
+            "dtc": {
+              "dtc_index": 58,
+              "packed_dtc": "0x55D162",
+              "raw_hex": "62d1550001000000",
+              "record_address": "0x00030A20",
+              "techstream_code": "C15D162",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 58,
+            "event": "0x0145",
+            "event_raw_hex": "43103a0288000000",
+            "event_record_address": "0x00030678"
+          },
+          {
+            "dtc": {
+              "dtc_index": 58,
+              "packed_dtc": "0x55D162",
+              "raw_hex": "62d1550001000000",
+              "record_address": "0x00030A20",
+              "techstream_code": "C15D162",
+              "techstream_description": "Power Steering Motor Position Sensor \"A\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 58,
+            "event": "0x0146",
+            "event_raw_hex": "43103a0288000000",
+            "event_record_address": "0x00030680"
+          },
+          {
+            "dtc": {
+              "dtc_index": 63,
+              "packed_dtc": "0x55D262",
+              "raw_hex": "62d2550001000000",
+              "record_address": "0x00030A48",
+              "techstream_code": "C15D262",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 63,
+            "event": "0x0147",
+            "event_raw_hex": "43103f0289000000",
+            "event_record_address": "0x00030688"
+          },
+          {
+            "dtc": {
+              "dtc_index": 63,
+              "packed_dtc": "0x55D262",
+              "raw_hex": "62d2550001000000",
+              "record_address": "0x00030A48",
+              "techstream_code": "C15D262",
+              "techstream_description": "Power Steering Motor Position Sensor \"B\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 63,
+            "event": "0x0148",
+            "event_raw_hex": "43103f0289000000",
+            "event_record_address": "0x00030690"
+          },
+          {
+            "dtc": {
+              "dtc_index": 66,
+              "packed_dtc": "0x55D362",
+              "raw_hex": "62d3550001000000",
+              "record_address": "0x00030A60",
+              "techstream_code": "C15D362",
+              "techstream_description": "Power Steering Motor Position Sensor \"C\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 66,
+            "event": "0x0149",
+            "event_raw_hex": "431042028a000000",
+            "event_record_address": "0x00030698"
+          },
+          {
+            "dtc": {
+              "dtc_index": 66,
+              "packed_dtc": "0x55D362",
+              "raw_hex": "62d3550001000000",
+              "record_address": "0x00030A60",
+              "techstream_code": "C15D362",
+              "techstream_description": "Power Steering Motor Position Sensor \"C\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 66,
+            "event": "0x014A",
+            "event_raw_hex": "431042028a000000",
+            "event_record_address": "0x000306A0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 11,
+              "packed_dtc": "0x551187",
+              "raw_hex": "8711550001000000",
+              "record_address": "0x000308A8",
+              "techstream_code": "C151187",
+              "techstream_description": "Power Steering Torque Sensor \"A\"",
+              "techstream_failure": "Missing Message"
+            },
+            "dtc_index": 11,
+            "event": "0x0155",
+            "event_raw_hex": "43100b0186010000",
+            "event_record_address": "0x000306F8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 13,
+              "packed_dtc": "0x551287",
+              "raw_hex": "8712550001000000",
+              "record_address": "0x000308B8",
+              "techstream_code": "C151287",
+              "techstream_description": "Power Steering Torque Sensor \"B\"",
+              "techstream_failure": "Missing Message"
+            },
+            "dtc_index": 13,
+            "event": "0x015A",
+            "event_raw_hex": "43100d0187010000",
+            "event_record_address": "0x00030720"
+          },
+          {
+            "dtc": {
+              "dtc_index": 10,
+              "packed_dtc": "0x551162",
+              "raw_hex": "6211550001000000",
+              "record_address": "0x000308A0",
+              "techstream_code": "C151162",
+              "techstream_description": "Power Steering Torque Sensor \"A\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 10,
+            "event": "0x0160",
+            "event_raw_hex": "43100a0186010000",
+            "event_record_address": "0x00030750"
+          },
+          {
+            "dtc": {
+              "dtc_index": 12,
+              "packed_dtc": "0x551262",
+              "raw_hex": "6212550001000000",
+              "record_address": "0x000308B0",
+              "techstream_code": "C151262",
+              "techstream_description": "Power Steering Torque Sensor \"B\"",
+              "techstream_failure": "Signal Compare Failure"
+            },
+            "dtc_index": 12,
+            "event": "0x0166",
+            "event_raw_hex": "43100c0187010000",
+            "event_record_address": "0x00030780"
+          },
+          {
+            "dtc": {
+              "dtc_index": 20,
+              "packed_dtc": "0x551A17",
+              "raw_hex": "171a550001000000",
+              "record_address": "0x000308F0",
+              "techstream_code": "C151A17",
+              "techstream_description": "Power Steering Torque Sensor \"A\" Supply Voltage",
+              "techstream_failure": "Circuit Voltage Above Threshold"
+            },
+            "dtc_index": 20,
+            "event": "0x016E",
+            "event_raw_hex": "4310140186010000",
+            "event_record_address": "0x000307C0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 21,
+              "packed_dtc": "0x551B17",
+              "raw_hex": "171b550001000000",
+              "record_address": "0x000308F8",
+              "techstream_code": "C151B17",
+              "techstream_description": "Power Steering Torque Sensor \"B\" Supply Voltage",
+              "techstream_failure": "Circuit Voltage Above Threshold"
+            },
+            "dtc_index": 21,
+            "event": "0x0170",
+            "event_raw_hex": "4310150187010000",
+            "event_record_address": "0x000307D0"
+          },
+          {
+            "dtc": {
+              "dtc_index": 3,
+              "packed_dtc": "0x45D646",
+              "raw_hex": "46d6450001000000",
+              "record_address": "0x00030868",
+              "techstream_code": "C05D646",
+              "techstream_description": "Power Steering Control Module Processor",
+              "techstream_failure": "Calibration / Parameter Memory Failure"
+            },
+            "dtc_index": 3,
+            "event": "0x017D",
+            "event_raw_hex": "4310030b00010000",
+            "event_record_address": "0x00030838"
+          }
+        ]
+      },
+      "0x20": {
+        "dtc_indexed_count": 6,
+        "event_count": 16,
+        "events": [
+          {
+            "dtc": {
+              "dtc_index": 107,
+              "packed_dtc": "0xC31957",
+              "raw_hex": "5719c30001000000",
+              "record_address": "0x00030BA8",
+              "techstream_code": "U031957",
+              "techstream_description": "Software Incompatibility with Steering Effort Control Module",
+              "techstream_failure": "Invalid / Incompatible Software Component"
+            },
+            "dtc_index": 107,
+            "event": "0x0021",
+            "event_raw_hex": "40206b1040000000",
+            "event_record_address": "0x0002FD58"
+          },
+          {
+            "dtc": {
+              "dtc_index": 8,
+              "packed_dtc": "0x523A17",
+              "raw_hex": "173a520001000000",
+              "record_address": "0x00030890",
+              "techstream_code": "C123A17",
+              "techstream_description": "Supply Voltage Circuit",
+              "techstream_failure": "Circuit Voltage Above Threshold"
+            },
+            "dtc_index": 8,
+            "event": "0x00A2",
+            "event_raw_hex": "4320080b40010000",
+            "event_record_address": "0x00030160"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x00E5",
+            "event_raw_hex": "4320000d00000000",
+            "event_record_address": "0x00030378"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x00E6",
+            "event_raw_hex": "4320000d00000000",
+            "event_record_address": "0x00030380"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x00E7",
+            "event_raw_hex": "4320000d00000000",
+            "event_record_address": "0x00030388"
+          },
+          {
+            "dtc": {
+              "dtc_index": 101,
+              "packed_dtc": "0xC30057",
+              "raw_hex": "5700c30001000000",
+              "record_address": "0x00030B78",
+              "techstream_code": "U030057",
+              "techstream_description": "Internal Control Module Software Incompatibility",
+              "techstream_failure": "Invalid / Incompatible Software Component"
+            },
+            "dtc_index": 101,
+            "event": "0x0100",
+            "event_raw_hex": "4020651040000000",
+            "event_record_address": "0x00030450"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0114",
+            "event_raw_hex": "4320000d00000000",
+            "event_record_address": "0x000304F0"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0115",
+            "event_raw_hex": "4320000d00000000",
+            "event_record_address": "0x000304F8"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0116",
+            "event_raw_hex": "4320000d00000000",
+            "event_record_address": "0x00030500"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0117",
+            "event_raw_hex": "4320000d00000000",
+            "event_record_address": "0x00030508"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0118",
+            "event_raw_hex": "4320000d00000000",
+            "event_record_address": "0x00030510"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0119",
+            "event_raw_hex": "4320000d00000000",
+            "event_record_address": "0x00030518"
+          },
+          {
+            "dtc": {
+              "dtc_index": 113,
+              "packed_dtc": "0xC32857",
+              "raw_hex": "5728c30001000000",
+              "record_address": "0x00030BD8",
+              "techstream_code": "U032857",
+              "techstream_description": "Software Incompatibility with Steering Angle Sensor Module",
+              "techstream_failure": "Invalid / Incompatible Software Component"
+            },
+            "dtc_index": 113,
+            "event": "0x0121",
+            "event_raw_hex": "4020711040000000",
+            "event_record_address": "0x00030558"
+          },
+          {
+            "dtc": {
+              "dtc_index": 132,
+              "packed_dtc": "0xD30657",
+              "raw_hex": "5706d30001000000",
+              "record_address": "0x00030C70",
+              "techstream_code": "U130657",
+              "techstream_description": "Software Incompatibility with Power Steering Control Module Rear",
+              "techstream_failure": "Invalid / Incompatible Software Component"
+            },
+            "dtc_index": 132,
+            "event": "0x0122",
+            "event_raw_hex": "4020841040000000",
+            "event_record_address": "0x00030560"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x012F",
+            "event_raw_hex": "0120000000000000",
+            "event_record_address": "0x000305C8"
+          },
+          {
+            "dtc": {
+              "dtc_index": 80,
+              "packed_dtc": "0xC12687",
+              "raw_hex": "8726c10001000000",
+              "record_address": "0x00030AD0",
+              "techstream_code": "U012687",
+              "techstream_description": "Lost Communication with Steering Angle Sensor Module",
+              "techstream_failure": "Missing Message"
+            },
+            "dtc_index": 80,
+            "event": "0x0141",
+            "event_raw_hex": "4320501300000000",
+            "event_record_address": "0x00030658"
+          }
+        ]
+      },
+      "0x40": {
+        "dtc_indexed_count": 0,
+        "event_count": 1,
+        "events": [
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x009A",
+            "event_raw_hex": "0040000000010000",
+            "event_record_address": "0x00030120"
+          }
+        ]
+      },
+      "0x80": {
+        "dtc_indexed_count": 0,
+        "event_count": 7,
+        "events": [
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0090",
+            "event_raw_hex": "0080000000010000",
+            "event_record_address": "0x000300D0"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x00AB",
+            "event_raw_hex": "0580000040010000",
+            "event_record_address": "0x000301A8"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0102",
+            "event_raw_hex": "0580000040010000",
+            "event_record_address": "0x00030460"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0104",
+            "event_raw_hex": "0580000040010000",
+            "event_record_address": "0x00030470"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0106",
+            "event_raw_hex": "0580000040010000",
+            "event_record_address": "0x00030480"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x0108",
+            "event_raw_hex": "0580000040010000",
+            "event_record_address": "0x00030490"
+          },
+          {
+            "dtc": null,
+            "dtc_index": 0,
+            "event": "0x010A",
+            "event_raw_hex": "0580000040010000",
+            "event_record_address": "0x000304A0"
+          }
+        ]
+      }
+    },
+    "comparison_to_h": {
+      "changed_record_count": 31,
+      "changed_records": [
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x0029",
+          "f33_raw": "43103a008b010000",
+          "h_raw": "43103a008b000000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x002A",
+          "f33_raw": "43103a008b010000",
+          "h_raw": "43103a008b000000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x002B",
+          "f33_raw": "43103f008c010000",
+          "h_raw": "43103f008c000000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x002C",
+          "f33_raw": "43103f008c010000",
+          "h_raw": "43103f008c000000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x0046",
+          "f33_raw": "43103b008b010000",
+          "h_raw": "43103b008b000000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x0047",
+          "f33_raw": "43103b008b010000",
+          "h_raw": "43103b008b000000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x0048",
+          "f33_raw": "43103b008b010000",
+          "h_raw": "43103b008b000000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x0049",
+          "f33_raw": "43103b008b010000",
+          "h_raw": "43103b008b000000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x004D",
+          "f33_raw": "43103b008b010000",
+          "h_raw": "43103b008b000000"
+        },
+        {
+          "changed_offsets": [
+            1,
+            5
+          ],
+          "event": "0x0085",
+          "f33_raw": "4300060b40010000",
+          "h_raw": "4310060b40000000"
+        },
+        {
+          "changed_offsets": [
+            1
+          ],
+          "event": "0x0088",
+          "f33_raw": "4300050b40010000",
+          "h_raw": "4310050b40010000"
+        },
+        {
+          "changed_offsets": [
+            2,
+            3
+          ],
+          "event": "0x00AC",
+          "f33_raw": "4300000000000000",
+          "h_raw": "4300781200000000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x00FB",
+          "f33_raw": "431040008c010000",
+          "h_raw": "431040008c000000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x00FC",
+          "f33_raw": "431040008c010000",
+          "h_raw": "431040008c000000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x00FD",
+          "f33_raw": "431040008c010000",
+          "h_raw": "431040008c000000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x00FE",
+          "f33_raw": "431040008c010000",
+          "h_raw": "431040008c000000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x0112",
+          "f33_raw": "431040008c010000",
+          "h_raw": "431040008c000000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x011A",
+          "f33_raw": "4310380288000000",
+          "h_raw": "4310380288010000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x011B",
+          "f33_raw": "4310380288000000",
+          "h_raw": "4310380288010000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x011C",
+          "f33_raw": "43103d0289000000",
+          "h_raw": "43103d0289010000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x011D",
+          "f33_raw": "43103d0289000000",
+          "h_raw": "43103d0289010000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x011E",
+          "f33_raw": "431041028a000000",
+          "h_raw": "431041028a010000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x011F",
+          "f33_raw": "431041028a000000",
+          "h_raw": "431041028a010000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x012E",
+          "f33_raw": "4302020b00010000",
+          "h_raw": "4302020b00000000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x0145",
+          "f33_raw": "43103a0288000000",
+          "h_raw": "43103a0288010000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x0146",
+          "f33_raw": "43103a0288000000",
+          "h_raw": "43103a0288010000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x0147",
+          "f33_raw": "43103f0289000000",
+          "h_raw": "43103f0289010000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x0148",
+          "f33_raw": "43103f0289000000",
+          "h_raw": "43103f0289010000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x0149",
+          "f33_raw": "431042028a000000",
+          "h_raw": "431042028a010000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x014A",
+          "f33_raw": "431042028a000000",
+          "h_raw": "431042028a010000"
+        },
+        {
+          "changed_offsets": [
+            5
+          ],
+          "event": "0x017D",
+          "f33_raw": "4310030b00010000",
+          "h_raw": "4310030b00000000"
+        }
+      ],
+      "class_removed_events": [
+        "0x0085",
+        "0x0088"
+      ],
+      "dtc_index_removed_events": [
+        "0x00AC"
+      ],
+      "thermal_dtcs_removed_from_class_0x10": [
+        {
+          "dtc": {
+            "dtc_index": 6,
+            "packed_dtc": "0x50051C",
+            "raw_hex": "1c05500001000000",
+            "record_address": "0x00030880",
+            "techstream_code": "C10051C",
+            "techstream_description": "Control Module Internal Temperature Sensor \"B\"",
+            "techstream_failure": "Circuit Voltage Out of Range"
+          },
+          "event": "0x0085",
+          "f33_class": 0
+        },
+        {
+          "dtc": {
+            "dtc_index": 5,
+            "packed_dtc": "0x50001C",
+            "raw_hex": "1c00500001000000",
+            "record_address": "0x00030878",
+            "techstream_code": "C10001C",
+            "techstream_description": "Control Module Internal Temperature Sensor \"A\"",
+            "techstream_failure": "Circuit Voltage Out of Range"
+          },
+          "event": "0x0088",
+          "f33_class": 0
+        }
+      ]
+    },
+    "dtc_index_offset": 2,
+    "event_count": 384,
+    "event_table": "0x0002FC50",
+    "record_size": 8
+  },
+  "dtc": {
+    "index_120_disabled": {
+      "f33_raw": "8710d10000000000",
+      "h_raw": "8710d10001000000"
+    },
+    "referenced_index_count": 80,
+    "referenced_indexes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      29,
+      30,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      53,
+      54,
+      56,
+      57,
+      58,
+      59,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      70,
+      72,
+      78,
+      80,
+      82,
+      89,
+      93,
+      97,
+      100,
+      101,
+      103,
+      106,
+      107,
+      109,
+      111,
+      113,
+      117,
+      122,
+      124,
+      126,
+      128,
+      131,
+      132,
+      133
+    ],
+    "referenced_rows_identical_to_h": true,
+    "table": "0x00030850",
+    "vocabulary_join": "For every DTC index still referenced by F33, the exact 8-byte F33 DTC record equals the pinned H record. Toyota EMPS_P5 names are therefore joined by identical packed-DTC bytes, not transferred by variant assumption."
+  },
+  "openpilot_policy": {
+    "internal_state_exposure": "safe as a diagnostic/status candidate set when 0x394 is present",
+    "production_output_authorized": false,
+    "reason": "Toyota's internal DEM class/latch distinction does not define openpilot temporary/permanent policy. Relay-correct asserted/recovery capture or an independent policy proof is still required.",
+    "state0": "unique deepest clear/normal internal classifier state; not independently a Ready authorization bit",
+    "steerFaultPermanent": "unresolved policy mapping",
+    "steerFaultTemporary": "unresolved policy mapping"
+  },
+  "passive_opendbc_integration": {
+    "behavior": "decode exact-F33 0x394 wire tuples into candidate internal states; unique tuple yields a unique internal-state observer only",
+    "full_gate": "4077 passed / 719 skipped plus ruff, ty, codespell, cpplint, MISRA",
+    "nested_opendbc_commit": "0d5773bd393bbf3d4109728171d2390b60fcde16",
+    "parent_kai_openpilot_commit": "191aeb43df3fb72f3264209be1aad57b9ca42e2d",
+    "production_output_authorized": false,
+    "public_fault_flags_changed": false
+  },
+  "schema": "camry-8965f3307000-fault-status-v1",
+  "sources": {
+    "codeflash": {
+      "path": "community/kai/camry-2026/normalized/8965F3307000_CodeFlash.bin",
+      "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+    },
+    "decompiler_evidence": {
+      "path": "data/generated/camry_8965F3307000_fault_status_decompiler_evidence.json",
+      "sha256": "92fb59d48202cbf33080522932a06616a928bd15fc6df5c52810487904e79f7d"
+    },
+    "h_techstream_vocabulary": {
+      "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
+      "sha256": "7deef976bf507db35170006ffd64e95fb5a6add23b3c30740eb6914016006794"
+    },
+    "tx_contract": {
+      "path": "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
+      "sha256": "314a148e9a0450615a02fac5aa6f0a55dd9470863a29e344dca761ba82a4ad76"
+    }
+  },
+  "target": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "software_id": "8965F3307000"
+  },
+  "wire": {
+    "ambiguous_projections": [
+      {
+        "states": [
+          1,
+          3,
+          4
+        ],
+        "wire": [
+          0,
+          3,
+          0,
+          0
+        ]
+      },
+      {
+        "states": [
+          2,
+          16
+        ],
+        "wire": [
+          0,
+          7,
+          0,
+          0
+        ]
+      }
+    ],
+    "boundary": "The wire projection is lossy. Expose candidate states; do not fabricate a unique state for ambiguous tuples.",
+    "can_id": "0x394",
+    "length": 3,
+    "projection_fields": [
+      "B1[7:6] table column 4",
+      "B1[5:3] table column 1",
+      "B2[3:1] table column 2",
+      "B2[0] table column 3"
+    ],
+    "projection_order": [
+      "table_column_4",
+      "table_column_1",
+      "table_column_2",
+      "table_column_3"
+    ],
+    "projection_to_state_candidates": [
+      {
+        "states": [
+          0
+        ],
+        "unique": true,
+        "wire": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "states": [
+          5
+        ],
+        "unique": true,
+        "wire": [
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "states": [
+          15
+        ],
+        "unique": true,
+        "wire": [
+          0,
+          2,
+          0,
+          0
+        ]
+      },
+      {
+        "states": [
+          1,
+          3,
+          4
+        ],
+        "unique": false,
+        "wire": [
+          0,
+          3,
+          0,
+          0
+        ]
+      },
+      {
+        "states": [
+          7
+        ],
+        "unique": true,
+        "wire": [
+          0,
+          3,
+          2,
+          1
+        ]
+      },
+      {
+        "states": [
+          9
+        ],
+        "unique": true,
+        "wire": [
+          0,
+          3,
+          3,
+          0
+        ]
+      },
+      {
+        "states": [
+          2,
+          16
+        ],
+        "unique": false,
+        "wire": [
+          0,
+          7,
+          0,
+          0
+        ]
+      },
+      {
+        "states": [
+          10
+        ],
+        "unique": true,
+        "wire": [
+          1,
+          7,
+          1,
+          1
+        ]
+      },
+      {
+        "states": [
+          11
+        ],
+        "unique": true,
+        "wire": [
+          1,
+          7,
+          4,
+          1
+        ]
+      },
+      {
+        "states": [
+          14
+        ],
+        "unique": true,
+        "wire": [
+          1,
+          7,
+          5,
+          0
+        ]
+      },
+      {
+        "states": [
+          13
+        ],
+        "unique": true,
+        "wire": [
+          1,
+          7,
+          6,
+          0
+        ]
+      },
+      {
+        "states": [
+          12
+        ],
+        "unique": true,
+        "wire": [
+          1,
+          7,
+          7,
+          0
+        ]
+      },
+      {
+        "states": [
+          6
+        ],
+        "unique": true,
+        "wire": [
+          2,
+          3,
+          2,
+          1
+        ]
+      },
+      {
+        "states": [
+          8
+        ],
+        "unique": true,
+        "wire": [
+          2,
+          3,
+          3,
+          0
+        ]
+      }
+    ],
+    "unique_state0_projection": [
+      0,
+      0,
+      0,
+      0
+    ]
+  }
+}
