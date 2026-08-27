@@ -27,6 +27,9 @@ OUT = ROOT / "data/generated/camry_8965F3307000_application_ram_loader_assessmen
 
 HIGH_BASE, HIGH_END = 0xFEBFF9F0, 0xFEBFFBFB
 XCP_LO, XCP_HI = 0xFEBF7C00, 0xFEBFFBFF
+CAL_SOURCE_LO, CAL_SOURCE_END = 0x00010000, 0x00017DEF
+CAL_SHADOW_LO, CAL_SHADOW_END = 0xFEBF7C00, 0xFEBFF9EF
+CAL_PAGE_STATE = (0xFEBE5EC4, 0xFEBE5EC5)
 
 # Body sizes were recovered target-natively from the F33 Ghidra project.  Hashes
 # bind every semantic address used by this assessment to exact firmware bytes.
@@ -63,6 +66,19 @@ FUNCTIONS = {
     "dmac_pair_table_caller": (0x060C20, 64, "76ad3e79f24b67da0d1728bc3287ea1a25d4f96e2ea5a8441fa10983dfd9bdd8"),
     "dmac_small_table_caller": (0x061B90, 176, "27d66c6339bdb867194fae88449c0b08c57b5e564343ca535b463b092b94e180"),
     "dmac_three_table_caller": (0x0628B2, 156, "52cbdb5d2b6ab4c70437aa1bb33d8c941bd23a7b3ff4db36ca72d7f023c8c4d7"),
+}
+
+# Exact instruction/data ranges recovered while closing the residual execution-
+# pivot question. These small startup/custom-XCP islands are not all owned by
+# stable Ghidra function objects, so keep them separate from function bodies.
+RAW_RANGES = {
+    "application_entry_wrapper": (0x020880, 0x0C, "e8f5ceae08d8f49cbed117749e2c048bf1fb446f48665d4921fd098ab8072ae5"),
+    "startup_calibration_shadow_copy": (0x0636D4, 0x24, "969ee65ec1d2a2523c1bd97a317de7923bc05a7e5ca3785760e5cb78296dc8b2"),
+    "startup_coordinator_prefix": (0x0637EE, 0x70, "699b5fba4d401cbe090e5344beeb22161af0cbbd23041b93aed92dc90166972a"),
+    "xcp_calibration_page_translator": (0x0991D2, 0x54, "22bb704d8afb3814195201d26b1e21662364e6815eff7e3ca58730dc6c255b26"),
+    "xcp_build_checksum_worker": (0x099226, 0x40, "c1507aa150c0ac06ca3d02c29f70da68af44967f94232412b0449b39a639516e"),
+    "xcp_calibration_shadow_copy": (0x0993F0, 0x24, "969ee65ec1d2a2523c1bd97a317de7923bc05a7e5ca3785760e5cb78296dc8b2"),
+    "calibration_source_page": (CAL_SOURCE_LO, 0x7DF0, "675e9f5f360277c6eb27ef73bb021e40861a88d99dd283adb2d7062506d246b6"),
 }
 
 # Fixed F33 application DMAC descriptor families recovered from the target-native
@@ -116,6 +132,29 @@ def find_all(b: bytes, needle: bytes) -> list[int]:
         pos=b.find(needle,pos)
         if pos < 0: return out
         out.append(pos); pos += 1
+
+
+def find_ldsr_writers(image: bytes, system_register: int, selector: int) -> list[dict]:
+    """Whole-image RH850/E3 LDSR census using the repository SLEIGH encoding.
+
+    `v850e3.sinc` defines LDSR with op0510=0x3F, SR1115=<system register>,
+    op1626=0x20, op2731=<selector>, and R0004 as the source GPR. RH850
+    instructions are 2-byte aligned, so this covers undiscovered instruction
+    islands instead of relying on Ghidra function ownership.
+    """
+    out=[]
+    for off in range(0,len(image)-3,2):
+        word=u32(image,off)
+        if (((word >> 5) & 0x3F) == 0x3F and
+            ((word >> 11) & 0x1F) == system_register and
+            ((word >> 16) & 0x7FF) == 0x20 and
+            ((word >> 27) & 0x1F) == selector):
+            out.append({
+                "address":f"0x{off:08X}",
+                "source_register":f"r{word & 0x1F}",
+                "bytes":image[off:off+4].hex(),
+            })
+    return out
 
 
 def build() -> dict:
@@ -183,6 +222,21 @@ def build() -> dict:
         need(len(body)==size and sha(body)==digest, f"{name} body identity drift")
         ranges[name]={"address":f"0x{off:08X}","size":size,"sha256":digest}
 
+    raw_ranges={}
+    for name,(off,size,digest) in RAW_RANGES.items():
+        body=image[off:off+size]
+        need(len(body)==size and sha(body)==digest, f"{name} raw-range identity drift")
+        raw_ranges[name]={"address":f"0x{off:08X}","size":size,"sha256":digest}
+
+    # F33 has two byte-identical calibration-page copy loops: one in normal
+    # application startup and one behind XCP COPY_CAL_PAGE (0xE4). Both copy the
+    # exact low calibration page into the lower XCP window. This is a calibration
+    # shadow/data path, not evidence of instruction-fetch remapping.
+    need(CAL_SOURCE_END-CAL_SOURCE_LO+1==0x7DF0, "calibration page size drift")
+    need(CAL_SHADOW_END-CAL_SHADOW_LO+1==0x7DF0, "calibration shadow size drift")
+    need(image[0x636D4:0x636F8]==image[0x993F0:0x99414], "startup/XCP calibration copy loops diverged")
+    need(image[0x63822:0x63826]==bytes.fromhex("bfffb2fe"), "startup calibration-copy callsite drift")
+
     # MPU region 1 contains the entire live high tail. Region 1 is supervisor RWX in
     # context 0 and supervisor RX in context 1.
     mpu=0x31688
@@ -227,12 +281,12 @@ def build() -> dict:
     need(len(dmac_endpoints)==88, f"DMAC endpoint census size drift: {len(dmac_endpoints)}")
     need(dmac_window_hits==[], f"fixed DMAC endpoint enters XCP window: {dmac_window_hits}")
 
-    # One exact reset-startup CTBP-zero instruction is retained as a supporting
-    # CPU-control-state fact only. This does NOT prove no other CTBP writer exists;
-    # no such broader claim is made without a target-native special-register
-    # instruction census.
-    ctbp_zero_hits=find_all(image,bytes.fromhex("e0a72000"))
-    need(ctbp_zero_hits==[0x25E], f"CTBP-zero reset instruction drift: {ctbp_zero_hits}")
+    # Close CALLT base retargeting against the exact image, including undiscovered
+    # instruction islands. CTBP is system-register id 20, selector 0 under the
+    # repository RH850/E3 SLEIGH. The only matching LDSR in the complete 1-MiB
+    # CodeFlash is reset's `ldsr r0,CTBP` at 0x25E, fixing CTBP to zero.
+    ctbp_writers=find_ldsr_writers(image,20,0)
+    need(ctbp_writers==[{"address":"0x0000025E","source_register":"r0","bytes":"e0a72000"}], f"CTBP writer census drift: {ctbp_writers}")
 
     # Exact current dynamic reachability result is only the normal EPS route.
     need(xlive["status"]=="unreachable" and xlive["route"]["eps_bus"]==1 and xlive["route"]["elm327_param"]==1, "XCP live discriminator drift")
@@ -283,30 +337,57 @@ def build() -> dict:
         "only_recovered_computed_call_with_fixed_localram_pointer":"0xFEBF0FD0",
         "fixed_localram_pointer_consumers":["0x0000435E","0x0000437C","0x0000440E"],
         "fixed_pointer_is_boot_region":True,"fixed_pointer_inside_xcp_write_window":False,
+        "residual_computed_calls":{
+          "sites":["0x0008863E","0x0008AF7A","0x0008AF88","0x0008AFAA"],
+          "callback_cells":["0xFEBF117C","0xFEBF1180","0xFEBF131C","0xFEBF1320","0xFEBF1324"],
+          "all_cells_below_xcp_write_window":True,
+          "writers_install_fixed_codeflash_targets":True,
+          "bitwise_complement_guards":True,
+          "representative_fixed_targets":["0x0008813C","0x00088086","0x0008892C","0x00088876","0x00088D60","0x00088CAA","0x00089170","0x000890BA","0x0008A538","0x0008A5AE","0x0008A600","0x0008A832","0x0008A898"],
+          "verdict":"the four call sites not closed by the local 24-instruction backtracker resolve to lower-RAM callback cells whose recovered writers install fixed CodeFlash targets plus complement guards; they are not XCP-writable pivots",
+        },
+        "exception_saved_pc_audit":{
+          "exception_return_sites":["0x000200C8","0x00020102","0x00071372","0x00071456","0x00071502","0x000715AE","0x00071A90","0x00071C40"],
+          "exception_return_count":8,
+          "application_initial_sp":"0xFEBE2000",
+          "temporary_isr_stacks":["0xFEBE0800","0xFEBE1000","0xFEBE1800","0xFEBE2800"],
+          "context_wrappers":["0x000713B0","0x0007145C","0x00071508"],
+          "eipc_saved_on_interrupted_stack":True,
+          "all_recovered_saved_pc_stacks_below_xcp_write_window":True,
+          "direct_flow_edges_into_xcp_write_window":0,
+        },
         "recovered_static_references_into_xcp_write_window":0,
         "high_tail_function_entries":0,
         "raw_codeflash_u32_pointers_into_high_tail":high_tail_pointer_hits,
         "fixed_dmac_descriptor_audit":{
           "descriptor_apply":"0x00060A6A",
+          "recovered_channel_programmers":["0x00060A6A"],
+          "recovered_channel_register_accessors":["0x0006091E","0x00060934","0x00060940","0x000609B0","0x00060A6A"],
+          "fixed_global_setup":"0x00060A10",
           "recovered_fixed_table_callers":["0x00060462","0x00060C20","0x00061B90","0x000628B2"],
           "tables":dmac_tables,
           "endpoint_field_offsets":["+0x08","+0x0C","+0x18","+0x1C"],
           "endpoint_count":len(dmac_endpoints),
           "endpoints_in_xcp_window":[f"0x{x:08X}" for x in dmac_window_hits],
           "fixed_descriptor_paths_closed":True,
-          "boundary":"All recovered F33 fixed CodeFlash DMAC descriptor families and their endpoint fields are target-natively enumerated. A separate undiscovered DMA programmer, computed descriptor source, or hardware-owned mutation path remains outside this proof.",
+          "boundary":"All recovered F33 fixed CodeFlash DMAC descriptor families and their endpoint fields are target-natively enumerated, and 0x60A6A is the only recovered application channel-register programmer. A separate undiscovered DMA programmer, computed descriptor source, or hardware-owned mutation path remains outside this proof.",
         },
-        "ctbp_supporting_fact":{
-          "ldsr_r0_ctbp_opcode":"e0a72000",
-          "hits":[f"0x{x:08X}" for x in ctbp_zero_hits],
-          "only_reset_zero_instruction_proven":True,
-          "all_ctbp_writers_census_closed":False,
+        "ctbp_writer_census":{
+          "sleigh_encoding":"op0510=0x3F, SR1115=20, op1626=0x20, op2731=0",
+          "alignment":2,
+          "image_bytes_scanned":len(image),
+          "writers":ctbp_writers,
+          "all_ctbp_writers_census_closed":True,
+          "only_writer_sets_zero":True,
+          "verdict":"CALLT base cannot be retargeted by application/tester state in the exact image; the sole LDSR-to-CTBP is reset's ldsr r0,CTBP at 0x25E",
         },
         "audit_scripts":{
           "computed_calls":{"path":"ghidra/scripts/investigate/ClassifyComputedCallTargets.java","sha256":sha_file(ROOT / "ghidra/scripts/investigate/ClassifyComputedCallTargets.java")},
           "range_references":{"path":"ghidra/scripts/investigate/InspectRangeReferences.java","sha256":sha_file(ROOT / "ghidra/scripts/investigate/InspectRangeReferences.java")},
+          "exception_flow":{"path":"ghidra/scripts/investigate/FindExceptionAndXcpFlowOps.java","sha256":sha_file(ROOT / "ghidra/scripts/investigate/FindExceptionAndXcpFlowOps.java")},
+          "stack_refs":{"path":"ghidra/scripts/investigate/FindStackPointerOps.java","sha256":sha_file(ROOT / "ghidra/scripts/investigate/FindStackPointerOps.java")},
         },
-        "bounded_negative":"No recovered scheduler/task/diagnostic/CAN/CryptoIf/ICU-S/OS/interrupt/PDU callback pointer or saved-PC cell lies in the XCP-writable window. The recovered fixed F33 DMAC descriptor families are separately closed and have zero endpoints in that window. Arbitrary computed aliases, a separate undiscovered DMA programmer/hardware mutation path, nonzero CTBP writers, and undiscovered code remain outside this static negative.",
+        "bounded_negative":"No recovered scheduler/task/diagnostic/CAN/CryptoIf/ICU-S/OS/interrupt/PDU callback pointer or saved-PC cell lies in the XCP-writable window. The four residual computed-call sites resolve to guarded lower-RAM callbacks, the exact whole-image CTBP-writer census closes CALLT-base retargeting, and the recovered fixed F33 DMAC families have zero endpoints in the window. Arbitrary synthesized/computed aliases, a separate undiscovered DMA programmer/hardware mutation path, and undiscovered code remain outside this static negative.",
       },
       "mpu":{
         "region_index":1,"bounds":["0xFEBF7C00","0xFEBFFBFC"],"ctx0_mpat":"0x000000B8","ctx1_mpat":"0x000000A8",
@@ -314,11 +395,27 @@ def build() -> dict:
       },
       "custom_xcp":{
         "table":"0x0002B250","selectors":[f"0x{x:02X}" for x in selectors],"handlers":[f"0x{x:08X}" for x in custom],
-        "e4_copy":{"handler":"0x00099414","source":["0x00010000","0x00017DEF"],"destination":["0xFEBF7C00","0xFEBFF9EF"]},
-        "residual_tail_starts_exactly_after_e4_copy":HIGH_BASE==0xFEBF7C00+0x7DF0,
+        "semantic_roles":{"0xF3":"BUILD_CHECKSUM","0xEB":"SET_CAL_PAGE","0xEA":"GET_CAL_PAGE","0xE4":"COPY_CAL_PAGE"},
+        "calibration_page_state":[f"0x{x:08X}" for x in CAL_PAGE_STATE],
+        "page_translator":"0x000991D2","build_checksum_worker":"0x00099226",
+        "e4_copy":{"handler":"0x00099414","copy_helper":"0x000993F0","source":[f"0x{CAL_SOURCE_LO:08X}",f"0x{CAL_SOURCE_END:08X}"],"destination":[f"0x{CAL_SHADOW_LO:08X}",f"0x{CAL_SHADOW_END:08X}"]},
+        "startup_copy":{"application_entry":"0x00020880","startup_coordinator":"0x000637EE","callsite":"0x00063822","copy_helper":"0x000636D4","same_copy_loop_as_xcp":image[0x636D4:0x636F8]==image[0x993F0:0x99414]},
+        "calibration_shadow_classification":{
+          "source_sha256":sha(image[CAL_SOURCE_LO:CAL_SOURCE_END+1]),
+          "recovered_function_entries_in_source_range":0,
+          "recovered_function_owned_flow_edges_into_source_range":0,
+          "recovered_flow_edges_into_ram_shadow":0,
+          "page_state_application_consumers_recovered":0,
+          "translator_recovered_use":"BUILD_CHECKSUM memory-address translation",
+          "instruction_fetch_or_branch_remap_recovered":False,
+          "verdict":"closed as calibration-page data shadow, not a recovered execution overlay or PC pivot",
+          "boundary":"Function/flow counts are from the exact F33 recovered Ghidra corpus. Undiscovered code remains outside that census, but exact startup/XCP copy identity and standard page-command semantics independently support the data-shadow classification.",
+        },
+        "residual_tail_starts_exactly_after_e4_copy":HIGH_BASE==CAL_SHADOW_END+1,
         "arbitrary_high_tail_writer":False,
       },
       "function_evidence":ranges,
+      "raw_range_evidence":raw_ranges,
       "architectures":[
         {
           "rank":1,"name":"stock application XCP DOWNLOAD + separate volatile execution pivot",

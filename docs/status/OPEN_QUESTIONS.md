@@ -936,18 +936,32 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   bytes throughout `FEBF7C00..FEBFFBFF`; GET_SEED/UNLOCK are unconfigured. The
   packed `0x7F7/0x7F8` endpoint is present in CodeFlash, but CONNECT timed out on
   the tested normal bus1/ELM1 route. The remaining architectural blocker is a
-  safe already-running-application control-transfer object into the tail. A
-  312-site computed-call audit (305 application) plus direct-reference and raw-u32
-  pointer censuses recover no XCP-writable scheduler/diagnostic/CAN/PDU/CryptoIf/
-  ICU-S/interrupt/OS callback or saved-PC cell; the only fixed LocalRAM call pointer
-  is boot-only `FEBF0FD0`. Seven recovered F33 fixed DMAC descriptor families
-  add 22 records / 88 endpoint fields, with zero endpoints in the XCP window,
-  closing the obvious fixed-DMA composition. This is still a bounded negative:
-  synthesized/computed pointers, a separate undiscovered DMA/hardware path,
-  unenumerated nonzero CTBP writers, and undiscovered code remain open.
-  Minimum next live discriminator is non-executing: locate a reachable physical
-  `0x7F7/0x7F8` route, then (only if reachable) perform bounded high-tail
-  DOWNLOAD+readback. Do not guess a PC write. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.
+  safe already-running-application control-transfer object into the tail.
+
+  The tempting lower-window execution composition is now closed: normal startup
+  `0x20880 -> 0x637EE -> 0x63822 -> 0x636D4` and XCP COPY_CAL_PAGE
+  `0x99414 -> 0x993F0` use byte-identical loops to copy calibration data
+  `0x10000..0x17DEF` to `FEBF7C00..FEBFF9EF`. Standard SET/GET_CAL_PAGE state at
+  `FEBE5EC4/5EC5` and translator `0x991D2` are recovered only in calibration/checksum
+  data paths; there are zero recovered functions/function-owned flows in the source
+  page and zero recovered flow edges into its RAM shadow. It is not a recovered
+  instruction overlay.
+
+  The control-transfer negative is also materially tighter. The four computed-call
+  sites not closed by the local backtracker resolve to guarded callback cells
+  `FEBF117C/FEBF1180/FEBF131C/FEBF1320/FEBF1324`, all below the XCP window and
+  populated only with fixed CodeFlash targets. Eight exact exception returns save/
+  restore PCs through lower `FEBE` stacks; no saved-PC frame enters the XCP window.
+  Seven fixed DMAC descriptor families add 22 records / 88 endpoint fields with zero
+  XCP-window endpoints, and `0x60A6A` is the only recovered application channel
+  programmer. Finally, a whole-image 2-byte-aligned LDSR census finds exactly one
+  CTBP writer, `ldsr r0,CTBP @ 0x25E`, so CALLT-base retargeting is closed.
+
+  This is still a bounded negative against synthesized/computed aliases, a separate
+  undiscovered DMA/hardware mutation path, and undiscovered code. Minimum next live
+  discriminator is non-executing: locate a reachable physical `0x7F7/0x7F8` route,
+  then (only if reachable) perform bounded high-tail DOWNLOAD+readback. Do not guess
+  a PC write. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

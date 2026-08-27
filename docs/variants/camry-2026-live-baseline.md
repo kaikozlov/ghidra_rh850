@@ -647,9 +647,30 @@ recover a safe application-mode control-transfer object.
 
 The seven-selector custom calibration/XCP family at `0x2B250` maps
 `FB/FA/F5/F3/EB/EA/E4` to
-`0x98FBA/0x9901A/0x99152/0x99266/0x9930E/0x99388/0x99414`. Its E4 handler invokes
-`0x993F0`, which copies CodeFlash `0x10000..0x17DEF` to
-LocalRAM `FEBF7C00..FEBFF9EF`. The verified carrier begins on the very next byte:
+`0x98FBA/0x9901A/0x99152/0x99266/0x9930E/0x99388/0x99414`. The final four are the
+standard calibration-page operations **BUILD_CHECKSUM (`F3`)**, **SET_CAL_PAGE
+(`EB`)**, **GET_CAL_PAGE (`EA`)**, and **COPY_CAL_PAGE (`E4`)**. SET/GET_CAL_PAGE
+mutate/report the two lower-RAM page-state bytes `FEBE5EC4/5EC5`. `0x991D2` is the
+page-address translator: the recovered path uses it from BUILD_CHECKSUM to translate
+between CodeFlash `0x10000..0x17DEF` and the RAM shadow. No recovered use feeds an
+instruction fetch or branch target.
+
+The E4 handler invokes `0x993F0`, which copies CodeFlash `0x10000..0x17DEF` to
+LocalRAM `FEBF7C00..FEBFF9EF`. Normal stock application startup independently does
+the **same copy**: entry `0x20880 -> 0x637EE`, then callsite `0x63822 -> 0x636D4`.
+The `0x636D4` and `0x993F0` 36-byte copy loops are byte-identical and the startup
+copy occurs before the later interrupt-enable point. The source page is therefore
+materialized as ordinary calibration data during every stock startup, not only by
+a diagnostic request.
+
+A target-native recovered-function census finds **zero function entries** in the
+32,240-byte source page and **zero function-owned flow edges** into it; the mirrored
+`FEBF7C00..FEBFF9EF` range likewise has **zero recovered flow edges**. No application
+consumer of the page-state bytes outside this calibration/XCP machinery is recovered.
+This closes the tempting "calibration overlay executes from RAM" composition as a
+**data-shadow path, not a recovered control-transfer primitive**.
+
+The verified carrier begins on the very next byte:
 
 ```text
 FEBF7C00 + 0x7DF0 = FEBFF9F0
@@ -709,21 +730,39 @@ diagnostic, CAN Tx/Rx, PDU, CryptoIf/ICU-S, OS, interrupt/vector, or saved-PC ce
 inside the XCP-writable region is currently available to hook as
 `original -> RAM trampoline -> signer -> original`.
 
+The four application computed-call sites that the local 24-instruction provenance
+backtracker could not initially close (`0x8863E`, `0x8AF7A`, `0x8AF88`, `0x8AFAA`)
+are now resolved too. Their targets come from callback cells
+`FEBF117C/FEBF1180` and `FEBF131C/FEBF1320/FEBF1324`, all far below the XCP write
+floor. Recovered writers install only fixed CodeFlash callback addresses and matching
+bitwise-complement guards; no tester-derived callback address reaches those cells.
+
+The exception-return route is likewise bounded. Exact F33 has eight decoded exception
+returns (one `feret`, seven `eiret`). Application context initialization starts at
+`SP=FEBE2000`; wrappers around `0x713B0/0x7145C/0x71508` save EIPC/CTPC state on the
+interrupted stack, then use fixed temporary ISR stacks `FEBE0800`, `FEBE1000`,
+`FEBE1800`, and `FEBE2800`. Every recovered saved-PC frame is therefore below
+`FEBF7C00`, and the direct-flow census still reports zero edges into the XCP window.
+
 The obvious DMA composition is now closed target-natively as well. Seven fixed
 F33 application DMAC descriptor families (22 total 0x28-byte records, **88 endpoint
 fields**) are consumed by the recovered setup callers around
-`0x60462/0x60C20/0x61B90/0x628B2` and descriptor apply helper `0x60A6A`; **zero**
-of those endpoint fields enters `FEBF7C00..FEBFFBFF`. Thus the recovered fixed-DMA
-paths cannot be repurposed to synthesize a callback/PC object in the XCP window.
-The reset image also contains the pinned `ldsr r0,CTBP` encoding exactly once at
-`0x25E`, retained only as a supporting fact; a complete census of all possible
-nonzero CTBP writers is not claimed.
+`0x60462/0x60C20/0x61B90/0x628B2`; `0x60A6A` is the only recovered application
+channel-register programmer and `0x60A10` performs fixed global setup. **Zero** of
+the 88 endpoint fields enters `FEBF7C00..FEBFFBFF`, so the recovered fixed-DMA
+paths cannot synthesize a callback/PC object there.
+
+CALLT-base retargeting is now closed against the **entire exact 1-MiB image**, not
+merely the discovered Ghidra listing. Decoding the repository RH850/E3 LDSR format
+(`op0510=0x3F`, system-register id 20, `op1626=0x20`, selector 0) at every 2-byte
+aligned image offset finds exactly one CTBP writer: `ldsr r0,CTBP @ 0x25E`. It sets
+CTBP to zero. There is no nonzero CTBP writer in the image, so CALLT cannot be turned
+into an XCP-RAM dispatch table by application/tester state.
 
 This remains a **bounded negative**, not a proof of architectural absence:
 synthesized/computed pointer aliases, a separate undiscovered DMA programmer or
-hardware-owned mutation path, unenumerated CTBP writers, and undiscovered code
-remain outside the static census. The repository therefore does not emit an
-execution PoC that guesses a branch target.
+hardware-owned mutation path, and undiscovered code remain outside the static census.
+The repository therefore does not emit an execution PoC that guesses a branch target.
 
 ### 13.6 Concrete production disposition and minimum next observations
 

@@ -33,6 +33,18 @@ def check(name: str, condition: object, detail: str = "") -> None:
     print(f"[{'PASS' if ok else 'FAIL'}] {name}{suffix}")
 
 
+def find_ldsr_writers(image: bytes, system_register: int, selector: int) -> list[tuple[int,int,bytes]]:
+    out=[]
+    for off in range(0,len(image)-3,2):
+        word=struct.unpack_from("<I",image,off)[0]
+        if (((word >> 5) & 0x3F) == 0x3F and
+            ((word >> 11) & 0x1F) == system_register and
+            ((word >> 16) & 0x7FF) == 0x20 and
+            ((word >> 27) & 0x1F) == selector):
+            out.append((off,word & 0x1F,image[off:off+4]))
+    return out
+
+
 a = json.loads(ART.read_text())
 img = IMAGE.read_bytes()
 print("== deterministic target/evidence binding ==")
@@ -66,6 +78,17 @@ check("MODIFY_BITS/SHORT_UPLOAD remain configured", x["modify_bits"] == "0x00082
 check("software write window exactly covers high tail", x["software_write_window"] == ["0xFEBF7C00", "0xFEBFFBFF"] and struct.unpack_from("<II", img, 0x2B21C) == (0xFEBF7C00, 0xFEBFFBFF) and x["high_tail_fully_inside_write_window"])
 check("normal bus1/ELM1 route is only a reachability negative", x["normal_route_live_result"]["status"] == "no_response_timeout" and x["normal_route_live_result"]["tested_bus"] == 1 and x["normal_route_live_result"]["elm327_param"] == 1 and "only" in x["reachability_boundary"])
 
+print("\n== calibration-page shadow is not an execution overlay ==")
+cx = a["custom_xcp"]
+raw = a["raw_range_evidence"]
+check("custom paging selectors carry standard calibration-page roles", cx["semantic_roles"] == {"0xE4":"COPY_CAL_PAGE","0xEA":"GET_CAL_PAGE","0xEB":"SET_CAL_PAGE","0xF3":"BUILD_CHECKSUM"} and cx["calibration_page_state"] == ["0xFEBE5EC4","0xFEBE5EC5"] and cx["page_translator"] == "0x000991D2")
+check("startup and XCP copy loops are byte-identical", cx["startup_copy"]["callsite"] == "0x00063822" and cx["startup_copy"]["same_copy_loop_as_xcp"] is True and img[0x636D4:0x636F8] == img[0x993F0:0x99414] and img[0x63822:0x63826] == bytes.fromhex("bfffb2fe"))
+check("calibration source/shadow geometry is exact", cx["e4_copy"]["source"] == ["0x00010000","0x00017DEF"] and cx["e4_copy"]["destination"] == ["0xFEBF7C00","0xFEBFF9EF"] and sha(img[0x10000:0x17DF0]) == cx["calibration_shadow_classification"]["source_sha256"] == "675e9f5f360277c6eb27ef73bb021e40861a88d99dd283adb2d7062506d246b6" and cx["residual_tail_starts_exactly_after_e4_copy"])
+check("recovered calibration shadow has no code-flow consumer", cx["calibration_shadow_classification"]["recovered_function_entries_in_source_range"] == 0 and cx["calibration_shadow_classification"]["recovered_function_owned_flow_edges_into_source_range"] == 0 and cx["calibration_shadow_classification"]["recovered_flow_edges_into_ram_shadow"] == 0 and cx["calibration_shadow_classification"]["page_state_application_consumers_recovered"] == 0 and cx["calibration_shadow_classification"]["instruction_fetch_or_branch_remap_recovered"] is False)
+for name,row in raw.items():
+    base=int(row["address"],16); size=row["size"]
+    check(f"raw evidence range pinned: {name}", sha(img[base:base+size]) == row["sha256"])
+
 print("\n== ordinary application UDS negatives ==")
 u = a["application_uds"]
 check("SID 0x3D WriteMemoryByAddress is absent", u["write_memory_by_address_0x3d_configured"] is False and "0x3D" not in u["configured_sids"])
@@ -97,9 +120,15 @@ for table in dma["tables"]:
         raw_dma_endpoints.extend(struct.unpack_from("<IIII", img, off+8)[:2])
         raw_dma_endpoints.extend(struct.unpack_from("<II", img, off+0x18))
 check("fixed DMAC endpoint census is 88 fields with zero XCP-window hits", len(raw_dma_endpoints) == dma["endpoint_count"] == 88 and dma["endpoints_in_xcp_window"] == [] and all(not (0xFEBF7C00 <= x <= 0xFEBFFBFF) for x in raw_dma_endpoints))
-ctbp=ct["ctbp_supporting_fact"]
-check("CTBP support fact is exact and deliberately bounded", ctbp["ldsr_r0_ctbp_opcode"] == "e0a72000" and ctbp["hits"] == ["0x0000025E"] and ctbp["only_reset_zero_instruction_proven"] and not ctbp["all_ctbp_writers_census_closed"])
-check("negative is explicitly bounded after fixed-DMA closure", all(word in ct["bounded_negative"].lower() for word in ("computed", "dma", "ctbp", "undiscovered")))
+residual=ct["residual_computed_calls"]
+check("four residual computed calls resolve below the XCP window", residual["sites"] == ["0x0008863E","0x0008AF7A","0x0008AF88","0x0008AFAA"] and all(int(x,16) < 0xFEBF7C00 for x in residual["callback_cells"]) and residual["all_cells_below_xcp_write_window"] and residual["writers_install_fixed_codeflash_targets"] and residual["bitwise_complement_guards"])
+exc=ct["exception_saved_pc_audit"]
+check("exception/saved-PC route is confined to lower stacks", exc["exception_return_count"] == len(exc["exception_return_sites"]) == 8 and exc["application_initial_sp"] == "0xFEBE2000" and exc["temporary_isr_stacks"] == ["0xFEBE0800","0xFEBE1000","0xFEBE1800","0xFEBE2800"] and exc["eipc_saved_on_interrupted_stack"] and exc["all_recovered_saved_pc_stacks_below_xcp_write_window"] and exc["direct_flow_edges_into_xcp_write_window"] == 0)
+check("only one recovered application DMAC channel programmer remains", dma["recovered_channel_programmers"] == ["0x00060A6A"] and dma["fixed_global_setup"] == "0x00060A10" and dma["recovered_channel_register_accessors"] == ["0x0006091E","0x00060934","0x00060940","0x000609B0","0x00060A6A"])
+ctbp=ct["ctbp_writer_census"]
+raw_ctbp=find_ldsr_writers(img,20,0)
+check("whole-image CTBP writer census closes CALLT-base retargeting", raw_ctbp == [(0x25E,0,bytes.fromhex("e0a72000"))] and ctbp["writers"] == [{"address":"0x0000025E","bytes":"e0a72000","source_register":"r0"}] and ctbp["all_ctbp_writers_census_closed"] and ctbp["only_writer_sets_zero"])
+check("negative is explicitly bounded after residual closure", all(word in ct["bounded_negative"].lower() for word in ("computed", "dma", "ctbp", "undiscovered")))
 check("no complete non-disruptive loader+exec path claimed", a["implementation_readiness"]["complete_non_disruptive_loader_and_execution_path"] is False and a["implementation_readiness"]["safe_inert_vehicle_poc_built"] is False)
 arch = a["architectures"]
 check("ranked architecture disposition is complete", [row["rank"] for row in arch] == [1,2,3] and "0x00081FFE" in arch[0]["exact_surface"].values() and arch[0]["lifetime"].startswith("volatile") and "PROGRAMMING" in arch[2]["network_visibility"] and arch[2]["remaining_unknowns"] == [])
