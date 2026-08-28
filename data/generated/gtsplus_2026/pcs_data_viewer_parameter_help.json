@@ -1,0 +1,491 @@
+{
+  "english_ffd_parameters": [
+    {
+      "description": "Activation request for Pre-collision brake hold",
+      "index": 1,
+      "name": "PBH Request Flag"
+    },
+    {
+      "description": "Activation request for Warning buzzer",
+      "index": 2,
+      "name": "ALM Request Flag"
+    },
+    {
+      "description": "TSS P, LSS+A Case: Activation request for Pre-collision brake assist 00(b) : No assist 01(b) : PBA1 10(b) : PBA2 11(b) : PBA3 TSS C Case: Activation request status of Pre-collision brake assist - 00(b) : No request PBA1 01(b) : No request PBA2 10(b) : Request PBA3 11(b) : Request",
+      "index": 3,
+      "name": "PBA Request Status"
+    },
+    {
+      "description": "TSS P, LSS+A Case: Activation request for Former Pre-collision Brake TSS C Case: Activation request for Pre-collision brake w/o Driver brake operation",
+      "index": 4,
+      "name": "FPB Request Flag"
+    },
+    {
+      "description": "TSS P, LSS+A Case: Activation request for Pre-collision brake TSS C Case: Activation request for Pre-collision brake w/ Driver brake operation",
+      "index": 5,
+      "name": "PB Request Flag"
+    },
+    {
+      "description": "Warning activation request of considering the approach for preceding vehicle",
+      "index": 6,
+      "name": "ALM Request Flag 2"
+    },
+    {
+      "description": "Warning display request to combination meter",
+      "index": 7,
+      "name": "PCS warning display request"
+    },
+    {
+      "description": "When PCS switch is valid, the flag is ON",
+      "index": 8,
+      "name": "valid/invalid status of PCS system"
+    },
+    {
+      "description": "PCS control status 3:PCS operation 0:PCS non-operation",
+      "index": 9,
+      "name": "PCS control status"
+    },
+    {
+      "description": "PCS deceleration request",
+      "index": 10,
+      "name": "Deceleration Request Output Value"
+    },
+    {
+      "description": "Object number of PCS control target",
+      "index": 11,
+      "name": "Target Object Number"
+    },
+    {
+      "description": "Relative acceleration of PCS control target",
+      "index": 12,
+      "name": "Relative acceleration for control target"
+    },
+    {
+      "description": "Fusion status of PCS control target",
+      "index": 13,
+      "name": "Sensor recognition status 2 for control target"
+    },
+    {
+      "description": "Recognition type of PCS control target",
+      "index": 14,
+      "name": "Type of the object for control target"
+    },
+    {
+      "description": "Time to Collision",
+      "index": 15,
+      "name": "TTC 1 for control target"
+    },
+    {
+      "description": "Corrected value of Time to Collision",
+      "index": 16,
+      "name": "TTC 2 for control target"
+    },
+    {
+      "description": "Following distance of PCS control target",
+      "index": 17,
+      "name": "Distance for control target"
+    },
+    {
+      "description": "Relative speed of PCS control target",
+      "index": 18,
+      "name": "Relative speed for control target"
+    },
+    {
+      "description": "Lateral position of PCS control target",
+      "index": 19,
+      "name": "Lateral position for control target"
+    },
+    {
+      "description": "Opening ratio of Accelerator pedal",
+      "index": 20,
+      "name": "Accelerator opening"
+    },
+    {
+      "description": "Stop Switch signal",
+      "index": 21,
+      "name": "STP switch signal"
+    },
+    {
+      "description": "Oil pressure of brake's master cylinder",
+      "index": 22,
+      "name": "Pressure of Master Cylinder"
+    },
+    {
+      "description": "Longitudinal acceleration of accelerometer",
+      "index": 23,
+      "name": "Longitudinal Acceleration Value"
+    },
+    {
+      "description": "Warning setting mode Far/Mid/Near",
+      "index": 24,
+      "name": "ALM Mode Status"
+    },
+    {
+      "description": "Estimated Curve radius",
+      "index": 25,
+      "name": "Estimated Curve R"
+    },
+    {
+      "description": "Vehicle speed",
+      "index": 26,
+      "name": "Vehicle Speed"
+    },
+    {
+      "description": "Yaw rate",
+      "index": 27,
+      "name": "Yaw rate"
+    },
+    {
+      "description": "Steering angle",
+      "index": 28,
+      "name": "Steering angle"
+    }
+  ],
+  "exact_join_count": 12,
+  "exact_normalized_dictionary_joins": [
+    {
+      "help_index": 1,
+      "help_name": "PBH Request Flag",
+      "matches": [
+        {
+          "family": "ffd_tss3_triggers",
+          "key": "FFD_TSS3_TRIGGER_ID_2097",
+          "name": "PBH Request Flag"
+        },
+        {
+          "family": "legacy_ffd_trigger_names",
+          "key": "FFD_TRIGGER_ID_2097_1",
+          "name": "PBH Request Flag"
+        }
+      ]
+    },
+    {
+      "help_index": 2,
+      "help_name": "ALM Request Flag",
+      "matches": [
+        {
+          "family": "ffd_tss3_signals",
+          "key": "FFD_TSS3_ID_5794",
+          "name": "ALM Request Flag"
+        },
+        {
+          "family": "ffd_tss3_triggers",
+          "key": "FFD_TSS3_TRIGGER_ID_2090",
+          "name": "ALM Request Flag"
+        },
+        {
+          "family": "legacy_ffd_trigger_names",
+          "key": "FFD_TRIGGER_ID_2090_1",
+          "name": "ALM Request Flag"
+        }
+      ]
+    },
+    {
+      "help_index": 3,
+      "help_name": "PBA Request Status",
+      "matches": [
+        {
+          "family": "ffd_tss3_signals",
+          "key": "FFD_TSS3_ID_5792",
+          "name": "PBA Request Status"
+        }
+      ]
+    },
+    {
+      "help_index": 4,
+      "help_name": "FPB Request Flag",
+      "matches": [
+        {
+          "family": "legacy_ffd_trigger_names",
+          "key": "FFD_TRIGGER_ID_2095_1",
+          "name": "FPB Request Flag"
+        }
+      ]
+    },
+    {
+      "help_index": 5,
+      "help_name": "PB Request Flag",
+      "matches": [
+        {
+          "family": "ffd_tss3_triggers",
+          "key": "FFD_TSS3_TRIGGER_ID_2096",
+          "name": "PB Request Flag"
+        },
+        {
+          "family": "legacy_ffd_trigger_names",
+          "key": "FFD_TRIGGER_ID_2096_1",
+          "name": "PB Request Flag"
+        }
+      ]
+    },
+    {
+      "help_index": 6,
+      "help_name": "ALM Request Flag 2",
+      "matches": [
+        {
+          "family": "legacy_ffd_trigger_names",
+          "key": "FFD_TRIGGER_ID_2090_2",
+          "name": "ALM Request Flag 2"
+        }
+      ]
+    },
+    {
+      "help_index": 11,
+      "help_name": "Target Object Number",
+      "matches": [
+        {
+          "family": "ffd_tss3_signals",
+          "key": "FFD_TSS3_ID_573E",
+          "name": "Target Object Number"
+        }
+      ]
+    },
+    {
+      "help_index": 13,
+      "help_name": "Sensor recognition status 2 for control target",
+      "matches": [
+        {
+          "family": "ffd_tss3_signals",
+          "key": "FFD_TSS3_ID_5743",
+          "name": "Sensor recognition status 2 for control target"
+        }
+      ]
+    },
+    {
+      "help_index": 14,
+      "help_name": "Type of the object for control target",
+      "matches": [
+        {
+          "family": "ffd_tss3_signals",
+          "key": "FFD_TSS3_ID_573F",
+          "name": "Type of the Object for Control Target"
+        }
+      ]
+    },
+    {
+      "help_index": 21,
+      "help_name": "STP switch signal",
+      "matches": [
+        {
+          "family": "ffd_tss3_signals",
+          "key": "FFD_TSS3_ID_5702",
+          "name": "STP switch signal"
+        }
+      ]
+    },
+    {
+      "help_index": 24,
+      "help_name": "ALM Mode Status",
+      "matches": [
+        {
+          "family": "ffd_tss3_signals",
+          "key": "FFD_TSS3_ID_5719",
+          "name": "ALM Mode Status"
+        }
+      ]
+    },
+    {
+      "help_index": 28,
+      "help_name": "Steering angle",
+      "matches": [
+        {
+          "family": "ffd_tss3_signals",
+          "key": "FFD_TSS3_ID_523D",
+          "name": "Steering angle"
+        }
+      ]
+    }
+  ],
+  "interpretation": [
+    "The CHM is an OEM-authored parameter-help surface shipped with PCS Data Viewer, independent of the resource-key display dictionary.",
+    "The FFD help page contains 28 parameter names with plain-language descriptions and some enumerated control-state semantics.",
+    "Exact normalized name joins tie a subset of help descriptions directly to recovered TSS3/resource keys; non-joined help rows are retained without guessed IDs."
+  ],
+  "japanese_help_ffd_parameters": [
+    {
+      "description": "Activation request for Pre-collision brake hold",
+      "index": 1,
+      "name": "PBH Request Flag"
+    },
+    {
+      "description": "Activation request for Warning buzzer",
+      "index": 2,
+      "name": "ALM Request Flag"
+    },
+    {
+      "description": "TSS P Case: Activation request for Pre-collision brake assist 00(b) : No assist 01(b) : PBA1 10(b) : PBA2 11(b) : PBA3 TSS C Case: Activation request status of Pre-collision brake assist - 00(b) : No request PBA1 01(b) : No request PBA2 10(b) : Request PBA3 11(b) : Request",
+      "index": 3,
+      "name": "PBA Request Status"
+    },
+    {
+      "description": "TSS P Case: Activation request for Former Pre-collision Brake TSS C Case: Activation request for Pre-collision brake w/o Driver brake operation",
+      "index": 4,
+      "name": "FPB Request Flag"
+    },
+    {
+      "description": "TSS P Case: Activation request for Pre-collision brake TSS C Case: Activation request for Pre-collision brake w/ Driver brake operation",
+      "index": 5,
+      "name": "PB Request Flag"
+    },
+    {
+      "description": "Warning activation request of considering the approach for preceding vehicle",
+      "index": 6,
+      "name": "ALM Request Flag 2"
+    },
+    {
+      "description": "Warning display request to combination meter",
+      "index": 7,
+      "name": "PCS warning display request"
+    },
+    {
+      "description": "When PCS switch is valid, the flag is ON",
+      "index": 8,
+      "name": "valid/invalid status of PCS system"
+    },
+    {
+      "description": "PCS control status 3:PCS operation 0:PCS non-operation",
+      "index": 9,
+      "name": "PCS control status"
+    },
+    {
+      "description": "PCS deceleration request",
+      "index": 10,
+      "name": "Deceleration Request Output Value"
+    },
+    {
+      "description": "Object number of PCS control target",
+      "index": 11,
+      "name": "Target Object Number"
+    },
+    {
+      "description": "Relative acceleration of PCS control target",
+      "index": 12,
+      "name": "Relative acceleration for control target"
+    },
+    {
+      "description": "Fusion status of PCS control target",
+      "index": 13,
+      "name": "Sensor recognition status 2 for control target"
+    },
+    {
+      "description": "Recognition type of PCS control target",
+      "index": 14,
+      "name": "Type of the object for control target"
+    },
+    {
+      "description": "Time to Collision",
+      "index": 15,
+      "name": "TTC 1 for control target"
+    },
+    {
+      "description": "Corrected value of Time to Collision",
+      "index": 16,
+      "name": "TTC 2 for control target"
+    },
+    {
+      "description": "Following distance of PCS control target",
+      "index": 17,
+      "name": "Distance for control target"
+    },
+    {
+      "description": "Relative speed of PCS control target",
+      "index": 18,
+      "name": "Relative speed for control target"
+    },
+    {
+      "description": "Lateral position of PCS control target",
+      "index": 19,
+      "name": "Lateral position for control target"
+    },
+    {
+      "description": "Opening ratio of Accelerator pedal",
+      "index": 20,
+      "name": "Accelerator opening"
+    },
+    {
+      "description": "Stop Switch signal",
+      "index": 21,
+      "name": "STP switch signal"
+    },
+    {
+      "description": "Oil pressure of brake's master cylinder",
+      "index": 22,
+      "name": "Pressure of Master Cylinder"
+    },
+    {
+      "description": "Longitudinal acceleration of accelerometer",
+      "index": 23,
+      "name": "Longitudinal Acceleration Value"
+    },
+    {
+      "description": "Warning setting mode Far/Mid/Near",
+      "index": 24,
+      "name": "ALM Mode Status"
+    },
+    {
+      "description": "Estimated Curve radius",
+      "index": 25,
+      "name": "Estimated Curve R"
+    },
+    {
+      "description": "Vehicle speed",
+      "index": 26,
+      "name": "Vehicle Speed"
+    },
+    {
+      "description": "Yaw rate",
+      "index": 27,
+      "name": "Yaw rate"
+    },
+    {
+      "description": "Steering angle",
+      "index": 28,
+      "name": "Steering angle"
+    }
+  ],
+  "oracles": {
+    "deceleration_request": {
+      "description": "PCS deceleration request",
+      "index": 10,
+      "name": "Deceleration Request Output Value"
+    },
+    "pcs_control_status": {
+      "description": "PCS control status 3:PCS operation 0:PCS non-operation",
+      "index": 9,
+      "name": "PCS control status"
+    },
+    "steering_angle": {
+      "description": "Steering angle",
+      "index": 28,
+      "name": "Steering angle"
+    },
+    "target_lateral_position": {
+      "description": "Lateral position of PCS control target",
+      "index": 19,
+      "name": "Lateral position for control target"
+    },
+    "target_object_number": {
+      "description": "Object number of PCS control target",
+      "index": 11,
+      "name": "Target Object Number"
+    }
+  },
+  "schema": "gtsplus-pcs-data-viewer-parameter-help-v1",
+  "sources": {
+    "english_chm": {
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/PCS Data Viewer/Help/ParameterHelp.chm",
+      "sha256": "6ee3f19993550b2117934f1eed14e13819002231b1f6fb6ccd0bc1c521518c03",
+      "size": 13194
+    },
+    "japanese_chm": {
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/PCS Data Viewer/Help/ParameterHelp_JA.chm",
+      "sha256": "822a4f3f745ca08fb3be0251c3962bc485d8e5e1936b5f0708a764b8011a67b9",
+      "size": 13020
+    },
+    "tss3_dictionary_artifact": {
+      "path": "data/generated/gtsplus_2026/pcs_data_viewer_tss3_dictionary.json",
+      "sha256": "dd3783e3213181949dbc02c94300dd235eced0434ffe66c7859f75c658ac9bc5"
+    }
+  },
+  "title": "PCS Data Viewer FFD parameter help and TSS3 dictionary joins"
+}

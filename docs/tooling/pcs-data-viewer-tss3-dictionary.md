@@ -213,7 +213,40 @@ and image-table geometry.
 The resource messages explicitly reference `SID$EB$23`, `SID$EB$33`, and
 `DID$6001`.
 
-## 9. What remains bounded
+## 9. Shipped FFD parameter help adds plain-language semantics
+
+The viewer also ships `Help/ParameterHelp.chm`. Its `FFD.htm` page is an
+independent OEM-authored help table with **28 parameter names and descriptions**.
+A deterministic extractor now preserves that table and exact normalized joins
+back into the recovered resource dictionary:
+
+`data/generated/gtsplus_2026/pcs_data_viewer_parameter_help.json`
+
+High-value descriptions include:
+
+| Help parameter | OEM description |
+|---|---|
+| PCS control status | `3:PCS operation`, `0:PCS non-operation` |
+| Deceleration Request Output Value | PCS deceleration request |
+| Target Object Number | Object number of PCS control target |
+| Relative acceleration for control target | Relative acceleration of PCS control target |
+| Distance for control target | Following distance of PCS control target |
+| Relative speed for control target | Relative speed of PCS control target |
+| **Lateral position for control target** | **Lateral position of PCS control target** |
+| Steering angle | Steering angle |
+
+Twelve help names join exactly (case/punctuation normalized) to resource keys,
+including `PBA Request Status -> FFD_TSS3_ID_5792`, `Target Object Number ->
+FFD_TSS3_ID_573E`, and `Steering angle -> FFD_TSS3_ID_523D`. The remaining
+help rows are retained as descriptions without guessed recorder IDs.
+
+The PBA help is especially useful because it documents value semantics across
+Toyota system families: for TSS P/LSS+A it enumerates `00 No assist / 01 PBA1 /
+10 PBA2 / 11 PBA3`, while the TSS C interpretation collapses the states to
+request/no-request behavior. This is host documentation, not a claim that every
+TSS3 generation uses the same raw field or network encoding.
+
+## 10. What remains bounded
 
 1. **Concrete bit assignments/scalings.** The schema is recovered, but the
    populated `DetailBitAssignInfo`/RoB tables are built in protected managed
