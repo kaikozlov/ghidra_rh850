@@ -9,6 +9,7 @@ inspection) without merging the subsystem-specific deterministic generators.
 from __future__ import annotations
 
 import argparse
+import functools
 import hashlib
 import json
 import re
@@ -28,6 +29,7 @@ from cuw_attach import parse_attach_bytes
 from cuw_parameter import factory_routes_from_ini_root
 from ddb_semantics import behavior_rows as semantic_behavior_rows
 from ddb_semantics import dtc_rows as semantic_dtc_rows
+from ddb_semantics import extract_monitor_records
 from ddb_semantics import monitor_rows as semantic_monitor_rows
 from ddb_semantics import records as ddb_records
 from ddb_strings import load_string_db as cached_string_db
@@ -555,9 +557,13 @@ def _file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+@functools.lru_cache(maxsize=1)
+def _execution_model() -> dict[str, Any]:
+    return json.loads(EXECUTION_MODEL.read_text())
+
+
 def _execution_plugin_profiles() -> dict[str, dict[str, Any]]:
-    data = json.loads(EXECUTION_MODEL.read_text())
-    return data["gtsplus_continuity"]["dll_role_schema"]["plugin_semantics"]
+    return _execution_model()["gtsplus_continuity"]["dll_role_schema"]["plugin_semantics"]
 
 
 def _master_command_binding(parser: DDBParser, master: Any, category_id: int, role: int) -> Any:
@@ -2385,6 +2391,8 @@ def _registry_signal_row(row: dict[str, Any]) -> dict[str, Any]:
         "decimal_point_count": info.get("decimal_point_count", 0),
         "signed": bool(info.get("signed", False)),
         "unit": info.get("unit"),
+        "data_range": info.get("data_range"),
+        "graph_range": info.get("graph_range"),
         "patterns": {str(key): value for key, value in (info.get("pattern_display") or {}).items()},
     }
 
@@ -2458,6 +2466,7 @@ def _compact_direct_active_test(
     selected: dict[str, Any],
     executor: dict[str, Any],
     monitor_rows: list[dict[str, Any]],
+    init_frame: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     linked = [
         row for row in monitor_rows
@@ -2480,10 +2489,31 @@ def _compact_direct_active_test(
         "stop_prefix": executor["stop"]["materialized_prefix"],
         "runtime_length_minimum": executor["runtime_data_length"]["minimum_from_bit_geometry"],
         "minimum_examples": executor.get("minimum_length_examples"),
+        "initial_read": _direct_initial_read_plan(selected, init_frame),
         "monitor_key": monitor.get("monitor_key"),
         "monitor_name": monitor.get("name") or "",
+        "session_requirement": _session_requirement(executor["start"]["materialized_prefix"]),
         "execution": "plan_only",
     }
+
+
+def _direct_initial_read_plan(selected: dict[str, Any], init_frame: dict[str, Any] | None) -> dict[str, Any]:
+    """Compact role-0x08 selector-0xCA initial-read request for one direct test."""
+    plan: dict[str, Any] = {"mode": selected["initial_read_mode"]}
+    if selected["initial_read_mode"] != 0 or init_frame is None:
+        return plan
+    did = int(selected["initial_read_did"])
+    request = bytearray.fromhex(init_frame["send"]["bytes"])
+    if len(request) < 3 or request[0] != 0x22:
+        raise ValueError("selector 0xCA base request is no longer 22xxxx")
+    request[1] = (did >> 8) & 0xFF
+    request[2] = did & 0xFF
+    plan.update({
+        "selector": "0xCA",
+        "request": request.hex(),
+        "check": init_frame["receive_check"]["bytes"],
+    })
+    return plan
 
 
 def _compact_routine_active_test(selected: dict[str, Any], executor: dict[str, Any]) -> dict[str, Any]:
@@ -2503,7 +2533,8 @@ def _compact_routine_active_test(selected: dict[str, Any], executor: dict[str, A
         "output_mask_value_variable": selected["output_mask_value_variable"],
         "output_mask_button_variable": selected["output_mask_button_variable"],
         "routine_status_key": selected["routine_status_key"],
-        "execution": "plan_only",
+        "session_requirement": _session_requirement(executor["start"]["materialized_static_request"]),
+        "execution": "executable" if executor["fixed_request"] else "plan_only",
     }
 
 
@@ -2517,6 +2548,8 @@ def _registry_active_tests(
 ) -> list[dict[str, Any]]:
     db_path = db_root / str(category["database"])
     db = parser.parse_ecu_db(db_path)
+    init_frames = _master_frame_rows(parser, master, int(category["category_id"]), 0xCA)
+    init_frame = init_frames[0] if len(init_frames) == 1 else None
     rows: list[dict[str, Any]] = []
     direct = db.sections.get(68)
     if direct is not None:
@@ -2548,7 +2581,7 @@ def _registry_active_tests(
                 executor = _direct_active_test_executor_plan(
                     parser, master, category, db_obj, selected_db_path, selected
                 )
-                rows.append(_compact_direct_active_test(selected, executor, monitor_rows))
+                rows.append(_compact_direct_active_test(selected, executor, monitor_rows, init_frame))
             except ValueError as exc:
                 rows.append({
                     "id": active_test_id,
@@ -2612,6 +2645,418 @@ def _registry_source_key(path: Path, gts_root: Path) -> str:
     raise ValueError(f"registry source is outside the repository/GTS+ roots: {resolved}")
 
 
+REGISTRY_FUNCTION_NAME_BOUNDARY = (
+    "current master type-26/type-27 rows for the Camry P5 categories carry string index 0: "
+    "function/detail keys, ordering, and membership are recovered, OEM function names are not"
+)
+
+# Recovered semantic kinds for the generic (category-0) command-plugin families
+# the runtime utility surface needs.  The six lifecycle wrappers are cross-checked
+# at build time against the pinned execution model; the four routine Active-Test
+# wrappers are the recovered shared P5 routine executors (TMS-073).  Every other
+# generic role stays opaque and is not classified here.
+GENERIC_UTILITY_ROLE_KINDS = {
+    0x3A: "test_present_start",
+    0x3B: "test_present_stop",
+    0x61: "check_mode_frame_get",
+    0x62: "check_mode_frame_confirm",
+    0xB0: "active_test_start",
+    0xAE: "routine_active_test_init",
+    0xAF: "routine_active_test_signal_info",
+    0xBF: "set_default_session",
+    0xCA: "move_session_cgwd",
+    0xD4: "single_routine_active_test",
+}
+
+_SEMANTIC_KIND_PATTERN = re.compile(r"^role_0x[0-9A-Fa-f]+_(?P<kind>.+)$")
+
+
+def _semantic_kind_for_profile(profile_name: str | None) -> str | None:
+    if profile_name is None:
+        return None
+    match = _SEMANTIC_KIND_PATTERN.match(profile_name)
+    return match.group("kind") if match else None
+
+
+def _registry_role_bindings(
+    parser: DDBParser,
+    master: Any,
+    category: dict[str, Any],
+    bin_root: Path,
+) -> list[dict[str, Any]]:
+    """Category plugin bindings; semantic kind only where the exact plugin identity is recovered."""
+    category_id = int(category["category_id"])
+    bindings = []
+    for entry in sorted(
+        (row for row in parser.extract_master_dlls(master.sections[19]) if row.category_id == category_id),
+        key=lambda row: (row.dll_role_id, row.dll_name.casefold()),
+    ):
+        profile_name, _, status = _semantic_profile_for_plugin(bin_root / entry.dll_name, entry.dll_role_id)
+        bindings.append({
+            "role": entry.dll_role_id,
+            "dll": entry.dll_name,
+            "semantic_kind": _semantic_kind_for_profile(profile_name),
+            "semantic_status": status,
+        })
+    return bindings
+
+
+def _registry_selector_rows(parser: DDBParser, master: Any, category_id: int) -> list[dict[str, Any]]:
+    """Every resolved (selector -> CommSet/CommFrame/send/mask/check) row for one category."""
+    rows = _master_frame_rows(parser, master, category_id)
+    return [
+        {
+            "selector": row["selector"],
+            "frame": row["comm_frame_id"],
+            "comm_set": row["comm_set"],
+            "send": row["send"]["bytes"],
+            "mask": row["receive_mask"]["bytes"],
+            "check": row["receive_check"]["bytes"],
+        }
+        for row in sorted(rows, key=lambda row: (int(row["selector"], 16), row["comm_frame_id"]))
+    ]
+
+
+def _registry_function_hierarchy(
+    parser: DDBParser,
+    master: Any,
+    strings: StringDataBase,
+    category_id: int,
+) -> list[dict[str, Any]]:
+    """Master type-26 function rows joined with type-27 detail keys per category."""
+    detail_ids: dict[int, list[int]] = {}
+    for entry in parser.extract_master_function_details(master.sections[27]):
+        if entry.category_id == category_id:
+            detail_ids.setdefault(entry.function_id, []).append(entry.detail_id)
+    return [
+        {
+            "function_id": entry.function_id,
+            "sort_key": entry.sort_key,
+            "name": strings.get_string(entry.name_string_index),
+            "description": strings.get_string(entry.description_string_index),
+            "detail_ids": sorted(detail_ids.get(entry.function_id, [])),
+        }
+        for entry in sorted(
+            (row for row in parser.extract_master_functions(master.sections[26]) if row.category_id == category_id),
+            key=lambda row: (row.sort_key, row.function_id),
+        )
+    ]
+
+
+def _registry_data_list(db: Any, strings: StringDataBase) -> dict[str, Any]:
+    """Data List display order from the consumer-pinned monitor sort key."""
+    records: list[Any] = []
+    for table in (62, 157):
+        section = db.sections.get(table)
+        if section is not None:
+            records.extend(extract_monitor_records(section))
+    def identity(record: Any) -> tuple[Any, ...]:
+        return (
+            strings.get_string(record.name_string_index),
+            record.primary_did,
+            record.alternate_did,
+            record.bit_start,
+            record.bit_end,
+        )
+
+    by_identity: dict[tuple[Any, ...], Any] = {}
+    for record in sorted(records, key=lambda record: (record.sort_key, record.table, record.index)):
+        by_identity.setdefault(identity(record), record)
+    ordered = sorted(by_identity.values(), key=lambda record: (record.sort_key, record.table, record.index))
+    return {
+        "tables": sorted({record.table for record in records}),
+        "record_counts": {
+            str(table): sum(1 for record in records if record.table == table)
+            for table in sorted({record.table for record in records})
+        },
+        "row_count": len(ordered),
+        "display_order": (
+            "type-62/157 sort key (u16 record +0x30, +0x10 on 80-byte rows), then table/record; "
+            "rows deduplicated by (name, did, alternate did, bit range), lowest ordering wins"
+        ),
+        "rows": [
+            {
+                "monitor_key": record.monitor_key,
+                "sort_key": record.sort_key,
+                "did": f"0x{record.primary_did:04X}",
+                "bit_start": record.bit_start,
+                "bit_end": record.bit_end,
+                "name": strings.get_string(record.name_string_index) or "",
+            }
+            for record in ordered
+        ],
+    }
+
+
+def _registry_active_test_groups(parser: DDBParser, category: dict[str, Any], db_root: Path) -> dict[str, Any]:
+    """Compact type-33 multi-control Active-Test group geometry."""
+    plan = _multi_active_test_category_plan(parser, category, db_root)
+    return {
+        "group_count": plan["group_count"],
+        "membership_count": plan["membership_count"],
+        "groups": [
+            {
+                "group_id": group["group_id"],
+                "members": [member["member_active_test_id"] for member in group["members"]],
+            }
+            for group in plan["groups"]
+        ],
+        "boundary": (
+            "type-33 rows are static multi-control expansion; each member still follows its type-68 "
+            "initialization path via role 0x63"
+            if plan["group_count"]
+            else "category has no type-33 multi-control membership rows"
+        ),
+    }
+
+
+def _registry_request_row(
+    parser: DDBParser,
+    master: Any,
+    category_id: int,
+    selector: int,
+    name: str,
+) -> dict[str, Any]:
+    matches = _master_frame_rows(parser, master, category_id, selector)
+    if len(matches) != 1:
+        return {"name": name, "selector": f"0x{selector:X}", "resolved": False}
+    row = matches[0]
+    comm_set = row["comm_set_metadata"]
+    return {
+        "name": name,
+        "selector": row["selector"],
+        "send": row["send"]["bytes"],
+        "mask": row["receive_mask"]["bytes"],
+        "check": row["receive_check"]["bytes"],
+        "comm_set": row["comm_set"],
+        "receive_timeout": comm_set["receive_timeout"],
+        "retry_count": comm_set["retry_count"],
+        "session_requirement": _session_requirement(row["send"]["bytes"]),
+        "resolved": True,
+    }
+
+
+def _registry_command_rows(
+    parser: DDBParser,
+    master: Any,
+    category: dict[str, Any],
+    bin_root: Path,
+    bindings: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Wire-request command plans for roles whose exact plugin semantics are recovered."""
+    category_id = int(category["category_id"])
+    rows: list[dict[str, Any]] = []
+    for binding in bindings:
+        kind = binding["semantic_kind"]
+        if kind is None:
+            continue
+        _, profile, _ = _semantic_profile_for_plugin(bin_root / binding["dll"], binding["role"])
+        if kind == "dtc_clear":
+            control_flow = profile["control_flow"]
+            timers = [row for row in _master_timer_rows(parser, master, category_id) if row["timer_id"] == 1]
+            rows.append({
+                "role": binding["role"],
+                "kind": kind,
+                "requests": [
+                    _registry_request_row(parser, master, category_id, 0x1, "primary"),
+                    _registry_request_row(parser, master, category_id, 0x102, "fallback"),
+                ],
+                "timer": {"timer_id": 1, "delay_ms": timers[0]["delay_ms"]} if len(timers) == 1 else None,
+                "flow": {
+                    "primary_selector": control_flow["primary_selector"],
+                    "fallback_selector": control_flow["fallback_selector"],
+                    "fallback_error_codes_when_function_gate_set": control_flow["fallback_error_codes_when_function_gate_set"],
+                    "success": control_flow["success"],
+                },
+                "execution": "plan_only",
+            })
+        elif kind == "generic_cid":
+            rows.append({
+                "role": binding["role"],
+                "kind": kind,
+                "requests": [_registry_request_row(parser, master, category_id, 0xDC, "request")],
+                "response_model": profile["response_model"],
+                "execution": "plan_only",
+            })
+        elif kind == "p5_active_test_init":
+            initial_read = profile["init_model"]["initial_read"]
+            rows.append({
+                "role": binding["role"],
+                "kind": kind,
+                "initial_read": {
+                    "selector": initial_read["selector"],
+                    "base_request": initial_read["base_request"],
+                    "did_substitution": (
+                        "request bytes 1/2 take the selected type-68 initial-read DID before send; "
+                        "per-test requests are on each direct active-test row"
+                    ),
+                    "positive_check": initial_read["base_positive_check"],
+                },
+                "execution": "plan_only",
+            })
+    return sorted(rows, key=lambda row: row["role"])
+
+
+def _session_requirement(send_hex: str) -> str:
+    """Classify a request against the recovered P5 first-byte session classifier.
+
+    Request byte 0x01..0x0F is class 1 (default-session path); byte >= 0x10 is
+    class 2, which the current-P5 host serves from extended session.
+    """
+    return "extended" if send_hex[:2].ljust(2, "0") >= "10" else "default"
+
+
+def _registry_session_control(
+    parser: DDBParser,
+    master: Any,
+    categories: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Current-P5 session lifecycle (TMS-077) with per-category resolved frames."""
+    lifecycle = _execution_model()["gtsplus_continuity"]["dll_role_schema"]["execution_lifecycle"]
+    transport = lifecycle["transport_and_session"]
+    auto = transport["p5_automatic_session_judgment"]
+    uds2 = auto["uds_class_2"]
+
+    def frame_row(category_id: int, selector: int) -> dict[str, Any] | None:
+        matches = _master_frame_rows(parser, master, category_id, selector)
+        if len(matches) != 1:
+            return None
+        row = matches[0]
+        return {
+            "selector": row["selector"],
+            "frame": row["comm_frame_id"],
+            "send": row["send"]["bytes"],
+            "mask": row["receive_mask"]["bytes"],
+            "check": row["receive_check"]["bytes"],
+            "comm_set": row["comm_set"],
+        }
+
+    per_category = {}
+    for category in categories:
+        category_id = int(category["category_id"])
+        default = frame_row(category_id, 0xD1)
+        extended = frame_row(category_id, 0xD2)
+        keepalive = frame_row(category_id, 0xDD)
+        for row, expected in ((default, "1001"), (extended, "1003"), (keepalive, "22f186")):
+            if row is not None and row["send"] != expected:
+                raise ValueError(
+                    f"category {category_id} session frame {row['selector']} drift: {row['send']} != {expected}"
+                )
+        per_category[str(category_id)] = {
+            "generation_low5": f"0x{int(category['generation']) & 0x1F:02X}",
+            "default_session": default,
+            "extended_session": extended,
+            "keepalive": keepalive,
+        }
+
+    judgment = uds2["session_judgment_flag"]
+    test_present = transport["test_present"]
+    if uds2["phase5_session_sender"]["current_camry_wire_sequence"] != ["10 01", "10 03"]:
+        raise ValueError("current-P5 session enter sequence drifted from the pinned wire proof")
+    wire_sequence = ["1001", "1003"]
+    return {
+        "generation": "current-p5",
+        "default_session": 1,
+        "extended_session": 3,
+        "enter_sequence": wire_sequence,
+        "return_default": "1001",
+        "keepalive": {
+            "kind": "session_did_poll",
+            "did": "0xF186",
+            "request": "22f186",
+            "positive_prefix": "62f186",
+            "interval_s": round(test_present["cadence_ms"] / 1000, 3),
+            "selector": "0xDD",
+            "mask": "ff",
+            "check": "62",
+            "meaning": test_present["meaning"],
+            "session_state": transport["session_state"],
+        },
+        "category_gate": auto["category_gate"],
+        "request_classifier": auto["classifier"]["rule"],
+        "class_1_default": auto["class_1_default"],
+        "class_2_normal_path": uds2["normal_path"],
+        "session_judgment_exception": {
+            "role": "documentation",
+            "runtime_default": False,
+            "flag": judgment["field"],
+            "setter": judgment["setter"],
+            "clearer": judgment["clearer"],
+            "behavior": judgment["phase5_alternate_behavior"],
+            "external_importers": judgment["external_importers"],
+        },
+        "wire_proven_categories": sorted(int(key) for key in auto["categories"]),
+        "per_category": per_category,
+        "boundary": (
+            "frames are resolved per category from the current master; the host lifecycle behavior "
+            "(generation gate, classifier, cadence, session-judgment exception) is instruction-proven "
+            "for the wire-proven categories only; session_judgment_exception is documentation, "
+            "not a runtime default"
+        ),
+    }
+
+
+def _registry_utilities(parser: DDBParser, master: Any) -> dict[str, Any]:
+    """Compact runtime utility surface over the already-recovered generic families."""
+    generic_roles = _execution_model()["gtsplus_continuity"]["dll_role_schema"]["execution_lifecycle"][
+        "transport_and_session"
+    ]["generic_roles"]
+    bindings = []
+    by_role: dict[int, list[str]] = {}
+    for entry in parser.extract_master_dlls(master.sections[19]):
+        if entry.category_id == 0:
+            by_role.setdefault(entry.dll_role_id, []).append(entry.dll_name)
+    for role in sorted(GENERIC_UTILITY_ROLE_KINDS):
+        dlls = sorted(set(by_role.get(role, [])))
+        if len(dlls) != 1:
+            raise ValueError(f"generic utility role 0x{role:X} resolved {len(dlls)} master bindings: {dlls}")
+        pinned = generic_roles.get(f"0x{role:X}")
+        if pinned is not None and pinned["plugin"] != dlls[0]:
+            raise ValueError(
+                f"generic utility role 0x{role:X} drift: master {dlls[0]} vs execution model {pinned['plugin']}"
+            )
+        bindings.append({"role": role, "dll": dlls[0], "semantic_kind": GENERIC_UTILITY_ROLE_KINDS[role]})
+    return {
+        "scope": (
+            "recovered generic (category-0) command families only; every other generic role is "
+            "intentionally absent rather than classified"
+        ),
+        "bindings": bindings,
+        "routine_control": {
+            "service": "0x31",
+            "positive_response": "0x71",
+            "start_selector": "0xD5",
+            "stop_selector": "0xD6",
+            "result_selector": "0xD7",
+            "session_requirement": "extended",
+            "request_template": (
+                "31 <01 start|02 stop|03 result> FF FF; template bytes 2/3 are replaced by the "
+                "selected type-71 routine ID; per-category frames are in catalogs.<id>.selectors"
+            ),
+        },
+        "io_control": {
+            "service": "0x2F",
+            "positive_response": "0x6F",
+            "start_selector": "0x9D",
+            "stop_selector": "0x64",
+            "session_requirement": "extended",
+            "request_template": (
+                "2F FF FF <03 shortTermAdjustment|00 returnControlToECU>; template bytes 1/2 are "
+                "replaced by the control DID; the trailing value/control-enable payload length is "
+                "runtime DataIdLengthList state"
+            ),
+        },
+        "utility_list_source": (
+            "per-ECU supported-function menu is catalogs.<id>.functions (master type-26/27 via "
+            "GetEcuFuncList role 0x4); names are not recovered for these categories"
+        ),
+        "boundary": (
+            "list/plan surface only; no execution authorization, SecurityAccess, session escalation, "
+            "flash, or write workflow is included"
+        ),
+    }
+
+
 def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str = "Gen") -> dict[str, Any]:
     gts_root = _resolve_gts_root(gts_root)
     db_root = _db_root(gts_root, region, family)
@@ -2635,18 +3080,55 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
     })
     catalogs: dict[str, Any] = {}
     source_files = [master_path, strings_path, dtc_clear_path, nrtd_p5_path, eps_identity_path, EXECUTION_MODEL]
+    bin_root = gts_root / "bin"
+    resolved_categories = []
     for category_id in known_categories:
         category = _resolve_master_category(parser, master, strings, str(category_id))
+        resolved_categories.append(category)
         db_path = db_root / str(category["database"])
         db = parser.parse_ecu_db(db_path)
         source_files.append(db_path)
         monitor_rows = _monitor_rows(db, strings, db_path.name)
+        bindings = _registry_role_bindings(parser, master, category, bin_root)
         catalogs[str(category_id)] = {
             "category": category,
             "dids": _registry_did_catalog(monitor_rows),
             "dtcs": _registry_dtc_catalog(parser, db, strings, db_path.name),
             "active_tests": _registry_active_tests(parser, master, category, db_root, strings, monitor_rows),
+            "functions": _registry_function_hierarchy(parser, master, strings, category_id),
+            "plugins": bindings,
+            "commands": _registry_command_rows(parser, master, category, bin_root, bindings),
+            "selectors": _registry_selector_rows(parser, master, category_id),
+            "data_list": _registry_data_list(db, strings),
+            "active_test_groups": _registry_active_test_groups(parser, category, db_root),
         }
+    profile["catalog_category_ids"] = known_categories
+    profile["session_control"] = _registry_session_control(parser, master, resolved_categories)
+
+    referenced_comm_sets = {
+        int(row["comm_set"])
+        for catalog in catalogs.values()
+        for row in catalog["selectors"]
+    }
+    for session_row in profile["session_control"]["per_category"].values():
+        for frame_key in ("default_session", "extended_session", "keepalive"):
+            frame = session_row[frame_key]
+            if frame is not None:
+                referenced_comm_sets.add(int(frame["comm_set"]))
+    referenced_comm_sets = sorted(referenced_comm_sets)
+    commsets = {}
+    for row in _master_comm_set_rows(parser, master):
+        if row["comm_set_id"] not in referenced_comm_sets:
+            continue
+        commsets[str(row["comm_set_id"])] = {
+            "send_parameter": row["send_parameter"],
+            "receive_timeout": row["receive_timeout"],
+            "retry_count": row["retry_count"],
+            "exception_handler_id": row["exception_handler_id"],
+            "exception_handler_flag": row["exception_handler_flag"],
+        }
+    if sorted(int(key) for key in commsets) != referenced_comm_sets:
+        raise ValueError("referenced CommSet ids did not all resolve in the master table")
 
     mode04 = dtc_clear["legislated_obd"]
     profile["dtc_clear"] = {
@@ -2682,7 +3164,7 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
             ecu["observed_identity"] = identity
 
     return {
-        "schema": "toyota-diagnostics-registry-v3",
+        "schema": "toyota-diagnostics-registry-v4",
         "profile": profile,
         "decoders": {
             "p5-linear-msb0-v1": {
@@ -2696,6 +3178,16 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
                 "pattern_lookup": "match converted_integer before decimal rendering",
             }
         },
+        "commsets": {
+            "boundary": (
+                "receive_timeout feeds CheckAndConvertRcvTimeOut before Receive; retry_count bounds "
+                "retransmission attempts; send_parameter reaches SendInt argument 4, which the common "
+                "CAN SendProc does not consume"
+            ),
+            "rows": commsets,
+        },
+        "utilities": _registry_utilities(parser, master),
+        "function_names": REGISTRY_FUNCTION_NAME_BOUNDARY,
         "catalogs": catalogs,
         "source_identity": {
             key: {
@@ -2708,8 +3200,10 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
             )
         },
         "boundary": (
-            "Clean derived diagnostic metadata only: no Toyota binaries are embedded. Active Tests are static plans only; "
-            "the registry intentionally contains no execution authorization, session escalation, SecurityAccess, flash, or write workflow."
+            "Clean derived diagnostic metadata only: no Toyota binaries are embedded. Active Tests are static plans; "
+            "execution=executable only means the fixed request geometry is complete, not that the registry authorizes "
+            "execution: it intentionally contains no execution authorization, session escalation, SecurityAccess, "
+            "flash, or write workflow."
         ),
     }
 

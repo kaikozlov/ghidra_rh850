@@ -34,7 +34,7 @@ def main() -> int:
 
     profile = actual["profile"]
     check("schema and exact Camry profile are pinned",
-          actual["schema"] == "toyota-diagnostics-registry-v3"
+          actual["schema"] == "toyota-diagnostics-registry-v4"
           and profile["profile"] == "camry-2026-f33"
           and profile["panda_bus"] == 0)
     decoder = actual["decoders"]["p5-linear-msb0-v1"]
@@ -181,22 +181,147 @@ def main() -> int:
           and hv_test["execution"] == "plan_only")
 
     frc_test = next(row for row in actual["catalogs"]["498"]["active_tests"] if row["id"] == 0xA429)
-    check("FRC LTA Steering Vibration is exact fixed RID 0x1588 plan-only RoutineControl",
+    check("FRC LTA Steering Vibration is exact fixed RID 0x1588 executable RoutineControl geometry",
           frc_test["name"] == "LTA Steering Vibration"
           and frc_test["routine_id"] == 0x1588
           and frc_test["fixed_request"] is True
           and frc_test["start_static"] == "31011588"
           and frc_test["stop_static"] == "31021588"
           and frc_test["result_static"] == "31031588"
-          and frc_test["execution"] == "plan_only")
+          and frc_test["session_requirement"] == "extended"
+          and frc_test["execution"] == "executable")
 
     active = [row for catalog in actual["catalogs"].values() for row in catalog["active_tests"]]
-    check("closed and ambiguous Active Tests are both represented without guessing",
-          sum(row["execution"] == "plan_only" for row in active) == 402
-          and sum(row["execution"] == "unresolved_static_plan" for row in active) == 26)
+    check("Active Tests are graded by fixed-geometry sufficiency without guessing",
+          sum(row["execution"] == "executable" for row in active) == 41
+          and sum(row["execution"] == "plan_only" for row in active) == 361
+          and sum(row["execution"] == "unresolved_static_plan" for row in active) == 26
+          and all(row["execution"] != "executable" for row in active if row["kind"] == "direct"))
     check("registry contains derived metadata only and forbids execution authorization",
           "no Toyota binaries" in actual["boundary"]
-          and "Active Tests are static plans only" in actual["boundary"])
+          and "no execution authorization" in actual["boundary"]
+          and "no execution authorization" in actual["utilities"]["boundary"])
+
+    # ---- schema v4: execution model, function hierarchy, utilities ----
+    hv = actual["catalogs"]["397"]
+    check("v3 loader surface is preserved behind the v4 additions",
+          all(key in hv for key in ("category", "dids", "dtcs", "active_tests"))
+          and hv_test["execution"] == "plan_only"
+          and hv_test["start_prefix"] == "2f280103")
+    check("initial-read request is materialized per direct Active Test",
+          hv_test["initial_read"] == {"mode": 0, "selector": "0xCA", "request": "222801", "check": "62"}
+          and hv_test["session_requirement"] == "extended")
+
+    session = profile["session_control"]
+    check("session_control carries the runtime current-P5 contract",
+          session["generation"] == "current-p5"
+          and session["default_session"] == 1
+          and session["extended_session"] == 3
+          and session["enter_sequence"] == ["1001", "1003"]
+          and session["return_default"] == "1001"
+          and session["keepalive"] == {
+              "kind": "session_did_poll", "did": "0xF186", "request": "22f186",
+              "positive_prefix": "62f186", "interval_s": 2.0,
+          } | {key: session["keepalive"][key] for key in ("selector", "mask", "check", "meaning", "session_state")})
+    check("session-judgment exception stays documentation, not runtime default",
+          session["session_judgment_exception"]["runtime_default"] is False
+          and session["session_judgment_exception"]["flag"] == "CCommFrameCtrl +0x398"
+          and session["wire_proven_categories"] == [397, 435, 498])
+    check("every catalog category resolves identical D1/D2/0xDD session frames",
+          set(session["per_category"]) == {str(cid) for cid in profile["catalog_category_ids"]}
+          and all(row["generation_low5"] == "0x14"
+                  and row["default_session"]["send"] == "1001"
+                  and row["extended_session"]["send"] == "1003"
+                  and row["keepalive"]["send"] == "22f186"
+                  and row["keepalive"]["check"] == "62"
+                  for row in session["per_category"].values()))
+
+    check("referenced CommSet timeout/retry rows are carried exactly",
+          actual["commsets"]["rows"] == {
+              "1": {
+                  "send_parameter": 1000, "receive_timeout": 1020, "retry_count": 1,
+                  "exception_handler_id": 0, "exception_handler_flag": 0,
+              }
+          }
+          and "CheckAndConvertRcvTimeOut" in actual["commsets"]["boundary"])
+
+    hv_selectors = {row["selector"]: row for row in hv["selectors"]}
+    check("resolved selector frames include the recovered executor templates",
+          len(hv["selectors"]) == 42
+          and hv_selectors["0xDD"] == {"selector": "0xDD", "frame": "0x2B55", "comm_set": 1,
+                                       "send": "22f186", "mask": "ff", "check": "62"}
+          and hv_selectors["0x9D"]["send"] == "2fffff03" and hv_selectors["0x9D"]["check"] == "6f"
+          and hv_selectors["0x64"]["send"] == "2fffff00"
+          and hv_selectors["0xD5"]["send"] == "3101ffff" and hv_selectors["0xD7"]["check"] == "7103")
+
+    hv_plugins = {row["role"]: row for row in hv["plugins"]}
+    check("role bindings carry recovered kinds and fail closed elsewhere",
+          hv_plugins[0x19]["dll"] == "DelDiagCodeP4.dll"
+          and hv_plugins[0x19]["semantic_kind"] == "dtc_clear"
+          and hv_plugins[0x41]["semantic_kind"] == "p5_signal_info"
+          and hv_plugins[0x29]["semantic_kind"] is None
+          and hv_plugins[0x29]["semantic_status"] == "plugin_semantics_unrecovered_for_identity")
+    emps_plugins = {row["role"]: row for row in actual["catalogs"]["405"]["plugins"]}
+    check("EMPS binds the exactly-recovered 0x52 CID plugin",
+          emps_plugins[0x52]["dll"] == "GetCID_SID22_DT.dll"
+          and emps_plugins[0x52]["semantic_kind"] == "generic_cid")
+
+    hv_commands = {row["role"]: row for row in hv["commands"]}
+    check("DTC-clear command carries both selector paths with per-request session class",
+          hv_commands[0x19]["kind"] == "dtc_clear"
+          and hv_commands[0x19]["requests"][0] == {
+              "name": "primary", "selector": "0x1", "send": "04", "mask": "", "check": "44",
+              "comm_set": 1, "receive_timeout": 1020, "retry_count": 1,
+              "session_requirement": "default", "resolved": True,
+          }
+          and hv_commands[0x19]["requests"][1]["send"] == "14ffffff"
+          and hv_commands[0x19]["requests"][1]["session_requirement"] == "extended"
+          and hv_commands[0x19]["timer"] == {"timer_id": 1, "delay_ms": 0}
+          and len(hv_commands[0x19]["flow"]["fallback_error_codes_when_function_gate_set"]) == 10)
+    emps_cid = {row["role"]: row for row in actual["catalogs"]["405"]["commands"]}[0x52]
+    check("CID response model is carried where the exact plugin identity is recovered",
+          emps_cid["requests"][0]["selector"] == "0xDC"
+          and emps_cid["requests"][0]["check"] == "62f181"
+          and emps_cid["response_model"]["payload_offset"] == 4
+          and emps_cid["response_model"]["record_size"] == 16)
+
+    hv_functions = {row["function_id"]: row for row in hv["functions"]}
+    check("supported-function hierarchy joins type-26 functions to type-27 details",
+          len(hv["functions"]) == 9
+          and sum(len(row["detail_ids"]) for row in hv["functions"]) == 18
+          and sorted(hv_functions) == [2, 3, 4, 10, 28, 29, 30, 32, 37]
+          and all(row["name"] is None and row["description"] is None for row in hv["functions"])
+          and "OEM function names are not" in actual["function_names"])
+
+    hv_data_list = hv["data_list"]
+    check("Data List display order is the consumer-pinned monitor sort key",
+          hv_data_list["record_counts"] == {"157": 1448, "62": 1464}
+          and hv_data_list["row_count"] == 1457
+          and hv_data_list["rows"][0] == {"monitor_key": 662, "sort_key": 0, "did": "0x0103",
+                                          "bit_start": 8, "bit_end": 31,
+                                          "name": "Total Distance Traveled"}
+          and [row["sort_key"] for row in hv_data_list["rows"]]
+          == sorted(row["sort_key"] for row in hv_data_list["rows"]))
+
+    engine_groups = actual["catalogs"]["372"]["active_test_groups"]
+    check("multi-control Active-Test group geometry is carried without manufacturing groups",
+          engine_groups["group_count"] == 5 and engine_groups["membership_count"] == 10
+          and engine_groups["groups"][0] == {"group_id": 76, "members": [77, 78]}
+          and actual["catalogs"]["397"]["active_test_groups"]["group_count"] == 0)
+
+    utilities = actual["utilities"]
+    check("utility surface is the recovered generic families only, others absent",
+          len(utilities["bindings"]) == 10
+          and {row["semantic_kind"] for row in utilities["bindings"]} == {
+              "test_present_start", "test_present_stop", "check_mode_frame_get",
+              "check_mode_frame_confirm", "active_test_start", "routine_active_test_init",
+              "routine_active_test_signal_info", "set_default_session", "move_session_cgwd",
+              "single_routine_active_test",
+          }
+          and {row["role"] for row in utilities["bindings"]}
+          == {0x3A, 0x3B, 0x61, 0x62, 0xB0, 0xAE, 0xAF, 0xBF, 0xCA, 0xD4}
+          and utilities["routine_control"]["session_requirement"] == "extended"
+          and utilities["io_control"]["session_requirement"] == "extended")
 
     print(f"\n== RESULT: {passed} passed, {failed} failed ==")
     return 1 if failed else 0

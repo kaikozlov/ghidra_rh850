@@ -320,23 +320,70 @@ history: EPS F181 `8965F3307000` + `8A3113303100` / F18C
 `8954147040CFC1800985`. Each identity row records Panda bus1 + ELM327 param1 as the
 observation route and explicitly points to current post-repin Panda bus0 diagnostics.
 
-The current registry contains 428 Active-Test candidates. **402** materialize through
-the recovered current P5 executors into read-only plans; **26** remain explicitly
-`unresolved_static_plan` because their current database rows are ambiguous. The exporter
-does not pick a row heuristically. Representative closed witnesses are Hybrid Active
-Test `0x0001` (`0x2F`, DID `0x2801`, start prefix `2F280103`, return-control prefix
-`2F280100`) and FRC `0xA429` **LTA Steering Vibration** (RID `0x1588`, fixed requests
+The current registry contains 428 Active-Test candidates. **41** routine tests are
+`executable` in the narrow sense that their fixed request geometry is complete
+(all four type-71 payload sources zero, so start/stop/result requests are fully
+materialized); **361** remain `plan_only` because a runtime parameter (typically the
+direct-executor DataIdLengthList payload length) or an explicit type-71 variable is
+required, and **26** remain `unresolved_static_plan` because their current database
+rows are ambiguous — the exporter does not pick a row heuristically. Representative
+witnesses are Hybrid Active Test `0x0001` (`0x2F`, DID `0x2801`, start prefix
+`2F280103`, return-control prefix `2F280100`, initial read `222801` via selector
+`0xCA`) and FRC `0xA429` **LTA Steering Vibration** (RID `0x1588`, fixed requests
 `31011588` / `31021588` / `31031588`).
 
-The registry is deliberately metadata, not authorization. Active Tests are plan-only;
-it contains no runtime command to execute them, no SecurityAccess secret, no session
-escalation policy, and no flash/write workflow. Live support state and any outer
-session/authentication requirements remain runtime questions. The generated artifact
-also records SHA-256 identities for every consumed GTS+/derived input so a changed
-corpus cannot silently reuse old plans. Source keys are logical and checkout-independent:
-GTS inputs use `gtsplus/<region>/DB/<family>/...` while tracked evidence remains
-repository-relative, so an isolated worktree cannot change registry bytes merely because
-the corpus is mounted at a different path.
+Registry schema **v4** compiles the recovered current-P5 execution model into the same
+clean artifact (all v3 sections are preserved unchanged in shape):
+
+- `profile.session_control` — the runtime current-P5 session contract from TMS-077:
+  `generation: current-p5`, default session `1` / extended `3`, enter sequence
+  `["1001","1003"]`, `return_default: "1001"`, and the keepalive poll
+  `{kind: session_did_poll, did: 0xF186, request 22f186, positive_prefix 62f186,
+  interval_s 2.0}`. The narrow session-judgment exception (`CCommFrameCtrl +0x398`
+  one-shot no-wire D1/D2) is retained as documentation metadata with
+  `runtime_default: false`, never as a runtime default. All eight catalog categories
+  resolve identical D1/D2/0xDD frames from the master; the host-side lifecycle
+  behavior is instruction-proven for 397/435/498 and the boundary says so.
+- `catalogs.<id>.plugins` — every category role/plugin binding with a
+  `semantic_kind` only where the exact plugin SHA-256 matches a recovered profile
+  (for example 0x19 `dtc_clear`, 0x52 `generic_cid`, 0x08 `p5_active_test_init`);
+  everything else stays `null`/`plugin_semantics_unrecovered_for_identity`.
+- `catalogs.<id>.commands` — wire-request plans for the recovered command roles:
+  DTC clear primary/fallback selector paths with per-request CommSet timeout/retry
+  and a `session_requirement` derived from the recovered first-byte session
+  classifier (`04` → default, `14ffffff`/`22`/`2F`/`31` → extended), the EMPS
+  `0x52` CID response model (payload offset 4, 16-byte records), and the role-0x08
+  initial-read template.
+- `catalogs.<id>.selectors` — every resolved `(category, selector)` frame as exact
+  send / receive-mask / receive-check bytes with its CommSet reference, plus
+  top-level `commsets` rows for the CommSets actually referenced.
+- `catalogs.<id>.functions` — the master type-26/type-27 supported-function
+  hierarchy (function/sort/detail keys) via `GetEcuFuncList` classes `0x11A/0x11B`;
+  these categories carry string index 0, so OEM function names are explicitly not
+  recovered (`function_names` states this).
+- `catalogs.<id>.data_list` — Data List display order from the consumer-pinned
+  type-62/157 sort key, deduplicated by signal identity; DID signal rows also gain
+  `data_range`/`graph_range` display metadata.
+- `catalogs.<id>.active_test_groups` — type-33 multi-control group geometry
+  (presently only Engine 372: 5 groups / 10 memberships).
+- `utilities` — a deliberately compact runtime `utility list/plan` surface: only the
+  recovered generic category-0 families (TestPresent start/stop, check-mode
+  get/confirm, set-default-session, move-session-CGWDK, and the four routine
+  Active-Test wrappers), the RoutineControl `31 01/02/03 FF FF` and IOControl
+  `2F FF FF 03/00` templates with their substitution grammar, and pointers to the
+  per-category function menus. Unrecovered generic roles are absent by design, not
+  classified.
+
+The registry is deliberately metadata, not authorization. `execution: executable`
+only certifies complete fixed request geometry; the registry still contains no
+runtime command to execute anything, no SecurityAccess secret, no session escalation
+policy beyond the recovered lifecycle description, and no flash/write workflow. Live
+support state and any outer session/authentication requirements remain runtime
+questions. The generated artifact also records SHA-256 identities for every consumed
+GTS+/derived input so a changed corpus cannot silently reuse old plans. Source keys
+are logical and checkout-independent: GTS inputs use `gtsplus/<region>/DB/<family>/...`
+while tracked evidence remains repository-relative, so an isolated worktree cannot
+change registry bytes merely because the corpus is mounted at a different path.
 
 ## Source selection
 
@@ -374,6 +421,6 @@ image-bound extractors/tests before recording them as firmware findings.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [TMS-064](../reference/index.md#finding-tms-064), [TMS-074](../reference/index.md#finding-tms-074), [TMS-075](../reference/index.md#finding-tms-075), [TMS-076](../reference/index.md#finding-tms-076)
+- Findings with this document as canonical home: [TMS-064](../reference/index.md#finding-tms-064), [TMS-074](../reference/index.md#finding-tms-074), [TMS-075](../reference/index.md#finding-tms-075), [TMS-076](../reference/index.md#finding-tms-076), [TMS-078](../reference/index.md#finding-tms-078)
 - Corrections with this document as canonical home: —
 <!-- knowledge-cross-references:end -->

@@ -35,6 +35,7 @@ class MonitorRecord:
     pattern_display_key: int
     primary_did: int
     alternate_did: int
+    sort_key: int
     raw: bytes
 
 
@@ -149,6 +150,7 @@ def extract_monitor_records(section: Any) -> list[MonitorRecord]:
             pattern_display_key=u16(0x32 + shift),
             primary_did=u16(0x36 + shift),
             alternate_did=u16(0x38 + shift),
+            sort_key=u16(0x30 + shift),
             raw=raw,
         ))
     return out
@@ -249,6 +251,7 @@ def monitor_rows(
                 "pattern_display_key": record.pattern_display_key,
                 "primary_did": record.primary_did,
                 "alternate_did": record.alternate_did,
+                "sort_key": record.sort_key,
                 "raw": record.raw,
             }
             if include_signal_info:
