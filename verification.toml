@@ -1242,6 +1242,15 @@ paths = [
   "docs/status/PRIORITIES.md",
 ]
 
+[suite.camry_f152633k0000_brake_acquisition]
+tests = ["tests/verify_camry_f152633k0000_brake_acquisition.py"]
+requires_external = ["cuw_reference_corpus", "gtsplus"]
+modes = ["local"]
+oracle = "independent_external_artifact"
+paths = [
+  "docs/variants/camry-2026-live-baseline.md",
+]
+
 [suite.techstream_tis_calibration_acquisition]
 tests = ["tests/verify_techstream_tis_calibration_acquisition.py"]
 requires_external = ["techstream_v18"]

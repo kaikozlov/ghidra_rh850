@@ -321,6 +321,17 @@ IDs from this negative. Same-image code also fixes `8A3113303100` as the F181
 software/compatibility record: callback `0x4FA26`, startup check `0x637EE -> 0x62D5E`,
 and separate DID2032 callback `0x4F9DE` are all exact and verified.
 
+**VAR-069 exact Brake producer acquisition:** the producer search is now narrowed to
+same-car category-435 identities `F152633K0000` / `8954147040` at physical `0x7B0`.
+The complete pinned 26-CUW raw descriptor census has zero `07B0` and zero exact-identity
+matches. `T-0051-26` is the only local Camry package but is `0724` Engine/MG, and the
+tracked 24TC01 Brake campaign is Corolla-only. Do not scan those payloads as Brake code
+or invent an F181-derived download URL. The acquisition route is the authenticated
+Toyota/TIS ECU-supply-change query for the exact VIN with `ecuAssyNo=8954147040` and
+`baseSwNo=[F152633K0000]`; only a returned, provenance-pinned `DiagID=07B0` package can
+start producer analysis. Until then the B6 Tx descriptor, signing/freshness, upstream
+FRC transform and enable/arming conditions are acquisition-blocked, not negative.
+
 COM-013 closes much more of the whole-vehicle side than the earlier EPS-only
 roadmap. TSS generation and SecOC/TSK are **orthogonal** (CORR-108). The public
 2023 route already proved partial state continuity; Span's newly retained July-29

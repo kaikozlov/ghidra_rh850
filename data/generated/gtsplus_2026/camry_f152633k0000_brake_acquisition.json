@@ -1,0 +1,147 @@
+{
+  "campaign_metadata": {
+    "boundary": "The tracked 24TC01 Brake campaign is Corolla-only and shares only broad F1526-family vocabulary. It is not an exact Camry package route and none of its CIDs may be transferred to F152633K0000.",
+    "exact_camry_brake_campaign_found_tracked": false,
+    "related_only": {
+      "campaign": "24TC01",
+      "published_cids": [
+        "F152612A5100",
+        "F152612A5200",
+        "F152612A5300",
+        "F152612A5400"
+      ],
+      "vehicle": [
+        "Certain 2023 Model Corolla"
+      ]
+    }
+  },
+  "exact_target": {
+    "category_id": 435,
+    "database": "ABS_P5.ddb",
+    "ecu_domain": "Brake/EPB",
+    "ecu_part_0105": "8954147040",
+    "f181_record_count": 1,
+    "f181_software_part": "F152633K0000",
+    "f18c_serial": "8954147040CFC1800985",
+    "identity_source": "tracked read-only NRTD response",
+    "physical_request": "0x7B0",
+    "physical_response": "0x7B8",
+    "vehicle": "maintainer 2026 Toyota Camry Hybrid"
+  },
+  "highest_confidence_acquisition_route": {
+    "accepted_package_checks": [
+      "Toyota/TIS result is returned for the exact VIN + ecuAssyNo + baseSwNo query",
+      "CUW attach descriptor identifies Node01/DiagID=07B0",
+      "container/member CRCs and package provenance are pinned before decoding",
+      "decoded representation is executable firmware before Ghidra target registration"
+    ],
+    "calibration_url": null,
+    "current_gtsplus_writer_route": {
+      "boundary": "P5-Unified is a current host route, not proof that an unavailable exact Brake package uses it; the acquired CUW descriptor must select the contact type.",
+      "can_id_source": "GetCanIDsFromCANIDTable",
+      "cid_getter": "TCUWCanUnifiedCIDGetter.dll",
+      "contact_type": "P5-Unified",
+      "flash_writer": "TCUWCanUnifiedFlashWriter.dll",
+      "parameter_file": "P5-Unified.ini",
+      "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll"
+    },
+    "host_dataflow_verification": "TMS-049 / tests/verify_techstream_tis_calibration_acquisition.py",
+    "result_selection_verification": "TMS-050 / tests/verify_techstream_tis_calibration_selection.py",
+    "route_kind": "Toyota/TIS ECU-supply-change search",
+    "search_inputs": {
+      "baseSwNoLst_from_counted_did_f181": [
+        "F152633K0000"
+      ],
+      "ecuAssyNo_from_did_0105": "8954147040",
+      "vin": "required at authenticated query time; not stored in this artifact"
+    },
+    "selection": "category-435 Brake/EPB at physical 0x7B0 for the exact vehicle VIN",
+    "server_package_availability_proven": false,
+    "url_policy": "Do not synthesize /t3Portal/calibration/F152633K0000 or any other URL. The exact F181 is a search input/current software identity, not a proved downloadable target CID."
+  },
+  "local_corpus": {
+    "boundary": "This is an exhaustive raw attach.att descriptor census of the pinned local 26-CUW corpus. It proves local absence only, not absence from Toyota/TIS or from an unretained package.",
+    "camry_package_rejection": "T-0051-26 is a validated 2025-26 AXVH85 CAMRY P5-Unified package, but Node01/DiagID=0724 and its 8A28/8A29/8A2A calibration family identify the Engine/MG package, not Brake/EPB 07B0.",
+    "camry_packages": [
+      {
+        "contact_type": "P5-Unified",
+        "date_of_issue": "2026-03-06",
+        "diag_id": "0724",
+        "engine_type": "A25A-FXS",
+        "filename": "T-0051-26.cuw",
+        "model_year": "25-26",
+        "new_cid": "8A2810602100",
+        "sha256": "536bf4c05e7c135445547574c4bb321d4521e413765be0c6c2ec42d13a1c0117",
+        "size": 13045570,
+        "source_calibration": "8A2810602000",
+        "vehicle_name": "CAMRY",
+        "vehicle_type": "AXVH85"
+      }
+    ],
+    "decoded_producer_application_available": false,
+    "diag_07b0_matches": [],
+    "diag_id_counts": {
+      "": 12,
+      "0724": 1,
+      "07500F": 1,
+      "07506D": 1,
+      "0792": 6,
+      "07A1": 3,
+      "07D2": 2
+    },
+    "exact_descriptor_value_matches": [],
+    "package_count": 26,
+    "producer_firmware_available": false
+  },
+  "next_step_after_acquisition": {
+    "register_only_if_plaintext_runtime_code_is_recovered": true,
+    "search_order": [
+      "Tx 0x0B6 / DLC 32 descriptor and packer",
+      "SecOC authenticator submission, profile/key selector, freshness extraction and commit",
+      "upstream FRC/ADS request inputs and byte-level transform",
+      "enable, arming, suppression, timeout and recovery gates"
+    ],
+    "vehicle_io_required": false
+  },
+  "requested_producer_searches": {
+    "ownership_still_unknown": {
+      "b6_freshness_generation": true,
+      "b6_signing_implementation": true,
+      "enable_arming_logic": true,
+      "frc_to_brake_payload_transform": true
+    },
+    "search_performed": false,
+    "sender_domain_already_known": "Brake System Control Module / Corolla category-435 Brake/EPB family",
+    "status_by_axis": {
+      "enable_arming_conditions": "blocked_missing_decoded_brake_application",
+      "secoc_generation_profile_freshness": "blocked_missing_decoded_brake_application",
+      "tx_0x0b6_32_descriptor": "blocked_missing_decoded_brake_application",
+      "upstream_frc_inputs": "blocked_missing_decoded_brake_application"
+    },
+    "why": "No decoded category-435 07B0 producer application is available. Searching opaque or unrelated payloads for executable Tx/SecOC constants would not be firmware evidence."
+  },
+  "schema": "camry-f152633k0000-brake-acquisition-v1",
+  "sources": {
+    "data/external/toyota_corolla_2023_calibration_campaigns.json": {
+      "sha256": "08abdf76eedb6bc551e17685b580aaca3580ebf365951dd264eee9c643c7308c"
+    },
+    "data/generated/camry_2026_nrtd_p5.json": {
+      "sha256": "3a344b6cb2de19edb163e040974955f2d27467dc0a864974b6a5af90659d308f"
+    },
+    "data/generated/techstream_v18/cuw_frc_corpus.json": {
+      "sha256": "8e83dc0c3a48eb6ab95637447f74b6b87698f23ae0d325db5935d9bdfd40475d"
+    },
+    "data/generated/techstream_v18/tss3_b6_sender_attribution.json": {
+      "sha256": "72bad7b601a7c3bc2492a64cfa3fa1042b84959176b1ead5b8b63639c1bcd9aa"
+    }
+  },
+  "static_conclusion": {
+    "acquisition_blocker_deterministic": true,
+    "exact_identity_search_route_identified": true,
+    "exact_producer_firmware_locally_available": false,
+    "no_live_vehicle_action_performed": true,
+    "package_url_identified": false,
+    "producer_analysis_completed": false
+  },
+  "title": "Exact 2026 Camry Brake/EPB producer acquisition blocker and route"
+}
