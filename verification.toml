@@ -96,9 +96,40 @@ requires_external = ["gtsplus"]
 modes = ["local"]
 oracle = "independent_external_artifact"
 
+[suite.gtsplus_pcs_data_viewer_tss3_dictionary]
+tests = ["tests/verify_gtsplus_pcs_data_viewer_tss3_dictionary.py"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+oracle = "independent_external_artifact"
+
+[suite.gtsplus_pcs_data_viewer_parameter_help]
+tests = ["tests/verify_gtsplus_pcs_data_viewer_parameter_help.py"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+oracle = "independent_external_artifact"
+
+[suite.gtsplus_tse_converter]
+tests = ["tests/verify_gtsplus_tse_converter.py"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+oracle = "independent_external_artifact"
+
+[suite.gtsplus_p5_adas_p6_migration]
+tests = ["tests/verify_gtsplus_p5_adas_p6_migration.py"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+oracle = "independent_external_artifact"
+
 [suite.gtsplus_body_recovery]
 tests = ["tests/verify_gtsplus_body_recovery.py"]
-paths = ["tools/techstream/recover_gtsplus_bodies.py", "tools/techstream/gts_cli.py", "docs/tooling/techstream.md", "docs/tooling/gtsplus-body-recovery.md"]
+paths = ["tools/techstream/gts_cli.py", "docs/tooling/techstream.md", "docs/tooling/gtsplus-body-recovery.md"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+oracle = "independent_external_artifact"
+
+[suite.gtsplus_tss3_native_recorder]
+tests = ["tests/verify_gtsplus_tss3_native_recorder.py"]
+paths = ["docs/tooling/techstream.md", "docs/tooling/pcs-data-viewer-tss3-dictionary.md"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 oracle = "independent_external_artifact"

@@ -2988,6 +2988,16 @@ Steering Actuator is **not intrinsic to the TSS3/FRC_P5 diagnostic generation**.
 is a fleet-database statement; the command wire contract, signer, feedback path, and
 suppression point still require target-native proof for each architecture.
 
+The expanded fleet artifact now also joins Toyota CAN Bus Check topology. Across every
+resolved category-498 placement shape that contains both **Power Steering (EPS)** and
+**Skid Control**, those two chassis controllers are colocated on the same Toyota logical
+network while **Front Camera Module is on a different logical network**: **114/114 NA**,
+**328/328 EU**, and **99/99 JP** qualifying shapes. No qualifying shape splits EPS from
+Skid. This generalizes the Camry's Toyota `Bus 4` EPS/Skid + `Bus 1` camera structure as a
+fleet-level TSS3 topology pattern; it still does not equate Toyota bus names with Panda
+bus indexes. The dedicated census and flat placement data live in
+[gtsplus-tss3-fleet-map.md](gtsplus-tss3-fleet-map.md).
+
 The same census records a useful negative that corrects a tempting broad-P5 inference.
 Among current category-498 install rows, selected categories `PCS1_P5` 427,
 `DSSystem_P5` 428, `Fr_RadSen_P5` 429, `RoadSign_P5` 431, and `PCS2_P5` 432 have
@@ -2998,48 +3008,100 @@ another vehicle/install-set or firmware/dynamic join. Numeric install-set IDs re
 region-local, as documented above.
 
 **PCS Data Viewer is a separate high-value TSS3 dictionary.** Current GTS+ ships
-`PCS Data Viewer` **12.00.005**. Its English resource assembly contains **1,131**
-`FFD_TSS3_ID_*` keys, **49** `FFD_TSS3_TRIGGER_ID_*` keys, 13
-`IMGFFD_TSS3_ID_*` keys, 18 image-trigger keys, 19 `INFO_TSS3FFD_*` keys, and 14
-`INFO_FCMIMGFFD_TSS3_*` keys. The executable also carries report accessors for
-`LATERAL_POSITION_FOR_CONTROL_TARGET`, `LANE_KEEPING_ASSIST`,
-`DYNAMIC_RADAR_CRUISE_CONTROL`, `STEERING_ANGLE`, `PRE_BRAKE_REQUEST`,
-`VEHICLE_CONTROL_HISTORY`, `DRIVE_DATA_RECORDER`, `EVENT_DATA_RECORDER`, and a
-TSS3 trigger name. Exact English resource witnesses include `Target Lateral Position`,
-`Lateral Control Switch Status`, `Arbitration result Lateral ID`,
-`Advanced Drive Control Target Steering Angle Order Value [rad]`, and the corresponding
-angle-speed value in `rad/s`. This proves Toyota ships a large offline TSS3
-FFD/report-decoding vocabulary beyond the per-ECU DDB Data List surface. It does **not**
-yet prove a one-to-one map from every viewer resource key to the FRC proprietary
-`AB/EB` Operation-FFD records recovered above.
+`PCS Data Viewer` **12.00.005**. Its managed resources have now been decoded as a
+regenerable artifact rather than a string census: **1,131** `FFD_TSS3_ID_*` signal keys,
+**49** `FFD_TSS3_TRIGGER_ID_*` event keys, 13 `IMGFFD_TSS3_ID_*` keys, 18 image-trigger
+keys, 19 `INFO_TSS3FFD_*` and 14 `INFO_FCMIMGFFD_TSS3_*` messages, with English/Japanese
+values and a metadata join back to the viewer's TSS3 extractor/model classes. Exact
+control/arbitration witnesses are substantially stronger than the earlier report-heading
+surface:
 
-**The TSE/GTSE converter exposes the saved-session side of the same evidence family.**
-Current `GTS+ TSEConverter` is version **01.02.002**. `Converter.dll` exposes named
-readers for P5 DTC FFD, `PredictiveFFD`, `RecordOnBehavior`, health-check ECU data,
-system ECU maps, and ring-buffer signal info/data/stored-signal lists;
-`RingBufferParser.dll` exposes `ParseRingBuffer`, `ParseFrameTable`,
-`ParseSignalInfoList`, `ParseBufferFrame`, and `ConvertDataFrame`. All three shipped
-format templates (`171`, `173`, `180`) explicitly allocate sections for timestamps,
-`RecordOnBehavior`, CAN bus data, `VehicleControlHistory`, **PCS time-series operation
-FFD**, **PCS image FFD**, Phase-5 DTC data, and `PredictiveFFD`. This is strong evidence
-that the shipped host stack can normalize rich saved diagnostic/recorder sessions. The
-next useful RE is to connect these three host layers:
+- `0x5280`: lower-limit longitudinal request ID / acceleration / brake-drive distribution,
+  plus shift-range and EPB request;
+- `0x5281`: upper-limit longitudinal request ID / acceleration / distribution;
+- `0x5282`: **TSS request - lateral ID**, **TSS request - pinion angle**, steering-assist
+  gain and damping-control gain;
+- `0x5284/0x5285`: **Arbitration result_longitudinal ID** / **Arbitration result_lateral ID**;
+- `0x5531`: LDA Lateral ID + LDA Control Request Pinion Angle;
+- `0x5631`: LTA Lateral ID + LTA Control Request Pinion Angle;
+- `0x57DB/0x57DE`: arbitration-result acceleration / pinion angle.
 
-`FRC_P5 AB/EB Operation FFD -> saved TSE/GTSE section -> PCS Data Viewer resource key/name`.
+The viewer's `DetailBitAssignInfo` schema names the missing per-field decoder columns
+`DataName`, `DataID`, `DataSize`, `SupportDID`, `BytePosition`, `BitPosition`, `BitLength`,
+`InvalidValueList`, `Type`, `Lsb`, `Offset`, and `Point`; concrete initializer contents are
+still hidden because the shipped managed method bodies are protector-zeroed. The viewer
+also independently exposes `LogAnalyserEB12` (RoB code/trigger) and `LogAnalyserEB13`
+(RoB code/frame/DID data), matching the already byte-anchored FRC proprietary Operation-FFD
+`AB 12/13 -> EB 12/13` acquisition family. The exact resource-ID-to-bit-assignment table
+remains bounded, but the host model now proves the **request -> arbitration -> result**
+semantics and the acquisition/decoder family join. Image FFD is independently pinned to
+front-camera recorder IDs `0501/0502/0507/0511/5101` plus raw image DID `6001`.
+See [pcs-data-viewer-tss3-dictionary.md](pcs-data-viewer-tss3-dictionary.md).
 
-That join could turn opaque recorder IDs into Toyota names without guessing CAN fields.
-Until that join is recovered, the viewer/converter prove decoder structure and
-vocabulary, not ECU-side producer ownership, CAN arbitration IDs, SecOC signing, or
-wire transforms.
+**The current native recorder acquisition stack is now release-local too.** The protected-body
+recovery supplies the original current `CommandCommon.dll` and
+`GetTSS3ImageFFDP5_DT.dll`; `GetTSS3OperationFFDP5_DT.dll` was already materialized.
+`data/generated/gtsplus_2026/tss3_native_recorder_protocol.json` pins the exact current
+PE identities, export-body hashes, direct-call edges and raw constants. Operation FFD is
+now directly current-body proven as selector `0x66` plus `AB11/EB11`,
+`AB12 + behavior_be16 / EB12`, and `AB13 + behavior_be16 + record_be16 / EB13`; EB13
+parsing starts at offset 6 and consumes `data_id_be16 + length_u8 + data`. Image FFD now
+has a current-body end-to-end setup chain: `22 11 03` spec -> `22 11 01` availability ->
+**`27 03` six-byte seed / `27 04` six-byte level-49 key** -> `22 20 81` encryption method.
+`GetTSS3ImageFFDInfo` directly calls the six-byte `SecurityUnlock` path, not the separate
+16-byte/level-2 implementation. Accepted image specs are 5 and 7; availability value 2
+marks slots 1..10 and 1..11 respectively. This removes the remaining V18 executable-body
+transfer from the native TSS3 recorder acquisition path. It does not remove the separate
+managed PCS Data Viewer initializer boundary.
 
-**P6 is a successor oracle, not TSS3 evidence.** Current category 6037 is generation-22
-`ADCU_P6 = ADAS Domain Controller`. Its NA database is much larger than the P5 FRC
-surface: 529 Data-ID rows, 1,647 primary Data Monitor rows, 183 DTC rows, 22 routine
-Active Tests, 2,045 RoB Data-ID rows, 501 RoB diagnostic-code rows, 717 RoB freeze-frame
-rows, 445 DDR Data-ID rows, and 1,797 DDR freeze-frame rows. P6 can therefore be used
-to compare Toyota terminology as functionality migrates into a domain controller, but
-P6 names/semantics must never be projected backward onto TSS3/P5 without an independent
-join.
+**The TSE/GTSE saved-session layer is now structurally recovered.** Current
+`GTS+ TSEConverter` is **01.02.002** and selects `180_Template.csv`; the shipped 173 and
+180 templates are byte-identical. Toyota's template is a 12,850-row binary-layout grammar
+with an 8-byte file-extension/header region, **38** 12-byte FAT/search-key entries with
+32-bit positions, nested list/size metadata, and first-class top-level sections for
+RecordOnBehavior, CAN Bus, VehicleControlHistory, **PCS time-series Operation FFD**, and
+**PCS Image FFD**. Native `GTSFileController.dll` independently exports add/get/count APIs
+for both PCS FFD section families, closing the persistence side of the host pipeline.
+
+The same template fully declares stored ring-buffer signal metadata: frame indexes/lengths,
+signal/frame IDs, start/end bits, names/units, signedness, **MUL/DIV/OFFSET**, decimal
+precision, display patterns, raw min/max, plus ring read/write positions and raw bytes.
+`RingBufferParser.SignalInfo` and `ParseFrameTable`/`ParseSignalInfoList`/`ParseRingBuffer`
+mirror that schema. A critical preservation boundary is explicit in the current config:
+`BinarySkipDataNames` includes `RecordOnBehavior共通`, **`PCS時系列作動時FFD`** and
+**`PCS画像FFD`**. Therefore original TSE files must be preserved for TSS3 recorder RE;
+the current TSE->GTSE conversion is configured to skip exactly those PCS sections.
+Procedural byte traversal remains bounded because all sampled managed converter/parser
+method bodies are protector-zeroed. Canonical detail and the generated artifact are in
+[gtsplus-tse-gtse-saved-session.md](gtsplus-tse-gtse-saved-session.md).
+
+The host chain is therefore no longer merely a lead:
+
+`FRC_P5 AB/EB recorder acquisition -> first-class TSE PCS FFD section -> PCS Data Viewer TSS3 dictionary`.
+
+What remains open is the concrete byte/bit table inside PCS Data Viewer and validation of
+FAT/list traversal on a real Toyota-generated TSE sample, not the existence or purpose of
+the three host layers.
+
+**P6 is a successor oracle, not TSS3 evidence, and its migration boundary is now
+explicit.** A dedicated cross-generation artifact joins `DSSystem_P5`, `Fr_RadSen_P5`,
+`LDA_P5`, `PCS1_P5`, `PCS2_P5`, and `RoadSign_P5` into generation-22
+`ADCU_P6 = ADAS Domain Controller`. The older P5 compute family is genuinely distributed:
+for example, the LS500/LS500h/MIRAI install architecture is exactly
+`PCS1 + DSSystem + Fr_RadSen + RoadSign + PCS2`; `PCS2_P5` owns named request outputs such
+as LPB/PB/PBA/PBH/PBR, Warning Brake Request and **PCS Steering Request**, while radar/lane
+peers retain their own perception and hands-off vocabularies.
+
+`ADCU_P6` then consolidates a much larger diagnostic/recorder surface: **1,645 deduplicated
+monitor signals** (1,647 raw primary monitor rows in the underlying table census),
+183 DTCs, 22 routine Active Tests, **2,045 RoB Data IDs**, 501 RoB diagnostic codes,
+717 RoB freeze-frame rows, and a separate DDR family with 445 Data IDs, 69 diagnostic
+codes, **1,797** freeze-frame rows and 1,165 invalid-condition rows. Importantly, the
+master preserves many P5 diagnostic **role IDs** while swapping in P6 implementations
+(e.g. monitor list `0x05`, signal info `0x41`, RoB get/delete `0xA0/0xA1`, clear `0x19`,
+CID `0x52`) and adds P6-only routine/image-FFD roles. That makes P6 a strong semantic
+migration oracle without making it evidence about category-498 TSS3 ownership. See
+[gtsplus-p5-adas-p6-migration.md](gtsplus-p5-adas-p6-migration.md).
 
 ### 6.3 Current GTS+ live transport for the selected FRC cruise Data IDs
 
@@ -3227,6 +3289,6 @@ Techstream on a vehicle or bench. The findings describe the *capability* and
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [TMS-001](../reference/index.md#finding-tms-001), [TMS-002](../reference/index.md#finding-tms-002), [TMS-003](../reference/index.md#finding-tms-003), [TMS-004](../reference/index.md#finding-tms-004), [TMS-005](../reference/index.md#finding-tms-005), [TMS-006](../reference/index.md#finding-tms-006), [TMS-007](../reference/index.md#finding-tms-007), [TMS-008](../reference/index.md#finding-tms-008), [TMS-009](../reference/index.md#finding-tms-009), [TMS-010](../reference/index.md#finding-tms-010), [TMS-012](../reference/index.md#finding-tms-012), [TMS-013](../reference/index.md#finding-tms-013), [TMS-017](../reference/index.md#finding-tms-017), [TMS-019](../reference/index.md#finding-tms-019), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [TMS-024](../reference/index.md#finding-tms-024), [TMS-025](../reference/index.md#finding-tms-025), [TMS-026](../reference/index.md#finding-tms-026), [TMS-027](../reference/index.md#finding-tms-027), [TMS-028](../reference/index.md#finding-tms-028), [TMS-029](../reference/index.md#finding-tms-029), [TMS-030](../reference/index.md#finding-tms-030), [TMS-031](../reference/index.md#finding-tms-031), [TMS-032](../reference/index.md#finding-tms-032), [TMS-033](../reference/index.md#finding-tms-033), [TMS-034](../reference/index.md#finding-tms-034), [TMS-035](../reference/index.md#finding-tms-035), [TMS-036](../reference/index.md#finding-tms-036), [TMS-037](../reference/index.md#finding-tms-037), [TMS-038](../reference/index.md#finding-tms-038), [TMS-039](../reference/index.md#finding-tms-039), [TMS-040](../reference/index.md#finding-tms-040), [TMS-041](../reference/index.md#finding-tms-041), [TMS-042](../reference/index.md#finding-tms-042), [TMS-043](../reference/index.md#finding-tms-043), [TMS-044](../reference/index.md#finding-tms-044), [TMS-045](../reference/index.md#finding-tms-045), [TMS-046](../reference/index.md#finding-tms-046), [TMS-047](../reference/index.md#finding-tms-047), [TMS-048](../reference/index.md#finding-tms-048), [TMS-049](../reference/index.md#finding-tms-049), [TMS-050](../reference/index.md#finding-tms-050), [TMS-051](../reference/index.md#finding-tms-051), [TMS-052](../reference/index.md#finding-tms-052), [TMS-057](../reference/index.md#finding-tms-057), [TMS-061](../reference/index.md#finding-tms-061), [TMS-062](../reference/index.md#finding-tms-062), [TMS-063](../reference/index.md#finding-tms-063), [TMS-065](../reference/index.md#finding-tms-065), [TMS-066](../reference/index.md#finding-tms-066), [TMS-067](../reference/index.md#finding-tms-067), [TMS-068](../reference/index.md#finding-tms-068), [TMS-069](../reference/index.md#finding-tms-069), [TMS-070](../reference/index.md#finding-tms-070), [TMS-071](../reference/index.md#finding-tms-071), [TMS-072](../reference/index.md#finding-tms-072), [TMS-073](../reference/index.md#finding-tms-073), [TMS-077](../reference/index.md#finding-tms-077), [TMS-079](../reference/index.md#finding-tms-079), [TMS-080](../reference/index.md#finding-tms-080), [VAR-064](../reference/index.md#finding-var-064)
+- Findings with this document as canonical home: [TMS-001](../reference/index.md#finding-tms-001), [TMS-002](../reference/index.md#finding-tms-002), [TMS-003](../reference/index.md#finding-tms-003), [TMS-004](../reference/index.md#finding-tms-004), [TMS-005](../reference/index.md#finding-tms-005), [TMS-006](../reference/index.md#finding-tms-006), [TMS-007](../reference/index.md#finding-tms-007), [TMS-008](../reference/index.md#finding-tms-008), [TMS-009](../reference/index.md#finding-tms-009), [TMS-010](../reference/index.md#finding-tms-010), [TMS-012](../reference/index.md#finding-tms-012), [TMS-013](../reference/index.md#finding-tms-013), [TMS-017](../reference/index.md#finding-tms-017), [TMS-019](../reference/index.md#finding-tms-019), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [TMS-024](../reference/index.md#finding-tms-024), [TMS-025](../reference/index.md#finding-tms-025), [TMS-026](../reference/index.md#finding-tms-026), [TMS-027](../reference/index.md#finding-tms-027), [TMS-028](../reference/index.md#finding-tms-028), [TMS-029](../reference/index.md#finding-tms-029), [TMS-030](../reference/index.md#finding-tms-030), [TMS-031](../reference/index.md#finding-tms-031), [TMS-032](../reference/index.md#finding-tms-032), [TMS-033](../reference/index.md#finding-tms-033), [TMS-034](../reference/index.md#finding-tms-034), [TMS-035](../reference/index.md#finding-tms-035), [TMS-036](../reference/index.md#finding-tms-036), [TMS-037](../reference/index.md#finding-tms-037), [TMS-038](../reference/index.md#finding-tms-038), [TMS-039](../reference/index.md#finding-tms-039), [TMS-040](../reference/index.md#finding-tms-040), [TMS-041](../reference/index.md#finding-tms-041), [TMS-042](../reference/index.md#finding-tms-042), [TMS-043](../reference/index.md#finding-tms-043), [TMS-044](../reference/index.md#finding-tms-044), [TMS-045](../reference/index.md#finding-tms-045), [TMS-046](../reference/index.md#finding-tms-046), [TMS-047](../reference/index.md#finding-tms-047), [TMS-048](../reference/index.md#finding-tms-048), [TMS-049](../reference/index.md#finding-tms-049), [TMS-050](../reference/index.md#finding-tms-050), [TMS-051](../reference/index.md#finding-tms-051), [TMS-052](../reference/index.md#finding-tms-052), [TMS-057](../reference/index.md#finding-tms-057), [TMS-061](../reference/index.md#finding-tms-061), [TMS-062](../reference/index.md#finding-tms-062), [TMS-063](../reference/index.md#finding-tms-063), [TMS-065](../reference/index.md#finding-tms-065), [TMS-066](../reference/index.md#finding-tms-066), [TMS-067](../reference/index.md#finding-tms-067), [TMS-068](../reference/index.md#finding-tms-068), [TMS-069](../reference/index.md#finding-tms-069), [TMS-070](../reference/index.md#finding-tms-070), [TMS-071](../reference/index.md#finding-tms-071), [TMS-072](../reference/index.md#finding-tms-072), [TMS-073](../reference/index.md#finding-tms-073), [TMS-077](../reference/index.md#finding-tms-077), [TMS-079](../reference/index.md#finding-tms-079), [TMS-080](../reference/index.md#finding-tms-080), [TMS-082](../reference/index.md#finding-tms-082), [VAR-064](../reference/index.md#finding-var-064)
 - Corrections with this document as canonical home: [CORR-018](../reference/index.md#correction-corr-018), [CORR-019](../reference/index.md#correction-corr-019), [CORR-020](../reference/index.md#correction-corr-020), [CORR-021](../reference/index.md#correction-corr-021), [CORR-022](../reference/index.md#correction-corr-022), [CORR-023](../reference/index.md#correction-corr-023), [CORR-027](../reference/index.md#correction-corr-027), [CORR-034](../reference/index.md#correction-corr-034), [CORR-035](../reference/index.md#correction-corr-035), [CORR-039](../reference/index.md#correction-corr-039), [CORR-079](../reference/index.md#correction-corr-079), [CORR-080](../reference/index.md#correction-corr-080), [CORR-081](../reference/index.md#correction-corr-081), [CORR-082](../reference/index.md#correction-corr-082), [CORR-083](../reference/index.md#correction-corr-083), [CORR-084](../reference/index.md#correction-corr-084), [CORR-085](../reference/index.md#correction-corr-085), [CORR-091](../reference/index.md#correction-corr-091), [CORR-102](../reference/index.md#correction-corr-102), [CORR-103](../reference/index.md#correction-corr-103), [CORR-104](../reference/index.md#correction-corr-104), [CORR-117](../reference/index.md#correction-corr-117), [CORR-125](../reference/index.md#correction-corr-125)
 <!-- knowledge-cross-references:end -->

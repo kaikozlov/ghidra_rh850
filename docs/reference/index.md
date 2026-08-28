@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 376 · Corrections: 131 · Open questions: 54 · Docs: 104 · Suites: 193
+Findings: 378 · Corrections: 131 · Open questions: 54 · Docs: 109 · Suites: 199
 
 ## Reading this index
 
@@ -310,7 +310,9 @@ Findings: 376 · Corrections: 131 · Open questions: 54 · Docs: 104 · Suites: 
 | <a id="finding-tms-077"></a>**TMS-077** | [docs/tooling/techstream.md](../tooling/techstream.md) | [gts-query-cli](../tooling/gts-query-cli.md) | `tests/verify_techstream_diagnostic_execution_model.py` | — |
 | <a id="finding-tms-078"></a>**TMS-078** | [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | — | `tests/verify_toyota_diag_registry.py` | — |
 | <a id="finding-tms-079"></a>**TMS-079** | [docs/tooling/techstream.md](../tooling/techstream.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_gtsplus_tss3_crossvehicle_surface.py` | OQ-030, OQ-052 |
-| <a id="finding-tms-080"></a>**TMS-080** | [docs/tooling/techstream.md](../tooling/techstream.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_gtsplus_tss3_crossvehicle_surface.py` | OQ-052 |
+| <a id="finding-tms-080"></a>**TMS-080** | [docs/tooling/techstream.md](../tooling/techstream.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) | `tests/verify_gtsplus_tss3_crossvehicle_surface.py` | OQ-052 |
+| <a id="finding-tms-081"></a>**TMS-081** | [docs/tooling/gtsplus-body-recovery.md](../tooling/gtsplus-body-recovery.md) | — | `tests/verify_gtsplus_body_recovery.py` | — |
+| <a id="finding-tms-082"></a>**TMS-082** | [docs/tooling/techstream.md](../tooling/techstream.md), [docs/tooling/pcs-data-viewer-tss3-dictionary.md](../tooling/pcs-data-viewer-tss3-dictionary.md) | — | `tests/verify_gtsplus_tss3_native_recorder.py` | — |
 | <a id="finding-var-001"></a>**VAR-001** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md) | `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-002"></a>**VAR-002** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_spanconstant_corolla_equivalence.py`, `tests/verify_spanconstant_corolla_cross_variant.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-003"></a>**VAR-003** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
@@ -452,7 +454,7 @@ Findings: 376 · Corrections: 131 · Open questions: 54 · Docs: 104 · Suites: 
 | <a id="open-question-oq-050"></a>**OQ-050** | Exploit-interest cohort consumption (SWEEP-008) | Tooling | SWEEP-008, SECOC-047, CORR-101 |
 | <a id="open-question-oq-051"></a>**OQ-051** | Cross-calibration structural triage of future P1M-E images | Tooling | MEM-SAFE-001 |
 | <a id="open-question-oq-052"></a>**OQ-052** | True-TSS3 longitudinal producer/control contract | Tooling | TMS-079, TMS-080 |
-| <a id="open-question-oq-053"></a>**OQ-053** | F33 non-disruptive application-mode RAM execution pivot | Tooling | VAR-060, CORR-124, CORR-123, CORR-092 |
+| <a id="open-question-oq-053"></a>**OQ-053** | F33 non-disruptive application-mode RAM execution pivot | Tooling | VAR-060, CORR-124, CORR-123 |
 | <a id="open-question-oq-054"></a>**OQ-054** | exact-F33 stock-LTA authority into the shared `CC50/CC62` actuation funnel | Tooling | VAR-081, VAR-082, VAR-083, VAR-084, CORR-129, CORR-092 |
 
 ## Correction index
@@ -671,14 +673,19 @@ Every tracked document under `docs/` with its owning suite(s) and gate tests.
 | [docs/tooling/exploit-interest-ranking.md](../tooling/exploit-interest-ranking.md) | doc_links, exploit_interest_ranking, exploit_interest_reviewed_candidates, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_exploit_interest_ranking.py`, `tests/verify_exploit_interest_reviewed_candidates.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/exploit-predicate-semantics.md](../tooling/exploit-predicate-semantics.md) | doc_links, exploit_predicate_semantics, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_exploit_predicate_semantics.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | doc_links, toyota_diag_registry, gts_query_cli, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_toyota_diag_registry.py`, `tests/verify_gts_query_cli.py`, `tests/verify_knowledge_index.py` |
+| [docs/tooling/gtsplus-body-recovery.md](../tooling/gtsplus-body-recovery.md) | gtsplus_body_recovery, doc_links, knowledge_index | `tests/verify_gtsplus_body_recovery.py`, `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
+| [docs/tooling/gtsplus-p5-adas-p6-migration.md](../tooling/gtsplus-p5-adas-p6-migration.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
+| [docs/tooling/gtsplus-tse-gtse-saved-session.md](../tooling/gtsplus-tse-gtse-saved-session.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
+| [docs/tooling/gtsplus-tss3-fleet-map.md](../tooling/gtsplus-tss3-fleet-map.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md) | doc_links, toyota_b_programming_topology, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_toyota_b_programming_topology.py`, `tests/verify_knowledge_index.py` |
+| [docs/tooling/pcs-data-viewer-tss3-dictionary.md](../tooling/pcs-data-viewer-tss3-dictionary.md) | gtsplus_tss3_native_recorder, doc_links, knowledge_index | `tests/verify_gtsplus_tss3_native_recorder.py`, `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/processor-module-audit.md](../tooling/processor-module-audit.md) | analysis_status, doc_links, knowledge_index | `tests/verify_analysis_status.py`, `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md) | doc_links, renesas_rfp, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_renesas_rfp.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/rh850-codeflash-structure-scanner.md](../tooling/rh850-codeflash-structure-scanner.md) | doc_links, codeflash_structure_scanner, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_rh850_codeflash_structure_scanner.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/secoc-semantic-patch-resolver.md](../tooling/secoc-semantic-patch-resolver.md) | doc_links, secoc_semantic_patch_resolver, albinoelephant_corolla_codeflash, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_secoc_semantic_patch_resolver.py`, `tests/verify_albinoelephant_corolla_codeflash.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/techstream-capture-procedure.md](../tooling/techstream-capture-procedure.md) | doc_links, target_artifact_manifest, techstream_pre_gts_static_closure, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_target_artifact_manifest.py`, `tests/verify_sienna_8965B4512000_techstream_did_semantics.py`, `tests/verify_techstream_cuw_calibration_schema.py`, `tests/verify_techstream_cuw_timing_recovery.py`, `tests/verify_techstream_cuw_writer_family_matrix.py`, `tests/verify_techstream_cuw_writer_protocol_grammar.py`, `tests/verify_techstream_rks_client_state.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/techstream-ddb-pipeline.md](../tooling/techstream-ddb-pipeline.md) | doc_links, diagnostic_vocabulary, application_interface_correlation, techstream_ddb_residuals, techstream_master_routes, techstream_priority_ddb_semantics, techstream_dtc_failure_types, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_diagnostic_vocabulary.py`, `tests/verify_application_interface_correlations.py`, `tests/verify_techstream_ddb_residuals.py`, `tests/verify_techstream_master_routes.py`, `tests/verify_techstream_priority_ddb_semantics.py`, `tests/verify_techstream_dtc_failure_types.py`, `tests/verify_knowledge_index.py` |
-| [docs/tooling/techstream.md](../tooling/techstream.md) | doc_links, tss3_cruise_live_transport_external, techstream_rks, techstream_ptshim, techstream_diagnostic_execution_model, techstream_mackey, techstream_crypto_inventory, techstream_layerb, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_tss3_cruise_live_transport_external.py`, `tests/verify_techstream_rks.py`, `tests/verify_techstream_ptshim.py`, `tests/verify_techstream_diagnostic_execution_model.py`, `tests/verify_techstream_mackey.py`, `tests/verify_techstream_crypto_inventory.py`, `tests/verify_techstream_layerb.py`, `tests/verify_knowledge_index.py` |
+| [docs/tooling/techstream.md](../tooling/techstream.md) | gtsplus_body_recovery, gtsplus_tss3_native_recorder, doc_links, tss3_cruise_live_transport_external, techstream_rks, techstream_ptshim, techstream_diagnostic_execution_model, techstream_mackey, techstream_crypto_inventory, techstream_layerb, knowledge_index | `tests/verify_gtsplus_body_recovery.py`, `tests/verify_gtsplus_tss3_native_recorder.py`, `tests/verify_doc_links.py`, `tests/verify_tss3_cruise_live_transport_external.py`, `tests/verify_techstream_rks.py`, `tests/verify_techstream_ptshim.py`, `tests/verify_techstream_diagnostic_execution_model.py`, `tests/verify_techstream_mackey.py`, `tests/verify_techstream_crypto_inventory.py`, `tests/verify_techstream_layerb.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/toyota-dataflash-analysis.md](../tooling/toyota-dataflash-analysis.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/variant-acquisition-readiness.md](../tooling/variant-acquisition-readiness.md) | doc_links, variant_acquisition_readiness, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_variant_acquisition_readiness.py`, `tests/verify_knowledge_index.py` |
 | [docs/variants/README.md](../variants/README.md) | doc_links, camry_8965f3307000_fault_status, camry_8965f3307000_application_ram_loader, corolla_pre_tss3_message_comparison, corolla_h, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_camry_8965F3307000.py`, `tests/verify_corolla_pre_tss3_message_comparison.py`, `tests/verify_corolla_h.py`, `tests/verify_knowledge_index.py` |
@@ -875,8 +882,15 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json` | camry_8965f3307000_gtsplus_semantics, camry_8965f3307000_gtsplus_external, camry_2026, camry_8965f3307000_external_lateral_ingress | — |
 | `data/generated/gtsplus_2026/camry_brake_observer_vocabulary.json` | camry_brake_observer_vocabulary | — |
 | `data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json` | camry_f152633k0000_brake_acquisition | — |
+| `data/generated/gtsplus_2026/p5_adas_p6_migration.json` | gtsplus_p5_adas_p6_migration | — |
+| `data/generated/gtsplus_2026/pcs_data_viewer_parameter_help.json` | gtsplus_pcs_data_viewer_parameter_help | — |
+| `data/generated/gtsplus_2026/pcs_data_viewer_tss3_dictionary.json` | gtsplus_pcs_data_viewer_tss3_dictionary, gtsplus_pcs_data_viewer_parameter_help | — |
 | `data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json` | toyota_diag_registry, camry_2026_lta_state_reconciliation | — |
+| `data/generated/gtsplus_2026/tse_converter_surface.json` | gtsplus_tse_converter | — |
+| `data/generated/gtsplus_2026/tss3_crossvehicle_canbus_placements.csv` | gtsplus_tss3_crossvehicle_surface | — |
+| `data/generated/gtsplus_2026/tss3_crossvehicle_fleet_install_sets.csv` | gtsplus_tss3_crossvehicle_surface | — |
 | `data/generated/gtsplus_2026/tss3_crossvehicle_surface.json` | gtsplus_tss3_crossvehicle_surface | — |
+| `data/generated/gtsplus_2026/tss3_native_recorder_protocol.json` | gtsplus_tss3_native_recorder | — |
 | `data/generated/p4dk4_template/p4dk4_vocabulary.json` | diagnostic_vocabulary | — |
 | `data/generated/rdbi_emitted_write_audit.json` | application_rdbi | — |
 | `data/generated/response_disclosure_audit.csv` | response_disclosure_audit | — |

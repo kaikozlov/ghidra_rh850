@@ -203,26 +203,29 @@ Canonical: [../tooling/techstream.md](../tooling/techstream.md) §6.2.2 ·
 [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) ·
 [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.35.
 
-### Next GTS+ host-static target — recorder/toolchain join, not another broad P5 sweep
+### Next GTS+ host-static target — finish the recorder decoder, not the acquisition chain
 
-TMS-079/TMS-080 close the fleet-level bookkeeping that was easy to keep
-re-deriving. Current category-498 `FRC_P5` spans multiple install-set
-architectures; category 499 `Steering Actuator` is a minority configuration, and
-`PCS1_P5`/`DSSystem_P5`/`Fr_RadSen_P5`/`RoadSign_P5`/`PCS2_P5` have zero selected
-co-occurrence with category 498 in the current NA/EU/JP install rows. Do **not**
-use broad P5 naming alone to nominate a TSS3 longitudinal owner.
+TMS-079/080/082 close the fleet bookkeeping and most of the host-side recorder chain that
+was easy to keep re-deriving. Current category-498 `FRC_P5` spans multiple install-set
+architectures; category 499 `Steering Actuator` is a minority configuration, and broad P5
+compute databases do not co-occur with category 498 in the selected fleet rows. Do **not**
+use P5 naming alone to nominate a TSS3 longitudinal owner.
 
-The highest-value remaining GTS+ host-static work is now the explicit offline
-recorder chain: `FRC_P5` proprietary `AB/EB` Operation FFD -> TSE/GTSE saved-session
-sections -> `PCS Data Viewer` TSS3 resource keys/Toyota names. The viewer ships
-1,131 `FFD_TSS3_ID_*` keys plus dedicated TSS3 trigger/image dictionaries and
-lateral/steering/cruise/recorder report vocabulary; the TSE converter ships P5
-FFD/RoB/PredictiveFFD/ring-buffer parsers and templates with PCS time-series/image
-FFD sections. Recovering that cross-layer mapping can produce OEM recorder semantics
-without guessing CAN fields. Treat generation-22 `ADCU_P6` only as a successor
-terminology oracle; never transfer its semantics backward without an independent
-P5 join. Canonical evidence:
-`data/generated/gtsplus_2026/tss3_crossvehicle_surface.json` and
+The current native acquisition path is no longer the blocker. Same-release bodies now prove
+`AB11/12/13 -> EB11/12/13`, EB13's BE16-ID/u8-length payload grammar, Image-FFD
+`22 11 03 -> 22 11 01 -> 27 03/04 -> 22 20 81`, and the current level-49 key algorithm.
+TSE persistence is also structurally recovered, and the current TSE->GTSE skip policy makes
+**preserving original TSE files** mandatory for PCS Operation/Image FFD. PCS Data Viewer
+then supplies 1,131 TSS3 recorder names plus request/arbitration semantics and parameter help.
+
+The remaining high-value GTS+ work is therefore narrower: recover or runtime-dump the managed
+`DetailBitAssignInfo` / RoB initializer tables that map recorder IDs to byte/bit/LSB/offset,
+or validate the TSE FAT/list traversal against a real Toyota-generated TSS3 TSE sample. In
+parallel, use the recorder's `TSS request - lateral ID/pinion angle -> Arbitration result_lateral
+ID/pinion angle` model to target exact firmware ownership/arbitration instead of broad CAN
+searches. Treat generation-22 `ADCU_P6` only as a successor terminology oracle. Canonical:
+`data/generated/gtsplus_2026/tss3_native_recorder_protocol.json`,
+[../tooling/pcs-data-viewer-tss3-dictionary.md](../tooling/pcs-data-viewer-tss3-dictionary.md), and
 [../tooling/techstream.md](../tooling/techstream.md) §6.2.4.
 
 ## Parallel integration target — firmware-identified, relay-correct TSS3 capture

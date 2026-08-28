@@ -1,0 +1,322 @@
+{
+  "boundary": "This is Techstream host acquisition semantics. It does not identify the ECU-side recorder producer, CAN/CAN-FD arbitration IDs, SecOC ownership, or PCS Data Viewer managed bit-assignment initializer contents.",
+  "conclusions": [
+    "The complete current-release native TSS3 recorder acquisition stack is now available without V18 behavioral transfer: current Operation plugin plus recovered-original current Image plugin and CommandCommon.",
+    "Operation FFD uses proprietary AB11/12/13 requests with EB11/12/13 responses and selector 0x66; record payloads carry BE16 recorder Data IDs and u8 lengths.",
+    "Current TSS3 Image FFD reads DID 0x1103 spec information and DID 0x1101 availability, then performs SecurityAccess 0x27 subfunctions 0x03/0x04 with a six-byte level-49 key before reading DID 0x2081 encryption method.",
+    "Image spec values 5 and 7 are explicitly supported; availability value 2 marks memorized image slots, 1..10 for spec5 and 1..11 for spec7."
+  ],
+  "gtsplus_version": "2026.03.002.02",
+  "image_ffd": {
+    "frames": {
+      "availability": {
+        "mask": "ffffff",
+        "positive": "621101",
+        "request": "221101",
+        "va": "0x100D7E5C"
+      },
+      "encryption_method": {
+        "mask": "ffffff",
+        "positive": "622081",
+        "request": "222081",
+        "va": "0x100D7FBC"
+      },
+      "security_key": {
+        "mask_prefix": "ffff",
+        "positive": "6704",
+        "positive_va": "0x100D7EE0",
+        "request_prefix": "2704",
+        "request_va": "0x100D7ED8"
+      },
+      "security_seed": {
+        "mask": "ffff",
+        "positive": "6703",
+        "positive_va": "0x100D7EA4",
+        "request": "2703",
+        "request_va": "0x100D7E98"
+      },
+      "spec_information": {
+        "mask": "ffffff",
+        "positive": "621103",
+        "request": "221103",
+        "va": "0x100D7F08"
+      }
+    },
+    "functions": {
+      "calculate_key_level49": {
+        "end_va": "0x10049C80",
+        "sha256": "cdd11c1cfc9efc46e61bbe63556f322e3fa70163385a4db0d4627df38cd8d9a2",
+        "size": 176,
+        "va": "0x10049BD0"
+      },
+      "image_availability": {
+        "end_va": "0x100564E0",
+        "sha256": "43bb6976c31afeee72606f1cf93dfd97a7ac51d34ddd254887e94b7623106be5",
+        "size": 944,
+        "va": "0x10056130"
+      },
+      "image_encryption": {
+        "end_va": "0x10056130",
+        "sha256": "22c6d7b902731b6e2ca9f289642cab799d3d652404faf9f69b3aa94986f8215b",
+        "size": 944,
+        "va": "0x10055D80"
+      },
+      "image_info": {
+        "end_va": "0x10056E70",
+        "sha256": "9e2d5b3a896571e649dde2d1b70aaf04fb2d7bc031e72f86887f2d3777825132",
+        "size": 2448,
+        "va": "0x100564E0"
+      },
+      "image_spec": {
+        "end_va": "0x10057220",
+        "sha256": "c3e08e6e2c57822b52c5c728f1d6393eb315f3f8d197a1e04ddfd7304717d373",
+        "size": 944,
+        "va": "0x10056E70"
+      },
+      "security_unlock": {
+        "end_va": "0x1005CF10",
+        "sha256": "18f61792a401ae3ce0bad0d700b7c22608a75091a0c2c1abb9dfe1b3a7dbb066",
+        "size": 2784,
+        "va": "0x1005C430"
+      },
+      "security_unlock_16": {
+        "end_va": "0x1005C430",
+        "sha256": "563fab294bb28f282f310cb8b716fa40c92280f4e5aeebe57e54e0dc12c2e28d",
+        "size": 2784,
+        "va": "0x1005B950"
+      }
+    },
+    "get_info_direct_calls": [
+      {
+        "call_va": "0x10056587",
+        "target": "?GetTSS3ImageFFDSpecInformation@CCmdImgOpeDdr@@QAEKPAUtagCOMMAND_DATA@@PAVCCommCachePlusP5@@PAVCCommFrameData@@@Z",
+        "target_va": "0x10056E70"
+      },
+      {
+        "call_va": "0x100567B6",
+        "target": "?GetTSS3ImageFFDFlagAndAvailability@CCmdImgOpeDdr@@AAEKPAUtagCOMMAND_DATA@@PAVCCommCachePlusP5@@PAVCCommFrameData@@@Z",
+        "target_va": "0x10056130"
+      },
+      {
+        "call_va": "0x10056BA8",
+        "target": "?GetTSS3ImageFFDFlagAndAvailability@CCmdImgOpeDdr@@AAEKPAUtagCOMMAND_DATA@@PAVCCommCachePlusP5@@PAVCCommFrameData@@@Z",
+        "target_va": "0x10056130"
+      },
+      {
+        "call_va": "0x10056D9E",
+        "target": "?SecurityUnlock@CCmdImgOpeDdr@@AAEKPAUtagCOMMAND_DATA@@PAVCCommCachePlusP5@@PAVCCommFrameData@@@Z",
+        "target_va": "0x1005C430"
+      },
+      {
+        "call_va": "0x10056DDA",
+        "target": "?GetTSS3ImageFFDEncryotionMethod@CCmdImgOpeDdr@@AAEKPAUtagCOMMAND_DATA@@PAVCCommCachePlusP5@@PAVCCommFrameData@@@Z",
+        "target_va": "0x10055D80"
+      }
+    ],
+    "plugin_execute_va": "0x1000EEB0",
+    "security": {
+      "algorithm": "CCmdImgOpeDdr::CalculateKeyDataSecLv49",
+      "algorithm_vectors": {
+        "000000000000": "000000000000",
+        "010203040506": "04070a0d1a64",
+        "123456789abc": "9e6a50252409",
+        "deadbeefcafe": "cbd8b6970cba"
+      },
+      "boundary": "SecurityUnlock16Byte is a separate current body using CalculateKeyDataSecLv2; GetTSS3ImageFFDInfo calls the six-byte SecurityUnlock path.",
+      "key_request_prefix": "2704",
+      "seed_length": 6,
+      "seed_request": "2703"
+    },
+    "semantic_call_order": [
+      "get spec information",
+      "get flag/availability",
+      "get flag/availability (spec-dependent branch)",
+      "security unlock",
+      "get encryption method"
+    ],
+    "spec_contract": {
+      "accepted_spec_values": [
+        5,
+        7
+      ],
+      "available_value": 2,
+      "spec_5_availability_slots": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "spec_7_availability_slots": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ]
+    }
+  },
+  "operation_ffd": {
+    "code_anchors": {
+      "ab11_eb11": [
+        {
+          "bytes": "c645a0ab508d4decc645ac11",
+          "va": "0x100011DE"
+        },
+        {
+          "bytes": "c645d0ebc645dc11",
+          "va": "0x100011F2"
+        }
+      ],
+      "ab12_eb12": [
+        {
+          "bytes": "c64588ab",
+          "va": "0x10001F12"
+        },
+        {
+          "bytes": "c6459412",
+          "va": "0x10001F16"
+        },
+        {
+          "bytes": "c645b8eb",
+          "va": "0x10001F32"
+        },
+        {
+          "bytes": "c645c412",
+          "va": "0x10001F36"
+        }
+      ],
+      "ab13_eb13": [
+        {
+          "bytes": "c6857cffffffab",
+          "va": "0x10001AC7"
+        },
+        {
+          "bytes": "c645aceb",
+          "va": "0x10001ADE"
+        },
+        {
+          "bytes": "c645b813",
+          "va": "0x10001AE2"
+        }
+      ],
+      "selector_66": [
+        {
+          "bytes": "6a66",
+          "va": "0x10002D73"
+        }
+      ]
+    },
+    "functions": {
+      "enumerate_behaviors": {
+        "end_va": "0x10001340",
+        "sha256": "c88d0c16d14ee5179dcae2e0afab2c8868cc53b68f9ba7b5795a6a0fc0ebc753",
+        "size": 528,
+        "va": "0x10001130"
+      },
+      "enumerate_records": {
+        "end_va": "0x10002190",
+        "sha256": "54ed8f4ba79cd506f8e711bd31f9eb1f46a52379fa80720171f1f02466f7ccae",
+        "size": 848,
+        "va": "0x10001E40"
+      },
+      "execute": {
+        "end_va": "0x10003190",
+        "sha256": "fe12fa2e4cf9643e3f8f1de774c35148507d6b45dffb7f98e9cf0a7f1fc40bf2",
+        "size": 1008,
+        "va": "0x10002DA0"
+      },
+      "fetch_record": {
+        "end_va": "0x10001CB0",
+        "sha256": "b71df2e8eac5de847b7dccc42dd39e9ce84ff28684674fe9c0a275d2fb85d9f3",
+        "size": 704,
+        "va": "0x100019F0"
+      },
+      "parse_eb13_blocks": {
+        "end_va": "0x10001910",
+        "sha256": "5c9f096abb32f7b1bf7748ccf61f179f2371faba64f9585227b905d257e49a69",
+        "size": 1264,
+        "va": "0x10001420"
+      },
+      "selector_66": {
+        "end_va": "0x10002DA0",
+        "sha256": "54f6e9df225811d278810d60a21633654b7f0a6eaa62447d63db62a0332cbeb0",
+        "size": 80,
+        "va": "0x10002D50"
+      }
+    },
+    "record_parser": {
+      "block": "data_id_be16 || length_u8 || data[length]",
+      "data_offset": 6,
+      "duplicate_policy": "deduplicate Data IDs within each parsed group",
+      "special_data_id": "0x0501 is additionally surfaced as BE16 metadata when length >= 2"
+    },
+    "requests": {
+      "enumerate_behavior_codes": {
+        "positive": "EB11",
+        "request": "AB11",
+        "response_items": "BE16 behavior/RoB codes from response offset 2"
+      },
+      "enumerate_behavior_records": {
+        "positive": "EB12",
+        "request": "AB12 || behavior_id_be16",
+        "response_items": "BE16 record/frame IDs from response offset 4; sorted and deduplicated"
+      },
+      "fetch_record": {
+        "positive": "EB13",
+        "request": "AB13 || behavior_id_be16 || record_id_be16"
+      }
+    },
+    "selector": "0x66",
+    "special_behavior_ids": [
+      "0x2270",
+      "0x2271",
+      "0x2272",
+      "0x2273",
+      "0x2274",
+      "0x2296",
+      "0x2297",
+      "0x2298",
+      "0x2299",
+      "0x227C",
+      "0x227D",
+      "0x229A",
+      "0x22B0",
+      "0x22B1",
+      "0x22B2"
+    ],
+    "special_behavior_table_va": "0x10005548"
+  },
+  "schema": "gtsplus-tss3-native-recorder-protocol-v1",
+  "sources": {
+    "command_common": {
+      "path": "bin/CommandCommon.dll",
+      "provenance": "Setup_PF.exe",
+      "sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+      "size": 1280016
+    },
+    "image_plugin": {
+      "path": "bin/GetTSS3ImageFFDP5_DT.dll",
+      "provenance": "Setup_PF.exe",
+      "sha256": "07cfb84e1d258862f95b68a966cf34dbe8d0967e4008c59b2f16b6733a05ecd8",
+      "size": 117776
+    },
+    "operation_plugin": {
+      "path": "bin/GetTSS3OperationFFDP5_DT.dll",
+      "provenance": "current installed image is already materialized",
+      "sha256": "67257cf5dfdab990adbc1bab1938ad1cb6bf52a1b307cc7fcd9b7bd33a093414",
+      "size": 38928
+    }
+  }
+}

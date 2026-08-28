@@ -921,10 +921,14 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   co-occurrence in NA/EU/JP with `PCS1_P5` 427, `DSSystem_P5` 428,
   `Fr_RadSen_P5` 429, `RoadSign_P5` 431, or `PCS2_P5` 432. Do not pick one of
   those databases as the TSS3 longitudinal owner merely because it is P5 or has a
-  promising name. TMS-080 instead identifies the cross-vehicle GTS+ recorder path
-  (`PCS Data Viewer` TSS3 FFD dictionary plus TSE/GTSE PredictiveFFD/RoB/PCS-FFD
-  parser) as a concrete host-static semantic source to join to an exact target's
-  installed modules and live/firmware evidence. Older Toyota prior
+  promising name. TMS-080/082 instead close a concrete cross-vehicle GTS+ recorder
+  source to join to an exact target: the same-release native FRC Operation/Image FFD
+  acquisition path is now recovered (`AB11/12/13 -> EB11/12/13`; Image-FFD
+  `22 11 03 -> 22 11 01 -> 27 03/04 -> 22 20 81`), TSE persists PCS FFD sections,
+  and PCS Data Viewer names the longitudinal/lateral request and arbitration model.
+  The remaining host-static gap is the managed recorder-ID -> byte/bit/LSB/offset
+  initializer table or a real TSS3 TSE specimen, not the acquisition protocol itself.
+  Join that evidence to an exact target's installed modules and live/firmware evidence. Older Toyota prior
   art makes longitudinal ownership a separate generation-specific architecture:
   ordinary TSS2 treats the camera as the ACC command source, `RADAR_ACC` moves
   ownership to the radar, and some SecOC-protected profiles split acceleration
