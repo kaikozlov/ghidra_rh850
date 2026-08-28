@@ -101,6 +101,7 @@ role19 = next(row for row in role_catalog if row["role"] == 25)
 check(len(role_catalog) == 191 and role19["binding_count"] == 536 and role19["category_count"] == 536 and role19["binding_surface_counts"] == {"direct_transport": 536} and role19["plugins"][0]["dll"] == "DelDiagCodeP4.dll" and role19["plugins"][0]["binding_count"] == 424, "current master role census resolves operation surfaces as well as 6194 -> 191 role compression")
 role5 = next(row for row in role_catalog if row["role"] == 5)
 check(role5["plugins"][0]["surface"] == "support_cache_v18_proven" and role5["plugins"][1]["surface"] == "delegated_transport_v18_proven", "role query distinguishes P4 cached support from P5 delegated support probing")
+engine_category = gts_cli._resolve_master_category(parser, master, strings, "Engine_P5")
 emps_category = gts_cli._resolve_master_category(parser, master, strings, "EMPS_P5")
 hybrid_active_plan = gts_cli._master_command_plan(parser, master, hybrid, 0x06, gts / "bin", db_root)
 check(
@@ -129,6 +130,36 @@ check(
     },
     "command plan partitions Hybrid role 0x06 into 29 DID-backed direct and 10 RID-backed routine candidates",
 )
+engine_multi_plan = gts_cli._master_command_plan(
+    parser, master, engine_category, 0x63, gts / "bin", db_root, 0x4C, strings
+)
+engine_multi = engine_multi_plan["multi_active_test_init_model"]
+engine_group = engine_multi["selected_plan"]
+check(
+    engine_multi_plan["plugin"] == "GetMultiActInitP5_DT.dll"
+    and engine_multi_plan["operation_surface"] == "direct_transport"
+    and engine_multi_plan["semantic_status"] == "exact_plugin_identity_and_selected_multi_active_test_plan"
+    and engine_multi["category_plan"]["group_count"] == 5
+    and engine_multi["category_plan"]["membership_count"] == 10
+    and engine_group["group"]["name"] == "Pilot Injection Volume"
+    and engine_group["group"]["member_count"] == 2
+    and [(m["sort_order"], m["selected_test"]["active_test_id"], m["selected_test"]["name"]) for m in engine_group["members"]] == [
+        (1, 0x4D, "Pilot Injection Volume Select Cylinder"),
+        (2, 0x4E, "Pilot Injection Volume Value"),
+    ]
+    and [(m["selected_test"]["initial_read_did"], m["selected_test"]["bit_start"], m["selected_test"]["bit_end"], m["initial_transaction"]["materialized_send"]) for m in engine_group["members"]] == [
+        (0x284A, 0, 7, "22284a"),
+        (0x284A, 8, 15, "22284a"),
+    ],
+    "command plan expands Engine role 0x63 group 0x4C into two ordered type-68 controls sharing DID 0x284A",
+)
+hybrid_multi_plan = gts_cli._master_command_plan(parser, master, hybrid, 0x63, gts / "bin", db_root)
+check(
+    hybrid_multi_plan["multi_active_test_init_model"]["category_plan"]["group_count"] == 0
+    and hybrid_multi_plan["multi_active_test_init_model"]["category_plan"]["membership_count"] == 0,
+    "command plan keeps Hybrid role 0x63 binding but reports no static type-33 multi-control groups",
+)
+
 hybrid_init_plan = gts_cli._master_command_plan(
     parser, master, hybrid, 0x08, gts / "bin", db_root, 0x01, strings
 )

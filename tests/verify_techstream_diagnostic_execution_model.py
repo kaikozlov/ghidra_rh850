@@ -170,11 +170,36 @@ check(
 
 plugin_semantics = gts["dll_role_schema"]["plugin_semantics"]
 monitor_list = plugin_semantics["role_0x05_p5_monitor_list"]
+multi_active_test_init = plugin_semantics["role_0x63_p5_multi_active_test_init"]
 active_test_monitor_list = plugin_semantics["role_0xad_p5_monitor_list_for_active_test"]
 active_test_signal_info = plugin_semantics["role_0x70_p5_active_test_signal_info"]
 active_test_init = plugin_semantics["role_0x08_p5_active_test_init"]
 active_test_list = plugin_semantics["role_0x06_p5_active_test_list"]
 signal_info = plugin_semantics["role_0x41_p5_signal_info"]
+check(
+    "current role 0x63 P5 multi-Active-Test init plugin is identity-pinned and type-33 driven",
+    multi_active_test_init["plugin"]["sha256"] == "ada491144d9cb0faded9317d355486b6b79d4ae8d25e7a262a2a0a69d05d1fc7"
+    and multi_active_test_init["example_binding"]["category_id"] == 372
+    and multi_active_test_init["example_binding"]["dll_role_id"] == 0x63
+    and multi_active_test_init["example_binding"]["dll_name"] == "GetMultiActInitP5_DT.dll"
+    and multi_active_test_init["example_frame"]["selector"] == "0xCA"
+    and multi_active_test_init["example_frame"]["variables"]["send"]["bytes"] == "22ffff"
+    and multi_active_test_init["example_frame"]["variables"]["receive_check"]["bytes"] == "62"
+    and multi_active_test_init["init_model"]["group_table"]["table"] == 33
+    and multi_active_test_init["init_model"]["group_fields"]["member_active_test_id"] == "u16 +0x02",
+)
+check(
+    "current role 0x63 group expansion, member initialization, selector mutation, and output are instruction-pinned",
+    multi_active_test_init["anchors"]["type33_group_lookup"]["bytes"].startswith("0fb7450881c1cc000000")
+    and multi_active_test_init["anchors"]["type33_member_fields"]["bytes"].startswith("8b4da86a188b0408")
+    and multi_active_test_init["anchors"]["group_sort_and_copy"]["bytes"].startswith("8d45dc508d4db0")
+    and multi_active_test_init["anchors"]["member_type68_lookup"]["bytes"].startswith("0fb7700c8d8decfdffff")
+    and multi_active_test_init["anchors"]["member_initial_read_mode"]["bytes"].startswith("8b8dfcfdffff8b01")
+    and multi_active_test_init["anchors"]["selector_ca_member_fields"]["bytes"].startswith("8b4610ff750c0fbfcf")
+    and multi_active_test_init["anchors"]["selector_ca_did_injection_and_send"]["bytes"].startswith("8b5dd48d4f306a01c1eb08")
+    and multi_active_test_init["anchors"]["panel_mode"]["bytes"].startswith("8b118a423c")
+    and multi_active_test_init["anchors"]["member_output"]["bytes"].startswith("8d8d88feffffff1550600010"),
+)
 check(
     "current role 0xAD P5 Active-Test monitor-list plugin is identity-pinned and reuses the P5 support pipeline",
     active_test_monitor_list["plugin"]["sha256"] == "a9f96403a1246f40018273137ae2f650eb95f6e651257979a98583155d33abff"

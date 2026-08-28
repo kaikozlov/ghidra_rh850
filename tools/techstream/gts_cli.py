@@ -865,6 +865,126 @@ def _active_test_signal_info_selected_plan(
     }
 
 
+def _multi_active_test_category_plan(
+    parser: DDBParser, category: dict[str, Any], db_root: Path
+) -> dict[str, Any]:
+    db_path = db_root / str(category["database"])
+    db = parser.parse_ecu_db(db_path)
+    section = db.sections.get(33)
+    if section is None:
+        return {
+            "group_table": 33,
+            "group_table_class": ECU_TABLE_CLASS_NAMES.get(33, "unknown"),
+            "group_count": 0,
+            "membership_count": 0,
+            "groups": [],
+            "boundary": "category binds role 0x63 but has no type-33 multi-control membership table",
+        }
+    if section.decoded_record_size != 12:
+        raise ValueError(f"{db_path.name}: type-33 record size {section.decoded_record_size}, expected 12")
+    groups: dict[int, list[dict[str, Any]]] = {}
+    for index in range(section.header.record_count):
+        raw = section.decoded_data[index * 12 : (index + 1) * 12]
+        group_id = struct.unpack_from("<H", raw, 0x00)[0]
+        groups.setdefault(group_id, []).append({
+            "record": index,
+            "member_active_test_id": struct.unpack_from("<H", raw, 0x02)[0],
+            "sort_order": struct.unpack_from("<I", raw, 0x06)[0],
+            "auxiliary_byte": raw[0x0B],
+            "raw": raw.hex(),
+        })
+    rows = [
+        {
+            "group_id": group_id,
+            "group_id_hex": f"0x{group_id:X}",
+            "members": sorted(members, key=lambda row: (row["sort_order"], row["member_active_test_id"])),
+        }
+        for group_id, members in sorted(groups.items())
+    ]
+    return {
+        "group_table": 33,
+        "group_table_class": ECU_TABLE_CLASS_NAMES.get(33, "unknown"),
+        "record_size": 12,
+        "group_count": len(rows),
+        "membership_count": section.header.record_count,
+        "groups": rows,
+        "boundary": "type-33 rows are static multi-control expansion; each member still follows its type-68 initialization path",
+    }
+
+
+def _multi_active_test_group_plan(
+    parser: DDBParser,
+    master: Any,
+    category: dict[str, Any],
+    db_root: Path,
+    group_id: int,
+    strings: StringDataBase,
+) -> dict[str, Any]:
+    census = _multi_active_test_category_plan(parser, category, db_root)
+    matches = [group for group in census["groups"] if group["group_id"] == group_id]
+    if len(matches) != 1:
+        raise ValueError(
+            f"{category['database']}: multi Active Test group 0x{group_id:X} resolved {len(matches)} type-33 groups"
+        )
+    group = matches[0]
+    _, _, parent = _direct_active_test_selected_row(parser, category, db_root, group_id, strings)
+    frames = _master_frame_rows(parser, master, int(category["category_id"]), 0xCA)
+    if len(frames) != 1:
+        raise ValueError(
+            f"category {category['category_id']}: role-0x63 selector 0xCA resolved {len(frames)} frames"
+        )
+    frame = frames[0]
+    members = []
+    for membership in group["members"]:
+        _, _, selected = _direct_active_test_selected_row(
+            parser, category, db_root, membership["member_active_test_id"], strings
+        )
+        mode = selected["initial_read_mode"]
+        transaction: dict[str, Any] = {"mode": mode, "performed": False}
+        if mode == 0:
+            send = bytearray.fromhex(frame["send"]["bytes"] )
+            if len(send) < 3 or send[0] != 0x22:
+                raise ValueError(
+                    f"category {category['category_id']}: selector 0xCA base request is not 22xxxx: {send.hex()}"
+                )
+            did = selected["initial_read_did"]
+            send[1] = (did >> 8) & 0xFF
+            send[2] = did & 0xFF
+            transaction = {
+                "mode": 0,
+                "performed": True,
+                "selector": "0xCA",
+                "materialized_send": send.hex(),
+                "receive_check": frame["receive_check"]["bytes"],
+                "bit_start": selected["bit_start"],
+                "bit_end": selected["bit_end"],
+            }
+        elif mode == 1:
+            transaction["reason"] = "type-68 initial_read_mode == 1"
+        else:
+            transaction["reason"] = "plugin rejects modes other than 0/1 as C0040102"
+        members.append({
+            **membership,
+            "selected_test": selected,
+            "initial_transaction": transaction,
+        })
+    return {
+        "group": {
+            "group_id": group_id,
+            "group_id_hex": f"0x{group_id:X}",
+            "name": parent["name"],
+            "selected_test": parent,
+            "member_count": len(members),
+        },
+        "base_frame": frame,
+        "members": members,
+        "runtime_boundary": (
+            "group expansion, ordering, type-68 member fields, and initial request materialization are static; "
+            "the role does not imply that every category binding has type-33 groups"
+        ),
+    }
+
+
 def _active_test_monitor_category_plan(
     parser: DDBParser, category: dict[str, Any], db_root: Path
 ) -> dict[str, Any]:
@@ -1009,17 +1129,32 @@ def _master_command_plan(
         "active_test_init_model": None,
         "active_test_signal_info_model": None,
         "active_test_monitor_model": None,
+        "multi_active_test_init_model": None,
         "boundary": (
             "Frames/timers are resolved from the selected category. Executable semantics are attached only "
             "when the selected plugin SHA-256 exactly matches a recovered profile."
         ),
     }
-    if selected_item is not None and role not in {0x08, 0x70}:
-        raise ValueError("--item is currently supported only for direct Active Test roles 0x08 and 0x70")
+    if selected_item is not None and role not in {0x08, 0x63, 0x70}:
+        raise ValueError("--item is currently supported only for Active Test roles 0x08, 0x63, and 0x70")
     if profile is None:
         return result
 
-    if profile_name == "role_0xad_p5_monitor_list_for_active_test":
+    if profile_name == "role_0x63_p5_multi_active_test_init":
+        result["multi_active_test_init_model"] = dict(profile["init_model"])
+        if db_root is not None:
+            result["multi_active_test_init_model"]["category_plan"] = _multi_active_test_category_plan(
+                parser, category, db_root
+            )
+            result["semantic_status"] = "exact_plugin_identity_and_category_multi_active_test_census"
+        if selected_item is not None:
+            if db_root is None or strings is None:
+                raise ValueError("role-0x63 selected-group planning requires the category ECU database and strings")
+            result["multi_active_test_init_model"]["selected_plan"] = _multi_active_test_group_plan(
+                parser, master, category, db_root, selected_item, strings
+            )
+            result["semantic_status"] = "exact_plugin_identity_and_selected_multi_active_test_plan"
+    elif profile_name == "role_0xad_p5_monitor_list_for_active_test":
         result["active_test_monitor_model"] = dict(profile["list_model"])
         if db_root is not None:
             result["active_test_monitor_model"]["category_plan"] = _active_test_monitor_category_plan(
@@ -1189,6 +1324,30 @@ def cmd_command(args: argparse.Namespace) -> int:
         )
     for timer in payload["timers"]:
         print(f"timer	id={timer['timer_id']}	delay_ms={timer['delay_ms']}")
+    multi_active = payload["multi_active_test_init_model"]
+    if multi_active is not None:
+        category_plan = multi_active.get("category_plan")
+        if category_plan is not None:
+            print(
+                f"multi-active-test-census\tgroups={category_plan['group_count']}\t"
+                f"memberships={category_plan['membership_count']}\ttable={category_plan['group_table']}"
+            )
+        selected_plan = multi_active.get("selected_plan")
+        if selected_plan is not None:
+            group = selected_plan["group"]
+            print(
+                f"multi-active-test\tgroup={group['group_id_hex']}\tname={group['name'] or '-'}\t"
+                f"members={group['member_count']}"
+            )
+            for member in selected_plan["members"]:
+                selected = member["selected_test"]
+                tx = member["initial_transaction"]
+                send = tx.get("materialized_send", "-")
+                print(
+                    f"member\torder={member['sort_order']}\tid={selected['active_test_id_hex']}\t"
+                    f"name={selected['name'] or '-'}\tdid=0x{selected['initial_read_did']:04X}\t"
+                    f"bits={selected['bit_start']}..{selected['bit_end']}\tsend={send}"
+                )
     active_test_monitor = payload["active_test_monitor_model"]
     if active_test_monitor is not None:
         category_plan = active_test_monitor.get("category_plan")

@@ -169,6 +169,13 @@ $ tools/gts command HV_P5 0xAD
 command  category=397  Hybrid Control  role=0xAD  plugin=GetDatMonListP5ForActTest_DT.dll  surface=delegated_transport_v18_proven  semantics=exact_plugin_identity_and_category_active_test_monitor_partition
 active-test-monitors  table=62  total=1464  active=1411  nonmember=53  direct=0  runtime_active=1411  runtime_nonmember=53  builder=CreateEnableDataIdList
 
+$ tools/gts command Engine_P5 0x63 --item 0x4C
+command  category=372  Engine  role=0x63  plugin=GetMultiActInitP5_DT.dll  surface=direct_transport  semantics=exact_plugin_identity_and_selected_multi_active_test_plan
+multi-active-test-census  groups=5  memberships=10  table=33
+multi-active-test  group=0x4C  name=Pilot Injection Volume  members=2
+member  order=1  id=0x4D  name=Pilot Injection Volume Select Cylinder  did=0x284A  bits=0..7  send=22284a
+member  order=2  id=0x4E  name=Pilot Injection Volume Value  did=0x284A  bits=8..15  send=22284a
+
 $ tools/gts command EMPS_P5 0x05
 command  category=405  EMPS  role=0x5  plugin=GetDatMonListP5_DT.dll  surface=delegated_transport_v18_proven  semantics=exact_plugin_identity_and_category_candidate_partition
 list     table=62  candidates=230  direct_include=0  direct_exclude=0  runtime_probe=230  builder=CreateEnableDataIdList
@@ -194,6 +201,8 @@ timer  category=397  id=1  delay_ms=0  unknown_08=0
 $ tools/gts frame 397 0x1
 frame  category=397  selector=0x1  comm_set=1  frame=0x279E  rcv_timeout=1020  retries=1  send=04  mask=  check=44
 ```
+
+Role `0x63` handles **multi-control Active Test initialization**. `--item` is the type-33 group ID, not a direct member ID. The current generic P5 plugin reads 12-byte `CDbMultiDidIdTable` rows keyed by u16 `+0x00`, takes member Active Test ID from `+0x02`, ordering from u32 `+0x06`, sorts the members, then looks up each member through type68 and applies the same selector-`0xCA` initial-read semantics used by role `0x08`. Categories may bind role `0x63` without having type-33 groups; the planner reports an empty census instead of manufacturing groups.
 
 Role `0xAD` is category-wide rather than selected-test-specific. The current `GetDatMonListP5ForActTest_DT.dll` reuses the normal role-`0x05` P5 support/table/MultiPID/conversion pipeline, but uses monitor flag bit `0x40` as the Active-Test membership bit. If flag bit4 is set, bit `0x40` is the direct include/exclude decision; if bit4 is clear, the plugin still calls `CheckSupportPid` and applies the `0x40` membership test afterward. `tools/gts command ... 0xAD` therefore reports both static membership and which rows still require runtime support evaluation. It does **not** take `--item`: the plugin does not join this list to one selected Active Test ID.
 

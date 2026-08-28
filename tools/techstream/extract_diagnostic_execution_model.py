@@ -400,6 +400,7 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
     active_test_list = bin_root / "GetActTstListP5_DT.dll"
     active_test_init = bin_root / "GetActTstInitP5_DT.dll"
     active_test_signal_info = bin_root / "GetATSignalInfoP5_DT.dll"
+    multi_active_test_init = bin_root / "GetMultiActInitP5_DT.dll"
     signal_info = bin_root / "GetDatMonSignalInfoP5_DT.dll"
     kgp = bin_root / "KgpDataCtrl.dll"
     return {
@@ -558,6 +559,45 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
                 "subaru_check_support_did": anchor(active_test_list, 0x10001FF8, "0fb7402050ffb560ffffffff15245000108bf885ff0f8509010000837dec010f"),
                 "subaru_check_support_rid": anchor(active_test_list, 0x100015A0, "6a018d8534ffffff0fbfce508d45ecc745ec00000000508b85f8feffff8b04888d8d54ffffff0fb7401e50ffb5c8feffffff15285000108bf8"),
                 "final_output": anchor(active_test_list, 0x10001948, "508bcbe8800800008bf0668b0e66894d8c8d4e04518d4d90ff153c5000108d4e14518d4da0ff153c5000108b46248b8db4feffff8945b08d458450ff1550500010"),
+            },
+        },
+        "role_0x63_p5_multi_active_test_init": {
+            "plugin": file_identity(multi_active_test_init, gts_root),
+            "example_binding": dll_binding(parser, master, 372, 0x63),
+            "example_frame": resolve_frame(parser, master, 372, 0xCA, variable_namespace_base=0x2710),
+            "init_model": {
+                "purpose": "expand a multi-control Active Test group through type-33 membership rows, sort its direct type-68 member controls, initialize each member, and emit CCmdActTstSignalDataInit entries",
+                "group_table": {"table": 33, "class": ECU_TABLE_CLASS_NAMES[33], "record_size": 12},
+                "group_fields": {
+                    "group_id": "u16 +0x00 lookup key",
+                    "member_active_test_id": "u16 +0x02",
+                    "sort_order": "u32 +0x06 copied into CSortData and sorted before initialization",
+                    "auxiliary_byte": "u8 +0x0B copied into CSortData",
+                },
+                "member_table": {"table": 68, "class": ECU_TABLE_CLASS_NAMES[68], "record_size": 64},
+                "member_initialization": {
+                    "lookup": "each sorted member ID -> type-68 u16 +0x20",
+                    "initial_read_mode": "type-68 u8 +0x39: mode 0 performs selector-0xCA RDBI, mode 1 skips, others reject C0040102",
+                    "initial_read_did": "type-68 u16 +0x34 replaces selector-0xCA base request bytes 1/2",
+                    "bit_range": "type-68 u16 +0x28/+0x2A",
+                    "panel_check_mode": "type-68 u8 +0x3C with +0x30/+0x32 panel keys",
+                    "selector": "0xCA",
+                    "base_request": "22ffff",
+                    "positive_check": "62",
+                },
+                "presentation": "each member joins type12 Active-Test pattern, type13 physical conversion, type14 display, and type15 unit metadata before CCmdActTstSignalDataInit::AddTail",
+                "current_category_boundary": "among current generic P5 bindings, only Engine_P5 carries type-33 rows; categories such as Hybrid bind the plugin but have no static multi-control groups",
+            },
+            "anchors": {
+                "type33_group_lookup": anchor(multi_active_test_init, 0x100025F4, "0fb7450881c1cc00000050ff76148d4598506821020000ff15bc6000108bf085f60f850c0100000fbf459c89459085c07f0abe010104c0e9f700000033ff33c0894594"),
+                "type33_member_fields": anchor(multi_active_test_init, 0x10002637, "8b4da86a188b04080fb740068945d48b04b9668b4002668945d08b04b90fb6400b8945d8e8bb1400008bf083c404897588c645fc0485f674150f57c08d4e040f1106660fd64610e80d100000"),
+                "group_sort_and_copy": anchor(multi_active_test_init, 0x100026DB, "8d45dc508d4db0e8790f00008bf085f6753aff758c8d4db0e8380c00008bf085f67529eb27"),
+                "member_type68_lookup": anchor(multi_active_test_init, 0x1000210A, "0fb7700c8d8decfdffff89b5c0fdffffff15f06000106a018d8d88feffffc645fc02ff154c6000108b95d8fdffff0fb7c6508d85ecfdffffc645fc03ff72148b4a045081c1cc000000c785dcfdffff00000000"),
+                "member_initial_read_mode": anchor(multi_active_test_init, 0x1000218F, "8b8dfcfdffff8b018b108b70048b78080fb640398995ccfdffff89b5d4fdffff89bdc4fdffff83e800743583e8010f8497010000689861001068cb01000068b8610010687462001068020104c0ff1568600010"),
+                "selector_ca_member_fields": anchor(multi_active_test_init, 0x100016F9, "8b4610ff750c0fbfcf8b04880fb74834894dd40fb748280fb7402a8945d08d45d85052894dc08bcb68ca000000ff15106000108bf085f60f85aa010000837de8017429"),
+                "selector_ca_did_injection_and_send": anchor(multi_active_test_init, 0x10001787, "8b5dd48d4f306a01c1eb08ff15486000106a028d4f30885808ff15486000108b4dd46a00578848088b4dccff150c6000108bf085f6"),
+                "panel_mode": anchor(multi_active_test_init, 0x1000235A, "8b118a423c8885e3fdffff84c074723c0174123c02746e3c03740abe020104c0e9170100008b8dd8fdffff8d4590508d85e8fdffff508d85dcfdffff500fb7423050ffb5d0fdffffe8f9f7ffff"),
+                "member_output": anchor(multi_active_test_init, 0x10002427, "8d8d88feffffff15506000108b85c0fdffff66898598feffff8b85ccfdffff898558ffffff8d4590508d85ecfdffff89bd2cffffff8bbdd8fdffff8bcf50ffb5d0fdffff8d8588feffff89b528ffffff50e8030300008bf0"),
             },
         },
         "role_0xad_p5_monitor_list_for_active_test": {

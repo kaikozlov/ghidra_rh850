@@ -859,6 +859,133 @@
             "value_capacity_chars": 17
           }
         },
+        "role_0x63_p5_multi_active_test_init": {
+          "anchors": {
+            "group_sort_and_copy": {
+              "bytes": "8d45dc508d4db0e8790f00008bf085f6753aff758c8d4db0e8380c00008bf085f67529eb27",
+              "file_offset": "0x1ADB",
+              "va": "0x100026DB"
+            },
+            "member_initial_read_mode": {
+              "bytes": "8b8dfcfdffff8b018b108b70048b78080fb640398995ccfdffff89b5d4fdffff89bdc4fdffff83e800743583e8010f8497010000689861001068cb01000068b8610010687462001068020104c0ff1568600010",
+              "file_offset": "0x158F",
+              "va": "0x1000218F"
+            },
+            "member_output": {
+              "bytes": "8d8d88feffffff15506000108b85c0fdffff66898598feffff8b85ccfdffff898558ffffff8d4590508d85ecfdffff89bd2cffffff8bbdd8fdffff8bcf50ffb5d0fdffff8d8588feffff89b528ffffff50e8030300008bf0",
+              "file_offset": "0x1827",
+              "va": "0x10002427"
+            },
+            "member_type68_lookup": {
+              "bytes": "0fb7700c8d8decfdffff89b5c0fdffffff15f06000106a018d8d88feffffc645fc02ff154c6000108b95d8fdffff0fb7c6508d85ecfdffffc645fc03ff72148b4a045081c1cc000000c785dcfdffff00000000",
+              "file_offset": "0x150A",
+              "va": "0x1000210A"
+            },
+            "panel_mode": {
+              "bytes": "8b118a423c8885e3fdffff84c074723c0174123c02746e3c03740abe020104c0e9170100008b8dd8fdffff8d4590508d85e8fdffff508d85dcfdffff500fb7423050ffb5d0fdffffe8f9f7ffff",
+              "file_offset": "0x175A",
+              "va": "0x1000235A"
+            },
+            "selector_ca_did_injection_and_send": {
+              "bytes": "8b5dd48d4f306a01c1eb08ff15486000106a028d4f30885808ff15486000108b4dd46a00578848088b4dccff150c6000108bf085f6",
+              "file_offset": "0xB87",
+              "va": "0x10001787"
+            },
+            "selector_ca_member_fields": {
+              "bytes": "8b4610ff750c0fbfcf8b04880fb74834894dd40fb748280fb7402a8945d08d45d85052894dc08bcb68ca000000ff15106000108bf085f60f85aa010000837de8017429",
+              "file_offset": "0xAF9",
+              "va": "0x100016F9"
+            },
+            "type33_group_lookup": {
+              "bytes": "0fb7450881c1cc00000050ff76148d4598506821020000ff15bc6000108bf085f60f850c0100000fbf459c89459085c07f0abe010104c0e9f700000033ff33c0894594",
+              "file_offset": "0x19F4",
+              "va": "0x100025F4"
+            },
+            "type33_member_fields": {
+              "bytes": "8b4da86a188b04080fb740068945d48b04b9668b4002668945d08b04b90fb6400b8945d8e8bb1400008bf083c404897588c645fc0485f674150f57c08d4e040f1106660fd64610e80d100000",
+              "file_offset": "0x1A37",
+              "va": "0x10002637"
+            }
+          },
+          "example_binding": {
+            "category_id": 372,
+            "dll_name": "GetMultiActInitP5_DT.dll",
+            "dll_role_hex": "0x63",
+            "dll_role_id": 99,
+            "raw": "4700650074004d0075006c007400690041006300740049006e0069007400500035005f00440054002e0064006c006c0000000000000000000000000000000000000000000000000000000000000000007401000063000000"
+          },
+          "example_frame": {
+            "category_id": 372,
+            "comm_frame_id": "0x2AE2",
+            "comm_frame_raw": "e22af62b8e276627",
+            "comm_set": 1,
+            "comm_set_metadata": {
+              "comm_set_id": 1,
+              "exception_handler_flag": 0,
+              "exception_handler_id": 0,
+              "raw": "e8030000fc0300000000010000000100",
+              "receive_timeout": 1020,
+              "retry_count": 1,
+              "send_parameter": 1000,
+              "unknown_word_0c": 0
+            },
+            "func_comm_frame_raw": "7401ca000100e22a0000010000000000",
+            "selector": "0xCA",
+            "variables": {
+              "receive_check": {
+                "bytes": "62",
+                "id": "0x2766",
+                "normalized_id": "0x56"
+              },
+              "receive_mask": {
+                "bytes": "ff",
+                "id": "0x278E",
+                "normalized_id": "0x7E"
+              },
+              "send": {
+                "bytes": "22ffff",
+                "id": "0x2BF6",
+                "normalized_id": "0x4E6"
+              }
+            }
+          },
+          "init_model": {
+            "current_category_boundary": "among current generic P5 bindings, only Engine_P5 carries type-33 rows; categories such as Hybrid bind the plugin but have no static multi-control groups",
+            "group_fields": {
+              "auxiliary_byte": "u8 +0x0B copied into CSortData",
+              "group_id": "u16 +0x00 lookup key",
+              "member_active_test_id": "u16 +0x02",
+              "sort_order": "u32 +0x06 copied into CSortData and sorted before initialization"
+            },
+            "group_table": {
+              "class": "CDbMultiDidIdTable",
+              "record_size": 12,
+              "table": 33
+            },
+            "member_initialization": {
+              "base_request": "22ffff",
+              "bit_range": "type-68 u16 +0x28/+0x2A",
+              "initial_read_did": "type-68 u16 +0x34 replaces selector-0xCA base request bytes 1/2",
+              "initial_read_mode": "type-68 u8 +0x39: mode 0 performs selector-0xCA RDBI, mode 1 skips, others reject C0040102",
+              "lookup": "each sorted member ID -> type-68 u16 +0x20",
+              "panel_check_mode": "type-68 u8 +0x3C with +0x30/+0x32 panel keys",
+              "positive_check": "62",
+              "selector": "0xCA"
+            },
+            "member_table": {
+              "class": "CDbActTestP5Table",
+              "record_size": 64,
+              "table": 68
+            },
+            "presentation": "each member joins type12 Active-Test pattern, type13 physical conversion, type14 display, and type15 unit metadata before CCmdActTstSignalDataInit::AddTail",
+            "purpose": "expand a multi-control Active Test group through type-33 membership rows, sort its direct type-68 member controls, initialize each member, and emit CCmdActTstSignalDataInit entries"
+          },
+          "plugin": {
+            "path": "bin/GetMultiActInitP5_DT.dll",
+            "sha256": "ada491144d9cb0faded9317d355486b6b79d4ae8d25e7a262a2a0a69d05d1fc7",
+            "size": 42512
+          }
+        },
         "role_0x70_p5_active_test_signal_info": {
           "anchors": {
             "name_and_ids": {
