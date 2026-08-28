@@ -1,0 +1,122 @@
+{
+  "category_435": {
+    "category_id": 435,
+    "database": "ABS_P5.ddb",
+    "generation": 20,
+    "monitor_schema": {
+      "candidate_count": 554,
+      "record_size": 80,
+      "table": 62,
+      "table_class": "CDbDatamonitorP5Table"
+    },
+    "name": "Brake/EPB",
+    "short_name": ""
+  },
+  "exact_camry_boundary": {
+    "brake_identity": {
+      "bus": 1,
+      "bus0_bus2_f181_timeout": true,
+      "ecu_part_0105": "8954147040",
+      "f181": "F152633K0000",
+      "f18c_serial": "8954147040CFC1800985",
+      "rx": "0x7B8",
+      "tx": "0x7B0"
+    },
+    "did_107e_default": {
+      "error": "NegativeResponseError: READ_DATA_BY_IDENTIFIER - request out of range",
+      "status": "negative_or_timeout"
+    },
+    "did_107e_extended": {
+      "error": "NegativeResponseError: READ_DATA_BY_IDENTIFIER - request out of range",
+      "extended_session": "positive",
+      "returned_default": true,
+      "status": "negative_or_timeout"
+    },
+    "did_10af_live_support": "not_measured"
+  },
+  "observer_vocabulary": {
+    "ads_control_eps_pinion_angle2": {
+      "alternate_did": "0x307E",
+      "bit_range_inclusive": [
+        0,
+        23
+      ],
+      "decimal_point_count": 5,
+      "did": "0x107E",
+      "div": 1,
+      "interpretation": "signed 24-bit angle; display radians = raw * 25 / 100000 (0.00025 rad/count)",
+      "mirrored_tables": [
+        62,
+        157
+      ],
+      "monitor_key": 314,
+      "mul": 25,
+      "name": "ADS Control EPS Pinion Angle2",
+      "offset": 0,
+      "pattern_display": {
+        "0": "-32.768",
+        "1": "Not supported"
+      },
+      "physical_data_key": 65,
+      "semantic_role": "diagnostic_data_monitor_observer_candidate",
+      "signed": true,
+      "table": 62,
+      "unit": "rad",
+      "width_bits": 24,
+      "width_bytes": 3
+    },
+    "software_number_for_authentication": {
+      "alternate_did": null,
+      "bit_range_inclusive": [
+        0,
+        135
+      ],
+      "decimal_point_count": 0,
+      "did": "0x10AF",
+      "div": 1,
+      "interpretation": "opaque 136-bit (17-byte) authentication software-number field; no unit or value dictionary",
+      "mirrored_tables": [
+        62,
+        157
+      ],
+      "monitor_key": 504,
+      "mul": 1,
+      "name": "Software Number for Authentication",
+      "offset": 0,
+      "pattern_display": {},
+      "physical_data_key": 17,
+      "semantic_role": "diagnostic_data_monitor_observer_candidate",
+      "signed": false,
+      "table": 62,
+      "unit": null,
+      "width_bits": 136,
+      "width_bytes": 17
+    }
+  },
+  "producer_boundary": {
+    "changes_acquisition_or_producer_hypothesis": false,
+    "conclusion": "0x10AF is observer vocabulary for a software-number field. Its name and 17-byte geometry do not identify a SecurityAccess secret, CMAC/freshness implementation, B6 producer, or package. It does not replace the exact F181/0105 acquisition inputs recorded separately."
+  },
+  "runtime_support_boundary": {
+    "candidate_partition": {
+      "direct_exclude": 0,
+      "direct_include": 0,
+      "runtime_check_support_pid": 554
+    },
+    "conclusion": "Both rows are static DDB candidates. Category 435 runtime-probes every monitor candidate via CheckSupportPid, so DDB presence does not prove that the exact Camry exposes either DID.",
+    "plugin": "GetDatMonListP5_DT.dll",
+    "role": "0x05 Data Monitor list"
+  },
+  "schema": "camry-brake-observer-vocabulary-v1",
+  "sources": {
+    "current_gtsplus_abs_p5": {
+      "path": "NA/DB/Gen/ABS_P5.ddb",
+      "sha256": "a7a6e4a66025a2ef0ef98746a9d3bce606d9ea1071bb884d46bc790e5fa0faf2",
+      "size": 200474
+    },
+    "data/generated/camry_2026_nrtd_p5.json": {
+      "sha256": "3a344b6cb2de19edb163e040974955f2d27467dc0a864974b6a5af90659d308f"
+    }
+  },
+  "title": "Current GTS+ category-435 Brake observer vocabulary"
+}

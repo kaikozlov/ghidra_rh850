@@ -1251,6 +1251,15 @@ paths = [
   "docs/variants/camry-2026-live-baseline.md",
 ]
 
+[suite.camry_brake_observer_vocabulary]
+tests = ["tests/verify_camry_brake_observer_vocabulary.py"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+oracle = "generated_self_check+external_source+dynamic_probe_join"
+paths = [
+  "docs/variants/camry-2026-live-baseline.md",
+]
+
 [suite.techstream_tis_calibration_acquisition]
 tests = ["tests/verify_techstream_tis_calibration_acquisition.py"]
 requires_external = ["techstream_v18"]
