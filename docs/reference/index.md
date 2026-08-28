@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 343 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 182
+Findings: 344 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 182
 
 ## Reading this index
 
@@ -362,6 +362,7 @@ Findings: 343 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="finding-var-063"></a>**VAR-063** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_2026.py` | — |
 | <a id="finding-var-064"></a>**VAR-064** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md), [docs/tooling/techstream.md](../tooling/techstream.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_2026.py` | — |
 | <a id="finding-var-065"></a>**VAR-065** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000_external_lateral_ingress.py` | — |
+| <a id="finding-var-066"></a>**VAR-066** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000_gtsplus_semantics.py`, `tests/verify_camry_2026.py` | — |
 
 ## Open-questions index
 
@@ -822,7 +823,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/ephemeral_runtime_target_manifest_8965H1202000.json` | ephemeral_runtime_resolver, corolla_2023_public_route_opendbc_evidence, corolla_tss3_opendbc_readiness, corolla_2023_public_route_opendbc_evidence_external, span_2025_discord_rlog_opendbc_evidence_external, albinoelephant_corolla_codeflash | — |
 | `data/generated/exploit_interest_cohorts.json` | exploit_interest_ranking, exploit_interest_reviewed_candidates | — |
 | `data/generated/exploit_interest_ranking.csv` | exploit_interest_ranking, exploit_interest_reviewed_candidates | — |
-| `data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json` | camry_8965f3307000_gtsplus_semantics, camry_8965f3307000_gtsplus_external, camry_8965f3307000_external_lateral_ingress | — |
+| `data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json` | camry_8965f3307000_gtsplus_semantics, camry_8965f3307000_gtsplus_external, camry_2026, camry_8965f3307000_external_lateral_ingress | — |
 | `data/generated/p4dk4_template/p4dk4_vocabulary.json` | diagnostic_vocabulary | — |
 | `data/generated/rdbi_emitted_write_audit.json` | application_rdbi | — |
 | `data/generated/response_disclosure_audit.csv` | response_disclosure_audit | — |

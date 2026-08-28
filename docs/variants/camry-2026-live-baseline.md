@@ -1149,8 +1149,11 @@ row selects Dem event `0x0143`; its exact F33 event record selects DTC index 82 
 Control Module` / `Missing Message`**. So this is not merely an H transfer: the exact Camry
 EPS itself expects B6 as **Brake System Control Module traffic** on its controller-1
 receive network. CAN has no source-node field, so the receiver cannot identify the unique
-transmitter implementation beyond that monitored module relationship; sender code must
-come from the Brake/EPB side (or the upstream FRC->Brake producer chain).
+transmitter implementation beyond that monitored module relationship. Section 19 now
+closes the stronger topology fact independently: Toyota's own current Camry CAN model
+places Skid Control and EPS together on Central-Gateway Bus 4, while the front-camera
+sensor domain is on Bus 1. The DTC therefore identifies the immediate logical source
+domain, not by itself the ECU that computes, transforms, or signs the lane target.
 
 The command-sized candidate set inside that complete normal surface is small. Exact F33
 has only nine signed generated-COM fields at least 12 bits wide: `0x025` signals 187/189,
@@ -1208,12 +1211,80 @@ inward to a non-COM/internal EPS path. Deterministic evidence is
 `tests/verify_camry_8965F3307000_external_lateral_ingress.py`. Production output remains
 disabled.
 
+## 19. Current GTS+ CAN topology closes the B6 bus question
+
+The zero-B6 result in §16 raised a hardware-topology alternative: perhaps the Toyota-B
+camera connector exposes only an ADAS/gateway view while protected B6 actually lives on
+a separate Brake↔EPS segment that the comma cannot see. Current GTS+ contains Toyota's
+own **CAN Bus Check** topology tables, so this can be tested against the exact current
+Camry family instead of inferred from message names.
+
+The relevant current master tables are now class-resolved as
+`CDbCanBusCarIdTable` (75), `CDbSubBusConfirmationCGWTable` (76),
+`CDbCanBusOptionTable` (77), `CDbCanBusComponentTable` (78),
+`CDbCanBusNameTable` (79), plus `CDbCanBusListTable` (55). The three current
+Camry-HV vehicle types already joined to category-405 `EMPS_P5` in §15 —
+**12704, 12862, and 12984** — each select the same CAN topology key
+**`0x00A7D910`**. That key has 18 option variants. Every variant resolves to the
+same 31 component placements; the three steering/ADAS placements that matter here are
+invariant:
+
+| Toyota component | component | Central-Gateway bus |
+|---|---:|---:|
+| Front Camera Module | `0x6D` | **Bus 1** (index 29) |
+| Skid Control (ABS/VSC/TRAC) | `0x29` | **Bus 4** (index 32) |
+| Power Steering (EPS) | `0x32` | **Bus 4** (index 32) |
+
+The neighboring membership makes the split unambiguous at the topology-model level.
+Bus 1 also contains Front Radar, Front Side Radar Master, blind-spot and camera/parking
+sensor domains. Bus 4 also contains Brake Booster, the steering-angle sensor/spiral
+cable, Airbag, Skid Control, and EPS. `CDbCanBusNameTable` names indices 29/32
+`Bus 1`/`Bus 4`, while `CDbCanBusListTable` independently assigns both to
+**Central Gateway**. This is Toyota's own current Camry network model, not a CAN-ID
+correlation.
+
+Exact F33 independently collapses the EPS-side escape hatch. The target has one configured
+CanIf controller (`0x21970 = 1`), and its normal receive/transmit interrupt wrappers at
+`0x83F30` and `0x8583E` both invoke their workers with controller/channel argument **1**.
+B6 is controller-1 acceptance rule 39 inside the same 47-rule span whose tail contains
+EPS diagnostics `0x7A1/0x777/0x7A0`. Thus the exact EPS does **not** have a second
+application CAN controller on which B6 could secretly arrive.
+
+Joined to the retained harness evidence, this closes the practical wiring question. Before
+the physical Toyota-B CAN0/CAN1 exchange, the large steering/chassis network was exposed
+on the unsplit Panda bus 1 while the separate 22-ID ADAS-FD family occupied the relay
+pair. After the exchange, the steering/chassis family moved onto CAN0/CAN2 and the 22-ID
+family moved to bus 1. The moved family contains exact-F33-produced `0x030`, protected
+Brake-domain `0x0D7`, `0x025` steering state and the EPS diagnostic route; the 22-ID
+family contains the `0x180..0x18C` 64-byte sensor/object vocabulary. That composition is
+exactly the direction predicted by Toyota's **Bus 4 chassis / Bus 1 camera-radar** split.
+The repin therefore moved the B6-capable Brake/EPS network onto the comma relay pair as
+intended; a simple wrong-Panda-bus or hidden-second-EPS-bus explanation for the repeated
+zero-B6 capture is rejected.
+
+There is one deliberately retained boundary. GTS+ `Bus 1`/`Bus 4` are Central-Gateway
+network identities, not connector cavity numbers, and passive CAN cannot mathematically
+exclude a perfectly transparent external gateway that republishes an entire native EPS
+bus. The retained data provide no positive evidence for such a mirror: post-repin
+CAN0/CAN2 have identical stream sets with only small per-port receive-loss differences,
+exact F33 `0x030` and EPS UDS responses are present on that network, and the Toyota model
+already places Brake/Skid and EPS on one shared Bus-4 segment. The supported engineering
+conclusion is therefore **Bus 4 is the Brake/EPS B6 segment and the relay-correct Toyota-B
+capture reaches it**. The remaining zero-B6 question is operational, not a bus-selection
+question: §16 still lacks a machine-synchronized proof that stock `LTA Control Condition`
+was active during either drive.
+
+Deterministic topology evidence is promoted inside
+`data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json` and verified by
+`tests/verify_camry_8965F3307000_gtsplus_semantics.py`; the physical relay/capture half
+remains `data/generated/camry_2026_relay_correct_capture.json`.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065)
+- Findings with this document as canonical home: [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066)
 - Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125)
 <!-- knowledge-cross-references:end -->

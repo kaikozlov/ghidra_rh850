@@ -71,6 +71,11 @@ with tempfile.TemporaryDirectory(prefix="gts-root-routing-") as td:
 parser = DDBParser()
 strings = gts_cli._english_strings(parser, db_root)
 master = parser.parse_master_db(db_root / "Toyota.ddb")
+camry_bus = gts_cli._master_canbus_topology_rows(parser, master, strings, "12704")
+check(len(camry_bus) == 1 and camry_bus[0]["vehicle_name"] == "Camry HV" and camry_bus[0]["can_bus_car_id"] == "0x00A7D910" and camry_bus[0]["option_count"] == 18 and camry_bus[0]["placement_variant_count"] == 1, "CAN Bus Check resolver joins current Camry-HV type 12704 to one 18-option topology")
+camry_placements = {row["component_hex"]: row for row in camry_bus[0]["placement_variants"][0]["placements"]}
+check(camry_placements["0x6D"]["ecu_domain"] == "Front Camera Module" and camry_placements["0x6D"]["bus_name"] == "Bus 1" and camry_placements["0x29"]["ecu_domain"] == "Skid Control (ABS/VSC/TRAC)" and camry_placements["0x29"]["bus_name"] == "Bus 4" and camry_placements["0x32"]["ecu_domain"] == "Power Steering (EPS)" and camry_placements["0x32"]["bus_name"] == "Bus 4", "CAN Bus Check resolver exposes camera Bus1 versus Brake/EPS Bus4 split")
+check(gts_cli.build_parser().parse_args(["canbus", "12704"]).func is gts_cli.cmd_canbus, "gts canbus command is registered in the unified CLI")
 hybrid = gts_cli._resolve_master_category(parser, master, strings, "HV_P5")
 check(hybrid["category_id"] == 397 and hybrid["name"] == "Hybrid Control", "master category resolver joins HV_P5 to category 397 Hybrid Control")
 plugins = gts_cli._master_plugins(parser, master, hybrid["category_id"])

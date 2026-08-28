@@ -10,7 +10,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-from parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES
+from parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES, MASTER_TABLE_CLASS_NAMES
 from ddb_semantics import extract_behavior_records, extract_monitor_records, records
 from ddb_strings import load_string_db
 from techstream_paths import GTSPLUS_EXTERNAL_ROOT, V18_TECHSTREAM_ROOT, resolve_gts_root
@@ -25,6 +25,7 @@ _, F33_TARGET = target("camry-8965F3307000")
 IMAGE = verified_file("camry-8965F3307000", "codeflash")
 RAM = REPO / "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin"
 DECOMP = REPO / "data/generated/camry_8965F3307000_gtsplus_decompiler_evidence.json"
+F33_CORPUS = REPO / F33_TARGET["decompiler_corpus"]
 OUT = REPO / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
 IMAGE_SHA = F33_TARGET["codeflash_sha256"]
 RDBI_OFFSET = 0x2928C
@@ -108,6 +109,7 @@ def main() -> int:
         "gts_strings": gdb / "M_English.ddb",
         "gts_master": gdb / "Toyota.ddb",
         "gts_kgp": args.gtsplus_root / "bin/KgpDataCtrl.dll",
+        "f33_decompiler_corpus": F33_CORPUS,
         "v18_emps": vdb / "EMPS_P5.ddb",
         "v18_strings": vdb / "M_English.ddb",
         "v18_master": vdb / "Toyota.ddb",
@@ -196,6 +198,147 @@ def main() -> int:
             )
     new_camry = sorted(set(g_camry) - set(v_camry))
     new_p5 = [vid for vid in new_camry if vid in p5_by_vehicle]
+
+    # Current GTS+ contains Toyota's own CAN Bus Check topology model.  Resolve
+    # the exact current-Camry family through the class-backed master tables
+    # rather than inferring network membership from CAN-ID correlations.
+    can_table_ids = (55, 75, 76, 77, 78, 79)
+    can_table_expected = {
+        55: ("CDbCanBusListTable", 52, 32),
+        75: ("CDbCanBusCarIdTable", 733, 12),
+        76: ("CDbSubBusConfirmationCGWTable", 256, 16),
+        77: ("CDbCanBusOptionTable", 1075, 80),
+        78: ("CDbCanBusComponentTable", 34365, 16),
+        79: ("CDbCanBusNameTable", 47, 20),
+    }
+    can_table_geometry = {}
+    for table_id in can_table_ids:
+        sec = g_master.sections[table_id]
+        expected_name, expected_count, expected_size = can_table_expected[table_id]
+        if MASTER_TABLE_CLASS_NAMES.get(table_id) != expected_name:
+            raise SystemExit(f"current CAN table {table_id} class-name drift")
+        if (sec.header.record_count, sec.decoded_record_size) != (expected_count, expected_size):
+            raise SystemExit(f"current CAN table {table_id} geometry drift")
+        can_table_geometry[str(table_id)] = {
+            "class_name": expected_name,
+            "record_count": sec.header.record_count,
+            "record_size": sec.decoded_record_size,
+        }
+
+    can_bus_car_rows = list(records(g_master.sections[75]))
+    camry_topology_vehicle_types = [12704, 12862, 12984]
+    if camry_topology_vehicle_types != new_p5:
+        raise SystemExit(f"Camry topology vehicle-type denominator drift: {new_p5}")
+    camry_car_id_rows = []
+    for vehicle_type in camry_topology_vehicle_types:
+        matches = [raw for raw in can_bus_car_rows if u32(raw, 4) == vehicle_type]
+        if len(matches) != 1:
+            raise SystemExit(f"Camry vehicle type {vehicle_type} has {len(matches)} CanBusCarId rows")
+        raw = matches[0]
+        camry_car_id_rows.append({
+            "vehicle_type": vehicle_type,
+            "vehicle_name": g_camry[vehicle_type],
+            "can_bus_car_id": f"0x{u32(raw, 0):08X}",
+            "raw_hex": raw.hex(),
+        })
+    car_ids = {row["can_bus_car_id"] for row in camry_car_id_rows}
+    if car_ids != {"0x00A7D910"}:
+        raise SystemExit(f"Camry CanBusCarId drift: {sorted(car_ids)}")
+    camry_can_bus_car_id = 0x00A7D910
+
+    option_rows = [raw for raw in records(g_master.sections[77]) if u32(raw, 0) == camry_can_bus_car_id]
+    if len(option_rows) != 18:
+        raise SystemExit(f"Camry CanBusOption variant count drift: {len(option_rows)}")
+    option_groups = [u32(raw, 44) for raw in option_rows]
+    if len(set(option_groups)) != 18:
+        raise SystemExit("Camry CanBusOption component-group keys are no longer unique")
+
+    # CDbCanBusComponentTable's exact current DLL API keys records by dword +0
+    # (component-set), u16 +8 (bus index), and u8 +14 (component index).
+    # CDbSubBusConfirmationCGWTable is one-based; component index + 1 resolves
+    # the Toyota ECU-domain label.  CDbCanBusNameTable resolves the bus index.
+    subbus_rows = list(records(g_master.sections[76]))
+    subbus_names = {u32(raw, 0): g_strings.get_string(u32(raw, 4)) for raw in subbus_rows}
+    if set(subbus_names) != set(range(1, 257)):
+        raise SystemExit("current CGW sub-bus sequence is no longer 1..256")
+    bus_name_rows = list(records(g_master.sections[79]))
+    bus_names = {u32(raw, 8): g_strings.get_string(u32(raw, 4)) for raw in bus_name_rows}
+    bus_list_rows = list(records(g_master.sections[55]))
+    bus_gateway_names = defaultdict(set)
+    for raw in bus_list_rows:
+        bus_gateway_names[u16(raw, 8)].add(g_strings.get_string(u32(raw, 4)))
+
+    component_rows = list(records(g_master.sections[78]))
+    component_sets = {}
+    for group in option_groups:
+        group_rows = [raw for raw in component_rows if u32(raw, 0) == group]
+        if len(group_rows) != 31:
+            raise SystemExit(f"Camry component group 0x{group:08X} row-count drift: {len(group_rows)}")
+        placements = []
+        for raw in sorted(group_rows, key=lambda item: (u16(item, 8), item[14])):
+            component = raw[14]
+            bus_index = u16(raw, 8)
+            placements.append({
+                "component_index": f"0x{component:02X}",
+                "subbus_sequence": f"0x{component + 1:02X}",
+                "ecu_domain": subbus_names[component + 1],
+                "bus_index": bus_index,
+                "bus_name": bus_names[bus_index],
+                "junction_name": g_strings.get_string(u32(raw, 4)),
+                "raw_hex": raw.hex(),
+            })
+        component_sets[group] = placements
+    placement_shapes = {
+        tuple((row["component_index"], row["ecu_domain"], row["bus_index"], row["bus_name"]) for row in rows_)
+        for rows_ in component_sets.values()
+    }
+    if len(placement_shapes) != 1:
+        raise SystemExit("Camry CAN component placement differs across option variants")
+    canonical_placements = next(iter(component_sets.values()))
+
+    critical = {
+        row["component_index"]: row
+        for row in canonical_placements
+        if row["component_index"] in {"0x6D", "0x29", "0x32"}
+    }
+    expected_critical = {
+        "0x6D": ("Front Camera Module", 29, "Bus 1"),
+        "0x29": ("Skid Control (ABS/VSC/TRAC)", 32, "Bus 4"),
+        "0x32": ("Power Steering (EPS)", 32, "Bus 4"),
+    }
+    for component, (domain, bus_index, bus_name) in expected_critical.items():
+        row = critical.get(component)
+        if row is None or (row["ecu_domain"], row["bus_index"], row["bus_name"]) != (domain, bus_index, bus_name):
+            raise SystemExit(f"Camry critical topology drift for {component}: {row}")
+    if bus_gateway_names[29] != {"Central Gateway"} or bus_gateway_names[32] != {"Central Gateway"}:
+        raise SystemExit("Camry critical bus owner/name drift")
+
+    # Exact F33 independently collapses the EPS-side physical denominator: one
+    # configured CanIf controller and channel-1-only normal Rx/Tx interrupt
+    # wrappers.  B6 is rule 39 inside controller 1's normal 0..42 span.
+    f33_funcs = {}
+    with F33_CORPUS.open() as corpus_file:
+        for line in corpus_file:
+            row = json.loads(line)
+            if row.get("record") == "function":
+                entry = int(row["entry_addr"], 16)
+                if entry in (0x83F30, 0x8583E):
+                    f33_funcs[entry] = row
+    if set(f33_funcs) != {0x83F30, 0x8583E}:
+        raise SystemExit("F33 CAN interrupt-wrapper corpus entries missing")
+    if "FUN_00083ef2(1);" not in f33_funcs[0x83F30]["decompiled_c"] or "FUN_00085800(1);" not in f33_funcs[0x8583E]["decompiled_c"]:
+        raise SystemExit("F33 normal CAN interrupt wrappers no longer select controller/channel 1")
+    wrapper_hex = image[0x83F30:0x83F3E].hex()
+    if wrapper_hex != "800721000132bfffbcff40063f00" or image[0x8583E:0x8584C].hex() != wrapper_hex:
+        raise SystemExit("F33 channel-1 interrupt wrapper raw bytes drift")
+    if image[0x21970] != 1:
+        raise SystemExit("F33 CanIf controller-count byte drift")
+    controller1_rules = [u32(image, 0x230B8 + 0x10 * i) for i in range(47)]
+    if controller1_rules[39] != 0x0B6 or controller1_rules[43:46] != [0x7A1, 0x777, 0x7A0]:
+        raise SystemExit("F33 controller-1 B6/diagnostic rule placement drift")
+    f33_normal_tx_ids = [u32(image, 0x21F58 + 8 * i) & 0x1FFFFFFF for i in range(5)]
+    if f33_normal_tx_ids != [0x030, 0x351, 0x394, 0x4A3, 0x4C8]:
+        raise SystemExit(f"F33 normal Tx table drift: {f33_normal_tx_ids}")
 
     # Current-only and changed monitor rows.
     current_only = [gm[key] for key in sorted(gm.keys() - vm.keys())]
@@ -330,6 +473,57 @@ def main() -> int:
                 for vid in new_p5
             ],
             "boundary": "Current GTS+ statically binds these Camry/Camry HV vehicle-type entries to category 405 EMPS_P5. Vehicle-type numeric ordering is not itself asserted to be a model-year field, and no VIN-specific vehicle-type selection is claimed here.",
+        },
+        "current_camry_can_topology": {
+            "table_geometry": can_table_geometry,
+            "vehicle_type_to_can_bus_car_id": camry_car_id_rows,
+            "can_bus_car_id": "0x00A7D910",
+            "option_variant_count": len(option_rows),
+            "option_variants": [
+                {
+                    "component_group": f"0x{u32(raw, 44):08X}",
+                    "option_words": [u16(raw, 56 + 2 * i) for i in range(10)],
+                    "raw_hex": raw.hex(),
+                }
+                for raw in option_rows
+            ],
+            "component_placement_variant_count": len(component_sets),
+            "component_placements_identical_across_variants": len(placement_shapes) == 1,
+            "canonical_component_placements": canonical_placements,
+            "critical_placement": {
+                "front_camera_module": critical["0x6D"],
+                "skid_control_abs_vsc_trac": critical["0x29"],
+                "power_steering_eps": critical["0x32"],
+            },
+            "critical_bus_owners": {
+                "29": {"bus_name": bus_names[29], "gateway_names": sorted(bus_gateway_names[29])},
+                "32": {"bus_name": bus_names[32], "gateway_names": sorted(bus_gateway_names[32])},
+            },
+            "exact_f33_channel_join": {
+                "canif_controller_count_byte": {"address": "0x00021970", "value": image[0x21970]},
+                "normal_rx_interrupt_wrapper": {
+                    "entry": "0x00083F30",
+                    "body_hex": wrapper_hex,
+                    "decompiled_c_sha256": f33_funcs[0x83F30]["decompiled_c_sha256"],
+                    "call": "FUN_00083EF2(1)",
+                },
+                "normal_tx_interrupt_wrapper": {
+                    "entry": "0x0008583E",
+                    "body_hex": wrapper_hex,
+                    "decompiled_c_sha256": f33_funcs[0x8583E]["decompiled_c_sha256"],
+                    "call": "FUN_00085800(1)",
+                },
+                "normal_tx_table": "0x00021F58",
+                "normal_tx_ids": [f"0x{x:03X}" for x in f33_normal_tx_ids],
+                "controller1_rule_array": "0x000230B8",
+                "controller1_rule_count": 47,
+                "b6_rule_index": 39,
+                "b6_rule_can_id": "0x0B6",
+                "diagnostic_rule_tail": ["0x7A1", "0x777", "0x7A0"],
+                "interpretation": "Exact F33 normal application CAN handling is channel/controller-1-only in the recovered interrupt wrappers, and B6 is accepted inside that same controller-1 rule span. A second private F33 application CAN controller is not supported by this target-native configuration.",
+            },
+            "interpretation": "Toyota's current Camry CAN Bus Check model places Front Camera Module on Central Gateway Bus 1 while Skid Control (ABS/VSC/TRAC) and Power Steering (EPS) are co-resident on Central Gateway Bus 4, invariant across all 18 current Camry option variants. Combined with exact F33's controller-1-only application CAN path, this supports B6 as a Brake/Skid-to-EPS Bus-4 message rather than traffic on a hidden second EPS CAN controller.",
+            "boundary": "The GTS+ Bus 1/Bus 4 labels are Toyota Central-Gateway topology identities, not Comma/Panda bus numbers or connector pin numbers. This static table alone does not prove which Toyota-B harness pair exposes Bus 4; that physical join is supplied separately by the retained pre/post-repin Camry captures and diagnostics. Front Camera Module is the GTS+ component-domain label and is not by itself a category-498 FRC identity proof.",
         },
         "emps_p5_schema_delta": {
             "v18_file_size": source_paths["v18_emps"].stat().st_size,

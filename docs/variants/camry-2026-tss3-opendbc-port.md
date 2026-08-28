@@ -234,18 +234,20 @@ safety module currently passes 283 tests with 34 skips in the local targeted gat
 
 The remaining first-actuation gates are now live, not unfinished static implementation:
 
-1. resolve VAR-063/065's live discriminator: two independent moving routes totaling
-   3,574,703 incoming frames / 19 segments still have zero B6 while protected `00F/D7`
-   remain healthy, and the exact-F33 controller-1 rule span is fully exhausted with no
-   hidden direct-CAN ID outside the normal COM table. Exact F33 communication-monitor
-   row5 maps `status 0x1A -> PDU44/B6 -> Dem 0x0143 -> DTC index82`, which current GTS+
-   names **U012987 Lost Communication with Brake System Control Module / Missing Message**;
-   the EPS therefore expects B6 from the Brake System Control domain. The inverse audit
-   also finds no observed ordinary generated-COM steering-command alternative (`0x115` is Engine Revolution; `0x0D5` is monitor/
-   plausibility; `0x025` is feedback; command-sized `0x1C5/0x64F` and group `0x013..0x01F`
-   are absent). Synchronize FRC P5 DID `0x1601` (`LTA Control Condition`) with relay-
-   correct CAN. If active LTA is proved while B6 remains absent, move to FRC/Brake
-   transformation or a non-COM/internal EPS path rather than guessing another EPS ID;
+1. resolve VAR-063/065/066's **operational** live discriminator: two independent moving
+   routes totaling 3,574,703 incoming frames / 19 segments still have zero B6 while
+   protected `00F/D7` remain healthy. The wrong-bus branch is now closed: current GTS+
+   places Front Camera Module on Central-Gateway Bus 1 but Skid Control and EPS together
+   on **Bus 4** across all 18 current-Camry option variants; exact F33 has one normal
+   CanIf controller/channel and receives B6 in that controller-1 span; the physical
+   repin moved the Bus4-like steering/chassis family onto CAN0/CAN2 and the 22-ID
+   camera/radar family onto logical bus1. The inverse audit also finds no observed
+   ordinary generated-COM steering-command alternative (`0x115` is Engine Revolution;
+   `0x0D5` is monitor/plausibility; `0x025` is feedback; command-sized `0x1C5/0x64F`
+   and group `0x013..0x01F` are absent). Synchronize FRC P5 DID `0x1601`
+   (`LTA Control Condition`) with the **already-correct Bus4 relay pair**. If active LTA
+   is machine-proved while B6 remains absent, then move to the upstream FRC/Brake
+   transformation or a non-COM/internal EPS path; do not repin or hunt another Panda bus;
 2. prove exclusive relay/source suppression behavior for whichever command path that
    synchronized factory-LTA observation identifies;
 3. complete the zero-write Gate-2 preflight, restore-gated APPLY, and an exact causal

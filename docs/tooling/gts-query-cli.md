@@ -30,6 +30,8 @@ tools/gts commset
 tools/gts commset 1
 tools/gts timer HV_P5 1
 tools/gts category HV_P5
+tools/gts canbus 12704
+tools/gts canbus 'Camry HV' --json
 tools/gts frame 397 0x01
 tools/gts frame HV_P5 0x102
 tools/gts did EMPS_P5 steering
@@ -86,6 +88,32 @@ default unit, raw/graph ranges, and the type-14 value→display dictionary. For
 example current `EMPS_P5` DID `0x1037 Steering Angle` reports `15/1`, offset 0,
 one decimal, signed 16-bit, `deg`; `0x106A Cooperation Control State` reports
 its exact `0=Cooperation Control`, `1=Other than Cooperation Control` dictionary.
+
+### CAN Bus Check topology
+
+`canbus` exposes Toyota's current master CAN Bus Check model directly. It resolves a
+vehicle-type ID or OEM vehicle-name substring through `CDbCanBusCarIdTable`, expands every
+`CDbCanBusOptionTable` variant, joins component membership through
+`CDbCanBusComponentTable` + `CDbSubBusConfirmationCGWTable`, and names each network through
+`CDbCanBusNameTable` / `CDbCanBusListTable`. If multiple option rows collapse to the same
+component placement, the CLI reports one placement variant rather than duplicating it.
+
+```text
+$ tools/gts canbus 12704
+vehicle=12704 name=Camry HV can_bus_car_id=0x00A7D910 options=18 placement_variants=1
+  Bus 1 index=29 gateway=Central Gateway
+    ...
+    0x6D Front Camera Module
+  Bus 4 index=32 gateway=Central Gateway
+    0x28 Brake Booster ...
+    0x29 Skid Control (ABS/VSC/TRAC) ...
+    0x32 Power Steering (EPS) ...
+    0xF0 Spiral cable (Steering Angle Sensor) ...
+```
+
+The displayed Toyota `Bus N` name is a Central-Gateway network identity, **not** a Panda
+bus number or connector pin. Physical harness mapping still requires vehicle evidence.
+For the exact 2026 Camry join, see the [Camry baseline §19](../variants/camry-2026-live-baseline.md#19-current-gts-can-topology-closes-the-b6-bus-question).
 
 ### Master DB execution model
 

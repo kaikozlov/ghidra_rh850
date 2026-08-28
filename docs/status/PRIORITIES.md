@@ -263,7 +263,8 @@ the 43 normal COM descriptors and the only tail is `7A1/777/7A0/7F7` diagnostics
 Exact F33 communication-monitor row5 also closes the immediate B6 source relationship:
 status slot `0x1A -> PDU44/B6 -> Dem 0x0143 -> DTC index82 ->` current-GTS+ **U012987
 Lost Communication with Brake System Control Module / Missing Message**. The EPS therefore
-expects B6 from the Brake System Control domain; stop treating the sender family as unknown.
+expects B6 from the Brake System Control domain; the immediate logical source domain is
+known even though the upstream planner and actual B6 construction/signing implementation remain bounded.
 Within that complete normal surface F33 has only nine signed generated-COM fields >=12
 bits. The observed non-B6 candidates are now closed: `0x025` is measured angle/rate feedback;
 `0x115` terminates at current-GTS+ DID1032 **Engine Revolution**; the two `0x0D5`
@@ -275,6 +276,19 @@ proves stock LTA active with B6 still absent, escalate specifically to upstream 
 transformation or a non-COM/internal EPS path. The bus1 `0x180..0x18C` family is useful
 upstream search vocabulary but cannot directly be the F33 normal-CAN command because
 none of those IDs is accepted by the exact EPS Rx table.
+
+**VAR-066 topology update:** stop treating the repeated zero-B6 result as a likely
+Toyota-B bus-selection problem. Current GTS+ CAN Bus Check tables bind all three current
+Camry-HV types used by the exact `EMPS_P5` join to one topology key (`0x00A7D910`),
+whose 18 option variants invariantly place **Front Camera Module on Central-Gateway Bus 1**
+and **Skid Control (ABS/VSC/TRAC) + Power Steering (EPS) together on Bus 4**. Exact F33
+has one configured normal CanIf controller and channel-1-only Rx/Tx wrappers; B6 is in
+that same controller-1 rule span. Joined to the physical repin capture, the large
+steering/chassis family moved onto CAN0/CAN2 while the 22-ID camera/radar FD family moved
+to logical bus1, matching Toyota's Bus4/Bus1 split. The relay pair is therefore already
+the B6-capable Brake/EPS network. Do not spend another pass swapping Panda buses or
+inventing a second EPS CAN port; the remaining discriminator is **stock operating state**:
+synchronize FRC `0x1601 LTA Control Condition` with the existing relay-correct capture.
 
 COM-013 closes much more of the whole-vehicle side than the earlier EPS-only
 roadmap. TSS generation and SecOC/TSK are **orthogonal** (CORR-108). The public

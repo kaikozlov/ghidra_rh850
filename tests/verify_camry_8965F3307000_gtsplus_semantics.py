@@ -37,6 +37,26 @@ check("artifact schema/target", a["schema"] == "gtsplus-2026-camry-8965f3307000-
 check("exact F33 image hash", len(img) == 0x100000 and sha(IMAGE) == a["target"]["codeflash_sha256"] == "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7")
 check("RDBI table geometry", a["target"]["rdbi_table_offset"] == "0x02928C" and a["target"]["rdbi_record_count"] == 241)
 check("current master binds new Camry-HV types to EMPS_P5", a["current_master_join"]["category"] == {"category_id": 405, "database": "EMPS_P5.ddb", "ecu_name": "EMPS", "generation": 20} and [x["vehicle_type"] for x in a["current_master_join"]["new_camry_vehicle_types_using_emps_p5"]] == [12704, 12862, 12984])
+topo = a["current_camry_can_topology"]
+check("current Camry CAN-table geometry exact", topo["table_geometry"] == {
+    "55":{"class_name":"CDbCanBusListTable","record_count":52,"record_size":32},
+    "75":{"class_name":"CDbCanBusCarIdTable","record_count":733,"record_size":12},
+    "76":{"class_name":"CDbSubBusConfirmationCGWTable","record_count":256,"record_size":16},
+    "77":{"class_name":"CDbCanBusOptionTable","record_count":1075,"record_size":80},
+    "78":{"class_name":"CDbCanBusComponentTable","record_count":34365,"record_size":16},
+    "79":{"class_name":"CDbCanBusNameTable","record_count":47,"record_size":20},
+})
+check("all exact Camry-HV types select one CAN topology id", [(x["vehicle_type"],x["can_bus_car_id"]) for x in topo["vehicle_type_to_can_bus_car_id"]] == [(12704,"0x00A7D910"),(12862,"0x00A7D910"),(12984,"0x00A7D910")])
+check("Camry CAN topology is invariant across 18 options", topo["can_bus_car_id"] == "0x00A7D910" and topo["option_variant_count"] == 18 and topo["component_placement_variant_count"] == 18 and topo["component_placements_identical_across_variants"] is True and len(topo["canonical_component_placements"]) == 31)
+crit = topo["critical_placement"]
+check("Front Camera Module is Toyota CGW Bus 1", crit["front_camera_module"]["component_index"] == "0x6D" and crit["front_camera_module"]["ecu_domain"] == "Front Camera Module" and crit["front_camera_module"]["bus_index"] == 29 and crit["front_camera_module"]["bus_name"] == "Bus 1")
+check("Brake/Skid and EPS share Toyota CGW Bus 4", crit["skid_control_abs_vsc_trac"]["component_index"] == "0x29" and crit["skid_control_abs_vsc_trac"]["ecu_domain"] == "Skid Control (ABS/VSC/TRAC)" and crit["skid_control_abs_vsc_trac"]["bus_index"] == 32 and crit["power_steering_eps"]["component_index"] == "0x32" and crit["power_steering_eps"]["ecu_domain"] == "Power Steering (EPS)" and crit["power_steering_eps"]["bus_index"] == 32 and crit["power_steering_eps"]["bus_name"] == "Bus 4")
+check("critical buses belong to Central Gateway", topo["critical_bus_owners"] == {"29":{"bus_name":"Bus 1","gateway_names":["Central Gateway"]},"32":{"bus_name":"Bus 4","gateway_names":["Central Gateway"]}})
+f33can = topo["exact_f33_channel_join"]
+check("F33 normal application CAN wrappers are channel1-only", f33can["canif_controller_count_byte"] == {"address":"0x00021970","value":1} and f33can["normal_rx_interrupt_wrapper"]["call"] == "FUN_00083EF2(1)" and f33can["normal_tx_interrupt_wrapper"]["call"] == "FUN_00085800(1)" and f33can["normal_rx_interrupt_wrapper"]["body_hex"] == f33can["normal_tx_interrupt_wrapper"]["body_hex"] == "800721000132bfffbcff40063f00")
+check("F33 B6 is on that same controller1 rule span", f33can["controller1_rule_count"] == 47 and f33can["b6_rule_index"] == 39 and f33can["b6_rule_can_id"] == "0x0B6" and f33can["diagnostic_rule_tail"] == ["0x7A1","0x777","0x7A0"])
+check("F33 normal Tx table starts with exact 030 steering-status carrier", f33can["normal_tx_table"] == "0x00021F58" and f33can["normal_tx_ids"] == ["0x030","0x351","0x394","0x4A3","0x4C8"])
+check("CAN-topology interpretation keeps connector boundary", "Skid Control (ABS/VSC/TRAC) and Power Steering (EPS) are co-resident" in topo["interpretation"] and "not Comma/Panda bus numbers" in topo["boundary"])
 check("GTS+ expands type62 222x64 -> 230x80", a["emps_p5_schema_delta"]["v18_type62"] == {"record_count": 222, "record_size": 64} and a["emps_p5_schema_delta"]["gtsplus_type62"] == {"record_count": 230, "record_size": 80})
 check("current mirrored datamon tables named", [(x["table_id"], x["class_name"]) for x in a["emps_p5_schema_delta"]["mirrored_current_tables"]] == [(151, "CDbDataIdForRobTable"), (153, "CDbBehaviorDataRecordP5Table"), (156, "CDbDataIdForDmTable"), (157, "CDbDatamonitorP5Table")])
 check("type157 is exact 214-key subset", a["emps_p5_schema_delta"]["type157_subset_of_type62"]["common_key_count"] == 214 and a["emps_p5_schema_delta"]["type157_subset_of_type62"]["type157_key_count"] == 214 and a["emps_p5_schema_delta"]["type157_subset_of_type62"]["type62_key_count"] == 230)

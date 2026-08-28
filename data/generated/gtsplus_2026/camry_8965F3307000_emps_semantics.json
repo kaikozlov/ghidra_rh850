@@ -75,6 +75,716 @@
     },
     "remaining_unknown": "Toyota's bit-level meanings inside the two 32-bit ASIC state words are not resolved by the current EMPS_P5 monitor database."
   },
+  "current_camry_can_topology": {
+    "boundary": "The GTS+ Bus 1/Bus 4 labels are Toyota Central-Gateway topology identities, not Comma/Panda bus numbers or connector pin numbers. This static table alone does not prove which Toyota-B harness pair exposes Bus 4; that physical join is supplied separately by the retained pre/post-repin Camry captures and diagnostics. Front Camera Module is the GTS+ component-domain label and is not by itself a category-498 FRC identity proof.",
+    "can_bus_car_id": "0x00A7D910",
+    "canonical_component_placements": [
+      {
+        "bus_index": 29,
+        "bus_name": "Bus 1",
+        "component_index": "0x0F",
+        "ecu_domain": "Front Radar",
+        "junction_name": "No. 1 Global CAN Junction Connector",
+        "raw_hex": "6ad24d002e1a02001d00000000000f00",
+        "subbus_sequence": "0x10"
+      },
+      {
+        "bus_index": 29,
+        "bus_name": "Bus 1",
+        "component_index": "0x10",
+        "ecu_domain": "Front Side Radar Master",
+        "junction_name": "No. 1 Global CAN Junction Connector",
+        "raw_hex": "6ad24d002e1a02001d00000000001000",
+        "subbus_sequence": "0x11"
+      },
+      {
+        "bus_index": 29,
+        "bus_name": "Bus 1",
+        "component_index": "0x41",
+        "ecu_domain": "Blind Spot Monitor Master",
+        "junction_name": "No. 10 Global CAN Junction Connector",
+        "raw_hex": "6ad24d002f1a02001d00000000004100",
+        "subbus_sequence": "0x42"
+      },
+      {
+        "bus_index": 29,
+        "bus_name": "Bus 1",
+        "component_index": "0x67",
+        "ecu_domain": "Clearance Warning (Intuitive Parking Assist)",
+        "junction_name": "No. 8 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00391a02001d00000000006700",
+        "subbus_sequence": "0x68"
+      },
+      {
+        "bus_index": 29,
+        "bus_name": "Bus 1",
+        "component_index": "0x68",
+        "ecu_domain": "Parking Assist Monitor System / Rear Camera",
+        "junction_name": "No. 11 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00301a02001d00000000006800",
+        "subbus_sequence": "0x69"
+      },
+      {
+        "bus_index": 29,
+        "bus_name": "Bus 1",
+        "component_index": "0x6D",
+        "ecu_domain": "Front Camera Module",
+        "junction_name": "-",
+        "raw_hex": "6ad24d000b8501001d00000000006d00",
+        "subbus_sequence": "0x6E"
+      },
+      {
+        "bus_index": 29,
+        "bus_name": "Bus 1",
+        "component_index": "0x7B",
+        "ecu_domain": "Panoramic View Monitor / Circumference Monitoring Camera Control Module",
+        "junction_name": "No. 8 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00391a02001d00000000007b00",
+        "subbus_sequence": "0x7C"
+      },
+      {
+        "bus_index": 30,
+        "bus_name": "Bus 2",
+        "component_index": "0x09",
+        "ecu_domain": "Motor Generator",
+        "junction_name": "BAT",
+        "raw_hex": "6ad24d0066a402001e00000000000900",
+        "subbus_sequence": "0x0A"
+      },
+      {
+        "bus_index": 30,
+        "bus_name": "Bus 2",
+        "component_index": "0x13",
+        "ecu_domain": "ECM (Engine)",
+        "junction_name": "MGC",
+        "raw_hex": "6ad24d006aa402001e00000000001300",
+        "subbus_sequence": "0x14"
+      },
+      {
+        "bus_index": 30,
+        "bus_name": "Bus 2",
+        "component_index": "0x16",
+        "ecu_domain": "Hybrid Vehicle Control",
+        "junction_name": "No. 6 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00371a02001e00000000001600",
+        "subbus_sequence": "0x17"
+      },
+      {
+        "bus_index": 30,
+        "bus_name": "Bus 2",
+        "component_index": "0xD5",
+        "ecu_domain": "HV Battery",
+        "junction_name": "No. 6 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00371a02001e0000000000d500",
+        "subbus_sequence": "0xD6"
+      },
+      {
+        "bus_index": 31,
+        "bus_name": "Bus 3",
+        "component_index": "0x61",
+        "ecu_domain": "Display and Navigation (AVN)",
+        "junction_name": "No.1 Global CAN IBC",
+        "raw_hex": "6ad24d00f72803001f00000000006100",
+        "subbus_sequence": "0x62"
+      },
+      {
+        "bus_index": 31,
+        "bus_name": "Bus 3",
+        "component_index": "0x62",
+        "ecu_domain": "Combination Meter",
+        "junction_name": "No.1 Global CAN IBC",
+        "raw_hex": "6ad24d00f72803001f00000000006200",
+        "subbus_sequence": "0x63"
+      },
+      {
+        "bus_index": 31,
+        "bus_name": "Bus 3",
+        "component_index": "0x74",
+        "ecu_domain": "74",
+        "junction_name": "No.1 Global CAN IBC",
+        "raw_hex": "6ad24d00f72803001f00000000007400",
+        "subbus_sequence": "0x75"
+      },
+      {
+        "bus_index": 31,
+        "bus_name": "Bus 3",
+        "component_index": "0xC6",
+        "ecu_domain": "DCM2",
+        "junction_name": "No.1 Global CAN IBC",
+        "raw_hex": "6ad24d00f72803001f0000000000c600",
+        "subbus_sequence": "0xC7"
+      },
+      {
+        "bus_index": 31,
+        "bus_name": "Bus 3",
+        "component_index": "0xC7",
+        "ecu_domain": "DCM",
+        "junction_name": "No.1 Global CAN IBC",
+        "raw_hex": "6ad24d00f72803001f0000000000c700",
+        "subbus_sequence": "0xC8"
+      },
+      {
+        "bus_index": 32,
+        "bus_name": "Bus 4",
+        "component_index": "0x28",
+        "ecu_domain": "Brake Booster",
+        "junction_name": "No. 2 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00331a02002000000000002800",
+        "subbus_sequence": "0x29"
+      },
+      {
+        "bus_index": 32,
+        "bus_name": "Bus 4",
+        "component_index": "0x29",
+        "ecu_domain": "Skid Control (ABS/VSC/TRAC)",
+        "junction_name": "No. 2 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00331a02002000000000002900",
+        "subbus_sequence": "0x2A"
+      },
+      {
+        "bus_index": 32,
+        "bus_name": "Bus 4",
+        "component_index": "0x32",
+        "ecu_domain": "Power Steering (EPS)",
+        "junction_name": "EBU",
+        "raw_hex": "6ad24d0067a402002000000000003200",
+        "subbus_sequence": "0x33"
+      },
+      {
+        "bus_index": 32,
+        "bus_name": "Bus 4",
+        "component_index": "0x47",
+        "ecu_domain": "Airbag",
+        "junction_name": "No. 7 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00381a02002000000000004700",
+        "subbus_sequence": "0x48"
+      },
+      {
+        "bus_index": 32,
+        "bus_name": "Bus 4",
+        "component_index": "0xF0",
+        "ecu_domain": "Spiral cable (Steering Angle Sensor)",
+        "junction_name": "No. 7 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00381a0200200000000000f000",
+        "subbus_sequence": "0xF1"
+      },
+      {
+        "bus_index": 33,
+        "bus_name": "Bus 5",
+        "component_index": "0x05",
+        "ecu_domain": "Power Management",
+        "junction_name": "No. 4 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00351a02002100000000000500",
+        "subbus_sequence": "0x06"
+      },
+      {
+        "bus_index": 33,
+        "bus_name": "Bus 5",
+        "component_index": "0x40",
+        "ecu_domain": "Main Body",
+        "junction_name": "No. 9 Global CAN Junction Connector",
+        "raw_hex": "6ad24d003a1a02002100000000004000",
+        "subbus_sequence": "0x41"
+      },
+      {
+        "bus_index": 33,
+        "bus_name": "Bus 5",
+        "component_index": "0x46",
+        "ecu_domain": "Air Conditioning Amplifier",
+        "junction_name": "No. 4 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00351a02002100000000004600",
+        "subbus_sequence": "0x47"
+      },
+      {
+        "bus_index": 33,
+        "bus_name": "Bus 5",
+        "component_index": "0xA5",
+        "ecu_domain": "Front Door RH/R-Mirror (FR-Door/R-Mirror)",
+        "junction_name": "No. 4 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00351a0200210000000000a500",
+        "subbus_sequence": "0xA6"
+      },
+      {
+        "bus_index": 33,
+        "bus_name": "Bus 5",
+        "component_index": "0xA6",
+        "ecu_domain": "Front Door LH/L-Mirror (FL-Door/L-Mirror)",
+        "junction_name": "No. 9 Global CAN Junction Connector",
+        "raw_hex": "6ad24d003a1a0200210000000000a600",
+        "subbus_sequence": "0xA7"
+      },
+      {
+        "bus_index": 33,
+        "bus_name": "Bus 5",
+        "component_index": "0xAB",
+        "ecu_domain": "D-Seat",
+        "junction_name": "No. 9 Global CAN Junction Connector",
+        "raw_hex": "6ad24d003a1a0200210000000000ab00",
+        "subbus_sequence": "0xAC"
+      },
+      {
+        "bus_index": 33,
+        "bus_name": "Bus 5",
+        "component_index": "0xB5",
+        "ecu_domain": "Certification (Smart)",
+        "junction_name": "No. 4 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00351a0200210000000000b500",
+        "subbus_sequence": "0xB6"
+      },
+      {
+        "bus_index": 34,
+        "bus_name": "Bus 6",
+        "component_index": "0x2A",
+        "ecu_domain": "Tire Pressure",
+        "junction_name": "No.1 Global CAN IBC",
+        "raw_hex": "6ad24d00f72803002200000000002a00",
+        "subbus_sequence": "0x2B"
+      },
+      {
+        "bus_index": 34,
+        "bus_name": "Bus 6",
+        "component_index": "0xD3",
+        "ecu_domain": "Acoustic Vehicle Alerting System",
+        "junction_name": "No.1 Global CAN IBC",
+        "raw_hex": "6ad24d00f7280300220000000000d300",
+        "subbus_sequence": "0xD4"
+      },
+      {
+        "bus_index": 35,
+        "bus_name": "Bus 7",
+        "component_index": "0xB7",
+        "ecu_domain": "Remote Engine Starter",
+        "junction_name": "-",
+        "raw_hex": "6ad24d000b850100230000000000b700",
+        "subbus_sequence": "0xB8"
+      }
+    ],
+    "component_placement_variant_count": 18,
+    "component_placements_identical_across_variants": true,
+    "critical_bus_owners": {
+      "29": {
+        "bus_name": "Bus 1",
+        "gateway_names": [
+          "Central Gateway"
+        ]
+      },
+      "32": {
+        "bus_name": "Bus 4",
+        "gateway_names": [
+          "Central Gateway"
+        ]
+      }
+    },
+    "critical_placement": {
+      "front_camera_module": {
+        "bus_index": 29,
+        "bus_name": "Bus 1",
+        "component_index": "0x6D",
+        "ecu_domain": "Front Camera Module",
+        "junction_name": "-",
+        "raw_hex": "6ad24d000b8501001d00000000006d00",
+        "subbus_sequence": "0x6E"
+      },
+      "power_steering_eps": {
+        "bus_index": 32,
+        "bus_name": "Bus 4",
+        "component_index": "0x32",
+        "ecu_domain": "Power Steering (EPS)",
+        "junction_name": "EBU",
+        "raw_hex": "6ad24d0067a402002000000000003200",
+        "subbus_sequence": "0x33"
+      },
+      "skid_control_abs_vsc_trac": {
+        "bus_index": 32,
+        "bus_name": "Bus 4",
+        "component_index": "0x29",
+        "ecu_domain": "Skid Control (ABS/VSC/TRAC)",
+        "junction_name": "No. 2 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00331a02002000000000002900",
+        "subbus_sequence": "0x2A"
+      }
+    },
+    "exact_f33_channel_join": {
+      "b6_rule_can_id": "0x0B6",
+      "b6_rule_index": 39,
+      "canif_controller_count_byte": {
+        "address": "0x00021970",
+        "value": 1
+      },
+      "controller1_rule_array": "0x000230B8",
+      "controller1_rule_count": 47,
+      "diagnostic_rule_tail": [
+        "0x7A1",
+        "0x777",
+        "0x7A0"
+      ],
+      "interpretation": "Exact F33 normal application CAN handling is channel/controller-1-only in the recovered interrupt wrappers, and B6 is accepted inside that same controller-1 rule span. A second private F33 application CAN controller is not supported by this target-native configuration.",
+      "normal_rx_interrupt_wrapper": {
+        "body_hex": "800721000132bfffbcff40063f00",
+        "call": "FUN_00083EF2(1)",
+        "decompiled_c_sha256": "1bc2f2953f6f8bc48cfe37727c76e7c8fed3522501627acdc3c6139f1de529f1",
+        "entry": "0x00083F30"
+      },
+      "normal_tx_ids": [
+        "0x030",
+        "0x351",
+        "0x394",
+        "0x4A3",
+        "0x4C8"
+      ],
+      "normal_tx_interrupt_wrapper": {
+        "body_hex": "800721000132bfffbcff40063f00",
+        "call": "FUN_00085800(1)",
+        "decompiled_c_sha256": "cbf840aa9f432fbbe2b90f62e941c592566e484c4914f9ddb7040d36ecfc382c",
+        "entry": "0x0008583E"
+      },
+      "normal_tx_table": "0x00021F58"
+    },
+    "interpretation": "Toyota's current Camry CAN Bus Check model places Front Camera Module on Central Gateway Bus 1 while Skid Control (ABS/VSC/TRAC) and Power Steering (EPS) are co-resident on Central Gateway Bus 4, invariant across all 18 current Camry option variants. Combined with exact F33's controller-1-only application CAN path, this supports B6 as a Brake/Skid-to-EPS Bus-4 message rather than traffic on a hidden second EPS CAN controller.",
+    "option_variant_count": 18,
+    "option_variants": [
+      {
+        "component_group": "0x004DD26A",
+        "option_words": [
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a700fd28030001290300082903000d2903000000000000000000000000000000000000000000000000006ad24d000100000042030000010001000100010000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD270",
+        "option_words": [
+          1,
+          1,
+          1,
+          7,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a700fd28030001290300082903000e29030000000000000000000000000000000000000000000000000070d24d000100000043030000010001000100070000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD26C",
+        "option_words": [
+          1,
+          1,
+          3,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a700fd28030001290300052903000d2903000000000000000000000000000000000000000000000000006cd24d000100000044030000010001000300030000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD272",
+        "option_words": [
+          1,
+          1,
+          3,
+          9,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a700fd28030001290300052903000e29030000000000000000000000000000000000000000000000000072d24d000100000045030000010001000300090000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD26E",
+        "option_words": [
+          1,
+          1,
+          5,
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a700fd28030001290300042903000d2903000000000000000000000000000000000000000000000000006ed24d000100000046030000010001000500050000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD274",
+        "option_words": [
+          1,
+          1,
+          5,
+          11,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a700fd28030001290300042903000e29030000000000000000000000000000000000000000000000000074d24d0001000000470300000100010005000b0000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD26B",
+        "option_words": [
+          1,
+          2,
+          2,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a700fd28030076ef0200082903000d2903000000000000000000000000000000000000000000000000006bd24d000100000048030000010002000200020000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD271",
+        "option_words": [
+          1,
+          2,
+          2,
+          8,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a700fd28030076ef0200082903000e29030000000000000000000000000000000000000000000000000071d24d000100000049030000010002000200080000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD26D",
+        "option_words": [
+          1,
+          2,
+          4,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a700fd28030076ef0200052903000d2903000000000000000000000000000000000000000000000000006dd24d00010000004a030000010002000400040000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD273",
+        "option_words": [
+          1,
+          2,
+          4,
+          10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a700fd28030076ef0200052903000e29030000000000000000000000000000000000000000000000000073d24d00010000004b0300000100020004000a0000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD26F",
+        "option_words": [
+          1,
+          2,
+          6,
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a700fd28030076ef0200042903000d2903000000000000000000000000000000000000000000000000006fd24d00010000004c030000010002000600060000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD275",
+        "option_words": [
+          1,
+          2,
+          6,
+          12,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a700fd28030076ef0200042903000e29030000000000000000000000000000000000000000000000000075d24d00010000004d0300000100020006000c0000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD29F",
+        "option_words": [
+          2,
+          3,
+          7,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a70067ef02000029030082ef0200000000000000000000000000000000000000000000000000000000009fd24d00010000004e030000020003000700000000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD2A0",
+        "option_words": [
+          2,
+          3,
+          8,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a70067ef0200002903008bd4020000000000000000000000000000000000000000000000000000000000a0d24d00010000004f030000020003000800000000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD2A1",
+        "option_words": [
+          2,
+          4,
+          9,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a70067ef0200ff28030082ef020000000000000000000000000000000000000000000000000000000000a1d24d000100000050030000020004000900000000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD2A2",
+        "option_words": [
+          2,
+          4,
+          10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a70067ef0200ff2803008bd4020000000000000000000000000000000000000000000000000000000000a2d24d000100000051030000020004000a00000000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD2A3",
+        "option_words": [
+          2,
+          5,
+          11,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a70067ef0200fe28030082ef020000000000000000000000000000000000000000000000000000000000a3d24d000100000052030000020005000b00000000000000000000000000000000000000"
+      },
+      {
+        "component_group": "0x004DD2A4",
+        "option_words": [
+          2,
+          5,
+          12,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "raw_hex": "10d9a70067ef0200fe2803008bd4020000000000000000000000000000000000000000000000000000000000a4d24d000100000053030000020005000c00000000000000000000000000000000000000"
+      }
+    ],
+    "table_geometry": {
+      "55": {
+        "class_name": "CDbCanBusListTable",
+        "record_count": 52,
+        "record_size": 32
+      },
+      "75": {
+        "class_name": "CDbCanBusCarIdTable",
+        "record_count": 733,
+        "record_size": 12
+      },
+      "76": {
+        "class_name": "CDbSubBusConfirmationCGWTable",
+        "record_count": 256,
+        "record_size": 16
+      },
+      "77": {
+        "class_name": "CDbCanBusOptionTable",
+        "record_count": 1075,
+        "record_size": 80
+      },
+      "78": {
+        "class_name": "CDbCanBusComponentTable",
+        "record_count": 34365,
+        "record_size": 16
+      },
+      "79": {
+        "class_name": "CDbCanBusNameTable",
+        "record_count": 47,
+        "record_size": 20
+      }
+    },
+    "vehicle_type_to_can_bus_car_id": [
+      {
+        "can_bus_car_id": "0x00A7D910",
+        "raw_hex": "10d9a700a031000000000000",
+        "vehicle_name": "Camry HV",
+        "vehicle_type": 12704
+      },
+      {
+        "can_bus_car_id": "0x00A7D910",
+        "raw_hex": "10d9a7003e32000000000000",
+        "vehicle_name": "Camry HV",
+        "vehicle_type": 12862
+      },
+      {
+        "can_bus_car_id": "0x00A7D910",
+        "raw_hex": "10d9a700b832000000000000",
+        "vehicle_name": "Camry HV",
+        "vehicle_type": 12984
+      }
+    ]
+  },
   "current_master_join": {
     "boundary": "Current GTS+ statically binds these Camry/Camry HV vehicle-type entries to category 405 EMPS_P5. Vehicle-type numeric ordering is not itself asserted to be a model-year field, and no VIN-specific vehicle-type selection is claimed here.",
     "category": {
@@ -3377,6 +4087,11 @@
   },
   "schema": "gtsplus-2026-camry-8965f3307000-emps-semantics-v1",
   "sources": {
+    "f33_decompiler_corpus": {
+      "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
+      "sha256": "f33efdbecac7d2d8ee8589ae8492d828451f5f1523aa43c72f672597c77fa8d1",
+      "size": 10883333
+    },
     "gts_emps": {
       "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/EMPS_P5.ddb",
       "sha256": "fb7933228bc2f1c5788d1f896c008c5c590ede45ec2e650c07123f94764e329e",

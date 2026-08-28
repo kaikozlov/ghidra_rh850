@@ -29,6 +29,7 @@ from cuw_parameter import factory_routes_from_ini_root
 from ddb_semantics import behavior_rows as semantic_behavior_rows
 from ddb_semantics import dtc_rows as semantic_dtc_rows
 from ddb_semantics import monitor_rows as semantic_monitor_rows
+from ddb_semantics import records as ddb_records
 from ddb_strings import load_string_db as cached_string_db
 from diagnostic_role_model import plugin_operation_signature, role_operation_catalog
 from parse_cuw_container import first_member_payload, read_first_member
@@ -946,6 +947,135 @@ def cmd_category(args: argparse.Namespace) -> int:
     return 0
 
 
+def _master_canbus_topology_rows(parser: DDBParser, master: Any, strings: Any, query: str) -> list[dict[str, Any]]:
+    """Resolve Toyota master CAN Bus Check topology for a vehicle type/name."""
+    required = (55, 75, 76, 77, 78, 79)
+    missing = [table_id for table_id in required if table_id not in master.sections]
+    if missing:
+        raise SystemExit(f"master database lacks CAN Bus Check tables: {missing}")
+
+    vehicle_names = {
+        struct.unpack_from("<I", raw, 4)[0]: strings.get_string(struct.unpack_from("<I", raw, 0)[0])
+        for raw in ddb_records(master.sections[43])
+    }
+    try:
+        vehicle_type = int(query, 0)
+    except ValueError:
+        vehicle_type = None
+    if vehicle_type is not None:
+        matches = [vehicle_type] if vehicle_type in vehicle_names else []
+    else:
+        matches = sorted(
+            vehicle_type for vehicle_type, name in vehicle_names.items()
+            if name and query.casefold() in name.casefold()
+        )
+    if not matches:
+        raise SystemExit(f"no Toyota master vehicle type/name matches {query!r}")
+
+    car_rows = list(ddb_records(master.sections[75]))
+    option_rows = list(ddb_records(master.sections[77]))
+    component_rows = list(ddb_records(master.sections[78]))
+    subbus_names = {
+        struct.unpack_from("<I", raw, 0)[0]: strings.get_string(struct.unpack_from("<I", raw, 4)[0])
+        for raw in ddb_records(master.sections[76])
+    }
+    bus_names = {
+        struct.unpack_from("<I", raw, 8)[0]: strings.get_string(struct.unpack_from("<I", raw, 4)[0])
+        for raw in ddb_records(master.sections[79])
+    }
+    gateway_names: dict[int, set[str]] = {}
+    for raw in ddb_records(master.sections[55]):
+        bus_index = struct.unpack_from("<H", raw, 8)[0]
+        gateway_names.setdefault(bus_index, set()).add(strings.get_string(struct.unpack_from("<I", raw, 4)[0]))
+
+    out = []
+    for vehicle_type in matches:
+        vehicle_car_rows = [raw for raw in car_rows if struct.unpack_from("<I", raw, 4)[0] == vehicle_type]
+        for car_raw in vehicle_car_rows:
+            car_id = struct.unpack_from("<I", car_raw, 0)[0]
+            options = [raw for raw in option_rows if struct.unpack_from("<I", raw, 0)[0] == car_id]
+            placement_variants: dict[tuple, dict[str, Any]] = {}
+            for option in options:
+                group = struct.unpack_from("<I", option, 44)[0]
+                rows = [raw for raw in component_rows if struct.unpack_from("<I", raw, 0)[0] == group]
+                placements = []
+                shape = []
+                for raw in sorted(rows, key=lambda item: (struct.unpack_from("<H", item, 8)[0], item[14])):
+                    bus_index = struct.unpack_from("<H", raw, 8)[0]
+                    component_index = raw[14]
+                    domain = subbus_names.get(component_index + 1, "")
+                    row = {
+                        "component_index": component_index,
+                        "component_hex": f"0x{component_index:02X}",
+                        "ecu_domain": domain,
+                        "bus_index": bus_index,
+                        "bus_name": bus_names.get(bus_index, f"BusIndex {bus_index}"),
+                        "gateway_names": sorted(x for x in gateway_names.get(bus_index, set()) if x),
+                        "junction_name": strings.get_string(struct.unpack_from("<I", raw, 4)[0]),
+                    }
+                    placements.append(row)
+                    shape.append((component_index, domain, bus_index, row["bus_name"]))
+                shape_key = tuple(shape)
+                existing = placement_variants.get(shape_key)
+                if existing is None:
+                    placement_variants[shape_key] = {
+                        "component_groups": [f"0x{group:08X}"],
+                        "placements": placements,
+                    }
+                else:
+                    existing["component_groups"].append(f"0x{group:08X}")
+            out.append({
+                "vehicle_type": vehicle_type,
+                "vehicle_name": vehicle_names[vehicle_type],
+                "can_bus_car_id": f"0x{car_id:08X}",
+                "option_count": len(options),
+                "placement_variant_count": len(placement_variants),
+                "placement_variants": list(placement_variants.values()),
+            })
+    if not out:
+        raise SystemExit(f"vehicle match {query!r} has no CAN Bus Check topology row")
+    return out
+
+
+def cmd_canbus(args: argparse.Namespace) -> int:
+    gts = _resolve_gts_root(args.gtsplus_root)
+    db_root = _db_root(gts, args.region, args.family)
+    parser = DDBParser()
+    strings = _english_strings(parser, db_root)
+    master = parser.parse_master_db(db_root / "Toyota.ddb")
+    rows = _master_canbus_topology_rows(parser, master, strings, args.vehicle)
+    if args.json:
+        print(json.dumps(rows, indent=2, sort_keys=True))
+        return 0
+    for index, row in enumerate(rows):
+        if index:
+            print()
+        print(
+            f"vehicle={row['vehicle_type']} name={row['vehicle_name']} "
+            f"can_bus_car_id={row['can_bus_car_id']} options={row['option_count']} "
+            f"placement_variants={row['placement_variant_count']}"
+        )
+        for variant_index, variant in enumerate(row["placement_variants"], 1):
+            if row["placement_variant_count"] > 1:
+                print(f"  variant {variant_index}: groups={','.join(variant['component_groups'])}")
+            by_bus: dict[tuple[int, str, tuple[str, ...]], list[dict[str, Any]]] = {}
+            for placement in variant["placements"]:
+                key = (
+                    placement["bus_index"],
+                    placement["bus_name"],
+                    tuple(placement["gateway_names"]),
+                )
+                by_bus.setdefault(key, []).append(placement)
+            for (bus_index, bus_name, gateways), placements in sorted(by_bus.items()):
+                gateway = ", ".join(gateways) if gateways else "-"
+                print(f"  {bus_name} index={bus_index} gateway={gateway}")
+                for placement in placements:
+                    junction = placement["junction_name"]
+                    suffix = f" via {junction}" if junction and junction != "-" else ""
+                    print(f"    {placement['component_hex']} {placement['ecu_domain']}{suffix}")
+    return 0
+
+
 def cmd_frame(args: argparse.Namespace) -> int:
     gts = _resolve_gts_root(args.gtsplus_root)
     db_root = _db_root(gts, args.region, args.family)
@@ -1244,6 +1374,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--limit", type=int, default=100)
     _common(p)
     p.set_defaults(func=cmd_category)
+
+    p = sub.add_parser("canbus", help="resolve Toyota master CAN Bus Check topology for a vehicle type/name")
+    p.add_argument("vehicle", help="vehicle type ID (decimal/0x) or OEM vehicle-name substring")
+    _common(p)
+    p.set_defaults(func=cmd_canbus)
 
     p = sub.add_parser("frame", help="resolve master FuncCommFrame selector(s) to current send/mask/check bytes")
     p.add_argument("category", help="category ID, database/short name, or OEM ECU name")

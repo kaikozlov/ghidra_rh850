@@ -192,6 +192,7 @@ def _section_camry_2026_relay_correct_capture():
     REPO = Path(__file__).resolve().parents[1]
     RAW = REPO / 'targets/camry-2026/raw-20260827'
     ART = REPO / 'data/generated/camry_2026_relay_correct_capture.json'
+    GTS_TOPOLOGY = REPO / 'data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json'
     BUILD = REPO / 'tools/analyze_camry_2026_relay_capture.py'
 
     def sha(path: Path) -> str:
@@ -231,6 +232,23 @@ def _section_camry_2026_relay_correct_capture():
     check('READY keeps same 0/2-vs-1 topology', ready['id_dlc_count_by_bus'] == {'0': 165, '1': 22, '2': 165})
     check('READY bit is present on both relay sides', ready['ready_values_bus0'] == [1] and ready['selected_counts']['0x51E/8'] == {'0': 9, '1': 0, '2': 9})
 
+    print('\n== current-GTS+ physical-network join ==')
+    gt = json.loads(GTS_TOPOLOGY.read_text())['current_camry_can_topology']
+    crit = gt['critical_placement']
+    check('Toyota current Camry topology separates camera Bus1 from Brake/EPS Bus4',
+          crit['front_camera_module']['bus_name'] == 'Bus 1' and
+          crit['skid_control_abs_vsc_trac']['bus_name'] == 'Bus 4' and
+          crit['power_steering_eps']['bus_name'] == 'Bus 4')
+    check('exact F33 030/B6 share the single normal application CAN controller surface',
+          gt['exact_f33_channel_join']['canif_controller_count_byte']['value'] == 1 and
+          gt['exact_f33_channel_join']['normal_tx_ids'][0] == '0x030' and
+          gt['exact_f33_channel_join']['b6_rule_can_id'] == '0x0B6')
+    check('repinned CAN0/CAN2 carries the Toyota Bus4 EPS surface',
+          nrtd['selected_counts']['0x030/32'] == {'0':1000,'1':0,'2':1000} and
+          nrtd['selected_counts']['0x0D7/32'] == {'0':500,'1':0,'2':500} and
+          nrtd['selected_counts']['0x025/32'] == {'0':1000,'1':0,'2':1000} and
+          gt['component_placements_identical_across_variants'] is True)
+
     print('\n== relay-correct moving route ==')
     drive = art['drive']
     check('route retains nine segments / 1.65M incoming frames', drive['segment_count'] == 9 and drive['frame_count'] == 1656656)
@@ -266,7 +284,7 @@ def _section_camry_2026_relay_correct_capture():
 
     print('\n== documentation ==')
     doc = (REPO / 'docs/variants/camry-2026-live-baseline.md').read_text()
-    for token in ('relay-correct', '1,656,656', '1,918,047', '3,574,703', 'zero `0x0B6`', '0x0FE', 'CHECKSUM_ERROR'):
+    for token in ('relay-correct', '1,656,656', '1,918,047', '3,574,703', 'zero `0x0B6`', '0x0FE', 'CHECKSUM_ERROR', 'Bus 4', '0x00A7D910'):
         check(f'Camry report preserves relay result {token}', token in doc)
 _section_camry_2026_relay_correct_capture()
 print()
