@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 359 · Corrections: 126 · Open questions: 53 · Docs: 104 · Suites: 185
+Findings: 360 · Corrections: 126 · Open questions: 53 · Docs: 104 · Suites: 185
 
 ## Reading this index
 
@@ -306,6 +306,7 @@ Findings: 359 · Corrections: 126 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="finding-tms-073"></a>**TMS-073** | [docs/tooling/techstream.md](../tooling/techstream.md) | — | `tests/verify_techstream_diagnostic_execution_model.py`, `tests/verify_gts_query_cli.py` | — |
 | <a id="finding-tms-074"></a>**TMS-074** | [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | — | `tests/verify_toyota_diag_registry.py` | — |
 | <a id="finding-tms-075"></a>**TMS-075** | [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | — | `tests/verify_techstream_diagnostic_execution_model.py`, `tests/verify_toyota_diag_registry.py` | — |
+| <a id="finding-tms-076"></a>**TMS-076** | [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | — | `tests/verify_toyota_diag_registry.py` | — |
 | <a id="finding-var-001"></a>**VAR-001** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md) | `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-002"></a>**VAR-002** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_spanconstant_corolla_equivalence.py`, `tests/verify_spanconstant_corolla_cross_variant.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-003"></a>**VAR-003** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
@@ -707,7 +708,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/camry_2026_cruise_lta_edge_census.json` | camry_2026, camry_8965f3307000_external_lateral_ingress | — |
 | `data/generated/camry_2026_dtc_clear.json` | toyota_diag_registry, gts_query_cli, camry_2026 | — |
 | `data/generated/camry_2026_motor_feedback_correlation.json` | camry_2026 | — |
-| `data/generated/camry_2026_nrtd_p5.json` | camry_2026 | — |
+| `data/generated/camry_2026_nrtd_p5.json` | toyota_diag_registry, gts_query_cli, camry_2026 | — |
 | `data/generated/camry_2026_ready_gear.json` | camry_2026 | — |
 | `data/generated/camry_2026_relay_correct_capture.json` | camry_2026, camry_8965f3307000_external_lateral_ingress | — |
 | `data/generated/camry_2026_tsk_baseline.json` | camry_2026 | — |

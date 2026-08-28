@@ -2397,6 +2397,49 @@ def _registry_did_catalog(rows: list[dict[str, Any]]) -> dict[str, list[dict[str
     return grouped
 
 
+def _registry_eps_observed_identity(capture: dict[str, Any]) -> dict[str, Any]:
+    route = capture["route"]
+    if int(route["eps_tx"], 16) != 0x7A1:
+        raise ValueError("Camry EPS identity TX drift")
+    if route["eps_bus"] != 1 or route["elm327_param"] != 1:
+        raise ValueError("Camry EPS pre-repin route drift")
+    rows = {row["name"]: row for row in capture["identity"]}
+    f181 = bytes.fromhex(rows["app_sw_id"]["hex"])
+    if not f181 or f181[0] != 2 or len(f181) != 33:
+        raise ValueError("Camry EPS F181 two-ID layout drift")
+    software_ids = [f181[1 + 16 * index : 1 + 16 * (index + 1)].rstrip(b"\0").decode("ascii") for index in range(2)]
+    serial = bytes.fromhex(rows["ecu_serial"]["hex"]).rstrip(b"\0").decode("ascii")
+    return {
+        "observation": "2026-08-26 pre-repin normal-harness NRTD",
+        "panda_bus_at_observation": 1,
+        "elm327_param": 1,
+        "f181_software_ids": software_ids,
+        "f18c_serial": serial,
+        "route_note": "historical pre-repin Panda bus; current profile diagnostic route is post-repin Panda bus0",
+    }
+
+
+def _registry_nrtd_observed_identities(nrtd: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    modules = nrtd["module_identity"]
+    if modules["elm327_param"] != 1:
+        raise ValueError("Camry NRTD module identity ELM327 param drift")
+    out: dict[str, dict[str, Any]] = {}
+    for key, source_key in (("frc", "FRC_P5"), ("brake", "Brake_EPB_category_435")):
+        row = modules[source_key]
+        if row["bus"] != 1:
+            raise ValueError(f"{source_key} pre-repin observation bus drift")
+        out[key] = {
+            "observation": "2026-08-26 pre-repin NRTD",
+            "panda_bus_at_observation": 1,
+            "elm327_param": 1,
+            "f181_software_ids": [row["f181"]],
+            "f18c_serial": row["f18c_serial"],
+            "ecu_part_0105": row["ecu_part_0105"],
+            "route_note": "historical pre-repin Panda bus; current profile diagnostic route is post-repin Panda bus0",
+        }
+    return out
+
+
 def _registry_dtc_catalog(parser: DDBParser, db: Any, strings: StringDataBase, source: str) -> dict[str, list[dict[str, Any]]]:
     grouped: dict[str, list[dict[str, Any]]] = {}
     for row in _dtc_rows(parser, db, strings, source):
@@ -2566,6 +2609,10 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
     strings = _english_strings(parser, db_root)
     dtc_clear_path = ROOT / "data/generated/camry_2026_dtc_clear.json"
     dtc_clear = json.loads(dtc_clear_path.read_text())
+    nrtd_p5_path = ROOT / "data/generated/camry_2026_nrtd_p5.json"
+    nrtd_p5 = json.loads(nrtd_p5_path.read_text())
+    eps_identity_path = ROOT / "targets/camry-2026/raw-20260826/identity.json"
+    eps_identity = json.loads(eps_identity_path.read_text())
 
     profile = json.loads(json.dumps(CAMRY_2026_DIAG_PROFILE))
     known_categories = sorted({
@@ -2574,7 +2621,7 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
         if "category_id" in ecu
     })
     catalogs: dict[str, Any] = {}
-    source_files = [master_path, strings_path, dtc_clear_path, EXECUTION_MODEL]
+    source_files = [master_path, strings_path, dtc_clear_path, nrtd_p5_path, eps_identity_path, EXECUTION_MODEL]
     for category_id in known_categories:
         category = _resolve_master_category(parser, master, strings, str(category_id))
         db_path = db_root / str(category["database"])
@@ -2601,8 +2648,28 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
     }
     profile["catalog_category_ids"] = known_categories
 
+    topology_rows = _master_canbus_topology_rows(parser, master, strings, "12704")
+    if len(topology_rows) != 1:
+        raise ValueError("Camry HV CAN topology cardinality drift")
+    topology = topology_rows[0]
+    if topology["vehicle_name"] != "Camry HV":
+        raise ValueError("Camry HV CAN topology name drift")
+    if topology["option_count"] != 18 or topology["placement_variant_count"] != 1:
+        raise ValueError("Camry HV CAN topology option/variant drift")
+    profile["gts_can_topology"] = {
+        **topology,
+        "namespace_boundary": "Toyota GTS Bus N names are vehicle-network domains, not Panda logical bus numbers; current post-repin diagnostics use Panda bus0",
+    }
+
+    observed_identities = _registry_nrtd_observed_identities(nrtd_p5)
+    observed_identities["eps"] = _registry_eps_observed_identity(eps_identity)
+    for ecu in profile["ecus"]:
+        identity = observed_identities.get(ecu["key"])
+        if identity is not None:
+            ecu["observed_identity"] = identity
+
     return {
-        "schema": "toyota-diagnostics-registry-v2",
+        "schema": "toyota-diagnostics-registry-v3",
         "profile": profile,
         "decoders": {
             "p5-linear-msb0-v1": {

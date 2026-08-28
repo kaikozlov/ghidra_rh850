@@ -34,7 +34,7 @@ def main() -> int:
 
     profile = actual["profile"]
     check("schema and exact Camry profile are pinned",
-          actual["schema"] == "toyota-diagnostics-registry-v2"
+          actual["schema"] == "toyota-diagnostics-registry-v3"
           and profile["profile"] == "camry-2026-f33"
           and profile["panda_bus"] == 0)
     decoder = actual["decoders"]["p5-linear-msb0-v1"]
@@ -63,6 +63,51 @@ def main() -> int:
           })
     check("core current P5 catalogs are present",
           profile["catalog_category_ids"] == [372, 395, 397, 398, 405, 435, 450, 498])
+
+    topology = profile["gts_can_topology"]
+    placements = topology["placement_variants"][0]["placements"]
+    placement_by_domain = {row["ecu_domain"]: row for row in placements}
+    check("current GTS Camry-HV CAN topology is a single invariant 18-option placement",
+          topology["vehicle_type"] == 12704
+          and topology["vehicle_name"] == "Camry HV"
+          and topology["can_bus_car_id"] == "0x00A7D910"
+          and topology["option_count"] == 18
+          and topology["placement_variant_count"] == 1
+          and len(topology["placement_variants"][0]["component_groups"]) == 18)
+    check("GTS Bus 1 is the Front Camera domain behind Central Gateway",
+          placement_by_domain["Front Camera Module"]["bus_name"] == "Bus 1"
+          and placement_by_domain["Front Camera Module"]["gateway_names"] == ["Central Gateway"])
+    check("GTS Bus 4 carries both EPS and Skid Control behind Central Gateway",
+          placement_by_domain["Power Steering (EPS)"]["bus_name"] == "Bus 4"
+          and placement_by_domain["Power Steering (EPS)"]["gateway_names"] == ["Central Gateway"]
+          and placement_by_domain["Skid Control (ABS/VSC/TRAC)"]["bus_name"] == "Bus 4"
+          and placement_by_domain["Skid Control (ABS/VSC/TRAC)"]["gateway_names"] == ["Central Gateway"])
+    check("GTS vehicle-bus names remain explicitly separate from Panda logical buses",
+          "not Panda logical bus numbers" in topology["namespace_boundary"]
+          and "post-repin diagnostics use Panda bus0" in topology["namespace_boundary"])
+
+    ecu_by_key = {row["key"]: row for row in profile["ecus"]}
+    eps_identity = ecu_by_key["eps"]["observed_identity"]
+    frc_identity = ecu_by_key["frc"]["observed_identity"]
+    brake_identity = ecu_by_key["brake"]["observed_identity"]
+    check("historical EPS identity is exact without rewriting its pre-repin Panda route",
+          eps_identity["f181_software_ids"] == ["8965F3307000", "8A3113303100"]
+          and eps_identity["f18c_serial"] == "8965033K9011J2740743"
+          and eps_identity["panda_bus_at_observation"] == 1
+          and eps_identity["elm327_param"] == 1
+          and "current profile diagnostic route is post-repin Panda bus0" in eps_identity["route_note"])
+    check("historical FRC identity is exact without rewriting its pre-repin Panda route",
+          frc_identity["f181_software_ids"] == ["8646F3315000"]
+          and frc_identity["ecu_part_0105"] == "8646C06091"
+          and frc_identity["f18c_serial"] == "TN69400026030404235J"
+          and frc_identity["panda_bus_at_observation"] == 1
+          and "current profile diagnostic route is post-repin Panda bus0" in frc_identity["route_note"])
+    check("historical Brake identity is exact without rewriting its pre-repin Panda route",
+          brake_identity["f181_software_ids"] == ["F152633K0000"]
+          and brake_identity["ecu_part_0105"] == "8954147040"
+          and brake_identity["f18c_serial"] == "8954147040CFC1800985"
+          and brake_identity["panda_bus_at_observation"] == 1
+          and "current profile diagnostic route is post-repin Panda bus0" in brake_identity["route_note"])
 
     eps_angle = actual["catalogs"]["405"]["dids"]["0x1037"]
     check("EPS steering-angle DID retains exact current scaling",

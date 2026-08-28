@@ -163145,14 +163145,36 @@
         "address": 1953,
         "category_id": 405,
         "key": "eps",
-        "name": "Power Steering"
+        "name": "Power Steering",
+        "observed_identity": {
+          "elm327_param": 1,
+          "f181_software_ids": [
+            "8965F3307000",
+            "8A3113303100"
+          ],
+          "f18c_serial": "8965033K9011J2740743",
+          "observation": "2026-08-26 pre-repin normal-harness NRTD",
+          "panda_bus_at_observation": 1,
+          "route_note": "historical pre-repin Panda bus; current profile diagnostic route is post-repin Panda bus0"
+        }
       },
       {
         "address": 1968,
         "category_id": 435,
         "functional_response": 2029,
         "key": "brake",
-        "name": "Brake/EPB"
+        "name": "Brake/EPB",
+        "observed_identity": {
+          "ecu_part_0105": "8954147040",
+          "elm327_param": 1,
+          "f181_software_ids": [
+            "F152633K0000"
+          ],
+          "f18c_serial": "8954147040CFC1800985",
+          "observation": "2026-08-26 pre-repin NRTD",
+          "panda_bus_at_observation": 1,
+          "route_note": "historical pre-repin Panda bus; current profile diagnostic route is post-repin Panda bus0"
+        }
       },
       {
         "address": 1872,
@@ -163184,7 +163206,18 @@
         "address": 1938,
         "category_id": 498,
         "key": "frc",
-        "name": "Front Recognition Camera"
+        "name": "Front Recognition Camera",
+        "observed_identity": {
+          "ecu_part_0105": "8646C06091",
+          "elm327_param": 1,
+          "f181_software_ids": [
+            "8646F3315000"
+          ],
+          "f18c_serial": "TN69400026030404235J",
+          "observation": "2026-08-26 pre-repin NRTD",
+          "panda_bus_at_observation": 1,
+          "route_note": "historical pre-repin Panda bus; current profile diagnostic route is post-repin Panda bus0"
+        }
       },
       {
         "address": 1954,
@@ -163193,6 +163226,381 @@
       }
     ],
     "fault_status_mask": 175,
+    "gts_can_topology": {
+      "can_bus_car_id": "0x00A7D910",
+      "namespace_boundary": "Toyota GTS Bus N names are vehicle-network domains, not Panda logical bus numbers; current post-repin diagnostics use Panda bus0",
+      "option_count": 18,
+      "placement_variant_count": 1,
+      "placement_variants": [
+        {
+          "component_groups": [
+            "0x004DD26A",
+            "0x004DD270",
+            "0x004DD26C",
+            "0x004DD272",
+            "0x004DD26E",
+            "0x004DD274",
+            "0x004DD26B",
+            "0x004DD271",
+            "0x004DD26D",
+            "0x004DD273",
+            "0x004DD26F",
+            "0x004DD275",
+            "0x004DD29F",
+            "0x004DD2A0",
+            "0x004DD2A1",
+            "0x004DD2A2",
+            "0x004DD2A3",
+            "0x004DD2A4"
+          ],
+          "placements": [
+            {
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "component_hex": "0x0F",
+              "component_index": 15,
+              "ecu_domain": "Front Radar",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 1 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "component_hex": "0x10",
+              "component_index": 16,
+              "ecu_domain": "Front Side Radar Master",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 1 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "component_hex": "0x41",
+              "component_index": 65,
+              "ecu_domain": "Blind Spot Monitor Master",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 10 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "component_hex": "0x67",
+              "component_index": 103,
+              "ecu_domain": "Clearance Warning (Intuitive Parking Assist)",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 8 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "component_hex": "0x68",
+              "component_index": 104,
+              "ecu_domain": "Parking Assist Monitor System / Rear Camera",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 11 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "component_hex": "0x6D",
+              "component_index": 109,
+              "ecu_domain": "Front Camera Module",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "-"
+            },
+            {
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "component_hex": "0x7B",
+              "component_index": 123,
+              "ecu_domain": "Panoramic View Monitor / Circumference Monitoring Camera Control Module",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 8 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 30,
+              "bus_name": "Bus 2",
+              "component_hex": "0x09",
+              "component_index": 9,
+              "ecu_domain": "Motor Generator",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "BAT"
+            },
+            {
+              "bus_index": 30,
+              "bus_name": "Bus 2",
+              "component_hex": "0x13",
+              "component_index": 19,
+              "ecu_domain": "ECM (Engine)",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "MGC"
+            },
+            {
+              "bus_index": 30,
+              "bus_name": "Bus 2",
+              "component_hex": "0x16",
+              "component_index": 22,
+              "ecu_domain": "Hybrid Vehicle Control",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 6 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 30,
+              "bus_name": "Bus 2",
+              "component_hex": "0xD5",
+              "component_index": 213,
+              "ecu_domain": "HV Battery",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 6 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 31,
+              "bus_name": "Bus 3",
+              "component_hex": "0x61",
+              "component_index": 97,
+              "ecu_domain": "Display and Navigation (AVN)",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No.1 Global CAN IBC"
+            },
+            {
+              "bus_index": 31,
+              "bus_name": "Bus 3",
+              "component_hex": "0x62",
+              "component_index": 98,
+              "ecu_domain": "Combination Meter",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No.1 Global CAN IBC"
+            },
+            {
+              "bus_index": 31,
+              "bus_name": "Bus 3",
+              "component_hex": "0x74",
+              "component_index": 116,
+              "ecu_domain": "74",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No.1 Global CAN IBC"
+            },
+            {
+              "bus_index": 31,
+              "bus_name": "Bus 3",
+              "component_hex": "0xC6",
+              "component_index": 198,
+              "ecu_domain": "DCM2",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No.1 Global CAN IBC"
+            },
+            {
+              "bus_index": 31,
+              "bus_name": "Bus 3",
+              "component_hex": "0xC7",
+              "component_index": 199,
+              "ecu_domain": "DCM",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No.1 Global CAN IBC"
+            },
+            {
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "component_hex": "0x28",
+              "component_index": 40,
+              "ecu_domain": "Brake Booster",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 2 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "component_hex": "0x29",
+              "component_index": 41,
+              "ecu_domain": "Skid Control (ABS/VSC/TRAC)",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 2 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "component_hex": "0x32",
+              "component_index": 50,
+              "ecu_domain": "Power Steering (EPS)",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "EBU"
+            },
+            {
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "component_hex": "0x47",
+              "component_index": 71,
+              "ecu_domain": "Airbag",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 7 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "component_hex": "0xF0",
+              "component_index": 240,
+              "ecu_domain": "Spiral cable (Steering Angle Sensor)",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 7 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 33,
+              "bus_name": "Bus 5",
+              "component_hex": "0x05",
+              "component_index": 5,
+              "ecu_domain": "Power Management",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 4 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 33,
+              "bus_name": "Bus 5",
+              "component_hex": "0x40",
+              "component_index": 64,
+              "ecu_domain": "Main Body",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 9 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 33,
+              "bus_name": "Bus 5",
+              "component_hex": "0x46",
+              "component_index": 70,
+              "ecu_domain": "Air Conditioning Amplifier",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 4 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 33,
+              "bus_name": "Bus 5",
+              "component_hex": "0xA5",
+              "component_index": 165,
+              "ecu_domain": "Front Door RH/R-Mirror (FR-Door/R-Mirror)",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 4 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 33,
+              "bus_name": "Bus 5",
+              "component_hex": "0xA6",
+              "component_index": 166,
+              "ecu_domain": "Front Door LH/L-Mirror (FL-Door/L-Mirror)",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 9 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 33,
+              "bus_name": "Bus 5",
+              "component_hex": "0xAB",
+              "component_index": 171,
+              "ecu_domain": "D-Seat",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 9 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 33,
+              "bus_name": "Bus 5",
+              "component_hex": "0xB5",
+              "component_index": 181,
+              "ecu_domain": "Certification (Smart)",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No. 4 Global CAN Junction Connector"
+            },
+            {
+              "bus_index": 34,
+              "bus_name": "Bus 6",
+              "component_hex": "0x2A",
+              "component_index": 42,
+              "ecu_domain": "Tire Pressure",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No.1 Global CAN IBC"
+            },
+            {
+              "bus_index": 34,
+              "bus_name": "Bus 6",
+              "component_hex": "0xD3",
+              "component_index": 211,
+              "ecu_domain": "Acoustic Vehicle Alerting System",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "No.1 Global CAN IBC"
+            },
+            {
+              "bus_index": 35,
+              "bus_name": "Bus 7",
+              "component_hex": "0xB7",
+              "component_index": 183,
+              "ecu_domain": "Remote Engine Starter",
+              "gateway_names": [
+                "Central Gateway"
+              ],
+              "junction_name": "-"
+            }
+          ]
+        }
+      ],
+      "vehicle_name": "Camry HV",
+      "vehicle_type": 12704
+    },
     "identity_guard": {
       "contains_ascii": "8965F3307000",
       "did": 61825,
@@ -163202,7 +163610,7 @@
     "profile": "camry-2026-f33",
     "vehicle": "2026 Toyota Camry Hybrid"
   },
-  "schema": "toyota-diagnostics-registry-v2",
+  "schema": "toyota-diagnostics-registry-v3",
   "source_identity": {
     "ABS_P5.ddb": {
       "bytes": 200474,
@@ -163248,9 +163656,17 @@
       "bytes": 4539,
       "sha256": "3bf830e700823c7d1962a754c676b4d6261ae6451f8f5d44687d69e6f8907b36"
     },
+    "data/generated/camry_2026_nrtd_p5.json": {
+      "bytes": 13866,
+      "sha256": "3a344b6cb2de19edb163e040974955f2d27467dc0a864974b6a5af90659d308f"
+    },
     "data/generated/techstream_v18/diagnostic_execution_model.json": {
       "bytes": 265352,
       "sha256": "7d8f2b4e120853523dc56d50b428f3ea12156a09d6f069341a06c68ced60df6e"
+    },
+    "targets/camry-2026/raw-20260826/identity.json": {
+      "bytes": 1559,
+      "sha256": "5feffa176a0a0293de53fee91486788c577d603ad72cc6e93064dd3710cad234"
     }
   }
 }
