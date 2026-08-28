@@ -203,6 +203,28 @@ Canonical: [../tooling/techstream.md](../tooling/techstream.md) §6.2.2 ·
 [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) ·
 [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.35.
 
+### Next GTS+ host-static target — recorder/toolchain join, not another broad P5 sweep
+
+TMS-079/TMS-080 close the fleet-level bookkeeping that was easy to keep
+re-deriving. Current category-498 `FRC_P5` spans multiple install-set
+architectures; category 499 `Steering Actuator` is a minority configuration, and
+`PCS1_P5`/`DSSystem_P5`/`Fr_RadSen_P5`/`RoadSign_P5`/`PCS2_P5` have zero selected
+co-occurrence with category 498 in the current NA/EU/JP install rows. Do **not**
+use broad P5 naming alone to nominate a TSS3 longitudinal owner.
+
+The highest-value remaining GTS+ host-static work is now the explicit offline
+recorder chain: `FRC_P5` proprietary `AB/EB` Operation FFD -> TSE/GTSE saved-session
+sections -> `PCS Data Viewer` TSS3 resource keys/Toyota names. The viewer ships
+1,131 `FFD_TSS3_ID_*` keys plus dedicated TSS3 trigger/image dictionaries and
+lateral/steering/cruise/recorder report vocabulary; the TSE converter ships P5
+FFD/RoB/PredictiveFFD/ring-buffer parsers and templates with PCS time-series/image
+FFD sections. Recovering that cross-layer mapping can produce OEM recorder semantics
+without guessing CAN fields. Treat generation-22 `ADCU_P6` only as a successor
+terminology oracle; never transfer its semantics backward without an independent
+P5 join. Canonical evidence:
+`data/generated/gtsplus_2026/tss3_crossvehicle_surface.json` and
+[../tooling/techstream.md](../tooling/techstream.md) §6.2.4.
+
 ## Parallel integration target — firmware-identified, relay-correct TSS3 capture
 
 **Current exact live target (VAR-051/052/053/054/055/056/057):** the maintainer's 2026 Camry now has both identity-bound live evidence and exact target-native EPS firmware. EPS F181 is `8965F3307000 / 8A3113303100` on normal-harness `(bus1,param1)`; FRC is `0x792→0x79A / 8646F3315000`; Brake/EPB is `0x7B0→0x7B8 / F152633K0000`. VAR-053 closes `0x51E` Ready plus **P=0, R=1, N=2, D=3, B=4**; VAR-054/056 close the target-native B6 receiver, timing, limits, feedback and runtime anchors. VAR-057 supersedes the old low-RAM carrier assumption: the real stock startup overwrites `FEBF0000`, while **`FEBFF9F0..FEBFFBFB` (524 bytes) is live-proven retained and executable** with stock application return and zero Panda TX-block delta. Exact F33 application XCP provides the placement half of the desired production loader: packed `0x7F7/0x7F8` descriptors exist, `SET_MTA 0x82C62` + `DOWNLOAD 0x81FFE` can write arbitrary bytes throughout `FEBF7C00..FEBFFBFF`, and GET_SEED/UNLOCK are unconfigured. A target-native 22-record / 88-endpoint fixed-DMAC census has zero endpoints in the XCP window, closing the obvious recovered DMA shortcut. **CORR-124 now proves the old normal bus1/ELM1 XCP probe used the correct physical route:** RX rule46 and TX handle `0x37` independently bind `0x7F7/0x7F8` to exact F33 RSCFD controller 1, so its timeout is a live admission/response negative rather than route falsification. The **remaining production architecture blocker is now a safe already-running-application PC pivot into the high tail**, not carrier retention or a RAM writer. OQ-053's recovered stock pivot classes are now **statically exhausted**: computed-call/callback cells, exception returns, fixed DMAC, CTBP/INTBP/EBASE, XCP DAQ, ECUReset, RoutineControl, WDBI, BA and AB dispatch were all closed target-natively without a writable control-transfer object into the retained tail. Do not repeat broad callback/service mining as if it were still the next static discriminator. Highest-value bounded next evidence is the read-only exact-state preflight on the proven bus1/controller-1 route, then CONNECT and non-executing high-tail DOWNLOAD/readback if admitted, plus a runtime-specific volatile-pivot discriminator; do not use the PROGRAMMING handoff as a normal startup design and do not guess arbitrary PC writes. Slot-4 command-5 permission/latency and stock-LTA sender/suppression characterization remain separate live gates. Production output remains disabled. Canonical baseline: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§12–13.

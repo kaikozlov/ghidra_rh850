@@ -90,6 +90,12 @@ requires_external = ["gtsplus"]
 modes = ["local"]
 oracle = "identity_hash"
 
+[suite.gtsplus_tss3_crossvehicle_surface]
+tests = ["tests/verify_gtsplus_tss3_crossvehicle_surface.py"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+oracle = "independent_external_artifact"
+
 [suite.toyota_cuw_corpus_lock]
 tests = ["tests/verify_toyota_cuw_corpus_lock.py"]
 paths = ["software/README.md"]

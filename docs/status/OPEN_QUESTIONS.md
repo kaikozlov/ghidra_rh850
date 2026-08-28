@@ -553,7 +553,14 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
   and [../tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md).
 - **OQ-030 — TSS 3.0 family breadth and generation control contract.** TSS
-  generation and SecOC/TSK remain explicitly separate axes (CORR-108). COM-013
+  generation and SecOC/TSK remain explicitly separate axes (CORR-108). TMS-079 now
+  closes the **host-side fleet architecture breadth** that used to be repeatedly
+  re-derived: current GTS+ category-498 `FRC_P5` spans 256/460/213 NA/EU/JP install
+  rows, 51/93/70 model names, and 5/9/9 selected architecture patterns. Category
+  499 `Steering Actuator` is present in only 4/256, 9/460, and 12/213 of those rows,
+  so it is not intrinsic to the TSS3/FRC_P5 generation. That does not collapse the
+  target-native work: each architecture still needs its own command/feedback,
+  producer/route, suppression, limits/faults, UI and authentication proof. COM-013
   now combines three vehicle-level oracles with exact H/F firmware. The public
   2023 route preserves substantial old-state structure but lacks `carFw`; Span's
   July-29 driving rlog independently exercises motion, brake/gas/steering and
@@ -909,7 +916,15 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   a triage candidate only; whether each mechanism transfers must be verified
   against the new firmware bytes before anything is recorded beyond
   `docs/variants/` hypothesis.
-- **OQ-052 — True-TSS3 longitudinal producer/control contract.** Older Toyota prior
+- **OQ-052 — True-TSS3 longitudinal producer/control contract.** TMS-079 adds an
+  important search boundary: current category-498 install rows have zero selected
+  co-occurrence in NA/EU/JP with `PCS1_P5` 427, `DSSystem_P5` 428,
+  `Fr_RadSen_P5` 429, `RoadSign_P5` 431, or `PCS2_P5` 432. Do not pick one of
+  those databases as the TSS3 longitudinal owner merely because it is P5 or has a
+  promising name. TMS-080 instead identifies the cross-vehicle GTS+ recorder path
+  (`PCS Data Viewer` TSS3 FFD dictionary plus TSE/GTSE PredictiveFFD/RoB/PCS-FFD
+  parser) as a concrete host-static semantic source to join to an exact target's
+  installed modules and live/firmware evidence. Older Toyota prior
   art makes longitudinal ownership a separate generation-specific architecture:
   ordinary TSS2 treats the camera as the ACC command source, `RADAR_ACC` moves
   ownership to the radar, and some SecOC-protected profiles split acceleration

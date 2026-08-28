@@ -1,0 +1,1614 @@
+{
+  "adcu_p6_successor_surface": {
+    "category": {
+      "category_id": 6037,
+      "database": "ADCU_P6.ddb",
+      "generation": 22,
+      "name": "ADAS Domain Controller",
+      "short_name": ""
+    },
+    "gtsplus_version": "2026.03.002.02",
+    "interpretation": "ADCU_P6 is a generation-22 successor-domain oracle with a much larger diagnostic/RoB/DDR surface. It can be used for semantic migration comparisons, but P6 names or behavior must not be projected back onto TSS3/P5 without an independent join.",
+    "selected_table_census": {
+      "157": {
+        "class": "CDbDatamonitorP5Table",
+        "record_count": 1637,
+        "record_size": 80
+      },
+      "163": {
+        "class": "CDbRoBDiagCodeTable",
+        "record_count": 501,
+        "record_size": 68
+      },
+      "164": {
+        "class": "CDbRoBFreezeFrameTable",
+        "record_count": 717,
+        "record_size": 48
+      },
+      "165": {
+        "class": "CDbDDRDiagCodeTable",
+        "record_count": 69,
+        "record_size": 20
+      },
+      "166": {
+        "class": "CDbDataIdForDdrTable",
+        "record_count": 445,
+        "record_size": 8
+      },
+      "167": {
+        "class": "CDbDDRFreezeFrameTable",
+        "record_count": 1797,
+        "record_size": 40
+      },
+      "168": {
+        "class": "CDbDDRInvalidConditionTable",
+        "record_count": 1165,
+        "record_size": 16
+      },
+      "61": {
+        "class": "CDbDataIdForDmTable",
+        "record_count": 529,
+        "record_size": 8
+      },
+      "62": {
+        "class": "CDbDatamonitorP5Table",
+        "record_count": 1647,
+        "record_size": 80
+      },
+      "65": {
+        "class": "CDbDiagCodeP5Table",
+        "record_count": 183,
+        "record_size": 68
+      },
+      "71": {
+        "class": "CDbRoutineActTestP5Table",
+        "record_count": 22,
+        "record_size": 72
+      },
+      "72": {
+        "class": "unknown",
+        "record_count": 4,
+        "record_size": 12
+      },
+      "73": {
+        "class": "unknown",
+        "record_count": 46,
+        "record_size": 20
+      },
+      "77": {
+        "class": "unknown",
+        "record_count": 1,
+        "record_size": 52
+      },
+      "78": {
+        "class": "unknown",
+        "record_count": 8,
+        "record_size": 20
+      },
+      "79": {
+        "class": "unknown",
+        "record_count": 2,
+        "record_size": 20
+      },
+      "90": {
+        "class": "CDbDataIdForRobTable",
+        "record_count": 2045,
+        "record_size": 8
+      }
+    },
+    "source": {
+      "path": "NA/DB/Gen/ADCU_P6.ddb",
+      "sha256": "3fd9458d8825858fb052b7c5ebdfa7707cccae524f61767f0f52d6118d448cc2",
+      "size": 574030
+    }
+  },
+  "fleet_category_498_architecture": {
+    "EU": {
+      "architecture_count": 9,
+      "architectures": [
+        {
+          "install_row_count": 221,
+          "model_names": [
+            "ALLION HEV",
+            "ALPHARD HEV/CROWN VELLFIRE HEV",
+            "ALPHARD HEV/VELLFIRE HEV",
+            "ALPHARD PHEV",
+            "AVALON HEV",
+            "AYGO HEV",
+            "C-HR HEV",
+            "C-HR PHEV",
+            "CAMRY HEV",
+            "CENTURY",
+            "COMFORT",
+            "COROLLA CROSS HEV",
+            "COROLLA CROSS HV",
+            "COROLLA HEV",
+            "CROWN FCEV",
+            "CROWN HEV",
+            "CROWN PHEV",
+            "FRONTLANDER HEV",
+            "GX550h",
+            "HARRIER HV/VENZA HV",
+            "HILUX BEV",
+            "INNOVA HEV/KIJANG INNOVA HEV",
+            "IS300h",
+            "LAND CR HEV",
+            "LAND CR PRADO HEV",
+            "LBX",
+            "LEVIN GT HEV",
+            "LEVIN HEV",
+            "LM350h",
+            "LM500h",
+            "LS500h",
+            "LX500d",
+            "LX600",
+            "LX700h",
+            "MIRAI",
+            "NOAH HEV",
+            "NX350h",
+            "NX400h+",
+            "NX450h+",
+            "PRIUS",
+            "PRIUS PHEV",
+            "RX350h",
+            "RX450h+",
+            "RX500h",
+            "RZ300e",
+            "RZ450e",
+            "SHIJI",
+            "SIENNA HV",
+            "SIENTA HEV",
+            "Tacoma HEV",
+            "UX300e",
+            "UX300h",
+            "YARIS CROSS HV",
+            "YARIS HV",
+            "bZ4X"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 466,
+              "database": "Brk_Bst_P5.ddb",
+              "generation": 20,
+              "name": "Brake Booster",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            435,
+            466,
+            498
+          ]
+        },
+        {
+          "install_row_count": 183,
+          "model_names": [
+            "4RUNNER",
+            "ALLION",
+            "ALPHARD/VELLFIRE",
+            "AVALON",
+            "CAMRY",
+            "COROLLA",
+            "COROLLA CROSS",
+            "COROLLA/COROLLA SPORT",
+            "FRONTLANDER",
+            "GR COROLLA",
+            "GX550",
+            "HARRIER",
+            "HIACE",
+            "HILUX",
+            "INNOVA/KIJANG INNOVA",
+            "IS350",
+            "LAND CR PRADO",
+            "LBX",
+            "LEVIN",
+            "LEVIN GT",
+            "NOAH/VOXY",
+            "NX200",
+            "NX250/NX260",
+            "NX350",
+            "RX300",
+            "RX350",
+            "SIENTA",
+            "Tacoma",
+            "YARIS"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            435,
+            498
+          ]
+        },
+        {
+          "install_row_count": 36,
+          "model_names": [
+            "4RUNNER",
+            "C-HR BEV",
+            "CROWN HEV",
+            "LAND CR PRADO HEV",
+            "LX500d",
+            "LX600",
+            "LX700h",
+            "PRIUS",
+            "PRIUS PHEV",
+            "RX350h",
+            "RX450h+",
+            "RX500h",
+            "Tacoma",
+            "Tacoma HEV",
+            "bZ4X",
+            "bZ4X Touring"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            498
+          ]
+        },
+        {
+          "install_row_count": 7,
+          "model_names": [
+            "COASTER",
+            "LAND CR FJ",
+            "TEST"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            435,
+            498
+          ]
+        },
+        {
+          "install_row_count": 4,
+          "model_names": [
+            "MAC"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 418,
+              "database": "LDA_P5.ddb",
+              "generation": 20,
+              "name": "Lane Departure Alert",
+              "short_name": ""
+            },
+            {
+              "category_id": 430,
+              "database": "Fr_Camera_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera",
+              "short_name": ""
+            },
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 466,
+              "database": "Brk_Bst_P5.ddb",
+              "generation": 20,
+              "name": "Brake Booster",
+              "short_name": ""
+            },
+            {
+              "category_id": 476,
+              "database": "ADS_Eth_P5.ddb",
+              "generation": 20,
+              "name": "Advanced Drive Control",
+              "short_name": ""
+            },
+            {
+              "category_id": 477,
+              "database": "ADeU_Eth_P5.ddb",
+              "generation": 20,
+              "name": "Advanced Drive eXtension Control",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            },
+            {
+              "category_id": 499,
+              "database": "EMPS2_P5.ddb",
+              "generation": 20,
+              "name": "Steering Actuator",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            418,
+            430,
+            435,
+            466,
+            476,
+            477,
+            498,
+            499
+          ]
+        },
+        {
+          "install_row_count": 3,
+          "model_names": [
+            "LS500"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 142,
+              "database": "EMPS_P4.ddb",
+              "generation": 4,
+              "name": "EPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            142,
+            405,
+            435,
+            498
+          ]
+        },
+        {
+          "install_row_count": 3,
+          "model_names": [
+            "LAND CR."
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 466,
+              "database": "Brk_Bst_P5.ddb",
+              "generation": 20,
+              "name": "Brake Booster",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            },
+            {
+              "category_id": 499,
+              "database": "EMPS2_P5.ddb",
+              "generation": 20,
+              "name": "Steering Actuator",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            435,
+            466,
+            498,
+            499
+          ]
+        },
+        {
+          "install_row_count": 2,
+          "model_names": [
+            "RZ350e",
+            "RZ450e/RZ500e/RZ550e/RZ600e"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            },
+            {
+              "category_id": 499,
+              "database": "EMPS2_P5.ddb",
+              "generation": 20,
+              "name": "Steering Actuator",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            498,
+            499
+          ]
+        },
+        {
+          "install_row_count": 1,
+          "model_names": [
+            "LAND CR."
+          ],
+          "selected_categories": [
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 466,
+              "database": "Brk_Bst_P5.ddb",
+              "generation": 20,
+              "name": "Brake Booster",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            435,
+            466,
+            498
+          ]
+        }
+      ],
+      "frc_p5_install_row_count": 460,
+      "frc_p5_model_name_count": 93,
+      "selected_category_cooccurrence_counts": {
+        "142": 3,
+        "405": 452,
+        "418": 4,
+        "427": 0,
+        "428": 0,
+        "429": 0,
+        "430": 4,
+        "431": 0,
+        "432": 0,
+        "435": 422,
+        "466": 229,
+        "476": 4,
+        "477": 4,
+        "485": 0,
+        "498": 460,
+        "499": 9
+      },
+      "source": {
+        "master": {
+          "path": "EU/DB/Gen/Toyota.ddb",
+          "sha256": "8d5e35dc4ddc0e4b1dc73306093af38fce239dfcb16fdcc0bd00f717be23f980",
+          "size": 13318791
+        },
+        "strings": {
+          "path": "EU/DB/Gen/M_English.ddb",
+          "sha256": "d0289b9092762448dde7de72b1735dfd59dca6680b3b3ac24d560384ccd4a38e",
+          "size": 4254372
+        }
+      }
+    },
+    "JP": {
+      "architecture_count": 9,
+      "architectures": [
+        {
+          "install_row_count": 99,
+          "model_names": [
+            "ALPHARD HEV/VELLFIRE HEV",
+            "ALPHARD PHEV/VELLFIRE PHEV",
+            "AQUA",
+            "CENTURY",
+            "COROLLA CROSS HEV",
+            "COROLLA CROSS HV",
+            "COROLLA HV",
+            "COROLLA SPORT HV",
+            "COROLLA TOURING HV",
+            "CROWN FCEV",
+            "CROWN HEV",
+            "CROWN PHEV",
+            "HARRIER HV",
+            "HARRIER PHEV",
+            "IS300h",
+            "JPN TAXI",
+            "LAND CRUISER HEV",
+            "LBX",
+            "LM350h",
+            "LM500h",
+            "LS500h",
+            "LX600",
+            "LX700h",
+            "MIRAI",
+            "NOAH HV/VOXY HV/ESQUIRE HV",
+            "NX350h",
+            "NX450h+",
+            "PRIUS",
+            "PRIUS PHEV",
+            "PROBOX HV/SUCCEED HV",
+            "RX350h",
+            "RX450h+",
+            "RX500h",
+            "RZ300e",
+            "RZ450e",
+            "SIENTA HEV",
+            "UX300e",
+            "UX300h",
+            "YARIS CROSS HV",
+            "YARIS HV",
+            "bZ4X"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 466,
+              "database": "Brk_Bst_P5.ddb",
+              "generation": 20,
+              "name": "Brake Booster",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            435,
+            466,
+            498
+          ]
+        },
+        {
+          "install_row_count": 65,
+          "model_names": [
+            "ALPHARD/VELLFIRE",
+            "COROLLA",
+            "COROLLA CROSS",
+            "COROLLA SPORT",
+            "COROLLA TOURING",
+            "GR COROLLA",
+            "GX550",
+            "HARRIER",
+            "HILUX",
+            "LAND CRUISER",
+            "LBX",
+            "LS500",
+            "NOAH/VOXY/ESQUIRE",
+            "NX250",
+            "NX350",
+            "PROBOX/SUCCEED",
+            "RX350",
+            "SIENTA",
+            "YARIS",
+            "YARIS CROSS"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            435,
+            498
+          ]
+        },
+        {
+          "install_row_count": 20,
+          "model_names": [
+            "CROWN HEV",
+            "CROWN PATROL CAR HEV",
+            "CROWN PHEV",
+            "LX600",
+            "LX700h",
+            "PRIUS",
+            "PRIUS PHEV",
+            "RX350h",
+            "RX450h+",
+            "RX500h",
+            "bZ4X",
+            "bZ4X Touring"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            498
+          ]
+        },
+        {
+          "install_row_count": 16,
+          "model_names": [
+            "COASTER",
+            "HIACE/REGIUSACE/HIMEDIC",
+            "LAND CRUISER"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            435,
+            498
+          ]
+        },
+        {
+          "install_row_count": 5,
+          "model_names": [
+            "LAND CRUISER",
+            "e-Palette"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 466,
+              "database": "Brk_Bst_P5.ddb",
+              "generation": 20,
+              "name": "Brake Booster",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            },
+            {
+              "category_id": 499,
+              "database": "EMPS2_P5.ddb",
+              "generation": 20,
+              "name": "Steering Actuator",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            435,
+            466,
+            498,
+            499
+          ]
+        },
+        {
+          "install_row_count": 4,
+          "model_names": [
+            "MAC"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 418,
+              "database": "LDA_P5.ddb",
+              "generation": 20,
+              "name": "Lane Departure Alert",
+              "short_name": ""
+            },
+            {
+              "category_id": 430,
+              "database": "Fr_Camera_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera",
+              "short_name": ""
+            },
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 466,
+              "database": "Brk_Bst_P5.ddb",
+              "generation": 20,
+              "name": "Brake Booster",
+              "short_name": ""
+            },
+            {
+              "category_id": 476,
+              "database": "ADS_Eth_P5.ddb",
+              "generation": 20,
+              "name": "Advanced Drive Control",
+              "short_name": ""
+            },
+            {
+              "category_id": 477,
+              "database": "ADeU_Eth_P5.ddb",
+              "generation": 20,
+              "name": "Advanced Drive eXtension Control",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            },
+            {
+              "category_id": 499,
+              "database": "EMPS2_P5.ddb",
+              "generation": 20,
+              "name": "Steering Actuator",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            418,
+            430,
+            435,
+            466,
+            476,
+            477,
+            498,
+            499
+          ]
+        },
+        {
+          "install_row_count": 2,
+          "model_names": [
+            "RZ350e",
+            "RZ500e/RZ550e/RZ600e"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            },
+            {
+              "category_id": 499,
+              "database": "EMPS2_P5.ddb",
+              "generation": 20,
+              "name": "Steering Actuator",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            498,
+            499
+          ]
+        },
+        {
+          "install_row_count": 1,
+          "model_names": [
+            "ZZZ4_P5C"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 418,
+              "database": "LDA_P5.ddb",
+              "generation": 20,
+              "name": "Lane Departure Alert",
+              "short_name": ""
+            },
+            {
+              "category_id": 430,
+              "database": "Fr_Camera_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera",
+              "short_name": ""
+            },
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 466,
+              "database": "Brk_Bst_P5.ddb",
+              "generation": 20,
+              "name": "Brake Booster",
+              "short_name": ""
+            },
+            {
+              "category_id": 485,
+              "database": "EPB_P5.ddb",
+              "generation": 20,
+              "name": "Electric Parking Brake",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            },
+            {
+              "category_id": 499,
+              "database": "EMPS2_P5.ddb",
+              "generation": 20,
+              "name": "Steering Actuator",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            418,
+            430,
+            435,
+            466,
+            485,
+            498,
+            499
+          ]
+        },
+        {
+          "install_row_count": 1,
+          "model_names": [
+            "TEST"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 485,
+              "database": "EPB_P5.ddb",
+              "generation": 20,
+              "name": "Electric Parking Brake",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            435,
+            485,
+            498
+          ]
+        }
+      ],
+      "frc_p5_install_row_count": 213,
+      "frc_p5_model_name_count": 70,
+      "selected_category_cooccurrence_counts": {
+        "142": 0,
+        "405": 196,
+        "418": 5,
+        "427": 0,
+        "428": 0,
+        "429": 0,
+        "430": 5,
+        "431": 0,
+        "432": 0,
+        "435": 191,
+        "466": 109,
+        "476": 4,
+        "477": 4,
+        "485": 2,
+        "498": 213,
+        "499": 12
+      },
+      "source": {
+        "master": {
+          "path": "JP/DB/Gen/Toyota.ddb",
+          "sha256": "6a3b9ff870278a4aeef8275f7fd232bc212aa81f14fe83aefb54f1bb00e301fe",
+          "size": 15294731
+        },
+        "strings": {
+          "path": "JP/DB/Gen/M_English.ddb",
+          "sha256": "b4a594b757b2fccf800b3d6e6d5b14d9e4892353bc553a5d339793df9b193201",
+          "size": 4254372
+        }
+      }
+    },
+    "NA": {
+      "architecture_count": 5,
+      "architectures": [
+        {
+          "install_row_count": 117,
+          "model_names": [
+            "4Runner HEV",
+            "CROWN HEV",
+            "CROWN SIGNIA HEV",
+            "Camry HV",
+            "Corolla Cross HEV",
+            "Corolla HV",
+            "Grand Highlander HEV",
+            "LS500h",
+            "LX600",
+            "LX700h",
+            "Land Cruiser HEV",
+            "MIRAI",
+            "NX350h",
+            "NX450h+",
+            "Prius",
+            "Prius PHEV",
+            "Prius Prime",
+            "RX350h",
+            "RX450h+",
+            "RX500h",
+            "RZ300e",
+            "RZ450e",
+            "Sienna HV",
+            "TX500h",
+            "TX550h+",
+            "Tacoma HEV",
+            "UX300h",
+            "bZ4X"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 466,
+              "database": "Brk_Bst_P5.ddb",
+              "generation": 20,
+              "name": "Brake Booster",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            435,
+            466,
+            498
+          ]
+        },
+        {
+          "install_row_count": 98,
+          "model_names": [
+            "4Runner",
+            "Corolla",
+            "Corolla Cross",
+            "GR Corolla",
+            "GX550",
+            "Grand Highlander",
+            "Hilux",
+            "IS350",
+            "LS500",
+            "NX250",
+            "NX350",
+            "RX350",
+            "TX350",
+            "Tacoma",
+            "Yaris"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            435,
+            498
+          ]
+        },
+        {
+          "install_row_count": 36,
+          "model_names": [
+            "4Runner",
+            "4Runner HEV",
+            "C-HR BEV",
+            "CROWN HEV",
+            "CROWN SIGNIA HEV",
+            "Corolla",
+            "Corolla HV",
+            "Grand Highlander HEV",
+            "LX600",
+            "LX700h",
+            "Land Cruiser HEV",
+            "Prius",
+            "Prius PHEV",
+            "RX350h",
+            "RX450h+",
+            "RX500h",
+            "RZ350e",
+            "RZ450e",
+            "RZ500e",
+            "RZ550e",
+            "TX500h",
+            "Tacoma",
+            "Tacoma HEV",
+            "bZ",
+            "bZ Woodland"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            498
+          ]
+        },
+        {
+          "install_row_count": 4,
+          "model_names": [
+            "MAC"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 405,
+              "database": "EMPS_P5.ddb",
+              "generation": 20,
+              "name": "EMPS",
+              "short_name": ""
+            },
+            {
+              "category_id": 418,
+              "database": "LDA_P5.ddb",
+              "generation": 20,
+              "name": "Lane Departure Alert",
+              "short_name": ""
+            },
+            {
+              "category_id": 430,
+              "database": "Fr_Camera_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera",
+              "short_name": ""
+            },
+            {
+              "category_id": 435,
+              "database": "ABS_P5.ddb",
+              "generation": 20,
+              "name": "Brake/EPB",
+              "short_name": ""
+            },
+            {
+              "category_id": 466,
+              "database": "Brk_Bst_P5.ddb",
+              "generation": 20,
+              "name": "Brake Booster",
+              "short_name": ""
+            },
+            {
+              "category_id": 476,
+              "database": "ADS_Eth_P5.ddb",
+              "generation": 20,
+              "name": "Advanced Drive Control",
+              "short_name": ""
+            },
+            {
+              "category_id": 477,
+              "database": "ADeU_Eth_P5.ddb",
+              "generation": 20,
+              "name": "Advanced Drive eXtension Control",
+              "short_name": ""
+            },
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            },
+            {
+              "category_id": 499,
+              "database": "EMPS2_P5.ddb",
+              "generation": 20,
+              "name": "Steering Actuator",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            405,
+            418,
+            430,
+            435,
+            466,
+            476,
+            477,
+            498,
+            499
+          ]
+        },
+        {
+          "install_row_count": 1,
+          "model_names": [
+            "TEST"
+          ],
+          "selected_categories": [
+            {
+              "category_id": 498,
+              "database": "FRC_P5.ddb",
+              "generation": 20,
+              "name": "Front Recognition Camera 2",
+              "short_name": ""
+            }
+          ],
+          "selected_category_ids": [
+            498
+          ]
+        }
+      ],
+      "frc_p5_install_row_count": 256,
+      "frc_p5_model_name_count": 51,
+      "selected_category_cooccurrence_counts": {
+        "142": 0,
+        "405": 255,
+        "418": 4,
+        "427": 0,
+        "428": 0,
+        "429": 0,
+        "430": 4,
+        "431": 0,
+        "432": 0,
+        "435": 219,
+        "466": 121,
+        "476": 4,
+        "477": 4,
+        "485": 0,
+        "498": 256,
+        "499": 4
+      },
+      "source": {
+        "master": {
+          "path": "NA/DB/Gen/Toyota.ddb",
+          "sha256": "f11e820968ac383a8fc5105b65322f0b9c3673df2c8dac46c9847e3d691b39b1",
+          "size": 18967903
+        },
+        "strings": {
+          "path": "NA/DB/Gen/M_English.ddb",
+          "sha256": "458a7039851fc66dc2385fff2efa910337218b8b23985b3c1afc0db7bc5f8014",
+          "size": 4254372
+        }
+      }
+    }
+  },
+  "generalization_boundaries": {
+    "host_decoder_not_wire_owner": "PCS Data Viewer/TSE parser structure proves Toyota knows how to decode saved recorder data. It does not by itself identify CAN arbitration IDs, ECU-side producer transforms, SecOC signing ownership, or a one-to-one mapping from resource keys to FRC proprietary AB/EB records.",
+    "region_local_install_sets": "Architecture is joined through vehicle/install-set/category membership per regional master. Numeric install-set IDs are region-local and must not be transferred between NA/EU/JP by number alone.",
+    "tss3_is_not_one_steering_topology": "Category 498 FRC_P5 spans multiple selected install-set architectures. EMPS2_P5/Steering Actuator category 499 is present only in a minority of category-498 rows, so Steering Actuator is not an intrinsic requirement of the TSS3 diagnostic generation.",
+    "unjoined_p5_longitudinal_databases": {
+      "categories": {
+        "427": {
+          "EU": 0,
+          "JP": 0,
+          "NA": 0
+        },
+        "428": {
+          "EU": 0,
+          "JP": 0,
+          "NA": 0
+        },
+        "429": {
+          "EU": 0,
+          "JP": 0,
+          "NA": 0
+        },
+        "431": {
+          "EU": 0,
+          "JP": 0,
+          "NA": 0
+        },
+        "432": {
+          "EU": 0,
+          "JP": 0,
+          "NA": 0
+        }
+      },
+      "meaning": "Current master install rows containing FRC_P5 category 498 have zero selected-category co-occurrence with PCS1_P5(427), DSSystem_P5(428), Fr_RadSen_P5(429), RoadSign_P5(431), or PCS2_P5(432) in NA/EU/JP. Those databases may still be useful Toyota vocabulary, but their P5 generation alone is not evidence that they are members of the category-498 TSS3 architecture."
+    }
+  },
+  "gtsplus_db_version": "01.01.037",
+  "gtsplus_version": "2026.03.002.02",
+  "pcs_data_viewer": {
+    "english_text_witnesses": [
+      "Target Lateral Position",
+      "Advanced Drive Control Target Steering Angle Speed Order Value [rad/s]",
+      "Advanced Drive Control Target Steering Angle Order Value [rad]",
+      "Lateral Control Switch Status",
+      "Arbitration result Lateral ID",
+      "Steering angle [deg]",
+      "Steering angle speed [deg/s]",
+      "Control target lateral position at front right",
+      "Control target lateral position at front left"
+    ],
+    "interpretation": "PCS Data Viewer contains a large explicit TSS3 FFD/trigger dictionary and report vocabulary for lateral, steering, cruise, recorder, and pre-brake concepts. This proves an OEM offline decoder/report surface exists; it does not yet map each resource key to an FRC AB/EB record.",
+    "report_accessors": [
+      "get_REPORT_LATERAL_POSITION_FOR_CONTROL_TARGET",
+      "get_REPORT_LANE_KEEPING_ASSIST",
+      "get_REPORT_DYNAMIC_RADAR_CRUISE_CONTROL",
+      "get_REPORT_STEERING_ANGLE",
+      "get_REPORT_PRE_BRAKE_REQUEST",
+      "get_REPORT_VEHICLE_CONTROL_HISTORY",
+      "get_REPORT_DRIVE_DATA_RECORDER",
+      "get_REPORT_EVENT_DATA_RECORDER",
+      "get_TRIGGER_NAME_TSS3"
+    ],
+    "sources": {
+      "english_resources": {
+        "path": "PCS Data Viewer/en-US/PCS Data Viewer.resources.dll",
+        "sha256": "3caf96927402d33f7c1abf32bcb0c5d98e0bd0a0a81122394577cdca69bb1e7d",
+        "size": 1528848
+      },
+      "exe": {
+        "path": "PCS Data Viewer/PCS Data Viewer.exe",
+        "sha256": "61adc03d1144a80b4f0920058232c8002e8baaa4c103d1668581753977a671cc",
+        "size": 6787088
+      }
+    },
+    "tss3_resource_key_counts": {
+      "FFD_TSS3_ID_": 1131,
+      "FFD_TSS3_TRIGGER_ID_": 49,
+      "IMGFFD_TSS3_ID_": 13,
+      "IMGFFD_TSS3_TRIGGER_ID_": 18,
+      "INFO_FCMIMGFFD_TSS3_": 14,
+      "INFO_TSS3FFD_": 19
+    },
+    "version": "12.00.005"
+  },
+  "schema": "gtsplus-tss3-crossvehicle-surface-v1",
+  "title": "Current GTS+ cross-vehicle TSS3 architecture and recorder surface",
+  "tse_converter": {
+    "converter_symbols": [
+      "GetDtcDataP5",
+      "GetDtcDataP5_Ffd",
+      "GetPredictiveFFD_FfdSignalData",
+      "GetRingBuffData_SignalDataList",
+      "GetRingBuffData_SignalInfoList",
+      "GetRingBuffData_StoredSignalList",
+      "GetRoB_CodeListAbsoluteTime",
+      "GetRoB_TimeStampInfo",
+      "GetHealthCheck_EcuInfo",
+      "GetSystemEcuInfoList"
+    ],
+    "interpretation": "The shipped TSE/GTSE converter has dedicated P5 DTC/FFD, PredictiveFFD, RoB, health-check, ring-buffer signal and ECU-map readers, and its three format templates explicitly allocate CAN, RoB, VehicleControlHistory, PCS time-series FFD and PCS image-FFD sections. This is a high-value offline capture-format decoder surface, not yet a proven direct parser for FRC AB/EB payloads.",
+    "ring_buffer_symbols": [
+      "ParseBufferFrame",
+      "ParseFrameTable",
+      "ParseRingBuffer",
+      "ParseSignalInfoList",
+      "ConvertDataFrame",
+      "frameId",
+      "signalId",
+      "signalName"
+    ],
+    "sources": {
+      "converter": {
+        "path": "GTSPlusTSEConverter/Converter.dll",
+        "sha256": "f967e062c024fb234280a281dbc70653564f399e4276bf11f577659a9197c3f0",
+        "size": 327696
+      },
+      "ring_buffer_parser": {
+        "path": "GTSPlusTSEConverter/RingBufferParser.dll",
+        "sha256": "bf738e35f35e0c30f0ee04016f16d5fce3c2cfbe465497f50f4ba96466abb637",
+        "size": 40976
+      },
+      "templates": [
+        {
+          "encoding": "cp932",
+          "path": "GTSPlusTSEConverter/TEMPLATE/171_Template.csv",
+          "required_sections": [
+            "\u30bf\u30a4\u30e0\u30b9\u30bf\u30f3\u30d7\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "RecordOnBehavior\u5171\u901a\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "CAN\u30d0\u30b9\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "VehicleControlHistory\u5171\u901a\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "PCS\u6642\u7cfb\u5217\u4f5c\u52d5\u6642FFD\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "PCS\u753b\u50cfFFD\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "DTC(Phase5)\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "PredictiveFFD\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9"
+          ],
+          "sha256": "d72f0d3c69c4833e31ee788afd90d9eed10f9c276662d2491ebcf87c36fb87e5",
+          "size": 609104
+        },
+        {
+          "encoding": "cp932",
+          "path": "GTSPlusTSEConverter/TEMPLATE/173_Template.csv",
+          "required_sections": [
+            "\u30bf\u30a4\u30e0\u30b9\u30bf\u30f3\u30d7\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "RecordOnBehavior\u5171\u901a\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "CAN\u30d0\u30b9\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "VehicleControlHistory\u5171\u901a\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "PCS\u6642\u7cfb\u5217\u4f5c\u52d5\u6642FFD\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "PCS\u753b\u50cfFFD\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "DTC(Phase5)\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "PredictiveFFD\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9"
+          ],
+          "sha256": "e72b4c878082180e36729019d72c3b24cfe410eba298f57ab93e9f2db1323a25",
+          "size": 616179
+        },
+        {
+          "encoding": "cp932",
+          "path": "GTSPlusTSEConverter/TEMPLATE/180_Template.csv",
+          "required_sections": [
+            "\u30bf\u30a4\u30e0\u30b9\u30bf\u30f3\u30d7\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "RecordOnBehavior\u5171\u901a\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "CAN\u30d0\u30b9\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "VehicleControlHistory\u5171\u901a\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "PCS\u6642\u7cfb\u5217\u4f5c\u52d5\u6642FFD\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "PCS\u753b\u50cfFFD\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "DTC(Phase5)\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9",
+            "PredictiveFFD\u5148\u982d\u4f4d\u7f6e\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9"
+          ],
+          "sha256": "e72b4c878082180e36729019d72c3b24cfe410eba298f57ab93e9f2db1323a25",
+          "size": 616179
+        }
+      ]
+    },
+    "template_section_translations": {
+      "CAN\u30d0\u30b9": "CAN bus",
+      "DTC(Phase5)": "Phase-5 DTC",
+      "PCS\u6642\u7cfb\u5217\u4f5c\u52d5\u6642FFD": "PCS time-series operation FFD",
+      "PCS\u753b\u50cfFFD": "PCS image FFD",
+      "PredictiveFFD": "Predictive FFD",
+      "RecordOnBehavior\u5171\u901a": "RecordOnBehavior common",
+      "VehicleControlHistory\u5171\u901a": "VehicleControlHistory common",
+      "\u30bf\u30a4\u30e0\u30b9\u30bf\u30f3\u30d7": "timestamp"
+    },
+    "version": "01.02.002"
+  }
+}

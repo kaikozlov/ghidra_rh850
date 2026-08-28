@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 370 · Corrections: 128 · Open questions: 53 · Docs: 104 · Suites: 190
+Findings: 372 · Corrections: 128 · Open questions: 53 · Docs: 104 · Suites: 191
 
 ## Reading this index
 
@@ -309,6 +309,8 @@ Findings: 370 · Corrections: 128 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="finding-tms-076"></a>**TMS-076** | [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | — | `tests/verify_toyota_diag_registry.py` | — |
 | <a id="finding-tms-077"></a>**TMS-077** | [docs/tooling/techstream.md](../tooling/techstream.md) | [gts-query-cli](../tooling/gts-query-cli.md) | `tests/verify_techstream_diagnostic_execution_model.py` | — |
 | <a id="finding-tms-078"></a>**TMS-078** | [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | — | `tests/verify_toyota_diag_registry.py` | — |
+| <a id="finding-tms-079"></a>**TMS-079** | [docs/tooling/techstream.md](../tooling/techstream.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_gtsplus_tss3_crossvehicle_surface.py` | OQ-030, OQ-052 |
+| <a id="finding-tms-080"></a>**TMS-080** | [docs/tooling/techstream.md](../tooling/techstream.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_gtsplus_tss3_crossvehicle_surface.py` | OQ-052 |
 | <a id="finding-var-001"></a>**VAR-001** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md) | `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-002"></a>**VAR-002** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_spanconstant_corolla_equivalence.py`, `tests/verify_spanconstant_corolla_cross_variant.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-003"></a>**VAR-003** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
@@ -423,7 +425,7 @@ Findings: 370 · Corrections: 128 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="open-question-oq-027"></a>**OQ-027** | Sienna `8965B4514000` | Variants | — |
 | <a id="open-question-oq-028"></a>**OQ-028** | Corolla `8965F1208000` | Variants | VAR-048, CORR-100 |
 | <a id="open-question-oq-029"></a>**OQ-029** | Separate 2023 US Corolla / historical-`8965H1202000` corpus | Variants | VAR-049 |
-| <a id="open-question-oq-030"></a>**OQ-030** | TSS 3.0 family breadth and generation control contract | Variants | CORR-108, COM-013, COM-014, COM-015, TMS-053, TMS-058, TMS-059, COM-016, CORR-111, COM-017 |
+| <a id="open-question-oq-030"></a>**OQ-030** | TSS 3.0 family breadth and generation control contract | Variants | CORR-108, TMS-079, COM-013, COM-014, COM-015, TMS-053, TMS-058, TMS-059, COM-016, CORR-111, COM-017 |
 | <a id="open-question-oq-031"></a>**OQ-031** | Boot SecurityAccess lifecycle measurement | Variants | — |
 | <a id="open-question-oq-032"></a>**OQ-032** | Semantic coverage | Tooling | — |
 | <a id="open-question-oq-033"></a>**OQ-033** | RFP/P1M-E serial-protocol transfer | Tooling | RFP-001, CORR-092 |
@@ -445,7 +447,7 @@ Findings: 370 · Corrections: 128 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="open-question-oq-049"></a>**OQ-049** | Application CommunicationControl live effect | Tooling | — |
 | <a id="open-question-oq-050"></a>**OQ-050** | Exploit-interest cohort consumption (SWEEP-008) | Tooling | SWEEP-008, SECOC-047, CORR-101 |
 | <a id="open-question-oq-051"></a>**OQ-051** | Cross-calibration structural triage of future P1M-E images | Tooling | MEM-SAFE-001 |
-| <a id="open-question-oq-052"></a>**OQ-052** | True-TSS3 longitudinal producer/control contract | Tooling | — |
+| <a id="open-question-oq-052"></a>**OQ-052** | True-TSS3 longitudinal producer/control contract | Tooling | TMS-079, TMS-080 |
 | <a id="open-question-oq-053"></a>**OQ-053** | F33 non-disruptive application-mode RAM execution pivot | Tooling | VAR-060, CORR-124, CORR-123, CORR-092 |
 
 ## Correction index
@@ -864,6 +866,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/gtsplus_2026/camry_brake_observer_vocabulary.json` | camry_brake_observer_vocabulary | — |
 | `data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json` | camry_f152633k0000_brake_acquisition | — |
 | `data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json` | toyota_diag_registry | — |
+| `data/generated/gtsplus_2026/tss3_crossvehicle_surface.json` | gtsplus_tss3_crossvehicle_surface | — |
 | `data/generated/p4dk4_template/p4dk4_vocabulary.json` | diagnostic_vocabulary | — |
 | `data/generated/rdbi_emitted_write_audit.json` | application_rdbi | — |
 | `data/generated/response_disclosure_audit.csv` | response_disclosure_audit | — |
