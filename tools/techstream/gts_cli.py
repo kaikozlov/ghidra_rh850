@@ -582,6 +582,49 @@ def _semantic_profile_for_plugin(plugin_path: Path, role: int) -> tuple[str | No
     return None, None, "plugin_semantics_unrecovered_for_identity"
 
 
+def _active_test_list_category_plan(parser: DDBParser, category: dict[str, Any], db_root: Path) -> dict[str, Any]:
+    mode = int(category["generation"]) & 0xE0
+    db_path = db_root / str(category["database"])
+    db = parser.parse_ecu_db(db_path)
+    direct = db.sections.get(68)
+    routine = db.sections.get(71)
+    multi = db.sections.get(33)
+    if direct is not None and direct.decoded_record_size != 64:
+        raise ValueError(f"{db_path.name}: type-68 record size {direct.decoded_record_size}, expected 64")
+    if routine is not None and routine.decoded_record_size != 72:
+        raise ValueError(f"{db_path.name}: type-71 record size {routine.decoded_record_size}, expected 72")
+    direct_count = 0 if direct is None else direct.header.record_count
+    routine_count = 0 if routine is None else routine.header.record_count
+    return {
+        "generation": int(category["generation"]),
+        "generation_mode": f"0x{mode:X}",
+        "direct_table": 68,
+        "direct_table_class": ECU_TABLE_CLASS_NAMES[68],
+        "direct_candidate_count": direct_count,
+        "routine_table": 71,
+        "routine_table_class": ECU_TABLE_CLASS_NAMES[71],
+        "routine_candidate_count": routine_count,
+        "multi_did_table_present": multi is not None,
+        "multi_did_count": 0 if multi is None else multi.header.record_count,
+        "support_builders": (
+            ["CreateEnableDataIdListForSubaruCheckDID", "CreateEnableRIdListforSUBARU"]
+            if mode == 0x20
+            else ["CreateEnableDataIdList", "CreateEnableRIdList"]
+        ),
+        "direct_support_helper": (
+            "CheckSupportDidForSUBARU" if mode == 0x20 else "CheckSupportDid"
+        ),
+        "routine_support_helper": (
+            "CheckSupportRidForSUBARU" if mode == 0x20 else "CheckSupportRid"
+        ),
+        "runtime_support_required": direct_count > 0 or routine_count > 0,
+        "runtime_boundary": (
+            "candidate counts are static; direct tests require DID support evaluation and routine tests require "
+            "RID support evaluation before Techstream's final Active Test list is known"
+        ),
+    }
+
+
 def _monitor_list_category_plan(parser: DDBParser, category: dict[str, Any], db_root: Path) -> dict[str, Any]:
     mode = int(category["generation"]) & 0xE0
     table = 157 if mode == 0x60 else 62
@@ -661,6 +704,7 @@ def _master_command_plan(
         "control_flow": None,
         "metadata_model": None,
         "list_model": None,
+        "active_test_model": None,
         "boundary": (
             "Frames/timers are resolved from the selected category. Executable semantics are attached only "
             "when the selected plugin SHA-256 exactly matches a recovered profile."
@@ -669,7 +713,14 @@ def _master_command_plan(
     if profile is None:
         return result
 
-    if profile_name == "role_0x05_p5_monitor_list":
+    if profile_name == "role_0x06_p5_active_test_list":
+        result["active_test_model"] = dict(profile["list_model"])
+        if db_root is not None:
+            result["active_test_model"]["category_plan"] = _active_test_list_category_plan(parser, category, db_root)
+            result["semantic_status"] = "exact_plugin_identity_and_category_active_test_partition"
+        else:
+            result["semantic_status"] = "exact_plugin_identity_active_test_list_semantics"
+    elif profile_name == "role_0x05_p5_monitor_list":
         result["list_model"] = dict(profile["list_model"])
         if db_root is not None:
             result["list_model"]["category_plan"] = _monitor_list_category_plan(parser, category, db_root)
@@ -796,6 +847,19 @@ def cmd_command(args: argparse.Namespace) -> int:
         )
     for timer in payload["timers"]:
         print(f"timer	id={timer['timer_id']}	delay_ms={timer['delay_ms']}")
+    active_test_model = payload["active_test_model"]
+    if active_test_model is not None:
+        category_plan = active_test_model.get("category_plan")
+        if category_plan is None:
+            print("active-tests\tcategory_partition=unresolved")
+        else:
+            print(
+                f"active-tests\tdirect={category_plan['direct_candidate_count']}\t"
+                f"routine={category_plan['routine_candidate_count']}\t"
+                f"multi_did={category_plan['multi_did_count']}\t"
+                f"did_helper={category_plan['direct_support_helper']}\t"
+                f"rid_helper={category_plan['routine_support_helper']}"
+            )
     list_model = payload["list_model"]
     if list_model is not None:
         category_plan = list_model.get("category_plan")

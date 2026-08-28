@@ -208,6 +208,107 @@
             "size": 39440
           }
         },
+        "role_0x06_p5_active_test_list": {
+          "anchors": {
+            "category_mode_subaru_builders": {
+              "bytes": "8d4dd48b008a404824e03c200f85a20100008b06ff701c8d45b45056ff15045000108bf885ff0f855a0500008d8de8feffffff15a85000108d8d34ffffffc645fc05ff15185000108d8d54ffffffc645fc06ff1534500010a15c500010c645fc07897dec8985c4feffff397e100f8420",
+              "file_offset": "0x8B4",
+              "va": "0x100014B4"
+            },
+            "direct_check_support_did": {
+              "bytes": "8b8d7cffffff8d45ec6a01ffb55cffffff500fbfc28b04818d4db80fb7402050ffb560ffffffff15205000108bf885ff",
+              "file_offset": "0x1045",
+              "va": "0x10001C45"
+            },
+            "direct_table_68": {
+              "bytes": "ff701c8b35bc5000108d856cffffff5081c1cc0000006844020000ffd68bf881ff070103a0750733ffe9a002000085ff0f85980200006683bd70ffffff010f8c8a0200008d4da0ff15c85000108b038b4b1081c1cc000000c645fc02",
+              "file_offset": "0xF33",
+              "va": "0x10001B33"
+            },
+            "final_output": {
+              "bytes": "508bcbe8800800008bf0668b0e66894d8c8d4e04518d4d90ff153c5000108d4e14518d4da0ff153c5000108b46248b8db4feffff8945b08d458450ff1550500010",
+              "file_offset": "0xD48",
+              "va": "0x10001948"
+            },
+            "normal_support_builders": {
+              "bytes": "6a008d45b45056ff15005000108bf885ff74165768980000006878510010685052001057e9a00300006a008d8514ffffff50568d4dd4ff15085000108bf885ff74165768a0000000687851001068b852001057e9710300008d45b48bcb5056e8c40300008b",
+              "file_offset": "0xA68",
+              "va": "0x10001668"
+            },
+            "routine_check_support_rid": {
+              "bytes": "6a018d8514ffffff0fbfce508d45ecc745ec00000000508b85f8feffff8b04888d8d54ffffff0fb7401e50ffb5c8feffffff15305000108bf885ff7546",
+              "file_offset": "0xB70",
+              "va": "0x10001770"
+            },
+            "routine_table_71": {
+              "bytes": "8d8de8feffffff15a85000108d8d54ffffffc645fc08ff15345000108b4e108b155c500010c645fc09897dec8995c4feffff85c90f84c40000008b0685c00f84ba000000ff701c8d85e8feffff81c1cc00000050a1bc5000106847020000ffd08bf881ff070103",
+              "file_offset": "0xAD6",
+              "va": "0x100016D6"
+            },
+            "subaru_check_support_did": {
+              "bytes": "0fb7402050ffb560ffffffff15245000108bf885ff0f8509010000837dec010f",
+              "file_offset": "0x13F8",
+              "va": "0x10001FF8"
+            },
+            "subaru_check_support_rid": {
+              "bytes": "6a018d8534ffffff0fbfce508d45ecc745ec00000000508b85f8feffff8b04888d8d54ffffff0fb7401e50ffb5c8feffffff15285000108bf8",
+              "file_offset": "0x9A0",
+              "va": "0x100015A0"
+            }
+          },
+          "example_binding": {
+            "category_id": 397,
+            "dll_name": "GetActTstListP5_DT.dll",
+            "dll_role_hex": "0x6",
+            "dll_role_id": 6,
+            "raw": "4700650074004100630074005400730074004c00690073007400500035005f00440054002e0064006c006c000000000000000000000000000000000000000000000000000000000000000000000000008d01000006000000"
+          },
+          "list_model": {
+            "category_mode": "low byte of master category generation field (+0x48 raw) masked with 0xE0",
+            "direct_support": {
+              "multi_did": "when a type-33 MultiDID association exists, its additional DIDs are individually support-checked before the active test is emitted",
+              "normal_helper": "CCommCachePlusP5::CheckSupportDid(command, did, &supported, enabled_did_list, 1)",
+              "primary_did_key": "type-68 u16 +0x20",
+              "subaru_helper": "CCommCachePlusP5::CheckSupportDidForSUBARU(command, did, &supported)"
+            },
+            "direct_test_table": {
+              "class": "CDbActTestP5Table",
+              "record_size": 64,
+              "table": 68
+            },
+            "multi_did_table": {
+              "class": "CDbMultiDidIdTable",
+              "optional": true,
+              "table": 33
+            },
+            "normal_support_builders": [
+              "CreateEnableDataIdList",
+              "CreateEnableRIdList"
+            ],
+            "output": "supported direct and routine entries are normalized/sorted and emitted as CCmdActTstData (id, name, short name, help id)",
+            "purpose": "construct the Active Test catalog from DID-backed direct tests and RID-backed routine tests after runtime support evaluation",
+            "routine_support": {
+              "normal_helper": "CCommCachePlusP5::CheckSupportRid(command, rid, &supported, enabled_rid_list, 1)",
+              "rid_key": "type-71 u16 +0x1E",
+              "subaru_helper": "CCommCachePlusP5::CheckSupportRidForSUBARU(command, rid, &supported, enabled_rid_list, 1)"
+            },
+            "routine_test_table": {
+              "class": "CDbRoutineActTestP5Table",
+              "record_size": 72,
+              "table": 71
+            },
+            "runtime_boundary": "offline DDB parsing enumerates direct/routine candidates but cannot determine DID/RID support outcomes without support-cache/live ECU state",
+            "subaru_mode_0x20_builders": [
+              "CreateEnableDataIdListForSubaruCheckDID",
+              "CreateEnableRIdListforSUBARU"
+            ]
+          },
+          "plugin": {
+            "path": "bin/GetActTstListP5_DT.dll",
+            "sha256": "16e3a6f9ad62722144313bebe38ebfe3393cff1356047ecc4b209c844594d844",
+            "size": 33296
+          }
+        },
         "role_0x19_dtc_clear": {
           "anchors": {
             "fallback_error_set": {

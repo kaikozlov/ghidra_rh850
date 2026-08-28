@@ -170,7 +170,29 @@ check(
 
 plugin_semantics = gts["dll_role_schema"]["plugin_semantics"]
 monitor_list = plugin_semantics["role_0x05_p5_monitor_list"]
+active_test_list = plugin_semantics["role_0x06_p5_active_test_list"]
 signal_info = plugin_semantics["role_0x41_p5_signal_info"]
+check(
+    "current role 0x06 P5 Active Test list plugin is identity-pinned and splits DID/RID support",
+    active_test_list["plugin"]["sha256"] == "16e3a6f9ad62722144313bebe38ebfe3393cff1356047ecc4b209c844594d844"
+    and active_test_list["example_binding"]["category_id"] == 397
+    and active_test_list["example_binding"]["dll_role_id"] == 0x06
+    and active_test_list["example_binding"]["dll_name"] == "GetActTstListP5_DT.dll"
+    and active_test_list["list_model"]["direct_test_table"] == {"table": 68, "class": "CDbActTestP5Table", "record_size": 64}
+    and active_test_list["list_model"]["routine_test_table"] == {"table": 71, "class": "CDbRoutineActTestP5Table", "record_size": 72}
+    and active_test_list["list_model"]["multi_did_table"] == {"table": 33, "class": "CDbMultiDidIdTable", "optional": True},
+)
+check(
+    "current role 0x06 normal/Subaru support paths and direct/routine keys are instruction-pinned",
+    active_test_list["anchors"]["category_mode_subaru_builders"]["bytes"].startswith("8d4dd48b008a404824e03c20")
+    and active_test_list["anchors"]["normal_support_builders"]["bytes"].startswith("6a008d45b45056ff1500500010")
+    and active_test_list["anchors"]["direct_table_68"]["bytes"].startswith("ff701c8b35bc500010")
+    and active_test_list["anchors"]["direct_check_support_did"]["bytes"].startswith("8b8d7cffffff8d45ec6a01")
+    and active_test_list["anchors"]["routine_table_71"]["bytes"].startswith("8d8de8feffffff15a8500010")
+    and active_test_list["anchors"]["routine_check_support_rid"]["bytes"].startswith("6a018d8514ffffff0fbfce")
+    and active_test_list["list_model"]["direct_support"]["primary_did_key"] == "type-68 u16 +0x20"
+    and active_test_list["list_model"]["routine_support"]["rid_key"] == "type-71 u16 +0x1E",
+)
 check(
     "current role 0x05 P5 monitor-list plugin is identity-pinned and delegates support discovery",
     monitor_list["plugin"]["sha256"] == "8db35a64b020a18b14f361e3fbb4f7375fc9a35293abb4b62f7a00e7c6a3a07c"

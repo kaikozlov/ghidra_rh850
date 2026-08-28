@@ -396,9 +396,47 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
     cid = bin_root / "GetCID_SID22_DT.dll"
     clear = bin_root / "DelDiagCodeP4.dll"
     monitor_list = bin_root / "GetDatMonListP5_DT.dll"
+    active_test_list = bin_root / "GetActTstListP5_DT.dll"
     signal_info = bin_root / "GetDatMonSignalInfoP5_DT.dll"
     kgp = bin_root / "KgpDataCtrl.dll"
     return {
+        "role_0x06_p5_active_test_list": {
+            "plugin": file_identity(active_test_list, gts_root),
+            "example_binding": dll_binding(parser, master, 397, 0x06),
+            "list_model": {
+                "purpose": "construct the Active Test catalog from DID-backed direct tests and RID-backed routine tests after runtime support evaluation",
+                "category_mode": "low byte of master category generation field (+0x48 raw) masked with 0xE0",
+                "direct_test_table": {"table": 68, "class": ECU_TABLE_CLASS_NAMES[68], "record_size": 64},
+                "routine_test_table": {"table": 71, "class": ECU_TABLE_CLASS_NAMES[71], "record_size": 72},
+                "multi_did_table": {"table": 33, "class": ECU_TABLE_CLASS_NAMES[33], "optional": True},
+                "normal_support_builders": ["CreateEnableDataIdList", "CreateEnableRIdList"],
+                "subaru_mode_0x20_builders": ["CreateEnableDataIdListForSubaruCheckDID", "CreateEnableRIdListforSUBARU"],
+                "direct_support": {
+                    "primary_did_key": "type-68 u16 +0x20",
+                    "normal_helper": "CCommCachePlusP5::CheckSupportDid(command, did, &supported, enabled_did_list, 1)",
+                    "subaru_helper": "CCommCachePlusP5::CheckSupportDidForSUBARU(command, did, &supported)",
+                    "multi_did": "when a type-33 MultiDID association exists, its additional DIDs are individually support-checked before the active test is emitted",
+                },
+                "routine_support": {
+                    "rid_key": "type-71 u16 +0x1E",
+                    "normal_helper": "CCommCachePlusP5::CheckSupportRid(command, rid, &supported, enabled_rid_list, 1)",
+                    "subaru_helper": "CCommCachePlusP5::CheckSupportRidForSUBARU(command, rid, &supported, enabled_rid_list, 1)",
+                },
+                "runtime_boundary": "offline DDB parsing enumerates direct/routine candidates but cannot determine DID/RID support outcomes without support-cache/live ECU state",
+                "output": "supported direct and routine entries are normalized/sorted and emitted as CCmdActTstData (id, name, short name, help id)",
+            },
+            "anchors": {
+                "category_mode_subaru_builders": anchor(active_test_list, 0x100014B4, "8d4dd48b008a404824e03c200f85a20100008b06ff701c8d45b45056ff15045000108bf885ff0f855a0500008d8de8feffffff15a85000108d8d34ffffffc645fc05ff15185000108d8d54ffffffc645fc06ff1534500010a15c500010c645fc07897dec8985c4feffff397e100f8420"),
+                "normal_support_builders": anchor(active_test_list, 0x10001668, "6a008d45b45056ff15005000108bf885ff74165768980000006878510010685052001057e9a00300006a008d8514ffffff50568d4dd4ff15085000108bf885ff74165768a0000000687851001068b852001057e9710300008d45b48bcb5056e8c40300008b"),
+                "direct_table_68": anchor(active_test_list, 0x10001B33, "ff701c8b35bc5000108d856cffffff5081c1cc0000006844020000ffd68bf881ff070103a0750733ffe9a002000085ff0f85980200006683bd70ffffff010f8c8a0200008d4da0ff15c85000108b038b4b1081c1cc000000c645fc02"),
+                "direct_check_support_did": anchor(active_test_list, 0x10001C45, "8b8d7cffffff8d45ec6a01ffb55cffffff500fbfc28b04818d4db80fb7402050ffb560ffffffff15205000108bf885ff"),
+                "routine_table_71": anchor(active_test_list, 0x100016D6, "8d8de8feffffff15a85000108d8d54ffffffc645fc08ff15345000108b4e108b155c500010c645fc09897dec8995c4feffff85c90f84c40000008b0685c00f84ba000000ff701c8d85e8feffff81c1cc00000050a1bc5000106847020000ffd08bf881ff070103"),
+                "routine_check_support_rid": anchor(active_test_list, 0x10001770, "6a018d8514ffffff0fbfce508d45ecc745ec00000000508b85f8feffff8b04888d8d54ffffff0fb7401e50ffb5c8feffffff15305000108bf885ff7546"),
+                "subaru_check_support_did": anchor(active_test_list, 0x10001FF8, "0fb7402050ffb560ffffffff15245000108bf885ff0f8509010000837dec010f"),
+                "subaru_check_support_rid": anchor(active_test_list, 0x100015A0, "6a018d8534ffffff0fbfce508d45ecc745ec00000000508b85f8feffff8b04888d8d54ffffff0fb7401e50ffb5c8feffffff15285000108bf8"),
+                "final_output": anchor(active_test_list, 0x10001948, "508bcbe8800800008bf0668b0e66894d8c8d4e04518d4d90ff153c5000108d4e14518d4da0ff153c5000108b46248b8db4feffff8945b08d458450ff1550500010"),
+            },
+        },
         "role_0x05_p5_monitor_list": {
             "plugin": file_identity(monitor_list, gts_root),
             "example_binding": dll_binding(parser, master, 405, 0x05),

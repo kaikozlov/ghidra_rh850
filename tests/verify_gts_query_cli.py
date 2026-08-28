@@ -84,6 +84,12 @@ commsets = gts_cli._master_comm_set_rows(parser, master)
 commset1 = next(row for row in commsets if row["comm_set_id"] == 1)
 check(len(commsets) == 13 and commset1["raw"] == "e8030000fc0300000000010000000100", "current master exposes 13 stable 16-byte CommSet rows")
 check(commset1["receive_timeout"] == 1020 and commset1["retry_count"] == 1, "current CommSet 1 resolves receive timeout 1020 and one retry")
+check(
+    gts_cli.ECU_TABLE_CLASS_NAMES[33] == "CDbMultiDidIdTable"
+    and gts_cli.ECU_TABLE_CLASS_NAMES[68] == "CDbActTestP5Table"
+    and gts_cli.ECU_TABLE_CLASS_NAMES[71] == "CDbRoutineActTestP5Table",
+    "current parser names the consumer-proven Active Test and MultiDID tables",
+)
 timers = gts_cli._master_timer_rows(parser, master, hybrid["category_id"])
 check(
     timers == [{"category_id": 397, "timer_id": 1, "delay_ms": 0, "unknown_dword_08": 0, "raw": "000000008d01010000000000"}],
@@ -96,6 +102,33 @@ check(len(role_catalog) == 191 and role19["binding_count"] == 536 and role19["ca
 role5 = next(row for row in role_catalog if row["role"] == 5)
 check(role5["plugins"][0]["surface"] == "support_cache_v18_proven" and role5["plugins"][1]["surface"] == "delegated_transport_v18_proven", "role query distinguishes P4 cached support from P5 delegated support probing")
 emps_category = gts_cli._resolve_master_category(parser, master, strings, "EMPS_P5")
+hybrid_active_plan = gts_cli._master_command_plan(parser, master, hybrid, 0x06, gts / "bin", db_root)
+check(
+    hybrid_active_plan["plugin"] == "GetActTstListP5_DT.dll"
+    and hybrid_active_plan["semantic_status"] == "exact_plugin_identity_and_category_active_test_partition"
+    and hybrid_active_plan["operation_surface"] == "delegated_transport_v18_proven"
+    and hybrid_active_plan["active_test_model"]["category_plan"] == {
+        "generation": 20,
+        "generation_mode": "0x0",
+        "direct_table": 68,
+        "direct_table_class": "CDbActTestP5Table",
+        "direct_candidate_count": 29,
+        "routine_table": 71,
+        "routine_table_class": "CDbRoutineActTestP5Table",
+        "routine_candidate_count": 10,
+        "multi_did_table_present": False,
+        "multi_did_count": 0,
+        "support_builders": ["CreateEnableDataIdList", "CreateEnableRIdList"],
+        "direct_support_helper": "CheckSupportDid",
+        "routine_support_helper": "CheckSupportRid",
+        "runtime_support_required": True,
+        "runtime_boundary": (
+            "candidate counts are static; direct tests require DID support evaluation and routine tests require "
+            "RID support evaluation before Techstream's final Active Test list is known"
+        ),
+    },
+    "command plan partitions Hybrid role 0x06 into 29 DID-backed direct and 10 RID-backed routine candidates",
+)
 emps_monitor_plan = gts_cli._master_command_plan(parser, master, emps_category, 0x05, gts / "bin", db_root)
 check(
     emps_monitor_plan["plugin"] == "GetDatMonListP5_DT.dll"
