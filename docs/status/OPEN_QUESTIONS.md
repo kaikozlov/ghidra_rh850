@@ -934,9 +934,13 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   the former `FEBF0000` carrier is disproved by that same startup. Target-native
   XCP `SET_MTA 0x82C62` + `DOWNLOAD 0x81FFE` can statically write arbitrary tester
   bytes throughout `FEBF7C00..FEBFFBFF`; GET_SEED/UNLOCK are unconfigured. The
-  packed `0x7F7/0x7F8` endpoint is present in CodeFlash, but CONNECT timed out on
-  the tested normal bus1/ELM1 route. The remaining architectural blocker is a
-  safe already-running-application control transfer into the tail.
+  packed `0x7F7/0x7F8` endpoint is present in CodeFlash. CORR-124 now closes its
+  physical route target-natively: RX rule46 at `0x23398` and TX handle `0x37`
+  independently resolve to RSCFD controller 1, the same EPS channel exposed as
+  Panda bus1 on the identity-bound normal harness. The retained CONNECT timeout is
+  therefore a correct-route/no-response runtime observation, not route falsification.
+  The remaining architectural blocker is a safe already-running-application control
+  transfer into the tail.
 
   The **recovered stock pivot surface is now statically exhausted**, rather than
   merely missing an obvious callback. CORR-123 refreshes that conclusion against
@@ -972,9 +976,11 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   value. The remaining bounded classes are synthesized/computed aliases not present
   in recovered references, a memory-safety bug outside the recovered CFG/dataflow,
   a separate undiscovered DMA/hardware mutation mechanism, or undiscovered code.
-  The next live work should remain non-executing: first locate a reachable physical
-  `0x7F7/0x7F8` route and, if reachable, close placement with bounded high-tail
-  DOWNLOAD+SHORT_UPLOAD readback. For the **execution** blocker, collect a targeted
+  The next live work should remain non-executing. First use the new read-only
+  `xcp_runtime_state_probe.py` on the proven normal-harness bus1/controller-1 route
+  to snapshot the exact admission chain (`FEBE3DF2/3DE5`, `FEBE4914..493A`,
+  `FEBE4EE6`, `FEBE4FAE`); only then repeat CONNECT. If it responds, close placement
+  with bounded high-tail DOWNLOAD+SHORT_UPLOAD readback. For the **execution** blocker, collect a targeted
   runtime RAM/control-flow discriminator (for example before/after lower-RAM state
   plus registration/control-flow trace around benign stock diagnostic/task activity)
   to identify a concrete mutable continuation/callback/task object or unrecovered

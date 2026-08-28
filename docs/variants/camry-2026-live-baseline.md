@@ -129,13 +129,15 @@ independently reproduces the transition with the passive logger already active
 before the operator is told to enter READY, closing the remaining causal ambiguity
 for state decoding while still bounding exact button-to-frame latency.
 
-## 6. XCP is negative on the tested route
+## 6. XCP timed out on the correct normal-harness route (CORR-124)
 
 A CONNECT-only probe on `0x7F7` over the identified EPS normal-harness route
-timed out waiting for `0x7F8`. No XCP writes were exposed or attempted. This
-makes the Sienna/H/F XCP observer route unavailable under the tested Camry
-route/session conditions; it does not prove another physical route or ECU could
-never expose that ID pair.
+timed out waiting for `0x7F8`; no XCP writes were exposed or attempted. Later
+exact-F33 static routing closes the interpretation that this was a wrong-route
+negative: receive-rule 46 at `0x23398` and transmit handle `0x37` independently
+resolve `0x7F7/0x7F8` to **RSCFD controller 1**, the same EPS channel exposed as
+Panda bus 1 on the identity-bound normal harness. The retained timeout therefore
+bounds live XCP admission/response state, not physical route selection.
 
 ## 7. NRTD P5 identities and cruise-control wire joins
 
@@ -640,11 +642,27 @@ descriptors rather than plain u32 IDs:
 - request `0x7F7`: packed `0x9FDC0002` at `0x21F50` and `0x23398`;
 - response `0x7F8`: packed `0x9FE00002` at `0x21F48`.
 
-The retained live CONNECT-only probe timed out on the normal EPS
-**bus-1 / ELM-param-1** route. That is only a physical-route/session negative; it
-does not negate the firmware endpoint. Production viability of this architecture
-therefore has two remaining gates: locate a reachable path to the endpoint, and
-recover a safe application-mode control-transfer object.
+The physical route is now target-natively closed. The second `0x7F7` descriptor at
+`0x23398` is receive-rule **46** in the 16-byte rule array at `0x230B8`; exact
+controller-span configuration assigns rules 0..46 to **RSCFD controller 1**. On
+transmit, XCP family 5 resolves through route record `0x21AF4` to hardware handle
+`0x37`; the handle table at `0x22DB8` maps `0x37 -> {controller=1, resource=8}`.
+The transport is classic standard CAN with max receive length 8. Thus RX and TX
+independently bind application XCP to controller 1, which is the identity-bound
+normal-harness Panda bus 1 EPS channel used by the retained CONNECT timeout.
+
+The timeout is therefore reclassified by **CORR-124** as a **correct-route,
+no-response runtime observation**. Exact transport admission explains the remaining
+ambiguity: `FEBE4EE6` is `0x69` disabled / `0x5A` enabled; `0x82F18` promotes it
+only when communication-owner state admits the channel. Owner active predicate
+`0x7F23C` requires `FEBE491B == 0xE1`; source/propagated communication masks use
+bit 4 (`0x10`), and the owner has a configured three-foreground-tick (15-ms) delay.
+The actual online-event byte `FEBE4919` is event-driven, so static initialization
+does not prove what state held during the old live run. `xcp_runtime_state_probe.py`
+now reads only those exact admission cells via application SID `0x23` before a new
+CONNECT attempt. Production viability therefore has two remaining gates: close live
+transport admission/write reachability on the already-proven route, and recover a
+safe application-mode control-transfer object.
 
 ### 13.2 Why the tail begins exactly at `FEBFF9F0`
 
@@ -844,8 +862,9 @@ guesses a branch target.
 Ranked disposition:
 
 1. **Application XCP `DOWNLOAD` + future volatile callback pivot** — best design.
-   Byte placement, tail retention/execution, MPU geometry, and zero-persistence
-   lifetime are closed; XCP transport reachability and PC transfer remain open.
+   Byte placement, tail retention/execution, MPU geometry, zero-persistence lifetime,
+   and exact controller-1 physical routing are closed; live transport admission/write
+   reachability and PC transfer remain open.
 2. **RID `0x100F` stock command-5 path** — real and non-disruptive, but only an
    internal fixed-16-byte crypto test/oracle, not a general SecOC signing API.
 3. **UDS `34/36/37` / programming loader** — rejected for production because it
@@ -858,10 +877,13 @@ because the execution half is missing. The recovered static stock surface no lon
 contains an obvious next pivot candidate, so the minimum useful live work separates
 **placement** from **execution discovery**:
 
-1. probe only whether `0x7F7/0x7F8` is reachable from another Panda-visible physical
-   route; CONNECT is sufficient;
-2. if reachable, use a bounded `SET_MTA + DOWNLOAD + SHORT_UPLOAD` readback inside
-   the already-proven high tail to close actual application-context write reachability;
+1. on the statically proven normal-harness bus-1/controller-1 route, snapshot the
+   exact XCP admission state with read-only SID `0x23` (`FEBE3DE5/FEBE3DF2`,
+   `FEBE4914..493A`, `FEBE4EE6`, `FEBE4FAE`) and then repeat CONNECT only if the
+   transport is observed admitted;
+2. if CONNECT responds, use a bounded `SET_MTA + DOWNLOAD + SHORT_UPLOAD` readback
+   inside the already-proven high tail to close actual application-context write
+   reachability without executing those bytes;
 3. for the execution blocker, collect a non-executing runtime RAM/control-flow
    discriminator capable of exposing a mutable continuation/callback/task object or
    a previously unrecovered hardware/software trigger. A useful observation is a
@@ -974,5 +996,5 @@ Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
 - Findings with this document as canonical home: [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124)
 <!-- knowledge-cross-references:end -->

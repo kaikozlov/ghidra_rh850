@@ -426,9 +426,10 @@
     "modify_bits": "0x000820C4",
     "normal_route_live_result": {
       "elm327_param": 1,
+      "panda_tx_block_counter_recorded": false,
       "source": "targets/camry-2026/raw-20260826/xcp_probe.json",
       "source_sha256": "b8d96ae5cb97f18d1138196e2a0cb95de5938ec0ff7e512ee9f752f86645e273",
-      "status": "no_response_timeout",
+      "status": "correct_route_no_response_timeout",
       "tested_bus": 1
     },
     "packed_descriptor_hits": {
@@ -440,8 +441,35 @@
         "0x021F48"
       ]
     },
+    "physical_route": {
+      "can_format": "classic standard CAN",
+      "frame_size": 8,
+      "normal_harness_join": "exact F33 RSCFD controller 1 is the same EPS channel exposed as Panda bus1 on the identity-bound normal-harness route; relay-correct topologies may number Panda buses differently",
+      "rscfd_controller": 1,
+      "rx": {
+        "controller_span": {
+          "count": 47,
+          "start_index": 0
+        },
+        "hardware_label": "0x0037",
+        "rule": "0x00023398",
+        "rule_array": "0x000230B8",
+        "rule_index": 46,
+        "rule_stride": 16
+      },
+      "tx": {
+        "family": 5,
+        "handle_entry": "0x00022E26",
+        "handle_map": "0x00022DB8",
+        "hardware_tx_handle": "0x0037",
+        "resource": 8,
+        "route_record": "0x00021AF4",
+        "software_route_index": 4
+      },
+      "verdict": "RX 0x7F7 and TX 0x7F8 independently resolve to exact F33 RSCFD controller 1; physical-route selection is statically closed"
+    },
     "placement_static_verdict": "proven: generic XCP DOWNLOAD can directly store tester-controlled bytes into the live-proven high tail while the application handler is executing",
-    "reachability_boundary": "firmware endpoint exists; only the normal bus1/ELM1 route has been dynamically falsified. Physical/special routing elsewhere remains unobserved.",
+    "reachability_boundary": "The normal-harness bus1 route is now statically proven correct, so the retained timeout is not physical-route falsification. Remaining reachability ambiguity is live transport/communication-owner admission or response behavior; the read-only SID-0x23 state preflight is the next discriminator.",
     "request_can_id": "0x7F7",
     "response_can_id": "0x7F8",
     "rx_adapter": "0x0008312E",
@@ -453,6 +481,28 @@
     ],
     "standard_callback_table": "0x00022B50",
     "standard_opcode_map": "0x00022B24",
+    "transport_activation": {
+      "activation_api": "0x00082F18",
+      "channel0_state": "0xFEBE3DE5",
+      "communication_manager_state": "0xFEBE3DF2",
+      "configured_delay_foreground_ticks": 3,
+      "configured_delay_ms": 15.0,
+      "configured_source_mask": "0x10",
+      "disabled_value": "0x69",
+      "dynamic_boundary": "the three-tick delay is target-native, but owner-online FEBE4919 is event-driven; whether the old live probe had reached the online/0x5A state is a runtime observation, not closed by static initialization",
+      "enabled_value": "0x5A",
+      "foreground_tick_ms": 5.0,
+      "owner_active_predicate": "0x0007F23C",
+      "owner_active_state": "0xFEBE491B",
+      "owner_online_event_state": "0xFEBE4919",
+      "owner_online_setter": "0x0007F030",
+      "propagated_comm_mask": "0xFEBE493A",
+      "read_only_preflight": "exploit/followups/xcp_runtime_state_probe.py",
+      "rx_gate": "0x00082FEC",
+      "source_comm_mask": "0xFEBE4FAE",
+      "transport_state": "0xFEBE4EE6",
+      "tx_gate": "0x00082D6C"
+    },
     "unconfigured_control_or_transfer_commands": [
       "0xF9 SET_REQUEST",
       "0xF5 UPLOAD",
@@ -470,7 +520,7 @@
   },
   "architectures": [
     {
-      "diagnostic_side_effects": "XCP connected/MTA state only under recovered software semantics; no flash/NvM write in DOWNLOAD path. Physical transport route and any gateway diagnostics remain unobserved.",
+      "diagnostic_side_effects": "XCP connected/MTA state only under recovered software semantics; no flash/NvM write in DOWNLOAD path. Exact physical RSCFD controller-1 routing is closed; runtime transport-admission state remains to be observed.",
       "exact_surface": {
         "download": "0x00081FFE",
         "request": "0x7F7",
@@ -486,7 +536,7 @@
       "privilege_mpu_context": "high tail is MPU region1; ctx0 supervisor R/W/X, ctx1 supervisor R/X. Live execution from the tail is independently proven. Actual XCP handler context must still be confirmed dynamically by a harmless write/readback.",
       "rank": 1,
       "remaining_unknowns": [
-        "reachable physical path to packed 0x7F7/0x7F8 endpoint",
+        "live communication-owner/XCP transport admission state on the correct route",
         "safe mutable control-transfer object",
         "runtime write context/latency on the live route"
       ],
@@ -1362,8 +1412,8 @@
     "stock_application_reappeared": true
   },
   "minimum_next_observations": [
-    "Resolve whether the stock 0x7F7/0x7F8 endpoint is physically reachable from any Panda-visible CAN path other than the already-falsified normal bus1/ELM1 route; CONNECT-only is sufficient.",
-    "If and only if XCP is reachable, a bounded application-mode DOWNLOAD + SHORT_UPLOAD readback inside the already-live-proven high tail would close transport-to-writer reachability without executing the bytes.",
+    "On the statically proven normal-harness bus1/RSCFD-controller-1 route, use read-only SID 0x23 to snapshot the exact XCP admission state (FEBE3DE5/FEBE3DF2/FEBE4914..493A/FEBE4EE6/FEBE4FAE) before repeating CONNECT; do not infer route failure from the old timeout.",
+    "If and only if the state preflight shows XCP admitted and CONNECT responds, a bounded application-mode DOWNLOAD + SHORT_UPLOAD readback inside the already-live-proven high tail would close transport-to-writer reachability without executing the bytes.",
     "Static analysis has exhausted the recovered stock pivot classes. The next execution-specific observation should be a dynamic RAM/control-flow discriminator that identifies a mutable control-transfer object or a previously unrecovered hardware/software trigger; do not probe arbitrary PC writes without that object."
   ],
   "mpu": {

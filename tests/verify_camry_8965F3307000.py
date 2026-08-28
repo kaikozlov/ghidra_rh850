@@ -1050,7 +1050,15 @@ def section_application_ram_loader() -> int:
     for cmd in (0xF9,0xF5,0xF3,0xF2,0xF1,0xEF,0xEE,0xED,0xDC,0xDB):
         check(f"standard XCP command 0x{cmd:02X} remains unmapped", opmap[0xFF-cmd] == 0)
     check("software write window exactly covers high tail", x["software_write_window"] == ["0xFEBF7C00", "0xFEBFFBFF"] and struct.unpack_from("<II", img, 0x2B21C) == (0xFEBF7C00, 0xFEBFFBFF) and x["high_tail_fully_inside_write_window"])
-    check("normal bus1/ELM1 route is only a reachability negative", x["normal_route_live_result"]["status"] == "no_response_timeout" and x["normal_route_live_result"]["tested_bus"] == 1 and x["normal_route_live_result"]["elm327_param"] == 1 and "only" in x["reachability_boundary"])
+    route=x["physical_route"]
+    check("XCP RX rule is exact RSCFD controller-1 rule 46", route["rscfd_controller"] == 1 and route["rx"]["rule_index"] == 46 and route["rx"]["controller_span"] == {"start_index":0,"count":47} and route["rx"]["rule"] == "0x00023398" and struct.unpack_from("<I",img,0x23398)[0] == 0x9FDC0002)
+    check("XCP TX handle 0x37 independently maps to controller1/resource8", route["tx"]["family"] == 5 and route["tx"]["software_route_index"] == 4 and route["tx"]["hardware_tx_handle"] == "0x0037" and route["tx"]["resource"] == 8 and struct.unpack_from("<I",img,0x22E38)[0] == 0x22DB8 and img[0x22E26:0x22E28] == bytes((1,8)))
+    check("XCP wire contract is classic standard CAN DLC8", route["can_format"] == "classic standard CAN" and route["frame_size"] == 8 and (struct.unpack_from("<I",img,0x23398)[0] & 0x40000000) == 0 and img[0x22ABD] == 8)
+    act=x["transport_activation"]
+    check("XCP activation uses exact owner/transport state cells", act["transport_state"] == "0xFEBE4EE6" and act["disabled_value"] == "0x69" and act["enabled_value"] == "0x5A" and act["owner_active_state"] == "0xFEBE491B" and act["owner_online_event_state"] == "0xFEBE4919" and act["configured_source_mask"] == "0x10")
+    check("XCP owner delay is three exact 5ms foreground ticks", act["configured_delay_foreground_ticks"] == 3 and act["foreground_tick_ms"] == 5.0 and act["configured_delay_ms"] == 15.0 and struct.unpack_from("<H",img,0x21B8C)[0] == 3)
+    check("normal bus1/ELM1 timeout is reclassified on the proven correct route", x["normal_route_live_result"]["status"] == "correct_route_no_response_timeout" and x["normal_route_live_result"]["tested_bus"] == 1 and x["normal_route_live_result"]["elm327_param"] == 1 and x["normal_route_live_result"]["panda_tx_block_counter_recorded"] is False and "statically proven correct" in x["reachability_boundary"])
+    check("read-only state preflight is the next XCP discriminator", act["read_only_preflight"] == "exploit/followups/xcp_runtime_state_probe.py" and any("SID 0x23" in row for row in a["minimum_next_observations"]))
 
     print("\n== calibration-page shadow is not an execution overlay ==")
     cx = a["custom_xcp"]

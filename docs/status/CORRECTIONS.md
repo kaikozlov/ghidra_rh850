@@ -3076,3 +3076,41 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`;
   `tests/verify_camry_8965F3307000.py`;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.5.
+
+### CORR-124 — F33 `0x7F7/0x7F8` was already on the correct normal-harness bus1 route; the unresolved timeout is transport admission/response state
+
+- **Superseded framing:** VAR-051/VAR-057 and OQ-053 treated the retained
+  CONNECT timeout on normal-harness `bus1 / ELM-param-1` as a physical-route or
+  route/session negative and listed discovery of another Panda-visible route as
+  the next XCP discriminator.
+- **Root cause:** the packed application endpoint descriptors had been recovered,
+  but their generated-COM/CanIf handles had not yet been joined all the way to the
+  exact F33 RSCFD controller configuration.
+- **Exact correction:** request descriptor `0x9FDC0002` at `0x23398` is receive
+  rule **46** in the 16-byte rule array at `0x230B8`; exact controller-span
+  configuration assigns rules `0..46` to **RSCFD controller 1**. Independently,
+  XCP response family 5 resolves through route record `0x21AF4` / software index 4
+  to hardware Tx handle `0x0037`; the handle map rooted at `0x22DB8` maps that
+  handle to **controller 1 / resource 8**. The transport is classic standard CAN
+  with an 8-byte receive contract. On the identity-bound normal harness, this is
+  the EPS channel already observed as Panda bus 1.
+- **Runtime admission boundary:** XCP RX/TX is gated by transport state
+  `FEBE4EE6` (`0x69` disabled / `0x5A` enabled) through activation API `0x82F18`.
+  Owner-active predicate `0x7F23C` requires `FEBE491B == 0xE1`; source and
+  propagated communication masks use bit 4 (`0x10`). The configured owner delay is
+  three exact 5-ms foreground ticks (15 ms), but owner-online byte `FEBE4919` is
+  event-driven. Static initialization therefore cannot prove the admission state
+  that held during the old CONNECT timeout.
+- **Consequence:** physical XCP route discovery is closed for exact F33. The old
+  timeout is reclassified as a **correct-route/no-response runtime observation**.
+  The next non-executing discriminator is `xcp_runtime_state_probe.py`, which sends
+  zero XCP frames and uses bounded application SID `0x23` reads to snapshot the
+  exact admission cells before repeating CONNECT. If admitted CONNECT responds, a
+  bounded high-tail DOWNLOAD + SHORT_UPLOAD readback can close live placement
+  reachability. The separate production control-transfer/pivot problem remains open.
+- **Canonical:**
+  `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`;
+  `exploit/followups/xcp_runtime_state_probe.py`;
+  `tests/verify_camry_8965F3307000.py`;
+  `tests/verify_exploit_followups.py`;
+  [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§6,13.1,13.6.
