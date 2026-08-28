@@ -26,6 +26,7 @@ tools/gts role 0x05
 tools/gts role 0x19
 tools/gts commset
 tools/gts commset 1
+tools/gts timer HV_P5 1
 tools/gts category HV_P5
 tools/gts frame 397 0x01
 tools/gts frame HV_P5 0x102
@@ -80,7 +81,7 @@ same Data List entry) are deduplicated for interactive output.
 
 ### Master DB execution model
 
-`role`, `commset`, `category`, and `frame` expose the means-based diagnostic execution model recovered
+`role`, `commset`, `timer`, `category`, and `frame` expose the means-based diagnostic execution model recovered
 from Techstream/GTS+ rather than another endpoint-specific lookup. The current
 master contains **6,194 category/plugin bindings but only 191 logical DLL roles**;
 `role` aggregates that vocabulary globally so one command family can be studied
@@ -91,7 +92,7 @@ resolves a master ECU category by numeric ID or an unambiguous database/name key
 and shows its `CDbDllTable` plugin-role bindings plus function IDs. `frame`
 resolves `CDbFuncCommFrameTable` selector operands through `CDbCommFrameTable`
 and `CDbVariableTable` to the exact current GTS+ send / receive-mask /
-receive-check bytes. `commset` decodes master type-29 `CDbComSetTable`, including
+receive-check bytes. `timer` decodes master type-25 `CDbTimerTable` by Toyota ECU category and timer ID; the recovered first dword is the command delay passed directly to `Sleep`. `commset` decodes master type-29 `CDbComSetTable`, including
 the proven receive-timeout and retry fields used by the shared runtime:
 
 ```text
@@ -102,6 +103,9 @@ category  397  Hybrid Control  db=HV_P5.ddb  generation=20
 
 $ tools/gts commset 1
 commset  1  send_parameter=1000  receive_timeout=1020  retries=1  exception_id=0  exception_flag=0  unknown_0c=0
+
+$ tools/gts timer HV_P5 1
+timer  category=397  id=1  delay_ms=0  unknown_08=0
 
 $ tools/gts frame 397 0x1
 frame  category=397  selector=0x1  comm_set=1  frame=0x279E  rcv_timeout=1020  retries=1  send=04  mask=  check=44

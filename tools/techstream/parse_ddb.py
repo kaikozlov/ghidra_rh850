@@ -41,7 +41,6 @@ from __future__ import annotations
 import struct
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import BinaryIO
 
 # Header families observed in the pinned Techstream V18 and GTS+ corpora.
 # The date/build bytes changed between the 2022 Techstream generation and the
@@ -145,6 +144,7 @@ MASTER_TABLE_CLASS_NAMES = {
     19: "CDbDllTable",
     23: "CDbSubSystemTable",
     24: "CDbUtilityListTable",
+    25: "CDbTimerTable",
     26: "CDbEcuFuncInfoTable",
     27: "CDbEcuFuncDetailsTable",
     28: "CDbEcuAddInfoTable",
@@ -234,7 +234,7 @@ class TableDataHead:
     HEADER_SIZE = 10
 
     @classmethod
-    def read(cls, data: bytes, offset: int) -> "TableDataHead":
+    def read(cls, data: bytes, offset: int) -> TableDataHead:
         if offset < 0 or offset + cls.HEADER_SIZE > len(data):
             raise ValueError(
                 f"section header at 0x{offset:X} extends past file size "
@@ -362,6 +362,23 @@ class MasterFunctionDetailEntry:
     category_id: int
     function_id: int
     detail_id: int
+    raw: bytes
+
+
+@dataclass
+class MasterTimerEntry:
+    """Consumer-proven master type-25 ``CDbTimerTable`` record.
+
+    Current ``CDbTimerTable::FindDbItem1`` keys first on ``category_id`` at
+    ``+0x04``; ``ComparativeKey`` adds ``timer_id`` at ``+0x06``.  The first
+    dword is consumed directly by command plugins such as ``DelDiagCodeP4`` as
+    a ``Sleep`` duration in milliseconds.  The final dword remains unresolved.
+    """
+
+    delay_ms: int
+    category_id: int
+    timer_id: int
+    unknown_dword_08: int
     raw: bytes
 
 
@@ -778,6 +795,20 @@ class DDBParser:
                 raw=raw,
             )
             for raw in _records(section, 27, 24)
+        ]
+
+    @staticmethod
+    def extract_master_timers(section: Section) -> list[MasterTimerEntry]:
+        """Decode consumer-proven fields of master type-25 ``CDbTimerTable``."""
+        return [
+            MasterTimerEntry(
+                delay_ms=struct.unpack_from("<I", raw, 0x00)[0],
+                category_id=struct.unpack_from("<H", raw, 0x04)[0],
+                timer_id=struct.unpack_from("<H", raw, 0x06)[0],
+                unknown_dword_08=struct.unpack_from("<I", raw, 0x08)[0],
+                raw=raw,
+            )
+            for raw in _records(section, 25, 12)
         ]
 
     @staticmethod

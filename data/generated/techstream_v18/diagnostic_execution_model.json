@@ -139,6 +139,311 @@
         "sha256": "19e709e12e53f485a84ccfbf6b226922b88502206c34b767db543c7f3df101f8",
         "size": 1824784
       },
+      "plugin_semantics": {
+        "role_0x19_dtc_clear": {
+          "anchors": {
+            "fallback_error_set": {
+              "bytes": "81fe09000191744c81fe21030290744481fe23030290743c81fe010204a0743481fe010004c0742c81fe020204a0742481fe27030290741c81fe20030291741481fe10030291740c81fe220302910f85",
+              "file_offset": "0x61C",
+              "va": "0x1000121C"
+            },
+            "fallback_restore_primary": {
+              "bytes": "81fe010104c075228b8564ffffff8bf068bc32001068fb000000681031001068b831001050ffd383c4148b3d1c300010",
+              "file_offset": "0x6ED",
+              "va": "0x100012ED"
+            },
+            "fallback_selector_0x102": {
+              "bytes": "b822000000663b45f08d45d45057680201000075188d8d7cffffffff1530300010684832001068ea000000eb14a1003000108d4dc0ffd0688c",
+              "file_offset": "0x69A",
+              "va": "0x1000129A"
+            },
+            "primary_addressing": {
+              "bytes": "83f8018d4dc08d45ac50576a017508ff152c300010eb06ff1500300010837d",
+              "file_offset": "0x5F3",
+              "va": "0x100011F3"
+            },
+            "special_bus_ids": {
+              "bytes": "b9120000008d50228b45f0663bc87419663bd07414b918000000663bc8740ab978000000663bc875718bb564ff",
+              "file_offset": "0x556",
+              "va": "0x10001156"
+            },
+            "success_sleep_and_flag": {
+              "bytes": "85f675348b8578ffffff8b00ff30ff15543000108b8560ffffff6a01682d0100006810310010682433001056c7402001000000ffd383c4",
+              "file_offset": "0x7B0",
+              "va": "0x100013B0"
+            },
+            "timeout_fallback_0x102": {
+              "bytes": "81fe09000191757ba1183000108d4dd4ffd068e83200106809010000681031001068b831001056ffd383c4148d45d48d4dc050a100300010576802010000ffd0688c3200106812",
+              "file_offset": "0x727",
+              "va": "0x10001327"
+            },
+            "timer_class_0x119_key_1": {
+              "bytes": "81c1cc0000006a0156506819010000ff1580300010",
+              "file_offset": "0x4E3",
+              "va": "0x100010E3"
+            },
+            "timer_key_1": {
+              "bytes": "0fb742048945ec837df400752c8b4dec3b4de87522c745f4010000",
+              "file_offset": "0xCF500",
+              "va": "0x100D0100"
+            },
+            "timer_key_pair": {
+              "bytes": "6b4d100c034dec894dfc8b55fc0fb742048b4d148b55f88b0c8a0fb751043bc275488b45fc0fb748068b55148b45f88b14900fb742063bc87509b80100",
+              "file_offset": "0xCF780",
+              "va": "0x100D0380"
+            },
+            "timer_record_pointer": {
+              "bytes": "8b45fc8b4dfc8b510c8950108be55d",
+              "file_offset": "0xCF287",
+              "va": "0x100CFE87"
+            }
+          },
+          "control_flow": {
+            "fallback_addressing": "FunctionAddress only when bus ID == 0x22; otherwise normal GetCommFrmSndRcv",
+            "fallback_c0040101_behavior": "restore/return primary error; in timeout-only branch restore 0x91010009",
+            "fallback_error_codes_when_function_gate_set": [
+              "0x91010009",
+              "0x90020321",
+              "0x90020323",
+              "0xA0040201",
+              "0xC0040001",
+              "0xA0040202",
+              "0x90020327",
+              "0x91020320",
+              "0x91020310",
+              "0x91020322"
+            ],
+            "fallback_selector": "0x102",
+            "fallback_when_function_gate_clear": "only 0x91010009 (logged as first-message TIMEOUT)",
+            "primary_addressing": "normal GetCommFrmSndRcv unless ECU detail flag == 1, then DifferentAddress",
+            "primary_selector": "0x1",
+            "special_bus_ids": [
+              18,
+              34,
+              24,
+              120
+            ],
+            "success": "return 0; Sleep(timer delay_ms); set command output +0x20 m_bDelDiagCode=1"
+          },
+          "example_binding": {
+            "category_id": 397,
+            "dll_name": "DelDiagCodeP4.dll",
+            "dll_role_hex": "0x19",
+            "dll_role_id": 25,
+            "raw": "440065006c00440069006100670043006f0064006500500034002e0064006c006c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008d01000019000000"
+          },
+          "fallback": {
+            "category_id": 397,
+            "comm_frame_id": "0x2BDB",
+            "comm_frame_raw": "db2b282d0000e428",
+            "comm_set": 1,
+            "comm_set_metadata": {
+              "comm_set_id": 1,
+              "exception_handler_flag": 0,
+              "exception_handler_id": 0,
+              "raw": "e8030000fc0300000000010000000100",
+              "receive_timeout": 1020,
+              "retry_count": 1,
+              "send_parameter": 1000,
+              "unknown_word_0c": 0
+            },
+            "func_comm_frame_raw": "8d0102010100db2b0000010000000000",
+            "selector": "0x102",
+            "variables": {
+              "receive_check": {
+                "bytes": "54",
+                "id": "0x28E4",
+                "normalized_id": "0x1D4"
+              },
+              "receive_mask": {
+                "bytes": "",
+                "id": "0x0",
+                "normalized_id": "0x0"
+              },
+              "send": {
+                "bytes": "14ffffff",
+                "id": "0x2D28",
+                "normalized_id": "0x618"
+              }
+            }
+          },
+          "plugin": {
+            "path": "bin/DelDiagCodeP4.dll",
+            "sha256": "8e52d52f860b5fbddcaf178bdbbfcf1e310c1a57e418cee840725f95d18d4e00",
+            "size": 23568
+          },
+          "primary": {
+            "category_id": 397,
+            "comm_frame_id": "0x279E",
+            "comm_frame_raw": "9e2743270000f728",
+            "comm_set": 1,
+            "comm_set_metadata": {
+              "comm_set_id": 1,
+              "exception_handler_flag": 0,
+              "exception_handler_id": 0,
+              "raw": "e8030000fc0300000000010000000100",
+              "receive_timeout": 1020,
+              "retry_count": 1,
+              "send_parameter": 1000,
+              "unknown_word_0c": 0
+            },
+            "func_comm_frame_raw": "8d01010001009e270000010000000000",
+            "selector": "0x1",
+            "variables": {
+              "receive_check": {
+                "bytes": "44",
+                "id": "0x28F7",
+                "normalized_id": "0x1E7"
+              },
+              "receive_mask": {
+                "bytes": "",
+                "id": "0x0",
+                "normalized_id": "0x0"
+              },
+              "send": {
+                "bytes": "04",
+                "id": "0x2743",
+                "normalized_id": "0x33"
+              }
+            }
+          },
+          "timer": {
+            "db_record_class": "0x119",
+            "hybrid_timer_1": {
+              "category_id": 397,
+              "delay_ms": 0,
+              "raw": "000000008d01010000000000",
+              "timer_id": 1,
+              "unknown_dword_08": 0
+            },
+            "lookup_key": [
+              397,
+              1
+            ],
+            "master_table_type": 25,
+            "record_count": 664,
+            "record_size": 12,
+            "table": "CDbTimerTable"
+          }
+        },
+        "role_0x52_generic_cid": {
+          "anchors": {
+            "chunk_size_16": {
+              "bytes": "8b8564fcffffbe100000003bf87d1d578d8dc0fc",
+              "file_offset": "0xADC",
+              "va": "0x100016DC"
+            },
+            "cid_format_literal": {
+              "bytes": "25007300250064000000",
+              "file_offset": "0x3078",
+              "va": "0x10004278"
+            },
+            "cid_literal": {
+              "bytes": "4300490044000000",
+              "file_offset": "0x3070",
+              "va": "0x10004270"
+            },
+            "convert_and_set_value": {
+              "bytes": "6a018d8d98fcffffff15284000108d855cfbffff898558fbffff8d8d58fbffff6a008d85fcfeffff50e8b6fbffff6a11ffb558fbffff8d8da0fcffffff1524400010",
+              "file_offset": "0xB4C",
+              "va": "0x1000174C"
+            },
+            "did_echo_index_1": {
+              "bytes": "6a018d7858ffd66a018bcf8a5808ffd63a58",
+              "file_offset": "0xA18",
+              "va": "0x10001618"
+            },
+            "did_echo_index_2": {
+              "bytes": "8b3d3c4000106a028d4858ffd76a028bce8a5808ffd73858",
+              "file_offset": "0xA4E",
+              "va": "0x1000164E"
+            },
+            "payload_copy_from_4": {
+              "bytes": "6a008d8de8fcffffffd78d48588d460450ffd3508d8dc0fcffffff153840",
+              "file_offset": "0xA80",
+              "va": "0x10001680"
+            },
+            "response_count_minus_4": {
+              "bytes": "ffd38b406883e804898564fcffff",
+              "file_offset": "0x9C0",
+              "va": "0x100015C0"
+            },
+            "selector_dc_lookup": {
+              "bytes": "68dc0000008d8d68fcffffff15184000",
+              "file_offset": "0x927",
+              "va": "0x10001527"
+            },
+            "zero_terminated_buffer": {
+              "bytes": "8d85fcfeffff68ff0000005650e8751e000083c40c85",
+              "file_offset": "0xB13",
+              "va": "0x10001713"
+            }
+          },
+          "example_binding": {
+            "category_id": 405,
+            "dll_name": "GetCID_SID22_DT.dll",
+            "dll_role_hex": "0x52",
+            "dll_role_id": 82,
+            "raw": "4700650074004300490044005f00530049004400320032005f00440054002e0064006c006c000000000000000000000000000000000000000000000000000000000000000000000000000000000000009501000052000000"
+          },
+          "example_frame": {
+            "category_id": 405,
+            "comm_frame_id": "0x2B54",
+            "comm_frame_raw": "542b912caf27932c",
+            "comm_set": 1,
+            "comm_set_metadata": {
+              "comm_set_id": 1,
+              "exception_handler_flag": 0,
+              "exception_handler_id": 0,
+              "raw": "e8030000fc0300000000010000000100",
+              "receive_timeout": 1020,
+              "retry_count": 1,
+              "send_parameter": 1000,
+              "unknown_word_0c": 0
+            },
+            "func_comm_frame_raw": "9501dc000100542b0000010000000000",
+            "selector": "0xDC",
+            "variables": {
+              "receive_check": {
+                "bytes": "62f181",
+                "id": "0x2C93",
+                "normalized_id": "0x583"
+              },
+              "receive_mask": {
+                "bytes": "ffffff",
+                "id": "0x27AF",
+                "normalized_id": "0x9F"
+              },
+              "send": {
+                "bytes": "22f181",
+                "id": "0x2C91",
+                "normalized_id": "0x581"
+              }
+            }
+          },
+          "plugin": {
+            "path": "bin/GetCID_SID22_DT.dll",
+            "sha256": "775aa63b75d8918c07a467b5e685ccae7ab3eb6c069ac9c0d5110463dd15f9c2",
+            "size": 30736
+          },
+          "response_model": {
+            "echoed_did_receive_indexes": [
+              1,
+              2
+            ],
+            "entry_name_format": "%s%d",
+            "entry_name_prefix": "CID",
+            "entry_numbering": "1-based",
+            "output_list_offset": "command output object +0x20",
+            "payload_offset": 4,
+            "positive_prefix": "62f181",
+            "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped, not used as count",
+            "record_size": 16,
+            "string_conversion": "Windows MultiByteToWideChar code page 0 (CP_ACP) from zero-terminated <=16-byte chunk",
+            "value_capacity_chars": 17
+          }
+        }
+      },
       "role_catalog": {
         "binding_count": 6194,
         "binding_surface_counts": {
@@ -5058,6 +5363,12 @@
         "sha256": "f11e820968ac383a8fc5105b65322f0b9c3673df2c8dac46c9847e3d691b39b1",
         "size": 18967903
       },
+      "timer_table": {
+        "class_name": "CDbTimerTable",
+        "master_table_type": 25,
+        "record_count": 664,
+        "record_size": 12
+      },
       "variable_layout": {
         "compare_anchor": {
           "bytes": "0fb74d0881f9102700007e0e0fb75508",
@@ -5510,6 +5821,12 @@
         "result": "CDbDllResRecords",
         "role": "(ECU/category, DLL role) -> plugin filename",
         "table": "CDbDllTable"
+      },
+      "0x119": {
+        "master_table_type": 25,
+        "result": "CDbTimerResRecords",
+        "role": "per-category command timer metadata",
+        "table": "CDbTimerTable"
       },
       "0x11A": {
         "master_table_type": 26,

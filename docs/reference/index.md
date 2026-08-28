@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 339 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 182
+Findings: 340 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 182
 
 ## Reading this index
 
@@ -293,6 +293,7 @@ Findings: 339 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="finding-tms-060"></a>**TMS-060** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [README](../tooling/README.md) | `tests/verify_camry_8965F3307000_gtsplus_semantics.py` | — |
 | <a id="finding-tms-061"></a>**TMS-061** | [docs/tooling/techstream.md](../tooling/techstream.md) | — | `tests/verify_techstream_diagnostic_execution_model.py` | — |
 | <a id="finding-tms-062"></a>**TMS-062** | [docs/tooling/techstream.md](../tooling/techstream.md) | — | `tests/verify_techstream_diagnostic_execution_model.py` | — |
+| <a id="finding-tms-063"></a>**TMS-063** | [docs/tooling/techstream.md](../tooling/techstream.md) | — | `tests/verify_techstream_diagnostic_execution_model.py` | — |
 | <a id="finding-var-001"></a>**VAR-001** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md) | `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-002"></a>**VAR-002** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_spanconstant_corolla_equivalence.py`, `tests/verify_spanconstant_corolla_cross_variant.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-003"></a>**VAR-003** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |

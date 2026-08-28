@@ -520,6 +520,21 @@ def _master_variable(master: Any, variable_id: int) -> dict[str, Any]:
     }
 
 
+def _master_timer_rows(parser: DDBParser, master: Any, category_id: int | None = None) -> list[dict[str, Any]]:
+    rows = [
+        {
+            "category_id": entry.category_id,
+            "timer_id": entry.timer_id,
+            "delay_ms": entry.delay_ms,
+            "unknown_dword_08": entry.unknown_dword_08,
+            "raw": entry.raw.hex(),
+        }
+        for entry in parser.extract_master_timers(master.sections[25])
+        if category_id is None or entry.category_id == category_id
+    ]
+    return sorted(rows, key=lambda row: (row["category_id"], row["timer_id"]))
+
+
 def _master_comm_set_rows(parser: DDBParser, master: Any) -> list[dict[str, Any]]:
     return [
         {
@@ -579,6 +594,33 @@ def _master_frame_rows(parser: DDBParser, master: Any, category_id: int, selecto
             "comm_frame_raw": frame.hex(),
         })
     return rows
+
+
+def cmd_timer(args: argparse.Namespace) -> int:
+    gts = _resolve_gts_root(args.gtsplus_root)
+    db_root = _db_root(gts, args.region, args.family)
+    parser = DDBParser()
+    master = parser.parse_master_db(db_root / "Toyota.ddb")
+    strings = _english_strings(parser, db_root)
+    category = _resolve_master_category(parser, master, strings, args.category)
+    rows = _master_timer_rows(parser, master, category["category_id"])
+    if args.timer is not None:
+        timer_id = _parse_master_key(args.timer)
+        if timer_id is None:
+            raise SystemExit(f"invalid timer {args.timer!r}; use decimal or 0x-prefixed hex")
+        rows = [row for row in rows if row["timer_id"] == timer_id]
+    if not rows:
+        raise SystemExit(f"category {category['category_id']} has no matching timer rows")
+    shown = rows[: args.limit]
+    if args.json:
+        print(json.dumps({"category": category, "timers": shown}, indent=2, sort_keys=True))
+        return 0
+    for row in shown:
+        print(
+            f"timer	category={row['category_id']}	id={row['timer_id']}	"
+            f"delay_ms={row['delay_ms']}	unknown_08={row['unknown_dword_08']}"
+        )
+    return 0
 
 
 def cmd_commset(args: argparse.Namespace) -> int:
@@ -936,6 +978,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("ecu", help="ECU .ddb name/stem/substr or path")
     _common(p)
     p.set_defaults(func=cmd_ecu)
+
+    p = sub.add_parser("timer", help="decode Toyota master per-category command timers")
+    p.add_argument("category", help="category ID, database/short name, or OEM ECU name")
+    p.add_argument("timer", nargs="?", help="timer ID (decimal or 0x-prefixed hex); omit to list category timers")
+    p.add_argument("--limit", type=int, default=100)
+    _common(p)
+    p.set_defaults(func=cmd_timer)
 
     p = sub.add_parser("commset", help="decode Toyota master communication-set timeout/retry metadata")
     p.add_argument("comm_set", nargs="?", help="CommSet ID (decimal or 0x-prefixed hex); omit to list all")

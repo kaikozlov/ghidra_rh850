@@ -9,9 +9,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools" / "techstream"))
 
-import gts_cli  # noqa: E402
-import ddb_strings  # noqa: E402
-from parse_ddb import DDBParser  # noqa: E402
+import ddb_strings
+import gts_cli
+from parse_ddb import DDBParser
 
 
 def check(condition: bool, message: str) -> None:
@@ -78,6 +78,11 @@ commsets = gts_cli._master_comm_set_rows(parser, master)
 commset1 = next(row for row in commsets if row["comm_set_id"] == 1)
 check(len(commsets) == 13 and commset1["raw"] == "e8030000fc0300000000010000000100", "current master exposes 13 stable 16-byte CommSet rows")
 check(commset1["receive_timeout"] == 1020 and commset1["retry_count"] == 1, "current CommSet 1 resolves receive timeout 1020 and one retry")
+timers = gts_cli._master_timer_rows(parser, master, hybrid["category_id"])
+check(
+    timers == [{"category_id": 397, "timer_id": 1, "delay_ms": 0, "unknown_dword_08": 0, "raw": "000000008d01010000000000"}],
+    "current Hybrid timer 1 resolves to zero-millisecond post-command delay",
+)
 
 role_catalog = gts_cli._master_role_catalog(parser, master, gts / "bin")
 role19 = next(row for row in role_catalog if row["role"] == 25)

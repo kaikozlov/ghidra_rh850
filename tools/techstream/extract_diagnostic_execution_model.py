@@ -209,6 +209,23 @@ def resolve_comm_set(parser: DDBParser, master, comm_set_id: int) -> dict:
     }
 
 
+def resolve_timer(parser: DDBParser, master, category_id: int, timer_id: int) -> dict:
+    matches = [
+        row for row in parser.extract_master_timers(master.sections[25])
+        if row.category_id == category_id and row.timer_id == timer_id
+    ]
+    if len(matches) != 1:
+        raise ValueError(f"Timer ({category_id}, {timer_id}): {len(matches)} rows")
+    row = matches[0]
+    return {
+        "category_id": row.category_id,
+        "timer_id": row.timer_id,
+        "delay_ms": row.delay_ms,
+        "unknown_dword_08": row.unknown_dword_08,
+        "raw": row.raw.hex(),
+    }
+
+
 def resolve_frame(parser: DDBParser, master, category: int, selector: int, *, variable_namespace_base: int = 0) -> dict:
     frows = [
         raw
@@ -373,6 +390,88 @@ def gtsplus_command_common_surface(gts_root: Path) -> dict:
     }
 
 
+def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
+    """Pin current-GTS plugin control-flow/response semantics for representative roles."""
+    bin_root = gts_root / "bin"
+    cid = bin_root / "GetCID_SID22_DT.dll"
+    clear = bin_root / "DelDiagCodeP4.dll"
+    kgp = bin_root / "KgpDataCtrl.dll"
+    return {
+        "role_0x52_generic_cid": {
+            "plugin": file_identity(cid, gts_root),
+            "example_binding": dll_binding(parser, master, 405, 0x52),
+            "example_frame": resolve_frame(parser, master, 405, 0xDC, variable_namespace_base=0x2710),
+            "response_model": {
+                "positive_prefix": "62f181",
+                "echoed_did_receive_indexes": [1, 2],
+                "payload_offset": 4,
+                "record_size": 16,
+                "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped, not used as count",
+                "string_conversion": "Windows MultiByteToWideChar code page 0 (CP_ACP) from zero-terminated <=16-byte chunk",
+                "value_capacity_chars": 17,
+                "entry_name_prefix": "CID",
+                "entry_name_format": "%s%d",
+                "entry_numbering": "1-based",
+                "output_list_offset": "command output object +0x20",
+            },
+            "anchors": {
+                "selector_dc_lookup": anchor(cid, 0x10001527, "68dc0000008d8d68fcffffff15184000"),
+                "response_count_minus_4": anchor(cid, 0x100015C0, "ffd38b406883e804898564fcffff"),
+                "did_echo_index_1": anchor(cid, 0x10001618, "6a018d7858ffd66a018bcf8a5808ffd63a58"),
+                "did_echo_index_2": anchor(cid, 0x1000164E, "8b3d3c4000106a028d4858ffd76a028bce8a5808ffd73858"),
+                "payload_copy_from_4": anchor(cid, 0x10001680, "6a008d8de8fcffffffd78d48588d460450ffd3508d8dc0fcffffff153840"),
+                "chunk_size_16": anchor(cid, 0x100016DC, "8b8564fcffffbe100000003bf87d1d578d8dc0fc"),
+                "zero_terminated_buffer": anchor(cid, 0x10001713, "8d85fcfeffff68ff0000005650e8751e000083c40c85"),
+                "convert_and_set_value": anchor(cid, 0x1000174C, "6a018d8d98fcffffff15284000108d855cfbffff898558fbffff8d8d58fbffff6a008d85fcfeffff50e8b6fbffff6a11ffb558fbffff8d8da0fcffffff1524400010"),
+                "cid_literal": anchor(cid, 0x10004270, "4300490044000000"),
+                "cid_format_literal": anchor(cid, 0x10004278, "25007300250064000000"),
+            },
+        },
+        "role_0x19_dtc_clear": {
+            "plugin": file_identity(clear, gts_root),
+            "example_binding": dll_binding(parser, master, 397, 0x19),
+            "primary": resolve_frame(parser, master, 397, 0x01, variable_namespace_base=0x2710),
+            "fallback": resolve_frame(parser, master, 397, 0x102, variable_namespace_base=0x2710),
+            "timer": {
+                "db_record_class": "0x119",
+                "master_table_type": 25,
+                "table": MASTER_TABLE_CLASS_NAMES[25],
+                "record_size": master.sections[25].decoded_record_size,
+                "record_count": master.sections[25].header.record_count,
+                "lookup_key": [397, 1],
+                "hybrid_timer_1": resolve_timer(parser, master, 397, 1),
+            },
+            "control_flow": {
+                "primary_selector": "0x1",
+                "primary_addressing": "normal GetCommFrmSndRcv unless ECU detail flag == 1, then DifferentAddress",
+                "special_bus_ids": [0x12, 0x22, 0x18, 0x78],
+                "fallback_selector": "0x102",
+                "fallback_error_codes_when_function_gate_set": [
+                    "0x91010009", "0x90020321", "0x90020323", "0xA0040201", "0xC0040001",
+                    "0xA0040202", "0x90020327", "0x91020320", "0x91020310", "0x91020322",
+                ],
+                "fallback_when_function_gate_clear": "only 0x91010009 (logged as first-message TIMEOUT)",
+                "fallback_addressing": "FunctionAddress only when bus ID == 0x22; otherwise normal GetCommFrmSndRcv",
+                "fallback_c0040101_behavior": "restore/return primary error; in timeout-only branch restore 0x91010009",
+                "success": "return 0; Sleep(timer delay_ms); set command output +0x20 m_bDelDiagCode=1",
+            },
+            "anchors": {
+                "timer_class_0x119_key_1": anchor(clear, 0x100010E3, "81c1cc0000006a0156506819010000ff1580300010"),
+                "special_bus_ids": anchor(clear, 0x10001156, "b9120000008d50228b45f0663bc87419663bd07414b918000000663bc8740ab978000000663bc875718bb564ff"),
+                "primary_addressing": anchor(clear, 0x100011F3, "83f8018d4dc08d45ac50576a017508ff152c300010eb06ff1500300010837d"),
+                "fallback_error_set": anchor(clear, 0x1000121C, "81fe09000191744c81fe21030290744481fe23030290743c81fe010204a0743481fe010004c0742c81fe020204a0742481fe27030290741c81fe20030291741481fe10030291740c81fe220302910f85"),
+                "fallback_selector_0x102": anchor(clear, 0x1000129A, "b822000000663b45f08d45d45057680201000075188d8d7cffffffff1530300010684832001068ea000000eb14a1003000108d4dc0ffd0688c"),
+                "fallback_restore_primary": anchor(clear, 0x100012ED, "81fe010104c075228b8564ffffff8bf068bc32001068fb000000681031001068b831001050ffd383c4148b3d1c300010"),
+                "timeout_fallback_0x102": anchor(clear, 0x10001327, "81fe09000191757ba1183000108d4dd4ffd068e83200106809010000681031001068b831001056ffd383c4148d45d48d4dc050a100300010576802010000ffd0688c3200106812"),
+                "success_sleep_and_flag": anchor(clear, 0x100013B0, "85f675348b8578ffffff8b00ff30ff15543000108b8560ffffff6a01682d0100006810310010682433001056c7402001000000ffd383c4"),
+                "timer_record_pointer": anchor(kgp, 0x100CFE87, "8b45fc8b4dfc8b510c8950108be55d"),
+                "timer_key_1": anchor(kgp, 0x100D0100, "0fb742048945ec837df400752c8b4dec3b4de87522c745f4010000"),
+                "timer_key_pair": anchor(kgp, 0x100D0380, "6b4d100c034dec894dfc8b55fc0fb742048b4d148b55f88b0c8a0fb751043bc275488b45fc0fb748068b55148b45f88b14900fb742063bc87509b80100"),
+            },
+        },
+    }
+
+
 def gtsplus_role_layout(gts_root: Path) -> dict:
     parser = DDBParser()
     master_path = gts_root / "NA/DB/Gen/Toyota.ddb"
@@ -396,6 +495,12 @@ def gtsplus_role_layout(gts_root: Path) -> dict:
             "subtract_anchor": anchor(kgp, 0x10065200, "0fb7550881ea10270000668955088b45"),
         },
         "command_common_surface": gtsplus_command_common_surface(gts_root),
+        "timer_table": {
+            "master_table_type": 25,
+            "class_name": MASTER_TABLE_CLASS_NAMES[25],
+            "record_size": master.sections[25].decoded_record_size,
+            "record_count": master.sections[25].header.record_count,
+        },
         "comm_set_table": {
             "master_table_type": 29,
             "class_name": MASTER_TABLE_CLASS_NAMES[29],
@@ -404,6 +509,7 @@ def gtsplus_role_layout(gts_root: Path) -> dict:
             "comm_set_1": resolve_comm_set(parser, master, 1),
         },
         "role_catalog": role_operation_catalog(parser, master, gts_root / "bin"),
+        "plugin_semantics": gtsplus_plugin_semantics(parser, master, gts_root),
         "hybrid_clear_binding": dll_binding(parser, master, 397, 25),
         "hybrid_clear_primary": resolve_frame(parser, master, 397, 0x01, variable_namespace_base=0x2710),
         "hybrid_clear_fallback": resolve_frame(parser, master, 397, 0x102, variable_namespace_base=0x2710),
@@ -444,6 +550,7 @@ def build(techstream_root: Path, gts_root: Path | None) -> dict:
                 "0x113": {"result": "CDbDllResRecords", "master_table_type": 19, "table": MASTER_TABLE_CLASS_NAMES[19], "role": "(ECU/category, DLL role) -> plugin filename"},
                 "0x11A": {"result": "CDbEcuFuncInfoResRecords", "master_table_type": 26, "table": MASTER_TABLE_CLASS_NAMES[26], "role": "ECU function-list discovery"},
                 "0x11B": {"result": "CDbEcuFuncDetailsResRecords", "master_table_type": 27, "table": MASTER_TABLE_CLASS_NAMES[27], "role": "function detail discovery"},
+                "0x119": {"result": "CDbTimerResRecords", "master_table_type": 25, "table": MASTER_TABLE_CLASS_NAMES[25], "role": "per-category command timer metadata"},
                 "0x112": {"result": "CDbFuncCommFrameResRecords", "master_table_type": 18, "table": MASTER_TABLE_CLASS_NAMES[18], "role": "(ECU/category, selector) -> CommSet + CommFrame"},
                 "0x111": {"result": "CDbCommFrameResRecords", "master_table_type": 17, "table": MASTER_TABLE_CLASS_NAMES[17], "role": "CommFrame -> send / receive-mask / receive-check variable references"},
                 "0x11D": {"result": "CDbComSetResRecords", "master_table_type": 29, "table": MASTER_TABLE_CLASS_NAMES[29], "role": "communication-set / diagnostic transport metadata"},

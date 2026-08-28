@@ -168,6 +168,69 @@ check(
     and all(current_cc["helper_exports_present"].values()),
 )
 
+plugin_semantics = gts["dll_role_schema"]["plugin_semantics"]
+cid = plugin_semantics["role_0x52_generic_cid"]
+clear = plugin_semantics["role_0x19_dtc_clear"]
+check(
+    "current generic role 0x52 EMPS CID route is exact F181 and current plugin identity is pinned",
+    cid["plugin"]["sha256"] == "775aa63b75d8918c07a467b5e685ccae7ab3eb6c069ac9c0d5110463dd15f9c2"
+    and cid["example_binding"]["category_id"] == 405
+    and cid["example_binding"]["dll_role_id"] == 0x52
+    and cid["example_binding"]["dll_name"] == "GetCID_SID22_DT.dll"
+    and cid["example_frame"]["selector"] == "0xDC"
+    and cid["example_frame"]["variables"]["send"]["bytes"] == "22f181"
+    and cid["example_frame"]["variables"]["receive_check"]["bytes"] == "62f181",
+)
+check(
+    "current role 0x52 response parser strips four bytes and emits 16-byte CID strings",
+    cid["response_model"]["echoed_did_receive_indexes"] == [1, 2]
+    and cid["response_model"]["payload_offset"] == 4
+    and cid["response_model"]["record_size"] == 16
+    and cid["response_model"]["value_capacity_chars"] == 17
+    and cid["response_model"]["entry_name_prefix"] == "CID"
+    and cid["response_model"]["entry_name_format"] == "%s%d"
+    and "byte 3 is skipped" in cid["response_model"]["record_count_source"]
+    and "code page 0" in cid["response_model"]["string_conversion"],
+)
+check(
+    "current role 0x52 parser semantics are instruction-pinned",
+    cid["anchors"]["response_count_minus_4"]["bytes"] == "ffd38b406883e804898564fcffff"
+    and cid["anchors"]["did_echo_index_1"]["bytes"] == "6a018d7858ffd66a018bcf8a5808ffd63a58"
+    and cid["anchors"]["payload_copy_from_4"]["bytes"] == "6a008d8de8fcffffffd78d48588d460450ffd3508d8dc0fcffffff153840"
+    and cid["anchors"]["chunk_size_16"]["bytes"] == "8b8564fcffffbe100000003bf87d1d578d8dc0fc"
+    and cid["anchors"]["cid_literal"]["bytes"] == "4300490044000000"
+    and cid["anchors"]["cid_format_literal"]["bytes"] == "25007300250064000000",
+)
+check(
+    "current role 0x19 clear state machine and timer table are exact",
+    clear["plugin"]["sha256"] == "8e52d52f860b5fbddcaf178bdbbfcf1e310c1a57e418cee840725f95d18d4e00"
+    and clear["timer"]["db_record_class"] == "0x119"
+    and clear["timer"]["master_table_type"] == 25
+    and clear["timer"]["table"] == "CDbTimerTable"
+    and clear["timer"]["record_size"] == 12
+    and clear["timer"]["record_count"] == 664
+    and clear["timer"]["hybrid_timer_1"] == {
+        "category_id": 397,
+        "delay_ms": 0,
+        "raw": "000000008d01010000000000",
+        "timer_id": 1,
+        "unknown_dword_08": 0,
+    },
+)
+check(
+    "current role 0x19 fallback policy is explicitly bounded by plugin error branches",
+    clear["control_flow"]["fallback_error_codes_when_function_gate_set"] == [
+        "0x91010009", "0x90020321", "0x90020323", "0xA0040201", "0xC0040001",
+        "0xA0040202", "0x90020327", "0x91020320", "0x91020310", "0x91020322",
+    ]
+    and clear["control_flow"]["fallback_when_function_gate_clear"] == "only 0x91010009 (logged as first-message TIMEOUT)"
+    and "FunctionAddress only when bus ID == 0x22" in clear["control_flow"]["fallback_addressing"]
+    and "restore/return primary error" in clear["control_flow"]["fallback_c0040101_behavior"]
+    and clear["anchors"]["fallback_error_set"]["bytes"].startswith("81fe09000191744c")
+    and clear["anchors"]["success_sleep_and_flag"]["bytes"].startswith("85f67534")
+    and clear["anchors"]["timer_record_pointer"]["bytes"] == "8b45fc8b4dfc8b510c8950108be55d",
+)
+
 check(
     "GTS+ variable references normalize by 0x2710 before the V18-style table lookup",
     gts["dll_role_schema"]["variable_layout"]["gtsplus_namespace_base"] == "0x2710"
@@ -212,6 +275,7 @@ expected_classes = {
     "0x113": (19, "CDbDllTable"),
     "0x11A": (26, "CDbEcuFuncInfoTable"),
     "0x11B": (27, "CDbEcuFuncDetailsTable"),
+    "0x119": (25, "CDbTimerTable"),
     "0x112": (18, "CDbFuncCommFrameTable"),
     "0x111": (17, "CDbCommFrameTable"),
     "0x11D": (29, "CDbComSetTable"),
