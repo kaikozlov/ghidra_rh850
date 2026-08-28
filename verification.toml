@@ -1973,3 +1973,12 @@ paths = [
   "docs/status/PRIORITIES.md",
   "docs/status/CORRECTIONS.md",
 ]
+
+[suite.camry_8965f3307000_d5_snapshot_provenance]
+tests = ["tests/verify_camry_8965F3307000_d5_snapshot_provenance.py"]
+oracle = "generated_self_check"
+paths = [
+  "data/generated/camry-8965F3307000/decompilations.jsonl",
+  "firmware/camry-8965F3307000/CodeFlash.bin",
+  "docs/variants/camry-2026-live-baseline.md",
+]

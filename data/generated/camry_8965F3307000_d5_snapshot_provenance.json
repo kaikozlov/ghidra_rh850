@@ -1,0 +1,3344 @@
+{
+  "acquisition_source_block": {
+    "range": [
+      "0xFEBE5EC8",
+      "0xFEBE5F30"
+    ],
+    "writers": {
+      "0x00066824": "getter 0x6217e (group-input channels 0/8) -> FEBE5EC8..5EDE; getter 0x629a2 (torque-sensor record pack) -> FEBE5F12..5F30",
+      "0x000668e2": "getter 0x62b32 (hardware comm-entry values) -> FEBE5F02..5F10, gated on FEBE5F28 bit0",
+      "0x00066932": "getters 0x62abc/0x62b18/0x6294e -> FEBE5EE0..5F00 and FEBE5F18..5F24",
+      "0x00098f4c": "one-time init: zeroes FEBE5EBC..5EC3 and sets FEBE5EC4=1"
+    }
+  },
+  "boundary": [
+    "Negative proofs are scoped to the canonical direct data-reference graph: computed aliases without a recovered reference, DMA/hardware mutation of LocalRAM outside the GlobalRAM rings, and unrecovered code remain outside the proof.",
+    "Ring/FIFO producer identity is classified as hardware/peripheral-fed shared memory; the exact per-channel DMAC trigger/peripheral assignment is bounded, not asserted.",
+    "No live vehicle I/O; firmware-static closure only."
+  ],
+  "can_join_guard": {
+    "checked_functions": [
+      "0x00059448",
+      "0x000486d0",
+      "0x000387ce",
+      "0x00047d62",
+      "0x0005d12c",
+      "0x0005d5e0",
+      "0x0005d6dc",
+      "0x00050b6a",
+      "0x00050bbc",
+      "0x00050c38",
+      "0x00066824",
+      "0x00066932",
+      "0x000668e2",
+      "0x00047b70",
+      "0x000484f0",
+      "0x00048684",
+      "0x00037f16",
+      "0x0003835e",
+      "0x000384d8",
+      "0x00037e48",
+      "0x000bf33e"
+    ],
+    "conclusion": "The only READ into these regions from any checked function is 0xBF33E reading FEBEAC54..FEBEAC7E, i.e. the already-verified B6-selected command-torque cone. 0x59448's FEBE7Fxx references are WRITEs (it cannot source COM values). No D5-path function reads generated COM/CAN staging.",
+    "hits": {
+      "0x00059448": [
+        {
+          "from": "0x00059f2c",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f30"
+        },
+        {
+          "from": "0x00059f2c",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f31"
+        },
+        {
+          "from": "0x00059f34",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f38"
+        },
+        {
+          "from": "0x00059f40",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f68"
+        },
+        {
+          "from": "0x00059f42",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f69"
+        },
+        {
+          "from": "0x00059f44",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f6a"
+        },
+        {
+          "from": "0x00059f46",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f6b"
+        },
+        {
+          "from": "0x00059f48",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f6c"
+        },
+        {
+          "from": "0x00059f4a",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f72"
+        },
+        {
+          "from": "0x00059f4c",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f74"
+        },
+        {
+          "from": "0x00059f4e",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f76"
+        },
+        {
+          "from": "0x00059f50",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f78"
+        },
+        {
+          "from": "0x00059f52",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f7a"
+        },
+        {
+          "from": "0x00059f54",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f7c"
+        },
+        {
+          "from": "0x00059f56",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f6d"
+        },
+        {
+          "from": "0x00059f58",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f7e"
+        },
+        {
+          "from": "0x00059f5a",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f80"
+        },
+        {
+          "from": "0x00059f5c",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f82"
+        },
+        {
+          "from": "0x00059f5e",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f84"
+        },
+        {
+          "from": "0x00059f60",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f86"
+        },
+        {
+          "from": "0x00059f62",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f6e"
+        },
+        {
+          "from": "0x00059f64",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f88"
+        },
+        {
+          "from": "0x00059f66",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f8a"
+        },
+        {
+          "from": "0x00059f68",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f8c"
+        },
+        {
+          "from": "0x00059f6a",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f8e"
+        },
+        {
+          "from": "0x00059f6c",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f90"
+        },
+        {
+          "from": "0x00059f6e",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f6f"
+        },
+        {
+          "from": "0x00059f70",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f70"
+        },
+        {
+          "from": "0x0005a00a",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f9c"
+        },
+        {
+          "from": "0x0005a00c",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f9d"
+        },
+        {
+          "from": "0x0005a016",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fa6"
+        },
+        {
+          "from": "0x0005a016",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fa8"
+        },
+        {
+          "from": "0x0005a022",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f9e"
+        },
+        {
+          "from": "0x0005a022",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7f9f"
+        },
+        {
+          "from": "0x0005a030",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fa2"
+        },
+        {
+          "from": "0x0005a030",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fa3"
+        },
+        {
+          "from": "0x0005a046",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fb0"
+        },
+        {
+          "from": "0x0005a046",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fb1"
+        },
+        {
+          "from": "0x0005a054",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fb8"
+        },
+        {
+          "from": "0x0005a054",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fb9"
+        },
+        {
+          "from": "0x0005a05e",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fc0"
+        },
+        {
+          "from": "0x0005a060",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fc2"
+        },
+        {
+          "from": "0x0005a062",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fc4"
+        },
+        {
+          "from": "0x0005a06c",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fe4"
+        },
+        {
+          "from": "0x0005a06e",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fe5"
+        },
+        {
+          "from": "0x0005a070",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fe6"
+        },
+        {
+          "from": "0x0005a072",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fe7"
+        },
+        {
+          "from": "0x0005a074",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fe8"
+        },
+        {
+          "from": "0x0005a076",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fe9"
+        },
+        {
+          "from": "0x0005a078",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fea"
+        },
+        {
+          "from": "0x0005a082",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fec"
+        },
+        {
+          "from": "0x0005a08a",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fd0"
+        },
+        {
+          "from": "0x0005a092",
+          "kind": "WRITE",
+          "region": "com_staging",
+          "to": "0xfebe7fe0"
+        },
+        {
+          "from": "0x0005c268",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef000"
+        },
+        {
+          "from": "0x0005c26c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef001"
+        },
+        {
+          "from": "0x0005c26e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef16a"
+        },
+        {
+          "from": "0x0005c272",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef002"
+        },
+        {
+          "from": "0x0005c278",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef003"
+        },
+        {
+          "from": "0x0005c278",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef004"
+        },
+        {
+          "from": "0x0005c286",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef16c"
+        },
+        {
+          "from": "0x0005c28e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef00b"
+        },
+        {
+          "from": "0x0005c28e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef00c"
+        },
+        {
+          "from": "0x0005c296",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef17a"
+        },
+        {
+          "from": "0x0005c29a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef178"
+        },
+        {
+          "from": "0x0005c2a2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef172"
+        },
+        {
+          "from": "0x0005c2a4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef170"
+        },
+        {
+          "from": "0x0005c2a6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef16e"
+        },
+        {
+          "from": "0x0005c2aa",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef010"
+        },
+        {
+          "from": "0x0005c2ac",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef00f"
+        },
+        {
+          "from": "0x0005c2b8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef176"
+        },
+        {
+          "from": "0x0005c2c0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef174"
+        },
+        {
+          "from": "0x0005c2c4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef014"
+        },
+        {
+          "from": "0x0005c2c6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef013"
+        },
+        {
+          "from": "0x0005c2c8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef012"
+        },
+        {
+          "from": "0x0005c2ca",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef011"
+        },
+        {
+          "from": "0x0005c2d6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef17c"
+        },
+        {
+          "from": "0x0005c2d6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef17e"
+        },
+        {
+          "from": "0x0005c2e4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef015"
+        },
+        {
+          "from": "0x0005c2e4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef016"
+        },
+        {
+          "from": "0x0005c2ee",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1da"
+        },
+        {
+          "from": "0x0005c2f2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1d8"
+        },
+        {
+          "from": "0x0005c2f6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1d6"
+        },
+        {
+          "from": "0x0005c2fa",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1d4"
+        },
+        {
+          "from": "0x0005c2fe",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1d2"
+        },
+        {
+          "from": "0x0005c306",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1ca"
+        },
+        {
+          "from": "0x0005c30a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1c8"
+        },
+        {
+          "from": "0x0005c30e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1c6"
+        },
+        {
+          "from": "0x0005c312",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1c4"
+        },
+        {
+          "from": "0x0005c316",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1c2"
+        },
+        {
+          "from": "0x0005c31a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1c0"
+        },
+        {
+          "from": "0x0005c31e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1be"
+        },
+        {
+          "from": "0x0005c322",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1bc"
+        },
+        {
+          "from": "0x0005c326",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1ba"
+        },
+        {
+          "from": "0x0005c32a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1b8"
+        },
+        {
+          "from": "0x0005c32e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1b6"
+        },
+        {
+          "from": "0x0005c332",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1b4"
+        },
+        {
+          "from": "0x0005c336",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1b2"
+        },
+        {
+          "from": "0x0005c33a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1b0"
+        },
+        {
+          "from": "0x0005c33e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1ae"
+        },
+        {
+          "from": "0x0005c342",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1ac"
+        },
+        {
+          "from": "0x0005c346",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1aa"
+        },
+        {
+          "from": "0x0005c34a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1a8"
+        },
+        {
+          "from": "0x0005c34e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1a6"
+        },
+        {
+          "from": "0x0005c352",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1a4"
+        },
+        {
+          "from": "0x0005c356",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1a0"
+        },
+        {
+          "from": "0x0005c35a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef19e"
+        },
+        {
+          "from": "0x0005c35e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef19c"
+        },
+        {
+          "from": "0x0005c362",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef19a"
+        },
+        {
+          "from": "0x0005c366",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef198"
+        },
+        {
+          "from": "0x0005c36a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef196"
+        },
+        {
+          "from": "0x0005c36e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef194"
+        },
+        {
+          "from": "0x0005c372",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef192"
+        },
+        {
+          "from": "0x0005c376",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef190"
+        },
+        {
+          "from": "0x0005c37a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef18e"
+        },
+        {
+          "from": "0x0005c37e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef18c"
+        },
+        {
+          "from": "0x0005c386",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef07f"
+        },
+        {
+          "from": "0x0005c388",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef07e"
+        },
+        {
+          "from": "0x0005c38a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef07d"
+        },
+        {
+          "from": "0x0005c38c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef07c"
+        },
+        {
+          "from": "0x0005c38e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef07b"
+        },
+        {
+          "from": "0x0005c390",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef07a"
+        },
+        {
+          "from": "0x0005c392",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef079"
+        },
+        {
+          "from": "0x0005c394",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef078"
+        },
+        {
+          "from": "0x0005c396",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef077"
+        },
+        {
+          "from": "0x0005c398",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef076"
+        },
+        {
+          "from": "0x0005c39a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef075"
+        },
+        {
+          "from": "0x0005c39c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef074"
+        },
+        {
+          "from": "0x0005c39e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef073"
+        },
+        {
+          "from": "0x0005c3a0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef072"
+        },
+        {
+          "from": "0x0005c3a2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef071"
+        },
+        {
+          "from": "0x0005c3a4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef070"
+        },
+        {
+          "from": "0x0005c3a6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef06f"
+        },
+        {
+          "from": "0x0005c3a8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef06e"
+        },
+        {
+          "from": "0x0005c3aa",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef06d"
+        },
+        {
+          "from": "0x0005c3ac",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef06c"
+        },
+        {
+          "from": "0x0005c3ae",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef06b"
+        },
+        {
+          "from": "0x0005c3b0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef06a"
+        },
+        {
+          "from": "0x0005c3b2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef069"
+        },
+        {
+          "from": "0x0005c3b4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef068"
+        },
+        {
+          "from": "0x0005c3b6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef067"
+        },
+        {
+          "from": "0x0005c3b8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef066"
+        },
+        {
+          "from": "0x0005c3ba",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef065"
+        },
+        {
+          "from": "0x0005c3bc",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef064"
+        },
+        {
+          "from": "0x0005c3be",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef063"
+        },
+        {
+          "from": "0x0005c3c0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef062"
+        },
+        {
+          "from": "0x0005c3c2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef061"
+        },
+        {
+          "from": "0x0005c3c4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef060"
+        },
+        {
+          "from": "0x0005c3c6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef05e"
+        },
+        {
+          "from": "0x0005c3c8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef05d"
+        },
+        {
+          "from": "0x0005c3ca",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef05c"
+        },
+        {
+          "from": "0x0005c3cc",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef05a"
+        },
+        {
+          "from": "0x0005c3ce",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef059"
+        },
+        {
+          "from": "0x0005c3d0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef058"
+        },
+        {
+          "from": "0x0005c3d2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef057"
+        },
+        {
+          "from": "0x0005c3d4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef056"
+        },
+        {
+          "from": "0x0005c3d6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef055"
+        },
+        {
+          "from": "0x0005c3d8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef054"
+        },
+        {
+          "from": "0x0005c3da",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef052"
+        },
+        {
+          "from": "0x0005c3dc",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef051"
+        },
+        {
+          "from": "0x0005c3de",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef050"
+        },
+        {
+          "from": "0x0005c3e0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef04f"
+        },
+        {
+          "from": "0x0005c3e2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef04e"
+        },
+        {
+          "from": "0x0005c3e4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef04d"
+        },
+        {
+          "from": "0x0005c3e6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef04c"
+        },
+        {
+          "from": "0x0005c3e8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef04b"
+        },
+        {
+          "from": "0x0005c3ea",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef04a"
+        },
+        {
+          "from": "0x0005c3ec",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef049"
+        },
+        {
+          "from": "0x0005c3ee",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef048"
+        },
+        {
+          "from": "0x0005c3f0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef047"
+        },
+        {
+          "from": "0x0005c3f2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef046"
+        },
+        {
+          "from": "0x0005c3f4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef045"
+        },
+        {
+          "from": "0x0005c3f6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef044"
+        },
+        {
+          "from": "0x0005c3f8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef043"
+        },
+        {
+          "from": "0x0005c3fa",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef041"
+        },
+        {
+          "from": "0x0005c3fc",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef040"
+        },
+        {
+          "from": "0x0005c3fe",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef03f"
+        },
+        {
+          "from": "0x0005c400",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef03e"
+        },
+        {
+          "from": "0x0005c402",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef03d"
+        },
+        {
+          "from": "0x0005c404",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef03c"
+        },
+        {
+          "from": "0x0005c406",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef03b"
+        },
+        {
+          "from": "0x0005c408",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef03a"
+        },
+        {
+          "from": "0x0005c40a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef039"
+        },
+        {
+          "from": "0x0005c40c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef038"
+        },
+        {
+          "from": "0x0005c40e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef037"
+        },
+        {
+          "from": "0x0005c410",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef036"
+        },
+        {
+          "from": "0x0005c412",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef035"
+        },
+        {
+          "from": "0x0005c414",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef034"
+        },
+        {
+          "from": "0x0005c416",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef033"
+        },
+        {
+          "from": "0x0005c41c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef188"
+        },
+        {
+          "from": "0x0005c420",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef032"
+        },
+        {
+          "from": "0x0005c422",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef031"
+        },
+        {
+          "from": "0x0005c424",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef030"
+        },
+        {
+          "from": "0x0005c426",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef02f"
+        },
+        {
+          "from": "0x0005c428",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef02e"
+        },
+        {
+          "from": "0x0005c42a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef02d"
+        },
+        {
+          "from": "0x0005c42c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef02c"
+        },
+        {
+          "from": "0x0005c42e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef02b"
+        },
+        {
+          "from": "0x0005c430",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef02a"
+        },
+        {
+          "from": "0x0005c432",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef029"
+        },
+        {
+          "from": "0x0005c434",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef028"
+        },
+        {
+          "from": "0x0005c436",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef027"
+        },
+        {
+          "from": "0x0005c442",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1f8"
+        },
+        {
+          "from": "0x0005c446",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1f6"
+        },
+        {
+          "from": "0x0005c44a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1f4"
+        },
+        {
+          "from": "0x0005c44e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1f2"
+        },
+        {
+          "from": "0x0005c452",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1f0"
+        },
+        {
+          "from": "0x0005c456",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1ee"
+        },
+        {
+          "from": "0x0005c45a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1ec"
+        },
+        {
+          "from": "0x0005c45e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1ea"
+        },
+        {
+          "from": "0x0005c462",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1e8"
+        },
+        {
+          "from": "0x0005c466",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1e6"
+        },
+        {
+          "from": "0x0005c46a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1e4"
+        },
+        {
+          "from": "0x0005c46e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1e2"
+        },
+        {
+          "from": "0x0005c472",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1e0"
+        },
+        {
+          "from": "0x0005c476",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef18a"
+        },
+        {
+          "from": "0x0005c47c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef042"
+        },
+        {
+          "from": "0x0005c47e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef053"
+        },
+        {
+          "from": "0x0005c482",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef05b"
+        },
+        {
+          "from": "0x0005c484",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef05f"
+        },
+        {
+          "from": "0x0005c490",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef080"
+        },
+        {
+          "from": "0x0005c492",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef081"
+        },
+        {
+          "from": "0x0005c494",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef082"
+        },
+        {
+          "from": "0x0005c496",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef083"
+        },
+        {
+          "from": "0x0005c498",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef084"
+        },
+        {
+          "from": "0x0005c49a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef085"
+        },
+        {
+          "from": "0x0005c49c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef086"
+        },
+        {
+          "from": "0x0005c49e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef087"
+        },
+        {
+          "from": "0x0005c4a0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef088"
+        },
+        {
+          "from": "0x0005c4a2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef089"
+        },
+        {
+          "from": "0x0005c4a4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef08a"
+        },
+        {
+          "from": "0x0005c4a6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef08b"
+        },
+        {
+          "from": "0x0005c4a8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef08c"
+        },
+        {
+          "from": "0x0005c4aa",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef08d"
+        },
+        {
+          "from": "0x0005c4ac",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef08e"
+        },
+        {
+          "from": "0x0005c4ae",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef08f"
+        },
+        {
+          "from": "0x0005c4b0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef090"
+        },
+        {
+          "from": "0x0005c4b2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef091"
+        },
+        {
+          "from": "0x0005c4b4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef092"
+        },
+        {
+          "from": "0x0005c4b6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef093"
+        },
+        {
+          "from": "0x0005c4b8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef094"
+        },
+        {
+          "from": "0x0005c4ba",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef095"
+        },
+        {
+          "from": "0x0005c4bc",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef096"
+        },
+        {
+          "from": "0x0005c4c2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1a2"
+        },
+        {
+          "from": "0x0005c4ca",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef097"
+        },
+        {
+          "from": "0x0005c4cc",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef098"
+        },
+        {
+          "from": "0x0005c4ce",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef099"
+        },
+        {
+          "from": "0x0005c4d0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef09a"
+        },
+        {
+          "from": "0x0005c4d2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef09b"
+        },
+        {
+          "from": "0x0005c4d4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef09c"
+        },
+        {
+          "from": "0x0005c4d6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef09d"
+        },
+        {
+          "from": "0x0005c4d8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef09e"
+        },
+        {
+          "from": "0x0005c4da",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef09f"
+        },
+        {
+          "from": "0x0005c4dc",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0a0"
+        },
+        {
+          "from": "0x0005c4e0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0a1"
+        },
+        {
+          "from": "0x0005c4e2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0a2"
+        },
+        {
+          "from": "0x0005c4e4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0a3"
+        },
+        {
+          "from": "0x0005c4e6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0a4"
+        },
+        {
+          "from": "0x0005c4e8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0a5"
+        },
+        {
+          "from": "0x0005c4ea",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0a6"
+        },
+        {
+          "from": "0x0005c4ec",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0a7"
+        },
+        {
+          "from": "0x0005c4ee",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0a8"
+        },
+        {
+          "from": "0x0005c4f0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0a9"
+        },
+        {
+          "from": "0x0005c4f2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0aa"
+        },
+        {
+          "from": "0x0005c4f4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0ab"
+        },
+        {
+          "from": "0x0005c4f6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0ac"
+        },
+        {
+          "from": "0x0005c4f8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0ad"
+        },
+        {
+          "from": "0x0005c4fa",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0ae"
+        },
+        {
+          "from": "0x0005c4fc",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0af"
+        },
+        {
+          "from": "0x0005c506",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0b0"
+        },
+        {
+          "from": "0x0005c508",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0b1"
+        },
+        {
+          "from": "0x0005c50a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0b2"
+        },
+        {
+          "from": "0x0005c50c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0b3"
+        },
+        {
+          "from": "0x0005c510",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0b4"
+        },
+        {
+          "from": "0x0005c512",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0b5"
+        },
+        {
+          "from": "0x0005c514",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0b6"
+        },
+        {
+          "from": "0x0005c516",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0b7"
+        },
+        {
+          "from": "0x0005c518",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0b8"
+        },
+        {
+          "from": "0x0005c51a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0b9"
+        },
+        {
+          "from": "0x0005c51e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0ba"
+        },
+        {
+          "from": "0x0005c520",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0bb"
+        },
+        {
+          "from": "0x0005c522",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0bc"
+        },
+        {
+          "from": "0x0005c524",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0bd"
+        },
+        {
+          "from": "0x0005c526",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0be"
+        },
+        {
+          "from": "0x0005c528",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0bf"
+        },
+        {
+          "from": "0x0005c52a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0c0"
+        },
+        {
+          "from": "0x0005c52c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0c1"
+        },
+        {
+          "from": "0x0005c52e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0c2"
+        },
+        {
+          "from": "0x0005c530",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0c3"
+        },
+        {
+          "from": "0x0005c532",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0c4"
+        },
+        {
+          "from": "0x0005c534",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0c5"
+        },
+        {
+          "from": "0x0005c536",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0c6"
+        },
+        {
+          "from": "0x0005c538",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0c7"
+        },
+        {
+          "from": "0x0005c53a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0c8"
+        },
+        {
+          "from": "0x0005c53c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0c9"
+        },
+        {
+          "from": "0x0005c53e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1de"
+        },
+        {
+          "from": "0x0005c546",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1cc"
+        },
+        {
+          "from": "0x0005c548",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1ce"
+        },
+        {
+          "from": "0x0005c54a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1d0"
+        },
+        {
+          "from": "0x0005c54c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1dc"
+        },
+        {
+          "from": "0x0005c554",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0ca"
+        },
+        {
+          "from": "0x0005c556",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0cb"
+        },
+        {
+          "from": "0x0005c558",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0cc"
+        },
+        {
+          "from": "0x0005c55a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0cd"
+        },
+        {
+          "from": "0x0005c55c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0ce"
+        },
+        {
+          "from": "0x0005c55e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0cf"
+        },
+        {
+          "from": "0x0005c560",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0d0"
+        },
+        {
+          "from": "0x0005c562",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0d1"
+        },
+        {
+          "from": "0x0005c564",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0d2"
+        },
+        {
+          "from": "0x0005c566",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0d3"
+        },
+        {
+          "from": "0x0005c568",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0d4"
+        },
+        {
+          "from": "0x0005c56a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0d5"
+        },
+        {
+          "from": "0x0005c56c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0d6"
+        },
+        {
+          "from": "0x0005c56e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0d7"
+        },
+        {
+          "from": "0x0005c570",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0d8"
+        },
+        {
+          "from": "0x0005c572",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0d9"
+        },
+        {
+          "from": "0x0005c574",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0da"
+        },
+        {
+          "from": "0x0005c576",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0db"
+        },
+        {
+          "from": "0x0005c578",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0dc"
+        },
+        {
+          "from": "0x0005c57a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0dd"
+        },
+        {
+          "from": "0x0005c57c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0de"
+        },
+        {
+          "from": "0x0005c57e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0df"
+        },
+        {
+          "from": "0x0005c580",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0e0"
+        },
+        {
+          "from": "0x0005c582",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0e1"
+        },
+        {
+          "from": "0x0005c584",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0e2"
+        },
+        {
+          "from": "0x0005c586",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef182"
+        },
+        {
+          "from": "0x0005c58e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0fe"
+        },
+        {
+          "from": "0x0005c590",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0fd"
+        },
+        {
+          "from": "0x0005c592",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0fc"
+        },
+        {
+          "from": "0x0005c594",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0fb"
+        },
+        {
+          "from": "0x0005c596",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0fa"
+        },
+        {
+          "from": "0x0005c598",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0f9"
+        },
+        {
+          "from": "0x0005c59a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0f8"
+        },
+        {
+          "from": "0x0005c59c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0f7"
+        },
+        {
+          "from": "0x0005c59e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0f6"
+        },
+        {
+          "from": "0x0005c5a0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0f5"
+        },
+        {
+          "from": "0x0005c5a2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0f4"
+        },
+        {
+          "from": "0x0005c5a4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0f3"
+        },
+        {
+          "from": "0x0005c5a6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0f2"
+        },
+        {
+          "from": "0x0005c5a8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0f1"
+        },
+        {
+          "from": "0x0005c5aa",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0f0"
+        },
+        {
+          "from": "0x0005c5ac",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0ef"
+        },
+        {
+          "from": "0x0005c5ae",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0ee"
+        },
+        {
+          "from": "0x0005c5b0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0ed"
+        },
+        {
+          "from": "0x0005c5b2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0ec"
+        },
+        {
+          "from": "0x0005c5b4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0eb"
+        },
+        {
+          "from": "0x0005c5b6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0ea"
+        },
+        {
+          "from": "0x0005c5b8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0e9"
+        },
+        {
+          "from": "0x0005c5ba",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0e8"
+        },
+        {
+          "from": "0x0005c5bc",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0e7"
+        },
+        {
+          "from": "0x0005c5be",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0e6"
+        },
+        {
+          "from": "0x0005c5c0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0e5"
+        },
+        {
+          "from": "0x0005c5c2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0e3"
+        },
+        {
+          "from": "0x0005c5c4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0e4"
+        },
+        {
+          "from": "0x0005c5c6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef184"
+        },
+        {
+          "from": "0x0005c5ce",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef11c"
+        },
+        {
+          "from": "0x0005c5d0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef11b"
+        },
+        {
+          "from": "0x0005c5d2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef11a"
+        },
+        {
+          "from": "0x0005c5d4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef119"
+        },
+        {
+          "from": "0x0005c5d6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef118"
+        },
+        {
+          "from": "0x0005c5d8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef117"
+        },
+        {
+          "from": "0x0005c5da",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef116"
+        },
+        {
+          "from": "0x0005c5dc",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef115"
+        },
+        {
+          "from": "0x0005c5de",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef114"
+        },
+        {
+          "from": "0x0005c5e0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef113"
+        },
+        {
+          "from": "0x0005c5e2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef112"
+        },
+        {
+          "from": "0x0005c5e4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef111"
+        },
+        {
+          "from": "0x0005c5ea",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef110"
+        },
+        {
+          "from": "0x0005c5ec",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef10f"
+        },
+        {
+          "from": "0x0005c5ee",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef10e"
+        },
+        {
+          "from": "0x0005c5f0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef10d"
+        },
+        {
+          "from": "0x0005c5f2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef10c"
+        },
+        {
+          "from": "0x0005c5f4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef10b"
+        },
+        {
+          "from": "0x0005c5f6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef10a"
+        },
+        {
+          "from": "0x0005c5f8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef109"
+        },
+        {
+          "from": "0x0005c5fa",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef108"
+        },
+        {
+          "from": "0x0005c5fc",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef107"
+        },
+        {
+          "from": "0x0005c5fe",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef106"
+        },
+        {
+          "from": "0x0005c600",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef105"
+        },
+        {
+          "from": "0x0005c602",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef104"
+        },
+        {
+          "from": "0x0005c604",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef103"
+        },
+        {
+          "from": "0x0005c606",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef102"
+        },
+        {
+          "from": "0x0005c608",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef101"
+        },
+        {
+          "from": "0x0005c60a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef100"
+        },
+        {
+          "from": "0x0005c60c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef0ff"
+        },
+        {
+          "from": "0x0005c60e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef186"
+        },
+        {
+          "from": "0x0005c616",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef131"
+        },
+        {
+          "from": "0x0005c618",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef130"
+        },
+        {
+          "from": "0x0005c61a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef12f"
+        },
+        {
+          "from": "0x0005c61c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef12e"
+        },
+        {
+          "from": "0x0005c61e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef12d"
+        },
+        {
+          "from": "0x0005c620",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef12c"
+        },
+        {
+          "from": "0x0005c622",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef12b"
+        },
+        {
+          "from": "0x0005c624",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef12a"
+        },
+        {
+          "from": "0x0005c626",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef129"
+        },
+        {
+          "from": "0x0005c628",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef128"
+        },
+        {
+          "from": "0x0005c62a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef127"
+        },
+        {
+          "from": "0x0005c62c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef126"
+        },
+        {
+          "from": "0x0005c62e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef125"
+        },
+        {
+          "from": "0x0005c630",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef124"
+        },
+        {
+          "from": "0x0005c632",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef123"
+        },
+        {
+          "from": "0x0005c634",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef122"
+        },
+        {
+          "from": "0x0005c636",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef121"
+        },
+        {
+          "from": "0x0005c638",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef120"
+        },
+        {
+          "from": "0x0005c63a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef11f"
+        },
+        {
+          "from": "0x0005c63c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef11e"
+        },
+        {
+          "from": "0x0005c63e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef11d"
+        },
+        {
+          "from": "0x0005c648",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef14a"
+        },
+        {
+          "from": "0x0005c64a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef149"
+        },
+        {
+          "from": "0x0005c64c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef148"
+        },
+        {
+          "from": "0x0005c64e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef147"
+        },
+        {
+          "from": "0x0005c650",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef146"
+        },
+        {
+          "from": "0x0005c652",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1fe"
+        },
+        {
+          "from": "0x0005c654",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef145"
+        },
+        {
+          "from": "0x0005c656",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef144"
+        },
+        {
+          "from": "0x0005c658",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef143"
+        },
+        {
+          "from": "0x0005c65a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef142"
+        },
+        {
+          "from": "0x0005c65c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef141"
+        },
+        {
+          "from": "0x0005c65e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef140"
+        },
+        {
+          "from": "0x0005c660",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef13f"
+        },
+        {
+          "from": "0x0005c662",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef13e"
+        },
+        {
+          "from": "0x0005c664",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef13d"
+        },
+        {
+          "from": "0x0005c666",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef13c"
+        },
+        {
+          "from": "0x0005c668",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef13b"
+        },
+        {
+          "from": "0x0005c66a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef13a"
+        },
+        {
+          "from": "0x0005c66c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef139"
+        },
+        {
+          "from": "0x0005c66e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef138"
+        },
+        {
+          "from": "0x0005c670",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef137"
+        },
+        {
+          "from": "0x0005c672",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef136"
+        },
+        {
+          "from": "0x0005c674",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef135"
+        },
+        {
+          "from": "0x0005c676",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef134"
+        },
+        {
+          "from": "0x0005c678",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef133"
+        },
+        {
+          "from": "0x0005c67a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef132"
+        },
+        {
+          "from": "0x0005c67c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1fc"
+        },
+        {
+          "from": "0x0005c67e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef1fa"
+        },
+        {
+          "from": "0x0005c680",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef14b"
+        },
+        {
+          "from": "0x0005c686",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef14c"
+        },
+        {
+          "from": "0x0005c688",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef14d"
+        },
+        {
+          "from": "0x0005c68a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef14e"
+        },
+        {
+          "from": "0x0005c68c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef14f"
+        },
+        {
+          "from": "0x0005c68e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef150"
+        },
+        {
+          "from": "0x0005c690",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef151"
+        },
+        {
+          "from": "0x0005c692",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef152"
+        },
+        {
+          "from": "0x0005c694",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef153"
+        },
+        {
+          "from": "0x0005c696",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef200"
+        },
+        {
+          "from": "0x0005c698",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef154"
+        },
+        {
+          "from": "0x0005c69a",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef155"
+        },
+        {
+          "from": "0x0005c69c",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef156"
+        },
+        {
+          "from": "0x0005c69e",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef157"
+        },
+        {
+          "from": "0x0005c6a0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef158"
+        },
+        {
+          "from": "0x0005c6a2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef159"
+        },
+        {
+          "from": "0x0005c6a4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef15a"
+        },
+        {
+          "from": "0x0005c6a6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef15b"
+        },
+        {
+          "from": "0x0005c6a8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef15c"
+        },
+        {
+          "from": "0x0005c6aa",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef15d"
+        },
+        {
+          "from": "0x0005c6ac",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef15e"
+        },
+        {
+          "from": "0x0005c6ae",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef15f"
+        },
+        {
+          "from": "0x0005c6b2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef160"
+        },
+        {
+          "from": "0x0005c6b4",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef161"
+        },
+        {
+          "from": "0x0005c6b6",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef162"
+        },
+        {
+          "from": "0x0005c6b8",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef163"
+        },
+        {
+          "from": "0x0005c6ba",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef164"
+        },
+        {
+          "from": "0x0005c6bc",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef165"
+        },
+        {
+          "from": "0x0005c6be",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef166"
+        },
+        {
+          "from": "0x0005c6c0",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef167"
+        },
+        {
+          "from": "0x0005c6c2",
+          "kind": "WRITE",
+          "region": "ef_snapshot",
+          "to": "0xfebef168"
+        }
+      ],
+      "0x000bf33e": [
+        {
+          "from": "0x000bf342",
+          "kind": "READ",
+          "region": "control_snapshot",
+          "to": "0xfebeac58"
+        },
+        {
+          "from": "0x000bf34a",
+          "kind": "READ",
+          "region": "control_snapshot",
+          "to": "0xfebeac56"
+        },
+        {
+          "from": "0x000bf350",
+          "kind": "READ",
+          "region": "control_snapshot",
+          "to": "0xfebeac54"
+        },
+        {
+          "from": "0x000bf356",
+          "kind": "READ",
+          "region": "control_snapshot",
+          "to": "0xfebeac70"
+        },
+        {
+          "from": "0x000bf35c",
+          "kind": "READ",
+          "region": "control_snapshot",
+          "to": "0xfebeac2d"
+        },
+        {
+          "from": "0x000bf362",
+          "kind": "READ",
+          "region": "control_snapshot",
+          "to": "0xfebeac76"
+        },
+        {
+          "from": "0x000bf368",
+          "kind": "READ",
+          "region": "control_snapshot",
+          "to": "0xfebeac7a"
+        },
+        {
+          "from": "0x000bf374",
+          "kind": "READ",
+          "region": "control_snapshot",
+          "to": "0xfebeac39"
+        },
+        {
+          "from": "0x000bf37e",
+          "kind": "READ",
+          "region": "control_snapshot",
+          "to": "0xfebeac7e"
+        },
+        {
+          "from": "0x000bf386",
+          "kind": "READ",
+          "region": "control_snapshot",
+          "to": "0xfebeac3e"
+        }
+      ]
+    },
+    "regions": {
+      "com_staging": [
+        "0xFEBE7F00",
+        "0xFEBE80E0"
+      ],
+      "control_snapshot": [
+        "0xFEBEAC00",
+        "0xFEBEAFFF"
+      ],
+      "ef_snapshot": [
+        "0xFEBEF000",
+        "0xFEBEF200"
+      ]
+    }
+  },
+  "command_current_chain": {
+    "classification": "internal current-control state (measured speed + flash calibration + current-limit envelope); no COM/CAN read anywhere in the chain",
+    "steps": [
+      "DID 0x1152 (0x0004e3d0): signed16((FEBE6724 * 100) / 0x80); DID 0x1154: FEBE6726",
+      "0x0005d12c mirror: FEBE6724 = FEBE6D84, FEBE6726 = FEBE6D86",
+      "0x00037f16: FEBE6D84 = FEBE6DD6, FEBE6D86 = FEBE6DC8",
+      "0x000384d8/0x00038396: field-weakening piecewise clamp (tables via DAT_000210e0, speed FEBE6E0A) of FEBE6DC8 = 0x0003835e clamp of envelope FEBE6DEC"
+    ]
+  },
+  "command_torque_chain": {
+    "classification": "internal control state whose sole external input is the already-proved protected B6 target-angle ingress",
+    "steps": [
+      "DID 0x1C02 (0x0004e7d6): signed16(((FEBE6772 * FEBEE8A6)/0x2000)*100/0x100)",
+      "0x0005d5e0 mirror: FEBE6772 = FEBEE40A",
+      "0x000bf33e: FEBEE40A = FEBEAC56 (the VAR-065-verified B6-selected internal command cone)"
+    ]
+  },
+  "conclusion": "The D5/snapshot/group-input path carries only (a) hardware/peripheral-fed shared-memory acquisition (DMAC rings + serial torque-sensor interface + ADC scan config), (b) internal control state (current loop, field weakening, angle integrator, rotation math), (c) the protected-B6-derived command-torque terminal, and (d) structural constants (invalid markers, zeroed error words). No generated COM/CAN value and no second-CAN route enters these cells; with controller-1 B6 absent this snapshot surface cannot carry hidden lateral command/state.",
+  "did_export_callbacks": {
+    "0x1035 steering_wheel_torque": "0x0004db70",
+    "0x1091 torque_sensor_1_output": "0x0004dd62",
+    "0x1152 command_value_current_q": "0x0004e3d0",
+    "0x1154 command_value_current_2_d": "0x0004e448",
+    "0x1c02 command_value_torque": "0x0004e7d6"
+  },
+  "driver": {
+    "mirrors": [
+      "0x0005d12c",
+      "0x0005d5e0",
+      "0x0005d6dc"
+    ],
+    "note": "0x58B5E gates the mirror pass behind a 0xA55A-magic checksummed block and a counter/inverse-counter handshake; 0x58B1A switches a data selector before each mirror.",
+    "periodic_task": "0x00058b5e",
+    "post_mirror_calls": [
+      "0x000fdc64",
+      "0x000fdc78",
+      "0x000fdc8c"
+    ],
+    "selector_driver": "0x00058b1a",
+    "selector_values": [
+      "0xffc0",
+      "0xff80",
+      "0xff00"
+    ]
+  },
+  "driver_torque_chain": {
+    "steps": [
+      "0x0004845e/0x0004849a/0x000484d2 -> FEBE7DEA (computed steering-wheel torque)",
+      "0x00048684: FEBE7E0C = FEBE6870 or FEBE7DEA (mode-dependent)",
+      "0x0005d5e0 mirror: FEBE66A8 = FEBE7E0C",
+      "DID 0x1035 (0x0004db70): signed16((FEBE66A8 * 1000) / 0x100), gated on FEBE6AF0 == 0xA55A5AA5"
+    ],
+    "torque_sensor_outputs": "DID 0x1091..0x1094 (0x0004dd62 family): signed16((FEBE64F2.. * 1000) / 0x100), mirrors of FEBE7DEC/7DEE/7DF0/7DF2"
+  },
+  "four_sensor_decode": {
+    "decode": "0x000484f0: FEBE7DFC = FEBE81E6 - FEBE6AD2 (zero point), x flash gains 0x30E54/0x30E56 /0x800, /2 -> FEBE7DEC/7DEE/7DF0/7DF2 plus main-sub diffs FEBE7DF4/7DF6",
+    "mode_select": "0x0004845e selects main/sub/difference from FEBE71EC bits 5-6",
+    "raw_origin": "0x00062b32 -> 0x00060c60 reads hardware comm entries at FEEF90FC/FEEF910C (12-bit value pairs + 4-bit counter + status)",
+    "raw_staging": "0x00050a52/0x00050a9a: FEBE81E6/81E8 <- FEBE5F02/5F04, FEBE81EA/81EC <- FEBE5F0A/5F0C with per-channel validity bytes"
+  },
+  "group_input_api": {
+    "accessors": {
+      "0x00060630": {
+        "entries": 80,
+        "table": "0xFEEF80A0"
+      },
+      "0x00060676": {
+        "entries": 432,
+        "table": "0xFEEF81E0"
+      },
+      "0x000606da": {
+        "entries": 96,
+        "table": "0xFEEF88A0"
+      },
+      "0x00060720": {
+        "entries": 432,
+        "table": "0xFEEF8A20"
+      }
+    },
+    "d5_channels": {
+      "0x620fe": 0,
+      "0x6213e": 8,
+      "0x62a86/0x62af4": 14
+    },
+    "descriptor_block": "FEBE3C00 + idx*0x40, 16 channels",
+    "entry_semantics": "value = (entry & 0x7ff8) << 1; consume clears low halfword (ack)",
+    "fill_count_getter": "0x00060940 (reads seq@+0x18 vs base@+0x08)",
+    "ring_base_map": "0x000620dc (ring size 0x1b0)",
+    "ring_layout": "contiguous FEEF80A0..FEEF90E0 followed by head counters FEEF90E0..FEEF90F4 and per-channel comm-entry blocks FEEF90F8..FEEF912B"
+  },
+  "ring_producers": {
+    "application_code_writers": [
+      "0x0005fa3a",
+      "0x0005fa84",
+      "0x00060aa8"
+    ],
+    "classification": "No application-code writer posts fresh ring/FIFO payloads: every direct writer in the zone is init zeroing/marker seeding or the consume-side ack clear. Producers are hardware/peripheral (DMAC) feeds into shared GlobalRAM. The channel initializer 0x6082C programs 0x40-stride channel descriptors and DMAC primary/secondary trigger-select SFRs; ADCG0/ADCG1 scan, CSIH1 serial, and CRC0/CRC1 unit config appear in the same driver family. Exact per-channel trigger identity beyond this evidence is bounded, not asserted.",
+    "consume_ack_only": [
+      "0x00060c60"
+    ],
+    "init_zeroing": [
+      "0x0005fa3a",
+      "0x0005fa84",
+      "0x00060aa8"
+    ],
+    "runtime_application_producers": [],
+    "sfr_evidence": {
+      "0x0005fafe": {
+        "named_sfr": [
+          "ADCG0VCR00 (ADCG0 virtual channel register 00)",
+          "ADCG1VCR00 (ADCG1 virtual channel register 00)"
+        ],
+        "raw_hits": [
+          "0xFFF89110",
+          "0xFFF91340",
+          "0xFFF91384",
+          "0xFFF91398",
+          "0xFFF913C0",
+          "0xFFF913C8",
+          "0xFFF91800",
+          "0xFFF92340",
+          "0xFFF92384",
+          "0xFFF92398",
+          "0xFFF923C0",
+          "0xFFF923C8",
+          "0xFFF92800"
+        ],
+        "role": "ADCG0/ADCG1 scan config"
+      },
+      "0x0006082c": {
+        "named_sfr": [
+          "DMACTRGSEL0 (DMAC primary/secondary select 0)",
+          "DMACTRGSEL1 (DMAC primary/secondary select 1)"
+        ],
+        "raw_hits": [
+          "0xFFF99000",
+          "0xFFF99004"
+        ],
+        "role": "channel descriptor initializer"
+      },
+      "0x000611fa": {
+        "named_sfr": [
+          "DCRA0CIN (CRC0 input register)"
+        ],
+        "raw_hits": [
+          "0xFFD50000",
+          "0xFFD50004",
+          "0xFFD50020"
+        ],
+        "role": "CRC unit A"
+      },
+      "0x00061260": {
+        "named_sfr": [
+          "CSIH1CTL0 (clocked serial H ch1 control 0)",
+          "CSIH1MCTL1 (clocked serial H ch1 memory control 1)"
+        ],
+        "raw_hits": [
+          "0xFFD82000",
+          "0xFFD82008",
+          "0xFFD82010",
+          "0xFFD82014",
+          "0xFFD83018",
+          "0xFFD83040",
+          "0xFFD83044",
+          "0xFFD83048",
+          "0xFFD8304C",
+          "0xFFD83050",
+          "0xFFD83054",
+          "0xFFD83058",
+          "0xFFD8305C",
+          "0xFFD83060",
+          "0xFFD83068",
+          "0xFFD8306C",
+          "0xFFD83070",
+          "0xFFD83074"
+        ],
+        "role": "serial driver A"
+      },
+      "0x000612dc": {
+        "named_sfr": [],
+        "raw_hits": [],
+        "role": "serial driver B"
+      },
+      "0x0006378c": {
+        "named_sfr": [
+          "DCRA1CIN (CRC1 input register)"
+        ],
+        "raw_hits": [
+          "0xFFD51000",
+          "0xFFD51004",
+          "0xFFD51020"
+        ],
+        "role": "CRC unit B"
+      }
+    },
+    "sfr_name_source": "R01UH0585EJ0120 Rev.1.20 (RH850/P1M-E User's Manual: Hardware)",
+    "zone": [
+      "0xFEEF80A0",
+      "0xFEEF9130"
+    ]
+  },
+  "schema": "camry-8965f3307000-d5-snapshot-provenance-v1",
+  "single_can_controller": {
+    "conclusion": "A second CAN controller does not exist on this MCU; combined with the VAR-065 47-rule exhaustion of the single controller's acceptance surface, no second-CAN ingress route can feed the D5 path.",
+    "mcu": "R7F701381 (RH850/P1M-E)",
+    "rscfd0_base": "0xFFD20000",
+    "source": "R01UH0585EJ0120 Rev.1.20 (RH850/P1M-E User's Manual: Hardware), section 17: 'RSCFDn (n = 0)' -- exactly one RS-CANFD unit"
+  },
+  "sources": {
+    "corpus": "data/generated/camry-8965F3307000/decompilations.jsonl",
+    "corpus_sha256": "f33efdbecac7d2d8ee8589ae8492d828451f5f1523aa43c72f672597c77fa8d1",
+    "image": "firmware/camry-8965F3307000/CodeFlash.bin"
+  },
+  "staging": {
+    "classification": {
+      "0x00050b6a": "copies acquisition block FEBE5EC8..5EDE (group-input getter 0x6217e output) into FEBE822C..8242",
+      "0x00050bbc": "copies torque-sensor records FEBE5F12..5F30 into FEBE8244..825E with x4 scaling on FEBE824C/824E/8250/8252",
+      "0x00050c38": "zero-fill of FEBE8260..8263 (error-words slot, no data payload)",
+      "0x00058c9a": "init/reset only: seeds FEBE822C..8242 with invalid marker 0x8000 and constants (closes VAR-071's bounded second-staging-writer question)",
+      "0x00059448": "snapshot distributor: staging -> freeze buffer FEBE5Cxx and working cells; its FEBE7Fxx references are WRITEs only"
+    },
+    "copy_edges": {
+      "0x00050b6a": [
+        [
+          "0xFEBE8238",
+          "0xFEBE5EC8"
+        ],
+        [
+          "0xFEBE823A",
+          "0xFEBE5ECA"
+        ],
+        [
+          "0xFEBE823C",
+          "0xFEBE5ECC"
+        ],
+        [
+          "0xFEBE822C",
+          "0xFEBE5ED4"
+        ],
+        [
+          "0xFEBE822E",
+          "0xFEBE5ED6"
+        ],
+        [
+          "0xFEBE8230",
+          "0xFEBE5ED8"
+        ],
+        [
+          "0xFEBE823E",
+          "0xFEBE5ECE"
+        ],
+        [
+          "0xFEBE8240",
+          "0xFEBE5ED0"
+        ],
+        [
+          "0xFEBE8242",
+          "0xFEBE5ED2"
+        ],
+        [
+          "0xFEBE8232",
+          "0xFEBE5EDA"
+        ],
+        [
+          "0xFEBE8234",
+          "0xFEBE5EDC"
+        ],
+        [
+          "0xFEBE8236",
+          "0xFEBE5EDE"
+        ]
+      ],
+      "0x00050bbc": [
+        [
+          "0xFEBE824C",
+          "0xFEBE5F12"
+        ],
+        [
+          "0xFEBE824E",
+          "0xFEBE5F14"
+        ],
+        [
+          "0xFEBE8254",
+          "0xFEBE5F16"
+        ],
+        [
+          "0xFEBE8244",
+          "0xFEBE5F29"
+        ],
+        [
+          "0xFEBE8246",
+          "0xFEBE5F2A"
+        ],
+        [
+          "0xFEBE8248",
+          "0xFEBE5F2B"
+        ],
+        [
+          "0xFEBE824A",
+          "0xFEBE5F2C"
+        ],
+        [
+          "0xFEBE8258",
+          "0xFEBE5F18"
+        ],
+        [
+          "0xFEBE825A",
+          "0xFEBE5F1A"
+        ],
+        [
+          "0xFEBE8250",
+          "0xFEBE5F1C"
+        ],
+        [
+          "0xFEBE8252",
+          "0xFEBE5F1E"
+        ],
+        [
+          "0xFEBE8256",
+          "0xFEBE5F20"
+        ],
+        [
+          "0xFEBE8245",
+          "0xFEBE5F2D"
+        ],
+        [
+          "0xFEBE8247",
+          "0xFEBE5F2E"
+        ],
+        [
+          "0xFEBE8249",
+          "0xFEBE5F2F"
+        ],
+        [
+          "0xFEBE824B",
+          "0xFEBE5F30"
+        ],
+        [
+          "0xFEBE825C",
+          "0xFEBE5F22"
+        ],
+        [
+          "0xFEBE825E",
+          "0xFEBE5F24"
+        ]
+      ]
+    },
+    "init_marker_only_0x58c9a": true,
+    "range": [
+      "0xFEBE822C",
+      "0xFEBE8260"
+    ],
+    "readers": [
+      "0x0003e0c2",
+      "0x00042486",
+      "0x00043448",
+      "0x00047d62",
+      "0x000486d0",
+      "0x00050c58",
+      "0x00059448",
+      "0x0005c7b6",
+      "0x0005ca3a",
+      "0x0005d12c"
+    ],
+    "scaled_cells_0x50bbc": {
+      "0xFEBE824C": "x4",
+      "0xFEBE824E": "x4",
+      "0xFEBE8250": "x4",
+      "0xFEBE8252": "x4"
+    },
+    "writers": [
+      "0x00050b6a",
+      "0x00050bbc",
+      "0x00050c38",
+      "0x00058c9a",
+      "0x00059448"
+    ]
+  },
+  "structural_constants": {
+    "error_words": "FEBE8260..8263 zeroed by 0x00050c38 each pass; 0x00050c58 OR-aggregates them into FEBE8274",
+    "invalid_marker_staging": "FEBE81F4..820A is only ever written 0x8000 (0x00050b00) after init zeroing (0x00058c9a); its mirror outputs FEBE6468..647E carry the invalid marker, not data"
+  },
+  "target": {
+    "analysis_target": "camry-8965F3307000",
+    "corpus_function_count": 6065,
+    "image_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "mcu": "R7F701381 (RH850/P1M-E)",
+    "software_id": "8965F3307000"
+  },
+  "torque_sensor_serial": {
+    "config_tables": {
+      "chan_fifo_len_0x31411": [
+        20,
+        20
+      ],
+      "chan_fifo_ptrs_0x313fc": [
+        "0xFEEF8050",
+        "0xFEEF8078"
+      ],
+      "desc_channel_0x31676": [
+        "0x02",
+        "0x0A"
+      ],
+      "group_offsets_0x30f2c": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "group_offsets_0x30f34": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "image_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+      "sensor_type_0x31678": [
+        "0x00",
+        "0x11"
+      ]
+    },
+    "frame_decode": "0x00062488 (5-byte frame, 2-bit sequence check at FEBE3928, CRC verify 0x623ee, unpack 14/14/12-bit into FEBE38D0/D2/D4)",
+    "frame_fetch": "0x00061008 (per-channel 20x u16 FIFOs via flash PTR table 0x313fc)",
+    "record_pack": "0x000629a2 (two 12-byte records from FEBE38D0[i*6]; channel type 0x11 from table 0x31678 negates the 14-bit pairs)"
+  }
+}
