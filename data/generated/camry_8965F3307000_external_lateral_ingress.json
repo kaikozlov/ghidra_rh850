@@ -23,8 +23,87 @@
   "conclusion": {
     "b6": "Protected 0x0B6 remains the only positively recovered external target-steering-angle ingress and now has selected downstream corroboration to Toyota-named 0x1C02 Command Value Torque, but it is absent in both relay-correct drives.",
     "next": "Do not search another arbitrary accepted EPS CAN ID first. Synchronize the FRC 0x1601 LTA-active oracle with relay-correct CAN. If LTA is machine-proved active while B6 remains absent, move the search outside ordinary EPS generated-COM ingress: upstream FRC/Brake transformation, an internal/non-COM path, or another controller/peripheral path.",
-    "normal_com": "Among exact F33 normal generated-COM signed fields >=12 bits, the two observed non-B6 candidates are 0x0D5 monitor channels and 0x115 Engine Revolution; 0x025 is measured steering feedback; 0x1C5/0x64F are absent. The generic group receive PDUs 0x013..0x01F are also absent. No observed ordinary EPS-CAN COM field besides B6 is identified as an external steering target/command.",
+    "normal_com": "Exact controller-1 rules 0..42 equal the 43 normal generated-COM descriptors one-for-one; rules 43..46 are diagnostics/XCP only. Within that complete normal-CAN surface, the two observed non-B6 command-sized candidates are 0x0D5 monitor channels and 0x115 Engine Revolution; 0x025 is measured steering feedback; 0x1C5/0x64F are absent. The generic group receive PDUs 0x013..0x01F are also absent. No observed ordinary EPS-CAN field besides B6 is identified as an external steering target/command, and there is no hidden controller-1 acceptance ID outside the normal COM table.",
     "production_output_authorized": false
+  },
+  "controller1_acceptance": {
+    "classification": "the exact steering/diagnostic RSCFD controller-1 hardware acceptance surface contains no hidden non-COM lateral CAN ID beyond the 43 normal descriptors",
+    "count": 47,
+    "normal_rule_ids": [
+      "0x3B0",
+      "0x63B",
+      "0x624",
+      "0x63D",
+      "0x00F",
+      "0x013",
+      "0x014",
+      "0x015",
+      "0x016",
+      "0x017",
+      "0x018",
+      "0x019",
+      "0x01A",
+      "0x01B",
+      "0x01C",
+      "0x01D",
+      "0x01E",
+      "0x01F",
+      "0x0D0",
+      "0x3BF",
+      "0x127",
+      "0x115",
+      "0x116",
+      "0x1C5",
+      "0x294",
+      "0x51E",
+      "0x611",
+      "0x2D1",
+      "0x675",
+      "0x2E8",
+      "0x025",
+      "0x0AA",
+      "0x101",
+      "0x0D5",
+      "0x13B",
+      "0x090",
+      "0x0D7",
+      "0x0D8",
+      "0x64F",
+      "0x0B6",
+      "0x403",
+      "0x490",
+      "0x1DA"
+    ],
+    "normal_rule_indices": [
+      0,
+      42
+    ],
+    "normal_rules_equal_descriptor_order": true,
+    "rule_array": "0x000230B8",
+    "special_tail": [
+      {
+        "can_id": "0x7A1",
+        "role": "physical UDS",
+        "rule": 43
+      },
+      {
+        "can_id": "0x777",
+        "role": "functional UDS",
+        "rule": 44
+      },
+      {
+        "can_id": "0x7A0",
+        "role": "secondary diagnostics",
+        "rule": 45
+      },
+      {
+        "can_id": "0x7F7",
+        "packed_descriptor": "0x9FDC0002",
+        "role": "application XCP",
+        "rule": 46
+      }
+    ],
+    "start_index": 0
   },
   "live_intersection": {
     "combined_incoming_frames": 3574703,

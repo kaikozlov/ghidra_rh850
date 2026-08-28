@@ -119,6 +119,20 @@ def build() -> dict:
         rx[pdu] = {"pdu": pdu, "can_id": raw & 0x1FFFFFFF, "can_fd": bool(raw & 0x40000000), "length": length}
     need(len(rx) == 43 and rx[44] == {"pdu": 44, "can_id": 0x0B6, "can_fd": True, "length": 32}, "Rx table/B6 drift")
 
+    # Exhaust the physical steering/diagnostic RSCFD controller-1 acceptance span.
+    # Existing target-native routing proves controller 1 owns exactly rules 0..46.
+    # Rules 0..42 are the 43 normal descriptors in identical ID order; the only
+    # remaining rules are three UDS addresses and the packed standard-CAN XCP 0x7F7.
+    rule_base = 0x230B8
+    rules = [struct.unpack_from("<IIII", image, rule_base + 0x10 * i) for i in range(47)]
+    need(struct.unpack_from("<H", image, 0x22ECE)[0] == 0 and image[0x22ED0] == 47,
+         "RSCFD controller-1 receive span drift")
+    normal_rule_ids = [r[0] for r in rules[:43]]
+    descriptor_ids = [rx[p]["can_id"] for p in range(5, 48)]
+    need(normal_rule_ids == descriptor_ids, "normal Rx descriptors no longer exhaust rules 0..42")
+    need([r[0] for r in rules[43:46]] == [0x7A1, 0x777, 0x7A0], "diagnostic acceptance tail drift")
+    need(rules[46][0] == 0x9FDC0002, "packed XCP rule46 drift")
+
     # Exact scalar generated-COM calls.  Relative byte geometry comes directly from
     # signal-to-PDU + PDU-buffer-offset tables, not guessed DBC layouts.
     s2p = [struct.unpack_from("<H", image, SIGNAL_TO_PDU + 2 * i)[0] for i in range(SIGNAL_COUNT)]
@@ -236,6 +250,19 @@ def build() -> dict:
             "scalar_receive_call_count": len(scalar),
             "signed_12plus_candidates": candidates,
         },
+        "controller1_acceptance": {
+            "rule_array": "0x000230B8", "start_index": 0, "count": 47,
+            "normal_rule_indices": [0, 42],
+            "normal_rule_ids": [f"0x{x:03X}" for x in normal_rule_ids],
+            "normal_rules_equal_descriptor_order": True,
+            "special_tail": [
+                {"rule": 43, "can_id": "0x7A1", "role": "physical UDS"},
+                {"rule": 44, "can_id": "0x777", "role": "functional UDS"},
+                {"rule": 45, "can_id": "0x7A0", "role": "secondary diagnostics"},
+                {"rule": 46, "packed_descriptor": "0x9FDC0002", "can_id": "0x7F7", "role": "application XCP"},
+            ],
+            "classification": "the exact steering/diagnostic RSCFD controller-1 hardware acceptance surface contains no hidden non-COM lateral CAN ID beyond the 43 normal descriptors",
+        },
         "special_paths": {
             "0x0D5": {
                 "wire": ["signal212 signed16 B1:B2", "signal213 signed16 B3:B4"],
@@ -265,7 +292,7 @@ def build() -> dict:
         },
         "live_intersection": live,
         "conclusion": {
-            "normal_com": "Among exact F33 normal generated-COM signed fields >=12 bits, the two observed non-B6 candidates are 0x0D5 monitor channels and 0x115 Engine Revolution; 0x025 is measured steering feedback; 0x1C5/0x64F are absent. The generic group receive PDUs 0x013..0x01F are also absent. No observed ordinary EPS-CAN COM field besides B6 is identified as an external steering target/command.",
+            "normal_com": "Exact controller-1 rules 0..42 equal the 43 normal generated-COM descriptors one-for-one; rules 43..46 are diagnostics/XCP only. Within that complete normal-CAN surface, the two observed non-B6 command-sized candidates are 0x0D5 monitor channels and 0x115 Engine Revolution; 0x025 is measured steering feedback; 0x1C5/0x64F are absent. The generic group receive PDUs 0x013..0x01F are also absent. No observed ordinary EPS-CAN field besides B6 is identified as an external steering target/command, and there is no hidden controller-1 acceptance ID outside the normal COM table.",
             "b6": "Protected 0x0B6 remains the only positively recovered external target-steering-angle ingress and now has selected downstream corroboration to Toyota-named 0x1C02 Command Value Torque, but it is absent in both relay-correct drives.",
             "next": "Do not search another arbitrary accepted EPS CAN ID first. Synchronize the FRC 0x1601 LTA-active oracle with relay-correct CAN. If LTA is machine-proved active while B6 remains absent, move the search outside ordinary EPS generated-COM ingress: upstream FRC/Brake transformation, an internal/non-COM path, or another controller/peripheral path.",
             "production_output_authorized": False,

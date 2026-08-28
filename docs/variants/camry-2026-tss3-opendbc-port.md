@@ -236,8 +236,9 @@ The remaining first-actuation gates are now live, not unfinished static implemen
 
 1. resolve VAR-063/065's live discriminator: two independent moving routes totaling
    3,574,703 incoming frames / 19 segments still have zero B6 while protected `00F/D7`
-   remain healthy, and the exact-F33 inverse audit finds no observed ordinary generated-
-   COM steering-command alternative (`0x115` is Engine Revolution; `0x0D5` is monitor/
+   remain healthy, and the exact-F33 controller-1 rule span is fully exhausted with no
+   hidden direct-CAN ID outside the normal COM table; that inverse audit also finds no
+   observed ordinary generated-COM steering-command alternative (`0x115` is Engine Revolution; `0x0D5` is monitor/
    plausibility; `0x025` is feedback; command-sized `0x1C5/0x64F` and group `0x013..0x01F`
    are absent). Synchronize FRC P5 DID `0x1601` (`LTA Control Condition`) with relay-
    correct CAN. If active LTA is proved while B6 remains absent, move to FRC/Brake

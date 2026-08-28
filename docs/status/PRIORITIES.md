@@ -258,8 +258,10 @@ from representation clamps. Canonical port report:
 [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md).
 
 **VAR-065 inverse-ingress update:** do not spend the next pass guessing another ordinary
-EPS CAN command. Exact F33 has only nine signed generated-COM fields >=12 bits. The
-observed non-B6 candidates are now closed: `0x025` is measured angle/rate feedback;
+EPS CAN command. Exact controller-1 acceptance itself is exhausted: rules 0..42 equal
+the 43 normal COM descriptors and the only tail is `7A1/777/7A0/7F7` diagnostics/XCP.
+Within that complete normal surface F33 has only nine signed generated-COM fields >=12
+bits. The observed non-B6 candidates are now closed: `0x025` is measured angle/rate feedback;
 `0x115` terminates at current-GTS+ DID1032 **Engine Revolution**; the two `0x0D5`
 signed16 fields terminate in disabled/unpopulated threshold-monitor events and are tiny/
 zero live. `0x1C5` and `0x64F` are absent, and the generic group receive surface maps only

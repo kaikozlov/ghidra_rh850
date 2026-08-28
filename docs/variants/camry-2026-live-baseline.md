@@ -1133,11 +1133,18 @@ table at `0x21FE8`, all **116** scalar `FUN_0007D12A` receive extractions, the
 signal-to-PDU and PDU-offset tables, the GP-relative `0x58074 -> 0xBCD66` staging/snapshot
 maps, current GTS+ names, and both retained drives.
 
-The command-sized candidate set is small. Exact F33 has only nine signed generated-COM
-fields at least 12 bits wide: `0x025` signals 187/189, B6 signal262, `0x0D5`
-signals212/213, `0x115` signal134, `0x1C5` signal141, and `0x64F` signals255/257.
-The intersection closes every observed non-B6 candidate without assigning semantics from
-correlation alone:
+The hardware acceptance denominator is also exact, not inferred from the COM table.
+RSCFD controller 1 owns exactly 47 rules at `0x230B8`: rules **0..42** match the 43
+normal Rx descriptors one-for-one and in the same arbitration-ID order; rules 43..45 are
+only physical/functional/secondary diagnostics `0x7A1/0x777/0x7A0`; rule 46 is packed
+application XCP `0x7F7`. Thus there is no hidden direct CAN acceptance ID on the exact
+steering/diagnostic controller outside the normal-COM denominator.
+
+The command-sized candidate set inside that complete normal surface is small. Exact F33
+has only nine signed generated-COM fields at least 12 bits wide: `0x025` signals 187/189,
+B6 signal262, `0x0D5` signals212/213, `0x115` signal134, `0x1C5` signal141, and
+`0x64F` signals255/257. The intersection closes every observed non-B6 candidate without
+assigning semantics from correlation alone:
 
 - `0x025` signal187 is the already-proved **Steering Angle** feedback and signal189 is
   **Steering Angle Velocity**; they are measured-state inputs, not a command target.
@@ -1171,7 +1178,8 @@ not merely a width/name inference: it is a positive code path from the already-p
 target-angle state toward Toyota's named steering-command observable.
 
 Therefore **no observed ordinary EPS generated-COM field other than B6 is identified as
-an external steering target/command**. This does not prove that stock LTA was active in
+an external steering target/command**, and controller-1 hardware acceptance contains no
+extra direct-CAN candidate outside that COM surface. This does not prove that stock LTA was active in
 §16, and it does not exclude DMA/peripheral mutation, diagnostic/debug paths, computed
 aliases outside the recovered maps, or another internal controller path. The separate
 bus-1 `0x180..0x18C` CAN-FD family remains a plausible *upstream* FRC/Brake planning or

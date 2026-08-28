@@ -29,6 +29,9 @@ with tempfile.TemporaryDirectory() as td:
 art = json.loads(ART.read_text())
 check("schema/target exact", art["schema"] == "camry-8965f3307000-external-lateral-ingress-v1" and art["target"]["software_id"] == "8965F3307000" and art["target"]["corpus_function_count"] == 6065)
 check("normal Rx/scalar census exact", art["normal_rx"]["descriptor_count"] == 43 and art["normal_rx"]["scalar_receive_call_count"] == 116)
+ctrl = art["controller1_acceptance"]
+check("controller1 acceptance span is exhausted", ctrl["count"] == 47 and ctrl["normal_rule_indices"] == [0,42] and ctrl["normal_rules_equal_descriptor_order"] is True)
+check("only diagnostic/XCP rules follow normal COM", [(x.get("can_id"), x["role"]) for x in ctrl["special_tail"]] == [("0x7A1","physical UDS"),("0x777","functional UDS"),("0x7A0","secondary diagnostics"),("0x7F7","application XCP")])
 
 cands = {(x["can_id"], x["signal"]): x for x in art["normal_rx"]["signed_12plus_candidates"]}
 check("signed >=12-bit ingress set exact", set(cands) == {(0x025,187),(0x025,189),(0x0B6,262),(0x0D5,212),(0x0D5,213),(0x115,134),(0x1C5,141),(0x64F,255),(0x64F,257)})
@@ -46,7 +49,7 @@ check("D5 second signed16 is identically zero", live["d5_signed16_b3_b4"] == {"c
 check("115 engine-revolution field is dynamically populated", live["id115_signed16_b0_b1"]["count"] == 47384 and live["id115_signed16_b0_b1"]["max"] == 2884 and live["id115_signed16_b0_b1"]["unique"] > 1000)
 check("generic group receive surface is absent live", art["special_paths"]["generic_group_receive"]["can_ids"] == [f"0x{x:03X}" for x in range(0x13,0x20)] and art["special_paths"]["generic_group_receive"]["live_total"] == 0)
 check("B6 reaches Toyota-named command torque", art["b6_to_command_torque"]["gtsplus_terminal"] == "0x1C02 Command Value Torque")
-check("normal-COM conclusion is bounded", "No observed ordinary EPS-CAN COM field besides B6" in art["conclusion"]["normal_com"] and "does not prove" in art["boundary"][1])
+check("normal-COM conclusion is bounded", "No observed ordinary EPS-CAN field besides B6" in art["conclusion"]["normal_com"] and "does not prove" in art["boundary"][1])
 check("production output remains disabled", art["conclusion"]["production_output_authorized"] is False)
 
 print(f"\nResults: {passed} passed, {failed} failed")
