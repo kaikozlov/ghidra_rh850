@@ -129,6 +129,34 @@ check(
     },
     "command plan partitions Hybrid role 0x06 into 29 DID-backed direct and 10 RID-backed routine candidates",
 )
+hybrid_init_plan = gts_cli._master_command_plan(
+    parser, master, hybrid, 0x08, gts / "bin", db_root, 0x01, strings
+)
+hybrid_init_selected = hybrid_init_plan["active_test_init_model"]["selected_plan"]
+check(
+    hybrid_init_plan["plugin"] == "GetActTstInitP5_DT.dll"
+    and hybrid_init_plan["operation_surface"] == "direct_transport"
+    and hybrid_init_plan["semantic_status"] == "exact_plugin_identity_and_selected_active_test_plan"
+    and hybrid_init_selected["selected_test"]["name"] == "Activate the Inverter Water Pump"
+    and hybrid_init_selected["selected_test"]["initial_read_did"] == 0x2801
+    and hybrid_init_selected["selected_test"]["bit_start"] == 15
+    and hybrid_init_selected["selected_test"]["bit_end"] == 15
+    and hybrid_init_selected["initial_transaction"]["selector"] == "0xCA"
+    and hybrid_init_selected["initial_transaction"]["base_frame"]["send"]["bytes"] == "22ffff"
+    and hybrid_init_selected["initial_transaction"]["materialized_send"] == "222801"
+    and hybrid_init_selected["initial_transaction"]["receive_check"] == "62"
+    and hybrid_init_selected["linked_monitor"]["monitor_key"] == 30
+    and hybrid_init_selected["linked_monitor"]["monitor"]["name"] == "Inverter Water Pump"
+    and hybrid_init_selected["linked_monitor"]["monitor"]["signal_info"]["pattern_display"] == {0: "OFF", 1: "ON"},
+    "command plan materializes Hybrid role 0x08 Active Test 1 into 222801/62 and its linked monitor metadata",
+)
+try:
+    gts_cli._master_command_plan(parser, master, hybrid, 0x08, gts / "bin", db_root, 0xFFFF, strings)
+except ValueError as exc:
+    check("resolved 0 type-68 rows" in str(exc), "role 0x08 selected-test planner fails closed for an unknown direct Active Test ID")
+else:
+    raise AssertionError("role 0x08 selected-test planner accepted an unknown Active Test ID")
+
 emps_monitor_plan = gts_cli._master_command_plan(parser, master, emps_category, 0x05, gts / "bin", db_root)
 check(
     emps_monitor_plan["plugin"] == "GetDatMonListP5_DT.dll"

@@ -397,9 +397,85 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
     clear = bin_root / "DelDiagCodeP4.dll"
     monitor_list = bin_root / "GetDatMonListP5_DT.dll"
     active_test_list = bin_root / "GetActTstListP5_DT.dll"
+    active_test_init = bin_root / "GetActTstInitP5_DT.dll"
     signal_info = bin_root / "GetDatMonSignalInfoP5_DT.dll"
     kgp = bin_root / "KgpDataCtrl.dll"
     return {
+        "role_0x08_p5_active_test_init": {
+            "plugin": file_identity(active_test_init, gts_root),
+            "example_binding": dll_binding(parser, master, 397, 0x08),
+            "example_frame": resolve_frame(parser, master, 397, 0xCA, variable_namespace_base=0x2710),
+            "init_model": {
+                "purpose": "initialize one selected direct P5 Active Test from its type-68 record, optional initial RDBI value, linked Data Monitor, and presentation metadata",
+                "selected_test_table": {"table": 68, "class": ECU_TABLE_CLASS_NAMES[68], "record_size": 64},
+                "selected_test_fields": {
+                    "name_string_index": "u32 +0x0C",
+                    "active_test_id": "u16 +0x20",
+                    "physical_data_key": "u16 +0x24",
+                    "active_test_pattern_key": "u16 +0x26",
+                    "bit_start": "u16 +0x28",
+                    "bit_end": "u16 +0x2A",
+                    "sort_key": "u16 +0x2C",
+                    "exception_id": "u16 +0x2E",
+                    "panel_key_0": "u16 +0x30",
+                    "panel_key_1": "u16 +0x32",
+                    "initial_read_did": "u16 +0x34",
+                    "direct_monitor_key": "u16 +0x36",
+                    "initial_read_mode": "u8 +0x39",
+                    "pattern": "u8 +0x3A -> initialized output m_byPattern",
+                    "exception_flag": "u8 +0x3B",
+                    "panel_check_mode": "u8 +0x3C",
+                    "monitor_link_mode": "u8 +0x3D",
+                },
+                "initial_read": {
+                    "mode_0": "resolve selector 0xCA with GetCommFrmInfo, overwrite request byte indexes 1/2 with initial_read_did high/low, then CommCacheSndRcvExt",
+                    "mode_1": "skip the initial selector-0xCA transaction and continue initialization",
+                    "other_modes": "rejected by the plugin as C0040102",
+                    "selector": "0xCA",
+                    "base_request": "22ffff",
+                    "base_positive_check": "62",
+                    "response_extraction": "bit_start/bit_end from +0x28/+0x2A select the initial value from the returned data",
+                },
+                "panel_gate": {
+                    "mode_0": "no panel-key helper",
+                    "mode_1_or_3": "evaluate panel_key_0 (+0x30)",
+                    "mode_2": "evaluate panel_key_1 (+0x32)",
+                    "helper": "initialization helper ultimately uses CCommCachePlusP5::CheckSupportPanel for pattern/display entries",
+                },
+                "linked_monitor": {
+                    "mode_1": "copy direct_monitor_key (+0x36) to initialized output",
+                    "other_modes": "scan the generation-selected Data Monitor table for a row with flag 0x40 and matching initial_read_did/bit_start/bit_end, then copy that monitor row's u16 +0x34 key",
+                    "normal_table": 62,
+                    "generation_0x60_table": 157,
+                    "current_monitor_match_fields": {
+                        "flag": "+0x30 & 0x40",
+                        "monitor_key": "u16 +0x34",
+                        "bit_start": "u16 +0x3C",
+                        "bit_end": "u16 +0x3E",
+                        "did": "u16 +0x46",
+                    },
+                },
+                "presentation": {
+                    "active_test_pattern_table": {"table": 12, "class": ECU_TABLE_CLASS_NAMES[12]},
+                    "physical_data_table": {"table": 13, "class": ECU_TABLE_CLASS_NAMES[13]},
+                    "pattern_display_table": {"table": 14, "class": ECU_TABLE_CLASS_NAMES[14]},
+                    "unit_table": {"table": 15, "class": ECU_TABLE_CLASS_NAMES[15]},
+                    "outputs": ["id", "name", "short name", "unit", "button size", "pattern", "key operation pattern", "key-invalid flag", "maintenance time", "display-info list", "physical conversion"],
+                },
+                "runtime_boundary": "this profile reconstructs deterministic DB-to-command initialization; whether a test is offered still depends on role-0x06 DID/RID support state, and panel support may require live/cache state",
+            },
+            "anchors": {
+                "selected_type68_lookup": anchor(active_test_init, 0x100012E5, "8b078b57108b481c0fb7402050518d8508ffffff5068440200008d8acc000000ff15b05000108bf085f60f85ee0800006639850cffffff7f29689051"),
+                "initial_read_mode": anchor(active_test_init, 0x10001353, "8b018b108b70048995e8feffff8b50080fb6403989b5f4feffff8995f0feffff83e800743b83e8017425689051001068a70100006898510010684c520010680201"),
+                "selector_ca_fields": anchor(active_test_init, 0x10001CA9, "8b4610ff750c0fbfcf8b04880fb74834894dd40fb748280fb7402a8945d08d45d85052894dc08bcb68ca000000ff15185000108bf085f6"),
+                "selector_ca_did_injection_and_send": anchor(active_test_init, 0x10001D37, "8b5dd48d4f306a01c1eb08ff155c5000106a028d4f30885808ff155c5000108b4dd46a00578848088b4dccff15145000108bf085"),
+                "panel_check_mode": anchor(active_test_init, 0x10001556, "8b118a423c8885fffeffff84c00f84800000003c0174293c02747c3c037421689051001068af0000006898510010be020104c0684c52001056ffd3e96a0600008b8decfeffff8d8504ffffff508d85f8feffff500fb742305057e89b0b0000"),
+                "linked_monitor_mode": anchor(active_test_init, 0x10001674, "80783d010f84130200008d4dd4ff15ec5000108b078b4f108b35b450001081c1cc000000c645fc04ff701c8d45d4506810010000ffd685c07529663b45d87c33a164500010689051001068ec0000006898510010684c52001068010104c0ffd083c4148d"),
+                "presentation_pattern": anchor(active_test_init, 0x1000273F, "8b000fb74828898d24ffffff0fb7482a0fb740265052898d28ffffff8d8538ffffff8b4e105081c1cc000000680c020000ff15b05000108bf085f60f851c0300006683bd3cffffff010f8c4d0100008b"),
+                "physical_unit_conversion": anchor(active_test_init, 0x100028EF, "0fb7402450ffb530ffffff8d854cffffff50680d020000ff15b05000108bf085f60f8586010000668b8d50ffffff8b955cffffff6683f9017c4c8b020fb640158887800000008b028b008987900000008b028b40048987940000"),
+                "output_fields": anchor(active_test_init, 0x10001953, "0fb6436483c4505068500100006898510010685c53001056ffd70fb643655068510100006898510010689c53001056ffd70fb64366506852010000689851001068d453001056ffd70fb683e00000005068530100006898510010681054001056ffd70fb7"),
+            },
+        },
         "role_0x06_p5_active_test_list": {
             "plugin": file_identity(active_test_list, gts_root),
             "example_binding": dll_binding(parser, master, 397, 0x06),

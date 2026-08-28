@@ -625,6 +625,150 @@ def _active_test_list_category_plan(parser: DDBParser, category: dict[str, Any],
     }
 
 
+def _active_test_init_selected_plan(
+    parser: DDBParser,
+    master: Any,
+    category: dict[str, Any],
+    db_root: Path,
+    active_test_id: int,
+    strings: StringDataBase | None = None,
+) -> dict[str, Any]:
+    db_path = db_root / str(category["database"])
+    db = parser.parse_ecu_db(db_path)
+    section = db.sections.get(68)
+    if section is None:
+        raise ValueError(f"{db_path.name}: selected role-0x08 Active Test table 68 is absent")
+    if section.decoded_record_size != 64:
+        raise ValueError(f"{db_path.name}: type-68 record size {section.decoded_record_size}, expected 64")
+    matches = []
+    for index in range(section.header.record_count):
+        raw = section.decoded_data[index * 64 : (index + 1) * 64]
+        if struct.unpack_from("<H", raw, 0x20)[0] == active_test_id:
+            matches.append((index, raw))
+    if len(matches) != 1:
+        raise ValueError(
+            f"{db_path.name}: direct Active Test ID 0x{active_test_id:X} resolved {len(matches)} type-68 rows"
+        )
+    index, raw = matches[0]
+    name_index = struct.unpack_from("<I", raw, 0x0C)[0]
+    selected = {
+        "record": index,
+        "active_test_id": active_test_id,
+        "active_test_id_hex": f"0x{active_test_id:X}",
+        "name_string_index": name_index,
+        "name": (strings.get_string(name_index) or "") if strings is not None else None,
+        "physical_data_key": struct.unpack_from("<H", raw, 0x24)[0],
+        "active_test_pattern_key": struct.unpack_from("<H", raw, 0x26)[0],
+        "bit_start": struct.unpack_from("<H", raw, 0x28)[0],
+        "bit_end": struct.unpack_from("<H", raw, 0x2A)[0],
+        "sort_key": struct.unpack_from("<H", raw, 0x2C)[0],
+        "exception_id": struct.unpack_from("<H", raw, 0x2E)[0],
+        "panel_key_0": struct.unpack_from("<H", raw, 0x30)[0],
+        "panel_key_1": struct.unpack_from("<H", raw, 0x32)[0],
+        "initial_read_did": struct.unpack_from("<H", raw, 0x34)[0],
+        "direct_monitor_key": struct.unpack_from("<H", raw, 0x36)[0],
+        "initial_read_mode": raw[0x39],
+        "pattern": raw[0x3A],
+        "exception_flag": raw[0x3B],
+        "panel_check_mode": raw[0x3C],
+        "monitor_link_mode": raw[0x3D],
+        "raw": raw.hex(),
+    }
+
+    mode = selected["initial_read_mode"]
+    transaction: dict[str, Any] = {"mode": mode, "performed": False}
+    if mode == 0:
+        frames = _master_frame_rows(parser, master, int(category["category_id"]), 0xCA)
+        if len(frames) != 1:
+            raise ValueError(
+                f"category {category['category_id']}: role-0x08 selector 0xCA resolved {len(frames)} frames"
+            )
+        frame = frames[0]
+        base = bytearray.fromhex(frame["send"]["bytes"])
+        if len(base) < 3 or base[0] != 0x22:
+            raise ValueError(
+                f"category {category['category_id']}: selector 0xCA base request is not 22xxxx: {base.hex()}"
+            )
+        did = selected["initial_read_did"]
+        base[1] = (did >> 8) & 0xFF
+        base[2] = did & 0xFF
+        transaction = {
+            "mode": mode,
+            "performed": True,
+            "selector": "0xCA",
+            "base_frame": frame,
+            "materialized_send": base.hex(),
+            "receive_check": frame["receive_check"]["bytes"],
+            "bit_start": selected["bit_start"],
+            "bit_end": selected["bit_end"],
+        }
+    elif mode == 1:
+        transaction["reason"] = "type-68 initial_read_mode == 1"
+    else:
+        transaction["reason"] = "plugin rejects modes other than 0/1 as C0040102"
+
+    mode_generation = int(category["generation"]) & 0xE0
+    monitor_table = 157 if mode_generation == 0x60 else 62
+    linked: dict[str, Any] = {
+        "mode": selected["monitor_link_mode"],
+        "table": monitor_table,
+        "monitor_key": None,
+        "resolution": None,
+    }
+    if selected["monitor_link_mode"] == 1:
+        linked["monitor_key"] = selected["direct_monitor_key"]
+        linked["resolution"] = "direct type-68 +0x36"
+    else:
+        monitor = db.sections.get(monitor_table)
+        if monitor is None:
+            linked["resolution"] = "generation-selected monitor table absent"
+        elif monitor.decoded_record_size < 0x48:
+            raise ValueError(
+                f"{db_path.name}: monitor table {monitor_table} record size 0x{monitor.decoded_record_size:X} too small"
+            )
+        else:
+            candidates = []
+            size = monitor.decoded_record_size
+            for monitor_index in range(monitor.header.record_count):
+                mon = monitor.decoded_data[monitor_index * size : (monitor_index + 1) * size]
+                if not (struct.unpack_from("<I", mon, 0x30)[0] & 0x40):
+                    continue
+                if struct.unpack_from("<H", mon, 0x46)[0] != selected["initial_read_did"]:
+                    continue
+                if struct.unpack_from("<H", mon, 0x3C)[0] != selected["bit_start"]:
+                    continue
+                if struct.unpack_from("<H", mon, 0x3E)[0] != selected["bit_end"]:
+                    continue
+                candidates.append({
+                    "record": monitor_index,
+                    "monitor_key": struct.unpack_from("<H", mon, 0x34)[0],
+                })
+            linked["candidates"] = candidates
+            if len(candidates) == 1:
+                linked["monitor_key"] = candidates[0]["monitor_key"]
+                linked["resolution"] = "unique DID/bit-range match from plugin scan"
+            else:
+                linked["resolution"] = f"plugin scan produced {len(candidates)} matches"
+
+    if strings is not None and linked["monitor_key"] is not None:
+        semantic = [
+            row for row in _monitor_rows(db, strings, db_path.name)
+            if row.get("monitor_key") == linked["monitor_key"]
+        ]
+        if len(semantic) == 1:
+            linked["monitor"] = semantic[0]
+
+    return {
+        "selected_test": selected,
+        "initial_transaction": transaction,
+        "linked_monitor": linked,
+        "runtime_boundary": (
+            "selected-row and initial-request materialization are offline deterministic; whether the test is offered "
+            "and panel entries are supported still depends on role-0x06/live support state"
+        ),
+    }
+
+
 def _monitor_list_category_plan(parser: DDBParser, category: dict[str, Any], db_root: Path) -> dict[str, Any]:
     mode = int(category["generation"]) & 0xE0
     table = 157 if mode == 0x60 else 62
@@ -670,6 +814,8 @@ def _master_command_plan(
     role: int,
     bin_root: Path,
     db_root: Path | None = None,
+    selected_item: int | None = None,
+    strings: StringDataBase | None = None,
 ) -> dict[str, Any]:
     category_id = int(category["category_id"])
     binding = _master_command_binding(parser, master, category_id, role)
@@ -705,15 +851,29 @@ def _master_command_plan(
         "metadata_model": None,
         "list_model": None,
         "active_test_model": None,
+        "active_test_init_model": None,
         "boundary": (
             "Frames/timers are resolved from the selected category. Executable semantics are attached only "
             "when the selected plugin SHA-256 exactly matches a recovered profile."
         ),
     }
+    if selected_item is not None and role != 0x08:
+        raise ValueError("--item is currently supported only for role 0x08 direct Active Test initialization")
     if profile is None:
         return result
 
-    if profile_name == "role_0x06_p5_active_test_list":
+    if profile_name == "role_0x08_p5_active_test_init":
+        result["active_test_init_model"] = dict(profile["init_model"])
+        if selected_item is not None:
+            if db_root is None:
+                raise ValueError("role-0x08 selected-item planning requires the category ECU database")
+            result["active_test_init_model"]["selected_plan"] = _active_test_init_selected_plan(
+                parser, master, category, db_root, selected_item, strings
+            )
+            result["semantic_status"] = "exact_plugin_identity_and_selected_active_test_plan"
+        else:
+            result["semantic_status"] = "exact_plugin_identity_requires_selected_active_test"
+    elif profile_name == "role_0x06_p5_active_test_list":
         result["active_test_model"] = dict(profile["list_model"])
         if db_root is not None:
             result["active_test_model"]["category_plan"] = _active_test_list_category_plan(parser, category, db_root)
@@ -825,8 +985,13 @@ def cmd_command(args: argparse.Namespace) -> int:
     role = _parse_master_key(args.role)
     if role is None:
         raise SystemExit(f"invalid role {args.role!r}; use decimal or 0x-prefixed hex")
+    selected_item = _parse_master_key(args.item) if args.item is not None else None
+    if args.item is not None and selected_item is None:
+        raise SystemExit(f"invalid item {args.item!r}; use decimal or 0x-prefixed hex")
     try:
-        payload = _master_command_plan(parser, master, category, role, gts / "bin", db_root)
+        payload = _master_command_plan(
+            parser, master, category, role, gts / "bin", db_root, selected_item, strings
+        )
     except ValueError as exc:
         raise SystemExit(str(exc)) from exc
     if args.json:
@@ -847,6 +1012,30 @@ def cmd_command(args: argparse.Namespace) -> int:
         )
     for timer in payload["timers"]:
         print(f"timer	id={timer['timer_id']}	delay_ms={timer['delay_ms']}")
+    active_test_init = payload["active_test_init_model"]
+    if active_test_init is not None:
+        selected_plan = active_test_init.get("selected_plan")
+        if selected_plan is None:
+            print("active-test-init\tselected_item=required")
+        else:
+            selected = selected_plan["selected_test"]
+            tx = selected_plan["initial_transaction"]
+            linked = selected_plan["linked_monitor"]
+            print(
+                f"active-test-init\tid={selected['active_test_id_hex']}\tname={selected['name'] or '-'}\t"
+                f"did=0x{selected['initial_read_did']:04X}\tbits={selected['bit_start']}..{selected['bit_end']}\t"
+                f"init_mode={selected['initial_read_mode']}\tmonitor_link_mode={selected['monitor_link_mode']}"
+            )
+            if tx["performed"]:
+                print(
+                    f"initial-read\tselector={tx['selector']}\tsend={tx['materialized_send']}\t"
+                    f"expect={tx['receive_check']}\tbits={tx['bit_start']}..{tx['bit_end']}"
+                )
+            monitor = linked.get("monitor")
+            print(
+                f"linked-monitor\tkey={linked['monitor_key']}\tresolution={linked['resolution']}\t"
+                f"name={(monitor or {}).get('name') or '-'}"
+            )
     active_test_model = payload["active_test_model"]
     if active_test_model is not None:
         category_plan = active_test_model.get("category_plan")
@@ -1410,6 +1599,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("command", help="resolve one category+role into plugin, wire frames, timers, and recovered semantics")
     p.add_argument("category", help="category ID, database/short name, or OEM ECU name")
     p.add_argument("role", help="DLL role ID (decimal or 0x-prefixed hex)")
+    p.add_argument("--item", help="selected direct Active Test ID for role 0x08 (decimal or 0x-prefixed hex)")
     _common(p)
     p.set_defaults(func=cmd_command)
 

@@ -170,8 +170,35 @@ check(
 
 plugin_semantics = gts["dll_role_schema"]["plugin_semantics"]
 monitor_list = plugin_semantics["role_0x05_p5_monitor_list"]
+active_test_init = plugin_semantics["role_0x08_p5_active_test_init"]
 active_test_list = plugin_semantics["role_0x06_p5_active_test_list"]
 signal_info = plugin_semantics["role_0x41_p5_signal_info"]
+check(
+    "current role 0x08 P5 Active Test init plugin is identity-pinned and selected-test driven",
+    active_test_init["plugin"]["sha256"] == "36baa624476758b2aa642a5becc9b8583dd431798d3f93c73a349210c7359d55"
+    and active_test_init["example_binding"]["category_id"] == 397
+    and active_test_init["example_binding"]["dll_role_id"] == 0x08
+    and active_test_init["example_binding"]["dll_name"] == "GetActTstInitP5_DT.dll"
+    and active_test_init["example_frame"]["selector"] == "0xCA"
+    and active_test_init["example_frame"]["variables"]["send"]["bytes"] == "22ffff"
+    and active_test_init["example_frame"]["variables"]["receive_check"]["bytes"] == "62"
+    and active_test_init["init_model"]["selected_test_fields"]["active_test_id"] == "u16 +0x20"
+    and active_test_init["init_model"]["selected_test_fields"]["initial_read_did"] == "u16 +0x34"
+    and active_test_init["init_model"]["initial_read"]["selector"] == "0xCA",
+)
+check(
+    "current role 0x08 initial RDBI, panel, monitor-link, and presentation paths are instruction-pinned",
+    active_test_init["anchors"]["selected_type68_lookup"]["bytes"].startswith("8b078b57108b481c0fb74020")
+    and active_test_init["anchors"]["initial_read_mode"]["bytes"].startswith("8b018b108b7004")
+    and active_test_init["anchors"]["selector_ca_fields"]["bytes"].startswith("8b4610ff750c0fbfcf")
+    and active_test_init["anchors"]["selector_ca_did_injection_and_send"]["bytes"].startswith("8b5dd48d4f306a01c1eb08")
+    and active_test_init["anchors"]["panel_check_mode"]["bytes"].startswith("8b118a423c")
+    and active_test_init["anchors"]["linked_monitor_mode"]["bytes"].startswith("80783d01")
+    and active_test_init["anchors"]["presentation_pattern"]["bytes"].startswith("8b000fb74828")
+    and active_test_init["anchors"]["physical_unit_conversion"]["bytes"].startswith("0fb7402450")
+    and active_test_init["init_model"]["linked_monitor"]["current_monitor_match_fields"]["did"] == "u16 +0x46"
+    and active_test_init["init_model"]["presentation"]["physical_data_table"]["table"] == 13,
+)
 check(
     "current role 0x06 P5 Active Test list plugin is identity-pinned and splits DID/RID support",
     active_test_list["plugin"]["sha256"] == "16e3a6f9ad62722144313bebe38ebfe3393cff1356047ecc4b209c844594d844"
