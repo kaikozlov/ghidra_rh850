@@ -581,12 +581,51 @@ def _semantic_profile_for_plugin(plugin_path: Path, role: int) -> tuple[str | No
     return None, None, "plugin_semantics_unrecovered_for_identity"
 
 
+def _monitor_list_category_plan(parser: DDBParser, category: dict[str, Any], db_root: Path) -> dict[str, Any]:
+    mode = int(category["generation"]) & 0xE0
+    table = 157 if mode == 0x60 else 62
+    db_path = db_root / str(category["database"])
+    db = parser.parse_ecu_db(db_path)
+    section = db.sections.get(table)
+    if section is None:
+        raise ValueError(f"{db_path.name}: role-0x05 selected monitor table {table}, but it is absent")
+    counts = {"direct_include": 0, "direct_exclude": 0, "runtime_check_support_pid": 0}
+    size = section.decoded_record_size
+    if size < 0x36:
+        raise ValueError(f"{db_path.name}: monitor table {table} record size 0x{size:X} too small")
+    for index in range(section.header.record_count):
+        raw = section.decoded_data[index * size : (index + 1) * size]
+        flag = raw[0x30]
+        if flag & 0x10:
+            counts["direct_include" if flag & 0x01 else "direct_exclude"] += 1
+        else:
+            counts["runtime_check_support_pid"] += 1
+    return {
+        "generation": int(category["generation"]),
+        "generation_mode": f"0x{mode:X}",
+        "candidate_table": table,
+        "candidate_table_class": ECU_TABLE_CLASS_NAMES.get(table, "unknown"),
+        "candidate_count": section.header.record_count,
+        "record_size": size,
+        "support_list_builder": (
+            "CreateEnableDataIdListForSubaruCheckDID" if mode == 0x20 else "CreateEnableDataIdList"
+        ),
+        "candidate_partition": counts,
+        "runtime_support_required": counts["runtime_check_support_pid"] > 0,
+        "runtime_boundary": (
+            "candidate partition is static; records in runtime_check_support_pid require support-cache/live ECU "
+            "CheckSupportPid results before Techstream's final presented list is known"
+        ),
+    }
+
+
 def _master_command_plan(
     parser: DDBParser,
     master: Any,
     category: dict[str, Any],
     role: int,
     bin_root: Path,
+    db_root: Path | None = None,
 ) -> dict[str, Any]:
     category_id = int(category["category_id"])
     binding = _master_command_binding(parser, master, category_id, role)
@@ -620,6 +659,7 @@ def _master_command_plan(
         "response_model": None,
         "control_flow": None,
         "metadata_model": None,
+        "list_model": None,
         "boundary": (
             "Frames/timers are resolved from the selected category. Executable semantics are attached only "
             "when the selected plugin SHA-256 exactly matches a recovered profile."
@@ -628,7 +668,14 @@ def _master_command_plan(
     if profile is None:
         return result
 
-    if profile_name == "role_0x41_p5_signal_info":
+    if profile_name == "role_0x05_p5_monitor_list":
+        result["list_model"] = dict(profile["list_model"])
+        if db_root is not None:
+            result["list_model"]["category_plan"] = _monitor_list_category_plan(parser, category, db_root)
+            result["semantic_status"] = "exact_plugin_identity_and_category_candidate_partition"
+        else:
+            result["semantic_status"] = "exact_plugin_identity_monitor_list_semantics"
+    elif profile_name == "role_0x41_p5_signal_info":
         result["metadata_model"] = profile["metadata_model"]
         result["semantic_status"] = "exact_plugin_identity_metadata_only"
     elif profile_name == "role_0x52_generic_cid":
@@ -727,7 +774,7 @@ def cmd_command(args: argparse.Namespace) -> int:
     if role is None:
         raise SystemExit(f"invalid role {args.role!r}; use decimal or 0x-prefixed hex")
     try:
-        payload = _master_command_plan(parser, master, category, role, gts / "bin")
+        payload = _master_command_plan(parser, master, category, role, gts / "bin", db_root)
     except ValueError as exc:
         raise SystemExit(str(exc)) from exc
     if args.json:
@@ -748,6 +795,19 @@ def cmd_command(args: argparse.Namespace) -> int:
         )
     for timer in payload["timers"]:
         print(f"timer	id={timer['timer_id']}	delay_ms={timer['delay_ms']}")
+    list_model = payload["list_model"]
+    if list_model is not None:
+        category_plan = list_model.get("category_plan")
+        if category_plan is None:
+            print("list\tcategory_partition=unresolved")
+        else:
+            part = category_plan["candidate_partition"]
+            print(
+                f"list\ttable={category_plan['candidate_table']}\tcandidates={category_plan['candidate_count']}\t"
+                f"direct_include={part['direct_include']}\tdirect_exclude={part['direct_exclude']}\t"
+                f"runtime_probe={part['runtime_check_support_pid']}\t"
+                f"builder={category_plan['support_list_builder']}"
+            )
     metadata = payload["metadata_model"]
     if metadata is not None:
         fields = metadata["conversion_fields"]

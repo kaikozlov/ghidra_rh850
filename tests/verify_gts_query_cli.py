@@ -90,6 +90,33 @@ role19 = next(row for row in role_catalog if row["role"] == 25)
 check(len(role_catalog) == 191 and role19["binding_count"] == 536 and role19["category_count"] == 536 and role19["binding_surface_counts"] == {"direct_transport": 536} and role19["plugins"][0]["dll"] == "DelDiagCodeP4.dll" and role19["plugins"][0]["binding_count"] == 424, "current master role census resolves operation surfaces as well as 6194 -> 191 role compression")
 role5 = next(row for row in role_catalog if row["role"] == 5)
 check(role5["plugins"][0]["surface"] == "support_cache_v18_proven" and role5["plugins"][1]["surface"] == "delegated_transport_v18_proven", "role query distinguishes P4 cached support from P5 delegated support probing")
+emps_category = gts_cli._resolve_master_category(parser, master, strings, "EMPS_P5")
+emps_monitor_plan = gts_cli._master_command_plan(parser, master, emps_category, 0x05, gts / "bin", db_root)
+check(
+    emps_monitor_plan["plugin"] == "GetDatMonListP5_DT.dll"
+    and emps_monitor_plan["semantic_status"] == "exact_plugin_identity_and_category_candidate_partition"
+    and emps_monitor_plan["operation_surface"] == "delegated_transport_v18_proven"
+    and emps_monitor_plan["list_model"]["category_plan"] == {
+        "generation": 20,
+        "generation_mode": "0x0",
+        "candidate_table": 62,
+        "candidate_table_class": "CDbDatamonitorP5Table",
+        "candidate_count": 230,
+        "record_size": 80,
+        "support_list_builder": "CreateEnableDataIdList",
+        "candidate_partition": {
+            "direct_include": 0,
+            "direct_exclude": 0,
+            "runtime_check_support_pid": 230,
+        },
+        "runtime_support_required": True,
+        "runtime_boundary": (
+            "candidate partition is static; records in runtime_check_support_pid require support-cache/live ECU "
+            "CheckSupportPid results before Techstream's final presented list is known"
+        ),
+    },
+    "command plan partitions EMPS role 0x05 into 230 runtime support-probed Data Monitor candidates",
+)
 hybrid_plan = gts_cli._master_command_plan(parser, master, hybrid, 0x19, gts / "bin")
 check(
     hybrid_plan["plugin"] == "DelDiagCodeP4.dll"
@@ -100,7 +127,6 @@ check(
     and len(hybrid_plan["control_flow"]["fallback_error_codes_when_function_gate_set"]) == 10,
     "command plan joins Hybrid role 0x19 plugin, category-local frames, timer, and exact state machine",
 )
-emps_category = gts_cli._resolve_master_category(parser, master, strings, "EMPS_P5")
 emps_cid_plan = gts_cli._master_command_plan(parser, master, emps_category, 0x52, gts / "bin")
 check(
     emps_cid_plan["plugin"] == "GetCID_SID22_DT.dll"

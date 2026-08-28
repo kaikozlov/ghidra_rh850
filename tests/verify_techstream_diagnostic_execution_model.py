@@ -169,7 +169,29 @@ check(
 )
 
 plugin_semantics = gts["dll_role_schema"]["plugin_semantics"]
+monitor_list = plugin_semantics["role_0x05_p5_monitor_list"]
 signal_info = plugin_semantics["role_0x41_p5_signal_info"]
+check(
+    "current role 0x05 P5 monitor-list plugin is identity-pinned and delegates support discovery",
+    monitor_list["plugin"]["sha256"] == "8db35a64b020a18b14f361e3fbb4f7375fc9a35293abb4b62f7a00e7c6a3a07c"
+    and monitor_list["example_binding"]["category_id"] == 405
+    and monitor_list["example_binding"]["dll_role_id"] == 0x05
+    and monitor_list["example_binding"]["dll_name"] == "GetDatMonListP5_DT.dll"
+    and monitor_list["list_model"]["monitor_table_selection"]["0x60"]["table"] == 157
+    and monitor_list["list_model"]["monitor_table_selection"]["otherwise"]["table"] == 62
+    and monitor_list["list_model"]["support_list_builder"]["0x20"] == "CreateEnableDataIdListForSubaruCheckDID"
+    and monitor_list["list_model"]["support_list_builder"]["otherwise"] == "CreateEnableDataIdList",
+)
+check(
+    "current role 0x05 candidate support decision is instruction-pinned",
+    monitor_list["anchors"]["category_mode_support_builder"]["bytes"].startswith("8a404824e0")
+    and monitor_list["anchors"]["monitor_table_selection"]["bytes"].startswith("80bdebfeffff60")
+    and monitor_list["anchors"]["candidate_fields"]["bytes"].startswith("8b04b10fb74034")
+    and monitor_list["anchors"]["flag_and_support_probe"]["bytes"].startswith("8a45988975e4a810")
+    and "CheckSupportPid" in monitor_list["list_model"]["candidate_decision"]["flag_bit4_clear"]
+    and monitor_list["list_model"]["candidate_decision"]["flag_bit4_set_bit0_set"].startswith("include directly")
+    and monitor_list["list_model"]["candidate_decision"]["flag_bit4_set_bit0_clear"].startswith("exclude directly"),
+)
 cid = plugin_semantics["role_0x52_generic_cid"]
 clear = plugin_semantics["role_0x19_dtc_clear"]
 check(

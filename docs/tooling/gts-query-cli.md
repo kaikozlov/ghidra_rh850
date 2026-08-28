@@ -122,6 +122,10 @@ command  category=405  EMPS  role=0x52  plugin=GetCID_SID22_DT.dll  surface=dire
 request  selector=0xDC  send=22f181  expect=62f181  commset=1  timeout=1020  retries=1
 response payload_offset=4  record_size=16  names=CID1...  conversion=CP_ACP
 
+$ tools/gts command EMPS_P5 0x05
+command  category=405  EMPS  role=0x5  plugin=GetDatMonListP5_DT.dll  surface=delegated_transport_v18_proven  semantics=exact_plugin_identity_and_category_candidate_partition
+list     table=62  candidates=230  direct_include=0  direct_exclude=0  runtime_probe=230  builder=CreateEnableDataIdList
+
 $ tools/gts command EMPS_P5 0x41
 command  category=405  EMPS  role=0x41  plugin=GetDatMonSignalInfoP5_DT.dll  surface=no_recovered_shared_transport_edge  semantics=exact_plugin_identity_metadata_only
 metadata physical=table13  unit=table15  patterns=table14  fields=10

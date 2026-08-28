@@ -140,6 +140,74 @@
         "size": 1824784
       },
       "plugin_semantics": {
+        "role_0x05_p5_monitor_list": {
+          "anchors": {
+            "candidate_fields": {
+              "bytes": "8b04b10fb74034668945948b04b18b40308945988b04b10fb7403a6689459c8b04b18b40248945a08b04b1f20f1000f20f1145a48b04b1f20f104008f20f1145ac8b04b18b40148945b48b04b18b40188945b88b04b18b402c8945bc8b04b18d8d08ffffff8b40288945c0ff15f0500010508d4dc4ff15605000108a45988975e4a81074",
+              "file_offset": "0x1166",
+              "va": "0x10001D66"
+            },
+            "category_mode_support_builder": {
+              "bytes": "8a404824e08885ebfeffff3c208d8554ffffff752e565053ff15185000108bf885ff744e5768de00000068c0510010689053001057ff157850001083c414e9870200006a005053ff151c5000108bf885ff741f5768",
+              "file_offset": "0xFD4",
+              "va": "0x10001BD4"
+            },
+            "final_conversion_output": {
+              "bytes": "668b483e662b483c66410fb7c18d8d64ffffff518d8d54ffffff518d8d50ffffff51ffb558ffffff8d8d94feffffffb528feffff50ffb55cffffffff7584ff15385000108bf085f60f85230100008b852cfeffff8b48048d8504ffffff508d4920ff156c5000108d8d",
+              "file_offset": "0x1F82",
+              "va": "0x10002B82"
+            },
+            "flag_and_support_probe": {
+              "bytes": "8a45988975e4a810740ca80174598bb5e0feffffeb3b6a018d8554ffffffc745ec00000000508d45ec50ff75948d8d24ffffffffb5dcfeffffff150c5000108bf885ff7556837dec01751c8bb5d8fe",
+              "file_offset": "0x11E1",
+              "va": "0x10001DE1"
+            },
+            "monitor_table_selection": {
+              "bytes": "80bdebfeffff6050a1f4500010755c689d020000ffd08bf885ff7420575668f400000068c0510010688054001057ff157850001083c418e9df010000668b850cffffff6683f8017d7e5668f900000068c051001068205500106a00ff157850001083c41433ffe9b0010000683e020000ffd08b",
+              "file_offset": "0x1077",
+              "va": "0x10001C77"
+            }
+          },
+          "example_binding": {
+            "category_id": 405,
+            "dll_name": "GetDatMonListP5_DT.dll",
+            "dll_role_hex": "0x5",
+            "dll_role_id": 5,
+            "raw": "4700650074004400610074004d006f006e004c00690073007400500035005f00440054002e0064006c006c000000000000000000000000000000000000000000000000000000000000000000000000009501000005000000"
+          },
+          "list_model": {
+            "candidate_decision": {
+              "flag_bit4_clear": "call CCommCachePlusP5::CheckSupportPid(command, candidate_id, &supported, enable_data_id_list, 1); include only when call succeeds and supported == 1",
+              "flag_bit4_set_bit0_clear": "exclude directly without CheckSupportPid",
+              "flag_bit4_set_bit0_set": "include directly without CheckSupportPid"
+            },
+            "candidate_flag": "current 80-byte monitor record byte +0x30",
+            "candidate_id": "current 80-byte monitor record u16 +0x34",
+            "category_mode": "low byte of master category generation field (+0x48 raw) masked with 0xE0",
+            "monitor_table_selection": {
+              "0x60": {
+                "class": "CDbDatamonitorP5Table",
+                "table": 157
+              },
+              "otherwise": {
+                "class": "CDbDatamonitorP5Table",
+                "table": 62
+              }
+            },
+            "post_filter": "MultiPID validation/merge followed by CCmdDatMonData construction; final conversion path joins physical/unit metadata and ChangeSignalLSB",
+            "purpose": "construct the Data Monitor list from current P5 DDB candidates plus runtime support state",
+            "runtime_boundary": "offline DB parsing can enumerate and partition candidates, but cannot know CheckSupportPid outcomes without support-cache/live ECU state",
+            "support_list_builder": {
+              "0x20": "CreateEnableDataIdListForSubaruCheckDID",
+              "otherwise": "CreateEnableDataIdList"
+            }
+          },
+          "plugin": {
+            "path": "bin/GetDatMonListP5_DT.dll",
+            "sha256": "8db35a64b020a18b14f361e3fbb4f7375fc9a35293abb4b62f7a00e7c6a3a07c",
+            "size": 39440
+          }
+        },
         "role_0x19_dtc_clear": {
           "anchors": {
             "fallback_error_set": {

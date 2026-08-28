@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pefile
 from diagnostic_role_model import role_operation_catalog
-from parse_ddb import MASTER_TABLE_CLASS_NAMES, DDBParser
+from parse_ddb import ECU_TABLE_CLASS_NAMES, MASTER_TABLE_CLASS_NAMES, DDBParser
 from techstream_paths import resolve_gts_root
 
 REPO = Path(__file__).resolve().parents[2]
@@ -395,9 +395,42 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
     bin_root = gts_root / "bin"
     cid = bin_root / "GetCID_SID22_DT.dll"
     clear = bin_root / "DelDiagCodeP4.dll"
+    monitor_list = bin_root / "GetDatMonListP5_DT.dll"
     signal_info = bin_root / "GetDatMonSignalInfoP5_DT.dll"
     kgp = bin_root / "KgpDataCtrl.dll"
     return {
+        "role_0x05_p5_monitor_list": {
+            "plugin": file_identity(monitor_list, gts_root),
+            "example_binding": dll_binding(parser, master, 405, 0x05),
+            "list_model": {
+                "purpose": "construct the Data Monitor list from current P5 DDB candidates plus runtime support state",
+                "category_mode": "low byte of master category generation field (+0x48 raw) masked with 0xE0",
+                "monitor_table_selection": {
+                    "0x60": {"table": 157, "class": ECU_TABLE_CLASS_NAMES[157]},
+                    "otherwise": {"table": 62, "class": ECU_TABLE_CLASS_NAMES[62]},
+                },
+                "support_list_builder": {
+                    "0x20": "CreateEnableDataIdListForSubaruCheckDID",
+                    "otherwise": "CreateEnableDataIdList",
+                },
+                "candidate_id": "current 80-byte monitor record u16 +0x34",
+                "candidate_flag": "current 80-byte monitor record byte +0x30",
+                "candidate_decision": {
+                    "flag_bit4_clear": "call CCommCachePlusP5::CheckSupportPid(command, candidate_id, &supported, enable_data_id_list, 1); include only when call succeeds and supported == 1",
+                    "flag_bit4_set_bit0_set": "include directly without CheckSupportPid",
+                    "flag_bit4_set_bit0_clear": "exclude directly without CheckSupportPid",
+                },
+                "runtime_boundary": "offline DB parsing can enumerate and partition candidates, but cannot know CheckSupportPid outcomes without support-cache/live ECU state",
+                "post_filter": "MultiPID validation/merge followed by CCmdDatMonData construction; final conversion path joins physical/unit metadata and ChangeSignalLSB",
+            },
+            "anchors": {
+                "category_mode_support_builder": anchor(monitor_list, 0x10001BD4, "8a404824e08885ebfeffff3c208d8554ffffff752e565053ff15185000108bf885ff744e5768de00000068c0510010689053001057ff157850001083c414e9870200006a005053ff151c5000108bf885ff741f5768"),
+                "monitor_table_selection": anchor(monitor_list, 0x10001C77, "80bdebfeffff6050a1f4500010755c689d020000ffd08bf885ff7420575668f400000068c0510010688054001057ff157850001083c418e9df010000668b850cffffff6683f8017d7e5668f900000068c051001068205500106a00ff157850001083c41433ffe9b0010000683e020000ffd08b"),
+                "candidate_fields": anchor(monitor_list, 0x10001D66, "8b04b10fb74034668945948b04b18b40308945988b04b10fb7403a6689459c8b04b18b40248945a08b04b1f20f1000f20f1145a48b04b1f20f104008f20f1145ac8b04b18b40148945b48b04b18b40188945b88b04b18b402c8945bc8b04b18d8d08ffffff8b40288945c0ff15f0500010508d4dc4ff15605000108a45988975e4a81074"),
+                "flag_and_support_probe": anchor(monitor_list, 0x10001DE1, "8a45988975e4a810740ca80174598bb5e0feffffeb3b6a018d8554ffffffc745ec00000000508d45ec50ff75948d8d24ffffffffb5dcfeffffff150c5000108bf885ff7556837dec01751c8bb5d8fe"),
+                "final_conversion_output": anchor(monitor_list, 0x10002B82, "668b483e662b483c66410fb7c18d8d64ffffff518d8d54ffffff518d8d50ffffff51ffb558ffffff8d8d94feffffffb528feffff50ffb55cffffffff7584ff15385000108bf085f60f85230100008b852cfeffff8b48048d8504ffffff508d4920ff156c5000108d8d"),
+            },
+        },
         "role_0x41_p5_signal_info": {
             "plugin": file_identity(signal_info, gts_root),
             "example_binding": dll_binding(parser, master, 405, 0x41),
