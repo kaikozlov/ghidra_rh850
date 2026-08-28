@@ -1,0 +1,92 @@
+[
+  {
+    "address": "0x700",
+    "bus": 0,
+    "records": 100,
+    "fault_status_records": []
+  },
+  {
+    "address": "0x701",
+    "error": "MessageTimeoutError: timeout waiting for response"
+  },
+  {
+    "address": "0x724",
+    "bus": 0,
+    "records": 120,
+    "fault_status_records": []
+  },
+  {
+    "address": "0x7D2",
+    "bus": 0,
+    "records": 35,
+    "fault_status_records": []
+  },
+  {
+    "address": "0x747",
+    "bus": 0,
+    "records": 29,
+    "fault_status_records": []
+  },
+  {
+    "address": "0x745",
+    "error": "MessageTimeoutError: timeout waiting for response"
+  },
+  {
+    "address": "0x707",
+    "error": "MessageTimeoutError: timeout waiting for response"
+  },
+  {
+    "address": "0x703",
+    "error": "MessageTimeoutError: timeout waiting for response"
+  },
+  {
+    "address": "0x7A1",
+    "bus": 0,
+    "records": 38,
+    "fault_status_records": []
+  },
+  {
+    "address": "0x7B0",
+    "bus": 0,
+    "records": 119,
+    "fault_status_records": []
+  },
+  {
+    "address": "0x750",
+    "error": "MessageTimeoutError: timeout waiting for response"
+  },
+  {
+    "address": "0x7B3",
+    "bus": 0,
+    "records": 3,
+    "fault_status_records": []
+  },
+  {
+    "address": "0x7C4",
+    "bus": 0,
+    "records": 0,
+    "fault_status_records": []
+  },
+  {
+    "address": "0x7D1",
+    "error": "MessageTimeoutError: timeout waiting for response"
+  },
+  {
+    "address": "0x7D0",
+    "bus": 0,
+    "records": 136,
+    "fault_status_records": []
+  },
+  {
+    "address": "0x792",
+    "bus": 0,
+    "records": 3,
+    "fault_status_records": []
+  },
+  {
+    "address": "0x7A2",
+    "bus": 0,
+    "records": 1,
+    "fault_status_records": []
+  }
+]

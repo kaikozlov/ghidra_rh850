@@ -1,0 +1,162 @@
+{
+  "boundary": "Live exact-vehicle maintenance result. Standard functional OBD Mode 04 cleared the legislated P5 controllers that reject physical UDS SID 0x14; direct UDS 0x14 cleared the remaining responding controllers. This does not generalize the route to every Toyota ECU.",
+  "dtc_status": {
+    "fault_mask": "0xAF",
+    "pre_clear_fault_records": [
+      {
+        "address": "0x7D2",
+        "dtc_raw": "C13187",
+        "fault_bits": 40,
+        "status": 40,
+        "status_hex": "0x28"
+      },
+      {
+        "address": "0x7B0",
+        "dtc_raw": "C13187",
+        "fault_bits": 172,
+        "status": 172,
+        "status_hex": "0xAC"
+      },
+      {
+        "address": "0x7C4",
+        "dtc_raw": "C13187",
+        "fault_bits": 40,
+        "status": 40,
+        "status_hex": "0x28"
+      },
+      {
+        "address": "0x792",
+        "dtc_raw": "C13187",
+        "fault_bits": 40,
+        "status": 40,
+        "status_hex": "0x28"
+      },
+      {
+        "address": "0x7A2",
+        "dtc_raw": "561854",
+        "fault_bits": 32,
+        "status": 32,
+        "status_hex": "0x20"
+      }
+    ],
+    "u0131_87_name": "Lost Communication with Power Steering Control Module \u2014 Missing Message",
+    "u0131_87_pre_clear_status": {
+      "0x792": "0x28",
+      "0x7b0": "0xAC",
+      "0x7c4": "0x28",
+      "0x7d2": "0x28"
+    },
+    "u0131_87_raw_dtc": "C13187"
+  },
+  "failed_mode04_routes": {
+    "per_ecu_func_addresses": [
+      "0x7e0",
+      "0x7e6",
+      "0x7e2",
+      "0x7e3",
+      "0x7e5"
+    ],
+    "physical_addresses": [
+      "0x700",
+      "0x724",
+      "0x7d2",
+      "0x747",
+      "0x7b0"
+    ]
+  },
+  "final_sweep": {
+    "all_responding_ecus_clear_of_fault_bits": true,
+    "remaining_fault_status_records": [],
+    "responders": [
+      "0x700",
+      "0x724",
+      "0x7D2",
+      "0x747",
+      "0x7A1",
+      "0x7B0",
+      "0x7B3",
+      "0x7C4",
+      "0x7D0",
+      "0x792",
+      "0x7A2"
+    ],
+    "responding_ecus": 11
+  },
+  "legislated_obd": {
+    "address_join": {
+      "0x7E8": "Engine / category 372 / Address 0x700 / FuncAddress 0x7E0",
+      "0x7EA": "Hybrid Control / category 397 / Address 0x7D2 / FuncAddress 0x7E2",
+      "0x7EB": "HV Battery / category 398 / Address 0x747 / FuncAddress 0x7E3",
+      "0x7ED": "Brake/EPB / category 435 / Address 0x7B0 / FuncAddress 0x7E5",
+      "0x7EE": "Motor Generator / category 395 / Address 0x724 / FuncAddress 0x7E6"
+    },
+    "mode01_probe_request_frame": "0201000000000000",
+    "mode01_responders": {
+      "0x7E8": "064100be1fa01300",
+      "0x7EA": "064100981a800300",
+      "0x7EB": "0641009818800300",
+      "0x7ED": "0641009818800300",
+      "0x7EE": "064100981a800300"
+    },
+    "mode04_clear_request_frame": "0104000000000000",
+    "mode04_positive_responses": {
+      "0x7E8": "0144000000000000",
+      "0x7EA": "0144000000000000",
+      "0x7EB": "0144000000000000",
+      "0x7ED": "0144000000000000",
+      "0x7EE": "0144000000000000"
+    },
+    "request_id": "0x7DF"
+  },
+  "physical_uds14": {
+    "rejected_service_not_supported": [
+      "0x700",
+      "0x724",
+      "0x747",
+      "0x7b0",
+      "0x7d2"
+    ],
+    "request": "14 FF FF FF",
+    "succeeded": [
+      "0x792",
+      "0x7a1",
+      "0x7a2",
+      "0x7b3",
+      "0x7c4",
+      "0x7d0"
+    ]
+  },
+  "schema": "camry-2026-dtc-clear-v1",
+  "source_identity": {
+    "camry_dtc_clear_results.json": {
+      "bytes": 2038,
+      "sha256": "5d428b050b351db858641f909de926bad0c269e7cbdfa04296378e6f594cf297"
+    },
+    "camry_dtc_final_sweep.json": {
+      "bytes": 1657,
+      "sha256": "b36d4b4e5788212168e83159c312f1202dcf82eccd36db50277615d58c9e307d"
+    },
+    "camry_dtc_sweep_after.json": {
+      "bytes": 3486,
+      "sha256": "6dd5942e2e96e02bdfc229494e1f8700e15da4d5f121036e2c4fb0542e0f62d9"
+    },
+    "camry_dtc_sweep_before.json": {
+      "bytes": 3536,
+      "sha256": "ceb02436269d1c2332088f853d3acf80fdc3367905c0fc85142f311c94ac8b27"
+    },
+    "camry_functional_mode04_results.json": {
+      "bytes": 742,
+      "sha256": "73721a17540a58779efd4b935c8d043dacfa8576dc151612e3d23c6e6110e916"
+    },
+    "camry_mode04_clear_results.json": {
+      "bytes": 717,
+      "sha256": "235d6b7d7effff5512854e51cbb5d09f0b4e4825cb269654c88cef9c54325dd4"
+    },
+    "camry_obd_mode04_clear_20260827.json": {
+      "bytes": 1494,
+      "sha256": "976957d9565c3d04c6ab2df658d6be5cd9525653acc5e4dcdbbc59d8848343b6"
+    }
+  },
+  "vehicle": "maintainer 2026 Toyota Camry Hybrid",
+  "vehicle_state": "parked READY throughout probe (operator-confirmed)"
+}

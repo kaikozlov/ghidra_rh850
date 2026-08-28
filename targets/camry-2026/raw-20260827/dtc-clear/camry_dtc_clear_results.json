@@ -1,0 +1,79 @@
+[
+  {
+    "address": "0x700",
+    "bus": 0,
+    "cleared": false,
+    "method": null,
+    "error": "default=NegativeResponseError: CLEAR_DIAGNOSTIC_INFORMATION - service not supported; extended=NegativeResponseError: CLEAR_DIAGNOSTIC_INFORMATION - service not supported"
+  },
+  {
+    "address": "0x724",
+    "bus": 0,
+    "cleared": false,
+    "method": null,
+    "error": "default=NegativeResponseError: CLEAR_DIAGNOSTIC_INFORMATION - service not supported; extended=NegativeResponseError: CLEAR_DIAGNOSTIC_INFORMATION - service not supported"
+  },
+  {
+    "address": "0x7d2",
+    "bus": 0,
+    "cleared": false,
+    "method": null,
+    "error": "default=NegativeResponseError: CLEAR_DIAGNOSTIC_INFORMATION - service not supported; extended=NegativeResponseError: CLEAR_DIAGNOSTIC_INFORMATION - service not supported"
+  },
+  {
+    "address": "0x747",
+    "bus": 0,
+    "cleared": false,
+    "method": null,
+    "error": "default=NegativeResponseError: CLEAR_DIAGNOSTIC_INFORMATION - service not supported; extended=NegativeResponseError: CLEAR_DIAGNOSTIC_INFORMATION - service not supported"
+  },
+  {
+    "address": "0x7a1",
+    "bus": 0,
+    "cleared": true,
+    "method": "default",
+    "error": null
+  },
+  {
+    "address": "0x7b0",
+    "bus": 0,
+    "cleared": false,
+    "method": null,
+    "error": "default=NegativeResponseError: CLEAR_DIAGNOSTIC_INFORMATION - service not supported; extended=NegativeResponseError: CLEAR_DIAGNOSTIC_INFORMATION - service not supported"
+  },
+  {
+    "address": "0x7b3",
+    "bus": 0,
+    "cleared": true,
+    "method": "default",
+    "error": null
+  },
+  {
+    "address": "0x7c4",
+    "bus": 0,
+    "cleared": true,
+    "method": "default",
+    "error": null
+  },
+  {
+    "address": "0x7d0",
+    "bus": 0,
+    "cleared": true,
+    "method": "default",
+    "error": null
+  },
+  {
+    "address": "0x792",
+    "bus": 0,
+    "cleared": true,
+    "method": "default",
+    "error": null
+  },
+  {
+    "address": "0x7a2",
+    "bus": 0,
+    "cleared": true,
+    "method": "default",
+    "error": null
+  }
+]

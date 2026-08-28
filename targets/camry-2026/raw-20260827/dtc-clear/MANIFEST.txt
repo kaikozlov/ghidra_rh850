@@ -1,0 +1,31 @@
+2026-08-27 Camry DTC clear probe
+
+Vehicle: maintainer 2026 Toyota Camry Hybrid
+State: parked in READY throughout the probe (operator-confirmed)
+Harness: Toyota-B, post-repin relay-correct CAN0/CAN2 topology
+Purpose: identify and clear DTCs created by the EPS/diagnostic development work.
+
+Sequence:
+1. Read UDS DTC status from the P5/direct diagnostic addresses.
+2. Try ordinary UDS ClearDiagnosticInformation (14 FF FF FF) on each responding ECU.
+3. Preserve the five P5/legislated ECUs that reject physical SID 14 and resolve the Toyota Techstream clear route statically.
+4. Confirm the legislated OBD functional domain with read-only 7DF Mode 01 PID 00.
+5. Send standard functional OBD Mode 04 on 7DF; Engine, Hybrid Control, HV Battery, Brake/EPB, and Motor Generator reply positively with 44.
+6. Re-read all responding direct-diagnostic ECUs and require that no DTC status has any of the failure/pending/confirmed/failed-since-clear/warning bits (mask AF) set.
+
+Important live observations:
+- Hybrid Control 0x7D2: U0131-87 status 0x28 before clear.
+- Brake/EPB 0x7B0: U0131-87 status 0xAC before clear; bit 7 warningIndicatorRequested was set.
+- Front Recognition Camera 0x792 and Air Conditioner 0x7C4 also carried U0131-87 status 0x28.
+- Final direct sweep: every responding ECU has zero records with status & 0xAF != 0.
+
+This evidence records diagnostic maintenance only. No steering command, firmware write, flash erase/program operation, SecurityAccess, or RoutineControl was performed as part of the DTC clear.
+
+SHA-256:
+5d428b050b351db858641f909de926bad0c269e7cbdfa04296378e6f594cf297  camry_dtc_clear_results.json
+b36d4b4e5788212168e83159c312f1202dcf82eccd36db50277615d58c9e307d  camry_dtc_final_sweep.json
+6dd5942e2e96e02bdfc229494e1f8700e15da4d5f121036e2c4fb0542e0f62d9  camry_dtc_sweep_after.json
+ceb02436269d1c2332088f853d3acf80fdc3367905c0fc85142f311c94ac8b27  camry_dtc_sweep_before.json
+73721a17540a58779efd4b935c8d043dacfa8576dc151612e3d23c6e6110e916  camry_functional_mode04_results.json
+235d6b7d7effff5512854e51cbb5d09f0b4e4825cb269654c88cef9c54325dd4  camry_mode04_clear_results.json
+976957d9565c3d04c6ab2df658d6be5cd9525653acc5e4dcdbbc59d8848343b6  camry_obd_mode04_clear_20260827.json

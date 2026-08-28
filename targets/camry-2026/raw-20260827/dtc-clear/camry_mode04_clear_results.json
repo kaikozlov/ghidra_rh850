@@ -1,0 +1,27 @@
+[
+  {
+    "address": "0x700",
+    "mode04_clear": false,
+    "error": "NegativeResponseError: NON_STANDARD_SERVICE - service not supported"
+  },
+  {
+    "address": "0x724",
+    "mode04_clear": false,
+    "error": "NegativeResponseError: NON_STANDARD_SERVICE - service not supported"
+  },
+  {
+    "address": "0x7d2",
+    "mode04_clear": false,
+    "error": "NegativeResponseError: NON_STANDARD_SERVICE - service not supported"
+  },
+  {
+    "address": "0x747",
+    "mode04_clear": false,
+    "error": "NegativeResponseError: NON_STANDARD_SERVICE - service not supported"
+  },
+  {
+    "address": "0x7b0",
+    "mode04_clear": false,
+    "error": "NegativeResponseError: NON_STANDARD_SERVICE - service not supported"
+  }
+]

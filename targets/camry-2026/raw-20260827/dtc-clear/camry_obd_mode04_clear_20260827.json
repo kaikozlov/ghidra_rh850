@@ -1,0 +1,40 @@
+{
+  "schema": "camry-2026-obd-mode04-clear-live-v1",
+  "vehicle_state": "parked READY throughout probe (operator-confirmed)",
+  "harness_state": "Toyota-B relay-correct post-repin topology",
+  "panda": {
+    "safety_model": "elm327",
+    "safety_param": 0,
+    "bus": 0
+  },
+  "functional_probe": {
+    "request_id": "0x7DF",
+    "request_frame": "0201000000000000",
+    "responses": {
+      "0x7E8": "064100be1fa01300",
+      "0x7EA": "064100981a800300",
+      "0x7EB": "0641009818800300",
+      "0x7ED": "0641009818800300",
+      "0x7EE": "064100981a800300"
+    }
+  },
+  "clear": {
+    "request_id": "0x7DF",
+    "request_frame": "0104000000000000",
+    "responses": {
+      "0x7E8": "0144000000000000",
+      "0x7EA": "0144000000000000",
+      "0x7EB": "0144000000000000",
+      "0x7ED": "0144000000000000",
+      "0x7EE": "0144000000000000"
+    }
+  },
+  "address_join": {
+    "0x7E8": "Engine / category 372 / Address 0x700 / FuncAddress 0x7E0",
+    "0x7EA": "Hybrid Control / category 397 / Address 0x7D2 / FuncAddress 0x7E2",
+    "0x7EB": "HV Battery / category 398 / Address 0x747 / FuncAddress 0x7E3",
+    "0x7ED": "Brake/EPB / category 435 / Address 0x7B0 / FuncAddress 0x7E5",
+    "0x7EE": "Motor Generator / category 395 / Address 0x724 / FuncAddress 0x7E6"
+  },
+  "boundary": "Exact live CAN observation from the maintainer's 2026 Camry. The request is standard legislated OBD Mode 04; this record does not claim that every Toyota ECU or every vehicle uses the same clear route."
+}
