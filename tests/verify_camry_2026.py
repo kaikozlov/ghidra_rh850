@@ -477,11 +477,12 @@ def _section_camry_frc_lta_capture_tool():
     import io
     import json
     import tempfile
-    from collections import Counter
     from pathlib import Path
+    from types import SimpleNamespace
 
     import tools.analyze_camry_frc_lta_capture as analyze
     import tools.camry_frc_lta_capture as cap
+    import tools.extract_camry_frc_lta_rlog as rlog_extract
 
     p = cap.plan()
     check('FRC LTA tool is read-only and pins exact 1601 request',
@@ -515,35 +516,13 @@ def _section_camry_frc_lta_capture_tool():
         (123, 0, 0x0B6, bytes(range(32))),
         (456, 1, 0x18A, bytes(range(64))),
     ])
-    class FakeRelayPanda:
-        def __init__(self):
-            self.pending = []
-            self.tx_buses = []
-        def can_send(self, address, data, bus):
-            self.tx_buses.append(bus)
-            if bus == 0:
-                response = bytes.fromhex('0762160101000000')
-                self.pending = [(cap.FRC_RX, response, 0), (cap.FRC_RX, response, 2)]
-        def can_recv(self):
-            pending, self.pending = self.pending, []
-            return pending
-    fake = FakeRelayPanda()
-    probe_can = io.BytesIO(); cap.write_canbin_header(probe_can)
-    probe_oracle = io.StringIO()
-    probe_stats = {
-        'frames_by_bus': Counter({'0':0,'1':0,'2':0}),
-        'b6_by_bus': Counter({'0':0,'1':0,'2':0}),
-        'oracle_positive': 0, 'oracle_negative': 0, 'oracle_positive_by_did': Counter(),
-        'lta_control_counts': Counter(), 'acc_operation_counts': Counter(),
-    }
-    selected = cap.auto_probe_diag_bus(fake, probe_can, probe_oracle, probe_stats, wait_s=0.002)
-    check('relay-aware 1601 probe selects TX bus0 even when one response is visible on RX0+RX2',
-          selected == 0 and fake.tx_buses == [0] and probe_stats['oracle_positive'] == 2 and
-          '"positive_rx_buses":[0,2]' in probe_oracle.getvalue())
+    check('direct-Panda fallback pins already-proved FRC route instead of probing unrelated buses',
+          p['diag_bus'] == 0 and 'post-repin FRC 0x792 live response on Panda bus 0' in p['route_source'] and
+          'auto_probe_diag_bus' not in (REPO / 'tools/camry_frc_lta_capture.py').read_text())
     with tempfile.TemporaryDirectory() as td:
         capture = Path(td)
         (capture / 'metadata.json').write_text(json.dumps({
-            'schema': 'camry-frc-lta-capture-v1', 'diag_bus': 1, 'duration_s': 1.0,
+            'schema': 'camry-frc-lta-capture-v1', 'diag_bus': 0, 'duration_s': 1.0,
             'files': {'can': 'can.bin', 'oracle': 'oracle.ndjson'},
         }))
         oracle_rows = [
@@ -585,6 +564,49 @@ def _section_camry_frc_lta_capture_tool():
               summary['can']['b6_during_stable_lta_enabled_plus_acc_operating'] == 0 and
               summary['can']['wheel_speed_kph_during_operating_context']['moving_over_2kph_sample_count'] == 1 and
               summary['discriminator']['strong_zero_b6_operating_context'] is True)
+
+    class FakeEvent:
+        def __init__(self, kind, t_ns, frames):
+            self._kind = kind
+            self.logMonoTime = t_ns
+            self.can = frames if kind == 'can' else []
+            self.sendcan = frames if kind == 'sendcan' else []
+        def which(self):
+            return self._kind
+
+    def frame(bus, addr, data):
+        return SimpleNamespace(src=bus, address=addr, dat=data)
+
+    with tempfile.TemporaryDirectory() as td:
+        reduced = Path(td) / 'reduced'
+        events = [
+            (26, FakeEvent('sendcan', 1_000_000_000, [frame(0, 0x792, cap.UDS_RDBI_REQUEST)])),
+            (26, FakeEvent('can', 1_005_000_000, [frame(0, 0x79A, bytes.fromhex('0762160101000000'))])),
+            (26, FakeEvent('sendcan', 1_010_000_000, [frame(0, 0x792, cap.ACC_OPERATION_RDBI_REQUEST)])),
+            (26, FakeEvent('can', 1_015_000_000, [frame(0, 0x79A, bytes.fromhex('0562191480010000'))])),
+            (26, FakeEvent('can', 1_030_000_000, [
+                frame(0, 0x00F, bytes(8)),
+                frame(0, 0x0D7, bytes(32)),
+                frame(0, 0x0AA, bytes.fromhex('1e571e571e571e57')),
+                frame(0, 0x030, bytes(32)),
+                frame(1, 0x18A, bytes(64)),
+            ])),
+            (26, FakeEvent('sendcan', 1_100_000_000, [frame(0, 0x792, cap.UDS_RDBI_REQUEST)])),
+            (26, FakeEvent('can', 1_105_000_000, [frame(0, 0x79A, bytes.fromhex('0762160101000000'))])),
+            (26, FakeEvent('sendcan', 1_110_000_000, [frame(0, 0x792, cap.ACC_OPERATION_RDBI_REQUEST)])),
+            (26, FakeEvent('can', 1_115_000_000, [frame(0, 0x79A, bytes.fromhex('0562191480010000'))])),
+        ]
+        meta = rlog_extract.reduce_events(
+            events, reduced, sources=[{'segment': 26, 'size': 123, 'sha256': 'a' * 64}],
+        )
+        reduced_summary = analyze.analyze(reduced)
+        check('loggerd reducer preserves only fixed FRC queries plus incoming CAN in analyzer-compatible shape',
+              meta['schema'] == 'camry-frc-lta-rlog-capture-v1' and
+              meta['diag_bus'] == 0 and
+              meta['oracle_query_by_did'] == {'0x1601': 2, '0x1914': 2} and
+              meta['oracle_positive_by_did'] == {'0x1601': 2, '0x1914': 2} and
+              meta['b6_by_bus'] == {'0': 0, '1': 0, '2': 0} and
+              reduced_summary['discriminator']['strong_zero_b6_operating_context'] is True)
     check('pandad process guard recognizes manager Python module and native process forms',
           cap.cmdline_is_pandad('/usr/bin/python3 -m openpilot.selfdrive.pandad.pandad') and
           cap.cmdline_is_pandad('/data/openpilot/openpilot/selfdrive/pandad/pandad') and

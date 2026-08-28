@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Capture exact-Camry FRC LTA state and all Panda CAN traffic with one USB owner.
 
-This is a read-only diagnostic capture helper for the remaining VAR-063/065/066
-live discriminator.  It deliberately refuses to run while ``pandad`` owns the
+This is a read-only direct-Panda fallback helper for the remaining
+VAR-063/065/066 live discriminator. The preferred live path is the
+``ToyotaTSS3FrcOracleCapture`` integration in kai-openpilot plus normal loggerd;
+this standalone helper deliberately refuses to run while ``pandad`` owns the
 Panda, avoiding the checksum/USB collision that invalidated the earlier
 parallel-reader capture.
 
@@ -36,6 +38,7 @@ from typing import BinaryIO
 
 FRC_TX = 0x792
 FRC_RX = 0x79A
+FRC_DIAG_BUS = 0
 FRC_DID = 0x1601
 ACC_OPERATION_DID = 0x1914
 ELM327_SAFETY_MODEL = 3
@@ -235,55 +238,14 @@ def _capture_messages(panda, can_stream: BinaryIO, oracle_stream, *, diag_bus: i
     return positive_buses
 
 
-def auto_probe_diag_bus(panda, can_stream: BinaryIO, oracle_stream, stats: dict,
-                        buses: tuple[int, ...] = (0, 2, 1), wait_s: float = 0.18) -> int:
-    """Return the first TX bus that elicits a positive FRC response.
-
-    After the Toyota-B repin, CAN0/CAN2 are two Panda transceivers on the same
-    closed-relay physical network.  A single FRC response can therefore be
-    observed on *both* receive buses.  The useful discriminator is which TX bus
-    successfully reaches the ECU, not whether the response appears on exactly
-    one logical RX bus.  Prefer relay-side bus0, then bus2, and only then the
-    separate bus1 network.
-    """
-    for bus in buses:
-        # Drain any delayed response from an earlier attempt so it cannot make
-        # the next TX bus look successful.
-        for _ in range(2):
-            _capture_messages(panda, can_stream, oracle_stream, diag_bus=None, stats=stats)
-        t_ns = time.monotonic_ns()
-        panda.can_send(FRC_TX, UDS_RDBI_REQUEST, bus)
-        _oracle_write(oracle_stream, {
-            "type": "query",
-            "phase": "probe",
-            "t_ns": t_ns,
-            "bus": bus,
-            "address": f"0x{FRC_TX:03X}",
-            "request": UDS_RDBI_REQUEST.hex(),
-        })
-        positive_rx_buses: set[int] = set()
-        deadline = time.monotonic() + wait_s
-        while time.monotonic() < deadline:
-            positive_rx_buses.update(
-                _capture_messages(panda, can_stream, oracle_stream, diag_bus=None, stats=stats)
-            )
-        if positive_rx_buses:
-            _oracle_write(oracle_stream, {
-                "type": "probe_result",
-                "t_ns": time.monotonic_ns(),
-                "tx_bus": bus,
-                "positive_rx_buses": sorted(positive_rx_buses),
-            })
-            return bus
-    raise RuntimeError("0x1601 probe received no positive response on candidate TX buses 0,2,1")
-
-
 def plan() -> dict:
     return {
         "operation": "single-Panda passive all-CAN capture plus read-only FRC SID22 polling",
         "tx": f"0x{FRC_TX:03X}",
         "rx": f"0x{FRC_RX:03X}",
         "did": f"0x{FRC_DID:04X}",
+        "diag_bus": FRC_DIAG_BUS,
+        "route_source": "relay-correct 2026-08-27 post-repin FRC 0x792 live response on Panda bus 0",
         "request_frame": UDS_RDBI_REQUEST.hex(),
         "companion_did": f"0x{ACC_OPERATION_DID:04X}",
         "companion_request_frame": ACC_OPERATION_RDBI_REQUEST.hex(),
@@ -309,7 +271,7 @@ def plan() -> dict:
     }
 
 
-def execute(out_dir: Path, *, diag_bus: int | None, duration_s: float | None, poll_hz: float) -> int:
+def execute(out_dir: Path, *, duration_s: float | None, poll_hz: float) -> int:
     if poll_hz <= 0 or poll_hz > 25:
         raise SystemExit("--poll-hz must be >0 and <=25")
     running = find_pandad_processes()
@@ -337,7 +299,7 @@ def execute(out_dir: Path, *, diag_bus: int | None, duration_s: float | None, po
     }
     started_wall = time.time()
     started_ns = time.monotonic_ns()
-    selected_bus = diag_bus
+    selected_bus = FRC_DIAG_BUS
     error: str | None = None
 
     panda = Panda(serials[0])
@@ -346,13 +308,10 @@ def execute(out_dir: Path, *, diag_bus: int | None, duration_s: float | None, po
         with can_path.open("wb", buffering=1024 * 1024) as can_stream, oracle_path.open("w", buffering=1) as oracle_stream:
             write_canbin_header(can_stream)
             _oracle_write(oracle_stream, {"type": "meta", "t_ns": started_ns, "plan": plan()})
-            # Drain initial backlog into the retained capture before probing.
+            # Drain initial backlog into the retained capture. The exact target
+            # post-repin route is already closed as Panda logical bus 0; do not probe unrelated buses.
             for _ in range(3):
                 _capture_messages(panda, can_stream, oracle_stream, diag_bus=None, stats=stats)
-            if selected_bus is None:
-                selected_bus = auto_probe_diag_bus(panda, can_stream, oracle_stream, stats)
-            if selected_bus not in (0, 1, 2):
-                raise RuntimeError(f"invalid selected diagnostic bus: {selected_bus}")
 
             # poll_hz is per DID; alternate 0x1601 and 0x1914 so each gets the
             # requested sampling rate without issuing two back-to-back UDS reads.
@@ -417,7 +376,6 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--execute", action="store_true", help="perform the read-only capture; default prints the plan")
     ap.add_argument("--out", type=Path, help="new output directory (required with --execute)")
-    ap.add_argument("--diag-bus", type=int, choices=(0, 1, 2), help="skip read-only 0x1601 bus auto-probe")
     ap.add_argument("--duration", type=float, help="capture seconds; omit to run until Ctrl-C")
     ap.add_argument("--poll-hz", type=float, default=DEFAULT_POLL_HZ,
                     help="poll rate per DID for 0x1601 and 0x1914 (default: 10 Hz each)")
@@ -427,7 +385,7 @@ def main() -> int:
         return 0
     if args.out is None:
         ap.error("--out is required with --execute")
-    return execute(args.out, diag_bus=args.diag_bus, duration_s=args.duration, poll_hz=args.poll_hz)
+    return execute(args.out, duration_s=args.duration, poll_hz=args.poll_hz)
 
 
 if __name__ == "__main__":

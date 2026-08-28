@@ -223,40 +223,49 @@ Provenance is in `raw-20260827/MANIFEST.txt`; deterministic interpretation is
 
 ## Synchronized FRC LTA discriminator capture
 
-`tools/camry_frc_lta_capture.py` is the prepared read-only capture helper for the
-remaining zero-B6 discriminator. By default it only prints its plan. In execute
-mode it uses one Panda process for both full CAN reception and alternating read-only
-FRC P5 DID `0x1601` (`0x792: 03 22 16 01 00 00 00 00`) plus `0x1914`
-(`03 22 19 14 00 00 00 00`) polling. The diagnostic auto-probe prefers TX bus0,
-then bus2, then bus1; it explicitly accepts
-one response being visible on both RX0 and RX2 because those transceivers sit on the
-same closed-relay physical network after the repin.
+The preferred live path now stays entirely inside normal openpilot ownership.
+`kai-openpilot@248777d0a` adds DEVELOPMENT_ONLY `ToyotaTSS3FrcOracleCapture` to
+`card`: it is exact-`8965F3307000`, passive, non-release, mutually exclusive with
+the staged development lateral sender, and reuses `card`'s existing `sendcan`
+publisher rather than opening a second Panda handle. Runtime transmission is
+allowed only while the single Panda reports ELM327 parameter 1 with controls
+disallowed. `ControlsReady` must already be false when the poller is configured,
+so this capture cannot coexist with a configured vehicle-control safety model.
+
+The route is no longer guessed or auto-probed. The relay-correct 2026-08-27
+post-repin DTC sweep directly reaches FRC `0x792→0x79A` on **Panda logical bus 0**.
+Current-GTS+ “Central-Gateway Bus 1” is Toyota's vehicle-topology namespace, not a
+Panda bus number; the earlier pre-repin normal-harness diagnostic route was Panda
+bus1 and must not be projected through the physical repin unchanged. The poller
+can emit only these two literal 8-byte
+SID-`0x22` requests, alternating at 10 Hz per DID:
+
+- `03 22 16 01 00 00 00 00` — FRC P5 DID `0x1601`;
+- `03 22 19 14 00 00 00 00` — FRC P5 DID `0x1914`.
+
 Current GTS+ resolves `0x1601` as LTA Switch `0=OFF/1=ON`, LTA Control
 `0=LTA Enabled/1=LTA Disabled`, Hands-Off Customize `0=OFF/1=ON`, and Hands-Off
-Control `0=Enabled/1=Disabled`. The discriminator therefore treats **switch=1 +
-LTA-control=0** as the exact OEM-named LTA-enabled diagnostic state; it does not
-rename that state to continuous steering actuation. `0x1914` independently resolves
-bit8 as `0=Cruise Control Not in Operation` / `1=Cruise Control in Operation`; the
-strong operating-context discriminator requires stable LTA-enabled + `0x1914=1` overlap.
+Control `0=Enabled/1=Disabled`. `0x1914` independently resolves bit8 as
+`0=Cruise Control Not in Operation` / `1=Cruise Control in Operation`. The
+strong operating-context discriminator therefore requires stable
+**LTA Switch=1 + LTA Control=0 + ACC-in-operation=1**, plus independently
+observed vehicle motion and healthy Bus-4 `0x00F/0x0D7`. It remains an OEM-named
+diagnostic operating context, not direct proof of continuous steering torque.
 
-The helper deliberately **refuses to run while `pandad` is present** and keeps a
-runtime watchdog for it. This is required because the 2026-08-27 parallel direct-
-Panda reader collided with `pandad` and failed with `CHECKSUM_ERROR`. Before any
-live run, the comma process supervisor must therefore be placed in a state where
-`pandad` will remain stopped for the entire capture; do not merely kill a process
-that the manager will immediately restart. The tool itself does not stop/reconfigure
-the process supervisor.
+Normal `pandad` and `loggerd` remain running. Loggerd records both the matching
+`sendcan` requests and incoming `can` responses; no competing direct-Panda reader
+is used. After the drive,
+`tools/extract_camry_frc_lta_rlog.py OUT SEGMENT=RLOG ...` privacy-minimizes the
+explicit source segments into `can.bin`, `oracle.ndjson`, and `metadata.json`,
+retaining incoming CAN plus only the two matching FRC requests. Then
+`tools/analyze_camry_frc_lta_capture.py OUT` performs the stable-interval join,
+wheel-speed check, protected-traffic check, and B6 census. The analyzer's
+`strong_zero_b6_operating_context` flag is true only when the combined OEM oracle
+overlaps motion and healthy Bus-4 traffic while B6 remains absent.
 
-The capture writes `can.bin` (compact timestamped all-bus CAN), `oracle.ndjson`
-(query/response events), and `metadata.json` (counts, selected diagnostic bus,
-B6 counts, and observed `LTA Control Condition` values). It transmits no vehicle-
-control frame, performs no SecurityAccess/RoutineControl, and makes no flash or
-DataFlash write. A live artifact is not claimed until this helper is actually run
-on the exact car and the resulting files are promoted with provenance.
-`tools/analyze_camry_frc_lta_capture.py CAPTURE_DIR` then classifies CAN only between
-two consecutive equal positive `0x1601` samples, leaving transitions and large oracle
-gaps unclassified. It reports stable LTA-enabled duration, stable overlap with ACC-in-operation,
-wheel-speed evidence during that overlap, B6 count, protected Bus-4 control carriers,
-and the bus-1 upstream ID/DLC census. Its `strong_zero_b6_operating_context` flag is true
-only when the stable combined oracle overlaps motion and healthy `0x00F/0x0D7` traffic
-while B6 remains absent.
+`tools/camry_frc_lta_capture.py` remains an exclusive-Panda fallback for controlled
+bench/acquisition work. It now pins the same already-proved post-repin Panda-bus0 FRC route and
+still refuses to execute while `pandad` is running. It is **not** the preferred
+road-capture path. A new live artifact is not claimed until the exact car actually
+runs the integrated oracle and the resulting privacy-minimized evidence is promoted
+with provenance.

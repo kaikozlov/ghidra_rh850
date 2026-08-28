@@ -253,8 +253,14 @@ the upper two bytes), with `0x1501` LDA, `0x1681` LCA, and `0x1903` Control Mode
 companions. Add FRC `0x1914`, whose current dictionary gives **1=“Cruise Control in
 Operation”**. The strong discriminator is stable 1601 LTA-enabled + 1914 ACC-operating
 overlap with vehicle motion and healthy Bus-4 `00F/D7`; this remains an OEM-named
-operating context, not direct steering-torque measurement. Only after that synchronized
-oracle should the B6 template assumption be kept or challenged. Exclusive source suppression, slot-4 command-5 generation
+operating context, not direct steering-torque measurement. `kai-openpilot@248777d0a`
+now implements the read-only acquisition shape inside passive exact-F33 `card`, using its
+existing `sendcan` publisher with normal `pandad`/`loggerd`, fixed post-repin Panda-bus0 `0x792` SID22
+reads, ELM327-param1/controls-disallowed gating, and per-DID two-second stale-stop.
+`tools/extract_camry_frc_lta_rlog.py` converts the resulting explicit rlog segments into
+the analyzer's privacy-minimized capture format. This is tooling readiness only; the live
+synchronized artifact is still missing. Only after that oracle should the B6 template
+assumption be kept or challenged. Exclusive source suppression, slot-4 command-5 generation
 permission plus latency/contention, and normal/asserted/recovery correlations for the
 F33 status carriers remain live work. Driver override and current-response thresholds
 remain policy choices requiring conservative dynamic validation, not values to infer
@@ -293,8 +299,10 @@ to logical bus1, matching Toyota's Bus4/Bus1 split. The relay pair is therefore 
 the B6-capable Brake/EPS network. Do not spend another pass swapping Panda buses or
 inventing a second EPS CAN port; the remaining discriminator is **stock operating state**:
 synchronize FRC `0x1601` **Switch=1 / LTA-Control=0 (Enabled)** plus `0x1914=1`
-**Cruise Control in Operation**, motion, and healthy Bus-4 protected traffic against the
-existing relay-correct capture.
+**Cruise Control in Operation**, motion, and healthy Bus-4 protected traffic. Use the
+prepared normal-loggerd exact-F33 oracle path rather than another direct-Panda reader or
+another blind drive; the old two-drive relay-correct capture remains the bounded negative
+baseline, not a substitute for the missing synchronized oracle.
 
 COM-013 closes much more of the whole-vehicle side than the earlier EPS-only
 roadmap. TSS generation and SecOC/TSK are **orthogonal** (CORR-108). The public
