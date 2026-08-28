@@ -1,4 +1,29 @@
 {
+  "b6_receiver_source_expectation": {
+    "classification": "exact F33 receiver expects B6/PDU44 as Brake System Control Module traffic; CAN itself carries no source-node address, so this identifies the monitored immediate source-domain relationship rather than a unique transmitter implementation",
+    "communication_monitor": {
+      "can_id": "0x0B6",
+      "dem_event": "0x0143",
+      "dem_event_raw_hex": "4200520000010000",
+      "dispatcher": "0x0003CBE8",
+      "dtc_index": 82,
+      "dtc_raw_hex": "8729c10001000000",
+      "length": 32,
+      "monitored_pdu": 44,
+      "raw_hex": "00004301051aa506",
+      "row_index": 5,
+      "scheduler": "0x0003CCBE",
+      "status_map_table": "0x00028FE4",
+      "status_slot": "0x1A",
+      "table": "0x000280A4"
+    },
+    "receiver_controller": 1,
+    "techstream_dtc": {
+      "code": "U012987",
+      "description": "Lost Communication with Brake System Control Module",
+      "failure": "Missing Message"
+    }
+  },
   "b6_to_command_torque": {
     "classification": "positive downstream corroboration of the already-proved protected B6 target-angle ingress",
     "gtsplus_terminal": "0x1C02 Command Value Torque",
@@ -21,7 +46,7 @@
     "GTS+ supplies diagnostic names/DIDs, not a CAN-ID database; CAN-to-name joins are through exact F33 firmware dataflow."
   ],
   "conclusion": {
-    "b6": "Protected 0x0B6 remains the only positively recovered external target-steering-angle ingress and now has selected downstream corroboration to Toyota-named 0x1C02 Command Value Torque, but it is absent in both relay-correct drives.",
+    "b6": "Protected 0x0B6 remains the only positively recovered external target-steering-angle ingress. Exact F33 communication-monitor row5 independently maps PDU44/B6 loss to DTC index82, which GTS+ names U012987 Lost Communication with Brake System Control Module / Missing Message, so the EPS itself expects B6 from the brake-system source domain. B6 also has selected downstream corroboration to Toyota-named 0x1C02 Command Value Torque, but it is absent in both relay-correct drives.",
     "next": "Do not search another arbitrary accepted EPS CAN ID first. Synchronize the FRC 0x1601 LTA-active oracle with relay-correct CAN. If LTA is machine-proved active while B6 remains absent, move the search outside ordinary EPS generated-COM ingress: upstream FRC/Brake transformation, an internal/non-COM path, or another controller/peripheral path.",
     "normal_com": "Exact controller-1 rules 0..42 equal the 43 normal generated-COM descriptors one-for-one; rules 43..46 are diagnostics/XCP only. Within that complete normal-CAN surface, the two observed non-B6 command-sized candidates are 0x0D5 monitor channels and 0x115 Engine Revolution; 0x025 is measured steering feedback; 0x1C5/0x64F are absent. The generic group receive PDUs 0x013..0x01F are also absent. No observed ordinary EPS-CAN field besides B6 is identified as an external steering target/command, and there is no hidden controller-1 acceptance ID outside the normal COM table.",
     "production_output_authorized": false
@@ -623,6 +648,10 @@
         "size": 24952076
       }
     ],
+    "fault_status": {
+      "path": "data/generated/camry_8965F3307000_fault_status.json",
+      "sha256": "cc0a0d55ce2465fa13a6b004d8f9c83848c8f27d98d337347570cb7203e7f455"
+    },
     "gtsplus_semantics": {
       "path": "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
       "sha256": "ffab4fad18b249eb5fe0bcf60afd69565165d9214a9b9beb0886069c55f1f670"

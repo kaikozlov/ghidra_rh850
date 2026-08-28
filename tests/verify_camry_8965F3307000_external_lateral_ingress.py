@@ -32,6 +32,9 @@ check("normal Rx/scalar census exact", art["normal_rx"]["descriptor_count"] == 4
 ctrl = art["controller1_acceptance"]
 check("controller1 acceptance span is exhausted", ctrl["count"] == 47 and ctrl["normal_rule_indices"] == [0,42] and ctrl["normal_rules_equal_descriptor_order"] is True)
 check("only diagnostic/XCP rules follow normal COM", [(x.get("can_id"), x["role"]) for x in ctrl["special_tail"]] == [("0x7A1","physical UDS"),("0x777","functional UDS"),("0x7A0","secondary diagnostics"),("0x7F7","application XCP")])
+src = art["b6_receiver_source_expectation"]
+check("F33 communication monitor maps slot1A to PDU44/B6", src["communication_monitor"]["row_index"] == 5 and src["communication_monitor"]["status_slot"] == "0x1A" and src["communication_monitor"]["monitored_pdu"] == 44 and src["communication_monitor"]["can_id"] == "0x0B6")
+check("F33 B6 loss is Brake System Control Module missing-message", src["communication_monitor"]["dem_event"] == "0x0143" and src["communication_monitor"]["dtc_index"] == 82 and src["techstream_dtc"] == {"code":"U012987","description":"Lost Communication with Brake System Control Module","failure":"Missing Message"})
 
 cands = {(x["can_id"], x["signal"]): x for x in art["normal_rx"]["signed_12plus_candidates"]}
 check("signed >=12-bit ingress set exact", set(cands) == {(0x025,187),(0x025,189),(0x0B6,262),(0x0D5,212),(0x0D5,213),(0x115,134),(0x1C5,141),(0x64F,255),(0x64F,257)})

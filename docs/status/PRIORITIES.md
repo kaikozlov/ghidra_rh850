@@ -260,6 +260,10 @@ from representation clamps. Canonical port report:
 **VAR-065 inverse-ingress update:** do not spend the next pass guessing another ordinary
 EPS CAN command. Exact controller-1 acceptance itself is exhausted: rules 0..42 equal
 the 43 normal COM descriptors and the only tail is `7A1/777/7A0/7F7` diagnostics/XCP.
+Exact F33 communication-monitor row5 also closes the immediate B6 source relationship:
+status slot `0x1A -> PDU44/B6 -> Dem 0x0143 -> DTC index82 ->` current-GTS+ **U012987
+Lost Communication with Brake System Control Module / Missing Message**. The EPS therefore
+expects B6 from the Brake System Control domain; stop treating the sender family as unknown.
 Within that complete normal surface F33 has only nine signed generated-COM fields >=12
 bits. The observed non-B6 candidates are now closed: `0x025` is measured angle/rate feedback;
 `0x115` terminates at current-GTS+ DID1032 **Engine Revolution**; the two `0x0D5`

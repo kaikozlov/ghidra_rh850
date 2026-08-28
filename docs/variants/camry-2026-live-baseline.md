@@ -1140,6 +1140,18 @@ only physical/functional/secondary diagnostics `0x7A1/0x777/0x7A0`; rule 46 is p
 application XCP `0x7F7`. Thus there is no hidden direct CAN acceptance ID on the exact
 steering/diagnostic controller outside the normal-COM denominator.
 
+The receiver also answers the more important source-domain question directly. Exact F33
+communication-monitor dispatcher `0x3CBE8` / scheduler `0x3CCBE` walks the six rows at
+`0x280A4`. Row 5 is `00004301051aa506`: status slot `0x1A`. The exact status-map table
+at `0x28FE4` maps slot `0x1A -> PDU44`, and PDU44 is protected `0x0B6/32`. Loss of that
+row selects Dem event `0x0143`; its exact F33 event record selects DTC index 82 / packed
+`0xC12987`. Current GTS+ names that DTC **U012987 `Lost Communication with Brake System
+Control Module` / `Missing Message`**. So this is not merely an H transfer: the exact Camry
+EPS itself expects B6 as **Brake System Control Module traffic** on its controller-1
+receive network. CAN has no source-node field, so the receiver cannot identify the unique
+transmitter implementation beyond that monitored module relationship; sender code must
+come from the Brake/EPB side (or the upstream FRC->Brake producer chain).
+
 The command-sized candidate set inside that complete normal surface is small. Exact F33
 has only nine signed generated-COM fields at least 12 bits wide: `0x025` signals 187/189,
 B6 signal262, `0x0D5` signals212/213, `0x115` signal134, `0x1C5` signal141, and
@@ -1178,8 +1190,9 @@ not merely a width/name inference: it is a positive code path from the already-p
 target-angle state toward Toyota's named steering-command observable.
 
 Therefore **no observed ordinary EPS generated-COM field other than B6 is identified as
-an external steering target/command**, and controller-1 hardware acceptance contains no
-extra direct-CAN candidate outside that COM surface. This does not prove that stock LTA was active in
+an external steering target/command**, controller-1 hardware acceptance contains no
+extra direct-CAN candidate outside that COM surface, and exact F33 independently labels
+B6 loss as **Brake System Control Module / Missing Message**. This does not prove that stock LTA was active in
 §16, and it does not exclude DMA/peripheral mutation, diagnostic/debug paths, computed
 aliases outside the recovered maps, or another internal controller path. The separate
 bus-1 `0x180..0x18C` CAN-FD family remains a plausible *upstream* FRC/Brake planning or

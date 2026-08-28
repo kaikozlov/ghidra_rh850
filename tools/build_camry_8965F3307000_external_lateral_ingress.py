@@ -22,6 +22,7 @@ from camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, REPO
 OUT = REPO / "data/generated/camry_8965F3307000_external_lateral_ingress.json"
 GTS = REPO / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
 B6 = REPO / "data/generated/camry_8965F3307000_codeflash.json"
+FAULT = REPO / "data/generated/camry_8965F3307000_fault_status.json"
 DRIVES = [
     REPO / "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
     REPO / "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
@@ -110,6 +111,7 @@ def build() -> dict:
     need(len(funcs) == 6065, "F33 corpus function count drift")
     gts = json.loads(GTS.read_text())
     b6 = json.loads(B6.read_text())
+    fault = json.loads(FAULT.read_text())
 
     # Exact normal application receive descriptors, PDU IDs 5..47.
     rx: dict[int, dict] = {}
@@ -132,6 +134,44 @@ def build() -> dict:
     need(normal_rule_ids == descriptor_ids, "normal Rx descriptors no longer exhaust rules 0..42")
     need([r[0] for r in rules[43:46]] == [0x7A1, 0x777, 0x7A0], "diagnostic acceptance tail drift")
     need(rules[46][0] == 0x9FDC0002, "packed XCP rule46 drift")
+
+    # The receiver also tells us the source *module relationship* for B6. CAN frames
+    # have no source-node address, so this comes from F33's own communication-loss
+    # monitor rather than from the arbitration descriptor. The six-row monitor family
+    # is the exact F33 homolog of the H family: row5 watches status slot 0x1A; the
+    # status-map table maps 0x1A -> PDU44 -> 0x0B6. Loss selects Dem event 0x0143,
+    # whose DTC index 82 is the same exact F33 DTC record used by populated event 0x00AA.
+    # Current GTS+ names that record U012987 Lost Communication with Brake System
+    # Control Module / Missing Message. Thus F33 itself expects B6 from the brake-system
+    # source domain even though it cannot encode a transmitter ECU address on the wire.
+    token(funcs, 0x3CBE8, "param_1 < 6", "DAT_000280a4", "DAT_000280a6")
+    token(funcs, 0x3CCBE, "uVar5 < 6", "DAT_000280a9", "FUN_000498e0")
+    monitor_table = 0x280A4
+    status_map = 0x28FE4
+    monitor_row = image[monitor_table + 5 * 8:monitor_table + 6 * 8]
+    need(monitor_row == bytes.fromhex("00004301051aa506"), f"B6 communication-monitor row drift: {monitor_row.hex()}")
+    dem_event = struct.unpack_from("<H", monitor_row, 2)[0]
+    status_slot = monitor_row[5]
+    need(dem_event == 0x143 and status_slot == 0x1A, "B6 monitor event/slot drift")
+    monitored_pdu = image[status_map + status_slot * 8]
+    need(monitored_pdu == 44 and rx[monitored_pdu]["can_id"] == 0x0B6, "B6 monitor slot no longer resolves PDU44")
+    event_rec = image[0x2FC50 + dem_event * 8:0x2FC58 + dem_event * 8]
+    dtc_index = event_rec[2]
+    need(event_rec == bytes.fromhex("4200520000010000") and dtc_index == 82, "B6 monitor Dem/DTC join drift")
+    dtc_rec = image[0x30850 + dtc_index * 8:0x30858 + dtc_index * 8]
+    need(dtc_rec == bytes.fromhex("8729c10001000000"), "B6 monitor DTC record drift")
+    dtc82 = None
+    for cls in fault["dem"]["classes"].values():
+        for event in cls["events"]:
+            d = event.get("dtc")
+            if d and d["dtc_index"] == 82:
+                dtc82 = d
+                break
+        if dtc82:
+            break
+    need(dtc82 is not None and dtc82["techstream_code"] == "U012987"
+         and dtc82["techstream_description"] == "Lost Communication with Brake System Control Module"
+         and dtc82["techstream_failure"] == "Missing Message", "B6 source-module Techstream join drift")
 
     # Exact scalar generated-COM calls.  Relative byte geometry comes directly from
     # signal-to-PDU + PDU-buffer-offset tables, not guessed DBC layouts.
@@ -242,6 +282,7 @@ def build() -> dict:
         "sources": {
             "gtsplus_semantics": {"path": str(GTS.relative_to(REPO)), "sha256": sha(GTS)},
             "b6_static": {"path": str(B6.relative_to(REPO)), "sha256": sha(B6)},
+            "fault_status": {"path": str(FAULT.relative_to(REPO)), "sha256": sha(FAULT)},
             "drive_artifacts": [{"path": str(p.relative_to(REPO)), "sha256": sha(p), "size": p.stat().st_size} for p in DRIVES],
         },
         "normal_rx": {
@@ -262,6 +303,23 @@ def build() -> dict:
                 {"rule": 46, "packed_descriptor": "0x9FDC0002", "can_id": "0x7F7", "role": "application XCP"},
             ],
             "classification": "the exact steering/diagnostic RSCFD controller-1 hardware acceptance surface contains no hidden non-COM lateral CAN ID beyond the 43 normal descriptors",
+        },
+        "b6_receiver_source_expectation": {
+            "receiver_controller": 1,
+            "communication_monitor": {
+                "dispatcher": "0x0003CBE8", "scheduler": "0x0003CCBE",
+                "table": "0x000280A4", "row_index": 5, "raw_hex": monitor_row.hex(),
+                "status_slot": "0x1A", "status_map_table": "0x00028FE4",
+                "monitored_pdu": 44, "can_id": "0x0B6", "length": 32,
+                "dem_event": "0x0143", "dem_event_raw_hex": event_rec.hex(),
+                "dtc_index": dtc_index, "dtc_raw_hex": dtc_rec.hex(),
+            },
+            "techstream_dtc": {
+                "code": dtc82["techstream_code"],
+                "description": dtc82["techstream_description"],
+                "failure": dtc82["techstream_failure"],
+            },
+            "classification": "exact F33 receiver expects B6/PDU44 as Brake System Control Module traffic; CAN itself carries no source-node address, so this identifies the monitored immediate source-domain relationship rather than a unique transmitter implementation",
         },
         "special_paths": {
             "0x0D5": {
@@ -293,7 +351,7 @@ def build() -> dict:
         "live_intersection": live,
         "conclusion": {
             "normal_com": "Exact controller-1 rules 0..42 equal the 43 normal generated-COM descriptors one-for-one; rules 43..46 are diagnostics/XCP only. Within that complete normal-CAN surface, the two observed non-B6 command-sized candidates are 0x0D5 monitor channels and 0x115 Engine Revolution; 0x025 is measured steering feedback; 0x1C5/0x64F are absent. The generic group receive PDUs 0x013..0x01F are also absent. No observed ordinary EPS-CAN field besides B6 is identified as an external steering target/command, and there is no hidden controller-1 acceptance ID outside the normal COM table.",
-            "b6": "Protected 0x0B6 remains the only positively recovered external target-steering-angle ingress and now has selected downstream corroboration to Toyota-named 0x1C02 Command Value Torque, but it is absent in both relay-correct drives.",
+            "b6": "Protected 0x0B6 remains the only positively recovered external target-steering-angle ingress. Exact F33 communication-monitor row5 independently maps PDU44/B6 loss to DTC index82, which GTS+ names U012987 Lost Communication with Brake System Control Module / Missing Message, so the EPS itself expects B6 from the brake-system source domain. B6 also has selected downstream corroboration to Toyota-named 0x1C02 Command Value Torque, but it is absent in both relay-correct drives.",
             "next": "Do not search another arbitrary accepted EPS CAN ID first. Synchronize the FRC 0x1601 LTA-active oracle with relay-correct CAN. If LTA is machine-proved active while B6 remains absent, move the search outside ordinary EPS generated-COM ingress: upstream FRC/Brake transformation, an internal/non-COM path, or another controller/peripheral path.",
             "production_output_authorized": False,
         },
