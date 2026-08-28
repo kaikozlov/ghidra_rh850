@@ -2032,10 +2032,15 @@ current GTS+ all the way to send/mask/check bytes.
 The architectural implication for a portable Toyota diagnostic runtime is now
 concrete: implement this shared DB interpreter and a growing library of plugin
 semantics rather than reproducing individual Techstream screens or hard-coding
-one DID/service at a time. Specialized parsers, retries, session transitions,
-security algorithms, and state machines still live in executable plugins and
-must be recovered honestly; the common interpreter does not make those behaviors
-declarative. The deterministic architecture artifact is
+one DID/service at a time. `tools/gts command <category> <role>` is the joined
+read-only view over that model: it resolves the selected category's own plugin,
+frames, CommSets and timers, then attaches executable semantics only when the
+selected plugin SHA-256 exactly matches a recovered profile. A filename/role
+match with changed bytes deliberately returns an unrecovered semantic state and
+no inferred parser/selector plan. Specialized parsers, retries, session
+transitions, security algorithms, and state machines still live in executable
+plugins and must be recovered honestly; the common interpreter does not make
+those behaviors declarative. The deterministic architecture artifact is
 `data/generated/techstream_v18/diagnostic_execution_model.json`, produced by
 `tools/techstream/extract_diagnostic_execution_model.py` and verified by
 `tests/verify_techstream_diagnostic_execution_model.py`.

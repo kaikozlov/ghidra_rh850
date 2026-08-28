@@ -2,6 +2,7 @@
 """Verify the unified read-only GTS+ query surface against pinned external artifacts."""
 from __future__ import annotations
 
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -89,6 +90,46 @@ role19 = next(row for row in role_catalog if row["role"] == 25)
 check(len(role_catalog) == 191 and role19["binding_count"] == 536 and role19["category_count"] == 536 and role19["binding_surface_counts"] == {"direct_transport": 536} and role19["plugins"][0]["dll"] == "DelDiagCodeP4.dll" and role19["plugins"][0]["binding_count"] == 424, "current master role census resolves operation surfaces as well as 6194 -> 191 role compression")
 role5 = next(row for row in role_catalog if row["role"] == 5)
 check(role5["plugins"][0]["surface"] == "support_cache_v18_proven" and role5["plugins"][1]["surface"] == "delegated_transport_v18_proven", "role query distinguishes P4 cached support from P5 delegated support probing")
+hybrid_plan = gts_cli._master_command_plan(parser, master, hybrid, 0x19, gts / "bin")
+check(
+    hybrid_plan["plugin"] == "DelDiagCodeP4.dll"
+    and hybrid_plan["semantic_status"] == "exact_plugin_identity_and_primary_frame"
+    and hybrid_plan["frames"]["primary"]["send"]["bytes"] == "04"
+    and hybrid_plan["frames"]["fallback"]["send"]["bytes"] == "14ffffff"
+    and hybrid_plan["timers"] == [{"category_id": 397, "timer_id": 1, "delay_ms": 0, "unknown_dword_08": 0, "raw": "000000008d01010000000000"}]
+    and len(hybrid_plan["control_flow"]["fallback_error_codes_when_function_gate_set"]) == 10,
+    "command plan joins Hybrid role 0x19 plugin, category-local frames, timer, and exact state machine",
+)
+emps_category = gts_cli._resolve_master_category(parser, master, strings, "EMPS_P5")
+emps_cid_plan = gts_cli._master_command_plan(parser, master, emps_category, 0x52, gts / "bin")
+check(
+    emps_cid_plan["plugin"] == "GetCID_SID22_DT.dll"
+    and emps_cid_plan["semantic_status"] == "exact_plugin_identity_and_category_frame"
+    and emps_cid_plan["frames"]["request"]["send"]["bytes"] == "22f181"
+    and emps_cid_plan["response_model"]["payload_offset"] == 4
+    and emps_cid_plan["response_model"]["record_size"] == 16,
+    "command plan joins EMPS role 0x52 F181 wire contract to exact current response parser",
+)
+emps_signal_plan = gts_cli._master_command_plan(parser, master, emps_category, 0x41, gts / "bin")
+check(
+    emps_signal_plan["semantic_status"] == "plugin_semantics_unrecovered_for_identity"
+    and emps_signal_plan["frames"] == {}
+    and emps_signal_plan["response_model"] is None,
+    "command plan does not infer selectors or parser semantics for an unrecovered plugin identity",
+)
+with tempfile.TemporaryDirectory(prefix="gts-command-hash-mismatch-") as td:
+    fake_bin = Path(td)
+    source = gts / "bin/GetCID_SID22_DT.dll"
+    altered = fake_bin / source.name
+    shutil.copyfile(source, altered)
+    altered.write_bytes(altered.read_bytes() + b"\x00")
+    mismatched = gts_cli._master_command_plan(parser, master, emps_category, 0x52, fake_bin)
+    check(
+        mismatched["semantic_status"] == "plugin_semantics_unrecovered_for_identity"
+        and mismatched["response_model"] is None
+        and mismatched["frames"] == {},
+        "command plan fails closed when a known plugin filename has a different SHA-256",
+    )
 primary = gts_cli._master_frame_rows(parser, master, hybrid["category_id"], 0x01)
 check(len(primary) == 1 and primary[0]["comm_set_metadata"]["receive_timeout"] == 1020 and primary[0]["comm_set_metadata"]["retry_count"] == 1 and primary[0]["send"] == {"id": "0x2743", "normalized_id": "0x33", "bytes": "04"} and primary[0]["receive_check"] == {"id": "0x28F7", "normalized_id": "0x1E7", "bytes": "44"}, "current master selector 1 resolves namespaced variables to 04 -> 44")
 fallback = gts_cli._master_frame_rows(parser, master, hybrid["category_id"], 0x102)

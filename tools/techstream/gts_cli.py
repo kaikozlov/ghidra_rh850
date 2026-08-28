@@ -9,6 +9,7 @@ inspection) without merging the subsystem-specific deterministic generators.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import struct
@@ -29,7 +30,7 @@ from ddb_semantics import behavior_rows as semantic_behavior_rows
 from ddb_semantics import dtc_rows as semantic_dtc_rows
 from ddb_semantics import monitor_rows as semantic_monitor_rows
 from ddb_strings import load_string_db as cached_string_db
-from diagnostic_role_model import role_operation_catalog
+from diagnostic_role_model import plugin_operation_signature, role_operation_catalog
 from parse_cuw_container import first_member_payload, read_first_member
 from parse_cuw_container import parse as parse_cuw_container
 from parse_ddb import ECU_TABLE_CLASS_NAMES, DDBParser, StringDataBase
@@ -47,6 +48,7 @@ from techstream_paths import (
 
 DEFAULT_GTS_EXTERNAL = GTSPLUS_EXTERNAL_ROOT
 DEFAULT_CUW_CORPUS = CUW_CORPUS_ROOT
+EXECUTION_MODEL = ROOT / "data/generated/techstream_v18/diagnostic_execution_model.json"
 
 
 def _resolve_gts_root(value: str | Path | None = None) -> Path:
@@ -535,6 +537,107 @@ def _master_timer_rows(parser: DDBParser, master: Any, category_id: int | None =
     return sorted(rows, key=lambda row: (row["category_id"], row["timer_id"]))
 
 
+def _file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _execution_plugin_profiles() -> dict[str, dict[str, Any]]:
+    data = json.loads(EXECUTION_MODEL.read_text())
+    return data["gtsplus_continuity"]["dll_role_schema"]["plugin_semantics"]
+
+
+def _master_command_binding(parser: DDBParser, master: Any, category_id: int, role: int) -> Any:
+    matches = [
+        entry for entry in parser.extract_master_dlls(master.sections[19])
+        if entry.category_id == category_id and entry.dll_role_id == role
+    ]
+    if len(matches) != 1:
+        raise ValueError(f"category {category_id} role 0x{role:X} resolved {len(matches)} plugin bindings")
+    return matches[0]
+
+
+def _semantic_profile_for_plugin(plugin_path: Path, role: int) -> tuple[str | None, dict[str, Any] | None, str]:
+    if not plugin_path.is_file():
+        return None, None, "plugin_file_missing"
+    actual_sha = _file_sha256(plugin_path)
+    for name, profile in _execution_plugin_profiles().items():
+        binding = profile.get("example_binding", {})
+        plugin = profile.get("plugin", {})
+        if binding.get("dll_role_id") == role and plugin.get("sha256") == actual_sha:
+            return name, profile, "exact_plugin_identity"
+    return None, None, "plugin_semantics_unrecovered_for_identity"
+
+
+def _master_command_plan(
+    parser: DDBParser,
+    master: Any,
+    category: dict[str, Any],
+    role: int,
+    bin_root: Path,
+) -> dict[str, Any]:
+    category_id = int(category["category_id"])
+    binding = _master_command_binding(parser, master, category_id, role)
+    plugin_path = bin_root / binding.dll_name
+    if plugin_path.is_file():
+        try:
+            operation = plugin_operation_signature(plugin_path)
+        except pefile.PEFormatError:
+            operation = {"surface": "plugin_pe_unparseable"}
+        identity = {
+            "path": plugin_path.name,
+            "size": plugin_path.stat().st_size,
+            "sha256": _file_sha256(plugin_path),
+        }
+    else:
+        operation = {"surface": "plugin_file_missing"}
+        identity = {"path": plugin_path.name, "size": None, "sha256": None}
+
+    profile_name, profile, semantic_status = _semantic_profile_for_plugin(plugin_path, role)
+    result: dict[str, Any] = {
+        "category": category,
+        "role": role,
+        "role_hex": f"0x{role:X}",
+        "plugin": binding.dll_name,
+        "plugin_identity": identity,
+        "operation_surface": operation["surface"],
+        "semantic_status": semantic_status,
+        "semantic_profile": profile_name,
+        "frames": {},
+        "timers": [],
+        "response_model": None,
+        "control_flow": None,
+        "boundary": (
+            "Frames/timers are resolved from the selected category. Executable semantics are attached only "
+            "when the selected plugin SHA-256 exactly matches a recovered profile."
+        ),
+    }
+    if profile is None:
+        return result
+
+    if profile_name == "role_0x52_generic_cid":
+        rows = _master_frame_rows(parser, master, category_id, 0xDC)
+        result["frames"]["request"] = rows[0] if len(rows) == 1 else None
+        result["response_model"] = profile["response_model"]
+        result["semantic_status"] = (
+            "exact_plugin_identity_and_category_frame"
+            if len(rows) == 1
+            else "exact_plugin_identity_but_category_selector_0xDC_missing"
+        )
+    elif profile_name == "role_0x19_dtc_clear":
+        primary = _master_frame_rows(parser, master, category_id, 0x01)
+        fallback = _master_frame_rows(parser, master, category_id, 0x102)
+        result["frames"]["primary"] = primary[0] if len(primary) == 1 else None
+        result["frames"]["fallback"] = fallback[0] if len(fallback) == 1 else None
+        result["timers"] = [row for row in _master_timer_rows(parser, master, category_id) if row["timer_id"] == 1]
+        result["control_flow"] = profile["control_flow"]
+        result["semantic_status"] = (
+            "exact_plugin_identity_and_primary_frame"
+            if len(primary) == 1
+            else "exact_plugin_identity_but_primary_selector_0x1_missing"
+        )
+    return result
+
+
 def _master_comm_set_rows(parser: DDBParser, master: Any) -> list[dict[str, Any]]:
     return [
         {
@@ -594,6 +697,53 @@ def _master_frame_rows(parser: DDBParser, master: Any, category_id: int, selecto
             "comm_frame_raw": frame.hex(),
         })
     return rows
+
+
+def cmd_command(args: argparse.Namespace) -> int:
+    gts = _resolve_gts_root(args.gtsplus_root)
+    db_root = _db_root(gts, args.region, args.family)
+    parser = DDBParser()
+    master = parser.parse_master_db(db_root / "Toyota.ddb")
+    strings = _english_strings(parser, db_root)
+    category = _resolve_master_category(parser, master, strings, args.category)
+    role = _parse_master_key(args.role)
+    if role is None:
+        raise SystemExit(f"invalid role {args.role!r}; use decimal or 0x-prefixed hex")
+    try:
+        payload = _master_command_plan(parser, master, category, role, gts / "bin")
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
+    print(
+        f"command	category={category['category_id']}	{category['name']}	role={payload['role_hex']}	"
+        f"plugin={payload['plugin']}	surface={payload['operation_surface']}	semantics={payload['semantic_status']}"
+    )
+    for name, frame in payload["frames"].items():
+        if frame is None:
+            print(f"{name}	selector=missing")
+            continue
+        print(
+            f"{name}	selector={frame['selector']}	send={frame['send']['bytes']}	"
+            f"expect={frame['receive_check']['bytes']}	commset={frame['comm_set']}	"
+            f"timeout={frame['comm_set_metadata']['receive_timeout']}	retries={frame['comm_set_metadata']['retry_count']}"
+        )
+    for timer in payload["timers"]:
+        print(f"timer	id={timer['timer_id']}	delay_ms={timer['delay_ms']}")
+    response = payload["response_model"]
+    if response is not None:
+        print(
+            f"response	payload_offset={response['payload_offset']}	record_size={response['record_size']}	"
+            f"names={response['entry_name_prefix']}1...	conversion=CP_ACP"
+        )
+    flow = payload["control_flow"]
+    if flow is not None:
+        print(
+            f"flow	primary={flow['primary_selector']}	fallback={flow['fallback_selector']}	"
+            f"fallback_errors={len(flow['fallback_error_codes_when_function_gate_set'])}"
+        )
+    return 0
 
 
 def cmd_timer(args: argparse.Namespace) -> int:
@@ -978,6 +1128,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("ecu", help="ECU .ddb name/stem/substr or path")
     _common(p)
     p.set_defaults(func=cmd_ecu)
+
+    p = sub.add_parser("command", help="resolve one category+role into plugin, wire frames, timers, and recovered semantics")
+    p.add_argument("category", help="category ID, database/short name, or OEM ECU name")
+    p.add_argument("role", help="DLL role ID (decimal or 0x-prefixed hex)")
+    _common(p)
+    p.set_defaults(func=cmd_command)
 
     p = sub.add_parser("timer", help="decode Toyota master per-category command timers")
     p.add_argument("category", help="category ID, database/short name, or OEM ECU name")

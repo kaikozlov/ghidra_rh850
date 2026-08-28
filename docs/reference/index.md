@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 340 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 182
+Findings: 341 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 182
 
 ## Reading this index
 
@@ -294,6 +294,7 @@ Findings: 340 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="finding-tms-061"></a>**TMS-061** | [docs/tooling/techstream.md](../tooling/techstream.md) | — | `tests/verify_techstream_diagnostic_execution_model.py` | — |
 | <a id="finding-tms-062"></a>**TMS-062** | [docs/tooling/techstream.md](../tooling/techstream.md) | — | `tests/verify_techstream_diagnostic_execution_model.py` | — |
 | <a id="finding-tms-063"></a>**TMS-063** | [docs/tooling/techstream.md](../tooling/techstream.md) | — | `tests/verify_techstream_diagnostic_execution_model.py` | — |
+| <a id="finding-tms-064"></a>**TMS-064** | [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | — | `tests/verify_gts_query_cli.py` | — |
 | <a id="finding-var-001"></a>**VAR-001** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md) | `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-002"></a>**VAR-002** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_spanconstant_corolla_equivalence.py`, `tests/verify_spanconstant_corolla_cross_variant.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-003"></a>**VAR-003** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
@@ -850,7 +851,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/techstream_v18/cuw_writer_inventory.json` | diagnostic_vocabulary, techstream_cuw_writer_routes, techstream_pre_gts_static_closure | — |
 | `data/generated/techstream_v18/cuw_writer_protocol_grammar.json` | diagnostic_vocabulary, techstream_pre_gts_static_closure | — |
 | `data/generated/techstream_v18/ddb_factory_table_map.json` | diagnostic_vocabulary, techstream_ddb_residuals, techstream_p5_lateral_control | — |
-| `data/generated/techstream_v18/diagnostic_execution_model.json` | diagnostic_vocabulary, techstream_diagnostic_execution_model | — |
+| `data/generated/techstream_v18/diagnostic_execution_model.json` | diagnostic_vocabulary, gts_query_cli, techstream_diagnostic_execution_model | — |
 | `data/generated/techstream_v18/dtc_failure_types.json` | diagnostic_vocabulary, techstream_dtc_failure_types | — |
 | `data/generated/techstream_v18/mackey_state_machine.csv` | diagnostic_vocabulary, techstream_mackey | — |
 | `data/generated/techstream_v18/mackey_vehicle_protocol.json` | diagnostic_vocabulary, techstream_mackey | — |
