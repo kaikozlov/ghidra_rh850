@@ -471,5 +471,90 @@ def _section_camry_2026_dtc_clear():
 _section_camry_2026_dtc_clear()
 print()
 
+
+print("== camry FRC LTA synchronized capture tooling ==")
+def _section_camry_frc_lta_capture_tool():
+    import io
+    import json
+    import tempfile
+    from pathlib import Path
+
+    import tools.analyze_camry_frc_lta_capture as analyze
+    import tools.camry_frc_lta_capture as cap
+
+    p = cap.plan()
+    check('FRC LTA tool is read-only and pins exact 1601 request',
+          p['tx'] == '0x792' and p['rx'] == '0x79A' and p['did'] == '0x1601' and
+          p['request_frame'] == '0322160100000000' and p['vehicle_control_tx'] is False and
+          p['flash_write'] is False and p['security_access'] is False and p['routine_control'] is False and
+          p['gtsplus_value_dictionary']['lta_control_condition'] == {0: 'LTA Enabled', 1: 'LTA Disabled'})
+    parsed = cap.parse_1601_frame(bytes.fromhex('0762160101020304'))
+    check('FRC 1601 positive response maps exact four GTS+ condition bytes', parsed == {
+        'status': 'positive', 'raw': '01020304', 'lta_switch_condition': 1,
+        'lta_control_condition': 2, 'hands_off_customize_condition': 3,
+        'hands_off_control_condition': 4, 'lta_switch_label': 'ON',
+        'lta_control_label': None, 'hands_off_customize_label': None,
+        'hands_off_control_label': None, 'lta_enabled_oracle': False,
+    })
+    check('FRC 1601 negative response is retained without decoding state',
+          cap.parse_1601_frame(bytes.fromhex('037f223100000000')) == {
+              'status': 'negative', 'nrc': 0x31, 'raw_frame': '037f223100000000'})
+    buf = io.BytesIO()
+    cap.write_canbin_header(buf)
+    cap.write_canbin_record(buf, 123, 0, 0x0B6, bytes(range(32)))
+    cap.write_canbin_record(buf, 456, 1, 0x18A, bytes(range(64)))
+    buf.seek(0)
+    check('compact CAN capture format round-trips classic/FD records', list(cap.iter_canbin_records(buf)) == [
+        (123, 0, 0x0B6, bytes(range(32))),
+        (456, 1, 0x18A, bytes(range(64))),
+    ])
+    with tempfile.TemporaryDirectory() as td:
+        capture = Path(td)
+        (capture / 'metadata.json').write_text(json.dumps({
+            'schema': 'camry-frc-lta-capture-v1', 'diag_bus': 1, 'duration_s': 1.0,
+            'files': {'can': 'can.bin', 'oracle': 'oracle.ndjson'},
+        }))
+        oracle_rows = [
+            {'type':'response','status':'positive','t_ns':1_000_000_000,'raw':'01000000',
+             'lta_switch_condition':1,'lta_control_condition':0,'hands_off_customize_condition':0,
+             'hands_off_control_condition':0,'lta_switch_label':'ON','lta_control_label':'LTA Enabled',
+             'hands_off_customize_label':'OFF','hands_off_control_label':'Hands-Off Enabled','lta_enabled_oracle':True},
+            {'type':'response','status':'positive','t_ns':1_100_000_000,'raw':'01000000',
+             'lta_switch_condition':1,'lta_control_condition':0,'hands_off_customize_condition':0,
+             'hands_off_control_condition':0,'lta_switch_label':'ON','lta_control_label':'LTA Enabled',
+             'hands_off_customize_label':'OFF','hands_off_control_label':'Hands-Off Enabled','lta_enabled_oracle':True},
+            {'type':'response','status':'positive','t_ns':1_200_000_000,'raw':'01010000',
+             'lta_switch_condition':1,'lta_control_condition':1,'hands_off_customize_condition':0,
+             'hands_off_control_condition':0,'lta_switch_label':'ON','lta_control_label':'LTA Disabled',
+             'hands_off_customize_label':'OFF','hands_off_control_label':'Hands-Off Enabled','lta_enabled_oracle':False},
+        ]
+        (capture / 'oracle.ndjson').write_text(''.join(json.dumps(row) + '\n' for row in oracle_rows))
+        with (capture / 'can.bin').open('wb') as stream:
+            cap.write_canbin_header(stream)
+            cap.write_canbin_record(stream, 1_050_000_000, 0, 0x030, bytes(32))
+            cap.write_canbin_record(stream, 1_060_000_000, 0, 0x0D7, bytes(32))
+            cap.write_canbin_record(stream, 1_070_000_000, 1, 0x18A, bytes(64))
+        summary = analyze.analyze(capture)
+        check('offline analyzer attributes only stable equal-state oracle intervals',
+              summary['oracle']['stable_lta_enabled_duration_s'] == 0.1 and
+              summary['can']['selected_counts']['enabled']['bus0:0x030/32'] == 1 and
+              summary['can']['selected_counts']['enabled']['bus0:0x0D7/32'] == 1 and
+              summary['can']['b6_during_stable_lta_enabled'] == 0 and
+              summary['discriminator']['stable_lta_enabled_interval_observed'] is True and
+              summary['discriminator']['b6_observed_during_stable_lta_enabled'] is False)
+    check('pandad process guard recognizes manager Python module and native process forms',
+          cap.cmdline_is_pandad('/usr/bin/python3 -m openpilot.selfdrive.pandad.pandad') and
+          cap.cmdline_is_pandad('/data/openpilot/openpilot/selfdrive/pandad/pandad') and
+          not cap.cmdline_is_pandad('/usr/bin/python3 tools/camry_frc_lta_capture.py'))
+    source = (REPO / 'tools/camry_frc_lta_capture.py').read_text()
+    check('capture tool hard-refuses pandad USB contention',
+          'refusing Panda USB collision: pandad is running' in source and
+          'pandad appeared during capture; aborting' in source)
+    readme = (REPO / 'targets/camry-2026/README.md').read_text()
+    check('Camry target docs preserve synchronized 1601 capture helper',
+          'tools/camry_frc_lta_capture.py' in readme and '0x1601' in readme and 'pandad' in readme)
+_section_camry_frc_lta_capture_tool()
+print()
+
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 raise SystemExit(1 if failed else 0)

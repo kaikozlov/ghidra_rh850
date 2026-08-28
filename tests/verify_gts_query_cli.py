@@ -193,6 +193,16 @@ check(
     },
     "current DID rows join role-0x41 physical/unit semantics for Steering Angle",
 )
+frc = parser.parse_ecu_db(db_root / "FRC_P5.ddb")
+frc_rows = gts_cli._monitor_rows(frc, strings, "FRC_P5.ddb")
+frc_1601 = {row["name"]: row for row in frc_rows if row["primary_did"] == 0x1601}
+check(
+    frc_1601["LTA Switch Condition Flag"]["signal_info"]["pattern_display"] == {0: "OFF", 1: "ON"}
+    and frc_1601["LTA Control Condition"]["signal_info"]["pattern_display"] == {0: "LTA Enabled", 1: "LTA Disabled"}
+    and frc_1601["Hands-Off Customize Condition Flag"]["signal_info"]["pattern_display"] == {0: "OFF", 1: "ON"}
+    and frc_1601["Hands-Off Control Condition"]["signal_info"]["pattern_display"] == {0: "Hands-Off Enabled", 1: "Hands-off Disabled"},
+    "current FRC DID 0x1601 exposes exact LTA/Hands-Off value dictionaries",
+)
 cooperation = next(row for row in rows if row["monitor_key"] == 60)
 check(
     cooperation["signal_info"]["pattern_display"] == {

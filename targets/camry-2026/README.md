@@ -220,3 +220,34 @@ discriminator is synchronized FRC P5 DID `0x1601` plus relay-correct CAN.
 Provenance is in `raw-20260827/MANIFEST.txt`; deterministic interpretation is
 `data/generated/camry_2026_relay_correct_capture.json`; canonical conclusions are
 `docs/variants/camry-2026-live-baseline.md` §16.
+
+## Synchronized FRC LTA discriminator capture
+
+`tools/camry_frc_lta_capture.py` is the prepared read-only capture helper for the
+remaining zero-B6 discriminator. By default it only prints its plan. In execute
+mode it uses one Panda process for both full CAN reception and FRC P5 DID `0x1601`
+polling (`0x792: 03 22 16 01 00 00 00 00`), retaining the raw four condition bytes.
+Current GTS+ resolves `0x1601` as LTA Switch `0=OFF/1=ON`, LTA Control
+`0=LTA Enabled/1=LTA Disabled`, Hands-Off Customize `0=OFF/1=ON`, and Hands-Off
+Control `0=Enabled/1=Disabled`. The discriminator therefore treats **switch=1 +
+LTA-control=0** as the exact OEM-named LTA-enabled diagnostic state; it does not
+rename that state to continuous steering actuation.
+
+The helper deliberately **refuses to run while `pandad` is present** and keeps a
+runtime watchdog for it. This is required because the 2026-08-27 parallel direct-
+Panda reader collided with `pandad` and failed with `CHECKSUM_ERROR`. Before any
+live run, the comma process supervisor must therefore be placed in a state where
+`pandad` will remain stopped for the entire capture; do not merely kill a process
+that the manager will immediately restart. The tool itself does not stop/reconfigure
+the process supervisor.
+
+The capture writes `can.bin` (compact timestamped all-bus CAN), `oracle.ndjson`
+(query/response events), and `metadata.json` (counts, selected diagnostic bus,
+B6 counts, and observed `LTA Control Condition` values). It transmits no vehicle-
+control frame, performs no SecurityAccess/RoutineControl, and makes no flash or
+DataFlash write. A live artifact is not claimed until this helper is actually run
+on the exact car and the resulting files are promoted with provenance.
+`tools/analyze_camry_frc_lta_capture.py CAPTURE_DIR` then classifies CAN only between
+two consecutive equal positive `0x1601` samples, leaving transitions and large oracle
+gaps unclassified. It reports stable LTA-enabled duration, B6 count during those stable
+intervals, the protected Bus-4 control carriers, and the bus-1 upstream ID/DLC census.

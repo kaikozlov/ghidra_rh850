@@ -2387,7 +2387,12 @@ are `LDA`/`LTA Installation Availability`; DID `0x1501` carries `LDA Customize
 Condition Flag` (bits 0–7) and `LDA Control Condition` (bits 8–15); DID
 `0x1601` carries `LTA Switch Condition Flag` (0–7), `LTA Control Condition`
 (8–15), `Hands-Off Customize Condition Flag` (16–23), and `Hands-Off Control
-Condition` (24–31). `Steering Wheel Information` is DID `0x1308`; `Control
+Condition` (24–31). Current GTS+ also resolves the exact PatternDisplay values:
+**LTA Switch 0=OFF / 1=ON; LTA Control 0=LTA Enabled / 1=LTA Disabled;
+Hands-Off Customize 0=OFF / 1=ON; Hands-Off Control 0=Hands-Off Enabled /
+1=Hands-off Disabled**. Thus a synchronized read returning switch `1` plus LTA
+control `0` is an OEM-named **LTA-enabled diagnostic-state oracle**; it still does
+not, by itself, prove continuous steering-torque output. `Steering Wheel Information` is DID `0x1308`; `Control
 Target Type (For DDR)` is `0x1806`; `Control Mode` is `0x1903`; `Forward
 Vehicle Lateral Position` is `0x1909` bits 0–31; and the control-target
 distance/side DDR values are `0x1804`/`0x1805` bits 0–31. Type 87 additionally
