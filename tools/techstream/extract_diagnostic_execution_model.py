@@ -773,6 +773,161 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
     }
 
 
+def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) -> dict:
+    """Recover the shared current GTS+ P5 direct Active-Test runtime executor.
+
+    This path lives below the per-category role plugins: DataMonitorPhase5_DT
+    materializes UDS IO-Control start/return-control requests, DataListIF queues
+    them, and the P5 J2534 worker hands the unchanged frame to SendIntExt.
+    """
+    bin_root = gts_root / "bin"
+    datamon = bin_root / "DataMonitorPhase5_DT.dll"
+    datalist = bin_root / "DataListIF.dll"
+    command_data = bin_root / "CommandDataLib.dll"
+    hybrid_db_path = gts_root / "NA/DB/Gen/HV_P5.ddb"
+    hybrid_db = parser.parse_ecu_db(hybrid_db_path)
+
+    table67 = hybrid_db.sections[67]
+    if table67.decoded_record_size != 18:
+        raise ValueError(f"HV_P5 type-67 record size {table67.decoded_record_size}, expected 18")
+    data_id_for_act = [
+        (index, raw)
+        for index, raw in enumerate(records(table67))
+        if struct.unpack_from("<H", raw, 0x02)[0] == 0x2801
+    ]
+    if len(data_id_for_act) != 1:
+        raise ValueError(f"HV_P5 DID 0x2801 resolved {len(data_id_for_act)} type-67 rows")
+    table67_index, table67_raw = data_id_for_act[0]
+
+    table68 = hybrid_db.sections[68]
+    direct_test = [
+        (index, raw)
+        for index, raw in enumerate(records(table68))
+        if struct.unpack_from("<H", raw, 0x20)[0] == 0x0001
+    ]
+    if len(direct_test) != 1:
+        raise ValueError(f"HV_P5 Active Test 0x0001 resolved {len(direct_test)} type-68 rows")
+    table68_index, table68_raw = direct_test[0]
+    did = struct.unpack_from("<H", table68_raw, 0x34)[0]
+    bit_start = struct.unpack_from("<H", table68_raw, 0x28)[0]
+    bit_end = struct.unpack_from("<H", table68_raw, 0x2A)[0]
+    encoding_mode = table67_raw[0x0A]
+    min_data_length = bit_end // 8 + 1
+    if (did, bit_start, bit_end, encoding_mode) != (0x2801, 15, 15, 1):
+        raise ValueError(
+            "HV_P5 Active Test 1 witness drifted: "
+            f"did=0x{did:04X} bits={bit_start}..{bit_end} mode={encoding_mode}"
+        )
+
+    start_frame = resolve_frame(parser, master, 397, 0x9D, variable_namespace_base=0x2710)
+    stop_frame = resolve_frame(parser, master, 397, 0x64, variable_namespace_base=0x2710)
+    if start_frame["variables"]["send"]["bytes"] != "2fffff03" or start_frame["variables"]["receive_check"]["bytes"] != "6f":
+        raise ValueError("Hybrid selector 0x9D is no longer the expected 2FFFFF03 -> 6F frame")
+    if stop_frame["variables"]["send"]["bytes"] != "2fffff00" or stop_frame["variables"]["receive_check"]["bytes"] != "6f":
+        raise ValueError("Hybrid selector 0x64 is no longer the expected 2FFFFF00 -> 6F frame")
+
+    # Minimum-length witness only.  The executable path obtains the actual N
+    # from CCmdDataIdLengthList; static bit geometry proves only N >= 2 here.
+    value_off = bit_end // 8
+    shift = 7 - (bit_end & 7)
+    start_off = bytearray(min_data_length)
+    start_on = bytearray(min_data_length)
+    start_on[value_off] = 1 << shift
+    stop_mask = bytearray(min_data_length)
+    stop_mask[value_off] = 1 << shift
+
+    return {
+        "binaries": {
+            "data_monitor_phase5": file_identity(datamon, gts_root),
+            "data_list_if": file_identity(datalist, gts_root),
+            "command_data_lib": file_identity(command_data, gts_root),
+        },
+        "protocol": {
+            "service": "0x2F InputOutputControlByIdentifier",
+            "start_control_parameter": "0x03 shortTermAdjustment",
+            "stop_control_parameter": "0x00 returnControlToECU",
+            "positive_response": "0x6F",
+            "start_selector": start_frame,
+            "stop_selector": stop_frame,
+        },
+        "command_value": {
+            "object": "CStartActTstSnd",
+            "set_value": "engineering input is normalized through the selected physical Mul/Div/Offset and the low raw byte is stored at +0x24",
+            "raw_value_field": "+0x24",
+            "alternate_value_field": "+0x28; constructor initializes it to zero and the normal SetValue path does not modify it",
+        },
+        "materializer": {
+            "function": "DataMonitorPhase5_DT.dll CDataMonitorThreadP5 virtual_104 @ 0x1000D5E0",
+            "selected_test_table": {"table": 68, "class": ECU_TABLE_CLASS_NAMES[68]},
+            "data_id_for_act_table": {"table": 67, "class": ECU_TABLE_CLASS_NAMES[67], "record_size": 18},
+            "data_id_for_act_fields": {
+                "did": "u16 +0x02",
+                "encoding_mode": "u8 +0x0A",
+            },
+            "runtime_data_length": {
+                "source": "CCommCachePlusP5::GetSupportEcuDataIdLengthListCache -> GetDataIdLengthList -> CCmdDataIdLengthList::Search(DID)",
+                "meaning": "N bytes of controlled DID data appended after the four-byte 2F/DID/IOCP prefix",
+                "static_boundary": "N is runtime support-cache state; the type-68 bit range proves only the minimum required length",
+            },
+            "mode_1": {
+                "normal_value_source": "CStartActTstSnd +0x24 when +0x28 == 0",
+                "placement": "zero-fill N data bytes, then place the raw value into the type-68 bit range using byte=bit_end>>3 and shift=7-(bit_end&7)",
+                "return_control": "append the N-byte control-enable mask built from the same type-68 bit range to selector 0x64",
+            },
+            "multi_control": "the caller's type-33 path invokes this materializer per member and OR-composes same-DID start/stop data bytes before the common launch interface",
+        },
+        "hybrid_witness": {
+            "category_id": 397,
+            "database": "HV_P5.ddb",
+            "active_test_id": "0x0001",
+            "name": "Activate the Inverter Water Pump",
+            "did": "0x2801",
+            "bit_start": bit_start,
+            "bit_end": bit_end,
+            "encoding_mode": encoding_mode,
+            "data_id_for_act_record": table67_index,
+            "data_id_for_act_raw": table67_raw.hex(),
+            "active_test_record": table68_index,
+            "runtime_data_length": "N",
+            "minimum_data_length": min_data_length,
+            "raw_values": {"OFF": 0, "ON": 1},
+            "start_formula": "2F 28 01 03 || N-byte value; byte[1] bit0 is the water-pump value",
+            "stop_formula": "2F 28 01 00 || N-byte control-enable mask; byte[1] bit0 = 1",
+            "minimum_length_examples": {
+                "OFF": (bytes.fromhex("2f280103") + start_off).hex(),
+                "ON": (bytes.fromhex("2f280103") + start_on).hex(),
+                "return_control": (bytes.fromhex("2f280100") + stop_mask).hex(),
+                "qualification": "examples use N=2, the static minimum implied by bit 15; they are not a claim that the runtime DataIdLengthList entry equals 2",
+            },
+        },
+        "handoff": {
+            "data_monitor_call": "CDataMonitorThreadP5::virtual_20 strips the already-present SID (buffer+1, length-1) and calls CDataMonitorPhase5Interface vtable +0x2C with ActiveTestType=0",
+            "interface_thunk": "DataMonitorPhase5_DT.dll 0x10016E75 -> DataListIF.dll p5dm_tf::DMInterface::active_test_start",
+            "event_queue": "CCommEventPhase5AT::ActiveTestStart prepends 0x2F for ActiveTestType 0, queues start and return-control frames, and replaces/updates an existing direct item with the same DID",
+            "send_frame": "CCommEventPhase5AT::GetSndFrame memcpy-copies the queued request and length unchanged",
+            "transport": "p5diag_tf::J2534DiagInterface::ThreadMain -> KGP_CommFrameCtrl.dll CCommFrameCtrl::SendIntExt",
+            "receive": "CCommEventPhase5AT::CheckRcvFrame requires 0x6F for a sent 0x2F request and at least three response bytes",
+        },
+        "anchors": {
+            "set_value_scaling": anchor(command_data, 0x10089E00, "558bec8b5508568bf185d274078b4a7085c9750ab8010008c05e5dc208008b450c2b42780faf427499f7f90fb6c833c0894e24"),
+            "data_id_for_act_lookup": anchor(datamon, 0x1000D75E, "8d8d98feffffff15c4b301108b858cfeffff8b9530feffffc645fc038b008b8a9c01000081c1cc0000000fb7403450ffb2f00000008d8598feffff506843020000ff1540b40110"),
+            "start_selector_0x9d": anchor(datamon, 0x1000D820, "8d8ddcfeffffff1590b001108b8530feffff8d8ddcfeffffff700405800100005150689d000000"),
+            "runtime_did_length_cache": anchor(datamon, 0x1000DA4B, "ffb79c0100008d8dacfeffffff153cb001108bf885ff0f8544fdffff8b9530feffff8d8dacfeffffffb2f0000000ff1538b00110"),
+            "encoding_mode_dispatch": anchor(datamon, 0x1000DB6A, "8b85a8feffff898538feffff8b000fb6400a83f8050f8761070000ff248590e5"),
+            "mode_1_value_encoding": anchor(datamon, 0x1000DDBC, "8b8548feffff0fb7d78b402889853cfeffff85c00f85dc00000085d27413660f1f4400008b06c6040300ff0683ea0175f38b858cfeffffb9070000008b000fb7502a8bc2c1ea0383e0072bc88b8548feffff8a4024d2e0"),
+            "stop_selector_0x64": anchor(datamon, 0x1000E273, "8d8ddcfeffffff1590b001108b8530feffff8d8ddcfeffffff7004058001000051506a64"),
+            "mode_1_stop_mask_append": anchor(datamon, 0x1000E417, "8b8534feffff33f60fb7f885ff741d8b0a8a8435f0feffff4688040bff023bf772ed"),
+            "phase5_interface_handoff": anchor(datamon, 0x10014F91, "8b8ff00100006a00ffb5ecdfffff8b016a008b502c8b85e8dfffff48508d85f1efffff508b85e4dfffff48508d85f1dfffff50ffb7f8000000"),
+            "active_test_start_thunk": anchor(datamon, 0x10016E75, "ff2548b20110"),
+            "dm_interface_forward": anchor(datalist, 0x10036540, "558bec8b490485c974068b015dff6044"),
+            "event_service_prefix": anchor(datalist, 0x10037528, "8b451c85c0756bb12feb7268010100e068ae000000"),
+            "event_get_send_frame": anchor(datalist, 0x10037A20, "558bec568bf1578b7d088b4608ff7004ff3057e8752a01008b460883c40c8b48048b450c89088a07"),
+            "event_positive_0x6f": anchor(datalist, 0x10037902, "8079102f8a00757d3c6f740c68020100e06828020000"),
+            "j2534_get_frame_to_sendint": anchor(datalist, 0x1003CF98, "68001000008d85f0efffffc785ccefffff000000006a0050e8fed400008b038d8dccefffff83c40c518d8df0efffff518bcbff50048985acefffff3d000100e00f858ffeffff33c0bb010000008985a4efffff899ddcefffff8bb5a8efffffe988feffff0fb747548b8f9c0000006a016a0050ff777c8d85f0efffffffb5ccefffff50ff7750ff15d0f30410"),
+        },
+        "boundary": "static executable semantics only: no Active Test was executed; exact total request length remains runtime DataIdLengthList state even though service, DID, control parameter, bit placement, queueing, response SID, and transport sink are recovered",
+    }
+
 def gtsplus_role_layout(gts_root: Path) -> dict:
     parser = DDBParser()
     master_path = gts_root / "NA/DB/Gen/Toyota.ddb"
@@ -811,6 +966,7 @@ def gtsplus_role_layout(gts_root: Path) -> dict:
         },
         "role_catalog": role_operation_catalog(parser, master, gts_root / "bin"),
         "plugin_semantics": gtsplus_plugin_semantics(parser, master, gts_root),
+        "p5_active_test_runtime": gtsplus_p5_active_test_runtime(parser, master, gts_root),
         "hybrid_clear_binding": dll_binding(parser, master, 397, 25),
         "hybrid_clear_primary": resolve_frame(parser, master, 397, 0x01, variable_namespace_base=0x2710),
         "hybrid_clear_fallback": resolve_frame(parser, master, 397, 0x102, variable_namespace_base=0x2710),

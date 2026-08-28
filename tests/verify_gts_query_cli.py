@@ -86,9 +86,10 @@ check(len(commsets) == 13 and commset1["raw"] == "e8030000fc03000000000100000001
 check(commset1["receive_timeout"] == 1020 and commset1["retry_count"] == 1, "current CommSet 1 resolves receive timeout 1020 and one retry")
 check(
     gts_cli.ECU_TABLE_CLASS_NAMES[33] == "CDbMultiDidIdTable"
+    and gts_cli.ECU_TABLE_CLASS_NAMES[67] == "CDbDataIdForActTable"
     and gts_cli.ECU_TABLE_CLASS_NAMES[68] == "CDbActTestP5Table"
     and gts_cli.ECU_TABLE_CLASS_NAMES[71] == "CDbRoutineActTestP5Table",
-    "current parser names the consumer-proven Active Test and MultiDID tables",
+    "current parser names the consumer-proven Active Test, DataIdForAct, and MultiDID tables",
 )
 timers = gts_cli._master_timer_rows(parser, master, hybrid["category_id"])
 check(
@@ -178,8 +179,22 @@ check(
     and hybrid_init_selected["initial_transaction"]["receive_check"] == "62"
     and hybrid_init_selected["linked_monitor"]["monitor_key"] == 30
     and hybrid_init_selected["linked_monitor"]["monitor"]["name"] == "Inverter Water Pump"
-    and hybrid_init_selected["linked_monitor"]["monitor"]["signal_info"]["pattern_display"] == {0: "OFF", 1: "ON"},
-    "command plan materializes Hybrid role 0x08 Active Test 1 into 222801/62 and its linked monitor metadata",
+    and hybrid_init_selected["linked_monitor"]["monitor"]["signal_info"]["pattern_display"] == {0: "OFF", 1: "ON"}
+    and hybrid_init_selected["executor"]["service"] == "0x2F"
+    and hybrid_init_selected["executor"]["positive_response"] == "0x6F"
+    and hybrid_init_selected["executor"]["data_id_for_act"]["table"] == 67
+    and hybrid_init_selected["executor"]["data_id_for_act"]["table_class"] == "CDbDataIdForActTable"
+    and hybrid_init_selected["executor"]["data_id_for_act"]["encoding_mode"] == 1
+    and hybrid_init_selected["executor"]["start"]["materialized_prefix"] == "2f280103"
+    and hybrid_init_selected["executor"]["stop"]["materialized_prefix"] == "2f280100"
+    and hybrid_init_selected["executor"]["runtime_data_length"]["minimum_from_bit_geometry"] == 2
+    and hybrid_init_selected["executor"]["minimum_length_examples"] == {
+        "raw_0": "2f2801030000",
+        "raw_1": "2f2801030001",
+        "return_control": "2f2801000001",
+        "qualification": "uses N=2, the static minimum required by bit 15; not proof that the runtime DataIdLengthList entry has that length",
+    },
+    "command plan materializes Hybrid role 0x08 Active Test 1 through init/read and bounded 0x2F runtime execution",
 )
 hybrid_active_monitor_plan = gts_cli._master_command_plan(
     parser, master, hybrid, 0xAD, gts / "bin", db_root

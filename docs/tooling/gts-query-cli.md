@@ -159,6 +159,8 @@ command  category=397  Hybrid Control  role=0x8  plugin=GetActTstInitP5_DT.dll  
 active-test-init  id=0x1  name=Activate the Inverter Water Pump  did=0x2801  bits=15..15  init_mode=0  monitor_link_mode=0
 initial-read      selector=0xCA  send=222801  expect=62  bits=15..15
 linked-monitor    key=30  resolution=unique DID/bit-range match from plugin scan  name=Inverter Water Pump
+active-test-executor  service=0x2F  did=0x2801  encoding_mode=1  start=2f280103+N  stop=2f280100+N  runtime_length=N  minimum=2
+active-test-wire-minimum  raw0=2f2801030000  raw1=2f2801030001  return=2f2801000001  qualification=uses N=2, the static minimum required by bit 15; not proof that the runtime DataIdLengthList entry has that length
 
 $ tools/gts command HV_P5 0x70 --item 0x1
 command  category=397  Hybrid Control  role=0x70  plugin=GetATSignalInfoP5_DT.dll  surface=no_recovered_shared_transport_edge  semantics=exact_plugin_identity_and_selected_active_test_signal_info
@@ -208,7 +210,7 @@ Role `0xAD` is category-wide rather than selected-test-specific. The current `Ge
 
 For role `0x70`, the same `--item` selects the direct type-68 Active Test but no wire transaction is attached. The exact current `GetATSignalInfoP5_DT.dll` consumes that selected ID and joins type-12 Active-Test pattern, type-13 physical conversion, type-14 display values, and type-15 unit metadata into `CCmdActTstSignalInfoItem`. This makes `0x70` the read-only presentation/conversion companion to role `0x08`, not another executor.
 
-For role `0x08`, `--item` is the direct Active Test ID from the selected category's type-68 `CDbActTestP5Table`. The planner joins that exact row to the current plugin's initialization state machine: when `initial_read_mode == 0`, selector `0xCA` supplies a base `22FFFF` request and the plugin substitutes the row's `+0x34` DID into request bytes 1/2 before send. It also reproduces the plugin's linked-Data-Monitor lookup by DID and bit range. This remains a **read-only plan**: it does not execute the Active Test or assert that role `0x06` would expose the test on a live ECU. Unknown direct-test IDs fail closed.
+For role `0x08`, `--item` is the direct Active Test ID from the selected category's type-68 `CDbActTestP5Table`. The planner joins that exact row to the current plugin's initialization state machine: when `initial_read_mode == 0`, selector `0xCA` supplies a base `22FFFF` request and the plugin substitutes the row's `+0x34` DID into request bytes 1/2 before send. It also reproduces the plugin's linked-Data-Monitor lookup by DID and bit range. The planner now continues into the shared P5 runtime executor: type67 `CDbDataIdForActTable` supplies the DID encoding mode; selector `0x9D` supplies `2FFFFF03 -> 6F` for start/short-term adjustment and selector `0x64` supplies `2FFFFF00 -> 6F` for return-control. The displayed `+N` is intentional: `DataMonitorPhase5_DT.dll` obtains the controlled DID-data length from the runtime `CCmdDataIdLengthList` support cache, so offline bit geometry gives only a minimum. `active-test-wire-minimum` is therefore explicitly a minimum-length illustration, not a claim about the live ECU's cached DID length. This remains a **read-only plan**: it does not execute the Active Test or assert that role `0x06` would expose the test on a live ECU. Unknown direct-test IDs fail closed.
 
 Current GTS+ namespaces base-variable references above `0x2710`; the CLI follows
 `CDbVariableTable::GetVariable` and subtracts `0x2710` before the unchanged

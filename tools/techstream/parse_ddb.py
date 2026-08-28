@@ -99,6 +99,7 @@ ECU_TABLE_CLASS_NAMES = {
     63: "CDbDataIdBitForDmTable",
     65: "CDbDiagCodeP5Table",
     66: "CDbDTCStatusMaskTable",
+    67: "CDbDataIdForActTable",
     68: "CDbActTestP5Table",
     71: "CDbRoutineActTestP5Table",
     80: "CDbDataIdBitForFfdTable",

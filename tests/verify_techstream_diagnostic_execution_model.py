@@ -169,6 +169,74 @@ check(
 )
 
 plugin_semantics = gts["dll_role_schema"]["plugin_semantics"]
+active_runtime = gts["dll_role_schema"]["p5_active_test_runtime"]
+check(
+    "current P5 Active-Test runtime binaries are identity-pinned",
+    active_runtime["binaries"]["data_monitor_phase5"] == {
+        "path": "bin/DataMonitorPhase5_DT.dll",
+        "size": 158224,
+        "sha256": "676192240b05e68a890e45f48575f826bc1dd44f935f5df4b77ee36558467519",
+    }
+    and active_runtime["binaries"]["data_list_if"] == {
+        "path": "bin/DataListIF.dll",
+        "size": 507920,
+        "sha256": "cce3ecd1203f81914c51d5b2599ee68eb4f7faafa8cbd9bb24fd7390b54d651d",
+    }
+    and active_runtime["binaries"]["command_data_lib"] == {
+        "path": "bin/CommandDataLib.dll",
+        "size": 1774608,
+        "sha256": "ffce12af45554a552dbf616545c4c4e02780702e4cb9e2c6f8235ff4f05c79ab",
+    },
+)
+check(
+    "current P5 direct Active-Test protocol is IOControl start/return-control with 0x6F response",
+    active_runtime["protocol"]["start_selector"]["selector"] == "0x9D"
+    and active_runtime["protocol"]["start_selector"]["variables"]["send"]["bytes"] == "2fffff03"
+    and active_runtime["protocol"]["start_selector"]["variables"]["receive_mask"]["bytes"] == "ff"
+    and active_runtime["protocol"]["start_selector"]["variables"]["receive_check"]["bytes"] == "6f"
+    and active_runtime["protocol"]["stop_selector"]["selector"] == "0x64"
+    and active_runtime["protocol"]["stop_selector"]["variables"]["send"]["bytes"] == "2fffff00"
+    and active_runtime["protocol"]["stop_selector"]["variables"]["receive_check"]["bytes"] == "6f",
+)
+witness = active_runtime["hybrid_witness"]
+check(
+    "Hybrid water-pump witness pins type-67 mode 1 and bit-15 packing without inventing runtime DID length",
+    active_runtime["materializer"]["data_id_for_act_table"] == {
+        "table": 67, "class": "CDbDataIdForActTable", "record_size": 18
+    }
+    and witness["did"] == "0x2801"
+    and [witness["bit_start"], witness["bit_end"], witness["encoding_mode"]] == [15, 15, 1]
+    and witness["data_id_for_act_raw"] == "000001280000000000000100000000000000"
+    and witness["minimum_data_length"] == 2
+    and witness["minimum_length_examples"]["OFF"] == "2f2801030000"
+    and witness["minimum_length_examples"]["ON"] == "2f2801030001"
+    and witness["minimum_length_examples"]["return_control"] == "2f2801000001"
+    and "not a claim" in witness["minimum_length_examples"]["qualification"]
+    and "runtime" in active_runtime["materializer"]["runtime_data_length"]["static_boundary"],
+)
+check(
+    "P5 Active-Test value materialization, return mask, interface handoff, response check, and SendIntExt edge are instruction-pinned",
+    active_runtime["anchors"]["set_value_scaling"]["bytes"].startswith("558bec8b5508568bf1")
+    and active_runtime["anchors"]["data_id_for_act_lookup"]["bytes"].endswith("506843020000ff1540b40110")
+    and active_runtime["anchors"]["start_selector_0x9d"]["bytes"].endswith("689d000000")
+    and active_runtime["anchors"]["runtime_did_length_cache"]["bytes"].startswith("ffb79c0100008d8dacfeffff")
+    and active_runtime["anchors"]["encoding_mode_dispatch"]["bytes"].startswith("8b85a8feffff898538feffff")
+    and active_runtime["anchors"]["mode_1_value_encoding"]["bytes"].startswith("8b8548feffff0fb7d7")
+    and active_runtime["anchors"]["stop_selector_0x64"]["bytes"].endswith("6a64")
+    and active_runtime["anchors"]["mode_1_stop_mask_append"]["bytes"].startswith("8b8534feffff33f6")
+    and active_runtime["anchors"]["phase5_interface_handoff"]["bytes"].startswith("8b8ff00100006a00")
+    and active_runtime["anchors"]["active_test_start_thunk"]["bytes"] == "ff2548b20110"
+    and active_runtime["anchors"]["event_service_prefix"]["bytes"].startswith("8b451c85c0756bb12f")
+    and active_runtime["anchors"]["event_get_send_frame"]["bytes"].startswith("558bec568bf1578b7d08")
+    and active_runtime["anchors"]["event_positive_0x6f"]["bytes"].startswith("8079102f8a00757d3c6f")
+    and active_runtime["anchors"]["j2534_get_frame_to_sendint"]["bytes"].endswith("ff15d0f30410"),
+)
+check(
+    "P5 Active-Test execution boundary remains static and non-executing",
+    "no Active Test was executed" in active_runtime["boundary"]
+    and "DataIdLengthList" in active_runtime["boundary"]
+    and active_runtime["handoff"]["transport"].endswith("CCommFrameCtrl::SendIntExt"),
+)
 monitor_list = plugin_semantics["role_0x05_p5_monitor_list"]
 multi_active_test_init = plugin_semantics["role_0x63_p5_multi_active_test_init"]
 active_test_monitor_list = plugin_semantics["role_0xad_p5_monitor_list_for_active_test"]

@@ -139,6 +139,247 @@
         "sha256": "19e709e12e53f485a84ccfbf6b226922b88502206c34b767db543c7f3df101f8",
         "size": 1824784
       },
+      "p5_active_test_runtime": {
+        "anchors": {
+          "active_test_start_thunk": {
+            "bytes": "ff2548b20110",
+            "file_offset": "0x16275",
+            "va": "0x10016E75"
+          },
+          "data_id_for_act_lookup": {
+            "bytes": "8d8d98feffffff15c4b301108b858cfeffff8b9530feffffc645fc038b008b8a9c01000081c1cc0000000fb7403450ffb2f00000008d8598feffff506843020000ff1540b40110",
+            "file_offset": "0xCB5E",
+            "va": "0x1000D75E"
+          },
+          "dm_interface_forward": {
+            "bytes": "558bec8b490485c974068b015dff6044",
+            "file_offset": "0x35940",
+            "va": "0x10036540"
+          },
+          "encoding_mode_dispatch": {
+            "bytes": "8b85a8feffff898538feffff8b000fb6400a83f8050f8761070000ff248590e5",
+            "file_offset": "0xCF6A",
+            "va": "0x1000DB6A"
+          },
+          "event_get_send_frame": {
+            "bytes": "558bec568bf1578b7d088b4608ff7004ff3057e8752a01008b460883c40c8b48048b450c89088a07",
+            "file_offset": "0x36E20",
+            "va": "0x10037A20"
+          },
+          "event_positive_0x6f": {
+            "bytes": "8079102f8a00757d3c6f740c68020100e06828020000",
+            "file_offset": "0x36D02",
+            "va": "0x10037902"
+          },
+          "event_service_prefix": {
+            "bytes": "8b451c85c0756bb12feb7268010100e068ae000000",
+            "file_offset": "0x36928",
+            "va": "0x10037528"
+          },
+          "j2534_get_frame_to_sendint": {
+            "bytes": "68001000008d85f0efffffc785ccefffff000000006a0050e8fed400008b038d8dccefffff83c40c518d8df0efffff518bcbff50048985acefffff3d000100e00f858ffeffff33c0bb010000008985a4efffff899ddcefffff8bb5a8efffffe988feffff0fb747548b8f9c0000006a016a0050ff777c8d85f0efffffffb5ccefffff50ff7750ff15d0f30410",
+            "file_offset": "0x3C398",
+            "va": "0x1003CF98"
+          },
+          "mode_1_stop_mask_append": {
+            "bytes": "8b8534feffff33f60fb7f885ff741d8b0a8a8435f0feffff4688040bff023bf772ed",
+            "file_offset": "0xD817",
+            "va": "0x1000E417"
+          },
+          "mode_1_value_encoding": {
+            "bytes": "8b8548feffff0fb7d78b402889853cfeffff85c00f85dc00000085d27413660f1f4400008b06c6040300ff0683ea0175f38b858cfeffffb9070000008b000fb7502a8bc2c1ea0383e0072bc88b8548feffff8a4024d2e0",
+            "file_offset": "0xD1BC",
+            "va": "0x1000DDBC"
+          },
+          "phase5_interface_handoff": {
+            "bytes": "8b8ff00100006a00ffb5ecdfffff8b016a008b502c8b85e8dfffff48508d85f1efffff508b85e4dfffff48508d85f1dfffff50ffb7f8000000",
+            "file_offset": "0x14391",
+            "va": "0x10014F91"
+          },
+          "runtime_did_length_cache": {
+            "bytes": "ffb79c0100008d8dacfeffffff153cb001108bf885ff0f8544fdffff8b9530feffff8d8dacfeffffffb2f0000000ff1538b00110",
+            "file_offset": "0xCE4B",
+            "va": "0x1000DA4B"
+          },
+          "set_value_scaling": {
+            "bytes": "558bec8b5508568bf185d274078b4a7085c9750ab8010008c05e5dc208008b450c2b42780faf427499f7f90fb6c833c0894e24",
+            "file_offset": "0x89200",
+            "va": "0x10089E00"
+          },
+          "start_selector_0x9d": {
+            "bytes": "8d8ddcfeffffff1590b001108b8530feffff8d8ddcfeffffff700405800100005150689d000000",
+            "file_offset": "0xCC20",
+            "va": "0x1000D820"
+          },
+          "stop_selector_0x64": {
+            "bytes": "8d8ddcfeffffff1590b001108b8530feffff8d8ddcfeffffff7004058001000051506a64",
+            "file_offset": "0xD673",
+            "va": "0x1000E273"
+          }
+        },
+        "binaries": {
+          "command_data_lib": {
+            "path": "bin/CommandDataLib.dll",
+            "sha256": "ffce12af45554a552dbf616545c4c4e02780702e4cb9e2c6f8235ff4f05c79ab",
+            "size": 1774608
+          },
+          "data_list_if": {
+            "path": "bin/DataListIF.dll",
+            "sha256": "cce3ecd1203f81914c51d5b2599ee68eb4f7faafa8cbd9bb24fd7390b54d651d",
+            "size": 507920
+          },
+          "data_monitor_phase5": {
+            "path": "bin/DataMonitorPhase5_DT.dll",
+            "sha256": "676192240b05e68a890e45f48575f826bc1dd44f935f5df4b77ee36558467519",
+            "size": 158224
+          }
+        },
+        "boundary": "static executable semantics only: no Active Test was executed; exact total request length remains runtime DataIdLengthList state even though service, DID, control parameter, bit placement, queueing, response SID, and transport sink are recovered",
+        "command_value": {
+          "alternate_value_field": "+0x28; constructor initializes it to zero and the normal SetValue path does not modify it",
+          "object": "CStartActTstSnd",
+          "raw_value_field": "+0x24",
+          "set_value": "engineering input is normalized through the selected physical Mul/Div/Offset and the low raw byte is stored at +0x24"
+        },
+        "handoff": {
+          "data_monitor_call": "CDataMonitorThreadP5::virtual_20 strips the already-present SID (buffer+1, length-1) and calls CDataMonitorPhase5Interface vtable +0x2C with ActiveTestType=0",
+          "event_queue": "CCommEventPhase5AT::ActiveTestStart prepends 0x2F for ActiveTestType 0, queues start and return-control frames, and replaces/updates an existing direct item with the same DID",
+          "interface_thunk": "DataMonitorPhase5_DT.dll 0x10016E75 -> DataListIF.dll p5dm_tf::DMInterface::active_test_start",
+          "receive": "CCommEventPhase5AT::CheckRcvFrame requires 0x6F for a sent 0x2F request and at least three response bytes",
+          "send_frame": "CCommEventPhase5AT::GetSndFrame memcpy-copies the queued request and length unchanged",
+          "transport": "p5diag_tf::J2534DiagInterface::ThreadMain -> KGP_CommFrameCtrl.dll CCommFrameCtrl::SendIntExt"
+        },
+        "hybrid_witness": {
+          "active_test_id": "0x0001",
+          "active_test_record": 0,
+          "bit_end": 15,
+          "bit_start": 15,
+          "category_id": 397,
+          "data_id_for_act_raw": "000001280000000000000100000000000000",
+          "data_id_for_act_record": 0,
+          "database": "HV_P5.ddb",
+          "did": "0x2801",
+          "encoding_mode": 1,
+          "minimum_data_length": 2,
+          "minimum_length_examples": {
+            "OFF": "2f2801030000",
+            "ON": "2f2801030001",
+            "qualification": "examples use N=2, the static minimum implied by bit 15; they are not a claim that the runtime DataIdLengthList entry equals 2",
+            "return_control": "2f2801000001"
+          },
+          "name": "Activate the Inverter Water Pump",
+          "raw_values": {
+            "OFF": 0,
+            "ON": 1
+          },
+          "runtime_data_length": "N",
+          "start_formula": "2F 28 01 03 || N-byte value; byte[1] bit0 is the water-pump value",
+          "stop_formula": "2F 28 01 00 || N-byte control-enable mask; byte[1] bit0 = 1"
+        },
+        "materializer": {
+          "data_id_for_act_fields": {
+            "did": "u16 +0x02",
+            "encoding_mode": "u8 +0x0A"
+          },
+          "data_id_for_act_table": {
+            "class": "CDbDataIdForActTable",
+            "record_size": 18,
+            "table": 67
+          },
+          "function": "DataMonitorPhase5_DT.dll CDataMonitorThreadP5 virtual_104 @ 0x1000D5E0",
+          "mode_1": {
+            "normal_value_source": "CStartActTstSnd +0x24 when +0x28 == 0",
+            "placement": "zero-fill N data bytes, then place the raw value into the type-68 bit range using byte=bit_end>>3 and shift=7-(bit_end&7)",
+            "return_control": "append the N-byte control-enable mask built from the same type-68 bit range to selector 0x64"
+          },
+          "multi_control": "the caller's type-33 path invokes this materializer per member and OR-composes same-DID start/stop data bytes before the common launch interface",
+          "runtime_data_length": {
+            "meaning": "N bytes of controlled DID data appended after the four-byte 2F/DID/IOCP prefix",
+            "source": "CCommCachePlusP5::GetSupportEcuDataIdLengthListCache -> GetDataIdLengthList -> CCmdDataIdLengthList::Search(DID)",
+            "static_boundary": "N is runtime support-cache state; the type-68 bit range proves only the minimum required length"
+          },
+          "selected_test_table": {
+            "class": "CDbActTestP5Table",
+            "table": 68
+          }
+        },
+        "protocol": {
+          "positive_response": "0x6F",
+          "service": "0x2F InputOutputControlByIdentifier",
+          "start_control_parameter": "0x03 shortTermAdjustment",
+          "start_selector": {
+            "category_id": 397,
+            "comm_frame_id": "0x2B0B",
+            "comm_frame_raw": "0b2b352c8e273a2c",
+            "comm_set": 1,
+            "comm_set_metadata": {
+              "comm_set_id": 1,
+              "exception_handler_flag": 0,
+              "exception_handler_id": 0,
+              "raw": "e8030000fc0300000000010000000100",
+              "receive_timeout": 1020,
+              "retry_count": 1,
+              "send_parameter": 1000,
+              "unknown_word_0c": 0
+            },
+            "func_comm_frame_raw": "8d019d0001000b2b0000010000000000",
+            "selector": "0x9D",
+            "variables": {
+              "receive_check": {
+                "bytes": "6f",
+                "id": "0x2C3A",
+                "normalized_id": "0x52A"
+              },
+              "receive_mask": {
+                "bytes": "ff",
+                "id": "0x278E",
+                "normalized_id": "0x7E"
+              },
+              "send": {
+                "bytes": "2fffff03",
+                "id": "0x2C35",
+                "normalized_id": "0x525"
+              }
+            }
+          },
+          "stop_control_parameter": "0x00 returnControlToECU",
+          "stop_selector": {
+            "category_id": 397,
+            "comm_frame_id": "0x2B0A",
+            "comm_frame_raw": "0a2b342c8e273a2c",
+            "comm_set": 1,
+            "comm_set_metadata": {
+              "comm_set_id": 1,
+              "exception_handler_flag": 0,
+              "exception_handler_id": 0,
+              "raw": "e8030000fc0300000000010000000100",
+              "receive_timeout": 1020,
+              "retry_count": 1,
+              "send_parameter": 1000,
+              "unknown_word_0c": 0
+            },
+            "func_comm_frame_raw": "8d01640001000a2b0000010000000000",
+            "selector": "0x64",
+            "variables": {
+              "receive_check": {
+                "bytes": "6f",
+                "id": "0x2C3A",
+                "normalized_id": "0x52A"
+              },
+              "receive_mask": {
+                "bytes": "ff",
+                "id": "0x278E",
+                "normalized_id": "0x7E"
+              },
+              "send": {
+                "bytes": "2fffff00",
+                "id": "0x2C34",
+                "normalized_id": "0x524"
+              }
+            }
+          }
+        }
+      },
       "plugin_semantics": {
         "role_0x05_p5_monitor_list": {
           "anchors": {

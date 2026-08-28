@@ -676,6 +676,128 @@ def _direct_active_test_selected_row(
     return db, db_path, selected
 
 
+def _direct_active_test_executor_plan(
+    parser: DDBParser,
+    master: Any,
+    category: dict[str, Any],
+    db: Any,
+    db_path: Path,
+    selected: dict[str, Any],
+) -> dict[str, Any]:
+    """Materialize the static P5 direct Active-Test executor contract.
+
+    The total DID data length is intentionally left symbolic because the
+    current DataMonitorPhase5 runtime reads it from CCmdDataIdLengthList.
+    """
+    section = db.sections.get(67)
+    if section is None:
+        raise ValueError(f"{db_path.name}: direct Active-Test table 67 is absent")
+    if section.decoded_record_size != 18:
+        raise ValueError(f"{db_path.name}: type-67 record size {section.decoded_record_size}, expected 18")
+    did = selected["initial_read_did"]
+    matches = []
+    for index in range(section.header.record_count):
+        raw = section.decoded_data[index * 18 : (index + 1) * 18]
+        if struct.unpack_from("<H", raw, 0x02)[0] == did:
+            matches.append((index, raw))
+    if len(matches) != 1:
+        raise ValueError(f"{db_path.name}: DID 0x{did:04X} resolved {len(matches)} type-67 rows")
+    record_index, raw = matches[0]
+    encoding_mode = raw[0x0A]
+
+    def frame(selector: int, expected: bytes) -> dict[str, Any]:
+        rows = _master_frame_rows(parser, master, int(category["category_id"]), selector)
+        if len(rows) != 1:
+            raise ValueError(
+                f"category {category['category_id']}: Active-Test selector 0x{selector:X} resolved {len(rows)} frames"
+            )
+        row = rows[0]
+        send = bytes.fromhex(row["send"]["bytes"])
+        if send != expected:
+            raise ValueError(
+                f"category {category['category_id']}: selector 0x{selector:X} base request {send.hex()} != {expected.hex()}"
+            )
+        return row
+
+    start_frame = frame(0x9D, bytes.fromhex("2fffff03"))
+    stop_frame = frame(0x64, bytes.fromhex("2fffff00"))
+    if start_frame["receive_check"]["bytes"] != "6f" or stop_frame["receive_check"]["bytes"] != "6f":
+        raise ValueError(f"category {category['category_id']}: Active-Test positive response is no longer 0x6F")
+
+    start_prefix = bytearray.fromhex(start_frame["send"]["bytes"])
+    stop_prefix = bytearray.fromhex(stop_frame["send"]["bytes"])
+    for buf in (start_prefix, stop_prefix):
+        buf[1] = (did >> 8) & 0xFF
+        buf[2] = did & 0xFF
+    bit_start = selected["bit_start"]
+    bit_end = selected["bit_end"]
+    minimum_length = bit_end // 8 + 1
+    plan: dict[str, Any] = {
+        "service": "0x2F",
+        "service_name": "InputOutputControlByIdentifier",
+        "positive_response": "0x6F",
+        "data_id_for_act": {
+            "table": 67,
+            "table_class": ECU_TABLE_CLASS_NAMES[67],
+            "record": record_index,
+            "did": did,
+            "did_hex": f"0x{did:04X}",
+            "encoding_mode": encoding_mode,
+            "raw": raw.hex(),
+        },
+        "start": {
+            "selector": "0x9D",
+            "control_parameter": "0x03",
+            "control_name": "shortTermAdjustment",
+            "base_frame": start_frame,
+            "materialized_prefix": start_prefix.hex(),
+            "formula": f"{start_prefix.hex()} || N-byte value payload",
+        },
+        "stop": {
+            "selector": "0x64",
+            "control_parameter": "0x00",
+            "control_name": "returnControlToECU",
+            "base_frame": stop_frame,
+            "materialized_prefix": stop_prefix.hex(),
+            "formula": f"{stop_prefix.hex()} || N-byte control-enable mask",
+        },
+        "runtime_data_length": {
+            "symbol": "N",
+            "source": "CCmdDataIdLengthList runtime support cache",
+            "minimum_from_bit_geometry": minimum_length,
+            "boundary": "static DDB geometry does not prove the runtime cached Data-ID length",
+        },
+        "bit_range": {"start": bit_start, "end": bit_end},
+        "encoding": (
+            "mode 1 zero-fills N bytes, then uses raw CStartActTstSnd +0x24 with byte=bit_end>>3 "
+            "and shift=7-(bit_end&7); stop appends the N-byte bit-range control-enable mask"
+            if encoding_mode == 1
+            else f"encoding mode {encoding_mode} is selected by type-67 +0x0A; this CLI currently exposes exact mode-1 packing only"
+        ),
+        "transport": (
+            "DataMonitorPhase5 strips the existing SID for its interface call; DataListIF CCommEventPhase5AT "
+            "re-prepends 0x2F, GetSndFrame copies the queued bytes unchanged, and the P5 J2534 thread sends them via SendIntExt"
+        ),
+    }
+    if encoding_mode == 1 and bit_start == bit_end:
+        byte_index = bit_end // 8
+        shift = 7 - (bit_end & 7)
+        off = bytearray(minimum_length)
+        on = bytearray(minimum_length)
+        mask = bytearray(minimum_length)
+        on[byte_index] = 1 << shift
+        mask[byte_index] = 1 << shift
+        plan["minimum_length_examples"] = {
+            "raw_0": (start_prefix + off).hex(),
+            "raw_1": (start_prefix + on).hex(),
+            "return_control": (stop_prefix + mask).hex(),
+            "qualification": (
+                f"uses N={minimum_length}, the static minimum required by bit {bit_end}; "
+                "not proof that the runtime DataIdLengthList entry has that length"
+            ),
+        }
+    return plan
+
 def _active_test_init_selected_plan(
     parser: DDBParser,
     master: Any,
@@ -771,10 +893,13 @@ def _active_test_init_selected_plan(
         if len(semantic) == 1:
             linked["monitor"] = semantic[0]
 
+    executor = _direct_active_test_executor_plan(parser, master, category, db, db_path, selected)
+
     return {
         "selected_test": selected,
         "initial_transaction": transaction,
         "linked_monitor": linked,
+        "executor": executor,
         "runtime_boundary": (
             "selected-row and initial-request materialization are offline deterministic; whether the test is offered "
             "and panel entries are supported still depends on role-0x06/live support state"
@@ -1411,6 +1536,20 @@ def cmd_command(args: argparse.Namespace) -> int:
                 f"linked-monitor\tkey={linked['monitor_key']}\tresolution={linked['resolution']}\t"
                 f"name={(monitor or {}).get('name') or '-'}"
             )
+            executor = selected_plan["executor"]
+            length = executor["runtime_data_length"]
+            print(
+                f"active-test-executor\tservice={executor['service']}\tdid={executor['data_id_for_act']['did_hex']}\t"
+                f"encoding_mode={executor['data_id_for_act']['encoding_mode']}\t"
+                f"start={executor['start']['materialized_prefix']}+N\tstop={executor['stop']['materialized_prefix']}+N\t"
+                f"runtime_length=N\tminimum={length['minimum_from_bit_geometry']}"
+            )
+            examples = executor.get("minimum_length_examples")
+            if examples is not None:
+                print(
+                    f"active-test-wire-minimum\traw0={examples['raw_0']}\traw1={examples['raw_1']}\t"
+                    f"return={examples['return_control']}\tqualification={examples['qualification']}"
+                )
     active_test_model = payload["active_test_model"]
     if active_test_model is not None:
         category_plan = active_test_model.get("category_plan")
