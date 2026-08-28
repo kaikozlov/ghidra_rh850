@@ -2083,13 +2083,27 @@ transport for all 536 current bindings, while role `0x41` Data Monitor
 signal-info has no recovered shared transport edge across all 283 bindings and
 is therefore a strong metadata/conversion candidate.
 
-Current GTS+ preserves the relevant `CommandCommon` helper exports, but its
-on-disk PE materializes only 4,096 bytes of an 868,352-byte virtual `.text`
-section. The current helper bodies themselves are therefore unavailable from
-that file; delegated/cache classifications transfer **V18 executable semantics
-only through identical current API imports/exports**, not by claiming current
-body byte parity. `tools/gts role` shows the binding-weighted surface breakdown
-so this boundary is visible during discovery.
+Current GTS+ preserves the relevant `CommandCommon` helper exports, while the
+**installed CP representation** materializes only 4,096 bytes of an 868,352-byte
+virtual `.text` section. That is no longer a corpus-level body limitation. The
+AgentLite-downloaded `Setup_PF.exe` contains both `GTSPlusCP\bin\CommandCommon.dll`
+(the installed 356,368-byte hollow PE) plus its 792,048-byte `.dll._` sidecar and
+`GTSPlus\bin\CommandCommon.dll` (the complete 1,280,016-byte original). The CP
+stub and sidecar hash byte-for-byte to the installed pair, while the original
+has SHA-256 `98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3`
+and a materialized `0xD3600`-byte raw `.text`.
+
+This is complete across the installed current GTS+ tree, not a one-file special
+case: `Setup_PF.exe` supplies 45 protected-body twins and
+`Setup_InfoCenter.exe` supplies the remaining 9, for **54/54 installed
+`.dll._`/`.exe._` pairs**. `tools/gts recover-bodies` now extracts the original
+same-release PEs under `build/out/gtsplus-unprotected/`, proves each installer
+`GTSPlusCP` stub/sidecar is byte-identical to the installed representation, and
+writes a provenance manifest. Thus V18 transfer remains useful historical
+context, but current `CommandCommon` and every other protected GTS+ body can now
+be analyzed directly. The protection/recovery evidence, including the separate
+CUWPlus `KONN` multi-stage boundary, is documented in
+[gtsplus-body-recovery.md](gtsplus-body-recovery.md).
 
 The next interpreter layer is now closed for two representative **current GTS+ plugin bodies**, rather than transferred from V18. Current category 405 `EMPS_P5` binds role `0x52` to `GetCID_SID22_DT.dll` (SHA-256 `775aa63b…5f9c2`), and selector `0xDC` materializes `22 F1 81` / mask `FF FF FF` / check `62 F1 81`. After `CommFrameSendReceiveExt`, the plugin compares receive indexes 1 and 2 with the requested DID, computes `received_count - 4`, skips indexes 0..3, and copies index 4 onward. The payload is chunked in fixed **16-byte** records, copied into a pre-zeroed buffer, converted by `MultiByteToWideChar` with code page 0 (`CP_ACP`), and emitted as 17-character-capacity `CCmdStringName` values named `CID1`, `CID2`, … from the literal `CID` and format `%s%d`. Receive byte 3 is deliberately skipped and is **not** the record count; iteration terminates from response length. This independently reproduces the older Brake-specific role-`0x52` geometry in TMS-047 without claiming every `0x52` plugin variant has identical parsing.
 

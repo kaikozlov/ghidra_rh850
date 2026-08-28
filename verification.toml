@@ -96,6 +96,13 @@ requires_external = ["gtsplus"]
 modes = ["local"]
 oracle = "independent_external_artifact"
 
+[suite.gtsplus_body_recovery]
+tests = ["tests/verify_gtsplus_body_recovery.py"]
+paths = ["tools/techstream/recover_gtsplus_bodies.py", "tools/techstream/gts_cli.py", "docs/tooling/techstream.md", "docs/tooling/gtsplus-body-recovery.md"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+oracle = "independent_external_artifact"
+
 [suite.toyota_cuw_corpus_lock]
 tests = ["tests/verify_toyota_cuw_corpus_lock.py"]
 paths = ["software/README.md"]

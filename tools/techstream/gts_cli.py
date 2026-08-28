@@ -40,6 +40,9 @@ from parse_ddb import ECU_TABLE_CLASS_NAMES, DDBParser, StringDataBase
 from pe_utils import binary_strings as pe_binary_strings
 from pe_utils import exports as pe_exports
 from pe_utils import imports as pe_imports
+from recover_gtsplus_bodies import DEFAULT_ARCHIVE as GTSPLUS_BODY_ARCHIVE
+from recover_gtsplus_bodies import DEFAULT_OUTPUT as GTSPLUS_BODY_OUTPUT
+from recover_gtsplus_bodies import recover as recover_gtsplus_bodies
 from techstream_paths import (
     CUW_CORPUS_ROOT,
     GTSPLUS_EXTERNAL_ROOT,
@@ -2343,6 +2346,24 @@ def cmd_pe(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_recover_bodies(args: argparse.Namespace) -> int:
+    gts = _resolve_gts_root(args.gtsplus_root)
+    manifest = recover_gtsplus_bodies(
+        archive=args.archive,
+        output=args.output,
+        installed_root=gts,
+        keep_workspace=args.keep_workspace,
+    )
+    if args.json:
+        print(json.dumps(manifest, indent=2, sort_keys=True))
+    else:
+        count = manifest["recovered_plaintext_body_count"]
+        installed = manifest["installed_protected_body_count"]
+        print(f"GTS+ {manifest['gtsplus_version']}: recovered {count}/{installed} protected PE bodies")
+        print(f"output\t{manifest['output_root']}")
+        print(f"manifest\t{Path(manifest['output_root']) / 'manifest.json'}")
+    return 0
+
 
 CAMRY_2026_DIAG_PROFILE = {
     "profile": "camry-2026-f33",
@@ -3348,6 +3369,16 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--limit", type=int, default=100)
     _common(p)
     p.set_defaults(func=cmd_pe)
+
+    p = sub.add_parser(
+        "recover-bodies",
+        help="recover original GTS+ PE bodies from the installer GTSPlus/GTSPlusCP twin groups",
+    )
+    p.add_argument("--archive", type=Path, default=GTSPLUS_BODY_ARCHIVE, help="gtsplus_msi.7z archive")
+    p.add_argument("--output", type=Path, default=GTSPLUS_BODY_OUTPUT, help="recovered plaintext output root")
+    p.add_argument("--keep-workspace", action="store_true", help="keep carved installer workspace under build/tmp")
+    _common(p)
+    p.set_defaults(func=cmd_recover_bodies)
 
     return ap
 
