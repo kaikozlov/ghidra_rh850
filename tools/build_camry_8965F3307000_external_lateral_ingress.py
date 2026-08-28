@@ -34,6 +34,31 @@ SIGNAL_TO_PDU = 0x22488
 SIGNAL_COUNT = 284
 PDU_OFFSETS = 0x22840
 
+# Authoritative exact-F33 scalar copy-edge cone.  These are the only scalar
+# receive signals whose raw -> staged -> snapshot chain survives the pinned
+# copy-edge model; all other 97 scalar extracts are empty under that model.
+COMMAND_CONE = {
+    130: (0xFEBE800E, 0xFEBEF192, 0xFEBEAE0A, [0xCC6BA], "gate"),
+    141: (0xFEBE801E, 0xFEBEF196, 0xFEBEAE08, [0xCC6BA], "monitor"),
+    186: (0xFEBE804E, 0xFEBEF06B, 0xFEBEACC4, [0xC2F78, 0xC2FAC, 0xCE9AC], "feedback-validity"),
+    187: (0xFEBE8048, 0xFEBEF1A0, 0xFEBEADFE, [0xC2E2A, 0xCE9EA], "measured-feedback"),
+    188: (0xFEBE804F, 0xFEBEF06F, 0xFEBEACC5, [0xC2E2A, 0xCE9EA], "measured-feedback"),
+    189: (0xFEBE804A, 0xFEBEF19E, 0xFEBEAE22, [0xCC07A, 0xCE9EA, 0xCED28], "measured-feedback"),
+    211: (0xFEBE8076, 0xFEBEF097, 0xFEBEACCE, [0xC9650, 0xC973A], "monitor-gate"),
+    212: (0xFEBE8072, 0xFEBEF1BC, 0xFEBEAE04, [0xC3D4C, 0xC9D18], "monitor/plausibility"),
+    213: (0xFEBE8074, 0xFEBEF1BE, 0xFEBEAE06, [0xC3D4C, 0xC9CAA], "monitor/plausibility"),
+    223: (0xFEBE807F, 0xFEBEF091, 0xFEBEACD6, [0xC3008, 0xCECD6], "gate"),
+    243: (0xFEBE80A0, 0xFEBEF094, 0xFEBEACCD, [0xC973A, 0xCB664, 0xCE772, 0xCE7A6], "protected-status-gate"),
+    261: (0xFEBE80BC, 0xFEBEF130, 0xFEBEADB0, [0xCB73A, 0xCEFFC], "sole-mode-selector"),
+    262: (0xFEBE80B8, 0xFEBEF1FA, 0xFEBEAE90, [0xCBA80, 0xCBB66, 0xCCF0E, 0xCEE80], "sole-command-magnitude"),
+    263: (0xFEBE80CB, 0xFEBEF155, 0xFEBEADDD, [0xCB664], "command-gate"),
+    265: (0xFEBE80C0, 0xFEBEF134, 0xFEBEADBB, [0xCDA20], "command-composition-gate"),
+    268: (0xFEBE80C3, 0xFEBEF137, 0xFEBEADBC, [0xCEC8A], "sequence-state"),
+    269: (0xFEBE80C4, 0xFEBEF138, 0xFEBEADBD, [0xCE3AA], "percentage-contribution"),
+    270: (0xFEBE80C5, 0xFEBEF139, 0xFEBEADBE, [0xCDFF8], "percentage-contribution"),
+    273: (0xFEBE80CA, 0xFEBEF14D, 0xFEBEADD9, [0xCFDA0], "command-gate"),
+}
+
 
 def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -59,6 +84,18 @@ def token(funcs: dict[int, dict], entry: int, *tokens: str) -> str:
     for item in tokens:
         need(item in text, f"0x{entry:08X} missing {item!r}")
     return text
+
+
+def has_ref(funcs: dict[int, dict], entry: int, address: int, ref_type: str) -> bool:
+    return any(
+        int(ref["to_addr"], 0) == address and ref["ref_type"] == ref_type
+        for ref in funcs[entry]["data_references"]
+    )
+
+
+def need_ref(funcs: dict[int, dict], entry: int, address: int, ref_type: str) -> None:
+    need(has_ref(funcs, entry, address, ref_type),
+         f"0x{entry:08X} missing {ref_type} reference to 0x{address:08X}")
 
 
 def sx16be(data: bytes, off: int) -> int:
@@ -205,6 +242,70 @@ def build() -> dict:
     }
     need(shapes == expected, f"large signed ingress drift: {sorted(shapes)}")
 
+    # Corrected scalar command-cone census.  Pin every surviving copy edge to
+    # canonical-corpus instruction/data references, including signal243's
+    # stack RMW (the generated unpacker does not receive FEBE80A0 directly).
+    scalar_by_signal = {row["signal"]: row for row in scalar}
+    need(len(scalar_by_signal) == len(scalar), "scalar signal IDs are no longer unique")
+    expected_cone_ids = {261, 262, 263, 265, 268, 269, 270, 273,
+                         186, 187, 188, 189, 211, 212, 213, 243, 223, 130, 141}
+    need(set(COMMAND_CONE) == expected_cone_ids, "pinned command-cone ID set drift")
+    cone_rows = []
+    for sid in sorted(COMMAND_CONE):
+        row = scalar_by_signal[sid]
+        raw, stage, snapshot, consumers, classification = COMMAND_CONE[sid]
+        unpacker = int(row["unpacker"], 0)
+        if sid == 243:
+            need(row["destination_expression"] == "auStack_9", "signal243 destination is no longer stack-backed")
+            token(funcs, 0x4BB62,
+                  "auStack_9[0] = DAT_febe80a0;",
+                  "FUN_0007d12a(0xf3,0x187,1,7,0,auStack_9);",
+                  "puVar2[-0x3760] = auStack_9[0];")
+            need_ref(funcs, unpacker, raw, "READ")
+            need_ref(funcs, unpacker, raw, "WRITE")
+            raw_edge = "0x0004BB62 stack-RMW auStack_9[0]"
+        else:
+            # The call-site reference is DATA because the unpacker writes
+            # through its destination pointer; the exact call arguments above
+            # establish that this address is the raw destination.
+            need_ref(funcs, unpacker, raw, "DATA")
+            raw_edge = row["unpacker"]
+        need_ref(funcs, 0x58074, raw, "READ")
+        need_ref(funcs, 0x58074, stage, "WRITE")
+        need_ref(funcs, 0xBCD66, stage, "READ")
+        need_ref(funcs, 0xBCD66, snapshot, "WRITE")
+        for consumer in consumers:
+            need_ref(funcs, consumer, snapshot, "READ")
+        cone_rows.append({
+            **row,
+            "can_id": f"0x{row['can_id']:03X}",
+            "raw": f"0x{raw:08X}",
+            "raw_copy": raw_edge,
+            "stage": f"0x{stage:08X}",
+            "stage_copy": "0x00058074",
+            "snapshot": f"0x{snapshot:08X}",
+            "snapshot_copy": "0x000BCD66",
+            "consumers": [f"0x{x:08X}" for x in consumers],
+            "classification": classification,
+        })
+    empty_cone_ids = sorted(set(scalar_by_signal) - expected_cone_ids)
+    need(len(cone_rows) == 19 and len(empty_cone_ids) == 97, "19/116 scalar command-cone census drift")
+
+    # Same-image identity: F181's secondary record is software compatibility
+    # identity, protected at startup by exact image-local comparisons.  DID2032
+    # is the separate 0x17D80 record and must not be conflated with F181.
+    token(funcs, 0x4FA26, "*param_1 = 2;", "(&DAT_00020860)[iVar2]", "(&DAT_00017dc0)[iVar2]")
+    token(funcs, 0x637EE, "FUN_00062d5e();")
+    token(funcs, 0x62D5E, "(&DAT_00020850)[uVar1] != (&DAT_00017da0)[uVar1]",
+          "DAT_00017dc0 != DAT_00020870", "iVar3 = -0x5aa55aa6;",
+          "FUN_00070a92(iVar3,&DAT_febf0668,&DAT_febf10a4,&DAT_febf10c8);", "puVar2[0x4e6c] = uVar4;")
+    token(funcs, 0x4F9DE, "*param_1 = 1;", "(&DAT_00017d80)[iVar2]")
+    need(image[0x20860:0x2086C] == b"8965F3307000", "F181 primary identity drift")
+    need(image[0x17DC0:0x17DCC] == b"8A3113303100", "F181 compatibility identity drift")
+    need(image[0x17DA0:0x17DA8] == image[0x20850:0x20858] == b"JB1BA101", "JB compatibility pair drift")
+    need(image[0x17DC0:0x17DC5] == image[0x20870:0x20875] == b"8A311", "8A311 prefix pair drift")
+    need(image[0x17D80:0x17D8D] == b"8965H33030A00", "DID2032 record drift")
+
     # D5's two signed16 fields use saturating GP-relative snapshot copies that a
     # direct-xref-only census would miss.  Their consumers are monitor/plausibility paths.
     token(funcs, 0x4B86E,
@@ -291,6 +392,37 @@ def build() -> dict:
             "scalar_receive_call_count": len(scalar),
             "signed_12plus_candidates": candidates,
         },
+        "scalar_command_cone_census": {
+            "model": "pinned raw -> stage@0x00058074 -> snapshot@0x000BCD66 copy edges with exact snapshot consumers",
+            "scalar_receive_call_count": len(scalar),
+            "nonempty_count": len(cone_rows),
+            "empty_count": len(empty_cone_ids),
+            "nonempty_signal_ids": [row["signal"] for row in cone_rows],
+            "empty_signal_ids": empty_cone_ids,
+            "chains": cone_rows,
+            "semantics": {
+                "signal261": "B6 signal261 is the sole recovered mode selector",
+                "signal262": "B6 signal262 is the sole recovered command magnitude",
+                "non_b6": "non-B6 cone members are feedback, monitors, plausibility inputs, or gates; none is a recovered command selector or magnitude",
+            },
+        },
+        "same_image_software_compatibility_identity": {
+            "f181_callback": "0x0004FA26",
+            "f181_count": 2,
+            "f181_records": ["8965F3307000 @ 0x00020860", "8A3113303100 @ 0x00017DC0"],
+            "classification": "8A3113303100 is the same-image F181 software/compatibility identity",
+            "startup_chain": ["0x000637EE", "0x00062D5E"],
+            "startup_checks": [
+                "8-byte JB1BA101: 0x00017DA0 <-> 0x00020850",
+                "5-byte 8A311 prefix: 0x00017DC0 <-> 0x00020870",
+            ],
+            "mismatch_behavior": {
+                "all_mismatches": "set protected error value -0x5AA55AA6 and pass it to 0x00070A92",
+                "jb1ba101_mismatch": "additionally writes 0x5A to FEBF066C",
+                "8a311_prefix_mismatch": "does not set the FEBF066C byte in this function",
+            },
+            "did2032": "0x0004F9DE separately emits count 1 from 0x00017D80 (8965H33030A00)",
+        },
         "controller1_acceptance": {
             "rule_array": "0x000230B8", "start_index": 0, "count": 47,
             "normal_rule_indices": [0, 42],
@@ -350,7 +482,7 @@ def build() -> dict:
         },
         "live_intersection": live,
         "conclusion": {
-            "normal_com": "Exact controller-1 rules 0..42 equal the 43 normal generated-COM descriptors one-for-one; rules 43..46 are diagnostics/XCP only. Within that complete normal-CAN surface, the two observed non-B6 command-sized candidates are 0x0D5 monitor channels and 0x115 Engine Revolution; 0x025 is measured steering feedback; 0x1C5/0x64F are absent. The generic group receive PDUs 0x013..0x01F are also absent. No observed ordinary EPS-CAN field besides B6 is identified as an external steering target/command, and there is no hidden controller-1 acceptance ID outside the normal COM table.",
+            "normal_com": "Exact controller-1 rules 0..42 equal the 43 normal generated-COM descriptors one-for-one; rules 43..46 are diagnostics/XCP only. The corrected pinned scalar copy-edge census has exactly 19 nonempty signals out of 116 and 97 empty: B6 signal261 is the sole mode selector and B6 signal262 the sole command magnitude; all non-B6 members are feedback, monitors, plausibility inputs, or gates. Signal243 uses the explicit 0x4BB62 stack-RMW path to FEBE80A0 -> FEBEF094 -> FEBEACCD. No observed ordinary EPS-CAN field besides B6 is identified as an external steering target/command, and there is no hidden controller-1 acceptance ID outside the normal COM table.",
             "b6": "Protected 0x0B6 remains the only positively recovered external target-steering-angle ingress. Exact F33 communication-monitor row5 independently maps PDU44/B6 loss to DTC index82, which GTS+ names U012987 Lost Communication with Brake System Control Module / Missing Message, so the EPS itself expects B6 from the brake-system source domain. B6 also has selected downstream corroboration to Toyota-named 0x1C02 Command Value Torque, but it is absent in both relay-correct drives.",
             "next": "Do not search another arbitrary accepted EPS CAN ID first. Synchronize the FRC 0x1601 LTA-active oracle with relay-correct CAN. If LTA is machine-proved active while B6 remains absent, move the search outside ordinary EPS generated-COM ingress: upstream FRC/Brake transformation, an internal/non-COM path, or another controller/peripheral path.",
             "production_output_authorized": False,

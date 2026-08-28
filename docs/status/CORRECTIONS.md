@@ -3122,3 +3122,19 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact correction:** pinned V18 `KgpDataCtrl.dll` consumes `mov al,[edx+0x56]` in `CDbDllTable::FindDbItem1`; pinned current GTS+ consumes `movzx eax,word [edx+0x54]`. `FindDbItem2` consumes category u16 `+0x50` in both. Under the corrected version-aware parser, current GTS+ categories 372 Engine, 395 Motor Generator, 397 Hybrid Control, 398 HV Battery, and 435 Brake/EPB all bind `DelDiagCodeP4.dll` at logical DLL role **`0x19` (25)**, matching V18.
 - **Consequence:** the exact Camry DTC-clear procedure and live evidence are unchanged: functional `0x7DF` Mode 04 remains the proven legislated-controller clear route, and physical SID14 remains the proven direct route where supported. The correction matters to the reusable Techstream execution model and any future database-driven Comma runtime, because plugin selection must use the correct generation-specific type-19 key layout.
 - **Canonical:** `tools/techstream/parse_ddb.py`; `tools/techstream/extract_diagnostic_execution_model.py`; `data/generated/techstream_v18/diagnostic_execution_model.json`; `tests/verify_techstream_diagnostic_execution_model.py`; `tests/verify_camry_2026.py`; [../tooling/techstream.md](../tooling/techstream.md) §6.2.0/§6.4; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §17.
+
+### CORR-126 — exact-F33 signal188 is `0x025` B4[7:4], not B2[7:4]
+
+- **Wrong:** the generated Camry CodeFlash artifact labeled signal188's signed four-bit
+  steering fraction as `B2[7:4]`.
+- **Right:** exact unpack call `0x4B59E` uses signal188 offset `0x12B`; relative to
+  PDU35/`0x025` buffer offset `0x127`, that is **B4[7:4] signed4**. The raw destination
+  remains `FEBE804F`, and the exact reconstruction remains coarse signed12 angle ×1.5
+  plus signed fraction ×0.1 degree.
+- **Consequence:** this corrects only the stale wire label; the firmware extraction,
+  scale, measured-feedback classification, and downstream reconstruction were already
+  correct.
+- **Canonical:** `tools/analyze_camry_8965F3307000_codeflash.py`;
+  `data/generated/camry_8965F3307000_codeflash.json`;
+  `tests/verify_camry_8965F3307000.py`;
+  [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §9.

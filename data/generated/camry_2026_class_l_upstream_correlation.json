@@ -1,0 +1,485 @@
+{
+  "combined": {
+    "common_accepted_rise_flip_bits_across_drives": [],
+    "eps_0x030_persistent_flip_total": 0,
+    "matched_upstream_0x18a_class_l_step_detected": false,
+    "matched_upstream_0x18a_rise_flip_bits_across_drives": [],
+    "upstream_18x_accepted_by_f33_rules": []
+  },
+  "dbc_formulas": {
+    "0x025_steering_angle_deg": "signed_be(3|12) * 1.5 + signed_be(39|4) * 0.1",
+    "0x025_steering_rate_raw": "signed_be(35|12)",
+    "0x030_steering_wheel_torque_nm": "signed_be(71|8) * 0.1 + signed_be(139|4) * 0.01"
+  },
+  "drives": {
+    "drive_a": {
+      "accepted_bit_step_scan": {
+        "distinct_fall_flip_bits": [
+          "0x00FB3.0",
+          "0x00FB3.1",
+          "0x00FB3.2",
+          "0x00FB3.3"
+        ],
+        "distinct_rise_flip_bits": [],
+        "fall_flips": {
+          "5:387603565907": [
+            {
+              "bit": 0,
+              "byte": 3,
+              "dlc": 8,
+              "id": "0x00F",
+              "post": 0,
+              "pre": 1
+            },
+            {
+              "bit": 1,
+              "byte": 3,
+              "dlc": 8,
+              "id": "0x00F",
+              "post": 0,
+              "pre": 1
+            },
+            {
+              "bit": 2,
+              "byte": 3,
+              "dlc": 8,
+              "id": "0x00F",
+              "post": 0,
+              "pre": 1
+            },
+            {
+              "bit": 3,
+              "byte": 3,
+              "dlc": 8,
+              "id": "0x00F",
+              "post": 1,
+              "pre": 0
+            }
+          ]
+        },
+        "observed_accepted_streams": 21,
+        "rise_flips": {
+          "5:371484309794": []
+        }
+      },
+      "bus1_family": {
+        "stream_rates_hz": {
+          "0x020": 18.99,
+          "0x123": 9.49,
+          "0x160": 37.93,
+          "0x180": 18.99,
+          "0x181": 18.96,
+          "0x182": 18.95,
+          "0x183": 18.94,
+          "0x184": 18.95,
+          "0x185": 18.98,
+          "0x186": 18.96,
+          "0x187": 18.93,
+          "0x188": 18.96,
+          "0x189": 18.97,
+          "0x18A": 18.94,
+          "0x18B": 18.95,
+          "0x18C": 18.94,
+          "0x1A0": 18.97,
+          "0x200": 9.48,
+          "0x201": 9.48,
+          "0x230": 18.96,
+          "0x440": 1.9,
+          "0x450": 1.89,
+          "0x45A": 0.01,
+          "0x4E0": 0.01,
+          "0x700": 0.0,
+          "0x701": 0.0,
+          "0x706": 0.0,
+          "0x720": 0.0,
+          "0x721": 0.0,
+          "0x742": 0.0,
+          "0x744": 0.0,
+          "0x746": 0.0,
+          "0x747": 0.0,
+          "0x74F": 0.0,
+          "0x750": 0.0,
+          "0x753": 0.0,
+          "0x75A": 0.0,
+          "0x780": 0.0,
+          "0x791": 0.0,
+          "0x7A1": 0.0,
+          "0x7A2": 0.01,
+          "0x7A3": 0.0,
+          "0x7AA": 0.01,
+          "0x7B0": 0.01,
+          "0x7B1": 0.0,
+          "0x7B3": 0.0,
+          "0x7B8": 0.01,
+          "0x7C4": 0.0,
+          "0x7D0": 0.0,
+          "0x7D1": 0.0,
+          "0x7D2": 0.0,
+          "0x7DF": 0.01,
+          "0x7E0": 0.0,
+          "0x7E1": 0.0,
+          "0x7E2": 0.0,
+          "0x7E4": 0.0
+        },
+        "upstream_18x_ids": [
+          "0x180",
+          "0x181",
+          "0x182",
+          "0x183",
+          "0x184",
+          "0x185",
+          "0x186",
+          "0x187",
+          "0x188",
+          "0x189",
+          "0x18A",
+          "0x18B",
+          "0x18C"
+        ]
+      },
+      "class_l": {
+        "intervals": [
+          {
+            "duration_s": 16.119256,
+            "end_ns": 387603565907,
+            "end_segment": 5,
+            "start_ns": 371484309794,
+            "start_segment": 5
+          }
+        ]
+      },
+      "eps_0x030_stability": {
+        "count": 0,
+        "edges": [
+          {
+            "edge": "rise",
+            "edge_ns": 371484309794,
+            "persistent_flips": [],
+            "post_frames": 301,
+            "pre_frames": 299,
+            "segment": 5
+          },
+          {
+            "edge": "fall",
+            "edge_ns": 387603565907,
+            "persistent_flips": [],
+            "post_frames": 300,
+            "pre_frames": 299,
+            "segment": 5
+          }
+        ],
+        "persistence_threshold": 0.95,
+        "persistent_flips_at_edges": [],
+        "scan_scope": "separate EPS transmit stream on relay-correct bus0"
+      },
+      "eps_metrics_inside_class_l": {
+        "exploratory_0x090_reproduction": {
+          "best_field": "B12[3:0]+B13",
+          "best_r": 0.9931,
+          "classification": "unresolved; correlation reproduction is not a semantic or causal wire join",
+          "peak_lag_ms": -60
+        },
+        "intervals": [
+          {
+            "abs_rate_raw_median": 1,
+            "abs_rate_raw_p90": 18,
+            "abs_torque_nm_median": 0.85,
+            "abs_torque_nm_p90": 1.43,
+            "angle_frames": 1612,
+            "angle_std_deg": 7.871,
+            "duration_s": 16.119256,
+            "end_segment": 5,
+            "start_s": 371.48431,
+            "start_segment": 5,
+            "torque_frames": 1613,
+            "wheel_speed_kph_mean": 40.27
+          }
+        ]
+      },
+      "source": {
+        "file": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+        "frame_count": 1656656,
+        "sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5"
+      },
+      "upstream_0x181_lag_field": {
+        "first10s_r": -0.6673,
+        "meaning": "corr(field(t), angle(t+dt)) peak at negative dt: the field lags measured steering, i.e. steering-derived",
+        "peak_dt_ms": -200,
+        "peak_r": -0.7192,
+        "wire": "bytes[35:37] signed LE i16"
+      },
+      "upstream_0x18a_activity": [
+        {
+          "class_l_step_detected": false,
+          "edge": "rise",
+          "edge_s": 371.48431,
+          "persistent_flips": [],
+          "post_frames": 60,
+          "post_nonzero_mean": 36.48,
+          "pre_frames": 60,
+          "pre_nonzero_mean": 35.02
+        },
+        {
+          "class_l_step_detected": false,
+          "edge": "fall",
+          "edge_s": 387.603566,
+          "persistent_flips": [],
+          "post_frames": 60,
+          "post_nonzero_mean": 43.18,
+          "pre_frames": 60,
+          "pre_nonzero_mean": 45.37
+        }
+      ],
+      "upstream_0x18c_record_counts": [
+        {
+          "edge": "rise",
+          "frames": 360,
+          "record_counts": {
+            "3": 360
+          }
+        },
+        {
+          "edge": "fall",
+          "frames": 360,
+          "record_counts": {
+            "3": 360
+          }
+        }
+      ]
+    },
+    "drive_b": {
+      "accepted_bit_step_scan": {
+        "distinct_fall_flip_bits": [
+          "0x116B0.3",
+          "0x116B0.4"
+        ],
+        "distinct_rise_flip_bits": [],
+        "fall_flips": {
+          "21:1325065360088": [
+            {
+              "bit": 3,
+              "byte": 0,
+              "dlc": 8,
+              "id": "0x116",
+              "post": 0,
+              "pre": 1
+            },
+            {
+              "bit": 4,
+              "byte": 0,
+              "dlc": 8,
+              "id": "0x116",
+              "post": 0,
+              "pre": 1
+            }
+          ]
+        },
+        "observed_accepted_streams": 21,
+        "rise_flips": {
+          "20:1267881231677": []
+        }
+      },
+      "bus1_family": {
+        "stream_rates_hz": {
+          "0x020": 20.0,
+          "0x123": 10.0,
+          "0x160": 40.0,
+          "0x180": 20.0,
+          "0x181": 20.0,
+          "0x182": 20.0,
+          "0x183": 20.0,
+          "0x184": 20.0,
+          "0x185": 20.0,
+          "0x186": 20.0,
+          "0x187": 20.0,
+          "0x188": 20.0,
+          "0x189": 20.0,
+          "0x18A": 20.0,
+          "0x18B": 20.0,
+          "0x18C": 20.0,
+          "0x1A0": 20.0,
+          "0x200": 10.0,
+          "0x201": 10.0,
+          "0x230": 20.0,
+          "0x440": 2.0,
+          "0x450": 2.0
+        },
+        "upstream_18x_ids": [
+          "0x18B",
+          "0x18C",
+          "0x180",
+          "0x181",
+          "0x182",
+          "0x183",
+          "0x184",
+          "0x185",
+          "0x186",
+          "0x187",
+          "0x188",
+          "0x189",
+          "0x18A"
+        ]
+      },
+      "class_l": {
+        "intervals": [
+          {
+            "duration_s": 57.184128,
+            "end_ns": 1325065360088,
+            "end_segment": 21,
+            "start_ns": 1267881231677,
+            "start_segment": 20
+          }
+        ]
+      },
+      "eps_0x030_stability": {
+        "count": 0,
+        "edges": [
+          {
+            "edge": "rise",
+            "edge_ns": 1267881231677,
+            "persistent_flips": [],
+            "post_frames": 300,
+            "pre_frames": 299,
+            "segment": 20
+          },
+          {
+            "edge": "fall",
+            "edge_ns": 1325065360088,
+            "persistent_flips": [],
+            "post_frames": 301,
+            "pre_frames": 299,
+            "segment": 21
+          }
+        ],
+        "persistence_threshold": 0.95,
+        "persistent_flips_at_edges": [],
+        "scan_scope": "separate EPS transmit stream on relay-correct bus0"
+      },
+      "eps_metrics_inside_class_l": {
+        "exploratory_0x090_reproduction": {
+          "best_field": "B12[3:0]+B13",
+          "best_r": 0.7615,
+          "classification": "unresolved; correlation reproduction is not a semantic or causal wire join",
+          "peak_lag_ms": -70
+        },
+        "intervals": [
+          {
+            "abs_rate_raw_median": 0,
+            "abs_rate_raw_p90": 0,
+            "abs_torque_nm_median": 0.26,
+            "abs_torque_nm_p90": 0.83,
+            "angle_frames": 5719,
+            "angle_std_deg": 0.556,
+            "duration_s": 57.184128,
+            "end_segment": 21,
+            "start_s": 1267.881232,
+            "start_segment": 20,
+            "torque_frames": 5719,
+            "wheel_speed_kph_mean": 70.24
+          }
+        ]
+      },
+      "source": {
+        "file": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+        "frame_count": 1918047,
+        "sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a"
+      },
+      "upstream_0x181_lag_field": {
+        "first10s_r": -0.5545,
+        "meaning": "corr(field(t), angle(t+dt)) peak at negative dt: the field lags measured steering, i.e. steering-derived",
+        "peak_dt_ms": -240,
+        "peak_r": -0.7287,
+        "wire": "bytes[35:37] signed LE i16"
+      },
+      "upstream_0x18a_activity": [
+        {
+          "class_l_step_detected": true,
+          "edge": "rise",
+          "edge_s": 1267.881232,
+          "persistent_flips": [
+            {
+              "bit": 4,
+              "byte": 27,
+              "post": 0,
+              "pre": 1
+            },
+            {
+              "bit": 5,
+              "byte": 27,
+              "post": 0,
+              "pre": 1
+            },
+            {
+              "bit": 6,
+              "byte": 27,
+              "post": 0,
+              "pre": 1
+            },
+            {
+              "bit": 7,
+              "byte": 27,
+              "post": 0,
+              "pre": 1
+            }
+          ],
+          "post_frames": 60,
+          "post_nonzero_mean": 28.18,
+          "pre_frames": 60,
+          "pre_nonzero_mean": 31.9
+        },
+        {
+          "class_l_step_detected": false,
+          "edge": "fall",
+          "edge_s": 1325.06536,
+          "persistent_flips": [],
+          "post_frames": 60,
+          "post_nonzero_mean": 40.35,
+          "pre_frames": 59,
+          "pre_nonzero_mean": 39.86
+        }
+      ],
+      "upstream_0x18c_record_counts": [
+        {
+          "edge": "rise",
+          "frames": 360,
+          "record_counts": {
+            "3": 360
+          }
+        },
+        {
+          "edge": "fall",
+          "frames": 360,
+          "record_counts": {
+            "3": 360
+          }
+        }
+      ]
+    }
+  },
+  "interpretation": {
+    "class_l_eps_negative": "observed/deterministic: across both drives no exact-F33-accepted bus0 field shows a common majority-bit step at Class-L rise, and EPS 0x030 shows zero persistent bit flips at rise/fall; inside Class-L the driver-style torque/rate observables stay bounded, consistent with Class-L being an upstream/display/availability state rather than a visible EPS cooperative-mode latch. This does not prove absence of EPS-internal state invisible on 0x030.",
+    "production_output_authorized": false,
+    "upstream_18x": "bounded: bus1 0x180..0x18C is not exact-F33 accepted and can only be upstream transformation input. 0x18A has no persistent rise flip reproduced across both matched Class-L windows; one isolated drive-B B27 high-nibble flip is retained in the per-edge evidence and is not promoted. 0x18C record count is 3 on both sides of every edge; 0x181 bytes[35:37] signed little-endian lags measured steering by 200/240 ms in the two drives and is steering-derived, not a command precursor. No identifiable upstream target/curvature/planning quantity is recoverable from these two drives."
+  },
+  "schema": "camry-2026-class-l-upstream-correlation-v1",
+  "sources": {
+    "census": {
+      "path": "data/generated/camry_2026_cruise_lta_edge_census.json",
+      "sha256": "9f0b0daf26a1d39d88d52be025fea4a7417c820b79d914c88c6f6f11cdfc0ec3"
+    },
+    "drives": [
+      {
+        "path": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+        "sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5"
+      },
+      {
+        "path": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+        "sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a"
+      }
+    ],
+    "ingress": {
+      "path": "data/generated/camry_8965F3307000_external_lateral_ingress.json",
+      "sha256": "26480a5cdc053cff4405d5e39131724df23d143574242ead01a3baa26d6378b8"
+    }
+  }
+}

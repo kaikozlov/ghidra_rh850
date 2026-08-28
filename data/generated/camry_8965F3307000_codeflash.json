@@ -381,7 +381,7 @@
         "raw": "gp-0x37B1",
         "scale_deg_per_count": 0.1,
         "signal_id": 188,
-        "wire": "B2[7:4] signed4"
+        "wire": "B4[7:4] signed4"
       },
       "pdu_id": 35,
       "reconstruction": "0xB3B06: 15*coarse + signed_fraction; 0xCE9EA: reconstructed_tenths_deg * 0x6FB / 0x200; 0xCEADA republishes the valid measured-angle domain into a voted triple."

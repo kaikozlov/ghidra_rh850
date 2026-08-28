@@ -12,6 +12,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 ART = REPO / "data/generated/camry_8965F3307000_external_lateral_ingress.json"
 BUILD = REPO / "tools/build_camry_8965F3307000_external_lateral_ingress.py"
+CLASS_ART = REPO / "data/generated/camry_2026_class_l_upstream_correlation.json"
+CLASS_BUILD = REPO / "tools/analyze_camry_2026_class_l_upstream.py"
 
 passed = failed = 0
 
@@ -25,6 +27,10 @@ with tempfile.TemporaryDirectory() as td:
     p = subprocess.run([sys.executable, str(BUILD), "--out", str(out)], cwd=REPO, capture_output=True, text=True)
     check("generator succeeds", p.returncode == 0, p.stderr[-300:])
     check("artifact regenerates byte-exact", p.returncode == 0 and out.read_bytes() == ART.read_bytes())
+    class_out = Path(td) / "class-l.json"
+    p = subprocess.run([sys.executable, str(CLASS_BUILD), "--out", str(class_out)], cwd=REPO, capture_output=True, text=True)
+    check("Class-L/upstream analyzer succeeds", p.returncode == 0, p.stderr[-300:])
+    check("Class-L/upstream artifact regenerates byte-exact", p.returncode == 0 and class_out.read_bytes() == CLASS_ART.read_bytes())
 
 art = json.loads(ART.read_text())
 check("schema/target exact", art["schema"] == "camry-8965f3307000-external-lateral-ingress-v1" and art["target"]["software_id"] == "8965F3307000" and art["target"]["corpus_function_count"] == 6065)
@@ -44,6 +50,31 @@ check("D5 signed16s are monitor paths", cands[(0x0D5,212)]["classification"] == 
 check("115 signed16 is engine-domain", cands[(0x115,134)]["classification"] == "engine-domain" and art["special_paths"]["0x115"]["gtsplus_name"] == "Engine Revolution")
 check("1C5/64F command-sized fields are not observed", all(cands[k]["classification"] == "not-observed" for k in ((0x1C5,141),(0x64F,255),(0x64F,257))))
 
+cone = art["scalar_command_cone_census"]
+cone_ids = {261,262,263,265,268,269,270,273,186,187,188,189,211,212,213,243,223,130,141}
+check("corrected scalar command-cone census is exactly 19/116", cone["scalar_receive_call_count"] == 116 and cone["nonempty_count"] == 19 and cone["empty_count"] == 97 and set(cone["nonempty_signal_ids"]) == cone_ids and len(cone["empty_signal_ids"]) == 97)
+chains = {row["signal"]: row for row in cone["chains"]}
+expected_chain_addresses = {
+    130:("0xFEBE800E","0xFEBEF192","0xFEBEAE0A"), 141:("0xFEBE801E","0xFEBEF196","0xFEBEAE08"),
+    186:("0xFEBE804E","0xFEBEF06B","0xFEBEACC4"), 187:("0xFEBE8048","0xFEBEF1A0","0xFEBEADFE"),
+    188:("0xFEBE804F","0xFEBEF06F","0xFEBEACC5"), 189:("0xFEBE804A","0xFEBEF19E","0xFEBEAE22"),
+    211:("0xFEBE8076","0xFEBEF097","0xFEBEACCE"), 212:("0xFEBE8072","0xFEBEF1BC","0xFEBEAE04"),
+    213:("0xFEBE8074","0xFEBEF1BE","0xFEBEAE06"), 223:("0xFEBE807F","0xFEBEF091","0xFEBEACD6"),
+    243:("0xFEBE80A0","0xFEBEF094","0xFEBEACCD"), 261:("0xFEBE80BC","0xFEBEF130","0xFEBEADB0"),
+    262:("0xFEBE80B8","0xFEBEF1FA","0xFEBEAE90"), 263:("0xFEBE80CB","0xFEBEF155","0xFEBEADDD"),
+    265:("0xFEBE80C0","0xFEBEF134","0xFEBEADBB"), 268:("0xFEBE80C3","0xFEBEF137","0xFEBEADBC"),
+    269:("0xFEBE80C4","0xFEBEF138","0xFEBEADBD"), 270:("0xFEBE80C5","0xFEBEF139","0xFEBEADBE"),
+    273:("0xFEBE80CA","0xFEBEF14D","0xFEBEADD9"),
+}
+check("all 19 raw/stage/snapshot chains are exact", {sid:(row["raw"],row["stage"],row["snapshot"]) for sid,row in chains.items()} == expected_chain_addresses)
+check("signal243 stack-RMW chain is pinned", chains[243]["unpacker"] == "0x0004BB62" and chains[243]["destination_expression"] == "auStack_9" and chains[243]["raw_copy"] == "0x0004BB62 stack-RMW auStack_9[0]" and [chains[243][k] for k in ("raw","stage","snapshot")] == ["0xFEBE80A0","0xFEBEF094","0xFEBEACCD"])
+check("B6 has sole selector and magnitude", chains[261]["classification"] == "sole-mode-selector" and chains[262]["classification"] == "sole-command-magnitude" and all(row["classification"] not in {"sole-mode-selector","sole-command-magnitude"} for row in cone["chains"] if row["can_id"] != "0x0B6"))
+check("non-B6 cone is feedback/monitor/gate only", cone["semantics"]["non_b6"].startswith("non-B6 cone members are feedback"))
+
+identity = art["same_image_software_compatibility_identity"]
+check("8A311 record is same-image compatibility identity", identity["f181_callback"] == "0x0004FA26" and identity["f181_count"] == 2 and identity["f181_records"] == ["8965F3307000 @ 0x00020860","8A3113303100 @ 0x00017DC0"] and identity["startup_chain"] == ["0x000637EE","0x00062D5E"])
+check("startup mismatch behavior and DID2032 are distinct", identity["mismatch_behavior"]["jb1ba101_mismatch"] == "additionally writes 0x5A to FEBF066C" and "does not set" in identity["mismatch_behavior"]["8a311_prefix_mismatch"] and identity["did2032"].startswith("0x0004F9DE separately"))
+
 live = art["live_intersection"]
 check("two drives total 3.574M frames", live["combined_incoming_frames"] == 3574703)
 check("B6 absent on every bus", live["selected_counts"]["0x0B6/32"] == {"0":0,"1":0,"2":0})
@@ -54,6 +85,15 @@ check("generic group receive surface is absent live", art["special_paths"]["gene
 check("B6 reaches Toyota-named command torque", art["b6_to_command_torque"]["gtsplus_terminal"] == "0x1C02 Command Value Torque")
 check("normal-COM conclusion is bounded", "No observed ordinary EPS-CAN field besides B6" in art["conclusion"]["normal_com"] and "does not prove" in art["boundary"][1])
 check("production output remains disabled", art["conclusion"]["production_output_authorized"] is False)
+
+class_art = json.loads(CLASS_ART.read_text())
+check("Class-L intervals preserve cross-segment B", class_art["drives"]["drive_a"]["class_l"]["intervals"][0]["duration_s"] == 16.119256 and class_art["drives"]["drive_b"]["class_l"]["intervals"][0] == {"start_segment":20,"end_segment":21,"start_ns":1267881231677,"end_ns":1325065360088,"duration_s":57.184128})
+check("persistent accepted/EPS edge result is negative", class_art["combined"]["common_accepted_rise_flip_bits_across_drives"] == [] and class_art["combined"]["eps_0x030_persistent_flip_total"] == 0 and all(d["eps_0x030_stability"]["persistence_threshold"] == 0.95 for d in class_art["drives"].values()))
+check("matched 0x18A result is negative", class_art["combined"]["matched_upstream_0x18a_rise_flip_bits_across_drives"] == [] and class_art["combined"]["matched_upstream_0x18a_class_l_step_detected"] is False)
+check("0x18C staircase record count stays three", all(edge["record_counts"] == {"3":edge["frames"]} for d in class_art["drives"].values() for edge in d["upstream_0x18c_record_counts"]))
+check("0x181 signed-LE lag result is pinned", [(d["upstream_0x181_lag_field"]["wire"], d["upstream_0x181_lag_field"]["peak_dt_ms"], d["upstream_0x181_lag_field"]["peak_r"]) for d in class_art["drives"].values()] == [("bytes[35:37] signed LE i16",-200,-0.7192),("bytes[35:37] signed LE i16",-240,-0.7287)])
+check("0x090 reproduction remains unresolved", all(d["eps_metrics_inside_class_l"]["exploratory_0x090_reproduction"]["classification"].startswith("unresolved") for d in class_art["drives"].values()))
+check("Class-L analyzer preserves exact DBC formulas", class_art["dbc_formulas"] == {"0x030_steering_wheel_torque_nm":"signed_be(71|8) * 0.1 + signed_be(139|4) * 0.01","0x025_steering_angle_deg":"signed_be(3|12) * 1.5 + signed_be(39|4) * 0.1","0x025_steering_rate_raw":"signed_be(35|12)"})
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

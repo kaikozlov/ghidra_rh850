@@ -278,17 +278,15 @@ status slot `0x1A -> PDU44/B6 -> Dem 0x0143 -> DTC index82 ->` current-GTS+ **U0
 Lost Communication with Brake System Control Module / Missing Message**. The EPS therefore
 expects B6 from the Brake System Control domain; the immediate logical source domain is
 known even though the upstream planner and actual B6 construction/signing implementation remain bounded.
-Within that complete normal surface F33 has only nine signed generated-COM fields >=12
-bits. The observed non-B6 candidates are now closed: `0x025` is measured angle/rate feedback;
-`0x115` terminates at current-GTS+ DID1032 **Engine Revolution**; the two `0x0D5`
-signed16 fields terminate in disabled/unpopulated threshold-monitor events and are tiny/
-zero live. `0x1C5` and `0x64F` are absent, and the generic group receive surface maps only
-to absent `0x013..0x01F`. B6 additionally reaches exact-GTS+ DID1C02 **Command Value
-Torque** downstream. The next discriminator remains synchronized FRC `0x1601`: if it
-proves stock LTA active with B6 still absent, escalate specifically to upstream FRC/Brake
-transformation or a non-COM/internal EPS path. The bus1 `0x180..0x18C` family is useful
-upstream search vocabulary but cannot directly be the F33 normal-CAN command because
-none of those IDs is accepted by the exact EPS Rx table.
+The corrected scalar copy-edge census is exactly **19/116 nonempty and 97 empty**, with
+the pinned signal set `{130,141,186,187,188,189,211,212,213,223,243,261,262,263,265,268,269,270,273}`.
+B6 signal261 is the sole recovered mode selector and signal262 the sole magnitude; every
+non-B6 member is feedback, monitor, plausibility, or gate state. Signal243 explicitly
+uses `0x4BB62` stack-RMW to `FEBE80A0 -> FEBEF094 -> FEBEACCD`. The generic group
+surface maps only to absent `0x013..0x01F`, and B6 reaches exact-GTS+ DID1C02 **Command
+Value Torque** downstream. Do not re-run a broad scalar or H-variant cone derivation.
+The bus1 `0x180..0x18C` family remains upstream vocabulary only because none of those IDs
+is accepted by exact F33; VAR-057/066 retain the peripheral/topology boundary.
 
 **VAR-066 topology update:** stop treating the repeated zero-B6 result as a likely
 Toyota-B bus-selection problem. Current GTS+ CAN Bus Check tables bind all three current
@@ -312,6 +310,16 @@ again with zero B6. The latter remains a lateral/HUD **candidate**, not an OEM-n
 bit. Therefore `0x1601` is now a naming/corroboration experiment rather than a reason to
 hold the reverse engineering: proceed in parallel with the actual steering-path audit,
 starting at the upstream FRC/Brake boundary and the residual non-COM/internal F33 paths.
+
+**VAR-068 Class-L/upstream and identity update:** the retained Class-L windows now have a
+portable persistent-edge analysis. No exact-F33-accepted stream has a reproduced rise
+flip, separate EPS-Tx `0x030` has zero persistent edge flips, `0x18A` has no matched
+two-drive rise, every `0x18C` edge-window frame has staircase record count 3, and
+`0x181 bytes[35:37]` signed LE lags measured steering by 200/240 ms. The differing
+exploratory `0x090` correlations remain unresolved. Do not mine neighboring upstream
+IDs from this negative. Same-image code also fixes `8A3113303100` as the F181
+software/compatibility record: callback `0x4FA26`, startup check `0x637EE -> 0x62D5E`,
+and separate DID2032 callback `0x4F9DE` are all exact and verified.
 
 COM-013 closes much more of the whole-vehicle side than the earlier EPS-only
 roadmap. TSS generation and SecOC/TSK are **orthogonal** (CORR-108). The public

@@ -322,7 +322,7 @@ def main() -> int:
             'measured_steering_angle_feedback': {
                 'can_id': '0x025', 'pdu_id': 35, 'buffer_offset': '0x127',
                 'coarse_signal': {'signal_id': 187, 'wire': 'B0..B1 signed12', 'raw': 'gp-0x37B8', 'techstream_did': '0x1037', 'techstream_name': steering_conv['name'], 'scale_deg_per_count': 1.5},
-                'fraction_signal': {'signal_id': 188, 'wire': 'B2[7:4] signed4', 'raw': 'gp-0x37B1', 'scale_deg_per_count': 0.1},
+                'fraction_signal': {'signal_id': 188, 'wire': 'B4[7:4] signed4', 'raw': 'gp-0x37B1', 'scale_deg_per_count': 0.1},
                 'did1037_row': {'address': '0x000293AC', 'callback': '0x0004DBF8', 'raw_hex': did1037_row.hex()},
                 'reconstruction': '0xB3B06: 15*coarse + signed_fraction; 0xCE9EA: reconstructed_tenths_deg * 0x6FB / 0x200; 0xCEADA republishes the valid measured-angle domain into a voted triple.',
             },
