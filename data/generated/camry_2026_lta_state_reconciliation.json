@@ -1,0 +1,1646 @@
+{
+  "combined": {
+    "b21_11_duration_s": 73.303384,
+    "b21_11_incoming_frame_count_all_buses": 237097,
+    "b21_value_set_both_drives": [
+      0,
+      11,
+      18
+    ],
+    "b6_during_entire_b21_11_intervals_all_buses_any_dlc": 0
+  },
+  "current_gtsplus_join": {
+    "emps_category": {
+      "category_id": 405,
+      "database": "EMPS_P5.ddb",
+      "generation": 20,
+      "name": "EMPS",
+      "short_name": ""
+    },
+    "frc_lta_indicator_1": {
+      "boundary": "FRC fixed RoutineControl/display active-test concept only; it is not a synchronized live-state oracle and is not used to name a captured byte.",
+      "category": {
+        "category_id": 498,
+        "database": "FRC_P5.ddb",
+        "generation": 20,
+        "name": "Front Recognition Camera 2",
+        "short_name": ""
+      },
+      "execution": "plan_only",
+      "result_static": "31031583",
+      "routine_id": 5507,
+      "service": 49,
+      "start_static": "31011583",
+      "stop_static": "31021583"
+    },
+    "source": {
+      "path": "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json",
+      "sha256": "44053e3892e1f489cf8382eba1705735824a804f5952348224ce987438904611",
+      "size": 7661955
+    },
+    "target_lateral_id": {
+      "alternate_did": "0x3CEE",
+      "bit_end": 7,
+      "bit_start": 0,
+      "dictionary": {
+        "0": "No Request (Manual Operation)",
+        "1": "PCS",
+        "10": "Hands Off LTA",
+        "11": "LTA/LCA",
+        "13": "DESA (Slow Deceleration Control)",
+        "15": "DESA (Deceleration Stop Control)",
+        "18": "SDG",
+        "19": "PDA",
+        "25": "AP",
+        "27": "Remote Parking",
+        "35": "AD (Lv.3)",
+        "37": "EM (Lv.3)",
+        "39": "DES (Lv.3)",
+        "4": "LDA",
+        "41": "AD (Lv.4)",
+        "43": "EM (Lv.4)",
+        "45": "DES (Lv.4)",
+        "49": "Self-Propelled Transport",
+        "63": "Driver Operation"
+      },
+      "did": "0x1CEE",
+      "monitor_key": 2069,
+      "selected_dictionary": {
+        "0": "No Request (Manual Operation)",
+        "11": "LTA/LCA",
+        "18": "SDG"
+      },
+      "source_ddb_sha256": "fb7933228bc2f1c5788d1f896c008c5c590ede45ec2e650c07123f94764e329e"
+    }
+  },
+  "drives": {
+    "drive_a": {
+      "0x081_b13_mirror": {
+        "confusion": [
+          {
+            "0x081_b13": 0,
+            "0x08A_b21": 0,
+            "count": 18698
+          },
+          {
+            "0x081_b13": 11,
+            "0x08A_b21": 0,
+            "count": 1
+          },
+          {
+            "0x081_b13": 128,
+            "0x08A_b21": 0,
+            "count": 32
+          },
+          {
+            "0x081_b13": 18,
+            "0x08A_b21": 0,
+            "count": 1
+          },
+          {
+            "0x081_b13": 11,
+            "0x08A_b21": 11,
+            "count": 645
+          },
+          {
+            "0x081_b13": 18,
+            "0x08A_b21": 11,
+            "count": 1
+          },
+          {
+            "0x081_b13": 0,
+            "0x08A_b21": 18,
+            "count": 2
+          },
+          {
+            "0x081_b13": 18,
+            "0x08A_b21": 18,
+            "count": 1099
+          }
+        ],
+        "matching_count": 20442,
+        "matching_fraction": 0.998193271,
+        "max_join_delta_ms": 24.652632,
+        "method": "same-segment nearest 0x081/32 frame for each 0x08A/32 frame, absolute delta <=25 ms",
+        "paired_count": 20479,
+        "transition_timeline": [
+          {
+            "log_mono_time_ns": 53795533519,
+            "segment": 0,
+            "segment_s": 0.131778,
+            "value": 128
+          },
+          {
+            "log_mono_time_ns": 54697036696,
+            "segment": 0,
+            "segment_s": 1.033281,
+            "value": 0
+          },
+          {
+            "log_mono_time_ns": 346969726102,
+            "segment": 4,
+            "segment_s": 52.304958,
+            "value": 18
+          },
+          {
+            "log_mono_time_ns": 371513930061,
+            "segment": 5,
+            "segment_s": 16.864188,
+            "value": 11
+          },
+          {
+            "log_mono_time_ns": 387654216051,
+            "segment": 5,
+            "segment_s": 33.004474,
+            "value": 0
+          },
+          {
+            "log_mono_time_ns": 408658252150,
+            "segment": 5,
+            "segment_s": 54.00851,
+            "value": 18
+          },
+          {
+            "log_mono_time_ns": 411659398295,
+            "segment": 5,
+            "segment_s": 57.009656,
+            "value": 0
+          }
+        ],
+        "unpaired_0x08A_count": 136
+      },
+      "0x08A_b21": {
+        "b21_11_intervals": [
+          {
+            "a8_frame_count": 646,
+            "b6_count_all_buses_any_dlc": 0,
+            "carrier_activation": {
+              "0x371_b9_0x30_b20_low2_3": {
+                "lag_from_b21_11_s": 0.17956,
+                "log_mono_time_ns": 371663869433,
+                "segment": 5,
+                "segment_s": 17.014128
+              },
+              "0x412_b0_0x14": {
+                "lag_from_b21_11_s": 0.110424,
+                "log_mono_time_ns": 371594733792,
+                "segment": 5,
+                "segment_s": 16.944992
+              }
+            },
+            "carrier_clear": {
+              "0x371_first_canonical_nonactive": {
+                "lag_from_b21_clear_s": 0.189708,
+                "log_mono_time_ns": 387823877103,
+                "segment": 5,
+                "segment_s": 33.174135,
+                "value": [
+                  32,
+                  1
+                ]
+              },
+              "0x371_first_not_active": {
+                "lag_from_b21_clear_s": 0.02997,
+                "log_mono_time_ns": 387664139021,
+                "segment": 5,
+                "segment_s": 33.014397,
+                "value": [
+                  32,
+                  3
+                ]
+              },
+              "0x412_first_not_0x14": {
+                "lag_from_b21_clear_s": 0.491876,
+                "log_mono_time_ns": 388126045085,
+                "segment": 5,
+                "segment_s": 33.476303,
+                "value": 16
+              }
+            },
+            "clear": {
+              "log_mono_time_ns": 387634169124,
+              "segment": 5,
+              "segment_s": 32.984427
+            },
+            "cruise_active_before_b21_11_s": 55.661835,
+            "duration_s": 16.119256,
+            "incoming_frame_count_all_buses": 53604,
+            "last_active": {
+              "log_mono_time_ns": 387603565907,
+              "segment": 5,
+              "segment_s": 32.953824
+            },
+            "prior_cruise_rise": {
+              "log_mono_time_ns": 315822474652,
+              "segment": 4,
+              "segment_s": 21.157706
+            },
+            "start": {
+              "log_mono_time_ns": 371484309794,
+              "segment": 5,
+              "segment_s": 16.834568
+            }
+          }
+        ],
+        "conditions": {
+          "b21_11_only_cruise_active_b24_100": true,
+          "b21_18_b23_0x20_count": 1101,
+          "b21_18_count": 1101,
+          "b21_18_only_cruise_off_b24_50": true
+        },
+        "joint_b3_b21_b23_b24_counts": [
+          {
+            "b21": 0,
+            "b23": 0,
+            "b24": 0,
+            "b3": 0,
+            "count": 9541
+          },
+          {
+            "b21": 0,
+            "b23": 0,
+            "b24": 100,
+            "b3": 0,
+            "count": 818
+          },
+          {
+            "b21": 0,
+            "b23": 0,
+            "b24": 50,
+            "b3": 0,
+            "count": 7321
+          },
+          {
+            "b21": 18,
+            "b23": 32,
+            "b24": 50,
+            "b3": 0,
+            "count": 1101
+          },
+          {
+            "b21": 0,
+            "b23": 0,
+            "b24": 0,
+            "b3": 8,
+            "count": 1166
+          },
+          {
+            "b21": 0,
+            "b23": 0,
+            "b24": 100,
+            "b3": 8,
+            "count": 22
+          },
+          {
+            "b21": 11,
+            "b23": 0,
+            "b24": 100,
+            "b3": 8,
+            "count": 270
+          },
+          {
+            "b21": 11,
+            "b23": 32,
+            "b24": 100,
+            "b3": 8,
+            "count": 376
+          }
+        ],
+        "transition_timeline": [
+          {
+            "log_mono_time_ns": 53905477998,
+            "segment": 0,
+            "segment_s": 0.241722,
+            "value": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "log_mono_time_ns": 315822474652,
+            "segment": 4,
+            "segment_s": 21.157706,
+            "value": [
+              8,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "log_mono_time_ns": 344979494089,
+            "segment": 4,
+            "segment_s": 50.314726,
+            "value": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "log_mono_time_ns": 346949984642,
+            "segment": 4,
+            "segment_s": 52.285216,
+            "value": [
+              0,
+              18,
+              32,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 371484309794,
+            "segment": 5,
+            "segment_s": 16.834568,
+            "value": [
+              8,
+              11,
+              0,
+              100
+            ]
+          },
+          {
+            "log_mono_time_ns": 372528592018,
+            "segment": 5,
+            "segment_s": 17.87885,
+            "value": [
+              8,
+              11,
+              32,
+              100
+            ]
+          },
+          {
+            "log_mono_time_ns": 377628200950,
+            "segment": 5,
+            "segment_s": 22.978459,
+            "value": [
+              8,
+              11,
+              0,
+              100
+            ]
+          },
+          {
+            "log_mono_time_ns": 383327053479,
+            "segment": 5,
+            "segment_s": 28.677312,
+            "value": [
+              8,
+              11,
+              32,
+              100
+            ]
+          },
+          {
+            "log_mono_time_ns": 387634169124,
+            "segment": 5,
+            "segment_s": 32.984427,
+            "value": [
+              8,
+              0,
+              0,
+              100
+            ]
+          },
+          {
+            "log_mono_time_ns": 388185372600,
+            "segment": 5,
+            "segment_s": 33.535631,
+            "value": [
+              0,
+              0,
+              0,
+              100
+            ]
+          },
+          {
+            "log_mono_time_ns": 408637123109,
+            "segment": 5,
+            "segment_s": 53.987381,
+            "value": [
+              0,
+              18,
+              32,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 411639156319,
+            "segment": 5,
+            "segment_s": 56.989414,
+            "value": [
+              0,
+              0,
+              0,
+              50
+            ]
+          }
+        ],
+        "value_counts": {
+          "0": 18868,
+          "11": 646,
+          "18": 1101
+        },
+        "value_set": [
+          0,
+          11,
+          18
+        ]
+      },
+      "known_0x0FE_cruise_button_events": {
+        "boundary": "These exact same-car predicates recover MAIN/RES+/SET-/CANCEL only; no independent physical LTA-button carrier is decoded or claimed.",
+        "counts": {
+          "CANCEL": 0,
+          "MAIN": 4,
+          "RES_PLUS": 0,
+          "SET_MINUS": 2
+        },
+        "events": {
+          "CANCEL": [],
+          "MAIN": [
+            {
+              "end_segment_s": 21.057623,
+              "frames": 4,
+              "log_mono_time_ns": 315622189580,
+              "segment": 4,
+              "segment_s": 20.957421
+            },
+            {
+              "end_segment_s": 50.32569,
+              "frames": 4,
+              "log_mono_time_ns": 344890538512,
+              "segment": 4,
+              "segment_s": 50.22577
+            },
+            {
+              "end_segment_s": 16.724249,
+              "frames": 6,
+              "log_mono_time_ns": 371211813760,
+              "segment": 5,
+              "segment_s": 16.562072
+            },
+            {
+              "end_segment_s": 33.54657,
+              "frames": 5,
+              "log_mono_time_ns": 388066097166,
+              "segment": 5,
+              "segment_s": 33.416355
+            }
+          ],
+          "RES_PLUS": [],
+          "SET_MINUS": [
+            {
+              "end_segment_s": 19.668284,
+              "frames": 5,
+              "log_mono_time_ns": 374195779434,
+              "segment": 5,
+              "segment_s": 19.546038
+            },
+            {
+              "end_segment_s": 20.178964,
+              "frames": 3,
+              "log_mono_time_ns": 374767465898,
+              "segment": 5,
+              "segment_s": 20.117724
+            }
+          ]
+        }
+      },
+      "segment21_cancel_clear": null,
+      "source": {
+        "compressed_sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5",
+        "compressed_size": 14639570,
+        "frame_count": 1656656,
+        "path": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+        "segments": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "uncompressed_sha256": "91ee1c9babead2ced001ca62fb6729dbd3f051d3335afe8d3093a2b3569e506a",
+        "uncompressed_size": 115629679
+      },
+      "three_state_carrier": {
+        "0x371_b9_b20_low2_counts": [
+          {
+            "b20_low2": 0,
+            "b9": 0,
+            "count": 3
+          },
+          {
+            "b20_low2": 0,
+            "b9": 16,
+            "count": 18
+          },
+          {
+            "b20_low2": 1,
+            "b9": 32,
+            "count": 2564
+          },
+          {
+            "b20_low2": 3,
+            "b9": 32,
+            "count": 1
+          },
+          {
+            "b20_low2": 3,
+            "b9": 48,
+            "count": 87
+          }
+        ],
+        "0x371_transition_timeline": [
+          {
+            "log_mono_time_ns": 54327035133,
+            "segment": 0,
+            "segment_s": 0.66328,
+            "value": [
+              0,
+              0
+            ]
+          },
+          {
+            "log_mono_time_ns": 54879552425,
+            "segment": 0,
+            "segment_s": 1.215797,
+            "value": [
+              32,
+              1
+            ]
+          },
+          {
+            "log_mono_time_ns": 356105822883,
+            "segment": 5,
+            "segment_s": 1.456081,
+            "value": [
+              16,
+              0
+            ]
+          },
+          {
+            "log_mono_time_ns": 359502223452,
+            "segment": 5,
+            "segment_s": 4.852482,
+            "value": [
+              32,
+              1
+            ]
+          },
+          {
+            "log_mono_time_ns": 371663869433,
+            "segment": 5,
+            "segment_s": 17.014128,
+            "value": [
+              48,
+              3
+            ]
+          },
+          {
+            "log_mono_time_ns": 387664139021,
+            "segment": 5,
+            "segment_s": 33.014397,
+            "value": [
+              32,
+              3
+            ]
+          },
+          {
+            "log_mono_time_ns": 387823877103,
+            "segment": 5,
+            "segment_s": 33.174135,
+            "value": [
+              32,
+              1
+            ]
+          }
+        ],
+        "0x412_b0_counts": {
+          "0": 3,
+          "16": 7,
+          "18": 498,
+          "2": 3,
+          "20": 18
+        },
+        "0x412_transition_timeline": [
+          {
+            "log_mono_time_ns": 54397506748,
+            "segment": 0,
+            "segment_s": 0.733751,
+            "value": 0
+          },
+          {
+            "log_mono_time_ns": 54899608467,
+            "segment": 0,
+            "segment_s": 1.235853,
+            "value": 2
+          },
+          {
+            "log_mono_time_ns": 56649206851,
+            "segment": 0,
+            "segment_s": 2.985451,
+            "value": 18
+          },
+          {
+            "log_mono_time_ns": 356075813095,
+            "segment": 5,
+            "segment_s": 1.426071,
+            "value": 16
+          },
+          {
+            "log_mono_time_ns": 359502223452,
+            "segment": 5,
+            "segment_s": 4.852482,
+            "value": 18
+          },
+          {
+            "log_mono_time_ns": 371594733792,
+            "segment": 5,
+            "segment_s": 16.944992,
+            "value": 20
+          },
+          {
+            "log_mono_time_ns": 388126045085,
+            "segment": 5,
+            "segment_s": 33.476303,
+            "value": 16
+          },
+          {
+            "log_mono_time_ns": 388628507806,
+            "segment": 5,
+            "segment_s": 33.978766,
+            "value": 18
+          }
+        ],
+        "canonical_joined_count": 520,
+        "canonical_matching_count": 518,
+        "canonical_matching_fraction": 0.996153846,
+        "canonical_states": [
+          {
+            "0x371_b20_low2": 0,
+            "0x371_b9": 16,
+            "0x412_b0": 16
+          },
+          {
+            "0x371_b20_low2": 1,
+            "0x371_b9": 32,
+            "0x412_b0": 18
+          },
+          {
+            "0x371_b20_low2": 3,
+            "0x371_b9": 48,
+            "0x412_b0": 20
+          }
+        ],
+        "confusion": [
+          {
+            "0x371_b20_low2": 0,
+            "0x371_b9": 0,
+            "0x412_b0": 0,
+            "count": 2
+          },
+          {
+            "0x371_b20_low2": 1,
+            "0x371_b9": 32,
+            "0x412_b0": 0,
+            "count": 1
+          },
+          {
+            "0x371_b20_low2": 0,
+            "0x371_b9": 16,
+            "0x412_b0": 16,
+            "count": 5
+          },
+          {
+            "0x371_b20_low2": 1,
+            "0x371_b9": 32,
+            "0x412_b0": 16,
+            "count": 2
+          },
+          {
+            "0x371_b20_low2": 1,
+            "0x371_b9": 32,
+            "0x412_b0": 18,
+            "count": 496
+          },
+          {
+            "0x371_b20_low2": 1,
+            "0x371_b9": 32,
+            "0x412_b0": 2,
+            "count": 3
+          },
+          {
+            "0x371_b20_low2": 3,
+            "0x371_b9": 32,
+            "0x412_b0": 20,
+            "count": 1
+          },
+          {
+            "0x371_b20_low2": 3,
+            "0x371_b9": 48,
+            "0x412_b0": 20,
+            "count": 17
+          }
+        ],
+        "join_method": "same-segment nearest 0x371/32 frame for each 0x412/8 frame, absolute delta <=100 ms",
+        "max_join_delta_ms": 80.203959,
+        "paired_count": 527,
+        "unpaired_0x412_count": 2
+      }
+    },
+    "drive_b": {
+      "0x081_b13_mirror": {
+        "confusion": [
+          {
+            "0x081_b13": 0,
+            "0x08A_b21": 0,
+            "count": 20910
+          },
+          {
+            "0x081_b13": 11,
+            "0x08A_b21": 0,
+            "count": 1
+          },
+          {
+            "0x081_b13": 18,
+            "0x08A_b21": 0,
+            "count": 3
+          },
+          {
+            "0x081_b13": 0,
+            "0x08A_b21": 11,
+            "count": 1
+          },
+          {
+            "0x081_b13": 11,
+            "0x08A_b21": 11,
+            "count": 2287
+          },
+          {
+            "0x081_b13": 0,
+            "0x08A_b21": 18,
+            "count": 3
+          },
+          {
+            "0x081_b13": 18,
+            "0x08A_b21": 18,
+            "count": 794
+          }
+        ],
+        "matching_count": 23991,
+        "matching_fraction": 0.999666653,
+        "max_join_delta_ms": 20.675259,
+        "method": "same-segment nearest 0x081/32 frame for each 0x08A/32 frame, absolute delta <=25 ms",
+        "paired_count": 23999,
+        "transition_timeline": [
+          {
+            "log_mono_time_ns": 1014669646466,
+            "segment": 16,
+            "segment_s": 0.020675,
+            "value": 0
+          },
+          {
+            "log_mono_time_ns": 1171516520800,
+            "segment": 18,
+            "segment_s": 36.865567,
+            "value": 18
+          },
+          {
+            "log_mono_time_ns": 1172741347304,
+            "segment": 18,
+            "segment_s": 38.090393,
+            "value": 0
+          },
+          {
+            "log_mono_time_ns": 1247002092880,
+            "segment": 19,
+            "segment_s": 52.357731,
+            "value": 18
+          },
+          {
+            "log_mono_time_ns": 1247151320079,
+            "segment": 19,
+            "segment_s": 52.506958,
+            "value": 0
+          },
+          {
+            "log_mono_time_ns": 1255967735233,
+            "segment": 20,
+            "segment_s": 1.326128,
+            "value": 18
+          },
+          {
+            "log_mono_time_ns": 1256211007176,
+            "segment": 20,
+            "segment_s": 1.5694,
+            "value": 0
+          },
+          {
+            "log_mono_time_ns": 1267912058359,
+            "segment": 20,
+            "segment_s": 13.270451,
+            "value": 11
+          },
+          {
+            "log_mono_time_ns": 1325124796814,
+            "segment": 21,
+            "segment_s": 10.475372,
+            "value": 0
+          },
+          {
+            "log_mono_time_ns": 1327163031363,
+            "segment": 21,
+            "segment_s": 12.513607,
+            "value": 18
+          },
+          {
+            "log_mono_time_ns": 1327695446321,
+            "segment": 21,
+            "segment_s": 13.046022,
+            "value": 0
+          },
+          {
+            "log_mono_time_ns": 1424029092945,
+            "segment": 22,
+            "segment_s": 49.381959,
+            "value": 18
+          },
+          {
+            "log_mono_time_ns": 1441793864778,
+            "segment": 23,
+            "segment_s": 7.150832,
+            "value": 0
+          }
+        ],
+        "unpaired_0x08A_count": 0
+      },
+      "0x08A_b21": {
+        "b21_11_intervals": [
+          {
+            "a8_frame_count": 2288,
+            "b6_count_all_buses_any_dlc": 0,
+            "carrier_activation": {
+              "0x371_b9_0x30_b20_low2_3": {
+                "lag_from_b21_11_s": 0.200434,
+                "log_mono_time_ns": 1268081665450,
+                "segment": 20,
+                "segment_s": 13.440058
+              },
+              "0x412_b0_0x14": {
+                "lag_from_b21_11_s": 0.100354,
+                "log_mono_time_ns": 1267981586059,
+                "segment": 20,
+                "segment_s": 13.339979
+              }
+            },
+            "carrier_clear": {
+              "0x371_first_canonical_nonactive": {
+                "lag_from_b21_clear_s": 0.070336,
+                "log_mono_time_ns": 1325155392233,
+                "segment": 21,
+                "segment_s": 10.505968,
+                "value": [
+                  32,
+                  1
+                ]
+              },
+              "0x371_first_not_active": {
+                "lag_from_b21_clear_s": 0.070336,
+                "log_mono_time_ns": 1325155392233,
+                "segment": 21,
+                "segment_s": 10.505968,
+                "value": [
+                  32,
+                  1
+                ]
+              },
+              "0x412_first_not_0x14": {
+                "lag_from_b21_clear_s": 0.0,
+                "log_mono_time_ns": 1325085056465,
+                "segment": 21,
+                "segment_s": 10.435632,
+                "value": 18
+              }
+            },
+            "clear": {
+              "log_mono_time_ns": 1325085056465,
+              "segment": 21,
+              "segment_s": 10.435632
+            },
+            "cruise_active_before_b21_11_s": 11.693298,
+            "duration_s": 57.184128,
+            "incoming_frame_count_all_buses": 183493,
+            "last_active": {
+              "log_mono_time_ns": 1325065360088,
+              "segment": 21,
+              "segment_s": 10.415935
+            },
+            "prior_cruise_rise": {
+              "log_mono_time_ns": 1256187933275,
+              "segment": 20,
+              "segment_s": 1.546326
+            },
+            "start": {
+              "log_mono_time_ns": 1267881231677,
+              "segment": 20,
+              "segment_s": 13.239624
+            }
+          }
+        ],
+        "conditions": {
+          "b21_11_only_cruise_active_b24_100": true,
+          "b21_18_b23_0x20_count": 797,
+          "b21_18_count": 797,
+          "b21_18_only_cruise_off_b24_50": true
+        },
+        "joint_b3_b21_b23_b24_counts": [
+          {
+            "b21": 0,
+            "b23": 0,
+            "b24": 100,
+            "b3": 0,
+            "count": 82
+          },
+          {
+            "b21": 0,
+            "b23": 0,
+            "b24": 50,
+            "b3": 0,
+            "count": 18594
+          },
+          {
+            "b21": 18,
+            "b23": 32,
+            "b24": 50,
+            "b3": 0,
+            "count": 797
+          },
+          {
+            "b21": 0,
+            "b23": 0,
+            "b24": 50,
+            "b3": 8,
+            "count": 2238
+          },
+          {
+            "b21": 11,
+            "b23": 0,
+            "b24": 100,
+            "b3": 8,
+            "count": 2059
+          },
+          {
+            "b21": 11,
+            "b23": 32,
+            "b24": 100,
+            "b3": 8,
+            "count": 229
+          }
+        ],
+        "transition_timeline": [
+          {
+            "log_mono_time_ns": 1014648971207,
+            "segment": 16,
+            "segment_s": 0.0,
+            "value": [
+              0,
+              0,
+              0,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 1163231355349,
+            "segment": 18,
+            "segment_s": 28.580401,
+            "value": [
+              8,
+              0,
+              0,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 1169529022671,
+            "segment": 18,
+            "segment_s": 34.878069,
+            "value": [
+              0,
+              0,
+              0,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 1171506700613,
+            "segment": 18,
+            "segment_s": 36.855747,
+            "value": [
+              0,
+              18,
+              32,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 1172731365924,
+            "segment": 18,
+            "segment_s": 38.080412,
+            "value": [
+              8,
+              0,
+              0,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 1203833861652,
+            "segment": 19,
+            "segment_s": 9.1895,
+            "value": [
+              0,
+              0,
+              0,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 1246981270735,
+            "segment": 19,
+            "segment_s": 52.336909,
+            "value": [
+              0,
+              18,
+              32,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 1247131541755,
+            "segment": 19,
+            "segment_s": 52.48718,
+            "value": [
+              8,
+              0,
+              0,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 1253980529153,
+            "segment": 19,
+            "segment_s": 59.336168,
+            "value": [
+              0,
+              0,
+              0,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 1255958089759,
+            "segment": 20,
+            "segment_s": 1.316482,
+            "value": [
+              0,
+              18,
+              32,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 1256187933275,
+            "segment": 20,
+            "segment_s": 1.546326,
+            "value": [
+              8,
+              0,
+              0,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 1267881231677,
+            "segment": 20,
+            "segment_s": 13.239624,
+            "value": [
+              8,
+              11,
+              0,
+              100
+            ]
+          },
+          {
+            "log_mono_time_ns": 1268413631218,
+            "segment": 20,
+            "segment_s": 13.772024,
+            "value": [
+              8,
+              11,
+              32,
+              100
+            ]
+          },
+          {
+            "log_mono_time_ns": 1269268064092,
+            "segment": 20,
+            "segment_s": 14.626457,
+            "value": [
+              8,
+              11,
+              0,
+              100
+            ]
+          },
+          {
+            "log_mono_time_ns": 1305290428129,
+            "segment": 20,
+            "segment_s": 50.648821,
+            "value": [
+              8,
+              11,
+              32,
+              100
+            ]
+          },
+          {
+            "log_mono_time_ns": 1309187786410,
+            "segment": 20,
+            "segment_s": 54.546179,
+            "value": [
+              8,
+              11,
+              0,
+              100
+            ]
+          },
+          {
+            "log_mono_time_ns": 1324111043775,
+            "segment": 21,
+            "segment_s": 9.461619,
+            "value": [
+              8,
+              11,
+              32,
+              100
+            ]
+          },
+          {
+            "log_mono_time_ns": 1325085056465,
+            "segment": 21,
+            "segment_s": 10.435632,
+            "value": [
+              0,
+              0,
+              0,
+              100
+            ]
+          },
+          {
+            "log_mono_time_ns": 1327133646843,
+            "segment": 21,
+            "segment_s": 12.484222,
+            "value": [
+              0,
+              18,
+              32,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 1327684675035,
+            "segment": 21,
+            "segment_s": 13.03525,
+            "value": [
+              0,
+              0,
+              0,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 1423999208662,
+            "segment": 22,
+            "segment_s": 49.352075,
+            "value": [
+              0,
+              18,
+              32,
+              50
+            ]
+          },
+          {
+            "log_mono_time_ns": 1441774044936,
+            "segment": 23,
+            "segment_s": 7.131012,
+            "value": [
+              0,
+              0,
+              0,
+              50
+            ]
+          }
+        ],
+        "value_counts": {
+          "0": 20914,
+          "11": 2288,
+          "18": 797
+        },
+        "value_set": [
+          0,
+          11,
+          18
+        ]
+      },
+      "known_0x0FE_cruise_button_events": {
+        "boundary": "These exact same-car predicates recover MAIN/RES+/SET-/CANCEL only; no independent physical LTA-button carrier is decoded or claimed.",
+        "counts": {
+          "CANCEL": 3,
+          "MAIN": 7,
+          "RES_PLUS": 3,
+          "SET_MINUS": 0
+        },
+        "events": {
+          "CANCEL": [
+            {
+              "end_segment_s": 9.240073,
+              "frames": 5,
+              "log_mono_time_ns": 1203764064532,
+              "segment": 19,
+              "segment_s": 9.119703
+            },
+            {
+              "end_segment_s": 10.535353,
+              "frames": 5,
+              "log_mono_time_ns": 1325055428412,
+              "segment": 21,
+              "segment_s": 10.406004
+            },
+            {
+              "end_segment_s": 1.806935,
+              "frames": 5,
+              "log_mono_time_ns": 1436320542441,
+              "segment": 23,
+              "segment_s": 1.67751
+            }
+          ],
+          "MAIN": [
+            {
+              "end_segment_s": 59.114571,
+              "frames": 6,
+              "log_mono_time_ns": 1073613416709,
+              "segment": 16,
+              "segment_s": 58.964446
+            },
+            {
+              "end_segment_s": 28.480461,
+              "frames": 7,
+              "log_mono_time_ns": 1162941798539,
+              "segment": 18,
+              "segment_s": 28.290845
+            },
+            {
+              "end_segment_s": 34.888047,
+              "frames": 5,
+              "log_mono_time_ns": 1169408929359,
+              "segment": 18,
+              "segment_s": 34.757975
+            },
+            {
+              "end_segment_s": 38.000603,
+              "frames": 5,
+              "log_mono_time_ns": 1172521416639,
+              "segment": 18,
+              "segment_s": 37.870463
+            },
+            {
+              "end_segment_s": 52.417154,
+              "frames": 4,
+              "log_mono_time_ns": 1246961232158,
+              "segment": 19,
+              "segment_s": 52.316871
+            },
+            {
+              "end_segment_s": 59.395435,
+              "frames": 6,
+              "log_mono_time_ns": 1253880164176,
+              "segment": 19,
+              "segment_s": 59.235803
+            },
+            {
+              "end_segment_s": 1.466796,
+              "frames": 5,
+              "log_mono_time_ns": 1255977510703,
+              "segment": 20,
+              "segment_s": 1.335903
+            }
+          ],
+          "RES_PLUS": [
+            {
+              "end_segment_s": 4.068462,
+              "frames": 3,
+              "log_mono_time_ns": 1258649779888,
+              "segment": 20,
+              "segment_s": 4.008172
+            },
+            {
+              "end_segment_s": 4.583582,
+              "frames": 4,
+              "log_mono_time_ns": 1259122639552,
+              "segment": 20,
+              "segment_s": 4.481032
+            },
+            {
+              "end_segment_s": 6.349877,
+              "frames": 5,
+              "log_mono_time_ns": 1260871238106,
+              "segment": 20,
+              "segment_s": 6.229631
+            }
+          ],
+          "SET_MINUS": []
+        }
+      },
+      "segment21_cancel_clear": {
+        "0x08A_cruise_and_b21_clear": {
+          "b21": 0,
+          "b3": 0,
+          "lag_s": 0.029628,
+          "log_mono_time_ns": 1325085056465,
+          "segment": 21,
+          "segment_s": 10.435632
+        },
+        "0x371_active_clear": {
+          "b20_low2": 1,
+          "b9": 32,
+          "lag_s": 0.099964,
+          "log_mono_time_ns": 1325155392233,
+          "segment": 21,
+          "segment_s": 10.505968
+        },
+        "0x412_b0_clear": {
+          "b0": 18,
+          "lag_s": 0.029628,
+          "log_mono_time_ns": 1325085056465,
+          "segment": 21,
+          "segment_s": 10.435632
+        },
+        "cancel": {
+          "end_segment_s": 10.535353,
+          "frames": 5,
+          "log_mono_time_ns": 1325055428412,
+          "segment": 21,
+          "segment_s": 10.406004
+        }
+      },
+      "source": {
+        "compressed_sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a",
+        "compressed_size": 24952076,
+        "frame_count": 1918047,
+        "path": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+        "segments": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25
+        ],
+        "uncompressed_sha256": "4bdf3d493595c6d76baa4f454b0443a6c15324c098c4872c0229f773fc7a0c65",
+        "uncompressed_size": 138287000
+      },
+      "three_state_carrier": {
+        "0x371_b9_b20_low2_counts": [
+          {
+            "b20_low2": 0,
+            "b9": 16,
+            "count": 1064
+          },
+          {
+            "b20_low2": 1,
+            "b9": 32,
+            "count": 1848
+          },
+          {
+            "b20_low2": 3,
+            "b9": 48,
+            "count": 307
+          }
+        ],
+        "0x371_transition_timeline": [
+          {
+            "log_mono_time_ns": 1014772366175,
+            "segment": 16,
+            "segment_s": 0.123395,
+            "value": [
+              32,
+              1
+            ]
+          },
+          {
+            "log_mono_time_ns": 1074942000434,
+            "segment": 17,
+            "segment_s": 0.28353,
+            "value": [
+              16,
+              0
+            ]
+          },
+          {
+            "log_mono_time_ns": 1267921655139,
+            "segment": 20,
+            "segment_s": 13.280048,
+            "value": [
+              32,
+              1
+            ]
+          },
+          {
+            "log_mono_time_ns": 1268081665450,
+            "segment": 20,
+            "segment_s": 13.440058,
+            "value": [
+              48,
+              3
+            ]
+          },
+          {
+            "log_mono_time_ns": 1325155392233,
+            "segment": 21,
+            "segment_s": 10.505968,
+            "value": [
+              32,
+              1
+            ]
+          }
+        ],
+        "0x412_b0_counts": {
+          "16": 216,
+          "18": 357,
+          "20": 58
+        },
+        "0x412_transition_timeline": [
+          {
+            "log_mono_time_ns": 1015443582016,
+            "segment": 16,
+            "segment_s": 0.794611,
+            "value": 18
+          },
+          {
+            "log_mono_time_ns": 1074918827916,
+            "segment": 17,
+            "segment_s": 0.260357,
+            "value": 16
+          },
+          {
+            "log_mono_time_ns": 1267881231677,
+            "segment": 20,
+            "segment_s": 13.239624,
+            "value": 18
+          },
+          {
+            "log_mono_time_ns": 1267981586059,
+            "segment": 20,
+            "segment_s": 13.339979,
+            "value": 20
+          },
+          {
+            "log_mono_time_ns": 1325085056465,
+            "segment": 21,
+            "segment_s": 10.435632,
+            "value": 18
+          }
+        ],
+        "canonical_joined_count": 631,
+        "canonical_matching_count": 630,
+        "canonical_matching_fraction": 0.998415214,
+        "canonical_states": [
+          {
+            "0x371_b20_low2": 0,
+            "0x371_b9": 16,
+            "0x412_b0": 16
+          },
+          {
+            "0x371_b20_low2": 1,
+            "0x371_b9": 32,
+            "0x412_b0": 18
+          },
+          {
+            "0x371_b20_low2": 3,
+            "0x371_b9": 48,
+            "0x412_b0": 20
+          }
+        ],
+        "confusion": [
+          {
+            "0x371_b20_low2": 0,
+            "0x371_b9": 16,
+            "0x412_b0": 16,
+            "count": 216
+          },
+          {
+            "0x371_b20_low2": 1,
+            "0x371_b9": 32,
+            "0x412_b0": 18,
+            "count": 357
+          },
+          {
+            "0x371_b20_low2": 1,
+            "0x371_b9": 32,
+            "0x412_b0": 20,
+            "count": 1
+          },
+          {
+            "0x371_b20_low2": 3,
+            "0x371_b9": 48,
+            "0x412_b0": 20,
+            "count": 57
+          }
+        ],
+        "join_method": "same-segment nearest 0x371/32 frame for each 0x412/8 frame, absolute delta <=100 ms",
+        "max_join_delta_ms": 88.870598,
+        "paired_count": 631,
+        "unpaired_0x412_count": 0
+      }
+    }
+  },
+  "exact_f33_receive_boundary": {
+    "accepted_can_ids": [
+      "0x3B0",
+      "0x63B",
+      "0x624",
+      "0x63D",
+      "0x00F",
+      "0x013",
+      "0x014",
+      "0x015",
+      "0x016",
+      "0x017",
+      "0x018",
+      "0x019",
+      "0x01A",
+      "0x01B",
+      "0x01C",
+      "0x01D",
+      "0x01E",
+      "0x01F",
+      "0x0D0",
+      "0x3BF",
+      "0x127",
+      "0x115",
+      "0x116",
+      "0x1C5",
+      "0x294",
+      "0x51E",
+      "0x611",
+      "0x2D1",
+      "0x675",
+      "0x2E8",
+      "0x025",
+      "0x0AA",
+      "0x101",
+      "0x0D5",
+      "0x13B",
+      "0x090",
+      "0x0D7",
+      "0x0D8",
+      "0x64F",
+      "0x0B6",
+      "0x403",
+      "0x490",
+      "0x1DA"
+    ],
+    "descriptor_count": 43,
+    "interpretation": "The three correlated messages are state/display-plane evidence, not exact-F33 EPS ingress.",
+    "source": {
+      "path": "data/generated/camry_8965F3307000_external_lateral_ingress.json",
+      "sha256": "61cb4b3ed9a6ea58c6562cdc4b449cf9141c496441051737e26dfe219e792477",
+      "size": 34127
+    },
+    "state_carriers_absent": {
+      "0x08A": true,
+      "0x371": true,
+      "0x412": true
+    }
+  },
+  "interpretation": {
+    "button_boundary": "No physical LTA-button carrier is recovered. The decoded 0x0FE pulses are retained only as the already-validated cruise buttons.",
+    "historical_labels": "Historical Toyota names LTA_RELATED for 0x371 and LKAS_HUD for 0x412 are corroboration only; no historical field layout is transferred.",
+    "identification": "Bus-0 0x08A B21=11 is strongly identified as LTA/LCA active by the exact current-GTS+ numeric dictionary joined to repeated cruise-distinct dynamic state, the 0x081 mirror, and the 0x371/0x412 three-state carrier.",
+    "production_output_authorized": false,
+    "proof_boundary": "This is a strong cross-domain numeric+dynamic join, not target-native byte-exact OEM producer-wire proof: the current 0x08A producer mapping is unavailable and exact F33 receives none of 0x08A/0x371/0x412."
+  },
+  "schema": "camry-2026-lta-state-reconciliation-v1"
+}

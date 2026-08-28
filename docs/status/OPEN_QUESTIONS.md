@@ -1002,6 +1002,44 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   trigger. Do not guess an arbitrary PC write. Canonical:
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.
 
+
+- **OQ-054 — exact-F33 stock-LTA authority into the shared `CC50/CC62` actuation funnel.**
+  This is the current steering-command blocker and should not be reopened as a broad CAN
+  search. VAR-081 strongly identifies **73.303384 s** of retained factory LTA/LCA-active
+  operation on the relay-correct Toyota Bus-4 Brake/EPS network with **zero B6**; the
+  operator directly observed factory LTA physically steering. VAR-082 then scans every
+  sufficiently periodic Bus-4 ID/DLC field family and finds zero external field that
+  reproducibly leads the EPS motor/steering response. VAR-083 closes the downstream exact
+  F33 current-control convergence instead of leaving it hypothetical:
+  `CC50 -> D042C/CC62 -> D042C/CC66 -> D047C/CC64 -> AC54/EE40C -> 6AF4 ->
+  6E0A -> 6DEC -> 6DC8/6DD6 -> 38162`. `AC56/EE40A/6772/1C02` is the diagnostic
+  mirror of pre-slew `CC62`; it is not the motor-driving sibling. No second additive
+  lateral command is recovered downstream of `CC50`.
+
+  The contradiction is therefore upstream: **what state/value gives `CC50/CC62` stock-LTA
+  lane authority while B6 is absent, and how would a B6 request arbitrate with it?** The
+  B6-inactive `D0218` value terms are already semantically bounded to torque/speed/angle
+  feedback, ROM/internal aggregation, and return/dither families; the ordinary `C28FC/
+  C2B64` selector is ineffective for the retained route because zero sig160 can reach only
+  equivalent selector 0/2 banks. Do not re-derive those branches unless new evidence
+  falsifies their pinned tests.
+
+  VAR-084 attacks the main static false-negative classes and finds no concrete alternate
+  producer: no stored CodeFlash/live-RAM pointer into the widened command/motor ROI, nine
+  non-default unrecovered ISR entries delegate into recovered timer/serial/acquisition code
+  without a transitive ROI writer, fixed DMAC descriptors route to known GlobalRAM rings
+  rather than LocalRAM, fixed callback cells install CodeFlash targets, and the exact 47
+  RSCFD rules contain no hidden normal-CAN route. Two static escape hatches remain and are
+  the next falsifiers: **E1**, resolve every register-arithmetic `st.{b,h,w}` effective
+  address that canonical data references leave computed and report any path capable of
+  landing in the command/motor ROI; **E2**, census every runtime writer of the DMAC
+  destination-address SFRs and prove the values derive only from the fixed descriptor
+  tables. If E1/E2 are clean, continue upstream from `CC50` through its remaining
+  selectors/gates/value producers with the physical factory-LTA observation held fixed;
+  do not resolve the contradiction by relabeling the observed steering as generic assist.
+  Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
+  §§20,33–35; VAR-081/082/083/084; CORR-129/130.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 

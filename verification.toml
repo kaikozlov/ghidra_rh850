@@ -844,12 +844,29 @@ paths = [
   'targets/camry-2026/raw-20260826/camry_ready_b_20260826.json.gz',
 ]
 
+[suite.camry_2026_lta_state_reconciliation]
+tests = ["tests/verify_camry_2026_lta_state_reconciliation.py"]
+oracle = "dynamic_trace"
+paths = [
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/PRIORITIES.md",
+]
+
 [suite.camry_2026_bus1_field_leadlag]
 tests = ["tests/verify_camry_2026_bus1_field_leadlag.py"]
 oracle = "dynamic_trace"
 paths = [
   "docs/variants/camry-2026-live-baseline.md",
   "docs/status/PRIORITIES.md",
+]
+
+[suite.camry_2026_bus4_field_leadlag]
+tests = ["tests/verify_camry_2026_bus4_field_leadlag.py"]
+oracle = "dynamic_trace"
+paths = [
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/PRIORITIES.md",
+  "docs/status/CORRECTIONS.md",
 ]
 
 [suite.camry_2026_baseline_selector]
@@ -1998,5 +2015,6 @@ tests = ["tests/verify_camry_8965F3307000_internal_assist_oracles.py"]
 oracle = "generated_self_check"
 paths = [
   "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/CORRECTIONS.md",
   "docs/status/PRIORITIES.md",
 ]

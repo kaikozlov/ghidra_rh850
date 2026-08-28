@@ -1,4 +1,47 @@
 {
+  "command_value_torque_observable_branch": {
+    "FEBE6772_direct_readers": [
+      "0x0004E7D6"
+    ],
+    "FEBEAC56_direct_readers": [
+      "0x000B8704",
+      "0x000BE070",
+      "0x000BF33E",
+      "0x000BF97A",
+      "0x000C1BE4",
+      "0x000C1CFE"
+    ],
+    "FEBECC62_canonical_direct_readers": [
+      "0x000C4F04",
+      "0x000D0AAE"
+    ],
+    "FEBEE40A_direct_readers": [
+      "0x00035C4C",
+      "0x0005C6D8",
+      "0x0005CF1C",
+      "0x0005D5E0"
+    ],
+    "classification": "verified distinction: AC56/EE40A/FEBE6772 is the diagnostic/model mirror of the pre-slew CC62 value. Its 6AF6->6E22/6E24 tail terminates in snapshot/report consumers. The physical motor-driving mirror is the sibling AC54/EE40C branch below. Canonical direct-reader census alone is insufficient to infer that CC62 is non-actuating because D042C writes CC62 and immediately reuses the same value intra-function to form CC66.",
+    "mirror_tail": {
+      "0x35C4C": "FEBEE40A -> FEBE6AF6",
+      "0x387CE": "FEBE6AF6 -> FEBE6E22/FEBE6E24",
+      "FEBE6AF6_direct_readers": [
+        "0x000387CE"
+      ],
+      "FEBE6E22_direct_readers": [
+        "0x00059448",
+        "0x0005CA3A",
+        "0x0005D12C"
+      ],
+      "FEBE6E24_direct_readers": [
+        "0x00059448",
+        "0x0005CA3A",
+        "0x0005D12C"
+      ]
+    },
+    "observable_chain": "FEBECC62 -> D0AAE/FEBEAC56 -> BF33E/FEBEE40A -> 5D5E0/FEBE6772 -> DID 0x1C02 Command Value Torque",
+    "pre_slew_value": "FEBECC62"
+  },
   "current_gtsplus_boundary": {
     "named_anchor": {
       "data_id": "0x1C02",
@@ -66,9 +109,160 @@
       "term_to_intermediate": "D0D7C: clamp((FEBECB38 * FEBEAE3C) / 0x8000, +/-0x569A) -> FEBEAE6E"
     }
   ],
+  "d0218_term_semantic_closure": {
+    "classification": "recovered/bounded inside the B6-inactive D0218 contribution to the shared CC50/CC62 actuation funnel: no term is an independently recovered external lane-target magnitude; term values reduce to measured steering torque, vehicle speed, steering-angle feedback, internal phase/mode state, and ROM calibration. The shared downstream physical funnel is separately verified below; how stock LTA creates/selects a lane target with B6 absent remains unresolved upstream of that convergence.",
+    "terms": [
+      {
+        "cell": "FEBEC43C",
+        "classification": "measured steering-torque-shaped assist",
+        "provenance": "C7E36 clamps C472+C45A+C44C against AC6C; the upstream family is the conditioned four-sensor steering-torque chain",
+        "runtime_writer": "0x000C7E36"
+      },
+      {
+        "cell": "FEBEC4C0",
+        "classification": "torque+speed gain/map term",
+        "provenance": "C8678 maps filtered torque-family C266 through ROM tables and crossfades with C1AA/BF40; exact ordinary selector maps alias",
+        "runtime_writer": "0x000C8678"
+      },
+      {
+        "cell": "FEBEC3BA",
+        "classification": "measured steering-torque-family term",
+        "provenance": "C74AC clamps ABB0+C3A4, both recovered in the torque-filter family",
+        "runtime_writer": "0x000C74AC"
+      },
+      {
+        "cell": "FEBECC2C",
+        "classification": "internal assist aggregate with ROM slew bound",
+        "provenance": "D0162 sums C3A0+C39C+C41E+C5A8+C53A with constant/ROM-bounded accumulator state",
+        "runtime_writer": "0x000D0162"
+      },
+      {
+        "cell": "FEBEBF3C",
+        "classification": "nonnegative |measured torque| calibration-curve term",
+        "provenance": "C2B64 interpolates C28FC-selected curves over |C128| and scales by ROM gain; route-zero ordinary selector can reach only equivalent normal banks 0/2",
+        "runtime_writer": "0x000C2B64"
+      },
+      {
+        "cell": "FEBECB38",
+        "classification": "angle-domain ramp/return/dither term",
+        "provenance": "CF2B2 slew/median-limits CB08*CB20/0x100; CB08 is recovered from the 0x025 angle-processing family and CB20 is an internal ramp sequencer",
+        "runtime_writer": "0x000CF2B2"
+      },
+      {
+        "cell": "FEBEC5EE",
+        "classification": "moving-mode monitor/assist term; zero in retained drives",
+        "provenance": "C9A84 scales C5EC by C5B8; retained 0x0D5 s213 source is identically zero",
+        "runtime_writer": "0x000C9A84"
+      },
+      {
+        "cell": "FEBECBE8",
+        "classification": "phase-window angle excitation/return term",
+        "provenance": "CFCD4 clamps CC22+CB64; both are internally sequenced angle/phase waveform state, not an external lane target",
+        "runtime_writer": "0x000CFCD4"
+      }
+    ]
+  },
   "exact_rdbi_table": {
     "offset": "0x2928C",
     "record_count": 241
+  },
+  "normal_selector_effect_closure": {
+    "C58B8_C1A4_C1A6_selector_records": {
+      "healthy": [
+        "000000038007000f001e0032004b0064ffff",
+        "000000038007000f001e0032004b0064ffff",
+        "000000038007000f001e0032004b0064ffff",
+        "000000038007000f001e0032004b0064ffff"
+      ],
+      "integrity_fallback": [
+        "000000038007000f001e0032004b0064ffff",
+        "000000038007000f001e0032004b0064ffff",
+        "000000038007000f001e0032004b0064ffff",
+        "000000038007000f001e0032004b0064ffff"
+      ]
+    },
+    "base_pointer_table_0xB144C": {
+      "AC3C_0_integrity_fallback": "0x18100",
+      "AC3C_1_healthy": "0x10100"
+    },
+    "classification": "verified static+retained-drive closure: the ordinary COM parameter selector has no effective C2B64 calibration effect under the route-wide zero sig160 state; the sole distinct normal bank is FEBEC156=1, which the zero mode value cannot select.",
+    "fallback_block_sha256": [
+      "0bf6b23b9ca2e957cafda774969d085e422e1443c41cc2e72b14d49b016b5c85",
+      "0bf6b23b9ca2e957cafda774969d085e422e1443c41cc2e72b14d49b016b5c85",
+      "0bf6b23b9ca2e957cafda774969d085e422e1443c41cc2e72b14d49b016b5c85",
+      "0bf6b23b9ca2e957cafda774969d085e422e1443c41cc2e72b14d49b016b5c85"
+    ],
+    "fallback_equivalence": "selectors 0/1/2/3 all byte-identical",
+    "healthy_block_sha256": [
+      "e7c4dd02bd2245de4c2412695feb88f41826bb93c629e82f3bf5a8033fa20a77",
+      "b48655a3c063d6dc2ca1795c225d7111d358dccf23b1ed07c146a09cefd8e000",
+      "e7c4dd02bd2245de4c2412695feb88f41826bb93c629e82f3bf5a8033fa20a77",
+      "e7c4dd02bd2245de4c2412695feb88f41826bb93c629e82f3bf5a8033fa20a77"
+    ],
+    "healthy_equivalence": "selector 0 == selector 2 == selector 3 byte-for-byte; selector 1 differs",
+    "healthy_selector0_vs_1_diff_bytes": 215,
+    "live_source": "data/generated/camry_2026_baseline_selector_live.json",
+    "normal_block_geometry": "four FEBEC156 banks x eight rows x 0x44 bytes = 0x220 bytes per selector bank",
+    "remaining_special_modes": "C54A2 internal 0x55/0x11 and diagnostic 0x66 branches bypass the normal FEBEC156 bank selection inside C28FC and remain separate internal/fault/diagnostic possibilities.",
+    "zero_sig160_state_reduction": "retained drives have sig160/FEBEF050 value 0 route-wide; with FEBEB124==0, B35DC/B372A can emit FEBEB121 only 0 or 0x22 on the ordinary COM branch; C54A2 maps those to FEBEC158 0 or 0x44 and C5554 maps them to FEBEC156 0 or 2. Those two C28FC normal blocks are identical in both healthy and fallback banks, so ordinary zero-valued COM selector state cannot change C2B64 curves."
+  },
+  "physical_actuation_funnel": {
+    "chain": "D039E/FEBECC50 -> D042C/FEBECC62 -> D042C/FEBECC66 -> D047C/FEBECC64 -> D0AAE/FEBEAC54 -> BF33E/FEBEE40C -> 35C4C/FEBE6AF4 -> 387BA/FEBE6E0A -> 38502/FEBE6DEC -> 3835E/FEBE6DC8 + 384D8/FEBE6DD6 -> 38162 motor-control transform",
+    "classification": "verified cell-level physical-current convergence through the exact F33 command/current chain. CC62 is a real pre-slew stage in this funnel; AC56/EE40A/1C02 is its diagnostic mirror, while AC54/EE40C carries the motor-driving post-slew/override value. No second additive lateral-command injection is recovered downstream of CC50; special 35C4C and D047C branches are bounded internal limit/override selections. The remaining stock-LTA contradiction is upstream: how a lane-target/authority state enters or selects CC50/CC62 while B6 is absent on the captured EPS network.",
+    "downstream_current_diagnostic_mirror": {
+      "cells": [
+        "FEBE6D84",
+        "FEBE6D86"
+      ],
+      "direct_writers": {
+        "FEBE6D84": [
+          "0x00037F16",
+          "0x00059448"
+        ],
+        "FEBE6D86": [
+          "0x00037F16",
+          "0x00059448"
+        ]
+      },
+      "runtime_copy": "0x00037F16: FEBE6D84=FEBE6DD6; FEBE6D86=FEBE6DC8"
+    },
+    "normal_motor_mirror": "0x35C4C normally sets FEBE6AF4=-FEBEE40C; service/limit branches can substitute bounded internal FEBE6AF8 before the same 6AF4 funnel",
+    "post_slew_override": "D047C normally copies FEBECC66->FEBECC64; if FEBECC98 is nonzero it substitutes clamp(FEBECC94,+/-0x569A), an internally generated return/limit path",
+    "pre_slew_intra_function_edge": "D042C computes FEBECC62=FEBECC50*FEBEAC5A/0x400, immediately loads it to iVar2, and writes/slew-limits FEBECC66 from the same value",
+    "writer_sets": {
+      "FEBE6AF4": [
+        "0x00035C4C",
+        "0x00059448"
+      ],
+      "FEBE6DC8": [
+        "0x0003835E",
+        "0x00059448"
+      ],
+      "FEBE6DD6": [
+        "0x000384D8",
+        "0x00059448"
+      ],
+      "FEBE6DEC": [
+        "0x00038502",
+        "0x00059448"
+      ],
+      "FEBE6E0A": [
+        "0x000387BA",
+        "0x00059448"
+      ],
+      "FEBEAC54": [
+        "0x000BF97A",
+        "0x000D0AAE"
+      ],
+      "FEBECC64": [
+        "0x000D01B4",
+        "0x000D047C"
+      ],
+      "FEBEE40C": [
+        "0x000BF33E",
+        "0x000BF97A"
+      ]
+    }
   },
   "production_output_authorized": false,
   "recommended_passive_oracles": [
@@ -80,7 +274,7 @@
     {
       "data_id": "0x1C02",
       "rank": 2,
-      "reason": "Toyota-named final Command Value Torque; blended but target-native downstream command observable"
+      "reason": "Toyota-named Command Value Torque pre-slew model/observable; diagnostic mirror of a value that D042C also feeds into the verified CC66/CC64 physical actuation funnel"
     },
     {
       "data_id": "0x1C3E",

@@ -229,7 +229,7 @@ P5 join. Canonical evidence:
 
 **Current exact live target (VAR-051/052/053/054/055/056/057):** the maintainer's 2026 Camry now has both identity-bound live evidence and exact target-native EPS firmware. EPS F181 is `8965F3307000 / 8A3113303100` on normal-harness `(bus1,param1)`; FRC is `0x792→0x79A / 8646F3315000`; Brake/EPB is `0x7B0→0x7B8 / F152633K0000`. VAR-053 closes `0x51E` Ready plus **P=0, R=1, N=2, D=3, B=4**; VAR-054/056 close the target-native B6 receiver, timing, limits, feedback and runtime anchors. VAR-057 supersedes the old low-RAM carrier assumption: the real stock startup overwrites `FEBF0000`, while **`FEBFF9F0..FEBFFBFB` (524 bytes) is live-proven retained and executable** with stock application return and zero Panda TX-block delta. Exact F33 application XCP provides the placement half of the desired production loader: packed `0x7F7/0x7F8` descriptors exist, `SET_MTA 0x82C62` + `DOWNLOAD 0x81FFE` can write arbitrary bytes throughout `FEBF7C00..FEBFFBFF`, and GET_SEED/UNLOCK are unconfigured. A target-native 22-record / 88-endpoint fixed-DMAC census has zero endpoints in the XCP window, closing the obvious recovered DMA shortcut. **CORR-124 now proves the old normal bus1/ELM1 XCP probe used the correct physical route:** RX rule46 and TX handle `0x37` independently bind `0x7F7/0x7F8` to exact F33 RSCFD controller 1, so its timeout is a live admission/response negative rather than route falsification. The **remaining production architecture blocker is now a safe already-running-application PC pivot into the high tail**, not carrier retention or a RAM writer. OQ-053's recovered stock pivot classes are now **statically exhausted**: computed-call/callback cells, exception returns, fixed DMAC, CTBP/INTBP/EBASE, XCP DAQ, ECUReset, RoutineControl, WDBI, BA and AB dispatch were all closed target-natively without a writable control-transfer object into the retained tail. Do not repeat broad callback/service mining as if it were still the next static discriminator. Highest-value bounded next evidence is the read-only exact-state preflight on the proven bus1/controller-1 route, then CONNECT and non-executing high-tail DOWNLOAD/readback if admitted, plus a runtime-specific volatile-pivot discriminator; do not use the PROGRAMMING handoff as a normal startup design and do not guess arbitrary PC writes. Slot-4 command-5 permission/latency and stock-LTA sender/suppression characterization remain separate live gates. Production output remains disabled. Canonical baseline: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§12–13.
 
-**Development-path update (VAR-060/SECOC-074):** exact F33 persistent Gate-2 patch construction is now closed offline from a fresh bare import, not transferred from Sienna/H/F: `0x8F952 e0d1→e001`, exact image SHA `42dce8ef…d9b0e7`, stock-valid high CRC region, repaired fixup `0xD9AF33AF`, and deterministic byte-exact restore. The flash backend is also now independently pinned by exact F33 boot code plus locally retained/CMAC-validated Toyota `T-0035-22.cuw`; both prove post-halfword FSTATR **DBFULL `0x400`** pacing, correcting the prior external `0x800/SUSRDY` interpretation. This means the §13 application-mode signer pivot no longer blocks **first development lateral**. The next development gates are a zero-write live patch preflight, restore-gated APPLY + invalid-MAC causal proof, then VAR-063's synchronized FRC `0x1601` LTA-active/CAN discriminator and conservative first actuation. Two blind stock-LTA drives already produced 3,574,703 incoming frames with zero B6, so do not repeat that acquisition shape. The volatile signer pivot remains the preferred production architecture and OQ-053 remains open for that purpose. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
+**Development-path update (VAR-060/SECOC-074):** exact F33 persistent Gate-2 patch construction is now closed offline from a fresh bare import, not transferred from Sienna/H/F: `0x8F952 e0d1→e001`, exact image SHA `42dce8ef…d9b0e7`, stock-valid high CRC region, repaired fixup `0xD9AF33AF`, and deterministic byte-exact restore. The flash backend is also now independently pinned by exact F33 boot code plus locally retained/CMAC-validated Toyota `T-0035-22.cuw`; both prove post-halfword FSTATR **DBFULL `0x400`** pacing, correcting the prior external `0x800/SUSRDY` interpretation. This means the §13 application-mode signer pivot no longer blocks a **future development lateral** test. It does **not** mean steering-command arbitration is ready: VAR-083/CORR-130 now close the shared `CC50/CC62 -> CC66/CC64 -> AC54/EE40C -> 6AF4 -> 6E0A -> 6DEC/6DC8/6DD6` current-control convergence, so the first steering gate has moved **upstream** to the unexplained stock-LTA authority/value that reaches that funnel with B6 absent. VAR-084 further closes the obvious hidden pointer/ISR/fixed-DMA/callback escapes while leaving computed-store and runtime-DMA reprogramming explicit. The next development security gates remain a zero-write live patch preflight and restore-gated APPLY + invalid-MAC causal proof, but no conservative first actuation should be scheduled until that upstream arbitration problem is closed. Two blind stock-LTA drives already produced 3,574,703 incoming frames with zero B6, so do not repeat that acquisition shape. The volatile signer pivot remains the preferred production architecture and OQ-053 remains open for that purpose. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
 
 ### Exact-F33 openpilot port — passive default + fail-closed development path (VAR-058/062)
 
@@ -242,13 +242,15 @@ strict subset, replays same-car `0x025/0x030/0x127/0x51E` state, and constructs 
 known B6/FV46/FV4/CMAC28 candidate in shadow. Ordinary TSS3 CarParams still remains
 `SafetyModel.noOutput`; without the explicit development config, controller output is zero CAN.
 
-The remaining **static first-development-lateral software work is now staged** in
+A **now-stale, fail-closed development B6 sender** is staged in
 `opendbc@dde0fcf0fbaf875750c54a072b0dcb3857f8829b` /
 `kai-openpilot@15f3550365e2eee54ca5645ae9c24d9d41ae4f31`. `ToyotaTSS3DevLateral` is
-development-only and rejected on release branches. Its JSON config must supply exact
-`8965F3307000`, a stock-captured 28-byte B6 template, measured cadence, and explicit
-completed Gate-2 + exclusive-authority live attestations; the Toyota interface also rejects
-the unsplit bus-1 topology. Only then can an `ALLOW_DEBUG` Panda mode whitelist bus-0
+development-only and rejected on release branches. It was deliberately written to require
+a stock-captured 28-byte B6 template plus measured cadence and exclusive-authority
+attestations. VAR-081 now proves **zero stock B6 throughout 73.303384 s of LTA/LCA-active
+operation**, so waiting for such a template is no longer a valid Camry integration shape.
+Do not weaken the fail-closed gate merely to make it transmit: direct F33 payload construction
+and, more importantly, **upstream stock-LTA/B6 authority arbitration at the now-known shared command funnel** must be understood first. Only then can an `ALLOW_DEBUG` Panda mode whitelist bus-0
 `0x0B6/32`, with exact-F33 ID11/±1745/+78/+1/steering-rate-100/35-ms checks. The
 development sender deliberately emits a real FV4 with zero MAC28 for the already-validated
 Gate-2 experiment, and disarms on inactivity rather than inventing OEM restart semantics.
@@ -267,10 +269,11 @@ VAR-063 now verifies the maintainer Camry's physical Toyota-B repin itself: the 
 steering/state network is on the CAN0/CAN2 relay pair. Two independent moving routes
 now retain **3,574,703 incoming frames across 19 segments** and still contain **zero B6
 at every DLC/bus** while `00F/D7` remain healthy; the second run deliberately reproduced
-the first negative at road speed. Do not repeat another blind "stock B6" drive. VAR-067 subsequently machine-recovers
-cruise operation from the existing routes themselves; the remaining **OEM naming**
-discriminator is a factory-LTA state synchronized to that relay-correct CAN. The prepared
-confirmation capture is
+the first negative at road speed. Do not repeat another blind "stock B6" drive. VAR-067
+machine-recovers cruise operation from the existing routes themselves, and
+**CORR-129/VAR-081 now strongly identify their `0x08A B21=11` state as LTA/LCA active**
+through the current EMPS Target-Lateral numeric dictionary plus the repeated three-state
+dynamic join. The prepared independent confirmation capture is
 FRC P5 `0x1601`, whose current GTS+ dictionary makes the exact enabled-state oracle
 **LTA Switch=1 (ON) + LTA Control=0 (LTA Enabled)** (`1=LTA Disabled`; Hands-Off occupies
 the upper two bytes), with `0x1501` LDA, `0x1681` LCA, and `0x1903` Control Mode as
@@ -283,9 +286,10 @@ existing `sendcan` publisher with normal `pandad`/`loggerd`, fixed post-repin Pa
 reads, ELM327-param1/controls-disallowed gating, and per-DID two-second stale-stop.
 `tools/extract_camry_frc_lta_rlog.py` converts the resulting explicit rlog segments into
 the analyzer's privacy-minimized capture format. This is tooling readiness only; the live
-synchronized artifact is still missing. Do not wait on that oracle before challenging the B6 stock-template assumption: VAR-067
-already proves zero B6 throughout recovered cruise operation and two long lateral/HUD
-candidate intervals. Use `0x1601` to name/corroborate the candidate state. Exclusive source suppression, slot-4 command-5 generation
+synchronized artifact is still missing. It remains valuable as an independent official
+live-state corroboration and B6-sender experiment, not as a prerequisite for naming the
+retained state. VAR-081 already proves zero B6 throughout both complete LTA/LCA-active
+intervals. Exclusive source suppression, slot-4 command-5 generation
 permission plus latency/contention, and normal/asserted/recovery correlations for the
 F33 status carriers remain live work. Driver override and current-response thresholds
 remain policy choices requiring conservative dynamic validation, not values to infer
@@ -302,11 +306,14 @@ expects B6 from the Brake System Control domain; the immediate logical source do
 known even though the upstream planner and actual B6 construction/signing implementation remain bounded.
 The corrected scalar copy-edge census is exactly **19/116 nonempty and 97 empty**, with
 the pinned signal set `{130,141,186,187,188,189,211,212,213,223,243,261,262,263,265,268,269,270,273}`.
-B6 signal261 is the sole recovered mode selector and signal262 the sole magnitude; every
-non-B6 member is feedback, monitor, plausibility, or gate state. Signal243 explicitly
+B6 signal261 is the sole recovered generated-COM mode selector and signal262 the sole recovered generated-COM external magnitude **inside the shared `FEBECC50/FEBECC62` command funnel**; every non-B6 COM member there is feedback, monitor, plausibility, or gate state. Signal243 explicitly
 uses `0x4BB62` stack-RMW to `FEBE80A0 -> FEBEF094 -> FEBEACCD`. The generic group
 surface maps only to absent `0x013..0x01F`, and B6 reaches exact-GTS+ DID1C02 **Command
-Value Torque** downstream. Do not re-run a broad scalar or H-variant cone derivation.
+Value Torque** downstream. **CORR-130/VAR-083 now close the physical current-control
+convergence:** `CC62` is a pre-slew actuation value, `AC56/EE40A/1C02` is its diagnostic
+mirror, and sibling `CC64/AC54/EE40C` drives `6AF4 -> 6E0A -> 6DEC/6DC8/6DD6`. Do not
+re-run the broad scalar model-cone derivation or the downstream motor join; move the static
+search **upstream of CC50/CC62** instead.
 The bus1 `0x180..0x18C` family remains upstream vocabulary only because none of those IDs
 is accepted by exact F33; VAR-057/066 retain the peripheral/topology boundary.
 
@@ -320,18 +327,51 @@ that same controller-1 rule span. Joined to the physical repin capture, the larg
 steering/chassis family moved onto CAN0/CAN2 while the 22-ID camera/radar FD family moved
 to logical bus1, matching Toyota's Bus4/Bus1 split. The relay pair is therefore already
 the B6-capable Brake/EPS network. Do not spend another pass swapping Panda buses or
-inventing a second EPS CAN port; the remaining discriminator is **stock operating state**:
-synchronize FRC `0x1601` **Switch=1 / LTA-Control=0 (Enabled)** plus `0x1914=1`
+inventing a second EPS CAN port. For an independent live cross-check and any B6 sender
+test, synchronize FRC `0x1601` **Switch=1 / LTA-Control=0 (Enabled)** plus `0x1914=1`
 **Cruise Control in Operation**, motion, and healthy Bus-4 protected traffic. Use the
 prepared normal-loggerd exact-F33 oracle path rather than another direct-Panda reader or
-another blind drive. **VAR-067 now extracts substantially more operating-state evidence
-from those same two drives:** `0x08A` byte3/set-speed behavior machine-proves 158.846096 s
-of cruise operation with zero B6, while a separate repeated `0x08A` byte21=`0x0B` /
-`0x081` byte13 / `0x412` display-state class contributes 73.303384 s and 237,097 frames,
-again with zero B6. The latter remains a lateral/HUD **candidate**, not an OEM-named LTA
-bit. Therefore `0x1601` is now a naming/corroboration experiment rather than a reason to
-hold the reverse engineering: proceed in parallel with the actual steering-path audit,
-starting at the upstream FRC/Brake boundary and the residual non-COM/internal F33 paths.
+another blind drive. **CORR-129/VAR-081 supersede VAR-067's generic-candidate wording:**
+the exact `{0,11,18}` B21 census, current EMPS `0/11/18 = Manual/LTA-LCA/SDG`
+dictionary, >99.8% `0x081` mirror, and `0x412/0x371` `10/10/0 -> 12/20/1 -> 14/30/3`
+carrier strongly identify the 73.303384-s / 237,097-frame / zero-B6 state as LTA/LCA
+active. This is not producer-wire proof and all three messages remain outside exact-F33
+ingress. FRC `0x1601` is now an independent live corroboration/B6 experiment rather than
+a reason to hold the reverse engineering. VAR-082 now also exhausts periodic Bus-4 fields
+and finds no ordinary external CAN field that reproducibly leads steering/motor response.
+VAR-083 now closes the `CC50/CC62`→current-control join, and VAR-084 finds no concrete
+alternate producer in ROM/live-RAM pointers, unrecovered ISR entries, fixed DMA, callbacks,
+or extra CAN acceptance. Proceed with the two remaining static falsifiers — **E1 computed
+store-target resolution and E2 runtime DMAC destination-register writer provenance** — and
+then the upstream `CC50/CC62` lane-authority logic, not another bus scan or downstream motor sweep.
+
+**VAR-081/082/083/084 steering-command boundary — current highest priority:** the retained
+logs machine-identify **73.303384 s of LTA/LCA-active operation with zero B6 on the actual
+Toyota Bus-4 Brake/EPS network**, and the unrestricted Bus-4 field census finds **930**
+cross-drive refined fields with **zero external fields** reproducing as a motor/steering
+lead. The downstream firmware side is now substantially closed too. `D042C` computes
+`CC62` from `CC50` and reuses the same value intra-function to form/slew `CC66`; `D047C ->
+CC64 -> D0AAE/AC54 -> BF33E/EE40C -> 35C4C/6AF4 -> 387BA/6E0A -> 38502/6DEC ->
+3835E/6DC8 + 384D8/6DD6` reaches the motor-control transform. `AC56/EE40A/1C02` is the
+diagnostic sibling of pre-slew `CC62`, not the motor-driving mirror. No second additive
+lateral injection is recovered downstream of `CC50`.
+
+Therefore the one steering question to close before any actuation is now sharply upstream:
+**what exact state/value gives the shared `CC50/CC62` funnel factory-LTA lane authority
+while B6 is absent, and how would an injected B6 request arbitrate with that stock authority?**
+VAR-084's false-negative audit finds no concrete alternate producer across ROM pointers,
+retained RAM pointers, nine unrecovered ISR entries, fixed DMA descriptors, indirect
+callbacks, diagnostics, or extra CAN acceptance. Two static holes remain explicit and
+should be finished before another vehicle experiment: **E1** resolve every register-arithmetic
+store target that could land in the command/motor ROI; **E2** exhaustively prove every
+runtime writer of DMAC destination-address registers derives only from the fixed descriptor
+tables. After E1/E2, trace the remaining upstream `CC50` selectors/gates/value producers
+with the operator-observed factory steering held as ground truth. Do not explain it away as
+generic assist, do not repeat broad CAN mining, and do not schedule steering output merely
+because B6 syntax/SecOC can be made to pass. FRC `0x1601` plus EPS `1C38/1C02/1C3E` remains
+useful passive correlation, secondary to this static authority proof. Production and
+development steering output remain disabled. Canonical: live-baseline §§20,33–35;
+VAR-081/082/083/084; CORR-129/130/131.
 
 **VAR-068 Class-L/upstream and identity update:** the retained Class-L windows now have a
 portable persistent-edge analysis. No exact-F33-accepted stream has a reproduced rise
@@ -355,9 +395,12 @@ driver-proportional control, plus opposing-driver/motion runs up to 0.914 s (dri
 where the proxy drives with steering motion against driver torque. This is the
 strongest bounded live evidence of active EPS assist without B6, and it sharpens — but
 does not resolve — the VAR-063/065/066 discriminator: a mode-changed EPS damping/assist
-map is not yet separable from LTA-class actuation by these two drives alone. Do not
-re-label Class-L as LTA from this; the `0x1601` naming/corroboration experiment remains
-the next discriminator step.
+map is not yet separable from LTA-class actuation by the motor proxy alone. VAR-081
+independently identifies the interval as LTA/LCA active from state vocabulary and dynamic
+carriers; it does **not** attribute this particular motor/current component to LTA. CORR-130/
+VAR-083 now close the shared command→current-control funnel, so the next discriminator is
+**which upstream stock-LTA authority/value enters that funnel with B6 absent**. FRC/EPS
+synchronization remains useful corroboration, not the authority proof.
 
 **VAR-074 exhaustive bus1 lead/lag negative:** the "hidden analog planner field in
 bus1" hypothesis is now closed at field granularity, not just persistent bits. After
@@ -369,8 +412,11 @@ lag≥+50 ms). Drive B has zero leads among 48 strong correlates; drive A's 69 l
 246 strong correlates do not reproduce. The enlarged denominator instead adds lagging
 feedback/derived encodings; `0x160[22]` remains a delayed steering-angle echo equally
 present in normal cruise. Do not spend more drives or scan time mining observed bus1
-IDs for the lateral planner; the discriminating evidence for Class-L is target-native
-`0x1601` naming and the EPS-internal baseline path of VAR-078, not more bus traffic.
+IDs for the lateral planner. VAR-081 already supplies the state identification and VAR-082
+adds the same matched negative across the actual Bus-4 chassis/EPS network. VAR-083 closes
+the shared downstream current-control convergence; VAR-084 bounds the major hidden-ingress
+classes. The remaining discriminator is the **upstream stock-LTA authority/value into
+`CC50/CC62`**, not more bus traffic.
 
 **VAR-075/076/077/078 internal/COM closure:** the remaining ordinary-EPS-CAN alternatives
 are now substantially narrower. The exact `C9590/C9650/C973A` moving assist/gain family is
@@ -381,7 +427,7 @@ both drives. CORR-127 replaces VAR-065's old `19/116 nonempty, 97 empty` shortcu
 the full denominator: 98/116 scalar raws staged, 52 stage readers, six snapshot copiers,
 306 snapshot destinations, plus the 14 table-driven `0x013..0x01F` extracts. Even under
 that stronger census, **B6 sig261/262 are still the only generated-COM mode/magnitude
-inputs recovered at command composition**. CORR-128/VAR-078 also close the former
+inputs recovered in the shared `CC50/CC62` command funnel**. CORR-128/VAR-078 also close the former
 `FEBE71F2` ambiguity: `FEBE71F2 -> FEBEAC52` is only a saturation limit, while the actual
 B6-independent magnitude is the internal `D0218 -> CC48 -> D0284 -> CC4C -> D02DA ->
 CC4E -> D0382 -> CC60` baseline-assist path. `D0284`'s `AC64` scale is also closed as
@@ -393,10 +439,10 @@ for a hidden target. VAR-080 now closes the immediate RDBI question: the selecto
 `FEBEC158/FEBEC156` have no direct exact-F33 RDBI callback, while `0x1C38/1C4A/1C50` expose
 a scaled/clamped `FEBECB38` term proxy and `0x1C3E` exposes `FEBEC5EE`. The apparent C5EE/
 C4C0 selector-indexed maps alias across all four banks in this exact calibration, so they
-do not reveal selector state. The next passive discriminator should synchronize **EPS
-`0x1C38` + named `0x1C02` + control `0x1C3E`** with FRC `0x1601/0x1914`; static work should
-trace the remaining selector-sensitive `C28FC -> C2B64/FEBEBF3C` branch and any indirect
-diagnostic mirror. Producer-side Brake firmware remains acquisition-blocked.
+do not reveal selector state. The next passive discriminator can still synchronize **EPS
+`0x1C38` + named `0x1C02` + control `0x1C3E`** with FRC `0x1601/0x1914`, but static work no
+longer needs to rediscover `C28FC/C2B64` or the downstream current join: both are closed.
+Static priority is E1/E2 plus the remaining upstream stock-LTA authority/value into `CC50`. Producer-side Brake firmware remains acquisition-blocked.
 
 **VAR-069 exact Brake producer acquisition:** the producer search is now narrowed to
 same-car category-435 identities `F152633K0000` / `8954147040` at physical `0x7B0`.
@@ -469,8 +515,9 @@ failure-forwarding mode: while `FEBE5408 < 204` (or the separate global D2 overr
 is active), freshness-hard-failed or retry-exhausted CMAC-failed B6 can still reach
 COM without committing freshness. Deterministic production control therefore
 requires exclusive B6 authority. VAR-063 now shows no stock B6 in two relay-correct
-drives, so the next live step is to prove a stable OEM-named operating interval with FRC `0x1601`
-(Switch=1 / LTA-Control=0) overlapping `0x1914=1` ACC operation and motion;
+drives, and VAR-081 strongly identifies 73.303384 s of those captures as LTA/LCA active.
+The next live step is an **independent** FRC `0x1601` (Switch=1 / LTA-Control=0) plus
+`0x1914=1` synchronized cross-check for B6 sender behavior and EPS term attribution;
 only if B6 appears in that synchronized interval is a physical stock suppression point
 needed. Racing two streams remains unacceptable. Current Toyota safety assumes checked state on logical bus 0; direct
 diagnostic/passive observation on bus 1 is not itself the production relay topology.
@@ -950,3 +997,13 @@ These directions have reached diminishing returns or have already been closed:
 Update this file only when the **execution order** changes. If an item is
 resolved, move the result to the appropriate subsystem report / `FINDINGS.md`
 and remove it here instead of appending a completion diary.
+
+<!-- knowledge-cross-references:begin -->
+## Knowledge cross-references
+
+Generated by `tools/build_knowledge_index.py` from the status ledgers;
+do not edit this block by hand.
+
+- Findings with this document as canonical home: —
+- Corrections with this document as canonical home: [CORR-131](../reference/index.md#correction-corr-131)
+<!-- knowledge-cross-references:end -->

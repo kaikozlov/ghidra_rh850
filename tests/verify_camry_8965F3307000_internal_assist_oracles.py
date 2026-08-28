@@ -50,6 +50,19 @@ check("1C38/1C4A/1C50 share exact CB38 proxy cell", all(rows[d]["source_term"] =
 check("proxy callbacks preserve common *100/0x80 post-scale", all("* 100) / 0x80" in r["rdbi_transform"] for r in rows.values()))
 check("current target-native GTS+ leaves all four proxy DIDs unnamed", set(art["current_gtsplus_boundary"]["unnamed_exact_f33_proxy_dids"]) == {"0x1C38","0x1C3E","0x1C4A","0x1C50"}
       and all(r["current_gtsplus_emps_p5_name"] is None for r in rows.values()))
+eff = art["normal_selector_effect_closure"]
+check("C28FC healthy selector1 is the sole distinct normal calibration bank",
+      eff["base_pointer_table_0xB144C"] == {"AC3C_0_integrity_fallback":"0x18100","AC3C_1_healthy":"0x10100"}
+      and eff["healthy_equivalence"] == "selector 0 == selector 2 == selector 3 byte-for-byte; selector 1 differs"
+      and eff["healthy_selector0_vs_1_diff_bytes"] == 215)
+check("C28FC fallback and C58B8 selector records alias across all selector values",
+      len(set(eff["fallback_block_sha256"])) == 1
+      and all(len(set(v)) == 1 for v in eff["C58B8_C1A4_C1A6_selector_records"].values()))
+check("route-zero sig160 can choose only equivalent normal C2B64 banks",
+      "FEBEC156 0 or 2" in eff["zero_sig160_state_reduction"]
+      and "normal blocks are identical" in eff["zero_sig160_state_reduction"]
+      and "no effective C2B64 calibration effect" in eff["classification"]
+      and "0x55/0x11" in eff["remaining_special_modes"])
 inf = art["selector_influence_observability"]
 check("1C3E C5EE selector indexing aliases away in exact F33 calibration",
       "PTR_DAT_000D39DC[FEBEC156&3]" in inf["FEBEC5EE_via_0x1C3E"]
@@ -64,9 +77,41 @@ check("selector-state discriminator remains internal after exact calibration ali
       "selector-state discriminator" in inf["classification"] and "C28FC/C2B64" in inf["classification"])
 check("passive oracle ranking favors unresolved CB38 then named final command torque",
       [(x["rank"],x["data_id"]) for x in art["recommended_passive_oracles"]] == [(1,"0x1C38"),(2,"0x1C02"),(3,"0x1C3E")])
-check("final Toyota-named command torque remains recommended context",
+check("Toyota-named 1C02 is preserved as the pre-slew diagnostic mirror of a physical-funnel value",
       art["recommended_passive_oracles"][1]["data_id"] == "0x1C02"
-      and "Toyota-named final Command Value Torque" in art["recommended_passive_oracles"][1]["reason"])
+      and "verified CC66/CC64 physical actuation funnel" in art["recommended_passive_oracles"][1]["reason"])
+terms = art["d0218_term_semantic_closure"]
+check("all eight B6-inactive D0218 value terms retain structural provenance classes",
+      {r["cell"] for r in terms["terms"]} == {"FEBEC43C","FEBEC4C0","FEBEC3BA","FEBECC2C","FEBEBF3C","FEBECB38","FEBEC5EE","FEBECBE8"}
+      and "no term is an independently recovered external lane-target magnitude" in terms["classification"])
+obs = art["command_value_torque_observable_branch"]
+check("1C02 pre-slew observable branch is pinned separately from the motor-driving sibling",
+      obs["FEBECC62_canonical_direct_readers"] == ["0x000C4F04","0x000D0AAE"]
+      and obs["FEBE6772_direct_readers"] == ["0x0004E7D6"]
+      and obs["mirror_tail"]["FEBE6AF6_direct_readers"] == ["0x000387CE"]
+      and obs["mirror_tail"]["FEBE6E22_direct_readers"] == ["0x00059448","0x0005CA3A","0x0005D12C"]
+      and "diagnostic/model mirror" in obs["classification"])
+funnel = art["physical_actuation_funnel"]
+check("physical actuation funnel crosses post-slew CC64 through AC54/EE40C into 6AF4/6E0A",
+      "FEBECC62 -> D042C/FEBECC66 -> D047C/FEBECC64" in funnel["chain"]
+      and "D0AAE/FEBEAC54 -> BF33E/FEBEE40C" in funnel["chain"]
+      and "35C4C/FEBE6AF4 -> 387BA/FEBE6E0A" in funnel["chain"]
+      and "38502/FEBE6DEC -> 3835E/FEBE6DC8 + 384D8/FEBE6DD6" in funnel["chain"])
+check("physical funnel writer sets remain exact for the command/current cells",
+      funnel["writer_sets"]["FEBECC64"] == ["0x000D01B4","0x000D047C"]
+      and funnel["writer_sets"]["FEBEAC54"] == ["0x000BF97A","0x000D0AAE"]
+      and funnel["writer_sets"]["FEBEE40C"] == ["0x000BF33E","0x000BF97A"]
+      and funnel["writer_sets"]["FEBE6AF4"] == ["0x00035C4C","0x00059448"]
+      and funnel["writer_sets"]["FEBE6E0A"] == ["0x000387BA","0x00059448"]
+      and funnel["writer_sets"]["FEBE6DEC"] == ["0x00038502","0x00059448"]
+      and funnel["writer_sets"]["FEBE6DC8"] == ["0x0003835E","0x00059448"]
+      and funnel["writer_sets"]["FEBE6DD6"] == ["0x000384D8","0x00059448"])
+check("6D84/6D86 are downstream diagnostic mirrors of 6DD6/6DC8, not the upstream command source",
+      funnel["downstream_current_diagnostic_mirror"]["cells"] == ["FEBE6D84","FEBE6D86"]
+      and funnel["downstream_current_diagnostic_mirror"]["direct_writers"]["FEBE6D84"] == ["0x00037F16","0x00059448"]
+      and funnel["downstream_current_diagnostic_mirror"]["direct_writers"]["FEBE6D86"] == ["0x00037F16","0x00059448"]
+      and "CC62 is a real pre-slew stage" in funnel["classification"]
+      and "remaining stock-LTA contradiction is upstream" in funnel["classification"])
 check("production output remains unauthorized", art["production_output_authorized"] is False)
 print(f"\nResults: {passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

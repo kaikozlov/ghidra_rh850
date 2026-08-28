@@ -4,12 +4,22 @@
 `8965F3307000 / 8A3113303100`.
 
 **Evidence boundary:** this report closes the exact-F33 generated-COM transmit geometry
-needed by the software port and records both the passive default and a fail-closed
-Gate-2 development-output path. It does **not** authorize steering transmission. The
-development path cannot arm until live evidence supplies a stock B6 template/cadence,
-proves the exact-F33 Gate-2 consequence, and proves exclusive relay/source authority.
-The retained Camry route has not yet observed stock B6, `0x351`, `0x394`, or `0x4A3`
-under the relay-correct stock-LTA transition required to promote their live semantics.
+needed by the software port and records both the passive default and the historically staged
+fail-closed Gate-2 development path. It does **not** authorize steering transmission.
+CORR-129/VAR-081 now strongly identify **73.303384 s of retained factory LTA/LCA-active
+operation with zero B6** on the relay-correct Toyota Bus-4 Brake/EPS network, so the
+staged sender's original requirement for a stock B6 template/cadence is no longer a valid
+Camry integration assumption (CORR-131). VAR-082 finds no second ordinary external CAN
+field that reproducibly leads steering. CORR-130/VAR-083 now close the exact F33
+command-to-current convergence: `CC62` is a real pre-slew actuation value, sibling
+`CC64/AC54/EE40C` drives `6AF4 -> 6E0A -> 6DEC/6DC8/6DD6`, while
+`AC56/EE40A/1C02` is the diagnostic mirror. VAR-084 also finds no concrete alternate
+producer across the major hidden-ingress classes, leaving computed-store and runtime-DMA
+rewrites as the strongest static false-negative holes. The unresolved steering problem is
+therefore **upstream stock-LTA authority/arbitration into the shared `CC50/CC62` funnel
+with B6 absent**. The existing development sender must remain fail-closed until that is
+understood and the B6 payload is deliberately constructed from the exact F33 receiver
+contract rather than copied from a nonexistent stock template.
 
 ## 1. Exact F33 generated-COM Tx carriers
 
@@ -207,7 +217,7 @@ not whitelist `0x0B6`. This is the state whenever the explicit development confi
 is absent, invalid, running on a release branch, bound to the wrong F181, or still on the
 normal-harness bus-1 topology.
 
-## 4. Default-off exact-F33 Gate-2 development plumbing (VAR-062)
+## 4. Default-off exact-F33 Gate-2 development plumbing (VAR-062; stock-template admission superseded by CORR-131)
 
 The remaining *static software* work for the first-development-lateral path is now staged
 in nested opendbc commit
@@ -217,7 +227,7 @@ and parent `kai-openpilot` commit
 This does not weaken the passive default. It adds a second path that is impossible to arm
 from inferred constants alone.
 
-### 4.1 Runtime configuration refuses guessed live facts
+### 4.1 Current staged runtime configuration refuses guessed live facts — and therefore remains intentionally unarmable on the retained Camry evidence
 
 `ToyotaTSS3DevLateral` is a development-only master switch. The companion JSON param
 `ToyotaTSS3DevLateralConfig` must provide all of the following, or the car card leaves the
@@ -233,9 +243,17 @@ platform passive:
 The interface additionally rejects `TSS3_PT_BUS1`: development output requires the
 relay-correct bus-0 topology. Release branches reject the development master switch.
 
-### 4.2 Development sender is deliberately not a production signer
+This list describes the **current staged implementation**, not the now-correct Camry
+integration contract. VAR-081 proves the required stock B6 template/cadence never appears
+during the retained LTA/LCA-active intervals. That is a reason for the sender to stay
+fail-closed, not a reason to weaken validation or manufacture a fake "stock" template. A
+future implementation should construct only fields whose F33 receiver semantics are
+proved, after the **upstream stock-LTA/B6 authority arbitration** question is closed; the
+shared command-to-current funnel itself is now statically recovered by VAR-083.
 
-After all gates above are supplied, the controller uses the existing exact-F33
+### 4.2 Historical development sender is deliberately not a production signer
+
+Under its original experimental contract, after all gates above are supplied, the controller uses the existing exact-F33
 replacement-freshness machinery. The first observed stock `0x00F` is baseline only; a
 **strictly newer** epoch arms message counter 1 / application sequence 0. Active output is
 Target Lateral ID 11 only. Target angle is clamped to ±1745 raw and each emitted command
@@ -271,27 +289,36 @@ safety module currently passes 283 tests with 34 skips in the local targeted gat
 
 ## 5. What remains before lateral output can actually be exercised
 
-The remaining first-actuation gates are now live, not unfinished static implementation:
+The critical remaining work is **upstream steering authority/arbitration**, not another
+stock-B6 capture and not another downstream motor-convergence sweep:
 
-1. resolve VAR-063/065/066's **operational** live discriminator: two independent moving
-   routes totaling 3,574,703 incoming frames / 19 segments still have zero B6 while
-   protected `00F/D7` remain healthy. The wrong-bus branch is now closed: current GTS+
-   places Front Camera Module on Central-Gateway Bus 1 but Skid Control and EPS together
-   on **Bus 4** across all 18 current-Camry option variants; exact F33 has one normal
-   CanIf controller/channel and receives B6 in that controller-1 span; the physical
-   repin moved the Bus4-like steering/chassis family onto CAN0/CAN2 and the 22-ID
-   camera/radar family onto logical bus1. The inverse audit also finds no observed
-   ordinary generated-COM steering-command alternative (`0x115` is Engine Revolution;
-   `0x0D5` is monitor/plausibility; `0x025` is feedback; command-sized `0x1C5/0x64F`
-   and group `0x013..0x01F` are absent). Synchronize FRC P5 DID `0x1601`
-   (`LTA Control Condition`) with the **already-correct Bus4 relay pair**. If active LTA
-   is machine-proved while B6 remains absent, then move to the upstream FRC/Brake
-   transformation or a non-COM/internal EPS path; do not repin or hunt another Panda bus;
-2. prove exclusive relay/source suppression behavior for whichever command path that
-   synchronized factory-LTA observation identifies;
-3. complete the zero-write Gate-2 preflight, restore-gated APPLY, and an exact causal
-   SecOC experiment before setting `gate2_bypass_validated`;
-4. perform the bounded first steering-response experiment.
+1. **Close the missing stock-LTA authority into `CC50/CC62`.** VAR-081 proves the retained
+   state is LTA/LCA active; VAR-082 finds no ordinary external Bus-4 steering carrier;
+   VAR-083 proves the shared `CC50/CC62 -> CC66/CC64 -> AC54/EE40C -> 6AF4 -> 6E0A ->
+   6DEC/6DC8/6DD6` current-control funnel. Yet stock LTA physically steered with B6 absent.
+   The remaining question is the upstream value/state/selector that gives that funnel lane
+   authority.
+2. **Finish the two strongest static false-negative holes from VAR-084 before another
+   vehicle experiment.** E1 resolves register-arithmetic computed store targets into the
+   command/motor ROI; E2 exhaustively proves runtime writers of DMAC destination-address
+   registers cannot retarget DMA into LocalRAM command state. Pointer tables, retained RAM
+   pointers, unrecovered ISR delegates, fixed DMA descriptors, callbacks, and extra CAN
+   acceptance are already negative.
+3. **Determine B6 arbitration against the stock authority.** Once the stock input is named,
+   establish whether B6 replaces, gates, blends with, or is mutually exclusive with that
+   authority. Only then can "exclusive source" have a concrete meaning for Panda and
+   openpilot safety.
+4. **Redesign the fail-closed B6 builder if B6 remains the chosen interface.** Do not wait
+   for or fabricate a stock template. Construct only the exact F33 fields proved by the
+   receiver contract and keep ordinary TSS3 `noOutput` until the upstream arbitration is
+   resolved.
+5. Security/TSK remains a separate implementation layer: apply whichever Gate-2 or signer
+   strategy is chosen only after the steering/arbitration semantics are correct. Only then
+   perform a bounded first steering-response experiment.
+
+FRC `0x1601/0x1914` and EPS `0x1C38/0x1C02/0x1C3E` remain useful passive synchronized
+correlation oracles, but VAR-081 means they are no longer needed merely to establish that
+the retained route entered LTA/LCA-active state.
 
 Production still additionally requires an application-context authenticated signer (or an
 equivalent non-persistent architecture), conservative dynamic driver-override/current
