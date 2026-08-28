@@ -60,6 +60,113 @@
       "0x569A"
     ]
   },
+  "baseline_selector_machinery": {
+    "ac50_validity_mask": "BCAA6 writes FEBEAC50 from internal mirror state including FEBEEF88<-FCC00<-FEBE71EC; no generated-COM value source recovered",
+    "boundary": "Direct ordinary-COM selector VALUE inputs are now enumerated exactly. Resolved COM-receive validity companions can gate their qualification but carry no selector value. Internal C54A2 alternatives and fault/debounce state can still change the selected parameter bank; this static closure alone does not prove which selector state held in a retained drive.",
+    "c54a2_internal_alternatives": {
+      "debounced_com_mode": "FEBEAC2F values 0x11/0x22/0x33 map to FEBEC158 0x77/0x44/0x88",
+      "diagnostic_forced": "FEBEC158=0x66 when FEBEAC2B=='Z'",
+      "internal_status": "FEBEC158=0x55 when FEBEAC30=='D' and FEBEAC40!='Z' under normal validity gates",
+      "magic_internal_state": "FEBEC158=0x11 when FEBEAC94==0x5AA5A55A"
+    },
+    "com_receive_validity_companions": {
+      "FEBEF000": {
+        "pdu": null,
+        "source": "FEBE7F68",
+        "unpacker": "shared COM gate"
+      },
+      "FEBEF0A0": {
+        "pdu": 28,
+        "source": "FEBE80D5",
+        "unpacker": "0x4BF4E"
+      },
+      "FEBEF0C2": {
+        "pdu": 21,
+        "source": "FEBE8081",
+        "unpacker": "0x4B8F4"
+      },
+      "FEBEF157": {
+        "pdu": 29,
+        "source": "FEBE80D8",
+        "unpacker": "0x4BFB2"
+      },
+      "classification": "resolved COM-receive status/gate state, not selector value: FEBEF0C2/FEBEF0A0/FEBEF157 are staged FUN_000498e0 PDU-validity results for 0x13B/0x490/0x1DA companion paths; FEBEF000<-FEBE7F68 is the shared extraction/debounce gate. They can suppress qualification but do not choose a parameter bank directly. Absent 0x490/0x1DA traffic cannot provide a fresh valid value."
+    },
+    "generated_com_inputs": [
+      {
+        "bit_offset": 0,
+        "bits": 4,
+        "byte": 0,
+        "can_id": "0x51E",
+        "length": 8,
+        "raw_cell": "0xFEBE8030",
+        "signal": 160,
+        "stage_cell": "0xFEBEF050"
+      },
+      {
+        "bit_offset": 0,
+        "bits": 4,
+        "byte": 1,
+        "can_id": "0x51E",
+        "length": 8,
+        "raw_cell": "0xFEBE8033",
+        "signal": 163,
+        "stage_cell": "0xFEBEF14A"
+      },
+      {
+        "bit_offset": 6,
+        "bits": 2,
+        "byte": 5,
+        "can_id": "0x51E",
+        "length": 8,
+        "raw_cell": "0xFEBE8032",
+        "signal": 166,
+        "stage_cell": "0xFEBEF141"
+      },
+      {
+        "bit_offset": 0,
+        "bits": 4,
+        "byte": 2,
+        "can_id": "0x13B",
+        "length": 8,
+        "raw_cell": "0xFEBE8082",
+        "signal": 224,
+        "stage_cell": "0xFEBEF14B"
+      },
+      {
+        "bit_offset": 4,
+        "bits": 3,
+        "byte": 0,
+        "can_id": "0x490",
+        "length": 1,
+        "raw_cell": "0xFEBE80D2",
+        "signal": 280,
+        "stage_cell": "0xFEBEF168"
+      },
+      {
+        "bit_offset": 0,
+        "bits": 4,
+        "byte": 0,
+        "can_id": "0x490",
+        "length": 1,
+        "raw_cell": "0xFEBE80D3",
+        "signal": 281,
+        "stage_cell": "0xFEBEF0A1"
+      },
+      {
+        "bit_offset": 0,
+        "bits": 4,
+        "byte": 0,
+        "can_id": "0x1DA",
+        "length": 8,
+        "raw_cell": "0xFEBE80D6",
+        "signal": 282,
+        "stage_cell": "0xFEBEF156"
+      }
+    ],
+    "parameter_integrity_bank": "FEBEAC3C&1 <- FEBEB354 <- B7374(FF254()==0); FF254->62E12 returns TMR-protected FEBF0668 written by 62D5E after exact ROM 0x17DA0/0x17DC0.. comparison against working copy 0x20850/0x20870..; this is parameter-copy integrity, not a lateral mode.",
+    "qualification_chain": "0x58074 stages the listed scalar inputs; B3430/B3686 debounce FEBEF050 into the FEBEB124 mode family while B34D4/B3538 qualify companion fields; B35DC/B372A map the result to FEBEB121; BCBD8 snapshots FEBEB121->FEBEAC2F; C54A2 selects FEBEC158; C5554 maps FEBEC158 to FEBEC156=0/1/2/3; C28FC chooses the parameter block consumed by baseline-assist terms."
+  },
   "boundary": [
     "statement-level closure: 0xBF97A holds WRITE refs into FEBEE400..418 whose stores the decompiler elides; 0xBF33E is the statement-verified block writer and BF97A's block refs are treated as a second (runtime/reset) writer with unchanged sourcing",
     "FEBEACC0 (0xC2F26 integrator-enable input) is computed inside 0xBCD66 rather than copied; its exact inputs remain bounded",
@@ -694,7 +801,7 @@
       "pdu": 39
     }
   ],
-  "schema": "camry-8965f3307000-command-cone-ingress-v2",
+  "schema": "camry-8965f3307000-command-cone-ingress-v3",
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "corpus_function_count": 6065,

@@ -845,6 +845,14 @@ paths = [
   "docs/variants/camry-2026-live-baseline.md",
   "docs/status/PRIORITIES.md",
 ]
+
+[suite.camry_2026_baseline_selector]
+tests = ["tests/verify_camry_2026_baseline_selector.py"]
+oracle = "dynamic_trace"
+paths = [
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/PRIORITIES.md",
+]
 [suite.camry_8965f3307000_codeflash]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "codeflash"]
@@ -1977,4 +1985,12 @@ tests = ["tests/verify_camry_8965F3307000_command_cone_ingress.py"]
 oracle = "generated_self_check"
 paths = [
   "docs/variants/camry-2026-live-baseline.md",
+]
+
+[suite.camry_8965f3307000_internal_assist_oracles]
+tests = ["tests/verify_camry_8965F3307000_internal_assist_oracles.py"]
+oracle = "generated_self_check"
+paths = [
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/PRIORITIES.md",
 ]

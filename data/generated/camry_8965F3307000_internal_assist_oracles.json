@@ -1,0 +1,146 @@
+{
+  "current_gtsplus_boundary": {
+    "named_anchor": {
+      "data_id": "0x1C02",
+      "name": "Command Value Torque"
+    },
+    "source": "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
+    "unnamed_exact_f33_proxy_dids": [
+      "0x1C3E",
+      "0x1C38",
+      "0x1C4A",
+      "0x1C50"
+    ]
+  },
+  "d0218_term_proxies": [
+    {
+      "callback": "0x0004EA90",
+      "classification": "exact scaled/clamped passive proxy of one D0218 internal term; OEM semantic name not inferred",
+      "current_gtsplus_emps_p5_name": null,
+      "data_id": "0x1C3E",
+      "diagnostic_cell": "FEBEE8B6",
+      "payload_size": 2,
+      "rdbi_transform": "(FEBEE8B6 * 100) / 0x80 -> saturate16 -> 2-byte RDBI payload",
+      "scaled_intermediate": "FEBEAE12",
+      "selector": 0,
+      "source_term": "FEBEC5EE",
+      "term_to_intermediate": "D0D7C: clamp((FEBEC5EE * FEBEAE3C) / 0x8000, +/-0x569A) -> FEBEAE12"
+    },
+    {
+      "callback": "0x0004EA06",
+      "classification": "exact scaled/clamped passive proxy of one D0218 internal term; OEM semantic name not inferred",
+      "current_gtsplus_emps_p5_name": null,
+      "data_id": "0x1C38",
+      "diagnostic_cell": "FEBEE8C2",
+      "payload_size": 2,
+      "rdbi_transform": "(FEBEE8C2 * 100) / 0x80 -> saturate16 -> 2-byte RDBI payload",
+      "scaled_intermediate": "FEBEAE6E",
+      "selector": 0,
+      "source_term": "FEBECB38",
+      "term_to_intermediate": "D0D7C: clamp((FEBECB38 * FEBEAE3C) / 0x8000, +/-0x569A) -> FEBEAE6E"
+    },
+    {
+      "callback": "0x0004EB7C",
+      "classification": "exact scaled/clamped passive proxy of one D0218 internal term; OEM semantic name not inferred",
+      "current_gtsplus_emps_p5_name": null,
+      "data_id": "0x1C4A",
+      "diagnostic_cell": "FEBEE8C2",
+      "payload_size": 2,
+      "rdbi_transform": "(FEBEE8C2 * 100) / 0x80 -> saturate16 -> 2-byte RDBI payload",
+      "scaled_intermediate": "FEBEAE6E",
+      "selector": 0,
+      "source_term": "FEBECB38",
+      "term_to_intermediate": "D0D7C: clamp((FEBECB38 * FEBEAE3C) / 0x8000, +/-0x569A) -> FEBEAE6E"
+    },
+    {
+      "callback": "0x0004EC06",
+      "classification": "exact scaled/clamped passive proxy of one D0218 internal term; OEM semantic name not inferred",
+      "current_gtsplus_emps_p5_name": null,
+      "data_id": "0x1C50",
+      "diagnostic_cell": "FEBEE8C2",
+      "payload_size": 2,
+      "rdbi_transform": "(FEBEE8C2 * 100) / 0x80 -> saturate16 -> 2-byte RDBI payload",
+      "scaled_intermediate": "FEBEAE6E",
+      "selector": 0,
+      "source_term": "FEBECB38",
+      "term_to_intermediate": "D0D7C: clamp((FEBECB38 * FEBEAE3C) / 0x8000, +/-0x569A) -> FEBEAE6E"
+    }
+  ],
+  "exact_rdbi_table": {
+    "offset": "0x2928C",
+    "record_count": 241
+  },
+  "production_output_authorized": false,
+  "recommended_passive_oracles": [
+    {
+      "data_id": "0x1C38",
+      "rank": 1,
+      "reason": "scaled/clamped FEBECB38 proxy; direct visibility into an unresolved nonzero-capable D0218 term"
+    },
+    {
+      "data_id": "0x1C02",
+      "rank": 2,
+      "reason": "Toyota-named final Command Value Torque; blended but target-native downstream command observable"
+    },
+    {
+      "data_id": "0x1C3E",
+      "rank": 3,
+      "reason": "scaled/clamped FEBEC5EE proxy; useful control oracle, but exact selector maps alias and retained-drive evidence already bounds this moving-mode term to zero"
+    }
+  ],
+  "schema": "camry-8965f3307000-internal-assist-oracles-v1",
+  "selector_influence_observability": {
+    "FEBEC4C0_no_direct_term_did": "C8678 syntactically indexes PTR_LAB_000D3630[FEBEC156&3] and selector-strided D3670/D3674 tables before writing FEBEC4C0, but exact pointer entries alias across all four selector banks (D3630=0xB1208 x4; D3670 family repeats 0xB1248/0xB121C). No exact F33 RDBI callback directly reads FEBEC4C0.",
+    "FEBEC5EE_via_0x1C3E": "C9812 syntactically indexes PTR_DAT_000D39DC[FEBEC156&3], filters/integrates into FEBEC5EC; C9A84 consumes FEBEC5EC and writes FEBEC5EE; D0D7C/BF3AA then expose its scaled/clamped proxy at DID 0x1C3E. In exact 8965F3307000 all four selector entries alias 0xB018A, so this path cannot distinguish FEBEC156 choices in this calibration.",
+    "classification": "Direct selector state remains unexposed by the exact RDBI callback census. 1C3E observes C5EE, but exact selector-indexed maps alias, so it is a moving-assist term oracle/control rather than a selector-state discriminator. Selector influence that survives calibration aliasing must be sought in other internal terms (notably C28FC/C2B64) or blended final command state.",
+    "exact_alias_tables": {
+      "C4C0_D3630": [
+        "0xB1208",
+        "0xB1208",
+        "0xB1208",
+        "0xB1208"
+      ],
+      "C4C0_D3670_family": [
+        "0xB1248",
+        "0xB121C",
+        "0xB1248",
+        "0xB121C",
+        "0xB1248",
+        "0xB121C",
+        "0xB1248",
+        "0xB121C"
+      ],
+      "C5EE_D39DC": [
+        "0xB018A",
+        "0xB018A",
+        "0xB018A",
+        "0xB018A"
+      ]
+    }
+  },
+  "selector_state_direct_rdbi": {
+    "cells": {
+      "FEBEC156": [],
+      "FEBEC158": []
+    },
+    "classification": "verified canonical direct-reference negative: no exact F33 RDBI callback directly reads FEBEC158/FEBEC156, and canonical write targets of all direct selector-reader functions do not intersect the 136 direct RDBI RAM source cells. Pointer/indexed or downstream-derived diagnostic effects remain outside this negative.",
+    "denominator": {
+      "distinct_direct_ram_read_cells_ge_FEBE0000": 136,
+      "rdbi_records": 241,
+      "selector_direct_reader_functions": 34,
+      "selector_reader_write_targets_intersecting_rdbi_read_cells": 0,
+      "unique_callbacks": 195
+    }
+  },
+  "shared_proxy_scale": {
+    "boundary": "The returned DID value is a scaled/clamped proxy, not the raw D0218 term and not an OEM-named engineering unit.",
+    "intermediate_clamp": "+/-0x569A",
+    "intermediate_scale_cell": "FEBEAE3C <- FEBEB140 via BCD66",
+    "rdbi_post_scale": "*100/0x80"
+  },
+  "target": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "corpus_function_count": 6065,
+    "software_id": "8965F3307000"
+  }
+}

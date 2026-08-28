@@ -363,10 +363,18 @@ inputs recovered at command composition**. CORR-128/VAR-078 also close the forme
 `FEBE71F2` ambiguity: `FEBE71F2 -> FEBEAC52` is only a saturation limit, while the actual
 B6-independent magnitude is the internal `D0218 -> CC48 -> D0284 -> CC4C -> D02DA ->
 CC4E -> D0382 -> CC60` baseline-assist path. `D0284`'s `AC64` scale is also closed as
-ROM/internal calibration (`B140 <- floor(0x2774564E/0x5571)`, reset `0x7637`), not CAN. Do not search more ordinary generated-COM
-IDs for a hidden target. The next discriminator is which internal D0218 term/mode changes
-inside Class-L, joined to target-native `0x1601` LTA naming; producer-side Brake firmware
-remains acquisition-blocked.
+ROM/internal calibration (`B140 <- floor(0x2774564E/0x5571)`, reset `0x7637`), not CAN.
+VAR-079 now closes the parameter-bank selector's ordinary COM inputs too: `0x51E`
+sig160/163/166 and `0x13B` sig224 are route-wide zero in both retained drives, while
+`0x490/0x1DA` selector inputs are absent. Do not search more ordinary generated-COM IDs
+for a hidden target. VAR-080 now closes the immediate RDBI question: the selector cells
+`FEBEC158/FEBEC156` have no direct exact-F33 RDBI callback, while `0x1C38/1C4A/1C50` expose
+a scaled/clamped `FEBECB38` term proxy and `0x1C3E` exposes `FEBEC5EE`. The apparent C5EE/
+C4C0 selector-indexed maps alias across all four banks in this exact calibration, so they
+do not reveal selector state. The next passive discriminator should synchronize **EPS
+`0x1C38` + named `0x1C02` + control `0x1C3E`** with FRC `0x1601/0x1914`; static work should
+trace the remaining selector-sensitive `C28FC -> C2B64/FEBEBF3C` branch and any indirect
+diagnostic mirror. Producer-side Brake firmware remains acquisition-blocked.
 
 **VAR-069 exact Brake producer acquisition:** the producer search is now narrowed to
 same-car category-435 identities `F152633K0000` / `8954147040` at physical `0x7B0`.

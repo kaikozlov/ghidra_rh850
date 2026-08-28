@@ -394,6 +394,127 @@ def build() -> dict:
         acc = accessors(int(cell_name, 16), funcs)
         need(writer in acc and "WRITE" in acc[writer], f"{cell_name} runtime writer drift: {acc}")
 
+    # ---- baseline-assist parameter-bank selector -------------------------
+    # C28FC selects the calibration block consumed by several default-assist terms.
+    # Close its ordinary-COM inputs separately from command magnitudes: these inputs
+    # choose/debounce parameter families, not a steering target.
+    selector_expect = {
+        160: (0x51E, 0, 4, 0, 0xFEBE8030, 0xFEBEF050),
+        163: (0x51E, 1, 4, 0, 0xFEBE8033, 0xFEBEF14A),
+        166: (0x51E, 5, 2, 6, 0xFEBE8032, 0xFEBEF141),
+        224: (0x13B, 2, 4, 0, 0xFEBE8082, 0xFEBEF14B),
+        280: (0x490, 0, 3, 4, 0xFEBE80D2, 0xFEBEF168),
+        281: (0x490, 0, 4, 0, 0xFEBE80D3, 0xFEBEF0A1),
+        282: (0x1DA, 0, 4, 0, 0xFEBE80D6, 0xFEBEF156),
+    }
+    selector_inputs = []
+    for sid, (can_id, byte, bits, bitoff, raw, stage) in selector_expect.items():
+        row = next(x for x in scalar if x["signal"] == sid)
+        need((row["can_id"], row["byte_offset"], row["bits"], row["bit_offset"], row["raw_cell"]) ==
+             (can_id, byte, bits, bitoff, f"0x{raw:08X}"), f"selector sig{sid} geometry drift: {row}")
+        need(any(r == raw and w == stage for r, w in raw_stage),
+             f"selector sig{sid} stage edge drift {raw:08X}->{stage:08X}")
+        selector_inputs.append({
+            "signal": sid, "can_id": f"0x{can_id:03X}", "length": row["length"],
+            "byte": byte, "bits": bits, "bit_offset": bitoff,
+            "raw_cell": f"0x{raw:08X}", "stage_cell": f"0x{stage:08X}",
+        })
+
+    # The selector debouncers also consume COM-receive validity/status companions.
+    # These are not scalar value inputs and cannot select a parameter bank by themselves;
+    # they gate extraction/debounce of the seven scalar values above.
+    selector_validity = {
+        "FEBEF0C2": {"source": "FEBE8081", "pdu": 0x15, "unpacker": "0x4B8F4"},
+        "FEBEF0A0": {"source": "FEBE80D5", "pdu": 0x1C, "unpacker": "0x4BF4E"},
+        "FEBEF157": {"source": "FEBE80D8", "pdu": 0x1D, "unpacker": "0x4BFB2"},
+        "FEBEF000": {"source": "FEBE7F68", "pdu": None, "unpacker": "shared COM gate"},
+    }
+    for stage_name, meta in selector_validity.items():
+        stage = int(stage_name, 16)
+        source = int(meta["source"], 16)
+        need(any(r == source and w == stage for r, w in stage_edges),
+             f"selector validity stage drift {source:08X}->{stage:08X}")
+    token(0x4B8F4, funcs, "FUN_000498e0(0x15)")
+    token(0x4BF4E, funcs, "FUN_000498e0(0x1c)")
+    token(0x4BFB2, funcs, "FUN_000498e0(0x1d)")
+
+    token(0xB3430, funcs, "cVar2 = puVar6[0x3850];", "puVar6[-0x6dc] = cVar10;")
+    token(0xB3686, funcs, "cVar2 = puVar6[0x3850];", "cVar11 = puVar6[0x38a1];",
+          "puVar6[-0x6dc] = cVar10;")
+    token(0xB34D4, funcs, "cVar6 = puVar3[0x3941];", "puVar3[-0x6d8] = cVar5;")
+    token(0xB3538, funcs, "cVar11 = puVar6[0x394b];", "cVar1 = puVar6[0x394a];",
+          "puVar6[-0x6d5] = cVar10;")
+    token(0xB35DC, funcs, "uVar1 = (uint)DAT_febeb124;", "DAT_febeb121 = 0x11;",
+          "DAT_febeb121 = 0x22;", "DAT_febeb121 = 0x33;")
+    token(0xB372A, funcs, "uVar1 = (uint)DAT_febeb124;", "DAT_febeb121 = 0x11;",
+          "DAT_febeb121 = 0x22;", "DAT_febeb121 = 0x33;")
+    need(pair_map.get(0xFEBEAC2F) == 0xFEBEB121, "AC2F selector snapshot drift")
+    token(0xC54A2, funcs, "DAT_febec158 = 0x66;", "DAT_febec158 = 0x11;",
+          "DAT_febec158 = 0x55;", "DAT_febec158 = 0x77;", "DAT_febec158 = 0x44;",
+          "DAT_febec158 = 0x88;")
+    token(0xC5554, funcs, "DAT_febec156 = 0;", "DAT_febec158 == 'w'",
+          "DAT_febec158 == 'D'")
+    token(0xC28FC, funcs, "(&PTR_LAB_000b144c)[DAT_febeac3c & 1]",
+          "DAT_febec158 == 'U'", "DAT_febec158 != 'f'", "&DAT_000d2e44")
+
+    # AC3C is a healthy-parameter integrity bank, not a drive-mode input.  B7374 stores
+    # the boolean result of FF254/62E12, whose exact comparison is ROM 0x17DA0.. against
+    # working copy 0x20850.. before the TMR-protected FEBF0668 verdict.
+    token(0xB7374, funcs, "iVar2 = FUN_000ff254();", "puVar1[-0x4ac] = iVar2 == 0;")
+    need(GP - 0x4AC == 0xFEBEB354 and pair_map.get(0xFEBEAC3C) == 0xFEBEB354,
+         "AC3C integrity-bank snapshot drift")
+    token(0x62D5E, funcs, "(&DAT_00020850)[uVar1] != (&DAT_00017da0)[uVar1]",
+          "FUN_00070a92(iVar3,&DAT_febf0668,&DAT_febf10a4,&DAT_febf10c8);")
+    token(0x62E12, funcs, "return DAT_febf0668;")
+
+    # AC50's validity mask is also an internal mirror, not COM-derived.
+    token(0xBCAA6, funcs, "uVar3 = *(ushort *)(puVar8 + 0x3788);",
+          "*(ushort *)(puVar8 + -0xbb0) = uVar3;")
+    need(GP + 0x3788 == 0xFEBEEF88 and GP - 0xBB0 == 0xFEBEAC50,
+         "AC50 mirror layout drift")
+    ac50_acc = accessors(0xFEBEAC50, funcs)
+    need("0xBCAA6" in ac50_acc and "WRITE" in ac50_acc["0xBCAA6"], f"AC50 writer drift: {ac50_acc}")
+    token(0xFCC00, funcs, "DAT_febeef88 = DAT_febe71ec;")
+    eef88_acc = accessors(0xFEBEEF88, funcs)
+    need("0xBCAA6" in eef88_acc and "READ" in eef88_acc["0xBCAA6"], f"EEF88 consumer drift: {eef88_acc}")
+
+    baseline_selector = {
+        "generated_com_inputs": selector_inputs,
+        "com_receive_validity_companions": {
+            **selector_validity,
+            "classification": (
+                "resolved COM-receive status/gate state, not selector value: FEBEF0C2/FEBEF0A0/FEBEF157 "
+                "are staged FUN_000498e0 PDU-validity results for 0x13B/0x490/0x1DA companion paths; "
+                "FEBEF000<-FEBE7F68 is the shared extraction/debounce gate. They can suppress qualification "
+                "but do not choose a parameter bank directly. Absent 0x490/0x1DA traffic cannot provide a fresh valid value."
+            ),
+        },
+        "qualification_chain": (
+            "0x58074 stages the listed scalar inputs; B3430/B3686 debounce FEBEF050 into the FEBEB124 "
+            "mode family while B34D4/B3538 qualify companion fields; B35DC/B372A map the result to "
+            "FEBEB121; BCBD8 snapshots FEBEB121->FEBEAC2F; C54A2 selects FEBEC158; C5554 maps "
+            "FEBEC158 to FEBEC156=0/1/2/3; C28FC chooses the parameter block consumed by baseline-assist terms."
+        ),
+        "c54a2_internal_alternatives": {
+            "diagnostic_forced": "FEBEC158=0x66 when FEBEAC2B=='Z'",
+            "magic_internal_state": "FEBEC158=0x11 when FEBEAC94==0x5AA5A55A",
+            "internal_status": "FEBEC158=0x55 when FEBEAC30=='D' and FEBEAC40!='Z' under normal validity gates",
+            "debounced_com_mode": "FEBEAC2F values 0x11/0x22/0x33 map to FEBEC158 0x77/0x44/0x88",
+        },
+        "parameter_integrity_bank": (
+            "FEBEAC3C&1 <- FEBEB354 <- B7374(FF254()==0); FF254->62E12 returns TMR-protected "
+            "FEBF0668 written by 62D5E after exact ROM 0x17DA0/0x17DC0.. comparison against "
+            "working copy 0x20850/0x20870..; this is parameter-copy integrity, not a lateral mode."
+        ),
+        "ac50_validity_mask": "BCAA6 writes FEBEAC50 from internal mirror state including FEBEEF88<-FCC00<-FEBE71EC; no generated-COM value source recovered",
+        "boundary": (
+            "Direct ordinary-COM selector VALUE inputs are now enumerated exactly. Resolved COM-receive "
+            "validity companions can gate their qualification but carry no selector value. Internal C54A2 "
+            "alternatives and fault/debounce state can still change the selected parameter bank; this static "
+            "closure alone does not prove which selector state held in a retained drive."
+        ),
+    }
+
     baseline_internal_path = {
         "D0218_sum": (
             "FEBECC48 baseline sum. Default diagnostic flag AC2B!=0x5A and B6 assist-active C7BF!=1: "
@@ -600,7 +721,7 @@ def build() -> dict:
     need(sum(b6_absent.values()) == 0, "B6 unexpectedly present in retained drives")
 
     return {
-        "schema": "camry-8965f3307000-command-cone-ingress-v2",
+        "schema": "camry-8965f3307000-command-cone-ingress-v3",
         "target": {"software_id": "8965F3307000", "codeflash_sha256": IMAGE_SHA256,
                    "corpus_function_count": len(funcs)},
         "cluster": {"range": [f"0x{CLUSTER_LO:05X}", f"0x{CLUSTER_HI:05X}"],
@@ -659,6 +780,7 @@ def build() -> dict:
         },
         "positive_non_b6_cluster_inputs": positive,
         "baseline_internal_assist_path": baseline_internal_path,
+        "baseline_selector_machinery": baseline_selector,
         "non_com_internal_mirrors": {
             "0x000FCC00": {"FEBEEF8E": "FEBE71F2", "FEBEEF80": "FEBE7BBC", "FEBEEF81": "FEBE686C",
                             "FEBEEF88": "FEBE71EC", "FEBEEF8A": "FEBE7DA6", "FEBEEF8C": "FEBE7DA8",

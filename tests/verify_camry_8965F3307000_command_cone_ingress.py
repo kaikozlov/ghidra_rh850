@@ -32,7 +32,7 @@ with tempfile.TemporaryDirectory() as td:
 
 art = json.loads(ART.read_text())
 check("schema/target exact",
-      art["schema"] == "camry-8965f3307000-command-cone-ingress-v2"
+      art["schema"] == "camry-8965f3307000-command-cone-ingress-v3"
       and art["target"]["software_id"] == "8965F3307000"
       and art["target"]["corpus_function_count"] == 6065)
 
@@ -150,6 +150,40 @@ check("D0218 direct internal value cells and runtime writers are pinned",
       and base["classification"].startswith("B6-independent EPS-internal baseline-assist magnitude path"))
 check("AC2B is an internal diagnostic gate, not a CAN target",
       "FEBEB112" in base["AC2B_gate"] and "B338C sets 0x5A" in base["AC2B_gate"])
+
+sel = art["baseline_selector_machinery"]
+check("baseline parameter-bank selector ordinary-COM inputs are exact and finite",
+      [(x["signal"], x["can_id"], x["byte"], x["bits"], x["bit_offset"], x["stage_cell"])
+       for x in sel["generated_com_inputs"]] == [
+          (160,"0x51E",0,4,0,"0xFEBEF050"), (163,"0x51E",1,4,0,"0xFEBEF14A"),
+          (166,"0x51E",5,2,6,"0xFEBEF141"), (224,"0x13B",2,4,0,"0xFEBEF14B"),
+          (280,"0x490",0,3,4,"0xFEBEF168"), (281,"0x490",0,4,0,"0xFEBEF0A1"),
+          (282,"0x1DA",0,4,0,"0xFEBEF156")])
+valid = sel["com_receive_validity_companions"]
+check("selector COM-receive validity companions are resolved separately from value inputs",
+      {k:(v["source"],v["pdu"],v["unpacker"]) for k,v in valid.items() if k.startswith("FEBEF")} == {
+          "FEBEF0C2": ("FEBE8081",0x15,"0x4B8F4"),
+          "FEBEF0A0": ("FEBE80D5",0x1C,"0x4BF4E"),
+          "FEBEF157": ("FEBE80D8",0x1D,"0x4BFB2"),
+          "FEBEF000": ("FEBE7F68",None,"shared COM gate"),
+      }
+      and "gate their qualification but carry no selector value" in sel["boundary"]
+      and "Absent 0x490/0x1DA traffic cannot provide a fresh valid value" in valid["classification"])
+check("selector qualification reaches C54A2/C5554/C28FC rather than command magnitude",
+      "B3430/B3686 debounce FEBEF050" in sel["qualification_chain"]
+      and "C54A2 selects FEBEC158" in sel["qualification_chain"]
+      and "C28FC chooses the parameter block" in sel["qualification_chain"])
+check("selector internal alternatives and integrity bank are separated from ordinary COM",
+      sel["c54a2_internal_alternatives"] == {
+          "diagnostic_forced": "FEBEC158=0x66 when FEBEAC2B=='Z'",
+          "magic_internal_state": "FEBEC158=0x11 when FEBEAC94==0x5AA5A55A",
+          "internal_status": "FEBEC158=0x55 when FEBEAC30=='D' and FEBEAC40!='Z' under normal validity gates",
+          "debounced_com_mode": "FEBEAC2F values 0x11/0x22/0x33 map to FEBEC158 0x77/0x44/0x88",
+      }
+      and "parameter-copy integrity, not a lateral mode" in sel["parameter_integrity_bank"])
+check("AC50 selector validity mask is internal mirror state",
+      "FEBEEF88<-FCC00<-FEBE71EC" in sel["ac50_validity_mask"]
+      and "no generated-COM value source" in sel["ac50_validity_mask"])
 
 mir = art["non_com_internal_mirrors"]
 check("FEBE71F2 mirror terminates at the D0382 saturation limit",

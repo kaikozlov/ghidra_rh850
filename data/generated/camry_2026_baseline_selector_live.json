@@ -1,0 +1,667 @@
+{
+  "combined": {
+    "all_observed_selector_inputs_constant_zero": true,
+    "class_l_edge_value_changes": 0,
+    "classification": "observed/deterministic: every ordinary selector input that appears in either retained drive is zero for the entire route and through the Class-L edge windows; 0x490/0x1DA selector inputs are absent. These ordinary COM selector inputs therefore do not distinguish Class-L from surrounding driving in the retained captures. Internal/fault/diagnostic selector alternatives remain separately bounded by the exact static model.",
+    "production_output_authorized": false
+  },
+  "drives": {
+    "drive_a": {
+      "class_l_duration_s": 16.119256,
+      "signals": {
+        "sig160": {
+          "all": {
+            "frames": 519,
+            "values": {
+              "0": 519
+            }
+          },
+          "bit_offset": 0,
+          "bits": 4,
+          "byte": 0,
+          "can_id": "0x51E",
+          "class_l": {
+            "frames": 16,
+            "values": {
+              "0": 16
+            }
+          },
+          "class_l_edges_3s": [
+            {
+              "edge": "rise",
+              "post_frames": 3,
+              "post_values": {
+                "0": 3
+              },
+              "pre_frames": 3,
+              "pre_values": {
+                "0": 3
+              },
+              "value_set_changed": false
+            },
+            {
+              "edge": "fall",
+              "post_frames": 3,
+              "post_values": {
+                "0": 3
+              },
+              "pre_frames": 3,
+              "pre_values": {
+                "0": 3
+              },
+              "value_set_changed": false
+            }
+          ],
+          "length": 8,
+          "raw_cell": "0xFEBE8030",
+          "stage_cell": "0xFEBEF050"
+        },
+        "sig163": {
+          "all": {
+            "frames": 519,
+            "values": {
+              "0": 519
+            }
+          },
+          "bit_offset": 0,
+          "bits": 4,
+          "byte": 1,
+          "can_id": "0x51E",
+          "class_l": {
+            "frames": 16,
+            "values": {
+              "0": 16
+            }
+          },
+          "class_l_edges_3s": [
+            {
+              "edge": "rise",
+              "post_frames": 3,
+              "post_values": {
+                "0": 3
+              },
+              "pre_frames": 3,
+              "pre_values": {
+                "0": 3
+              },
+              "value_set_changed": false
+            },
+            {
+              "edge": "fall",
+              "post_frames": 3,
+              "post_values": {
+                "0": 3
+              },
+              "pre_frames": 3,
+              "pre_values": {
+                "0": 3
+              },
+              "value_set_changed": false
+            }
+          ],
+          "length": 8,
+          "raw_cell": "0xFEBE8033",
+          "stage_cell": "0xFEBEF14A"
+        },
+        "sig166": {
+          "all": {
+            "frames": 519,
+            "values": {
+              "0": 519
+            }
+          },
+          "bit_offset": 6,
+          "bits": 2,
+          "byte": 5,
+          "can_id": "0x51E",
+          "class_l": {
+            "frames": 16,
+            "values": {
+              "0": 16
+            }
+          },
+          "class_l_edges_3s": [
+            {
+              "edge": "rise",
+              "post_frames": 3,
+              "post_values": {
+                "0": 3
+              },
+              "pre_frames": 3,
+              "pre_values": {
+                "0": 3
+              },
+              "value_set_changed": false
+            },
+            {
+              "edge": "fall",
+              "post_frames": 3,
+              "post_values": {
+                "0": 3
+              },
+              "pre_frames": 3,
+              "pre_values": {
+                "0": 3
+              },
+              "value_set_changed": false
+            }
+          ],
+          "length": 8,
+          "raw_cell": "0xFEBE8032",
+          "stage_cell": "0xFEBEF141"
+        },
+        "sig224": {
+          "all": {
+            "frames": 17176,
+            "values": {
+              "0": 17176
+            }
+          },
+          "bit_offset": 0,
+          "bits": 4,
+          "byte": 2,
+          "can_id": "0x13B",
+          "class_l": {
+            "frames": 537,
+            "values": {
+              "0": 537
+            }
+          },
+          "class_l_edges_3s": [
+            {
+              "edge": "rise",
+              "post_frames": 100,
+              "post_values": {
+                "0": 100
+              },
+              "pre_frames": 100,
+              "pre_values": {
+                "0": 100
+              },
+              "value_set_changed": false
+            },
+            {
+              "edge": "fall",
+              "post_frames": 100,
+              "post_values": {
+                "0": 100
+              },
+              "pre_frames": 99,
+              "pre_values": {
+                "0": 99
+              },
+              "value_set_changed": false
+            }
+          ],
+          "length": 8,
+          "raw_cell": "0xFEBE8082",
+          "stage_cell": "0xFEBEF14B"
+        },
+        "sig280": {
+          "all": {
+            "frames": 0,
+            "values": {}
+          },
+          "bit_offset": 4,
+          "bits": 3,
+          "byte": 0,
+          "can_id": "0x490",
+          "class_l": {
+            "frames": 0,
+            "values": {}
+          },
+          "class_l_edges_3s": [
+            {
+              "edge": "rise",
+              "post_frames": 0,
+              "post_values": {},
+              "pre_frames": 0,
+              "pre_values": {},
+              "value_set_changed": false
+            },
+            {
+              "edge": "fall",
+              "post_frames": 0,
+              "post_values": {},
+              "pre_frames": 0,
+              "pre_values": {},
+              "value_set_changed": false
+            }
+          ],
+          "length": 1,
+          "raw_cell": "0xFEBE80D2",
+          "stage_cell": "0xFEBEF168"
+        },
+        "sig281": {
+          "all": {
+            "frames": 0,
+            "values": {}
+          },
+          "bit_offset": 0,
+          "bits": 4,
+          "byte": 0,
+          "can_id": "0x490",
+          "class_l": {
+            "frames": 0,
+            "values": {}
+          },
+          "class_l_edges_3s": [
+            {
+              "edge": "rise",
+              "post_frames": 0,
+              "post_values": {},
+              "pre_frames": 0,
+              "pre_values": {},
+              "value_set_changed": false
+            },
+            {
+              "edge": "fall",
+              "post_frames": 0,
+              "post_values": {},
+              "pre_frames": 0,
+              "pre_values": {},
+              "value_set_changed": false
+            }
+          ],
+          "length": 1,
+          "raw_cell": "0xFEBE80D3",
+          "stage_cell": "0xFEBEF0A1"
+        },
+        "sig282": {
+          "all": {
+            "frames": 0,
+            "values": {}
+          },
+          "bit_offset": 0,
+          "bits": 4,
+          "byte": 0,
+          "can_id": "0x1DA",
+          "class_l": {
+            "frames": 0,
+            "values": {}
+          },
+          "class_l_edges_3s": [
+            {
+              "edge": "rise",
+              "post_frames": 0,
+              "post_values": {},
+              "pre_frames": 0,
+              "pre_values": {},
+              "value_set_changed": false
+            },
+            {
+              "edge": "fall",
+              "post_frames": 0,
+              "post_values": {},
+              "pre_frames": 0,
+              "pre_values": {},
+              "value_set_changed": false
+            }
+          ],
+          "length": 8,
+          "raw_cell": "0xFEBE80D6",
+          "stage_cell": "0xFEBEF156"
+        }
+      },
+      "source": {
+        "frame_count": 1656656,
+        "path": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+        "sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5"
+      },
+      "summary": {
+        "class_l_edge_value_changes": 0,
+        "observed_signals": 4,
+        "observed_signals_constant_zero_all_route": 4,
+        "ordinary_selector_signals": 7,
+        "unobserved_signals": [
+          "sig280",
+          "sig281",
+          "sig282"
+        ]
+      }
+    },
+    "drive_b": {
+      "class_l_duration_s": 57.184128,
+      "signals": {
+        "sig160": {
+          "all": {
+            "frames": 600,
+            "values": {
+              "0": 600
+            }
+          },
+          "bit_offset": 0,
+          "bits": 4,
+          "byte": 0,
+          "can_id": "0x51E",
+          "class_l": {
+            "frames": 57,
+            "values": {
+              "0": 57
+            }
+          },
+          "class_l_edges_3s": [
+            {
+              "edge": "rise",
+              "post_frames": 3,
+              "post_values": {
+                "0": 3
+              },
+              "pre_frames": 3,
+              "pre_values": {
+                "0": 3
+              },
+              "value_set_changed": false
+            },
+            {
+              "edge": "fall",
+              "post_frames": 3,
+              "post_values": {
+                "0": 3
+              },
+              "pre_frames": 3,
+              "pre_values": {
+                "0": 3
+              },
+              "value_set_changed": false
+            }
+          ],
+          "length": 8,
+          "raw_cell": "0xFEBE8030",
+          "stage_cell": "0xFEBEF050"
+        },
+        "sig163": {
+          "all": {
+            "frames": 600,
+            "values": {
+              "0": 600
+            }
+          },
+          "bit_offset": 0,
+          "bits": 4,
+          "byte": 1,
+          "can_id": "0x51E",
+          "class_l": {
+            "frames": 57,
+            "values": {
+              "0": 57
+            }
+          },
+          "class_l_edges_3s": [
+            {
+              "edge": "rise",
+              "post_frames": 3,
+              "post_values": {
+                "0": 3
+              },
+              "pre_frames": 3,
+              "pre_values": {
+                "0": 3
+              },
+              "value_set_changed": false
+            },
+            {
+              "edge": "fall",
+              "post_frames": 3,
+              "post_values": {
+                "0": 3
+              },
+              "pre_frames": 3,
+              "pre_values": {
+                "0": 3
+              },
+              "value_set_changed": false
+            }
+          ],
+          "length": 8,
+          "raw_cell": "0xFEBE8033",
+          "stage_cell": "0xFEBEF14A"
+        },
+        "sig166": {
+          "all": {
+            "frames": 600,
+            "values": {
+              "0": 600
+            }
+          },
+          "bit_offset": 6,
+          "bits": 2,
+          "byte": 5,
+          "can_id": "0x51E",
+          "class_l": {
+            "frames": 57,
+            "values": {
+              "0": 57
+            }
+          },
+          "class_l_edges_3s": [
+            {
+              "edge": "rise",
+              "post_frames": 3,
+              "post_values": {
+                "0": 3
+              },
+              "pre_frames": 3,
+              "pre_values": {
+                "0": 3
+              },
+              "value_set_changed": false
+            },
+            {
+              "edge": "fall",
+              "post_frames": 3,
+              "post_values": {
+                "0": 3
+              },
+              "pre_frames": 3,
+              "pre_values": {
+                "0": 3
+              },
+              "value_set_changed": false
+            }
+          ],
+          "length": 8,
+          "raw_cell": "0xFEBE8032",
+          "stage_cell": "0xFEBEF141"
+        },
+        "sig224": {
+          "all": {
+            "frames": 20000,
+            "values": {
+              "0": 20000
+            }
+          },
+          "bit_offset": 0,
+          "bits": 4,
+          "byte": 2,
+          "can_id": "0x13B",
+          "class_l": {
+            "frames": 1906,
+            "values": {
+              "0": 1906
+            }
+          },
+          "class_l_edges_3s": [
+            {
+              "edge": "rise",
+              "post_frames": 100,
+              "post_values": {
+                "0": 100
+              },
+              "pre_frames": 100,
+              "pre_values": {
+                "0": 100
+              },
+              "value_set_changed": false
+            },
+            {
+              "edge": "fall",
+              "post_frames": 100,
+              "post_values": {
+                "0": 100
+              },
+              "pre_frames": 100,
+              "pre_values": {
+                "0": 100
+              },
+              "value_set_changed": false
+            }
+          ],
+          "length": 8,
+          "raw_cell": "0xFEBE8082",
+          "stage_cell": "0xFEBEF14B"
+        },
+        "sig280": {
+          "all": {
+            "frames": 0,
+            "values": {}
+          },
+          "bit_offset": 4,
+          "bits": 3,
+          "byte": 0,
+          "can_id": "0x490",
+          "class_l": {
+            "frames": 0,
+            "values": {}
+          },
+          "class_l_edges_3s": [
+            {
+              "edge": "rise",
+              "post_frames": 0,
+              "post_values": {},
+              "pre_frames": 0,
+              "pre_values": {},
+              "value_set_changed": false
+            },
+            {
+              "edge": "fall",
+              "post_frames": 0,
+              "post_values": {},
+              "pre_frames": 0,
+              "pre_values": {},
+              "value_set_changed": false
+            }
+          ],
+          "length": 1,
+          "raw_cell": "0xFEBE80D2",
+          "stage_cell": "0xFEBEF168"
+        },
+        "sig281": {
+          "all": {
+            "frames": 0,
+            "values": {}
+          },
+          "bit_offset": 0,
+          "bits": 4,
+          "byte": 0,
+          "can_id": "0x490",
+          "class_l": {
+            "frames": 0,
+            "values": {}
+          },
+          "class_l_edges_3s": [
+            {
+              "edge": "rise",
+              "post_frames": 0,
+              "post_values": {},
+              "pre_frames": 0,
+              "pre_values": {},
+              "value_set_changed": false
+            },
+            {
+              "edge": "fall",
+              "post_frames": 0,
+              "post_values": {},
+              "pre_frames": 0,
+              "pre_values": {},
+              "value_set_changed": false
+            }
+          ],
+          "length": 1,
+          "raw_cell": "0xFEBE80D3",
+          "stage_cell": "0xFEBEF0A1"
+        },
+        "sig282": {
+          "all": {
+            "frames": 0,
+            "values": {}
+          },
+          "bit_offset": 0,
+          "bits": 4,
+          "byte": 0,
+          "can_id": "0x1DA",
+          "class_l": {
+            "frames": 0,
+            "values": {}
+          },
+          "class_l_edges_3s": [
+            {
+              "edge": "rise",
+              "post_frames": 0,
+              "post_values": {},
+              "pre_frames": 0,
+              "pre_values": {},
+              "value_set_changed": false
+            },
+            {
+              "edge": "fall",
+              "post_frames": 0,
+              "post_values": {},
+              "pre_frames": 0,
+              "pre_values": {},
+              "value_set_changed": false
+            }
+          ],
+          "length": 8,
+          "raw_cell": "0xFEBE80D6",
+          "stage_cell": "0xFEBEF156"
+        }
+      },
+      "source": {
+        "frame_count": 1918047,
+        "path": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+        "sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a"
+      },
+      "summary": {
+        "class_l_edge_value_changes": 0,
+        "observed_signals": 4,
+        "observed_signals_constant_zero_all_route": 4,
+        "ordinary_selector_signals": 7,
+        "unobserved_signals": [
+          "sig280",
+          "sig281",
+          "sig282"
+        ]
+      }
+    }
+  },
+  "schema": "camry-2026-baseline-selector-live-v1",
+  "selector_scope": {
+    "can_ids": [
+      "0x13B",
+      "0x1DA",
+      "0x490",
+      "0x51E"
+    ],
+    "role": "ordinary generated-COM inputs to the recovered baseline parameter-bank selector; not command magnitudes",
+    "signals": [
+      160,
+      163,
+      166,
+      224,
+      280,
+      281,
+      282
+    ]
+  },
+  "sources": {
+    "class_l_census": {
+      "path": "data/generated/camry_2026_cruise_lta_edge_census.json",
+      "sha256": "355ea5b408442a541bd946d21c3e85b0fa4d9e924474d3223189cb37894ee9fc"
+    },
+    "static_selector": {
+      "path": "data/generated/camry_8965F3307000_command_cone_ingress.json",
+      "sha256": "01858fab5510b6302de9a57fa27ce09b3228670bd06ba8af082f7833ff5c1034"
+    }
+  }
+}
