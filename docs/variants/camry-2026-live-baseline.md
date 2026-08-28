@@ -1408,8 +1408,8 @@ flip remains visible in the artifact and is not promoted. Literal `0x18C` stairc
 parsing yields record count **3 in every frame on both sides of all four edges**. The
 `0x181 bytes[35:37]` signed little-endian field peaks at -200/-240 ms against measured
 steering in the two drives, so it lags steering and is steering-derived rather than a
-command precursor. An exploratory `0x090` correlation reproduces different peak values
-between the drives and remains explicitly unresolved; it is not a semantic wire join.
+command precursor. The exploratory `0x090` correlation is now closed and retired in
+§28: its best field was a synthetic composite outside the exact-F33 receive surface.
 These negatives do not prove absence of invisible EPS-internal state and do not authorize
 production output.
 
@@ -1609,12 +1609,253 @@ the proof. Deterministic evidence is
 `tools/build_camry_8965F3307000_d5_snapshot_provenance.py` and verified by
 `tests/verify_camry_8965F3307000_d5_snapshot_provenance.py` (VAR-073).
 
+## 26. Exhaustive bus1 field census: no lateral planner candidate leads the EPS motor proxy
+
+Section 21's upstream negative rested on persistent-bit edge scans plus one hand-picked
+`0x181` lag probe, and Section 24 proved the EPS motor proxy changes mode inside Class-L
+while B6 = 0. The remaining question — whether some *analog* bus1 field behaves like the
+lateral target/planner input that mode change would need — is now closed by exhaustive
+field enumeration over the same two relay-correct drives (VAR-074).
+
+Method: for every periodic bus1 stream (22 per drive: the full `0x180..0x18C` family plus
+`0x020/0x123/0x160/0x1A0/0x200/0x201/0x230/0x440/0x450`), every byte-aligned
+(u/s8, u/s16 BE+LE, u/s24 BE+LE), nibble, bit, and per-frame delta candidate is
+enumerated. Constants, low-diversity scalars, duplicate series, and **nonzero** rolling
+counters are suppressed first: byte 2 on every periodic stream except low-rate
+`0x440/0x450`, byte 3 on the 18x family and `0x020/0x1A0/0x200/0x201`, and byte 7 on
+`0x1A0`. The corrected checksum heuristic requires a nontrivial head-sum/XOR relation;
+constant-zero trailer bytes are not self-evidence, and no such checksum carrier is
+detected. That leaves **15,367 kept candidates (drive A) / 14,130 (drive B)**, each zero-order-hold
+resampled onto a 25-ms grid spanning Class-L ± 8 s, screened against seven bus0 targets
+— the exact `0x030 B22:B23` motor-feedback proxy, |motor|, driver torque, `0x025`
+angle and rate, wheel speed, and the Class-L indicator — with a coarse ±500-ms lag
+sweep, then fine-swept at 25-ms resolution with a speed-matched cruise
+(non-Class-L) control region. Promotion requires |r| ≥ 0.40 in **both** drives with a
+peak lag ≥ +50 ms in both; positive lag means the field **leads** the target.
+
+Result: of **2,929** fields fine-swept in both drives, **exactly 0 reproduce as
+leading** the motor-feedback proxy. Drive B — the drive with the clean 57.2-s Class-L
+window — has zero leading fields among its 48 strong (|r| ≥ 0.40) motor correlates at
+all; drive A's 69 single-drive leads among 246 strong correlates are the multiple-testing
+tail and none reproduce. The corrected filter exposes 26 reproduced lagging encodings
+(and seven strong delayed angle echoes), still feedback/derived-like rather than planner
+leads. A particularly clear **steering-angle echo**, `0x160[22]` (s8/s16be), tracks `0x025` angle at
+r = +0.9963 (−75 ms) and r = +0.8698 (−100 ms) in the two drives and correlates with
+the motor proxy equally strongly in drive-B's ordinary cruise control (r = +0.78), so
+bus1 demonstrably carries *delayed steering feedback*, not commands. Section 21's
+`0x181 bytes[35:37]` signed-LE field does not reproduce as a stable correlate over the
+full windows (|r| < 0.40 in both, inconsistent peak lags), further weakening any
+command reading of it.
+
+Boundaries: drive A contributes no local speed-matched control points (its cruise
+interval 2 begins exactly at the Class-L rise and ends 0.56 s after the fall), so
+in-drive Class-L specificity rests on drive B. The declared tested lead range is
+±500 ms at 25-ms resolution; weak fields peaking at that boundary are window-scale
+trends, and a Toyota lateral command consumed by a 100-Hz EPS leads by control frames,
+not half-seconds. This negative covers observed periodic bus1 traffic only: it does
+not touch the EPS-internal mode explanation of Section 24 and does not authorize
+production output.
+
+Deterministic evidence is `data/generated/camry_2026_bus1_field_leadlag.json`, generated
+by `tools/analyze_camry_2026_bus1_field_leadlag.py` and verified by
+`tests/verify_camry_2026_bus1_field_leadlag.py`.
+
+## 27. Exact-F33 internal assist/mode/gain census: the moving-mode family is cruise-generic and cannot produce the Class-L B22:B23 shift
+
+This section is the canonical home for the static decode of the EPS-internal assist-mode
+state around the `C9590/C9650/C973A` moving-mode chain and its consumers
+(`C6AF6/C8124/C854A/C878A/C8EF4/C9B04/C9D86/D0D7C/D0218`), asked directly by the §24
+question: which internal state could change assist behavior inside Class-L while B6=0?
+All addresses are exact-F33 CodeFlash (file offset = VA; the Sienna `+0x8000` rule does
+not apply to this image).
+
+**The latch family.** `C9590` (re)initializes the block, loading one-shot primer
+`FEBEC5E5=1`. `C9650` arms pre-latch `FEBEC5F2` when `FEBEACCE=1` for a calibrated count
+(ROM `[0xB0186]=40`, enabled by `[0xB0187]=1`) plus magic `FEBEAF08==0x55AAAA55`, then
+sets one-shot moving-mode latch `FEBEC5F3` when additionally `FEBEACBD=0`,
+`FEBEACBE=1`, `FEBEC601=FEBEC602=0`, `FEBEC5AC=0`, `FEBEAD19=0`, and
+`FEBEADFC&0x1FF=0`; consuming the primer (C5F3 cannot re-arm after a clear without
+re-init). Clears: `FEBEC601/602`, `FEBEACBE=0`, `FEBEC5AC&2`, `FEBEC603`,
+`FEBEAD19∈{0x22,0x44}`, `FEBEADFC&0x1FF≠0`. `C973A` derives sub-latch `FEBEC5F4`
+(= C5F3 ∧ C5AC=0 ∧ FEBEACCE=1 ∧ FEBEACCD=0 ∧ FEBEACBD=0) and slews crossfade weight
+`FEBEC5B8` toward `[0xB016C]=1024` when C5F4 (else `[0xB016E]=0`) at rate
+`1024/[0xB017E]=[0xB0180]=0x1800` per cycle, snapping inside a 20-count deadband.
+`C9812` maps `|FEBEC5FC|` through a table selected by `FEBEC156&3` into `FEBEC5EC`
+under a speed latch (`FEBEADF6 ≥ [0xB0170]=13` = 0.13 km/h set, `==[0xB0172]=0` clear).
+`C9A84` emits `FEBEC5EE = clamp(C5B8,0,1024)/1024 × clamp(C5EC-integrator, ±[0xB017C])`.
+`C9B04` qualifies the block on `|FEBEC600|` (`≤[0xB0188]=10`, `≥[0xB0189]=1`,
+counter `[0xB0184]=200`); `C9D86`/`C9E44` supervise (`[0xB0446]=5000`,
+`[0xB0448]=1`, `768/1024/600/600`) and `C9EEA/C9E18/C9F1E` persist a one-shot
+activation counter trio.
+
+**Every external input to the family, traced to source.**
+
+| Working byte | Source | Origin | Grade |
+|---|---|---|---|
+| `FEBEACCE` | `0x0D5` signal211 B0[3] (`0x4B86E`→`FEBEF097`) | CAN, brake-domain monitor gate | verified (§18 census) |
+| `FEBEC5FC`/`FEBEC600` | `0x0D5` s213/s212 monitor pair `FEBEAE06`/`FEBEAE04` (clamp ±1000/±100, trips `[0xB044A]=1000`/`[0xB044C]=100`, Dem 200/201) | CAN monitor channels | verified |
+| `FEBEADF6` | filtered `0x0D7` signal283 SP1 speed (`0xBECF4` clamp 30000 → `0xBEDC4/0xBEE2C`, status `FEBEBEF0`) | CAN, 0.01 km/h; UDS `0xBA` op `FA` tester override | verified |
+| `FEBEACBD` | `FEBEF000 ← FEBE7F68` | internal ComM communication-mode {0..3} | verified internal |
+| `FEBEAD19` | `FEBEF014 ← FEBE687B ← FEBE7FC8` | internal service/lifecycle state | verified internal |
+| `FEBEACBE` | `FEBEB1A4==0x11` | internal system-transition phase | verified internal |
+| `FEBEADFC` | `FEBEB354` | boot-time same-image software identity | verified internal |
+| `FEBEC5AC` | `C9562/C956A` from `FEBEACCC/FEBEAD6F` | internal fault bitfields | verified internal |
+| `FEBEC156&3` map selector | `C54A2/C5554` ← `FEBEAC2F ← FEBEB121` = shift-position decode (`B35DC/B372A` over gear enum `FEBEB124`, S-range submodes `FEBEB125/12F`), diag override `FEBEB112` (`B3314/B338C`) | gear/diagnostic; **not live CAN** | verified internal |
+
+**The selector is a calibration no-op in this exact image.** All four entries of every
+`FEBEC156&3` pointer table alias one table: `0xD39DC→0xB018A ×4`, `0xD3A1C→0xB01D2 ×4`,
+`0xD3A5C→0xB01E6 ×4`, `0xD3A9C→0xB01FA ×4`, `0xD3ADC→0xB019A ×4`, `0xD3B1C→0xB01B2 ×4`.
+Gear-position map selection therefore cannot change assist in `8965F3307000` even if the
+selector moved.
+
+**Consumers reach the command path, but their magnitude input is pinned live.** All
+C5F4-family outputs feed the assist pipeline (`C6AF6→C69EC→…→C72C0→D0162`,
+`C854A/C878A/C8124/C8EF4→…→D0162/D0218`) whose sum `FEBECC48` scales through
+`D0284/D02DA/D0382/D039E/D042C` to `FEBECC62/FEBEAC56` (DID 1C02 Command Value Torque,
+Q-current command family), and `D0D7C` exports `C5F4` itself (`FEBEACF1`) plus
+`FEBEC5EE×scale` telemetry. But `FEBEC5EE`'s only magnitude source is `FEBEC5EC =
+interp(table 0xB018A over |0x0D5 s213|)`, and **s213 is identically zero across both
+retained drives** (55,793 bus-0 `0x0D5` samples), so the family's commanded contribution
+is deterministically zero in these logs; s212 (cruise `[−2,2]`, Class-L `[−2,2]`/`[−1,1]`)
+never approaches its ±100/±1000 monitor thresholds either.
+
+**Live pinning (deterministic, both drives).** `0x0D5` s211 is set in **100% of frames
+inside cruise-active intervals and inside Class-L intervals alike** (2,291/807 drive A;
+5,655/2,860 drive B), `0x0D7` s243 is **never** set (0/25,798, 0/29,999), so with ComM
+mode 0 and no faults the entire `FEBEC5F3/FEBEC5F4` family is a **generic
+normal-communication driving mode — active in all moving/cruise driving, not a Class-L
+discriminator**. This directly answers the live `0x0D5` s211 observation that motivated
+the census.
+
+**Verdict.** No non-B6 external state accepted by exact F33 can select a different
+assist behavior while cruising in this calibration: the only map selector is
+gear/diagnostic-derived and its four tables alias; the C5F4 family's assist contribution
+is zero whenever `0x0D5` s213 is zero; and every other enumerated cone member
+(`0x025` angle feedback, engine RPM `0x115`, gates `0x127/0x13B/0x1C5`) is feedback,
+engine, or gate state (§18 census). The §24 Class-L B22:B23 mode shift therefore cannot
+be attributed to the enumerated external assist/mode/gain selector cone; the mechanism
+remains bounded to EPS-internal dynamics outside this cone, unobserved accepted PDUs
+(`0x1C5`, `0x64F`: zero frames in both drives), or surfaces outside the recovered
+census. This is a static-census negative bounded exactly like VAR-068's live matched
+negative; it does not authorize production output.
+
+Deterministic evidence is the `eps_latch_inputs` section of
+`data/generated/camry_2026_cruise_lta_edge_census.json`, generated by
+`tools/analyze_camry_2026_cruise_lta_edges.py` and verified by
+`tests/verify_camry_2026.py`; the static decode is reproduced from the tracked
+decompiler corpus `data/generated/camry-8965F3307000/decompilations.jsonl`.
+
+## 28. Exact-F33 `0x090` (PDU40) receive closure: sig235 is the strongest angle-like feedback; sig232 feeds the integrator; the exploratory B12/B13 composite is retired
+
+Section 21 left the exploratory `0x090` nibble-scan correlation (best field
+`B12[3:0]+B13`, r = 0.9931 at -60 ms in drive A) explicitly unresolved. Exact-F33
+generated-COM geometry now closes that ambiguity (VAR-076) and corrects the temporary
+in-flight byte-index interpretation used while this section was being built.
+
+**Geometry (firmware-static).** Unpacker `FUN_0004B9F4 -> FUN_0007D12A` calls scalar
+windows `0x167/0x169/0x16B/0x183`. The exact PDU-offset table at `0x22840` gives
+PDU40 base `0x167`, therefore those windows begin at PDU bytes **B0/B2/B4/B28**.
+`FUN_0007D12A` loads four bytes and assembles them as a big-endian window word; for the
+10-bit, bit-offset-0 fields this yields `(Bstart & 3) << 8 | Bstart+1`. The complete
+firmware-defined surface is therefore:
+
+| Signal | Exact wire geometry | Raw / recentered or flag cell |
+|---|---|---|
+| sig229 | `B0[1:0]+B1`, 10-bit unsigned | `FEBE8084` / `FEBE808A` |
+| sig227/228 | B0 bits 7/6 | `FEBE8090/91` |
+| sig232 | `B2[1:0]+B3`, 10-bit unsigned | `FEBE8086` / `FEBE808C` |
+| sig230/231 | B2 bits 7/6 | `FEBE8092/93` |
+| sig235 | `B4[1:0]+B5`, 10-bit unsigned | `FEBE8088` / `FEBE808E` |
+| sig233/234 | B4 bits 7/6 | `FEBE8094/95` |
+| sig241 | `B28[7:4]` | `FEBE8096` |
+| freshness | — | `FEBE8097` + `FUN_000498E0(0x16)` |
+
+`FUN_0004AFCC(0,0x200,v,dst)` is exactly a signed-16 saturating recenter `v - 512`.
+Bytes B6..B27 are not touched by the PDU40 unpacker. The sig241 extractor fetches the
+B28..B31 four-byte window but only B28[7:4] survives its mask; B29..B31 do not affect the
+signal value.
+
+**Receiver chain (firmware-static).** `FUN_00058074` distributes the recentered cells as
+`FEBE808A -> FEBEF1C6`, `FEBE808C -> FEBEF1C8`, and `FEBE808E -> FEBEF1CA`, with the
+six flags staged at `FEBEF0A4..FEBEF0AE`. Runtime constants in this image pin
+`FEBEF098=FEBEF099=0`, `FEBEF09C=1`, and `FEBEF0AA=0`. Under those constants,
+`FUN_000BE846`'s active combination reduces to the **sig232** branch:
+`FEBEBE96 = clamp((sig232-512)*0x931/0x100, +/-3763)`; the sig229 contribution is
+suppressed by the `FEBEF0AA&2` branch. `FUN_000BCD66` copies `FEBEBE96 -> FEBEAE0C`, and
+`FUN_000C310E` leak-integrates that value (`FEBEBF58 += FEBEAE0C - FEBEBFA0`, then
+`FEBEBFA0 = FEBEBF58*0x400/8672` when its validity gate is open). Thus the previously
+posed `FEBEBE96 -> FEBEAE0C -> C310E` chain is exact, but its source is **sig232**, not
+the strongest angle-correlated field. Sig235 follows the separate `FEBEF1CA` consumer
+family instead.
+
+**Dynamic classification (both retained Class-L intervals, 10-ms grid, +/-120-ms lag
+sweep).** Sig235 is the strongest angle-like exact field: drive A r = **+0.9924 at
+-60 ms**, slope **0.9569 count/deg**; drive B r = **+0.7428 at -70 ms**, slope
+**1.1976 count/deg**. In the analyzer's convention, negative lag means the `0x090` field
+follows the `0x025` measured angle, so this is feedback-shaped. Sig232 is weaker and does
+not reproduce as the dominant angle channel (A **+0.8934 at -40 ms**, B **+0.3331 at
++10 ms**); nevertheless its motor-proxy correlations peak at **-120 ms in both drives**
+(A +0.5397, B +0.4631), again lagging rather than leading. Sig229 is weak/unstable
+(A +0.1831 at +120 ms, B +0.4115 at -120 ms vs angle). All six flag bits are zero inside
+both Class-L intervals. Across the three exact 10-bit fields there is **no reproducible
+strong lead of the `0x030 B22:B23` motor-feedback proxy**.
+
+**Retirement of the exploratory composite.** The old scan winner `B12[3:0]+B13`
+reproduces exactly (r = 0.9931/-60 ms drive A; 0.7615/-70 ms drive B), but B12/B13 lie
+inside the B6..B27 region the exact EPS receive logic never touches. B12:B13 is
+byte-identical to B14:B15 in every inside-Class-L frame, so that result is a duplicated
+fine-scale angle-correlated observer riding in the CAN payload, not a field consumed by
+this EPS code. The scan-ranked `B4[3:0]+B5` is different: while B4 <= 3 inside both
+Class-L intervals it is numerically identical to exact **sig235**, which explains its
+strong angle correlation without inventing another signal.
+
+Boundaries: sig229/sig232/sig235 OEM names remain unknown; the angle interpretation is a
+dynamic classification, not an OEM label. Nothing here authorizes production output.
+
+Deterministic evidence is the `firmware_exact_0x090` and
+`exploratory_0x090_reproduction` sections of
+`data/generated/camry_2026_class_l_upstream_correlation.json`, generated by
+`tools/analyze_camry_2026_class_l_upstream.py` and verified by
+`tests/verify_camry_8965F3307000_external_lateral_ingress.py`.
+
+## 29. Complete generated-COM command-cone denominator: VAR-065's 19/116 framing is superseded, but the B6-only command-level conclusion survives
+
+CORR-127 closes the denominator question raised by the broader `0x58074` staging audit. The old VAR-065 `19/116 nonempty, 97 empty` count was a count through one fixed raw→stage→snapshot model, not an exhaustive census of every staged COM value and consumer. The exact-F33 pipeline is larger but still converges to the same external-command result.
+
+**L1/L2 denominator.** Exact `FUN_0007D12A` literal calls provide **116 scalar raw cells** (including signal243's stack-RMW path `0x4BB62 -> FEBE80A0`). The table-driven callers `0x693FE/0x697F4` add **14 configured extracts**, signals 90..103, spanning CAN `0x013..0x01F`; their qualification/forwarding state remains inside the communications-manager family and does not become a lateral magnitude. `FUN_00058074` stages **98 of the 116 scalar raw cells over 105 exact copy edges**. The other 18 raw cells have no consumer beyond their unpacker/staging/init machinery.
+
+**Stage/snapshot denominator.** The exact COM-derived stage-space has **52 reader functions**; **15** sit inside the recovered steering cluster and the highest direct stage reader is `0xBF0EC`. No C/D-family command-composition function reads those stage cells directly: it consumes the later snapshot bank. Six exact copiers — `0xBC96A`, `0xBCA08`, `0xBCAA6`, `0xBCBD8`, `0xBCD62`, `0xBCD66` — account for **306 unique snapshot destinations**. This is the denominator the old 19-signal shortcut omitted.
+
+**What reaches the steering cluster without B6.** Four non-B6 COM families survive far enough to matter, but none is an external command magnitude: `0x090` is the observer/plausibility family closed in §28; `0x0D7` contributes speed-class gating and a handler-pointer selector; `0x675` contributes configuration/telemetry/plausibility cells; and `0x13B` contributes gate state whose relevant qualifier branch is itself invalidated/gated by B6 signal243. These are real inputs and are why the old “empty” wording was too strong.
+
+**Command composition.** The final command path is much narrower. `D039E` composes `FEBECC50`, later scaled/clamped through `D042C` into `FEBECC62 -> FEBEAC56`, and `BF33E` publishes the command/current block `FEBEE400..418` (including command-torque observable byte/halfword family at `FEBEE40A`). The only **generated-COM** value/mode inputs recovered at this level are B6: `CBA80` writes `FEBEC81A` from B6 sig262 snapshot `FEBEAE90`, while `CB73A` can raise the B6 assist-active state only when B6 sig261 snapshot `FEBEADB0=='1'`. Gain pairs are ROM-installed and internally adapted; without sig261 that B6-selected adaptation cannot activate. CORR-128 corrects one important distinction in the other branch: `FEBE71F2 -> FEBEEF8E -> FEBEAC52` does **not** supply the `FEBECC60` magnitude. `D0382` uses `FEBEAC52` only as a symmetric saturation limit on dynamic `FEBECC4E`; the actual B6-independent value comes from the internal `D0218 -> D0284 -> D02DA` chain closed in §30.
+
+Therefore the corrected statement is stronger and narrower than VAR-065's old shorthand: **many more ordinary COM values are staged and observed than the 19-signal model showed, but no non-B6 generated-COM value is recovered as a steering command magnitude or as the B6 assist-activation mode input.** At the same time, exact F33 positively contains a B6-independent **internal baseline-assist magnitude path**, so command/motor activity with stock B6 absent is expected and is not itself evidence for a hidden external target. The remaining Class-L discriminator is which internal terms/modes change in that path, plus OEM LTA naming/corroboration — not another blind ordinary-COM search. This does not authorize output.
+
+Deterministic evidence is `data/generated/camry_8965F3307000_command_cone_ingress.json`, generated by `tools/build_camry_8965F3307000_command_cone_ingress.py` and verified by `tests/verify_camry_8965F3307000_command_cone_ingress.py`.
+
+## 30. Exact-F33 B6-independent baseline-assist path: `D0218` supplies `CC4E/CC60`; `FEBE71F2` is only the limiter
+
+The residual command branch from §29 is now positively recovered far enough to correct its provenance. `FUN_000D0382` loads dynamic `FEBECC4E` and limit `FEBEAC52`, then computes `FEBECC60 = clamp(FEBECC4E, +/-FEBEAC52)`. `FEBEAC52 <- FEBEEF8E <- FEBE71F2` is therefore a **saturation bound**, not command magnitude. Exact runtime writer `0x3BDC6` chooses the minimum active value from ROM table `0x317E0` — entries are only `0x2B4D`, `0x3A75`, or `0x569A`, with `0x569A` as the default — from an internally protected status mask before storing `FEBE71F2`. The former “peripheral planner/magnitude” interpretation is rejected by CORR-128.
+
+The dynamic B6-independent magnitude enters earlier. `D0218` writes `FEBECC48`; `D0284` scales it by `FEBEAC64/0x8000` and clamps it to calibration `+/-B1334` as `FEBECC4C`; `D02DA` optionally slew/filters that value into `FEBECC4E`; `D0382` applies the limit above; then `D039E -> D042C` carries the result into `FEBECC62 -> FEBEAC56`, Toyota's recovered command-torque observable path. The `D0284` multiplier is internal calibration state as well: `BCBD8` snapshots `FEBEB140 -> FEBEAC64`, while the complete `FEBEB140` writer census is `B3866/B389C/B38D2/BF97A`. The first three derive it from exact ROM u16 `0xAEF4C=0x5571` as `floor(0x2774564E/0x5571)=0x7636`; reset/default writer `BF97A` uses adjacent rounded constant `0x7637`. Thus no generated-COM/CAN value enters through the scale factor either.
+
+`D0218` has three exact branches. When internal diagnostic flag `FEBEAC2B==0x5A`, it reduces to `FEBEC4C0 + FEBEC3BA + FEBEBF3C`. When B6-selected `FEBEC7BF==1`, it reduces to `FEBEC4C0 + FEBEBF3C`. In the ordinary B6-inactive branch it computes:
+
+`FEBEC43C + FEBEC4C0 + FEBEC3BA + FEBECC2C + FEBEBF3C + clamp(FEBECB38 + FEBEC5EE, +/-B132C/2) + FEBECBE8`.
+
+The direct runtime writers are all internal C/D-family algorithm state: `CF2B2 -> FEBECB38`, `C9A84 -> FEBEC5EE`, `C7E36 -> FEBEC43C`, `C8678 -> FEBEC4C0`, `C74AC -> FEBEC3BA`, `D0162 -> FEBECC2C`, `C2B64 -> FEBEBF3C`, and `CFCD4 -> FEBECBE8`. `FEBEAC2B` is an internal diagnostic/control snapshot (`BCBD8 <- FEBEB112`; `B338C` sets `0x5A`, `B330A/B3314` clear it), while `CB73A` can set `FEBEC7BF=1` only with B6 sig261 snapshot `FEBEADB0=='1'`. The complete generated-COM denominator in §29 therefore remains intact: this is an **EPS-internal baseline-assist path**, not a second generated-COM target ingress.
+
+This also bounds the retained-drive interpretation. VAR-075 already pins the `FEBEC5EE` moving-mode contribution to zero in both retained drives because its `0x0D5` s213 source is identically zero; the other `D0218` terms can still produce command torque with B6 absent. Thus the Class-L `0x030 B22:B23` shift can plausibly be an internal assist/damping change without any hidden CAN target. Exact attribution of that Class-L change among the remaining internal terms is still bounded, and OEM `0x1601` LTA naming remains the clean live discriminator. Nothing here proves Class-L is LTA or authorizes output.
+
+Deterministic evidence is the `baseline_internal_assist_path` section of `data/generated/camry_8965F3307000_command_cone_ingress.json`, generated from the exact 6,065-function F33 corpus and verified by `tests/verify_camry_8965F3307000_command_cone_ingress.py`.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126)
+- Findings with this document as canonical home: [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128)
 <!-- knowledge-cross-references:end -->

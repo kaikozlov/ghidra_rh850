@@ -8,7 +8,9 @@ Read-only analysis against tracked raw captures:
     Class-L rise/fall (3 s pre/post windows);
   * DBC-decoded EPS observables inside Class-L (0x030 steering-wheel torque,
     0x025 angle/rate) and wheel speed;
-  * 0x090 feedback-likeness (lead/lag against 0x025 angle);
+  * 0x090 closure: exact-F33 PDU40 receive geometry (sig229/232/235 + flags + sig241),
+    lead/lag vs 0x025 angle, and the retirement of the prior synthetic B12/B13
+    exploratory composite (outside the firmware-defined receive surface);
   * bus1 upstream-family census and Class-L-conditioned 0x18A activity, 0x18C
     staircase record count, and the 0x181 bytes[35:37] steering-lag field.
 
@@ -70,6 +72,11 @@ def angle_deg(d: bytes) -> float:
 
 def rate_raw(d: bytes) -> int:
     return be_signal(d, 35, 12, is_signed=True)
+
+
+def motor_raw(d: bytes) -> int:
+    """Exact-F33 0x030 B22:B23 signed big-endian motor-feedback/current-family proxy."""
+    return int.from_bytes(d[22:24], "big", signed=True)
 
 
 def majority_bits(frames: list[bytes], persistence: float = 0.95) -> list[int]:
@@ -243,10 +250,13 @@ def analyze_drive(label: str, path: Path, accepted: set[int], census_intervals: 
             "wheel_speed_kph_mean": round(sum(sp) / len(sp), 2) if sp else None,
         })
 
-    # 0x090 feedback-likeness: best signed BE12 field vs 0x025 angle, lead/lag.
+    # 0x090: exploratory nibble-scan reproduction (evidence trail), then the exact-F33
+    # generated-COM receive geometry and its lead/lag verdict against 0x025 angle.
     t90 = streams.get((0x090, 32), [])
     _start_seg0, a0, _end_seg0, b0 = ints[0]
     angle_series = [(t, angle_deg(d)) for _seg, t, d in t25 if a0 <= t <= b0]
+    torque_series = [(t, torque_nm(d)) for _seg, t, d in eps_tx30 if a0 <= t <= b0]
+    motor_series = [(t, float(motor_raw(d))) for _seg, t, d in eps_tx30 if a0 <= t <= b0]
     best = {"field": None, "r": 0.0, "lag_ms": None}
     if angle_series and t90:
         inside90 = [(t, d) for _seg, t, d in t90 if a0 <= t <= b0]
@@ -269,10 +279,107 @@ def analyze_drive(label: str, path: Path, accepted: set[int], census_intervals: 
                         cur = {"r": round(r, 4), "lag_ms": lag_ms}
                 if abs(cur["r"]) > abs(best["r"]):
                     best = {"field": f"B{off}[{'7:4' if sh else '3:0'}]+B{off+1}", **cur}
+        # Exploratory nibble-scan verdict (kept as the evidence trail for VAR-068):
+        # the synthetic winners sit at bytes 12..15, which the exact-F33 PDU40
+        # unpacker FUN_0004b9f4 never reads (see firmware_exact_0x090 below).
         eps["exploratory_0x090_reproduction"] = {
             "best_field": best["field"], "best_r": best["r"], "peak_lag_ms": best["lag_ms"],
-            "classification": "unresolved; correlation reproduction is not a semantic or causal wire join",
+            "classification": (
+                "resolved: synthetic cross-signal composite outside the exact-F33 0x090 "
+                "receive surface; retired in favor of firmware-exact fields (sig235 is the strongest angle-like channel)"
+            ),
         }
+
+        # Exact-F33 PDU40 (=CAN 0x090) generated-COM receive geometry, recovered from
+        # unpacker FUN_0004b9f4 -> FUN_0007d12a windows 0x167/0x169/0x16b/0x183 and the
+        # per-PDU slice-offset table at 0x22840 (PDU40 base 0x167; byte_offset =
+        # window - 0x167, so the three scalar windows begin at B0/B2/B4; in-window extraction is the big-endian 32-bit window word,
+        # the same method build_camry_8965F3307000_external_lateral_ingress.py pins
+        # and validates against the 0x025/B6 shapes).
+        fw_fields = {
+            "sig229": lambda d: ((d[0] & 3) << 8) | d[1],   # 10u  B0[1:0]+B1
+            "sig232": lambda d: ((d[2] & 3) << 8) | d[3],   # 10u  B2[1:0]+B3
+            "sig235": lambda d: ((d[4] & 3) << 8) | d[5],   # 10u  B4[1:0]+B5
+        }
+        fw = {"signals": {}, "flags_all_zero_inside_class_l": None, "duplication": {}}
+        flags = {
+            "sig227": lambda d: (d[0] >> 7) & 1, "sig228": lambda d: (d[0] >> 6) & 1,
+            "sig230": lambda d: (d[2] >> 7) & 1, "sig231": lambda d: (d[2] >> 6) & 1,
+            "sig233": lambda d: (d[4] >> 7) & 1, "sig234": lambda d: (d[4] >> 6) & 1,
+        }
+        fw["flags_all_zero_inside_class_l"] = all(fn(d) == 0 for _t, d in inside90 for fn in flags.values())
+        ra = resample(angle_series, a0, b0, 10_000_000)
+        for name, fn in fw_fields.items():
+            ser = [(t, float(fn(d))) for t, d in inside90]
+
+            def peak(target: list[tuple[int, float]]) -> dict:
+                rt = resample(target, a0, b0, 10_000_000)
+                cur_ = {"r": 0.0, "lag_ms": None}
+                for lag_ms in range(-120, 121, 10):
+                    rb_ = resample(sorted((t + lag_ms * 1_000_000, v) for t, v in ser), a0, b0, 10_000_000)
+                    r_ = corr(rt, rb_)
+                    if abs(r_) > abs(cur_["r"]):
+                        cur_ = {"r": round(r_, 4), "lag_ms": lag_ms}
+                return cur_
+
+            cur = peak(angle_series)
+            cur_torque = peak(torque_series)
+            cur_motor = peak(motor_series)
+            rb = resample(sorted((t + cur["lag_ms"] * 1_000_000, v) for t, v in ser), a0, b0, 10_000_000)
+            n = len(ra)
+            ma, mb = sum(ra) / n, sum(rb) / n
+            slope = sum((x - ma) * (y - mb) for x, y in zip(ra, rb)) / sum((x - ma) ** 2 for x in ra)
+            vals = [fn(d) for _t, d in inside90]
+            fw["signals"][name] = {
+                "wire": {"sig229": "B0[1:0]+B1", "sig232": "B2[1:0]+B3", "sig235": "B4[1:0]+B5"}[name],
+                "bits": 10, "signed": False,
+                "range": [min(vals), max(vals)], "unique": len(set(vals)),
+                "r_vs_0x025_angle": cur["r"], "peak_lag_ms": cur["lag_ms"],
+                "slope_counts_per_deg_at_peak": round(slope, 4),
+                "r_vs_driver_torque": cur_torque["r"], "torque_peak_lag_ms": cur_torque["lag_ms"],
+                "r_vs_0x030_motor_proxy": cur_motor["r"], "motor_peak_lag_ms": cur_motor["lag_ms"],
+            }
+        # Wire duplication the synthetic scan exploited: B12:B13 is byte-identical to
+        # B14:B15 (a duplicated fine-scale angle-correlated copy), and the synthetic
+        # candidate B4[3:0]+B5 equals exact sig235 whenever B4 <= 3 (true for every
+        # inside-Class-L frame in both drives).
+        n90 = len(inside90)
+        fw["duplication"] = {
+            "b12b13_equals_b14b15_frames": sum(1 for _t, d in inside90 if d[12] == d[14] and d[13] == d[15]),
+            "b4_le3_frames": sum(1 for _t, d in inside90 if d[4] <= 3),
+            "frames": n90,
+        }
+        fw["receive_surface"] = {
+            "defined_bytes": "B0..B5 carry three 10-bit pairs + six flag bits; sig241 consumes B28[7:4]. B6..B27 are not touched by the PDU40 unpacker; B29..B31 are fetched in sig241's 4-byte window but masked away",
+            "sig241_wire": "B28[7:4]", "sig241_unique_inside_class_l": len({d[28] >> 4 for _t, d in inside90}),
+        }
+        fw["receiver_chain"] = {
+            "recenter": "FUN_0004afcc(0, 0x200, v, dst): dst = saturate16(v - 512)",
+            "raw_stage": {"sig229": "FEBE8084", "sig232": "FEBE8086", "sig235": "FEBE8088"},
+            "recentered_stage": {"sig229": "FEBE808A", "sig232": "FEBE808C", "sig235": "FEBE808E"},
+            "flags_stage": "FEBE8090..FEBE8095", "sig241_stage": "FEBE8096",
+            "freshness": "FEBE8097 + FUN_000498e0(0x16)",
+            "distribution": ("FUN_00058074: FEBE808A->FEBEF1C6, FEBE808C->FEBEF1C8, FEBE808E->FEBEF1CA, "
+                             "flags->FEBEF0A4..FEBEF0AE; runtime constants FEBEF098=FEBEF099=0, "
+                             "FEBEF09C=1, FEBEF0AA=0"),
+            "combination": ("FUN_000be846 (active when DAT_FEBEB11A==0x400 and FEBEBE8D!='Z'): with the "
+                            "pinned runtime constants the output reduces to "
+                            "FEBEBE96 = clamp(((sig232-512)*0x931/0x10)/0x10, +/-DAT_000af3f8=+/-3763); "
+                            "the sig229 term enters only via FEBEF0AA&2 (clear here); pre-clamp "
+                            "+/-DAT_000af3f0=+/-409600; validity outputs FEBEBE90..FEBEBE94"),
+            "integrator": ("FUN_000bcd66 (FEBEB800-0x9F4): FEBEAE0C = FEBEBE96; FUN_000c310e "
+                           "(gated DAT_FEBEBFB1=='Z'): FEBEBF58 += FEBEAE0C - FEBEBFA0; "
+                           "FEBEBFA0 = FEBEBF58*0x400/PTR_LAB_000af564 (8672)"),
+        }
+        fw["classification"] = (
+            "feedback/status: sig235 is the strongest exact-F33 0x090 angle-like channel (~1 count/deg about the "
+            "512 recenter), lagging 0x025 steering angle in both drives. sig232 feeds the FEBEBE96->FEBEAE0C "
+            "integrator path but does not reproduce as the dominant angle channel across drives; sig229 is a slow-drift channel. "
+            "No exact 0x090 signal reproducibly leads angle, torque, or the motor proxy. sig229 is dropped from the FEBEBE96 combination by "
+            "the pinned runtime constants. The prior exploratory best field B12[3:0]+B13 is a "
+            "synthetic composite over bytes the F33 never reads from this frame."
+        )
+        eps["firmware_exact_0x090"] = fw
 
     # bus1 family census
     span = (min(t for rows in bus1.values() for _, t, _ in rows),
@@ -411,6 +518,7 @@ def main() -> int:
         "interpretation": {
             "class_l_eps_negative": "observed/deterministic: across both drives no exact-F33-accepted bus0 field shows a common majority-bit step at Class-L rise, and EPS 0x030 shows zero persistent bit flips at rise/fall; inside Class-L the driver-style torque/rate observables stay bounded, consistent with Class-L being an upstream/display/availability state rather than a visible EPS cooperative-mode latch. This does not prove absence of EPS-internal state invisible on 0x030.",
             "upstream_18x": "bounded: bus1 0x180..0x18C is not exact-F33 accepted and can only be upstream transformation input. 0x18A has no persistent rise flip reproduced across both matched Class-L windows; one isolated drive-B B27 high-nibble flip is retained in the per-edge evidence and is not promoted. 0x18C record count is 3 on both sides of every edge; 0x181 bytes[35:37] signed little-endian lags measured steering by 200/240 ms in the two drives and is steering-derived, not a command precursor. No identifiable upstream target/curvature/planning quantity is recoverable from these two drives.",
+            "exploratory_0x090_resolution": "verified/recovered: the exact-F33 PDU40 (CAN 0x090) receive surface is sig229 B0[1:0]+B1, sig232 B2[1:0]+B3, sig235 B4[1:0]+B5 (10-bit unsigned, recentered by FUN_0004afcc v-512 into FEBE808A/8C/8E), six flag bits B0/B2/B4.7/.6 into FEBE8090..95, and sig241 B28[7:4] into FEBE8096; B6..B27 are never read by the PDU40 unpacker and B29..B31 are fetched only inside sig241's four-byte window then masked away. sig235 is the strongest angle-like exact field (~1 count/deg about 512) and lags 0x025 steering angle by 60/70 ms across the two drives (r=0.9924/0.7428); no exact 0x090 signal reproducibly leads the motor proxy. FUN_00058074 routes the recentered cells (FEBE808A->FEBEF1C6, FEBE808C->FEBEF1C8, FEBE808E->FEBEF1CA) and FUN_000be846's combination reduces, under the pinned runtime constants FEBEF098=FEBEF099=0/FEBEF09C=1/FEBEF0AA=0, to the sig232-derived FEBEBE96 branch, copied by FUN_000bcd66 to FEBEAE0C and integrated by FUN_000c310e (leaky, x0x400/8672, gated FEBEBFB1=='Z'). The prior exploratory best field B12[3:0]+B13 (r=0.9931/-60 ms, drive A) is a synthetic cross-signal composite over wire bytes the EPS never unpacks from 0x090: bytes 12..15 carry a byte-duplicated fine-scale angle-correlated copy (B12:B13 == B14:B15 in every inside-Class-L frame) that merely observes the same underlying steering; the synthetic B4[3:0]+B5 candidate coincides numerically with exact sig235 whenever B4<=3.",
             "production_output_authorized": False,
         },
     }

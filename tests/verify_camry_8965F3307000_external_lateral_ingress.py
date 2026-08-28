@@ -92,7 +92,25 @@ check("persistent accepted/EPS edge result is negative", class_art["combined"]["
 check("matched 0x18A result is negative", class_art["combined"]["matched_upstream_0x18a_rise_flip_bits_across_drives"] == [] and class_art["combined"]["matched_upstream_0x18a_class_l_step_detected"] is False)
 check("0x18C staircase record count stays three", all(edge["record_counts"] == {"3":edge["frames"]} for d in class_art["drives"].values() for edge in d["upstream_0x18c_record_counts"]))
 check("0x181 signed-LE lag result is pinned", [(d["upstream_0x181_lag_field"]["wire"], d["upstream_0x181_lag_field"]["peak_dt_ms"], d["upstream_0x181_lag_field"]["peak_r"]) for d in class_art["drives"].values()] == [("bytes[35:37] signed LE i16",-200,-0.7192),("bytes[35:37] signed LE i16",-240,-0.7287)])
-check("0x090 reproduction remains unresolved", all(d["eps_metrics_inside_class_l"]["exploratory_0x090_reproduction"]["classification"].startswith("unresolved") for d in class_art["drives"].values()))
+check("0x090 exploratory composite retired with reproduction intact", [(d["eps_metrics_inside_class_l"]["exploratory_0x090_reproduction"]["best_field"], d["eps_metrics_inside_class_l"]["exploratory_0x090_reproduction"]["best_r"], d["eps_metrics_inside_class_l"]["exploratory_0x090_reproduction"]["peak_lag_ms"]) for d in class_art["drives"].values()] == [("B12[3:0]+B13",0.9931,-60),("B12[3:0]+B13",0.7615,-70)] and all(d["eps_metrics_inside_class_l"]["exploratory_0x090_reproduction"]["classification"].startswith("resolved: synthetic cross-signal composite outside the exact-F33 0x090 receive surface") for d in class_art["drives"].values()))
+fw_a = class_art["drives"]["drive_a"]["eps_metrics_inside_class_l"]["firmware_exact_0x090"]
+fw_b = class_art["drives"]["drive_b"]["eps_metrics_inside_class_l"]["firmware_exact_0x090"]
+check("0x090 firmware-exact geometry and lead/lag pinned",
+      [fw_a["signals"][s]["wire"] for s in ("sig229","sig232","sig235")] == ["B0[1:0]+B1","B2[1:0]+B3","B4[1:0]+B5"]
+      and [(fw_a["signals"][s]["r_vs_0x025_angle"], fw_a["signals"][s]["peak_lag_ms"], fw_a["signals"][s]["slope_counts_per_deg_at_peak"]) for s in ("sig229","sig232","sig235")] == [(0.1831,120,0.1097),(0.8934,-40,1.3163),(0.9924,-60,0.9569)]
+      and [(fw_b["signals"][s]["r_vs_0x025_angle"], fw_b["signals"][s]["peak_lag_ms"], fw_b["signals"][s]["slope_counts_per_deg_at_peak"]) for s in ("sig229","sig232","sig235")] == [(0.4115,-120,8.8637),(0.3331,10,1.9853),(0.7428,-70,1.1976)])
+check("0x090 strong motor correlations do not reproduce as leads",
+      not any(abs(fw_a["signals"][s]["r_vs_0x030_motor_proxy"]) >= 0.25
+                  and abs(fw_b["signals"][s]["r_vs_0x030_motor_proxy"]) >= 0.25
+                  and fw_a["signals"][s]["motor_peak_lag_ms"] > 0
+                  and fw_b["signals"][s]["motor_peak_lag_ms"] > 0
+                  for s in ("sig229","sig232","sig235")))
+check("0x090 synthetic winners sit outside the consumed surface",
+      all(fw["duplication"]["b12b13_equals_b14b15_frames"] == fw["duplication"]["frames"] == fw["duplication"]["b4_le3_frames"] for fw in (fw_a, fw_b))
+      and fw_a["flags_all_zero_inside_class_l"] is True and fw_b["flags_all_zero_inside_class_l"] is True
+      and fw_a["receive_surface"]["sig241_wire"] == "B28[7:4]"
+      and "B6..B27 are not touched" in fw_a["receive_surface"]["defined_bytes"]
+      and "sig232" in fw_a["receiver_chain"]["combination"] and "FEBEAE0C" in fw_a["receiver_chain"]["integrator"])
 check("Class-L analyzer preserves exact DBC formulas", class_art["dbc_formulas"] == {"0x030_steering_wheel_torque_nm":"signed_be(71|8) * 0.1 + signed_be(139|4) * 0.01","0x025_steering_angle_deg":"signed_be(3|12) * 1.5 + signed_be(39|4) * 0.1","0x025_steering_rate_raw":"signed_be(35|12)"})
 
 print(f"\nResults: {passed} passed, {failed} failed")

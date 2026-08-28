@@ -315,9 +315,10 @@ starting at the upstream FRC/Brake boundary and the residual non-COM/internal F3
 portable persistent-edge analysis. No exact-F33-accepted stream has a reproduced rise
 flip, separate EPS-Tx `0x030` has zero persistent edge flips, `0x18A` has no matched
 two-drive rise, every `0x18C` edge-window frame has staircase record count 3, and
-`0x181 bytes[35:37]` signed LE lags measured steering by 200/240 ms. The differing
-exploratory `0x090` correlations remain unresolved. Do not mine neighboring upstream
-IDs from this negative. Same-image code also fixes `8A3113303100` as the F181
+`0x181 bytes[35:37]` signed LE lags measured steering by 200/240 ms. VAR-076 now closes
+the old exploratory `0x090` ambiguity: exact-F33 geometry makes sig235 the strongest
+angle-like feedback field, while the B12/B13 scan winner sits in payload bytes the EPS
+does not consume. Do not mine neighboring upstream IDs from this negative. Same-image code also fixes `8A3113303100` as the F181
 software/compatibility record: callback `0x4FA26`, startup check `0x637EE -> 0x62D5E`,
 and separate DID2032 callback `0x4F9DE` are all exact and verified.
 
@@ -335,6 +336,37 @@ does not resolve — the VAR-063/065/066 discriminator: a mode-changed EPS dampi
 map is not yet separable from LTA-class actuation by these two drives alone. Do not
 re-label Class-L as LTA from this; the `0x1601` naming/corroboration experiment remains
 the next discriminator step.
+
+**VAR-074 exhaustive bus1 lead/lag negative:** the "hidden analog planner field in
+bus1" hypothesis is now closed at field granularity, not just persistent bits. After
+correcting the filter so zero-delta fields and zero trailers are not mislabeled as
+counters/checksums, all 22 periodic bus1 streams still yield **15,367/14,130** surviving
+candidates and **2,929** fields fine-swept in both drives, with **zero reproducing as
+leading** the exact `0x030 B22:B23` motor-feedback proxy (|r|≥0.40 both drives,
+lag≥+50 ms). Drive B has zero leads among 48 strong correlates; drive A's 69 leads among
+246 strong correlates do not reproduce. The enlarged denominator instead adds lagging
+feedback/derived encodings; `0x160[22]` remains a delayed steering-angle echo equally
+present in normal cruise. Do not spend more drives or scan time mining observed bus1
+IDs for the lateral planner; the discriminating evidence for Class-L is target-native
+`0x1601` naming and the EPS-internal baseline path of VAR-078, not more bus traffic.
+
+**VAR-075/076/077/078 internal/COM closure:** the remaining ordinary-EPS-CAN alternatives
+are now substantially narrower. The exact `C9590/C9650/C973A` moving assist/gain family is
+cruise-generic (0x0D5 s211 is set in 100% of both cruise and Class-L strata) and its
+live magnitude source s213 is identically zero. Exact `0x090` is feedback/status: sig235
+lags measured angle by 60/70 ms and sig232's motor correlation also peaks at -120 ms in
+both drives. CORR-127 replaces VAR-065's old `19/116 nonempty, 97 empty` shortcut with
+the full denominator: 98/116 scalar raws staged, 52 stage readers, six snapshot copiers,
+306 snapshot destinations, plus the 14 table-driven `0x013..0x01F` extracts. Even under
+that stronger census, **B6 sig261/262 are still the only generated-COM mode/magnitude
+inputs recovered at command composition**. CORR-128/VAR-078 also close the former
+`FEBE71F2` ambiguity: `FEBE71F2 -> FEBEAC52` is only a saturation limit, while the actual
+B6-independent magnitude is the internal `D0218 -> CC48 -> D0284 -> CC4C -> D02DA ->
+CC4E -> D0382 -> CC60` baseline-assist path. `D0284`'s `AC64` scale is also closed as
+ROM/internal calibration (`B140 <- floor(0x2774564E/0x5571)`, reset `0x7637`), not CAN. Do not search more ordinary generated-COM
+IDs for a hidden target. The next discriminator is which internal D0218 term/mode changes
+inside Class-L, joined to target-native `0x1601` LTA naming; producer-side Brake firmware
+remains acquisition-blocked.
 
 **VAR-069 exact Brake producer acquisition:** the producer search is now narrowed to
 same-car category-435 identities `F152633K0000` / `8954147040` at physical `0x7B0`.

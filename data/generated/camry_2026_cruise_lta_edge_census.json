@@ -6,6 +6,12 @@
     "cruise_active_incoming_frame_count_all_buses": 511760,
     "cruise_rises_with_recent_main": 6,
     "cruise_rising_edge_count": 6,
+    "eps_latch_inputs": {
+      "d5_s211_set_fraction_cruise_min": 1.0,
+      "d5_s211_set_fraction_lateral_min": 1.0,
+      "d5_s213_abs_max": 0,
+      "d7_s243_set_fraction_max": 0
+    },
     "lateral_hud_candidate_duration_s": 73.303384,
     "lateral_hud_candidate_incoming_frame_count_all_buses": 237097,
     "max_abs_set_speed_vs_wheel_kph_at_cruise_rise": 1.39
@@ -269,6 +275,39 @@
             "wheel_speed_kph": 42.28
           }
         ]
+      },
+      "eps_latch_inputs": {
+        "0x0D5": {
+          "all": {
+            "frame_count": 25794,
+            "s211_b0_bit3_set_fraction": 0.496511,
+            "s212_max": 4,
+            "s212_min": -5,
+            "s213_max": 0,
+            "s213_min": 0
+          },
+          "cruise_active": {
+            "frame_count": 2291,
+            "s211_b0_bit3_set_fraction": 1.0,
+            "s212_max": 2,
+            "s212_min": -2,
+            "s213_max": 0,
+            "s213_min": 0
+          },
+          "lateral_hud_candidate": {
+            "frame_count": 807,
+            "s211_b0_bit3_set_fraction": 1.0,
+            "s212_max": 2,
+            "s212_min": -2,
+            "s213_max": 0,
+            "s213_min": 0
+          }
+        },
+        "0x0D7": {
+          "frame_count": 25798,
+          "s243_b0_bit7_set_fraction": 0.0
+        },
+        "definition": "exact-F33 moving-mode latch inputs: FEBEACCE=0x0D5 s211 B0[3] (set gate), FEBEACCD=0x0D7 s243 B0[7] (clear gate), FEBEAE04/FEBEAE06=0x0D5 s212/s213 signed16 B1:B2/B3:B4 monitor channels feeding FEBEC600/FEBEC5FC"
       },
       "lateral_hud_candidate": {
         "b6_count_all_buses": 0,
@@ -798,6 +837,39 @@
           }
         ]
       },
+      "eps_latch_inputs": {
+        "0x0D5": {
+          "all": {
+            "frame_count": 29999,
+            "s211_b0_bit3_set_fraction": 0.690123,
+            "s212_max": 11,
+            "s212_min": -5,
+            "s213_max": 0,
+            "s213_min": 0
+          },
+          "cruise_active": {
+            "frame_count": 5655,
+            "s211_b0_bit3_set_fraction": 1.0,
+            "s212_max": 1,
+            "s212_min": -2,
+            "s213_max": 0,
+            "s213_min": 0
+          },
+          "lateral_hud_candidate": {
+            "frame_count": 2860,
+            "s211_b0_bit3_set_fraction": 1.0,
+            "s212_max": 1,
+            "s212_min": -1,
+            "s213_max": 0,
+            "s213_min": 0
+          }
+        },
+        "0x0D7": {
+          "frame_count": 29999,
+          "s243_b0_bit7_set_fraction": 0.0
+        },
+        "definition": "exact-F33 moving-mode latch inputs: FEBEACCE=0x0D5 s211 B0[3] (set gate), FEBEACCD=0x0D7 s243 B0[7] (clear gate), FEBEAE04/FEBEAE06=0x0D5 s212/s213 signed16 B1:B2/B3:B4 monitor channels feeding FEBEC600/FEBEC5FC"
+      },
       "lateral_hud_candidate": {
         "b6_count_all_buses": 0,
         "definition": "structural only: bus0 0x08A byte21 == 0x0B; not an OEM-named signal and not an EPS command",
@@ -845,8 +917,9 @@
   "interpretation": {
     "b6": "observed/deterministic: B6 remains absent not only globally but throughout machine-recovered cruise-active intervals and throughout the bounded lateral/HUD candidate intervals.",
     "cruise": "observed/deterministic: 0x08A byte3=0x08 is a machine-visible cruise operating-state carrier. It toggles after effective MAIN/CANCEL actions and byte10 is the set-speed value in km/h: activation values track independent 0x0AA wheel speed and RES+/SET- adjust it.",
+    "eps_latch_inputs": "observed/deterministic: the exact-F33 moving-mode gate inputs are pinned across both retained drives: 0x0D5 s211 is set in 100% of frames inside both cruise-active and lateral/HUD candidate intervals while 0x0D7 s243 is never set, so the FEBEC5F3/FEBEC5F4 moving-mode family is a generic driving-state mode rather than a Class-L discriminator, and the FEBEC5EE assist contribution fed by 0x0D5 s213 stays zero because s213 is identically zero in these drives.",
     "lateral_hud_candidate": "bounded: 0x08A byte21/byte24, mirrored 0x081 byte13, and 0x412 display-state changes form a state class distinct from the cruise-main and button-echo classes. Long intervals overlap the operator-reported steering-assistance drive, but no target-native current-Camry OEM name is yet joined, so this is not called LTA-active proof.",
     "production_output_authorized": false
   },
-  "schema": "camry-2026-cruise-lta-edge-census-v1"
+  "schema": "camry-2026-cruise-lta-edge-census-v2"
 }

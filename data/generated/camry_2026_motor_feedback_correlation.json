@@ -390,7 +390,7 @@
   "sources": {
     "census": {
       "path": "data/generated/camry_2026_cruise_lta_edge_census.json",
-      "sha256": "9f0b0daf26a1d39d88d52be025fea4a7417c820b79d914c88c6f6f11cdfc0ec3"
+      "sha256": "355ea5b408442a541bd946d21c3e85b0fa4d9e924474d3223189cb37894ee9fc"
     },
     "drives": [
       {

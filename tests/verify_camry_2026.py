@@ -308,7 +308,7 @@ def _section_camry_2026_cruise_lta_edges():
         check('cruise/lateral edge artifact regenerates exactly', proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
 
     art = json.loads(ART.read_text())
-    check('cruise/lateral edge schema v1', art['schema'] == 'camry-2026-cruise-lta-edge-census-v1')
+    check('cruise/lateral edge schema v2', art['schema'] == 'camry-2026-cruise-lta-edge-census-v2')
     combined = art['combined']
     check('existing logs machine-recover sustained cruise operation',
           combined['cruise_rising_edge_count'] == 6 and combined['cruise_rises_with_recent_main'] == 6 and
@@ -331,7 +331,20 @@ def _section_camry_2026_cruise_lta_edges():
     lat = art['combined']
     check('existing logs contain long structurally distinct lateral/HUD candidate intervals',
           lat['lateral_hud_candidate_duration_s'] > 70 and lat['lateral_hud_candidate_incoming_frame_count_all_buses'] > 230000)
-    check('B6 also remains zero throughout lateral/HUD candidate intervals', lat['b6_during_lateral_hud_candidate_all_buses'] == 0)
+    check('B6 also remains zero throughout lateral/HUD candidate intervals',
+          lat['b6_during_lateral_hud_candidate_all_buses'] == 0)
+    latch = combined['eps_latch_inputs']
+    check('exact-F33 moving-mode gate 0x0D5 s211 is set throughout cruise AND lateral/HUD strata in both drives',
+          latch['d5_s211_set_fraction_cruise_min'] == 1.0 and latch['d5_s211_set_fraction_lateral_min'] == 1.0)
+    check('exact-F33 moving-mode clear gate 0x0D7 s243 is never set in either drive',
+          latch['d7_s243_set_fraction_max'] == 0)
+    check('0x0D5 s213 (FEBEC5FC/FEBEC5EC magnitude source) is identically zero in both drives',
+          latch['d5_s213_abs_max'] == 0)
+    for drv in (a, b):
+        li = drv['eps_latch_inputs']['0x0D5']
+        check(f"{drv['source']['file'].split('/')[-1]}: s212 stays far below the FEBEC602 monitor threshold inside every stratum",
+              max(abs(li[s]['s212_min']) for s in ('all', 'cruise_active', 'lateral_hud_candidate')) <= 5 and
+              max(abs(li[s]['s212_max']) for s in ('all', 'cruise_active', 'lateral_hud_candidate')) <= 11)
     a_lat = a['lateral_hud_candidate']['intervals']
     b_lat = b['lateral_hud_candidate']['intervals']
     check('lateral/HUD state is mirrored on 0x081 and dominated by one 0x412 payload',

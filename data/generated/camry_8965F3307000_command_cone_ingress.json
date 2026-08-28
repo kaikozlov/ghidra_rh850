@@ -1,0 +1,703 @@
+{
+  "baseline_internal_assist_path": {
+    "AC2B_gate": "FEBEAC2B <- FEBEB112; B338C sets 0x5A through an internal API and B330A clears it",
+    "C7BF_gate": "FEBEC7BF can activate only through CB73A when B6 sig261 snapshot FEBEADB0=='1'",
+    "D0218_sum": "FEBECC48 baseline sum. Default diagnostic flag AC2B!=0x5A and B6 assist-active C7BF!=1: C43C + C4C0 + C3BA + CC2C + BF3C + clamp(CB38 + C5EE, +/-B132C/2) + CBE8. If AC2B==0x5A the diagnostic branch reduces to C4C0+C3BA+BF3C; if C7BF==1 the B6-active branch reduces to C4C0+BF3C.",
+    "D0284_scale_clamp": "FEBECC48 -> scaled by FEBEAC64/0x8000 -> clamp +/-ROM B1334 -> FEBECC4C",
+    "D0284_scale_provenance": {
+      "calibration_u16_at_0x000AEF4C": "0x5571",
+      "classification": "internal ROM/calibration-derived scale; no generated-COM/CAN value source",
+      "reset_default": "BF97A writes FEBEB140=0x7637",
+      "runtime_derivation": "FEBEB140 = floor(0x2774564E / 0x5571) = 0x7636 in B3866/B389C/B38D2",
+      "snapshot": "FEBEAC64 <- FEBEB140 via BCBD8",
+      "writer_census": [
+        "0xB3866",
+        "0xB389C",
+        "0xB38D2",
+        "0xBF97A"
+      ]
+    },
+    "D02DA_filter": "FEBECC4C -> optional slew/filter state CC30/34/38/3C -> FEBECC4E",
+    "D0382_limit": "FEBECC60 = clamp(FEBECC4E, +/-FEBEAC52); AC52 is a limit, not the source magnitude",
+    "FEBEAC52_limit_provenance": "BCBD8 <- FEBEEF8E <- FCC00 <- FEBE71F2. Runtime 0x3BDC6 selects the minimum active entry from ROM table 0x317E0 (0x2B4D/0x3A75/0x569A; default 0x569A) from an internal protected status mask and stores FEBE71F2.",
+    "classification": "B6-independent EPS-internal baseline-assist magnitude path. It explains how CC60/command torque can be nonzero with B6 absent; FEBE71F2 is only its saturation limit. This does not create a second generated-COM target ingress: the complete COM denominator remains separately closed.",
+    "direct_D0218_value_cells": [
+      "FEBECB38",
+      "FEBEC5EE",
+      "FEBEC43C",
+      "FEBEC4C0",
+      "FEBEC3BA",
+      "FEBECC2C",
+      "FEBEBF3C",
+      "FEBECBE8"
+    ],
+    "direct_value_runtime_writers": {
+      "FEBEBF3C": "0xC2B64",
+      "FEBEC3BA": "0xC74AC",
+      "FEBEC43C": "0xC7E36",
+      "FEBEC4C0": "0xC8678",
+      "FEBEC5EE": "0xC9A84",
+      "FEBECB38": "0xCF2B2",
+      "FEBECBE8": "0xCFCD4",
+      "FEBECC2C": "0xD0162"
+    },
+    "limit_table": [
+      "0x3A75",
+      "0x3A75",
+      "0x2B4D",
+      "0x2B4D",
+      "0x2B4D",
+      "0x2B4D",
+      "0x2B4D",
+      "0x2B4D",
+      "0x2B4D",
+      "0x569A",
+      "0x569A",
+      "0x569A",
+      "0x569A",
+      "0x569A",
+      "0x569A",
+      "0x569A"
+    ]
+  },
+  "boundary": [
+    "statement-level closure: 0xBF97A holds WRITE refs into FEBEE400..418 whose stores the decompiler elides; 0xBF33E is the statement-verified block writer and BF97A's block refs are treated as a second (runtime/reset) writer with unchanged sourcing",
+    "FEBEACC0 (0xC2F26 integrator-enable input) is computed inside 0xBCD66 rather than copied; its exact inputs remain bounded",
+    "FEBEB3FC/FEBEB3FE/FEBEB400/FEBEB354 (command block bytes 406/407/416/418) come from 0xB7xxx/0xB8xxx internal qualification not traced byte-exhaustively here",
+    "no live vehicle I/O was performed; live context is re-read from retained artifacts"
+  ],
+  "census_supersession": {
+    "correction": "docs/status/CORRECTIONS.md CORR entry: the '97 empty' framing is superseded",
+    "finding": "the 19-signal set was an artifact of requiring a fixed raw->stage->snapshot triple with pre-listed consumers; the complete pipeline stages 98/116 raw cells and 6 copiers fill 306 unique snapshot destinations",
+    "preserved": "the VAR-065 headline survives and is strengthened: at composition level the only COM-derived VALUE inputs to FEBECC50/FEBECC62 are still B6 sig261 (mode) and B6 sig262 (magnitude); every other non-B6 member is a gate, qualifier, observer, or telemetry input",
+    "prior": "VAR-065 pinned copy-edge census: 19/116 nonempty, 97 empty"
+  },
+  "class_l_relevance": {
+    "0x090": "the previously unresolved live 0x090 correlation now has a firmware path: 0x090-derived values are integrated observers (FEBEBFA0/FEBEBF80) whose plausibility flags (FEBEC02C/FEBEC043/FEBEC045) and validity gates (FEBEBFB0..FB2) qualify other paths; no 0x090 value is a command magnitude",
+    "mode_without_b6": "no non-B6 COM signal can raise assist-active FEBEC7BF (activation is B6-sig261-gated at 0xCB73A); Class-L mode change with B6=0 must therefore arise from the B6-independent internal baseline-assist path, other internal state machinery, or driver/feedback dynamics rather than another COM target"
+  },
+  "cluster": {
+    "command_cone": [
+      "FEBECC50",
+      "FEBECC62",
+      "FEBEAC56",
+      "FEBEAC5A",
+      "FEBEE400..FEBEE418",
+      "FEBE6768..FEBE6794",
+      "FEBE6772",
+      "FEBE7C58"
+    ],
+    "range": [
+      "0xBCD66",
+      "0xCEFFC"
+    ]
+  },
+  "command_block_map": {
+    "bytes": {
+      "FEBEE400": [
+        "0xFEBEAC2D"
+      ],
+      "FEBEE401": [],
+      "FEBEE402": [],
+      "FEBEE403": [
+        "0xFEBEAC39"
+      ],
+      "FEBEE404": [],
+      "FEBEE405": [
+        "0xFEBEAC3E"
+      ],
+      "FEBEE406": [
+        "0xFEBEB3FC"
+      ],
+      "FEBEE407": [
+        "0xFEBEB354"
+      ],
+      "FEBEE408": [
+        "0xFEBEAC58"
+      ],
+      "FEBEE40A": [
+        "0xFEBEAC56"
+      ],
+      "FEBEE40C": [
+        "0xFEBEAC54"
+      ],
+      "FEBEE40E": [
+        "0xFEBEAC70"
+      ],
+      "FEBEE410": [
+        "0xFEBEAC76"
+      ],
+      "FEBEE412": [
+        "0xFEBEAC7A"
+      ],
+      "FEBEE414": [
+        "0xFEBEAC7E"
+      ],
+      "FEBEE416": [
+        "0xFEBEB3FE"
+      ],
+      "FEBEE418": [
+        "0xFEBEB400"
+      ]
+    },
+    "via_D0AAE": {
+      "FEBEAC2D": "0x5A iff FEBECC98 != 0",
+      "FEBEAC39": "0",
+      "FEBEAC3E": "0",
+      "FEBEAC54": "FEBECC64",
+      "FEBEAC56": "FEBECC62 (command torque)",
+      "FEBEAC58": "FEBEC128",
+      "FEBEAC68": "FEBECC60",
+      "FEBEAC70": "FEBEC172",
+      "FEBEAC76": "FEBECC66",
+      "FEBEAC7E": "FEBECC68"
+    },
+    "writer": "0x000BF33E"
+  },
+  "composition_provenance": {
+    "FEBECC50/FEBECC62 (command torque composition)": {
+      "D039E": "FEBECC50 = clamp(sVar7*G1/0x100 + sVar4); sVar7 = FEBECC5A|FEBECC60 by FEBEAC28==1; G1 = FEBEC7A0 (guard FEBEC7AA complement) via FUN_000CB9C8; sVar4 = G2*FEBEC81A/0x100; G2 = FEBEC7BC via FUN_000CB9AE",
+      "FEBEAC5A": "BCBD8 <- FEBEB1F8 <- B4B6C/B4EF4 (internal mode state, no stage reads)",
+      "FEBEC81A": "CBA80 <- FEBEAE90 (B6 sig262 snapshot)",
+      "FEBECC5A": "D04AC mode-latch from FEBEAC10 <- FEBEAFA8 <- FUN_000C1BE4 <- FEBEAC68 (previous cycle echo)",
+      "FEBECC60": "D0382 <- dynamic FEBECC4E from D0218/D0284/D02DA, saturated to +/-FEBEAC52; AC52 <- FEBE71F2 is only the limit",
+      "classification": "the only COM-derived VALUE inputs are B6 sig261 (mode via FEBEADB0) and B6 sig262 (magnitude via FEBEAE90); gains are ROM-installed and internally adapted; a separate B6-independent EPS-internal baseline-assist path feeds FEBECC60"
+    }
+  },
+  "gain_selector_machinery": {
+    "activation": "0x000CB73A: assist-active FEBEC7BF=1 requires FEBEC7B4==1, FEBEC7BE==0, FEBEC795==1, FEBEC7B3==0, FEBEADB0=='1' (B6 sig261 snapshot), and FEBEAE02 (sig246-derived speed class) < ROM threshold row [FEBEAC3C & 1]",
+    "adapt": "0x000CB82C: mode FEBEC7BA/FEBEC7B5 (1/2/3 -> ROM 0xB04CC..0xB04D1 bases) migrate FEBEC7A0/FEBEC7BC toward FEBEC7A2/A4 within ROM 0xB04C2..0xB04D4 bounds; 0x000CB9E2 re-clamps deviations",
+    "deactivation": "FEBEC7B5 = 3 on condition loss, 2 otherwise",
+    "effect_on_command": "FEBECC50 = clamp(sVar7*G1 + sVar4) with G1/G2 the guarded gains; gain adaptation cannot activate while B6 sig261 is absent",
+    "init": "0x000CB548: FEBEC7A2/A4 = ROM 0xB04C4*0xB04CD / 0xB04D4*0xB04D0 products",
+    "install": "0x000CB516(param1,param2): FEBEC7BC/FEBEC7A0 = params; FEBEC7AC/FEBEC7AA = complements"
+  },
+  "ingress_denominator": {
+    "extract_api_geometry": {
+      "frame_block_base": "0xFEBE4A48",
+      "new_data_bit": "0x80 of status byte; extractor returns 0x20 when set",
+      "pdu_status_base": "0xFEBE493E"
+    },
+    "literal_scalar_extracts": 116,
+    "table_driven": [
+      {
+        "byte_offset": 0,
+        "caller": "0x000693FE",
+        "can_id": 19,
+        "pdu": 10,
+        "signal": 90,
+        "source": "DAT_0257DA",
+        "wire_offset": 95
+      },
+      {
+        "byte_offset": 0,
+        "caller": "0x000693FE",
+        "can_id": 20,
+        "pdu": 11,
+        "signal": 91,
+        "source": "DAT_0257DC",
+        "wire_offset": 103
+      },
+      {
+        "byte_offset": 0,
+        "caller": "0x000693FE",
+        "can_id": 21,
+        "pdu": 12,
+        "signal": 92,
+        "source": "DAT_0257DE",
+        "wire_offset": 111
+      },
+      {
+        "byte_offset": 0,
+        "caller": "0x000693FE",
+        "can_id": 22,
+        "pdu": 13,
+        "signal": 93,
+        "source": "DAT_0257E0",
+        "wire_offset": 119
+      },
+      {
+        "byte_offset": 0,
+        "caller": "0x000693FE",
+        "can_id": 23,
+        "pdu": 14,
+        "signal": 94,
+        "source": "DAT_0257E2",
+        "wire_offset": 127
+      },
+      {
+        "byte_offset": 0,
+        "caller": "0x000693FE",
+        "can_id": 24,
+        "pdu": 15,
+        "signal": 95,
+        "source": "DAT_0257E4",
+        "wire_offset": 135
+      },
+      {
+        "byte_offset": 0,
+        "caller": "0x000693FE",
+        "can_id": 25,
+        "pdu": 16,
+        "signal": 96,
+        "source": "DAT_0257E6",
+        "wire_offset": 143
+      },
+      {
+        "byte_offset": 0,
+        "caller": "0x000693FE",
+        "can_id": 26,
+        "pdu": 17,
+        "signal": 97,
+        "source": "DAT_0257E8",
+        "wire_offset": 151
+      },
+      {
+        "byte_offset": 0,
+        "caller": "0x000697F4",
+        "can_id": 27,
+        "pdu": 18,
+        "signal": 98,
+        "source": "DAT_0257EA",
+        "wire_offset": 159
+      },
+      {
+        "byte_offset": 1,
+        "caller": "0x000697F4",
+        "can_id": 27,
+        "pdu": 18,
+        "signal": 99,
+        "source": "DAT_0257EC",
+        "wire_offset": 160
+      },
+      {
+        "byte_offset": 0,
+        "caller": "0x000697F4",
+        "can_id": 28,
+        "pdu": 19,
+        "signal": 100,
+        "source": "DAT_0257EE",
+        "wire_offset": 167
+      },
+      {
+        "byte_offset": 0,
+        "caller": "0x000697F4",
+        "can_id": 29,
+        "pdu": 20,
+        "signal": 101,
+        "source": "DAT_0257F0",
+        "wire_offset": 175
+      },
+      {
+        "byte_offset": 0,
+        "caller": "0x000697F4",
+        "can_id": 30,
+        "pdu": 21,
+        "signal": 102,
+        "source": "DAT_0257F2",
+        "wire_offset": 183
+      },
+      {
+        "byte_offset": 0,
+        "caller": "0x000697F4",
+        "can_id": 31,
+        "pdu": 22,
+        "signal": 103,
+        "source": "DAT_0257F4",
+        "wire_offset": 191
+      }
+    ],
+    "table_driven_extracts": 14,
+    "transform_helpers": [
+      {
+        "can_id": "0x090",
+        "form": "s16(raw10 - 0x200)",
+        "helper": "0x0004AFCC",
+        "signals": {
+          "229": "0xFEBE808A",
+          "232": "0xFEBE808C",
+          "235": "0xFEBE808E"
+        }
+      }
+    ]
+  },
+  "live_context": {
+    "b6_frames_in_retained_drives": 0,
+    "note": "retained-drive intersection re-read from camry_8965F3307000_external_lateral_ingress.json; no new vehicle I/O"
+  },
+  "non_com_internal_mirrors": {
+    "0x00057F00": {
+      "FEBEEE00": "FEBE7BBC",
+      "FEBEEE02": "FEBE686C",
+      "FEBEEE12": "FEBE8A24",
+      "FEBEEE1C": "FEBE7DB0",
+      "FEBEEE26": "FEBE71F2"
+    },
+    "0x000FCC00": {
+      "FEBEEF80": "FEBE7BBC",
+      "FEBEEF81": "FEBE686C",
+      "FEBEEF82": "FEBE7567",
+      "FEBEEF83": "FEBE7568",
+      "FEBEEF88": "FEBE71EC",
+      "FEBEEF8A": "FEBE7DA6",
+      "FEBEEF8C": "FEBE7DA8",
+      "FEBEEF8E": "FEBE71F2",
+      "FEBEEF90": "FEBE8B28"
+    },
+    "classification": "internal mirror/configuration class outside generated-COM; FEBE71F2 is a ROM-selected limit, not command magnitude",
+    "into_cone": "FEBE71F2 -> FCC00/FEBEEF8E -> BCBD8/FEBEAC52 -> D0382 saturation limit on dynamic FEBECC4E; FEBEAC04/FEBEAC06 gates (D04AC mode-latch) <- FEBEEE02/FEBEEE12"
+  },
+  "pipeline": {
+    "L1_raw_cells": {
+      "count": 116,
+      "signal243_path": "0x4BB62 auStack_9 -> FEBE80A0",
+      "span": "0xFEBE7FF0..0xFEBE80D6 (+0xFEBE80A0 stack-RMW via 0x4BB62)"
+    },
+    "L2_stage": {
+      "copier": "0x00058074",
+      "edges": 105,
+      "init_only_evidence": "no writer besides 0x58074 constants and 0x59448 zero-init exists in the corpus",
+      "init_only_stage_cells": {
+        "0xFEBEF098": 0,
+        "0xFEBEF099": 0,
+        "0xFEBEF09C": 1,
+        "0xFEBEF0AA": 0,
+        "0xFEBEF1C0": 0
+      },
+      "raw_cells_staged": 98
+    },
+    "L2_unstaged_raw_closure": {
+      "evidence": "each unstaged raw cell is accessed only by its own unpacker, the stage copier, and write-only initializer 0x58C9A; no consumer exists",
+      "unstaged_count": 18
+    },
+    "L3_qualification": {
+      "0xB34xx-B4Dxx": "per-signal qualification records into FEBEB1xx/FEBEB2xx/FEBEB4xx..B9xx (values+flags consumed by 0xBCD66/0xBCD62/0xBCBD8 snapshots, 0xBF3AA telemetry, 0xBE070 diagnostic status)",
+      "0xB93AA": "reads 14 stage cells (0x0AA wheel family 194-201, 0x13B, 0x116, 0x090, 0x0D7) and writes only status cell FEBEB49E",
+      "0xB95xx-B9Dxx/0xBA0xx": "sig246 (0x0D7) statistics/records into FEBEB4A3/7xx/Bxx family; 0xD8 sigs 251-254 and 0x64F sig257 qualification records"
+    },
+    "L3_stage_reader_census": {
+      "in_cluster": 15,
+      "max_reader": "0xBF0EC",
+      "readers": [
+        "0xB3430",
+        "0xB34D4",
+        "0xB3538",
+        "0xB3686",
+        "0xB37DA",
+        "0xB3AD8",
+        "0xB3B06",
+        "0xB3DC0",
+        "0xB3F44",
+        "0xB4370",
+        "0xB4430",
+        "0xB4546",
+        "0xB480C",
+        "0xB48DC",
+        "0xB4948",
+        "0xB49E4",
+        "0xB4C4C",
+        "0xB4D26",
+        "0xB7728",
+        "0xB93AA",
+        "0xB957A",
+        "0xB95F2",
+        "0xB966A",
+        "0xB96E2",
+        "0xB98C8",
+        "0xB9BC2",
+        "0xB9BF0",
+        "0xB9C28",
+        "0xB9CBE",
+        "0xB9D5E",
+        "0xB9EAA",
+        "0xB9FBC",
+        "0xBA052",
+        "0xBA134",
+        "0xBBD02",
+        "0xBBD9C",
+        "0xBCD62",
+        "0xBCD66",
+        "0xBE326",
+        "0xBE3C4",
+        "0xBE43A",
+        "0xBE4C2",
+        "0xBE622",
+        "0xBE65C",
+        "0xBE6E0",
+        "0xBE80E",
+        "0xBE846",
+        "0xBECD0",
+        "0xBECF4",
+        "0xBEF9C",
+        "0xBEFD6",
+        "0xBF0EC"
+      ],
+      "structural_claim": "no function above 0xBF0EC (no C/D-family cluster compute or composition function) reads stage cells directly; the C/D families consume the L4 snapshot bank instead",
+      "total": 52
+    },
+    "L4_snapshot_copiers": {
+      "0xBC96A": {
+        "exact_pairs": 1
+      },
+      "0xBCA08": {
+        "exact_pairs": 13
+      },
+      "0xBCAA6": {
+        "exact_pairs": 1
+      },
+      "0xBCBD8": {
+        "exact_pairs": 46
+      },
+      "0xBCD62": {
+        "exact_pairs": 245
+      },
+      "0xBCD66": {
+        "exact_pairs": 245
+      }
+    },
+    "L4_unique_snapshot_destinations": 306,
+    "group_api_callers": [
+      "0x693FE",
+      "0x697F4"
+    ]
+  },
+  "positive_non_b6_cluster_inputs": [
+    {
+      "can_id": "0x090",
+      "chains": [
+        "sig232t*0x931/0x10 (FEBEF1C8) + sig229t branch -> 0xBE846 -> FEBEBE96 -> snapshot FEBEAE0C (0xBCD66)",
+        "0xC310E integrator: FEBEBF58 += FEBEAE0C - FEBEBFA0; FEBEBFA0 = FEBEBF58*0x400/ROM_0AF564, gated by FEBEBFB1",
+        "sig235t*0x3E77/0x100 (FEBEF1CA) -> 0xBEFD6 -> FEBEBF00 -> snapshot FEBEAF00 -> 0xC310E integrator FEBEBF54/FEBEBF80",
+        "sig233|sig228|sig231 -> 0xBE80E -> FEBEBE8C/FEBEBE8D; 0xBEF9C -> FEBEBF4C/FEBEBF4D",
+        "validity snapshots FEBEACE7/E8/DF/E0/E1 -> 0xC2F26 -> integrator-enable gate FEBEBFB1 (requires FEBEACC0==1, FEBEBF4B==0)",
+        "0xC3C12/0xC3E44 plausibility aggregation -> FEBEC02C/FEBEC043/FEBEC045 flags"
+      ],
+      "classification": "observer/plausibility: 0x090-derived values are integrated and cross-checked but never reach FEBECC50/FEBECC62/FEBEE400..418 as magnitudes",
+      "consumers": [
+        "0xBCD66",
+        "0xBE80E",
+        "0xBE846",
+        "0xBEF9C",
+        "0xBEFD6",
+        "0xB93AA",
+        "0xC2F26",
+        "0xC310E",
+        "0xC3C12",
+        "0xC3E44"
+      ],
+      "geometry": [
+        {
+          "bit": 7,
+          "bits": 1,
+          "byte": 0,
+          "signal": 227
+        },
+        {
+          "bit": 6,
+          "bits": 1,
+          "byte": 0,
+          "signal": 228
+        },
+        {
+          "bit": 0,
+          "bits": 10,
+          "byte": 0,
+          "signal": 229,
+          "transform": "s16(x-0x200) -> FEBE808A"
+        },
+        {
+          "bit": 7,
+          "bits": 1,
+          "byte": 2,
+          "signal": 230
+        },
+        {
+          "bit": 6,
+          "bits": 1,
+          "byte": 2,
+          "signal": 231
+        },
+        {
+          "bit": 0,
+          "bits": 10,
+          "byte": 2,
+          "signal": 232,
+          "transform": "s16(x-0x200) -> FEBE808C"
+        },
+        {
+          "bit": 7,
+          "bits": 1,
+          "byte": 4,
+          "signal": 233
+        },
+        {
+          "bit": 6,
+          "bits": 1,
+          "byte": 4,
+          "signal": 234
+        },
+        {
+          "bit": 0,
+          "bits": 10,
+          "byte": 4,
+          "signal": 235,
+          "transform": "s16(x-0x200) -> FEBE808E"
+        },
+        {
+          "bit": 4,
+          "bits": 4,
+          "byte": 28,
+          "signal": 241
+        }
+      ],
+      "length": 32,
+      "pdu": 40
+    },
+    {
+      "can_id": "0x0D7",
+      "chains": [
+        "sig246 u16 B1:B2 -> clamp(30000)*0x147B>>12 -> 0xBECF4 -> FEBEBEDE -> snapshot FEBEAE02 (0xBCD66)",
+        "FEBEAE02 consumers: CB664 (B6 sig263 command-gate consumer), CB73A assist-activation speed threshold, CBD64, CD2A0, CD426, CD45C, CD590, CDE26, CDFF8 (sig270 percentage-contribution consumer), CE0AE, CE144, CE51C",
+        "sig244 -> stage FEBEF095 -> qualification 0xB7728/0xBECD0 -> FEBEB37C 'Z' flag -> 0xBB7FA handler-branch select -> FEBEAF40",
+        "FEBEAF40 -> snapshot FEBEAC4C (0xBCBD8) -> D042C -> FEBECC66/FEBECC68 -> FEBEAC76/FEBEAC7E -> FEBEE410/FEBEE414"
+      ],
+      "classification": "speed-class gating and handler selection: sig246 bounds/qualifies command paths; sig244 selects a handler pointer branch (FEBEAF40 stores a pointer, not a magnitude); no FEBECC50/FEBECC62 magnitude contribution",
+      "consumers": [
+        "0xBECF4",
+        "0xB7728",
+        "0xBECD0",
+        "0xBB7FA",
+        "0xCB664",
+        "0xCB73A",
+        "0xCDFF8",
+        "0xD042C"
+      ],
+      "geometry": [
+        {
+          "bit": 0,
+          "bits": 8,
+          "byte": 0,
+          "signal": 244
+        },
+        {
+          "bit": 0,
+          "bits": 16,
+          "byte": 1,
+          "signal": 246,
+          "signed": false
+        },
+        {
+          "bit": 0,
+          "bits": 16,
+          "byte": 3,
+          "signal": 247
+        }
+      ],
+      "length": 32,
+      "pdu": 41
+    },
+    {
+      "can_id": "0x675",
+      "chains": [
+        "sigs177..182 -> decode FUN_000BE4A4 + range checks -> 0xBE4C2 -> FEBEBE66..FEBEBE6C (invalid = -1)",
+        "FEBEBE66..6C readers: BA0C4, BDFAC, BE070 (diagnostic status builder), BE134, BE216, BE28E, BF3AA (telemetry)"
+      ],
+      "classification": "CAN-configured parameter/selector cells consumed by diagnostics, telemetry, and plausibility family; no composition magnitude path recovered",
+      "consumers": [
+        "0xBE4C2",
+        "0xBE070",
+        "0xBF3AA",
+        "0xBE134",
+        "0xBE216",
+        "0xBE28E"
+      ],
+      "geometry": [
+        {
+          "bit": 0,
+          "bits": 8,
+          "byte": 0,
+          "signal": 177
+        },
+        {
+          "bit": 0,
+          "bits": 8,
+          "byte": 1,
+          "signal": 178
+        },
+        {
+          "bit": 0,
+          "bits": 8,
+          "byte": 2,
+          "signal": 179
+        },
+        {
+          "bit": 0,
+          "bits": 8,
+          "byte": 3,
+          "signal": 180
+        },
+        {
+          "bit": 0,
+          "bits": 8,
+          "byte": 4,
+          "signal": 181
+        },
+        {
+          "bit": 0,
+          "bits": 8,
+          "byte": 5,
+          "signal": 182
+        }
+      ],
+      "length": 8,
+      "pdu": 33
+    },
+    {
+      "can_id": "0x13B",
+      "chains": [
+        "sig219 stages FEBEF04A/FEBEF04B/FEBEF0A2 -> 0xBCD66 snapshots; sig223 -> FEBEF091 -> snapshot (gate family)",
+        "0xB7728 reads FEBEF094 = B6 signal 243 (staged at 0x58074) and FEBEF093 = FEBE80A5 (raw cell with no extractor anywhere in the corpus, structurally 0): the 0x0D7 sig244 qualifier FEBEB37C is invalidated by B6 sig243 != 0"
+      ],
+      "classification": "gate family whose 0x0D7-qualifier branch is B6-sig243-gated; no magnitude path",
+      "consumers": [
+        "0xBCD66",
+        "0xB93AA",
+        "0xB7728"
+      ],
+      "geometry": [
+        {
+          "bit": 7,
+          "bits": 1,
+          "byte": 0,
+          "signal": 215
+        },
+        {
+          "bit": 2,
+          "bits": 6,
+          "byte": 1,
+          "signal": 219
+        },
+        {
+          "bit": 7,
+          "bits": 1,
+          "byte": 3,
+          "signal": 223
+        },
+        {
+          "bit": 7,
+          "bits": 1,
+          "byte": 5,
+          "signal": 224
+        }
+      ],
+      "length": 8,
+      "pdu": 39
+    }
+  ],
+  "schema": "camry-8965f3307000-command-cone-ingress-v2",
+  "target": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "corpus_function_count": 6065,
+    "software_id": "8965F3307000"
+  }
+}

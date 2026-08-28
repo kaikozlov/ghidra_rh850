@@ -116,6 +116,8 @@ def analyze_one(label: str, path: Path) -> dict:
   hud412: list[tuple[int, bytes, int]] = []
   speeds: list[tuple[int, float, int]] = []
   b6: list[tuple[int, int, int, int]] = []
+  d5: list[tuple[int, bytes]] = []
+  d7: list[tuple[int, bytes]] = []
 
   for seg, t, bus, addr, dat in frames:
     bases[seg] = min(bases.get(seg, t), t)
@@ -131,6 +133,10 @@ def analyze_one(label: str, path: Path) -> dict:
       speeds.append((t, decode_wheel_speed(dat), seg))
     if addr == 0x0B6:
       b6.append((t, seg, bus, len(dat)))
+    if bus == 0 and addr == 0x0D5 and len(dat) >= 5:
+      d5.append((t, dat))
+    elif bus == 0 and addr == 0x0D7 and dat:
+      d7.append((t, dat))
 
   buttons = {name: [] for name in BUTTONS}
   for seg in segs:
@@ -227,6 +233,40 @@ def analyze_one(label: str, path: Path) -> dict:
         "lag_s": round((first_change[0] - ev["start_ns"]) / 1e9, 6) if first_change else None,
       })
 
+  # Exact-F33 EPS moving-mode latch inputs (firmware census, live-baseline §23):
+  # FEBEACCE = 0x0D5 s211 B0[3] (set gate), FEBEACCD = 0x0D7 s243 B0[7] (clear gate),
+  # FEBEAE04/FEBEAE06 = 0x0D5 s212/s213 signed16 B1:B2/B3:B4 monitor channels.
+  def _latch_strata(rows: list[tuple[int, bytes]], intervals: list[tuple[int, int]]) -> dict:
+    sel = [d for t, d in rows if in_intervals(t, intervals)]
+    if not sel:
+      return {"frame_count": 0}
+    return {
+      "frame_count": len(sel),
+      "s211_b0_bit3_set_fraction": round(sum(1 for d in sel if d[0] & 8) / len(sel), 6),
+      "s212_min": min(int.from_bytes(d[1:3], "big", signed=True) for d in sel),
+      "s212_max": max(int.from_bytes(d[1:3], "big", signed=True) for d in sel),
+      "s213_min": min(int.from_bytes(d[3:5], "big", signed=True) for d in sel),
+      "s213_max": max(int.from_bytes(d[3:5], "big", signed=True) for d in sel),
+    }
+
+  everything = [(0, 1 << 62)]
+  eps_latch_inputs = {
+    "definition": (
+      "exact-F33 moving-mode latch inputs: FEBEACCE=0x0D5 s211 B0[3] (set gate), "
+      "FEBEACCD=0x0D7 s243 B0[7] (clear gate), FEBEAE04/FEBEAE06=0x0D5 s212/s213 "
+      "signed16 B1:B2/B3:B4 monitor channels feeding FEBEC600/FEBEC5FC"
+    ),
+    "0x0D5": {
+      "all": _latch_strata(d5, everything),
+      "cruise_active": _latch_strata(d5, cruise_ints),
+      "lateral_hud_candidate": _latch_strata(d5, lateral_ints),
+    },
+    "0x0D7": {
+      "frame_count": len(d7),
+      "s243_b0_bit7_set_fraction": round(sum(1 for _, d in d7 if d[0] & 0x80) / len(d7), 6) if d7 else None,
+    },
+  }
+
   return {
     "source": {"file": str(path.relative_to(REPO)), "sha256": sha256(path), "frame_count": len(frames), "segments": segs},
     "button_events": {name: [{k: v for k, v in e.items() if not k.endswith("_ns")} for e in events] for name, events in buttons.items()},
@@ -246,6 +286,7 @@ def analyze_one(label: str, path: Path) -> dict:
       "b6_count_all_buses": sum(1 for t, *_ in b6 if in_intervals(t, lateral_ints)),
       "intervals": lateral_summary,
     },
+    "eps_latch_inputs": eps_latch_inputs,
     "a8_state_transitions": a8_transitions,
   }
 
@@ -255,7 +296,7 @@ def build() -> dict:
   rises = [r for d in drives.values() for r in d["cruise_active"]["rising_edges"]]
   speed_deltas = [abs(r["set_minus_wheel_kph"]) for r in rises if r["set_minus_wheel_kph"] is not None]
   return {
-    "schema": "camry-2026-cruise-lta-edge-census-v1",
+    "schema": "camry-2026-cruise-lta-edge-census-v2",
     "drives": drives,
     "combined": {
       "cruise_active_duration_s": round(sum(d["cruise_active"]["duration_s"] for d in drives.values()), 6),
@@ -267,11 +308,31 @@ def build() -> dict:
       "cruise_rising_edge_count": len(rises),
       "cruise_rises_with_recent_main": sum(r["main_press_start_s"] is not None for r in rises),
       "max_abs_set_speed_vs_wheel_kph_at_cruise_rise": round(max(speed_deltas), 3) if speed_deltas else None,
+      "eps_latch_inputs": {
+        "d5_s211_set_fraction_cruise_min": min(
+          d["eps_latch_inputs"]["0x0D5"]["cruise_active"]["s211_b0_bit3_set_fraction"] for d in drives.values()),
+        "d5_s211_set_fraction_lateral_min": min(
+          d["eps_latch_inputs"]["0x0D5"]["lateral_hud_candidate"]["s211_b0_bit3_set_fraction"] for d in drives.values()),
+        "d5_s213_abs_max": max(
+          max(abs(d["eps_latch_inputs"]["0x0D5"][s]["s213_min"]),
+              abs(d["eps_latch_inputs"]["0x0D5"][s]["s213_max"]))
+          for d in drives.values() for s in ("all", "cruise_active", "lateral_hud_candidate")),
+        "d7_s243_set_fraction_max": max(
+          (d["eps_latch_inputs"]["0x0D7"]["s243_b0_bit7_set_fraction"] or 0) for d in drives.values()),
+      },
     },
     "interpretation": {
       "cruise": "observed/deterministic: 0x08A byte3=0x08 is a machine-visible cruise operating-state carrier. It toggles after effective MAIN/CANCEL actions and byte10 is the set-speed value in km/h: activation values track independent 0x0AA wheel speed and RES+/SET- adjust it.",
       "lateral_hud_candidate": "bounded: 0x08A byte21/byte24, mirrored 0x081 byte13, and 0x412 display-state changes form a state class distinct from the cruise-main and button-echo classes. Long intervals overlap the operator-reported steering-assistance drive, but no target-native current-Camry OEM name is yet joined, so this is not called LTA-active proof.",
       "b6": "observed/deterministic: B6 remains absent not only globally but throughout machine-recovered cruise-active intervals and throughout the bounded lateral/HUD candidate intervals.",
+      "eps_latch_inputs": (
+        "observed/deterministic: the exact-F33 moving-mode gate inputs are pinned across both "
+        "retained drives: 0x0D5 s211 is set in 100% of frames inside both cruise-active and "
+        "lateral/HUD candidate intervals while 0x0D7 s243 is never set, so the "
+        "FEBEC5F3/FEBEC5F4 moving-mode family is a generic driving-state mode rather than a "
+        "Class-L discriminator, and the FEBEC5EE assist contribution fed by 0x0D5 s213 stays "
+        "zero because s213 is identically zero in these drives."
+      ),
       "production_output_authorized": False,
     },
   }
