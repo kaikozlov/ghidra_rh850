@@ -1905,3 +1905,22 @@ paths = [
 [suite.knowledge_index]
 tests = ["tests/verify_knowledge_index.py"]
 oracle = "documentation_lint"
+
+[suite.camry_8965f3307000_external_lateral_ingress]
+tests = ["tests/verify_camry_8965F3307000_external_lateral_ingress.py"]
+oracle = "dynamic_trace"
+paths = [
+  "tools/build_camry_8965F3307000_external_lateral_ingress.py",
+  "tools/camry_f33_corpus.py",
+  "data/analysis_targets.json",
+  "firmware/camry-8965F3307000/CodeFlash.bin",
+  "data/generated/camry-8965F3307000/decompilations.jsonl",
+  "data/generated/camry_8965F3307000_external_lateral_ingress.json",
+  "data/generated/camry_8965F3307000_codeflash.json",
+  "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
+  "targets/camry-2026/raw-20260827/",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/variants/camry-2026-tss3-opendbc-port.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/PRIORITIES.md",
+]

@@ -1,0 +1,654 @@
+{
+  "b6_to_command_torque": {
+    "classification": "positive downstream corroboration of the already-proved protected B6 target-angle ingress",
+    "gtsplus_terminal": "0x1C02 Command Value Torque",
+    "selected_chain": [
+      "CBA80 cooperative target state",
+      "D039E command composition",
+      "D042C scaling/clamp",
+      "FEBECC62",
+      "D0AAE -> FEBEAC56",
+      "BF33E -> FEBEE40A",
+      "5D5E0/5C6D8 -> FEBE6772",
+      "RDBI 0x1C02"
+    ],
+    "target_snapshot": "FEBEAE90"
+  },
+  "boundary": [
+    "The two drives do not machine-prove an exact factory-LTA-active interval.",
+    "This census closes generated scalar COM plus the generic group-receive surface represented by exact F33 configuration; it does not prove the absence of DMA/peripheral mutation, diagnostics, computed aliases outside the recovered maps, or another internal controller path.",
+    "Bus1 0x180..0x18C traffic is upstream candidate traffic only: those arbitration IDs are not in the exact F33 normal Rx descriptor table and cannot directly be the EPS normal-CAN command.",
+    "GTS+ supplies diagnostic names/DIDs, not a CAN-ID database; CAN-to-name joins are through exact F33 firmware dataflow."
+  ],
+  "conclusion": {
+    "b6": "Protected 0x0B6 remains the only positively recovered external target-steering-angle ingress and now has selected downstream corroboration to Toyota-named 0x1C02 Command Value Torque, but it is absent in both relay-correct drives.",
+    "next": "Do not search another arbitrary accepted EPS CAN ID first. Synchronize the FRC 0x1601 LTA-active oracle with relay-correct CAN. If LTA is machine-proved active while B6 remains absent, move the search outside ordinary EPS generated-COM ingress: upstream FRC/Brake transformation, an internal/non-COM path, or another controller/peripheral path.",
+    "normal_com": "Among exact F33 normal generated-COM signed fields >=12 bits, the two observed non-B6 candidates are 0x0D5 monitor channels and 0x115 Engine Revolution; 0x025 is measured steering feedback; 0x1C5/0x64F are absent. The generic group receive PDUs 0x013..0x01F are also absent. No observed ordinary EPS-CAN COM field besides B6 is identified as an external steering target/command.",
+    "production_output_authorized": false
+  },
+  "live_intersection": {
+    "combined_incoming_frames": 3574703,
+    "d5_signed16_b1_b2": {
+      "count": 55793,
+      "max": 11,
+      "min": -5,
+      "unique": 17
+    },
+    "d5_signed16_b3_b4": {
+      "count": 55793,
+      "max": 0,
+      "min": 0,
+      "unique": 1
+    },
+    "id115_signed16_b0_b1": {
+      "count": 47384,
+      "max": 2884,
+      "min": 0,
+      "unique": 1743
+    },
+    "selected_counts": {
+      "0x025/32": {
+        "0": 111507,
+        "1": 0,
+        "2": 111517
+      },
+      "0x0B6/32": {
+        "0": 0,
+        "1": 0,
+        "2": 0
+      },
+      "0x0D5/8": {
+        "0": 55793,
+        "1": 0,
+        "2": 55795
+      },
+      "0x115/8": {
+        "0": 47384,
+        "1": 0,
+        "2": 47384
+      },
+      "0x1C5/8": {
+        "0": 0,
+        "1": 0,
+        "2": 0
+      },
+      "0x64F/8": {
+        "0": 0,
+        "1": 0,
+        "2": 0
+      }
+    }
+  },
+  "normal_rx": {
+    "accepted": [
+      {
+        "can_fd": false,
+        "can_id": "0x3B0",
+        "length": 8,
+        "pdu": 5
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x63B",
+        "length": 8,
+        "pdu": 6
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x624",
+        "length": 8,
+        "pdu": 7
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x63D",
+        "length": 8,
+        "pdu": 8
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x00F",
+        "length": 8,
+        "pdu": 9
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x013",
+        "length": 8,
+        "pdu": 10
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x014",
+        "length": 8,
+        "pdu": 11
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x015",
+        "length": 8,
+        "pdu": 12
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x016",
+        "length": 8,
+        "pdu": 13
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x017",
+        "length": 8,
+        "pdu": 14
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x018",
+        "length": 8,
+        "pdu": 15
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x019",
+        "length": 8,
+        "pdu": 16
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01A",
+        "length": 8,
+        "pdu": 17
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01B",
+        "length": 8,
+        "pdu": 18
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01C",
+        "length": 8,
+        "pdu": 19
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01D",
+        "length": 8,
+        "pdu": 20
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01E",
+        "length": 8,
+        "pdu": 21
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01F",
+        "length": 8,
+        "pdu": 22
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x0D0",
+        "length": 8,
+        "pdu": 23
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x3BF",
+        "length": 8,
+        "pdu": 24
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x127",
+        "length": 8,
+        "pdu": 25
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x115",
+        "length": 8,
+        "pdu": 26
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x116",
+        "length": 8,
+        "pdu": 27
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x1C5",
+        "length": 8,
+        "pdu": 28
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x294",
+        "length": 8,
+        "pdu": 29
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x51E",
+        "length": 8,
+        "pdu": 30
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x611",
+        "length": 8,
+        "pdu": 31
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x2D1",
+        "length": 8,
+        "pdu": 32
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x675",
+        "length": 8,
+        "pdu": 33
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x2E8",
+        "length": 8,
+        "pdu": 34
+      },
+      {
+        "can_fd": true,
+        "can_id": "0x025",
+        "length": 32,
+        "pdu": 35
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x0AA",
+        "length": 8,
+        "pdu": 36
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x101",
+        "length": 8,
+        "pdu": 37
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x0D5",
+        "length": 8,
+        "pdu": 38
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x13B",
+        "length": 8,
+        "pdu": 39
+      },
+      {
+        "can_fd": true,
+        "can_id": "0x090",
+        "length": 32,
+        "pdu": 40
+      },
+      {
+        "can_fd": true,
+        "can_id": "0x0D7",
+        "length": 32,
+        "pdu": 41
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x0D8",
+        "length": 8,
+        "pdu": 42
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x64F",
+        "length": 8,
+        "pdu": 43
+      },
+      {
+        "can_fd": true,
+        "can_id": "0x0B6",
+        "length": 32,
+        "pdu": 44
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x403",
+        "length": 8,
+        "pdu": 45
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x490",
+        "length": 1,
+        "pdu": 46
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x1DA",
+        "length": 8,
+        "pdu": 47
+      }
+    ],
+    "descriptor_count": 43,
+    "descriptor_table": "0x00021FE8",
+    "scalar_receive_call_count": 116,
+    "signed_12plus_candidates": [
+      {
+        "bit_offset": 0,
+        "bits": 12,
+        "byte_offset": 0,
+        "can_fd": true,
+        "can_id": 37,
+        "classification": "measured-feedback",
+        "destination_expression": "&DAT_febe8048",
+        "evidence": "Steering Angle; target-native 0x1037 join",
+        "length": 32,
+        "live_counts": {
+          "0": 111507,
+          "1": 0,
+          "2": 111517
+        },
+        "pdu": 35,
+        "signal": 187,
+        "signed": true,
+        "unpacker": "0x0004B59E"
+      },
+      {
+        "bit_offset": 0,
+        "bits": 12,
+        "byte_offset": 4,
+        "can_fd": true,
+        "can_id": 37,
+        "classification": "measured-feedback",
+        "destination_expression": "puVar2 + -0x37b6",
+        "evidence": "Steering Angle Velocity; target-native 0x1036 join",
+        "length": 32,
+        "live_counts": {
+          "0": 111507,
+          "1": 0,
+          "2": 111517
+        },
+        "pdu": 35,
+        "signal": 189,
+        "signed": true,
+        "unpacker": "0x0004B59E"
+      },
+      {
+        "bit_offset": 0,
+        "bits": 16,
+        "byte_offset": 4,
+        "can_fd": true,
+        "can_id": 182,
+        "classification": "external-lateral-command",
+        "destination_expression": "puVar2 + -0x3748",
+        "evidence": "Target Steering Angle; protected B6 cooperative-control ingress",
+        "length": 32,
+        "live_counts": {
+          "0": 0,
+          "1": 0,
+          "2": 0
+        },
+        "pdu": 44,
+        "signal": 262,
+        "signed": true,
+        "unpacker": "0x0004BD46"
+      },
+      {
+        "bit_offset": 0,
+        "bits": 16,
+        "byte_offset": 1,
+        "can_fd": false,
+        "can_id": 213,
+        "classification": "monitor/plausibility",
+        "destination_expression": "&DAT_febe8072",
+        "evidence": "saturating snapshot -> C9D18 threshold monitor; DEM event C9 unpopulated",
+        "length": 8,
+        "live_counts": {
+          "0": 55793,
+          "1": 0,
+          "2": 55795
+        },
+        "pdu": 38,
+        "signal": 212,
+        "signed": true,
+        "unpacker": "0x0004B86E"
+      },
+      {
+        "bit_offset": 0,
+        "bits": 16,
+        "byte_offset": 3,
+        "can_fd": false,
+        "can_id": 213,
+        "classification": "monitor/plausibility",
+        "destination_expression": "puVar2 + -0x378c",
+        "evidence": "saturating snapshot -> C9CAA threshold monitor; DEM event C8 unpopulated",
+        "length": 8,
+        "live_counts": {
+          "0": 55793,
+          "1": 0,
+          "2": 55795
+        },
+        "pdu": 38,
+        "signal": 213,
+        "signed": true,
+        "unpacker": "0x0004B86E"
+      },
+      {
+        "bit_offset": 0,
+        "bits": 16,
+        "byte_offset": 0,
+        "can_fd": false,
+        "can_id": 277,
+        "classification": "engine-domain",
+        "destination_expression": "&DAT_febe8014",
+        "evidence": "dataflow terminates at GTS+ DID1032 Engine Revolution",
+        "length": 8,
+        "live_counts": {
+          "0": 47384,
+          "1": 0,
+          "2": 47384
+        },
+        "pdu": 26,
+        "signal": 134,
+        "signed": true,
+        "unpacker": "0x0004B12E"
+      },
+      {
+        "bit_offset": 0,
+        "bits": 16,
+        "byte_offset": 2,
+        "can_fd": false,
+        "can_id": 453,
+        "classification": "not-observed",
+        "destination_expression": "&DAT_febe801e",
+        "evidence": "accepted signed16 field; absent in both relay-correct drives",
+        "length": 8,
+        "live_counts": {
+          "0": 0,
+          "1": 0,
+          "2": 0
+        },
+        "pdu": 28,
+        "signal": 141,
+        "signed": true,
+        "unpacker": "0x0004B1F6"
+      },
+      {
+        "bit_offset": 6,
+        "bits": 18,
+        "byte_offset": 2,
+        "can_fd": false,
+        "can_id": 1615,
+        "classification": "not-observed",
+        "destination_expression": "&DAT_febe80ac",
+        "evidence": "accepted signed18 field; absent in both relay-correct drives",
+        "length": 8,
+        "live_counts": {
+          "0": 0,
+          "1": 0,
+          "2": 0
+        },
+        "pdu": 43,
+        "signal": 255,
+        "signed": true,
+        "unpacker": "0x0004BCC0"
+      },
+      {
+        "bit_offset": 0,
+        "bits": 18,
+        "byte_offset": 4,
+        "can_fd": false,
+        "can_id": 1615,
+        "classification": "not-observed",
+        "destination_expression": "puVar2 + -0x3750",
+        "evidence": "accepted signed18 field; absent in both relay-correct drives",
+        "length": 8,
+        "live_counts": {
+          "0": 0,
+          "1": 0,
+          "2": 0
+        },
+        "pdu": 43,
+        "signal": 257,
+        "signed": true,
+        "unpacker": "0x0004BCC0"
+      }
+    ]
+  },
+  "schema": "camry-8965f3307000-external-lateral-ingress-v1",
+  "sources": {
+    "b6_static": {
+      "path": "data/generated/camry_8965F3307000_codeflash.json",
+      "sha256": "34ed0a4d47e0e9e52f412d0d823b3b84dcd1bef267fca18207c8d137abfe10c2"
+    },
+    "drive_artifacts": [
+      {
+        "path": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+        "sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5",
+        "size": 14639570
+      },
+      {
+        "path": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+        "sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a",
+        "size": 24952076
+      }
+    ],
+    "gtsplus_semantics": {
+      "path": "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
+      "sha256": "ffab4fad18b249eb5fe0bcf60afd69565165d9214a9b9beb0886069c55f1f670"
+    }
+  },
+  "special_paths": {
+    "0x0D5": {
+      "classification": "monitor/plausibility inputs; no target-angle/command-torque dataflow recovered",
+      "dem_events": [
+        "0x00C9 unpopulated",
+        "0x00C8 unpopulated"
+      ],
+      "live": {
+        "signal212": {
+          "count": 55793,
+          "max": 11,
+          "min": -5,
+          "unique": 17
+        },
+        "signal213": {
+          "count": 55793,
+          "max": 0,
+          "min": 0,
+          "unique": 1
+        }
+      },
+      "path": [
+        "FEBE8072/8074",
+        "FEBEF1BC/F1BE",
+        "FEBEAE04/AE06",
+        "C9D18/C9CAA monitor paths"
+      ],
+      "thresholds": [
+        100,
+        1000
+      ],
+      "wire": [
+        "signal212 signed16 B1:B2",
+        "signal213 signed16 B3:B4"
+      ]
+    },
+    "0x115": {
+      "classification": "engine-domain readiness/measurement input; not lateral command",
+      "gtsplus_name": "Engine Revolution",
+      "live": {
+        "count": 47384,
+        "max": 2884,
+        "min": 0,
+        "unique": 1743
+      },
+      "path": [
+        "FEBE8014",
+        "FEBEF194",
+        "BE622/BE65C",
+        "FEBEBE82",
+        "BF3AA",
+        "FEBEE890",
+        "RDBI 0x1032"
+      ],
+      "wire": "signal134 signed16 B0:B1"
+    },
+    "generic_group_receive": {
+      "callers": [
+        "0x000693FE",
+        "0x000697F4"
+      ],
+      "can_ids": [
+        "0x013",
+        "0x014",
+        "0x015",
+        "0x016",
+        "0x017",
+        "0x018",
+        "0x019",
+        "0x01A",
+        "0x01B",
+        "0x01C",
+        "0x01D",
+        "0x01E",
+        "0x01F"
+      ],
+      "classification": "generic group/non-scalar receive route is absent in both captured drives",
+      "copy_function": "0x0007E72A",
+      "live_total": 0,
+      "signal_ids": [
+        "0x5A",
+        "0x5B",
+        "0x5C",
+        "0x5D",
+        "0x5E",
+        "0x5F",
+        "0x60",
+        "0x61",
+        "0x62",
+        "0x63",
+        "0x64",
+        "0x65",
+        "0x66",
+        "0x67"
+      ]
+    }
+  },
+  "target": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "corpus_function_count": 6065,
+    "software_id": "8965F3307000"
+  }
+}

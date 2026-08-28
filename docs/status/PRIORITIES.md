@@ -257,6 +257,19 @@ remain policy choices requiring conservative dynamic validation, not values to i
 from representation clamps. Canonical port report:
 [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md).
 
+**VAR-065 inverse-ingress update:** do not spend the next pass guessing another ordinary
+EPS CAN command. Exact F33 has only nine signed generated-COM fields >=12 bits. The
+observed non-B6 candidates are now closed: `0x025` is measured angle/rate feedback;
+`0x115` terminates at current-GTS+ DID1032 **Engine Revolution**; the two `0x0D5`
+signed16 fields terminate in disabled/unpopulated threshold-monitor events and are tiny/
+zero live. `0x1C5` and `0x64F` are absent, and the generic group receive surface maps only
+to absent `0x013..0x01F`. B6 additionally reaches exact-GTS+ DID1C02 **Command Value
+Torque** downstream. The next discriminator remains synchronized FRC `0x1601`: if it
+proves stock LTA active with B6 still absent, escalate specifically to upstream FRC/Brake
+transformation or a non-COM/internal EPS path. The bus1 `0x180..0x18C` family is useful
+upstream search vocabulary but cannot directly be the F33 normal-CAN command because
+none of those IDs is accepted by the exact EPS Rx table.
+
 COM-013 closes much more of the whole-vehicle side than the earlier EPS-only
 roadmap. TSS generation and SecOC/TSK are **orthogonal** (CORR-108). The public
 2023 route already proved partial state continuity; Span's newly retained July-29
