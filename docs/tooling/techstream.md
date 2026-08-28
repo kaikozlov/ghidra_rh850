@@ -1923,8 +1923,9 @@ The recovered control path is:
 2. `DiagCommCtrlMain` constructs `CDbDllResRecords` and asks the DB for record
    class **`0x113`**. The corresponding master table is type 19
    **`CDbDllTable`**: `(ECU/category, DLL-role) -> plugin filename`.
-   The controller `LoadLibraryA`s that filename, resolves the single exported
-   **`Execute`**, and calls it under the shared communication critical section.
+   V18 uses `LoadLibraryA`; current GTS+ uses `LoadLibraryExW(..., flags=8)`.
+   Both resolve the single exported **`Execute`** and call it under the shared
+   communication critical section.
 3. ECU feature discovery follows the same model. `GetEcuFuncList.dll` first
    consults `CFuncInfoCache`; on a miss it reads record classes **`0x11A`**
    (`CDbEcuFuncInfoTable`, master type 26) and **`0x11B`**
@@ -1953,6 +1954,100 @@ The recovered control path is:
 7. `CCommCachePlus::CommFrameSendReceive` consumes the materialized frame and
    terminates in `KGP_CommFrameCtrl::SendInt*` / `Receive*`, selecting ordinary,
    extended, or no-session variants from the frame/transport state.
+
+The current GTS+ **outer command/session lifecycle is now instruction-closed** as
+well. `CCommandCtrl::CommandExecute @ 0x1000F060` passes command `m_dwCmd`
+(`+0x08`) and `m_dwEcuId` (`+0x1C`) to its role/category resolver, loads the
+selected plugin, resolves `Execute`, clears the controller-owned cancel flag,
+and invokes the plugin with one six-dword context containing command, response,
+`CDataCtrl`, `CCommFrameCtrl`, `CDataMonitorCtrl`, and cancel-flag pointers.
+`CCommFrameCtrl::LineCriticalSection(1)` is taken immediately before execution
+and `(2)` releases it afterward. This is the host-side serialization contract:
+one selected command plugin independently owns the J2534 line while another
+plugin is executing.
+
+Current `KGP_CommFrameCtrl.dll` then closes the transport boundary below those
+plugins. `SendInt`/`SendIntExt` converge on `SendProc @ 0x10037F10`, `Receive @
+0x100375B0` is the paired receive path, and `LoadDeviceDll @ 0x100363E0`
+explicitly loads **`J2534Ctrl.dll`** with `LoadLibraryExW`. The framework also
+owns persistent diagnostic-session state rather than requiring each plugin to
+implement keepalive independently. `SendTestPresentThread @ 0x10038A20` runs on
+an approximately **2,000-ms** cadence and updates `CCommFrameCtrl +0x29` from
+its response; `WatchIdleThread @ 0x1003A250` separately handles roughly
+3-second line-idle state.
+
+The name `TestPresentStart` is slightly misleading for the current Camry P5
+categories. `TestPresentStart @ 0x10039E70` calls DB class `0x112` with two keys,
+**K1 = ECU/category and K2 = `0xDD`**. Current `CDbFuncCommFrameTable` proves the
+first key is row u16 `+0x00` and the second is u16 `+0x02`. Hybrid397, Brake435,
+and FRC498 therefore all resolve selector `0xDD` to CommSet1/frame `0x2B55`:
+**`22 F1 86`**, receive mask `FF`, positive-SID check `62`. The keepalive thread
+validates `62 F1 86 xx` and stores response byte 3 as its current-session byte.
+Thus current GTS+ periodically **reads the active diagnostic session while also
+refreshing diagnostic activity**. The master separately contains selector
+`0x66` = `3E 00` and selector `0x67` = `3E 00` with positive check `7E`; those
+frames are real but are not the request buffered by this current
+`TestPresentStart` path for 397/435/498.
+
+The same three categories share explicit session-control operands:
+selector `0xD1` = **`10 01`** (default session) and selector `0xD2` = **`10 03`**
+(extended session), both CommSet1. The actual wire owner is not the Data Monitor
+wrapper: it is **`KGP_CommFrameCtrl::SendProc @ 0x10037F10`**. SendProc reads
+master class `0x110` / `CDbEcuCategoryTable` byte `+0x48`, masks the low five
+bits, and selects the P5-family session machinery for values `0x14/0x15/0x16`.
+Hybrid397 (`HV_P5.ddb`), Brake435 (`ABS_P5.ddb`), and FRC498 (`FRC_P5.ddb`) all
+have exact value **`0x14`**. The Phase5 request classifier at vtable `+0x100`
+(`0x100292F0`) returns class 2 for service bytes `>=0x10`. When class 2 is
+selected and `CCommFrameCtrl +0x29` is not already session 3, the normal path
+invokes the Phase5 vtable `+0x50` sender first with `0xD1`, then `0xD2`, and
+records software session 3. That sender is `0x10028490`: argument 1 is the
+target ECU/category key, argument 5 is the selector, and the function performs
+`GetDbRecord(0x112, category, selector)`, follows the resulting class-`0x111`
+CommFrame, materializes its send bytes, and dispatches through the protocol
+object. For these Camry categories the automatic wire sequence is therefore
+exactly **`10 01` -> `10 03`**. Class-1 requests (`0x01..0x0F`) instead use the
+DB-backed `0xD1` path and record software session 0.
+
+There is one narrow exception to that normal session-judgment path.
+`SetSessionJudgmentFlg @ 0x10039690` writes `1` to `CCommFrameCtrl +0x398`;
+`ClearSessionJudgmentFlg @ 0x100326C0` writes `0`. In the SendProc branch that
+checks this flag, value 1 routes both `0xD1` and `0xD2` through Phase5 vtable
+`+0x54`. The Phase5 implementation at `0x100143A0` is exactly `xor eax,eax;
+ret 0x18`, so no session-control frame is transmitted; SendProc then clears the
+flag and still advances its software session byte to 3 on the no-op success
+path. A current-bin import census finds external use of these Set/Clear APIs
+only in `NoConfGenComRes_DT.dll`, around `SendIntForced`; ordinary P5 Data
+Monitor/Active-Test code does not import them. This exception must therefore not
+be generalized into the ordinary P5 monitor lifecycle.
+
+`DataMonitorPhase5_DT.dll` does still reference `0xD1`/`0xD2`, but those
+references are **DRS journaling, not transport**. The `+0x1DC` sink is the DRS writer path; the D1 callsite creates `CDrsChangDefaultSession` and the D2
+callsite creates `CDrsChangExtendedSession`, mirroring a session change already
+owned by KGP. The worker itself remains command-driven: command 9 starts Data
+Monitor, 10 stops it, `0x0B` launches the direct Active-Test path, and `0x0C`
+handles Active-Test initialization. Low-level `DataListIF` polling can use
+no-init/no-session send variants because the outer session judgment belongs to
+KGP `SendProc`, not because the session transition is absent.
+
+Security is now narrower than the earlier generic caveat too. During current P5
+monitor setup, `DataMonitorPhase5_DT.dll @ 0x10013DB2` calls
+`CheckEcuFunc(dataCtrl, ecu, 3, 0x50, 0, nullptr)` before arming the phase5
+security-release interface. The materialized V18 `CheckEcuFunc` implementation
+confirms that this API walks the cached ECU -> function -> detail capability
+hierarchy, and current master type27 `CDbEcuFuncDetailsTable` has **no function
+3 / detail `0x50` row for Hybrid397, Brake435, or FRC498**. The current ordinary
+P5 monitor plan therefore does not statically advertise that security-release
+capability for those three categories. Teardown still contains conditional
+`CancelSecurity` support for Toyota/Subaru/Suzuki mode families, so this is a
+category/operation-specific negative, not a blanket claim that every Toyota
+utility is authentication-free.
+
+Finally, Toyota **check mode is a different state machine**. Hybrid397 alone
+binds roles `0x17` `ConfCheckModeP5_DT.dll` and `0x18`
+`ChangeCheckModeP5_DT.dll`; Brake435/FRC498 do not. Those Hybrid plugins use
+RoutineControl RID `0x1002`: selector3 `31 01 10 02`, selector4 `31 02 10 02`,
+and selector5 `31 03 10 02` with result check `71 03 10 02 01`. They are
+maintenance/check-mode operations, not aliases for UDS DiagnosticSessionControl.
 
 This makes the selector numbers used throughout Toyota's command DLLs effectively
 **operands into a diagnostic database VM**. The DLL contributes sequencing,
@@ -2012,7 +2107,7 @@ The shared **current P5 routine Active-Test executor** is now closed alongside t
 
 `DataMonitorPhase5_DT.dll` `CDataMonitorThreadBase::virtual_108 @ 0x1000E710` is the current routine materializer. Selector `0xD5` is **`31 01 FF FF`** / mask `FF FF` / check `71 01`; selector `0xD6` is **`31 02 FF FF`** / check `71 02`; selector `0xD7` is **`31 03 FF FF`** / check `71 03`. The builder replaces bytes 2/3 with the selected type71 RID. Start appends `GetRoutineCommand` bytes and merges runtime value/button bytes only where `GetOutputMaskValue` / `GetOutputMaskButtonData` explicitly authorize them; stop analogously appends `GetRoutineStopCommand`. `CDataMonitorThreadP5::virtual_28` calls that builder through vtable `+0x6C`, then uses the same phase5 interface `+0x2C` as direct tests with `ActiveTestType=1`. `DataListIF::CCommEventPhase5AT::ActiveTestStart` therefore re-prepends **`0x31`**, de-duplicates/replaces routine queue entries by RID, and `CheckRcvFrame` requires **`0x71`**. The queued bytes reach the same P5 J2534 `SendIntExt` sink as the direct executor. Independent role `0xD4` `SingleRoutineActTstP5_DT.dll` corroborates the sequence as D5 start -> 200 ms -> D7 result request -> 5000 ms on success -> D6 stop.
 
-The steering-relevant current witness stays deliberately narrow and strong. `FRC_P5` Active-Test key `0xA429` is **LTA Steering Vibration**, RID `0x1588`; its routine-command, stop-command, value-mask, and button-mask variable refs are all zero, while status key `+0x30` is `2`. There is therefore no hidden type71 parameter/setpoint source in the recovered current executor. Its exact current requests are **`31 01 15 88`** (start), **`31 02 15 88`** (stop), and **`31 03 15 88`** (request results). This does not mean the downstream FRC->vehicle-network effect is known, nor that an outer diagnostic session/authentication is unnecessary. It also does not overwrite TMS-041: the pinned V18 `SingleRoutineActTstP5_DT.dll` family used proprietary `21 E2` / `61 E2` framing, so the two observations are retained as a versioned transport change. `tools/gts active-test FRC_P5 0xA429` exposes the current fixed request plan, and `tools/gts active-test HV_P5 0x1` provides the analogous direct-test plan; both commands are offline/read-only and send nothing to a vehicle.
+The steering-relevant current witness stays deliberately narrow and strong. `FRC_P5` Active-Test key `0xA429` is **LTA Steering Vibration**, RID `0x1588`; its routine-command, stop-command, value-mask, and button-mask variable refs are all zero, while status key `+0x30` is `2`. There is therefore no hidden type71 parameter/setpoint source in the recovered current executor. Its exact current requests are **`31 01 15 88`** (start), **`31 02 15 88`** (stop), and **`31 03 15 88`** (request results). This does not mean the downstream FRC->vehicle-network effect is known. The shared current-P5 session/keepalive wrapper is closed above; live ECU state and operation success remain separate from the fixed routine payload. It also does not overwrite TMS-041: the pinned V18 `SingleRoutineActTstP5_DT.dll` family used proprietary `21 E2` / `61 E2` framing, so the two observations are retained as a versioned transport change. `tools/gts active-test FRC_P5 0xA429` exposes the current fixed request plan, and `tools/gts active-test HV_P5 0x1` provides the analogous direct-test plan; both commands are offline/read-only and send nothing to a vehicle.
 
 Current role `0x63` closes **multi-control Active Test initialization** through `GetMultiActInitP5_DT.dll` (42,512 B; SHA-256 `ada49114…d1fc7`). The generic current body first queries type33 `CDbMultiDidIdTable` with the requested group ID: type33 u16 `+0x00` is the group key, `+0x02` is a member direct Active Test ID, unaligned u32 `+0x06` is copied into the internal `CSortData` ordering field, and u8 `+0x0B` is copied as auxiliary member metadata. It sorts those members, looks each up as type68 u16 `+0x20`, then applies the same direct-member initialization state machine as role `0x08`: type68 `+0x39` selects initial-read mode; mode0 resolves selector `0xCA` (`22FFFF -> 62`) and replaces request bytes1/2 with type68 DID `+0x34`, using `+0x28/+0x2A` as the bit slice; `+0x3C` drives panel-key handling; final member output joins type12/13/14/15 metadata into `CCmdActTstSignalDataInit`. In the current generic P5 corpus, only category372 `Engine_P5` among the 87 `GetMultiActInitP5_DT.dll` bindings contains type33 rows: 10 memberships forming five two-member groups. Exact witness group `0x004C` **Pilot Injection Volume** expands in order to `0x004D` **Pilot Injection Volume Select Cylinder** (DID `0x284A`, bits0..7) and `0x004E` **Pilot Injection Volume Value** (same DID, bits8..15), so both initial reads materialize as `22 28 4A -> 62`. Hybrid category397 binds role `0x63` but has no type33 table and therefore no static multi-control group. `tools/gts command Engine_P5 0x63 --item 0x4C` reproduces the expansion. Boundary: this is initialization/decomposition; it does not by itself recover the later value-write execution request.
 
@@ -3035,6 +3130,6 @@ Techstream on a vehicle or bench. The findings describe the *capability* and
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [TMS-001](../reference/index.md#finding-tms-001), [TMS-002](../reference/index.md#finding-tms-002), [TMS-003](../reference/index.md#finding-tms-003), [TMS-004](../reference/index.md#finding-tms-004), [TMS-005](../reference/index.md#finding-tms-005), [TMS-006](../reference/index.md#finding-tms-006), [TMS-007](../reference/index.md#finding-tms-007), [TMS-008](../reference/index.md#finding-tms-008), [TMS-009](../reference/index.md#finding-tms-009), [TMS-010](../reference/index.md#finding-tms-010), [TMS-012](../reference/index.md#finding-tms-012), [TMS-013](../reference/index.md#finding-tms-013), [TMS-017](../reference/index.md#finding-tms-017), [TMS-019](../reference/index.md#finding-tms-019), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [TMS-024](../reference/index.md#finding-tms-024), [TMS-025](../reference/index.md#finding-tms-025), [TMS-026](../reference/index.md#finding-tms-026), [TMS-027](../reference/index.md#finding-tms-027), [TMS-028](../reference/index.md#finding-tms-028), [TMS-029](../reference/index.md#finding-tms-029), [TMS-030](../reference/index.md#finding-tms-030), [TMS-031](../reference/index.md#finding-tms-031), [TMS-032](../reference/index.md#finding-tms-032), [TMS-033](../reference/index.md#finding-tms-033), [TMS-034](../reference/index.md#finding-tms-034), [TMS-035](../reference/index.md#finding-tms-035), [TMS-036](../reference/index.md#finding-tms-036), [TMS-037](../reference/index.md#finding-tms-037), [TMS-038](../reference/index.md#finding-tms-038), [TMS-039](../reference/index.md#finding-tms-039), [TMS-040](../reference/index.md#finding-tms-040), [TMS-041](../reference/index.md#finding-tms-041), [TMS-042](../reference/index.md#finding-tms-042), [TMS-043](../reference/index.md#finding-tms-043), [TMS-044](../reference/index.md#finding-tms-044), [TMS-045](../reference/index.md#finding-tms-045), [TMS-046](../reference/index.md#finding-tms-046), [TMS-047](../reference/index.md#finding-tms-047), [TMS-048](../reference/index.md#finding-tms-048), [TMS-049](../reference/index.md#finding-tms-049), [TMS-050](../reference/index.md#finding-tms-050), [TMS-051](../reference/index.md#finding-tms-051), [TMS-052](../reference/index.md#finding-tms-052), [TMS-057](../reference/index.md#finding-tms-057), [TMS-061](../reference/index.md#finding-tms-061), [TMS-062](../reference/index.md#finding-tms-062), [TMS-063](../reference/index.md#finding-tms-063), [TMS-065](../reference/index.md#finding-tms-065), [TMS-066](../reference/index.md#finding-tms-066), [TMS-067](../reference/index.md#finding-tms-067), [TMS-068](../reference/index.md#finding-tms-068), [TMS-069](../reference/index.md#finding-tms-069), [TMS-070](../reference/index.md#finding-tms-070), [TMS-071](../reference/index.md#finding-tms-071), [TMS-072](../reference/index.md#finding-tms-072), [TMS-073](../reference/index.md#finding-tms-073), [VAR-064](../reference/index.md#finding-var-064)
+- Findings with this document as canonical home: [TMS-001](../reference/index.md#finding-tms-001), [TMS-002](../reference/index.md#finding-tms-002), [TMS-003](../reference/index.md#finding-tms-003), [TMS-004](../reference/index.md#finding-tms-004), [TMS-005](../reference/index.md#finding-tms-005), [TMS-006](../reference/index.md#finding-tms-006), [TMS-007](../reference/index.md#finding-tms-007), [TMS-008](../reference/index.md#finding-tms-008), [TMS-009](../reference/index.md#finding-tms-009), [TMS-010](../reference/index.md#finding-tms-010), [TMS-012](../reference/index.md#finding-tms-012), [TMS-013](../reference/index.md#finding-tms-013), [TMS-017](../reference/index.md#finding-tms-017), [TMS-019](../reference/index.md#finding-tms-019), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [TMS-024](../reference/index.md#finding-tms-024), [TMS-025](../reference/index.md#finding-tms-025), [TMS-026](../reference/index.md#finding-tms-026), [TMS-027](../reference/index.md#finding-tms-027), [TMS-028](../reference/index.md#finding-tms-028), [TMS-029](../reference/index.md#finding-tms-029), [TMS-030](../reference/index.md#finding-tms-030), [TMS-031](../reference/index.md#finding-tms-031), [TMS-032](../reference/index.md#finding-tms-032), [TMS-033](../reference/index.md#finding-tms-033), [TMS-034](../reference/index.md#finding-tms-034), [TMS-035](../reference/index.md#finding-tms-035), [TMS-036](../reference/index.md#finding-tms-036), [TMS-037](../reference/index.md#finding-tms-037), [TMS-038](../reference/index.md#finding-tms-038), [TMS-039](../reference/index.md#finding-tms-039), [TMS-040](../reference/index.md#finding-tms-040), [TMS-041](../reference/index.md#finding-tms-041), [TMS-042](../reference/index.md#finding-tms-042), [TMS-043](../reference/index.md#finding-tms-043), [TMS-044](../reference/index.md#finding-tms-044), [TMS-045](../reference/index.md#finding-tms-045), [TMS-046](../reference/index.md#finding-tms-046), [TMS-047](../reference/index.md#finding-tms-047), [TMS-048](../reference/index.md#finding-tms-048), [TMS-049](../reference/index.md#finding-tms-049), [TMS-050](../reference/index.md#finding-tms-050), [TMS-051](../reference/index.md#finding-tms-051), [TMS-052](../reference/index.md#finding-tms-052), [TMS-057](../reference/index.md#finding-tms-057), [TMS-061](../reference/index.md#finding-tms-061), [TMS-062](../reference/index.md#finding-tms-062), [TMS-063](../reference/index.md#finding-tms-063), [TMS-065](../reference/index.md#finding-tms-065), [TMS-066](../reference/index.md#finding-tms-066), [TMS-067](../reference/index.md#finding-tms-067), [TMS-068](../reference/index.md#finding-tms-068), [TMS-069](../reference/index.md#finding-tms-069), [TMS-070](../reference/index.md#finding-tms-070), [TMS-071](../reference/index.md#finding-tms-071), [TMS-072](../reference/index.md#finding-tms-072), [TMS-073](../reference/index.md#finding-tms-073), [TMS-077](../reference/index.md#finding-tms-077), [VAR-064](../reference/index.md#finding-var-064)
 - Corrections with this document as canonical home: [CORR-018](../reference/index.md#correction-corr-018), [CORR-019](../reference/index.md#correction-corr-019), [CORR-020](../reference/index.md#correction-corr-020), [CORR-021](../reference/index.md#correction-corr-021), [CORR-022](../reference/index.md#correction-corr-022), [CORR-023](../reference/index.md#correction-corr-023), [CORR-027](../reference/index.md#correction-corr-027), [CORR-034](../reference/index.md#correction-corr-034), [CORR-035](../reference/index.md#correction-corr-035), [CORR-039](../reference/index.md#correction-corr-039), [CORR-079](../reference/index.md#correction-corr-079), [CORR-080](../reference/index.md#correction-corr-080), [CORR-081](../reference/index.md#correction-corr-081), [CORR-082](../reference/index.md#correction-corr-082), [CORR-083](../reference/index.md#correction-corr-083), [CORR-084](../reference/index.md#correction-corr-084), [CORR-085](../reference/index.md#correction-corr-085), [CORR-091](../reference/index.md#correction-corr-091), [CORR-102](../reference/index.md#correction-corr-102), [CORR-103](../reference/index.md#correction-corr-103), [CORR-104](../reference/index.md#correction-corr-104), [CORR-117](../reference/index.md#correction-corr-117), [CORR-125](../reference/index.md#correction-corr-125)
 <!-- knowledge-cross-references:end -->

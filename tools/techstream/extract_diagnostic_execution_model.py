@@ -1180,6 +1180,376 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
         "boundary": "static executable semantics only: no Active Test was executed; exact total request length remains runtime DataIdLengthList state even though service, DID, control parameter, bit placement, queueing, response SID, and transport sink are recovered",
     }
 
+
+def gtsplus_execution_lifecycle(parser: DDBParser, master, gts_root: Path) -> dict:
+    """Recover current GTS+ command/session/Data-Monitor lifecycle semantics.
+
+    This is the control plane around the already-recovered endpoint executors.  It
+    deliberately distinguishes the framework's periodic TestPresentStart request from
+    the separate master selectors whose payload is UDS TesterPresent (3E 00).
+    """
+    bin_root = gts_root / "bin"
+    diag_comm = bin_root / "DiagCommCtrlMain.dll"
+    kgp_comm = bin_root / "KGP_CommFrameCtrl.dll"
+    kgp_data = bin_root / "KgpDataCtrl.dll"
+    datamon = bin_root / "DataMonitorPhase5_DT.dll"
+    datalist = bin_root / "DataListIF.dll"
+    start_tp = bin_root / "StartTestPresent.dll"
+    stop_tp = bin_root / "StopTestPresent.dll"
+    set_default = bin_root / "SetDefSession_DT.dll"
+    no_conf_general_response = bin_root / "NoConfGenComRes_DT.dll"
+    conf_check = bin_root / "ConfCheckModeP5_DT.dll"
+    change_check = bin_root / "ChangeCheckModeP5_DT.dll"
+
+    categories = (397, 435, 498)
+    category_rows = {
+        row.category_id: row
+        for row in parser.extract_master_ecu_categories(master.sections[16])
+        if row.category_id in categories
+    }
+    if set(category_rows) != set(categories):
+        raise ValueError(f"missing current P5 category rows: {sorted(set(categories) - set(category_rows))}")
+    category_modes = {}
+    for category in categories:
+        row = category_rows[category]
+        if (row.generation & 0x1F) != 0x14:
+            raise ValueError(
+                f"category {category} no longer has current P5 mode/generation low-5 0x14: "
+                f"0x{row.generation:X}"
+            )
+        category_modes[str(category)] = {
+            "database": row.database_name,
+            "generation": row.generation,
+            "generation_low5": f"0x{row.generation & 0x1F:02X}",
+            "raw": row.raw.hex(),
+        }
+
+    lifecycle_frames: dict[str, dict[str, dict]] = {}
+    for category in categories:
+        lifecycle_frames[str(category)] = {
+            "default_session": resolve_frame(parser, master, category, 0xD1, variable_namespace_base=0x2710),
+            "extended_session": resolve_frame(parser, master, category, 0xD2, variable_namespace_base=0x2710),
+            "uds_tester_present_no_check": resolve_frame(parser, master, category, 0x66, variable_namespace_base=0x2710),
+            "uds_tester_present_checked": resolve_frame(parser, master, category, 0x67, variable_namespace_base=0x2710),
+            "test_present_thread_request": resolve_frame(parser, master, category, 0xDD, variable_namespace_base=0x2710),
+        }
+        frame = lifecycle_frames[str(category)]
+        expected = {
+            "default_session": ("1001", ""),
+            "extended_session": ("1003", ""),
+            "uds_tester_present_no_check": ("3e00", ""),
+            "uds_tester_present_checked": ("3e00", "7e"),
+            "test_present_thread_request": ("22f186", "62"),
+        }
+        for key, (send, check) in expected.items():
+            actual = frame[key]
+            if actual["comm_set"] != 1:
+                raise ValueError(f"category {category} lifecycle {key} no longer uses CommSet 1")
+            if actual["variables"]["send"]["bytes"] != send:
+                raise ValueError(f"category {category} lifecycle {key} send drifted")
+            if actual["variables"]["receive_check"]["bytes"] != check:
+                raise ValueError(f"category {category} lifecycle {key} response check drifted")
+
+    dll_rows = parser.extract_master_dlls(master.sections[19])
+    generic_roles = {}
+    for role, expected_name in {
+        0x3A: "StartTestPresent.dll",
+        0x3B: "StopTestPresent.dll",
+        0x61: "GetFrmCheckMode_DT.dll",
+        0x62: "GetFrmConfCheckMode_DT.dll",
+        0xBF: "SetDefSession_DT.dll",
+        0xCA: "MoveSessionCGWDK_DT.dll",
+    }.items():
+        matches = [row for row in dll_rows if row.dll_role_id == role and row.category_id == 0]
+        if len(matches) != 1 or matches[0].dll_name != expected_name:
+            raise ValueError(f"generic lifecycle role 0x{role:X} drifted: {matches}")
+        generic_roles[f"0x{role:X}"] = {
+            "category_id": 0,
+            "plugin": matches[0].dll_name,
+        }
+
+    check_mode_bindings: dict[str, dict[str, object]] = {}
+    for category in categories:
+        check_mode_bindings[str(category)] = {}
+        for role in (0x17, 0x18):
+            matches = [row for row in dll_rows if row.dll_role_id == role and row.category_id == category]
+            check_mode_bindings[str(category)][f"0x{role:X}"] = (
+                {"plugin": matches[0].dll_name} if len(matches) == 1 else None
+            )
+    if check_mode_bindings["397"] != {
+        "0x17": {"plugin": "ConfCheckModeP5_DT.dll"},
+        "0x18": {"plugin": "ChangeCheckModeP5_DT.dll"},
+    }:
+        raise ValueError(f"Hybrid check-mode role bindings drifted: {check_mode_bindings['397']}")
+    if any(check_mode_bindings[str(category)][role] is not None for category in (435, 498) for role in ("0x17", "0x18")):
+        raise ValueError("Brake/FRC unexpectedly gained P5 check-mode role 0x17/0x18")
+
+    hybrid_check_frames = {
+        "start": resolve_frame(parser, master, 397, 0x03, variable_namespace_base=0x2710),
+        "stop": resolve_frame(parser, master, 397, 0x04, variable_namespace_base=0x2710),
+        "results": resolve_frame(parser, master, 397, 0x05, variable_namespace_base=0x2710),
+    }
+    for key, (send, check) in {
+        "start": ("31011002", "71011002"),
+        "stop": ("31021002", "71021002"),
+        "results": ("31031002", "7103100201"),
+    }.items():
+        if hybrid_check_frames[key]["variables"]["send"]["bytes"] != send or hybrid_check_frames[key]["variables"]["receive_check"]["bytes"] != check:
+            raise ValueError(f"Hybrid RID 0x1002 check-mode {key} frame drifted")
+
+    session_flag_symbols = {
+        "?SetSessionJudgmentFlg@CCommFrameCtrl@@QAEXXZ",
+        "?ClearSessionJudgmentFlg@CCommFrameCtrl@@QAEXXZ",
+    }
+    session_flag_importers = {}
+    for path in sorted(bin_root.glob("*.dll")):
+        try:
+            pe = parse_pe(path)
+        except pefile.PEFormatError:
+            continue
+        selected = sorted(
+            name
+            for dll, name in imports(pe)
+            if dll.lower() == "kgp_commframectrl.dll" and name in session_flag_symbols
+        )
+        if selected:
+            session_flag_importers[path.name] = selected
+    expected_flag_imports = {
+        "NoConfGenComRes_DT.dll": sorted(session_flag_symbols),
+    }
+    if session_flag_importers != expected_flag_imports:
+        raise ValueError(f"session-judgment external import surface drifted: {session_flag_importers}")
+    no_conf_imports = imports(parse_pe(no_conf_general_response))
+    if not any(
+        dll.lower() == "kgp_commframectrl.dll"
+        and name == "?SendIntForced@CCommFrameCtrl@@QAEKKPAEGKGHH@Z"
+        for dll, name in no_conf_imports
+    ):
+        raise ValueError("NoConfGenComRes_DT.dll no longer imports CCommFrameCtrl::SendIntForced")
+
+    # DataMonitorThreadP5::SetupMonitor asks CheckEcuFunc(dataCtrl, ecu, 3,
+    # 0x50, 0, nullptr) before passing its security-release flag to the phase5
+    # interface.  Current type-27 CDbEcuFuncDetails contains no (function 3,
+    # detail 0x50) capability row for the three Camry P5 categories below.
+    details = parser.extract_master_function_details(master.sections[27])
+    security_capability = {}
+    for category in categories:
+        rows = [
+            row for row in details
+            if row.category_id == category and row.function_id == 3 and row.detail_id == 0x50
+        ]
+        if rows:
+            raise ValueError(f"category {category} unexpectedly advertises function 3/detail 0x50")
+        security_capability[str(category)] = {
+            "function_id": 3,
+            "detail_id": "0x50",
+            "advertised_in_type27": False,
+        }
+
+    return {
+        "binaries": {
+            "diag_comm_ctrl_main": file_identity(diag_comm, gts_root),
+            "kgp_comm_frame_ctrl": file_identity(kgp_comm, gts_root),
+            "kgp_data_ctrl": file_identity(kgp_data, gts_root),
+            "data_monitor_phase5": file_identity(datamon, gts_root),
+            "data_list_if": file_identity(datalist, gts_root),
+            "start_test_present": file_identity(start_tp, gts_root),
+            "stop_test_present": file_identity(stop_tp, gts_root),
+            "set_default_session": file_identity(set_default, gts_root),
+            "no_conf_general_response": file_identity(no_conf_general_response, gts_root),
+            "conf_check_mode_p5": file_identity(conf_check, gts_root),
+            "change_check_mode_p5": file_identity(change_check, gts_root),
+        },
+        "command_dispatch": {
+            "controller": "DiagCommCtrlMain.dll CCommandCtrl::CommandExecute @ 0x1000F060",
+            "resolver": "0x1000F540 resolves m_dwCmd +0x08 and m_dwEcuId +0x1C through CDbDllTable/class 0x113",
+            "loader": "current GTS+ uses LoadLibraryExW(plugin, 0, 8), then GetProcAddress(\"Execute\")",
+            "execute_abi": {
+                "argument": "pointer to six-dword command context",
+                "fields": ["CCmdBase* command", "CCmdBase* response", "CDataCtrl*", "CCommFrameCtrl*", "CDataMonitorCtrl*", "DWORD* cancel_flag"],
+                "cancel_flag": "controller-owned flag at +0x2C is cleared immediately before plugin execution",
+            },
+            "serialization": "CCommFrameCtrl::LineCriticalSection(1) brackets plugin Execute and LineCriticalSection(2) releases it",
+            "anchors": {
+                "role_and_ecu_to_resolver": anchor(diag_comm, 0x1000F0A6, "8d45e050ff7708ff771ce88b040000"),
+                "execute_symbol_lookup": anchor(diag_comm, 0x1000F0DC, "682053011050ff15045101108945e0"),
+                "cancel_reset_and_line_lock": anchor(diag_comm, 0x1000F116, "6a01897de48975e88945f8894df0c70300000000895decff1560510110"),
+                "plugin_execute": anchor(diag_comm, 0x1000F1AA, "8d45e450ff55e0"),
+                "line_unlock": anchor(diag_comm, 0x1000F1CD, "8b49086a02ff1560510110"),
+            },
+        },
+        "transport_and_session": {
+            "functions": {
+                "line_critical_section": "0x100363C0",
+                "load_device_dll": "0x100363E0",
+                "receive": "0x100375B0",
+                "send_int": "0x10037D50",
+                "send_int_ext": "0x10037D80",
+                "send_proc": "0x10037F10",
+                "send_test_present_thread": "0x10038A20",
+                "test_present_start": "0x10039E70",
+                "watch_idle_thread": "0x1003A250",
+            },
+            "device_boundary": "KGP_CommFrameCtrl loads J2534Ctrl.dll with LoadLibraryExW and dispatches the protocol-interface send/receive vtable below KGP",
+            "session_state": "SendTestPresentThread maintains current session at CCommFrameCtrl +0x29; SID 0x10 response 0x50 sets session 3, while non-0x10 requests store response byte 3 after SID/subidentifier checks",
+            "test_present": {
+                "cadence_ms": 2000,
+                "lookup": "TestPresentStart calls GetDbRecord class 0x112 with K1=ECU/category and K2=0xDD; CDbFuncCommFrameTable FindDbItem1 compares row +0x00, FindDbItem2 row +0x02",
+                "current_camry_p5": {
+                    "categories": list(categories),
+                    "frame": lifecycle_frames["397"]["test_present_thread_request"],
+                    "identical_across_categories": True,
+                },
+                "meaning": "for current Hybrid397/Brake435/FRC498 the framework's periodic TestPresentStart request is 22 F1 86 with positive SID check 62; SendTestPresentThread validates 62 F1 86 and stores response byte 3 as current-session state, so this path both refreshes diagnostic activity and polls the active-session DID rather than using the separate 3E 00 selector family",
+                "separate_uds_tester_present_frames": {
+                    "categories": list(categories),
+                    "selector_0x66": lifecycle_frames["397"]["uds_tester_present_no_check"],
+                    "selector_0x67": lifecycle_frames["397"]["uds_tester_present_checked"],
+                    "identical_across_categories": True,
+                },
+            },
+            "session_frames": {
+                "categories": list(categories),
+                "default": lifecycle_frames["397"]["default_session"],
+                "extended": lifecycle_frames["397"]["extended_session"],
+                "identical_across_categories": True,
+            },
+            "p5_automatic_session_judgment": {
+                "categories": category_modes,
+                "category_gate": (
+                    "SendProc reads CDbEcuCategoryTable/class 0x110 record byte +0x48, masks low 5 bits, "
+                    "and enters the P5-family session path for 0x14/0x15/0x16; current Hybrid397, "
+                    "Brake435, and FRC498 are all 0x14"
+                ),
+                "classifier": {
+                    "vtable_slot": "+0x100",
+                    "phase5_function": "0x100292F0",
+                    "rule": "request byte 0x01..0x0F -> class 1; request byte >=0x10 -> class 2; otherwise class 0",
+                },
+                "uds_class_2": {
+                    "normal_path": (
+                        "when the P5 classifier returns 2 and current session CCommFrameCtrl +0x29 is not 3, "
+                        "the normal session-judgment path calls protocol vtable +0x50 with selector 0xD1 then "
+                        "0xD2 and records software session state 3"
+                    ),
+                    "phase5_session_sender": {
+                        "vtable_slot": "+0x50",
+                        "function": "0x10028490",
+                        "lookup": (
+                            "callee argument 1 is the target ECU/category key and argument 5 is the selector; "
+                            "the function queries DB class 0x112(key1, selector), follows the resulting "
+                            "class-0x111 CommFrame, obtains its send bytes, and dispatches send/receive through "
+                            "the protocol object"
+                        ),
+                        "default_selector": "0xD1",
+                        "extended_selector": "0xD2",
+                        "current_camry_wire_sequence": ["10 01", "10 03"],
+                    },
+                    "session_judgment_flag": {
+                        "field": "CCommFrameCtrl +0x398",
+                        "setter": "SetSessionJudgmentFlg @ 0x10039690 writes 1",
+                        "clearer": "ClearSessionJudgmentFlg @ 0x100326C0 writes 0",
+                        "alternate_slot": "+0x54",
+                        "phase5_alternate_function": "0x100143A0",
+                        "phase5_alternate_behavior": (
+                            "xor eax,eax; ret 0x18: no wire transaction. In the SendProc branch that checks "
+                            "+0x398, flag==1 routes both D1 and D2 through this no-op slot, clears the flag, "
+                            "and still advances software session state to 3 on the no-op success path"
+                        ),
+                        "external_importers": session_flag_importers,
+                        "scope": (
+                            "current GTS+ bin-corpus import scan finds external Set/ClearSessionJudgmentFlg use "
+                            "only in NoConfGenComRes_DT.dll, which also imports SendIntForced; ordinary P5 Data "
+                            "Monitor/Active-Test code does not import these setters"
+                        ),
+                    },
+                },
+                "class_1_default": (
+                    "for classifier class 1, SendProc uses the DB-backed +0x50 selector 0xD1 path and records "
+                    "software session state 0"
+                ),
+                "data_monitor_drs_mirror": (
+                    "DataMonitorPhase5_DT.dll D1/D2 callsites at 0x10014A8E/0x10014B6A write "
+                    "CDrsChangDefaultSession/CDrsChangExtendedSession records through the +0x1DC DRS writer sink; "
+                    "they journal session changes and are not the transport sender"
+                ),
+            },
+            "generic_roles": generic_roles,
+            "anchors": {
+                "line_critical_section": anchor(kgp_comm, 0x100363C0, "558bec83c174837d0801750a894d085dff2508610410894d085dff250c610410"),
+                "load_device_dll": anchor(kgp_comm, 0x100363E0, "558bec81ec0c020000a10060051033c58945fc56578bf9837f1c000f85da000000"),
+                "send_proc": anchor(kgp_comm, 0x10037F10, "558bec6aff685e29041064a1000000005083ec34a10060051033c58945f053565750"),
+                "p5_category_generation_gate": anchor(kgp_comm, 0x100380B6, "8b45e48b008a40488845c4eb038a45cf241f3c14740c3c1574083c160f855a030000"),
+                "p5_class2_current_session_gate": anchor(kgp_comm, 0x1003814C, "8b4b088b551452ff75c88b01ff900001000083f8027578807b29037472"),
+                "p5_normal_d1_d2_dispatch": anchor(kgp_comm, 0x10038163, "807b290374728b7b088bcbff751cff750c8b078b7050e8a2d2ffffff75208bcf68d1000000ff75c450ff751cff750cffd68b7b088bcbff751cff750c8b078b7050e877d2ffffff75208bcf68d2000000ff75c450ff751cff750cffd68b4340c6432903"),
+                "p5_session_judgment_branch": anchor(kgp_comm, 0x1003828E, "83bb98030000018bcb578945d0560f85aa000000e879d1ffffff75208b4dc068d1000000ff75c4508b45d05756ff5054"),
+                "p5_normal_session_sender": anchor(kgp_comm, 0x1003834C, "e8cfd0ffffff75208b4dc068d1000000ff75c4508b45d05756ff5050"),
+                "p5_class1_default_session": anchor(kgp_comm, 0x10038382, "8b7b088bcbff751cff750c8b078b7050e889d0ffffff75208bcf68d1000000ff75c450ff751cff750cffd6c6432900"),
+                "p5_session_sender": anchor(kgp_comm, 0x10028490, "558bec6aff68a116041064a1000000005081ec00010000a10060051033c58945f0535657508d45f464a3000000008bf9"),
+                "p5_session_sender_db_lookup": anchor(kgp_comm, 0x1002855A, "0fb745188b4f1c50528d85f8feffff81c1cc000000506812010000ff1544610410"),
+                "p5_session_sender_materialize": anchor(kgp_comm, 0x10028647, "8b8530ffffff8d8d50ffffff8b000fb740108985f4feffff8d8574ffffff506a00ff155c610410"),
+                "p5_session_alternate_noop": anchor(kgp_comm, 0x100143A0, "33c0c21800"),
+                "set_session_judgment_flag": anchor(kgp_comm, 0x10039690, "c7819803000001000000c3"),
+                "clear_session_judgment_flag": anchor(kgp_comm, 0x100326C0, "c7819803000000000000c3"),
+                "receive": anchor(kgp_comm, 0x100375B0, "558bec83ec18a10060051033c58945fc8b45088b551c8945f48955ec538bd9"),
+                "test_present_lookup_0xdd": anchor(kgp_comm, 0x10039F14, "8b4e0468dd000000508d45b881c1cc000000506812010000ff1544610410"),
+                "test_present_cadence": anchor(kgp_comm, 0x10038B08, "68d00700006a008d8574ffffff506a02ffd3"),
+                "test_present_send_timeout": anchor(kgp_comm, 0x10038BC9, "80fb6075046a64eb0568e803000050ff764cffb5"),
+                "test_present_receive_timeout": anchor(kgp_comm, 0x10038C02, "80fb6075046a6eeb0568e80300006a7852"),
+                "idle_watchdog": anchor(kgp_comm, 0x1003A250, "558bec83ec18a10060051033c58945fc568b75085785f60f8407020000"),
+                "query_first_key": anchor(kgp_data, 0x10064086, "8d45f8508d4df0518b55e0528b45e48b4810518b5514528b4de4ff55dc"),
+                "query_second_key": anchor(kgp_data, 0x100640B7, "8d45f4508d4dec518b55f8528b45f0508b4d18518b4de4ff55d8"),
+                "func_frame_key1_record_00": anchor(kgp_data, 0x100B3B17, "8b45f88b4df08b14810fb7028945ec"),
+                "func_frame_key2_record_02": anchor(kgp_data, 0x100B3C27, "8b45f88b4df08b14810fb742028945ec"),
+            },
+        },
+        "p5_data_monitor_lifecycle": {
+            "worker": "CDataMonitorThreadP5 command-driven worker; command 9 starts Data Monitor and command 10 stops it",
+            "commands": {
+                "0x09": "start Data Monitor",
+                "0x0A": "stop Data Monitor",
+                "0x0B": "direct Active Test",
+                "0x0C": "Active-Test initialization",
+                "0x38": "zero-adjust path",
+                "0x57": "monitor/recording setting path",
+            },
+            "start": "0x10015070 performs per-ECU setup/assembly, persistent diagnostic-interface creation, monitor setup, and final start; +0x1C4 records running interface state",
+            "stop": "0x10011370 is the worker stop/cleanup path",
+            "session_journaling": {
+                "default_selector_callsite": "0x10014A8E -> selector 0xD1 with CDrsChangDefaultSession DRS journaling",
+                "extended_selector_callsite": "0x10014B6A -> selector 0xD2 with CDrsChangExtendedSession DRS journaling",
+                "current_session_query": "GetCurrentSession callsite 0x100156ED",
+                "boundary": (
+                    "these DataMonitor callsites mirror session changes into the +0x1DC CDrsFileWriter; they "
+                    "do not send 10 01/10 03. The transport transition is owned by KGP_CommFrameCtrl::SendProc"
+                ),
+            },
+            "security_release_gate": {
+                "call": "CheckEcuFunc(dataCtrl, ecu, 3, 0x50, 0, nullptr) at 0x10013DB2",
+                "vendor_protocol_gate": "the capability can only arm when the monitor security/vendor byte is Toyota low-5-bit 0x15, Subaru high bits 0x20, or Suzuki high bits 0x60",
+                "camry_p5_capability": security_capability,
+                "conclusion": "current master type-27 does not advertise function 3/detail 0x50 for Hybrid397, Brake435, or FRC498, so their ordinary current-P5 monitor plan does not statically request this security-release capability",
+                "boundary": "this is a static capability negative, not a proof that every possible utility/ECU operation is authentication-free",
+            },
+            "check_mode": {
+                "meaning": "Hybrid P5 roles 0x17/0x18 are RoutineControl RID 0x1002 maintenance/check-mode operations, not DiagnosticSessionControl",
+                "bindings": check_mode_bindings,
+                "hybrid_frames": hybrid_check_frames,
+            },
+            "persistent_interface": "one phase5 diagnostic interface persists across setup/poll/active-test operations; low-level DataListIF transactions may use no-init/no-session send variants because KGP SendProc owns the outer session judgment rather than the DataMonitor DRS wrapper",
+            "anchors": {
+                "command_dispatch": anchor(datamon, 0x1000CBF0, "558bec6aff687797011064a1000000005083ec7ca18040021033c58945f05657"),
+                "start_monitor": anchor(datamon, 0x10015070, "558bec83ec0ca18040021033c58945fc538b5d0c56578b7d088bf185ff"),
+                "stop_monitor": anchor(datamon, 0x10011370, "568bf18b86c401000085c075025ec325373b00005783f8107717741a"),
+                "security_support_gate": anchor(datamon, 0x10013DB2, "8d4ddcff15acb001106a006a006a506a03ff378d4ddcc745fc00000000ffb69c010000ff15a4b00110"),
+                "default_session_selector": anchor(datamon, 0x10014A8E, "68d1000000"),
+                "extended_session_selector": anchor(datamon, 0x10014B6A, "68d2000000"),
+                "security_cancel_teardown": anchor(datamon, 0x10015579, "ff1520b001106a03ff76048d8680010000c745fc00000000508d8d4cfbffffff1518b00110"),
+            },
+        },
+        "boundary": "static current-GTS+ lifecycle recovery: no vehicle command was sent; live ECU state can still affect support, session state, and operation success",
+    }
+
 def gtsplus_role_layout(gts_root: Path) -> dict:
     parser = DDBParser()
     master_path = gts_root / "NA/DB/Gen/Toyota.ddb"
@@ -1220,6 +1590,7 @@ def gtsplus_role_layout(gts_root: Path) -> dict:
         "plugin_semantics": gtsplus_plugin_semantics(parser, master, gts_root),
         "data_monitor_decoder": gtsplus_data_monitor_decoder(gts_root),
         "p5_active_test_runtime": gtsplus_p5_active_test_runtime(parser, master, gts_root),
+        "execution_lifecycle": gtsplus_execution_lifecycle(parser, master, gts_root),
         "hybrid_clear_binding": dll_binding(parser, master, 397, 25),
         "hybrid_clear_primary": resolve_frame(parser, master, 397, 0x01, variable_namespace_base=0x2710),
         "hybrid_clear_fallback": resolve_frame(parser, master, 397, 0x102, variable_namespace_base=0x2710),

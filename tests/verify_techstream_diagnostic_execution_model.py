@@ -170,6 +170,145 @@ check(
 
 plugin_semantics = gts["dll_role_schema"]["plugin_semantics"]
 active_runtime = gts["dll_role_schema"]["p5_active_test_runtime"]
+lifecycle = gts["dll_role_schema"]["execution_lifecycle"]
+check(
+    "current command controller, KGP transport, and P5 monitor lifecycle binaries are identity-pinned",
+    lifecycle["binaries"]["diag_comm_ctrl_main"]["sha256"] == "d1ba329ba144bbfe49ba91a2e11bfee397f881e2f37c6c20c79376a6e9849967"
+    and lifecycle["binaries"]["kgp_comm_frame_ctrl"]["sha256"] == "5366aba0f1da6ec7806cb6c8346a4429ce61b9ac7b1495be53e35ee6263b9517"
+    and lifecycle["binaries"]["data_monitor_phase5"]["sha256"] == "676192240b05e68a890e45f48575f826bc1dd44f935f5df4b77ee36558467519"
+    and lifecycle["binaries"]["data_list_if"]["sha256"] == "cce3ecd1203f81914c51d5b2599ee68eb4f7faafa8cbd9bb24fd7390b54d651d"
+    and lifecycle["binaries"]["start_test_present"]["sha256"] == "c42eaf6a06113009de9b2821daf1e2b4fdb232e3e1ce32c8645e619c8b38bbb3",
+)
+check(
+    "current command dispatch resolves cmd+ECU, loads Execute, and serializes one plugin on the diagnostic line",
+    lifecycle["command_dispatch"]["anchors"]["role_and_ecu_to_resolver"]["bytes"] == "8d45e050ff7708ff771ce88b040000"
+    and lifecycle["command_dispatch"]["anchors"]["execute_symbol_lookup"]["bytes"].startswith("682053011050ff15")
+    and lifecycle["command_dispatch"]["anchors"]["cancel_reset_and_line_lock"]["bytes"].startswith("6a01897de48975e88945f8894df0c70300000000")
+    and lifecycle["command_dispatch"]["anchors"]["plugin_execute"]["bytes"] == "8d45e450ff55e0"
+    and lifecycle["command_dispatch"]["anchors"]["line_unlock"]["bytes"] == "8b49086a02ff1560510110"
+    and lifecycle["command_dispatch"]["execute_abi"]["fields"] == [
+        "CCmdBase* command", "CCmdBase* response", "CDataCtrl*", "CCommFrameCtrl*", "CDataMonitorCtrl*", "DWORD* cancel_flag"
+    ],
+)
+transport = lifecycle["transport_and_session"]
+check(
+    "current TestPresentStart is a two-key class-0x112 category+0xDD lookup",
+    transport["anchors"]["test_present_lookup_0xdd"]["bytes"].startswith("8b4e0468dd000000")
+    and transport["anchors"]["query_first_key"]["bytes"].startswith("8d45f8508d4df051")
+    and transport["anchors"]["query_second_key"]["bytes"].startswith("8d45f4508d4dec51")
+    and transport["anchors"]["func_frame_key1_record_00"]["bytes"].endswith("0fb7028945ec")
+    and transport["anchors"]["func_frame_key2_record_02"]["bytes"].endswith("0fb742028945ec"),
+)
+check(
+    "current Camry P5 TestPresentStart polls 22 F1 86 every ~2 s and tracks the returned session byte",
+    transport["test_present"]["cadence_ms"] == 2000
+    and transport["anchors"]["test_present_cadence"]["bytes"].startswith("68d0070000")
+    and transport["test_present"]["current_camry_p5"]["categories"] == [397, 435, 498]
+    and transport["test_present"]["current_camry_p5"]["identical_across_categories"] is True
+    and transport["test_present"]["current_camry_p5"]["frame"]["selector"] == "0xDD"
+    and transport["test_present"]["current_camry_p5"]["frame"]["comm_set"] == 1
+    and transport["test_present"]["current_camry_p5"]["frame"]["variables"]["send"]["bytes"] == "22f186"
+    and transport["test_present"]["current_camry_p5"]["frame"]["variables"]["receive_mask"]["bytes"] == "ff"
+    and transport["test_present"]["current_camry_p5"]["frame"]["variables"]["receive_check"]["bytes"] == "62"
+    and "stores response byte 3 as current-session state" in transport["test_present"]["meaning"],
+)
+check(
+    "current D1/D2 and 3E00 master frames remain separate from the 0xDD active-session poll",
+    transport["session_frames"]["categories"] == [397, 435, 498]
+    and transport["session_frames"]["identical_across_categories"] is True
+    and transport["session_frames"]["default"]["variables"]["send"]["bytes"] == "1001"
+    and transport["session_frames"]["extended"]["variables"]["send"]["bytes"] == "1003"
+    and transport["test_present"]["separate_uds_tester_present_frames"]["categories"] == [397, 435, 498]
+    and transport["test_present"]["separate_uds_tester_present_frames"]["identical_across_categories"] is True
+    and transport["test_present"]["separate_uds_tester_present_frames"]["selector_0x66"]["variables"]["send"]["bytes"] == "3e00"
+    and transport["test_present"]["separate_uds_tester_present_frames"]["selector_0x67"]["variables"]["send"]["bytes"] == "3e00"
+    and transport["test_present"]["separate_uds_tester_present_frames"]["selector_0x67"]["variables"]["receive_check"]["bytes"] == "7e"
+    and transport["generic_roles"]["0x3A"]["plugin"] == "StartTestPresent.dll"
+    and transport["generic_roles"]["0x3B"]["plugin"] == "StopTestPresent.dll"
+    and transport["generic_roles"]["0xBF"]["plugin"] == "SetDefSession_DT.dll",
+)
+auto_session = transport["p5_automatic_session_judgment"]
+check(
+    "current Hybrid/Brake/FRC categories enter the P5 automatic-session family and materialize D1/D2 through DB class 0x112",
+    set(auto_session["categories"]) == {"397", "435", "498"}
+    and all(row["generation"] == 20 and row["generation_low5"] == "0x14" for row in auto_session["categories"].values())
+    and auto_session["classifier"]["vtable_slot"] == "+0x100"
+    and auto_session["classifier"]["phase5_function"] == "0x100292F0"
+    and auto_session["uds_class_2"]["phase5_session_sender"]["vtable_slot"] == "+0x50"
+    and auto_session["uds_class_2"]["phase5_session_sender"]["function"] == "0x10028490"
+    and auto_session["uds_class_2"]["phase5_session_sender"]["current_camry_wire_sequence"] == ["10 01", "10 03"]
+    and "DB class 0x112" in auto_session["uds_class_2"]["phase5_session_sender"]["lookup"]
+    and transport["anchors"]["p5_category_generation_gate"]["bytes"].startswith("8b45e48b008a4048")
+    and transport["anchors"]["p5_class2_current_session_gate"]["bytes"].endswith("83f8027578807b29037472")
+    and "68d1000000" in transport["anchors"]["p5_normal_d1_d2_dispatch"]["bytes"]
+    and "68d2000000" in transport["anchors"]["p5_normal_d1_d2_dispatch"]["bytes"]
+    and transport["anchors"]["p5_session_sender_db_lookup"]["bytes"].endswith("506812010000ff1544610410")
+    and transport["anchors"]["p5_session_sender_materialize"]["bytes"].startswith("8b8530ffffff8d8d50ffffff8b000fb74010"),
+)
+check(
+    "current Phase5 session-judgment exception is one-shot no-wire D1/D2 while software session still advances",
+    auto_session["uds_class_2"]["session_judgment_flag"]["field"] == "CCommFrameCtrl +0x398"
+    and auto_session["uds_class_2"]["session_judgment_flag"]["alternate_slot"] == "+0x54"
+    and auto_session["uds_class_2"]["session_judgment_flag"]["phase5_alternate_function"] == "0x100143A0"
+    and "no wire transaction" in auto_session["uds_class_2"]["session_judgment_flag"]["phase5_alternate_behavior"]
+    and "software session state to 3" in auto_session["uds_class_2"]["session_judgment_flag"]["phase5_alternate_behavior"]
+    and auto_session["uds_class_2"]["session_judgment_flag"]["external_importers"] == {
+        "NoConfGenComRes_DT.dll": [
+            "?ClearSessionJudgmentFlg@CCommFrameCtrl@@QAEXXZ",
+            "?SetSessionJudgmentFlg@CCommFrameCtrl@@QAEXXZ",
+        ]
+    }
+    and "only in NoConfGenComRes_DT.dll" in auto_session["uds_class_2"]["session_judgment_flag"]["scope"]
+    and lifecycle["binaries"]["no_conf_general_response"] == {
+        "path": "bin/NoConfGenComRes_DT.dll",
+        "size": 23568,
+        "sha256": "17e8313ef731d3f2d6dfa4baad6e47c5c0a44a3ed4d2c564113d0571fee647fd",
+    }
+    and transport["anchors"]["p5_session_judgment_branch"]["bytes"].startswith("83bb9803000001")
+    and transport["anchors"]["p5_session_alternate_noop"]["bytes"] == "33c0c21800"
+    and transport["anchors"]["set_session_judgment_flag"]["bytes"].startswith("c7819803000001000000")
+    and transport["anchors"]["clear_session_judgment_flag"]["bytes"].startswith("c7819803000000000000"),
+)
+check(
+    "SendProc owns P5 transport session changes; DataMonitor D1/D2 callsites are DRS journaling only",
+    "session state 0" in auto_session["class_1_default"]
+    and "not the transport sender" in auto_session["data_monitor_drs_mirror"]
+    and transport["anchors"]["p5_class1_default_session"]["bytes"].endswith("ffd6c6432900")
+)
+
+monitor_lifecycle = lifecycle["p5_data_monitor_lifecycle"]
+check(
+    "current P5 monitor wrapper exposes start/stop while its D1/D2 callsites only journal the KGP-owned session transition",
+    monitor_lifecycle["commands"]["0x09"] == "start Data Monitor"
+    and monitor_lifecycle["commands"]["0x0A"] == "stop Data Monitor"
+    and monitor_lifecycle["anchors"]["default_session_selector"]["bytes"] == "68d1000000"
+    and monitor_lifecycle["anchors"]["extended_session_selector"]["bytes"] == "68d2000000"
+    and "DRS journaling" in monitor_lifecycle["session_journaling"]["default_selector_callsite"]
+    and "DRS journaling" in monitor_lifecycle["session_journaling"]["extended_selector_callsite"]
+    and "do not send 10 01/10 03" in monitor_lifecycle["session_journaling"]["boundary"]
+    and "KGP_CommFrameCtrl::SendProc" in monitor_lifecycle["session_journaling"]["boundary"],
+)
+check(
+    "Camry Hybrid/Brake/FRC ordinary P5 monitor setup does not advertise the function-3 detail-0x50 security-release capability",
+    monitor_lifecycle["anchors"]["security_support_gate"]["bytes"].startswith("8d4ddcff15acb001106a006a006a506a03")
+    and all(
+        row == {"function_id": 3, "detail_id": "0x50", "advertised_in_type27": False}
+        for row in monitor_lifecycle["security_release_gate"]["camry_p5_capability"].values()
+    )
+    and "does not statically request" in monitor_lifecycle["security_release_gate"]["conclusion"],
+)
+check(
+    "Hybrid check mode is RID 0x1002 RoutineControl and is absent from Brake/FRC role bindings",
+    monitor_lifecycle["check_mode"]["bindings"]["397"] == {
+        "0x17": {"plugin": "ConfCheckModeP5_DT.dll"},
+        "0x18": {"plugin": "ChangeCheckModeP5_DT.dll"},
+    }
+    and monitor_lifecycle["check_mode"]["bindings"]["435"] == {"0x17": None, "0x18": None}
+    and monitor_lifecycle["check_mode"]["bindings"]["498"] == {"0x17": None, "0x18": None}
+    and monitor_lifecycle["check_mode"]["hybrid_frames"]["start"]["variables"]["send"]["bytes"] == "31011002"
+    and monitor_lifecycle["check_mode"]["hybrid_frames"]["stop"]["variables"]["send"]["bytes"] == "31021002"
+    and monitor_lifecycle["check_mode"]["hybrid_frames"]["results"]["variables"]["send"]["bytes"] == "31031002",
+)
 check(
     "current P5 Active-Test runtime binaries are identity-pinned",
     active_runtime["binaries"]["data_monitor_phase5"] == {

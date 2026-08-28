@@ -146,6 +146,750 @@
         "scope": "ordinary current P5 Data Monitor signals described by CCmdConversionTbl",
         "special_conversion_boundary": "CComDataConvert also exposes an overload with a final special-format mode for time/chassis/illuminance-style conversions, but ordinary P5 CCmdConversionTbl GetValue/GetString calls the basic overload without that mode. The normal P5 monitor decoder therefore uses only extraction plus Mul/Div/Offset/sign/bit-width and decimal/pattern presentation."
       },
+      "execution_lifecycle": {
+        "binaries": {
+          "change_check_mode_p5": {
+            "path": "bin/ChangeCheckModeP5_DT.dll",
+            "sha256": "0b5c757f895aa2ca80a43191f7e992613a5e0dea04e6f609a0bb053a27833f9a",
+            "size": 23568
+          },
+          "conf_check_mode_p5": {
+            "path": "bin/ConfCheckModeP5_DT.dll",
+            "sha256": "83d1af10fb450f466c622cae7eca38ca971f5e64121fbd424993e5a8ad0b3983",
+            "size": 22544
+          },
+          "data_list_if": {
+            "path": "bin/DataListIF.dll",
+            "sha256": "cce3ecd1203f81914c51d5b2599ee68eb4f7faafa8cbd9bb24fd7390b54d651d",
+            "size": 507920
+          },
+          "data_monitor_phase5": {
+            "path": "bin/DataMonitorPhase5_DT.dll",
+            "sha256": "676192240b05e68a890e45f48575f826bc1dd44f935f5df4b77ee36558467519",
+            "size": 158224
+          },
+          "diag_comm_ctrl_main": {
+            "path": "bin/DiagCommCtrlMain.dll",
+            "sha256": "d1ba329ba144bbfe49ba91a2e11bfee397f881e2f37c6c20c79376a6e9849967",
+            "size": 122384
+          },
+          "kgp_comm_frame_ctrl": {
+            "path": "bin/KGP_CommFrameCtrl.dll",
+            "sha256": "5366aba0f1da6ec7806cb6c8346a4429ce61b9ac7b1495be53e35ee6263b9517",
+            "size": 379920
+          },
+          "kgp_data_ctrl": {
+            "path": "bin/KgpDataCtrl.dll",
+            "sha256": "19e709e12e53f485a84ccfbf6b226922b88502206c34b767db543c7f3df101f8",
+            "size": 1824784
+          },
+          "no_conf_general_response": {
+            "path": "bin/NoConfGenComRes_DT.dll",
+            "sha256": "17e8313ef731d3f2d6dfa4baad6e47c5c0a44a3ed4d2c564113d0571fee647fd",
+            "size": 23568
+          },
+          "set_default_session": {
+            "path": "bin/SetDefSession_DT.dll",
+            "sha256": "3ab69de864938d443ea06660e23fb3db97110187d8306c6ff44a365b645d9c2f",
+            "size": 23056
+          },
+          "start_test_present": {
+            "path": "bin/StartTestPresent.dll",
+            "sha256": "c42eaf6a06113009de9b2821daf1e2b4fdb232e3e1ce32c8645e619c8b38bbb3",
+            "size": 21520
+          },
+          "stop_test_present": {
+            "path": "bin/StopTestPresent.dll",
+            "sha256": "9fe1daeb14d9c60f90843c2ae7f44f7b8a9f643d2311fac464d063f599b7909f",
+            "size": 21520
+          }
+        },
+        "boundary": "static current-GTS+ lifecycle recovery: no vehicle command was sent; live ECU state can still affect support, session state, and operation success",
+        "command_dispatch": {
+          "anchors": {
+            "cancel_reset_and_line_lock": {
+              "bytes": "6a01897de48975e88945f8894df0c70300000000895decff1560510110",
+              "file_offset": "0xE516",
+              "va": "0x1000F116"
+            },
+            "execute_symbol_lookup": {
+              "bytes": "682053011050ff15045101108945e0",
+              "file_offset": "0xE4DC",
+              "va": "0x1000F0DC"
+            },
+            "line_unlock": {
+              "bytes": "8b49086a02ff1560510110",
+              "file_offset": "0xE5CD",
+              "va": "0x1000F1CD"
+            },
+            "plugin_execute": {
+              "bytes": "8d45e450ff55e0",
+              "file_offset": "0xE5AA",
+              "va": "0x1000F1AA"
+            },
+            "role_and_ecu_to_resolver": {
+              "bytes": "8d45e050ff7708ff771ce88b040000",
+              "file_offset": "0xE4A6",
+              "va": "0x1000F0A6"
+            }
+          },
+          "controller": "DiagCommCtrlMain.dll CCommandCtrl::CommandExecute @ 0x1000F060",
+          "execute_abi": {
+            "argument": "pointer to six-dword command context",
+            "cancel_flag": "controller-owned flag at +0x2C is cleared immediately before plugin execution",
+            "fields": [
+              "CCmdBase* command",
+              "CCmdBase* response",
+              "CDataCtrl*",
+              "CCommFrameCtrl*",
+              "CDataMonitorCtrl*",
+              "DWORD* cancel_flag"
+            ]
+          },
+          "loader": "current GTS+ uses LoadLibraryExW(plugin, 0, 8), then GetProcAddress(\"Execute\")",
+          "resolver": "0x1000F540 resolves m_dwCmd +0x08 and m_dwEcuId +0x1C through CDbDllTable/class 0x113",
+          "serialization": "CCommFrameCtrl::LineCriticalSection(1) brackets plugin Execute and LineCriticalSection(2) releases it"
+        },
+        "p5_data_monitor_lifecycle": {
+          "anchors": {
+            "command_dispatch": {
+              "bytes": "558bec6aff687797011064a1000000005083ec7ca18040021033c58945f05657",
+              "file_offset": "0xBFF0",
+              "va": "0x1000CBF0"
+            },
+            "default_session_selector": {
+              "bytes": "68d1000000",
+              "file_offset": "0x13E8E",
+              "va": "0x10014A8E"
+            },
+            "extended_session_selector": {
+              "bytes": "68d2000000",
+              "file_offset": "0x13F6A",
+              "va": "0x10014B6A"
+            },
+            "security_cancel_teardown": {
+              "bytes": "ff1520b001106a03ff76048d8680010000c745fc00000000508d8d4cfbffffff1518b00110",
+              "file_offset": "0x14979",
+              "va": "0x10015579"
+            },
+            "security_support_gate": {
+              "bytes": "8d4ddcff15acb001106a006a006a506a03ff378d4ddcc745fc00000000ffb69c010000ff15a4b00110",
+              "file_offset": "0x131B2",
+              "va": "0x10013DB2"
+            },
+            "start_monitor": {
+              "bytes": "558bec83ec0ca18040021033c58945fc538b5d0c56578b7d088bf185ff",
+              "file_offset": "0x14470",
+              "va": "0x10015070"
+            },
+            "stop_monitor": {
+              "bytes": "568bf18b86c401000085c075025ec325373b00005783f8107717741a",
+              "file_offset": "0x10770",
+              "va": "0x10011370"
+            }
+          },
+          "check_mode": {
+            "bindings": {
+              "397": {
+                "0x17": {
+                  "plugin": "ConfCheckModeP5_DT.dll"
+                },
+                "0x18": {
+                  "plugin": "ChangeCheckModeP5_DT.dll"
+                }
+              },
+              "435": {
+                "0x17": null,
+                "0x18": null
+              },
+              "498": {
+                "0x17": null,
+                "0x18": null
+              }
+            },
+            "hybrid_frames": {
+              "results": {
+                "category_id": 397,
+                "comm_frame_id": "0x2B15",
+                "comm_frame_raw": "152b432c5029462c",
+                "comm_set": 1,
+                "comm_set_metadata": {
+                  "comm_set_id": 1,
+                  "exception_handler_flag": 0,
+                  "exception_handler_id": 0,
+                  "raw": "e8030000fc0300000000010000000100",
+                  "receive_timeout": 1020,
+                  "retry_count": 1,
+                  "send_parameter": 1000,
+                  "unknown_word_0c": 0
+                },
+                "func_comm_frame_raw": "8d0105000100152b0000010000000000",
+                "selector": "0x5",
+                "variables": {
+                  "receive_check": {
+                    "bytes": "7103100201",
+                    "id": "0x2C46",
+                    "normalized_id": "0x536"
+                  },
+                  "receive_mask": {
+                    "bytes": "00000000ff",
+                    "id": "0x2950",
+                    "normalized_id": "0x240"
+                  },
+                  "send": {
+                    "bytes": "31031002",
+                    "id": "0x2C43",
+                    "normalized_id": "0x533"
+                  }
+                }
+              },
+              "start": {
+                "category_id": 397,
+                "comm_frame_id": "0x2B13",
+                "comm_frame_raw": "132b412c0000442c",
+                "comm_set": 1,
+                "comm_set_metadata": {
+                  "comm_set_id": 1,
+                  "exception_handler_flag": 0,
+                  "exception_handler_id": 0,
+                  "raw": "e8030000fc0300000000010000000100",
+                  "receive_timeout": 1020,
+                  "retry_count": 1,
+                  "send_parameter": 1000,
+                  "unknown_word_0c": 0
+                },
+                "func_comm_frame_raw": "8d0103000100132b0000010000000000",
+                "selector": "0x3",
+                "variables": {
+                  "receive_check": {
+                    "bytes": "71011002",
+                    "id": "0x2C44",
+                    "normalized_id": "0x534"
+                  },
+                  "receive_mask": {
+                    "bytes": "",
+                    "id": "0x0",
+                    "normalized_id": "0x0"
+                  },
+                  "send": {
+                    "bytes": "31011002",
+                    "id": "0x2C41",
+                    "normalized_id": "0x531"
+                  }
+                }
+              },
+              "stop": {
+                "category_id": 397,
+                "comm_frame_id": "0x2B14",
+                "comm_frame_raw": "142b422c0000452c",
+                "comm_set": 1,
+                "comm_set_metadata": {
+                  "comm_set_id": 1,
+                  "exception_handler_flag": 0,
+                  "exception_handler_id": 0,
+                  "raw": "e8030000fc0300000000010000000100",
+                  "receive_timeout": 1020,
+                  "retry_count": 1,
+                  "send_parameter": 1000,
+                  "unknown_word_0c": 0
+                },
+                "func_comm_frame_raw": "8d0104000100142b0000010000000000",
+                "selector": "0x4",
+                "variables": {
+                  "receive_check": {
+                    "bytes": "71021002",
+                    "id": "0x2C45",
+                    "normalized_id": "0x535"
+                  },
+                  "receive_mask": {
+                    "bytes": "",
+                    "id": "0x0",
+                    "normalized_id": "0x0"
+                  },
+                  "send": {
+                    "bytes": "31021002",
+                    "id": "0x2C42",
+                    "normalized_id": "0x532"
+                  }
+                }
+              }
+            },
+            "meaning": "Hybrid P5 roles 0x17/0x18 are RoutineControl RID 0x1002 maintenance/check-mode operations, not DiagnosticSessionControl"
+          },
+          "commands": {
+            "0x09": "start Data Monitor",
+            "0x0A": "stop Data Monitor",
+            "0x0B": "direct Active Test",
+            "0x0C": "Active-Test initialization",
+            "0x38": "zero-adjust path",
+            "0x57": "monitor/recording setting path"
+          },
+          "persistent_interface": "one phase5 diagnostic interface persists across setup/poll/active-test operations; low-level DataListIF transactions may use no-init/no-session send variants because KGP SendProc owns the outer session judgment rather than the DataMonitor DRS wrapper",
+          "security_release_gate": {
+            "boundary": "this is a static capability negative, not a proof that every possible utility/ECU operation is authentication-free",
+            "call": "CheckEcuFunc(dataCtrl, ecu, 3, 0x50, 0, nullptr) at 0x10013DB2",
+            "camry_p5_capability": {
+              "397": {
+                "advertised_in_type27": false,
+                "detail_id": "0x50",
+                "function_id": 3
+              },
+              "435": {
+                "advertised_in_type27": false,
+                "detail_id": "0x50",
+                "function_id": 3
+              },
+              "498": {
+                "advertised_in_type27": false,
+                "detail_id": "0x50",
+                "function_id": 3
+              }
+            },
+            "conclusion": "current master type-27 does not advertise function 3/detail 0x50 for Hybrid397, Brake435, or FRC498, so their ordinary current-P5 monitor plan does not statically request this security-release capability",
+            "vendor_protocol_gate": "the capability can only arm when the monitor security/vendor byte is Toyota low-5-bit 0x15, Subaru high bits 0x20, or Suzuki high bits 0x60"
+          },
+          "session_journaling": {
+            "boundary": "these DataMonitor callsites mirror session changes into the +0x1DC CDrsFileWriter; they do not send 10 01/10 03. The transport transition is owned by KGP_CommFrameCtrl::SendProc",
+            "current_session_query": "GetCurrentSession callsite 0x100156ED",
+            "default_selector_callsite": "0x10014A8E -> selector 0xD1 with CDrsChangDefaultSession DRS journaling",
+            "extended_selector_callsite": "0x10014B6A -> selector 0xD2 with CDrsChangExtendedSession DRS journaling"
+          },
+          "start": "0x10015070 performs per-ECU setup/assembly, persistent diagnostic-interface creation, monitor setup, and final start; +0x1C4 records running interface state",
+          "stop": "0x10011370 is the worker stop/cleanup path",
+          "worker": "CDataMonitorThreadP5 command-driven worker; command 9 starts Data Monitor and command 10 stops it"
+        },
+        "transport_and_session": {
+          "anchors": {
+            "clear_session_judgment_flag": {
+              "bytes": "c7819803000000000000c3",
+              "file_offset": "0x31AC0",
+              "va": "0x100326C0"
+            },
+            "func_frame_key1_record_00": {
+              "bytes": "8b45f88b4df08b14810fb7028945ec",
+              "file_offset": "0xB2F17",
+              "va": "0x100B3B17"
+            },
+            "func_frame_key2_record_02": {
+              "bytes": "8b45f88b4df08b14810fb742028945ec",
+              "file_offset": "0xB3027",
+              "va": "0x100B3C27"
+            },
+            "idle_watchdog": {
+              "bytes": "558bec83ec18a10060051033c58945fc568b75085785f60f8407020000",
+              "file_offset": "0x39650",
+              "va": "0x1003A250"
+            },
+            "line_critical_section": {
+              "bytes": "558bec83c174837d0801750a894d085dff2508610410894d085dff250c610410",
+              "file_offset": "0x357C0",
+              "va": "0x100363C0"
+            },
+            "load_device_dll": {
+              "bytes": "558bec81ec0c020000a10060051033c58945fc56578bf9837f1c000f85da000000",
+              "file_offset": "0x357E0",
+              "va": "0x100363E0"
+            },
+            "p5_category_generation_gate": {
+              "bytes": "8b45e48b008a40488845c4eb038a45cf241f3c14740c3c1574083c160f855a030000",
+              "file_offset": "0x374B6",
+              "va": "0x100380B6"
+            },
+            "p5_class1_default_session": {
+              "bytes": "8b7b088bcbff751cff750c8b078b7050e889d0ffffff75208bcf68d1000000ff75c450ff751cff750cffd6c6432900",
+              "file_offset": "0x37782",
+              "va": "0x10038382"
+            },
+            "p5_class2_current_session_gate": {
+              "bytes": "8b4b088b551452ff75c88b01ff900001000083f8027578807b29037472",
+              "file_offset": "0x3754C",
+              "va": "0x1003814C"
+            },
+            "p5_normal_d1_d2_dispatch": {
+              "bytes": "807b290374728b7b088bcbff751cff750c8b078b7050e8a2d2ffffff75208bcf68d1000000ff75c450ff751cff750cffd68b7b088bcbff751cff750c8b078b7050e877d2ffffff75208bcf68d2000000ff75c450ff751cff750cffd68b4340c6432903",
+              "file_offset": "0x37563",
+              "va": "0x10038163"
+            },
+            "p5_normal_session_sender": {
+              "bytes": "e8cfd0ffffff75208b4dc068d1000000ff75c4508b45d05756ff5050",
+              "file_offset": "0x3774C",
+              "va": "0x1003834C"
+            },
+            "p5_session_alternate_noop": {
+              "bytes": "33c0c21800",
+              "file_offset": "0x137A0",
+              "va": "0x100143A0"
+            },
+            "p5_session_judgment_branch": {
+              "bytes": "83bb98030000018bcb578945d0560f85aa000000e879d1ffffff75208b4dc068d1000000ff75c4508b45d05756ff5054",
+              "file_offset": "0x3768E",
+              "va": "0x1003828E"
+            },
+            "p5_session_sender": {
+              "bytes": "558bec6aff68a116041064a1000000005081ec00010000a10060051033c58945f0535657508d45f464a3000000008bf9",
+              "file_offset": "0x27890",
+              "va": "0x10028490"
+            },
+            "p5_session_sender_db_lookup": {
+              "bytes": "0fb745188b4f1c50528d85f8feffff81c1cc000000506812010000ff1544610410",
+              "file_offset": "0x2795A",
+              "va": "0x1002855A"
+            },
+            "p5_session_sender_materialize": {
+              "bytes": "8b8530ffffff8d8d50ffffff8b000fb740108985f4feffff8d8574ffffff506a00ff155c610410",
+              "file_offset": "0x27A47",
+              "va": "0x10028647"
+            },
+            "query_first_key": {
+              "bytes": "8d45f8508d4df0518b55e0528b45e48b4810518b5514528b4de4ff55dc",
+              "file_offset": "0x63486",
+              "va": "0x10064086"
+            },
+            "query_second_key": {
+              "bytes": "8d45f4508d4dec518b55f8528b45f0508b4d18518b4de4ff55d8",
+              "file_offset": "0x634B7",
+              "va": "0x100640B7"
+            },
+            "receive": {
+              "bytes": "558bec83ec18a10060051033c58945fc8b45088b551c8945f48955ec538bd9",
+              "file_offset": "0x369B0",
+              "va": "0x100375B0"
+            },
+            "send_proc": {
+              "bytes": "558bec6aff685e29041064a1000000005083ec34a10060051033c58945f053565750",
+              "file_offset": "0x37310",
+              "va": "0x10037F10"
+            },
+            "set_session_judgment_flag": {
+              "bytes": "c7819803000001000000c3",
+              "file_offset": "0x38A90",
+              "va": "0x10039690"
+            },
+            "test_present_cadence": {
+              "bytes": "68d00700006a008d8574ffffff506a02ffd3",
+              "file_offset": "0x37F08",
+              "va": "0x10038B08"
+            },
+            "test_present_lookup_0xdd": {
+              "bytes": "8b4e0468dd000000508d45b881c1cc000000506812010000ff1544610410",
+              "file_offset": "0x39314",
+              "va": "0x10039F14"
+            },
+            "test_present_receive_timeout": {
+              "bytes": "80fb6075046a6eeb0568e80300006a7852",
+              "file_offset": "0x38002",
+              "va": "0x10038C02"
+            },
+            "test_present_send_timeout": {
+              "bytes": "80fb6075046a64eb0568e803000050ff764cffb5",
+              "file_offset": "0x37FC9",
+              "va": "0x10038BC9"
+            }
+          },
+          "device_boundary": "KGP_CommFrameCtrl loads J2534Ctrl.dll with LoadLibraryExW and dispatches the protocol-interface send/receive vtable below KGP",
+          "functions": {
+            "line_critical_section": "0x100363C0",
+            "load_device_dll": "0x100363E0",
+            "receive": "0x100375B0",
+            "send_int": "0x10037D50",
+            "send_int_ext": "0x10037D80",
+            "send_proc": "0x10037F10",
+            "send_test_present_thread": "0x10038A20",
+            "test_present_start": "0x10039E70",
+            "watch_idle_thread": "0x1003A250"
+          },
+          "generic_roles": {
+            "0x3A": {
+              "category_id": 0,
+              "plugin": "StartTestPresent.dll"
+            },
+            "0x3B": {
+              "category_id": 0,
+              "plugin": "StopTestPresent.dll"
+            },
+            "0x61": {
+              "category_id": 0,
+              "plugin": "GetFrmCheckMode_DT.dll"
+            },
+            "0x62": {
+              "category_id": 0,
+              "plugin": "GetFrmConfCheckMode_DT.dll"
+            },
+            "0xBF": {
+              "category_id": 0,
+              "plugin": "SetDefSession_DT.dll"
+            },
+            "0xCA": {
+              "category_id": 0,
+              "plugin": "MoveSessionCGWDK_DT.dll"
+            }
+          },
+          "p5_automatic_session_judgment": {
+            "categories": {
+              "397": {
+                "database": "HV_P5.ddb",
+                "generation": 20,
+                "generation_low5": "0x14",
+                "raw": "480056005f00500035002e0064006400620000000000000000000000000000000000000000000000000000000000000000000000000000000000000096770000000000008d01000014000000"
+              },
+              "435": {
+                "database": "ABS_P5.ddb",
+                "generation": 20,
+                "generation_low5": "0x14",
+                "raw": "4100420053005f00500035002e0064006400620000000000000000000000000000000000000000000000000000000000000000000000000000000000faef010000000000b301000014000000"
+              },
+              "498": {
+                "database": "FRC_P5.ddb",
+                "generation": 20,
+                "generation_low5": "0x14",
+                "raw": "4600520043005f00500035002e00640064006200000000000000000000000000000000000000000000000000000000000000000000000000000000009f73020000000000f201000014000000"
+              }
+            },
+            "category_gate": "SendProc reads CDbEcuCategoryTable/class 0x110 record byte +0x48, masks low 5 bits, and enters the P5-family session path for 0x14/0x15/0x16; current Hybrid397, Brake435, and FRC498 are all 0x14",
+            "class_1_default": "for classifier class 1, SendProc uses the DB-backed +0x50 selector 0xD1 path and records software session state 0",
+            "classifier": {
+              "phase5_function": "0x100292F0",
+              "rule": "request byte 0x01..0x0F -> class 1; request byte >=0x10 -> class 2; otherwise class 0",
+              "vtable_slot": "+0x100"
+            },
+            "data_monitor_drs_mirror": "DataMonitorPhase5_DT.dll D1/D2 callsites at 0x10014A8E/0x10014B6A write CDrsChangDefaultSession/CDrsChangExtendedSession records through the +0x1DC DRS writer sink; they journal session changes and are not the transport sender",
+            "uds_class_2": {
+              "normal_path": "when the P5 classifier returns 2 and current session CCommFrameCtrl +0x29 is not 3, the normal session-judgment path calls protocol vtable +0x50 with selector 0xD1 then 0xD2 and records software session state 3",
+              "phase5_session_sender": {
+                "current_camry_wire_sequence": [
+                  "10 01",
+                  "10 03"
+                ],
+                "default_selector": "0xD1",
+                "extended_selector": "0xD2",
+                "function": "0x10028490",
+                "lookup": "callee argument 1 is the target ECU/category key and argument 5 is the selector; the function queries DB class 0x112(key1, selector), follows the resulting class-0x111 CommFrame, obtains its send bytes, and dispatches send/receive through the protocol object",
+                "vtable_slot": "+0x50"
+              },
+              "session_judgment_flag": {
+                "alternate_slot": "+0x54",
+                "clearer": "ClearSessionJudgmentFlg @ 0x100326C0 writes 0",
+                "external_importers": {
+                  "NoConfGenComRes_DT.dll": [
+                    "?ClearSessionJudgmentFlg@CCommFrameCtrl@@QAEXXZ",
+                    "?SetSessionJudgmentFlg@CCommFrameCtrl@@QAEXXZ"
+                  ]
+                },
+                "field": "CCommFrameCtrl +0x398",
+                "phase5_alternate_behavior": "xor eax,eax; ret 0x18: no wire transaction. In the SendProc branch that checks +0x398, flag==1 routes both D1 and D2 through this no-op slot, clears the flag, and still advances software session state to 3 on the no-op success path",
+                "phase5_alternate_function": "0x100143A0",
+                "scope": "current GTS+ bin-corpus import scan finds external Set/ClearSessionJudgmentFlg use only in NoConfGenComRes_DT.dll, which also imports SendIntForced; ordinary P5 Data Monitor/Active-Test code does not import these setters",
+                "setter": "SetSessionJudgmentFlg @ 0x10039690 writes 1"
+              }
+            }
+          },
+          "session_frames": {
+            "categories": [
+              397,
+              435,
+              498
+            ],
+            "default": {
+              "category_id": 397,
+              "comm_frame_id": "0x2AF5",
+              "comm_frame_raw": "f52a752800000000",
+              "comm_set": 1,
+              "comm_set_metadata": {
+                "comm_set_id": 1,
+                "exception_handler_flag": 0,
+                "exception_handler_id": 0,
+                "raw": "e8030000fc0300000000010000000100",
+                "receive_timeout": 1020,
+                "retry_count": 1,
+                "send_parameter": 1000,
+                "unknown_word_0c": 0
+              },
+              "func_comm_frame_raw": "8d01d1000100f52a0000010000000000",
+              "selector": "0xD1",
+              "variables": {
+                "receive_check": {
+                  "bytes": "",
+                  "id": "0x0",
+                  "normalized_id": "0x0"
+                },
+                "receive_mask": {
+                  "bytes": "",
+                  "id": "0x0",
+                  "normalized_id": "0x0"
+                },
+                "send": {
+                  "bytes": "1001",
+                  "id": "0x2875",
+                  "normalized_id": "0x165"
+                }
+              }
+            },
+            "extended": {
+              "category_id": 397,
+              "comm_frame_id": "0x2AF6",
+              "comm_frame_raw": "f62ad72b00000000",
+              "comm_set": 1,
+              "comm_set_metadata": {
+                "comm_set_id": 1,
+                "exception_handler_flag": 0,
+                "exception_handler_id": 0,
+                "raw": "e8030000fc0300000000010000000100",
+                "receive_timeout": 1020,
+                "retry_count": 1,
+                "send_parameter": 1000,
+                "unknown_word_0c": 0
+              },
+              "func_comm_frame_raw": "8d01d2000100f62a0000010000000000",
+              "selector": "0xD2",
+              "variables": {
+                "receive_check": {
+                  "bytes": "",
+                  "id": "0x0",
+                  "normalized_id": "0x0"
+                },
+                "receive_mask": {
+                  "bytes": "",
+                  "id": "0x0",
+                  "normalized_id": "0x0"
+                },
+                "send": {
+                  "bytes": "1003",
+                  "id": "0x2BD7",
+                  "normalized_id": "0x4C7"
+                }
+              }
+            },
+            "identical_across_categories": true
+          },
+          "session_state": "SendTestPresentThread maintains current session at CCommFrameCtrl +0x29; SID 0x10 response 0x50 sets session 3, while non-0x10 requests store response byte 3 after SID/subidentifier checks",
+          "test_present": {
+            "cadence_ms": 2000,
+            "current_camry_p5": {
+              "categories": [
+                397,
+                435,
+                498
+              ],
+              "frame": {
+                "category_id": 397,
+                "comm_frame_id": "0x2B55",
+                "comm_frame_raw": "552b922c8e276627",
+                "comm_set": 1,
+                "comm_set_metadata": {
+                  "comm_set_id": 1,
+                  "exception_handler_flag": 0,
+                  "exception_handler_id": 0,
+                  "raw": "e8030000fc0300000000010000000100",
+                  "receive_timeout": 1020,
+                  "retry_count": 1,
+                  "send_parameter": 1000,
+                  "unknown_word_0c": 0
+                },
+                "func_comm_frame_raw": "8d01dd000100552b0000010000000000",
+                "selector": "0xDD",
+                "variables": {
+                  "receive_check": {
+                    "bytes": "62",
+                    "id": "0x2766",
+                    "normalized_id": "0x56"
+                  },
+                  "receive_mask": {
+                    "bytes": "ff",
+                    "id": "0x278E",
+                    "normalized_id": "0x7E"
+                  },
+                  "send": {
+                    "bytes": "22f186",
+                    "id": "0x2C92",
+                    "normalized_id": "0x582"
+                  }
+                }
+              },
+              "identical_across_categories": true
+            },
+            "lookup": "TestPresentStart calls GetDbRecord class 0x112 with K1=ECU/category and K2=0xDD; CDbFuncCommFrameTable FindDbItem1 compares row +0x00, FindDbItem2 row +0x02",
+            "meaning": "for current Hybrid397/Brake435/FRC498 the framework's periodic TestPresentStart request is 22 F1 86 with positive SID check 62; SendTestPresentThread validates 62 F1 86 and stores response byte 3 as current-session state, so this path both refreshes diagnostic activity and polls the active-session DID rather than using the separate 3E 00 selector family",
+            "separate_uds_tester_present_frames": {
+              "categories": [
+                397,
+                435,
+                498
+              ],
+              "identical_across_categories": true,
+              "selector_0x66": {
+                "category_id": 397,
+                "comm_frame_id": "0x2AF9",
+                "comm_frame_raw": "f92a172c00000000",
+                "comm_set": 1,
+                "comm_set_metadata": {
+                  "comm_set_id": 1,
+                  "exception_handler_flag": 0,
+                  "exception_handler_id": 0,
+                  "raw": "e8030000fc0300000000010000000100",
+                  "receive_timeout": 1020,
+                  "retry_count": 1,
+                  "send_parameter": 1000,
+                  "unknown_word_0c": 0
+                },
+                "func_comm_frame_raw": "8d0166000100f92a0000010000000000",
+                "selector": "0x66",
+                "variables": {
+                  "receive_check": {
+                    "bytes": "",
+                    "id": "0x0",
+                    "normalized_id": "0x0"
+                  },
+                  "receive_mask": {
+                    "bytes": "",
+                    "id": "0x0",
+                    "normalized_id": "0x0"
+                  },
+                  "send": {
+                    "bytes": "3e00",
+                    "id": "0x2C17",
+                    "normalized_id": "0x507"
+                  }
+                }
+              },
+              "selector_0x67": {
+                "category_id": 397,
+                "comm_frame_id": "0x2AFA",
+                "comm_frame_raw": "fa2a172c0000cd27",
+                "comm_set": 1,
+                "comm_set_metadata": {
+                  "comm_set_id": 1,
+                  "exception_handler_flag": 0,
+                  "exception_handler_id": 0,
+                  "raw": "e8030000fc0300000000010000000100",
+                  "receive_timeout": 1020,
+                  "retry_count": 1,
+                  "send_parameter": 1000,
+                  "unknown_word_0c": 0
+                },
+                "func_comm_frame_raw": "8d0167000100fa2a0000010000000000",
+                "selector": "0x67",
+                "variables": {
+                  "receive_check": {
+                    "bytes": "7e",
+                    "id": "0x27CD",
+                    "normalized_id": "0xBD"
+                  },
+                  "receive_mask": {
+                    "bytes": "",
+                    "id": "0x0",
+                    "normalized_id": "0x0"
+                  },
+                  "send": {
+                    "bytes": "3e00",
+                    "id": "0x2C17",
+                    "normalized_id": "0x507"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "hybrid_clear_binding": {
         "category_id": 397,
         "dll_name": "DelDiagCodeP4.dll",
