@@ -150,6 +150,29 @@ check(
     and hybrid_init_selected["linked_monitor"]["monitor"]["signal_info"]["pattern_display"] == {0: "OFF", 1: "ON"},
     "command plan materializes Hybrid role 0x08 Active Test 1 into 222801/62 and its linked monitor metadata",
 )
+hybrid_active_monitor_plan = gts_cli._master_command_plan(
+    parser, master, hybrid, 0xAD, gts / "bin", db_root
+)
+hybrid_active_monitor = hybrid_active_monitor_plan["active_test_monitor_model"]["category_plan"]
+check(
+    hybrid_active_monitor_plan["plugin"] == "GetDatMonListP5ForActTest_DT.dll"
+    and hybrid_active_monitor_plan["operation_surface"] == "delegated_transport_v18_proven"
+    and hybrid_active_monitor_plan["semantic_status"] == "exact_plugin_identity_and_category_active_test_monitor_partition"
+    and hybrid_active_monitor["candidate_table"] == 62
+    and hybrid_active_monitor["candidate_count"] == 1464
+    and hybrid_active_monitor["active_test_membership_bit"] == "0x40"
+    and hybrid_active_monitor["active_test_candidate_count"] == 1411
+    and hybrid_active_monitor["nonmember_count"] == 53
+    and hybrid_active_monitor["candidate_partition"] == {
+        "active_direct_include": 0,
+        "active_runtime_check_support_pid": 1411,
+        "nonmember_direct_exclude": 0,
+        "nonmember_runtime_probe_then_filter": 53,
+    }
+    and hybrid_active_monitor["support_list_builder"] == "CreateEnableDataIdList",
+    "command plan closes Hybrid role 0xAD as 1411 bit-0x40 Active-Test monitors plus 53 runtime-probed nonmembers",
+)
+
 hybrid_signal_plan = gts_cli._master_command_plan(
     parser, master, hybrid, 0x70, gts / "bin", db_root, 0x01, strings
 )

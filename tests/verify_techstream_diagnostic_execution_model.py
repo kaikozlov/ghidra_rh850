@@ -170,10 +170,31 @@ check(
 
 plugin_semantics = gts["dll_role_schema"]["plugin_semantics"]
 monitor_list = plugin_semantics["role_0x05_p5_monitor_list"]
+active_test_monitor_list = plugin_semantics["role_0xad_p5_monitor_list_for_active_test"]
 active_test_signal_info = plugin_semantics["role_0x70_p5_active_test_signal_info"]
 active_test_init = plugin_semantics["role_0x08_p5_active_test_init"]
 active_test_list = plugin_semantics["role_0x06_p5_active_test_list"]
 signal_info = plugin_semantics["role_0x41_p5_signal_info"]
+check(
+    "current role 0xAD P5 Active-Test monitor-list plugin is identity-pinned and reuses the P5 support pipeline",
+    active_test_monitor_list["plugin"]["sha256"] == "a9f96403a1246f40018273137ae2f650eb95f6e651257979a98583155d33abff"
+    and active_test_monitor_list["example_binding"]["category_id"] == 397
+    and active_test_monitor_list["example_binding"]["dll_role_id"] == 0xAD
+    and active_test_monitor_list["example_binding"]["dll_name"] == "GetDatMonListP5ForActTest_DT.dll"
+    and active_test_monitor_list["list_model"]["active_test_membership_bit"] == "0x40"
+    and active_test_monitor_list["list_model"]["monitor_table_selection"]["otherwise"]["table"] == 62
+    and active_test_monitor_list["list_model"]["candidate_id"] == "current 80-byte monitor record u16 +0x34"
+    and "role 0xAD uses membership bit 0x40" in active_test_monitor_list["list_model"]["relationship_to_role_0x05"],
+)
+check(
+    "current role 0xAD membership/direct-support/final-filter path is instruction-pinned",
+    active_test_monitor_list["anchors"]["category_mode_support_builder"]["bytes"].startswith("8a404824e0")
+    and active_test_monitor_list["anchors"]["monitor_table_selection"]["bytes"].startswith("80bdebfeffff60")
+    and active_test_monitor_list["anchors"]["candidate_fields"]["bytes"].startswith("8b04b10fb74034")
+    and active_test_monitor_list["anchors"]["active_membership_and_support_probe"]["bytes"].startswith("8a45988975e4a810740ca840")
+    and active_test_monitor_list["anchors"]["final_active_membership_filter"]["bytes"].startswith("8d8d40ffffff50e818f9fffff6854cffffff40")
+    and active_test_monitor_list["anchors"]["final_conversion_output"]["bytes"].startswith("668b483e662b483c66410fb7"),
+)
 check(
     "current role 0x70 P5 Active Test signal-info plugin is identity-pinned and metadata-only",
     active_test_signal_info["plugin"]["sha256"] == "0544b446514d722a491ae537a545c91fabb1a0d71e0fddfe8acd6482d2741b7b"

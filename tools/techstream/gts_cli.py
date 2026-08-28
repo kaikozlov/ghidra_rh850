@@ -865,6 +865,65 @@ def _active_test_signal_info_selected_plan(
     }
 
 
+def _active_test_monitor_category_plan(
+    parser: DDBParser, category: dict[str, Any], db_root: Path
+) -> dict[str, Any]:
+    mode = int(category["generation"]) & 0xE0
+    table = 157 if mode == 0x60 else 62
+    db_path = db_root / str(category["database"])
+    db = parser.parse_ecu_db(db_path)
+    section = db.sections.get(table)
+    if section is None:
+        raise ValueError(f"{db_path.name}: role-0xAD selected monitor table {table}, but it is absent")
+    size = section.decoded_record_size
+    if size < 0x36:
+        raise ValueError(f"{db_path.name}: monitor table {table} record size 0x{size:X} too small")
+    counts = {
+        "active_direct_include": 0,
+        "active_runtime_check_support_pid": 0,
+        "nonmember_direct_exclude": 0,
+        "nonmember_runtime_probe_then_filter": 0,
+    }
+    for index in range(section.header.record_count):
+        raw = section.decoded_data[index * size : (index + 1) * size]
+        flag = raw[0x30]
+        active_member = bool(flag & 0x40)
+        direct_decision = bool(flag & 0x10)
+        if active_member and direct_decision:
+            counts["active_direct_include"] += 1
+        elif active_member:
+            counts["active_runtime_check_support_pid"] += 1
+        elif direct_decision:
+            counts["nonmember_direct_exclude"] += 1
+        else:
+            counts["nonmember_runtime_probe_then_filter"] += 1
+    active_count = counts["active_direct_include"] + counts["active_runtime_check_support_pid"]
+    nonmember_count = counts["nonmember_direct_exclude"] + counts["nonmember_runtime_probe_then_filter"]
+    return {
+        "generation": int(category["generation"]),
+        "generation_mode": f"0x{mode:X}",
+        "candidate_table": table,
+        "candidate_table_class": ECU_TABLE_CLASS_NAMES.get(table, "unknown"),
+        "candidate_count": section.header.record_count,
+        "record_size": size,
+        "active_test_membership_bit": "0x40",
+        "active_test_candidate_count": active_count,
+        "nonmember_count": nonmember_count,
+        "support_list_builder": (
+            "CreateEnableDataIdListForSubaruCheckDID" if mode == 0x20 else "CreateEnableDataIdList"
+        ),
+        "candidate_partition": counts,
+        "runtime_support_required": (
+            counts["active_runtime_check_support_pid"] > 0
+            or counts["nonmember_runtime_probe_then_filter"] > 0
+        ),
+        "runtime_boundary": (
+            "bit-0x40 membership is static, but CheckSupportPid outcomes remain runtime/cache dependent; "
+            "nonmember rows with bit4 clear are still support-probed by the plugin before the final 0x40 filter"
+        ),
+    }
+
+
 def _monitor_list_category_plan(parser: DDBParser, category: dict[str, Any], db_root: Path) -> dict[str, Any]:
     mode = int(category["generation"]) & 0xE0
     table = 157 if mode == 0x60 else 62
@@ -949,6 +1008,7 @@ def _master_command_plan(
         "active_test_model": None,
         "active_test_init_model": None,
         "active_test_signal_info_model": None,
+        "active_test_monitor_model": None,
         "boundary": (
             "Frames/timers are resolved from the selected category. Executable semantics are attached only "
             "when the selected plugin SHA-256 exactly matches a recovered profile."
@@ -959,7 +1019,16 @@ def _master_command_plan(
     if profile is None:
         return result
 
-    if profile_name == "role_0x70_p5_active_test_signal_info":
+    if profile_name == "role_0xad_p5_monitor_list_for_active_test":
+        result["active_test_monitor_model"] = dict(profile["list_model"])
+        if db_root is not None:
+            result["active_test_monitor_model"]["category_plan"] = _active_test_monitor_category_plan(
+                parser, category, db_root
+            )
+            result["semantic_status"] = "exact_plugin_identity_and_category_active_test_monitor_partition"
+        else:
+            result["semantic_status"] = "exact_plugin_identity_active_test_monitor_semantics"
+    elif profile_name == "role_0x70_p5_active_test_signal_info":
         result["active_test_signal_info_model"] = dict(profile["metadata_model"])
         if selected_item is not None:
             if db_root is None or strings is None:
@@ -1120,6 +1189,22 @@ def cmd_command(args: argparse.Namespace) -> int:
         )
     for timer in payload["timers"]:
         print(f"timer	id={timer['timer_id']}	delay_ms={timer['delay_ms']}")
+    active_test_monitor = payload["active_test_monitor_model"]
+    if active_test_monitor is not None:
+        category_plan = active_test_monitor.get("category_plan")
+        if category_plan is None:
+            print("active-test-monitors\tcategory_partition=unresolved")
+        else:
+            part = category_plan["candidate_partition"]
+            print(
+                f"active-test-monitors\ttable={category_plan['candidate_table']}\t"
+                f"total={category_plan['candidate_count']}\tactive={category_plan['active_test_candidate_count']}\t"
+                f"nonmember={category_plan['nonmember_count']}\t"
+                f"direct={part['active_direct_include']}\t"
+                f"runtime_active={part['active_runtime_check_support_pid']}\t"
+                f"runtime_nonmember={part['nonmember_runtime_probe_then_filter']}\t"
+                f"builder={category_plan['support_list_builder']}"
+            )
     active_test_signal_info = payload["active_test_signal_info_model"]
     if active_test_signal_info is not None:
         selected_plan = active_test_signal_info.get("selected_plan")

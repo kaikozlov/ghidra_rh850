@@ -165,6 +165,10 @@ command  category=397  Hybrid Control  role=0x70  plugin=GetATSignalInfoP5_DT.dl
 active-test-signal-info  id=0x1  name=Activate the Inverter Water Pump  pattern_key=10  physical_key=6  conv=1/1 offset=0  dec=0  signed=0  unit=-
 active-test-display      pattern=1  button_size=0  key_op=101  key_invalid=0  values=1=ON
 
+$ tools/gts command HV_P5 0xAD
+command  category=397  Hybrid Control  role=0xAD  plugin=GetDatMonListP5ForActTest_DT.dll  surface=delegated_transport_v18_proven  semantics=exact_plugin_identity_and_category_active_test_monitor_partition
+active-test-monitors  table=62  total=1464  active=1411  nonmember=53  direct=0  runtime_active=1411  runtime_nonmember=53  builder=CreateEnableDataIdList
+
 $ tools/gts command EMPS_P5 0x05
 command  category=405  EMPS  role=0x5  plugin=GetDatMonListP5_DT.dll  surface=delegated_transport_v18_proven  semantics=exact_plugin_identity_and_category_candidate_partition
 list     table=62  candidates=230  direct_include=0  direct_exclude=0  runtime_probe=230  builder=CreateEnableDataIdList
@@ -190,6 +194,8 @@ timer  category=397  id=1  delay_ms=0  unknown_08=0
 $ tools/gts frame 397 0x1
 frame  category=397  selector=0x1  comm_set=1  frame=0x279E  rcv_timeout=1020  retries=1  send=04  mask=  check=44
 ```
+
+Role `0xAD` is category-wide rather than selected-test-specific. The current `GetDatMonListP5ForActTest_DT.dll` reuses the normal role-`0x05` P5 support/table/MultiPID/conversion pipeline, but uses monitor flag bit `0x40` as the Active-Test membership bit. If flag bit4 is set, bit `0x40` is the direct include/exclude decision; if bit4 is clear, the plugin still calls `CheckSupportPid` and applies the `0x40` membership test afterward. `tools/gts command ... 0xAD` therefore reports both static membership and which rows still require runtime support evaluation. It does **not** take `--item`: the plugin does not join this list to one selected Active Test ID.
 
 For role `0x70`, the same `--item` selects the direct type-68 Active Test but no wire transaction is attached. The exact current `GetATSignalInfoP5_DT.dll` consumes that selected ID and joins type-12 Active-Test pattern, type-13 physical conversion, type-14 display values, and type-15 unit metadata into `CCmdActTstSignalInfoItem`. This makes `0x70` the read-only presentation/conversion companion to role `0x08`, not another executor.
 

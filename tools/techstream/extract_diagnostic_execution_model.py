@@ -396,6 +396,7 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
     cid = bin_root / "GetCID_SID22_DT.dll"
     clear = bin_root / "DelDiagCodeP4.dll"
     monitor_list = bin_root / "GetDatMonListP5_DT.dll"
+    active_test_monitor_list = bin_root / "GetDatMonListP5ForActTest_DT.dll"
     active_test_list = bin_root / "GetActTstListP5_DT.dll"
     active_test_init = bin_root / "GetActTstInitP5_DT.dll"
     active_test_signal_info = bin_root / "GetATSignalInfoP5_DT.dll"
@@ -557,6 +558,41 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
                 "subaru_check_support_did": anchor(active_test_list, 0x10001FF8, "0fb7402050ffb560ffffffff15245000108bf885ff0f8509010000837dec010f"),
                 "subaru_check_support_rid": anchor(active_test_list, 0x100015A0, "6a018d8534ffffff0fbfce508d45ecc745ec00000000508b85f8feffff8b04888d8d54ffffff0fb7401e50ffb5c8feffffff15285000108bf8"),
                 "final_output": anchor(active_test_list, 0x10001948, "508bcbe8800800008bf0668b0e66894d8c8d4e04518d4d90ff153c5000108d4e14518d4da0ff153c5000108b46248b8db4feffff8945b08d458450ff1550500010"),
+            },
+        },
+        "role_0xad_p5_monitor_list_for_active_test": {
+            "plugin": file_identity(active_test_monitor_list, gts_root),
+            "example_binding": dll_binding(parser, master, 397, 0xAD),
+            "list_model": {
+                "purpose": "construct the P5 Data Monitor list exposed for Active Test use from DDB membership flag 0x40 plus normal runtime PID support state",
+                "category_mode": "low byte of master category generation field (+0x48 raw) masked with 0xE0",
+                "monitor_table_selection": {
+                    "0x60": {"table": 157, "class": ECU_TABLE_CLASS_NAMES[157]},
+                    "otherwise": {"table": 62, "class": ECU_TABLE_CLASS_NAMES[62]},
+                },
+                "support_list_builder": {
+                    "0x20": "CreateEnableDataIdListForSubaruCheckDID",
+                    "otherwise": "CreateEnableDataIdList",
+                },
+                "candidate_id": "current 80-byte monitor record u16 +0x34",
+                "candidate_flag": "low byte of current monitor record dword +0x30",
+                "active_test_membership_bit": "0x40",
+                "candidate_decision": {
+                    "flag_bit4_set_bit6_set": "include directly without CheckSupportPid; candidate is Active-Test monitor member",
+                    "flag_bit4_set_bit6_clear": "exclude directly without CheckSupportPid",
+                    "flag_bit4_clear": "call CCommCachePlusP5::CheckSupportPid; after a positive support result, retain only candidates whose flag also has bit 0x40",
+                },
+                "relationship_to_role_0x05": "same P5 support/table/MultiPID/conversion pipeline, but role 0xAD uses membership bit 0x40 where role 0x05 uses direct-list bit 0x01 and rechecks 0x40 before final emission",
+                "runtime_boundary": "offline DDB parsing identifies Active-Test monitor membership and direct-vs-runtime support branches, but CheckSupportPid outcomes still require support-cache/live ECU state",
+                "post_filter": "0x40 membership check, MultiPID validation/merge, then CCmdDatMonData construction with physical/unit ChangeSignalLSB conversion",
+            },
+            "anchors": {
+                "category_mode_support_builder": anchor(active_test_monitor_list, 0x10001BD4, "8a404824e08885ebfeffff3c208d8554ffffff752e565053ff15185000108bf885ff744e5768e100000068c051001068b853001057ff157850001083c414e9870200006a005053ff151c5000108bf885"),
+                "monitor_table_selection": anchor(active_test_monitor_list, 0x10001C77, "80bdebfeffff6050a1f4500010755c689d020000ffd08bf885ff7420575668f600000068c051001068a854001057ff157850001083c418e9df010000668b850cffffff6683f8017d7e5668fb00000068c051001068485500106a"),
+                "candidate_fields": anchor(active_test_monitor_list, 0x10001D66, "8b04b10fb74034668945948b04b18b40308945988b04b10fb7403a6689459c8b04b18b40248945a08b04b1f20f1000f20f1145a48b04b1f20f104008f20f1145ac8b04b18b40148945b48b04b18b40188945b88b04b18b402c8945bc8b04b18d8d08ffffff8b40288945c0ff15f0500010508d4dc4ff1560"),
+                "active_membership_and_support_probe": anchor(active_test_monitor_list, 0x10001DE1, "8a45988975e4a810740ca84074598bb5e0feffffeb3b6a018d8554ffffffc745ec00000000508d45ec50ff75948d8d24ffffffffb5dcfeffffff150c5000108bf885ff7556837dec01751c8bb5d8feffff8bcee8e7f4ffff8b4e"),
+                "final_active_membership_filter": anchor(active_test_monitor_list, 0x1000171C, "8d8d40ffffff50e818f9fffff6854cffffff40c645fc05741a8d4dc8e8e3fbffff8b4dd48d8540ffffff508d4908e8c1faffff8d4d88c645fc04c785"),
+                "final_conversion_output": anchor(active_test_monitor_list, 0x10002B82, "668b483e662b483c66410fb7c18d8d64ffffff518d8d54ffffff518d8d50ffffff51ffb558ffffff8d8d94feffffffb528feffff50ffb55cffffffff7584ff15385000108bf085f60f85230100008b852cfeffff8b48048d8504ffffff508d4920ff156c5000108d8d30feffffff15c85000108b35585000"),
             },
         },
         "role_0x05_p5_monitor_list": {
