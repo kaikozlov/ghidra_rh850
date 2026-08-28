@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 349 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 182
+Findings: 350 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 182
 
 ## Reading this index
 
@@ -368,6 +368,7 @@ Findings: 349 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="finding-var-064"></a>**VAR-064** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md), [docs/tooling/techstream.md](../tooling/techstream.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_2026.py` | — |
 | <a id="finding-var-065"></a>**VAR-065** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000_external_lateral_ingress.py` | — |
 | <a id="finding-var-066"></a>**VAR-066** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000_gtsplus_semantics.py`, `tests/verify_camry_2026.py` | — |
+| <a id="finding-var-067"></a>**VAR-067** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_2026.py` | — |
 
 ## Open-questions index
 
@@ -692,6 +693,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/21140bbd65e530a9/diagnostic_annotations.json` | diagnostic_vocabulary | — |
 | `data/generated/21140bbd65e530a9/diagnostic_vocabulary.json` | diagnostic_vocabulary, application_wdbi, application_wdbi_surface_live, spanconstant_corolla_codeflash | — |
 | `data/generated/camry-8965F3307000/decompilations.jsonl` | analysis_targets, camry_8965f3307000_gtsplus_semantics, camry_8965f3307000_codeflash, camry_8965f3307000_flash_backend, camry_8965f3307000_lateral_static, camry_8965f3307000_tss3_opendbc_port, camry_8965f3307000_fault_status, camry_8965f3307000_external_lateral_ingress | — |
+| `data/generated/camry_2026_cruise_lta_edge_census.json` | camry_2026 | — |
 | `data/generated/camry_2026_dtc_clear.json` | camry_2026 | — |
 | `data/generated/camry_2026_nrtd_p5.json` | camry_2026 | — |
 | `data/generated/camry_2026_ready_gear.json` | camry_2026 | — |

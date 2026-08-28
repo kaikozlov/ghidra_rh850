@@ -289,6 +289,62 @@ def _section_camry_2026_relay_correct_capture():
 _section_camry_2026_relay_correct_capture()
 print()
 
+print("== camry 2026 cruise/lateral edge census ==")
+def _section_camry_2026_cruise_lta_edges():
+    import json
+    import subprocess
+    import sys
+    import tempfile
+    from pathlib import Path
+    REPO = Path(__file__).resolve().parents[1]
+    ART = REPO / 'data/generated/camry_2026_cruise_lta_edge_census.json'
+    BUILD = REPO / 'tools/analyze_camry_2026_cruise_lta_edges.py'
+
+    with tempfile.TemporaryDirectory() as td:
+        out = Path(td) / 'edges.json'
+        proc = subprocess.run([sys.executable, str(BUILD), '--out', str(out)], cwd=REPO,
+                              capture_output=True, text=True, check=False)
+        check('cruise/lateral edge analyzer succeeds', proc.returncode == 0, proc.stderr[-300:])
+        check('cruise/lateral edge artifact regenerates exactly', proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
+
+    art = json.loads(ART.read_text())
+    check('cruise/lateral edge schema v1', art['schema'] == 'camry-2026-cruise-lta-edge-census-v1')
+    combined = art['combined']
+    check('existing logs machine-recover sustained cruise operation',
+          combined['cruise_rising_edge_count'] == 6 and combined['cruise_rises_with_recent_main'] == 6 and
+          combined['cruise_active_duration_s'] > 150 and combined['cruise_active_incoming_frame_count_all_buses'] > 500000)
+    check('0x08A byte10 independently joins set speed to wheel speed',
+          combined['max_abs_set_speed_vs_wheel_kph_at_cruise_rise'] <= 1.4)
+    check('B6 remains zero throughout recovered cruise-active intervals', combined['b6_during_cruise_active_all_buses'] == 0)
+
+    a = art['drives']['drive_a']
+    b = art['drives']['drive_b']
+    a_edges = [e for e in a['cruise_active']['control_edges'] if e['button'] == 'SET_MINUS']
+    b_res = [e for e in b['cruise_active']['control_edges'] if e['button'] == 'RES_PLUS']
+    b_cancel = [e for e in b['cruise_active']['control_edges'] if e['button'] == 'CANCEL' and e['a8_after_b3'] == 0]
+    check('SET- decrements 0x08A set-speed byte in first drive',
+          [(e['a8_before_b10'], e['a8_after_b10']) for e in a_edges] == [(42, 40), (40, 39)])
+    check('RES+ increments 0x08A set-speed byte in confirmation drive',
+          [(e['a8_before_b10'], e['a8_after_b10']) for e in b_res] == [(66, 67), (67, 68), (68, 70)])
+    check('CANCEL clears recovered cruise state', len(b_cancel) >= 2 and all(e['a8_after_b10'] == 0 for e in b_cancel))
+
+    lat = art['combined']
+    check('existing logs contain long structurally distinct lateral/HUD candidate intervals',
+          lat['lateral_hud_candidate_duration_s'] > 70 and lat['lateral_hud_candidate_incoming_frame_count_all_buses'] > 230000)
+    check('B6 also remains zero throughout lateral/HUD candidate intervals', lat['b6_during_lateral_hud_candidate_all_buses'] == 0)
+    a_lat = a['lateral_hud_candidate']['intervals']
+    b_lat = b['lateral_hud_candidate']['intervals']
+    check('lateral/HUD state is mirrored on 0x081 and dominated by one 0x412 payload',
+          len(a_lat) == len(b_lat) == 1 and
+          a_lat[0]['id081_b13_match_fraction'] > 0.998 and b_lat[0]['id081_b13_match_fraction'] > 0.999 and
+          a_lat[0]['hud_0x412_modal_payload'] == b_lat[0]['hud_0x412_modal_payload'] == '1400004401ee9307' and
+          a_lat[0]['hud_0x412_modal_fraction'] > 0.94 and b_lat[0]['hud_0x412_modal_fraction'] > 0.98)
+    check('lateral/HUD semantics remain explicitly bounded',
+          'not an OEM-named signal' in b['lateral_hud_candidate']['definition'] and
+          art['interpretation']['production_output_authorized'] is False)
+_section_camry_2026_cruise_lta_edges()
+print()
+
 print("== camry 2026 tsk baseline ==")
 def _section_camry_2026_tsk_baseline():
     import gzip

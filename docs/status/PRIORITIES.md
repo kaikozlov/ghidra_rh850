@@ -245,8 +245,10 @@ VAR-063 now verifies the maintainer Camry's physical Toyota-B repin itself: the 
 steering/state network is on the CAN0/CAN2 relay pair. Two independent moving routes
 now retain **3,574,703 incoming frames across 19 segments** and still contain **zero B6
 at every DLC/bus** while `00F/D7` remain healthy; the second run deliberately reproduced
-the first negative at road speed. Do not repeat another blind "stock B6" drive. The missing discriminator is now an OEM-named **factory-LTA
-active state** synchronized to that relay-correct CAN. Highest-value next capture is
+the first negative at road speed. Do not repeat another blind "stock B6" drive. VAR-067 subsequently machine-recovers
+cruise operation from the existing routes themselves; the remaining **OEM naming**
+discriminator is a factory-LTA state synchronized to that relay-correct CAN. The prepared
+confirmation capture is
 FRC P5 `0x1601`, whose current GTS+ dictionary makes the exact enabled-state oracle
 **LTA Switch=1 (ON) + LTA Control=0 (LTA Enabled)** (`1=LTA Disabled`; Hands-Off occupies
 the upper two bytes), with `0x1501` LDA, `0x1681` LCA, and `0x1903` Control Mode as
@@ -259,8 +261,9 @@ existing `sendcan` publisher with normal `pandad`/`loggerd`, fixed post-repin Pa
 reads, ELM327-param1/controls-disallowed gating, and per-DID two-second stale-stop.
 `tools/extract_camry_frc_lta_rlog.py` converts the resulting explicit rlog segments into
 the analyzer's privacy-minimized capture format. This is tooling readiness only; the live
-synchronized artifact is still missing. Only after that oracle should the B6 template
-assumption be kept or challenged. Exclusive source suppression, slot-4 command-5 generation
+synchronized artifact is still missing. Do not wait on that oracle before challenging the B6 stock-template assumption: VAR-067
+already proves zero B6 throughout recovered cruise operation and two long lateral/HUD
+candidate intervals. Use `0x1601` to name/corroborate the candidate state. Exclusive source suppression, slot-4 command-5 generation
 permission plus latency/contention, and normal/asserted/recovery correlations for the
 F33 status carriers remain live work. Driver override and current-response thresholds
 remain policy choices requiring conservative dynamic validation, not values to infer
@@ -301,8 +304,14 @@ inventing a second EPS CAN port; the remaining discriminator is **stock operatin
 synchronize FRC `0x1601` **Switch=1 / LTA-Control=0 (Enabled)** plus `0x1914=1`
 **Cruise Control in Operation**, motion, and healthy Bus-4 protected traffic. Use the
 prepared normal-loggerd exact-F33 oracle path rather than another direct-Panda reader or
-another blind drive; the old two-drive relay-correct capture remains the bounded negative
-baseline, not a substitute for the missing synchronized oracle.
+another blind drive. **VAR-067 now extracts substantially more operating-state evidence
+from those same two drives:** `0x08A` byte3/set-speed behavior machine-proves 158.846096 s
+of cruise operation with zero B6, while a separate repeated `0x08A` byte21=`0x0B` /
+`0x081` byte13 / `0x412` display-state class contributes 73.303384 s and 237,097 frames,
+again with zero B6. The latter remains a lateral/HUD **candidate**, not an OEM-named LTA
+bit. Therefore `0x1601` is now a naming/corroboration experiment rather than a reason to
+hold the reverse engineering: proceed in parallel with the actual steering-path audit,
+starting at the upstream FRC/Brake boundary and the residual non-COM/internal F33 paths.
 
 COM-013 closes much more of the whole-vehicle side than the earlier EPS-only
 roadmap. TSS generation and SecOC/TSK are **orthogonal** (CORR-108). The public

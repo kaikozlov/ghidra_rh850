@@ -1,0 +1,852 @@
+{
+  "combined": {
+    "b6_during_cruise_active_all_buses": 0,
+    "b6_during_lateral_hud_candidate_all_buses": 0,
+    "cruise_active_duration_s": 158.846096,
+    "cruise_active_incoming_frame_count_all_buses": 511760,
+    "cruise_rises_with_recent_main": 6,
+    "cruise_rising_edge_count": 6,
+    "lateral_hud_candidate_duration_s": 73.303384,
+    "lateral_hud_candidate_incoming_frame_count_all_buses": 237097,
+    "max_abs_set_speed_vs_wheel_kph_at_cruise_rise": 1.39
+  },
+  "drives": {
+    "drive_a": {
+      "a8_state_transitions": [
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 0,
+          "b23": 0,
+          "b24": 0,
+          "b3": 0,
+          "seconds": 0.241722,
+          "segment": 0
+        },
+        {
+          "b10": 31,
+          "b20": 192,
+          "b21": 0,
+          "b23": 0,
+          "b24": 0,
+          "b3": 8,
+          "seconds": 21.157706,
+          "segment": 4
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 0,
+          "b23": 0,
+          "b24": 0,
+          "b3": 0,
+          "seconds": 50.314726,
+          "segment": 4
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 18,
+          "b23": 32,
+          "b24": 50,
+          "b3": 0,
+          "seconds": 52.285216,
+          "segment": 4
+        },
+        {
+          "b10": 42,
+          "b20": 192,
+          "b21": 11,
+          "b23": 0,
+          "b24": 100,
+          "b3": 8,
+          "seconds": 16.834568,
+          "segment": 5
+        },
+        {
+          "b10": 42,
+          "b20": 192,
+          "b21": 11,
+          "b23": 32,
+          "b24": 100,
+          "b3": 8,
+          "seconds": 17.87885,
+          "segment": 5
+        },
+        {
+          "b10": 42,
+          "b20": 64,
+          "b21": 11,
+          "b23": 32,
+          "b24": 100,
+          "b3": 8,
+          "seconds": 19.575657,
+          "segment": 5
+        },
+        {
+          "b10": 40,
+          "b20": 192,
+          "b21": 11,
+          "b23": 32,
+          "b24": 100,
+          "b3": 8,
+          "seconds": 19.777782,
+          "segment": 5
+        },
+        {
+          "b10": 40,
+          "b20": 64,
+          "b21": 11,
+          "b23": 32,
+          "b24": 100,
+          "b3": 8,
+          "seconds": 20.178964,
+          "segment": 5
+        },
+        {
+          "b10": 39,
+          "b20": 192,
+          "b21": 11,
+          "b23": 32,
+          "b24": 100,
+          "b3": 8,
+          "seconds": 20.279214,
+          "segment": 5
+        },
+        {
+          "b10": 39,
+          "b20": 192,
+          "b21": 11,
+          "b23": 0,
+          "b24": 100,
+          "b3": 8,
+          "seconds": 22.978459,
+          "segment": 5
+        },
+        {
+          "b10": 39,
+          "b20": 192,
+          "b21": 11,
+          "b23": 32,
+          "b24": 100,
+          "b3": 8,
+          "seconds": 28.677312,
+          "segment": 5
+        },
+        {
+          "b10": 39,
+          "b20": 192,
+          "b21": 0,
+          "b23": 0,
+          "b24": 100,
+          "b3": 8,
+          "seconds": 32.984427,
+          "segment": 5
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 0,
+          "b23": 0,
+          "b24": 100,
+          "b3": 0,
+          "seconds": 33.535631,
+          "segment": 5
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 18,
+          "b23": 32,
+          "b24": 50,
+          "b3": 0,
+          "seconds": 53.987381,
+          "segment": 5
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 0,
+          "seconds": 56.989414,
+          "segment": 5
+        }
+      ],
+      "button_events": {
+        "CANCEL": [],
+        "MAIN": [
+          {
+            "end_s": 21.057623,
+            "frames": 4,
+            "segment": 4,
+            "start_s": 20.957421
+          },
+          {
+            "end_s": 50.32569,
+            "frames": 4,
+            "segment": 4,
+            "start_s": 50.22577
+          },
+          {
+            "end_s": 16.724249,
+            "frames": 6,
+            "segment": 5,
+            "start_s": 16.562072
+          },
+          {
+            "end_s": 33.54657,
+            "frames": 5,
+            "segment": 5,
+            "start_s": 33.416355
+          }
+        ],
+        "RES_PLUS": [],
+        "SET_MINUS": [
+          {
+            "end_s": 19.668284,
+            "frames": 5,
+            "segment": 5,
+            "start_s": 19.546038
+          },
+          {
+            "end_s": 20.178964,
+            "frames": 3,
+            "segment": 5,
+            "start_s": 20.117724
+          }
+        ]
+      },
+      "cruise_active": {
+        "b6_count_all_buses": 0,
+        "control_edges": [
+          {
+            "a8_after_b10": 40,
+            "a8_after_b3": 8,
+            "a8_before_b10": 42,
+            "a8_before_b3": 8,
+            "button": "SET_MINUS",
+            "button_start_s": 19.546038,
+            "first_a8_change_s": 19.777782,
+            "lag_s": 0.231745,
+            "segment": 5
+          },
+          {
+            "a8_after_b10": 39,
+            "a8_after_b3": 8,
+            "a8_before_b10": 40,
+            "a8_before_b3": 8,
+            "button": "SET_MINUS",
+            "button_start_s": 20.117724,
+            "first_a8_change_s": 20.279214,
+            "lag_s": 0.16149,
+            "segment": 5
+          }
+        ],
+        "duration_s": 45.798973,
+        "incoming_frame_count_all_buses": 148886,
+        "interval_count": 2,
+        "rising_edges": [
+          {
+            "lag_from_main_start_s": 0.200285,
+            "main_press_segment": 4,
+            "main_press_start_s": 20.957421,
+            "seconds": 21.157706,
+            "segment": 4,
+            "set_minus_wheel_kph": -0.793,
+            "set_speed_raw_kph": 31,
+            "wheel_speed_kph": 31.793
+          },
+          {
+            "lag_from_main_start_s": 0.272496,
+            "main_press_segment": 5,
+            "main_press_start_s": 16.562072,
+            "seconds": 16.834568,
+            "segment": 5,
+            "set_minus_wheel_kph": -0.28,
+            "set_speed_raw_kph": 42,
+            "wheel_speed_kph": 42.28
+          }
+        ]
+      },
+      "lateral_hud_candidate": {
+        "b6_count_all_buses": 0,
+        "definition": "structural only: bus0 0x08A byte21 == 0x0B; not an OEM-named signal and not an EPS command",
+        "duration_s": 16.119256,
+        "incoming_frame_count_all_buses": 53604,
+        "interval_count": 1,
+        "intervals": [
+          {
+            "a8_b21_values": [
+              11
+            ],
+            "a8_b24_values": [
+              100
+            ],
+            "a8_frame_count": 646,
+            "b6_count_all_buses": 0,
+            "duration_s": 16.119256,
+            "hud_0x412_modal_fraction": 0.944444,
+            "hud_0x412_modal_payload": "1400004401ee9307",
+            "id081_b13_match_fraction": 0.998141,
+            "start_s": 16.834568,
+            "start_segment": 5
+          }
+        ]
+      },
+      "source": {
+        "file": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+        "frame_count": 1656656,
+        "segments": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5"
+      }
+    },
+    "drive_b": {
+      "a8_state_transitions": [
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 0,
+          "seconds": 0.0,
+          "segment": 16
+        },
+        {
+          "b10": 37,
+          "b20": 192,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 8,
+          "seconds": 28.580401,
+          "segment": 18
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 0,
+          "seconds": 34.878069,
+          "segment": 18
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 18,
+          "b23": 32,
+          "b24": 50,
+          "b3": 0,
+          "seconds": 36.855747,
+          "segment": 18
+        },
+        {
+          "b10": 70,
+          "b20": 192,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 8,
+          "seconds": 38.080412,
+          "segment": 18
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 0,
+          "seconds": 9.1895,
+          "segment": 19
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 18,
+          "b23": 32,
+          "b24": 50,
+          "b3": 0,
+          "seconds": 52.336909,
+          "segment": 19
+        },
+        {
+          "b10": 38,
+          "b20": 192,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 8,
+          "seconds": 52.48718,
+          "segment": 19
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 0,
+          "seconds": 59.336168,
+          "segment": 19
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 18,
+          "b23": 32,
+          "b24": 50,
+          "b3": 0,
+          "seconds": 1.316482,
+          "segment": 20
+        },
+        {
+          "b10": 66,
+          "b20": 192,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 8,
+          "seconds": 1.546326,
+          "segment": 20
+        },
+        {
+          "b10": 66,
+          "b20": 64,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 8,
+          "seconds": 4.037554,
+          "segment": 20
+        },
+        {
+          "b10": 67,
+          "b20": 192,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 8,
+          "seconds": 4.140223,
+          "segment": 20
+        },
+        {
+          "b10": 67,
+          "b20": 64,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 8,
+          "seconds": 4.540012,
+          "segment": 20
+        },
+        {
+          "b10": 68,
+          "b20": 192,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 8,
+          "seconds": 4.642586,
+          "segment": 20
+        },
+        {
+          "b10": 68,
+          "b20": 64,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 8,
+          "seconds": 6.289876,
+          "segment": 20
+        },
+        {
+          "b10": 70,
+          "b20": 192,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 8,
+          "seconds": 6.439717,
+          "segment": 20
+        },
+        {
+          "b10": 70,
+          "b20": 192,
+          "b21": 11,
+          "b23": 0,
+          "b24": 100,
+          "b3": 8,
+          "seconds": 13.239624,
+          "segment": 20
+        },
+        {
+          "b10": 70,
+          "b20": 192,
+          "b21": 11,
+          "b23": 32,
+          "b24": 100,
+          "b3": 8,
+          "seconds": 13.772024,
+          "segment": 20
+        },
+        {
+          "b10": 70,
+          "b20": 192,
+          "b21": 11,
+          "b23": 0,
+          "b24": 100,
+          "b3": 8,
+          "seconds": 14.626457,
+          "segment": 20
+        },
+        {
+          "b10": 70,
+          "b20": 192,
+          "b21": 11,
+          "b23": 32,
+          "b24": 100,
+          "b3": 8,
+          "seconds": 50.648821,
+          "segment": 20
+        },
+        {
+          "b10": 70,
+          "b20": 192,
+          "b21": 11,
+          "b23": 0,
+          "b24": 100,
+          "b3": 8,
+          "seconds": 54.546179,
+          "segment": 20
+        },
+        {
+          "b10": 70,
+          "b20": 192,
+          "b21": 11,
+          "b23": 32,
+          "b24": 100,
+          "b3": 8,
+          "seconds": 9.461619,
+          "segment": 21
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 0,
+          "b23": 0,
+          "b24": 100,
+          "b3": 0,
+          "seconds": 10.435632,
+          "segment": 21
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 18,
+          "b23": 32,
+          "b24": 50,
+          "b3": 0,
+          "seconds": 12.484222,
+          "segment": 21
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 0,
+          "seconds": 13.03525,
+          "segment": 21
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 18,
+          "b23": 32,
+          "b24": 50,
+          "b3": 0,
+          "seconds": 49.352075,
+          "segment": 22
+        },
+        {
+          "b10": 0,
+          "b20": 0,
+          "b21": 0,
+          "b23": 0,
+          "b24": 50,
+          "b3": 0,
+          "seconds": 7.131012,
+          "segment": 23
+        }
+      ],
+      "button_events": {
+        "CANCEL": [
+          {
+            "end_s": 9.240073,
+            "frames": 5,
+            "segment": 19,
+            "start_s": 9.119703
+          },
+          {
+            "end_s": 10.535353,
+            "frames": 5,
+            "segment": 21,
+            "start_s": 10.406004
+          },
+          {
+            "end_s": 1.806935,
+            "frames": 5,
+            "segment": 23,
+            "start_s": 1.67751
+          }
+        ],
+        "MAIN": [
+          {
+            "end_s": 59.114571,
+            "frames": 6,
+            "segment": 16,
+            "start_s": 58.964446
+          },
+          {
+            "end_s": 28.480461,
+            "frames": 7,
+            "segment": 18,
+            "start_s": 28.290845
+          },
+          {
+            "end_s": 34.888047,
+            "frames": 5,
+            "segment": 18,
+            "start_s": 34.757975
+          },
+          {
+            "end_s": 38.000603,
+            "frames": 5,
+            "segment": 18,
+            "start_s": 37.870463
+          },
+          {
+            "end_s": 52.417154,
+            "frames": 4,
+            "segment": 19,
+            "start_s": 52.316871
+          },
+          {
+            "end_s": 59.395435,
+            "frames": 6,
+            "segment": 19,
+            "start_s": 59.235803
+          },
+          {
+            "end_s": 1.466796,
+            "frames": 5,
+            "segment": 20,
+            "start_s": 1.335903
+          }
+        ],
+        "RES_PLUS": [
+          {
+            "end_s": 4.068462,
+            "frames": 3,
+            "segment": 20,
+            "start_s": 4.008172
+          },
+          {
+            "end_s": 4.583582,
+            "frames": 4,
+            "segment": 20,
+            "start_s": 4.481032
+          },
+          {
+            "end_s": 6.349877,
+            "frames": 5,
+            "segment": 20,
+            "start_s": 6.229631
+          }
+        ],
+        "SET_MINUS": []
+      },
+      "cruise_active": {
+        "b6_count_all_buses": 0,
+        "control_edges": [
+          {
+            "a8_after_b10": 67,
+            "a8_after_b3": 8,
+            "a8_before_b10": 66,
+            "a8_before_b3": 8,
+            "button": "RES_PLUS",
+            "button_start_s": 4.008172,
+            "first_a8_change_s": 4.140223,
+            "lag_s": 0.132051,
+            "segment": 20
+          },
+          {
+            "a8_after_b10": 68,
+            "a8_after_b3": 8,
+            "a8_before_b10": 67,
+            "a8_before_b3": 8,
+            "button": "RES_PLUS",
+            "button_start_s": 4.481032,
+            "first_a8_change_s": 4.642586,
+            "lag_s": 0.161554,
+            "segment": 20
+          },
+          {
+            "a8_after_b10": 70,
+            "a8_after_b3": 8,
+            "a8_before_b10": 68,
+            "a8_before_b3": 8,
+            "button": "RES_PLUS",
+            "button_start_s": 6.229631,
+            "first_a8_change_s": 6.439717,
+            "lag_s": 0.210087,
+            "segment": 20
+          },
+          {
+            "a8_after_b10": 0,
+            "a8_after_b3": 0,
+            "a8_before_b10": 70,
+            "a8_before_b3": 8,
+            "button": "CANCEL",
+            "button_start_s": 9.119703,
+            "first_a8_change_s": 9.1895,
+            "lag_s": 0.069797,
+            "segment": 19
+          },
+          {
+            "a8_after_b10": 0,
+            "a8_after_b3": 0,
+            "a8_before_b10": 70,
+            "a8_before_b3": 8,
+            "button": "CANCEL",
+            "button_start_s": 10.406004,
+            "first_a8_change_s": 10.435632,
+            "lag_s": 0.029628,
+            "segment": 21
+          },
+          {
+            "a8_after_b10": null,
+            "a8_after_b3": null,
+            "a8_before_b10": 0,
+            "a8_before_b3": 0,
+            "button": "CANCEL",
+            "button_start_s": 1.67751,
+            "first_a8_change_s": null,
+            "lag_s": null,
+            "segment": 23
+          }
+        ],
+        "duration_s": 113.047123,
+        "incoming_frame_count_all_buses": 362874,
+        "interval_count": 4,
+        "rising_edges": [
+          {
+            "lag_from_main_start_s": 0.289557,
+            "main_press_segment": 18,
+            "main_press_start_s": 28.290845,
+            "seconds": 28.580401,
+            "segment": 18,
+            "set_minus_wheel_kph": -1.25,
+            "set_speed_raw_kph": 37,
+            "wheel_speed_kph": 38.25
+          },
+          {
+            "lag_from_main_start_s": 0.209949,
+            "main_press_segment": 18,
+            "main_press_start_s": 37.870463,
+            "seconds": 38.080412,
+            "segment": 18,
+            "set_minus_wheel_kph": 0.225,
+            "set_speed_raw_kph": 70,
+            "wheel_speed_kph": 69.775
+          },
+          {
+            "lag_from_main_start_s": 0.17031,
+            "main_press_segment": 19,
+            "main_press_start_s": 52.316871,
+            "seconds": 52.48718,
+            "segment": 19,
+            "set_minus_wheel_kph": -1.39,
+            "set_speed_raw_kph": 38,
+            "wheel_speed_kph": 39.39
+          },
+          {
+            "lag_from_main_start_s": 0.210423,
+            "main_press_segment": 20,
+            "main_press_start_s": 1.335903,
+            "seconds": 1.546326,
+            "segment": 20,
+            "set_minus_wheel_kph": -0.547,
+            "set_speed_raw_kph": 66,
+            "wheel_speed_kph": 66.547
+          }
+        ]
+      },
+      "lateral_hud_candidate": {
+        "b6_count_all_buses": 0,
+        "definition": "structural only: bus0 0x08A byte21 == 0x0B; not an OEM-named signal and not an EPS command",
+        "duration_s": 57.184128,
+        "incoming_frame_count_all_buses": 183493,
+        "interval_count": 1,
+        "intervals": [
+          {
+            "a8_b21_values": [
+              11
+            ],
+            "a8_b24_values": [
+              100
+            ],
+            "a8_frame_count": 2288,
+            "b6_count_all_buses": 0,
+            "duration_s": 57.184128,
+            "hud_0x412_modal_fraction": 0.983051,
+            "hud_0x412_modal_payload": "1400004401ee9307",
+            "id081_b13_match_fraction": 0.999476,
+            "start_s": 13.239624,
+            "start_segment": 20
+          }
+        ]
+      },
+      "source": {
+        "file": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+        "frame_count": 1918047,
+        "segments": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25
+        ],
+        "sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a"
+      }
+    }
+  },
+  "interpretation": {
+    "b6": "observed/deterministic: B6 remains absent not only globally but throughout machine-recovered cruise-active intervals and throughout the bounded lateral/HUD candidate intervals.",
+    "cruise": "observed/deterministic: 0x08A byte3=0x08 is a machine-visible cruise operating-state carrier. It toggles after effective MAIN/CANCEL actions and byte10 is the set-speed value in km/h: activation values track independent 0x0AA wheel speed and RES+/SET- adjust it.",
+    "lateral_hud_candidate": "bounded: 0x08A byte21/byte24, mirrored 0x081 byte13, and 0x412 display-state changes form a state class distinct from the cruise-main and button-echo classes. Long intervals overlap the operator-reported steering-assistance drive, but no target-native current-Camry OEM name is yet joined, so this is not called LTA-active proof.",
+    "production_output_authorized": false
+  },
+  "schema": "camry-2026-cruise-lta-edge-census-v1"
+}

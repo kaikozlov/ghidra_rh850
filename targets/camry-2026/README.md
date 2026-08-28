@@ -221,6 +221,19 @@ Provenance is in `raw-20260827/MANIFEST.txt`; deterministic interpretation is
 `data/generated/camry_2026_relay_correct_capture.json`; canonical conclusions are
 `docs/variants/camry-2026-live-baseline.md` §16.
 
+A second deterministic pass now uses the already-proved `0x0FE` button bits as timing
+anchors instead of treating them only as interaction markers. `0x08A/32` byte3=`0x08`
+forms a reproducible cruise latch and byte10 behaves as set speed: six activations follow
+effective MAIN presses, activation speed agrees with `0x0AA` wheel speed within 1.39 km/h,
+SET- decrements it and RES+ increments it. The two drives therefore contain 158.846096 s
+of machine-recovered cruise operation / 511,760 incoming frames, still with zero B6.
+A separate repeated state (`0x08A` byte21=`0x0B`, mirrored by `0x081` byte13 and a stable
+`0x412` display payload) adds 73.303384 s / 237,097 frames with zero B6. That state is
+kept as a **lateral/HUD candidate**, not an OEM-named LTA bit, until the current FRC state
+is joined directly. Reproduce with `tools/analyze_camry_2026_cruise_lta_edges.py`; the
+artifact is `data/generated/camry_2026_cruise_lta_edge_census.json` and canonical analysis
+is §20 of the live baseline.
+
 ## Synchronized FRC LTA discriminator capture
 
 The preferred live path now stays entirely inside normal openpilot ownership.
