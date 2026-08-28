@@ -124,59 +124,33 @@ This distinction matters because the protection is defeated for analysis at
 the packaging boundary: recover `GTSPlus`, do not attack the installed
 `GTSPlusCP` payload unless the protector itself is the research target.
 
-## CUWPlus boundary and recovered protector mechanics
+## CUWPlus boundary
 
-Do not silently generalize the GTS+ installer-twin shortcut to CUWPlus.
-`CUWPlusPF.exe` exposes the protected CUW DLL + `._` pairs in its main cabinet,
-but no adjacent plaintext CUW group was found. During this investigation the
-first CP loader layer was nevertheless decoded far enough to make the boundary
-concrete.
+The installer-twin shortcut documented above remains specific to the main
+`GTSPlus` tree. `CUWPlusPF.exe` does not expose an equivalent plaintext CUWPlus
+group. That no longer leaves the CUWPlus bodies unavailable: the CP sidecar
+format, staged transforms, import restoration, final section geometry, and
+managed/native handoff paths have now been recovered sufficiently to decode the
+full current CUWPlus corpus offline.
 
-The protected CUW stub keeps a small executable `.text` loader. It dynamically
-resolves the usual Windows file/mapping/protection APIs and opens its sibling
-`._` payload. The first 32-byte sidecar record decodes to eight dwords; dword 1
-must be little-endian `KONN` (`0x4E4E4F4B`). Header decoding is:
+Use:
 
-```text
-out[0] = src[0]
-state = src[0]
-for i = 0..6:
-    raw = src[i + 1]
-    out[i + 1] = raw ^ state
-    state = ((raw - i + state) mod 2^32) ^ (i * i)
+```sh
+tools/gts recover-cuw-bodies
 ```
 
-For current `CUW.dll`, mode-0 decodes to:
-
-```text
-0b1f390e 4e4e4f4b 0000196c 00096000
-000004e0 0001d9d0 00098400 000000a0
-```
-
-The first loader stage restores a second-stage protector blob at RVA `0x96000`
-and redirects to RVA `0x98400`. Its rolling 32-bit transform is:
-
-```text
-state = seed + ~length          # modulo 2^32
-for i over 32-bit words:
-    raw = src[i]
-    dst[i] = raw ^ state
-    state = (raw + i + state) ^ (i * i)   # modulo 2^32
-```
-
-The decoded second-stage entry bytes were checked against the retained
-runtime-unpacked CUW specimens and match exactly. Emulation also showed the
-second stage resolving `VirtualProtect`, `VirtualAlloc`, `VirtualQuery`,
-`OpenProcess`, `WriteProcessMemory`, file/time/process APIs, and writing a
-protector fingerprint record headed by timestamp, module paths, and version
-`003-003-000`. It returns without eagerly rewriting the hollow application
-`.text` in the synthetic DllMain environment, consistent with additional
-protector state/on-demand behavior.
-
-That CUW work is retained here because it establishes that `._` is a real
-multi-stage CP container rather than arbitrary missing-file data. It is **not**
-needed to recover GTS+ bodies, and this document does not claim a complete
-offline CUWPlus body decoder.
+The current census is **143/143** protected CUWPlus bodies (127 native and 16
+CLR-labeled). The same generic CP decoder also closes the **52/52** protected
+auxiliary product bodies outside `GTSPlus`/`CUWPlus` (18 native, 34 CLR-labeled),
+so the complete `Toyota Diagnostics` protected-body census is now **249/249**:
+54 exact installer twins + 143 CUWPlus + 52 auxiliary. Use `tools/gts
+recover-aux-bodies` for the auxiliary trees or `tools/gts recover-all-bodies`
+for one aggregate materialization. The emulator/rebuilder, six independent
+runtime-unpack oracles, managed-image boundary, full product census, and clean-PE
+normalization are documented in [cuwplus-body-recovery.md](cuwplus-body-recovery.md).
+The original `KONN` header and rolling-XOR observations recorded during TMS-081
+were the first stages of that now-complete decoder rather than a permanent
+CUWPlus boundary.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

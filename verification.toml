@@ -2056,3 +2056,27 @@ paths = [
   "docs/status/CORRECTIONS.md",
   "docs/status/PRIORITIES.md",
 ]
+
+[suite.cuwplus_body_recovery]
+tests = ["tests/verify_cuwplus_body_recovery.py"]
+oracle = "dynamic_trace"
+paths = [
+  "tools/techstream/cp_body_decode.py",
+  "tools/techstream/recover_cp_bodies.py",
+  "tools/techstream/recover_all_gtsplus_bodies.py",
+  "tools/techstream/gts_cli.py",
+  "docs/tooling/cuwplus-body-recovery.md",
+]
+requires_external = ["gtsplus"]
+
+[suite.gtsplus_aux_body_recovery]
+tests = ["tests/verify_gtsplus_aux_body_recovery.py"]
+oracle = "dynamic_trace"
+paths = [
+  "tools/techstream/cp_body_decode.py",
+  "tools/techstream/recover_cp_bodies.py",
+  "tools/techstream/recover_all_gtsplus_bodies.py",
+  "tools/techstream/gts_cli.py",
+  "docs/tooling/cuwplus-body-recovery.md",
+]
+requires_external = ["gtsplus"]

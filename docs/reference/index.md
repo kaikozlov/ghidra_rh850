@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 378 · Corrections: 131 · Open questions: 54 · Docs: 109 · Suites: 199
+Findings: 379 · Corrections: 131 · Open questions: 54 · Docs: 110 · Suites: 201
 
 ## Reading this index
 
@@ -313,6 +313,7 @@ Findings: 378 · Corrections: 131 · Open questions: 54 · Docs: 109 · Suites: 
 | <a id="finding-tms-080"></a>**TMS-080** | [docs/tooling/techstream.md](../tooling/techstream.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) | `tests/verify_gtsplus_tss3_crossvehicle_surface.py` | OQ-052 |
 | <a id="finding-tms-081"></a>**TMS-081** | [docs/tooling/gtsplus-body-recovery.md](../tooling/gtsplus-body-recovery.md) | — | `tests/verify_gtsplus_body_recovery.py` | — |
 | <a id="finding-tms-082"></a>**TMS-082** | [docs/tooling/techstream.md](../tooling/techstream.md), [docs/tooling/pcs-data-viewer-tss3-dictionary.md](../tooling/pcs-data-viewer-tss3-dictionary.md) | — | `tests/verify_gtsplus_tss3_native_recorder.py` | — |
+| <a id="finding-tms-083"></a>**TMS-083** | [docs/tooling/cuwplus-body-recovery.md](../tooling/cuwplus-body-recovery.md) | — | `tests/verify_gtsplus_body_recovery.py`, `tests/verify_cuwplus_body_recovery.py`, `tests/verify_gtsplus_aux_body_recovery.py` | — |
 | <a id="finding-var-001"></a>**VAR-001** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md) | `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-002"></a>**VAR-002** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_spanconstant_corolla_equivalence.py`, `tests/verify_spanconstant_corolla_cross_variant.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-003"></a>**VAR-003** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
@@ -669,6 +670,7 @@ Every tracked document under `docs/` with its owning suite(s) and gate tests.
 | [docs/tooling/annotation-ledger.md](../tooling/annotation-ledger.md) | doc_links, annotation_ledger, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_annotation_ledger.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/community-dataflash-secoc.md](../tooling/community-dataflash-secoc.md) | p1me_product_memory, doc_links, albinoelephant_corolla_dataflash, albinoelephant_corolla_repeatability, knowledge_index | `tests/verify_p1me_product_memory.py`, `tests/verify_doc_links.py`, `tests/verify_albinoelephant_corolla_dataflash.py`, `tests/verify_albinoelephant_corolla_repeatability.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/community-patch-target-analysis.md](../tooling/community-patch-target-analysis.md) | doc_links, application_proprietary_ba, lochuan_patch_semantics, secoc_semantic_patch_resolver, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_application_proprietary_ba.py`, `tests/verify_lochuan_patch_semantics.py`, `tests/verify_secoc_semantic_patch_resolver.py`, `tests/verify_knowledge_index.py` |
+| [docs/tooling/cuwplus-body-recovery.md](../tooling/cuwplus-body-recovery.md) | doc_links, knowledge_index, cuwplus_body_recovery, gtsplus_aux_body_recovery | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py`, `tests/verify_cuwplus_body_recovery.py`, `tests/verify_gtsplus_aux_body_recovery.py` |
 | [docs/tooling/ephemeral-runtime-semantic-resolver.md](../tooling/ephemeral-runtime-semantic-resolver.md) | doc_links, ephemeral_runtime_resolver, albinoelephant_corolla_codeflash, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_ephemeral_runtime_resolver.py`, `tests/verify_albinoelephant_corolla_codeflash.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/exploit-interest-ranking.md](../tooling/exploit-interest-ranking.md) | doc_links, exploit_interest_ranking, exploit_interest_reviewed_candidates, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_exploit_interest_ranking.py`, `tests/verify_exploit_interest_reviewed_candidates.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/exploit-predicate-semantics.md](../tooling/exploit-predicate-semantics.md) | doc_links, exploit_predicate_semantics, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_exploit_predicate_semantics.py`, `tests/verify_knowledge_index.py` |

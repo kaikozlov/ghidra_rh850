@@ -40,9 +40,15 @@ from parse_ddb import ECU_TABLE_CLASS_NAMES, DDBParser, StringDataBase
 from pe_utils import binary_strings as pe_binary_strings
 from pe_utils import exports as pe_exports
 from pe_utils import imports as pe_imports
+from recover_all_gtsplus_bodies import DEFAULT_OUTPUT as GTS_ALL_BODY_OUTPUT
+from recover_all_gtsplus_bodies import recover as recover_all_gtsplus_bodies
 from recover_gtsplus_bodies import DEFAULT_ARCHIVE as GTSPLUS_BODY_ARCHIVE
 from recover_gtsplus_bodies import DEFAULT_OUTPUT as GTSPLUS_BODY_OUTPUT
 from recover_gtsplus_bodies import recover as recover_gtsplus_bodies
+from recover_cp_bodies import DEFAULT_AUX_OUTPUT as GTS_AUX_BODY_OUTPUT
+from recover_cp_bodies import DEFAULT_OUTPUT as CUWPLUS_BODY_OUTPUT
+from recover_cp_bodies import recover as recover_cp_bodies
+from recover_cp_bodies import recover_auxiliary as recover_gts_aux_bodies
 from techstream_paths import (
     CUW_CORPUS_ROOT,
     GTSPLUS_EXTERNAL_ROOT,
@@ -2365,6 +2371,61 @@ def cmd_recover_bodies(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_recover_cuw_bodies(args: argparse.Namespace) -> int:
+    manifest = recover_cp_bodies(
+        gtsplus_root=Path(args.gtsplus_root).expanduser() if args.gtsplus_root else None,
+        source=args.source,
+        output=args.output,
+        workers=args.workers,
+        only=args.only,
+        keep_workspace=args.keep_workspace,
+    )
+    if args.json:
+        print(json.dumps(manifest, indent=2, sort_keys=True))
+    else:
+        print(f"CUWPlus: recovered {manifest['recovered_body_count']}/{manifest['protected_body_count']} protected PE bodies")
+        print(f"native\t{manifest['native_count']}")
+        print(f"managed\t{manifest['managed_count']} (mixed={manifest['mixed_managed_count']})")
+        print(f"output\t{manifest['output_root']}")
+        print(f"manifest\t{Path(manifest['output_root']) / 'manifest.json'}")
+    return 0
+
+
+def cmd_recover_aux_bodies(args: argparse.Namespace) -> int:
+    manifest = recover_gts_aux_bodies(
+        gtsplus_root=Path(args.gtsplus_root).expanduser() if args.gtsplus_root else None,
+        output=args.output,
+        workers=args.workers,
+        keep_workspace=args.keep_workspace,
+    )
+    if args.json:
+        print(json.dumps(manifest, indent=2, sort_keys=True))
+    else:
+        print(f"GTS+ auxiliary: recovered {manifest['recovered_body_count']}/{manifest['protected_body_count']} protected PE bodies")
+        print(f"native\t{manifest['native_count']}")
+        print(f"managed\t{manifest['managed_count']} (mixed={manifest['mixed_managed_count']})")
+        print(f"output\t{manifest['output_root']}")
+        print(f"manifest\t{Path(manifest['output_root']) / 'manifest.json'}")
+    return 0
+
+
+def cmd_recover_all_bodies(args: argparse.Namespace) -> int:
+    manifest = recover_all_gtsplus_bodies(
+        gtsplus_root=Path(args.gtsplus_root).expanduser() if args.gtsplus_root else None,
+        output=args.output,
+        workers=args.workers,
+    )
+    if args.json:
+        print(json.dumps(manifest, indent=2, sort_keys=True))
+    else:
+        print(f"GTS+ protected bodies: recovered {manifest['recovered_body_count']}/{manifest['protected_body_count']}")
+        for name, row in manifest["components"].items():
+            print(f"{name}\t{row['count']}\t{row['method']}")
+        print(f"output\t{manifest['output_root']}")
+        print(f"manifest\t{Path(manifest['output_root']) / 'manifest.json'}")
+    return 0
+
+
 CAMRY_2026_DIAG_PROFILE = {
     "profile": "camry-2026-f33",
     "vehicle": "2026 Toyota Camry Hybrid",
@@ -3379,6 +3440,37 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--keep-workspace", action="store_true", help="keep carved installer workspace under build/tmp")
     _common(p)
     p.set_defaults(func=cmd_recover_bodies)
+
+    p = sub.add_parser(
+        "recover-cuw-bodies",
+        help="decode CP-protected CUWPlus PE bodies by emulating the protector handoff",
+    )
+    p.add_argument("--source", type=Path, help="protected CUWPlus directory (default: sibling of selected GTSPlus tree)")
+    p.add_argument("--output", type=Path, default=CUWPLUS_BODY_OUTPUT, help="clean recovered output root")
+    p.add_argument("--workers", type=int, help="parallel decoder workers (default: up to 8)")
+    p.add_argument("--only", action="append", help="recover only a filename or filename substring (repeatable)")
+    p.add_argument("--keep-workspace", action="store_true", help="keep decoder memory/log workspace under build/tmp")
+    _common(p)
+    p.set_defaults(func=cmd_recover_cuw_bodies)
+
+    p = sub.add_parser(
+        "recover-aux-bodies",
+        help="decode CP-protected PE bodies outside the main GTSPlus and CUWPlus trees",
+    )
+    p.add_argument("--output", type=Path, default=GTS_AUX_BODY_OUTPUT, help="clean recovered auxiliary output root")
+    p.add_argument("--workers", type=int, help="parallel decoder workers (default: up to 8)")
+    p.add_argument("--keep-workspace", action="store_true", help="keep decoder memory/log workspace under build/tmp")
+    _common(p)
+    p.set_defaults(func=cmd_recover_aux_bodies)
+
+    p = sub.add_parser(
+        "recover-all-bodies",
+        help="recover all 249 CP-protected PE bodies across GTSPlus, CUWPlus, and auxiliary products",
+    )
+    p.add_argument("--output", type=Path, default=GTS_ALL_BODY_OUTPUT, help="complete recovered suite output root")
+    p.add_argument("--workers", type=int, help="parallel CP decoder workers (default: up to 8)")
+    _common(p)
+    p.set_defaults(func=cmd_recover_all_bodies)
 
     return ap
 
