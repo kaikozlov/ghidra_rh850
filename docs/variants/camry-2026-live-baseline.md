@@ -989,12 +989,87 @@ Transmission Counter Malfunction`; this is diagnostic vocabulary, not proof of a
 wire-field or SecOC-signer implementation. The complete machine-readable join is
 `data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json`.
 
+## 16. Relay-correct 2026-08-27 captures: topology closed; B6 repeatedly not observed
+
+The maintainer physically exchanged the Toyota-B CAN0/CAN1 pairs before this
+pass. A passive 10.000003-second census immediately closes the hardware effect:
+the steering/state family that the unmodified harness exposed on logical bus 1
+now appears on **both sides of the harness CAN0/CAN2 relay pair**. The first post-repin capture
+counts are 13,910 / 3,938 / 13,910 frames on buses 0/1/2 with 153 / 22 / 153
+ID-DLC streams; buses 0 and 2 are byte-for-byte sequence-identical. Exact
+`0x00F/8`, `0x025/32`, `0x030/32`, and `0x0D7/32` counts are respectively
+100, 1000, 1000, and 500 on each relay side and zero on bus 1. A separate
+READY/parked pass retains the same split at 165 / 22 / 165 streams and observes
+`0x51E B0[7]=1` on both relay sides. This is the first direct Camry proof that
+the physical repin puts the exact F33 steering network on comma's intercept
+topology rather than merely reaching it diagnostically.
+
+The normal comma logger then retained nine route segments. To avoid retaining
+location/video/private route metadata, the tracked evidence is reduced to exactly
+**1,656,656 incoming CAN frames** (`src < 128`) in
+`targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz`.
+Raw `0x0AA` wheel-speed decoding proves continuous movement in segments 4-6;
+segment 5 is entirely D (`0x127` raw 3) and spans 32.66..42.88 km/h. The exact
+same-car FRC diagnostic/CAN join from §7.2 independently recognizes factory
+`0x0FE/32` interaction in that moving segment: MAIN toggles at about 16.54 s
+and 33.40 s from the first segment-5 `0x0FE`, while SET- is pressed around
+19.53 s and 20.10 s. Thus this is not another stationary/no-input negative.
+
+The surprising result is exact: there is **zero `0x0B6` at every DLC on every
+incoming bus across all nine segments**. In the same route, protected `0x00F`
+and `0x0D7` remain healthy on both buses 0 and 2 in every segment (for example,
+segment 5 has 600 `0x00F` and 3000 `0x0D7` frames per relay side). A structural
+`0x08A/32` state changes around the validated MAIN/SET interactions, but exact
+F33's receive descriptor table does not accept `0x08A`; it is therefore retained
+only as cross-ECU state corroboration, **not** promoted as an EPS lateral command.
+No alternative steering-command carrier is assigned from this capture.
+
+A second deliberately requested drive then reproduced the negative rather than
+resolving it. Its privacy-minimized artifact retains **1,918,047 incoming CAN
+frames across ten additional loggerd segments (16..25)**. Segments 18 and 20-22
+are continuously moving above 2 km/h; segment 20 alone spans 65.310..72.493 km/h.
+The same-car `0x0FE` join sees repeated MAIN interactions in segments 16/18/19/20,
+and the structural `0x08A/32` tuple changes in segments 18-21. Nevertheless the
+second drive again contains **zero `0x0B6` at every DLC on every incoming bus**,
+while every segment retains protected `0x00F` and `0x0D7` on both relay sides.
+Across the two drives the exact retained total is therefore **3,574,703 incoming
+CAN frames / 19 route segments / zero B6**. This makes the live absence a repeated
+bounded negative rather than a one-route acquisition accident.
+
+The acquisition boundary still matters. The operator reported apparent factory steering
+assistance during the first drive and deliberately retried the experiment on the
+second, but neither capture simultaneously polled an OEM-named LTA-active state.
+Raw CAN proves movement, D, control-button interaction, healthy protected traffic,
+and the complete repeated B6 negative; it does **not machine-prove the exact
+interval in which factory lane centering was actively applying steering**. Exact
+F33 firmware independently still configures `0x0B6/32` as protected PDU44 and
+unpacks its selector/target-angle fields into the recovered cooperative-control
+path, so the repeated negative does not retract §§9.1-9.3. It changes the next
+dynamic step: before assuming that an active-LTA B6 template merely remains
+uncaptured—or before concluding stock LTA uses some other path—we must synchronize
+the FRC's own P5 lateral state with the relay-correct CAN.
+Toyota/GTS+ gives a direct oracle: FRC DID **`0x1601`** contains `LTA Switch
+Condition Flag` in bits 0-7 and **`LTA Control Condition`** in bits 8-15, with
+Hands-Off customize/control in bits 16-31. Useful companion reads are `0x1501`
+(LDA customize/control), `0x1681` (LCA customize/control), and `0x1903` (`Control
+Mode`). The current P5 Data List transport is ordinary `22 <DID>` / `62 <DID>`;
+response bytes must be independently checked against the requested DID.
+
+A separate direct-Panda logger attempted during the drive collided with the
+already-running `pandad` and terminated on Panda USB **`CHECKSUM_ERROR`**. It is
+not used as evidence. All drive conclusions above come from normal `loggerd` rlogs
+reduced deterministically to the tracked CAN-only artifacts. Future synchronized
+diagnostic captures must use one Panda owner rather than opening a second direct
+Panda stream alongside `pandad`. Deterministic interpretation lives in
+`data/generated/camry_2026_relay_correct_capture.json` and is verified by
+`tests/verify_camry_2026.py`. Production steering output remains disabled.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061)
+- Findings with this document as canonical home: [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063)
 - Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124)
 <!-- knowledge-cross-references:end -->

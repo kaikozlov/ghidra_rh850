@@ -1,0 +1,99 @@
+2026 Camry relay-correct evidence — 2026-08-27
+================================================
+
+Vehicle: maintainer 2026 Toyota Camry Hybrid
+EPS application F181: 8965F3307000 / 8A3113303100
+Harness: Toyota-B, physical CAN0/CAN1 pairs repinned before these captures so
+         the previously observed steering/state network lands on the harness
+         CAN0/CAN2 intercept-relay pair.
+Safety boundary: passive incoming CAN only; production output remained disabled.
+
+Tracked files
+-------------
+camry_post_repin_nrtd_20260827.json.gz
+  size 252884
+  sha256 4e061d5ec06b0dee0b208e7bc34d5f8050af565978ef3254ce221ad329b4f74d
+  10.000003282 s first post-repin passive census, 31,758 frames. The capture label says NRTD, but 0x51E B0[7] is 1 throughout; the operator label is therefore not used as vehicle-state evidence.
+
+camry_post_repin_ready_20260827.json.gz
+  size 298123
+  sha256 32e9ac52c53ac05248b45c2f0eb6a6d50c59c11a9db4fafb31e145919078a58d
+  12.000458837 s READY/parked passive census, 33,598 frames.
+
+camry_relay_route_can_20260827.ndjson.gz
+  size 14639570
+  sha256 be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5
+  uncompressed NDJSON sha256 91ee1c9babead2ced001ca62fb6729dbd3f051d3335afe8d3093a2b3569e506a
+  1,656,656 src<128 incoming CAN frames reduced from nine normal loggerd rlog
+  segments. Row schema: [segment, logMonoTime, src, address, data_hex]. No GPS,
+  video, carState, route name, or other user-facing metadata is retained.
+
+extract_route_can.py
+  deterministic extraction recipe for the CAN-only route artifact. It requires
+  an openpilot Python environment because source rlogs are not committed.
+
+Untracked source rlog identities
+--------------------------------
+The CAN-only artifact was reduced from normal loggerd route
+00000008--dbe6fabe0d--0..8. The original rlogs are intentionally not committed.
+Their exact identities at extraction time were:
+
+segment 0  size 7924294  sha256 12d9e270ad10d118b69baf8238127162409653ec642f1380ed736becde490857
+segment 1  size 8475430  sha256 f36c5c81bb6a063dc140adce09ad3f470387bd69ff9291129449b8d13e18fa27
+segment 2  size 8381422  sha256 636467ffde22e771bccac28d0802855f2f0c1a43039ed561da00f8c031021a69
+segment 3  size 9209267  sha256 39e8e676d55909ae8137db283fd559b33ea26a5ab08d2996c3cd5ce8f0ae6a21
+segment 4  size 9538629  sha256 b576afaa635df1b1214462851d8299a931833ad26f874c68843ac78fb59de220
+segment 5  size 9764649  sha256 3f2c72ef82b2112fe3aee2743e70b3da56fdafde6339177ef0626f8b03250077
+segment 6  size 9676092  sha256 d894e4003739d5a172b5355b8cb287c034dafa2b8cbe1b5c236a585e7efe83de
+segment 7  size 9431581  sha256 9d96725281d0f3cd8826d583b610927332310e76e0bf26eb7d080dc4eae5d24f
+segment 8  size 8920154  sha256 bc60cb8d24c17e88fdf51167a5201701bc9e2ab6b9c9a0ee4d3ffcb80d087e5a
+
+Capture note
+------------
+A separate direct-Panda drive logger was attempted while pandad was already
+running and stopped with Panda USB CHECKSUM_ERROR. It is not evidence. The drive
+facts in this evidence unit come only from the normal loggerd rlogs reduced to
+the tracked CAN-only artifact.
+
+The operator was asked to exercise factory DRCC/LTA during the drive. The tracked
+CAN itself proves movement, D state, MAIN toggles, and SET- presses, but does not
+machine-prove an exact interval in which factory LTA lane centering was active.
+Accordingly zero B6 is retained as a bounded active-LTA acquisition result until
+a synchronized official FRC LTA oracle is captured.
+
+Confirmation drive
+------------------
+camry_relay_lta_confirm_route_can_20260827.ndjson.gz
+  size 24952076
+  sha256 641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a
+  uncompressed NDJSON sha256 4bdf3d493595c6d76baa4f454b0443a6c15324c098c4872c0229f773fc7a0c65
+  1,918,047 src<128 incoming CAN frames reduced from ten additional normal
+  loggerd rlog segments. Row schema is identical to the first route artifact.
+  No GPS, video, carState, route name, or other user-facing route metadata is retained.
+
+The confirmation drive was deliberately requested after the first route unexpectedly
+contained no B6. It includes sustained road-speed operation (segments 18 and 20-22 are
+continuously above 2 km/h; segment 20 spans 65.310..72.493 km/h), repeated same-car
+0x0FE MAIN interactions, and several sparse 0x08A cross-ECU state changes. It again
+contains zero 0x0B6 at every DLC on every incoming bus while 0x00F and 0x0D7 remain
+continuous on both relay sides in every segment. The operator reported that the test
+track was not ideal, and no OEM-named LTA-active diagnostic state was synchronized to
+the CAN log. This is therefore a repeated bounded stock-LTA negative, not a machine-
+proved active-LTA/B6 causal result.
+
+Confirmation source rlog identities
+-----------------------------------
+The second CAN-only artifact was reduced from normal loggerd route
+00000008--dbe6fabe0d--16..25. The original rlogs are intentionally not committed.
+Their exact identities at extraction time were:
+
+segment 16  size 9204294  sha256 2605a0a2e53f4562cd7f8cdfb84a5818d0a0c45fa824c2337784f03315027f20
+segment 17  size 9591058  sha256 c5c65f662ab8f48304470c7e54d7e3fb792437499a479ff930bea08e11056906
+segment 18  size 9668280  sha256 ec23f1bc59bab4cb9009a9cf7372b2239d23d0542979874cd4f1d5ba981643df
+segment 19  size 9673241  sha256 6a382de194c544aebead8c4061bdaac5d241718a57f008655aa7229816462c3b
+segment 20  size 9595406  sha256 931af7e9ba69e0e7de7deb540e95d29402694dc179b7a44a033cc671213aafb4
+segment 21  size 9685055  sha256 cb3b125b82e428b91d9cbd779e91ac334e38244b8c53a2e84dade7d74097e83e
+segment 22  size 9702153  sha256 fb4d5d524a69bab7799e1aa3dcddd997940c096c15f50e226936322e80059269
+segment 23  size 9662045  sha256 08fdb84a21709063b2b5a156a4b0ed69c61c1aa5d58a70f321c7ac420cfde630
+segment 24  size 8872888  sha256 95e952d6177180fb76e9114712ec83630b772550aac76381d20afb5e4cd72cd8
+segment 25  size 9153834  sha256 bd7384d72347bad2ff47589fc53610240dc539d6b6836576a785efb066afc859

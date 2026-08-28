@@ -234,11 +234,15 @@ safety module currently passes 283 tests with 34 skips in the local targeted gat
 
 The remaining first-actuation gates are now live, not unfinished static implementation:
 
-1. capture stock B6 off→active→off on a relay-correct, exact-F181 Camry and populate the
-   runtime 28-byte template + cadence while observing sequence/restart behavior;
-2. prove exclusive relay/source suppression behavior;
-3. complete the zero-write Gate-2 preflight, restore-gated APPLY, and invalid-MAC causal
-   B6 proof before setting `gate2_bypass_validated`;
+1. resolve VAR-063's new live discriminator: the physical relay topology is now proved,
+   and two independent moving routes totaling 3,574,703 incoming frames / 19 segments still have zero B6 while protected `00F/D7` remain healthy;
+   synchronize FRC P5 DID `0x1601` (`LTA Control Condition`) with relay-correct CAN and
+   only then determine whether there is a stock B6 template/cadence to populate or the
+   staged B6 sender assumption must be revised;
+2. prove exclusive relay/source suppression behavior for whichever command path that
+   synchronized factory-LTA observation identifies;
+3. complete the zero-write Gate-2 preflight, restore-gated APPLY, and an exact causal
+   SecOC experiment before setting `gate2_bypass_validated`;
 4. perform the bounded first steering-response experiment.
 
 Production still additionally requires an application-context authenticated signer (or an

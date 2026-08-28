@@ -1,0 +1,1160 @@
+{
+  "capture_boundary": {
+    "dedicated_logger_failure": "the separate direct-Panda logger collided with pandad and stopped on a Panda USB CHECKSUM_ERROR; all drive conclusions use normal loggerd rlogs reduced to tracked CAN-only artifacts",
+    "operation": "passive incoming CAN only; openpilot/Panda production output remained disabled",
+    "operator_report_boundary": "the operator reported apparent factory steering assistance during the first drive and deliberately retried the experiment on the second drive, but the operator reports are not synchronized to an OEM-named LTA-active diagnostic state; exact active intervals therefore remain unproved",
+    "route_privacy": "tracked route artifacts contain only src<128 CAN frames reduced from 19 rlog segments across two drives; no GPS, video, or user-facing route metadata"
+  },
+  "combined_route_evidence": {
+    "b6_any_bus_any_length_count": 0,
+    "frame_count": 3574703,
+    "segment_count": 19
+  },
+  "conclusion": {
+    "b6": "repeated bounded negative: zero 0x0B6 at any DLC on any incoming bus across 19 retained route segments / 3574703 incoming CAN frames from two separate drives, while protected 0x00F/0x0D7 remain healthy",
+    "next_observation": "synchronize an exact factory-LTA active/inactive oracle (prefer FRC P5 DID 0x1601) with relay-correct CAN before revising the recovered F33 B6 command-path interpretation or the staged sender's stock-template requirement",
+    "production_output_authorized": false,
+    "relay_topology": "observed: the former bus-1 steering/state family appears on the CAN0/CAN2 pair after the physical CAN0/CAN1 repin, while the separate 22-ID FD family remains on bus1"
+  },
+  "confirmation_drive": {
+    "b6_any_bus_any_length_count": 0,
+    "b6_examples": [],
+    "frame_count": 1918047,
+    "interpretation": "The retained route proves a relay-correct moving capture with healthy protected 0x00F/0x0D7 traffic and zero 0x0B6 on every incoming bus/length. Same-car 0x0FE switch decoding and sparse 0x08A cross-ECU state changes provide timing markers, but neither machine-proves an exact factory-LTA-active interval. Accordingly zero B6 remains a bounded stock-LTA negative rather than evidence that F33's recovered B6 target-angle path is unused in all operating states.",
+    "segment_count": 10,
+    "segments": [
+      {
+        "duration_s": 59.999789,
+        "frames_by_bus": {
+          "0": 83561,
+          "1": 23643,
+          "2": 83561
+        },
+        "gear_raw_counts": {
+          "0": 2749,
+          "1": 914
+        },
+        "id_dlc_count_by_bus": {
+          "0": 153,
+          "1": 22,
+          "2": 153
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 600,
+            "1": 0,
+            "2": 600
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 3001,
+            "1": 0,
+            "2": 3001
+          }
+        },
+        "ready_bit_counts": {
+          "1": 60
+        },
+        "segment": 16,
+        "speed_kph": {
+          "max": 4.02,
+          "min": 0.0,
+          "moving_over_2kph_fraction": 0.148309
+        }
+      },
+      {
+        "duration_s": 59.982487,
+        "frames_by_bus": {
+          "0": 84069,
+          "1": 23632,
+          "2": 84069
+        },
+        "gear_raw_counts": {
+          "0": 987,
+          "3": 2675
+        },
+        "id_dlc_count_by_bus": {
+          "0": 153,
+          "1": 22,
+          "2": 153
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 600,
+            "1": 0,
+            "2": 600
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 2999,
+            "1": 0,
+            "2": 2999
+          }
+        },
+        "ready_bit_counts": {
+          "1": 60
+        },
+        "segment": 17,
+        "speed_kph": {
+          "max": 47.148,
+          "min": 0.0,
+          "moving_over_2kph_fraction": 0.683614
+        }
+      },
+      {
+        "duration_s": 59.982477,
+        "frames_by_bus": {
+          "0": 84402,
+          "1": 23633,
+          "2": 84402
+        },
+        "gear_raw_counts": {
+          "3": 3661
+        },
+        "id_dlc_count_by_bus": {
+          "0": 153,
+          "1": 22,
+          "2": 153
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 600,
+            "1": 0,
+            "2": 600
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 3000,
+            "1": 0,
+            "2": 3000
+          }
+        },
+        "ready_bit_counts": {
+          "1": 60
+        },
+        "segment": 18,
+        "speed_kph": {
+          "max": 71.797,
+          "min": 11.878,
+          "moving_over_2kph_fraction": 1.0
+        }
+      },
+      {
+        "duration_s": 59.987464,
+        "frames_by_bus": {
+          "0": 84274,
+          "1": 23640,
+          "2": 84274
+        },
+        "gear_raw_counts": {
+          "1": 391,
+          "3": 3271
+        },
+        "id_dlc_count_by_bus": {
+          "0": 153,
+          "1": 22,
+          "2": 153
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 600,
+            "1": 0,
+            "2": 600
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 3000,
+            "1": 0,
+            "2": 3000
+          }
+        },
+        "ready_bit_counts": {
+          "1": 60
+        },
+        "segment": 19,
+        "speed_kph": {
+          "max": 70.988,
+          "min": 0.0,
+          "moving_over_2kph_fraction": 0.909
+        }
+      },
+      {
+        "duration_s": 59.997931,
+        "frames_by_bus": {
+          "0": 84479,
+          "1": 23640,
+          "2": 84479
+        },
+        "gear_raw_counts": {
+          "3": 3663
+        },
+        "id_dlc_count_by_bus": {
+          "0": 153,
+          "1": 22,
+          "2": 153
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 600,
+            "1": 0,
+            "2": 600
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 3000,
+            "1": 0,
+            "2": 3000
+          }
+        },
+        "ready_bit_counts": {
+          "1": 60
+        },
+        "segment": 20,
+        "speed_kph": {
+          "max": 72.493,
+          "min": 65.31,
+          "moving_over_2kph_fraction": 1.0
+        }
+      },
+      {
+        "duration_s": 59.987985,
+        "frames_by_bus": {
+          "0": 84375,
+          "1": 23640,
+          "2": 84375
+        },
+        "gear_raw_counts": {
+          "3": 3662
+        },
+        "id_dlc_count_by_bus": {
+          "0": 153,
+          "1": 22,
+          "2": 153
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 600,
+            "1": 0,
+            "2": 600
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 3000,
+            "1": 0,
+            "2": 3000
+          }
+        },
+        "ready_bit_counts": {
+          "1": 60
+        },
+        "segment": 21,
+        "speed_kph": {
+          "max": 70.123,
+          "min": 23.165,
+          "moving_over_2kph_fraction": 1.0
+        }
+      },
+      {
+        "duration_s": 59.986154,
+        "frames_by_bus": {
+          "0": 84263,
+          "1": 23639,
+          "2": 84263
+        },
+        "gear_raw_counts": {
+          "3": 3662
+        },
+        "id_dlc_count_by_bus": {
+          "0": 153,
+          "1": 22,
+          "2": 153
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 600,
+            "1": 0,
+            "2": 600
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 2999,
+            "1": 0,
+            "2": 2999
+          }
+        },
+        "ready_bit_counts": {
+          "1": 60
+        },
+        "segment": 22,
+        "speed_kph": {
+          "max": 51.188,
+          "min": 18.163,
+          "moving_over_2kph_fraction": 1.0
+        }
+      },
+      {
+        "duration_s": 59.995674,
+        "frames_by_bus": {
+          "0": 84195,
+          "1": 23640,
+          "2": 84195
+        },
+        "gear_raw_counts": {
+          "3": 3662
+        },
+        "id_dlc_count_by_bus": {
+          "0": 153,
+          "1": 22,
+          "2": 153
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 600,
+            "1": 0,
+            "2": 600
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 3001,
+            "1": 0,
+            "2": 3001
+          }
+        },
+        "ready_bit_counts": {
+          "1": 60
+        },
+        "segment": 23,
+        "speed_kph": {
+          "max": 44.543,
+          "min": 0.663,
+          "moving_over_2kph_fraction": 0.775204
+        }
+      },
+      {
+        "duration_s": 59.986563,
+        "frames_by_bus": {
+          "0": 83549,
+          "1": 23636,
+          "2": 83549
+        },
+        "gear_raw_counts": {
+          "0": 3342,
+          "1": 117,
+          "2": 18,
+          "3": 185
+        },
+        "id_dlc_count_by_bus": {
+          "0": 153,
+          "1": 22,
+          "2": 153
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 600,
+            "1": 0,
+            "2": 600
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 2999,
+            "1": 0,
+            "2": 2999
+          }
+        },
+        "ready_bit_counts": {
+          "1": 60
+        },
+        "segment": 24,
+        "speed_kph": {
+          "max": 0.955,
+          "min": 0.0,
+          "moving_over_2kph_fraction": 0.0
+        }
+      },
+      {
+        "duration_s": 59.992118,
+        "frames_by_bus": {
+          "0": 83665,
+          "1": 23640,
+          "2": 83665
+        },
+        "gear_raw_counts": {
+          "0": 1828,
+          "1": 1001,
+          "3": 833
+        },
+        "id_dlc_count_by_bus": {
+          "0": 153,
+          "1": 22,
+          "2": 153
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 600,
+            "1": 0,
+            "2": 600
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 3000,
+            "1": 0,
+            "2": 3000
+          }
+        },
+        "ready_bit_counts": {
+          "1": 60
+        },
+        "segment": 25,
+        "speed_kph": {
+          "max": 3.637,
+          "min": 0.0,
+          "moving_over_2kph_fraction": 0.180333
+        }
+      }
+    ],
+    "structural_0x08A_transitions": {
+      "18": [
+        {
+          "bytes_3_6_7_10_20_22": "082c4625c010",
+          "seconds": 28.580401
+        },
+        {
+          "bytes_3_6_7_10_20_22": "000012000000",
+          "seconds": 34.878069
+        },
+        {
+          "bytes_3_6_7_10_20_22": "082c4646c010",
+          "seconds": 38.080412
+        },
+        {
+          "bytes_3_6_7_10_20_22": "082d4746c010",
+          "seconds": 38.232093
+        }
+      ],
+      "19": [
+        {
+          "bytes_3_6_7_10_20_22": "000012000000",
+          "seconds": 9.1795
+        },
+        {
+          "bytes_3_6_7_10_20_22": "082c4626c010",
+          "seconds": 52.47718
+        },
+        {
+          "bytes_3_6_7_10_20_22": "000012000000",
+          "seconds": 59.326167
+        }
+      ],
+      "20": [
+        {
+          "bytes_3_6_7_10_20_22": "082c4642c010",
+          "seconds": 1.525419
+        },
+        {
+          "bytes_3_6_7_10_20_22": "082d4742c010",
+          "seconds": 3.3248
+        },
+        {
+          "bytes_3_6_7_10_20_22": "082d47424010",
+          "seconds": 4.016647
+        },
+        {
+          "bytes_3_6_7_10_20_22": "082d4743c010",
+          "seconds": 4.119317
+        },
+        {
+          "bytes_3_6_7_10_20_22": "082d47434010",
+          "seconds": 4.519105
+        },
+        {
+          "bytes_3_6_7_10_20_22": "082d4744c010",
+          "seconds": 4.621679
+        },
+        {
+          "bytes_3_6_7_10_20_22": "082d47444010",
+          "seconds": 6.268969
+        },
+        {
+          "bytes_3_6_7_10_20_22": "082d4746c010",
+          "seconds": 6.418811
+        }
+      ],
+      "21": [
+        {
+          "bytes_3_6_7_10_20_22": "000012000000",
+          "seconds": 10.42455
+        }
+      ]
+    },
+    "validated_cruise_switch_events": {
+      "MAIN": {
+        "16": [
+          {
+            "end_s": 59.104741,
+            "frames": 6,
+            "start_s": 58.954615
+          }
+        ],
+        "18": [
+          {
+            "end_s": 28.480461,
+            "frames": 7,
+            "start_s": 28.290845
+          },
+          {
+            "end_s": 34.888047,
+            "frames": 5,
+            "start_s": 34.757975
+          },
+          {
+            "end_s": 38.000603,
+            "frames": 5,
+            "start_s": 37.870463
+          }
+        ],
+        "19": [
+          {
+            "end_s": 52.407154,
+            "frames": 4,
+            "start_s": 52.30687
+          },
+          {
+            "end_s": 59.385435,
+            "frames": 6,
+            "start_s": 59.225802
+          }
+        ],
+        "20": [
+          {
+            "end_s": 1.455659,
+            "frames": 5,
+            "start_s": 1.324766
+          }
+        ]
+      },
+      "SET_MINUS": {}
+    }
+  },
+  "drive": {
+    "b6_any_bus_any_length_count": 0,
+    "b6_examples": [],
+    "frame_count": 1656656,
+    "interpretation": "The retained route proves a relay-correct moving capture with healthy protected 0x00F/0x0D7 traffic and zero 0x0B6 on every incoming bus/length. Same-car 0x0FE switch decoding and sparse 0x08A cross-ECU state changes provide timing markers, but neither machine-proves an exact factory-LTA-active interval. Accordingly zero B6 remains a bounded stock-LTA negative rather than evidence that F33's recovered B6 target-angle path is unused in all operating states.",
+    "segment_count": 9,
+    "segments": [
+      {
+        "duration_s": 60.985917,
+        "frames_by_bus": {
+          "0": 84711,
+          "1": 22889,
+          "2": 84889
+        },
+        "gear_raw_counts": {
+          "0": 3703
+        },
+        "id_dlc_count_by_bus": {
+          "0": 174,
+          "1": 56,
+          "2": 220
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 609,
+            "1": 0,
+            "2": 609
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 3040,
+            "1": 0,
+            "2": 3042
+          }
+        },
+        "ready_bit_counts": {
+          "0": 4,
+          "1": 61
+        },
+        "segment": 0,
+        "speed_kph": {
+          "max": 0.0,
+          "min": 0.0,
+          "moving_over_2kph_fraction": 0.0
+        }
+      },
+      {
+        "duration_s": 59.98015,
+        "frames_by_bus": {
+          "0": 68898,
+          "1": 19531,
+          "2": 68900
+        },
+        "gear_raw_counts": {
+          "0": 3019
+        },
+        "id_dlc_count_by_bus": {
+          "0": 161,
+          "1": 22,
+          "2": 161
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 496,
+            "1": 0,
+            "2": 496
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 2466,
+            "1": 0,
+            "2": 2463
+          }
+        },
+        "ready_bit_counts": {
+          "1": 51
+        },
+        "segment": 1,
+        "speed_kph": {
+          "max": 0.0,
+          "min": 0.0,
+          "moving_over_2kph_fraction": 0.0
+        }
+      },
+      {
+        "duration_s": 59.988639,
+        "frames_by_bus": {
+          "0": 63142,
+          "1": 17804,
+          "2": 63145
+        },
+        "gear_raw_counts": {
+          "0": 2768
+        },
+        "id_dlc_count_by_bus": {
+          "0": 153,
+          "1": 22,
+          "2": 153
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 456,
+            "1": 0,
+            "2": 456
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 2292,
+            "1": 0,
+            "2": 2291
+          }
+        },
+        "ready_bit_counts": {
+          "1": 44
+        },
+        "segment": 2,
+        "speed_kph": {
+          "max": 0.0,
+          "min": 0.0,
+          "moving_over_2kph_fraction": 0.0
+        }
+      },
+      {
+        "duration_s": 60.003501,
+        "frames_by_bus": {
+          "0": 83991,
+          "1": 23650,
+          "2": 83991
+        },
+        "gear_raw_counts": {
+          "0": 988,
+          "1": 857,
+          "3": 1818
+        },
+        "id_dlc_count_by_bus": {
+          "0": 153,
+          "1": 22,
+          "2": 153
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 601,
+            "1": 0,
+            "2": 601
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 3001,
+            "1": 0,
+            "2": 3001
+          }
+        },
+        "ready_bit_counts": {
+          "1": 60
+        },
+        "segment": 3,
+        "speed_kph": {
+          "max": 33.615,
+          "min": 0.0,
+          "moving_over_2kph_fraction": 0.620063
+        }
+      },
+      {
+        "duration_s": 59.974748,
+        "frames_by_bus": {
+          "0": 84352,
+          "1": 23623,
+          "2": 84352
+        },
+        "gear_raw_counts": {
+          "3": 3661
+        },
+        "id_dlc_count_by_bus": {
+          "0": 171,
+          "1": 22,
+          "2": 171
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 599,
+            "1": 0,
+            "2": 599
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 2999,
+            "1": 0,
+            "2": 2999
+          }
+        },
+        "ready_bit_counts": {
+          "1": 59
+        },
+        "segment": 4,
+        "speed_kph": {
+          "max": 46.078,
+          "min": 22.433,
+          "moving_over_2kph_fraction": 1.0
+        }
+      },
+      {
+        "duration_s": 59.992895,
+        "frames_by_bus": {
+          "0": 89753,
+          "1": 23640,
+          "2": 89753
+        },
+        "gear_raw_counts": {
+          "3": 3662
+        },
+        "id_dlc_count_by_bus": {
+          "0": 179,
+          "1": 22,
+          "2": 179
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 600,
+            "1": 0,
+            "2": 600
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 3000,
+            "1": 0,
+            "2": 3000
+          }
+        },
+        "ready_bit_counts": {
+          "1": 60
+        },
+        "segment": 5,
+        "speed_kph": {
+          "max": 42.88,
+          "min": 32.66,
+          "moving_over_2kph_fraction": 1.0
+        }
+      },
+      {
+        "duration_s": 59.994808,
+        "frames_by_bus": {
+          "0": 84894,
+          "1": 23640,
+          "2": 84894
+        },
+        "gear_raw_counts": {
+          "3": 3663
+        },
+        "id_dlc_count_by_bus": {
+          "0": 155,
+          "1": 22,
+          "2": 155
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 601,
+            "1": 0,
+            "2": 601
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 3000,
+            "1": 0,
+            "2": 3000
+          }
+        },
+        "ready_bit_counts": {
+          "1": 60
+        },
+        "segment": 6,
+        "speed_kph": {
+          "max": 41.578,
+          "min": 11.355,
+          "moving_over_2kph_fraction": 1.0
+        }
+      },
+      {
+        "duration_s": 59.984245,
+        "frames_by_bus": {
+          "0": 83984,
+          "1": 23640,
+          "2": 83984
+        },
+        "gear_raw_counts": {
+          "0": 683,
+          "1": 135,
+          "2": 13,
+          "3": 2830
+        },
+        "id_dlc_count_by_bus": {
+          "0": 153,
+          "1": 22,
+          "2": 153
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 599,
+            "1": 0,
+            "2": 599
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 3000,
+            "1": 0,
+            "2": 3000
+          }
+        },
+        "ready_bit_counts": {
+          "1": 60
+        },
+        "segment": 7,
+        "speed_kph": {
+          "max": 30.043,
+          "min": 0.0,
+          "moving_over_2kph_fraction": 0.523833
+        }
+      },
+      {
+        "duration_s": 59.990807,
+        "frames_by_bus": {
+          "0": 83483,
+          "1": 23640,
+          "2": 83483
+        },
+        "gear_raw_counts": {
+          "0": 3662
+        },
+        "id_dlc_count_by_bus": {
+          "0": 153,
+          "1": 22,
+          "2": 153
+        },
+        "protected_counts": {
+          "0x00F/8": {
+            "0": 601,
+            "1": 0,
+            "2": 601
+          },
+          "0x0B6/32": {
+            "0": 0,
+            "1": 0,
+            "2": 0
+          },
+          "0x0D7/32": {
+            "0": 3000,
+            "1": 0,
+            "2": 3000
+          }
+        },
+        "ready_bit_counts": {
+          "1": 60
+        },
+        "segment": 8,
+        "speed_kph": {
+          "max": 0.0,
+          "min": 0.0,
+          "moving_over_2kph_fraction": 0.0
+        }
+      }
+    ],
+    "structural_0x08A_transitions": {
+      "4": [
+        {
+          "bytes_3_6_7_10_20_22": "082d471fc010",
+          "seconds": 21.147887
+        },
+        {
+          "bytes_3_6_7_10_20_22": "000012000000",
+          "seconds": 50.304906
+        }
+      ],
+      "5": [
+        {
+          "bytes_3_6_7_10_20_22": "082d472ac010",
+          "seconds": 16.824638
+        },
+        {
+          "bytes_3_6_7_10_20_22": "082d472a4010",
+          "seconds": 19.565727
+        },
+        {
+          "bytes_3_6_7_10_20_22": "082d4728c010",
+          "seconds": 19.767852
+        },
+        {
+          "bytes_3_6_7_10_20_22": "082d47284010",
+          "seconds": 20.169033
+        },
+        {
+          "bytes_3_6_7_10_20_22": "082d4727c010",
+          "seconds": 20.269283
+        },
+        {
+          "bytes_3_6_7_10_20_22": "000012000000",
+          "seconds": 33.5257
+        }
+      ]
+    },
+    "validated_cruise_switch_events": {
+      "MAIN": {
+        "4": [
+          {
+            "end_s": 21.047803,
+            "frames": 4,
+            "start_s": 20.947601
+          },
+          {
+            "end_s": 50.31587,
+            "frames": 4,
+            "start_s": 50.21595
+          }
+        ],
+        "5": [
+          {
+            "end_s": 16.704504,
+            "frames": 6,
+            "start_s": 16.542327
+          },
+          {
+            "end_s": 33.526825,
+            "frames": 5,
+            "start_s": 33.396611
+          }
+        ]
+      },
+      "SET_MINUS": {
+        "5": [
+          {
+            "end_s": 19.64854,
+            "frames": 5,
+            "start_s": 19.526293
+          },
+          {
+            "end_s": 20.159219,
+            "frames": 3,
+            "start_s": 20.097979
+          }
+        ]
+      }
+    }
+  },
+  "post_repin_nrtd": {
+    "bus0_bus2_sequence_identical": true,
+    "duration_s": 10.000003,
+    "frame_count": 31758,
+    "frames_by_bus": {
+      "0": 13910,
+      "1": 3938,
+      "2": 13910
+    },
+    "id_dlc_count_by_bus": {
+      "0": 153,
+      "1": 22,
+      "2": 153
+    },
+    "ready_values_bus0": [
+      1
+    ],
+    "selected_counts": {
+      "0x00F/8": {
+        "0": 100,
+        "1": 0,
+        "2": 100
+      },
+      "0x025/32": {
+        "0": 1000,
+        "1": 0,
+        "2": 1000
+      },
+      "0x030/32": {
+        "0": 1000,
+        "1": 0,
+        "2": 1000
+      },
+      "0x0D7/32": {
+        "0": 500,
+        "1": 0,
+        "2": 500
+      },
+      "0x51E/8": {
+        "0": 10,
+        "1": 0,
+        "2": 10
+      }
+    }
+  },
+  "post_repin_ready": {
+    "bus0_bus2_sequence_identical": false,
+    "duration_s": 12.000459,
+    "frame_count": 33598,
+    "frames_by_bus": {
+      "0": 14744,
+      "1": 4100,
+      "2": 14754
+    },
+    "id_dlc_count_by_bus": {
+      "0": 165,
+      "1": 22,
+      "2": 165
+    },
+    "ready_values_bus0": [
+      1
+    ],
+    "selected_counts": {
+      "0x00F/8": {
+        "0": 104,
+        "1": 0,
+        "2": 104
+      },
+      "0x025/32": {
+        "0": 1062,
+        "1": 0,
+        "2": 1061
+      },
+      "0x030/32": {
+        "0": 1056,
+        "1": 0,
+        "2": 1059
+      },
+      "0x0D7/32": {
+        "0": 532,
+        "1": 0,
+        "2": 535
+      },
+      "0x51E/8": {
+        "0": 9,
+        "1": 0,
+        "2": 9
+      }
+    }
+  },
+  "schema": "camry-2026-relay-correct-capture-v2",
+  "sources": {
+    "camry_post_repin_nrtd_20260827.json.gz": {
+      "sha256": "4e061d5ec06b0dee0b208e7bc34d5f8050af565978ef3254ce221ad329b4f74d",
+      "size": 252884
+    },
+    "camry_post_repin_ready_20260827.json.gz": {
+      "sha256": "32e9ac52c53ac05248b45c2f0eb6a6d50c59c11a9db4fafb31e145919078a58d",
+      "size": 298123
+    },
+    "camry_relay_lta_confirm_route_can_20260827.ndjson.gz": {
+      "sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a",
+      "size": 24952076
+    },
+    "camry_relay_route_can_20260827.ndjson.gz": {
+      "sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5",
+      "size": 14639570
+    }
+  }
+}

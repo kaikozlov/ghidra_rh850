@@ -195,3 +195,28 @@ Exact firmware analysis then identifies the stock application XCP placement
 surface and the remaining execution-pivot boundary. Canonical interpretation is
 `data/generated/camry_8965F3307000_application_ram_loader_assessment.json` and
 `docs/variants/camry-2026-live-baseline.md` §13.
+
+## Relay-correct Toyota-B follow-up (2026-08-27)
+
+The Toyota-B CAN0/CAN1 pairs were physically repinned and verified passively before
+the drive. The former steering/state bus now lands on the harness CAN0/CAN2 relay
+pair: the first 10-second census is 153/22/153 ID-DLC streams on buses 0/1/2, with
+bus0 and bus2 byte-for-byte identical. A READY/parked repeat preserves the split.
+
+Normal loggerd then retained two privacy-minimized drive artifacts:
+`raw-20260827/camry_relay_route_can_20260827.ndjson.gz` (1,656,656 incoming CAN
+frames / nine segments) and the deliberately repeated
+`raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz` (1,918,047
+frames / ten segments). Together they retain exactly **3,574,703 incoming CAN
+frames / 19 segments** and no GPS/video/route metadata. Both contain sustained
+movement and same-car `0x0FE` control interactions; the confirmation run reaches
+65.310..72.493 km/h continuously in segment 20. Both nevertheless record zero
+`0x0B6` on every incoming bus/length while protected `0x00F/0x0D7` remain healthy
+on both relay sides. Because neither drive sampled an OEM-named LTA-active diagnostic
+state simultaneously, this is a repeated bounded negative rather than proof that
+factory LTA never uses the recovered F33 B6 target-angle path. The next live
+discriminator is synchronized FRC P5 DID `0x1601` plus relay-correct CAN.
+
+Provenance is in `raw-20260827/MANIFEST.txt`; deterministic interpretation is
+`data/generated/camry_2026_relay_correct_capture.json`; canonical conclusions are
+`docs/variants/camry-2026-live-baseline.md` §16.

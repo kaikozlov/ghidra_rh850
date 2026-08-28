@@ -181,6 +181,96 @@ def _section_camry_2026_ready_gear():
 _section_camry_2026_ready_gear()
 print()
 
+print("== camry 2026 relay-correct capture ==")
+def _section_camry_2026_relay_correct_capture():
+    import hashlib
+    import json
+    import subprocess
+    import sys
+    import tempfile
+    from pathlib import Path
+    REPO = Path(__file__).resolve().parents[1]
+    RAW = REPO / 'targets/camry-2026/raw-20260827'
+    ART = REPO / 'data/generated/camry_2026_relay_correct_capture.json'
+    BUILD = REPO / 'tools/analyze_camry_2026_relay_capture.py'
+
+    def sha(path: Path) -> str:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+
+    print('== source provenance ==')
+    expected = {
+        'camry_post_repin_nrtd_20260827.json.gz': (252884, '4e061d5ec06b0dee0b208e7bc34d5f8050af565978ef3254ce221ad329b4f74d'),
+        'camry_post_repin_ready_20260827.json.gz': (298123, '32e9ac52c53ac05248b45c2f0eb6a6d50c59c11a9db4fafb31e145919078a58d'),
+        'camry_relay_route_can_20260827.ndjson.gz': (14639570, 'be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5'),
+        'camry_relay_lta_confirm_route_can_20260827.ndjson.gz': (24952076, '641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a'),
+        'extract_route_can.py': (None, 'ed4d5a69c8485296287aeda09735e5724c87270b610b264491dc3070a637a926'),
+    }
+    for name, (size, digest) in expected.items():
+        path = RAW / name
+        check(f'{name} exact tracked identity', (size is None or path.stat().st_size == size) and sha(path) == digest)
+    manifest = (RAW / 'MANIFEST.txt').read_text()
+    check('relay manifest pins privacy/passive boundary', all(x in manifest for x in ('passive incoming CAN only', 'No GPS', 'CHECKSUM_ERROR', 'machine-prove')))
+
+    print('\n== deterministic artifact ==')
+    with tempfile.TemporaryDirectory() as td:
+        out = Path(td) / 'relay.json'
+        proc = subprocess.run([sys.executable, str(BUILD), '--out', str(out)], cwd=REPO, capture_output=True, text=True, check=False)
+        check('relay analyzer succeeds', proc.returncode == 0, proc.stderr[-300:])
+        check('relay artifact regenerates exactly', proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
+    art = json.loads(ART.read_text())
+    check('relay artifact schema v2', art['schema'] == 'camry-2026-relay-correct-capture-v2')
+    check('production output stays disabled', art['conclusion']['production_output_authorized'] is False and 'passive incoming CAN only' in art['capture_boundary']['operation'])
+
+    print('\n== physical repin topology ==')
+    nrtd = art['post_repin_nrtd']
+    check('NRTD bus0/bus2 exact duplicated sequence', nrtd['bus0_bus2_sequence_identical'] is True and nrtd['frames_by_bus'] == {'0': 13910, '1': 3938, '2': 13910})
+    check('NRTD repin census is 153/22/153', nrtd['id_dlc_count_by_bus'] == {'0': 153, '1': 22, '2': 153})
+    for addr, expected_count in (('0x00F/8', 100), ('0x025/32', 1000), ('0x030/32', 1000), ('0x0D7/32', 500)):
+        check(f'{addr} moved to relay pair', nrtd['selected_counts'][addr] == {'0': expected_count, '1': 0, '2': expected_count})
+    ready = art['post_repin_ready']
+    check('READY keeps same 0/2-vs-1 topology', ready['id_dlc_count_by_bus'] == {'0': 165, '1': 22, '2': 165})
+    check('READY bit is present on both relay sides', ready['ready_values_bus0'] == [1] and ready['selected_counts']['0x51E/8'] == {'0': 9, '1': 0, '2': 9})
+
+    print('\n== relay-correct moving route ==')
+    drive = art['drive']
+    check('route retains nine segments / 1.65M incoming frames', drive['segment_count'] == 9 and drive['frame_count'] == 1656656)
+    check('B6 absent at every DLC on every incoming bus', drive['b6_any_bus_any_length_count'] == 0 and drive['b6_examples'] == [])
+    for seg in drive['segments']:
+        p = seg['protected_counts']
+        check(f'seg{seg["segment"]} keeps protected sync/D7 but no B6', p['0x00F/8']['0'] > 0 and p['0x00F/8']['2'] > 0 and p['0x0D7/32']['0'] > 0 and p['0x0D7/32']['2'] > 0 and sum(p['0x0B6/32'].values()) == 0)
+    check('segments 4-6 are continuously moving', all(drive['segments'][i]['speed_kph']['moving_over_2kph_fraction'] == 1.0 for i in (4, 5, 6)))
+    check('segment 5 is D-state and 32.66..42.88 kph', drive['segments'][5]['gear_raw_counts'] == {'3': 3662} and drive['segments'][5]['speed_kph']['min'] == 32.66 and drive['segments'][5]['speed_kph']['max'] == 42.88)
+    switches = drive['validated_cruise_switch_events']
+    check('same-car 0x0FE join sees MAIN toggles in segments 4/5', len(switches['MAIN']['4']) == 2 and len(switches['MAIN']['5']) == 2)
+    check('same-car 0x0FE join sees SET- interaction in segment 5', switches['SET_MINUS']['5'] == [
+        {'end_s': 19.64854, 'frames': 5, 'start_s': 19.526293},
+        {'end_s': 20.159219, 'frames': 3, 'start_s': 20.097979},
+    ])
+    check('0x08A is retained only as structural corroboration', set(drive['structural_0x08A_transitions']) == {'4', '5'} and 'machine-prove' in drive['interpretation'])
+    check('zero-B6 conclusion remains bounded', 'bounded negative' in art['conclusion']['b6'] and 'synchronize' in art['conclusion']['next_observation'])
+
+    print('\n== deliberate confirmation drive ==')
+    confirm = art['confirmation_drive']
+    check('confirmation route retains ten segments / 1.918M incoming frames', confirm['segment_count'] == 10 and confirm['frame_count'] == 1918047)
+    check('confirmation route repeats zero B6 at every DLC/bus', confirm['b6_any_bus_any_length_count'] == 0 and confirm['b6_examples'] == [])
+    for seg in confirm['segments']:
+        pcounts = seg['protected_counts']
+        check(f'confirmation seg{seg["segment"]} keeps protected sync/D7 but no B6', pcounts['0x00F/8']['0'] > 0 and pcounts['0x00F/8']['2'] > 0 and pcounts['0x0D7/32']['0'] > 0 and pcounts['0x0D7/32']['2'] > 0 and sum(pcounts['0x0B6/32'].values()) == 0)
+    segs = {x['segment']: x for x in confirm['segments']}
+    check('confirmation contains sustained road-speed operation', all(segs[i]['speed_kph']['moving_over_2kph_fraction'] == 1.0 for i in (18, 20, 21, 22)) and segs[20]['speed_kph']['min'] == 65.31 and segs[20]['speed_kph']['max'] == 72.493)
+    check('confirmation sees repeated same-car MAIN interactions', set(confirm['validated_cruise_switch_events']['MAIN']) == {'16', '18', '19', '20'})
+    check('confirmation 0x08A stays structural only', set(confirm['structural_0x08A_transitions']) == {'18', '19', '20', '21'} and 'machine-proves' in confirm['interpretation'])
+    combined = art['combined_route_evidence']
+    check('two drives total 19 segments / 3.574M incoming frames / zero B6', combined == {'b6_any_bus_any_length_count': 0, 'frame_count': 3574703, 'segment_count': 19})
+    check('operator report is retained as unsynchronized evidence only', 'not synchronized' in art['capture_boundary']['operator_report_boundary'])
+
+    print('\n== documentation ==')
+    doc = (REPO / 'docs/variants/camry-2026-live-baseline.md').read_text()
+    for token in ('relay-correct', '1,656,656', '1,918,047', '3,574,703', 'zero `0x0B6`', '0x0FE', 'CHECKSUM_ERROR'):
+        check(f'Camry report preserves relay result {token}', token in doc)
+_section_camry_2026_relay_correct_capture()
+print()
+
 print("== camry 2026 tsk baseline ==")
 def _section_camry_2026_tsk_baseline():
     import gzip

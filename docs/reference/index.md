@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 334 · Corrections: 124 · Open questions: 53 · Docs: 104 · Suites: 180
+Findings: 335 · Corrections: 124 · Open questions: 53 · Docs: 104 · Suites: 180
 
 ## Reading this index
 
@@ -353,6 +353,7 @@ Findings: 334 · Corrections: 124 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="finding-var-060"></a>**VAR-060** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000.py` | OQ-053 |
 | <a id="finding-var-061"></a>**VAR-061** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md), [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | `tests/verify_analysis_targets.py`, `tests/verify_camry_8965F3307000.py` | — |
 | <a id="finding-var-062"></a>**VAR-062** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | `tests/verify_camry_8965F3307000.py` | — |
+| <a id="finding-var-063"></a>**VAR-063** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_2026.py` | — |
 
 ## Open-questions index
 
@@ -678,6 +679,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/camry-8965F3307000/decompilations.jsonl` | analysis_targets, camry_8965f3307000_gtsplus_semantics, camry_8965f3307000_codeflash, camry_8965f3307000_flash_backend, camry_8965f3307000_lateral_static, camry_8965f3307000_tss3_opendbc_port, camry_8965f3307000_fault_status | — |
 | `data/generated/camry_2026_nrtd_p5.json` | camry_2026 | — |
 | `data/generated/camry_2026_ready_gear.json` | camry_2026 | — |
+| `data/generated/camry_2026_relay_correct_capture.json` | camry_2026 | — |
 | `data/generated/camry_2026_tsk_baseline.json` | camry_2026 | — |
 | `data/generated/camry_8965F3307000_application_ram_loader_assessment.json` | camry_8965f3307000_application_ram_loader | — |
 | `data/generated/camry_8965F3307000_codeflash.json` | camry_8965f3307000_codeflash, camry_8965f3307000_lateral_static, camry_8965f3307000_command5_runtime_carrier | — |
