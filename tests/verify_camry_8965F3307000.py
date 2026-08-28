@@ -597,17 +597,36 @@ def section_tss3_opendbc_port() -> int:
     check("Panda production path remains disabled", "ALLOW_DEBUG-only" in o["panda_boundary"] and "0x0B6 is absent" in o["panda_boundary"] and "SafetyModel.noOutput" in o["panda_boundary"])
     check("production output remains unauthorized", o["production_output_authorized"] is False and "steering CAN transmission" in art["boundary"])
 
+    print("\n== exact-F33 default-off development integration ==")
+    d = art["gate2_development_integration"]
+    check("development implementation commits pinned",
+          d["nested_opendbc_commit"] == "dde0fcf0fbaf875750c54a072b0dcb3857f8829b" and
+          d["parent_kai_openpilot_commit"] == "15f3550365e2eee54ca5645ae9c24d9d41ae4f31")
+    check("development path defaults off and rejects release branches", d["default_enabled"] is False and d["release_branch_allowed"] is False)
+    check("development target/topology binding exact", "8965F3307000" in d["target_binding"] and "bus0" in d["target_binding"])
+    required = d["runtime_config"]["required_live_fields"]
+    check("development config refuses guessed live facts",
+          d["runtime_config"]["master_enable"] == "ToyotaTSS3DevLateral" and
+          d["runtime_config"]["json"] == "ToyotaTSS3DevLateralConfig" and
+          any("b6_template_hex" in x for x in required) and any("cadence_frames" in x for x in required) and
+          any("gate2_bypass_validated=true" in x for x in required) and any("exclusive_b6_authority_validated=true" in x for x in required))
+    check("development sender keeps exact F33 static bounds", all(tok in d["sender"] for tok in ("ID11", "+/-1745", "+78", "newer stock 0x00F", "zero MAC28")))
+    check("development Panda is debug-only B6-only fail-closed", all(tok in d["panda"] for tok in ("ALLOW_DEBUG-only", "0x0B6-only", "0x025", "0x00F", "strict +1", "35-ms")))
+    check("development inactive path invents no OEM packet", "no invented inactive B6 frame" in d["inactive_behavior"] and "newer sync epoch" in d["inactive_behavior"])
+    check("development does not authorize production", d["production_output_authorized"] is False and "production output remains unsupported" in art["boundary"])
+
     print("\n== canonical documentation ==")
     report = REPORT.read_text(encoding="utf-8")
     findings = FINDINGS.read_text(encoding="utf-8")
     corrections = CORRECTIONS.read_text(encoding="utf-8")
     priorities = PRIORITIES.read_text(encoding="utf-8")
-    for token in ("ab60fd95", "d7d7dfd7e", "0x4C000", "0x4C7AA", "0x4CED0", "0x4CE08", "SafetyModel.noOutput", "179-ID", "147-ID"):
+    for token in ("ab60fd95", "d7d7dfd7e", "dde0fcf0", "15f355036", "0x4C000", "0x4C7AA", "0x4CED0", "0x4CE08", "SafetyModel.noOutput", "179-ID", "147-ID", "ToyotaTSS3DevLateral"):
         check(f"dedicated port report contains {token}", token in report)
     check("VAR-058 registered", "| VAR-058 |" in findings and "8965F3307000" in findings and "ab60fd95" in findings)
+    check("VAR-062 development staging registered", "| VAR-062 |" in findings and "dde0fcf0" in findings and "15f355036" in findings)
     check("CORR-120 historical step retained", "### CORR-120" in corrections and "0x4C000" in corrections and "VAR-056" in corrections and "five" in corrections.lower())
     check("CORR-122 canonical census registered", "### CORR-122" in corrections and "6,065" in corrections and "FEBE66A8" in corrections and "FEBE670E" in corrections and "9" in corrections)
-    check("priorities record passive port", "ab60fd95" in priorities and "production output remains disabled" in priorities.lower())
+    check("priorities record passive baseline plus gated development port", "ab60fd95" in priorities and "dde0fcf0" in priorities and "production output remains disabled" in priorities.lower())
 
     print(f"\nResults: {p} passed, {f} failed")
     return 1 if f else 0
@@ -1091,8 +1110,25 @@ def section_application_ram_loader() -> int:
 
     print("\n== control-transfer boundary ==")
     ct = a["control_transfer_audit"]
-    check("all recovered computed calls were reviewed with application split", ct["computed_call_sites_reviewed_total"] == 312 and ct["computed_call_sites_reviewed_application"] == 305)
-    check("only fixed LocalRAM call target is boot FEBF0FD0", ct["only_recovered_computed_call_with_fixed_localram_pointer"] == "0xFEBF0FD0" and ct["fixed_pointer_is_boot_region"] and not ct["fixed_pointer_inside_xcp_write_window"])
+    raw_indirect = ct["raw_indirect_control_transfer_census"]
+    check("current first-class indirect-transfer census is 496 total / 487 application",
+          raw_indirect["total"] == 496 and raw_indirect["application"] == 487 and
+          raw_indirect["mnemonics_total"] == {"jarl":403,"jmp":93} and
+          raw_indirect["mnemonics_application"] == {"jarl":395,"jmp":92} and
+          raw_indirect["reset_thunk_outside_function_classifier"] == "0x00000032")
+    check("current computed-call classifier covers 495 total / all 487 application transfers",
+          ct["computed_call_sites_reviewed_total"] == 495 and ct["computed_call_sites_reviewed_application"] == 487)
+    cp = ct["computed_call_classifier_provenance"]
+    check("direct classifier provenance has zero XCP-window source cells",
+          cp["direct_referenced_definition_sites"] == 161 and cp["direct_referenced_non_ram_sites"] == 152 and
+          cp["direct_referenced_lower_ram_sites"] == 9 and cp["direct_referenced_xcp_window_sites"] == 0 and
+          cp["locally_resolved_without_operand_reference_sites"] == 330 and cp["no_definition_within_24_instruction_backtracker_sites"] == 4 and
+          cp["all_direct_lower_ram_cells_below_xcp_write_window"])
+    ram_cells = {row["cell"]: row for row in cp["direct_lower_ram_cells"]}
+    check("direct RAM call-source cells are concrete and below the XCP floor",
+          set(ram_cells) == {"0xFEBF0FD0","0xFEBF6B04","0xFEBF117C","0xFEBF1194","0xFEBE5628"} and
+          ram_cells["0xFEBF6B04"]["writer"] == "0x00073EEE" and ram_cells["0xFEBF6B04"]["fixed_targets"] == ["0x000766F4","0x000767EA"] and
+          all(int(cell,16) < 0xFEBF7C00 for cell in ram_cells))
     check("no raw CodeFlash u32 pointer lands in high tail", ct["raw_codeflash_u32_pointers_into_high_tail"] == [])
     dma = ct["fixed_dmac_descriptor_audit"]
     check("F33 fixed DMAC descriptor families are target-natively enumerated", dma["fixed_descriptor_paths_closed"] is True and dma["descriptor_apply"] == "0x00060A6A" and dma["recovered_fixed_table_callers"] == ["0x00060462","0x00060C20","0x00061B90","0x000628B2"] and len(dma["tables"]) == 7)
@@ -1108,7 +1144,12 @@ def section_application_ram_loader() -> int:
     residual=ct["residual_computed_calls"]
     check("four residual computed calls resolve below the XCP window", residual["sites"] == ["0x0008863E","0x0008AF7A","0x0008AF88","0x0008AFAA"] and all(int(x,16) < 0xFEBF7C00 for x in residual["callback_cells"]) and residual["all_cells_below_xcp_write_window"] and residual["writers_install_fixed_codeflash_targets"] and residual["bitwise_complement_guards"])
     exc=ct["exception_saved_pc_audit"]
-    check("exception/saved-PC route is confined to lower stacks", exc["exception_return_count"] == len(exc["exception_return_sites"]) == 8 and exc["application_initial_sp"] == "0xFEBE2000" and exc["temporary_isr_stacks"] == ["0xFEBE0800","0xFEBE1000","0xFEBE1800","0xFEBE2800"] and exc["eipc_saved_on_interrupted_stack"] and exc["all_recovered_saved_pc_stacks_below_xcp_write_window"] and exc["direct_flow_edges_into_xcp_write_window"] == 0)
+    check("exception/saved-PC route is confined to lower stacks",
+          exc["exception_return_sites"] == ["0x00020102","0x00065C60","0x00071372","0x00071456","0x00071502","0x000715AE","0x00071A90","0x00071C40"] and
+          exc["exception_return_count"] == 8 and exc["application_initial_sp"] == "0xFEBE2000" and
+          exc["temporary_isr_stacks"] == ["0xFEBE0800","0xFEBE1000","0xFEBE1800","0xFEBE2800"] and
+          exc["eipc_saved_on_interrupted_stack"] and exc["all_recovered_saved_pc_stacks_below_xcp_write_window"] and
+          exc["direct_flow_edges_into_xcp_write_window"] == 0)
     check("only one recovered application DMAC channel programmer remains", dma["recovered_channel_programmers"] == ["0x00060A6A"] and dma["fixed_global_setup"] == "0x00060A10" and dma["recovered_channel_register_accessors"] == ["0x0006091E","0x00060934","0x00060940","0x000609B0","0x00060A6A"])
     ctbp=ct["ctbp_writer_census"]
     raw_ctbp=find_ldsr_writers(img,20,0)

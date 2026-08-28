@@ -16,6 +16,8 @@ EVID = REPO / "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.jso
 OUT = REPO / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
 NESTED_OPENDDBC_COMMIT = "ab60fd95d8a7b566e10ed1cf59738292f3498932"
 PARENT_OPENPILOT_COMMIT = "d7d7dfd7e49961e9d35eb7a7681e8756ceee8d04"
+DEVELOPMENT_NESTED_OPENDDBC_COMMIT = "dde0fcf0fbaf875750c54a072b0dcb3857f8829b"
+DEVELOPMENT_PARENT_OPENPILOT_COMMIT = "15f3550365e2eee54ca5645ae9c24d9d41ae4f31"
 TX = struct.Struct("<IBBH")
 PDU = struct.Struct("<HBBHBB")
 TX_TABLE = 0x21F58
@@ -204,13 +206,52 @@ def build() -> dict:
                 "live 0x351/0x394/0x4A3 availability and fault-policy transitions",
             ],
         },
+        "gate2_development_integration": {
+            "nested_opendbc_commit": DEVELOPMENT_NESTED_OPENDDBC_COMMIT,
+            "parent_kai_openpilot_commit": DEVELOPMENT_PARENT_OPENPILOT_COMMIT,
+            "default_enabled": False,
+            "release_branch_allowed": False,
+            "target_binding": "exact TOYOTA_CAMRY_TSS3 + current EPS F181 containing 8965F3307000 + relay-correct bus0 topology",
+            "runtime_config": {
+                "master_enable": "ToyotaTSS3DevLateral",
+                "json": "ToyotaTSS3DevLateralConfig",
+                "required_live_fields": [
+                    "f181=8965F3307000",
+                    "stock-captured 28-byte b6_template_hex",
+                    "stock-captured cadence_frames",
+                    "gate2_bypass_validated=true",
+                    "exclusive_b6_authority_validated=true",
+                ],
+            },
+            "sender": (
+                "Active ID11 only; exact-F33 +/-1745 raw clamp and +78 raw command-step clamp; "
+                "requires a strictly newer stock 0x00F epoch, uses FV46/FV4 replacement counters, "
+                "and intentionally transmits zero MAC28 for the already-validated Gate-2 development bypass."
+            ),
+            "panda": (
+                "ALLOW_DEBUG-only Toyota TSS3 development flag installs a dedicated bus0/32-byte 0x0B6-only TX whitelist; "
+                "requires observed 0x025 steering rate and 0x00F sync, enforces ID11, +/-1745 raw, strict +1 sequence, "
+                "+/-78 raw step, abs steering-rate <=100, and 35-ms active timeout. Ordinary Toyota modes still cannot TX B6."
+            ),
+            "inactive_behavior": (
+                "controller emits no invented inactive B6 frame; sender disarms after active->inactive and requires a newer sync epoch before reactivation"
+            ),
+            "production_output_authorized": False,
+            "remaining_live_gates": [
+                "stock B6 template/cadence capture supplying runtime config",
+                "live exact-F33 Gate-2 causal invalid-MAC proof",
+                "exclusive relay/source suppression proof",
+                "driver override and motor-current response policy",
+                "live fault-state transition policy",
+            ],
+        },
         "sources": {
             "codeflash": {"path": str(IMAGE.relative_to(REPO)), "sha256": IMAGE_SHA256},
             "decompiler_evidence": {"path": str(EVID.relative_to(REPO)), "sha256": sha(EVID.read_bytes())},
         },
         "boundary": (
-            "The F33 Tx/status carrier geometry and passive software integration are closed at the stated evidence grades. "
-            "This artifact does not authorize steering CAN transmission or claim that the still-unobserved status carriers are available on the production relay-correct route."
+            "The F33 Tx/status carrier geometry, passive software integration, and default-off development-output plumbing are closed at the stated evidence grades. "
+            "This artifact does not authorize steering CAN transmission: development output remains impossible until live-supplied gates are explicitly attested, and production output remains unsupported."
         ),
     }
 

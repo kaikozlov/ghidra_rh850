@@ -3033,3 +3033,46 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact correction:** `GP-0x5158 = FEBE66A8` has **9** direct Ghidra-reference owners: readers `0x35A06, 0x4C000, 0x4C490, 0x4DB70, 0x52CA0, 0x54244, 0x564CE` and writers `0x59448, 0x5D5E0`. DID1151 Q-current `GP-0x50F2 = FEBE670E` has **6**: readers `0x4E394, 0x52CA0, 0x54244, 0x564CE` and writers `0x59448, 0x5D12C`. The distinct `0x4A3` source `GP-0x50E8 = FEBE6718` has four direct refs: readers `0x4C000/0x4C490`, writers `0x59448/0x5D12C`.
 - **Safety consequence:** the prior bounded control-cone conclusion survives the stronger census: neither `FEBE66A8` nor `FEBE670E` has a direct Ghidra data reference in the cooperative `C8xxx–D1xxx` target-to-motor cone. Computed aliases without a recovered data reference, DMA/hardware mutation, and unrecovered code remain outside the negative proof.
 - **Canonical:** `data/generated/camry-8965F3307000/decompilations.jsonl`; `data/generated/camry_8965F3307000_lateral_decompiler_evidence.json`; `data/generated/camry_8965F3307000_lateral_static.json`; `tests/verify_camry_8965F3307000.py`; [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §2.
+
+### CORR-123 — the F33 application-pivot census was stale; the first-class graph has 496 indirect transfers / 487 application transfers and more lower-RAM call cells
+
+- **Superseded framing:** VAR-057 / the generated application-RAM-loader assessment
+  recorded a 312-site computed-call census (305 application) and described
+  `FEBF0FD0` as the only recovered fixed LocalRAM call-source cell. Its exception
+  list also carried scratch address `0x200C8`.
+- **Root cause:** those values came from an earlier, less-complete scratch Ghidra
+  graph. The canonical first-class `8965F3307000` project now contains 6,065
+  functions and recovers substantially more function-owned dispatch/thunk code.
+- **Exact correction:** fresh primary Ghidra output from
+  `ExportIndirectControlTransfers.java` reports **496** decoded indirect transfers:
+  **403 `jarl` + 93 `jmp`**; **487** are in application CodeFlash (**395 + 92**).
+  `ClassifyComputedCallTargets.java` classifies **495 total / all 487 application**;
+  the one omitted total-site is reset thunk `jmp 0x1E1E[r0] @ 0x32`, which has no
+  containing function. Of the 495 classifier sites, 161 nearest definitions carry
+  direct operand references: 152 non-RAM, **9 lower-RAM, zero XCP-window**; 330
+  more are locally resolved without operand references and four exceed the
+  24-instruction backtracker.
+- **Lower-RAM closure:** the nine directly referenced RAM sites reduce to five
+  concrete cells, all below `FEBF7C00`: boot `FEBF0FD0`; `FEBF6B04`, whose writer
+  `0x73EEE` selects only fixed CodeFlash `0x766F4/0x767EA`; guarded callback cells
+  `FEBF117C` and `FEBF1194`; and service callback `FEBE5628`, derived from fixed
+  CodeFlash service configuration rather than request bytes. The four backtracker
+  misses remain separately closed through guarded `FEBF117C/FEBF1180` and
+  `FEBF131C/FEBF1320/FEBF1324` callback families with fixed CodeFlash installers
+  and complement guards. The stronger census still finds **zero recovered
+  XCP-writable call-source cells**.
+- **Exception correction:** the current eight decoded exception returns are
+  `eiret @ 0x20102`, `feret @ 0x65C60`, and `eiret` at
+  `0x71372/0x71456/0x71502/0x715AE/0x71A90/0x71C40`; `0x200C8` is not an
+  instruction in the first-class project. `0x65BD4` explicitly saves FEPC/FEPSW/
+  FEIC/FEWR on the interrupted lower stack before `feret`; the existing lower-stack
+  saved-PC boundary therefore remains intact.
+- **Consequence:** the prior *negative conclusion survives*, but its denominator and
+  RAM-cell description are now current and stronger. No safe restoreable
+  application-mode PC pivot into `FEBFF9F0..FEBFFBFB` is recovered. OQ-053's known
+  stock static surface remains exhausted; the next discriminator is runtime/live,
+  not another pass over the stale 312-site corpus.
+- **Canonical:**
+  `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`;
+  `tests/verify_camry_8965F3307000.py`;
+  [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.5.

@@ -542,6 +542,10 @@
         "path": "ghidra/scripts/investigate/FindExceptionAndXcpFlowOps.java",
         "sha256": "4b3b7f5bc14e4968f84977992c94904f9455585592686a95b47324bd877cca5c"
       },
+      "indirect_transfers": {
+        "path": "ghidra/scripts/investigate/ExportIndirectControlTransfers.java",
+        "sha256": "27270dcf9d0a20abb4c22c9f7a9647e7a4dd44b85b0774fba4a414e6ad986670"
+      },
       "range_references": {
         "path": "ghidra/scripts/investigate/InspectRangeReferences.java",
         "sha256": "26d9d2a94ae9b676e794d15be731a40e4b1b96c957574938fd14c183ce91ff8c"
@@ -551,9 +555,65 @@
         "sha256": "21d7e88f038bb22a350374a291b9496150d4527391f74adeae3c228d4d04880e"
       }
     },
-    "bounded_negative": "No recovered scheduler/task/diagnostic/CAN/CryptoIf/ICU-S/OS/interrupt/PDU callback pointer or saved-PC cell lies in the XCP-writable window. The four residual computed-call sites resolve to guarded lower-RAM callbacks; CTBP/CALLT and fixed EBASE/INTBP vector-base compositions are closed; recovered XCP DAQ is measurement-only; all configured write/proprietary/routine/reset diagnostics resolve to fixed-code/bounded-data semantics; and the recovered fixed F33 DMAC families have zero endpoints in the window. Arbitrary synthesized/computed aliases, a memory-safety bug not represented by recovered control/data-flow, a separate undiscovered DMA/hardware mutation path, and undiscovered code remain outside this static negative.",
-    "computed_call_sites_reviewed_application": 305,
-    "computed_call_sites_reviewed_total": 312,
+    "bounded_negative": "No recovered scheduler/task/diagnostic/CAN/CryptoIf/ICU-S/OS/interrupt/PDU callback pointer or saved-PC cell lies in the XCP-writable window. The current first-class census has 496 decoded indirect transfers / 487 application transfers; every directly referenced RAM call-source cell is below the XCP floor, and the four residual computed-call sites resolve to guarded lower-RAM callbacks; CTBP/CALLT and fixed EBASE/INTBP vector-base compositions are closed; recovered XCP DAQ is measurement-only; all configured write/proprietary/routine/reset diagnostics resolve to fixed-code/bounded-data semantics; and the recovered fixed F33 DMAC families have zero endpoints in the window. Arbitrary synthesized/computed aliases, a memory-safety bug not represented by recovered control/data-flow, a separate undiscovered DMA/hardware mutation path, and undiscovered code remain outside this static negative.",
+    "computed_call_classifier_provenance": {
+      "all_direct_lower_ram_cells_below_xcp_write_window": true,
+      "bounded_note": "The classifier reports source-cell provenance, not complete target semantics. Fixed descriptor/table families and the four backtracker misses are closed separately below.",
+      "direct_lower_ram_cells": [
+        {
+          "cell": "0xFEBF0FD0",
+          "closure": "boot-only authenticated payload callback; below application XCP window",
+          "consumers": [
+            "0x0000435E",
+            "0x0000437C",
+            "0x0000440E"
+          ]
+        },
+        {
+          "cell": "0xFEBF6B04",
+          "closure": "writer selects one of two fixed CodeFlash targets",
+          "consumers": [
+            "0x00073EE6"
+          ],
+          "fixed_targets": [
+            "0x000766F4",
+            "0x000767EA"
+          ],
+          "writer": "0x00073EEE"
+        },
+        {
+          "cell": "0xFEBF117C",
+          "closure": "guarded callback family; fixed CodeFlash installers plus complement checks",
+          "consumers": [
+            "0x00088614"
+          ]
+        },
+        {
+          "cell": "0xFEBF1194",
+          "closure": "guarded callback family; fixed CodeFlash installers",
+          "consumers": [
+            "0x00088716",
+            "0x0008873C"
+          ]
+        },
+        {
+          "cell": "0xFEBE5628",
+          "closure": "temporary service callback derived from fixed CodeFlash service configuration; request bytes do not become a pointer",
+          "consumers": [
+            "0x00091678",
+            "0x000916BE"
+          ]
+        }
+      ],
+      "direct_referenced_definition_sites": 161,
+      "direct_referenced_lower_ram_sites": 9,
+      "direct_referenced_non_ram_sites": 152,
+      "direct_referenced_xcp_window_sites": 0,
+      "locally_resolved_without_operand_reference_sites": 330,
+      "no_definition_within_24_instruction_backtracker_sites": 4
+    },
+    "computed_call_sites_reviewed_application": 487,
+    "computed_call_sites_reviewed_total": 495,
     "ctbp_writer_census": {
       "alignment": 2,
       "all_ctbp_writers_census_closed": true,
@@ -581,8 +641,8 @@
       "eipc_saved_on_interrupted_stack": true,
       "exception_return_count": 8,
       "exception_return_sites": [
-        "0x000200C8",
         "0x00020102",
+        "0x00065C60",
         "0x00071372",
         "0x00071456",
         "0x00071502",
@@ -927,13 +987,6 @@
         }
       ]
     },
-    "fixed_localram_pointer_consumers": [
-      "0x0000435E",
-      "0x0000437C",
-      "0x0000440E"
-    ],
-    "fixed_pointer_inside_xcp_write_window": false,
-    "fixed_pointer_is_boot_region": true,
     "fixed_vector_base_setup": {
       "context_setup_range": "0x000715B4..0x000715E3",
       "ebase": "0x00020000",
@@ -946,8 +999,21 @@
       "verdict": "application context setup writes fixed CodeFlash vector bases before fixed GP/TP/SP; it is not a parameterized vector-base setter"
     },
     "high_tail_function_entries": 0,
-    "only_recovered_computed_call_with_fixed_localram_pointer": "0xFEBF0FD0",
     "raw_codeflash_u32_pointers_into_high_tail": [],
+    "raw_indirect_control_transfer_census": {
+      "application": 487,
+      "mnemonics_application": {
+        "jarl": 395,
+        "jmp": 92
+      },
+      "mnemonics_total": {
+        "jarl": 403,
+        "jmp": 93
+      },
+      "reset_thunk_outside_function_classifier": "0x00000032",
+      "source": "ghidra/scripts/investigate/ExportIndirectControlTransfers.java",
+      "total": 496
+    },
     "recovered_static_references_into_xcp_write_window": 0,
     "residual_computed_calls": {
       "all_cells_below_xcp_write_window": true,

@@ -205,21 +205,32 @@ Canonical: [../tooling/techstream.md](../tooling/techstream.md) §6.2.2 ·
 
 ## Parallel integration target — firmware-identified, relay-correct TSS3 capture
 
-**Current exact live target (VAR-051/052/053/054/055/056/057):** the maintainer's 2026 Camry now has both identity-bound live evidence and exact target-native EPS firmware. EPS F181 is `8965F3307000 / 8A3113303100` on normal-harness `(bus1,param1)`; FRC is `0x792→0x79A / 8646F3315000`; Brake/EPB is `0x7B0→0x7B8 / F152633K0000`. VAR-053 closes `0x51E` Ready plus **P=0, R=1, N=2, D=3, B=4**; VAR-054/056 close the target-native B6 receiver, timing, limits, feedback and runtime anchors. VAR-057 supersedes the old low-RAM carrier assumption: the real stock startup overwrites `FEBF0000`, while **`FEBFF9F0..FEBFFBFB` (524 bytes) is live-proven retained and executable** with stock application return and zero Panda TX-block delta. Exact F33 application XCP provides the placement half of the desired production loader: packed `0x7F7/0x7F8` descriptors exist, `SET_MTA 0x82C62` + `DOWNLOAD 0x81FFE` can write arbitrary bytes throughout `FEBF7C00..FEBFFBFF`, and GET_SEED/UNLOCK are unconfigured. A target-native 22-record / 88-endpoint fixed-DMAC census has zero endpoints in the XCP window, closing the obvious recovered DMA shortcut. The tested normal bus1/ELM1 XCP route still times out. The **remaining production architecture blocker is now a safe already-running-application PC pivot into the high tail**, not carrier retention or a RAM writer. Highest-value next static work is OQ-053: continue callback/registration/computed-pointer analysis for a volatile hook. Highest-value bounded live discriminator, if needed, is CONNECT-only route discovery and then non-executing high-tail DOWNLOAD/readback; do not use the PROGRAMMING handoff as a normal startup design and do not guess arbitrary PC writes. Slot-4 command-5 permission/latency and stock-LTA sender/suppression characterization remain separate live gates. Production output remains disabled. Canonical baseline: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§12–13.
+**Current exact live target (VAR-051/052/053/054/055/056/057):** the maintainer's 2026 Camry now has both identity-bound live evidence and exact target-native EPS firmware. EPS F181 is `8965F3307000 / 8A3113303100` on normal-harness `(bus1,param1)`; FRC is `0x792→0x79A / 8646F3315000`; Brake/EPB is `0x7B0→0x7B8 / F152633K0000`. VAR-053 closes `0x51E` Ready plus **P=0, R=1, N=2, D=3, B=4**; VAR-054/056 close the target-native B6 receiver, timing, limits, feedback and runtime anchors. VAR-057 supersedes the old low-RAM carrier assumption: the real stock startup overwrites `FEBF0000`, while **`FEBFF9F0..FEBFFBFB` (524 bytes) is live-proven retained and executable** with stock application return and zero Panda TX-block delta. Exact F33 application XCP provides the placement half of the desired production loader: packed `0x7F7/0x7F8` descriptors exist, `SET_MTA 0x82C62` + `DOWNLOAD 0x81FFE` can write arbitrary bytes throughout `FEBF7C00..FEBFFBFF`, and GET_SEED/UNLOCK are unconfigured. A target-native 22-record / 88-endpoint fixed-DMAC census has zero endpoints in the XCP window, closing the obvious recovered DMA shortcut. The tested normal bus1/ELM1 XCP route still times out. The **remaining production architecture blocker is now a safe already-running-application PC pivot into the high tail**, not carrier retention or a RAM writer. OQ-053's recovered stock pivot classes are now **statically exhausted**: computed-call/callback cells, exception returns, fixed DMAC, CTBP/INTBP/EBASE, XCP DAQ, ECUReset, RoutineControl, WDBI, BA and AB dispatch were all closed target-natively without a writable control-transfer object into the retained tail. Do not repeat broad callback/service mining as if it were still the next static discriminator. Highest-value bounded next evidence is live CONNECT-only route discovery, non-executing high-tail DOWNLOAD/readback, and a runtime-specific volatile-pivot discriminator; do not use the PROGRAMMING handoff as a normal startup design and do not guess arbitrary PC writes. Slot-4 command-5 permission/latency and stock-LTA sender/suppression characterization remain separate live gates. Production output remains disabled. Canonical baseline: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§12–13.
 
 **Development-path update (VAR-060/SECOC-074):** exact F33 persistent Gate-2 patch construction is now closed offline from a fresh bare import, not transferred from Sienna/H/F: `0x8F952 e0d1→e001`, exact image SHA `42dce8ef…d9b0e7`, stock-valid high CRC region, repaired fixup `0xD9AF33AF`, and deterministic byte-exact restore. The flash backend is also now independently pinned by exact F33 boot code plus locally retained/CMAC-validated Toyota `T-0035-22.cuw`; both prove post-halfword FSTATR **DBFULL `0x400`** pacing, correcting the prior external `0x800/SUSRDY` interpretation. This means the §13 application-mode signer pivot no longer blocks **first development lateral**. The next development gates are a zero-write live patch preflight, restore-gated APPLY + invalid-MAC causal proof, then stock-B6 off→active→off capture/source suppression and conservative first actuation. The volatile signer pivot remains the preferred production architecture and OQ-053 remains open for that purpose. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
 
-### Passive exact-F33 openpilot port — implemented, deliberately non-enabling (VAR-058)
+### Exact-F33 openpilot port — passive default + fail-closed development path (VAR-058/062)
 
-The exact Camry software side is now implemented in nested opendbc commit
+The passive baseline remains pinned at nested opendbc commit
 `ab60fd95d8a7b566e10ed1cf59738292f3498932` (parent `kai-openpilot`
 `d7d7dfd7e49961e9d35eb7a7681e8756ceee8d04`). It binds the Camry by byte-exact
 EPS F181 on the relay-correct Toyota bus-0 UDS F181 query, retains the 179-ID
 normal-harness census separately because Corolla's 147-ID TSS3 fingerprint is a
-strict subset, replays same-car `0x025/0x030/0x127/0x51E` state, constructs the
-known B6/FV46/FV4/CMAC28 candidate in shadow, and encodes the F33 static limits in
-a debug-only C helper. **Controller output is zero CAN, `0x0B6` is not whitelisted,
-and CarParams remains `SafetyModel.noOutput`; production output remains disabled.**
+strict subset, replays same-car `0x025/0x030/0x127/0x51E` state, and constructs the
+known B6/FV46/FV4/CMAC28 candidate in shadow. Ordinary TSS3 CarParams still remains
+`SafetyModel.noOutput`; without the explicit development config, controller output is zero CAN.
+
+The remaining **static first-development-lateral software work is now staged** in
+`opendbc@dde0fcf0fbaf875750c54a072b0dcb3857f8829b` /
+`kai-openpilot@15f3550365e2eee54ca5645ae9c24d9d41ae4f31`. `ToyotaTSS3DevLateral` is
+development-only and rejected on release branches. Its JSON config must supply exact
+`8965F3307000`, a stock-captured 28-byte B6 template, measured cadence, and explicit
+completed Gate-2 + exclusive-authority live attestations; the Toyota interface also rejects
+the unsplit bus-1 topology. Only then can an `ALLOW_DEBUG` Panda mode whitelist bus-0
+`0x0B6/32`, with exact-F33 ID11/±1745/+78/+1/steering-rate-100/35-ms checks. The
+development sender deliberately emits a real FV4 with zero MAC28 for the already-validated
+Gate-2 experiment, and disarms on inactivity rather than inventing OEM restart semantics.
+**Production output remains disabled.**
 
 Static F33 Tx closure also removes the need to transfer `0x351/0x394/0x4A3` wire
 geometry from H/F. **VAR-059 now also closes the F33 `0x394` classifier statically:**

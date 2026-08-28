@@ -939,7 +939,16 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   safe already-running-application control transfer into the tail.
 
   The **recovered stock pivot surface is now statically exhausted**, rather than
-  merely missing an obvious callback. The calibration-page shadow is data-only;
+  merely missing an obvious callback. CORR-123 refreshes that conclusion against
+  the current first-class 6,065-function graph: **496 decoded indirect transfers**
+  exist in total (403 `jarl` / 93 `jmp`), **487 in application CodeFlash**
+  (395 / 92). The function-owned classifier covers 495 total and **all 487
+  application sites**; among its direct target-definition references, 152 resolve
+  to CodeFlash/data, 9 to concrete lower-RAM cells, and **zero to the
+  `FEBF7C00..FEBFFBFF` XCP window**. Those lower-RAM call sources reduce to
+  `FEBF0FD0/FEBF6B04/FEBF117C/FEBF1194/FEBE5628`, all below the XCP floor and
+  closed to boot-only, fixed-CodeFlash, guarded-callback, or fixed service-table
+  semantics. The calibration-page shadow is data-only;
   the four locally unresolved computed calls resolve to guarded lower-RAM fixed-
   CodeFlash callbacks; eight exception-return paths save PCs on lower `FEBE`
   stacks; seven fixed DMAC families cover 22 records / 88 endpoint fields with

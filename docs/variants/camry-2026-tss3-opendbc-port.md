@@ -1,13 +1,15 @@
-# 2026 Camry TSS3 passive openpilot/opendbc port
+# 2026 Camry TSS3 passive + gated-development openpilot/opendbc port
 
 **Target:** maintainer 2026 Toyota Camry Hybrid, EPS application F181
 `8965F3307000 / 8A3113303100`.
 
 **Evidence boundary:** this report closes the exact-F33 generated-COM transmit geometry
-needed by the passive software port and records the implementation state. It does **not**
-authorize steering transmission. The retained Camry route has not yet observed stock B6,
-`0x351`, `0x394`, or `0x4A3` under the relay-correct stock-LTA transition required to
-promote their live policy semantics.
+needed by the software port and records both the passive default and a fail-closed
+Gate-2 development-output path. It does **not** authorize steering transmission. The
+development path cannot arm until live evidence supplies a stock B6 template/cadence,
+proves the exact-F33 Gate-2 consequence, and proves exclusive relay/source authority.
+The retained Camry route has not yet observed stock B6, `0x351`, `0x394`, or `0x4A3`
+under the relay-correct stock-LTA transition required to promote their live semantics.
 
 ## 1. Exact F33 generated-COM Tx carriers
 
@@ -157,37 +159,96 @@ The passive stack now has deterministic code for the exact known B6 contract:
 The default application template is intentionally marked `stock_validated=false`.
 No zero-filled candidate is represented as Toyota stock behavior.
 
-### 3.4 Controller and Panda remain mechanically non-enabling
+### 3.4 Passive default remains mechanically non-enabling
 
-The TSS3 controller computes a shadow B6 application and a shadow F33 safety decision for
-unit/replay inspection, but returns **zero CAN frames** on every control request.
+The ordinary TSS3 controller path still computes a shadow B6 application and F33 safety
+decision for unit/replay inspection while returning **zero CAN frames**. The platform's
+normal CarParams remains `SafetyModel.noOutput`; ordinary Toyota safety modes still do
+not whitelist `0x0B6`. This is the state whenever the explicit development configuration
+is absent, invalid, running on a release branch, bound to the wrong F181, or still on the
+normal-harness bus-1 topology.
 
-The candidate F33 C limits are compiled only with `ALLOW_DEBUG`; the helper is not called
-from `toyota_tx_hook`. `0x0B6` is absent from every Toyota TX whitelist and the platform's
-CarParams remains `SafetyModel.noOutput`. Dedicated tests assert that actual no-output
-safety rejects B6.
+## 4. Default-off exact-F33 Gate-2 development plumbing (VAR-062)
 
-The complete nested opendbc gate passed after this implementation: 4,075 executed unit
-tests passed with 719 skipped, and Ruff, type checking, codespell, cpplint, and MISRA all
-passed.
+The remaining *static software* work for the first-development-lateral path is now staged
+in nested opendbc commit
+`dde0fcf0fbaf875750c54a072b0dcb3857f8829b` (`toyota: harden F33 development freshness`)
+and parent `kai-openpilot` commit
+`15f3550365e2eee54ca5645ae9c24d9d41ae4f31` (`toyota: harden F33 development gating`).
+This does not weaken the passive default. It adds a second path that is impossible to arm
+from inferred constants alone.
 
-## 4. What remains before lateral output can be enabled
+### 4.1 Runtime configuration refuses guessed live facts
 
-This port intentionally stops before actuation. The remaining production gates are live:
+`ToyotaTSS3DevLateral` is a development-only master switch. The companion JSON param
+`ToyotaTSS3DevLateralConfig` must provide all of the following, or the car card leaves the
+platform passive:
 
-1. capture stock B6 off→active→off on a relay-correct, exact-F181 Camry and close cadence,
-   full 28-byte template behavior, sequence start/restart, and freshness behavior;
-2. prove exclusive relay/source suppression behavior for the production topology;
-3. prove application-context slot-4 command-5 generation permission plus latency/jitter
-   under normal EPS load;
-4. choose and dynamically validate conservative driver-override and motor-current-response
-   policy rather than converting representation limits into safety thresholds;
-5. observe `0x351/0x394/0x4A3` on the relevant route and correlate normal, inhibit, asserted
-   fault, and recovery transitions before public fault-policy mapping.
+- exact `f181 = 8965F3307000`; the Toyota interface independently requires the current
+  EPS CarFw entry to contain that F181 and rejects any other platform;
+- a **28-byte `b6_template_hex` obtained from the relay-correct stock-LTA capture**;
+- the measured stock `cadence_frames` (1–3 control frames, ≤30 ms, with no guessed default);
+- `gate2_bypass_validated=true` only after the live exact-F33 invalid-MAC causal proof;
+- `exclusive_b6_authority_validated=true` only after relay/source-suppression proof.
+
+The interface additionally rejects `TSS3_PT_BUS1`: development output requires the
+relay-correct bus-0 topology. Release branches reject the development master switch.
+
+### 4.2 Development sender is deliberately not a production signer
+
+After all gates above are supplied, the controller uses the existing exact-F33
+replacement-freshness machinery. The first observed stock `0x00F` is baseline only; a
+**strictly newer** epoch arms message counter 1 / application sequence 0. Active output is
+Target Lateral ID 11 only. Target angle is clamped to ±1745 raw and each emitted command
+is clamped to ±78 raw from the prior command. The 28-byte stock template is preserved
+outside recovered fields. The four-byte trailer carries the correct FV4 nibble but an
+**intentionally zero MAC28**, because this path exists only for the already-live-validated
+Gate-2 bypass experiment.
+
+On active→inactive, the controller emits **no invented OEM inactive packet**. It stops B6,
+disarms replacement freshness, and requires a newer stock sync epoch before another
+activation. That intentionally leaves exact disengage/restart packet semantics to the live
+stock capture rather than encoding a guess.
+
+### 4.3 Panda development mode is B6-only and fail-closed
+
+`ToyotaSafetyFlags.TSS3_DEV_LATERAL` exists only behind Panda `ALLOW_DEBUG`. Selecting it
+installs a dedicated TX whitelist containing exactly bus-0 `0x0B6`, DLC 32, with relay
+checking. The hook requires prior bus-0 `0x025` steering-rate and `0x00F` sync observations
+and enforces the statically recovered F33 envelope:
+
+- active Target Lateral ID exactly 11;
+- absolute target ≤1745 raw;
+- absolute steering-rate raw ≤100;
+- modulo-64 sequence exactly +1 after the first accepted command;
+- target step ≤78 raw;
+- active inter-command timeout ≤35 ms.
+
+Only a **strictly newer** stock `0x00F` epoch resets Panda's command-history
+baseline; stale or backward epochs do not. No legacy Toyota TX message is admitted by
+this development safety mode. Targeted regression coverage
+includes the existing passive/no-output path plus actual Panda hook tests; the Toyota
+safety module currently passes 283 tests with 34 skips in the local targeted gate.
+
+## 5. What remains before lateral output can actually be exercised
+
+The remaining first-actuation gates are now live, not unfinished static implementation:
+
+1. capture stock B6 off→active→off on a relay-correct, exact-F181 Camry and populate the
+   runtime 28-byte template + cadence while observing sequence/restart behavior;
+2. prove exclusive relay/source suppression behavior;
+3. complete the zero-write Gate-2 preflight, restore-gated APPLY, and invalid-MAC causal
+   B6 proof before setting `gate2_bypass_validated`;
+4. perform the bounded first steering-response experiment.
+
+Production still additionally requires an application-context authenticated signer (or an
+equivalent non-persistent architecture), conservative dynamic driver-override/current
+policy, and asserted/recovery fault-state mapping. Those values remain deliberately absent
+from the static safety model because the current corpus does not prove them.
 
 **Production output remains disabled.**
 
-## 5. Deterministic evidence
+## 6. Deterministic evidence
 
 - `data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json`
 - `data/generated/camry_8965F3307000_tss3_opendbc_port.json`
@@ -199,6 +260,6 @@ This port intentionally stops before actuation. The remaining production gates a
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061)
+- Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061), [VAR-062](../reference/index.md#finding-var-062)
 - Corrections with this document as canonical home: [CORR-120](../reference/index.md#correction-corr-120), [CORR-122](../reference/index.md#correction-corr-122)
 <!-- knowledge-cross-references:end -->

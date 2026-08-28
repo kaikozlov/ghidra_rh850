@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 333 · Corrections: 122 · Open questions: 53 · Docs: 104 · Suites: 180
+Findings: 334 · Corrections: 123 · Open questions: 53 · Docs: 104 · Suites: 180
 
 ## Reading this index
 
@@ -347,11 +347,12 @@ Findings: 333 · Corrections: 122 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="finding-var-054"></a>**VAR-054** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000.py` | — |
 | <a id="finding-var-055"></a>**VAR-055** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_camry_8965F3307000.py` | — |
 | <a id="finding-var-056"></a>**VAR-056** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [generated-artifacts](generated-artifacts.md), [CORRECTIONS](../status/CORRECTIONS.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md), [README](../../exploit/ephemeral_runtime/README.md) | `tests/verify_camry_8965F3307000.py` | — |
-| <a id="finding-var-057"></a>**VAR-057** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [sender-implementation](../security/secoc/sender-implementation.md), [PRIORITIES](../status/PRIORITIES.md), [README](../../exploit/ephemeral_runtime/README.md) | `tests/verify_camry_8965F3307000.py` | — |
+| <a id="finding-var-057"></a>**VAR-057** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [sender-implementation](../security/secoc/sender-implementation.md), [CORRECTIONS](../status/CORRECTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [README](../../exploit/ephemeral_runtime/README.md) | `tests/verify_camry_8965F3307000.py` | — |
 | <a id="finding-var-058"></a>**VAR-058** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000.py` | — |
 | <a id="finding-var-059"></a>**VAR-059** | [docs/variants/camry-2026-tss3-fault-status.md](../variants/camry-2026-tss3-fault-status.md) | [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000.py` | — |
 | <a id="finding-var-060"></a>**VAR-060** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000.py` | OQ-053 |
 | <a id="finding-var-061"></a>**VAR-061** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md), [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | `tests/verify_analysis_targets.py`, `tests/verify_camry_8965F3307000.py` | — |
+| <a id="finding-var-062"></a>**VAR-062** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | `tests/verify_camry_8965F3307000.py` | — |
 
 ## Open-questions index
 
@@ -409,7 +410,7 @@ Findings: 333 · Corrections: 122 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="open-question-oq-050"></a>**OQ-050** | Exploit-interest cohort consumption (SWEEP-008) | Tooling | SWEEP-008, SECOC-047, CORR-101 |
 | <a id="open-question-oq-051"></a>**OQ-051** | Cross-calibration structural triage of future P1M-E images | Tooling | MEM-SAFE-001 |
 | <a id="open-question-oq-052"></a>**OQ-052** | True-TSS3 longitudinal producer/control contract | Tooling | — |
-| <a id="open-question-oq-053"></a>**OQ-053** | F33 non-disruptive application-mode RAM execution pivot | Tooling | VAR-060, CORR-092 |
+| <a id="open-question-oq-053"></a>**OQ-053** | F33 non-disruptive application-mode RAM execution pivot | Tooling | VAR-060, CORR-123, CORR-092 |
 
 ## Correction index
 
@@ -537,6 +538,7 @@ Findings: 333 · Corrections: 122 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="correction-corr-120"></a>**CORR-120** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | yes |
 | <a id="correction-corr-121"></a>**CORR-121** | [docs/security/secoc/application-chain.md](../security/secoc/application-chain.md) | yes |
 | <a id="correction-corr-122"></a>**CORR-122** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | yes |
+| <a id="correction-corr-123"></a>**CORR-123** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 
 ## Document registry
 
