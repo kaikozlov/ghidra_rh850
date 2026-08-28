@@ -163612,46 +163612,6 @@
   },
   "schema": "toyota-diagnostics-registry-v3",
   "source_identity": {
-    "ABS_P5.ddb": {
-      "bytes": 200474,
-      "sha256": "a7a6e4a66025a2ef0ef98746a9d3bce606d9ea1071bb884d46bc790e5fa0faf2"
-    },
-    "A_C_P5.ddb": {
-      "bytes": 101036,
-      "sha256": "b9a76dc7d547cacd2abc1b81abd2b5e253725be8a4572b15ef9b7129c59b0b55"
-    },
-    "EMPS_P5.ddb": {
-      "bytes": 85846,
-      "sha256": "fb7933228bc2f1c5788d1f896c008c5c590ede45ec2e650c07123f94764e329e"
-    },
-    "Engine_P5.ddb": {
-      "bytes": 750536,
-      "sha256": "1f28aa3733efe8497065ba2e7423c1cf33115ee389eca249c9492b75ac240171"
-    },
-    "FRC_P5.ddb": {
-      "bytes": 86714,
-      "sha256": "57ecfef044f57709d97fe8588ea84d6045f9c555e49ef041537724a679e99fce"
-    },
-    "HV_Battery_P5.ddb": {
-      "bytes": 305996,
-      "sha256": "606cf6b3662ca3c26a9d2c5ce96321ad83abe6217b1429775e5f6c82a9ae8657"
-    },
-    "HV_P5.ddb": {
-      "bytes": 496186,
-      "sha256": "2ddb04861754fb62810275fde3b6c3663ee2af98d6029ea0c1ecff8cfa7a93ba"
-    },
-    "MG_P5.ddb": {
-      "bytes": 96438,
-      "sha256": "4b6201e1a2208fea651bde163163eac644618fc0cd60d45fc6f525556bb65ac7"
-    },
-    "M_English.ddb": {
-      "bytes": 4254372,
-      "sha256": "458a7039851fc66dc2385fff2efa910337218b8b23985b3c1afc0db7bc5f8014"
-    },
-    "Toyota.ddb": {
-      "bytes": 18967903,
-      "sha256": "f11e820968ac383a8fc5105b65322f0b9c3673df2c8dac46c9847e3d691b39b1"
-    },
     "data/generated/camry_2026_dtc_clear.json": {
       "bytes": 4539,
       "sha256": "3bf830e700823c7d1962a754c676b4d6261ae6451f8f5d44687d69e6f8907b36"
@@ -163663,6 +163623,46 @@
     "data/generated/techstream_v18/diagnostic_execution_model.json": {
       "bytes": 265352,
       "sha256": "7d8f2b4e120853523dc56d50b428f3ea12156a09d6f069341a06c68ced60df6e"
+    },
+    "gtsplus/NA/DB/Gen/ABS_P5.ddb": {
+      "bytes": 200474,
+      "sha256": "a7a6e4a66025a2ef0ef98746a9d3bce606d9ea1071bb884d46bc790e5fa0faf2"
+    },
+    "gtsplus/NA/DB/Gen/A_C_P5.ddb": {
+      "bytes": 101036,
+      "sha256": "b9a76dc7d547cacd2abc1b81abd2b5e253725be8a4572b15ef9b7129c59b0b55"
+    },
+    "gtsplus/NA/DB/Gen/EMPS_P5.ddb": {
+      "bytes": 85846,
+      "sha256": "fb7933228bc2f1c5788d1f896c008c5c590ede45ec2e650c07123f94764e329e"
+    },
+    "gtsplus/NA/DB/Gen/Engine_P5.ddb": {
+      "bytes": 750536,
+      "sha256": "1f28aa3733efe8497065ba2e7423c1cf33115ee389eca249c9492b75ac240171"
+    },
+    "gtsplus/NA/DB/Gen/FRC_P5.ddb": {
+      "bytes": 86714,
+      "sha256": "57ecfef044f57709d97fe8588ea84d6045f9c555e49ef041537724a679e99fce"
+    },
+    "gtsplus/NA/DB/Gen/HV_Battery_P5.ddb": {
+      "bytes": 305996,
+      "sha256": "606cf6b3662ca3c26a9d2c5ce96321ad83abe6217b1429775e5f6c82a9ae8657"
+    },
+    "gtsplus/NA/DB/Gen/HV_P5.ddb": {
+      "bytes": 496186,
+      "sha256": "2ddb04861754fb62810275fde3b6c3663ee2af98d6029ea0c1ecff8cfa7a93ba"
+    },
+    "gtsplus/NA/DB/Gen/MG_P5.ddb": {
+      "bytes": 96438,
+      "sha256": "4b6201e1a2208fea651bde163163eac644618fc0cd60d45fc6f525556bb65ac7"
+    },
+    "gtsplus/NA/DB/Gen/M_English.ddb": {
+      "bytes": 4254372,
+      "sha256": "458a7039851fc66dc2385fff2efa910337218b8b23985b3c1afc0db7bc5f8014"
+    },
+    "gtsplus/NA/DB/Gen/Toyota.ddb": {
+      "bytes": 18967903,
+      "sha256": "f11e820968ac383a8fc5105b65322f0b9c3673df2c8dac46c9847e3d691b39b1"
     },
     "targets/camry-2026/raw-20260826/identity.json": {
       "bytes": 1559,

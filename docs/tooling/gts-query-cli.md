@@ -333,7 +333,10 @@ it contains no runtime command to execute them, no SecurityAccess secret, no ses
 escalation policy, and no flash/write workflow. Live support state and any outer
 session/authentication requirements remain runtime questions. The generated artifact
 also records SHA-256 identities for every consumed GTS+/derived input so a changed
-corpus cannot silently reuse old plans.
+corpus cannot silently reuse old plans. Source keys are logical and checkout-independent:
+GTS inputs use `gtsplus/<region>/DB/<family>/...` while tracked evidence remains
+repository-relative, so an isolated worktree cannot change registry bytes merely because
+the corpus is mounted at a different path.
 
 ## Source selection
 

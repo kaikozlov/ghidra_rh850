@@ -2600,7 +2600,20 @@ def _registry_active_tests(
     return sorted(rows, key=lambda row: (int(row["id"]), row["kind"]))
 
 
+def _registry_source_key(path: Path, gts_root: Path) -> str:
+    """Return a checkout-independent logical identity for a registry source."""
+    resolved = path.resolve()
+    normalized_gts = gts_root.resolve()
+    normalized_repo = ROOT.resolve()
+    if resolved.is_relative_to(normalized_gts):
+        return f"gtsplus/{resolved.relative_to(normalized_gts).as_posix()}"
+    if resolved.is_relative_to(normalized_repo):
+        return resolved.relative_to(normalized_repo).as_posix()
+    raise ValueError(f"registry source is outside the repository/GTS+ roots: {resolved}")
+
+
 def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str = "Gen") -> dict[str, Any]:
+    gts_root = _resolve_gts_root(gts_root)
     db_root = _db_root(gts_root, region, family)
     parser = DDBParser()
     master_path = db_root / "Toyota.ddb"
@@ -2685,11 +2698,14 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
         },
         "catalogs": catalogs,
         "source_identity": {
-            path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else path.name: {
+            key: {
                 "bytes": path.stat().st_size,
                 "sha256": _file_sha256(path),
             }
-            for path in sorted(set(source_files), key=lambda item: str(item))
+            for key, path in sorted(
+                ((_registry_source_key(path, gts_root), path) for path in set(source_files)),
+                key=lambda item: item[0],
+            )
         },
         "boundary": (
             "Clean derived diagnostic metadata only: no Toyota binaries are embedded. Active Tests are static plans only; "

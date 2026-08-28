@@ -63,6 +63,12 @@ def main() -> int:
           })
     check("core current P5 catalogs are present",
           profile["catalog_category_ids"] == [372, 395, 397, 398, 405, 435, 450, 498])
+    source_keys = set(actual["source_identity"])
+    check("registry source identities are checkout-independent logical paths",
+          "gtsplus/NA/DB/Gen/Toyota.ddb" in source_keys
+          and "gtsplus/NA/DB/Gen/M_English.ddb" in source_keys
+          and all(not key.startswith("software/Techstream/") for key in source_keys)
+          and all("/Users/" not in key for key in source_keys))
 
     topology = profile["gts_can_topology"]
     placements = topology["placement_variants"][0]["placements"]
