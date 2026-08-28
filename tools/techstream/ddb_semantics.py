@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import struct
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any, Iterable
+from typing import Any
 
 from parse_ddb import DDBParser
 
@@ -92,14 +93,71 @@ def extract_behavior_records(section: Any) -> list[BehaviorRecord]:
     return out
 
 
-def monitor_rows(db: Any, strings: Any, source: str, *, deduplicate: bool = True) -> list[dict[str, Any]]:
+def _signal_info(db: Any, strings: Any, record: MonitorRecord) -> dict[str, Any] | None:
+    physical_section = db.sections.get(13)
+    unit_section = db.sections.get(15)
+    if physical_section is None or unit_section is None:
+        return None
+    physical = None
+    for raw in records(physical_section):
+        if len(raw) >= 0x16 and struct.unpack_from("<H", raw, 0x0C)[0] == record.physical_data_key:
+            physical = raw
+            break
+    if physical is None:
+        return None
+    unit_key = struct.unpack_from("<H", physical, 0x0E)[0]
+    unit = None
+    for raw in records(unit_section):
+        if len(raw) >= 8 and struct.unpack_from("<H", raw, 0x04)[0] == unit_key:
+            unit = raw
+            break
+    unit_text = None if unit is None else strings.get_string(struct.unpack_from("<I", unit, 0x00)[0])
+    patterns: dict[int, str | None] = {}
+    pattern_section = db.sections.get(14)
+    if pattern_section is not None and record.pattern_display_key:
+        for raw in records(pattern_section):
+            if len(raw) >= 0x0E and struct.unpack_from("<H", raw, 0x0C)[0] == record.pattern_display_key:
+                patterns[struct.unpack_from("<I", raw, 0x04)[0]] = strings.get_string(struct.unpack_from("<I", raw, 0x00)[0])
+    shift = 0x10 if len(record.raw) >= 0x50 else 0
+    data_range = [
+        struct.unpack_from("<i", record.raw, 0x10 + shift)[0],
+        struct.unpack_from("<i", record.raw, 0x0C + shift)[0],
+    ]
+    graph_range = [
+        struct.unpack_from("<i", record.raw, 0x08 + shift)[0],
+        struct.unpack_from("<i", record.raw, 0x04 + shift)[0],
+    ]
+    return {
+        "physical_data_key": record.physical_data_key,
+        "mul": struct.unpack_from("<i", physical, 0x00)[0],
+        "div": struct.unpack_from("<i", physical, 0x04)[0],
+        "offset": struct.unpack_from("<i", physical, 0x08)[0],
+        "unit_key": unit_key,
+        "unit": unit_text,
+        "signed": bool(physical[0x14]),
+        "decimal_point_count": physical[0x15],
+        "bit_width": record.bit_end - record.bit_start + 1,
+        "data_range": data_range,
+        "graph_range": graph_range,
+        "pattern_display": dict(sorted(patterns.items())),
+    }
+
+
+def monitor_rows(
+    db: Any,
+    strings: Any,
+    source: str,
+    *,
+    deduplicate: bool = True,
+    include_signal_info: bool = False,
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for table in (62, 157):
         section = db.sections.get(table)
         if section is None:
             continue
         for record in extract_monitor_records(section):
-            rows.append({
+            row = {
                 "kind": "did",
                 "source": source,
                 "table": table,
@@ -114,7 +172,10 @@ def monitor_rows(db: Any, strings: Any, source: str, *, deduplicate: bool = True
                 "primary_did": record.primary_did,
                 "alternate_did": record.alternate_did,
                 "raw": record.raw,
-            })
+            }
+            if include_signal_info:
+                row["signal_info"] = _signal_info(db, strings, record)
+            rows.append(row)
     if not deduplicate:
         return rows
     by_identity: dict[tuple[Any, ...], dict[str, Any]] = {}

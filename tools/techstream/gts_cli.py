@@ -130,7 +130,9 @@ def _without_raw(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def _monitor_rows(db: Any, strings: Any, source: str) -> list[dict[str, Any]]:
-    return _without_raw(semantic_monitor_rows(db, strings, source, deduplicate=True))
+    return _without_raw(
+        semantic_monitor_rows(db, strings, source, deduplicate=True, include_signal_info=True)
+    )
 
 
 def _dtc_rows(parser: DDBParser, db: Any, strings: Any, source: str) -> list[dict[str, Any]]:
@@ -147,7 +149,18 @@ def _format_row(row: dict[str, Any]) -> str:
         did = row.get("primary_did")
         alt = row.get("alternate_did")
         alt_text = f" alt=0x{alt:04X}" if isinstance(alt, int) and alt not in {0, did} else ""
-        return f"did\t{row['source']}\t0x{did:04X}{alt_text}\t{row.get('name') or ''}"
+        info = row.get("signal_info")
+        info_text = ""
+        if isinstance(info, dict):
+            unit = info.get("unit") or "-"
+            info_text = (
+                f"\tconv={info['mul']}/{info['div']} offset={info['offset']} "
+                f"dec={info['decimal_point_count']} signed={int(info['signed'])} "
+                f"bits={info['bit_width']} unit={unit}"
+            )
+            if info.get("pattern_display"):
+                info_text += f" patterns={len(info['pattern_display'])}"
+        return f"did\t{row['source']}\t0x{did:04X}{alt_text}\t{row.get('name') or ''}{info_text}"
     if kind == "dtc":
         return f"dtc\t{row['source']}\t{row.get('code') or row.get('packed_dtc')}\t{row.get('description') or ''}\t{row.get('failure') or ''}"
     if kind == "behavior":
@@ -606,6 +619,7 @@ def _master_command_plan(
         "timers": [],
         "response_model": None,
         "control_flow": None,
+        "metadata_model": None,
         "boundary": (
             "Frames/timers are resolved from the selected category. Executable semantics are attached only "
             "when the selected plugin SHA-256 exactly matches a recovered profile."
@@ -614,7 +628,10 @@ def _master_command_plan(
     if profile is None:
         return result
 
-    if profile_name == "role_0x52_generic_cid":
+    if profile_name == "role_0x41_p5_signal_info":
+        result["metadata_model"] = profile["metadata_model"]
+        result["semantic_status"] = "exact_plugin_identity_metadata_only"
+    elif profile_name == "role_0x52_generic_cid":
         rows = _master_frame_rows(parser, master, category_id, 0xDC)
         result["frames"]["request"] = rows[0] if len(rows) == 1 else None
         result["response_model"] = profile["response_model"]
@@ -731,6 +748,13 @@ def cmd_command(args: argparse.Namespace) -> int:
         )
     for timer in payload["timers"]:
         print(f"timer	id={timer['timer_id']}	delay_ms={timer['delay_ms']}")
+    metadata = payload["metadata_model"]
+    if metadata is not None:
+        fields = metadata["conversion_fields"]
+        print(
+            f"metadata\tphysical=table{metadata['physical_data_table']}\tunit=table{metadata['unit_table']}\t"
+            f"patterns=table{metadata['pattern_display_table']}\tfields={len(fields)}"
+        )
     response = payload["response_model"]
     if response is not None:
         print(

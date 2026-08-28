@@ -79,7 +79,13 @@ The default database is the current GTS+ `NA/DB/Gen` tree. `search`, `did`, and
   relevant (the runtime selects among those string-table contexts).
 
 Overlapping current table aliases (for example table 62 and 157 copies of the
-same Data List entry) are deduplicated for interactive output.
+same Data List entry) are deduplicated for interactive output. `did` also joins
+the current role-`0x41` signal-info metadata when type-13/14/15 tables are
+present: physical `Mul/Div/Offset`, signedness, decimal-point count, bit width,
+default unit, raw/graph ranges, and the type-14 value→display dictionary. For
+example current `EMPS_P5` DID `0x1037 Steering Angle` reports `15/1`, offset 0,
+one decimal, signed 16-bit, `deg`; `0x106A Cooperation Control State` reports
+its exact `0=Cooperation Control`, `1=Other than Cooperation Control` dictionary.
 
 ### Master DB execution model
 
@@ -115,6 +121,13 @@ $ tools/gts command EMPS_P5 0x52
 command  category=405  EMPS  role=0x52  plugin=GetCID_SID22_DT.dll  surface=direct_transport  semantics=exact_plugin_identity_and_category_frame
 request  selector=0xDC  send=22f181  expect=62f181  commset=1  timeout=1020  retries=1
 response payload_offset=4  record_size=16  names=CID1...  conversion=CP_ACP
+
+$ tools/gts command EMPS_P5 0x41
+command  category=405  EMPS  role=0x41  plugin=GetDatMonSignalInfoP5_DT.dll  surface=no_recovered_shared_transport_edge  semantics=exact_plugin_identity_metadata_only
+metadata physical=table13  unit=table15  patterns=table14  fields=10
+
+$ tools/gts did EMPS_P5 0x1037
+did      EMPS_P5.ddb  0x1037 alt=0x3037  Steering Angle  conv=15/1 offset=0 dec=1 signed=1 bits=16 unit=deg
 
 $ tools/gts category HV_P5
 category  397  Hybrid Control  db=HV_P5.ddb  generation=20

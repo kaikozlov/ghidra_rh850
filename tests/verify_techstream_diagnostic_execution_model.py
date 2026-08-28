@@ -169,8 +169,28 @@ check(
 )
 
 plugin_semantics = gts["dll_role_schema"]["plugin_semantics"]
+signal_info = plugin_semantics["role_0x41_p5_signal_info"]
 cid = plugin_semantics["role_0x52_generic_cid"]
 clear = plugin_semantics["role_0x19_dtc_clear"]
+check(
+    "current role 0x41 P5 signal-info plugin is identity-pinned and metadata-only",
+    signal_info["plugin"]["sha256"] == "3bb9b8f2738376992d312e12688739cfbaefc8f5503c7624f838a0379de20587"
+    and signal_info["example_binding"]["category_id"] == 405
+    and signal_info["example_binding"]["dll_role_id"] == 0x41
+    and signal_info["example_binding"]["dll_name"] == "GetDatMonSignalInfoP5_DT.dll"
+    and signal_info["metadata_model"]["transport"].startswith("none in this plugin")
+    and signal_info["metadata_model"]["physical_data_table"] == 13
+    and signal_info["metadata_model"]["unit_table"] == 15
+    and signal_info["metadata_model"]["pattern_display_table"] == 14,
+)
+check(
+    "current role 0x41 conversion/unit/pattern consumers are instruction-pinned",
+    signal_info["anchors"]["physical_key_lookup"]["bytes"] == "0fb7403a50ff75188d45b050680d020000ff1584400010"
+    and signal_info["anchors"]["unit_key_lookup"]["bytes"].startswith("8b45c08b8d74ffffff")
+    and signal_info["anchors"]["conversion_copies"]["bytes"].startswith("8b9574ffffff2bfe")
+    and signal_info["anchors"]["pattern_key_lookup"]["bytes"].startswith("0fb74042898578ffffff")
+    and signal_info["anchors"]["pattern_output"]["bytes"].startswith("8b8d78ffffff0fb7c1"),
+)
 check(
     "current generic role 0x52 EMPS CID route is exact F181 and current plugin identity is pinned",
     cid["plugin"]["sha256"] == "775aa63b75d8918c07a467b5e685ccae7ab3eb6c069ac9c0d5110463dd15f9c2"

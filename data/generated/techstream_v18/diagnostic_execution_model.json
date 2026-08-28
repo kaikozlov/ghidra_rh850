@@ -326,6 +326,70 @@
             "table": "CDbTimerTable"
           }
         },
+        "role_0x41_p5_signal_info": {
+          "anchors": {
+            "conversion_copies": {
+              "bytes": "8b9574ffffff2bfe8b4dc0478b040a0fb640158843458b45908b0402668b40066689436c8b040a8b008943608b040a8b40048943648b040a8b40088943688b040a8b8d70ffffff0fb6401488436e66897b70",
+              "file_offset": "0x60F",
+              "va": "0x1000120F"
+            },
+            "pattern_key_lookup": {
+              "bytes": "0fb74042898578ffffff0fb7c050ff75188d459850680e020000ff15844000108b",
+              "file_offset": "0x6B0",
+              "va": "0x100012B0"
+            },
+            "pattern_output": {
+              "bytes": "8b8d78ffffff0fb7c18d4d988945cc8b45a8568b04b08b008945e0ff1598400010508d4dd0ff15304000108b45a88d4b748b04b08b40048945e48d45c450ff1524",
+              "file_offset": "0x710",
+              "va": "0x10001310"
+            },
+            "physical_key_lookup": {
+              "bytes": "0fb7403a50ff75188d45b050680d020000ff1584400010",
+              "file_offset": "0x542",
+              "va": "0x10001142"
+            },
+            "unit_key_lookup": {
+              "bytes": "8b45c08b8d74ffffff8b04018b8d7cffffff0fb7400e50ff75188d458050680f020000ff15844000108b",
+              "file_offset": "0x592",
+              "va": "0x10001192"
+            }
+          },
+          "example_binding": {
+            "category_id": 405,
+            "dll_name": "GetDatMonSignalInfoP5_DT.dll",
+            "dll_role_hex": "0x41",
+            "dll_role_id": 65,
+            "raw": "4700650074004400610074004d006f006e005300690067006e0061006c0049006e0066006f00500035005f00440054002e0064006c006c000000000000000000000000000000000000000000000000009501000041000000"
+          },
+          "metadata_model": {
+            "cli_join": "tools/gts did enriches current monitor rows with signal_info from these exact tables",
+            "conversion_fields": {
+              "bit_width": "monitor bit_end(+0x3E) - bit_start(+0x3C) + 1 -> +0x70 (current 80-byte monitor geometry)",
+              "decimal_point_count": "CDbPhyData +0x15 -> +0x45",
+              "div": "CDbPhyData +0x04 -> +0x64",
+              "mul": "CDbPhyData +0x00 -> CCmdDatMonSignalInfo +0x60",
+              "offset": "CDbPhyData +0x08 -> +0x68",
+              "pattern_display": "monitor +0x42 key -> CDbPatDisp; value/string pairs -> display-info list at +0x74",
+              "signed": "CDbPhyData +0x14 -> +0x6E",
+              "unit_genre_id": "CDbUnit +0x06 -> +0x6C",
+              "unit_key": "CDbPhyData +0x0E -> CDbUnit lookup",
+              "unit_text": "CDbUnit::GetDefaultUnitStr -> CCmdString at +0x34"
+            },
+            "monitor_tables": [
+              62,
+              157
+            ],
+            "pattern_display_table": 14,
+            "physical_data_table": 13,
+            "transport": "none in this plugin; constructs CCmdDatMonSignalInfo metadata from DDB records",
+            "unit_table": 15
+          },
+          "plugin": {
+            "path": "bin/GetDatMonSignalInfoP5_DT.dll",
+            "sha256": "3bb9b8f2738376992d312e12688739cfbaefc8f5503c7624f838a0379de20587",
+            "size": 28176
+          }
+        },
         "role_0x52_generic_cid": {
           "anchors": {
             "chunk_size_16": {

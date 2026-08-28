@@ -395,8 +395,40 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
     bin_root = gts_root / "bin"
     cid = bin_root / "GetCID_SID22_DT.dll"
     clear = bin_root / "DelDiagCodeP4.dll"
+    signal_info = bin_root / "GetDatMonSignalInfoP5_DT.dll"
     kgp = bin_root / "KgpDataCtrl.dll"
     return {
+        "role_0x41_p5_signal_info": {
+            "plugin": file_identity(signal_info, gts_root),
+            "example_binding": dll_binding(parser, master, 405, 0x41),
+            "metadata_model": {
+                "transport": "none in this plugin; constructs CCmdDatMonSignalInfo metadata from DDB records",
+                "monitor_tables": [62, 157],
+                "physical_data_table": 13,
+                "unit_table": 15,
+                "pattern_display_table": 14,
+                "conversion_fields": {
+                    "mul": "CDbPhyData +0x00 -> CCmdDatMonSignalInfo +0x60",
+                    "div": "CDbPhyData +0x04 -> +0x64",
+                    "offset": "CDbPhyData +0x08 -> +0x68",
+                    "signed": "CDbPhyData +0x14 -> +0x6E",
+                    "decimal_point_count": "CDbPhyData +0x15 -> +0x45",
+                    "unit_key": "CDbPhyData +0x0E -> CDbUnit lookup",
+                    "unit_text": "CDbUnit::GetDefaultUnitStr -> CCmdString at +0x34",
+                    "unit_genre_id": "CDbUnit +0x06 -> +0x6C",
+                    "bit_width": "monitor bit_end(+0x3E) - bit_start(+0x3C) + 1 -> +0x70 (current 80-byte monitor geometry)",
+                    "pattern_display": "monitor +0x42 key -> CDbPatDisp; value/string pairs -> display-info list at +0x74",
+                },
+                "cli_join": "tools/gts did enriches current monitor rows with signal_info from these exact tables",
+            },
+            "anchors": {
+                "physical_key_lookup": anchor(signal_info, 0x10001142, "0fb7403a50ff75188d45b050680d020000ff1584400010"),
+                "unit_key_lookup": anchor(signal_info, 0x10001192, "8b45c08b8d74ffffff8b04018b8d7cffffff0fb7400e50ff75188d458050680f020000ff15844000108b"),
+                "conversion_copies": anchor(signal_info, 0x1000120F, "8b9574ffffff2bfe8b4dc0478b040a0fb640158843458b45908b0402668b40066689436c8b040a8b008943608b040a8b40048943648b040a8b40088943688b040a8b8d70ffffff0fb6401488436e66897b70"),
+                "pattern_key_lookup": anchor(signal_info, 0x100012B0, "0fb74042898578ffffff0fb7c050ff75188d459850680e020000ff15844000108b"),
+                "pattern_output": anchor(signal_info, 0x10001310, "8b8d78ffffff0fb7c18d4d988945cc8b45a8568b04b08b008945e0ff1598400010508d4dd0ff15304000108b45a88d4b748b04b08b40048945e48d45c450ff1524"),
+            },
+        },
         "role_0x52_generic_cid": {
             "plugin": file_identity(cid, gts_root),
             "example_binding": dll_binding(parser, master, 405, 0x52),

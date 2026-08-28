@@ -112,10 +112,12 @@ check(
 )
 emps_signal_plan = gts_cli._master_command_plan(parser, master, emps_category, 0x41, gts / "bin")
 check(
-    emps_signal_plan["semantic_status"] == "plugin_semantics_unrecovered_for_identity"
+    emps_signal_plan["semantic_status"] == "exact_plugin_identity_metadata_only"
     and emps_signal_plan["frames"] == {}
-    and emps_signal_plan["response_model"] is None,
-    "command plan does not infer selectors or parser semantics for an unrecovered plugin identity",
+    and emps_signal_plan["metadata_model"]["physical_data_table"] == 13
+    and emps_signal_plan["metadata_model"]["unit_table"] == 15
+    and emps_signal_plan["metadata_model"]["pattern_display_table"] == 14,
+    "command plan joins EMPS role 0x41 to exact current signal-info metadata semantics without inventing transport",
 )
 with tempfile.TemporaryDirectory(prefix="gts-command-hash-mismatch-") as td:
     fake_bin = Path(td)
@@ -140,6 +142,35 @@ rows_1cee = [row for row in rows if row["primary_did"] == 0x1CEE]
 names_1cee = {row["name"] for row in rows_1cee}
 check("Advanced Drive Target Steering Angle" in names_1cee, "DID 0x1CEE resolves Advanced Drive Target Steering Angle")
 check("Target Steering Angle After Output Compensation" in names_1cee, "DID 0x1CEE retains the second Toyota interpretation")
+steering = next(row for row in rows if row["monitor_key"] == 17)
+check(
+    steering["name"] == "Steering Angle"
+    and steering["primary_did"] == 0x1037
+    and steering["signal_info"] == {
+        "physical_data_key": 3,
+        "mul": 15,
+        "div": 1,
+        "offset": 0,
+        "unit_key": 46,
+        "unit": "deg",
+        "signed": True,
+        "decimal_point_count": 1,
+        "bit_width": 16,
+        "data_range": [-2048, 2047],
+        "graph_range": [-30720, 30705],
+        "pattern_display": {},
+    },
+    "current DID rows join role-0x41 physical/unit semantics for Steering Angle",
+)
+cooperation = next(row for row in rows if row["monitor_key"] == 60)
+check(
+    cooperation["signal_info"]["pattern_display"] == {
+        0: "Cooperation Control",
+        1: "Other than Cooperation Control",
+    }
+    and cooperation["signal_info"]["bit_width"] == 8,
+    "current DID rows join type-14 display dictionary for Cooperation Control State",
+)
 check(
     len({(row["name"], row["primary_did"], row["alternate_did"]) for row in rows}) == len(rows),
     "overlapping current Data List table aliases are deduplicated",
