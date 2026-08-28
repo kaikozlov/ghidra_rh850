@@ -2855,6 +2855,14 @@ ordinary UDS ReadDataByIdentifier requests:
 | `0x1912` | `22 19 12` | `62 19 12` | Set Vehicle Interval Time |
 | `0x1914` | `22 19 14` | `62 19 14` | ACC Control in Operation Flag |
 
+Current GTS+ PatternDisplay resolves the `0x1914` bit-8 flag exactly as
+**0=`Cruise Control Not in Operation`, 1=`Cruise Control in Operation`**.
+Combined with the current `0x1601` dictionary above, the strongest read-only
+Camry operating-context oracle is therefore stable `0x1601` **LTA Switch=1 / LTA
+Control=0 (Enabled)** overlapping stable `0x1914` **ACC-in-operation=1**. This
+proves Toyota's diagnostic operating context; it still does not directly measure
+continuous EPS steering torque.
+
 One host quirk is important for independent tooling: this receive worker checks the
 `0x62` service byte but does not itself compare response bytes 1/2 against the queued
 Data ID before stripping the first three bytes. A capture script should therefore be

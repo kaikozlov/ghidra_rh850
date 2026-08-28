@@ -6,18 +6,17 @@ live discriminator.  It deliberately refuses to run while ``pandad`` owns the
 Panda, avoiding the checksum/USB collision that invalidated the earlier
 parallel-reader capture.
 
-The only transmitted vehicle request is classic-CAN UDS ReadDataByIdentifier
-for FRC_P5 DID 0x1601::
+The only transmitted vehicle requests are classic-CAN UDS
+ReadDataByIdentifier for FRC_P5 DIDs 0x1601 and 0x1914::
 
     0x792  03 22 16 01 00 00 00 00
+    0x792  03 22 19 14 00 00 00 00
 
-A positive single-frame response is::
-
-    0x79A  07 62 16 01 SS LL HC HH
-
-where the four data bytes are Toyota/GTS+ ``LTA Switch Condition Flag``,
-``LTA Control Condition``, ``Hands-Off Customize Condition Flag``, and
-``Hands-Off Control Condition`` respectively.
+The first response carries Toyota/GTS+ ``LTA Switch Condition Flag``, ``LTA
+Control Condition``, ``Hands-Off Customize Condition Flag``, and ``Hands-Off
+Control Condition``. The second carries the independently named ``ACC Control
+in Operation Flag``. Alternating both gives the read-only operating-context
+oracle used by the offline discriminator.
 
 The CAN stream is stored in a compact binary format so a Python process on the
 comma can sustain the full relay-correct traffic rate without JSON/gzip work in
@@ -38,9 +37,15 @@ from typing import BinaryIO
 FRC_TX = 0x792
 FRC_RX = 0x79A
 FRC_DID = 0x1601
+ACC_OPERATION_DID = 0x1914
 ELM327_SAFETY_MODEL = 3
 ELM327_PARAM = 1
 UDS_RDBI_REQUEST = bytes.fromhex("0322160100000000")
+ACC_OPERATION_RDBI_REQUEST = bytes.fromhex("0322191400000000")
+RDBI_REQUESTS = (
+    (FRC_DID, UDS_RDBI_REQUEST),
+    (ACC_OPERATION_DID, ACC_OPERATION_RDBI_REQUEST),
+)
 CANBIN_MAGIC = b"CAMFRC1\0"
 CANBIN_HEADER = struct.Struct("<QIBB")  # monotonic_ns, address, bus, dlc
 DEFAULT_POLL_HZ = 10.0
@@ -48,6 +53,7 @@ LTA_SWITCH_LABELS = {0: "OFF", 1: "ON"}
 LTA_CONTROL_LABELS = {0: "LTA Enabled", 1: "LTA Disabled"}
 HANDS_OFF_CUSTOMIZE_LABELS = {0: "OFF", 1: "ON"}
 HANDS_OFF_CONTROL_LABELS = {0: "Hands-Off Enabled", 1: "Hands-off Disabled"}
+ACC_OPERATION_LABELS = {0: "Cruise Control Not in Operation", 1: "Cruise Control in Operation"}
 
 
 def positive_1601_payload(frame: bytes) -> bytes | None:
@@ -75,6 +81,36 @@ def parse_1601_frame(frame: bytes) -> dict | None:
     # Single-frame negative response to SID 0x22: 03 7F 22 NRC ...
     if len(frame) == 8 and frame[0] == 0x03 and frame[1:3] == b"\x7f\x22":
         return {"status": "negative", "nrc": frame[3], "raw_frame": frame.hex()}
+    return None
+
+
+def parse_1914_frame(frame: bytes) -> dict | None:
+    if len(frame) == 8 and frame[:4] == bytes.fromhex("05621914"):
+        payload = frame[4:6]
+        value = (int.from_bytes(payload, "little") >> 8) & 1
+        return {
+            "status": "positive",
+            "raw": payload.hex(),
+            "acc_control_in_operation": value,
+            "acc_control_label": ACC_OPERATION_LABELS[value],
+            "acc_in_operation_oracle": value == 1,
+        }
+    if len(frame) == 8 and frame[0] == 0x03 and frame[1:3] == b"\x7f\x22":
+        return {"status": "negative", "nrc": frame[3], "raw_frame": frame.hex()}
+    return None
+
+
+def parse_frc_response(frame: bytes) -> dict | None:
+    lta = parse_1601_frame(frame)
+    if lta is not None and lta["status"] == "positive":
+        return {"did": "0x1601", **lta}
+    acc = parse_1914_frame(frame)
+    if acc is not None and acc["status"] == "positive":
+        return {"did": "0x1914", **acc}
+    # A negative SID22 response does not echo the DID, so retain it once without
+    # guessing which of the alternating requests it belongs to.
+    if lta is not None and lta["status"] == "negative":
+        return {"did": None, **lta}
     return None
 
 
@@ -175,7 +211,7 @@ def _capture_messages(panda, can_stream: BinaryIO, oracle_stream, *, diag_bus: i
             if address == 0x0B6:
                 stats["b6_by_bus"][str(bus)] += 1
             if address == FRC_RX:
-                parsed = parse_1601_frame(data)
+                parsed = parse_frc_response(data)
                 if parsed is not None:
                     _oracle_write(oracle_stream, {
                         "type": "response",
@@ -186,8 +222,12 @@ def _capture_messages(panda, can_stream: BinaryIO, oracle_stream, *, diag_bus: i
                     })
                     if parsed["status"] == "positive":
                         stats["oracle_positive"] += 1
-                        stats["lta_control_counts"][str(parsed["lta_control_condition"])] += 1
-                        positive_buses.append(bus)
+                        stats["oracle_positive_by_did"][parsed["did"]] += 1
+                        if parsed["did"] == "0x1601":
+                            stats["lta_control_counts"][str(parsed["lta_control_condition"])] += 1
+                            positive_buses.append(bus)
+                        elif parsed["did"] == "0x1914":
+                            stats["acc_operation_counts"][str(parsed["acc_control_in_operation"])] += 1
                     else:
                         stats["oracle_negative"] += 1
         if stop_ns is not None and recv_ns >= stop_ns:
@@ -245,7 +285,9 @@ def plan() -> dict:
         "rx": f"0x{FRC_RX:03X}",
         "did": f"0x{FRC_DID:04X}",
         "request_frame": UDS_RDBI_REQUEST.hex(),
-        "poll_hz_default": DEFAULT_POLL_HZ,
+        "companion_did": f"0x{ACC_OPERATION_DID:04X}",
+        "companion_request_frame": ACC_OPERATION_RDBI_REQUEST.hex(),
+        "poll_hz_default_per_did": DEFAULT_POLL_HZ,
         "gtsplus_value_dictionary": {
             "lta_switch_condition": LTA_SWITCH_LABELS,
             "lta_control_condition": LTA_CONTROL_LABELS,
@@ -253,6 +295,11 @@ def plan() -> dict:
             "hands_off_control_condition": HANDS_OFF_CONTROL_LABELS,
         },
         "lta_enabled_oracle": "switch=ON (1) and control=LTA Enabled (0)",
+        "acc_operation_dictionary": ACC_OPERATION_LABELS,
+        "operational_context_oracle": (
+            "0x1601 switch=ON/control=LTA Enabled plus 0x1914 ACC Control in Operation=1; "
+            "this is a diagnostic operating-context oracle, not direct steering-torque proof"
+        ),
         "safety": {"model": "ELM327", "numeric": ELM327_SAFETY_MODEL, "param": ELM327_PARAM},
         "hard_guard": "refuse execution while pandad is running; one process must own Panda USB",
         "vehicle_control_tx": False,
@@ -284,7 +331,9 @@ def execute(out_dir: Path, *, diag_bus: int | None, duration_s: float | None, po
         "b6_by_bus": Counter({"0": 0, "1": 0, "2": 0}),
         "oracle_positive": 0,
         "oracle_negative": 0,
+        "oracle_positive_by_did": Counter(),
         "lta_control_counts": Counter(),
+        "acc_operation_counts": Counter(),
     }
     started_wall = time.time()
     started_ns = time.monotonic_ns()
@@ -305,8 +354,11 @@ def execute(out_dir: Path, *, diag_bus: int | None, duration_s: float | None, po
             if selected_bus not in (0, 1, 2):
                 raise RuntimeError(f"invalid selected diagnostic bus: {selected_bus}")
 
-            interval_ns = int(1e9 / poll_hz)
+            # poll_hz is per DID; alternate 0x1601 and 0x1914 so each gets the
+            # requested sampling rate without issuing two back-to-back UDS reads.
+            query_spacing_ns = int(1e9 / (poll_hz * len(RDBI_REQUESTS)))
             next_query_ns = time.monotonic_ns()
+            query_index = 0
             stop_ns = None if duration_s is None else started_ns + int(duration_s * 1e9)
             last_guard_ns = 0
             while stop_ns is None or time.monotonic_ns() < stop_ns:
@@ -316,17 +368,20 @@ def execute(out_dir: Path, *, diag_bus: int | None, duration_s: float | None, po
                         raise RuntimeError("pandad appeared during capture; aborting to protect Panda USB ownership")
                     last_guard_ns = now_ns
                 if now_ns >= next_query_ns:
-                    panda.can_send(FRC_TX, UDS_RDBI_REQUEST, selected_bus)
+                    did, request = RDBI_REQUESTS[query_index]
+                    panda.can_send(FRC_TX, request, selected_bus)
                     _oracle_write(oracle_stream, {
                         "type": "query",
                         "phase": "capture",
                         "t_ns": now_ns,
                         "bus": selected_bus,
                         "address": f"0x{FRC_TX:03X}",
-                        "request": UDS_RDBI_REQUEST.hex(),
+                        "did": f"0x{did:04X}",
+                        "request": request.hex(),
                     })
+                    query_index = (query_index + 1) % len(RDBI_REQUESTS)
                     while next_query_ns <= now_ns:
-                        next_query_ns += interval_ns
+                        next_query_ns += query_spacing_ns
                 _capture_messages(panda, can_stream, oracle_stream, diag_bus=selected_bus, stats=stats, stop_ns=stop_ns)
     except KeyboardInterrupt:
         error = "keyboard_interrupt"
@@ -349,7 +404,9 @@ def execute(out_dir: Path, *, diag_bus: int | None, duration_s: float | None, po
             "b6_by_bus": dict(stats["b6_by_bus"]),
             "oracle_positive": stats["oracle_positive"],
             "oracle_negative": stats["oracle_negative"],
+            "oracle_positive_by_did": dict(stats["oracle_positive_by_did"]),
             "lta_control_counts": dict(stats["lta_control_counts"]),
+            "acc_operation_counts": dict(stats["acc_operation_counts"]),
             "files": {"can": can_path.name, "oracle": oracle_path.name},
         }
         meta_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n")
@@ -362,7 +419,8 @@ def main() -> int:
     ap.add_argument("--out", type=Path, help="new output directory (required with --execute)")
     ap.add_argument("--diag-bus", type=int, choices=(0, 1, 2), help="skip read-only 0x1601 bus auto-probe")
     ap.add_argument("--duration", type=float, help="capture seconds; omit to run until Ctrl-C")
-    ap.add_argument("--poll-hz", type=float, default=DEFAULT_POLL_HZ)
+    ap.add_argument("--poll-hz", type=float, default=DEFAULT_POLL_HZ,
+                    help="poll rate per DID for 0x1601 and 0x1914 (default: 10 Hz each)")
     args = ap.parse_args()
     if not args.execute:
         print(json.dumps(plan(), indent=2, sort_keys=True))

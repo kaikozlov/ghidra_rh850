@@ -225,16 +225,19 @@ Provenance is in `raw-20260827/MANIFEST.txt`; deterministic interpretation is
 
 `tools/camry_frc_lta_capture.py` is the prepared read-only capture helper for the
 remaining zero-B6 discriminator. By default it only prints its plan. In execute
-mode it uses one Panda process for both full CAN reception and FRC P5 DID `0x1601`
-polling (`0x792: 03 22 16 01 00 00 00 00`), retaining the raw four condition bytes.
-The diagnostic auto-probe prefers TX bus0, then bus2, then bus1; it explicitly accepts
+mode it uses one Panda process for both full CAN reception and alternating read-only
+FRC P5 DID `0x1601` (`0x792: 03 22 16 01 00 00 00 00`) plus `0x1914`
+(`03 22 19 14 00 00 00 00`) polling. The diagnostic auto-probe prefers TX bus0,
+then bus2, then bus1; it explicitly accepts
 one response being visible on both RX0 and RX2 because those transceivers sit on the
 same closed-relay physical network after the repin.
 Current GTS+ resolves `0x1601` as LTA Switch `0=OFF/1=ON`, LTA Control
 `0=LTA Enabled/1=LTA Disabled`, Hands-Off Customize `0=OFF/1=ON`, and Hands-Off
 Control `0=Enabled/1=Disabled`. The discriminator therefore treats **switch=1 +
 LTA-control=0** as the exact OEM-named LTA-enabled diagnostic state; it does not
-rename that state to continuous steering actuation.
+rename that state to continuous steering actuation. `0x1914` independently resolves
+bit8 as `0=Cruise Control Not in Operation` / `1=Cruise Control in Operation`; the
+strong operating-context discriminator requires stable LTA-enabled + `0x1914=1` overlap.
 
 The helper deliberately **refuses to run while `pandad` is present** and keeps a
 runtime watchdog for it. This is required because the 2026-08-27 parallel direct-
@@ -252,5 +255,8 @@ DataFlash write. A live artifact is not claimed until this helper is actually ru
 on the exact car and the resulting files are promoted with provenance.
 `tools/analyze_camry_frc_lta_capture.py CAPTURE_DIR` then classifies CAN only between
 two consecutive equal positive `0x1601` samples, leaving transitions and large oracle
-gaps unclassified. It reports stable LTA-enabled duration, B6 count during those stable
-intervals, the protected Bus-4 control carriers, and the bus-1 upstream ID/DLC census.
+gaps unclassified. It reports stable LTA-enabled duration, stable overlap with ACC-in-operation,
+wheel-speed evidence during that overlap, B6 count, protected Bus-4 control carriers,
+and the bus-1 upstream ID/DLC census. Its `strong_zero_b6_operating_context` flag is true
+only when the stable combined oracle overlaps motion and healthy `0x00F/0x0D7` traffic
+while B6 remains absent.

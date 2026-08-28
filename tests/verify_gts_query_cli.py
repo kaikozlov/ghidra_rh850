@@ -203,6 +203,15 @@ check(
     and frc_1601["Hands-Off Control Condition"]["signal_info"]["pattern_display"] == {0: "Hands-Off Enabled", 1: "Hands-off Disabled"},
     "current FRC DID 0x1601 exposes exact LTA/Hands-Off value dictionaries",
 )
+frc_1914 = next(row for row in frc_rows if row["primary_did"] == 0x1914 and row["name"] == "ACC Control in Operation Flag")
+check(
+    [frc_1914["bit_start"], frc_1914["bit_end"]] == [8, 8]
+    and frc_1914["signal_info"]["pattern_display"] == {
+        0: "Cruise Control Not in Operation",
+        1: "Cruise Control in Operation",
+    },
+    "current FRC DID 0x1914 exposes exact ACC-in-operation dictionary",
+)
 cooperation = next(row for row in rows if row["monitor_key"] == 60)
 check(
     cooperation["signal_info"]["pattern_display"] == {

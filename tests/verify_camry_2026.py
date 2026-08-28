@@ -486,9 +486,11 @@ def _section_camry_frc_lta_capture_tool():
     p = cap.plan()
     check('FRC LTA tool is read-only and pins exact 1601 request',
           p['tx'] == '0x792' and p['rx'] == '0x79A' and p['did'] == '0x1601' and
-          p['request_frame'] == '0322160100000000' and p['vehicle_control_tx'] is False and
+          p['request_frame'] == '0322160100000000' and p['companion_did'] == '0x1914' and
+          p['companion_request_frame'] == '0322191400000000' and p['vehicle_control_tx'] is False and
           p['flash_write'] is False and p['security_access'] is False and p['routine_control'] is False and
-          p['gtsplus_value_dictionary']['lta_control_condition'] == {0: 'LTA Enabled', 1: 'LTA Disabled'})
+          p['gtsplus_value_dictionary']['lta_control_condition'] == {0: 'LTA Enabled', 1: 'LTA Disabled'} and
+          p['acc_operation_dictionary'] == {0: 'Cruise Control Not in Operation', 1: 'Cruise Control in Operation'})
     parsed = cap.parse_1601_frame(bytes.fromhex('0762160101020304'))
     check('FRC 1601 positive response maps exact four GTS+ condition bytes', parsed == {
         'status': 'positive', 'raw': '01020304', 'lta_switch_condition': 1,
@@ -500,6 +502,10 @@ def _section_camry_frc_lta_capture_tool():
     check('FRC 1601 negative response is retained without decoding state',
           cap.parse_1601_frame(bytes.fromhex('037f223100000000')) == {
               'status': 'negative', 'nrc': 0x31, 'raw_frame': '037f223100000000'})
+    check('FRC 1914 response maps exact ACC-in-operation bit and OEM label',
+          cap.parse_1914_frame(bytes.fromhex('0562191480010000')) == {
+              'status': 'positive', 'raw': '8001', 'acc_control_in_operation': 1,
+              'acc_control_label': 'Cruise Control in Operation', 'acc_in_operation_oracle': True})
     buf = io.BytesIO()
     cap.write_canbin_header(buf)
     cap.write_canbin_record(buf, 123, 0, 0x0B6, bytes(range(32)))
@@ -527,7 +533,8 @@ def _section_camry_frc_lta_capture_tool():
     probe_stats = {
         'frames_by_bus': Counter({'0':0,'1':0,'2':0}),
         'b6_by_bus': Counter({'0':0,'1':0,'2':0}),
-        'oracle_positive': 0, 'oracle_negative': 0, 'lta_control_counts': Counter(),
+        'oracle_positive': 0, 'oracle_negative': 0, 'oracle_positive_by_did': Counter(),
+        'lta_control_counts': Counter(), 'acc_operation_counts': Counter(),
     }
     selected = cap.auto_probe_diag_bus(fake, probe_can, probe_oracle, probe_stats, wait_s=0.002)
     check('relay-aware 1601 probe selects TX bus0 even when one response is visible on RX0+RX2',
@@ -540,35 +547,44 @@ def _section_camry_frc_lta_capture_tool():
             'files': {'can': 'can.bin', 'oracle': 'oracle.ndjson'},
         }))
         oracle_rows = [
-            {'type':'response','status':'positive','t_ns':1_000_000_000,'raw':'01000000',
+            {'type':'response','status':'positive','did':'0x1601','t_ns':1_000_000_000,'raw':'01000000',
              'lta_switch_condition':1,'lta_control_condition':0,'hands_off_customize_condition':0,
              'hands_off_control_condition':0,'lta_switch_label':'ON','lta_control_label':'LTA Enabled',
              'hands_off_customize_label':'OFF','hands_off_control_label':'Hands-Off Enabled','lta_enabled_oracle':True},
-            {'type':'response','status':'positive','t_ns':1_100_000_000,'raw':'01000000',
+            {'type':'response','status':'positive','did':'0x1914','t_ns':1_010_000_000,'raw':'8001',
+             'acc_control_in_operation':1,'acc_control_label':'Cruise Control in Operation','acc_in_operation_oracle':True},
+            {'type':'response','status':'positive','did':'0x1601','t_ns':1_100_000_000,'raw':'01000000',
              'lta_switch_condition':1,'lta_control_condition':0,'hands_off_customize_condition':0,
              'hands_off_control_condition':0,'lta_switch_label':'ON','lta_control_label':'LTA Enabled',
              'hands_off_customize_label':'OFF','hands_off_control_label':'Hands-Off Enabled','lta_enabled_oracle':True},
-            {'type':'response','status':'positive','t_ns':1_200_000_000,'raw':'01010000',
+            {'type':'response','status':'positive','did':'0x1914','t_ns':1_110_000_000,'raw':'8001',
+             'acc_control_in_operation':1,'acc_control_label':'Cruise Control in Operation','acc_in_operation_oracle':True},
+            {'type':'response','status':'positive','did':'0x1601','t_ns':1_200_000_000,'raw':'01010000',
              'lta_switch_condition':1,'lta_control_condition':1,'hands_off_customize_condition':0,
              'hands_off_control_condition':0,'lta_switch_label':'ON','lta_control_label':'LTA Disabled',
              'hands_off_customize_label':'OFF','hands_off_control_label':'Hands-Off Enabled','lta_enabled_oracle':False},
         ]
         oracle_rows.insert(1, oracle_rows[0] | {'bus': 2})
+        oracle_rows.insert(3, oracle_rows[2] | {'bus': 2})
         (capture / 'oracle.ndjson').write_text(''.join(json.dumps(row) + '\n' for row in oracle_rows))
         with (capture / 'can.bin').open('wb') as stream:
             cap.write_canbin_header(stream)
+            cap.write_canbin_record(stream, 1_020_000_000, 0, 0x00F, bytes(8))
+            cap.write_canbin_record(stream, 1_030_000_000, 0, 0x0D7, bytes(32))
+            cap.write_canbin_record(stream, 1_040_000_000, 0, 0x0AA, bytes.fromhex('1e571e571e571e57'))
             cap.write_canbin_record(stream, 1_050_000_000, 0, 0x030, bytes(32))
-            cap.write_canbin_record(stream, 1_060_000_000, 0, 0x0D7, bytes(32))
             cap.write_canbin_record(stream, 1_070_000_000, 1, 0x18A, bytes(64))
         summary = analyze.analyze(capture)
-        check('offline analyzer attributes only stable equal-state oracle intervals',
-              summary['oracle']['positive_sample_count'] == 3 and
-              summary['oracle']['stable_lta_enabled_duration_s'] == 0.1 and
-              summary['can']['selected_counts']['enabled']['bus0:0x030/32'] == 1 and
-              summary['can']['selected_counts']['enabled']['bus0:0x0D7/32'] == 1 and
-              summary['can']['b6_during_stable_lta_enabled'] == 0 and
-              summary['discriminator']['stable_lta_enabled_interval_observed'] is True and
-              summary['discriminator']['b6_observed_during_stable_lta_enabled'] is False)
+        check('offline analyzer intersects stable LTA-enabled + ACC-operating oracle intervals',
+              summary['oracle']['lta_0x1601']['positive_sample_count'] == 3 and
+              summary['oracle']['acc_0x1914']['positive_sample_count'] == 2 and
+              summary['oracle']['lta_0x1601']['stable_lta_enabled_duration_s'] == 0.1 and
+              abs(summary['oracle']['combined_operating_context']['stable_lta_enabled_plus_acc_operating_duration_s'] - 0.09) < 1e-9 and
+              summary['can']['operating_context_selected_counts']['operational']['bus0:0x030/32'] == 1 and
+              summary['can']['operating_context_selected_counts']['operational']['bus0:0x0D7/32'] == 1 and
+              summary['can']['b6_during_stable_lta_enabled_plus_acc_operating'] == 0 and
+              summary['can']['wheel_speed_kph_during_operating_context']['moving_over_2kph_sample_count'] == 1 and
+              summary['discriminator']['strong_zero_b6_operating_context'] is True)
     check('pandad process guard recognizes manager Python module and native process forms',
           cap.cmdline_is_pandad('/usr/bin/python3 -m openpilot.selfdrive.pandad.pandad') and
           cap.cmdline_is_pandad('/data/openpilot/openpilot/selfdrive/pandad/pandad') and

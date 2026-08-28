@@ -250,9 +250,11 @@ active state** synchronized to that relay-correct CAN. Highest-value next captur
 FRC P5 `0x1601`, whose current GTS+ dictionary makes the exact enabled-state oracle
 **LTA Switch=1 (ON) + LTA Control=0 (LTA Enabled)** (`1=LTA Disabled`; Hands-Off occupies
 the upper two bytes), with `0x1501` LDA, `0x1681` LCA, and `0x1903` Control Mode as
-companions. This is an OEM-named diagnostic control state, not by itself proof of
-continuous steering torque. Only after that synchronized oracle should the B6 template
-assumption be kept or challenged. Exclusive source suppression, slot-4 command-5 generation
+companions. Add FRC `0x1914`, whose current dictionary gives **1=“Cruise Control in
+Operation”**. The strong discriminator is stable 1601 LTA-enabled + 1914 ACC-operating
+overlap with vehicle motion and healthy Bus-4 `00F/D7`; this remains an OEM-named
+operating context, not direct steering-torque measurement. Only after that synchronized
+oracle should the B6 template assumption be kept or challenged. Exclusive source suppression, slot-4 command-5 generation
 permission plus latency/contention, and normal/asserted/recovery correlations for the
 F33 status carriers remain live work. Driver override and current-response thresholds
 remain policy choices requiring conservative dynamic validation, not values to infer
@@ -290,8 +292,9 @@ steering/chassis family moved onto CAN0/CAN2 while the 22-ID camera/radar FD fam
 to logical bus1, matching Toyota's Bus4/Bus1 split. The relay pair is therefore already
 the B6-capable Brake/EPS network. Do not spend another pass swapping Panda buses or
 inventing a second EPS CAN port; the remaining discriminator is **stock operating state**:
-synchronize FRC `0x1601` and require the exact **Switch=1 / LTA-Control=0 (Enabled)**
-state against the existing relay-correct capture.
+synchronize FRC `0x1601` **Switch=1 / LTA-Control=0 (Enabled)** plus `0x1914=1`
+**Cruise Control in Operation**, motion, and healthy Bus-4 protected traffic against the
+existing relay-correct capture.
 
 COM-013 closes much more of the whole-vehicle side than the earlier EPS-only
 roadmap. TSS generation and SecOC/TSK are **orthogonal** (CORR-108). The public
@@ -353,8 +356,8 @@ failure-forwarding mode: while `FEBE5408 < 204` (or the separate global D2 overr
 is active), freshness-hard-failed or retry-exhausted CMAC-failed B6 can still reach
 COM without committing freshness. Deterministic production control therefore
 requires exclusive B6 authority. VAR-063 now shows no stock B6 in two relay-correct
-drives, so the next live step is to prove a stable OEM-named LTA-enabled interval with FRC `0x1601`
-(Switch=1 / LTA-Control=0);
+drives, so the next live step is to prove a stable OEM-named operating interval with FRC `0x1601`
+(Switch=1 / LTA-Control=0) overlapping `0x1914=1` ACC operation and motion;
 only if B6 appears in that synchronized interval is a physical stock suppression point
 needed. Racing two streams remains unacceptable. Current Toyota safety assumes checked state on logical bus 0; direct
 diagnostic/passive observation on bus 1 is not itself the production relay topology.
