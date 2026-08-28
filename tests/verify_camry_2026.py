@@ -417,7 +417,7 @@ def _section_camry_2026_dtc_clear():
     check('current GTS+ DelDiagCodeP4 exact identity', gts_dll.stat().st_size == 23568 and sha(gts_dll) == '8e52d52f860b5fbddcaf178bdbbfcf1e310c1a57e418cee840725f95d18d4e00')
     bound = {(r.category_id, r.dll_role_id, r.dll_name) for r in parser.extract_master_dlls(gts_master.sections[19])}
     for cat in (372, 395, 397, 398, 435):
-        check(f'current GTS+ category {cat} binds DelDiagCodeP4 role 0', (cat, 0, 'DelDiagCodeP4.dll') in bound)
+        check(f'current GTS+ category {cat} binds DelDiagCodeP4 role 0x19', (cat, 25, 'DelDiagCodeP4.dll') in bound)
 
     def rows(section):
         size = section.decoded_record_size

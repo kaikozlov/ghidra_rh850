@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 337 · Corrections: 124 · Open questions: 53 · Docs: 104 · Suites: 181
+Findings: 338 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 182
 
 ## Reading this index
 
@@ -291,6 +291,7 @@ Findings: 337 · Corrections: 124 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="finding-tms-058"></a>**TMS-058** | [docs/variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) | [toyota-openpilot-porting-contract](../architecture/toyota-openpilot-porting-contract.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_corolla_hf.py` | OQ-030 |
 | <a id="finding-tms-059"></a>**TMS-059** | [docs/variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) | [toyota-openpilot-porting-contract](../architecture/toyota-openpilot-porting-contract.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_corolla_hf.py` | OQ-030 |
 | <a id="finding-tms-060"></a>**TMS-060** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [README](../tooling/README.md) | `tests/verify_camry_8965F3307000_gtsplus_semantics.py` | — |
+| <a id="finding-tms-061"></a>**TMS-061** | [docs/tooling/techstream.md](../tooling/techstream.md) | — | `tests/verify_techstream_diagnostic_execution_model.py` | — |
 | <a id="finding-var-001"></a>**VAR-001** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md) | `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-002"></a>**VAR-002** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_spanconstant_corolla_equivalence.py`, `tests/verify_spanconstant_corolla_cross_variant.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-003"></a>**VAR-003** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
@@ -354,7 +355,7 @@ Findings: 337 · Corrections: 124 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="finding-var-061"></a>**VAR-061** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md), [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | `tests/verify_analysis_targets.py`, `tests/verify_camry_8965F3307000.py` | — |
 | <a id="finding-var-062"></a>**VAR-062** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | `tests/verify_camry_8965F3307000.py` | — |
 | <a id="finding-var-063"></a>**VAR-063** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_2026.py` | — |
-| <a id="finding-var-064"></a>**VAR-064** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md), [docs/tooling/techstream.md](../tooling/techstream.md) | — | `tests/verify_camry_2026.py` | — |
+| <a id="finding-var-064"></a>**VAR-064** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md), [docs/tooling/techstream.md](../tooling/techstream.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_2026.py` | — |
 | <a id="finding-var-065"></a>**VAR-065** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000_external_lateral_ingress.py` | — |
 
 ## Open-questions index
@@ -543,6 +544,7 @@ Findings: 337 · Corrections: 124 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="correction-corr-122"></a>**CORR-122** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | yes |
 | <a id="correction-corr-123"></a>**CORR-123** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 | <a id="correction-corr-124"></a>**CORR-124** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
+| <a id="correction-corr-125"></a>**CORR-125** | [docs/tooling/techstream.md](../tooling/techstream.md), [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 
 ## Document registry
 
@@ -631,7 +633,7 @@ Every tracked document under `docs/` with its owning suite(s) and gate tests.
 | [docs/tooling/secoc-semantic-patch-resolver.md](../tooling/secoc-semantic-patch-resolver.md) | doc_links, secoc_semantic_patch_resolver, albinoelephant_corolla_codeflash, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_secoc_semantic_patch_resolver.py`, `tests/verify_albinoelephant_corolla_codeflash.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/techstream-capture-procedure.md](../tooling/techstream-capture-procedure.md) | doc_links, target_artifact_manifest, techstream_pre_gts_static_closure, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_target_artifact_manifest.py`, `tests/verify_sienna_8965B4512000_techstream_did_semantics.py`, `tests/verify_techstream_cuw_calibration_schema.py`, `tests/verify_techstream_cuw_timing_recovery.py`, `tests/verify_techstream_cuw_writer_family_matrix.py`, `tests/verify_techstream_cuw_writer_protocol_grammar.py`, `tests/verify_techstream_rks_client_state.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/techstream-ddb-pipeline.md](../tooling/techstream-ddb-pipeline.md) | doc_links, diagnostic_vocabulary, application_interface_correlation, techstream_ddb_residuals, techstream_master_routes, techstream_priority_ddb_semantics, techstream_dtc_failure_types, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_diagnostic_vocabulary.py`, `tests/verify_application_interface_correlations.py`, `tests/verify_techstream_ddb_residuals.py`, `tests/verify_techstream_master_routes.py`, `tests/verify_techstream_priority_ddb_semantics.py`, `tests/verify_techstream_dtc_failure_types.py`, `tests/verify_knowledge_index.py` |
-| [docs/tooling/techstream.md](../tooling/techstream.md) | doc_links, tss3_cruise_live_transport_external, techstream_rks, techstream_ptshim, techstream_mackey, techstream_crypto_inventory, techstream_layerb, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_tss3_cruise_live_transport_external.py`, `tests/verify_techstream_rks.py`, `tests/verify_techstream_ptshim.py`, `tests/verify_techstream_mackey.py`, `tests/verify_techstream_crypto_inventory.py`, `tests/verify_techstream_layerb.py`, `tests/verify_knowledge_index.py` |
+| [docs/tooling/techstream.md](../tooling/techstream.md) | doc_links, tss3_cruise_live_transport_external, techstream_rks, techstream_ptshim, techstream_diagnostic_execution_model, techstream_mackey, techstream_crypto_inventory, techstream_layerb, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_tss3_cruise_live_transport_external.py`, `tests/verify_techstream_rks.py`, `tests/verify_techstream_ptshim.py`, `tests/verify_techstream_diagnostic_execution_model.py`, `tests/verify_techstream_mackey.py`, `tests/verify_techstream_crypto_inventory.py`, `tests/verify_techstream_layerb.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/toyota-dataflash-analysis.md](../tooling/toyota-dataflash-analysis.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/variant-acquisition-readiness.md](../tooling/variant-acquisition-readiness.md) | doc_links, variant_acquisition_readiness, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_variant_acquisition_readiness.py`, `tests/verify_knowledge_index.py` |
 | [docs/variants/README.md](../variants/README.md) | doc_links, camry_8965f3307000_fault_status, camry_8965f3307000_application_ram_loader, corolla_pre_tss3_message_comparison, corolla_h, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_camry_8965F3307000.py`, `tests/verify_corolla_pre_tss3_message_comparison.py`, `tests/verify_corolla_h.py`, `tests/verify_knowledge_index.py` |
@@ -846,6 +848,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/techstream_v18/cuw_writer_inventory.json` | diagnostic_vocabulary, techstream_cuw_writer_routes, techstream_pre_gts_static_closure | — |
 | `data/generated/techstream_v18/cuw_writer_protocol_grammar.json` | diagnostic_vocabulary, techstream_pre_gts_static_closure | — |
 | `data/generated/techstream_v18/ddb_factory_table_map.json` | diagnostic_vocabulary, techstream_ddb_residuals, techstream_p5_lateral_control | — |
+| `data/generated/techstream_v18/diagnostic_execution_model.json` | diagnostic_vocabulary, techstream_diagnostic_execution_model | — |
 | `data/generated/techstream_v18/dtc_failure_types.json` | diagnostic_vocabulary, techstream_dtc_failure_types | — |
 | `data/generated/techstream_v18/mackey_state_machine.csv` | diagnostic_vocabulary, techstream_mackey | — |
 | `data/generated/techstream_v18/mackey_vehicle_protocol.json` | diagnostic_vocabulary, techstream_mackey | — |

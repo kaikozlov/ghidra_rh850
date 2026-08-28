@@ -21,6 +21,13 @@ tools/gts search 'Missing Message' --ecu EMPS_P5 --kind dtc
 tools/gts search 0x1CEE --ecu EMPS_P5 --kind did
 
 tools/gts ecu EMPS_P5
+tools/gts role
+tools/gts role 0x19
+tools/gts commset
+tools/gts commset 1
+tools/gts category HV_P5
+tools/gts frame 397 0x01
+tools/gts frame HV_P5 0x102
 tools/gts did EMPS_P5 steering
 tools/gts did EMPS_P5 0x1CEE
 tools/gts dtc EMPS_P5 U012987
@@ -59,6 +66,50 @@ The default database is the current GTS+ `NA/DB/Gen` tree. `search`, `did`, and
 
 Overlapping current table aliases (for example table 62 and 157 copies of the
 same Data List entry) are deduplicated for interactive output.
+
+### Master DB execution model
+
+`role`, `commset`, `category`, and `frame` expose the means-based diagnostic execution model recovered
+from Techstream/GTS+ rather than another endpoint-specific lookup. The current
+master contains **6,194 category/plugin bindings but only 191 logical DLL roles**;
+`role` aggregates that vocabulary globally so one command family can be studied
+across every ECU generation that uses it. For example, role `0x19` has 536
+bindings and is dominated by `DelDiagCodeP4.dll` (424) plus the P6 equivalent
+(106). `category`
+resolves a master ECU category by numeric ID or an unambiguous database/name key
+and shows its `CDbDllTable` plugin-role bindings plus function IDs. `frame`
+resolves `CDbFuncCommFrameTable` selector operands through `CDbCommFrameTable`
+and `CDbVariableTable` to the exact current GTS+ send / receive-mask /
+receive-check bytes. `commset` decodes master type-29 `CDbComSetTable`, including
+the proven receive-timeout and retry fields used by the shared runtime:
+
+```text
+$ tools/gts category HV_P5
+category  397  Hybrid Control  db=HV_P5.ddb  generation=20
+...
+0x19      DelDiagCodeP4.dll
+
+$ tools/gts commset 1
+commset  1  send_parameter=1000  receive_timeout=1020  retries=1  exception_id=0  exception_flag=0  unknown_0c=0
+
+$ tools/gts frame 397 0x1
+frame  category=397  selector=0x1  comm_set=1  frame=0x279E  rcv_timeout=1020  retries=1  send=04  mask=  check=44
+```
+
+Current GTS+ namespaces base-variable references above `0x2710`; the CLI follows
+`CDbVariableTable::GetVariable` and subtracts `0x2710` before the unchanged
+1-based offset/length lookup. Thus current IDs such as `0x2743` and `0x28F7`
+resolve to logical variables `0x33` and `0x1E7` rather than being mistaken for
+out-of-range table indices. CommSet dword `+0x00` is intentionally exposed as
+`send_parameter`: it reaches `SendInt` argument 4, but the common CAN `SendProc`
+does not consume that argument, so the CLI does not invent a timeout/unit label.
+The current type-19 DLL-role layout is likewise
+version-aware (`u16 +0x54`, not V18's `u8 +0x56`).
+
+OEM display names can legitimately be ambiguous across diagnostic generations
+(e.g. multiple P3/P4/P5 categories named `Hybrid Control`); the CLI refuses such
+a query instead of silently choosing one. Use category `397` or database key
+`HV_P5` when the generation matters.
 
 ### CUW -> current writer route
 

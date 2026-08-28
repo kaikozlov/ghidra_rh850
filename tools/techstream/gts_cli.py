@@ -13,8 +13,9 @@ import json
 import re
 import struct
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import pefile
 
@@ -22,16 +23,25 @@ ROOT = Path(__file__).resolve().parents[2]
 TECHSTREAM_TOOLS = ROOT / "tools" / "techstream"
 sys.path.insert(0, str(TECHSTREAM_TOOLS))
 
-from cuw_parameter import factory_routes_from_ini_root  # noqa: E402
-from cuw_attach import parse_attach_bytes  # noqa: E402
-from parse_cuw_container import first_member_payload, parse as parse_cuw_container, read_first_member  # noqa: E402
-from parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES, StringDataBase  # noqa: E402
-from ddb_semantics import behavior_rows as semantic_behavior_rows, dtc_rows as semantic_dtc_rows, monitor_rows as semantic_monitor_rows  # noqa: E402
-from ddb_strings import load_string_db as cached_string_db  # noqa: E402
-from pe_utils import binary_strings as pe_binary_strings, exports as pe_exports, imports as pe_imports  # noqa: E402
-from techstream_paths import (  # noqa: E402
-    GTSPLUS_EXTERNAL_ROOT, CUW_CORPUS_ROOT, gts_db_root,
-    resolve_cuw_corpus, resolve_cuwplus_root, resolve_gts_root,
+from cuw_attach import parse_attach_bytes
+from cuw_parameter import factory_routes_from_ini_root
+from ddb_semantics import behavior_rows as semantic_behavior_rows
+from ddb_semantics import dtc_rows as semantic_dtc_rows
+from ddb_semantics import monitor_rows as semantic_monitor_rows
+from ddb_strings import load_string_db as cached_string_db
+from parse_cuw_container import first_member_payload, read_first_member
+from parse_cuw_container import parse as parse_cuw_container
+from parse_ddb import ECU_TABLE_CLASS_NAMES, DDBParser, StringDataBase
+from pe_utils import binary_strings as pe_binary_strings
+from pe_utils import exports as pe_exports
+from pe_utils import imports as pe_imports
+from techstream_paths import (
+    CUW_CORPUS_ROOT,
+    GTSPLUS_EXTERNAL_ROOT,
+    gts_db_root,
+    resolve_cuw_corpus,
+    resolve_cuwplus_root,
+    resolve_gts_root,
 )
 
 DEFAULT_GTS_EXTERNAL = GTSPLUS_EXTERNAL_ROOT
@@ -147,6 +157,14 @@ def _format_row(row: dict[str, Any]) -> str:
         return (
             f"route\t{row.get('contact_type','')}\t{row.get('cid_getter','')}\t"
             f"{row.get('prepare_writer','')}\t{row.get('flash_writer','')}\t{row.get('parameter_file','')}"
+        )
+    if kind == "frame":
+        return (
+            f"frame\tcategory={row['category_id']}\tselector={row['selector']}\t"
+            f"comm_set={row['comm_set']}\tframe={row['comm_frame_id']}\t"
+            f"rcv_timeout={row['comm_set_metadata']['receive_timeout']}\t"
+            f"retries={row['comm_set_metadata']['retry_count']}\t"
+            f"send={row['send']['bytes']}\tmask={row['receive_mask']['bytes']}\tcheck={row['receive_check']['bytes']}"
         )
     if kind == "cuw":
         return f"cuw\t{row.get('source','')}\t{row.get('vehicle','')}\t{row.get('contact_type','')}\t{row.get('new_cids','')}"
@@ -371,6 +389,295 @@ def cmd_route(args: argparse.Namespace) -> int:
     rows = _route_rows(_resolve_cuwplus_root(gts, args.cuwplus_root))
     if args.query:
         rows = [row for row in rows if _route_match(args.query, row)]
+    _print_rows(rows, as_json=args.json, limit=args.limit)
+    return 0
+
+
+
+def _parse_master_key(value: str) -> int | None:
+    try:
+        return int(value, 0)
+    except ValueError:
+        return None
+
+
+def _master_category_rows(parser: DDBParser, master: Any, strings: StringDataBase) -> list[dict[str, Any]]:
+    return [
+        {
+            "category_id": entry.category_id,
+            "generation": entry.generation,
+            "database": entry.database_name,
+            "short_name": entry.ecu_short_name,
+            "name": strings.get_string(entry.ecu_name_string_index) or "",
+        }
+        for entry in parser.extract_master_ecu_categories(master.sections[16])
+    ]
+
+
+def _resolve_master_category(parser: DDBParser, master: Any, strings: StringDataBase, query: str) -> dict[str, Any]:
+    rows = _master_category_rows(parser, master, strings)
+    numeric = _parse_master_key(query)
+    if numeric is not None:
+        matches = [row for row in rows if row["category_id"] == numeric]
+    else:
+        exact = [
+            row for row in rows
+            if query.casefold() in {
+                row["database"].casefold(),
+                Path(row["database"]).stem.casefold(),
+                row["short_name"].casefold(),
+                row["name"].casefold(),
+            }
+        ]
+        matches = exact or [
+            row for row in rows
+            if _fold_match(query, row["database"], row["short_name"], row["name"])
+        ]
+    if not matches:
+        raise SystemExit(f"no Toyota master ECU category matches {query!r}")
+    category_ids = {row["category_id"] for row in matches}
+    if len(category_ids) != 1:
+        summary = "\n".join(
+            f"  {row['category_id']}\t{row['database']}\t{row['name']}"
+            for row in matches[:40]
+        )
+        raise SystemExit(f"ambiguous Toyota master ECU category {query!r}; matches:\n{summary}")
+    return matches[0]
+
+
+def _master_role_catalog(parser: DDBParser, master: Any) -> list[dict[str, Any]]:
+    by_role: dict[int, list[Any]] = {}
+    for entry in parser.extract_master_dlls(master.sections[19]):
+        by_role.setdefault(entry.dll_role_id, []).append(entry)
+    rows = []
+    for role, entries in by_role.items():
+        plugin_counts: dict[str, int] = {}
+        for entry in entries:
+            plugin_counts[entry.dll_name] = plugin_counts.get(entry.dll_name, 0) + 1
+        plugins = [
+            {"dll": dll, "binding_count": count}
+            for dll, count in sorted(plugin_counts.items(), key=lambda item: (-item[1], item[0].casefold()))
+        ]
+        rows.append({
+            "role": role,
+            "role_hex": f"0x{role:X}",
+            "binding_count": len(entries),
+            "category_count": len({entry.category_id for entry in entries}),
+            "plugins": plugins,
+        })
+    return sorted(rows, key=lambda row: (-row["binding_count"], row["role"]))
+
+
+def _master_plugins(parser: DDBParser, master: Any, category_id: int) -> list[dict[str, Any]]:
+    return [
+        {"role": entry.dll_role_id, "role_hex": f"0x{entry.dll_role_id:X}", "dll": entry.dll_name}
+        for entry in sorted(
+            (row for row in parser.extract_master_dlls(master.sections[19]) if row.category_id == category_id),
+            key=lambda row: (row.dll_role_id, row.dll_name.casefold()),
+        )
+    ]
+
+
+def _master_functions(parser: DDBParser, master: Any, strings: StringDataBase, category_id: int) -> list[dict[str, Any]]:
+    return [
+        {
+            "function_id": entry.function_id,
+            "function_hex": f"0x{entry.function_id:X}",
+            "sort_key": entry.sort_key,
+            "name": strings.get_string(entry.name_string_index) or "",
+            "description": strings.get_string(entry.description_string_index) or "",
+        }
+        for entry in parser.extract_master_functions(master.sections[26])
+        if entry.category_id == category_id
+    ]
+
+
+def _master_variable(master: Any, variable_id: int) -> dict[str, Any]:
+    if variable_id == 0:
+        return {"id": "0x0", "normalized_id": "0x0", "bytes": ""}
+    # Current GTS+ CDbVariableTable::GetVariable namespaces references above
+    # decimal 10000 (0x2710); subtract before the unchanged 1-based table lookup.
+    normalized = variable_id - 0x2710 if variable_id > 0x2710 else variable_id
+    section = master.sections[0]
+    count = section.header.record_count
+    if not 1 <= normalized <= count:
+        raise ValueError(
+            f"variable 0x{variable_id:X} normalizes to 0x{normalized:X}, outside 1..{count}"
+        )
+    data = section.decoded_data
+    table_end = count * 6
+    rel, length = struct.unpack_from("<IH", data, (normalized - 1) * 6)
+    start = table_end + rel
+    end = start + length
+    if end > len(data):
+        raise ValueError(f"variable 0x{variable_id:X} overruns variable pool")
+    return {
+        "id": f"0x{variable_id:X}",
+        "normalized_id": f"0x{normalized:X}",
+        "bytes": data[start:end].hex(),
+    }
+
+
+def _master_comm_set_rows(parser: DDBParser, master: Any) -> list[dict[str, Any]]:
+    return [
+        {
+            "comm_set_id": entry.comm_set_id,
+            "send_parameter": entry.send_parameter,
+            "receive_timeout": entry.receive_timeout,
+            "exception_handler_id": entry.exception_handler_id,
+            "unknown_word_0c": entry.unknown_word_0c,
+            "retry_count": entry.retry_count,
+            "exception_handler_flag": entry.exception_handler_flag,
+            "raw": entry.raw.hex(),
+        }
+        for entry in parser.extract_master_comm_sets(master.sections[29])
+    ]
+
+
+def _master_comm_set(parser: DDBParser, master: Any, comm_set_id: int) -> dict[str, Any]:
+    matches = [row for row in _master_comm_set_rows(parser, master) if row["comm_set_id"] == comm_set_id]
+    if len(matches) != 1:
+        raise ValueError(f"master CommSet {comm_set_id} resolved {len(matches)} rows")
+    return matches[0]
+
+
+def _master_frame_rows(parser: DDBParser, master: Any, category_id: int, selector: int | None = None) -> list[dict[str, Any]]:
+    func = master.sections[18]
+    frame_table = master.sections[17]
+    func_size = func.decoded_record_size
+    frame_size = frame_table.decoded_record_size
+    frames = {
+        struct.unpack_from("<H", raw, 0)[0]: raw
+        for raw in (
+            frame_table.decoded_data[i * frame_size : (i + 1) * frame_size]
+            for i in range(frame_table.header.record_count)
+        )
+    }
+    rows = []
+    for i in range(func.header.record_count):
+        raw = func.decoded_data[i * func_size : (i + 1) * func_size]
+        category, row_selector, comm_set, frame_id = struct.unpack_from("<HHHH", raw, 0)
+        if category != category_id or (selector is not None and row_selector != selector):
+            continue
+        frame = frames.get(frame_id)
+        if frame is None:
+            raise ValueError(f"category {category_id} selector 0x{row_selector:X}: missing frame 0x{frame_id:X}")
+        send_var, mask_var, check_var = struct.unpack_from("<HHH", frame, 2)
+        rows.append({
+            "kind": "frame",
+            "category_id": category_id,
+            "selector": f"0x{row_selector:X}",
+            "comm_set": comm_set,
+            "comm_set_metadata": _master_comm_set(parser, master, comm_set),
+            "comm_frame_id": f"0x{frame_id:X}",
+            "send": _master_variable(master, send_var),
+            "receive_mask": _master_variable(master, mask_var),
+            "receive_check": _master_variable(master, check_var),
+            "func_comm_frame_raw": raw.hex(),
+            "comm_frame_raw": frame.hex(),
+        })
+    return rows
+
+
+def cmd_commset(args: argparse.Namespace) -> int:
+    gts = _resolve_gts_root(args.gtsplus_root)
+    db_root = _db_root(gts, args.region, args.family)
+    parser = DDBParser()
+    master = parser.parse_master_db(db_root / "Toyota.ddb")
+    rows = _master_comm_set_rows(parser, master)
+    if args.comm_set is not None:
+        comm_set_id = _parse_master_key(args.comm_set)
+        if comm_set_id is None:
+            raise SystemExit(f"invalid CommSet {args.comm_set!r}; use decimal or 0x-prefixed hex")
+        rows = [row for row in rows if row["comm_set_id"] == comm_set_id]
+        if not rows:
+            raise SystemExit(f"no Toyota master CommSet {comm_set_id}")
+    shown = rows[: args.limit]
+    if args.json:
+        print(json.dumps(shown, indent=2, sort_keys=True))
+        return 0
+    for row in shown:
+        send_value = "FFFFFFFF" if row["send_parameter"] == 0xFFFFFFFF else str(row["send_parameter"])
+        receive_value = "FFFFFFFF" if row["receive_timeout"] == 0xFFFFFFFF else str(row["receive_timeout"])
+        print(
+            f"commset\t{row['comm_set_id']}\tsend_parameter={send_value}\t"
+            f"receive_timeout={receive_value}\tretries={row['retry_count']}\t"
+            f"exception_id={row['exception_handler_id']}\texception_flag={row['exception_handler_flag']}\t"
+            f"unknown_0c={row['unknown_word_0c']}"
+        )
+    return 0
+
+
+def cmd_role(args: argparse.Namespace) -> int:
+    gts = _resolve_gts_root(args.gtsplus_root)
+    db_root = _db_root(gts, args.region, args.family)
+    parser = DDBParser()
+    master = parser.parse_master_db(db_root / "Toyota.ddb")
+    rows = _master_role_catalog(parser, master)
+    if args.role is not None:
+        role = _parse_master_key(args.role)
+        if role is None:
+            raise SystemExit(f"invalid role {args.role!r}; use decimal or 0x-prefixed hex")
+        rows = [row for row in rows if row["role"] == role]
+        if not rows:
+            raise SystemExit(f"no Toyota master DLL role 0x{role:X}")
+    shown = rows[: args.limit]
+    if args.json:
+        print(json.dumps(shown, indent=2, sort_keys=True))
+        return 0
+    for row in shown:
+        plugins = "; ".join(
+            f"{item['dll']}({item['binding_count']})"
+            for item in row["plugins"][: args.plugin_limit]
+        )
+        print(
+            f"role	{row['role_hex']}	bindings={row['binding_count']}	"
+            f"categories={row['category_count']}	{plugins}"
+        )
+    return 0
+
+
+def cmd_category(args: argparse.Namespace) -> int:
+    gts = _resolve_gts_root(args.gtsplus_root)
+    db_root = _db_root(gts, args.region, args.family)
+    parser = DDBParser()
+    master = parser.parse_master_db(db_root / "Toyota.ddb")
+    strings = _english_strings(parser, db_root)
+    category = _resolve_master_category(parser, master, strings, args.category)
+    payload = {
+        "category": category,
+        "plugins": _master_plugins(parser, master, category["category_id"]),
+        "functions": _master_functions(parser, master, strings, category["category_id"]),
+    }
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
+    print(
+        f"category\t{category['category_id']}\t{category['name']}\t"
+        f"db={category['database']}\tshort={category['short_name']}\tgeneration={category['generation']}"
+    )
+    print("plugins")
+    for row in payload["plugins"][: args.limit]:
+        print(f"{row['role_hex']}\t{row['dll']}")
+    print("functions")
+    for row in payload["functions"][: args.limit]:
+        print(f"{row['function_hex']}\t{row['name']}\t{row['description']}")
+    return 0
+
+
+def cmd_frame(args: argparse.Namespace) -> int:
+    gts = _resolve_gts_root(args.gtsplus_root)
+    db_root = _db_root(gts, args.region, args.family)
+    parser = DDBParser()
+    master = parser.parse_master_db(db_root / "Toyota.ddb")
+    strings = _english_strings(parser, db_root)
+    category = _resolve_master_category(parser, master, strings, args.category)
+    selector = _parse_master_key(args.selector) if args.selector is not None else None
+    if args.selector is not None and selector is None:
+        raise SystemExit(f"invalid selector {args.selector!r}; use decimal or 0x-prefixed hex")
+    rows = _master_frame_rows(parser, master, category["category_id"], selector)
+    if selector is not None and not rows:
+        raise SystemExit(f"category {category['category_id']} has no selector 0x{selector:X}")
     _print_rows(rows, as_json=args.json, limit=args.limit)
     return 0
 
@@ -624,6 +931,32 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("ecu", help="ECU .ddb name/stem/substr or path")
     _common(p)
     p.set_defaults(func=cmd_ecu)
+
+    p = sub.add_parser("commset", help="decode Toyota master communication-set timeout/retry metadata")
+    p.add_argument("comm_set", nargs="?", help="CommSet ID (decimal or 0x-prefixed hex); omit to list all")
+    p.add_argument("--limit", type=int, default=100)
+    _common(p)
+    p.set_defaults(func=cmd_commset)
+
+    p = sub.add_parser("role", help="summarize Toyota master DLL roles and their plugin families")
+    p.add_argument("role", nargs="?", help="DLL role ID (decimal or 0x-prefixed hex); omit for census")
+    p.add_argument("--limit", type=int, default=100)
+    p.add_argument("--plugin-limit", type=int, default=8)
+    _common(p)
+    p.set_defaults(func=cmd_role)
+
+    p = sub.add_parser("category", help="resolve a Toyota master ECU category, its command plugins, and functions")
+    p.add_argument("category", help="category ID, database/short name, or OEM ECU name")
+    p.add_argument("--limit", type=int, default=100)
+    _common(p)
+    p.set_defaults(func=cmd_category)
+
+    p = sub.add_parser("frame", help="resolve master FuncCommFrame selector(s) to current send/mask/check bytes")
+    p.add_argument("category", help="category ID, database/short name, or OEM ECU name")
+    p.add_argument("selector", nargs="?", help="selector ID (decimal or 0x-prefixed hex); omit to list all")
+    p.add_argument("--limit", type=int, default=100)
+    _common(p)
+    p.set_defaults(func=cmd_frame)
 
     p = sub.add_parser("did", help="resolve GTS+ Data List DIDs for one ECU")
     p.add_argument("ecu")

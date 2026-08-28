@@ -1902,6 +1902,106 @@ index at `+0x18`, behavior key at `+0x24`, and sort key at `+0x2E`. Complete
 `raw_hex` is retained for every record, so unnamed bytes are not silently
 promoted to semantics.
 
+#### 6.2.0 Diagnostic execution model: database -> plugin -> frame -> transport
+
+A means-first pass over the command framework closes the ordinary diagnostic
+execution spine instead of one endpoint at a time. The result is much more
+regular than the screen-oriented Techstream UI suggests. In the pinned V18
+`bin/` corpus, **310 of 419 DLLs export only `Execute`**, and **289** import the
+shared `CommandCommon.dll` runtime. Current GTS+ preserves and expands the same
+shape: **374 of 480** DLLs are `Execute`-only and **339** import
+`CommandCommon`. V18 command plugins reuse `CCommCachePlus::GetCommFrmInfo` in
+120 DLLs, `CommFrameSendReceive` in 49, `CFuncInfoCache::CheckEcuFunc` in 56,
+and `CEcuConnectBufferList::GetBusId` in 49. These are not isolated protocol
+implementations; most command DLLs are small strategy modules over one common
+execution engine.
+
+The recovered control path is:
+
+1. `CommandAPI.dll` exposes typed host APIs and hands a command object to
+   `DiagCommCtrlMain::CCommCtrlMain::CommandExecute`.
+2. `DiagCommCtrlMain` constructs `CDbDllResRecords` and asks the DB for record
+   class **`0x113`**. The corresponding master table is type 19
+   **`CDbDllTable`**: `(ECU/category, DLL-role) -> plugin filename`.
+   The controller `LoadLibraryA`s that filename, resolves the single exported
+   **`Execute`**, and calls it under the shared communication critical section.
+3. ECU feature discovery follows the same model. `GetEcuFuncList.dll` first
+   consults `CFuncInfoCache`; on a miss it reads record classes **`0x11A`**
+   (`CDbEcuFuncInfoTable`, master type 26) and **`0x11B`**
+   (`CDbEcuFuncDetailsTable`, master type 27), support-gates the resulting
+   functions/details, and installs the tree in the shared cache.
+4. An executing plugin chooses one or more **selector IDs** and calls
+   `CCommCachePlus::GetCommFrmInfo`. Record class **`0x112`** is master type 18
+   **`CDbFuncCommFrameTable`**, mapping `(ECU/category, selector)` to a
+   communication-set and communication-frame ID.
+5. `CCommFrameData::SetCommFrame` resolves record class **`0x111`** / master
+   type 17 **`CDbCommFrameTable`**. That row points into master
+   `CDbVariableTable` blobs for the actual **send bytes, receive mask, and
+   receive-check bytes**. `SetCommSet` separately resolves class **`0x11D`** /
+   master type 29 **`CDbComSetTable`** transport metadata.
+6. `CDbComSetTable` is a stable 16-byte master table: V18 has 12 rows and current
+   GTS+ has 13, with the original 12 byte-identical. `FindDbItem1` keys on u16
+   `+0x0A`. For ordinary `CommSet=1`, `SetCommSet` copies dword `+0x00` to the
+   send-side parameter, dword `+0x04` to the receive-timeout input, and byte
+   `+0x0E` to the retry bound. `CommFrameSendReceive` passes `+0x04` through
+   `CheckAndConvertRcvTimeOut` before `Receive` and increments attempts until the
+   `+0x0E` bound is exceeded. `+0x08`/`+0x0F` are the table's exception-handler
+   ID/flag. The `+0x00` value is passed as `SendInt` argument 4 but the shared
+   CAN `SendProc` does not consume that argument, so it remains deliberately
+   named only `send_parameter`. CommSet 1 is `1000 / 1020 / retry=1` in both
+   releases.
+7. `CCommCachePlus::CommFrameSendReceive` consumes the materialized frame and
+   terminates in `KGP_CommFrameCtrl::SendInt*` / `Receive*`, selecting ordinary,
+   extended, or no-session variants from the frame/transport state.
+
+This makes the selector numbers used throughout Toyota's command DLLs effectively
+**operands into a diagnostic database VM**. The DLL contributes sequencing,
+fallbacks, conditionals, and specialized response parsing; the master DDB often
+supplies the wire contract itself. Current GTS+ makes the reuse measurable:
+**6,194 `CDbDllTable` bindings collapse to only 191 logical DLL roles**. The
+highest-coverage roles are coherent command families rather than ECU identities:
+`0x05` Data Monitor list (562 bindings), `0x19` DTC clear (536), `0xAD` Data
+Monitor-for-Active-Test (433), `0x52` CID/software identity (359), `0x06` Active
+Test list (346), and `0x08` Active Test initialization (342). `tools/gts role`
+now exposes this role census directly. Two already-proven endpoints illustrate the
+same machinery. Category 397 Hybrid Control + DLL role `0x19`
+`DelDiagCodeP4.dll` selects `0x01`, which materializes `04 -> 44`, and fallback
+`0x102`, which materializes `14 FF FF FF -> 54`. Category 435 Brake/EPB + DLL
+role `0x52` `GetCID_SID22_SAS_DT.dll` selects `0xDC`, which materializes
+`22 F1 81`, mask `FF FF FF`, and check `62 F1 81`. Both routes use CommSet 1,
+so the same master query also recovers raw receive timeout `1020` and one retry.
+
+The means-first pass also found a real **V18 -> GTS+ schema migration** in
+`CDbDllTable`. V18 `FindDbItem1` consumes the DLL-role key as **u8 `+0x56`**;
+all V18 type-19 rows have u16 `+0x54 == 0`. Current GTS+ `FindDbItem1` instead
+consumes the role as **u16 `+0x54`**, while `+0x56` is a separate field/flag.
+The old shared parser treated `+0x56` as the role in both generations and thus
+misreported current GTS+ `DelDiagCodeP4.dll` as role 0. The corrected parser is
+version-aware; the logical role is **`0x19` (25) in both generations**. This is
+recorded as CORR-125. The live Camry DTC-clear transport/result is unchanged;
+only the plugin-role attribution was wrong.
+
+Current GTS+ also namespaces master-variable references without changing the
+underlying variable table. `CDbVariableTable::GetVariable` checks a base-table
+state flag and, for IDs **greater than `0x2710` (10,000)**, subtracts `0x2710`
+before performing the same 1-based 6-byte `[u32 relative offset][u16 length]`
+lookup used by V18. This closes the apparently out-of-range current CommFrame
+references directly: `0x2743 -> 0x33 -> 04`, `0x28F7 -> 0x1E7 -> 44`, and
+`0x2D28 -> 0x618 -> 14 FF FF FF`. The current `tools/gts frame` command applies
+that exact normalization, so selectors can now be resolved interactively from
+current GTS+ all the way to send/mask/check bytes.
+
+The architectural implication for a portable Toyota diagnostic runtime is now
+concrete: implement this shared DB interpreter and a growing library of plugin
+semantics rather than reproducing individual Techstream screens or hard-coding
+one DID/service at a time. Specialized parsers, retries, session transitions,
+security algorithms, and state machines still live in executable plugins and
+must be recovered honestly; the common interpreter does not make those behaviors
+declarative. The deterministic architecture artifact is
+`data/generated/techstream_v18/diagnostic_execution_model.json`, produced by
+`tools/techstream/extract_diagnostic_execution_model.py` and verified by
+`tests/verify_techstream_diagnostic_execution_model.py`.
+
 #### 6.2.1 EMPS_P5 application-interface correlation
 
 A targeted pass now closes one previously useful-but-unproven diagnostic
@@ -2698,7 +2798,7 @@ against the pinned local GTS+ archive by
 
 The P4/P5 diagnostic clear path is explicitly represented in the Toyota host,
 and it is not equivalent to blindly issuing UDS SID `0x14` to every physical
-ECU address. Current GTS+ binds role 0 `DelDiagCodeP4.dll` to at least the
+ECU address. Current GTS+ binds role `0x19` (25) `DelDiagCodeP4.dll` to at least the
 legislated P5 categories exercised on the 2026 Camry: 372 Engine, 395 Motor
 Generator, 397 Hybrid Control, 398 HV Battery, and 435 Brake/EPB. The plugin's
 primary transaction asks the master for clear selector `0x01`; current master
@@ -2829,6 +2929,6 @@ Techstream on a vehicle or bench. The findings describe the *capability* and
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [TMS-001](../reference/index.md#finding-tms-001), [TMS-002](../reference/index.md#finding-tms-002), [TMS-003](../reference/index.md#finding-tms-003), [TMS-004](../reference/index.md#finding-tms-004), [TMS-005](../reference/index.md#finding-tms-005), [TMS-006](../reference/index.md#finding-tms-006), [TMS-007](../reference/index.md#finding-tms-007), [TMS-008](../reference/index.md#finding-tms-008), [TMS-009](../reference/index.md#finding-tms-009), [TMS-010](../reference/index.md#finding-tms-010), [TMS-012](../reference/index.md#finding-tms-012), [TMS-013](../reference/index.md#finding-tms-013), [TMS-017](../reference/index.md#finding-tms-017), [TMS-019](../reference/index.md#finding-tms-019), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [TMS-024](../reference/index.md#finding-tms-024), [TMS-025](../reference/index.md#finding-tms-025), [TMS-026](../reference/index.md#finding-tms-026), [TMS-027](../reference/index.md#finding-tms-027), [TMS-028](../reference/index.md#finding-tms-028), [TMS-029](../reference/index.md#finding-tms-029), [TMS-030](../reference/index.md#finding-tms-030), [TMS-031](../reference/index.md#finding-tms-031), [TMS-032](../reference/index.md#finding-tms-032), [TMS-033](../reference/index.md#finding-tms-033), [TMS-034](../reference/index.md#finding-tms-034), [TMS-035](../reference/index.md#finding-tms-035), [TMS-036](../reference/index.md#finding-tms-036), [TMS-037](../reference/index.md#finding-tms-037), [TMS-038](../reference/index.md#finding-tms-038), [TMS-039](../reference/index.md#finding-tms-039), [TMS-040](../reference/index.md#finding-tms-040), [TMS-041](../reference/index.md#finding-tms-041), [TMS-042](../reference/index.md#finding-tms-042), [TMS-043](../reference/index.md#finding-tms-043), [TMS-044](../reference/index.md#finding-tms-044), [TMS-045](../reference/index.md#finding-tms-045), [TMS-046](../reference/index.md#finding-tms-046), [TMS-047](../reference/index.md#finding-tms-047), [TMS-048](../reference/index.md#finding-tms-048), [TMS-049](../reference/index.md#finding-tms-049), [TMS-050](../reference/index.md#finding-tms-050), [TMS-051](../reference/index.md#finding-tms-051), [TMS-052](../reference/index.md#finding-tms-052), [TMS-057](../reference/index.md#finding-tms-057), [VAR-064](../reference/index.md#finding-var-064)
-- Corrections with this document as canonical home: [CORR-018](../reference/index.md#correction-corr-018), [CORR-019](../reference/index.md#correction-corr-019), [CORR-020](../reference/index.md#correction-corr-020), [CORR-021](../reference/index.md#correction-corr-021), [CORR-022](../reference/index.md#correction-corr-022), [CORR-023](../reference/index.md#correction-corr-023), [CORR-027](../reference/index.md#correction-corr-027), [CORR-034](../reference/index.md#correction-corr-034), [CORR-035](../reference/index.md#correction-corr-035), [CORR-039](../reference/index.md#correction-corr-039), [CORR-079](../reference/index.md#correction-corr-079), [CORR-080](../reference/index.md#correction-corr-080), [CORR-081](../reference/index.md#correction-corr-081), [CORR-082](../reference/index.md#correction-corr-082), [CORR-083](../reference/index.md#correction-corr-083), [CORR-084](../reference/index.md#correction-corr-084), [CORR-085](../reference/index.md#correction-corr-085), [CORR-091](../reference/index.md#correction-corr-091), [CORR-102](../reference/index.md#correction-corr-102), [CORR-103](../reference/index.md#correction-corr-103), [CORR-104](../reference/index.md#correction-corr-104), [CORR-117](../reference/index.md#correction-corr-117)
+- Findings with this document as canonical home: [TMS-001](../reference/index.md#finding-tms-001), [TMS-002](../reference/index.md#finding-tms-002), [TMS-003](../reference/index.md#finding-tms-003), [TMS-004](../reference/index.md#finding-tms-004), [TMS-005](../reference/index.md#finding-tms-005), [TMS-006](../reference/index.md#finding-tms-006), [TMS-007](../reference/index.md#finding-tms-007), [TMS-008](../reference/index.md#finding-tms-008), [TMS-009](../reference/index.md#finding-tms-009), [TMS-010](../reference/index.md#finding-tms-010), [TMS-012](../reference/index.md#finding-tms-012), [TMS-013](../reference/index.md#finding-tms-013), [TMS-017](../reference/index.md#finding-tms-017), [TMS-019](../reference/index.md#finding-tms-019), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [TMS-024](../reference/index.md#finding-tms-024), [TMS-025](../reference/index.md#finding-tms-025), [TMS-026](../reference/index.md#finding-tms-026), [TMS-027](../reference/index.md#finding-tms-027), [TMS-028](../reference/index.md#finding-tms-028), [TMS-029](../reference/index.md#finding-tms-029), [TMS-030](../reference/index.md#finding-tms-030), [TMS-031](../reference/index.md#finding-tms-031), [TMS-032](../reference/index.md#finding-tms-032), [TMS-033](../reference/index.md#finding-tms-033), [TMS-034](../reference/index.md#finding-tms-034), [TMS-035](../reference/index.md#finding-tms-035), [TMS-036](../reference/index.md#finding-tms-036), [TMS-037](../reference/index.md#finding-tms-037), [TMS-038](../reference/index.md#finding-tms-038), [TMS-039](../reference/index.md#finding-tms-039), [TMS-040](../reference/index.md#finding-tms-040), [TMS-041](../reference/index.md#finding-tms-041), [TMS-042](../reference/index.md#finding-tms-042), [TMS-043](../reference/index.md#finding-tms-043), [TMS-044](../reference/index.md#finding-tms-044), [TMS-045](../reference/index.md#finding-tms-045), [TMS-046](../reference/index.md#finding-tms-046), [TMS-047](../reference/index.md#finding-tms-047), [TMS-048](../reference/index.md#finding-tms-048), [TMS-049](../reference/index.md#finding-tms-049), [TMS-050](../reference/index.md#finding-tms-050), [TMS-051](../reference/index.md#finding-tms-051), [TMS-052](../reference/index.md#finding-tms-052), [TMS-057](../reference/index.md#finding-tms-057), [TMS-061](../reference/index.md#finding-tms-061), [VAR-064](../reference/index.md#finding-var-064)
+- Corrections with this document as canonical home: [CORR-018](../reference/index.md#correction-corr-018), [CORR-019](../reference/index.md#correction-corr-019), [CORR-020](../reference/index.md#correction-corr-020), [CORR-021](../reference/index.md#correction-corr-021), [CORR-022](../reference/index.md#correction-corr-022), [CORR-023](../reference/index.md#correction-corr-023), [CORR-027](../reference/index.md#correction-corr-027), [CORR-034](../reference/index.md#correction-corr-034), [CORR-035](../reference/index.md#correction-corr-035), [CORR-039](../reference/index.md#correction-corr-039), [CORR-079](../reference/index.md#correction-corr-079), [CORR-080](../reference/index.md#correction-corr-080), [CORR-081](../reference/index.md#correction-corr-081), [CORR-082](../reference/index.md#correction-corr-082), [CORR-083](../reference/index.md#correction-corr-083), [CORR-084](../reference/index.md#correction-corr-084), [CORR-085](../reference/index.md#correction-corr-085), [CORR-091](../reference/index.md#correction-corr-091), [CORR-102](../reference/index.md#correction-corr-102), [CORR-103](../reference/index.md#correction-corr-103), [CORR-104](../reference/index.md#correction-corr-104), [CORR-117](../reference/index.md#correction-corr-117), [CORR-125](../reference/index.md#correction-corr-125)
 <!-- knowledge-cross-references:end -->

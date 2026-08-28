@@ -1158,6 +1158,17 @@ paths = [
   "docs/tooling/techstream-ddb-pipeline.md",
 ]
 
+[suite.techstream_diagnostic_execution_model]
+tests = ["tests/verify_techstream_diagnostic_execution_model.py"]
+requires_external = ["techstream_v18", "gtsplus"]
+modes = ["local"]
+oracle = "instruction_semantics"
+paths = [
+  "tools/techstream/extract_diagnostic_execution_model.py",
+  "tools/techstream/parse_ddb.py",
+  "docs/tooling/techstream.md",
+]
+
 [suite.techstream_priority_ddb_semantics]
 tests = ["tests/verify_techstream_priority_ddb_semantics.py"]
 requires_external = ["techstream_v18"]

@@ -69,6 +69,23 @@ with tempfile.TemporaryDirectory(prefix="gts-root-routing-") as td:
 
 parser = DDBParser()
 strings = gts_cli._english_strings(parser, db_root)
+master = parser.parse_master_db(db_root / "Toyota.ddb")
+hybrid = gts_cli._resolve_master_category(parser, master, strings, "HV_P5")
+check(hybrid["category_id"] == 397 and hybrid["name"] == "Hybrid Control", "master category resolver joins HV_P5 to category 397 Hybrid Control")
+plugins = gts_cli._master_plugins(parser, master, hybrid["category_id"])
+check(any(row == {"role": 25, "role_hex": "0x19", "dll": "DelDiagCodeP4.dll"} for row in plugins), "current master plugin resolver decodes DelDiagCodeP4 role 0x19")
+commsets = gts_cli._master_comm_set_rows(parser, master)
+commset1 = next(row for row in commsets if row["comm_set_id"] == 1)
+check(len(commsets) == 13 and commset1["raw"] == "e8030000fc0300000000010000000100", "current master exposes 13 stable 16-byte CommSet rows")
+check(commset1["receive_timeout"] == 1020 and commset1["retry_count"] == 1, "current CommSet 1 resolves receive timeout 1020 and one retry")
+
+role_catalog = gts_cli._master_role_catalog(parser, master)
+role19 = next(row for row in role_catalog if row["role"] == 25)
+check(len(role_catalog) == 191 and role19["binding_count"] == 536 and role19["category_count"] == 536 and role19["plugins"][0] == {"dll": "DelDiagCodeP4.dll", "binding_count": 424}, "current master role census collapses 6194 bindings into 191 reusable command roles")
+primary = gts_cli._master_frame_rows(parser, master, hybrid["category_id"], 0x01)
+check(len(primary) == 1 and primary[0]["comm_set_metadata"]["receive_timeout"] == 1020 and primary[0]["comm_set_metadata"]["retry_count"] == 1 and primary[0]["send"] == {"id": "0x2743", "normalized_id": "0x33", "bytes": "04"} and primary[0]["receive_check"] == {"id": "0x28F7", "normalized_id": "0x1E7", "bytes": "44"}, "current master selector 1 resolves namespaced variables to 04 -> 44")
+fallback = gts_cli._master_frame_rows(parser, master, hybrid["category_id"], 0x102)
+check(len(fallback) == 1 and fallback[0]["send"] == {"id": "0x2D28", "normalized_id": "0x618", "bytes": "14ffffff"} and fallback[0]["receive_check"] == {"id": "0x28E4", "normalized_id": "0x1D4", "bytes": "54"}, "current master selector 0x102 resolves namespaced variables to 14FFFFFF -> 54")
 emps = parser.parse_ecu_db(db_root / "EMPS_P5.ddb")
 rows = gts_cli._monitor_rows(emps, strings, "EMPS_P5.ddb")
 rows_1cee = [row for row in rows if row["primary_did"] == 0x1CEE]

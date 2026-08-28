@@ -1,0 +1,4109 @@
+{
+  "boundary": "This recovers the common diagnostic execution architecture, not a claim that every plugin is declarative or that all Toyota diagnostics can be implemented without plugin semantics. Specialized parsing, retries, session changes, security, and state machines remain executable behavior.",
+  "gtsplus_continuity": {
+    "core_identities": {
+      "CommandCommon.dll": {
+        "path": "bin/CommandCommon.dll",
+        "sha256": "89fe3c1f17d7ec58e659a099fc4fc96b55d30534d813c2a4c26211c4d30284c2",
+        "size": 356368
+      },
+      "DiagCommCtrlMain.dll": {
+        "path": "bin/DiagCommCtrlMain.dll",
+        "sha256": "d1ba329ba144bbfe49ba91a2e11bfee397f881e2f37c6c20c79376a6e9849967",
+        "size": 122384
+      },
+      "GetEcuFuncList.dll": {
+        "path": "bin/GetEcuFuncList.dll",
+        "sha256": "80bb8f5de1b9b614e225f4ccf1823a1d0011a04c7b81788024db82cadb85c214",
+        "size": 33808
+      },
+      "KgpDataCtrl.dll": {
+        "path": "bin/KgpDataCtrl.dll",
+        "sha256": "19e709e12e53f485a84ccfbf6b226922b88502206c34b767db543c7f3df101f8",
+        "size": 1824784
+      }
+    },
+    "dll_role_schema": {
+      "comm_set_table": {
+        "class_name": "CDbComSetTable",
+        "comm_set_1": {
+          "comm_set_id": 1,
+          "exception_handler_flag": 0,
+          "exception_handler_id": 0,
+          "raw": "e8030000fc0300000000010000000100",
+          "receive_timeout": 1020,
+          "retry_count": 1,
+          "send_parameter": 1000,
+          "unknown_word_0c": 0
+        },
+        "master_table_type": 29,
+        "record_count": 13,
+        "record_size": 16
+      },
+      "hybrid_clear_binding": {
+        "category_id": 397,
+        "dll_name": "DelDiagCodeP4.dll",
+        "dll_role_hex": "0x19",
+        "dll_role_id": 25,
+        "raw": "440065006c00440069006100670043006f0064006500500034002e0064006c006c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008d01000019000000"
+      },
+      "hybrid_clear_fallback": {
+        "category_id": 397,
+        "comm_frame_id": "0x2BDB",
+        "comm_frame_raw": "db2b282d0000e428",
+        "comm_set": 1,
+        "comm_set_metadata": {
+          "comm_set_id": 1,
+          "exception_handler_flag": 0,
+          "exception_handler_id": 0,
+          "raw": "e8030000fc0300000000010000000100",
+          "receive_timeout": 1020,
+          "retry_count": 1,
+          "send_parameter": 1000,
+          "unknown_word_0c": 0
+        },
+        "func_comm_frame_raw": "8d0102010100db2b0000010000000000",
+        "selector": "0x102",
+        "variables": {
+          "receive_check": {
+            "bytes": "54",
+            "id": "0x28E4",
+            "normalized_id": "0x1D4"
+          },
+          "receive_mask": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
+          "send": {
+            "bytes": "14ffffff",
+            "id": "0x2D28",
+            "normalized_id": "0x618"
+          }
+        }
+      },
+      "hybrid_clear_primary": {
+        "category_id": 397,
+        "comm_frame_id": "0x279E",
+        "comm_frame_raw": "9e2743270000f728",
+        "comm_set": 1,
+        "comm_set_metadata": {
+          "comm_set_id": 1,
+          "exception_handler_flag": 0,
+          "exception_handler_id": 0,
+          "raw": "e8030000fc0300000000010000000100",
+          "receive_timeout": 1020,
+          "retry_count": 1,
+          "send_parameter": 1000,
+          "unknown_word_0c": 0
+        },
+        "func_comm_frame_raw": "8d01010001009e270000010000000000",
+        "selector": "0x1",
+        "variables": {
+          "receive_check": {
+            "bytes": "44",
+            "id": "0x28F7",
+            "normalized_id": "0x1E7"
+          },
+          "receive_mask": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
+          "send": {
+            "bytes": "04",
+            "id": "0x2743",
+            "normalized_id": "0x33"
+          }
+        }
+      },
+      "kgp_identity": {
+        "path": "bin/KgpDataCtrl.dll",
+        "sha256": "19e709e12e53f485a84ccfbf6b226922b88502206c34b767db543c7f3df101f8",
+        "size": 1824784
+      },
+      "role_catalog": {
+        "binding_count": 6194,
+        "role_count": 191,
+        "roles": [
+          {
+            "binding_count": 562,
+            "category_count": 560,
+            "plugin_count": 13,
+            "plugins": [
+              {
+                "binding_count": 227,
+                "dll": "GetDatMonListP4.dll"
+              },
+              {
+                "binding_count": 178,
+                "dll": "GetDatMonListP5_DT.dll"
+              },
+              {
+                "binding_count": 104,
+                "dll": "GetDatMonListP6_DT.dll"
+              },
+              {
+                "binding_count": 22,
+                "dll": "GetDatMonListPSA_DT.dll"
+              },
+              {
+                "binding_count": 12,
+                "dll": "GetDatMonListDk.dll"
+              },
+              {
+                "binding_count": 5,
+                "dll": "GetDatMonListP4_MultiPid_DT.dll"
+              },
+              {
+                "binding_count": 4,
+                "dll": "GetDatMonList_OldBody.dll"
+              },
+              {
+                "binding_count": 4,
+                "dll": "GetDatMonListPSAMode35_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetDMLP4FrcVisbl_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDatMonList.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDatMonList_MultiPid_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDMLstDkA8Only_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDatMonListOsc_DT.dll"
+              }
+            ],
+            "role": 5,
+            "role_hex": "0x5"
+          },
+          {
+            "binding_count": 536,
+            "category_count": 536,
+            "plugin_count": 6,
+            "plugins": [
+              {
+                "binding_count": 424,
+                "dll": "DelDiagCodeP4.dll"
+              },
+              {
+                "binding_count": 106,
+                "dll": "DelDiagCodeP6_DT.dll"
+              },
+              {
+                "binding_count": 3,
+                "dll": "DelDiagCodePSA_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "DelDiagCode.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "DelDiagCode_Vgrs.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "DelDiagCode_func_DT.dll"
+              }
+            ],
+            "role": 25,
+            "role_hex": "0x19"
+          },
+          {
+            "binding_count": 433,
+            "category_count": 431,
+            "plugin_count": 13,
+            "plugins": [
+              {
+                "binding_count": 226,
+                "dll": "GetDatMonListP4.dll"
+              },
+              {
+                "binding_count": 92,
+                "dll": "GetDatMonListP5ForActTest_DT.dll"
+              },
+              {
+                "binding_count": 62,
+                "dll": "GetDatMonListP6ForActTest_DT.dll"
+              },
+              {
+                "binding_count": 22,
+                "dll": "GetDatMonListPSA_DT.dll"
+              },
+              {
+                "binding_count": 12,
+                "dll": "GetDatMonListDk.dll"
+              },
+              {
+                "binding_count": 5,
+                "dll": "GetDatMonListP4_MultiPid_DT.dll"
+              },
+              {
+                "binding_count": 4,
+                "dll": "GetDatMonList_OldBody.dll"
+              },
+              {
+                "binding_count": 4,
+                "dll": "GetDatMonListPSAMode35_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetDMLP4FrcVisbl_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDatMonList.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDatMonList_MultiPid_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDMLstDkA8Only_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDatMonListOsc_DT.dll"
+              }
+            ],
+            "role": 173,
+            "role_hex": "0xAD"
+          },
+          {
+            "binding_count": 359,
+            "category_count": 356,
+            "plugin_count": 38,
+            "plugins": [
+              {
+                "binding_count": 98,
+                "dll": "GetCID_SID22_P6_DT.dll"
+              },
+              {
+                "binding_count": 89,
+                "dll": "GetCID_SID22_DT.dll"
+              },
+              {
+                "binding_count": 33,
+                "dll": "GetCID_CAN1A_Body_DT.dll"
+              },
+              {
+                "binding_count": 26,
+                "dll": "GetCID_CAN_DT.dll"
+              },
+              {
+                "binding_count": 24,
+                "dll": "GetCID_CAN1A_DT.dll"
+              },
+              {
+                "binding_count": 19,
+                "dll": "GetCID_SID22_SUZUKI_DT.dll"
+              },
+              {
+                "binding_count": 14,
+                "dll": "GetCID_SID22_SBR_DT.dll"
+              },
+              {
+                "binding_count": 7,
+                "dll": "GetCID_Dk_CAN_DT.dll"
+              },
+              {
+                "binding_count": 6,
+                "dll": "GetCID_P39C_DT.dll"
+              },
+              {
+                "binding_count": 5,
+                "dll": "GetCID_SID22_HN_DT.dll"
+              },
+              {
+                "binding_count": 5,
+                "dll": "GetCID_PSA_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetCID_CAN09_1A_HV_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetCID_CAN1A_A4_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetCID_CAN1A_AA_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetCID_SID22_GearShiftControl_HV_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetCID_SID22_MMC_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetCID_SID22_P6_CHG_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_P3VSC_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_P3_21_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_CAN1A_EPB_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_CAN1A_EPC_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_CAN1A_PreCrash2_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_DCM_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_CAN_HICM_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_CAN1A_AMT_HN_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_CAN1AB0_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_CAN1A_GearShiftControl_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_SID22_MotorGenerator_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_SID22_CHG_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_SID22_SAS_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_CAN1A_HN_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_SID22_GearShiftControl_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_CAN1A_VC_HN_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_Dk_KWP_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_CAN1A_B1_HN_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_SID22_HN_CGW_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCID_CAN1A_21_DT.dll"
+              }
+            ],
+            "role": 82,
+            "role_hex": "0x52"
+          },
+          {
+            "binding_count": 346,
+            "category_count": 346,
+            "plugin_count": 10,
+            "plugins": [
+              {
+                "binding_count": 164,
+                "dll": "GetActTstListP4.dll"
+              },
+              {
+                "binding_count": 87,
+                "dll": "GetActTstListP5_DT.dll"
+              },
+              {
+                "binding_count": 62,
+                "dll": "GetActTstListP6_DT.dll"
+              },
+              {
+                "binding_count": 11,
+                "dll": "GetActTstListDk.dll"
+              },
+              {
+                "binding_count": 10,
+                "dll": "GetATLstPsaVrbl_DT.dll"
+              },
+              {
+                "binding_count": 4,
+                "dll": "GetActTstList_OldBody.dll"
+              },
+              {
+                "binding_count": 4,
+                "dll": "GetATLstPsaVrblMode35_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetActTstLstP4SA_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetActTstList.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetATLstDkVrbl_DT.dll"
+              }
+            ],
+            "role": 6,
+            "role_hex": "0x6"
+          },
+          {
+            "binding_count": 342,
+            "category_count": 342,
+            "plugin_count": 7,
+            "plugins": [
+              {
+                "binding_count": 166,
+                "dll": "GetActTstInitP4.dll"
+              },
+              {
+                "binding_count": 87,
+                "dll": "GetActTstInitP5_DT.dll"
+              },
+              {
+                "binding_count": 62,
+                "dll": "GetActTstInitP6_DT.dll"
+              },
+              {
+                "binding_count": 14,
+                "dll": "GetATInitPsaVrbl_DT.dll"
+              },
+              {
+                "binding_count": 11,
+                "dll": "GetActTstInitDk.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetActTstInit.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetATInitDkVrbl_DT.dll"
+              }
+            ],
+            "role": 8,
+            "role_hex": "0x8"
+          },
+          {
+            "binding_count": 325,
+            "category_count": 322,
+            "plugin_count": 21,
+            "plugins": [
+              {
+                "binding_count": 247,
+                "dll": "GetDiagCodeP4V2_DT.dll"
+              },
+              {
+                "binding_count": 15,
+                "dll": "GetDiagCodeDLC12.dll"
+              },
+              {
+                "binding_count": 15,
+                "dll": "GetDiagCode_CARBCAN_DT.dll"
+              },
+              {
+                "binding_count": 14,
+                "dll": "GetDiagCodePSANoStatus_DT.dll"
+              },
+              {
+                "binding_count": 8,
+                "dll": "GetDiagCodePSAV2_DT.dll"
+              },
+              {
+                "binding_count": 4,
+                "dll": "GetDTC_NoFrmNoV2_DT.dll"
+              },
+              {
+                "binding_count": 4,
+                "dll": "GetDTC_HisFrzV2_DT.dll"
+              },
+              {
+                "binding_count": 3,
+                "dll": "GetDTC_OsEngV2_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetDTC_woCountV2_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetDTCSiennaDoor_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDTCV2_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDiagCodeDk.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDTCDk_ATV2_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDiagCodePSA_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDTCPSA_Audio_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDTCTSL_EV_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDTCDk_Roof_woNR_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDiagCodeDk_CGW.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDTCPSA_AddHt_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDiagCode_CARB_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDTC_0000Rjct_DT.dll"
+              }
+            ],
+            "role": 134,
+            "role_hex": "0x86"
+          },
+          {
+            "binding_count": 302,
+            "category_count": 299,
+            "plugin_count": 22,
+            "plugins": [
+              {
+                "binding_count": 195,
+                "dll": "GetDTCP4_TS_DT.dll"
+              },
+              {
+                "binding_count": 43,
+                "dll": "GetDiagCodeP4V2_DT.dll"
+              },
+              {
+                "binding_count": 15,
+                "dll": "GetDiagCodeDLC12.dll"
+              },
+              {
+                "binding_count": 14,
+                "dll": "GetDiagCodePSANoStatus_DT.dll"
+              },
+              {
+                "binding_count": 8,
+                "dll": "GetDiagCodePSAV2_DT.dll"
+              },
+              {
+                "binding_count": 4,
+                "dll": "GetDTC_NoFrmNoV2_DT.dll"
+              },
+              {
+                "binding_count": 4,
+                "dll": "GetDTC_HisFrz_TS_DT.dll"
+              },
+              {
+                "binding_count": 3,
+                "dll": "GetDTC_OsEngV2_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetDTC_woCountV2_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetDTCSiennaDoor_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDTCV2_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDiagCodeDk.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDTCDk_ATV2_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDiagCodePSA_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDTCPSA_Audio_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDTCTSL_EV_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDTCDk_Roof_woNR_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDiagCodeDk_CGW.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDTCPSA_AddHt_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDiagCode_CARB_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDiagCode_CARBCAN_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDTC_0000Rjct_DT.dll"
+              }
+            ],
+            "role": 20,
+            "role_hex": "0x14"
+          },
+          {
+            "binding_count": 283,
+            "category_count": 283,
+            "plugin_count": 3,
+            "plugins": [
+              {
+                "binding_count": 178,
+                "dll": "GetDatMonSignalInfoP5_DT.dll"
+              },
+              {
+                "binding_count": 104,
+                "dll": "GetDatMonSignalInfoP6_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDatMonSignalInfo.dll"
+              }
+            ],
+            "role": 65,
+            "role_hex": "0x41"
+          },
+          {
+            "binding_count": 278,
+            "category_count": 278,
+            "plugin_count": 4,
+            "plugins": [
+              {
+                "binding_count": 172,
+                "dll": "GetSupportMultiP5_DT.dll"
+              },
+              {
+                "binding_count": 104,
+                "dll": "GetSupportMultiP6_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetSupportMultiP4_Mlt_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetSupportMultiP3_DT.dll"
+              }
+            ],
+            "role": 213,
+            "role_hex": "0xD5"
+          },
+          {
+            "binding_count": 258,
+            "category_count": 257,
+            "plugin_count": 7,
+            "plugins": [
+              {
+                "binding_count": 246,
+                "dll": "GetDiagCodeCountP4.dll"
+              },
+              {
+                "binding_count": 4,
+                "dll": "GetDiagCodeCount_AC.dll"
+              },
+              {
+                "binding_count": 3,
+                "dll": "GetDiagCodeCount_OsEng.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetDiagCodeCount_wCode.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDiagCodeCount.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDiagCodeCount_VGRS.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDiagCodeCount_TT.dll"
+              }
+            ],
+            "role": 19,
+            "role_hex": "0x13"
+          },
+          {
+            "binding_count": 231,
+            "category_count": 231,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 230,
+                "dll": "JudgeDiagStatusP5_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "JudgeDiagP4_Pend_DT.dll"
+              }
+            ],
+            "role": 41,
+            "role_hex": "0x29"
+          },
+          {
+            "binding_count": 181,
+            "category_count": 181,
+            "plugin_count": 3,
+            "plugins": [
+              {
+                "binding_count": 179,
+                "dll": "GetSupportP5_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetSupportP4_Mlt_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetSupportP3_DT.dll"
+              }
+            ],
+            "role": 103,
+            "role_hex": "0x67"
+          },
+          {
+            "binding_count": 176,
+            "category_count": 175,
+            "plugin_count": 6,
+            "plugins": [
+              {
+                "binding_count": 88,
+                "dll": "DelRoBP5_DT.dll"
+              },
+              {
+                "binding_count": 84,
+                "dll": "DelRoBP6_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "DelRoBP4_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "DelRoBP5_SUBARU_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "DelRoBP5_SUZUKI_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "DelRoBP5_wTO_DT.dll"
+              }
+            ],
+            "role": 161,
+            "role_hex": "0xA1"
+          },
+          {
+            "binding_count": 175,
+            "category_count": 175,
+            "plugin_count": 4,
+            "plugins": [
+              {
+                "binding_count": 89,
+                "dll": "GetRoBP5_DT.dll"
+              },
+              {
+                "binding_count": 84,
+                "dll": "GetRoBP6_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetRoBP4_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetRoBP5_SUBARU_DT.dll"
+              }
+            ],
+            "role": 160,
+            "role_hex": "0xA0"
+          },
+          {
+            "binding_count": 165,
+            "category_count": 165,
+            "plugin_count": 9,
+            "plugins": [
+              {
+                "binding_count": 147,
+                "dll": "GetFrzFrmDatP4.dll"
+              },
+              {
+                "binding_count": 8,
+                "dll": "GetFrzFrmDatPSA_DT.dll"
+              },
+              {
+                "binding_count": 4,
+                "dll": "GetFrzFrmDat_NoFrmNo.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetFrzFrmDat.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetFrzFrmDat_MultiRcv_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetFrzFrmDatDk.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetFrzFrmDatDk_AT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetFrzFrmDatDk_Roof.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetFrzFrmDatDk_CGW.dll"
+              }
+            ],
+            "role": 21,
+            "role_hex": "0x15"
+          },
+          {
+            "binding_count": 165,
+            "category_count": 165,
+            "plugin_count": 4,
+            "plugins": [
+              {
+                "binding_count": 87,
+                "dll": "GetATSignalInfoP5_DT.dll"
+              },
+              {
+                "binding_count": 62,
+                "dll": "GetATSignalInfoP6_DT.dll"
+              },
+              {
+                "binding_count": 15,
+                "dll": "GetATSigInfDkVrbl_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetATSignalInfo_DT.dll"
+              }
+            ],
+            "role": 112,
+            "role_hex": "0x70"
+          },
+          {
+            "binding_count": 151,
+            "category_count": 151,
+            "plugin_count": 4,
+            "plugins": [
+              {
+                "binding_count": 87,
+                "dll": "GetMultiActInitP5_DT.dll"
+              },
+              {
+                "binding_count": 62,
+                "dll": "GetMultiActInitP6_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetMultiActInitP4_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetMultiActInitPsaVrbl_DT.dll"
+              }
+            ],
+            "role": 99,
+            "role_hex": "0x63"
+          },
+          {
+            "binding_count": 114,
+            "category_count": 114,
+            "plugin_count": 4,
+            "plugins": [
+              {
+                "binding_count": 104,
+                "dll": "GetDiagCodeP6_DT.dll"
+              },
+              {
+                "binding_count": 7,
+                "dll": "GetDiagCodeP5_HN_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetDiagCodeP5_HN_Wo_DLen_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDiagCodeP5_DT.dll"
+              }
+            ],
+            "role": 172,
+            "role_hex": "0xAC"
+          },
+          {
+            "binding_count": 114,
+            "category_count": 114,
+            "plugin_count": 4,
+            "plugins": [
+              {
+                "binding_count": 104,
+                "dll": "GetEachFrzFrmDatP6_DT.dll"
+              },
+              {
+                "binding_count": 7,
+                "dll": "GetEachFrzFrmDatP5_HN_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "GetEachFrzFrmDatP5_HN_Wo_DLen_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetEachFrzFrmDatP5_DT.dll"
+              }
+            ],
+            "role": 181,
+            "role_hex": "0xB5"
+          },
+          {
+            "binding_count": 112,
+            "category_count": 112,
+            "plugin_count": 5,
+            "plugins": [
+              {
+                "binding_count": 72,
+                "dll": "ConfCheckModeOnlyP4.dll"
+              },
+              {
+                "binding_count": 20,
+                "dll": "ConfCheckModeP5_DT.dll"
+              },
+              {
+                "binding_count": 18,
+                "dll": "ConfCheckModeP6_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "ConfCheckMode.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "ConfCheckModeP4.dll"
+              }
+            ],
+            "role": 23,
+            "role_hex": "0x17"
+          },
+          {
+            "binding_count": 112,
+            "category_count": 112,
+            "plugin_count": 3,
+            "plugins": [
+              {
+                "binding_count": 73,
+                "dll": "ChangeCheckModeP4.dll"
+              },
+              {
+                "binding_count": 38,
+                "dll": "ChangeCheckModeP5_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "ChangeCheckMode.dll"
+              }
+            ],
+            "role": 24,
+            "role_hex": "0x18"
+          },
+          {
+            "binding_count": 63,
+            "category_count": 63,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 62,
+                "dll": "GetSimpleOperationUtilityResultP6.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetSimpleOperationUtilityResult_DT.dll"
+              }
+            ],
+            "role": 179,
+            "role_hex": "0xB3"
+          },
+          {
+            "binding_count": 45,
+            "category_count": 45,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 44,
+                "dll": "GetRoutineActTstInitP6_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetRoutineActTstInitP5_DT.dll"
+              }
+            ],
+            "role": 174,
+            "role_hex": "0xAE"
+          },
+          {
+            "binding_count": 45,
+            "category_count": 45,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 44,
+                "dll": "GetRoutineActTstSignalInfoP6_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetRoutineActTstSignalInfoP5_DT.dll"
+              }
+            ],
+            "role": 175,
+            "role_hex": "0xAF"
+          },
+          {
+            "binding_count": 32,
+            "category_count": 32,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 31,
+                "dll": "GetPendP4TsFfd_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetPendingCode.dll"
+              }
+            ],
+            "role": 52,
+            "role_hex": "0x34"
+          },
+          {
+            "binding_count": 32,
+            "category_count": 32,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 31,
+                "dll": "GetPendP4Ffd_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetPendingCode.dll"
+              }
+            ],
+            "role": 141,
+            "role_hex": "0x8D"
+          },
+          {
+            "binding_count": 14,
+            "category_count": 14,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 13,
+                "dll": "GetAnlzWrkFctP4_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetAnlzWrkFctP3_DT.dll"
+              }
+            ],
+            "role": 111,
+            "role_hex": "0x6F"
+          },
+          {
+            "binding_count": 12,
+            "category_count": 12,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 12,
+                "dll": "RepairGetEcuDataP4.dll"
+              }
+            ],
+            "role": 53,
+            "role_hex": "0x35"
+          },
+          {
+            "binding_count": 11,
+            "category_count": 11,
+            "plugin_count": 3,
+            "plugins": [
+              {
+                "binding_count": 7,
+                "dll": "IsAbsFrzFrmDatP4.dll"
+              },
+              {
+                "binding_count": 3,
+                "dll": "IsPSDFrzFrmDat_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "IsAbsFrzFrmDat.dll"
+              }
+            ],
+            "role": 48,
+            "role_hex": "0x30"
+          },
+          {
+            "binding_count": 8,
+            "category_count": 8,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 7,
+                "dll": "GetDiagDetailIdListP4.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDiagDetailIdList.dll"
+              }
+            ],
+            "role": 42,
+            "role_hex": "0x2A"
+          },
+          {
+            "binding_count": 8,
+            "category_count": 8,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 7,
+                "dll": "GetDetailDiagP4.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDetailDiag.dll"
+              }
+            ],
+            "role": 43,
+            "role_hex": "0x2B"
+          },
+          {
+            "binding_count": 7,
+            "category_count": 7,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 6,
+                "dll": "GetExcept_NRSleepDT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetException.dll"
+              }
+            ],
+            "role": 39,
+            "role_hex": "0x27"
+          },
+          {
+            "binding_count": 7,
+            "category_count": 7,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 6,
+                "dll": "GetExcptCarTpNRS_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetExceptCarType_DT.dll"
+              }
+            ],
+            "role": 140,
+            "role_hex": "0x8C"
+          },
+          {
+            "binding_count": 5,
+            "category_count": 5,
+            "plugin_count": 3,
+            "plugins": [
+              {
+                "binding_count": 2,
+                "dll": "IsImageFFDP4_DT.dll"
+              },
+              {
+                "binding_count": 2,
+                "dll": "IsImageFFDP6_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "IsImageFFDP5_DT.dll"
+              }
+            ],
+            "role": 210,
+            "role_hex": "0xD2"
+          },
+          {
+            "binding_count": 4,
+            "category_count": 4,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 4,
+                "dll": "GetDiagModeList.dll"
+              }
+            ],
+            "role": 67,
+            "role_hex": "0x43"
+          },
+          {
+            "binding_count": 4,
+            "category_count": 4,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 4,
+                "dll": "ChangeDiagModeP4.dll"
+              }
+            ],
+            "role": 68,
+            "role_hex": "0x44"
+          },
+          {
+            "binding_count": 4,
+            "category_count": 4,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 4,
+                "dll": "WriteAfterSalesZn_DT.dll"
+              }
+            ],
+            "role": 95,
+            "role_hex": "0x5F"
+          },
+          {
+            "binding_count": 4,
+            "category_count": 4,
+            "plugin_count": 3,
+            "plugins": [
+              {
+                "binding_count": 2,
+                "dll": "GetDDRInfoP6_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDDRInfo_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDDRInfoP5_DT.dll"
+              }
+            ],
+            "role": 169,
+            "role_hex": "0xA9"
+          },
+          {
+            "binding_count": 4,
+            "category_count": 4,
+            "plugin_count": 3,
+            "plugins": [
+              {
+                "binding_count": 2,
+                "dll": "GetDDRInfoImgOpeDdrP6_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDDRInfoSaveLog_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetDDRInfoImgOpeDdr_DT.dll"
+              }
+            ],
+            "role": 188,
+            "role_hex": "0xBC"
+          },
+          {
+            "binding_count": 3,
+            "category_count": 3,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 2,
+                "dll": "StopActTst_Init.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "StopActTst.dll"
+              }
+            ],
+            "role": 12,
+            "role_hex": "0xC"
+          },
+          {
+            "binding_count": 3,
+            "category_count": 3,
+            "plugin_count": 3,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetVIN_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetVinPSA_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetVIN_CAN_DT.dll"
+              }
+            ],
+            "role": 81,
+            "role_hex": "0x51"
+          },
+          {
+            "binding_count": 3,
+            "category_count": 3,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 2,
+                "dll": "GetMonitoringTestCARB_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetMonitoringTest_DT.dll"
+              }
+            ],
+            "role": 84,
+            "role_hex": "0x54"
+          },
+          {
+            "binding_count": 2,
+            "category_count": 2,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCVN_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCVN_CAN_DT.dll"
+              }
+            ],
+            "role": 83,
+            "role_hex": "0x53"
+          },
+          {
+            "binding_count": 2,
+            "category_count": 1,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCanBusLstV2_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetCanBusLstV2DK_DT.dll"
+              }
+            ],
+            "role": 118,
+            "role_hex": "0x76"
+          },
+          {
+            "binding_count": 2,
+            "category_count": 2,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetAnlWkFctDcmP4_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetAnlWkFctBTP4_DT.dll"
+              }
+            ],
+            "role": 120,
+            "role_hex": "0x78"
+          },
+          {
+            "binding_count": 2,
+            "category_count": 2,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetPCSOperationFFDP4_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetOperationFrzFrmDatP5_DT.dll"
+              }
+            ],
+            "role": 186,
+            "role_hex": "0xBA"
+          },
+          {
+            "binding_count": 2,
+            "category_count": 2,
+            "plugin_count": 2,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetImageFFD_DT.dll"
+              },
+              {
+                "binding_count": 1,
+                "dll": "GetImageFFDP5_DT.dll"
+              }
+            ],
+            "role": 187,
+            "role_hex": "0xBB"
+          },
+          {
+            "binding_count": 2,
+            "category_count": 2,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 2,
+                "dll": "IsPCSSBRVehicleP5_DT.dll"
+              }
+            ],
+            "role": 246,
+            "role_hex": "0xF6"
+          },
+          {
+            "binding_count": 2,
+            "category_count": 2,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 2,
+                "dll": "GetDiagCode_J1979_2_DT.dll"
+              }
+            ],
+            "role": 258,
+            "role_hex": "0x102"
+          },
+          {
+            "binding_count": 2,
+            "category_count": 2,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 2,
+                "dll": "GetEachFrzFrmDat_J1979_2_DT.dll"
+              }
+            ],
+            "role": 259,
+            "role_hex": "0x103"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetEcuGroupList.dll"
+              }
+            ],
+            "role": 2,
+            "role_hex": "0x2"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetEcuFuncList.dll"
+              }
+            ],
+            "role": 4,
+            "role_hex": "0x4"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "CheckDatMonCommFrm.dll"
+              }
+            ],
+            "role": 7,
+            "role_hex": "0x7"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "StartDatMon.dll"
+              }
+            ],
+            "role": 9,
+            "role_hex": "0x9"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "StopDatMon.dll"
+              }
+            ],
+            "role": 10,
+            "role_hex": "0xA"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "StartActTst.dll"
+              }
+            ],
+            "role": 11,
+            "role_hex": "0xB"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCustItemLstV2_DT.dll"
+              }
+            ],
+            "role": 13,
+            "role_hex": "0xD"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "SetCustom.dll"
+              }
+            ],
+            "role": 14,
+            "role_hex": "0xE"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetMultiFrzFrmDatP4.dll"
+              }
+            ],
+            "role": 22,
+            "role_hex": "0x16"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCustSptLstV2_DT.dll"
+              }
+            ],
+            "role": 34,
+            "role_hex": "0x22"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCanBusEcuList.dll"
+              }
+            ],
+            "role": 38,
+            "role_hex": "0x26"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "SetException.dll"
+              }
+            ],
+            "role": 40,
+            "role_hex": "0x28"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetUtilFuncList.dll"
+              }
+            ],
+            "role": 51,
+            "role_hex": "0x33"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "StartDatMon.dll"
+              }
+            ],
+            "role": 56,
+            "role_hex": "0x38"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetTriggerItemList.dll"
+              }
+            ],
+            "role": 57,
+            "role_hex": "0x39"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "StartTestPresent.dll"
+              }
+            ],
+            "role": 58,
+            "role_hex": "0x3A"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "StopTestPresent.dll"
+              }
+            ],
+            "role": 59,
+            "role_hex": "0x3B"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCanBusDiag.dll"
+              }
+            ],
+            "role": 62,
+            "role_hex": "0x3E"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetShortCutList.dll"
+              }
+            ],
+            "role": 63,
+            "role_hex": "0x3F"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "CheckConnectShortCut.dll"
+              }
+            ],
+            "role": 64,
+            "role_hex": "0x40"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "CheckDatMonCommFrm.dll"
+              }
+            ],
+            "role": 66,
+            "role_hex": "0x42"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "SelectCarType.dll"
+              }
+            ],
+            "role": 69,
+            "role_hex": "0x45"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetMountEcuList_DLC12.dll"
+              }
+            ],
+            "role": 70,
+            "role_hex": "0x46"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetStandardValueInfo.dll"
+              }
+            ],
+            "role": 71,
+            "role_hex": "0x47"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "SelectCarCtgrMltOpt.dll"
+              }
+            ],
+            "role": 72,
+            "role_hex": "0x48"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "SelectCarTypeVin.dll"
+              }
+            ],
+            "role": 74,
+            "role_hex": "0x4A"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "IsMultiFrzFrmDatV2_DT.dll"
+              }
+            ],
+            "role": 75,
+            "role_hex": "0x4B"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetMilInfo.dll"
+              }
+            ],
+            "role": 76,
+            "role_hex": "0x4C"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetVimInfo.dll"
+              }
+            ],
+            "role": 77,
+            "role_hex": "0x4D"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "SetVimSystemTime.dll"
+              }
+            ],
+            "role": 78,
+            "role_hex": "0x4E"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetO2SList_DT.dll"
+              }
+            ],
+            "role": 79,
+            "role_hex": "0x4F"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetO2SData_DT.dll"
+              }
+            ],
+            "role": 80,
+            "role_hex": "0x50"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetReadinessCode_DT.dll"
+              }
+            ],
+            "role": 85,
+            "role_hex": "0x55"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "CARBModeInit_DT.dll"
+              }
+            ],
+            "role": 86,
+            "role_hex": "0x56"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "StartDatMon.dll"
+              }
+            ],
+            "role": 87,
+            "role_hex": "0x57"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "CreateDrsFile_DT.dll"
+              }
+            ],
+            "role": 88,
+            "role_hex": "0x58"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "TestEvapSystemLeak_DT.dll"
+              }
+            ],
+            "role": 89,
+            "role_hex": "0x59"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetMonitorStatusInfo_DT.dll"
+              }
+            ],
+            "role": 90,
+            "role_hex": "0x5A"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetMonitorResultInfo_DT.dll"
+              }
+            ],
+            "role": 91,
+            "role_hex": "0x5B"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "SetCustomizeAllDefault_DT.dll"
+              }
+            ],
+            "role": 92,
+            "role_hex": "0x5C"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "StartDiagCARB_DT.dll"
+              }
+            ],
+            "role": 93,
+            "role_hex": "0x5D"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetGeneralCommResult_DT.dll"
+              }
+            ],
+            "role": 94,
+            "role_hex": "0x5E"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "StartActTst.dll"
+              }
+            ],
+            "role": 96,
+            "role_hex": "0x60"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetFrmCheckMode_DT.dll"
+              }
+            ],
+            "role": 97,
+            "role_hex": "0x61"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetFrmConfCheckMode_DT.dll"
+              }
+            ],
+            "role": 98,
+            "role_hex": "0x62"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetDischargeMonData_DT.dll"
+              }
+            ],
+            "role": 100,
+            "role_hex": "0x64"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetFrmCarInfoVin_DT.dll"
+              }
+            ],
+            "role": 101,
+            "role_hex": "0x65"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCommConfig_DT.dll"
+              }
+            ],
+            "role": 102,
+            "role_hex": "0x66"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "DelComCachCstDop_DT.dll"
+              }
+            ],
+            "role": 106,
+            "role_hex": "0x6A"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCurTimeInfo_DT.dll"
+              }
+            ],
+            "role": 114,
+            "role_hex": "0x72"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetPermanentCdV3_DT.dll"
+              }
+            ],
+            "role": 116,
+            "role_hex": "0x74"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCanBusCtgrV2_DT.dll"
+              }
+            ],
+            "role": 117,
+            "role_hex": "0x75"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetDescription_DT.dll"
+              }
+            ],
+            "role": 119,
+            "role_hex": "0x77"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetMntEcuLstNoCf_DT.dll"
+              }
+            ],
+            "role": 121,
+            "role_hex": "0x79"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetEcuEchConnect_DT.dll"
+              }
+            ],
+            "role": 122,
+            "role_hex": "0x7A"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetDefaultExcept_DT.dll"
+              }
+            ],
+            "role": 123,
+            "role_hex": "0x7B"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "SelectCarTypVn10_DT.dll"
+              }
+            ],
+            "role": 125,
+            "role_hex": "0x7D"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetTrslationStr_DT.dll"
+              }
+            ],
+            "role": 126,
+            "role_hex": "0x7E"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCustLstInfoV2_DT.dll"
+              }
+            ],
+            "role": 128,
+            "role_hex": "0x80"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetDispMessage_DT.dll"
+              }
+            ],
+            "role": 133,
+            "role_hex": "0x85"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetTirePressInfo_DT.dll"
+              }
+            ],
+            "role": 135,
+            "role_hex": "0x87"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetAbsltTime_DT.dll"
+              }
+            ],
+            "role": 136,
+            "role_hex": "0x88"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "StartDatMon.dll"
+              }
+            ],
+            "role": 137,
+            "role_hex": "0x89"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "CheckDatMonCommFrm.dll"
+              }
+            ],
+            "role": 138,
+            "role_hex": "0x8A"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCarInfoExcept_DT.dll"
+              }
+            ],
+            "role": 139,
+            "role_hex": "0x8B"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "NoConfGenComRes_DT.dll"
+              }
+            ],
+            "role": 149,
+            "role_hex": "0x95"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetEcuFnLstNoCom_DT.dll"
+              }
+            ],
+            "role": 155,
+            "role_hex": "0x9B"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetUtlFnLstNoCom_DT.dll"
+              }
+            ],
+            "role": 158,
+            "role_hex": "0x9E"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetRoBCandEcuLst_DT.dll"
+              }
+            ],
+            "role": 159,
+            "role_hex": "0x9F"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetActCusId_DT.dll"
+              }
+            ],
+            "role": 162,
+            "role_hex": "0xA2"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetPIDSignalData_DT.dll"
+              }
+            ],
+            "role": 163,
+            "role_hex": "0xA3"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetDiagCodeInfo_DT.dll"
+              }
+            ],
+            "role": 164,
+            "role_hex": "0xA4"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetSltFuncEcuLst_DT.dll"
+              }
+            ],
+            "role": 165,
+            "role_hex": "0xA5"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetDTC_CanBus_DT.dll"
+              }
+            ],
+            "role": 166,
+            "role_hex": "0xA6"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetOperationFrzFrmDatP4_DT.dll"
+              }
+            ],
+            "role": 170,
+            "role_hex": "0xAA"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "SelectCarId_DT.dll"
+              }
+            ],
+            "role": 171,
+            "role_hex": "0xAB"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "StartActTst.dll"
+              }
+            ],
+            "role": 176,
+            "role_hex": "0xB0"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetDTC_CanBusP5_DT.dll"
+              }
+            ],
+            "role": 177,
+            "role_hex": "0xB1"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetSimpleOperationUtilityInfo_DT.dll"
+              }
+            ],
+            "role": 178,
+            "role_hex": "0xB2"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetPhysicalAddress_CARB_DT.dll"
+              }
+            ],
+            "role": 180,
+            "role_hex": "0xB4"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetIdCodeFuncListNoCarInfo_DT.dll"
+              }
+            ],
+            "role": 182,
+            "role_hex": "0xB6"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "DelEcuCnctCache_DT.dll"
+              }
+            ],
+            "role": 183,
+            "role_hex": "0xB7"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetPCSFuncList_DT.dll"
+              }
+            ],
+            "role": 184,
+            "role_hex": "0xB8"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetPCSReadTime_DT.dll"
+              }
+            ],
+            "role": 185,
+            "role_hex": "0xB9"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetAbsTimeStampSaveLog_DT.dll"
+              }
+            ],
+            "role": 189,
+            "role_hex": "0xBD"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetPCSHeaderInfo_DT.dll"
+              }
+            ],
+            "role": 190,
+            "role_hex": "0xBE"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "SetDefSession_DT.dll"
+              }
+            ],
+            "role": 191,
+            "role_hex": "0xBF"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "SelectCGWCanBusOption_DT.dll"
+              }
+            ],
+            "role": 192,
+            "role_hex": "0xC0"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCGWCanBusCtgrList_DT.dll"
+              }
+            ],
+            "role": 193,
+            "role_hex": "0xC1"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCGWCanBusChkList_DT.dll"
+              }
+            ],
+            "role": 194,
+            "role_hex": "0xC2"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCanBusEcuConnect_DT.dll"
+              }
+            ],
+            "role": 195,
+            "role_hex": "0xC3"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "DelDiagCodeForMazda_DT.dll"
+              }
+            ],
+            "role": 196,
+            "role_hex": "0xC4"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetMktMonRamData_DT.dll"
+              }
+            ],
+            "role": 199,
+            "role_hex": "0xC7"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetVINCheckEcu_DT.dll"
+              }
+            ],
+            "role": 201,
+            "role_hex": "0xC9"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "MoveSessionCGWDK_DT.dll"
+              }
+            ],
+            "role": 202,
+            "role_hex": "0xCA"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetOpeFrzFrmDatP4_ICS02_DT.Dll"
+              }
+            ],
+            "role": 203,
+            "role_hex": "0xCB"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "DelSpecifiedCache_DT.dll"
+              }
+            ],
+            "role": 204,
+            "role_hex": "0xCC"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "SetVehicleInfoForVehicleId_DT.dll"
+              }
+            ],
+            "role": 205,
+            "role_hex": "0xCD"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "IsNonDisplayInfo_DT.dll"
+              }
+            ],
+            "role": 206,
+            "role_hex": "0xCE"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetLCSOperationFFDP5_DT.dll"
+              }
+            ],
+            "role": 208,
+            "role_hex": "0xD0"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCurTimeInfoEachEcu_DT.dll"
+              }
+            ],
+            "role": 209,
+            "role_hex": "0xD1"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "CheckUtilFunc_DT.dll"
+              }
+            ],
+            "role": 211,
+            "role_hex": "0xD3"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "SingleRoutineActTstP5_DT.dll"
+              }
+            ],
+            "role": 212,
+            "role_hex": "0xD4"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetRoBP5_AnlzWkFct_DT.dll"
+              }
+            ],
+            "role": 214,
+            "role_hex": "0xD6"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetAnlWkFctDcm35_DT.dll"
+              }
+            ],
+            "role": 215,
+            "role_hex": "0xD7"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetImageSpecInfo_DT.dll"
+              }
+            ],
+            "role": 217,
+            "role_hex": "0xD9"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCurAbsTimeInfo_DT.Dll"
+              }
+            ],
+            "role": 218,
+            "role_hex": "0xDA"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetPartNumber_DT.dll"
+              }
+            ],
+            "role": 219,
+            "role_hex": "0xDB"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "ChangeLogCollectionMode_DT.dll"
+              }
+            ],
+            "role": 220,
+            "role_hex": "0xDC"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "AutoPowerOffCansel_DT.dll"
+              }
+            ],
+            "role": 221,
+            "role_hex": "0xDD"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetPVMImageFFDP5_DT.dll"
+              }
+            ],
+            "role": 222,
+            "role_hex": "0xDE"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetCBESTInfo_DT.dll"
+              }
+            ],
+            "role": 223,
+            "role_hex": "0xDF"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetADSOperationFFDP5_DT.dll"
+              }
+            ],
+            "role": 224,
+            "role_hex": "0xE0"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetADSImageFFDP5_DT.dll"
+              }
+            ],
+            "role": 225,
+            "role_hex": "0xE1"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetVBatteryValue_DT.dll"
+              }
+            ],
+            "role": 226,
+            "role_hex": "0xE2"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetVehicleCache_DT.dll"
+              }
+            ],
+            "role": 227,
+            "role_hex": "0xE3"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetReadTimeP5_DT.dll"
+              }
+            ],
+            "role": 228,
+            "role_hex": "0xE4"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetADSDDRInfoP5_DT.dll"
+              }
+            ],
+            "role": 229,
+            "role_hex": "0xE5"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "QueryVehicleDBbyId_DT.dll"
+              }
+            ],
+            "role": 230,
+            "role_hex": "0xE6"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "QueryVehiclebyManualVin_DT.dll"
+              }
+            ],
+            "role": 231,
+            "role_hex": "0xE7"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetVimVersion_DT.dll"
+              }
+            ],
+            "role": 232,
+            "role_hex": "0xE8"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetTSS3ImageFFDP5_DT.dll"
+              }
+            ],
+            "role": 233,
+            "role_hex": "0xE9"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetTSS3OperationFFDP5_DT.dll"
+              }
+            ],
+            "role": 234,
+            "role_hex": "0xEA"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetRCImageFFDP5_DT.dll"
+              }
+            ],
+            "role": 235,
+            "role_hex": "0xEB"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetVIMSupport_DT.dll"
+              }
+            ],
+            "role": 236,
+            "role_hex": "0xEC"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "InitializeWiredVehicleData_DT.dll"
+              }
+            ],
+            "role": 237,
+            "role_hex": "0xED"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "JudgeWiredVehicleTarget_DT.dll"
+              }
+            ],
+            "role": 238,
+            "role_hex": "0xEE"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "CollectWiredVehicleData_DT.dll"
+              }
+            ],
+            "role": 239,
+            "role_hex": "0xEF"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "CheckVimDrs_DT.dll"
+              }
+            ],
+            "role": 240,
+            "role_hex": "0xF0"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "CheckVimDlog_DT.dll"
+              }
+            ],
+            "role": 241,
+            "role_hex": "0xF1"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "ClearVimDlog_DT.dll"
+              }
+            ],
+            "role": 242,
+            "role_hex": "0xF2"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "CopyDrsFile_DT.dll"
+              }
+            ],
+            "role": 243,
+            "role_hex": "0xF3"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "CopyDlogFile_DT.dll"
+              }
+            ],
+            "role": 244,
+            "role_hex": "0xF4"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "ReadDlogFile_DT.dll"
+              }
+            ],
+            "role": 245,
+            "role_hex": "0xF5"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetDMCImageFFDP5_DT.dll"
+              }
+            ],
+            "role": 247,
+            "role_hex": "0xF7"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetSoh_DT.dll"
+              }
+            ],
+            "role": 248,
+            "role_hex": "0xF8"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetADUOperationFFDP6_DT.dll"
+              }
+            ],
+            "role": 260,
+            "role_hex": "0x104"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetADUImageFFDP6_DT.dll"
+              }
+            ],
+            "role": 261,
+            "role_hex": "0x105"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetADUDDRInfoP6_DT.dll"
+              }
+            ],
+            "role": 262,
+            "role_hex": "0x106"
+          },
+          {
+            "binding_count": 1,
+            "category_count": 1,
+            "plugin_count": 1,
+            "plugins": [
+              {
+                "binding_count": 1,
+                "dll": "GetADUDDRInfoImgOpeDdrP6_DT.dll"
+              }
+            ],
+            "role": 263,
+            "role_hex": "0x107"
+          }
+        ]
+      },
+      "role_layout": {
+        "gtsplus": "u16 +0x54 (CDbDllTable::FindDbItem1)",
+        "gtsplus_category_anchor": {
+          "bytes": "0fb742508945ec837df40075",
+          "file_offset": "0xAA820",
+          "va": "0x100AB420"
+        },
+        "gtsplus_role_anchor": {
+          "bytes": "0fb742548945ec837df40075",
+          "file_offset": "0xAA710",
+          "va": "0x100AB310"
+        },
+        "logical_key": "DLL role",
+        "v18": "u8 +0x56 (CDbDllTable::FindDbItem1)"
+      },
+      "source": {
+        "path": "NA/DB/Gen/Toyota.ddb",
+        "sha256": "f11e820968ac383a8fc5105b65322f0b9c3673df2c8dac46c9847e3d691b39b1",
+        "size": 18967903
+      },
+      "variable_layout": {
+        "compare_anchor": {
+          "bytes": "0fb74d0881f9102700007e0e0fb75508",
+          "file_offset": "0x645F4",
+          "va": "0x100651F4"
+        },
+        "gtsplus_namespace_base": "0x2710",
+        "logical_model": "same 1-based 6-byte [u32 relative offset][u16 length] table as V18 after namespace normalization",
+        "rule": "when the base variable table is selected and variable_id > 0x2710, subtract 0x2710 before lookup",
+        "subtract_anchor": {
+          "bytes": "0fb7550881ea10270000668955088b45",
+          "file_offset": "0x64600",
+          "va": "0x10065200"
+        }
+      }
+    },
+    "plugin_census": {
+      "command_common_importer_count": 339,
+      "dll_count": 480,
+      "execute_only_export_count": 374,
+      "parsed_pe_count": 480,
+      "selected_command_common_import_counts": {
+        "?CheckEcuFunc@CFuncInfoCache@@QAEHPAVCDataCtrl@@KGGGPAK@Z": 62,
+        "?CommFrameSendReceive@CCommCachePlus@@QAEKPAVCCommFrameData@@G@Z": 44,
+        "?CommFrameSendReceiveExt@CCommCachePlus@@QAEKPAVCCommFrameData@@G@Z": 49,
+        "?GetBusId@CEcuConnectBufferList@@QAEGK@Z": 52,
+        "?GetCommFrmInfo@CCommCachePlus@@QAEKGPAUtagCOMMAND_DATA@@PAV?$CCmdList@VCCommFrameData@@@@K@Z": 147,
+        "?GetEcuFunc@CFuncInfoCache@@QAEKPAVCDataCtrl@@KPAPAVCEcuFuncInfo@@PAH@Z": 1
+      },
+      "top_command_common_imports": [
+        {
+          "dll_count": 179,
+          "name": "??0CCommCachePlus@@QAE@XZ"
+        },
+        {
+          "dll_count": 179,
+          "name": "??1CCommCachePlus@@UAE@XZ"
+        },
+        {
+          "dll_count": 161,
+          "name": "??0?$CCmdList@VCCommFrameData@@@@QAE@XZ"
+        },
+        {
+          "dll_count": 161,
+          "name": "??1?$CCmdList@VCCommFrameData@@@@UAE@XZ"
+        },
+        {
+          "dll_count": 149,
+          "name": "?GetAt@?$CCmdList@VCCommFrameData@@@@QBEAAVCCommFrameData@@K@Z"
+        },
+        {
+          "dll_count": 147,
+          "name": "?GetCommFrmInfo@CCommCachePlus@@QAEKGPAUtagCOMMAND_DATA@@PAV?$CCmdList@VCCommFrameData@@@@K@Z"
+        },
+        {
+          "dll_count": 78,
+          "name": "??1CCommCachePlusP5@@UAE@XZ"
+        },
+        {
+          "dll_count": 78,
+          "name": "??0CCommCachePlusP5@@QAE@XZ"
+        },
+        {
+          "dll_count": 67,
+          "name": "??0CFuncInfoCache@@QAE@XZ"
+        },
+        {
+          "dll_count": 67,
+          "name": "??1CFuncInfoCache@@UAE@XZ"
+        },
+        {
+          "dll_count": 62,
+          "name": "?CheckEcuFunc@CFuncInfoCache@@QAEHPAVCDataCtrl@@KGGGPAK@Z"
+        },
+        {
+          "dll_count": 59,
+          "name": "??1CPidList@@QAE@XZ"
+        },
+        {
+          "dll_count": 58,
+          "name": "??0CPidList@@QAE@XZ"
+        },
+        {
+          "dll_count": 52,
+          "name": "?GetBusId@CEcuConnectBufferList@@QAEGK@Z"
+        },
+        {
+          "dll_count": 49,
+          "name": "?CommFrameSendReceiveExt@CCommCachePlus@@QAEKPAVCCommFrameData@@G@Z"
+        },
+        {
+          "dll_count": 49,
+          "name": "??1CEcuConnectCheck@@UAE@XZ"
+        },
+        {
+          "dll_count": 49,
+          "name": "??0CEcuConnectCheck@@QAE@XZ"
+        },
+        {
+          "dll_count": 49,
+          "name": "??1CCmdSupportBitList@@UAE@XZ"
+        },
+        {
+          "dll_count": 45,
+          "name": "??1CCommFrameData@@UAE@XZ"
+        },
+        {
+          "dll_count": 45,
+          "name": "?RemoveAll@?$CCmdList@VCCommFrameData@@@@QAEXXZ"
+        }
+      ]
+    }
+  },
+  "interpretation": "Techstream's ordinary diagnostic command layer is a database-driven execution engine: the controller resolves an ECU/category plus DLL-role through CDbDllTable, dynamically loads a one-export Execute plugin, and the plugin selects master FuncCommFrame selectors. Shared CommandCommon code materializes CommSet/CommFrame send-mask-check bytes and sends them through KGP_CommFrameCtrl. Plugins remain necessary for control flow and specialized response handling, but the wire contracts are predominantly database material.",
+  "schema": "techstream-diagnostic-execution-model-v1",
+  "v18": {
+    "comm_set_table": {
+      "class_name": "CDbComSetTable",
+      "comm_set_1": {
+        "comm_set_id": 1,
+        "exception_handler_flag": 0,
+        "exception_handler_id": 0,
+        "raw": "e8030000fc0300000000010000000100",
+        "receive_timeout": 1020,
+        "retry_count": 1,
+        "send_parameter": 1000,
+        "unknown_word_0c": 0
+      },
+      "field_semantics": {
+        "+0x00": "send_parameter; copied to SendInt argument 4; common CAN SendProc does not consume it",
+        "+0x04": "receive_timeout input; passed by pointer through CheckAndConvertRcvTimeOut before Receive",
+        "+0x08": "exception-handler ID (CDbComSetTable::GetExceptahandId)",
+        "+0x0A": "CommSet lookup key (CDbComSetTable::FindDbItem1)",
+        "+0x0C": "unresolved u16",
+        "+0x0E": "retry bound consumed by CommFrameSendReceive",
+        "+0x0F": "exception-handler flag (CDbComSetTable::GetExceptahandFlag)"
+      },
+      "master_table_type": 29,
+      "record_count": 12,
+      "record_size": 16
+    },
+    "core_binaries": {
+      "CommandAPI.dll": {
+        "anchors": {},
+        "exports_selected": [
+          "_EcuFuncListAPI@8"
+        ],
+        "imports_selected": [
+          {
+            "dll": "KERNEL32.dll",
+            "name": "LoadLibraryA"
+          },
+          {
+            "dll": "KERNEL32.dll",
+            "name": "GetProcAddress"
+          }
+        ],
+        "path": "bin/CommandAPI.dll",
+        "sha256": "43913a3baeef678b70dd3f7a533575824d9d88e2acb61acb23702983e5b337f3",
+        "size": 1257472
+      },
+      "CommandCommon.dll": {
+        "anchors": {
+          "comm_frame_db_class_0x111": {
+            "bytes": "50518b4e10681101000081c1",
+            "file_offset": "0x6A986",
+            "va": "0x1006A986"
+          },
+          "comm_set_db_class_0x11d": {
+            "bytes": "50518b4e10681d01000081c1",
+            "file_offset": "0x6ABCB",
+            "va": "0x1006ABCB"
+          },
+          "comm_set_field_copy": {
+            "bytes": "8b4424148b108b0a894e188b108b4a04894e1c8b1033c08a420e894620",
+            "file_offset": "0x6ABEF",
+            "va": "0x1006ABEF"
+          },
+          "comm_set_receive_timeout_convert": {
+            "bytes": "8b5424508d6e1c8bc88b461455518b4e10525051e8c2e80000",
+            "file_offset": "0x5D305",
+            "va": "0x1005D305"
+          },
+          "comm_set_retry_bound": {
+            "bytes": "8b5e40894424508b46203bdd8944241c",
+            "file_offset": "0x5D211",
+            "va": "0x1005D211"
+          },
+          "comm_set_retry_loop": {
+            "bytes": "8b4424188b4c241c403bc1894424187f7b",
+            "file_offset": "0x5D378",
+            "va": "0x1005D378"
+          },
+          "func_comm_frame_db_class_0x112": {
+            "bytes": "50565168120100008d8fbc00",
+            "file_offset": "0x5E1C6",
+            "va": "0x1005E1C6"
+          },
+          "transport_receive_sink": {
+            "bytes": "ff1550040b108bf881ff2303",
+            "file_offset": "0x5D344",
+            "va": "0x1005D344"
+          },
+          "transport_send_sink": {
+            "bytes": "8b4e0c52ff1540040b10eb4a",
+            "file_offset": "0x5D29D",
+            "va": "0x1005D29D"
+          }
+        },
+        "exports_selected": [
+          "??0CFuncInfoCache@@QAE@ABV0@@Z",
+          "??0CFuncInfoCache@@QAE@XZ",
+          "??1CFuncInfoCache@@UAE@XZ",
+          "??4CFuncInfoCache@@QAEAAV0@ABV0@@Z",
+          "??_7CFuncInfoCache@@6B@",
+          "?CheckEcuFunc@CFuncInfoCache@@QAEHPAVCDataCtrl@@KGGGPAK@Z",
+          "?CommFrameSendReceive@CCommCacheDkIso9141@@QAEKPAVCCommFrameData@@G@Z",
+          "?CommFrameSendReceive@CCommCachePlus@@QAEKPAVCCommFrameData@@G@Z",
+          "?CommFrameSendReceiveExt@CCommCachePlus@@QAEKPAVCCommFrameData@@G@Z",
+          "?DelEcuFunc@CFuncInfoCache@@QAEKPAVCDataCtrl@@KPAH@Z",
+          "?GetCommFrmInfo@CCommCachePlus@@QAEKGPAUtagCOMMAND_DATA@@PAV?$CCmdList@VCCommFrameData@@@@K@Z",
+          "?GetCommFrmInfo@CCommCachePlus@@QAEKGPAUtagCOMMAND_DATA@@PAV?$CCmdList@VCCommFrameDataMultiReceive@@@@K@Z",
+          "?GetEcuFunc@CFuncInfoCache@@QAEKPAVCDataCtrl@@KPAPAVCEcuFuncInfo@@PAH@Z",
+          "?SetFuncList@CFuncInfoCache@@QAEKPAVCDataCtrl@@PAVCEcuFuncList@@@Z"
+        ],
+        "imports_selected": [
+          {
+            "dll": "KERNEL32.dll",
+            "name": "GetProcAddress"
+          },
+          {
+            "dll": "KERNEL32.dll",
+            "name": "LoadLibraryA"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "?Disconnect@CCommFrameCtrl@@QAEKH@Z"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "?GetDiagnosticMode@CCommFrameCtrl@@QAEPBUDIAGNOSTIC_INFO@@XZ"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "?SetDiagnosticMode@CCommFrameCtrl@@QAEXPAUDIAGNOSTIC_INFO@@@Z"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "?SendIntNoInitExt@CCommFrameCtrl@@QAEKKPAEGKGHH@Z"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "?SendIntExt@CCommFrameCtrl@@QAEKKPAEGKGHH@Z"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "?ReceiveExt@CCommFrameCtrl@@QAEKPAEPAGGKGPAKK@Z"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "?SendIntNoInitNoSession@CCommFrameCtrl@@QAEKKPAEGKGHH@Z"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "?SendIntNoInit@CCommFrameCtrl@@QAEKKPAEEKGHH@Z"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "?SetJ2534InterruptMode@CCommFrameCtrl@@QAEXH@Z"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "?SendInt@CCommFrameCtrl@@QAEKKPAEEKGHH@Z"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "?Receive@CCommFrameCtrl@@QAEKPAE0EKEPAKK@Z"
+          }
+        ],
+        "path": "bin/CommandCommon.dll",
+        "sha256": "07547a9e47378d37c3ef7d96c2f33f6c62c4151626d98d3f3ff03b7c74909de7",
+        "size": 1028096
+      },
+      "DiagCommCtrlMain.dll": {
+        "anchors": {
+          "plugin_db_class_0x113": {
+            "bytes": "578d4424146a0a5068130100",
+            "file_offset": "0x1301",
+            "va": "0x10001301"
+          }
+        },
+        "exports_selected": [
+          "?CommandExecute@CCommCtrlMain@@QAEKPAVCCmdBase@@0@Z"
+        ],
+        "imports_selected": [
+          {
+            "dll": "KERNEL32.dll",
+            "name": "LoadLibraryA"
+          },
+          {
+            "dll": "KERNEL32.dll",
+            "name": "GetProcAddress"
+          },
+          {
+            "dll": "KgpDataCtrl.dll",
+            "name": "??1CDbDllResRecords@@UAE@XZ"
+          },
+          {
+            "dll": "KgpDataCtrl.dll",
+            "name": "??0CDbDllResRecords@@QAE@XZ"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "??1CCommFrameCtrl@@UAE@XZ"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "??0CCommFrameCtrl@@QAE@PAD@Z"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "?Disconnect@CCommFrameCtrl@@QAEKH@Z"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "?CloseDevice@CCommFrameCtrl@@QAEKXZ"
+          },
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "?LineCriticalSection@CCommFrameCtrl@@QAEXW4CSTYPE@1@@Z"
+          }
+        ],
+        "path": "bin/DiagCommCtrlMain.dll",
+        "sha256": "b37720ffee312d81fb1e06f68c6920c5be9898c18d23989e98141d4ede0b096d",
+        "size": 77824
+      },
+      "GetEcuFuncList.dll": {
+        "anchors": {
+          "ecu_func_detail_db_class_0x11b": {
+            "bytes": "8b4e1452681b01000081c1bc",
+            "file_offset": "0x1564",
+            "va": "0x10001564"
+          },
+          "ecu_func_info_db_class_0x11a": {
+            "bytes": "518b4e14681a01000081c1bc",
+            "file_offset": "0x142E",
+            "va": "0x1000142E"
+          }
+        },
+        "exports_selected": [
+          "Execute"
+        ],
+        "imports_selected": [
+          {
+            "dll": "KGP_CommFrameCtrl.dll",
+            "name": "?ReceiveExt@CCommFrameCtrl@@QAEKPAEPAGGKGPAKK@Z"
+          },
+          {
+            "dll": "KERNEL32.dll",
+            "name": "GetProcAddress"
+          },
+          {
+            "dll": "KERNEL32.dll",
+            "name": "LoadLibraryA"
+          }
+        ],
+        "path": "bin/GetEcuFuncList.dll",
+        "sha256": "93d809bf8f3e11174ab2607a19a2e5dacc514bb9a794c89abc18b0f31193bd6c",
+        "size": 61440
+      },
+      "KgpDataCtrl.dll": {
+        "anchors": {
+          "comm_set_lookup_key": {
+            "bytes": "8b148133c0668b420a8945e8",
+            "file_offset": "0x14816",
+            "va": "0x10014816"
+          }
+        },
+        "exports_selected": [],
+        "imports_selected": [
+          {
+            "dll": "KERNEL32.dll",
+            "name": "LoadLibraryA"
+          },
+          {
+            "dll": "KERNEL32.dll",
+            "name": "GetProcAddress"
+          }
+        ],
+        "path": "bin/KgpDataCtrl.dll",
+        "sha256": "e5235bc0c241c6a450fe461031eed0915675032b1db994bd54d98818fac88aa9",
+        "size": 721008
+      }
+    },
+    "db_record_classes": {
+      "0x111": {
+        "master_table_type": 17,
+        "result": "CDbCommFrameResRecords",
+        "role": "CommFrame -> send / receive-mask / receive-check variable references",
+        "table": "CDbCommFrameTable"
+      },
+      "0x112": {
+        "master_table_type": 18,
+        "result": "CDbFuncCommFrameResRecords",
+        "role": "(ECU/category, selector) -> CommSet + CommFrame",
+        "table": "CDbFuncCommFrameTable"
+      },
+      "0x113": {
+        "master_table_type": 19,
+        "result": "CDbDllResRecords",
+        "role": "(ECU/category, DLL role) -> plugin filename",
+        "table": "CDbDllTable"
+      },
+      "0x11A": {
+        "master_table_type": 26,
+        "result": "CDbEcuFuncInfoResRecords",
+        "role": "ECU function-list discovery",
+        "table": "CDbEcuFuncInfoTable"
+      },
+      "0x11B": {
+        "master_table_type": 27,
+        "result": "CDbEcuFuncDetailsResRecords",
+        "role": "function detail discovery",
+        "table": "CDbEcuFuncDetailsTable"
+      },
+      "0x11D": {
+        "master_table_type": 29,
+        "result": "CDbComSetResRecords",
+        "role": "communication-set / diagnostic transport metadata",
+        "table": "CDbComSetTable"
+      }
+    },
+    "execution_spine": [
+      "Techstream UI -> CommandAPI typed request/response objects",
+      "CommandAPI -> DiagCommCtrlMain::CCommCtrlMain::CommandExecute",
+      "DB 0x113 / CDbDllTable: (ECU/category, DLL-role) -> DLL filename",
+      "LoadLibraryA/GetProcAddress(\"Execute\") -> one-export command plugin",
+      "plugin chooses one or more FuncCommFrame selector IDs and control-flow/fallback policy",
+      "DB 0x112 / CDbFuncCommFrameTable: (ECU/category, selector) -> CommSet + CommFrame",
+      "DB 0x111 / CDbCommFrameTable + CDbVariableTable: CommFrame -> send/mask/check bytes",
+      "DB 0x11D / CDbComSetTable: communication-set transport metadata",
+      "CCommCachePlus::CommFrameSendReceive -> KGP_CommFrameCtrl::SendInt* / Receive*"
+    ],
+    "function_discovery": {
+      "cache": "CFuncInfoCache / CShareData slot 0x0B",
+      "cache_miss": "CDbEcuFuncInfoResRecords (0x11A) + CDbEcuFuncDetailsResRecords (0x11B), support-gated by CCmdCheckSupport, then SetFuncList",
+      "entry_export": "Execute",
+      "plugin": "GetEcuFuncList.dll"
+    },
+    "plugin_census": {
+      "command_common_importer_count": 289,
+      "dll_count": 419,
+      "execute_only_export_count": 310,
+      "parsed_pe_count": 419,
+      "selected_command_common_import_counts": {
+        "?CheckEcuFunc@CFuncInfoCache@@QAEHPAVCDataCtrl@@KGGGPAK@Z": 56,
+        "?CommFrameSendReceive@CCommCachePlus@@QAEKPAVCCommFrameData@@G@Z": 49,
+        "?CommFrameSendReceiveExt@CCommCachePlus@@QAEKPAVCCommFrameData@@G@Z": 37,
+        "?GetBusId@CEcuConnectBufferList@@QAEGK@Z": 49,
+        "?GetCommFrmInfo@CCommCachePlus@@QAEKGPAUtagCOMMAND_DATA@@PAV?$CCmdList@VCCommFrameData@@@@K@Z": 120,
+        "?GetEcuFunc@CFuncInfoCache@@QAEKPAVCDataCtrl@@KPAPAVCEcuFuncInfo@@PAH@Z": 1
+      },
+      "top_command_common_imports": [
+        {
+          "dll_count": 176,
+          "name": "??0CCommCachePlus@@QAE@XZ"
+        },
+        {
+          "dll_count": 176,
+          "name": "??1CCommCachePlus@@UAE@XZ"
+        },
+        {
+          "dll_count": 132,
+          "name": "??0?$CCmdList@VCCommFrameData@@@@QAE@XZ"
+        },
+        {
+          "dll_count": 132,
+          "name": "??1?$CCmdList@VCCommFrameData@@@@UAE@XZ"
+        },
+        {
+          "dll_count": 121,
+          "name": "?GetAt@?$CCmdList@VCCommFrameData@@@@QBEAAVCCommFrameData@@K@Z"
+        },
+        {
+          "dll_count": 120,
+          "name": "?GetCommFrmInfo@CCommCachePlus@@QAEKGPAUtagCOMMAND_DATA@@PAV?$CCmdList@VCCommFrameData@@@@K@Z"
+        },
+        {
+          "dll_count": 61,
+          "name": "??0CFuncInfoCache@@QAE@XZ"
+        },
+        {
+          "dll_count": 61,
+          "name": "??1CFuncInfoCache@@UAE@XZ"
+        },
+        {
+          "dll_count": 56,
+          "name": "?CheckEcuFunc@CFuncInfoCache@@QAEHPAVCDataCtrl@@KGGGPAK@Z"
+        },
+        {
+          "dll_count": 56,
+          "name": "??1CPidList@@QAE@XZ"
+        },
+        {
+          "dll_count": 56,
+          "name": "??0CPidList@@QAE@XZ"
+        },
+        {
+          "dll_count": 53,
+          "name": "??1CCmdSupportBitList@@UAE@XZ"
+        },
+        {
+          "dll_count": 50,
+          "name": "??1CCommCachePlusP5@@UAE@XZ"
+        },
+        {
+          "dll_count": 50,
+          "name": "??0CCommCachePlusP5@@QAE@XZ"
+        },
+        {
+          "dll_count": 49,
+          "name": "?CommFrameSendReceive@CCommCachePlus@@QAEKPAVCCommFrameData@@G@Z"
+        },
+        {
+          "dll_count": 49,
+          "name": "?GetBusId@CEcuConnectBufferList@@QAEGK@Z"
+        },
+        {
+          "dll_count": 47,
+          "name": "??1CEcuConnectCheck@@UAE@XZ"
+        },
+        {
+          "dll_count": 47,
+          "name": "??0CEcuConnectCheck@@QAE@XZ"
+        },
+        {
+          "dll_count": 44,
+          "name": "?InitDiagCode@CGetDiagCode@@QAEKPAUtagCOMMAND_DATA@@@Z"
+        },
+        {
+          "dll_count": 40,
+          "name": "?RemoveAll@?$CCmdList@VCCommFrameData@@@@QAEXXZ"
+        }
+      ]
+    },
+    "representative_routes": {
+      "brake_current_cid": {
+        "binding": {
+          "category_id": 435,
+          "dll_name": "GetCID_SID22_SAS_DT.dll",
+          "dll_role_hex": "0x52",
+          "dll_role_id": 82,
+          "raw": "4700650074004300490044005f00530049004400320032005f005300410053005f00440054002e0064006c006c0000000000000000000000000000000000000000000000000000000000000000000000b301000000005200"
+        },
+        "frame": {
+          "category_id": 435,
+          "comm_frame_id": "0x444",
+          "comm_frame_raw": "440481059f008305",
+          "comm_set": 1,
+          "comm_set_metadata": {
+            "comm_set_id": 1,
+            "exception_handler_flag": 0,
+            "exception_handler_id": 0,
+            "raw": "e8030000fc0300000000010000000100",
+            "receive_timeout": 1020,
+            "retry_count": 1,
+            "send_parameter": 1000,
+            "unknown_word_0c": 0
+          },
+          "func_comm_frame_raw": "b301dc00010044040000010000000000",
+          "selector": "0xDC",
+          "variables": {
+            "receive_check": {
+              "bytes": "62f181",
+              "id": "0x583",
+              "normalized_id": "0x583"
+            },
+            "receive_mask": {
+              "bytes": "ffffff",
+              "id": "0x9F",
+              "normalized_id": "0x9F"
+            },
+            "send": {
+              "bytes": "22f181",
+              "id": "0x581",
+              "normalized_id": "0x581"
+            }
+          }
+        }
+      },
+      "comm_set_1": {
+        "comm_set_id": 1,
+        "exception_handler_flag": 0,
+        "exception_handler_id": 0,
+        "raw": "e8030000fc0300000000010000000100",
+        "receive_timeout": 1020,
+        "retry_count": 1,
+        "send_parameter": 1000,
+        "unknown_word_0c": 0
+      },
+      "comm_set_table_record_count": 12,
+      "hybrid_clear": {
+        "binding": {
+          "category_id": 397,
+          "dll_name": "DelDiagCodeP4.dll",
+          "dll_role_hex": "0x19",
+          "dll_role_id": 25,
+          "raw": "440065006c00440069006100670043006f0064006500500034002e0064006c006c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008d01000000001900"
+        },
+        "fallback": {
+          "category_id": 397,
+          "comm_frame_id": "0x4CB",
+          "comm_frame_raw": "cb0418060000d401",
+          "comm_set": 1,
+          "comm_set_metadata": {
+            "comm_set_id": 1,
+            "exception_handler_flag": 0,
+            "exception_handler_id": 0,
+            "raw": "e8030000fc0300000000010000000100",
+            "receive_timeout": 1020,
+            "retry_count": 1,
+            "send_parameter": 1000,
+            "unknown_word_0c": 0
+          },
+          "func_comm_frame_raw": "8d0102010100cb040000010000000000",
+          "selector": "0x102",
+          "variables": {
+            "receive_check": {
+              "bytes": "54",
+              "id": "0x1D4",
+              "normalized_id": "0x1D4"
+            },
+            "receive_mask": {
+              "bytes": "",
+              "id": "0x0",
+              "normalized_id": "0x0"
+            },
+            "send": {
+              "bytes": "14ffffff",
+              "id": "0x618",
+              "normalized_id": "0x618"
+            }
+          }
+        },
+        "primary": {
+          "category_id": 397,
+          "comm_frame_id": "0x8E",
+          "comm_frame_raw": "8e0033000000e701",
+          "comm_set": 1,
+          "comm_set_metadata": {
+            "comm_set_id": 1,
+            "exception_handler_flag": 0,
+            "exception_handler_id": 0,
+            "raw": "e8030000fc0300000000010000000100",
+            "receive_timeout": 1020,
+            "retry_count": 1,
+            "send_parameter": 1000,
+            "unknown_word_0c": 0
+          },
+          "func_comm_frame_raw": "8d01010001008e000000010000000000",
+          "selector": "0x1",
+          "variables": {
+            "receive_check": {
+              "bytes": "44",
+              "id": "0x1E7",
+              "normalized_id": "0x1E7"
+            },
+            "receive_mask": {
+              "bytes": "",
+              "id": "0x0",
+              "normalized_id": "0x0"
+            },
+            "send": {
+              "bytes": "04",
+              "id": "0x33",
+              "normalized_id": "0x33"
+            }
+          }
+        }
+      },
+      "source": {
+        "path": "NA/DB/Toyota.ddb",
+        "sha256": "63ee18391421a7b02996eef282bc8ea3251889981d9cf9e1722e89f4952cb19e",
+        "size": 13646849
+      }
+    }
+  }
+}

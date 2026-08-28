@@ -148,6 +148,7 @@ MASTER_TABLE_CLASS_NAMES = {
     26: "CDbEcuFuncInfoTable",
     27: "CDbEcuFuncDetailsTable",
     28: "CDbEcuAddInfoTable",
+    29: "CDbComSetTable",
     41: "CDbVehicleDecisionTable",
     43: "CDbVehicleNameTable",
     44: "CDbInstallingEcuListTable",
@@ -361,6 +362,28 @@ class MasterFunctionDetailEntry:
     category_id: int
     function_id: int
     detail_id: int
+    raw: bytes
+
+
+@dataclass
+class MasterCommSetEntry:
+    """Consumer-proven subset of master type-29 ``CDbComSetTable``.
+
+    ``send_parameter`` is deliberately not named as a timeout. The ordinary
+    CAN ``SetCommSet(1)`` path copies it into ``CCommFrameData+0x18`` and passes
+    it as ``CCommFrameCtrl::SendInt`` argument 4, but the shared CAN
+    ``SendProc`` implementation does not read that argument. The second dword
+    is independently consumed as receive-timeout input, while byte ``+0x0E``
+    bounds the retry loop.
+    """
+
+    send_parameter: int
+    receive_timeout: int
+    exception_handler_id: int
+    comm_set_id: int
+    unknown_word_0c: int
+    retry_count: int
+    exception_handler_flag: int
     raw: bytes
 
 
@@ -701,15 +724,29 @@ class DDBParser:
 
     @staticmethod
     def extract_master_dlls(section: Section) -> list[MasterDllEntry]:
-        """Decode type 19 filename and its two factory-consumed lookup keys."""
+        """Decode type-19 plugin filename/category/role across V18 and GTS+.
+
+        The record remains 88 bytes, but Toyota moved the role key between the
+        two pinned generations.  V18 ``CDbDllTable::FindDbItem1`` consumes a
+        u8 at +0x56 and every V18 type-19 row has u16(+0x54)==0.  Current GTS+
+        consumes a u16 at +0x54; its +0x56 byte is a separate field/flag and is
+        nonzero on a small subset.  Detect the table generation from the whole
+        section rather than interpreting the GTS+ flag as a role.
+        """
+        rows = _records(section, 19, 88)
+        role_at_54 = any(struct.unpack_from("<H", raw, 0x54)[0] != 0 for raw in rows)
         return [
             MasterDllEntry(
                 dll_name=_fixed_utf16le(raw[0:80]),
                 category_id=struct.unpack_from("<H", raw, 80)[0],
-                dll_role_id=raw[86],
+                dll_role_id=(
+                    struct.unpack_from("<H", raw, 0x54)[0]
+                    if role_at_54
+                    else raw[0x56]
+                ),
                 raw=raw,
             )
-            for raw in _records(section, 19, 88)
+            for raw in rows
         ]
 
     @staticmethod
@@ -741,6 +778,23 @@ class DDBParser:
                 raw=raw,
             )
             for raw in _records(section, 27, 24)
+        ]
+
+    @staticmethod
+    def extract_master_comm_sets(section: Section) -> list[MasterCommSetEntry]:
+        """Decode master type-29 fields used by CDbComSetTable/CommandCommon."""
+        return [
+            MasterCommSetEntry(
+                send_parameter=struct.unpack_from("<I", raw, 0x00)[0],
+                receive_timeout=struct.unpack_from("<I", raw, 0x04)[0],
+                exception_handler_id=struct.unpack_from("<H", raw, 0x08)[0],
+                comm_set_id=struct.unpack_from("<H", raw, 0x0A)[0],
+                unknown_word_0c=struct.unpack_from("<H", raw, 0x0C)[0],
+                retry_count=raw[0x0E],
+                exception_handler_flag=raw[0x0F],
+                raw=raw,
+            )
+            for raw in _records(section, 29, 16)
         ]
 
     @staticmethod
