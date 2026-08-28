@@ -2337,6 +2337,302 @@ def cmd_pe(args: argparse.Namespace) -> int:
     return 0
 
 
+
+CAMRY_2026_DIAG_PROFILE = {
+    "profile": "camry-2026-f33",
+    "vehicle": "2026 Toyota Camry Hybrid",
+    "panda_bus": 0,
+    "fault_status_mask": 0xAF,
+    "identity_guard": {
+        "ecu": "eps",
+        "did": 0xF181,
+        "contains_ascii": "8965F3307000",
+    },
+    "ecus": [
+        {"key": "engine", "name": "Engine", "address": 0x700, "category_id": 372, "functional_response": 0x7E8},
+        {"key": "ect", "name": "ECT", "address": 0x701},
+        {"key": "motor_generator", "name": "Motor Generator", "address": 0x724, "category_id": 395, "functional_response": 0x7EE},
+        {"key": "hybrid", "name": "Hybrid Control", "address": 0x7D2, "category_id": 397, "functional_response": 0x7EA},
+        {"key": "hv_battery", "name": "HV Battery", "address": 0x747, "category_id": 398, "functional_response": 0x7EB},
+        {"key": "plug_in", "name": "Plug-in Control", "address": 0x745},
+        {"key": "ecu_707", "name": "ECU 0x707", "address": 0x707},
+        {"key": "ecu_703", "name": "ECU 0x703", "address": 0x703},
+        {"key": "eps", "name": "Power Steering", "address": 0x7A1, "category_id": 405},
+        {"key": "brake", "name": "Brake/EPB", "address": 0x7B0, "category_id": 435, "functional_response": 0x7ED},
+        {"key": "ecu_750", "name": "ECU 0x750", "address": 0x750},
+        {"key": "ecu_7b3", "name": "ECU 0x7B3", "address": 0x7B3},
+        {"key": "air_conditioner", "name": "Air Conditioner", "address": 0x7C4, "category_id": 450},
+        {"key": "ecu_7d1", "name": "ECU 0x7D1", "address": 0x7D1},
+        {"key": "ecu_7d0", "name": "ECU 0x7D0", "address": 0x7D0},
+        {"key": "frc", "name": "Front Recognition Camera", "address": 0x792, "category_id": 498},
+        {"key": "ecu_7a2", "name": "ECU 0x7A2", "address": 0x7A2},
+    ],
+}
+
+
+def _registry_signal_row(row: dict[str, Any]) -> dict[str, Any]:
+    info = row.get("signal_info") or {}
+    return {
+        "monitor_key": row.get("monitor_key"),
+        "alternate_did": row.get("alternate_did"),
+        "name": row.get("name") or "",
+        "bit_start": row.get("bit_start"),
+        "bit_end": row.get("bit_end"),
+        "mul": info.get("mul", 1),
+        "div": info.get("div", 1),
+        "offset": info.get("offset", 0),
+        "decimal_point_count": info.get("decimal_point_count", 0),
+        "signed": bool(info.get("signed", False)),
+        "unit": info.get("unit"),
+        "patterns": {str(key): value for key, value in (info.get("pattern_display") or {}).items()},
+    }
+
+
+def _registry_did_catalog(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        did = int(row["primary_did"])
+        grouped.setdefault(f"0x{did:04X}", []).append(_registry_signal_row(row))
+    return grouped
+
+
+def _registry_dtc_catalog(parser: DDBParser, db: Any, strings: StringDataBase, source: str) -> dict[str, list[dict[str, Any]]]:
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for row in _dtc_rows(parser, db, strings, source):
+        packed = str(row.get("packed_dtc") or "").removeprefix("0x").upper()
+        if not packed:
+            continue
+        grouped.setdefault(packed, []).append({
+            "code": row.get("code") or "",
+            "description": row.get("description") or "",
+            "failure": row.get("failure") or "",
+        })
+    return grouped
+
+
+def _compact_direct_active_test(
+    selected: dict[str, Any],
+    executor: dict[str, Any],
+    monitor_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    linked = [
+        row for row in monitor_rows
+        if row.get("primary_did") == selected["initial_read_did"]
+        and row.get("bit_start") == selected["bit_start"]
+        and row.get("bit_end") == selected["bit_end"]
+    ]
+    monitor = linked[0] if len(linked) == 1 else {}
+    return {
+        "id": selected["active_test_id"],
+        "name": selected.get("name") or "",
+        "kind": "direct",
+        "service": 0x2F,
+        "positive_response": 0x6F,
+        "did": executor["data_id_for_act"]["did"],
+        "encoding_mode": executor["data_id_for_act"]["encoding_mode"],
+        "bit_start": executor["bit_range"]["start"],
+        "bit_end": executor["bit_range"]["end"],
+        "start_prefix": executor["start"]["materialized_prefix"],
+        "stop_prefix": executor["stop"]["materialized_prefix"],
+        "runtime_length_minimum": executor["runtime_data_length"]["minimum_from_bit_geometry"],
+        "minimum_examples": executor.get("minimum_length_examples"),
+        "monitor_key": monitor.get("monitor_key"),
+        "monitor_name": monitor.get("name") or "",
+        "execution": "plan_only",
+    }
+
+
+def _compact_routine_active_test(selected: dict[str, Any], executor: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": selected["active_test_id"],
+        "name": selected.get("name") or "",
+        "kind": "routine",
+        "service": 0x31,
+        "positive_response": 0x71,
+        "routine_id": selected["routine_id"],
+        "start_static": executor["start"]["materialized_static_request"],
+        "stop_static": executor["stop"]["materialized_static_request"],
+        "result_static": executor["result"]["materialized_static_request"],
+        "fixed_request": executor["fixed_request"],
+        "routine_command_variable": selected["routine_command_variable"],
+        "routine_stop_command_variable": selected["routine_stop_command_variable"],
+        "output_mask_value_variable": selected["output_mask_value_variable"],
+        "output_mask_button_variable": selected["output_mask_button_variable"],
+        "routine_status_key": selected["routine_status_key"],
+        "execution": "plan_only",
+    }
+
+
+def _registry_active_tests(
+    parser: DDBParser,
+    master: Any,
+    category: dict[str, Any],
+    db_root: Path,
+    strings: StringDataBase,
+    monitor_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    db_path = db_root / str(category["database"])
+    db = parser.parse_ecu_db(db_path)
+    rows: list[dict[str, Any]] = []
+    direct = db.sections.get(68)
+    if direct is not None:
+        if direct.decoded_record_size != 64:
+            raise ValueError(f"{db_path.name}: type-68 record size {direct.decoded_record_size}, expected 64")
+        direct_ids = [
+            struct.unpack_from("<H", direct.decoded_data, index * 64 + 0x20)[0]
+            for index in range(direct.header.record_count)
+        ]
+        direct_counts = {value: direct_ids.count(value) for value in set(direct_ids)}
+        for index, active_test_id in enumerate(direct_ids):
+            raw = direct.decoded_data[index * 64 : (index + 1) * 64]
+            name_index = struct.unpack_from("<I", raw, 0x0C)[0]
+            name = strings.get_string(name_index) or ""
+            if direct_counts[active_test_id] != 1:
+                rows.append({
+                    "id": active_test_id,
+                    "record": index,
+                    "name": name,
+                    "kind": "direct",
+                    "execution": "unresolved_static_plan",
+                    "error": f"duplicate direct Active Test ID resolves {direct_counts[active_test_id]} rows",
+                })
+                continue
+            try:
+                db_obj, selected_db_path, selected = _direct_active_test_selected_row(
+                    parser, category, db_root, active_test_id, strings
+                )
+                executor = _direct_active_test_executor_plan(
+                    parser, master, category, db_obj, selected_db_path, selected
+                )
+                rows.append(_compact_direct_active_test(selected, executor, monitor_rows))
+            except ValueError as exc:
+                rows.append({
+                    "id": active_test_id,
+                    "record": index,
+                    "name": name,
+                    "kind": "direct",
+                    "execution": "unresolved_static_plan",
+                    "error": str(exc),
+                })
+    routine = db.sections.get(71)
+    if routine is not None:
+        if routine.decoded_record_size != 72:
+            raise ValueError(f"{db_path.name}: type-71 record size {routine.decoded_record_size}, expected 72")
+        routine_ids = [
+            struct.unpack_from("<H", routine.decoded_data, index * 72 + 0x1E)[0]
+            for index in range(routine.header.record_count)
+        ]
+        routine_counts = {value: routine_ids.count(value) for value in set(routine_ids)}
+        for index, active_test_id in enumerate(routine_ids):
+            raw = routine.decoded_data[index * 72 : (index + 1) * 72]
+            name_index = struct.unpack_from("<I", raw, 0x08)[0]
+            name = strings.get_string(name_index) or ""
+            routine_id = struct.unpack_from("<H", raw, 0x1C)[0]
+            if routine_counts[active_test_id] != 1:
+                rows.append({
+                    "id": active_test_id,
+                    "record": index,
+                    "name": name,
+                    "kind": "routine",
+                    "routine_id": routine_id,
+                    "execution": "unresolved_static_plan",
+                    "error": f"duplicate routine Active Test ID resolves {routine_counts[active_test_id]} rows",
+                })
+                continue
+            _, _, selected = _routine_active_test_selected_row(parser, category, db_root, active_test_id, strings)
+            try:
+                executor = _routine_active_test_executor_plan(parser, master, category, selected)
+                rows.append(_compact_routine_active_test(selected, executor))
+            except ValueError as exc:
+                rows.append({
+                    "id": active_test_id,
+                    "record": index,
+                    "name": name,
+                    "kind": "routine",
+                    "routine_id": routine_id,
+                    "execution": "unresolved_static_plan",
+                    "error": str(exc),
+                })
+    return sorted(rows, key=lambda row: (int(row["id"]), row["kind"]))
+
+
+def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str = "Gen") -> dict[str, Any]:
+    db_root = _db_root(gts_root, region, family)
+    parser = DDBParser()
+    master_path = db_root / "Toyota.ddb"
+    master = parser.parse_master_db(master_path)
+    strings_path = db_root / "M_English.ddb"
+    strings = _english_strings(parser, db_root)
+    dtc_clear_path = ROOT / "data/generated/camry_2026_dtc_clear.json"
+    dtc_clear = json.loads(dtc_clear_path.read_text())
+
+    profile = json.loads(json.dumps(CAMRY_2026_DIAG_PROFILE))
+    known_categories = sorted({
+        int(ecu["category_id"])
+        for ecu in profile["ecus"]
+        if "category_id" in ecu
+    })
+    catalogs: dict[str, Any] = {}
+    source_files = [master_path, strings_path, dtc_clear_path, EXECUTION_MODEL]
+    for category_id in known_categories:
+        category = _resolve_master_category(parser, master, strings, str(category_id))
+        db_path = db_root / str(category["database"])
+        db = parser.parse_ecu_db(db_path)
+        source_files.append(db_path)
+        monitor_rows = _monitor_rows(db, strings, db_path.name)
+        catalogs[str(category_id)] = {
+            "category": category,
+            "dids": _registry_did_catalog(monitor_rows),
+            "dtcs": _registry_dtc_catalog(parser, db, strings, db_path.name),
+            "active_tests": _registry_active_tests(parser, master, category, db_root, strings, monitor_rows),
+        }
+
+    mode04 = dtc_clear["legislated_obd"]
+    profile["dtc_clear"] = {
+        "physical_uds14": dtc_clear["physical_uds14"],
+        "functional_obd": {
+            "request_id": int(mode04["request_id"], 16),
+            "mode04_request": mode04["mode04_clear_request_frame"],
+            "positive_prefix": "0144",
+            "expected_responders": sorted(int(value, 16) for value in mode04["mode04_positive_responses"]),
+        },
+        "boundary": dtc_clear["boundary"],
+    }
+    profile["catalog_category_ids"] = known_categories
+
+    return {
+        "schema": "toyota-diagnostics-registry-v1",
+        "profile": profile,
+        "catalogs": catalogs,
+        "source_identity": {
+            path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else path.name: {
+                "bytes": path.stat().st_size,
+                "sha256": _file_sha256(path),
+            }
+            for path in sorted(set(source_files), key=lambda item: str(item))
+        },
+        "boundary": (
+            "Clean derived diagnostic metadata only: no Toyota binaries are embedded. Active Tests are static plans only; "
+            "the registry intentionally contains no execution authorization, session escalation, SecurityAccess, flash, or write workflow."
+        ),
+    }
+
+
+def cmd_registry(args: argparse.Namespace) -> int:
+    gts = _resolve_gts_root(args.gtsplus_root)
+    if args.profile != "camry-2026-f33":
+        raise SystemExit(f"unsupported derived registry profile {args.profile!r}")
+    payload = build_toyota_diag_registry(gts, args.region, args.family)
+    text = json.dumps(payload, indent=None if args.compact else 2, sort_keys=True, separators=(",", ":") if args.compact else None) + "\n"
+    if args.out:
+        out = Path(args.out)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(text)
+        print(out)
+    else:
+        sys.stdout.write(text)
+    return 0
+
 def _common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--gtsplus-root", help="GTS+ external root or .../Toyota Diagnostics/GTSPlus (default: GTSPLUS_ROOT/repo pin)")
     parser.add_argument("--cuw-root", help="CUW corpus root (default: TOYOTA_CUW_CORPUS_ROOT/repo pin)")
@@ -2407,6 +2703,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--limit", type=int, default=100)
     _common(p)
     p.set_defaults(func=cmd_category)
+
+    p = sub.add_parser("registry", help="derive a clean Toyota diagnostic registry for Comma-side tooling")
+    p.add_argument("profile", nargs="?", default="camry-2026-f33", choices=("camry-2026-f33",))
+    p.add_argument("--out", help="write registry JSON to this path instead of stdout")
+    p.add_argument("--compact", action="store_true", help="emit compact JSON for runtime vendoring")
+    _common(p)
+    p.set_defaults(func=cmd_registry)
 
     p = sub.add_parser("canbus", help="resolve Toyota master CAN Bus Check topology for a vehicle type/name")
     p.add_argument("vehicle", help="vehicle type ID (decimal/0x) or OEM vehicle-name substring")

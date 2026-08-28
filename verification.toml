@@ -802,6 +802,19 @@ requires_external = ["techstream_v18", "gtsplus"]
 modes = ["local"]
 oracle = "independent_external_artifact"
 
+[suite.toyota_diag_registry]
+tests = ["tests/verify_toyota_diag_registry.py"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+oracle = "generated_self_check"
+paths = [
+  "tools/gts",
+  "tools/techstream/gts_cli.py",
+  "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json",
+  "data/generated/camry_2026_dtc_clear.json",
+  "docs/tooling/gts-query-cli.md",
+]
+
 [suite.gts_query_cli]
 tests = ["tests/verify_gts_query_cli.py"]
 requires_external = ["gtsplus", "cuw_reference_corpus"]

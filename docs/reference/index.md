@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 352 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 182
+Findings: 353 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 183
 
 ## Reading this index
 
@@ -304,6 +304,7 @@ Findings: 352 · Corrections: 125 · Open questions: 53 · Docs: 104 · Suites: 
 | <a id="finding-tms-071"></a>**TMS-071** | [docs/tooling/techstream.md](../tooling/techstream.md) | — | `tests/verify_techstream_diagnostic_execution_model.py`, `tests/verify_gts_query_cli.py` | — |
 | <a id="finding-tms-072"></a>**TMS-072** | [docs/tooling/techstream.md](../tooling/techstream.md) | — | `tests/verify_techstream_diagnostic_execution_model.py`, `tests/verify_gts_query_cli.py` | — |
 | <a id="finding-tms-073"></a>**TMS-073** | [docs/tooling/techstream.md](../tooling/techstream.md) | — | `tests/verify_techstream_diagnostic_execution_model.py`, `tests/verify_gts_query_cli.py` | — |
+| <a id="finding-tms-074"></a>**TMS-074** | [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | — | `tests/verify_toyota_diag_registry.py` | — |
 | <a id="finding-var-001"></a>**VAR-001** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md) | `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-002"></a>**VAR-002** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_spanconstant_corolla_equivalence.py`, `tests/verify_spanconstant_corolla_cross_variant.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-003"></a>**VAR-003** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
@@ -639,7 +640,7 @@ Every tracked document under `docs/` with its owning suite(s) and gate tests.
 | [docs/tooling/ephemeral-runtime-semantic-resolver.md](../tooling/ephemeral-runtime-semantic-resolver.md) | doc_links, ephemeral_runtime_resolver, albinoelephant_corolla_codeflash, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_ephemeral_runtime_resolver.py`, `tests/verify_albinoelephant_corolla_codeflash.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/exploit-interest-ranking.md](../tooling/exploit-interest-ranking.md) | doc_links, exploit_interest_ranking, exploit_interest_reviewed_candidates, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_exploit_interest_ranking.py`, `tests/verify_exploit_interest_reviewed_candidates.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/exploit-predicate-semantics.md](../tooling/exploit-predicate-semantics.md) | doc_links, exploit_predicate_semantics, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_exploit_predicate_semantics.py`, `tests/verify_knowledge_index.py` |
-| [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | doc_links, gts_query_cli, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_gts_query_cli.py`, `tests/verify_knowledge_index.py` |
+| [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | doc_links, toyota_diag_registry, gts_query_cli, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_toyota_diag_registry.py`, `tests/verify_gts_query_cli.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md) | doc_links, toyota_b_programming_topology, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_toyota_b_programming_topology.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/processor-module-audit.md](../tooling/processor-module-audit.md) | analysis_status, doc_links, knowledge_index | `tests/verify_analysis_status.py`, `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md) | doc_links, renesas_rfp, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_renesas_rfp.py`, `tests/verify_knowledge_index.py` |
@@ -696,7 +697,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/21140bbd65e530a9/diagnostic_vocabulary.json` | diagnostic_vocabulary, application_wdbi, application_wdbi_surface_live, spanconstant_corolla_codeflash | — |
 | `data/generated/camry-8965F3307000/decompilations.jsonl` | analysis_targets, camry_8965f3307000_gtsplus_semantics, camry_8965f3307000_codeflash, camry_8965f3307000_flash_backend, camry_8965f3307000_lateral_static, camry_8965f3307000_tss3_opendbc_port, camry_8965f3307000_fault_status, camry_8965f3307000_external_lateral_ingress | — |
 | `data/generated/camry_2026_cruise_lta_edge_census.json` | camry_2026 | — |
-| `data/generated/camry_2026_dtc_clear.json` | camry_2026 | — |
+| `data/generated/camry_2026_dtc_clear.json` | toyota_diag_registry, gts_query_cli, camry_2026 | — |
 | `data/generated/camry_2026_nrtd_p5.json` | camry_2026 | — |
 | `data/generated/camry_2026_ready_gear.json` | camry_2026 | — |
 | `data/generated/camry_2026_relay_correct_capture.json` | camry_2026 | — |
@@ -833,6 +834,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/exploit_interest_cohorts.json` | exploit_interest_ranking, exploit_interest_reviewed_candidates | — |
 | `data/generated/exploit_interest_ranking.csv` | exploit_interest_ranking, exploit_interest_reviewed_candidates | — |
 | `data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json` | camry_8965f3307000_gtsplus_semantics, camry_8965f3307000_gtsplus_external, camry_2026, camry_8965f3307000_external_lateral_ingress | — |
+| `data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json` | toyota_diag_registry | — |
 | `data/generated/p4dk4_template/p4dk4_vocabulary.json` | diagnostic_vocabulary | — |
 | `data/generated/rdbi_emitted_write_audit.json` | application_rdbi | — |
 | `data/generated/response_disclosure_audit.csv` | response_disclosure_audit | — |
@@ -863,7 +865,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/techstream_v18/cuw_writer_inventory.json` | diagnostic_vocabulary, techstream_cuw_writer_routes, techstream_pre_gts_static_closure | — |
 | `data/generated/techstream_v18/cuw_writer_protocol_grammar.json` | diagnostic_vocabulary, techstream_pre_gts_static_closure | — |
 | `data/generated/techstream_v18/ddb_factory_table_map.json` | diagnostic_vocabulary, techstream_ddb_residuals, techstream_p5_lateral_control | — |
-| `data/generated/techstream_v18/diagnostic_execution_model.json` | diagnostic_vocabulary, gts_query_cli, techstream_diagnostic_execution_model | — |
+| `data/generated/techstream_v18/diagnostic_execution_model.json` | diagnostic_vocabulary, toyota_diag_registry, gts_query_cli, techstream_diagnostic_execution_model | — |
 | `data/generated/techstream_v18/dtc_failure_types.json` | diagnostic_vocabulary, techstream_dtc_failure_types | — |
 | `data/generated/techstream_v18/mackey_state_machine.csv` | diagnostic_vocabulary, techstream_mackey | — |
 | `data/generated/techstream_v18/mackey_vehicle_protocol.json` | diagnostic_vocabulary, techstream_mackey | — |
