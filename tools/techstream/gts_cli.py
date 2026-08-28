@@ -676,6 +676,141 @@ def _direct_active_test_selected_row(
     return db, db_path, selected
 
 
+def _routine_active_test_selected_row(
+    parser: DDBParser,
+    category: dict[str, Any],
+    db_root: Path,
+    active_test_id: int,
+    strings: StringDataBase | None = None,
+) -> tuple[Any, Path, dict[str, Any]]:
+    """Resolve one current 72-byte type-71 P5 routine Active-Test row."""
+    db_path = db_root / str(category["database"])
+    db = parser.parse_ecu_db(db_path)
+    section = db.sections.get(71)
+    if section is None:
+        raise ValueError(f"{db_path.name}: selected routine Active Test table 71 is absent")
+    if section.decoded_record_size != 72:
+        raise ValueError(
+            f"{db_path.name}: current type-71 record size {section.decoded_record_size}, expected 72"
+        )
+    matches = []
+    for index in range(section.header.record_count):
+        raw = section.decoded_data[index * 72 : (index + 1) * 72]
+        if struct.unpack_from("<H", raw, 0x1E)[0] == active_test_id:
+            matches.append((index, raw))
+    if len(matches) != 1:
+        raise ValueError(
+            f"{db_path.name}: routine Active Test ID 0x{active_test_id:X} resolved {len(matches)} type-71 rows"
+        )
+    index, raw = matches[0]
+    name_index = struct.unpack_from("<I", raw, 0x08)[0]
+    selected = {
+        "record": index,
+        "active_test_id": active_test_id,
+        "active_test_id_hex": f"0x{active_test_id:X}",
+        "name_string_index": name_index,
+        "name": (strings.get_string(name_index) or "") if strings is not None else None,
+        "routine_id": struct.unpack_from("<H", raw, 0x1C)[0],
+        "routine_id_hex": f"0x{struct.unpack_from('<H', raw, 0x1C)[0]:04X}",
+        "active_test_pattern_key": struct.unpack_from("<H", raw, 0x24)[0],
+        "routine_command_variable": struct.unpack_from("<H", raw, 0x28)[0],
+        "routine_stop_command_variable": struct.unpack_from("<H", raw, 0x2A)[0],
+        "output_mask_value_variable": struct.unpack_from("<H", raw, 0x2C)[0],
+        "output_mask_button_variable": struct.unpack_from("<H", raw, 0x2E)[0],
+        "routine_status_key": struct.unpack_from("<H", raw, 0x30)[0],
+        "pattern_display_variable_key": struct.unpack_from("<H", raw, 0x3C)[0],
+        "sort_key": struct.unpack_from("<H", raw, 0x40)[0],
+        "raw": raw.hex(),
+    }
+    return db, db_path, selected
+
+
+def _routine_active_test_executor_plan(
+    parser: DDBParser,
+    master: Any,
+    category: dict[str, Any],
+    selected: dict[str, Any],
+) -> dict[str, Any]:
+    """Materialize the current GTS+ P5 UDS RoutineControl contract."""
+    category_id = int(category["category_id"])
+    rid = int(selected["routine_id"])
+
+    def phase(selector: int, subfunction: int, variable_field: str | None) -> dict[str, Any]:
+        rows = _master_frame_rows(parser, master, category_id, selector)
+        if len(rows) != 1:
+            raise ValueError(
+                f"category {category_id}: routine selector 0x{selector:X} resolved {len(rows)} frames"
+            )
+        frame = rows[0]
+        expected = bytes((0x31, subfunction, 0xFF, 0xFF))
+        send = bytes.fromhex(frame["send"]["bytes"])
+        if send != expected:
+            raise ValueError(
+                f"category {category_id}: selector 0x{selector:X} base request {send.hex()} != {expected.hex()}"
+            )
+        expected_reply = bytes((0x71, subfunction)).hex()
+        if frame["receive_check"]["bytes"] != expected_reply:
+            raise ValueError(
+                f"category {category_id}: selector 0x{selector:X} positive check "
+                f"{frame['receive_check']['bytes']} != {expected_reply}"
+            )
+        request = bytearray(send)
+        request[2] = (rid >> 8) & 0xFF
+        request[3] = rid & 0xFF
+        variable = None
+        if variable_field is not None:
+            variable_id = int(selected[variable_field])
+            variable = _master_variable(master, variable_id)
+            if variable_id:
+                request.extend(bytes.fromhex(variable["bytes"]))
+        return {
+            "selector": f"0x{selector:X}",
+            "subfunction": f"0x{subfunction:02X}",
+            "base_frame": frame,
+            "static_command_variable": variable,
+            "materialized_static_request": request.hex(),
+        }
+
+    start = phase(0xD5, 0x01, "routine_command_variable")
+    stop = phase(0xD6, 0x02, "routine_stop_command_variable")
+    result = phase(0xD7, 0x03, None)
+    value_mask = _master_variable(master, int(selected["output_mask_value_variable"]))
+    button_mask = _master_variable(master, int(selected["output_mask_button_variable"]))
+    fixed = not any(
+        int(selected[field])
+        for field in (
+            "routine_command_variable",
+            "routine_stop_command_variable",
+            "output_mask_value_variable",
+            "output_mask_button_variable",
+        )
+    )
+    return {
+        "service": "0x31",
+        "service_name": "RoutineControl",
+        "positive_response": "0x71",
+        "routine_id": rid,
+        "routine_id_hex": f"0x{rid:04X}",
+        "start": start,
+        "stop": stop,
+        "result": result,
+        "output_mask_value": value_mask,
+        "output_mask_button": button_mask,
+        "fixed_request": fixed,
+        "parameterization": (
+            "fixed: no routine command, stop-command, value-mask, or button-mask variable is referenced"
+            if fixed
+            else "parameterized: static command bytes and/or runtime value/button bytes are merged through explicit type-71 variable masks"
+        ),
+        "transport": (
+            "DataMonitorPhase5 passes buffer+1/length-1 to the shared active_test_start interface with "
+            "ActiveTestType=1; DataListIF re-prepends 0x31, queues/replaces by RID, accepts 0x71, "
+            "and the common P5 J2534 worker sends the queued frame via SendIntExt"
+        ),
+        "boundary": "static plan only; does not execute RoutineControl or prove outer session/authentication requirements",
+    }
+
+
 def _direct_active_test_executor_plan(
     parser: DDBParser,
     master: Any,
@@ -1412,6 +1547,129 @@ def _master_frame_rows(parser: DDBParser, master: Any, category_id: int, selecto
     return rows
 
 
+def cmd_active_test(args: argparse.Namespace) -> int:
+    """Resolve one direct or routine P5 Active Test into its static wire plan."""
+    gts = _resolve_gts_root(args.gtsplus_root)
+    db_root = _db_root(gts, args.region, args.family)
+    parser = DDBParser()
+    master = parser.parse_master_db(db_root / "Toyota.ddb")
+    strings = _english_strings(parser, db_root)
+    category = _resolve_master_category(parser, master, strings, args.category)
+    active_test_id = _parse_master_key(args.item)
+    if active_test_id is None:
+        raise SystemExit(f"invalid Active Test ID {args.item!r}; use decimal or 0x-prefixed hex")
+
+    db = parser.parse_ecu_db(db_root / str(category["database"]))
+    kinds = []
+    if 68 in db.sections and db.sections[68].decoded_record_size == 64:
+        size = db.sections[68].decoded_record_size
+        if any(
+            struct.unpack_from("<H", db.sections[68].decoded_data, index * size + 0x20)[0] == active_test_id
+            for index in range(db.sections[68].header.record_count)
+        ):
+            kinds.append("direct")
+    if 71 in db.sections and db.sections[71].decoded_record_size == 72:
+        size = db.sections[71].decoded_record_size
+        if any(
+            struct.unpack_from("<H", db.sections[71].decoded_data, index * size + 0x1E)[0] == active_test_id
+            for index in range(db.sections[71].header.record_count)
+        ):
+            kinds.append("routine")
+
+    if args.kind is not None:
+        if args.kind not in kinds:
+            raise SystemExit(
+                f"{category['database']}: Active Test 0x{active_test_id:X} is not a {args.kind} candidate"
+            )
+        kind = args.kind
+    elif len(kinds) == 1:
+        kind = kinds[0]
+    elif not kinds:
+        raise SystemExit(
+            f"{category['database']}: Active Test 0x{active_test_id:X} was not found in current type-68/type-71 tables"
+        )
+    else:
+        raise SystemExit(
+            f"{category['database']}: Active Test 0x{active_test_id:X} exists as both {', '.join(kinds)}; use --kind"
+        )
+
+    if kind == "direct":
+        _, _, selected = _direct_active_test_selected_row(
+            parser, category, db_root, active_test_id, strings
+        )
+        selected_plan = _active_test_init_selected_plan(
+            parser, master, category, db_root, active_test_id, strings
+        )
+        payload = {
+            "category": category,
+            "kind": kind,
+            "selected_test": selected,
+            "executor": selected_plan["executor"],
+            "initial_transaction": selected_plan["initial_transaction"],
+            "linked_monitor": selected_plan["linked_monitor"],
+            "boundary": "read-only static planning; no Active Test request is sent",
+        }
+    else:
+        _, _, selected = _routine_active_test_selected_row(
+            parser, category, db_root, active_test_id, strings
+        )
+        payload = {
+            "category": category,
+            "kind": kind,
+            "selected_test": selected,
+            "executor": _routine_active_test_executor_plan(parser, master, category, selected),
+            "boundary": "read-only static planning; no RoutineControl request is sent",
+        }
+
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
+
+    selected = payload["selected_test"]
+    executor = payload["executor"]
+    print(
+        f"active-test\tcategory={category['category_id']}\t{category['name']}\tkind={kind}\t"
+        f"id={selected['active_test_id_hex']}\tname={selected['name'] or '-'}"
+    )
+    if kind == "direct":
+        length = executor["runtime_data_length"]
+        print(
+            f"wire\tservice={executor['service']}\tdid={executor['data_id_for_act']['did_hex']}\t"
+            f"start={executor['start']['materialized_prefix']}+N\tstop={executor['stop']['materialized_prefix']}+N\t"
+            f"runtime_length=N\tminimum={length['minimum_from_bit_geometry']}"
+        )
+        examples = executor.get("minimum_length_examples")
+        if examples is not None:
+            print(
+                f"minimum-example\traw0={examples['raw_0']}\traw1={examples['raw_1']}\t"
+                f"return={examples['return_control']}"
+            )
+    else:
+        refs = selected
+        if executor["fixed_request"]:
+            print(
+                f"wire\tservice={executor['service']}\trid={executor['routine_id_hex']}\t"
+                f"start={executor['start']['materialized_static_request']}\t"
+                f"stop={executor['stop']['materialized_static_request']}\t"
+                f"result={executor['result']['materialized_static_request']}\tfixed=1"
+            )
+        else:
+            print(
+                f"wire\tservice={executor['service']}\trid={executor['routine_id_hex']}\t"
+                f"start_static={executor['start']['materialized_static_request']}\t"
+                f"stop_static={executor['stop']['materialized_static_request']}\t"
+                f"result={executor['result']['materialized_static_request']}\tfixed=0\tdynamic=masked"
+            )
+        print(
+            f"routine-vars\tstart=0x{refs['routine_command_variable']:X}\t"
+            f"stop=0x{refs['routine_stop_command_variable']:X}\t"
+            f"value_mask=0x{refs['output_mask_value_variable']:X}\t"
+            f"button_mask=0x{refs['output_mask_button_variable']:X}\t"
+            f"status_key=0x{refs['routine_status_key']:X}"
+        )
+    return 0
+
+
 def cmd_command(args: argparse.Namespace) -> int:
     gts = _resolve_gts_root(args.gtsplus_root)
     db_root = _db_root(gts, args.region, args.family)
@@ -2109,6 +2367,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("ecu", help="ECU .ddb name/stem/substr or path")
     _common(p)
     p.set_defaults(func=cmd_ecu)
+
+    p = sub.add_parser("active-test", help="resolve one current P5 Active Test into a read-only static wire plan")
+    p.add_argument("category", help="category ID, database/short name, or OEM ECU name")
+    p.add_argument("item", help="Active Test lookup ID (decimal or 0x-prefixed hex)")
+    p.add_argument("--kind", choices=("direct", "routine"), help="disambiguate a key present in both type-68 and type-71")
+    _common(p)
+    p.set_defaults(func=cmd_active_test)
 
     p = sub.add_parser("command", help="resolve one category+role into plugin, wire frames, timers, and recovered semantics")
     p.add_argument("category", help="category ID, database/short name, or OEM ECU name")

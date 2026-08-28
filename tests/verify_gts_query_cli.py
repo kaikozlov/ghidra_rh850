@@ -245,6 +245,42 @@ check(
     "command plan joins Hybrid role 0x70 Active Test 1 to exact pattern/physical/display metadata without transport",
 )
 
+frc_category = gts_cli._resolve_master_category(parser, master, strings, "FRC_P5")
+_, _, routine_selected = gts_cli._routine_active_test_selected_row(
+    parser, frc_category, db_root, 0xA429, strings
+)
+routine_executor = gts_cli._routine_active_test_executor_plan(
+    parser, master, frc_category, routine_selected
+)
+check(
+    routine_selected["name"] == "LTA Steering Vibration"
+    and routine_selected["routine_id"] == 0x1588
+    and routine_selected["routine_command_variable"] == 0
+    and routine_selected["routine_stop_command_variable"] == 0
+    and routine_selected["output_mask_value_variable"] == 0
+    and routine_selected["output_mask_button_variable"] == 0
+    and routine_selected["routine_status_key"] == 2
+    and routine_selected["sort_key"] == 542
+    and routine_executor["service"] == "0x31"
+    and routine_executor["positive_response"] == "0x71"
+    and routine_executor["fixed_request"] is True
+    and routine_executor["start"]["materialized_static_request"] == "31011588"
+    and routine_executor["stop"]["materialized_static_request"] == "31021588"
+    and routine_executor["result"]["materialized_static_request"] == "31031588",
+    "unified Active-Test planner resolves FRC A429 as fixed UDS RoutineControl RID 0x1588",
+)
+check(
+    gts_cli.build_parser().parse_args(["active-test", "FRC_P5", "0xA429"]).func is gts_cli.cmd_active_test,
+    "gts active-test command is registered in the unified CLI",
+)
+
+try:
+    gts_cli._routine_active_test_selected_row(parser, frc_category, db_root, 0xFFFF, strings)
+except ValueError as exc:
+    check("resolved 0 type-71 rows" in str(exc), "routine Active-Test planner fails closed for an unknown type-71 key")
+else:
+    raise AssertionError("routine Active-Test planner accepted an unknown type-71 key")
+
 try:
     gts_cli._master_command_plan(parser, master, hybrid, 0x08, gts / "bin", db_root, 0xFFFF, strings)
 except ValueError as exc:

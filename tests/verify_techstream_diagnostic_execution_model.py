@@ -237,6 +237,121 @@ check(
     and "DataIdLengthList" in active_runtime["boundary"]
     and active_runtime["handoff"]["transport"].endswith("CCommFrameCtrl::SendIntExt"),
 )
+routine = active_runtime["routine_executor"]
+check(
+    "current P5 routine runtime binaries and generic category-0 dispatcher roles are identity-pinned",
+    active_runtime["binaries"]["kgp_data_ctrl"]["sha256"] == "19e709e12e53f485a84ccfbf6b226922b88502206c34b767db543c7f3df101f8"
+    and active_runtime["binaries"]["start_active_test"]["sha256"] == "85d8f8df1c6aaa83c4ff5a9e2d9bf2a2c535727424a2289c68b66292c7107a4b"
+    and active_runtime["binaries"]["routine_init"]["sha256"] == "52a53a3d111e82c6440f2f049538f645aa9d685c63cd7bfad1e9ada76011eec5"
+    and active_runtime["binaries"]["routine_signal_info"]["sha256"] == "a937098d1f5374564386be688b0c6db056c6bf35f5c1dd85d68bdc9c9e052781"
+    and active_runtime["binaries"]["single_routine"]["sha256"] == "8e4853798bb1cc2cd259f32d7d30feffdddafdaa1802204f87fcd2f26aeb0e72"
+    and active_runtime["binaries"]["diag_comm_ctrl_main"]["sha256"] == "d1ba329ba144bbfe49ba91a2e11bfee397f881e2f37c6c20c79376a6e9849967"
+    and {key: (row["category_id"], row["plugin"]) for key, row in routine["generic_dispatch"]["roles"].items()} == {
+        "0xB0": (0, "StartActTst.dll"),
+        "0xAE": (0, "GetRoutineActTstInitP5_DT.dll"),
+        "0xAF": (0, "GetRoutineActTstSignalInfoP5_DT.dll"),
+        "0xD4": (0, "SingleRoutineActTstP5_DT.dll"),
+    }
+    and "m_dwEcuId (+0x1C)" in routine["generic_dispatch"]["category_zero_semantics"]
+    and "exact category match" in routine["generic_dispatch"]["category_zero_semantics"]
+    and "first role match" in routine["generic_dispatch"]["category_zero_semantics"]
+    and "category 0" in routine["generic_dispatch"]["category_zero_semantics"],
+)
+check(
+    "current P5 generic routine plugin selection is role-first, exact-category-second, then category-0 first-row fallback",
+    routine["generic_dispatch"]["fallback_order"]["0xB0"] == [
+        {"category_id": 0, "plugin": "StartActTst.dll"}
+    ]
+    and routine["generic_dispatch"]["fallback_order"]["0xD4"] == [
+        {"category_id": 0, "plugin": "SingleRoutineActTstP5_DT.dll"}
+    ]
+    and routine["generic_dispatch"]["fallback_order"]["0xAE"][0] == {
+        "category_id": 0, "plugin": "GetRoutineActTstInitP5_DT.dll"
+    }
+    and routine["generic_dispatch"]["fallback_order"]["0xAE"][1]["category_id"] == 6000
+    and routine["generic_dispatch"]["fallback_order"]["0xAE"][1]["plugin"] == "GetRoutineActTstInitP6_DT.dll"
+    and routine["generic_dispatch"]["fallback_order"]["0xAF"][0] == {
+        "category_id": 0, "plugin": "GetRoutineActTstSignalInfoP5_DT.dll"
+    }
+    and routine["generic_dispatch"]["fallback_order"]["0xAF"][1]["category_id"] == 6000
+    and routine["generic_dispatch"]["fallback_order"]["0xAF"][1]["plugin"] == "GetRoutineActTstSignalInfoP6_DT.dll",
+)
+check(
+    "current 72-byte type-71 routine layout is pinned separately from the older V18 layout",
+    routine["type71_layout_current_72_byte"] == {
+        "table": 71,
+        "class": "CDbRoutineActTestP5Table",
+        "record_size": 72,
+        "routine_id": "u16 +0x1C",
+        "active_test_lookup_key": "u16 +0x1E",
+        "routine_command_variable": "u16 +0x28",
+        "routine_stop_command_variable": "u16 +0x2A",
+        "output_mask_value_variable": "u16 +0x2C",
+        "output_mask_button_variable": "u16 +0x2E",
+        "routine_status_key": "u16 +0x30 -> type-72 CDbRoutineStatus",
+        "sort_key": "u16 +0x40",
+    }
+    and "current GTS+" in routine["version_boundary"]
+    and "V18 TMS-041" in routine["version_boundary"],
+)
+check(
+    "current FRC routine selectors are standard UDS 31 start/stop/results with 71 responses",
+    routine["service"] == "0x31 RoutineControl"
+    and routine["positive_response"] == "0x71"
+    and routine["frames"]["start"]["variables"]["send"]["bytes"] == "3101ffff"
+    and routine["frames"]["start"]["variables"]["receive_check"]["bytes"] == "7101"
+    and routine["frames"]["stop"]["variables"]["send"]["bytes"] == "3102ffff"
+    and routine["frames"]["stop"]["variables"]["receive_check"]["bytes"] == "7102"
+    and routine["frames"]["result"]["variables"]["send"]["bytes"] == "3103ffff"
+    and routine["frames"]["result"]["variables"]["receive_check"]["bytes"] == "7103",
+)
+frc_routine = routine["frc_lta_steering_vibration_witness"]
+check(
+    "current FRC LTA Steering Vibration is a fixed RID 0x1588 routine with no setpoint payload",
+    frc_routine["active_test_key"] == "0xA429"
+    and frc_routine["name"] == "LTA Steering Vibration"
+    and frc_routine["routine_id"] == "0x1588"
+    and frc_routine["variable_refs"] == {
+        "routine_command": 0,
+        "routine_stop_command": 0,
+        "output_mask_value": 0,
+        "output_mask_button_data": 0,
+    }
+    and frc_routine["routine_status_key"] == 2
+    and frc_routine["sort_key"] == 542
+    and frc_routine["start_request"] == "31011588"
+    and frc_routine["stop_request"] == "31021588"
+    and frc_routine["result_request"] == "31031588"
+    and "no parameter payload or steering setpoint" in frc_routine["parameterization_negative"],
+)
+check(
+    "current P5 routine materialization, queueing, response, and one-shot corroboration are instruction-pinned",
+    active_runtime["anchors"]["routine_command_object_role_b0"]["bytes"].startswith("6a00ff750868b0000000")
+    and active_runtime["anchors"]["routine_dispatch_startact"]["bytes"].endswith("5dff2540300010")
+    and active_runtime["anchors"]["routine_type71_variable_refs"]["bytes"].startswith("8b14910fb74228")
+    and active_runtime["anchors"]["routine_type71_status_key"]["bytes"] == "6689430a8b018d4d980fb740306689430c8d45ec506a00ff15984000108943108d4d980fb745ec66"
+    and active_runtime["anchors"]["routine_type71_sort_key"]["bytes"] == "8b45f08b4c90fc0fb751408b45fc8b4df08b04810fb748403bd17e388b55f88b42188b4dfc8b14888955"
+    and active_runtime["anchors"]["routine_command_execute_cmd_ecu"]["bytes"] == "8d45e050ff7708ff771ce88b04000085c00f85350100008b45e085c075185f"
+    and active_runtime["anchors"]["routine_dll_role_category_lookup"]["bytes"] == "8b4e048d85ccfbffff57525081c1cc0000006813010000ff95c8fbffff8bf8"
+    and active_runtime["anchors"]["routine_dll_category_fallback"]["bytes"].startswith("8b45e48b088b51308955d48d45f8508d4dec51")
+    and active_runtime["anchors"]["routine_init_target_ecuid"]["bytes"].startswith("8b078b4f1081c1cc000000ff701c")
+    and active_runtime["anchors"]["routine_d5_rid_and_command"]["bytes"].endswith("ff15b8b30110")
+    and active_runtime["anchors"]["routine_d6_rid"]["bytes"].startswith("ffd0ff7604")
+    and active_runtime["anchors"]["routine_stop_command_append"]["bytes"].startswith("8d45e0506a00")
+    and active_runtime["anchors"]["routine_active_test_type_1_handoff"]["bytes"].endswith("8b018b502c")
+    and active_runtime["anchors"]["routine_queue_rid_identity"]["bytes"].startswith("83f8010f85e60000008b0a803931")
+    and active_runtime["anchors"]["routine_event_service_prefix_31"]["bytes"].startswith("83f8017523b131")
+    and active_runtime["anchors"]["routine_event_positive_71"]["bytes"].startswith("3c71740f")
+    and active_runtime["anchors"]["single_routine_sequence"]["bytes"].startswith("53568d4db8e8f9faffff")
+    and active_runtime["anchors"]["single_routine_status_key"]["bytes"].endswith("506848020000ff15a0400010")
+    and [row["selector"] for row in routine["single_routine_corroboration"]["sequence"]] == ["0xD5", "0xD7", "0xD6"],
+)
+check(
+    "current P5 routine recovery remains static and does not transfer the older V18 wire grammar",
+    "no Active Test or RoutineControl request was sent" in routine["safety_boundary"]
+    and "outer session/authentication" in routine["safety_boundary"]
+    and "standard UDS 31/71" in routine["version_boundary"],
+)
 monitor_list = plugin_semantics["role_0x05_p5_monitor_list"]
 multi_active_test_init = plugin_semantics["role_0x63_p5_multi_active_test_init"]
 active_test_monitor_list = plugin_semantics["role_0xad_p5_monitor_list_for_active_test"]

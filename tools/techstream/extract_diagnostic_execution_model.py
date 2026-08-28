@@ -774,18 +774,27 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
 
 
 def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) -> dict:
-    """Recover the shared current GTS+ P5 direct Active-Test runtime executor.
+    """Recover the shared current GTS+ P5 direct and routine Active-Test runtime.
 
-    This path lives below the per-category role plugins: DataMonitorPhase5_DT
-    materializes UDS IO-Control start/return-control requests, DataListIF queues
-    them, and the P5 J2534 worker hands the unchanged frame to SendIntExt.
+    These paths live below the per-category role plugins. Direct tests materialize
+    UDS IO-Control; routine tests materialize UDS RoutineControl. Both converge on
+    DataListIF queueing and the same P5 J2534 SendIntExt transport worker.
     """
     bin_root = gts_root / "bin"
     datamon = bin_root / "DataMonitorPhase5_DT.dll"
     datalist = bin_root / "DataListIF.dll"
     command_data = bin_root / "CommandDataLib.dll"
+    kgp_data = bin_root / "KgpDataCtrl.dll"
+    diag_comm = bin_root / "DiagCommCtrlMain.dll"
+    start_act = bin_root / "StartActTst.dll"
+    routine_init = bin_root / "GetRoutineActTstInitP5_DT.dll"
+    routine_signal = bin_root / "GetRoutineActTstSignalInfoP5_DT.dll"
+    single_routine = bin_root / "SingleRoutineActTstP5_DT.dll"
     hybrid_db_path = gts_root / "NA/DB/Gen/HV_P5.ddb"
     hybrid_db = parser.parse_ecu_db(hybrid_db_path)
+    frc_db_path = gts_root / "NA/DB/Gen/FRC_P5.ddb"
+    frc_db = parser.parse_ecu_db(frc_db_path)
+    strings = parser.load_string_db(gts_root / "NA/DB/Gen/M_English.ddb")
 
     table67 = hybrid_db.sections[67]
     if table67.decoded_record_size != 18:
@@ -826,6 +835,80 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
     if stop_frame["variables"]["send"]["bytes"] != "2fffff00" or stop_frame["variables"]["receive_check"]["bytes"] != "6f":
         raise ValueError("Hybrid selector 0x64 is no longer the expected 2FFFFF00 -> 6F frame")
 
+    # Current FRC routine witness. The 72-byte GTS+ type-71 layout differs
+    # from the older V18 64-byte record: KgpDataCtrl::SetRecVariableData pins
+    # +0x28/+0x2A/+0x2C/+0x2E to start/stop/value-mask/button-mask variables,
+    # while +0x30 is the type-72 routine-status key and +0x40 is the sort key.
+    table71 = frc_db.sections[71]
+    if table71.decoded_record_size != 72:
+        raise ValueError(f"FRC_P5 type-71 record size {table71.decoded_record_size}, expected 72")
+    routine_rows = [
+        (index, raw)
+        for index, raw in enumerate(records(table71))
+        if struct.unpack_from("<H", raw, 0x1E)[0] == 0xA429
+    ]
+    if len(routine_rows) != 1:
+        raise ValueError(f"FRC_P5 Active Test 0xA429 resolved {len(routine_rows)} type-71 rows")
+    routine_index, routine_raw = routine_rows[0]
+    routine_name = strings.get_string(struct.unpack_from("<I", routine_raw, 0x08)[0]) or ""
+    routine_id = struct.unpack_from("<H", routine_raw, 0x1C)[0]
+    routine_refs = {
+        "routine_command": struct.unpack_from("<H", routine_raw, 0x28)[0],
+        "routine_stop_command": struct.unpack_from("<H", routine_raw, 0x2A)[0],
+        "output_mask_value": struct.unpack_from("<H", routine_raw, 0x2C)[0],
+        "output_mask_button_data": struct.unpack_from("<H", routine_raw, 0x2E)[0],
+    }
+    routine_status_key = struct.unpack_from("<H", routine_raw, 0x30)[0]
+    routine_sort_key = struct.unpack_from("<H", routine_raw, 0x40)[0]
+    if (routine_name, routine_id, routine_refs, routine_status_key, routine_sort_key) != (
+        "LTA Steering Vibration", 0x1588,
+        {"routine_command": 0, "routine_stop_command": 0, "output_mask_value": 0, "output_mask_button_data": 0},
+        2, 542,
+    ):
+        raise ValueError(
+            "FRC_P5 Active Test 0xA429 witness drifted: "
+            f"name={routine_name!r} rid=0x{routine_id:04X} refs={routine_refs} "
+            f"status={routine_status_key} sort={routine_sort_key}"
+        )
+
+    routine_frames = {
+        selector: resolve_frame(parser, master, 498, selector, variable_namespace_base=0x2710)
+        for selector in (0xD5, 0xD6, 0xD7)
+    }
+    expected_routine_frames = {
+        0xD5: ("3101ffff", "7101"),
+        0xD6: ("3102ffff", "7102"),
+        0xD7: ("3103ffff", "7103"),
+    }
+    for selector, (send, check) in expected_routine_frames.items():
+        frame = routine_frames[selector]
+        if frame["variables"]["send"]["bytes"] != send or frame["variables"]["receive_check"]["bytes"] != check:
+            raise ValueError(
+                f"FRC selector 0x{selector:X} drifted: "
+                f"{frame['variables']['send']['bytes']} -> {frame['variables']['receive_check']['bytes']}"
+            )
+
+    routine_binding_roles = {
+        role: [row for row in parser.extract_master_dlls(master.sections[19]) if row.dll_role_id == role]
+        for role in (0xB0, 0xAE, 0xAF, 0xD4)
+    }
+    expected_generic = {
+        0xB0: "StartActTst.dll",
+        0xAE: "GetRoutineActTstInitP5_DT.dll",
+        0xAF: "GetRoutineActTstSignalInfoP5_DT.dll",
+        0xD4: "SingleRoutineActTstP5_DT.dll",
+    }
+    for role, plugin in expected_generic.items():
+        rows = routine_binding_roles[role]
+        p5_rows = [row for row in rows if row.category_id < 6000]
+        if len(p5_rows) != 1 or p5_rows[0].category_id != 0 or p5_rows[0].dll_name != plugin:
+            raise ValueError(f"P5 generic routine role 0x{role:X} binding drifted: {p5_rows}")
+        if rows[0].category_id != 0 or rows[0].dll_name != plugin:
+            raise ValueError(
+                f"P5 generic routine role 0x{role:X} is no longer the first role match: "
+                f"category={rows[0].category_id} plugin={rows[0].dll_name}"
+            )
+
     # Minimum-length witness only.  The executable path obtains the actual N
     # from CCmdDataIdLengthList; static bit geometry proves only N >= 2 here.
     value_off = bit_end // 8
@@ -841,6 +924,12 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
             "data_monitor_phase5": file_identity(datamon, gts_root),
             "data_list_if": file_identity(datalist, gts_root),
             "command_data_lib": file_identity(command_data, gts_root),
+            "kgp_data_ctrl": file_identity(kgp_data, gts_root),
+            "diag_comm_ctrl_main": file_identity(diag_comm, gts_root),
+            "start_active_test": file_identity(start_act, gts_root),
+            "routine_init": file_identity(routine_init, gts_root),
+            "routine_signal_info": file_identity(routine_signal, gts_root),
+            "single_routine": file_identity(single_routine, gts_root),
         },
         "protocol": {
             "service": "0x2F InputOutputControlByIdentifier",
@@ -908,6 +997,94 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
             "transport": "p5diag_tf::J2534DiagInterface::ThreadMain -> KGP_CommFrameCtrl.dll CCommFrameCtrl::SendIntExt",
             "receive": "CCommEventPhase5AT::CheckRcvFrame requires 0x6F for a sent 0x2F request and at least three response bytes",
         },
+        "routine_executor": {
+            "service": "0x31 RoutineControl",
+            "positive_response": "0x71",
+            "generic_dispatch": {
+                "roles": {
+                    "0xB0": {"category_id": 0, "plugin": "StartActTst.dll", "purpose": "generic Start Active Test command -> DataMonitorRun"},
+                    "0xAE": {"category_id": 0, "plugin": "GetRoutineActTstInitP5_DT.dll", "purpose": "routine initialization; command payload carries target category and selected type-71 key"},
+                    "0xAF": {"category_id": 0, "plugin": "GetRoutineActTstSignalInfoP5_DT.dll", "purpose": "routine signal/presentation metadata"},
+                    "0xD4": {"category_id": 0, "plugin": "SingleRoutineActTstP5_DT.dll", "purpose": "generic one-shot D5/D7/D6 routine command surface"},
+                },
+                "category_zero_semantics": (
+                    "CDiagCommCtrlMain passes CCmdBase m_dwCmd (+0x08) and the actual m_dwEcuId (+0x1C) "
+                    "to CDbDllTable. CDbDllTable first narrows by role (+0x54), then attempts an exact "
+                    "category match (+0x50); if that second-stage match is empty but the role set is nonempty, "
+                    "GetQuery supplies the first role match. For current P5 roles 0xB0/0xAE/0xAF/0xD4 that "
+                    "first/default row is category 0, while the 0xAE/0xAF plugins still consume the original "
+                    "command m_dwEcuId as the real target ECU/category."
+                ),
+                "fallback_order": {
+                    f"0x{role:X}": [
+                        {"category_id": row.category_id, "plugin": row.dll_name}
+                        for row in rows[:6]
+                    ]
+                    for role, rows in routine_binding_roles.items()
+                },
+            },
+            "type71_layout_current_72_byte": {
+                "table": 71,
+                "class": ECU_TABLE_CLASS_NAMES[71],
+                "record_size": 72,
+                "routine_id": "u16 +0x1C",
+                "active_test_lookup_key": "u16 +0x1E",
+                "routine_command_variable": "u16 +0x28",
+                "routine_stop_command_variable": "u16 +0x2A",
+                "output_mask_value_variable": "u16 +0x2C",
+                "output_mask_button_variable": "u16 +0x2E",
+                "routine_status_key": "u16 +0x30 -> type-72 CDbRoutineStatus",
+                "sort_key": "u16 +0x40",
+            },
+            "frames": {
+                "start": routine_frames[0xD5],
+                "stop": routine_frames[0xD6],
+                "result": routine_frames[0xD7],
+            },
+            "materializer": {
+                "function": "DataMonitorPhase5_DT.dll CDataMonitorThreadBase::virtual_108 @ 0x1000E710",
+                "start": "copy D5 31 01 FF FF, overwrite bytes 2/3 with type-71 RID, append GetRoutineCommand, then merge value/button data only through explicit output masks",
+                "stop": "copy D6 31 02 FF FF, overwrite bytes 2/3 with RID, append GetRoutineStopCommand when present",
+                "result_probe": "D7 31 03 FF FF with RID substitution is used by routine initialization/one-shot status polling",
+            },
+            "data_monitor_handoff": {
+                "entry": "CDataMonitorThreadP5::virtual_28 @ 0x10015D60",
+                "builder_call": "vtable +0x6C -> virtual_108 routine materializer",
+                "interface": "same CDataMonitorPhase5Interface +0x2C active_test_start used by direct tests",
+                "active_test_type": 1,
+                "sid_handling": "DataMonitor passes buffer+1/length-1; DataListIF CCommEventPhase5AT::ActiveTestStart prepends 0x31 for ActiveTestType=1",
+                "queue_identity": "routine queue replacement is keyed by RID",
+                "receive": "CCommEventPhase5AT::CheckRcvFrame requires response SID 0x71 for queued 0x31 requests",
+            },
+            "single_routine_corroboration": {
+                "plugin": "SingleRoutineActTstP5_DT.dll",
+                "execute": "0x10001DF0",
+                "sequence": [
+                    {"selector": "0xD5", "operation": "start", "sleep_after_ms": 200},
+                    {"selector": "0xD7", "operation": "requestResults", "sleep_after_success_ms": 5000},
+                    {"selector": "0xD6", "operation": "stop"},
+                ],
+                "boundary": "independent generic one-shot command API corroborates frame/RID semantics; it is distinct from the normal DataMonitor queue path",
+            },
+            "frc_lta_steering_vibration_witness": {
+                "category_id": 498,
+                "database": "FRC_P5.ddb",
+                "active_test_key": "0xA429",
+                "name": routine_name,
+                "routine_id": f"0x{routine_id:04X}",
+                "record": routine_index,
+                "raw": routine_raw.hex(),
+                "variable_refs": routine_refs,
+                "routine_status_key": routine_status_key,
+                "sort_key": routine_sort_key,
+                "start_request": "31011588",
+                "stop_request": "31021588",
+                "result_request": "31031588",
+                "parameterization_negative": "all four command/stop/value-mask/button-mask variable references are zero; no parameter payload or steering setpoint is appended by the recovered current routine materializer",
+            },
+            "version_boundary": "current GTS+ uses standard UDS 31/71 templates; the pinned V18 TMS-041 21 E2/61 E2 executor is retained as version-specific older behavior, not treated as an error",
+            "safety_boundary": "static recovery only; no Active Test or RoutineControl request was sent to a vehicle; outer session/authentication and downstream FRC network effects remain separate questions",
+        },
         "anchors": {
             "set_value_scaling": anchor(command_data, 0x10089E00, "558bec8b5508568bf185d274078b4a7085c9750ab8010008c05e5dc208008b450c2b42780faf427499f7f90fb6c833c0894e24"),
             "data_id_for_act_lookup": anchor(datamon, 0x1000D75E, "8d8d98feffffff15c4b301108b858cfeffff8b9530feffffc645fc038b008b8a9c01000081c1cc0000000fb7403450ffb2f00000008d8598feffff506843020000ff1540b40110"),
@@ -924,6 +1101,24 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
             "event_get_send_frame": anchor(datalist, 0x10037A20, "558bec568bf1578b7d088b4608ff7004ff3057e8752a01008b460883c40c8b48048b450c89088a07"),
             "event_positive_0x6f": anchor(datalist, 0x10037902, "8079102f8a00757d3c6f740c68020100e06828020000"),
             "j2534_get_frame_to_sendint": anchor(datalist, 0x1003CF98, "68001000008d85f0efffffc785ccefffff000000006a0050e8fed400008b038d8dccefffff83c40c518d8df0efffff518bcbff50048985acefffff3d000100e00f858ffeffff33c0bb010000008985a4efffff899ddcefffff8bb5a8efffffe988feffff0fb747548b8f9c0000006a016a0050ff777c8d85f0efffffffb5ccefffff50ff7750ff15d0f30410"),
+            "routine_command_object_role_b0": anchor(command_data, 0x1008C0DD, "6a00ff750868b0000000e814cdf7ff8d7728c745fc000000006a006a018bcec70708c00f10897508"),
+            "routine_dispatch_startact": anchor(start_act, 0x10001010, "558bec8b450885c07428833800742383780400741d83781000741783780c0074118b481485c9740a8945085dff2540300010"),
+            "routine_type71_variable_refs": anchor(kgp_data, 0x100C5FDF, "8b14910fb74228508b4d08e8e1f1f9ff8945f4837df4007405e9ce0000000fbf4dfc8b55f88b42208d4cc804510fbf55fc8b45f88b48208d14d1520fbf45fc8b4df88b51108b04820fb7482a51"),
+            "routine_type71_status_key": anchor(single_routine, 0x10001302, "6689430a8b018d4d980fb740306689430c8d45ec506a00ff15984000108943108d4d980fb745ec66"),
+            "routine_type71_sort_key": anchor(kgp_data, 0x100C6842, "8b45f08b4c90fc0fb751408b45fc8b4df08b04810fb748403bd17e388b55f88b42188b4dfc8b14888955"),
+            "routine_command_execute_cmd_ecu": anchor(diag_comm, 0x1000F0A6, "8d45e050ff7708ff771ce88b04000085c00f85350100008b45e085c075185f"),
+            "routine_dll_role_category_lookup": anchor(diag_comm, 0x1000F8AD, "8b4e048d85ccfbffff57525081c1cc0000006813010000ff95c8fbffff8bf8"),
+            "routine_dll_category_fallback": anchor(kgp_data, 0x100AB1BC, "8b45e48b088b51308955d48d45f8508d4dec518b55f4528b45f0508b4d18518b4de4ff55d48945e8837de8007562837df80076258b55088b028b08894dd06a008b5510528b450c508b4dec518b55f8528b4d08ff55d090eb37c745dc00000000837df4007607c745dc010000008b45088b088b118955cc6a008b4510508b4d0c518b55f0528b45dc508b4d08ff55cc908b45e88b4dfc33"),
+            "routine_init_target_ecuid": anchor(routine_init, 0x10002119, "8b078b4f1081c1cc000000ff701c8d4590506810010000ff15c84000108bf085f60f85"),
+            "routine_d5_rid_and_command": anchor(datamon, 0x1000E858, "8d4dccff1590b001108b8538ffffffff70048d88800100008d45cc505168d50000008d4d9cff15b0b001108bf085f60f8510050000508d4dccff15b4b0011083784004740f6870b5011068950e0000e98e0400008b9d4cffffff8d783033f6568bcfff15ccb001108b953cffffff468a48088b02880c03ff0283fe0472e18b8d6cffffff8b010fb6401d8843028b018d8d5cffffff0fb6401c8843038d45e4506a00ff15b8b30110"),
+            "routine_d6_rid": anchor(datamon, 0x1000EB2D, "ffd0ff76048d45cc508d868001000050a1b0b001108d4d9c68d6000000ffd08bf085f60f854702000050a1b4b001108d4dccffd083784004740f6870b50110682a0f0000e9c401000033f683c030898550ffffff568bc8ff15ccb00110468a48088b07880c03ff07"),
+            "routine_stop_command_append": anchor(datamon, 0x1000EC4F, "8d45e0506a008d8d5cffffffff15b4b301100fb775e033c98bd885f674618b9548ffffff83fe10723f"),
+            "routine_active_test_type_1_handoff": anchor(datamon, 0x10015F5D, "8b078d8de8dfffff518d8df0efffff518d8decdfffff518d8df0dfffff51ffb5ccdfffff8bcf53ff506c8bf085f60f859800000083bdecdfffff01770c6870b5011068f3050000eb54ffb7b4010000ff15ecb201108b8ff00100006a016a006a008b018b502c"),
+            "routine_queue_rid_identity": anchor(datalist, 0x1003769F, "83f8010f85e60000008b0a80393175178a41023a4701750c8a41033a47020f84a7000000"),
+            "routine_event_service_prefix_31": anchor(datalist, 0x1003774E, "83f8017523b1318b06525788088b064050e8492d010083c40c8973345e5fb8000100e05b5dc21800"),
+            "routine_event_positive_71": anchor(datalist, 0x10037987, "3c71740f68020100e0685a020000e94affffff"),
+            "single_routine_sequence": anchor(single_routine, 0x10001F1D, "53568d4db8e8f9faffff8bd885db75238b3d7440001068c8000000ffd7568d4db8e8bdf4ffff8bd885db75076888130000ffd7568d4db8e8c7fcffff8bf8"),
+            "single_routine_status_key": anchor(single_routine, 0x10001922, "0fb7470c8b4e1050ff77048d45d481c1cc000000506848020000ff15a0400010"),
         },
         "boundary": "static executable semantics only: no Active Test was executed; exact total request length remains runtime DataIdLengthList state even though service, DID, control parameter, bit placement, queueing, response SID, and transport sink are recovered",
     }

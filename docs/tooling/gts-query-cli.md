@@ -117,7 +117,7 @@ For the exact 2026 Camry join, see the [Camry baseline §19](../variants/camry-2
 
 ### Master DB execution model
 
-`command`, `role`, `commset`, `timer`, `category`, and `frame` expose the means-based diagnostic execution model recovered
+`active-test`, `command`, `role`, `commset`, `timer`, `category`, and `frame` expose the means-based diagnostic execution model recovered
 from Techstream/GTS+ rather than another endpoint-specific lookup. The current
 master contains **6,194 category/plugin bindings but only 191 logical DLL roles**.
 `command` is the normal joined view: it resolves one category+role to the exact
@@ -162,6 +162,16 @@ linked-monitor    key=30  resolution=unique DID/bit-range match from plugin scan
 active-test-executor  service=0x2F  did=0x2801  encoding_mode=1  start=2f280103+N  stop=2f280100+N  runtime_length=N  minimum=2
 active-test-wire-minimum  raw0=2f2801030000  raw1=2f2801030001  return=2f2801000001  qualification=uses N=2, the static minimum required by bit 15; not proof that the runtime DataIdLengthList entry has that length
 
+$ tools/gts active-test HV_P5 0x1
+active-test  category=397  Hybrid Control  kind=direct  id=0x1  name=Activate the Inverter Water Pump
+wire  service=0x2F  did=0x2801  start=2f280103+N  stop=2f280100+N  runtime_length=N  minimum=2
+minimum-example  raw0=2f2801030000  raw1=2f2801030001  return=2f2801000001
+
+$ tools/gts active-test FRC_P5 0xA429
+active-test  category=498  Front Recognition Camera 2  kind=routine  id=0xA429  name=LTA Steering Vibration
+wire  service=0x31  rid=0x1588  start=31011588  stop=31021588  result=31031588  fixed=1
+routine-vars  start=0x0  stop=0x0  value_mask=0x0  button_mask=0x0  status_key=0x2
+
 $ tools/gts command HV_P5 0x70 --item 0x1
 command  category=397  Hybrid Control  role=0x70  plugin=GetATSignalInfoP5_DT.dll  surface=no_recovered_shared_transport_edge  semantics=exact_plugin_identity_and_selected_active_test_signal_info
 active-test-signal-info  id=0x1  name=Activate the Inverter Water Pump  pattern_key=10  physical_key=6  conv=1/1 offset=0  dec=0  signed=0  unit=-
@@ -203,6 +213,8 @@ timer  category=397  id=1  delay_ms=0  unknown_08=0
 $ tools/gts frame 397 0x1
 frame  category=397  selector=0x1  comm_set=1  frame=0x279E  rcv_timeout=1020  retries=1  send=04  mask=  check=44
 ```
+
+`active-test` is the preferred selected-test planner when you do not already know Toyota's internal command role. It auto-detects a unique current type-68 direct versus 72-byte type-71 routine row (or accepts `--kind` for an ambiguous key), resolves the current master templates, and never opens a transport. For current routine rows, type71 `+0x28/+0x2A/+0x2C/+0x2E` are respectively routine-command, routine-stop, output-value-mask, and output-button-mask variable references; `+0x30` is the type72 routine-status key. A `fixed=1` result means all four payload sources are zero, as for FRC `0xA429`, so the displayed `31 01/02/03 + RID` requests have no hidden setpoint bytes. Current GTS+ uses standard UDS `31/71` here; the older pinned V18 `21 E2/61 E2` routine executor remains version-specific.
 
 Role `0x63` handles **multi-control Active Test initialization**. `--item` is the type-33 group ID, not a direct member ID. The current generic P5 plugin reads 12-byte `CDbMultiDidIdTable` rows keyed by u16 `+0x00`, takes member Active Test ID from `+0x02`, ordering from u32 `+0x06`, sorts the members, then looks up each member through type68 and applies the same selector-`0xCA` initial-read semantics used by role `0x08`. Categories may bind role `0x63` without having type-33 groups; the planner reports an empty census instead of manufacturing groups.
 
