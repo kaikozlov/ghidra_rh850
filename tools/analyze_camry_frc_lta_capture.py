@@ -47,7 +47,18 @@ def load_oracle(path: Path) -> list[dict[str, Any]]:
                 raise ValueError(f"oracle line {line_no}: positive response lacks 4-byte raw state")
             rows.append(row)
     rows.sort(key=lambda row: row["t_ns"])
-    return rows
+    # The closed CAN0/CAN2 relay pair can expose the same FRC response on both
+    # Panda RX transceivers in one USB batch. Capture timestamps are assigned per
+    # batch, so exact (timestamp, raw-state) duplicates are one diagnostic sample.
+    deduped = []
+    seen: set[tuple[int, str]] = set()
+    for row in rows:
+        key = (row["t_ns"], row["raw"])
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(row)
+    return deduped
 
 
 def stable_intervals(oracles: list[dict[str, Any]], max_gap_s: float) -> list[dict[str, Any]]:

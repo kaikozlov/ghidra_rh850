@@ -477,6 +477,7 @@ def _section_camry_frc_lta_capture_tool():
     import io
     import json
     import tempfile
+    from collections import Counter
     from pathlib import Path
 
     import tools.analyze_camry_frc_lta_capture as analyze
@@ -508,6 +509,30 @@ def _section_camry_frc_lta_capture_tool():
         (123, 0, 0x0B6, bytes(range(32))),
         (456, 1, 0x18A, bytes(range(64))),
     ])
+    class FakeRelayPanda:
+        def __init__(self):
+            self.pending = []
+            self.tx_buses = []
+        def can_send(self, address, data, bus):
+            self.tx_buses.append(bus)
+            if bus == 0:
+                response = bytes.fromhex('0762160101000000')
+                self.pending = [(cap.FRC_RX, response, 0), (cap.FRC_RX, response, 2)]
+        def can_recv(self):
+            pending, self.pending = self.pending, []
+            return pending
+    fake = FakeRelayPanda()
+    probe_can = io.BytesIO(); cap.write_canbin_header(probe_can)
+    probe_oracle = io.StringIO()
+    probe_stats = {
+        'frames_by_bus': Counter({'0':0,'1':0,'2':0}),
+        'b6_by_bus': Counter({'0':0,'1':0,'2':0}),
+        'oracle_positive': 0, 'oracle_negative': 0, 'lta_control_counts': Counter(),
+    }
+    selected = cap.auto_probe_diag_bus(fake, probe_can, probe_oracle, probe_stats, wait_s=0.002)
+    check('relay-aware 1601 probe selects TX bus0 even when one response is visible on RX0+RX2',
+          selected == 0 and fake.tx_buses == [0] and probe_stats['oracle_positive'] == 2 and
+          '"positive_rx_buses":[0,2]' in probe_oracle.getvalue())
     with tempfile.TemporaryDirectory() as td:
         capture = Path(td)
         (capture / 'metadata.json').write_text(json.dumps({
@@ -528,6 +553,7 @@ def _section_camry_frc_lta_capture_tool():
              'hands_off_control_condition':0,'lta_switch_label':'ON','lta_control_label':'LTA Disabled',
              'hands_off_customize_label':'OFF','hands_off_control_label':'Hands-Off Enabled','lta_enabled_oracle':False},
         ]
+        oracle_rows.insert(1, oracle_rows[0] | {'bus': 2})
         (capture / 'oracle.ndjson').write_text(''.join(json.dumps(row) + '\n' for row in oracle_rows))
         with (capture / 'can.bin').open('wb') as stream:
             cap.write_canbin_header(stream)
@@ -536,6 +562,7 @@ def _section_camry_frc_lta_capture_tool():
             cap.write_canbin_record(stream, 1_070_000_000, 1, 0x18A, bytes(64))
         summary = analyze.analyze(capture)
         check('offline analyzer attributes only stable equal-state oracle intervals',
+              summary['oracle']['positive_sample_count'] == 3 and
               summary['oracle']['stable_lta_enabled_duration_s'] == 0.1 and
               summary['can']['selected_counts']['enabled']['bus0:0x030/32'] == 1 and
               summary['can']['selected_counts']['enabled']['bus0:0x0D7/32'] == 1 and

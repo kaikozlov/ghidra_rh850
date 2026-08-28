@@ -196,9 +196,21 @@ def _capture_messages(panda, can_stream: BinaryIO, oracle_stream, *, diag_bus: i
 
 
 def auto_probe_diag_bus(panda, can_stream: BinaryIO, oracle_stream, stats: dict,
-                        buses: tuple[int, ...] = (0, 1, 2), wait_s: float = 0.18) -> int:
-    positives: set[int] = set()
+                        buses: tuple[int, ...] = (0, 2, 1), wait_s: float = 0.18) -> int:
+    """Return the first TX bus that elicits a positive FRC response.
+
+    After the Toyota-B repin, CAN0/CAN2 are two Panda transceivers on the same
+    closed-relay physical network.  A single FRC response can therefore be
+    observed on *both* receive buses.  The useful discriminator is which TX bus
+    successfully reaches the ECU, not whether the response appears on exactly
+    one logical RX bus.  Prefer relay-side bus0, then bus2, and only then the
+    separate bus1 network.
+    """
     for bus in buses:
+        # Drain any delayed response from an earlier attempt so it cannot make
+        # the next TX bus look successful.
+        for _ in range(2):
+            _capture_messages(panda, can_stream, oracle_stream, diag_bus=None, stats=stats)
         t_ns = time.monotonic_ns()
         panda.can_send(FRC_TX, UDS_RDBI_REQUEST, bus)
         _oracle_write(oracle_stream, {
@@ -209,15 +221,21 @@ def auto_probe_diag_bus(panda, can_stream: BinaryIO, oracle_stream, stats: dict,
             "address": f"0x{FRC_TX:03X}",
             "request": UDS_RDBI_REQUEST.hex(),
         })
+        positive_rx_buses: set[int] = set()
         deadline = time.monotonic() + wait_s
         while time.monotonic() < deadline:
-            positives.update(_capture_messages(panda, can_stream, oracle_stream, diag_bus=None, stats=stats))
-    if len(positives) != 1:
-        raise RuntimeError(
-            f"0x1601 probe did not resolve one diagnostic bus; positive buses={sorted(positives)}. "
-            "Re-run with --diag-bus after reviewing oracle.ndjson."
-        )
-    return next(iter(positives))
+            positive_rx_buses.update(
+                _capture_messages(panda, can_stream, oracle_stream, diag_bus=None, stats=stats)
+            )
+        if positive_rx_buses:
+            _oracle_write(oracle_stream, {
+                "type": "probe_result",
+                "t_ns": time.monotonic_ns(),
+                "tx_bus": bus,
+                "positive_rx_buses": sorted(positive_rx_buses),
+            })
+            return bus
+    raise RuntimeError("0x1601 probe received no positive response on candidate TX buses 0,2,1")
 
 
 def plan() -> dict:

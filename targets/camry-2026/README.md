@@ -227,6 +227,9 @@ Provenance is in `raw-20260827/MANIFEST.txt`; deterministic interpretation is
 remaining zero-B6 discriminator. By default it only prints its plan. In execute
 mode it uses one Panda process for both full CAN reception and FRC P5 DID `0x1601`
 polling (`0x792: 03 22 16 01 00 00 00 00`), retaining the raw four condition bytes.
+The diagnostic auto-probe prefers TX bus0, then bus2, then bus1; it explicitly accepts
+one response being visible on both RX0 and RX2 because those transceivers sit on the
+same closed-relay physical network after the repin.
 Current GTS+ resolves `0x1601` as LTA Switch `0=OFF/1=ON`, LTA Control
 `0=LTA Enabled/1=LTA Disabled`, Hands-Off Customize `0=OFF/1=ON`, and Hands-Off
 Control `0=Enabled/1=Disabled`. The discriminator therefore treats **switch=1 +
