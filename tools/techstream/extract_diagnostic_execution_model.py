@@ -390,6 +390,63 @@ def gtsplus_command_common_surface(gts_root: Path) -> dict:
     }
 
 
+def gtsplus_data_monitor_decoder(gts_root: Path) -> dict:
+    """Pin the ordinary current-P5 Data Monitor bit/physical conversion contract."""
+    bin_root = gts_root / "bin"
+    datmon_common = bin_root / "DatMonCommon.dll"
+    command_data = bin_root / "CommandDataLib.dll"
+    signal_info = bin_root / "GetDatMonSignalInfoP5_DT.dll"
+    return {
+        "scope": "ordinary current P5 Data Monitor signals described by CCmdConversionTbl",
+        "binaries": {
+            "datmon_common": file_identity(datmon_common, gts_root),
+            "command_data": file_identity(command_data, gts_root),
+            "signal_info_plugin": file_identity(signal_info, gts_root),
+        },
+        "extraction": {
+            "bit_numbering": "msb0: bit 0 is byte 0 bit 7",
+            "byte_order": "big-endian across all bytes touched by [bit_start, bit_end]",
+            "bit_range": "inclusive",
+            "algorithm": "assemble covered bytes big-endian; shift right by 7-(bit_end&7); mask bit_end-bit_start+1 bits",
+            "ordinary_p5_payload_origin": "monitor bit_start/bit_end are relative to the Data Monitor value payload; CPacketConvertor's +4 is its ring-packet framing, not a signal-bit offset",
+        },
+        "physical_conversion": {
+            "sign_modes": {
+                "0": "unsigned",
+                "1": "two's-complement sign extension to bit_width",
+                "3": "sign-magnitude (generic converter capability; not present in the shipped current-P5 physical tables)",
+            },
+            "formula": "converted_integer = trunc_toward_zero(signed_raw * mul / div) + offset",
+            "conversion_table_layout": {
+                "mul": "CCmdConversionTbl +0x08; current P5 CDbPhyData +0x00",
+                "div": "CCmdConversionTbl +0x0C; current P5 CDbPhyData +0x04",
+                "offset": "CCmdConversionTbl +0x10; current P5 CDbPhyData +0x08",
+                "sign_mode": "CCmdConversionTbl +0x16; current P5 CDbPhyData +0x14",
+                "bit_width": "CCmdConversionTbl +0x18; monitor bit_end-bit_start+1",
+            },
+        },
+        "presentation": {
+            "decimal_point_count": "current P5 CDbPhyData +0x15; applied after converted_integer as value / 10^decimal_point_count",
+            "pattern_lookup": "CComDataConvert::GetString converts first, then compares converted_integer against each conversion-table pattern value",
+        },
+        "special_conversion_boundary": (
+            "CComDataConvert also exposes an overload with a final special-format mode for time/chassis/illuminance-style conversions, "
+            "but ordinary P5 CCmdConversionTbl GetValue/GetString calls the basic overload without that mode. The normal P5 monitor "
+            "decoder therefore uses only extraction plus Mul/Div/Offset/sign/bit-width and decimal/pattern presentation."
+        ),
+        "anchors": {
+            "pickup_geometry_msb0": anchor(datmon_common, 0x100030EF, "0fb7750c8bc6c1e903c1e803894308894b0c5781e20700008079054a83caf8422bc8895314894b18c7431c000000008d3ccd0000000081e60700008079054e83cef8462bfe"),
+            "real_data_big_endian_shift_mask": anchor(datmon_common, 0x1000343E, "8b7308578b7b1883c60483ff040f878a0000000fb74b303b4a040f4f4a0485c97e258d41ff33c985c07e1c8bf80f1f4400000fb7c1410fb784420808000003f03bcf7cee8b7b188d04373b45fc7f4033d285ff781f0375f88d0cfd000000004766900fb6068d7601d3e083e9080bd083ef0175ee8b4b108b450cd3fa23531c2b5304"),
+            "set_conversion_layout": anchor(datmon_common, 0x10003738, "8b450c894411208b4e488b451089440a248b4e488b451489440a288b4e48668b45186689440a2c8b4e488a451c5e8844"),
+            "base_get_value_sign_and_arithmetic": anchor(command_data, 0x10022AC3, "0fb6450c83ec085683e800744a83e801742783e80275400fb74d1c8b7508498bc6d3e8a801743383c8ffd3e0f7d023c6f7d8998bf08bcaeb230fb74d1c8b7508498bc6d3e8a801741183c8ffd3e00bc6998bf08bcaeb058b750833c98b451083f801740e5199565250e87fc70b008bf08bca8b451483f80176129952505156e8b9c60b00034518"),
+            "conversion_table_uses_basic_get_value": anchor(command_data, 0x10022C23, "8b4d0c0fb7411850ff71100fb64116ff710cff710850ff7508e87ffeffff83c4185dc3"),
+            "pattern_lookup_uses_converted_value": anchor(command_data, 0x10022918, "570fb7461850ff76100fb64616ff760cff760850ff7508e88c0100008b7e2c83c41833c98bd885ff74208b76248bc685c0740d85c974098bd18b0083ea0175f9395824"),
+            "signal_info_monitor_mode_fields": anchor(signal_info, 0x10001100, "8b04300fb6404a8843448b47108b04308b40108943488b47108b04300fb6404c88434c8b47108b04308b40248943508b47108b04300fb6404d884354"),
+            "signal_info_physical_conversion_fields": anchor(signal_info, 0x1000120F, "8b9574ffffff2bfe8b4dc0478b040a0fb640158843458b45908b0402668b40066689436c8b040a8b008943608b040a8b40048943648b040a8b40088943688b040a8b8d70ffffff0fb6401488436e66897b70"),
+        },
+    }
+
+
 def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
     """Pin current-GTS plugin control-flow/response semantics for representative roles."""
     bin_root = gts_root / "bin"
@@ -1161,6 +1218,7 @@ def gtsplus_role_layout(gts_root: Path) -> dict:
         },
         "role_catalog": role_operation_catalog(parser, master, gts_root / "bin"),
         "plugin_semantics": gtsplus_plugin_semantics(parser, master, gts_root),
+        "data_monitor_decoder": gtsplus_data_monitor_decoder(gts_root),
         "p5_active_test_runtime": gtsplus_p5_active_test_runtime(parser, master, gts_root),
         "hybrid_clear_binding": dll_binding(parser, master, 397, 25),
         "hybrid_clear_primary": resolve_frame(parser, master, 397, 0x01, variable_namespace_base=0x2710),

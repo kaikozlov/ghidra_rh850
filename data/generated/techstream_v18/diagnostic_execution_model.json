@@ -57,6 +57,95 @@
         "text_rva": "0x1000",
         "text_virtual_size": 868352
       },
+      "data_monitor_decoder": {
+        "anchors": {
+          "base_get_value_sign_and_arithmetic": {
+            "bytes": "0fb6450c83ec085683e800744a83e801742783e80275400fb74d1c8b7508498bc6d3e8a801743383c8ffd3e0f7d023c6f7d8998bf08bcaeb230fb74d1c8b7508498bc6d3e8a801741183c8ffd3e00bc6998bf08bcaeb058b750833c98b451083f801740e5199565250e87fc70b008bf08bca8b451483f80176129952505156e8b9c60b00034518",
+            "file_offset": "0x21EC3",
+            "va": "0x10022AC3"
+          },
+          "conversion_table_uses_basic_get_value": {
+            "bytes": "8b4d0c0fb7411850ff71100fb64116ff710cff710850ff7508e87ffeffff83c4185dc3",
+            "file_offset": "0x22023",
+            "va": "0x10022C23"
+          },
+          "pattern_lookup_uses_converted_value": {
+            "bytes": "570fb7461850ff76100fb64616ff760cff760850ff7508e88c0100008b7e2c83c41833c98bd885ff74208b76248bc685c0740d85c974098bd18b0083ea0175f9395824",
+            "file_offset": "0x21D18",
+            "va": "0x10022918"
+          },
+          "pickup_geometry_msb0": {
+            "bytes": "0fb7750c8bc6c1e903c1e803894308894b0c5781e20700008079054a83caf8422bc8895314894b18c7431c000000008d3ccd0000000081e60700008079054e83cef8462bfe",
+            "file_offset": "0x24EF",
+            "va": "0x100030EF"
+          },
+          "real_data_big_endian_shift_mask": {
+            "bytes": "8b7308578b7b1883c60483ff040f878a0000000fb74b303b4a040f4f4a0485c97e258d41ff33c985c07e1c8bf80f1f4400000fb7c1410fb784420808000003f03bcf7cee8b7b188d04373b45fc7f4033d285ff781f0375f88d0cfd000000004766900fb6068d7601d3e083e9080bd083ef0175ee8b4b108b450cd3fa23531c2b5304",
+            "file_offset": "0x283E",
+            "va": "0x1000343E"
+          },
+          "set_conversion_layout": {
+            "bytes": "8b450c894411208b4e488b451089440a248b4e488b451489440a288b4e48668b45186689440a2c8b4e488a451c5e8844",
+            "file_offset": "0x2B38",
+            "va": "0x10003738"
+          },
+          "signal_info_monitor_mode_fields": {
+            "bytes": "8b04300fb6404a8843448b47108b04308b40108943488b47108b04300fb6404c88434c8b47108b04308b40248943508b47108b04300fb6404d884354",
+            "file_offset": "0x500",
+            "va": "0x10001100"
+          },
+          "signal_info_physical_conversion_fields": {
+            "bytes": "8b9574ffffff2bfe8b4dc0478b040a0fb640158843458b45908b0402668b40066689436c8b040a8b008943608b040a8b40048943648b040a8b40088943688b040a8b8d70ffffff0fb6401488436e66897b70",
+            "file_offset": "0x60F",
+            "va": "0x1000120F"
+          }
+        },
+        "binaries": {
+          "command_data": {
+            "path": "bin/CommandDataLib.dll",
+            "sha256": "ffce12af45554a552dbf616545c4c4e02780702e4cb9e2c6f8235ff4f05c79ab",
+            "size": 1774608
+          },
+          "datmon_common": {
+            "path": "bin/DatMonCommon.dll",
+            "sha256": "5f244b62937aa646eda6c145eff7dfdf64a6135ebc69d179e4b9f9481dcc7090",
+            "size": 72208
+          },
+          "signal_info_plugin": {
+            "path": "bin/GetDatMonSignalInfoP5_DT.dll",
+            "sha256": "3bb9b8f2738376992d312e12688739cfbaefc8f5503c7624f838a0379de20587",
+            "size": 28176
+          }
+        },
+        "extraction": {
+          "algorithm": "assemble covered bytes big-endian; shift right by 7-(bit_end&7); mask bit_end-bit_start+1 bits",
+          "bit_numbering": "msb0: bit 0 is byte 0 bit 7",
+          "bit_range": "inclusive",
+          "byte_order": "big-endian across all bytes touched by [bit_start, bit_end]",
+          "ordinary_p5_payload_origin": "monitor bit_start/bit_end are relative to the Data Monitor value payload; CPacketConvertor's +4 is its ring-packet framing, not a signal-bit offset"
+        },
+        "physical_conversion": {
+          "conversion_table_layout": {
+            "bit_width": "CCmdConversionTbl +0x18; monitor bit_end-bit_start+1",
+            "div": "CCmdConversionTbl +0x0C; current P5 CDbPhyData +0x04",
+            "mul": "CCmdConversionTbl +0x08; current P5 CDbPhyData +0x00",
+            "offset": "CCmdConversionTbl +0x10; current P5 CDbPhyData +0x08",
+            "sign_mode": "CCmdConversionTbl +0x16; current P5 CDbPhyData +0x14"
+          },
+          "formula": "converted_integer = trunc_toward_zero(signed_raw * mul / div) + offset",
+          "sign_modes": {
+            "0": "unsigned",
+            "1": "two's-complement sign extension to bit_width",
+            "3": "sign-magnitude (generic converter capability; not present in the shipped current-P5 physical tables)"
+          }
+        },
+        "presentation": {
+          "decimal_point_count": "current P5 CDbPhyData +0x15; applied after converted_integer as value / 10^decimal_point_count",
+          "pattern_lookup": "CComDataConvert::GetString converts first, then compares converted_integer against each conversion-table pattern value"
+        },
+        "scope": "ordinary current P5 Data Monitor signals described by CCmdConversionTbl",
+        "special_conversion_boundary": "CComDataConvert also exposes an overload with a final special-format mode for time/chassis/illuminance-style conversions, but ordinary P5 CCmdConversionTbl GetValue/GetString calls the basic overload without that mode. The normal P5 monitor decoder therefore uses only extraction plus Mul/Div/Offset/sign/bit-width and decimal/pattern presentation."
+      },
       "hybrid_clear_binding": {
         "category_id": 397,
         "dll_name": "DelDiagCodeP4.dll",

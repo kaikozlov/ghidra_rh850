@@ -2373,6 +2373,7 @@ CAMRY_2026_DIAG_PROFILE = {
 def _registry_signal_row(row: dict[str, Any]) -> dict[str, Any]:
     info = row.get("signal_info") or {}
     return {
+        "decoder": "p5-linear-msb0-v1",
         "monitor_key": row.get("monitor_key"),
         "alternate_did": row.get("alternate_did"),
         "name": row.get("name") or "",
@@ -2601,8 +2602,20 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
     profile["catalog_category_ids"] = known_categories
 
     return {
-        "schema": "toyota-diagnostics-registry-v1",
+        "schema": "toyota-diagnostics-registry-v2",
         "profile": profile,
+        "decoders": {
+            "p5-linear-msb0-v1": {
+                "payload_origin": "UDS DID value bytes (positive SID/DID echo excluded)",
+                "bit_numbering": "msb0",
+                "byte_order": "big-endian",
+                "bit_range": "inclusive",
+                "sign": "unsigned unless signal.signed; signed values use two's-complement at signal bit width",
+                "integer_formula": "trunc_toward_zero(signed_raw * mul / div) + offset",
+                "display_formula": "converted_integer / 10^decimal_point_count",
+                "pattern_lookup": "match converted_integer before decimal rendering",
+            }
+        },
         "catalogs": catalogs,
         "source_identity": {
             path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else path.name: {

@@ -48,6 +48,84 @@ class BehaviorRecord:
     raw: bytes
 
 
+def extract_msb0(payload: bytes, bit_start: int, bit_end: int) -> int:
+    """Extract a Toyota Data Monitor bit range (inclusive, MSB-first per byte)."""
+    if bit_start < 0 or bit_end < bit_start:
+        raise ValueError(f"invalid bit range {bit_start}..{bit_end}")
+    if bit_end >= len(payload) * 8:
+        raise ValueError(f"bit range {bit_start}..{bit_end} exceeds {len(payload)}-byte payload")
+    start_byte = bit_start >> 3
+    end_byte = bit_end >> 3
+    assembled = int.from_bytes(payload[start_byte:end_byte + 1], "big")
+    shift = 7 - (bit_end & 7)
+    width = bit_end - bit_start + 1
+    return (assembled >> shift) & ((1 << width) - 1)
+
+
+def _trunc_div_toward_zero(numerator: int, denominator: int) -> int:
+    if denominator == 0:
+        raise ZeroDivisionError("Toyota physical conversion divisor is zero")
+    quotient = abs(numerator) // abs(denominator)
+    return -quotient if (numerator < 0) != (denominator < 0) else quotient
+
+
+def convert_p5_physical(raw: int, *, bit_width: int, signed: bool, mul: int, div: int, offset: int) -> int:
+    """Apply ordinary P5 CCmdConversionTbl/CComDataConvert integer semantics."""
+    if bit_width <= 0:
+        raise ValueError(f"invalid bit width {bit_width}")
+    mask = (1 << bit_width) - 1
+    value = raw & mask
+    if signed and value & (1 << (bit_width - 1)):
+        value -= 1 << bit_width
+    numerator = value * mul
+    converted = numerator if div <= 1 else _trunc_div_toward_zero(numerator, div)
+    return converted + offset
+
+
+def format_p5_decimal(converted_integer: int, decimal_point_count: int) -> str:
+    """Render Techstream's integer graph value with its DDB decimal precision."""
+    if decimal_point_count < 0:
+        raise ValueError(f"invalid decimal point count {decimal_point_count}")
+    if decimal_point_count == 0:
+        return str(converted_integer)
+    scale = 10 ** decimal_point_count
+    magnitude = abs(converted_integer)
+    whole, fraction = divmod(magnitude, scale)
+    sign = "-" if converted_integer < 0 else ""
+    return f"{sign}{whole}.{fraction:0{decimal_point_count}d}"
+
+
+def decode_p5_signal(
+    payload: bytes,
+    *,
+    bit_start: int,
+    bit_end: int,
+    mul: int,
+    div: int,
+    offset: int,
+    signed: bool,
+    decimal_point_count: int,
+    patterns: dict[int, str | None] | None = None,
+) -> dict[str, Any]:
+    """Decode one ordinary current-P5 Data Monitor signal from its DID value payload."""
+    raw = extract_msb0(payload, bit_start, bit_end)
+    converted = convert_p5_physical(
+        raw,
+        bit_width=bit_end - bit_start + 1,
+        signed=signed,
+        mul=mul,
+        div=div,
+        offset=offset,
+    )
+    pattern = (patterns or {}).get(converted)
+    return {
+        "raw": raw,
+        "converted_integer": converted,
+        "value": format_p5_decimal(converted, decimal_point_count),
+        "pattern": pattern,
+    }
+
+
 def extract_monitor_records(section: Any) -> list[MonitorRecord]:
     table = int(section.header.table_type)
     if table not in {62, 157}:

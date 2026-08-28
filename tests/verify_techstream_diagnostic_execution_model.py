@@ -359,6 +359,34 @@ active_test_signal_info = plugin_semantics["role_0x70_p5_active_test_signal_info
 active_test_init = plugin_semantics["role_0x08_p5_active_test_init"]
 active_test_list = plugin_semantics["role_0x06_p5_active_test_list"]
 signal_info = plugin_semantics["role_0x41_p5_signal_info"]
+data_monitor_decoder = gts["dll_role_schema"]["data_monitor_decoder"]
+check(
+    "current P5 Data Monitor generic decoder binaries and scope are identity-pinned",
+    data_monitor_decoder["scope"] == "ordinary current P5 Data Monitor signals described by CCmdConversionTbl"
+    and data_monitor_decoder["binaries"]["datmon_common"]["sha256"] == "5f244b62937aa646eda6c145eff7dfdf64a6135ebc69d179e4b9f9481dcc7090"
+    and data_monitor_decoder["binaries"]["command_data"]["sha256"] == "ffce12af45554a552dbf616545c4c4e02780702e4cb9e2c6f8235ff4f05c79ab"
+    and data_monitor_decoder["binaries"]["signal_info_plugin"]["sha256"] == "3bb9b8f2738376992d312e12688739cfbaefc8f5503c7624f838a0379de20587",
+)
+check(
+    "current P5 generic decoder closes MSB0 extraction, linear conversion, decimal display, and converted-value patterns",
+    data_monitor_decoder["extraction"]["bit_numbering"] == "msb0: bit 0 is byte 0 bit 7"
+    and data_monitor_decoder["extraction"]["byte_order"].startswith("big-endian")
+    and data_monitor_decoder["physical_conversion"]["formula"] == "converted_integer = trunc_toward_zero(signed_raw * mul / div) + offset"
+    and data_monitor_decoder["physical_conversion"]["sign_modes"]["1"].startswith("two's-complement")
+    and "10^decimal_point_count" in data_monitor_decoder["presentation"]["decimal_point_count"]
+    and "converted_integer" in data_monitor_decoder["presentation"]["pattern_lookup"]
+    and "without that mode" in data_monitor_decoder["special_conversion_boundary"],
+)
+check(
+    "current P5 generic decoder extraction/conversion/consumer edges are instruction-pinned",
+    data_monitor_decoder["anchors"]["pickup_geometry_msb0"]["bytes"].startswith("0fb7750c8bc6c1e903c1e803")
+    and data_monitor_decoder["anchors"]["real_data_big_endian_shift_mask"]["bytes"].endswith("d3fa23531c2b5304")
+    and data_monitor_decoder["anchors"]["set_conversion_layout"]["bytes"].startswith("8b450c89441120")
+    and data_monitor_decoder["anchors"]["base_get_value_sign_and_arithmetic"]["bytes"].endswith("e8b9c60b00034518")
+    and data_monitor_decoder["anchors"]["conversion_table_uses_basic_get_value"]["bytes"].endswith("83c4185dc3")
+    and data_monitor_decoder["anchors"]["pattern_lookup_uses_converted_value"]["bytes"].startswith("570fb7461850")
+    and data_monitor_decoder["anchors"]["signal_info_physical_conversion_fields"]["bytes"].endswith("88436e66897b70"),
+)
 check(
     "current role 0x63 P5 multi-Active-Test init plugin is identity-pinned and type-33 driven",
     multi_active_test_init["plugin"]["sha256"] == "ada491144d9cb0faded9317d355486b6b79d4ae8d25e7a262a2a0a69d05d1fc7"

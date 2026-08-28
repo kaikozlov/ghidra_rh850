@@ -10,6 +10,7 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "tools/techstream"))
 
 import gts_cli
+from ddb_semantics import decode_p5_signal, extract_msb0, format_p5_decimal, convert_p5_physical
 
 ART = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
 
@@ -33,9 +34,16 @@ def main() -> int:
 
     profile = actual["profile"]
     check("schema and exact Camry profile are pinned",
-          actual["schema"] == "toyota-diagnostics-registry-v1"
+          actual["schema"] == "toyota-diagnostics-registry-v2"
           and profile["profile"] == "camry-2026-f33"
           and profile["panda_bus"] == 0)
+    decoder = actual["decoders"]["p5-linear-msb0-v1"]
+    check("registry carries the closed current-P5 value decoder contract",
+          decoder["payload_origin"] == "UDS DID value bytes (positive SID/DID echo excluded)"
+          and decoder["bit_numbering"] == "msb0"
+          and decoder["byte_order"] == "big-endian"
+          and decoder["integer_formula"] == "trunc_toward_zero(signed_raw * mul / div) + offset"
+          and decoder["pattern_lookup"] == "match converted_integer before decimal rendering")
     check("exact F33 EPS identity guard is pinned",
           profile["identity_guard"] == {
               "ecu": "eps", "did": 0xF181, "contains_ascii": "8965F3307000",
@@ -59,11 +67,34 @@ def main() -> int:
     eps_angle = actual["catalogs"]["405"]["dids"]["0x1037"]
     check("EPS steering-angle DID retains exact current scaling",
           len(eps_angle) == 1
+          and eps_angle[0]["decoder"] == "p5-linear-msb0-v1"
           and eps_angle[0]["name"] == "Steering Angle"
           and (eps_angle[0]["bit_start"], eps_angle[0]["bit_end"]) == (0, 15)
           and eps_angle[0]["mul"] == 15
           and eps_angle[0]["signed"] is True
           and eps_angle[0]["unit"] == "deg")
+    signal_rows = [
+        signal
+        for catalog in actual["catalogs"].values()
+        for signals in catalog["dids"].values()
+        for signal in signals
+    ]
+    check("every shipped current-P5 DID signal explicitly selects the closed decoder",
+          signal_rows and all(row["decoder"] == "p5-linear-msb0-v1" for row in signal_rows))
+    check("MSB0 extraction crosses bytes exactly",
+          extract_msb0(bytes.fromhex("a53c"), 4, 11) == 0x53)
+    check("signed conversion truncates division toward zero rather than Python floor",
+          convert_p5_physical(0xFF, bit_width=8, signed=True, mul=5, div=2, offset=0) == -2)
+    check("decimal presentation retains exact DDB precision",
+          format_p5_decimal(-15, 1) == "-1.5" and format_p5_decimal(15, 3) == "0.015")
+    eps_decoded = decode_p5_signal(
+        bytes.fromhex("0001"),
+        bit_start=eps_angle[0]["bit_start"], bit_end=eps_angle[0]["bit_end"],
+        mul=eps_angle[0]["mul"], div=eps_angle[0]["div"], offset=eps_angle[0]["offset"],
+        signed=eps_angle[0]["signed"], decimal_point_count=eps_angle[0]["decimal_point_count"],
+    )
+    check("Steering Angle raw 1 deterministically renders as 1.5 deg",
+          eps_decoded == {"raw": 1, "converted_integer": 15, "value": "1.5", "pattern": None})
 
     frc_lta = actual["catalogs"]["498"]["dids"]["0x1601"]
     check("FRC 0x1601 carries the current LTA and Hands-Off state vocabulary",
@@ -72,6 +103,17 @@ def main() -> int:
               "Hands-Off Customize Condition Flag", "Hands-Off Control Condition",
           ]
           and frc_lta[1]["patterns"] == {"0": "LTA Enabled", "1": "LTA Disabled"})
+    frc_condition = frc_lta[1]
+    frc_decoded = decode_p5_signal(
+        bytes.fromhex("00010000"),
+        bit_start=frc_condition["bit_start"], bit_end=frc_condition["bit_end"],
+        mul=frc_condition["mul"], div=frc_condition["div"], offset=frc_condition["offset"],
+        signed=frc_condition["signed"], decimal_point_count=frc_condition["decimal_point_count"],
+        patterns={int(key): value for key, value in frc_condition["patterns"].items()},
+    )
+    check("FRC 0x1601 pattern display matches the converted integer",
+          frc_decoded["raw"] == 1 and frc_decoded["converted_integer"] == 1
+          and frc_decoded["pattern"] == "LTA Disabled")
 
     for category in (397, 435, 450, 498):
         dtc = actual["catalogs"][str(category)]["dtcs"].get("C13187", [])
