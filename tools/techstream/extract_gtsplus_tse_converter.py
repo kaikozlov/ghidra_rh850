@@ -1,0 +1,456 @@
+#!/usr/bin/env python3
+"""Extract the current GTS+ TSE/GTSE saved-session grammar and converter surface.
+
+The current TSE converter's managed method bodies are AgentLite/protector-zeroed, but
+Toyota still ships three deterministic evidence surfaces that are sufficient to recover
+its saved-session data model without guessing:
+
+* TEMPLATE/*.csv: the declared TSE binary hierarchy and scalar widths;
+* managed metadata: converter/ring-buffer/compression class and member contracts;
+* GTSFileController.dll exports: the native saved-section ABI used by GTS/TSE storage.
+
+This extractor deliberately does not claim byte-level parsing beyond the template-declared
+fields. It records the exact boundary so a real TSE sample can later validate offsets and
+list/size semantics without redoing the host RE.
+"""
+from __future__ import annotations
+
+import argparse
+import csv
+import hashlib
+import json
+import sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
+from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import dnfile  # type: ignore
+import pefile  # type: ignore
+from techstream_paths import resolve_gts_root
+
+REPO = Path(__file__).resolve().parents[2]
+DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/tse_converter_surface.json"
+
+SELECTED_SECTIONS = (
+    "RecordOnBehavior共通",
+    "CANバス",
+    "VehicleControlHistory共通",
+    "PCS時系列作動時FFD",
+    "PCS画像FFD",
+)
+
+METADATA_TYPES = {
+    "Converter.dll": {
+        "Converter.BinaryRead",
+        "Converter.BinaryWrite",
+        "Converter.TemplateFormat",
+        "Converter.BinaryStructure",
+        "TimeStamp",
+        "ROB",
+        "PredictiveFFD",
+        "_FfdList",
+        "_RingBufferData",
+        "_AbsoluteTimeStamp",
+        "_TimeStampList",
+        "_FfdGroup",
+    },
+    "RingBufferParser.dll": {
+        "RingBufferParser.Parser",
+        "RingBufferParser.RingBufferData",
+        "RingBufferParser.SignalInfo",
+        "RingBufferParser.PatternInfo",
+        "RingBufferParser.DataFrame",
+        "RingBufferParser.DataRow",
+        "RingBufferParser.DataCol",
+        "FrameTable",
+        "Frame",
+    },
+    "TseCompression.dll": {"TSECompressionUtility.TSECompression"},
+    "TSEConverter.exe": {"TSEConverter.MainForm"},
+}
+
+EXPORT_KEYWORDS = (
+    "FAT",
+    "TimeStamp",
+    "CanBus",
+    "DataList",
+    "ActiveTest",
+    "RecordOnBehavior",
+    "VehicleControlHistory",
+    "PCSMultiOperationFFD",
+    "PCSImageFFD",
+)
+
+
+def sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def source(path: Path, root: Path) -> dict[str, Any]:
+    return {
+        "path": str(path.relative_to(root)).replace("\\", "/"),
+        "size": path.stat().st_size,
+        "sha256": sha256_file(path),
+    }
+
+
+def type_full_name(row: Any) -> str:
+    ns = row.TypeNamespace.value or ""
+    name = row.TypeName.value
+    return f"{ns}.{name}" if ns else name
+
+
+def member_names(items: Any) -> list[str]:
+    out: list[str] = []
+    for item in items:
+        row = getattr(item, "row", None)
+        if row is not None and getattr(row, "Name", None) is not None:
+            out.append(row.Name.value)
+    return out
+
+
+def managed_metadata(path: Path) -> dict[str, Any]:
+    pe = dnfile.dnPE(str(path))
+    wanted = METADATA_TYPES[path.name]
+    types: dict[str, Any] = {}
+    for td in pe.net.mdtables.TypeDef.rows:
+        full = type_full_name(td)
+        if full not in wanted and td.TypeName.value not in wanted:
+            continue
+        fields = member_names(td.FieldList)
+        methods = member_names(td.MethodList)
+        types[full] = {"fields": fields, "methods": methods}
+
+    raw = path.read_bytes()
+    sampled = 0
+    nonzero = 0
+    for row in pe.net.mdtables.MethodDef.rows[:512]:
+        rva = int(row.Rva or 0)
+        if not rva:
+            continue
+        off = pe.get_offset_from_rva(rva)
+        if off is None or off >= len(raw):
+            continue
+        sampled += 1
+        nonzero += int(any(raw[off : off + 8]))
+
+    return {
+        "source": source(path, path.parent.parent),
+        "selected_types": dict(sorted(types.items())),
+        "method_body_sample": {
+            "sampled": sampled,
+            "nonzero_prefixes": nonzero,
+            "conclusion": "shipped managed method bodies are protector-zeroed"
+            if sampled and nonzero == 0
+            else "method bodies are at least partly materialized",
+        },
+    }
+
+
+def load_template(path: Path) -> list[list[str]]:
+    with path.open(encoding="shift_jis", errors="strict", newline="") as f:
+        return list(csv.reader(f))
+
+
+def row_name(row: list[str]) -> str:
+    return "/".join(x.strip() for x in row[:15] if x.strip() and not x.startswith("#"))
+
+
+def template_record(index: int, row: list[str]) -> dict[str, Any]:
+    def col(i: int) -> str | None:
+        if i >= len(row):
+            return None
+        v = row[i].strip()
+        return v or None
+
+    return {
+        "row": index,
+        "path": row_name(row),
+        "type": col(15),
+        "size": col(16),
+        "size_flag": col(17),
+        "list_flag": col(18),
+        "level": col(19),
+        "exists_flag": col(20),
+        "position_flag": col(21),
+        "skip_flag": col(22),
+    }
+
+
+def extract_fat(rows: list[list[str]]) -> list[dict[str, Any]]:
+    out = []
+    for i, row in enumerate(rows):
+        name = row_name(row)
+        if "先頭位置検索キーワード" not in name and "先頭位置キーワード" not in name:
+            continue
+        rec = template_record(i, row)
+        if rec["type"] != "CHAR":
+            continue
+        # Top-level/ECU FAT search-key records are all declared as 12-byte CHAR fields.
+        if rec["size"] == "12":
+            out.append(rec)
+    return out
+
+
+def section_slice(rows: list[list[str]], section: str) -> list[dict[str, Any]]:
+    starts = [i for i, row in enumerate(rows) if row and row[0].strip() == section]
+    if not starts:
+        return []
+    start = starts[0]
+    base_level = template_record(start, rows[start])["level"]
+    end = len(rows)
+    for i in range(start + 1, len(rows)):
+        rec = template_record(i, rows[i])
+        if not rec["path"]:
+            continue
+        # The selected persisted sections are top-level. Stop at the next non-comment
+        # row whose first column is populated and whose declared level matches.
+        if (
+            rows[i]
+            and rows[i][0].strip()
+            and not rows[i][0].lstrip().startswith("#")
+            and rec["level"] == base_level
+        ):
+            end = i
+            break
+    return [template_record(i, rows[i]) for i in range(start, end) if row_name(rows[i])]
+
+
+def ring_buffer_schema(rows: list[list[str]]) -> list[dict[str, Any]]:
+    # Use the first occurrence. The same substructure is repeated under multiple
+    # DataList/ActiveTest/DualDataList families in the template.
+    start = next(i for i, row in enumerate(rows) if row_name(row) == "リングバッファ関連データ")
+    end = next(
+        i
+        for i in range(start + 1, len(rows))
+        if row_name(rows[i]) == "VehicleControlHistory共通"
+    )
+    return [template_record(i, rows[i]) for i in range(start, end) if row_name(rows[i])]
+
+
+def config_surface(path: Path) -> dict[str, Any]:
+    tree = ET.parse(path)
+    settings = {
+        node.attrib["key"]: node.attrib.get("value", "")
+        for node in tree.findall(".//appSettings/add")
+    }
+    skip = [x for x in settings.get("BinarySkipDataNames", "").split(",") if x]
+    return {
+        "source": source(path, path.parent),
+        "settings": settings,
+        "binary_skip_data_names": skip,
+    }
+
+
+def native_gfc_surface(path: Path) -> dict[str, Any]:
+    pe = pefile.PE(str(path), fast_load=True)
+    pe.parse_data_directories(
+        directories=[pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_EXPORT"]]
+    )
+    exports = []
+    for sym in getattr(pe, "DIRECTORY_ENTRY_EXPORT", []).symbols:
+        if not sym.name:
+            continue
+        name = sym.name.decode("ascii", errors="replace")
+        exports.append(name)
+    selected = sorted(
+        x for x in exports if any(keyword.lower() in x.lower() for keyword in EXPORT_KEYWORDS)
+    )
+    return {
+        "source": source(path, path.parent.parent),
+        "export_count": len(exports),
+        "selected_exports": selected,
+    }
+
+
+def build(gts_root: Path | None = None) -> dict[str, Any]:
+    gts = resolve_gts_root(gts_root) if gts_root else resolve_gts_root()
+    diagnostics = gts.parent
+    root = diagnostics / "GTSPlusTSEConverter"
+    manifest = json.loads((gts / "Ver/Manifest.json").read_text(encoding="utf-8-sig"))
+    components = manifest[0]["Components"]
+    versions = {x["Name"]: x["Version"] for x in components}
+
+    config = config_surface(root / "TSEConverter.exe.config")
+    configured_template = config["settings"]["TemplateFileName"]
+    template_paths = sorted((root / "TEMPLATE").glob("*_Template.csv"))
+    templates: dict[str, Any] = {}
+    parsed: dict[str, list[list[str]]] = {}
+    for p in template_paths:
+        rows = load_template(p)
+        parsed[p.name] = rows
+        templates[p.name] = {
+            **source(p, diagnostics),
+            "row_count": len(rows),
+            "nonempty_row_count": sum(any(c.strip() for c in row) for row in rows),
+        }
+
+    current_rows = parsed[configured_template]
+    header = [template_record(i, current_rows[i]) for i in range(4, 96) if row_name(current_rows[i])]
+    sections = {name: section_slice(current_rows, name) for name in SELECTED_SECTIONS}
+
+    managed = {
+        p.name: managed_metadata(p)
+        for p in (
+            root / "Converter.dll",
+            root / "RingBufferParser.dll",
+            root / "TseCompression.dll",
+            root / "TSEConverter.exe",
+        )
+    }
+    gfc = native_gfc_surface(root / "DLL/GTSFileController.dll")
+
+    fat = extract_fat(current_rows)
+    skip = set(config["binary_skip_data_names"])
+    retained_sections = {name: bool(sections[name]) for name in SELECTED_SECTIONS}
+    skip_intersection = sorted(skip & set(SELECTED_SECTIONS))
+
+    ring_rows = ring_buffer_schema(current_rows)
+    ring_names = [r["path"] for r in ring_rows]
+    required_ring = {
+        "フレームテーブルサイズ(L4)",
+        "フレームインデックス",
+        "フレーム長",
+        "信号テーブルサイズ(L5)",
+        "信号ID",
+        "通信フレームのID",
+        "通信フレームに対する先頭ビット",
+        "通信フレームに対する終端ビット",
+        "換算MUL",
+        "換算DIV",
+        "換算OFFSET",
+        "リングバッファサイズ(L6)",
+        "書き込み開始位置",
+        "読み込み開始位置",
+        "書き込み終端位置",
+        "リングバッファデータ",
+    }
+    missing_ring = sorted(x for x in required_ring if not any(x in n for n in ring_names))
+    if missing_ring:
+        raise ValueError(f"ring-buffer schema drift: missing {missing_ring}")
+
+    selected_exports = set(gfc["selected_exports"])
+    required_exports = {
+        "_GFCAddPCSMultiOperationFFDData@8",
+        "_GFCGetPCSMultiOperationFFDData@12",
+        "_GFCGetPCSMultiOperationFFDDataCount@4",
+        "_GFCAddPCSImageFFDData@8",
+        "_GFCGetPCSImageFFDData@12",
+        "_GFCGetPCSImageFFDDataCount@4",
+        "_GFCAddRecordOnBehaviorCommon@8",
+        "_GFCAddVehicleControlHistoryData@8",
+    }
+    missing_exports = sorted(required_exports - selected_exports)
+    if missing_exports:
+        raise ValueError(f"GTSFileController export drift: {missing_exports}")
+
+    if not templates["173_Template.csv"]["sha256"] == templates["180_Template.csv"]["sha256"]:
+        raise ValueError("173/180 template identity drift")
+
+    signal_fields = managed["RingBufferParser.dll"]["selected_types"].get(
+        "RingBufferParser.SignalInfo", {}
+    ).get("fields", [])
+    required_signal_fields = {
+        "signalId",
+        "signalName",
+        "unitName",
+        "dataType",
+        "genreId",
+        "signed",
+        "mul",
+        "div",
+        "offset",
+        "decPntCnt",
+        "dataMax",
+        "dataMin",
+        "dispPattern",
+        "frameId",
+        "startBit",
+        "endBit",
+    }
+    if not required_signal_fields <= set(signal_fields):
+        raise ValueError("RingBufferParser.SignalInfo field drift")
+
+    return {
+        "schema": "gtsplus-tse-converter-surface-v1",
+        "title": "GTS+ TSE/GTSE saved-session grammar and converter surface",
+        "gtsplus_version": manifest[0]["SoftwareVersion"],
+        "tse_converter_version": versions["GTS+ TSEConverter"],
+        "configuration": config,
+        "templates": templates,
+        "configured_template": configured_template,
+        "template_identity": {
+            "173_equals_180": True,
+            "171_equals_180": templates["171_Template.csv"]["sha256"]
+            == templates["180_Template.csv"]["sha256"],
+        },
+        "header_and_fat": {
+            "declared_header_rows": header,
+            "fat_search_key_count": len(fat),
+            "fat_search_keys": fat,
+            "search_key_width_bytes": 12,
+        },
+        "selected_saved_sections": sections,
+        "ring_buffer_schema": {
+            "declared_rows": ring_rows,
+            "interpretation": {
+                "frame_table": "version/reserved, frame size, 256 frame indexes and lengths, standard-value list",
+                "signal_table": "signal/frame IDs, start/end bits, UTF-16 names/units, sign, MUL/DIV/OFFSET, decimals, display patterns and raw min/max",
+                "ring_buffer": "phase, packets-per-block, total/free size, read/write positions/sizes, raw byte buffer",
+            },
+        },
+        "managed_metadata": managed,
+        "native_gts_file_controller": gfc,
+        "conversion_policy": {
+            "template_contains_selected_sections": retained_sections,
+            "configured_binary_skip_intersection": skip_intersection,
+            "pcs_operation_ffd_present_in_tse_template": bool(sections["PCS時系列作動時FFD"]),
+            "pcs_image_ffd_present_in_tse_template": bool(sections["PCS画像FFD"]),
+            "pcs_operation_ffd_native_storage_api": True,
+            "pcs_image_ffd_native_storage_api": True,
+            "current_tse_to_gtse_configuration_skips_pcs_operation_ffd": "PCS時系列作動時FFD" in skip,
+            "current_tse_to_gtse_configuration_skips_pcs_image_ffd": "PCS画像FFD" in skip,
+            "boundary": (
+                "The current converter is configured to skip these binary section names while "
+                "reading TSE for GTSE conversion. The original TSE format and GTSFileController "
+                "still have first-class storage APIs for them. Exact GTSE omission on a concrete "
+                "saved session remains sample-testable because the managed method bodies are protected."
+            ),
+        },
+        "key_conclusions": [
+            "TSE is a FAT/indexed hierarchical binary container with declared scalar/list widths in Toyota's template CSV.",
+            "PCS time-series Operation FFD and PCS Image FFD are first-class TSE sections, not PCS-Viewer-only concepts.",
+            "The current TSE->GTSE converter configuration explicitly skips those two PCS FFD section names (and RecordOnBehavior common) while converting the binary file.",
+            "Ring-buffer saved data retains enough metadata to reconstruct engineering signals: frame membership, bit range, signedness, MUL/DIV/OFFSET, decimal precision, unit and display patterns.",
+            "Current managed converter bodies are protector-zeroed, so exact procedural byte-offset/list traversal remains bounded until validated against a sample or unprotected predecessor.",
+        ],
+    }
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--gts-root", type=Path, default=None)
+    ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    args = ap.parse_args()
+    payload = build(args.gts_root)
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(
+        json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    print(
+        f"wrote {args.out}: template={payload['configured_template']} "
+        f"fat={payload['header_and_fat']['fat_search_key_count']} "
+        f"gfc_exports={payload['native_gts_file_controller']['export_count']}"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
