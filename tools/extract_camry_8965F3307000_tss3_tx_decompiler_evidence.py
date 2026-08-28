@@ -11,12 +11,17 @@ from decompiler_evidence import bind_entries, bind_function, load_function_corpu
 REPO = Path(__file__).resolve().parents[1]
 OUT = REPO / "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json"
 ENTRIES = [
+    0x37E48,  # dual-channel actual-current aggregation; Q-axis sum feeds DID1151
+    0x38678,  # nonlinear current/assist-feedback map
+    0x3879E,  # publish mapped feedback to GP-0x4A00
     0x4C000,  # 0x4A3 source preparation
     0x4C14E,  # 0x4A3 staging
     0x4C1C0,  # 0x351 debounce/state preparation
     0x4C216,  # 0x351 force/status producer
     0x4C24A,  # 0x394 state projection
+    0x4C490,  # 0x030 torque/current source preparation
     0x4C7AA,  # 0x4A3 packer / PDU3
+    0x4C97A,  # 0x030 packer / PDU0
     0x4CE08,  # 0x394 packer / PDU2
     0x4CED0,  # 0x351 packer / PDU1
     0x7D0EA,  # generic Tx PDU status helper
@@ -81,6 +86,9 @@ def main() -> int:
             "driver_torque_source_gp_minus_0x5158": refs(0xFEBE66A8),
             "alternate_4a3_current_source_gp_minus_0x50e8": refs(0xFEBE6718),
             "did1151_q_current_source_gp_minus_0x50f2": refs(0xFEBE670E),
+            "did1151_q_current_upstream_gp_minus_0x4a8e": refs(0xFEBE6D72),
+            "mapped_current_feedback_gp_minus_0x4a00": refs(0xFEBE6E00),
+            "tx030_current_scale_gp_plus_0x30d8": refs(0xFEBEE8D8),
             "boundary": (
                 "Whole 6,065-function canonical Ghidra data-reference census to exact GP-resolved RAM addresses. Computed aliases "
                 "without a Ghidra data reference, value-set pointer recovery, DMA, and unrecovered code remain outside the negative proof."

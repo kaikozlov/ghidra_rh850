@@ -1,0 +1,410 @@
+{
+  "combined": {
+    "b6_observed_any": false,
+    "class_l_floor_ratios": {
+      "drive_a": null,
+      "drive_b": 6.0
+    },
+    "class_l_hands_light_sweeps_ge_500ms": {
+      "drive_a": 0,
+      "drive_b": 0
+    },
+    "class_l_opposing_max_run_s": {
+      "drive_a": 0.914178,
+      "drive_b": 0.223651
+    },
+    "class_l_opposing_runs_ge_100ms": {
+      "drive_a": 5,
+      "drive_b": 1
+    },
+    "class_l_r_current_vs_torque": {
+      "drive_a": 0.2569,
+      "drive_b": -0.1028
+    },
+    "control_hands_light_sweeps_ge_500ms": {
+      "drive_a": 1,
+      "drive_b": 0
+    },
+    "control_opposing_runs_ge_100ms": {
+      "drive_a": 3,
+      "drive_b": 0
+    },
+    "control_r_current_vs_torque": {
+      "drive_a": 0.8641,
+      "drive_b": 0.8509
+    }
+  },
+  "decode_provenance": {
+    "class_l": "bus0 0x08A byte21 == 0x0B (VAR-067 census intervals, recomputed and asserted equal)",
+    "cruise_latch": "bus0 0x08A byte3 == 0x08 (census interval count and duration asserted equal)",
+    "driver_torque_nm": "signed_be(71|8) * 0.1 + signed_be(139|4) * 0.01",
+    "motor_feedback": "0x030 B22:B23 signed big-endian 16-bit; signal 33; bound to camry_8965F3307000_tss3_opendbc_port.json mapped_motor_feedback (PDU0 slice offset 0, buffer offset 0x16)",
+    "steering_angle_deg": "signed_be(3|12) * 1.5 + signed_be(39|4) * 0.1",
+    "steering_rate_raw": "signed_be(35|12)",
+    "wheel_speed_kph": "0x0AA mean of 4 wheels, be_raw(s,15)*0.01-67.67"
+  },
+  "drives": {
+    "drive_a": {
+      "b6": {
+        "observed_any": false,
+        "total_all_buses": 0
+      },
+      "class_l": {
+        "intervals": [
+          {
+            "duration_s": 16.119256,
+            "start_s": 16.834568,
+            "start_segment": 5
+          }
+        ],
+        "speed_range_kph": [
+          38.52,
+          42.88
+        ],
+        "stats": {
+          "median_abs_current": 203.0,
+          "median_abs_driver_torque_nm": 0.85,
+          "median_speed_kph": 39.485,
+          "n": 1613,
+          "p90_abs_current": 485.0,
+          "r_current_vs_angle": 0.457,
+          "r_current_vs_rate": 0.6463,
+          "r_current_vs_torque": 0.2569
+        }
+      },
+      "class_l_edge_abs_current": {
+        "edges": [
+          {
+            "edge": "rise",
+            "edge_s": 371.48431,
+            "post_median_abs_current": 78.0,
+            "post_n": 301,
+            "pre_median_abs_current": 260.0,
+            "pre_n": 299
+          },
+          {
+            "edge": "fall",
+            "edge_s": 387.603566,
+            "post_median_abs_current": 534.0,
+            "post_n": 300,
+            "pre_median_abs_current": 422.0,
+            "pre_n": 299
+          }
+        ],
+        "window_s": 3
+      },
+      "control": {
+        "n": 55,
+        "stats": {
+          "median_abs_current": 218.0,
+          "median_abs_driver_torque_nm": 0.3,
+          "median_speed_kph": 38.948,
+          "n": 55,
+          "p90_abs_current": 675.0,
+          "r_current_vs_angle": -0.334,
+          "r_current_vs_rate": 0.3221,
+          "r_current_vs_torque": 0.8641
+        }
+      },
+      "control_definition": "cruise latch (0x08A B3==0x08) and not Class-L and wheel speed within the Class-L speed range",
+      "hands_light_core": {
+        "class_l": {
+          "lag1_autocorr_abs_current": 0.7562,
+          "median_abs_current": 160.0,
+          "median_abs_driver_torque_nm": 0.3,
+          "median_speed_kph": 39.226,
+          "n": 352,
+          "p90_abs_current": 345.0,
+          "r_current_vs_angle": 0.3052,
+          "r_current_vs_rate": 0.1972,
+          "r_current_vs_torque": -0.2308
+        },
+        "control": {
+          "lag1_autocorr_abs_current": null,
+          "median_abs_current": null,
+          "median_abs_driver_torque_nm": null,
+          "median_speed_kph": null,
+          "n": 0,
+          "p90_abs_current": null,
+          "r_current_vs_angle": null,
+          "r_current_vs_rate": null,
+          "r_current_vs_torque": null
+        },
+        "definition": "|driver torque| <= 0.5 N.m and |rate_raw| <= 2",
+        "median_abs_current_floor_ratio": null,
+        "rank_sum_z_class_l_larger": null
+      },
+      "hands_light_motion_sweeps": {
+        "class_l_max_sweep_s": 0.463102,
+        "class_l_runs_ge_500ms": 0,
+        "control_runs_ge_500ms": 1,
+        "definition": "|driver torque| <= 0.5 N.m and |rate_raw| >= 2; runs >= 0.5 s"
+      },
+      "opposing_driver_motion_runs": {
+        "class_l": {
+          "max_run_s": 0.914178,
+          "qualifying_samples": 214,
+          "runs_ge_100ms": 5,
+          "top_runs": [
+            {
+              "angle_first_deg": 3.7,
+              "angle_last_deg": -6.2,
+              "duration_s": 0.914178,
+              "median_current": -445.5,
+              "median_driver_torque_nm": 0.91,
+              "median_rate_raw": -10.0,
+              "median_speed_kph": 40.648,
+              "start_reference": "class_l_interval_start",
+              "start_s": 4.698966
+            },
+            {
+              "angle_first_deg": 0.2,
+              "angle_last_deg": -1.8,
+              "duration_s": 0.262403,
+              "median_current": -348,
+              "median_driver_torque_nm": 0.54,
+              "median_rate_raw": -8.0,
+              "median_speed_kph": 39.545,
+              "start_reference": "class_l_interval_start",
+              "start_s": 13.286025
+            },
+            {
+              "angle_first_deg": 3.2,
+              "angle_last_deg": 0.0,
+              "duration_s": 0.250371,
+              "median_current": -438.5,
+              "median_driver_torque_nm": 0.805,
+              "median_rate_raw": -15.0,
+              "median_speed_kph": 41.791,
+              "start_reference": "class_l_interval_start",
+              "start_s": 3.917442
+            },
+            {
+              "angle_first_deg": -3.4,
+              "angle_last_deg": -3.4,
+              "duration_s": 0.230675,
+              "median_current": -439.0,
+              "median_driver_torque_nm": 0.66,
+              "median_rate_raw": -2.0,
+              "median_speed_kph": 42.605,
+              "start_reference": "class_l_interval_start",
+              "start_s": 1.536739
+            },
+            {
+              "angle_first_deg": 0.4,
+              "angle_last_deg": 0.4,
+              "duration_s": 0.100958,
+              "median_current": 321,
+              "median_driver_torque_nm": -0.31,
+              "median_rate_raw": 2.0,
+              "median_speed_kph": 39.155,
+              "start_reference": "class_l_interval_start",
+              "start_s": 7.84221
+            }
+          ]
+        },
+        "control": {
+          "max_run_s": 0.150823,
+          "qualifying_samples": 105,
+          "runs_ge_100ms": 3
+        },
+        "definition": "|B22:B23| >= 150 and |driver torque| >= 0.2 N.m and |rate_raw| >= 2 and sign(B)==sign(rate) and sign(B)==-sign(torque); <= 1 sample dropout bridging; runs >= 0.1 s"
+      },
+      "source": {
+        "file": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+        "frame_count": 1656656,
+        "sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5"
+      },
+      "speed_matched_non_class_l": {
+        "definition": "not Class-L and wheel speed within the Class-L speed range (any latch state)",
+        "n": 3627
+      },
+      "streams": {
+        "dropped_no_025": 133,
+        "dropped_no_0aa": 1,
+        "eps_0x030_frames": 51512,
+        "join_tolerances": {
+          "0x025_ms": 40,
+          "0x0AA_ms": 300
+        },
+        "joined_samples": 51378,
+        "speed_0x0AA_frames": 51660,
+        "steer_0x025_frames": 51510
+      }
+    },
+    "drive_b": {
+      "b6": {
+        "observed_any": false,
+        "total_all_buses": 0
+      },
+      "class_l": {
+        "intervals": [
+          {
+            "duration_s": 57.184128,
+            "start_s": 13.239624,
+            "start_segment": 20
+          }
+        ],
+        "speed_range_kph": [
+          68.38,
+          72.49
+        ],
+        "stats": {
+          "median_abs_current": 110.0,
+          "median_abs_driver_torque_nm": 0.26,
+          "median_speed_kph": 69.885,
+          "n": 5719,
+          "p90_abs_current": 271.0,
+          "r_current_vs_angle": 0.0123,
+          "r_current_vs_rate": 0.1791,
+          "r_current_vs_torque": -0.1028
+        }
+      },
+      "class_l_edge_abs_current": {
+        "edges": [
+          {
+            "edge": "rise",
+            "edge_s": 1267.881232,
+            "post_median_abs_current": 102.0,
+            "post_n": 300,
+            "pre_median_abs_current": 84.0,
+            "pre_n": 299
+          },
+          {
+            "edge": "fall",
+            "edge_s": 1325.06536,
+            "post_median_abs_current": 38.0,
+            "post_n": 301,
+            "pre_median_abs_current": 77.0,
+            "pre_n": 299
+          }
+        ],
+        "window_s": 3
+      },
+      "control": {
+        "n": 3375,
+        "stats": {
+          "median_abs_current": 54.0,
+          "median_abs_driver_torque_nm": 0.7,
+          "median_speed_kph": 69.977,
+          "n": 3375,
+          "p90_abs_current": 241.0,
+          "r_current_vs_angle": 0.4357,
+          "r_current_vs_rate": 0.3776,
+          "r_current_vs_torque": 0.8509
+        }
+      },
+      "control_definition": "cruise latch (0x08A B3==0x08) and not Class-L and wheel speed within the Class-L speed range",
+      "hands_light_core": {
+        "class_l": {
+          "lag1_autocorr_abs_current": 0.9113,
+          "median_abs_current": 120.0,
+          "median_abs_driver_torque_nm": 0.18,
+          "median_speed_kph": 70.322,
+          "n": 4292,
+          "p90_abs_current": 274.0,
+          "r_current_vs_angle": -0.0894,
+          "r_current_vs_rate": 0.0244,
+          "r_current_vs_torque": -0.29
+        },
+        "control": {
+          "lag1_autocorr_abs_current": 0.6927,
+          "median_abs_current": 20.0,
+          "median_abs_driver_torque_nm": 0.24,
+          "median_speed_kph": 70.02,
+          "n": 1200,
+          "p90_abs_current": 61.0,
+          "r_current_vs_angle": -0.3697,
+          "r_current_vs_rate": -0.0702,
+          "r_current_vs_torque": -0.0299
+        },
+        "definition": "|driver torque| <= 0.5 N.m and |rate_raw| <= 2",
+        "median_abs_current_floor_ratio": 6.0,
+        "rank_sum_z_class_l_larger": {
+          "p_two_sided": 0.0,
+          "z": 39.57
+        }
+      },
+      "hands_light_motion_sweeps": {
+        "class_l_max_sweep_s": 0.292001,
+        "class_l_runs_ge_500ms": 0,
+        "control_runs_ge_500ms": 0,
+        "definition": "|driver torque| <= 0.5 N.m and |rate_raw| >= 2; runs >= 0.5 s"
+      },
+      "opposing_driver_motion_runs": {
+        "class_l": {
+          "max_run_s": 0.223651,
+          "qualifying_samples": 28,
+          "runs_ge_100ms": 1,
+          "top_runs": [
+            {
+              "angle_first_deg": -0.2,
+              "angle_last_deg": 0.7,
+              "duration_s": 0.223651,
+              "median_current": 333,
+              "median_driver_torque_nm": -0.73,
+              "median_rate_raw": 4.0,
+              "median_speed_kph": 69.66,
+              "start_reference": "class_l_interval_start",
+              "start_s": 38.011325
+            }
+          ]
+        },
+        "control": {
+          "max_run_s": 0.0,
+          "qualifying_samples": 0,
+          "runs_ge_100ms": 0
+        },
+        "definition": "|B22:B23| >= 150 and |driver torque| >= 0.2 N.m and |rate_raw| >= 2 and sign(B)==sign(rate) and sign(B)==-sign(torque); <= 1 sample dropout bridging; runs >= 0.1 s"
+      },
+      "source": {
+        "file": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+        "frame_count": 1918047,
+        "sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a"
+      },
+      "speed_matched_non_class_l": {
+        "definition": "not Class-L and wheel speed within the Class-L speed range (any latch state)",
+        "n": 3882
+      },
+      "streams": {
+        "dropped_no_025": 0,
+        "dropped_no_0aa": 0,
+        "eps_0x030_frames": 59999,
+        "join_tolerances": {
+          "0x025_ms": 40,
+          "0x0AA_ms": 300
+        },
+        "joined_samples": 59999,
+        "speed_0x0AA_frames": 59998,
+        "steer_0x025_frames": 59997
+      }
+    }
+  },
+  "interpretation": {
+    "bounded_edges_and_sweeps": "observed/deterministic: the cruise-clean drive-B Class-L rise shows no immediate |B22:B23| step (3 s pre/post medians 84 vs 102), and no sustained >=0.5 s hands-light steering-motion sweep occurs inside Class-L in either drive; the speed-matched non-Class-L stratum contains one such sweep (drive A). The floor grows with Class-L occupancy rather than stepping at its rise edge, and falls after Class-L ends.",
+    "bounded_motor_feedback_floor": "observed/deterministic: inside Class-L the rate-controlled hands-light core carries a several-fold larger |B22:B23| floor than the speed-matched cruise control stratum (drive B median ratio 6.0, rank-sum z=39.6), with higher lag-1 autocorrelation and near-zero correlation with driver torque, while the control stratum is driver-proportional (r(current,torque) strongly positive). This proves a smooth non-driver-proportional motor-feedback component inside Class-L; it does NOT uniquely label it LTA torque, because a mode-changed EPS damping/assist map produces the same signature.",
+    "bounded_opposing_runs": "observed/deterministic: episodes exist (longest 0.9 s, drive A) where the motor-feedback proxy drives in the steering-motion direction while opposing measured driver torque, with B6 absent on all buses. This is consistent with active EPS assist applying torque against the driver, but driver assist, damping, friction/road-load compensation, and lane-keeping-class functions are not separable from these two drives; it is not proof of LTA authority.",
+    "production_output_authorized": false
+  },
+  "schema": "camry-2026-motor-feedback-correlation-v1",
+  "sources": {
+    "census": {
+      "path": "data/generated/camry_2026_cruise_lta_edge_census.json",
+      "sha256": "9f0b0daf26a1d39d88d52be025fea4a7417c820b79d914c88c6f6f11cdfc0ec3"
+    },
+    "drives": [
+      {
+        "path": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+        "sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5"
+      },
+      {
+        "path": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+        "sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a"
+      }
+    ],
+    "tss3_port": {
+      "path": "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
+      "sha256": "bcefc0dd599f0958434e0855fd719a29f281c2387b53070208a40c00c84d0745"
+    }
+  }
+}

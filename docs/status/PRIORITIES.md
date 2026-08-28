@@ -321,6 +321,21 @@ IDs from this negative. Same-image code also fixes `8A3113303100` as the F181
 software/compatibility record: callback `0x4FA26`, startup check `0x637EE -> 0x62D5E`,
 and separate DID2032 callback `0x4F9DE` are all exact and verified.
 
+**VAR-071/072 `0x030 B22:B23` motor-feedback closure:** exact-F33 code now fixes the
+`0x030` bytes 22:23 as a signed BE16 **mapped motor-feedback/current-family proxy**
+(signal 33, wire bytes derived from the pinned `0x22840` PDU slice-offset table;
+`0x37E48 -> 0x38678 -> 0x3879E -> GP-0x50E8 -> 0x4C490 -> B22:B23`), sharing DID1151's
+pre-clamp Q-axis aggregate. The deterministic two-drive correlation then proves EPS
+behavior **changes mode inside Class-L while B6 = 0**: a 6.0x hands-light current
+floor (drive B, z=+39.6) that is non-driver-proportional versus the r=+0.85
+driver-proportional control, plus opposing-driver/motion runs up to 0.914 s (drive A)
+where the proxy drives with steering motion against driver torque. This is the
+strongest bounded live evidence of active EPS assist without B6, and it sharpens — but
+does not resolve — the VAR-063/065/066 discriminator: a mode-changed EPS damping/assist
+map is not yet separable from LTA-class actuation by these two drives alone. Do not
+re-label Class-L as LTA from this; the `0x1601` naming/corroboration experiment remains
+the next discriminator step.
+
 **VAR-069 exact Brake producer acquisition:** the producer search is now narrowed to
 same-car category-435 identities `F152633K0000` / `8954147040` at physical `0x7B0`.
 The complete pinned 26-CUW raw descriptor census has zero `07B0` and zero exact-identity

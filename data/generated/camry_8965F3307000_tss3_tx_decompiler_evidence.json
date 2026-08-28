@@ -185,6 +185,119 @@
         ]
       }
     ],
+    "did1151_q_current_upstream_gp_minus_0x4a8e": [
+      {
+        "body_ranges": [
+          {
+            "max": "0x00037f11",
+            "min": "0x00037e48",
+            "space": "ram"
+          }
+        ],
+        "body_sha256": "2ea6337414202d165649db773991b30b0dc6d125d48ad72e9e53bed26a4e5747",
+        "body_size": 202,
+        "entry": "0x00037E48",
+        "reference_sites": [
+          "0x00037e5c",
+          "0x00037ed4"
+        ],
+        "reference_types": [
+          "WRITE"
+        ]
+      },
+      {
+        "body_ranges": [
+          {
+            "max": "0x00037fd1",
+            "min": "0x00037f92",
+            "space": "ram"
+          }
+        ],
+        "body_sha256": "d0d9ba9390c4b4e7bdde0ac1789cfefe482aba0a321d62c09cc1cd8306f218fe",
+        "body_size": 64,
+        "entry": "0x00037F92",
+        "reference_sites": [
+          "0x00037f96"
+        ],
+        "reference_types": [
+          "READ"
+        ]
+      },
+      {
+        "body_ranges": [
+          {
+            "max": "0x0005c6d7",
+            "min": "0x00059448",
+            "space": "ram"
+          }
+        ],
+        "body_sha256": "a990474d440289163bce4d358c67c5c76f0a2b71bad2e224305c57e67103cf21",
+        "body_size": 12944,
+        "entry": "0x00059448",
+        "reference_sites": [
+          "0x0005bd76",
+          "0x0005bd8c"
+        ],
+        "reference_types": [
+          "READ",
+          "WRITE"
+        ]
+      },
+      {
+        "body_ranges": [
+          {
+            "max": "0x0005ca39",
+            "min": "0x0005c7b6",
+            "space": "ram"
+          }
+        ],
+        "body_sha256": "6001411c95724a194e50c63723e72d9d5c175d3f535fd8037b65788f31958f5e",
+        "body_size": 644,
+        "entry": "0x0005C7B6",
+        "reference_sites": [
+          "0x0005c9fe"
+        ],
+        "reference_types": [
+          "READ"
+        ]
+      },
+      {
+        "body_ranges": [
+          {
+            "max": "0x0005cf1b",
+            "min": "0x0005ca3a",
+            "space": "ram"
+          }
+        ],
+        "body_sha256": "e1ad0693ac71bcc1835c805d5b87e3947f10dec566c6a176816a216d95476980",
+        "body_size": 1250,
+        "entry": "0x0005CA3A",
+        "reference_sites": [
+          "0x0005ce4c"
+        ],
+        "reference_types": [
+          "READ"
+        ]
+      },
+      {
+        "body_ranges": [
+          {
+            "max": "0x0005d5df",
+            "min": "0x0005d12c",
+            "space": "ram"
+          }
+        ],
+        "body_sha256": "b0bc939dba9eef6418afb6f1966f5c725d8d9d7730343527e9f4457b03d3dc75",
+        "body_size": 1204,
+        "entry": "0x0005D12C",
+        "reference_sites": [
+          "0x0005d574"
+        ],
+        "reference_types": [
+          "READ"
+        ]
+      }
+    ],
     "driver_torque_source_gp_minus_0x5158": [
       {
         "body_ranges": [
@@ -348,10 +461,442 @@
           "WRITE"
         ]
       }
+    ],
+    "mapped_current_feedback_gp_minus_0x4a00": [
+      {
+        "body_ranges": [
+          {
+            "max": "0x000387b5",
+            "min": "0x0003879e",
+            "space": "ram"
+          }
+        ],
+        "body_sha256": "96c2ab31eb43a81a0608db262605ac3ae08c6ad4508e4bd848fb4ad8f306cb95",
+        "body_size": 24,
+        "entry": "0x0003879E",
+        "reference_sites": [
+          "0x000387ae"
+        ],
+        "reference_types": [
+          "WRITE"
+        ]
+      },
+      {
+        "body_ranges": [
+          {
+            "max": "0x00058029",
+            "min": "0x00057fd2",
+            "space": "ram"
+          }
+        ],
+        "body_sha256": "d6ecd51e82e3a509090659d5a5df508bcce814c7133c0ac58a6795c0fac5b1c7",
+        "body_size": 88,
+        "entry": "0x00057FD2",
+        "reference_sites": [
+          "0x00057ff2"
+        ],
+        "reference_types": [
+          "READ"
+        ]
+      },
+      {
+        "body_ranges": [
+          {
+            "max": "0x0005c6d7",
+            "min": "0x00059448",
+            "space": "ram"
+          }
+        ],
+        "body_sha256": "a990474d440289163bce4d358c67c5c76f0a2b71bad2e224305c57e67103cf21",
+        "body_size": 12944,
+        "entry": "0x00059448",
+        "reference_sites": [
+          "0x0005bd80",
+          "0x0005bdc6"
+        ],
+        "reference_types": [
+          "READ",
+          "WRITE"
+        ]
+      },
+      {
+        "body_ranges": [
+          {
+            "max": "0x0005d5df",
+            "min": "0x0005d12c",
+            "space": "ram"
+          }
+        ],
+        "body_sha256": "b0bc939dba9eef6418afb6f1966f5c725d8d9d7730343527e9f4457b03d3dc75",
+        "body_size": 1204,
+        "entry": "0x0005D12C",
+        "reference_sites": [
+          "0x0005d58a"
+        ],
+        "reference_types": [
+          "READ"
+        ]
+      }
+    ],
+    "tx030_current_scale_gp_plus_0x30d8": [
+      {
+        "body_ranges": [
+          {
+            "max": "0x0004c58f",
+            "min": "0x0004c490",
+            "space": "ram"
+          }
+        ],
+        "body_sha256": "1044a9ad18fc5aca3185a38a440537915fb68e7ae00ee8981fdd4aa27dbecf09",
+        "body_size": 256,
+        "entry": "0x0004C490",
+        "reference_sites": [
+          "0x0004c550"
+        ],
+        "reference_types": [
+          "READ"
+        ]
+      },
+      {
+        "body_ranges": [
+          {
+            "max": "0x000bf919",
+            "min": "0x000bf3aa",
+            "space": "ram"
+          }
+        ],
+        "body_sha256": "458d3dea1ae398a442393759f0fad4385bb2ebd7dcf1482ee2d1b5d1336215d8",
+        "body_size": 1392,
+        "entry": "0x000BF3AA",
+        "reference_sites": [
+          "0x000bf840"
+        ],
+        "reference_types": [
+          "WRITE"
+        ]
+      },
+      {
+        "body_ranges": [
+          {
+            "max": "0x000c1b23",
+            "min": "0x000bf97a",
+            "space": "ram"
+          }
+        ],
+        "body_sha256": "7ebaa27631cf0eb5764243762144159d5b30e376c708f387f5b454f5aec0135e",
+        "body_size": 8618,
+        "entry": "0x000BF97A",
+        "reference_sites": [
+          "0x000c19b8"
+        ],
+        "reference_types": [
+          "WRITE"
+        ]
+      }
     ]
   },
-  "function_count": 11,
+  "function_count": 16,
   "functions": [
+    {
+      "body_ranges": [
+        {
+          "max": "0x00037f11",
+          "min": "0x00037e48",
+          "space": "ram"
+        }
+      ],
+      "body_sha256": "2ea6337414202d165649db773991b30b0dc6d125d48ad72e9e53bed26a4e5747",
+      "body_size": 202,
+      "data_references": [
+        {
+          "from_addr": "0x00037e48",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8b28",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00037e5a",
+          "operand_index": 1,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe6d70",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00037e5c",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe6d72",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00037e5e",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe6d78",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00037e62",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe71ec",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00037e6a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe6e28",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00037e6c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe6e2c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00037e6e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe6e30",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00037e70",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe6e34",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00037eae",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe6d70",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00037ed4",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe6d72",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00037ed6",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe6d78",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00037eee",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe6d74",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00037f0c",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe6d76",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_00037e48(void)\n\n{\n  int iVar1;\n  int iVar2;\n  int iVar3;\n  int iVar4;\n  int iVar5;\n  \n  if ((DAT_febe8b28 & 0x40004) != 0) {\n    DAT_febe6d70 = 0;\n    DAT_febe6d72 = 0;\n    DAT_febe6d78 = 0;\n    return;\n  }\n  iVar4 = DAT_febe6e2c;\n  iVar1 = DAT_febe6e28;\n  if ((DAT_febe71ec & 1) != 0) {\n    iVar4 = 0;\n    iVar1 = 0;\n  }\n  iVar2 = DAT_febe6e34;\n  iVar5 = DAT_febe6e30;\n  if ((DAT_febe71ec & 2) != 0) {\n    iVar2 = 0;\n    iVar5 = 0;\n  }\n  iVar3 = iVar5 + iVar1;\n  DAT_febe6d78 = iVar2 + iVar4;\n  iVar1 = iVar1 - iVar5;\n  iVar4 = iVar4 - iVar2;\n  if (iVar3 + 0x7fff < 0 == (-1 < iVar3 && iVar3 + 0x7fff < 0) && iVar3 != -0x7fff) {\n    if (iVar3 + -0x7fff < 0 == (iVar3 < 0 && -1 < iVar3 + -0x7fff) && iVar3 != 0x7fff) {\n      iVar3 = 0x7fff;\n    }\n    DAT_febe6d70 = (undefined2)iVar3;\n  }\n  else {\n    DAT_febe6d70 = 0x8001;\n  }\n  if (DAT_febe6d78 + 0x7fff < 0 == (-1 < DAT_febe6d78 && DAT_febe6d78 + 0x7fff < 0) &&\n      DAT_febe6d78 != -0x7fff) {\n    iVar5 = DAT_febe6d78;\n    if (DAT_febe6d78 + -0x7fff < 0 == (DAT_febe6d78 < 0 && -1 < DAT_febe6d78 + -0x7fff) &&\n        DAT_febe6d78 != 0x7fff) {\n      iVar5 = 0x7fff;\n    }\n  }\n  else {\n    iVar5 = -0x7fff;\n  }\n  DAT_febe6d72 = (short)iVar5;\n  if (iVar1 + 0x7fff < 0 == (-1 < iVar1 && iVar1 + 0x7fff < 0) && iVar1 != -0x7fff) {\n    if (iVar1 + -0x7fff < 0 == (iVar1 < 0 && -1 < iVar1 + -0x7fff) && iVar1 != 0x7fff) {\n      DAT_febe6d74 = 0x7fff;\n    }\n    else {\n      DAT_febe6d74 = (undefined2)iVar1;\n    }\n  }\n  else {\n    DAT_febe6d74 = 0x8001;\n  }\n  if (iVar4 + 0x7fff < 0 == (-1 < iVar4 && iVar4 + 0x7fff < 0) && iVar4 != -0x7fff) {\n    if (iVar4 + -0x7fff < 0 == (iVar4 < 0 && -1 < iVar4 + -0x7fff) && iVar4 != 0x7fff) {\n      DAT_febe6d76 = 0x7fff;\n    }\n    else {\n      DAT_febe6d76 = (undefined2)iVar4;\n    }\n  }\n  else {\n    DAT_febe6d76 = 0x8001;\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "901e28ef7fed944226d6659a3b70cab772bc06a15c07ffb15bb14cb2853c609a",
+      "entry": "0x00037E48"
+    },
+    {
+      "body_ranges": [
+        {
+          "max": "0x0003879d",
+          "min": "0x00038678",
+          "space": "ram"
+        }
+      ],
+      "body_sha256": "753f27858f83a886d4088ceed68f8a8a88f8243e6604d84978832b7b2c7ae2e4",
+      "body_size": 294,
+      "data_references": [
+        {
+          "from_addr": "0x0003869c",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0x00031d44",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000386b8",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x00031d46",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000386c4",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x00031d48",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000386d0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x00031d4a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000386e6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x00031d4c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003870c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x000210f4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003870c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x000210f8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003870c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x00021104",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00038720",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002ef3e",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00038720",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002f342",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00038720",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002ff4e",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003872c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002ef42",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003872c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002f346",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003872c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002ff52",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00038742",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002eb3e",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003874e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x000210f4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003875e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002ef3e",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003876a",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002ef42",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00038782",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002eb3e",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nint FUN_00038678(uint param_1,short param_2)\n\n{\n  int iVar1;\n  int iVar2;\n  uint uVar3;\n  uint uVar4;\n  uint uVar5;\n  int iVar6;\n  uint uVar7;\n  int iVar8;\n  undefined *puVar9;\n  int iVar10;\n  \n  iVar2 = (int)param_2;\n  if ((int)(param_1 + 0x7fffffff) < 0 == (-1 < (int)param_1 && (int)(param_1 + 0x7fffffff) < 0) &&\n      param_1 != 0x80000001) {\n    uVar5 = param_1;\n    if ((int)param_1 < 0) {\n      uVar5 = -param_1;\n    }\n  }\n  else {\n    uVar5 = 0x7fffffff;\n  }\n  iVar6 = (int)DAT_00031d44;\n  if ((int)(uVar5 - 0xffff) < 0 == ((int)uVar5 < 0 && -1 < (int)(uVar5 - 0xffff))) {\n    uVar5 = 0xffff;\n  }\n  if ((int)uVar5 < 0) {\n    uVar5 = 0;\n  }\n  if (iVar2 - iVar6 < 0 != (iVar2 < 0 != iVar6 < 0 && iVar6 < 0 == iVar2 - iVar6 < 0)) {\n    iVar1 = 0;\n    iVar10 = 0;\n    uVar3 = 0;\n    goto LAB_00038704;\n  }\n  iVar8 = (int)DAT_00031d46;\n  if (iVar2 - iVar8 < 0 == (iVar2 < 0 != iVar8 < 0 && iVar8 < 0 == iVar2 - iVar8 < 0)) {\n    iVar6 = (int)DAT_00031d48;\n    if (iVar2 - iVar6 < 0 == (iVar2 < 0 != iVar6 < 0 && iVar6 < 0 == iVar2 - iVar6 < 0)) {\n      iVar8 = (int)DAT_00031d4a;\n      if (iVar2 - iVar8 < 0 != (iVar2 < 0 != iVar8 < 0 && iVar8 < 0 == iVar2 - iVar8 < 0)) {\n        iVar1 = 2;\n        iVar10 = 3;\n        goto LAB_000386da;\n      }\n      iVar6 = (int)DAT_00031d4c;\n      iVar10 = 4;\n      if (iVar2 - iVar6 < 0 == (iVar2 < 0 != iVar6 < 0 && iVar6 < 0 == iVar2 - iVar6 < 0)) {\n        iVar1 = 4;\n        uVar3 = 0x400;\n        goto LAB_00038704;\n      }\n      iVar1 = 3;\n    }\n    else {\n      iVar1 = 1;\n      iVar10 = 2;\n    }\n    uVar3 = ((iVar2 - iVar8) * 0x400) / (iVar6 - iVar8);\n  }\n  else {\n    iVar1 = 0;\n    iVar10 = 1;\nLAB_000386da:\n    uVar3 = ((iVar2 - iVar6) * 0x400) / (iVar8 - iVar6);\n  }\n  uVar3 = uVar3 & 0xffff;\nLAB_00038704:\n  uVar7 = (uVar5 & 0xffff) >> 7;\n  puVar9 = (&PTR_DAT_000210f4)[iVar10];\n  if (uVar7 < 0xff) {\n    uVar4 = (uint)*(ushort *)(puVar9 + uVar7 * 4 + 2) +\n            (int)((uVar5 & 0x7f) *\n                 ((uint)*(ushort *)(puVar9 + (uVar7 + 1) * 4 + 2) -\n                 (uint)*(ushort *)(puVar9 + uVar7 * 4 + 2))) / 0x80 & 0xffff;\n  }\n  else {\n    uVar4 = (uint)*(ushort *)(puVar9 + 0x3fe);\n  }\n  puVar9 = (&PTR_DAT_000210f4)[iVar1];\n  if (uVar7 < 0xff) {\n    uVar5 = (uint)*(ushort *)(puVar9 + uVar7 * 4 + 2) +\n            (int)((uVar5 & 0x7f) *\n                 ((uint)*(ushort *)(puVar9 + (uVar7 + 1) * 4 + 2) -\n                 (uint)*(ushort *)(puVar9 + uVar7 * 4 + 2))) / 0x80 & 0xffff;\n  }\n  else {\n    uVar5 = (uint)*(ushort *)(puVar9 + 0x3fe);\n  }\n  iVar2 = (int)((uVar4 - uVar5) * uVar3) / 0x400 + uVar5;\n  if ((int)param_1 < 1) {\n    iVar2 = -iVar2;\n  }\n  return iVar2;\n}\n\n",
+      "decompiled_c_sha256": "aced0051f73e9ca057c005f8d93b89b6d674a7a3174faa98a8375f0aa37c9c03",
+      "entry": "0x00038678"
+    },
+    {
+      "body_ranges": [
+        {
+          "max": "0x000387b5",
+          "min": "0x0003879e",
+          "space": "ram"
+        }
+      ],
+      "body_sha256": "96c2ab31eb43a81a0608db262605ac3ae08c6ad4508e4bd848fb4ad8f306cb95",
+      "body_size": 24,
+      "data_references": [
+        {
+          "from_addr": "0x000387a6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe6d78",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000387a8",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0xfebe6d70",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x000387ae",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe6e00",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_0003879e(void)\n\n{\n  undefined *puVar1;\n  undefined2 uVar2;\n  \n  puVar1 = &LAB_febeb800;\n  uVar2 = FUN_00038678(DAT_febe6d78,(int)DAT_febe6d70);\n  *(undefined2 *)(&UNK_ffffb600 + (int)puVar1) = uVar2;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "7e654c37743c9af818e01b93a4c2f8a0d352a8fb14d65b672f9d02d92297eb35",
+      "entry": "0x0003879E"
+    },
     {
       "body_ranges": [
         {
@@ -855,6 +1400,218 @@
     {
       "body_ranges": [
         {
+          "max": "0x0004c58f",
+          "min": "0x0004c490",
+          "space": "ram"
+        }
+      ],
+      "body_sha256": "1044a9ad18fc5aca3185a38a440537915fb68e7ae00ee8981fdd4aa27dbecf09",
+      "body_size": 256,
+      "data_references": [
+        {
+          "from_addr": "0x0004c49c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe5f53",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c4a6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe66a8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c4d0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8152",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c4d4",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe65d3",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c4f6",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8136",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c51c",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8142",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c51e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8051",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c522",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8050",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c526",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe813a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c528",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe7f68",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c530",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8144",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c532",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8145",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c548",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe6718",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c550",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebee8d8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c554",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8144",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c556",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8145",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c558",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe813e",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c560",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8151",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c566",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8150",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c568",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8137",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c56e",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe813c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c57c",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe816c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c57e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe80e7",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c580",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8140",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c582",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe80e6",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c584",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8141",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c586",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe7475",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c58a",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe813f",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nvoid FUN_0004c490(void)\n\n{\n  char cVar1;\n  char cVar2;\n  undefined *puVar4;\n  undefined1 uVar5;\n  int iVar6;\n  int iVar7;\n  undefined1 auStack_11 [5];\n  int iVar3;\n  \n  puVar4 = &LAB_febeb800;\n  FUN_0004c380();\n  FUN_0004c3d2();\n  if (puVar4[-0x58ad] == 'Z') {\n    iVar7 = (int)(short)((*(short *)(puVar4 + -0x5158) * 100) / 0x100);\n    if (iVar7 + -1000 < 0 == (iVar7 < 0 && -1 < iVar7 + -1000) && iVar7 != 1000) {\n      iVar7 = 1000;\n    }\n    else if (iVar7 + 1000 < 0 != (-1 < iVar7 && iVar7 + 1000 < 0)) {\n      iVar7 = -1000;\n    }\n  }\n  else {\n    iVar7 = (int)*(short *)(puVar4 + -0x36ae);\n  }\n  cVar1 = puVar4[-0x522d];\n  FUN_0006a5cc((int)(short)(iVar7 / 10),auStack_11);\n  puVar4[-0x36ca] = auStack_11[0];\n  cVar2 = (char)((iVar7 + 1000) % 10);\n  iVar3 = (int)cVar2;\n  if (iVar7 < 0) {\n    iVar6 = 6;\n  }\n  else {\n    iVar6 = 5;\n  }\n  if (iVar3 - iVar6 < 0 == (iVar3 < 0 && -1 < iVar3 - iVar6)) {\n    iVar3 = (int)(char)(cVar2 + -10);\n  }\n  puVar4[-0x36be] = (char)iVar3;\n  uVar5 = puVar4[-0x37b0];\n  puVar4[-0x36c6] = (char)((iVar7 - iVar3) / 10);\n  cVar2 = puVar4[-0x36bc];\n  if (cVar2 == '\\0') {\n    if ((puVar4[-0x37af] == puVar4[-0x36bb]) || (1 < (byte)puVar4[-0x3898])) {\n      uVar5 = 1;\n    }\n    else {\n      cVar2 = 'Z';\n    }\n  }\n  puVar4[-0x36bc] = cVar2;\n  puVar4[-0x36bb] = puVar4[-0x37af];\n  puVar4[-0x36c2] = uVar5;\n  puVar4[-13999] = 0;\n  puVar4[-14000] = 0;\n  puVar4[-0x36c9] = cVar1 != '\\0';\n  puVar4[-0x36c4] = cVar1 != '\\0';\n  *(short *)(puVar4 + -0x3694) =\n       (short)((((int)(-(int)*(short *)(puVar4 + -0x50e8) * (uint)*(ushort *)(puVar4 + 0x30d8)) /\n                0x100) * 100) / 0x2000);\n  puVar4[-0x36c0] = puVar4[-0x3719];\n  puVar4[-0x36bf] = puVar4[-0x371a];\n  puVar4[-0x36c1] = (&UNK_ffffbc75)[(int)puVar4];\n  return;\n}\n\n",
+      "decompiled_c_sha256": "e786e765e4368d807864c8129957fcbd116e5e89cb47447a6008647d97e7cc78",
+      "entry": "0x0004C490"
+    },
+    {
+      "body_ranges": [
+        {
           "max": "0x0004c8db",
           "min": "0x0004c7aa",
           "space": "ram"
@@ -1042,6 +1799,771 @@
       "decompiled_c": "\nuint FUN_0004c7aa(void)\n\n{\n  char cVar1;\n  undefined *puVar2;\n  uint uVar3;\n  uint uVar4;\n  \n  puVar2 = &LAB_febeb800;\n  DAT_febe8c53 = DAT_febe810b;\n  DAT_febe8c54 = DAT_febe810c;\n  DAT_febe8c55 = DAT_febe810d;\n  DAT_febe8c56 = DAT_febe810e;\n  DAT_febe8c57 = DAT_febe810f;\n  DAT_febe8c58 = DAT_febe8110;\n  DAT_febe8c59 = DAT_febe8111;\n  DAT_febe8c5a = DAT_febe8112;\n  FUN_0007d31e(0x2c,0x27,8,0,&DAT_febe8c53);\n  FUN_0007d31e(0x2d,0x28,8,0,puVar2 + -0x2bac);\n  FUN_0007d31e(0x2e,0x29,8,0,puVar2 + -0x2bab);\n  FUN_0007d31e(0x2f,0x2a,8,0,puVar2 + -0x2baa);\n  FUN_0007d31e(0x30,0x2b,8,0,puVar2 + -0x2ba9);\n  FUN_0007d31e(0x31,0x2c,8,0,puVar2 + -0x2ba8);\n  FUN_0007d31e(0x32,0x2d,8,0,puVar2 + -0x2ba7);\n  FUN_0007d31e(0x33,0x2e,8,0,puVar2 + -0x2ba6);\n  cVar1 = puVar2[-0x386a];\n  uVar3 = FUN_0007d0ea(3);\n  if ((cVar1 == 'Z') && ((uVar3 & 0x10) == 0)) {\n    uVar4 = FUN_0007e612(3);\n  }\n  else {\n    uVar4 = uVar3;\n    if ((cVar1 == '\\0') && (uVar4 = uVar3 >> 5, (uVar3 & 0x10) != 0)) {\n      FUN_0007e46a(3,0x40);\n      uVar4 = FUN_0007e696(3);\n    }\n  }\n  return uVar4;\n}\n\n",
       "decompiled_c_sha256": "50a30aa917414fb075e70683321f09796a4a6f10fa6260fdbc20214864a9a544",
       "entry": "0x0004C7AA"
+    },
+    {
+      "body_ranges": [
+        {
+          "max": "0x0004ce03",
+          "min": "0x0004c97a",
+          "space": "ram"
+        }
+      ],
+      "body_sha256": "f79978b2cdf683c326076a26f46243e3c20535858eaf3eea3733790809eed6ba",
+      "body_size": 1162,
+      "data_references": [
+        {
+          "from_addr": "0x0004c97e",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c4c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c986",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8136",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c98c",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c32",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c990",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8137",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c994",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c33",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c998",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8164",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c99a",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c24",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c99e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8138",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9a0",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c34",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9a4",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8166",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9a6",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c26",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9aa",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8139",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9ae",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c49",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9b2",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe80de",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9b4",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c35",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9b8",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe80e3",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9ba",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c36",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9be",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe80e2",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9c0",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c37",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9c4",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe813a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9c6",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c38",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9ca",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8168",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9cc",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c28",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9d0",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe813b",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9d4",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c39",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9d8",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8174",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9da",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c20",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9de",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe813c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9e2",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c3a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9e6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe813d",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9ea",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c3b",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9ee",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe813e",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9f2",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c3c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9f6",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe813f",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9fa",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c3d",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004c9fe",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe817c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca02",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c3e",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca06",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe816a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca0c",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c2a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca10",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe80f6",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca12",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c3f",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca16",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe80f7",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca18",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c40",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca1c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe80f8",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca1e",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c41",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca22",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe80f9",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca24",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c42",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca28",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0xfebe80ec",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca32",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c43",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca36",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8140",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca3a",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c44",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca3e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8141",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca42",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c45",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca46",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe818e",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca4a",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c4a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca4e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe818d",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca52",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c4b",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca56",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8142",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca58",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c46",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca5c",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe80e0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca5e",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c47",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca62",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8156",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca64",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c2c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca68",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe816c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca6e",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c2e",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca72",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8150",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca74",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c4d",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca78",
+          "operand_index": 1,
+          "ref_type": "READ",
+          "to_addr": "0xfebe8151",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca7a",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c4e",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca82",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c32",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ca90",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c4c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004caa4",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c33",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cab8",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c24",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cacc",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c34",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cae0",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c26",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004caf4",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c49",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cb08",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c35",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cb1c",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c36",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cb30",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c37",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cb44",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c38",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cb58",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c28",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cb6c",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c39",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cb80",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c20",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cb96",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c3a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cbac",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c3b",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cbc2",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c3c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cbd8",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c3d",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cbee",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c3e",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cc04",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c2a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cc1c",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c3f",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cc34",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c40",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cc4c",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c41",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cc64",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c42",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cc7c",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c43",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cc94",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c44",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ccac",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c45",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ccc4",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c4a",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ccdc",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c4b",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004ccf4",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c46",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cd0c",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c47",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cd24",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c2c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cd3e",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c2e",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cd56",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c4d",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cd70",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c4e",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cdb4",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe8c48",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cdc0",
+          "operand_index": 0,
+          "ref_type": "DATA",
+          "to_addr": "0xfebe8c48",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004cdca",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe7f96",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c": "\nuint FUN_0004c97a(void)\n\n{\n  char *pcVar1;\n  uint uVar2;\n  undefined *puVar3;\n  uint uVar4;\n  char cVar5;\n  char acStack_28 [36];\n  \n  puVar3 = &LAB_febeb800;\n  DAT_febe8c4c = 0;\n  DAT_febe8c32 = DAT_febe8136;\n  DAT_febe8c33 = DAT_febe8137;\n  DAT_febe8c24 = DAT_febe8164;\n  DAT_febe8c34 = DAT_febe8138;\n  DAT_febe8c26 = DAT_febe8166;\n  DAT_febe8c49 = DAT_febe8139;\n  DAT_febe8c35 = DAT_febe80de;\n  DAT_febe8c36 = DAT_febe80e3;\n  DAT_febe8c37 = DAT_febe80e2;\n  DAT_febe8c38 = DAT_febe813a;\n  DAT_febe8c28 = DAT_febe8168;\n  DAT_febe8c39 = DAT_febe813b;\n  DAT_febe8c20 = DAT_febe8174;\n  DAT_febe8c3a = DAT_febe813c;\n  DAT_febe8c3b = DAT_febe813d;\n  DAT_febe8c3c = DAT_febe813e;\n  DAT_febe8c3d = DAT_febe813f;\n  DAT_febe8c3e = DAT_febe817c;\n  DAT_febe8c2a = DAT_febe816a;\n  DAT_febe8c3f = DAT_febe80f6;\n  DAT_febe8c40 = DAT_febe80f7;\n  DAT_febe8c41 = DAT_febe80f8;\n  DAT_febe8c42 = DAT_febe80f9;\n  DAT_febe8c43 = DAT_febe80ec;\n  DAT_febe8c44 = DAT_febe8140;\n  DAT_febe8c45 = DAT_febe8141;\n  DAT_febe8c4a = DAT_febe818e;\n  DAT_febe8c4b = DAT_febe818d;\n  DAT_febe8c46 = DAT_febe8142;\n  DAT_febe8c47 = DAT_febe80e0;\n  DAT_febe8c2c = DAT_febe8156;\n  DAT_febe8c2e = DAT_febe816c;\n  DAT_febe8c4d = DAT_febe8150;\n  DAT_febe8c4e = DAT_febe8151;\n  FUN_0007d31e(0,0,8,0,&DAT_febe8c32);\n  FUN_0007d31e(1,2,1,1,puVar3 + -0x2bb4);\n  FUN_0007d31e(2,2,1,0,puVar3 + -0x2bcd);\n  FUN_0007d31e(3,3,0xc,4,puVar3 + -0x2bdc);\n  FUN_0007d31e(4,4,4,0,puVar3 + -0x2bcc);\n  FUN_0007d31e(5,5,0xc,4,puVar3 + -0x2bda);\n  FUN_0007d31e(6,6,1,3,puVar3 + -0x2bb7);\n  FUN_0007d31e(7,6,1,2,puVar3 + -0x2bcb);\n  FUN_0007d31e(8,6,1,1,puVar3 + -0x2bca);\n  FUN_0007d31e(9,6,1,0,puVar3 + -0x2bc9);\n  FUN_0007d31e(0xb,8,8,0,puVar3 + -0x2bc8);\n  FUN_0007d31e(0xc,9,0xc,4,puVar3 + -0x2bd8);\n  FUN_0007d31e(0xd,10,1,3,puVar3 + -0x2bc7);\n  FUN_0007d31e(0xe,0xb,0x12,6,puVar3 + -0x2be0);\n  FUN_0007d31e(0xf,0xd,1,5,puVar3 + -0x2bc6);\n  FUN_0007d31e(0x10,0xd,1,4,puVar3 + -0x2bc5);\n  FUN_0007d31e(0x11,0xd,1,3,puVar3 + -0x2bc4);\n  FUN_0007d31e(0x12,0xd,1,2,puVar3 + -0x2bc3);\n  FUN_0007d31e(0x13,0xd,2,0,puVar3 + -0x2bc2);\n  FUN_0007d31e(0x14,0xe,0x10,0,puVar3 + -0x2bd6);\n  FUN_0007d31e(0x15,0x10,1,5,puVar3 + -0x2bc1);\n  FUN_0007d31e(0x16,0x10,1,4,puVar3 + -0x2bc0);\n  FUN_0007d31e(0x17,0x10,1,3,puVar3 + -0x2bbf);\n  FUN_0007d31e(0x18,0x10,2,1,puVar3 + -0x2bbe);\n  FUN_0007d31e(0x19,0x10,1,0,puVar3 + -0x2bbd);\n  FUN_0007d31e(0x1a,0x11,1,7,puVar3 + -0x2bbc);\n  FUN_0007d31e(0x1b,0x11,1,6,puVar3 + -0x2bbb);\n  FUN_0007d31e(0x1c,0x11,1,5,puVar3 + -0x2bb6);\n  FUN_0007d31e(0x1d,0x11,1,4,puVar3 + -0x2bb5);\n  FUN_0007d31e(0x1e,0x11,4,0,puVar3 + -0x2bba);\n  FUN_0007d31e(0x1f,0x13,1,0,puVar3 + -0x2bb9);\n  FUN_0007d31e(0x20,0x14,0x10,0,puVar3 + -0x2bd4);\n  FUN_0007d31e(0x21,0x16,0x10,0,puVar3 + -0x2bd2);\n  FUN_0007d31e(0x22,0x1b,1,1,puVar3 + -0x2bb3);\n  FUN_0007d31e(0x23,0x1b,1,0,puVar3 + -0x2bb2);\n  cVar5 = '\\0';\n  uVar2 = 0;\n  do {\n    uVar4 = uVar2 + 1;\n    acStack_28[uVar2] = '\\0';\n    uVar2 = uVar4;\n  } while (uVar4 < 0x20);\n  FUN_0007d05c(0,acStack_28);\n  uVar2 = 0;\n  do {\n    pcVar1 = acStack_28 + uVar2;\n    uVar2 = uVar2 + 1;\n    cVar5 = cVar5 + *pcVar1;\n  } while (uVar2 < 7);\n  puVar3[-0x2bb8] = cVar5 + '8';\n  FUN_0007d31e(10,7,8,0,puVar3 + -0x2bb8);\n  cVar5 = puVar3[-0x386a];\n  uVar2 = FUN_0007d0ea(0);\n  if ((cVar5 == 'Z') && ((uVar2 & 0x10) == 0)) {\n    uVar4 = FUN_0007e612(0);\n  }\n  else {\n    uVar4 = uVar2;\n    if ((cVar5 == '\\0') && (uVar4 = uVar2 >> 5, (uVar2 & 0x10) != 0)) {\n      FUN_0007e46a(0,0x40);\n      uVar4 = FUN_0007e696(0);\n    }\n  }\n  return uVar4;\n}\n\n",
+      "decompiled_c_sha256": "b20ba679d5723ecdeb235c3f646604780b9e461943ac82f937fbb8ce12e79d10",
+      "entry": "0x0004C97A"
     },
     {
       "body_ranges": [

@@ -539,7 +539,7 @@ def section_tss3_opendbc_port() -> int:
     print("== target/evidence identity ==")
     check("artifact schema/target", art["schema"] == "camry-8965f3307000-tss3-opendbc-port-v1" and art["target"]["software_id"] == "8965F3307000")
     check("exact image hash", sha(img) == evid["image"]["sha256"] == art["target"]["codeflash_sha256"] == "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7")
-    check("compact evidence exact", evid["schema"] == "camry-8965f3307000-tss3-tx-decompiler-evidence-v1" and evid["function_count"] == len(funcs) == 11)
+    check("compact evidence exact", evid["schema"] == "camry-8965f3307000-tss3-tx-decompiler-evidence-v1" and evid["function_count"] == len(funcs) == 16)
     for entry, row in sorted(funcs.items()):
         check(f"0x{entry:08X} body hash", sha(body_bytes(img,row)) == row["body_sha256"])
     with tempfile.TemporaryDirectory(prefix="camry-f33-tss3-port-") as td:
@@ -553,6 +553,7 @@ def section_tss3_opendbc_port() -> int:
     check("Tx table exact address", tx["tx_table"] == "0x00021F58")
     check("first five Tx IDs exact", [(x["can_id"], x["can_fd"]) for x in tx["first_five"]] == [("0x030", True), ("0x351", False), ("0x394", False), ("0x4A3", False), ("0x4C8", False)])
     check("signal/PDU tables exact", tx["signal_to_pdu_table"] == "0x00022488" and tx["pdu_table"] == "0x000226C0" and tx["signal_count"] == 284)
+    check("PDU slice-offset table pinned", tx["pdu_slice_offset_table"] == "0x00022840" and tx["pdu_slice_offsets"] == [0, 32, 36, 39, 47] and "wire bytes = buffer_offset - pdu_slice_offsets[pdu]" in tx["wire_byte_rule"])
     check("PDU descriptors exact", tx["pdu_descriptors"] == {
         "0": [2, 0, 0, 32, 0, 3], "1": [200, 0, 0, 4, 0, 3], "2": [60, 0, 0, 3, 0, 3],
         "3": [100, 0, 0, 8, 0, 3], "4": [196, 0, 0, 8, 0, 3],
@@ -577,6 +578,22 @@ def section_tss3_opendbc_port() -> int:
     check("4A3 torque staging exact", "DAT_febe66a8" in funcs[0x4C000]["decompiled_c"] and "* 100) / 0x100" in funcs[0x4C000]["decompiled_c"] and "puVar1 + -0x36ae" in funcs[0x4C14E]["decompiled_c"])
     check("4A3 alternate current source exact", "DAT_febe6718" in funcs[0x4C000]["decompiled_c"] and "* -100) / 0x80" in funcs[0x4C000]["decompiled_c"])
     check("4A3 current is not mislabeled DID1151", "GP-0x50E8" in s["0x4A3"]["current_semantic_boundary"] and "GP-0x50F2" in s["0x4A3"]["current_semantic_boundary"])
+
+    print("\n== 0x030 mapped motor-feedback closure ==")
+    m = s["0x030"]["mapped_motor_feedback"]
+    check("0x030 carrier exact", s["0x030"]["pdu"] == 0 and s["0x030"]["length"] == 32 and s["0x030"]["source_preparation"] == "0x0004C490" and s["0x030"]["packer"] == "0x0004C97A")
+    check("B22:B23 derived from pinned slice offsets", m["wire"] == "B22:B23" and m["signal_id"] == 33 and "0x16 - PDU0 slice offset 0" in m["wire_derivation"] and m["pdu_slice_offset_table"] == "0x00022840")
+    check("driver torque wire fields exact", [f["wire"] for f in s["0x030"]["driver_torque_fields"]][:2] == ["B8", "B17[3:0]"] and "signed8(B8)*0.1 + signed4(B17[3:0])*0.01" in s["0x030"]["driver_torque_fields"][2]["formula"])
+    check("aggregate packs the mapped chain", all(tok in funcs[0x37E48]["decompiled_c"] for tok in ("DAT_febe6e28", "DAT_febe6d78 = iVar2 + iVar4", "DAT_febe6d72 = (short)iVar5")))
+    check("map is nonlinear lookup interpolation", all(tok in funcs[0x38678]["decompiled_c"] for tok in ("DAT_00031d44", "(&PTR_DAT_000210f4)", "if ((int)param_1 < 1)")))
+    check("publish maps extended Q sum conditioned by sibling axis", all(tok in funcs[0x3879E]["decompiled_c"] for tok in ("DAT_febe6d78", "DAT_febe6d70", "FUN_00038678")))
+    check("0x030 staging formula exact", "* 100) / 0x2000" in funcs[0x4C490]["decompiled_c"] and "puVar4 + 0x30d8" in funcs[0x4C490]["decompiled_c"])
+    check("signal33 packs signed BE16 at B22", "FUN_0007d31e(0x21,0x16,0x10,0" in funcs[0x4C97A]["decompiled_c"] and "DAT_febe8c2e = DAT_febe816c" in funcs[0x4C97A]["decompiled_c"])
+    check("mapped-feedback census exact", [x["entry"] for x in evid["fixed_gp_census"]["mapped_current_feedback_gp_minus_0x4a00"]] == ["0x0003879E", "0x00057FD2", "0x00059448", "0x0005D12C"])
+    check("extended Q-sum census exact", [x["entry"] for x in evid["fixed_gp_census"]["did1151_q_current_upstream_gp_minus_0x4a8e"]] == ["0x00037E48", "0x00037F92", "0x00059448", "0x0005C7B6", "0x0005CA3A", "0x0005D12C"])
+    check("0x030 scale census exact", [x["entry"] for x in evid["fixed_gp_census"]["tx030_current_scale_gp_plus_0x30d8"]] == ["0x0004C490", "0x000BF3AA", "0x000BF97A"])
+    check("boundary denies current-as-authority", "driver EPS assist also creates current" in m["semantic_boundary"] and "not amperes" in m["semantic_boundary"])
+    check("alternate staging writer bounded", "0x00058C9A" in m["alternate_staging_writer"] and "no semantic claim" in m["alternate_staging_writer"])
 
     print("\n== VAR-056 bounded-census correction ==")
     c = art["census_correction"]

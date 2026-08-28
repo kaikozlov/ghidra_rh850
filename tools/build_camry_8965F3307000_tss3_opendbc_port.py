@@ -23,6 +23,7 @@ PDU = struct.Struct("<HBBHBB")
 TX_TABLE = 0x21F58
 SIGNAL_TO_PDU = 0x22488
 PDU_TABLE = 0x226C0
+PDU_SLICE_TABLE = 0x22840
 SIGNAL_COUNT = 284
 
 
@@ -49,10 +50,10 @@ def build() -> dict:
     need(len(image) == 0x100000 and sha(image) == IMAGE_SHA256, "exact F33 image drift")
     need(evid["schema"] == "camry-8965f3307000-tss3-tx-decompiler-evidence-v1", "Tx evidence schema drift")
     need(evid["software_id"] == "8965F3307000" and evid["image"]["sha256"] == IMAGE_SHA256, "Tx evidence target drift")
-    need(evid["function_count"] == 11, "Tx evidence function count drift")
+    need(evid["function_count"] == 16, "Tx evidence function count drift")
 
     funcs = {int(row["entry"], 16): row for row in evid["functions"]}
-    need(len(funcs) == 11, "duplicate/missing Tx evidence functions")
+    need(len(funcs) == 16, "duplicate/missing Tx evidence functions")
     for entry, row in funcs.items():
         need(sha(body_bytes(image, row)) == row["body_sha256"], f"body hash drift 0x{entry:08X}")
 
@@ -77,6 +78,16 @@ def build() -> dict:
         (196, 0, 0, 8, 0, 3),
     ]
     need(pdu_rows == expected_pdu, f"F33 first-five Tx PDU descriptor drift: {pdu_rows}")
+    # FUN_0007d05c submits each PDU by copying its descriptor length out of the shared
+    # pack buffer at FEBE4A48 starting at the per-PDU u16 slice offset in the table at
+    # 0x22840. FUN_0007d31e's second argument is an absolute buffer byte offset, so a
+    # signal's wire bytes are (buffer_offset - pdu_slice_offset).
+    pdu_slice = list(struct.unpack_from("<5H", image, PDU_SLICE_TABLE))
+    need(pdu_slice == [0, 32, 36, 39, 47], f"F33 PDU slice-offset table drift: {pdu_slice}")
+    # 0x4A3 anchor: signal 44 buffer offset 0x27 - PDU3 slice 39 => wire B0.
+    need(0x27 - pdu_slice[3] == 0, "0x4A3 signal-44 wire anchor drift")
+    # 0x030 mapped motor feedback: signal 33 buffer offset 0x16 - PDU0 slice 0 => B22:B23.
+    need(0x16 - pdu_slice[0] == 22 and 22 + 2 <= pdu_rows[0][3], "signal-33 wire byte derivation drift")
 
     signal_map = [struct.unpack_from("<H", image, SIGNAL_TO_PDU + i * 2)[0] for i in range(SIGNAL_COUNT)]
     allocations = {pdu: [i for i, mapped in enumerate(signal_map) if mapped == pdu] for pdu in range(5)}
@@ -95,6 +106,9 @@ def build() -> dict:
                 "FUN_0007d1dc(0x2a,0x26,3,1", "FUN_0007d1dc(0x2b,0x26,1,0", "FUN_0007d0ea(2)")
     need_tokens(funcs, 0x4C7AA,
                 "FUN_0007d31e(0x2c,0x27,8,0", "FUN_0007d31e(0x33,0x2e,8,0", "FUN_0007d0ea(3)")
+    need_tokens(funcs, 0x4C97A,
+                "FUN_0007d31e(0,0,8,0", "FUN_0007d31e(0x21,0x16,0x10,0",
+                "FUN_0007d31e(10,7,8,0", "FUN_0007d0ea(0)")
 
     source = need_tokens(funcs, 0x4C000,
                          "DAT_febe66a8", "* 100) / 0x100", "DAT_febe8152 = 1000", "DAT_febe8152 = -1000",
@@ -109,6 +123,36 @@ def build() -> dict:
     need_tokens(funcs, 0x4C216, "param_1 = 7;", "DAT_febe8100", "DAT_febe8101")
     need_tokens(funcs, 0x4C24A, "uVar1 = DAT_febe82a0 - 1", "DAT_febe810a", "DAT_febe8102")
 
+    # The live 0x030 current-like field is target-native, not a transferred H
+    # interpretation.  The extended Q-axis sum is clamped into the DID1151
+    # upstream cell and independently enters a nonlinear two-axis map.  That
+    # mapped result is mirrored through GP-0x50E8, scaled, and packed at B22:B23.
+    aggregate = need_tokens(funcs, 0x37E48,
+                            "DAT_febe6e28", "DAT_febe6e2c", "DAT_febe6e30", "DAT_febe6e34",
+                            "DAT_febe6d78 = iVar2 + iVar4", "DAT_febe6d72 = (short)iVar5")
+    mapped = need_tokens(funcs, 0x38678,
+                         "DAT_00031d44", "DAT_00031d46", "DAT_00031d48", "DAT_00031d4a", "DAT_00031d4c",
+                         "(&PTR_DAT_000210f4)", "if ((int)param_1 < 1)")
+    publish = need_tokens(funcs, 0x3879E, "DAT_febe6d78", "DAT_febe6d70", "FUN_00038678")
+    tx030_source = need_tokens(funcs, 0x4C490,
+                               "puVar4 + -0x50e8", "puVar4 + 0x30d8", "puVar4 + -0x3694")
+    need(all(token in aggregate for token in ("DAT_febe6d70", "DAT_febe6d72", "DAT_febe6d78")),
+         "actual-current aggregate staging drift")
+    need("return iVar2" in mapped and "UNK_ffffb600" in publish,
+         "mapped current-feedback publication drift")
+    need("* 100) / 0x2000" in tx030_source, "0x030 current scale formula drift")
+
+    def ref_types(entry: int, address: int) -> set[str]:
+        return {
+            ref["ref_type"] for ref in funcs[entry]["data_references"]
+            if int(ref["to_addr"], 16) == address
+        }
+
+    need(ref_types(0x3879E, 0xFEBE6E00) == {"WRITE"}, "mapped feedback destination drift")
+    need(ref_types(0x4C490, 0xFEBE6718) == {"READ"} and
+         ref_types(0x4C490, 0xFEBEE8D8) == {"READ"} and
+         ref_types(0x4C490, 0xFEBE816C) == {"WRITE"}, "0x030 current source/stage refs drift")
+
     census = evid["fixed_gp_census"]
     torque_refs = [row["entry"] for row in census["driver_torque_source_gp_minus_0x5158"]]
     current_alt_refs = [row["entry"] for row in census["alternate_4a3_current_source_gp_minus_0x50e8"]]
@@ -116,6 +160,12 @@ def build() -> dict:
     need(torque_refs == ["0x00035A06", "0x0004C000", "0x0004C490", "0x0004DB70", "0x00052CA0", "0x00054244", "0x000564CE", "0x00059448", "0x0005D5E0"], "canonical torque census drift")
     need(current_alt_refs == ["0x0004C000", "0x0004C490", "0x00059448", "0x0005D12C"], "0x4A3 alternate-current census drift")
     need(did1151_refs == ["0x0004E394", "0x00052CA0", "0x00054244", "0x000564CE", "0x00059448", "0x0005D12C"], "DID1151 Q-current census drift")
+    mapped_refs = [row["entry"] for row in census["mapped_current_feedback_gp_minus_0x4a00"]]
+    qsum_refs = [row["entry"] for row in census["did1151_q_current_upstream_gp_minus_0x4a8e"]]
+    scale_refs = [row["entry"] for row in census["tx030_current_scale_gp_plus_0x30d8"]]
+    need(mapped_refs == ["0x0003879E", "0x00057FD2", "0x00059448", "0x0005D12C"], "mapped-feedback census drift")
+    need(qsum_refs == ["0x00037E48", "0x00037F92", "0x00059448", "0x0005C7B6", "0x0005CA3A", "0x0005D12C"], "extended Q-axis-sum census drift")
+    need(scale_refs == ["0x0004C490", "0x000BF3AA", "0x000BF97A"], "0x030 runtime-scale census drift")
 
     return {
         "schema": "camry-8965f3307000-tss3-opendbc-port-v1",
@@ -131,11 +181,44 @@ def build() -> dict:
             ],
             "signal_to_pdu_table": f"0x{SIGNAL_TO_PDU:08X}",
             "pdu_table": f"0x{PDU_TABLE:08X}",
+            "pdu_slice_offset_table": f"0x{PDU_SLICE_TABLE:08X}",
+            "pdu_slice_offsets": pdu_slice,
+            "wire_byte_rule": "FUN_0007d31e param_2 is an absolute pack-buffer byte offset; wire bytes = buffer_offset - pdu_slice_offsets[pdu]",
             "signal_count": SIGNAL_COUNT,
             "pdu_descriptors": {str(i): list(row) for i, row in enumerate(pdu_rows)},
             "signal_allocations": {str(i): values for i, values in allocations.items()},
         },
         "status_carriers": {
+            "0x030": {
+                "pdu": 0,
+                "length": 32,
+                "source_preparation": "0x0004C490",
+                "packer": "0x0004C97A",
+                "driver_torque_fields": [
+                    {"wire": "B8", "signal_id": 11, "role": "coarse signed Steering Wheel Torque", "scale": "0.1 N.m/count"},
+                    {"wire": "B17[3:0]", "signal_id": 30, "role": "signed decimal digit of Steering Wheel Torque", "scale": "0.01 N.m/count"},
+                    {"wire": "B8 plus B17[3:0]", "role": "combined signed Steering Wheel Torque", "formula": "signed8(B8)*0.1 + signed4(B17[3:0])*0.01 N.m"},
+                ],
+                "mapped_motor_feedback": {
+                    "signal_id": 33,
+                    "wire": "B22:B23",
+                    "wire_derivation": "FUN_0007d31e(0x21,0x16,0x10,0) buffer offset 0x16 - PDU0 slice offset 0 => 0x030 wire bytes 22:23, big-endian",
+                    "pdu_slice_offset_table": "0x00022840",
+                    "wire_decode": "signed big-endian 16-bit",
+                    "source_chain": [
+                        "0x00037E48: dual-channel feedback sums -> FEBE6D70 plus extended Q-axis sum FEBE6D78; saturated FEBE6D72 is the DID1151 upstream source",
+                        "0x00038678: abs/sign-preserving lookup interpolation over FEBE6D78, conditioned by FEBE6D70",
+                        "0x0003879E: mapped result -> FEBE6E00",
+                        "0x00059448/0x0005D12C: FEBE6E00 -> FEBE6718",
+                        "0x0004C490: FEBE6718 plus unsigned scale FEBEE8D8 -> FEBE816C",
+                        "0x0004C97A: signal33 -> 0x030 B22:B23",
+                    ],
+                    "staging_formula": "signed16(((((int)(-signed16(FEBE6718)) * unsigned16(FEBEE8D8)) / 0x100) * 100) / 0x2000)",
+                    "alternate_staging_writer": "0x00058C9A also writes FEBE816C (and signal-0 source FEBE8132); it is not decompiled here and carries no semantic claim",
+                    "classification": "nonlinear mapped motor-feedback/current-family proxy sharing the pre-clamp Q-axis aggregate that feeds DID 0x1151",
+                    "semantic_boundary": "The source family is now target-natively joined to DID1151's pre-clamp Q-axis aggregate, but B22:B23 is not DID1151 in wire units: a sibling-axis-conditioned lookup and a separate runtime scale intervene. Treat it as a signed motor-feedback/assist proxy, not amperes, commanded torque, or LTA authority. Motor feedback is never by itself proof of an external lateral command: driver EPS assist also creates current.",
+                },
+            },
             "0x351": {
                 "pdu": 1,
                 "length": 4,
@@ -168,8 +251,9 @@ def build() -> dict:
                     {"wire": "B6:B7", "role": "alternate motor-current telemetry source", "formula": "signed16 = (GP-0x50E8 * -100) / 0x80"},
                 ],
                 "current_semantic_boundary": (
-                    "F33 0x4A3 uses GP-0x50E8, while target-native DID 0x1151 Motor Actual Current (Q Axis) uses GP-0x50F2. "
-                    "The packet field must therefore remain structurally named until an F33 source join or live correlation closes equivalence."
+                    "F33 0x4A3 uses GP-0x50E8, while DID 0x1151 Motor Actual Current (Q Axis) reads GP-0x50F2. "
+                    "The upstream join is now closed: GP-0x50E8 is a nonlinear sibling-axis-conditioned map of the same extended Q-axis sum that is saturated into the DID1151 source. "
+                    "It is therefore a motor-current-family feedback proxy, but not DID1151 in wire units and not yet amperes or commanded torque."
                 ),
             },
         },

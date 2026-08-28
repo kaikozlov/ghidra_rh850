@@ -56,7 +56,36 @@ this F33 closure deliberately does not equate the deepest clear state with Ready
 any numeric class to openpilot `steerFaultTemporary`/`steerFaultPermanent` without a
 same-car asserted/recovery transition.
 
-### 1.3 `0x4A3`
+### 1.3 `0x030`
+
+The target-native chain is `0x4C490 -> 0x4C97A` (PDU0, 32 bytes, CAN FD). Wire
+geometry is derived from the pinned per-PDU slice-offset table at `0x22840`
+(`FUN_0007d05c` copies each PDU out of the shared pack buffer at `FEBE4A48`;
+`FUN_0007d31e`'s second argument is an absolute buffer byte offset, so wire bytes =
+buffer offset - slice offset; PDU0 slice offset is 0):
+
+- `B8` (signal 11): coarse signed steering-wheel torque, 0.1 N.m/count;
+- `B17[3:0]` (signal 30): signed decimal digit, 0.01 N.m/count;
+- combined: `signed8(B8)*0.1 + signed4(B17[3:0])*0.01` N.m;
+- `B22:B23` (signal 33): **signed big-endian 16-bit mapped motor-feedback proxy**.
+
+The `B22:B23` source chain is now target-natively closed: `0x37E48` forms dual-channel
+feedback sums into `FEBE6D70` plus an extended Q-axis sum `FEBE6D78` (whose saturated
+i16 `FEBE6D72` is the DID `0x1151` upstream source); `0x38678` maps
+`abs(FEBE6D78)` through a lookup table conditioned by the sibling axis `FEBE6D70`;
+`0x3879E` publishes the mapped result to `FEBE6E00`; `0x59448`/`0x5D12C` mirror it to
+`FEBE6718` (GP-0x50E8, the same cell `0x4A3 B6:B7` reads); `0x4C490` stages
+`signed16(((-FEBE6718 * FEBEE8D8) / 0x100) * 100 / 0x2000)` into `FEBE816C`; and
+`0x4C97A` packs it at `B22:B23`. It is therefore a **motor-current-family feedback
+proxy sharing DID1151's pre-clamp Q-axis aggregate**, but not DID1151 in wire units:
+the sibling-axis-conditioned lookup and the runtime scale (`FEBEE8D8`, written at
+runtime by `0xBF3AA`/`0xBF97A`) intervene. A second staging-cell writer `0x58C9A`
+also writes `FEBE816C`; it is bounded with no semantic claim. Treat `B22:B23` as a
+signed motor-feedback/assist proxy — never as amperes, commanded torque, or lateral
+authority: driver EPS assist also creates current. The two-drive bounded correlation
+of this field lives in the live-baseline report §24 (VAR-072).
+
+### 1.4 `0x4A3`
 
 The exact F33 chain is `0x4C000 -> 0x4C14E -> 0x4C7AA` and is materially better evidence
 than transferring the H/F packer by shape.
@@ -73,11 +102,14 @@ geometry is:
 - `B6:B7`: signed16 alternate motor-current telemetry from
   `(GP-0x50E8 * -100) / 0x80`.
 
-A target-specific semantic boundary matters here. F33 DID `0x1151` **Motor Actual
-Current (Q Axis)** reads `GP-0x50F2`, while the `0x4A3` producer reads `GP-0x50E8`.
-The opendbc field is therefore structurally named `MOTOR_CURRENT_ALT`; this report does
-not claim that the two sources are equivalent merely because the H/F homolog joins to
-Q-axis current.
+The distinct `0x4A3` alternate-current source `GP-0x50E8 = FEBE6718` has four
+direct references: readers `0x4C000/0x4C490` and writers `0x59448/0x5D12C`. The
+`0x030 B22:B23` field reads this same cell, and its upstream is now closed (§1.3,
+§2): `GP-0x50E8` is a nonlinear sibling-axis-conditioned map of the same extended
+Q-axis sum that saturates into the DID1151 source. The packed fields therefore remain
+structurally named (`MOTOR_CURRENT_ALT`, mapped motor-feedback proxy) — not because
+the source relationship is unknown, but because the lookup and runtime scale mean the
+wire values are not DID1151 units, amperes, or commanded torque.
 
 ## 2. Canonical first-class source-reference census
 
@@ -99,9 +131,16 @@ For DID1151 Q-current `GP-0x50F2 = FEBE670E`, the exact direct-reference set is
 - readers: `0x4E394`, `0x52CA0`, `0x54244`, `0x564CE`;
 - writers: `0x59448`, `0x5D12C`.
 
-The distinct `0x4A3` alternate-current source `GP-0x50E8 = FEBE6718` has four
-direct references: readers `0x4C000/0x4C490` and writers `0x59448/0x5D12C`. This
-continues to justify keeping the packed field structurally distinct from DID1151.
+The distinct `0x4A3`/`0x030` mapped-current source `GP-0x50E8 = FEBE6718` has four
+direct references: readers `0x4C000/0x4C490` and writers `0x59448/0x5D12C`.
+
+The `0x030 B22:B23` upstream is now census-closed as well: the mapped feedback
+`FEBE6E00` (GP-0x4A00) is written only by `0x3879E` and read by `0x57FD2`,
+`0x59448`, `0x5D12C`; the extended Q-axis sum `FEBE6D78` (GP-0x4A8E) is written by
+`0x37E48` and read by `0x375C2`-family consumers including the `0x38678` map input;
+the DID1151 pre-clamp cell `FEBE6D72` is written by `0x37E48` and read by `0x37F92`,
+`0x59448`, `0x5C7B6`, `0x5CA3A`, `0x5D12C`; and the `0x030` runtime scale
+`FEBEE8D8` is read by `0x4C490` and written at runtime by `0xBF3AA`/`0xBF97A`.
 
 The safety-relevant negative is unchanged and is now stronger: **none** of the direct
 references to `FEBE66A8` or `FEBE670E` lies in the cooperative `C8xxx-D1xxx`
@@ -266,6 +305,7 @@ from the static safety model because the current corpus does not prove them.
 - `data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json`
 - `data/generated/camry_8965F3307000_tss3_opendbc_port.json`
 - `data/generated/camry_8965F3307000_external_lateral_ingress.json`
+- `data/generated/camry_2026_motor_feedback_correlation.json`
 - `tests/verify_camry_8965F3307000.py`
 
 <!-- knowledge-cross-references:begin -->
@@ -274,6 +314,6 @@ from the static safety model because the current corpus does not prove them.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061), [VAR-062](../reference/index.md#finding-var-062)
+- Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061), [VAR-062](../reference/index.md#finding-var-062), [VAR-071](../reference/index.md#finding-var-071)
 - Corrections with this document as canonical home: [CORR-120](../reference/index.md#correction-corr-120), [CORR-122](../reference/index.md#correction-corr-122)
 <!-- knowledge-cross-references:end -->
