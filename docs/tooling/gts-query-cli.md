@@ -22,6 +22,7 @@ tools/gts search 0x1CEE --ecu EMPS_P5 --kind did
 
 tools/gts ecu EMPS_P5
 tools/gts role
+tools/gts role 0x05
 tools/gts role 0x19
 tools/gts commset
 tools/gts commset 1
@@ -40,6 +41,16 @@ tools/gts cuw list
 tools/gts pe KgpDataCtrl.dll CDbDatamonitor
 tools/gts pe TCUWCanReproStdFlashWriter.unpack.dll StartFlashWrite
 ```
+
+`tools/gts role` also reports a binding-weighted `surfaces=` breakdown. Its
+labels describe the recovered shared-runtime edge, not blanket vehicle I/O:
+`direct_transport` means the plugin imports frame/send primitives itself;
+`delegated_transport_v18_proven` means a stable current support-helper import has
+an executable V18 path to frame/send; `support_cache_v18_proven` consumes cached
+support response bytes; and the `unclosed`/`no_recovered` classes remain bounded
+unknowns. For example, role `0x05` exposes the P4 cached-support versus P5
+delegated-support evolution, while role `0x19` is direct transport for all 536
+bindings.
 
 All commands bootstrap the repository's locked `uv` environment themselves.
 No venv activation or direct Python invocation is required. `--json` is

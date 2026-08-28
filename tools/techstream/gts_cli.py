@@ -29,6 +29,7 @@ from ddb_semantics import behavior_rows as semantic_behavior_rows
 from ddb_semantics import dtc_rows as semantic_dtc_rows
 from ddb_semantics import monitor_rows as semantic_monitor_rows
 from ddb_strings import load_string_db as cached_string_db
+from diagnostic_role_model import role_operation_catalog
 from parse_cuw_container import first_member_payload, read_first_member
 from parse_cuw_container import parse as parse_cuw_container
 from parse_ddb import ECU_TABLE_CLASS_NAMES, DDBParser, StringDataBase
@@ -445,7 +446,9 @@ def _resolve_master_category(parser: DDBParser, master: Any, strings: StringData
     return matches[0]
 
 
-def _master_role_catalog(parser: DDBParser, master: Any) -> list[dict[str, Any]]:
+def _master_role_catalog(parser: DDBParser, master: Any, bin_root: Path | None = None) -> list[dict[str, Any]]:
+    if bin_root is not None:
+        return role_operation_catalog(parser, master, bin_root)["roles"]
     by_role: dict[int, list[Any]] = {}
     for entry in parser.extract_master_dlls(master.sections[19]):
         by_role.setdefault(entry.dll_role_id, []).append(entry)
@@ -466,7 +469,6 @@ def _master_role_catalog(parser: DDBParser, master: Any) -> list[dict[str, Any]]
             "plugins": plugins,
         })
     return sorted(rows, key=lambda row: (-row["binding_count"], row["role"]))
-
 
 def _master_plugins(parser: DDBParser, master: Any, category_id: int) -> list[dict[str, Any]]:
     return [
@@ -613,7 +615,7 @@ def cmd_role(args: argparse.Namespace) -> int:
     db_root = _db_root(gts, args.region, args.family)
     parser = DDBParser()
     master = parser.parse_master_db(db_root / "Toyota.ddb")
-    rows = _master_role_catalog(parser, master)
+    rows = _master_role_catalog(parser, master, gts / "bin")
     if args.role is not None:
         role = _parse_master_key(args.role)
         if role is None:
@@ -630,9 +632,12 @@ def cmd_role(args: argparse.Namespace) -> int:
             f"{item['dll']}({item['binding_count']})"
             for item in row["plugins"][: args.plugin_limit]
         )
+        surface_counts = row.get("binding_surface_counts", {})
+        surfaces = ",".join(f"{name}:{count}" for name, count in surface_counts.items())
+        surface_text = f"\tsurfaces={surfaces}" if surfaces else ""
         print(
-            f"role	{row['role_hex']}	bindings={row['binding_count']}	"
-            f"categories={row['category_count']}	{plugins}"
+            f"role\t{row['role_hex']}\tbindings={row['binding_count']}\t"
+            f"categories={row['category_count']}{surface_text}\t{plugins}"
         )
     return 0
 

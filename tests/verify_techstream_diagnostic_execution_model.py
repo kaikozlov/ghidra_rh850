@@ -111,7 +111,61 @@ check(
     and role_catalog["role_count"] == 191
     and role19["binding_count"] == 536
     and role19["category_count"] == 536
-    and role19["plugins"][0] == {"dll": "DelDiagCodeP4.dll", "binding_count": 424},
+    and role19["plugins"][0] == {"dll": "DelDiagCodeP4.dll", "binding_count": 424, "surface": "direct_transport"},
+)
+
+role_ops = role_catalog
+role5_ops = next(row for row in role_ops["roles"] if row["role"] == 0x05)
+role6_ops = next(row for row in role_ops["roles"] if row["role"] == 0x06)
+role19_ops = next(row for row in role_ops["roles"] if row["role"] == 0x19)
+role41_ops = next(row for row in role_ops["roles"] if row["role"] == 0x41)
+check(
+    "current role-operation census separates direct, delegated, cached, and unresolved shared-runtime edges",
+    role_ops["binding_count"] == 6194
+    and role_ops["role_count"] == 191
+    and role_ops["binding_surface_counts"] == {
+        "delegated_transport_v18_proven": 1139,
+        "direct_transport": 2643,
+        "no_recovered_shared_transport_edge": 1323,
+        "plugin_file_missing": 59,
+        "support_cache_v18_proven": 790,
+        "support_orchestration_unclosed": 240,
+    },
+)
+check(
+    "Data Monitor list role 0x05 spans cached P4 support and delegated P5/P6 support discovery",
+    role5_ops["binding_surface_counts"] == {
+        "delegated_transport_v18_proven": 318,
+        "no_recovered_shared_transport_edge": 5,
+        "support_cache_v18_proven": 233,
+        "support_orchestration_unclosed": 6,
+    }
+    and role5_ops["plugins"][0]["dll"] == "GetDatMonListP4.dll"
+    and role5_ops["plugins"][0]["surface"] == "support_cache_v18_proven"
+    and role5_ops["plugins"][1]["dll"] == "GetDatMonListP5_DT.dll"
+    and role5_ops["plugins"][1]["surface"] == "delegated_transport_v18_proven",
+)
+check(
+    "Active Test list role 0x06 has the same P4-cache versus P5/P6-delegated split",
+    role6_ops["plugins"][0]["dll"] == "GetActTstListP4.dll"
+    and role6_ops["plugins"][0]["surface"] == "support_cache_v18_proven"
+    and role6_ops["plugins"][1]["dll"] == "GetActTstListP5_DT.dll"
+    and role6_ops["plugins"][1]["surface"] == "delegated_transport_v18_proven",
+)
+check(
+    "DTC clear role 0x19 is direct transport for every current binding",
+    role19_ops["binding_surface_counts"] == {"direct_transport": 536},
+)
+check(
+    "Data Monitor signal-info role 0x41 has no recovered shared transport edge",
+    role41_ops["binding_surface_counts"] == {"no_recovered_shared_transport_edge": 283},
+)
+current_cc = gts["dll_role_schema"]["command_common_surface"]
+check(
+    "current GTS+ preserves support-helper exports but not their materialized on-disk bodies",
+    current_cc["text_raw_size"] == 4096
+    and current_cc["text_virtual_size"] == 868352
+    and all(current_cc["helper_exports_present"].values()),
 )
 
 check(
@@ -188,7 +242,15 @@ check(
     and core["CommandCommon.dll"]["anchors"]["comm_set_retry_loop"]["bytes"] == "8b4424188b4c241c403bc1894424187f7b"
     and core["KgpDataCtrl.dll"]["anchors"]["comm_set_lookup_key"]["bytes"] == "8b148133c0668b420a8945e8"
     and core["CommandCommon.dll"]["anchors"]["transport_send_sink"]["bytes"] == "8b4e0c52ff1540040b10eb4a"
-    and core["CommandCommon.dll"]["anchors"]["transport_receive_sink"]["bytes"] == "ff1550040b108bf881ff2303",
+    and core["CommandCommon.dll"]["anchors"]["transport_receive_sink"]["bytes"] == "ff1550040b108bf881ff2303"
+    and core["CommandCommon.dll"]["anchors"]["p5_support_pid_frame_lookup"]["bytes"] == "68ca000000e8deadffff"
+    and core["CommandCommon.dll"]["anchors"]["p5_support_pid_transport"]["bytes"] == "e86da6ffff"
+    and core["CommandCommon.dll"]["anchors"]["p4_support_bit_frame_lookup"]["bytes"] == "e87feeffff"
+    and core["CommandCommon.dll"]["anchors"]["p4_support_bit_transport"]["bytes"] == "e8e4e5ffff"
+    and core["CommandCommon.dll"]["anchors"]["enable_data_id_frame_lookup"]["bytes"] == "e87a750000"
+    and core["CommandCommon.dll"]["anchors"]["enable_data_id_transport"]["bytes"] == "e837720000"
+    and core["CommandCommon.dll"]["anchors"]["enable_rid_frame_lookup"]["bytes"] == "e8de6d0000"
+    and core["CommandCommon.dll"]["anchors"]["enable_rid_transport"]["bytes"] == "e8986a0000",
 )
 check(
     "GetEcuFuncList pins function-info/detail DB record classes",

@@ -809,6 +809,8 @@ modes = ["local"]
 oracle = "independent_external_artifact"
 paths = [
   "tools/gts",
+  "tools/techstream/gts_cli.py",
+  "tools/techstream/diagnostic_role_model.py",
   "docs/tooling/gts-query-cli.md",
   "docs/tooling/README.md",
   "docs/WORKFLOW.md",
@@ -1165,6 +1167,7 @@ modes = ["local"]
 oracle = "instruction_semantics"
 paths = [
   "tools/techstream/extract_diagnostic_execution_model.py",
+  "tools/techstream/diagnostic_role_model.py",
   "tools/techstream/parse_ddb.py",
   "docs/tooling/techstream.md",
 ]

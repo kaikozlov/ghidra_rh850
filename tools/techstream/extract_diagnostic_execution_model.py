@@ -16,6 +16,7 @@ import struct
 from pathlib import Path
 
 import pefile
+from diagnostic_role_model import role_operation_catalog
 from parse_ddb import MASTER_TABLE_CLASS_NAMES, DDBParser
 from techstream_paths import resolve_gts_root
 
@@ -47,6 +48,14 @@ ANCHORS = {
         "comm_set_retry_loop": (0x1005D378, "8b4424188b4c241c403bc1894424187f7b"),
         "transport_send_sink": (0x1005D29D, "8b4e0c52ff1540040b10eb4a"),
         "transport_receive_sink": (0x1005D344, "ff1550040b108bf881ff2303"),
+        "p5_support_pid_frame_lookup": (0x10063338, "68ca000000e8deadffff"),
+        "p5_support_pid_transport": (0x1006339E, "e86da6ffff"),
+        "p4_support_bit_frame_lookup": (0x1005F29C, "e87feeffff"),
+        "p4_support_bit_transport": (0x1005F617, "e8e4e5ffff"),
+        "enable_data_id_frame_lookup": (0x10056BA1, "e87a750000"),
+        "enable_data_id_transport": (0x10056BC4, "e837720000"),
+        "enable_rid_frame_lookup": (0x1005733D, "e8de6d0000"),
+        "enable_rid_transport": (0x10057363, "e8986a0000"),
     },
     "KgpDataCtrl.dll": {
         "comm_set_lookup_key": (0x10014816, "8b148133c0668b420a8945e8"),
@@ -343,6 +352,27 @@ def dll_role_catalog(parser: DDBParser, master) -> dict:
     }
 
 
+def gtsplus_command_common_surface(gts_root: Path) -> dict:
+    path = gts_root / "bin/CommandCommon.dll"
+    pe = parse_pe(path)
+    text = next(section for section in pe.sections if section.Name.rstrip(b"\0") == b".text")
+    exported = set(exports(pe))
+    helpers = [
+        "?CheckSupportPid@CCommCachePlusP5@@QAEKPAUtagCOMMAND_DATA@@GPAHPAVCCmdDataIdList@@H@Z",
+        "?CheckSupportDid@CCommCachePlusP5@@QAEKPAUtagCOMMAND_DATA@@GPAHPAVCCmdDataIdList@@H@Z",
+        "?CreateEnableDataIdList@CCmdSupportDataIdList@@QAEKPAUtagCOMMAND_DATA@@PAVCCmdDataIdList@@K@Z",
+        "?CreateEnableRIdList@CCmdSupportDataIdList@@QAEKPAUtagCOMMAND_DATA@@PAVCCmdDataIdList@@K@Z",
+    ]
+    return {
+        "identity": file_identity(path, gts_root),
+        "text_virtual_size": text.Misc_VirtualSize,
+        "text_raw_size": text.SizeOfRawData,
+        "text_rva": f"0x{text.VirtualAddress:X}",
+        "helper_exports_present": {name: name in exported for name in helpers},
+        "body_boundary": "current on-disk PE keeps these helper exports in virtual .text beyond the materialized raw .text page; use V18 executable bodies only as API-continuity evidence",
+    }
+
+
 def gtsplus_role_layout(gts_root: Path) -> dict:
     parser = DDBParser()
     master_path = gts_root / "NA/DB/Gen/Toyota.ddb"
@@ -365,6 +395,7 @@ def gtsplus_role_layout(gts_root: Path) -> dict:
             "compare_anchor": anchor(kgp, 0x100651F4, "0fb74d0881f9102700007e0e0fb75508"),
             "subtract_anchor": anchor(kgp, 0x10065200, "0fb7550881ea10270000668955088b45"),
         },
+        "command_common_surface": gtsplus_command_common_surface(gts_root),
         "comm_set_table": {
             "master_table_type": 29,
             "class_name": MASTER_TABLE_CLASS_NAMES[29],
@@ -372,7 +403,7 @@ def gtsplus_role_layout(gts_root: Path) -> dict:
             "record_count": master.sections[29].header.record_count,
             "comm_set_1": resolve_comm_set(parser, master, 1),
         },
-        "role_catalog": dll_role_catalog(parser, master),
+        "role_catalog": role_operation_catalog(parser, master, gts_root / "bin"),
         "hybrid_clear_binding": dll_binding(parser, master, 397, 25),
         "hybrid_clear_primary": resolve_frame(parser, master, 397, 0x01, variable_namespace_base=0x2710),
         "hybrid_clear_fallback": resolve_frame(parser, master, 397, 0x102, variable_namespace_base=0x2710),

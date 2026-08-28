@@ -40,6 +40,23 @@
         "record_count": 13,
         "record_size": 16
       },
+      "command_common_surface": {
+        "body_boundary": "current on-disk PE keeps these helper exports in virtual .text beyond the materialized raw .text page; use V18 executable bodies only as API-continuity evidence",
+        "helper_exports_present": {
+          "?CheckSupportDid@CCommCachePlusP5@@QAEKPAUtagCOMMAND_DATA@@GPAHPAVCCmdDataIdList@@H@Z": true,
+          "?CheckSupportPid@CCommCachePlusP5@@QAEKPAUtagCOMMAND_DATA@@GPAHPAVCCmdDataIdList@@H@Z": true,
+          "?CreateEnableDataIdList@CCmdSupportDataIdList@@QAEKPAUtagCOMMAND_DATA@@PAVCCmdDataIdList@@K@Z": true,
+          "?CreateEnableRIdList@CCmdSupportDataIdList@@QAEKPAUtagCOMMAND_DATA@@PAVCCmdDataIdList@@K@Z": true
+        },
+        "identity": {
+          "path": "bin/CommandCommon.dll",
+          "sha256": "89fe3c1f17d7ec58e659a099fc4fc96b55d30534d813c2a4c26211c4d30284c2",
+          "size": 356368
+        },
+        "text_raw_size": 4096,
+        "text_rva": "0x1000",
+        "text_virtual_size": 868352
+      },
       "hybrid_clear_binding": {
         "category_id": 397,
         "dll_name": "DelDiagCodeP4.dll",
@@ -124,64 +141,105 @@
       },
       "role_catalog": {
         "binding_count": 6194,
+        "binding_surface_counts": {
+          "delegated_transport_v18_proven": 1139,
+          "direct_transport": 2643,
+          "no_recovered_shared_transport_edge": 1323,
+          "plugin_file_missing": 59,
+          "support_cache_v18_proven": 790,
+          "support_orchestration_unclosed": 240
+        },
+        "plugin_surface_counts": {
+          "delegated_transport_v18_proven": 25,
+          "direct_transport": 164,
+          "no_recovered_shared_transport_edge": 151,
+          "plugin_file_missing": 14,
+          "support_cache_v18_proven": 14,
+          "support_orchestration_unclosed": 20
+        },
         "role_count": 191,
         "roles": [
           {
             "binding_count": 562,
+            "binding_surface_counts": {
+              "delegated_transport_v18_proven": 318,
+              "no_recovered_shared_transport_edge": 5,
+              "support_cache_v18_proven": 233,
+              "support_orchestration_unclosed": 6
+            },
             "category_count": 560,
             "plugin_count": 13,
+            "plugin_surface_counts": {
+              "delegated_transport_v18_proven": 6,
+              "no_recovered_shared_transport_edge": 2,
+              "support_cache_v18_proven": 3,
+              "support_orchestration_unclosed": 2
+            },
             "plugins": [
               {
                 "binding_count": 227,
-                "dll": "GetDatMonListP4.dll"
+                "dll": "GetDatMonListP4.dll",
+                "surface": "support_cache_v18_proven"
               },
               {
                 "binding_count": 178,
-                "dll": "GetDatMonListP5_DT.dll"
+                "dll": "GetDatMonListP5_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 104,
-                "dll": "GetDatMonListP6_DT.dll"
+                "dll": "GetDatMonListP6_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 22,
-                "dll": "GetDatMonListPSA_DT.dll"
+                "dll": "GetDatMonListPSA_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 12,
-                "dll": "GetDatMonListDk.dll"
+                "dll": "GetDatMonListDk.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 5,
-                "dll": "GetDatMonListP4_MultiPid_DT.dll"
+                "dll": "GetDatMonListP4_MultiPid_DT.dll",
+                "surface": "support_cache_v18_proven"
               },
               {
                 "binding_count": 4,
-                "dll": "GetDatMonList_OldBody.dll"
+                "dll": "GetDatMonList_OldBody.dll",
+                "surface": "support_orchestration_unclosed"
               },
               {
                 "binding_count": 4,
-                "dll": "GetDatMonListPSAMode35_DT.dll"
+                "dll": "GetDatMonListPSAMode35_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 2,
-                "dll": "GetDMLP4FrcVisbl_DT.dll"
+                "dll": "GetDMLP4FrcVisbl_DT.dll",
+                "surface": "support_orchestration_unclosed"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDatMonList.dll"
+                "dll": "GetDatMonList.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDatMonList_MultiPid_DT.dll"
+                "dll": "GetDatMonList_MultiPid_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDMLstDkA8Only_DT.dll"
+                "dll": "GetDatMonListOsc_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDatMonListOsc_DT.dll"
+                "dll": "GetDMLstDkA8Only_DT.dll",
+                "surface": "support_cache_v18_proven"
               }
             ],
             "role": 5,
@@ -189,32 +247,44 @@
           },
           {
             "binding_count": 536,
+            "binding_surface_counts": {
+              "direct_transport": 536
+            },
             "category_count": 536,
             "plugin_count": 6,
+            "plugin_surface_counts": {
+              "direct_transport": 6
+            },
             "plugins": [
               {
                 "binding_count": 424,
-                "dll": "DelDiagCodeP4.dll"
+                "dll": "DelDiagCodeP4.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 106,
-                "dll": "DelDiagCodeP6_DT.dll"
+                "dll": "DelDiagCodeP6_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 3,
-                "dll": "DelDiagCodePSA_DT.dll"
+                "dll": "DelDiagCodePSA_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "DelDiagCode.dll"
+                "dll": "DelDiagCode.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "DelDiagCode_Vgrs.dll"
+                "dll": "DelDiagCode_func_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "DelDiagCode_func_DT.dll"
+                "dll": "DelDiagCode_Vgrs.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 25,
@@ -222,60 +292,85 @@
           },
           {
             "binding_count": 433,
+            "binding_surface_counts": {
+              "delegated_transport_v18_proven": 190,
+              "no_recovered_shared_transport_edge": 5,
+              "support_cache_v18_proven": 232,
+              "support_orchestration_unclosed": 6
+            },
             "category_count": 431,
             "plugin_count": 13,
+            "plugin_surface_counts": {
+              "delegated_transport_v18_proven": 6,
+              "no_recovered_shared_transport_edge": 2,
+              "support_cache_v18_proven": 3,
+              "support_orchestration_unclosed": 2
+            },
             "plugins": [
               {
                 "binding_count": 226,
-                "dll": "GetDatMonListP4.dll"
+                "dll": "GetDatMonListP4.dll",
+                "surface": "support_cache_v18_proven"
               },
               {
                 "binding_count": 92,
-                "dll": "GetDatMonListP5ForActTest_DT.dll"
+                "dll": "GetDatMonListP5ForActTest_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 62,
-                "dll": "GetDatMonListP6ForActTest_DT.dll"
+                "dll": "GetDatMonListP6ForActTest_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 22,
-                "dll": "GetDatMonListPSA_DT.dll"
+                "dll": "GetDatMonListPSA_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 12,
-                "dll": "GetDatMonListDk.dll"
+                "dll": "GetDatMonListDk.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 5,
-                "dll": "GetDatMonListP4_MultiPid_DT.dll"
+                "dll": "GetDatMonListP4_MultiPid_DT.dll",
+                "surface": "support_cache_v18_proven"
               },
               {
                 "binding_count": 4,
-                "dll": "GetDatMonList_OldBody.dll"
+                "dll": "GetDatMonList_OldBody.dll",
+                "surface": "support_orchestration_unclosed"
               },
               {
                 "binding_count": 4,
-                "dll": "GetDatMonListPSAMode35_DT.dll"
+                "dll": "GetDatMonListPSAMode35_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 2,
-                "dll": "GetDMLP4FrcVisbl_DT.dll"
+                "dll": "GetDMLP4FrcVisbl_DT.dll",
+                "surface": "support_orchestration_unclosed"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDatMonList.dll"
+                "dll": "GetDatMonList.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDatMonList_MultiPid_DT.dll"
+                "dll": "GetDatMonList_MultiPid_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDMLstDkA8Only_DT.dll"
+                "dll": "GetDatMonListOsc_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDatMonListOsc_DT.dll"
+                "dll": "GetDMLstDkA8Only_DT.dll",
+                "surface": "support_cache_v18_proven"
               }
             ],
             "role": 173,
@@ -283,160 +378,206 @@
           },
           {
             "binding_count": 359,
+            "binding_surface_counts": {
+              "direct_transport": 290,
+              "no_recovered_shared_transport_edge": 69
+            },
             "category_count": 356,
             "plugin_count": 38,
+            "plugin_surface_counts": {
+              "direct_transport": 30,
+              "no_recovered_shared_transport_edge": 8
+            },
             "plugins": [
               {
                 "binding_count": 98,
-                "dll": "GetCID_SID22_P6_DT.dll"
+                "dll": "GetCID_SID22_P6_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 89,
-                "dll": "GetCID_SID22_DT.dll"
+                "dll": "GetCID_SID22_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 33,
-                "dll": "GetCID_CAN1A_Body_DT.dll"
+                "dll": "GetCID_CAN1A_Body_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 26,
-                "dll": "GetCID_CAN_DT.dll"
+                "dll": "GetCID_CAN_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 24,
-                "dll": "GetCID_CAN1A_DT.dll"
+                "dll": "GetCID_CAN1A_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 19,
-                "dll": "GetCID_SID22_SUZUKI_DT.dll"
+                "dll": "GetCID_SID22_SUZUKI_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 14,
-                "dll": "GetCID_SID22_SBR_DT.dll"
+                "dll": "GetCID_SID22_SBR_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 7,
-                "dll": "GetCID_Dk_CAN_DT.dll"
+                "dll": "GetCID_Dk_CAN_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 6,
-                "dll": "GetCID_P39C_DT.dll"
+                "dll": "GetCID_P39C_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 5,
-                "dll": "GetCID_SID22_HN_DT.dll"
+                "dll": "GetCID_PSA_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 5,
-                "dll": "GetCID_PSA_DT.dll"
+                "dll": "GetCID_SID22_HN_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 2,
-                "dll": "GetCID_CAN09_1A_HV_DT.dll"
+                "dll": "GetCID_CAN09_1A_HV_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 2,
-                "dll": "GetCID_CAN1A_A4_DT.dll"
+                "dll": "GetCID_CAN1A_A4_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 2,
-                "dll": "GetCID_CAN1A_AA_DT.dll"
+                "dll": "GetCID_CAN1A_AA_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 2,
-                "dll": "GetCID_SID22_GearShiftControl_HV_DT.dll"
+                "dll": "GetCID_SID22_GearShiftControl_HV_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 2,
-                "dll": "GetCID_SID22_MMC_DT.dll"
+                "dll": "GetCID_SID22_MMC_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 2,
-                "dll": "GetCID_SID22_P6_CHG_DT.dll"
+                "dll": "GetCID_SID22_P6_CHG_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_DT.dll"
+                "dll": "GetCID_CAN1A_21_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_P3VSC_DT.dll"
+                "dll": "GetCID_CAN1A_AMT_HN_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_P3_21_DT.dll"
+                "dll": "GetCID_CAN1A_B1_HN_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_CAN1A_EPB_DT.dll"
+                "dll": "GetCID_CAN1A_EPB_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_CAN1A_EPC_DT.dll"
+                "dll": "GetCID_CAN1A_EPC_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_CAN1A_PreCrash2_DT.dll"
+                "dll": "GetCID_CAN1A_GearShiftControl_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_DCM_DT.dll"
+                "dll": "GetCID_CAN1A_HN_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_CAN_HICM_DT.dll"
+                "dll": "GetCID_CAN1A_PreCrash2_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_CAN1A_AMT_HN_DT.dll"
+                "dll": "GetCID_CAN1A_VC_HN_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_CAN1AB0_DT.dll"
+                "dll": "GetCID_CAN1AB0_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_CAN1A_GearShiftControl_DT.dll"
+                "dll": "GetCID_CAN_HICM_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_SID22_MotorGenerator_DT.dll"
+                "dll": "GetCID_DCM_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_SID22_CHG_DT.dll"
+                "dll": "GetCID_Dk_KWP_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_SID22_SAS_DT.dll"
+                "dll": "GetCID_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_CAN1A_HN_DT.dll"
+                "dll": "GetCID_P3_21_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_SID22_GearShiftControl_DT.dll"
+                "dll": "GetCID_P3VSC_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_CAN1A_VC_HN_DT.dll"
+                "dll": "GetCID_SID22_CHG_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_Dk_KWP_DT.dll"
+                "dll": "GetCID_SID22_GearShiftControl_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_CAN1A_B1_HN_DT.dll"
+                "dll": "GetCID_SID22_HN_CGW_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_SID22_HN_CGW_DT.dll"
+                "dll": "GetCID_SID22_MotorGenerator_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCID_CAN1A_21_DT.dll"
+                "dll": "GetCID_SID22_SAS_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 82,
@@ -444,48 +585,70 @@
           },
           {
             "binding_count": 346,
+            "binding_surface_counts": {
+              "delegated_transport_v18_proven": 171,
+              "no_recovered_shared_transport_edge": 6,
+              "support_cache_v18_proven": 165,
+              "support_orchestration_unclosed": 4
+            },
             "category_count": 346,
             "plugin_count": 10,
+            "plugin_surface_counts": {
+              "delegated_transport_v18_proven": 5,
+              "no_recovered_shared_transport_edge": 2,
+              "support_cache_v18_proven": 2,
+              "support_orchestration_unclosed": 1
+            },
             "plugins": [
               {
                 "binding_count": 164,
-                "dll": "GetActTstListP4.dll"
+                "dll": "GetActTstListP4.dll",
+                "surface": "support_cache_v18_proven"
               },
               {
                 "binding_count": 87,
-                "dll": "GetActTstListP5_DT.dll"
+                "dll": "GetActTstListP5_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 62,
-                "dll": "GetActTstListP6_DT.dll"
+                "dll": "GetActTstListP6_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 11,
-                "dll": "GetActTstListDk.dll"
+                "dll": "GetActTstListDk.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 10,
-                "dll": "GetATLstPsaVrbl_DT.dll"
+                "dll": "GetATLstPsaVrbl_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 4,
-                "dll": "GetActTstList_OldBody.dll"
+                "dll": "GetActTstList_OldBody.dll",
+                "surface": "support_orchestration_unclosed"
               },
               {
                 "binding_count": 4,
-                "dll": "GetATLstPsaVrblMode35_DT.dll"
+                "dll": "GetATLstPsaVrblMode35_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 2,
-                "dll": "GetActTstLstP4SA_DT.dll"
+                "dll": "GetActTstLstP4SA_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetActTstList.dll"
+                "dll": "GetActTstList.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 1,
-                "dll": "GetATLstDkVrbl_DT.dll"
+                "dll": "GetATLstDkVrbl_DT.dll",
+                "surface": "support_cache_v18_proven"
               }
             ],
             "role": 6,
@@ -493,36 +656,53 @@
           },
           {
             "binding_count": 342,
+            "binding_surface_counts": {
+              "direct_transport": 149,
+              "no_recovered_shared_transport_edge": 26,
+              "support_orchestration_unclosed": 167
+            },
             "category_count": 342,
             "plugin_count": 7,
+            "plugin_surface_counts": {
+              "direct_transport": 2,
+              "no_recovered_shared_transport_edge": 3,
+              "support_orchestration_unclosed": 2
+            },
             "plugins": [
               {
                 "binding_count": 166,
-                "dll": "GetActTstInitP4.dll"
+                "dll": "GetActTstInitP4.dll",
+                "surface": "support_orchestration_unclosed"
               },
               {
                 "binding_count": 87,
-                "dll": "GetActTstInitP5_DT.dll"
+                "dll": "GetActTstInitP5_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 62,
-                "dll": "GetActTstInitP6_DT.dll"
+                "dll": "GetActTstInitP6_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 14,
-                "dll": "GetATInitPsaVrbl_DT.dll"
+                "dll": "GetATInitPsaVrbl_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 11,
-                "dll": "GetActTstInitDk.dll"
+                "dll": "GetActTstInitDk.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetActTstInit.dll"
+                "dll": "GetActTstInit.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetATInitDkVrbl_DT.dll"
+                "dll": "GetATInitDkVrbl_DT.dll",
+                "surface": "support_orchestration_unclosed"
               }
             ],
             "role": 8,
@@ -530,92 +710,123 @@
           },
           {
             "binding_count": 325,
+            "binding_surface_counts": {
+              "direct_transport": 10,
+              "no_recovered_shared_transport_edge": 300,
+              "plugin_file_missing": 15
+            },
             "category_count": 322,
             "plugin_count": 21,
+            "plugin_surface_counts": {
+              "direct_transport": 5,
+              "no_recovered_shared_transport_edge": 15,
+              "plugin_file_missing": 1
+            },
             "plugins": [
               {
                 "binding_count": 247,
-                "dll": "GetDiagCodeP4V2_DT.dll"
+                "dll": "GetDiagCodeP4V2_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 15,
-                "dll": "GetDiagCodeDLC12.dll"
+                "dll": "GetDiagCode_CARBCAN_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 15,
-                "dll": "GetDiagCode_CARBCAN_DT.dll"
+                "dll": "GetDiagCodeDLC12.dll",
+                "surface": "plugin_file_missing"
               },
               {
                 "binding_count": 14,
-                "dll": "GetDiagCodePSANoStatus_DT.dll"
+                "dll": "GetDiagCodePSANoStatus_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 8,
-                "dll": "GetDiagCodePSAV2_DT.dll"
+                "dll": "GetDiagCodePSAV2_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 4,
-                "dll": "GetDTC_NoFrmNoV2_DT.dll"
+                "dll": "GetDTC_HisFrzV2_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 4,
-                "dll": "GetDTC_HisFrzV2_DT.dll"
+                "dll": "GetDTC_NoFrmNoV2_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 3,
-                "dll": "GetDTC_OsEngV2_DT.dll"
+                "dll": "GetDTC_OsEngV2_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 2,
-                "dll": "GetDTC_woCountV2_DT.dll"
+                "dll": "GetDTC_woCountV2_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 2,
-                "dll": "GetDTCSiennaDoor_DT.dll"
+                "dll": "GetDTCSiennaDoor_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDTCV2_DT.dll"
+                "dll": "GetDiagCode_CARB_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDiagCodeDk.dll"
+                "dll": "GetDiagCodeDk.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDTCDk_ATV2_DT.dll"
+                "dll": "GetDiagCodeDk_CGW.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDiagCodePSA_DT.dll"
+                "dll": "GetDiagCodePSA_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDTCPSA_Audio_DT.dll"
+                "dll": "GetDTC_0000Rjct_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDTCTSL_EV_DT.dll"
+                "dll": "GetDTCDk_ATV2_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDTCDk_Roof_woNR_DT.dll"
+                "dll": "GetDTCDk_Roof_woNR_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDiagCodeDk_CGW.dll"
+                "dll": "GetDTCPSA_AddHt_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDTCPSA_AddHt_DT.dll"
+                "dll": "GetDTCPSA_Audio_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDiagCode_CARB_DT.dll"
+                "dll": "GetDTCTSL_EV_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDTC_0000Rjct_DT.dll"
+                "dll": "GetDTCV2_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 134,
@@ -623,96 +834,128 @@
           },
           {
             "binding_count": 302,
+            "binding_surface_counts": {
+              "direct_transport": 10,
+              "no_recovered_shared_transport_edge": 277,
+              "plugin_file_missing": 15
+            },
             "category_count": 299,
             "plugin_count": 22,
+            "plugin_surface_counts": {
+              "direct_transport": 5,
+              "no_recovered_shared_transport_edge": 16,
+              "plugin_file_missing": 1
+            },
             "plugins": [
               {
                 "binding_count": 195,
-                "dll": "GetDTCP4_TS_DT.dll"
+                "dll": "GetDTCP4_TS_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 43,
-                "dll": "GetDiagCodeP4V2_DT.dll"
+                "dll": "GetDiagCodeP4V2_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 15,
-                "dll": "GetDiagCodeDLC12.dll"
+                "dll": "GetDiagCodeDLC12.dll",
+                "surface": "plugin_file_missing"
               },
               {
                 "binding_count": 14,
-                "dll": "GetDiagCodePSANoStatus_DT.dll"
+                "dll": "GetDiagCodePSANoStatus_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 8,
-                "dll": "GetDiagCodePSAV2_DT.dll"
+                "dll": "GetDiagCodePSAV2_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 4,
-                "dll": "GetDTC_NoFrmNoV2_DT.dll"
+                "dll": "GetDTC_HisFrz_TS_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 4,
-                "dll": "GetDTC_HisFrz_TS_DT.dll"
+                "dll": "GetDTC_NoFrmNoV2_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 3,
-                "dll": "GetDTC_OsEngV2_DT.dll"
+                "dll": "GetDTC_OsEngV2_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 2,
-                "dll": "GetDTC_woCountV2_DT.dll"
+                "dll": "GetDTC_woCountV2_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 2,
-                "dll": "GetDTCSiennaDoor_DT.dll"
+                "dll": "GetDTCSiennaDoor_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDTCV2_DT.dll"
+                "dll": "GetDiagCode_CARB_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDiagCodeDk.dll"
+                "dll": "GetDiagCode_CARBCAN_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDTCDk_ATV2_DT.dll"
+                "dll": "GetDiagCodeDk.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDiagCodePSA_DT.dll"
+                "dll": "GetDiagCodeDk_CGW.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDTCPSA_Audio_DT.dll"
+                "dll": "GetDiagCodePSA_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDTCTSL_EV_DT.dll"
+                "dll": "GetDTC_0000Rjct_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDTCDk_Roof_woNR_DT.dll"
+                "dll": "GetDTCDk_ATV2_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDiagCodeDk_CGW.dll"
+                "dll": "GetDTCDk_Roof_woNR_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDTCPSA_AddHt_DT.dll"
+                "dll": "GetDTCPSA_AddHt_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDiagCode_CARB_DT.dll"
+                "dll": "GetDTCPSA_Audio_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDiagCode_CARBCAN_DT.dll"
+                "dll": "GetDTCTSL_EV_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDTC_0000Rjct_DT.dll"
+                "dll": "GetDTCV2_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 20,
@@ -720,20 +963,29 @@
           },
           {
             "binding_count": 283,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 283
+            },
             "category_count": 283,
             "plugin_count": 3,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 3
+            },
             "plugins": [
               {
                 "binding_count": 178,
-                "dll": "GetDatMonSignalInfoP5_DT.dll"
+                "dll": "GetDatMonSignalInfoP5_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 104,
-                "dll": "GetDatMonSignalInfoP6_DT.dll"
+                "dll": "GetDatMonSignalInfoP6_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDatMonSignalInfo.dll"
+                "dll": "GetDatMonSignalInfo.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 65,
@@ -741,24 +993,38 @@
           },
           {
             "binding_count": 278,
+            "binding_surface_counts": {
+              "delegated_transport_v18_proven": 276,
+              "support_cache_v18_proven": 1,
+              "support_orchestration_unclosed": 1
+            },
             "category_count": 278,
             "plugin_count": 4,
+            "plugin_surface_counts": {
+              "delegated_transport_v18_proven": 2,
+              "support_cache_v18_proven": 1,
+              "support_orchestration_unclosed": 1
+            },
             "plugins": [
               {
                 "binding_count": 172,
-                "dll": "GetSupportMultiP5_DT.dll"
+                "dll": "GetSupportMultiP5_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 104,
-                "dll": "GetSupportMultiP6_DT.dll"
+                "dll": "GetSupportMultiP6_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 1,
-                "dll": "GetSupportMultiP4_Mlt_DT.dll"
+                "dll": "GetSupportMultiP3_DT.dll",
+                "surface": "support_orchestration_unclosed"
               },
               {
                 "binding_count": 1,
-                "dll": "GetSupportMultiP3_DT.dll"
+                "dll": "GetSupportMultiP4_Mlt_DT.dll",
+                "surface": "support_cache_v18_proven"
               }
             ],
             "role": 213,
@@ -766,36 +1032,51 @@
           },
           {
             "binding_count": 258,
+            "binding_surface_counts": {
+              "direct_transport": 253,
+              "no_recovered_shared_transport_edge": 5
+            },
             "category_count": 257,
             "plugin_count": 7,
+            "plugin_surface_counts": {
+              "direct_transport": 5,
+              "no_recovered_shared_transport_edge": 2
+            },
             "plugins": [
               {
                 "binding_count": 246,
-                "dll": "GetDiagCodeCountP4.dll"
+                "dll": "GetDiagCodeCountP4.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 4,
-                "dll": "GetDiagCodeCount_AC.dll"
+                "dll": "GetDiagCodeCount_AC.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 3,
-                "dll": "GetDiagCodeCount_OsEng.dll"
+                "dll": "GetDiagCodeCount_OsEng.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 2,
-                "dll": "GetDiagCodeCount_wCode.dll"
+                "dll": "GetDiagCodeCount_wCode.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDiagCodeCount.dll"
+                "dll": "GetDiagCodeCount.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDiagCodeCount_VGRS.dll"
+                "dll": "GetDiagCodeCount_TT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDiagCodeCount_TT.dll"
+                "dll": "GetDiagCodeCount_VGRS.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 19,
@@ -803,16 +1084,26 @@
           },
           {
             "binding_count": 231,
+            "binding_surface_counts": {
+              "direct_transport": 230,
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 231,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "direct_transport": 1,
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 230,
-                "dll": "JudgeDiagStatusP5_DT.dll"
+                "dll": "JudgeDiagStatusP5_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "JudgeDiagP4_Pend_DT.dll"
+                "dll": "JudgeDiagP4_Pend_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 41,
@@ -820,20 +1111,33 @@
           },
           {
             "binding_count": 181,
+            "binding_surface_counts": {
+              "delegated_transport_v18_proven": 179,
+              "support_cache_v18_proven": 1,
+              "support_orchestration_unclosed": 1
+            },
             "category_count": 181,
             "plugin_count": 3,
+            "plugin_surface_counts": {
+              "delegated_transport_v18_proven": 1,
+              "support_cache_v18_proven": 1,
+              "support_orchestration_unclosed": 1
+            },
             "plugins": [
               {
                 "binding_count": 179,
-                "dll": "GetSupportP5_DT.dll"
+                "dll": "GetSupportP5_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 1,
-                "dll": "GetSupportP4_Mlt_DT.dll"
+                "dll": "GetSupportP3_DT.dll",
+                "surface": "support_orchestration_unclosed"
               },
               {
                 "binding_count": 1,
-                "dll": "GetSupportP3_DT.dll"
+                "dll": "GetSupportP4_Mlt_DT.dll",
+                "surface": "support_cache_v18_proven"
               }
             ],
             "role": 103,
@@ -841,32 +1145,44 @@
           },
           {
             "binding_count": 176,
+            "binding_surface_counts": {
+              "direct_transport": 176
+            },
             "category_count": 175,
             "plugin_count": 6,
+            "plugin_surface_counts": {
+              "direct_transport": 6
+            },
             "plugins": [
               {
                 "binding_count": 88,
-                "dll": "DelRoBP5_DT.dll"
+                "dll": "DelRoBP5_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 84,
-                "dll": "DelRoBP6_DT.dll"
+                "dll": "DelRoBP6_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "DelRoBP4_DT.dll"
+                "dll": "DelRoBP4_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "DelRoBP5_SUBARU_DT.dll"
+                "dll": "DelRoBP5_SUBARU_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "DelRoBP5_SUZUKI_DT.dll"
+                "dll": "DelRoBP5_SUZUKI_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "DelRoBP5_wTO_DT.dll"
+                "dll": "DelRoBP5_wTO_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 161,
@@ -874,24 +1190,34 @@
           },
           {
             "binding_count": 175,
+            "binding_surface_counts": {
+              "direct_transport": 175
+            },
             "category_count": 175,
             "plugin_count": 4,
+            "plugin_surface_counts": {
+              "direct_transport": 4
+            },
             "plugins": [
               {
                 "binding_count": 89,
-                "dll": "GetRoBP5_DT.dll"
+                "dll": "GetRoBP5_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 84,
-                "dll": "GetRoBP6_DT.dll"
+                "dll": "GetRoBP6_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetRoBP4_DT.dll"
+                "dll": "GetRoBP4_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetRoBP5_SUBARU_DT.dll"
+                "dll": "GetRoBP5_SUBARU_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 160,
@@ -899,44 +1225,65 @@
           },
           {
             "binding_count": 165,
+            "binding_surface_counts": {
+              "delegated_transport_v18_proven": 2,
+              "direct_transport": 6,
+              "no_recovered_shared_transport_edge": 10,
+              "support_cache_v18_proven": 147
+            },
             "category_count": 165,
             "plugin_count": 9,
+            "plugin_surface_counts": {
+              "delegated_transport_v18_proven": 2,
+              "direct_transport": 3,
+              "no_recovered_shared_transport_edge": 3,
+              "support_cache_v18_proven": 1
+            },
             "plugins": [
               {
                 "binding_count": 147,
-                "dll": "GetFrzFrmDatP4.dll"
+                "dll": "GetFrzFrmDatP4.dll",
+                "surface": "support_cache_v18_proven"
               },
               {
                 "binding_count": 8,
-                "dll": "GetFrzFrmDatPSA_DT.dll"
+                "dll": "GetFrzFrmDatPSA_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 4,
-                "dll": "GetFrzFrmDat_NoFrmNo.dll"
+                "dll": "GetFrzFrmDat_NoFrmNo.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetFrzFrmDat.dll"
+                "dll": "GetFrzFrmDat.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 1,
-                "dll": "GetFrzFrmDat_MultiRcv_DT.dll"
+                "dll": "GetFrzFrmDat_MultiRcv_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               },
               {
                 "binding_count": 1,
-                "dll": "GetFrzFrmDatDk.dll"
+                "dll": "GetFrzFrmDatDk.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetFrzFrmDatDk_AT.dll"
+                "dll": "GetFrzFrmDatDk_AT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetFrzFrmDatDk_Roof.dll"
+                "dll": "GetFrzFrmDatDk_CGW.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetFrzFrmDatDk_CGW.dll"
+                "dll": "GetFrzFrmDatDk_Roof.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 21,
@@ -944,24 +1291,34 @@
           },
           {
             "binding_count": 165,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 165
+            },
             "category_count": 165,
             "plugin_count": 4,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 4
+            },
             "plugins": [
               {
                 "binding_count": 87,
-                "dll": "GetATSignalInfoP5_DT.dll"
+                "dll": "GetATSignalInfoP5_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 62,
-                "dll": "GetATSignalInfoP6_DT.dll"
+                "dll": "GetATSignalInfoP6_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 15,
-                "dll": "GetATSigInfDkVrbl_DT.dll"
+                "dll": "GetATSigInfDkVrbl_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetATSignalInfo_DT.dll"
+                "dll": "GetATSignalInfo_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 112,
@@ -969,24 +1326,38 @@
           },
           {
             "binding_count": 151,
+            "binding_surface_counts": {
+              "delegated_transport_v18_proven": 1,
+              "direct_transport": 149,
+              "support_cache_v18_proven": 1
+            },
             "category_count": 151,
             "plugin_count": 4,
+            "plugin_surface_counts": {
+              "delegated_transport_v18_proven": 1,
+              "direct_transport": 2,
+              "support_cache_v18_proven": 1
+            },
             "plugins": [
               {
                 "binding_count": 87,
-                "dll": "GetMultiActInitP5_DT.dll"
+                "dll": "GetMultiActInitP5_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 62,
-                "dll": "GetMultiActInitP6_DT.dll"
+                "dll": "GetMultiActInitP6_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetMultiActInitP4_DT.dll"
+                "dll": "GetMultiActInitP4_DT.dll",
+                "surface": "support_cache_v18_proven"
               },
               {
                 "binding_count": 1,
-                "dll": "GetMultiActInitPsaVrbl_DT.dll"
+                "dll": "GetMultiActInitPsaVrbl_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               }
             ],
             "role": 99,
@@ -994,24 +1365,34 @@
           },
           {
             "binding_count": 114,
+            "binding_surface_counts": {
+              "direct_transport": 114
+            },
             "category_count": 114,
             "plugin_count": 4,
+            "plugin_surface_counts": {
+              "direct_transport": 4
+            },
             "plugins": [
               {
                 "binding_count": 104,
-                "dll": "GetDiagCodeP6_DT.dll"
+                "dll": "GetDiagCodeP6_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 7,
-                "dll": "GetDiagCodeP5_HN_DT.dll"
+                "dll": "GetDiagCodeP5_HN_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 2,
-                "dll": "GetDiagCodeP5_HN_Wo_DLen_DT.dll"
+                "dll": "GetDiagCodeP5_HN_Wo_DLen_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDiagCodeP5_DT.dll"
+                "dll": "GetDiagCodeP5_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 172,
@@ -1019,24 +1400,34 @@
           },
           {
             "binding_count": 114,
+            "binding_surface_counts": {
+              "direct_transport": 114
+            },
             "category_count": 114,
             "plugin_count": 4,
+            "plugin_surface_counts": {
+              "direct_transport": 4
+            },
             "plugins": [
               {
                 "binding_count": 104,
-                "dll": "GetEachFrzFrmDatP6_DT.dll"
+                "dll": "GetEachFrzFrmDatP6_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 7,
-                "dll": "GetEachFrzFrmDatP5_HN_DT.dll"
+                "dll": "GetEachFrzFrmDatP5_HN_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 2,
-                "dll": "GetEachFrzFrmDatP5_HN_Wo_DLen_DT.dll"
+                "dll": "GetEachFrzFrmDatP5_HN_Wo_DLen_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetEachFrzFrmDatP5_DT.dll"
+                "dll": "GetEachFrzFrmDatP5_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 181,
@@ -1044,28 +1435,39 @@
           },
           {
             "binding_count": 112,
+            "binding_surface_counts": {
+              "direct_transport": 112
+            },
             "category_count": 112,
             "plugin_count": 5,
+            "plugin_surface_counts": {
+              "direct_transport": 5
+            },
             "plugins": [
               {
                 "binding_count": 72,
-                "dll": "ConfCheckModeOnlyP4.dll"
+                "dll": "ConfCheckModeOnlyP4.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 20,
-                "dll": "ConfCheckModeP5_DT.dll"
+                "dll": "ConfCheckModeP5_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 18,
-                "dll": "ConfCheckModeP6_DT.dll"
+                "dll": "ConfCheckModeP6_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "ConfCheckMode.dll"
+                "dll": "ConfCheckMode.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "ConfCheckModeP4.dll"
+                "dll": "ConfCheckModeP4.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 23,
@@ -1073,20 +1475,29 @@
           },
           {
             "binding_count": 112,
+            "binding_surface_counts": {
+              "direct_transport": 112
+            },
             "category_count": 112,
             "plugin_count": 3,
+            "plugin_surface_counts": {
+              "direct_transport": 3
+            },
             "plugins": [
               {
                 "binding_count": 73,
-                "dll": "ChangeCheckModeP4.dll"
+                "dll": "ChangeCheckModeP4.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 38,
-                "dll": "ChangeCheckModeP5_DT.dll"
+                "dll": "ChangeCheckModeP5_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "ChangeCheckMode.dll"
+                "dll": "ChangeCheckMode.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 24,
@@ -1094,16 +1505,24 @@
           },
           {
             "binding_count": 63,
+            "binding_surface_counts": {
+              "direct_transport": 63
+            },
             "category_count": 63,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "direct_transport": 2
+            },
             "plugins": [
               {
                 "binding_count": 62,
-                "dll": "GetSimpleOperationUtilityResultP6.dll"
+                "dll": "GetSimpleOperationUtilityResultP6.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetSimpleOperationUtilityResult_DT.dll"
+                "dll": "GetSimpleOperationUtilityResult_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 179,
@@ -1111,16 +1530,24 @@
           },
           {
             "binding_count": 45,
+            "binding_surface_counts": {
+              "direct_transport": 45
+            },
             "category_count": 45,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "direct_transport": 2
+            },
             "plugins": [
               {
                 "binding_count": 44,
-                "dll": "GetRoutineActTstInitP6_DT.dll"
+                "dll": "GetRoutineActTstInitP6_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetRoutineActTstInitP5_DT.dll"
+                "dll": "GetRoutineActTstInitP5_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 174,
@@ -1128,16 +1555,24 @@
           },
           {
             "binding_count": 45,
+            "binding_surface_counts": {
+              "support_orchestration_unclosed": 45
+            },
             "category_count": 45,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "support_orchestration_unclosed": 2
+            },
             "plugins": [
               {
                 "binding_count": 44,
-                "dll": "GetRoutineActTstSignalInfoP6_DT.dll"
+                "dll": "GetRoutineActTstSignalInfoP6_DT.dll",
+                "surface": "support_orchestration_unclosed"
               },
               {
                 "binding_count": 1,
-                "dll": "GetRoutineActTstSignalInfoP5_DT.dll"
+                "dll": "GetRoutineActTstSignalInfoP5_DT.dll",
+                "surface": "support_orchestration_unclosed"
               }
             ],
             "role": 175,
@@ -1145,16 +1580,24 @@
           },
           {
             "binding_count": 32,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 32
+            },
             "category_count": 32,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 2
+            },
             "plugins": [
               {
                 "binding_count": 31,
-                "dll": "GetPendP4TsFfd_DT.dll"
+                "dll": "GetPendP4TsFfd_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetPendingCode.dll"
+                "dll": "GetPendingCode.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 52,
@@ -1162,16 +1605,24 @@
           },
           {
             "binding_count": 32,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 32
+            },
             "category_count": 32,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 2
+            },
             "plugins": [
               {
                 "binding_count": 31,
-                "dll": "GetPendP4Ffd_DT.dll"
+                "dll": "GetPendP4Ffd_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetPendingCode.dll"
+                "dll": "GetPendingCode.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 141,
@@ -1179,16 +1630,24 @@
           },
           {
             "binding_count": 14,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 14
+            },
             "category_count": 14,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 2
+            },
             "plugins": [
               {
                 "binding_count": 13,
-                "dll": "GetAnlzWrkFctP4_DT.dll"
+                "dll": "GetAnlzWrkFctP4_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetAnlzWrkFctP3_DT.dll"
+                "dll": "GetAnlzWrkFctP3_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 111,
@@ -1196,12 +1655,19 @@
           },
           {
             "binding_count": 12,
+            "binding_surface_counts": {
+              "plugin_file_missing": 12
+            },
             "category_count": 12,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "plugins": [
               {
                 "binding_count": 12,
-                "dll": "RepairGetEcuDataP4.dll"
+                "dll": "RepairGetEcuDataP4.dll",
+                "surface": "plugin_file_missing"
               }
             ],
             "role": 53,
@@ -1209,20 +1675,33 @@
           },
           {
             "binding_count": 11,
+            "binding_surface_counts": {
+              "direct_transport": 1,
+              "no_recovered_shared_transport_edge": 7,
+              "support_cache_v18_proven": 3
+            },
             "category_count": 11,
             "plugin_count": 3,
+            "plugin_surface_counts": {
+              "direct_transport": 1,
+              "no_recovered_shared_transport_edge": 1,
+              "support_cache_v18_proven": 1
+            },
             "plugins": [
               {
                 "binding_count": 7,
-                "dll": "IsAbsFrzFrmDatP4.dll"
+                "dll": "IsAbsFrzFrmDatP4.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 3,
-                "dll": "IsPSDFrzFrmDat_DT.dll"
+                "dll": "IsPSDFrzFrmDat_DT.dll",
+                "surface": "support_cache_v18_proven"
               },
               {
                 "binding_count": 1,
-                "dll": "IsAbsFrzFrmDat.dll"
+                "dll": "IsAbsFrzFrmDat.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 48,
@@ -1230,16 +1709,24 @@
           },
           {
             "binding_count": 8,
+            "binding_surface_counts": {
+              "direct_transport": 8
+            },
             "category_count": 8,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "direct_transport": 2
+            },
             "plugins": [
               {
                 "binding_count": 7,
-                "dll": "GetDiagDetailIdListP4.dll"
+                "dll": "GetDiagDetailIdListP4.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDiagDetailIdList.dll"
+                "dll": "GetDiagDetailIdList.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 42,
@@ -1247,16 +1734,26 @@
           },
           {
             "binding_count": 8,
+            "binding_surface_counts": {
+              "delegated_transport_v18_proven": 1,
+              "support_cache_v18_proven": 7
+            },
             "category_count": 8,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "delegated_transport_v18_proven": 1,
+              "support_cache_v18_proven": 1
+            },
             "plugins": [
               {
                 "binding_count": 7,
-                "dll": "GetDetailDiagP4.dll"
+                "dll": "GetDetailDiagP4.dll",
+                "surface": "support_cache_v18_proven"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDetailDiag.dll"
+                "dll": "GetDetailDiag.dll",
+                "surface": "delegated_transport_v18_proven"
               }
             ],
             "role": 43,
@@ -1264,16 +1761,24 @@
           },
           {
             "binding_count": 7,
+            "binding_surface_counts": {
+              "direct_transport": 7
+            },
             "category_count": 7,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "direct_transport": 2
+            },
             "plugins": [
               {
                 "binding_count": 6,
-                "dll": "GetExcept_NRSleepDT.dll"
+                "dll": "GetExcept_NRSleepDT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetException.dll"
+                "dll": "GetException.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 39,
@@ -1281,16 +1786,24 @@
           },
           {
             "binding_count": 7,
+            "binding_surface_counts": {
+              "direct_transport": 7
+            },
             "category_count": 7,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "direct_transport": 2
+            },
             "plugins": [
               {
                 "binding_count": 6,
-                "dll": "GetExcptCarTpNRS_DT.dll"
+                "dll": "GetExcptCarTpNRS_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetExceptCarType_DT.dll"
+                "dll": "GetExceptCarType_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 140,
@@ -1298,20 +1811,31 @@
           },
           {
             "binding_count": 5,
+            "binding_surface_counts": {
+              "direct_transport": 3,
+              "no_recovered_shared_transport_edge": 2
+            },
             "category_count": 5,
             "plugin_count": 3,
+            "plugin_surface_counts": {
+              "direct_transport": 2,
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 2,
-                "dll": "IsImageFFDP4_DT.dll"
+                "dll": "IsImageFFDP4_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 2,
-                "dll": "IsImageFFDP6_DT.dll"
+                "dll": "IsImageFFDP6_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "IsImageFFDP5_DT.dll"
+                "dll": "IsImageFFDP5_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 210,
@@ -1319,12 +1843,19 @@
           },
           {
             "binding_count": 4,
+            "binding_surface_counts": {
+              "plugin_file_missing": 4
+            },
             "category_count": 4,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "plugins": [
               {
                 "binding_count": 4,
-                "dll": "GetDiagModeList.dll"
+                "dll": "GetDiagModeList.dll",
+                "surface": "plugin_file_missing"
               }
             ],
             "role": 67,
@@ -1332,12 +1863,19 @@
           },
           {
             "binding_count": 4,
+            "binding_surface_counts": {
+              "plugin_file_missing": 4
+            },
             "category_count": 4,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "plugins": [
               {
                 "binding_count": 4,
-                "dll": "ChangeDiagModeP4.dll"
+                "dll": "ChangeDiagModeP4.dll",
+                "surface": "plugin_file_missing"
               }
             ],
             "role": 68,
@@ -1345,12 +1883,19 @@
           },
           {
             "binding_count": 4,
+            "binding_surface_counts": {
+              "direct_transport": 4
+            },
             "category_count": 4,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 4,
-                "dll": "WriteAfterSalesZn_DT.dll"
+                "dll": "WriteAfterSalesZn_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 95,
@@ -1358,20 +1903,33 @@
           },
           {
             "binding_count": 4,
+            "binding_surface_counts": {
+              "delegated_transport_v18_proven": 1,
+              "no_recovered_shared_transport_edge": 1,
+              "support_orchestration_unclosed": 2
+            },
             "category_count": 4,
             "plugin_count": 3,
+            "plugin_surface_counts": {
+              "delegated_transport_v18_proven": 1,
+              "no_recovered_shared_transport_edge": 1,
+              "support_orchestration_unclosed": 1
+            },
             "plugins": [
               {
                 "binding_count": 2,
-                "dll": "GetDDRInfoP6_DT.dll"
+                "dll": "GetDDRInfoP6_DT.dll",
+                "surface": "support_orchestration_unclosed"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDDRInfo_DT.dll"
+                "dll": "GetDDRInfo_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDDRInfoP5_DT.dll"
+                "dll": "GetDDRInfoP5_DT.dll",
+                "surface": "delegated_transport_v18_proven"
               }
             ],
             "role": 169,
@@ -1379,20 +1937,31 @@
           },
           {
             "binding_count": 4,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 3,
+              "support_orchestration_unclosed": 1
+            },
             "category_count": 4,
             "plugin_count": 3,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 2,
+              "support_orchestration_unclosed": 1
+            },
             "plugins": [
               {
                 "binding_count": 2,
-                "dll": "GetDDRInfoImgOpeDdrP6_DT.dll"
+                "dll": "GetDDRInfoImgOpeDdrP6_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDDRInfoSaveLog_DT.dll"
+                "dll": "GetDDRInfoImgOpeDdr_DT.dll",
+                "surface": "support_orchestration_unclosed"
               },
               {
                 "binding_count": 1,
-                "dll": "GetDDRInfoImgOpeDdr_DT.dll"
+                "dll": "GetDDRInfoSaveLog_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 188,
@@ -1400,16 +1969,24 @@
           },
           {
             "binding_count": 3,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 3
+            },
             "category_count": 3,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 2
+            },
             "plugins": [
               {
                 "binding_count": 2,
-                "dll": "StopActTst_Init.dll"
+                "dll": "StopActTst_Init.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "StopActTst.dll"
+                "dll": "StopActTst.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 12,
@@ -1417,20 +1994,29 @@
           },
           {
             "binding_count": 3,
+            "binding_surface_counts": {
+              "direct_transport": 3
+            },
             "category_count": 3,
             "plugin_count": 3,
+            "plugin_surface_counts": {
+              "direct_transport": 3
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetVIN_DT.dll"
+                "dll": "GetVIN_CAN_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetVinPSA_DT.dll"
+                "dll": "GetVIN_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetVIN_CAN_DT.dll"
+                "dll": "GetVinPSA_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 81,
@@ -1438,16 +2024,26 @@
           },
           {
             "binding_count": 3,
+            "binding_surface_counts": {
+              "direct_transport": 2,
+              "plugin_file_missing": 1
+            },
             "category_count": 3,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "direct_transport": 1,
+              "plugin_file_missing": 1
+            },
             "plugins": [
               {
                 "binding_count": 2,
-                "dll": "GetMonitoringTestCARB_DT.dll"
+                "dll": "GetMonitoringTestCARB_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetMonitoringTest_DT.dll"
+                "dll": "GetMonitoringTest_DT.dll",
+                "surface": "plugin_file_missing"
               }
             ],
             "role": 84,
@@ -1455,16 +2051,24 @@
           },
           {
             "binding_count": 2,
+            "binding_surface_counts": {
+              "direct_transport": 2
+            },
             "category_count": 2,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "direct_transport": 2
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCVN_DT.dll"
+                "dll": "GetCVN_CAN_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCVN_CAN_DT.dll"
+                "dll": "GetCVN_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 83,
@@ -1472,16 +2076,24 @@
           },
           {
             "binding_count": 2,
+            "binding_surface_counts": {
+              "direct_transport": 2
+            },
             "category_count": 1,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "direct_transport": 2
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCanBusLstV2_DT.dll"
+                "dll": "GetCanBusLstV2_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetCanBusLstV2DK_DT.dll"
+                "dll": "GetCanBusLstV2DK_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 118,
@@ -1489,16 +2101,24 @@
           },
           {
             "binding_count": 2,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 2
+            },
             "category_count": 2,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 2
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetAnlWkFctDcmP4_DT.dll"
+                "dll": "GetAnlWkFctBTP4_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetAnlWkFctBTP4_DT.dll"
+                "dll": "GetAnlWkFctDcmP4_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 120,
@@ -1506,16 +2126,24 @@
           },
           {
             "binding_count": 2,
+            "binding_surface_counts": {
+              "direct_transport": 2
+            },
             "category_count": 2,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "direct_transport": 2
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetPCSOperationFFDP4_DT.dll"
+                "dll": "GetOperationFrzFrmDatP5_DT.dll",
+                "surface": "direct_transport"
               },
               {
                 "binding_count": 1,
-                "dll": "GetOperationFrzFrmDatP5_DT.dll"
+                "dll": "GetPCSOperationFFDP4_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 186,
@@ -1523,16 +2151,24 @@
           },
           {
             "binding_count": 2,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 2
+            },
             "category_count": 2,
             "plugin_count": 2,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 2
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetImageFFD_DT.dll"
+                "dll": "GetImageFFD_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               },
               {
                 "binding_count": 1,
-                "dll": "GetImageFFDP5_DT.dll"
+                "dll": "GetImageFFDP5_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 187,
@@ -1540,12 +2176,19 @@
           },
           {
             "binding_count": 2,
+            "binding_surface_counts": {
+              "direct_transport": 2
+            },
             "category_count": 2,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 2,
-                "dll": "IsPCSSBRVehicleP5_DT.dll"
+                "dll": "IsPCSSBRVehicleP5_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 246,
@@ -1553,12 +2196,19 @@
           },
           {
             "binding_count": 2,
+            "binding_surface_counts": {
+              "direct_transport": 2
+            },
             "category_count": 2,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 2,
-                "dll": "GetDiagCode_J1979_2_DT.dll"
+                "dll": "GetDiagCode_J1979_2_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 258,
@@ -1566,12 +2216,19 @@
           },
           {
             "binding_count": 2,
+            "binding_surface_counts": {
+              "direct_transport": 2
+            },
             "category_count": 2,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 2,
-                "dll": "GetEachFrzFrmDat_J1979_2_DT.dll"
+                "dll": "GetEachFrzFrmDat_J1979_2_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 259,
@@ -1579,12 +2236,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetEcuGroupList.dll"
+                "dll": "GetEcuGroupList.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 2,
@@ -1592,12 +2256,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetEcuFuncList.dll"
+                "dll": "GetEcuFuncList.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 4,
@@ -1605,12 +2276,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "CheckDatMonCommFrm.dll"
+                "dll": "CheckDatMonCommFrm.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 7,
@@ -1618,12 +2296,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "StartDatMon.dll"
+                "dll": "StartDatMon.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 9,
@@ -1631,12 +2316,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "StopDatMon.dll"
+                "dll": "StopDatMon.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 10,
@@ -1644,12 +2336,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "StartActTst.dll"
+                "dll": "StartActTst.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 11,
@@ -1657,12 +2356,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "support_orchestration_unclosed": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "support_orchestration_unclosed": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCustItemLstV2_DT.dll"
+                "dll": "GetCustItemLstV2_DT.dll",
+                "surface": "support_orchestration_unclosed"
               }
             ],
             "role": 13,
@@ -1670,12 +2376,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "SetCustom.dll"
+                "dll": "SetCustom.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 14,
@@ -1683,12 +2396,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetMultiFrzFrmDatP4.dll"
+                "dll": "GetMultiFrzFrmDatP4.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 22,
@@ -1696,12 +2416,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCustSptLstV2_DT.dll"
+                "dll": "GetCustSptLstV2_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 34,
@@ -1709,12 +2436,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCanBusEcuList.dll"
+                "dll": "GetCanBusEcuList.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 38,
@@ -1722,12 +2456,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "SetException.dll"
+                "dll": "SetException.dll",
+                "surface": "plugin_file_missing"
               }
             ],
             "role": 40,
@@ -1735,12 +2476,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetUtilFuncList.dll"
+                "dll": "GetUtilFuncList.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 51,
@@ -1748,12 +2496,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "StartDatMon.dll"
+                "dll": "StartDatMon.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 56,
@@ -1761,12 +2516,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetTriggerItemList.dll"
+                "dll": "GetTriggerItemList.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 57,
@@ -1774,12 +2536,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "StartTestPresent.dll"
+                "dll": "StartTestPresent.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 58,
@@ -1787,12 +2556,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "StopTestPresent.dll"
+                "dll": "StopTestPresent.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 59,
@@ -1800,12 +2576,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "support_orchestration_unclosed": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "support_orchestration_unclosed": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCanBusDiag.dll"
+                "dll": "GetCanBusDiag.dll",
+                "surface": "support_orchestration_unclosed"
               }
             ],
             "role": 62,
@@ -1813,12 +2596,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetShortCutList.dll"
+                "dll": "GetShortCutList.dll",
+                "surface": "plugin_file_missing"
               }
             ],
             "role": 63,
@@ -1826,12 +2616,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "CheckConnectShortCut.dll"
+                "dll": "CheckConnectShortCut.dll",
+                "surface": "plugin_file_missing"
               }
             ],
             "role": 64,
@@ -1839,12 +2636,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "CheckDatMonCommFrm.dll"
+                "dll": "CheckDatMonCommFrm.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 66,
@@ -1852,12 +2656,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "SelectCarType.dll"
+                "dll": "SelectCarType.dll",
+                "surface": "plugin_file_missing"
               }
             ],
             "role": 69,
@@ -1865,12 +2676,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetMountEcuList_DLC12.dll"
+                "dll": "GetMountEcuList_DLC12.dll",
+                "surface": "plugin_file_missing"
               }
             ],
             "role": 70,
@@ -1878,12 +2696,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetStandardValueInfo.dll"
+                "dll": "GetStandardValueInfo.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 71,
@@ -1891,12 +2716,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "SelectCarCtgrMltOpt.dll"
+                "dll": "SelectCarCtgrMltOpt.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 72,
@@ -1904,12 +2736,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "SelectCarTypeVin.dll"
+                "dll": "SelectCarTypeVin.dll",
+                "surface": "plugin_file_missing"
               }
             ],
             "role": 74,
@@ -1917,12 +2756,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "IsMultiFrzFrmDatV2_DT.dll"
+                "dll": "IsMultiFrzFrmDatV2_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 75,
@@ -1930,12 +2776,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetMilInfo.dll"
+                "dll": "GetMilInfo.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 76,
@@ -1943,12 +2796,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetVimInfo.dll"
+                "dll": "GetVimInfo.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 77,
@@ -1956,12 +2816,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "SetVimSystemTime.dll"
+                "dll": "SetVimSystemTime.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 78,
@@ -1969,12 +2836,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetO2SList_DT.dll"
+                "dll": "GetO2SList_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 79,
@@ -1982,12 +2856,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetO2SData_DT.dll"
+                "dll": "GetO2SData_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 80,
@@ -1995,12 +2876,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetReadinessCode_DT.dll"
+                "dll": "GetReadinessCode_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 85,
@@ -2008,12 +2896,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "CARBModeInit_DT.dll"
+                "dll": "CARBModeInit_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 86,
@@ -2021,12 +2916,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "StartDatMon.dll"
+                "dll": "StartDatMon.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 87,
@@ -2034,12 +2936,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "CreateDrsFile_DT.dll"
+                "dll": "CreateDrsFile_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 88,
@@ -2047,12 +2956,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "TestEvapSystemLeak_DT.dll"
+                "dll": "TestEvapSystemLeak_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 89,
@@ -2060,12 +2976,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetMonitorStatusInfo_DT.dll"
+                "dll": "GetMonitorStatusInfo_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 90,
@@ -2073,12 +2996,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetMonitorResultInfo_DT.dll"
+                "dll": "GetMonitorResultInfo_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 91,
@@ -2086,12 +3016,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "SetCustomizeAllDefault_DT.dll"
+                "dll": "SetCustomizeAllDefault_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 92,
@@ -2099,12 +3036,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "StartDiagCARB_DT.dll"
+                "dll": "StartDiagCARB_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 93,
@@ -2112,12 +3056,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetGeneralCommResult_DT.dll"
+                "dll": "GetGeneralCommResult_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 94,
@@ -2125,12 +3076,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "StartActTst.dll"
+                "dll": "StartActTst.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 96,
@@ -2138,12 +3096,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetFrmCheckMode_DT.dll"
+                "dll": "GetFrmCheckMode_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 97,
@@ -2151,12 +3116,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetFrmConfCheckMode_DT.dll"
+                "dll": "GetFrmConfCheckMode_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 98,
@@ -2164,12 +3136,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetDischargeMonData_DT.dll"
+                "dll": "GetDischargeMonData_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 100,
@@ -2177,12 +3156,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetFrmCarInfoVin_DT.dll"
+                "dll": "GetFrmCarInfoVin_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 101,
@@ -2190,12 +3176,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCommConfig_DT.dll"
+                "dll": "GetCommConfig_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 102,
@@ -2203,12 +3196,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "DelComCachCstDop_DT.dll"
+                "dll": "DelComCachCstDop_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 106,
@@ -2216,12 +3216,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCurTimeInfo_DT.dll"
+                "dll": "GetCurTimeInfo_DT.dll",
+                "surface": "plugin_file_missing"
               }
             ],
             "role": 114,
@@ -2229,12 +3236,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetPermanentCdV3_DT.dll"
+                "dll": "GetPermanentCdV3_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 116,
@@ -2242,12 +3256,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCanBusCtgrV2_DT.dll"
+                "dll": "GetCanBusCtgrV2_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 117,
@@ -2255,12 +3276,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetDescription_DT.dll"
+                "dll": "GetDescription_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 119,
@@ -2268,12 +3296,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetMntEcuLstNoCf_DT.dll"
+                "dll": "GetMntEcuLstNoCf_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 121,
@@ -2281,12 +3316,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetEcuEchConnect_DT.dll"
+                "dll": "GetEcuEchConnect_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 122,
@@ -2294,12 +3336,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetDefaultExcept_DT.dll"
+                "dll": "GetDefaultExcept_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 123,
@@ -2307,12 +3356,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "SelectCarTypVn10_DT.dll"
+                "dll": "SelectCarTypVn10_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 125,
@@ -2320,12 +3376,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetTrslationStr_DT.dll"
+                "dll": "GetTrslationStr_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 126,
@@ -2333,12 +3396,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "support_orchestration_unclosed": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "support_orchestration_unclosed": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCustLstInfoV2_DT.dll"
+                "dll": "GetCustLstInfoV2_DT.dll",
+                "surface": "support_orchestration_unclosed"
               }
             ],
             "role": 128,
@@ -2346,12 +3416,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetDispMessage_DT.dll"
+                "dll": "GetDispMessage_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 133,
@@ -2359,12 +3436,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "support_orchestration_unclosed": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "support_orchestration_unclosed": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetTirePressInfo_DT.dll"
+                "dll": "GetTirePressInfo_DT.dll",
+                "surface": "support_orchestration_unclosed"
               }
             ],
             "role": 135,
@@ -2372,12 +3456,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetAbsltTime_DT.dll"
+                "dll": "GetAbsltTime_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 136,
@@ -2385,12 +3476,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "StartDatMon.dll"
+                "dll": "StartDatMon.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 137,
@@ -2398,12 +3496,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "CheckDatMonCommFrm.dll"
+                "dll": "CheckDatMonCommFrm.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 138,
@@ -2411,12 +3516,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCarInfoExcept_DT.dll"
+                "dll": "GetCarInfoExcept_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 139,
@@ -2424,12 +3536,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "NoConfGenComRes_DT.dll"
+                "dll": "NoConfGenComRes_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 149,
@@ -2437,12 +3556,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetEcuFnLstNoCom_DT.dll"
+                "dll": "GetEcuFnLstNoCom_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 155,
@@ -2450,12 +3576,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetUtlFnLstNoCom_DT.dll"
+                "dll": "GetUtlFnLstNoCom_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 158,
@@ -2463,12 +3596,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetRoBCandEcuLst_DT.dll"
+                "dll": "GetRoBCandEcuLst_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 159,
@@ -2476,12 +3616,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetActCusId_DT.dll"
+                "dll": "GetActCusId_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 162,
@@ -2489,12 +3636,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetPIDSignalData_DT.dll"
+                "dll": "GetPIDSignalData_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 163,
@@ -2502,12 +3656,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetDiagCodeInfo_DT.dll"
+                "dll": "GetDiagCodeInfo_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 164,
@@ -2515,12 +3676,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetSltFuncEcuLst_DT.dll"
+                "dll": "GetSltFuncEcuLst_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 165,
@@ -2528,12 +3696,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetDTC_CanBus_DT.dll"
+                "dll": "GetDTC_CanBus_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 166,
@@ -2541,12 +3716,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetOperationFrzFrmDatP4_DT.dll"
+                "dll": "GetOperationFrzFrmDatP4_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 170,
@@ -2554,12 +3736,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "plugin_file_missing": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "SelectCarId_DT.dll"
+                "dll": "SelectCarId_DT.dll",
+                "surface": "plugin_file_missing"
               }
             ],
             "role": 171,
@@ -2567,12 +3756,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "StartActTst.dll"
+                "dll": "StartActTst.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 176,
@@ -2580,12 +3776,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetDTC_CanBusP5_DT.dll"
+                "dll": "GetDTC_CanBusP5_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 177,
@@ -2593,12 +3796,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetSimpleOperationUtilityInfo_DT.dll"
+                "dll": "GetSimpleOperationUtilityInfo_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 178,
@@ -2606,12 +3816,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetPhysicalAddress_CARB_DT.dll"
+                "dll": "GetPhysicalAddress_CARB_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 180,
@@ -2619,12 +3836,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetIdCodeFuncListNoCarInfo_DT.dll"
+                "dll": "GetIdCodeFuncListNoCarInfo_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 182,
@@ -2632,12 +3856,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "DelEcuCnctCache_DT.dll"
+                "dll": "DelEcuCnctCache_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 183,
@@ -2645,12 +3876,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetPCSFuncList_DT.dll"
+                "dll": "GetPCSFuncList_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 184,
@@ -2658,12 +3896,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetPCSReadTime_DT.dll"
+                "dll": "GetPCSReadTime_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 185,
@@ -2671,12 +3916,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetAbsTimeStampSaveLog_DT.dll"
+                "dll": "GetAbsTimeStampSaveLog_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 189,
@@ -2684,12 +3936,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetPCSHeaderInfo_DT.dll"
+                "dll": "GetPCSHeaderInfo_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 190,
@@ -2697,12 +3956,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "SetDefSession_DT.dll"
+                "dll": "SetDefSession_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 191,
@@ -2710,12 +3976,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "SelectCGWCanBusOption_DT.dll"
+                "dll": "SelectCGWCanBusOption_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 192,
@@ -2723,12 +3996,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCGWCanBusCtgrList_DT.dll"
+                "dll": "GetCGWCanBusCtgrList_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 193,
@@ -2736,12 +4016,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCGWCanBusChkList_DT.dll"
+                "dll": "GetCGWCanBusChkList_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 194,
@@ -2749,12 +4036,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCanBusEcuConnect_DT.dll"
+                "dll": "GetCanBusEcuConnect_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 195,
@@ -2762,12 +4056,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "DelDiagCodeForMazda_DT.dll"
+                "dll": "DelDiagCodeForMazda_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 196,
@@ -2775,12 +4076,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "support_orchestration_unclosed": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "support_orchestration_unclosed": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetMktMonRamData_DT.dll"
+                "dll": "GetMktMonRamData_DT.dll",
+                "surface": "support_orchestration_unclosed"
               }
             ],
             "role": 199,
@@ -2788,12 +4096,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetVINCheckEcu_DT.dll"
+                "dll": "GetVINCheckEcu_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 201,
@@ -2801,12 +4116,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "MoveSessionCGWDK_DT.dll"
+                "dll": "MoveSessionCGWDK_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 202,
@@ -2814,12 +4136,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetOpeFrzFrmDatP4_ICS02_DT.Dll"
+                "dll": "GetOpeFrzFrmDatP4_ICS02_DT.Dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 203,
@@ -2827,12 +4156,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "DelSpecifiedCache_DT.dll"
+                "dll": "DelSpecifiedCache_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 204,
@@ -2840,12 +4176,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "SetVehicleInfoForVehicleId_DT.dll"
+                "dll": "SetVehicleInfoForVehicleId_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 205,
@@ -2853,12 +4196,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "IsNonDisplayInfo_DT.dll"
+                "dll": "IsNonDisplayInfo_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 206,
@@ -2866,12 +4216,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetLCSOperationFFDP5_DT.dll"
+                "dll": "GetLCSOperationFFDP5_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 208,
@@ -2879,12 +4236,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCurTimeInfoEachEcu_DT.dll"
+                "dll": "GetCurTimeInfoEachEcu_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 209,
@@ -2892,12 +4256,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "CheckUtilFunc_DT.dll"
+                "dll": "CheckUtilFunc_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 211,
@@ -2905,12 +4276,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "SingleRoutineActTstP5_DT.dll"
+                "dll": "SingleRoutineActTstP5_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 212,
@@ -2918,12 +4296,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetRoBP5_AnlzWkFct_DT.dll"
+                "dll": "GetRoBP5_AnlzWkFct_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 214,
@@ -2931,12 +4316,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetAnlWkFctDcm35_DT.dll"
+                "dll": "GetAnlWkFctDcm35_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 215,
@@ -2944,12 +4336,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetImageSpecInfo_DT.dll"
+                "dll": "GetImageSpecInfo_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 217,
@@ -2957,12 +4356,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCurAbsTimeInfo_DT.Dll"
+                "dll": "GetCurAbsTimeInfo_DT.Dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 218,
@@ -2970,12 +4376,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetPartNumber_DT.dll"
+                "dll": "GetPartNumber_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 219,
@@ -2983,12 +4396,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "ChangeLogCollectionMode_DT.dll"
+                "dll": "ChangeLogCollectionMode_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 220,
@@ -2996,12 +4416,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "AutoPowerOffCansel_DT.dll"
+                "dll": "AutoPowerOffCansel_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 221,
@@ -3009,12 +4436,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetPVMImageFFDP5_DT.dll"
+                "dll": "GetPVMImageFFDP5_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 222,
@@ -3022,12 +4456,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetCBESTInfo_DT.dll"
+                "dll": "GetCBESTInfo_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 223,
@@ -3035,12 +4476,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetADSOperationFFDP5_DT.dll"
+                "dll": "GetADSOperationFFDP5_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 224,
@@ -3048,12 +4496,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetADSImageFFDP5_DT.dll"
+                "dll": "GetADSImageFFDP5_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 225,
@@ -3061,12 +4516,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetVBatteryValue_DT.dll"
+                "dll": "GetVBatteryValue_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 226,
@@ -3074,12 +4536,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetVehicleCache_DT.dll"
+                "dll": "GetVehicleCache_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 227,
@@ -3087,12 +4556,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetReadTimeP5_DT.dll"
+                "dll": "GetReadTimeP5_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 228,
@@ -3100,12 +4576,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetADSDDRInfoP5_DT.dll"
+                "dll": "GetADSDDRInfoP5_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 229,
@@ -3113,12 +4596,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "QueryVehicleDBbyId_DT.dll"
+                "dll": "QueryVehicleDBbyId_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 230,
@@ -3126,12 +4616,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "QueryVehiclebyManualVin_DT.dll"
+                "dll": "QueryVehiclebyManualVin_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 231,
@@ -3139,12 +4636,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetVimVersion_DT.dll"
+                "dll": "GetVimVersion_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 232,
@@ -3152,12 +4656,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetTSS3ImageFFDP5_DT.dll"
+                "dll": "GetTSS3ImageFFDP5_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 233,
@@ -3165,12 +4676,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetTSS3OperationFFDP5_DT.dll"
+                "dll": "GetTSS3OperationFFDP5_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 234,
@@ -3178,12 +4696,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetRCImageFFDP5_DT.dll"
+                "dll": "GetRCImageFFDP5_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 235,
@@ -3191,12 +4716,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetVIMSupport_DT.dll"
+                "dll": "GetVIMSupport_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 236,
@@ -3204,12 +4736,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "InitializeWiredVehicleData_DT.dll"
+                "dll": "InitializeWiredVehicleData_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 237,
@@ -3217,12 +4756,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "JudgeWiredVehicleTarget_DT.dll"
+                "dll": "JudgeWiredVehicleTarget_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 238,
@@ -3230,12 +4776,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "CollectWiredVehicleData_DT.dll"
+                "dll": "CollectWiredVehicleData_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 239,
@@ -3243,12 +4796,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "CheckVimDrs_DT.dll"
+                "dll": "CheckVimDrs_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 240,
@@ -3256,12 +4816,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "CheckVimDlog_DT.dll"
+                "dll": "CheckVimDlog_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 241,
@@ -3269,12 +4836,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "ClearVimDlog_DT.dll"
+                "dll": "ClearVimDlog_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 242,
@@ -3282,12 +4856,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "CopyDrsFile_DT.dll"
+                "dll": "CopyDrsFile_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 243,
@@ -3295,12 +4876,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "CopyDlogFile_DT.dll"
+                "dll": "CopyDlogFile_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 244,
@@ -3308,12 +4896,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "ReadDlogFile_DT.dll"
+                "dll": "ReadDlogFile_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 245,
@@ -3321,12 +4916,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetDMCImageFFDP5_DT.dll"
+                "dll": "GetDMCImageFFDP5_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 247,
@@ -3334,12 +4936,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "support_orchestration_unclosed": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "support_orchestration_unclosed": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetSoh_DT.dll"
+                "dll": "GetSoh_DT.dll",
+                "surface": "support_orchestration_unclosed"
               }
             ],
             "role": 248,
@@ -3347,12 +4956,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetADUOperationFFDP6_DT.dll"
+                "dll": "GetADUOperationFFDP6_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 260,
@@ -3360,12 +4976,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "direct_transport": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "direct_transport": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetADUImageFFDP6_DT.dll"
+                "dll": "GetADUImageFFDP6_DT.dll",
+                "surface": "direct_transport"
               }
             ],
             "role": 261,
@@ -3373,12 +4996,19 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "support_orchestration_unclosed": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "support_orchestration_unclosed": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetADUDDRInfoP6_DT.dll"
+                "dll": "GetADUDDRInfoP6_DT.dll",
+                "surface": "support_orchestration_unclosed"
               }
             ],
             "role": 262,
@@ -3386,18 +5016,27 @@
           },
           {
             "binding_count": 1,
+            "binding_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "category_count": 1,
             "plugin_count": 1,
+            "plugin_surface_counts": {
+              "no_recovered_shared_transport_edge": 1
+            },
             "plugins": [
               {
                 "binding_count": 1,
-                "dll": "GetADUDDRInfoImgOpeDdrP6_DT.dll"
+                "dll": "GetADUDDRInfoImgOpeDdrP6_DT.dll",
+                "surface": "no_recovered_shared_transport_edge"
               }
             ],
             "role": 263,
             "role_hex": "0x107"
           }
-        ]
+        ],
+        "scope": "shared-runtime edges recovered from plugin imports; absence is not proof of no vehicle I/O",
+        "unique_plugin_count": 349
       },
       "role_layout": {
         "gtsplus": "u16 +0x54 (CDbDllTable::FindDbItem1)",
@@ -3612,10 +5251,50 @@
             "file_offset": "0x5D378",
             "va": "0x1005D378"
           },
+          "enable_data_id_frame_lookup": {
+            "bytes": "e87a750000",
+            "file_offset": "0x56BA1",
+            "va": "0x10056BA1"
+          },
+          "enable_data_id_transport": {
+            "bytes": "e837720000",
+            "file_offset": "0x56BC4",
+            "va": "0x10056BC4"
+          },
+          "enable_rid_frame_lookup": {
+            "bytes": "e8de6d0000",
+            "file_offset": "0x5733D",
+            "va": "0x1005733D"
+          },
+          "enable_rid_transport": {
+            "bytes": "e8986a0000",
+            "file_offset": "0x57363",
+            "va": "0x10057363"
+          },
           "func_comm_frame_db_class_0x112": {
             "bytes": "50565168120100008d8fbc00",
             "file_offset": "0x5E1C6",
             "va": "0x1005E1C6"
+          },
+          "p4_support_bit_frame_lookup": {
+            "bytes": "e87feeffff",
+            "file_offset": "0x5F29C",
+            "va": "0x1005F29C"
+          },
+          "p4_support_bit_transport": {
+            "bytes": "e8e4e5ffff",
+            "file_offset": "0x5F617",
+            "va": "0x1005F617"
+          },
+          "p5_support_pid_frame_lookup": {
+            "bytes": "68ca000000e8deadffff",
+            "file_offset": "0x63338",
+            "va": "0x10063338"
+          },
+          "p5_support_pid_transport": {
+            "bytes": "e86da6ffff",
+            "file_offset": "0x6339E",
+            "va": "0x1006339E"
           },
           "transport_receive_sink": {
             "bytes": "ff1550040b108bf881ff2303",
