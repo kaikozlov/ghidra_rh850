@@ -625,19 +625,18 @@ def _active_test_list_category_plan(parser: DDBParser, category: dict[str, Any],
     }
 
 
-def _active_test_init_selected_plan(
+def _direct_active_test_selected_row(
     parser: DDBParser,
-    master: Any,
     category: dict[str, Any],
     db_root: Path,
     active_test_id: int,
     strings: StringDataBase | None = None,
-) -> dict[str, Any]:
+) -> tuple[Any, Path, dict[str, Any]]:
     db_path = db_root / str(category["database"])
     db = parser.parse_ecu_db(db_path)
     section = db.sections.get(68)
     if section is None:
-        raise ValueError(f"{db_path.name}: selected role-0x08 Active Test table 68 is absent")
+        raise ValueError(f"{db_path.name}: selected direct Active Test table 68 is absent")
     if section.decoded_record_size != 64:
         raise ValueError(f"{db_path.name}: type-68 record size {section.decoded_record_size}, expected 64")
     matches = []
@@ -674,6 +673,20 @@ def _active_test_init_selected_plan(
         "monitor_link_mode": raw[0x3D],
         "raw": raw.hex(),
     }
+    return db, db_path, selected
+
+
+def _active_test_init_selected_plan(
+    parser: DDBParser,
+    master: Any,
+    category: dict[str, Any],
+    db_root: Path,
+    active_test_id: int,
+    strings: StringDataBase | None = None,
+) -> dict[str, Any]:
+    db, db_path, selected = _direct_active_test_selected_row(
+        parser, category, db_root, active_test_id, strings
+    )
 
     mode = selected["initial_read_mode"]
     transaction: dict[str, Any] = {"mode": mode, "performed": False}
@@ -769,6 +782,89 @@ def _active_test_init_selected_plan(
     }
 
 
+def _active_test_signal_info_selected_plan(
+    parser: DDBParser,
+    category: dict[str, Any],
+    db_root: Path,
+    active_test_id: int,
+    strings: StringDataBase,
+) -> dict[str, Any]:
+    db, db_path, selected = _direct_active_test_selected_row(
+        parser, category, db_root, active_test_id, strings
+    )
+
+    def unique_record(table: int, key_offset: int, key: int) -> tuple[int, bytes]:
+        section = db.sections.get(table)
+        if section is None:
+            raise ValueError(f"{db_path.name}: required role-0x70 table {table} is absent")
+        size = section.decoded_record_size
+        matches = []
+        for index in range(section.header.record_count):
+            raw = section.decoded_data[index * size : (index + 1) * size]
+            if len(raw) >= key_offset + 2 and struct.unpack_from("<H", raw, key_offset)[0] == key:
+                matches.append((index, raw))
+        if len(matches) != 1:
+            raise ValueError(
+                f"{db_path.name}: table {table} key 0x{key:X} resolved {len(matches)} rows"
+            )
+        return matches[0]
+
+    pattern_index, pattern = unique_record(12, 0x00, selected["active_test_pattern_key"])
+    physical_index, physical = unique_record(13, 0x0C, selected["physical_data_key"])
+    unit_key = struct.unpack_from("<H", physical, 0x0E)[0]
+    unit_index, unit = unique_record(15, 0x04, unit_key)
+    pattern_display_key = struct.unpack_from("<H", pattern, 0x0A)[0]
+    display = []
+    section14 = db.sections.get(14)
+    if section14 is None:
+        raise ValueError(f"{db_path.name}: required role-0x70 table 14 is absent")
+    for index in range(section14.header.record_count):
+        size = section14.decoded_record_size
+        raw = section14.decoded_data[index * size : (index + 1) * size]
+        if len(raw) >= 0x0E and struct.unpack_from("<H", raw, 0x0C)[0] == pattern_display_key:
+            display.append({
+                "record": index,
+                "value": struct.unpack_from("<I", raw, 0x04)[0],
+                "text": strings.get_string(struct.unpack_from("<I", raw, 0x00)[0]),
+                "raw": raw.hex(),
+            })
+
+    return {
+        "selected_test": selected,
+        "active_test_pattern": {
+            "record": pattern_index,
+            "key": selected["active_test_pattern_key"],
+            "button_size": pattern[0x15],
+            "key_operation_pattern": pattern[0x13],
+            "key_invalid_flag": pattern[0x12],
+            "maintenance_time": struct.unpack_from("<H", pattern, 0x04)[0],
+            "auto_continue_time": struct.unpack_from("<H", pattern, 0x06)[0],
+            "lock_time": struct.unpack_from("<H", pattern, 0x0C)[0],
+            "pattern_display_key": pattern_display_key,
+            "raw": pattern.hex(),
+        },
+        "physical": {
+            "record": physical_index,
+            "key": selected["physical_data_key"],
+            "mul": struct.unpack_from("<i", physical, 0x00)[0],
+            "div": struct.unpack_from("<i", physical, 0x04)[0],
+            "offset": struct.unpack_from("<i", physical, 0x08)[0],
+            "signed": bool(physical[0x14]),
+            "decimal_point_count": physical[0x15],
+            "unit_key": unit_key,
+            "unit_record": unit_index,
+            "unit": strings.get_string(struct.unpack_from("<I", unit, 0x00)[0]),
+            "unit_genre_id": struct.unpack_from("<H", unit, 0x06)[0],
+            "raw": physical.hex(),
+        },
+        "display_info": display,
+        "runtime_boundary": (
+            "role-0x70 is metadata-only for the exact plugin identity; this selected-item plan does not execute "
+            "transport or prove role-0x06 live availability"
+        ),
+    }
+
+
 def _monitor_list_category_plan(parser: DDBParser, category: dict[str, Any], db_root: Path) -> dict[str, Any]:
     mode = int(category["generation"]) & 0xE0
     table = 157 if mode == 0x60 else 62
@@ -852,17 +948,29 @@ def _master_command_plan(
         "list_model": None,
         "active_test_model": None,
         "active_test_init_model": None,
+        "active_test_signal_info_model": None,
         "boundary": (
             "Frames/timers are resolved from the selected category. Executable semantics are attached only "
             "when the selected plugin SHA-256 exactly matches a recovered profile."
         ),
     }
-    if selected_item is not None and role != 0x08:
-        raise ValueError("--item is currently supported only for role 0x08 direct Active Test initialization")
+    if selected_item is not None and role not in {0x08, 0x70}:
+        raise ValueError("--item is currently supported only for direct Active Test roles 0x08 and 0x70")
     if profile is None:
         return result
 
-    if profile_name == "role_0x08_p5_active_test_init":
+    if profile_name == "role_0x70_p5_active_test_signal_info":
+        result["active_test_signal_info_model"] = dict(profile["metadata_model"])
+        if selected_item is not None:
+            if db_root is None or strings is None:
+                raise ValueError("role-0x70 selected-item planning requires the category ECU database and strings")
+            result["active_test_signal_info_model"]["selected_plan"] = _active_test_signal_info_selected_plan(
+                parser, category, db_root, selected_item, strings
+            )
+            result["semantic_status"] = "exact_plugin_identity_and_selected_active_test_signal_info"
+        else:
+            result["semantic_status"] = "exact_plugin_identity_requires_selected_active_test"
+    elif profile_name == "role_0x08_p5_active_test_init":
         result["active_test_init_model"] = dict(profile["init_model"])
         if selected_item is not None:
             if db_root is None:
@@ -1012,6 +1120,29 @@ def cmd_command(args: argparse.Namespace) -> int:
         )
     for timer in payload["timers"]:
         print(f"timer	id={timer['timer_id']}	delay_ms={timer['delay_ms']}")
+    active_test_signal_info = payload["active_test_signal_info_model"]
+    if active_test_signal_info is not None:
+        selected_plan = active_test_signal_info.get("selected_plan")
+        if selected_plan is None:
+            print("active-test-signal-info\tselected_item=required")
+        else:
+            selected = selected_plan["selected_test"]
+            pattern = selected_plan["active_test_pattern"]
+            physical = selected_plan["physical"]
+            display = selected_plan["display_info"]
+            display_text = ",".join(f"{row['value']}={row['text'] or '-'}" for row in display) or "-"
+            print(
+                f"active-test-signal-info\tid={selected['active_test_id_hex']}\tname={selected['name'] or '-'}\t"
+                f"pattern_key={pattern['key']}\tphysical_key={physical['key']}\t"
+                f"conv={physical['mul']}/{physical['div']} offset={physical['offset']}\t"
+                f"dec={physical['decimal_point_count']}\tsigned={int(physical['signed'])}\t"
+                f"unit={physical['unit'] or '-'}"
+            )
+            print(
+                f"active-test-display\tpattern={selected['pattern']}\tbutton_size={pattern['button_size']}\t"
+                f"key_op={pattern['key_operation_pattern']}\tkey_invalid={pattern['key_invalid_flag']}\t"
+                f"values={display_text}"
+            )
     active_test_init = payload["active_test_init_model"]
     if active_test_init is not None:
         selected_plan = active_test_init.get("selected_plan")

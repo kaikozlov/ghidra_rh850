@@ -150,6 +150,32 @@ check(
     and hybrid_init_selected["linked_monitor"]["monitor"]["signal_info"]["pattern_display"] == {0: "OFF", 1: "ON"},
     "command plan materializes Hybrid role 0x08 Active Test 1 into 222801/62 and its linked monitor metadata",
 )
+hybrid_signal_plan = gts_cli._master_command_plan(
+    parser, master, hybrid, 0x70, gts / "bin", db_root, 0x01, strings
+)
+hybrid_signal_selected = hybrid_signal_plan["active_test_signal_info_model"]["selected_plan"]
+check(
+    hybrid_signal_plan["plugin"] == "GetATSignalInfoP5_DT.dll"
+    and hybrid_signal_plan["operation_surface"] == "no_recovered_shared_transport_edge"
+    and hybrid_signal_plan["semantic_status"] == "exact_plugin_identity_and_selected_active_test_signal_info"
+    and hybrid_signal_selected["selected_test"]["name"] == "Activate the Inverter Water Pump"
+    and hybrid_signal_selected["active_test_pattern"]["key"] == 10
+    and hybrid_signal_selected["active_test_pattern"]["pattern_display_key"] == 102
+    and hybrid_signal_selected["active_test_pattern"]["key_operation_pattern"] == 101
+    and hybrid_signal_selected["physical"]["key"] == 6
+    and hybrid_signal_selected["physical"]["mul"] == 1
+    and hybrid_signal_selected["physical"]["div"] == 1
+    and hybrid_signal_selected["physical"]["offset"] == 0
+    and hybrid_signal_selected["physical"]["signed"] is False
+    and hybrid_signal_selected["display_info"] == [{
+        "record": 690,
+        "value": 1,
+        "text": "ON",
+        "raw": "ae6300000100000000000000660001000000000000000100",
+    }],
+    "command plan joins Hybrid role 0x70 Active Test 1 to exact pattern/physical/display metadata without transport",
+)
+
 try:
     gts_cli._master_command_plan(parser, master, hybrid, 0x08, gts / "bin", db_root, 0xFFFF, strings)
 except ValueError as exc:

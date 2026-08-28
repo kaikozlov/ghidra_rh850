@@ -170,9 +170,32 @@ check(
 
 plugin_semantics = gts["dll_role_schema"]["plugin_semantics"]
 monitor_list = plugin_semantics["role_0x05_p5_monitor_list"]
+active_test_signal_info = plugin_semantics["role_0x70_p5_active_test_signal_info"]
 active_test_init = plugin_semantics["role_0x08_p5_active_test_init"]
 active_test_list = plugin_semantics["role_0x06_p5_active_test_list"]
 signal_info = plugin_semantics["role_0x41_p5_signal_info"]
+check(
+    "current role 0x70 P5 Active Test signal-info plugin is identity-pinned and metadata-only",
+    active_test_signal_info["plugin"]["sha256"] == "0544b446514d722a491ae537a545c91fabb1a0d71e0fddfe8acd6482d2741b7b"
+    and active_test_signal_info["example_binding"]["category_id"] == 397
+    and active_test_signal_info["example_binding"]["dll_role_id"] == 0x70
+    and active_test_signal_info["example_binding"]["dll_name"] == "GetATSignalInfoP5_DT.dll"
+    and active_test_signal_info["metadata_model"]["transport"].startswith("none in this plugin")
+    and active_test_signal_info["metadata_model"]["selected_test_id"] == "input CCmdWordId value -> type-68 u16 +0x20 lookup"
+    and active_test_signal_info["metadata_model"]["physical"]["table"] == 13
+    and active_test_signal_info["metadata_model"]["pattern_display_table"]["table"] == 14
+    and active_test_signal_info["metadata_model"]["unit_table"]["table"] == 15,
+)
+check(
+    "current role 0x70 selected-ID, pattern, display, physical, unit, and name paths are instruction-pinned",
+    active_test_signal_info["anchors"]["selected_ids_and_type68_lookup"]["bytes"].startswith("8b8d04ffffff53c645fc01")
+    and active_test_signal_info["anchors"]["pattern_lookup"]["bytes"].startswith("8b43108b56048b00")
+    and active_test_signal_info["anchors"]["pattern_field_copies"]["bytes"].startswith("8b43108b75948b95")
+    and active_test_signal_info["anchors"]["pattern_display_lookup"]["bytes"].startswith("ff701c8d45ac50680e020000")
+    and active_test_signal_info["anchors"]["physical_lookup_and_copies"]["bytes"].startswith("8b8568ffffff8b5004")
+    and active_test_signal_info["anchors"]["unit_lookup"]["bytes"].startswith("8b4a100fb7400e")
+    and active_test_signal_info["anchors"]["name_and_ids"]["bytes"].startswith("8b43108bcb6a00"),
+)
 check(
     "current role 0x08 P5 Active Test init plugin is identity-pinned and selected-test driven",
     active_test_init["plugin"]["sha256"] == "36baa624476758b2aa642a5becc9b8583dd431798d3f93c73a349210c7359d55"

@@ -858,6 +858,99 @@
             "string_conversion": "Windows MultiByteToWideChar code page 0 (CP_ACP) from zero-terminated <=16-byte chunk",
             "value_capacity_chars": 17
           }
+        },
+        "role_0x70_p5_active_test_signal_info": {
+          "anchors": {
+            "name_and_ids": {
+              "bytes": "8b43108bcb6a008b008b400c89470cff157c300010508d4f10ff151c30001068283100108d4f20ff151c3000108b43108b008b40188947508b43108b008b40108947548b43108b008b401c8947588b43108b008b40148987b0000000c787b40000000000",
+              "file_offset": "0xBD0",
+              "va": "0x100017D0"
+            },
+            "pattern_display_lookup": {
+              "bytes": "ff701c8d45ac50680e020000ff15803000108bf085f60f85fa010000668b45b06683f8017c7533c933db663bc87d668d477c8bf80f1f008b45bc8d4dac0fbff3538b04b08b008945e0ff1564300010508d4dd0ff151c3000108b4dbc8b04b10fb7400c89",
+              "file_offset": "0xA59",
+              "va": "0x10001659"
+            },
+            "pattern_field_copies": {
+              "bytes": "8b43108b75948b9568ffffff8b000fb6403a8847418b060fb640138847428b060fb640128887b80000008b060fb74004668947488b060fb740066689474a8b060fb640158847408b060fb7400c668987ba0000008b068b52040fb7400a8b4a10508b0281",
+              "file_offset": "0x9F0",
+              "va": "0x100015F0"
+            },
+            "pattern_lookup": {
+              "bytes": "8b43108b56048b008b4a1081c1cc0000000fb74026508b02ff701c8d458450680c020000ff15803000108bf085f60f858a02000066837d88010f8c040100008b43108b75948b",
+              "file_offset": "0x9B1",
+              "va": "0x100015B1"
+            },
+            "physical_lookup_and_copies": {
+              "bytes": "8b8568ffffff8b50048b43108b4a108b0081c1cc0000000fb74024508b02ff701c8d459850680d020000ff15803000108bf085f60f854101000066837d9c010f8c360100008b75a88b060fb6401588475c8b068b008947688b068b400489476c8b068b40088947708b060fb64014",
+              "file_offset": "0xAF4",
+              "va": "0x100016F4"
+            },
+            "selected_ids_and_type68_lookup": {
+              "bytes": "8b8d04ffffff53c645fc01ff150c3000100fb758088b46048b48108bc350898500ffffff81c1cc0000008b8508ffffffff701c8d8514ffffff506844020000ff15803000108b",
+              "file_offset": "0x520",
+              "va": "0x10001120"
+            },
+            "unit_lookup": {
+              "bytes": "8b4a100fb7400e81c1cc000000508b02ff701c8d856cffffff50680f020000ff15803000108bf085f60f85d00000006683bd70ffffff017c27508d8d6cffffffff1574300010508d4f30ff151c3000108b857cffffff8b00668b4006668947748b43108b",
+              "file_offset": "0xB70",
+              "va": "0x10001770"
+            }
+          },
+          "example_binding": {
+            "category_id": 397,
+            "dll_name": "GetATSignalInfoP5_DT.dll",
+            "dll_role_hex": "0x70",
+            "dll_role_id": 112,
+            "raw": "470065007400410054005300690067006e0061006c0049006e0066006f00500035005f00440054002e0064006c006c0000000000000000000000000000000000000000000000000000000000000000008d01000070000000"
+          },
+          "metadata_model": {
+            "active_test_pattern": {
+              "auto_continue_time": "type-12 u16 +0x06",
+              "button_size": "type-12 u8 +0x15",
+              "class": "CDbActTestPatternTable",
+              "key": "type-68 u16 +0x26 -> type-12 u16 +0x00",
+              "key_invalid_flag": "type-12 u8 +0x12",
+              "key_operation_pattern": "type-12 u8 +0x13",
+              "lock_time": "type-12 u16 +0x0C",
+              "maintenance_time": "type-12 u16 +0x04",
+              "pattern_display_key": "type-12 u16 +0x0A -> type-14",
+              "table": 12
+            },
+            "output": "one CCmdActTstSignalInfoItem per requested selected Active Test ID, including name/unit/control-pattern/display/physical-conversion metadata",
+            "pattern_display_table": {
+              "class": "CDbPatDispTable",
+              "table": 14
+            },
+            "physical": {
+              "class": "CDbPhyDataTable",
+              "decimal_point_count": "+0x15",
+              "div": "+0x04",
+              "key": "type-68 u16 +0x24 -> type-13 u16 +0x0C",
+              "mul": "+0x00",
+              "offset": "+0x08",
+              "signed": "+0x14",
+              "table": 13,
+              "unit_key": "+0x0E -> type-15"
+            },
+            "runtime_boundary": "metadata construction only; this plugin has no recovered vehicle transport edge and does not prove role-0x06 live availability",
+            "selected_test_id": "input CCmdWordId value -> type-68 u16 +0x20 lookup",
+            "selected_test_table": {
+              "class": "CDbActTestP5Table",
+              "record_size": 64,
+              "table": 68
+            },
+            "transport": "none in this plugin; iterates selected Active Test IDs and constructs CCmdActTstSignalInfoItem metadata from DDB records",
+            "unit_table": {
+              "class": "CDbUnitTable",
+              "table": 15
+            }
+          },
+          "plugin": {
+            "path": "bin/GetATSignalInfoP5_DT.dll",
+            "sha256": "0544b446514d722a491ae537a545c91fabb1a0d71e0fddfe8acd6482d2741b7b",
+            "size": 27664
+          }
         }
       },
       "role_catalog": {

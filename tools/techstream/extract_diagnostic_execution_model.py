@@ -398,9 +398,55 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
     monitor_list = bin_root / "GetDatMonListP5_DT.dll"
     active_test_list = bin_root / "GetActTstListP5_DT.dll"
     active_test_init = bin_root / "GetActTstInitP5_DT.dll"
+    active_test_signal_info = bin_root / "GetATSignalInfoP5_DT.dll"
     signal_info = bin_root / "GetDatMonSignalInfoP5_DT.dll"
     kgp = bin_root / "KgpDataCtrl.dll"
     return {
+        "role_0x70_p5_active_test_signal_info": {
+            "plugin": file_identity(active_test_signal_info, gts_root),
+            "example_binding": dll_binding(parser, master, 397, 0x70),
+            "metadata_model": {
+                "transport": "none in this plugin; iterates selected Active Test IDs and constructs CCmdActTstSignalInfoItem metadata from DDB records",
+                "selected_test_table": {"table": 68, "class": ECU_TABLE_CLASS_NAMES[68], "record_size": 64},
+                "selected_test_id": "input CCmdWordId value -> type-68 u16 +0x20 lookup",
+                "active_test_pattern": {
+                    "table": 12,
+                    "class": ECU_TABLE_CLASS_NAMES[12],
+                    "key": "type-68 u16 +0x26 -> type-12 u16 +0x00",
+                    "pattern_display_key": "type-12 u16 +0x0A -> type-14",
+                    "button_size": "type-12 u8 +0x15",
+                    "key_operation_pattern": "type-12 u8 +0x13",
+                    "key_invalid_flag": "type-12 u8 +0x12",
+                    "maintenance_time": "type-12 u16 +0x04",
+                    "auto_continue_time": "type-12 u16 +0x06",
+                    "lock_time": "type-12 u16 +0x0C",
+                },
+                "physical": {
+                    "table": 13,
+                    "class": ECU_TABLE_CLASS_NAMES[13],
+                    "key": "type-68 u16 +0x24 -> type-13 u16 +0x0C",
+                    "mul": "+0x00",
+                    "div": "+0x04",
+                    "offset": "+0x08",
+                    "unit_key": "+0x0E -> type-15",
+                    "signed": "+0x14",
+                    "decimal_point_count": "+0x15",
+                },
+                "pattern_display_table": {"table": 14, "class": ECU_TABLE_CLASS_NAMES[14]},
+                "unit_table": {"table": 15, "class": ECU_TABLE_CLASS_NAMES[15]},
+                "output": "one CCmdActTstSignalInfoItem per requested selected Active Test ID, including name/unit/control-pattern/display/physical-conversion metadata",
+                "runtime_boundary": "metadata construction only; this plugin has no recovered vehicle transport edge and does not prove role-0x06 live availability",
+            },
+            "anchors": {
+                "selected_ids_and_type68_lookup": anchor(active_test_signal_info, 0x10001120, "8b8d04ffffff53c645fc01ff150c3000100fb758088b46048b48108bc350898500ffffff81c1cc0000008b8508ffffffff701c8d8514ffffff506844020000ff15803000108b"),
+                "pattern_lookup": anchor(active_test_signal_info, 0x100015B1, "8b43108b56048b008b4a1081c1cc0000000fb74026508b02ff701c8d458450680c020000ff15803000108bf085f60f858a02000066837d88010f8c040100008b43108b75948b"),
+                "pattern_field_copies": anchor(active_test_signal_info, 0x100015F0, "8b43108b75948b9568ffffff8b000fb6403a8847418b060fb640138847428b060fb640128887b80000008b060fb74004668947488b060fb740066689474a8b060fb640158847408b060fb7400c668987ba0000008b068b52040fb7400a8b4a10508b0281"),
+                "pattern_display_lookup": anchor(active_test_signal_info, 0x10001659, "ff701c8d45ac50680e020000ff15803000108bf085f60f85fa010000668b45b06683f8017c7533c933db663bc87d668d477c8bf80f1f008b45bc8d4dac0fbff3538b04b08b008945e0ff1564300010508d4dd0ff151c3000108b4dbc8b04b10fb7400c89"),
+                "physical_lookup_and_copies": anchor(active_test_signal_info, 0x100016F4, "8b8568ffffff8b50048b43108b4a108b0081c1cc0000000fb74024508b02ff701c8d459850680d020000ff15803000108bf085f60f854101000066837d9c010f8c360100008b75a88b060fb6401588475c8b068b008947688b068b400489476c8b068b40088947708b060fb64014"),
+                "unit_lookup": anchor(active_test_signal_info, 0x10001770, "8b4a100fb7400e81c1cc000000508b02ff701c8d856cffffff50680f020000ff15803000108bf085f60f85d00000006683bd70ffffff017c27508d8d6cffffffff1574300010508d4f30ff151c3000108b857cffffff8b00668b4006668947748b43108b"),
+                "name_and_ids": anchor(active_test_signal_info, 0x100017D0, "8b43108bcb6a008b008b400c89470cff157c300010508d4f10ff151c30001068283100108d4f20ff151c3000108b43108b008b40188947508b43108b008b40108947548b43108b008b401c8947588b43108b008b40148987b0000000c787b40000000000"),
+            },
+        },
         "role_0x08_p5_active_test_init": {
             "plugin": file_identity(active_test_init, gts_root),
             "example_binding": dll_binding(parser, master, 397, 0x08),

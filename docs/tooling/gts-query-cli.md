@@ -160,6 +160,11 @@ active-test-init  id=0x1  name=Activate the Inverter Water Pump  did=0x2801  bit
 initial-read      selector=0xCA  send=222801  expect=62  bits=15..15
 linked-monitor    key=30  resolution=unique DID/bit-range match from plugin scan  name=Inverter Water Pump
 
+$ tools/gts command HV_P5 0x70 --item 0x1
+command  category=397  Hybrid Control  role=0x70  plugin=GetATSignalInfoP5_DT.dll  surface=no_recovered_shared_transport_edge  semantics=exact_plugin_identity_and_selected_active_test_signal_info
+active-test-signal-info  id=0x1  name=Activate the Inverter Water Pump  pattern_key=10  physical_key=6  conv=1/1 offset=0  dec=0  signed=0  unit=-
+active-test-display      pattern=1  button_size=0  key_op=101  key_invalid=0  values=1=ON
+
 $ tools/gts command EMPS_P5 0x05
 command  category=405  EMPS  role=0x5  plugin=GetDatMonListP5_DT.dll  surface=delegated_transport_v18_proven  semantics=exact_plugin_identity_and_category_candidate_partition
 list     table=62  candidates=230  direct_include=0  direct_exclude=0  runtime_probe=230  builder=CreateEnableDataIdList
@@ -185,6 +190,8 @@ timer  category=397  id=1  delay_ms=0  unknown_08=0
 $ tools/gts frame 397 0x1
 frame  category=397  selector=0x1  comm_set=1  frame=0x279E  rcv_timeout=1020  retries=1  send=04  mask=  check=44
 ```
+
+For role `0x70`, the same `--item` selects the direct type-68 Active Test but no wire transaction is attached. The exact current `GetATSignalInfoP5_DT.dll` consumes that selected ID and joins type-12 Active-Test pattern, type-13 physical conversion, type-14 display values, and type-15 unit metadata into `CCmdActTstSignalInfoItem`. This makes `0x70` the read-only presentation/conversion companion to role `0x08`, not another executor.
 
 For role `0x08`, `--item` is the direct Active Test ID from the selected category's type-68 `CDbActTestP5Table`. The planner joins that exact row to the current plugin's initialization state machine: when `initial_read_mode == 0`, selector `0xCA` supplies a base `22FFFF` request and the plugin substitutes the row's `+0x34` DID into request bytes 1/2 before send. It also reproduces the plugin's linked-Data-Monitor lookup by DID and bit range. This remains a **read-only plan**: it does not execute the Active Test or assert that role `0x06` would expose the test on a live ECU. Unknown direct-test IDs fail closed.
 
