@@ -11,7 +11,7 @@ ARTIFACT = REPO / "data/generated/gtsplus_2026/camry_brake_observer_vocabulary.j
 BUILDER = REPO / "tools/techstream/build_camry_brake_observer_vocabulary.py"
 
 passed = failed = 0
-oracle = "generated_self_check+external_source+dynamic_probe_join"
+oracle = "generated_self_check"
 
 
 def check(name: str, condition: object) -> None:

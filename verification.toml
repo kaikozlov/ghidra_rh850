@@ -809,9 +809,6 @@ modes = ["local"]
 oracle = "generated_self_check"
 paths = [
   "tools/gts",
-  "tools/techstream/gts_cli.py",
-  "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json",
-  "data/generated/camry_2026_dtc_clear.json",
   "docs/tooling/gts-query-cli.md",
 ]
 
@@ -822,8 +819,6 @@ modes = ["local"]
 oracle = "independent_external_artifact"
 paths = [
   "tools/gts",
-  "tools/techstream/gts_cli.py",
-  "tools/techstream/diagnostic_role_model.py",
   "docs/tooling/gts-query-cli.md",
   "docs/tooling/README.md",
   "docs/WORKFLOW.md",
@@ -836,28 +831,20 @@ oracle = 'dynamic_trace'
 paths = [
   'targets/camry-2026/',
   'data/toyota_eps_variant_matrix.csv',
-  'targets/camry-2026/README.md',
   'docs/status/PRIORITIES.md',
   'targets/camry-2026/raw-20260826/camry_ready_gear_capture.py',
   'targets/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz',
   'targets/camry-2026/raw-20260826/camry_b_capture.py',
   'targets/camry-2026/raw-20260826/camry_ready_b_20260826.json.gz',
 ]
+
 [suite.camry_2026_bus1_field_leadlag]
 tests = ["tests/verify_camry_2026_bus1_field_leadlag.py"]
 oracle = "dynamic_trace"
 paths = [
-  "tools/analyze_camry_2026_bus1_field_leadlag.py",
-  "data/generated/camry_2026_bus1_field_leadlag.json",
-  "data/generated/camry_2026_cruise_lta_edge_census.json",
-  "tools/analyze_camry_2026_relay_capture.py",
-  "tools/toyota_route_opendbc_common.py",
-  "targets/camry-2026/raw-20260827/",
   "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/FINDINGS.md",
   "docs/status/PRIORITIES.md",
 ]
-
 [suite.camry_8965f3307000_codeflash]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "codeflash"]
@@ -1194,9 +1181,6 @@ requires_external = ["techstream_v18", "gtsplus"]
 modes = ["local"]
 oracle = "instruction_semantics"
 paths = [
-  "tools/techstream/extract_diagnostic_execution_model.py",
-  "tools/techstream/diagnostic_role_model.py",
-  "tools/techstream/parse_ddb.py",
   "docs/tooling/techstream.md",
 ]
 
@@ -1270,7 +1254,7 @@ paths = [
 tests = ["tests/verify_camry_brake_observer_vocabulary.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "generated_self_check+external_source+dynamic_probe_join"
+oracle = "generated_self_check"
 paths = [
   "docs/variants/camry-2026-live-baseline.md",
 ]
@@ -1970,21 +1954,12 @@ oracle = "documentation_lint"
 tests = ["tests/verify_camry_8965F3307000_external_lateral_ingress.py"]
 oracle = "dynamic_trace"
 paths = [
-  "tools/build_camry_8965F3307000_external_lateral_ingress.py",
-  "tools/analyze_camry_2026_class_l_upstream.py",
-  "tools/camry_f33_corpus.py",
-  "data/analysis_targets.json",
-  "firmware/camry-8965F3307000/CodeFlash.bin",
   "data/generated/camry-8965F3307000/decompilations.jsonl",
-  "data/generated/camry_8965F3307000_external_lateral_ingress.json",
-  "data/generated/camry_2026_class_l_upstream_correlation.json",
-  "data/generated/camry_2026_cruise_lta_edge_census.json",
   "data/generated/camry_8965F3307000_codeflash.json",
   "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
   "targets/camry-2026/raw-20260827/",
   "docs/variants/camry-2026-live-baseline.md",
   "docs/variants/camry-2026-tss3-opendbc-port.md",
-  "docs/status/FINDINGS.md",
   "docs/status/PRIORITIES.md",
   "docs/status/CORRECTIONS.md",
 ]
@@ -1994,7 +1969,6 @@ tests = ["tests/verify_camry_8965F3307000_d5_snapshot_provenance.py"]
 oracle = "generated_self_check"
 paths = [
   "data/generated/camry-8965F3307000/decompilations.jsonl",
-  "firmware/camry-8965F3307000/CodeFlash.bin",
   "docs/variants/camry-2026-live-baseline.md",
 ]
 
@@ -2002,10 +1976,5 @@ paths = [
 tests = ["tests/verify_camry_8965F3307000_command_cone_ingress.py"]
 oracle = "generated_self_check"
 paths = [
-  "data/generated/camry-8965F3307000/decompilations.jsonl",
-  "firmware/camry-8965F3307000/CodeFlash.bin",
-  "targets/camry-2026/raw-20260827/",
   "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/FINDINGS.md",
-  "docs/status/CORRECTIONS.md",
 ]
