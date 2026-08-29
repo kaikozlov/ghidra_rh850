@@ -388,7 +388,7 @@ remains optional corroboration, not the next steering blocker.
 **CORR-129/134 and VAR-081 supersede VAR-067's generic-candidate and state-only
 wording.** `0x08A B21` is Target Lateral ID and signed B18:B19 is its target angle at
 the exact downstream B6 factor. Manual ID0 fits measured `0x025` within 0.027% scale
-error in both drives; ID11 leads measured angle. The exact `{0,11,18}` census, current
+error in both drives; ID11 correlations shift forward toward future measured angle. The exact
 EMPS vocabulary, >99.8% `0x081` mirror, and `0x412/0x371`
 `10/10/0 -> 12/20/1 -> 14/30/3` state carrier independently identify the
 73.303384-s / 237,097-frame / zero-B6 interval as LTA/LCA active. Exact F33 still
@@ -400,14 +400,17 @@ sweep.
 **VAR-081/082/083/084/085 steering-command boundary — current highest priority:**
 recover the producer-side contract that converts the now-identified upstream `0x08A`
 request into exact-F33 protected B6. Evidence already closes the representation:
-B21=Target Lateral ID, B18:B19=signed target angle at `1024/17870`, and B26 low6 is the
-observed sequence. Evidence also closes the architectural boundary: exact F33 does not
+B21=Target Lateral ID, B18:B19=signed target angle at `1024/17870`, and B26 is a
+modulo-64 sequence (upper two bits never observed nonzero, so a 6-bit field boundary is
+an encoding assumption). Every retained `0x08A` frame is on the Bus-4 capture; the
+producer is unknown. Evidence also closes the architectural boundary: exact F33 does not
 accept `0x08A`; Brake/EPS-side B6 remains protected ingress.
 
 Required next work is narrowly the `0x08A` integrity/authentication trailer, source
-ownership, Bus-1/upstream-to-B6 value transformation, SecOC signer/freshness owner,
-suppression/fallback behavior, and arbitration with other lateral requesters. The
-VAR-082 broad field census, VAR-083 downstream current join, and VAR-084/085 hidden
+ownership, producer-side path and value transformation into protected B6, SecOC
+signer/freshness owner, suppression/fallback behavior, and arbitration with other
+lateral requesters. The VAR-082 broad field census, VAR-083 downstream current join, and
+VAR-084/085 hidden
 STORE/DMA audits remain valid closures; do not repeat them or continue searching inside
 F33 for an external `0x08A` path. Do not send `0x08A` to EPS and do not enable the stale
 bus-0 B6 development path merely because either payload can be packed. Passive parsing

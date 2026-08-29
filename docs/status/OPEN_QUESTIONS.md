@@ -1069,17 +1069,24 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 - **OQ-054 — Authenticate and transform the upstream Camry lateral request into exact-F33 ingress.** VAR-081/CORR-134 resolve the former hidden-authority contradiction:
   `0x08A/32` B21 is Target Lateral ID and signed big-endian B18:B19 is its target angle
   at exact F33's protected-B6 factor `1024/17870`. In manual ID0 it tracks measured
-  `0x025` with less than 0.027% fitted-scale error in both drives; in ID11 it leads
-  measured angle. The retained ID11 intervals still contain zero B6 on every captured
+  `0x025` with less than 0.027% fitted-scale error in both drives; in ID11 its
+  correlation shifts forward toward future measured angle (a shape change, not an exact
+  causal lead). The retained ID11 intervals still contain zero B6 on every captured
   bus, and exact F33 still excludes `0x08A` from its 43 normal-Rx descriptors.
 
-  Current topology supplies the route boundary: Front Camera is on Toyota Bus 1;
-  Brake/EPS are on Bus 4; exact F33 accepts protected B6 from the Brake control domain.
-  Therefore `0x08A` is an upstream request representation, not a Panda-bus substitute
-  for B6. The remaining steering blocker is now concrete: recover `0x08A`'s
-  integrity/authentication trailer and the Bus-1/upstream-to-B6 transformation, signer,
-  freshness, suppression/fallback, and arbitration semantics. Do not send `0x08A` to
-  EPS or revive the bus-0 B6 development sender until that ownership path is proved.
+  Observed placement and encoding caveats: every retained `0x08A` frame is on the
+  Bus-4 Brake/EPS capture itself (Panda bus 0: 44,614 / relay mirror bus 2: 44,617 /
+  bus 1: zero); Front Camera is on Toyota Bus 1 and exact F33 accepts protected B6 from
+  the Brake control domain. The producer of the observed Bus-4 `0x08A` is unknown — it
+  must not be labeled a Bus-1 camera frame. B21/B26 upper two bits are zero in all
+  89,231 retained frames while the current GTS+ Target Lateral ID diagnostic field is
+  8-bit, so a 6-bit field boundary is an encoding assumption. Therefore `0x08A` is an
+  upstream request representation, not a Panda-bus substitute for B6. The remaining
+  steering blocker is now concrete: recover `0x08A`'s producer, its
+  integrity/authentication trailer, and the producer-side path/transform into protected
+  B6, plus signer, freshness, suppression/fallback, and arbitration semantics. Do not
+  send `0x08A` to EPS or revive the bus-0 B6 development sender until that ownership
+  path is proved.
 
   VAR-082/083/084/085 remain useful negative and downstream closures, but their former
   instruction to continue searching inside F33 upstream of `CC50/CC62` is superseded by
