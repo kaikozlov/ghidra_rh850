@@ -957,6 +957,16 @@ paths = [
   "docs/variants/camry-2026-live-baseline.md",
   "docs/status/PRIORITIES.md",
 ]
+[suite.camry_2026_tss3_request_capture]
+tests = ["tests/verify_camry_tss3_request_capture.py"]
+oracle = "generated_self_check"
+paths = [
+  "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "targets/camry-2026/README.md",
+]
 [suite.camry_8965f3307000_codeflash]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "codeflash"]

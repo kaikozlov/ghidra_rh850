@@ -256,9 +256,11 @@ high-value evidence is **target-native dynamic/firmware correlation**. Exact Cam
 firmware acquisition is already deterministically bounded by VAR-069: `0x7B0`, F181
 `F152633K0000`, assembly `8954147040`, zero local 07B0 CUWs, and a Toyota/TIS exact-VIN
 ECU-supply-change query as the only provenance-safe external route. VAR-070 already rejects
-`0x107E` live on this Camry. Poll the newly identified Brake `0x7B0` `22 10 A1..A4`
-(currently unmeasured for live support) together with FRC `0x792` `22 1B 03..1B 07` during
-stock DRCC and synchronize those values with all-bus CAN plus Operation FFD. That can close
+`0x107E` live on this Camry. The synchronized read-only poll itself is now turnkey
+(VAR-086): run `tools/camry_tss3_request_capture.py --execute` during stock DRCC to poll
+Brake `0x7B0` `22 10 A1..A4` (currently unmeasured for live support) together with FRC
+`0x792` `22 1B 03..1B 07` with all-bus CAN retained, then summarize with
+`tools/analyze_camry_tss3_request_capture.py`; add Operation FFD alongside. That can close
 the vehicle-network frame, transformation, cadence, arbitration executor, SecOC/integrity owner
 and suppression/fallback point. Separately, TMS-086 closes **generic real-TSE framing validation** with four public legacy
 Toyota Techstream specimens: the current-template header family, 12-byte-key/DWORD FAT and

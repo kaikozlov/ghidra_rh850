@@ -3192,6 +3192,13 @@ longitudinal oracle is Brake `0x7B0` RDBI `22 10 A1`..`22 10 A4` (live support c
 **unmeasured**), synchronized with FRC `0x792` `0x1B03`..`0x1B07`, stock DRCC state,
 Operation FFD and all-bus capture.
 
+That synchronized read-only oracle now has turnkey acquisition tooling (VAR-086):
+`tools/camry_tss3_request_capture.py` polls all nine pinned reads on one clock with
+registry-driven decoding and passive all-bus capture, and
+`tools/analyze_camry_tss3_request_capture.py` summarizes the artifact; the live run
+itself is the only remaining step. Canonical tooling narrative:
+[../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §37.
+
 **The TSE/GTSE saved-session layer is now structurally recovered.** Current
 `GTS+ TSEConverter` is **01.02.002** and selects `180_Template.csv`; the shipped 173 and
 180 templates are byte-identical. Toyota's template is a 12,850-row binary-layout grammar
