@@ -9,6 +9,8 @@ import hashlib
 import json
 from array import array
 from collections import Counter, defaultdict
+import math
+import statistics
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -19,6 +21,7 @@ SOURCES = {
 }
 REGISTRY = REPO / "data/generated/gtsplus_2026" / "toyota_diag_registry_camry_2026.json"
 F33_INGRESS = REPO / "data/generated/camry_8965F3307000_external_lateral_ingress.json"
+F33_STATIC = REPO / "data/generated/camry_8965F3307000_codeflash.json"
 
 BUTTONS = {
   "MAIN": lambda d: bool(d[7] & 0x04),
@@ -147,6 +150,73 @@ def counter_rows(counter: Counter, names: tuple[str, ...]) -> list[dict]:
     rows.append(row)
   return rows
 
+def signed(value: int, bits: int) -> int:
+  sign = 1 << (bits - 1)
+  return value - (1 << bits) if value & sign else value
+
+
+def steering_angle_025(data: bytes) -> float:
+  coarse = signed(((data[0] & 0x0F) << 8) | data[1], 12)
+  fraction = signed(data[4] >> 4, 4)
+  return coarse * 1.5 + fraction * 0.1
+
+
+def pearson(samples: list[tuple[int, float]]) -> float | None:
+  if len(samples) < 2:
+    return None
+  xs = [x for x, _y in samples]
+  ys = [y for _x, y in samples]
+  mean_x = statistics.fmean(xs)
+  mean_y = statistics.fmean(ys)
+  numerator = sum((x - mean_x) * (y - mean_y) for x, y in samples)
+  denominator = math.sqrt(sum((x - mean_x) ** 2 for x in xs) * sum((y - mean_y) ** 2 for y in ys))
+  return numerator / denominator if denominator else None
+
+
+def target_angle_fit(a8, a25, state: int) -> dict:
+  angle_by_seg = defaultdict(list)
+  for t, seg, data in a25:
+    angle_by_seg[seg].append((t, steering_angle_025(data)))
+  angle_times = {seg: [row[0] for row in rows] for seg, rows in angle_by_seg.items()}
+
+  def joined(lag_ms: int) -> list[tuple[int, float]]:
+    result = []
+    offset = lag_ms * 1_000_000
+    for t, seg, data in a8:
+      if data[21] != state or seg not in angle_by_seg:
+        continue
+      rows = angle_by_seg[seg]
+      times = angle_times[seg]
+      target = t + offset
+      index = bisect.bisect_left(times, target)
+      candidates = [i for i in (index - 1, index) if 0 <= i < len(rows)]
+      if not candidates:
+        continue
+      nearest = min(candidates, key=lambda i: abs(times[i] - target))
+      if abs(times[nearest] - target) <= 20_000_000:
+        result.append((int.from_bytes(data[18:20], "big", signed=True), rows[nearest][1]))
+    return result
+
+  sweep = [(lag_ms, pearson(joined(lag_ms))) for lag_ms in range(-500, 501, 25)]
+  best_lag_ms, best_r = max(sweep, key=lambda row: abs(row[1] or 0.0))
+  samples = joined(best_lag_ms)
+  xs = [x for x, _y in samples]
+  ys = [y for _x, y in samples]
+  mean_x = statistics.fmean(xs)
+  mean_y = statistics.fmean(ys)
+  denominator = sum((x - mean_x) ** 2 for x in xs)
+  slope = sum((x - mean_x) * (y - mean_y) for x, y in samples) / denominator
+  return {
+    "state": state,
+    "sample_count": len(samples),
+    "best_lag_ms": best_lag_ms,
+    "pearson_r": round(best_r, 4),
+    "raw_range": [min(xs), max(xs)],
+    "steering_angle_deg_range": [round(min(ys), 1), round(max(ys), 1)],
+    "fit_deg_per_raw_count": round(slope, 8),
+    "fit_intercept_deg": round(mean_y - slope * mean_x, 4),
+  }
+
 
 def analyze_drive(path: Path) -> dict:
   streams = defaultdict(list)
@@ -167,13 +237,14 @@ def analyze_drive(path: Path) -> dict:
       frame_count += 1
       if addr == 0x0B6:
         b6_times.append(t)
-      if bus == 0 and addr in (0x081, 0x08A, 0x0FE, 0x371, 0x412):
+      if bus == 0 and addr in (0x025, 0x081, 0x08A, 0x0FE, 0x371, 0x412):
         streams[addr].append((t, seg, bytes.fromhex(data_hex)))
 
   a8 = streams[0x08A]
   a81 = streams[0x081]
   a371 = streams[0x371]
   a412 = streams[0x412]
+  a25 = streams[0x025]
   buttons = short_button_events(streams[0x0FE], bases)
   intervals = b21_intervals(a8)
 
@@ -253,6 +324,7 @@ def analyze_drive(path: Path) -> dict:
   b21_11 = [d for _t, _s, d in a8 if d[21] == 11]
   b21_18 = [d for _t, _s, d in a8 if d[21] == 18]
   mirror_matches = sum(count for (a, b), count in mirror.items() if a == b)
+  target_angle_states = {str(state): target_angle_fit(a8, a25, state) for state in (0, 11, 18)}
   return {
     "source": {
       "path": rel(path),
@@ -275,6 +347,13 @@ def analyze_drive(path: Path) -> dict:
       },
       "transition_timeline": transition_rows(a8, lambda d: [d[3], d[21], d[23], d[24]], bases),
       "b21_11_intervals": interval_rows,
+    },
+    "0x08A_b18_b19_target_angle": {
+      "wire": "signed big-endian B18:B19",
+      "measured_reference": "0x025 steering angle = signed12(B0[3:0]:B1)*1.5 deg + signed4(B4[7:4])*0.1 deg",
+      "join": "same-segment nearest 0x025 within 20 ms after shifting 0x08A by each candidate lag; peak absolute Pearson r over -500..+500 ms in 25-ms steps",
+      "lag_sign": "positive means 0x08A leads the later measured steering angle",
+      "states": target_angle_states,
     },
     "0x081_b13_mirror": {
       "method": "same-segment nearest 0x081/32 frame for each 0x08A/32 frame, absolute delta <=25 ms",
@@ -325,6 +404,9 @@ def build() -> dict:
   indicator = next(row for row in frc["active_tests"] if row["name"] == "LTA Indicator 1")
   ingress = json.loads(F33_INGRESS.read_text())
   accepted = [row["can_id"] for row in ingress["normal_rx"]["accepted"]]
+  f33_static = json.loads(F33_STATIC.read_text())
+  f33_scale = f33_static["b6_steering_command"]["controller_equivalent_scale"]["deg_per_b6_count"]
+  target_angle = next(row for row in emps["dids"]["0x1CEE"] if row["name"] == "Target Steering Angle After Output Compensation")
   combined_intervals = [
     interval
     for drive in drives.values()
@@ -339,6 +421,20 @@ def build() -> dict:
       "b21_11_duration_s": round(sum(row["duration_s"] for row in combined_intervals), 6),
       "b21_11_incoming_frame_count_all_buses": sum(row["incoming_frame_count_all_buses"] for row in combined_intervals),
       "b6_during_entire_b21_11_intervals_all_buses_any_dlc": sum(row["b6_count_all_buses_any_dlc"] for row in combined_intervals),
+      "0x08A_target_angle": {
+        "wire": "B18:B19 signed big-endian",
+        "manual_state_fit_by_drive": {
+          name: drive["0x08A_b18_b19_target_angle"]["states"]["0"] for name, drive in drives.items()
+        },
+        "lta_lca_state_fit_by_drive": {
+          name: drive["0x08A_b18_b19_target_angle"]["states"]["11"] for name, drive in drives.items()
+        },
+        "exact_f33_b6_deg_per_count": f33_scale,
+        "manual_fit_scale_error_percent_by_drive": {
+          name: round(abs(drive["0x08A_b18_b19_target_angle"]["states"]["0"]["fit_deg_per_raw_count"] / f33_scale - 1) * 100, 6)
+          for name, drive in drives.items()
+        },
+      },
     },
     "current_gtsplus_join": {
       "source": {"path": rel(REGISTRY), "size": REGISTRY.stat().st_size, "sha256": sha256(REGISTRY)},
@@ -351,6 +447,14 @@ def build() -> dict:
         "bit_end": target_lateral["bit_end"],
         "selected_dictionary": {key: target_lateral["patterns"][key] for key in ("0", "11", "18")},
         "dictionary": target_lateral["patterns"],
+        "source_ddb_sha256": registry["source_identity"]["gtsplus/NA/DB/Gen/EMPS_P5.ddb"]["sha256"],
+      },
+      "target_steering_angle_after_output_compensation": {
+        "did": "0x1CEE",
+        "monitor_key": target_angle["monitor_key"],
+        "bit_start": target_angle["bit_start"],
+        "bit_end": target_angle["bit_end"],
+        "name": target_angle["name"],
         "source_ddb_sha256": registry["source_identity"]["gtsplus/NA/DB/Gen/EMPS_P5.ddb"]["sha256"],
       },
       "frc_lta_indicator_1": {
@@ -372,8 +476,9 @@ def build() -> dict:
       "interpretation": "The three correlated messages are state/display-plane evidence, not exact-F33 EPS ingress.",
     },
     "interpretation": {
-      "identification": "Bus-0 0x08A B21=11 is strongly identified as LTA/LCA active by the exact current-GTS+ numeric dictionary joined to repeated cruise-distinct dynamic state, the 0x081 mirror, and the 0x371/0x412 three-state carrier.",
-      "proof_boundary": "This is a strong cross-domain numeric+dynamic join, not target-native byte-exact OEM producer-wire proof: the current 0x08A producer mapping is unavailable and exact F33 receives none of 0x08A/0x371/0x412.",
+      "identification": "Bus-0 0x08A B21 is Target Lateral ID and B18:B19 is the upstream target-steering-angle quantity. In manual ID0, B18:B19 tracks measured 0x025 angle in both drives at the exact F33 B6 controller-equivalent scale; in ID11 LTA/LCA the field leads the later measured angle in both drives.",
+      "route_boundary": "Current GTS+ places the Front Camera on Toyota Bus 1 and EPS/Brake on Bus 4. Exact F33 receives protected B6 but not 0x08A, so 0x08A is the camera-side upstream command/state carrier and B6 is the downstream EPS ingress; they are not interchangeable Panda-bus messages.",
+      "proof_boundary": "The field identity is a recovered cross-domain join: GTS+ supplies Target Lateral ID and Target Steering Angle After Output Compensation vocabulary, the captures supply state-dependent lead/lag and scale, and exact F33 supplies the matching downstream B6 scale. The 0x08A authentication/trailer and the Bus-1-to-Bus-4 transformation remain unresolved.",
       "historical_labels": "Historical Toyota names LTA_RELATED for 0x371 and LKAS_HUD for 0x412 are corroboration only; no historical field layout is transferred.",
       "button_boundary": "No physical LTA-button carrier is recovered. The decoded 0x0FE pulses are retained only as the already-validated cruise buttons.",
       "production_output_authorized": False,

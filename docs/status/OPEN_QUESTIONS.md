@@ -1066,48 +1066,29 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.
 
 
-- **OQ-054 — exact-F33 stock-LTA authority into the shared `CC50/CC62` actuation funnel.**
-  This is the current steering-command blocker and should not be reopened as a broad CAN
-  search. VAR-081 strongly identifies **73.303384 s** of retained factory LTA/LCA-active
-  operation on the relay-correct Toyota Bus-4 Brake/EPS network with **zero B6**; the
-  operator directly observed factory LTA physically steering. VAR-082 then scans every
-  sufficiently periodic Bus-4 ID/DLC field family and finds zero external field that
-  reproducibly leads the EPS motor/steering response. VAR-083 closes the downstream exact
-  F33 current-control convergence instead of leaving it hypothetical:
-  `CC50 -> D042C/CC62 -> D042C/CC66 -> D047C/CC64 -> AC54/EE40C -> 6AF4 ->
-  6E0A -> 6DEC -> 6DC8/6DD6 -> 38162`. `AC56/EE40A/6772/1C02` is the diagnostic
-  mirror of pre-slew `CC62`; it is not the motor-driving sibling. No second additive
-  lateral command is recovered downstream of `CC50`.
+- **OQ-054 — Authenticate and transform the upstream Camry lateral request into exact-F33 ingress.** VAR-081/CORR-134 resolve the former hidden-authority contradiction:
+  `0x08A/32` B21 is Target Lateral ID and signed big-endian B18:B19 is its target angle
+  at exact F33's protected-B6 factor `1024/17870`. In manual ID0 it tracks measured
+  `0x025` with less than 0.027% fitted-scale error in both drives; in ID11 it leads
+  measured angle. The retained ID11 intervals still contain zero B6 on every captured
+  bus, and exact F33 still excludes `0x08A` from its 43 normal-Rx descriptors.
 
-  The contradiction is therefore upstream: **what state/value gives `CC50/CC62` stock-LTA
-  lane authority while B6 is absent, and how would a B6 request arbitrate with it?** The
-  B6-inactive `D0218` value terms are already semantically bounded to torque/speed/angle
-  feedback, ROM/internal aggregation, and return/dither families; the ordinary `C28FC/
-  C2B64` selector is ineffective for the retained route because zero sig160 can reach only
-  equivalent selector 0/2 banks. Do not re-derive those branches unless new evidence
-  falsifies their pinned tests.
+  Current topology supplies the route boundary: Front Camera is on Toyota Bus 1;
+  Brake/EPS are on Bus 4; exact F33 accepts protected B6 from the Brake control domain.
+  Therefore `0x08A` is an upstream request representation, not a Panda-bus substitute
+  for B6. The remaining steering blocker is now concrete: recover `0x08A`'s
+  integrity/authentication trailer and the Bus-1/upstream-to-B6 transformation, signer,
+  freshness, suppression/fallback, and arbitration semantics. Do not send `0x08A` to
+  EPS or revive the bus-0 B6 development sender until that ownership path is proved.
 
-  VAR-084 attacks the main static false-negative classes and finds no concrete alternate
-  producer: no stored CodeFlash/live-RAM pointer into the widened command/motor ROI, nine
-  non-default unrecovered ISR entries delegate into recovered timer/serial/acquisition code
-  without a transitive ROI writer, fixed DMAC descriptors route to known GlobalRAM rings
-  rather than LocalRAM, fixed callback cells install CodeFlash targets, and the exact 47
-  RSCFD rules contain no hidden normal-CAN route. **VAR-085 now closes both residual static
-  escape hatches.** E1's HighFunction STORE resolver scans 13,493 STOREs and reduces 100
-  coarse command-cone candidates / 46 functions to zero after exact index/config bounds.
-  E2's all-channel destination-SFR scan leaves only control-register false positives; the
-  only recovered runtime destination updater is `60A6A`, whose four callers use seven fixed
-  CodeFlash descriptor families / 22 rows / 44 destination fields, with zero LocalRAM
-  destinations.
-
-  Therefore **do not repeat E1/E2, broad CAN mining, pointer-table mining, or another DMA
-  descriptor sweep without new falsifying evidence.** Continue upstream from `CC50` through
-  its remaining selectors/gates/value producers and recover the state transition that gives
-  the B6-independent path lane authority during factory LTA. In parallel, characterize how
-  a valid injected B6 request arbitrates with that stock authority. Hold the physical
-  factory-LTA observation fixed; do not resolve the contradiction by relabeling it as generic
-  assist. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
-  §§20,33–36; VAR-081/082/083/084/085; CORR-129/130.
+  VAR-082/083/084/085 remain useful negative and downstream closures, but their former
+  instruction to continue searching inside F33 upstream of `CC50/CC62` is superseded by
+  this network-boundary evidence. Do not repeat the broad CAN, computed-STORE, pointer,
+  ISR, or DMA censuses. The next capture/recovery target is the producer-side transform
+  and authentication state synchronized with the known `0x08A` sequence and target
+  angle. Canonical:
+  [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
+  §§20,33–36; VAR-081/082/083/084/085; CORR-129/130/134.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

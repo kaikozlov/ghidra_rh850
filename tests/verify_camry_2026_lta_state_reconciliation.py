@@ -171,6 +171,25 @@ check("B6 remains zero on every bus/DLC throughout both complete Class-L interva
       combined["b6_during_entire_b21_11_intervals_all_buses_any_dlc"] == 0 and
       a_int["b6_count_all_buses_any_dlc"] == b_int["b6_count_all_buses_any_dlc"] == 0)
 
+print("\n== 0x08A upstream target-steering-angle field ==")
+target = combined["0x08A_target_angle"]
+check("manual B18:B19 fit reproduces exact F33 B6 scale in both drives",
+      target["wire"] == "B18:B19 signed big-endian" and
+      target["exact_f33_b6_deg_per_count"] == 0.05730274202574147 and
+      target["manual_fit_scale_error_percent_by_drive"] == {"drive_a": 0.017046, "drive_b": 0.026993})
+manual_a = target["manual_state_fit_by_drive"]["drive_a"]
+manual_b = target["manual_state_fit_by_drive"]["drive_b"]
+check("manual ID0 B18:B19 is a 25-ms-lagging measured-angle-scale echo",
+      (manual_a["best_lag_ms"], manual_a["pearson_r"], manual_a["fit_deg_per_raw_count"]) ==
+      (-25, 0.9987, 0.05731251) and
+      (manual_b["best_lag_ms"], manual_b["pearson_r"], manual_b["fit_deg_per_raw_count"]) ==
+      (-25, 1.0, 0.05731821))
+lta_a = target["lta_lca_state_fit_by_drive"]["drive_a"]
+lta_b = target["lta_lca_state_fit_by_drive"]["drive_b"]
+check("LTA/LCA ID11 changes B18:B19 into a leading angle quantity in both drives",
+      (lta_a["best_lag_ms"], lta_a["pearson_r"], lta_a["raw_range"]) == (50, 0.8755, [-367, 63]) and
+      (lta_b["best_lag_ms"], lta_b["pearson_r"], lta_b["raw_range"]) == (225, 0.4467, [-1, 56]))
+
 print("\n== current GTS+ and exact-F33 boundaries ==")
 gts = art["current_gtsplus_join"]
 check("current registry identity and exact EMPS source DDB pinned",
@@ -179,6 +198,15 @@ check("current registry identity and exact EMPS source DDB pinned",
 check("Target Lateral ID exact 0/11/18 dictionary",
       gts["target_lateral_id"]["selected_dictionary"] == {
         "0": "No Request (Manual Operation)", "11": "LTA/LCA", "18": "SDG"})
+check("GTS+ supplies the matching target-angle output-compensation vocabulary",
+      gts["target_steering_angle_after_output_compensation"] == {
+        "did": "0x1CEE",
+        "monitor_key": 2071,
+        "bit_start": 16,
+        "bit_end": 31,
+        "name": "Target Steering Angle After Output Compensation",
+        "source_ddb_sha256": "fb7933228bc2f1c5788d1f896c008c5c590ede45ec2e650c07123f94764e329e",
+      })
 indicator = gts["frc_lta_indicator_1"]
 check("LTA Indicator 1 retained only as fixed FRC routine/display concept",
       (indicator["service"], indicator["routine_id"], indicator["start_static"], indicator["execution"]) ==
@@ -197,9 +225,10 @@ check("0x08A/0x371/0x412 are absent from exact-F33 ingress",
       f33["state_carriers_absent"] == {"0x08A": True, "0x371": True, "0x412": True})
 
 interpretation = art["interpretation"]
-check("conclusion is strong numeric+dynamic join, not byte-exact wire proof",
-      "strongly identified as LTA/LCA active" in interpretation["identification"] and
-      "not target-native byte-exact OEM producer-wire proof" in interpretation["proof_boundary"])
+check("conclusion identifies upstream angle while keeping route/authentication open",
+      "B18:B19 is the upstream target-steering-angle quantity" in interpretation["identification"] and
+      "camera-side upstream command/state carrier" in interpretation["route_boundary"] and
+      "authentication/trailer" in interpretation["proof_boundary"])
 check("historical layouts and physical LTA button remain untransferred",
       "corroboration only" in interpretation["historical_labels"] and
       "No physical LTA-button carrier is recovered" in interpretation["button_boundary"] and

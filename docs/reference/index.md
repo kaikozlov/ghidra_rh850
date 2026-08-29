@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 385 · Corrections: 133 · Open questions: 54 · Docs: 111 · Suites: 209
+Findings: 385 · Corrections: 134 · Open questions: 54 · Docs: 111 · Suites: 209
 
 ## Reading this index
 
@@ -400,9 +400,9 @@ Findings: 385 · Corrections: 133 · Open questions: 54 · Docs: 111 · Suites: 
 | <a id="finding-var-080"></a>**VAR-080** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000_internal_assist_oracles.py` | — |
 | <a id="finding-var-081"></a>**VAR-081** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_2026_lta_state_reconciliation.py` | OQ-054 |
 | <a id="finding-var-082"></a>**VAR-082** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_2026_bus4_field_leadlag.py` | OQ-054 |
-| <a id="finding-var-083"></a>**VAR-083** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_8965F3307000_internal_assist_oracles.py` | OQ-054 |
-| <a id="finding-var-084"></a>**VAR-084** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_8965F3307000_d5_snapshot_provenance.py`, `tests/verify_camry_8965F3307000.py`, `tests/verify_camry_8965F3307000_hidden_ingress_residuals.py` | OQ-054 |
-| <a id="finding-var-085"></a>**VAR-085** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000_hidden_ingress_residuals.py` | OQ-054 |
+| <a id="finding-var-083"></a>**VAR-083** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_8965F3307000_internal_assist_oracles.py` | — |
+| <a id="finding-var-084"></a>**VAR-084** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_8965F3307000_d5_snapshot_provenance.py`, `tests/verify_camry_8965F3307000.py`, `tests/verify_camry_8965F3307000_hidden_ingress_residuals.py` | — |
+| <a id="finding-var-085"></a>**VAR-085** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000_hidden_ingress_residuals.py` | — |
 | <a id="finding-var-086"></a>**VAR-086** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [techstream](../tooling/techstream.md) | `tests/verify_camry_tss3_request_capture.py` | OQ-052 |
 
 ## Open-questions index
@@ -462,7 +462,7 @@ Findings: 385 · Corrections: 133 · Open questions: 54 · Docs: 111 · Suites: 
 | <a id="open-question-oq-051"></a>**OQ-051** | Cross-calibration structural triage of future P1M-E images | Tooling | MEM-SAFE-001 |
 | <a id="open-question-oq-052"></a>**OQ-052** | True-TSS3 longitudinal wire/auth/arbitration execution contract | Tooling | TMS-085, TMS-079, VAR-069, VAR-070, VAR-086, TMS-087 |
 | <a id="open-question-oq-053"></a>**OQ-053** | F33 non-disruptive application-mode RAM execution pivot | Tooling | VAR-060, CORR-124, CORR-123 |
-| <a id="open-question-oq-054"></a>**OQ-054** | exact-F33 stock-LTA authority into the shared `CC50/CC62` actuation funnel | Tooling | VAR-081, VAR-082, VAR-083, VAR-084, VAR-085, CORR-129, CORR-092 |
+| <a id="open-question-oq-054"></a>**OQ-054** | Authenticate and transform the upstream Camry lateral request into exact-F33 ingress | Tooling | VAR-081, CORR-134, VAR-082, CORR-129, CORR-092 |
 
 ## Correction index
 
@@ -601,6 +601,7 @@ Findings: 385 · Corrections: 133 · Open questions: 54 · Docs: 111 · Suites: 
 | <a id="correction-corr-131"></a>**CORR-131** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md), [docs/status/PRIORITIES.md](../status/PRIORITIES.md) | yes |
 | <a id="correction-corr-132"></a>**CORR-132** | [docs/tooling/cuwplus-body-recovery.md](../tooling/cuwplus-body-recovery.md) | yes |
 | <a id="correction-corr-133"></a>**CORR-133** | [docs/tooling/gtsplus-tse-gtse-saved-session.md](../tooling/gtsplus-tse-gtse-saved-session.md) | yes |
+| <a id="correction-corr-134"></a>**CORR-134** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 
 ## Document registry
 
@@ -757,7 +758,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/camry_2026_relay_correct_capture.json` | camry_2026, camry_2026_bus1_field_leadlag, camry_2026_bus4_field_leadlag, camry_8965f3307000_external_lateral_ingress | — |
 | `data/generated/camry_2026_tsk_baseline.json` | camry_2026 | — |
 | `data/generated/camry_8965F3307000_application_ram_loader_assessment.json` | camry_8965f3307000_application_ram_loader, camry_8965f3307000_hidden_ingress_residuals | — |
-| `data/generated/camry_8965F3307000_codeflash.json` | camry_8965f3307000_codeflash, camry_8965f3307000_lateral_static, camry_8965f3307000_command5_runtime_carrier, camry_8965f3307000_external_lateral_ingress | — |
+| `data/generated/camry_8965F3307000_codeflash.json` | camry_2026_lta_state_reconciliation, camry_8965f3307000_codeflash, camry_8965f3307000_lateral_static, camry_8965f3307000_command5_runtime_carrier, camry_8965f3307000_external_lateral_ingress | — |
 | `data/generated/camry_8965F3307000_command5_runtime_carrier.json` | camry_8965f3307000_lateral_static, camry_8965f3307000_command5_runtime_carrier | — |
 | `data/generated/camry_8965F3307000_command_cone_ingress.json` | camry_2026_baseline_selector, camry_8965f3307000_command_cone_ingress | — |
 | `data/generated/camry_8965F3307000_computed_store_target_census.json` | camry_8965f3307000_hidden_ingress_residuals | — |

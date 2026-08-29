@@ -3230,3 +3230,23 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Version boundary:** current recovered `TSEConverter` first invokes native `GFCConvertOldTSEToLatestTSE`, writes `_NEW.TSE`, and only then applies `BinaryRead` with the configured current template. The legacy bytes therefore prove stable format lineage and the old-file conversion boundary; they do not prove direct `180_Template.csv` compatibility.
 - **Correct remaining blocker:** only a **true-TSS3** raw TSE carrying PCS Operation/Image FFD remains source-data blocked. Generic real-TSE header/FAT/position-record validation is now closed by TMS-086.
 - **Canonical:** TMS-086; `data/external/public_techstream_tse_lineage.json`; `data/generated/gtsplus_2026/tse_managed_semantics.json`; `tests/verify_public_techstream_tse_lineage.py`; [../tooling/gtsplus-tse-gtse-saved-session.md](../tooling/gtsplus-tse-gtse-saved-session.md) §3.1.
+
+### CORR-134 — `0x08A` is an upstream lateral-request carrier, not state/display-only evidence
+
+- **Superseded framing:** VAR-081 and the Camry live baseline correctly identified
+  `0x08A B21=11` as LTA/LCA active, but concluded that `0x08A` supplied only
+  state/display-plane evidence and no steering-command wire.
+- **Exact correction:** signed big-endian B18:B19 uses exact F33's protected-B6
+  target-angle factor `1024/17870`. In manual ID0 it tracks measured `0x025` angle at
+  -25 ms in both drives with fitted-scale error below 0.027%; in ID11 it changes to a
+  leading target (+50 ms A, +225 ms B). Current GTS+ independently places Target
+  Steering Angle After Output Compensation next to Target Lateral ID.
+- **Preserved boundary:** exact F33 still does not accept `0x08A`; it accepts protected
+  B6 on the Brake/EPS network. `0x08A` is upstream representation, not a frame that can
+  be sent to EPS. Its producer, integrity/authentication trailer, upstream-to-B6
+  transformation, signer, freshness, and arbitration remain unrecovered. Steering
+  output remains unauthorized.
+- **Canonical:** VAR-081;
+  `data/generated/camry_2026_lta_state_reconciliation.json`;
+  `tests/verify_camry_2026_lta_state_reconciliation.py`;
+  [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §20.

@@ -1,5 +1,81 @@
 {
   "combined": {
+    "0x08A_target_angle": {
+      "exact_f33_b6_deg_per_count": 0.05730274202574147,
+      "lta_lca_state_fit_by_drive": {
+        "drive_a": {
+          "best_lag_ms": 50,
+          "fit_deg_per_raw_count": 0.07228228,
+          "fit_intercept_deg": 1.8627,
+          "pearson_r": 0.8755,
+          "raw_range": [
+            -367,
+            63
+          ],
+          "sample_count": 646,
+          "state": 11,
+          "steering_angle_deg_range": [
+            -31.4,
+            4.4
+          ]
+        },
+        "drive_b": {
+          "best_lag_ms": 225,
+          "fit_deg_per_raw_count": 0.02820223,
+          "fit_intercept_deg": 0.3166,
+          "pearson_r": 0.4467,
+          "raw_range": [
+            -1,
+            56
+          ],
+          "sample_count": 2279,
+          "state": 11,
+          "steering_angle_deg_range": [
+            -0.8,
+            4.8
+          ]
+        }
+      },
+      "manual_fit_scale_error_percent_by_drive": {
+        "drive_a": 0.017046,
+        "drive_b": 0.026993
+      },
+      "manual_state_fit_by_drive": {
+        "drive_a": {
+          "best_lag_ms": -25,
+          "fit_deg_per_raw_count": 0.05731251,
+          "fit_intercept_deg": 3.2765,
+          "pearson_r": 0.9987,
+          "raw_range": [
+            -8412,
+            8162
+          ],
+          "sample_count": 18771,
+          "state": 0,
+          "steering_angle_deg_range": [
+            -482.6,
+            467.0
+          ]
+        },
+        "drive_b": {
+          "best_lag_ms": -25,
+          "fit_deg_per_raw_count": 0.05731821,
+          "fit_intercept_deg": -0.325,
+          "pearson_r": 1.0,
+          "raw_range": [
+            -8460,
+            8151
+          ],
+          "sample_count": 20911,
+          "state": 0,
+          "steering_angle_deg_range": [
+            -485.9,
+            467.0
+          ]
+        }
+      },
+      "wire": "B18:B19 signed big-endian"
+    },
     "b21_11_duration_s": 73.303384,
     "b21_11_incoming_frame_count_all_buses": 237097,
     "b21_value_set_both_drives": [
@@ -70,6 +146,14 @@
         "11": "LTA/LCA",
         "18": "SDG"
       },
+      "source_ddb_sha256": "fb7933228bc2f1c5788d1f896c008c5c590ede45ec2e650c07123f94764e329e"
+    },
+    "target_steering_angle_after_output_compensation": {
+      "bit_end": 31,
+      "bit_start": 16,
+      "did": "0x1CEE",
+      "monitor_key": 2071,
+      "name": "Target Steering Angle After Output Compensation",
       "source_ddb_sha256": "fb7933228bc2f1c5788d1f896c008c5c590ede45ec2e650c07123f94764e329e"
     }
   },
@@ -168,6 +252,62 @@
           }
         ],
         "unpaired_0x08A_count": 136
+      },
+      "0x08A_b18_b19_target_angle": {
+        "join": "same-segment nearest 0x025 within 20 ms after shifting 0x08A by each candidate lag; peak absolute Pearson r over -500..+500 ms in 25-ms steps",
+        "lag_sign": "positive means 0x08A leads the later measured steering angle",
+        "measured_reference": "0x025 steering angle = signed12(B0[3:0]:B1)*1.5 deg + signed4(B4[7:4])*0.1 deg",
+        "states": {
+          "0": {
+            "best_lag_ms": -25,
+            "fit_deg_per_raw_count": 0.05731251,
+            "fit_intercept_deg": 3.2765,
+            "pearson_r": 0.9987,
+            "raw_range": [
+              -8412,
+              8162
+            ],
+            "sample_count": 18771,
+            "state": 0,
+            "steering_angle_deg_range": [
+              -482.6,
+              467.0
+            ]
+          },
+          "11": {
+            "best_lag_ms": 50,
+            "fit_deg_per_raw_count": 0.07228228,
+            "fit_intercept_deg": 1.8627,
+            "pearson_r": 0.8755,
+            "raw_range": [
+              -367,
+              63
+            ],
+            "sample_count": 646,
+            "state": 11,
+            "steering_angle_deg_range": [
+              -31.4,
+              4.4
+            ]
+          },
+          "18": {
+            "best_lag_ms": -250,
+            "fit_deg_per_raw_count": 0.05515363,
+            "fit_intercept_deg": -1.3707,
+            "pearson_r": 0.9324,
+            "raw_range": [
+              -339,
+              195
+            ],
+            "sample_count": 1092,
+            "state": 18,
+            "steering_angle_deg_range": [
+              -18.3,
+              9.8
+            ]
+          }
+        },
+        "wire": "signed big-endian B18:B19"
       },
       "0x08A_b21": {
         "b21_11_intervals": [
@@ -881,6 +1021,62 @@
           }
         ],
         "unpaired_0x08A_count": 0
+      },
+      "0x08A_b18_b19_target_angle": {
+        "join": "same-segment nearest 0x025 within 20 ms after shifting 0x08A by each candidate lag; peak absolute Pearson r over -500..+500 ms in 25-ms steps",
+        "lag_sign": "positive means 0x08A leads the later measured steering angle",
+        "measured_reference": "0x025 steering angle = signed12(B0[3:0]:B1)*1.5 deg + signed4(B4[7:4])*0.1 deg",
+        "states": {
+          "0": {
+            "best_lag_ms": -25,
+            "fit_deg_per_raw_count": 0.05731821,
+            "fit_intercept_deg": -0.325,
+            "pearson_r": 1.0,
+            "raw_range": [
+              -8460,
+              8151
+            ],
+            "sample_count": 20911,
+            "state": 0,
+            "steering_angle_deg_range": [
+              -485.9,
+              467.0
+            ]
+          },
+          "11": {
+            "best_lag_ms": 225,
+            "fit_deg_per_raw_count": 0.02820223,
+            "fit_intercept_deg": 0.3166,
+            "pearson_r": 0.4467,
+            "raw_range": [
+              -1,
+              56
+            ],
+            "sample_count": 2279,
+            "state": 11,
+            "steering_angle_deg_range": [
+              -0.8,
+              4.8
+            ]
+          },
+          "18": {
+            "best_lag_ms": -75,
+            "fit_deg_per_raw_count": 0.03745868,
+            "fit_intercept_deg": -2.4406,
+            "pearson_r": 0.769,
+            "raw_range": [
+              -209,
+              123
+            ],
+            "sample_count": 794,
+            "state": 18,
+            "steering_angle_deg_range": [
+              -11.1,
+              5.5
+            ]
+          }
+        },
+        "wire": "signed big-endian B18:B19"
       },
       "0x08A_b21": {
         "b21_11_intervals": [
@@ -1638,9 +1834,10 @@
   "interpretation": {
     "button_boundary": "No physical LTA-button carrier is recovered. The decoded 0x0FE pulses are retained only as the already-validated cruise buttons.",
     "historical_labels": "Historical Toyota names LTA_RELATED for 0x371 and LKAS_HUD for 0x412 are corroboration only; no historical field layout is transferred.",
-    "identification": "Bus-0 0x08A B21=11 is strongly identified as LTA/LCA active by the exact current-GTS+ numeric dictionary joined to repeated cruise-distinct dynamic state, the 0x081 mirror, and the 0x371/0x412 three-state carrier.",
+    "identification": "Bus-0 0x08A B21 is Target Lateral ID and B18:B19 is the upstream target-steering-angle quantity. In manual ID0, B18:B19 tracks measured 0x025 angle in both drives at the exact F33 B6 controller-equivalent scale; in ID11 LTA/LCA the field leads the later measured angle in both drives.",
     "production_output_authorized": false,
-    "proof_boundary": "This is a strong cross-domain numeric+dynamic join, not target-native byte-exact OEM producer-wire proof: the current 0x08A producer mapping is unavailable and exact F33 receives none of 0x08A/0x371/0x412."
+    "proof_boundary": "The field identity is a recovered cross-domain join: GTS+ supplies Target Lateral ID and Target Steering Angle After Output Compensation vocabulary, the captures supply state-dependent lead/lag and scale, and exact F33 supplies the matching downstream B6 scale. The 0x08A authentication/trailer and the Bus-1-to-Bus-4 transformation remain unresolved.",
+    "route_boundary": "Current GTS+ places the Front Camera on Toyota Bus 1 and EPS/Brake on Bus 4. Exact F33 receives protected B6 but not 0x08A, so 0x08A is the camera-side upstream command/state carrier and B6 is the downstream EPS ingress; they are not interchangeable Panda-bus messages."
   },
   "schema": "camry-2026-lta-state-reconciliation-v1"
 }
