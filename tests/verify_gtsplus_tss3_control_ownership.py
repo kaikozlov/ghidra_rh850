@@ -28,7 +28,7 @@ def main() -> int:
     stored = json.loads(ART.read_text(encoding="utf-8"))
     current = build()
     check("artifact regenerates from pinned current GTS+", stored == current)
-    check("schema", stored["schema"] == "gtsplus-tss3-control-ownership-surface-v1")
+    check("schema", stored["schema"] == "gtsplus-tss3-control-ownership-surface-v2")
 
     host = stored["recorder_hosting"]
     check(
@@ -173,6 +173,52 @@ def main() -> int:
         camry["already_tested_observers"]["did_107e_default"]["status"] == "negative_or_timeout"
         and camry["already_tested_observers"]["did_107e_extended"]["status"] == "negative_or_timeout"
         and camry["new_longitudinal_observers_10a1_10a4_live_support"] == "not_measured",
+    )
+
+    srp = stored["current_utility_srp_census"]
+    check(
+        "current GTS+ UtilityNeo CONF scripts decode under the pinned V18 AES-256-ECB key",
+        srp["srp_file_count"] == 18
+        and srp["func_ids"] == [
+            "ALM-01", "CSP-03", "CSP-05", "DCM-13", "DCM-33", "DSC-03", "ECD-43",
+            "ECD-45", "ECD-46", "EFI-39", "FHV-03", "LAMP-02", "LAMP-03", "MG-01",
+            "MM-37", "RCM-01", "SAS-01", "TVD-01",
+        ],
+    )
+    check(
+        "current utility frames carry no SecurityAccess/reflash service and no control/auth vocabulary",
+        srp["forbidden_service_bytes_present"] == []
+        and srp["control_security_vocabulary_hits"] == [],
+    )
+
+    graph = stored["labeled_observer_dtc_graph"]["databases"]
+    check(
+        "FRC carries no 'Toyota Safety Sense'-named ordinary monitor",
+        graph["FRC_P5"]["safety_sense_named_monitors"] == [],
+    )
+    check(
+        "brake domain carries no camera/recognition/radar-named monitor or DTC",
+        all(
+            graph[db]["camera_named_monitors"] == []
+            and graph[db]["camera_radar_tss_named_dtcs"] == []
+            for db in ("ABS_P5", "Brk_Bst_P5", "EPB_P5")
+        ),
+    )
+    check(
+        "brake request_or_arbitration_output monitors are exactly the four TSS request DIDs",
+        all(
+            len(graph[db]["request_or_arbitration_output_named_monitors"]) == 4
+            for db in ("ABS_P5", "Brk_Bst_P5", "EPB_P5")
+        ),
+    )
+    check(
+        "the brake side's only ADAS-adjacent communication partner is the ADS Interface Module",
+        stored["labeled_observer_dtc_graph"]["ads_interface_partner_on_brake"] is True
+        and "Front Recognition Camera" not in " ".join(graph["ABS_P5"]["lost_communication_partners"]),
+    )
+    check(
+        "EPS retains the Image Processing Module A/B communication naming",
+        any("Image Processing Module" in name for name in graph["EMPS_P5"]["camera_radar_tss_named_dtcs"]),
     )
 
     specimens = stored["specimen_census"]

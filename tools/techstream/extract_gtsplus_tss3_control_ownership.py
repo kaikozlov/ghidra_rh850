@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import struct
 import sys
 from collections import Counter, defaultdict
@@ -30,11 +31,12 @@ from extract_gtsplus_p5_adas_p6_migration import rob_data_ids
 from ddb_strings import load_string_db
 from parse_ddb import DDBParser
 from techstream_paths import gts_db_root, resolve_gts_root
+from decode_srp import decrypt_srp
+from ddb_semantics import dtc_rows
 
 REPO = Path(__file__).resolve().parents[2]
 DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/tss3_control_ownership_surface.json"
 REGIONS = ("NA", "EU", "JP")
-
 TSS3_RECORDER_BINDINGS = (
     (498, 233, "GetTSS3ImageFFDP5_DT.dll"),
     (498, 234, "GetTSS3OperationFFDP5_DT.dll"),
@@ -56,6 +58,40 @@ CROSSVEHICLE = REPO / "data/generated/gtsplus_2026/tss3_crossvehicle_surface.jso
 B6_SENDER_ATTRIBUTION = REPO / "data/generated/techstream_v18/tss3_b6_sender_attribution.json"
 CAMRY_BRAKE_ACQUISITION = REPO / "data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json"
 CAMRY_BRAKE_OBSERVERS = REPO / "data/generated/gtsplus_2026/camry_brake_observer_vocabulary.json"
+
+CROSS_ECU_DATABASES = (
+    ("FRC_P5", 498),
+    ("ABS_P5", 435),
+    ("Brk_Bst_P5", 466),
+    ("EPB_P5", 485),
+    ("EMPS_P5", 405),
+    ("EMPS2_P5", 499),
+)
+SAFETY_SENSE_NAME = ("toyota safety sense", "tss")
+CAMERA_NAME_TOKENS = ("camera", "recognition", "image", "monocular")
+RADAR_NAME_TOKENS = ("radar", "millimeter")
+REQUEST_OR_ARBITRATION_OUTPUT_TOKENS = (
+    "arbitrat",
+    "command value",
+    "final accel",
+    "final decel",
+    "selected accel",
+    "selected decel",
+    "request accel",
+    "request decel",
+)
+FORBIDDEN_SRP_SERVICES = ("27", "34", "36", "37")
+FORBIDDEN_SRP_VOCABULARY = (
+    "safety sense",
+    "arbitrat",
+    "lateral",
+    "longitudinal",
+    "secoc",
+    "securityaccess",
+    "seedkey",
+    "serviceauthkey",
+    "ecuauthkey",
+)
 
 
 def _u16(raw: bytes, off: int) -> int:
@@ -510,26 +546,130 @@ def specimen_census(root: Path) -> dict[str, Any]:
     }
 
 
+
+def current_utility_srp_census(root: Path) -> dict[str, Any]:
+    conf = root / "CONF"
+    files = sorted(conf.glob("*.srp"))
+    per_file = {}
+    service_bytes: set[str] = set()
+    func_ids: set[str] = set()
+    for path in files:
+        text = decrypt_srp(path)
+        ids = sorted(set(re.findall(r"<FUNCID>([^<]+)</FUNCID>", text)))
+        frames = re.findall(r"<FRAME[^>]*>([^<]*)</FRAME>", text)
+        bytes_in_file = sorted(
+            {
+                token
+                for frame in frames
+                for token in frame.replace("$", " ").replace(",", " ").split()
+                if re.fullmatch(r"[0-9A-Fa-f]{2}", token)
+            }
+        )
+        per_file[path.name] = {"func_ids": ids, "frame_service_bytes": bytes_in_file}
+        func_ids.update(ids)
+        service_bytes.update(bytes_in_file)
+    joined = "\n".join(decrypt_srp(path) for path in files).casefold()
+    vocabulary_hits = sorted(
+        token for token in FORBIDDEN_SRP_VOCABULARY if token in joined
+    )
+    return {
+        "conf_dir": "CONF",
+        "srp_file_count": len(files),
+        "srp_files": sorted(path.name for path in files),
+        "func_ids": sorted(func_ids),
+        "distinct_frame_service_bytes": sorted(service_bytes),
+        "forbidden_service_bytes_present": sorted(
+            set(FORBIDDEN_SRP_SERVICES) & service_bytes
+        ),
+        "control_security_vocabulary_hits": vocabulary_hits,
+        "boundary": (
+            "The current GTS+ UtilityNeo CONF scripts decode with the pinned V18 AES-256-ECB key and are "
+            "ordinary maintenance/utilities (alarm, lamp, DCM, SAS zero point, RCM, TVD). Their literal frame "
+            "corpus contains no SecurityAccess/reflash service and no TSS3 lateral/longitudinal/arbitration/SecOC "
+            "vocabulary, so current host utilities cannot distinguish arbitration execution or wire ownership "
+            "either. This is a literal decoded-script closure, not a claim about dynamically synthesized bytes."
+        ),
+    }
+
+
+def _name_hits(names: list[str], tokens: tuple[str, ...]) -> list[str]:
+    return sorted({name for name in names if any(token in name.casefold() for token in tokens)})
+
+
+def labeled_observer_dtc_graph(parser: DDBParser, root: Path) -> dict[str, Any]:
+    db_root = gts_db_root(root, "NA", "Gen")
+    strings = load_string_db(parser, db_root / "M_English.ddb")
+    databases = {}
+    for database, _category in CROSS_ECU_DATABASES:
+        db = parser.parse_ecu_db(db_root / f"{database}.ddb")
+        monitors = monitor_rows(db, strings, f"{database}.ddb")
+        names = [row.get("name") or "" for row in monitors]
+        dtcs = dtc_rows(parser, db, strings, f"{database}.ddb")
+        descriptions = [row.get("description") or "" for row in dtcs]
+        safety_sense = _name_hits(names, SAFETY_SENSE_NAME)
+        camera_named = _name_hits(names, CAMERA_NAME_TOKENS)
+        radar_named = _name_hits(names, RADAR_NAME_TOKENS)
+        request_or_output = _name_hits(names, REQUEST_OR_ARBITRATION_OUTPUT_TOKENS)
+        camera_dtcs = _name_hits(descriptions, CAMERA_NAME_TOKENS + RADAR_NAME_TOKENS + SAFETY_SENSE_NAME)
+        partners = sorted(
+            {
+                match.group(1).strip()
+                for description in descriptions
+                for match in (re.search(r"Lost Communication with ([^\(\"(]+)", description),)
+                if match
+            }
+        )
+        databases[database] = {
+            "monitor_count": len(monitors),
+            "dtc_count": len(dtcs),
+            "safety_sense_named_monitors": safety_sense,
+            "camera_named_monitors": camera_named,
+            "radar_named_monitors": radar_named,
+            "request_or_arbitration_output_named_monitors": request_or_output,
+            "camera_radar_tss_named_dtcs": camera_dtcs,
+            "lost_communication_partners": partners,
+        }
+    abs_partners = databases["ABS_P5"]["lost_communication_partners"]
+    return {
+        "region": "NA",
+        "databases": databases,
+        "ads_interface_partner_on_brake": "Automated Driving System Interface Module" in abs_partners,
+        "boundary": (
+            "The ordinary-diagnostic cross-ECU graph is closed. FRC_P5 carries no 'Toyota Safety Sense'-named "
+            "monitor (its request vocabulary is ISA-named, upper-limit only), and the brake domain (ABS/Brk_Bst/EPB) "
+            "carries no camera/recognition/radar-named monitor or DTC at all; its only ADAS-adjacent communication "
+            "partner is the 'Automated Driving System Interface Module', while EPS names Image Processing Modules "
+            "A/B. No generation-20 ECU exposes a final/selected/arbitrated acceleration output monitor; the only "
+            "named post-arbitration output remains the EPS 'Command Value Torque' lateral family. Therefore "
+            "neither candidate's diagnostic surface witnesses the arbitration result, and static diagnostics "
+            "cannot distinguish FRC-side from Brake-side arbitration execution."
+        ),
+    }
+
+
 def build() -> dict[str, Any]:
     root = resolve_gts_root()
     parser = DDBParser()
     return {
-        "schema": "gtsplus-tss3-control-ownership-surface-v1",
-        "title": "Current GTS+ TSS3 recorder hosting and longitudinal request ownership surface",
+        "schema": "gtsplus-tss3-control-ownership-surface-v2",
+        "title": "Current GTS+ TSS3 recorder hosting, longitudinal request ownership, and utility/observer exhaustion surface",
         "recorder_hosting": recorder_hosting(parser, root),
         "lateral_ownership_boundary": lateral_ownership_boundary(),
-        "longitudinal_request_surface": longitudinal_request_surface(parser, root),
         "fleet_brake_sink_census": fleet_brake_sink_census(parser, root),
         "brake_rob_boundary": brake_rob_boundary(parser, root),
+        "longitudinal_request_surface": longitudinal_request_surface(parser, root),
         "ordinary_arbitration_census": ordinary_arbitration_census(parser, root),
+        "current_utility_srp_census": current_utility_srp_census(root),
+        "labeled_observer_dtc_graph": labeled_observer_dtc_graph(parser, root),
         "exact_camry_blocker": exact_camry_blocker(),
         "specimen_census": specimen_census(root),
         "remaining_boundary": (
             "Static GTS+ now identifies the TSS3 recorder host (FRC) and the longitudinal diagnostic request "
-            "source/sink architecture (FRC/TSS vocabulary observed at the brake domain). It still cannot prove "
-            "the vehicle-network command frame, copy/forwarding transform, SecOC signer/freshness owner, or the "
-            "ECU/function that executes final arbitration. Those require target firmware or synchronized live "
-            "recorder + CAN observations."
+            "source/sink architecture (FRC/TSS vocabulary observed at the brake domain). The current UtilityNeo "
+            "scripts and the ordinary cross-ECU labeled observer/DTC graph add no executor witness either. It "
+            "still cannot prove the vehicle-network command frame, copy/forwarding transform, SecOC signer/"
+            "freshness owner, or the ECU/function that executes final arbitration. Those require target firmware "
+            "or synchronized live recorder + CAN observations."
         ),
     }
 

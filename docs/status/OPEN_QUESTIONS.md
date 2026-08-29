@@ -973,6 +973,21 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   (**live support unmeasured**), synchronized with FRC `0x792` `22 1B 03`..`22 1B 07`,
   stock DRCC engagement, Operation FFD and all-bus capture. Do not add a TSS3
   longitudinal builder or Panda whitelist until that wire/auth contract is target-native.
+  An independent post-TMS-085 audit closed the last two unexamined static host surfaces.
+  First, the **current** GTS+ `CONF/*.srp` UtilityNeo scripts (18 files) decode under the
+  pinned V18 AES-256-ECB key and are ordinary maintenance utilities (FUNCIDs `ALM-01`,
+  `CSP-03/05`, `DCM-13/33`, `DSC-03`, `ECD-43/45/46`, `EFI-39`, `FHV-03`, `LAMP-02/03`,
+  `MG-01`, `MM-37`, `RCM-01`, `SAS-01`, `TVD-01`); their literal frame corpus contains no
+  `27/34/36/37` and no TSS3 lateral/longitudinal/arbitration/SecOC vocabulary. Second, a
+  cross-ECU labeled observer/DTC graph census over `FRC_P5`/`ABS_P5`/`Brk_Bst_P5`/
+  `EPB_P5`/`EMPS_P5`/`EMPS2_P5` shows FRC carries no 'Toyota Safety Sense'-named monitor,
+  the brake domain carries no camera/recognition/radar-named monitor or DTC at all (its
+  only ADAS-adjacent communication partner is the 'Automated Driving System Interface
+  Module'), and no generation-20 ECU exposes a final/selected/arbitrated acceleration
+  output monitor. Neither candidate's diagnostic surface witnesses the arbitration result,
+  so static GTS+ cannot distinguish FRC-side from Brake-side arbitration execution. Both
+  closures are pinned in `tss3_control_ownership_surface.json` schema v2 and verified by
+  `tests/verify_gtsplus_tss3_control_ownership.py`.
   Canonical: [../tooling/techstream.md](../tooling/techstream.md) §6.2.4,
   `data/generated/gtsplus_2026/tss3_control_ownership_surface.json`, and
   [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md) §4.1/§5D.
