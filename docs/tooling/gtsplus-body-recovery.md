@@ -104,7 +104,9 @@ extractor rather than a protector emulator:
 9. copy the original `GTSPlus` PE to the output tree and write the manifest.
 
 No GTS+ executable is run. No Windows environment, debugger, memory dump, or
-protector key is required.
+protector key is required. The output tree is built in a sibling staging
+directory and replaces the previous result only after the 54/54 recovery and
+manifest checks succeed.
 
 `tests/verify_gtsplus_body_recovery.py` repeats the recovery against the pinned
 external corpus and pins the 54/54 coverage plus the `CommandCommon.dll`

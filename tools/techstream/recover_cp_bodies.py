@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures
+import contextlib
+import io
 import hashlib
 import json
 import os
@@ -12,6 +14,7 @@ import struct
 import subprocess
 import sys
 import tempfile
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +25,7 @@ from techstream_paths import REPO, resolve_gts_root
 DEFAULT_OUTPUT = REPO / "build/out/cuwplus-unprotected"
 DEFAULT_AUX_OUTPUT = REPO / "build/out/gts-aux-unprotected"
 DECODER = Path(__file__).with_name("cp_body_decode.py")
+ProgressCallback = Callable[[int, int, Path], None]
 
 
 def _u16(data: bytes | bytearray, off: int) -> int:
@@ -429,24 +433,43 @@ def _managed_build(stub: Path, meta_path: Path, memory_path: Path, out_path: Pat
     }
 
 
+def _log_tail(path: Path, lines: int = 30) -> str:
+    if not path.is_file():
+        return "(decoder log unavailable)"
+    rows = path.read_text(errors="replace").splitlines()
+    return "\n".join(rows[-lines:]) or "(decoder log empty)"
+
+
 def _run_decoder(stub: Path, decoded: Path, log_dir: Path) -> tuple[Path, Path]:
     decoded.mkdir(parents=True, exist_ok=True)
     log_dir.mkdir(parents=True, exist_ok=True)
     log = log_dir / f"{_stem(stub)}.log"
-    with log.open("w") as handle:
-        subprocess.run(
-            [sys.executable, str(DECODER), str(stub), "--output-dir", str(decoded)],
-            stdout=handle,
-            stderr=subprocess.STDOUT,
-            check=True,
-        )
+    try:
+        with log.open("w") as handle:
+            subprocess.run(
+                [sys.executable, str(DECODER), str(stub), "--output-dir", str(decoded)],
+                stdout=handle,
+                stderr=subprocess.STDOUT,
+                check=True,
+            )
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(
+            f"CP decoder failed for {stub.name} with exit status {exc.returncode}; "
+            f"decoder log tail follows:\n{_log_tail(log)}"
+        ) from exc
     meta = decoded / f"{_stem(stub)}.json"
     memory = decoded / f"{_stem(stub)}.final.mem"
     if not meta.is_file() or not memory.is_file():
-        raise RuntimeError(f"decoder did not emit expected artifacts for {stub.name}; see {log}")
+        raise RuntimeError(
+            f"decoder did not emit expected artifacts for {stub.name}; "
+            f"decoder log tail follows:\n{_log_tail(log)}"
+        )
     data = json.loads(meta.read_text())
     if not data.get("protector_success"):
-        raise RuntimeError(f"CP protector did not reach success for {stub.name}; see {log}")
+        raise RuntimeError(
+            f"CP protector did not reach success for {stub.name}; "
+            f"decoder log tail follows:\n{_log_tail(log)}"
+        )
     return meta, memory
 
 
@@ -464,7 +487,11 @@ def _validate_output(path: Path, expect_managed: bool) -> dict[str, Any]:
     if expect_managed:
         import dnfile
 
-        managed = dnfile.dnPE(str(path))
+        # dnfile can emit parser diagnostics for valid mixed/obfuscated metadata.
+        # Validation below is authoritative; keep those implementation warnings out
+        # of the user-facing recovery CLI.
+        with contextlib.redirect_stderr(io.StringIO()):
+            managed = dnfile.dnPE(str(path))
         if not (managed.net and managed.net.metadata and managed.net.mdtables):
             raise RuntimeError(f"rebuilt managed PE has no parseable CLR metadata: {path}")
         assembly = managed.net.mdtables.Assembly
@@ -482,6 +509,8 @@ def recover(
     only: list[str] | None = None,
     exclude: list[str] | None = None,
     keep_workspace: bool = False,
+    progress: ProgressCallback | None = None,
+    workspace_name: str = "cp-body-recovery",
 ) -> dict[str, Any]:
     gts = resolve_gts_root(gtsplus_root)
     source_root = _protected_source(gts, source)
@@ -510,78 +539,105 @@ def recover(
     if not stubs:
         raise SystemExit(f"no protected CP stubs selected under {source_root}")
 
-    if output.exists() and not only:
-        shutil.rmtree(output)
-    output.mkdir(parents=True, exist_ok=True)
-    build_tmp = REPO / "build/tmp"
-    build_tmp.mkdir(parents=True, exist_ok=True)
+    # Every invocation is transactional: the destination is replaced only after
+    # all selected bodies validate, so its contents always match manifest.json.
+    output.parent.mkdir(parents=True, exist_ok=True)
+    staging_output: Path | None = Path(tempfile.mkdtemp(prefix=f".{output.name}.staging-", dir=output.parent))
+    write_root = staging_output
     temp: tempfile.TemporaryDirectory[str] | None = None
-    if keep_workspace:
-        workspace = build_tmp / "cp-body-recovery"
-        if workspace.exists():
-            shutil.rmtree(workspace)
-        workspace.mkdir(parents=True)
-    else:
-        temp = tempfile.TemporaryDirectory(prefix="cp-body-recovery-", dir=build_tmp)
-        workspace = Path(temp.name)
-    decoded = workspace / "decoded"
-    logs = workspace / "logs"
-
-    max_workers = max(1, min(workers or min(8, os.cpu_count() or 1), len(stubs)))
-    decoded_paths: dict[Path, tuple[Path, Path]] = {}
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
-        futures = {pool.submit(_run_decoder, stub, decoded, logs): stub for stub in stubs}
-        for future in concurrent.futures.as_completed(futures):
-            stub = futures[future]
-            decoded_paths[stub] = future.result()
-
-    entries: list[dict[str, Any]] = []
-    for stub in stubs:
-        meta_path, memory_path = decoded_paths[stub]
-        meta = json.loads(meta_path.read_text())
-        calls = [item for item in meta["protect_calls"] if item[0]]
-        managed_input = _is_managed(stub)
-        rel = stub.relative_to(source_root)
-        destination = output / rel
-        if managed_input and len(calls) in (3, 4):
-            build_info = _managed_build(stub, meta_path, memory_path, destination)
+    try:
+        build_tmp = REPO / "build/tmp"
+        build_tmp.mkdir(parents=True, exist_ok=True)
+        if keep_workspace:
+            workspace = build_tmp / workspace_name
+            if workspace.exists():
+                shutil.rmtree(workspace)
+            workspace.mkdir(parents=True)
         else:
-            build_info = _native_build(stub, meta_path, memory_path, destination)
-        validation = _validate_output(destination, managed_input)
-        sidecar = Path(str(stub) + "._")
-        entries.append({
-            "relative_path": rel.as_posix(),
-            "classification": build_info["classification"],
-            "managed_input": managed_input,
-            "stub_size": stub.stat().st_size,
-            "stub_sha256": _sha256(stub),
-            "sidecar_size": sidecar.stat().st_size,
-            "sidecar_sha256": _sha256(sidecar),
-            "output_size": destination.stat().st_size,
-            "output_sha256": _sha256(destination),
-            "lfsr_rva": meta.get("lfsr_rva"),
-            "phase5c_done": bool(meta.get("phase5c_done")),
-            "protector_success": bool(meta.get("protector_success")),
-            "protect_calls": meta["protect_calls"],
-            "recovered_import_count": len(meta.get("imports", [])),
-            **validation,
-        })
+            temp = tempfile.TemporaryDirectory(prefix="cp-body-recovery-", dir=build_tmp)
+            workspace = Path(temp.name)
+        decoded = workspace / "decoded"
+        logs = workspace / "logs"
 
-    manifest = {
-        "format": "gtsplus-cp-body-recovery-v1",
-        "source_root": str(source_root),
-        "output_root": str(output),
-        "protected_body_count": len(stubs),
-        "recovered_body_count": len(entries),
-        "native_count": sum(not entry["managed_input"] for entry in entries),
-        "managed_count": sum(entry["managed_input"] for entry in entries),
-        "mixed_managed_count": sum(entry["classification"] == "mixed-managed" for entry in entries),
-        "entries": entries,
-    }
-    (output / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
-    if temp is not None:
-        temp.cleanup()
-    return manifest
+        max_workers = max(1, min(workers or min(8, os.cpu_count() or 1), len(stubs)))
+        decoded_paths: dict[Path, tuple[Path, Path]] = {}
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
+            futures = {pool.submit(_run_decoder, stub, decoded, logs): stub for stub in stubs}
+            completed = 0
+            for future in concurrent.futures.as_completed(futures):
+                stub = futures[future]
+                decoded_paths[stub] = future.result()
+                completed += 1
+                if progress is not None:
+                    progress(completed, len(stubs), stub.relative_to(source_root))
+
+        entries: list[dict[str, Any]] = []
+        for stub in stubs:
+            meta_path, memory_path = decoded_paths[stub]
+            meta = json.loads(meta_path.read_text())
+            calls = [item for item in meta["protect_calls"] if item[0]]
+            managed_input = _is_managed(stub)
+            rel = stub.relative_to(source_root)
+            destination = write_root / rel
+            if managed_input and len(calls) in (3, 4):
+                build_info = _managed_build(stub, meta_path, memory_path, destination)
+            else:
+                build_info = _native_build(stub, meta_path, memory_path, destination)
+            validation = _validate_output(destination, managed_input)
+            sidecar = Path(str(stub) + "._")
+            entries.append({
+                "relative_path": rel.as_posix(),
+                "classification": build_info["classification"],
+                "managed_input": managed_input,
+                "stub_size": stub.stat().st_size,
+                "stub_sha256": _sha256(stub),
+                "sidecar_size": sidecar.stat().st_size,
+                "sidecar_sha256": _sha256(sidecar),
+                "output_size": destination.stat().st_size,
+                "output_sha256": _sha256(destination),
+                "lfsr_rva": meta.get("lfsr_rva"),
+                "phase5c_done": bool(meta.get("phase5c_done")),
+                "protector_success": bool(meta.get("protector_success")),
+                "protect_calls": meta["protect_calls"],
+                "recovered_import_count": len(meta.get("imports", [])),
+                **validation,
+            })
+
+        manifest = {
+            "format": "gtsplus-cp-body-recovery-v1",
+            "source_root": str(source_root),
+            "output_root": str(output),
+            "protected_body_count": len(stubs),
+            "recovered_body_count": len(entries),
+            "native_count": sum(not entry["managed_input"] for entry in entries),
+            "managed_count": sum(entry["managed_input"] for entry in entries),
+            "mixed_managed_count": sum(entry["classification"] == "mixed-managed" for entry in entries),
+            "entries": entries,
+        }
+        (write_root / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+
+        if staging_output is not None:
+            backup = output.parent / f".{output.name}.previous"
+            shutil.rmtree(backup, ignore_errors=True)
+            if output.exists():
+                output.rename(backup)
+            try:
+                staging_output.rename(output)
+                staging_output = None
+            except Exception:
+                if backup.exists() and not output.exists():
+                    backup.rename(output)
+                raise
+            else:
+                shutil.rmtree(backup, ignore_errors=True)
+
+        return manifest
+    finally:
+        if temp is not None:
+            temp.cleanup()
+        if staging_output is not None:
+            shutil.rmtree(staging_output, ignore_errors=True)
+
 
 
 def recover_auxiliary(
@@ -589,7 +645,9 @@ def recover_auxiliary(
     gtsplus_root: Path | None = None,
     output: Path = DEFAULT_AUX_OUTPUT,
     workers: int | None = None,
+    only: list[str] | None = None,
     keep_workspace: bool = False,
+    progress: ProgressCallback | None = None,
 ) -> dict[str, Any]:
     """Recover CP bodies outside the main GTSPlus and CUWPlus trees."""
     gts = resolve_gts_root(gtsplus_root)
@@ -598,8 +656,11 @@ def recover_auxiliary(
         source=gts.parent,
         output=output,
         workers=workers,
+        only=only,
         exclude=["GTSPlus", "CUWPlus"],
         keep_workspace=keep_workspace,
+        progress=progress,
+        workspace_name="gts-aux-body-recovery",
     )
 
 

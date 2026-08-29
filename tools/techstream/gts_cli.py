@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Fast, read-only query surface over Toyota GTS+/Techstream evidence.
+"""Fast query and recovery surface over Toyota GTS+/Techstream evidence.
 
-This command is for discovery, not proof generation. It exposes the shared
-mechanics already recovered by the repository (DDB parsing/string resolution,
-CUW descriptor parsing + writer-route resolution, and PE metadata/string
-inspection) without merging the subsystem-specific deterministic generators.
+Most commands are read-only discovery helpers over already recovered repository
+mechanics. The recover-* commands are the explicit exception: they materialize
+validated analysis PEs and provenance manifests under their selected output root.
 """
 from __future__ import annotations
 
@@ -2352,6 +2351,19 @@ def cmd_pe(args: argparse.Namespace) -> int:
     return 0
 
 
+def _recovery_progress(label: str):
+    def report(done: int, total: int, path: Path) -> None:
+        if done == 1 or done == total or done % 10 == 0:
+            print(f"{label}\t{done}/{total}\t{path.as_posix()}", file=sys.stderr, flush=True)
+
+    return report
+
+
+def _aggregate_recovery_progress(component: str, done: int, total: int, path: Path) -> None:
+    if done == 1 or done == total or done % 10 == 0:
+        print(f"{component}\t{done}/{total}\t{path.as_posix()}", file=sys.stderr, flush=True)
+
+
 def cmd_recover_bodies(args: argparse.Namespace) -> int:
     gts = _resolve_gts_root(args.gtsplus_root)
     manifest = recover_gtsplus_bodies(
@@ -2379,6 +2391,7 @@ def cmd_recover_cuw_bodies(args: argparse.Namespace) -> int:
         workers=args.workers,
         only=args.only,
         keep_workspace=args.keep_workspace,
+        progress=_recovery_progress("CUWPlus"),
     )
     if args.json:
         print(json.dumps(manifest, indent=2, sort_keys=True))
@@ -2396,7 +2409,9 @@ def cmd_recover_aux_bodies(args: argparse.Namespace) -> int:
         gtsplus_root=Path(args.gtsplus_root).expanduser() if args.gtsplus_root else None,
         output=args.output,
         workers=args.workers,
+        only=args.only,
         keep_workspace=args.keep_workspace,
+        progress=_recovery_progress("Auxiliary"),
     )
     if args.json:
         print(json.dumps(manifest, indent=2, sort_keys=True))
@@ -2414,6 +2429,8 @@ def cmd_recover_all_bodies(args: argparse.Namespace) -> int:
         gtsplus_root=Path(args.gtsplus_root).expanduser() if args.gtsplus_root else None,
         output=args.output,
         workers=args.workers,
+        keep_workspace=args.keep_workspace,
+        progress=_aggregate_recovery_progress,
     )
     if args.json:
         print(json.dumps(manifest, indent=2, sort_keys=True))
@@ -3314,6 +3331,11 @@ def _common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--json", action="store_true", help="emit JSON")
 
 
+def _recovery_common(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--gtsplus-root", help="GTS+ external root or .../Toyota Diagnostics/GTSPlus (default: GTSPLUS_ROOT/repo pin)")
+    parser.add_argument("--json", action="store_true", help="emit JSON; progress remains on stderr")
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="command", required=True)
@@ -3438,7 +3460,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--archive", type=Path, default=GTSPLUS_BODY_ARCHIVE, help="gtsplus_msi.7z archive")
     p.add_argument("--output", type=Path, default=GTSPLUS_BODY_OUTPUT, help="recovered plaintext output root")
     p.add_argument("--keep-workspace", action="store_true", help="keep carved installer workspace under build/tmp")
-    _common(p)
+    _recovery_common(p)
     p.set_defaults(func=cmd_recover_bodies)
 
     p = sub.add_parser(
@@ -3450,7 +3472,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--workers", type=int, help="parallel decoder workers (default: up to 8)")
     p.add_argument("--only", action="append", help="recover only a filename or filename substring (repeatable)")
     p.add_argument("--keep-workspace", action="store_true", help="keep decoder memory/log workspace under build/tmp")
-    _common(p)
+    _recovery_common(p)
     p.set_defaults(func=cmd_recover_cuw_bodies)
 
     p = sub.add_parser(
@@ -3459,8 +3481,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--output", type=Path, default=GTS_AUX_BODY_OUTPUT, help="clean recovered auxiliary output root")
     p.add_argument("--workers", type=int, help="parallel decoder workers (default: up to 8)")
+    p.add_argument("--only", action="append", help="recover only a filename or relative-path substring (repeatable)")
     p.add_argument("--keep-workspace", action="store_true", help="keep decoder memory/log workspace under build/tmp")
-    _common(p)
+    _recovery_common(p)
     p.set_defaults(func=cmd_recover_aux_bodies)
 
     p = sub.add_parser(
@@ -3469,7 +3492,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--output", type=Path, default=GTS_ALL_BODY_OUTPUT, help="complete recovered suite output root")
     p.add_argument("--workers", type=int, help="parallel CP decoder workers (default: up to 8)")
-    _common(p)
+    p.add_argument("--keep-workspace", action="store_true", help="keep installer/decoder workspaces under build/tmp")
+    _recovery_common(p)
     p.set_defaults(func=cmd_recover_all_bodies)
 
     return ap

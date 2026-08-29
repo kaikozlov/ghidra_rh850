@@ -12,6 +12,7 @@ import pefile
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "tools/techstream"))
 
+import recover_cp_bodies
 from recover_cp_bodies import recover
 from techstream_paths import resolve_gts_root
 
@@ -45,6 +46,35 @@ def main() -> int:
         "CUWAccessRKSWrapper.dll",         # mixed native/CLR image
         "CuwBackendServiceConsoleApp.exe", # managed EXE + phase-0x520 anti-debug path
     ]
+    # Full-corpus mode is transactional and decoder failures carry useful log
+    # context even when the temporary workspace is cleaned up on unwind.
+    with tempfile.TemporaryDirectory(prefix="verify-cuwplus-transaction-") as tmp:
+        fixture = Path(tmp)
+        source_one = fixture / "source"
+        source_one.mkdir()
+        sample = source / "TCUWCanCommonPrepareWriter.dll"
+        (source_one / sample.name).write_bytes(sample.read_bytes())
+        (source_one / f"{sample.name}._").write_bytes(Path(str(sample) + "._").read_bytes())
+        output_one = fixture / "output"
+        output_one.mkdir()
+        sentinel = output_one / "known-good.txt"
+        sentinel.write_text("preserve-me")
+        failing = fixture / "fail_decoder.py"
+        failing.write_text("import sys\nprint('synthetic decoder failure marker')\nraise SystemExit(7)\n")
+        original_decoder = recover_cp_bodies.DECODER
+        recover_cp_bodies.DECODER = failing
+        try:
+            try:
+                recover_cp_bodies.recover(source=source_one, output=output_one, workers=1)
+            except RuntimeError as exc:
+                message = str(exc)
+            else:
+                raise AssertionError("synthetic decoder failure unexpectedly succeeded")
+        finally:
+            recover_cp_bodies.DECODER = original_decoder
+        check("failed full recovery preserves previous output", sentinel.read_text() == "preserve-me")
+        check("decoder failure includes temporary log tail", "synthetic decoder failure marker" in message)
+
     with tempfile.TemporaryDirectory(prefix="verify-cuwplus-body-recovery-") as tmp:
         output = Path(tmp) / "recovered"
         manifest = recover(output=output, only=selected, workers=5)

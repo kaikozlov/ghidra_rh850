@@ -65,6 +65,23 @@ This writes the three component corpora and an aggregate 249/249 manifest under
 `build/out/gts-all-unprotected/`. The component commands remain useful when
 only one product family is needed.
 
+### Operator behavior
+
+Recovery output roots are transactional. A run builds and validates in a sibling
+staging directory, then replaces the selected output only after every selected
+body succeeds; a failed decode therefore leaves the previous known-good output
+and manifest intact. `--only` follows the same rule and replaces its output root
+with exactly the selected bodies, so use `--output build/tmp/...` for one-off
+debugging when a full corpus is already materialized.
+
+Long CP runs report concise progress on stderr (first completion, every tenth
+body, and final completion), while `--json` keeps the manifest JSON on stdout.
+`recover-aux-bodies` also accepts repeatable `--only` selectors, and
+`recover-all-bodies --keep-workspace` retains distinct installer/CUWPlus/auxiliary
+workspaces instead of overwriting one component's logs with the next. Decoder
+failures include the tail of the captured worker log in the raised error even
+when the temporary workspace is automatically removed.
+
 The auxiliary 52 are `DS-4` 14, `ContentServer` 10,
 `GTSPlusCSVConverter` 10, `GTSPlus DataSync` 8, `GTSPlusTSEConverter` 5,
 `GTSPlusGraphViewer` 2, and one each in `DiagMessageInput`, `GTSE`, and

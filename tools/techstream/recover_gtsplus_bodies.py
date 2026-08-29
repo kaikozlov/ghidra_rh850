@@ -246,7 +246,9 @@ def recover(
     sevenzip = _sevenzip()
     unshield = _require_tool("unshield")
     version = _archive_version(archive, sevenzip)
-    output.mkdir(parents=True, exist_ok=True)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    staging_output: Path | None = Path(tempfile.mkdtemp(prefix=f".{output.name}.staging-", dir=output.parent))
+    write_root = staging_output
 
     workspace_owner: tempfile.TemporaryDirectory[str] | None = None
     if keep_workspace:
@@ -286,7 +288,7 @@ def recover(
                 source_side = Path(str(source_stub) + "._")
                 if not source_plain.is_file() or not source_stub.is_file() or not source_side.is_file():
                     raise RuntimeError(f"{installer}: extracted protected/plain triplet incomplete for {relative}")
-                destination = output.joinpath(*relative.split("/"))
+                destination = write_root.joinpath(*relative.split("/"))
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(source_plain, destination)
 
@@ -370,12 +372,28 @@ def recover(
             "coverage_complete": True,
             "binaries": rows,
         }
-        manifest_path = output / "manifest.json"
+        manifest_path = write_root / "manifest.json"
         manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+        backup = output.parent / f".{output.name}.previous"
+        shutil.rmtree(backup, ignore_errors=True)
+        if output.exists():
+            output.rename(backup)
+        try:
+            staging_output.rename(output)
+            staging_output = None
+        except Exception:
+            if backup.exists() and not output.exists():
+                backup.rename(output)
+            raise
+        else:
+            shutil.rmtree(backup, ignore_errors=True)
         return manifest
     finally:
         if workspace_owner is not None:
             workspace_owner.cleanup()
+        if staging_output is not None:
+            shutil.rmtree(staging_output, ignore_errors=True)
 
 
 def build_parser() -> argparse.ArgumentParser:
