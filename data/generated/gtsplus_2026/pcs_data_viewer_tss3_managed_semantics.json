@@ -17081,6 +17081,370 @@
     ],
     "detail_table_cctor_rva": 2323848,
     "did_count": 623,
+    "lateral_arbitration_schema": {
+      "arbitration_result": {
+        "lateral_id": {
+          "BitLength": 8,
+          "BitPosition": 7,
+          "BytePosition": 1,
+          "DataID": "5285",
+          "DataName": "Arbitration result_lateral ID",
+          "DataSize": 1,
+          "InvalidValueList": [],
+          "Lsb": "1",
+          "Offset": "0",
+          "Point": 0,
+          "SupportDID": 0,
+          "Type": "u",
+          "index": 146
+        },
+        "pinion_angle": {
+          "BitLength": 16,
+          "BitPosition": 7,
+          "BytePosition": 1,
+          "DataID": "57DE",
+          "DataName": "Arbitration result Pinion angle",
+          "DataSize": 2,
+          "InvalidValueList": [],
+          "Lsb": "0.001",
+          "Offset": "0",
+          "Point": 3,
+          "SupportDID": 0,
+          "Type": "s",
+          "index": 689
+        }
+      },
+      "feature_requests": {
+        "LCA": {
+          "boundary": "LCA is explicitly present as a feature in DID 5202, but this 1,130-row current recorder dictionary contains no LCA-named lateral-ID/pinion-angle/assist-gain/damping-gain request tuple. This is a recorder-schema negative, not proof that LCA has no internal request path.",
+          "dedicated_request_tuple_rows": [],
+          "presence_field": {
+            "BitLength": 1,
+            "BitPosition": 1,
+            "BytePosition": 2,
+            "DataID": "5202",
+            "DataName": "LCA presence information",
+            "DataSize": 2,
+            "InvalidValueList": [],
+            "Lsb": "1",
+            "Offset": "0",
+            "Point": 0,
+            "SupportDID": 1,
+            "Type": "u",
+            "index": 26
+          }
+        },
+        "LDA": {
+          "data_id": "5531",
+          "fields": [
+            {
+              "BitLength": 8,
+              "BitPosition": 7,
+              "BytePosition": 1,
+              "DataID": "5531",
+              "DataName": "LDA Lateral ID",
+              "DataSize": 1,
+              "InvalidValueList": [],
+              "Lsb": "1",
+              "Offset": "0",
+              "Point": 0,
+              "SupportDID": 0,
+              "Type": "u",
+              "index": 314
+            },
+            {
+              "BitLength": 16,
+              "BitPosition": 7,
+              "BytePosition": 2,
+              "DataID": "5531",
+              "DataName": "LDA Control Request Pinion Angle",
+              "DataSize": 3,
+              "InvalidValueList": [],
+              "Lsb": "0.001",
+              "Offset": "0",
+              "Point": 3,
+              "SupportDID": 0,
+              "Type": "s",
+              "index": 315
+            },
+            {
+              "BitLength": 8,
+              "BitPosition": 7,
+              "BytePosition": 4,
+              "DataID": "5531",
+              "DataName": "LDA Steering Assist Gain",
+              "DataSize": 4,
+              "InvalidValueList": [],
+              "Lsb": "0.01",
+              "Offset": "0",
+              "Point": 2,
+              "SupportDID": 0,
+              "Type": "u",
+              "index": 316
+            },
+            {
+              "BitLength": 8,
+              "BitPosition": 7,
+              "BytePosition": 5,
+              "DataID": "5531",
+              "DataName": "LDA Damping Control Gain",
+              "DataSize": 5,
+              "InvalidValueList": [],
+              "Lsb": "0.01",
+              "Offset": "0",
+              "Point": 2,
+              "SupportDID": 0,
+              "Type": "u",
+              "index": 317
+            }
+          ],
+          "layout_matches_generic_5282": true
+        },
+        "LTA": {
+          "data_id": "5631",
+          "fields": [
+            {
+              "BitLength": 8,
+              "BitPosition": 7,
+              "BytePosition": 1,
+              "DataID": "5631",
+              "DataName": "LTA Lateral ID",
+              "DataSize": 1,
+              "InvalidValueList": [],
+              "Lsb": "1",
+              "Offset": "0",
+              "Point": 0,
+              "SupportDID": 0,
+              "Type": "u",
+              "index": 382
+            },
+            {
+              "BitLength": 16,
+              "BitPosition": 7,
+              "BytePosition": 2,
+              "DataID": "5631",
+              "DataName": "LTA Control Request Pinion Angle",
+              "DataSize": 3,
+              "InvalidValueList": [],
+              "Lsb": "0.001",
+              "Offset": "0",
+              "Point": 3,
+              "SupportDID": 0,
+              "Type": "s",
+              "index": 383
+            },
+            {
+              "BitLength": 8,
+              "BitPosition": 7,
+              "BytePosition": 4,
+              "DataID": "5631",
+              "DataName": "LTA Steering Assist Gain",
+              "DataSize": 4,
+              "InvalidValueList": [],
+              "Lsb": "0.01",
+              "Offset": "0",
+              "Point": 2,
+              "SupportDID": 0,
+              "Type": "u",
+              "index": 384
+            },
+            {
+              "BitLength": 8,
+              "BitPosition": 7,
+              "BytePosition": 5,
+              "DataID": "5631",
+              "DataName": "LTA Damping Control Gain",
+              "DataSize": 5,
+              "InvalidValueList": [],
+              "Lsb": "0.01",
+              "Offset": "0",
+              "Point": 2,
+              "SupportDID": 0,
+              "Type": "u",
+              "index": 385
+            }
+          ],
+          "layout_matches_generic_5282": true
+        },
+        "PDA_OAA": {
+          "data_ids": [
+            "5A09",
+            "5A0A",
+            "5A0D"
+          ],
+          "fields": [
+            {
+              "BitLength": 6,
+              "BitPosition": 5,
+              "BytePosition": 1,
+              "DataID": "5A09",
+              "DataName": "ID Request Lateral ID",
+              "DataSize": 1,
+              "InvalidValueList": [],
+              "Lsb": "1",
+              "Offset": "0",
+              "Point": 0,
+              "SupportDID": 0,
+              "Type": "u",
+              "index": 774
+            },
+            {
+              "BitLength": 16,
+              "BitPosition": 7,
+              "BytePosition": 1,
+              "DataID": "5A0A",
+              "DataName": "PDA(OAA) request pinion angle",
+              "DataSize": 2,
+              "InvalidValueList": [],
+              "Lsb": "0.001",
+              "Offset": "0",
+              "Point": 3,
+              "SupportDID": 0,
+              "Type": "s",
+              "index": 775
+            },
+            {
+              "BitLength": 8,
+              "BitPosition": 7,
+              "BytePosition": 1,
+              "DataID": "5A0D",
+              "DataName": "PDA(OAA) Gain for steering support",
+              "DataSize": 1,
+              "InvalidValueList": [],
+              "Lsb": "0.01",
+              "Offset": "0",
+              "Point": 2,
+              "SupportDID": 0,
+              "Type": "u",
+              "index": 779
+            },
+            {
+              "BitLength": 8,
+              "BitPosition": 7,
+              "BytePosition": 2,
+              "DataID": "5A0D",
+              "DataName": "PDA(OAA) Damping control gain",
+              "DataSize": 2,
+              "InvalidValueList": [],
+              "Lsb": "0.01",
+              "Offset": "0",
+              "Point": 2,
+              "SupportDID": 0,
+              "Type": "u",
+              "index": 780
+            }
+          ],
+          "layout": "same semantic ingredients but split across three recorder DIDs; lateral ID is 6 bits rather than generic/LDA/LTA 8 bits"
+        }
+      },
+      "generic_request": {
+        "data_id": "5282",
+        "fields": [
+          {
+            "BitLength": 8,
+            "BitPosition": 7,
+            "BytePosition": 1,
+            "DataID": "5282",
+            "DataName": "TSS request - lateral ID",
+            "DataSize": 1,
+            "InvalidValueList": [],
+            "Lsb": "1",
+            "Offset": "0",
+            "Point": 0,
+            "SupportDID": 0,
+            "Type": "u",
+            "index": 131
+          },
+          {
+            "BitLength": 16,
+            "BitPosition": 7,
+            "BytePosition": 2,
+            "DataID": "5282",
+            "DataName": "TSS request - pinion angle",
+            "DataSize": 3,
+            "InvalidValueList": [],
+            "Lsb": "0.001",
+            "Offset": "0",
+            "Point": 3,
+            "SupportDID": 0,
+            "Type": "s",
+            "index": 132
+          },
+          {
+            "BitLength": 8,
+            "BitPosition": 7,
+            "BytePosition": 4,
+            "DataID": "5282",
+            "DataName": "Steering assist gain",
+            "DataSize": 4,
+            "InvalidValueList": [],
+            "Lsb": "0.01",
+            "Offset": "0",
+            "Point": 2,
+            "SupportDID": 0,
+            "Type": "u",
+            "index": 133
+          },
+          {
+            "BitLength": 8,
+            "BitPosition": 7,
+            "BytePosition": 5,
+            "DataID": "5282",
+            "DataName": "Damping control gain",
+            "DataSize": 5,
+            "InvalidValueList": [],
+            "Lsb": "0.01",
+            "Offset": "0",
+            "Point": 2,
+            "SupportDID": 0,
+            "Type": "u",
+            "index": 134
+          }
+        ]
+      },
+      "shape_equivalence": {
+        "generic_5282_equals_lda_5531_equals_lta_5631": true,
+        "interpretation": "The current recorder exposes generic, LDA, and LTA request tuples with identical byte/bit/scaling geometry. This supports a normalized arbitration model but does not by itself prove runtime copy direction or ECU ownership.",
+        "layout": [
+          {
+            "BitLength": 8,
+            "BitPosition": 7,
+            "BytePosition": 1,
+            "Lsb": "1",
+            "Offset": "0",
+            "Point": 0,
+            "Type": "u"
+          },
+          {
+            "BitLength": 16,
+            "BitPosition": 7,
+            "BytePosition": 2,
+            "Lsb": "0.001",
+            "Offset": "0",
+            "Point": 3,
+            "Type": "s"
+          },
+          {
+            "BitLength": 8,
+            "BitPosition": 7,
+            "BytePosition": 4,
+            "Lsb": "0.01",
+            "Offset": "0",
+            "Point": 2,
+            "Type": "u"
+          },
+          {
+            "BitLength": 8,
+            "BitPosition": 7,
+            "BytePosition": 5,
+            "Lsb": "0.01",
+            "Offset": "0",
+            "Point": 2,
+            "Type": "u"
+          }
+        ]
+      }
+    },
     "physical_value_contract": {
       "format": "fixed-point with Point decimal places",
       "formula": "physical = raw * Lsb + Offset",
@@ -18686,6 +19050,7 @@
         "PostTriggerNumber": 2,
         "PreTriggerNumber": 10,
         "Sampling": "0.6",
+        "SystemName": "AHBAHS",
         "SystemType": 1,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2033"
@@ -18697,6 +19062,7 @@
         "PostTriggerNumber": 0,
         "PreTriggerNumber": 0,
         "Sampling": "0",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "20DA"
@@ -18708,6 +19074,7 @@
         "PostTriggerNumber": 0,
         "PreTriggerNumber": 0,
         "Sampling": "0",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "20DB"
@@ -18719,6 +19086,7 @@
         "PostTriggerNumber": 0,
         "PreTriggerNumber": 0,
         "Sampling": "0",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "20DC"
@@ -18730,6 +19098,7 @@
         "PostTriggerNumber": 8,
         "PreTriggerNumber": 36,
         "Sampling": "0.2",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "209C"
@@ -18741,6 +19110,7 @@
         "PostTriggerNumber": 8,
         "PreTriggerNumber": 36,
         "Sampling": "0.2",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "209D"
@@ -18752,6 +19122,7 @@
         "PostTriggerNumber": 8,
         "PreTriggerNumber": 36,
         "Sampling": "0.2",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "209E"
@@ -18763,6 +19134,7 @@
         "PostTriggerNumber": 11,
         "PreTriggerNumber": 10,
         "Sampling": "0.4",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2818"
@@ -18774,6 +19146,7 @@
         "PostTriggerNumber": 11,
         "PreTriggerNumber": 16,
         "Sampling": "0.5",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "227E"
@@ -18785,6 +19158,7 @@
         "PostTriggerNumber": 5,
         "PreTriggerNumber": 5,
         "Sampling": "1",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2844"
@@ -18796,6 +19170,7 @@
         "PostTriggerNumber": 7,
         "PreTriggerNumber": 3,
         "Sampling": "1",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2845"
@@ -18807,6 +19182,7 @@
         "PostTriggerNumber": 0,
         "PreTriggerNumber": 0,
         "Sampling": "0",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2846"
@@ -18818,6 +19194,7 @@
         "PostTriggerNumber": 0,
         "PreTriggerNumber": 0,
         "Sampling": "0",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2847"
@@ -18829,6 +19206,7 @@
         "PostTriggerNumber": 5,
         "PreTriggerNumber": 20,
         "Sampling": "0.2",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "240E"
@@ -18840,6 +19218,7 @@
         "PostTriggerNumber": 5,
         "PreTriggerNumber": 20,
         "Sampling": "0.2",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "240F"
@@ -18851,6 +19230,7 @@
         "PostTriggerNumber": 6,
         "PreTriggerNumber": 6,
         "Sampling": "0.5",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "229B"
@@ -18862,6 +19242,7 @@
         "PostTriggerNumber": 6,
         "PreTriggerNumber": 6,
         "Sampling": "0.5",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "229C"
@@ -18873,6 +19254,7 @@
         "PostTriggerNumber": 6,
         "PreTriggerNumber": 6,
         "Sampling": "0.5",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "229D"
@@ -18884,6 +19266,7 @@
         "PostTriggerNumber": 3,
         "PreTriggerNumber": 7,
         "Sampling": "0.8",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "229E"
@@ -18895,6 +19278,7 @@
         "PostTriggerNumber": 11,
         "PreTriggerNumber": 6,
         "Sampling": "0.5",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "229F"
@@ -18906,6 +19290,7 @@
         "PostTriggerNumber": 0,
         "PreTriggerNumber": 0,
         "Sampling": "0",
+        "SystemName": "LDA",
         "SystemType": 2,
         "UniqueRoBCodeDID": -1,
         "rob_code": "22B3"
@@ -18917,6 +19302,7 @@
         "PostTriggerNumber": 25,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "PCS",
         "SystemType": 3,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2090"
@@ -18928,6 +19314,7 @@
         "PostTriggerNumber": 25,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "PCS",
         "SystemType": 3,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2093"
@@ -18939,6 +19326,7 @@
         "PostTriggerNumber": 25,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "PCS",
         "SystemType": 3,
         "UniqueRoBCodeDID": 610,
         "rob_code": "2098"
@@ -18950,6 +19338,7 @@
         "PostTriggerNumber": 25,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "PCS",
         "SystemType": 3,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2095"
@@ -18961,6 +19350,7 @@
         "PostTriggerNumber": 25,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "PCS",
         "SystemType": 3,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2096"
@@ -18972,6 +19362,7 @@
         "PostTriggerNumber": 25,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "PCS",
         "SystemType": 3,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2097"
@@ -18983,6 +19374,7 @@
         "PostTriggerNumber": 25,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "PCS",
         "SystemType": 3,
         "UniqueRoBCodeDID": -1,
         "rob_code": "209A"
@@ -18994,6 +19386,7 @@
         "PostTriggerNumber": 25,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "PCS",
         "SystemType": 3,
         "UniqueRoBCodeDID": -1,
         "rob_code": "20DD"
@@ -19005,6 +19398,7 @@
         "PostTriggerNumber": 25,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "PCS",
         "SystemType": 3,
         "UniqueRoBCodeDID": -1,
         "rob_code": "20FF"
@@ -19016,6 +19410,7 @@
         "PostTriggerNumber": 25,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "PCS",
         "SystemType": 3,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2809"
@@ -19027,6 +19422,7 @@
         "PostTriggerNumber": 25,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "PCS",
         "SystemType": 3,
         "UniqueRoBCodeDID": -1,
         "rob_code": "280A"
@@ -19038,6 +19434,7 @@
         "PostTriggerNumber": 25,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "PCS",
         "SystemType": 3,
         "UniqueRoBCodeDID": -1,
         "rob_code": "280B"
@@ -19049,6 +19446,7 @@
         "PostTriggerNumber": 25,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "PCS",
         "SystemType": 3,
         "UniqueRoBCodeDID": -1,
         "rob_code": "283F"
@@ -19060,6 +19458,7 @@
         "PostTriggerNumber": 25,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "PCS",
         "SystemType": 3,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2862"
@@ -19071,6 +19470,7 @@
         "PostTriggerNumber": 30,
         "PreTriggerNumber": 60,
         "Sampling": "0.1",
+        "SystemName": "IDA",
         "SystemType": 4,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2279"
@@ -19082,6 +19482,7 @@
         "PostTriggerNumber": 30,
         "PreTriggerNumber": 60,
         "Sampling": "0.1",
+        "SystemName": "IDA",
         "SystemType": 4,
         "UniqueRoBCodeDID": -1,
         "rob_code": "227A"
@@ -19093,6 +19494,7 @@
         "PostTriggerNumber": 30,
         "PreTriggerNumber": 60,
         "Sampling": "0.1",
+        "SystemName": "IDA",
         "SystemType": 4,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2276"
@@ -19104,6 +19506,7 @@
         "PostTriggerNumber": 30,
         "PreTriggerNumber": 60,
         "Sampling": "0.1",
+        "SystemName": "IDA",
         "SystemType": 4,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2277"
@@ -19115,6 +19518,7 @@
         "PostTriggerNumber": 30,
         "PreTriggerNumber": 60,
         "Sampling": "0.1",
+        "SystemName": "IDA",
         "SystemType": 4,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2278"
@@ -19126,6 +19530,7 @@
         "PostTriggerNumber": 0,
         "PreTriggerNumber": 60,
         "Sampling": "0.1",
+        "SystemName": "IDA",
         "SystemType": 4,
         "UniqueRoBCodeDID": -1,
         "rob_code": "227B"
@@ -19137,6 +19542,7 @@
         "PostTriggerNumber": 20,
         "PreTriggerNumber": 50,
         "Sampling": "0.1",
+        "SystemName": "URSM",
         "SystemType": 5,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2291"
@@ -19148,6 +19554,7 @@
         "PostTriggerNumber": 20,
         "PreTriggerNumber": 50,
         "Sampling": "0.1",
+        "SystemName": "URSM",
         "SystemType": 5,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2292"
@@ -19159,6 +19566,7 @@
         "PostTriggerNumber": 20,
         "PreTriggerNumber": 50,
         "Sampling": "0.1",
+        "SystemName": "URSM",
         "SystemType": 5,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2293"
@@ -19170,6 +19578,7 @@
         "PostTriggerNumber": 10,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "URSM",
         "SystemType": 5,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2294"
@@ -19181,6 +19590,7 @@
         "PostTriggerNumber": 10,
         "PreTriggerNumber": 25,
         "Sampling": "0.2",
+        "SystemName": "URSM",
         "SystemType": 5,
         "UniqueRoBCodeDID": -1,
         "rob_code": "2290"
@@ -19192,11 +19602,29 @@
         "PostTriggerNumber": 10,
         "PreTriggerNumber": 25,
         "Sampling": "0.1",
+        "SystemName": "SDG",
         "SystemType": 6,
         "UniqueRoBCodeDID": -1,
         "rob_code": "22B4"
       }
     ],
+    "system_type_enum": {
+      "0": "None",
+      "1": "AHBAHS",
+      "2": "LDA",
+      "3": "PCS",
+      "4": "IDA",
+      "5": "URSM",
+      "6": "SDG"
+    },
+    "system_type_usage": {
+      "analyze_rob_parameter_reads_system_type": false,
+      "analyze_rob_parameter_rva": 2315720,
+      "check_multi_trigger_info_rva": 2314396,
+      "did_decode_scans_full_definition_table": true,
+      "interpretation": "SYSTEM_TYPE classifies/matches RoB trigger families. The per-RoB parameter analyzer iterates the global DID definition table and does not read SYSTEM_TYPE, so the enum is not a per-DID ECU/producer binding.",
+      "multi_trigger_matching_compares_system_type_and_group": true
+    },
     "table_cctor_rva": 2384104
   },
   "schema": "gtsplus-pcs-data-viewer-tss3-managed-semantics-v1",

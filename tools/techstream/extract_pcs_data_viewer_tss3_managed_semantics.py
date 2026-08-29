@@ -36,6 +36,7 @@ DID_DEFINE = "PCSDataViewer.Extractor.OperationFFD.TSS3.Define.DIDDataDefine"
 DETAIL_INFO = "PCSDataViewer.Extractor.OperationFFD.TSS3.Define.DetailBitAssignInfo"
 ROB_DEFINE = "PCSDataViewer.Extractor.OperationFFD.TSS3.Define.RoBCodeDefine"
 ROB_INFO = "PCSDataViewer.Extractor.OperationFFD.TSS3.Define.RoBCodeDetailInfo"
+TSS3_OPERATION_EXTRACTOR = "PCSDataViewer.Extractor.OperationFFD.TSS3.TSS3OperationFFDExtractor"
 DETAIL_FIELDS = (
     "DataName", "DataID", "DataSize", "SupportDID", "BytePosition", "BitPosition",
     "BitLength", "InvalidValueList", "Type", "Lsb", "Offset", "Point",
@@ -498,6 +499,33 @@ def _interpret_collection(
     return int(method.Rva), records
 
 
+
+def _enum_literal_map(pe: dnfile.dnPE, full_type: str) -> dict[int, str]:
+    constants: dict[int, int] = {}
+    for row in pe.net.mdtables.Constant.rows:
+        parent = getattr(row.Parent, "row", None)
+        raw = getattr(getattr(row, "Value", None), "value", None)
+        if parent is None or not isinstance(raw, (bytes, bytearray)) or len(raw) not in (1, 2, 4, 8):
+            continue
+        constants[id(parent)] = int.from_bytes(raw, "little", signed=True)
+    for td in pe.net.mdtables.TypeDef.rows:
+        if type_name(td) != full_type:
+            continue
+        out: dict[int, str] = {}
+        for item in td.FieldList:
+            field = item.row
+            name = str(field.Name)
+            if name == "value__" or id(field) not in constants:
+                continue
+            value = constants[id(field)]
+            if value in out:
+                raise ValueError(f"{full_type}: duplicate enum value {value}")
+            out[value] = name
+        if not out:
+            raise ValueError(f"{full_type}: no literal enum values")
+        return dict(sorted(out.items()))
+    raise ValueError(f"enum type not found: {full_type}")
+
 def _normalize(value: Any) -> Any:
     if isinstance(value, Decimal):
         return format(value, "f")
@@ -511,6 +539,135 @@ def _normalize(value: Any) -> Any:
         return [_normalize(item) for item in value]
     return value
 
+
+
+def _rob_system_type_usage(pe: dnfile.dnPE) -> dict[str, Any]:
+    analyze_rva, analyze = _method_instructions(pe, TSS3_OPERATION_EXTRACTOR, "AnalyzeRoBParameter")
+    analyze_calls = _call_names(pe, analyze)
+    required_analyze = [
+        (DID_DEFINE, "GetDataCount"),
+        (DID_DEFINE, "GetDetailBitAssignInfo"),
+        ("PCSDataViewer.Extractor.OperationFFD.TSS3.Model.MeasuredValue", "GetValue"),
+    ]
+    if any(call not in analyze_calls for call in required_analyze):
+        raise ValueError(f"AnalyzeRoBParameter DID-table scan drift: {analyze_calls!r}")
+    if any(name == "get_SystemType" for _owner, name in analyze_calls):
+        raise ValueError("AnalyzeRoBParameter unexpectedly binds DID extraction to SYSTEM_TYPE")
+
+    multi_rva, multi = _method_instructions(pe, TSS3_OPERATION_EXTRACTOR, "CheckMultiTriggerInfo")
+    multi_calls = _call_names(pe, multi)
+    if multi_calls.count((ROB_DEFINE, "GetRoBCodeInfo")) != 2:
+        raise ValueError("CheckMultiTriggerInfo RoB lookup drift")
+    if multi_calls.count((ROB_INFO, "get_SystemType")) != 2 or multi_calls.count((ROB_INFO, "get_Group")) != 2:
+        raise ValueError("CheckMultiTriggerInfo SYSTEM_TYPE/group comparison drift")
+
+    return {
+        "analyze_rob_parameter_rva": analyze_rva,
+        "check_multi_trigger_info_rva": multi_rva,
+        "did_decode_scans_full_definition_table": True,
+        "analyze_rob_parameter_reads_system_type": False,
+        "multi_trigger_matching_compares_system_type_and_group": True,
+        "interpretation": "SYSTEM_TYPE classifies/matches RoB trigger families. The per-RoB parameter analyzer iterates the global DID definition table and does not read SYSTEM_TYPE, so the enum is not a per-DID ECU/producer binding.",
+    }
+
+
+def _lateral_arbitration_schema(details: list[dict[str, Any]]) -> dict[str, Any]:
+    by_did: dict[str, list[dict[str, Any]]] = {}
+    for row in details:
+        by_did.setdefault(str(row["DataID"]), []).append(row)
+
+    def selected(did: str, names: list[str]) -> list[dict[str, Any]]:
+        rows = {str(row["DataName"]): row for row in by_did.get(did, [])}
+        missing = [name for name in names if name not in rows]
+        if missing:
+            raise ValueError(f"{did}: missing lateral arbitration fields {missing!r}")
+        return [rows[name] for name in names]
+
+    generic_names = [
+        "TSS request - lateral ID",
+        "TSS request - pinion angle",
+        "Steering assist gain",
+        "Damping control gain",
+    ]
+    lda_names = [
+        "LDA Lateral ID",
+        "LDA Control Request Pinion Angle",
+        "LDA Steering Assist Gain",
+        "LDA Damping Control Gain",
+    ]
+    lta_names = [
+        "LTA Lateral ID",
+        "LTA Control Request Pinion Angle",
+        "LTA Steering Assist Gain",
+        "LTA Damping Control Gain",
+    ]
+    generic = selected("5282", generic_names)
+    lda = selected("5531", lda_names)
+    lta = selected("5631", lta_names)
+
+    def shape(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        return [
+            {
+                "BytePosition": row["BytePosition"],
+                "BitPosition": row["BitPosition"],
+                "BitLength": row["BitLength"],
+                "Type": row["Type"],
+                "Lsb": row["Lsb"],
+                "Offset": row["Offset"],
+                "Point": row["Point"],
+            }
+            for row in rows
+        ]
+
+    generic_shape = shape(generic)
+    if shape(lda) != generic_shape or shape(lta) != generic_shape:
+        raise ValueError("generic/LDA/LTA lateral request tuple layout drift")
+
+    pda_id = selected("5A09", ["ID Request Lateral ID"])[0]
+    pda_angle = selected("5A0A", ["PDA(OAA) request pinion angle"])[0]
+    pda_gains = selected("5A0D", ["PDA(OAA) Gain for steering support", "PDA(OAA) Damping control gain"])
+
+    lca_presence = selected("5202", ["LCA presence information"])[0]
+    lca_request_rows = [
+        row for row in details
+        if "LCA" in str(row["DataName"]).upper()
+        and any(token in str(row["DataName"]).lower() for token in ("pinion", "lateral id", "steering assist gain", "damping control gain"))
+    ]
+    if lca_request_rows:
+        raise ValueError(f"unexpected dedicated LCA request tuple rows: {lca_request_rows!r}")
+
+    result_id = selected("5285", ["Arbitration result_lateral ID"])[0]
+    result_angle = selected("57DE", ["Arbitration result Pinion angle"])[0]
+
+    return {
+        "generic_request": {
+            "data_id": "5282",
+            "fields": generic,
+        },
+        "feature_requests": {
+            "LDA": {"data_id": "5531", "fields": lda, "layout_matches_generic_5282": True},
+            "LTA": {"data_id": "5631", "fields": lta, "layout_matches_generic_5282": True},
+            "PDA_OAA": {
+                "data_ids": ["5A09", "5A0A", "5A0D"],
+                "fields": [pda_id, pda_angle, *pda_gains],
+                "layout": "same semantic ingredients but split across three recorder DIDs; lateral ID is 6 bits rather than generic/LDA/LTA 8 bits",
+            },
+            "LCA": {
+                "presence_field": lca_presence,
+                "dedicated_request_tuple_rows": [],
+                "boundary": "LCA is explicitly present as a feature in DID 5202, but this 1,130-row current recorder dictionary contains no LCA-named lateral-ID/pinion-angle/assist-gain/damping-gain request tuple. This is a recorder-schema negative, not proof that LCA has no internal request path.",
+            },
+        },
+        "arbitration_result": {
+            "lateral_id": result_id,
+            "pinion_angle": result_angle,
+        },
+        "shape_equivalence": {
+            "generic_5282_equals_lda_5531_equals_lta_5631": True,
+            "layout": generic_shape,
+            "interpretation": "The current recorder exposes generic, LDA, and LTA request tuples with identical byte/bit/scaling geometry. This supports a normalized arbitration model but does not by itself prove runtime copy direction or ECU ownership.",
+        },
+    }
 
 def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, Any]:
     assembly = assembly.expanduser().resolve()
@@ -555,12 +712,22 @@ def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, An
     for index, record in did_records:
         item = {"index": index, **record}
         details.append(_normalize(item))
+    system_types = _enum_literal_map(pe, "SYSTEM_TYPE")
+    expected_system_types = {0: "None", 1: "AHBAHS", 2: "LDA", 3: "PCS", 4: "IDA", 5: "URSM", 6: "SDG"}
+    if system_types != expected_system_types:
+        raise ValueError(f"SYSTEM_TYPE enum drift: {system_types!r}")
+
     robs = []
     for rob_code, record in rob_records:
-        item = {"rob_code": rob_code, **record}
+        system_type = int(record["SystemType"])
+        if system_type not in system_types:
+            raise ValueError(f"RoB {rob_code}: unknown SYSTEM_TYPE {system_type}")
+        item = {"rob_code": rob_code, **record, "SystemName": system_types[system_type]}
         robs.append(_normalize(item))
 
     image_ffd = _extract_fcm_image_contract(pe)
+    lateral_arbitration = _lateral_arbitration_schema(details)
+    system_type_usage = _rob_system_type_usage(pe)
 
     steering = [item for item in details if item["DataID"] in STEERING_DIDS]
     by_did: dict[str, int] = {}
@@ -600,10 +767,13 @@ def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, An
             },
             "detail_rows": details,
             "steering_relevant_rows": steering,
+            "lateral_arbitration_schema": lateral_arbitration,
         },
         "rob_codes": {
             "table_cctor_rva": rob_rva,
             "row_count": len(robs),
+            "system_type_enum": {str(key): value for key, value in system_types.items()},
+            "system_type_usage": system_type_usage,
             "rows": robs,
         },
         "image_ffd": {

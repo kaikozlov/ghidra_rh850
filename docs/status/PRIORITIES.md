@@ -227,12 +227,19 @@ projects 15 recursive FAT/list levels. Ring-buffer conversion and GTSE compressi
 recovered. The current TSE->GTSE skip policy still makes **preserving original TSE files**
 mandatory for PCS Operation/Image FFD.
 
-There is no remaining generic protected-host decoder target to sweep. The next high-value work
-is to use the OEM request/arbitration model to identify **exact vehicle-network producer/frame/
-SecOC ownership and the arbitration execution owner** in target firmware, and to validate the
-recovered TSE FAT/list traversal end-to-end when a representative Toyota-generated TSS3 TSE
-specimen becomes available. Treat generation-22 `ADCU_P6` only as a successor terminology
-oracle. Canonical: `data/generated/gtsplus_2026/tss3_native_recorder_protocol.json`,
+There is no remaining generic protected-host decoder target to sweep. The current recorder
+schema also closes one tempting dead end: `5282`, LDA `5531`, and LTA `5631` have exactly
+matching four-field request layouts, PDA(OAA) has the same ingredients split across
+`5A09/5A0A/5A0D`, and **no LCA-named request tuple exists anywhere in the 1,130-row current
+viewer dictionary despite explicit LCA presence/state fields**. Do not spend another host
+search trying to discover such a tuple. Its absence is consistent with the EPS-side shared
+Target Lateral ID `11=LTA/LCA`, but is not a runtime-copy or ownership proof.
+
+The next high-value work is to use the OEM request/arbitration model to identify **exact
+vehicle-network producer/frame/SecOC ownership and the arbitration execution owner** in target
+firmware or a synchronized Operation-FFD capture, and to validate the recovered TSE FAT/list
+traversal end-to-end when a representative Toyota-generated TSS3 TSE specimen becomes
+available. Treat generation-22 `ADCU_P6` only as a successor terminology oracle. Canonical: `data/generated/gtsplus_2026/tss3_native_recorder_protocol.json`,
 `data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json`,
 `data/generated/gtsplus_2026/tse_managed_semantics.json`,
 [../tooling/pcs-data-viewer-tss3-dictionary.md](../tooling/pcs-data-viewer-tss3-dictionary.md), and

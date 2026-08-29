@@ -3046,12 +3046,21 @@ RoB/trigger definitions**, and the recovered `MeasuredValue` code proves
 The steering witnesses are now byte-level OEM contracts rather than name-only leads:
 `5282` is byte1 lateral ID, bytes2-3 signed pinion-angle request at **0.001**, byte4
 steering-assist gain at **0.01**, byte5 damping gain at **0.01**; `5531` LDA and `5631`
-LTA use the same four-field layout/scales. `5285` is the byte1 arbitration-result lateral
-ID, `560D` carries signed EPS pinion angle in bytes4-5 at **0.001**, and `57DE` is signed
-arbitration-result pinion angle in bytes1-2 at **0.001**. RoB policy is concrete as well:
-`209D` LCS Steer Override is 0.2 sampling with 36 pre/8 post records, `2818` Steering
-Angle Speed Threshold Exceeded is 0.4 with 10/11, `2845` LTA Hands Free Cancel is 1.0
-with 3/7, and `240F` LCA Cancel is 0.2 with 20/5.
+LTA use the **exact same four-field byte/bit/scaling shape**. PDA(OAA) exposes the same
+semantic ingredients split across `5A09/5A0A/5A0D`. Conversely, although `5202`
+explicitly records `LCA presence information`, the complete 1,130-row dictionary contains
+**no LCA-named lateral-ID/pinion-angle/assist-gain/damping-gain request tuple**. That is
+consistent with the independent `EMPS_P5` Target Lateral ID value **11 = LTA/LCA**, but
+it does not prove `5631` carries LCA at runtime or identify the producer/copy direction.
+`5285` is the byte1 arbitration-result lateral ID, `560D` carries signed EPS pinion angle
+in bytes4-5 at **0.001**, and `57DE` is signed arbitration-result pinion angle in bytes1-2
+at **0.001**. The recovered `SYSTEM_TYPE` enum is `0=None, 1=AHBAHS, 2=LDA, 3=PCS,
+4=IDA, 5=URSM, 6=SDG`; the LCS steer-override, steering-angle-speed, LTA hands-free-cancel
+and LCA-cancel RoBs are all explicitly **type 2=LDA**. Recovered viewer control flow proves
+that label is trigger taxonomy rather than a per-DID binding: `CheckMultiTriggerInfo` compares
+RoB `SystemType`/`Group`, whereas `AnalyzeRoBParameter` scans the global DID table and never
+reads `SystemType`. It therefore cannot be promoted to physical ECU ownership. Their sampling
+windows are respectively 0.2 s/36+8, 0.4/10+11, 1.0/3+7 and 0.2/20+5 pre/post records.
 
 The viewer also independently exposes `LogAnalyserEB12` (RoB code/trigger) and
 `LogAnalyserEB13` (RoB code/frame/DID data), matching the already byte-anchored FRC

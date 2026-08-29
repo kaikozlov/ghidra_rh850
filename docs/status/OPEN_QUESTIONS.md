@@ -926,8 +926,17 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   acquisition path is now recovered (`AB11/12/13 -> EB11/12/13`; Image-FFD
   `22 11 03 -> 22 11 01 -> 27 03/04 -> 22 20 81`), TSE persists PCS FFD sections,
   and PCS Data Viewer names the longitudinal/lateral request and arbitration model.
-  TMS-084 now closes the former managed-table gap too: 1,130 exact bit/scaling rows
-  across 623 recorder DIDs, 47 RoB definitions, and the current FCM TSS3 image decode
+  TMS-084 now closes the former managed-table gap too: 1,130 exact bit/scaling rows,
+  plus Toyota's exact `SYSTEM_TYPE` enum (`2=LDA`) showing the LCS/LTA/LCA steering
+  RoBs belong to the LDA recorder domain. Recovered viewer flow proves this is trigger
+  taxonomy (`CheckMultiTriggerInfo` compares `SystemType`/`Group`; `AnalyzeRoBParameter`
+  scans all DID definitions without reading `SystemType`), not physical ECU/network-producer
+  ownership. The same table proves `5282`, LDA `5531`, and LTA `5631`
+  have identical four-field request geometry, while explicit LCA presence/state exists with
+  **no LCA-named request tuple** anywhere in the 1,130 rows; that is consistent with the
+  independently named EPS profile `11=LTA/LCA`, but does not establish runtime copy direction
+  or producer ownership. Those 1,130 rows span 623 recorder DIDs; the artifact also contains
+  47 RoB definitions and the current FCM TSS3 image decode
   (`AB31/EB31`, `AB33/EB33`, exact byte-9 variable-length block grammar, `6002..6017`
   split reassembly to `6001`, then `622081` value `01` unencrypted or
   `reverse_bits8(cipher_byte) XOR 0xAA`).

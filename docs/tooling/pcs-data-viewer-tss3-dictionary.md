@@ -202,11 +202,42 @@ High-value lateral rows are no longer inferred from names alone:
 | `57DE` | Arbitration result Pinion angle | byte 1, bit pos 7, length 16 | signed, **LSB 0.001**, point 3 |
 
 `5531` and `5631` also have the same byte-1 lateral ID, byte-4 steering-assist
-gain (`0.01`), and byte-5 damping gain (`0.01`) layout as `5282`. The RoB table
-now pins sampling windows too: for example `209D` **LCS Steer Override** is
-0.2-s sampling with 36 pre / 8 post records; `2818` **Steering Angle Speed
-Threshold Exceeded** is 0.4 with 10/11; `2845` **LTA Hands Free Cancel** is 1.0
-with 3/7; and `240F` **LCA Cancel** is 0.2 with 20/5.
+gain (`0.01`), and byte-5 damping gain (`0.01`) layout as `5282`. The recovered
+managed enum `SYSTEM_TYPE` is exact Toyota terminology: **0=None, 1=AHBAHS,
+2=LDA, 3=PCS, 4=IDA, 5=URSM, 6=SDG**. The 47 RoBs split as 1 AHBAHS, 20 LDA,
+14 PCS, 6 IDA, 5 URSM, and 1 SDG. In particular, `209D` **LCS Steer Override**,
+`2818` **Steering Angle Speed Threshold Exceeded**, `2845` **LTA Hands Free
+Cancel**, and `240F` **LCA Cancel** are all explicitly `SystemType=2` = **LDA**.
+Their sampling windows are respectively 0.2 s with 36/8 pre/post, 0.4 with
+10/11, 1.0 with 3/7, and 0.2 with 20/5.
+
+This is a useful **recorder-domain** attribution: Toyota groups the LTA/LCA/LCS
+trigger family under its LDA system type. Recovered control flow makes the boundary
+explicit: `CheckMultiTriggerInfo` compares `RoBCodeInfo.SystemType` and `Group`, while
+`AnalyzeRoBParameter` iterates the **global** DID definition table (`GetDataCount` /
+`GetDetailBitAssignInfo` / `GetValue`) and never reads `SystemType`. Therefore the enum
+classifies RoB trigger families; it is not a per-DID ECU/producer label and does not by
+itself prove which ECU constructs `5282` or the vehicle-network lateral command.
+
+The request schema itself adds a second bounded result. Generic `5282`, LDA
+`5531`, and LTA `5631` are not merely similar by name: the recovered table gives
+all three the **same four-field byte/bit/scaling geometry** — byte1 lateral ID,
+bytes2-3 signed pinion-angle request at `0.001`, byte4 steering-assist gain at
+`0.01`, and byte5 damping gain at `0.01`. PDA(OAA) carries the same semantic
+ingredients but splits them across `5A09` (6-bit lateral ID), `5A0A` (signed
+pinion-angle request at `0.001`) and `5A0D` (assist/damping gains at `0.01`).
+Generic arbitration outputs are separately recorded as `5285` lateral ID and
+`57DE` signed pinion angle at `0.001`.
+
+**LCA is the notable negative.** `5202` explicitly contains `LCA presence
+information`, and the viewer has extensive LCA state/DDR/display fields, but
+across all 1,130 current bit-assignment rows there is **no LCA-named lateral-ID,
+pinion-angle, steering-assist-gain or damping-gain request tuple**. That schema
+shape is consistent with the independently recovered `EMPS_P5` Target Lateral
+ID dictionary using one shared profile value **11 = LTA/LCA**. It does **not**
+prove that `5631` is the runtime LCA carrier, establish copy direction between
+`5631` and `5282`, or identify the ECU/network producer. Those require dynamic
+Operation-FFD data or producer firmware/dataflow.
 
 ## 7. Join to the current FRC_P5 proprietary protocol
 

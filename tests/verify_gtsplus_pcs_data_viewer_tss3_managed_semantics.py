@@ -32,6 +32,9 @@ def main() -> int:
     check("Operation-FFD bit-assignment row census", operation["detail_row_count"] == 1130)
     check("Operation-FFD DID census", operation["did_count"] == 623)
     check("RoB/trigger row census", data["rob_codes"]["row_count"] == 47)
+    check("TSS3 RoB system enum", data["rob_codes"]["system_type_enum"] == {"0": "None", "1": "AHBAHS", "2": "LDA", "3": "PCS", "4": "IDA", "5": "URSM", "6": "SDG"})
+    usage = data["rob_codes"]["system_type_usage"]
+    check("RoB SYSTEM_TYPE classifies triggers rather than DIDs", usage["did_decode_scans_full_definition_table"] and not usage["analyze_rob_parameter_reads_system_type"] and usage["multi_trigger_matching_compares_system_type_and_group"])
     check("physical conversion formula", operation["physical_value_contract"]["formula"] == "physical = raw * Lsb + Offset")
 
     rows = {(row["DataID"], row["DataName"]): row for row in operation["detail_rows"]}
@@ -51,6 +54,16 @@ def main() -> int:
         actual = (row["BytePosition"], row["BitPosition"], row["BitLength"], row["Type"], row["Lsb"], row["Offset"], row["Point"])
         check(f"{key[0]} {key[1]} byte/bit/scaling contract", actual == values)
 
+    arbitration = operation["lateral_arbitration_schema"]
+    check("generic/LDA/LTA request tuple shape equivalence", arbitration["shape_equivalence"]["generic_5282_equals_lda_5531_equals_lta_5631"])
+    check("generic lateral request DID", arbitration["generic_request"]["data_id"] == "5282")
+    check("LDA lateral request DID", arbitration["feature_requests"]["LDA"]["data_id"] == "5531")
+    check("LTA lateral request DID", arbitration["feature_requests"]["LTA"]["data_id"] == "5631")
+    check("PDA(OAA) lateral request split DIDs", arbitration["feature_requests"]["PDA_OAA"]["data_ids"] == ["5A09", "5A0A", "5A0D"])
+    check("LCA is present but has no dedicated recorder request tuple", arbitration["feature_requests"]["LCA"]["presence_field"]["DataName"] == "LCA presence information" and arbitration["feature_requests"]["LCA"]["dedicated_request_tuple_rows"] == [])
+    check("generic arbitration result ID", arbitration["arbitration_result"]["lateral_id"]["DataID"] == "5285")
+    check("generic arbitration result pinion angle", arbitration["arbitration_result"]["pinion_angle"]["DataID"] == "57DE")
+
     rob = {row["rob_code"]: row for row in data["rob_codes"]["rows"]}
     for code, name, sampling, pre, post in (
         ("209D", "LCS Steer Override", "0.2", 36, 8),
@@ -60,6 +73,7 @@ def main() -> int:
     ):
         row = rob[code]
         check(f"RoB {code} definition", (row["DataName"], row["Sampling"], row["PreTriggerNumber"], row["PostTriggerNumber"]) == (name, sampling, pre, post))
+        check(f"RoB {code} Toyota system family", row["SystemType"] == 2 and row["SystemName"] == "LDA")
 
     image = data["image_ffd"]["fcm_tss3"]
     check("FCM TSS3 image specs", image["accepted_specs"] == [5, 7])
