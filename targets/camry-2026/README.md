@@ -282,3 +282,20 @@ still refuses to execute while `pandad` is running. It is **not** the preferred
 road-capture path. A new live artifact is not claimed until the exact car actually
 runs the integrated oracle and the resulting privacy-minimized evidence is promoted
 with provenance.
+
+## OQ-052 synchronized Brake/FRC TSS3-request capture (read-only)
+
+The longitudinal discriminator is turnkey: during stock DRCC engagement, run the
+exclusive-Panda poller exactly like the LTA fallback (never while `pandad` runs):
+
+```bash
+tools/camry_tss3_request_capture.py --execute --out captures/oq052_$(date +%Y%m%d_%H%M%S)
+tools/analyze_camry_tss3_request_capture.py captures/oq052_* --json summary.json
+```
+
+It round-robins Brake `0x7B0` `22 10 A1..A4` and FRC `0x792` `22 1B 03..1B 07`
+on the same live-proven post-repin bus-0 routes, decodes through the tracked
+diagnostics registry, retains negative NRCs and passive all-bus CAN, and sends
+nothing except those nine reads plus one flow-control frame per multiframe
+response. Live PID support is unmeasured until the first retained artifact; no
+live result is claimed by the tooling itself (§37 of the live baseline).

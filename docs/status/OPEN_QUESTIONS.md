@@ -971,7 +971,13 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   disproves `0x107E` as a live Camry oracle in default/extended sessions. The immediate
   new read-only Camry oracle is therefore Brake `0x7B0`: `22 10 A1`..`22 10 A4`
   (**live support unmeasured**), synchronized with FRC `0x792` `22 1B 03`..`22 1B 07`,
-  stock DRCC engagement, Operation FFD and all-bus capture. Do not add a TSS3
+  stock DRCC engagement, Operation FFD and all-bus capture. That synchronized
+  read-only discriminator is now turnkey: `tools/camry_tss3_request_capture.py`
+  polls the nine pinned reads on one monotonic clock with registry-driven
+  decoding, multiframe response assembly, NRC retention, and passive all-bus
+  capture, and `tools/analyze_camry_tss3_request_capture.py` summarizes the
+  artifact deterministically (VAR-086; no live run claimed yet — the remaining
+  step is the vehicle capture itself during stock DRCC). Do not add a TSS3
   longitudinal builder or Panda whitelist until that wire/auth contract is target-native.
   Canonical: [../tooling/techstream.md](../tooling/techstream.md) §6.2.4,
   `data/generated/gtsplus_2026/tss3_control_ownership_surface.json`, and
