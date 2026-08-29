@@ -254,8 +254,9 @@ control-arbitration signals; P6 `0x3486` arbitration names remain successor-only
 There is therefore no remaining generic GTS+ ownership/name sweep to perform. The next
 high-value evidence is **target-native dynamic/firmware correlation**. Exact Camry Brake
 firmware acquisition is already deterministically bounded by VAR-069: `0x7B0`, F181
-`F152633K0000`, assembly `8954147040`, zero local 07B0 CUWs, and a Toyota/TIS exact-VIN
-ECU-supply-change query as the only provenance-safe external route. VAR-070 already rejects
+`F152633K0000`, assembly `8954147040`, zero local 07B0 CUWs, zero exact identity hits in
+the full raw/recognized-decoded CUW census, no retained local package/session cache, and a
+Toyota/TIS exact-VIN ECU-supply-change query as the only provenance-safe external route. VAR-070 already rejects
 `0x107E` live on this Camry. The synchronized read-only poll itself is now turnkey
 (VAR-086): run `tools/camry_tss3_request_capture.py --execute` during stock DRCC to poll
 Brake `0x7B0` `22 10 A1..A4` (currently unmeasured for live support) together with FRC
@@ -272,8 +273,7 @@ parallel **VDAS** host path: if PCS Vehicle Data Analysis can export a `.vdas` d
 same session, preserve it too. VDAS is a standard ZIP containing UTF-8 `json.log` and
 explicitly carries `TSS3OperationFFD.log -> Gts.Tss3Ffd.Data` plus
 `ImageFFD.log -> Gts.PcsImg.Data`, so it may be the easiest direct PCS recorder artifact to
-correlate against CAN.
-because the converter skips the PCS Operation/Image FFD sections. Treat generation-22
+correlate against CAN. Treat generation-22
 `ADCU_P6` only as a successor terminology oracle. Canonical:
 `data/generated/gtsplus_2026/tss3_control_ownership_surface.json`,
 `data/generated/gtsplus_2026/tss3_native_recorder_protocol.json`,
@@ -503,9 +503,13 @@ Static priority is now the remaining upstream stock-LTA authority/value into `CC
 
 **VAR-069 exact Brake producer acquisition:** the producer search is now narrowed to
 same-car category-435 identities `F152633K0000` / `8954147040` at physical `0x7B0`.
-The complete pinned 26-CUW raw descriptor census has zero `07B0` and zero exact-identity
-matches. `T-0051-26` is the only local Camry package but is `0724` Engine/MG, and the
-tracked 24TC01 Brake campaign is Corolla-only. Do not scan those payloads as Brake code
+The complete pinned 26-CUW descriptor census has zero `07B0`, and the stronger raw +
+recognized-decoded byte census (538,136,128 S-record data bytes + 28,573,696 ZV/LZF bytes)
+has zero exact `F152633K0000`/`8954147040` hits. The two raw `F152633` prefix hits are
+seven-nibble S-record-text coincidences. Retained AgentLite/DataSync/DOWNLOAD/AutoSave and
+session/package suffix censuses also contain no reusable local calibration/session package.
+`T-0051-26` is the only local Camry package but is `0724` Engine/MG, and the tracked 24TC01
+Brake campaign is Corolla-only. Do not scan those payloads as Brake code
 or invent an F181-derived download URL. The acquisition route is the authenticated
 Toyota/TIS ECU-supply-change query for the exact VIN with `ecuAssyNo=8954147040` and
 `baseSwNo=[F152633K0000]`; only a returned, provenance-pinned `DiagID=07B0` package can

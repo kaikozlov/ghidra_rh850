@@ -14,9 +14,11 @@ REPO = Path(__file__).resolve().parents[1]
 ARTIFACT = REPO / "data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json"
 BUILDER = REPO / "tools/techstream/build_camry_f152633k0000_brake_acquisition.py"
 CUW_ROOT = REPO / "software/Techstream/cuw"
+GTSPLUS_TREE = REPO / "software/Techstream/gtsplus/unpacked/gtsplus"
 sys.path.insert(0, str(REPO / "tools/techstream"))
 
 from cuw_attach import parse_attach_bytes  # noqa: E402
+import cuw_identity_census as census  # noqa: E402
 
 passed = failed = 0
 oracle = "generated_self_check+independent_external_artifact+raw_bytes"
@@ -44,8 +46,8 @@ def descriptor(path: Path) -> dict[str, dict[str, str]]:
     return parse_attach_bytes(payload)
 
 
-if not CUW_ROOT.is_dir():
-    print("[SKIP] Toyota CUW reference corpus unavailable")
+if not CUW_ROOT.is_dir() or not GTSPLUS_TREE.is_dir():
+    print("[SKIP] Toyota CUW/GTS+ reference corpus unavailable")
     raise SystemExit(77)
 
 spec = importlib.util.spec_from_file_location("camry_brake_acquisition_builder", BUILDER)
@@ -55,7 +57,7 @@ spec.loader.exec_module(mod)
 art = json.loads(ARTIFACT.read_text(encoding="utf-8"))
 
 check("artifact regenerates exactly", art == mod.build())
-check("schema exact", art["schema"] == "camry-f152633k0000-brake-acquisition-v1")
+check("schema exact", art["schema"] == "camry-f152633k0000-brake-acquisition-v2")
 
 target = art["exact_target"]
 check(
@@ -106,6 +108,83 @@ check(
     "producer runtime bytes are unavailable",
     local["producer_firmware_available"] is False
     and local["decoded_producer_application_available"] is False,
+)
+
+byte_census = local["byte_level_census"]
+check(
+    "full CUW byte/image census covers all packages with zero exact identity hits",
+    byte_census["package_count"] == 26
+    and byte_census["decoded_member_count"] == 46
+    and byte_census["exact_identity_hits"] == []
+    and byte_census["identities"] == {"f181": "F152633K0000", "ecu_part": "8954147040"},
+)
+check(
+    "correctly framed S-record and ZV decoded-byte census is pinned",
+    byte_census["srecord_decoded_record_count"] == 33567972
+    and byte_census["srecord_decoded_bytes"] == 538136128
+    and byte_census["zv_decoded_record_count"] == 6976
+    and byte_census["zv_decoded_bytes"] == 28573696,
+)
+expected_prefix_hits = [
+    {"filename": "T-0015-20.cuw", "package_offset": 5001412},
+    {"filename": "T-0150-24.cuw", "package_offset": 251781836},
+]
+check(
+    "only raw F152633 family-prefix hits are the two pinned S-record nibble coincidences",
+    byte_census["raw_family_prefix_hits"] == expected_prefix_hits
+    and "seven hex nibbles" in byte_census["raw_family_prefix_disposition"],
+)
+for hit in expected_prefix_hits:
+    raw = (CUW_ROOT / hit["filename"]).read_bytes()
+    offset = hit["package_offset"]
+    line_start = raw.rfind(b"\n", 0, offset) + 1
+    line_end = raw.find(b"\n", offset)
+    line = raw[line_start:line_end if line_end >= 0 else len(raw)].strip()
+    check(
+        f"{hit['filename']} family-prefix hit is inside S-record hex text, not an identity string",
+        line.startswith((b"S1", b"S2", b"S3"))
+        and b"F152633" in line
+        and b"F152633K0000" not in line
+        and b"46313532363333" not in line,
+    )
+
+# Unit-check the streamed S-record framing/carry independently of the external
+# corpus. The target is deliberately split across two S3 data records.
+def s3(address: int, data: bytes) -> bytes:
+    count = 4 + len(data) + 1
+    return f"S3{count:02X}{address:08X}".encode() + data.hex().upper().encode() + b"00\n"
+
+pattern, lookup, max_pattern = census._patterns({"f181": "F152633K0000"})
+records, decoded_bytes, synthetic_hits = census._scan_srecords(
+    s3(0x1000, b"abcF152") + s3(0x1007, b"633K0000xyz"),
+    pattern,
+    lookup,
+    max_pattern,
+)
+check(
+    "streamed S-record scanner excludes count/address/checksum and catches cross-record identities",
+    records == 2
+    and decoded_bytes == len(b"abcF152633K0000xyz")
+    and synthetic_hits == [{"identity": "f181", "encoding": "ascii", "offset": 3}],
+)
+
+runtime = local["retained_runtime_state"]
+check(
+    "retained AgentLite channel contains exactly the 11 host-software components",
+    [row["component"] for row in runtime["completed_updater_components"]] == [
+        "CUWPlusPF.exe", "Setup_DB.exe", "Setup_DataSync.exe", "Setup_GUI.exe",
+        "Setup_GuiServer.exe", "Setup_InfoCenter.exe", "Setup_NativeGraphViewer.exe",
+        "Setup_PCSDataViewer.exe", "Setup_PF.exe", "Setup_TSEConverter.exe",
+        "GTSPlusParentInstaller_NA.exe",
+    ],
+)
+check(
+    "retained GTS+ package/session surfaces contain no hidden vehicle package",
+    runtime["calibration_package_references"] == []
+    and runtime["datasync_db_rows"] == {"hash_info": 0, "logging_history": 0, "process_info": 0}
+    and runtime["download_cache_files"] == []
+    and runtime["autosave_files"] == ["READ ME.txt"]
+    and runtime["session_or_package_files"] == [],
 )
 
 requested = art["requested_producer_searches"]
@@ -163,9 +242,11 @@ check(
     "final boundary is acquisition-only and no-live-I/O",
     conclusion == {
         "acquisition_blocker_deterministic": True,
+        "byte_level_absence_deterministic": True,
         "exact_identity_search_route_identified": True,
         "exact_producer_firmware_locally_available": False,
         "no_live_vehicle_action_performed": True,
+        "offline_package_availability_data_present": False,
         "package_url_identified": False,
         "producer_analysis_completed": False,
     },

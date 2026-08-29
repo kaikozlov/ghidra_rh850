@@ -60,7 +60,164 @@
     "url_policy": "Do not synthesize /t3Portal/calibration/F152633K0000 or any other URL. The exact F181 is a search input/current software identity, not a proved downloadable target CID."
   },
   "local_corpus": {
-    "boundary": "This is an exhaustive raw attach.att descriptor census of the pinned local 26-CUW corpus. It proves local absence only, not absence from Toyota/TIS or from an unretained package.",
+    "boundary": "The pinned 26-CUW corpus is covered both at CRC-checked attach.att descriptor level and by a full raw-container/recognized-decoded-image identity census. This proves local absence only, not absence from Toyota/TIS or from an unretained package.",
+    "byte_level_census": {
+      "decoded_member_count": 46,
+      "exact_identity_hits": [],
+      "identities": {
+        "ecu_part": "8954147040",
+        "f181": "F152633K0000"
+      },
+      "package_count": 26,
+      "packages": [
+        {
+          "decoded_member_count": 1,
+          "filename": "T-0002-21 - 04A72.cuw",
+          "format_type": 4
+        },
+        {
+          "decoded_member_count": 1,
+          "filename": "T-0003-21 - 04B42.cuw",
+          "format_type": 4
+        },
+        {
+          "decoded_member_count": 1,
+          "filename": "T-0003-25.cuw",
+          "format_type": 103
+        },
+        {
+          "decoded_member_count": 1,
+          "filename": "T-0004-21 - 04B91.cuw",
+          "format_type": 4
+        },
+        {
+          "decoded_member_count": 1,
+          "filename": "T-0005-25.cuw",
+          "format_type": 103
+        },
+        {
+          "decoded_member_count": 4,
+          "filename": "T-0008-22.cuw",
+          "format_type": 103
+        },
+        {
+          "decoded_member_count": 1,
+          "filename": "T-0009-22.cuw",
+          "format_type": 103
+        },
+        {
+          "decoded_member_count": 1,
+          "filename": "T-0011-21 - 04C21.cuw",
+          "format_type": 4
+        },
+        {
+          "decoded_member_count": 2,
+          "filename": "T-0012-21 - 04B82.cuw",
+          "format_type": 4
+        },
+        {
+          "decoded_member_count": 1,
+          "filename": "T-0014-20 - 04B14.cuw",
+          "format_type": 4
+        },
+        {
+          "decoded_member_count": 0,
+          "filename": "T-0015-20.cuw",
+          "format_type": 102
+        },
+        {
+          "decoded_member_count": 2,
+          "filename": "T-0022-20 - 04B33.cuw",
+          "format_type": 4
+        },
+        {
+          "decoded_member_count": 2,
+          "filename": "T-0023-20 - 04B81.cuw",
+          "format_type": 4
+        },
+        {
+          "decoded_member_count": 2,
+          "filename": "T-0034-18 - 04B04.cuw",
+          "format_type": 4
+        },
+        {
+          "decoded_member_count": 0,
+          "filename": "T-0035-22.cuw",
+          "format_type": 101
+        },
+        {
+          "decoded_member_count": 2,
+          "filename": "T-0036-18 - 04A61.cuw",
+          "format_type": 4
+        },
+        {
+          "decoded_member_count": 0,
+          "filename": "T-0036-22.cuw",
+          "format_type": 101
+        },
+        {
+          "decoded_member_count": 1,
+          "filename": "T-0037-18 - 04A71.cuw",
+          "format_type": 4
+        },
+        {
+          "decoded_member_count": 10,
+          "filename": "T-0051-26.cuw",
+          "format_type": 103
+        },
+        {
+          "decoded_member_count": 2,
+          "filename": "T-0058-23.cuw",
+          "format_type": 103
+        },
+        {
+          "decoded_member_count": 2,
+          "filename": "T-0060-23.cuw",
+          "format_type": 103
+        },
+        {
+          "decoded_member_count": 2,
+          "filename": "T-0061-23.cuw",
+          "format_type": 103
+        },
+        {
+          "decoded_member_count": 2,
+          "filename": "T-0062-23.cuw",
+          "format_type": 103
+        },
+        {
+          "decoded_member_count": 1,
+          "filename": "T-0087-17.cuw",
+          "format_type": 4
+        },
+        {
+          "decoded_member_count": 2,
+          "filename": "T-0149-24.cuw",
+          "format_type": 103
+        },
+        {
+          "decoded_member_count": 2,
+          "filename": "T-0150-24.cuw",
+          "format_type": 103
+        }
+      ],
+      "raw_family_prefix_disposition": "The two raw F152633 occurrences are seven hex nibbles embedded inside unrelated S-record text. They are not string encodings of F152633/F152633K0000 and neither decoded image contains the exact identity.",
+      "raw_family_prefix_hits": [
+        {
+          "filename": "T-0015-20.cuw",
+          "package_offset": 5001412
+        },
+        {
+          "filename": "T-0150-24.cuw",
+          "package_offset": 251781836
+        }
+      ],
+      "scope": "Every CUW is scanned byte-for-byte in direct, UTF-16, inverted and textual-hex representations. Recognized S-record CPU members are additionally streamed as decoded binary with cross-record carry; recognized ASCII-hex ZV/LZF members are decompressed and scanned as logical image bytes. Unknown/opaque tail representations remain raw-byte covered only.",
+      "srecord_decoded_bytes": 538136128,
+      "srecord_decoded_record_count": 33567972,
+      "zv_decoded_bytes": 28573696,
+      "zv_decoded_record_count": 6976
+    },
     "camry_package_rejection": "T-0051-26 is a validated 2025-26 AXVH85 CAMRY P5-Unified package, but Node01/DiagID=0724 and its 8A28/8A29/8A2A calibration family identify the Engine/MG package, not Brake/EPB 07B0.",
     "camry_packages": [
       {
@@ -91,7 +248,89 @@
     },
     "exact_descriptor_value_matches": [],
     "package_count": 26,
-    "producer_firmware_available": false
+    "producer_firmware_available": false,
+    "retained_runtime_state": {
+      "autosave_files": [
+        "READ ME.txt"
+      ],
+      "boundary": "This is retained local GTS+ runtime/updater state only. Empty caches and zero package-name references do not prove Toyota/TIS lacks the exact calibration; they prove the pinned local distribution did not retain a reusable vehicle package/session specimen in these surfaces.",
+      "calibration_package_references": [],
+      "completed_updater_components": [
+        {
+          "component": "CUWPlusPF.exe",
+          "version": "05.03.013"
+        },
+        {
+          "component": "Setup_DB.exe",
+          "version": "01.01.037"
+        },
+        {
+          "component": "Setup_DataSync.exe",
+          "version": "01.02.016"
+        },
+        {
+          "component": "Setup_GUI.exe",
+          "version": "06.03.002"
+        },
+        {
+          "component": "Setup_GuiServer.exe",
+          "version": "07.03.000"
+        },
+        {
+          "component": "Setup_InfoCenter.exe",
+          "version": "01.01.018"
+        },
+        {
+          "component": "Setup_NativeGraphViewer.exe",
+          "version": "01.02.013"
+        },
+        {
+          "component": "Setup_PCSDataViewer.exe",
+          "version": "12.00.005"
+        },
+        {
+          "component": "Setup_PF.exe",
+          "version": "01.01.047"
+        },
+        {
+          "component": "Setup_TSEConverter.exe",
+          "version": "01.02.002"
+        },
+        {
+          "component": "GTSPlusParentInstaller_NA.exe",
+          "version": "2026.03.002.02"
+        }
+      ],
+      "datasync_db_rows": {
+        "hash_info": 0,
+        "logging_history": 0,
+        "process_info": 0
+      },
+      "download_cache_files": [],
+      "searched_suffixes": [
+        ".cal",
+        ".cuw",
+        ".gtse",
+        ".tse",
+        ".vdas",
+        ".xxz"
+      ],
+      "session_or_package_files": [],
+      "source_identity": {
+        "AgentLite/logs/AgentLite_Message.log": {
+          "sha256": "e0b1c3b83b83fb3aa8cc45f9d7913b10f6cdff09ea8059a7bef34b6534f3d799",
+          "size": 169566
+        },
+        "AgentLite/logs/AgentLite_Service.log": {
+          "sha256": "f238b6f03460d191f00e6051f7479748eae9c9bdb2d2c3889e43cc7269b1116c",
+          "size": 54379
+        },
+        "GTSPlusDataSyncDb/GTSPlusDataSync.db": {
+          "sha256": "1bfd03638f49f445bad9e8e13b7f680c06c34f9e66f575e44980b41b172ecee1",
+          "size": 28672
+        }
+      }
+    }
   },
   "next_step_after_acquisition": {
     "register_only_if_plaintext_runtime_code_is_recovered": true,
@@ -120,7 +359,7 @@
     },
     "why": "No decoded category-435 07B0 producer application is available. Searching opaque or unrelated payloads for executable Tx/SecOC constants would not be firmware evidence."
   },
-  "schema": "camry-f152633k0000-brake-acquisition-v1",
+  "schema": "camry-f152633k0000-brake-acquisition-v2",
   "sources": {
     "data/external/toyota_corolla_2023_calibration_campaigns.json": {
       "sha256": "08abdf76eedb6bc551e17685b580aaca3580ebf365951dd264eee9c643c7308c"
@@ -133,13 +372,18 @@
     },
     "data/generated/techstream_v18/tss3_b6_sender_attribution.json": {
       "sha256": "72bad7b601a7c3bc2492a64cfa3fa1042b84959176b1ead5b8b63639c1bcd9aa"
+    },
+    "software/locks/gtsplus.json": {
+      "sha256": "f6f5a072d3ef890787b9e09f7b54fed6dc00d3e367a66f632a05a435bbe2e5ed"
     }
   },
   "static_conclusion": {
     "acquisition_blocker_deterministic": true,
+    "byte_level_absence_deterministic": true,
     "exact_identity_search_route_identified": true,
     "exact_producer_firmware_locally_available": false,
     "no_live_vehicle_action_performed": true,
+    "offline_package_availability_data_present": false,
     "package_url_identified": false,
     "producer_analysis_completed": false
   },

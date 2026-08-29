@@ -966,8 +966,10 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   executor, SecOC/integrity signer/freshness owner, lead/distance/standstill feedback, and
   safe stock-source suppression/fallback. VAR-069 already pins the exact Camry Brake
   producer acquisition blocker: `0x7B0->0x7B8`, F181 `F152633K0000`, DID0105
-  `8954147040`, **zero local `DiagID=07B0` CUWs**, and an authenticated Toyota/TIS
-  search route requiring the exact VIN + assembly + base-software values. VAR-070 already
+  `8954147040`, **zero local `DiagID=07B0` CUWs**, zero exact identity hits across the full
+  raw/recognized-decoded 26-CUW byte census, no retained local GTS+ calibration/session
+  cache, and an authenticated Toyota/TIS search route requiring the exact VIN + assembly +
+  base-software values. VAR-070 already
   disproves `0x107E` as a live Camry oracle in default/extended sessions. The immediate
   new read-only Camry oracle is therefore Brake `0x7B0`: `22 10 A1`..`22 10 A4`
   (**live support unmeasured**), synchronized with FRC `0x792` `22 1B 03`..`22 1B 07`,

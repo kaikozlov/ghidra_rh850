@@ -3183,7 +3183,11 @@ exact-target firmware or synchronized live FRC/brake/recorder/CAN evidence; do n
 them from recorder hosting. The exact Camry acquisition boundary is already pinned by
 VAR-069/070: Brake is `0x7B0->0x7B8`, F181 `F152633K0000`, DID0105
 `8954147040`, but the 26-package local CUW corpus has **zero `DiagID=07B0`** packages.
-The legitimate external acquisition route is Toyota/TIS ECU-supply-change search using the
+VAR-069 now additionally scans every raw CUW and 46 recognized decoded CPU members
+(538,136,128 S-record data bytes + 28,573,696 ZV/LZF bytes) with zero exact identity hits;
+the two raw `F152633` prefix hits are unrelated S-record hex-nibble coincidences. Retained
+AgentLite/DataSync/download/session state also contains no reusable local vehicle package.
+Those negatives remain local-only. The legitimate external acquisition route is Toyota/TIS ECU-supply-change search using the
 exact VIN plus `ecuAssyNo=8954147040` and `baseSwNo=[F152633K0000]`; package availability
 and a calibration URL are not known and must not be synthesized from F181. The older
 Brake `0x107E ADS Control EPS Pinion Angle2` oracle has already been live-rejected by the

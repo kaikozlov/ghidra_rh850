@@ -20,17 +20,19 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from techstream_paths import CUW_CORPUS_ROOT
+from techstream_paths import CUW_CORPUS_ROOT, resolve_gts_root
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from cuw_attach import parse_attach_bytes  # noqa: E402
+from cuw_identity_census import scan_cuw_corpus, scan_retained_gtsplus_state  # noqa: E402
 
 LIVE = REPO / "data/generated/camry_2026_nrtd_p5.json"
 CORPUS = REPO / "data/generated/techstream_v18/cuw_frc_corpus.json"
 SENDER = REPO / "data/generated/techstream_v18/tss3_b6_sender_attribution.json"
 CAMPAIGNS = REPO / "data/external/toyota_corolla_2023_calibration_campaigns.json"
+GTSPLUS_LOCK = REPO / "software/locks/gtsplus.json"
 DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json"
 
 EXACT_F181 = "F152633K0000"
@@ -155,6 +157,50 @@ def build() -> dict[str, Any]:
     if camry_packages[0]["diag_id"] != "0724":
         raise ValueError("the local Camry contrast package is no longer the 0724 Engine/MG package")
 
+    byte_census = scan_cuw_corpus(
+        CUW_CORPUS_ROOT,
+        {"f181": EXACT_F181, "ecu_part": EXACT_ECU_PART},
+        family_prefix=b"F152633",
+    )
+    expected_prefix_hits = [
+        {"filename": "T-0015-20.cuw", "package_offset": 5001412},
+        {"filename": "T-0150-24.cuw", "package_offset": 251781836},
+    ]
+    if byte_census["package_count"] != 26 or byte_census["exact_identity_hits"]:
+        raise ValueError("exact Camry Brake identity appeared in the full CUW byte/image census")
+    if byte_census["raw_family_prefix_hits"] != expected_prefix_hits:
+        raise ValueError(f"F152633 raw-prefix census drift: {byte_census['raw_family_prefix_hits']}")
+    byte_census["raw_family_prefix_disposition"] = (
+        "The two raw F152633 occurrences are seven hex nibbles embedded inside unrelated S-record text. "
+        "They are not string encodings of F152633/F152633K0000 and neither decoded image contains the exact identity."
+    )
+
+    gts_runtime_root = resolve_gts_root().parents[1]
+    runtime_state = scan_retained_gtsplus_state(gts_runtime_root)
+    expected_components = [
+        {"component": "CUWPlusPF.exe", "version": "05.03.013"},
+        {"component": "Setup_DB.exe", "version": "01.01.037"},
+        {"component": "Setup_DataSync.exe", "version": "01.02.016"},
+        {"component": "Setup_GUI.exe", "version": "06.03.002"},
+        {"component": "Setup_GuiServer.exe", "version": "07.03.000"},
+        {"component": "Setup_InfoCenter.exe", "version": "01.01.018"},
+        {"component": "Setup_NativeGraphViewer.exe", "version": "01.02.013"},
+        {"component": "Setup_PCSDataViewer.exe", "version": "12.00.005"},
+        {"component": "Setup_PF.exe", "version": "01.01.047"},
+        {"component": "Setup_TSEConverter.exe", "version": "01.02.002"},
+        {"component": "GTSPlusParentInstaller_NA.exe", "version": "2026.03.002.02"},
+    ]
+    if runtime_state["completed_updater_components"] != expected_components:
+        raise ValueError("retained AgentLite component census drift")
+    if runtime_state["calibration_package_references"]:
+        raise ValueError("retained AgentLite state now references Toyota calibration package names")
+    if runtime_state["datasync_db_rows"] != {"hash_info": 0, "logging_history": 0, "process_info": 0}:
+        raise ValueError("retained GTSPlusDataSync database is no longer empty")
+    if runtime_state["download_cache_files"] or runtime_state["session_or_package_files"]:
+        raise ValueError("retained GTS+ tree now contains a package/session candidate; inspect it instead of preserving absence")
+    if runtime_state["autosave_files"] != ["READ ME.txt"]:
+        raise ValueError(f"retained AutoSave census drift: {runtime_state['autosave_files']}")
+
     category = gts_json("category", "435")["category"]
     if category != {
         "category_id": 435,
@@ -187,11 +233,11 @@ def build() -> dict[str, Any]:
     }
 
     return {
-        "schema": "camry-f152633k0000-brake-acquisition-v1",
+        "schema": "camry-f152633k0000-brake-acquisition-v2",
         "title": "Exact 2026 Camry Brake/EPB producer acquisition blocker and route",
         "sources": {
             str(path.relative_to(REPO)): {"sha256": sha256_file(path)}
-            for path in (LIVE, CORPUS, SENDER, CAMPAIGNS)
+            for path in (LIVE, CORPUS, SENDER, CAMPAIGNS, GTSPLUS_LOCK)
         },
         "exact_target": {
             "vehicle": "maintainer 2026 Toyota Camry Hybrid",
@@ -211,6 +257,8 @@ def build() -> dict[str, Any]:
             "diag_id_counts": dict(sorted(diag_counts.items())),
             "diag_07b0_matches": diag_matches,
             "exact_descriptor_value_matches": exact_value_matches,
+            "byte_level_census": byte_census,
+            "retained_runtime_state": runtime_state,
             "producer_firmware_available": False,
             "decoded_producer_application_available": False,
             "camry_packages": camry_packages,
@@ -219,8 +267,9 @@ def build() -> dict[str, Any]:
                 "and its 8A28/8A29/8A2A calibration family identify the Engine/MG package, not Brake/EPB 07B0."
             ),
             "boundary": (
-                "This is an exhaustive raw attach.att descriptor census of the pinned local 26-CUW corpus. "
-                "It proves local absence only, not absence from Toyota/TIS or from an unretained package."
+                "The pinned 26-CUW corpus is covered both at CRC-checked attach.att descriptor level and by a full "
+                "raw-container/recognized-decoded-image identity census. This proves local absence only, not absence "
+                "from Toyota/TIS or from an unretained package."
             ),
         },
         "requested_producer_searches": {
@@ -297,6 +346,8 @@ def build() -> dict[str, Any]:
         },
         "static_conclusion": {
             "exact_producer_firmware_locally_available": False,
+            "byte_level_absence_deterministic": True,
+            "offline_package_availability_data_present": False,
             "producer_analysis_completed": False,
             "acquisition_blocker_deterministic": True,
             "exact_identity_search_route_identified": True,
