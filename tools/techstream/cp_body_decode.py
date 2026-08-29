@@ -96,6 +96,7 @@ phase5c=[False]; phase5c_done=[False]; protector_success=[False]; capture_vprote
 current_module=[None]; current_module_ptr=[None]; pending_resolve=[None]
 import_records=[]; protect_calls=[]; module_protect_calls=[]; restored_image=[None]; captured_entry=[None]; lfsr_addr=[None]
 import_write_hook=[None]; initial_special_hook=[None]; lfsr_hook=[None]; ntqip_hook=[None]; entry_hook=[None]
+synthetic_api_integrity_hook=[None]; synthetic_api_integrity_trusts=[]
 file_handles={}
 mapping_handles={}
 file_offsets={}
@@ -191,6 +192,40 @@ def _install_entry_hook() -> None:
  def _hook(uc,a,size,user):
   captured_entry[0]=a-BASE; stopped_reason[0]='original entry captured'; print(' ORIGINAL_ENTRY',hex(captured_entry[0])); uc.emu_stop()
  entry_hook[0]=uc.hook_add(UC_HOOK_CODE,_hook,begin=BASE+text[2],end=BASE+text[2]+text[1]-1)
+
+def _arm_synthetic_api_integrity_trust(api_address):
+ # Coree-managed EXEs run one protector integrity probe over GetProcAddress.
+ # Synthetic emulator APIs are semantic callbacks, not byte-identical Windows
+ # exports, so the probe cannot validate their prologues. Treat only our own
+ # registered GetProcAddress trampoline as a known-clean export. Derive the
+ # enclosing checker's return address from the live stack/code shape instead
+ # of baking in a protector RVA.
+ expected=addr_by_api.get(('kernel32.dll','GetProcAddress'))
+ if not (is_managed and rel.suffix.lower()=='.exe' and 'gtspluscoree32.dll' in imported_dlls):
+  return
+ if expected is None or api_address != expected or synthetic_api_integrity_hook[0] is not None:
+  return
+ sp=uc.reg_read(UC_X86_REG_ESP); candidates=[]
+ for i in range(8,96):
+  try: candidate=rd32(sp+4*i)
+  except Exception: break
+  if not (BASE <= candidate <= BASE+size_image-24):
+   continue
+  code=bytes(uc.mem_read(candidate,24))
+  if (code[:2]==b'\x85\xc0' and code[4:8]==b'\x8b\x4e\x08\x50' and code[8]==0x68
+      and code[13:19]==b'\x8b\x91\xb4\x00\x00\x00' and code[19:23]==b'\xff\x12\x33\xc0'):
+   candidates.append(candidate)
+ if len(candidates)!=1:
+  raise RuntimeError(f'expected one synthetic-API integrity return site, got {[hex(x-BASE) for x in candidates]}')
+ checker=candidates[0]
+ def _trust(uc,a,size,user):
+  if uc.reg_read(UC_X86_REG_EAX)==0:
+   uc.reg_write(UC_X86_REG_EAX,1)
+  synthetic_api_integrity_trusts.append({'api':'kernel32.dll!GetProcAddress','checker_rva':checker-BASE})
+  if synthetic_api_integrity_hook[0] is not None:
+   uc.hook_del(synthetic_api_integrity_hook[0]); synthetic_api_integrity_hook[0]=None
+  print(' SYNTHETIC_API_INTEGRITY_TRUST','kernel32.dll!GetProcAddress',hex(checker-BASE))
+ synthetic_api_integrity_hook[0]=uc.hook_add(UC_HOOK_CODE,_trust,begin=checker,end=checker)
 
 def hook_initial_special(uc,a,size,user):
  # Unicorn's flat x86 segment model stores DS as zero. AgentLite saves DS and
@@ -368,6 +403,8 @@ def hook_api(uc,a,size,user):
   ret_stdcall(5,1); return
  if name=='WriteFile':
   data=bytes(uc.mem_read(arg(1),arg(2))); print(' WRITEFILE_DATA',data[:512].hex(),repr(data[:512]))
+  if data==b'A0F\r\n':
+   _arm_synthetic_api_integrity_trust(arg(5))
   if lfsr_addr[0] is None:
    pattern=bytes.fromhex('558bec83ec0460ff751064ff350000000064892500000000c745fc210300009c810c24000100009d')
    blob=bytes(uc.mem_read(BASE,size_image)); hits=[]; pos=0
@@ -416,6 +453,18 @@ def hook_api(uc,a,size,user):
   try: print(' CREATEPROCESS app',repr(read_w(arg(0))) if arg(0) else None,'cmd',repr(read_w(arg(1))) if arg(1) else None)
   except Exception as ex: print(' CREATEPROCESS_ERR',repr(ex))
   ret_stdcall(10,0); return
+ if name=='NtQueryInformationProcess':
+  process,cls,buf,ln,retlen=arg(0),arg(1),arg(2),arg(3),arg(4)
+  print(' NTQIP_API',hex(process),'class',cls,'buf',hex(buf),'len',ln,'retlen',hex(retlen))
+  if cls==4 and buf and ln>=32:  # ProcessTimes / KERNEL_USER_TIMES
+   uc.mem_write(buf,b'\0'*32)
+   if retlen: wr32(retlen,32)
+   ret_stdcall(5,0); return
+  if cls in (7,30,31) and buf and ln>=4:  # debug port/object/flags
+   wr32(buf,1 if cls==31 else 0)
+   if retlen: wr32(retlen,4)
+   ret_stdcall(5,0); return
+  ret_stdcall(5,0xC0000003); return
  if name=='NtQuerySystemInformation':
   cls,buf,ln,retlen=arg(0),arg(1),arg(2),arg(3)
   print(' NTQSI',cls,hex(buf),ln,hex(retlen))
@@ -516,16 +565,8 @@ def hook_api(uc,a,size,user):
  if name=='TerminateThread': print(' TERMINATE_THREAD',hex(arg(0)),arg(1)); ret_stdcall(2,1); return
  if name=='ExitProcess':
   print('ExitProcess',arg(0))
-  if is_managed and rel.suffix.lower()=='.exe':
-   # EXE CP does not emit the DLL-only 0x280/000-000-000 markers. Its final
-   # authoritative map is the trailing module-local non-RWX protection pass.
-   candidates=[x for x in module_protect_calls if x[2] != 0x40]
-   if len(candidates)>=4:
-    protect_calls[:] = candidates[-4:]
-    protector_success[0]=True; stopped_reason[0]='managed EXE handoff'
-    if ntqip_hook[0] is not None:
-     uc.hook_del(ntqip_hook[0]); ntqip_hook[0]=None
-    print(' PROTECTOR_SUCCESS_EXE')
+  if not protector_success[0]:
+   stopped_reason[0]='ExitProcess before protector success'
   uc.emu_stop(); return
  if is_managed and dll=='mscoree.dll' and name in ('_CorDllMain','_CorExeMain'):
   stopped_reason[0]='managed CLR handoff'; print(' MANAGED_HANDOFF',name); uc.emu_stop(); return
@@ -650,4 +691,4 @@ print('done eip',hex(uc.reg_read(UC_X86_REG_EIP)),'entry',hex(captured_entry[0] 
 outdir=args.output_dir.resolve(); outdir.mkdir(parents=True,exist_ok=True); stem=rel.name.replace('.','_')
 if restored_image[0] is not None: (outdir/(stem+'.restored.mem')).write_bytes(restored_image[0])
 (outdir/(stem+'.final.mem')).write_bytes(bytes(uc.mem_read(BASE,size_image)))
-(outdir/(stem+'.json')).write_text(json.dumps({'relative_path':str(rel),'entrypoint_rva':captured_entry[0],'imports':import_records,'protect_calls':protect_calls,'lfsr_rva':(lfsr_addr[0]-BASE if lfsr_addr[0] else None),'phase5c_done':phase5c_done[0],'protector_success':protector_success[0]},indent=2))
+(outdir/(stem+'.json')).write_text(json.dumps({'relative_path':str(rel),'entrypoint_rva':captured_entry[0],'imports':import_records,'protect_calls':protect_calls,'lfsr_rva':(lfsr_addr[0]-BASE if lfsr_addr[0] else None),'phase5c_done':phase5c_done[0],'protector_success':protector_success[0],'synthetic_api_integrity_trusts':synthetic_api_integrity_trusts},indent=2))

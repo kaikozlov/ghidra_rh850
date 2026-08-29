@@ -145,11 +145,17 @@ The current census is **143/143** protected CUWPlus bodies (127 native and 16
 CLR-labeled). The same generic CP decoder also closes the **52/52** protected
 auxiliary product bodies outside `GTSPlus`/`CUWPlus` (18 native, 34 CLR-labeled),
 so the complete `Toyota Diagnostics` protected-body census is now **249/249**:
-54 exact installer twins + 143 CUWPlus + 52 auxiliary. Use `tools/gts
-recover-aux-bodies` for the auxiliary trees or `tools/gts recover-all-bodies`
-for one aggregate materialization. The emulator/rebuilder, six independent
-runtime-unpack oracles, managed-image boundary, full product census, and clean-PE
-normalization are documented in [cuwplus-body-recovery.md](cuwplus-body-recovery.md).
+54 exact installer twins + 143 CUWPlus + 52 auxiliary. Managed recovery is now
+semantic rather than metadata-only: every nonzero `MethodDef` RVA must contain a
+materialized body or recovery fails. The coree-managed EXE path is independently
+validated against five exact Toyota installer originals totaling **2,719
+MethodDef rows / 2,637 executable bodies**, with all 2,637 method-body prefixes,
+all five entrypoints, and application section geometry matching the originals.
+Use `tools/gts recover-aux-bodies` for the auxiliary trees or `tools/gts
+recover-all-bodies` for one aggregate materialization. The emulator/rebuilder,
+six independent native runtime-unpack oracles, five managed-EXE installer
+oracles, full product census, and clean-PE normalization are documented in
+[cuwplus-body-recovery.md](cuwplus-body-recovery.md).
 The original `KONN` header and rolling-XOR observations recorded during TMS-081
 were the first stages of that now-complete decoder rather than a permanent
 CUWPlus boundary.

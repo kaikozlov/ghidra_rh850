@@ -3035,17 +3035,32 @@ surface:
 - `0x5631`: LTA Lateral ID + LTA Control Request Pinion Angle;
 - `0x57DB/0x57DE`: arbitration-result acceleration / pinion angle.
 
-The viewer's `DetailBitAssignInfo` schema names the missing per-field decoder columns
-`DataName`, `DataID`, `DataSize`, `SupportDID`, `BytePosition`, `BitPosition`, `BitLength`,
-`InvalidValueList`, `Type`, `Lsb`, `Offset`, and `Point`; concrete initializer contents are
-still hidden because the shipped managed method bodies are protector-zeroed. The viewer
-also independently exposes `LogAnalyserEB12` (RoB code/trigger) and `LogAnalyserEB13`
-(RoB code/frame/DID data), matching the already byte-anchored FRC proprietary Operation-FFD
-`AB 12/13 -> EB 12/13` acquisition family. The exact resource-ID-to-bit-assignment table
-remains bounded, but the host model now proves the **request -> arbitration -> result**
-semantics and the acquisition/decoder family join. Image FFD is independently pinned to
-front-camera recorder IDs `0501/0502/0507/0511/5101` plus raw image DID `6001`.
-See [pcs-data-viewer-tss3-dictionary.md](pcs-data-viewer-tss3-dictionary.md).
+The shipped PCS executable still has protector-zeroed managed bodies, but the generic
+CP decoder now recovers a clean analysis PE with **22,447/22,447 executable `MethodDef`
+bodies materialized**. That closes the previously missing `DetailBitAssignInfo` and
+`RoBCodeDetailInfo` initializers. The generated managed-semantics artifact contains
+**1,130 exact Operation-FFD bit/scaling rows across 623 recorder DIDs** plus **47 exact
+RoB/trigger definitions**, and the recovered `MeasuredValue` code proves
+`physical = raw * Lsb + Offset` with `Point` decimal presentation.
+
+The steering witnesses are now byte-level OEM contracts rather than name-only leads:
+`5282` is byte1 lateral ID, bytes2-3 signed pinion-angle request at **0.001**, byte4
+steering-assist gain at **0.01**, byte5 damping gain at **0.01**; `5531` LDA and `5631`
+LTA use the same four-field layout/scales. `5285` is the byte1 arbitration-result lateral
+ID, `560D` carries signed EPS pinion angle in bytes4-5 at **0.001**, and `57DE` is signed
+arbitration-result pinion angle in bytes1-2 at **0.001**. RoB policy is concrete as well:
+`209D` LCS Steer Override is 0.2 sampling with 36 pre/8 post records, `2818` Steering
+Angle Speed Threshold Exceeded is 0.4 with 10/11, `2845` LTA Hands Free Cancel is 1.0
+with 3/7, and `240F` LCA Cancel is 0.2 with 20/5.
+
+The viewer also independently exposes `LogAnalyserEB12` (RoB code/trigger) and
+`LogAnalyserEB13` (RoB code/frame/DID data), matching the already byte-anchored FRC
+proprietary Operation-FFD `AB 12/13 -> EB 12/13` acquisition family. Image FFD is pinned
+to front-camera recorder IDs `0501/0502/0507/0511/5101` plus variable raw-image DID
+`6001`; its restored initializers now expose minimum lengths, 13 header-field bit layouts,
+and image-RoB timing tables too. See
+[pcs-data-viewer-tss3-dictionary.md](pcs-data-viewer-tss3-dictionary.md) and
+`data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json`.
 
 **The current native recorder acquisition stack is now release-local too.** The protected-body
 recovery supplies the original current `CommandCommon.dll` and
@@ -3059,9 +3074,9 @@ has a current-body end-to-end setup chain: `22 11 03` spec -> `22 11 01` availab
 **`27 03` six-byte seed / `27 04` six-byte level-49 key** -> `22 20 81` encryption method.
 `GetTSS3ImageFFDInfo` directly calls the six-byte `SecurityUnlock` path, not the separate
 16-byte/level-2 implementation. Accepted image specs are 5 and 7; availability value 2
-marks slots 1..10 and 1..11 respectively. This removes the remaining V18 executable-body
-transfer from the native TSS3 recorder acquisition path. It does not remove the separate
-managed PCS Data Viewer initializer boundary.
+marks slots 1..10 and 1..11 respectively. This removes the remaining V18 executable-body transfer from the native TSS3 recorder
+acquisition path. The former managed PCS Data Viewer initializer boundary is now closed
+independently by the CP-managed-EXE recovery above.
 
 **The TSE/GTSE saved-session layer is now structurally recovered.** Current
 `GTS+ TSEConverter` is **01.02.002** and selects `180_Template.csv`; the shipped 173 and
@@ -3075,22 +3090,36 @@ for both PCS FFD section families, closing the persistence side of the host pipe
 The same template fully declares stored ring-buffer signal metadata: frame indexes/lengths,
 signal/frame IDs, start/end bits, names/units, signedness, **MUL/DIV/OFFSET**, decimal
 precision, display patterns, raw min/max, plus ring read/write positions and raw bytes.
-`RingBufferParser.SignalInfo` and `ParseFrameTable`/`ParseSignalInfoList`/`ParseRingBuffer`
-mirror that schema. A critical preservation boundary is explicit in the current config:
+The managed bodies are now executable after CP recovery rather than an analysis boundary.
+`RingBufferParser::ParseRingBuffer` uses an 8-byte timestamp and record stride
+**`8 + 2 * sum(frame lengths)`**. `ConvertNumericValue` handles signed 1/2/4/8-byte values
+and unsigned bitmask/shift extraction, then computes
+**`(raw * MUL / DIV + OFFSET) / 10^decimal_places`**. `Converter.BinaryRead` exposes the
+actual saved-file typed-reader branches and signature resynchronization logic.
+
+`TseCompression` closes the outer GTSE container too: it recursively inventories the
+source tree, appends Toyota's static salt before SHA-256 hashing each file, writes a
+Shift-JIS `list.txt` manifest headed `Target Folder`, creates a Shift-JIS-named ZIP with
+`ZipFile.CreateFromDirectory`, and moves that ZIP to the requested `.GTSE` path. The
+current protected `TSEConverter.exe` itself now recovers with **27/27** executable method
+bodies and entry `0x6BAE`.
+
+A critical preservation boundary remains explicit in the current config:
 `BinarySkipDataNames` includes `RecordOnBehavior共通`, **`PCS時系列作動時FFD`** and
 **`PCS画像FFD`**. Therefore original TSE files must be preserved for TSS3 recorder RE;
 the current TSE->GTSE conversion is configured to skip exactly those PCS sections.
-Procedural byte traversal remains bounded because all sampled managed converter/parser
-method bodies are protector-zeroed. Canonical detail and the generated artifact are in
+Canonical detail and the generated artifact are in
 [gtsplus-tse-gtse-saved-session.md](gtsplus-tse-gtse-saved-session.md).
 
 The host chain is therefore no longer merely a lead:
 
 `FRC_P5 AB/EB recorder acquisition -> first-class TSE PCS FFD section -> PCS Data Viewer TSS3 dictionary`.
 
-What remains open is the concrete byte/bit table inside PCS Data Viewer and validation of
-FAT/list traversal on a real Toyota-generated TSE sample, not the existence or purpose of
-the three host layers.
+The concrete PCS Operation-FFD byte/bit/scaling table is now closed. What remains open at
+this host layer is primarily recorder-ID -> vehicle-network producer/frame correlation and
+validation of the saved-session traversal against a representative Toyota-generated TSE
+sample, not the existence, purpose, or executable decoder semantics of the three host
+layers.
 
 **P6 is a successor oracle, not TSS3 evidence, and its migration boundary is now
 explicit.** A dedicated cross-generation artifact joins `DSSystem_P5`, `Fr_RadSen_P5`,

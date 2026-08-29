@@ -26,6 +26,11 @@ DEFAULT_OUTPUT = REPO / "build/out/cuwplus-unprotected"
 DEFAULT_AUX_OUTPUT = REPO / "build/out/gts-aux-unprotected"
 DECODER = Path(__file__).with_name("cp_body_decode.py")
 ProgressCallback = Callable[[int, int, Path], None]
+# The protected CP loader header uses 0x1000/0x1000, but restored coree CLR images
+# use the standard 0x2000/0x200 PE geometry. Five same-release Toyota plaintext
+# EXEs independently pin these values and the resulting section RVAs.
+CLR_SECTION_ALIGNMENT = 0x2000
+CLR_FILE_ALIGNMENT = 0x200
 
 
 def _u16(data: bytes | bytearray, off: int) -> int:
@@ -297,19 +302,60 @@ def _managed_build(stub: Path, meta_path: Path, memory_path: Path, out_path: Pat
     opt = peoff + 24
     image_base = _u32(stub_data, opt + 28)
     calls = [tuple(map(int, item)) for item in meta["protect_calls"] if int(item[0])]
+    clr_rva = _u32(mem, opt + 96 + 14 * 8)
+    if clr_rva == 0:
+        raise RuntimeError(f"restored CLR header missing for {stub.name}")
     if len(calls) == 3:
         (text_va, text_vs, _), (rsrc_va, rsrc_vs, _), (reloc_va, reloc_vs, _) = calls
         data_range = None
     elif len(calls) == 4:
         (text_va, text_vs, _), (data_va, data_vs, _), (rsrc_va, rsrc_vs, _), (reloc_va, reloc_vs, _) = calls
         data_range = (data_va, data_vs)
+    elif not calls and stub.suffix.lower() == ".exe" and meta.get("synthetic_api_integrity_trusts"):
+        # Coree-managed EXEs complete through the ordinary 0x280/000-000-000
+        # handoff but do not expose the useful final application VirtualProtect
+        # map seen for managed DLLs. Their restored CLR/resource directories and
+        # standard managed-image alignment are sufficient to recover the three
+        # original application ranges without an oracle.
+        section_align = CLR_SECTION_ALIGNMENT
+        text_va = clr_rva & ~(section_align - 1)
+        rsrc_va = _u32(mem, opt + 96 + 2 * 8)
+        rsrc_vs = _u32(mem, opt + 100 + 2 * 8)
+        if not (text_va and text_va < rsrc_va < len(mem) and rsrc_vs):
+            raise RuntimeError(
+                f"invalid restored CLR/resource geometry for {stub.name}: "
+                f"clr=0x{clr_rva:X} rsrc=0x{rsrc_va:X}+0x{rsrc_vs:X}"
+            )
+        text_chunk = mem[text_va:rsrc_va]
+        last_nonzero = max((index for index, value in enumerate(text_chunk) if value), default=-1)
+        if last_nonzero < 0:
+            raise RuntimeError(f"restored CLR text is empty for {stub.name}")
+        text_vs = _align(last_nonzero + 1, 4)
+        reloc_va = _align(rsrc_va + rsrc_vs, section_align)
+        reloc_vs = 0
+        cursor = reloc_va
+        while cursor + 8 <= len(mem):
+            page_rva, block_size = struct.unpack_from("<II", mem, cursor)
+            if not page_rva or not block_size:
+                break
+            if block_size < 8 or block_size > 0x10000 or cursor + block_size > len(mem):
+                raise RuntimeError(
+                    f"invalid restored relocation block for {stub.name} at 0x{cursor:X}: "
+                    f"page=0x{page_rva:X} size=0x{block_size:X}"
+                )
+            reloc_vs += block_size
+            cursor += block_size
+        if reloc_vs == 0:
+            raise RuntimeError(f"restored CLR relocation range missing for {stub.name}")
+        data_range = None
     else:
         raise RuntimeError(f"unexpected managed restored-range count for {stub.name}: {calls}")
-    if _u32(mem, opt + 96 + 14 * 8) == 0:
-        raise RuntimeError(f"restored CLR header missing for {stub.name}")
 
-    pattern = b"\xff\x25" + struct.pack("<I", image_base + text_va)
+    iat_absolute = image_base + text_va
+    pattern = b"\xff\x25" + struct.pack("<I", iat_absolute)
+    guarded_pattern = b"\xc3\x25" + struct.pack("<I", iat_absolute)
     hits: list[int] = []
+    guarded_hits: list[int] = []
     pos = text_va
     while True:
         found = mem.find(pattern, pos, text_va + text_vs)
@@ -317,17 +363,38 @@ def _managed_build(stub: Path, meta_path: Path, memory_path: Path, out_path: Pat
             break
         hits.append(found)
         pos = found + 1
-    if len(hits) == 1:
+    pos = text_va
+    while True:
+        found = mem.find(guarded_pattern, pos, text_va + text_vs)
+        if found < 0:
+            break
+        guarded_hits.append(found)
+        pos = found + 1
+    if len(hits) == 1 and not guarded_hits:
         entry = hits[0]
-    elif not hits and stub.suffix.lower() == ".exe":
+    elif (
+        not hits
+        and len(guarded_hits) == 1
+        and stub.suffix.lower() == ".exe"
+        and meta.get("synthetic_api_integrity_trusts")
+    ):
+        # Coree-managed EXEs leave the restored CLR bootstrap guarded as
+        # `RET; db 25 ...` in memory. The remaining five bytes are the original
+        # absolute-IAT JMP. Restore only that guard byte for the clean disk PE.
+        entry = guarded_hits[0]
+        mem[entry] = 0xFF
+    elif not hits and not guarded_hits and stub.suffix.lower() == ".exe" and not meta.get("synthetic_api_integrity_trusts"):
         chunk = mem[text_va : text_va + text_vs]
         last = max((index for index, value in enumerate(chunk) if value), default=0)
         entry = text_va + _align(last + 1, 0x10)
         if entry + 6 > text_va + text_vs or any(mem[entry : entry + 6]):
             raise RuntimeError(f"no safe CLR EXE bootstrap padding for {stub.name}")
-        mem[entry : entry + 6] = b"\xff\x25" + struct.pack("<I", image_base + text_va)
+        mem[entry : entry + 6] = pattern
     else:
-        raise RuntimeError(f"expected one CLR bootstrap jump for {stub.name}, got {hits}")
+        raise RuntimeError(
+            f"expected one CLR bootstrap jump for {stub.name}, "
+            f"plain={hits} guarded={guarded_hits}"
+        )
 
     recovered = [
         rec
@@ -342,8 +409,8 @@ def _managed_build(stub: Path, meta_path: Path, memory_path: Path, out_path: Pat
         raise RuntimeError(f"ambiguous CLR handoff for {stub.name}: {recovered}")
 
     dll = b"mscoree.dll"
-    section_align = 0x2000
-    file_align = 0x200
+    section_align = CLR_SECTION_ALIGNMENT
+    file_align = CLR_FILE_ALIGNMENT
     idata_va = _align(reloc_va + reloc_vs, section_align)
     int_off = 40
     ibn_off = _align(int_off + 8, 2)
@@ -497,6 +564,22 @@ def _validate_output(path: Path, expect_managed: bool) -> dict[str, Any]:
         assembly = managed.net.mdtables.Assembly
         if assembly and assembly.rows:
             result["assembly_name"] = str(assembly.rows[0].Name)
+        method_rows = list(managed.net.mdtables.MethodDef.rows)
+        method_rvas = [int(row.Rva or 0) for row in method_rows if int(row.Rva or 0)]
+        materialized = 0
+        raw = path.read_bytes()
+        for rva in method_rvas:
+            offset = managed.get_offset_from_rva(rva)
+            if offset is not None and offset < len(raw) and any(raw[offset : offset + 16]):
+                materialized += 1
+        result["method_def_count"] = len(method_rows)
+        result["method_body_rva_count"] = len(method_rvas)
+        result["method_body_materialized_count"] = materialized
+        if materialized != len(method_rvas):
+            raise RuntimeError(
+                f"rebuilt managed PE has zero/unmaterialized method bodies: {path} "
+                f"({materialized}/{len(method_rvas)} nonzero prefixes)"
+            )
     return result
 
 
@@ -579,7 +662,12 @@ def recover(
             managed_input = _is_managed(stub)
             rel = stub.relative_to(source_root)
             destination = write_root / rel
-            if managed_input and len(calls) in (3, 4):
+            managed_exe_complete = bool(
+                managed_input
+                and stub.suffix.lower() == ".exe"
+                and meta.get("synthetic_api_integrity_trusts")
+            )
+            if managed_input and (len(calls) in (3, 4) or managed_exe_complete):
                 build_info = _managed_build(stub, meta_path, memory_path, destination)
             else:
                 build_info = _native_build(stub, meta_path, memory_path, destination)
@@ -600,6 +688,7 @@ def recover(
                 "protector_success": bool(meta.get("protector_success")),
                 "protect_calls": meta["protect_calls"],
                 "recovered_import_count": len(meta.get("imports", [])),
+                "synthetic_api_integrity_trusts": meta.get("synthetic_api_integrity_trusts", []),
                 **validation,
             })
 

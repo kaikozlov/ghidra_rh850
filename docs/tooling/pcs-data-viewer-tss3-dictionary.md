@@ -141,8 +141,11 @@ overrides, request boundaries, and hands-off state around events.
 
 ## 6. How PCS Data Viewer models Operation FFD
 
-The shipped managed method bodies are protected/zero-filled, but .NET metadata
-remains intact. The recovered type/model surface includes:
+The shipped `PCS Data Viewer.exe` intentionally has protected/zero-filled managed
+method bodies, but that is now only an **input representation**, not an analysis
+boundary. The generic CP recovery materializes **22,447/22,447** nonzero-RVA
+`MethodDef` bodies from the installed stub + sidecar and rebuilds a clean CLR PE
+(entry `0x66FB8E`). The recovered type/model surface includes:
 
 - `TSS3OperationFFDExtractor`
   - `Extract`, `Output`
@@ -172,10 +175,38 @@ BitLength, InvalidValueList, Type, Lsb, Offset, Point`.
 `DataName, SystemType, Group, Sampling, PreTriggerNumber,
 PostTriggerNumber, IsMultiTrigger, UniqueRoBCodeDID`.
 
-Therefore the viewer contains a data-driven map from recorder ID/bit placement
-to physical values and RoB grouping/sampling policy. The concrete initialized
-instances are in protected managed initializers in this shipped image, so this
-pass does not claim their exact bit/LSB/offset table.
+The concrete initialized instances are now recovered as well.
+`tools/techstream/extract_pcs_data_viewer_tss3_managed_semantics.py` interprets
+the restored straight-line `DIDDataDefine::.cctor` and `RoBCodeDefine::.cctor`
+and writes
+`data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json`.
+The current artifact contains **1,130 exact `DetailBitAssignInfo` rows across 623
+recorder DIDs** and **47 exact RoB/trigger definitions**. The recovered
+`MeasuredValue` methods prove the common engineering conversion
+**`physical = raw * Lsb + Offset`**, followed by fixed-point presentation using
+`Point` decimal places; `f`/`d` reinterpret IEEE-754 single/double payloads,
+while `u`/`s` use the integer path.
+
+High-value lateral rows are no longer inferred from names alone:
+
+| Recorder DID | Toyota field | byte/bit contract | type / conversion |
+|---|---|---|---|
+| `5282` | TSS request - lateral ID | byte 1, bit pos 7, length 8 | unsigned, LSB 1 |
+| `5282` | TSS request - pinion angle | byte 2, bit pos 7, length 16 | signed, **LSB 0.001**, offset 0, point 3 |
+| `5282` | Steering assist gain | byte 4, bit pos 7, length 8 | unsigned, **LSB 0.01**, point 2 |
+| `5282` | Damping control gain | byte 5, bit pos 7, length 8 | unsigned, **LSB 0.01**, point 2 |
+| `5285` | Arbitration result_lateral ID | byte 1, bit pos 7, length 8 | unsigned, LSB 1 |
+| `5531` | LDA Control Request Pinion Angle | byte 2, bit pos 7, length 16 | signed, **LSB 0.001**, point 3 |
+| `560D` | EPS Pinion Angle | byte 4, bit pos 7, length 16 | signed, **LSB 0.001**, point 3 |
+| `5631` | LTA Control Request Pinion Angle | byte 2, bit pos 7, length 16 | signed, **LSB 0.001**, point 3 |
+| `57DE` | Arbitration result Pinion angle | byte 1, bit pos 7, length 16 | signed, **LSB 0.001**, point 3 |
+
+`5531` and `5631` also have the same byte-1 lateral ID, byte-4 steering-assist
+gain (`0.01`), and byte-5 damping gain (`0.01`) layout as `5282`. The RoB table
+now pins sampling windows too: for example `209D` **LCS Steer Override** is
+0.2-s sampling with 36 pre / 8 post records; `2818` **Steering Angle Speed
+Threshold Exceeded** is 0.4 with 10/11; `2845` **LTA Hands Free Cancel** is 1.0
+with 3/7; and `240F` **LCA Cancel** is 0.2 with 20/5.
 
 ## 7. Join to the current FRC_P5 proprietary protocol
 
@@ -212,6 +243,22 @@ and image-table geometry.
 
 The resource messages explicitly reference `SID$EB$23`, `SID$EB$33`, and
 `DID$6001`.
+
+The restored Image-FFD static constructors also close several formerly hidden
+layout constants. `FCMDataTableDIDData` requires minimum lengths `5101:2`,
+`0501:7`, `0502:4`, `0507:6`, `0511:4`, while `6001` is variable (`-1`).
+`FCMDataTableHeaderData` contains 13 header fields, including trigger ID
+(`5101`, byte1, 16 bits, invalid `FFFE`), trip (`0501`, byte1, 16 bits, invalid
+`FFFF`), time counter (`0501`, byte3, 32 bits, invalid `FFFFFFFF`), odometer
+units/info (`0502`, byte1/byte2, 8/24 bits), six date/time bytes under `0507`,
+and `0511` unique-counter/add-time fields. The add-time counter starts at byte1
+bit4, spans 29 bits, uses LSB 100, and marks `00FFFFFF` invalid.
+
+`FCMDataTableRoBCode` likewise materializes the image event table. Its first
+spec group contains `2822,2824,2821,2825,2820,2827,2826,2823,2828,2861`; the
+second adds `282F`. The recovered constructor pins pre/post record times such as
+`2826 = 3.6/0`, `2823 = 2.4/0`, `2828 = 3.6/3.6`, `2861 = 6.0/1.2`, and
+`282F = 6.0/2.4` seconds/record-window units as represented by the viewer.
 
 ## 9. Current native acquisition stack is now release-local
 
@@ -273,8 +320,10 @@ same DLL but is **not** the direct path called by `GetTSS3ImageFFDInfo`.
 Image spec values **5** and **7** are explicitly accepted. Availability byte
 value **2** marks memorized image slots: 1..10 for spec 5 and 1..11 for spec 7.
 This is host acquisition/authentication semantics; it still does not identify
-the ECU-side recorder producer, CAN/CAN-FD arbitration IDs, SecOC owner, or the
-protected PCS Data Viewer managed bit-assignment initializer contents.
+the ECU-side recorder producer, CAN/CAN-FD arbitration IDs, or SecOC owner. The
+former PCS managed-initializer boundary is closed above: the recovered viewer
+supplies exact Operation-FFD bit/scaling/RoB tables and also makes the Image-FFD
+initializers executable.
 
 ## 10. Shipped FFD parameter help adds plain-language semantics
 
@@ -311,19 +360,22 @@ TSS3 generation uses the same raw field or network encoding.
 
 ## 11. What remains bounded
 
-1. **Concrete bit assignments/scalings.** The schema is recovered, but the
-   populated `DetailBitAssignInfo`/RoB tables are built in protected managed
-   initializers. A runtime dump, an unprotected matching viewer, or another
-   data source is needed for exact byte/bit/LSB/offset recovery.
-2. **Recorder ID -> CAN frame.** The dictionary decodes the internal recorder
-   namespace, not network arbitration IDs. Firmware/dynamic correlation is
-   still required to map a recorder field to a bus frame.
-3. **Arbitration execution owner.** The existence of generic TSS request and
+1. **Recorder ID -> CAN frame.** The managed table now closes recorder
+   byte/bit/scaling semantics, but recorder IDs remain an internal AB/EB record
+   namespace rather than network arbitration IDs. Firmware/dynamic correlation
+   is still required to map a recorder field to a bus frame/producer.
+2. **Producer/auth ownership.** The host acquisition and viewer decode paths do
+   not by themselves identify which ECU constructs each recorder field on the
+   vehicle network, nor the relevant CAN-FD/SecOC ownership boundary.
+3. **Runtime trigger occurrence.** The 47 RoB definitions recover configured
+   sampling/pre/post policy; they do not prove a particular vehicle actually
+   emitted a given RoB event in a retained drive.
+4. **Arbitration execution owner.** The existence of generic TSS request and
    arbitration-result fields proves the software abstraction, not which ECU
    executes the arbitration on every TSS3 architecture.
-4. **Image encryption details.** Metadata proves an encryption-aware image
-   path, but key/algorithm behavior was not recovered from the protected
-   managed bodies here.
+5. **Image payload encryption/decryption.** The managed bodies are now
+   executable and the native host setup/security path is recovered, but this
+   pass has not established the recorder image payload transform or key material.
 
 The immediate practical use is to treat PCS Data Viewer as a second Rosetta
 stone alongside GTS+ DDBs: search the full generated dictionary for a firmware
@@ -336,6 +388,6 @@ firmware/CAN correlation.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [TMS-082](../reference/index.md#finding-tms-082)
+- Findings with this document as canonical home: [TMS-082](../reference/index.md#finding-tms-082), [TMS-084](../reference/index.md#finding-tms-084)
 - Corrections with this document as canonical home: —
 <!-- knowledge-cross-references:end -->

@@ -3182,3 +3182,43 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Right interpretation:** waiting for a stock B6 template/cadence is no longer a valid Camry steering-integration prerequisite. The staged implementation remains safely fail-closed and should stay that way until it is deliberately redesigned to construct the exact F33 B6 payload from the receiver contract. That redesign still does **not** authorize actuation: CORR-130/VAR-083 now close the shared command-to-current convergence, but the **upstream stock-LTA authority/arbitration with B6 absent** remains unresolved and VAR-084 leaves two computed/DMAC false-negative holes explicit.
 - **Consequence:** do not repeat blind stock-B6 drives and do not weaken the development gate merely to make the sender transmit. Preserve the existing sender as historical/default-off scaffolding until the steering-path audit determines the correct arbitration architecture.
 - **Canonical:** VAR-062/081/082/083/084; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§20,33–35; [PRIORITIES.md](PRIORITIES.md).
+
+### CORR-132 — the first 249/249 CP recovery claim was structurally complete but accepted the wrong coree-managed EXE terminal path
+
+- **Superseded framing:** the first TMS-083 recovery pass treated a managed EXE
+  `A0F -> 042-023-000 -> ExitProcess(0)` path as successful because the rebuilt
+  image had parseable CLR metadata and a plausible section map. That was sufficient
+  for native/mixed images but too weak for `GTSPluscoree32.dll`-managed EXEs.
+- **Root cause:** coree-managed EXEs run an integrity/prologue probe over
+  `kernel32!GetProcAddress`. The emulator represents Win32 APIs as semantic callback
+  trampolines, not byte-identical Windows export machine code, so the probe correctly
+  rejected the synthetic bytes. The old worker then followed an error/termination
+  branch while the rebuilder mistook that state for an EXE handoff.
+- **Exact correction:** on `A0F`, and only for a managed EXE importing
+  `GTSPluscoree32.dll`, the emulator now requires the probe subject to equal its own
+  registered `kernel32!GetProcAddress`, derives the enclosing checker from the live
+  stack/code shape (no product/RVA constant), records the one-shot synthetic-API trust,
+  and models the following `NtQueryInformationProcess` path. The real success sequence
+  continues through `5D0 -> 590 -> 5B0/5B1 -> 5C0 -> 5A0 -> 610 -> 655 -> 280 ->
+  000-000-000`. `ExitProcess` before that boundary is an explicit failure. Coree EXEs
+  leave their normal CLR bootstrap guarded as `C3 25 <IAT>`; the clean rebuilder restores
+  the original first byte `FF` and therefore the original entrypoint.
+- **Independent proof:** five main-GTSPlus protected EXEs also have same-release Toyota
+  plaintext twins. Generic CP recovery preserves **2,719 MethodDef rows / 2,637
+  executable-body rows**; every one of the 2,637 first-32-byte body prefixes matches the
+  Toyota original at the same RVA, all five entrypoints match, and `.text/.rsrc/.reloc`
+  virtual geometry matches. `GTSPlus.exe` alone changes from the old effectively empty
+  IL state to **667/667** materialized executable-body rows. The CUW backend is **11/11**,
+  PCS Data Viewer is **22,447/22,447**, and TSEConverter is **27/27**.
+- **Permanent invariant:** `recover_cp_bodies.py` now validates every managed output by
+  enumerating all nonzero `MethodDef` RVAs and rejects the recovery if any method prefix
+  remains zero/unmaterialized. A fresh whole-corpus run passes **249/249** under this
+  stronger rule; all **50 managed** CP-emulated CUWPlus+auxiliary outputs are complete.
+- **Consequence:** the protected-body problem remains closed, but the reason is stronger
+  and narrower than the original claim. Parseable CLR metadata is not evidence of a
+  recovered managed body. The current corpus is closed because executable method bodies
+  are now positively materialized and independently oracle-checked.
+- **Canonical:** `tools/techstream/cp_body_decode.py`;
+  `tools/techstream/recover_cp_bodies.py`;
+  `tests/verify_gtsplus_managed_exe_recovery.py`;
+  [../tooling/cuwplus-body-recovery.md](../tooling/cuwplus-body-recovery.md).

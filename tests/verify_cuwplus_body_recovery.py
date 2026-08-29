@@ -44,7 +44,7 @@ def main() -> int:
         "TCUWControlCommPhase.dll",       # seven-section native/.idata outlier
         "CommonLib.dll",                  # pure managed DLL
         "CUWAccessRKSWrapper.dll",         # mixed native/CLR image
-        "CuwBackendServiceConsoleApp.exe", # managed EXE + phase-0x520 anti-debug path
+        "CuwBackendServiceConsoleApp.exe", # coree-managed EXE + synthetic API integrity probe
     ]
     # Full-corpus mode is transactional and decoder failures carry useful log
     # context even when the temporary workspace is cleaned up on unwind.
@@ -115,10 +115,15 @@ def main() -> int:
         )
         console = by_path["CuwBackendServiceConsoleApp.exe"]
         check(
-            "managed EXE anti-debug/handoff path recovered",
+            "coree-managed EXE reaches true CLR handoff with all method bodies",
             console["classification"] == "managed"
             and console["assembly_name"] == "CuwBackendServiceConsoleApp"
-            and console["entrypoint_rva"] == 0x3AD0,
+            and console["entrypoint_rva"] == 0x3B32
+            and console["method_def_count"] == 11
+            and console["method_body_rva_count"] == 11
+            and console["method_body_materialized_count"] == 11
+            and len(console["synthetic_api_integrity_trusts"]) == 1
+            and console["synthetic_api_integrity_trusts"][0]["api"] == "kernel32.dll!GetProcAddress",
         )
 
         # Independent runtime-unpack oracle retained from the earlier Windows

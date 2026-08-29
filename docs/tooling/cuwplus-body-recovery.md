@@ -23,8 +23,10 @@ the census is complete:
 | **total** | **143** | **143** |
 
 The 16 CLR-labeled inputs comprise 12 ordinary managed images and four mixed
-native/CLR wrappers. All 143 rebuilt outputs parse as PE files; all 16 CLR
-outputs additionally parse through `dnfile` with intact CLR metadata/tables.
+native/CLR wrappers. All 143 rebuilt outputs parse as PE files; every managed
+output is additionally required to materialize every nonzero `MethodDef` RVA,
+not merely parse its CLR metadata. A zero/missing method body is now a hard
+recovery failure.
 
 Run:
 
@@ -106,8 +108,11 @@ The recovered evidence is stronger than merely producing a parseable wrapper:
 - native original entrypoints are observed at the protector handoff;
 - original native import symbols are decrypted by CP phase `0x5C0` and their
   real IAT writes are captured as they occur;
-- the protector's final `VirtualProtect` pass supplies the authoritative
-  original application section RVAs and virtual sizes;
+- for protector variants that emit it, the final `VirtualProtect` pass supplies
+  the authoritative original application section RVAs and virtual sizes; coree-managed
+  EXEs instead recover `.text`/`.rsrc`/`.reloc` geometry from the restored CLR/resource
+  directories and section alignment, a path independently checked against five exact
+  Toyota plaintext EXEs;
 - resources and relocation bodies are taken from those restored ranges; and
 - six separately retained runtime-unpacked native DLLs independently match the
   new decoder's entrypoint and complete restored `.text` **byte-for-byte**.
@@ -124,11 +129,13 @@ Two reconstruction details are explicitly analysis normalizations:
    recovered in place, but its restored `.rdata` ends at the export directory,
    so the rebuilt PE uses a small `.impfix` section only for reconstructed
    import descriptors.
-2. Within CUWPlus, `CuwBackendServiceConsoleApp.exe` is the lone managed EXE. CP removes the
-   normal CLR native trampoline before the captured final state. The rebuilder
-   inserts the standard six-byte `jmp [IAT]` `_CorExeMain` bootstrap into
-   verified zero padding after the restored managed body. Its IL/metadata and
-   CLR header are recovered; the tiny bootstrap is regenerated.
+2. Within CUWPlus, `CuwBackendServiceConsoleApp.exe` is the lone coree-managed
+   EXE. The successful protector path restores all 11/11 method bodies and leaves
+   the original six-byte `_CorExeMain` trampoline in a guarded form: its first
+   byte is temporarily `RET` (`C3 25 <IAT>`) instead of the original indirect
+   jump (`FF 25 <IAT>`). The rebuilder recognizes that unique guard, restores
+   only `C3 -> FF`, and therefore recovers the original entrypoint at `0x3B32`;
+   it does not synthesize a new bootstrap in padding.
 
 Those boundaries are represented in tooling and tests rather than hidden by a
 whole-file-equality claim.
@@ -203,9 +210,9 @@ The meaningful CP phases are visible through its own status records:
 | `0x590` | maps/consumes the real sibling `._` sidecar and performs the first large body restoration |
 | `0x5A0` | completes the application-code transform; native `.text` becomes plaintext |
 | `0x5C0` | decrypts original import names, calls `GetProcAddress`, and writes resolved addresses into the real application IAT |
-| final protection pass | assigns page protections to the restored application sections, exposing their original RVA/size geometry |
-| DLL `000-000-000` | normal protector-success boundary |
-| managed EXE `ExitProcess(0)` | EXE success boundary after its final protection map |
+| final protection pass | assigns page protections to restored native/application ranges when that variant emits the map |
+| `000-000-000` | normal protector-success boundary for native, DLL, and the corrected coree-managed EXE path |
+| pre-success `ExitProcess` | explicit failure; it is never accepted as a recovered managed EXE |
 
 The import recovery is particularly useful for RE. The installed CP stub may
 contain only one placeholder import per dependency, while phase `0x5C0` reveals
@@ -229,17 +236,55 @@ The normal audit path uses:
 
 Those calls are anti-debug/process checks; they are not payload crypto.
 
-Managed EXE protector variants additionally enter phase `0x520`; they check
-`IsDebuggerPresent` / `CheckRemoteDebuggerPresent`, query
-`ProcessDebugPort`, execute `INT 2D` under the protector's own SEH frame, and
-perform further process/module/registry checks. This branch is observed in the
-CUW backend console as well as auxiliary Windows-service/viewer executables;
-the local `NtQueryInformationProcess` dispatch slot moves between protector
-layouts, so the emulator recognizes its ABI rather than a hard-coded module
-name or RVA. The emulator supplies a normal
-non-debugged synthetic process and dispatches `INT 2D` as Windows
-`EXCEPTION_BREAKPOINT`, allowing the protector's own handler to choose the
-continuation. No decrypted body bytes are substituted by hand.
+Managed EXE protector variants additionally run the normal process/debug
+checks (`IsDebuggerPresent`, `CheckRemoteDebuggerPresent`,
+`NtQueryInformationProcess`, `INT 2D`, process/module/registry inspection) and,
+when they import `GTSPluscoree32.dll`, an integrity probe over
+`kernel32!GetProcAddress`. The emulator necessarily represents Windows APIs as
+semantic callback trampolines rather than byte-identical Windows export code,
+so that probe cannot validate the real Windows prologue. The decoder handles
+this as an explicit emulator trust boundary: only when the probe subject is
+exactly the emulator's registered `kernel32!GetProcAddress` does it derive the
+enclosing checker from the live stack/code shape and one-shot treat that
+synthetic export as trusted. The event is recorded in the manifest as
+`synthetic_api_integrity_trusts`; no product name or protector RVA is baked in.
+
+This distinction corrected an important earlier false success. Before the
+integrity model existed, coree-managed EXEs followed
+`A0F -> 042-023-000 -> ExitProcess`; enough CLR metadata was present to look
+plausible, but their IL remained zero. The corrected path instead continues
+through `5D0 -> 590 -> 5B0/5B1 -> 5C0 -> 5A0 -> 610 -> 655 -> 280 ->
+000-000-000`. `recover_cp_bodies.py` now independently validates every nonzero
+`MethodDef` body, so the old metadata-only state cannot be reported as recovered.
+
+## Independent managed-EXE oracles
+
+The main `GTSPlus` installer twins provide an unusually strong independent test
+of the generic coree-managed EXE path. Five protected EXEs import
+`GTSPluscoree32.dll` and also have exact same-release Toyota plaintext twins.
+The generic decoder/rebuilder was run on the protected copies and compared at
+the original managed RVAs:
+
+| module | MethodDef rows | body RVAs | recovered entry |
+|---|---:|---:|---:|
+| `GTSPlus.exe` | 706 | 667 | `0x302BE` |
+| `GTSPlusArbitration.exe` | 225 | 213 | `0x1121A` |
+| `GtsPlus-InfoCenter.exe` | 1,252 | 1,235 | `0x45BBA` |
+| `GtsPlus-InfoCenter_Multi.exe` | 171 | 167 | `0xAED2` |
+| `GtsPlus-PcCheckerTool.exe` | 365 | 355 | `0x25ED6` |
+| **total** | **2,719** | **2,637** | — |
+
+All **2,637/2,637** materialized method-body prefixes match Toyota's plaintext
+originals byte-for-byte at the same RVAs, all five entrypoints match exactly,
+and `.text/.rsrc/.reloc` virtual geometry matches. The clean rebuilt files may
+still differ at the disk-container level because the analysis rebuilder emits a
+small normalized `.idata`; application semantics are the oracle here.
+
+The same corrected path recovers `PCS Data Viewer.exe` with **22,447/22,447**
+nonzero-RVA method bodies materialized (entry `0x66FB8E`) and
+`GTSPlusTSEConverter/TSEConverter.exe` with **27/27** (entry `0x6BAE`).
+`tests/verify_gtsplus_managed_exe_recovery.py` pins the five exact Toyota
+oracles; the auxiliary recovery test pins PCS/TSEConverter.
 
 ## Independent native oracle
 
@@ -292,5 +337,5 @@ Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
 - Findings with this document as canonical home: [TMS-083](../reference/index.md#finding-tms-083)
-- Corrections with this document as canonical home: —
+- Corrections with this document as canonical home: [CORR-132](../reference/index.md#correction-corr-132)
 <!-- knowledge-cross-references:end -->

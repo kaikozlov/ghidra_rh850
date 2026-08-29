@@ -102,6 +102,17 @@ requires_external = ["gtsplus"]
 modes = ["local"]
 oracle = "independent_external_artifact"
 
+[suite.gtsplus_pcs_data_viewer_tss3_managed_semantics]
+tests = ["tests/verify_gtsplus_pcs_data_viewer_tss3_managed_semantics.py"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+oracle = "generated_self_check"
+paths = [
+  "tools/techstream/extract_pcs_data_viewer_tss3_managed_semantics.py",
+  "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json",
+  "docs/tooling/pcs-data-viewer-tss3-dictionary.md",
+]
+
 [suite.gtsplus_pcs_data_viewer_parameter_help]
 tests = ["tests/verify_gtsplus_pcs_data_viewer_parameter_help.py"]
 requires_external = ["gtsplus"]
@@ -123,6 +134,17 @@ oracle = "independent_external_artifact"
 [suite.gtsplus_body_recovery]
 tests = ["tests/verify_gtsplus_body_recovery.py"]
 paths = ["tools/techstream/gts_cli.py", "docs/tooling/techstream.md", "docs/tooling/gtsplus-body-recovery.md"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+oracle = "independent_external_artifact"
+
+[suite.gtsplus_managed_exe_recovery]
+tests = ["tests/verify_gtsplus_managed_exe_recovery.py"]
+paths = [
+  "tools/techstream/cp_body_decode.py",
+  "tools/techstream/recover_cp_bodies.py",
+  "docs/tooling/cuwplus-body-recovery.md",
+]
 requires_external = ["gtsplus"]
 modes = ["local"]
 oracle = "independent_external_artifact"
