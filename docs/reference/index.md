@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 387 · Corrections: 135 · Open questions: 54 · Docs: 111 · Suites: 210
+Findings: 388 · Corrections: 135 · Open questions: 54 · Docs: 111 · Suites: 210
 
 ## Reading this index
 
@@ -406,6 +406,7 @@ Findings: 387 · Corrections: 135 · Open questions: 54 · Docs: 111 · Suites: 
 | <a id="finding-var-086"></a>**VAR-086** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [techstream](../tooling/techstream.md) | `tests/verify_camry_tss3_request_capture.py` | OQ-052 |
 | <a id="finding-var-087"></a>**VAR-087** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_camry_2026_lta_state_reconciliation.py`, `tests/verify_camry_8965F3307000_internal_assist_oracles.py` | — |
 | <a id="finding-var-088"></a>**VAR-088** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_2026_upstream_request_census.py` | — |
+| <a id="finding-var-089"></a>**VAR-089** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_camry_8965F3307000.py --section b6_receive_bridge` | — |
 
 ## Open-questions index
 

@@ -1210,6 +1210,68 @@ def section_application_ram_loader() -> int:
     return 1 if failed else 0
 
 
+def section_b6_receive_bridge() -> int:
+    """Verify the exact-F33 zero-MAC28 protected-B6 receive-bridge candidate."""
+    import hashlib, json, struct
+    from pathlib import Path
+    ROOT = Path(__file__).resolve().parents[1]
+    BRIDGE_BIN = ROOT / 'exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin'
+    BRIDGE_AUDIT = ROOT / 'exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json'
+    BRIDGE_SOURCE = ROOT / 'exploit/ephemeral_runtime/camry_f33_b6_bridge.c'
+    BRIDGE_BUILDER = ROOT / 'exploit/ephemeral_runtime/build_camry_f33_b6_bridge.py'
+    IMAGE = ROOT / 'firmware/camry-8965F3307000/CodeFlash.bin'
+    p = f = 0
+    def sha(b: bytes) -> str:
+        return hashlib.sha256(b).hexdigest()
+    def check(name: str, cond: object) -> None:
+        nonlocal p, f
+        ok = bool(cond); p += int(ok); f += int(not ok); print(f"[{'PASS' if ok else 'FAIL'}] {name}")
+    audit = json.loads(BRIDGE_AUDIT.read_text())
+    img = IMAGE.read_bytes()
+    print('== audited bridge binary ==')
+    check('binary identity exact', audit['shellcode']['size'] == BRIDGE_BIN.stat().st_size == 528 and
+          audit['shellcode']['sha256'] == sha(BRIDGE_BIN.read_bytes()) == 'ab38df4f4b82c00c920ade9c16e2e28116cf9c956a21c85ad9629c103ae576d7')
+    check('entry/relocations clean', audit['compile_contract']['entry_offset'] == 0 and audit['compile_contract']['relocations'] == 0)
+    check('source and builder bound', audit['source']['sha256'] == sha(BRIDGE_SOURCE.read_bytes()) and
+          audit['builder']['sha256'] == sha(BRIDGE_BUILDER.read_bytes()))
+    print('== retained-tail residency budget ==')
+    c = audit['compile_contract']
+    check('resident stays inside the verified 524-byte high tail',
+          c['resident_base'] == '0xFEBFF9F0' and c['resident_size_incl_marker_slack'] == 428 and
+          c['resident_limit'] == 508 and c['staging_limit'] == 776 and
+          0 < c['resident_entry_staging_offset'] < c['resident_tail_marker_staging_offset'] == 526)
+    check('heartbeat cell inside the verified retained span',
+          c['resident_mailbox'] == '0xFEBFFBEC' and 0xFEBFF9F0 <= 0xFEBFFBEC <= 0xFEBFFBFB)
+    print('== static pins re-derived from firmware ==')
+    def u16(va: int) -> int:
+        return struct.unpack_from('<H', img, va)[0]
+    def u32(va: int) -> int:
+        return struct.unpack_from('<I', img, va)[0]
+    pins = {k: int(v, 16) for k, v in audit['static_pins'].items()}
+    check('PDU44 COM window exact (0x22840 table -> FEBE4BFF)',
+          u16(0x22840 + 44 * 2) == 0x1B7 and pins['B6_COM_WINDOW'] == 0xFEBEB800 - 0x6DB8 + 0x1B7 == 0xFEBE4BFF)
+    check('B6 secured buffer exact (SecOC record idx2)',
+          u32(0x2586C + 2 * 0x50) == 32 and u32(0x25870 + 2 * 0x50) == 40 and
+          pins['B6_SECURED_BUFFER'] == 0xFEBE54AC + 40 == 0xFEBE54D4)
+    check('B6 queue record + unpacker flags exact',
+          pins['B6_QUEUE_RECORD'] == 0xFEBE546A + 2 * 8 == 0xFEBE547A and
+          pins['B6_IPDU_FLAG'] == 0xFEBE5364 and pins['B6_STAGED_FLAG'] == 0xFEBE80C8)
+    check('trailer config 2 (asynchronous ICU-S verify) exact', u32(0x25874 + 2 * 0x50) & 0xFFFF == 2)
+    print('== bridge semantics ==')
+    src = BRIDGE_SOURCE.read_text()
+    check('MAC28 zero marker mask exact (B28[3:0]|B29|B30|B31)', '#define B6_MAC28_MASK 0xFFFF0F0Fu' in src)
+    check('splice wraps the stock comm/SecOC aggregate only',
+          src.count('call0(TARGET_FG_AGGREGATE);') == 1 and
+          audit['scheduler_transfer']['FG_AGGREGATE'] == '0x000667E6')
+    check('scheduler transfer matches the audited F33 carrier schedule',
+          audit['scheduler_transfer']['BOOT_INIT_0'] == '0x00000C9A' and
+          audit['scheduler_transfer']['APP_CPU_CONTEXT_INIT'] == '0x000715B4' and
+          audit['scheduler_transfer']['FOREGROUND_TIMING_FLAG'] == '0x00031910')
+    check('candidate stays non-live', audit['review_status'] == 'static-carrier-candidate-not-live-validated')
+    print(f'\nResults: {p} passed, {f} failed')
+    return 1 if f else 0
+
+
 SECTIONS = {
     "codeflash": section_codeflash,
     "flash_backend": section_flash_backend,
@@ -1220,6 +1282,7 @@ SECTIONS = {
     "secoc_recovery": section_secoc_recovery,
     "command5_runtime_carrier": section_command5_runtime_carrier,
     "application_ram_loader": section_application_ram_loader,
+    "b6_receive_bridge": section_b6_receive_bridge,
 }
 
 def main() -> int:
