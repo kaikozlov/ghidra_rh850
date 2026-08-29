@@ -3100,6 +3100,81 @@ formulas. This removes the remaining V18 executable-body transfer from the nativ
 acquisition path. The former managed PCS Data Viewer initializer boundary is now closed
 independently by the CP-managed-EXE recovery above.
 
+**The remaining static control-ownership join is now closed as far as GTS+ can take it.**
+`data/generated/gtsplus_2026/tss3_control_ownership_surface.json` joins the current
+master plugin bindings, ordinary Data Monitor rows, PCS recorder dictionary and full
+category-498 fleet census. Current NA/EU/JP `CDbDllTable` records bind exactly two
+TSS3-named recorder plugins, and both bind **only category 498 `FRC_P5 = Front
+Recognition Camera 2`**: role `0xE9` `GetTSS3ImageFFDP5_DT.dll` and role `0xEA`
+`GetTSS3OperationFFDP5_DT.dll`. The category-498 diagnostic request address is `0x792`
+in every pinned region. Therefore the current TSS3 Operation/Image recorder is hosted
+and served by the FRC diagnostic endpoint. This is recorder-host evidence, not proof
+that the FRC executes the final arbitration or physically transmits every recorded
+request/result on the vehicle network.
+
+Joined to the already-pinned exact-H B6 sender-attribution artifact, this also closes the
+**lateral static ownership boundary**. The EPS receives protected `0x0B6` and maps its
+loss to Toyota DTC U012987 **Lost Communication with Brake System Control Module**; the
+EPS path is the SecOC receiver/verifier, and the protected `0x00F/0x0D7/0x0B6` family
+shares ICU-S slot 4. That excludes EPS as the command producer and makes the Brake System
+Control Module/category-435 family the only positively attributed **immediate source
+domain** at the EPS endpoint. Meanwhile FRC is now proven to host the TSS3 request/
+arbitration recorder. The current corpus is statically exhausted without producer-side
+Brake application code, so it cannot distinguish an FRC-originated target forwarded/
+secured by Brake from a Brake-computed target, nor identify the CMAC/freshness owner.
+The remaining discriminator is matched category-435 firmware or a synchronized FRC
+Operation-FFD + wire capture during confirmed LTA.
+
+The same join materially narrows **true-TSS3 longitudinal control**. `FRC_P5` ordinary
+Data Monitor exposes an upper-limit ISA request surface: `0x1B03` **ISA Requesting
+Vertical ID (Upper Limit)**, `0x1B04` **ISA Request Acceleration (Upper Limit)**,
+`0x1B05` request speed / variation-no-limit acceleration, `0x1B06` braking/driving-force
+allocation + responsiveness/shift-priority requests, and `0x1B07` brake-hold/stop/brake-
+usage permission flags. Independently, the brake domain exposes ordinary read-only
+request observers explicitly named by Toyota as coming **from Toyota Safety Sense**:
+
+| DID | Toyota name | exact monitor geometry |
+|---|---|---|
+| `0x10A1` | Request Acceleration of Upper Limit from Toyota Safety Sense | signed 16-bit, 0.001 m/s² |
+| `0x10A2` | Request Acceleration of Lower Limit from Toyota Safety Sense | signed 16-bit, 0.001 m/s² |
+| `0x10A3` | Request Acceleration and Deceleration ID of Upper Limit from Toyota Safety Sense | unsigned 6-bit |
+| `0x10A4` | Request Acceleration and Deceleration ID of Lower Limit from Toyota Safety Sense | unsigned 6-bit |
+
+The exact `0x10A1..0x10A4` surface is present in `ABS_P5` (435), `Brk_Bst_P5`
+(466), `EPB_P5` (485), and successor `BSCM_A_P6` (6004). The FRC-hosted PCS
+recorder independently carries the normalized lower request (`5280`), upper request
+(`5281`), **arbitration-result longitudinal ID** (`5284`), arbitration-result
+acceleration (`57DB`) and validity (`57D3`). Thus GTS+ now closes a real OEM diagnostic
+architecture: **FRC/TSS request vocabulary -> brake-domain request observation**, with
+the FRC-hosted recorder retaining both request halves and the winning result. The FRC
+ordinary Data List exposes only the upper-limit half; the lower-limit half is visible in
+the recorder and brake receive surface.
+
+This brake observation sink is effectively fleet-wide for category-498 architectures.
+Among the same **256/460/213** NA/EU/JP FRC_P5 install rows from TMS-079, a DDB that
+exposes `0x10A1..0x10A4` is present in **255/256 NA, 460/460 EU, and 213/213 JP**
+rows; the sole NA exception is the explicit model-name `TEST` placeholder. This is an
+install/DDB observation-surface result, not a claim that every PID is runtime-supported
+on every vehicle; normal P5 PID support remains runtime-probed. The request DIDs are also
+not intrinsically TSS3-only because Toyota reuses the brake DDB family in older
+architectures.
+
+A corpus-wide ordinary-Data-Monitor search additionally finds **zero generation-20
+control-arbitration signals**. The matching ordinary arbitration vocabulary appears only
+in successor `ADCU_P6/P6F` (`0x3486`: longitudinal powertrain arbitration ID,
+longitudinal brake arbitration ID, lateral arbitration ID), which remains a terminology
+oracle rather than transferable P5 implementation evidence. Consequently the FRC-hosted
+recorder is the current P5 host-visible source for arbitration-result values.
+
+The static boundary is now precise. GTS+ proves recorder hosting and the longitudinal
+diagnostic source/sink model, but it does **not** prove the vehicle-network frame,
+32-bit-FRC-to-16-bit-brake transformation/copy order, final arbitration executor, SecOC
+signer/freshness owner, cadence, or stock-source suppression point. Those facts require
+exact-target firmware or synchronized live FRC/brake/recorder/CAN evidence; do not infer
+them from recorder hosting. For the maintainer Camry the immediate read-only longitudinal
+oracle is Brake `0x7B0` RDBI `22 10 A1`..`22 10 A4`, synchronized with FRC `0x792`
+`0x1B03`..`0x1B07`, stock DRCC state, and all-bus capture.
+
 **The TSE/GTSE saved-session layer is now structurally recovered.** Current
 `GTS+ TSEConverter` is **01.02.002** and selects `180_Template.csv`; the shipped 173 and
 180 templates are byte-identical. Toyota's template is a 12,850-row binary-layout grammar
@@ -3353,6 +3428,6 @@ Techstream on a vehicle or bench. The findings describe the *capability* and
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [TMS-001](../reference/index.md#finding-tms-001), [TMS-002](../reference/index.md#finding-tms-002), [TMS-003](../reference/index.md#finding-tms-003), [TMS-004](../reference/index.md#finding-tms-004), [TMS-005](../reference/index.md#finding-tms-005), [TMS-006](../reference/index.md#finding-tms-006), [TMS-007](../reference/index.md#finding-tms-007), [TMS-008](../reference/index.md#finding-tms-008), [TMS-009](../reference/index.md#finding-tms-009), [TMS-010](../reference/index.md#finding-tms-010), [TMS-012](../reference/index.md#finding-tms-012), [TMS-013](../reference/index.md#finding-tms-013), [TMS-017](../reference/index.md#finding-tms-017), [TMS-019](../reference/index.md#finding-tms-019), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [TMS-024](../reference/index.md#finding-tms-024), [TMS-025](../reference/index.md#finding-tms-025), [TMS-026](../reference/index.md#finding-tms-026), [TMS-027](../reference/index.md#finding-tms-027), [TMS-028](../reference/index.md#finding-tms-028), [TMS-029](../reference/index.md#finding-tms-029), [TMS-030](../reference/index.md#finding-tms-030), [TMS-031](../reference/index.md#finding-tms-031), [TMS-032](../reference/index.md#finding-tms-032), [TMS-033](../reference/index.md#finding-tms-033), [TMS-034](../reference/index.md#finding-tms-034), [TMS-035](../reference/index.md#finding-tms-035), [TMS-036](../reference/index.md#finding-tms-036), [TMS-037](../reference/index.md#finding-tms-037), [TMS-038](../reference/index.md#finding-tms-038), [TMS-039](../reference/index.md#finding-tms-039), [TMS-040](../reference/index.md#finding-tms-040), [TMS-041](../reference/index.md#finding-tms-041), [TMS-042](../reference/index.md#finding-tms-042), [TMS-043](../reference/index.md#finding-tms-043), [TMS-044](../reference/index.md#finding-tms-044), [TMS-045](../reference/index.md#finding-tms-045), [TMS-046](../reference/index.md#finding-tms-046), [TMS-047](../reference/index.md#finding-tms-047), [TMS-048](../reference/index.md#finding-tms-048), [TMS-049](../reference/index.md#finding-tms-049), [TMS-050](../reference/index.md#finding-tms-050), [TMS-051](../reference/index.md#finding-tms-051), [TMS-052](../reference/index.md#finding-tms-052), [TMS-057](../reference/index.md#finding-tms-057), [TMS-061](../reference/index.md#finding-tms-061), [TMS-062](../reference/index.md#finding-tms-062), [TMS-063](../reference/index.md#finding-tms-063), [TMS-065](../reference/index.md#finding-tms-065), [TMS-066](../reference/index.md#finding-tms-066), [TMS-067](../reference/index.md#finding-tms-067), [TMS-068](../reference/index.md#finding-tms-068), [TMS-069](../reference/index.md#finding-tms-069), [TMS-070](../reference/index.md#finding-tms-070), [TMS-071](../reference/index.md#finding-tms-071), [TMS-072](../reference/index.md#finding-tms-072), [TMS-073](../reference/index.md#finding-tms-073), [TMS-077](../reference/index.md#finding-tms-077), [TMS-079](../reference/index.md#finding-tms-079), [TMS-080](../reference/index.md#finding-tms-080), [TMS-082](../reference/index.md#finding-tms-082), [VAR-064](../reference/index.md#finding-var-064)
+- Findings with this document as canonical home: [TMS-001](../reference/index.md#finding-tms-001), [TMS-002](../reference/index.md#finding-tms-002), [TMS-003](../reference/index.md#finding-tms-003), [TMS-004](../reference/index.md#finding-tms-004), [TMS-005](../reference/index.md#finding-tms-005), [TMS-006](../reference/index.md#finding-tms-006), [TMS-007](../reference/index.md#finding-tms-007), [TMS-008](../reference/index.md#finding-tms-008), [TMS-009](../reference/index.md#finding-tms-009), [TMS-010](../reference/index.md#finding-tms-010), [TMS-012](../reference/index.md#finding-tms-012), [TMS-013](../reference/index.md#finding-tms-013), [TMS-017](../reference/index.md#finding-tms-017), [TMS-019](../reference/index.md#finding-tms-019), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [TMS-024](../reference/index.md#finding-tms-024), [TMS-025](../reference/index.md#finding-tms-025), [TMS-026](../reference/index.md#finding-tms-026), [TMS-027](../reference/index.md#finding-tms-027), [TMS-028](../reference/index.md#finding-tms-028), [TMS-029](../reference/index.md#finding-tms-029), [TMS-030](../reference/index.md#finding-tms-030), [TMS-031](../reference/index.md#finding-tms-031), [TMS-032](../reference/index.md#finding-tms-032), [TMS-033](../reference/index.md#finding-tms-033), [TMS-034](../reference/index.md#finding-tms-034), [TMS-035](../reference/index.md#finding-tms-035), [TMS-036](../reference/index.md#finding-tms-036), [TMS-037](../reference/index.md#finding-tms-037), [TMS-038](../reference/index.md#finding-tms-038), [TMS-039](../reference/index.md#finding-tms-039), [TMS-040](../reference/index.md#finding-tms-040), [TMS-041](../reference/index.md#finding-tms-041), [TMS-042](../reference/index.md#finding-tms-042), [TMS-043](../reference/index.md#finding-tms-043), [TMS-044](../reference/index.md#finding-tms-044), [TMS-045](../reference/index.md#finding-tms-045), [TMS-046](../reference/index.md#finding-tms-046), [TMS-047](../reference/index.md#finding-tms-047), [TMS-048](../reference/index.md#finding-tms-048), [TMS-049](../reference/index.md#finding-tms-049), [TMS-050](../reference/index.md#finding-tms-050), [TMS-051](../reference/index.md#finding-tms-051), [TMS-052](../reference/index.md#finding-tms-052), [TMS-057](../reference/index.md#finding-tms-057), [TMS-061](../reference/index.md#finding-tms-061), [TMS-062](../reference/index.md#finding-tms-062), [TMS-063](../reference/index.md#finding-tms-063), [TMS-065](../reference/index.md#finding-tms-065), [TMS-066](../reference/index.md#finding-tms-066), [TMS-067](../reference/index.md#finding-tms-067), [TMS-068](../reference/index.md#finding-tms-068), [TMS-069](../reference/index.md#finding-tms-069), [TMS-070](../reference/index.md#finding-tms-070), [TMS-071](../reference/index.md#finding-tms-071), [TMS-072](../reference/index.md#finding-tms-072), [TMS-073](../reference/index.md#finding-tms-073), [TMS-077](../reference/index.md#finding-tms-077), [TMS-079](../reference/index.md#finding-tms-079), [TMS-080](../reference/index.md#finding-tms-080), [TMS-082](../reference/index.md#finding-tms-082), [TMS-085](../reference/index.md#finding-tms-085), [VAR-064](../reference/index.md#finding-var-064)
 - Corrections with this document as canonical home: [CORR-018](../reference/index.md#correction-corr-018), [CORR-019](../reference/index.md#correction-corr-019), [CORR-020](../reference/index.md#correction-corr-020), [CORR-021](../reference/index.md#correction-corr-021), [CORR-022](../reference/index.md#correction-corr-022), [CORR-023](../reference/index.md#correction-corr-023), [CORR-027](../reference/index.md#correction-corr-027), [CORR-034](../reference/index.md#correction-corr-034), [CORR-035](../reference/index.md#correction-corr-035), [CORR-039](../reference/index.md#correction-corr-039), [CORR-079](../reference/index.md#correction-corr-079), [CORR-080](../reference/index.md#correction-corr-080), [CORR-081](../reference/index.md#correction-corr-081), [CORR-082](../reference/index.md#correction-corr-082), [CORR-083](../reference/index.md#correction-corr-083), [CORR-084](../reference/index.md#correction-corr-084), [CORR-085](../reference/index.md#correction-corr-085), [CORR-091](../reference/index.md#correction-corr-091), [CORR-102](../reference/index.md#correction-corr-102), [CORR-103](../reference/index.md#correction-corr-103), [CORR-104](../reference/index.md#correction-corr-104), [CORR-117](../reference/index.md#correction-corr-117), [CORR-125](../reference/index.md#correction-corr-125)
 <!-- knowledge-cross-references:end -->

@@ -1,0 +1,966 @@
+{
+  "fleet_brake_sink_census": {
+    "did_serving_brake_categories": {
+      "435": "ABS_P5.ddb",
+      "466": "Brk_Bst_P5.ddb",
+      "485": "EPB_P5.ddb",
+      "6004": "BSCM_A_P6.ddb"
+    },
+    "interpretation": "Every EU/JP FRC_P5 install row and every NA row except one explicit TEST placeholder includes at least one brake ECU whose current DDB exposes 0x10A1..0x10A4. This establishes a fleet-wide diagnostic observation sink, not guaranteed runtime PID support on every physical vehicle.",
+    "regions": {
+      "EU": {
+        "frc_install_row_count": 460,
+        "rows_with_tss_request_observable_brake_sink": 460,
+        "rows_without_sink": [],
+        "serving_category_counts": {
+          "435": 422,
+          "466": 229,
+          "485": 0,
+          "6004": 51
+        }
+      },
+      "JP": {
+        "frc_install_row_count": 213,
+        "rows_with_tss_request_observable_brake_sink": 213,
+        "rows_without_sink": [],
+        "serving_category_counts": {
+          "435": 191,
+          "466": 109,
+          "485": 2,
+          "6004": 26
+        }
+      },
+      "NA": {
+        "frc_install_row_count": 256,
+        "rows_with_tss_request_observable_brake_sink": 255,
+        "rows_without_sink": [
+          {
+            "category_ids": [
+              498,
+              5027,
+              6055
+            ],
+            "install_set_id": 3938,
+            "vehicle_id": 11310,
+            "vehicle_name": "TEST"
+          }
+        ],
+        "serving_category_counts": {
+          "435": 219,
+          "466": 121,
+          "485": 0,
+          "6004": 40
+        }
+      }
+    }
+  },
+  "lateral_ownership_boundary": {
+    "brake_domain": {
+      "authenticated_source_family_supported": true,
+      "category": {
+        "category_id": 435,
+        "database": "ABS_P5.ddb",
+        "diagnostic_request_address": "0x7B0",
+        "display_name": "Brake/EPB",
+        "functional_address": "0x7E5"
+      },
+      "icus_slot_selector": 4,
+      "shared_protected_profiles": [
+        "0x00F",
+        "0x0D7",
+        "0x0B6"
+      ]
+    },
+    "eps_is_not_producer_evidence": {
+      "role": "SecOC receiver/verifier for protected B6",
+      "slot4_secret_cpu_visible": false,
+      "verifier_envelope_known": true
+    },
+    "eps_receiver": {
+      "can_id": "0x0B6",
+      "monitored_source_domain": "Brake System Control Module",
+      "pdu_id": 42,
+      "techstream_dtc": {
+        "base_dtc": "0xC129",
+        "dem_event": "0x0143",
+        "dem_event_raw_hex": "4200520000010000",
+        "dem_event_record_address": "0x0002C3A0",
+        "enabled_word": 1,
+        "failure_type": "0x87",
+        "h_dtc_index": 82,
+        "h_raw_hex": "8729c10001000000",
+        "h_record_address": "0x0002C818",
+        "packed_dtc": "0xC12987",
+        "techstream_code": "U012987",
+        "techstream_description": "Lost Communication with Brake System Control Module",
+        "techstream_failure": "Missing Message",
+        "techstream_raw_sha256": "b9b22676cbb4f869c419e0d5c9fbf1197c3cda91cb38cc9eacf98142383f64b4"
+      }
+    },
+    "frc_to_brake_transform_identified": false,
+    "freshness_owner_identified": false,
+    "interpretation": "Exact EPS firmware/DTC evidence attributes protected B6 to the Brake System Control Module domain and the EPS is the receiving/verifying endpoint. Current GTS+ separately proves FRC hosts the TSS3 request/arbitration recorder. Together these exclude EPS as the producer and make Brake the only positively attributed immediate source domain, but they do not uniquely distinguish FRC-originated commands forwarded by Brake from Brake-computed commands, nor identify the CMAC/freshness implementation owner.",
+    "next_evidence": "Acquire the category-435 07B0 Brake/EPB CUW matched to the target vehicle and decode its application representation; pair it with the matched 0792 FRC image or a synchronized stock-LTA capture. Then search the decoded producer images for the 32-byte B6 Tx descriptor, request-ID state, angle conversion, cadence, freshness state and CMAC submission path.",
+    "signing_owner_identified": false,
+    "static_search_exhausted": true,
+    "unique_originator_identified": false
+  },
+  "longitudinal_request_surface": {
+    "brake_receive_vocabulary": {
+      "abs_identical_across_regions": true,
+      "consumers": {
+        "435": {
+          "database": "ABS_P5.ddb",
+          "request_dids": {
+            "0x10A1": [
+              {
+                "alternate_did": null,
+                "bit_end": 15,
+                "bit_start": 0,
+                "bit_width": 16,
+                "decimal_point_count": 3,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration of Upper Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A1",
+                "signed": true,
+                "unit": "m/s^2"
+              }
+            ],
+            "0x10A2": [
+              {
+                "alternate_did": null,
+                "bit_end": 15,
+                "bit_start": 0,
+                "bit_width": 16,
+                "decimal_point_count": 3,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration of Lower Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A2",
+                "signed": true,
+                "unit": "m/s^2"
+              }
+            ],
+            "0x10A3": [
+              {
+                "alternate_did": null,
+                "bit_end": 7,
+                "bit_start": 2,
+                "bit_width": 6,
+                "decimal_point_count": 0,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration and Deceleration ID of Upper Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A3",
+                "signed": false,
+                "unit": null
+              }
+            ],
+            "0x10A4": [
+              {
+                "alternate_did": null,
+                "bit_end": 7,
+                "bit_start": 2,
+                "bit_width": 6,
+                "decimal_point_count": 0,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration and Deceleration ID of Lower Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A4",
+                "signed": false,
+                "unit": null
+              }
+            ]
+          }
+        },
+        "466": {
+          "database": "Brk_Bst_P5.ddb",
+          "request_dids": {
+            "0x10A1": [
+              {
+                "alternate_did": null,
+                "bit_end": 15,
+                "bit_start": 0,
+                "bit_width": 16,
+                "decimal_point_count": 3,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration of Upper Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A1",
+                "signed": true,
+                "unit": "m/s^2"
+              }
+            ],
+            "0x10A2": [
+              {
+                "alternate_did": null,
+                "bit_end": 15,
+                "bit_start": 0,
+                "bit_width": 16,
+                "decimal_point_count": 3,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration of Lower Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A2",
+                "signed": true,
+                "unit": "m/s^2"
+              }
+            ],
+            "0x10A3": [
+              {
+                "alternate_did": null,
+                "bit_end": 7,
+                "bit_start": 2,
+                "bit_width": 6,
+                "decimal_point_count": 0,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration and Deceleration ID of Upper Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A3",
+                "signed": false,
+                "unit": null
+              }
+            ],
+            "0x10A4": [
+              {
+                "alternate_did": null,
+                "bit_end": 7,
+                "bit_start": 2,
+                "bit_width": 6,
+                "decimal_point_count": 0,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration and Deceleration ID of Lower Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A4",
+                "signed": false,
+                "unit": null
+              }
+            ]
+          }
+        },
+        "485": {
+          "database": "EPB_P5.ddb",
+          "request_dids": {
+            "0x10A1": [
+              {
+                "alternate_did": null,
+                "bit_end": 15,
+                "bit_start": 0,
+                "bit_width": 16,
+                "decimal_point_count": 3,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration of Upper Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A1",
+                "signed": true,
+                "unit": "m/s^2"
+              }
+            ],
+            "0x10A2": [
+              {
+                "alternate_did": null,
+                "bit_end": 15,
+                "bit_start": 0,
+                "bit_width": 16,
+                "decimal_point_count": 3,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration of Lower Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A2",
+                "signed": true,
+                "unit": "m/s^2"
+              }
+            ],
+            "0x10A3": [
+              {
+                "alternate_did": null,
+                "bit_end": 7,
+                "bit_start": 2,
+                "bit_width": 6,
+                "decimal_point_count": 0,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration and Deceleration ID of Upper Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A3",
+                "signed": false,
+                "unit": null
+              }
+            ],
+            "0x10A4": [
+              {
+                "alternate_did": null,
+                "bit_end": 7,
+                "bit_start": 2,
+                "bit_width": 6,
+                "decimal_point_count": 0,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration and Deceleration ID of Lower Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A4",
+                "signed": false,
+                "unit": null
+              }
+            ]
+          }
+        },
+        "6004": {
+          "database": "BSCM_A_P6.ddb",
+          "request_dids": {
+            "0x10A1": [
+              {
+                "alternate_did": null,
+                "bit_end": 15,
+                "bit_start": 0,
+                "bit_width": 16,
+                "decimal_point_count": 3,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration of Upper Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A1",
+                "signed": true,
+                "unit": "m/s^2"
+              }
+            ],
+            "0x10A2": [
+              {
+                "alternate_did": null,
+                "bit_end": 15,
+                "bit_start": 0,
+                "bit_width": 16,
+                "decimal_point_count": 3,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration of Lower Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A2",
+                "signed": true,
+                "unit": "m/s^2"
+              }
+            ],
+            "0x10A3": [
+              {
+                "alternate_did": null,
+                "bit_end": 7,
+                "bit_start": 2,
+                "bit_width": 6,
+                "decimal_point_count": 0,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration and Deceleration ID of Upper Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A3",
+                "signed": false,
+                "unit": null
+              }
+            ],
+            "0x10A4": [
+              {
+                "alternate_did": null,
+                "bit_end": 7,
+                "bit_start": 2,
+                "bit_width": 6,
+                "decimal_point_count": 0,
+                "div": 1,
+                "mul": 1,
+                "name": "Request Acceleration and Deceleration ID of Lower Limit from Toyota Safety Sense",
+                "offset": 0,
+                "patterns": {},
+                "primary_did": "0x10A4",
+                "signed": false,
+                "unit": null
+              }
+            ]
+          }
+        }
+      },
+      "dids": {
+        "0x10A1": [
+          {
+            "alternate_did": null,
+            "bit_end": 15,
+            "bit_start": 0,
+            "bit_width": 16,
+            "decimal_point_count": 3,
+            "div": 1,
+            "mul": 1,
+            "name": "Request Acceleration of Upper Limit from Toyota Safety Sense",
+            "offset": 0,
+            "patterns": {},
+            "primary_did": "0x10A1",
+            "signed": true,
+            "unit": "m/s^2"
+          }
+        ],
+        "0x10A2": [
+          {
+            "alternate_did": null,
+            "bit_end": 15,
+            "bit_start": 0,
+            "bit_width": 16,
+            "decimal_point_count": 3,
+            "div": 1,
+            "mul": 1,
+            "name": "Request Acceleration of Lower Limit from Toyota Safety Sense",
+            "offset": 0,
+            "patterns": {},
+            "primary_did": "0x10A2",
+            "signed": true,
+            "unit": "m/s^2"
+          }
+        ],
+        "0x10A3": [
+          {
+            "alternate_did": null,
+            "bit_end": 7,
+            "bit_start": 2,
+            "bit_width": 6,
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "name": "Request Acceleration and Deceleration ID of Upper Limit from Toyota Safety Sense",
+            "offset": 0,
+            "patterns": {},
+            "primary_did": "0x10A3",
+            "signed": false,
+            "unit": null
+          }
+        ],
+        "0x10A4": [
+          {
+            "alternate_did": null,
+            "bit_end": 7,
+            "bit_start": 2,
+            "bit_width": 6,
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "name": "Request Acceleration and Deceleration ID of Lower Limit from Toyota Safety Sense",
+            "offset": 0,
+            "patterns": {},
+            "primary_did": "0x10A4",
+            "signed": false,
+            "unit": null
+          }
+        ]
+      },
+      "meaning": "Toyota labels 0x10A1..0x10A4 as upper/lower acceleration magnitudes and request IDs 'from Toyota Safety Sense'. They are ordinary read-only Data Monitor observations in the brake domain, not proof of the underlying vehicle-network frame or authentication owner."
+    },
+    "frc_output_vocabulary": {
+      "boundary": "The ordinary FRC Data List exposes only the upper-limit ISA request half. Lower-limit TSS request fields are present in the PCS recorder and brake receive surface but are not exposed as FRC_P5 ordinary Data Monitor DIDs.",
+      "database": "FRC_P5.ddb",
+      "dids": {
+        "0x1B03": [
+          {
+            "alternate_did": "0x3B03",
+            "bit_end": 7,
+            "bit_start": 0,
+            "bit_width": 8,
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "name": "ISA Requesting Vertical ID (Upper Limit)",
+            "offset": 0,
+            "patterns": {
+              "0": "No Request",
+              "63": "Driver Operation"
+            },
+            "primary_did": "0x1B03",
+            "signed": false,
+            "unit": null
+          }
+        ],
+        "0x1B04": [
+          {
+            "alternate_did": "0x3B04",
+            "bit_end": 31,
+            "bit_start": 0,
+            "bit_width": 32,
+            "decimal_point_count": 3,
+            "div": 1,
+            "mul": 1000,
+            "name": "ISA Request Acceleration (Upper Limit)",
+            "offset": 0,
+            "patterns": {},
+            "primary_did": "0x1B04",
+            "signed": true,
+            "unit": "m/s2"
+          }
+        ],
+        "0x1B05": [
+          {
+            "alternate_did": "0x3B05",
+            "bit_end": 7,
+            "bit_start": 0,
+            "bit_width": 8,
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "name": "ISA Requesting Vehicle Speed (Upper Limit)",
+            "offset": 0,
+            "patterns": {},
+            "primary_did": "0x1B05",
+            "signed": false,
+            "unit": "km/h"
+          },
+          {
+            "alternate_did": "0x3B05",
+            "bit_end": 39,
+            "bit_start": 8,
+            "bit_width": 32,
+            "decimal_point_count": 3,
+            "div": 1,
+            "mul": 1000,
+            "name": "ISA Request Acceleration (Upper Limit) (Variation No Limit)",
+            "offset": 0,
+            "patterns": {},
+            "primary_did": "0x1B05",
+            "signed": true,
+            "unit": "m/s2"
+          }
+        ],
+        "0x1B06": [
+          {
+            "alternate_did": "0x3B06",
+            "bit_end": 7,
+            "bit_start": 0,
+            "bit_width": 8,
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "name": "ISA Braking Force and Driving Force Allocation Method Specification (Upper Limit)",
+            "offset": 0,
+            "patterns": {
+              "0": "Engine Only",
+              "1": "Engine and Brake 1",
+              "2": "Engine and Brake 2",
+              "3": "Brake Only"
+            },
+            "primary_did": "0x1B06",
+            "signed": false,
+            "unit": null
+          },
+          {
+            "alternate_did": "0x3B06",
+            "bit_end": 15,
+            "bit_start": 8,
+            "bit_width": 8,
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "name": "ISA Speed Change Priority Request (Upper Limit)",
+            "offset": 0,
+            "patterns": {
+              "0": "No Brake Coordination Down Shifting Request",
+              "1": "Brake Coordination Down Shifting Request Exists"
+            },
+            "primary_did": "0x1B06",
+            "signed": false,
+            "unit": null
+          },
+          {
+            "alternate_did": "0x3B06",
+            "bit_end": 23,
+            "bit_start": 16,
+            "bit_width": 8,
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "name": "ISA Responsiveness Request (Upper Limit)",
+            "offset": 0,
+            "patterns": {
+              "0": "No FB",
+              "1": "FB Control High Gain",
+              "2": "FB Control Medium Gain",
+              "3": "FB Control Low Gain"
+            },
+            "primary_did": "0x1B06",
+            "signed": false,
+            "unit": null
+          }
+        ],
+        "0x1B07": [
+          {
+            "alternate_did": "0x3B07",
+            "bit_end": 8,
+            "bit_start": 8,
+            "bit_width": 1,
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "name": "ISA Brake Hold Control Prohibited Flag (Upper Limit)",
+            "offset": 0,
+            "patterns": {
+              "0": "Allowed",
+              "1": "Not Allowed"
+            },
+            "primary_did": "0x1B07",
+            "signed": false,
+            "unit": null
+          },
+          {
+            "alternate_did": "0x3B07",
+            "bit_end": 9,
+            "bit_start": 9,
+            "bit_width": 1,
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "name": "ISA Stop Control Permission Flag (Upper Limit)",
+            "offset": 0,
+            "patterns": {
+              "0": "Not Allowed",
+              "1": "Allowed"
+            },
+            "primary_did": "0x1B07",
+            "signed": false,
+            "unit": null
+          },
+          {
+            "alternate_did": "0x3B07",
+            "bit_end": 10,
+            "bit_start": 10,
+            "bit_width": 1,
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "name": "ISA Brake Usage Limit Permission Flag (Upper Limit)",
+            "offset": 0,
+            "patterns": {
+              "0": "Not Allowed",
+              "1": "Allowed"
+            },
+            "primary_did": "0x1B07",
+            "signed": false,
+            "unit": null
+          }
+        ]
+      },
+      "identical_across_regions": true
+    },
+    "pcs_recorder_vocabulary": {
+      "5280": [
+        {
+          "bit_length": 8,
+          "bit_position": 7,
+          "byte_position": 1,
+          "lsb": "1",
+          "name": "TSS required longitudinal ID (lower limit)",
+          "offset": "0",
+          "point": 0,
+          "type": "u"
+        },
+        {
+          "bit_length": 16,
+          "bit_position": 7,
+          "byte_position": 2,
+          "lsb": "0.001",
+          "name": "TSS required acceleration (lower limit)",
+          "offset": "0",
+          "point": 3,
+          "type": "s"
+        },
+        {
+          "bit_length": 8,
+          "bit_position": 7,
+          "byte_position": 4,
+          "lsb": "1",
+          "name": "TSS braking/driving force distribution method (lower limit)",
+          "offset": "0",
+          "point": 0,
+          "type": "u"
+        },
+        {
+          "bit_length": 8,
+          "bit_position": 7,
+          "byte_position": 5,
+          "lsb": "1",
+          "name": "TSS shift range request",
+          "offset": "0",
+          "point": 0,
+          "type": "u"
+        },
+        {
+          "bit_length": 8,
+          "bit_position": 7,
+          "byte_position": 6,
+          "lsb": "1",
+          "name": "TSS EPB request",
+          "offset": "0",
+          "point": 0,
+          "type": "u"
+        },
+        {
+          "bit_length": 8,
+          "bit_position": 7,
+          "byte_position": 7,
+          "lsb": "1",
+          "name": "TSS accelerator override prohibition flag",
+          "offset": "0",
+          "point": 0,
+          "type": "u"
+        },
+        {
+          "bit_length": 8,
+          "bit_position": 7,
+          "byte_position": 8,
+          "lsb": "1",
+          "name": "TSS acceleration request low priority flag",
+          "offset": "0",
+          "point": 0,
+          "type": "u"
+        }
+      ],
+      "5281": [
+        {
+          "bit_length": 8,
+          "bit_position": 7,
+          "byte_position": 1,
+          "lsb": "1",
+          "name": "TSS request longitudinal ID (upper limit)",
+          "offset": "0",
+          "point": 0,
+          "type": "u"
+        },
+        {
+          "bit_length": 16,
+          "bit_position": 7,
+          "byte_position": 2,
+          "lsb": "0.001",
+          "name": "TSS request acceleration (upper limit)",
+          "offset": "0",
+          "point": 3,
+          "type": "s"
+        },
+        {
+          "bit_length": 8,
+          "bit_position": 7,
+          "byte_position": 4,
+          "lsb": "1",
+          "name": "TSS braking/driving force distribution method instruction (upper limit)",
+          "offset": "0",
+          "point": 0,
+          "type": "u"
+        }
+      ],
+      "5284": [
+        {
+          "bit_length": 8,
+          "bit_position": 7,
+          "byte_position": 1,
+          "lsb": "1",
+          "name": "Arbitration result_longitudinal ID",
+          "offset": "0",
+          "point": 0,
+          "type": "u"
+        }
+      ],
+      "57D3": [
+        {
+          "bit_length": 1,
+          "bit_position": 7,
+          "byte_position": 2,
+          "lsb": "1",
+          "name": "Arbitration result_Acceleration valid flag",
+          "offset": "0",
+          "point": 0,
+          "type": "u"
+        }
+      ],
+      "57DB": [
+        {
+          "bit_length": 16,
+          "bit_position": 7,
+          "byte_position": 1,
+          "lsb": "0.001",
+          "name": "Arbitration result Acceleration",
+          "offset": "0",
+          "point": 3,
+          "type": "s"
+        }
+      ]
+    },
+    "static_join": "FRC_P5 contains the upper-limit requester/acceleration/allocation/permission source vocabulary; brake-domain ECUs expose upper/lower acceleration and requester IDs explicitly named 'from Toyota Safety Sense'; and the FRC-hosted PCS recorder contains both request halves plus arbitration-result longitudinal ID/acceleration. This closes the diagnostic source->brake-sink architecture, but not copy direction, wire encoding, SecOC ownership, or arbitration execution."
+  },
+  "ordinary_arbitration_census": {
+    "boundary": "The current ordinary P5 Data Monitor surface exposes no control-related arbitration-result signal. P6 arbitration rows are successor terminology only; the P5 winner remains available through the FRC-hosted PCS recorder rather than an ordinary RDBI oracle.",
+    "control_related_hits": [
+      {
+        "alternate_did": "0x3486",
+        "bit_end": 287,
+        "bit_start": 280,
+        "bit_width": 8,
+        "category_id": 6037,
+        "database": "ADCU_P6.ddb",
+        "decimal_point_count": 0,
+        "div": 1,
+        "generation": 22,
+        "mul": 1,
+        "name": "Longitudinal Powertrain Arbitration ID",
+        "offset": 0,
+        "patterns": {},
+        "primary_did": "0x0000",
+        "signed": false,
+        "unit": null
+      },
+      {
+        "alternate_did": "0x3486",
+        "bit_end": 295,
+        "bit_start": 288,
+        "bit_width": 8,
+        "category_id": 6037,
+        "database": "ADCU_P6.ddb",
+        "decimal_point_count": 0,
+        "div": 1,
+        "generation": 22,
+        "mul": 1,
+        "name": "Longitudinal Brake Arbitration ID",
+        "offset": 0,
+        "patterns": {},
+        "primary_did": "0x0000",
+        "signed": false,
+        "unit": null
+      },
+      {
+        "alternate_did": "0x3486",
+        "bit_end": 303,
+        "bit_start": 296,
+        "bit_width": 8,
+        "category_id": 6037,
+        "database": "ADCU_P6.ddb",
+        "decimal_point_count": 0,
+        "div": 1,
+        "generation": 22,
+        "mul": 1,
+        "name": "Lateral Arbitration ID",
+        "offset": 0,
+        "patterns": {},
+        "primary_did": "0x0000",
+        "signed": false,
+        "unit": null
+      },
+      {
+        "alternate_did": "0x3486",
+        "bit_end": 287,
+        "bit_start": 280,
+        "bit_width": 8,
+        "category_id": 6537,
+        "database": "ADCU_P6F.ddb",
+        "decimal_point_count": 0,
+        "div": 1,
+        "generation": 22,
+        "mul": 1,
+        "name": "Longitudinal Powertrain Arbitration ID",
+        "offset": 0,
+        "patterns": {},
+        "primary_did": "0x0000",
+        "signed": false,
+        "unit": null
+      },
+      {
+        "alternate_did": "0x3486",
+        "bit_end": 295,
+        "bit_start": 288,
+        "bit_width": 8,
+        "category_id": 6537,
+        "database": "ADCU_P6F.ddb",
+        "decimal_point_count": 0,
+        "div": 1,
+        "generation": 22,
+        "mul": 1,
+        "name": "Longitudinal Brake Arbitration ID",
+        "offset": 0,
+        "patterns": {},
+        "primary_did": "0x0000",
+        "signed": false,
+        "unit": null
+      },
+      {
+        "alternate_did": "0x3486",
+        "bit_end": 303,
+        "bit_start": 296,
+        "bit_width": 8,
+        "category_id": 6537,
+        "database": "ADCU_P6F.ddb",
+        "decimal_point_count": 0,
+        "div": 1,
+        "generation": 22,
+        "mul": 1,
+        "name": "Lateral Arbitration ID",
+        "offset": 0,
+        "patterns": {},
+        "primary_did": "0x0000",
+        "signed": false,
+        "unit": null
+      }
+    ],
+    "generation20_hit_count": 0,
+    "generation20_hits": [],
+    "region": "NA"
+  },
+  "recorder_hosting": {
+    "diagnostic_request_address_by_region": {
+      "EU": "792",
+      "JP": "792",
+      "NA": "792"
+    },
+    "host": {
+      "bindings": [
+        {
+          "dll": "GetTSS3ImageFFDP5_DT.dll",
+          "role": 233,
+          "role_hex": "0xE9"
+        },
+        {
+          "dll": "GetTSS3OperationFFDP5_DT.dll",
+          "role": 234,
+          "role_hex": "0xEA"
+        }
+      ],
+      "category_id": 498,
+      "database": "FRC_P5.ddb",
+      "generation": 20,
+      "name": "Front Recognition Camera 2"
+    },
+    "identical_across_regions": true,
+    "proof": "Current master CDbDllTable binds both TSS3 Operation/Image FFD plugins only to category 498, FRC_P5 / Front Recognition Camera 2. Therefore Toyota's current TSS3 recorder is hosted and served at the FRC diagnostic endpoint; this does not identify the arbitration executor or vehicle-network transmitter."
+  },
+  "remaining_boundary": "Static GTS+ now identifies the TSS3 recorder host (FRC) and the longitudinal diagnostic request source/sink architecture (FRC/TSS vocabulary observed at the brake domain). It still cannot prove the vehicle-network command frame, copy/forwarding transform, SecOC signer/freshness owner, or the ECU/function that executes final arbitration. Those require target firmware or synchronized live recorder + CAN observations.",
+  "schema": "gtsplus-tss3-control-ownership-surface-v1",
+  "specimen_census": {
+    "boundary": "The pinned Toyota Diagnostics distribution and tracked REFERENCE/community/targets corpora contain no real TSE/GTSE specimen. Host traversal is recovered, but end-to-end real-section validation requires an externally acquired Toyota-generated raw TSE; preserve it before GTSE conversion because the current converter skip policy omits PCS Operation/Image FFD sections.",
+    "bundled_toyota_diagnostics_tse_gtse_count": 0,
+    "bundled_toyota_diagnostics_tse_gtse_paths": [],
+    "repository_reference_tse_gtse_count": 0,
+    "repository_reference_tse_gtse_paths": []
+  },
+  "title": "Current GTS+ TSS3 recorder hosting and longitudinal request ownership surface"
+}

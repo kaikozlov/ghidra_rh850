@@ -916,54 +916,56 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   a triage candidate only; whether each mechanism transfers must be verified
   against the new firmware bytes before anything is recorded beyond
   `docs/variants/` hypothesis.
-- **OQ-052 — True-TSS3 longitudinal producer/control contract.** TMS-079 adds an
-  important search boundary: current category-498 install rows have zero selected
-  co-occurrence in NA/EU/JP with `PCS1_P5` 427, `DSSystem_P5` 428,
-  `Fr_RadSen_P5` 429, `RoadSign_P5` 431, or `PCS2_P5` 432. Do not pick one of
-  those databases as the TSS3 longitudinal owner merely because it is P5 or has a
-  promising name. TMS-080/082 instead close a concrete cross-vehicle GTS+ recorder
-  source to join to an exact target: the same-release native FRC Operation/Image FFD
-  acquisition path is now recovered (`AB11/12/13 -> EB11/12/13`; Image-FFD
-  `22 11 03 -> 22 11 01 -> 27 03/04 -> 22 20 81`), TSE persists PCS FFD sections,
-  and PCS Data Viewer names the longitudinal/lateral request and arbitration model.
-  TMS-084 now closes the former managed-table gap too: 1,130 exact bit/scaling rows,
-  plus Toyota's exact `SYSTEM_TYPE` enum (`2=LDA`) showing the LCS/LTA/LCA steering
-  RoBs belong to the LDA recorder domain. Recovered viewer flow proves this is trigger
-  taxonomy (`CheckMultiTriggerInfo` compares `SystemType`/`Group`; `AnalyzeRoBParameter`
-  scans all DID definitions without reading `SystemType`), not physical ECU/network-producer
-  ownership. The same table proves `5282`, LDA `5531`, and LTA `5631`
-  have identical four-field request geometry, while explicit LCA presence/state exists with
-  **no LCA-named request tuple** anywhere in the 1,130 rows; that is consistent with the
-  independently named EPS profile `11=LTA/LCA`, but does not establish runtime copy direction
-  or producer ownership. Those 1,130 rows span 623 recorder DIDs; the artifact also contains
-  47 RoB definitions and the current FCM TSS3 image decode
-  (`AB31/EB31`, `AB33/EB33`, exact byte-9 variable-length block grammar, `6002..6017`
-  split reassembly to `6001`, then `622081` value `01` unencrypted or
-  `reverse_bits8(cipher_byte) XOR 0xAA`).
-  Recovered TSE managed bodies now also close the host traversal itself: 35 exact position
-  markers, the `FF FF FF FF <selector> FF FF FF` resynchronization grammar, 8-byte rewind
-  behavior, template `PositionF/PositionSkipF` control and 15-level FAT/list projection are
-  deterministic artifacts. The remaining host-side item is therefore only **execution of that
-  recovered traversal against a representative Toyota-generated TSS3 TSE specimen**; the
-  substantive open problem is recorder-ID -> vehicle-network producer/frame/SecOC ownership
-  and arbitration execution on an exact target. Join that evidence to an exact
-  target's installed modules and live/firmware evidence. Older Toyota prior
-  art makes longitudinal ownership a separate generation-specific architecture:
-  ordinary TSS2 treats the camera as the ACC command source, `RADAR_ACC` moves
-  ownership to the radar, and some SecOC-protected profiles split acceleration
-  across classic `0x343` plus authenticated `0x183`. That SecOC fact is orthogonal
-  to TSS generation. The pinned 2023 Corolla route has **no `0x343`** and its
-  `0x183` is a 64-byte ~20-Hz CAN-FD member of the wider `0x180..0x18B` family;
-  the retained 2025 Span capture reproduces the same ID/DLC family. This proves the
-  old `0x183/8` ACC_CONTROL_2 wire contract does not transfer and makes the numeric
-  ID alone non-semantic. For one exact TSS3 target, identify the real ACC producer
-  (FRC, radar/ADS, gateway, brake/ACC controller, or other), command/feedback fields
-  and cadence, lead/distance/standstill state, AEB/brake arbitration,
-  integrity/authentication, and the safe stock-source suppression/fallback point.
-  Do not add a TSS3 longitudinal builder or Panda whitelist until that ownership
-  contract is target-native. Canonical:
-  [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md) §4.1/§5D and
-  `data/generated/corolla_tss3_opendbc_readiness.json`.
+- **OQ-052 — True-TSS3 longitudinal wire/auth/arbitration execution contract.**
+  TMS-085 closes the remaining **static GTS+ ownership architecture** that originally
+  motivated this question. Current NA/EU/JP master `CDbDllTable` binds the TSS3 recorder
+  roles exclusively to category **498 `FRC_P5 = Front Recognition Camera 2`**: role
+  `0xE9` `GetTSS3ImageFFDP5_DT.dll` and `0xEA` `GetTSS3OperationFFDP5_DT.dll`; the
+  category-498 diagnostic request address is `0x792` in all three regions. Thus the
+  proprietary Operation/Image recorder that contains the request/arbitration records is
+  hosted by FRC. Recorder hosting does **not** prove arbitration execution ownership.
+
+  The ordinary diagnostic source/sink model is now concrete too. `FRC_P5` exposes upper-
+  limit ISA request state at `0x1B03..0x1B07` (requesting longitudinal/"Vertical" ID,
+  signed 0.001-m/s² request acceleration, speed/variation-no-limit acceleration, braking/
+  driving-force allocation, responsiveness/shift-priority and brake-hold/stop/brake-use
+  permission flags). Brake-domain DDBs independently expose `0x10A1..0x10A4` explicitly
+  named **Request Acceleration ... from Toyota Safety Sense** and **Request Acceleration
+  and Deceleration ID ... from Toyota Safety Sense** for both upper and lower limits. The
+  exact four-DID receive surface exists in `ABS_P5` 435, `Brk_Bst_P5` 466, `EPB_P5` 485
+  and successor `BSCM_A_P6` 6004. PCS Data Viewer separately records lower request `5280`,
+  upper request `5281`, arbitration-result longitudinal ID `5284`, arbitration-result
+  acceleration `57DB`, and validity `57D3`. This closes an OEM-named diagnostic
+  architecture: **FRC/TSS request vocabulary -> brake-domain request observation ->
+  FRC-hosted request/arbitration recorder**. The FRC ordinary Data List exposes only the
+  upper-limit half; lower-limit request state is visible in the recorder/brake sink.
+
+  The sink is fleet-wide at the install/DDB level: among TMS-079's 256/460/213 current
+  category-498 rows, a brake category exposing `0x10A1..0x10A4` is present in
+  **255/256 NA, 460/460 EU, and 213/213 JP**; the sole NA exception is model `TEST`. This
+  does not claim runtime PID support on every physical vehicle. The former candidate
+  databases `PCS1_P5` 427, `DSSystem_P5` 428, `Fr_RadSen_P5` 429, `RoadSign_P5` 431 and
+  `PCS2_P5` 432 remain a disproved ownership shortcut: they have zero selected
+  co-occurrence with category 498 in all three regions.
+
+  A current corpus-wide ordinary Data Monitor census finds **zero generation-20 control
+  arbitration-result signals**. Only successor `ADCU_P6/P6F` exposes the corresponding
+  ordinary vocabulary (`0x3486`: longitudinal powertrain arbitration ID, longitudinal
+  brake arbitration ID, lateral arbitration ID); that is a P6 terminology oracle only.
+  Older TSS2 `0x343` / `0x183/8` ACC contracts remain non-transferable: the pinned TSS3
+  Corolla route has no `0x343`, and its `0x183` belongs to a 64-byte CAN-FD family.
+
+  **What is still genuinely open is target-native wire/auth/execution, not GTS+ naming.**
+  For one exact TSS3 target, join the diagnostic values to the real vehicle-network frame
+  and cadence, determine the FRC->brake copy/transform, final brake/powertrain arbitration
+  executor, SecOC/integrity signer/freshness owner, lead/distance/standstill feedback, and
+  safe stock-source suppression/fallback. The immediate read-only Camry oracle is
+  Brake `0x7B0`: `22 10 A1`..`22 10 A4`, synchronized with FRC `0x792`
+  `22 1B 03`..`22 1B 07`, stock DRCC engagement and all-bus capture. Do not add a TSS3
+  longitudinal builder or Panda whitelist until that wire/auth contract is target-native.
+  Canonical: [../tooling/techstream.md](../tooling/techstream.md) §6.2.4,
+  `data/generated/gtsplus_2026/tss3_control_ownership_surface.json`, and
+  [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md) §4.1/§5D.
 
 - **OQ-053 — F33 non-disruptive application-mode RAM execution pivot.** **Production-only ordering note:** VAR-060 now closes an exact persistent F33 Gate-2 development patch and deterministic restore, so this question no longer blocks first development lateral. It remains open because the production goal is still a non-persistent signer/control path. Exact
   `8965F3307000` has the desired volatile carrier and the placement half of the

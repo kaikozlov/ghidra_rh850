@@ -252,9 +252,29 @@ The saved-session pipeline is now useful in three ways:
    offline interpretation.
 
 The remaining high-value closure is a real TSE sample containing TSS3 Operation FFD or
-Image FFD. That would let us validate the recovered FAT search-key/position/list semantics
-end-to-end and directly exercise a standalone reader against Toyota-generated data; the
-managed executable-body and GTSE compression-algorithm boundaries themselves are closed.
+Image FFD. A deterministic corpus census now confirms that **none is bundled or already
+tracked**: the pinned Toyota Diagnostics tree contains zero `.tse`/`.gtse` files, and the
+repository `REFERENCE/`, `community/`, and `targets/` corpora contain zero such specimens.
+A broader read-only local search also found no Toyota-generated TSE/GTSE or genuine
+`0x792<->0x79A` AB11/EB11 recorder exchange in the retained CAN captures. The shipped
+`TEMPLATE/{171,173,180}_Template.csv` files and recovered converter PEs are format/tool
+evidence, not session specimens.
+
+The minimum acquisition needed to close that validation boundary is therefore concrete:
+
+1. connect current GTS+ to a true-TSS3 vehicle through Toyota VCI/J2534;
+2. select the category-498 Front Recognition Camera / PCS recorder surface and retrieve
+   Operation FFD (`AB11/12/13 -> EB11/12/13`, selector `0x66`);
+3. save the diagnostic session and copy the **raw pre-conversion `.TSE`**;
+4. preserve that TSE before any GTSE conversion, because current `BinarySkipDataNames`
+   omits `RecordOnBehavior共通`, `PCS時系列作動時FFD`, and `PCS画像FFD`; and
+5. pin the specimen SHA-256 plus vehicle/FRC software identity, then exercise the recovered
+   35-marker FAT/list traversal and PCS dictionary join against its populated sections.
+
+Until such external source data exists, there is no further static implementation RE to do
+here: the managed executable-body, TSE traversal, ring-buffer and GTSE compression
+boundaries are closed, while real-session validation is **source-data blocked** rather than
+code-analysis blocked.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

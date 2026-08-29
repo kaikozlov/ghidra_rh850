@@ -96,6 +96,12 @@ requires_external = ["gtsplus"]
 modes = ["local"]
 oracle = "independent_external_artifact"
 
+[suite.gtsplus_tss3_control_ownership]
+tests = ["tests/verify_gtsplus_tss3_control_ownership.py"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+oracle = "independent_external_artifact"
+
 [suite.gtsplus_pcs_data_viewer_tss3_dictionary]
 tests = ["tests/verify_gtsplus_pcs_data_viewer_tss3_dictionary.py"]
 requires_external = ["gtsplus"]

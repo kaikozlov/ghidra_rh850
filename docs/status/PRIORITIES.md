@@ -235,14 +235,35 @@ viewer dictionary despite explicit LCA presence/state fields**. Do not spend ano
 search trying to discover such a tuple. Its absence is consistent with the EPS-side shared
 Target Lateral ID `11=LTA/LCA`, but is not a runtime-copy or ownership proof.
 
-The next high-value work is to use the OEM request/arbitration model to identify **exact
-vehicle-network producer/frame/SecOC ownership and the arbitration execution owner** in target
-firmware or a synchronized Operation-FFD capture, and to validate the recovered TSE FAT/list
-traversal end-to-end when a representative Toyota-generated TSS3 TSE specimen becomes
-available. Treat generation-22 `ADCU_P6` only as a successor terminology oracle. Canonical: `data/generated/gtsplus_2026/tss3_native_recorder_protocol.json`,
+TMS-085 now closes the remaining **static GTS+ ownership architecture** too. Current master
+role bindings put both TSS3 recorder plugins exclusively on category 498 `FRC_P5` at
+diagnostic address `0x792`, so Toyota's Operation/Image recorder is FRC-hosted. Joined to
+the exact-H B6 attribution, EPS is the protected-B6 receiver/verifier while U012987 identifies
+Brake System Control Module as the immediate monitored source domain; EPS is excluded as
+producer, but unique FRC-vs-Brake origin and the CMAC/freshness implementation owner remain
+static-corpus bounded. For longitudinal control, `FRC_P5` exposes upper-limit ISA request state at `0x1B03..0x1B07`,
+while brake-domain DDBs expose `0x10A1..0x10A4` explicitly named upper/lower request
+acceleration and request IDs **from Toyota Safety Sense**. The FRC-hosted PCS recorder carries
+both request halves (`5280/5281`) plus winner ID/acceleration (`5284/57DB/57D3`). A compatible
+brake observation sink appears in 255/256 NA (the exception is `TEST`), 460/460 EU, and
+213/213 JP category-498 install rows. A corpus-wide ordinary Data Monitor census has zero
+generation-20 control-arbitration signals; P6 `0x3486` arbitration names remain successor-only.
+
+There is therefore no remaining generic GTS+ ownership/name sweep to perform. The next
+high-value evidence is **target-native dynamic/firmware correlation**: on the maintainer Camry,
+poll Brake `0x7B0` `22 10 A1..A4` together with FRC `0x792` `22 1B 03..1B 07` during stock
+DRCC and synchronize those values with all-bus CAN plus Operation FFD. That is what can close
+the vehicle-network frame, transformation, cadence, arbitration executor, SecOC/integrity owner
+and suppression/fallback point. Separately, the saved-session implementation is complete but
+real-session validation is **source-data blocked**: the pinned Toyota distribution and tracked
+reference/community/target corpora contain zero TSE/GTSE specimens. Acquire and preserve the raw
+`.TSE` before GTSE conversion
+because the converter skips the PCS Operation/Image FFD sections. Treat generation-22
+`ADCU_P6` only as a successor terminology oracle. Canonical:
+`data/generated/gtsplus_2026/tss3_control_ownership_surface.json`,
+`data/generated/gtsplus_2026/tss3_native_recorder_protocol.json`,
 `data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json`,
-`data/generated/gtsplus_2026/tse_managed_semantics.json`,
-[../tooling/pcs-data-viewer-tss3-dictionary.md](../tooling/pcs-data-viewer-tss3-dictionary.md), and
+`data/generated/gtsplus_2026/tse_managed_semantics.json`, and
 [../tooling/techstream.md](../tooling/techstream.md) §6.2.4.
 
 ## Parallel integration target — firmware-identified, relay-correct TSS3 capture
