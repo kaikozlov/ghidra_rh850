@@ -76,6 +76,7 @@ check(len(camry_bus) == 1 and camry_bus[0]["vehicle_name"] == "Camry HV" and cam
 camry_placements = {row["component_hex"]: row for row in camry_bus[0]["placement_variants"][0]["placements"]}
 check(camry_placements["0x6D"]["ecu_domain"] == "Front Camera Module" and camry_placements["0x6D"]["bus_name"] == "Bus 1" and camry_placements["0x29"]["ecu_domain"] == "Skid Control (ABS/VSC/TRAC)" and camry_placements["0x29"]["bus_name"] == "Bus 4" and camry_placements["0x32"]["ecu_domain"] == "Power Steering (EPS)" and camry_placements["0x32"]["bus_name"] == "Bus 4", "CAN Bus Check resolver exposes camera Bus1 versus Brake/EPS Bus4 split")
 check(gts_cli.build_parser().parse_args(["canbus", "12704"]).func is gts_cli.cmd_canbus, "gts canbus command is registered in the unified CLI")
+check(gts_cli.build_parser().parse_args(["vdas", "/tmp/example.vdas"]).func is gts_cli.cmd_vdas, "gts vdas command is registered in the unified CLI")
 recovery_args = gts_cli.build_parser().parse_args(["recover-cuw-bodies"])
 check(
     all(not hasattr(recovery_args, name) for name in ("region", "family", "cuw_root", "cuwplus_root")),

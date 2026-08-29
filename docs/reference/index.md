@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 383 · Corrections: 133 · Open questions: 54 · Docs: 110 · Suites: 207
+Findings: 384 · Corrections: 133 · Open questions: 54 · Docs: 111 · Suites: 208
 
 ## Reading this index
 
@@ -317,6 +317,7 @@ Findings: 383 · Corrections: 133 · Open questions: 54 · Docs: 110 · Suites: 
 | <a id="finding-tms-084"></a>**TMS-084** | [docs/tooling/pcs-data-viewer-tss3-dictionary.md](../tooling/pcs-data-viewer-tss3-dictionary.md), [docs/tooling/gtsplus-tse-gtse-saved-session.md](../tooling/gtsplus-tse-gtse-saved-session.md) | — | `tests/verify_gtsplus_pcs_data_viewer_tss3_managed_semantics.py`, `tests/verify_gtsplus_tse_managed_semantics.py`, `tests/verify_gtsplus_aux_body_recovery.py` | — |
 | <a id="finding-tms-085"></a>**TMS-085** | [docs/tooling/techstream.md](../tooling/techstream.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_gtsplus_tss3_control_ownership.py` | OQ-052 |
 | <a id="finding-tms-086"></a>**TMS-086** | [docs/tooling/gtsplus-tse-gtse-saved-session.md](../tooling/gtsplus-tse-gtse-saved-session.md) | [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md), [CORRECTIONS](../status/CORRECTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_public_techstream_tse_lineage.py`, `tests/verify_gtsplus_tse_managed_semantics.py` | — |
+| <a id="finding-tms-087"></a>**TMS-087** | [docs/tooling/gtsplus-vdas-pcs-data.md](../tooling/gtsplus-vdas-pcs-data.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [techstream](../tooling/techstream.md) | `tests/verify_gtsplus_vdas_semantics.py` | OQ-052 |
 | <a id="finding-var-001"></a>**VAR-001** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md) | `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-002"></a>**VAR-002** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_spanconstant_corolla_equivalence.py`, `tests/verify_spanconstant_corolla_cross_variant.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-003"></a>**VAR-003** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
@@ -458,7 +459,7 @@ Findings: 383 · Corrections: 133 · Open questions: 54 · Docs: 110 · Suites: 
 | <a id="open-question-oq-049"></a>**OQ-049** | Application CommunicationControl live effect | Tooling | — |
 | <a id="open-question-oq-050"></a>**OQ-050** | Exploit-interest cohort consumption (SWEEP-008) | Tooling | SWEEP-008, SECOC-047, CORR-101 |
 | <a id="open-question-oq-051"></a>**OQ-051** | Cross-calibration structural triage of future P1M-E images | Tooling | MEM-SAFE-001 |
-| <a id="open-question-oq-052"></a>**OQ-052** | True-TSS3 longitudinal wire/auth/arbitration execution contract | Tooling | TMS-085, TMS-079, VAR-069, VAR-070 |
+| <a id="open-question-oq-052"></a>**OQ-052** | True-TSS3 longitudinal wire/auth/arbitration execution contract | Tooling | TMS-085, TMS-079, VAR-069, VAR-070, TMS-087 |
 | <a id="open-question-oq-053"></a>**OQ-053** | F33 non-disruptive application-mode RAM execution pivot | Tooling | VAR-060, CORR-124, CORR-123 |
 | <a id="open-question-oq-054"></a>**OQ-054** | exact-F33 stock-LTA authority into the shared `CC50/CC62` actuation funnel | Tooling | VAR-081, VAR-082, VAR-083, VAR-084, VAR-085, CORR-129, CORR-092 |
 
@@ -685,6 +686,7 @@ Every tracked document under `docs/` with its owning suite(s) and gate tests.
 | [docs/tooling/gtsplus-p5-adas-p6-migration.md](../tooling/gtsplus-p5-adas-p6-migration.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/gtsplus-tse-gtse-saved-session.md](../tooling/gtsplus-tse-gtse-saved-session.md) | gtsplus_tse_managed_semantics, doc_links, knowledge_index | `tests/verify_gtsplus_tse_managed_semantics.py`, `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/gtsplus-tss3-fleet-map.md](../tooling/gtsplus-tss3-fleet-map.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
+| [docs/tooling/gtsplus-vdas-pcs-data.md](../tooling/gtsplus-vdas-pcs-data.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md) | doc_links, toyota_b_programming_topology, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_toyota_b_programming_topology.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/pcs-data-viewer-tss3-dictionary.md](../tooling/pcs-data-viewer-tss3-dictionary.md) | gtsplus_pcs_data_viewer_tss3_managed_semantics, gtsplus_tss3_native_recorder, doc_links, knowledge_index | `tests/verify_gtsplus_pcs_data_viewer_tss3_managed_semantics.py`, `tests/verify_gtsplus_tss3_native_recorder.py`, `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/processor-module-audit.md](../tooling/processor-module-audit.md) | analysis_status, doc_links, knowledge_index | `tests/verify_analysis_status.py`, `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
@@ -899,12 +901,13 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json` | gtsplus_tss3_control_ownership, gtsplus_pcs_data_viewer_tss3_managed_semantics, gtsplus_aux_body_recovery | — |
 | `data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json` | toyota_diag_registry, camry_2026_lta_state_reconciliation | — |
 | `data/generated/gtsplus_2026/tse_converter_surface.json` | gtsplus_tse_converter, public_techstream_tse_lineage | — |
-| `data/generated/gtsplus_2026/tse_managed_semantics.json` | gtsplus_tse_managed_semantics, public_techstream_tse_lineage | — |
+| `data/generated/gtsplus_2026/tse_managed_semantics.json` | gtsplus_tse_managed_semantics, public_techstream_tse_lineage, gtsplus_vdas_semantics | — |
 | `data/generated/gtsplus_2026/tss3_control_ownership_surface.json` | gtsplus_tss3_control_ownership | — |
 | `data/generated/gtsplus_2026/tss3_crossvehicle_canbus_placements.csv` | gtsplus_tss3_crossvehicle_surface | — |
 | `data/generated/gtsplus_2026/tss3_crossvehicle_fleet_install_sets.csv` | gtsplus_tss3_crossvehicle_surface | — |
 | `data/generated/gtsplus_2026/tss3_crossvehicle_surface.json` | gtsplus_tss3_crossvehicle_surface, gtsplus_tss3_control_ownership | — |
 | `data/generated/gtsplus_2026/tss3_native_recorder_protocol.json` | gtsplus_tss3_native_recorder | — |
+| `data/generated/gtsplus_2026/vdas_semantics.json` | gtsplus_vdas_semantics | — |
 | `data/generated/p4dk4_template/p4dk4_vocabulary.json` | diagnostic_vocabulary | — |
 | `data/generated/rdbi_emitted_write_audit.json` | application_rdbi | — |
 | `data/generated/response_disclosure_audit.csv` | response_disclosure_audit | — |

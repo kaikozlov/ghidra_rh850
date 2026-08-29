@@ -971,7 +971,11 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   disproves `0x107E` as a live Camry oracle in default/extended sessions. The immediate
   new read-only Camry oracle is therefore Brake `0x7B0`: `22 10 A1`..`22 10 A4`
   (**live support unmeasured**), synchronized with FRC `0x792` `22 1B 03`..`22 1B 07`,
-  stock DRCC engagement, Operation FFD and all-bus capture. Do not add a TSS3
+  stock DRCC engagement, Operation FFD and all-bus capture. TMS-087 adds a second host
+  artifact worth preserving during that run: PCS Vehicle Data Analysis `.vdas` is a
+  standard ZIP whose UTF-8 `json.log` explicitly carries `TSS3OperationFFD.log` as
+  `Gts.Tss3Ffd.Data` and `ImageFFD.log` as `Gts.PcsImg.Data`, avoiding the current GTSE
+  skip of PCS Operation/Image FFD. Do not add a TSS3
   longitudinal builder or Panda whitelist until that wire/auth contract is target-native.
   An independent post-TMS-085 audit closed the last two unexamined static host surfaces.
   First, the **current** GTS+ `CONF/*.srp` UtilityNeo scripts (18 files) decode under the

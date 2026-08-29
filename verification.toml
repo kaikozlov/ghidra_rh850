@@ -141,6 +141,12 @@ oracle = "dynamic_trace"
 tests = ["tests/verify_public_techstream_tse_lineage.py"]
 oracle = "independent_external_artifact"
 
+[suite.gtsplus_vdas_semantics]
+tests = ["tests/verify_gtsplus_vdas_semantics.py"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+oracle = "independent_external_artifact"
+
 [suite.gtsplus_p5_adas_p6_migration]
 tests = ["tests/verify_gtsplus_p5_adas_p6_migration.py"]
 requires_external = ["gtsplus"]

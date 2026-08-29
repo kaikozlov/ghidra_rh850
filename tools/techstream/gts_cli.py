@@ -48,6 +48,7 @@ from recover_cp_bodies import DEFAULT_AUX_OUTPUT as GTS_AUX_BODY_OUTPUT
 from recover_cp_bodies import DEFAULT_OUTPUT as CUWPLUS_BODY_OUTPUT
 from recover_cp_bodies import recover as recover_cp_bodies
 from recover_cp_bodies import recover_auxiliary as recover_gts_aux_bodies
+from vdas import json_path as vdas_json_path, load_vdas
 from techstream_paths import (
     CUW_CORPUS_ROOT,
     GTSPLUS_EXTERNAL_ROOT,
@@ -3322,6 +3323,45 @@ def cmd_registry(args: argparse.Namespace) -> int:
         sys.stdout.write(text)
     return 0
 
+def cmd_vdas(args: argparse.Namespace) -> int:
+    try:
+        payload = load_vdas(Path(args.file))
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
+    if args.path:
+        try:
+            selected = vdas_json_path(payload["document"], args.path)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        if isinstance(selected, (dict, list)) or args.json:
+            print(json.dumps(selected, indent=2, ensure_ascii=False, sort_keys=True))
+        elif selected is None:
+            print("null")
+        else:
+            print(selected)
+        return 0
+    if args.json:
+        print(json.dumps(payload, indent=2, ensure_ascii=False, sort_keys=True))
+        return 0
+
+    document = payload["document"]
+    gts = document.get("Gts") if isinstance(document.get("Gts"), dict) else document.get("gts")
+    print(f"vdas\t{payload['path']}\tentries={len(payload['archive_entries'])}\tjson_bytes={payload['json_bytes']}")
+    print("entries\t" + ",".join(payload["archive_entries"]))
+    if isinstance(gts, dict):
+        version = gts.get("FormatVersion")
+        if isinstance(version, dict):
+            version = version.get("Version")
+        print(f"format_version\t{version if version is not None else '-'}")
+        for key in ("Ddr", "AduDdr", "PcsFfd", "LcsFfd", "Tss3Ffd", "AdsFfd", "AdsEng", "AduFfd", "PcsImg", "PvmImg", "AdsImg", "RcImg", "DmcImg", "AbsoluteTime"):
+            section = gts.get(key)
+            data = section.get("Data") if isinstance(section, dict) else None
+            if data not in (None, ""):
+                length = len(data) if isinstance(data, (str, list, dict)) else 1
+                print(f"payload\t{key}\tpresent\tlength={length}")
+    return 0
+
+
 def _common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--gtsplus-root", help="GTS+ external root or .../Toyota Diagnostics/GTSPlus (default: GTSPLUS_ROOT/repo pin)")
     parser.add_argument("--cuw-root", help="CUW corpus root (default: TOYOTA_CUW_CORPUS_ROOT/repo pin)")
@@ -3444,6 +3484,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--limit", type=int, default=80)
     _common(p)
     p.set_defaults(func=cmd_cuw)
+
+    p = sub.add_parser("vdas", help="inspect a PCS Vehicle Data Analysis .vdas file (standard ZIP + UTF-8 json.log)")
+    p.add_argument("file", help="path to .vdas file")
+    p.add_argument("--path", help="case-insensitive dotted JSON path, e.g. Gts.Tss3Ffd.Data")
+    p.add_argument("--json", action="store_true", help="emit parsed JSON / selected value as JSON")
+    p.set_defaults(func=cmd_vdas)
 
     p = sub.add_parser("pe", help="inspect GTS+/CUWPlus PE imports/exports/strings")
     p.add_argument("binary", help="DLL/EXE filename, substring, or path")

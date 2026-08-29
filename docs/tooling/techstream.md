@@ -3229,6 +3229,16 @@ The host chain is therefore no longer merely a lead:
 
 `FRC_P5 AB/EB recorder acquisition -> first-class TSE PCS FFD section -> PCS Data Viewer TSS3 dictionary`.
 
+TMS-087 adds a **parallel PCS persistence path** that is easier to consume offline. Current
+`GTSPlusDiagAdaptMng.dll` creates `{VIN}_{timestamp}.vdas` by reading 30 per-function log
+files into JSON model version `001`; critically, `TSS3OperationFFD.log` maps to
+`Gts.Tss3Ffd.Data` and `ImageFFD.log` maps to `Gts.PcsImg.Data`. `GTSPlusArchiver.dll`
+proves the outer `.vdas` is an ordinary ZIP containing UTF-8 `json.log` at .NET Optimal
+compression. The reverse path extracts that JSON and derives Toyota's CSV presentation.
+Unlike current TSE->GTSE conversion, this builder explicitly **retains** the TSS3 Operation
+and PCS Image log inputs. `tools/gts vdas FILE --path Gts.Tss3Ffd.Data` provides a clean
+Toyota-binary-free reader. Canonical detail: [gtsplus-vdas-pcs-data.md](gtsplus-vdas-pcs-data.md).
+
 The concrete PCS Operation-FFD byte/bit/scaling table is now closed. The recovered TSE
 reader also pins a 35-entry runtime position-marker dictionary (including PCS Operation FFD
 `...27`, PCS Image FFD `...28`, VCH `...23`, and TMR `...FE`), the

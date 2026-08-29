@@ -265,7 +265,12 @@ Toyota Techstream specimens: the current-template header family, 12-byte-key/DWO
 `FF FF FF FF <selector> FF FF FF` position records all occur in real saved bytes, and current
 `TSEConverter` explicitly upgrades old input through `GFCConvertOldTSEToLatestTSE` before the
 180-template reader. The remaining saved-session source-data block is now only a **true-TSS3**
-PCS Operation/Image FFD specimen. Acquire and preserve that raw `.TSE` before GTSE conversion
+PCS Operation/Image FFD specimen. Acquire and preserve that raw `.TSE` before GTSE conversion. TMS-087 also closes the
+parallel **VDAS** host path: if PCS Vehicle Data Analysis can export a `.vdas` during the
+same session, preserve it too. VDAS is a standard ZIP containing UTF-8 `json.log` and
+explicitly carries `TSS3OperationFFD.log -> Gts.Tss3Ffd.Data` plus
+`ImageFFD.log -> Gts.PcsImg.Data`, so it may be the easiest direct PCS recorder artifact to
+correlate against CAN.
 because the converter skips the PCS Operation/Image FFD sections. Treat generation-22
 `ADCU_P6` only as a successor terminology oracle. Canonical:
 `data/generated/gtsplus_2026/tss3_control_ownership_surface.json`,

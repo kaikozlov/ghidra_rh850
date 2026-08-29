@@ -1,0 +1,226 @@
+{
+  "archive": {
+    "container": "standard ZIP archive",
+    "create_mode": "ZipArchiveMode.Create",
+    "entry_name_rule": "Path.GetFileName(source_file)",
+    "method_pins": {
+      "compress_file_to_file": {
+        "body_sha256": "f5b655c061537b0aacbb32e3c88f6122e7504147ee9b2c3f872b508bcbbc8bed",
+        "body_size": 104,
+        "rva": 9748
+      },
+      "compression_level_conversion": {
+        "body_sha256": "79cf6ad355583b135323a1538862bf54f5980cc5c68a0765f72f7ef8edf63110",
+        "body_size": 35,
+        "rva": 10472
+      },
+      "decompress_file_to_file": {
+        "body_sha256": "f19ef3594873eb88c2f0a59f2dae96994a5f10fced173b3e92f657cadac23c71",
+        "body_size": 172,
+        "rva": 9960
+      }
+    },
+    "read_mode": "ZipFile.OpenRead; enumerate entries; ExtractToFile(overwrite=true)",
+    "vdas_call_argument": 6,
+    "vdas_effective_compression_level": "System.IO.Compression.CompressionLevel.Optimal (enum 0)"
+  },
+  "boundary": "This proves the host persistence/export format and exact source-log bindings. It does not prove that a given vehicle/session populated those logs, nor does it identify ECU-side CAN/SecOC producer ownership.",
+  "capture_implication": "A real .vdas file can be inspected with an ordinary ZIP reader and its UTF-8 json.log retained directly. For TSS3 RE this may be simpler than GTSE because the current VDAS creation path explicitly includes TSS3OperationFFD.log and ImageFFD.log rather than applying TSEConverter's PCS skip list.",
+  "create_and_export": {
+    "csv_export": {
+      "container_entry": "json.log",
+      "flow": "decompress VDAS -> read UTF-8 json.log -> MakeImgOpeDdrCsvData -> append native hash text -> write UTF-8 CSV",
+      "hash_import": "GTSPlusFileCryptographic.dll!CalculateImgOpeDdrHash",
+      "output_extension": ".csv"
+    },
+    "file_naming": {
+      "pattern": "{sanitized_vin}_{yyyyMMddHHmmss}.vdas",
+      "replacement": "_",
+      "vin_sanitizer_regex": "[^A-Za-z0-9-]+"
+    },
+    "json_entry": {
+      "archive_entry": "json.log",
+      "bindings": [
+        {
+          "file": "Airbag_Hinban.log",
+          "json_model_target": "Airbag.Hinban"
+        },
+        {
+          "file": "Airbag_Software.log",
+          "json_model_target": "Airbag.Software"
+        },
+        {
+          "file": "Adu_Hinban.log",
+          "json_model_target": "Adu.Hinban"
+        },
+        {
+          "file": "Adu_Software.log",
+          "json_model_target": "Adu.Software"
+        },
+        {
+          "file": "CSP_MakerId.log",
+          "json_model_target": "Csp.MakerId"
+        },
+        {
+          "file": "CSP_Hinban.log",
+          "json_model_target": "Csp.Hinban"
+        },
+        {
+          "file": "CSP_SerialNo.log",
+          "json_model_target": "Csp.Serial"
+        },
+        {
+          "file": "PCS_MakerId.log",
+          "json_model_target": "Pcs.MakerId"
+        },
+        {
+          "file": "PCS_Hinban.log",
+          "json_model_target": "Pcs.Hinban"
+        },
+        {
+          "file": "PCS_SerialNo.log",
+          "json_model_target": "Pcs.Serial"
+        },
+        {
+          "file": "FCM_MakerId.log",
+          "json_model_target": "Fcm.MakerId"
+        },
+        {
+          "file": "FCM_Hinban.log",
+          "json_model_target": "Fcm.Hinban"
+        },
+        {
+          "file": "FCM_SerialNo.log",
+          "json_model_target": "Fcm.Serial"
+        },
+        {
+          "file": "TripCount.log",
+          "json_model_target": "CarInfo.TripCount"
+        },
+        {
+          "file": "OdoMeter.log",
+          "json_model_target": "CarInfo.OdoMeter"
+        },
+        {
+          "file": "OdoUnit.log",
+          "json_model_target": "CarInfo.OdoUnit"
+        },
+        {
+          "file": "DDR.log",
+          "json_model_target": "Ddr.Data"
+        },
+        {
+          "file": "ADUDDR.log",
+          "json_model_target": "AduDdr.Data"
+        },
+        {
+          "file": "OperationFFD.log",
+          "json_model_target": "PcsFfd.Data"
+        },
+        {
+          "file": "LCSOperationFFD.log",
+          "json_model_target": "LcsFfd.Data"
+        },
+        {
+          "file": "TSS3OperationFFD.log",
+          "json_model_target": "Tss3Ffd.Data"
+        },
+        {
+          "file": "ADSOperationFFD.log",
+          "json_model_target": "AdsFfd.Data"
+        },
+        {
+          "file": "ADSOperationFFD_Eng.log",
+          "json_model_target": "AdsEng.Data"
+        },
+        {
+          "file": "ADUOperationFFD.log",
+          "json_model_target": "AduFfd.Data"
+        },
+        {
+          "file": "ImageFFD.log",
+          "json_model_target": "PcsImg.Data"
+        },
+        {
+          "file": "PVMImageFFD.log",
+          "json_model_target": "PvmImg.Data"
+        },
+        {
+          "file": "ADSImageFFD.log",
+          "json_model_target": "AdsImg.Data"
+        },
+        {
+          "file": "RCImageFFD.log",
+          "json_model_target": "RcImg.Data"
+        },
+        {
+          "file": "DMCImageFFD.log",
+          "json_model_target": "DmcImg.Data"
+        },
+        {
+          "file": "AbsoluteTimeStamp.log",
+          "json_model_target": "AbsoluteTime.Data"
+        }
+      ],
+      "format_version": "001",
+      "source_log_encoding": "UTF-8",
+      "source_log_read": "entire file text",
+      "text_encoding": "UTF-8 without BOM"
+    },
+    "method_pins": {
+      "convert_vdas_to_csv": {
+        "body_sha256": "b48ac5704a3d9334f8a62061b26cee919b7b56a41b34a1d50d74d2407e537c5f",
+        "body_size": 940,
+        "rva": 15952
+      },
+      "create_vdas": {
+        "body_sha256": "2ae8ba4aa101dc388da7dbfbb4ddfcb579a709b4a77a344e59b1c51125adcc49",
+        "body_size": 976,
+        "rva": 13044
+      },
+      "make_csv": {
+        "body_sha256": "e06651a0bc998b8e3fe8c2b4f3ae418b85392d287c133528f367f05109707771",
+        "body_size": 312,
+        "rva": 18228
+      },
+      "make_json": {
+        "body_sha256": "a25652e29e058811b7f531d75e032fd8daacd63ebca5650390e91a4b0e4045a4",
+        "body_size": 1571,
+        "rva": 14204
+      },
+      "read_log": {
+        "body_sha256": "47af50ba3d5f916db6b191a798b6f49c8d3ea5e8bfdd50d272b238bea4a78759",
+        "body_size": 176,
+        "rva": 15776
+      }
+    }
+  },
+  "schema": "gtsplus-vdas-semantics-v1",
+  "sources": {
+    "GTSPlusArchiver.dll": {
+      "sha256": "ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2",
+      "size": 19472
+    },
+    "GTSPlusDiagAdaptMng.dll": {
+      "sha256": "7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e",
+      "size": 57360
+    },
+    "installer_recovery": {
+      "gtsplus_version": "2026.03.002.02",
+      "method": "extract the Toyota installer GTSPlus group paired with GTSPlusCP; no runtime decryption/emulation is required",
+      "source_archive_sha256": "fb65ac31b1c0a0c1b28d53af8cf540d12eb46d77ba1e6645a014473352ce00c4"
+    }
+  },
+  "title": "Current GTS+ PCS Vehicle Data Analysis (.vdas) persistence/export contract",
+  "tss3_pcs_witnesses": {
+    "image_ffd": {
+      "file": "ImageFFD.log",
+      "json_model_target": "PcsImg.Data"
+    },
+    "interpretation": "VDAS is a second first-class current GTS+ persistence/export path for PCS recorder evidence. The JSON model explicitly carries TSS3OperationFFD.log as Tss3Ffd.Data and ImageFFD.log as PcsImg.Data before packaging json.log into a ZIP-backed .vdas file.",
+    "operation_ffd": {
+      "file": "TSS3OperationFFD.log",
+      "json_model_target": "Tss3Ffd.Data"
+    }
+  }
+}
