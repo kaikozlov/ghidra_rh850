@@ -1,25 +1,27 @@
-# 2026 Camry TSS3 passive + gated-development openpilot/opendbc port
+# 2026 Camry TSS3 passive + historical-development openpilot/opendbc port
 
 **Target:** maintainer 2026 Toyota Camry Hybrid, EPS application F181
 `8965F3307000 / 8A3113303100`.
 
 **Evidence boundary:** this report closes the exact-F33 generated-COM transmit geometry
-needed by the software port and records both the passive default and the historically staged
-fail-closed Gate-2 development path. It does **not** authorize steering transmission.
-CORR-129/VAR-081 now strongly identify **73.303384 s of retained factory LTA/LCA-active
-operation with zero B6** on the relay-correct Toyota Bus-4 Brake/EPS network, so the
-staged sender's original requirement for a stock B6 template/cadence is no longer a valid
-Camry integration assumption (CORR-131). VAR-082 finds no second ordinary external CAN
-field that reproducibly leads steering. CORR-130/VAR-083 now close the exact F33
-command-to-current convergence: `CC62` is a real pre-slew actuation value, sibling
-`CC64/AC54/EE40C` drives `6AF4 -> 6E0A -> 6DEC/6DC8/6DD6`, while
-`AC56/EE40A/1C02` is the diagnostic mirror. VAR-084 also finds no concrete alternate
-producer across the major hidden-ingress classes, leaving computed-store and runtime-DMA
-rewrites as the strongest static false-negative holes. The unresolved steering problem is
-therefore **upstream stock-LTA authority/arbitration into the shared `CC50/CC62` funnel
-with B6 absent**. The existing development sender must remain fail-closed until that is
-understood and the B6 payload is deliberately constructed from the exact F33 receiver
-contract rather than copied from a nonexistent stock template.
+needed by the software port, records the passive implementation, and preserves the former
+Gate-2 development path as historical/test-only engineering context. It does **not**
+authorize steering transmission. CORR-129/VAR-081 identify **73.303384 s of retained
+factory LTA/LCA-active operation with zero B6** and CORR-134 recovers the observed Bus-4
+`0x08A` as the upstream-of-EPS lateral-request representation: B21 is Target Lateral ID,
+B18:B19 is the signed target-angle quantity at the downstream B6 scale, and B26 is a
+modulo-64 sequence. Exact F33 still does not accept `0x08A`; its protected external
+steering ingress remains B6. Every retained `0x08A` is on the Bus-4 capture and the
+producer is unknown, so the frame must not be labeled a Bus-1 camera message.
+
+VAR-082/083/084/085 close the broad Bus-4 field, downstream current-convergence, hidden
+STORE, and runtime-DMA alternatives. The remaining integration problem is therefore
+OQ-054: **identify the producer of the observed `0x08A`, recover its
+integrity/authentication trailer and producer-side transformation into protected B6, and
+identify signer/freshness ownership plus suppression/fallback/arbitration semantics**.
+The old stock-template B6 runtime sender was removed in `opendbc@b9e86924` and
+`kai-openpilot@abf3ca70a`; current opendbc `a2ad31f3` retains only passive observation and
+analysis/test-only B6 receiver/freshness/safety helpers.
 
 ## 1. Exact F33 generated-COM Tx carriers
 
@@ -212,44 +214,36 @@ No zero-filled candidate is represented as Toyota stock behavior.
 
 The ordinary TSS3 controller path still computes a shadow B6 application and F33 safety
 decision for unit/replay inspection while returning **zero CAN frames**. The platform's
-normal CarParams remains `SafetyModel.noOutput`; ordinary Toyota safety modes still do
-not whitelist `0x0B6`. This is the state whenever the explicit development configuration
-is absent, invalid, running on a release branch, bound to the wrong F181, or still on the
-normal-harness bus-1 topology.
+CarParams remains `SafetyModel.noOutput`; ordinary Toyota safety modes do not whitelist
+`0x0B6`. The former interface/card development configuration path has been removed, so no
+current CarInterface/CarController runtime switch can arm B6 output.
 
-## 4. Default-off exact-F33 Gate-2 development plumbing (VAR-062; stock-template admission superseded by CORR-131)
+## 4. Historical exact-F33 Gate-2 development plumbing (VAR-062; runtime path removed)
 
-The remaining *static software* work for the first-development-lateral path is now staged
-in nested opendbc commit
-`dde0fcf0fbaf875750c54a072b0dcb3857f8829b` (`toyota: harden F33 development freshness`)
-and parent `kai-openpilot` commit
-`15f3550365e2eee54ca5645ae9c24d9d41ae4f31` (`toyota: harden F33 development gating`).
-This does not weaken the passive default. It adds a second path that is impossible to arm
-from inferred constants alone.
+The original fail-closed experiment was staged in opendbc
+`dde0fcf0fbaf875750c54a072b0dcb3857f8829b` and parent kai-openpilot
+`15f3550365e2eee54ca5645ae9c24d9d41ae4f31`. After VAR-081/CORR-134 disproved the
+stock-template integration shape, the runtime hook was removed in `opendbc@b9e86924`
+and `kai-openpilot@abf3ca70a`; current opendbc `a2ad31f3` keeps the lower-level receiver,
+freshness, packer, and debug-safety helpers only for deterministic analysis/tests.
 
-### 4.1 Current staged runtime configuration refuses guessed live facts — and therefore remains intentionally unarmable on the retained Camry evidence
+### 4.1 Historical admission contract
 
-`ToyotaTSS3DevLateral` is a development-only master switch. The companion JSON param
-`ToyotaTSS3DevLateralConfig` must provide all of the following, or the car card leaves the
-platform passive:
+For provenance, the removed runtime path required `ToyotaTSS3DevLateral` plus
+`ToyotaTSS3DevLateralConfig` to provide all of the following:
 
-- exact `f181 = 8965F3307000`; the Toyota interface independently requires the current
-  EPS CarFw entry to contain that F181 and rejects any other platform;
-- a **28-byte `b6_template_hex` obtained from the relay-correct stock-LTA capture**;
-- the measured stock `cadence_frames` (1–3 control frames, ≤30 ms, with no guessed default);
-- `gate2_bypass_validated=true` only after the live exact-F33 invalid-MAC causal proof;
-- `exclusive_b6_authority_validated=true` only after relay/source-suppression proof.
+- exact `f181 = 8965F3307000`;
+- a **28-byte `b6_template_hex` claimed to come from relay-correct stock LTA**;
+- measured `cadence_frames` in the 1–3 control-frame range;
+- `gate2_bypass_validated=true` after an exact-F33 invalid-MAC causal proof;
+- `exclusive_b6_authority_validated=true` after relay/source-suppression proof.
 
-The interface additionally rejects `TSS3_PT_BUS1`: development output requires the
-relay-correct bus-0 topology. Release branches reject the development master switch.
-
-This list describes the **current staged implementation**, not the now-correct Camry
-integration contract. VAR-081 proves the required stock B6 template/cadence never appears
-during the retained LTA/LCA-active intervals. That is a reason for the sender to stay
-fail-closed, not a reason to weaken validation or manufacture a fake "stock" template. A
-future implementation should construct only fields whose F33 receiver semantics are
-proved, after the **upstream stock-LTA/B6 authority arbitration** question is closed; the
-shared command-to-current funnel itself is now statically recovered by VAR-083.
+Those params and the CarInterface/CarController sender hook no longer exist. VAR-081 proves
+that no stock B6 template/cadence appears during the retained factory LTA/LCA intervals,
+so the old admission contract is historical evidence only and must not be revived by
+inventing a template or weakening its gates. OQ-054 now owns the real integration
+boundary: the observed Bus-4 `0x08A` producer, authentication/integrity, transformation
+into protected B6, signer/freshness ownership, and authority/arbitration.
 
 ### 4.2 Historical development sender is deliberately not a production signer
 
@@ -267,12 +261,14 @@ disarms replacement freshness, and requires a newer stock sync epoch before anot
 activation. That intentionally leaves exact disengage/restart packet semantics to the live
 stock capture rather than encoding a guess.
 
-### 4.3 Panda development mode is B6-only and fail-closed
+### 4.3 Historical/debug Panda B6 safety mode is test-only and fail-closed
 
-`ToyotaSafetyFlags.TSS3_DEV_LATERAL` exists only behind Panda `ALLOW_DEBUG`. Selecting it
-installs a dedicated TX whitelist containing exactly bus-0 `0x0B6`, DLC 32, with relay
-checking. The hook requires prior bus-0 `0x025` steering-rate and `0x00F` sync observations
-and enforces the statically recovered F33 envelope:
+`ToyotaSafetyFlags.TSS3_DEV_LATERAL` still exists behind Panda `ALLOW_DEBUG` so the
+recovered B6 envelope can be regression-tested, but no current Camry CarParams,
+CarInterface, or CarController runtime path selects it. If explicitly selected by a debug
+test, it installs a dedicated TX whitelist containing exactly bus-0 `0x0B6`, DLC 32, with
+relay checking. The hook requires prior bus-0 `0x025` steering-rate and `0x00F` sync
+observations and enforces the statically recovered F33 envelope:
 
 - active Target Lateral ID exactly 11;
 - absolute target ≤1745 raw;
@@ -289,41 +285,44 @@ safety module currently passes 283 tests with 34 skips in the local targeted gat
 
 ## 5. What remains before lateral output can actually be exercised
 
-The critical remaining work is **upstream steering authority/arbitration**, not another
-stock-B6 capture and not another downstream motor-convergence sweep:
+The critical remaining work is now the **`0x08A` producer/authentication/transformation
+chain**, not another hidden-F33 ingress sweep, stock-B6-template capture, or downstream
+motor-convergence pass:
 
-1. **Close the missing stock-LTA authority into `CC50/CC62`.** VAR-081 proves the retained
-   state is LTA/LCA active; VAR-082 finds no ordinary external Bus-4 steering carrier;
-   VAR-083 proves the shared `CC50/CC62 -> CC66/CC64 -> AC54/EE40C -> 6AF4 -> 6E0A ->
-   6DEC/6DC8/6DD6` current-control funnel. Yet stock LTA physically steered with B6 absent.
-   The remaining question is the upstream value/state/selector that gives that funnel lane
-   authority.
-2. **Finish the two strongest static false-negative holes from VAR-084 before another
-   vehicle experiment.** E1 resolves register-arithmetic computed store targets into the
-   command/motor ROI; E2 exhaustively proves runtime writers of DMAC destination-address
-   registers cannot retarget DMA into LocalRAM command state. Pointer tables, retained RAM
-   pointers, unrecovered ISR delegates, fixed DMA descriptors, callbacks, and extra CAN
-   acceptance are already negative.
-3. **Determine B6 arbitration against the stock authority.** Once the stock input is named,
-   establish whether B6 replaces, gates, blends with, or is mutually exclusive with that
-   authority. Only then can "exclusive source" have a concrete meaning for Panda and
-   openpilot safety.
-4. **Redesign the fail-closed B6 builder if B6 remains the chosen interface.** Do not wait
-   for or fabricate a stock template. Construct only the exact F33 fields proved by the
-   receiver contract and keep ordinary TSS3 `noOutput` until the upstream arbitration is
-   resolved.
-5. Security/TSK remains a separate implementation layer: apply whichever Gate-2 or signer
-   strategy is chosen only after the steering/arbitration semantics are correct. Only then
-   perform a bounded first steering-response experiment.
+1. **Identify who produces the observed Bus-4 `0x08A`.** Every retained frame is on Panda
+   bus 0 and its relay mirror bus 2, with zero on Panda bus 1. The evidence therefore does
+   not distinguish a Bus-1-side request that is transformed/gatewayed before the observed
+   frame from a Bus-4-side producer or echo. Do not label the frame as camera-originated
+   until that boundary is proved.
+2. **Recover `0x08A` integrity/authentication and the producer-side transformation into
+   protected B6.** Exact F33 excludes `0x08A` and consumes protected `0x0B6`; the missing
+   code/data path must explain how Target Lateral ID, target angle, sequence, and any
+   companion state become the B6 application plus protection. Candidate producer-side
+   software acquisition remains the exact Brake/EPB `0x7B0` (`DiagID 07B0`) and FRC
+   `0x792` images, without presupposing which one owns the transform.
+3. **Identify signer/freshness ownership and authority semantics.** Recover who constructs
+   the B6 freshness/MAC, where suppression/fallback occurs, and how simultaneous lateral
+   requesters are selected, gated, blended, or rejected. This must establish the concrete
+   arbitration point before Panda/openpilot can claim exclusive lateral authority.
+4. **Only then design the sender, if B6 remains the correct controllable interface.** Do
+   not wait for or fabricate a stock 28-byte template. Construct only fields justified by
+   the recovered producer/receiver contract. The existing `TSS3_DEV_LATERAL` Panda mode
+   stays a debug/test envelope and ordinary TSS3 remains `noOutput`.
+5. **Close dynamic safety policy before actuation.** After the producer/auth path is known,
+   validate signer latency/jitter, driver override and motor-current response, and
+   `0x351/0x394/0x4A3` normal/inhibit/fault/recovery behavior. Only then perform a bounded
+   first steering-response experiment.
 
-FRC `0x1601/0x1914` and EPS `0x1C38/0x1C02/0x1C3E` remain useful passive synchronized
-correlation oracles, but VAR-081 means they are no longer needed merely to establish that
-the retained route entered LTA/LCA-active state.
+VAR-084/085 already close the strongest hidden-STORE/runtime-DMA false-negative classes,
+so do not repeat those searches. FRC `0x1601/0x1914` and EPS
+`0x1C38/0x1C02/0x1C3E` remain useful passive synchronized corroboration, but VAR-081 means
+they are no longer needed merely to establish that the retained route entered LTA/LCA
+active state.
 
-Production still additionally requires an application-context authenticated signer (or an
-equivalent non-persistent architecture), conservative dynamic driver-override/current
-policy, and asserted/recovery fault-state mapping. Those values remain deliberately absent
-from the static safety model because the current corpus does not prove them.
+Production still requires an authenticated signer or equivalent non-persistent protection
+architecture plus conservative dynamic safety/fault policy. Those values remain
+intentionally absent from the production path because the current evidence does not prove
+them.
 
 **Production output remains disabled.**
 
@@ -333,7 +332,9 @@ from the static safety model because the current corpus does not prove them.
 - `data/generated/camry_8965F3307000_tss3_opendbc_port.json`
 - `data/generated/camry_8965F3307000_external_lateral_ingress.json`
 - `data/generated/camry_2026_motor_feedback_correlation.json`
+- `data/generated/camry_2026_lta_state_reconciliation.json`
 - `tests/verify_camry_8965F3307000.py`
+- `tests/verify_camry_2026_lta_state_reconciliation.py`
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

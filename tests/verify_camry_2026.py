@@ -264,8 +264,12 @@ def _section_camry_2026_relay_correct_capture():
         {'end_s': 19.64854, 'frames': 5, 'start_s': 19.526293},
         {'end_s': 20.159219, 'frames': 3, 'start_s': 20.097979},
     ])
-    check('0x08A is retained only as structural corroboration', set(drive['structural_0x08A_transitions']) == {'4', '5'} and 'machine-prove' in drive['interpretation'])
-    check('zero-B6 conclusion remains bounded', 'bounded negative' in art['conclusion']['b6'] and 'synchronize' in art['conclusion']['next_observation'])
+    check('raw relay artifact retains structural 0x08A transitions without pretending this artifact alone names them', set(drive['structural_0x08A_transitions']) == {'4', '5'} and 'machine-prove' in drive['interpretation'])
+    check('current semantic upgrade preserves zero-B6 while moving next work to producer/auth/transform',
+          'bounded negative' in art['conclusion']['b6'] and
+          'VAR-081/CORR-134' in art['conclusion']['semantic_upgrade'] and
+          '0x08A producer' in art['conclusion']['next_observation'] and
+          'optional independent corroboration' in art['conclusion']['next_observation'])
 
     print('\n== deliberate confirmation drive ==')
     confirm = art['confirmation_drive']
@@ -277,10 +281,10 @@ def _section_camry_2026_relay_correct_capture():
     segs = {x['segment']: x for x in confirm['segments']}
     check('confirmation contains sustained road-speed operation', all(segs[i]['speed_kph']['moving_over_2kph_fraction'] == 1.0 for i in (18, 20, 21, 22)) and segs[20]['speed_kph']['min'] == 65.31 and segs[20]['speed_kph']['max'] == 72.493)
     check('confirmation sees repeated same-car MAIN interactions', set(confirm['validated_cruise_switch_events']['MAIN']) == {'16', '18', '19', '20'})
-    check('confirmation 0x08A stays structural only', set(confirm['structural_0x08A_transitions']) == {'18', '19', '20', '21'} and 'machine-proves' in confirm['interpretation'])
+    check('raw confirmation artifact preserves 0x08A transition locations without assigning semantics', set(confirm['structural_0x08A_transitions']) == {'18', '19', '20', '21'} and 'machine-proves' in confirm['interpretation'])
     combined = art['combined_route_evidence']
     check('two drives total 19 segments / 3.574M incoming frames / zero B6', combined == {'b6_any_bus_any_length_count': 0, 'frame_count': 3574703, 'segment_count': 19})
-    check('operator report is retained as unsynchronized evidence only', 'not synchronized' in art['capture_boundary']['operator_report_boundary'])
+    check('raw relay artifact defers semantic interval classification to VAR-081', 'artifact alone does not semantically classify' in art['capture_boundary']['operator_report_boundary'] and 'VAR-081' in art['capture_boundary']['operator_report_boundary'])
 
     print('\n== documentation ==')
     doc = (REPO / 'docs/variants/camry-2026-live-baseline.md').read_text()

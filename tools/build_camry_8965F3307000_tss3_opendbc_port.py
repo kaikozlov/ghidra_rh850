@@ -18,6 +18,10 @@ NESTED_OPENDDBC_COMMIT = "ab60fd95d8a7b566e10ed1cf59738292f3498932"
 PARENT_OPENPILOT_COMMIT = "d7d7dfd7e49961e9d35eb7a7681e8756ceee8d04"
 DEVELOPMENT_NESTED_OPENDDBC_COMMIT = "dde0fcf0fbaf875750c54a072b0dcb3857f8829b"
 DEVELOPMENT_PARENT_OPENPILOT_COMMIT = "15f3550365e2eee54ca5645ae9c24d9d41ae4f31"
+UPSTREAM_REQUEST_NESTED_OPENDDBC_COMMIT = "b9e86924b96eac248b6b9e6bcf0d4dfdc95b62d0"
+RUNTIME_REMOVAL_PARENT_OPENPILOT_COMMIT = "abf3ca70a713d21b88a0cd0241f0650a3d96db7a"
+CURRENT_NESTED_OPENDDBC_COMMIT = "a2ad31f3e2679bc893e2a00521a0d6c9c19eaf3c"
+CURRENT_PARENT_OPENPILOT_COMMIT = "f7c7ed3855771abe19b2339010e26de4774b8f64"
 TX = struct.Struct("<IBBH")
 PDU = struct.Struct("<HBBHBB")
 TX_TABLE = 0x21F58
@@ -282,21 +286,31 @@ def build() -> dict:
             "controller_boundary": "computes a shadow B6 application/safety decision but returns zero CAN",
             "panda_boundary": "F33 C candidate helper is ALLOW_DEBUG-only, not called from toyota_tx_hook, 0x0B6 is absent from Toyota TX whitelists, and CarParams remains SafetyModel.noOutput",
             "production_output_authorized": False,
+            "current_nested_opendbc_commit": CURRENT_NESTED_OPENDDBC_COMMIT,
+            "current_parent_kai_openpilot_commit": CURRENT_PARENT_OPENPILOT_COMMIT,
+            "upstream_request_decode_commit": UPSTREAM_REQUEST_NESTED_OPENDDBC_COMMIT,
+            "upstream_request_observation": "passive 0x08A Target Lateral ID / target-angle / modulo-64 sequence; exact F33 does not accept 0x08A",
             "remaining_live_gates": [
-                "stock B6 cadence/template/freshness",
-                "exclusive relay/source suppression",
-                "slot-4 command-5 generation permission and latency/contention",
+                "identify the observed Bus-4 0x08A producer",
+                "recover 0x08A integrity/authentication and producer-side transformation into protected B6",
+                "identify B6 signer/freshness ownership and suppression/fallback/arbitration",
                 "driver override and motor-current response policy",
                 "live 0x351/0x394/0x4A3 availability and fault-policy transitions",
             ],
         },
         "gate2_development_integration": {
-            "nested_opendbc_commit": DEVELOPMENT_NESTED_OPENDDBC_COMMIT,
-            "parent_kai_openpilot_commit": DEVELOPMENT_PARENT_OPENPILOT_COMMIT,
+            "status": "historical-runtime-removed",
+            "historical_nested_opendbc_commit": DEVELOPMENT_NESTED_OPENDDBC_COMMIT,
+            "historical_parent_kai_openpilot_commit": DEVELOPMENT_PARENT_OPENPILOT_COMMIT,
+            "removed_in_nested_opendbc_commit": UPSTREAM_REQUEST_NESTED_OPENDDBC_COMMIT,
+            "removed_in_parent_kai_openpilot_commit": RUNTIME_REMOVAL_PARENT_OPENPILOT_COMMIT,
+            "current_nested_opendbc_commit": CURRENT_NESTED_OPENDDBC_COMMIT,
+            "current_parent_kai_openpilot_commit": CURRENT_PARENT_OPENPILOT_COMMIT,
             "default_enabled": False,
+            "runtime_selectable": False,
             "release_branch_allowed": False,
-            "target_binding": "exact TOYOTA_CAMRY_TSS3 + current EPS F181 containing 8965F3307000 + relay-correct bus0 topology",
-            "runtime_config": {
+            "historical_target_binding": "exact TOYOTA_CAMRY_TSS3 + current EPS F181 containing 8965F3307000 + relay-correct bus0 topology",
+            "historical_runtime_config": {
                 "master_enable": "ToyotaTSS3DevLateral",
                 "json": "ToyotaTSS3DevLateralConfig",
                 "required_live_fields": [
@@ -307,35 +321,32 @@ def build() -> dict:
                     "exclusive_b6_authority_validated=true",
                 ],
             },
-            "sender": (
+            "historical_sender": (
                 "Active ID11 only; exact-F33 +/-1745 raw clamp and +78 raw command-step clamp; "
-                "requires a strictly newer stock 0x00F epoch, uses FV46/FV4 replacement counters, "
-                "and intentionally transmits zero MAC28 for the already-validated Gate-2 development bypass."
+                "required a strictly newer stock 0x00F epoch, used FV46/FV4 replacement counters, "
+                "and intentionally transmitted zero MAC28 for the historical Gate-2 bypass experiment."
             ),
-            "panda": (
-                "ALLOW_DEBUG-only Toyota TSS3 development flag installs a dedicated bus0/32-byte 0x0B6-only TX whitelist; "
-                "requires observed 0x025 steering rate and 0x00F sync, enforces ID11, +/-1745 raw, strict +1 sequence, "
+            "panda_debug_test_boundary": (
+                "ALLOW_DEBUG-only Toyota TSS3 development safety flag remains for tests and installs a dedicated bus0/32-byte 0x0B6-only TX whitelist; "
+                "no current Camry CarParams/CarInterface/CarController path selects it. The hook enforces ID11, +/-1745 raw, strict +1 sequence, "
                 "+/-78 raw step, abs steering-rate <=100, and 35-ms active timeout. Ordinary Toyota modes still cannot TX B6."
             ),
-            "inactive_behavior": (
-                "controller emits no invented inactive B6 frame; sender disarms after active->inactive and requires a newer sync epoch before reactivation"
+            "historical_inactive_behavior": (
+                "removed sender emitted no invented inactive B6 frame; it disarmed after active->inactive and required a newer sync epoch before reactivation"
             ),
             "production_output_authorized": False,
-            "remaining_live_gates": [
-                "stock B6 template/cadence capture supplying runtime config",
-                "live exact-F33 Gate-2 causal invalid-MAC proof",
-                "exclusive relay/source suppression proof",
-                "driver override and motor-current response policy",
-                "live fault-state transition policy",
-            ],
+            "current_blocker": (
+                "OQ-054: recover the observed Bus-4 0x08A producer, integrity/authentication, producer-side transformation into protected B6, "
+                "signer/freshness ownership, and suppression/fallback/arbitration before designing any sender"
+            ),
         },
         "sources": {
             "codeflash": {"path": str(IMAGE.relative_to(REPO)), "sha256": IMAGE_SHA256},
             "decompiler_evidence": {"path": str(EVID.relative_to(REPO)), "sha256": sha(EVID.read_bytes())},
         },
         "boundary": (
-            "The F33 Tx/status carrier geometry, passive software integration, and default-off development-output plumbing are closed at the stated evidence grades. "
-            "This artifact does not authorize steering CAN transmission: development output remains impossible until live-supplied gates are explicitly attested, and production output remains unsupported."
+            "The F33 Tx/status carrier geometry and passive software integration are closed at the stated evidence grades; the former Gate-2 runtime sender is retained here only as historical/test provenance and is removed from current integration. "
+            "This artifact does not authorize steering CAN transmission: current Camry output is noOutput/zero CAN, and the observed Bus-4 0x08A producer/authentication/transformation plus signer/freshness and arbitration remain unresolved."
         ),
     }
 

@@ -190,7 +190,8 @@ def summarize_route(path: Path, segment_ids: tuple[int, ...], structural_segment
           for x in ints
         ]
 
-  # 0x08A is deliberately structural only: exact F33 EPS Rx configuration does not
+  # This raw relay-capture artifact treats 0x08A structurally; VAR-081/CORR-134
+  # subsequently recover its upstream-request semantics. Exact F33 Rx configuration does not
   # accept this ID. Its sparse tuple changes are retained as cross-ECU state markers,
   # never as lateral-command attribution.
   a8_transitions = {}
@@ -244,7 +245,7 @@ def build() -> dict:
       "operation": "passive incoming CAN only; openpilot/Panda production output remained disabled",
       "route_privacy": "tracked route artifacts contain only src<128 CAN frames reduced from 19 rlog segments across two drives; no GPS, video, or user-facing route metadata",
       "dedicated_logger_failure": "the separate direct-Panda logger collided with pandad and stopped on a Panda USB CHECKSUM_ERROR; all drive conclusions use normal loggerd rlogs reduced to tracked CAN-only artifacts",
-      "operator_report_boundary": "the operator reported apparent factory steering assistance during the first drive and deliberately retried the experiment on the second drive, but the operator reports are not synchronized to an OEM-named LTA-active diagnostic state; exact active intervals therefore remain unproved",
+      "operator_report_boundary": "the operator reported apparent factory steering assistance during the first drive and deliberately retried the experiment on the second drive; this raw relay-capture artifact alone does not semantically classify the active intervals, which are subsequently identified by VAR-081's GTS+ plus 0x08A reconciliation",
     },
     "post_repin_nrtd": summarize_snapshot(nrtd),
     "post_repin_ready": summarize_snapshot(ready),
@@ -258,7 +259,8 @@ def build() -> dict:
     "conclusion": {
       "relay_topology": "observed: the former bus-1 steering/state family appears on the CAN0/CAN2 pair after the physical CAN0/CAN1 repin, while the separate 22-ID FD family remains on bus1",
       "b6": f"repeated bounded negative: zero 0x0B6 at any DLC on any incoming bus across {combined_segments} retained route segments / {combined_frames} incoming CAN frames from two separate drives, while protected 0x00F/0x0D7 remain healthy",
-      "next_observation": "synchronize an exact factory-LTA active/inactive oracle (prefer FRC P5 DID 0x1601) with relay-correct CAN before revising the recovered F33 B6 command-path interpretation or the staged sender's stock-template requirement",
+      "semantic_upgrade": "VAR-081/CORR-134 subsequently identify complete retained LTA/LCA-active intervals and recover Bus-4 0x08A as the upstream request representation while preserving the zero-B6 and exact-F33-ingress boundaries",
+      "next_observation": "recover the observed Bus-4 0x08A producer, integrity/authentication, producer-side transformation into protected B6, signer/freshness ownership, and suppression/fallback/arbitration; FRC 0x1601 remains optional independent corroboration",
       "production_output_authorized": False,
     },
   }

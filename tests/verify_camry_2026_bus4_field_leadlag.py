@@ -42,7 +42,7 @@ def sha(path: Path) -> str:
 EXPECTED = {
     ART: "25d625ca2c5d1aeedcd06c3d1fe5647b3425e2470ff1ef806e98e9b7b77eaea0",
     BUILD: "e53e30ed28fac057459e32e7bf6615908aaf4dfb6faee6d80142d04653fd29ec",
-    REPO / "tools/analyze_camry_2026_relay_capture.py": "54eff5007139ebe21c302dbaff92a2518540a3ab248e1f71d78705395bef1fb0",
+    REPO / "tools/analyze_camry_2026_relay_capture.py": "1d361e985418b256a72e8d5e1e1018984850797ab09565edff8c05078930339a",
     REPO / "tools/toyota_route_opendbc_common.py": "1eab32c06d22c28305a89e14f8ba4c24af434461f1f2c270770c6d305fde8ec7",
     CENSUS: "355ea5b408442a541bd946d21c3e85b0fa4d9e924474d3223189cb37894ee9fc",
 }

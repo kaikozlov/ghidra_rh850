@@ -486,27 +486,25 @@ anchors, and the static carrier geometry. The earlier read-only CarState
 evidence (`0x030` torque, `0x51E` Ready, `0x127` gear, FRC cruise oracles)
 remains complementary live evidence.
 
-The remaining blockers are narrower and concrete:
+The original stock-B6-capture blocker in this section is superseded by
+VAR-081/CORR-134. The retained relay-correct drives already contain complete
+LTA/LCA-active intervals with zero B6 and recover Bus-4 `0x08A` as the upstream
+request representation. The current blockers are therefore narrower and
+producer-directed:
 
-1. capture stock LTA `off -> active -> off` on this exact car while retaining all
-   buses — the still-open producer-side facts are stock sender cadence, the
-   active-LTA secondary-field template, freshness evolution, and
-   side-of-relay producer/suppression behavior;
-2. live validation, not another static pass, of the now-closed F33 constants
-   (tick period, mode2 limits, sequence-gap cap, monitor thresholds) against
-   observed stock behavior before constructing production Panda limits;
-3. prove target-native operational signing capability/latency and any required
-   application-retention carrier before relying on ICU-S command 5. The complete
-   DataFlash + post-handoff LocalRAM/GlobalRAM sweep found no raw authenticating
-   key, so a retained application-context ICU-S command-5 path is now the primary
-   signing direction rather than plaintext-key recovery. Retention, slot-4
-   command-5 permission, and completion latency/contention under live
-   command-7 traffic remain live gates (§12.6);
-4. synchronize actual cruise engage/cancel with FRC `0x1905/0x1914`, and repeat
-   following-distance if production CarState needs that ordinary-CAN field;
-5. perform relay-correct interception testing before any lateral output. Passive
-   bus-1 observation does not establish exclusive B6 authority or safe stock
-   sender suppression.
+1. identify who produces the observed Bus-4 `0x08A`; its absence from Panda bus 1
+   means the retained capture does not distinguish a Bus-1-side request transformed
+   before observation from a Bus-4-side producer/echo;
+2. recover `0x08A` integrity/authentication and the producer-side transformation
+   into exact-F33 protected B6, including the companion-state mapping;
+3. identify the B6 signer/freshness owner plus suppression/fallback and lateral
+   authority/arbitration semantics before claiming an exclusive controllable source;
+4. only after that chain is known, validate signing latency/jitter, driver-override
+   and motor-current response policy, and `0x351/0x394/0x4A3` fault/recovery behavior;
+5. perform a bounded relay-correct steering experiment only after those producer,
+   protection, arbitration, and safety gates close. FRC `0x1601/0x1914` remains
+   useful independent corroboration, not a prerequisite for identifying the retained
+   LTA/LCA interval.
 
 Production output remains disabled. The exact firmware substantially reduces the
 remaining work, but it does not by itself authorize steering transmission.
@@ -1939,7 +1937,7 @@ CORR-127 closes the denominator question raised by the broader `0x58074` staging
 
 **Command-value composition.** The recovered `1C02` model/observable path is much narrower. `D039E` composes `FEBECC50`, later scaled/clamped through `D042C` into `FEBECC62 -> FEBEAC56`, and `BF33E` publishes the command-model/status block `FEBEE400..418` (including the Command Value Torque observable family at `FEBEE40A`). The only **generated-COM** value/mode inputs recovered at this level are B6: `CBA80` writes `FEBEC81A` from B6 sig262 snapshot `FEBEAE90`, while `CB73A` can raise the B6 assist-active state only when B6 sig261 snapshot `FEBEADB0=='1'`. Gain pairs are ROM-installed and internally adapted; without sig261 that B6-selected adaptation cannot activate. CORR-128 corrects one important distinction in the other branch: `FEBE71F2 -> FEBEEF8E -> FEBEAC52` does **not** supply the `FEBECC60` magnitude. `D0382` uses `FEBEAC52` only as a symmetric saturation limit on dynamic `FEBECC4E`; the actual B6-independent value comes from the internal `D0218 -> D0284 -> D02DA` chain closed in §30.
 
-Therefore the corrected statement is stronger and narrower than VAR-065's old shorthand: **many more ordinary COM values are staged and observed than the 19-signal model showed, but no non-B6 generated-COM value is recovered as a value/mode input to the shared `CC50/CC62` command funnel or as the B6 assist-activation input.** Exact F33 also contains a B6-independent internal magnitude path feeding that same funnel. CORR-130/VAR-083 now close the downstream consequence that this section originally left open: `CC62` is a real pre-slew physical-command value and continues intra-function through `D042C -> CC66`, then `CC64/AC54/EE40C -> 6AF4 -> 6E0A -> 6DEC/6DC8/6DD6`. The remaining discriminator is **upstream stock-LTA authority into this funnel while B6 is absent**, not another blind ordinary-COM or downstream motor search. This does not authorize output.
+Therefore the corrected statement is stronger and narrower than VAR-065's old shorthand: **many more ordinary COM values are staged and observed than the 19-signal model showed, but no non-B6 generated-COM value is recovered as a value/mode input to the shared `CC50/CC62` command funnel or as the B6 assist-activation input.** Exact F33 also contains a B6-independent internal magnitude path feeding that same funnel. CORR-130/VAR-083 close the downstream consequence that this section originally left open: `CC62` is a real pre-slew physical-command value and continues intra-function through `D042C -> CC66`, then `CC64/AC54/EE40C -> 6AF4 -> 6E0A -> 6DEC/6DC8/6DD6`. CORR-134/VAR-081 subsequently move the unresolved boundary out of another F33-internal search: Bus-4 `0x08A` is the upstream request representation, and the current discriminator is its **producer/authentication/transformation into protected B6 plus authority/arbitration ownership**. This does not authorize output.
 
 Deterministic evidence is `data/generated/camry_8965F3307000_command_cone_ingress.json`, generated by `tools/build_camry_8965F3307000_command_cone_ingress.py` and verified by `tests/verify_camry_8965F3307000_command_cone_ingress.py`.
 
@@ -1969,7 +1967,7 @@ The other selector branches are explicitly internal. `C54A2` can choose `0x66` f
 
 **Retained-drive join.** The two relay-correct CAN-only captures directly reject the ordinary-COM selector as the Class-L discriminator. In drive A, all **519** observed `0x51E` frames have sig160=sig163=sig166=0, including all **16** samples inside the 16.119256-s Class-L interval; all **17,176** `0x13B` frames have sig224=0, including **537** inside Class-L. In drive B, all **600** `0x51E` frames have those three signals zero, including all **57** Class-L samples; all **20,000** `0x13B` frames have sig224=0, including **1,906** inside Class-L. `0x490` and `0x1DA` are absent in both captures. Every populated three-second pre/post Class-L edge window has the same selector value support on both sides.
 
-Therefore the directly recovered ordinary-COM parameter-bank inputs cannot explain the retained LTA/LCA transition or its motor-feedback shift. Exact calibration now strengthens that negative: healthy selector1 is the only distinct `C28FC/C2B64` normal bank, selectors0/2/3 alias, all fallback banks alias, and route-zero sig160 can reach only equivalent selector0/2. Combined with VAR-081/083, the remaining discriminator has moved upstream into **internal/special selector state or another as-yet-unrecovered authority/value producer feeding `CC50`**, not the ordinary COM selector. The 0x51E observations are only about one sample per second, so they do not establish high-rate timing; their stronger fact is that the relevant fields are zero for the entire retained routes. VAR-081 already supplies the LTA/LCA state identification; FRC `0x1601` is independent corroboration, not a naming prerequisite. Nothing here authorizes output.
+Therefore the directly recovered ordinary-COM parameter-bank inputs cannot explain the retained LTA/LCA transition or its motor-feedback shift. Exact calibration now strengthens that negative: healthy selector1 is the only distinct `C28FC/C2B64` normal bank, selectors0/2/3 alias, all fallback banks alias, and route-zero sig160 can reach only equivalent selector0/2. This removes the ordinary COM selector as a candidate. CORR-134/VAR-081 subsequently recover Bus-4 `0x08A` as the upstream request representation, so the current discriminator is **its producer/authentication/transformation into protected B6 and the associated authority/arbitration**, not another F33 selector search. The 0x51E observations are only about one sample per second, so they do not establish high-rate timing; their stronger fact is that the relevant fields are zero for the entire retained routes. VAR-081 already supplies the LTA/LCA state identification; FRC `0x1601` is independent corroboration, not a naming prerequisite. Nothing here authorizes output.
 
 Deterministic evidence is `data/generated/camry_2026_baseline_selector_live.json`, generated by `tools/analyze_camry_2026_baseline_selector.py` and verified by `tests/verify_camry_2026_baseline_selector.py`; static selector provenance is in `data/generated/camry_8965F3307000_command_cone_ingress.json`.
 
@@ -2088,14 +2086,14 @@ healthy selector 1 is the only distinct 0x220-byte bank, selectors 0/2/3 alias, 
 fallback banks alias, and route-zero ordinary sig160 can reach only equivalent selector
 0/2. None of those ordinary model inputs supplies an independently recovered lane target.
 
-The remaining contradiction is therefore **upstream of this now-closed physical
-convergence**, not downstream: during 73.303384 s of strongly identified factory
-LTA/LCA-active operation the actual Brake/EPS Bus-4 capture contains zero B6, yet the
-operator directly observed the car steering under factory LTA. VAR-082 simultaneously
-finds no second ordinary external CAN field that leads the steering response. The next
-question is exactly **what state/value makes the shared `CC50/CC62` funnel carry factory
-LTA authority with B6 absent, or which still-unclosed indirect producer changes that
-funnel's inputs.** Nothing here authorizes output.
+At this recovery stage the contradiction appeared upstream of the now-closed physical
+convergence: 73.303384 s of LTA/LCA-active Bus-4 traffic had zero B6 and VAR-082 found no
+second ordinary external CAN field leading the response. CORR-134/VAR-081 subsequently
+resolve the representation side by recovering Bus-4 `0x08A` Target Lateral ID plus target
+angle, while exact F33 still excludes `0x08A`. The current question is therefore **who
+produces that observed request and how its authenticated/protected state is transformed
+into B6, including signer/freshness and authority/arbitration ownership**. Nothing here
+authorizes output.
 
 Deterministic evidence is carried by
 `data/generated/camry_8965F3307000_internal_assist_oracles.json` and

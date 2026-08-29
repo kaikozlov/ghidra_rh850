@@ -1,5 +1,5 @@
 {
-  "boundary": "The F33 Tx/status carrier geometry, passive software integration, and default-off development-output plumbing are closed at the stated evidence grades. This artifact does not authorize steering CAN transmission: development output remains impossible until live-supplied gates are explicitly attested, and production output remains unsupported.",
+  "boundary": "The F33 Tx/status carrier geometry and passive software integration are closed at the stated evidence grades; the former Gate-2 runtime sender is retained here only as historical/test provenance and is removed from current integration. This artifact does not authorize steering CAN transmission: current Camry output is noOutput/zero CAN, and the observed Bus-4 0x08A producer/authentication/transformation plus signer/freshness and arbitration remain unresolved.",
   "census_correction": {
     "control_cone_conclusion_changed": false,
     "driver_torque_direct_fixed_gp_entries": [
@@ -22,21 +22,14 @@
     "supersedes": "VAR-056/VAR-058 scratch-corpus direct/fixed-GP torque-source counts"
   },
   "gate2_development_integration": {
+    "current_blocker": "OQ-054: recover the observed Bus-4 0x08A producer, integrity/authentication, producer-side transformation into protected B6, signer/freshness ownership, and suppression/fallback/arbitration before designing any sender",
+    "current_nested_opendbc_commit": "a2ad31f3e2679bc893e2a00521a0d6c9c19eaf3c",
+    "current_parent_kai_openpilot_commit": "f7c7ed3855771abe19b2339010e26de4774b8f64",
     "default_enabled": false,
-    "inactive_behavior": "controller emits no invented inactive B6 frame; sender disarms after active->inactive and requires a newer sync epoch before reactivation",
-    "nested_opendbc_commit": "dde0fcf0fbaf875750c54a072b0dcb3857f8829b",
-    "panda": "ALLOW_DEBUG-only Toyota TSS3 development flag installs a dedicated bus0/32-byte 0x0B6-only TX whitelist; requires observed 0x025 steering rate and 0x00F sync, enforces ID11, +/-1745 raw, strict +1 sequence, +/-78 raw step, abs steering-rate <=100, and 35-ms active timeout. Ordinary Toyota modes still cannot TX B6.",
-    "parent_kai_openpilot_commit": "15f3550365e2eee54ca5645ae9c24d9d41ae4f31",
-    "production_output_authorized": false,
-    "release_branch_allowed": false,
-    "remaining_live_gates": [
-      "stock B6 template/cadence capture supplying runtime config",
-      "live exact-F33 Gate-2 causal invalid-MAC proof",
-      "exclusive relay/source suppression proof",
-      "driver override and motor-current response policy",
-      "live fault-state transition policy"
-    ],
-    "runtime_config": {
+    "historical_inactive_behavior": "removed sender emitted no invented inactive B6 frame; it disarmed after active->inactive and required a newer sync epoch before reactivation",
+    "historical_nested_opendbc_commit": "dde0fcf0fbaf875750c54a072b0dcb3857f8829b",
+    "historical_parent_kai_openpilot_commit": "15f3550365e2eee54ca5645ae9c24d9d41ae4f31",
+    "historical_runtime_config": {
       "json": "ToyotaTSS3DevLateralConfig",
       "master_enable": "ToyotaTSS3DevLateral",
       "required_live_fields": [
@@ -47,8 +40,15 @@
         "exclusive_b6_authority_validated=true"
       ]
     },
-    "sender": "Active ID11 only; exact-F33 +/-1745 raw clamp and +78 raw command-step clamp; requires a strictly newer stock 0x00F epoch, uses FV46/FV4 replacement counters, and intentionally transmits zero MAC28 for the already-validated Gate-2 development bypass.",
-    "target_binding": "exact TOYOTA_CAMRY_TSS3 + current EPS F181 containing 8965F3307000 + relay-correct bus0 topology"
+    "historical_sender": "Active ID11 only; exact-F33 +/-1745 raw clamp and +78 raw command-step clamp; required a strictly newer stock 0x00F epoch, used FV46/FV4 replacement counters, and intentionally transmitted zero MAC28 for the historical Gate-2 bypass experiment.",
+    "historical_target_binding": "exact TOYOTA_CAMRY_TSS3 + current EPS F181 containing 8965F3307000 + relay-correct bus0 topology",
+    "panda_debug_test_boundary": "ALLOW_DEBUG-only Toyota TSS3 development safety flag remains for tests and installs a dedicated bus0/32-byte 0x0B6-only TX whitelist; no current Camry CarParams/CarInterface/CarController path selects it. The hook enforces ID11, +/-1745 raw, strict +1 sequence, +/-78 raw step, abs steering-rate <=100, and 35-ms active timeout. Ordinary Toyota modes still cannot TX B6.",
+    "production_output_authorized": false,
+    "release_branch_allowed": false,
+    "removed_in_nested_opendbc_commit": "b9e86924b96eac248b6b9e6bcf0d4dfdc95b62d0",
+    "removed_in_parent_kai_openpilot_commit": "abf3ca70a713d21b88a0cd0241f0650a3d96db7a",
+    "runtime_selectable": false,
+    "status": "historical-runtime-removed"
   },
   "generated_com_tx": {
     "first_five": [
@@ -223,6 +223,8 @@
       "0x51E Ready 0/1"
     ],
     "controller_boundary": "computes a shadow B6 application/safety decision but returns zero CAN",
+    "current_nested_opendbc_commit": "a2ad31f3e2679bc893e2a00521a0d6c9c19eaf3c",
+    "current_parent_kai_openpilot_commit": "f7c7ed3855771abe19b2339010e26de4774b8f64",
     "exact_platform": "TOYOTA_CAMRY_TSS3",
     "identity_binding": "byte-exact EPS F181 02||8965F3307000[16]||8A3113303100[16], with present FRC/Brake identities required not to conflict",
     "nested_opendbc_commit": "ab60fd95d8a7b566e10ed1cf59738292f3498932",
@@ -230,9 +232,9 @@
     "parent_kai_openpilot_commit": "d7d7dfd7e49961e9d35eb7a7681e8756ceee8d04",
     "production_output_authorized": false,
     "remaining_live_gates": [
-      "stock B6 cadence/template/freshness",
-      "exclusive relay/source suppression",
-      "slot-4 command-5 generation permission and latency/contention",
+      "identify the observed Bus-4 0x08A producer",
+      "recover 0x08A integrity/authentication and producer-side transformation into protected B6",
+      "identify B6 signer/freshness ownership and suppression/fallback/arbitration",
       "driver override and motor-current response policy",
       "live 0x351/0x394/0x4A3 availability and fault-policy transitions"
     ],
@@ -240,7 +242,9 @@
       "0x4A3",
       "0x351",
       "0x394"
-    ]
+    ],
+    "upstream_request_decode_commit": "b9e86924b96eac248b6b9e6bcf0d4dfdc95b62d0",
+    "upstream_request_observation": "passive 0x08A Target Lateral ID / target-angle / modulo-64 sequence; exact F33 does not accept 0x08A"
   },
   "schema": "camry-8965f3307000-tss3-opendbc-port-v1",
   "sources": {

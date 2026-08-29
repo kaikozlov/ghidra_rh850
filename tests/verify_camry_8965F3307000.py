@@ -606,31 +606,41 @@ def section_tss3_opendbc_port() -> int:
 
     print("\n== passive opendbc integration boundary ==")
     o = art["passive_opendbc_integration"]
-    check("implementation commits pinned", o["nested_opendbc_commit"] == "ab60fd95d8a7b566e10ed1cf59738292f3498932" and o["parent_kai_openpilot_commit"] == "d7d7dfd7e49961e9d35eb7a7681e8756ceee8d04")
+    check("baseline and current implementation commits pinned",
+          o["nested_opendbc_commit"] == "ab60fd95d8a7b566e10ed1cf59738292f3498932" and
+          o["parent_kai_openpilot_commit"] == "d7d7dfd7e49961e9d35eb7a7681e8756ceee8d04" and
+          o["current_nested_opendbc_commit"] == "a2ad31f3e2679bc893e2a00521a0d6c9c19eaf3c" and
+          o["current_parent_kai_openpilot_commit"] == "f7c7ed3855771abe19b2339010e26de4774b8f64" and
+          o["upstream_request_decode_commit"] == "b9e86924b96eac248b6b9e6bcf0d4dfdc95b62d0")
     check("exact platform/F181 binding recorded", o["exact_platform"] == "TOYOTA_CAMRY_TSS3" and "byte-exact EPS F181" in o["identity_binding"])
     check("ambiguous legacy fingerprint avoided", "179-ID" in o["can_census"] and "147-ID Corolla" in o["can_census"] and "strict subset" in o["can_census"])
     check("same-car replay coverage recorded", o["carstate_replay"] == ["0x025", "0x030", "0x127 P/R/N/D/B", "0x51E Ready 0/1"])
     check("shadow controller sends zero CAN", "returns zero CAN" in o["controller_boundary"])
+    check("passive upstream request decoder is non-ingress", "passive 0x08A" in o["upstream_request_observation"] and "does not accept 0x08A" in o["upstream_request_observation"])
     check("Panda production path remains disabled", "ALLOW_DEBUG-only" in o["panda_boundary"] and "0x0B6 is absent" in o["panda_boundary"] and "SafetyModel.noOutput" in o["panda_boundary"])
-    check("production output remains unauthorized", o["production_output_authorized"] is False and "steering CAN transmission" in art["boundary"])
+    check("current gates start at producer/auth/transform rather than stock template",
+          o["remaining_live_gates"][0] == "identify the observed Bus-4 0x08A producer" and
+          all("stock B6" not in gate for gate in o["remaining_live_gates"]))
+    check("production output remains unauthorized", o["production_output_authorized"] is False and "does not authorize steering CAN transmission" in art["boundary"])
 
-    print("\n== exact-F33 default-off development integration ==")
+    print("\n== historical exact-F33 Gate-2 development integration ==")
     d = art["gate2_development_integration"]
-    check("development implementation commits pinned",
-          d["nested_opendbc_commit"] == "dde0fcf0fbaf875750c54a072b0dcb3857f8829b" and
-          d["parent_kai_openpilot_commit"] == "15f3550365e2eee54ca5645ae9c24d9d41ae4f31")
-    check("development path defaults off and rejects release branches", d["default_enabled"] is False and d["release_branch_allowed"] is False)
-    check("development target/topology binding exact", "8965F3307000" in d["target_binding"] and "bus0" in d["target_binding"])
-    required = d["runtime_config"]["required_live_fields"]
-    check("development config refuses guessed live facts",
-          d["runtime_config"]["master_enable"] == "ToyotaTSS3DevLateral" and
-          d["runtime_config"]["json"] == "ToyotaTSS3DevLateralConfig" and
-          any("b6_template_hex" in x for x in required) and any("cadence_frames" in x for x in required) and
-          any("gate2_bypass_validated=true" in x for x in required) and any("exclusive_b6_authority_validated=true" in x for x in required))
-    check("development sender keeps exact F33 static bounds", all(tok in d["sender"] for tok in ("ID11", "+/-1745", "+78", "newer stock 0x00F", "zero MAC28")))
-    check("development Panda is debug-only B6-only fail-closed", all(tok in d["panda"] for tok in ("ALLOW_DEBUG-only", "0x0B6-only", "0x025", "0x00F", "strict +1", "35-ms")))
-    check("development inactive path invents no OEM packet", "no invented inactive B6 frame" in d["inactive_behavior"] and "newer sync epoch" in d["inactive_behavior"])
-    check("development does not authorize production", d["production_output_authorized"] is False and "production output remains unsupported" in art["boundary"])
+    check("historical development and removal commits pinned",
+          d["historical_nested_opendbc_commit"] == "dde0fcf0fbaf875750c54a072b0dcb3857f8829b" and
+          d["historical_parent_kai_openpilot_commit"] == "15f3550365e2eee54ca5645ae9c24d9d41ae4f31" and
+          d["removed_in_nested_opendbc_commit"] == "b9e86924b96eac248b6b9e6bcf0d4dfdc95b62d0" and
+          d["removed_in_parent_kai_openpilot_commit"] == "abf3ca70a713d21b88a0cd0241f0650a3d96db7a")
+    check("development runtime is explicitly removed", d["status"] == "historical-runtime-removed" and d["runtime_selectable"] is False and d["default_enabled"] is False)
+    check("historical target/topology binding retained for provenance", "8965F3307000" in d["historical_target_binding"] and "bus0" in d["historical_target_binding"])
+    required = d["historical_runtime_config"]["required_live_fields"]
+    check("historical config provenance retains the disproved stock-template admission rule",
+          d["historical_runtime_config"]["master_enable"] == "ToyotaTSS3DevLateral" and
+          d["historical_runtime_config"]["json"] == "ToyotaTSS3DevLateralConfig" and
+          any("b6_template_hex" in x for x in required) and any("cadence_frames" in x for x in required))
+    check("historical sender keeps exact F33 static bounds", all(tok in d["historical_sender"] for tok in ("ID11", "+/-1745", "+78", "newer stock 0x00F", "zero MAC28")))
+    check("Panda B6 safety envelope remains debug-test-only", all(tok in d["panda_debug_test_boundary"] for tok in ("ALLOW_DEBUG-only", "0x0B6-only", "no current Camry", "strict +1", "35-ms")))
+    check("historical inactive path invents no OEM packet", "no invented inactive B6 frame" in d["historical_inactive_behavior"] and "newer sync epoch" in d["historical_inactive_behavior"])
+    check("current blocker is producer/auth/transform, not sender arming", d["production_output_authorized"] is False and "OQ-054" in d["current_blocker"] and "producer-side transformation" in d["current_blocker"])
 
     print("\n== canonical documentation ==")
     report = REPORT.read_text(encoding="utf-8")
@@ -643,7 +653,7 @@ def section_tss3_opendbc_port() -> int:
     check("VAR-062 development staging registered", "| VAR-062 |" in findings and "dde0fcf0" in findings and "15f355036" in findings)
     check("CORR-120 historical step retained", "### CORR-120" in corrections and "0x4C000" in corrections and "VAR-056" in corrections and "five" in corrections.lower())
     check("CORR-122 canonical census registered", "### CORR-122" in corrections and "6,065" in corrections and "FEBE66A8" in corrections and "FEBE670E" in corrections and "9" in corrections)
-    check("priorities record passive baseline plus gated development port", "ab60fd95" in priorities and "dde0fcf0" in priorities and "production output remains disabled" in priorities.lower())
+    check("priorities record passive current cutover and retired sender", "a2ad31f3" in priorities and "f7c7ed385" in priorities and "obsolete Camry B6 sender is retired" in priorities)
 
     print(f"\nResults: {p} passed, {f} failed")
     return 1 if f else 0
