@@ -159,6 +159,22 @@ def main() -> int:
         },
     )
 
+    camry = stored["exact_camry_blocker"]
+    check(
+        "exact Camry Brake identity and local producer-firmware absence are pinned",
+        camry["identity"]["request"] == "0x7B0"
+        and camry["identity"]["f181"] == "F152633K0000"
+        and camry["identity"]["ecu_part_0105"] == "8954147040"
+        and camry["producer_firmware"]["locally_available"] is False
+        and camry["producer_firmware"]["diag_07b0_matches"] == [],
+    )
+    check(
+        "Camry 0x107E is already disproved while 0x10A1..0x10A4 remain unmeasured live",
+        camry["already_tested_observers"]["did_107e_default"]["status"] == "negative_or_timeout"
+        and camry["already_tested_observers"]["did_107e_extended"]["status"] == "negative_or_timeout"
+        and camry["new_longitudinal_observers_10a1_10a4_live_support"] == "not_measured",
+    )
+
     specimens = stored["specimen_census"]
     check(
         "no bundled or tracked TSE/GTSE specimen exists",

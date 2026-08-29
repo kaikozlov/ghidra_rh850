@@ -3180,9 +3180,17 @@ diagnostic source/sink model, but it does **not** prove the vehicle-network fram
 32-bit-FRC-to-16-bit-brake transformation/copy order, final arbitration executor, SecOC
 signer/freshness owner, cadence, or stock-source suppression point. Those facts require
 exact-target firmware or synchronized live FRC/brake/recorder/CAN evidence; do not infer
-them from recorder hosting. For the maintainer Camry the immediate read-only longitudinal
-oracle is Brake `0x7B0` RDBI `22 10 A1`..`22 10 A4`, synchronized with FRC `0x792`
-`0x1B03`..`0x1B07`, stock DRCC state, and all-bus capture.
+them from recorder hosting. The exact Camry acquisition boundary is already pinned by
+VAR-069/070: Brake is `0x7B0->0x7B8`, F181 `F152633K0000`, DID0105
+`8954147040`, but the 26-package local CUW corpus has **zero `DiagID=07B0`** packages.
+The legitimate external acquisition route is Toyota/TIS ECU-supply-change search using the
+exact VIN plus `ecuAssyNo=8954147040` and `baseSwNo=[F152633K0000]`; package availability
+and a calibration URL are not known and must not be synthesized from F181. The older
+Brake `0x107E ADS Control EPS Pinion Angle2` oracle has already been live-rejected by the
+Camry in both default and positive extended sessions. Therefore the immediate new read-only
+longitudinal oracle is Brake `0x7B0` RDBI `22 10 A1`..`22 10 A4` (live support currently
+**unmeasured**), synchronized with FRC `0x792` `0x1B03`..`0x1B07`, stock DRCC state,
+Operation FFD and all-bus capture.
 
 **The TSE/GTSE saved-session layer is now structurally recovered.** Current
 `GTS+ TSEConverter` is **01.02.002** and selects `180_Template.csv`; the shipped 173 and

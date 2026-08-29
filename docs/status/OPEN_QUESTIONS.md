@@ -964,9 +964,14 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   For one exact TSS3 target, join the diagnostic values to the real vehicle-network frame
   and cadence, determine the FRC->brake copy/transform, final brake/powertrain arbitration
   executor, SecOC/integrity signer/freshness owner, lead/distance/standstill feedback, and
-  safe stock-source suppression/fallback. The immediate read-only Camry oracle is
-  Brake `0x7B0`: `22 10 A1`..`22 10 A4`, synchronized with FRC `0x792`
-  `22 1B 03`..`22 1B 07`, stock DRCC engagement and all-bus capture. Do not add a TSS3
+  safe stock-source suppression/fallback. VAR-069 already pins the exact Camry Brake
+  producer acquisition blocker: `0x7B0->0x7B8`, F181 `F152633K0000`, DID0105
+  `8954147040`, **zero local `DiagID=07B0` CUWs**, and an authenticated Toyota/TIS
+  search route requiring the exact VIN + assembly + base-software values. VAR-070 already
+  disproves `0x107E` as a live Camry oracle in default/extended sessions. The immediate
+  new read-only Camry oracle is therefore Brake `0x7B0`: `22 10 A1`..`22 10 A4`
+  (**live support unmeasured**), synchronized with FRC `0x792` `22 1B 03`..`22 1B 07`,
+  stock DRCC engagement, Operation FFD and all-bus capture. Do not add a TSS3
   longitudinal builder or Panda whitelist until that wire/auth contract is target-native.
   Canonical: [../tooling/techstream.md](../tooling/techstream.md) §6.2.4,
   `data/generated/gtsplus_2026/tss3_control_ownership_surface.json`, and

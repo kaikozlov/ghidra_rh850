@@ -39,6 +39,47 @@
     "interpretation": "The ordinary P5 FRC/Brake Record-on-Behavior tables contain no named TSS request or arbitration-result field that resolves the remaining producer/executor question. ABS_P5 and Brk_Bst_P5 do persist one pinion-named observer, RoB DID 0x507E 'ADS Control EPS Pinion Angle2' (mirrored in tables 90/151), which corroborates brake-domain observation of steering state but does not name a target/request/winner.",
     "region": "NA"
   },
+  "exact_camry_blocker": {
+    "already_tested_observers": {
+      "did_107e_default": {
+        "error": "NegativeResponseError: READ_DATA_BY_IDENTIFIER - request out of range",
+        "status": "negative_or_timeout"
+      },
+      "did_107e_extended": {
+        "error": "NegativeResponseError: READ_DATA_BY_IDENTIFIER - request out of range",
+        "extended_session": "positive",
+        "returned_default": true,
+        "status": "negative_or_timeout"
+      },
+      "did_10af_live_support": "not_measured"
+    },
+    "identity": {
+      "category_id": 435,
+      "ecu_part_0105": "8954147040",
+      "f181": "F152633K0000",
+      "f18c_serial": "8954147040CFC1800985",
+      "request": "0x7B0",
+      "response": "0x7B8",
+      "vehicle": "maintainer 2026 Toyota Camry Hybrid"
+    },
+    "interpretation": "The exact Camry Brake ECU is identity-bound, but its decoded producer firmware is absent from the pinned CUW corpus and Toyota/TIS has not returned a package in retained evidence. The older 0x107E steering observer is already live-rejected in default and extended sessions, so it is not a Camry runtime oracle. The newly identified 0x10A1..0x10A4 longitudinal TSS receive observers remain the next read-only live support/correlation probe; static DDB presence alone does not claim they answer.",
+    "new_longitudinal_observers_10a1_10a4_live_support": "not_measured",
+    "producer_firmware": {
+      "acquisition_route": "Toyota/TIS ECU-supply-change search",
+      "diag_07b0_matches": [],
+      "local_cuw_count": 26,
+      "locally_available": false,
+      "search_inputs": {
+        "baseSwNoLst_from_counted_did_f181": [
+          "F152633K0000"
+        ],
+        "ecuAssyNo_from_did_0105": "8954147040",
+        "vin": "required at authenticated query time; not stored in this artifact"
+      },
+      "t2_tis_package_availability_proven": false,
+      "url_policy": "Do not synthesize /t3Portal/calibration/F152633K0000 or any other URL. The exact F181 is a search input/current software identity, not a proved downloadable target CID."
+    }
+  },
   "fleet_brake_sink_census": {
     "did_serving_brake_categories": {
       "435": "ABS_P5.ddb",

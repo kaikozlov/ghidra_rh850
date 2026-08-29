@@ -252,9 +252,13 @@ Control EPS Pinion Angle2**. A corpus-wide ordinary Data Monitor census has zero
 control-arbitration signals; P6 `0x3486` arbitration names remain successor-only.
 
 There is therefore no remaining generic GTS+ ownership/name sweep to perform. The next
-high-value evidence is **target-native dynamic/firmware correlation**: on the maintainer Camry,
-poll Brake `0x7B0` `22 10 A1..A4` together with FRC `0x792` `22 1B 03..1B 07` during stock
-DRCC and synchronize those values with all-bus CAN plus Operation FFD. That is what can close
+high-value evidence is **target-native dynamic/firmware correlation**. Exact Camry Brake
+firmware acquisition is already deterministically bounded by VAR-069: `0x7B0`, F181
+`F152633K0000`, assembly `8954147040`, zero local 07B0 CUWs, and a Toyota/TIS exact-VIN
+ECU-supply-change query as the only provenance-safe external route. VAR-070 already rejects
+`0x107E` live on this Camry. Poll the newly identified Brake `0x7B0` `22 10 A1..A4`
+(currently unmeasured for live support) together with FRC `0x792` `22 1B 03..1B 07` during
+stock DRCC and synchronize those values with all-bus CAN plus Operation FFD. That can close
 the vehicle-network frame, transformation, cadence, arbitration executor, SecOC/integrity owner
 and suppression/fallback point. Separately, the saved-session implementation is complete but
 real-session validation is **source-data blocked**: the pinned Toyota distribution and tracked

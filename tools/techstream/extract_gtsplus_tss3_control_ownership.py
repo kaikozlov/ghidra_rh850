@@ -54,6 +54,8 @@ RECORDER_LONGITUDINAL_DIDS = ("5280", "5281", "5284", "57D3", "57DB")
 PCS_SEMANTICS = REPO / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json"
 CROSSVEHICLE = REPO / "data/generated/gtsplus_2026/tss3_crossvehicle_surface.json"
 B6_SENDER_ATTRIBUTION = REPO / "data/generated/techstream_v18/tss3_b6_sender_attribution.json"
+CAMRY_BRAKE_ACQUISITION = REPO / "data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json"
+CAMRY_BRAKE_OBSERVERS = REPO / "data/generated/gtsplus_2026/camry_brake_observer_vocabulary.json"
 
 
 def _u16(raw: bytes, off: int) -> int:
@@ -430,6 +432,56 @@ def ordinary_arbitration_census(parser: DDBParser, root: Path) -> dict[str, Any]
     }
 
 
+def exact_camry_blocker() -> dict[str, Any]:
+    acquisition = json.loads(CAMRY_BRAKE_ACQUISITION.read_text(encoding="utf-8"))
+    observers = json.loads(CAMRY_BRAKE_OBSERVERS.read_text(encoding="utf-8"))
+    target = acquisition["exact_target"]
+    local = acquisition["local_corpus"]
+    route = acquisition["highest_confidence_acquisition_route"]
+    obs = observers["exact_camry_boundary"]
+    if not (
+        target["f181_software_part"] == "F152633K0000"
+        and target["ecu_part_0105"] == "8954147040"
+        and target["physical_request"] == "0x7B0"
+        and local["producer_firmware_available"] is False
+        and local["diag_07b0_matches"] == []
+    ):
+        raise ValueError("exact Camry Brake acquisition boundary changed")
+    return {
+        "identity": {
+            "vehicle": target["vehicle"],
+            "category_id": target["category_id"],
+            "request": target["physical_request"],
+            "response": target["physical_response"],
+            "f181": target["f181_software_part"],
+            "ecu_part_0105": target["ecu_part_0105"],
+            "f18c_serial": target["f18c_serial"],
+        },
+        "producer_firmware": {
+            "locally_available": local["producer_firmware_available"],
+            "local_cuw_count": local["package_count"],
+            "diag_07b0_matches": local["diag_07b0_matches"],
+            "t2_tis_package_availability_proven": route["server_package_availability_proven"],
+            "acquisition_route": route["route_kind"],
+            "search_inputs": route["search_inputs"],
+            "url_policy": route["url_policy"],
+        },
+        "already_tested_observers": {
+            "did_107e_default": obs["did_107e_default"],
+            "did_107e_extended": obs["did_107e_extended"],
+            "did_10af_live_support": obs["did_10af_live_support"],
+        },
+        "new_longitudinal_observers_10a1_10a4_live_support": "not_measured",
+        "interpretation": (
+            "The exact Camry Brake ECU is identity-bound, but its decoded producer firmware is absent from the "
+            "pinned CUW corpus and Toyota/TIS has not returned a package in retained evidence. The older 0x107E "
+            "steering observer is already live-rejected in default and extended sessions, so it is not a Camry "
+            "runtime oracle. The newly identified 0x10A1..0x10A4 longitudinal TSS receive observers remain the "
+            "next read-only live support/correlation probe; static DDB presence alone does not claim they answer."
+        ),
+    }
+
+
 def specimen_census(root: Path) -> dict[str, Any]:
     diagnostics = root.parent
     bundled = sorted(
@@ -470,6 +522,7 @@ def build() -> dict[str, Any]:
         "fleet_brake_sink_census": fleet_brake_sink_census(parser, root),
         "brake_rob_boundary": brake_rob_boundary(parser, root),
         "ordinary_arbitration_census": ordinary_arbitration_census(parser, root),
+        "exact_camry_blocker": exact_camry_blocker(),
         "specimen_census": specimen_census(root),
         "remaining_boundary": (
             "Static GTS+ now identifies the TSS3 recorder host (FRC) and the longitudinal diagnostic request "

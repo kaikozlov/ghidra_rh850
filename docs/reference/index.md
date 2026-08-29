@@ -384,8 +384,8 @@ Findings: 382 · Corrections: 132 · Open questions: 54 · Docs: 110 · Suites: 
 | <a id="finding-var-066"></a>**VAR-066** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000_gtsplus_semantics.py`, `tests/verify_camry_2026.py` | — |
 | <a id="finding-var-067"></a>**VAR-067** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_2026.py` | — |
 | <a id="finding-var-068"></a>**VAR-068** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000_external_lateral_ingress.py` | — |
-| <a id="finding-var-069"></a>**VAR-069** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_f152633k0000_brake_acquisition.py` | — |
-| <a id="finding-var-070"></a>**VAR-070** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_camry_brake_observer_vocabulary.py` | — |
+| <a id="finding-var-069"></a>**VAR-069** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [techstream](../tooling/techstream.md) | `tests/verify_camry_f152633k0000_brake_acquisition.py` | OQ-052 |
+| <a id="finding-var-070"></a>**VAR-070** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_brake_observer_vocabulary.py` | OQ-052 |
 | <a id="finding-var-071"></a>**VAR-071** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [PRIORITIES](../status/PRIORITIES.md), [camry-2026-live-baseline](../variants/camry-2026-live-baseline.md) | `tests/verify_camry_8965F3307000.py --section tss3_opendbc_port` | — |
 | <a id="finding-var-072"></a>**VAR-072** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_2026.py` | — |
 | <a id="finding-var-073"></a>**VAR-073** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_camry_8965F3307000_d5_snapshot_provenance.py` | — |
@@ -457,7 +457,7 @@ Findings: 382 · Corrections: 132 · Open questions: 54 · Docs: 110 · Suites: 
 | <a id="open-question-oq-049"></a>**OQ-049** | Application CommunicationControl live effect | Tooling | — |
 | <a id="open-question-oq-050"></a>**OQ-050** | Exploit-interest cohort consumption (SWEEP-008) | Tooling | SWEEP-008, SECOC-047, CORR-101 |
 | <a id="open-question-oq-051"></a>**OQ-051** | Cross-calibration structural triage of future P1M-E images | Tooling | MEM-SAFE-001 |
-| <a id="open-question-oq-052"></a>**OQ-052** | True-TSS3 longitudinal wire/auth/arbitration execution contract | Tooling | TMS-085, TMS-079 |
+| <a id="open-question-oq-052"></a>**OQ-052** | True-TSS3 longitudinal wire/auth/arbitration execution contract | Tooling | TMS-085, TMS-079, VAR-069, VAR-070 |
 | <a id="open-question-oq-053"></a>**OQ-053** | F33 non-disruptive application-mode RAM execution pivot | Tooling | VAR-060, CORR-124, CORR-123 |
 | <a id="open-question-oq-054"></a>**OQ-054** | exact-F33 stock-LTA authority into the shared `CC50/CC62` actuation funnel | Tooling | VAR-081, VAR-082, VAR-083, VAR-084, VAR-085, CORR-129, CORR-092 |
 
@@ -889,8 +889,8 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/exploit_interest_cohorts.json` | exploit_interest_ranking, exploit_interest_reviewed_candidates | — |
 | `data/generated/exploit_interest_ranking.csv` | exploit_interest_ranking, exploit_interest_reviewed_candidates | — |
 | `data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json` | camry_8965f3307000_gtsplus_semantics, camry_8965f3307000_gtsplus_external, camry_2026, camry_8965f3307000_external_lateral_ingress | — |
-| `data/generated/gtsplus_2026/camry_brake_observer_vocabulary.json` | camry_brake_observer_vocabulary | — |
-| `data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json` | camry_f152633k0000_brake_acquisition | — |
+| `data/generated/gtsplus_2026/camry_brake_observer_vocabulary.json` | gtsplus_tss3_control_ownership, camry_brake_observer_vocabulary | — |
+| `data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json` | gtsplus_tss3_control_ownership, camry_f152633k0000_brake_acquisition | — |
 | `data/generated/gtsplus_2026/p5_adas_p6_migration.json` | gtsplus_tss3_control_ownership, gtsplus_p5_adas_p6_migration | — |
 | `data/generated/gtsplus_2026/pcs_data_viewer_parameter_help.json` | gtsplus_pcs_data_viewer_parameter_help | — |
 | `data/generated/gtsplus_2026/pcs_data_viewer_tss3_dictionary.json` | gtsplus_pcs_data_viewer_tss3_dictionary, gtsplus_pcs_data_viewer_parameter_help, gtsplus_aux_body_recovery | — |
