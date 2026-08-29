@@ -290,7 +290,7 @@ def build() -> dict:
             "result": "the only recovered runtime destination-register updater is 0x60A6A, and every callsite supplies one of seven fixed CodeFlash descriptor families; all 44 destination fields avoid LocalRAM",
             "boundary": "arbitrary unknown-pointer corruption/hardware faults remain outside this recovered-dataflow proof; no separate DMAC destination programmer is recovered",
         },
-        "combined_classification": "VAR-084 E1 and E2 are closed without finding a hidden stock-LTA producer. The remaining steering contradiction is semantic/upstream of CC50/CC62, not an identified computed-store or DMAC ingress escape.",
+        "combined_classification": "VAR-084 E1 and E2 are closed without finding a hidden computed-store or DMAC steering ingress. CORR-135 subsequently removes the premise that such an escape was needed to explain zero-B6 factory LTA: exact F33 has a B6-independent D0218->CC60->CC50 actuation path. These negatives therefore bound hidden mutation mechanisms; they do not imply an 0x08A-to-B6 transform.",
         "evidence_functions": bind(rows, image, evidence_entries),
         "production_output_authorized": False,
     }

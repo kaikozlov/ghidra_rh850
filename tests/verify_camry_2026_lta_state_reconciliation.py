@@ -171,7 +171,7 @@ check("B6 remains zero on every bus/DLC throughout both complete Class-L interva
       combined["b6_during_entire_b21_11_intervals_all_buses_any_dlc"] == 0 and
       a_int["b6_count_all_buses_any_dlc"] == b_int["b6_count_all_buses_any_dlc"] == 0)
 
-print("\n== 0x08A upstream target-steering-angle field ==")
+print("\n== 0x08A request target-steering-angle field ==")
 target = combined["0x08A_target_angle"]
 check("manual B18:B19 fit reproduces exact F33 B6 scale in both drives",
       target["wire"] == "B18:B19 signed big-endian" and
@@ -205,6 +205,29 @@ check("0x08A observed-route and upper-bit boundary is exact across both drives",
         "b26_high2_value_set": [0],
         "boundary": "Observed route/bit support only. Zero upper bits do not prove a 6-bit producer field boundary.",
       })
+
+
+print("\n== 0x08A SecOC structural match ==")
+for name, expected in {
+  "drive_a": (20615, 20615, 19868, 0.963764249, 20615, 20431, 18727),
+  "drive_b": (23999, 23996, 23093, 0.962368728, 23998, 23989, 21989),
+}.items():
+  sec = art["drives"][name]["0x08A_secoc_structural_match"]
+  check(f"{name} 0x08A has Toyota ordinary-SecOC trailer geometry and reset relation",
+        sec["frame_count"] == expected[0] and sec["b27_value_set"] == [0] and
+        sec["fv4_value_set"] == list(range(16)) and sec["auth28_unique_count"] == expected[4] and
+        (sec["preceding_0x00F_reset_low2"]["eligible_frames"], sec["preceding_0x00F_reset_low2"]["matching_frames"],
+         sec["preceding_0x00F_reset_low2"]["matching_fraction"]) == expected[1:4] and
+        sec["application_sequence_relation"]["same_segment_plus1_pairs"] == expected[5] and
+        sec["application_sequence_relation"]["same_reset_plus1_pairs"] == expected[6] and
+        sec["application_sequence_relation"]["same_reset_pairs_with_message_low2_plus1"] == expected[6] and
+        sec["application_sequence_relation"]["same_reset_message_plus1_fraction"] == 1.0 and
+        "structural match" in sec["classification"] and "exact sender profile/key/CMAC implementation is not recovered" in sec["classification"])
+check("known protected 0x0D7/0x090 show the same 0x00F reset-low2 boundary behavior",
+      a["0x08A_secoc_structural_match"]["known_protected_comparators_same_method"]["0x0D7"]["preceding_0x00F_reset_low2"]["matching_fraction"] == 0.975191875 and
+      a["0x08A_secoc_structural_match"]["known_protected_comparators_same_method"]["0x090"]["preceding_0x00F_reset_low2"]["matching_fraction"] == 0.974312745 and
+      b["0x08A_secoc_structural_match"]["known_protected_comparators_same_method"]["0x0D7"]["preceding_0x00F_reset_low2"]["matching_fraction"] == 0.980130022 and
+      b["0x08A_secoc_structural_match"]["known_protected_comparators_same_method"]["0x090"]["preceding_0x00F_reset_low2"]["matching_fraction"] == 0.979113186)
 
 print("\n== current GTS+ and exact-F33 boundaries ==")
 gts = art["current_gtsplus_join"]
@@ -242,13 +265,15 @@ check("0x08A/0x371/0x412 are absent from exact-F33 ingress",
       f33["state_carriers_absent"] == {"0x08A": True, "0x371": True, "0x412": True})
 
 interpretation = art["interpretation"]
-check("conclusion identifies upstream angle while keeping producer/route/authentication open",
-      "B18:B19 is the upstream target-steering-angle quantity" in interpretation["identification"] and
+check("conclusion identifies secured request without inventing an 0x08A-to-B6 transform",
+      "B18:B19 is the request target-steering-angle quantity" in interpretation["identification"] and
       "shape change rather than an exact causal lead" in interpretation["identification"] and
       "zero on Panda bus 1" in interpretation["route_boundary"] and
       "producer is unknown" in interpretation["route_boundary"] and
+      "B6-independent internal assist path" in interpretation["route_boundary"] and
       "6-bit field boundaries remain encoding assumptions" in interpretation["proof_boundary"] and
-      "producer-side transformation into protected B6" in interpretation["proof_boundary"])
+      "strongly supports a secured 0x08A PDU" in interpretation["proof_boundary"] and
+      "No 0x08A-to-B6 transform is established or required" in interpretation["proof_boundary"])
 check("historical layouts and physical LTA button remain untransferred",
       "corroboration only" in interpretation["historical_labels"] and
       "No physical LTA-button carrier is recovered" in interpretation["button_boundary"] and

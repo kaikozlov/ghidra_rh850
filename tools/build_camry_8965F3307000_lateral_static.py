@@ -178,11 +178,12 @@ def build() -> dict:
     out = {
         "boundary": {
             "driver_override_numeric_threshold_closed": False,
-            "interpretation": "The exact F33 static command envelope, wall-clock receive timeout, sequence semantics, steering-rate monitor, diagnostic torque/current sources, and runtime construction prerequisites are closed at their stated evidence grades. Driver override policy, motor-current response policy, stock sender/template behavior, live signer gates, and relay-correct actuation remain dynamic/open.",
+            "interpretation": "The exact F33 external-B6 command envelope, wall-clock receive timeout, sequence semantics, steering-rate monitor, diagnostic torque/current sources, and runtime construction prerequisites are closed at their stated evidence grades. Driver override policy, motor-current response policy, live signer gates, and relay-correct actuation remain dynamic/open. Stock B6 sender/template behavior is not a prerequisite for explaining factory LTA because exact F33 has a B6-independent internal assist path and retained LTA/LCA intervals contain zero B6.",
             "motor_current_response_threshold_closed": False,
             "production_lateral_output_authorized": False,
             "relay_suppression_live_closed": False,
             "stock_b6_cadence_template_freshness_closed": False,
+            "stock_b6_template_is_current_camry_prerequisite": False,
             "target_native_mode2_envelope_closed": True,
             "target_native_rate_monitor_closed": True,
             "target_native_timing_closed": True,

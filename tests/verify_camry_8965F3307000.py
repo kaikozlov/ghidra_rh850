@@ -471,7 +471,9 @@ def section_lateral_static() -> int:
     b = art["boundary"]
     check("static envelope/timing/rate closed", b["target_native_mode2_envelope_closed"] and b["target_native_rate_monitor_closed"] and b["target_native_timing_closed"])
     check("override/current response not invented", not b["driver_override_numeric_threshold_closed"] and not b["motor_current_response_threshold_closed"])
-    check("stock sender/relay/production remain open", not b["stock_b6_cadence_template_freshness_closed"] and not b["relay_suppression_live_closed"] and not b["production_lateral_output_authorized"])
+    check("stock B6 template is not a current Camry prerequisite while relay/production remain open",
+          not b["stock_b6_cadence_template_freshness_closed"] and not b["stock_b6_template_is_current_camry_prerequisite"] and
+          not b["relay_suppression_live_closed"] and not b["production_lateral_output_authorized"])
     check("runtime carrier itself forbids actuation", runtime["boundary"]["vehicle_actuation_authorized"] is False and runtime["boundary"]["steering_can_transmit_used"] is False)
 
     print("\n== canonical docs ==")
@@ -609,17 +611,19 @@ def section_tss3_opendbc_port() -> int:
     check("baseline and current implementation commits pinned",
           o["nested_opendbc_commit"] == "ab60fd95d8a7b566e10ed1cf59738292f3498932" and
           o["parent_kai_openpilot_commit"] == "d7d7dfd7e49961e9d35eb7a7681e8756ceee8d04" and
-          o["current_nested_opendbc_commit"] == "a2ad31f3e2679bc893e2a00521a0d6c9c19eaf3c" and
-          o["current_parent_kai_openpilot_commit"] == "f7c7ed3855771abe19b2339010e26de4774b8f64" and
+          o["current_nested_opendbc_commit"] == "525ee987f32167f7e579a4cc773d0d4a8ab7794b" and
+          o["current_parent_kai_openpilot_commit"] == "1f26280ac6f2a0733877a08540aa3336d0a50d47" and
           o["upstream_request_decode_commit"] == "b9e86924b96eac248b6b9e6bcf0d4dfdc95b62d0")
     check("exact platform/F181 binding recorded", o["exact_platform"] == "TOYOTA_CAMRY_TSS3" and "byte-exact EPS F181" in o["identity_binding"])
     check("ambiguous legacy fingerprint avoided", "179-ID" in o["can_census"] and "147-ID Corolla" in o["can_census"] and "strict subset" in o["can_census"])
     check("same-car replay coverage recorded", o["carstate_replay"] == ["0x025", "0x030", "0x127 P/R/N/D/B", "0x51E Ready 0/1"])
     check("shadow controller sends zero CAN", "returns zero CAN" in o["controller_boundary"])
-    check("passive upstream request decoder is non-ingress", "passive 0x08A" in o["upstream_request_observation"] and "does not accept 0x08A" in o["upstream_request_observation"])
+    check("passive lateral-request decoder is non-ingress and non-transmit", "passive 0x08A" in o["lateral_request_observation"] and "neither accepts 0x08A as normal Rx nor lists it among the five generated-COM Tx IDs" in o["lateral_request_observation"])
     check("Panda production path remains disabled", "ALLOW_DEBUG-only" in o["panda_boundary"] and "0x0B6 is absent" in o["panda_boundary"] and "SafetyModel.noOutput" in o["panda_boundary"])
-    check("current gates start at producer/auth/transform rather than stock template",
-          o["remaining_live_gates"][0] == "identify the observed Bus-4 0x08A producer" and
+    check("current gates separate 0x08A ownership, stock internal authority, and optional B6 actuation",
+          o["remaining_live_gates"][0] == "identify the observed Bus-4 0x08A producer and exact SecOC/security ownership" and
+          "B6-independent D0218/CC60/CC50 assist path" in o["remaining_live_gates"][1] and
+          "decide whether protected B6 is the intended openpilot actuation interface" in o["remaining_live_gates"][2] and
           all("stock B6" not in gate for gate in o["remaining_live_gates"]))
     check("production output remains unauthorized", o["production_output_authorized"] is False and "does not authorize steering CAN transmission" in art["boundary"])
 
@@ -640,7 +644,7 @@ def section_tss3_opendbc_port() -> int:
     check("historical sender keeps exact F33 static bounds", all(tok in d["historical_sender"] for tok in ("ID11", "+/-1745", "+78", "newer stock 0x00F", "zero MAC28")))
     check("Panda B6 safety envelope remains debug-test-only", all(tok in d["panda_debug_test_boundary"] for tok in ("ALLOW_DEBUG-only", "0x0B6-only", "no current Camry", "strict +1", "35-ms")))
     check("historical inactive path invents no OEM packet", "no invented inactive B6 frame" in d["historical_inactive_behavior"] and "newer sync epoch" in d["historical_inactive_behavior"])
-    check("current blocker is producer/auth/transform, not sender arming", d["production_output_authorized"] is False and "OQ-054" in d["current_blocker"] and "producer-side transformation" in d["current_blocker"])
+    check("current blocker rejects the old 0x08A-to-B6 premise", d["production_output_authorized"] is False and "OQ-054" in d["current_blocker"] and "do not assume an 0x08A-to-B6 transform" in d["current_blocker"] and "B6-independent stock-LTA assist path" in d["current_blocker"])
 
     print("\n== canonical documentation ==")
     report = REPORT.read_text(encoding="utf-8")
@@ -653,7 +657,7 @@ def section_tss3_opendbc_port() -> int:
     check("VAR-062 development staging registered", "| VAR-062 |" in findings and "dde0fcf0" in findings and "15f355036" in findings)
     check("CORR-120 historical step retained", "### CORR-120" in corrections and "0x4C000" in corrections and "VAR-056" in corrections and "five" in corrections.lower())
     check("CORR-122 canonical census registered", "### CORR-122" in corrections and "6,065" in corrections and "FEBE66A8" in corrections and "FEBE670E" in corrections and "9" in corrections)
-    check("priorities record passive current cutover and retired sender", "a2ad31f3" in priorities and "f7c7ed385" in priorities and "obsolete Camry B6 sender is retired" in priorities)
+    check("priorities record passive current cutover and retired sender", "525ee987" in priorities and "1f26280ac" in priorities and "obsolete Camry B6 sender is retired" in priorities)
 
     print(f"\nResults: {p} passed, {f} failed")
     return 1 if f else 0

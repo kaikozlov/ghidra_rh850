@@ -46,8 +46,8 @@
     "GTS+ supplies diagnostic names/DIDs, not a CAN-ID database; CAN-to-name joins are through exact F33 firmware dataflow."
   ],
   "conclusion": {
-    "b6": "Protected 0x0B6 remains the only positively recovered external target-steering-angle ingress. Exact F33 communication-monitor row5 independently maps PDU44/B6 loss to DTC index82, which GTS+ names U012987 Lost Communication with Brake System Control Module / Missing Message, so the EPS itself expects B6 from the brake-system source domain. B6 also has selected downstream corroboration to Toyota-named 0x1C02 Command Value Torque, but it is absent in both relay-correct drives.",
-    "next": "Do not search another arbitrary accepted EPS CAN ID first. Synchronize the FRC 0x1601 LTA-active oracle with relay-correct CAN. If LTA is machine-proved active while B6 remains absent, move the search outside ordinary EPS generated-COM ingress: upstream FRC/Brake transformation, an internal/non-COM path, or another controller/peripheral path.",
+    "b6": "Protected 0x0B6 remains the only positively recovered external target-steering-angle ingress. Exact F33 communication-monitor row5 independently maps PDU44/B6 loss to DTC index82, which GTS+ names U012987 Lost Communication with Brake System Control Module / Missing Message, so the EPS expects B6 from the brake-system source domain. This is an external cooperative-control interface, not proof that factory LTA uses B6: the retained machine-identified LTA/LCA intervals contain zero B6 and exact F33 has a separate B6-independent internal assist path into the physical command funnel.",
+    "next": "Do not search another arbitrary accepted EPS CAN ID or infer an 0x08A-to-B6 translation. Factory LTA with zero B6 is already machine-proved and compatible with exact F33's D0218->CC48->CC60->CC50 internal assist path. Trace the exact external/local snapshot leaves that select or modulate that path during the LTA/LCA transition; treat 0x08A producer/SecOC ownership as a separate network-ownership question.",
     "normal_com": "Exact controller-1 rules 0..42 equal the 43 normal generated-COM descriptors one-for-one; rules 43..46 are diagnostics/XCP only. The corrected pinned scalar copy-edge census has exactly 19 nonempty signals out of 116 and 97 empty: B6 signal261 is the sole mode selector and B6 signal262 the sole command magnitude; all non-B6 members are feedback, monitors, plausibility inputs, or gates. Signal243 uses the explicit 0x4BB62 stack-RMW path to FEBE80A0 -> FEBEF094 -> FEBEACCD. No observed ordinary EPS-CAN field besides B6 is identified as an external steering target/command, and there is no hidden controller-1 acceptance ID outside the normal COM table.",
     "production_output_authorized": false
   },
@@ -1260,7 +1260,7 @@
     ],
     "fault_status": {
       "path": "data/generated/camry_8965F3307000_fault_status.json",
-      "sha256": "f5defd66f88c062014e424599e06e11f3131003a51e8eb69a30f5026c59874e4"
+      "sha256": "caf50b613e00454e5fcbe57ebcd141522417dc5b8c9b417d3832d970ce6fb582"
     },
     "gtsplus_semantics": {
       "path": "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",

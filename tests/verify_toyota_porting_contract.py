@@ -155,7 +155,7 @@ for token in (
 
 check("ARCH-016 points at the contract report", "| ARCH-016 |" in findings and "toyota-openpilot-porting-contract.md" in findings)
 open_questions = (REPO / "docs/status/OPEN_QUESTIONS.md").read_text(encoding="utf-8")
-check("TSS3 longitudinal ownership is independently tracked", "OQ-052" in open_questions and "True-TSS3 longitudinal producer/control contract" in open_questions)
+check("TSS3 longitudinal ownership is independently tracked", "OQ-052" in open_questions and "True-TSS3 longitudinal wire/auth/arbitration execution contract" in open_questions)
 check("priority queue links the porting contract", "toyota-openpilot-porting-contract.md" in priorities)
 check("priority queue preserves separate longitudinal work", "OQ-052" in priorities)
 

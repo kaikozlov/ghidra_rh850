@@ -1066,36 +1066,16 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.
 
 
-- **OQ-054 — Authenticate and transform the upstream Camry lateral request into exact-F33 ingress.** VAR-081/CORR-134 resolve the former hidden-authority contradiction:
-  `0x08A/32` B21 is Target Lateral ID and signed big-endian B18:B19 is its target angle
-  at exact F33's protected-B6 factor `1024/17870`. In manual ID0 it tracks measured
-  `0x025` with less than 0.027% fitted-scale error in both drives; in ID11 its
-  correlation shifts forward toward future measured angle (a shape change, not an exact
-  causal lead). The retained ID11 intervals still contain zero B6 on every captured
-  bus, and exact F33 still excludes `0x08A` from its 43 normal-Rx descriptors.
+- **OQ-054 — Identify the secured `0x08A` producer and the exact F33 stock-LTA authority input without assuming B6 translation.** VAR-081/CORR-134 recover `0x08A/32` B21 as Target Lateral ID and signed big-endian B18:B19 as its target-angle quantity at a numeric scale matching exact F33's B6 controller-equivalent factor. CORR-135 corrects the next-hop inference: matching scale plus exact F33's `0x08A` Rx exclusion does **not** prove that stock LTA transforms `0x08A` into B6. The retained machine-identified LTA/LCA intervals contain 73.303384 s / 237,097 incoming frames / zero B6, while exact F33's ordinary B6-inactive `D0218 -> CC48 -> CC60 -> CC50 -> CC62/CC66 -> CC64` path reaches the physical motor-current funnel. Zero B6 is therefore architecturally consistent with factory steering.
 
-  Observed placement and encoding caveats: every retained `0x08A` frame is on the
-  Bus-4 Brake/EPS capture itself (Panda bus 0: 44,614 / relay mirror bus 2: 44,617 /
-  bus 1: zero); Front Camera is on Toyota Bus 1 and exact F33 accepts protected B6 from
-  the Brake control domain. The producer of the observed Bus-4 `0x08A` is unknown — it
-  must not be labeled a Bus-1 camera frame. B21/B26 upper two bits are zero in all
-  89,231 retained frames while the current GTS+ Target Lateral ID diagnostic field is
-  8-bit, so a 6-bit field boundary is an encoding assumption. Therefore `0x08A` is an
-  upstream request representation, not a Panda-bus substitute for B6. The remaining
-  steering blocker is now concrete: recover `0x08A`'s producer, its
-  integrity/authentication trailer, and the producer-side path/transform into protected
-  B6, plus signer, freshness, suppression/fallback, and arbitration semantics. Do not
-  send `0x08A` to EPS or revive the bus-0 B6 development sender until that ownership
-  path is proved.
+  The `0x08A` network/security question remains independently real. Every retained frame is on the Toyota Bus-4 capture (Panda bus 0: 44,614 / relay mirror bus 2: 44,617 / bus 1: zero), exact F33 neither normally receives it nor lists it among generated-COM Tx IDs, and its producer remains unknown. B21/B26 upper two bits are zero in all 89,231 retained copies while GTS+ Target Lateral ID is an 8-bit diagnostic field, so the DBC low6 boundaries remain encoding assumptions. B28..B31 now make a strong Toyota-P5 ordinary-SecOC structural match: candidate reset-low2 follows authenticated `0x00F` at 96.376% / 96.237% under the same log-order method that gives ~97–98% for known protected `0x0D7/0x090`; on every same-reset B26+1 pair (18,727 A / 21,989 B), candidate message-low2 advances +1. This supports `FV4 || MAC28` framing but does not recover the sender profile, key, or CMAC implementation.
 
-  VAR-082/083/084/085 remain useful negative and downstream closures, but their former
-  instruction to continue searching inside F33 upstream of `CC50/CC62` is superseded by
-  this network-boundary evidence. Do not repeat the broad CAN, computed-STORE, pointer,
-  ISR, or DMA censuses. The next capture/recovery target is the producer-side transform
-  and authentication state synchronized with the known `0x08A` sequence and target
-  angle. Canonical:
-  [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
-  §§20,33–36; VAR-081/082/083/084/085; CORR-129/130/134.
+  Keep the two remaining workstreams separate:
+
+  1. **`0x08A` ownership/security:** identify the actual producer, SecOC profile/key-slot/freshness owner, and request arbitration/consumer set. Do not label it camera-originated from topology alone.
+  2. **Exact-F33 stock-LTA authority:** starting from the B6-inactive `D0218` terms and their snapshot boundary, identify which external/local state changes select or modulate the internal assist path during B21=11 LTA/LCA. Do not search only for another angle-shaped CAN field; the control input may be a mode/gain/authority state.
+
+  Protected B6 remains a real external cooperative-control ingress. Whether it is the best controllable openpilot interface is a **separate integration decision**. If chosen, recover its valid signer/freshness/suppression/arbitration contract from producer/receiver evidence; do not use stock LTA as evidence that an `0x08A -> B6` path exists. The removed bus-0 development sender stays removed, and production output remains disabled. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§20,30,38; VAR-081/083/087; CORR-135.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

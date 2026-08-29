@@ -111,7 +111,8 @@ check("6D84/6D86 are downstream diagnostic mirrors of 6DD6/6DC8, not the upstrea
       and funnel["downstream_current_diagnostic_mirror"]["direct_writers"]["FEBE6D84"] == ["0x00037F16","0x00059448"]
       and funnel["downstream_current_diagnostic_mirror"]["direct_writers"]["FEBE6D86"] == ["0x00037F16","0x00059448"]
       and "CC62 is a real pre-slew stage" in funnel["classification"]
-      and "remaining stock-LTA contradiction is upstream" in funnel["classification"])
+      and "Factory LTA with B6 absent is therefore not contradictory" in funnel["classification"]
+      and "no 0x08A-to-B6 transformation is implied or required" in funnel["classification"])
 check("production output remains unauthorized", art["production_output_authorized"] is False)
 print(f"\nResults: {passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

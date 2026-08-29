@@ -222,7 +222,7 @@ def summarize_route(path: Path, segment_ids: tuple[int, ...], structural_segment
     "interpretation": (
       "The retained route proves a relay-correct moving capture with healthy protected 0x00F/0x0D7 traffic and zero 0x0B6 on every incoming bus/length. "
       "Same-car 0x0FE switch decoding and sparse 0x08A cross-ECU state changes provide timing markers, but neither machine-proves an exact factory-LTA-active interval. "
-      "Accordingly zero B6 remains a bounded stock-LTA negative rather than evidence that F33's recovered B6 target-angle path is unused in all operating states."
+      "Accordingly this raw artifact alone treats zero B6 only as a segment-level observation; later synchronized LTA/LCA evidence plus exact F33 firmware proves that stock steering can occur through the B6-independent internal assist path, so a stock-B6 template/cadence is not required to explain these drives."
     ),
   }
 
@@ -259,8 +259,8 @@ def build() -> dict:
     "conclusion": {
       "relay_topology": "observed: the former bus-1 steering/state family appears on the CAN0/CAN2 pair after the physical CAN0/CAN1 repin, while the separate 22-ID FD family remains on bus1",
       "b6": f"repeated bounded negative: zero 0x0B6 at any DLC on any incoming bus across {combined_segments} retained route segments / {combined_frames} incoming CAN frames from two separate drives, while protected 0x00F/0x0D7 remain healthy",
-      "semantic_upgrade": "VAR-081/CORR-134 subsequently identify complete retained LTA/LCA-active intervals and recover Bus-4 0x08A as the upstream request representation while preserving the zero-B6 and exact-F33-ingress boundaries",
-      "next_observation": "recover the observed Bus-4 0x08A producer, integrity/authentication, producer-side transformation into protected B6, signer/freshness ownership, and suppression/fallback/arbitration; FRC 0x1601 remains optional independent corroboration",
+      "semantic_upgrade": "VAR-081/CORR-134 subsequently identify complete retained LTA/LCA-active intervals and Bus-4 0x08A as the lateral-request representation; CORR-135 closes the false inference that zero B6 requires an 0x08A-to-B6 transform because exact F33 has a B6-independent internal assist path",
+      "next_observation": "identify the observed Bus-4 0x08A producer and exact SecOC/security ownership, and independently trace which exact external/local state selects or drives F33's B6-independent D0218/CC60/CC50 assist path during LTA/LCA; do not assume an 0x08A-to-B6 transform",
       "production_output_authorized": False,
     },
   }

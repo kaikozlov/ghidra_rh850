@@ -20,8 +20,8 @@ DEVELOPMENT_NESTED_OPENDDBC_COMMIT = "dde0fcf0fbaf875750c54a072b0dcb3857f8829b"
 DEVELOPMENT_PARENT_OPENPILOT_COMMIT = "15f3550365e2eee54ca5645ae9c24d9d41ae4f31"
 UPSTREAM_REQUEST_NESTED_OPENDDBC_COMMIT = "b9e86924b96eac248b6b9e6bcf0d4dfdc95b62d0"
 RUNTIME_REMOVAL_PARENT_OPENPILOT_COMMIT = "abf3ca70a713d21b88a0cd0241f0650a3d96db7a"
-CURRENT_NESTED_OPENDDBC_COMMIT = "a2ad31f3e2679bc893e2a00521a0d6c9c19eaf3c"
-CURRENT_PARENT_OPENPILOT_COMMIT = "f7c7ed3855771abe19b2339010e26de4774b8f64"
+CURRENT_NESTED_OPENDDBC_COMMIT = "525ee987f32167f7e579a4cc773d0d4a8ab7794b"
+CURRENT_PARENT_OPENPILOT_COMMIT = "1f26280ac6f2a0733877a08540aa3336d0a50d47"
 TX = struct.Struct("<IBBH")
 PDU = struct.Struct("<HBBHBB")
 TX_TABLE = 0x21F58
@@ -289,11 +289,11 @@ def build() -> dict:
             "current_nested_opendbc_commit": CURRENT_NESTED_OPENDDBC_COMMIT,
             "current_parent_kai_openpilot_commit": CURRENT_PARENT_OPENPILOT_COMMIT,
             "upstream_request_decode_commit": UPSTREAM_REQUEST_NESTED_OPENDDBC_COMMIT,
-            "upstream_request_observation": "passive 0x08A Target Lateral ID / target-angle / modulo-64 sequence; exact F33 does not accept 0x08A",
+            "lateral_request_observation": "passive 0x08A Target Lateral ID / target-angle / modulo-64 sequence; exact F33 neither accepts 0x08A as normal Rx nor lists it among the five generated-COM Tx IDs",
             "remaining_live_gates": [
-                "identify the observed Bus-4 0x08A producer",
-                "recover 0x08A integrity/authentication and producer-side transformation into protected B6",
-                "identify B6 signer/freshness ownership and suppression/fallback/arbitration",
+                "identify the observed Bus-4 0x08A producer and exact SecOC/security ownership",
+                "identify which exact external/local state selects or modulates F33's B6-independent D0218/CC60/CC50 assist path during stock LTA/LCA",
+                "decide whether protected B6 is the intended openpilot actuation interface; if so recover its signing/freshness/suppression contract separately from the stock-LTA path",
                 "driver override and motor-current response policy",
                 "live 0x351/0x394/0x4A3 availability and fault-policy transitions",
             ],
@@ -336,8 +336,9 @@ def build() -> dict:
             ),
             "production_output_authorized": False,
             "current_blocker": (
-                "OQ-054: recover the observed Bus-4 0x08A producer, integrity/authentication, producer-side transformation into protected B6, "
-                "signer/freshness ownership, and suppression/fallback/arbitration before designing any sender"
+                "OQ-054: identify the observed Bus-4 0x08A producer/security ownership and independently recover the exact "
+                "external/local authority input to F33's B6-independent stock-LTA assist path; do not assume an 0x08A-to-B6 transform. "
+                "Only after that should B6 be evaluated separately as a candidate openpilot actuation interface."
             ),
         },
         "sources": {
@@ -346,7 +347,7 @@ def build() -> dict:
         },
         "boundary": (
             "The F33 Tx/status carrier geometry and passive software integration are closed at the stated evidence grades; the former Gate-2 runtime sender is retained here only as historical/test provenance and is removed from current integration. "
-            "This artifact does not authorize steering CAN transmission: current Camry output is noOutput/zero CAN, and the observed Bus-4 0x08A producer/authentication/transformation plus signer/freshness and arbitration remain unresolved."
+            "This artifact does not authorize steering CAN transmission: current Camry output is noOutput/zero CAN. The observed Bus-4 0x08A producer/security ownership and the exact authority input to F33's B6-independent stock-LTA path remain unresolved; B6 is a separate external cooperative-control interface whose production use requires its own signing/freshness/suppression contract."
         ),
     }
 

@@ -605,6 +605,126 @@
         ],
         "boundary": "Observed route/bit support only. Zero upper bits do not prove a 6-bit producer field boundary."
       },
+      "0x08A_secoc_structural_match": {
+        "application_sequence_relation": {
+          "byte": 26,
+          "same_reset_message_plus1_fraction": 1.0,
+          "same_reset_pairs_with_message_low2_plus1": 18727,
+          "same_reset_plus1_pairs": 18727,
+          "same_segment_plus1_pairs": 20431
+        },
+        "auth28_unique_count": 20615,
+        "b27_value_set": [
+          0
+        ],
+        "classification": "recovered structural match to Toyota P5 ordinary FV4+MAC28 framing; exact sender profile/key/CMAC implementation is not recovered from these captures",
+        "frame_count": 20615,
+        "fv4_value_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "known_protected_comparators_same_method": {
+          "0x090": {
+            "application_sequence_relation": null,
+            "auth28_unique_count": 51577,
+            "b27_value_set": [
+              0
+            ],
+            "frame_count": 51582,
+            "fv4_value_set": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15
+            ],
+            "preceding_0x00F_reset_low2": {
+              "eligible_frames": 51582,
+              "matching_fraction": 0.974312745,
+              "matching_frames": 50257
+            },
+            "wire_candidate": {
+              "B28_3_0_B29_B30_B31": "candidate 28-bit authenticator",
+              "B28_5_4": "candidate reset_low2",
+              "B28_7_6": "candidate message_low2",
+              "application_bytes": "B0..B27"
+            }
+          },
+          "0x0D7": {
+            "application_sequence_relation": null,
+            "auth28_unique_count": 25795,
+            "b27_value_set": [
+              0
+            ],
+            "frame_count": 25798,
+            "fv4_value_set": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15
+            ],
+            "preceding_0x00F_reset_low2": {
+              "eligible_frames": 25798,
+              "matching_fraction": 0.975191875,
+              "matching_frames": 25158
+            },
+            "wire_candidate": {
+              "B28_3_0_B29_B30_B31": "candidate 28-bit authenticator",
+              "B28_5_4": "candidate reset_low2",
+              "B28_7_6": "candidate message_low2",
+              "application_bytes": "B0..B27"
+            }
+          }
+        },
+        "preceding_0x00F_reset_low2": {
+          "eligible_frames": 20615,
+          "matching_fraction": 0.963764249,
+          "matching_frames": 19868
+        },
+        "wire_candidate": {
+          "B28_3_0_B29_B30_B31": "candidate 28-bit authenticator",
+          "B28_5_4": "candidate reset_low2",
+          "B28_7_6": "candidate message_low2",
+          "application_bytes": "B0..B27"
+        }
+      },
       "known_0x0FE_cruise_button_events": {
         "boundary": "These exact same-car predicates recover MAIN/RES+/SET-/CANCEL only; no independent physical LTA-button carrier is decoded or claimed.",
         "counts": {
@@ -1484,6 +1604,126 @@
         ],
         "boundary": "Observed route/bit support only. Zero upper bits do not prove a 6-bit producer field boundary."
       },
+      "0x08A_secoc_structural_match": {
+        "application_sequence_relation": {
+          "byte": 26,
+          "same_reset_message_plus1_fraction": 1.0,
+          "same_reset_pairs_with_message_low2_plus1": 21989,
+          "same_reset_plus1_pairs": 21989,
+          "same_segment_plus1_pairs": 23989
+        },
+        "auth28_unique_count": 23998,
+        "b27_value_set": [
+          0
+        ],
+        "classification": "recovered structural match to Toyota P5 ordinary FV4+MAC28 framing; exact sender profile/key/CMAC implementation is not recovered from these captures",
+        "frame_count": 23999,
+        "fv4_value_set": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "known_protected_comparators_same_method": {
+          "0x090": {
+            "application_sequence_relation": null,
+            "auth28_unique_count": 59989,
+            "b27_value_set": [
+              0
+            ],
+            "frame_count": 59997,
+            "fv4_value_set": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15
+            ],
+            "preceding_0x00F_reset_low2": {
+              "eligible_frames": 59990,
+              "matching_fraction": 0.979113186,
+              "matching_frames": 58737
+            },
+            "wire_candidate": {
+              "B28_3_0_B29_B30_B31": "candidate 28-bit authenticator",
+              "B28_5_4": "candidate reset_low2",
+              "B28_7_6": "candidate message_low2",
+              "application_bytes": "B0..B27"
+            }
+          },
+          "0x0D7": {
+            "application_sequence_relation": null,
+            "auth28_unique_count": 29999,
+            "b27_value_set": [
+              0
+            ],
+            "frame_count": 29999,
+            "fv4_value_set": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15
+            ],
+            "preceding_0x00F_reset_low2": {
+              "eligible_frames": 29995,
+              "matching_fraction": 0.980130022,
+              "matching_frames": 29399
+            },
+            "wire_candidate": {
+              "B28_3_0_B29_B30_B31": "candidate 28-bit authenticator",
+              "B28_5_4": "candidate reset_low2",
+              "B28_7_6": "candidate message_low2",
+              "application_bytes": "B0..B27"
+            }
+          }
+        },
+        "preceding_0x00F_reset_low2": {
+          "eligible_frames": 23996,
+          "matching_fraction": 0.962368728,
+          "matching_frames": 23093
+        },
+        "wire_candidate": {
+          "B28_3_0_B29_B30_B31": "candidate 28-bit authenticator",
+          "B28_5_4": "candidate reset_low2",
+          "B28_7_6": "candidate message_low2",
+          "application_bytes": "B0..B27"
+        }
+      },
       "known_0x0FE_cruise_button_events": {
         "boundary": "These exact same-car predicates recover MAIN/RES+/SET-/CANCEL only; no independent physical LTA-button carrier is decoded or claimed.",
         "counts": {
@@ -1847,11 +2087,11 @@
       "0x1DA"
     ],
     "descriptor_count": 43,
-    "interpretation": "0x08A is an upstream request representation and 0x371/0x412 are state/display evidence; none is exact-F33 EPS ingress.",
+    "interpretation": "0x08A carries a lateral-request representation and 0x371/0x412 carry state/display evidence; none is exact-F33 normal-CAN ingress. This does not imply that stock LTA must be transformed into B6 before F33 can steer.",
     "source": {
       "path": "data/generated/camry_8965F3307000_external_lateral_ingress.json",
-      "sha256": "61cb4b3ed9a6ea58c6562cdc4b449cf9141c496441051737e26dfe219e792477",
-      "size": 34127
+      "sha256": "186a1365b1761bd3796da305c7a42d3cd9ab5454bb5a680d372c79b655cfdfea",
+      "size": 34298
     },
     "state_carriers_absent": {
       "0x08A": true,
@@ -1862,10 +2102,10 @@
   "interpretation": {
     "button_boundary": "No physical LTA-button carrier is recovered. The decoded 0x0FE pulses are retained only as the already-validated cruise buttons.",
     "historical_labels": "Historical Toyota names LTA_RELATED for 0x371 and LKAS_HUD for 0x412 are corroboration only; no historical field layout is transferred.",
-    "identification": "Bus-0 0x08A B21 is Target Lateral ID and B18:B19 is the upstream target-steering-angle quantity. In manual ID0, B18:B19 tracks measured 0x025 angle in both drives at the exact F33 B6 controller-equivalent scale; under ID11 LTA/LCA its correlation shifts forward toward future measured angle, which is a shape change rather than an exact causal lead.",
+    "identification": "Bus-0 0x08A B21 is Target Lateral ID and B18:B19 is the request target-steering-angle quantity. In manual ID0, B18:B19 tracks measured 0x025 angle in both drives at the exact F33 B6 controller-equivalent scale; under ID11 LTA/LCA its correlation shifts forward toward future measured angle, which is a shape change rather than an exact causal lead.",
     "production_output_authorized": false,
-    "proof_boundary": "The field identity is a recovered cross-domain join: current GTS+ EMPS_P5 supplies Target Lateral ID and Target Steering Angle After Output Compensation vocabulary, the captures supply state-dependent correlation shape and scale, and exact F33 supplies the matching downstream B6 scale. B21/B26 upper bits are never observed nonzero, but the GTS+ Target Lateral ID diagnostic field is 8-bit, so the DBC's 6-bit field boundaries remain encoding assumptions. The 0x08A producer, authentication/integrity trailer, producer-side transformation into protected B6, signer, freshness, suppression/fallback, and arbitration remain unresolved.",
-    "route_boundary": "Every retained 0x08A frame is on the captured Toyota Bus-4 Brake/EPS segment (Panda bus 0 and its relay mirror bus 2; zero on Panda bus 1). Exact F33 receives protected B6 but not 0x08A. The 0x08A producer is unknown, so the frame must not be labeled a Bus-1 camera message and is not interchangeable with downstream B6."
+    "proof_boundary": "The field identity is a recovered cross-domain join: current GTS+ EMPS_P5 supplies Target Lateral ID and Target Steering Angle After Output Compensation vocabulary, the captures supply state-dependent correlation shape and scale, and exact F33 supplies a numerically matching B6 controller-equivalent scale without proving a conversion path. B21/B26 upper bits are never observed nonzero, while the GTS+ Target Lateral ID diagnostic field is 8-bit, so the DBC's 6-bit field boundaries remain encoding assumptions. B28..B31 structurally match Toyota P5 ordinary FV4+MAC28 framing: candidate reset_low2 tracks preceding authenticated 0x00F at ~96% in both drives, comparable to known protected 0x0D7/0x090 under the same log-order method; candidate message_low2 advances +1 on every same-reset, same-segment B26+1 pair. This strongly supports a secured 0x08A PDU but does not recover its exact sender profile/key/CMAC implementation. No 0x08A-to-B6 transform is established or required by the exact F33 stock-LTA evidence.",
+    "route_boundary": "Every retained 0x08A frame is on the captured Toyota Bus-4 Brake/EPS segment (Panda bus 0 and its relay mirror bus 2; zero on Panda bus 1). Exact F33 does not receive 0x08A. The 0x08A producer is unknown, so the frame must not be labeled a Bus-1 camera message. Protected B6 is a separate exact-F33 external cooperative-control ingress; zero B6 during factory LTA does not require an 0x08A-to-B6 transformation because F33 has a B6-independent internal assist path."
   },
   "schema": "camry-2026-lta-state-reconciliation-v1"
 }

@@ -218,8 +218,67 @@ def target_angle_fit(a8, a25, state: int) -> dict:
   }
 
 
+def secoc_shape_stats(rows, sync_rows, app_sequence_byte: int | None = None) -> dict:
+  """Measure Toyota-P5 ordinary SecOC trailer structure without claiming sender ownership."""
+  sync_times = [t for t, _seg, _d in sync_rows]
+
+  def reset20(d: bytes) -> int:
+    return (d[2] << 12) | (d[3] << 4) | (d[4] >> 4)
+
+  eligible = matches = 0
+  auth28_values = set()
+  fv4_values = set()
+  b27_values = set()
+  same_segment_app_plus1 = 0
+  same_reset_app_plus1 = 0
+  same_reset_message_plus1 = 0
+  previous = None
+  for t, seg, d in rows:
+    i = bisect.bisect_right(sync_times, t) - 1
+    if i >= 0:
+      eligible += 1
+      matches += (((d[28] >> 4) & 3) == (reset20(sync_rows[i][2]) & 3))
+    fv4_values.add(d[28] >> 4)
+    b27_values.add(d[27])
+    auth28_values.add(((d[28] & 0x0F) << 24) | (d[29] << 16) | (d[30] << 8) | d[31])
+    if app_sequence_byte is not None and previous is not None and previous[1] == seg:
+      pd = previous[2]
+      if ((d[app_sequence_byte] - pd[app_sequence_byte]) & 0x3F) == 1:
+        same_segment_app_plus1 += 1
+        if ((d[28] >> 4) & 3) == ((pd[28] >> 4) & 3):
+          same_reset_app_plus1 += 1
+          if (((d[28] >> 6) - (pd[28] >> 6)) & 3) == 1:
+            same_reset_message_plus1 += 1
+    previous = (t, seg, d)
+  return {
+    "frame_count": len(rows),
+    "wire_candidate": {
+      "application_bytes": "B0..B27",
+      "B28_7_6": "candidate message_low2",
+      "B28_5_4": "candidate reset_low2",
+      "B28_3_0_B29_B30_B31": "candidate 28-bit authenticator",
+    },
+    "b27_value_set": sorted(b27_values),
+    "fv4_value_set": sorted(fv4_values),
+    "auth28_unique_count": len(auth28_values),
+    "preceding_0x00F_reset_low2": {
+      "eligible_frames": eligible,
+      "matching_frames": matches,
+      "matching_fraction": round(matches / eligible, 9) if eligible else None,
+    },
+    "application_sequence_relation": None if app_sequence_byte is None else {
+      "byte": app_sequence_byte,
+      "same_segment_plus1_pairs": same_segment_app_plus1,
+      "same_reset_plus1_pairs": same_reset_app_plus1,
+      "same_reset_pairs_with_message_low2_plus1": same_reset_message_plus1,
+      "same_reset_message_plus1_fraction": round(same_reset_message_plus1 / same_reset_app_plus1, 9) if same_reset_app_plus1 else None,
+    },
+  }
+
+
 def analyze_drive(path: Path) -> dict:
   streams = defaultdict(list)
+  security_streams = defaultdict(list)
   bases: dict[int, int] = {}
   all_times = array("Q")
   b6_times = array("Q")
@@ -245,6 +304,8 @@ def analyze_drive(path: Path) -> dict:
         a8_bus_counts[bus] += 1
         a8_b21_high2[data[21] >> 6] += 1
         a8_b26_high2[data[26] >> 6] += 1
+      if bus == 0 and addr in (0x00F, 0x08A, 0x0D7, 0x090):
+        security_streams[addr].append((t, seg, bytes.fromhex(data_hex)))
       if bus == 0 and addr in (0x025, 0x081, 0x08A, 0x0FE, 0x371, 0x412):
         streams[addr].append((t, seg, data if addr == 0x08A else bytes.fromhex(data_hex)))
 
@@ -333,6 +394,11 @@ def analyze_drive(path: Path) -> dict:
   b21_18 = [d for _t, _s, d in a8 if d[21] == 18]
   mirror_matches = sum(count for (a, b), count in mirror.items() if a == b)
   target_angle_states = {str(state): target_angle_fit(a8, a25, state) for state in (0, 11, 18)}
+  a8_secoc = secoc_shape_stats(security_streams[0x08A], security_streams[0x00F], 26)
+  secoc_comparators = {
+    f"0x{addr:03X}": secoc_shape_stats(security_streams[addr], security_streams[0x00F])
+    for addr in (0x0D7, 0x090)
+  }
   return {
     "source": {
       "path": rel(path),
@@ -349,6 +415,11 @@ def analyze_drive(path: Path) -> dict:
       "b21_high2_value_set": sorted(a8_b21_high2),
       "b26_high2_value_set": sorted(a8_b26_high2),
       "boundary": "Observed route/bit support only. Zero upper bits do not prove a 6-bit producer field boundary.",
+    },
+    "0x08A_secoc_structural_match": {
+      **a8_secoc,
+      "known_protected_comparators_same_method": secoc_comparators,
+      "classification": "recovered structural match to Toyota P5 ordinary FV4+MAC28 framing; exact sender profile/key/CMAC implementation is not recovered from these captures",
     },
     "0x08A_b21": {
       "value_set": sorted(b21_counts),
@@ -488,12 +559,12 @@ def build() -> dict:
       "descriptor_count": ingress["normal_rx"]["descriptor_count"],
       "accepted_can_ids": accepted,
       "state_carriers_absent": {can_id: can_id not in accepted for can_id in ("0x08A", "0x371", "0x412")},
-      "interpretation": "0x08A is an upstream request representation and 0x371/0x412 are state/display evidence; none is exact-F33 EPS ingress.",
+      "interpretation": "0x08A carries a lateral-request representation and 0x371/0x412 carry state/display evidence; none is exact-F33 normal-CAN ingress. This does not imply that stock LTA must be transformed into B6 before F33 can steer.",
     },
     "interpretation": {
-      "identification": "Bus-0 0x08A B21 is Target Lateral ID and B18:B19 is the upstream target-steering-angle quantity. In manual ID0, B18:B19 tracks measured 0x025 angle in both drives at the exact F33 B6 controller-equivalent scale; under ID11 LTA/LCA its correlation shifts forward toward future measured angle, which is a shape change rather than an exact causal lead.",
-      "route_boundary": "Every retained 0x08A frame is on the captured Toyota Bus-4 Brake/EPS segment (Panda bus 0 and its relay mirror bus 2; zero on Panda bus 1). Exact F33 receives protected B6 but not 0x08A. The 0x08A producer is unknown, so the frame must not be labeled a Bus-1 camera message and is not interchangeable with downstream B6.",
-      "proof_boundary": "The field identity is a recovered cross-domain join: current GTS+ EMPS_P5 supplies Target Lateral ID and Target Steering Angle After Output Compensation vocabulary, the captures supply state-dependent correlation shape and scale, and exact F33 supplies the matching downstream B6 scale. B21/B26 upper bits are never observed nonzero, but the GTS+ Target Lateral ID diagnostic field is 8-bit, so the DBC's 6-bit field boundaries remain encoding assumptions. The 0x08A producer, authentication/integrity trailer, producer-side transformation into protected B6, signer, freshness, suppression/fallback, and arbitration remain unresolved.",
+      "identification": "Bus-0 0x08A B21 is Target Lateral ID and B18:B19 is the request target-steering-angle quantity. In manual ID0, B18:B19 tracks measured 0x025 angle in both drives at the exact F33 B6 controller-equivalent scale; under ID11 LTA/LCA its correlation shifts forward toward future measured angle, which is a shape change rather than an exact causal lead.",
+      "route_boundary": "Every retained 0x08A frame is on the captured Toyota Bus-4 Brake/EPS segment (Panda bus 0 and its relay mirror bus 2; zero on Panda bus 1). Exact F33 does not receive 0x08A. The 0x08A producer is unknown, so the frame must not be labeled a Bus-1 camera message. Protected B6 is a separate exact-F33 external cooperative-control ingress; zero B6 during factory LTA does not require an 0x08A-to-B6 transformation because F33 has a B6-independent internal assist path.",
+      "proof_boundary": "The field identity is a recovered cross-domain join: current GTS+ EMPS_P5 supplies Target Lateral ID and Target Steering Angle After Output Compensation vocabulary, the captures supply state-dependent correlation shape and scale, and exact F33 supplies a numerically matching B6 controller-equivalent scale without proving a conversion path. B21/B26 upper bits are never observed nonzero, while the GTS+ Target Lateral ID diagnostic field is 8-bit, so the DBC's 6-bit field boundaries remain encoding assumptions. B28..B31 structurally match Toyota P5 ordinary FV4+MAC28 framing: candidate reset_low2 tracks preceding authenticated 0x00F at ~96% in both drives, comparable to known protected 0x0D7/0x090 under the same log-order method; candidate message_low2 advances +1 on every same-reset, same-segment B26+1 pair. This strongly supports a secured 0x08A PDU but does not recover its exact sender profile/key/CMAC implementation. No 0x08A-to-B6 transform is established or required by the exact F33 stock-LTA evidence.",
       "historical_labels": "Historical Toyota names LTA_RELATED for 0x371 and LKAS_HUD for 0x412 are corroboration only; no historical field layout is transferred.",
       "button_boundary": "No physical LTA-button carrier is recovered. The decoded 0x0FE pulses are retained only as the already-validated cruise buttons.",
       "production_output_authorized": False,

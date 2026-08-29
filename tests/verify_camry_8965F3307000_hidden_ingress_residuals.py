@@ -95,9 +95,10 @@ check("E2 fixed and runtime-refreshable destinations never enter LocalRAM",
 check("E2 closure remains bounded to recovered application dataflow",
       em["status"] == "closed_within_recovered_application_dataflow"
       and "unknown-pointer" in em["boundary"])
-check("combined result leaves stock-LTA authority unresolved upstream",
+check("combined result bounds hidden mutation without inventing a B6 translation",
       "E1 and E2 are closed" in art["combined_classification"]
-      and "upstream of CC50/CC62" in art["combined_classification"])
+      and "B6-independent D0218->CC60->CC50 actuation path" in art["combined_classification"]
+      and "do not imply an 0x08A-to-B6 transform" in art["combined_classification"])
 check("production output remains unauthorized", art["production_output_authorized"] is False)
 check("all promoted evidence functions are exact body/decompile bound",
       len(art["evidence_functions"]) >= 60

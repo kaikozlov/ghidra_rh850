@@ -265,11 +265,13 @@ def _section_camry_2026_relay_correct_capture():
         {'end_s': 20.159219, 'frames': 3, 'start_s': 20.097979},
     ])
     check('raw relay artifact retains structural 0x08A transitions without pretending this artifact alone names them', set(drive['structural_0x08A_transitions']) == {'4', '5'} and 'machine-prove' in drive['interpretation'])
-    check('current semantic upgrade preserves zero-B6 while moving next work to producer/auth/transform',
+    check('current semantic upgrade preserves zero-B6 without inventing an 0x08A-to-B6 transform',
           'bounded negative' in art['conclusion']['b6'] and
           'VAR-081/CORR-134' in art['conclusion']['semantic_upgrade'] and
+          'CORR-135' in art['conclusion']['semantic_upgrade'] and
           '0x08A producer' in art['conclusion']['next_observation'] and
-          'optional independent corroboration' in art['conclusion']['next_observation'])
+          'B6-independent D0218/CC60/CC50 assist path' in art['conclusion']['next_observation'] and
+          'do not assume an 0x08A-to-B6 transform' in art['conclusion']['next_observation'])
 
     print('\n== deliberate confirmation drive ==')
     confirm = art['confirmation_drive']
@@ -415,7 +417,7 @@ def _section_camry_2026_tsk_baseline():
     check('bus0/bus2 share exact 22-ID/DLC set', can['bus0_bus2_same_id_dlc_set'] and can['bus0_bus2_stream_count'] == 22)
     check('only 189 payload sequence differs across bus0/bus2', can['bus0_bus2_payload_sequence_unequal'] == ['0x189/64'])
     check('classic 131/2E4 steering is absent', can['legacy_steering_commands_absent'] and can['legacy_steering_counts'] == {'0x131/8': 0, '0x2E4/8': 0})
-    check('B6 absent only in non-LTA segment', can['b6_absent_in_stationary_ready_segment'] and 'stock-LTA' in can['b6_absence_boundary'] and ('segment-level negative' in can['b6_absence_boundary']))
+    check('early B6 absence is segment-local and later stock-LTA evidence supersedes the old prerequisite', can['b6_absent_in_stationary_ready_segment'] and 'segment-level fact' in can['b6_absence_boundary'] and '73.303384 s of LTA/LCA with zero B6' in can['b6_absence_boundary'] and 'B6-independent internal assist path' in can['b6_absence_boundary'])
     streams = can['selected_streams']
     for key, expected_count in (('0x00F/8', 619), ('0x025/32', 6188), ('0x030/32', 6188), ('0x090/32', 6187), ('0x0D7/32', 3094), ('0x0AA/8', 6187), ('0x101/8', 3095), ('0x116/8', 2627), ('0x127/8', 3777), ('0x176/8', 1949), ('0x51E/8', 61)):
         check(f'{key} retained count', streams[key]['count'] == expected_count and streams[key]['bus'] == 1)

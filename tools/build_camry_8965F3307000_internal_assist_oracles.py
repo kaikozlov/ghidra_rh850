@@ -391,8 +391,9 @@ def main() -> int:
                 "recovered/bounded inside the B6-inactive D0218 contribution to the shared CC50/CC62 actuation funnel: "
                 "no term is an independently recovered external lane-target magnitude; term values reduce to measured steering "
                 "torque, vehicle speed, steering-angle feedback, internal phase/mode state, and ROM calibration. The shared "
-                "downstream physical funnel is separately verified below; how stock LTA creates/selects a lane target with B6 "
-                "absent remains unresolved upstream of that convergence."
+                "downstream physical funnel is separately verified below. This positively explains why factory steering can "
+                "occur with B6 absent; the unresolved question is which exact external/local state selects or modulates this "
+                "internal assist path during LTA/LCA, not how an upstream request is converted into B6."
             ),
         },
         "command_value_torque_observable_branch": {
@@ -440,8 +441,9 @@ def main() -> int:
                 "real pre-slew stage in this funnel; AC56/EE40A/1C02 is its diagnostic mirror, while AC54/EE40C carries "
                 "the motor-driving post-slew/override value. No second additive lateral-command injection is recovered "
                 "downstream of CC50; special 35C4C and D047C branches are bounded internal limit/override selections. "
-                "The remaining stock-LTA contradiction is upstream: how a lane-target/authority state enters or selects "
-                "CC50/CC62 while B6 is absent on the captured EPS network."
+                "Factory LTA with B6 absent is therefore not contradictory to the exact F33 actuation architecture. The "
+                "remaining stock-LTA question is which exact external/local state changes select or modulate the B6-independent "
+                "D0218/CC60/CC50 path; no 0x08A-to-B6 transformation is implied or required."
             ),
         },
         "normal_selector_effect_closure": {
