@@ -151,6 +151,60 @@ check("D0218 direct internal value cells and runtime writers are pinned",
 check("AC2B is an internal diagnostic gate, not a CAN target",
       "FEBEB112" in base["AC2B_gate"] and "B338C sets 0x5A" in base["AC2B_gate"])
 
+# VAR-090: CEFFC's Target Lateral ID map indexes D0218 return/dither tables via CB00.
+# Direct corpus join; do not wait on command_cone JSON regen.
+def _camry_decompiled(entry: int) -> str:
+    want = f"0x{entry:08x}"
+    with (REPO / "data/generated/camry-8965F3307000/decompilations.jsonl").open() as fh:
+        for line in fh:
+            rec = json.loads(line)
+            if rec.get("record") == "function" and rec.get("entry_addr") == want:
+                return rec["decompiled_c"]
+    raise SystemExit(f"missing Camry corpus function {want}")
+
+
+ceffc = _camry_decompiled(0xCEFFC)
+cd094 = _camry_decompiled(0xCD094)
+cdff8 = _camry_decompiled(0xCDFF8)
+check("CEFFC defaults CB00=7 and maps ADB0 11/18 onto CB00=2/5",
+      "DAT_febecb00 = 7;" in ceffc
+      and "DAT_febeadb0 == '\\v'" in ceffc and "DAT_febecb00 = 2;" in ceffc
+      and "DAT_febeadb0 == '\\x12'" in ceffc and "DAT_febecb00 = 5;" in ceffc)
+check("D0218 return/dither tables index CB00&7 (B6 Target Lateral ID bank)",
+      "(DAT_febecb00 & 7)" in cd094 and "(DAT_febecb00 & 7)" in cdff8)
+
+# VAR-092: default-bank D0218 terms are plant+ROM, not an unpublished milliradian.
+c7e36 = _camry_decompiled(0xC7E36)
+c52fa = _camry_decompiled(0xC52FA)
+c55b4 = _camry_decompiled(0xC55B4)
+c7e88 = _camry_decompiled(0xC7E88)
+c7fba = _camry_decompiled(0xC7FBA)
+c1b84 = _camry_decompiled(0xC1B84)
+c8678 = _camry_decompiled(0xC8678)
+check("C43C sums C472+C45A+C44C (torque/speed/return addends)",
+      "DAT_febec472" in c7e36 and "DAT_febec45a" in c7e36 and "DAT_febec44c" in c7e36)
+check("C150 torque source is snapshot AC44, not a CAN target",
+      "DAT_febeac44" in c52fa)
+check("C172 angle-rate source is delta of snapshot AC88",
+      "DAT_febeac88" in c55b4)
+check("C43E/C450 speed lookups read ADF6",
+      "DAT_febeadf6" in c7e88 and "DAT_febeadf6" in c7fba)
+check("AF88 plant cell is copied from peripheral EC14",
+      "DAT_febeaf88 = DAT_febeec14" in c1b84)
+check("CD094 blends CA36 toward C172 under CB00 bank, not ADB0 milliradian",
+      "DAT_febec172" in cd094 and "DAT_febeadb0" not in cd094)
+check("C4C0 torque-speed maps do not read B6 Target Lateral ID",
+      "DAT_febeadb0" not in c8678)
+writers = {
+    0xC7E36: c7e36, 0xC8678: c8678, 0xC74AC: _camry_decompiled(0xC74AC),
+    0xD0162: _camry_decompiled(0xD0162), 0xC2B64: _camry_decompiled(0xC2B64),
+    0xCF2B2: _camry_decompiled(0xCF2B2), 0xC9A84: _camry_decompiled(0xC9A84),
+    0xCFCD4: _camry_decompiled(0xCFCD4),
+}
+check("eight D0218 term writers do not reference ADB0 or the B6 COM window",
+      all("DAT_febeadb0" not in src and "DAT_febe4bff" not in src
+          for src in writers.values()))
+
 sel = art["baseline_selector_machinery"]
 check("baseline parameter-bank selector ordinary-COM inputs are exact and finite",
       [(x["signal"], x["can_id"], x["byte"], x["bits"], x["bit_offset"], x["stage_cell"])

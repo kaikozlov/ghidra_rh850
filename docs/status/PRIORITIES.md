@@ -302,14 +302,14 @@ Target Lateral ID / target-angle / sequence observation. CarParams remains
 The former fail-closed B6 sender staged in `opendbc@dde0fcf0` /
 `kai-openpilot@15f355036` was removed from runtime in `opendbc@b9e86924` /
 `kai-openpilot@abf3ca70a`; only low-level construction/freshness/debug-safety helpers remain
-for analysis/tests. VAR-081/CORR-134 identify the observed Bus-4 `0x08A` representation, while CORR-135 adds its strong ordinary-P5 SecOC trailer match and corrects the next-hop assumption. Exact F33 neither accepts `0x08A` as normal ingress nor lists it among generated-COM Tx IDs; its producer remains unknown, so it must not be labeled a Bus-1 camera message. Factory LTA does not require B6 because exact F33 has a B6-independent internal assist path. Production and development output remain disabled while `0x08A` ownership, F33 stock-LTA authority selection, and any separately chosen B6 actuation contract remain unresolved.
+for analysis/tests. VAR-081/CORR-134 identify the observed Bus-4 `0x08A` representation; CORR-135 adds its strong ordinary-P5 SecOC trailer match and corrects the next-hop assumption. Exact F33 neither accepts `0x08A` as normal ingress nor lists it among generated-COM Tx IDs. VAR-091/CORR-136 prove only captured Bus-4 placement, Bus-1 absence, and the observed Bus-1 trailer negative: batched rlog timestamps cannot identify a TX queue or ECU, and the plaintext Bus-1 streams cannot identify the CMAC computation owner or FRC HSM capability. Factory LTA does not require B6 because exact F33 has a B6-independent internal assist path; VAR-092 closes that path's default-bank terms as not a COM milliradian. Production and development output remain disabled while actuation-interface safety remains unresolved.
 
 **VAR-088 completes the `0x08A` field census and the fork DBC entry** (live-baseline
 §39): every application byte is closed across 44,613 deduped bus-0 frames, EMPS `0x1CEE`
 supplies the four-monitor cooperative-control record naming, and the Bus-4 DDB negative
-means GTS+ cannot name the producer. Do not redo the byte census; the next `0x08A` work
-is producer firmware acquisition and the F33 authority-selector walk, not more field
-scanning.
+means GTS+ cannot name the producer. Do not redo the byte census. The remaining
+network work requires producer firmware or source-identifying physical evidence; the
+separate grant question requires synchronized FRC Operation FFD.
 
 Static F33 Tx closure also removes the need to transfer `0x351/0x394/0x4A3` wire
 geometry from H/F. **VAR-059 now also closes the F33 `0x394` classifier statically:**
@@ -393,11 +393,11 @@ EMPS vocabulary, >99.8% `0x081` mirror, and `0x412/0x371`
 `10/10/0 -> 12/20/1 -> 14/30/3` state carrier independently identify the
 73.303384-s / 237,097-frame / zero-B6 interval as LTA/LCA active. Exact F33 still
 excludes `0x08A`; current topology places Front Camera on Bus 1 and Brake/EPS on Bus 4.
-B28..B31 now strongly match Toyota ordinary-P5 `FV4 || MAC28` structure, but sender/key/profile ownership remains open. CORR-135 rejects the old upstream-to-B6 inference: the next F33 task is to trace which exact external/local state selects or modulates the already-proved B6-independent internal assist path during LTA/LCA.
+B28..B31 strongly match Toyota ordinary-P5 `FV4 || MAC28`, but physical transmitter, private transport, signer/key/profile, and actual grant remain open. CORR-135 rejects the old upstream-to-B6 inference; CORR-136 rejects rlog cadence and Bus-1 trailer absence as source/signer proof.
 
-**VAR-081/083/087 steering-command boundary — current highest priority:** keep the `0x08A` network question and the exact-F33 stock-LTA authority question separate. `0x08A` B21=Target Lateral ID, B18:B19=signed target angle at the numerically matching `1024/17870` scale, B26 is modulo-64 behavior, and B28..B31 strongly match Toyota ordinary-P5 `FV4 || MAC28`; every retained frame is on Bus 4 and the producer/security profile remains unknown. Exact F33 does not accept `0x08A` and does not list it among its five generated-COM Tx IDs.
+**VAR-081/083/087/091/092/093/094 steering-command boundary — current highest priority:** keep three questions separate: request publication, grant/actuation, and any candidate openpilot ingress. `0x08A` B21=Target Lateral ID, B18:B19=signed target angle at the numerically matching `1024/17870` scale, B26 is modulo-64 behavior, and B28..B31 strongly match Toyota ordinary-P5 `FV4 || MAC28`. VAR-091/CORR-136 place it on captured Bus 4 and exclude exact F33 Tx/Rx, but do not identify the physical transmitter or signer. Rlog timestamps batch a median 14 bus-0 frames, invalidating the former 20/30 ms/`0x0D7`-queue attribution. Bus-1 camera streams lack the trailing ordinary-P5 envelope, which does not prove FRC lacks CMAC capability or private pre-authentication. VAR-093 reads that Bus-1 family as plaintext object slots. VAR-094 closes only consecutive `5282` on native Bus 1 and the inbound SAS-echo direction. VAR-092 closes default-bank `D0218` as not an F33 COM milliradian.
 
-At the same time, exact F33's B6-inactive `D0218 -> CC48 -> CC60 -> CC50 -> CC62/CC66 -> CC64` path reaches motor current control, so the 73.303384-s zero-B6 LTA/LCA observation needs no missing B6 packet. Required next work is therefore (1) identify `0x08A` producer/SecOC/arbitration ownership, and independently (2) trace the exact external/local snapshot state that selects or modulates the B6-independent internal assist path across B21=0/11/18. The VAR-082 broad field census, VAR-083 downstream current join, and VAR-084/085 hidden STORE/DMA audits remain valid closures; do not repeat them, do not search only for another angle-shaped F33 CAN field, and do not infer an `0x08A -> B6` transform. Do not send `0x08A` to EPS. Protected B6 stays a separate candidate external actuation interface; if eventually chosen, recover its signer/freshness/suppression contract separately. Production and development steering output remain disabled. Canonical: live-baseline §§20,30,38; VAR-081/083/087; CORR-135.
+Exact F33's B6-inactive `D0218 -> CC48 -> CC60 -> CC50 -> CC62/CC66 -> CC64` path reaches motor current control, so zero B6 needs no missing packet; it also does not prove the retained ID11 intervals received an autonomous lane-centering grant. Required next evidence is (1) FRC Operation FFD `5282/5285/57DE/5265` synchronized with CAN to separate request from winner/grant, and (2) exact candidate firmware or a source-identifying physical capture to separate FRC pre-authentication from CGW/Skid/Brake assembly/signing. Do not repeat the completed field/COM/D0218 scans or infer an `0x08A -> B6` transform. Do not send `0x08A` to EPS. Protected B6 stays a separate external-actuation candidate whose bridge/signing/suppression contract can be evaluated independently.
 
 **VAR-068 Class-L/upstream and identity update:** the retained Class-L windows now have a
 portable persistent-edge analysis. No exact-F33-accepted stream has a reproduced rise
@@ -465,7 +465,7 @@ C4C0 selector-indexed maps alias across all four banks in this exact calibration
 do not reveal selector state. The next passive discriminator can still synchronize **EPS
 `0x1C38` + named `0x1C02` + control `0x1C3E`** with FRC `0x1601/0x1914`, but static work no
 longer needs to rediscover `C28FC/C2B64` or the downstream current join: both are closed.
-Static priority is now OQ-054/CORR-135: identify the observed Bus-4 `0x08A` producer/SecOC ownership and independently trace the exact external/local state into F33's B6-independent `D0218/CC60/CC50` assist path; VAR-085 already closes E1/E2. Candidate producer-side Brake/FRC firmware remains useful for `0x08A` ownership, not as a presupposed `0x08A -> B6` transformer.
+Static priority is OQ-054 after CORR-136: obtain candidate FRC/Brake/CGW/Skid firmware and trace private transport plus SecOC generation. Rlog cadence cannot attribute a transmitter. VAR-091/092/094 preserve Bus placement, default-bank `D0218`, and consecutive-`5282`-on-Bus-1 closures; VAR-085 closes E1/E2. Candidate producer firmware is useful for both physical-TX and signer dataflow, not as a presupposed `0x08A -> B6` transformer.
 
 **VAR-069 exact Brake producer acquisition:** the producer search is now narrowed to
 same-car category-435 identities `F152633K0000` / `8954147040` at physical `0x7B0`.
@@ -560,9 +560,8 @@ weakening its disproved stock-template gate; low-level B6 construction/freshness
 helpers remain analysis/test-only. Therefore **do not spend the next pass rebuilding
 basic state parsing or trying to capture/fabricate a stock B6 template**.
 
-For the Camry, focus next evidence on OQ-054/CORR-135: identify the producer and exact SecOC ownership of observed Bus-4 `0x08A`; independently trace which exact external/local state selects or modulates F33's B6-independent `D0218/CC60/CC50` path during LTA/LCA. FRC `0x1601/0x1914` remains useful independent corroboration. Protected B6 should be treated separately as a candidate openpilot interface, not as a required stock-LTA next hop.
-Only after that producer chain closes should live driver-override/current-response policy,
-`0x351/0x394/0x4A3` fault/recovery behavior, or a production sender be promoted.
+For the Camry, the next architecture discriminator is synchronized FRC Operation FFD `5282/5285/57DE/5265`: it tells whether retained ID11 was only a request or a granted control state. In parallel, OQ-054 needs exact candidate firmware or source-identifying physical evidence; current logs cannot choose FRC pre-authentication versus CGW/Skid/Brake signing. Protected B6 remains a separate candidate openpilot interface and does not depend on resolving the `0x08A` signer first.
+Before promoting any production sender, validate the selected interface's stationary acceptance, driver override, motor-current response, source suppression/fallback, and `0x351/0x394/0x4A3` inhibit/fault/recovery behavior.
 Static firmware recovery has
 already bounded the ~±8.238 N.m torque acquisition clamp and ±10 N.m telemetry
 saturation as representation limits—not override thresholds—and found no measured-Q

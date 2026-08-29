@@ -3,9 +3,11 @@
 **Target:** maintainer 2026 Toyota Camry Hybrid, EPS application F181
 `8965F3307000 / 8A3113303100`.
 
-**Evidence boundary:** this report closes the exact-F33 generated-COM transmit geometry needed by the software port, records the passive implementation, and preserves the former Gate-2 development path as historical/test-only engineering context. It does **not** authorize steering transmission. CORR-129/VAR-081 identify **73.303384 s of retained factory LTA/LCA-active operation with zero B6**; CORR-134 recovers observed Bus-4 `0x08A` B21 as Target Lateral ID and B18:B19 as the signed target-angle quantity, and CORR-135 adds a strong ordinary-P5 SecOC trailer match while correcting the former next-hop assumption. Exact F33 neither accepts `0x08A` as normal Rx nor lists it among its five generated-COM Tx IDs, but its B6-inactive `D0218 -> CC48 -> CC60 -> CC50 -> CC62/CC66 -> CC64` path reaches physical steering. Factory LTA therefore does **not** require an `0x08A -> B6` transform. Every retained `0x08A` is on the Bus-4 capture and its producer/security profile is unknown, so it must not be labeled a Bus-1 camera message.
+**Evidence boundary:** this report closes the exact-F33 generated-COM transmit geometry needed by the software port, records the passive implementation, and preserves the former Gate-2 development path as historical/test-only engineering context. It does **not** authorize steering transmission. CORR-129/VAR-081 identify **73.303384 s of retained `0x08A` ID11 LTA/LCA request state with zero B6**; this is not a direct winner/grant oracle. CORR-134 recovers B21 as Target Lateral ID and B18:B19 as the signed request-angle quantity; CORR-135 rejects a presumed `0x08A -> B6` transform. Exact F33 neither accepts `0x08A` nor transmits it, while its B6-inactive internal path reaches physical steering; that makes zero B6 architecturally possible but does not prove the retained request was granted. VAR-091/CORR-136 place authenticated `0x08A` on captured Bus 4 and observed plaintext camera PDUs on Bus 1, but batched rlog timestamps cannot identify the physical transmitter and Bus-1 trailer absence cannot identify the signer or FRC HSM capability. VAR-094 proves only that consecutive `5282` is absent from native Bus-1 CAN and the camera-bus steering angle is inbound SAS echo.
 
-The remaining integration problem is split deliberately. OQ-054 tracks (1) `0x08A` producer/SecOC/arbitration ownership and (2) the exact external/local state that selects or modulates F33's B6-independent stock-LTA assist path. Protected B6 remains a real external cooperative-control ingress and may later be chosen as the openpilot actuation interface, but that choice requires a separate valid signing/freshness/suppression contract and must not be inferred from stock LTA. The old stock-template B6 runtime sender was removed in `opendbc@b9e86924` and `kai-openpilot@abf3ca70a`; current opendbc `525ee987` retains only passive observation and analysis/test-only B6 receiver/freshness/safety helpers.
+The remaining integration problem is split deliberately. OQ-054 tracks physical `0x08A` transmission, private transport, and SecOC computation ownership; current evidence permits FRC pre-authentication or CGW/Skid/Brake assembly/signing. Synchronized FRC Operation FFD `5282/5285/57DE/5265` separately determines request versus winner/grant. VAR-092 closes default-bank `D0218` as not an F33 COM copy of the published milliradian. Protected B6 remains a real external cooperative-control ingress and a separate candidate openpilot interface; choosing it requires a valid bridge/signing, freshness, suppression, and safety contract, not stock-LTA inference. The old stock-template B6 runtime sender was removed in `opendbc@b9e86924` and `kai-openpilot@abf3ca70a`; current opendbc `525ee987` retains passive observation and analysis/test-only B6 receiver/freshness/safety helpers.
+
+Working session notes for the GTS+ vehicle-type → install-set → family-`.ddb` → GetSupport funnel (not a claim ledger): [../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md).
 
 ## 1. Exact F33 generated-COM Tx carriers
 
@@ -230,12 +232,12 @@ For provenance, the removed runtime path required `ToyotaTSS3DevLateral` plus
 - `gate2_bypass_validated=true` after an exact-F33 invalid-MAC causal proof;
 - `exclusive_b6_authority_validated=true` after relay/source-suppression proof.
 
-Those params and the CarInterface/CarController sender hook no longer exist. VAR-081 proves
-that no stock B6 template/cadence appears during the retained factory LTA/LCA intervals,
-so the old admission contract is historical evidence only and must not be revived by
-inventing a template or weakening its gates. OQ-054 now owns the real integration
-boundary: the observed Bus-4 `0x08A` producer, authentication/integrity, transformation
-into protected B6, signer/freshness ownership, and authority/arbitration.
+Those params and the CarInterface/CarController sender hook no longer exist. No stock B6
+template/cadence appears during the retained ID11 request intervals, so the old admission
+contract is historical evidence only and must not be revived by inventing a template or
+weakening its gates. OQ-054's `0x08A` transmitter/signer question is separate from B6:
+resolving the request publisher does not establish a transform into protected B6 or select
+the openpilot actuation interface.
 
 ### 4.2 Historical development sender is deliberately not a production signer
 
@@ -277,12 +279,11 @@ safety module currently passes 283 tests with 34 skips in the local targeted gat
 
 ## 5. What remains before lateral output can actually be exercised
 
-The critical remaining work is **not** a presumed `0x08A -> B6` producer chain. CORR-135 separates the stock architecture from the possible external actuation interface:
+The critical remaining work is **not** a presumed `0x08A -> B6` producer chain:
 
-1. **Identify who produces and security-protects observed Bus-4 `0x08A`.** Exact F33 does not normally receive or generated-COM-transmit it. Recover the actual producer, SecOC profile/key-slot/freshness ownership, consumers, and arbitration. Its B28..B31 trailer strongly matches Toyota ordinary-P5 `FV4 || MAC28`, but the exact sender implementation is not yet recovered.
-2. **Recover the exact F33 stock-LTA authority selector/modulator.** Start at the proven B6-inactive `D0218 -> CC48 -> CC60 -> CC50` path and trace its snapshot leaves backward while conditioning the retained logs on Target Lateral ID `0/11/18`. The missing discriminator may be a mode/gain/authority state rather than another angle-shaped CAN signal.
-3. **Choose the openpilot actuation interface only after those roles are understood.** Protected B6 is a genuine F33 external cooperative-control ingress, so it remains a plausible interface; it is simply not proved to be Toyota's stock-LTA next hop. If B6 is selected, recover its valid signer/freshness/suppression/arbitration contract separately from the stock-LTA path. Do not wait for or fabricate a stock B6 template.
-4. **Close dynamic safety policy before actuation.** Validate driver override, motor-current response, normal/inhibit/fault/recovery behavior, and any signer latency/jitter required by the chosen interface. Ordinary Camry operation stays `noOutput` until that contract is closed.
+1. **Discriminate request from grant.** Capture FRC Operation FFD `5282/5285/57DE/5265` synchronized with `0x08A`, `0x025`, `0x030`, and the B6 count. Current logs prove ID11 request state, not an autonomous winner/grant.
+2. **Resolve `0x08A` ownership with source-capable evidence.** Exact F33 is excluded and consecutive `5282` is absent from native Bus-1 CAN. Batched rlog cadence and plaintext Bus-1 trailers cannot choose FRC pre-authentication versus CGW/Skid/Brake assembly/signing. Use exact candidate firmware, private-link dataflow, or source-identifying physical capture. Do not send `0x08A` to EPS.
+3. **Choose and validate the openpilot ingress separately.** Protected B6 is a genuine exact-F33 external angle ingress; the audited zero-MAC28 receive bridge is a static candidate, not live authorization. Validate stationary zero-angle acceptance, driver override, motor-current response, source suppression/fallback, and normal/inhibit/fault/recovery before leaving `noOutput`.
 
 The historical `TSS3_DEV_LATERAL` B6 sender/safety work remains useful only as a bounded receiver/envelope experiment. It is not evidence that stock Camry LTA uses B6 and is not a reason to revive the removed runtime hook.
 
@@ -293,8 +294,12 @@ The historical `TSS3_DEV_LATERAL` B6 sender/safety work remains useful only as a
 - `data/generated/camry_8965F3307000_external_lateral_ingress.json`
 - `data/generated/camry_2026_motor_feedback_correlation.json`
 - `data/generated/camry_2026_lta_state_reconciliation.json`
+- `data/generated/camry_2026_08a_producer_bounds.json`
 - `tests/verify_camry_8965F3307000.py`
 - `tests/verify_camry_2026_lta_state_reconciliation.py`
+- `tests/verify_camry_2026_08a_producer_bounds.py`
+- `tools/decode_camry_tss3_operation_ffd.py`
+- `tests/verify_camry_tss3_operation_ffd_decoder.py`
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

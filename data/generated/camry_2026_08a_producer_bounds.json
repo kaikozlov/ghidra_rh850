@@ -1,0 +1,252 @@
+{
+ "schema": "camry-2026-08a-producer-bounds-v3",
+ "drives": {
+  "drive_a": {
+   "source": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+   "source_sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5",
+   "duration_s": 540.978568,
+   "0x08A_bus_counts": {
+    "0": 20615,
+    "1": 0,
+    "2": 20618
+   },
+   "event_timestamp_batching": {
+    "timestamp_bucket_count": 53328,
+    "median_bus0_frames_per_event": 14,
+    "max_bus0_frames_per_event": 38,
+    "0x08A_frames_in_multi_frame_events": 20607,
+    "0x08A_frame_count": 20615,
+    "0x08A_multi_frame_event_fraction": 0.999612,
+    "boundary": "Each rlog Event.logMonoTime timestamps a publication batch, not an individual CAN frame. Inter-frame 20/30 ms classes therefore cannot identify physical arbitration, a CAN TX queue, or a transmitter ECU"
+   },
+   "cadence": {
+    "0x08A": {
+     "n": 20615,
+     "mean_hz": 38.122,
+     "median_ms": 22.953,
+     "gap_20ms_class": 10033,
+     "gap_30ms_class": 9699,
+     "gap_other": 881,
+     "frac_30ms": 0.4705
+    },
+    "0x081": {
+     "n": 17172,
+     "mean_hz": 31.749,
+     "median_ms": 29.867,
+     "gap_20ms_class": 468,
+     "gap_30ms_class": 15617,
+     "gap_other": 1085,
+     "frac_30ms": 0.9096
+    },
+    "0x00F": {
+     "n": 5162,
+     "mean_hz": 9.542,
+     "median_ms": 100.013,
+     "gap_20ms_class": 0,
+     "gap_30ms_class": 0,
+     "gap_other": 5159,
+     "frac_30ms": 0.0
+    },
+    "0x0D7": {
+     "n": 25798,
+     "mean_hz": 47.697,
+     "median_ms": 19.871,
+     "gap_20ms_class": 23799,
+     "gap_30ms_class": 510,
+     "gap_other": 1487,
+     "frac_30ms": 0.0198
+    },
+    "0x030": {
+     "n": 51512,
+     "mean_hz": 95.268,
+     "median_ms": 9.901,
+     "gap_20ms_class": 1389,
+     "gap_30ms_class": 27,
+     "gap_other": 48506,
+     "frac_30ms": 0.0005
+    },
+    "0x180": {
+     "n": 10268,
+     "mean_hz": 18.986,
+     "median_ms": 50.181,
+     "gap_20ms_class": 0,
+     "gap_30ms_class": 0,
+     "gap_other": 10266,
+     "frac_30ms": 0.0
+    }
+   },
+   "bus1_auth_negative": {
+    "0x00F_count": 0,
+    "periodic_stream_count": 22,
+    "max_last4_unique_frac": 0.000978,
+    "maclike_last4_stream_count": 0,
+    "0x180_unique_last4": 1,
+    "0x160_unique_last4": 1,
+    "classification": "no ordinary-P5 SecOC trailer on panda bus 1: zero 0x00F, and every periodic stream has a near-constant last-4 (max unique fraction 0.000978); last-8 variation on 64-byte vision PDUs is payload, not a MAC (a MAC28 would uniquify last-4)"
+   },
+   "bus0_08a_last4_unique_frac": 1.0
+  },
+  "drive_b": {
+   "source": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+   "source_sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a",
+   "duration_s": 599.987914,
+   "0x08A_bus_counts": {
+    "0": 23999,
+    "1": 0,
+    "2": 23999
+   },
+   "event_timestamp_batching": {
+    "timestamp_bucket_count": 59746,
+    "median_bus0_frames_per_event": 14,
+    "max_bus0_frames_per_event": 30,
+    "0x08A_frames_in_multi_frame_events": 23999,
+    "0x08A_frame_count": 23999,
+    "0x08A_multi_frame_event_fraction": 1.0,
+    "boundary": "Each rlog Event.logMonoTime timestamps a publication batch, not an individual CAN frame. Inter-frame 20/30 ms classes therefore cannot identify physical arbitration, a CAN TX queue, or a transmitter ECU"
+   },
+   "cadence": {
+    "0x08A": {
+     "n": 23999,
+     "mean_hz": 39.997,
+     "median_ms": 22.738,
+     "gap_20ms_class": 11785,
+     "gap_30ms_class": 11407,
+     "gap_other": 806,
+     "frac_30ms": 0.4753
+    },
+    "0x081": {
+     "n": 19999,
+     "mean_hz": 33.332,
+     "median_ms": 29.874,
+     "gap_20ms_class": 489,
+     "gap_30ms_class": 18372,
+     "gap_other": 1137,
+     "frac_30ms": 0.9187
+    },
+    "0x00F": {
+     "n": 6000,
+     "mean_hz": 10.0,
+     "median_ms": 99.995,
+     "gap_20ms_class": 0,
+     "gap_30ms_class": 0,
+     "gap_other": 5999,
+     "frac_30ms": 0.0
+    },
+    "0x0D7": {
+     "n": 29999,
+     "mean_hz": 49.999,
+     "median_ms": 19.873,
+     "gap_20ms_class": 27941,
+     "gap_30ms_class": 550,
+     "gap_other": 1507,
+     "frac_30ms": 0.0183
+    },
+    "0x030": {
+     "n": 59999,
+     "mean_hz": 99.999,
+     "median_ms": 9.896,
+     "gap_20ms_class": 1239,
+     "gap_30ms_class": 0,
+     "gap_other": 57241,
+     "frac_30ms": 0.0
+    },
+    "0x180": {
+     "n": 11999,
+     "mean_hz": 19.999,
+     "median_ms": 50.179,
+     "gap_20ms_class": 0,
+     "gap_30ms_class": 0,
+     "gap_other": 11998,
+     "frac_30ms": 0.0
+    }
+   },
+   "bus1_auth_negative": {
+    "0x00F_count": 0,
+    "periodic_stream_count": 22,
+    "max_last4_unique_frac": 0.000834,
+    "maclike_last4_stream_count": 0,
+    "0x180_unique_last4": 1,
+    "0x160_unique_last4": 1,
+    "classification": "no ordinary-P5 SecOC trailer on panda bus 1: zero 0x00F, and every periodic stream has a near-constant last-4 (max unique fraction 0.000834); last-8 variation on 64-byte vision PDUs is payload, not a MAC (a MAC28 would uniquify last-4)"
+   },
+   "bus0_08a_last4_unique_frac": 1.0
+  }
+ },
+ "f33_generated_com_tx": [
+  "0x030",
+  "0x351",
+  "0x394",
+  "0x4A3",
+  "0x4C8"
+ ],
+ "gtsplus_canbus_12984": {
+  "vehicle_name": "Camry HV",
+  "vehicle_type": 12984,
+  "domains_by_bus": {
+   "Bus 1": [
+    "Blind Spot Monitor Master",
+    "Clearance Warning (Intuitive Parking Assist)",
+    "Front Camera Module",
+    "Front Radar",
+    "Front Side Radar Master",
+    "Panoramic View Monitor / Circumference Monitoring Camera Control Module",
+    "Parking Assist Monitor System / Rear Camera"
+   ],
+   "Bus 2": [
+    "ECM (Engine)",
+    "HV Battery",
+    "Hybrid Vehicle Control",
+    "Motor Generator"
+   ],
+   "Bus 3": [
+    "74",
+    "Combination Meter",
+    "DCM",
+    "DCM2",
+    "Display and Navigation (AVN)"
+   ],
+   "Bus 4": [
+    "Airbag",
+    "Brake Booster",
+    "Power Steering (EPS)",
+    "Skid Control (ABS/VSC/TRAC)",
+    "Spiral cable (Steering Angle Sensor)"
+   ],
+   "Bus 5": [
+    "Air Conditioning Amplifier",
+    "Certification (Smart)",
+    "D-Seat",
+    "Front Door LH/L-Mirror (FL-Door/L-Mirror)",
+    "Front Door RH/R-Mirror (FR-Door/R-Mirror)",
+    "Main Body",
+    "Power Management"
+   ],
+   "Bus 6": [
+    "Acoustic Vehicle Alerting System",
+    "Tire Pressure"
+   ],
+   "Bus 7": [
+    "Remote Engine Starter"
+   ]
+  },
+  "recovered_via": "tools/gts canbus 12984 --json"
+ },
+ "classification": {
+  "recorder_object": "FRC-hosted TSS recorder objects 5282/5631; Bus-4 0x08A carries the same ID/pinion/assist subset",
+  "not_exact_f33": "exact F33 generated-COM Tx is only 0x030/0x351/0x394/0x4A3/0x4C8; 0x08A is absent",
+  "wire_placement": "zero retained 0x08A on panda bus 1; Front Camera Module is GTS+ Bus 1 only; 0x08A is observed on captured Bus 4, but CAN event timestamps and GTS+ topology do not identify its physical transmitter",
+  "camera_output_auth_boundary": "panda bus 1 is sniffed in both retained drives. Zero 0x00F. Every periodic Bus-1 stream has a near-constant last-4 (max unique fraction <0.002) while Bus-4 0x08A last-4 is frame-unique. The observed Bus-1 PDUs do not carry an ordinary-P5 FV4||MAC28 trailer. This does not show whether FRC can compute CMAC or whether a private transport carries a pre-authenticated 0x08A image",
+  "timestamp_attribution_boundary": "rlog Event.logMonoTime is shared by multi-frame CAN publication batches. The apparent 0x08A 20/30 ms mix versus 0x0D7 cannot reject a shared controller, TX queue, or scheduler",
+  "secoc": "ordinary Toyota-P5 FV4||MAC28 trailer on Bus-4 0x08A only, synced to authenticated 0x00F on the chassis buses; Bus 1 is outside that domain; key/profile/CMAC unrecovered",
+  "bus4_native_nodes": [
+   "Airbag",
+   "Brake Booster",
+   "Power Steering (EPS)",
+   "Skid Control (ABS/VSC/TRAC)",
+   "Spiral cable (Steering Angle Sensor)"
+  ],
+  "bus1_includes_front_camera": true,
+  "physical_tx_and_signer_bounds": "Exact F33 is excluded as generated-COM transmitter. GTS+ Bus-4 placement leaves Skid Control, Brake Booster, and Central Gateway as architecture candidates for physical transmission; the captures do not provide transmitter fingerprints. SecOC computation may occur at the physical transmitter or upstream (including FRC over a private transport). No candidate MCU, HSM, key holder, or CMAC implementation is identified",
+  "regression_rule": "Do not label 0x08A a Bus-1 camera frame. Do not send 0x08A to EPS. No 0x08A->B6 stock-LTA transform (CORR-135). No output authorized"
+ }
+}

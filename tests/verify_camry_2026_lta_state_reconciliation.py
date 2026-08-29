@@ -269,11 +269,12 @@ check("conclusion identifies secured request without inventing an 0x08A-to-B6 tr
       "B18:B19 is the request target-steering-angle quantity" in interpretation["identification"] and
       "shape change rather than an exact causal lead" in interpretation["identification"] and
       "zero on Panda bus 1" in interpretation["route_boundary"] and
-      "producer is unknown" in interpretation["route_boundary"] and
-      "B6-independent internal assist path" in interpretation["route_boundary"] and
+      "physical transmitter and SecOC computation owner are unknown" in interpretation["route_boundary"] and
+      "prove request state, not a granted autonomous lane-centering mode" in interpretation["route_boundary"] and
       "6-bit field boundaries remain encoding assumptions" in interpretation["proof_boundary"] and
       "strongly supports a secured 0x08A PDU" in interpretation["proof_boundary"] and
-      "No 0x08A-to-B6 transform is established or required" in interpretation["proof_boundary"])
+      "whether the ID11 request won/granted" in interpretation["proof_boundary"] and
+      "No 0x08A-to-B6 transform is established" in interpretation["proof_boundary"])
 check("historical layouts and physical LTA button remain untransferred",
       "corroboration only" in interpretation["historical_labels"] and
       "No physical LTA-button carrier is recovered" in interpretation["button_boundary"] and

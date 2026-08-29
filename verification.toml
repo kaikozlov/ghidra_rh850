@@ -942,6 +942,26 @@ paths = [
   "docs/status/PRIORITIES.md",
 ]
 
+[suite.camry_2026_08a_producer_bounds]
+tests = ["tests/verify_camry_2026_08a_producer_bounds.py"]
+oracle = "dynamic_trace"
+paths = [
+  "targets/camry-2026/raw-20260827/",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/PRIORITIES.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
+
+[suite.camry_2026_bus1_camera_output]
+tests = ["tests/verify_camry_2026_bus1_camera_output.py"]
+oracle = "dynamic_trace"
+paths = [
+  "targets/camry-2026/raw-20260827/",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/PRIORITIES.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
+
 [suite.camry_2026_bus1_field_leadlag]
 tests = ["tests/verify_camry_2026_bus1_field_leadlag.py"]
 oracle = "dynamic_trace"
@@ -975,6 +995,17 @@ paths = [
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
   "targets/camry-2026/README.md",
+]
+
+[suite.camry_tss3_operation_ffd_decoder]
+tests = ["tests/verify_camry_tss3_operation_ffd_decoder.py"]
+oracle = "generated_self_check"
+paths = [
+  "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/variants/camry-2026-tss3-opendbc-port.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
 ]
 [suite.camry_8965f3307000_codeflash]
 tests = ["tests/verify_camry_8965F3307000.py"]

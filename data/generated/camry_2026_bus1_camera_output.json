@@ -1,0 +1,950 @@
+{
+ "schema": "camry-2026-bus1-camera-output-v2",
+ "gts_vocabulary": {
+  "boundary": "GTS+ names quantities and diagnostic/FFD bit layouts. It does not emit BO_ 0x180. Wire packing is recovered from sniffed Bus-1 frames joined to those scales.",
+  "frc_p5_geometry_dids": [
+   {
+    "did": "0x1806",
+    "name": "Control Target Type (For DDR)",
+    "bit_start": 0,
+    "bit_end": 7,
+    "mul": 1,
+    "div": 1,
+    "offset": 0,
+    "signed": false,
+    "bit_width": 8,
+    "decimal_point_count": 0,
+    "unit": null
+   },
+   {
+    "did": "0x1909",
+    "name": "Forward Vehicle Lateral Position",
+    "bit_start": 0,
+    "bit_end": 31,
+    "mul": 100,
+    "div": 1,
+    "offset": 0,
+    "signed": true,
+    "bit_width": 32,
+    "decimal_point_count": 2,
+    "unit": "m"
+   },
+   {
+    "did": "0x1804",
+    "name": "Control Target Vehicle Distance (DDR)",
+    "bit_start": 0,
+    "bit_end": 31,
+    "mul": 10,
+    "div": 1,
+    "offset": 0,
+    "signed": false,
+    "bit_width": 32,
+    "decimal_point_count": 1,
+    "unit": "m"
+   },
+   {
+    "did": "0x1805",
+    "name": "Control Target Side Position (DDR)",
+    "bit_start": 0,
+    "bit_end": 31,
+    "mul": 10,
+    "div": 1,
+    "offset": 0,
+    "signed": true,
+    "bit_width": 32,
+    "decimal_point_count": 1,
+    "unit": "m"
+   },
+   {
+    "did": "0x190A",
+    "name": "Forward Vehicle Distance",
+    "bit_start": 0,
+    "bit_end": 31,
+    "mul": 100,
+    "div": 1,
+    "offset": 0,
+    "signed": false,
+    "bit_width": 32,
+    "decimal_point_count": 2,
+    "unit": "m"
+   },
+   {
+    "did": "0x190A",
+    "name": "Forward Vehicle Relative Speed",
+    "bit_start": 32,
+    "bit_end": 63,
+    "mul": 1000,
+    "div": 1,
+    "offset": 0,
+    "signed": true,
+    "bit_width": 32,
+    "decimal_point_count": 3,
+    "unit": "m/s"
+   }
+  ],
+  "operation_ffd_object_layouts": {
+   "5737": {
+    "role": "control-target lateral corners s11 LSB 0.05 m",
+    "fields": [
+     {
+      "name": "Control target lateral position at front right",
+      "byte": 1,
+      "bit": 2,
+      "length": 11,
+      "type": "s",
+      "lsb": "0.05",
+      "data_size": 2
+     },
+     {
+      "name": "Control target lateral position at front left",
+      "byte": 3,
+      "bit": 2,
+      "length": 11,
+      "type": "s",
+      "lsb": "0.05",
+      "data_size": 4
+     },
+     {
+      "name": "Control target lateral position at rear right",
+      "byte": 5,
+      "bit": 2,
+      "length": 11,
+      "type": "s",
+      "lsb": "0.05",
+      "data_size": 6
+     },
+     {
+      "name": "Control target lateral position at rear left",
+      "byte": 7,
+      "bit": 2,
+      "length": 11,
+      "type": "s",
+      "lsb": "0.05",
+      "data_size": 8
+     }
+    ]
+   },
+   "5738": {
+    "role": "control-target longitudinal corners u11 LSB 0.05 m",
+    "fields": [
+     {
+      "name": "Control target longitudinal position at front right",
+      "byte": 1,
+      "bit": 2,
+      "length": 11,
+      "type": "u",
+      "lsb": "0.05",
+      "data_size": 2
+     },
+     {
+      "name": "Control target longitudinal position at front left",
+      "byte": 3,
+      "bit": 2,
+      "length": 11,
+      "type": "u",
+      "lsb": "0.05",
+      "data_size": 4
+     },
+     {
+      "name": "Control target longitudinal position at rear right",
+      "byte": 5,
+      "bit": 2,
+      "length": 11,
+      "type": "u",
+      "lsb": "0.05",
+      "data_size": 6
+     },
+     {
+      "name": "Control target longitudinal position at rear left",
+      "byte": 7,
+      "bit": 2,
+      "length": 11,
+      "type": "u",
+      "lsb": "0.05",
+      "data_size": 8
+     }
+    ]
+   },
+   "590C": {
+    "role": "ACC control-target floats (distance/lateral/rel-speed Type f)",
+    "fields": [
+     {
+      "name": "Distance between controlled objects",
+      "byte": 1,
+      "bit": 7,
+      "length": 32,
+      "type": "f",
+      "lsb": "1",
+      "data_size": 4
+     },
+     {
+      "name": "ACC control vehicle distance for DDR",
+      "byte": 5,
+      "bit": 7,
+      "length": 15,
+      "type": "u",
+      "lsb": "1",
+      "data_size": 6
+     },
+     {
+      "name": "Lateral position of controlled object",
+      "byte": 7,
+      "bit": 7,
+      "length": 32,
+      "type": "f",
+      "lsb": "1",
+      "data_size": 10
+     },
+     {
+      "name": "ACC control target lateral position for DDR",
+      "byte": 11,
+      "bit": 7,
+      "length": 32,
+      "type": "f",
+      "lsb": "1",
+      "data_size": 14
+     },
+     {
+      "name": "Target relative speed of controlled object",
+      "byte": 15,
+      "bit": 7,
+      "length": 32,
+      "type": "f",
+      "lsb": "1",
+      "data_size": 18
+     },
+     {
+      "name": "ACC controlled lateral relative velocity for DDR",
+      "byte": 19,
+      "bit": 7,
+      "length": 32,
+      "type": "f",
+      "lsb": "1",
+      "data_size": 22
+     },
+     {
+      "name": "Target number for control",
+      "byte": 23,
+      "bit": 7,
+      "length": 8,
+      "type": "u",
+      "lsb": "1",
+      "data_size": 23
+     },
+     {
+      "name": "ACC control target number for DDR",
+      "byte": 24,
+      "bit": 7,
+      "length": 8,
+      "type": "u",
+      "lsb": "1",
+      "data_size": 24
+     },
+     {
+      "name": "ACC control camera recognition for DDR",
+      "byte": 25,
+      "bit": 7,
+      "length": 8,
+      "type": "u",
+      "lsb": "1",
+      "data_size": 25
+     },
+     {
+      "name": "ACC control target radar recognition for DDR",
+      "byte": 26,
+      "bit": 7,
+      "length": 8,
+      "type": "u",
+      "lsb": "1",
+      "data_size": 26
+     }
+    ]
+   },
+   "5A22": {
+    "role": "vertical/longitudinal distance u16 LSB 0.01 m",
+    "fields": [
+     {
+      "name": "Right pedestrian _ vertical distance",
+      "byte": 1,
+      "bit": 7,
+      "length": 16,
+      "type": "u",
+      "lsb": "0.01",
+      "data_size": 2
+     },
+     {
+      "name": "Left pedestrian _ vertical distance",
+      "byte": 3,
+      "bit": 7,
+      "length": 16,
+      "type": "u",
+      "lsb": "0.01",
+      "data_size": 4
+     },
+     {
+      "name": "Right vehicle _ vertical distance",
+      "byte": 5,
+      "bit": 7,
+      "length": 16,
+      "type": "u",
+      "lsb": "0.01",
+      "data_size": 6
+     },
+     {
+      "name": "Left vehicle _ vertical distance",
+      "byte": 7,
+      "bit": 7,
+      "length": 16,
+      "type": "u",
+      "lsb": "0.01",
+      "data_size": 8
+     }
+    ]
+   },
+   "5A24": {
+    "role": "lateral position s16 LSB 0.01 m",
+    "fields": [
+     {
+      "name": "Right pedestrian lateral position",
+      "byte": 1,
+      "bit": 7,
+      "length": 16,
+      "type": "s",
+      "lsb": "0.01",
+      "data_size": 2
+     },
+     {
+      "name": "Left pedestrian _ lateral position",
+      "byte": 3,
+      "bit": 7,
+      "length": 16,
+      "type": "s",
+      "lsb": "0.01",
+      "data_size": 4
+     },
+     {
+      "name": "Right vehicle _ lateral position",
+      "byte": 5,
+      "bit": 7,
+      "length": 16,
+      "type": "s",
+      "lsb": "0.01",
+      "data_size": 6
+     },
+     {
+      "name": "Left vehicle _ lateral position",
+      "byte": 7,
+      "bit": 7,
+      "length": 16,
+      "type": "s",
+      "lsb": "0.01",
+      "data_size": 8
+     }
+    ]
+   },
+   "5A26": {
+    "role": "relative speed s16 LSB 0.05 m/s",
+    "fields": [
+     {
+      "name": "Right pedestrian _ relative speed",
+      "byte": 1,
+      "bit": 7,
+      "length": 16,
+      "type": "s",
+      "lsb": "0.05",
+      "data_size": 2
+     },
+     {
+      "name": "Left pedestrian _ relative speed",
+      "byte": 3,
+      "bit": 7,
+      "length": 16,
+      "type": "s",
+      "lsb": "0.05",
+      "data_size": 4
+     },
+     {
+      "name": "Right vehicle _ relative speed",
+      "byte": 5,
+      "bit": 7,
+      "length": 16,
+      "type": "s",
+      "lsb": "0.05",
+      "data_size": 6
+     },
+     {
+      "name": "Left vehicle _ relative speed",
+      "byte": 7,
+      "bit": 7,
+      "length": 16,
+      "type": "s",
+      "lsb": "0.05",
+      "data_size": 8
+     }
+    ]
+   },
+   "5A30": {
+    "role": "left lane boundary offset/yaw Type f",
+    "fields": [
+     {
+      "name": "Left Lane Boundary Offset",
+      "byte": 1,
+      "bit": 7,
+      "length": 32,
+      "type": "f",
+      "lsb": "1",
+      "data_size": 4
+     },
+     {
+      "name": "Left lane boundary yaw angle",
+      "byte": 5,
+      "bit": 7,
+      "length": 32,
+      "type": "f",
+      "lsb": "1",
+      "data_size": 8
+     }
+    ]
+   },
+   "5A33": {
+    "role": "right lane boundary offset/yaw Type f",
+    "fields": [
+     {
+      "name": "Right Lane Boundary Offset",
+      "byte": 1,
+      "bit": 7,
+      "length": 32,
+      "type": "f",
+      "lsb": "1",
+      "data_size": 4
+     },
+     {
+      "name": "Right lane boundary yaw angle",
+      "byte": 5,
+      "bit": 7,
+      "length": 32,
+      "type": "f",
+      "lsb": "1",
+      "data_size": 8
+     }
+    ]
+   }
+  },
+  "joined_distance_scale": {
+   "lsb_m": 0.01,
+   "sources": [
+    "FRC_P5 DID 0x190A Forward Vehicle Distance (mul=100, 2 decimal places, m)",
+    "FFD 5A22 vertical distance (unsigned, LSB 0.01 m)"
+   ]
+  }
+ },
+ "drives": {
+  "drive_a": {
+   "source": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+   "source_sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5",
+   "0x00F_count": 0,
+   "periodic_streams": [
+    {
+     "can_id": "0x020",
+     "dlc": 12,
+     "n": 10270,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x123",
+     "dlc": 16,
+     "n": 5130,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x160",
+     "dlc": 32,
+     "n": 20510,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x180",
+     "dlc": 64,
+     "n": 10268,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x181",
+     "dlc": 64,
+     "n": 10255,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x182",
+     "dlc": 64,
+     "n": 10246,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x183",
+     "dlc": 64,
+     "n": 10245,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x184",
+     "dlc": 64,
+     "n": 10250,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x185",
+     "dlc": 64,
+     "n": 10263,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x186",
+     "dlc": 64,
+     "n": 10253,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x187",
+     "dlc": 64,
+     "n": 10238,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x188",
+     "dlc": 64,
+     "n": 10254,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x189",
+     "dlc": 64,
+     "n": 10258,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x18A",
+     "dlc": 64,
+     "n": 10245,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x18B",
+     "dlc": 64,
+     "n": 10248,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x18C",
+     "dlc": 48,
+     "n": 10245,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x1A0",
+     "dlc": 48,
+     "n": 10259,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x200",
+     "dlc": 64,
+     "n": 5128,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x201",
+     "dlc": 64,
+     "n": 5129,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x230",
+     "dlc": 64,
+     "n": 10256,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x440",
+     "dlc": 32,
+     "n": 1025,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x450",
+     "dlc": 32,
+     "n": 1022,
+     "unique_last4": null
+    }
+   ],
+   "0x180_n": 10268,
+   "0x180_unique_last4": 1,
+   "object_slots_0x180_0x182": {
+    "header_bytes": 4,
+    "slot_bytes": 7,
+    "slots_per_pdu": 8,
+    "trailer_bytes": 4,
+    "empty_sentinel": "fff8000000ffff",
+    "empty_slots": 140099,
+    "occupied_slots": 106053,
+    "longitudinal_m_u16be_lsb_0_01": {
+     "n": 106053,
+     "min": 1.29,
+     "p05": 4.06,
+     "median": 26.06,
+     "p95": 169.8,
+     "max": 384.37
+    },
+    "occupied_distance_in_range_frac": 1.0,
+    "rejected_direct_ffd_5A24_lateral_s16_0_01": {
+     "reason": "s16be at slot bytes 2-3 at FFD 5A24 LSB 0.01 m spans hundreds of metres; not a 1:1 overlay",
+     "span_m": {
+      "n": 106053,
+      "min": -279.21,
+      "p05": -47.84,
+      "median": -5.93,
+      "p95": 50.56,
+      "max": 222.53
+     }
+    },
+    "rejected_direct_ffd_5A26_relspeed_s16_0_05": {
+     "reason": "s16be at slot bytes 4-5 at FFD 5A26 LSB 0.05 m/s is physically impossible as relative speed",
+     "span_m_s": {
+      "n": 106053,
+      "min": -1637.65,
+      "p05": -1331.25,
+      "median": 12.75,
+      "p95": 1344.75,
+      "max": 1638.35
+     }
+    }
+   },
+   "family_first_samples": {
+    "0x180/64": "7fa70006fff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000ffff00000000",
+    "0x181/64": "4e940006fff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000ffff00000000",
+    "0x182/64": "1dc10006fff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000ffff00000000",
+    "0x183/64": "38e00006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0x184/64": "af790006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0x185/64": "9e4a0006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0x186/64": "cd1f0006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0x187/64": "fc2c0006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0x188/64": "c23c0006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0x189/64": "f30f0006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0x18A/64": "a05a0006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0x18B/64": "91690006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0x18C/48": "bcdd0006fff80001fe01fff00003fc03ffe00007f807ffc0000ff00fff80001fe0000000000000000000000000000000"
+   },
+   "request_object_on_bus1": {
+    "layout": "5282 byte1 Target Lateral ID || bytes2-3 pinion s16be || byte4 assist",
+    "id11_min_abs_pinion": 20,
+    "id11_qualifying": 571,
+    "sampled": 200,
+    "window_ns": 25000000,
+    "layout_hits_in_window": 0,
+    "layout_hits_global_bus1": 0,
+    "exact_pinion_2byte_in_window": 22,
+    "exact_pinion_top": [
+     {
+      "can_id": "0x186",
+      "offset": 5,
+      "n": 2
+     },
+     {
+      "can_id": "0x186",
+      "offset": 26,
+      "n": 2
+     },
+     {
+      "can_id": "0x187",
+      "offset": 19,
+      "n": 2
+     },
+     {
+      "can_id": "0x188",
+      "offset": 5,
+      "n": 2
+     },
+     {
+      "can_id": "0x189",
+      "offset": 8,
+      "n": 2
+     },
+     {
+      "can_id": "0x18A",
+      "offset": 29,
+      "n": 2
+     },
+     {
+      "can_id": "0x1A0",
+      "offset": 20,
+      "n": 2
+     },
+     {
+      "can_id": "0x1A0",
+      "offset": 22,
+      "n": 2
+     }
+    ]
+   }
+  },
+  "drive_b": {
+   "source": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+   "source_sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a",
+   "0x00F_count": 0,
+   "periodic_streams": [
+    {
+     "can_id": "0x020",
+     "dlc": 12,
+     "n": 11999,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x123",
+     "dlc": 16,
+     "n": 5999,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x160",
+     "dlc": 32,
+     "n": 23998,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x180",
+     "dlc": 64,
+     "n": 11999,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x181",
+     "dlc": 64,
+     "n": 11999,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x182",
+     "dlc": 64,
+     "n": 11999,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x183",
+     "dlc": 64,
+     "n": 11999,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x184",
+     "dlc": 64,
+     "n": 11999,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x185",
+     "dlc": 64,
+     "n": 11999,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x186",
+     "dlc": 64,
+     "n": 11999,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x187",
+     "dlc": 64,
+     "n": 11999,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x188",
+     "dlc": 64,
+     "n": 11999,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x189",
+     "dlc": 64,
+     "n": 11999,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x18A",
+     "dlc": 64,
+     "n": 11999,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x18B",
+     "dlc": 64,
+     "n": 12000,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x18C",
+     "dlc": 48,
+     "n": 12000,
+     "unique_last4": 1
+    },
+    {
+     "can_id": "0x1A0",
+     "dlc": 48,
+     "n": 12000,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x200",
+     "dlc": 64,
+     "n": 6000,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x201",
+     "dlc": 64,
+     "n": 6000,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x230",
+     "dlc": 64,
+     "n": 11999,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x440",
+     "dlc": 32,
+     "n": 1200,
+     "unique_last4": null
+    },
+    {
+     "can_id": "0x450",
+     "dlc": 32,
+     "n": 1199,
+     "unique_last4": null
+    }
+   ],
+   "0x180_n": 11999,
+   "0x180_unique_last4": 1,
+   "object_slots_0x180_0x182": {
+    "header_bytes": 4,
+    "slot_bytes": 7,
+    "slots_per_pdu": 8,
+    "trailer_bytes": 4,
+    "empty_sentinel": "fff8000000ffff",
+    "empty_slots": 138183,
+    "occupied_slots": 149793,
+    "longitudinal_m_u16be_lsb_0_01": {
+     "n": 149793,
+     "min": 1.29,
+     "p05": 5.75,
+     "median": 37.12,
+     "p95": 211.95,
+     "max": 439.11
+    },
+    "occupied_distance_in_range_frac": 1.0,
+    "rejected_direct_ffd_5A24_lateral_s16_0_01": {
+     "reason": "s16be at slot bytes 2-3 at FFD 5A24 LSB 0.01 m spans hundreds of metres; not a 1:1 overlay",
+     "span_m": {
+      "n": 149793,
+      "min": -279.28,
+      "p05": -44.17,
+      "median": -6.89,
+      "p95": 57.91,
+      "max": 272.63
+     }
+    },
+    "rejected_direct_ffd_5A26_relspeed_s16_0_05": {
+     "reason": "s16be at slot bytes 4-5 at FFD 5A26 LSB 0.05 m/s is physically impossible as relative speed",
+     "span_m_s": {
+      "n": 149793,
+      "min": -1637.65,
+      "p05": -1126.45,
+      "median": 12.75,
+      "p95": 1164.75,
+      "max": 1638.35
+     }
+    }
+   },
+   "family_first_samples": {
+    "0x180/64": "2fbd1016074a010003ff0a0e08062001ff5e0879f7eff5ff400160004000ff100901ff7005ff650291fae000ffff069df96004ff0a085405afffffff00000000",
+    "0x181/64": "228f1016fff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000ffff00000000",
+    "0x182/64": "71da1016fff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000ffff00000000",
+    "0x183/64": "44fa1016080000000001420000000000010200bffcff000902018000000083000800000000010200000000048b40080001ff00094200000000040b4200000000",
+    "0x184/64": "c3621016000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0x185/64": "f2511016000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0x186/64": "c2871016000032f0010000000032f0010001000030f0020001000021000a0ff8000032f0020000000070f0080000000032f0020001000032f003000100000000",
+    "0x187/64": "90371016000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0x188/64": "ae271016000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0x189/64": "41cd10166406fe0c0000010006fe0900000000060108ffe7fb640601060000006405010c0000020009020f000000000600070008020009fe0f00000000000000",
+    "0x18A/64": "cc411016000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0x18B/64": "dedb0f15000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0x18C/48": "1cb50f15025fed4c2a0004bbfe0028000ee7fa002800150ff20104001f9fd001a01fff80000000000000000000000000"
+   },
+   "request_object_on_bus1": {
+    "layout": "5282 byte1 Target Lateral ID || bytes2-3 pinion s16be || byte4 assist",
+    "id11_min_abs_pinion": 20,
+    "id11_qualifying": 1078,
+    "sampled": 200,
+    "window_ns": 25000000,
+    "layout_hits_in_window": 0,
+    "layout_hits_global_bus1": 0,
+    "exact_pinion_2byte_in_window": 40,
+    "exact_pinion_top": [
+     {
+      "can_id": "0x1A0",
+      "offset": 20,
+      "n": 7
+     },
+     {
+      "can_id": "0x18C",
+      "offset": 30,
+      "n": 6
+     },
+     {
+      "can_id": "0x186",
+      "offset": 5,
+      "n": 3
+     },
+     {
+      "can_id": "0x186",
+      "offset": 12,
+      "n": 2
+     },
+     {
+      "can_id": "0x187",
+      "offset": 5,
+      "n": 2
+     },
+     {
+      "can_id": "0x160",
+      "offset": 22,
+      "n": 1
+     },
+     {
+      "can_id": "0x180",
+      "offset": 28,
+      "n": 1
+     },
+     {
+      "can_id": "0x180",
+      "offset": 45,
+      "n": 1
+     }
+    ]
+   }
+  }
+ },
+ "classification": {
+  "bus": "Panda bus 1 is Toyota Bus 1 after the CAN0/CAN1 repin. GTS+ canbus 12984 places Front Camera Module, Front Radar, and other ADAS nodes on that bus. Exact F33 does not accept 0x180..0x18C.",
+  "framing": "0x180..0x18B/64: B0-B1 unique per frame (checksum/CRC), B2-B3 shared rolling counter across the burst, last-4 constant 00000000 (not a MAC). 0x18C is the same header/trailer with DLC 48.",
+  "object_family_0x180_0x182": "Eight 7-byte slots after the 4-byte header. Empty slot is exactly fff8000000ffff (0xFFF8/0xFFFF invalid-style sentinels). Occupied slot bytes 0-1 unsigned big-endian * 0.01 m is longitudinal/vertical range at the FRC 0x190A / FFD 5A22 scale (median tens of metres, tail to a few hundred metres on occupied slots).",
+  "not_08A": "The 28-byte 0x08A application blob is absent. This family is perception output, not the truncated TSS request 5282.",
+  "middle_hop": "FRC builds FFD 5282/5631 in camera RAM (ID + milliradian pinion + assist + damping) from vision objects plus plant observers (SAS 0x025 / 0x160 echo inbound, EPS torque 0x030). The consecutive 5282 layout ID||pinion||assist is absent from sniffed Bus-1 CAN. A Bus-4 origin truncates damping, packs ID/pinion/assist as 0x08A B21/B18/B24, and SecOC-wraps it. Measured angle on the camera bus is inbound plant echo, not a command to EPS. Requested pinion is not an F33 COM input.",
+  "not_tss2_8byte_radar_dbc": "Old comma 8-byte 0x180..0x19F radar-track geometry does not transfer.",
+  "0x160": "0x160/32 is delayed 0x025 steering-angle echo at byte 22 (VAR-074): plant measured pinion onto the ADAS bus so FRC can see the wheel. Direction is SAS -> FRC, not FRC -> EPS.",
+  "0x183_0x18C": "Different schemas: 0x183/0x184 carry typed records with float-shaped words (FFD Type-f / 32-bit FRC geometry vocabulary) but are not a 1:1 copy of FFD 590C. 0x185/0x188/0x18B are often idle zeros. 0x186/0x189/0x18A are structured and still unpacking. 0x18C/48 is the VAR-068 staircase/status PDU.",
+  "remainder": "Object-slot bytes 2-6 are not FFD 5A24/5A26 16-bit overlays. Which Bus-1 node transmits which ID (FRC vs Front Radar vs fusion) is not named by GTS+ CAN-ID. No output authorized."
+ }
+}

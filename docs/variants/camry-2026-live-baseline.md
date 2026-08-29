@@ -1326,15 +1326,15 @@ conclusion is therefore **Bus 4 is the Brake/EPS B6 segment and the relay-correc
 capture reaches it**. Section 20 subsequently recovers cruise operation and a repeated
 lateral/HUD state directly from the retained CAN while B6 remains absent. What still lacks
 machine synchronization is Toyota's exact **`LTA Control Condition` name**, not evidence
-that the vehicle entered meaningful cruise/ADAS state. The remaining zero-B6 problem is
-therefore architectural rather than a bus-selection problem.
+that the vehicle entered meaningful cruise/ADAS request state. Whether that request won
+and received active-steering grant remains a separate Operation-FFD question.
 
 Deterministic topology evidence is promoted inside
 `data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json` and verified by
 `tests/verify_camry_8965F3307000_gtsplus_semantics.py`; the physical relay/capture half
 remains `data/generated/camry_2026_relay_correct_capture.json`.
 
-## 20. Existing drives recover cruise operation and strongly identify LTA/LCA active state without B6
+## 20. Existing drives recover cruise operation and strongly identify LTA/LCA request state without B6
 
 The two §16 routes contain more operating-state information than the original bounded
 analysis used. The same-car stationary FRC/`0x0FE` join from §7 gives exact momentary
@@ -1375,8 +1375,8 @@ The retained **current** GTS+ registry supplies the independent numeric vocabula
 Generation-20 category 405 `EMPS_P5.ddb` (source SHA-256 `fb793322…e329e`) defines DID
 `0x1CEE` byte 0 as **Target Lateral ID**, with the exact dictionary **`0 = No Request
 (Manual Operation)`, `11 = LTA/LCA`, `18 = SDG`**. The raw CAN sequence independently
-supplies the dynamic semantics: B21=`11` is the long cruise-active Class-L state;
-B21=`18` is a short cruise-off state; and B21=`0` is the other state. Same-segment
+supplies the dynamic semantics: B21=`11` is the long cruise-active LTA/LCA request state;
+B21=`18` is a short cruise-off SDG request state; and B21=`0` is no request.
 nearest-frame joins (absolute delta <=25 ms) show `0x081/32` B13 mirrors B21 in
 **20,442/20,479 = 99.8193271%** paired A rows and **23,991/23,999 = 99.9666653%**
 paired B rows. The exact mirror confusion matrices, including the 32 drive-A startup
@@ -1423,7 +1423,7 @@ The Class-L edge timeline is especially discriminating:
 | A | seg5 +16.834568 s | +16.944992 (**+0.110424**) | +17.014128 (**+0.179560**) | +32.984427 | `371 20/3` +0.029970, canonical `20/1` +0.189708; `412 10` +0.491876 then `12` +0.994339 |
 | B | seg20 +13.239624 s | +13.339979 (**+0.100354**) | +13.440058 (**+0.200434**) | seg21 +10.435632 | `412 12` at the clear; `371 20/1` +0.070336 |
 
-Drive B also proves cruise and lateral active state are distinct: the `0x08A B3=8`
+Drive B also proves cruise and lateral **request** state are distinct: the `0x08A B3=8`
 cruise rise is segment20 +1.546326 s, exactly **11.693298 s before** B21=`11` begins.
 The five-frame segment21 CANCEL pulse starts at +10.406004 s; after **0.029628 s** the
 same captured time clears cruise B3, B21=`11`, and `0x412 B0=14`, and after
@@ -1441,8 +1441,8 @@ diagnostic field is 8-bit, so any 6-bit field boundary is an encoding assumption
 proved producer layout. Every retained `0x08A` frame is on the Bus-4 capture itself
 (Panda bus 0: 44,614 / relay mirror bus 2: 44,617 / bus 1: zero); current GTS+ topology
 places Front Camera on Toyota Bus 1 and Brake/EPS together on Bus 4, while exact F33
-accepts protected B6 on the latter. The producer of the observed Bus-4 `0x08A` is
-unknown, so it must not be labeled a Bus-1 camera frame. The retained `0x08A` therefore closes the request representation without making it an EPS-addressable frame. CORR-135 further corrects the former next-hop inference: exact F33's B6-independent internal assist path can reach physical steering, so zero-B6 factory LTA does not require `0x08A` to be transformed into B6.
+accepts protected B6 on the latter. Physical transmitter and signer are unknown, so
+`0x08A` must not be labeled a native Bus-1 frame. The retained bytes close the request representation without making it an EPS ingress or grant oracle. Exact F33's B6-independent internal path explains why zero B6 needs no missing packet; it does not prove autonomous lane-centering authority in these intervals (CORR-137 / VAR-095).
 
 Historical Toyota names `LTA_RELATED` for `0x371` and `LKAS_HUD` for `0x412` are
 corroboration only; no historical signal layout is transferred. Current FRC_P5 `LTA
@@ -1949,6 +1949,10 @@ The direct runtime writers are all internal C/D-family algorithm state: `CF2B2 -
 
 This also bounds the retained-drive interpretation. VAR-075 pins the `FEBEC5EE` moving-mode contribution to zero in both retained drives because its `0x0D5` s213 source is identically zero; the other `D0218` terms remain live and, through the now-verified `CC62 -> CC66/CC64 -> AC54/EE40C` chain, can have a real current-control consequence with B6 absent. But semantic closure of all eight terms finds no independently recovered **lane-target** magnitude: they reduce to measured torque, torque+speed maps, internal aggregation/ROM state, `|torque|` curves, and angle return/dither/excitation. VAR-081 identifies the interval as LTA/LCA active. The unresolved question is therefore what upstream state/value gives this shared funnel factory lane-centering authority with B6 absent, not whether `CC62` reaches the motor. Nothing here authorizes output.
 
+**`CEFFC` / `CB00` is the recovered D0218 map-bank selector, and it is B6-fed.** Exact `FUN_000CEFFC` writes `FEBECB00`. Default is `7`. When `FEBEACBD==0` and `FEBECAFF==1`, B6 signal 261 snapshot `FEBEADB0` (Target Lateral ID, B3[5:0]) maps `1→0`, `4→1`, `0x0A→3`, `0x0B→2` (LTA/LCA), `0x12→5` (SDG), `0x13→4`. `CD094` and `CDFF8` then index return/dither tables as `(CB00&7)+(AC3C&1)*8`. That is how F33 would change D0218 angle-domain maps **if B6 carried ID 11/18**. Runtime writers of `FEBEADB0` are only snapshot copier `BCD66` and reset `BF97A`; `0x08A` is not a source. In the retained drives B6 is absent, so `ADB0` stays 0 and `CB00` stays **7**. The ID11/18 D0218 banks therefore do not run. `CEFFC` does not import the `0x08A` milliradian target; it only switches internal maps from B6's copy of the same Target Lateral ID dictionary. Hands-light motor tracking of `0x08A` error remains a separate plant observation, not this selector. VAR-090.
+
+**Default-bank terms themselves have no unpublished milliradian.** With `CB00=7`, `C43C` is `clamp(C472+C45A+C44C)` from driver-torque snapshot `AC44`, speed `ADF6`, and filtered measured-angle rate `C172` (delta of `AC88`). `C4C0` is a torque×speed map. `C3BA`/`CC2C`/`BF3C` stay inside the torque family. `CD094` blends return state `CA36` toward `C172` under that default bank; dither/return copies peripheral `EC14`/`EC18`. None of the eight term writers reads B6 `ADB0` or the B6 COM window. Combined with VAR-077 (only B6 supplies COM value/mode into `CC50/CC62`), the retained hands-light motor correlation with published `0x08A` error is **not an F33 COM input** (VAR-092). The command is adjacent to EPS, not into it.
+
 Deterministic evidence is the `baseline_internal_assist_path` section of `data/generated/camry_8965F3307000_command_cone_ingress.json`, generated from the exact 6,065-function F33 corpus and verified by `tests/verify_camry_8965F3307000_command_cone_ingress.py`.
 
 ## 31. Baseline-assist parameter-bank selector: ordinary COM selector inputs are route-wide zero/absent in both retained Class-L drives
@@ -2265,10 +2269,10 @@ executor, and SecOC/integrity ownership remain OQ-052's open questions.
 CORR-135 removes the architecture assumption that accumulated after the `0x08A` target-angle recovery. Three exact evidence surfaces now have to be held simultaneously:
 
 1. **`0x08A` is a real secured-looking lateral-request PDU, but not exact-F33 normal CAN.** B21 carries the Target Lateral ID state and B18:B19 the signed target-angle quantity. Every retained frame is on the Toyota Bus-4 capture; exact F33's 43 normal Rx descriptors exclude `0x08A`, its generated-COM Tx IDs are only `0x030/0x351/0x394/0x4A3/0x4C8`, and its 47-rule acceptance surface adds only diagnostics/XCP. The trailer strongly matches ordinary Toyota P5 SecOC: candidate reset-low2 agrees with preceding authenticated `0x00F` at 96.376% A / 96.237% B, candidate message-low2 advances +1 on every same-reset B26+1 pair, B27 is zero, and the remaining 28 bits are effectively frame-unique. This supports `FV4 || MAC28` structurally, not an exact sender/key/profile claim.
-2. **Factory LTA does not need B6 to make F33 steer.** Exact `FUN_000D0218` has an ordinary B6-inactive branch that computes `FEBECC48` from the eight recovered internal assist terms. The exact chain `CC48 -> D0284/D02DA -> CC4E -> D0382/CC60 -> D039E/CC50 -> D042C/CC62/CC66 -> D047C/CC64 -> AC54/EE40C -> 6AF4 -> 6E0A -> 6DEC/6DC8/6DD6` reaches motor control. The retained 73.303384 s of machine-identified LTA/LCA with zero B6 is therefore architecturally consistent, not evidence of a missing B6 packet.
+2. **Zero B6 does not require a missing cooperative packet.** Exact `FUN_000D0218` has an ordinary B6-inactive branch that computes `FEBECC48` from eight internal assist terms, and the exact `CC48 -> ... -> motor-control` chain reaches physical current control. The retained 73.303384 s is machine-identified **request state** (`0x08A` ID11/LTA-LCA), not a direct grant oracle: zero B6 is architecturally consistent with F33 continuing to actuate, but the logs do not prove that this internal path carried autonomous lane-centering authority. Operation FFD `5285/57DE/5265` is the missing grant discriminator.
 3. **B6 remains a separate protected external cooperative-control ingress.** Exact F33 really does accept B6 and consume its target/mode when active. That makes B6 a possible future openpilot actuation interface, but stock LTA does not prove that Toyota converts `0x08A` into B6. If B6 is chosen, its signer/freshness/suppression/arbitration contract must be recovered on its own evidence.
 
-The current first-principles work is consequently split. On the network side, identify who actually transmits `0x08A`, which SecOC profile/key-slot/freshness state protects it, and who consumes/arbitrates it. On the F33 side, walk backward from the B6-inactive `D0218` terms through the snapshot boundary and identify the exact external/local **mode, gain, authority, or state** that changes across Target Lateral ID `0 -> 11 -> 18`. Do not constrain that search to another angle-shaped CAN field.
+The current work is therefore three-way. VAR-091/CORR-136 close observed bus placement but leave physical transmitter, private transport, and signer open; plaintext Bus-1 trailers do not establish FRC crypto capability. VAR-090/092 close default-bank `D0218` as not an F33 COM copy of the published milliradian. Synchronized FRC Operation FFD must separately determine whether the retained ID11 request was selected/granted. Protected B6 remains an independent candidate openpilot ingress.
 
 **Regression rule:** do not infer or document an `0x08A -> B6` stock-LTA transform from matching scale, bus topology, or F33's `0x08A` exclusion. Such a transform may be considered only if producer firmware or synchronized evidence positively recovers it.
 
@@ -2377,12 +2381,69 @@ Deterministic evidence: `exploit/ephemeral_runtime/camry_f33_b6_bridge.c`,
 `exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json`, and
 `tests/verify_camry_8965F3307000.py --section b6_receive_bridge`.
 
+## 41. `0x08A` placement/authentication bounds: transmitter and signer remain open (VAR-091 / CORR-136)
+
+The two relay-correct drives plus GTS+ canbus for Camry HV type **12984** close bus placement and the observed trailer shape. They do **not** identify a physical transmitter, CPU family, HSM, or CMAC owner.
+
+**Placement.** Every retained `0x08A/32` is on the Toyota Bus-4 capture (panda bus 0 / relay mirror 2); Bus 1 count is **zero**. GTS+ `canbus 12984` places **Front Camera Module on Bus 1 only**. Bus 4 native application nodes are Airbag, Brake Booster, Power Steering (EPS), Skid Control, and SAS, all behind Central Gateway. This is a topology candidate set, not an arbitration-ID source map. Post-repin FRC UDS `0x792` on panda bus 0 is diagnostic gatewaying, not proof that FRC is a Bus-4 application node.
+
+**Not EPS.** Exact F33's generated-COM Tx set is only `0x030/0x351/0x394/0x4A3/0x4C8`; its normal Rx and complete acceptance surface also exclude `0x08A`.
+
+**Rlog timing cannot attribute the source.** The observed `0x08A` rate is 38.122 / 39.997 Hz. The apparent 20/30 ms gap mix is not a physical CAN timing fingerprint: each rlog `Event.logMonoTime` timestamps a complete CAN publication batch. Median bus-0 batch size is 14 frames in both drives, and 20,607/20,615 A plus 23,999/23,999 B `0x08A` frames share their timestamp with another frame. CAN arbitration delay, same-controller scheduling, TX-queue identity, oscillator skew, and transmitter identity are not recoverable from those gaps. The former “not Skid's `0x0D7` queue” claim is invalid.
+
+**Observed Bus-1 envelope.** Bus 1 contains zero `0x00F`. Every periodic Bus-1 stream (n≥50) has a near-constant last-4 (max unique fraction <0.002); FRC vision `0x180/64` last-4 is constant. These observed PDUs do not end in ordinary-P5 `FV4||MAC28`. Bus-4 `0x08A` does: B28..B31 remain on the vehicle `0x00F` reset domain (CORR-135) and the last-4 is frame-unique.
+
+**What that does not prove.** Plaintext observed Bus-1 PDUs do not establish FRC's MCU, whether it has ICU-S or another CMAC primitive, or where the `0x08A` CMAC is computed. A private FRC→gateway/brake link could carry a pre-authenticated image, or CGW/Skid/Brake could assemble and sign after consuming a differently packed request. Physical transmission and SecOC computation may occur in different ECUs.
+
+**Closed vs open.** The FRC-hosted recorder carries `5282/5631`; Bus-4 `0x08A` carries the same ID/pinion/assist subset; exact F33 is neither transmitter nor consumer; native Bus-1 CAN does not carry `0x08A`. Physical-TX candidates by topology are Skid Control, Brake Booster, and Central Gateway, but none is selected. FRC remains a signer candidate over private transport. OQ-054 requires exact candidate firmware or source-identifying physical evidence. Do not send `0x08A` to EPS.
+
+Deterministic evidence: `tools/analyze_camry_2026_08a_producer_bounds.py`, `data/generated/camry_2026_08a_producer_bounds.json` schema v3, `tests/verify_camry_2026_08a_producer_bounds.py`.
+
+## 42. Bus-1 camera/radar output is plaintext; GTS+ names the quantities, not a CAN DBC (VAR-093)
+
+Panda bus 1 is sniffed in both retained drives. The 22 periodic streams are readable as raw bytes. GTS+ still has **no** `BO_ 384` field map: it is DID/FFD keyed. The decode is a join from those OEM scales onto the wire.
+
+**Inventory** (drive B; drive A is the same ID/DLC set): `0x180..0x18B/64` and `0x18C/48` at ~20 Hz, `0x160/32` at ~40 Hz, plus `0x020/12`, `0x123/16`, `0x1A0/48`, `0x200/0x201/64`, `0x230/64`, `0x440/0x450/32`. Authenticated `0x00F` is absent. Last-4 of `0x180` is constant `00000000` (not ordinary-P5 MAC28).
+
+**CAN-FD framing.** `0x180..0x18B`: B0-B1 unique per frame (checksum/CRC), B2-B3 a shared rolling counter across the burst, last four bytes zero. `0x18C` uses the same header/trailer at DLC 48.
+
+**Object slots on `0x180/0x181/0x182`.** After the 4-byte header sit **eight 7-byte slots**, then a 4-byte zero trailer. Empty slot is exactly `fff8000000ffff` (Toyota `0xFFF8`/`0xFFFF` invalid-style sentinels). Occupied slot bytes 0-1 as unsigned big-endian × **0.01 m** match FRC Data List `0x190A` Forward Vehicle Distance (mul 100, two decimal places, metres) and Operation-FFD `5A22` vertical distance (unsigned, LSB 0.01 m). Both drives: every occupied slot is in (0, 500] m; median 26.06 m A / 37.12 m B; max 384.37 / 439.11 m. That is perception range, not the Bus-4 `0x08A` milliradian.
+
+FFD `5A24` (s16 lateral × 0.01 m) and `5A26` (s16 relative speed × 0.05 m/s) are **not** 1:1 overlays on slot bytes 2-5: those reads span hundreds of metres / thousands of m/s. Slot bytes 2-6 remain packed. The old 8-byte TSS2 radar DBC does not transfer.
+
+**The rest of the family.** `0x160[22]` is a delayed `0x025` steering-angle echo (VAR-074): measured pinion **onto** the ADAS bus so FRC can see the wheel (SAS → FRC), not a command. `0x183/0x184` use a different typed-record schema with float-shaped words (FFD Type-`f` / 32-bit FRC geometry vocabulary) but are not a copy of FFD `590C`. `0x185/0x188/0x18B` are often idle zeros. `0x186/0x189/0x18A` are structured and still unpacking. `0x18C/48` is the VAR-068 staircase/status PDU. GTS+ Bus 1 also contains Front Radar, so per-ID FRC-vs-radar TX is not named by CAN ID.
+
+The native camera family is perception plus inbound plant observers. How FRC's TSS **request** is built, handed to chassis, and whether any of that angle reaches EPS is §43 / VAR-094.
+
+Deterministic evidence: `tools/analyze_camry_2026_bus1_camera_output.py`, `data/generated/camry_2026_bus1_camera_output.json`, `tests/verify_camry_2026_bus1_camera_output.py` (VAR-093/094).
+
+## 43. Middle hop: FRC-hosted `5282`; no consecutive Bus-1 layout; authenticated request appears beside EPS (VAR-094)
+
+This bounds camera-bus contents and EPS ingress. It does not identify the private transport, physical Bus-4 transmitter, or signer.
+
+**Recorder object.** FRC is the TSS recorder host. Operation-FFD `5282` / LTA `5631` (LDA `5531` has the same shape) stores Target Lateral ID, signed pinion at 0.001 LSB, assist gain at 0.01, and damping gain at 0.01. Ordinary FRC Data List exposes LTA switch/control (`0x1601`) but not this four-field object. Named CAN observers include measured SAS `0x025` (FFD `2E8D` / `5273`) echoed onto Bus 1 as `0x160[22]`, EPS torque `0x030` (FFD `2E94` / `5247`), and the perception objects in VAR-093. Diagnostic `0x792` serves the recorder. Host location does not by itself prove final arbitration, wire packing, or CMAC ownership.
+
+**Observed route boundary.** The consecutive recorder layout `ID || pinion_s16be || assist` is absent from native Bus 1: 200 spread ID11 samples with `|B18|≥20` per drive yield zero hits inside ±25 ms and zero global four-byte hits. Scattered two-byte collisions (22/200 A, 40/200 B) never concentrate on one `(CAN ID, offset)`. Bus 4 separately carries the matching subset in `0x08A`. The transport between the FRC-hosted object and Bus 4 may be private or differently packed; retained CAN does not select FRC pre-authentication versus CGW/Skid/Brake assembly/signing.
+
+**Observed packing relation.** `0x08A` retains ID + pinion + assist as B21 / B18:B19 / B24, omits damping (B25=0), adds a cruise sidecar, and carries ordinary-P5 `FV4||MAC28`. That structural relation does not prove which ECU performed each step. Dual-pinion record `1B40_2` is the live milliradian at B18; `1B40_3` is unpublished (`0x7FFF` at B13:B14 and B16:B17). Winner `5285`/`57DE` is not a distinct Bus-4 s16. Grant `5265` remains FFD-only.
+
+**Steering angle, and whether any of it is relayed to EPS.**
+
+| Quantity | On the camera bus | Relayed to EPS? |
+|---|---|---|
+| Measured pinion | Yes: `0x160[22]` lags SAS `0x025` (VAR-074). Direction is plant → FRC. | No. SAS already lives on Bus 4 as `0x025`. The camera echo is FRC looking at the wheel. |
+| Requested pinion | No consecutive `5282` layout is observed. | Bus 4 publishes the quantity as `0x08A` B18 **beside** EPS. Exact F33 does not Rx `0x08A`; protected B6 is idle in the retained ID11 intervals; `1B40_3` is unpublished; default-bank `D0218` is not this milliradian. The captures therefore do not show this requested angle entering F33 as COM. |
+
+Remainder: private transport, physical Bus-4 transmitter, SecOC computation owner, and whether ID11 was actually granted. The signer needs producer/private-link evidence; the grant needs synchronized Operation FFD `5282/5285/57DE/5265`. Do not hunt another EPS CAN field or send `0x08A` to EPS.
+
+Deterministic evidence: same artifact/test as VAR-093 (`request_object_on_bus1` in schema v2).
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135)
+- Findings with this document as canonical home: [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137)
 <!-- knowledge-cross-references:end -->
