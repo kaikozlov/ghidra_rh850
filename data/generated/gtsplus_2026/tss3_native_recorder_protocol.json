@@ -1,10 +1,11 @@
 {
-  "boundary": "This is Techstream host acquisition semantics. It does not identify the ECU-side recorder producer, CAN/CAN-FD arbitration IDs, SecOC ownership, or PCS Data Viewer managed bit-assignment initializer contents.",
+  "boundary": "This is Techstream host acquisition/decoding semantics. It does not identify the ECU-side recorder producer, CAN/CAN-FD arbitration IDs, SecOC ownership, or arbitration execution owner.",
   "conclusions": [
     "The complete current-release native TSS3 recorder acquisition stack is now available without V18 behavioral transfer: current Operation plugin plus recovered-original current Image plugin and CommandCommon.",
     "Operation FFD uses proprietary AB11/12/13 requests with EB11/12/13 responses and selector 0x66; record payloads carry BE16 recorder Data IDs and u8 lengths.",
     "Current TSS3 Image FFD reads DID 0x1103 spec information and DID 0x1101 availability, then performs SecurityAccess 0x27 subfunctions 0x03/0x04 with a six-byte level-49 key before reading DID 0x2081 encryption method.",
-    "Image spec values 5 and 7 are explicitly supported; availability value 2 marks memorized image slots, 1..10 for spec5 and 1..11 for spec7."
+    "Image spec values 5 and 7 are explicitly supported; availability value 2 marks memorized image slots, 1..10 for spec5 and 1..11 for spec7.",
+    "Current Image-FFD split transport uses AB31/EB31 for RoB enumeration and AB33/EB33 for record fetch; EB33 carries RoB code, BE32 frame number, block count, and variable-length Data-ID blocks."
   ],
   "gtsplus_version": "2026.03.002.02",
   "image_ffd": {
@@ -165,6 +166,151 @@
         10,
         11
       ]
+    },
+    "split_record_protocol": {
+      "code_anchors": {
+        "ab31_eb31": [
+          {
+            "bytes": "c6857cffffffab",
+            "va": "0x10002863"
+          },
+          {
+            "bytes": "c6458831",
+            "va": "0x1000286E"
+          },
+          {
+            "bytes": "c645c4eb",
+            "va": "0x1000287A"
+          },
+          {
+            "bytes": "c645d031",
+            "va": "0x1000287E"
+          }
+        ],
+        "ab33_eb33": [
+          {
+            "bytes": "c68540ffffffab",
+            "va": "0x100033AD"
+          },
+          {
+            "bytes": "c6854cffffff33",
+            "va": "0x100033B4"
+          },
+          {
+            "bytes": "c64588eb",
+            "va": "0x100033C9"
+          },
+          {
+            "bytes": "c6459433",
+            "va": "0x100033CD"
+          }
+        ],
+        "ab33_payload_big_endian": [
+          {
+            "bytes": "0fb74b108bc1884db88b4b148b9d34ffffffc1e8088845ac8bc1c1e8188845c48bc1c1e8108845d08bc1c1e8088845dc8d45a4884de8",
+            "va": "0x100033FC"
+          }
+        ],
+        "eb33_length_selector": [
+          {
+            "bytes": "8a5008b8000100000fafc80fb6c2baff0f00006603c80fb7c189856cffffff05",
+            "va": "0x10002CE3"
+          }
+        ],
+        "eb33_offsets": [
+          {
+            "bytes": "bf08000000",
+            "va": "0x10002B04"
+          },
+          {
+            "bytes": "8d5f01",
+            "va": "0x10002B20"
+          }
+        ],
+        "frame_selector_divisor": [
+          {
+            "bytes": "b800020000",
+            "va": "0x10003207"
+          },
+          {
+            "bytes": "b800020000",
+            "va": "0x10003257"
+          }
+        ]
+      },
+      "eb33_response": {
+        "block": "data_id_be16 || length || data[length]",
+        "block_count_offset": 8,
+        "blocks_offset": 9,
+        "count_zero_policy": "derive block count by scanning valid blocks from offset 9",
+        "duplicate_policy": "deduplicate Data IDs within the parsed record",
+        "header": "EB33 || rob_code_be16 || frame_number_be32 || block_count_u8",
+        "length": "BE32 when data_id is 0x6000..0x6FFF; otherwise u8",
+        "special_data_id": "0x0501 is additionally surfaced as BE16 metadata when length >= 2"
+      },
+      "frame_number_helpers": {
+        "occurrence": "u32 = 0x00000000 | (split*0x200 + data_set*10 + trigger - 10)",
+        "split_range_observed_in_current acquisition loops": [
+          1,
+          22
+        ],
+        "time_series": "u32 = ((split*0x200 + data_set*10 - 9) << 16) | (trigger_part_a + trigger_part_b - 1)",
+        "vectors": {
+          "occurrence_split1_set1_trigger1": "0x00000201",
+          "occurrence_split22_set3_trigger7": "0x00002C1B",
+          "time_series_split1_set1_parts1_0": "0x02010000",
+          "time_series_split22_set3_parts4_3": "0x2C150006"
+        }
+      },
+      "functions": {
+        "enumerate_rob_codes": {
+          "end_va": "0x100029E0",
+          "sha256": "294e4fdc3c8e43d263b1cfb0f3ca42c5607490e2e16d9aa8e6b75fd8d61728d1",
+          "size": 576,
+          "va": "0x100027A0"
+        },
+        "fetch_record": {
+          "end_va": "0x10003550",
+          "sha256": "772b4b313ac30e4d838e2ed09681f1df32b4fd015af61882a959a5db020af234",
+          "size": 704,
+          "va": "0x10003290"
+        },
+        "frame_selector_occurrence": {
+          "end_va": "0x10003290",
+          "sha256": "b2d3d8f2fb79073ff4d712c23a349bbf59c636da5ab82d65aecb4382d968f488",
+          "size": 64,
+          "va": "0x10003250"
+        },
+        "frame_selector_time_series": {
+          "end_va": "0x10003250",
+          "sha256": "c94d569e83a1cc6a4ffc05e86f856647c1e3f6e8c9cd50ebb2e800e9b9db1403",
+          "size": 80,
+          "va": "0x10003200"
+        },
+        "init_fetch_record": {
+          "end_va": "0x10003710",
+          "sha256": "b0e615f30b7b3fea1e8e609c130ca7d2e0174bc1c4d03746e20a80391a8e30a7",
+          "size": 96,
+          "va": "0x100036B0"
+        },
+        "parse_eb33": {
+          "end_va": "0x10003120",
+          "sha256": "94c06c075bf9d37e91fd375abd469b2b9524a5cb6dcbbffc4e5104530dd7ab21",
+          "size": 1664,
+          "va": "0x10002AA0"
+        }
+      },
+      "requests": {
+        "enumerate_rob_codes": {
+          "positive": "EB31",
+          "request": "AB31",
+          "response_items": "BE16 RoB codes from response offset 2"
+        },
+        "fetch_record": {
+          "positive": "EB33",
+          "request": "AB33 || rob_code_be16 || frame_number_be32"
+        }
+      }
     }
   },
   "operation_ffd": {

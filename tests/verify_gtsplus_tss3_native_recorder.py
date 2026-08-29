@@ -9,7 +9,12 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "tools/techstream"))
 
-from extract_gtsplus_tss3_native_recorder import build, level49
+from extract_gtsplus_tss3_native_recorder import (
+    build,
+    image_frame_selector_occurrence,
+    image_frame_selector_time_series,
+    level49,
+)
 
 ART = REPO / "data/generated/gtsplus_2026/tss3_native_recorder_protocol.json"
 
@@ -73,6 +78,25 @@ def main() -> int:
     check("spec5 has ten image slots", image["spec_contract"]["spec_5_availability_slots"] == list(range(1, 11)))
     check("spec7 has eleven image slots", image["spec_contract"]["spec_7_availability_slots"] == list(range(1, 12)))
     check("availability marker is 2", image["spec_contract"]["available_value"] == 2)
+
+    split = image["split_record_protocol"]
+    check("Image RoB enumeration", split["requests"]["enumerate_rob_codes"] == {"request": "AB31", "positive": "EB31", "response_items": "BE16 RoB codes from response offset 2"})
+    check("Image record fetch", split["requests"]["fetch_record"] == {"request": "AB33 || rob_code_be16 || frame_number_be32", "positive": "EB33"})
+    eb33 = split["eb33_response"]
+    check("EB33 header", eb33["header"] == "EB33 || rob_code_be16 || frame_number_be32 || block_count_u8")
+    check("EB33 count/data offsets", eb33["block_count_offset"] == 8 and eb33["blocks_offset"] == 9)
+    check("EB33 variable length grammar", eb33["length"] == "BE32 when data_id is 0x6000..0x6FFF; otherwise u8")
+    check("EB33 zero-count fallback", eb33["count_zero_policy"] == "derive block count by scanning valid blocks from offset 9")
+    check("EB33 duplicate policy", eb33["duplicate_policy"] == "deduplicate Data IDs within the parsed record")
+    check("EB33 special 0501", eb33["special_data_id"].startswith("0x0501"))
+
+    frame = split["frame_number_helpers"]
+    check("Image split range 1..22", frame["split_range_observed_in_current acquisition loops"] == [1, 22])
+    check("occurrence frame vector 1", image_frame_selector_occurrence(1, 1, 1) == 0x0201 and frame["vectors"]["occurrence_split1_set1_trigger1"] == "0x00000201")
+    check("occurrence frame vector 22", image_frame_selector_occurrence(22, 3, 7) == 0x2C1B and frame["vectors"]["occurrence_split22_set3_trigger7"] == "0x00002C1B")
+    check("time-series frame vector 1", image_frame_selector_time_series(1, 1, 1, 0) == 0x02010000 and frame["vectors"]["time_series_split1_set1_parts1_0"] == "0x02010000")
+    check("time-series frame vector 22", image_frame_selector_time_series(22, 3, 4, 3) == 0x2C150006 and frame["vectors"]["time_series_split22_set3_parts4_3"] == "0x2C150006")
+    check("Image split function body pins", split["functions"]["parse_eb33"]["sha256"] == "94c06c075bf9d37e91fd375abd469b2b9524a5cb6dcbbffc4e5104530dd7ab21" and split["functions"]["fetch_record"]["sha256"] == "772b4b313ac30e4d838e2ed09681f1df32b4fd015af61882a959a5db020af234")
 
     vectors = image["security"]["algorithm_vectors"]
     for seed, expected in {

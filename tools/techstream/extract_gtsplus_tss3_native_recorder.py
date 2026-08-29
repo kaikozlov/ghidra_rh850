@@ -58,6 +58,45 @@ OPERATION_CODE_ANCHORS = {
     "selector_66": (0x10002D73, "6a66"),
 }
 
+
+IMAGE_PLUGIN_FUNCTIONS = {
+    "enumerate_rob_codes": (0x100027A0, 0x100029E0),
+    "parse_eb33": (0x10002AA0, 0x10003120),
+    "frame_selector_time_series": (0x10003200, 0x10003250),
+    "frame_selector_occurrence": (0x10003250, 0x10003290),
+    "fetch_record": (0x10003290, 0x10003550),
+    "init_fetch_record": (0x100036B0, 0x10003710),
+}
+
+IMAGE_PLUGIN_CODE_ANCHORS = {
+    "ab31_eb31": (
+        0x10002863, "c6857cffffffab",
+        0x1000286E, "c6458831",
+        0x1000287A, "c645c4eb",
+        0x1000287E, "c645d031",
+    ),
+    "ab33_eb33": (
+        0x100033AD, "c68540ffffffab",
+        0x100033B4, "c6854cffffff33",
+        0x100033C9, "c64588eb",
+        0x100033CD, "c6459433",
+    ),
+    "eb33_offsets": (
+        0x10002B04, "bf08000000",
+        0x10002B20, "8d5f01",
+    ),
+    "eb33_length_selector": (
+        0x10002CE3, "8a5008b8000100000fafc80fb6c2baff0f00006603c80fb7c189856cffffff05",
+    ),
+    "ab33_payload_big_endian": (
+        0x100033FC, "0fb74b108bc1884db88b4b148b9d34ffffffc1e8088845ac8bc1c1e8188845c48bc1c1e8108845d08bc1c1e8088845dc8d45a4884de8",
+    ),
+    "frame_selector_divisor": (
+        0x10003207, "b800020000",
+        0x10003257, "b800020000",
+    ),
+}
+
 SPECIAL_BEHAVIOR_IDS = [
     0x2270, 0x2271, 0x2272, 0x2273, 0x2274,
     0x2296, 0x2297, 0x2298, 0x2299,
@@ -135,6 +174,18 @@ def operation_anchor(pe: pefile.PE, data: bytes, base: int, spec: tuple[Any, ...
     return out
 
 
+def image_frame_selector_time_series(split_no: int, data_set_no: int, trigger_part_a: int, trigger_part_b: int) -> int:
+    """Express FUN_10003200: packed current Image-FFD time-series selector."""
+    high = ((split_no & 0xFF) * 0x200 + (data_set_no & 0xFF) * 10 - 9) & 0xFFFF
+    low = ((trigger_part_a & 0xFF) + (trigger_part_b & 0xFF) - 1) & 0xFFFF
+    return (high << 16) | low
+
+
+def image_frame_selector_occurrence(split_no: int, data_set_no: int, trigger_no: int) -> int:
+    """Express FUN_10003250: current Image-FFD occurrence selector (0000xxxx)."""
+    return ((split_no & 0xFF) * 0x200 + (data_set_no & 0xFF) * 10 + (trigger_no & 0xFF) - 10) & 0xFFFF
+
+
 def level49(seed: bytes) -> bytes:
     """Independently express current CalculateKeyDataSecLv49 semantics."""
     if len(seed) != 6:
@@ -167,7 +218,7 @@ def build() -> dict[str, Any]:
         image_path = recovered_root / "bin/GetTSS3ImageFFDP5_DT.dll"
 
         command_pe, command_data, command_base = pe_info(command_path)
-        image_pe, _image_data, image_base = pe_info(image_path)
+        image_pe, image_data, image_base = pe_info(image_path)
         operation_pe, operation_data, operation_base = pe_info(operation_path)
         command_exports = exports(command_pe, command_base)
         image_exports = exports(image_pe, image_base)
@@ -233,11 +284,32 @@ def build() -> dict[str, Any]:
         if special_values != SPECIAL_BEHAVIOR_IDS:
             raise ValueError(f"special behavior table drift: {special_values}")
 
-        # The recovered Image plugin itself is useful identity/provenance even
-        # though its execution delegates core protocol semantics to CommandCommon.
+        # The Image plugin also owns the split-record transport that follows the
+        # CommandCommon setup/security path. Pin exact current function bodies
+        # and direct machine-code anchors so this grammar fails closed on drift.
         image_execute = image_exports.get("Execute")
         if image_execute != 0x1000EEB0:
             raise ValueError(f"GetTSS3Image Execute drift: {image_execute}")
+        image_plugin_functions: dict[str, Any] = {}
+        for key, (start, end) in IMAGE_PLUGIN_FUNCTIONS.items():
+            body = read_va(image_pe, image_data, image_base, start, end - start)
+            image_plugin_functions[key] = {
+                "va": f"0x{start:08X}",
+                "end_va": f"0x{end:08X}",
+                "size": len(body),
+                "sha256": sha256_bytes(body),
+            }
+        image_plugin_anchors = {
+            key: operation_anchor(image_pe, image_data, image_base, spec)
+            for key, spec in IMAGE_PLUGIN_CODE_ANCHORS.items()
+        }
+
+        frame_vectors = {
+            "occurrence_split1_set1_trigger1": f"0x{image_frame_selector_occurrence(1, 1, 1):08X}",
+            "occurrence_split22_set3_trigger7": f"0x{image_frame_selector_occurrence(22, 3, 7):08X}",
+            "time_series_split1_set1_parts1_0": f"0x{image_frame_selector_time_series(1, 1, 1, 0):08X}",
+            "time_series_split22_set3_parts4_3": f"0x{image_frame_selector_time_series(22, 3, 4, 3):08X}",
+        }
 
         vectors = {
             "000000000000": level49(bytes.fromhex("000000000000")).hex(),
@@ -275,14 +347,46 @@ def build() -> dict[str, Any]:
                 "frames": constants,
                 "spec_contract": {"accepted_spec_values": [5, 7], "spec_5_availability_slots": list(range(1, 11)), "spec_7_availability_slots": list(range(1, 12)), "available_value": 2},
                 "security": {"seed_length": 6, "seed_request": "2703", "key_request_prefix": "2704", "algorithm": "CCmdImgOpeDdr::CalculateKeyDataSecLv49", "algorithm_vectors": vectors, "boundary": "SecurityUnlock16Byte is a separate current body using CalculateKeyDataSecLv2; GetTSS3ImageFFDInfo calls the six-byte SecurityUnlock path."},
+                "split_record_protocol": {
+                    "requests": {
+                        "enumerate_rob_codes": {
+                            "request": "AB31",
+                            "positive": "EB31",
+                            "response_items": "BE16 RoB codes from response offset 2",
+                        },
+                        "fetch_record": {
+                            "request": "AB33 || rob_code_be16 || frame_number_be32",
+                            "positive": "EB33",
+                        },
+                    },
+                    "eb33_response": {
+                        "header": "EB33 || rob_code_be16 || frame_number_be32 || block_count_u8",
+                        "block_count_offset": 8,
+                        "blocks_offset": 9,
+                        "block": "data_id_be16 || length || data[length]",
+                        "length": "BE32 when data_id is 0x6000..0x6FFF; otherwise u8",
+                        "count_zero_policy": "derive block count by scanning valid blocks from offset 9",
+                        "duplicate_policy": "deduplicate Data IDs within the parsed record",
+                        "special_data_id": "0x0501 is additionally surfaced as BE16 metadata when length >= 2",
+                    },
+                    "frame_number_helpers": {
+                        "occurrence": "u32 = 0x00000000 | (split*0x200 + data_set*10 + trigger - 10)",
+                        "time_series": "u32 = ((split*0x200 + data_set*10 - 9) << 16) | (trigger_part_a + trigger_part_b - 1)",
+                        "split_range_observed_in_current acquisition loops": [1, 22],
+                        "vectors": frame_vectors,
+                    },
+                    "functions": image_plugin_functions,
+                    "code_anchors": image_plugin_anchors,
+                },
             },
             "conclusions": [
                 "The complete current-release native TSS3 recorder acquisition stack is now available without V18 behavioral transfer: current Operation plugin plus recovered-original current Image plugin and CommandCommon.",
                 "Operation FFD uses proprietary AB11/12/13 requests with EB11/12/13 responses and selector 0x66; record payloads carry BE16 recorder Data IDs and u8 lengths.",
                 "Current TSS3 Image FFD reads DID 0x1103 spec information and DID 0x1101 availability, then performs SecurityAccess 0x27 subfunctions 0x03/0x04 with a six-byte level-49 key before reading DID 0x2081 encryption method.",
                 "Image spec values 5 and 7 are explicitly supported; availability value 2 marks memorized image slots, 1..10 for spec5 and 1..11 for spec7.",
+                "Current Image-FFD split transport uses AB31/EB31 for RoB enumeration and AB33/EB33 for record fetch; EB33 carries RoB code, BE32 frame number, block count, and variable-length Data-ID blocks.",
             ],
-            "boundary": "This is Techstream host acquisition semantics. It does not identify the ECU-side recorder producer, CAN/CAN-FD arbitration IDs, SecOC ownership, or PCS Data Viewer managed bit-assignment initializer contents.",
+            "boundary": "This is Techstream host acquisition/decoding semantics. It does not identify the ECU-side recorder producer, CAN/CAN-FD arbitration IDs, SecOC ownership, or arbitration execution owner.",
         }
 
 

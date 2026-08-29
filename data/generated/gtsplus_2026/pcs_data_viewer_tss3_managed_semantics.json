@@ -1,4 +1,124 @@
 {
+  "image_ffd": {
+    "fcm_tss3": {
+      "accepted_specs": [
+        5,
+        7
+      ],
+      "decryption": {
+        "bit_mapping": "b0->b7,b1->b6,b2->b5,b3->b4,b4->b3,b5->b2,b6->b1,b7->b0",
+        "create_method_rva": 2424344,
+        "per_byte": "reverse_bits8(cipher_byte) XOR 0xAA",
+        "source_method_rva": 2424452
+      },
+      "encryption_key": 170,
+      "encryption_status": {
+        "decrypt_when": "value != 01",
+        "diagnostic_did": "2081",
+        "positive_response_prefix": "622081",
+        "predicate_method_rva": 2424328,
+        "source_method_rva": 2430959,
+        "unencrypted_value": "01",
+        "value_hex_length": 2,
+        "value_hex_offset": 6
+      },
+      "filename_format": "{0:D3}.jpg",
+      "height": 180,
+      "image_table_cctor_rva": 2435112,
+      "split_transport": {
+        "assembled_raw_image_did": "6001",
+        "detected_markers": {
+          "split": "EB31",
+          "unsplit": "EB21"
+        },
+        "eb33": {
+          "data_hex_length": "2 * parsed byte length",
+          "did_id_hex_length": 4,
+          "did_parser_method_rva": 2431724,
+          "did_stream_hex_offset": 18,
+          "frame_number_hex_length": 8,
+          "frame_number_hex_offset": 8,
+          "frame_parser_method_rva": 2431131,
+          "length_hex_length": {
+            "did_starts_with_6": 8,
+            "other": 2
+          },
+          "length_number_style": "0x203 (hex)",
+          "rob_code_hex_length": 4,
+          "rob_code_hex_offset": 4,
+          "rob_parser_method_rva": 2431056
+        },
+        "extract_method_rva": 2421004,
+        "extraction_type_method_rva": 2421188,
+        "first_group_metadata_split_id_removed": "6002",
+        "first_split_group_required": 1,
+        "frame_number": {
+          "format_width_hex": 8,
+          "methods": {
+            "constants_rva": 2425654,
+            "constructor_rva": 2425328,
+            "occurrence_data_set_rva": 2425589,
+            "occurrence_trigger_rva": 2425570,
+            "split_rva": 2425561,
+            "time_series_data_set_rva": 2425633,
+            "time_series_trigger_rva": 2425628
+          },
+          "occurrence_decode": {
+            "data_set": "ceil((value % 0x200) / 10)",
+            "split": "value // 0x200",
+            "trigger": "((value % 0x200 - 1) % 10) + 1",
+            "trigger_type": "1 when trigger == 1, otherwise 2"
+          },
+          "occurrence_selector": "first four frame-number hex characters are 0000",
+          "split_divisor": 512,
+          "time_series_decode": {
+            "data_set": "((high16 - split*0x200 - 1) // 10) + 1",
+            "high16": "frame_number[0:4] as hex",
+            "low16": "frame_number[4:8] as hex",
+            "split": "high16 // 0x200",
+            "trigger": "low16 + 1",
+            "trigger_type": 3
+          },
+          "trigger_point_max": 10
+        },
+        "join_method_rva": 2431340,
+        "reassembly": "for each split group, append the first present DID from 6002..6017; publish the concatenation as DID 6001",
+        "split_id_table_method_rva": 2432928,
+        "split_image_dids": [
+          "6002",
+          "6003",
+          "6004",
+          "6005",
+          "6006",
+          "6007",
+          "6008",
+          "6009",
+          "600A",
+          "600B",
+          "600C",
+          "600D",
+          "600E",
+          "600F",
+          "6010",
+          "6011",
+          "6012",
+          "6013",
+          "6014",
+          "6015",
+          "6016",
+          "6017"
+        ],
+        "split_info_markers": [
+          "621103",
+          "622081",
+          "EB33"
+        ],
+        "split_info_method_rva": 2421336,
+        "supported_path": "split EB31/EB33; Extract rejects the EB21 discriminator"
+      },
+      "width": 360
+    }
+  },
   "operation_ffd": {
     "detail_row_count": 1130,
     "detail_rows": [

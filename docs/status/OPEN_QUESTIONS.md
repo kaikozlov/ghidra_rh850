@@ -926,9 +926,15 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   acquisition path is now recovered (`AB11/12/13 -> EB11/12/13`; Image-FFD
   `22 11 03 -> 22 11 01 -> 27 03/04 -> 22 20 81`), TSE persists PCS FFD sections,
   and PCS Data Viewer names the longitudinal/lateral request and arbitration model.
-  The remaining host-static gap is the managed recorder-ID -> byte/bit/LSB/offset
-  initializer table or a real TSS3 TSE specimen, not the acquisition protocol itself.
-  Join that evidence to an exact target's installed modules and live/firmware evidence. Older Toyota prior
+  TMS-084 now closes the former managed-table gap too: 1,130 exact bit/scaling rows
+  across 623 recorder DIDs, 47 RoB definitions, and the current FCM TSS3 image decode
+  (`AB31/EB31`, `AB33/EB33`, exact byte-9 variable-length block grammar, `6002..6017`
+  split reassembly to `6001`, then `622081` value `01` unencrypted or
+  `reverse_bits8(cipher_byte) XOR 0xAA`).
+  The remaining host-side validation item is a representative Toyota-generated TSS3 TSE
+  specimen; the substantive open problem is recorder-ID -> vehicle-network producer/frame/
+  SecOC ownership and arbitration execution on an exact target. Join that evidence to an exact
+  target's installed modules and live/firmware evidence. Older Toyota prior
   art makes longitudinal ownership a separate generation-specific architecture:
   ordinary TSS2 treats the camera as the ACC command source, `RADAR_ACC` moves
   ownership to the radar, and some SecOC-protected profiles split acceleration

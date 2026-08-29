@@ -4,8 +4,8 @@
 > English/Japanese satellite resources, and the native `FRC_P5` TSS3
 > Operation/Image FFD plugins.
 >
-> **Status:** recovered host-side dictionary/model surface; concrete per-field
-> bit assignments/scalings remain bounded by protected managed initializers.
+> **Status:** recovered host-side dictionary/model surface with exact Operation-FFD
+> bit/scaling/RoB tables and the current FCM TSS3 Image-FFD payload transform.
 >
 > **Artifact:**
 > `data/generated/gtsplus_2026/pcs_data_viewer_tss3_dictionary.json`, generated
@@ -325,6 +325,58 @@ former PCS managed-initializer boundary is closed above: the recovered viewer
 supplies exact Operation-FFD bit/scaling/RoB tables and also makes the Image-FFD
 initializers executable.
 
+The current native Image plugin and recovered viewer now join at the record
+transport as well. `GetTSS3ImageFFDP5_DT.dll` byte-anchors **`AB31 -> EB31`**
+for BE16 RoB-code enumeration and **`AB33 || rob_code_be16 || frame_number_be32
+-> EB33`** for record fetch. The raw EB33 response is:
+
+```text
+EB33 || rob_code_be16 || frame_number_be32 || block_count_u8 || blocks...
+```
+
+The count is byte 8 and blocks begin at byte 9. Each block is
+`data_id_be16 || length || data[length]`; `6xxx` image DIDs use a **BE32** length,
+while other DIDs use a one-byte length. If the count byte is zero the native
+parser derives the count by scanning valid blocks from byte 9. It deduplicates
+Data IDs and retains the same special `0501` BE16 metadata behavior seen in the
+Operation path. Current frame-number helpers use `0x200`-wide split groups and
+the acquisition loops cover split numbers **1..22**.
+
+The recovered viewer independently parses the logged EB33 text with the exact
+same geometry: RoB at hex offset 4/length 4, frame number at offset 8/length 8,
+and DID blocks at hex offset **18** (= byte 9). Its split-image table is exactly
+`6002..6017` (22 DIDs). For each split group it appends the first present split
+DID in that order and publishes the concatenation as synthetic raw-image DID
+**`6001`**; group 1 removes `6002` from the copied metadata before publishing.
+The viewer detects `EB21` as the unsplit discriminator and `EB31` as split, but
+the current `Extract` implementation rejects the EB21 branch and proceeds via
+`EB31/EB33`. Frame-number encoding is also closed in both directions. A value
+whose high 16 bits are zero is an occurrence selector:
+`split*0x200 + set*10 + trigger - 10`. A nonzero high half is the time-series
+form: `high16 = split*0x200 + set*10 - 9`, while the low half is one less than
+the viewer's recovered trigger number. The managed decoder independently
+recovers split/set/trigger/type from those fields, providing a round-trip check
+on the native helper semantics rather than relying on function-name inference.
+
+The restored FCM TSS3 image bodies close the payload transform too.
+`LogAnalyser622081::GetEncryption` reads the two hex characters immediately
+after positive-response prefix `622081` and `FFImage::JudgeEncryption` treats
+exact value **`01` as unencrypted**; any other value selects the decryption
+branch in `FFImage::Create`. Specs 5 and 7 both index the same image-table row:
+**360×180**, filename format **`{0:D3}.jpg`**, encryption key **`0xAA`**. For
+each ciphertext byte the viewer reverses all eight bit positions and then XORs
+the result with `0xAA`:
+
+```text
+plain_byte = reverse_bits8(cipher_byte) XOR 0xAA
+```
+
+The generated managed-semantics artifact pins the method RVAs, status-field
+substring geometry, table constants and bit-transform opcode pattern, and the
+verification suite exercises independent byte vectors. This is the exact
+current host decode algorithm; it is not a claim about how the FCM internally
+forms or protects image data before the diagnostic readout.
+
 ## 10. Shipped FFD parameter help adds plain-language semantics
 
 The viewer also ships `Help/ParameterHelp.chm`. Its `FFD.htm` page is an
@@ -373,9 +425,6 @@ TSS3 generation uses the same raw field or network encoding.
 4. **Arbitration execution owner.** The existence of generic TSS request and
    arbitration-result fields proves the software abstraction, not which ECU
    executes the arbitration on every TSS3 architecture.
-5. **Image payload encryption/decryption.** The managed bodies are now
-   executable and the native host setup/security path is recovered, but this
-   pass has not established the recorder image payload transform or key material.
 
 The immediate practical use is to treat PCS Data Viewer as a second Rosetta
 stone alongside GTS+ DDBs: search the full generated dictionary for a firmware

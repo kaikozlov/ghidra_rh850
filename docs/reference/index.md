@@ -314,7 +314,7 @@ Findings: 380 · Corrections: 132 · Open questions: 54 · Docs: 110 · Suites: 
 | <a id="finding-tms-081"></a>**TMS-081** | [docs/tooling/gtsplus-body-recovery.md](../tooling/gtsplus-body-recovery.md) | — | `tests/verify_gtsplus_body_recovery.py` | — |
 | <a id="finding-tms-082"></a>**TMS-082** | [docs/tooling/techstream.md](../tooling/techstream.md), [docs/tooling/pcs-data-viewer-tss3-dictionary.md](../tooling/pcs-data-viewer-tss3-dictionary.md) | — | `tests/verify_gtsplus_tss3_native_recorder.py` | — |
 | <a id="finding-tms-083"></a>**TMS-083** | [docs/tooling/cuwplus-body-recovery.md](../tooling/cuwplus-body-recovery.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_gtsplus_managed_exe_recovery.py`, `tests/verify_cuwplus_body_recovery.py`, `tests/verify_gtsplus_aux_body_recovery.py` | — |
-| <a id="finding-tms-084"></a>**TMS-084** | [docs/tooling/pcs-data-viewer-tss3-dictionary.md](../tooling/pcs-data-viewer-tss3-dictionary.md), [docs/tooling/gtsplus-tse-gtse-saved-session.md](../tooling/gtsplus-tse-gtse-saved-session.md) | — | `tests/verify_gtsplus_pcs_data_viewer_tss3_managed_semantics.py`, `tests/verify_gtsplus_aux_body_recovery.py` | — |
+| <a id="finding-tms-084"></a>**TMS-084** | [docs/tooling/pcs-data-viewer-tss3-dictionary.md](../tooling/pcs-data-viewer-tss3-dictionary.md), [docs/tooling/gtsplus-tse-gtse-saved-session.md](../tooling/gtsplus-tse-gtse-saved-session.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) | `tests/verify_gtsplus_pcs_data_viewer_tss3_managed_semantics.py`, `tests/verify_gtsplus_aux_body_recovery.py` | OQ-052 |
 | <a id="finding-var-001"></a>**VAR-001** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md) | `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-002"></a>**VAR-002** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_spanconstant_corolla_equivalence.py`, `tests/verify_spanconstant_corolla_cross_variant.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-003"></a>**VAR-003** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
@@ -455,7 +455,7 @@ Findings: 380 · Corrections: 132 · Open questions: 54 · Docs: 110 · Suites: 
 | <a id="open-question-oq-049"></a>**OQ-049** | Application CommunicationControl live effect | Tooling | — |
 | <a id="open-question-oq-050"></a>**OQ-050** | Exploit-interest cohort consumption (SWEEP-008) | Tooling | SWEEP-008, SECOC-047, CORR-101 |
 | <a id="open-question-oq-051"></a>**OQ-051** | Cross-calibration structural triage of future P1M-E images | Tooling | MEM-SAFE-001 |
-| <a id="open-question-oq-052"></a>**OQ-052** | True-TSS3 longitudinal producer/control contract | Tooling | TMS-079, TMS-080 |
+| <a id="open-question-oq-052"></a>**OQ-052** | True-TSS3 longitudinal producer/control contract | Tooling | TMS-079, TMS-080, TMS-084 |
 | <a id="open-question-oq-053"></a>**OQ-053** | F33 non-disruptive application-mode RAM execution pivot | Tooling | VAR-060, CORR-124, CORR-123 |
 | <a id="open-question-oq-054"></a>**OQ-054** | exact-F33 stock-LTA authority into the shared `CC50/CC62` actuation funnel | Tooling | VAR-081, VAR-082, VAR-083, VAR-084, CORR-129, CORR-092 |
 

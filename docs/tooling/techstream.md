@@ -3058,7 +3058,12 @@ The viewer also independently exposes `LogAnalyserEB12` (RoB code/trigger) and
 proprietary Operation-FFD `AB 12/13 -> EB 12/13` acquisition family. Image FFD is pinned
 to front-camera recorder IDs `0501/0502/0507/0511/5101` plus variable raw-image DID
 `6001`; its restored initializers now expose minimum lengths, 13 header-field bit layouts,
-and image-RoB timing tables too. See
+and image-RoB timing tables too. The same recovered FCM TSS3 bodies close the image
+payload decoder: `622081` value `01` means unencrypted, otherwise each byte is decoded as
+`reverse_bits8(cipher_byte) XOR 0xAA`; specs 5/7 share the 360×180 `{0:D3}.jpg` row. The
+viewer also closes split reassembly: logged `EB33` blocks start at byte 9, `6xxx` DIDs use
+BE32 lengths, split DIDs `6002..6017` are joined in order, and the result is exposed as raw
+image DID `6001`. See
 [pcs-data-viewer-tss3-dictionary.md](pcs-data-viewer-tss3-dictionary.md) and
 `data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json`.
 
@@ -3074,7 +3079,15 @@ has a current-body end-to-end setup chain: `22 11 03` spec -> `22 11 01` availab
 **`27 03` six-byte seed / `27 04` six-byte level-49 key** -> `22 20 81` encryption method.
 `GetTSS3ImageFFDInfo` directly calls the six-byte `SecurityUnlock` path, not the separate
 16-byte/level-2 implementation. Accepted image specs are 5 and 7; availability value 2
-marks slots 1..10 and 1..11 respectively. This removes the remaining V18 executable-body transfer from the native TSS3 recorder
+marks slots 1..10 and 1..11 respectively. The same current Image plugin now closes the
+record transport too: `AB31 -> EB31` enumerates BE16 RoB codes;
+`AB33 || rob_code_be16 || frame_number_be32 -> EB33` fetches a record; EB33 is
+`EB33 || RoB BE16 || frame BE32 || count u8 || blocks`, with blocks starting at byte 9 and
+using BE32 lengths for `6xxx` DIDs versus u8 lengths otherwise. The current frame helpers
+use `0x200` split groups and acquisition loops cover splits 1..22; `0000xxxx` frame numbers
+are occurrence selectors, while nonzero high16 values encode the time-series split/set group
+and the low16 value is trigger-minus-one. PCS Data Viewer independently implements the inverse
+formulas. This removes the remaining V18 executable-body transfer from the native TSS3 recorder
 acquisition path. The former managed PCS Data Viewer initializer boundary is now closed
 independently by the CP-managed-EXE recovery above.
 

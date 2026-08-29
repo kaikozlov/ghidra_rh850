@@ -3,9 +3,10 @@
 
 The shipped PCS Data Viewer.exe intentionally has zeroed managed method bodies.
 Run ``tools/gts recover-aux-bodies`` (or ``recover-all-bodies``) first, then
-point this extractor at the recovered PE.  It interprets only the straight-line
+point this extractor at the recovered PE.  It interprets the straight-line
 static-constructor subset needed for Toyota's Operation-FFD TSS3 definition
-objects; it is not a general CLR interpreter.
+objects and validates the exact FCM TSS3 image-decoder IL shape; it is not a
+general CLR interpreter.
 """
 from __future__ import annotations
 
@@ -44,6 +45,14 @@ ROB_FIELDS = (
     "PostTriggerNumber", "IsMultiTrigger", "UniqueRoBCodeDID",
 )
 STEERING_DIDS = {"5282", "5285", "5531", "560D", "5631", "5681", "568D", "57A3", "57DE", "590C"}
+FCM_IMAGE_TYPE = "PCSDataViewer.Extractor.ImageFFD.FCMImageFFD.FCMImageFFDTSS3.DataTable.FCMDataTableImage"
+FCM_IMAGE_MODEL = "PCSDataViewer.Extractor.ImageFFD.FCMImageFFD.FCMImageFFDTSS3.Model.FFImage"
+FCM_IMAGE_LOG = "PCSDataViewer.Extractor.ImageFFD.FCMImageFFD.FCMImageFFDTSS3.LogAnalyser.LogAnalyser622081"
+FCM_IMAGE_EXTRACTOR = "PCSDataViewer.Extractor.ImageFFD.FCMImageFFD.FCMImageFFDTSS3.FCMImageFFDTTS3"
+FCM_IMAGE_EB33 = "PCSDataViewer.Extractor.ImageFFD.FCMImageFFD.FCMImageFFDTSS3.LogAnalyser.LogAnalyserEB33"
+FCM_IMAGE_EB33_LIST = "PCSDataViewer.Extractor.ImageFFD.FCMImageFFD.FCMImageFFDTSS3.LogAnalyser.LogAnalyserEB33List"
+FCM_IMAGE_DID_TABLE = "PCSDataViewer.Extractor.ImageFFD.FCMImageFFD.FCMImageFFDTSS3.DataTable.FCMDataTableDIDData"
+FCM_IMAGE_FRAME = "PCSDataViewer.Extractor.ImageFFD.FCMImageFFD.FCMImageFFDTSS3.Model.FrameNumberData"
 
 
 def sha256_file(path: Path) -> str:
@@ -121,6 +130,247 @@ def _find_method(pe: dnfile.dnPE, full_type: str, name: str) -> dnfile.mdtable.M
             raise ValueError(f"{full_type}: expected one {name}, got {len(matches)}")
         return matches[0]
     raise ValueError(f"type not found: {full_type}")
+
+
+def _method_instructions(pe: dnfile.dnPE, full_type: str, name: str) -> tuple[int, list[Any]]:
+    method = _find_method(pe, full_type, name)
+    body = CilMethodBody(MethodBodyReader(pe, method))
+    return int(method.Rva), list(body.instructions)
+
+
+def _call_names(pe: dnfile.dnPE, instructions: list[Any]) -> list[tuple[str, str]]:
+    owners = _method_owner_map(pe)
+    out: list[tuple[str, str]] = []
+    for ins in instructions:
+        if str(ins.opcode) not in ("call", "callvirt", "newobj"):
+            continue
+        out.append(_owner_and_name(resolve_token(pe, ins.operand), owners))
+    return out
+
+
+def _extract_fcm_image_contract(pe: dnfile.dnPE) -> dict[str, Any]:
+    table_rva, table = _method_instructions(pe, FCM_IMAGE_TYPE, ".cctor")
+    table_ints = [value for ins in table if (value := _int_constant(ins)) is not None]
+    table_strings = [str(resolve_token(pe, ins.operand)) for ins in table if str(ins.opcode) == "ldstr"]
+    table_fields = [
+        _field_owner_and_name(resolve_token(pe, ins.operand))[1]
+        for ins in table
+        if str(ins.opcode) == "ldsfld"
+    ]
+    if table_ints != [360, 180, 170, 0, 0] or table_strings != ["{0:D3}.jpg"] or table_fields != ["NO_05", "NO_07"]:
+        raise ValueError(
+            "unexpected FCM TSS3 image table constructor: "
+            f"ints={table_ints!r} strings={table_strings!r} fields={table_fields!r}"
+        )
+
+    judge_rva, judge = _method_instructions(pe, FCM_IMAGE_MODEL, "JudgeEncryption")
+    judge_ops = [str(ins.opcode) for ins in judge]
+    judge_strings = [str(resolve_token(pe, ins.operand)) for ins in judge if str(ins.opcode) == "ldstr"]
+    judge_calls = _call_names(pe, judge)
+    if judge_strings != ["01"] or judge_ops != ["ldarg.0", "ldstr", "call", "ldc.i4.0", "cgt.un", "ret"]:
+        raise ValueError(f"unexpected FCM TSS3 JudgeEncryption body: ops={judge_ops!r} strings={judge_strings!r}")
+    if judge_calls != [("System.String", "op_Equality")]:
+        raise ValueError(f"unexpected FCM TSS3 JudgeEncryption call: {judge_calls!r}")
+
+    log_rva, log = _method_instructions(pe, FCM_IMAGE_LOG, "GetEncryption")
+    log_ints = [value for ins in log if (value := _int_constant(ins)) is not None]
+    log_calls = _call_names(pe, log)
+    if log_ints != [0, 8, 1, 6, 2, 1]:
+        raise ValueError(f"unexpected FCM TSS3 GetEncryption constants: {log_ints!r}")
+    if ("System.String", "Substring") not in log_calls or (FCM_IMAGE_MODEL, "JudgeEncryption") not in log_calls:
+        raise ValueError(f"unexpected FCM TSS3 GetEncryption calls: {log_calls!r}")
+
+    decrypt_rva, decrypt = _method_instructions(pe, FCM_IMAGE_MODEL, "DecryptionImageBuffer")
+    decrypt_ops = [str(ins.opcode) for ins in decrypt]
+    decrypt_ints = [value for ins in decrypt if (value := _int_constant(ins)) is not None]
+    decrypt_calls = _call_names(pe, decrypt)
+    expected_bit_reverse = [1, 7, 2, 5, 4, 3, 8, 1, 16, 1, 32, 3, 64, 5, 128, 7]
+    if decrypt_ints != expected_bit_reverse:
+        raise ValueError(f"unexpected FCM TSS3 byte transform constants: {decrypt_ints!r}")
+    if decrypt_ops.count("and") != 8 or decrypt_ops.count("or") != 7 or decrypt_ops.count("xor") != 1:
+        raise ValueError("unexpected FCM TSS3 byte transform opcode census")
+    if (FCM_IMAGE_TYPE, "GetEncryptionKey") not in decrypt_calls:
+        raise ValueError(f"FCM TSS3 decryption does not fetch image encryption key: {decrypt_calls!r}")
+
+    create_rva, create = _method_instructions(pe, FCM_IMAGE_MODEL, "Create")
+    create_calls = _call_names(pe, create)
+    if (FCM_IMAGE_MODEL, "DecryptionImageBuffer") not in create_calls or ("System.Drawing.ImageConverter", ".ctor") not in create_calls:
+        raise ValueError(f"unexpected FCM TSS3 image creation path: {create_calls!r}")
+
+    extract_rva, extract = _method_instructions(pe, FCM_IMAGE_EXTRACTOR, "Extract")
+    extract_calls = _call_names(pe, extract)
+    for required in (
+        (FCM_IMAGE_EXTRACTOR, "AnalyzeExtractionsType"),
+        (FCM_IMAGE_EXTRACTOR, "GetImageFFDInfoForSplit"),
+        (FCM_IMAGE_EXTRACTOR, "CreateImageFFDExtractDataForSplit"),
+    ):
+        if required not in extract_calls:
+            raise ValueError(f"FCM TSS3 split extractor missing {required}: {extract_calls!r}")
+    if [value for ins in extract if (value := _int_constant(ins)) is not None] != [1]:
+        raise ValueError("unexpected FCM TSS3 Extract type discriminator")
+
+    analyze_rva, analyze = _method_instructions(pe, FCM_IMAGE_EXTRACTOR, "AnalyzeExtractionsType")
+    analyze_strings = [str(resolve_token(pe, ins.operand)) for ins in analyze if str(ins.opcode) == "ldstr"]
+    if [value for value in analyze_strings if value] != ["EB21", "EB31"]:
+        raise ValueError(f"unexpected FCM TSS3 extraction markers: {analyze_strings!r}")
+
+    split_info_rva, split_info = _method_instructions(pe, FCM_IMAGE_EXTRACTOR, "GetImageFFDInfoForSplit")
+    split_info_strings = [str(resolve_token(pe, ins.operand)) for ins in split_info if str(ins.opcode) == "ldstr"]
+    if split_info_strings != ["621103", "622081", "EB33"]:
+        raise ValueError(f"unexpected FCM TSS3 split-info markers: {split_info_strings!r}")
+
+    rob_rva, rob = _method_instructions(pe, FCM_IMAGE_EB33, "GetRoBCode")
+    frame_rva, frame = _method_instructions(pe, FCM_IMAGE_EB33, "GetFrameNumber")
+    rob_ints = [value for ins in rob if (value := _int_constant(ins)) is not None]
+    frame_ints = [value for ins in frame if (value := _int_constant(ins)) is not None]
+    if rob_ints != [8, 1, 4, 4, 1] or frame_ints != [16, 1, 8, 8, 1]:
+        raise ValueError(f"unexpected FCM TSS3 EB33 header geometry: rob={rob_ints!r} frame={frame_ints!r}")
+
+    split_ids_rva, split_ids_method = _method_instructions(pe, FCM_IMAGE_DID_TABLE, "GetAllSplitImageDataID")
+    split_fields = [
+        _field_owner_and_name(resolve_token(pe, ins.operand))[1]
+        for ins in split_ids_method
+        if str(ins.opcode) == "ldsfld"
+    ]
+    expected_split_fields = [f"ID_{value:04X}" for value in range(0x6002, 0x6018)]
+    if split_fields != expected_split_fields:
+        raise ValueError(f"unexpected FCM TSS3 split image IDs: {split_fields!r}")
+
+    parse_rva, parse = _method_instructions(pe, FCM_IMAGE_EB33_LIST, "CreateDIDDataList")
+    parse_ints = [value for ins in parse if (value := _int_constant(ins)) is not None]
+    parse_strings = [str(resolve_token(pe, ins.operand)) for ins in parse if str(ins.opcode) == "ldstr"]
+    if parse_ints != [18, 1, 18, 4, 0, 4, 2, 8, 4, 4, 0x203, 2, 4, 4, 4, 1] or parse_strings != ["6"]:
+        raise ValueError(f"unexpected FCM TSS3 EB33 DID grammar: ints={parse_ints!r} strings={parse_strings!r}")
+
+    join_rva, join = _method_instructions(pe, FCM_IMAGE_EB33_LIST, "CreateDIDDataListjoinedLog")
+    join_fields = [
+        _field_owner_and_name(resolve_token(pe, ins.operand))[1]
+        for ins in join
+        if str(ins.opcode) == "ldsfld"
+    ]
+    join_calls = _call_names(pe, join)
+    if join_fields != ["Empty", "ID_6002", "Empty", "ID_6001"]:
+        raise ValueError(f"unexpected FCM TSS3 split join fields: {join_fields!r}")
+    if (FCM_IMAGE_DID_TABLE, "GetAllSplitImageDataID") not in join_calls or ("System.Text.StringBuilder", "Append") not in join_calls:
+        raise ValueError(f"unexpected FCM TSS3 split join calls: {join_calls!r}")
+
+    frame_table_rva, frame_table = _method_instructions(pe, FCM_IMAGE_FRAME, ".cctor")
+    if [value for ins in frame_table if (value := _int_constant(ins)) is not None] != [0x200, 10]:
+        raise ValueError("unexpected FCM TSS3 frame-number constants")
+    split_number_rva, split_number = _method_instructions(pe, FCM_IMAGE_FRAME, "ExtractSplitNumber")
+    if [str(ins.opcode) for ins in split_number] != ["ldarg.1", "ldsfld", "div", "ret"]:
+        raise ValueError("unexpected FCM TSS3 split-number extraction")
+
+    frame_ctor_rva, frame_ctor = _method_instructions(pe, FCM_IMAGE_FRAME, ".ctor")
+    ctor_strings = [str(resolve_token(pe, ins.operand)) for ins in frame_ctor if str(ins.opcode) == "ldstr"]
+    ctor_calls = _call_names(pe, frame_ctor)
+    expected_frame_calls = [
+        (FCM_IMAGE_FRAME, "ExtractSplitNumber"),
+        (FCM_IMAGE_FRAME, "ExtractTriggerNumberForOccur"),
+        (FCM_IMAGE_FRAME, "ExtractDataSetNumberForOccur"),
+        (FCM_IMAGE_FRAME, "ExtractTriggerNumberForTimeSeries"),
+        (FCM_IMAGE_FRAME, "ExtractDataSetNumberForTimeSeries"),
+    ]
+    if ctor_strings != ["0000"] or any(call not in ctor_calls for call in expected_frame_calls):
+        raise ValueError(f"unexpected FCM TSS3 frame constructor: strings={ctor_strings!r} calls={ctor_calls!r}")
+
+    occur_trigger_rva, occur_trigger = _method_instructions(pe, FCM_IMAGE_FRAME, "ExtractTriggerNumberForOccur")
+    if [str(ins.opcode) for ins in occur_trigger] != ["ldarg.1", "ldsfld", "rem", "ldc.i4.1", "sub", "ldsfld", "rem", "ldc.i4.1", "add", "ret"]:
+        raise ValueError("unexpected FCM TSS3 occurrence-trigger decoder")
+    occur_set_rva, occur_set = _method_instructions(pe, FCM_IMAGE_FRAME, "ExtractDataSetNumberForOccur")
+    occur_set_calls = _call_names(pe, occur_set)
+    if ("System.Math", "Ceiling") not in occur_set_calls or ("System.Decimal", "ToInt32") not in occur_set_calls:
+        raise ValueError(f"unexpected FCM TSS3 occurrence-set decoder: {occur_set_calls!r}")
+
+    series_trigger_rva, series_trigger = _method_instructions(pe, FCM_IMAGE_FRAME, "ExtractTriggerNumberForTimeSeries")
+    if [str(ins.opcode) for ins in series_trigger] != ["ldarg.1", "ldc.i4.1", "add", "ret"]:
+        raise ValueError("unexpected FCM TSS3 time-series trigger decoder")
+    series_set_rva, series_set = _method_instructions(pe, FCM_IMAGE_FRAME, "ExtractDataSetNumberForTimeSeries")
+    if [str(ins.opcode) for ins in series_set] != ["ldarg.1", "ldsfld", "ldarg.2", "mul", "sub", "ldc.i4.1", "sub", "ldsfld", "div", "ldc.i4.1", "add", "ret"]:
+        raise ValueError("unexpected FCM TSS3 time-series set decoder")
+
+    return {
+        "image_table_cctor_rva": table_rva,
+        "accepted_specs": [5, 7],
+        "width": 360,
+        "height": 180,
+        "filename_format": "{0:D3}.jpg",
+        "encryption_key": 170,
+        "encryption_status": {
+            "diagnostic_did": "2081",
+            "positive_response_prefix": "622081",
+            "value_hex_offset": 6,
+            "value_hex_length": 2,
+            "unencrypted_value": "01",
+            "decrypt_when": "value != 01",
+            "source_method_rva": log_rva,
+            "predicate_method_rva": judge_rva,
+        },
+        "decryption": {
+            "per_byte": "reverse_bits8(cipher_byte) XOR 0xAA",
+            "bit_mapping": "b0->b7,b1->b6,b2->b5,b3->b4,b4->b3,b5->b2,b6->b1,b7->b0",
+            "source_method_rva": decrypt_rva,
+            "create_method_rva": create_rva,
+        },
+        "split_transport": {
+            "extract_method_rva": extract_rva,
+            "extraction_type_method_rva": analyze_rva,
+            "detected_markers": {"unsplit": "EB21", "split": "EB31"},
+            "supported_path": "split EB31/EB33; Extract rejects the EB21 discriminator",
+            "split_info_method_rva": split_info_rva,
+            "split_info_markers": ["621103", "622081", "EB33"],
+            "eb33": {
+                "rob_code_hex_offset": 4,
+                "rob_code_hex_length": 4,
+                "frame_number_hex_offset": 8,
+                "frame_number_hex_length": 8,
+                "did_stream_hex_offset": 18,
+                "did_id_hex_length": 4,
+                "length_hex_length": {"did_starts_with_6": 8, "other": 2},
+                "length_number_style": "0x203 (hex)",
+                "data_hex_length": "2 * parsed byte length",
+                "rob_parser_method_rva": rob_rva,
+                "frame_parser_method_rva": frame_rva,
+                "did_parser_method_rva": parse_rva,
+            },
+            "split_image_dids": [field.removeprefix("ID_") for field in split_fields],
+            "assembled_raw_image_did": "6001",
+            "reassembly": "for each split group, append the first present DID from 6002..6017; publish the concatenation as DID 6001",
+            "first_split_group_required": 1,
+            "first_group_metadata_split_id_removed": "6002",
+            "join_method_rva": join_rva,
+            "split_id_table_method_rva": split_ids_rva,
+            "frame_number": {
+                "split_divisor": 0x200,
+                "trigger_point_max": 10,
+                "format_width_hex": 8,
+                "occurrence_selector": "first four frame-number hex characters are 0000",
+                "occurrence_decode": {
+                    "split": "value // 0x200",
+                    "trigger": "((value % 0x200 - 1) % 10) + 1",
+                    "data_set": "ceil((value % 0x200) / 10)",
+                    "trigger_type": "1 when trigger == 1, otherwise 2",
+                },
+                "time_series_decode": {
+                    "high16": "frame_number[0:4] as hex",
+                    "low16": "frame_number[4:8] as hex",
+                    "split": "high16 // 0x200",
+                    "trigger": "low16 + 1",
+                    "data_set": "((high16 - split*0x200 - 1) // 10) + 1",
+                    "trigger_type": 3,
+                },
+                "methods": {
+                    "constructor_rva": frame_ctor_rva,
+                    "constants_rva": frame_table_rva,
+                    "split_rva": split_number_rva,
+                    "occurrence_trigger_rva": occur_trigger_rva,
+                    "occurrence_data_set_rva": occur_set_rva,
+                    "time_series_trigger_rva": series_trigger_rva,
+                    "time_series_data_set_rva": series_set_rva,
+                },
+            },
+        },
+    }
 
 
 def _decimal_from_ctor(stack: list[Any], row: dnfile.mdtable.MemberRefRow) -> Decimal:
@@ -310,6 +560,8 @@ def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, An
         item = {"rob_code": rob_code, **record}
         robs.append(_normalize(item))
 
+    image_ffd = _extract_fcm_image_contract(pe)
+
     steering = [item for item in details if item["DataID"] in STEERING_DIDS]
     by_did: dict[str, int] = {}
     for item in details:
@@ -353,6 +605,9 @@ def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, An
             "table_cctor_rva": rob_rva,
             "row_count": len(robs),
             "rows": robs,
+        },
+        "image_ffd": {
+            "fcm_tss3": image_ffd,
         },
     }
 
