@@ -218,9 +218,14 @@ Viewer managed body set; deterministic extraction closes **1,130 `DetailBitAssig
 across 623 recorder DIDs**, **47 RoB definitions**, exact physical scaling, and the current
 FCM TSS3 image decode (`AB31/EB31`, `AB33/EB33`, exact byte-9 block grammar,
 `6002..6017 -> 6001` split reassembly, then `622081` value `01` unencrypted or
-`reverse_bits8(cipher_byte) XOR 0xAA`, specs 5/7 at 360×180). TSE persistence, ring-buffer
-conversion and GTSE compression are also recovered. The current TSE->GTSE skip policy still
-makes **preserving original TSE files** mandatory for PCS Operation/Image FFD.
+`reverse_bits8(cipher_byte) XOR 0xAA`, specs 5/7 at 360×180). TSE persistence and managed
+traversal are also closed: **35 exact runtime position markers** include VCH `...23`, PCS
+Operation FFD `...27`, PCS Image FFD `...28`, and TMR `...FE`; the reader consumes template
+columns 15..22 as `Type/Size/SizeF/IsList/LevelF/ExistF/PositionF/PositionSkipF`, scans
+`FF FF FF FF <selector> FF FF FF`, rewinds 8-byte position records at skip boundaries, and
+projects 15 recursive FAT/list levels. Ring-buffer conversion and GTSE compression are likewise
+recovered. The current TSE->GTSE skip policy still makes **preserving original TSE files**
+mandatory for PCS Operation/Image FFD.
 
 There is no remaining generic protected-host decoder target to sweep. The next high-value work
 is to use the OEM request/arbitration model to identify **exact vehicle-network producer/frame/
@@ -229,6 +234,7 @@ recovered TSE FAT/list traversal end-to-end when a representative Toyota-generat
 specimen becomes available. Treat generation-22 `ADCU_P6` only as a successor terminology
 oracle. Canonical: `data/generated/gtsplus_2026/tss3_native_recorder_protocol.json`,
 `data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json`,
+`data/generated/gtsplus_2026/tse_managed_semantics.json`,
 [../tooling/pcs-data-viewer-tss3-dictionary.md](../tooling/pcs-data-viewer-tss3-dictionary.md), and
 [../tooling/techstream.md](../tooling/techstream.md) §6.2.4.
 

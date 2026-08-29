@@ -95,9 +95,13 @@ def main() -> int:
     for method in ("ParseFrameTable", "ParseSignalInfoList", "ParseRingBuffer", "ConvertDataFrame", "ConvertNumericValue"):
         check(f"RingBufferParser method {method}", method in parser_methods)
 
+    recovery = tracked["managed_recovery"]
+    check("recovered procedural semantics artifact linked", recovery["procedural_semantics_artifact"] == "data/generated/gtsplus_2026/tse_managed_semantics.json")
+    check("managed implementation boundary closed", recovery["status"].startswith("closed by generic CP recovery"))
+    check("real-TSE traversal validation remains", "Toyota-generated TSE" in recovery["remaining_validation"])
     for component in ("Converter.dll", "RingBufferParser.dll", "TseCompression.dll", "TSEConverter.exe"):
         sample = tracked["managed_metadata"][component]["method_body_sample"]
-        check(f"{component} method bodies protector-zeroed", sample["sampled"] > 0 and sample["nonzero_prefixes"] == 0)
+        check(f"{component} installed protected body is zeroed", sample["sampled"] > 0 and sample["nonzero_prefixes"] == 0 and sample["conclusion"].startswith("installed protected"))
 
     return 0
 

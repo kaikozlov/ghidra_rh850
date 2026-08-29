@@ -1,0 +1,423 @@
+{
+  "binary_read": {
+    "binary_value_decode": {
+      "primitive_reader": "System.IO.BinaryReader",
+      "ring_buffer_data": "ReadBytes(Size) retained in RawValue",
+      "scalar_types": [
+        "BYTE",
+        "CHAR",
+        "SHORT",
+        "WORD",
+        "INT",
+        "UINT",
+        "LONG",
+        "ULONG",
+        "DWORD",
+        "DOUBLE",
+        "BOOL",
+        "SYSTEMTIME",
+        "UNSIGNED CHAR",
+        "CCMDSTRING",
+        "WCHAR_T"
+      ],
+      "special_time_fields": [
+        "時系列の時間情報",
+        "時系列範囲開始(基本的にマイナスの数値)",
+        "時系列範囲終了"
+      ],
+      "string_decode": "CodePageEncoding.GetString followed by NullTrim"
+    },
+    "fat_projection": {
+      "bool_uses_raw_value": true,
+      "dictionary_levels": 15,
+      "duplicate_list_key_format": "{name}_{index:03d}",
+      "recursive_child_lists": true,
+      "removed_top_level_keys": [
+        "ヘッダ情報",
+        "初期車両情報"
+      ],
+      "ring_buffer_data_uses_raw_value": true
+    },
+    "method_pins": {
+      "bulk_read_to_list": {
+        "body_sha256": "de561dd1400cee7e57df398c34d1ea92223ae933b9cc1754df7f17fbe4387dbd",
+        "body_size": 624,
+        "rva": 10196
+      },
+      "check_data_exist_case": {
+        "body_sha256": "4cedbc2eb7efa2081bccbe04f29d3dcac81f647241b806bd527bb16689cb6e56",
+        "body_size": 903,
+        "rva": 13416
+      },
+      "compare_bin_data_position": {
+        "body_sha256": "79c7fb1152df63564402065d85836112cf7e85638248f4b7538e668d7c3d4b8a",
+        "body_size": 59,
+        "rva": 17956
+      },
+      "constructor": {
+        "body_sha256": "6836f4418bf4613bac04de5c720c4a74429613ae1f5473df1d3bc04f80f51596",
+        "body_size": 645,
+        "rva": 9548
+      },
+      "encoding_value": {
+        "body_sha256": "2e973a3b96a0bcae54962ead3f02d76caf2128fad9d8aa5d9693062637b3344f",
+        "body_size": 19,
+        "rva": 18115
+      },
+      "get_binary_data": {
+        "body_sha256": "b87b02e17903b01ff11d193b54645d9e069448a2316a865f1679ef02fd9e1680",
+        "body_size": 1535,
+        "rva": 10976
+      },
+      "get_fat_data": {
+        "body_sha256": "ca63034024984685eff3803aa950c39eb322e6ecab08cf0e047cb1c44ce6f954",
+        "body_size": 146,
+        "rva": 17228
+      },
+      "get_next_read_position_scan": {
+        "body_sha256": "15707fa6bde65fdfcf80b07856942d30911aa01f1067cde407fb58c52912a9b2",
+        "body_size": 640,
+        "rva": 12644
+      },
+      "get_template_data": {
+        "body_sha256": "3c457b266c51db56ebc06d6a8dd508f41b6061e1a48be7eb0a357802cfc97da5",
+        "body_size": 154,
+        "rva": 10820
+      },
+      "read_binary_data": {
+        "body_sha256": "461b93bf044593fdf48b1329048e1c08309786409a6471332d10d70dca5bcdbf",
+        "body_size": 1770,
+        "rva": 14320
+      },
+      "set_list_to_dic": {
+        "body_sha256": "37620fbff8ff5e4dd0b47dac8f62a3ca5d0d8bcb3e1b04263350ca6a3711aa73",
+        "body_size": 577,
+        "rva": 17376
+      }
+    },
+    "position_markers": [
+      {
+        "key": "初期車両情報位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF01"
+      },
+      {
+        "key": "確定後車両情報位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF02"
+      },
+      {
+        "key": "多目的PID信号情報位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF17"
+      },
+      {
+        "key": "機能名称情報位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF18"
+      },
+      {
+        "key": "ヘルスチェック位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF03"
+      },
+      {
+        "key": "タイムスタンプ位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF12"
+      },
+      {
+        "key": "RecordOnBehavior共通位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF15"
+      },
+      {
+        "key": "MILMessage位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF10"
+      },
+      {
+        "key": "CANバス位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF16"
+      },
+      {
+        "key": "DualDataList位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF19"
+      },
+      {
+        "key": "VehicleControlHistory共通位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF23"
+      },
+      {
+        "key": "PCS時系列作動時FFD位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF27"
+      },
+      {
+        "key": "PCS画像FFD位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF28"
+      },
+      {
+        "key": "ECU位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF04"
+      },
+      {
+        "key": "DataList位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF05"
+      },
+      {
+        "key": "DTC位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF06"
+      },
+      {
+        "key": "DTC(Phase5)位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF26"
+      },
+      {
+        "key": "ActiveTest位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF07"
+      },
+      {
+        "key": "ActiveTest(DualDataList)位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF21"
+      },
+      {
+        "key": "DriveRecorder位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF08"
+      },
+      {
+        "key": "SystemCheck位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF09"
+      },
+      {
+        "key": "FuelConsumption位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF11"
+      },
+      {
+        "key": "OperationHistory位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF13"
+      },
+      {
+        "key": "RecordOnBehavior位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF14"
+      },
+      {
+        "key": "オシロ連携データ位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF20"
+      },
+      {
+        "key": "ABSHistory位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF22"
+      },
+      {
+        "key": "ICS-01位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF24"
+      },
+      {
+        "key": "AF/O2SensorOperation位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF25"
+      },
+      {
+        "key": "PSDHistory位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF29"
+      },
+      {
+        "key": "PredictiveFFD位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF31"
+      },
+      {
+        "key": "Operative/InoperativeConditionHistory位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF32"
+      },
+      {
+        "key": "指定DID(市場モニタRAM)通信ログ位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF30"
+      },
+      {
+        "key": "市場モニタRAMSSR通信ログ情報位置情報",
+        "marker_hex": "FFFFFFFFFFFFFF33"
+      },
+      {
+        "key": "TMR位置情報",
+        "marker_hex": "FFFFFFFFFFFFFFFE"
+      },
+      {
+        "key": "エラーレポート位置情報",
+        "marker_hex": "FFFFFFFFFFFFFFFF"
+      }
+    ],
+    "position_traversal": {
+      "ecu_skip_selector_acceptance": [
+        "0x30",
+        "0x33",
+        "0xFE"
+      ],
+      "generic_selector_acceptance": "0x01..0x33 or 0xFE",
+      "position_dictionary_compare": "case-insensitive hex-string equality",
+      "position_marker_width_bytes": 8,
+      "position_record_rewind_bytes": 8,
+      "sentinel_shape": "FF FF FF FF <selector> FF FF FF",
+      "skip_contract": "PositionF==1 sections can be skipped by scanning to the next recognized position marker; terminal/skip cases rewind one 8-byte position record before outer traversal resumes."
+    },
+    "selected_position_markers": {
+      "PCS時系列作動時FFD位置情報": "FFFFFFFFFFFFFF27",
+      "PCS画像FFD位置情報": "FFFFFFFFFFFFFF28",
+      "TMR位置情報": "FFFFFFFFFFFFFFFE",
+      "VehicleControlHistory共通位置情報": "FFFFFFFFFFFFFF23",
+      "エラーレポート位置情報": "FFFFFFFFFFFFFFFF"
+    },
+    "template_runtime_contract": {
+      "columns": {
+        "15": "Type",
+        "16": "Size",
+        "17": "SizeF",
+        "18": "IsList",
+        "19": "LevelF",
+        "20": "ExistF",
+        "21": "PositionF",
+        "22": "PositionSkipF"
+      },
+      "template_encoding": "Shift_JIS"
+    },
+    "version_conditioned_fields": {
+      "features": [
+        "ヘルスチェック",
+        "DualDataList",
+        "DataList",
+        "ActiveTest",
+        "ActiveTest(DualDataList)",
+        "DriveRecorder",
+        "SystemCheck",
+        "FuelConsumption",
+        "AF/O2SensorOperation"
+      ],
+      "frame_id_upgrade": "通信フレームのID changes to WORD/2 bytes when バージョン_L5_1(ObjectVer) > 3",
+      "help_id_upgrade": "へルプID changes to DWORD/4 bytes when バージョン_L5_1(ObjectVer) > 2"
+    }
+  },
+  "gtse_compression": {
+    "archive": "ZipFile.CreateFromDirectory with Shift-JIS entry encoding, then File.Move .zip to .GTSE",
+    "manifest": "list.txt encoded Shift-JIS with Target Folder header",
+    "method_pins": {
+      "change_ext_zip_to_gtse": {
+        "body_sha256": "0e949633e81a7df80141aee395d3eb4918571dc1b43bad5e6072a21110112b69",
+        "body_size": 34,
+        "rva": 9476
+      },
+      "compression_dir": {
+        "body_sha256": "2493a690a6697472960e7050d9f2aacce88c9fb66ee3c2227be749ee98f1b90c",
+        "body_size": 78,
+        "rva": 9396
+      },
+      "get_list_file_info": {
+        "body_sha256": "0c980eaf912fac2e2372dc58189952fca66dd1c835f6af4cc6d6d722d07ffbea",
+        "body_size": 223,
+        "rva": 8884
+      },
+      "write_list_text_file": {
+        "body_sha256": "82db41d799d83fb9d9881761e5eeb1a737fc8b3a2ae2d163a66db05ab0c3d2b0",
+        "body_size": 180,
+        "rva": 9216
+      }
+    },
+    "per_file_digest": "SHA-256(file_bytes || 20-byte salt), rendered uppercase hex",
+    "salt_hex": "e7b77797f2e62ce74b5dc58f8d15c82c574d8a4a"
+  },
+  "recovery_proof": {
+    "GTSPlusTSEConverter/Converter.dll": {
+      "method_body_materialized_count": 2433,
+      "method_body_rva_count": 2433,
+      "method_def_count": 2433
+    },
+    "GTSPlusTSEConverter/RingBufferParser.dll": {
+      "method_body_materialized_count": 48,
+      "method_body_rva_count": 48,
+      "method_def_count": 48
+    },
+    "GTSPlusTSEConverter/TSEConverter.exe": {
+      "method_body_materialized_count": 27,
+      "method_body_rva_count": 27,
+      "method_def_count": 30
+    },
+    "GTSPlusTSEConverter/TseCompression.dll": {
+      "method_body_materialized_count": 12,
+      "method_body_rva_count": 12,
+      "method_def_count": 12
+    }
+  },
+  "ring_buffer_parser": {
+    "engineering_value": "((raw * MUL) / DIV + OFFSET) / 10^decimal_places",
+    "method_pins": {
+      "convert_numeric_value": {
+        "body_sha256": "41969700da30967e09a4c4aafdddda203ae46be1480809920d1307383355cecf",
+        "body_size": 228,
+        "rva": 9852
+      },
+      "parse_ring_buffer": {
+        "body_sha256": "3c60715f517e598a8cab3174e7925e7ea8fb5e98afb750f464b465d1bc793cf9",
+        "body_size": 155,
+        "rva": 9312
+      }
+    },
+    "record_width": "8-byte timestamp + 2 * sum(frame lengths)",
+    "signed_decode": [
+      "SByte",
+      "Int16",
+      "Int32",
+      "Int64"
+    ],
+    "unsigned_decode": "UInt64 parse, bit-mask, then right shift"
+  },
+  "schema": "gtsplus-tse-managed-semantics-v1",
+  "sources": {
+    "GTSPlusTSEConverter/Converter.dll": {
+      "protected_sidecar": {
+        "sha256": "ae68cff915240cba77333c612f81b848712594ae8e0ddf7e756db1bcca496b80",
+        "size": 171328
+      },
+      "protected_stub": {
+        "sha256": "f967e062c024fb234280a281dbc70653564f399e4276bf11f577659a9197c3f0",
+        "size": 327696
+      },
+      "recovered_analysis_pe": {
+        "sha256": "4b7ca45672fd22d4f78424c63a832ed43daf590e67b1a76558ccacbf64756fd5",
+        "size": 299008
+      }
+    },
+    "GTSPlusTSEConverter/RingBufferParser.dll": {
+      "protected_sidecar": {
+        "sha256": "8af44d95b02a2c41ee41c2dc4e8b9b0aa19d37c022ccba19786b2b3a9f83fbcb",
+        "size": 117568
+      },
+      "protected_stub": {
+        "sha256": "bf738e35f35e0c30f0ee04016f16d5fce3c2cfbe465497f50f4ba96466abb637",
+        "size": 40976
+      },
+      "recovered_analysis_pe": {
+        "sha256": "e1c8ea8c3546f226d02f4c3b5b5a388adf9f376b82b7fc7194a45745b125fd0b",
+        "size": 14848
+      }
+    },
+    "GTSPlusTSEConverter/TSEConverter.exe": {
+      "protected_sidecar": {
+        "sha256": "21238786b33825e26366ee3e67068c339675659c0990e0a93eae78d3331e5f44",
+        "size": 165776
+      },
+      "protected_stub": {
+        "sha256": "d5930588de495b8e45a251eba42eecf287d45af7805aa3995c49374574f8dd6d",
+        "size": 49168
+      },
+      "recovered_analysis_pe": {
+        "sha256": "ef20a7bec94f3cdcf19df4deb4464b93906f744ce8f66312ce116bd2caba2ccf",
+        "size": 23040
+      }
+    },
+    "GTSPlusTSEConverter/TseCompression.dll": {
+      "protected_sidecar": {
+        "sha256": "d1959386d69f2a5b19ae7fad4720454b46056ff0074b5bbaf035c6260ce01b9e",
+        "size": 116384
+      },
+      "protected_stub": {
+        "sha256": "2aaad2729482aeb03d9d0e75f90c4cf2e9ac2a67c925f7712bf16fab7f98c97f",
+        "size": 36880
+      },
+      "recovered_analysis_pe": {
+        "sha256": "c55131093f9a2892065634af1f5fcb0f67c3fe9f2653bd3b4488dfdcc9b4a245",
+        "size": 9728
+      }
+    }
+  },
+  "title": "GTS+ recovered TSE/GTSE managed procedural semantics",
+  "validation_boundary": "Procedural host semantics are recovered. A representative Toyota-generated TSE is still required only to exercise the complete position/FAT/list traversal against real saved bytes and to validate concrete section population."
+}

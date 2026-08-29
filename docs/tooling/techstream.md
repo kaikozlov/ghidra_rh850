@@ -3128,11 +3128,15 @@ The host chain is therefore no longer merely a lead:
 
 `FRC_P5 AB/EB recorder acquisition -> first-class TSE PCS FFD section -> PCS Data Viewer TSS3 dictionary`.
 
-The concrete PCS Operation-FFD byte/bit/scaling table is now closed. What remains open at
-this host layer is primarily recorder-ID -> vehicle-network producer/frame correlation and
-validation of the saved-session traversal against a representative Toyota-generated TSE
-sample, not the existence, purpose, or executable decoder semantics of the three host
-layers.
+The concrete PCS Operation-FFD byte/bit/scaling table is now closed. The recovered TSE
+reader also pins a 35-entry runtime position-marker dictionary (including PCS Operation FFD
+`...27`, PCS Image FFD `...28`, VCH `...23`, and TMR `...FE`), the
+`FF FF FF FF <selector> FF FF FF` resynchronization grammar, template columns 15..22 as
+`Type/Size/SizeF/IsList/LevelF/ExistF/PositionF/PositionSkipF`, exact 8-byte rewind behavior,
+and 15-level FAT/list projection. What remains open at this host layer is primarily
+recorder-ID -> vehicle-network producer/frame correlation and exercising that recovered
+saved-session traversal against a representative Toyota-generated TSE sample, not the
+existence, purpose, or executable decoder semantics of the three host layers.
 
 **P6 is a successor oracle, not TSS3 evidence, and its migration boundary is now
 explicit.** A dedicated cross-generation artifact joins `DSSystem_P5`, `Fr_RadSen_P5`,

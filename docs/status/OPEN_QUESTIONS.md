@@ -931,9 +931,13 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   (`AB31/EB31`, `AB33/EB33`, exact byte-9 variable-length block grammar, `6002..6017`
   split reassembly to `6001`, then `622081` value `01` unencrypted or
   `reverse_bits8(cipher_byte) XOR 0xAA`).
-  The remaining host-side validation item is a representative Toyota-generated TSS3 TSE
-  specimen; the substantive open problem is recorder-ID -> vehicle-network producer/frame/
-  SecOC ownership and arbitration execution on an exact target. Join that evidence to an exact
+  Recovered TSE managed bodies now also close the host traversal itself: 35 exact position
+  markers, the `FF FF FF FF <selector> FF FF FF` resynchronization grammar, 8-byte rewind
+  behavior, template `PositionF/PositionSkipF` control and 15-level FAT/list projection are
+  deterministic artifacts. The remaining host-side item is therefore only **execution of that
+  recovered traversal against a representative Toyota-generated TSS3 TSE specimen**; the
+  substantive open problem is recorder-ID -> vehicle-network producer/frame/SecOC ownership
+  and arbitration execution on an exact target. Join that evidence to an exact
   target's installed modules and live/firmware evidence. Older Toyota prior
   art makes longitudinal ownership a separate generation-specific architecture:
   ordinary TSS2 treats the camera as the ACC command source, `RADAR_ACC` moves

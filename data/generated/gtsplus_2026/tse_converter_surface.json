@@ -21,7 +21,7 @@
   },
   "configured_template": "180_Template.csv",
   "conversion_policy": {
-    "boundary": "The current converter is configured to skip these binary section names while reading TSE for GTSE conversion. The original TSE format and GTSFileController still have first-class storage APIs for them. Exact GTSE omission on a concrete saved session remains sample-testable because the managed method bodies are protected.",
+    "boundary": "The current converter is configured to skip these binary section names while reading TSE for GTSE conversion. The original TSE format and GTSFileController still have first-class storage APIs for them. Generic CP recovery closes the managed reader implementation; exact section population/omission on a concrete saved session remains sample-testable.",
     "configured_binary_skip_intersection": [
       "PCS時系列作動時FFD",
       "PCS画像FFD",
@@ -1615,12 +1615,13 @@
     "PCS time-series Operation FFD and PCS Image FFD are first-class TSE sections, not PCS-Viewer-only concepts.",
     "The current TSE->GTSE converter configuration explicitly skips those two PCS FFD section names (and RecordOnBehavior common) while converting the binary file.",
     "Ring-buffer saved data retains enough metadata to reconstruct engineering signals: frame membership, bit range, signedness, MUL/DIV/OFFSET, decimal precision, unit and display patterns.",
-    "Current managed converter bodies are protector-zeroed, so exact procedural byte-offset/list traversal remains bounded until validated against a sample or unprotected predecessor."
+    "Installed managed converter stubs are protector-zeroed, but generic CP recovery now materializes their executable IL; exact position/FAT/list traversal semantics are captured in the recovered managed-semantics artifact.",
+    "A representative Toyota-generated TSE is still required to exercise the recovered traversal against real section population, not to recover the host implementation."
   ],
   "managed_metadata": {
     "Converter.dll": {
       "method_body_sample": {
-        "conclusion": "shipped managed method bodies are protector-zeroed",
+        "conclusion": "installed protected managed method bodies are protector-zeroed",
         "nonzero_prefixes": 0,
         "sampled": 512
       },
@@ -2165,7 +2166,7 @@
     },
     "RingBufferParser.dll": {
       "method_body_sample": {
-        "conclusion": "shipped managed method bodies are protector-zeroed",
+        "conclusion": "installed protected managed method bodies are protector-zeroed",
         "nonzero_prefixes": 0,
         "sampled": 48
       },
@@ -2283,7 +2284,7 @@
     },
     "TSEConverter.exe": {
       "method_body_sample": {
-        "conclusion": "shipped managed method bodies are protector-zeroed",
+        "conclusion": "installed protected managed method bodies are protector-zeroed",
         "nonzero_prefixes": 0,
         "sampled": 27
       },
@@ -2350,7 +2351,7 @@
     },
     "TseCompression.dll": {
       "method_body_sample": {
-        "conclusion": "shipped managed method bodies are protector-zeroed",
+        "conclusion": "installed protected managed method bodies are protector-zeroed",
         "nonzero_prefixes": 0,
         "sampled": 12
       },
@@ -2379,6 +2380,11 @@
         "size": 36880
       }
     }
+  },
+  "managed_recovery": {
+    "procedural_semantics_artifact": "data/generated/gtsplus_2026/tse_managed_semantics.json",
+    "remaining_validation": "exercise recovered position/FAT/list traversal on a representative Toyota-generated TSE",
+    "status": "closed by generic CP recovery; every executable method body in the four current managed TSE components is materialized and interpreted by the dedicated semantics extractor"
   },
   "native_gts_file_controller": {
     "export_count": 207,
