@@ -1394,7 +1394,7 @@ measured `0x025` steering angle with best lag **-25 ms** in both drives: fitted 
 from feedback-shaped to forward-correlated: the best measured-angle lag shifts to
 **+50 ms** in drive A (a broad plateau — `r` varies only 0.8746..0.8755 across 0..75 ms)
 and **+225 ms** in drive B (weaker, `r=0.4467`, over a narrow target range). These are
-correlation-shape observations, not exact causal lead times. Current `EMPS2_P5` DID
+correlation-shape observations, not exact causal lead times. Current category-405 `EMPS_P5` DID
 `0x1CEE` independently places
 **Target Steering Angle After Output Compensation** immediately after Target Lateral ID.
 The byte position is not transferred from that diagnostic DID; the CAN position, scale,

@@ -186,18 +186,35 @@ check("manual ID0 B18:B19 is a 25-ms-lagging measured-angle-scale echo",
       (-25, 1.0, 0.05731821))
 lta_a = target["lta_lca_state_fit_by_drive"]["drive_a"]
 lta_b = target["lta_lca_state_fit_by_drive"]["drive_b"]
-check("LTA/LCA ID11 changes B18:B19 into a leading angle quantity in both drives",
+check("LTA/LCA ID11 correlation peak shifts forward without claiming an exact causal lead",
       (lta_a["best_lag_ms"], lta_a["pearson_r"], lta_a["raw_range"]) == (50, 0.8755, [-367, 63]) and
       (lta_b["best_lag_ms"], lta_b["pearson_r"], lta_b["raw_range"]) == (225, 0.4467, [-1, 56]))
+
+check("0x08A observed-route and upper-bit boundary is exact across both drives",
+      a["0x08A_observation_boundary"] == {
+        "all_bus_frame_counts": {"0": 20615, "2": 20618},
+        "all_bus_frame_count": 41233,
+        "b21_high2_value_set": [0],
+        "b26_high2_value_set": [0],
+        "boundary": "Observed route/bit support only. Zero upper bits do not prove a 6-bit producer field boundary.",
+      } and
+      b["0x08A_observation_boundary"] == {
+        "all_bus_frame_counts": {"0": 23999, "2": 23999},
+        "all_bus_frame_count": 47998,
+        "b21_high2_value_set": [0],
+        "b26_high2_value_set": [0],
+        "boundary": "Observed route/bit support only. Zero upper bits do not prove a 6-bit producer field boundary.",
+      })
 
 print("\n== current GTS+ and exact-F33 boundaries ==")
 gts = art["current_gtsplus_join"]
 check("current registry identity and exact EMPS source DDB pinned",
       gts["source"]["sha256"] == "44053e3892e1f489cf8382eba1705735824a804f5952348224ce987438904611" and
       gts["target_lateral_id"]["source_ddb_sha256"] == "fb7933228bc2f1c5788d1f896c008c5c590ede45ec2e650c07123f94764e329e")
-check("Target Lateral ID exact 0/11/18 dictionary",
+check("Target Lateral ID exact 0/11/18 dictionary and 8-bit diagnostic width",
       gts["target_lateral_id"]["selected_dictionary"] == {
-        "0": "No Request (Manual Operation)", "11": "LTA/LCA", "18": "SDG"})
+        "0": "No Request (Manual Operation)", "11": "LTA/LCA", "18": "SDG"} and
+      (gts["target_lateral_id"]["bit_start"], gts["target_lateral_id"]["bit_end"]) == (0, 7))
 check("GTS+ supplies the matching target-angle output-compensation vocabulary",
       gts["target_steering_angle_after_output_compensation"] == {
         "did": "0x1CEE",
@@ -225,10 +242,13 @@ check("0x08A/0x371/0x412 are absent from exact-F33 ingress",
       f33["state_carriers_absent"] == {"0x08A": True, "0x371": True, "0x412": True})
 
 interpretation = art["interpretation"]
-check("conclusion identifies upstream angle while keeping route/authentication open",
+check("conclusion identifies upstream angle while keeping producer/route/authentication open",
       "B18:B19 is the upstream target-steering-angle quantity" in interpretation["identification"] and
-      "camera-side upstream command/state carrier" in interpretation["route_boundary"] and
-      "authentication/trailer" in interpretation["proof_boundary"])
+      "shape change rather than an exact causal lead" in interpretation["identification"] and
+      "zero on Panda bus 1" in interpretation["route_boundary"] and
+      "producer is unknown" in interpretation["route_boundary"] and
+      "6-bit field boundaries remain encoding assumptions" in interpretation["proof_boundary"] and
+      "producer-side transformation into protected B6" in interpretation["proof_boundary"])
 check("historical layouts and physical LTA button remain untransferred",
       "corroboration only" in interpretation["historical_labels"] and
       "No physical LTA-button carrier is recovered" in interpretation["button_boundary"] and

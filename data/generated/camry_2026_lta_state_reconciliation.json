@@ -591,6 +591,20 @@
           18
         ]
       },
+      "0x08A_observation_boundary": {
+        "all_bus_frame_count": 41233,
+        "all_bus_frame_counts": {
+          "0": 20615,
+          "2": 20618
+        },
+        "b21_high2_value_set": [
+          0
+        ],
+        "b26_high2_value_set": [
+          0
+        ],
+        "boundary": "Observed route/bit support only. Zero upper bits do not prove a 6-bit producer field boundary."
+      },
       "known_0x0FE_cruise_button_events": {
         "boundary": "These exact same-car predicates recover MAIN/RES+/SET-/CANCEL only; no independent physical LTA-button carrier is decoded or claimed.",
         "counts": {
@@ -1456,6 +1470,20 @@
           18
         ]
       },
+      "0x08A_observation_boundary": {
+        "all_bus_frame_count": 47998,
+        "all_bus_frame_counts": {
+          "0": 23999,
+          "2": 23999
+        },
+        "b21_high2_value_set": [
+          0
+        ],
+        "b26_high2_value_set": [
+          0
+        ],
+        "boundary": "Observed route/bit support only. Zero upper bits do not prove a 6-bit producer field boundary."
+      },
       "known_0x0FE_cruise_button_events": {
         "boundary": "These exact same-car predicates recover MAIN/RES+/SET-/CANCEL only; no independent physical LTA-button carrier is decoded or claimed.",
         "counts": {
@@ -1819,7 +1847,7 @@
       "0x1DA"
     ],
     "descriptor_count": 43,
-    "interpretation": "The three correlated messages are state/display-plane evidence, not exact-F33 EPS ingress.",
+    "interpretation": "0x08A is an upstream request representation and 0x371/0x412 are state/display evidence; none is exact-F33 EPS ingress.",
     "source": {
       "path": "data/generated/camry_8965F3307000_external_lateral_ingress.json",
       "sha256": "61cb4b3ed9a6ea58c6562cdc4b449cf9141c496441051737e26dfe219e792477",
@@ -1834,10 +1862,10 @@
   "interpretation": {
     "button_boundary": "No physical LTA-button carrier is recovered. The decoded 0x0FE pulses are retained only as the already-validated cruise buttons.",
     "historical_labels": "Historical Toyota names LTA_RELATED for 0x371 and LKAS_HUD for 0x412 are corroboration only; no historical field layout is transferred.",
-    "identification": "Bus-0 0x08A B21 is Target Lateral ID and B18:B19 is the upstream target-steering-angle quantity. In manual ID0, B18:B19 tracks measured 0x025 angle in both drives at the exact F33 B6 controller-equivalent scale; in ID11 LTA/LCA the field leads the later measured angle in both drives.",
+    "identification": "Bus-0 0x08A B21 is Target Lateral ID and B18:B19 is the upstream target-steering-angle quantity. In manual ID0, B18:B19 tracks measured 0x025 angle in both drives at the exact F33 B6 controller-equivalent scale; under ID11 LTA/LCA its correlation shifts forward toward future measured angle, which is a shape change rather than an exact causal lead.",
     "production_output_authorized": false,
-    "proof_boundary": "The field identity is a recovered cross-domain join: GTS+ supplies Target Lateral ID and Target Steering Angle After Output Compensation vocabulary, the captures supply state-dependent lead/lag and scale, and exact F33 supplies the matching downstream B6 scale. The 0x08A authentication/trailer and the Bus-1-to-Bus-4 transformation remain unresolved.",
-    "route_boundary": "Current GTS+ places the Front Camera on Toyota Bus 1 and EPS/Brake on Bus 4. Exact F33 receives protected B6 but not 0x08A, so 0x08A is the camera-side upstream command/state carrier and B6 is the downstream EPS ingress; they are not interchangeable Panda-bus messages."
+    "proof_boundary": "The field identity is a recovered cross-domain join: current GTS+ EMPS_P5 supplies Target Lateral ID and Target Steering Angle After Output Compensation vocabulary, the captures supply state-dependent correlation shape and scale, and exact F33 supplies the matching downstream B6 scale. B21/B26 upper bits are never observed nonzero, but the GTS+ Target Lateral ID diagnostic field is 8-bit, so the DBC's 6-bit field boundaries remain encoding assumptions. The 0x08A producer, authentication/integrity trailer, producer-side transformation into protected B6, signer, freshness, suppression/fallback, and arbitration remain unresolved.",
+    "route_boundary": "Every retained 0x08A frame is on the captured Toyota Bus-4 Brake/EPS segment (Panda bus 0 and its relay mirror bus 2; zero on Panda bus 1). Exact F33 receives protected B6 but not 0x08A. The 0x08A producer is unknown, so the frame must not be labeled a Bus-1 camera message and is not interchangeable with downstream B6."
   },
   "schema": "camry-2026-lta-state-reconciliation-v1"
 }

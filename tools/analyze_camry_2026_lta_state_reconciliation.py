@@ -223,6 +223,9 @@ def analyze_drive(path: Path) -> dict:
   bases: dict[int, int] = {}
   all_times = array("Q")
   b6_times = array("Q")
+  a8_bus_counts = Counter()
+  a8_b21_high2 = Counter()
+  a8_b26_high2 = Counter()
   raw_hash = hashlib.sha256()
   raw_size = 0
   frame_count = 0
@@ -237,8 +240,13 @@ def analyze_drive(path: Path) -> dict:
       frame_count += 1
       if addr == 0x0B6:
         b6_times.append(t)
+      if addr == 0x08A:
+        data = bytes.fromhex(data_hex)
+        a8_bus_counts[bus] += 1
+        a8_b21_high2[data[21] >> 6] += 1
+        a8_b26_high2[data[26] >> 6] += 1
       if bus == 0 and addr in (0x025, 0x081, 0x08A, 0x0FE, 0x371, 0x412):
-        streams[addr].append((t, seg, bytes.fromhex(data_hex)))
+        streams[addr].append((t, seg, data if addr == 0x08A else bytes.fromhex(data_hex)))
 
   a8 = streams[0x08A]
   a81 = streams[0x081]
@@ -334,6 +342,13 @@ def analyze_drive(path: Path) -> dict:
       "uncompressed_sha256": raw_hash.hexdigest(),
       "frame_count": frame_count,
       "segments": sorted(bases),
+    },
+    "0x08A_observation_boundary": {
+      "all_bus_frame_counts": {str(bus): count for bus, count in sorted(a8_bus_counts.items())},
+      "all_bus_frame_count": sum(a8_bus_counts.values()),
+      "b21_high2_value_set": sorted(a8_b21_high2),
+      "b26_high2_value_set": sorted(a8_b26_high2),
+      "boundary": "Observed route/bit support only. Zero upper bits do not prove a 6-bit producer field boundary.",
     },
     "0x08A_b21": {
       "value_set": sorted(b21_counts),
@@ -473,12 +488,12 @@ def build() -> dict:
       "descriptor_count": ingress["normal_rx"]["descriptor_count"],
       "accepted_can_ids": accepted,
       "state_carriers_absent": {can_id: can_id not in accepted for can_id in ("0x08A", "0x371", "0x412")},
-      "interpretation": "The three correlated messages are state/display-plane evidence, not exact-F33 EPS ingress.",
+      "interpretation": "0x08A is an upstream request representation and 0x371/0x412 are state/display evidence; none is exact-F33 EPS ingress.",
     },
     "interpretation": {
-      "identification": "Bus-0 0x08A B21 is Target Lateral ID and B18:B19 is the upstream target-steering-angle quantity. In manual ID0, B18:B19 tracks measured 0x025 angle in both drives at the exact F33 B6 controller-equivalent scale; in ID11 LTA/LCA the field leads the later measured angle in both drives.",
-      "route_boundary": "Current GTS+ places the Front Camera on Toyota Bus 1 and EPS/Brake on Bus 4. Exact F33 receives protected B6 but not 0x08A, so 0x08A is the camera-side upstream command/state carrier and B6 is the downstream EPS ingress; they are not interchangeable Panda-bus messages.",
-      "proof_boundary": "The field identity is a recovered cross-domain join: GTS+ supplies Target Lateral ID and Target Steering Angle After Output Compensation vocabulary, the captures supply state-dependent lead/lag and scale, and exact F33 supplies the matching downstream B6 scale. The 0x08A authentication/trailer and the Bus-1-to-Bus-4 transformation remain unresolved.",
+      "identification": "Bus-0 0x08A B21 is Target Lateral ID and B18:B19 is the upstream target-steering-angle quantity. In manual ID0, B18:B19 tracks measured 0x025 angle in both drives at the exact F33 B6 controller-equivalent scale; under ID11 LTA/LCA its correlation shifts forward toward future measured angle, which is a shape change rather than an exact causal lead.",
+      "route_boundary": "Every retained 0x08A frame is on the captured Toyota Bus-4 Brake/EPS segment (Panda bus 0 and its relay mirror bus 2; zero on Panda bus 1). Exact F33 receives protected B6 but not 0x08A. The 0x08A producer is unknown, so the frame must not be labeled a Bus-1 camera message and is not interchangeable with downstream B6.",
+      "proof_boundary": "The field identity is a recovered cross-domain join: current GTS+ EMPS_P5 supplies Target Lateral ID and Target Steering Angle After Output Compensation vocabulary, the captures supply state-dependent correlation shape and scale, and exact F33 supplies the matching downstream B6 scale. B21/B26 upper bits are never observed nonzero, but the GTS+ Target Lateral ID diagnostic field is 8-bit, so the DBC's 6-bit field boundaries remain encoding assumptions. The 0x08A producer, authentication/integrity trailer, producer-side transformation into protected B6, signer, freshness, suppression/fallback, and arbitration remain unresolved.",
       "historical_labels": "Historical Toyota names LTA_RELATED for 0x371 and LKAS_HUD for 0x412 are corroboration only; no historical field layout is transferred.",
       "button_boundary": "No physical LTA-button carrier is recovered. The decoded 0x0FE pulses are retained only as the already-validated cruise buttons.",
       "production_output_authorized": False,

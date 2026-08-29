@@ -3240,12 +3240,13 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   target-angle factor `1024/17870`. In manual ID0 it tracks measured `0x025` angle at
   -25 ms in both drives with fitted-scale error below 0.027%; in ID11 its correlation
   shifts forward toward future measured angle (+50 ms A on a broad plateau; +225 ms B at
-  weaker correlation). Current GTS+ independently places Target
+  weaker correlation). Current category-405 `EMPS_P5` independently places **Target
+  Steering Angle After Output Compensation** next to **Target Lateral ID**.
 - **Preserved boundary:** exact F33 still does not accept `0x08A`; it accepts protected
   B6 on the Brake/EPS network. `0x08A` is upstream representation, not a frame that can
-  be sent to EPS. Its producer, integrity/authentication trailer, upstream-to-B6
-  transformation, signer, freshness, and arbitration remain unrecovered. Steering
-  output remains unauthorized.
+  be sent to EPS. Every retained `0x08A` is on the Bus-4 capture and its producer remains
+  unknown; the producer-side path into protected B6, integrity/authentication, signer,
+  freshness, and arbitration remain unrecovered. Steering output remains unauthorized.
 - **Canonical:** VAR-081;
   `data/generated/camry_2026_lta_state_reconciliation.json`;
   `tests/verify_camry_2026_lta_state_reconciliation.py`;
