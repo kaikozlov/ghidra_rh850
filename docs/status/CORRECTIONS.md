@@ -3222,3 +3222,11 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `tools/techstream/recover_cp_bodies.py`;
   `tests/verify_gtsplus_managed_exe_recovery.py`;
   [../tooling/cuwplus-body-recovery.md](../tooling/cuwplus-body-recovery.md).
+
+### CORR-133 — “no real TSE specimen” was too broad; public legacy Toyota TSEs validate the common framing lineage
+
+- **Superseded framing:** TMS-085/PRIORITIES and the saved-session report correctly established that the pinned Toyota distribution and tracked repository corpora contain no TSE/GTSE specimen, but the follow-on wording generalized that local negative into “real-session validation is source-data blocked” / no usable real specimen at all.
+- **New evidence:** three public 2017 Techstream forum attachments contain four genuine `.TSE` sessions. Privacy-minimized structural extraction pins four distinct TSE SHA-256 identities, common GTS `11.30.137` / TSE header `0x102A`, the same current-template header field sequence, a 14-entry `12-byte ASCII key + DWORD absolute position` FAT, and **56/56** FAT targets beginning `FF FF FF FF <selector> FF FF FF`, exactly the current recovered position-scan shape. Raw third-party sessions and their vehicle-identifying filenames are deliberately not committed.
+- **Version boundary:** current recovered `TSEConverter` first invokes native `GFCConvertOldTSEToLatestTSE`, writes `_NEW.TSE`, and only then applies `BinaryRead` with the configured current template. The legacy bytes therefore prove stable format lineage and the old-file conversion boundary; they do not prove direct `180_Template.csv` compatibility.
+- **Correct remaining blocker:** only a **true-TSS3** raw TSE carrying PCS Operation/Image FFD remains source-data blocked. Generic real-TSE header/FAT/position-record validation is now closed by TMS-086.
+- **Canonical:** TMS-086; `data/external/public_techstream_tse_lineage.json`; `data/generated/gtsplus_2026/tse_managed_semantics.json`; `tests/verify_public_techstream_tse_lineage.py`; [../tooling/gtsplus-tse-gtse-saved-session.md](../tooling/gtsplus-tse-gtse-saved-session.md) §3.1.

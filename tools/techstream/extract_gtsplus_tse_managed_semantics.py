@@ -30,6 +30,7 @@ COMPONENTS = (
 BINARY_READ = "Converter.BinaryRead"
 RING_PARSER = "RingBufferParser.Parser"
 COMPRESSION = "TSECompressionUtility.TSECompression"
+TSE_CONVERTER = "TSEConverter.MainForm"
 
 
 def sha256_file(path: Path) -> str:
@@ -291,6 +292,61 @@ def _binary_read_contract(path: Path) -> dict[str, Any]:
     }
 
 
+def _legacy_upgrade_contract(path: Path) -> dict[str, Any]:
+    """Recover the current converter's old-TSE -> latest-TSE handoff.
+
+    The configured 180 template is not applied directly to arbitrary historical TSE
+    layouts. TSEConverter first asks native GTSFileController to rewrite the source to
+    a ``*_NEW.TSE`` file, then gives that upgraded file to managed BinaryRead.
+    """
+    pe = _open(path)
+
+    convert_row, convert, convert_body = _instructions(pe, TSE_CONVERTER, "ConvTse_ToNewTseFile")
+    convert_lines = _lines(pe, convert)
+    if not _contains_ordered(convert_lines, ("GFCConvertOldTSEToLatestTSE", "stloc.0", "ldloc.0", "ret")):
+        raise ValueError("TSEConverter old-TSE native upgrade call drift")
+    convert_strings = _strings(pe, convert)
+    for required in ("* TSE/VerUP Read: Failure.", "* TSE/VerUP Write: Failure."):
+        if required not in convert_strings:
+            raise ValueError(f"TSEConverter legacy-upgrade status text drift: {required}")
+
+    main_row, main, main_body = _instructions(pe, TSE_CONVERTER, "TseConvert")
+    main_strings = _strings(pe, main)
+    for required in ("TEMPLATE", "_NewTSE", "{0}_NEW.TSE", "> Update TSE file to the latest"):
+        if required not in main_strings:
+            raise ValueError(f"TSEConverter upgrade pipeline string drift: {required}")
+    main_lines = _lines(pe, main)
+    if not _contains_ordered(
+        main_lines,
+        (
+            "ConvTse_ToNewTseFile",
+            "System.IO.File::OpenRead",
+            "Converter.BinaryRead::.ctor",
+            "Converter.BinaryRead::set_FilePath_TemplateFile",
+            "Converter.BinaryRead::set_FilePath_BinaryFile",
+            "Converter.BinaryRead::set_BinaryDataSkipNames",
+            "Converter.BinaryRead::BulkReadToList",
+        ),
+    ):
+        raise ValueError("TSEConverter upgraded-TSE -> managed BinaryRead flow drift")
+
+    return {
+        "method_pins": {
+            "tse_convert": _method_pin(main_row, main_body),
+            "convert_old_tse_to_latest": _method_pin(convert_row, convert_body),
+        },
+        "native_upgrade_api": "GFCConvertOldTSEToLatestTSE",
+        "intermediate_directory": "_NewTSE",
+        "intermediate_filename": "{source_stem}_NEW.TSE",
+        "pipeline": "source TSE -> native GFCConvertOldTSEToLatestTSE -> upgraded _NEW.TSE -> BinaryRead with configured template",
+        "boundary": (
+            "Historical TSE files are normalized by native GTSFileController before the current managed template reader. "
+            "A legacy specimen can validate format lineage and the native-upgrade input boundary without being assumed "
+            "byte-layout-identical to 180_Template.csv."
+        ),
+    }
+
+
 def _ring_contract(path: Path) -> dict[str, Any]:
     pe = _open(path)
     parse_row, parse, parse_body = _instructions(pe, RING_PARSER, "ParseRingBuffer")
@@ -381,14 +437,15 @@ def extract(recovered_root: Path, *, gtsplus_root: Path | None = None) -> dict[s
         }
 
     return {
-        "schema": "gtsplus-tse-managed-semantics-v1",
+        "schema": "gtsplus-tse-managed-semantics-v2",
         "title": "GTS+ recovered TSE/GTSE managed procedural semantics",
         "sources": sources,
         "recovery_proof": proofs,
         "binary_read": _binary_read_contract(paths["GTSPlusTSEConverter/Converter.dll"]),
+        "legacy_upgrade": _legacy_upgrade_contract(paths["GTSPlusTSEConverter/TSEConverter.exe"]),
         "ring_buffer_parser": _ring_contract(paths["GTSPlusTSEConverter/RingBufferParser.dll"]),
         "gtse_compression": _compression_contract(paths["GTSPlusTSEConverter/TseCompression.dll"]),
-        "validation_boundary": "Procedural host semantics are recovered. A representative Toyota-generated TSE is still required only to exercise the complete position/FAT/list traversal against real saved bytes and to validate concrete section population.",
+        "validation_boundary": "Procedural host semantics are recovered. Public legacy Toyota-generated TSE specimens validate the shared header/FAT/position-marker lineage, while a true-TSS3 TSE is still required to exercise current PCS Operation/Image FFD population and the complete latest-layout traversal end-to-end.",
     }
 
 

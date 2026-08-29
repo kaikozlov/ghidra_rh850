@@ -314,6 +314,25 @@
     "per_file_digest": "SHA-256(file_bytes || 20-byte salt), rendered uppercase hex",
     "salt_hex": "e7b77797f2e62ce74b5dc58f8d15c82c574d8a4a"
   },
+  "legacy_upgrade": {
+    "boundary": "Historical TSE files are normalized by native GTSFileController before the current managed template reader. A legacy specimen can validate format lineage and the native-upgrade input boundary without being assumed byte-layout-identical to 180_Template.csv.",
+    "intermediate_directory": "_NewTSE",
+    "intermediate_filename": "{source_stem}_NEW.TSE",
+    "method_pins": {
+      "convert_old_tse_to_latest": {
+        "body_sha256": "e145acbba1a20ef86a6ff541692ebec8bab73272fcaa963e3abccbc89cd43d28",
+        "body_size": 133,
+        "rva": 9948
+      },
+      "tse_convert": {
+        "body_sha256": "9a1dab02b123a9e317e10bc670ec0111e08e984725c5be94c34f3076829a4f88",
+        "body_size": 1136,
+        "rva": 8812
+      }
+    },
+    "native_upgrade_api": "GFCConvertOldTSEToLatestTSE",
+    "pipeline": "source TSE -> native GFCConvertOldTSEToLatestTSE -> upgraded _NEW.TSE -> BinaryRead with configured template"
+  },
   "recovery_proof": {
     "GTSPlusTSEConverter/Converter.dll": {
       "method_body_materialized_count": 2433,
@@ -359,7 +378,7 @@
     ],
     "unsigned_decode": "UInt64 parse, bit-mask, then right shift"
   },
-  "schema": "gtsplus-tse-managed-semantics-v1",
+  "schema": "gtsplus-tse-managed-semantics-v2",
   "sources": {
     "GTSPlusTSEConverter/Converter.dll": {
       "protected_sidecar": {
@@ -419,5 +438,5 @@
     }
   },
   "title": "GTS+ recovered TSE/GTSE managed procedural semantics",
-  "validation_boundary": "Procedural host semantics are recovered. A representative Toyota-generated TSE is still required only to exercise the complete position/FAT/list traversal against real saved bytes and to validate concrete section population."
+  "validation_boundary": "Procedural host semantics are recovered. Public legacy Toyota-generated TSE specimens validate the shared header/FAT/position-marker lineage, while a true-TSS3 TSE is still required to exercise current PCS Operation/Image FFD population and the complete latest-layout traversal end-to-end."
 }

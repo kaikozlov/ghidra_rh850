@@ -3234,10 +3234,15 @@ reader also pins a 35-entry runtime position-marker dictionary (including PCS Op
 `...27`, PCS Image FFD `...28`, VCH `...23`, and TMR `...FE`), the
 `FF FF FF FF <selector> FF FF FF` resynchronization grammar, template columns 15..22 as
 `Type/Size/SizeF/IsList/LevelF/ExistF/PositionF/PositionSkipF`, exact 8-byte rewind behavior,
-and 15-level FAT/list projection. What remains open at this host layer is primarily
-recorder-ID -> vehicle-network producer/frame correlation and exercising that recovered
-saved-session traversal against a representative Toyota-generated TSE sample, not the
-existence, purpose, or executable decoder semantics of the three host layers.
+and 15-level FAT/list projection. Public legacy Toyota-generated TSEs now independently validate the stable saved-session
+framing layer: current-template header field order, 12-byte-key/DWORD-position FAT geometry,
+and the exact `FF FF FF FF <selector> FF FF FF` position record all occur in real
+Techstream 11.30.137 files. Current `TSEConverter` also proves the version boundary by
+calling `GFCConvertOldTSEToLatestTSE` before feeding `_NEW.TSE` to `BinaryRead` with the
+configured template. What remains open at this host layer is primarily recorder-ID ->
+vehicle-network producer/frame correlation and exercising the latest layout against a
+**true-TSS3** Toyota TSE containing PCS Operation/Image FFD, not generic real-TSE framing or
+the existence/purpose/executable semantics of the three host layers.
 
 **P6 is a successor oracle, not TSS3 evidence, and its migration boundary is now
 explicit.** A dedicated cross-generation artifact joins `DSSystem_P5`, `Fr_RadSen_P5`,

@@ -6,9 +6,10 @@
 >
 > **Status:** saved-session structure **and recovered managed reader/compression
 > semantics**. The shipped managed files are protector-zeroed inputs, but the generic CP
-> recovery materializes their executable IL. A real Toyota-generated TSE sample is still
-> required to validate every FAT/list traversal edge before a standalone reader is
-> declared production-complete.
+> recovery materializes their executable IL. Four public Toyota-generated legacy TSE
+> specimens now validate the shared header/FAT/position-marker lineage against real bytes.
+> A **true-TSS3** TSE is still required to validate current PCS Operation/Image FFD section
+> population and the complete latest-layout traversal end-to-end.
 >
 > **Artifacts:** `data/generated/gtsplus_2026/tse_converter_surface.json` captures the
 > installed/template/native storage surface; `data/generated/gtsplus_2026/tse_managed_semantics.json`
@@ -107,9 +108,46 @@ The reader's traversal contract is now recovered rather than inferred from the C
   disambiguates repeated list keys as `{name}_{index:03d}`. Raw ring-buffer bytes survive
   the projection as `RawValue`.
 
-These rules are pinned by recovered IL and fresh CP recovery. A real Toyota-generated TSE
-is still needed to exercise every branch against concrete saved bytes and section
-population; it is **not** needed to recover the host traversal implementation itself.
+These rules are pinned by recovered IL and fresh CP recovery. TMS-086 now adds real-file
+validation for the stable framing layer: four public Toyota Techstream 11.30.137 TSEs use
+this same header/FAT family and the same 8-byte position-record shape. They are legacy
+pre-TSS3 files, so they do **not** establish current PCS section population or prove that
+`180_Template.csv` directly parses their old layout. Current `TSEConverter` explicitly
+normalizes historical input first through `GFCConvertOldTSEToLatestTSE`, writes an
+`_NEW.TSE`, and only then gives that upgraded file to `BinaryRead` with the configured
+current template.
+
+### 3.1 Real Toyota TSE lineage validation
+
+A public 2017 Toyota diagnostic discussion provides three downloadable RAR attachments
+containing four genuine `.TSE` sessions. The repository intentionally does **not** retain
+those raw third-party sessions or their original filenames/vehicle identifier. Instead,
+`data/external/public_techstream_tse_lineage.json` records privacy-minimized structural
+facts plus the public attachment and TSE SHA-256 identities.
+
+All four files are GTS `11.30.137`, header version `0x102A`. Their common prefix is:
+
+- signature/file-extension bytes `9A 53 DB 12 54 53 45 00`;
+- `DWORD ID=1`, `WORD Ver=0x102A`, `WORD reserved=0`;
+- the legacy-save flag, store counter and destination fields in the same widths/order as
+  the current 171/173/180 template;
+- length-prefixed GTS-version and user-type strings, ending at byte `0x2E`; then
+- a 14-entry legacy top-level FAT made of **12-byte ASCII key + little-endian DWORD
+  absolute position** records (`IniCarInfo`, `ConfCarInfo`, `MultiPID`, ... `ImgFFD`,
+  `ECUInfo`).
+
+Most importantly, all **56/56** retained FAT targets are in bounds and begin
+`FF FF FF FF <selector> FF FF FF`, exactly the current recovered
+`BinaryRead::GetNextReadPosition` scan shape. The first three entries are consistently
+selectors `01`, `02`, and `17`. Repeated legacy FAT positions can point at the next
+present section when an intermediate family is absent, so the observation is deliberately
+about FAT/position-record framing rather than projecting a current section meaning onto
+every old key.
+
+This removes the generic “no real TSE specimen” blocker. What remains specimen-blocked is
+narrower: a **true-TSS3** raw TSE with PCS Operation/Image FFD, needed to validate current
+section population plus the post-upgrade 180-template traversal on the data we actually
+care about.
 
 ## 4. PCS recorder sections
 
@@ -251,14 +289,13 @@ The saved-session pipeline is now useful in three ways:
    proves where the proprietary FRC recorder data is persisted between acquisition and
    offline interpretation.
 
-The remaining high-value closure is a real TSE sample containing TSS3 Operation FFD or
-Image FFD. A deterministic corpus census now confirms that **none is bundled or already
-tracked**: the pinned Toyota Diagnostics tree contains zero `.tse`/`.gtse` files, and the
-repository `REFERENCE/`, `community/`, and `targets/` corpora contain zero such specimens.
-A broader read-only local search also found no Toyota-generated TSE/GTSE or genuine
-`0x792<->0x79A` AB11/EB11 recorder exchange in the retained CAN captures. The shipped
-`TEMPLATE/{171,173,180}_Template.csv` files and recovered converter PEs are format/tool
-evidence, not session specimens.
+The remaining high-value closure is specifically a **true-TSS3** TSE sample containing
+PCS Operation FFD or Image FFD. The pinned Toyota Diagnostics tree and repository
+`REFERENCE/`, `community/`, and `targets/` corpora contain zero such specimens, and the
+retained CAN captures contain no genuine `0x792<->0x79A` AB11/EB11 recorder exchange.
+TMS-086 supersedes the broader “no real TSE specimen” framing: public legacy Toyota TSEs
+now validate the common header/FAT/position-record lineage, but they predate TSS3 and cannot
+populate the current PCS sections.
 
 The minimum acquisition needed to close that validation boundary is therefore concrete:
 
@@ -271,10 +308,10 @@ The minimum acquisition needed to close that validation boundary is therefore co
 5. pin the specimen SHA-256 plus vehicle/FRC software identity, then exercise the recovered
    35-marker FAT/list traversal and PCS dictionary join against its populated sections.
 
-Until such external source data exists, there is no further static implementation RE to do
-here: the managed executable-body, TSE traversal, ring-buffer and GTSE compression
-boundaries are closed, while real-session validation is **source-data blocked** rather than
-code-analysis blocked.
+Until such true-TSS3 source data exists, there is no further static implementation RE to do
+here: the managed executable-body, old-file upgrade handoff, TSE traversal, ring-buffer and
+GTSE compression boundaries are closed. **PCS TSS3 real-section validation** remains
+source-data blocked rather than code-analysis blocked; generic real-TSE framing no longer is.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
@@ -282,6 +319,6 @@ code-analysis blocked.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [TMS-084](../reference/index.md#finding-tms-084)
-- Corrections with this document as canonical home: —
+- Findings with this document as canonical home: [TMS-084](../reference/index.md#finding-tms-084), [TMS-086](../reference/index.md#finding-tms-086)
+- Corrections with this document as canonical home: [CORR-133](../reference/index.md#correction-corr-133)
 <!-- knowledge-cross-references:end -->

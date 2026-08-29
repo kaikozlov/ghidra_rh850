@@ -1,0 +1,531 @@
+{
+  "schema": "public-techstream-tse-lineage-v1",
+  "title": "Privacy-minimized structural observations from public Toyota Techstream TSE specimens",
+  "source": {
+    "provider": "Japan Vehicles Diagnostics public forum attachment corpus",
+    "topic_url": "https://forum.alflash.com.ua/viewtopic.php?t=1250",
+    "topic_context": "2017 Toyota Avensis Techstream diagnostic discussion; the public thread explicitly names the attached logs as .TSE files.",
+    "attachments": {
+      "2573": {
+        "url": "https://forum.alflash.com.ua/download/file.php?id=2573",
+        "size": 3029,
+        "sha256": "e30acdd71cc1d3b26db1ceabee88d6fb6023618af23a9a359b0c0194132bcbb3"
+      },
+      "2594": {
+        "url": "https://forum.alflash.com.ua/download/file.php?id=2594",
+        "size": 6032,
+        "sha256": "27004a462755a9c43c9ca9f78017f6669f734fcfc8e24f07a1f215883f65a9bb"
+      },
+      "2615": {
+        "url": "https://forum.alflash.com.ua/download/file.php?id=2615",
+        "size": 4803,
+        "sha256": "875e01e2391552a055b5b306d3b23110f09487486afcdb48e352abb69f9ad2de"
+      }
+    },
+    "observed_date": "2026-08-28"
+  },
+  "privacy_boundary": "Raw third-party diagnostic sessions and their original filenames/vehicle identifier are intentionally not tracked. This file retains only public attachment IDs, cryptographic identities, non-personal format/header metadata, FAT positions, and 8-byte section-marker prefixes.",
+  "specimen_scope": {
+    "count": 4,
+    "gts_version": "11.30.137",
+    "tse_header_version": "0x102A",
+    "generation": "legacy pre-TSS3",
+    "boundary": "These specimens validate Toyota TSE format lineage only. They do not contain or validate true-TSS3 PCS Operation/Image FFD sections."
+  },
+  "common_legacy_top_level_fat_keys": [
+    "IniCarInfo",
+    "ConfCarInfo",
+    "MultiPID",
+    "FuncName",
+    "HealthCheck",
+    "TimeStamp",
+    "ROBCommon",
+    "MILMessage",
+    "CanBus",
+    "DualData",
+    "DDRData",
+    "OpeFFD",
+    "ImgFFD",
+    "ECUInfo"
+  ],
+  "samples": [
+    {
+      "sample_id": "legacy-tse-1",
+      "attachment_id": 2594,
+      "tse_size": 18739,
+      "tse_sha256": "1ef8d7ae67bc4e26baabc2bf48bd1782c95b3d17c5c483b80398eb7afc12dd3b",
+      "header": {
+        "signature_hex": "9a53db1254534500",
+        "id": 1,
+        "version": "0x102A",
+        "reserved": 0,
+        "legacy_save_flag": 0,
+        "store_count": 3,
+        "destination": 0,
+        "gts_version": "11.30.137",
+        "user_type_code": "EU_CORP",
+        "header_size": 46
+      },
+      "legacy_top_level_fat": [
+        {
+          "key": "IniCarInfo",
+          "position": 672,
+          "target_marker_hex": "ffffffff01ffffff",
+          "target_selector": 1,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ConfCarInfo",
+          "position": 838,
+          "target_marker_hex": "ffffffff02ffffff",
+          "target_selector": 2,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "MultiPID",
+          "position": 1042,
+          "target_marker_hex": "ffffffff17ffffff",
+          "target_selector": 23,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "FuncName",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "HealthCheck",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "TimeStamp",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ROBCommon",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "MILMessage",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "CanBus",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "DualData",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "DDRData",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "OpeFFD",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ImgFFD",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ECUInfo",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        }
+      ]
+    },
+    {
+      "sample_id": "legacy-tse-2",
+      "attachment_id": 2573,
+      "tse_size": 10712,
+      "tse_sha256": "44ae66be6d20566aacecb602b6afb87a6019f9e394d3dc4041fa98afa3691f6d",
+      "header": {
+        "signature_hex": "9a53db1254534500",
+        "id": 1,
+        "version": "0x102A",
+        "reserved": 0,
+        "legacy_save_flag": 0,
+        "store_count": 3,
+        "destination": 0,
+        "gts_version": "11.30.137",
+        "user_type_code": "EU_CORP",
+        "header_size": 46
+      },
+      "legacy_top_level_fat": [
+        {
+          "key": "IniCarInfo",
+          "position": 672,
+          "target_marker_hex": "ffffffff01ffffff",
+          "target_selector": 1,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ConfCarInfo",
+          "position": 838,
+          "target_marker_hex": "ffffffff02ffffff",
+          "target_selector": 2,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "MultiPID",
+          "position": 1060,
+          "target_marker_hex": "ffffffff17ffffff",
+          "target_selector": 23,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "FuncName",
+          "position": 1072,
+          "target_marker_hex": "ffffffff03ffffff",
+          "target_selector": 3,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "HealthCheck",
+          "position": 1072,
+          "target_marker_hex": "ffffffff03ffffff",
+          "target_selector": 3,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "TimeStamp",
+          "position": 2396,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ROBCommon",
+          "position": 2396,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "MILMessage",
+          "position": 2396,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "CanBus",
+          "position": 2396,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "DualData",
+          "position": 2396,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "DDRData",
+          "position": 2396,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "OpeFFD",
+          "position": 2396,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ImgFFD",
+          "position": 2396,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ECUInfo",
+          "position": 2396,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        }
+      ]
+    },
+    {
+      "sample_id": "legacy-tse-3",
+      "attachment_id": 2594,
+      "tse_size": 18388,
+      "tse_sha256": "4c7edde9c7f74912864d409d4962448b8bf42151c4894a89f609cd6803b0261a",
+      "header": {
+        "signature_hex": "9a53db1254534500",
+        "id": 1,
+        "version": "0x102A",
+        "reserved": 0,
+        "legacy_save_flag": 0,
+        "store_count": 4,
+        "destination": 0,
+        "gts_version": "11.30.137",
+        "user_type_code": "EU_CORP",
+        "header_size": 46
+      },
+      "legacy_top_level_fat": [
+        {
+          "key": "IniCarInfo",
+          "position": 672,
+          "target_marker_hex": "ffffffff01ffffff",
+          "target_selector": 1,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ConfCarInfo",
+          "position": 838,
+          "target_marker_hex": "ffffffff02ffffff",
+          "target_selector": 2,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "MultiPID",
+          "position": 1042,
+          "target_marker_hex": "ffffffff17ffffff",
+          "target_selector": 23,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "FuncName",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "HealthCheck",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "TimeStamp",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ROBCommon",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "MILMessage",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "CanBus",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "DualData",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "DDRData",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "OpeFFD",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ImgFFD",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ECUInfo",
+          "position": 1054,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        }
+      ]
+    },
+    {
+      "sample_id": "legacy-tse-4",
+      "attachment_id": 2615,
+      "tse_size": 25408,
+      "tse_sha256": "633dbf451059de6c84a156fbe924d1a3dae818113fad6d2f077e31a454a59ae4",
+      "header": {
+        "signature_hex": "9a53db1254534500",
+        "id": 1,
+        "version": "0x102A",
+        "reserved": 0,
+        "legacy_save_flag": 0,
+        "store_count": 5,
+        "destination": 0,
+        "gts_version": "11.30.137",
+        "user_type_code": "EU_CORP",
+        "header_size": 46
+      },
+      "legacy_top_level_fat": [
+        {
+          "key": "IniCarInfo",
+          "position": 960,
+          "target_marker_hex": "ffffffff01ffffff",
+          "target_selector": 1,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ConfCarInfo",
+          "position": 1126,
+          "target_marker_hex": "ffffffff02ffffff",
+          "target_selector": 2,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "MultiPID",
+          "position": 1347,
+          "target_marker_hex": "ffffffff17ffffff",
+          "target_selector": 23,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "FuncName",
+          "position": 1359,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "HealthCheck",
+          "position": 1359,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "TimeStamp",
+          "position": 1359,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ROBCommon",
+          "position": 1359,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "MILMessage",
+          "position": 1359,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "CanBus",
+          "position": 1359,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "DualData",
+          "position": 1359,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "DDRData",
+          "position": 1359,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "OpeFFD",
+          "position": 1359,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ImgFFD",
+          "position": 1359,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        },
+        {
+          "key": "ECUInfo",
+          "position": 1359,
+          "target_marker_hex": "ffffffff04ffffff",
+          "target_selector": 4,
+          "target_matches_current_scan_shape": true
+        }
+      ]
+    }
+  ],
+  "observed_format_join": {
+    "current_template_header_match": "The public files begin with the same field sequence declared by current 171/173/180 templates: 8-byte file-extension/signature field; DWORD ID; WORD version; WORD reserved; legacy-save DWORD; store-counter DWORD; destination WORD; length-prefixed GTS version; length-prefixed user-type code.",
+    "legacy_fat_geometry": "14 consecutive 12-byte ASCII search keys followed by little-endian DWORD absolute positions, beginning immediately after the 0x2E-byte header.",
+    "fat_target_marker_shape": "Every recorded legacy top-level FAT position in all four specimens points in-bounds to FF FF FF FF <selector> FF FF FF, the exact shape used by current recovered BinaryRead.GetNextReadPosition.",
+    "current_converter_upgrade_boundary": "Current recovered TSEConverter calls GFCConvertOldTSEToLatestTSE before BinaryRead; these 0x102A files are therefore old-format inputs to the native upgrader, not proof that 180_Template.csv directly parses their original layout."
+  }
+}

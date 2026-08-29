@@ -260,10 +260,12 @@ ECU-supply-change query as the only provenance-safe external route. VAR-070 alre
 (currently unmeasured for live support) together with FRC `0x792` `22 1B 03..1B 07` during
 stock DRCC and synchronize those values with all-bus CAN plus Operation FFD. That can close
 the vehicle-network frame, transformation, cadence, arbitration executor, SecOC/integrity owner
-and suppression/fallback point. Separately, the saved-session implementation is complete but
-real-session validation is **source-data blocked**: the pinned Toyota distribution and tracked
-reference/community/target corpora contain zero TSE/GTSE specimens. Acquire and preserve the raw
-`.TSE` before GTSE conversion
+and suppression/fallback point. Separately, TMS-086 closes **generic real-TSE framing validation** with four public legacy
+Toyota Techstream specimens: the current-template header family, 12-byte-key/DWORD FAT and
+`FF FF FF FF <selector> FF FF FF` position records all occur in real saved bytes, and current
+`TSEConverter` explicitly upgrades old input through `GFCConvertOldTSEToLatestTSE` before the
+180-template reader. The remaining saved-session source-data block is now only a **true-TSS3**
+PCS Operation/Image FFD specimen. Acquire and preserve that raw `.TSE` before GTSE conversion
 because the converter skips the PCS Operation/Image FFD sections. Treat generation-22
 `ADCU_P6` only as a successor terminology oracle. Canonical:
 `data/generated/gtsplus_2026/tss3_control_ownership_surface.json`,

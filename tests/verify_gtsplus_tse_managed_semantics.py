@@ -37,7 +37,7 @@ def main() -> int:
         check("four TSE managed components recover", manifest["recovered_body_count"] == 4)
         rebuilt = extract(recovered)
     check("artifact regenerates from fresh CP recovery", rebuilt == tracked)
-    check("schema", tracked["schema"] == "gtsplus-tse-managed-semantics-v1")
+    check("schema", tracked["schema"] == "gtsplus-tse-managed-semantics-v2")
 
     proof = tracked["recovery_proof"]
     for component in COMPONENTS:
@@ -47,6 +47,11 @@ def main() -> int:
             row["method_body_rva_count"] > 0
             and row["method_body_materialized_count"] == row["method_body_rva_count"],
         )
+
+    upgrade = tracked["legacy_upgrade"]
+    check("legacy TSE is upgraded through native GTSFileController", upgrade["native_upgrade_api"] == "GFCConvertOldTSEToLatestTSE")
+    check("legacy upgrade writes an intermediate NEW.TSE", upgrade["intermediate_directory"] == "_NewTSE" and upgrade["intermediate_filename"] == "{source_stem}_NEW.TSE")
+    check("managed BinaryRead consumes upgraded TSE", "upgraded _NEW.TSE -> BinaryRead" in upgrade["pipeline"])
 
     binary = tracked["binary_read"]
     check("BinaryRead runtime position marker census", len(binary["position_markers"]) == 35)
