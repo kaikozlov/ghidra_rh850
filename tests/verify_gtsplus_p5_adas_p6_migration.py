@@ -40,6 +40,29 @@ def main() -> int:
     check("P6 ADCU has production-style NA installs", arch["6037"]["install_row_count_na"] == 24)
     check("P6F ADCU paired family", arch["6537"]["install_row_count_na"] == 20)
 
+    frc = arch["498"]
+    check("FRC generation has five NA install architectures", frc["architecture_count_na"] == 5)
+    camry_arch = frc["architectures_na"][0]
+    check(
+        "Camry HV architecture is exactly EPS+ABS+BrakeBooster+FRC",
+        {row["category_id"] for row in camry_arch["categories"]} == {405, 435, 466, 498}
+        and "Camry HV" in camry_arch["model_names"]
+        and camry_arch["install_row_count"] == 117,
+    )
+    frc_cats = {
+        row["category_id"]
+        for a in frc["architectures_na"]
+        for row in a["categories"]
+    }
+    check(
+        "P5 compute peers are disjoint from every FRC architecture",
+        frc_cats.isdisjoint({427, 428, 429, 431, 432}),
+    )
+    check(
+        "non-production FRC architectures are MAC and TEST only",
+        [a["model_names"] for a in frc["architectures_na"][3:]] == [["MAC"], ["TEST"]],
+    )
+
     p5 = tracked["p5_databases"]
     pcs2_names = monitor_names(p5["PCS2_P5"])
     for name in ("LPB Request", "PB Request", "PBA Request", "PCS Steering Request", "Warning Brake Request"):

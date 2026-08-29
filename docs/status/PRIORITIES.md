@@ -399,6 +399,8 @@ B28..B31 strongly match Toyota ordinary-P5 `FV4 || MAC28`, but physical transmit
 
 Exact F33's B6-inactive `D0218 -> CC48 -> CC60 -> CC50 -> CC62/CC66 -> CC64` path reaches motor current control, so zero B6 needs no missing packet; it also does not prove the retained ID11 intervals received an autonomous lane-centering grant. Required next evidence is (1) FRC Operation FFD `5282/5285/57DE/5265` synchronized with CAN to separate request from winner/grant, and (2) exact candidate firmware or a source-identifying physical capture to separate FRC pre-authentication from CGW/Skid/Brake assembly/signing. Do not repeat the completed field/COM/D0218 scans or infer an `0x08A -> B6` transform. Do not send `0x08A` to EPS. Protected B6 stays a separate external-actuation candidate whose bridge/signing/suppression contract can be evaluated independently.
 
+**VAR-096 signer-set bound:** current GTS+ install-set co-occurrence proves no separate ADAS arbitration/request ECU co-installs with FRC_P5 498 (the older PCS1/DSSystem/Fr_RadSen/RoadSign/PCS2 compute split is LS500/LS500h/MIRAI-only and disjoint from 498), and the Camry HV architecture is exactly EMPS+ABS+BrakeBooster+FRC. The FRC is therefore the sole ADAS compute ECU on this car, and any `0x08A`/B6 signer hunt should target the co-installed brake family (ABS 435 / BrakeBooster 466) or the Central Gateway — not a nonexistent ADAS peer. Canonical: `docs/variants/camry-2026-live-baseline.md` §44.
+
 **VAR-068 Class-L/upstream and identity update:** the retained Class-L windows now have a
 portable persistent-edge analysis. No exact-F33-accepted stream has a reproduced rise
 flip, separate EPS-Tx `0x030` has zero persistent edge flips, `0x18A` has no matched
