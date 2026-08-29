@@ -2055,7 +2055,7 @@ Deterministic evidence is carried by
 `data/generated/camry_8965F3307000_internal_assist_oracles.json` and
 `tests/verify_camry_8965F3307000_internal_assist_oracles.py` (VAR-083 / CORR-130).
 
-## 35. Hidden-ingress false-negative audit: no concrete alternate producer found; two static holes remain
+## 35. Hidden-ingress false-negative audit: no concrete alternate producer found; residuals closed in §36
 
 Because the retained physical observation and the firmware model are now in direct tension,
 a second read-only audit attacked the ways the canonical Ghidra graph could have missed a
@@ -2092,8 +2092,9 @@ corpus, and the retained LocalRAM/GlobalRAM snapshots:
   calibration/crypto/data tables rather than a hidden second application-control program;
   the executable unrecovered islands relevant here are the ISR entries above.
 
-No concrete alternate external steering-value ingress emerged from those classes. Two
-static false-negative modes remain worth keeping explicit rather than rediscovering:
+No concrete alternate external steering-value ingress emerged from those classes. At this
+stage two static false-negative modes remained worth keeping explicit rather than
+rediscovering; §36 / VAR-085 now closes both within their declared static scope:
 
 1. **register-arithmetic computed store target:** a pointer/value assembled through runtime
    arithmetic could evade canonical direct-reference recovery even when no stored ROM/RAM
@@ -2102,20 +2103,90 @@ static false-negative modes remain worth keeping explicit rather than rediscover
    application path that rewrites a DMAC destination register after initialization has not
    yet been exhaustively disproved.
 
-The clean static falsifiers are correspondingly narrow. **E1:** adapt the existing computed
-call-target backtracker into a store-target resolver and classify every `st.{b,h,w}` whose
+The clean static falsifiers were correspondingly narrow. **E1:** adapt the existing computed
+call-target backtracker into a store-target resolver and classify every recovered STORE whose
 effective address is not already resolved, reporting any arithmetic chain that can land in
-the command/motor ROI. **E2:** census every writer of the DMAC destination-address SFRs
-and prove that every runtime value derives only from the fixed ROM descriptor tables. A
-clean E1+E2 would remove the two strongest remaining “Ghidra missed the producer” escape
-hatches.
+the command/motor ROI. **E2:** census every recovered writer of the DMAC destination-address
+SFRs and prove that every runtime value derives only from the fixed ROM descriptor tables.
+Those falsifiers have now been executed and are preserved below rather than left as future
+work.
 
 This audit does **not** resolve the contradiction by reclassifying the observed factory LTA
 steering as generic assist. The direct vehicle observation is retained as evidence to be
 explained. The supported conclusion is narrower: **ordinary CAN, the known fixed DMA and
 pointer/callback paths, and the recovered downstream physical actuation funnel do not yet
 explain how stock LTA authority enters `CC50/CC62` with B6 absent.** That is now the one
-steering-command problem to solve (VAR-084).
+steering-command problem to solve (VAR-084). VAR-085 removes E1/E2 as remaining static
+escape hatches; it does not supply the missing stock-LTA authority source.
+
+## 36. E1/E2 closure: computed STORE arithmetic and runtime DMAC destination provenance are clean
+
+VAR-085 executes the two falsifiers left open by §35 against the exact F33 image and the
+canonical **6,065-function** decompiler corpus. The reusable target-native resolver is
+`ghidra/scripts/investigate/AuditComputedStoreTargets.java`. It works on HighFunction STORE
+pointer expressions, recovers conservative unsigned-32 address ranges through constants,
+casts, adds/subtracts, masks, shifts, multiplies, `PTRADD/PTRSUB`, and bounded PHIs, and
+reports only target intersections that are not already represented by a canonical write
+reference. Unknown/unbounded pointers are deliberately not converted into false certainty;
+that general memory-corruption class remains separate from E1/E2.
+
+**E1 — register-arithmetic STORE targets.** Across **13,493** recovered STORE operations,
+**5,011** have a statically bounded target range. Scanning the command/current/D0218 target
+set produces **100 candidate STORE rows in 46 functions** before exact runtime/configuration
+bounds are applied. Every candidate collapses outside the target cell it only overlapped
+under the coarse range analysis:
+
+- the `FEBE71F2` candidates are ordinary indexed status arrays: `3B8E4` receives only
+  literal lane indices **0..7**, while `3C108/3C116/3C184/3C19C` are bounded to
+  indices `<0x18`;
+- generated-COM bookkeeping candidates are confined by exact manager/event/route counts to
+  `FEBE48xx..FEBE4Fxx`; the five route buffers are fixed at
+  `FEBE3DF8/FEBE3E2C/FEBE3E48/FEBE3E64/FEBE3EA0`;
+- XCP/CAN-manager scratch candidates are confined to `FEBE493E..FEBE503A` by the exact
+  state/rule counts; diagnostic-event state is bounded below `FEBE5527`;
+- the logical-block family has exactly three state rows and backing buffers
+  `FEBE5651/FEBE5751/FEBE5851`; the apparent wide indexed motor/snapshot families are
+  called only with the exact five-channel domain **0..4**; and the remaining `CBxx`
+  helpers carry explicit `<=0x13` / `<3` bounds.
+
+The result is **zero recovered register-arithmetic STORE path that can land on an audited
+steering command/current target after exact index provenance is applied**. This closes
+VAR-084 **E1** as defined. It does not assert that an arbitrary corrupted pointer can never
+write there.
+
+**E2 — runtime DMAC destination reprogramming.** Exact F33 uses a `0x40`-byte channel
+slice at `0xFFFF8400`; the two destination-address registers are offsets **`+0x04` and
+`+0x14`**. Running the same resolver against all 32 destination-register addresses yields
+only **5 candidate STOREs in 3 functions**: `607FE`, `6080E`, and `609B0`. Their actual
+per-channel offsets are `+0x20`, `+0x2C`, or `+0x38`, so modulo the `0x40` stride they
+cannot be either destination register. Exact recovered writer provenance then leaves:
+
+- destination `+0x04`: writer `6082C` only; `6091E` is a read-only accessor;
+- destination `+0x14`: writers `6082C` and runtime refresher `60A6A` only;
+- `60A6A` has exactly four recovered callers (`60462`, `60C20`, `61B90`, `628B2`),
+  and every callsite passes one of the seven already-pinned fixed CodeFlash descriptor
+  families (`310A8`, `3125C`, `312AC`, `314AC`, `314FC`, `3154C`, `3161C`).
+
+Those seven tables contain **22 descriptor rows / 44 destination fields / 22 distinct
+destinations**. Both destination copies in each row agree, and **none of the 44 fields is
+in LocalRAM `FEBE0000..FEBFFFFF`**. Therefore the recovered runtime updater can refresh
+known peripheral/GlobalRAM routes but cannot retarget DMA into the steering-command cone.
+This closes VAR-084 **E2 within recovered application dataflow**. Arbitrary unknown-pointer
+corruption or a hardware fault remains outside the claim; no separate destination-register
+programmer is recovered.
+
+Together E1+E2 remove the two strongest remaining “Ghidra missed the producer” explanations
+without producing a hidden stock-LTA ingress. The contradiction is now narrower: **the
+missing factory-LTA authority must be found in the semantics/selection of the already
+recovered upstream `CC50/CC62` value path (or new evidence must falsify a closed boundary),
+not in an identified computed STORE or DMAC escape.** The next static work is therefore
+upstream producer/selector semantics and B6-vs-stock arbitration, not another broad ingress
+census.
+
+Deterministic evidence is
+`data/generated/camry_8965F3307000_hidden_ingress_residuals.json`, backed by the two
+promoted target-native STORE censuses and
+`tests/verify_camry_8965F3307000_hidden_ingress_residuals.py` (VAR-085).
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
@@ -2123,6 +2194,6 @@ steering-command problem to solve (VAR-084).
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084)
+- Findings with this document as canonical home: [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085)
 - Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131)
 <!-- knowledge-cross-references:end -->

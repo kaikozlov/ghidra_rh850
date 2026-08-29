@@ -346,11 +346,11 @@ active. This is not producer-wire proof and all three messages remain outside ex
 ingress. FRC `0x1601` is now an independent live corroboration/B6 experiment rather than
 a reason to hold the reverse engineering. VAR-082 now also exhausts periodic Bus-4 fields
 and finds no ordinary external CAN field that reproducibly leads steering/motor response.
-VAR-083 now closes the `CC50/CC62`→current-control join, and VAR-084 finds no concrete
+VAR-083 now closes the `CC50/CC62`→current-control join, VAR-084 finds no concrete
 alternate producer in ROM/live-RAM pointers, unrecovered ISR entries, fixed DMA, callbacks,
-or extra CAN acceptance. Proceed with the two remaining static falsifiers — **E1 computed
-store-target resolution and E2 runtime DMAC destination-register writer provenance** — and
-then the upstream `CC50/CC62` lane-authority logic, not another bus scan or downstream motor sweep.
+or extra CAN acceptance, and **VAR-085 closes the two residual E1/E2 static falsifiers**.
+Proceed directly into the upstream `CC50/CC62` lane-authority state/value logic and B6-vs-
+stock arbitration, not another bus scan, computed-store sweep, DMA sweep, or downstream motor sweep.
 
 **VAR-081/082/083/084 steering-command boundary — current highest priority:** the retained
 logs machine-identify **73.303384 s of LTA/LCA-active operation with zero B6 on the actual
@@ -368,17 +368,18 @@ Therefore the one steering question to close before any actuation is now sharply
 while B6 is absent, and how would an injected B6 request arbitrate with that stock authority?**
 VAR-084's false-negative audit finds no concrete alternate producer across ROM pointers,
 retained RAM pointers, nine unrecovered ISR entries, fixed DMA descriptors, indirect
-callbacks, diagnostics, or extra CAN acceptance. Two static holes remain explicit and
-should be finished before another vehicle experiment: **E1** resolve every register-arithmetic
-store target that could land in the command/motor ROI; **E2** exhaustively prove every
-runtime writer of DMAC destination-address registers derives only from the fixed descriptor
-tables. After E1/E2, trace the remaining upstream `CC50` selectors/gates/value producers
-with the operator-observed factory steering held as ground truth. Do not explain it away as
-generic assist, do not repeat broad CAN mining, and do not schedule steering output merely
-because B6 syntax/SecOC can be made to pass. FRC `0x1601` plus EPS `1C38/1C02/1C3E` remains
-useful passive correlation, secondary to this static authority proof. Production and
-development steering output remain disabled. Canonical: live-baseline §§20,33–35;
-VAR-081/082/083/084; CORR-129/130/131.
+callbacks, diagnostics, or extra CAN acceptance. VAR-085 then closes both residual holes:
+E1 reduces 100 computed-STORE candidates / 46 functions to zero actual command-cone hits
+under exact index/config bounds; E2 proves the only recovered runtime DMAC destination
+updater consumes seven fixed descriptor families / 22 rows / 44 destination fields, none
+in LocalRAM. **The next static task is now the remaining upstream `CC50` selectors/gates/
+value producers themselves**, with the operator-observed factory steering held as ground
+truth, followed by explicit B6-vs-stock arbitration. Do not explain it away as generic
+assist, repeat broad CAN/pointer/DMA mining, or schedule steering output merely because B6
+syntax/SecOC can be made to pass. FRC `0x1601` plus EPS `1C38/1C02/1C3E` remains useful
+passive correlation, secondary to this static authority proof. Production and development
+steering output remain disabled. Canonical: live-baseline §§20,33–36;
+VAR-081/082/083/084/085; CORR-129/130/131.
 
 **VAR-068 Class-L/upstream and identity update:** the retained Class-L windows now have a
 portable persistent-edge analysis. No exact-F33-accepted stream has a reproduced rise
@@ -449,7 +450,7 @@ C4C0 selector-indexed maps alias across all four banks in this exact calibration
 do not reveal selector state. The next passive discriminator can still synchronize **EPS
 `0x1C38` + named `0x1C02` + control `0x1C3E`** with FRC `0x1601/0x1914`, but static work no
 longer needs to rediscover `C28FC/C2B64` or the downstream current join: both are closed.
-Static priority is E1/E2 plus the remaining upstream stock-LTA authority/value into `CC50`. Producer-side Brake firmware remains acquisition-blocked.
+Static priority is now the remaining upstream stock-LTA authority/value into `CC50` and its arbitration with B6; VAR-085 closes E1/E2. Producer-side Brake firmware remains acquisition-blocked.
 
 **VAR-069 exact Brake producer acquisition:** the producer search is now narrowed to
 same-car category-435 identities `F152633K0000` / `8954147040` at physical `0x7B0`.

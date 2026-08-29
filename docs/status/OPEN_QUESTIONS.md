@@ -1039,16 +1039,22 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   non-default unrecovered ISR entries delegate into recovered timer/serial/acquisition code
   without a transitive ROI writer, fixed DMAC descriptors route to known GlobalRAM rings
   rather than LocalRAM, fixed callback cells install CodeFlash targets, and the exact 47
-  RSCFD rules contain no hidden normal-CAN route. Two static escape hatches remain and are
-  the next falsifiers: **E1**, resolve every register-arithmetic `st.{b,h,w}` effective
-  address that canonical data references leave computed and report any path capable of
-  landing in the command/motor ROI; **E2**, census every runtime writer of the DMAC
-  destination-address SFRs and prove the values derive only from the fixed descriptor
-  tables. If E1/E2 are clean, continue upstream from `CC50` through its remaining
-  selectors/gates/value producers with the physical factory-LTA observation held fixed;
-  do not resolve the contradiction by relabeling the observed steering as generic assist.
-  Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
-  §§20,33–35; VAR-081/082/083/084; CORR-129/130.
+  RSCFD rules contain no hidden normal-CAN route. **VAR-085 now closes both residual static
+  escape hatches.** E1's HighFunction STORE resolver scans 13,493 STOREs and reduces 100
+  coarse command-cone candidates / 46 functions to zero after exact index/config bounds.
+  E2's all-channel destination-SFR scan leaves only control-register false positives; the
+  only recovered runtime destination updater is `60A6A`, whose four callers use seven fixed
+  CodeFlash descriptor families / 22 rows / 44 destination fields, with zero LocalRAM
+  destinations.
+
+  Therefore **do not repeat E1/E2, broad CAN mining, pointer-table mining, or another DMA
+  descriptor sweep without new falsifying evidence.** Continue upstream from `CC50` through
+  its remaining selectors/gates/value producers and recover the state transition that gives
+  the B6-independent path lane authority during factory LTA. In parallel, characterize how
+  a valid injected B6 request arbitrates with that stock authority. Hold the physical
+  factory-LTA observation fixed; do not resolve the contradiction by relabeling it as generic
+  assist. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
+  §§20,33–36; VAR-081/082/083/084/085; CORR-129/130.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

@@ -2077,6 +2077,16 @@ paths = [
   "docs/status/PRIORITIES.md",
 ]
 
+[suite.camry_8965f3307000_hidden_ingress_residuals]
+tests = ["tests/verify_camry_8965F3307000_hidden_ingress_residuals.py"]
+oracle = "generated_self_check"
+paths = [
+  "data/generated/camry-8965F3307000/decompilations.jsonl",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+]
+
 [suite.cuwplus_body_recovery]
 tests = ["tests/verify_cuwplus_body_recovery.py"]
 oracle = "dynamic_trace"
