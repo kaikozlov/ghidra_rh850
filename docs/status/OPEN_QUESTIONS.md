@@ -975,8 +975,9 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   (**live support unmeasured**), synchronized with FRC `0x792` `22 1B 03`..`22 1B 07`,
   stock DRCC engagement, Operation FFD and all-bus capture. That synchronized read-only
   discriminator is now turnkey: `tools/camry_tss3_request_capture.py` polls the nine
-  pinned reads on one monotonic clock with registry-driven decoding, multiframe response
-  assembly, NRC retention, and passive all-bus capture, while
+  pinned reads on one monotonic clock with registry-driven decoding, one unresolved
+  request maximum per responder, multiframe response assembly, safe negative-response
+  request association, timeout/assembly-error responder quarantine, and passive all-bus capture, while
   `tools/analyze_camry_tss3_request_capture.py` summarizes the artifact deterministically
   (VAR-086; no live run claimed yet — the remaining step is the vehicle capture itself
   during stock DRCC). TMS-087 adds a second host artifact worth preserving during that

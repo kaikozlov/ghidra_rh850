@@ -71,10 +71,16 @@ def _median(values: list[int]) -> int | None:
 
 def _did_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     queries = [row for row in rows if row.get("type") == "query"]
-    positives = [row for row in rows if row.get("status") == "positive"]
+    responses = [row for row in rows if row.get("type") == "response"]
+    positives = [row for row in responses if row.get("status") == "positive"]
+    negatives = [row for row in responses if row.get("status") == "negative"]
+    nrc_rows = [row for row in responses if row.get("nrc") is not None]
     out: dict[str, Any] = {
         "query_count": len(queries),
         "positive_count": len(positives),
+        "negative_count": len(negatives),
+        "nrc_counts": dict(Counter(row["nrc"] for row in nrc_rows)),
+        "response_status_counts": dict(Counter(row.get("status", "unknown") for row in responses)),
         "raw_counts": dict(Counter(row["raw"] for row in positives)),
     }
     if positives:
@@ -162,7 +168,8 @@ def analyze(capture_dir: Path, *, max_pair_gap_s: float = DEFAULT_MAX_PAIR_GAP_S
     for target in targets:
         did = f"0x{target.did:04X}"
         rows = [row for row in oracle_rows
-                if row.get("ecu") == target.ecu and row.get("did") == did
+                if row.get("ecu") == target.ecu
+                and (row.get("did") == did or row.get("request_did") == did)
                 and row.get("type") in ("query", "response")]
         per_did[target.key] = _did_summary(rows)
     per_ecu: dict[str, Any] = {}
@@ -170,9 +177,13 @@ def analyze(capture_dir: Path, *, max_pair_gap_s: float = DEFAULT_MAX_PAIR_GAP_S
         negatives = [row for row in oracle_rows
                      if row.get("type") == "response" and row.get("ecu") == ecu
                      and row.get("status") == "negative"]
+        pending_rows = [row for row in oracle_rows
+                        if row.get("type") == "response" and row.get("ecu") == ecu
+                        and row.get("status") == "response_pending"]
         per_ecu[ecu] = {
             "negative_count": len(negatives),
-            "nrc_counts": dict(Counter(row["nrc"] for row in negatives)),
+            "response_pending_count": len(pending_rows),
+            "nrc_counts": dict(Counter(row["nrc"] for row in negatives + pending_rows)),
         }
 
     can_summary: dict[str, Any] = {"frames_by_bus": Counter()}

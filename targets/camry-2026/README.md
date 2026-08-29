@@ -295,7 +295,9 @@ tools/analyze_camry_tss3_request_capture.py captures/oq052_* --json summary.json
 
 It round-robins Brake `0x7B0` `22 10 A1..A4` and FRC `0x792` `22 1B 03..1B 07`
 on the same live-proven post-repin bus-0 routes, decodes through the tracked
-diagnostics registry, retains negative NRCs and passive all-bus CAN, and sends
-nothing except those nine reads plus one flow-control frame per multiframe
-response. Live PID support is unmeasured until the first retained artifact; no
+diagnostics registry, retains negative NRCs and passive all-bus CAN, and permits only
+one unresolved request per responder. It sends nothing except those nine reads plus one
+flow-control frame for an expected multiframe response; a 500-ms query timeout or ISO-TP
+assembly error quarantines that responder for the rest of the capture rather than risking
+late-response mis-association. Live PID support is unmeasured until the first retained artifact; no
 live result is claimed by the tooling itself (§37 of the live baseline).

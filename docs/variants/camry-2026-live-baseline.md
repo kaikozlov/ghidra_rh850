@@ -2216,9 +2216,13 @@ RDBI `22 10 A1..A4` synchronized with FRC `0x792` `22 1B 03..1B 07` plus all-bus
 CAN — now has its acquisition tooling complete and deterministically verified, so
 the live step needs no further code work.
 
-`tools/camry_tss3_request_capture.py` is the single-USB-owner poller. It round-robins
-the nine pinned `(ECU, DID)` reads on one monotonic clock at a configurable per-DID
-rate (default 2 Hz), reusing the LTA capture tool's pandad ownership guard, ELM327
+`tools/camry_tss3_request_capture.py` is the single-USB-owner poller. It schedules
+the nine pinned `(ECU, DID)` reads in responder-interleaved order on one monotonic clock,
+with independent per-DID due deadlines at a configurable target rate (default 2 Hz) so a
+busy target cannot increase another DID's cadence. It enforces **at most one unresolved
+RDBI per responder**: a busy
+ECU is skipped until its response resolves, and receive traffic is drained before another
+query is selected. It reuses the LTA capture tool's pandad ownership guard, ELM327
 safety configuration, and compact `can.bin` all-bus writer rather than duplicating
 them. Routes are fixed, not probed: FRC `0x792->0x79A` is the VAR-064 live-proven
 post-repin bus-0 route, and Brake `0x7B0->0x7B8` is the pair VAR-069 pins, on the
@@ -2232,14 +2236,19 @@ profile, bus, addresses, or decoder drift, and no ad-hoc scale exists in the too
 Transmit discipline is fixed: the only requests are the nine single-frame
 `03 22 <DID>` reads in the default diagnostic session — no DiagnosticSessionControl,
 SecurityAccess, RoutineControl, or write — plus exactly one ISO-TP flow-control
-frame (`30 00`) per multiframe response, required because FRC DID `0x1B05` declares
-a five-byte value record whose positive response cannot fit a classic single frame.
-Responses are reassembled single-frame or first/consecutive-frame PDUs; positives
-are decoded to timestamped raw + converted values with OEM pattern labels,
-negatives are retained with their NRC (attributed per ECU only, since ISO 14229
-negatives carry no DID echo), and assembly timeouts/sequence errors are retained
-with their raw frames instead of being dropped. Passive buses 0..2 are recorded
-throughout.
+frame (`30 00`) per **expected** multiframe response, required because FRC DID `0x1B05`
+declares a five-byte value record whose positive response cannot fit a classic single
+frame; an unsolicited first frame is retained but cannot trigger flow control. Responses
+are reassembled single-frame or first/consecutive-frame PDUs; positives are decoded to
+timestamped raw + converted values with OEM pattern labels. ISO 14229 negatives still do
+not echo a DID, but the one-outstanding invariant now lets the artifact safely record the
+sole `request_did` that was outstanding without claiming it appeared on wire. NRC `0x78`
+**Response Pending** is interim: it keeps that sole request outstanding and refreshes its
+500-ms response window rather than releasing the ECU for another DID. A request that
+otherwise remains unresolved for 500 ms, or any ISO-TP assembly timeout/sequence error,
+**quarantines that responder for the rest of the capture** so a late response can never be
+mis-associated with a retry. Raw error/timeout evidence is retained. Passive buses 0..2
+are recorded throughout.
 
 `tools/analyze_camry_tss3_request_capture.py` summarizes a capture directory
 deterministically: per-DID query/response census, NRC and raw histograms,

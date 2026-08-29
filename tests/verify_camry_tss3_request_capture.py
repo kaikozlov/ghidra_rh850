@@ -153,62 +153,194 @@ for t in targets:
     by_rx.setdefault(t.rx, tuple(x for x in targets if x.rx == t.rx))
 
 
-def run_capture(batches, batch_times=None):
+def run_capture(batches, batch_times=None, outstanding_targets=(), outstanding_t0_ns=None):
     panda = FakePanda(batches)
     oracle = io.StringIO()
     canbuf = io.BytesIO()
     stats = {"frames_by_bus": Counter({"0": 0, "1": 0, "2": 0}),
-             "responses": {ecu: {"positive_by_did": Counter(), "negative": 0, "nrc": Counter()}
+             "responses": {ecu: {"positive_by_did": Counter(), "negative": 0, "nrc": Counter(),
+                                  "query_timeout": 0, "assembly_error": 0, "protocol_error": 0,
+                                  "response_pending": 0}
                            for ecu in ("brake", "frc")},
              "rx_ecu": {0x7B8: "brake", 0x79A: "frc"}}
     pending = {}
+    base_ns = (outstanding_t0_ns if outstanding_t0_ns is not None else
+               (batch_times[0] if batch_times else cap.time.monotonic_ns()))
+    outstanding = {target.rx: cap.OutstandingQuery(target=target, t0_ns=base_ns)
+                   for target in outstanding_targets}
+    quarantined = set()
     cap.write_canbin_header(canbuf)
     calls = max(len(batches) + 2, 8)
     for index in range(calls):
         now_ns = batch_times[index] if batch_times and index < len(batch_times) else None
-        cap._capture_messages(panda, canbuf, oracle, by_rx, stats=stats, pending=pending, now_ns=now_ns)
+        cap._capture_messages(panda, canbuf, oracle, by_rx, stats=stats, pending=pending,
+                              outstanding=outstanding, quarantined=quarantined, now_ns=now_ns)
     rows = [json.loads(line) for line in oracle.getvalue().splitlines() if line]
-    return panda, rows, canbuf, stats
+    return panda, rows, canbuf, stats, outstanding, quarantined
 
 
-panda, rows, canbuf, stats = run_capture([
+brake_a1 = next(t for t in targets if t.ecu == "brake" and t.did == 0x10A1)
+frc_1b03 = next(t for t in targets if t.ecu == "frc" and t.did == 0x1B03)
+frc_1b05 = next(t for t in targets if t.ecu == "frc" and t.did == 0x1B05)
+poll_targets = cap._interleave_targets(targets)
+check("poll order alternates Brake/FRC responders while preserving each ECU DID order",
+      [target.key for target in poll_targets] == [
+          "brake/0x10A1", "frc/0x1B03", "brake/0x10A2", "frc/0x1B04",
+          "brake/0x10A3", "frc/0x1B05", "brake/0x10A4", "frc/0x1B06", "frc/0x1B07",
+      ])
+
+panda, rows, canbuf, stats, outstanding, quarantined = run_capture([
     [(0x7B8, bytes.fromhex("056210A1FC180000"), 0)],
     [(0x79A, bytes.fromhex("1008621B05500000"), 0)],
     [(0x79A, bytes.fromhex("210FA00000000000"), 0)],
-    [(0x79A, bytes.fromhex("037F223100000000"), 0)],
     [(0x18A, bytes(64), 1)],
-])
+], outstanding_targets=(brake_a1, frc_1b05))
 positive_rows = [r for r in rows if r.get("status") == "positive"]
-check("single-frame brake positive retained with decoded value",
-      any(r["did"] == "0x10A1" and r["transport"] == "single-frame"
-          and r["signals"][0]["value"] == "-1.000" for r in positive_rows))
+check("single-frame brake positive retained with decoded value and request association",
+      any(r["did"] == "0x10A1" and r["request_did"] == "0x10A1"
+          and r["transport"] == "single-frame" and r["signals"][0]["value"] == "-1.000"
+          for r in positive_rows))
 mf = next(r for r in positive_rows if r["did"] == "0x1B05")
-check("multiframe 0x1B05 assembled, both signals decoded, frames retained",
-      mf["transport"] == "multiframe" and mf["raw"] == "5000000fa0"
+check("multiframe 0x1B05 assembled, associated, decoded, and frames retained",
+      mf["transport"] == "multiframe" and mf["request_did"] == "0x1B05"
+      and mf["raw"] == "5000000fa0"
       and mf["frames"] == ["1008621b05500000", "210fa00000000000"]
-      and [s["value"] for s in mf["signals"]] == ["80", "4000.000"])
-check("exactly one flow-control frame sent to the FRC request address per multiframe",
+      and [sig["value"] for sig in mf["signals"]] == ["80", "4000.000"])
+check("exactly one flow-control frame sent for the expected FRC multiframe response",
       panda.sent == [(0x792, "3000000000000000", 0)])
-check("negative NRC retained once with per-ECU bucket",
-      [r for r in rows if r.get("status") == "negative"][0]["nrc"] == "0x31"
-      and stats["responses"]["frc"]["nrc"] == Counter({"0x31": 1}))
+check("resolved responses clear both outstanding responder slots", outstanding == {})
 check("passive capture retains every incoming bus-0/1 frame including 64-byte FD",
-      stats["frames_by_bus"] == Counter({"0": 4, "1": 1, "2": 0})
-      and len(list(lta.iter_canbin_records(io.BytesIO(canbuf.getvalue())))) == 5)
+      stats["frames_by_bus"] == Counter({"0": 3, "1": 1, "2": 0})
+      and len(list(lta.iter_canbin_records(io.BytesIO(canbuf.getvalue())))) == 4)
 
-panda, rows, _canbuf, _stats = run_capture(
+panda, rows, _canbuf, stats, outstanding, quarantined = run_capture(
+    [[(0x79A, bytes.fromhex("037F223100000000"), 0)]],
+    outstanding_targets=(frc_1b03,))
+negative = next(r for r in rows if r.get("status") == "negative")
+check("negative NRC is associated to the sole outstanding DID without claiming an echoed DID",
+      negative["did"] is None and negative["request_did"] == "0x1B03" and negative["nrc"] == "0x31"
+      and outstanding == {} and stats["responses"]["frc"]["nrc"] == Counter({"0x31": 1}))
+
+base = 1_500_000_000
+panda, rows, _canbuf, stats, outstanding, quarantined = run_capture(
+    [[(0x79A, bytes.fromhex("037F227800000000"), 0)],
+     [(0x79A, bytes.fromhex("04621B033F000000"), 0)]],
+    batch_times=[base + 400_000_000, base + 700_000_000],
+    outstanding_targets=(frc_1b03,), outstanding_t0_ns=base)
+check("NRC 0x78 keeps the request outstanding and refreshes its deadline until final response",
+      [row["status"] for row in rows if row.get("ecu") == "frc"] == ["response_pending", "positive"]
+      and rows[0]["request_did"] == "0x1B03"
+      and outstanding == {} and quarantined == set()
+      and stats["responses"]["frc"]["response_pending"] == 1
+      and stats["responses"]["frc"]["nrc"] == Counter({"0x78": 1}))
+
+base = 1_800_000_000
+panda, rows, _canbuf, _stats, outstanding, quarantined = run_capture(
+    [[(0x79A, bytes.fromhex("04621B033F000000"), 0)]],
+    batch_times=[base + cap.QUERY_TIMEOUT_NS + 1],
+    outstanding_targets=(frc_1b03,), outstanding_t0_ns=base)
+check("terminal response already in the drained batch wins over the local query-timeout boundary",
+      any(row.get("status") == "positive" and row.get("request_did") == "0x1B03" for row in rows)
+      and not any(row.get("status") == "query_timeout" for row in rows)
+      and outstanding == {} and quarantined == set())
+
+panda, rows, _canbuf, stats, outstanding, quarantined = run_capture(
+    [[(0x79A, bytes.fromhex("04621B9901000000"), 0)]],
+    outstanding_targets=(frc_1b03,))
+unparsed = next(r for r in rows if r.get("status") == "unparsed_response")
+check("complete but unparseable target response is retained and quarantined instead of becoming a false timeout",
+      unparsed["raw_pdu"] == "621b9901" and unparsed["request_did"] == "0x1B03"
+      and outstanding == {} and quarantined == {0x79A}
+      and stats["responses"]["frc"]["protocol_error"] == 1
+      and not any(r.get("status") == "query_timeout" for r in rows))
+
+panda, rows, _canbuf, _stats, outstanding, quarantined = run_capture(
     [[(0x79A, bytes.fromhex("1008621B05500000"), 0)]],
-    batch_times=[1_000_000_000, 1_000_000_000 + cap.ASSEMBLY_TIMEOUT_NS + 1])
-check("stale partial assembly expires with retained frames and partial PDU",
-      any(r.get("status") == "assembly_timeout"
-          and r["frames"] == ["1008621b05500000"] for r in rows))
+    batch_times=[1_000_000_000, 1_000_000_000 + cap.ASSEMBLY_TIMEOUT_NS + 1],
+    outstanding_targets=(frc_1b05,))
+check("stale partial assembly expires with retained frames and request association",
+      any(r.get("status") == "assembly_timeout" and r["request_did"] == "0x1B05"
+          and r["frames"] == ["1008621b05500000"] for r in rows)
+      and outstanding == {} and quarantined == {0x79A})
 
-panda, rows, _canbuf, _stats = run_capture([
+panda, rows, _canbuf, stats, outstanding, quarantined = run_capture([
     [(0x79A, bytes.fromhex("1008621B05500000"), 0)],
     [(0x79A, bytes.fromhex("220FA00000000000"), 0)],
+], outstanding_targets=(frc_1b05,))
+check("wrong consecutive-frame sequence number clears the request as an assembly error",
+      any(r.get("status") == "assembly_sequence_error" and r["request_did"] == "0x1B05" for r in rows)
+      and outstanding == {} and quarantined == {0x79A}
+      and stats["responses"]["frc"]["assembly_error"] == 1)
+
+base = 2_000_000_000
+panda, rows, _canbuf, _stats, outstanding, quarantined = run_capture(
+    [[(0x79A, bytes.fromhex("1008621B05500000"), 0)],
+     [(0x79A, bytes.fromhex("210FA00000000000"), 0)]],
+    batch_times=[base + cap.QUERY_TIMEOUT_NS - 10_000_000,
+                 base + cap.QUERY_TIMEOUT_NS + 10_000_000],
+    outstanding_targets=(frc_1b05,), outstanding_t0_ns=base)
+check("active multiframe assembly owns its 200-ms deadline across the 500-ms query boundary",
+      any(r.get("status") == "positive" and r.get("did") == "0x1B05" for r in rows)
+      and not any(r.get("status") == "query_timeout" for r in rows)
+      and outstanding == {} and quarantined == set())
+
+print("\n== scheduler association: at most one unresolved query per ECU ==")
+outstanding = {brake_a1.rx: cap.OutstandingQuery(target=brake_a1, t0_ns=1_000_000_000)}
+quarantined = set()
+due = {target.key: 1_000_000_000 for target in poll_targets}
+next_index, selected = cap._next_query_target(
+    poll_targets, 0, outstanding, quarantined, due, now_ns=1_000_000_000)
+check("busy Brake responder is skipped in favor of FRC rather than overlapping same-ECU RDBI",
+      selected is frc_1b03 and next_index == 2)
+outstanding[frc_1b03.rx] = cap.OutstandingQuery(target=frc_1b03, t0_ns=1_000_000_000)
+unchanged_index, selected = cap._next_query_target(
+    poll_targets, next_index, outstanding, quarantined, due, now_ns=1_000_000_000)
+check("no request is selected while both responder slots are unresolved",
+      selected is None and unchanged_index == next_index)
+
+single_due = {frc_1b03.key: 2_000_000_000}
+_, early = cap._next_query_target((frc_1b03,), 0, {}, set(), single_due,
+                                  now_ns=1_999_999_999)
+_, on_time = cap._next_query_target((frc_1b03,), 0, {}, set(), single_due,
+                                    now_ns=2_000_000_000)
+check("per-DID due time prevents an idle target from consuming another target's skipped rate",
+      early is None and on_time is frc_1b03)
+
+oracle = io.StringIO()
+stats = {"responses": {ecu: {"positive_by_did": Counter(), "negative": 0, "nrc": Counter(),
+                              "query_timeout": 0, "assembly_error": 0}
+                       for ecu in ("brake", "frc")}}
+cap._expire_query_timeouts(outstanding, {}, quarantined, oracle, stats,
+                           now_ns=1_000_000_000 + cap.QUERY_TIMEOUT_NS + 1)
+timeout_rows = [json.loads(line) for line in oracle.getvalue().splitlines()]
+check("query timeout records exact DID and quarantines both responder slots",
+      outstanding == {} and quarantined == {0x7B8, 0x79A}
+      and {(row["ecu"], row["request_did"], row["status"]) for row in timeout_rows} == {
+          ("brake", "0x10A1", "query_timeout"), ("frc", "0x1B03", "query_timeout")}
+      and stats["responses"]["brake"]["query_timeout"] == 1
+      and stats["responses"]["frc"]["query_timeout"] == 1)
+retry_index, retry_target = cap._next_query_target(
+    poll_targets, next_index, outstanding, quarantined, due, now_ns=2_000_000_000)
+check("quarantined responders are never retried, preventing late-negative misassociation",
+      retry_target is None and retry_index == next_index)
+
+# A first frame without an outstanding query is retained as anomalous metadata
+# but must never cause a flow-control transmit.
+panda, rows, _canbuf, _stats, _outstanding, _quarantined = run_capture([
+    [(0x79A, bytes.fromhex("1008621B05500000"), 0)],
 ])
-check("wrong consecutive-frame sequence number is retained as an assembly error",
-      any(r.get("status") == "assembly_sequence_error" for r in rows))
+check("unsolicited multiframe response never triggers flow control",
+      panda.sent == [] and any(row.get("status") == "unsolicited_first_frame" for row in rows))
+
+panda, rows, _canbuf, stats, outstanding, quarantined = run_capture(
+    [[(0x79A, bytes.fromhex("210FA00000000000"), 0)]],
+    outstanding_targets=(frc_1b05,))
+check("consecutive frame without an assembly is retained as a protocol error and quarantines the responder",
+      any(row.get("status") == "unexpected_consecutive_frame"
+          and row.get("request_did") == "0x1B05" for row in rows)
+      and outstanding == {} and quarantined == {0x79A}
+      and stats["responses"]["frc"]["protocol_error"] == 1)
+
 
 print("\n== shared plumbing: no duplicated stack ==")
 check("canbin writer and pandad guard are reused from the LTA capture tool",
@@ -252,8 +384,8 @@ with tempfile.TemporaryDirectory() as td:
              "signals": [{"name": "ISA Requesting Vertical ID (Upper Limit)",
                           "converted_integer": 11, "value": "11"}]},
             {"type": "query", "ecu": "brake", "did": "0x10A3", "t_ns": base + 120_000_000},
-            {"type": "response", "ecu": "brake", "did": "0x10A3", "status": "negative",
-             "nrc": "0x31", "t_ns": base + 128_000_000},
+            {"type": "response", "ecu": "brake", "did": None, "request_did": "0x10A3",
+             "status": "negative", "nrc": "0x31", "t_ns": base + 128_000_000},
         ]
     # one out-of-gap FRC 0x1B05 sample to prove pair-gap filtering
     rows.append({"type": "response", "ecu": "frc", "did": "0x1B05", "status": "positive",
@@ -275,9 +407,11 @@ with tempfile.TemporaryDirectory() as td:
           and summary["oracle"]["brake/0x10A1"]["positive_count"] == 3
           and summary["oracle"]["brake/0x10A1"]["raw_counts"] == {"fc18": 3}
           and summary["oracle"]["brake/0x10A1"]["positive_interval_median_ns"] == 500_000_000)
-    check("negatives are attributed per ECU only",
-          summary["oracle_per_ecu_negatives"]["brake"] == {"negative_count": 3, "nrc_counts": {"0x31": 3}}
-          and "negative_count" not in summary["oracle"]["brake/0x10A3"])
+    check("negative responses are safely associated per DID and also summarized per ECU",
+          summary["oracle_per_ecu_negatives"]["brake"] == {
+              "negative_count": 3, "response_pending_count": 0, "nrc_counts": {"0x31": 3}}
+          and summary["oracle"]["brake/0x10A3"]["negative_count"] == 3
+          and summary["oracle"]["brake/0x10A3"]["nrc_counts"] == {"0x31": 3})
     check("unpolled DID reports not-polled and zero-positive DID reports unmeasured",
           summary["oracle"]["frc/0x1B06"]["live_support"] == "not polled"
           and summary["oracle"]["brake/0x10A3"]["live_support"] == "unmeasured: no positive response recorded")
@@ -305,6 +439,9 @@ plan_only = json.loads(proc.stdout) if proc.returncode == 0 else {}
 check("plan-only CLI prints the validated plan and exits zero",
       proc.returncode == 0 and plan_only.get("schema") == "camry-tss3-request-capture-v1"
       and plan_only.get("vehicle_control_tx") is False
+      and "at most one unresolved RDBI" in plan_only.get("synchronization", "")
+      and plan_only.get("poll_order", []) == [target.key for target in poll_targets]
+      and "cannot donate its slot" in plan_only.get("pacing", "")
       and len(plan_only.get("requests", [])) == 9)
 proc = subprocess.run([sys.executable, str(REPO / "tools/camry_tss3_request_capture.py"), "--execute"],
                       capture_output=True, text=True, check=False)

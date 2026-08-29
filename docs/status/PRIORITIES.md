@@ -260,7 +260,9 @@ Toyota/TIS exact-VIN ECU-supply-change query as the only provenance-safe externa
 `0x107E` live on this Camry. The synchronized read-only poll itself is now turnkey
 (VAR-086): run `tools/camry_tss3_request_capture.py --execute` during stock DRCC to poll
 Brake `0x7B0` `22 10 A1..A4` (currently unmeasured for live support) together with FRC
-`0x792` `22 1B 03..1B 07` with all-bus CAN retained, then summarize with
+`0x792` `22 1B 03..1B 07` with all-bus CAN retained. The poller permits only one unresolved
+RDBI per responder and quarantines a responder after query/assembly timeout, preventing
+late negative responses from being assigned to a later DID. Then summarize with
 `tools/analyze_camry_tss3_request_capture.py`; add Operation FFD alongside. That can close
 the vehicle-network frame, transformation, cadence, arbitration executor, SecOC/integrity owner
 and suppression/fallback point. Separately, TMS-086 closes **generic real-TSE framing validation** with four public legacy
