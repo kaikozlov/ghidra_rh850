@@ -1,4 +1,44 @@
 {
+  "brake_rob_boundary": {
+    "boundary": "This closes the remaining obvious brake-RoB static-table lead. The specialized FRC-hosted PCS Operation FFD remains the only current P5 host surface here that explicitly names request and arbitration results.",
+    "databases": {
+      "ABS_P5.ddb": {
+        "pinion_name_hits": [
+          {
+            "data_id": "0x507E",
+            "record_name": "ADS Control EPS Pinion Angle2",
+            "tables": [
+              90,
+              151
+            ]
+          }
+        ],
+        "request_or_arbitration_name_hits": [],
+        "unique_data_id_count": 104
+      },
+      "Brk_Bst_P5.ddb": {
+        "pinion_name_hits": [
+          {
+            "data_id": "0x507E",
+            "record_name": "ADS Control EPS Pinion Angle2",
+            "tables": [
+              90,
+              151
+            ]
+          }
+        ],
+        "request_or_arbitration_name_hits": [],
+        "unique_data_id_count": 103
+      },
+      "FRC_P5.ddb": {
+        "pinion_name_hits": [],
+        "request_or_arbitration_name_hits": [],
+        "unique_data_id_count": 38
+      }
+    },
+    "interpretation": "The ordinary P5 FRC/Brake Record-on-Behavior tables contain no named TSS request or arbitration-result field that resolves the remaining producer/executor question. ABS_P5 and Brk_Bst_P5 do persist one pinion-named observer, RoB DID 0x507E 'ADS Control EPS Pinion Angle2' (mirrored in tables 90/151), which corroborates brake-domain observation of steering state but does not name a target/request/winner.",
+    "region": "NA"
+  },
   "fleet_brake_sink_census": {
     "did_serving_brake_categories": {
       "435": "ABS_P5.ddb",

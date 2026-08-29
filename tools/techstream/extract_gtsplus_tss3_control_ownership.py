@@ -26,6 +26,7 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from ddb_semantics import monitor_rows, records
+from extract_gtsplus_p5_adas_p6_migration import rob_data_ids
 from ddb_strings import load_string_db
 from parse_ddb import DDBParser
 from techstream_paths import gts_db_root, resolve_gts_root
@@ -322,6 +323,71 @@ def fleet_brake_sink_census(parser: DDBParser, root: Path) -> dict[str, Any]:
     }
 
 
+def brake_rob_boundary(parser: DDBParser, root: Path) -> dict[str, Any]:
+    db_root = gts_db_root(root, "NA", "Gen")
+    strings = load_string_db(parser, db_root / "M_English.ddb")
+    databases = {}
+    forbidden_terms = (
+        "arbitration",
+        "toyota safety sense",
+        "request acceleration",
+        "requesting vertical",
+        "lateral control request",
+        "tss request",
+        "steering assist gain",
+        "damping control gain",
+    )
+    for database in ("FRC_P5.ddb", "ABS_P5.ddb", "Brk_Bst_P5.ddb"):
+        db = parser.parse_ecu_db(db_root / database)
+        raw_rows = rob_data_ids(db, strings)
+        unique: dict[tuple[str, str | None], dict[str, Any]] = {}
+        for row in raw_rows:
+            key = (row["data_id"], row.get("record_name"))
+            unique.setdefault(key, {
+                "data_id": row["data_id"],
+                "record_name": row.get("record_name"),
+                "tables": [],
+            })["tables"].append(row["table"])
+        rows = sorted(unique.values(), key=lambda row: (row["data_id"], row["record_name"] or ""))
+        request_or_arbitration = [
+            row for row in rows
+            if any(term in (row.get("record_name") or "").casefold() for term in forbidden_terms)
+        ]
+        pinion = [row for row in rows if "pinion" in (row.get("record_name") or "").casefold()]
+        databases[database] = {
+            "unique_data_id_count": len(rows),
+            "request_or_arbitration_name_hits": request_or_arbitration,
+            "pinion_name_hits": pinion,
+        }
+    if databases["FRC_P5.ddb"]["request_or_arbitration_name_hits"]:
+        raise ValueError("ordinary FRC RoB unexpectedly gained a request/arbitration field")
+    if databases["ABS_P5.ddb"]["request_or_arbitration_name_hits"]:
+        raise ValueError("ordinary ABS RoB unexpectedly gained a request/arbitration field")
+    expected_observer = [{
+        "data_id": "0x507E",
+        "record_name": "ADS Control EPS Pinion Angle2",
+        "tables": [90, 151],
+    }]
+    if databases["ABS_P5.ddb"]["pinion_name_hits"] != expected_observer:
+        raise ValueError(f"ABS RoB pinion surface changed: {databases['ABS_P5.ddb']['pinion_name_hits']!r}")
+    if databases["Brk_Bst_P5.ddb"]["pinion_name_hits"] != expected_observer:
+        raise ValueError("Brake Booster RoB pinion surface changed")
+    return {
+        "region": "NA",
+        "databases": databases,
+        "interpretation": (
+            "The ordinary P5 FRC/Brake Record-on-Behavior tables contain no named TSS request or arbitration-result "
+            "field that resolves the remaining producer/executor question. ABS_P5 and Brk_Bst_P5 do persist one "
+            "pinion-named observer, RoB DID 0x507E 'ADS Control EPS Pinion Angle2' (mirrored in tables 90/151), "
+            "which corroborates brake-domain observation of steering state but does not name a target/request/winner."
+        ),
+        "boundary": (
+            "This closes the remaining obvious brake-RoB static-table lead. The specialized FRC-hosted PCS "
+            "Operation FFD remains the only current P5 host surface here that explicitly names request and arbitration results."
+        ),
+    }
+
+
 def ordinary_arbitration_census(parser: DDBParser, root: Path) -> dict[str, Any]:
     db_root = gts_db_root(root, "NA", "Gen")
     master = parser.parse_master_db(db_root / "Toyota.ddb")
@@ -402,6 +468,7 @@ def build() -> dict[str, Any]:
         "lateral_ownership_boundary": lateral_ownership_boundary(),
         "longitudinal_request_surface": longitudinal_request_surface(parser, root),
         "fleet_brake_sink_census": fleet_brake_sink_census(parser, root),
+        "brake_rob_boundary": brake_rob_boundary(parser, root),
         "ordinary_arbitration_census": ordinary_arbitration_census(parser, root),
         "specimen_census": specimen_census(root),
         "remaining_boundary": (

@@ -891,7 +891,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json` | camry_8965f3307000_gtsplus_semantics, camry_8965f3307000_gtsplus_external, camry_2026, camry_8965f3307000_external_lateral_ingress | — |
 | `data/generated/gtsplus_2026/camry_brake_observer_vocabulary.json` | camry_brake_observer_vocabulary | — |
 | `data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json` | camry_f152633k0000_brake_acquisition | — |
-| `data/generated/gtsplus_2026/p5_adas_p6_migration.json` | gtsplus_p5_adas_p6_migration | — |
+| `data/generated/gtsplus_2026/p5_adas_p6_migration.json` | gtsplus_tss3_control_ownership, gtsplus_p5_adas_p6_migration | — |
 | `data/generated/gtsplus_2026/pcs_data_viewer_parameter_help.json` | gtsplus_pcs_data_viewer_parameter_help | — |
 | `data/generated/gtsplus_2026/pcs_data_viewer_tss3_dictionary.json` | gtsplus_pcs_data_viewer_tss3_dictionary, gtsplus_pcs_data_viewer_parameter_help, gtsplus_aux_body_recovery | — |
 | `data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json` | gtsplus_tss3_control_ownership, gtsplus_pcs_data_viewer_tss3_managed_semantics, gtsplus_aux_body_recovery | — |

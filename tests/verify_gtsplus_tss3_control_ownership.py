@@ -133,6 +133,20 @@ def main() -> int:
         and fleet["NA"]["rows_without_sink"][0]["vehicle_name"] == "TEST",
     )
 
+    rob = stored["brake_rob_boundary"]
+    check(
+        "ordinary FRC/Brake RoB tables add no request/arbitration winner field",
+        all(
+            not rob["databases"][db]["request_or_arbitration_name_hits"]
+            for db in ("FRC_P5.ddb", "ABS_P5.ddb", "Brk_Bst_P5.ddb")
+        ),
+    )
+    check(
+        "brake RoB retains only the named ADS pinion observer",
+        rob["databases"]["ABS_P5.ddb"]["pinion_name_hits"]
+        == [{"data_id": "0x507E", "record_name": "ADS Control EPS Pinion Angle2", "tables": [90, 151]}],
+    )
+
     arbitration = stored["ordinary_arbitration_census"]
     check("no ordinary generation-20 control arbitration monitor exists", arbitration["generation20_hit_count"] == 0)
     check(

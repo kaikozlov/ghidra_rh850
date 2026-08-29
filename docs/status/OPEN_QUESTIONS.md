@@ -948,6 +948,11 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `PCS2_P5` 432 remain a disproved ownership shortcut: they have zero selected
   co-occurrence with category 498 in all three regions.
 
+  The remaining ordinary P5 Brake/FRC RoB-table lead is also exhausted: tables 90/151
+  joined through 88/153 contain no named TSS request/arbitration winner field in `FRC_P5`,
+  `ABS_P5`, or `Brk_Bst_P5`. The sole pinion-named brake RoB datum is `0x507E` **ADS
+  Control EPS Pinion Angle2**, an observer rather than a named target/request/result.
+
   A current corpus-wide ordinary Data Monitor census finds **zero generation-20 control
   arbitration-result signals**. Only successor `ADCU_P6/P6F` exposes the corresponding
   ordinary vocabulary (`0x3486`: longitudinal powertrain arbitration ID, longitudinal

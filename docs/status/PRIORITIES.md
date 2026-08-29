@@ -246,8 +246,10 @@ while brake-domain DDBs expose `0x10A1..0x10A4` explicitly named upper/lower req
 acceleration and request IDs **from Toyota Safety Sense**. The FRC-hosted PCS recorder carries
 both request halves (`5280/5281`) plus winner ID/acceleration (`5284/57DB/57D3`). A compatible
 brake observation sink appears in 255/256 NA (the exception is `TEST`), 460/460 EU, and
-213/213 JP category-498 install rows. A corpus-wide ordinary Data Monitor census has zero
-generation-20 control-arbitration signals; P6 `0x3486` arbitration names remain successor-only.
+213/213 JP category-498 install rows. The ordinary FRC/Brake RoB tables add no hidden
+request/arbitration winner field; their only pinion-named brake observer is `0x507E` **ADS
+Control EPS Pinion Angle2**. A corpus-wide ordinary Data Monitor census has zero generation-20
+control-arbitration signals; P6 `0x3486` arbitration names remain successor-only.
 
 There is therefore no remaining generic GTS+ ownership/name sweep to perform. The next
 high-value evidence is **target-native dynamic/firmware correlation**: on the maintainer Camry,

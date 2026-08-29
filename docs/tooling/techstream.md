@@ -3159,6 +3159,15 @@ on every vehicle; normal P5 PID support remains runtime-probed. The request DIDs
 not intrinsically TSS3-only because Toyota reuses the brake DDB family in older
 architectures.
 
+The remaining ordinary P5 **Record-on-Behavior** lead is negative as well. A direct
+`CDbDataIdForRobTable` / `CDbBehaviorDataRecordP5Table` scan of current `FRC_P5`,
+`ABS_P5`, and `Brk_Bst_P5` finds no RoB field named as a Toyota-Safety-Sense request,
+request acceleration, lateral-control request, steering-assist/damping request, or
+arbitration result. Brake does persist one pinion-named observer, RoB DID `0x507E`
+**ADS Control EPS Pinion Angle2**, mirrored in current tables 90/151. That corroborates
+brake-domain observation of steering state but does not identify a target/request/winner,
+so it cannot resolve FRC-vs-Brake arbitration execution.
+
 A corpus-wide ordinary-Data-Monitor search additionally finds **zero generation-20
 control-arbitration signals**. The matching ordinary arbitration vocabulary appears only
 in successor `ADCU_P6/P6F` (`0x3486`: longitudinal powertrain arbitration ID,
