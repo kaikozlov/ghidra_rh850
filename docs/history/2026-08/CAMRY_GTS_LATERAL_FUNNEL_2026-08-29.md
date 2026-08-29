@@ -1406,3 +1406,38 @@ Synthetic fixture verification pins `5282` request, `5285/57DE` winner,
 `5265` active-steering grant, `560D` EPS pinion, invalid `0501`, malformed
 length rejection, and CLI JSON. Live `AB11/12/13` acquisition is the
 remaining step; no car I/O was performed.
+
+### 2026-08-29 — FRC internal pipeline and predecessor-role migration (VAR-097)
+
+Follow-up direct queries used current DDB/plugin bytes rather than the prior
+architecture prose:
+
+```text
+tools/gts category 428 --json
+tools/gts category 432 --json
+tools/gts category 498 --json
+tools/gts did FRC_P5 --limit 1000 --json
+tools/gts dtc FRC_P5 --json
+tools/gts canbus 12984 --json
+```
+
+The recovered PCS initializer separates feature requests (`5531/5631/5Axx`),
+generic request `5282`, result `5285/57DE`, and external ABS/EPS observations
+`5265/560D`. The recorder therefore supplies an arbitration grammar but not an
+executor identity. Retained Bus 1 carries neither `0x08A` nor consecutive
+`5282`, rejecting an observed CAN serialize/readback loop.
+
+`DSSystem_P5` is a sparse dependency supervisor (17 rows / 13 unique
+housekeeping names, 33 DTCs, no routine Active Tests or Operation FFD), while
+`FRC_P5` exposes 283 monitor rows, 58 DTCs, 69 routine Active Tests, distinct
+Main/Image-Processing-Microcomputer domains, and TSS3 Image/Operation FFD.
+Exact DTC identity continuity into FRC is LDA 18/21, PCS2 16/31, DSSystem
+15/33, Fr_RadSen 11/31, RoadSign 9/11, PCS1 3/32. PCS2's generic
+Operation-FFD/request-output surface is the closest direct predecessor.
+
+Two models remain: FRC selects the result before a chassis peer signs/transmits,
+or Brake/Skid selects/signs and returns result/status to the FRC recorder. The
+canonical evidence, boundaries, discriminator, and Mermaid flowchart are in
+`docs/variants/camry-2026-live-baseline.md` §45. The deterministic comparison
+is now part of `p5_adas_p6_migration.json` schema v2 and
+`tests/verify_gtsplus_p5_adas_p6_migration.py`.

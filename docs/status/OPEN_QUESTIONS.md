@@ -1069,6 +1069,15 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 - **OQ-054 — Identify the `0x08A` physical transmitter, private transport, and SecOC computation owner.** VAR-091/CORR-136 preserve the hard boundary: `0x08A` is observed on captured Bus 4 with ordinary-P5 `FV4||MAC28`, absent from Bus 1, and excluded from exact F33 Tx/Rx. GTS+ puts FRC on Bus 1 and Skid/Brake Booster/EPS/SAS/Airbag on Bus 4 behind Central Gateway, but that topology is not a CAN-ID source map. Retained rlog timestamps are multi-frame publication timestamps, so the former 20/30 ms arbitration/`0x0D7`-queue attribution is invalid. The observed Bus-1 PDUs have no trailing ordinary-P5 envelope, but that does not prove FRC lacks ICU-S/another CMAC primitive or cannot pass a pre-authenticated image over private transport. VAR-094 proves only that consecutive recorder layout `ID||pinion||assist` is absent from native Bus-1 CAN and that its steering angle is inbound SAS echo. Remaining paths include FRC pre-authentication plus private forwarding, or signing/assembly at Central Gateway, Skid, or Brake Booster. Close this with exact candidate firmware, a source-identifying physical capture/isolation experiment, or recovered private-link dataflow—not batched rlog cadence. Independently capture FRC Operation FFD `5282/5285/57DE/5265` to distinguish request from granted control; that recorder does not identify the signer by itself. Do not send `0x08A` to EPS or infer an `0x08A -> B6` stock-LTA transform. Protected B6 remains a separate candidate openpilot interface. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§20,30,38,41–43; VAR-081/087/091/092/094; CORR-135/136.
   Request/grant grading is VAR-095/CORR-137.
   VAR-096 adds the install-set closure: no separate arbitration/request ECU co-installs with FRC_P5 498 in any region, so on this architecture the transmitter/signer candidate set is bounded to the brake family (ABS 435 / BrakeBooster 466) or the Central Gateway.
+  VAR-097 adds the internal-pipeline discriminator. The FRC recorder separates
+  feature requests (`5531/5631/5Axx`), generic request `5282`, result
+  `5285/57DE`, and external control/plant observations `5265/560D`; native Bus 1
+  contains neither `0x08A` nor the consecutive `5282` layout, so a CAN
+  broadcast/readback self-loop is not supported. Two models remain: FRC selects
+  the result before a chassis peer signs/transmits, or Brake/Skid selects/signs
+  and returns result/status to the FRC recorder. Close that split with
+  synchronized Operation FFD + all-bus ordering across the five stages or
+  matched category-435 Brake and `0x792` FRC firmware. Canonical §45.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

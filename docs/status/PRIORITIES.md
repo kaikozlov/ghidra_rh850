@@ -391,8 +391,9 @@ the exact downstream B6 factor. Manual ID0 fits measured `0x025` within 0.027% s
 error in both drives; ID11 correlations shift forward toward future measured angle. The exact
 EMPS vocabulary, >99.8% `0x081` mirror, and `0x412/0x371`
 `10/10/0 -> 12/20/1 -> 14/30/3` state carrier independently identify the
-73.303384-s / 237,097-frame / zero-B6 interval as LTA/LCA active. Exact F33 still
-excludes `0x08A`; current topology places Front Camera on Bus 1 and Brake/EPS on Bus 4.
+73.303384-s / 237,097-frame / zero-B6 interval as **LTA/LCA request state, not
+a verified winner/grant** (VAR-095/CORR-137). Exact F33 still excludes `0x08A`;
+current topology places Front Camera on Bus 1 and Brake/EPS on Bus 4.
 B28..B31 strongly match Toyota ordinary-P5 `FV4 || MAC28`, but physical transmitter, private transport, signer/key/profile, and actual grant remain open. CORR-135 rejects the old upstream-to-B6 inference; CORR-136 rejects rlog cadence and Bus-1 trailer absence as source/signer proof.
 
 **VAR-081/083/087/091/092/093/094 steering-command boundary — current highest priority:** keep three questions separate: request publication, grant/actuation, and any candidate openpilot ingress. `0x08A` B21=Target Lateral ID, B18:B19=signed target angle at the numerically matching `1024/17870` scale, B26 is modulo-64 behavior, and B28..B31 strongly match Toyota ordinary-P5 `FV4 || MAC28`. VAR-091/CORR-136 place it on captured Bus 4 and exclude exact F33 Tx/Rx, but do not identify the physical transmitter or signer. Rlog timestamps batch a median 14 bus-0 frames, invalidating the former 20/30 ms/`0x0D7`-queue attribution. Bus-1 camera streams lack the trailing ordinary-P5 envelope, which does not prove FRC lacks CMAC capability or private pre-authentication. VAR-093 reads that Bus-1 family as plaintext object slots. VAR-094 closes only consecutive `5282` on native Bus 1 and the inbound SAS-echo direction. VAR-092 closes default-bank `D0218` as not an F33 COM milliradian.
@@ -400,6 +401,16 @@ B28..B31 strongly match Toyota ordinary-P5 `FV4 || MAC28`, but physical transmit
 Exact F33's B6-inactive `D0218 -> CC48 -> CC60 -> CC50 -> CC62/CC66 -> CC64` path reaches motor current control, so zero B6 needs no missing packet; it also does not prove the retained ID11 intervals received an autonomous lane-centering grant. Required next evidence is (1) FRC Operation FFD `5282/5285/57DE/5265` synchronized with CAN to separate request from winner/grant, and (2) exact candidate firmware or a source-identifying physical capture to separate FRC pre-authentication from CGW/Skid/Brake assembly/signing. Do not repeat the completed field/COM/D0218 scans or infer an `0x08A -> B6` transform. Do not send `0x08A` to EPS. Protected B6 stays a separate external-actuation candidate whose bridge/signing/suppression contract can be evaluated independently.
 
 **VAR-096 signer-set bound:** current GTS+ install-set co-occurrence proves no separate ADAS arbitration/request ECU co-installs with FRC_P5 498 (the older PCS1/DSSystem/Fr_RadSen/RoadSign/PCS2 compute split is LS500/LS500h/MIRAI-only and disjoint from 498), and the Camry HV architecture is exactly EMPS+ABS+BrakeBooster+FRC. The FRC is therefore the sole ADAS compute ECU on this car, and any `0x08A`/B6 signer hunt should target the co-installed brake family (ABS 435 / BrakeBooster 466) or the Central Gateway — not a nonexistent ADAS peer. Canonical: `docs/variants/camry-2026-live-baseline.md` §44.
+**VAR-097 internal-pipeline bound:** direct DDB/PCS/wire comparison rejects an
+observed Bus-1 request self-loop and recovers substantial pre-498 role
+continuity into FRC (`LDA 18/21`, `PCS2 16/31`, `DSSystem 15/33` exact DTC
+codes). The live split is now precise: either FRC selects `5285/57DE` before a
+chassis peer signs/transmits, or Brake/Skid selects/signs and returns
+result/status to the FRC recorder. Next dynamic evidence must compare
+`5531/5631`, `5282`, `5285/57DE`, `0x08A`, and `5265/560D` in one synchronized
+Operation-FFD/all-bus capture; next static evidence remains matched Brake/FRC
+firmware. Canonical §45.
+
 
 **VAR-068 Class-L/upstream and identity update:** the retained Class-L windows now have a
 portable persistent-edge analysis. No exact-F33-accepted stream has a reproduced rise

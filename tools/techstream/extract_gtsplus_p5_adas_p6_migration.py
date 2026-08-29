@@ -46,8 +46,9 @@ P5_TARGETS = (
     "RoadSign_P5",
     "LDA_P5",
 )
+FRC_TARGET = "FRC_P5"
 P6_TARGETS = ("ADCU_P6", "ADCU_P6F")
-ALL_TARGETS = P5_TARGETS + P6_TARGETS
+ALL_TARGETS = P5_TARGETS + (FRC_TARGET,) + P6_TARGETS
 
 # Category IDs used for architecture co-occurrence.
 ARCHITECTURE_CATEGORY_NAMES = {
@@ -310,8 +311,8 @@ def p6_ecosystem_section(contexts: dict[str, RegionContext]) -> dict[str, Any]:
 # ── ECU database surfaces ─────────────────────────────────────────────────────
 
 
-def table_census(db: Any) -> dict[str, dict[str, int]]:
-    out = {}
+def table_census(db: Any) -> dict[str, dict[str, Any]]:
+    out: dict[str, dict[str, Any]] = {}
     for tid in sorted(db.sections):
         section = db.sections[tid]
         out[str(tid)] = {
@@ -603,7 +604,7 @@ def migration_section(surfaces: dict[str, Any]) -> dict[str, Any]:
         own = surfaces[name]["monitors"]
         own_names = {norm_name(m["name"]) for m in own}
         exact = sorted(n for n in own_names if n in adcu_names)
-        partial = []
+        partial: list[dict[str, Any]] = []
         for monitor in own:
             key = norm_name(monitor["name"])
             if not key or key in adcu_names:
@@ -660,6 +661,72 @@ def migration_section(surfaces: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def frc_generation_continuity_section(
+    contexts: dict[str, RegionContext], surfaces: dict[str, Any]
+) -> dict[str, Any]:
+    """Compare the pre-498 P5 peer roles with the FRC generation."""
+    frc = surfaces[FRC_TARGET]
+    frc_monitor_names = {norm_name(row["name"]) for row in frc["monitors"]}
+    frc_dtc_codes = {row["code"] for row in frc["dtcs"]}
+    per_target = {}
+    for name in P5_TARGETS:
+        own_monitor_names = {norm_name(row["name"]) for row in surfaces[name]["monitors"]}
+        own_dtc_codes = {row["code"] for row in surfaces[name]["dtcs"]}
+        shared_monitor_names = sorted(own_monitor_names & frc_monitor_names)
+        shared_dtc_codes = sorted(own_dtc_codes & frc_dtc_codes)
+        per_target[name] = {
+            "p5_monitor_name_count": len(own_monitor_names),
+            "exact_monitor_name_count": len(shared_monitor_names),
+            "exact_monitor_names": shared_monitor_names,
+            "p5_dtc_count": len(own_dtc_codes),
+            "exact_dtc_code_count": len(shared_dtc_codes),
+            "exact_dtc_codes": shared_dtc_codes,
+        }
+
+    na = contexts["NA"]
+    plugin_categories = {
+        "DSSystem_P5": 428,
+        "PCS2_P5": 432,
+        FRC_TARGET: 498,
+    }
+    internal_compute_codes = {
+        "C1A7E49",
+        "C1A7F49",
+        "C1A9346",
+        "C1A9447",
+        "C1A9500",
+    }
+    return {
+        "frc_database": {
+            "source": frc["source"],
+            "table_census": frc["table_census"],
+            "monitor_row_count": len(frc["monitors"]),
+            "monitor_name_count": len(frc_monitor_names),
+            "dtc_count": len(frc["dtcs"]),
+            "routine_active_test_count": len(frc["routine_active_tests"]),
+            "behavior_count": len(frc["behaviors"]),
+            "rob_data_id_count": len(frc["rob_data_ids"]),
+            "internal_compute_dtcs": [
+                row for row in frc["dtcs"] if row["code"] in internal_compute_codes
+            ],
+        },
+        "pre_498_role_continuity": per_target,
+        "plugin_role_surfaces": {
+            name: plugin_bindings(na, category_id)
+            for name, category_id in plugin_categories.items()
+        },
+        "interpretation": (
+            "FRC_P5 retains substantial exact DTC dependency identity from DSSystem_P5, "
+            "PCS2_P5, LDA_P5, Fr_RadSen_P5, RoadSign_P5 and PCS1_P5 while replacing the "
+            "older peer install set. Its DDB distinguishes a main microcomputer from an "
+            "image-processing microcomputer and replaces PCS2's generic Operation-FFD "
+            "plugin with TSS3-specific Operation/Image-FFD roles. This is role-continuity "
+            "evidence, not proof of ECU-side code identity, arbitration placement, CAN "
+            "payload ownership or SecOC ownership."
+        ),
+    }
+
+
 # ── build ─────────────────────────────────────────────────────────────────────
 
 
@@ -688,6 +755,14 @@ def build() -> dict[str, Any]:
         p5_section[name] = p5_database_section(
             parser, surfaces[name], na_strings, name, source(db_path, root)
         )
+    frc_db_path = db_root / f"{FRC_TARGET}.ddb"
+    frc_section = p5_database_section(
+        parser,
+        surfaces[FRC_TARGET],
+        na_strings,
+        FRC_TARGET,
+        source(frc_db_path, root),
+    )
     adcu_section: dict[str, Any] = {}
     for name in P6_TARGETS:
         db_path = db_root / f"{name}.ddb"
@@ -715,8 +790,9 @@ def build() -> dict[str, Any]:
         }
 
     merged = {**p5_section, "ADCU_P6": adcu_section["ADCU_P6"]}
+    frc_merged = {**p5_section, FRC_TARGET: frc_section}
     payload = {
-        "schema": "gtsplus-p5-adas-p6-migration-v1",
+        "schema": "gtsplus-p5-adas-p6-migration-v2",
         "title": (
             "Current GTS+ underused P5 ADAS databases and the P6 ADAS domain "
             "controller successor surface"
@@ -738,6 +814,9 @@ def build() -> dict[str, Any]:
         "adcu_p6_databases": adcu_section,
         "module_dependency_graph": dependency_section(merged),
         "concept_migration": migration_section(merged),
+        "frc_generation_continuity": frc_generation_continuity_section(
+            contexts, frc_merged
+        ),
         "interpretation": {
             "p5_distributed_ownership": (
                 "In the P5 generation the longitudinal/lateral ADAS surface is split across "

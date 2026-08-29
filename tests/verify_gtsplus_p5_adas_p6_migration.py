@@ -26,7 +26,7 @@ def main() -> int:
     tracked = json.loads(DEFAULT_OUT.read_text(encoding="utf-8"))
     rebuilt = build()
     check("artifact regenerates deterministically", rebuilt == tracked)
-    check("schema", tracked["schema"] == "gtsplus-p5-adas-p6-migration-v1")
+    check("schema", tracked["schema"] == "gtsplus-p5-adas-p6-migration-v2")
 
     arch = tracked["install_set_architectures"]
     check("DSSystem P5 is a three-model NA family", arch["428"]["model_count_na"] == 3)
@@ -71,6 +71,46 @@ def main() -> int:
     check("radar cruise dirt monitor", "Dirt Detection for Radar Cruise" in radar_names)
     lda_names = monitor_names(p5["LDA_P5"])
     check("legacy LDA hands-off torque observer", "Not Holding Steering Wheel Judgment Status (Torque Sensor)" in lda_names)
+    frc_continuity = tracked["frc_generation_continuity"]
+    frc_database = frc_continuity["frc_database"]
+    check("FRC monitor breadth", frc_database["monitor_row_count"] == 283)
+    check("FRC DTC breadth", frc_database["dtc_count"] == 58)
+    check("FRC routine Active Tests", frc_database["routine_active_test_count"] == 69)
+    check(
+        "FRC internal compute domains",
+        {row["code"] for row in frc_database["internal_compute_dtcs"]}
+        == {"C1A7E49", "C1A7F49", "C1A9346", "C1A9447", "C1A9500"},
+    )
+    expected_dtc_continuity = {
+        "DSSystem_P5": 15,
+        "PCS2_P5": 16,
+        "LDA_P5": 18,
+        "Fr_RadSen_P5": 11,
+        "RoadSign_P5": 9,
+        "PCS1_P5": 3,
+    }
+    for name, count in expected_dtc_continuity.items():
+        check(
+            f"{name} exact DTC identity continues into FRC",
+            frc_continuity["pre_498_role_continuity"][name][
+                "exact_dtc_code_count"
+            ]
+            == count,
+        )
+    plugin_roles = {
+        name: {row["role"]: row["dll"] for row in rows}
+        for name, rows in frc_continuity["plugin_role_surfaces"].items()
+    }
+    check("DSSystem has no Operation-FFD role", "0xBA" not in plugin_roles["DSSystem_P5"])
+    check(
+        "PCS2 owns generic Operation-FFD role",
+        plugin_roles["PCS2_P5"]["0xBA"] == "GetOperationFrzFrmDatP5_DT.dll",
+    )
+    check(
+        "FRC owns TSS3 Image/Operation-FFD roles",
+        plugin_roles["FRC_P5"]["0xE9"] == "GetTSS3ImageFFDP5_DT.dll"
+        and plugin_roles["FRC_P5"]["0xEA"] == "GetTSS3OperationFFDP5_DT.dll",
+    )
 
     p6 = tracked["adcu_p6_databases"]["ADCU_P6"]
     check("ADCU P6 monitor breadth", p6["monitor_count"] == 1645)

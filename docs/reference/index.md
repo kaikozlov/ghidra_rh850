@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 395 · Corrections: 137 · Open questions: 54 · Docs: 112 · Suites: 213
+Findings: 396 · Corrections: 137 · Open questions: 54 · Docs: 112 · Suites: 213
 
 ## Reading this index
 
@@ -412,8 +412,9 @@ Findings: 395 · Corrections: 137 · Open questions: 54 · Docs: 112 · Suites: 
 | <a id="finding-var-092"></a>**VAR-092** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CAMRY_GTS_LATERAL_FUNNEL_2026-08-29](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md), [PRIORITIES](../status/PRIORITIES.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_8965F3307000_command_cone_ingress.py` | — |
 | <a id="finding-var-093"></a>**VAR-093** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CAMRY_GTS_LATERAL_FUNNEL_2026-08-29](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_2026_bus1_camera_output.py` | — |
 | <a id="finding-var-094"></a>**VAR-094** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CAMRY_GTS_LATERAL_FUNNEL_2026-08-29](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_2026_bus1_camera_output.py` | OQ-054 |
-| <a id="finding-var-095"></a>**VAR-095** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) | `tests/verify_camry_2026_lta_state_reconciliation.py`, `tests/verify_gtsplus_pcs_data_viewer_tss3_managed_semantics.py` | OQ-054 |
+| <a id="finding-var-095"></a>**VAR-095** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_2026_lta_state_reconciliation.py`, `tests/verify_gtsplus_pcs_data_viewer_tss3_managed_semantics.py` | OQ-054 |
 | <a id="finding-var-096"></a>**VAR-096** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_gtsplus_p5_adas_p6_migration.py` | OQ-054 |
+| <a id="finding-var-097"></a>**VAR-097** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CAMRY_GTS_LATERAL_FUNNEL_2026-08-29](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_gtsplus_p5_adas_p6_migration.py`, `tests/verify_gtsplus_pcs_data_viewer_tss3_managed_semantics.py`, `tests/verify_camry_2026_bus1_camera_output.py`, `tests/verify_camry_2026_08a_producer_bounds.py` | OQ-054 |
 
 ## Open-questions index
 
@@ -472,7 +473,7 @@ Findings: 395 · Corrections: 137 · Open questions: 54 · Docs: 112 · Suites: 
 | <a id="open-question-oq-051"></a>**OQ-051** | Cross-calibration structural triage of future P1M-E images | Tooling | MEM-SAFE-001 |
 | <a id="open-question-oq-052"></a>**OQ-052** | True-TSS3 longitudinal wire/auth/arbitration execution contract | Tooling | TMS-085, TMS-079, VAR-069, VAR-070, VAR-086, TMS-087 |
 | <a id="open-question-oq-053"></a>**OQ-053** | F33 non-disruptive application-mode RAM execution pivot | Tooling | VAR-060, CORR-124, CORR-123 |
-| <a id="open-question-oq-054"></a>**OQ-054** | Identify the `0x08A` physical transmitter, private transport, and SecOC computation owner | Tooling | VAR-091, CORR-136, VAR-094, VAR-081, CORR-135, VAR-095, CORR-137, VAR-096, CORR-092 |
+| <a id="open-question-oq-054"></a>**OQ-054** | Identify the `0x08A` physical transmitter, private transport, and SecOC computation owner | Tooling | VAR-091, CORR-136, VAR-094, VAR-081, CORR-135, VAR-095, CORR-137, VAR-096, VAR-097, CORR-092 |
 
 ## Correction index
 

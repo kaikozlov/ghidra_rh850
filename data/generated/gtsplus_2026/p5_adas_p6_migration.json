@@ -27771,6 +27771,550 @@
       "RoadSign_P5": []
     }
   },
+  "frc_generation_continuity": {
+    "frc_database": {
+      "behavior_count": 78,
+      "dtc_count": 58,
+      "internal_compute_dtcs": [
+        {
+          "code": "C1A7E49",
+          "description": "Front Recognition Camera LVDS",
+          "failure": "Internal Electronic Failure"
+        },
+        {
+          "code": "C1A7F49",
+          "description": "Front Recognition Camera ADC",
+          "failure": "Internal Electronic Failure"
+        },
+        {
+          "code": "C1A9346",
+          "description": "Main Microcomputer in Front Recognition Camera",
+          "failure": "Calibration / Parameter Memory Failure"
+        },
+        {
+          "code": "C1A9447",
+          "description": "Image Processing Microcomputer in Front Recognition Camera",
+          "failure": "Watchdog / Safety MCU Failure"
+        },
+        {
+          "code": "C1A9500",
+          "description": "Image Processing Module Malfunction in Front Recognition Camera",
+          "failure": null
+        }
+      ],
+      "monitor_name_count": 279,
+      "monitor_row_count": 283,
+      "rob_data_id_count": 72,
+      "routine_active_test_count": 69,
+      "source": {
+        "path": "NA/DB/Gen/FRC_P5.ddb",
+        "sha256": "57ecfef044f57709d97fe8588ea84d6045f9c555e49ef041537724a679e99fce",
+        "size": 86714
+      },
+      "table_census": {
+        "0": {
+          "class": "CDbSignalGroupTable",
+          "record_count": 15,
+          "record_size": 12
+        },
+        "1": {
+          "class": "CDbSignalCheckTable",
+          "record_count": 16,
+          "record_size": 8
+        },
+        "12": {
+          "class": "CDbActTestPatternTable",
+          "record_count": 2,
+          "record_size": 24
+        },
+        "13": {
+          "class": "CDbPhyDataTable",
+          "record_count": 34,
+          "record_size": 24
+        },
+        "14": {
+          "class": "CDbPatDispTable",
+          "record_count": 297,
+          "record_size": 24
+        },
+        "15": {
+          "class": "CDbUnitTable",
+          "record_count": 21,
+          "record_size": 12
+        },
+        "151": {
+          "class": "CDbDataIdForRobTable",
+          "record_count": 34,
+          "record_size": 8
+        },
+        "153": {
+          "class": "CDbBehaviorDataRecordP5Table",
+          "record_count": 80,
+          "record_size": 72
+        },
+        "156": {
+          "class": "CDbDataIdForDmTable",
+          "record_count": 286,
+          "record_size": 8
+        },
+        "157": {
+          "class": "CDbDatamonitorP5Table",
+          "record_count": 269,
+          "record_size": 80
+        },
+        "16": {
+          "class": "CDbTriggerListTable",
+          "record_count": 3,
+          "record_size": 24
+        },
+        "19": {
+          "class": "CDbTriggerAnalyzeRetrievalTable",
+          "record_count": 1,
+          "record_size": 8
+        },
+        "61": {
+          "class": "CDbDataIdForDmTable",
+          "record_count": 293,
+          "record_size": 8
+        },
+        "62": {
+          "class": "CDbDatamonitorP5Table",
+          "record_count": 285,
+          "record_size": 80
+        },
+        "63": {
+          "class": "CDbDataIdBitForDmTable",
+          "record_count": 2,
+          "record_size": 16
+        },
+        "65": {
+          "class": "CDbDiagCodeP5Table",
+          "record_count": 58,
+          "record_size": 68
+        },
+        "66": {
+          "class": "CDbDTCStatusMaskTable",
+          "record_count": 3,
+          "record_size": 12
+        },
+        "71": {
+          "class": "CDbRoutineActTestP5Table",
+          "record_count": 69,
+          "record_size": 72
+        },
+        "72": {
+          "class": "unknown",
+          "record_count": 2,
+          "record_size": 12
+        },
+        "73": {
+          "class": "unknown",
+          "record_count": 192,
+          "record_size": 20
+        },
+        "80": {
+          "class": "CDbDataIdBitForFfdTable",
+          "record_count": 2,
+          "record_size": 12
+        },
+        "87": {
+          "class": "CDbBehaviorCodeTable",
+          "record_count": 78,
+          "record_size": 28
+        },
+        "88": {
+          "class": "CDbBehaviorDataRecordP5Table",
+          "record_count": 92,
+          "record_size": 72
+        },
+        "90": {
+          "class": "CDbDataIdForRobTable",
+          "record_count": 38,
+          "record_size": 8
+        },
+        "91": {
+          "class": "CDbBehaviorSignalCheckTable",
+          "record_count": 12,
+          "record_size": 12
+        }
+      }
+    },
+    "interpretation": "FRC_P5 retains substantial exact DTC dependency identity from DSSystem_P5, PCS2_P5, LDA_P5, Fr_RadSen_P5, RoadSign_P5 and PCS1_P5 while replacing the older peer install set. Its DDB distinguishes a main microcomputer from an image-processing microcomputer and replaces PCS2's generic Operation-FFD plugin with TSS3-specific Operation/Image-FFD roles. This is role-continuity evidence, not proof of ECU-side code identity, arbitration placement, CAN payload ownership or SecOC ownership.",
+    "plugin_role_surfaces": {
+      "DSSystem_P5": [
+        {
+          "dll": "GetDatMonListP5_DT.dll",
+          "role": "0x05"
+        },
+        {
+          "dll": "DelDiagCodeP4.dll",
+          "role": "0x19"
+        },
+        {
+          "dll": "JudgeDiagStatusP5_DT.dll",
+          "role": "0x29"
+        },
+        {
+          "dll": "GetDatMonSignalInfoP5_DT.dll",
+          "role": "0x41"
+        },
+        {
+          "dll": "GetCID_SID22_DT.dll",
+          "role": "0x52"
+        },
+        {
+          "dll": "GetSupportP5_DT.dll",
+          "role": "0x67"
+        },
+        {
+          "dll": "GetSupportMultiP5_DT.dll",
+          "role": "0xD5"
+        }
+      ],
+      "FRC_P5": [
+        {
+          "dll": "GetDatMonListP5_DT.dll",
+          "role": "0x05"
+        },
+        {
+          "dll": "GetActTstListP5_DT.dll",
+          "role": "0x06"
+        },
+        {
+          "dll": "GetActTstInitP5_DT.dll",
+          "role": "0x08"
+        },
+        {
+          "dll": "DelDiagCodeP4.dll",
+          "role": "0x19"
+        },
+        {
+          "dll": "JudgeDiagStatusP5_DT.dll",
+          "role": "0x29"
+        },
+        {
+          "dll": "GetDatMonSignalInfoP5_DT.dll",
+          "role": "0x41"
+        },
+        {
+          "dll": "GetCID_SID22_DT.dll",
+          "role": "0x52"
+        },
+        {
+          "dll": "GetMultiActInitP5_DT.dll",
+          "role": "0x63"
+        },
+        {
+          "dll": "GetSupportP5_DT.dll",
+          "role": "0x67"
+        },
+        {
+          "dll": "GetATSignalInfoP5_DT.dll",
+          "role": "0x70"
+        },
+        {
+          "dll": "GetRoBP5_DT.dll",
+          "role": "0xA0"
+        },
+        {
+          "dll": "DelRoBP5_DT.dll",
+          "role": "0xA1"
+        },
+        {
+          "dll": "GetDatMonListP5ForActTest_DT.dll",
+          "role": "0xAD"
+        },
+        {
+          "dll": "GetSupportMultiP5_DT.dll",
+          "role": "0xD5"
+        },
+        {
+          "dll": "GetTSS3ImageFFDP5_DT.dll",
+          "role": "0xE9"
+        },
+        {
+          "dll": "GetTSS3OperationFFDP5_DT.dll",
+          "role": "0xEA"
+        }
+      ],
+      "PCS2_P5": [
+        {
+          "dll": "GetDatMonListP5_DT.dll",
+          "role": "0x05"
+        },
+        {
+          "dll": "GetActTstListP5_DT.dll",
+          "role": "0x06"
+        },
+        {
+          "dll": "GetActTstInitP5_DT.dll",
+          "role": "0x08"
+        },
+        {
+          "dll": "DelDiagCodeP4.dll",
+          "role": "0x19"
+        },
+        {
+          "dll": "JudgeDiagStatusP5_DT.dll",
+          "role": "0x29"
+        },
+        {
+          "dll": "GetDatMonSignalInfoP5_DT.dll",
+          "role": "0x41"
+        },
+        {
+          "dll": "GetMultiActInitP5_DT.dll",
+          "role": "0x63"
+        },
+        {
+          "dll": "GetSupportP5_DT.dll",
+          "role": "0x67"
+        },
+        {
+          "dll": "GetATSignalInfoP5_DT.dll",
+          "role": "0x70"
+        },
+        {
+          "dll": "GetRoBP5_DT.dll",
+          "role": "0xA0"
+        },
+        {
+          "dll": "DelRoBP5_DT.dll",
+          "role": "0xA1"
+        },
+        {
+          "dll": "GetDatMonListP5ForActTest_DT.dll",
+          "role": "0xAD"
+        },
+        {
+          "dll": "GetOperationFrzFrmDatP5_DT.dll",
+          "role": "0xBA"
+        },
+        {
+          "dll": "GetSupportMultiP5_DT.dll",
+          "role": "0xD5"
+        }
+      ]
+    },
+    "pre_498_role_continuity": {
+      "DSSystem_P5": {
+        "exact_dtc_code_count": 15,
+        "exact_dtc_codes": [
+          "U010087",
+          "U012687",
+          "U012987",
+          "U013187",
+          "U013487",
+          "U014087",
+          "U015587",
+          "U023287",
+          "U023587",
+          "U029387",
+          "U030051",
+          "U030057",
+          "U032251",
+          "U032257",
+          "U123687"
+        ],
+        "exact_monitor_name_count": 13,
+        "exact_monitor_names": [
+          "absolute value time (day)",
+          "absolute value time (hour)",
+          "absolute value time (minute)",
+          "absolute value time (month)",
+          "absolute value time (second)",
+          "absolute value time (year)",
+          "clock type",
+          "ig-on elapsed time",
+          "key cycle",
+          "master sync information",
+          "number of dtc",
+          "total distance traveled",
+          "total distance traveled - unit"
+        ],
+        "p5_dtc_count": 33,
+        "p5_monitor_name_count": 13
+      },
+      "Fr_RadSen_P5": {
+        "exact_dtc_code_count": 11,
+        "exact_dtc_codes": [
+          "U010087",
+          "U012687",
+          "U012987",
+          "U014087",
+          "U015587",
+          "U019887",
+          "U030051",
+          "U030057",
+          "U032251",
+          "U032257",
+          "U131757"
+        ],
+        "exact_monitor_name_count": 14,
+        "exact_monitor_names": [
+          "absolute value time (day)",
+          "absolute value time (hour)",
+          "absolute value time (minute)",
+          "absolute value time (month)",
+          "absolute value time (second)",
+          "absolute value time (year)",
+          "clock type",
+          "ig voltage",
+          "ig-on elapsed time",
+          "key cycle",
+          "master sync information",
+          "number of dtc",
+          "total distance traveled",
+          "total distance traveled - unit"
+        ],
+        "p5_dtc_count": 31,
+        "p5_monitor_name_count": 79
+      },
+      "LDA_P5": {
+        "exact_dtc_code_count": 18,
+        "exact_dtc_codes": [
+          "C1A7496",
+          "C1A7796",
+          "U010087",
+          "U010187",
+          "U012687",
+          "U012987",
+          "U013187",
+          "U013487",
+          "U013787",
+          "U015587",
+          "U016387",
+          "U023287",
+          "U023587",
+          "U029387",
+          "U030051",
+          "U030057",
+          "U111287",
+          "U123687"
+        ],
+        "exact_monitor_name_count": 13,
+        "exact_monitor_names": [
+          "absolute value time (day)",
+          "absolute value time (hour)",
+          "absolute value time (minute)",
+          "absolute value time (month)",
+          "absolute value time (second)",
+          "absolute value time (year)",
+          "clock type",
+          "ig-on elapsed time",
+          "key cycle",
+          "master sync information",
+          "number of dtc",
+          "total distance traveled",
+          "total distance traveled - unit"
+        ],
+        "p5_dtc_count": 21,
+        "p5_monitor_name_count": 26
+      },
+      "PCS1_P5": {
+        "exact_dtc_code_count": 3,
+        "exact_dtc_codes": [
+          "U012987",
+          "U014087",
+          "U015187"
+        ],
+        "exact_monitor_name_count": 13,
+        "exact_monitor_names": [
+          "absolute value time (day)",
+          "absolute value time (hour)",
+          "absolute value time (minute)",
+          "absolute value time (month)",
+          "absolute value time (second)",
+          "absolute value time (year)",
+          "clock type",
+          "ig-on elapsed time",
+          "key cycle",
+          "master sync information",
+          "number of dtc",
+          "total distance traveled",
+          "total distance traveled - unit"
+        ],
+        "p5_dtc_count": 32,
+        "p5_monitor_name_count": 42
+      },
+      "PCS2_P5": {
+        "exact_dtc_code_count": 16,
+        "exact_dtc_codes": [
+          "U010087",
+          "U010187",
+          "U012687",
+          "U012987",
+          "U013187",
+          "U013487",
+          "U013787",
+          "U015587",
+          "U023287",
+          "U023587",
+          "U029387",
+          "U030051",
+          "U030057",
+          "U032251",
+          "U032257",
+          "U123687"
+        ],
+        "exact_monitor_name_count": 18,
+        "exact_monitor_names": [
+          "absolute value time (day)",
+          "absolute value time (hour)",
+          "absolute value time (minute)",
+          "absolute value time (month)",
+          "absolute value time (second)",
+          "absolute value time (year)",
+          "clock type",
+          "ig-on elapsed time",
+          "key cycle",
+          "master sync information",
+          "number of dtc",
+          "pcs collision avoidance assist function",
+          "pcs function on/off state stored",
+          "pcs reminder buzzer sound",
+          "pcs warning timing state stored 1",
+          "pcs warning timing state stored 2",
+          "total distance traveled",
+          "total distance traveled - unit"
+        ],
+        "p5_dtc_count": 31,
+        "p5_monitor_name_count": 55
+      },
+      "RoadSign_P5": {
+        "exact_dtc_code_count": 9,
+        "exact_dtc_codes": [
+          "U010087",
+          "U010187",
+          "U012687",
+          "U012987",
+          "U013487",
+          "U014087",
+          "U015587",
+          "U016387",
+          "U029387"
+        ],
+        "exact_monitor_name_count": 13,
+        "exact_monitor_names": [
+          "absolute value time (day)",
+          "absolute value time (hour)",
+          "absolute value time (minute)",
+          "absolute value time (month)",
+          "absolute value time (second)",
+          "absolute value time (year)",
+          "clock type",
+          "ig-on elapsed time",
+          "key cycle",
+          "master sync information",
+          "number of dtc",
+          "total distance traveled",
+          "total distance traveled - unit"
+        ],
+        "p5_dtc_count": 11,
+        "p5_monitor_name_count": 17
+      }
+    }
+  },
   "generalization_boundaries": {
     "host_metadata_limit": "DDB/plugin data proves which host-side vocabulary and command roles exist, not CAN arbitration IDs, ECU-side producer transforms, or SecOC ownership.",
     "no_frc_join": "The six P5 targets still have zero install-set co-occurrence with FRC_P5 category 498 in NA/EU/JP; nothing here changes that boundary.",
@@ -38693,6 +39237,225 @@
         }
       }
     },
+    "FRC_P5": {
+      "category_id": 498,
+      "generation": 20,
+      "regional": {
+        "EU": {
+          "category_id": 498,
+          "ecu_name": "Front Recognition Camera 2",
+          "generation": 20,
+          "plugins": [
+            {
+              "dll": "GetDatMonListP5_DT.dll",
+              "role": "0x05"
+            },
+            {
+              "dll": "GetActTstListP5_DT.dll",
+              "role": "0x06"
+            },
+            {
+              "dll": "GetActTstInitP5_DT.dll",
+              "role": "0x08"
+            },
+            {
+              "dll": "DelDiagCodeP4.dll",
+              "role": "0x19"
+            },
+            {
+              "dll": "JudgeDiagStatusP5_DT.dll",
+              "role": "0x29"
+            },
+            {
+              "dll": "GetDatMonSignalInfoP5_DT.dll",
+              "role": "0x41"
+            },
+            {
+              "dll": "GetCID_SID22_DT.dll",
+              "role": "0x52"
+            },
+            {
+              "dll": "GetMultiActInitP5_DT.dll",
+              "role": "0x63"
+            },
+            {
+              "dll": "GetSupportP5_DT.dll",
+              "role": "0x67"
+            },
+            {
+              "dll": "GetATSignalInfoP5_DT.dll",
+              "role": "0x70"
+            },
+            {
+              "dll": "GetRoBP5_DT.dll",
+              "role": "0xA0"
+            },
+            {
+              "dll": "DelRoBP5_DT.dll",
+              "role": "0xA1"
+            },
+            {
+              "dll": "GetDatMonListP5ForActTest_DT.dll",
+              "role": "0xAD"
+            },
+            {
+              "dll": "GetSupportMultiP5_DT.dll",
+              "role": "0xD5"
+            },
+            {
+              "dll": "GetTSS3ImageFFDP5_DT.dll",
+              "role": "0xE9"
+            },
+            {
+              "dll": "GetTSS3OperationFFDP5_DT.dll",
+              "role": "0xEA"
+            }
+          ]
+        },
+        "JP": {
+          "category_id": 498,
+          "ecu_name": "Front Recognition Camera 2",
+          "generation": 20,
+          "plugins": [
+            {
+              "dll": "GetDatMonListP5_DT.dll",
+              "role": "0x05"
+            },
+            {
+              "dll": "GetActTstListP5_DT.dll",
+              "role": "0x06"
+            },
+            {
+              "dll": "GetActTstInitP5_DT.dll",
+              "role": "0x08"
+            },
+            {
+              "dll": "DelDiagCodeP4.dll",
+              "role": "0x19"
+            },
+            {
+              "dll": "JudgeDiagStatusP5_DT.dll",
+              "role": "0x29"
+            },
+            {
+              "dll": "GetDatMonSignalInfoP5_DT.dll",
+              "role": "0x41"
+            },
+            {
+              "dll": "GetCID_SID22_DT.dll",
+              "role": "0x52"
+            },
+            {
+              "dll": "GetMultiActInitP5_DT.dll",
+              "role": "0x63"
+            },
+            {
+              "dll": "GetSupportP5_DT.dll",
+              "role": "0x67"
+            },
+            {
+              "dll": "GetATSignalInfoP5_DT.dll",
+              "role": "0x70"
+            },
+            {
+              "dll": "GetRoBP5_DT.dll",
+              "role": "0xA0"
+            },
+            {
+              "dll": "DelRoBP5_DT.dll",
+              "role": "0xA1"
+            },
+            {
+              "dll": "GetDatMonListP5ForActTest_DT.dll",
+              "role": "0xAD"
+            },
+            {
+              "dll": "GetSupportMultiP5_DT.dll",
+              "role": "0xD5"
+            },
+            {
+              "dll": "GetTSS3ImageFFDP5_DT.dll",
+              "role": "0xE9"
+            },
+            {
+              "dll": "GetTSS3OperationFFDP5_DT.dll",
+              "role": "0xEA"
+            }
+          ]
+        },
+        "NA": {
+          "category_id": 498,
+          "ecu_name": "Front Recognition Camera 2",
+          "generation": 20,
+          "plugins": [
+            {
+              "dll": "GetDatMonListP5_DT.dll",
+              "role": "0x05"
+            },
+            {
+              "dll": "GetActTstListP5_DT.dll",
+              "role": "0x06"
+            },
+            {
+              "dll": "GetActTstInitP5_DT.dll",
+              "role": "0x08"
+            },
+            {
+              "dll": "DelDiagCodeP4.dll",
+              "role": "0x19"
+            },
+            {
+              "dll": "JudgeDiagStatusP5_DT.dll",
+              "role": "0x29"
+            },
+            {
+              "dll": "GetDatMonSignalInfoP5_DT.dll",
+              "role": "0x41"
+            },
+            {
+              "dll": "GetCID_SID22_DT.dll",
+              "role": "0x52"
+            },
+            {
+              "dll": "GetMultiActInitP5_DT.dll",
+              "role": "0x63"
+            },
+            {
+              "dll": "GetSupportP5_DT.dll",
+              "role": "0x67"
+            },
+            {
+              "dll": "GetATSignalInfoP5_DT.dll",
+              "role": "0x70"
+            },
+            {
+              "dll": "GetRoBP5_DT.dll",
+              "role": "0xA0"
+            },
+            {
+              "dll": "DelRoBP5_DT.dll",
+              "role": "0xA1"
+            },
+            {
+              "dll": "GetDatMonListP5ForActTest_DT.dll",
+              "role": "0xAD"
+            },
+            {
+              "dll": "GetSupportMultiP5_DT.dll",
+              "role": "0xD5"
+            },
+            {
+              "dll": "GetTSS3ImageFFDP5_DT.dll",
+              "role": "0xE9"
+            },
+            {
+              "dll": "GetTSS3OperationFFDP5_DT.dll",
+              "role": "0xEA"
+            }
+          ]
+        }
+      }
+    },
     "Fr_RadSen_P5": {
       "category_id": 429,
       "generation": 20,
@@ -39477,6 +40240,6 @@
       }
     }
   },
-  "schema": "gtsplus-p5-adas-p6-migration-v1",
+  "schema": "gtsplus-p5-adas-p6-migration-v2",
   "title": "Current GTS+ underused P5 ADAS databases and the P6 ADAS domain controller successor surface"
 }
