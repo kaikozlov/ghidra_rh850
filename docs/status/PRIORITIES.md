@@ -304,6 +304,13 @@ The former fail-closed B6 sender staged in `opendbc@dde0fcf0` /
 `kai-openpilot@abf3ca70a`; only low-level construction/freshness/debug-safety helpers remain
 for analysis/tests. VAR-081/CORR-134 identify the observed Bus-4 `0x08A` representation, while CORR-135 adds its strong ordinary-P5 SecOC trailer match and corrects the next-hop assumption. Exact F33 neither accepts `0x08A` as normal ingress nor lists it among generated-COM Tx IDs; its producer remains unknown, so it must not be labeled a Bus-1 camera message. Factory LTA does not require B6 because exact F33 has a B6-independent internal assist path. Production and development output remain disabled while `0x08A` ownership, F33 stock-LTA authority selection, and any separately chosen B6 actuation contract remain unresolved.
 
+**VAR-088 completes the `0x08A` field census and the fork DBC entry** (live-baseline
+§39): every application byte is closed across 44,613 deduped bus-0 frames, EMPS `0x1CEE`
+supplies the four-monitor cooperative-control record naming, and the Bus-4 DDB negative
+means GTS+ cannot name the producer. Do not redo the byte census; the next `0x08A` work
+is producer firmware acquisition and the F33 authority-selector walk, not more field
+scanning.
+
 Static F33 Tx closure also removes the need to transfer `0x351/0x394/0x4A3` wire
 geometry from H/F. **VAR-059 now also closes the F33 `0x394` classifier statically:**
 `0x512E4`, state table `0x2A19C`, DEM table `0x2FC50`, DTC table `0x30850`,

@@ -178,6 +178,14 @@ The dedicated Camry tests replay source-real retained payloads for:
 Their absence is distinguished from a real all-zero packet. They are not required for
 CAN-alive checking and are not yet mapped to public openpilot fault policy.
 
+VAR-088 completes the `0x08A` `TSS3_LATERAL_REQUEST` DBC entry with the full
+census-bounded field set — cruise latch/sub-state mirrors, the byte-identical
+duplicated signed16 request word, set speed, `0x7FFF` sentinel slots, the
+cooperative substate flag, the 0/50/100 request level, and the `FV4+MAC28`
+trailer geometry — plus the full 19-value Target Lateral ID dictionary on both
+`0x08A` and B6 (live-baseline §39). These remain passive observables; the
+producer/security and stock-LTA authority questions of OQ-054 are unchanged.
+
 ### 3.3 B6 candidate construction and freshness/signing interfaces
 
 The passive stack now has deterministic code for the exact known B6 contract:

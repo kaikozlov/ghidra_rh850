@@ -933,6 +933,15 @@ paths = [
   "docs/status/PRIORITIES.md",
 ]
 
+
+[suite.camry_2026_upstream_request_census]
+tests = ["tests/verify_camry_2026_upstream_request_census.py"]
+oracle = "dynamic_trace"
+paths = [
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/PRIORITIES.md",
+]
+
 [suite.camry_2026_bus1_field_leadlag]
 tests = ["tests/verify_camry_2026_bus1_field_leadlag.py"]
 oracle = "dynamic_trace"

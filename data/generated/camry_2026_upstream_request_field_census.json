@@ -1,0 +1,1316 @@
+{
+ "schema": "camry-2026-upstream-request-field-census-v1",
+ "drives": {
+  "drive_a": {
+   "source": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+   "source_sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5",
+   "bus0_frames": 20614,
+   "duplication_b8_eq_b11": 20614,
+   "duplication_b9_eq_b12": 20614,
+   "sentinel_b13_b14_0x7fff": 20614,
+   "sentinel_b16_b17_0x7fff": 20614,
+   "zero_byte_frames": {
+    "B00": 20614,
+    "B01": 20614,
+    "B02": 20614,
+    "B05": 20614,
+    "B15": 20614,
+    "B25": 20614,
+    "B27": 20614
+   },
+   "request_word_b8_raw_range": [
+    -1146,
+    995
+   ],
+   "byte_census_by_b21_state": {
+    "0": {
+     "frames": 18867,
+     "bytes": {
+      "B00": {
+       "distinct": 1,
+       "values": {
+        "0": 18867
+       }
+      },
+      "B01": {
+       "distinct": 1,
+       "values": {
+        "0": 18867
+       }
+      },
+      "B02": {
+       "distinct": 1,
+       "values": {
+        "0": 18867
+       }
+      },
+      "B03": {
+       "distinct": 2,
+       "values": {
+        "0": 17679,
+        "8": 1188
+       }
+      },
+      "B04": {
+       "distinct": 2,
+       "values": {
+        "0": 33,
+        "128": 18834
+       }
+      },
+      "B05": {
+       "distinct": 1,
+       "values": {
+        "0": 18867
+       }
+      },
+      "B06": {
+       "distinct": 2,
+       "values": {
+        "0": 17679,
+        "45": 1188
+       }
+      },
+      "B07": {
+       "distinct": 3,
+       "values": {
+        "18": 17646,
+        "71": 1188,
+        "146": 33
+       }
+      },
+      "B08": {
+       "distinct": 9
+      },
+      "B09": {
+       "distinct": 256
+      },
+      "B10": {
+       "distinct": 3,
+       "values": {
+        "0": 17679,
+        "31": 1166,
+        "39": 22
+       }
+      },
+      "B11": {
+       "distinct": 9
+      },
+      "B12": {
+       "distinct": 256
+      },
+      "B13": {
+       "distinct": 1,
+       "values": {
+        "127": 18867
+       }
+      },
+      "B14": {
+       "distinct": 1,
+       "values": {
+        "255": 18867
+       }
+      },
+      "B15": {
+       "distinct": 1,
+       "values": {
+        "0": 18867
+       }
+      },
+      "B16": {
+       "distinct": 1,
+       "values": {
+        "127": 18867
+       }
+      },
+      "B17": {
+       "distinct": 1,
+       "values": {
+        "255": 18867
+       }
+      },
+      "B18": {
+       "distinct": 65
+      },
+      "B19": {
+       "distinct": 256
+      },
+      "B20": {
+       "distinct": 2,
+       "values": {
+        "0": 17679,
+        "192": 1188
+       }
+      },
+      "B21": {
+       "distinct": 1,
+       "values": {
+        "0": 18867
+       }
+      },
+      "B22": {
+       "distinct": 2,
+       "values": {
+        "0": 17679,
+        "16": 1188
+       }
+      },
+      "B23": {
+       "distinct": 1,
+       "values": {
+        "0": 18867
+       }
+      },
+      "B24": {
+       "distinct": 3,
+       "values": {
+        "0": 10706,
+        "50": 7321,
+        "100": 840
+       }
+      },
+      "B25": {
+       "distinct": 1,
+       "values": {
+        "0": 18867
+       }
+      },
+      "B26": {
+       "distinct": 64
+      },
+      "B27": {
+       "distinct": 1,
+       "values": {
+        "0": 18867
+       }
+      }
+     }
+    },
+    "11": {
+     "frames": 646,
+     "bytes": {
+      "B00": {
+       "distinct": 1,
+       "values": {
+        "0": 646
+       }
+      },
+      "B01": {
+       "distinct": 1,
+       "values": {
+        "0": 646
+       }
+      },
+      "B02": {
+       "distinct": 1,
+       "values": {
+        "0": 646
+       }
+      },
+      "B03": {
+       "distinct": 1,
+       "values": {
+        "8": 646
+       }
+      },
+      "B04": {
+       "distinct": 1,
+       "values": {
+        "128": 646
+       }
+      },
+      "B05": {
+       "distinct": 1,
+       "values": {
+        "0": 646
+       }
+      },
+      "B06": {
+       "distinct": 1,
+       "values": {
+        "45": 646
+       }
+      },
+      "B07": {
+       "distinct": 1,
+       "values": {
+        "71": 646
+       }
+      },
+      "B08": {
+       "distinct": 3,
+       "values": {
+        "0": 46,
+        "254": 86,
+        "255": 514
+       }
+      },
+      "B09": {
+       "distinct": 132
+      },
+      "B10": {
+       "distinct": 3,
+       "values": {
+        "39": 508,
+        "40": 20,
+        "42": 118
+       }
+      },
+      "B11": {
+       "distinct": 3,
+       "values": {
+        "0": 46,
+        "254": 86,
+        "255": 514
+       }
+      },
+      "B12": {
+       "distinct": 132
+      },
+      "B13": {
+       "distinct": 1,
+       "values": {
+        "127": 646
+       }
+      },
+      "B14": {
+       "distinct": 1,
+       "values": {
+        "255": 646
+       }
+      },
+      "B15": {
+       "distinct": 1,
+       "values": {
+        "0": 646
+       }
+      },
+      "B16": {
+       "distinct": 1,
+       "values": {
+        "127": 646
+       }
+      },
+      "B17": {
+       "distinct": 1,
+       "values": {
+        "255": 646
+       }
+      },
+      "B18": {
+       "distinct": 3,
+       "values": {
+        "0": 138,
+        "254": 42,
+        "255": 466
+       }
+      },
+      "B19": {
+       "distinct": 208
+      },
+      "B20": {
+       "distinct": 2,
+       "values": {
+        "64": 12,
+        "192": 634
+       }
+      },
+      "B21": {
+       "distinct": 1,
+       "values": {
+        "11": 646
+       }
+      },
+      "B22": {
+       "distinct": 1,
+       "values": {
+        "16": 646
+       }
+      },
+      "B23": {
+       "distinct": 2,
+       "values": {
+        "0": 270,
+        "32": 376
+       }
+      },
+      "B24": {
+       "distinct": 1,
+       "values": {
+        "100": 646
+       }
+      },
+      "B25": {
+       "distinct": 1,
+       "values": {
+        "0": 646
+       }
+      },
+      "B26": {
+       "distinct": 64
+      },
+      "B27": {
+       "distinct": 1,
+       "values": {
+        "0": 646
+       }
+      }
+     }
+    },
+    "18": {
+     "frames": 1101,
+     "bytes": {
+      "B00": {
+       "distinct": 1,
+       "values": {
+        "0": 1101
+       }
+      },
+      "B01": {
+       "distinct": 1,
+       "values": {
+        "0": 1101
+       }
+      },
+      "B02": {
+       "distinct": 1,
+       "values": {
+        "0": 1101
+       }
+      },
+      "B03": {
+       "distinct": 1,
+       "values": {
+        "0": 1101
+       }
+      },
+      "B04": {
+       "distinct": 1,
+       "values": {
+        "128": 1101
+       }
+      },
+      "B05": {
+       "distinct": 1,
+       "values": {
+        "0": 1101
+       }
+      },
+      "B06": {
+       "distinct": 1,
+       "values": {
+        "0": 1101
+       }
+      },
+      "B07": {
+       "distinct": 1,
+       "values": {
+        "18": 1101
+       }
+      },
+      "B08": {
+       "distinct": 5,
+       "values": {
+        "251": 104,
+        "252": 16,
+        "253": 190,
+        "254": 265,
+        "255": 526
+       }
+      },
+      "B09": {
+       "distinct": 225
+      },
+      "B10": {
+       "distinct": 1,
+       "values": {
+        "0": 1101
+       }
+      },
+      "B11": {
+       "distinct": 5,
+       "values": {
+        "251": 104,
+        "252": 16,
+        "253": 190,
+        "254": 265,
+        "255": 526
+       }
+      },
+      "B12": {
+       "distinct": 225
+      },
+      "B13": {
+       "distinct": 1,
+       "values": {
+        "127": 1101
+       }
+      },
+      "B14": {
+       "distinct": 1,
+       "values": {
+        "255": 1101
+       }
+      },
+      "B15": {
+       "distinct": 1,
+       "values": {
+        "0": 1101
+       }
+      },
+      "B16": {
+       "distinct": 1,
+       "values": {
+        "127": 1101
+       }
+      },
+      "B17": {
+       "distinct": 1,
+       "values": {
+        "255": 1101
+       }
+      },
+      "B18": {
+       "distinct": 3,
+       "values": {
+        "0": 178,
+        "254": 144,
+        "255": 779
+       }
+      },
+      "B19": {
+       "distinct": 159
+      },
+      "B20": {
+       "distinct": 1,
+       "values": {
+        "0": 1101
+       }
+      },
+      "B21": {
+       "distinct": 1,
+       "values": {
+        "18": 1101
+       }
+      },
+      "B22": {
+       "distinct": 1,
+       "values": {
+        "0": 1101
+       }
+      },
+      "B23": {
+       "distinct": 1,
+       "values": {
+        "32": 1101
+       }
+      },
+      "B24": {
+       "distinct": 1,
+       "values": {
+        "50": 1101
+       }
+      },
+      "B25": {
+       "distinct": 1,
+       "values": {
+        "0": 1101
+       }
+      },
+      "B26": {
+       "distinct": 64
+      },
+      "B27": {
+       "distinct": 1,
+       "values": {
+        "0": 1101
+       }
+      }
+     }
+    }
+   },
+   "request_word_negative_joins": {
+    "speed_accel": 0.0967,
+    "steer_angle_025": -0.0763,
+    "driver_torque_030": -0.0342,
+    "target_angle_rate": -0.0235
+   }
+  },
+  "drive_b": {
+   "source": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+   "source_sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a",
+   "bus0_frames": 23999,
+   "duplication_b8_eq_b11": 23999,
+   "duplication_b9_eq_b12": 23999,
+   "sentinel_b13_b14_0x7fff": 23999,
+   "sentinel_b16_b17_0x7fff": 23999,
+   "zero_byte_frames": {
+    "B00": 23999,
+    "B01": 23999,
+    "B02": 23999,
+    "B05": 23999,
+    "B15": 23999,
+    "B25": 23999,
+    "B27": 23999
+   },
+   "request_word_b8_raw_range": [
+    -1102,
+    1070
+   ],
+   "byte_census_by_b21_state": {
+    "0": {
+     "frames": 20914,
+     "bytes": {
+      "B00": {
+       "distinct": 1,
+       "values": {
+        "0": 20914
+       }
+      },
+      "B01": {
+       "distinct": 1,
+       "values": {
+        "0": 20914
+       }
+      },
+      "B02": {
+       "distinct": 1,
+       "values": {
+        "0": 20914
+       }
+      },
+      "B03": {
+       "distinct": 2,
+       "values": {
+        "0": 18676,
+        "8": 2238
+       }
+      },
+      "B04": {
+       "distinct": 1,
+       "values": {
+        "128": 20914
+       }
+      },
+      "B05": {
+       "distinct": 1,
+       "values": {
+        "0": 20914
+       }
+      },
+      "B06": {
+       "distinct": 3,
+       "values": {
+        "0": 18676,
+        "44": 604,
+        "45": 1634
+       }
+      },
+      "B07": {
+       "distinct": 3,
+       "values": {
+        "18": 18676,
+        "70": 604,
+        "71": 1634
+       }
+      },
+      "B08": {
+       "distinct": 10
+      },
+      "B09": {
+       "distinct": 256
+      },
+      "B10": {
+       "distinct": 7,
+       "values": {
+        "0": 18676,
+        "37": 252,
+        "38": 274,
+        "66": 104,
+        "67": 20,
+        "68": 72,
+        "70": 1516
+       }
+      },
+      "B11": {
+       "distinct": 10
+      },
+      "B12": {
+       "distinct": 256
+      },
+      "B13": {
+       "distinct": 1,
+       "values": {
+        "127": 20914
+       }
+      },
+      "B14": {
+       "distinct": 1,
+       "values": {
+        "255": 20914
+       }
+      },
+      "B15": {
+       "distinct": 1,
+       "values": {
+        "0": 20914
+       }
+      },
+      "B16": {
+       "distinct": 1,
+       "values": {
+        "127": 20914
+       }
+      },
+      "B17": {
+       "distinct": 1,
+       "values": {
+        "255": 20914
+       }
+      },
+      "B18": {
+       "distinct": 66
+      },
+      "B19": {
+       "distinct": 256
+      },
+      "B20": {
+       "distinct": 3,
+       "values": {
+        "0": 18676,
+        "64": 14,
+        "192": 2224
+       }
+      },
+      "B21": {
+       "distinct": 1,
+       "values": {
+        "0": 20914
+       }
+      },
+      "B22": {
+       "distinct": 2,
+       "values": {
+        "0": 18676,
+        "16": 2238
+       }
+      },
+      "B23": {
+       "distinct": 1,
+       "values": {
+        "0": 20914
+       }
+      },
+      "B24": {
+       "distinct": 2,
+       "values": {
+        "50": 20832,
+        "100": 82
+       }
+      },
+      "B25": {
+       "distinct": 1,
+       "values": {
+        "0": 20914
+       }
+      },
+      "B26": {
+       "distinct": 64
+      },
+      "B27": {
+       "distinct": 1,
+       "values": {
+        "0": 20914
+       }
+      }
+     }
+    },
+    "11": {
+     "frames": 2288,
+     "bytes": {
+      "B00": {
+       "distinct": 1,
+       "values": {
+        "0": 2288
+       }
+      },
+      "B01": {
+       "distinct": 1,
+       "values": {
+        "0": 2288
+       }
+      },
+      "B02": {
+       "distinct": 1,
+       "values": {
+        "0": 2288
+       }
+      },
+      "B03": {
+       "distinct": 1,
+       "values": {
+        "8": 2288
+       }
+      },
+      "B04": {
+       "distinct": 1,
+       "values": {
+        "128": 2288
+       }
+      },
+      "B05": {
+       "distinct": 1,
+       "values": {
+        "0": 2288
+       }
+      },
+      "B06": {
+       "distinct": 1,
+       "values": {
+        "45": 2288
+       }
+      },
+      "B07": {
+       "distinct": 1,
+       "values": {
+        "71": 2288
+       }
+      },
+      "B08": {
+       "distinct": 3,
+       "values": {
+        "0": 1298,
+        "254": 60,
+        "255": 930
+       }
+      },
+      "B09": {
+       "distinct": 249
+      },
+      "B10": {
+       "distinct": 1,
+       "values": {
+        "70": 2288
+       }
+      },
+      "B11": {
+       "distinct": 3,
+       "values": {
+        "0": 1298,
+        "254": 60,
+        "255": 930
+       }
+      },
+      "B12": {
+       "distinct": 249
+      },
+      "B13": {
+       "distinct": 1,
+       "values": {
+        "127": 2288
+       }
+      },
+      "B14": {
+       "distinct": 1,
+       "values": {
+        "255": 2288
+       }
+      },
+      "B15": {
+       "distinct": 1,
+       "values": {
+        "0": 2288
+       }
+      },
+      "B16": {
+       "distinct": 1,
+       "values": {
+        "127": 2288
+       }
+      },
+      "B17": {
+       "distinct": 1,
+       "values": {
+        "255": 2288
+       }
+      },
+      "B18": {
+       "distinct": 2,
+       "values": {
+        "0": 2287,
+        "255": 1
+       }
+      },
+      "B19": {
+       "distinct": 53
+      },
+      "B20": {
+       "distinct": 1,
+       "values": {
+        "192": 2288
+       }
+      },
+      "B21": {
+       "distinct": 1,
+       "values": {
+        "11": 2288
+       }
+      },
+      "B22": {
+       "distinct": 1,
+       "values": {
+        "16": 2288
+       }
+      },
+      "B23": {
+       "distinct": 2,
+       "values": {
+        "0": 2059,
+        "32": 229
+       }
+      },
+      "B24": {
+       "distinct": 1,
+       "values": {
+        "100": 2288
+       }
+      },
+      "B25": {
+       "distinct": 1,
+       "values": {
+        "0": 2288
+       }
+      },
+      "B26": {
+       "distinct": 64
+      },
+      "B27": {
+       "distinct": 1,
+       "values": {
+        "0": 2288
+       }
+      }
+     }
+    },
+    "18": {
+     "frames": 797,
+     "bytes": {
+      "B00": {
+       "distinct": 1,
+       "values": {
+        "0": 797
+       }
+      },
+      "B01": {
+       "distinct": 1,
+       "values": {
+        "0": 797
+       }
+      },
+      "B02": {
+       "distinct": 1,
+       "values": {
+        "0": 797
+       }
+      },
+      "B03": {
+       "distinct": 1,
+       "values": {
+        "0": 797
+       }
+      },
+      "B04": {
+       "distinct": 1,
+       "values": {
+        "128": 797
+       }
+      },
+      "B05": {
+       "distinct": 1,
+       "values": {
+        "0": 797
+       }
+      },
+      "B06": {
+       "distinct": 1,
+       "values": {
+        "0": 797
+       }
+      },
+      "B07": {
+       "distinct": 1,
+       "values": {
+        "18": 797
+       }
+      },
+      "B08": {
+       "distinct": 4,
+       "values": {
+        "252": 299,
+        "253": 133,
+        "254": 288,
+        "255": 77
+       }
+      },
+      "B09": {
+       "distinct": 234
+      },
+      "B10": {
+       "distinct": 1,
+       "values": {
+        "0": 797
+       }
+      },
+      "B11": {
+       "distinct": 4,
+       "values": {
+        "252": 299,
+        "253": 133,
+        "254": 288,
+        "255": 77
+       }
+      },
+      "B12": {
+       "distinct": 234
+      },
+      "B13": {
+       "distinct": 1,
+       "values": {
+        "127": 797
+       }
+      },
+      "B14": {
+       "distinct": 1,
+       "values": {
+        "255": 797
+       }
+      },
+      "B15": {
+       "distinct": 1,
+       "values": {
+        "0": 797
+       }
+      },
+      "B16": {
+       "distinct": 1,
+       "values": {
+        "127": 797
+       }
+      },
+      "B17": {
+       "distinct": 1,
+       "values": {
+        "255": 797
+       }
+      },
+      "B18": {
+       "distinct": 2,
+       "values": {
+        "0": 307,
+        "255": 490
+       }
+      },
+      "B19": {
+       "distinct": 165
+      },
+      "B20": {
+       "distinct": 1,
+       "values": {
+        "0": 797
+       }
+      },
+      "B21": {
+       "distinct": 1,
+       "values": {
+        "18": 797
+       }
+      },
+      "B22": {
+       "distinct": 1,
+       "values": {
+        "0": 797
+       }
+      },
+      "B23": {
+       "distinct": 1,
+       "values": {
+        "32": 797
+       }
+      },
+      "B24": {
+       "distinct": 1,
+       "values": {
+        "50": 797
+       }
+      },
+      "B25": {
+       "distinct": 1,
+       "values": {
+        "0": 797
+       }
+      },
+      "B26": {
+       "distinct": 64
+      },
+      "B27": {
+       "distinct": 1,
+       "values": {
+        "0": 797
+       }
+      }
+     }
+    }
+   },
+   "request_word_negative_joins": {
+    "speed_accel": 0.0229,
+    "steer_angle_025": -0.0295,
+    "driver_torque_030": 0.0658,
+    "target_angle_rate": -0.0274
+   }
+  }
+ },
+ "combined": {
+  "bus0_frames_total": 44613,
+  "duplication_total": 44613,
+  "joint_tuple_census_b3_b6_b7_b20hi_b22b4_b21_b23b5_b24": [
+   {
+    "b3": 0,
+    "b6": 0,
+    "b7": 18,
+    "b20_bits7_6": 0,
+    "b22_bit4": 0,
+    "b21": 0,
+    "b23_bit5": 0,
+    "b24": 50,
+    "count": 25915
+   },
+   {
+    "b3": 0,
+    "b6": 0,
+    "b7": 18,
+    "b20_bits7_6": 0,
+    "b22_bit4": 0,
+    "b21": 0,
+    "b23_bit5": 0,
+    "b24": 0,
+    "count": 9507
+   },
+   {
+    "b3": 8,
+    "b6": 45,
+    "b7": 71,
+    "b20_bits7_6": 3,
+    "b22_bit4": 1,
+    "b21": 11,
+    "b23_bit5": 0,
+    "b24": 100,
+    "count": 2329
+   },
+   {
+    "b3": 0,
+    "b6": 0,
+    "b7": 18,
+    "b20_bits7_6": 0,
+    "b22_bit4": 0,
+    "b21": 18,
+    "b23_bit5": 1,
+    "b24": 50,
+    "count": 1898
+   },
+   {
+    "b3": 8,
+    "b6": 45,
+    "b7": 71,
+    "b20_bits7_6": 3,
+    "b22_bit4": 1,
+    "b21": 0,
+    "b23_bit5": 0,
+    "b24": 50,
+    "count": 1620
+   },
+   {
+    "b3": 8,
+    "b6": 45,
+    "b7": 71,
+    "b20_bits7_6": 3,
+    "b22_bit4": 1,
+    "b21": 0,
+    "b23_bit5": 0,
+    "b24": 0,
+    "count": 1166
+   },
+   {
+    "b3": 0,
+    "b6": 0,
+    "b7": 18,
+    "b20_bits7_6": 0,
+    "b22_bit4": 0,
+    "b21": 0,
+    "b23_bit5": 0,
+    "b24": 100,
+    "count": 900
+   },
+   {
+    "b3": 8,
+    "b6": 44,
+    "b7": 70,
+    "b20_bits7_6": 3,
+    "b22_bit4": 1,
+    "b21": 0,
+    "b23_bit5": 0,
+    "b24": 50,
+    "count": 604
+   },
+   {
+    "b3": 8,
+    "b6": 45,
+    "b7": 71,
+    "b20_bits7_6": 3,
+    "b22_bit4": 1,
+    "b21": 11,
+    "b23_bit5": 1,
+    "b24": 100,
+    "count": 593
+   },
+   {
+    "b3": 0,
+    "b6": 0,
+    "b7": 146,
+    "b20_bits7_6": 0,
+    "b22_bit4": 0,
+    "b21": 0,
+    "b23_bit5": 0,
+    "b24": 0,
+    "count": 33
+   },
+   {
+    "b3": 8,
+    "b6": 45,
+    "b7": 71,
+    "b20_bits7_6": 3,
+    "b22_bit4": 1,
+    "b21": 0,
+    "b23_bit5": 0,
+    "b24": 100,
+    "count": 22
+   },
+   {
+    "b3": 8,
+    "b6": 45,
+    "b7": 71,
+    "b20_bits7_6": 1,
+    "b22_bit4": 1,
+    "b21": 0,
+    "b23_bit5": 0,
+    "b24": 50,
+    "count": 14
+   },
+   {
+    "b3": 8,
+    "b6": 45,
+    "b7": 71,
+    "b20_bits7_6": 1,
+    "b22_bit4": 1,
+    "b21": 11,
+    "b23_bit5": 1,
+    "b24": 100,
+    "count": 12
+   }
+  ],
+  "invariants": {
+   "b21_11_frames": 2934,
+   "b21_11_with_b24_100": 2934,
+   "b21_11_with_cruise_latch": 2934,
+   "b21_18_frames": 1898,
+   "b21_18_with_b23_bit5": 1898,
+   "b21_18_with_b24_50": 1898,
+   "b21_18_with_b3_clear": 1898,
+   "latch_frames": 6360,
+   "latch_mirror_agreement": 44587
+  }
+ },
+ "gtsplus_join": {
+  "emps_p5_did_0x1cee": {
+   "monitors": [
+    {
+     "monitor_key": 2069,
+     "name": "Target Lateral ID",
+     "bits": "0-7",
+     "mul": 1,
+     "div": 1,
+     "signed": false,
+     "patterns": 19
+    },
+    {
+     "monitor_key": 2070,
+     "name": "Cooperative Control in Progress Flag",
+     "bits": "8-15",
+     "mul": 1,
+     "div": 1,
+     "signed": false,
+     "pattern_display": {
+      "0": "OFF",
+      "1": "ON"
+     }
+    },
+    {
+     "monitor_key": 2071,
+     "name": "Target Steering Angle After Output Compensation",
+     "bits": "16-31",
+     "mul": 15,
+     "div": 1,
+     "signed": true,
+     "unit": "deg",
+     "decimal_places": 1
+    },
+    {
+     "monitor_key": 2072,
+     "name": "Advanced Drive Target Steering Angle",
+     "bits": "32-47",
+     "mul": 15,
+     "div": 1,
+     "signed": true,
+     "unit": "deg",
+     "decimal_places": 1
+    }
+   ],
+   "target_lateral_id_dictionary": {
+    "0": "No Request (Manual Operation)",
+    "1": "PCS",
+    "4": "LDA",
+    "10": "Hands Off LTA",
+    "11": "LTA/LCA",
+    "13": "DESA (Slow Deceleration Control)",
+    "15": "DESA (Deceleration Stop Control)",
+    "18": "SDG",
+    "19": "PDA",
+    "25": "AP",
+    "27": "Remote Parking",
+    "35": "AD (Lv.3)",
+    "37": "EM (Lv.3)",
+    "39": "DES (Lv.3)",
+    "41": "AD (Lv.4)",
+    "43": "EM (Lv.4)",
+    "45": "DES (Lv.4)",
+    "49": "Self-Propelled Transport",
+    "63": "Driver Operation"
+   },
+   "recovered_via": "tools/gts did EMPS_P5 0x1CEE --json (generation-20 NA EMPS_P5.ddb)"
+  },
+  "frc_p5_set_speed_concept": {
+   "did": "0x1901",
+   "names": [
+    "Current Vehicle Speed",
+    "Memory Vehicle Speed"
+   ],
+   "unit": "km/h",
+   "bits": 32,
+   "note": "corroborates the set-speed concept and km/h unit only; not a wire mapping proof"
+  }
+ },
+ "interpretation": {
+  "producer_boundary": "0x08A producer remains unidentified; GTS+ Bus-4 ECU dictionaries (ABS_P5, Brk_Bst_P5, EPB_P5, BSCM) carry no lateral-request DID vocabulary, so GTS+ cannot name the producer from DID semantics.",
+  "field_boundary": "Structural names (CRUISE_*, REQUEST_WORD_B8, LATERAL_REQUEST_LEVEL, COOPERATIVE_SUBSTATE_FLAG, RESERVED_16BIT_*) are census-bounded, not OEM-joined. B21/B26 six-bit boundaries remain encoding assumptions. The percent unit on B24 is bounded from the observed 0/50/100 value set.",
+  "regression_rule": "No 0x08A-to-B6 stock-LTA transform is implied by scale or topology (CORR-135). Passive analysis only; no output authorized."
+ }
+}
