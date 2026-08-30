@@ -28,7 +28,7 @@ from exploit.patcher.patch_config import (
     VERSION,
     config_from_manifest,
 )
-from exploit.common.payload_package import PAYLOAD_SIZE, inspect_payload, package_shellcode
+from exploit.common.payload_package import PAYLOAD_LOAD_ADDR, PAYLOAD_SIZE, inspect_payload, package_shellcode
 from exploit.common.ram_exec import bootstrap_protocol_values, explicit_ram_exec_geometry, explicit_route
 from exploit.patcher.build_payload import (
     CONFIG_OFFSET,
@@ -211,6 +211,7 @@ check("preflight reports stored CRC fixup", "read_le_word(cfg->crc_fixup_va)" in
 check("preflight computes live CRC prefix", "crc32_flash_range(cfg->crc_start, cfg->crc_fixup_va)" in preflight_c)
 check("preflight computes current full residue", "crc32_flash_range(cfg->crc_start, cfg->crc_end)" in preflight_c)
 check("validate-only returns to halt before APPLY dispatch", main_c.index("patch_config_validate_only") < main_c.index("run_apply(cfg)"))
+check("runtime is initialized before first telemetry send", main_c.index("runtime_init();") < main_c.index("telemetry_stage(stage_boot);"))
 check("payload source contains no reset call", "reset(" not in zero_write_sources and "0x157e" not in zero_write_sources)
 check("runtime halt services watchdog indefinitely", "while (1)" in runtime_c and "feed_watchdog();" in runtime_c)
 check("runtime enforces absolute P1M-E CodeFlash base/size", "patch_backend_flash_base" in runtime_c and "patch_backend_flash_size" in runtime_c)
@@ -229,6 +230,11 @@ check("telemetry status clear uses the firmware's sync barrier", 'asm("syncp")' 
 header_lower = (REPO / "exploit" / "common" / "patch_config.h").read_text(encoding="utf-8").lower()
 check("runtime config uses fixed plaintext-shellcode offset", "patch_config_offset      0x0f70u" in header_lower and "patch_config_runtime_addr" in header_lower)
 check("runtime config slot remains below bootloader callback boundary", CONFIG_OFFSET + CONFIG_SIZE <= 0xFD0)
+from exploit.patcher.build_shellcode_template import _compile_args as shellcode_compile_args
+link_args = shellcode_compile_args("v850-elf-gcc", "shellcode.c", "shellcode.elf")
+check("patcher shellcode links at authenticated callback VMA", f"-Wl,-Ttext=0x{PAYLOAD_LOAD_ADDR:08X}" in link_args and "-Wl,-Ttext=0" not in link_args)
+ram_exec_source = (REPO / "exploit" / "common" / "ram_exec.py").read_text(encoding="utf-8")
+check("payload telemetry accepts relay-mate Panda bus visibility", "bus != route.bus" not in ram_exec_source and "can_addr != RX_ADDR" in ram_exec_source)
 
 print("\n== fail-closed APPLY structure ==")
 apply_c = (REPO / "exploit" / "patcher" / "apply.c").read_text(encoding="utf-8").lower()
@@ -519,7 +525,7 @@ with tempfile.TemporaryDirectory() as td:
         image_path=live_image,
         manifest_path=live_manifest_path,
         template_path=template_path,
-        execution={"f181_hex": "018965B451200000000000", "f181_ascii": None, "route": {"bus": 1, "elm327_param": 1, "uds_variant": "old", "cpu_index": 0}},
+        execution={"f181_hex": "018965B451200000000000", "f181_ascii": None, "boot_f181_hex": "02" + "21" * 32, "boot_f181_ascii": None, "route": {"bus": 1, "elm327_param": 1, "uds_variant": "old", "cpu_index": 0}},
         telemetry_sha256="ab" * 32,
     )
     check("matching valid live preflight is APPLY-ready", pf["apply_ready"] is True)
@@ -577,9 +583,12 @@ check("shared bootstrap contains no embedded payload-build secret", payload_buil
 check("bootstrap takes SecurityAccess secret from environment/file", "toyota_eps_boot_secret_hex" in ram_exec_source and "security-secret-file" in deploy_source)
 check("bootstrap takes separate payload-build secret from environment/file", "toyota_eps_payload_secret_hex" in ram_exec_source and "payload-secret-file" in deploy_source)
 check("bootstrap requires explicit UDS variant", "uds variant must be explicitly 'old' or 'new'" in ram_exec_source)
+check("bootstrap requires bootloader reappearance before SecurityAccess", "_enter_programming_bootloader" in ram_exec_source and "expected_boot_f181_hex" in ram_exec_source and "bootloader did not reappear" in ram_exec_source.lower())
+check("bootstrap uses one clean boot DEFAULT-EXTENDED-PROGRAMMING ladder", "boot.diagnostic_session_control(session.default)" in ram_exec_source and "boot.diagnostic_session_control(session.extended_diagnostic)" in ram_exec_source and "boot.diagnostic_session_control(session.programming)" in ram_exec_source)
 check("deployer requires explicit route or recorded session", "--session-dir or explicit --bus and --elm327-param" in deploy_source)
 check("deployer binds APPLY to prior F181 before RAM upload", "expected_f181_hex = preflight.get(\"f181_hex\")" in deploy_source and "expected_f181_hex=expected_f181_hex" in deploy_source)
 check("deployer requires explicit F181 on first live preflight", "first live validate-only execution requires --expected-f181-hex" in deploy_source and "expected_f181_hex=expected_f181_hex" in deploy_source)
+check("deployer requires explicit boot F181 on first live preflight", "first live validate-only execution requires --expected-boot-f181-hex" in deploy_source and "expected_boot_f181_hex=expected_boot_f181_hex" in deploy_source)
 check("deployer does not equate payload completion with SecOC proof", "it is not evidence that secoc authentication is bypassed" in deploy_source)
 
 print("\n== deploy CLI fail-closed APPLY gate ==")
