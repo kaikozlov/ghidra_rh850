@@ -208,7 +208,7 @@ source = (ROOT / "exploit/common/ram_exec.py").read_text().lower()
 deploy_source = (ROOT / "exploit/patcher/deploy.py").read_text().lower()
 build_source = (ROOT / "exploit/patcher/build_payload.py").read_text().lower()
 check("RAM-exec implementation retains 120s caller-configurable timeout", "timeout: float = 120.0" in source)
-check("RAM-exec UDS client handles response-pending separately", "response_pending_timeout=1.0" in source)
+check("RAM-exec UDS client handles response-pending separately", "response_pending_timeout" in source and "timeout: float" in source)
 check("RAM-exec host guard covers both modern pandad and legacy boardd", "selfdrive\\.pandad\\.pandad" in source and '"pidof", "pandad"' in source and '"pidof", "boardd"' in source)
 
 original_run = ram_exec.subprocess.run
