@@ -96,6 +96,16 @@ def section_codeflash() -> int:
     check('persistent APPLY CRC repair/readback/final residue exact', values.get((0xC1, 0x0300)) == 0x2650CC50 and values.get((0xC1, 0x0302)) == 0xD9AF33AF and values.get((0xC1, 0x0304)) == 0xD9AF33AF and values.get((0xC1, 0x0305)) == 0xFFFFFFFF)
     check('persistent APPLY reaches SUCCESS and DONE while keeping SecOC proof separate', apply_run['apply']['write_crc_sequence_complete'] and apply_run['apply']['secoc_bypass_proven'] is False and any(e.get('name') == 'SUCCESS' for e in apply_events) and any(e.get('name') == 'DONE' for e in apply_events))
 
+    print('\n== 2026-08-30 post-reboot persistence verification ==')
+    persist_dir = REPO / 'targets/camry-2026/raw-20260830/secoc-patch-post-reboot-verify'
+    persist_run = json.loads((persist_dir / 'run.json').read_text())
+    persist_events = [json.loads(line) for line in (persist_dir / 'telemetry.ndjson').read_text().splitlines() if line.strip()]
+    check('post-reboot patch persistence verifier succeeds', persist_run['verified'] is True and persist_run['config_mismatches'] == [] and persist_run['observation_mismatches'] == [] and persist_run['telemetry']['payload_success'] and persist_run['telemetry']['event_count'] == 35)
+    check('post-reboot exact F33 identities survive power cycle', persist_run['execution']['f181_hex'] == '023839363546333330373030300000000038413331313333303331303000000000' and persist_run['execution']['boot_f181_hex'] == '02' + '21' * 32 and persist_run['execution']['direct_bootloader'] is False)
+    check('post-reboot live patch/fixup/CRC exactly match patched image', persist_run['observed'] == persist_run['expected'] == {'crc_prefix': 0x2650CC50, 'crc_residue': 0xFFFFFFFF, 'fixup_stored': 0xD9AF33AF, 'patch_observed': 0x01E0})
+    check('post-reboot patched image identity matches APPLY simulation', persist_run['expected_post_image_sha256'] == apply_run['apply']['expected_post_image_sha256'] == '272843a2c1d179f91105d7f103f213034f850dc476c96dad48067fbf3afd9f65')
+    check('post-reboot verifier remains zero-write and SecOC consequence separate', persist_run['verify_config']['original'] == 'e001' and persist_run['verify_config']['replacement'] == 'e0d1' and any(e.get('name') == 'SUCCESS' for e in persist_events) and any(e.get('name') == 'DONE' for e in persist_events) and 'SecOC bypass' in persist_run['interpretation'])
+
     print('\n== deterministic static artifact ==')
     with tempfile.TemporaryDirectory() as td:
         out = Path(td) / 'camry.json'
