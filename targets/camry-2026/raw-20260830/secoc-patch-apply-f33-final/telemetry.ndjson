@@ -1,0 +1,65 @@
+{"name": "BOOT", "raw": "1000addebebafeca", "stage": 16, "type": "stage"}
+{"name": "BOOT", "raw": "1000addebebafeca", "stage": 16, "type": "stage"}
+{"name": "CONFIG", "raw": "1100addebebafeca", "stage": 17, "type": "stage"}
+{"name": "CONFIG", "raw": "1100addebebafeca", "stage": 17, "type": "stage"}
+{"field": 1, "field_name": "mode", "raw": "b101000002000000", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 2}
+{"field": 1, "field_name": "mode", "raw": "b101000002000000", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 2}
+{"field": 2, "field_name": "patch_va", "raw": "b102000052f90800", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 588114}
+{"field": 2, "field_name": "patch_va", "raw": "b102000052f90800", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 588114}
+{"field": 3, "field_name": "patch_block_base", "raw": "b103000000800800", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 557056}
+{"field": 3, "field_name": "patch_block_base", "raw": "b103000000800800", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 557056}
+{"field": 4, "field_name": "flash_block_size", "raw": "b104000000800000", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 32768}
+{"field": 4, "field_name": "flash_block_size", "raw": "b104000000800000", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 32768}
+{"field": 5, "field_name": "crc_start", "raw": "b105000000800100", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 98304}
+{"field": 5, "field_name": "crc_start", "raw": "b105000000800100", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 98304}
+{"field": 6, "field_name": "crc_end", "raw": "b1060000f0fd0f00", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 1048048}
+{"field": 6, "field_name": "crc_end", "raw": "b1060000f0fd0f00", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 1048048}
+{"field": 7, "field_name": "crc_fixup_va", "raw": "b1070000ecfd0f00", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 1048044}
+{"field": 7, "field_name": "crc_fixup_va", "raw": "b1070000ecfd0f00", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 1048044}
+{"field": 8, "field_name": "crc_fixup_block_base", "raw": "b108000000800f00", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 1015808}
+{"field": 8, "field_name": "crc_fixup_block_base", "raw": "b108000000800f00", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 1015808}
+{"field": 9, "field_name": "config_crc32", "raw": "b1090000632ae402", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 48507491}
+{"field": 9, "field_name": "config_crc32", "raw": "b1090000632ae402", "tag": 177, "tag_name": "CONFIG", "type": "value", "value": 48507491}
+{"name": "PREFLIGHT", "raw": "1200addebebafeca", "stage": 18, "type": "stage"}
+{"name": "PREFLIGHT", "raw": "1200addebebafeca", "stage": 18, "type": "stage"}
+{"field": 256, "field_name": "patch_observed", "raw": "b2000100e0d10000", "tag": 178, "tag_name": "PREFLIGHT", "type": "value", "value": 53728}
+{"field": 256, "field_name": "patch_observed", "raw": "b2000100e0d10000", "tag": 178, "tag_name": "PREFLIGHT", "type": "value", "value": 53728}
+{"field": 257, "field_name": "fixup_stored", "raw": "b2010100eb76c3d8", "tag": 178, "tag_name": "PREFLIGHT", "type": "value", "value": 3636688619}
+{"field": 257, "field_name": "fixup_stored", "raw": "b2010100eb76c3d8", "tag": 178, "tag_name": "PREFLIGHT", "type": "value", "value": 3636688619}
+{"field": 258, "field_name": "crc_prefix", "raw": "b202010014893c27", "tag": 178, "tag_name": "PREFLIGHT", "type": "value", "value": 658278676}
+{"field": 258, "field_name": "crc_prefix", "raw": "b202010014893c27", "tag": 178, "tag_name": "PREFLIGHT", "type": "value", "value": 658278676}
+{"field": 259, "field_name": "crc_residue", "raw": "b2030100ffffffff", "tag": 178, "tag_name": "PREFLIGHT", "type": "value", "value": 4294967295}
+{"field": 259, "field_name": "crc_residue", "raw": "b2030100ffffffff", "tag": 178, "tag_name": "PREFLIGHT", "type": "value", "value": 4294967295}
+{"name": "APPLY_TARGET", "raw": "2000addebebafeca", "stage": 32, "type": "stage"}
+{"name": "APPLY_TARGET", "raw": "2000addebebafeca", "stage": 32, "type": "stage"}
+{"field": 512, "raw": "c000020000800800", "tag": 192, "tag_name": "APPLY", "type": "value", "value": 557056}
+{"field": 512, "raw": "c000020000800800", "tag": 192, "tag_name": "APPLY", "type": "value", "value": 557056}
+{"field": 513, "raw": "c001020052790000", "tag": 192, "tag_name": "APPLY", "type": "value", "value": 31058}
+{"field": 513, "raw": "c001020052790000", "tag": 192, "tag_name": "APPLY", "type": "value", "value": 31058}
+{"field": 514, "raw": "c0020200e0d10000", "tag": 192, "tag_name": "APPLY", "type": "value", "value": 53728}
+{"field": 514, "raw": "c0020200e0d10000", "tag": 192, "tag_name": "APPLY", "type": "value", "value": 53728}
+{"field": 515, "raw": "c0030200e0010000", "tag": 192, "tag_name": "APPLY", "type": "value", "value": 480}
+{"field": 515, "raw": "c0030200e0010000", "tag": 192, "tag_name": "APPLY", "type": "value", "value": 480}
+{"field": 516, "raw": "c004020000000000", "tag": 192, "tag_name": "APPLY", "type": "value", "value": 0}
+{"field": 516, "raw": "c004020000000000", "tag": 192, "tag_name": "APPLY", "type": "value", "value": 0}
+{"field": 515, "raw": "c0030200e0010000", "tag": 192, "tag_name": "APPLY", "type": "value", "value": 480}
+{"field": 515, "raw": "c0030200e0010000", "tag": 192, "tag_name": "APPLY", "type": "value", "value": 480}
+{"name": "APPLY_CRC", "raw": "2100addebebafeca", "stage": 33, "type": "stage"}
+{"name": "APPLY_CRC", "raw": "2100addebebafeca", "stage": 33, "type": "stage"}
+{"field": 768, "raw": "c100030050cc5026", "tag": 193, "tag_name": "CRC", "type": "value", "value": 642829392}
+{"field": 768, "raw": "c100030050cc5026", "tag": 193, "tag_name": "CRC", "type": "value", "value": 642829392}
+{"field": 769, "raw": "c1010300eb76c3d8", "tag": 193, "tag_name": "CRC", "type": "value", "value": 3636688619}
+{"field": 769, "raw": "c1010300eb76c3d8", "tag": 193, "tag_name": "CRC", "type": "value", "value": 3636688619}
+{"field": 770, "raw": "c1020300af33afd9", "tag": 193, "tag_name": "CRC", "type": "value", "value": 3652137903}
+{"field": 770, "raw": "c1020300af33afd9", "tag": 193, "tag_name": "CRC", "type": "value", "value": 3652137903}
+{"field": 771, "raw": "c103030000000000", "tag": 193, "tag_name": "CRC", "type": "value", "value": 0}
+{"field": 771, "raw": "c103030000000000", "tag": 193, "tag_name": "CRC", "type": "value", "value": 0}
+{"field": 772, "raw": "c1040300af33afd9", "tag": 193, "tag_name": "CRC", "type": "value", "value": 3652137903}
+{"field": 772, "raw": "c1040300af33afd9", "tag": 193, "tag_name": "CRC", "type": "value", "value": 3652137903}
+{"name": "VERIFY_FINAL", "raw": "2200addebebafeca", "stage": 34, "type": "stage"}
+{"name": "VERIFY_FINAL", "raw": "2200addebebafeca", "stage": 34, "type": "stage"}
+{"field": 773, "raw": "c1050300ffffffff", "tag": 193, "tag_name": "CRC", "type": "value", "value": 4294967295}
+{"field": 773, "raw": "c1050300ffffffff", "tag": 193, "tag_name": "CRC", "type": "value", "value": 4294967295}
+{"name": "SUCCESS", "raw": "7f00addebebafeca", "stage": 127, "type": "stage"}
+{"name": "SUCCESS", "raw": "7f00addebebafeca", "stage": 127, "type": "stage"}
+{"name": "DONE", "raw": "ff00addebebafeca", "stage": 255, "type": "stage"}

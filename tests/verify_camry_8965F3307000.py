@@ -85,6 +85,17 @@ def section_codeflash() -> int:
     check('collector-fixed live observations exactly match offline image', live_pf['config_mismatches'] == [] and live_pf['observation_mismatches'] == [] and live_pf['observed'] == live_pf['expected'] == {'crc_prefix': 0x273C8914, 'crc_residue': 0xFFFFFFFF, 'fixup_stored': 0xD8C376EB, 'patch_observed': 0xD1E0})
     check('collector-fixed telemetry reaches SUCCESS and DONE', any(e.get('name') == 'SUCCESS' for e in live_events) and any(e.get('name') == 'DONE' for e in live_events))
 
+    print('\n== 2026-08-30 persistent Gate-2 APPLY ==')
+    apply_dir = REPO / 'targets/camry-2026/raw-20260830/secoc-patch-apply-f33-final'
+    apply_run = json.loads((apply_dir / 'run.json').read_text())
+    apply_events = [json.loads(line) for line in (apply_dir / 'telemetry.ndjson').read_text().splitlines() if line.strip()]
+    check('persistent APPLY completed with no telemetry errors', apply_run['status'] == 'payload-complete' and apply_run['telemetry']['payload_success'] and apply_run['telemetry']['errors'] == [] and apply_run['execution']['handler_done'] and apply_run['execution']['telemetry_frames'] == apply_run['telemetry']['event_count'] == 65)
+    check('persistent APPLY exact target and payload identity', apply_run['execution']['f181_hex'] == '023839363546333330373030300000000038413331313333303331303000000000' and apply_run['execution']['boot_f181_hex'] == '02' + '21' * 32 and apply_run['payload']['sha256'] == '5cd8ed3bbdf0c5afeb9af675548ecad836cc3ef4494e8c87528e5c0683188d73')
+    values = {(e.get('tag'), e.get('field')): e.get('value') for e in apply_events if e.get('type') == 'value'}
+    check('persistent APPLY target readback is patched E001', values.get((0xC0, 0x0203)) == 0x000001E0)
+    check('persistent APPLY CRC repair/readback/final residue exact', values.get((0xC1, 0x0300)) == 0x2650CC50 and values.get((0xC1, 0x0302)) == 0xD9AF33AF and values.get((0xC1, 0x0304)) == 0xD9AF33AF and values.get((0xC1, 0x0305)) == 0xFFFFFFFF)
+    check('persistent APPLY reaches SUCCESS and DONE while keeping SecOC proof separate', apply_run['apply']['write_crc_sequence_complete'] and apply_run['apply']['secoc_bypass_proven'] is False and any(e.get('name') == 'SUCCESS' for e in apply_events) and any(e.get('name') == 'DONE' for e in apply_events))
+
     print('\n== deterministic static artifact ==')
     with tempfile.TemporaryDirectory() as td:
         out = Path(td) / 'camry.json'
