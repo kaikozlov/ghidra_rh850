@@ -153,9 +153,18 @@ original_isotp = ram_exec._import_isotp_send
 ram_exec._import_isotp_send = lambda: (
     lambda _panda, data, addr, *, bus: isotp_rows.append((bytes(data), int(addr), int(bus)))
 )
+class FakePanda:
+    def __init__(self) -> None:
+        self.clears: list[int] = []
+
+    def can_clear(self, bus: int) -> None:
+        self.clears.append(int(bus))
+
+
+fake_panda = FakePanda()
 try:
     ram_exec._upload_and_trigger(
-        object(),
+        fake_panda,
         fake_uds,
         fake_mod,
         route,
@@ -173,6 +182,7 @@ check(
     and fake_uds.requests[0][1].endswith(expected_download_tail),
     repr(fake_uds.requests),
 )
+check("FF00 bootstrap clears Panda host RX backlog", fake_panda.clears == [0xFFFF], repr(fake_panda.clears))
 check(
     "0x10F0 verification covers the same explicit geometry",
     len(fake_uds.routines) == 1

@@ -1,0 +1,116 @@
+{
+  "config_identity": {
+    "crc_end": 1048048,
+    "crc_fixup_block_base": 1015808,
+    "crc_fixup_va": 1048044,
+    "crc_start": 98304,
+    "expected_residue": 4294967295,
+    "flash_block_size": 32768,
+    "image_base": 0,
+    "image_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "image_size": 1048576,
+    "original": "e0d1",
+    "patch_block_base": 557056,
+    "patch_len": 2,
+    "patch_va": 588114,
+    "replacement": "e001"
+  },
+  "configured_shellcode": {
+    "path": "run-preflight-handoff-vmafix/shellcode-validate-only.bin",
+    "sha256": "d5a2322a17e62efd408c23b74fb9838aafada6dcae3dd01dc7953d595539e75f",
+    "size": 4048
+  },
+  "created_at": "2026-08-30T21:03:44+00:00",
+  "execute": true,
+  "execution": {
+    "boot_f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+    "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+    "handler_done": false,
+    "ram_exec_geometry": {
+      "evidence": "firmware-static:sienna-8965b4512000",
+      "load_addr": 4273930240,
+      "load_size": 4096
+    },
+    "route": {
+      "bus": 0,
+      "cpu_index": 0,
+      "elm327_param": 1,
+      "uds_variant": "old"
+    },
+    "security_access": {
+      "secret_value_recorded": false,
+      "seed_length": 16
+    },
+    "telemetry_frames": 0,
+    "timed_out": true
+  },
+  "image": {
+    "path": "firmware/camry-8965F3307000/CodeFlash.bin",
+    "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "size": 1048576
+  },
+  "interpretation": "payload-complete proves only the requested preflight/write+CRC sequence; it is not evidence that SecOC authentication is bypassed",
+  "manifest": {
+    "path": "data/generated/secoc_patch_manifest_8965F3307000.json",
+    "schema": "toyota-secoc-patch-manifest-v1",
+    "sha256": "701440d34ff37ba38f20d1c26ad74c515f284361e5b38359fe76829394a83601"
+  },
+  "mode": "validate-only",
+  "payload": {
+    "authenticated": true,
+    "path": "run-preflight-handoff-vmafix/payload-validate-only.bin",
+    "sha256": "deeb75e0017224ce770dc85f22f9fc6431eebca5b8aac3f468758a69661f87c0",
+    "size": 4096
+  },
+  "payload_authentication": {
+    "secret_source": "file:payload_secret.bin",
+    "secret_value_recorded": false
+  },
+  "preflight": {
+    "apply_ready": false,
+    "mismatches": [
+      "config telemetry mode: expected 0x1, observed None",
+      "config telemetry patch_va: expected 0x8F952, observed None",
+      "config telemetry patch_block_base: expected 0x88000, observed None",
+      "config telemetry flash_block_size: expected 0x8000, observed None",
+      "config telemetry crc_start: expected 0x18000, observed None",
+      "config telemetry crc_end: expected 0xFFDF0, observed None",
+      "config telemetry crc_fixup_va: expected 0xFFDEC, observed None",
+      "config telemetry crc_fixup_block_base: expected 0xF8000, observed None",
+      "config telemetry config_crc32: expected 0x76497A9C, observed None",
+      "preflight patch_observed: expected 0x0000D1E0, observed None",
+      "preflight fixup_stored: expected 0xD8C376EB, observed None",
+      "preflight crc_prefix: expected 0x273C8914, observed None",
+      "preflight crc_residue: expected 0xFFFFFFFF, observed None"
+    ],
+    "path": "run-preflight-handoff-vmafix/preflight.json",
+    "sha256": "f77baf7d5722a6c4e308917b028acdba6c26f86373d99baaf50ccac8f784b78a"
+  },
+  "preflight_record": null,
+  "ram_exec_geometry": {
+    "evidence": "firmware-static:sienna-8965b4512000",
+    "load_addr": 4273930240,
+    "load_size": 4096
+  },
+  "restore_artifact": null,
+  "schema": "secoc-patch-run-v1",
+  "security_access": {
+    "secret_source": "file:boot_secret.bin",
+    "secret_value_recorded": false
+  },
+  "status": "payload-failed",
+  "telemetry": {
+    "errors": [],
+    "event_count": 0,
+    "path": "run-preflight-handoff-vmafix/telemetry.ndjson",
+    "payload_success": false,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "template": {
+    "config_offset": 3952,
+    "path": "build/out/secoc-patcher/generic_shellcode_template.bin",
+    "sha256": "2ef7cd1bea782a103c204fd5b3389d8d193922cbdd53a581ccf220ae694cc41f"
+  }
+}

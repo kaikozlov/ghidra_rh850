@@ -585,6 +585,7 @@ check("bootstrap takes separate payload-build secret from environment/file", "to
 check("bootstrap requires explicit UDS variant", "uds variant must be explicitly 'old' or 'new'" in ram_exec_source)
 check("bootstrap requires bootloader reappearance before SecurityAccess", "_enter_programming_bootloader" in ram_exec_source and "expected_boot_f181_hex" in ram_exec_source and "bootloader did not reappear" in ram_exec_source.lower())
 check("bootstrap uses one clean boot DEFAULT-EXTENDED-PROGRAMMING ladder", "boot.diagnostic_session_control(session.default)" in ram_exec_source and "boot.diagnostic_session_control(session.extended_diagnostic)" in ram_exec_source and "boot.diagnostic_session_control(session.programming)" in ram_exec_source)
+check("bootstrap clears host RX backlog immediately before FF00 trigger", "panda.can_clear(0xffff)" in ram_exec_source and ram_exec_source.index("panda.can_clear(0xffff)") < ram_exec_source.index("isotp_send = _import_isotp_send()"))
 check("deployer requires explicit route or recorded session", "--session-dir or explicit --bus and --elm327-param" in deploy_source)
 check("deployer binds APPLY to prior F181 before RAM upload", "expected_f181_hex = preflight.get(\"f181_hex\")" in deploy_source and "expected_f181_hex=expected_f181_hex" in deploy_source)
 check("deployer requires explicit F181 on first live preflight", "first live validate-only execution requires --expected-f181-hex" in deploy_source and "expected_f181_hex=expected_f181_hex" in deploy_source)
