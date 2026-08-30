@@ -3,9 +3,25 @@
 **Target:** maintainer 2026 Toyota Camry Hybrid, EPS application F181
 `8965F3307000 / 8A3113303100`.
 
-**Evidence boundary:** this report closes the exact-F33 generated-COM transmit geometry needed by the software port, records the passive implementation, and preserves the former Gate-2 development path as historical/test-only engineering context. It does **not** authorize steering transmission. CORR-129/VAR-081 identify **73.303384 s of retained `0x08A` ID11 LTA/LCA request state with zero B6**; this is not a direct winner/grant oracle. CORR-134 recovers B21 as Target Lateral ID and B18:B19 as the signed request-angle quantity; CORR-135 rejects a presumed `0x08A -> B6` transform. Exact F33 neither accepts `0x08A` nor transmits it, while its B6-inactive internal path reaches physical steering; that makes zero B6 architecturally possible but does not prove the retained request was granted. VAR-091/CORR-136 place authenticated `0x08A` on captured Bus 4 and observed plaintext camera PDUs on Bus 1, but batched rlog timestamps cannot identify the physical transmitter and Bus-1 trailer absence cannot identify the signer or FRC HSM capability. VAR-094 proves only that consecutive `5282` is absent from native Bus-1 CAN and the camera-bus steering angle is inbound SAS echo.
+**Evidence boundary:** this report closes the exact-F33 generated-COM transmit geometry needed by the software port, records the passive implementation, and preserves the former Gate-2 development path as historical/test-only engineering context. It does **not** authorize steering transmission. CORR-129/VAR-081 identify **73.303384 s of retained `0x08A` ID11 LTA/LCA request state with zero B6**; this is not a direct winner/grant oracle. CORR-134 recovers B21 as Target Lateral ID and B18:B19 as the signed request-angle quantity; CORR-135 rejects a presumed `0x08A -> B6` transform. Exact F33 neither accepts `0x08A` nor transmits it, while its B6-inactive internal path reaches physical steering; that makes zero B6 architecturally possible but does not prove the retained request was granted. VAR-091/CORR-136 place authenticated `0x08A` on captured Bus 4 and observed plaintext camera PDUs on Bus 1, but batched rlog timestamps cannot identify the physical transmitter and Bus-1 trailer absence cannot identify the signer or FRC HSM capability. VAR-094 proves only that consecutive `5282` is absent from native Bus-1 CAN; CORR-138 retracts the former standing-echo interpretation of `0x160[22]`.
 
-The remaining integration problem is split deliberately. OQ-054 tracks physical `0x08A` transmission, private transport, and SecOC computation ownership; current evidence permits FRC pre-authentication or CGW/Skid/Brake assembly/signing. Synchronized FRC Operation FFD `5282/5285/57DE/5265` separately determines request versus winner/grant. VAR-092 closes default-bank `D0218` as not an F33 COM copy of the published milliradian. Protected B6 remains a real external cooperative-control ingress and a separate candidate openpilot interface; choosing it requires a valid bridge/signing, freshness, suppression, and safety contract, not stock-LTA inference. The old stock-template B6 runtime sender was removed in `opendbc@b9e86924` and `kai-openpilot@abf3ca70a`; current opendbc `525ee987` retains passive observation and analysis/test-only B6 receiver/freshness/safety helpers.
+The remaining integration problem is split deliberately. OQ-054 tracks physical `0x08A` transmission, private transport, and SecOC computation ownership; current evidence permits FRC pre-authentication or CGW/Skid/Brake assembly/signing. Synchronized FRC Operation FFD `5282/5285/57DE/5265` separately determines request versus winner/grant. VAR-092 closes default-bank `D0218` as not an F33 COM copy of the published milliradian. Protected B6 remains a real external cooperative-control ingress and a separate candidate openpilot interface. Production use still needs a signing/freshness contract, but that is not a prerequisite for the development path: VAR-060 already supplies a deterministic exact-F33 Gate-2 compare-neutralization plus CRC repair, so a patched/bridged EPS can accept deliberately zero-MAC28 B6 frames. The old stock-template B6 runtime sender was removed in `opendbc@b9e86924` and `kai-openpilot@abf3ca70a`; the development task is to deploy/arm the acceptance bypass and correctly enable the fork sender, Panda safety, suppression/relay, and bounded live-test path rather than infer anything from stock LTA.
+
+**Physical routing decision (CORR-139):** the present Toyota-B repin is correct.
+Current GTS+ places Brake/Skid/SAS/EPS together on Toyota Bus 4; exact F33 has one
+application CAN controller carrying both its B6 rule and diagnostic rules; the
+relay-correct capture observes exact-F33 `0x030` and EPS UDS on the repinned
+steering family. Therefore the candidate external-control route is `0x0B6`,
+DLC 32, on **Panda bus 0 across the current CAN0/CAN2 relay pair**. Panda bus 1
+remains the native FRC/camera-radar plane. Do not send `0x08A` to EPS, do not infer
+an `0x08A -> B6` transform, and do not repin again in search of an EBU-private EPS
+stub: the telemetry/carrier absences in VAR-099 are not a routing discriminator.
+The next integration gate is not discovery of B6 receiver authentication: VAR-060's
+exact-F33 Gate-2 patch and deterministic CRC repair already make deliberately
+zero-MAC28 development frames admissible on a patched/bridged EPS. What remains
+is deployment/arming, correct fork sender and Panda-safety enablement, required
+source-suppression/relay behavior, and bounded live-response validation.
+Production transmission remains unauthorized.
 
 Working session notes for the GTS+ vehicle-type → install-set → family-`.ddb` → GetSupport funnel (not a claim ledger): [../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md).
 
@@ -308,5 +324,5 @@ Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
 - Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061), [VAR-062](../reference/index.md#finding-var-062), [VAR-071](../reference/index.md#finding-var-071)
-- Corrections with this document as canonical home: [CORR-120](../reference/index.md#correction-corr-120), [CORR-122](../reference/index.md#correction-corr-122)
+- Corrections with this document as canonical home: [CORR-120](../reference/index.md#correction-corr-120), [CORR-122](../reference/index.md#correction-corr-122), [CORR-139](../reference/index.md#correction-corr-139)
 <!-- knowledge-cross-references:end -->

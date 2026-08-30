@@ -447,8 +447,9 @@ candidates and **2,929** fields fine-swept in both drives, with **zero reproduci
 leading** the exact `0x030 B22:B23` motor-feedback proxy (|r|≥0.40 both drives,
 lag≥+50 ms). Drive B has zero leads among 48 strong correlates; drive A's 69 leads among
 246 strong correlates do not reproduce. The enlarged denominator instead adds lagging
-feedback/derived encodings; `0x160[22]` remains a delayed steering-angle echo equally
-present in normal cruise. Do not spend more drives or scan time mining observed bus1
+feedback/derived encodings; CORR-138 retracts the former standing
+`0x160[22]` delayed-steering-angle-echo identity because its full-drive
+correlation collapses. Do not spend more drives or scan time mining observed bus1
 IDs for the lateral planner. VAR-081 already supplies the state identification and VAR-082
 adds the same matched negative across the actual Bus-4 chassis/EPS network. VAR-083 closes
 the shared downstream current-control convergence; VAR-084/085 close the major hidden-ingress

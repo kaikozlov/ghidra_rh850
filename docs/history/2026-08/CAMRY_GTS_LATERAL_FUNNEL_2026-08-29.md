@@ -1348,7 +1348,8 @@ Join onto the wire (VAR-093):
 - `0x180/181/182`: **eight 7-byte object slots**. Empty =
   `fff8000000ffff`. Occupied bytes 0-1 u16be × 0.01 m is range
   (median 26 / 37 m). `5A24`/`5A26` are not 1:1 on bytes 2-5.
-- `0x160[22]` is still the inbound SAS steering-angle echo.
+- `0x160` remains a ~40 Hz camera-domain stream; CORR-138 retracts the former
+  standing B22 SAS-echo identity because full-drive correlation collapses.
 
 Canonical: live-baseline §42. Still `noOutput`.
 
@@ -1449,19 +1450,24 @@ authority): `build/tmp/camry_trace/` (`find_round1.json`, `verify_round.json`,
 `close_round.json`, per-test `_out.json`). Compacted 2026-08-29 into
 `data/generated/camry_2026_lateral_flow_trace.json` +
 `tests/verify_camry_2026_lateral_flow_trace.py` (43 checks, byte-identical
-regeneration), FINDINGS VAR-098/099/100, CORR-138, and live-baseline §46; the
-scratch scripts remain the working derivations.
+regeneration), FINDINGS VAR-098/099/100, CORR-138/139, and live-baseline §46;
+the scratch scripts remain the working derivations. **CORR-139 supersedes this
+journal's original private-EPS-stub routing inference; the raw counts below are
+preserved, while their current bounded interpretation is stated explicitly.**
 
 **Structural negatives (verified on every retained capture, both drives + all
 2026-08-26/27 censuses, oracle runs, diag logs):**
 
 1. EPS Tx PDUs `0x351/0x394/0x4A3/0x4C8` = **0 frames, never captured anywhere**
    (any bus, any DLC, 11- or 29-bit), while `0x030` (10.0–10.5 ms, DLC 32)
-   streams throughout as control. The captured Bus-4 segment is demonstrably
-   **not** the full EPS interface; the port's static fault-status inputs
-   (`0x394` columns) have no live wire on this segment.
-2. `0x0B6` = 0 everywhere (re-proven); no B6-shaped carrier exists on any
-   captured segment: only true mod-64 counter on the wire is `0x08A` B26;
+   streams throughout as control. This proves the configured telemetry IDs are
+   absent from the retained wire data; it does not prove a second physical EPS
+   interface or that those configured PDU schedules were active. The port's
+   static fault-status inputs (`0x394` columns) have no identified live carrier
+   in these captures.
+2. `0x0B6` = 0 everywhere (re-proven); no B6-shaped carrier was identified by
+   the declared counter/echo/boundary scans on any captured segment: only the
+   true mod-64 counter on the wire is `0x08A` B26;
    only in-interval echo group that beats a 10x/100-match bar (664 stream
    groups scanned) is `0x081`; zero boundary-locked or delayed (0.5–5 s)
    state flips on any of the 16 DLC-32 bus-0/2 streams beyond request-side
@@ -1478,13 +1484,13 @@ scratch scripts remain the working derivations.
    angle in manual, request angle under LTA. Candidate arbitrated-reference
    object; B13 mirrors B21 (known).
 4. `0x08A` fully byte-mapped: constants B0/B1/B2/B5/B15/B25/B27=0x00,
-   B13/B16=0x7F, B14/B17=0xFF; B6[0]/B7[0]/B20[7] mirror B3[3] latch; active
-   flags B22[4], B23[5], B4[7]; B26 = per-frame +1 mod-64 freshness counter
-   (B: 0 breaks/23,998; A: one sender reset 53.9 s + outage-window skips),
-   independent of `0x00F`'s 4.76–4.80 s counter — i.e. `0x08A` carries its own
-   SecOC freshness value beside the B28:B31 `FV4‖MAC28` trailer. **Damping
-   gain is not on the frame** (closed-negative): `0x08A` carries ID + angle +
-   assist only.
+   B13/B16=0x7F, B14/B17=0xFF; B6[0]/B7[0]/B20[7] mirror B3[3] latch;
+   B22[4]/B4[7] assert in every ID11 frame while B23[5] is drive-dependent;
+   B26[5:0] is overwhelmingly +1 mod-64 (A 175 non-+1 breaks, B 0), but batched
+   ordering cannot classify reset versus omitted/interleaved publications.
+   B24 is the only byte with the recorder assist `{0,50,100}` alphabet; no
+   separate damping-gain field was identified on `0x08A`, without excluding a
+   different encoding or carrier.
 5. SDG(18) is a real steering-request state, ~30% of request traffic: word
    range −339..+195 mrad, r vs SAS 0.753–0.914 in the three long intervals,
    blips carry 12–20 mrad trims. Flag join: `0x412` B7[3] SDG-only;
@@ -1494,8 +1500,9 @@ scratch scripts remain the working derivations.
    small-signal (word ±[1,56] mrad, SAS p2p 4 ct — tracking holds
    1267.9–1297.9 s, collapses after; not hands-on). Motor proxy `0x030`
    B22:B23 follows the reference word at least as well as SAS (A 0.582 vs
-   0.481; B 0.605 vs 0.149): command-following is visible on the wire with
-   no command frame on the wire.
+   0.481; B 0.605 vs 0.149). This is request-associated plant correlation;
+   batched timestamps and missing winner/grant state do not prove a causal
+   command path.
 7. State joins: A's LTA exit trigger is the `0x127` B1 0x10→0x17 D→N blip
    (386.882) → `0x0FE` B10[2] (387.404) → B21 11→0 (387.634) → latch off
    (388.185) → MAIN press (388.066, follower). B's onset is auto-resume from
@@ -1515,10 +1522,11 @@ scratch scripts remain the working derivations.
    `1B40_3` EPS-copy shadow (every EPS telemetry PDU absent); B6 SecOC key
    (OQ-054); damping gain (recorder layouts + B6 sig269/270 only).
 
-**Bottom line for "why no steering message":** three independent exhaustive
-scans agree the actuation command for stock LTA never appears on any captured
-segment. The wire carries request + mirrors only; actuation is observable only
-through plant response. Together with (1), this strengthens the EBU-private-
-stub / brake-family-signer reading of OQ-054 and makes the FRC Operation-FFD
-hop-2 capture (`REFERENCE/CAMRY_TSS3_OPERATION_FFD_PLAN.md`) the only remaining
-no-output way to see request vs winner vs grant.
+**Corrected bottom line for "why no steering message" (CORR-139):** the scans
+identify no separate stock-LTA actuation/grant CAN carrier within their declared
+search. They do not prove that the reached Bus-4 network is an incomplete EPS
+interface or private stub. VAR-066 independently places B6 on the already reached
+Bus-4 Brake/EPS segment: keep the current repin and treat `0x0B6` DLC 32 on Panda
+bus 0 / the `CAN0/CAN2` relay pair as the candidate openpilot ingress. FRC
+Operation FFD remains the no-output discriminator for request versus winner versus
+grant ownership, not a physical-routing oracle.

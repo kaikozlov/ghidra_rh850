@@ -47,7 +47,7 @@
     "cruise_latch_B3_3_set_fraction": 0.088964,
     "damping_gain_absence": {
      "B24_distinct": 3,
-     "conclusion": "B24 is the only gain-shaped byte (recorder assist alphabet); no unnamed 0x08A byte carries a {0/50/100}-style 0.01-LSB gain alphabet, so the recorder's damping field has no wire carrier on 0x08A",
+     "conclusion": "B24 is the only byte with the recorder assist {0/50/100} alphabet; no other 0x08A byte carries that same alphabet. This scan does not identify a separate damping-gain field on 0x08A and does not exclude a differently encoded field or a carrier outside 0x08A.",
      "unnamed_bytes_distinct": {
       "B0": 1,
       "B1": 1,
@@ -330,7 +330,7 @@
     }
    },
    "delayed_ack": {
-    "classification": "zero delayed persistent flips of any class on either clean onset; no grant/ack announcement exists on the captured Bus-4 broadcast",
+    "classification": "zero delayed persistent flips under the declared criterion at either clean onset; no delayed persistent grant/ack-class announcement was identified on the captured Bus-4 segment",
     "definition": "per byte: >=95%-persistent value in each +0.5..+5.0 s window (0.5 s steps) vs the [-4,-1] s pre-window; DLC-32 bus-0 streams",
     "onsets": {
      "id11_onset": {
@@ -606,7 +606,7 @@
     "cruise_latch_B3_3_set_fraction": 0.188591,
     "damping_gain_absence": {
      "B24_distinct": 2,
-     "conclusion": "B24 is the only gain-shaped byte (recorder assist alphabet); no unnamed 0x08A byte carries a {0/50/100}-style 0.01-LSB gain alphabet, so the recorder's damping field has no wire carrier on 0x08A",
+     "conclusion": "B24 is the only byte with the recorder assist {0/50/100} alphabet; no other 0x08A byte carries that same alphabet. This scan does not identify a separate damping-gain field on 0x08A and does not exclude a differently encoded field or a carrier outside 0x08A.",
      "unnamed_bytes_distinct": {
       "B0": 1,
       "B1": 1,
@@ -883,7 +883,7 @@
     }
    },
    "delayed_ack": {
-    "classification": "zero delayed persistent flips of any class on either clean onset; no grant/ack announcement exists on the captured Bus-4 broadcast",
+    "classification": "zero delayed persistent flips under the declared criterion at either clean onset; no delayed persistent grant/ack-class announcement was identified on the captured Bus-4 segment",
     "definition": "per byte: >=95%-persistent value in each +0.5..+5.0 s window (0.5 s steps) vs the [-4,-1] s pre-window; DLC-32 bus-0 streams",
     "onsets": {
      "id11_onset": {
@@ -1179,9 +1179,9 @@
  },
  "generated_from": "retained relay-correct 2026-08-27 Camry drives; nearest-neighbour and batch-granular pairings per CORR-136",
  "interpretation": {
-  "conclusion": "The stock-LTA actuation command never appears on any captured segment: 0x0B6, the four EPS telemetry Tx PDUs, and any B6-shaped/grant-shaped carrier are absent from every retained capture, while 0x030 and 0x081 stream throughout. The captured Bus-4 broadcast is therefore not the full EPS interface, and the wire carries request + mirrors only.",
-  "new_carrier": "0x081 B16:B17 (s16BE) byte-equals the 0x08A B18:B19 request word at publication granularity in the LTA state and equals the measured 0x025 angle times the F33 B6 scale factor in the manual state: one mode-switching steering-reference quantity, republished at ~32 Hz beside EPS.",
-  "proof_boundary": "Batched loggerd timestamps (CORR-136) bound all orderings; equality and correlation statistics do not establish which ECU produces 0x08A/0x081, a request-to-winner transform, or any grant. No 0x08A-to-B6 transform is established. Production output remains unauthorized."
+  "conclusion": "No separate stock-LTA actuation/grant CAN carrier was identified within the declared retained-capture search: 0x0B6, legacy 0x131/0x2E4, and the four configured F33 telemetry Tx IDs are absent, and the delayed-persistent-flip scan found no grant/ack-class announcement. These observations do not imply an incomplete EPS interface or a private EPS stub: the independent VAR-066 GTS+/exact-F33/repin join places B6 on the reached Bus-4 Brake/EPS segment. Stock LTA also need not publish B6 because exact F33 has a B6-inactive internal path into motor-current control.",
+  "new_carrier": "0x081 B16:B17 (s16BE) strongly supports the same mode-switching steering-reference quantity as 0x08A B18:B19: static pairs frequently agree, drive-B ID11 batch medians agree within one count in 92.0555% of shared batches, and in manual state the word tracks measured 0x025 angle at the F33 B6 scale. Moving-pair disagreement and drive-A fast-slew strata preclude a blanket byte-equality claim.",
+  "proof_boundary": "Batched loggerd timestamps (CORR-136) bound all orderings; equality and correlation statistics do not establish which ECU produces 0x08A/0x081, a request-to-winner transform, a grant, or a causal command path. No 0x08A-to-B6 transform is established. Production output remains unauthorized."
  },
  "parked_censuses": {
   "post_repin_nrtd": {

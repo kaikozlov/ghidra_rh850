@@ -10,6 +10,9 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 ART = REPO / "data/generated/camry_2026_lateral_flow_trace.json"
+TOPO = REPO / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
+CAPTURE = REPO / "data/generated/camry_2026_relay_correct_capture.json"
+PORT = REPO / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
 BUILD = REPO / "tools/analyze_camry_2026_lateral_flow_trace.py"
 
 passed = failed = 0
@@ -103,16 +106,16 @@ print("\n== 0x08A byte-complete census ==")
 for name, b26_frac, b26_breaks, b24_distinct in (("drive_a", 0.991511, 175, 3),
                                                  ("drive_b", 1.0, 0, 2)):
     c = art["drives"][name]["a08A_byte_census"]
-    check(f"{name} B26 mod-64 freshness counter",
+    check(f"{name} B26[5:0] mostly advances +1 mod 64 with exact break counts",
           c["B26_freshness_counter"]["step_fraction_plus1_mod64"] == b26_frac
           and c["B26_freshness_counter"]["break_count"] == b26_breaks)
-    check(f"{name} latch mirrors and active flags exact",
+    check(f"{name} latch mirrors and observed bit prevalence exact",
           c["latch_mirror_agreement"] == {"B6[0]": c["latch_mirror_agreement"]["B6[0]"],
                                           "B7[0]": c["latch_mirror_agreement"]["B7[0]"],
                                           "B20[7]": c["latch_mirror_agreement"]["B20[7]"]}
           and c["active_flags"]["B22[4]"]["set_fraction_b21_11"] == 1.0
           and c["active_flags"]["B4[7]"]["set_fraction_b21_11"] == 1.0)
-    check(f"{name} damping absence: B24 gain alphabet vs unnamed bytes",
+    check(f"{name} bounded damping alphabet scan: B24 vs other bytes",
           c["damping_gain_absence"]["B24_distinct"] == b24_distinct
           and c["damping_gain_absence"]["unnamed_bytes_distinct"]["B12"] == 256)
 
@@ -146,7 +149,7 @@ for name, pc in (("drive_a", pa), ("drive_b", pb)):
           tri["vs_reference_word_081"]["pearson_r"] > tri["vs_sas"]["pearson_r"],
           f"word={tri['vs_reference_word_081']['pearson_r']} sas={tri['vs_sas']['pearson_r']}")
 
-print("\n== no delayed grant/ack on any DLC-32 bus-0 stream ==")
+print("\n== zero delayed persistent flips under the grant/ack-class scan ==")
 for name in ("drive_a", "drive_b"):
     da = art["drives"][name]["delayed_ack"]["onsets"]["id11_onset"]
     check(f"{name} zero delayed persistent flips +0.5..+5.0 s after ID11 onset",
@@ -170,14 +173,43 @@ for name, fast_start, fast_end in (("drive_a", 263.945429, 503.945429),
           len(fast) == 1 and (fast[0]["start_s"], fast[0]["end_s"]) == (fast_start, fast_end)
           and p["id11_contained_in_fast_phase"] is True)
 
-print("\n== interpretation boundaries ==")
+print("\n== interpretation and routing boundaries ==")
 interp = art["interpretation"]
-check("conclusion states the command never appears on any captured segment",
-      "never appears on any captured segment" in interp["conclusion"]
-      and "not the full EPS interface" in interp["conclusion"])
-check("proof boundary forbids producer/transform/grant claims and output",
+check("conclusion bounds the negative to carriers identified by the declared search",
+      "No separate stock-LTA actuation/grant CAN carrier was identified" in interp["conclusion"]
+      and "delayed-persistent-flip scan" in interp["conclusion"])
+check("absence does not resurrect an incomplete-interface/private-stub route",
+      "do not imply an incomplete EPS interface or a private EPS stub" in interp["conclusion"]
+      and "not the full EPS interface" not in interp["conclusion"])
+check("0x081 interpretation discloses moving and fast-slew disagreement",
+      "preclude a blanket byte-equality claim" in interp["new_carrier"])
+check("proof boundary forbids producer/transform/grant/causal-command claims and output",
       "No 0x08A-to-B6 transform is established" in interp["proof_boundary"]
+      and "causal command path" in interp["proof_boundary"]
       and art["production_output_authorized"] is False)
+
+# Cross-surface guard for CORR-139: an absence-only trace must not overturn the
+# independently verified GTS+/firmware/physical-repin topology join (VAR-066).
+topo = json.loads(TOPO.read_text())["current_camry_can_topology"]
+crit = topo["critical_placement"]
+f33 = topo["exact_f33_channel_join"]
+capture = json.loads(CAPTURE.read_text())["conclusion"]
+port = json.loads(PORT.read_text())["gate2_development_integration"]
+check("GTS+ keeps Brake/Skid and EPS co-resident on Bus 4",
+      crit["skid_control_abs_vsc_trac"]["bus_index"] == 32
+      and crit["power_steering_eps"]["bus_index"] == 32
+      and crit["power_steering_eps"]["bus_name"] == "Bus 4")
+check("exact F33 keeps B6 and diagnostics on its sole application CAN controller",
+      f33["canif_controller_count_byte"]["value"] == 1
+      and f33["b6_rule_can_id"] == "0x0B6"
+      and f33["b6_rule_index"] == 39
+      and f33["diagnostic_rule_tail"] == ["0x7A1", "0x777", "0x7A0"])
+check("physical repin places the steering family on the CAN0/CAN2 relay pair",
+      "CAN0/CAN2 pair" in capture["relay_topology"])
+check("the bounded development ingress is B6 DLC32 on relay-correct Panda bus 0",
+      "relay-correct bus0 topology" in port["historical_target_binding"]
+      and "bus0/32-byte 0x0B6-only TX whitelist" in port["panda_debug_test_boundary"]
+      and port["production_output_authorized"] is False)
 
 print(f"\n{passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)
