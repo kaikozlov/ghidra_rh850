@@ -1,5 +1,5 @@
 {
-  "boundary": "The F33 Tx/status carrier geometry and passive software integration are closed at the stated evidence grades; the former Gate-2 runtime sender is retained here only as historical/test provenance and is removed from current integration. This artifact does not authorize steering CAN transmission: current Camry output is noOutput/zero CAN. The observed Bus-4 0x08A producer/security ownership and the exact authority input to F33's B6-independent stock-LTA path remain unresolved; B6 is a separate external cooperative-control interface whose production use requires its own signing/freshness/suppression contract.",
+  "boundary": "The F33 Tx/status geometry, passive default, and exact-F181 non-release development B6 path are closed at the stated evidence grades. Default/release behavior remains noOutput/zero CAN; the development path is present but dormant until external receiver-acceptance attestation parameters select it. This artifact does not authorize steering transmission. Immediate blockers are acceptance-bypass deployment and bounded stationary application/safety validation, not OQ-054 signer attribution. Toyota's stock FRC-to-chassis request transport and exact Bus-4 0x08A key holder remain independently unresolved.",
   "census_correction": {
     "control_cone_conclusion_changed": false,
     "driver_torque_direct_fixed_gp_entries": [
@@ -22,33 +22,38 @@
     "supersedes": "VAR-056/VAR-058 scratch-corpus direct/fixed-GP torque-source counts"
   },
   "gate2_development_integration": {
-    "current_blocker": "OQ-054: identify the observed Bus-4 0x08A producer/security ownership and independently recover the exact external/local authority input to F33's B6-independent stock-LTA assist path; do not assume an 0x08A-to-B6 transform. Only after that should B6 be evaluated separately as a candidate openpilot actuation interface.",
-    "current_nested_opendbc_commit": "525ee987f32167f7e579a4cc773d0d4a8ab7794b",
-    "current_parent_kai_openpilot_commit": "1f26280ac6f2a0733877a08540aa3336d0a50d47",
+    "acceptance_options": {
+      "persistent_codeflash": "exact-F33 Gate-2 compare neutralization plus deterministic CRC repair; persistent and frictionless after installation, with flash/persistent-modification risk",
+      "ram_bridge": "audited exact-F33 zero-MAC28 re-admission candidate in application-retained high RAM; reset restores stock, but reliable deployment/execution/heartbeat is not implemented"
+    },
+    "application_candidate": "The 28-byte base is the explicit-zero non-stock candidate. Recovered command fields are packed exactly; bounded companion defaults set additive-term suppression=1 and both percentage contributions=0. No stock B6 was observed, so stationary application-semantic validation remains mandatory.",
+    "card_deployment_boundary": "card.py consumes exact-F181 bridge-attestation params and arms the sender/safety mode; it does not deploy the resident or verify an EPS heartbeat",
+    "current_blocker": "Install and positively verify one receiver-acceptance option, then run bounded stationary inactive/zero/small-angle tests for application fields, sign/scale, driver override, motor response, timeout/release, source coexistence or suppression, and inhibit/fault recovery. OQ-054 signer attribution is a separate stock-architecture question and does not block this direct B6 development test.",
+    "current_nested_opendbc_commit": "8da4bb9bb62ecbef0a24653e4aecdaedc514b046",
+    "current_parent_kai_openpilot_commit": "6dd58cf5eb2fd47a568f85ce83542ee6aebf176b",
     "default_enabled": false,
-    "historical_inactive_behavior": "removed sender emitted no invented inactive B6 frame; it disarmed after active->inactive and required a newer sync epoch before reactivation",
+    "deployment_verified_on_exact_vehicle": false,
     "historical_nested_opendbc_commit": "dde0fcf0fbaf875750c54a072b0dcb3857f8829b",
     "historical_parent_kai_openpilot_commit": "15f3550365e2eee54ca5645ae9c24d9d41ae4f31",
-    "historical_runtime_config": {
-      "json": "ToyotaTSS3DevLateralConfig",
-      "master_enable": "ToyotaTSS3DevLateral",
-      "required_live_fields": [
-        "f181=8965F3307000",
-        "stock-captured 28-byte b6_template_hex",
-        "stock-captured cadence_frames",
-        "gate2_bypass_validated=true",
-        "exclusive_b6_authority_validated=true"
-      ]
-    },
-    "historical_sender": "Active ID11 only; exact-F33 +/-1745 raw clamp and +78 raw command-step clamp; required a strictly newer stock 0x00F epoch, used FV46/FV4 replacement counters, and intentionally transmitted zero MAC28 for the historical Gate-2 bypass experiment.",
-    "historical_target_binding": "exact TOYOTA_CAMRY_TSS3 + current EPS F181 containing 8965F3307000 + relay-correct bus0 topology",
-    "panda_debug_test_boundary": "ALLOW_DEBUG-only Toyota TSS3 development safety flag remains for tests and installs a dedicated bus0/32-byte 0x0B6-only TX whitelist; no current Camry CarParams/CarInterface/CarController path selects it. The hook enforces ID11, +/-1745 raw, strict +1 sequence, +/-78 raw step, abs steering-rate <=100, and 35-ms active timeout. Ordinary Toyota modes still cannot TX B6.",
+    "panda_debug_boundary": "ALLOW_DEBUG-only Toyota TSS3_DEV_LATERAL installs a dedicated bus0/DLC32/0x0B6-only TX whitelist, consumes 0x025 steering rate, 0x00F synchronization and 0x08A B3[3] cruise latch, requires controls_allowed for active ID11, permits inactive release, and enforces +/-1745 raw, strict +1 sequence, +/-78 raw step, abs steering-rate <=100 and 35-ms active timeout. Ordinary Toyota modes still reject B6.",
     "production_output_authorized": false,
+    "reintroduced_in_nested_opendbc_commit": "c98872c61ff9e1657bd3a54a9f2168b1b3d59d7d",
+    "reintroduced_in_parent_kai_openpilot_commit": "5fee63cfc0d570f3af0add2b2a1e9e66de3bc49d",
     "release_branch_allowed": false,
     "removed_in_nested_opendbc_commit": "b9e86924b96eac248b6b9e6bcf0d4dfdc95b62d0",
     "removed_in_parent_kai_openpilot_commit": "abf3ca70a713d21b88a0cd0241f0650a3d96db7a",
-    "runtime_selectable": false,
-    "status": "historical-runtime-removed"
+    "runtime_gates": [
+      "ToyotaEphemeralSecOCBridge=true",
+      "ToyotaEphemeralSecOCBridgeF181=8965F3307000 and byte-match against current EPS firmware inventory",
+      "ToyotaTss3DevLateral=true",
+      "no preferred SecOCKey loaded",
+      "stock longitudinal control disabled",
+      "Toyota TSS3 platform and non-release build"
+    ],
+    "runtime_selectable": true,
+    "sender": "One zero-MAC28 B6 per control cycle on Panda bus0. Live 0x00F supplies the trip/reset epoch; the sender owns message8 and modulo-64 application sequence locally, clamps target to +/-1745 raw and each step to +/-78 raw, ramps to zero before inactive ID0, and reports the actual slew-limited transmitted angle.",
+    "status": "development-runtime-present-default-off",
+    "target_binding": "exact TOYOTA_CAMRY_TSS3 + exact EPS F181 8965F3307000 + non-release build + current bus0/CAN0-CAN2 topology"
   },
   "generated_com_tx": {
     "first_five": [
@@ -222,22 +227,22 @@
       "0x127 P/R/N/D/B",
       "0x51E Ready 0/1"
     ],
-    "controller_boundary": "computes a shadow B6 application/safety decision but returns zero CAN",
-    "current_nested_opendbc_commit": "525ee987f32167f7e579a4cc773d0d4a8ab7794b",
-    "current_parent_kai_openpilot_commit": "1f26280ac6f2a0733877a08540aa3336d0a50d47",
+    "controller_boundary": "default path computes a shadow B6 application/safety decision and returns zero CAN; exact-F181 non-release development gating can arm one zero-MAC28 B6 per control cycle after an external EPS acceptance bridge is installed",
+    "current_nested_opendbc_commit": "8da4bb9bb62ecbef0a24653e4aecdaedc514b046",
+    "current_parent_kai_openpilot_commit": "6dd58cf5eb2fd47a568f85ce83542ee6aebf176b",
     "exact_platform": "TOYOTA_CAMRY_TSS3",
     "identity_binding": "byte-exact EPS F181 02||8965F3307000[16]||8A3113303100[16], with present FRC/Brake identities required not to conflict",
     "lateral_request_observation": "passive 0x08A Target Lateral ID / target-angle / modulo-64 sequence; exact F33 neither accepts 0x08A as normal Rx nor lists it among the five generated-COM Tx IDs",
     "nested_opendbc_commit": "ab60fd95d8a7b566e10ed1cf59738292f3498932",
-    "panda_boundary": "F33 C candidate helper is ALLOW_DEBUG-only, not called from toyota_tx_hook, 0x0B6 is absent from Toyota TX whitelists, and CarParams remains SafetyModel.noOutput",
+    "panda_boundary": "ordinary Toyota modes still reject 0x0B6; exact-F181 non-release development gating selects the ALLOW_DEBUG TSS3_DEV_LATERAL bus0/DLC32/B6-only whitelist with cruise-latch controls_allowed and exact F33 limits",
     "parent_kai_openpilot_commit": "d7d7dfd7e49961e9d35eb7a7681e8756ceee8d04",
     "production_output_authorized": false,
     "remaining_live_gates": [
-      "identify the observed Bus-4 0x08A producer and exact SecOC/security ownership",
-      "identify which exact external/local state selects or modulates F33's B6-independent D0218/CC60/CC50 assist path during stock LTA/LCA",
-      "decide whether protected B6 is the intended openpilot actuation interface; if so recover its signing/freshness/suppression contract separately from the stock-LTA path",
-      "driver override and motor-current response policy",
-      "live 0x351/0x394/0x4A3 availability and fault-policy transitions"
+      "install and positively verify one exact-F33 receiver-acceptance path: persistent Gate-2 CodeFlash patch or reset-to-stock RAM bridge",
+      "validate the explicit-zero B6 application candidate and bounded companion defaults at inactive/zero angle before any nonzero request",
+      "validate driver override, motor-current response, timeout/release, source coexistence or suppression, and inhibit/fault/recovery behavior on the stationary vehicle",
+      "for the RAM option, recover a reliable application-mode deployment/execution/heartbeat path; card.py currently consumes attestation parameters but does not deploy or heartbeat-check the resident",
+      "separately identify the Bus-4 0x08A signer and FRC private request transport if reproducing Toyota's stock architecture; this attribution does not block direct development B6 actuation"
     ],
     "static_presence_bounded_carstate": [
       "0x4A3",

@@ -207,8 +207,8 @@ check("exact F33 keeps B6 and diagnostics on its sole application CAN controller
 check("physical repin places the steering family on the CAN0/CAN2 relay pair",
       "CAN0/CAN2 pair" in capture["relay_topology"])
 check("the bounded development ingress is B6 DLC32 on relay-correct Panda bus 0",
-      "relay-correct bus0 topology" in port["historical_target_binding"]
-      and "bus0/32-byte 0x0B6-only TX whitelist" in port["panda_debug_test_boundary"]
+      "bus0/CAN0-CAN2 topology" in port["target_binding"]
+      and "bus0/DLC32/0x0B6-only TX whitelist" in port["panda_debug_boundary"]
       and port["production_output_authorized"] is False)
 
 print(f"\n{passed} passed, {failed} failed")

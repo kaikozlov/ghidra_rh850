@@ -141,7 +141,7 @@ check(
         "-8.23..+2.85 N.m",
     )),
 )
-check("priority queue marks the read-only scaffold complete", "Read-only opendbc scaffold is complete" in priorities)
+check("priority queue records the current default-off development cutover", "development B6 path is present but default-off" in priorities)
 
 for token in (
     "control contract",

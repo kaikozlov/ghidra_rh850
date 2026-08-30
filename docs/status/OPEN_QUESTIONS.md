@@ -1087,6 +1087,25 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   pre-authentication + chassis re-signing remains formally open but
   downweighted. Canonical §47.
 
+  The captured native Bus-1 boundary is now explicit. Both retained relay-correct
+  drives contain the same 22 periodic camera/radar-domain streams:
+  `0x020/12`, `0x123/16`, `0x160/32`, `0x180..0x18B/64`, `0x18C/48`,
+  `0x1A0/48`, `0x200/64`, `0x201/64`, `0x230/64`, `0x440/32`, and
+  `0x450/32`. `0x180..0x182` contain recovered eight-slot perception-object
+  records at the FRC 0.01 m range scale; per-ID FRC-versus-radar/fusion TX
+  ownership and most remaining fields are not named. Neither the 28-byte
+  `0x08A` application nor consecutive FFD `5282` appears on native Bus 1.
+  Therefore we know the FRC computes request `5282/5631` and distinct
+  winner/grant state `5285/57DE/5265`, but not which private message carries
+  that state into the chassis signer.
+
+  This stock-architecture attribution is **not a blocker for the independent
+  development B6 ingress**. VAR-102 records the current default-off sender and
+  Panda safety path; its next gate is exact receiver-acceptance deployment and
+  bounded stationary application/safety validation. Resolving OQ-054 remains
+  required for a stock-compatible signing architecture, not for the first
+  patched/bridged B6 development probe.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 

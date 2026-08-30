@@ -404,7 +404,7 @@
     ],
     "tss3_port": {
       "path": "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
-      "sha256": "c55199d69af953ade1f7c543d8b61a2935cb7ba941746bde7162ad358e7ea685"
+      "sha256": "fb8f118cc8e69f8a69b65be966fb55c128218ab203ff3a816a894845f53cb2d4"
     }
   }
 }

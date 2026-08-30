@@ -623,11 +623,15 @@ def main() -> int:
         # Prefer the echo that is strongest in the weaker of the two drives, rather
         # than whichever field sorts first lexicographically.
         e = max(angle_echoes, key=lambda x: min(abs(x["drive_a"]["angle_r"]), abs(x["drive_b"]["angle_r"])))
-        echo_note = (f" The strongest reproduced lagging family is a steering-angle echo: "
-                     f"{e['field']} tracks 0x025 angle at r={e['drive_a']['angle_r']}"
-                     f"({e['drive_a']['lag_ms']} ms) and r={e['drive_b']['angle_r']}"
-                     f"({e['drive_b']['lag_ms']} ms), so bus1 demonstrably carries delayed "
-                     f"steering feedback, not commands.")
+        echo_note = (f" Within the selected Class-L analysis windows, the strongest lagging "
+                     f"family is {e['field']}, which tracks 0x025 angle at "
+                     f"r={e['drive_a']['angle_r']}({e['drive_a']['lag_ms']} ms) and "
+                     f"r={e['drive_b']['angle_r']}({e['drive_b']['lag_ms']} ms). CORR-138 "
+                     f"shows this is window-restricted rather than a standing field identity: "
+                     f"full-drive 0x160[22]s16be correlation collapses to "
+                     f"+0.086104/-0.091204. Preserve only the bounded observation that Bus 1 "
+                     f"carries plant-shaped data; do not name a standing SAS echo or command."
+                     )
 
     out = {
         "schema": "camry-2026-bus1-field-leadlag-v2",
@@ -669,10 +673,12 @@ def main() -> int:
                 f"field in these captures behaves like a lateral target/planner input for the EPS."
             ) + echo_note,
             "lagging_classification": (
-                f"observed/deterministic: {len(reproduced_lagging)} reproduced fields lag the motor proxy "
-                f"(peak lag <= -{LEAD_MIN_MS} ms in both drives), all feedback-like; the drive-B "
-                f"speed-matched cruise control region shows the strongest of them are equally present "
-                f"outside Class-L, i.e. generic steering/torque echoes, not Class-L-gated commands."
+                f"observed/deterministic within the selected Class-L windows: {len(reproduced_lagging)} "
+                f"reproduced fields lag the motor proxy (peak lag <= -{LEAD_MIN_MS} ms in both drives). "
+                f"The drive-B speed-matched cruise control region shows the strongest correlations are "
+                f"also present outside Class-L. This supports generic plant-shaped traffic rather than "
+                f"a Class-L-gated command; CORR-138 forbids promoting window-local 0x160 correlations "
+                f"to a standing steering-angle-echo identity."
             ),
             "control_region_boundary": (
                 "bounded: drive A has zero local speed-matched cruise control grid points (its cruise "

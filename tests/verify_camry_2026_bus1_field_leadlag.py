@@ -39,7 +39,7 @@ def sha(path: Path) -> str:
 RAW = REPO / "targets/camry-2026/raw-20260827"
 CENSUS_SHA = "355ea5b408442a541bd946d21c3e85b0fa4d9e924474d3223189cb37894ee9fc"
 ART = REPO / "data/generated/camry_2026_bus1_field_leadlag.json"
-ART_SHA = "30a0acf9758d0b22f8dbc78a4ca47ee9febd1597350a3b3ed396762c3c322bfc"
+ART_SHA = "75a8f2a3c1758499c6c66a938c48d810991a8f28f4d87a8aaf0c0b4ddc7e1b55"
 BUILD = REPO / "tools/analyze_camry_2026_bus1_field_leadlag.py"
 CENSUS = REPO / "data/generated/camry_2026_cruise_lta_edge_census.json"
 REGENERATE = "--regenerate" in sys.argv[1:]
@@ -49,7 +49,7 @@ REGENERATE = "--regenerate" in sys.argv[1:]
 # tracked result immediately, without paying the ~12-minute exhaustive recomputation on
 # every unrelated test run.  ``--regenerate`` remains the byte-exact proof path.
 EXPECTED_LOGIC_SHA = {
-    BUILD: "68d02237b84cc6c5c620ac579bb17d728989fea5b04ab6ee8a69a1894161b075",
+    BUILD: "615742ee5480554726600fe1e4fe62a27d8bc2cd0b064e55009e5bf955d3e931",
     REPO / "tools/analyze_camry_2026_relay_capture.py": "0e979b8e579994ca93457f4c0c0b6240a3b25bbc36fd7c192ef4ec5978cf790f",
     REPO / "tools/toyota_route_opendbc_common.py": "1eab32c06d22c28305a89e14f8ba4c24af434461f1f2c270770c6d305fde8ec7",
 }
@@ -163,13 +163,13 @@ s8 = lag_by_field["0x160[22]s8"]
 check("0x160[22]s8 lags motor in both drives (A +0.7058@-500ms, B +0.5479@-375ms)",
       s8["drive_a"]["motor_r"] == 0.7058 and s8["drive_a"]["motor_peak_lag_ms"] == -500
       and s8["drive_b"]["motor_r"] == 0.5479 and s8["drive_b"]["motor_peak_lag_ms"] == -375)
-check("0x160[22]s8 is a steering-angle echo (A r=+0.9963@-75ms, B r=+0.8597@-100ms vs 0x025 angle)",
+check("0x160[22]s8 has high window-local angle correlation (not a standing identity)",
       s8["drive_a"]["angle_r"] == 0.9963 and s8["drive_a"]["angle_lag_ms"] == -75
       and s8["drive_b"]["angle_r"] == 0.8597 and s8["drive_b"]["angle_lag_ms"] == -100)
-check("0x160[22]s8 equally correlates with motor outside Class-L in drive-B control (generic echo)",
+check("0x160[22]s8 motor correlation also appears outside Class-L in drive-B control",
       s8["drive_b"]["control_motor_r"] == 0.7844)
 echo = {e["field"]: e for e in comb["angle_echo_fields"]}
-check("angle-echo census pins seven delayed feedback encodings including the 0x160[22] family",
+check("window-local angle-correlation census retains seven candidate encodings",
       len(echo) == 7 and "0x160[22]s8" in echo and "0x160[22]s16be" in echo
       and echo["0x160[22]s8"]["drive_a"]["angle_r"] == 0.9963
       and echo["0x160[22]s8"]["drive_b"]["angle_r"] == 0.8597)
@@ -191,6 +191,8 @@ check("VAR-068 0x181[35:37] s16le stays weak and inconsistent over full windows"
 
 print("== interpretation boundary ==")
 interp = art["interpretation"]
+check("lag interpretation preserves CORR-138 standing-identity correction",
+      "CORR-138" in interp["lagging_classification"] and "standing steering-angle-echo identity" in interp["lagging_classification"])
 check("production output stays unauthorized", interp["production_output_authorized"] is False)
 check("exhaustive negative stated", "0 reproduce as LEADING" in interp["exhaustive_negative"] or
       comb["reproduced_leading_fields"] == [])

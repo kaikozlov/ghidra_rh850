@@ -356,8 +356,9 @@ def main() -> int:
             ),
             "middle_hop": (
                 "FRC builds FFD 5282/5631 in camera RAM (ID + milliradian pinion + "
-                "assist + damping) from vision objects plus plant observers (SAS "
-                "0x025 / 0x160 echo inbound, EPS torque 0x030). The consecutive 5282 "
+                "assist + damping) from vision objects plus plant observers (including "
+                "SAS 0x025 and EPS torque 0x030; 0x160 remains unassigned after CORR-138). "
+                "The consecutive 5282 "
                 "layout ID||pinion||assist is absent from sniffed Bus-1 CAN. A Bus-4 "
                 "origin truncates damping, packs ID/pinion/assist as 0x08A B21/B18/B24, "
                 "and SecOC-wraps it. Measured angle on the camera bus is inbound plant "
@@ -367,9 +368,11 @@ def main() -> int:
                 "Old comma 8-byte 0x180..0x19F radar-track geometry does not transfer."
             ),
             "0x160": (
-                "0x160/32 is delayed 0x025 steering-angle echo at byte 22 (VAR-074): "
-                "plant measured pinion onto the ADAS bus so FRC can see the wheel. "
-                "Direction is SAS -> FRC, not FRC -> EPS."
+                "0x160/32 remains a roughly 40 Hz camera/radar-domain stream. CORR-138 "
+                "rejects the former standing 0x025 steering-angle-echo identity: the high "
+                "0x160[22] correlation was Class-L-window-restricted, while full-drive "
+                "correlation collapses to r=+0.086104/-0.091204. No per-ID FRC-versus-radar "
+                "transmitter or standing field identity is assigned."
             ),
             "0x183_0x18C": (
                 "Different schemas: 0x183/0x184 carry typed records with float-shaped "

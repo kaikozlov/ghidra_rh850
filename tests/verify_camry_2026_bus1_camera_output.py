@@ -100,7 +100,7 @@ for drive in ("drive_a", "drive_b"):
 cl = art["classification"]
 check("not a 1:1 0x08A copy", "absent" in cl["not_08A"])
 check("middle hop: 5282 not on native Bus 1", "absent from sniffed Bus-1" in cl["middle_hop"])
-check("0x160 is inbound SAS echo", "SAS -> FRC" in cl["0x160"])
+check("0x160 standing SAS echo is explicitly rejected", "rejects the former standing" in cl["0x160"] and "CORR-138" in cl["0x160"])
 check("old 8-byte radar DBC does not transfer", "does not transfer" in cl["not_tss2_8byte_radar_dbc"])
 check("slot bytes 2-6 remain unmapped", "bytes 2-6" in cl["remainder"])
 
