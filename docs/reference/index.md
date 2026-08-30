@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 407 · Corrections: 145 · Open questions: 54 · Docs: 114 · Suites: 215
+Findings: 408 · Corrections: 145 · Open questions: 54 · Docs: 114 · Suites: 215
 
 ## Reading this index
 
@@ -222,6 +222,7 @@ Findings: 407 · Corrections: 145 · Open questions: 54 · Docs: 114 · Suites: 
 | <a id="finding-secoc-078"></a>**SECOC-078** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_secoc_manifest_patcher.py`, `tests/verify_ram_exec_variant_requirements.py` | — |
 | <a id="finding-secoc-079"></a>**SECOC-079** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_secoc_manifest_patcher.py`, `tests/verify_camry_8965F3307000.py` | — |
 | <a id="finding-secoc-080"></a>**SECOC-080** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_camry_8965F3307000.py` | — |
+| <a id="finding-secoc-081"></a>**SECOC-081** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_secoc_manifest_patcher.py` | — |
 | <a id="finding-store-001"></a>**STORE-001** | [docs/storage/dataflash.md](../storage/dataflash.md) | — | `tests/verify_dataflash_layout.py` | — |
 | <a id="finding-store-002"></a>**STORE-002** | [docs/storage/dataflash.md](../storage/dataflash.md) | — | `tests/verify_dataflash_layout.py` | — |
 | <a id="finding-store-003"></a>**STORE-003** | [docs/storage/dataflash.md](../storage/dataflash.md) | — | `tests/verify_dataflash_semantics.py` | — |
