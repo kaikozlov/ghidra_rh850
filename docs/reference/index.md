@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 403 · Corrections: 142 · Open questions: 54 · Docs: 114 · Suites: 215
+Findings: 404 · Corrections: 143 · Open questions: 54 · Docs: 114 · Suites: 215
 
 ## Reading this index
 
@@ -218,6 +218,7 @@ Findings: 403 · Corrections: 142 · Open questions: 54 · Docs: 114 · Suites: 
 | <a id="finding-secoc-074"></a>**SECOC-074** | [docs/security/secoc/application-chain.md](../security/secoc/application-chain.md) | [key-recovery-assessment](../security/secoc/key-recovery-assessment.md), [PRIORITIES](../status/PRIORITIES.md), [techstream](../tooling/techstream.md), [camry-2026-live-baseline](../variants/camry-2026-live-baseline.md) (+1) | `tests/verify_t0035_faci_backend_external.py` | — |
 | <a id="finding-secoc-075"></a>**SECOC-075** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_secoc_manifest_patcher.py`, `tests/verify_ephemeral_runtime_live_installer.py` | — |
 | <a id="finding-secoc-076"></a>**SECOC-076** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_secoc_manifest_patcher.py`, `tests/verify_ram_exec_variant_requirements.py` | — |
+| <a id="finding-secoc-077"></a>**SECOC-077** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_secoc_manifest_patcher.py` | — |
 | <a id="finding-store-001"></a>**STORE-001** | [docs/storage/dataflash.md](../storage/dataflash.md) | — | `tests/verify_dataflash_layout.py` | — |
 | <a id="finding-store-002"></a>**STORE-002** | [docs/storage/dataflash.md](../storage/dataflash.md) | — | `tests/verify_dataflash_layout.py` | — |
 | <a id="finding-store-003"></a>**STORE-003** | [docs/storage/dataflash.md](../storage/dataflash.md) | — | `tests/verify_dataflash_semantics.py` | — |
@@ -628,6 +629,7 @@ Findings: 403 · Corrections: 142 · Open questions: 54 · Docs: 114 · Suites: 
 | <a id="correction-corr-140"></a>**CORR-140** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | yes |
 | <a id="correction-corr-141"></a>**CORR-141** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md), [exploit/common/README.md](../../exploit/common/README.md) | yes |
 | <a id="correction-corr-142"></a>**CORR-142** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
+| <a id="correction-corr-143"></a>**CORR-143** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 
 ## Document registry
 
