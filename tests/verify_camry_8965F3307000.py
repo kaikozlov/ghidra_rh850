@@ -75,6 +75,16 @@ def section_codeflash() -> int:
     check('authenticated geometry exact', stages['RequestDownload']['data_hex'] == '01460100febf000000001000' and stages['RoutineControl 0x10F0']['data_hex'] == '4500febf000000001000')
     check('callback trigger exact', stages['RoutineControl 0xFF00 callback trigger']['data_hex'] == '3101ff004500000e000000008000')
 
+    print('\n== 2026-08-30 collector-fixed zero-write preflight ==')
+    live_pf_dir = REPO / 'targets/camry-2026/raw-20260830/secoc-patch-preflight-f33-collector-fixed'
+    live_run = json.loads((live_pf_dir / 'run.json').read_text())
+    live_pf = json.loads((live_pf_dir / 'preflight.json').read_text())
+    live_events = [json.loads(line) for line in (live_pf_dir / 'telemetry.ndjson').read_text().splitlines() if line.strip()]
+    check('collector-fixed preflight completed with telemetry', live_run['status'] == 'payload-complete' and live_run['telemetry']['payload_success'] and live_run['execution']['handler_done'] and live_run['execution']['telemetry_frames'] == live_run['telemetry']['event_count'] == 35)
+    check('collector-fixed preflight is exact-target and APPLY-ready', live_pf['apply_ready'] and live_pf['boot_crc_valid'] and live_pf['f181_hex'] == '023839363546333330373030300000000038413331313333303331303000000000' and live_pf['boot_f181_hex'] == '02' + '21' * 32 and live_pf['route'] == {'bus': 0, 'cpu_index': 0, 'elm327_param': 1, 'uds_variant': 'old'})
+    check('collector-fixed live observations exactly match offline image', live_pf['config_mismatches'] == [] and live_pf['observation_mismatches'] == [] and live_pf['observed'] == live_pf['expected'] == {'crc_prefix': 0x273C8914, 'crc_residue': 0xFFFFFFFF, 'fixup_stored': 0xD8C376EB, 'patch_observed': 0xD1E0})
+    check('collector-fixed telemetry reaches SUCCESS and DONE', any(e.get('name') == 'SUCCESS' for e in live_events) and any(e.get('name') == 'DONE' for e in live_events))
+
     print('\n== deterministic static artifact ==')
     with tempfile.TemporaryDirectory() as td:
         out = Path(td) / 'camry.json'
