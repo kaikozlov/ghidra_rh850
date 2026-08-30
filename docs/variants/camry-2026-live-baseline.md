@@ -961,50 +961,32 @@ Until that live causal step, `SecOC bypass works on F33` is not promoted beyond 
 recovered Gate-2 semantics.
 
 A 2026-08-30 sequence of live validate-only attempts exposed several independent
-host/tooling defects before any flash write. The first attempt matched exact application
-F181 and passed boot SecurityAccess plus RID `0x10F0`, but the generic RAM-exec helper
-had sent DID `0x0203 = 01 00 00 00 00` merely because `cpu_index=0`. Retained exact-F33
-acquisition transcripts prove this ECU is the **old** boot stack and accepts
-`0x0203 = 00 00 00 00 00`; `01 00 00 00 00` is the newer-stack CPU0 offset selector.
-The shared bootstrap now derives DID `0x0203` from **UDS stack variant + CPU index**,
-while RequestDownload memory ID remains independently CPU-indexed (`1` for CPU0, `0`
-for CPU1). Later corrected-DID runs still produced zero telemetry, so the DID bug is
-verified but the earlier claim that it caused the telemetry loss is superseded by
-CORR-142.
+tooling defects before any flash write. The old-stack DID `0x0203` selector was wrong,
+the generic patcher had been linked at VMA 0 despite absolute intra-payload addresses,
+the shared FF00 path omitted the retained pre-trigger Panda RX clear/10-ms settle, the
+generic callback had transferred unverified boot-RAM helper/scratch assumptions, and the
+shared handoff duplicated a retained successful helper. Each issue is fixed on its own
+static or retained-success evidence.
 
-The same investigation found two further host defects. First, the generic patcher had
-been linked at VMA 0 despite GCC materializing absolute intra-payload call addresses;
-its disassembly therefore contained low targets such as `0x154`/`0x196`. The builder
-now links at the authenticated callback VMA `FEBF0000` while preserving entry offset 0.
-Second, a later run with that fix and the exact F33 asynchronous handoff proved
-application F181, boot reappearance, exact boot F181 `02 || 32*0x21`, boot
-SecurityAccess, upload, and RID `0x10F0`, yet still emitted zero telemetry. Comparing
-the shared runner against the successful 2026-08-26 exact-F33 acquisition revealed a
-remaining trigger-path difference: the proven acquisition clears Panda's host RX ring
-with `can_clear(0xFFFF)` and waits 10 ms immediately before the multi-frame FF00
-request. The current `opendbc.car.isotp.isotp_send()` accepts the first matching
-`0x7A9` frame as flow-control, so stale diagnostic backlog can corrupt this one-shot
-trigger. The shared runner now mirrors that exact clear+settle sequence. Its live
-causal confirmation failed in the next short NRTD retry: exact app/boot identity, boot
-SecurityAccess and authenticated `0x10F0` still succeeded, but telemetry remained zero
-and `apply_ready=false`. Comparing the emitted callback with the successful Calvin payload
-then found one more transferred assumption before the first CAN witness: `runtime_init()`
-still zeroed community scratch words `FEBF1F00/FEBF1F04`. Those words lie outside the
-authenticated 4-KiB package and are not proven free on F33. The generic callback now
-performs **no bootloader-RAM mutation before its first `0x7A9` transmit**. No persistent
-flash write has occurred. The retained runs are under `targets/camry-2026/raw-20260830/`.
+The critical telemetry interpretation changed afterward. Current Panda Python returns raw
+CAN rows as **3-tuples `(address, data, bus)`**, but `execute_ram_payload()` required
+`len(row) >= 4`; it therefore discarded every current Panda frame before testing for
+`0x7A9`. Consequently, all earlier shared-run `telemetry_frames=0` results are invalid as
+payload-execution negatives and cannot establish which of the independently found defects
+was causal. The collector now accepts length>=3 and decodes address from field 0 and
+data/bus from the last two fields, retaining compatibility with wider historical tuples.
 
-A decisive one-word control then separated payload/runtime theories from host state. The exact
+A positive control independently proves the current physical/software route. The exact
 retained Aug-26 Calvin payload was changed at only three plaintext bytes so its loop upper
-bound became zero; package callback/descriptor/CRC/CMAC remained valid. The derivative
-still emitted zero frames through the duplicate shared handoff, but the **actual Aug-26 host
-path** (`tsk.lib.programming.enter_programming_bootloader`) on the current post-repin
-**Panda bus 0** returned address `0x00000000` / word `0x06E0001F` in **6 ms** with zero SPI
-errors. On-device hashes confirm opendbc ISO-TP/UDS, Panda Python, Panda firmware source,
-and `tsk/lib/programming.py` match the working Aug-26 versions. The repin, bus0 callback
-transport, and dependency versions are therefore exonerated. The shared runner now delegates
-the stateful boot transition to the retained field-proven helper and preserves its boot F181,
-EXTENDED/SID23, and final clean programming-ladder choreography; see SECOC-078/CORR-144.
+bound became zero; callback/descriptor/CRC/CMAC remained valid. Through the retained
+Aug-26 host lifecycle on the current post-repin **Panda bus 0**, it returned address
+`0x00000000` / CodeFlash word `0x06E0001F` in **6 ms** with zero SPI errors. On-device
+hashes confirm opendbc ISO-TP/UDS, Panda Python/submodule, and `tsk/lib/programming.py`
+match the working Aug-26 versions. The repin, bus0 callback transport, and dependency
+stack are therefore exonerated. The shared runner now also reuses that retained handoff
+helper, but CORR-145 withdraws the earlier claim that the duplicate handoff itself caused
+the zero counts because that comparison used the blind collector. See SECOC-078/079 and
+CORR-144/145. No persistent flash write has occurred.
 
 For the lateral project this changes ordering: the persistent development patch can
 remove signing from the first-actuation critical path. The RAM-only signer work in
@@ -2821,6 +2803,6 @@ Canonical evidence: `data/generated/camry_2026_08a_signer_continuity.json`;
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144)
+- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145)
 <!-- knowledge-cross-references:end -->

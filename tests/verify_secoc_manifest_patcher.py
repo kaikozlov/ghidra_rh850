@@ -236,6 +236,7 @@ link_args = shellcode_compile_args("v850-elf-gcc", "shellcode.c", "shellcode.elf
 check("patcher shellcode links at authenticated callback VMA", f"-Wl,-Ttext=0x{PAYLOAD_LOAD_ADDR:08X}" in link_args and "-Wl,-Ttext=0" not in link_args)
 ram_exec_source = (REPO / "exploit" / "common" / "ram_exec.py").read_text(encoding="utf-8")
 check("payload telemetry accepts relay-mate Panda bus visibility", "bus != route.bus" not in ram_exec_source and "can_addr != RX_ADDR" in ram_exec_source)
+check("payload telemetry accepts current Panda 3-tuple rows", "if len(row) < 3:" in ram_exec_source and "if len(row) < 4:" not in ram_exec_source)
 
 print("\n== fail-closed APPLY structure ==")
 apply_c = (REPO / "exploit" / "patcher" / "apply.c").read_text(encoding="utf-8").lower()
