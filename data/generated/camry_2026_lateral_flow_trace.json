@@ -1,0 +1,1224 @@
+{
+ "drives": {
+  "drive_a": {
+   "a08A_byte_census": {
+    "B26_freshness_counter": {
+     "break_count": 175,
+     "breaks_first5": [
+      {
+       "next": 0,
+       "prev": 0,
+       "ts_s": 53.925039
+      },
+      {
+       "next": 0,
+       "prev": 0,
+       "ts_s": 53.955741
+      },
+      {
+       "next": 0,
+       "prev": 0,
+       "ts_s": 53.97531
+      },
+      {
+       "next": 0,
+       "prev": 0,
+       "ts_s": 54.004905
+      },
+      {
+       "next": 0,
+       "prev": 0,
+       "ts_s": 54.025309
+      }
+     ],
+     "step_fraction_plus1_mod64": 0.991511
+    },
+    "active_flags": {
+     "B22[4]": {
+      "set_fraction_b21_11": 1.0
+     },
+     "B23[5]": {
+      "set_fraction_b21_11": 0.582043
+     },
+     "B4[7]": {
+      "set_fraction_b21_11": 1.0
+     }
+    },
+    "cruise_latch_B3_3_set_fraction": 0.088964,
+    "damping_gain_absence": {
+     "B24_distinct": 3,
+     "conclusion": "B24 is the only gain-shaped byte (recorder assist alphabet); no unnamed 0x08A byte carries a {0/50/100}-style 0.01-LSB gain alphabet, so the recorder's damping field has no wire carrier on 0x08A",
+     "unnamed_bytes_distinct": {
+      "B0": 1,
+      "B1": 1,
+      "B12": 256,
+      "B13": 1,
+      "B14": 1,
+      "B15": 1,
+      "B16": 1,
+      "B2": 1,
+      "B20": 3,
+      "B22": 2,
+      "B23": 2,
+      "B25": 1,
+      "B27": 1,
+      "B4": 2,
+      "B5": 1,
+      "B6": 2,
+      "B7": 3
+     }
+    },
+    "frames": 20615,
+    "latch_mirror_agreement": {
+     "B20[7]": 0.999418,
+     "B6[0]": 1.0,
+     "B7[0]": 1.0
+    },
+    "per_byte": {
+     "B0": {
+      "distinct": 1,
+      "values": [
+       0
+      ]
+     },
+     "B1": {
+      "distinct": 1,
+      "values": [
+       0
+      ]
+     },
+     "B10": {
+      "distinct": 5,
+      "values": [
+       0,
+       31,
+       39,
+       40,
+       42
+      ]
+     },
+     "B11": {
+      "distinct": 9,
+      "max": 255,
+      "min": 0
+     },
+     "B12": {
+      "distinct": 256,
+      "max": 255,
+      "min": 0
+     },
+     "B13": {
+      "distinct": 1,
+      "values": [
+       127
+      ]
+     },
+     "B14": {
+      "distinct": 1,
+      "values": [
+       255
+      ]
+     },
+     "B15": {
+      "distinct": 1,
+      "values": [
+       0
+      ]
+     },
+     "B16": {
+      "distinct": 1,
+      "values": [
+       127
+      ]
+     },
+     "B17": {
+      "distinct": 1,
+      "values": [
+       255
+      ]
+     },
+     "B18": {
+      "distinct": 65,
+      "max": 255,
+      "min": 0
+     },
+     "B19": {
+      "distinct": 256,
+      "max": 255,
+      "min": 0
+     },
+     "B2": {
+      "distinct": 1,
+      "values": [
+       0
+      ]
+     },
+     "B20": {
+      "distinct": 3,
+      "values": [
+       0,
+       64,
+       192
+      ]
+     },
+     "B21": {
+      "distinct": 3,
+      "values": [
+       0,
+       11,
+       18
+      ]
+     },
+     "B22": {
+      "distinct": 2,
+      "values": [
+       0,
+       16
+      ]
+     },
+     "B23": {
+      "distinct": 2,
+      "values": [
+       0,
+       32
+      ]
+     },
+     "B24": {
+      "distinct": 3,
+      "values": [
+       0,
+       50,
+       100
+      ]
+     },
+     "B25": {
+      "distinct": 1,
+      "values": [
+       0
+      ]
+     },
+     "B26": {
+      "distinct": 64,
+      "max": 63,
+      "min": 0
+     },
+     "B27": {
+      "distinct": 1,
+      "values": [
+       0
+      ]
+     },
+     "B28": {
+      "distinct": 256,
+      "max": 255,
+      "min": 0
+     },
+     "B29": {
+      "distinct": 256,
+      "max": 255,
+      "min": 0
+     },
+     "B3": {
+      "distinct": 2,
+      "values": [
+       0,
+       8
+      ]
+     },
+     "B30": {
+      "distinct": 256,
+      "max": 255,
+      "min": 0
+     },
+     "B31": {
+      "distinct": 256,
+      "max": 255,
+      "min": 0
+     },
+     "B4": {
+      "distinct": 2,
+      "values": [
+       0,
+       128
+      ]
+     },
+     "B5": {
+      "distinct": 1,
+      "values": [
+       0
+      ]
+     },
+     "B6": {
+      "distinct": 2,
+      "values": [
+       0,
+       45
+      ]
+     },
+     "B7": {
+      "distinct": 3,
+      "values": [
+       18,
+       71,
+       146
+      ]
+     },
+     "B8": {
+      "distinct": 9,
+      "max": 255,
+      "min": 0
+     },
+     "B9": {
+      "distinct": 256,
+      "max": 255,
+      "min": 0
+     }
+    }
+   },
+   "absent_carriers": {
+    "0x0B6": {
+     "src0": 0,
+     "src1": 0,
+     "src2": 0,
+     "total": 0
+    },
+    "0x131": {
+     "src0": 0,
+     "src1": 0,
+     "src2": 0,
+     "total": 0
+    },
+    "0x2E4": {
+     "src0": 0,
+     "src1": 0,
+     "src2": 0,
+     "total": 0
+    },
+    "0x351": {
+     "src0": 0,
+     "src1": 0,
+     "src2": 0,
+     "total": 0
+    },
+    "0x394": {
+     "src0": 0,
+     "src1": 0,
+     "src2": 0,
+     "total": 0
+    },
+    "0x4A3": {
+     "src0": 0,
+     "src1": 0,
+     "src2": 0,
+     "total": 0
+    },
+    "0x4C8": {
+     "src0": 0,
+     "src1": 0,
+     "src2": 0,
+     "total": 0
+    }
+   },
+   "control_carriers": {
+    "0x030": {
+     "src0": 51512,
+     "src2": 51514
+    },
+    "0x081": {
+     "src0": 17172,
+     "src2": 17174
+    }
+   },
+   "delayed_ack": {
+    "classification": "zero delayed persistent flips of any class on either clean onset; no grant/ack announcement exists on the captured Bus-4 broadcast",
+    "definition": "per byte: >=95%-persistent value in each +0.5..+5.0 s window (0.5 s steps) vs the [-4,-1] s pre-window; DLC-32 bus-0 streams",
+    "onsets": {
+     "id11_onset": {
+      "delayed_persistent_flips": [],
+      "flip_count": 0,
+      "onset_s": 371.48431
+     }
+    }
+   },
+   "id11_interval": {
+    "duration_s": 16.119256,
+    "end_s": 387.603566,
+    "frames_bus0": 646,
+    "start_s": 371.48431
+   },
+   "incoming_frames": 1656656,
+   "p19c_phase_refutation": {
+    "definition": "0x19C bus-0 median inter-arrival per 30 s bucket; fast < 55 ms",
+    "id11_contained_in_fast_phase": true,
+    "phases": [
+     {
+      "end_s": 263.945429,
+      "mode": "slow",
+      "start_s": 53.945429
+     },
+     {
+      "end_s": 503.945429,
+      "mode": "fast",
+      "start_s": 263.945429
+     },
+     {
+      "end_s": 623.945429,
+      "mode": "slow",
+      "start_s": 503.945429
+     }
+    ],
+    "present": true
+   },
+   "plant_closure": {
+    "b_style_30s_subinterval_word_vs_sas_r": [
+     {
+      "end_s": 387.603566,
+      "n": 645,
+      "pearson_r": 0.866216,
+      "start_s": 371.48431
+     }
+    ],
+    "best_lag": {
+     "lag_ms": 50,
+     "n": 646,
+     "pearson_r": 0.867905,
+     "slope_sas_ct_per_word": 0.047712
+    },
+    "id11_word_vs_sas_lag_table": [
+     {
+      "lag_ms": -50,
+      "n": 646,
+      "pearson_r": 0.864612,
+      "slope_sas_ct_per_word": 0.046724
+     },
+     {
+      "lag_ms": -25,
+      "n": 646,
+      "pearson_r": 0.865859,
+      "slope_sas_ct_per_word": 0.04697
+     },
+     {
+      "lag_ms": 0,
+      "n": 646,
+      "pearson_r": 0.867767,
+      "slope_sas_ct_per_word": 0.047301
+     },
+     {
+      "lag_ms": 25,
+      "n": 646,
+      "pearson_r": 0.867807,
+      "slope_sas_ct_per_word": 0.047559
+     },
+     {
+      "lag_ms": 50,
+      "n": 646,
+      "pearson_r": 0.867905,
+      "slope_sas_ct_per_word": 0.047712
+     },
+     {
+      "lag_ms": 75,
+      "n": 646,
+      "pearson_r": 0.867214,
+      "slope_sas_ct_per_word": 0.047894
+     },
+     {
+      "lag_ms": 100,
+      "n": 646,
+      "pearson_r": 0.866894,
+      "slope_sas_ct_per_word": 0.04808
+     },
+     {
+      "lag_ms": 125,
+      "n": 646,
+      "pearson_r": 0.865545,
+      "slope_sas_ct_per_word": 0.048238
+     },
+     {
+      "lag_ms": 150,
+      "n": 646,
+      "pearson_r": 0.864121,
+      "slope_sas_ct_per_word": 0.048423
+     },
+     {
+      "lag_ms": 175,
+      "n": 646,
+      "pearson_r": 0.861678,
+      "slope_sas_ct_per_word": 0.048472
+     },
+     {
+      "lag_ms": 200,
+      "n": 646,
+      "pearson_r": 0.859946,
+      "slope_sas_ct_per_word": 0.048654
+     },
+     {
+      "lag_ms": 225,
+      "n": 646,
+      "pearson_r": 0.85604,
+      "slope_sas_ct_per_word": 0.048649
+     },
+     {
+      "lag_ms": 250,
+      "n": 646,
+      "pearson_r": 0.853325,
+      "slope_sas_ct_per_word": 0.048748
+     }
+    ],
+    "motor_proxy_triangle": {
+     "definition": "0x030 B22:B23 paired to the same-batch (+/-20 ms) partner inside ID11",
+     "vs_reference_word_081": {
+      "n": 574,
+      "pearson_r": 0.587897
+     },
+     "vs_sas": {
+      "n": 1587,
+      "pearson_r": 0.456945
+     }
+    },
+    "plant_gain_mrad_per_mrad": 1.248945
+   },
+   "reference_word_081": {
+    "batch_median_comparison": {
+     "definition": "per shared publication batch: |median(0x081 B16:B17) - median(0x08A B18:B19)| <= 1 count; robust to publication phase",
+     "equality_exact_fraction": 0.657954,
+     "equality_le1_fraction": 0.727797,
+     "id11_equality_exact_fraction": 0.232877,
+     "id11_equality_le1_fraction": 0.506849,
+     "id11_shared_batches": 219,
+     "shared_batches": 7116
+    },
+    "definition": {
+     "equality": "signed16 0x081 B16:B17 == signed16 0x08A B18:B19",
+     "pairing": "each bus-0 0x081 frame paired to the nearest-in-time bus-0 0x08A frame; publication-granular per CORR-136",
+     "static": "both words moved <=2 counts vs their own predecessors"
+    },
+    "duplicate_word_B8_B9_equality_fraction": 0.002038,
+    "id11_equality_fraction": 0.345725,
+    "id11_paired": 538,
+    "manual_equality_fraction": 0.679392,
+    "manual_paired": 16634,
+    "manual_state_word_vs_sas_ct": {
+     "expected_f33_b6_scale_deg_per_word": 0.05730274202574147,
+     "implied_deg_per_word": 0.057346,
+     "n": 16531,
+     "pearson_r": 0.998737,
+     "slope_sas_ct_per_word": 0.038231
+    },
+    "moving_equality_fraction": 0.08508,
+    "pair_dt_buckets": {
+     "gt30ms": 102,
+     "le10ms": 14942,
+     "le30ms": 2128
+    },
+    "paired_frames": 17172,
+    "static_both_equality_fraction": 0.893595,
+    "static_both_paired": 12396
+   },
+   "sdg_states": {
+    "interval_definition": "B21==18 runs merged at <0.5 s gaps",
+    "intervals": [
+     {
+      "duration_s": 24.505057,
+      "end_s": 371.455042,
+      "frames": 981,
+      "long_interval": true,
+      "mean_abs_word": 218.420999,
+      "start_s": 346.949985,
+      "word_distinct": 170,
+      "word_max": 32,
+      "word_min": -339,
+      "word_vs_sas_pearson_r": 0.816961,
+      "word_vs_sas_slope_sas_ct_per_word": 0.02966
+     },
+     {
+      "duration_s": 2.972646,
+      "end_s": 411.609769,
+      "frames": 120,
+      "long_interval": true,
+      "mean_abs_word": 76.683333,
+      "start_s": 408.637123,
+      "word_distinct": 48,
+      "word_max": 195,
+      "word_min": 20,
+      "word_vs_sas_pearson_r": 0.908715,
+      "word_vs_sas_slope_sas_ct_per_word": 0.038128
+     }
+    ]
+   },
+   "sha256_compressed": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5",
+   "sha256_uncompressed_ndjson": "91ee1c9babead2ced001ca62fb6729dbd3f051d3335afe8d3093a2b3569e506a",
+   "source": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+   "x160_echo_correction": {
+    "definition": "0x160 (bus 1) decodes vs 0x025 coarse SAS ct, nearest join +/-20 ms, zero lag",
+    "provenance_note": "the r=+0.9963/+0.8698 echo statistics in camry_2026_bus1_field_leadlag.json were computed inside the Class-L window only (frames_in_window 1285/2927); the same decodes over the full drive do not reproduce an echo",
+    "results": {
+     "full_drive/B21lo3_0_B22_12bit": {
+      "n": 20385,
+      "pearson_r": 0.506847,
+      "slope_sas_ct_per_count": 1.012858
+     },
+     "full_drive/B22s16be": {
+      "n": 20385,
+      "pearson_r": 0.086104,
+      "slope_sas_ct_per_count": 0.000742
+     },
+     "id11_window/B21lo3_0_B22_12bit": {
+      "n": 645,
+      "pearson_r": 0.985035,
+      "slope_sas_ct_per_count": 0.455924
+     },
+     "id11_window/B22s16be": {
+      "n": 645,
+      "pearson_r": 0.985033,
+      "slope_sas_ct_per_count": 0.001779
+     },
+     "outside_id11/B21lo3_0_B22_12bit": {
+      "n": 19740,
+      "pearson_r": 0.506964,
+      "slope_sas_ct_per_count": 1.015218
+     },
+     "outside_id11/B22s16be": {
+      "n": 19740,
+      "pearson_r": 0.085086,
+      "slope_sas_ct_per_count": 0.000735
+     }
+    }
+   }
+  },
+  "drive_b": {
+   "a08A_byte_census": {
+    "B26_freshness_counter": {
+     "break_count": 0,
+     "breaks_first5": [],
+     "step_fraction_plus1_mod64": 1.0
+    },
+    "active_flags": {
+     "B22[4]": {
+      "set_fraction_b21_11": 1.0
+     },
+     "B23[5]": {
+      "set_fraction_b21_11": 0.100087
+     },
+     "B4[7]": {
+      "set_fraction_b21_11": 1.0
+     }
+    },
+    "cruise_latch_B3_3_set_fraction": 0.188591,
+    "damping_gain_absence": {
+     "B24_distinct": 2,
+     "conclusion": "B24 is the only gain-shaped byte (recorder assist alphabet); no unnamed 0x08A byte carries a {0/50/100}-style 0.01-LSB gain alphabet, so the recorder's damping field has no wire carrier on 0x08A",
+     "unnamed_bytes_distinct": {
+      "B0": 1,
+      "B1": 1,
+      "B12": 256,
+      "B13": 1,
+      "B14": 1,
+      "B15": 1,
+      "B16": 1,
+      "B2": 1,
+      "B20": 3,
+      "B22": 2,
+      "B23": 2,
+      "B25": 1,
+      "B27": 1,
+      "B4": 1,
+      "B5": 1,
+      "B6": 3,
+      "B7": 3
+     }
+    },
+    "frames": 23999,
+    "latch_mirror_agreement": {
+     "B20[7]": 0.999417,
+     "B6[0]": 0.974832,
+     "B7[0]": 0.974832
+    },
+    "per_byte": {
+     "B0": {
+      "distinct": 1,
+      "values": [
+       0
+      ]
+     },
+     "B1": {
+      "distinct": 1,
+      "values": [
+       0
+      ]
+     },
+     "B10": {
+      "distinct": 7,
+      "max": 70,
+      "min": 0
+     },
+     "B11": {
+      "distinct": 10,
+      "max": 255,
+      "min": 0
+     },
+     "B12": {
+      "distinct": 256,
+      "max": 255,
+      "min": 0
+     },
+     "B13": {
+      "distinct": 1,
+      "values": [
+       127
+      ]
+     },
+     "B14": {
+      "distinct": 1,
+      "values": [
+       255
+      ]
+     },
+     "B15": {
+      "distinct": 1,
+      "values": [
+       0
+      ]
+     },
+     "B16": {
+      "distinct": 1,
+      "values": [
+       127
+      ]
+     },
+     "B17": {
+      "distinct": 1,
+      "values": [
+       255
+      ]
+     },
+     "B18": {
+      "distinct": 66,
+      "max": 255,
+      "min": 0
+     },
+     "B19": {
+      "distinct": 256,
+      "max": 255,
+      "min": 0
+     },
+     "B2": {
+      "distinct": 1,
+      "values": [
+       0
+      ]
+     },
+     "B20": {
+      "distinct": 3,
+      "values": [
+       0,
+       64,
+       192
+      ]
+     },
+     "B21": {
+      "distinct": 3,
+      "values": [
+       0,
+       11,
+       18
+      ]
+     },
+     "B22": {
+      "distinct": 2,
+      "values": [
+       0,
+       16
+      ]
+     },
+     "B23": {
+      "distinct": 2,
+      "values": [
+       0,
+       32
+      ]
+     },
+     "B24": {
+      "distinct": 2,
+      "values": [
+       50,
+       100
+      ]
+     },
+     "B25": {
+      "distinct": 1,
+      "values": [
+       0
+      ]
+     },
+     "B26": {
+      "distinct": 64,
+      "max": 63,
+      "min": 0
+     },
+     "B27": {
+      "distinct": 1,
+      "values": [
+       0
+      ]
+     },
+     "B28": {
+      "distinct": 256,
+      "max": 255,
+      "min": 0
+     },
+     "B29": {
+      "distinct": 256,
+      "max": 255,
+      "min": 0
+     },
+     "B3": {
+      "distinct": 2,
+      "values": [
+       0,
+       8
+      ]
+     },
+     "B30": {
+      "distinct": 256,
+      "max": 255,
+      "min": 0
+     },
+     "B31": {
+      "distinct": 256,
+      "max": 255,
+      "min": 0
+     },
+     "B4": {
+      "distinct": 1,
+      "values": [
+       128
+      ]
+     },
+     "B5": {
+      "distinct": 1,
+      "values": [
+       0
+      ]
+     },
+     "B6": {
+      "distinct": 3,
+      "values": [
+       0,
+       44,
+       45
+      ]
+     },
+     "B7": {
+      "distinct": 3,
+      "values": [
+       18,
+       70,
+       71
+      ]
+     },
+     "B8": {
+      "distinct": 10,
+      "max": 255,
+      "min": 0
+     },
+     "B9": {
+      "distinct": 256,
+      "max": 255,
+      "min": 0
+     }
+    }
+   },
+   "absent_carriers": {
+    "0x0B6": {
+     "src0": 0,
+     "src1": 0,
+     "src2": 0,
+     "total": 0
+    },
+    "0x131": {
+     "src0": 0,
+     "src1": 0,
+     "src2": 0,
+     "total": 0
+    },
+    "0x2E4": {
+     "src0": 0,
+     "src1": 0,
+     "src2": 0,
+     "total": 0
+    },
+    "0x351": {
+     "src0": 0,
+     "src1": 0,
+     "src2": 0,
+     "total": 0
+    },
+    "0x394": {
+     "src0": 0,
+     "src1": 0,
+     "src2": 0,
+     "total": 0
+    },
+    "0x4A3": {
+     "src0": 0,
+     "src1": 0,
+     "src2": 0,
+     "total": 0
+    },
+    "0x4C8": {
+     "src0": 0,
+     "src1": 0,
+     "src2": 0,
+     "total": 0
+    }
+   },
+   "control_carriers": {
+    "0x030": {
+     "src0": 59999,
+     "src2": 59999
+    },
+    "0x081": {
+     "src0": 19999,
+     "src2": 19999
+    }
+   },
+   "delayed_ack": {
+    "classification": "zero delayed persistent flips of any class on either clean onset; no grant/ack announcement exists on the captured Bus-4 broadcast",
+    "definition": "per byte: >=95%-persistent value in each +0.5..+5.0 s window (0.5 s steps) vs the [-4,-1] s pre-window; DLC-32 bus-0 streams",
+    "onsets": {
+     "id11_onset": {
+      "delayed_persistent_flips": [],
+      "flip_count": 0,
+      "onset_s": 1267.881232
+     }
+    }
+   },
+   "id11_interval": {
+    "duration_s": 57.184128,
+    "end_s": 1325.06536,
+    "frames_bus0": 2288,
+    "start_s": 1267.881232
+   },
+   "incoming_frames": 1918047,
+   "p19c_phase_refutation": {
+    "definition": "0x19C bus-0 median inter-arrival per 30 s bucket; fast < 55 ms",
+    "id11_contained_in_fast_phase": true,
+    "phases": [
+     {
+      "end_s": 1104.701663,
+      "mode": "slow",
+      "start_s": 1014.701663
+     },
+     {
+      "end_s": 1494.701663,
+      "mode": "fast",
+      "start_s": 1104.701663
+     },
+     {
+      "end_s": 1614.701663,
+      "mode": "slow",
+      "start_s": 1494.701663
+     }
+    ],
+    "present": true
+   },
+   "plant_closure": {
+    "b_style_30s_subinterval_word_vs_sas_r": [
+     {
+      "end_s": 1297.881232,
+      "n": 1200,
+      "pearson_r": 0.561663,
+      "start_s": 1267.881232
+     },
+     {
+      "end_s": 1325.06536,
+      "n": 1087,
+      "pearson_r": 0.139101,
+      "start_s": 1297.881232
+     }
+    ],
+    "best_lag": {
+     "lag_ms": 175,
+     "n": 2288,
+     "pearson_r": 0.415567,
+     "slope_sas_ct_per_word": 0.02691
+    },
+    "id11_word_vs_sas_lag_table": [
+     {
+      "lag_ms": -50,
+      "n": 2288,
+      "pearson_r": 0.352264,
+      "slope_sas_ct_per_word": 0.022908
+     },
+     {
+      "lag_ms": -25,
+      "n": 2288,
+      "pearson_r": 0.359007,
+      "slope_sas_ct_per_word": 0.023343
+     },
+     {
+      "lag_ms": 0,
+      "n": 2288,
+      "pearson_r": 0.367942,
+      "slope_sas_ct_per_word": 0.023921
+     },
+     {
+      "lag_ms": 25,
+      "n": 2288,
+      "pearson_r": 0.379322,
+      "slope_sas_ct_per_word": 0.024615
+     },
+     {
+      "lag_ms": 50,
+      "n": 2288,
+      "pearson_r": 0.384591,
+      "slope_sas_ct_per_word": 0.025001
+     },
+     {
+      "lag_ms": 75,
+      "n": 2288,
+      "pearson_r": 0.396366,
+      "slope_sas_ct_per_word": 0.025683
+     },
+     {
+      "lag_ms": 100,
+      "n": 2288,
+      "pearson_r": 0.400109,
+      "slope_sas_ct_per_word": 0.026003
+     },
+     {
+      "lag_ms": 125,
+      "n": 2288,
+      "pearson_r": 0.408132,
+      "slope_sas_ct_per_word": 0.026475
+     },
+     {
+      "lag_ms": 150,
+      "n": 2288,
+      "pearson_r": 0.410025,
+      "slope_sas_ct_per_word": 0.02664
+     },
+     {
+      "lag_ms": 175,
+      "n": 2288,
+      "pearson_r": 0.415567,
+      "slope_sas_ct_per_word": 0.02691
+     },
+     {
+      "lag_ms": 200,
+      "n": 2288,
+      "pearson_r": 0.412499,
+      "slope_sas_ct_per_word": 0.026791
+     },
+     {
+      "lag_ms": 225,
+      "n": 2288,
+      "pearson_r": 0.415091,
+      "slope_sas_ct_per_word": 0.026915
+     },
+     {
+      "lag_ms": 250,
+      "n": 2288,
+      "pearson_r": 0.409259,
+      "slope_sas_ct_per_word": 0.026577
+     }
+    ],
+    "motor_proxy_triangle": {
+     "definition": "0x030 B22:B23 paired to the same-batch (+/-20 ms) partner inside ID11",
+     "vs_reference_word_081": {
+      "n": 1935,
+      "pearson_r": 0.591181
+     },
+     "vs_sas": {
+      "n": 5609,
+      "pearson_r": 0.126883
+     }
+    },
+    "plant_gain_mrad_per_mrad": 0.704417
+   },
+   "reference_word_081": {
+    "batch_median_comparison": {
+     "definition": "per shared publication batch: |median(0x081 B16:B17) - median(0x08A B18:B19)| <= 1 count; robust to publication phase",
+     "equality_exact_fraction": 0.586787,
+     "equality_le1_fraction": 0.688048,
+     "id11_equality_exact_fraction": 0.626734,
+     "id11_equality_le1_fraction": 0.920555,
+     "id11_shared_batches": 793,
+     "shared_batches": 8325
+    },
+    "definition": {
+     "equality": "signed16 0x081 B16:B17 == signed16 0x08A B18:B19",
+     "pairing": "each bus-0 0x081 frame paired to the nearest-in-time bus-0 0x08A frame; publication-granular per CORR-136",
+     "static": "both words moved <=2 counts vs their own predecessors"
+    },
+    "duplicate_word_B8_B9_equality_fraction": 0.0009,
+    "id11_equality_fraction": 0.702674,
+    "id11_paired": 1907,
+    "manual_equality_fraction": 0.589155,
+    "manual_paired": 18092,
+    "manual_state_word_vs_sas_ct": {
+     "expected_f33_b6_scale_deg_per_word": 0.05730274202574147,
+     "implied_deg_per_word": 0.057321,
+     "n": 18092,
+     "pearson_r": 0.999911,
+     "slope_sas_ct_per_word": 0.038214
+    },
+    "moving_equality_fraction": 0.052353,
+    "pair_dt_buckets": {
+     "le10ms": 17539,
+     "le30ms": 2460
+    },
+    "paired_frames": 19999,
+    "static_both_equality_fraction": 0.836711,
+    "static_both_paired": 13963
+   },
+   "sdg_states": {
+    "interval_definition": "B21==18 runs merged at <0.5 s gaps",
+    "intervals": [
+     {
+      "duration_s": 1.194982,
+      "end_s": 1172.701683,
+      "frames": 49,
+      "long_interval": true,
+      "mean_abs_word": 14.530612,
+      "start_s": 1171.506701,
+      "word_distinct": 4,
+      "word_max": 16,
+      "word_min": 12,
+      "word_vs_sas_pearson_r": -0.134298,
+      "word_vs_sas_slope_sas_ct_per_word": -0.012024
+     },
+     {
+      "duration_s": 0.130613,
+      "end_s": 1247.111883,
+      "frames": 6,
+      "long_interval": false,
+      "mean_abs_word": 14.0,
+      "start_s": 1246.981271,
+      "word_distinct": 1,
+      "word_max": 14,
+      "word_min": 14
+     },
+     {
+      "duration_s": 0.200506,
+      "end_s": 1256.158595,
+      "frames": 9,
+      "long_interval": false,
+      "mean_abs_word": 20.0,
+      "start_s": 1255.95809,
+      "word_distinct": 1,
+      "word_max": 20,
+      "word_min": 20
+     },
+     {
+      "duration_s": 0.531657,
+      "end_s": 1327.665304,
+      "frames": 22,
+      "long_interval": false,
+      "mean_abs_word": 15.727273,
+      "start_s": 1327.133647,
+      "word_distinct": 3,
+      "word_max": 17,
+      "word_min": 15
+     },
+     {
+      "duration_s": 17.745086,
+      "end_s": 1441.744295,
+      "frames": 711,
+      "long_interval": true,
+      "mean_abs_word": 102.046414,
+      "start_s": 1423.999209,
+      "word_distinct": 204,
+      "word_max": 123,
+      "word_min": -209,
+      "word_vs_sas_pearson_r": 0.754389,
+      "word_vs_sas_slope_sas_ct_per_word": 0.023479
+     }
+    ]
+   },
+   "sha256_compressed": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a",
+   "sha256_uncompressed_ndjson": "4bdf3d493595c6d76baa4f454b0443a6c15324c098c4872c0229f773fc7a0c65",
+   "source": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+   "x160_echo_correction": {
+    "definition": "0x160 (bus 1) decodes vs 0x025 coarse SAS ct, nearest join +/-20 ms, zero lag",
+    "provenance_note": "the r=+0.9963/+0.8698 echo statistics in camry_2026_bus1_field_leadlag.json were computed inside the Class-L window only (frames_in_window 1285/2927); the same decodes over the full drive do not reproduce an echo",
+    "results": {
+     "full_drive/B21lo3_0_B22_12bit": {
+      "n": 23998,
+      "pearson_r": 0.458923,
+      "slope_sas_ct_per_count": 0.907067
+     },
+     "full_drive/B22s16be": {
+      "n": 23998,
+      "pearson_r": -0.091204,
+      "slope_sas_ct_per_count": -0.000879
+     },
+     "id11_window/B21lo3_0_B22_12bit": {
+      "n": 2287,
+      "pearson_r": 0.527012,
+      "slope_sas_ct_per_count": 0.223315
+     },
+     "id11_window/B22s16be": {
+      "n": 2287,
+      "pearson_r": 0.554946,
+      "slope_sas_ct_per_count": 0.000937
+     },
+     "outside_id11/B21lo3_0_B22_12bit": {
+      "n": 21711,
+      "pearson_r": 0.459046,
+      "slope_sas_ct_per_count": 0.907194
+     },
+     "outside_id11/B22s16be": {
+      "n": 21711,
+      "pearson_r": -0.090978,
+      "slope_sas_ct_per_count": -0.000877
+     }
+    }
+   }
+  }
+ },
+ "generated_from": "retained relay-correct 2026-08-27 Camry drives; nearest-neighbour and batch-granular pairings per CORR-136",
+ "interpretation": {
+  "conclusion": "The stock-LTA actuation command never appears on any captured segment: 0x0B6, the four EPS telemetry Tx PDUs, and any B6-shaped/grant-shaped carrier are absent from every retained capture, while 0x030 and 0x081 stream throughout. The captured Bus-4 broadcast is therefore not the full EPS interface, and the wire carries request + mirrors only.",
+  "new_carrier": "0x081 B16:B17 (s16BE) byte-equals the 0x08A B18:B19 request word at publication granularity in the LTA state and equals the measured 0x025 angle times the F33 B6 scale factor in the manual state: one mode-switching steering-reference quantity, republished at ~32 Hz beside EPS.",
+  "proof_boundary": "Batched loggerd timestamps (CORR-136) bound all orderings; equality and correlation statistics do not establish which ECU produces 0x08A/0x081, a request-to-winner transform, or any grant. No 0x08A-to-B6 transform is established. Production output remains unauthorized."
+ },
+ "parked_censuses": {
+  "post_repin_nrtd": {
+   "absent_carriers": {
+    "0x0B6": 0,
+    "0x131": 0,
+    "0x2E4": 0,
+    "0x351": 0,
+    "0x394": 0,
+    "0x4A3": 0,
+    "0x4C8": 0
+   },
+   "controls": {
+    "0x030": 2000,
+    "0x081": 666
+   },
+   "frames": 31758,
+   "source": "targets/camry-2026/raw-20260827/camry_post_repin_nrtd_20260827.json.gz"
+  },
+  "post_repin_ready": {
+   "absent_carriers": {
+    "0x0B6": 0,
+    "0x131": 0,
+    "0x2E4": 0,
+    "0x351": 0,
+    "0x394": 0,
+    "0x4A3": 0,
+    "0x4C8": 0
+   },
+   "controls": {
+    "0x030": 2115,
+    "0x081": 697
+   },
+   "frames": 33598,
+   "source": "targets/camry-2026/raw-20260827/camry_post_repin_ready_20260827.json.gz"
+  }
+ },
+ "production_output_authorized": false,
+ "schema": "camry-2026-lateral-flow-trace-v1"
+}

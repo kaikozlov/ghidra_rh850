@@ -1441,3 +1441,84 @@ canonical evidence, boundaries, discriminator, and Mermaid flowchart are in
 `docs/variants/camry-2026-live-baseline.md` §45. The deterministic comparison
 is now part of `p5_adas_p6_migration.json` schema v2 and
 `tests/verify_gtsplus_p5_adas_p6_migration.py`.
+### 2026-08-29 — exhaustive flow trace: every TSS lateral object hunted in both retained drives
+
+Multi-agent sweep over `raw-20260827` drives A/B (five stage finders → adversarial
+verification → gap closure). Session scratch (workspace state, not evidence
+authority): `build/tmp/camry_trace/` (`find_round1.json`, `verify_round.json`,
+`close_round.json`, per-test `_out.json`). Compacted 2026-08-29 into
+`data/generated/camry_2026_lateral_flow_trace.json` +
+`tests/verify_camry_2026_lateral_flow_trace.py` (43 checks, byte-identical
+regeneration), FINDINGS VAR-098/099/100, CORR-138, and live-baseline §46; the
+scratch scripts remain the working derivations.
+
+**Structural negatives (verified on every retained capture, both drives + all
+2026-08-26/27 censuses, oracle runs, diag logs):**
+
+1. EPS Tx PDUs `0x351/0x394/0x4A3/0x4C8` = **0 frames, never captured anywhere**
+   (any bus, any DLC, 11- or 29-bit), while `0x030` (10.0–10.5 ms, DLC 32)
+   streams throughout as control. The captured Bus-4 segment is demonstrably
+   **not** the full EPS interface; the port's static fault-status inputs
+   (`0x394` columns) have no live wire on this segment.
+2. `0x0B6` = 0 everywhere (re-proven); no B6-shaped carrier exists on any
+   captured segment: only true mod-64 counter on the wire is `0x08A` B26;
+   only in-interval echo group that beats a 10x/100-match bar (664 stream
+   groups scanned) is `0x081`; zero boundary-locked or delayed (0.5–5 s)
+   state flips on any of the 16 DLC-32 bus-0/2 streams beyond request-side
+   mirrors.
+
+**New positives:**
+
+3. `0x081` (32 Hz, DLC 32, buses 0/2, absent bus 1) is a **second carrier of
+   the steering-reference word**: B16:B17 s16BE == `0x08A` B18:B19 with
+   P=0.844/0.953 in-ID11 (±1 batch; 0.9998 when static; NOT the B8:B9 dup
+   word, eq 0.1–0.2%; sub-batch sampling skew only, no ≥1-batch lead either
+   direction). At B21=0 the same word == SAS_ct×26.17, r=1.000 (exactly the
+   1.5°/0.057303° ratio): one mode-switching reference quantity — measured
+   angle in manual, request angle under LTA. Candidate arbitrated-reference
+   object; B13 mirrors B21 (known).
+4. `0x08A` fully byte-mapped: constants B0/B1/B2/B5/B15/B25/B27=0x00,
+   B13/B16=0x7F, B14/B17=0xFF; B6[0]/B7[0]/B20[7] mirror B3[3] latch; active
+   flags B22[4], B23[5], B4[7]; B26 = per-frame +1 mod-64 freshness counter
+   (B: 0 breaks/23,998; A: one sender reset 53.9 s + outage-window skips),
+   independent of `0x00F`'s 4.76–4.80 s counter — i.e. `0x08A` carries its own
+   SecOC freshness value beside the B28:B31 `FV4‖MAC28` trailer. **Damping
+   gain is not on the frame** (closed-negative): `0x08A` carries ID + angle +
+   assist only.
+5. SDG(18) is a real steering-request state, ~30% of request traffic: word
+   range −339..+195 mrad, r vs SAS 0.753–0.914 in the three long intervals,
+   blips carry 12–20 mrad trims. Flag join: `0x412` B7[3] SDG-only;
+   `0x371` B25[5]/B9[4] LTA-only (per-frame, all 7 intervals).
+6. Plant closure on retained data: A ID11 request leads SAS (r 0.860–0.870,
+   gain 1.258 mrad/mrad, best −2 batches); B whole-interval r=0.384 is
+   small-signal (word ±[1,56] mrad, SAS p2p 4 ct — tracking holds
+   1267.9–1297.9 s, collapses after; not hands-on). Motor proxy `0x030`
+   B22:B23 follows the reference word at least as well as SAS (A 0.582 vs
+   0.481; B 0.605 vs 0.149): command-following is visible on the wire with
+   no command frame on the wire.
+7. State joins: A's LTA exit trigger is the `0x127` B1 0x10→0x17 D→N blip
+   (386.882) → `0x0FE` B10[2] (387.404) → B21 11→0 (387.634) → latch off
+   (388.185) → MAIN press (388.066, follower). B's onset is auto-resume from
+   an 11.7 s-old latch — no button in [-6,+1] s. Drive-A-only UDS session
+   (29-bit startup sweep + `0x770/0x778/0x796/0x79E` polling, 12,645 0x7xx
+   frames; zero in B) is an external tool; its 354.5–391.7 s pause is
+   tool-side, not vehicle suppression.
+8. Refuted round-1 candidates (retained to prevent regression): `0x19C`
+   "LTA cadence flip" (10/20 Hz phase dilution — the fast phase contains ID11
+   in BOTH drives); bus-1 "5.3% rate deficit outside ID11" (capture-side
+   frame deletion at start + outage windows; wire 50.2 ms cadence unchanged);
+   `0x160` B21[3:0]:B22 "camera angle estimate" (it is a 9-bit sign-flagged
+   lateral-path offset, ~0.01 m/ct, ±2 m span; its slope-1.01 SAS fit was a
+   range coincidence).
+9. Explicitly untestable on retained data (missing preconditions): PCS `57A3`,
+   LDA `5531`, PDA `5A09/5A0A/5A0D` recorder shadows (states never exercised);
+   `1B40_3` EPS-copy shadow (every EPS telemetry PDU absent); B6 SecOC key
+   (OQ-054); damping gain (recorder layouts + B6 sig269/270 only).
+
+**Bottom line for "why no steering message":** three independent exhaustive
+scans agree the actuation command for stock LTA never appears on any captured
+segment. The wire carries request + mirrors only; actuation is observable only
+through plant response. Together with (1), this strengthens the EBU-private-
+stub / brake-family-signer reading of OQ-054 and makes the FRC Operation-FFD
+hop-2 capture (`REFERENCE/CAMRY_TSS3_OPERATION_FFD_PLAN.md`) the only remaining
+no-output way to see request vs winner vs grant.
