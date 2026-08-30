@@ -597,6 +597,10 @@ check("deployer does not equate payload completion with SecOC proof", "it is not
 check("RESTORE executor validates only hash-bound recovery artifact", "validate_restore_artifact(" in restore_source and "restore_payload" in restore_source)
 check("RESTORE executor enables exact direct-boot recovery", "allow_direct_boot=true" in restore_source and "expected-boot-f181-hex" in restore_source)
 check("direct-boot RAM exec accepts only exact expected boot F181", "allow_direct_boot" in ram_exec_source and "initial_f181_hex.lower() == expected_boot_f181_hex.lower()" in ram_exec_source and "_prepare_direct_bootloader(" in ram_exec_source)
+post_verify_source = (REPO / "exploit" / "patcher" / "post_apply_verify.py").read_text(encoding="utf-8").lower()
+check("post-APPLY verifier is validate-only by construction", "flags=flag_validate_only" in post_verify_source and "run_apply" not in post_verify_source)
+check("post-APPLY verifier binds deterministic patched-image SHA to APPLY record", "expected_post_image_sha256" in post_verify_source and "simulate_apply" in post_verify_source)
+check("post-APPLY verifier requires exact target and boot F181", "--expected-f181-hex" in post_verify_source and "--expected-boot-f181-hex" in post_verify_source)
 
 print("\n== deploy CLI fail-closed APPLY gate ==")
 with tempfile.TemporaryDirectory() as td:
