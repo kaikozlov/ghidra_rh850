@@ -985,9 +985,14 @@ with `can_clear(0xFFFF)` and waits 10 ms immediately before the multi-frame FF00
 request. The current `opendbc.car.isotp.isotp_send()` accepts the first matching
 `0x7A9` frame as flow-control, so stale diagnostic backlog can corrupt this one-shot
 trigger. The shared runner now mirrors that exact clear+settle sequence. Its live
-causal confirmation remains pending one short NRTD retry. All failed preflights stayed
-`apply_ready=false`; **no persistent flash write has occurred**. The retained runs are
-under `targets/camry-2026/raw-20260830/`.
+causal confirmation failed in the next short NRTD retry: exact app/boot identity, boot
+SecurityAccess and authenticated `0x10F0` still succeeded, but telemetry remained zero
+and `apply_ready=false`. Comparing the emitted callback with the successful Calvin payload
+then found one more transferred assumption before the first CAN witness: `runtime_init()`
+still zeroed community scratch words `FEBF1F00/FEBF1F04`. Those words lie outside the
+authenticated 4-KiB package and are not proven free on F33. The generic callback now
+performs **no bootloader-RAM mutation before its first `0x7A9` transmit**. No persistent
+flash write has occurred. The retained runs are under `targets/camry-2026/raw-20260830/`.
 
 For the lateral project this changes ordering: the persistent development patch can
 remove signing from the first-actuation critical path. The RAM-only signer work in

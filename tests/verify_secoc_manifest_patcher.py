@@ -214,6 +214,7 @@ check("validate-only returns to halt before APPLY dispatch", main_c.index("patch
 check("runtime is initialized before first telemetry send", main_c.index("runtime_init();") < main_c.index("telemetry_stage(stage_boot);"))
 check("generic runtime does not call unverified F33 boot-RAM helpers", "0xfebf1188" not in runtime_c and "0xfebf11ac" not in runtime_c and "0xfebf11d2" not in runtime_c)
 check("generic watchdog hook is intentionally inert until target-native recovery", "deliberate no-op until a target-native callable watchdog contract is proven" in runtime_c)
+check("generic runtime does not write community scratch RAM before first witness", "0xfebf1f00" not in runtime_c and "0xfebf1f04" not in runtime_c)
 check("payload source contains no reset call", "reset(" not in zero_write_sources and "0x157e" not in zero_write_sources)
 check("runtime halt services watchdog indefinitely", "while (1)" in runtime_c and "feed_watchdog();" in runtime_c)
 check("runtime enforces absolute P1M-E CodeFlash base/size", "patch_backend_flash_base" in runtime_c and "patch_backend_flash_size" in runtime_c)
