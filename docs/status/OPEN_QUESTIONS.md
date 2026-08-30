@@ -1078,6 +1078,14 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   and returns result/status to the FRC recorder. Close that split with
   synchronized Operation FFD + all-bus ordering across the five stages or
   matched category-435 Brake and `0x792` FRC firmware. Canonical §45.
+  VAR-101 refines the question: the secured `0x08A` family signs **continuously
+  at zero request** (stationary READY, `B21=0` in 2,475/2,475 frames, live FV4
+  epoch tracking, `+1 mod 64` B26, frame-unique MAC28), so the signer is an
+  always-on chassis engine independent of the FRC request lifecycle. The open
+  question is therefore no longer "does FRC sign" but "which always-on Bus-4
+  node holds the slot-class key" — brake family or Central Gateway. FRC
+  pre-authentication + chassis re-signing remains formally open but
+  downweighted. Canonical §47.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

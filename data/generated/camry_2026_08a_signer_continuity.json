@@ -1,0 +1,86 @@
+{
+  "active_request_contrast": {
+    "drive_a": {
+      "b21_census": {
+        "0": 18868,
+        "11": 646,
+        "18": 1101
+      },
+      "b26_plus1_mod64_fraction": 0.9915106238478704,
+      "mac28_last4_unique_fraction": 1.0
+    },
+    "drive_b": {
+      "b21_census": {
+        "0": 20914,
+        "11": 2288,
+        "18": 797
+      },
+      "b26_plus1_mod64_fraction": 1.0,
+      "mac28_last4_unique_fraction": 1.0
+    }
+  },
+  "production_output_authorized": false,
+  "question": "Is the Bus-4 0x08A signer always-on (signing at zero lateral request) or on-demand? An always-on signer is structurally inconsistent with the front camera being the SecOC key holder, because the camera only signs what its planner authorizes.",
+  "schema": "camry-2026-08a-signer-continuity-v1",
+  "signer_identity": {
+    "decisive_evidence": "Exact producer firmware: decode the brake-family Tx descriptors (search order in camry_f152633k0000_brake_acquisition.json). A 0x08A Tx descriptor + SecOC generation profile in F152633K0000 or Skid Control firmware identifies the signer deterministically.",
+    "frc_branch_disposition": "FRC pre-authentication is not excluded by signing continuity alone \u2014 an always-on signer could re-sign a forwarded FRC image \u2014 but it requires the FRC to hold no key while forwarding unsigned request images to the signer, which the zero-request continuity makes unnecessary as an assumption. The decisive FRC exclusion remains producer firmware.",
+    "grade": "hypothesis",
+    "grades": {
+      "frc_excluded_as_key_holder": "hypothesis",
+      "signer_identity_brake_family_or_cgw": "hypothesis",
+      "zero_request_signing_continuity": "observed"
+    },
+    "verdict": "Hypothesis: a brake-family node (Skid Control ABS / Brake Booster) or the Central Gateway signs 0x08A; the FRC publishes the request into the chassis domain and cannot be the key holder. Architectural support: TSK AES-CMAC keys live in ICU-S protected storage (F33-class RH850 parts); the FRC is not an ICU-S key-store part in any retained evidence; GTS+ places the brake family and EPS on Bus 4 where 0x08A appears; ADCU_P6 vocabulary names the OEM request/arbitrate/sign pattern explicitly (Lateral Arbitration ID / Lateral Control ID of Arbitrated Result)."
+  },
+  "stationary_ready_detail": {
+    "a8_frames": 2475,
+    "b21_census": {
+      "0": 2475
+    },
+    "b26_plus1_mod64_fraction": 0.9995957962813258,
+    "capture_name": "2026 Camry NRTD->READY + stationary gear sequence",
+    "duration_s": 60.00031347000004,
+    "f00f_frames": 619,
+    "f00f_reset_span": [
+      5212,
+      9807
+    ],
+    "f00f_trip_values": [
+      434
+    ],
+    "fv4_census": {
+      "0": 156,
+      "1": 156,
+      "10": 154,
+      "11": 153,
+      "12": 156,
+      "13": 156,
+      "14": 153,
+      "15": 153,
+      "2": 153,
+      "3": 154,
+      "4": 156,
+      "5": 156,
+      "6": 154,
+      "7": 153,
+      "8": 156,
+      "9": 156
+    },
+    "fv4_reset_low2_agreement": {
+      "agree": 2444,
+      "fraction": 0.9874747474747475,
+      "total": 2475
+    },
+    "mac28_last4_unique_fraction": 1.0,
+    "sha256": "379ec28fba65191d2898ebb156fe83e2e8e59c38bbf5fcfb7166ec9ff32c3889",
+    "source": "targets/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz",
+    "stationary": true
+  },
+  "zero_request_result": {
+    "boundary": "Structural signing continuity does not identify the signer. VAR-091/096 bound candidates to the brake family (ABS 435 / Brake Booster 466) or Central Gateway; FRC is excluded as generated-COM transmitter and as a plausible always-on key holder. Producer firmware remains the decisive evidence (acquisition route TMS-049/050).",
+    "interpretation": "The secured 0x08A family signs continuously at zero lateral request: B21=0 in 100% of stationary frames while FV4 reset-low2 tracks the live 0x00F epoch, B26 advances +1 mod 64, and MAC28 stays frame-unique. The signer is an always-on chassis engine whose output is independent of the FRC request lifecycle.",
+    "regime": "stationary READY, B21=0 (No Request) in every retained frame",
+    "signing_continues": true
+  }
+}

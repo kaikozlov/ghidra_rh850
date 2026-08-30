@@ -10,3 +10,6 @@ Current state: [../../OVERVIEW.md](../../OVERVIEW.md) ·
 
 Living Camry TSS3 GTS+→wire working notes:
 [CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md](CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md).
+
+2026-08-30 signer-continuity closure (VAR-101):
+[CAMRY_08A_SIGNER_CONTINUITY_2026-08-30.md](CAMRY_08A_SIGNER_CONTINUITY_2026-08-30.md).

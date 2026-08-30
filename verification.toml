@@ -995,6 +995,16 @@ paths = [
   "docs/status/PRIORITIES.md",
   "docs/status/CORRECTIONS.md",
 ]
+
+[suite.camry_2026_08a_signer_continuity]
+tests = ["tests/verify_camry_2026_08a_signer_continuity.py"]
+oracle = "dynamic_trace"
+paths = [
+  "targets/camry-2026/raw-20260826/",
+  "targets/camry-2026/raw-20260827/",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
 [suite.camry_2026_tss3_request_capture]
 tests = ["tests/verify_camry_tss3_request_capture.py"]
 oracle = "generated_self_check"
