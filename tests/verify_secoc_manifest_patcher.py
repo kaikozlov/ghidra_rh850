@@ -29,7 +29,7 @@ from exploit.patcher.patch_config import (
     config_from_manifest,
 )
 from exploit.common.payload_package import PAYLOAD_SIZE, inspect_payload, package_shellcode
-from exploit.common.ram_exec import explicit_ram_exec_geometry
+from exploit.common.ram_exec import bootstrap_protocol_values, explicit_ram_exec_geometry, explicit_route
 from exploit.patcher.build_payload import (
     CONFIG_OFFSET,
     TEMPLATE_SIZE,
@@ -69,6 +69,16 @@ def rejects(name: str, manifest: dict, needle: str) -> None:
 
 manifest_path = REPO / "data" / "generated" / "secoc_patch_manifest_4512000.json"
 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+print("== boot bootstrap grammar ==")
+old0 = explicit_route(bus=0, elm327_param=1, uds_variant="old", cpu_index=0)
+new0 = explicit_route(bus=0, elm327_param=1, uds_variant="new", cpu_index=0)
+old1 = explicit_route(bus=0, elm327_param=1, uds_variant="old", cpu_index=1)
+new1 = explicit_route(bus=0, elm327_param=1, uds_variant="new", cpu_index=1)
+check("old-stack CPU0 keeps DID 0203 all-zero while RequestDownload uses memory ID 1", bootstrap_protocol_values(old0) == (bytes(5), b"\x01", b"\x45\x00"))
+check("new-stack CPU0 alone uses DID 0203 offset selector 01", bootstrap_protocol_values(new0) == (b"\x01" + bytes(4), b"\x01", b"\x45\x01"))
+check("old-stack CPU1 keeps zero DID 0203 and memory ID 0", bootstrap_protocol_values(old1) == (bytes(5), b"\x00", b"\x45\x00"))
+check("new-stack CPU1 keeps zero DID 0203 and uses new routine magic", bootstrap_protocol_values(new1) == (bytes(5), b"\x00", b"\x45\x01"))
 
 print("== ABI shape ==")
 check("runtime config ABI is exactly 96 bytes", CONFIG_SIZE == 96 and STRUCT.size == 96)

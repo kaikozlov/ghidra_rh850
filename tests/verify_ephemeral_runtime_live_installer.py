@@ -175,7 +175,7 @@ check("old-stack session choreography repeats 01->03->02", e[:6] == [
 check("SecurityAccess request is zero data-record", e[6] == ("security", 1, bytes(16)))
 check("SecurityAccess send-key is 16 bytes", e[7][0:2] == ("security", 2) and len(e[7][2]) == 16)
 check("DID setup is 0203 -> 0201 -> 0202", e[8:11] == [
-    ("wdbi", 0x203, b"\x01\x00\x00\x00\x00"),
+    ("wdbi", 0x203, bytes(5)),
     ("wdbi", 0x201, bytes(16)),
     ("wdbi", 0x202, bytes(16)),
 ])
@@ -208,6 +208,7 @@ _bootstrap_and_substitute(
     isotp_send_fn=lambda panda, data, addr, *, bus: isotp_new.append((bytes(data), addr, bus)),
 )
 check("new-stack live trigger uses 45 01 magic", isotp_new == [(FF00_REQUEST_NEW, 0x7A1, 1)])
+check("new-stack CPU0 uses DID 0203 offset selector 01", client_new.events[5] == ("wdbi", 0x203, b"\x01" + bytes(4)))
 check("new-stack 10F0 and FF00 magic agree", client_new.events[14][3][:2] == b"\x45\x01" and FF00_REQUEST_NEW[4:6] == b"\x45\x01")
 
 source = (REPO / "exploit/ephemeral_runtime/live_installer.py").read_text(encoding="utf-8")
