@@ -17,10 +17,16 @@ THE DOCS ARE NOT A PRIMARY SOURCE. THEY ARE AN APPROXIMATE EXPLANATION BASED
 ON FINDINGS UP TO THIS POINT. THEY ARE FALSIFIABLE. THE FIRMWARE IS THE SINGLE
 SOURCE OF TRUTH.
 
-Use Ghidra CLI tools against the binary FIRST — never read our own docs/tests
-as primary sources. `query functions --count`/`--sort -size` for census;
-`decompile`/`x-ref`/`disasm` for analysis. Heuristic function naming without
-decompiling is slop. Verify claims from firmware gate code, not spec knowledge.
+For **firmware/vehicle-behavior questions**, use Ghidra CLI tools against the
+binary first — never read our own docs/tests as primary sources. `query functions
+--count`/`--sort -size` for census; `decompile`/`x-ref`/`disasm` for analysis.
+Heuristic function naming without decompiling is slop. Verify firmware claims
+from firmware gate code, not spec knowledge.
+
+For **openpilot/comma integration-design questions**, the design reference is
+current upstream openpilot/opendbc/Panda. Do not reverse the priority and derive
+a bespoke software architecture from firmware simply because this is an RE repo.
+Use firmware to determine what is genuinely target-specific.
 
 ## Non-negotiable repository hazards
 
@@ -199,21 +205,114 @@ ledger in `docs/status/FINDINGS.md`). Evidence also carries a **source**
 - **hypothesis** — plausible, explicitly unverified;
 - **disproved** — retained only to prevent regression.
 
+## Openpilot / comma integration: native-shape rule
+
+When this repository informs `kai-openpilot`, `opendbc`, or Panda, **start from
+current upstream comma/openpilot and make the smallest target-specific changes
+required to support the car.** Do not design a new control architecture from the
+firmware.
+
+The default assumption is that normal openpilot behavior is correct. The burden
+of proof is on a **deviation from upstream**, not on re-proving upstream behavior
+from Toyota firmware. Firmware and live evidence are for discovering the target's
+wire format, buses, scaling, limits, capabilities, and actual incompatibilities.
+They are not an invitation to add extra policy.
+
+### Keep the normal ownership boundaries
+
+- `controlsd` owns engagement and `CC.latActive`.
+- `CarInterface` / `CarParams` describe the vehicle and select existing features.
+- `CarState` decodes observed vehicle state into standard openpilot fields.
+- `CarController` turns openpilot requests into the vehicle's messages.
+- Panda safety applies the ordinary steering/longitudinal safety model and TX
+  whitelist.
+- Panda forwarding blocks/replaces stock traffic only when the actual stock
+  control message is known.
+
+Do not add a second permission system in another layer. Do not make
+`CarController` re-decide whether openpilot is allowed to steer. Do not make
+Panda enforce receiver behavior just because the firmware has such behavior.
+Do not turn a request/status bit into an authority signal without proof that it
+is one.
+
+### No speculative safety policy
+
+"Just to be safe" is not a justification for target-specific runtime behavior.
+If a target semantic is unknown, prefer the normal upstream behavior or leave the
+unsupported semantic unmapped. **Do not fill uncertainty with a guard, timer,
+threshold, interlock, special Param, debug mode, or alternate state machine.**
+
+Examples of things that must not be promoted into runtime policy merely because
+they were observed during RE:
+
+- receiver sequence/freshness/timing supervision;
+- internal firmware limiters or persistence counters;
+- request-plane Target Lateral IDs;
+- sensor representation limits;
+- unknown/reserved companion bits;
+- internal Toyota status bits with no proven openpilot equivalent.
+
+Only add target-specific policy when upstream has no suitable mechanism **and**
+the target demonstrably requires different behavior. Put that difference in the
+same layer where upstream handles analogous differences.
+
+### Do not reintroduce the F33 bring-up scaffolding
+
+The following were experiments, not architecture, and must stay out of the
+normal driving path unless an actual upstream-equivalent requirement is later
+proven:
+
+- private lateral-arming Params or fake SecOC-key availability;
+- runtime diagnostic/oracle arming;
+- `ALLOW_DEBUG` steering modes or Python shadow safety;
+- dynamic harness modes for a fixed supported harness topology;
+- controller-side `steeringPressed` or Toyota-LTA permission vetoes layered over
+  `CC.latActive`;
+- Panda `0x00F` permission gates, bespoke B6 sequence/35-ms/rate policy, or
+  request-plane `0x08A` arbitration gates;
+- template-wide required-zero checks for unknown fields;
+- global Toyota runtime/query changes solely to accommodate this one target.
+
+Historical RE about those mechanisms can remain documented. Their existence in
+the firmware or in old experiments does not make them part of the openpilot
+implementation.
+
+### Practical review rule
+
+Before adding any Camry/TSS3-specific runtime branch, first search current
+upstream openpilot/opendbc/Panda for how the same feature is normally implemented.
+If the normal mechanism works, use it. If it does not, make the **smallest**
+vehicle-specific adaptation needed.
+
+Tests should mirror that shape: standard upstream-style behavior tests for the
+port, plus focused protocol tests for the genuinely target-specific message
+format and constants. Do not build large test frameworks around temporary
+bring-up guards.
+
 ## Documentation requirements
 
-When you produce a material conclusion:
+When you produce a **material new reverse-engineering conclusion** about the
+firmware, vehicle protocol, or observed target behavior:
 
 1. **Update the canonical subsystem report** — every claim has exactly one
    home. Other documents summarize it in one sentence and link there.
 2. **Update `docs/status/FINDINGS.md`** with the claim, scope, grade, and
-   verifying test.
-3. **Add or update a deterministic test** in `tests/` where possible.
-4. **Record any disproved prior claim** in `docs/status/CORRECTIONS.md`.
+   verifying test when a durable finding was actually established.
+3. **Add or update a deterministic test** when it protects a real recovered fact
+   and is worth preserving. Do not write tests merely to memorialize temporary
+   bring-up policy or ordinary upstream behavior.
+4. **Record a disproved prior durable claim** in `docs/status/CORRECTIONS.md`.
 5. **Keep this file slim** — never duplicate long findings lists here. Link to
    the canonical report instead.
-6. **When the requested task includes updating the repository**, persist durable
-   findings in the appropriate report and tests before reporting completion.
-   Do not modify or commit files during review-only tasks.
+
+Routine refactors, upstream-shape alignment, deletion of experimental scaffolding,
+and ordinary code fixes do **not** require manufacturing a new finding, proof
+artifact, or documentation trail. Document them where normal software work would
+be documented: code, tests that protect actual behavior, and the commit message.
+
+When the requested task includes updating the repository, persist any genuinely
+new durable RE findings before reporting completion. Do not modify or commit files
+during review-only tasks.
 
 ## Scope discipline
 
