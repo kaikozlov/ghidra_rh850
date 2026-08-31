@@ -975,7 +975,21 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   replacement architecture also needs either an inline Bus-1 interception point or a
   later transformed handoff reachable on the existing relay plane.
 
-  **What is still genuinely open is target-native wire/auth/execution, not GTS+ naming.**
+  VAR-107 now closes the **observable native-Bus-1 integrity/freshness shape**. Across
+  both retained drives every one of the 22 periodic Bus-1 streams has a deterministic,
+  affine-linear 16-bit B0:B1 integrity word over visible B2..end state; no repeated
+  suffix ever acquires a second integrity value. Combined `0x160` gives 44,508 frames,
+  rank 111 and zero affine conflicts, and a sparse training basis predicts essentially
+  every held-out B0:B1 exactly. Equal-DLC PDUs share the same counter-bit transform and
+  equal suffixes show a fixed CAN-ID/Data-ID contribution. `0x160 B2` is an 8-bit alive
+  counter (+1 on all 23,988 drive-B same-segment pairs); constant `0x020` has only 256
+  complete wire images and repeats byte-for-byte after wrap at ~12.8 s. The corpus even
+  solves every used `0x160 B12` integrity delta. This is **linear E2E integrity plus
+  rolling freshness, not an observed cryptographic authenticator**. Exact Toyota
+  polynomial/implementation naming and receiver counter-window/timeout behavior remain
+  open, as do `0x160` producer/direction and B12 OEM identity.
+
+  **What is still genuinely open is target-native request identity, receiver acceptance, and execution ownership, not GTS+ naming.**
   For one exact TSS3 target, join the diagnostic values to the real vehicle-network frame
   and cadence, determine the FRC->brake copy/transform, final brake/powertrain arbitration
   executor, SecOC/integrity signer/freshness owner, lead/distance/standstill feedback, and

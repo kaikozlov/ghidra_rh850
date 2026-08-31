@@ -962,6 +962,15 @@ paths = [
   "docs/status/OPEN_QUESTIONS.md",
 ]
 
+[suite.camry_2026_bus1_e2e]
+tests = ["tests/verify_camry_2026_bus1_e2e.py"]
+oracle = "dynamic_trace"
+paths = [
+  "targets/camry-2026/raw-20260827/",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
+
 [suite.camry_2026_bus1_field_leadlag]
 tests = ["tests/verify_camry_2026_bus1_field_leadlag.py"]
 oracle = "dynamic_trace"
