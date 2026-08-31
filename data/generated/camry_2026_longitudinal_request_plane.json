@@ -1,0 +1,332 @@
+{
+  "drives": {
+    "drive_a": {
+      "plaintext_candidate_0x160": {
+        "B12_high_bit_histogram": {
+          "0": 20510
+        },
+        "B12_signed7_to_0x0CA_result": {
+          "all": {
+            "intercept": 0.092473744,
+            "pearson_r": -0.951664059,
+            "sample_count": 1834,
+            "slope": -0.097299385,
+            "x_range": [
+              -4,
+              9
+            ],
+            "y_range": [
+              -0.434,
+              0.45
+            ]
+          },
+          "join": "native bus1 0x160 B12 signed7 to nearest protected bus0 0x0CA B7:B8 within 30 ms while stock cruise latch is set",
+          "unsaturated_result": {
+            "filter": "B7:B8 > B5:B6 + 0.05 m/s^2 and B7:B8 < B3:B4 - 0.05 m/s^2",
+            "intercept": 0.100719555,
+            "pearson_r": -0.911522875,
+            "sample_count": 1218,
+            "slope": -0.099274255,
+            "x_range": [
+              -4,
+              7
+            ],
+            "y_range": [
+              -0.354,
+              0.45
+            ]
+          }
+        },
+        "dlc": 32,
+        "last4_histogram": {
+          "00000000": 20510
+        },
+        "native_bus1_frame_count": 20510,
+        "panda_bus_counts": {
+          "0": 0,
+          "1": 20510,
+          "2": 0
+        }
+      },
+      "protected_0x0CA": {
+        "dlc": 32,
+        "longitudinal_geometry": {
+          "B5_B6_le_B7_B8_le_B3_B4": {
+            "matching_fraction": 0.978941962,
+            "matching_frames": 1906,
+            "violation_raw_delta_from_nearest_bound": {
+              "-1": 22,
+              "-2": 6,
+              "-3": 3,
+              "-4": 4,
+              "-5": 3,
+              "-6": 2,
+              "-7": 1
+            }
+          },
+          "signed_be_words": {
+            "B3_B4": {
+              "max_mps2": 5.272,
+              "median_mps2": 4.253,
+              "min_mps2": 2.794,
+              "scale_mps2_per_count": 0.001
+            },
+            "B5_B6": {
+              "max_mps2": -0.227,
+              "median_mps2": -0.252,
+              "min_mps2": -0.434,
+              "scale_mps2_per_count": 0.001
+            },
+            "B7_B8": {
+              "max_mps2": 0.45,
+              "median_mps2": -0.112,
+              "min_mps2": -0.434,
+              "scale_mps2_per_count": 0.001
+            }
+          },
+          "stock_cruise_frame_count": 1947
+        },
+        "measured_acceleration_join": {
+          "best_shift_s": 0.6,
+          "method": "1.0 s centered derivative of decoded 0x0AA mean wheel speed; lag is a correlation shift only",
+          "pearson_r": 0.519732977,
+          "sample_count": 1947
+        },
+        "panda_bus_counts": {
+          "0": 21879,
+          "1": 0,
+          "2": 21880
+        },
+        "secoc_shape_bus0": {
+          "application_sequence_relation": {
+            "byte": 2,
+            "same_reset_message_plus1_fraction": 1.0,
+            "same_reset_pairs_with_message_low2_plus1": 20026,
+            "same_reset_plus1_pairs": 20026,
+            "same_segment_plus1_pairs": 21729
+          },
+          "auth28_unique_count": 21878,
+          "auth28_unique_fraction": 0.999954294,
+          "b27_value_set": [
+            0
+          ],
+          "frame_count": 21879,
+          "fv4_value_set": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "preceding_0x00F_reset_low2": {
+            "eligible_frames": 21879,
+            "matching_fraction": 0.855706385,
+            "matching_frames": 18722
+          },
+          "wire_candidate": {
+            "B28_3_0_B29_B30_B31": "candidate 28-bit authenticator",
+            "B28_5_4": "candidate reset_low2",
+            "B28_7_6": "candidate message_low2",
+            "application_bytes": "B0..B27"
+          }
+        }
+      },
+      "source": {
+        "frame_count": 1656656,
+        "path": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+        "sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5"
+      }
+    },
+    "drive_b": {
+      "plaintext_candidate_0x160": {
+        "B12_high_bit_histogram": {
+          "0": 23998
+        },
+        "B12_signed7_to_0x0CA_result": {
+          "all": {
+            "intercept": 0.1799564,
+            "pearson_r": -0.989395798,
+            "sample_count": 4526,
+            "slope": -0.118672776,
+            "x_range": [
+              -13,
+              6
+            ],
+            "y_range": [
+              -0.462,
+              1.693
+            ]
+          },
+          "join": "native bus1 0x160 B12 signed7 to nearest protected bus0 0x0CA B7:B8 within 30 ms while stock cruise latch is set",
+          "unsaturated_result": {
+            "filter": "B7:B8 > B5:B6 + 0.05 m/s^2 and B7:B8 < B3:B4 - 0.05 m/s^2",
+            "intercept": 0.178409775,
+            "pearson_r": -0.986808299,
+            "sample_count": 3826,
+            "slope": -0.119391143,
+            "x_range": [
+              -13,
+              5
+            ],
+            "y_range": [
+              -0.231,
+              1.693
+            ]
+          }
+        },
+        "dlc": 32,
+        "last4_histogram": {
+          "00000000": 23998
+        },
+        "native_bus1_frame_count": 23998,
+        "panda_bus_counts": {
+          "0": 0,
+          "1": 23998,
+          "2": 0
+        }
+      },
+      "protected_0x0CA": {
+        "dlc": 32,
+        "longitudinal_geometry": {
+          "B5_B6_le_B7_B8_le_B3_B4": {
+            "matching_fraction": 0.944421316,
+            "matching_frames": 4537,
+            "violation_raw_delta_from_nearest_bound": {
+              "-1": 36,
+              "-10": 12,
+              "-11": 9,
+              "-12": 4,
+              "-13": 2,
+              "-14": 1,
+              "-15": 1,
+              "-16": 1,
+              "-17": 1,
+              "-2": 37,
+              "-3": 29,
+              "-4": 33,
+              "-5": 24,
+              "-6": 21,
+              "-7": 19,
+              "-8": 20,
+              "-9": 17
+            }
+          },
+          "signed_be_words": {
+            "B3_B4": {
+              "max_mps2": 5.02,
+              "median_mps2": 2.6655,
+              "min_mps2": 1.895,
+              "scale_mps2_per_count": 0.001
+            },
+            "B5_B6": {
+              "max_mps2": -0.249,
+              "median_mps2": -0.255,
+              "min_mps2": -0.463,
+              "scale_mps2_per_count": 0.001
+            },
+            "B7_B8": {
+              "max_mps2": 1.693,
+              "median_mps2": 0.18,
+              "min_mps2": -0.462,
+              "scale_mps2_per_count": 0.001
+            }
+          },
+          "stock_cruise_frame_count": 4804
+        },
+        "measured_acceleration_join": {
+          "best_shift_s": 0.3,
+          "method": "1.0 s centered derivative of decoded 0x0AA mean wheel speed; lag is a correlation shift only",
+          "pearson_r": 0.785714287,
+          "sample_count": 4712
+        },
+        "panda_bus_counts": {
+          "0": 25475,
+          "1": 0,
+          "2": 25475
+        },
+        "secoc_shape_bus0": {
+          "application_sequence_relation": {
+            "byte": 2,
+            "same_reset_message_plus1_fraction": 1.0,
+            "same_reset_pairs_with_message_low2_plus1": 23465,
+            "same_reset_plus1_pairs": 23465,
+            "same_segment_plus1_pairs": 25465
+          },
+          "auth28_unique_count": 25473,
+          "auth28_unique_fraction": 0.999921492,
+          "b27_value_set": [
+            0
+          ],
+          "frame_count": 25475,
+          "fv4_value_set": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "preceding_0x00F_reset_low2": {
+            "eligible_frames": 25472,
+            "matching_fraction": 0.858903894,
+            "matching_frames": 21878
+          },
+          "wire_candidate": {
+            "B28_3_0_B29_B30_B31": "candidate 28-bit authenticator",
+            "B28_5_4": "candidate reset_low2",
+            "B28_7_6": "candidate message_low2",
+            "application_bytes": "B0..B27"
+          }
+        }
+      },
+      "source": {
+        "frame_count": 1918047,
+        "path": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+        "sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a"
+      }
+    }
+  },
+  "gtsplus_semantic_bridge": {
+    "brake": {
+      "0x10A1": "Request Acceleration of Upper Limit from Toyota Safety Sense (signed16, 0.001 m/s^2)",
+      "0x10A2": "Request Acceleration of Lower Limit from Toyota Safety Sense (signed16, 0.001 m/s^2)",
+      "0x10A3": "Request Acceleration and Deceleration ID of Upper Limit from Toyota Safety Sense",
+      "0x10A4": "Request Acceleration and Deceleration ID of Lower Limit from Toyota Safety Sense"
+    },
+    "frc": {
+      "0x1B03..0x1B07": "FRC_P5 longitudinal request/permission Data Monitor surface, including ISA upper-limit ID/acceleration, allocation/shift/response, and brake/stop permissions",
+      "PCS_5280": "TSS required longitudinal ID + lower-limit acceleration + force/shift/EPB/override/priority fields",
+      "PCS_5281": "TSS request longitudinal ID + upper-limit acceleration + force-distribution field",
+      "PCS_5284_57DB": "arbitration-result longitudinal ID / arbitration-result acceleration"
+    }
+  },
+  "interpretation": {
+    "0x0CA": "Already-protected/downstream-looking Toyota-P5 longitudinal PDU. Its FV4||MAC28 structural match rejects treating 0x0CA itself as the unsigned FRC-to-signer request.",
+    "0x0CA_words": "B3:B4, B5:B6, and B7:B8 form a strong upper/lower/result-like signed16 x0.001 m/s^2 triplet, but exact byte-to-OEM-name assignment awaits synchronized diagnostic/FFD capture.",
+    "0x160_B12": "High-value non-SecOC cross-plane candidate. Signed7 B12 maps tightly to protected 0x0CA B7:B8 during stock cruise, but producer, direction, and OEM request identity are not yet proved.",
+    "next_discriminator": "Run tools/camry_tss3_request_capture.py during stock DRCC and join FRC 0x792 DIDs 1B03..1B07 plus Brake 0x7B0 DIDs 10A1..10A4 to native bus1 0x160 and protected bus0/bus2 0x0CA."
+  },
+  "schema": "camry-2026-longitudinal-request-plane-v1",
+  "vehicle": "2026 Toyota Camry Hybrid / exact maintainer vehicle"
+}

@@ -960,6 +960,21 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   Older TSS2 `0x343` / `0x183/8` ACC contracts remain non-transferable: the pinned TSS3
   Corolla route has no `0x343`, and its `0x183` belongs to a 64-byte CAN-FD family.
 
+  VAR-106 now closes the **first target-native wire lead** without over-promoting it.
+  Bus-4/Panda-bus0 `0x0CA/32` is already downstream protected traffic: its B27/B28..B31
+  envelope makes the same ordinary-P5 `FV4||MAC28` structural match as the secured
+  family, including exact same-reset message-low2 progression on every retained B2+1
+  pair. Its signed-BE B3:B4/B5:B6/B7:B8 words at 0.001 m/s² form an
+  upper/lower/result-like triplet during stock cruise and B7:B8 tracks measured vehicle
+  acceleration. Therefore `0x0CA` itself is **not** the unsigned FRC→signer request.
+  The new upstream candidate is native Bus-1 `0x160 B12`: `0x160/32` has constant-zero
+  trailing four bytes, and signed7 B12 joins nearest protected `0x0CA B7:B8` during
+  stock cruise at r=-0.951664/-0.989396 across the two drives. That is a reproducible
+  plaintext/protected cross-plane relation, but `0x160` producer, direction and OEM
+  request identity remain unproved. Current Toyota-B CAN1 is unsplit, so a source-
+  replacement architecture also needs either an inline Bus-1 interception point or a
+  later transformed handoff reachable on the existing relay plane.
+
   **What is still genuinely open is target-native wire/auth/execution, not GTS+ naming.**
   For one exact TSS3 target, join the diagnostic values to the real vehicle-network frame
   and cadence, determine the FRC->brake copy/transform, final brake/powertrain arbitration

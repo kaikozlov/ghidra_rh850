@@ -2939,12 +2939,138 @@ for eliminating the persistent development patch. It is not part of the current
 openpilot runtime and must not reintroduce private Params/oracles or alternative
 safety authority.
 
+## 50. Longitudinal cross-plane join: `0x0CA` is already protected; Bus-1 `0x160 B12` is a pre-protection candidate (VAR-106)
+
+The retained relay-correct drives now give the first concrete target-native bridge
+between Toyota's plaintext camera/radar network and the protected longitudinal
+chassis plane. The result is useful precisely because it corrects the tempting
+interpretation of `0x0CA`: **`0x0CA` itself is not the unsigned FRC→signer
+request. It is already downstream-looking protected traffic.** The interesting
+upstream lead is a field on native Bus 1.
+
+### 50.1 `0x0CA/32` has the ordinary Toyota-P5 protected envelope
+
+`0x0CA/32` is present on Panda bus 0 and its bus-2 relay mirror and absent from
+native bus 1 (drive A 21,879 / 21,880 / 0; drive B 25,475 / 25,475 / 0). Its
+application byte B2 advances `+1` in 21,729 drive-A and 25,465 drive-B
+same-segment pairs. Applying the same bounded P5 trailer geometry used for
+`0x08A` gives:
+
+- B27 is always zero and B28[7:4] visits all 16 FV4 values;
+- B28[5:4] matches the preceding authenticated `0x00F` reset-low2 on
+  **85.5706385% / 85.8903894%** of eligible A/B frames;
+- whenever B2 advances and the candidate reset-low2 stays constant, candidate
+  B28[7:6] message-low2 advances `+1 mod 4` in **20,026/20,026** A and
+  **23,465/23,465** B pairs;
+- the candidate MAC28 in B28[3:0]|B29|B30|B31 is nearly frame-unique:
+  **21,878/21,879** A and **25,473/25,475** B.
+
+That is a strong ordinary-P5 `FV4 || MAC28` structural match. It does not recover
+the key/profile/CMAC inputs, but it is enough to reject using `0x0CA` as evidence
+for an unsigned pre-sign PDU.
+
+### 50.2 The application words look like longitudinal upper/lower/result arbitration
+
+During the stock-cruise latch, signed big-endian words B3:B4, B5:B6, and B7:B8
+all occupy physically plausible acceleration ranges at **0.001 m/s²/count**.
+B7:B8 lies between B5:B6 and B3:B4 in **1,906/1,947 = 97.8941962%** of
+drive-A cruise frames and **4,537/4,804 = 94.4421316%** of drive-B cruise
+frames. The misses remain close to a bound (maximum observed under-run 0.007
+m/s² A and 0.017 m/s² B).
+
+B7:B8 is also the measured-acceleration-like member of the triplet. Against the
+existing exact `0x0AA` wheel-speed decode and a 1.0-s centered derivative, its
+best stock-cruise correlation is **r=0.519733 at +0.6 s** in drive A and
+**r=0.785714 at +0.3 s** in drive B. These are correlation shifts only; the
+rlog publication timestamps remain unsuitable for a precise causal-latency
+claim.
+
+The shape is independently consistent with current GTS+ vocabulary:
+
+- Brake `0x10A1` = **Request Acceleration of Upper Limit from Toyota Safety Sense**,
+  signed16 ×0.001 m/s²;
+- Brake `0x10A2` = the corresponding **Lower Limit**;
+- FRC-hosted PCS recorder `57DB` = **Arbitration result Acceleration**, signed16
+  ×0.001 m/s²;
+- FRC recorder `5280/5281` separately carries lower/upper request IDs,
+  accelerations, force allocation, shift priority, EPB/override/priority state.
+
+This supports an **upper/lower/result-like** interpretation of the three `0x0CA`
+words. It still does not assign `10A1`, `10A2`, and `57DB` byte-for-byte until a
+synchronized diagnostic/Operation-FFD capture overlays the values directly.
+
+### 50.3 Native Bus-1 `0x160 B12` is the first serious pre-protection candidate
+
+`0x160/32` is the inverse placement: it appears only on native Panda bus 1
+(**20,510 / 23,998** A/B frames), has a B2 rolling counter, and its last four
+bytes are exactly `00 00 00 00` in every retained frame. It therefore does not
+carry the ordinary P5 trailing SecOC envelope seen on `0x0CA`.
+
+During stock cruise, B12 is confined to raw `0..127`; interpreting it as signed
+7-bit two's complement and nearest-time joining it (≤30 ms) to protected
+`0x0CA B7:B8` produces a very strong and reproducible relation:
+
+- drive A: **n=1,834, r=-0.951664**, `B7:B8[m/s²] ≈ -0.097299*s7 + 0.092474`;
+- drive B: **n=4,526, r=-0.989396**, `B7:B8[m/s²] ≈ -0.118673*s7 + 0.179956`.
+
+The relation remains strong after excluding samples within 0.05 m/s² of the
+candidate upper/lower arbitration bounds: A **n=1,218, r=-0.911523**, slope
+`-0.099274`; B **n=3,826, r=-0.986808**, slope `-0.119391`.
+
+This is substantially stronger than generic same-drive correlation and makes
+`0x160 B12` a **high-value plaintext/non-SecOC cross-plane candidate upstream of
+protected longitudinal arbitration**. The evidence does **not** yet prove that
+FRC transmits `0x160`, that B12 is the Toyota request acceleration, or even the
+direction of the relation. `0x160` remains only source-bounded to the native
+camera/radar domain; feedback/perception or another correlated arbitration input
+remain live alternatives.
+
+### 50.4 What this means for an OEM-signer interception architecture
+
+The desired architecture is now plausible for longitudinal control but not yet
+closed:
+
+`openpilot request -> replace OEM pre-protection request -> stock brake/gateway arbitration + signer -> protected chassis output`.
+
+If the candidate is source-attributed and the diagnostic join proves that it is
+the FRC request, this would let Comma reuse Toyota's own trust boundary rather
+than implement/store the SecOC/TSK signing material itself. That is **not** a
+cryptographic bypass; it is an upstream request-plane replacement that leaves the
+OEM protected output path intact.
+
+Two target-native constraints remain before any such implementation:
+
+1. current Toyota-B topology gives CAN0/CAN2 the intercept-relay pair while
+   CAN1 is **unsplit**. The present harness can observe/inject native Bus 1 but
+   cannot selectively remove an FRC-produced `0x160`; source replacement needs
+   an inline Bus-1 interception point or discovery of a later transformed handoff
+   on the already intercepted gateway/brake plane;
+2. the longitudinal result does not solve lateral. VAR-104/105 still prove there
+   is no justifiable Panda-forwarding stock-LTA block on the current F33 path;
+   `0x08A` is request-plane and not accepted by F33, and the stock LTA authority
+   selection remains inside the unresolved private middle/B6-independent path.
+
+The decisive next step is already read-only and implemented:
+`tools/camry_tss3_request_capture.py` should be run during stock DRCC while
+capturing all buses. Join FRC `0x792` DIDs `1B03..1B07`, Brake `0x7B0` DIDs
+`10A1..10A4`, native Bus-1 `0x160`, and protected `0x0CA`; preserve a PCS
+Operation-FFD/VDAS specimen if available. Exact overlays of `10A1/10A2` onto the
+`0x0CA` triplet and an FRC request quantity onto `0x160 B12` would materially
+close request source, transform direction, and the location of the signing
+boundary.
+
+Deterministic evidence:
+`tools/analyze_camry_2026_longitudinal_request_plane.py`,
+`data/generated/camry_2026_longitudinal_request_plane.json`, and
+`tests/verify_camry_2026_longitudinal_request_plane.py`. No control output is
+authorized by this finding.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105)
+- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106)
 - Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148)
 <!-- knowledge-cross-references:end -->

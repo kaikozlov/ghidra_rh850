@@ -979,6 +979,15 @@ paths = [
   "docs/status/CORRECTIONS.md",
 ]
 
+[suite.camry_2026_longitudinal_request_plane]
+tests = ["tests/verify_camry_2026_longitudinal_request_plane.py"]
+oracle = "dynamic_trace"
+paths = [
+  "targets/camry-2026/raw-20260827/",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
+
 [suite.camry_2026_baseline_selector]
 tests = ["tests/verify_camry_2026_baseline_selector.py"]
 oracle = "dynamic_trace"
