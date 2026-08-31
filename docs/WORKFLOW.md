@@ -57,13 +57,6 @@ and destructive layout operations are restricted to this repository's own
 `build/` root. `work/` and `cache/` cleanup refuse to run while an RH850 Ghidra
 daemon is active.
 
-Migration is explicit and non-destructive. `tools/build_layout.py migrate-known`
-dry-runs the recognized reusable cache/work/output moves; add `--apply` to
-perform them. `tools/build_layout.py migrate-legacy` dry-runs quarantine of any
-remaining pre-layout top-level entries under `build/work/legacy-root/`; add
-`--apply` only after review. Migration never deletes those opaque analysis
-artifacts, and canonical tools do not consume `legacy-root/` implicitly.
-
 Live-project assertions are `local` verification suites. Core verification uses
 tracked firmware/evidence only; external proprietary/public source trees are
 owned through explicit `requires_external` gates rather than `REFERENCE/` paths.

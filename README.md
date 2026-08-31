@@ -103,7 +103,6 @@ The top level is intentionally split by evidence role:
 | `community/` | In-tree community artifacts/tooling with provenance |
 | `software/` | Tracked external-software provenance/locks plus ignored local vendor corpora |
 | `REFERENCE/` | External/reference material; context only, not project truth |
-| `legacy/` | Superseded analysis retained only for history |
 
 Large licensed/local corpora live under ignored subtrees of `software/`: Techstream
 V18, GTS+, Toyota CUW packages, and Renesas RFP. Their analyzed source identities are
