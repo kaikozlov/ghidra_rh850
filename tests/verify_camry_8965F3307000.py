@@ -306,6 +306,28 @@ def section_secoc_patch() -> int:
     for start, label in ((0xBFD8, "payload-build root"), (0xBFE8, "boot-SA root"), (0x20840, "application-SA root")):
         f33 = image[start:start + 16]
         check(f"F33 {label} is 16 bytes and byte-identical to canonical Sienna", len(f33) == 16 and f33 == sienna[start:start + 16])
+    check("F33 reset/startup key-wipe neighborhood is byte-identical to canonical Sienna",
+          image[0x13E0:0x1478] == sienna[0x13E0:0x1478])
+    check("F33 payload KDF/init/clear neighborhood is byte-identical to canonical Sienna",
+          image[0x7068:0x70F8] == sienna[0x7068:0x70F8])
+    check("F33 AES init/clear neighborhood is byte-identical to canonical Sienna",
+          image[0x7680:0x76DA] == sienna[0x7680:0x76DA])
+    ram_exclusions = [
+        (int.from_bytes(image[0x29254 + i * 8:0x29258 + i * 8], "little"),
+         int.from_bytes(image[0x29258 + i * 8:0x2925C + i * 8], "little"))
+        for i in range(5)
+    ]
+    check("F33 application RMBA LocalRAM exclusions are exact",
+          ram_exclusions == [
+              (0xFEBE0000, 0xFEBE37FF), (0xFEBE503C, 0xFEBE52A7),
+              (0xFEBF0288, 0xFEBF13CB), (0xFEBF4958, 0xFEBF4B33),
+              (0xFEBF6000, 0xFEBF6CDF),
+          ])
+    check("F33 derived payload-key slot FEBF2D18 is outside every application RMBA exclusion",
+          all(not (lo <= 0xFEBF2D18 <= hi or lo <= 0xFEBF2D27 <= hi) for lo, hi in ram_exclusions))
+    retained_ram = (REPO / "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin").read_bytes()
+    check("retained F33 zero-DID boot session contains expected derived payload key at FEBF2D18",
+          retained_ram[0x12D18:0x12D28].hex() == "80d221a05622b4f9d4f287922e6c78d1")
 
     print("\n== target-native Gate-2 semantic result ==")
     check("fresh bare-import semantic resolver is unique and SHA-bound",

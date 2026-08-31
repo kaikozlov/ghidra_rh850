@@ -225,12 +225,18 @@ SecurityAccess state, object-15 RAM, the DataFlash object-12..15 bank, and the
 ICU-S tail. They do **not** make SID `0x23` non-security-relevant: most live
 application RAM and DataFlash remain directly observable without SID `0x27`.
 
-One notable allowed address is bootloader payload-derivation buffer
-`FEBF2D08..FEBF2D17`. Bootloader handoff calls application entry directly and no
-application static writer/clearer of that address is recovered. Whether useful
-programming-session material survives the resets/transitions required to reach
-application SID `0x23` is therefore a **dynamic residue question**, not a proven
-key disclosure.
+The payload-authentication neighborhood needs a sharper distinction than the
+original residue note made. `FEBF2D08..FEBF2D17` is merely tester-provided DID
+`0x0201` input. The secret-derived value is the adjacent 16-byte payload key at
+`FEBF2D18..FEBF2D27`, and that address is also inside the SID `0x23` allow-set.
+Boot payload crypto does not explicitly clear the standalone derived-key slot,
+so it is a high-value residue target in any future lifetime composition.
+However, the ordinary boot→application reset route is statically closed: reset
+startup zeroes `FEBE8000..FEBFFFFF` before calling application entry, destroying
+the derived key and its CBC/CMAC contexts before application RMBA becomes
+available. No recovered stock boot→application no-reset return bypasses that
+clear. The complete key-lifetime analysis and exact-F33 transfer are canonical
+in [bootloader-payload-gate.md](../bootloader-payload-gate.md#key-material-lifetime-and-residue-boundary).
 
 The read-only host implementation is
 `exploit/followups/application_rmba_probe.py`. It models the exact exclusion

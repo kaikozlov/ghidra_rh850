@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS SEC-BOOT-001 … SEC-BOOT-006
+> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS SEC-BOOT-001 … SEC-BOOT-009 and SEC-BOOT-014
 >
 > **Canonical artifacts:** pinned payload fixtures
 >
@@ -307,6 +307,66 @@ Thus the payload-build secret is a genuine code-execution gate. The CRC is only
 an integrity/format check; CMAC provides the cryptographic authorization. The
 critical execution primitive is the overlap between the allowed 4 KiB download
 window and the flash driver's callback slot at offset `0xFD0`.
+
+### Key-material lifetime and residue boundary
+
+The root and the derived payload key have materially different lifetimes.
+`payload_build_derive_key @ 0x7068` initializes an AES-128 context from the
+16-byte `PAYLOAD_BUILD_SECRET @ 0xBFD8`, placing the raw root plus expanded
+round-key state in the temporary context rooted at `0xFEBF2D48`. It then
+computes
+
+```text
+Kpayload = AES-128-ECB-ENC(PAYLOAD_BUILD_SECRET, DID_0x201)
+```
+
+and writes the 16-byte result to `0xFEBF2D18..0xFEBF2D27`. Immediately after
+that block operation, `aes128_clear_context @ 0x76C6` clears the temporary
+root-derived AES context (`0xC4` bytes after its state flag). No recovered
+software reader exposes the low-CodeFlash root at `0xBFD8`, and the transient
+root key schedule is therefore not a recovered disclosure surface.
+
+The derived key is handled less strictly. `payload_crypto_init_cbc_cmac @
+0x709A` uses `0xFEBF2D18` to initialize both the CBC-decrypt context at
+`0xFEBF2EF0` and the CMAC context at `0xFEBF2C00`; AES context initialization
+copies the 16-byte raw key into each context before expanding it. Thus an active
+payload operation has CPU-visible derived-key material at the persistent
+`0xFEBF2D18` slot and in both live crypto contexts. `payload_crypto_clear @
+0x70E4` clears the CBC/CMAC contexts, but does not clear the standalone
+`0xFEBF2D18` slot. Retained zero-DID sessions independently observe the expected
+value `80d221a05622b4f9d4f287922e6c78d1` at that address.
+
+This matters because application SID `0x23` ReadMemoryByAddress permits reads of
+`0xFEBF2D18` in both the canonical Sienna policy and the exact F33 policy; the
+cell lies outside their LocalRAM exclusion ranges. Knowledge of `Kpayload` for a
+chosen DID `0x201` is sufficient to construct the corresponding CBC ciphertext
+and CMAC without separately recovering `PAYLOAD_BUILD_SECRET`. The neighboring
+`0xFEBF2D08..0xFEBF2D17` buffer is only tester-provided DID `0x201` input and is
+not itself secret-derived material.
+
+The obvious residue composition is nevertheless closed by reset lifetime. The
+reset-only startup initializer `0x1404` zeroes the full
+`0xFEBE8000..0xFEBFFFFF` LocalRAM interval before the boot validity gate calls
+the application, which necessarily destroys `0xFEBF2C00`, `0xFEBF2D18`,
+`0xFEBF2D48`, and `0xFEBF2EF0`. Exact F33 is byte-identical to canonical Sienna
+over the reset-clear neighborhood (`0x13E0..0x1477`), payload KDF/init/clear
+neighborhood (`0x7068..0x70F7`), and AES init/clear neighborhood
+(`0x7680..0x76D9`), so the same boundary applies there.
+
+Therefore the stock software paths currently form a split capability:
+
+```text
+boot programming runtime: can derive Kpayload, but has no recovered arbitrary reader
+reset/startup:             wipes Kpayload and its crypto contexts
+application extended mode: can RMBA-read the address, but only after the wipe
+```
+
+No recovered stock boot-runtime operation returns to application execution
+without traversing that reset/startup clear. A future no-reset boot→application
+control transfer would immediately make `0xFEBF2D18` a high-value disclosure
+candidate and should be re-audited before attempting to recover the root itself.
+This is a software-path boundary, not a claim about physical fault injection,
+debug access, or other out-of-model hardware disclosure.
 
 ### Persistent-trust consequence
 
