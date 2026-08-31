@@ -32,6 +32,26 @@ assert groups[("0792", "9318e0bfa4be96b787365ea2b5e26f3f")]["package_count"] == 
 assert groups[("07D2", "da4158ee9dd381cf7f9fc66da74682f3")]["package_count"] == 2
 assert groups[("0724", "c178ed94d8dd00a65e520a536b7fa30c")]["package_count"] == 1
 assert actual["simple_public_id_kdf_negative"]["matching_packages"] == []
+
+payload = actual["eps_payload_root_cuw_trials"]
+assert payload["packages_with_seedkey_nonce_grammar"] == [
+    "T-0015-20.cuw",
+    "T-0035-22.cuw",
+    "T-0036-22.cuw",
+]
+assert payload["verified_shared_root_packages"] == ["T-0035-22.cuw", "T-0036-22.cuw"]
+assert payload["rejected_same_root_packages"] == ["T-0015-20.cuw"]
+trial_by_name = {trial["filename"]: trial for trial in payload["trials"]}
+assert all(
+    cpu["all_regions_cmac_valid"]
+    for name in ("T-0035-22.cuw", "T-0036-22.cuw")
+    for cpu in trial_by_name[name]["cpus"]
+)
+assert all(
+    not region["cmac_valid"]
+    for cpu in trial_by_name["T-0015-20.cuw"]["cpus"]
+    for region in cpu["regions"]
+)
 assert all(trial["best_candidate"]["byte_identity_after_32"] < 0.01 for trial in actual["reprostd_image_key_trials"])
 
 print("CUW cross-ECU SecurityAccess derivations: PASS")

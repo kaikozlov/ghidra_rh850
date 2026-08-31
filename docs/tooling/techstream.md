@@ -869,6 +869,36 @@ request. They are high-value firmware fingerprints: finding one
 beside the same AES seed/key state machine in a non-EPS image would strongly
 support a shared `f05f…` backend root.
 
+The **payload-build root** now has a separate direct cross-CUW test. Exactly
+three retained packages expose the EPS-style `SeedKey + Nonce + encrypted
+S-record` grammar: `T-0015-20`, `T-0035-22`, and `T-0036-22`, all `0x7A1` EPS.
+Using the root recovered independently from real EPS CodeFlash,
+`ba052435f8843f985fd1329d2b6117b0`, the normal package construction
+
+```text
+Kimage = AES-128-ECB-ENC(payload_build_root, deobfuscate(SeedKey))
+plain  = AES-128-CBC-DEC(Kimage, deobfuscate(Nonce), ciphertext)
+CMAC   = AES-CMAC(Kimage, Nonce || plain_without_final_tag)
+```
+
+validates **every body and erase region** in both Tundra F340 packages:
+`T-0035-22` (`8965F3401200/2200`) and independently `T-0036-22`
+(`8965F3403200/4200`). Their `SeedKey`/`Nonce` values differ, so this is direct
+reuse of the backend root across separate manufacturer packages rather than a
+replay of one derived image key. The older RAV4 `T-0015-20`
+(`8965B0R02300/01300`, repro spec 10, split ~2-MiB address geometry,
+`FEBE0000` erase routine) fails CMAC on **all six** encrypted regions under the
+same root. That establishes a generation boundary: `ba0524…` is reusable across
+the recovered F340/P1M-E-style EPS package family, but is not a universal key
+for every historical `0x7A1` EPS CUW. A failure on the older package does not
+distinguish a different root from a different generation-specific image
+construction.
+
+The modern non-EPS ReproStd packages do not expose `SeedKey`, so this exact
+positive oracle cannot yet be applied to FRC/HV/MG/Brake. Their missing KDF /
+image-transform layer remains the blocker; the first root to test once that
+layer is recovered remains the proven F340 EPS payload-build root.
+
 Two obvious alternatives were also checked and rejected narrowly. None of the
 recovered family working keys equals a simple AES encrypt/decrypt or CMAC of the
 public 16-bit diagnostic ID under the three known EPS roots. And selected FRC

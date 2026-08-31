@@ -2,7 +2,7 @@
   "conclusion": {
     "hypothesis": "If that backend root and wrapper algebra are shared cross-ECU, the predicted ECUAuthKey-shaped values are concrete firmware-search fingerprints for FRC/HV/MG.",
     "not_proved": "The corpus alone cannot decide whether a ReproStd ECU stores Kwork directly, stores the predicted wrapper under a universal root, derives it another way, or uses a different backend root. The tested simple ReproStd image-key guesses also do not identify the image transform or settle payload-build-root reuse.",
-    "verified": "Techstream/CUW exposes stable effective SecurityAccess working keys for several non-EPS ReproStd families. The T-0035 EPS control specimen exactly validates the frontend/backend wrapping algebra under the recovered EPS boot root."
+    "verified": "Techstream/CUW exposes stable effective SecurityAccess working keys for several non-EPS ReproStd families. The T-0035 EPS control specimen exactly validates the frontend/backend wrapping algebra under the recovered EPS boot root. Separately, the recovered EPS payload-build root CMAC-validates every encrypted body/erase region in both T-0035-22 and T-0036-22, while the older T-0015-20 RAV4 EPS package rejects that same root on every region."
   },
   "credential_groups": [
     {
@@ -106,6 +106,194 @@
     "filename": "T-0035-22.cuw",
     "service_auth_key": "5ff03870f01d7ae6ccb131918506c0f1",
     "working_key": "cbba47e8b05aa585a3b03516b0c27ed0"
+  },
+  "eps_payload_root_cuw_trials": {
+    "boundary": "This proves payload-build-root reuse only for packages whose own SeedKey/Nonce grammar validates under the recovered EPS root. A CMAC failure can reflect a different root or a different generation-specific payload construction; it is not evidence about ReproStd packages that omit SeedKey.",
+    "grammar": "Kimage=AES-128-ECB-ENC(EPS_PAYLOAD_BUILD_ROOT, deobfuscate(SeedKey)); plaintext=AES-128-CBC-DEC(Kimage, deobfuscate(Nonce), ciphertext); CMAC is stored in the final 16 plaintext bytes",
+    "packages_with_seedkey_nonce_grammar": [
+      "T-0015-20.cuw",
+      "T-0035-22.cuw",
+      "T-0036-22.cuw"
+    ],
+    "rejected_same_root_packages": [
+      "T-0015-20.cuw"
+    ],
+    "trials": [
+      {
+        "all_regions_cmac_valid": false,
+        "contact_type": "P5-Unified",
+        "cpus": [
+          {
+            "all_regions_cmac_valid": false,
+            "cpu_section": "CPU11",
+            "new_cid": "8965B0R02300",
+            "regions": [
+              {
+                "cmac_valid": false,
+                "kind": "body",
+                "load_address": "0x10008000",
+                "plaintext_sha256": "742bcc985db70eef5d0cb35785a75cf3fb8c4136d0f8e3f351ec9356ce3f6c54",
+                "size": 32768
+              },
+              {
+                "cmac_valid": false,
+                "kind": "body",
+                "load_address": "0x10028000",
+                "plaintext_sha256": "7dcb4e51ca0e7cf9f8d05ccd4afcfbbc83f13774328db9d7ef717dc8085978d9",
+                "size": 1933312
+              },
+              {
+                "cmac_valid": false,
+                "kind": "erase",
+                "load_address": "0xFEBE0000",
+                "plaintext_sha256": "ce4e2edc49c56530e8dc0a3880c590cf2fbe49d482e3a4741287739b28ee8226",
+                "size": 10960
+              }
+            ]
+          },
+          {
+            "all_regions_cmac_valid": false,
+            "cpu_section": "CPU12",
+            "new_cid": "8965B0R01300",
+            "regions": [
+              {
+                "cmac_valid": false,
+                "kind": "body",
+                "load_address": "0x8000",
+                "plaintext_sha256": "fce892f11fd67ff93d55eccf05fec9bd146fb9755eceaf2c09b0913cb3b1bf03",
+                "size": 32768
+              },
+              {
+                "cmac_valid": false,
+                "kind": "body",
+                "load_address": "0x28000",
+                "plaintext_sha256": "c4f4a18b3f6776d2bcdbd11e3de187d761eb983a2132737975094abdc5220bde",
+                "size": 1933312
+              },
+              {
+                "cmac_valid": false,
+                "kind": "erase",
+                "load_address": "0xFEBE0000",
+                "plaintext_sha256": "ce4e2edc49c56530e8dc0a3880c590cf2fbe49d482e3a4741287739b28ee8226",
+                "size": 10960
+              }
+            ]
+          }
+        ],
+        "diag_id": "07A1",
+        "filename": "T-0015-20.cuw",
+        "required_spec_repro_ver": "10",
+        "vehicle": "RAV4"
+      },
+      {
+        "all_regions_cmac_valid": true,
+        "contact_type": "P5-Unified",
+        "cpus": [
+          {
+            "all_regions_cmac_valid": true,
+            "cpu_section": "CPU11",
+            "new_cid": "8965F3401200",
+            "regions": [
+              {
+                "cmac_valid": true,
+                "kind": "body",
+                "load_address": "0x18000",
+                "plaintext_sha256": "e1f7ecb6df0721438c10bc5d5e42771e1c59dc37441305753428093b3bd1f150",
+                "size": 949760
+              },
+              {
+                "cmac_valid": true,
+                "kind": "erase",
+                "load_address": "0xFEBF0000",
+                "plaintext_sha256": "2d7f71a990f44fdec7072a11ec4de24dbb1b78d325d820641c39ecf1c0e5de81",
+                "size": 4096
+              }
+            ]
+          },
+          {
+            "all_regions_cmac_valid": true,
+            "cpu_section": "CPU12",
+            "new_cid": "8965F3402200",
+            "regions": [
+              {
+                "cmac_valid": true,
+                "kind": "body",
+                "load_address": "0x18000",
+                "plaintext_sha256": "6ddcb7e7a6a015168be6bc1a33948372ccac5d8d1045b9e2fc811e4fd43aafbe",
+                "size": 949760
+              },
+              {
+                "cmac_valid": true,
+                "kind": "erase",
+                "load_address": "0xFEBF0000",
+                "plaintext_sha256": "da015b63967baf772f0794ac207656a62b3796eb6ac2805d996dd35bbeb30b3f",
+                "size": 4096
+              }
+            ]
+          }
+        ],
+        "diag_id": "07A1",
+        "filename": "T-0035-22.cuw",
+        "required_spec_repro_ver": "02",
+        "vehicle": "TUNDRA"
+      },
+      {
+        "all_regions_cmac_valid": true,
+        "contact_type": "P5-Unified",
+        "cpus": [
+          {
+            "all_regions_cmac_valid": true,
+            "cpu_section": "CPU11",
+            "new_cid": "8965F3403200",
+            "regions": [
+              {
+                "cmac_valid": true,
+                "kind": "body",
+                "load_address": "0x18000",
+                "plaintext_sha256": "098c583cb86f1404f5aa870d4f200fdf8bdd7f4664d8a0071c513b6c46d958a7",
+                "size": 949760
+              },
+              {
+                "cmac_valid": true,
+                "kind": "erase",
+                "load_address": "0xFEBF0000",
+                "plaintext_sha256": "3857c10de3729e25c4cce4905ddd90dda47215872be514405caa6cbee39beb52",
+                "size": 4096
+              }
+            ]
+          },
+          {
+            "all_regions_cmac_valid": true,
+            "cpu_section": "CPU12",
+            "new_cid": "8965F3404200",
+            "regions": [
+              {
+                "cmac_valid": true,
+                "kind": "body",
+                "load_address": "0x18000",
+                "plaintext_sha256": "1ab43566c9a442f9ee96ab08321f23d15335496fca8e932c75b9311e1bcca526",
+                "size": 949760
+              },
+              {
+                "cmac_valid": true,
+                "kind": "erase",
+                "load_address": "0xFEBF0000",
+                "plaintext_sha256": "d3e062dc8babe050444d7d9aaa050e981698b30b357709e3a745db2665351cb3",
+                "size": 4096
+              }
+            ]
+          }
+        ],
+        "diag_id": "07A1",
+        "filename": "T-0036-22.cuw",
+        "required_spec_repro_ver": "02",
+        "vehicle": "TUNDRA"
+      }
+    ],
+    "verified_shared_root_packages": [
+      "T-0035-22.cuw",
+      "T-0036-22.cuw"
+    ]
   },
   "high_value_non_eps_predictions": {
     "0724": "192b8e45370251dff3b77f6bb069bf27",

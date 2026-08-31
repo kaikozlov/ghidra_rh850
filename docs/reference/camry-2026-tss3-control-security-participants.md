@@ -179,6 +179,37 @@ membership still needs to be read**
   Toyota SecOC, and authenticated chassis publication requires a downstream
   TSK-capable proxy.
 
+## Brake CUW shape / acquisition boundary
+
+The exact Camry category-435 package is **not yet local**, so do not assign it
+an EPS or FRC encryption grammar by analogy. What is fixed today is:
+
+- exact live Brake/EPB endpoint `0x7B0 -> 0x7B8`;
+- F181 `F152633K0000`, DID0105/assembly `8954147040`;
+- any accepted package must identify `Node01/DiagID=07B0`;
+- Toyota's official 24TC01 2023-Corolla Skid-Control/Brake-EPB campaign proves
+  a contemporary category-435 software-update family
+  `F152612A5100/5200/5300 -> F152612A5400`; this is a related Brake precedent,
+  **not** the Camry package;
+- current CUWPlus has a generic `P5-Unified` route using
+  `TCUWCanUnifiedCIDGetter` + Unified prepare/flash writers and generic CAN-ID
+  lookup, but the unavailable Brake descriptor must itself prove whether the
+  exact package selects that route;
+- the 26-package corpus contains zero `07B0` packages, so we currently have no
+  Brake-side `SeedKey`, Nonce, `ReproMethod`, image format, or plaintext decode
+  to transfer.
+
+This matters for the recovered EPS payload root. The same
+`ba052435f8843f985fd1329d2b6117b0` root CMAC-validates every encrypted body and
+erase region in two independent F340 EPS CUWs (`T-0035-22` and `T-0036-22`),
+while an older RAV4 EPS package rejects it. If an acquired `07B0` Brake CUW
+contains the same `SeedKey + Nonce` grammar, test that root immediately. If it
+omits `SeedKey` like the current ReproStd FRC/HV/MG packages, recover the
+package's KDF/image-transform layer before concluding that the backend root is
+different.
+
+Canonical acquisition evidence: TMS-047..052, VAR-069, and TMS-088.
+
 ## Hardware implication
 
 Toyota's recovered TSK implementation uses a SHE-like symmetric AES-CMAC key

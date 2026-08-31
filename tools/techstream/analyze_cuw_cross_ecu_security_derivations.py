@@ -12,17 +12,21 @@ backend ECU roots.  For every modern descriptor carrying ServiceAuthKey it:
   would produce the same working key if the recovered EPS boot root were shared
   by another ECU family.
 
-It also performs two bounded negatives useful for avoiding obvious dead ends:
-working keys are compared against simple DiagID KDFs under the three recovered
-EPS roots, and selected ReproStd image pairs are tested against a small explicit
-set of one-step AES image-key guesses.  These negatives do not identify the
-actual ReproStd image transform or disprove a shared backend root.
+It also tests the recovered EPS payload-build root against every retained CUW
+that exposes the legacy/Unified ``SeedKey + Nonce + S-record`` image grammar.
+That gives a direct CMAC oracle for cross-package root reuse. Finally, two
+bounded negatives avoid obvious dead ends: working keys are compared against
+simple DiagID KDFs under the three recovered EPS roots, and selected ReproStd
+image pairs are tested against a small explicit set of one-step AES image-key
+guesses. These negatives do not identify the actual ReproStd image transform or
+disprove a shared backend root.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import re
 import struct
 from collections import defaultdict
 from pathlib import Path
@@ -56,6 +60,7 @@ IMAGE_PAIR_SPECS = (
     ("hv_different_nonce", "T-0003-25.cuw", "T-0005-25.cuw"),
 )
 IMAGE_SAMPLE_BYTES = 0x10000
+EPS_PAYLOAD_GRAMMAR_PACKAGES = ("T-0015-20.cuw", "T-0035-22.cuw", "T-0036-22.cuw")
 
 
 def sha256(data: bytes) -> str:
@@ -294,6 +299,101 @@ def image_pair_trial(name: str, left_name: str, right_name: str, packages: dict[
     }
 
 
+
+def parse_srec_streams(data: bytes) -> list[list[bytes]]:
+    lines = [m.group(0) for m in re.finditer(rb"S[03789][0-9A-Fa-f]+(?=\r\n)", data)]
+    streams: list[list[bytes]] = []
+    current: list[bytes] = []
+    for line in lines:
+        kind = line[1:2]
+        if kind == b"0":
+            if current:
+                streams.append(current)
+            current = [line]
+        else:
+            current.append(line)
+            if kind == b"7":
+                streams.append(current)
+                current = []
+    if current:
+        streams.append(current)
+    return streams
+
+
+def srec_regions(stream: list[bytes]) -> list[tuple[int, bytes]]:
+    records: dict[int, bytes] = {}
+    for line in stream:
+        if line[1:2] != b"3":
+            continue
+        count = int(line[2:4], 16)
+        address = int(line[4:12], 16)
+        records[address] = bytes.fromhex(line[12:12 + 2 * (count - 5)].decode("ascii"))
+    regions: list[tuple[int, bytes]] = []
+    for address in sorted(records):
+        chunk = records[address]
+        if regions and address == regions[-1][0] + len(regions[-1][1]):
+            regions[-1] = (regions[-1][0], regions[-1][1] + chunk)
+        else:
+            regions.append((address, chunk))
+    return regions
+
+
+def eps_payload_root_trial(path: Path) -> dict:
+    attach, _format_type, _first_member_end = read_attach(path)
+    cpu_names = sorted(
+        (name for name in attach if re.fullmatch(r"CPU\d+", name) and attach[name].get("SeedKey") and attach[name].get("Nonce")),
+        key=lambda name: int(name[3:]),
+    )
+    streams = parse_srec_streams(path.read_bytes())
+    if len(cpu_names) != len(streams):
+        raise ValueError(f"{path.name}: CPU/stream mismatch {len(cpu_names)}/{len(streams)}")
+
+    cpu_rows = []
+    for cpu_name, stream in zip(cpu_names, streams):
+        index = cpu_name[3:]
+        cpu = attach[cpu_name]
+        did201 = decode_index_obfuscated_16(cpu["SeedKey"])
+        did202 = decode_index_obfuscated_16(cpu["Nonce"])
+        derived = AES.new(EPS_PAYLOAD_BUILD_ROOT, AES.MODE_ECB).encrypt(did201)
+
+        areas: dict[int, str] = {}
+        for prefix, label in (("CPUImage", "body"), ("EraseRoutine", "erase")):
+            section = attach.get(prefix + index, {})
+            for area_index in range(1, int(section.get("NumberOfAreaSettings", "0")) + 1):
+                key = f"{area_index:02d}_StartAddress"
+                if key in section:
+                    areas[int(section[key], 16)] = label
+
+        regions = []
+        for address, ciphertext in srec_regions(stream):
+            if len(ciphertext) % 16:
+                raise ValueError(f"{path.name}/{cpu_name}: unaligned region at 0x{address:X}")
+            plaintext = AES.new(derived, AES.MODE_CBC, did202).decrypt(ciphertext)
+            tag = cmac(derived, did202 + plaintext[:-16])
+            regions.append({
+                "kind": areas.get(address, "unknown"),
+                "load_address": f"0x{address:X}",
+                "size": len(ciphertext),
+                "cmac_valid": tag == plaintext[-16:],
+                "plaintext_sha256": sha256(plaintext),
+            })
+        cpu_rows.append({
+            "cpu_section": cpu_name,
+            "new_cid": cpu.get("NewCID", ""),
+            "regions": regions,
+            "all_regions_cmac_valid": bool(regions) and all(region["cmac_valid"] for region in regions),
+        })
+
+    return {
+        "filename": path.name,
+        "vehicle": attach.get("Vehicle", {}).get("VehicleName", ""),
+        "diag_id": attach.get("Node01", {}).get("DiagID", ""),
+        "required_spec_repro_ver": attach.get("Node01", {}).get("RequiredSpecReproVer", ""),
+        "contact_type": attach.get("Vehicle", {}).get("ContactType", ""),
+        "cpus": cpu_rows,
+        "all_regions_cmac_valid": bool(cpu_rows) and all(cpu["all_regions_cmac_valid"] for cpu in cpu_rows),
+    }
+
 def build() -> dict:
     packages: dict[str, dict] = {}
     for path in sorted(CUW_CORPUS_ROOT.glob("*.cuw")):
@@ -355,6 +455,7 @@ def build() -> dict:
     if not control or not control["actual_ecu_auth_key"] or control["eps_boot_root_relation_exact_when_actual_present"] is not True:
         raise ValueError("EPS control specimen does not reproduce the recovered backend relation")
 
+    payload_trials = [eps_payload_root_trial(CUW_CORPUS_ROOT / filename) for filename in EPS_PAYLOAD_GRAMMAR_PACKAGES]
     pair_trials = [image_pair_trial(name, left, right, packages) for name, left, right in IMAGE_PAIR_SPECS]
     for trial in pair_trials:
         # Random byte identity is 1/256 ~= 0.003906.  Keep a generous ceiling:
@@ -395,9 +496,17 @@ def build() -> dict:
             "matching_packages": [name for name, row in packages.items() if row["simple_diag_kdf_matches"]],
             "interpretation": "No tested working key is an obvious one-step derivation of the public diagnostic identifier under the recovered EPS roots. This is a bounded negative, not an exhaustive KDF search.",
         },
+        "eps_payload_root_cuw_trials": {
+            "grammar": "Kimage=AES-128-ECB-ENC(EPS_PAYLOAD_BUILD_ROOT, deobfuscate(SeedKey)); plaintext=AES-128-CBC-DEC(Kimage, deobfuscate(Nonce), ciphertext); CMAC is stored in the final 16 plaintext bytes",
+            "packages_with_seedkey_nonce_grammar": [trial["filename"] for trial in payload_trials],
+            "trials": payload_trials,
+            "verified_shared_root_packages": [trial["filename"] for trial in payload_trials if trial["all_regions_cmac_valid"]],
+            "rejected_same_root_packages": [trial["filename"] for trial in payload_trials if not trial["all_regions_cmac_valid"]],
+            "boundary": "This proves payload-build-root reuse only for packages whose own SeedKey/Nonce grammar validates under the recovered EPS root. A CMAC failure can reflect a different root or a different generation-specific payload construction; it is not evidence about ReproStd packages that omit SeedKey.",
+        },
         "reprostd_image_key_trials": pair_trials,
         "conclusion": {
-            "verified": "Techstream/CUW exposes stable effective SecurityAccess working keys for several non-EPS ReproStd families. The T-0035 EPS control specimen exactly validates the frontend/backend wrapping algebra under the recovered EPS boot root.",
+            "verified": "Techstream/CUW exposes stable effective SecurityAccess working keys for several non-EPS ReproStd families. The T-0035 EPS control specimen exactly validates the frontend/backend wrapping algebra under the recovered EPS boot root. Separately, the recovered EPS payload-build root CMAC-validates every encrypted body/erase region in both T-0035-22 and T-0036-22, while the older T-0015-20 RAV4 EPS package rejects that same root on every region.",
             "hypothesis": "If that backend root and wrapper algebra are shared cross-ECU, the predicted ECUAuthKey-shaped values are concrete firmware-search fingerprints for FRC/HV/MG.",
             "not_proved": "The corpus alone cannot decide whether a ReproStd ECU stores Kwork directly, stores the predicted wrapper under a universal root, derives it another way, or uses a different backend root. The tested simple ReproStd image-key guesses also do not identify the image transform or settle payload-build-root reuse.",
         },
