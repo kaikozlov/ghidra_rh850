@@ -4,7 +4,8 @@
 This intentionally does not transmit CAN.  It starts from an observed 32-byte
 0x160 template, changes only the candidate signed-7 request at B12 and the B2
 alive counter, then recomputes the exact AUTOSAR E2E Profile-5 CRC recovered in
-VAR-107.
+VAR-107.  See the standards note beside CAN_ID below for the recovered Profile-5
+wire parameters used by this Toyota family.
 
 The tool does *not* claim that B12 is the final OEM longitudinal request field
 or that a downstream receiver will accept synthetic traffic.  Those remain
@@ -23,6 +24,16 @@ sys.path.insert(0, str(REPO))
 
 from tools.toyota_e2e_p05 import e2e_p05_check, e2e_p05_protect
 
+# AUTOSAR E2E Profile 5 (AUTOSAR_PRS_E2EProtocol), as recovered for the
+# native Camry Bus-1 family:
+#   - CRC-16/CCITT-FALSE: poly=0x1021, init=0xFFFF, refin=false,
+#     refout=false, xorout=0x0000 (AUTOSAR CRC library parameters)
+#   - transmitted CRC is little-endian in B0:B1
+#   - B2 is the 8-bit Profile-5 counter
+#   - CRC covers B2..end, then the implicit 16-bit Data ID
+#   - on these Toyota PDUs, Data ID == CAN ID and is appended low byte then high byte
+# The reusable implementation lives in tools/toyota_e2e_p05.py; this PoC only
+# supplies the recovered 0x160 application-field semantics on top of that standard.
 CAN_ID = 0x160
 DLC = 32
 

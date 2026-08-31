@@ -44,6 +44,12 @@ def check(name: str, condition, detail: str = "") -> None:
 print("== exact Profile-5 primitive ==")
 check("CRC-16/CCITT-FALSE standard check vector", crc16_ccitt(b"123456789") == 0x29B1)
 
+poc_source = (REPO / "tools/camry_frc_request_poc.py").read_text()
+check("PoC documents AUTOSAR Profile-5 standard and recovered wire parameters",
+      "AUTOSAR_PRS_E2EProtocol" in poc_source
+      and "poly=0x1021" in poc_source
+      and "Data ID == CAN ID" in poc_source)
+
 print("== signed7 codec ==")
 check("signed7 endpoints", encode_signed7(-64) == 0x40 and encode_signed7(63) == 0x3F)
 check("signed7 roundtrip", all(decode_signed7(encode_signed7(v)) == v for v in range(-64, 64)))
