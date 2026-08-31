@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 411 · Corrections: 146 · Open questions: 54 · Docs: 114 · Suites: 215
+Findings: 413 · Corrections: 148 · Open questions: 54 · Docs: 114 · Suites: 215
 
 ## Reading this index
 
@@ -430,6 +430,8 @@ Findings: 411 · Corrections: 146 · Open questions: 54 · Docs: 114 · Suites: 
 | <a id="finding-var-101"></a>**VAR-101** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CAMRY_08A_SIGNER_CONTINUITY_2026-08-30](../history/2026-08/CAMRY_08A_SIGNER_CONTINUITY_2026-08-30.md), [README](../history/2026-08/README.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) (+1) | `tests/verify_camry_2026_08a_signer_continuity.py` | OQ-054 |
 | <a id="finding-var-102"></a>**VAR-102** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000.py` | OQ-054 |
 | <a id="finding-var-103"></a>**VAR-103** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | — | — |
+| <a id="finding-var-104"></a>**VAR-104** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_8965F3307000_command_cone_ingress.py` | — |
+| <a id="finding-var-105"></a>**VAR-105** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_8965F3307000_command_cone_ingress.py` | — |
 
 ## Open-questions index
 
@@ -640,6 +642,8 @@ Findings: 411 · Corrections: 146 · Open questions: 54 · Docs: 114 · Suites: 
 | <a id="correction-corr-144"></a>**CORR-144** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 | <a id="correction-corr-145"></a>**CORR-145** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 | <a id="correction-corr-146"></a>**CORR-146** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
+| <a id="correction-corr-147"></a>**CORR-147** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
+| <a id="correction-corr-148"></a>**CORR-148** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 
 ## Document registry
 

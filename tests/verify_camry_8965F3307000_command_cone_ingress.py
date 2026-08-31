@@ -205,6 +205,65 @@ check("eight D0218 term writers do not reference ADB0 or the B6 COM window",
       all("DAT_febeadb0" not in src and "DAT_febe4bff" not in src
           for src in writers.values()))
 
+# VAR-104: B6-vs-internal arbitration decode (stock pass-through, transient
+# pulse machine, no blockable carrier). Direct corpus + CodeFlash joins.
+codeflash = (REPO / "firmware/camry-8965F3307000/CodeFlash.bin").read_bytes()
+
+def _camry_u16(addr: int) -> int:
+    return int.from_bytes(codeflash[addr:addr + 2], "little")
+
+cb73a = _camry_decompiled(0xCB73A)
+cb396 = _camry_decompiled(0xCB396)
+cb82c = _camry_decompiled(0xCB82C)
+cb9c8 = _camry_decompiled(0xCB9C8)
+cb9ae = _camry_decompiled(0xCB9AE)
+cbf9e = _camry_decompiled(0xCBF9E)
+cbc80 = _camry_decompiled(0xCBC80)
+d039e = _camry_decompiled(0xD039E)
+bca08 = _camry_decompiled(0xBCA08)
+c1be4 = _camry_decompiled(0xC1BE4)
+d0674 = _camry_decompiled(0xD0674)
+cf2b2 = _camry_decompiled(0xCF2B2)
+bcd66 = _camry_decompiled(0xBCD66)
+
+check("stock state passes CC60 through CC50 unchanged (guard fallbacks 0x100/0x0)",
+      "DAT_000b04c4" in cb9c8 and "0xffff" in cb9c8
+      and "DAT_000b04d4" in cb9ae and "0xffff" in cb9ae
+      and _camry_u16(0xB04C2) == 0x100 and _camry_u16(0xB04C4) == 0x100
+      and _camry_u16(0xB04C6) == 0x100 and _camry_u16(0xB04D4) == 0x0)
+check("base-scale target never deviates from x1.0 in either C7BF state",
+      "DAT_000b04c2" in cb82c and "DAT_000b04c4" in cb82c
+      and "DAT_000b04c6" in cb82c and "DAT_000b04d4" in cb82c)
+check("C81A addend is measured-rate/damping shaped, not a raw B6 angle",
+      "DAT_febec172" in cbf9e and "DAT_febec81a" in cbf9e
+      and "DAT_febeac88" in cbc80)
+check("D039E composes base*f(CB9C8) plus a C797-gated CB9AE*C81A term",
+      "FUN_000cb9c8()" in d039e and "FUN_000cb9ae()" in d039e
+      and "puVar3[-0xbd8] == '\\x01'" in d039e and "puVar3 + 0x1460" in d039e
+      and "puVar3 + 0x1450" in d039e and "DAT_000b1334" in d039e)
+check("CB73A raise requires the sig261 0x31 literal plus enable/freshness gates",
+      "DAT_febec7b4 == '\\x01'" in cb73a and "DAT_febec7be == '\\0'" in cb73a
+      and "DAT_febec795 == '\\x01'" in cb73a and "DAT_febec7b3 == '\\0'" in cb73a
+      and "DAT_febeadb0 == '1'" in cb73a
+      and "DAT_febeadb0 == '\\x01'" not in cb73a
+      and "DAT_000b04c0" in cb73a and "LAB_000cb80c" in cb73a)
+check("0x31 is not a CEFFC bank case, so the pulse machine is not the ID11 path",
+      "DAT_febeadb0 == '1'" not in ceffc)
+check("C797 latch self-terminates the pulse (5 ticks, 0x280 magnitude gate)",
+      "puVar5[0xf97] = 1" in cb396 and "DAT_000b04b6" in cb396
+      and "DAT_000b04b4" in cb396 and _camry_u16(0xB04B4) == 0x280
+      and _camry_u16(0xB04B6) == 5 and _camry_u16(0xB04C0) == 0x12C)
+check("AC10 base-swap payload is internal AC68, not B6-derived",
+      "DAT_febeac10 = DAT_febeafa8;" in bca08
+      and "DAT_febeafa8 = DAT_febeac68;" in c1be4)
+check("ADB0 snapshot copies staged FEBEF130 via BCD66",
+      "puVar15[-0xa50] = puVar15[0x3930];" in bcd66)
+check("CC94/CC98 override writer is internal-only (no B6 references)",
+      "DAT_febecc94 = -DAT_febecc80;" in d0674 and "DAT_febeadb0" not in d0674)
+check("CB38 ramp target comes from CB08/CB20 supervisor state",
+      "DAT_febecb08" in cf2b2 and "DAT_febecb20" in cf2b2
+      and "DAT_febecb38" in cf2b2)
+
 sel = art["baseline_selector_machinery"]
 check("baseline parameter-bank selector ordinary-COM inputs are exact and finite",
       [(x["signal"], x["can_id"], x["byte"], x["bits"], x["bit_offset"], x["stage_cell"])

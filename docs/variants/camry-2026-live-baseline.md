@@ -2835,12 +2835,116 @@ The relay-open rlogs also resolve an integration-routing bug that was invisible 
 
 **Current rule:** exact-F33 development uses normal comma topology — physical relay open, native-format software forwarding, B6 injection on bus 0, and native camera-side `0x08A` observation on bus 2. Do not restore the relay-closed workaround and do not parse the forwarded `0x08A` TX echo as bus-0 state.
 
+## 48. B6-vs-internal steering arbitration: no receiver-side exclusion, no blockable stock-LTA carrier (VAR-104)
+
+Session question: can stock lateral remain active while an external B6 command is
+accepted, does `0x08A` ID11 carry actual authority, and is there an exact-F33-accepted
+CAN frame whose Panda-forwarding suppression could disable the stock
+B6-independent internal path? Every claim below is a direct read of the exact
+`8965F3307000` canonical corpus (VA = file offset; image `42dce8ef…d9b0e7`),
+extending §29/§30 rather than transferring from H/F.
+
+### 48.1 The shared funnel has exactly one external authority ingress, and stock passes it by
+
+- `FUN_000D039E` composes `FEBECC50 = clamp(base×CB9C8()/0x100 + (FEBEC797==0 ? CB9AE()×FEBEC81A/0x100 : 0), ±B1334)`, with `FEBEAC28` selecting base `FEBECC60` (the `D0218` path) or `FEBECC5A`.
+- Guarded-factor fallbacks pin the stock state: `FUN_000CB9C8` falls back to ROM `0xB04C4 = 0x100` (base ×1.0) and `FUN_000CB9AE` to `0xB04D4 = 0` (addend ×0), so with B6 absent `CC50 = CC60` exactly. `FUN_000CB82C` holds the base-scale target at `0x100` in **both** `C7BF` states (`0xB04C2 == 0xB04C4 == 0x100`); only the addend factor `FEBEC7BC` targets `0 ↔ 0x100`. The base is never scaled away — native power assist survives any B6 state.
+- The addend payload `FEBEC81A` (`FUN_000CBF9E`) is composed from measured angle-rate `FEBEC172`, a ROM-gain damping product, and cone integrators — not a raw B6 angle pass-through; `FUN_000CBC80/CBCB8` derive their request from Δ(`FEBEAC88`) and a speed class.
+
+### 48.2 The only displacement machine is a self-terminating transient, not LTA/LCA
+
+`FUN_000CB73A` raises `FEBEC7BF` only with `C7B4 && !C7BE && C795 && !C7B3 && ADB0 == 0x31 && AE02 < ROM[bank]` after a 300-tick (`0xB04C0 = 0x12C`) qualification. The decompiler literal `'1'` is **0x31, not numeric 1**: `FUN_000CEFFC`'s bank cases for the same snapshot cell are exactly `0x01/0x04/0x0A/0x0B/0x12/0x13`, so the arming value lies outside the documented Target Lateral ID alphabet. The hold path requires `ADB0 == 0x31` continuously, and `FUN_000CB396` latches `FEBEC797` after ≥5 ticks (`0xB04B6 = 5`, magnitude gate `0xB04B4 = 0x280`), which removes the addend in `D039E` and lets `FUN_000CB664` clear `C7B4` — the machine self-terminates. When it does run, `D0218` collapses to `C4C0 + BF3C` (verified), dropping the driver-torque and return/dither terms: a bounded cooperative pulse profile, not a sustained steering authority. Any future B6 sender must not assume dictionary IDs arm this path.
+
+### 48.3 Verdicts and the remaining open state
+
+- **B6 with ID11 co-modulates the ordinary branch**: `CEFFC` banks (`CB00=2`) re-index the `CD094`/`CDFF8` tables whose outputs `CA7A/CA88` feed the supervisor family (`CC9AC/CE144/CE26E`) that drives the `CF2B2` ramp of `CB38` from `CB08/CB20`. No receiver-side exclusion between external B6 and the internal authority state is recovered; the `CA7A/CA88 → CB08` edge is statement-unclosed and the stock authority selector remains the CORR-135 open question. This bounds coexistence as an unresolved receiver behavior; it does not identify a separate openpilot authority signal.
+- **`0x08A` ID11 stays request-plane only** (F33's 43-Rx/47-rule/5-Tx surfaces exclude it; grant discriminator remains Operation-FFD `5265`, VAR-095/OQ-054). It therefore must not be promoted into a Panda or `CarController` lateral-permission/interlock signal.
+- **No Panda-forwarding suppression frame can be justified.** F33's accepted surface contains no stock-LTA carrier; `0x08A`/`0x081` are not accepted by F33, and suppressing them would only destroy `CarState` inputs and OQ-054 producer evidence; the stock request crosses the private middle (VAR-094). The native openpilot integration therefore keeps authority in the normal stack (`controls_allowed`/`CC.latActive`) rather than inventing a request-plane engage veto. Passive DID readback (`0x1C02/0x1C38/0x1C3E`) remains useful for observing arbitration behavior without becoming an engagement gate.
+
+Deterministic evidence: `tests/verify_camry_8965F3307000_command_cone_ingress.py` (VAR-104 corpus-join block) against
+`data/generated/camry-8965F3307000/decompilations.jsonl` and `firmware/camry-8965F3307000/CodeFlash.bin`.
+No output authorized.
+
+
+## 49. Final native openpilot port boundary and route-2A disposition (VAR-105 / CORR-148)
+
+The final integration audit deliberately separates **Toyota/F33 protocol facts** from
+**openpilot control policy**. Target-specific decoding, B6 construction, the exact
+angle scale/range, fixed bus topology, and the zero-MAC28 trailer required by the
+already-installed Gate-2 patch remain platform code. Bring-up-only policy and
+instrumentation do not.
+
+The normal driving path is now:
+
+`controlsd -> CC.latActive -> Toyota CarController -> standard angle shaping -> F33 B6 -> ordinary Toyota Panda safety -> EPS`.
+
+There are no private F33 arming Params, runtime FRC diagnostic oracle, fake
+`secOcKeyAvailable`, separate `ALLOW_DEBUG` steering mode, Python shadow safety,
+dynamic harness selection, controller-side `0x08A` authority veto, custom Panda
+B6 sequence-gap/35-ms/`0x00F` admission policy, or raw steering-rate veto. Panda
+uses the normal Toyota safety model, a B6-only transmit whitelist, normal
+`controls_allowed`, measured angle, and shared `steer_angle_cmd_checks()`. The
+request-plane `0x08A` state remains an observed Toyota state and is not promoted
+to an EPS grant or forwarding-block signal (VAR-104).
+
+### 49.1 Route `0000002a--c5647fd694` explains the old zero-steering result
+
+The complete copied route contains **13,410 active B6 send attempts**. Panda
+returned **8,051** as transmitted and rejected **5,359** under the superseded
+custom safety policy. Every active old command used Target Lateral ID 11 and
+100/100 contribution fields but B6 byte6=`0x04`. Exact-F33 signal265 is that bit;
+its mode2 consumer proves value 1 suppresses one target-derived contribution.
+Thus the road-test failure is consistent with two already-removed implementation
+errors: an active command shape that explicitly suppressed a contribution and a
+custom Panda admission policy that discarded about 40% of active attempts. It is
+not evidence for restoring those policies or inventing another receiver gate.
+
+The cleaned sender uses active ID11 with signal265=0 and 100/100 contributions.
+Inactive output uses ID0 with inert companions. Application sequence/freshness
+remain protocol-construction state in the sender; they are not duplicated as
+Panda control policy.
+
+### 49.2 Standard semantics are mapped only where the target closes them
+
+The port exposes the target's physical steering angle/rate and driver torque.
+The first-class F33 evidence explicitly leaves the **driver-override numeric
+threshold** unresolved (the ~8.238 N.m figure is representation saturation, not
+an override threshold), so `steeringPressed` is not synthesized from a guessed
+number. Likewise, the exact fault/status work does not close openpilot
+`steerFaultTemporary` versus `steerFaultPermanent`; those policy fields remain
+neutral until live asserted/recovery dynamics establish the mapping.
+
+Cruise engagement follows normal Toyota `pcmCruise` semantics using the recovered
+Camry operating state. Physical MAIN/RES+/SET-/CANCEL are exposed as standard
+read-only button events. Door, belt, brake/hold, parking brake, blinkers, BSM,
+traction-control state, generic high-beam toggle, gear/Ready, speed and cruise set
+speed flow through ordinary `CarState` fields. No TSS3 HUD sender or legacy Toyota
+ACC/LKA frame is fabricated without a target contract.
+
+### 49.3 Supported output versus bounded unsupported features
+
+Lateral output is supported on the **exact maintainer Camry with the persistent
+Gate-2 patch already installed and reboot-verified**. This support does not claim
+a recovered SecOC key and does not generalize to unpatched F33 EPS software or
+other TSS3 platforms. The Corolla TSS3 target remains read-only.
+
+One normal openpilot feature remains intentionally unsupported: system-generated
+stock-ACC cancel. Physical CANCEL is decoded, but no safe TSS3 transmit command
+is recovered. `0x0FE` is a protected/rolling switch carrier and is not spoofed;
+`0x0C9`/`0x0CA` are continuous longitudinal quantities, not discrete cancel
+messages; old Toyota cancel IDs are absent from the captured network. Recovery
+of that exact transmit contract is future work, not a lateral-output gate.
+
+The preferred RAM-only/reset-to-stock signer architecture is also future research
+for eliminating the persistent development patch. It is not part of the current
+openpilot runtime and must not reintroduce private Params/oracles or alternative
+safety authority.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146)
+- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148)
 <!-- knowledge-cross-references:end -->
