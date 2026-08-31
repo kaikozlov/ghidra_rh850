@@ -3142,6 +3142,16 @@ Consequently, for an intercepted stock `0x160` frame, changing only B12 from
 
 `new_B0B1 = old_B0B1 XOR XOR(B12_contribution[i] for each set bit i in old XOR new)`.
 
+`tools/camry_frc_request_poc.py` packages that recovered rule as an **offline
+template-based request constructor**. It takes an observed 32-byte `0x160`,
+sets the signed-7 B12 candidate, preserves the intercepted B2 by default (or
+explicitly advances/sets it for next-frame synthesis), repairs B0:B1 from the
+recovered B2/B12 XOR contributions, and changes no other byte. Its
+verifier reconstructs **23,083** retained same-payload frame pairs (including
+81 B12-changing pairs) with **0 mismatches**. The CLI contains no CAN transmit
+path; source attribution, B12 OEM identity, receiver counter-window behavior,
+and downstream acceptance remain separate live questions.
+
 This is an **analysis result**, not yet a vehicle-control contract. VAR-106 still
 leaves `0x160` physical transmitter/direction and B12 OEM identity open, and no
 live experiment has shown how the downstream ECU reacts to a synthetically
@@ -3152,8 +3162,9 @@ SecOC/TSK authentication boundary** seen on Bus 4.
 Deterministic evidence:
 `tools/analyze_camry_2026_bus1_e2e.py`,
 `data/generated/camry_2026_bus1_e2e.json`, and
-`tests/verify_camry_2026_bus1_e2e.py`. No control output is authorized by this
-finding.
+`tests/verify_camry_2026_bus1_e2e.py`; implementation witness:
+`tools/camry_frc_request_poc.py` / `tests/verify_camry_frc_request_poc.py`. No
+control output is authorized by this finding.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
