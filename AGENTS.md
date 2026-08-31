@@ -1,8 +1,7 @@
 # Agent instructions
 
-Operating contract for changing this repository. For what the firmware *is*,
-read `docs/OVERVIEW.md`. For how to run the tooling, read `docs/WORKFLOW.md`.
-This file is only what an agent must **obey** while working here.
+Operating contract for changing this repository. What the firmware *is*:
+`docs/OVERVIEW.md`. How to run the tooling: `docs/WORKFLOW.md`.
 
 ## Source-of-truth hierarchy
 
@@ -10,319 +9,175 @@ This file is only what an agent must **obey** while working here.
 2. **Generated artifacts** (`data/` generated CSVs — regenerate, never hand-edit)
 3. **Curated evidence tables** (`data/` hand-maintained CSVs — edit intentionally, validate with tests)
 4. **Annotated Ghidra project** (`project/` committed snapshot)
-5. **Narrative documentation** (`docs/` subsystem reports)
-6. **Historical notes** (`legacy/`, superseded claims in `docs/status/CORRECTIONS.md`)
+5. **Narrative documentation** (`docs/`), then historical notes (`docs/status/CORRECTIONS.md`)
 
-THE DOCS ARE NOT A PRIMARY SOURCE. THEY ARE AN APPROXIMATE EXPLANATION BASED
-ON FINDINGS UP TO THIS POINT. THEY ARE FALSIFIABLE. THE FIRMWARE IS THE SINGLE
-SOURCE OF TRUTH.
+The firmware is the single source of truth; the docs are falsifiable
+approximations. For firmware/vehicle-behavior questions, go to the Ghidra CLI
+against the binary first (`tools/g`, `tools/pseudo`) — never read our own
+docs/tests as primary sources. Naming a function without decompiling it is
+slop; verify firmware claims from gate code, not spec knowledge.
 
-For **firmware/vehicle-behavior questions**, use Ghidra CLI tools against the
-binary first — never read our own docs/tests as primary sources. `query functions
---count`/`--sort -size` for census; `decompile`/`x-ref`/`disasm` for analysis.
-Heuristic function naming without decompiling is slop. Verify firmware claims
-from firmware gate code, not spec knowledge.
+For **openpilot/comma integration-design questions** the priority reverses:
+current upstream openpilot/opendbc/Panda is the design reference. Firmware
+evidence defines only what is genuinely target-specific (wire format, buses,
+scaling, limits, capabilities, actual incompatibilities) — it is not an
+invitation to add policy. -- The goal is native openpilot/comma integrattion.
 
-For **openpilot/comma integration-design questions**, the design reference is
-current upstream openpilot/opendbc/Panda. Do not reverse the priority and derive
-a bespoke software architecture from firmware simply because this is an RE repo.
-Use firmware to determine what is genuinely target-specific.
+## Non-negotiable hazards
 
-## Non-negotiable repository hazards
-
-- **Never open committed `project/` or `projects/` snapshots with a `ghidra` daemon.** Any open
-  compacts its DB and dirties the tree even with no analysis change. Use
-  `build/work/project/` (via `make work-project`).
-- **Always `ghidra ... stop` before copying or committing the working
-  project.** The daemon holds edits in memory; only teardown commits durably.
-  Confirm `pgrep -f 'AnalyzeHeadless.*rh850'` is empty before snapshotting.
-- **Never commit while a daemon is running** — it holds transient `.lock` /
-  `tmp*` files.
-- **Never infer CodeFlash VA without accounting for the DataFlash prefix.**
-  CodeFlash VA = file offset − `0x8000`.
-- **Never point a rebuild at committed `project/` or `projects/`.** Promote only with
-  `make snapshot-project`.
-- **`build/` is workspace state, never evidence authority.** Portable verification
-  must pass without it. Use only `build/cache/`, `build/work/`, `build/out/`,
-  `build/logs/`, and `build/tmp/`; promote any input that verification depends on
-  into a tracked repository location first.
-- **Do not collapse the four-stage rebuild.** Seed timing changes Ghidra's
-  recovered graph. See `docs/WORKFLOW.md` §"The four-stage analysis".
-- **`legacy/flat-import/` is historical only.** Do not use it for current
-  results.
+- **Never open committed `project/` or `projects/` with a Ghidra daemon** — any
+  open compacts the DB and dirties the tree. Work in `build/work/project/`
+  (`make work-project`).
+- **Never commit while a daemon runs** (it holds transient `.lock`/`tmp*`
+  files), and always `tools/g stop` before copying or snapshotting the working
+  project — only clean teardown persists edits durably. Confirm
+  `pgrep -f 'AnalyzeHeadless.*rh850'` is empty before snapshotting.
+- **Never point a rebuild at `project/` or `projects/`.** Promote only with
+  `make snapshot-project` (end of session: `make finalize-project`).
+- **CodeFlash VA = file offset − `0x8000`** (DataFlash prefix).
+- **`build/` is workspace state, never evidence authority.** Portable
+  verification must pass without it; promote any input verification depends on
+  to a tracked location first.
+- **Do not collapse the four-stage rebuild** — seed timing changes Ghidra's
+  recovered graph (docs/WORKFLOW.md §"The four-stage analysis").
 
 ## Snapshot policy
 
-Direct CLI mutations are exploratory. Any persistent rename, function
-creation, signature, type, comment, or overlay must be represented in tracked
-rebuild inputs before snapshotting. Use `tools/annotations` /
-`data/annotations/annotation_ledger.jsonl` for mechanical renames, data labels,
-and listing comments; use seed/annotation scripts for semantic recovery, function creation,
-signatures, types, and overlays. Only the designated integration task updates
-`project/` (via `make snapshot-project`).
+Direct CLI mutations are exploratory. Anything persistent — renames, function
+creation, signatures, types, comments, overlays — must be represented in
+tracked rebuild inputs before snapshotting: `tools/annotations` /
+`data/annotations/annotation_ledger.jsonl` for mechanical renames, data
+labels, and listing comments; seed/annotation scripts for semantic recovery.
 
-## Standard commands
+## Tools
 
-```bash
-uv sync --locked          # one-time environment
-tools/test                # dirty + untracked vs HEAD; clean tree exits 0
-tools/test branch         # PR-shaped: all work since upstream merge-base
-tools/test @exploit       # manifest-defined cross-family bundle
-tools/test list [query]   # discover suites/families/groups, test counts, and modes
-tools/test plan [changed|branch|query] # show selection without executing
-tools/test core           # fast repository-integrity smoke; also full or local
-make verify               # alias for tools/test
-make verify-core          # fast repository-integrity smoke
-make verify-full          # exhaustive portable tracked-repository gate
-make verify-local         # full + locally available external/live suites
-make verify-agent         # core smoke with compact JSON summary
-make verify-required-external # require the pinned Techstream corpus
-make ghidra-cli           # build the vendored ghidra CLI into build/cache/ghidra-cli/
-make verify-sleigh        # SLEIGH compile + isolated install
-make verify-processor     # fixtures + asserting audits on build/work/project/
-make snapshot-project     # the ONLY path that mutates committed project/
-make finalize-project     # stop daemon, verify, snapshot, print diff (end-of-session)
-make build-status         # namespace sizes + legacy top-level build entries
-make clean-build          # safe cleanup: build/logs + build/tmp only
-# Explicit legacy quarantine (dry-run first):
-uv run --locked python tools/build_layout.py migrate-legacy
-```
-
-## Tool discovery
-
-Remember four task commands, not individual implementation files:
+Remember task commands, not implementation files:
 
 | Task | Command |
 |---|---|
-| Edit-loop tests | `tools/test` |
-| Discover / preview | `tools/test list [word]`, `tools/test plan` |
+| Edit-loop tests | `tools/test` (dirty + untracked vs HEAD; clean tree exits 0) |
+| Discover / preview suites | `tools/test list [query]`, `tools/test plan [changed\|branch\|query]` |
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
 | GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
-| Repository knowledge / findings / open questions | `tools/know QUERY` |
-| Generated artifacts / producers / owners | `tools/artifact` |
+| Repository knowledge (findings, corrections, open questions) | `tools/know QUERY` |
+| Generated artifacts / producers / owners | `tools/artifact list/show/regen/check` |
 | Registered analysis targets | `tools/gtarget list`, `tools/gtarget show TARGET` |
-| Deliberate gates | `tools/test core` / `full` / `branch` |
+| Evidence compaction / variant extraction / project exports | `tools/extract_corolla_h_evidence.py list`, `tools/extract_variant_evidence.py list`, `tools/export_ghidra_project.sh list` |
 
-`tools/gtarget list` and `tools/gtarget show TARGET` are the target discovery surface; `tools/gtarget TARGET ...` (and wrappers such as `tools/gcamry`) run Ghidra commands against a configured target. Registered rebuild inputs, stage scripts, image identities, and corpus paths live in `data/analysis_targets.json`; generic target shell tooling must not bake in vehicle-specific paths.
+`tools/gtarget TARGET ...` (and wrappers such as `tools/gcamry`) run Ghidra
+commands against a configured target. Registered rebuild inputs, stage
+scripts, image identities, and corpus paths live in
+`data/analysis_targets.json`; generic target tooling must not bake in
+vehicle-specific paths.
 
-`tools/artifact list/show/regen/check` is the generated-artifact discovery surface. It derives producer candidates from tracked tool references and verification ownership from `verification.toml`; do not recreate builder→artifact tables in new regen wrappers.
+Daily commands: `uv sync --locked` (one-time), `tools/test`, `tools/test core`,
+`make verify-core`. The full gate surface (`branch`, `@exploit`,
+`verify-full`, `verify-local`, `verify-sleigh`, `verify-processor`, …) is
+enumerated in `docs/WORKFLOW.md` §Verification — don't recreate it as Make
+wrappers or new registries; `verification.toml` and the discovery commands
+above are the source of truth.
 
-`tools/know QUERY` searches the authoritative findings, corrections, open-question ledgers, generated-artifact catalog, verification suites, and tracked docs. Use it for repository-memory questions before grepping individual ledgers; it does not replace firmware/Ghidra as evidence authority.
-
-Evidence compaction, cross-variant extraction, and working-project exports expose their own discovery commands: Evidence compaction, cross-variant extraction, and working-project
-exports expose their own discovery commands:
-
-```bash
-uv run --locked python tools/extract_corolla_h_evidence.py list
-uv run --locked python tools/extract_variant_evidence.py list
-tools/export_ghidra_project.sh list
-```
-
-Portable proofs that share a family, mode, and compatible evidence class live in one
-module (`tests/verify_application_wdbi.py`, `tests/verify_corolla_h.py`, and so on).
-Prefix queries are the memory: `tools/test list application` / `corolla` /
-`techstream`. Cross-family deliberate bundles are manifest groups such as
-`tools/test @exploit`; do not recreate them as Make wrappers. Statically resolvable
-Python file/import/subprocess dependencies are derived by `tools/verification_deps.py`;
-keep `verification.toml` `paths` for non-obvious semantic/dynamic invalidators and
-for dependencies hidden behind string tables or shell indirection, not paths the
-verifier already exposes as resolvable `Path` expressions. Merge same-mode same-family portable
-proofs only when the merged module can preserve conservative oracle labeling; keep
-live, external, and distinct safety pipelines separate.
-
-### Interactive Ghidra via tools/g
+### tools/g (interactive Ghidra)
 
 `tools/g` is fully self-contained — it bootstraps the isolated processor
-environment internally. **Never** `source build/cache/ghidra-processor.env` manually;
-the wrapper handles it.
+environment and materializes the working project itself. **Never** `source
+build/cache/ghidra-processor.env` manually.
 
 ```bash
 tools/g decompile 0x8db22
-tools/g x-ref to 0x8db22
 tools/g inspect 0xc853a --decompile --callers --callees --xrefs --disasm 40
-tools/g inspect 0xc853a 0x8db22 --decompile
 tools/g x-ref trace-to 0xfebef02a --disasm 20
 printf 'stats\nquery functions --count\n' | tools/g batch --read-only -
-tools/g script run ghidra/scripts/investigate/Foo.java -- arg1
-tools/g session-status
-tools/g stop
+tools/g session-status   # daemon state, mutation marker, snapshot diff
+tools/g stop             # persist working-copy edits (does NOT promote)
 ```
 
-`tools/g` resolves the repo root, bootstraps the isolated Ghidra environment
-(processor extension, Java options, fingerprint check), materializes the
-working project if absent, selects the pinned CLI binary, and injects
-`--projects-dir/--project/--program`. It refuses to operate against committed
-`project/` and `projects/` snapshot namespaces. Set `GHIDRA_AGENT=1` for compact JSON output.
+It refuses committed `project/`/`projects/` namespaces. `GHIDRA_AGENT=1`
+gives compact JSON output. To promote a finished working copy into the
+committed snapshot, use `make finalize-project`.
 
-`tools/g session-status` reports daemon state, project path, processor
-fingerprint, mutation marker, and snapshot diff — useful before deciding
-whether to promote.
+### tools/pseudo (persistent decompiler corpus)
 
-`tools/g stop` persists working-copy edits only. To deliberately promote a
-finished working copy into the committed snapshot, use `make finalize-project`.
-
-### Persistent pseudocode corpus
-
-Use the tracked whole-image decompiler corpus for broad reading, search, and
+Use the tracked whole-image corpus for broad reading, search, and
 cross-function reasoning before dropping to individual CLI calls:
 
 ```bash
 tools/pseudo 0x6fec
 tools/pseudo security_access --list
-tools/pseudo secoc --all
-tools/pseudo --data-ref 0xfebef02a # canonical RAM xrefs, independent of decompiler aliases
-make pseudocode                    # materialize build/out/pseudocode/*.c from the tracked corpus
-rg 'ICUSCMD' build/out/pseudocode
+tools/pseudo --data-ref 0xfebef02a   # canonical RAM xrefs, alias-independent
+make pseudocode                      # materialize build/out/pseudocode/*.c
 ```
 
-`data/generated/decompilations.jsonl` is derived evidence, provenance-locked to
-`data/ghidra_project_inventory.baseline.jsonl`. Each function also carries the
-canonical non-flow instruction/data-reference graph exported by Ghidra. Use
-`tools/pseudo --data-ref ADDRESS` instead of grepping decompiler spelling when a
-RAM byte may appear as `DAT_base._n_m_` or `LAB_base + offset`. It is not firmware
-truth. Use pseudocode for understanding, xrefs/dataflow for tracing, and
-disassembly/bytes for proof. After any graph, naming, type, calling-convention, or processor
-semantic change, regenerate it with `make generate-decompiler-corpus` against a
-fresh rebuilt project that exactly matches the canonical inventory (not merely
-a snapshot-materialized project that Ghidra may report as hijacked).
+`data/generated/decompilations.jsonl` is derived evidence, not firmware
+truth: pseudocode for understanding, xrefs/dataflow for tracing,
+disassembly/bytes for proof. Prefer `--data-ref` over grepping decompiler
+spelling. After any graph, naming, type, calling-convention, or processor
+semantic change, regenerate with `make generate-decompiler-corpus` against a
+fresh rebuilt project that exactly matches the canonical inventory.
 
-All repository one-shot Ghidra execution goes through `tools/run_headless`,
-which owns environment setup, path rejection, script paths, logging, and script
-error detection. The only intentional raw `analyzeHeadless` call is the
-negative regression in `tools/verify_sleigh.sh` proving `project/` cannot open.
+All one-shot Ghidra execution goes through `tools/run_headless`.
 
 ## Evidence language
 
-Use these confidence grades in any finding you record (definitions and full
-ledger in `docs/status/FINDINGS.md`). Evidence also carries a **source**
-(`firmware-static` / `dynamic-probe` / `generated-artifact` /
-`external-source`) — keep it distinct from confidence:
+Grades (full definitions and ledger in `docs/status/FINDINGS.md`):
+**verified** (asserted by a deterministic test), **observed** (directly
+observed, not test-reproduced), **recovered** (flow substantially
+reconstructed), **bounded** (interpretation constrained, exact semantics
+unknown), **hypothesis** (plausible, unverified), **disproved** (retained to
+prevent regression). Keep the evidence **source** (`firmware-static` /
+`dynamic-probe` / `generated-artifact` / `external-source`) distinct from
+confidence.
 
-- **verified** — directly asserted by a deterministic test;
-- **observed** — directly observed (e.g. a field probe) but not reproduced by a repository test;
-- **recovered** — control/data flow substantially reconstructed;
-- **bounded** — interpretation constrained, exact semantics unknown;
-- **hypothesis** — plausible, explicitly unverified;
-- **disproved** — retained only to prevent regression.
+## Openpilot integration: native-shape rule
 
-## Openpilot / comma integration: native-shape rule
+Canonical contract: [docs/architecture/toyota-openpilot-porting-contract.md](docs/architecture/toyota-openpilot-porting-contract.md).
+Operating summary:
 
-When this repository informs `kai-openpilot`, `opendbc`, or Panda, **start from
-current upstream comma/openpilot and make the smallest target-specific changes
-required to support the car.** Do not design a new control architecture from the
-firmware.
+- Start from current upstream comma/openpilot and make the **smallest
+  target-specific change** required to support the car. The burden of proof is
+  on a deviation from upstream, never on re-proving upstream behavior from
+  firmware.
+- Keep normal ownership boundaries: `controlsd` owns engagement and
+  `CC.latActive`; `CarInterface`/`CarParams` describe the vehicle;
+  `CarState` decodes; `CarController` encodes; Panda applies the ordinary
+  safety model and TX whitelist. No second permission system, no
+  controller-side steering vetoes, no Panda enforcement of receiver behavior,
+  no request/status bit promoted to an authority signal without proof.
+- No speculative safety policy: unknown target semantics stay unmapped or use
+  the normal upstream mechanism — never a guard, timer, threshold, interlock,
+  special Param, debug mode, or alternate state machine "just to be safe."
+- The F33 bring-up experiments (private lateral-arming Params, fake SecOC-key
+  availability, diagnostic/oracle arming, `ALLOW_DEBUG` shadow-safety modes,
+  dynamic harness modes, controller-side permission vetoes, Panda `0x00F`/B6
+  sequence/`0x08A` gates, template-wide required-zero checks, global Toyota
+  changes for this one target) were scaffolding, not architecture. Keep them
+  out of the normal driving path unless an actual upstream-equivalent
+  requirement is later proven.
 
-The default assumption is that normal openpilot behavior is correct. The burden
-of proof is on a **deviation from upstream**, not on re-proving upstream behavior
-from Toyota firmware. Firmware and live evidence are for discovering the target's
-wire format, buses, scaling, limits, capabilities, and actual incompatibilities.
-They are not an invitation to add extra policy.
+Before adding any Camry/TSS3-specific runtime branch, search current upstream
+for how the same feature is normally implemented; if the normal mechanism
+works, use it.
 
-### Keep the normal ownership boundaries
+## Documentation
 
-- `controlsd` owns engagement and `CC.latActive`.
-- `CarInterface` / `CarParams` describe the vehicle and select existing features.
-- `CarState` decodes observed vehicle state into standard openpilot fields.
-- `CarController` turns openpilot requests into the vehicle's messages.
-- Panda safety applies the ordinary steering/longitudinal safety model and TX
-  whitelist.
-- Panda forwarding blocks/replaces stock traffic only when the actual stock
-  control message is known.
+A **material new RE conclusion** (firmware, vehicle protocol, observed target
+behavior) gets exactly one home: update the canonical subsystem report, and
+record the claim — scope, grade, verifying test when established — in
+`docs/status/FINDINGS.md`. Disproved prior durable claims go to
+`docs/status/CORRECTIONS.md`. Add a deterministic test only when it protects
+a real recovered fact worth preserving.
 
-Do not add a second permission system in another layer. Do not make
-`CarController` re-decide whether openpilot is allowed to steer. Do not make
-Panda enforce receiver behavior just because the firmware has such behavior.
-Do not turn a request/status bit into an authority signal without proof that it
-is one.
-
-### No speculative safety policy
-
-"Just to be safe" is not a justification for target-specific runtime behavior.
-If a target semantic is unknown, prefer the normal upstream behavior or leave the
-unsupported semantic unmapped. **Do not fill uncertainty with a guard, timer,
-threshold, interlock, special Param, debug mode, or alternate state machine.**
-
-Examples of things that must not be promoted into runtime policy merely because
-they were observed during RE:
-
-- receiver sequence/freshness/timing supervision;
-- internal firmware limiters or persistence counters;
-- request-plane Target Lateral IDs;
-- sensor representation limits;
-- unknown/reserved companion bits;
-- internal Toyota status bits with no proven openpilot equivalent.
-
-Only add target-specific policy when upstream has no suitable mechanism **and**
-the target demonstrably requires different behavior. Put that difference in the
-same layer where upstream handles analogous differences.
-
-### Do not reintroduce the F33 bring-up scaffolding
-
-The following were experiments, not architecture, and must stay out of the
-normal driving path unless an actual upstream-equivalent requirement is later
-proven:
-
-- private lateral-arming Params or fake SecOC-key availability;
-- runtime diagnostic/oracle arming;
-- `ALLOW_DEBUG` steering modes or Python shadow safety;
-- dynamic harness modes for a fixed supported harness topology;
-- controller-side `steeringPressed` or Toyota-LTA permission vetoes layered over
-  `CC.latActive`;
-- Panda `0x00F` permission gates, bespoke B6 sequence/35-ms/rate policy, or
-  request-plane `0x08A` arbitration gates;
-- template-wide required-zero checks for unknown fields;
-- global Toyota runtime/query changes solely to accommodate this one target.
-
-Historical RE about those mechanisms can remain documented. Their existence in
-the firmware or in old experiments does not make them part of the openpilot
-implementation.
-
-### Practical review rule
-
-Before adding any Camry/TSS3-specific runtime branch, first search current
-upstream openpilot/opendbc/Panda for how the same feature is normally implemented.
-If the normal mechanism works, use it. If it does not, make the **smallest**
-vehicle-specific adaptation needed.
-
-Tests should mirror that shape: standard upstream-style behavior tests for the
-port, plus focused protocol tests for the genuinely target-specific message
-format and constants. Do not build large test frameworks around temporary
-bring-up guards.
-
-## Documentation requirements
-
-When you produce a **material new reverse-engineering conclusion** about the
-firmware, vehicle protocol, or observed target behavior:
-
-1. **Update the canonical subsystem report** — every claim has exactly one
-   home. Other documents summarize it in one sentence and link there.
-2. **Update `docs/status/FINDINGS.md`** with the claim, scope, grade, and
-   verifying test when a durable finding was actually established.
-3. **Add or update a deterministic test** when it protects a real recovered fact
-   and is worth preserving. Do not write tests merely to memorialize temporary
-   bring-up policy or ordinary upstream behavior.
-4. **Record a disproved prior durable claim** in `docs/status/CORRECTIONS.md`.
-5. **Keep this file slim** — never duplicate long findings lists here. Link to
-   the canonical report instead.
-
-Routine refactors, upstream-shape alignment, deletion of experimental scaffolding,
-and ordinary code fixes do **not** require manufacturing a new finding, proof
-artifact, or documentation trail. Document them where normal software work would
-be documented: code, tests that protect actual behavior, and the commit message.
-
-When the requested task includes updating the repository, persist any genuinely
-new durable RE findings before reporting completion. Do not modify or commit files
-during review-only tasks.
+Routine work — refactors, upstream-shape alignment, deleting experimental
+scaffolding, ordinary fixes — requires no manufactured finding or proof
+artifact. Document it where normal software work would be: code, tests that
+protect actual behavior, and the commit message.
 
 ## Scope discipline
 
-- Findings are specific to the Sienna `8965B4512000` calibration. Do not
-  project them onto the Corolla or the wider TSS 3 family as fact — record
-  transfers as **hypothesis** in `docs/variants/`.
+- Findings are specific to their individual calibration until proven
+  otherwise; record transfers as **hypothesis** in `docs/variants/`.
 - Do not project application-mode or related-variant probe expectations onto
   the bootloader DID table (or vice versa).
-- CAN `0x344` is absent from this image. Do not re-introduce it from
-  related-variant expectations.
 - Do not invent OEM field names unavailable in the firmware; use bounded
   structural names.
 - Don't prematurely declare a path "not security-relevant" — thorough
@@ -333,8 +188,6 @@ during review-only tasks.
 - Operating manual: [docs/WORKFLOW.md](docs/WORKFLOW.md)
 - Documentation map: [docs/README.md](docs/README.md)
 - Current priorities: [docs/status/PRIORITIES.md](docs/status/PRIORITIES.md)
-- Findings ledger: [docs/status/FINDINGS.md](docs/status/FINDINGS.md)
-- Generated cross-reference index (findings ↔ reports ↔ leads ↔ gates): [docs/reference/index.md](docs/reference/index.md)
-- Open questions: [docs/status/OPEN_QUESTIONS.md](docs/status/OPEN_QUESTIONS.md)
-- Corrections: [docs/status/CORRECTIONS.md](docs/status/CORRECTIONS.md)
+- Ledgers: [docs/status/FINDINGS.md](docs/status/FINDINGS.md) · [docs/status/CORRECTIONS.md](docs/status/CORRECTIONS.md) · [docs/status/OPEN_QUESTIONS.md](docs/status/OPEN_QUESTIONS.md)
+- Cross-reference index: [docs/reference/index.md](docs/reference/index.md)
 - Historical journals: [docs/history/README.md](docs/history/README.md)
