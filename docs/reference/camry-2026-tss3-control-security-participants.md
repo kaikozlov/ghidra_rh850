@@ -239,6 +239,54 @@ security-topology DID is endpoint-specific and must not be confused with the EPS
 records. Do **not** run the `0x3002` registration routine or any key write merely
 to enumerate participants.
 
+### Live read-only security characterization
+
+Current GTS+ exposes two especially useful brake-domain read-only fingerprints:
+
+- category 435 `ABS_P5` and category 466 `Brk_Bst_P5` both define DID `0x10AF`
+  as the 17-byte **Software Number for Authentication**;
+- category 498 `FRC_P5` defines DID `0x10AF` (alternate `0x30AF`) as **ECU
+  Security Key Registered Incomplete Flag**, with the OEM 0/1/2 enum.
+
+On the exact Camry, category 435 is already live-pinned at `0x7B0`. The Brake
+Booster physical diagnostic request address is still unresolved; do not invent
+one from the Toyota topology component index `0x28`. Use the `0x763` roster to
+identify any additional security slave endpoint first.
+
+With ignition/READY awake, the first characterization pass should remain
+read-only and use the Comma Toyota diagnostic CLI:
+
+```text
+# Toyota MACKey-registration master / exact roster
+tools/toyota uds raw 0x763 0x22 1033
+tools/toyota uds raw 0x763 0x22 1010
+tools/toyota uds raw 0x763 0x22 102E
+tools/toyota uds raw 0x763 0x22 1100
+... through 1105, then 1107 and 1108
+
+# exact live Brake/EPB endpoint
+tools/toyota did read brake 0x10AF
+tools/toyota uds raw brake 0x22 1010
+
+# FRC security-registration observer
+tools/toyota did read frc 0x10AF
+tools/toyota uds raw frc 0x22 1010
+```
+
+`kai-openpilot@25f6909ea` extends `uds raw` so an unregistered numeric 11-bit
+endpoint such as `0x763` is accepted **only for read-only UDS services**. Mutation
+to an unregistered address remains forbidden even with `--force`. Once
+`0x763:1033` identifies a Brake-Booster/security-slave address, read its `F181`,
+`F18C`, `0x10AF`, and `0x1010` by that exact numeric endpoint before assigning a
+role.
+
+An ignition-off attempt on 2026-08-31 timed out for both known-good Brake
+`0x7B0` and `0x763`; because the known Brake endpoint was asleep too, that run is
+**not evidence** that `0x763` or any security DID is unsupported. Repeat only with
+the vehicle diagnostic network awake. Do not send `27 xx`, `31 01 30 02`,
+`2E 10 35`, session changes, resets, downloads, or Active Tests during this
+characterization pass.
+
 For control ownership rather than provisioning membership, the next decisive
 artifacts remain exact `F152633K0000` Brake firmware and a synchronized stock
 DRCC capture joining FRC `1B03..1B07`, Brake `10A1..10A4`, Operation FFD, and
