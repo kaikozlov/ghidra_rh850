@@ -2981,11 +2981,26 @@ cluster `UI_SET_SPEED`. Older opendbc already documents the reason the two must
 not be conflated: an internal Toyota `SET_SPEED` of 43 km/h can be shown as
 28 mph, so direct unit conversion is not exact.
 
+The route also preserves upstream Toyota's **exact legacy vehicle-unit carrier**:
+native bus0 `0x610/8 = BODY_CONTROL_STATE_2` is present throughout the TSS3 drive
+(1,388 native bus0 frames), and the pre-TSS3 DBC layout decodes its `UNITS` field
+as `0` on every retained frame. Upstream Toyota's production CarState contract is
+`UNITS in (1,2) => metric`, otherwise imperial, so the observed `0` independently
+selects the imperial interpretation of `0x251 B2`. This is not merely an ID-name
+transfer: the retained legacy `0x610.UI_SPEED` field also remains physically
+coherent on this Camry, tracking logged cluster/vehicle speed as km/h with about
+0.22 mph median absolute error after conversion. `0x611 UI_SETTING` is likewise
+present and its legacy `UNITS` field also reads zero, but openpilot follows the
+existing upstream `0x610` contract rather than introducing a second authority.
+
 The exact maintainer-Camry openpilot mapping therefore keeps `0x08A B10` as
-`cruiseState.speed` and uses `0x251 B2` as imperial
-`cruiseState.speedCluster`. This removes the display offset without adding a
-percentage/fudge conversion. Metric-cluster encoding has not been observed and
-must not be generalized from this imperial capture.
+`cruiseState.speed`, uses `0x251 B2` as `cruiseState.speedCluster`, and interprets
+the latter through the retained `0x610 BODY_CONTROL_STATE_2.UNITS` selector exactly
+like upstream Toyota. This removes the display offset without adding a
+percentage/fudge conversion and removes the implementation's previous
+imperial-only assumption. A metric-configured TSS3 Camry has not been physically
+captured, so the metric branch is supported by the unchanged upstream Toyota
+carrier/contract rather than a maintainer metric-state observation.
 
 ## 50. Longitudinal cross-plane join: `0x0CA` is already protected; Bus-1 `0x160 B12` is a pre-protection candidate (VAR-106)
 
