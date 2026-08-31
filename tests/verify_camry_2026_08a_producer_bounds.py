@@ -41,7 +41,7 @@ with tempfile.TemporaryDirectory() as td:
         proc.returncode == 0 and out.read_bytes() == ART.read_bytes(),
     )
 
-check("schema is v3", art["schema"] == "camry-2026-08a-producer-bounds-v3")
+check("schema is v4", art["schema"] == "camry-2026-08a-producer-bounds-v4")
 check(
     "F33 generated-COM Tx excludes 0x08A",
     art["f33_generated_com_tx"] == ["0x030", "0x351", "0x394", "0x4A3", "0x4C8"],
@@ -121,15 +121,18 @@ check(
 )
 check("SecOC remains 0x00F-domain FV4||MAC28", "FV4||MAC28" in cl["secoc"] and "unrecovered" in cl["secoc"])
 check(
-    "camera Bus-1 output lacks an ordinary trailer without HSM inference",
+    "camera Bus-1 output terminates before the TSK signing boundary",
     "do not carry an ordinary-P5 FV4||MAC28 trailer" in cl["camera_output_auth_boundary"]
-    and "does not show whether FRC can compute CMAC" in cl["camera_output_auth_boundary"],
+    and "FRC is not a TSK key-holder/signing participant" in cl["camera_output_auth_boundary"]
+    and "downstream TSK-capable proxy" in cl["camera_output_auth_boundary"],
 )
 check(
-    "physical transmitter and signer remain separate",
-    "do not provide transmitter fingerprints" in cl["physical_tx_and_signer_bounds"]
-    and "SecOC computation may occur" in cl["physical_tx_and_signer_bounds"]
-    and "No candidate MCU, HSM, key holder" in cl["physical_tx_and_signer_bounds"],
+    "physical transmitter/proxy signer remains bounded to downstream chassis candidates",
+    "FRC is excluded as the TSK key holder/signer" in cl["physical_tx_and_signer_bounds"]
+    and "Skid Control" in cl["physical_tx_and_signer_bounds"]
+    and "Brake Booster" in cl["physical_tx_and_signer_bounds"]
+    and "Central Gateway" in cl["physical_tx_and_signer_bounds"]
+    and "remains unidentified" in cl["physical_tx_and_signer_bounds"],
 )
 check("regression forbids sending 0x08A to EPS", "Do not send 0x08A to EPS" in cl["regression_rule"])
 

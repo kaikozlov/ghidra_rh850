@@ -1,5 +1,5 @@
 {
- "schema": "camry-2026-08a-producer-bounds-v3",
+ "schema": "camry-2026-08a-producer-bounds-v4",
  "drives": {
   "drive_a": {
    "source": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
@@ -235,7 +235,7 @@
   "recorder_object": "FRC-hosted TSS recorder objects 5282/5631; Bus-4 0x08A carries the same ID/pinion/assist subset",
   "not_exact_f33": "exact F33 generated-COM Tx is only 0x030/0x351/0x394/0x4A3/0x4C8; 0x08A is absent",
   "wire_placement": "zero retained 0x08A on panda bus 1; Front Camera Module is GTS+ Bus 1 only; 0x08A is observed on captured Bus 4, but CAN event timestamps and GTS+ topology do not identify its physical transmitter",
-  "camera_output_auth_boundary": "panda bus 1 is sniffed in both retained drives. Zero 0x00F. Every periodic Bus-1 stream has a near-constant last-4 (max unique fraction <0.002) while Bus-4 0x08A last-4 is frame-unique. The observed Bus-1 PDUs do not carry an ordinary-P5 FV4||MAC28 trailer. This does not show whether FRC can compute CMAC or whether a private transport carries a pre-authenticated 0x08A image",
+  "camera_output_auth_boundary": "panda bus 1 is sniffed in both retained drives. Zero 0x00F. Every periodic Bus-1 stream has a near-constant last-4 (max unique fraction <0.002) while Bus-4 0x08A last-4 is frame-unique. The observed Bus-1 PDUs do not carry an ordinary-P5 FV4||MAC28 trailer. Joined to Toyota's recovered TSK architecture, where AES-CMAC keys reside in protected Renesas ICU-S slots on TSK-capable chassis participants, the FRC is not a TSK key-holder/signing participant; its request must cross into a downstream TSK-capable proxy before authenticated Bus-4 publication",
   "timestamp_attribution_boundary": "rlog Event.logMonoTime is shared by multi-frame CAN publication batches. The apparent 0x08A 20/30 ms mix versus 0x0D7 cannot reject a shared controller, TX queue, or scheduler",
   "secoc": "ordinary Toyota-P5 FV4||MAC28 trailer on Bus-4 0x08A only, synced to authenticated 0x00F on the chassis buses; Bus 1 is outside that domain; key/profile/CMAC unrecovered",
   "bus4_native_nodes": [
@@ -246,7 +246,7 @@
    "Spiral cable (Steering Angle Sensor)"
   ],
   "bus1_includes_front_camera": true,
-  "physical_tx_and_signer_bounds": "Exact F33 is excluded as generated-COM transmitter. GTS+ Bus-4 placement leaves Skid Control, Brake Booster, and Central Gateway as architecture candidates for physical transmission; the captures do not provide transmitter fingerprints. SecOC computation may occur at the physical transmitter or upstream (including FRC over a private transport). No candidate MCU, HSM, key holder, or CMAC implementation is identified",
+  "physical_tx_and_signer_bounds": "Exact F33 is excluded as generated-COM transmitter and FRC is excluded as the TSK key holder/signer. GTS+ Bus-4 placement leaves Skid Control, Brake Booster, and Central Gateway as architecture candidates for the downstream proxy that assembles/authenticates and physically publishes 0x08A; the captures do not provide transmitter fingerprints. Which of those TSK-capable chassis/gateway participants owns the SecOC profile, ICU-S key selection, and final Tx descriptor remains unidentified",
   "regression_rule": "Do not label 0x08A a Bus-1 camera frame. Do not send 0x08A to EPS. No 0x08A->B6 stock-LTA transform (CORR-135). No output authorized"
  }
 }

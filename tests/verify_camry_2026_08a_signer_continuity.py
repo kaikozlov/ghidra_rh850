@@ -90,12 +90,13 @@ check("brake-family/CGW hypothesis names the candidate set",
       "brake family" in ident["verdict"] and "Central Gateway" in ident["verdict"])
 check("decisive evidence names producer firmware",
       "producer firmware" in ident["decisive_evidence"])
-check("FRC pre-authentication branch is not overclaimed",
-      "not excluded by signing continuity alone" in ident["frc_branch_disposition"])
-check("grades separate observed continuity from hypothesis identity",
+check("FRC is excluded from the TSK signing branch",
+      "TSK pre-authentication is excluded" in ident["frc_branch_disposition"]
+      and "downstream brake/gateway participant" in ident["frc_branch_disposition"])
+check("grades separate observed continuity, bounded FRC exclusion, and hypothesis identity",
       ident["grades"]["zero_request_signing_continuity"] == "observed"
       and ident["grades"]["signer_identity_brake_family_or_cgw"] == "hypothesis"
-      and ident["grades"]["frc_excluded_as_key_holder"] == "hypothesis")
+      and ident["grades"]["frc_excluded_as_key_holder"] == "architecture-bounded")
 
 print(f"\n{passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

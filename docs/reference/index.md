@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 416 · Corrections: 148 · Open questions: 54 · Docs: 114 · Suites: 217
+Findings: 416 · Corrections: 149 · Open questions: 54 · Docs: 114 · Suites: 217
 
 ## Reading this index
 
@@ -428,13 +428,13 @@ Findings: 416 · Corrections: 148 · Open questions: 54 · Docs: 114 · Suites: 
 | <a id="finding-var-098"></a>**VAR-098** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CAMRY_GTS_LATERAL_FUNNEL_2026-08-29](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md) | `tests/verify_camry_2026_lateral_flow_trace.py` | — |
 | <a id="finding-var-099"></a>**VAR-099** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_2026_lateral_flow_trace.py` | — |
 | <a id="finding-var-100"></a>**VAR-100** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_camry_2026_lateral_flow_trace.py` | — |
-| <a id="finding-var-101"></a>**VAR-101** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CAMRY_08A_SIGNER_CONTINUITY_2026-08-30](../history/2026-08/CAMRY_08A_SIGNER_CONTINUITY_2026-08-30.md), [README](../history/2026-08/README.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) (+1) | `tests/verify_camry_2026_08a_signer_continuity.py` | OQ-054 |
+| <a id="finding-var-101"></a>**VAR-101** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CAMRY_08A_SIGNER_CONTINUITY_2026-08-30](../history/2026-08/CAMRY_08A_SIGNER_CONTINUITY_2026-08-30.md), [README](../history/2026-08/README.md), [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) (+2) | `tests/verify_camry_2026_08a_signer_continuity.py` | OQ-054 |
 | <a id="finding-var-102"></a>**VAR-102** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000.py` | OQ-054 |
 | <a id="finding-var-103"></a>**VAR-103** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | — | — |
 | <a id="finding-var-104"></a>**VAR-104** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_8965F3307000_command_cone_ingress.py` | — |
 | <a id="finding-var-105"></a>**VAR-105** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_8965F3307000_command_cone_ingress.py` | — |
 | <a id="finding-var-106"></a>**VAR-106** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) | `tests/verify_camry_2026_longitudinal_request_plane.py` | OQ-052 |
-| <a id="finding-var-107"></a>**VAR-107** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) | `tests/verify_camry_2026_bus1_e2e.py` | OQ-052 |
+| <a id="finding-var-107"></a>**VAR-107** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_2026_bus1_e2e.py` | OQ-052, OQ-054 |
 
 ## Open-questions index
 
@@ -493,7 +493,7 @@ Findings: 416 · Corrections: 148 · Open questions: 54 · Docs: 114 · Suites: 
 | <a id="open-question-oq-051"></a>**OQ-051** | Cross-calibration structural triage of future P1M-E images | Tooling | MEM-SAFE-001 |
 | <a id="open-question-oq-052"></a>**OQ-052** | True-TSS3 longitudinal wire/auth/arbitration execution contract | Tooling | TMS-085, TMS-079, VAR-106, VAR-107, VAR-069, VAR-070, VAR-086, TMS-087 |
 | <a id="open-question-oq-053"></a>**OQ-053** | F33 non-disruptive application-mode RAM execution pivot | Tooling | VAR-060, CORR-124, CORR-123 |
-| <a id="open-question-oq-054"></a>**OQ-054** | Identify the `0x08A` physical transmitter, private transport, and SecOC computation owner | Tooling | VAR-091, CORR-136, VAR-094, VAR-081, CORR-135, VAR-095, CORR-137, VAR-096, VAR-097, VAR-101, VAR-102, CORR-092 |
+| <a id="open-question-oq-054"></a>**OQ-054** | Identify the downstream `0x08A` proxy/transmitter, private request handoff, and SecOC profile owner | Tooling | VAR-091, CORR-149, VAR-107, VAR-094, VAR-081, CORR-135, VAR-095, CORR-137, VAR-096, VAR-097, VAR-101, VAR-102, CORR-092 |
 
 ## Correction index
 
@@ -647,6 +647,7 @@ Findings: 416 · Corrections: 148 · Open questions: 54 · Docs: 114 · Suites: 
 | <a id="correction-corr-146"></a>**CORR-146** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 | <a id="correction-corr-147"></a>**CORR-147** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 | <a id="correction-corr-148"></a>**CORR-148** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
+| <a id="correction-corr-149"></a>**CORR-149** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 
 ## Document registry
 

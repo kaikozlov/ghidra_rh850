@@ -125,9 +125,9 @@ def build() -> dict:
         "schema": "camry-2026-08a-signer-continuity-v1",
         "question": (
             "Is the Bus-4 0x08A signer always-on (signing at zero lateral request) "
-            "or on-demand? An always-on signer is structurally inconsistent with the "
-            "front camera being the SecOC key holder, because the camera only signs "
-            "what its planner authorizes."
+            "or request-gated? The recovered Toyota TSK hardware boundary independently "
+            "excludes the FRC as key holder; always-on zero-request signing tests whether "
+            "the observed publisher instead behaves like a downstream chassis proxy."
         ),
         "zero_request_result": {
             "regime": "stationary READY, B21=0 (No Request) in every retained frame",
@@ -179,16 +179,17 @@ def build() -> dict:
                 "Skid Control firmware identifies the signer deterministically."
             ),
             "frc_branch_disposition": (
-                "FRC pre-authentication is not excluded by signing continuity alone — an "
-                "always-on signer could re-sign a forwarded FRC image — but it requires "
-                "the FRC to hold no key while forwarding unsigned request images to the "
-                "signer, which the zero-request continuity makes unnecessary as an "
-                "assumption. The decisive FRC exclusion remains producer firmware."
+                "FRC-side TSK pre-authentication is excluded by the recovered Toyota TSK "
+                "hardware architecture: the protected AES-CMAC key resides in Renesas "
+                "ICU-S on TSK-capable chassis participants, while the FRC request domain "
+                "is not an ICU-S key-holder/signing participant. The remaining unknown is "
+                "which downstream brake/gateway participant proxies the FRC request into "
+                "the authenticated Bus-4 publisher."
             ),
             "grades": {
                 "zero_request_signing_continuity": "observed",
                 "signer_identity_brake_family_or_cgw": "hypothesis",
-                "frc_excluded_as_key_holder": "hypothesis",
+                "frc_excluded_as_key_holder": "architecture-bounded",
             },
         },
         "stationary_ready_detail": ready,

@@ -2327,7 +2327,7 @@ CORR-135 removes the architecture assumption that accumulated after the `0x08A` 
 2. **Zero B6 does not require a missing cooperative packet.** Exact `FUN_000D0218` has an ordinary B6-inactive branch that computes `FEBECC48` from eight internal assist terms, and the exact `CC48 -> ... -> motor-control` chain reaches physical current control. The retained 73.303384 s is machine-identified **request state** (`0x08A` ID11/LTA-LCA), not a direct grant oracle: zero B6 is architecturally consistent with F33 continuing to actuate, but the logs do not prove that this internal path carried autonomous lane-centering authority. Operation FFD `5285/57DE/5265` is the missing grant discriminator.
 3. **B6 remains a separate protected external cooperative-control ingress.** Exact F33 really does accept B6 and consume its target/mode when active. That makes B6 a possible future openpilot actuation interface, but stock LTA does not prove that Toyota converts `0x08A` into B6. If B6 is chosen, its signer/freshness/suppression/arbitration contract must be recovered on its own evidence.
 
-The current work is therefore three-way. VAR-091/CORR-136 close observed bus placement but leave physical transmitter, private transport, and signer open; plaintext Bus-1 trailers do not establish FRC crypto capability. VAR-090/092 close default-bank `D0218` as not an F33 COM copy of the published milliradian. Synchronized FRC Operation FFD must separately determine whether the retained ID11 request was selected/granted. Protected B6 remains an independent candidate openpilot ingress.
+The current work is therefore three-way. VAR-091/CORR-149 close observed bus placement **and the FRC side of the TSK boundary**: the FRC is the request-side participant, not the TSK key holder, so the remaining stock-path question is which downstream Brake/Skid/CGW proxy receives the request and publishes the authenticated Bus-4 PDU. VAR-090/092 close default-bank `D0218` as not an F33 COM copy of the published milliradian. Synchronized FRC Operation FFD must separately determine whether the retained ID11 request was selected/granted. Protected B6 remains an independent candidate openpilot ingress.
 
 **Regression rule:** do not infer or document an `0x08A -> B6` stock-LTA transform from matching scale, bus topology, or F33's `0x08A` exclusion. Such a transform may be considered only if producer firmware or synchronized evidence positively recovers it.
 
@@ -2436,9 +2436,9 @@ Deterministic evidence: `exploit/ephemeral_runtime/camry_f33_b6_bridge.c`,
 `exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json`, and
 `tests/verify_camry_8965F3307000.py --section b6_receive_bridge`.
 
-## 41. `0x08A` placement/authentication bounds: transmitter and signer remain open (VAR-091 / CORR-136)
+## 41. `0x08A` placement/authentication bounds: downstream proxy transmitter/signer remains open (VAR-091 / CORR-136 / CORR-149)
 
-The two relay-correct drives plus GTS+ canbus for Camry HV type **12984** close bus placement and the observed trailer shape. They do **not** identify a physical transmitter, CPU family, HSM, or CMAC owner.
+The two relay-correct drives plus GTS+ canbus for Camry HV type **12984** close bus placement and the observed trailer shape. Combined with the recovered Toyota TSK hardware architecture, they also close the FRC side of the trust boundary: **the FRC is not a TSK key-holder/signing participant; a downstream TSK-capable chassis/gateway participant must proxy the FRC request into the authenticated Bus-4 domain.** The remaining identity question is which downstream participant performs that assembly/signing and physical publication.
 
 **Placement.** Every retained `0x08A/32` is on the Toyota Bus-4 capture (panda bus 0 / relay mirror 2); Bus 1 count is **zero**. GTS+ `canbus 12984` places **Front Camera Module on Bus 1 only**. Bus 4 native application nodes are Airbag, Brake Booster, Power Steering (EPS), Skid Control, and SAS, all behind Central Gateway. This is a topology candidate set, not an arbitration-ID source map. Post-repin FRC UDS `0x792` on panda bus 0 is diagnostic gatewaying, not proof that FRC is a Bus-4 application node.
 
@@ -2448,11 +2448,11 @@ The two relay-correct drives plus GTS+ canbus for Camry HV type **12984** close 
 
 **Observed Bus-1 envelope.** Bus 1 contains zero `0x00F`. Every periodic Bus-1 stream (n≥50) has a near-constant last-4 (max unique fraction <0.002); FRC vision `0x180/64` last-4 is constant. These observed PDUs do not end in ordinary-P5 `FV4||MAC28`. Bus-4 `0x08A` does: B28..B31 remain on the vehicle `0x00F` reset domain (CORR-135) and the last-4 is frame-unique.
 
-**What that does not prove.** Plaintext observed Bus-1 PDUs do not establish FRC's MCU, whether it has ICU-S or another CMAC primitive, or where the `0x08A` CMAC is computed. A private FRC→gateway/brake link could carry a pre-authenticated image, or CGW/Skid/Brake could assemble and sign after consuming a differently packed request. Physical transmission and SecOC computation may occur in different ECUs.
+**Authentication boundary.** Toyota's recovered TSK path keeps the AES-CMAC key in protected Renesas ICU-S storage on TSK-capable network participants. The FRC request domain is not such a key-holder/signing participant, and its observed Bus-1 output is E2E-protected rather than SecOC-wrapped (VAR-107). Therefore the FRC cannot be the source of the Bus-4 TSK authenticator: its semantic request must cross a private or differently packed handoff into a downstream TSK-capable participant, which then constructs/authenticates the chassis-domain publication.
 
-**Closed vs open.** The FRC-hosted recorder carries `5282/5631`; Bus-4 `0x08A` carries the same ID/pinion/assist subset; exact F33 is neither transmitter nor consumer; native Bus-1 CAN does not carry `0x08A`. Physical-TX candidates by topology are Skid Control, Brake Booster, and Central Gateway, but none is selected. FRC remains a signer candidate over private transport. OQ-054 requires exact candidate firmware or source-identifying physical evidence. Do not send `0x08A` to EPS.
+**Closed vs open.** The FRC-hosted recorder carries `5282/5631`; Bus-4 `0x08A` carries the same ID/pinion/assist subset; exact F33 is neither transmitter nor consumer; native Bus-1 CAN does not carry `0x08A`. The downstream proxy/transmitter candidates by topology are Skid Control, Brake Booster, and Central Gateway, but none is selected. OQ-054 is now specifically to identify **which of those downstream participants receives the FRC request, arbitrates/repacks it, owns the TSK profile/key selection, and publishes `0x08A`**. Do not send `0x08A` to EPS.
 
-Deterministic evidence: `tools/analyze_camry_2026_08a_producer_bounds.py`, `data/generated/camry_2026_08a_producer_bounds.json` schema v3, `tests/verify_camry_2026_08a_producer_bounds.py`.
+Deterministic evidence: `tools/analyze_camry_2026_08a_producer_bounds.py`, `data/generated/camry_2026_08a_producer_bounds.json` schema v4, `tests/verify_camry_2026_08a_producer_bounds.py`.
 
 ## 42. Bus-1 camera/radar output is plaintext; GTS+ names the quantities, not a CAN DBC (VAR-093)
 
@@ -2487,7 +2487,7 @@ This bounds camera-bus contents and EPS ingress. It does not identify the privat
 
 **Recorder object.** FRC is the TSS recorder host. Operation-FFD `5282` / LTA `5631` (LDA `5531` has the same shape) stores Target Lateral ID, signed pinion at 0.001 LSB, assist gain at 0.01, and damping gain at 0.01. Ordinary FRC Data List exposes LTA switch/control (`0x1601`) but not this four-field object. Named CAN observers include measured SAS `0x025` (FFD `2E8D` / `5273`) echoed onto Bus 1 as `0x160[22]`, EPS torque `0x030` (FFD `2E94` / `5247`), and the perception objects in VAR-093. Diagnostic `0x792` serves the recorder. Host location does not by itself prove final arbitration, wire packing, or CMAC ownership.
 
-**Observed route boundary.** The consecutive recorder layout `ID || pinion_s16be || assist` is absent from native Bus 1: 200 spread ID11 samples with `|B18|≥20` per drive yield zero hits inside ±25 ms and zero global four-byte hits. Scattered two-byte collisions (22/200 A, 40/200 B) never concentrate on one `(CAN ID, offset)`. Bus 4 separately carries the matching subset in `0x08A`. The transport between the FRC-hosted object and Bus 4 may be private or differently packed; retained CAN does not select FRC pre-authentication versus CGW/Skid/Brake assembly/signing.
+**Observed route boundary.** The consecutive recorder layout `ID || pinion_s16be || assist` is absent from native Bus 1: 200 spread ID11 samples with `|B18|≥20` per drive yield zero hits inside ±25 ms and zero global four-byte hits. Scattered two-byte collisions (22/200 A, 40/200 B) never concentrate on one `(CAN ID, offset)`. Bus 4 separately carries the matching subset in `0x08A`. The transport between the FRC-hosted object and Bus 4 may be private or differently packed; retained CAN does not select **which downstream CGW/Skid/Brake proxy receives, repacks/arbitrates, and signs it**.
 
 **Observed packing relation.** `0x08A` retains ID + pinion + assist as B21 / B18:B19 / B24, omits damping (B25=0), adds a cruise sidecar, and carries ordinary-P5 `FV4||MAC28`. That structural relation does not prove which ECU performed each step. Dual-pinion record `1B40_2` is the live milliradian at B18; `1B40_3` is unpublished (`0x7FFF` at B13:B14 and B16:B17). Winner `5285`/`57DE` is not a distinct Bus-4 s16. Grant `5265` remains FFD-only.
 
@@ -2498,7 +2498,7 @@ This bounds camera-bus contents and EPS ingress. It does not identify the privat
 | `0x160[22]` candidate | Former SAS-echo reading is retracted by CORR-138: full-drive correlation is only +0.086/-0.091 and the field remains unnamed. | No F33 ingress join; do not use it as a request or plant oracle. |
 | Requested pinion | No consecutive `5282` layout is observed. | Bus 4 publishes the quantity as `0x08A` B18 **beside** EPS. Exact F33 does not Rx `0x08A`; protected B6 is idle in the retained ID11 intervals; `1B40_3` is unpublished; default-bank `D0218` is not this milliradian. The captures therefore do not show this requested angle entering F33 as COM. |
 
-Remainder: private transport, physical Bus-4 transmitter, SecOC computation owner, and whether ID11 was actually granted. The signer needs producer/private-link evidence; the grant needs synchronized Operation FFD `5282/5285/57DE/5265`. Do not hunt another EPS CAN field or send `0x08A` to EPS.
+Remainder: private request transport, downstream Bus-4 proxy/transmitter identity, exact SecOC profile/key-selection owner, and whether ID11 was actually granted. The proxy identity needs producer/private-link evidence; the grant needs synchronized Operation FFD `5282/5285/57DE/5265`. Do not hunt another EPS CAN field or send `0x08A` to EPS.
 
 Deterministic evidence: same artifact/test as VAR-093 (`request_object_on_bus1` in schema v2).
 
@@ -2658,9 +2658,10 @@ flowchart LR
 
 The diagram is deliberately two-model. Exact F33/B6 evidence makes Brake the
 only positively attributed immediate protected-command source domain, while
-the `0x08A` physical transmitter, final arbitration executor, CMAC/freshness
-owner, and any FRC pre-authentication remain unidentified. `0x08A` must not be
-drawn as an EPS input or as an established `0x08A -> B6` transform. The
+the `0x08A` physical transmitter, final arbitration executor, and downstream
+TSK proxy's CMAC/freshness ownership remain unidentified. FRC-side TSK
+pre-authentication is not a live branch. `0x08A` must not be drawn as an EPS
+input or as an established `0x08A -> B6` transform. The
 retained ID11 intervals are request state without a verified `5285/57DE/5265`
 winner/grant and contain zero B6.
 
@@ -2799,16 +2800,16 @@ signer's structural cadence is **regime-independent**.
 
 ### 47.2 Interpretation and boundary
 
-Signing at zero request is structurally inconsistent with the front camera
-being the SecOC key holder: a camera that only publishes what its planner
-authorizes cannot produce an always-on authenticated chassis publisher. OQ-054
-therefore narrows from "who signs" to "which always-on Bus-4 node holds the
-slot-class key": the brake family (ABS 435 / Brake Booster 466) or the Central
-Gateway (VAR-096's install-set bound). FRC pre-authentication plus chassis
-re-signing remains formally open but is unnecessary as an assumption and is
-downweighted. Current GTS+ ADCU_P6 vocabulary names the OEM
-request/arbitrate/sign pattern explicitly (`Lateral Arbitration ID`, `Lateral
-Control ID of Arbitrated Result`); that is architecture corroboration only —
+The recovered TSK hardware boundary independently excludes the front camera
+from the SecOC key-holder/signing role: the FRC is the request producer, while a
+downstream ICU-S-equipped participant must own the protected chassis publication.
+The zero-request capture then adds an orthogonal dynamic result: that downstream
+publisher is **always-on**, maintaining authenticated `0x08A` cadence even while
+FRC Target Lateral ID is 0. OQ-054 therefore narrows from "who signs" to "which
+always-on Bus-4 node holds the slot-class key": the brake family (ABS 435 /
+Brake Booster 466) or the Central Gateway (VAR-096's install-set bound). Current GTS+ ADCU_P6 vocabulary names the OEM request/arbitrate/sign
+pattern explicitly (`Lateral Arbitration ID`, `Lateral Control ID of Arbitrated
+Result`); that is architecture corroboration only —
 P6 names are not transferred onto this gen-20 P5 car.
 
 The observed continuity does not identify the signer. The decisive evidence
@@ -3161,5 +3162,5 @@ Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
 - Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149)
 <!-- knowledge-cross-references:end -->

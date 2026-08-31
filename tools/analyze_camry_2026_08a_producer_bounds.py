@@ -245,7 +245,7 @@ def main() -> int:
     tx = f33_tx_ids()
 
     artifact = {
-        "schema": "camry-2026-08a-producer-bounds-v3",
+        "schema": "camry-2026-08a-producer-bounds-v4",
         "drives": drives,
         "f33_generated_com_tx": tx,
         "gtsplus_canbus_12984": canbus,
@@ -267,9 +267,12 @@ def main() -> int:
                 "panda bus 1 is sniffed in both retained drives. Zero 0x00F. Every "
                 "periodic Bus-1 stream has a near-constant last-4 (max unique fraction "
                 "<0.002) while Bus-4 0x08A last-4 is frame-unique. The observed "
-                "Bus-1 PDUs do not carry an ordinary-P5 FV4||MAC28 trailer. This does "
-                "not show whether FRC can compute CMAC or whether a private transport "
-                "carries a pre-authenticated 0x08A image"
+                "Bus-1 PDUs do not carry an ordinary-P5 FV4||MAC28 trailer. Joined to "
+                "Toyota's recovered TSK architecture, where AES-CMAC keys reside in "
+                "protected Renesas ICU-S slots on TSK-capable chassis participants, "
+                "the FRC is not a TSK key-holder/signing participant; its request must "
+                "cross into a downstream TSK-capable proxy before authenticated Bus-4 "
+                "publication"
             ),
             "timestamp_attribution_boundary": (
                 "rlog Event.logMonoTime is shared by multi-frame CAN publication "
@@ -284,13 +287,13 @@ def main() -> int:
             "bus4_native_nodes": sorted(bus4),
             "bus1_includes_front_camera": "Front Camera Module" in bus1,
             "physical_tx_and_signer_bounds": (
-                "Exact F33 is excluded as generated-COM transmitter. GTS+ Bus-4 "
-                "placement leaves Skid Control, Brake Booster, and Central Gateway "
-                "as architecture candidates for physical transmission; the captures "
-                "do not provide transmitter fingerprints. SecOC computation may occur "
-                "at the physical transmitter or upstream (including FRC over a private "
-                "transport). No candidate MCU, HSM, key holder, or CMAC implementation "
-                "is identified"
+                "Exact F33 is excluded as generated-COM transmitter and FRC is excluded "
+                "as the TSK key holder/signer. GTS+ Bus-4 placement leaves Skid Control, "
+                "Brake Booster, and Central Gateway as architecture candidates for the "
+                "downstream proxy that assembles/authenticates and physically publishes "
+                "0x08A; the captures do not provide transmitter fingerprints. Which of "
+                "those TSK-capable chassis/gateway participants owns the SecOC profile, "
+                "ICU-S key selection, and final Tx descriptor remains unidentified"
             ),
             "regression_rule": (
                 "Do not label 0x08A a Bus-1 camera frame. Do not send 0x08A to EPS. "
