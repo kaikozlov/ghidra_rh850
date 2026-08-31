@@ -1606,6 +1606,16 @@ paths = [
   "software/locks/techstream-v18.json",
 ]
 
+[suite.techstream_cuw_cross_ecu_security_derivations]
+tests = ["tests/verify_techstream_cuw_cross_ecu_security_derivations.py"]
+requires_external = ["cuw_reference_corpus"]
+modes = ["local"]
+oracle = "generated_self_check"
+paths = [
+  "docs/tooling/techstream.md",
+  "data/generated/techstream_v18/cuw_cross_ecu_security_derivations.json",
+]
+
 [suite.techstream_layerb]
 tests = ["tests/verify_techstream_layerb.py"]
 paths = ["docs/tooling/techstream.md"]

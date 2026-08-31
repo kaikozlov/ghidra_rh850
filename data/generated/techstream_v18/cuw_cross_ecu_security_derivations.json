@@ -1,0 +1,842 @@
+{
+  "conclusion": {
+    "hypothesis": "If that backend root and wrapper algebra are shared cross-ECU, the predicted ECUAuthKey-shaped values are concrete firmware-search fingerprints for FRC/HV/MG.",
+    "not_proved": "The corpus alone cannot decide whether a ReproStd ECU stores Kwork directly, stores the predicted wrapper under a universal root, derives it another way, or uses a different backend root. The tested simple ReproStd image-key guesses also do not identify the image transform or settle payload-build-root reuse.",
+    "verified": "Techstream/CUW exposes stable effective SecurityAccess working keys for several non-EPS ReproStd families. The T-0035 EPS control specimen exactly validates the frontend/backend wrapping algebra under the recovered EPS boot root."
+  },
+  "credential_groups": [
+    {
+      "diag_id": "0724",
+      "eps_boot_root_hypothesis_ecu_auth_key": "192b8e45370251dff3b77f6bb069bf27",
+      "package_count": 1,
+      "packages": [
+        "T-0051-26.cuw"
+      ],
+      "service_auth_key": "3df2fe55c6c84111bf77b9f52453ff18",
+      "simple_diag_kdf_match_count": 0,
+      "working_key": "c178ed94d8dd00a65e520a536b7fa30c"
+    },
+    {
+      "diag_id": "07500F",
+      "eps_boot_root_hypothesis_ecu_auth_key": "1ed6562049033f1bc23ab3161b840008",
+      "package_count": 1,
+      "packages": [
+        "T-0009-22.cuw"
+      ],
+      "service_auth_key": "6a66c37c6638a82142310d972a16b720",
+      "simple_diag_kdf_match_count": 0,
+      "working_key": "5cde2dc12035abdc93f0933a01af43f5"
+    },
+    {
+      "diag_id": "07506D",
+      "eps_boot_root_hypothesis_ecu_auth_key": "26c75e485cac712821f6d8746fd08285",
+      "package_count": 1,
+      "packages": [
+        "T-0008-22.cuw"
+      ],
+      "service_auth_key": "38ef43f658e9945b9b377bc6d2c0de32",
+      "simple_diag_kdf_match_count": 0,
+      "working_key": "cf4a30a97d41ce5faef633693cfb8ab0"
+    },
+    {
+      "diag_id": "0792",
+      "eps_boot_root_hypothesis_ecu_auth_key": "5f1ca3df28378c808de34318288b056b",
+      "package_count": 6,
+      "packages": [
+        "T-0058-23.cuw",
+        "T-0060-23.cuw",
+        "T-0061-23.cuw",
+        "T-0062-23.cuw",
+        "T-0149-24.cuw",
+        "T-0150-24.cuw"
+      ],
+      "service_auth_key": "3a8a90ae0ed81b6c37e21c1c5179a93e",
+      "simple_diag_kdf_match_count": 0,
+      "working_key": "9318e0bfa4be96b787365ea2b5e26f3f"
+    },
+    {
+      "diag_id": "07A1",
+      "eps_boot_root_hypothesis_ecu_auth_key": "555f4b2f987867529b2315ad5cd779c5",
+      "package_count": 1,
+      "packages": [
+        "T-0036-22.cuw"
+      ],
+      "service_auth_key": "5afa75da4aee1b6e47cc573d96513bd4",
+      "simple_diag_kdf_match_count": 0,
+      "working_key": "131e268272258d21658b42e341ba98c2"
+    },
+    {
+      "diag_id": "07A1",
+      "eps_boot_root_hypothesis_ecu_auth_key": "38adeef5ccae3f96d598d6fe9db14585",
+      "package_count": 1,
+      "packages": [
+        "T-0035-22.cuw"
+      ],
+      "service_auth_key": "5ff03870f01d7ae6ccb131918506c0f1",
+      "simple_diag_kdf_match_count": 0,
+      "working_key": "cbba47e8b05aa585a3b03516b0c27ed0"
+    },
+    {
+      "diag_id": "07A1",
+      "eps_boot_root_hypothesis_ecu_auth_key": "e0d10ba15800aa3c384913d73d7cd514",
+      "package_count": 1,
+      "packages": [
+        "T-0015-20.cuw"
+      ],
+      "service_auth_key": "e184531c13df8e24c10795a06bcb6811",
+      "simple_diag_kdf_match_count": 0,
+      "working_key": "3a7d78df1a987c5e880f389e5ba8658b"
+    },
+    {
+      "diag_id": "07D2",
+      "eps_boot_root_hypothesis_ecu_auth_key": "5693eea973333cf7a408bc86b1c98914",
+      "package_count": 2,
+      "packages": [
+        "T-0003-25.cuw",
+        "T-0005-25.cuw"
+      ],
+      "service_auth_key": "a34c53c7b1fd7ade8b51bbe1e0efef57",
+      "simple_diag_kdf_match_count": 0,
+      "working_key": "da4158ee9dd381cf7f9fc66da74682f3"
+    }
+  ],
+  "eps_control_specimen": {
+    "actual_ecu_auth_key": "38adeef5ccae3f96d598d6fe9db14585",
+    "eps_root_reproduces_actual_ecu_auth_key": true,
+    "filename": "T-0035-22.cuw",
+    "service_auth_key": "5ff03870f01d7ae6ccb131918506c0f1",
+    "working_key": "cbba47e8b05aa585a3b03516b0c27ed0"
+  },
+  "high_value_non_eps_predictions": {
+    "0724": "192b8e45370251dff3b77f6bb069bf27",
+    "0792": "5f1ca3df28378c808de34318288b056b",
+    "07D2": "5693eea973333cf7a408bc86b1c98914"
+  },
+  "packages": {
+    "T-0003-25.cuw": {
+      "actual_ecu_auth_key": null,
+      "contact_type": "P5-Unified",
+      "diag_id": "07D2",
+      "eps_boot_root_hypothesis_ecu_auth_key": "5693eea973333cf7a408bc86b1c98914",
+      "eps_boot_root_relation_exact_when_actual_present": null,
+      "filename": "T-0003-25.cuw",
+      "first_member_end": 1462,
+      "format_type": "0x67",
+      "logical_block": "LogicalBlock101",
+      "new_cid": "8A2520E01200",
+      "nonce": "082163a560054cadea32bd2a5871fc08",
+      "repro_method": "01",
+      "service_auth_key": "a34c53c7b1fd7ade8b51bbe1e0efef57",
+      "simple_diag_kdf_matches": [],
+      "size": 7872007,
+      "target_calibration": "8A2520E01100",
+      "vehicle": "GRAND HIGHLANDER",
+      "working_key": "da4158ee9dd381cf7f9fc66da74682f3"
+    },
+    "T-0005-25.cuw": {
+      "actual_ecu_auth_key": null,
+      "contact_type": "P5-Unified",
+      "diag_id": "07D2",
+      "eps_boot_root_hypothesis_ecu_auth_key": "5693eea973333cf7a408bc86b1c98914",
+      "eps_boot_root_relation_exact_when_actual_present": null,
+      "filename": "T-0005-25.cuw",
+      "first_member_end": 1486,
+      "format_type": "0x67",
+      "logical_block": "LogicalBlock101",
+      "new_cid": "8A2523002400",
+      "nonce": "2c0af3ad32dc8b28b85104e02b900b67",
+      "repro_method": "01",
+      "service_auth_key": "a34c53c7b1fd7ade8b51bbe1e0efef57",
+      "simple_diag_kdf_matches": [],
+      "size": 7872031,
+      "target_calibration": "8A2523002200",
+      "vehicle": "CROWN",
+      "working_key": "da4158ee9dd381cf7f9fc66da74682f3"
+    },
+    "T-0008-22.cuw": {
+      "actual_ecu_auth_key": null,
+      "contact_type": "P5-Unified",
+      "diag_id": "07506D",
+      "eps_boot_root_hypothesis_ecu_auth_key": "26c75e485cac712821f6d8746fd08285",
+      "eps_boot_root_relation_exact_when_actual_present": null,
+      "filename": "T-0008-22.cuw",
+      "first_member_end": 3186,
+      "format_type": "0x67",
+      "logical_block": "LogicalBlock101",
+      "new_cid": "8646G0C15000",
+      "nonce": "4ae2467420ed576e0c08973530e006eb",
+      "repro_method": "01",
+      "service_auth_key": "38ef43f658e9945b9b377bc6d2c0de32",
+      "simple_diag_kdf_matches": [],
+      "size": 35551267,
+      "target_calibration": "8646G0C11000",
+      "vehicle": "Tundra",
+      "working_key": "cf4a30a97d41ce5faef633693cfb8ab0"
+    },
+    "T-0009-22.cuw": {
+      "actual_ecu_auth_key": null,
+      "contact_type": "P5-Unified",
+      "diag_id": "07500F",
+      "eps_boot_root_hypothesis_ecu_auth_key": "1ed6562049033f1bc23ab3161b840008",
+      "eps_boot_root_relation_exact_when_actual_present": null,
+      "filename": "T-0009-22.cuw",
+      "first_member_end": 1337,
+      "format_type": "0x67",
+      "logical_block": "LogicalBlock101",
+      "new_cid": "8821F0C13000",
+      "nonce": "aa22da49b2be6e82ee580fafcc9683b7",
+      "repro_method": "01",
+      "service_auth_key": "6a66c37c6638a82142310d972a16b720",
+      "simple_diag_kdf_matches": [],
+      "size": 5481006,
+      "target_calibration": "8821F0C11000",
+      "vehicle": "Tundra",
+      "working_key": "5cde2dc12035abdc93f0933a01af43f5"
+    },
+    "T-0015-20.cuw": {
+      "actual_ecu_auth_key": "5a3e86bb8c5ce48de25a6e1bd48e70b2",
+      "contact_type": "P5-Unified",
+      "diag_id": "07A1",
+      "eps_boot_root_hypothesis_ecu_auth_key": "e0d10ba15800aa3c384913d73d7cd514",
+      "eps_boot_root_relation_exact_when_actual_present": false,
+      "filename": "T-0015-20.cuw",
+      "first_member_end": 1976,
+      "format_type": "0x66",
+      "logical_block": "",
+      "new_cid": "",
+      "nonce": "",
+      "repro_method": "",
+      "service_auth_key": "e184531c13df8e24c10795a06bcb6811",
+      "simple_diag_kdf_matches": [],
+      "size": 9887355,
+      "target_calibration": "",
+      "vehicle": "RAV4",
+      "working_key": "3a7d78df1a987c5e880f389e5ba8658b"
+    },
+    "T-0035-22.cuw": {
+      "actual_ecu_auth_key": "38adeef5ccae3f96d598d6fe9db14585",
+      "contact_type": "P5-Unified",
+      "diag_id": "07A1",
+      "eps_boot_root_hypothesis_ecu_auth_key": "38adeef5ccae3f96d598d6fe9db14585",
+      "eps_boot_root_relation_exact_when_actual_present": true,
+      "filename": "T-0035-22.cuw",
+      "first_member_end": 1994,
+      "format_type": "0x65",
+      "logical_block": "",
+      "new_cid": "",
+      "nonce": "",
+      "repro_method": "",
+      "service_auth_key": "5ff03870f01d7ae6ccb131918506c0f1",
+      "simple_diag_kdf_matches": [],
+      "size": 5725237,
+      "target_calibration": "",
+      "vehicle": "TUNDRA",
+      "working_key": "cbba47e8b05aa585a3b03516b0c27ed0"
+    },
+    "T-0036-22.cuw": {
+      "actual_ecu_auth_key": "555f4b2f987867529b2315ad5cd779c5",
+      "contact_type": "P5-Unified",
+      "diag_id": "07A1",
+      "eps_boot_root_hypothesis_ecu_auth_key": "555f4b2f987867529b2315ad5cd779c5",
+      "eps_boot_root_relation_exact_when_actual_present": true,
+      "filename": "T-0036-22.cuw",
+      "first_member_end": 1987,
+      "format_type": "0x65",
+      "logical_block": "",
+      "new_cid": "",
+      "nonce": "",
+      "repro_method": "",
+      "service_auth_key": "5afa75da4aee1b6e47cc573d96513bd4",
+      "simple_diag_kdf_matches": [],
+      "size": 5725230,
+      "target_calibration": "",
+      "vehicle": "TUNDRA",
+      "working_key": "131e268272258d21658b42e341ba98c2"
+    },
+    "T-0051-26.cuw": {
+      "actual_ecu_auth_key": null,
+      "contact_type": "P5-Unified",
+      "diag_id": "0724",
+      "eps_boot_root_hypothesis_ecu_auth_key": "192b8e45370251dff3b77f6bb069bf27",
+      "eps_boot_root_relation_exact_when_actual_present": null,
+      "filename": "T-0051-26.cuw",
+      "first_member_end": 7201,
+      "format_type": "0x67",
+      "logical_block": "LogicalBlock101",
+      "new_cid": "8A2810602100",
+      "nonce": "7addc5c6d23bbdf2b0308e10195a5958",
+      "repro_method": "01",
+      "service_auth_key": "3df2fe55c6c84111bf77b9f52453ff18",
+      "simple_diag_kdf_matches": [],
+      "size": 13045570,
+      "target_calibration": "8A2810602000",
+      "vehicle": "CAMRY",
+      "working_key": "c178ed94d8dd00a65e520a536b7fa30c"
+    },
+    "T-0058-23.cuw": {
+      "actual_ecu_auth_key": null,
+      "contact_type": "P5-Unified",
+      "diag_id": "0792",
+      "eps_boot_root_hypothesis_ecu_auth_key": "5f1ca3df28378c808de34318288b056b",
+      "eps_boot_root_relation_exact_when_actual_present": null,
+      "filename": "T-0058-23.cuw",
+      "first_member_end": 5895,
+      "format_type": "0x67",
+      "logical_block": "LogicalBlock101",
+      "new_cid": "8646F1204500",
+      "nonce": "5587bf845f3ff525e610a8a5ec9bd6e5",
+      "repro_method": "07",
+      "service_auth_key": "3a8a90ae0ed81b6c37e21c1c5179a93e",
+      "simple_diag_kdf_matches": [],
+      "size": 256400446,
+      "target_calibration": "8646F1204300",
+      "vehicle": "COROLLA Series",
+      "working_key": "9318e0bfa4be96b787365ea2b5e26f3f"
+    },
+    "T-0060-23.cuw": {
+      "actual_ecu_auth_key": null,
+      "contact_type": "P5-Unified",
+      "diag_id": "0792",
+      "eps_boot_root_hypothesis_ecu_auth_key": "5f1ca3df28378c808de34318288b056b",
+      "eps_boot_root_relation_exact_when_actual_present": null,
+      "filename": "T-0060-23.cuw",
+      "first_member_end": 5895,
+      "format_type": "0x67",
+      "logical_block": "LogicalBlock101",
+      "new_cid": "8646F1204500",
+      "nonce": "5587bf845f3ff525e610a8a5ec9bd6e5",
+      "repro_method": "07",
+      "service_auth_key": "3a8a90ae0ed81b6c37e21c1c5179a93e",
+      "simple_diag_kdf_matches": [],
+      "size": 256399534,
+      "target_calibration": "8646F1204400",
+      "vehicle": "COROLLA Series",
+      "working_key": "9318e0bfa4be96b787365ea2b5e26f3f"
+    },
+    "T-0061-23.cuw": {
+      "actual_ecu_auth_key": null,
+      "contact_type": "P5-Unified",
+      "diag_id": "0792",
+      "eps_boot_root_hypothesis_ecu_auth_key": "5f1ca3df28378c808de34318288b056b",
+      "eps_boot_root_relation_exact_when_actual_present": null,
+      "filename": "T-0061-23.cuw",
+      "first_member_end": 5837,
+      "format_type": "0x67",
+      "logical_block": "LogicalBlock101",
+      "new_cid": "8646F1606300",
+      "nonce": "5587bf845f3ff525e610a8a5ec9bd6e5",
+      "repro_method": "07",
+      "service_auth_key": "3a8a90ae0ed81b6c37e21c1c5179a93e",
+      "simple_diag_kdf_matches": [],
+      "size": 256401572,
+      "target_calibration": "8646F1606200",
+      "vehicle": "",
+      "working_key": "9318e0bfa4be96b787365ea2b5e26f3f"
+    },
+    "T-0062-23.cuw": {
+      "actual_ecu_auth_key": null,
+      "contact_type": "P5-Unified",
+      "diag_id": "0792",
+      "eps_boot_root_hypothesis_ecu_auth_key": "5f1ca3df28378c808de34318288b056b",
+      "eps_boot_root_relation_exact_when_actual_present": null,
+      "filename": "T-0062-23.cuw",
+      "first_member_end": 5776,
+      "format_type": "0x67",
+      "logical_block": "LogicalBlock101",
+      "new_cid": "8646F4206400",
+      "nonce": "5587bf845f3ff525e610a8a5ec9bd6e5",
+      "repro_method": "07",
+      "service_auth_key": "3a8a90ae0ed81b6c37e21c1c5179a93e",
+      "simple_diag_kdf_matches": [],
+      "size": 257142135,
+      "target_calibration": "8646F4206200",
+      "vehicle": "",
+      "working_key": "9318e0bfa4be96b787365ea2b5e26f3f"
+    },
+    "T-0149-24.cuw": {
+      "actual_ecu_auth_key": null,
+      "contact_type": "P5-Unified",
+      "diag_id": "0792",
+      "eps_boot_root_hypothesis_ecu_auth_key": "5f1ca3df28378c808de34318288b056b",
+      "eps_boot_root_relation_exact_when_actual_present": null,
+      "filename": "T-0149-24.cuw",
+      "first_member_end": 5844,
+      "format_type": "0x67",
+      "logical_block": "LogicalBlock101",
+      "new_cid": "8646F4206700",
+      "nonce": "5587bf845f3ff525e610a8a5ec9bd6e5",
+      "repro_method": "07",
+      "service_auth_key": "3a8a90ae0ed81b6c37e21c1c5179a93e",
+      "simple_diag_kdf_matches": [],
+      "size": 257894251,
+      "target_calibration": "8646F4206400",
+      "vehicle": "bZ4X",
+      "working_key": "9318e0bfa4be96b787365ea2b5e26f3f"
+    },
+    "T-0150-24.cuw": {
+      "actual_ecu_auth_key": null,
+      "contact_type": "P5-Unified",
+      "diag_id": "0792",
+      "eps_boot_root_hypothesis_ecu_auth_key": "5f1ca3df28378c808de34318288b056b",
+      "eps_boot_root_relation_exact_when_actual_present": null,
+      "filename": "T-0150-24.cuw",
+      "first_member_end": 5820,
+      "format_type": "0x67",
+      "logical_block": "LogicalBlock101",
+      "new_cid": "8646F1611200",
+      "nonce": "5587bf845f3ff525e610a8a5ec9bd6e5",
+      "repro_method": "07",
+      "service_auth_key": "3a8a90ae0ed81b6c37e21c1c5179a93e",
+      "simple_diag_kdf_matches": [],
+      "size": 257646163,
+      "target_calibration": "8646F1606300",
+      "vehicle": "",
+      "working_key": "9318e0bfa4be96b787365ea2b5e26f3f"
+    }
+  },
+  "reprostd_image_key_trials": [
+    {
+      "all_results": [
+        {
+          "byte_identity_after_32": 0.004350879335613092,
+          "key": "service_auth",
+          "mode": "CBC"
+        },
+        {
+          "byte_identity_after_32": 0.004228749389350269,
+          "key": "eps_application_sa_root",
+          "mode": "CBC"
+        },
+        {
+          "byte_identity_after_32": 0.004137151929653151,
+          "key": "eps_application_sa_root",
+          "mode": "CFB128"
+        },
+        {
+          "byte_identity_after_32": 0.003969223253541768,
+          "key": "eps_boot_sa_root",
+          "mode": "CFB128"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "AES-DEC(eps_payload_root,working_key)",
+          "mode": "CTR_BE"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "AES-DEC(eps_payload_root,working_key)",
+          "mode": "CTR_LE"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "AES-DEC(eps_payload_root,working_key)",
+          "mode": "OFB"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "AES-ENC(eps_payload_root,working_key)",
+          "mode": "CTR_BE"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "AES-ENC(eps_payload_root,working_key)",
+          "mode": "CTR_LE"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "AES-ENC(eps_payload_root,working_key)",
+          "mode": "OFB"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "eps_application_sa_root",
+          "mode": "CTR_BE"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "eps_application_sa_root",
+          "mode": "CTR_LE"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "eps_application_sa_root",
+          "mode": "OFB"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "eps_boot_sa_root",
+          "mode": "CTR_BE"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "eps_boot_sa_root",
+          "mode": "CTR_LE"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "eps_boot_sa_root",
+          "mode": "OFB"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "eps_payload_root",
+          "mode": "CTR_BE"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "eps_payload_root",
+          "mode": "CTR_LE"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "eps_payload_root",
+          "mode": "OFB"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "service_auth",
+          "mode": "CTR_BE"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "service_auth",
+          "mode": "CTR_LE"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "service_auth",
+          "mode": "OFB"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "working_key",
+          "mode": "CTR_BE"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "working_key",
+          "mode": "CTR_LE"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "working_key",
+          "mode": "OFB"
+        },
+        {
+          "byte_identity_after_32": 0.0039081582804103565,
+          "key": "AES-DEC(eps_payload_root,working_key)",
+          "mode": "CBC"
+        },
+        {
+          "byte_identity_after_32": 0.0039081582804103565,
+          "key": "service_auth",
+          "mode": "CFB128"
+        },
+        {
+          "byte_identity_after_32": 0.003801294577430386,
+          "key": "AES-DEC(eps_payload_root,working_key)",
+          "mode": "CFB128"
+        },
+        {
+          "byte_identity_after_32": 0.00377076209086468,
+          "key": "eps_payload_root",
+          "mode": "CFB128"
+        },
+        {
+          "byte_identity_after_32": 0.003740229604298974,
+          "key": "eps_payload_root",
+          "mode": "CBC"
+        },
+        {
+          "byte_identity_after_32": 0.003740229604298974,
+          "key": "working_key",
+          "mode": "CFB128"
+        },
+        {
+          "byte_identity_after_32": 0.003709697117733268,
+          "key": "eps_boot_sa_root",
+          "mode": "CBC"
+        },
+        {
+          "byte_identity_after_32": 0.003709697117733268,
+          "key": "working_key",
+          "mode": "CBC"
+        },
+        {
+          "byte_identity_after_32": 0.0035723009281875915,
+          "key": "AES-ENC(eps_payload_root,working_key)",
+          "mode": "CFB128"
+        },
+        {
+          "byte_identity_after_32": 0.0031448461162677088,
+          "key": "AES-ENC(eps_payload_root,working_key)",
+          "mode": "CBC"
+        }
+      ],
+      "best_candidate": {
+        "byte_identity_after_32": 0.004350879335613092,
+        "key": "service_auth",
+        "mode": "CBC"
+      },
+      "boundary": "A chance-level result rejects only these explicit one-step AES guesses. It does not recover or exclude a more complex ECU-side image transform and does not disprove reuse of the EPS payload-build root.",
+      "encoded_byte_identity_after_32": 0.003953957010258915,
+      "left": "T-0062-23.cuw",
+      "left_member": "01-8646F4206400.xx",
+      "name": "frc_same_nonce",
+      "reprodata_start": "0x8E80000",
+      "right": "T-0149-24.cuw",
+      "right_member": "01-8646F4206700.xx",
+      "same_nonce": true,
+      "same_service_auth": true,
+      "same_working_key": true,
+      "sample_bytes": 65536,
+      "tested_key_candidates": [
+        "eps_payload_root",
+        "eps_boot_sa_root",
+        "eps_application_sa_root",
+        "service_auth",
+        "working_key",
+        "AES-ENC(eps_payload_root,working_key)",
+        "AES-DEC(eps_payload_root,working_key)"
+      ],
+      "tested_modes": [
+        "CBC",
+        "CFB128",
+        "OFB",
+        "CTR_BE",
+        "CTR_LE"
+      ]
+    },
+    {
+      "all_results": [
+        {
+          "byte_identity_after_32": 0.004488275525158769,
+          "key": "service_auth",
+          "mode": "CTR_LE"
+        },
+        {
+          "byte_identity_after_32": 0.004381411822178798,
+          "key": "eps_payload_root",
+          "mode": "CTR_LE"
+        },
+        {
+          "byte_identity_after_32": 0.004305080605764533,
+          "key": "AES-ENC(eps_payload_root,working_key)",
+          "mode": "OFB"
+        },
+        {
+          "byte_identity_after_32": 0.004213483146067416,
+          "key": "eps_application_sa_root",
+          "mode": "OFB"
+        },
+        {
+          "byte_identity_after_32": 0.00418295065950171,
+          "key": "eps_payload_root",
+          "mode": "CBC"
+        },
+        {
+          "byte_identity_after_32": 0.004121885686370298,
+          "key": "service_auth",
+          "mode": "CTR_BE"
+        },
+        {
+          "byte_identity_after_32": 0.004091353199804592,
+          "key": "AES-DEC(eps_payload_root,working_key)",
+          "mode": "CTR_BE"
+        },
+        {
+          "byte_identity_after_32": 0.004076086956521739,
+          "key": "eps_application_sa_root",
+          "mode": "CBC"
+        },
+        {
+          "byte_identity_after_32": 0.004060820713238886,
+          "key": "AES-ENC(eps_payload_root,working_key)",
+          "mode": "CTR_BE"
+        },
+        {
+          "byte_identity_after_32": 0.004060820713238886,
+          "key": "eps_payload_root",
+          "mode": "OFB"
+        },
+        {
+          "byte_identity_after_32": 0.004045554469956033,
+          "key": "eps_application_sa_root",
+          "mode": "CTR_LE"
+        },
+        {
+          "byte_identity_after_32": 0.004015021983390327,
+          "key": "AES-DEC(eps_payload_root,working_key)",
+          "mode": "OFB"
+        },
+        {
+          "byte_identity_after_32": 0.003999755740107474,
+          "key": "service_auth",
+          "mode": "CFB128"
+        },
+        {
+          "byte_identity_after_32": 0.003984489496824621,
+          "key": "working_key",
+          "mode": "CBC"
+        },
+        {
+          "byte_identity_after_32": 0.003953957010258915,
+          "key": "AES-ENC(eps_payload_root,working_key)",
+          "mode": "CBC"
+        },
+        {
+          "byte_identity_after_32": 0.003938690766976062,
+          "key": "eps_boot_sa_root",
+          "mode": "CTR_LE"
+        },
+        {
+          "byte_identity_after_32": 0.003938690766976062,
+          "key": "eps_boot_sa_root",
+          "mode": "OFB"
+        },
+        {
+          "byte_identity_after_32": 0.0039234245236932095,
+          "key": "service_auth",
+          "mode": "OFB"
+        },
+        {
+          "byte_identity_after_32": 0.0038470933072789447,
+          "key": "eps_application_sa_root",
+          "mode": "CTR_BE"
+        },
+        {
+          "byte_identity_after_32": 0.0038470933072789447,
+          "key": "service_auth",
+          "mode": "CBC"
+        },
+        {
+          "byte_identity_after_32": 0.0038470933072789447,
+          "key": "working_key",
+          "mode": "CTR_LE"
+        },
+        {
+          "byte_identity_after_32": 0.0038165608207132388,
+          "key": "eps_boot_sa_root",
+          "mode": "CTR_BE"
+        },
+        {
+          "byte_identity_after_32": 0.003786028334147533,
+          "key": "AES-ENC(eps_payload_root,working_key)",
+          "mode": "CTR_LE"
+        },
+        {
+          "byte_identity_after_32": 0.003786028334147533,
+          "key": "eps_payload_root",
+          "mode": "CFB128"
+        },
+        {
+          "byte_identity_after_32": 0.00377076209086468,
+          "key": "working_key",
+          "mode": "CTR_BE"
+        },
+        {
+          "byte_identity_after_32": 0.00377076209086468,
+          "key": "working_key",
+          "mode": "OFB"
+        },
+        {
+          "byte_identity_after_32": 0.003724963361016121,
+          "key": "AES-ENC(eps_payload_root,working_key)",
+          "mode": "CFB128"
+        },
+        {
+          "byte_identity_after_32": 0.003724963361016121,
+          "key": "eps_boot_sa_root",
+          "mode": "CFB128"
+        },
+        {
+          "byte_identity_after_32": 0.003694430874450415,
+          "key": "eps_boot_sa_root",
+          "mode": "CBC"
+        },
+        {
+          "byte_identity_after_32": 0.0036638983878847092,
+          "key": "AES-DEC(eps_payload_root,working_key)",
+          "mode": "CBC"
+        },
+        {
+          "byte_identity_after_32": 0.0036638983878847092,
+          "key": "eps_application_sa_root",
+          "mode": "CFB128"
+        },
+        {
+          "byte_identity_after_32": 0.0035723009281875915,
+          "key": "AES-DEC(eps_payload_root,working_key)",
+          "mode": "CTR_LE"
+        },
+        {
+          "byte_identity_after_32": 0.0034959697117733267,
+          "key": "working_key",
+          "mode": "CFB128"
+        },
+        {
+          "byte_identity_after_32": 0.003450170981924768,
+          "key": "AES-DEC(eps_payload_root,working_key)",
+          "mode": "CFB128"
+        },
+        {
+          "byte_identity_after_32": 0.003343307278944797,
+          "key": "eps_payload_root",
+          "mode": "CTR_BE"
+        }
+      ],
+      "best_candidate": {
+        "byte_identity_after_32": 0.004488275525158769,
+        "key": "service_auth",
+        "mode": "CTR_LE"
+      },
+      "boundary": "A chance-level result rejects only these explicit one-step AES guesses. It does not recover or exclude a more complex ECU-side image transform and does not disprove reuse of the EPS payload-build root.",
+      "encoded_byte_identity_after_32": 0.004015021983390327,
+      "left": "T-0003-25.cuw",
+      "left_member": "01-8A2520E01200.xx",
+      "name": "hv_different_nonce",
+      "reprodata_start": "0x18000",
+      "right": "T-0005-25.cuw",
+      "right_member": "01-8A2523002400.xx",
+      "same_nonce": false,
+      "same_service_auth": true,
+      "same_working_key": true,
+      "sample_bytes": 65536,
+      "tested_key_candidates": [
+        "eps_payload_root",
+        "eps_boot_sa_root",
+        "eps_application_sa_root",
+        "service_auth",
+        "working_key",
+        "AES-ENC(eps_payload_root,working_key)",
+        "AES-DEC(eps_payload_root,working_key)"
+      ],
+      "tested_modes": [
+        "CBC",
+        "CFB128",
+        "OFB",
+        "CTR_BE",
+        "CTR_LE"
+      ]
+    }
+  ],
+  "roots": {
+    "cross_ecu_status": "The three EPS roots are proven across tracked EPS images only. Their reuse in FRC/HV/MG/Brake remains a hypothesis.",
+    "eps_application_security_access_root": "893e08418c741ffa2a9c044bffa55813",
+    "eps_boot_security_access_root": "f05f36b7d78c03e24ab4faef2a57d044",
+    "eps_payload_build_root": "ba052435f8843f985fd1329d2b6117b0",
+    "techstream_security_up_wrap_key": "b45b26d6344fd60e80bc01d63c7584a0"
+  },
+  "schema": "toyota-cuw-cross-ecu-security-derivations-v1",
+  "security_access_model": {
+    "eps_unified_backend": "Kwork = AES-128-ECB-DEC(EPS_BOOT_SA_ROOT, ECUAuthKey); response = AES-128-ECB-ENC(Kwork, ECU_seed)",
+    "frontend": "Kwork = AES-128-ECB-DEC(Kwrap, ServiceAuthKey); response = AES-128-ECB-ENC(Kwork, ECU_seed)",
+    "reprostd_boundary": "ReproStd uses a bare 27 01 seed request and the CUW ServiceAuthKey-derived working key; unlike Unified, it does not send ECUAuthKey in the request. Therefore the backend must already hold or derive an equivalent effective key by some ECU-local mechanism.",
+    "universal_root_test": "If a non-EPS backend uses the same EPS root/wrapper algebra, its ECUAuthKey-shaped stored/provisioned value must equal AES-128-ECB-ENC(EPS_BOOT_SA_ROOT, Kwork)."
+  },
+  "simple_public_id_kdf_negative": {
+    "interpretation": "No tested working key is an obvious one-step derivation of the public diagnostic identifier under the recovered EPS roots. This is a bounded negative, not an exhaustive KDF search.",
+    "matching_packages": [],
+    "tested": "AES-ENC/AES-DEC of six obvious 16-byte DiagID embeddings and CMAC of binary/ascii DiagID under the recovered EPS payload/boot/application roots"
+  }
+}
