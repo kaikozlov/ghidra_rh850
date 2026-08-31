@@ -3066,16 +3066,18 @@ Deterministic evidence:
 `tests/verify_camry_2026_longitudinal_request_plane.py`. No control output is
 authorized by this finding.
 
-## 51. Native Bus-1 framing is linear E2E integrity plus an alive counter, not observed cryptographic authentication (VAR-107)
+## 51. Native Bus-1 framing is exact AUTOSAR E2E Profile 5, not cryptographic authentication (VAR-107)
 
-The retained Bus-1 corpus is now sufficient to answer the next security-boundary
-question directly from wire bytes. The native camera/radar family does carry an
-integrity/freshness layer, but it is structurally unlike the Bus-4 P5 SecOC
-family: **B0:B1 is an affine-linear 16-bit integrity word and the visible
-freshness primitive on `0x160` is an 8-bit alive counter in B2.** No
-cryptographic authenticator is observed on this interface.
+The retained Bus-1 corpus now closes the request-plane E2E format exactly. The
+native camera/radar family uses **AUTOSAR E2E Profile 5**: B0:B1 is a
+little-endian CRC-16/CCITT word, B2 is the 8-bit alive counter, and the implicit
+16-bit Data ID equals the CAN identifier. The protected bytes are B2..end in
+wire order, followed in the CRC calculation by `CAN_ID_low, CAN_ID_high`.
+Across both retained drives the exact generator matches **438,380/438,380**
+periodic Bus-1 frames across all 22 stream IDs with zero mismatches. No
+cryptographic authenticator is present on this interface.
 
-### 51.1 B0:B1 is a deterministic affine-linear integrity code
+### 51.1 B0:B1 is exact AUTOSAR E2E Profile 5
 
 For every one of the **22 periodic Bus-1 streams** in both retained drives,
 identical bytes B2..end always imply identical B0:B1; there are zero suffixes
@@ -3098,9 +3100,22 @@ The transform is also common across PDUs rather than a per-ID opaque tag:
   `0x184 -> 0x185` changes B0:B1 by fixed XOR `0x3133` on all 257 overlaps;
   `0x18A -> 0x18B` produces the same `0x3133` on all 256 overlaps.
 
-That is consistent with one length-dependent linear E2E checksum plus an
-ID/Data-ID contribution. The exact Toyota polynomial/implementation name is not
-yet recovered, but no secret is required to reproduce the observed transform.
+The exact generator is:
+
+`CRC = CRC16_CCITT(init=0xFFFF, B2..end || CAN_ID_low || CAN_ID_high)`
+
+with polynomial **`0x1021`** (`x^16 + x^12 + x^5 + 1`), non-reflected input and
+output, no final XOR, and the resulting 16-bit CRC stored **little-endian** in
+B0:B1. The E2E header offset is zero, so B2 is exactly Profile-5's one-byte
+counter. This is byte-for-byte the AUTOSAR Profile-5 computation rather than a
+Toyota-specific opaque checksum.
+
+The recovery is independently visible from the learned syndromes: after
+byte-swapping B0:B1 into the CRC register value, adjacent bit contributions
+follow the `0x1021` recurrence exactly, and the B2->B12 bit-0 contributions are
+separated by precisely 80 CRC shifts. The fixed CAN-ID term also closes: every
+same-suffix `0x18x` cross-ID pair matches the CRC effect of appending the 16-bit
+CAN ID low byte then high byte. There is no secret input.
 
 ### 51.2 `0x160 B2` is the visible alive/freshness counter
 
@@ -3116,7 +3131,8 @@ do **not** recover the downstream receiver's accepted counter window, timeout,
 or restart policy.
 
 The wrap boundary is visible directly on constant `0x020/12`. Its body is zero
-apart from the B2/B3 counter pair and B0:B1 integrity word. Across each drive it
+apart from the Profile-5 B2 counter, a B3 application byte that mirrors B2 in
+this stream, and the B0:B1 CRC word. Across each drive it
 has exactly **256 complete wire images**; the counter->integrity mapping passes
 all **65,536/65,536** affine pair identities with zero violations, and the same
 complete frame repeats byte-for-byte after the 8-bit counter wraps. Median exact
@@ -3125,39 +3141,32 @@ is no observed long-lived epoch or nonce on this Bus-1 framing. A receiver may
 reject an immediate replay from local counter state, but the wire image itself
 contains nothing beyond the modulo-256 state to distinguish a post-wrap replay.
 
-### 51.3 The logs already recover the integrity delta needed for `0x160 B12`
+### 51.3 Exact Profile-5 generation replaces the learned `0x160 B12` delta patch
 
-The combined corpus independently spans every bit actually used by the signed-7
-`0x160 B12` candidate. The exact observed B0:B1 XOR contribution for B12 bits
-0..6 is:
+The earlier affine recovery already solved the B12 and B2 checksum deltas:
+B12 bits 0..6 contributed
+`D86D/B0DB/41A7/A35E/46BD/AD6A/5AD5`, while B2 bits 0..7 contributed
+`4659/8CB2/3975/72EA/C5C4/AB99/7723/EE46` in transmitted B0:B1 order. Those
+values remain useful regression witnesses, but they are now derived consequences
+of the recovered Profile-5 generator rather than the implementation method.
 
-`D86D, B0DB, 41A7, A35E, 46BD, AD6A, 5AD5`.
-
-The corresponding B2 counter-bit contributions 0..7 are:
-
-`4659, 8CB2, 3975, 72EA, C5C4, AB99, 7723, EE46`.
-
-Consequently, for an intercepted stock `0x160` frame, changing only B12 from
-`old` to `new` has a fully recovered observed-wire integrity repair:
-
-`new_B0B1 = old_B0B1 XOR XOR(B12_contribution[i] for each set bit i in old XOR new)`.
-
-`tools/camry_frc_request_poc.py` packages that recovered rule as an **offline
-template-based request constructor**. It takes an observed 32-byte `0x160`,
-sets the signed-7 B12 candidate, preserves the intercepted B2 by default (or
-explicitly advances/sets it for next-frame synthesis), repairs B0:B1 from the
-recovered B2/B12 XOR contributions, and changes no other byte. Its
-verifier reconstructs **23,083** retained same-payload frame pairs (including
-81 B12-changing pairs) with **0 mismatches**. The CLI contains no CAN transmit
-path; source attribution, B12 OEM identity, receiver counter-window behavior,
-and downstream acceptance remain separate live questions.
+`tools/camry_frc_request_poc.py` now recomputes the **full exact Profile-5 CRC**
+instead of applying a B2/B12-specific delta table. It takes an observed 32-byte
+`0x160`, verifies its existing CRC using Data ID `0x0160`, sets the signed-7 B12
+candidate, preserves the intercepted B2 by default (or explicitly advances/sets
+it for next-frame synthesis), and recomputes B0:B1 from the entire PDU. The
+retained same-payload oracle still reconstructs **23,083** frame pairs including
+81 B12-changing pairs with **0 mismatches**, while the exact generator also
+validates every retained periodic Bus-1 frame. The CLI contains no CAN transmit
+path; source attribution, B12 OEM identity, receiver `MaxDeltaCounter`/timeout
+behavior, and downstream acceptance remain separate live questions.
 
 This is an **analysis result**, not yet a vehicle-control contract. VAR-106 still
 leaves `0x160` physical transmitter/direction and B12 OEM identity open, and no
 live experiment has shown how the downstream ECU reacts to a synthetically
-modified request. The important security conclusion is narrower: the native
-Bus-1 family exposes **linear integrity + rolling freshness, not the ordinary P5
-SecOC/TSK authentication boundary** seen on Bus 4.
+modified request. The important security conclusion is narrower: the native Bus-1 family exposes
+**standard AUTOSAR Profile-5 CRC integrity + rolling freshness, not the ordinary
+Toyota P5 SecOC/TSK authentication boundary** seen on Bus 4.
 
 Deterministic evidence:
 `tools/analyze_camry_2026_bus1_e2e.py`,
@@ -3173,5 +3182,5 @@ Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
 - Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150)
 <!-- knowledge-cross-references:end -->

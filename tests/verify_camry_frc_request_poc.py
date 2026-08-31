@@ -17,6 +17,12 @@ from tools.camry_frc_request_poc import (
     decode_signed7,
     encode_signed7,
 )
+from tools.toyota_e2e_p05 import (
+    crc16_ccitt,
+    e2e_p05_check,
+    e2e_p05_protect,
+    e2e_p05_recover_data_id,
+)
 
 RAW = REPO / "targets/camry-2026/raw-20260827"
 DRIVES = (
@@ -35,6 +41,9 @@ def check(name: str, condition, detail: str = "") -> None:
     print(f"[{'PASS' if ok else 'FAIL'}] {name}" + (f" ({detail})" if detail else ""))
 
 
+print("== exact Profile-5 primitive ==")
+check("CRC-16/CCITT-FALSE standard check vector", crc16_ccitt(b"123456789") == 0x29B1)
+
 print("== signed7 codec ==")
 check("signed7 endpoints", encode_signed7(-64) == 0x40 and encode_signed7(63) == 0x3F)
 check("signed7 roundtrip", all(decode_signed7(encode_signed7(v)) == v for v in range(-64, 64)))
@@ -42,6 +51,7 @@ check("signed7 roundtrip", all(decode_signed7(encode_signed7(v)) == v for v in r
 print("== fixed retained witnesses ==")
 a = bytes.fromhex("f13bf182800040034de80b0000a80080012f80c0000000140000000000000000")
 b = bytes.fromhex("8420b582800040034de80b007fa80080012f80c0000000140000000000000000")
+check("retained 0x160 independently recovers implicit DataID 0x0160", e2e_p05_recover_data_id(a) == 0x160)
 r = build_0x160_request(a, request_signed7=-1, counter=0xB5)
 check("combined counter+B12 mutation reproduces retained frame byte-exact", r.frame == b)
 check("only header/counter/request changed", r.frame[3:12] == a[3:12] and r.frame[13:] == a[13:])
@@ -117,14 +127,20 @@ for bad in (-65, 64):
         ok = True
     check(f"request {bad} rejected", ok)
 
-bad_b12 = bytearray(base)
-bad_b12[12] = 0x80
+corrupt = bytearray(base)
+corrupt[8] ^= 0x01
 try:
-    build_0x160_request(bytes(bad_b12), 0)
+    build_0x160_request(bytes(corrupt), 0)
     ok = False
 except ValueError:
     ok = True
-check("unrecovered B12 bit7 template rejected", ok)
+check("invalid Profile-5 template rejected", ok)
+
+bit7_template = bytearray(base)
+bit7_template[12] = 0x80
+bit7_template = bytearray(e2e_p05_protect(bytes(bit7_template), 0x160))
+check("exact Profile-5 recovery covers formerly-unrecovered B12 bit7", e2e_p05_check(bit7_template, 0x160))
+check("PoC can repair from a valid bit7 template", e2e_p05_check(build_0x160_request(bytes(bit7_template), 0).frame, 0x160))
 
 try:
     build_0x160_request(base, 0, counter=4, advance_counter=True)

@@ -483,6 +483,12 @@
             "00000000": 10270
           },
           "n": 10270,
+          "profile5_matches": 10270,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0020",
+            "0x0020"
+          ],
           "suffix_determinism": {
             "frames": 10270,
             "max_headers_per_suffix": 1,
@@ -502,6 +508,12 @@
             "00000000": 5130
           },
           "n": 5130,
+          "profile5_matches": 5130,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0123",
+            "0x0123"
+          ],
           "suffix_determinism": {
             "frames": 5130,
             "max_headers_per_suffix": 1,
@@ -523,6 +535,12 @@
             "00000000": 20510
           },
           "n": 20510,
+          "profile5_matches": 20510,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0160",
+            "0x0160"
+          ],
           "suffix_determinism": {
             "frames": 20510,
             "max_headers_per_suffix": 1,
@@ -797,6 +815,12 @@
             "00000000": 10268
           },
           "n": 10268,
+          "profile5_matches": 10268,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0180",
+            "0x0180"
+          ],
           "suffix_determinism": {
             "frames": 10268,
             "max_headers_per_suffix": 1,
@@ -1071,6 +1095,12 @@
             "00000000": 10255
           },
           "n": 10255,
+          "profile5_matches": 10255,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0181",
+            "0x0181"
+          ],
           "suffix_determinism": {
             "frames": 10255,
             "max_headers_per_suffix": 1,
@@ -1345,6 +1375,12 @@
             "00000000": 10246
           },
           "n": 10246,
+          "profile5_matches": 10246,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0182",
+            "0x0182"
+          ],
           "suffix_determinism": {
             "frames": 10246,
             "max_headers_per_suffix": 1,
@@ -1619,6 +1655,12 @@
             "00000000": 10245
           },
           "n": 10245,
+          "profile5_matches": 10245,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0183",
+            "0x0183"
+          ],
           "suffix_determinism": {
             "frames": 10245,
             "max_headers_per_suffix": 1,
@@ -1893,6 +1935,12 @@
             "00000000": 10250
           },
           "n": 10250,
+          "profile5_matches": 10250,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0184",
+            "0x0184"
+          ],
           "suffix_determinism": {
             "frames": 10250,
             "max_headers_per_suffix": 1,
@@ -2167,6 +2215,12 @@
             "00000000": 10263
           },
           "n": 10263,
+          "profile5_matches": 10263,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0185",
+            "0x0185"
+          ],
           "suffix_determinism": {
             "frames": 10263,
             "max_headers_per_suffix": 1,
@@ -2441,6 +2495,12 @@
             "00000000": 10253
           },
           "n": 10253,
+          "profile5_matches": 10253,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0186",
+            "0x0186"
+          ],
           "suffix_determinism": {
             "frames": 10253,
             "max_headers_per_suffix": 1,
@@ -2715,6 +2775,12 @@
             "00000000": 10238
           },
           "n": 10238,
+          "profile5_matches": 10238,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0187",
+            "0x0187"
+          ],
           "suffix_determinism": {
             "frames": 10238,
             "max_headers_per_suffix": 1,
@@ -2989,6 +3055,12 @@
             "00000000": 10254
           },
           "n": 10254,
+          "profile5_matches": 10254,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0188",
+            "0x0188"
+          ],
           "suffix_determinism": {
             "frames": 10254,
             "max_headers_per_suffix": 1,
@@ -3263,6 +3335,12 @@
             "00000000": 10258
           },
           "n": 10258,
+          "profile5_matches": 10258,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0189",
+            "0x0189"
+          ],
           "suffix_determinism": {
             "frames": 10258,
             "max_headers_per_suffix": 1,
@@ -3537,6 +3615,12 @@
             "00000000": 10245
           },
           "n": 10245,
+          "profile5_matches": 10245,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x018A",
+            "0x018A"
+          ],
           "suffix_determinism": {
             "frames": 10245,
             "max_headers_per_suffix": 1,
@@ -3811,6 +3895,12 @@
             "00000000": 10248
           },
           "n": 10248,
+          "profile5_matches": 10248,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x018B",
+            "0x018B"
+          ],
           "suffix_determinism": {
             "frames": 10248,
             "max_headers_per_suffix": 1,
@@ -4085,6 +4175,12 @@
             "00000000": 10245
           },
           "n": 10245,
+          "profile5_matches": 10245,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x018C",
+            "0x018C"
+          ],
           "suffix_determinism": {
             "frames": 10245,
             "max_headers_per_suffix": 1,
@@ -4359,6 +4455,12 @@
             "00000000": 10259
           },
           "n": 10259,
+          "profile5_matches": 10259,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x01A0",
+            "0x01A0"
+          ],
           "suffix_determinism": {
             "frames": 10259,
             "max_headers_per_suffix": 1,
@@ -4505,6 +4607,12 @@
             "00000000": 5128
           },
           "n": 5128,
+          "profile5_matches": 5128,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0200",
+            "0x0200"
+          ],
           "suffix_determinism": {
             "frames": 5128,
             "max_headers_per_suffix": 1,
@@ -4651,6 +4759,12 @@
             "00000000": 5129
           },
           "n": 5129,
+          "profile5_matches": 5129,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0201",
+            "0x0201"
+          ],
           "suffix_determinism": {
             "frames": 5129,
             "max_headers_per_suffix": 1,
@@ -4685,6 +4799,12 @@
             "00000000": 10256
           },
           "n": 10256,
+          "profile5_matches": 10256,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0230",
+            "0x0230"
+          ],
           "suffix_determinism": {
             "frames": 10256,
             "max_headers_per_suffix": 1,
@@ -4705,6 +4825,12 @@
             "00000000": 1025
           },
           "n": 1025,
+          "profile5_matches": 1025,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0440",
+            "0x0440"
+          ],
           "suffix_determinism": {
             "frames": 1025,
             "max_headers_per_suffix": 1,
@@ -4724,6 +4850,12 @@
             "00000000": 1022
           },
           "n": 1022,
+          "profile5_matches": 1022,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0450",
+            "0x0450"
+          ],
           "suffix_determinism": {
             "frames": 1022,
             "max_headers_per_suffix": 1,
@@ -5019,6 +5151,12 @@
             "00000000": 11999
           },
           "n": 11999,
+          "profile5_matches": 11999,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0020",
+            "0x0020"
+          ],
           "suffix_determinism": {
             "frames": 11999,
             "max_headers_per_suffix": 1,
@@ -5038,6 +5176,12 @@
             "00000000": 5999
           },
           "n": 5999,
+          "profile5_matches": 5999,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0123",
+            "0x0123"
+          ],
           "suffix_determinism": {
             "frames": 5999,
             "max_headers_per_suffix": 1,
@@ -5057,6 +5201,12 @@
             "00000000": 23998
           },
           "n": 23998,
+          "profile5_matches": 23998,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0160",
+            "0x0160"
+          ],
           "suffix_determinism": {
             "frames": 23998,
             "max_headers_per_suffix": 1,
@@ -5331,6 +5481,12 @@
             "00000000": 11999
           },
           "n": 11999,
+          "profile5_matches": 11999,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0180",
+            "0x0180"
+          ],
           "suffix_determinism": {
             "frames": 11999,
             "max_headers_per_suffix": 1,
@@ -5605,6 +5761,12 @@
             "00000000": 11999
           },
           "n": 11999,
+          "profile5_matches": 11999,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0181",
+            "0x0181"
+          ],
           "suffix_determinism": {
             "frames": 11999,
             "max_headers_per_suffix": 1,
@@ -5879,6 +6041,12 @@
             "00000000": 11999
           },
           "n": 11999,
+          "profile5_matches": 11999,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0182",
+            "0x0182"
+          ],
           "suffix_determinism": {
             "frames": 11999,
             "max_headers_per_suffix": 1,
@@ -6153,6 +6321,12 @@
             "00000000": 11999
           },
           "n": 11999,
+          "profile5_matches": 11999,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0183",
+            "0x0183"
+          ],
           "suffix_determinism": {
             "frames": 11999,
             "max_headers_per_suffix": 1,
@@ -6427,6 +6601,12 @@
             "00000000": 11999
           },
           "n": 11999,
+          "profile5_matches": 11999,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0184",
+            "0x0184"
+          ],
           "suffix_determinism": {
             "frames": 11999,
             "max_headers_per_suffix": 1,
@@ -6701,6 +6881,12 @@
             "00000000": 11999
           },
           "n": 11999,
+          "profile5_matches": 11999,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0185",
+            "0x0185"
+          ],
           "suffix_determinism": {
             "frames": 11999,
             "max_headers_per_suffix": 1,
@@ -6975,6 +7161,12 @@
             "00000000": 11999
           },
           "n": 11999,
+          "profile5_matches": 11999,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0186",
+            "0x0186"
+          ],
           "suffix_determinism": {
             "frames": 11999,
             "max_headers_per_suffix": 1,
@@ -7249,6 +7441,12 @@
             "00000000": 11999
           },
           "n": 11999,
+          "profile5_matches": 11999,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0187",
+            "0x0187"
+          ],
           "suffix_determinism": {
             "frames": 11999,
             "max_headers_per_suffix": 1,
@@ -7523,6 +7721,12 @@
             "00000000": 11999
           },
           "n": 11999,
+          "profile5_matches": 11999,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0188",
+            "0x0188"
+          ],
           "suffix_determinism": {
             "frames": 11999,
             "max_headers_per_suffix": 1,
@@ -7797,6 +8001,12 @@
             "00000000": 11999
           },
           "n": 11999,
+          "profile5_matches": 11999,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0189",
+            "0x0189"
+          ],
           "suffix_determinism": {
             "frames": 11999,
             "max_headers_per_suffix": 1,
@@ -8071,6 +8281,12 @@
             "00000000": 11999
           },
           "n": 11999,
+          "profile5_matches": 11999,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x018A",
+            "0x018A"
+          ],
           "suffix_determinism": {
             "frames": 11999,
             "max_headers_per_suffix": 1,
@@ -8345,6 +8561,12 @@
             "00000000": 12000
           },
           "n": 12000,
+          "profile5_matches": 12000,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x018B",
+            "0x018B"
+          ],
           "suffix_determinism": {
             "frames": 12000,
             "max_headers_per_suffix": 1,
@@ -8619,6 +8841,12 @@
             "00000000": 12000
           },
           "n": 12000,
+          "profile5_matches": 12000,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x018C",
+            "0x018C"
+          ],
           "suffix_determinism": {
             "frames": 12000,
             "max_headers_per_suffix": 1,
@@ -8893,6 +9121,12 @@
             "00000000": 12000
           },
           "n": 12000,
+          "profile5_matches": 12000,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x01A0",
+            "0x01A0"
+          ],
           "suffix_determinism": {
             "frames": 12000,
             "max_headers_per_suffix": 1,
@@ -9039,6 +9273,12 @@
             "00000000": 6000
           },
           "n": 6000,
+          "profile5_matches": 6000,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0200",
+            "0x0200"
+          ],
           "suffix_determinism": {
             "frames": 6000,
             "max_headers_per_suffix": 1,
@@ -9185,6 +9425,12 @@
             "00000000": 6000
           },
           "n": 6000,
+          "profile5_matches": 6000,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0201",
+            "0x0201"
+          ],
           "suffix_determinism": {
             "frames": 6000,
             "max_headers_per_suffix": 1,
@@ -9211,6 +9457,12 @@
             "00000000": 11999
           },
           "n": 11999,
+          "profile5_matches": 11999,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0230",
+            "0x0230"
+          ],
           "suffix_determinism": {
             "frames": 11999,
             "max_headers_per_suffix": 1,
@@ -9230,6 +9482,12 @@
             "00000000": 1200
           },
           "n": 1200,
+          "profile5_matches": 1200,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0440",
+            "0x0440"
+          ],
           "suffix_determinism": {
             "frames": 1200,
             "max_headers_per_suffix": 1,
@@ -9249,6 +9507,12 @@
             "00000000": 1199
           },
           "n": 1199,
+          "profile5_matches": 1199,
+          "profile5_mismatches": 0,
+          "profile5_recovered_data_ids_first_last": [
+            "0x0450",
+            "0x0450"
+          ],
           "suffix_determinism": {
             "frames": 1199,
             "max_headers_per_suffix": 1,
@@ -9261,11 +9525,43 @@
       "source_sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a"
     }
   },
+  "exact_profile5": {
+    "counter": {
+      "byte": 2,
+      "width_bits": 8,
+      "wrap": 256
+    },
+    "crc": {
+      "initial_value": "0xFFFF",
+      "polynomial": "0x1021",
+      "reflected_input": false,
+      "reflected_output": false,
+      "width_bits": 16,
+      "wire_storage": "little-endian B0:B1",
+      "xorout": "0x0000"
+    },
+    "frames": 438380,
+    "implicit_data_id": {
+      "crc_append_order": "low byte, then high byte",
+      "value": "CAN ID",
+      "width_bits": 16
+    },
+    "matches": 438380,
+    "mismatches": 0,
+    "offset_bytes": 0,
+    "periodic_streams_per_drive": {
+      "drive_a": 22,
+      "drive_b": 22
+    },
+    "profile": "AUTOSAR E2E Profile 5",
+    "protected_wire_bytes": "B2..end in increasing byte order",
+    "wire_formula": "crc = CRC16_CCITT(init=0xFFFF, bytes B2..end || CAN_ID_low || CAN_ID_high); store crc little-endian in B0:B1"
+  },
   "interpretation": {
     "freshness": "0x160 B2 is an 8-bit alive/rolling counter. It advances +1 on every retained drive-B same-segment pair; drive-A non-+1 observations coincide with capture gaps/missed cycles. Sender traces do not prove the receiver's accepted counter window or timeout policy.",
-    "integrity": "B0:B1 is an affine-linear 16-bit integrity code over the visible PDU state, with a common length-dependent transform and an ID/Data-ID contribution. This is incompatible with treating B0:B1 as a cryptographic MAC on the observed interface. The exact OEM polynomial/implementation name remains unrecovered.",
+    "integrity": "B0:B1 is exactly AUTOSAR E2E Profile 5 on every retained periodic native-Bus-1 frame: non-reflected CRC-16/CCITT polynomial 0x1021, start 0xFFFF, no xorout, CRC stored little-endian, B2 as the 8-bit counter, and an implicit 16-bit Data ID equal to the CAN identifier appended low byte then high byte after B2..end. This is deterministic non-cryptographic E2E integrity, not a cryptographic MAC.",
     "replay_boundary": "There is no observed long-lived epoch/nonce on this Bus-1 framing. Constant 0x020 has only 256 complete wire images and repeats byte-for-byte after the 8-bit counter wraps (about 12.8 s at its ~20 Hz cadence). Immediate replay can still be rejected by receiver-side counter state; post-wrap anti-replay beyond that state is not on wire.",
     "security_boundary": "The retained native Bus-1 family therefore exposes E2E integrity/freshness rather than ordinary P5 SecOC. This does not identify which node transmits 0x160 or prove receiver acceptance of synthetically modified frames."
   },
-  "schema": "camry-2026-bus1-e2e-v1"
+  "schema": "camry-2026-bus1-e2e-v2"
 }

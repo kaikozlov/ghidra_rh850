@@ -3,8 +3,8 @@
 
 This intentionally does not transmit CAN.  It starts from an observed 32-byte
 0x160 template, changes only the candidate signed-7 request at B12 and the B2
-alive counter, then repairs the observed affine-linear B0:B1 integrity word
-using VAR-107's recovered bit contributions.
+alive counter, then recomputes the exact AUTOSAR E2E Profile-5 CRC recovered in
+VAR-107.
 
 The tool does *not* claim that B12 is the final OEM longitudinal request field
 or that a downstream receiver will accept synthetic traffic.  Those remain
@@ -14,32 +14,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from dataclasses import dataclass
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO))
+
+from tools.toyota_e2e_p05 import e2e_p05_check, e2e_p05_protect
 
 CAN_ID = 0x160
 DLC = 32
-
-# Recovered from 44,508 retained 0x160 frames (VAR-107). Values are the XOR
-# effect on big-endian B0:B1 when the corresponding visible input bit flips.
-B2_INTEGRITY_XOR = (
-    0x4659,
-    0x8CB2,
-    0x3975,
-    0x72EA,
-    0xC5C4,
-    0xAB99,
-    0x7723,
-    0xEE46,
-)
-B12_INTEGRITY_XOR = (
-    0xD86D,
-    0xB0DB,
-    0x41A7,
-    0xA35E,
-    0x46BD,
-    0xAD6A,
-    0x5AD5,
-)
 
 
 @dataclass(frozen=True)
@@ -69,19 +54,6 @@ def encode_signed7(value: int) -> int:
     return value & 0x7F
 
 
-def _integrity_delta(old: int, new: int, contributions: tuple[int, ...]) -> int:
-    changed = old ^ new
-    if changed >> len(contributions):
-        raise ValueError(
-            f"change 0x{changed:X} touches unrecovered bit(s) outside {len(contributions)}-bit model"
-        )
-    out = 0
-    for bit, contribution in enumerate(contributions):
-        if changed & (1 << bit):
-            out ^= contribution
-    return out
-
-
 def build_0x160_request(
     template: bytes,
     request_signed7: int,
@@ -98,8 +70,8 @@ def build_0x160_request(
     """
     if len(template) != DLC:
         raise ValueError(f"0x{CAN_ID:03X} template must be {DLC} bytes, got {len(template)}")
-    if template[12] & 0x80:
-        raise ValueError("template B12 bit7 is set, but VAR-107 did not recover that bit contribution")
+    if not e2e_p05_check(template, CAN_ID):
+        raise ValueError("template does not carry a valid recovered Profile-5 CRC for CAN ID 0x160")
 
     if counter is not None and advance_counter:
         raise ValueError("counter and advance_counter are mutually exclusive")
@@ -116,20 +88,16 @@ def build_0x160_request(
 
     old_request = template[12]
     new_request = encode_signed7(request_signed7)
-    old_integrity = int.from_bytes(template[:2], "big")
-    new_integrity = (
-        old_integrity
-        ^ _integrity_delta(old_counter, new_counter, B2_INTEGRITY_XOR)
-        ^ _integrity_delta(old_request, new_request, B12_INTEGRITY_XOR)
-    )
+    old_integrity = int.from_bytes(template[:2], "little")
 
     out = bytearray(template)
-    out[:2] = new_integrity.to_bytes(2, "big")
     out[2] = new_counter
     out[12] = new_request
+    frame = e2e_p05_protect(bytes(out), CAN_ID)
+    new_integrity = int.from_bytes(frame[:2], "little")
 
     return RequestFrame(
-        frame=bytes(out),
+        frame=frame,
         old_counter=old_counter,
         new_counter=new_counter,
         old_request_raw=old_request,

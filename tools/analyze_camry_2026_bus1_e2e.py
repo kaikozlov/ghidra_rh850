@@ -1,22 +1,33 @@
 #!/usr/bin/env python3
-"""Recover the observable E2E integrity/freshness shape of Camry Toyota Bus 1.
+"""Recover and verify the Camry native-Bus-1 AUTOSAR E2E Profile-5 framing.
 
-This is deliberately wire-only. It tests whether the first two bytes of the
-native Bus-1 periodic family behave as a cryptographic authenticator or as an
-affine-linear integrity code, and characterizes the visible rolling counter.
-It does not claim receiver acceptance-window semantics from sender traces.
+This is deliberately wire-only. It proves the exact CRC/Data-ID/counter
+construction of the native Bus-1 periodic family and retains the earlier affine
+witnesses as independent regression evidence. It does not claim receiver
+acceptance-window semantics from sender traces.
 """
 from __future__ import annotations
 
 import argparse
 import gzip
 import hashlib
+import itertools
 import json
 import statistics
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO))
+
+from tools.toyota_e2e_p05 import (
+    CRC16_INIT,
+    CRC16_POLY,
+    e2e_p05_check,
+    e2e_p05_recover_data_id,
+)
+
 RAW = REPO / "targets/camry-2026/raw-20260827"
 DRIVES = {
     "drive_a": RAW / "camry_relay_route_can_20260827.ndjson.gz",
@@ -133,7 +144,7 @@ def counter_stats(rows: list[tuple[int, int, bytes]]) -> dict:
     total = plus1 = 0
     gaps_ms: list[float] = []
     non_plus1: list[dict] = []
-    for (s0, t0, a), (s1, t1, b) in zip(rows, rows[1:]):
+    for (s0, t0, a), (s1, t1, b) in itertools.pairwise(rows):
         if s0 != s1:
             continue
         total += 1
@@ -195,13 +206,18 @@ def cross_id_same_suffix(streams: dict[tuple[int, int], list[tuple[int, int, byt
     }
 
 
-def stream_summary(rows: list[tuple[int, int, bytes]]) -> dict:
+def stream_summary(addr: int, rows: list[tuple[int, int, bytes]]) -> dict:
     frames = [d for _s, _t, d in rows]
     base, basis, conflicts = build_basis(frames)
+    p05_matches = sum(e2e_p05_check(d, addr) for d in frames)
+    recovered_data_ids = [e2e_p05_recover_data_id(frames[i]) for i in (0, -1)]
     return {
         "n": len(frames),
         "affine_rank": len(basis),
         "affine_conflicts": conflicts,
+        "profile5_matches": p05_matches,
+        "profile5_mismatches": len(frames) - p05_matches,
+        "profile5_recovered_data_ids_first_last": [f"0x{x:04X}" for x in recovered_data_ids],
         "suffix_determinism": suffix_determinism(frames),
         "last4_histogram": {k.hex(): v for k, v in Counter(d[-4:] for d in frames).items()},
         "B2_unique": len({d[2] for d in frames}),
@@ -226,7 +242,7 @@ def main() -> int:
         for (addr, dlc), rows in sorted(streams.items()):
             if len(rows) < MIN_STREAM:
                 continue
-            periodic[f"0x{addr:03X}/{dlc}"] = stream_summary(rows)
+            periodic[f"0x{addr:03X}/{dlc}"] = stream_summary(addr, rows)
         x160 = streams[(0x160, 32)]
         drive_out[name] = {
             "source": str(DRIVES[name].relative_to(REPO)),
@@ -250,9 +266,46 @@ def main() -> int:
         base, basis, _ = build_basis(frames)
         same_dlc_b2[f"0x{addr:03X}"] = fmt_contrib([bit_contribution(base, basis, 2, b) for b in range(8)])
 
+    total_p05_frames = sum(
+        s["n"] for d in drive_out.values() for s in d["periodic_streams"].values()
+    )
+    total_p05_matches = sum(
+        s["profile5_matches"] for d in drive_out.values() for s in d["periodic_streams"].values()
+    )
+
     artifact = {
-        "schema": "camry-2026-bus1-e2e-v1",
+        "schema": "camry-2026-bus1-e2e-v2",
         "drives": drive_out,
+        "exact_profile5": {
+            "profile": "AUTOSAR E2E Profile 5",
+            "offset_bytes": 0,
+            "crc": {
+                "width_bits": 16,
+                "polynomial": f"0x{CRC16_POLY:04X}",
+                "initial_value": f"0x{CRC16_INIT:04X}",
+                "xorout": "0x0000",
+                "reflected_input": False,
+                "reflected_output": False,
+                "wire_storage": "little-endian B0:B1",
+            },
+            "counter": {"byte": 2, "width_bits": 8, "wrap": 256},
+            "protected_wire_bytes": "B2..end in increasing byte order",
+            "implicit_data_id": {
+                "width_bits": 16,
+                "value": "CAN ID",
+                "crc_append_order": "low byte, then high byte",
+            },
+            "periodic_streams_per_drive": {
+                name: len(d["periodic_streams"]) for name, d in drive_out.items()
+            },
+            "frames": total_p05_frames,
+            "matches": total_p05_matches,
+            "mismatches": total_p05_frames - total_p05_matches,
+            "wire_formula": (
+                "crc = CRC16_CCITT(init=0xFFFF, bytes B2..end || CAN_ID_low || CAN_ID_high); "
+                "store crc little-endian in B0:B1"
+            ),
+        },
         "combined_0x160": {
             "frames": len(combined_160),
             "affine_rank": len(basis160),
@@ -276,9 +329,10 @@ def main() -> int:
         },
         "interpretation": {
             "integrity": (
-                "B0:B1 is an affine-linear 16-bit integrity code over the visible PDU state, with a common length-dependent "
-                "transform and an ID/Data-ID contribution. This is incompatible with treating B0:B1 as a cryptographic MAC "
-                "on the observed interface. The exact OEM polynomial/implementation name remains unrecovered."
+                "B0:B1 is exactly AUTOSAR E2E Profile 5 on every retained periodic native-Bus-1 frame: non-reflected "
+                "CRC-16/CCITT polynomial 0x1021, start 0xFFFF, no xorout, CRC stored little-endian, B2 as the 8-bit counter, "
+                "and an implicit 16-bit Data ID equal to the CAN identifier appended low byte then high byte after B2..end. "
+                "This is deterministic non-cryptographic E2E integrity, not a cryptographic MAC."
             ),
             "freshness": (
                 "0x160 B2 is an 8-bit alive/rolling counter. It advances +1 on every retained drive-B same-segment pair; "

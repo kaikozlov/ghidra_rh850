@@ -975,19 +975,17 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   replacement architecture also needs either an inline Bus-1 interception point or a
   later transformed handoff reachable on the existing relay plane.
 
-  VAR-107 now closes the **observable native-Bus-1 integrity/freshness shape**. Across
-  both retained drives every one of the 22 periodic Bus-1 streams has a deterministic,
-  affine-linear 16-bit B0:B1 integrity word over visible B2..end state; no repeated
-  suffix ever acquires a second integrity value. Combined `0x160` gives 44,508 frames,
-  rank 111 and zero affine conflicts, and a sparse training basis predicts essentially
-  every held-out B0:B1 exactly. Equal-DLC PDUs share the same counter-bit transform and
-  equal suffixes show a fixed CAN-ID/Data-ID contribution. `0x160 B2` is an 8-bit alive
-  counter (+1 on all 23,988 drive-B same-segment pairs); constant `0x020` has only 256
-  complete wire images and repeats byte-for-byte after wrap at ~12.8 s. The corpus even
-  solves every used `0x160 B12` integrity delta. This is **linear E2E integrity plus
-  rolling freshness, not an observed cryptographic authenticator**. Exact Toyota
-  polynomial/implementation naming and receiver counter-window/timeout behavior remain
-  open, as do `0x160` producer/direction and B12 OEM identity.
+  VAR-107 now closes the **native-Bus-1 E2E generator exactly**. Every retained periodic
+  Bus-1 frame across both drives—**438,380/438,380 frames over all 22 stream IDs**—matches
+  AUTOSAR E2E Profile 5 with CRC-16/CCITT polynomial `0x1021`, init `0xFFFF`, no xorout,
+  little-endian B0:B1 storage, B2 as the 8-bit counter, and an implicit 16-bit Data ID
+  equal to the CAN identifier appended low byte then high byte after B2..end. The earlier
+  affine model independently recovers the same transform and the CAN-ID contribution.
+  `0x160 B2` advances +1 on all 23,988 drive-B same-segment pairs; constant `0x020` has
+  only 256 complete wire images and repeats byte-for-byte after wrap at ~12.8 s. This is
+  **standard non-cryptographic E2E CRC integrity plus rolling freshness, not SecOC/TSK**.
+  The checksum polynomial/implementation is no longer open. Receiver `MaxDeltaCounter`,
+  timeout/restart behavior, `0x160` producer/direction, and B12 OEM identity remain open.
 
   **What is still genuinely open is target-native request identity, receiver acceptance, and execution ownership, not GTS+ naming.**
   For one exact TSS3 target, join the diagnostic values to the real vehicle-network frame
@@ -1095,7 +1093,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.
 
 
-- **OQ-054 — Identify the downstream `0x08A` proxy/transmitter, private request handoff, and SecOC profile owner.** VAR-091/CORR-149 preserve the hard boundary: `0x08A` is observed on captured Bus 4 with ordinary-P5 `FV4||MAC28`, absent from Bus 1, and excluded from exact F33 Tx/Rx. GTS+ puts FRC on Bus 1 and Skid/Brake Booster/EPS/SAS/Airbag on Bus 4 behind Central Gateway, but that topology is not a CAN-ID source map. Retained rlog timestamps are multi-frame publication timestamps, so the former 20/30 ms arbitration/`0x0D7`-queue attribution is invalid. VAR-107 closes the observed native Bus-1 family as linear E2E integrity plus an alive counter, not TSK/SecOC. Combined with the recovered Toyota TSK hardware architecture—AES-CMAC keys in protected Renesas ICU-S storage on TSK-capable chassis participants—the FRC is not a TSK key-holder/signing participant. Its semantic request therefore must cross into a downstream proxy before authenticated Bus-4 publication. VAR-094 proves only that consecutive recorder layout `ID||pinion||assist` is absent from native Bus-1 CAN; the private/differently-packed request handoff remains unknown. Remaining candidates for proxy assembly/signing/physical Tx are Central Gateway, Skid Control, or Brake Booster. Close this with exact candidate firmware, a source-identifying physical capture/isolation experiment, or recovered private-link dataflow—not batched rlog cadence. Independently capture FRC Operation FFD `5282/5285/57DE/5265` to distinguish request from granted control. Do not send `0x08A` to EPS or infer an `0x08A -> B6` stock-LTA transform. Protected B6 remains a separate candidate openpilot interface. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§20,30,38,41–43,47,51; VAR-081/087/091/092/094/101/107; CORR-135/136/149.
+- **OQ-054 — Identify the downstream `0x08A` proxy/transmitter, private request handoff, and SecOC profile owner.** VAR-091/CORR-149 preserve the hard boundary: `0x08A` is observed on captured Bus 4 with ordinary-P5 `FV4||MAC28`, absent from Bus 1, and excluded from exact F33 Tx/Rx. GTS+ puts FRC on Bus 1 and Skid/Brake Booster/EPS/SAS/Airbag on Bus 4 behind Central Gateway, but that topology is not a CAN-ID source map. Retained rlog timestamps are multi-frame publication timestamps, so the former 20/30 ms arbitration/`0x0D7`-queue attribution is invalid. VAR-107 closes the observed native Bus-1 family as exact AUTOSAR E2E Profile 5—CRC-16/CCITT `0x1021`, B2 alive counter, implicit DataID=CAN ID—not TSK/SecOC. Combined with the recovered Toyota TSK hardware architecture—AES-CMAC keys in protected Renesas ICU-S storage on TSK-capable chassis participants—the FRC is not a TSK key-holder/signing participant. Its semantic request therefore must cross into a downstream proxy before authenticated Bus-4 publication. VAR-094 proves only that consecutive recorder layout `ID||pinion||assist` is absent from native Bus-1 CAN; the private/differently-packed request handoff remains unknown. Remaining candidates for proxy assembly/signing/physical Tx are Central Gateway, Skid Control, or Brake Booster. Close this with exact candidate firmware, a source-identifying physical capture/isolation experiment, or recovered private-link dataflow—not batched rlog cadence. Independently capture FRC Operation FFD `5282/5285/57DE/5265` to distinguish request from granted control. Do not send `0x08A` to EPS or infer an `0x08A -> B6` stock-LTA transform. Protected B6 remains a separate candidate openpilot interface. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§20,30,38,41–43,47,51; VAR-081/087/091/092/094/101/107; CORR-135/136/149.
   Request/grant grading is VAR-095/CORR-137.
   VAR-096 adds the install-set closure: no separate arbitration/request ECU co-installs with FRC_P5 498 in any region, so on this architecture the transmitter/signer candidate set is bounded to the brake family (ABS 435 / BrakeBooster 466) or the Central Gateway.
   VAR-097 adds the internal-pipeline discriminator. The FRC recorder separates

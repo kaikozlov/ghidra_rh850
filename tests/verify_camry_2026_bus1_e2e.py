@@ -2,6 +2,7 @@
 """Verify the retained Camry native-Bus-1 E2E integrity/freshness shape."""
 from __future__ import annotations
 
+import gzip
 import json
 import subprocess
 import sys
@@ -15,6 +16,27 @@ BUILD = REPO / "tools/analyze_camry_2026_bus1_e2e.py"
 passed = failed = 0
 
 
+def make_crc16_table() -> tuple[int, ...]:
+    table = []
+    for value in range(256):
+        crc = value << 8
+        for _ in range(8):
+            crc = ((crc << 1) & 0xFFFF) ^ (0x1021 if crc & 0x8000 else 0)
+        table.append(crc)
+    return tuple(table)
+
+
+CRC16_TABLE = make_crc16_table()
+
+
+def crc16_ccitt_independent(data: bytes) -> int:
+    """Independent table implementation of the recovered Profile-5 CRC."""
+    crc = 0xFFFF
+    for value in data:
+        crc = ((crc << 8) & 0xFFFF) ^ CRC16_TABLE[((crc >> 8) ^ value) & 0xFF]
+    return crc
+
+
 def check(name: str, cond, detail: str = "") -> None:
     global passed, failed
     ok = bool(cond)
@@ -24,12 +46,18 @@ def check(name: str, cond, detail: str = "") -> None:
 
 
 art = json.loads(ART.read_text())
-check("schema", art["schema"] == "camry-2026-bus1-e2e-v1")
+check("schema", art["schema"] == "camry-2026-bus1-e2e-v2")
 
 print("== deterministic regeneration ==")
 with tempfile.TemporaryDirectory() as td:
     out = Path(td) / ART.name
-    proc = subprocess.run([sys.executable, str(BUILD), "--out", str(out)], cwd=REPO, capture_output=True, text=True)
+    proc = subprocess.run(
+        [sys.executable, str(BUILD), "--out", str(out)],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
     check("analyzer succeeds", proc.returncode == 0, proc.stderr[-300:])
     check("artifact regenerates byte-exact", proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
 
@@ -84,6 +112,59 @@ for label, d in art["drives"].items():
           all(s["affine_conflicts"] == 0 for s in streams.values()))
     check(f"{label}: every periodic stream is deterministic for identical visible suffix",
           all(s["suffix_determinism"]["suffixes_with_multiple_headers"] == 0 for s in streams.values()))
+    check(f"{label}: every periodic frame matches exact Profile-5 generator",
+          all(s["profile5_matches"] == s["n"] and s["profile5_mismatches"] == 0 for s in streams.values()))
+    check(f"{label}: first/last wire images independently recover DataID=CAN ID",
+          all(s["profile5_recovered_data_ids_first_last"] == [f"0x{int(name.split('/')[0], 16):04X}"] * 2
+              for name, s in streams.items()))
+
+print("== exact AUTOSAR E2E Profile 5 recovery ==")
+p05 = art["exact_profile5"]
+check("profile identified as AUTOSAR E2E Profile 5", p05["profile"] == "AUTOSAR E2E Profile 5")
+check("CRC-16/CCITT parameters recovered",
+      p05["crc"] == {
+          "width_bits": 16,
+          "polynomial": "0x1021",
+          "initial_value": "0xFFFF",
+          "xorout": "0x0000",
+          "reflected_input": False,
+          "reflected_output": False,
+          "wire_storage": "little-endian B0:B1",
+      })
+check("Profile-5 counter/offset recovered",
+      p05["offset_bytes"] == 0 and p05["counter"] == {"byte": 2, "width_bits": 8, "wrap": 256})
+check("implicit Data ID is CAN ID in little-endian append order",
+      p05["implicit_data_id"] == {
+          "width_bits": 16,
+          "value": "CAN ID",
+          "crc_append_order": "low byte, then high byte",
+      })
+check("all 438,380 retained periodic frames match exact generator",
+      p05["frames"] == 438380 and p05["matches"] == 438380 and p05["mismatches"] == 0)
+
+# Reparse the raw routes and recompute the checksum independently of the analyzer/helper.
+independent_frames = independent_mismatches = 0
+for label, drive in art["drives"].items():
+    periodic = {
+        (int(key.split("/")[0], 16), int(key.split("/")[1]))
+        for key in drive["periodic_streams"]
+    }
+    with gzip.open(REPO / drive["source"], "rt") as f:
+        for line in f:
+            _seg, _t, src, addr, hx = json.loads(line)
+            frame = bytes.fromhex(hx)
+            if src != 1 or (addr, len(frame)) not in periodic:
+                continue
+            independent_frames += 1
+            stored = int.from_bytes(frame[:2], "little")
+            expected_crc = crc16_ccitt_independent(
+                frame[2:] + bytes((addr & 0xFF, (addr >> 8) & 0xFF))
+            )
+            independent_mismatches += stored != expected_crc
+check("independent raw-route recomputation covers 438,380 frames",
+      independent_frames == 438380, str(independent_frames))
+check("independent raw-route Profile-5 recomputation has zero mismatches",
+      independent_mismatches == 0, str(independent_mismatches))
 
 print("== 0x160 recoverable integrity deltas ==")
 x = art["combined_0x160"]
@@ -112,8 +193,9 @@ check("same CAN-ID bit change produces same fixed header XOR on two 64-byte pair
 
 print("== interpretation boundary ==")
 interp = art["interpretation"]
-check("integrity classified as affine-linear rather than cryptographic MAC",
-      "affine-linear" in interp["integrity"] and "cryptographic MAC" in interp["integrity"])
+check("integrity identified as exact Profile-5 CRC rather than cryptographic MAC",
+      "AUTOSAR E2E Profile 5" in interp["integrity"] and "0x1021" in interp["integrity"]
+      and "cryptographic MAC" in interp["integrity"])
 check("receiver counter window remains unproved", "do not prove" in interp["freshness"])
 check("wire replay boundary records 8-bit wrap", "256 complete wire images" in interp["replay_boundary"])
 check("producer/acceptance remain bounded", "does not identify" in interp["security_boundary"] and "acceptance" in interp["security_boundary"])
