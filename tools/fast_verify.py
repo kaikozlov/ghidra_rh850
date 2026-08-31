@@ -712,6 +712,26 @@ def plan_changed_suites(
         notes.append(f"{path}: {note} ({len(routed)} suite(s))")
         if warning:
             warnings.append(warning)
+
+    # The changed/branch edit loop is the portable gate. Local-only suites routed
+    # in by path or ledger IDs (live hardware, live projects) are deferred to
+    # `--local`/`verify-local` instead of demanding prerequisites the portable
+    # loop cannot satisfy. Suites with required external prerequisites keep
+    # their fail-closed behavior in the caller.
+    manifest_suites = manifest.get("suite", {})
+    default_modes = manifest.get("verification", {}).get("default_modes", ["full", "local"])
+    deferred_local = sorted(
+        name for name in names
+        if "local" in manifest_suites[name].get("modes", default_modes)
+        and "full" not in manifest_suites[name].get("modes", default_modes)
+        and "core" not in manifest_suites[name].get("modes", default_modes)
+        and not manifest_suites[name].get("requires_external")
+    )
+    if deferred_local:
+        names -= set(deferred_local)
+        notes.append(
+            "deferred local-only suite(s) -> run with --local: " + ", ".join(deferred_local)
+        )
     return sorted(names), notes, warnings, unmatched
 
 
