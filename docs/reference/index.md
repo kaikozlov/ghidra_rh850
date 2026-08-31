@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 417 · Corrections: 150 · Open questions: 54 · Docs: 115 · Suites: 219
+Findings: 418 · Corrections: 150 · Open questions: 54 · Docs: 115 · Suites: 219
 
 ## Reading this index
 
@@ -436,6 +436,7 @@ Findings: 417 · Corrections: 150 · Open questions: 54 · Docs: 115 · Suites: 
 | <a id="finding-var-105"></a>**VAR-105** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_8965F3307000_command_cone_ingress.py` | — |
 | <a id="finding-var-106"></a>**VAR-106** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [camry-2026-tss3-control-security-participants](camry-2026-tss3-control-security-participants.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) | `tests/verify_camry_2026_longitudinal_request_plane.py` | OQ-052 |
 | <a id="finding-var-107"></a>**VAR-107** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [camry-2026-tss3-control-security-participants](camry-2026-tss3-control-security-participants.md), [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_2026_bus1_e2e.py` | OQ-052, OQ-054 |
+| <a id="finding-var-108"></a>**VAR-108** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | — | — |
 
 ## Open-questions index
 
