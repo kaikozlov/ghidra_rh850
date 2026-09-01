@@ -1143,3 +1143,112 @@ EB33 2822 00000201 06
 ### Relevance boundary
 
 This interface is valuable FRC introspection and exact event timing/context, but the image bytes themselves are not currently the shortest path to lateral control. The steering-relevant internal-state recorder remains TSS3 **Operation FFD** (`AB11/12/13 -> EB11/12/13`), whose dictionary directly contains `5531/5631 -> 5282 -> 5285/57DE -> 5265/560D` lateral request/arbitration/plant objects.
+
+## FRC recorder / FFD surface inventory
+
+A current-GTS+ inventory was performed after the live Image-FFD unlock to determine whether category 498 exposes another recorder more useful than the image stream for lateral-control RE.
+
+### 1. TSS3 Operation FFD — primary steering/control recorder
+
+This remains the uniquely useful FRC-hosted recorder for the lateral pipeline:
+
+```text
+AB11                         -> EB11                    enumerate behavior/RoB codes
+AB12 || behavior_be16        -> EB12                    enumerate records
+AB13 || behavior_be16 || record_be16 -> EB13           fetch record
+```
+
+Its recovered PCS dictionary directly names the steering pipeline objects:
+
+```text
+5531 LDA request
+5631 LTA request
+5282 generic TSS lateral request
+5285 arbitration result lateral ID
+57DE arbitration result pinion angle
+5265 Active steering under-control flag family
+560D driver-steering/LTA state + EPS pinion observation
+```
+
+No other current P5/FRC recorder dictionary found below contains this request/arbitration-result vocabulary.
+
+### 2. TSS3 Image FFD — deep event context, not the shortest lateral path
+
+Current category-498 role `0xE9` is `GetTSS3ImageFFDP5_DT.dll`. Its live SecurityAccess and `AB31/AB33` protocol are documented in the preceding section. It provides timestamped camera-event metadata plus split image payload (`6002..6017 -> 6001`), but it does not expose the lateral request/arbitration object graph directly.
+
+### 3. Generic P5 Record-on-Behavior — present, but materially poorer for lateral
+
+Current category-498 also binds:
+
+```text
+role 0xA0  GetRoBP5_DT.dll
+role 0xA1  DelRoBP5_DT.dll
+```
+
+The current FRC communication-set templates expose a parallel generic RoB family:
+
+```text
+AB01                         -> EB01
+AB02 || behavior_be16        -> EB02
+AB03 || behavior_be16 || record_be16 -> EB03
+```
+
+(`AB01/02/03` is distinct from TSS3 Operation FFD `AB11/12/13`.)
+
+The FRC generic RoB dictionary contains 38 unique stored Data IDs. They are principally event/context state: key cycle/time/distance, IG voltage, camera temperature/voltage/weather/recognition validity, white-lane recognition, LDA/LTA/LCA customize/switch/control condition, PCS/PDA/RSA/ASL state, and related user/display state. A complete current-table name scan contains **no TSS request, lateral target/pinion request, steering-assist/damping request, or arbitration-result field**. Therefore generic RoB can supplement perception/feature context but is not a replacement for TSS3 Operation FFD in the `5631 -> 5282 -> 5285/57DE` investigation.
+
+A live `AB01` probe was attempted after Image-FFD retrieval, but the Comma diagnostic transport simultaneously stopped returning even ordinary F181 reads. No conclusion is assigned to that non-response; the generic RoB wire grammar above is current GTS+ static evidence and should be retried when transport is healthy.
+
+### 4. Standard P5 per-DTC Freeze Frame Data — present through global P5 role
+
+The current master binds role `0xB5` at category 0 to `GetEachFrzFrmDatP5_DT.dll`. Thus ordinary current-P5 ECUs, including FRC unless specifically overridden, use the standard P5 per-DTC freeze-frame reader. FRC's current comm set contains the UDS snapshot request template:
+
+```text
+19 04 <DTC24> FF  -> 59 04 ...
+```
+
+The reader resolves returned Data IDs through the P5 Data Monitor tables and can therefore preserve a broader fault-time snapshot than the 38-field generic RoB set. The current FRC Data Monitor dictionary includes LDA/LTA/LCA installation/control states, steering-wheel information, control mode, lane/perception state and other ADAS context.
+
+However, the same dictionary contains **no lateral target/pinion request or arbitration-result signal**. Consequently this path is worth sampling for fault/context analysis, but it is not expected to reveal the signed `0x08A` command construction directly.
+
+`FRC_P5` contains two type-80 `CDbDataIdBitForFfdTable` rows:
+
+```text
+11271a2c0000070007000007
+12271a2c0000060006000007
+```
+
+Their lookup keys are `0x2711/0x2712` and both reference master variable `0x2C1A`, which normalizes through the current GTS+ `-0x2710` variable namespace to entry `0x50A = 04 03`. A corpus census shows this exact pair in **126 P5 databases**. It is generic P5 FFD plumbing, not a hidden FRC-specific recorder channel.
+
+### 5. Older generic Operation Freeze Frame — not bound to current FRC
+
+Current master role `0xBA` binds `GetOperationFrzFrmDatP5_DT.dll` only to category 432 `PCS2_P5` (with the category-0 fallback being the P4 PCS implementation). It is **not** bound to category 498. This matches the generation migration: current FRC absorbs the older PCS/LDA/DSS roles and exposes the specialized TSS3 Operation/Image FFD pair instead.
+
+Therefore there is no second legacy P5 Operation-FFD recorder hiding behind category 498 that is richer than `AB11/12/13`.
+
+### 6. DDR / event-recorder and Vehicle Control History boundary
+
+GTS+ ships generic `GetDDRInfo*` plugins and its TSE saved-session format has first-class `VehicleControlHistory`, `PredictiveFFD`, DTC/FFD, RoB, PCS Operation FFD and PCS Image FFD sections. These container/plugin families must not be mistaken for additional live FRC diagnostic recorders.
+
+`FRC_P5.ddb` has **none** of the DDR model tables:
+
+```text
+165 CDbDDRDiagCodeTable
+167 CDbDDRFreezeFrameTable
+168 CDbDDRInvalidConditionTable
+```
+
+and current category 498 has no DDR-specific DLL binding. The richer DDR/event-recorder dictionary appears on other ECUs / the P6 ADAS-domain successor, not as a hidden P5 FRC surface. Vehicle Control History likewise remains a saved-session/report family here rather than a separately identified category-498 live request protocol.
+
+### Practical priority
+
+For the present lateral problem, recorder priority is therefore:
+
+```text
+1. TSS3 Operation FFD    request/arbitration/result internals      highest value
+2. standard DTC FFD      broad fault-time FRC context              supplemental
+3. generic RoB           feature/perception/event context          supplemental
+4. Image FFD             visual/timestamp context                  optional
+```
+
+The highest-value next live specimen remains a clean stock-LTA event in which Operation FFD captures `5631`, `5282`, `5285`, ideally `57DE`, `5265`, and `560D`, synchronized with native `0x08A` and return `0x081` traffic.

@@ -489,3 +489,28 @@ split1/set1/trigger1) returned a populated `EB33` with six blocks:
 `AB33 || RoB_BE16 || frame_BE32` request, byte-8 block count, byte-9 block stream,
 and BE32 `6xxx` length grammar. The live work remained read-only; no RoB deletion or
 vehicle-control routine was invoked.
+
+### Current FRC recorder hierarchy
+
+A complete current category-498/master-DDB recorder census separates the specialized TSS3
+surfaces from generic P5 diagnostic storage. `FRC_P5` binds the TSS3 Image/Operation plugins
+(`0xE9/0xEA`) and generic P5 RoB get/delete (`0xA0/0xA1`). Generic RoB uses the parallel
+`AB01/AB02/AB03 -> EB01/EB02/EB03` family, but its 38 unique FRC stored Data IDs are
+configuration/perception/feature-state objects and contain no named TSS lateral request,
+pinion target, steering-assist/damping request, or arbitration-result field. The specialized
+`AB11/12/13` TSS3 Operation FFD therefore remains the only current P5 FRC recorder dictionary
+that explicitly exposes the request/arbitration pipeline.
+
+Standard P5 per-DTC FFD is separately inherited through current master category-0 role `0xB5`
+`GetEachFrzFrmDatP5_DT.dll`; the FRC comm-set includes `19 04 <DTC24> FF -> 59 04 ...`.
+It can preserve broad FRC Data-Monitor state at fault time, but the FRC monitor dictionary also
+contains no lateral target/pinion-request or arbitration-result signal. The two FRC type-80
+`CDbDataIdBitForFfdTable` rows (`0x2711/0x2712`, variable `0x2C1A -> 04 03`) are not
+FRC-specific: the exact pair occurs in 126 current P5 databases.
+
+The older generic P5 Operation Freeze Frame plugin `GetOperationFrzFrmDatP5_DT.dll` role
+`0xBA` remains bound to category 432 `PCS2_P5`, not current category 498. `FRC_P5` also lacks
+DDR tables 165/167/168 and has no category-498 DDR plugin binding. GTS+'s generic DDR,
+PredictiveFFD, and VehicleControlHistory saved-session families therefore do not establish an
+additional hidden live FRC recorder. For TSS3 lateral-control RE, Operation FFD is the primary
+internal-state oracle; DTC FFD/RoB/Image FFD are context supplements.
