@@ -832,3 +832,44 @@ SOAP action             = http://www.openuri.org/sendSearchInfo
 ```
 
 The endpoint currently publishes a WSDL/XSD. `sendSearchInfo` contains only `File`, `Filename`, `Filesize`, `Timestamp`, `SoftwareID`, and `ID`; `requestSearchInfo` contains `ID` + `HashValue`. No TIS username/password field is carried inside this SOAP method; Techstream's browser-login flow is separate. The next acquisition experiment should characterize this service with a dummy VIN before transmitting the real vehicle identity.
+
+### 2026-09-01 targeted credential/package hunt: local + public boundary
+
+A dedicated hunt for any additional ReproStd/`07B0`-relevant package or credential,
+re-running the descriptor census independently of the VAR-069 artifact:
+
+- **Local package discovery is exhausted.** A full-filesystem `*.cuw` sweep finds
+  exactly 52 hits = the same 26 pinned packages (repo + one `herdr` worktree
+  mirror); no undiscovered cache exists anywhere on this machine. A repo-wide
+  `~/dev/inspect` content search for `F152633K0000` / `8954147040` matches only
+  this repo's own generated artifacts and docs.
+- **The 12 blank-DiagID format-4 packages are re-verified as non-Brake**: all are
+  Tacoma `ENG & ECT` P5-CAN packages whose `LocationID` routes `...0720`
+  (89663/89665-xxx CIDs); none carries a brake address or identity.
+- **Public metadata has no exact hit and no campaign route**: `F152633K0000` /
+  `89541-47040` appear nowhere public; no 2025–26 Camry Brake/EPB reflash
+  campaign exists (the only 2025–26 Camry HV actions are the 25V869 inverter
+  hardware recall and the 26V511 cluster-software recall — neither reflashes
+  skid control). The one public CUW specimen (icanhack.nl) is the same
+  `T-0015-20` RAV4 EPS package already in the corpus. Corolla 24TC01
+  `F152612A5100..A5400` remains the only public brake-CID campaign family,
+  Corolla-only.
+- **P5-Unified04 decoded**: the current GTS+ `P5-Unified04.ini` route is
+  ReproStd (`TCUWCanReproStdPrepareWriter`/`TCUWCanReproStdFlashWriter`) —
+  consistent with the live boot grammar match above.
+
+**Credential-family conclusion.** `cuw_security_up.py` was re-verified
+end-to-end (all ten corpus `ServiceAuthKey`s re-derive their recorded `Kwork`
+byte-for-byte). Across the corpus, credentials are scoped **per DiagID, not per
+vehicle or per calibration**: 0792 shares one key across six
+packages/vehicles/years (Corolla, Corolla Cross, bZ4X, 2023–24), and 07D2
+shares one across Grand Highlander + Crown; but 07A1 rotates per generation
+(three distinct keys), and no key is shared across different DiagIDs. The live
+rejection of all eight local keys — including the same-vehicle-same-generation
+Camry MG `0x724` key — is therefore consistent evidence that the Brake
+credential is a distinct `0x7B0`-family secret. The one acquisition target that
+could test this without Toyota/TIS is **any `DiagID=07B0` ReproStd package from
+any vehicle/generation** (per the 0792/07D2 pattern such a key plausibly
+transfers, though 07A1 shows generational rotation is possible); no such
+package exists locally or publicly today. Exact-identity `F152633K0000`
+firmware still requires the authenticated TIS `ECUSupplyChange` route above.
