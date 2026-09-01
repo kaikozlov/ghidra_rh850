@@ -1114,6 +1114,29 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   pre-authentication + chassis re-signing remains formally open but
   downweighted. Canonical §47.
 
+  VAR-110 now closes the **observable relay direction** without closing ECU ownership.
+  On relay-open route `0000002d--4a4806c524`, `0x08A` is native bus2 and
+  forwarded into bus0, while protected `0x081` is native bus0 and forwarded back
+  outward; exact-F33 `0x030` independently fixes bus0 as the EPS/chassis side.
+  `0x081` carries the same state/reference family and has its own FV4/MAC28-shaped
+  trailer, but exact F33 accepts neither `0x08A` nor `0x081`. The same finding adds
+  a deterministic 0.903-s plant episode where motor feedback and wheel motion move
+  toward the Toyota target while measured driver torque opposes it, with zero B6.
+  The remaining lateral problem is therefore two-part: identify the exact chassis
+  producer/arbitrator of `0x08A`/`0x081`, and identify the **final chassis-reference
+  to local EPS authority/actuator handoff**. VAR-111 now exhausts the most plausible
+  F33-side escape hatches: the H-like `CB38` autonomous-control chain is proven to be
+  sourced from dormant protected B6; `CC5A` is only delayed `CC60`; `C81A` is local
+  assist/damping; FlexRay/PSI5 have no application references; and the surviving RSENT1
+  hardware path feeds steering-torque sensors. Therefore the second half of OQ-054 is no
+  longer a generic "find another F33 input" problem. It is a chassis/assembly boundary
+  problem. F33's recovered B6-independent D0218
+  terms contain torque/speed/angle/internal phase-calibration state but no external
+  lane-target magnitude, so another arbitrary F33 CAN-field search is not the next
+  step. Prioritize exact ABS/Brake-Booster firmware, Operation-FFD winner/grant, or
+  a live internal-oracle capture synchronized to the request. Batched rlog timing
+  remains unusable for physical latency/source inference. Canonical §52.
+
   The captured native Bus-1 boundary is now explicit. Both retained relay-correct
   drives contain the same 22 periodic camera/radar-domain streams:
   `0x020/12`, `0x123/16`, `0x160/32`, `0x180..0x18B/64`, `0x18C/48`,

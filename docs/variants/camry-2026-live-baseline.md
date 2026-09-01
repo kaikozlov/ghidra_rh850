@@ -495,10 +495,11 @@ producer-directed:
 1. identify who produces the observed Bus-4 `0x08A`; its absence from Panda bus 1
    means the retained capture does not distinguish a Bus-1-side request transformed
    before observation from a Bus-4-side producer/echo;
-2. recover `0x08A` integrity/authentication and the producer-side transformation
-   into exact-F33 protected B6, including the companion-state mapping;
-3. identify the B6 signer/freshness owner plus suppression/fallback and lateral
-   authority/arbitration semantics before claiming an exclusive controllable source;
+2. recover `0x08A`/`0x081` producer, integrity/authentication, and arbitration ownership
+   without assuming either frame is transformed into exact-F33 B6;
+3. recover the stock chassis/reference-to-steering-assembly authority handoff that
+   produces factory steering with B6 absent; evaluate B6 separately as an optional
+   external cooperative-control ingress rather than as the stock-LTA transport;
 4. only after that chain is known, validate signing latency/jitter, driver-override
    and motor-current response policy, and `0x351/0x394/0x4A3` fault/recovery behavior;
 5. perform a bounded relay-correct steering experiment only after those producer,
@@ -1497,7 +1498,7 @@ proved producer layout. Every retained `0x08A` frame is on the Bus-4 capture its
 (Panda bus 0: 44,614 / relay mirror bus 2: 44,617 / bus 1: zero); current GTS+ topology
 places Front Camera on Toyota Bus 1 and Brake/EPS together on Bus 4, while exact F33
 accepts protected B6 on the latter. Physical transmitter and signer are unknown, so
-`0x08A` must not be labeled a native Bus-1 frame. The retained bytes close the request representation without making it an EPS ingress or grant oracle. Exact F33's B6-independent internal path explains why zero B6 needs no missing packet; it does not prove autonomous lane-centering authority in these intervals (CORR-137 / VAR-095).
+`0x08A` must not be labeled a native Bus-1 frame. The retained bytes close the request representation without making it an EPS ingress or grant oracle. Exact F33's B6-independent internal path proves only that ordinary assist/current control can continue with zero B6; VAR-111/CORR-151 now close the recovered autonomous-target branch as B6-only and reject the earlier implication that this internal path itself explains stock lane-centering authority. The remaining authority handoff is outside the recovered F33 external-command surface (CORR-137 / VAR-095).
 
 Historical Toyota names `LTA_RELATED` for `0x371` and `LKAS_HUD` for `0x412` are
 corroboration only; no historical signal layout is transferred. Current FRC_P5 `LTA
@@ -1986,7 +1987,7 @@ CORR-127 closes the denominator question raised by the broader `0x58074` staging
 
 **Command-value composition.** The recovered `1C02` model/observable path is much narrower. `D039E` composes `FEBECC50`, later scaled/clamped through `D042C` into `FEBECC62 -> FEBEAC56`, and `BF33E` publishes the command-model/status block `FEBEE400..418` (including the Command Value Torque observable family at `FEBEE40A`). The only **generated-COM** value/mode inputs recovered at this level are B6: `CBA80` writes `FEBEC81A` from B6 sig262 snapshot `FEBEAE90`, while `CB73A` can raise the B6 assist-active state only when B6 sig261 snapshot `FEBEADB0=='1'`. Gain pairs are ROM-installed and internally adapted; without sig261 that B6-selected adaptation cannot activate. CORR-128 corrects one important distinction in the other branch: `FEBE71F2 -> FEBEEF8E -> FEBEAC52` does **not** supply the `FEBECC60` magnitude. `D0382` uses `FEBEAC52` only as a symmetric saturation limit on dynamic `FEBECC4E`; the actual B6-independent value comes from the internal `D0218 -> D0284 -> D02DA` chain closed in §30.
 
-Therefore the corrected statement is stronger and narrower than VAR-065's old shorthand: **many more ordinary COM values are staged and observed than the 19-signal model showed, but no non-B6 generated-COM value is recovered as a value/mode input to the shared `CC50/CC62` command funnel or as the B6 assist-activation input.** Exact F33 also contains a B6-independent internal magnitude path feeding that same funnel. CORR-130/VAR-083 close the downstream consequence that this section originally left open: `CC62` is a real pre-slew physical-command value and continues intra-function through `D042C -> CC66`, then `CC64/AC54/EE40C -> 6AF4 -> 6E0A -> 6DEC/6DC8/6DD6`. CORR-135 supersedes the subsequent attempt to move this negative into an `0x08A -> B6` transform. Bus-4 `0x08A` is a secured-looking request representation, while exact F33 already has a B6-independent internal magnitude path into the same physical funnel. The current discriminators are `0x08A` producer/SecOC ownership and, independently, the exact external/local state that selects or modulates the internal stock-LTA path. This does not authorize output.
+Therefore the corrected statement is stronger and narrower than VAR-065's old shorthand: **many more ordinary COM values are staged and observed than the 19-signal model showed, but no non-B6 generated-COM value is recovered as a value/mode input to the shared `CC50/CC62` command funnel or as the B6 assist-activation input.** Exact F33 also contains a B6-independent internal magnitude path feeding that same funnel. CORR-130/VAR-083 close the downstream consequence that this section originally left open: `CC62` is a real pre-slew physical-command value and continues intra-function through `D042C -> CC66`, then `CC64/AC54/EE40C -> 6AF4 -> 6E0A -> 6DEC/6DC8/6DD6`. CORR-135 supersedes the subsequent attempt to move this negative into an `0x08A -> B6` transform. Bus-4 `0x08A` is a secured-looking request representation, while exact F33 already has a B6-independent internal magnitude path into the same physical funnel. The current discriminators are `0x08A`/`0x081` proxy/SecOC ownership and, independently, the chassis/reference-to-steering-assembly authority handoff outside the recovered F33 external-command surface. This does not authorize output.
 
 Deterministic evidence is `data/generated/camry_8965F3307000_command_cone_ingress.json`, generated by `tools/build_camry_8965F3307000_command_cone_ingress.py` and verified by `tests/verify_camry_8965F3307000_command_cone_ingress.py`.
 
@@ -2139,7 +2140,7 @@ healthy selector 1 is the only distinct 0x220-byte bank, selectors 0/2/3 alias, 
 fallback banks alias, and route-zero ordinary sig160 can reach only equivalent selector
 0/2. None of those ordinary model inputs supplies an independently recovered lane target.
 
-The former “upstream contradiction” framing is now superseded by CORR-135. These exact functions themselves show how 73.303384 s of LTA/LCA-active operation can steer with zero B6: the B6-inactive internal assist value reaches the same physical current funnel. CORR-134/VAR-081 separately recover Bus-4 `0x08A` Target Lateral ID plus target angle while exact F33 excludes `0x08A`. The current questions are therefore **which exact external/local state selects or modulates this internal path during LTA/LCA** and, independently, **who produces/security-protects `0x08A`**. No `0x08A -> B6` stock-LTA transform is established or required. Nothing here authorizes output.
+The former “upstream contradiction” framing is now superseded by CORR-135. These exact functions show only that B6-independent assist/current-control values reach the physical current funnel; VAR-111/CORR-151 supersede the stronger inference that this path itself explains autonomous lane-centering during the retained zero-B6 request intervals. CORR-134/VAR-081 separately recover Bus-4 `0x08A` Target Lateral ID plus target angle while exact F33 excludes `0x08A`. The current questions are therefore **where the chassis/reference plane hands autonomous authority into the steering assembly outside the recovered F33 external-command surface** and, independently, **who produces/security-protects `0x08A`/`0x081`**. No `0x08A -> B6` stock-LTA transform is established or required. Nothing here authorizes output.
 
 Deterministic evidence is carried by
 `data/generated/camry_8965F3307000_internal_assist_oracles.json` and
@@ -3237,12 +3238,183 @@ Deterministic evidence:
 `tools/camry_frc_request_poc.py` / `tests/verify_camry_frc_request_poc.py`. No
 control output is authorized by this finding.
 
+
+## 52. Relay-open lateral direction + request-coherent plant witness (VAR-110)
+
+A later normal-relay route finally supplies the direction information that the two
+2026-08-27 privacy-minimized captures could not. On copied full route
+`0000002d--4a4806c524`, after the Toyota-B relay is open, the lateral request
+family crosses the interception boundary in opposite directions:
+
+- `0x08A/32`: **12,960 native Panda-bus2 RX** frames and **12,486 returned
+  bus0 TX echoes (`src=128`)**; only 473 native bus0 frames occur around startup;
+- `0x081/32`: **10,802 native Panda-bus0 RX** frames and **10,406 returned
+  bus2 TX echoes (`src=130`)**; only 398 native bus2 frames occur around startup;
+- exact-F33 `0x030/32`: **32,399 native bus0 RX**, independently fixing bus0 as
+  the EPS/chassis side of the split.
+
+Therefore the observable stock request topology is directional: `0x08A` arrives
+**from the upstream/camera side into the Bus-4 chassis/EPS side**, while `0x081`
+is generated on that chassis side and forwarded back outward. This does not name
+the `0x081` transmitter: exact F33 still excludes both `0x08A` and `0x081` from
+its complete hardware Rx and generated-COM Tx surfaces, leaving Brake/Skid,
+Brake Booster and Central Gateway as the relevant chassis-side producer classes.
+
+`0x081` is also not an ordinary gateway plaintext echo. On the 10,802 native
+bus0 frames, B28[7:4] visits all 16 candidate FV4 values, the trailing candidate
+MAC28 is unique on **10,801/10,802** frames, and among consecutive same-reset-low2
+pairs the candidate message-low2 advances `+1 mod 4` on **9,711/9,715** pairs.
+Nearest publication-batch pairing to native bus2 `0x08A` within 40 ms gives the
+state byte match `0x08A B21 == 0x081 B13` on **10,769/10,799 = 99.7222%** of
+pairs. In the ID11 stratum, `0x081 B16:B17` versus `0x08A B18:B19` has
+**r=0.999816** (2,082 state-matched pairs; mean absolute difference 1.49 counts).
+This supports `0x081` as a second authenticated chassis publication of the same
+steering-request/reference family. It is not promoted to Toyota's arbitration
+winner `57DE`: earlier whole-corpus work already showed its value behaves like a
+filtered/request-side reference rather than a distinct winner quantity.
+
+The relay direction does **not** recover physical latency. Openpilot rlogs assign
+one `logMonoTime` to a multi-frame CAN publication batch; the apparent one/two/
+three-batch offsets between `0x08A` and `0x081` therefore cannot identify an
+arbitration delay, queue, oscillator or transmitter. CORR-136 remains the timing
+rule.
+
+The tracked 2026-08-27 CAN-only corpus now contributes a stronger independent
+plant witness. `tools/analyze_camry_2026_stock_steering_witness.py` joins exact-F33
+`0x030` motor feedback + measured driver torque, `0x025` steering angle/rate and
+`0x08A` ID11 target angle. The strongest drive-A run begins **4.698966 s** into
+the first ID11 interval and lasts **0.903264 s / 91 joined samples**. Throughout
+that run:
+
+- motor-feedback sign == measured steering-motion sign == target-error sign on
+  **91/91** samples;
+- measured driver-torque sign opposes the target-error sign on **91/91** samples;
+- median motor feedback is **-447** while median measured driver torque is
+  **+0.91 N.m**;
+- measured angle moves **+3.7 deg -> -6.0 deg** while the Toyota target is
+  **-5.271852 deg -> -6.417907 deg**;
+- the absolute target error collapses from **8.971852 deg to 0.417907 deg**,
+  a reduction of **8.553945 deg**.
+
+Drive B independently reproduces the opposite-sign geometry in one 0.223651-s
+run (median motor +333, driver torque -0.73 N.m, all direction fractions 1.0).
+B6 is absent on every bus in both retained drives. This is deterministic positive
+**plant** evidence substantially stronger than request-state correlation alone:
+the EPS motor/current-family proxy and wheel motion move toward the Toyota request
+while the measured driver torque opposes that motion. It still does not observe
+FRC Operation-FFD `5285/57DE/5265`, so ID11 itself remains request state rather
+than a proved arbitration-winner/grant signal (VAR-095/CORR-137).
+
+The remaining gap is correspondingly narrower. Exact F33 receives neither
+`0x08A` nor `0x081`; its complete B6-independent `D0218` contributors reduce to
+measured steering torque, speed, measured angle, internal phase/mode state and
+ROM calibration, with no independently recovered lane-target magnitude. Thus the
+unresolved stock path is no longer “find another arbitrary F33 CAN target.” It is
+to identify **where the chassis-side request/reference is converted into the
+local authority that modulates or supplements F33's motor loop**: a still-unrecovered
+local/non-CAN interface, an integrated companion controller/actuator path, or a
+specific chassis control state that is not itself a target magnitude. Exact
+Brake/Skid firmware or synchronized FRC Operation FFD plus live F33 internal
+oracles is the shortest path to distinguish those models.
+
+Deterministic tracked-capture evidence:
+`tools/analyze_camry_2026_stock_steering_witness.py`,
+`data/generated/camry_2026_stock_steering_witness.json`, and
+`tests/verify_camry_2026_stock_steering_witness.py`. Relay-direction/protected-
+`0x081` counts are observed from copied full route `0000002d--4a4806c524`; that
+full rlog is not a tracked repository input. No control output is authorized by
+this finding.
+
+
+## 53. Exact-F33 stock-authority recensus: dormant B6 controller closed; no hidden peripheral target
+
+The post-VAR-110 static recensus closes a misleading structural analogy and tightens the
+remaining stock-LTA boundary.  Corolla H's external B6 controller does have a close F33
+descendant, but the F33 descendant is itself driven by **F33's dormant protected-B6 COM
+signals** and therefore cannot be the authority observed in the retained zero-B6 Camry
+steering episodes.
+
+The exact F33 chain is now closed from wire field to general torque composition:
+
+```text
+protected 0x0B6 / PDU44
+  signal261 B3[5:0]  -> FEBE80BC -> FEBEF130 -> FEBEADB0  (Target Lateral ID)
+  signal269 B8       -> FEBE80C4 -> FEBEF138 -> FEBEADBD
+  signal270 B9       -> FEBE80C5 -> FEBEF139 -> FEBEADBE
+                       |
+                       v
+       CEFFC / CE144 / CE3AA / CE594
+                       |
+                CA46 / CA7C / CA8A
+                       |
+                     CE6F4
+                       |
+                CA2E / CA80 / CA8E
+                       |
+                     CCDF8
+                       |
+               CAA6 / CAA8 / CAAA
+                       |
+                     CF22C
+                       |
+                      CB08
+                       |
+                     CF2B2
+                       |
+                      CB38
+                       |
+                     D0218
+```
+
+`FUN_0004BD46` is the decisive target-native ingress proof: it unpacks signal 261 as a
+6-bit field at PDU44 buffer `0x1BA`, signal 269 at `0x1BF`, and signal 270 at `0x1C0`.
+PDU44 is exact F33's protected `0x0B6/32` receive PDU. `CEFFC` decodes `ADB0` using the
+same Target-Lateral-ID values already closed by current EMPS_P5 (`1,4,10,11,18,19`).
+The H/F33 structural analogy is nevertheless useful: H `C9C16` corresponds to F33
+`CCDF8`, H terminal autonomous-command slew/gain stage `CB9B6` corresponds to F33
+`CF2B2`, and H autonomous contribution `C2A8` corresponds to F33 `CB38`. What changes is
+**the live source**: on F33 that controller family is reached from protected B6. Since the
+retained Camry factory-LTA episodes contain zero B6, `CB38` is not evidence for the stock
+authority source.
+
+The subsequent motor-command recensus also closes two tempting B6-independent escape
+routes. `D0218 -> CC48 -> D0284 -> CC4C -> D02DA -> CC4E -> D0382 -> CC60` is followed
+by `D039E`, which chooses either `CC60` or `CC5A` before producing `CC50`; however,
+`CC5A` is only a delayed/held history of that same path (`CC60 -> AC68 -> AFA8 -> AC10 ->
+D04AC -> CC5A`). `D039E`'s independent additive `C81A` is likewise local assist/damping
+state: `CBF9E` builds it from internally filtered steering/return terms and calibration,
+not an imported lateral target. `CC50 -> D042C -> CC62/CC66 -> CC64` therefore preserves
+the prior VAR-083 motor-current convergence without revealing another external stock
+setpoint.
+
+The MCU-level hardware boundary is now tighter as well. Renesas identifies exact
+`R7F701381` as one functional G3M CPU plus a lockstep checker, not a second executing
+sub-CPU. A target-native SFR-reference census finds no application data references to the
+P1M-E FlexRay block (`0x10020000`) or PSI5 blocks (`0xFFE00000/0xFFE01000`). The one
+previously unnamed sensor interface is RSENT1: `0x60C20` enables `RSENT1IDE @
+0xFFE06018`, DMAC-backed entries at `FEEF90FC/FEEF910C` are consumed by
+`0x62B32 -> 0x668E2`, and the resulting `FEBE5F02..5F10` values feed the already-recovered
+four-sensor steering-wheel-torque decode (`FEBE81E6/81E8/81EA/81EC -> 0x484F0`). RSENT
+therefore closes as **torque-sensor acquisition**, not lateral-command ingress. The existing
+CSIH/ADC/DMAC/ASIC-status paths remain sensor/status-only.
+
+The static conclusion is stronger but narrower than "F33 steers without an input": exact
+F33 has ordinary B6-independent assist/current-control behavior, but every recovered
+external autonomous-target route into its high-level controller is B6, and B6 is absent in
+the retained stock episodes. No second functional core, FlexRay/PSI5 command path,
+RSENT command, post-`D0218` history bypass, or additive `C81A` target remains. Therefore
+the unexplained stock hop is **outside the recovered F33 external-command surface**. The
+next discriminator is chassis-side ownership/execution (`0x08A`/`0x081`, Brake/Booster/
+gateway, or an assembly-level actuator boundary), not another arbitrary F33 signal scan.
+This does not change B6's status as a real, independently recoverable external cooperative
+actuation interface.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150)
+- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151)
 <!-- knowledge-cross-references:end -->

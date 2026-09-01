@@ -1,0 +1,150 @@
+{
+  "criterion": {
+    "coherent_opposition": "|motor|>=150, |driver torque|>=0.2 N.m, |rate|>=2; sign(motor)==sign(rate)==sign(target-angle) and sign(driver torque)==-sign(target-angle); bridge <= 1 sample; run >= 0.1s",
+    "driver_torque": "0x030 signed_be(71|8)*0.1 + signed_be(139|4)*0.01 N.m",
+    "id11": "nearest bus0 0x08A B21 == 11",
+    "motion": "0x025 steering rate signed_be(35|12)",
+    "motor": "0x030 B22:B23 signed BE16 exact-F33 motor-feedback/current-family proxy",
+    "target": "0x08A B18:B19 signed BE16 * 0.05730274202574147 deg/count"
+  },
+  "drives": {
+    "drive_a": {
+      "b6_total_all_buses": 0,
+      "coherent_opposition_samples": 212,
+      "id11_interval_count": 1,
+      "joined_id11_samples": 1615,
+      "max_run_s": 0.903264,
+      "runs_ge_100ms": 5,
+      "source": {
+        "path": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+        "sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5"
+      },
+      "top_runs": [
+        {
+          "angle_first_deg": 3.7,
+          "angle_last_deg": -6.0,
+          "driver_opposes_target_fraction": 1.0,
+          "duration_s": 0.903264,
+          "median_driver_torque_nm": 0.91,
+          "median_motor_feedback": -447.0,
+          "median_rate_raw": -10.0,
+          "motion_toward_target_fraction": 1.0,
+          "motor_toward_target_fraction": 1.0,
+          "sample_count": 91,
+          "start_from_id11_interval_s": 4.698966,
+          "target_error_abs_reduction_deg": 8.553945,
+          "target_error_first_deg": -8.971852,
+          "target_error_last_deg": -0.417907,
+          "target_first_deg": -5.271852,
+          "target_last_deg": -6.417907
+        },
+        {
+          "angle_first_deg": 0.2,
+          "angle_last_deg": -1.8,
+          "driver_opposes_target_fraction": 1.0,
+          "duration_s": 0.262403,
+          "median_driver_torque_nm": 0.54,
+          "median_motor_feedback": -348.0,
+          "median_rate_raw": -8.0,
+          "motion_toward_target_fraction": 1.0,
+          "motor_toward_target_fraction": 1.0,
+          "sample_count": 27,
+          "start_from_id11_interval_s": 13.286025,
+          "target_error_abs_reduction_deg": 2.286514,
+          "target_error_first_deg": -2.893229,
+          "target_error_last_deg": -0.606715,
+          "target_first_deg": -2.693229,
+          "target_last_deg": -2.406715
+        },
+        {
+          "angle_first_deg": 3.2,
+          "angle_last_deg": 0.0,
+          "driver_opposes_target_fraction": 1.0,
+          "duration_s": 0.250371,
+          "median_driver_torque_nm": 0.805,
+          "median_motor_feedback": -438.5,
+          "median_rate_raw": -15.0,
+          "motion_toward_target_fraction": 1.0,
+          "motor_toward_target_fraction": 1.0,
+          "sample_count": 26,
+          "start_from_id11_interval_s": 3.917442,
+          "target_error_abs_reduction_deg": 2.970789,
+          "target_error_first_deg": -8.701063,
+          "target_error_last_deg": -5.730274,
+          "target_first_deg": -5.501063,
+          "target_last_deg": -5.730274
+        },
+        {
+          "angle_first_deg": -3.4,
+          "angle_last_deg": -3.4,
+          "driver_opposes_target_fraction": 1.0,
+          "duration_s": 0.230675,
+          "median_driver_torque_nm": 0.66,
+          "median_motor_feedback": -439.0,
+          "median_rate_raw": -2.0,
+          "motion_toward_target_fraction": 1.0,
+          "motor_toward_target_fraction": 1.0,
+          "sample_count": 24,
+          "start_from_id11_interval_s": 1.536739,
+          "target_error_abs_reduction_deg": 0.802239,
+          "target_error_first_deg": -4.221265,
+          "target_error_last_deg": -3.419026,
+          "target_first_deg": -7.621265,
+          "target_last_deg": -6.819026
+        },
+        {
+          "angle_first_deg": 0.4,
+          "angle_last_deg": 0.4,
+          "driver_opposes_target_fraction": 1.0,
+          "duration_s": 0.100958,
+          "median_driver_torque_nm": -0.31,
+          "median_motor_feedback": 321.0,
+          "median_rate_raw": 2.0,
+          "motion_toward_target_fraction": 1.0,
+          "motor_toward_target_fraction": 1.0,
+          "sample_count": 11,
+          "start_from_id11_interval_s": 7.84221,
+          "target_error_abs_reduction_deg": -0.458422,
+          "target_error_first_deg": 1.720201,
+          "target_error_last_deg": 2.178623,
+          "target_first_deg": 2.120201,
+          "target_last_deg": 2.578623
+        }
+      ]
+    },
+    "drive_b": {
+      "b6_total_all_buses": 0,
+      "coherent_opposition_samples": 28,
+      "id11_interval_count": 1,
+      "joined_id11_samples": 5721,
+      "max_run_s": 0.223651,
+      "runs_ge_100ms": 1,
+      "source": {
+        "path": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+        "sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a"
+      },
+      "top_runs": [
+        {
+          "angle_first_deg": -0.2,
+          "angle_last_deg": 0.7,
+          "driver_opposes_target_fraction": 1.0,
+          "duration_s": 0.223651,
+          "median_driver_torque_nm": -0.73,
+          "median_motor_feedback": 333.0,
+          "median_rate_raw": 4.0,
+          "motion_toward_target_fraction": 1.0,
+          "motor_toward_target_fraction": 1.0,
+          "sample_count": 23,
+          "start_from_id11_interval_s": 38.011325,
+          "target_error_abs_reduction_deg": 1.702238,
+          "target_error_first_deg": 3.237045,
+          "target_error_last_deg": 1.534807,
+          "target_first_deg": 3.037045,
+          "target_last_deg": 2.234807
+        }
+      ]
+    }
+  },
+  "interpretation": "The longest retained request-state episode has EPS motor feedback and measured wheel motion directed toward the 0x08A steering target while measured driver torque opposes that direction, and the target-angle error collapses substantially. This is deterministic positive plant evidence associated with the Toyota ID11 request and is stronger than request-state correlation alone. It does not observe Toyota's FRC Operation-FFD arbitration winner or active-steering grant, and therefore does not promote ID11 itself to a grant signal.",
+  "schema": "camry-2026-stock-steering-witness-v1"
+}

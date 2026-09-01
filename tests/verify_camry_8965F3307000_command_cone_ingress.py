@@ -264,6 +264,51 @@ check("CB38 ramp target comes from CB08/CB20 supervisor state",
       "DAT_febecb08" in cf2b2 and "DAT_febecb20" in cf2b2
       and "DAT_febecb38" in cf2b2)
 
+
+# VAR-111: close the H-like CB38 branch as exact dormant protected-B6 machinery,
+# then close the apparent post-D0218 escape paths as local/history state.
+bd46 = _camry_decompiled(0x4BD46)
+c58074 = _camry_decompiled(0x58074)
+ce144 = _camry_decompiled(0xCE144)
+ce3aa = _camry_decompiled(0xCE3AA)
+ce594 = _camry_decompiled(0xCE594)
+ce6f4 = _camry_decompiled(0xCE6F4)
+ccdf8 = _camry_decompiled(0xCCDF8)
+cf22c = _camry_decompiled(0xCF22C)
+d04ac = _camry_decompiled(0xD04AC)
+d0aae = _camry_decompiled(0xD0AAE)
+
+check("PDU44 signal261/269/270 unpack into the Target-Lateral supervisor bank",
+      "FUN_0007d12a(0x105,0x1ba,6,0,0,&DAT_febe80bc);" in bd46
+      and "FUN_0007d12a(0x10d,0x1bf,8,0,0,puVar2 + -0x373c);" in bd46
+      and "FUN_0007d12a(0x10e,0x1c0,8,0,0,puVar2 + -0x373b);" in bd46)
+check("live COM staging copies 80BC/80C4/80C5 into F130/F138/F139",
+      "DAT_febef130 = DAT_febe80bc;" in c58074
+      and "DAT_febef138 = DAT_febe80c4;" in c58074
+      and "DAT_febef139 = DAT_febe80c5;" in c58074)
+check("B6 supervisor reaches replicated autonomous contribution CB38",
+      "DAT_febecb00 & 7" in ce144 and "DAT_febeadbd" in ce3aa
+      and all(x in ce594 for x in ("DAT_febec940", "DAT_febec998", "DAT_febec9c4"))
+      and all(x in ce6f4 for x in ("DAT_febeca46", "DAT_febeca7c", "DAT_febeca8a",
+                                  "puVar2 + 0x122e", "puVar2 + 0x1280", "puVar2 + 0x128e"))
+      and all(x in ccdf8 for x in ("DAT_febeca2e", "DAT_febeca80", "DAT_febeca8e", "DAT_febecaa6", "DAT_febecaa8", "DAT_febecaaa"))
+      and all(x in cf22c for x in ("DAT_febecaa6", "DAT_febecaa8", "DAT_febecaaa", "DAT_febecb08"))
+      and "DAT_febecb38" in cf2b2)
+check("CB38 branch is B6-sourced and therefore dormant in retained zero-B6 stock runs",
+      "DAT_febeadb0" in ceffc and "DAT_febecb00" in ceffc
+      and "DAT_febecb00" in cf22c and art["live_context"]["b6_frames_in_retained_drives"] == 0)
+check("CC5A apparent post-D0218 bypass is only delayed CC60 history",
+      "DAT_febeac68 = DAT_febecc60;" in d0aae
+      and "DAT_febeafa8 = DAT_febeac68;" in c1be4
+      and "DAT_febeac10 = DAT_febeafa8;" in bca08
+      and "DAT_febecc5a = DAT_febeac10;" in d04ac
+      and "LAB_0000145a" in d039e and "puVar3 + 0x1460" in d039e)
+check("D039E independent C81A addend remains local damping/assist state",
+      "DAT_febec172" in cbf9e and "DAT_febec7fa" in cbf9e
+      and "DAT_febec814" in cbf9e and "DAT_febec800" in cbf9e
+      and "DAT_febec812" in cbf9e and "DAT_febec81a" in cbf9e
+      and "DAT_febeadb0" not in cbf9e)
+
 sel = art["baseline_selector_machinery"]
 check("baseline parameter-bank selector ordinary-COM inputs are exact and finite",
       [(x["signal"], x["can_id"], x["byte"], x["bits"], x["bit_offset"], x["stage_cell"])

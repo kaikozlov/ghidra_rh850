@@ -1613,7 +1613,6 @@ modes = ["local"]
 oracle = "generated_self_check"
 paths = [
   "docs/tooling/techstream.md",
-  "data/generated/techstream_v18/cuw_cross_ecu_security_derivations.json",
 ]
 
 [suite.techstream_layerb]
@@ -2209,7 +2208,16 @@ paths = [
 tests = ["tests/verify_camry_8965F3307000_hidden_ingress_residuals.py"]
 oracle = "generated_self_check"
 paths = [
-  "data/generated/camry-8965F3307000/decompilations.jsonl",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+]
+
+[suite.camry_2026_stock_steering_witness]
+tests = ["tests/verify_camry_2026_stock_steering_witness.py"]
+oracle = "dynamic_trace"
+paths = [
+  "targets/camry-2026/raw-20260827/",
   "docs/variants/camry-2026-live-baseline.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",

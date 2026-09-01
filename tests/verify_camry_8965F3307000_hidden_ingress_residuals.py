@@ -104,5 +104,54 @@ check("all promoted evidence functions are exact body/decompile bound",
       len(art["evidence_functions"]) >= 60
       and all(len(x["body_sha256"]) == 64 and len(x["decompiled_c_sha256"]) == 64 for x in art["evidence_functions"]))
 
+
+# VAR-111: exact P1M-E residual peripheral census. These ranges come from the
+# pinned R7F701381/P1M-E hardware manual; only canonical Ghidra data references
+# are counted (literal constants are not treated as MMIO use).
+corpus = REPO / "data/generated/camry-8965F3307000/decompilations.jsonl"
+ranges = {
+    "flexray": (0x10020000, 0x10022000),
+    "psi50": (0xFFE00000, 0xFFE01000),
+    "psi51": (0xFFE01000, 0xFFE02000),
+    "rsent": (0xFFE05000, 0xFFE0B000),
+}
+refs = {k: [] for k in ranges}
+with corpus.open() as fh:
+    for line in fh:
+        rec = json.loads(line)
+        for dref in rec.get("data_references", []):
+            try:
+                addr = int(dref["to_addr"], 16)
+            except (KeyError, ValueError):
+                continue
+            for name, (lo, hi) in ranges.items():
+                if lo <= addr < hi:
+                    refs[name].append((rec.get("entry_addr"), dref.get("from_addr"), dref.get("ref_type"), addr))
+check("exact F33 has no application FlexRay/PSI5 data references",
+      refs["flexray"] == [] and refs["psi50"] == [] and refs["psi51"] == [])
+check("sole RSENT SFR reference is RSENT1IDE enable at 0xFFE06018",
+      refs["rsent"] == [("0x00060c20", "0x00060c40", "WRITE", 0xFFE06018)])
+
+def _decomp(entry: str) -> str:
+    with corpus.open() as fh:
+        for line in fh:
+            rec = json.loads(line)
+            if rec.get("entry_addr") == entry:
+                return rec["decompiled_c"]
+    raise AssertionError(f"missing corpus function {entry}")
+
+rsent_init = _decomp("0x00060c20")
+rsent_get = _decomp("0x00062b32")
+rsent_copy = _decomp("0x000668e2")
+check("RSENT1 path terminates in the existing four-sensor torque acquisition staging",
+      "DAT_0003125c" in rsent_init and "FUN_00060a6a" in rsent_init
+      and "FUN_00060c60" in rsent_get
+      and all(x in rsent_copy for x in ("-0x58fe", "-0x58fc", "-0x58f6", "-0x58f4")))
+d5 = json.loads((REPO / "data/generated/camry_8965F3307000_d5_snapshot_provenance.json").read_text())
+check("D5 provenance classifies RSENT-backed hardware values as torque-sensor raw origin",
+      "FEEF90FC/FEEF910C" in d5["four_sensor_decode"]["raw_origin"]
+      and "FEBE5F02/5F04" in d5["four_sensor_decode"]["raw_staging"]
+      and "steering-wheel torque" in d5["driver_torque_chain"]["steps"][0])
+
 print(f"\nResults: {passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)
