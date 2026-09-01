@@ -348,3 +348,408 @@ Do not repeat broad discovery. Resume exactly here:
 6. Investigate `0x081 B11[4]` OEM identity via Brake/GTS/firmware separately; its live behavior is already clear.
 7. Physical `0x08A` signer/proxy remains unresolved. The source dependency points to FRC; tested FRC/Brake/EPS/three unknown responders/powertrain nodes do not identify a separate Bus-4 publisher. Central Gateway/non-addressed proxy remains a hypothesis, not a finding.
 
+
+## 13. Post-restart continuation: corrected EB13 parser and first exact lateral decode
+
+After the vehicle restart, passive health was normal and stationary:
+
+- Brake DID `0x1042` Vehicle Speed (Control Value): `0.0 km/h`
+- 2 s passive chassis-bus census: `0x030=330`, `0x081=111`, `0x08A=132`
+
+The saved `AB13 2818 0100` response was re-parsed offline. Important parser correction: after the six-byte `EB13 || behavior_be16 || record_be16` header, the next byte is the **block count**. In this response it is `0x5C = 92`; the DID stream begins at byte 7, not byte 6. Parsing exactly 92 `data_id_be16 || length_u8 || data[length]` blocks consumes the response with no trailing bytes.
+
+Critical lateral blocks in behavior `0x2818` record `0x0100`:
+
+- `0x5265`, len 14: `8000800080008000800080008000`
+  - current PCS bit assignments place the seven under-control flags at byte positions 2,4,...,14 bit7 (1-based positions); all are clear here, including **Active steering under-control flag = 0**.
+- `0x560D`, len 7: `020001ffc70000`
+  - Driver Steering Control Detection Status = `0x02`
+  - LTA Driver Steering Control prohibited = `0x00`
+  - LTA DDR Control State = `0x01`
+  - EPS Pinion Angle raw `0xFFC7` = `-57`, physical `-0.057` at the recovered 0.001 scale
+  - following flags = `0,0`
+- `0x5631`, len 5: `0000000000`
+  - LTA Lateral ID = `0`
+  - LTA Control Request Pinion Angle = `0`
+  - LTA Steering Assist Gain = `0`
+  - LTA Damping Control Gain = `0`
+- `0x5282`, `0x5285`, `0x57DE`: not present in this particular stored record.
+
+Interpretation for this snapshot only: the stored steering-angle-speed event records a nonzero EPS pinion angle, but no active LTA feature request and no active-steering grant at the sampled instant. This is internally coherent and is not evidence against active LTA in other records.
+
+Next read-only target: existing `0x2844` (**Lane Departure Warning Operation under LTA**) records, especially the `0x0100..0x0109` series, searching for `5282/5285/57DE/5265/560D/5631` together.
+
+## 14. `0x2844` stored LDA-under-LTA records: feature request follows EPS pinion
+
+Four representative stored records from behavior `0x2844` (**Lane Departure Warning Operation under LTA**) were fetched and parsed with the corrected EB13 block-count rule.
+
+All four contain:
+
+- `0x5531` LDA request tuple active as lateral ID 11;
+- `0x5631` LTA request tuple all zero;
+- `0x5265` under-control family with all seven recovered flags clear at the snapshot instant;
+- `0x560D` EPS Pinion Angle numerically very close to the LDA requested pinion angle;
+- no `0x5282`, `0x5285`, or `0x57DE` in this record family sample.
+
+| record | `5531` raw | LDA ID | requested pinion | assist | damping | `560D` EPS pinion |
+|---|---|---:|---:|---:|---:|---:|
+| `0100` | `0b006e6400` | 11 | +0.110 | 1.00 | 0.00 | +0.111 |
+| `0109` | `0b00876400` | 11 | +0.135 | 1.00 | 0.00 | +0.115 |
+| `0200` | `0b00556400` | 11 | +0.085 | 1.00 | 0.00 | +0.101 |
+| `0209` | `0b00496400` | 11 | +0.073 | 1.00 | 0.00 | +0.071 |
+
+Important distinction: this trigger name contains “under LTA”, but Toyota's own stored feature request is `5531` **LDA**, not `5631` LTA. ID11 is a lateral request identity used across feature/arbitration layers; it must not be casually equated with one feature-local recorder tuple.
+
+## 15. Sparse live Operation-FFD family census: generic request and arbitration result
+
+To avoid brute-forcing hundreds of stored FFD frames, one existing record was sampled from each of the 15 currently enumerated behavior families. The lateral-bearing families split cleanly.
+
+Representative feature-state families:
+
+- `20DC/0001`: `5531=0b00496400`, `560D` pinion `+0.121`; no `5282/5285`.
+- `2818/0001`: `5531=00fe726400`, `560D` pinion `-0.398`; no `5282/5285`.
+- `2844/0001`: `5531=0b006e6400`, `560D` pinion `+0.100`; no `5282/5285`.
+- `2847/0001`: `5531=0400416400`, `560D` pinion `+0.063`; no `5282/5285`.
+
+Generic/arbitration-bearing families:
+
+- `22B1/0001`: `5285=00`; no `5282` in this sampled record.
+- `2279/0001`: `5282=00ffc96400`, `5285=00`
+  - generic request ID 0, pinion `-0.055`, assist `1.00`, damping `0.00`
+  - arbitration-result lateral ID 0
+- `2292/0001`: `5282=0006b70000`, `5285=00`
+  - generic request ID 0, pinion `+1.719`, assist/damping 0
+  - arbitration-result lateral ID 0
+- `2294/0001`: `5282=1200173200`, `5285=12`
+  - generic request ID **18 (SDG)**, pinion `+0.023`, assist `0.50`, damping `0.00`
+  - arbitration-result lateral ID **18 (SDG)**
+
+The `2294/0001` snapshot is the first direct same-record live-car witness that the FRC-hosted Operation FFD contains both a generic lateral request and a matching arbitration-result lateral ID. It establishes the request/result distinction as active recorder data on this car, not merely a static PCS schema distinction.
+
+Far-end samples of those same generic/arbitration families (`22B1/0195`, `2279/0159`, `2292/0245`, `2294/0122`) also contain `5285` and where applicable `5282`, but still no `57DE`. Across the one-per-family census, no currently stored behavior sample contains `57DE`. Working interpretation: the present stored trigger set logs arbitration-result ID but not the separate arbitration-result pinion-angle datum; do not brute-force all records unless another reason emerges.
+
+## 16. Central Gateway middlebox check started
+
+Current GTS+ resolves category **443 = Central Gateway**, database `CentralGW_P5.ddb`, generation 20. Its current plugin surface is ordinary diagnostics/monitor/RoB support and does not expose steering/lateral routing vocabulary. The next middlebox task is to recover/resolve its live diagnostic address or otherwise identify whether the CGW can be independently CommunicationControl-isolated. FRC-source dependence of `0x08A` does not by itself prove that the FRC CAN controller physically emits the protected Bus-4 PDU.
+
+## 17. Post-restart FRC health with replacement `0x08A` still active
+
+After restart, with the current openpilot `0x08A` replacement path still installed and emitting inactive ID0 replacements, the FRC diagnostic state returned to healthy/enabled:
+
+- `10AF = 00`: ECU Security Key Registered Incomplete Flag = OFF
+- `1501 = 01 00`: LDA Customize ON, **LDA Enabled**
+- `1601 = 01 00 00 00`: LTA switch ON, **LTA Enabled**, Hands-Off control enabled
+- `1703 = F0 00`: PCS Availability Flag Output Signal = **Enabled**
+- `1705 = FF 00`: PCS AES Invalid Flag = OFF; the other decoded PCS invalid flags are also OFF
+- `1681` is unsupported on this exact calibration in the tested session (NRC requestOutOfRange)
+
+This sharply weakens the earlier simple model “replacement `0x08A` with a non-stock trailer is continuously rejected and therefore keeps ADAS faulted.” The same replacement remains present after restart while FRC lateral/PCS conditions are enabled. A failure that appears only on an active ID11 steer attempt, request/result mismatch, freshness transition, or another transient supervision condition remains plausible.
+
+The pre-restart disabled state is retained as a real observation but not attributed solely to the inactive replacement frame.
+
+## 18. Important correction: direct-Panda state, split mirroring, and post-restart health attribution
+
+Two interpretations made during the continuation were corrected immediately after checking the actual comma transport state and doing a simultaneous all-bus capture.
+
+### 18.1 `pandad` is stopped; post-restart FRC health was not observed with CarController replacing `0x08A`
+
+`./tools/toyota transport status` reports:
+
+- `pandad: stopped`
+- mode `direct-panda`
+
+In this mode the Toyota CLI claims Panda directly and `transport.connect()` sets ELM327 safety for diagnostics. The normal openpilot `pandad`/`sendcan` path is therefore not running, so the normal CarController replacement sender is not actively emitting `0x08A` during these diagnostic observations.
+
+Therefore §17's initial wording that the healthy post-restart FRC state was observed “while the replacement `0x08A` remained actively emitted” was wrong. The correct fact is narrower: after restart, in direct diagnostic Panda state, FRC LDA/LTA/PCS state is healthy/enabled.
+
+This also means the pre-restart fault cannot yet be attributed by comparing that healthy state against a supposedly still-running replacement sender.
+
+### 18.2 Sequential bus0/bus2 trailer differences were a time-pairing artifact, not re-signing
+
+Sequential one-second captures of `0x08A` on bus0 then bus2 naturally contained the same recurring application states at different freshness/MAC publications. Comparing equal modulo-64 sequence values across those non-simultaneous windows produced different trailers and briefly suggested a re-authentication stage at the Panda split. That inference was wrong.
+
+A single receive-only simultaneous all-bus capture through the Toyota transport layer settles the boundary exactly. Ordered bus0/bus2 streams are 1:1 identical at zero index shift:
+
+- `0x08A`: 139 bus0 / 139 bus2; **139/139 full 32-byte frames identical**
+- `0x081`: 115 / 115; **115/115 full 32-byte frames identical**
+- `0x00F`: 35 / 35; **35/35 full 8-byte frames identical**
+
+No +/-1..3 frame offset reproduces equality for `0x08A`; zero shift alone is exact. `0x081` application bytes are static in the parked sample, but only zero shift gives full trailer equality. `0x00F` likewise aligns exactly at zero shift.
+
+Correct interpretation: **the Panda bus0/bus2 boundary forwards these protected frames byte-for-byte; it is not the signer/re-signer boundary.** This matches the earlier relay-open direction finding:
+
+- protected `0x08A` is native upstream/bus2 and forwarded unchanged to bus0;
+- protected `0x081` is native chassis/bus0 and forwarded unchanged to bus2;
+- `0x00F` is likewise mirrored unchanged across the split in the current state.
+
+The physical SecOC generation point for `0x08A` is therefore **upstream of the accessible Panda split**. FRC CommunicationControl still proves that `0x08A` publication depends on FRC normal Tx, but because GTS+ places FRC on Toyota Bus 1 and recovered FRC-side periodic traffic is E2E-P05 rather than SecOC, that dependency does not by itself prove the FRC CPU/HSM physically signs or emits the protected Bus-4 `0x08A` frame.
+
+The working graph remains: FRC source/request logic -> unresolved upstream proxy/signer -> protected `0x08A` -> byte-for-byte Panda relay -> Brake/chassis consumer; Brake publishes protected `0x081` in the reverse direction and its B11[4] missing-request state responds when the `0x08A` source stream disappears.
+
+## 19. Direct Bus-1 transmitter attribution: only four frequent periodic streams are FRC Tx
+
+The direct diagnostic state initially left Panda in ELM327 param0, whose board behavior multiplexes bus1 to OBD and therefore made `toyota can sniff --bus 1` empty. Panda source confirms:
+
+- ELM327 `param==0` -> `CAN_MODE_OBD_CAN2`
+- ELM327 `param!=0` -> `CAN_MODE_NORMAL`
+- both remain no-output diagnostic safety and do not enable normal control TX.
+
+A single direct-Panda process therefore used the already-established ELM327 param1 normal-CAN observation mode, captured one second of Bus 1, entered FRC extended session, applied UDS CommunicationControl `28 01 01` (normal Rx enabled / normal Tx disabled), captured one second, restored `28 00 01`, returned FRC to default session, captured again, and finally restored Panda ELM327 param0.
+
+The result is exact at the one-second rate scale:
+
+| ID | baseline | FRC Tx disabled | restored | attribution |
+|---|---:|---:|---:|---|
+| `0x020` | 20 | **0** | 20 | **FRC normal Tx** |
+| `0x160` | 40 | **0** | 40 | **FRC normal Tx** |
+| `0x230` | 20 | **0** | 20 | **FRC normal Tx** |
+| `0x440` | 2 | **0** | 2 | **FRC normal Tx** |
+| `0x123` | 10 | 10 | 10 | non-FRC |
+| `0x180..0x18A` | ~20 each | ~20 each | ~20 each | non-FRC |
+| `0x18B/0x18C/0x1A0` | ~19-20 | ~20 | 20 | non-FRC |
+| `0x200/0x201` | 10 | 10 | 10 | non-FRC |
+| `0x450` | 2 | 2 | 2 | non-FRC |
+
+Sparse baseline-only `0x45A` (2 frames) and `0x4E0` (1 frame) vanished during FRC-off but also did not recur in the one-second restored window, so they are **not** assigned from this short sample.
+
+Consequences:
+
+1. The former 22-stream Bus-1 candidate set collapses to **four frequent FRC-origin E2E-P05 PDUs**: `0x020/12`, `0x160/32`, `0x230/64`, `0x440/32`.
+2. The object-track family `0x180..0x18C` is positively **not** transmitted by the FRC under CommunicationControl. This resolves the earlier FRC-vs-radar ownership ambiguity for the frequent family at least at the FRC/non-FRC split.
+3. `0x160` is now directly isolated as an FRC normal-Tx PDU. Its previously recovered longitudinal relationship to protected chassis `0x0CA` is therefore much stronger architectural evidence for an FRC-source -> downstream protected-publication path.
+4. The unknown lateral handoff, if it uses a frequent ordinary Bus-1 FRC PDU, is now constrained to `0x020`, `0x160`, `0x230`, or `0x440` rather than all 22 frequent streams. Prior single-field sweeps still say no simple scalar copy of downstream `0x08A` was found; this attribution does not change that negative, but it radically narrows multivariate/multiplexed/state-machine work.
+
+## 20. FRC CommunicationControl owns an entire protected upstream Bus-4 publication domain
+
+A two-second all-bus census under ELM327 param1 compared baseline, FRC normal-Tx disabled (`10 03`, `28 01 01`), and restored (`28 00 01`, `10 01`). On bus0/bus2, **47 recurring ID/DLC streams drop to zero while FRC normal Tx is disabled and return on restore**. This includes:
+
+`08A/32, 0C9/32, 13F/8, 159/8, 15A/8, 198/8, 19C/8, 19F/1, 1B1/8, 1B2/32, 1BC/8, 1D9/8, 1DE/8, 1DF/8, 20F/8, 251/8, 252/8, 261/8, 274/32, 275/8, 276/8, 277/8, 27B/8, 27C/8, 28A/8, 28B/8, 28C/8, 28D/8, 317/8, 36D/8, 371/32, 411/8, 412/8, 414/8, 489/8, 48A/8, 48B/8, 494/8, 4D3/8, 5AE/32, 5AF/32, 5F1/8, 5F6/8, 5F7/8, 5F9/8, 608/8, 68D/8`.
+
+The existing relay-open route `0000002d--4a4806c524` was then re-read directly from all six local rlogs. **Every one of these FRC-suppressed streams has the same physical direction:** overwhelmingly native Panda bus2 RX, with the corresponding bus0 copy present as returned software-forwarding TX echo. A few bus0 RX frames occur around startup only.
+
+Representative route counts:
+
+| ID | native bus2 RX | forwarded bus0 TX echo | native bus0 RX |
+|---|---:|---:|---:|
+| `0x08A` | 12,960 | 12,486 | 473 |
+| `0x0C9` | 10,128 | 9,755 | 372 |
+| `0x13F` | 6,482 | 6,243 | 237 |
+| `0x371` | 1,719 | 1,658 | 61 |
+| `0x5AE` | 1,697 | 1,636 | 61 |
+| `0x5AF` | 1,621 | 1,561 | 59 |
+
+The full 47-ID list reproduces this same direction.
+
+### Architectural consequence
+
+This materially supersedes the weaker “FRC request -> unknown external proxy -> protected `0x08A`” working model.
+
+The live FRC diagnostic endpoint's standard UDS CommunicationControl governs **both**:
+
+1. four frequent native Bus-1 E2E-P05 FRC Tx streams (`020/160/230/440`), and
+2. a large native-upstream/bus2 Bus-4 publication domain that includes protected `0x08A` and many ADAS/cruise/state PDUs.
+
+The most natural hardware interpretation is a **multi-interface FRC ECU/assembly**: perception/control-side traffic is exposed on Toyota Bus 1 with ordinary AUTOSAR E2E P05, while a chassis-facing network/security side of the same diagnostic ECU boundary publishes the protected Bus-4 family. This network/security side can contain the SecOC/TSK capability even if the previously considered main FRC compute silicon does not.
+
+This interpretation also resolves why `0x08A` disappears immediately under FRC CommunicationControl without requiring a separately diagnosed downstream proxy ECU to honor that command.
+
+Keep one distinction: UDS CommunicationControl proves the protected bus2 transmitter lies under the FRC diagnostic/ECU boundary; it does not yet identify the exact internal MCU/HSM within the camera assembly. For integration purposes, however, **stock protected `0x08A` is an FRC-owned output domain**, not an independently controlled Brake/gateway output.
+
+## 21. Symmetric Brake/EPB transmitter attribution: 15 native chassis/bus0 publications
+
+The same two-second CommunicationControl census was run against category-435 Brake/EPB (`0x7B0`) under ELM327 param1. Brake normal-Tx disable removes exactly these recurring bus0/bus2 streams and restore brings them back:
+
+`081/32, 090/32, 0AA/8, 0C6/8, 0D5/8, 0D7/32, 0D8/8, 101/8, 129/8, 13B/8, 13C/8, 1D5/8, 3B7/8, 420/8, 427/8`.
+
+The relay-open route `0000002d--4a4806c524` shows the exact opposite direction from the FRC-owned family: every Brake-suppressed stream is overwhelmingly **native Panda bus0 RX**, with its bus2 copy present as returned forwarding TX echo.
+
+Representative counts:
+
+| ID | native bus0 RX | forwarded bus2 TX echo | native bus2 RX |
+|---|---:|---:|---:|
+| `0x081` | 10,802 | 10,406 | 398 |
+| `0x090` | 32,408 | 31,217 | 1,197 |
+| `0x0AA` | 32,406 | 31,218 | 1,194 |
+| `0x0D7` | 16,204 | 15,609 | 598 |
+| `0x101` | 16,204 | 15,610 | 599 |
+| `0x13B` | 10,804 | 10,406 | 399 |
+
+This gives a direct two-domain topology rather than an inferred one:
+
+```text
+FRC diagnostic/ECU boundary
+  native upstream bus2 -> chassis:
+    47-ID protected/state domain, including 0x08A
+
+                [Panda relay split]
+
+Brake/EPB diagnostic/ECU boundary
+  native chassis bus0 -> upstream:
+    15-ID domain, including 0x081, 0x090, 0x0D7, 0x101
+
+EPS
+  native chassis bus0 -> upstream:
+    separate EPS domain, including 0x030
+```
+
+The previously observed `0x081 B11[4]` change when FRC Tx disappears is therefore a Brake-owned upstream return/supervision state reacting to loss of the FRC-owned downstream request domain. It is not an EPS echo.
+
+## 22. `0x081 B11[4]` is a dedicated FRC-request supervision state, not ordinary Brake comm-open status
+
+A before / FRC-normal-Tx-off / restored modal-byte comparison was run over the major Brake-owned return PDUs while parked. Among:
+
+`081, 090, 0AA, 0C6, 0D5, 0D7, 0D8, 101, 129, 13B, 13C`
+
+the only stable dominant application-byte transition that asserted under FRC silence and cleared after FRC restore was:
+
+- **`0x081 B11: 0x04 -> 0x14 -> 0x04`**
+  - baseline dominance: 100%
+  - FRC-off dominance: 96%
+  - restored dominance: 100%
+  - exact changed bit: **B11[4]**
+
+The other inspected Brake-owned PDUs retained their dominant parked application state. This makes `0x081 B11[4]` a very specific supervision/validity response to loss of the FRC-owned publication domain rather than a generic Brake failsafe mode.
+
+Current ABS_P5 ordinary Data List vocabulary contains many communication-open diagnostics in DID `0x102F`, but no explicit FRC/TSS communication-open item. A live exact check confirms the distinction: Brake DID `0x102F` is exactly `f700fd007c00a9000000` before FRC Tx suppression, during FRC Tx suppression, and after restore, with every decoded communication/open item still `Normal` (including Steering Open, Brake ECU Communication Open, and EPS/Steering Control Actuator ECU Communication Open).
+
+Therefore `0x081 B11[4]` is **not** the ordinary Brake `0x102F` communication-open bitmap. Keep it structurally named for now as the FRC/request-domain supervision/validity bit until a direct OEM name is found.
+
+## 23. Reciprocal Brake-off check became intentionally contaminated; stop live suppression here
+
+A reciprocal experiment was attempted: with the vehicle confirmed at `0.0 km/h`, read FRC `1501/1601/1703/1705`, suppress Brake normal Tx, wait two seconds, read the same FRC DIDs, restore Brake, and read again.
+
+The experiment cannot distinguish the effect of losing `0x081`, because **before Brake suppression began** the FRC had already returned to the communication-faulted state after the preceding sequence of intentional ECU Tx-suppression fingerprints:
+
+- `1501 = 01 01`: LDA Disabled
+- `1601 = 01 01 00 00`: LTA switch ON, LTA Disabled
+- `1703 = F0 20`: PCS Availability Disabled
+- `1705 = FF 3A`: PCS PB / ESA / AES / PAS-A Invalid flags asserted; PCS AES Invalid Flag = ON
+
+These values remained the same during and after the short Brake-Tx suppression, so the reciprocal test is **inconclusive**, not negative.
+
+Brake was returned to default session; an explicit `28 00 01` attempted after the diagnostic session had already dropped returned NRC `0x7F`, but returning to default succeeded and a subsequent passive check confirmed `0x081` is again flowing normally (5/5 requested frames observed immediately).
+
+A final read-only DTC snapshot records the expected consequence of the characterization campaign: **31 fault-status communication records** are now active across the vehicle. These are dominated by `Uxxxx87` lost-communication faults and were induced by deliberately suppressing normal Tx from FRC, Brake, EPS, and other candidate ECUs while mapping transmitter ownership / the `0x00F` owner. Examples include:
+
+- FRC: U029387, U010087, U110687, U013187, U012687, U012987 (`status 0x28`, confirmed / failed-since-clear)
+- EPS: U012987 Lost Communication with Brake System Control Module (`0x28`)
+- Brake: U010087, U012687, U029300, U111A87, U012987, U029387, U115087, U013187 (mostly `0xAC`, warning requested)
+- Engine/Hybrid/powertrain peers similarly record expected missing-message faults from the earlier ownership fingerprints.
+
+This DTC storm means the current FRC disabled/AES-invalid state must **not** be attributed to the openpilot `0x08A` steering experiment. The live characterization itself intentionally removed whole ECU Tx domains and is now the immediate confounder.
+
+**Stop point:** do not perform additional CommunicationControl / Tx-suppression experiments in this ignition cycle. The communication graph is sufficiently characterized to move back to offline reasoning and targeted implementation work. A vehicle restart/normal communication recovery should precede any later active-steering experiment; DTC clearing is a separate maintenance action and was not performed here.
+
+## 24. Working communication model after live characterization
+
+The combined source isolation, relay-open direction, and Operation-FFD data now support a much simpler working model than the previous external-proxy picture:
+
+```text
+                    FRC / Front Recognition Camera 2
+                    diagnostic boundary: 0x792
+
+      feature planners / TSS3 recorder state
+      5531 LDA request
+      5631 LTA request
+               |
+               v
+      5282 generic lateral request
+               |
+        arbitration state
+      5285 result lateral ID
+      57DE result angle (schema present; not in current stored records)
+               |
+               v
+    +-----------------------------------------+
+    | FRC assembly has at least two CAN planes|
+    |                                         |
+    | Bus 1 normal/E2E-P05 Tx:                |
+    |   0x020, 0x160, 0x230, 0x440            |
+    |                                         |
+    | chassis-facing protected Tx domain:     |
+    |   47 recurring PDUs                     |
+    |   including protected 0x08A             |
+    +-----------------------------------------+
+               |
+               | 0x08A lateral request/reference
+               | native upstream Panda bus2
+               v
+        [accessible Panda relay split]
+               |
+               v
+                    Brake / ABS / VSC domain
+                    diagnostic boundary: 0x7B0
+               |
+        consumes/supervises FRC request plane
+               |
+               +----> local chassis steering-authority handoff -> EPS internals
+               |          (exact final transport remains unresolved)
+               |
+               +----> 0x081 protected return/reference/supervision
+               |     native chassis Panda bus0 -> upstream
+               |     B13 mirrors lateral ID family
+               |     B16:B17 mirrors steering-reference family
+               |     B11[4] asserts when FRC Tx/request domain disappears
+               |
+               +----> Brake-owned 15-PDU return/state domain
+
+                    EPS / F33
+                    diagnostic boundary: 0x7A1
+               |
+               +----> native chassis telemetry 0x030
+               +----> Operation FFD observation 560D EPS Pinion Angle
+               +----> exact firmware still does not receive 0x08A or 0x081
+```
+
+### What changed conceptually
+
+The prior standing model treated the FRC as only the request-compute side and required an externally diagnosed Brake/Skid/CGW proxy to turn that request into protected `0x08A`. The live CommunicationControl census no longer supports that separation as the primary model. Standard FRC normal-Tx suppression removes the entire native-upstream protected `0x08A` publication family as well as the four Bus-1 FRC PDUs. The protected publisher is therefore inside the **FRC ECU/assembly diagnostic boundary**.
+
+This does not require the main vision/control MCU itself to contain the Toyota TSK key/HSM. A multi-MCU FRC assembly with a separate network/security controller is entirely consistent with all observed facts and is now the leading hardware model. The old categorical statement “FRC cannot sign SecOC, therefore an external Brake/gateway proxy must sign `0x08A`” should be retired; at most, it applies to the previously considered main compute silicon, not the complete FRC assembly.
+
+### `0x081` role
+
+`0x081` is now best treated as **Brake-owned chassis result/reference/supervision feedback to the FRC side**:
+
+- Brake CommunicationControl removes it;
+- relay-open direction is chassis bus0 -> upstream bus2;
+- its lateral ID and steering-reference word closely mirror `0x08A` during stock operation;
+- it continues publishing when the FRC Tx domain is suppressed;
+- its B11[4] status asserts specifically when the FRC request domain disappears;
+- ordinary Brake communication-open DID `0x102F` remains normal during that condition.
+
+That is exactly the shape expected from a receiver-owned result/validity publication rather than an EPS echo.
+
+### Operation FFD fits the same loop
+
+Toyota's own FRC-hosted recorder separates:
+
+1. feature-local request (`5531`/`5631`),
+2. generic lateral request (`5282`),
+3. arbitration-result lateral ID (`5285`) and schema for result pinion (`57DE`),
+4. active-steering under-control state (`5265`),
+5. EPS pinion observation (`560D`).
+
+The live stored data provides concrete examples of these stages, notably `2294/0001` where generic request ID18/SDG and arbitration-result ID18 coexist, and the `2844` records where LDA ID11 request pinion closely follows the EPS pinion snapshot.
+
+The recorder host alone still cannot tell whether every result/grant field is computed locally or sampled from Brake/chassis return traffic. The newly identified `0x081` feedback loop makes the latter entirely plausible for result/validity state.
+
+### Implication for the current openpilot steering experiment
+
+The accessible relay split is **after stock `0x08A` has already been protected**. Blocking stock `0x08A` there and transmitting a modified replacement therefore bypasses the FRC assembly's normal SecOC-generation path. The existing EPS B6 acceptance patch is irrelevant to `0x08A`, because F33 receives neither `0x08A` nor `0x081`.
+
+The highest-value next steering discriminator is no longer “find the external `0x08A` proxy.” It is one of:
+
+- recover/use the FRC assembly's own protected `0x08A` generation/signing path;
+- identify the exact Brake-side `0x08A` verification boundary and patch/satisfy it;
+- or find an upstream controllable FRC-internal/request input that causes the FRC assembly itself to generate the desired signed `0x08A`.
+
+The return-side `0x081` consistency loop should be watched on the first clean steering attempt because Brake clearly reports request-domain validity there.
+
+### Current unresolved pieces
+
+- exact internal FRC network/security MCU/HSM and the `0x08A` CMAC key/profile implementation;
+- exact `0x00F` synchronization publisher (none of the 11 directly tested diagnostic ECUs owns it under CommunicationControl; category-443 Central Gateway has no normal phase-5 physical diagnostic address in the V18 table);
+- exact Brake/chassis -> F33 local authority handoff that turns accepted lateral reference into the B6-independent EPS motor-control path;
+- semantic OEM name for `0x081 B11[4]`;
+- live active-LTA Operation-FFD snapshot containing `5265=active` and/or `57DE` result angle.
