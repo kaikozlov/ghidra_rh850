@@ -772,3 +772,63 @@ default:  10 01                                      -> 50 01 00 32 01 F4
 ```
 
 Interpretation for the next live step: application/default does not expose SecurityAccess in the active session (`0x7F`), and application/extended explicitly rejects subfunction 1 (`0x12`) independent of bare-vs-16-byte request shape. This does **not** determine the Brake bootloader SecurityAccess grammar. The directed next probe is `10 02` programming transition followed by boot-context identity/session/SecurityAccess/DID fingerprinting, mirroring the exact-F33 EPS methodology without assuming the EPS secret or RAM geometry transfers.
+
+## Brake bootloader / ReproStd characterization checkpoint
+
+The category-435 Brake/EPB application does not expose SA level 1, but programming session does:
+
+```text
+10 02 -> 50 02 00 32 01 F4
+22 F1 81 -> 62 F1 81 01 || 16*21
+27 01 -> 67 01 || seed[16]
+27 01 || 16*00 -> 7F 27 13
+```
+
+This is the recovered CUW **ReproStd** SecurityAccess grammar, not the exact-F33 EPS Unified grammar. Techstream's recovered host construction is:
+
+```text
+Kwork = AES-128-ECB-DEC(B45B26D6344FD60E80BC01D63C7584A0, ServiceAuthKey[16])
+27 02 payload = AES-128-ECB-ENC(Kwork, ECU_seed[16])
+```
+
+All eight effective ReproStd working keys currently available in the local CUW corpus were tried against fresh live Brake seeds with the observed ~10 s retry interval. None authenticated (`7F 27 35` / `7F 27 36`). The tested families were 0724, 07500F, 07506D, 0792, three 07A1 credentials, and 07D2. Therefore the live F152633K0000 Brake uses another working key; the algorithm itself remains matched to ReproStd.
+
+Boot SA exposes only level `01/02` in the sampled odd-subfunction census: `03/05/07/09/0B/11/21/31/33/41/61` all returned NRC `0x12`.
+
+The bootloader has no obvious pre-auth read/dump service:
+
+```text
+22 0201 / 0202 / 0203 -> 7F 22 31
+23 ReadMemoryByAddress -> 7F 23 11
+35 RequestUpload       -> 7F 35 11
+```
+
+The write/download side is substantially more informative. `34 RequestDownload` is implemented; `37 TransferExit` exists; RID `10F5` is specifically security-gated pre-auth. ReproStd-style RequestDownload probing, with **no TransferData sent**, gives:
+
+- required ALFI shape: `0x44`;
+- DFI `0x01`, `0x11`, and `0x21` all recognize start `0xFEBF0000` and return `7F 34 33` (SecurityAccess denied);
+- DFI `0x00` at the same start returns `7F 34 31`;
+- coarse FE/FF address scan found only `0xFEBF0000` taking the valid-but-locked path;
+- `FEBF1000..FEBFF000` individually return `0x31` when used as start addresses;
+- requests beginning exactly at `FEBF0000` remain security-gated for lengths from 1 byte through at least `0x20000` bytes.
+
+The working interpretation is an OEM-configured download/staging area whose accepted base is exactly `0xFEBF0000`, not a generic claim that arbitrary LocalRAM is writable. This is a high-value post-auth canary/payload candidate once SA is solved.
+
+### Missing Brake credential / Toyota acquisition path
+
+Exact live identity remains:
+
+- physical diagnostic request `0x7B0` / response `0x7B8`;
+- F181 `F152633K0000`;
+- ECU part `8954147040`.
+
+No current local CUW has `Node01/DiagID=07B0`. Upstream openpilot firmware fingerprints independently show `F152633...` is a broad Toyota Brake/ABS software family across Camry and Lexus ES generations, so acquisition of any same-family ReproStd Brake CUW remains useful for credential-family testing.
+
+The North-American Techstream configuration and live Toyota service schema were additionally recovered:
+
+```text
+ECUSupplyChange_upload = https://t3services.toyota.com/t3webservices/service/ws1/scantool/ScantoolMilIService.jws
+SOAP action             = http://www.openuri.org/sendSearchInfo
+```
+
+The endpoint currently publishes a WSDL/XSD. `sendSearchInfo` contains only `File`, `Filename`, `Filesize`, `Timestamp`, `SoftwareID`, and `ID`; `requestSearchInfo` contains `ID` + `HashValue`. No TIS username/password field is carried inside this SOAP method; Techstream's browser-login flow is separate. The next acquisition experiment should characterize this service with a dummy VIN before transmitting the real vehicle identity.
