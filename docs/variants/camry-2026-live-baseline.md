@@ -2860,7 +2860,7 @@ extending §29/§30 rather than transferring from H/F.
 
 - **B6 with ID11 co-modulates the ordinary branch**: `CEFFC` banks (`CB00=2`) re-index the `CD094`/`CDFF8` tables whose outputs `CA7A/CA88` feed the supervisor family (`CC9AC/CE144/CE26E`) that drives the `CF2B2` ramp of `CB38` from `CB08/CB20`. No receiver-side exclusion between external B6 and the internal authority state is recovered; the `CA7A/CA88 → CB08` edge is statement-unclosed and the stock authority selector remains the CORR-135 open question. This bounds coexistence as an unresolved receiver behavior; it does not identify a separate openpilot authority signal.
 - **`0x08A` ID11 stays request-plane only** (F33's 43-Rx/47-rule/5-Tx surfaces exclude it; grant discriminator remains Operation-FFD `5265`, VAR-095/OQ-054). It therefore must not be promoted into a Panda or `CarController` lateral-permission/interlock signal.
-- **No Panda-forwarding suppression frame can be justified.** F33's accepted surface contains no stock-LTA carrier; `0x08A`/`0x081` are not accepted by F33, and suppressing them would only destroy `CarState` inputs and OQ-054 producer evidence; the stock request crosses the private middle (VAR-094). The native openpilot integration therefore keeps authority in the normal stack (`controls_allowed`/`CC.latActive`) rather than inventing a request-plane engage veto. Passive DID readback (`0x1C02/0x1C38/0x1C3E`) remains useful for observing arbitration behavior without becoming an engagement gate.
+- **Panda-forwarding suppression: originally none; superseded by CORR-152/§54.** At this evidence stage no suppression frame was justified, and that conclusion held until VAR-110 fixed the relay direction and the retained route exposed B6-on-bus0 beside continuously forwarded stock `0x08A`. The still-valid core is narrower: F33's accepted surface contains no stock-LTA carrier, `0x08A`/`0x081` are not F33 inputs, and `0x08A` must not become an engage veto. The originally feared `CarState`/producer-evidence loss does not occur — Panda RX and CarState consume native bus2 `0x08A` before forwarding, so blocking only the forwarded chassis copy preserves host observation and OQ-054 producer evidence. The stock request still crosses the private middle (VAR-094); the native openpilot integration keeps authority in the normal stack (`controls_allowed`/`CC.latActive`). Passive DID readback (`0x1C02/0x1C38/0x1C3E`) remains useful for observing arbitration behavior without becoming an engagement gate.
 
 Deterministic evidence: `tests/verify_camry_8965F3307000_command_cone_ingress.py` (VAR-104 corpus-join block) against
 `data/generated/camry-8965F3307000/decompilations.jsonl` and `firmware/camry-8965F3307000/CodeFlash.bin`.
@@ -3401,13 +3401,105 @@ CSIH/ADC/DMAC/ASIC-status paths remain sensor/status-only.
 The static conclusion is stronger but narrower than "F33 steers without an input": exact
 F33 has ordinary B6-independent assist/current-control behavior, but every recovered
 external autonomous-target route into its high-level controller is B6, and B6 is absent in
-the retained stock episodes. No second functional core, FlexRay/PSI5 command path,
-RSENT command, post-`D0218` history bypass, or additive `C81A` target remains. Therefore
-the unexplained stock hop is **outside the recovered F33 external-command surface**. The
+the retained stock episodes. No second functional core, FlexRay/PSI5/RSENT command,
+post-`D0218` history bypass, or additive `C81A` target remains. Therefore the
+unexplained stock hop is **outside the recovered F33 external-command surface**. The
 next discriminator is chassis-side ownership/execution (`0x08A`/`0x081`, Brake/Booster/
 gateway, or an assembly-level actuator boundary), not another arbitrary F33 signal scan.
 This does not change B6's status as a real, independently recoverable external cooperative
 actuation interface.
+
+
+## 54. Openpilot takeover boundary: stock `0x08A` must not remain forwarded beside B6
+
+The post-VAR-110 integration recensus corrects one consequence that VAR-104/105 got
+backwards. Exact F33's non-reception of `0x08A` proves that `0x08A` is not an F33 CAN
+command; it does **not** make the message irrelevant to controller replacement. The
+relay-open route fixes `0x08A` as the upstream-to-chassis request crossing the accessible
+interception boundary before the still-private chassis authority conversion. `0x081`
+crosses back in the other direction. Factory steering with zero B6 independently proves
+that this upstream request can reach physical steering through the private middle.
+
+Copied route `0000002d--4a4806c524` then exposes the concrete integration defect: the
+final openpilot path transmits protected B6 on Panda bus0 while Panda simultaneously
+forwards every native bus2 `0x08A` into bus0. Because openpilot transmits B6 rather than
+`0x08A`, Panda's normal same-address static replacement rule never suppresses the stock
+request. The implementation therefore leaves the stock authority path intact while
+injecting the separate F33 cooperative interface.
+
+The minimal native-shape correction is selective interception at that proven direction:
+Toyota TSS3 safety blocks bus2 `0x08A` forwarding while preserving chassis-to-upstream
+`0x081`. This is **not** an `0x08A -> B6` transform, an assertion that F33 consumes
+`0x08A`, a controller-side engage veto, or a new permission system. It is the ordinary
+replacement invariant applied across different request and actuator addresses: remove the
+stock command path at the relay boundary when the openpilot B6 controller is installed.
+
+This correction establishes a necessary takeover boundary, not a completed actuation
+proof. The copied full rlog is not tracked repository input, and it cannot prove F33
+accepted the transmitted B6 or that suppressing `0x08A` alone is sufficient. The relay
+boundary now also carries the ordinary hardware-failure backstop: the stock request
+address is registered for chassis-bus relay-malfunction detection (detection only —
+static blocking stays disabled so the upstream host copy flows), `toyota_tx_hook`
+categorically refuses transmitting it, and a detected electrical crossing latches relay
+malfunction, which blocks all B6 TX and both forwarding directions. Deployment must
+therefore remain a bounded validation: verify the Panda image contains the hook,
+confirm native bus2 `0x08A` remains observable but has no returned bus0 TX echo, confirm
+`0x081` still returns outward, and then test inactive release followed by a stationary
+small-angle B6 command before another road test. CORR-152 supersedes only the old
+"no forwarding suppression is justified" conclusion.
+
+
+## 55. DataFlash NvM closure: learned state does not feed the assist funnel (VAR-112)
+
+The maintainer challenge to CORR-151/VAR-111 — "unless there's something in the
+DataFlash we haven't looked at, this is bullshit" — is now answered with bytes
+rather than narrative. The exact-F33 `DataFlash.bin` had previously been only
+key-window-scanned (VAR-055); its NvM object/layout layer was never decoded.
+
+The boot NvM job table is recovered at ROM `0x27636`: 48 stride-6 handles
+`{u16 payload_len, u16 pad, u16 page}` read through `FUN_00074884` (length),
+`FUN_00077314` (allocation pages), and `FUN_00074892` (page<<6 base). Handles
+map DataFlash pages 479..432 with payload lengths 32/16/8. The committed-marker
+rule (`storage_index == 480 - page` plus the `0xAAAAAAAA` trailer, verified
+against the reference analyzer's independent decode) yields **9/48 committed
+slots** on the retained `231fbdde…4432` dump: the object-0 raw/XOR55/XORAA
+family at slots 1/5/9 is fully committed; the adjacent interleaved banks
+(slots 2-4, 6-8, 10-12 — the 8-byte learned-state pages) are uncommitted.
+
+Live READY-state values from the retained 2026-08-26 PE1 LocalRAM dump:
+
+- the four-channel torque-sensor offsets are at the **neutral `0x0800`
+  default** in both staged (`FEBE6AD2`) and active (`FEBE6AE6`) images —
+  the four LE u16 channels each read `0x0800`, exactly the neutral value
+  the Corolla's RID `0x1109` restore path writes;
+- the 45-byte learned block is staged==active (`FEBE6A26`/`FEBE6A84`), so
+  the consistency checkers (`FUN_00035532` family) report clean;
+- the `A55A5AA5` marker family is intact at `FEBE6AAA`.
+
+The decisive census: over the 6,065-function canonical corpus, **45 functions
+touch learned `FEBE6Axx` cells, 17 touch the `D0218` assist-funnel cells
+(`C43C/C4C0/C3BA/CC2C/BF3C/CB08/CB20/CC50/CC60`), and exactly zero touch
+both.** The learned-adaptation machinery and the assist funnel are disjoint
+reference cones on this image.
+
+Consequences:
+
+1. Learned DataFlash adaptation **does not modulate** the B6-independent
+   actuation path. The neutral live offsets rule out a mis-learned torque
+   offset masquerading as steering authority, and the disjoint cones rule out
+   any direct learned-state contribution into the funnel.
+2. The witness paradox therefore cannot be dissolved by "the EPS learned
+   something weird"; the stock-authority handoff remains exactly where
+   CORR-151 bounded it — chassis-side, outside F33's external-command and
+   learned-state surfaces.
+3. Object-identity grouping (which physical slots form one logical object's
+   three copies) is deliberately not asserted here; recovering the
+   application-side restore table that performs that grouping remains open.
+
+Deterministic evidence: `tools/analyze_camry_8965F3307000_dataflash_nvm_owners.py`
+against the tracked CodeFlash/DataFlash/corpus/LocalRAM inputs, verified by
+`tests/verify_camry_8965F3307000_dataflash_nvm_owners.py` (byte-identical
+regeneration plus all closure pillars).
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
@@ -3415,6 +3507,6 @@ actuation interface.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151)
+- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152)
 <!-- knowledge-cross-references:end -->

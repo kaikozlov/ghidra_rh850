@@ -1,0 +1,110 @@
+{
+  "schema": "camry-8965f3307000-dataflash-nvm-owner-closure-v1",
+  "software_id": "8965F3307000",
+  "question": "Does unexamined F33 DataFlash learned NvM state feed the assist funnel?",
+  "inputs": {
+    "codeflash": {
+      "path": "firmware/camry-8965F3307000/CodeFlash.bin",
+      "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+    },
+    "dataflash": {
+      "path": "firmware/camry-8965F3307000/DataFlash.bin",
+      "sha256": "231fbdde4ef317931d8f1ff20ff131650f7d773c124a179b0ae3dc98bf8e4432"
+    },
+    "corpus": {
+      "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
+      "functions": 6065
+    },
+    "local_ram_ready": {
+      "path": "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin",
+      "sha256": "0ddef478b15bcf3241c56573463eda25ba018081629daf0042fcae1204c435a7",
+      "note": "post application->boot handoff READY snapshot"
+    }
+  },
+  "job_table": {
+    "rom_address": "0x27636",
+    "decoded_from": [
+      "FUN_00074884",
+      "FUN_00077314",
+      "FUN_00074892"
+    ],
+    "handle_count": 48,
+    "layout": "48 physical slots, pages 479..432; per-slot committed state (object grouping not asserted)"
+  },
+  "slot_census": {
+    "committed_slots": 9,
+    "total_slots": 48,
+    "slot_census": {
+      "bank_si_1_5_9_...": {
+        "slots": [
+          1,
+          5,
+          9
+        ],
+        "committed": 3,
+        "total": 3
+      },
+      "bank_si_2_6_10_...": {
+        "slots": [
+          2,
+          6,
+          10
+        ],
+        "committed": 0,
+        "total": 3
+      },
+      "bank_si_3_7_11_...": {
+        "slots": [
+          3,
+          7,
+          11
+        ],
+        "committed": 3,
+        "total": 3
+      },
+      "bank_si_4_8_12_...": {
+        "slots": [
+          4,
+          8,
+          12
+        ],
+        "committed": 0,
+        "total": 3
+      },
+      "bank_si_13_37": {
+        "slots": [
+          13,
+          25,
+          37
+        ],
+        "committed": 0,
+        "total": 3
+      }
+    }
+  },
+  "live_learned_state": {
+    "staged_45b_block": "008000800080008000800080008000800080008000800080000000000000000000000000008000800080008000",
+    "active_45b_block": "008000800080008000800080008000800080008000800080000000000000000000000000008000800080008000",
+    "four_channel_offsets_staged": "0008000800080008",
+    "four_channel_offsets_active": "0008000800080008",
+    "marker_block": "00800080008000800080002000200020",
+    "obj5_baseline_a": "a3640000e13e0000",
+    "obj5_baseline_b": "e13e000000000000",
+    "four_channel_offsets_neutral": true,
+    "staged_active_equal_45b": true
+  },
+  "census": {
+    "functions_touching_learned_cells": 45,
+    "functions_touching_funnel_cells": 17,
+    "functions_touching_both": [],
+    "four_channel_offset_consumers": 25
+  },
+  "conclusion": {
+    "dataflash_learned_state_feeds_assist_funnel": false,
+    "reasons": [
+      "four-channel torque offsets live at neutral 0x0800 with staged==active",
+      "no corpus function touches both a learned NvM cell and an assist-funnel cell",
+      "objects 7-11 have no committed records at all on this car"
+    ]
+  }
+}

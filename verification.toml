@@ -2223,6 +2223,13 @@ paths = [
   "docs/status/PRIORITIES.md",
 ]
 
+[suite.camry_8965f3307000_dataflash_nvm_owners]
+tests = ["tests/verify_camry_8965F3307000_dataflash_nvm_owners.py"]
+oracle = "generated_self_check"
+paths = [
+  "docs/variants/camry-2026-live-baseline.md",
+]
+
 [suite.cuwplus_body_recovery]
 tests = ["tests/verify_cuwplus_body_recovery.py"]
 oracle = "dynamic_trace"
