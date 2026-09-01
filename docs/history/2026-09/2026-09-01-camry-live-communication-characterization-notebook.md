@@ -753,3 +753,22 @@ The return-side `0x081` consistency loop should be watched on the first clean st
 - exact Brake/chassis -> F33 local authority handoff that turns accepted lateral reference into the B6-independent EPS motor-control path;
 - semantic OEM name for `0x081 B11[4]`;
 - live active-LTA Operation-FFD snapshot containing `5265=active` and/or `57DE` result angle.
+
+## Brake authenticated-execution characterization — initial SecurityAccess fingerprint
+
+The exact Camry Brake/EPB endpoint remains category 435 `ABS_P5`, physical `0x7B0 -> 0x7B8`, F181 `F152633K0000`. Before attempting programming mode, the application diagnostic context was fingerprinted with request-seed operations only; **no `27 02` key was submitted**.
+
+Car speed at the Brake oracle was `0.0 km/h`.
+
+Observed wire results:
+
+```text
+default:  27 01                                      -> 7F 27 7F
+default:  27 01 || 16*00                             -> 7F 27 7F
+extended: 10 03                                      -> 50 03 00 32 01 F4
+extended: 27 01                                      -> 7F 27 12
+extended: 27 01 || 16*00                             -> 7F 27 12
+default:  10 01                                      -> 50 01 00 32 01 F4
+```
+
+Interpretation for the next live step: application/default does not expose SecurityAccess in the active session (`0x7F`), and application/extended explicitly rejects subfunction 1 (`0x12`) independent of bare-vs-16-byte request shape. This does **not** determine the Brake bootloader SecurityAccess grammar. The directed next probe is `10 02` programming transition followed by boot-context identity/session/SecurityAccess/DID fingerprinting, mirroring the exact-F33 EPS methodology without assuming the EPS secret or RAM geometry transfers.
