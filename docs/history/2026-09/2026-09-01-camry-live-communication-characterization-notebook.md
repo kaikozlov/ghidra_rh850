@@ -833,6 +833,153 @@ SOAP action             = http://www.openuri.org/sendSearchInfo
 
 The endpoint currently publishes a WSDL/XSD. `sendSearchInfo` contains only `File`, `Filename`, `Filesize`, `Timestamp`, `SoftwareID`, and `ID`; `requestSearchInfo` contains `ID` + `HashValue`. No TIS username/password field is carried inside this SOAP method; Techstream's browser-login flow is separate. The next acquisition experiment should characterize this service with a dummy VIN before transmitting the real vehicle identity.
 
+## Techstream V18 NA TIS ECU-supply SOAP path: PecuID client identity, sendSearchInfo fields, and Result semantics
+
+Static recovery from the pinned V18 binaries plus dummy-payload live characterization of
+`https://t3services.toyota.com/t3webservices/service/ws1/scantool/ScantoolMilIService.jws`.
+All live probes in this session used the masked VIN `XXXXXXXXXXXXXXXXX` (or artifacts already
+probed earlier today with a non-maintainer public sample VIN). No TIS credentials were sent and
+no vehicle was touched. This is a working note; nothing here is promoted to a finding.
+
+### `CTISCommon::GetPecID` — implementation and data source
+
+`CTISCommon::GetPecID(CString* out)` is at **Techstream.exe VA `0xB95770`** (x86-32, pinned
+`Techstream.exe` `e6b7ab88…5e54`):
+
+- Reads a cached char buffer at **`this+0xDC`** and requires `strlen == 32` exactly
+  (`cmp ecx,0x20` at `0xB957FA`); additionally requires a non-null result from a validity
+  getter on the embedded machine-ID object at `this+0x14` (`call 0x990B80`). On failure it
+  copies the literal `No Data!!` (`0x19F707C`) and the caller then skips the whole web call.
+- On success it returns the raw 32-char buffer verbatim; the formatted string it builds in
+  between is used **only for the log line** `[TI-AP(%s)] %s` + ` PecuID(N) %s `
+  (literals `0x1A3C0F0`, `0x1A3DA1C`, `0x1A3DA34`). `CVehicleWizardDlg::GetPecID` logs the same
+  `PecuID(N) %s` vocabulary, so this buffer is the client identity consumed everywhere.
+- The `this+0x14` object is an embedded mirror of the standalone generator: same skeleton as
+  the DLL below, with `CGetID::GetIdData` / `CGetID::GetBiosUUID` / `m_strUUID <- [ %s ] `
+  strings and OS-name comparisons (`WinNT`, `WinXP`, `WinVista`, `Win7`).
+
+**Data source: `GetPeculiarID.dll`** (45,056 B, SHA-256
+`703fe9609ac6577efea525bc4fee96f1d130b9a329ac40004355e8ed27848ca3`), exports
+`PecIdGetPeculiarID`, `PecIdGetBiosUUID`, `PecIdGetMacAddress`, `PecIdGetMachineGUID`,
+`PecIdGetProductID`. The PecuID ("Peculiar ID") is a **synthetic 32-char machine fingerprint
+composed only of non-user machine data**:
+
+- `MachineGuid` from registry `HKLM\SOFTWARE\Microsoft\Cryptography`;
+- `ProductId` from `SOFTWARE\Microsoft\Windows( NT)\CurrentVersion`;
+- MAC address(es) via `GetAdaptersInfo` (`%02X%02X%02X%02X%02X%02X`);
+- BIOS UUID / physical-disk serials via `DeviceIoControl` SMART/SCSI passes
+  (`\\.\PhysicalDrive%d`, `\\.\Scsi%d:`, drive model/serial strings);
+- an OS-version tag.
+
+`PecIdGetPeculiarID` (`0x10003860`) gates on `strlen(synthetic)==32`, logs
+`Before making software ID %s : strSyntheticID %s` / `NormalEnd %s : PecuID %s`, and on
+failure emits `No Data!!`. Exact final composition of the 32 chars (prefix vs 30-char
+truncation interplay) is bounded at the last copy step, but the wire-relevant fact is fixed:
+**`SoftwareID` on this SOAP path is the 32-char PecuID — client/PC identity, never an ECU CID.**
+
+### sendSearchInfo — field requirements
+
+Wire grammar (pinned WSDL/XSD, `elementFormDefault=qualified`, ns `http://www.openuri.org/`,
+`SOAPAction: http://www.openuri.org/sendSearchInfo`, request element `sendSearchInfo` with
+`File` (base64), `Filename`, `Filesize` (int), `Timestamp`, `SoftwareID`, `ID` — all
+`minOccurs=0`). Response element `resultofSearchInfoSend` = `ID` + `Result` (strings).
+
+Caller `CEcuSupplyChange*` wrapper at **`0xB99863`** (delay-import slot `0xF533B8` =
+`?TisServiceSendSearchInfo@CWebService@@…`):
+
+1. `TisServiceSetServerAddr(0x15, URL)` — service index **21** = the
+   `ECUSupplyChange_upload|URL` endpoint.
+2. `strSoftwareId` = `CTISCommon::GetPecID()` output (empty ⇒ skip the call entirely).
+3. `Timestamp` = `Format("%04u.%02u.%02u.%02u:%02u:%02u:%07lu", SYSTEMTIME)` — e.g.
+   `2026.09.01.18:40:00:0000000`.
+4. `File` = base64 of the `reqData` XML written by `SaveEcuSupplyChangeSendXmlFile`
+   (`vinNo` + `ecuInfo/ecuId, ecuAssyNo, writeFlg, baseSwNoLst/baseSwNo`); `Filesize` = its
+   byte length; `Filename` = its name (`SC_*.xml`).
+5. **`ID` = the constant string `"000000"`** — the orchestrator
+   `CEcuSupplyChangeFuncProc::GetXmlDataSwSearch` (`0x52C6A3`) resets member `+0x1A4` to the
+   literal `"000000"` (`0x11EA3BC`) immediately before the send and passes that member as the
+   ID argument. The client job tag is therefore fixed, not a GUID/counter.
+
+Log literals byte-pinned: `-- Send -- strFileNamePath[%s] strSoftwareId[%s] strTimeStamp[%s]`,
+`-- Return -- bRet[%d]`, `-- Receive -- strId[%s] Result[%s]`,
+`-- Receive -- Failed to get Result: strId[%s] Result[%s]`,
+`-- Receive -- Soap.FaultMessage[%s]`.
+
+Client acceptance rule for the send response (`0xB99ACF`): `bRet==1` **and** `Result=="0"`
+are required; anything else ⇒ error `0x1000`, abort (no poll is started). A missing `Result`
+with a fault string present takes the `Soap.FaultMessage` branch.
+
+### requestSearchInfo — poll and HashValue
+
+Poll wrapper at **`0xB99D03`** calls `TisServiceGetSearchInfo` (slot `0xF533BC`) with
+`ID` = the same `"000000"` member string and
+**`HashValue` = uppercase-hex SHA-256 of that ID string**, produced by
+`CTISCommon::CreateHashValueSha256` (`0xB9AAD0`; `CryptAcquireContext(PROV_RSA_AES,
+CRYPT_VERIFYCONTEXT)` → `CryptCreateHash(CALG_SHA_256=0x800C)` → `CryptHashData(input)` →
+`CryptGetHashParam(HP_HASHVAL)` formatted with `"%02X"`). E.g. for `"000000"`:
+`91B4D142823F7D20C5F08DF69122DE43F35F057A988D9619F6D3138485C9A203`.
+Log: `-- Send -- a_strId[%s] strHashValue[%s]`; result log
+`-- Receive -- strFileName[%s] strFileSize[%s] Result[%s]`.
+
+Poll response `resultofSearchInfoRequest` = `File`, `Filename`, `Filesize`, `Result`. Client
+decision tree (byte-pinned, `0xB99EF0`–`0xB99FE6`):
+
+- `bRet==1 && Result=="0"` ⇒ success: copy `Filename`, `Filesize`, base64-decode `File` and
+  write the `resData` XML to the response path (flow continues into `LoadEcuSupplyChangeDownloadXmlData`,
+  TMS-050).
+- `Result=="1"` or `Result=="4"` ⇒ **pending**: retry while `time() − t0 < 0x493E0` (300 s =
+  5 minutes); pre-poll wait in the orchestrator is 15 s (`0x3A98`), or 3 s (`0xBB8`) when the
+  fast-path member `+0x1B4 == 1`.
+- any other non-empty `Result` ⇒ terminal failure; missing `Result` ⇒ `Failed to get Result`.
+
+### Server Result semantics observed (live, 2026-09-01)
+
+Endpoint is **anonymous at the transport level** (Apache/Servlet 2.5, plain SOAP 1.1, no auth
+headers observed or required). Probes (masked/public VIN only, no credentials):
+
+| probe | SoftwareID | ID | inner reqData VIN | sendSearchInfo response |
+|---|---|---|---|---|
+| prior: empty | empty | empty | `<reqData/>` junk | `<ID>0</ID><Result>2</Result>` |
+| prior: fake | `FAKE-TECHSTREAM` | `FAKE` | masked `X*17` | `<ID>0</ID><Result>2</Result>` |
+| prior: 32-hex | 32 hex chars | empty | masked `X*17` | `<ID>0</ID><Result>2</Result>` |
+| prior: public | 32 hex chars | empty | public sample VIN | `<ID>0</ID><Result>2</Result>` |
+| this session: Techstream-exact | 32 hex chars | `000000` | masked `X*17` | `<ID>0</ID><Result>2</Result>` |
+
+Independent calls:
+
+- `getConfiguration` with a minimal anonymous `milInput` ⇒ full `getConfigurationResult`
+  (all capability flags `false`). The service responds normally without any session.
+- `requestSearchInfo` with `ID=0` + all-zero hash ⇒ `<Result>1</Result>`, nil
+  `File/Filename/Filesize` — **unknown/never-queued job reports the same `1` (pending) state**,
+  and the dummy hash is not validated.
+- `requestSearchInfo` in the exact Techstream shape (`ID=000000`,
+  `HashValue=91B4D142…A203`) ⇒ same `<Result>1</Result>`.
+
+**Interpretation.** The server echoes its own job id `0` regardless of the client `ID` value
+(`""`, `FAKE`, `000000` all ⇒ `<ID>0</ID>`), so `ID` is not client-authoritative on the
+response. `sendSearchInfo Result=2` is a server-side **rejection of the search submission
+itself**, invariant across SoftwareID format (empty / 15-char / 32-hex), ID value, payload
+well-formedness, and VIN (masked vs public sample). Under the client's own grammar `2` is
+simply "not accepted" (terminal; `0` = accepted). The two remaining hypotheses are not
+separable without a registered identity, which is out of scope:
+
+1. **Unregistered PecuID** — the server likely expects `SoftwareID` to match a Techstream
+   installation registered with TIS (`TisServiceRegistration` / the browser TIS-login flow
+   binds the PecuID to a dealer/user session). All tested SoftwareIDs were synthetic.
+2. **Entitlement/region gate** — the submission may be rejected before VIN matching for
+   anonymous callers regardless of identity format.
+
+Consequence for the Brake `07B0` acquisition plan: with `Result=2` the client aborts before
+any polling, so the observed path cannot be turned into package retrieval by payload shaping
+alone; a registered client identity (real Techstream + TIS login) is the missing prerequisite.
+Also noted (bounded): `tiswebapi.dll` carries `180000` (ms, plausibly a 3-minute SOAP
+conversation timeout) beside the ID fragment table, and HTTP-header vocabulary
+`gts-guid`, `user-language`, `request-id`, `date`, `software-content` for the transport.
+
+Safety record for this session's probes: masked VIN only, no TIS username/password, no vehicle
+connection involved; the only state created server-side is the anonymous rejected-search
+records already produced by the earlier same-day probes.
+
 ### 2026-09-01 targeted credential/package hunt: local + public boundary
 
 A dedicated hunt for any additional ReproStd/`07B0`-relevant package or credential,
