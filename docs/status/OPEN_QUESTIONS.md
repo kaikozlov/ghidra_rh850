@@ -1150,11 +1150,12 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   that state into the chassis signer.
 
   This stock-architecture attribution is **not a blocker for the independent
-  development B6 ingress**. VAR-102 records the current default-off sender and
-  Panda safety path; its next gate is exact receiver-acceptance deployment and
-  bounded stationary application/safety validation. Resolving OQ-054 remains
-  required for a stock-compatible signing architecture, not for the first
-  patched/bridged B6 development probe.
+  development B6 ingress**. VAR-114/CORR-154 now sharpen its next gate: route 2D
+  proved cleaned B6 transmission but did not measure EPS application acceptance.
+  The next probe is stationary ID0 then bounded ID11 while observing the exact F33
+  ladder `5364/80C8 -> 80C9/F13E/ADB9`, `ADB0/AE90`, `CAFF/ACBD`, and `CB00`.
+  Resolving OQ-054 remains required for a stock-compatible signing architecture,
+  not for this patched/bridged B6 acceptance experiment.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
