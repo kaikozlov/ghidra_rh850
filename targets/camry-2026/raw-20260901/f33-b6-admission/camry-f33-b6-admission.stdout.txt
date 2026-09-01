@@ -1,0 +1,88 @@
+INFO: connecting to panda 3a0007000151343435333330
+{
+  "b6_echoes": 85,
+  "b6_sent": 85,
+  "baseline": {
+    "b6_controller_enable": 1,
+    "consumed_generation": 108,
+    "controller_bank": 7,
+    "global_comm_mode": 0,
+    "publication_generation": 106,
+    "snapshot_status": 0,
+    "staged_status": 0,
+    "target_angle_raw": 64,
+    "target_lateral_id": 0,
+    "unpacker_status": 0
+  },
+  "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+  "id0": {
+    "snapshot": {
+      "b6_controller_enable": 1,
+      "consumed_generation": 191,
+      "controller_bank": 7,
+      "global_comm_mode": 0,
+      "publication_generation": 189,
+      "snapshot_status": 0,
+      "staged_status": 0,
+      "target_angle_raw": 64,
+      "target_lateral_id": 0,
+      "unpacker_status": 0
+    },
+    "target_raw": 66,
+    "verdict": {
+      "admitted": false,
+      "bank_selected": true,
+      "controller_enabled": true,
+      "payload_delivered": false,
+      "reason": "payload_not_delivered",
+      "status_healthy": true
+    }
+  },
+  "id11": {
+    "snapshot": {
+      "b6_controller_enable": 1,
+      "consumed_generation": 19,
+      "controller_bank": 7,
+      "global_comm_mode": 0,
+      "publication_generation": 17,
+      "snapshot_status": 0,
+      "staged_status": 0,
+      "target_angle_raw": 64,
+      "target_lateral_id": 0,
+      "unpacker_status": 0
+    },
+    "target_raw": 66,
+    "verdict": {
+      "admitted": false,
+      "bank_selected": false,
+      "controller_enabled": true,
+      "payload_delivered": false,
+      "reason": "payload_not_delivered",
+      "status_healthy": true
+    }
+  },
+  "initial_preflight": {
+    "gear": 0,
+    "reset_counter": 1144,
+    "steering_angle_deg": 3.8,
+    "wheel_speeds_kph": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "preflight": {
+    "gear": 0,
+    "reset_counter": 1145,
+    "steering_angle_deg": 3.8,
+    "wheel_speeds_kph": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "schema": "camry-f33-b6-stationary-probe-v1",
+  "small_offset": null
+}

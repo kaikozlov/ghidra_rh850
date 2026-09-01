@@ -1252,3 +1252,14 @@ For the present lateral problem, recorder priority is therefore:
 ```
 
 The highest-value next live specimen remains a clean stock-LTA event in which Operation FFD captures `5631`, `5282`, `5285`, ideally `57DE`, `5265`, and `560D`, synchronized with native `0x08A` and return `0x081` traffic.
+
+
+## Stationary B6 admission run: stage-1 Gate-2 result
+
+The car-ready discriminator was executed later on 2026-09-01 against exact EPS F181 `02 || 8965F3307000 || 8A3113303100`, current post-repin Panda bus 0, Park, and zero decoded wheel speed. The already-installed persistent development image had only the final Gate-2 compare neutralized (`0x8F952=E001`, known fixup `D9AF33AF`).
+
+The ID11/current-angle phase sent **85 B6 frames and received 85 Panda TX echoes**. Three independent SID-0x23 ladder snapshots all reported healthy sampled status (`ADB9=0`, `CAFF=1`, `ACBD=0`) but retained the previous application value (`ADB0=0`, `AE90=64` while commanded raw target was 66) and `CB00=7`. The stationary probe therefore returned `payload_not_delivered`. No steering-offset phase ran. Raw evidence is retained under `targets/camry-2026/raw-20260901/f33-b6-admission/`.
+
+Exact Gate-2 disassembly sharpens the next experiment. One pre-callback path already executes `8F944 003A = mov 0,r7`; the other executes `8F948 1A38 = mov r26,r7` before callback `8F94C`, and only later reaches the stage-1-patched compare at `8F952`. The next bounded persistent stage therefore changes only `8F948 1A38->003A` while preserving `8F952=E001`. The builder reconstructs the source from stock plus stage 1 and resigns the **combined** image: source SHA `272843a2…9f65`, source fixup `D9AF33AF`; two-patch prefix `2ED524FA`, final fixup `D12ADB05`, final residue `FFFFFFFF`, final SHA `6a371a2a…d59c`. The inverse recovery payload reverses stage 2 only.
+
+This is a testable hypothesis, not a live success claim. The next car sequence is zero-write stage-2 preflight, APPLY only on exact preflight, full OFF->READY, zero-write persistence verification, then repeat the same admission-only ID0/ID11 ladder. A steering offset remains gated on `ADMITTED`.

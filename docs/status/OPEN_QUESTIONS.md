@@ -1150,12 +1150,16 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   that state into the chassis signer.
 
   This stock-architecture attribution is **not a blocker for the independent
-  development B6 ingress**. VAR-114/CORR-154 now sharpen its next gate: route 2D
-  proved cleaned B6 transmission but did not measure EPS application acceptance.
-  The next probe is stationary ID0 then bounded ID11 while observing the exact F33
-  ladder `5364/80C8 -> 80C9/F13E/ADB9`, `ADB0/AE90`, `CAFF/ACBD`, and `CB00`.
-  Resolving OQ-054 remains required for a stock-compatible signing architecture,
-  not for this patched/bridged B6 acceptance experiment.
+  development B6 ingress**. VAR-115/CORR-155 now close the first instrumented
+  stage-1 admission run: with the reboot-verified `8F952=E001` patch, 85/85 active
+  B6 frames transmitted but `ADB0/AE90` remained on the previous ID0/current-angle
+  snapshot and `CB00` remained 7, yielding `payload_not_delivered`. The next bounded
+  discriminator is the cumulative stage-2 callback-result patch `8F948 1A38->003A`,
+  executed only after an exact zero-write preflight, followed by OFF->READY
+  persistence verification and the **same admission-only ladder**. No steering
+  offset is justified before `ADMITTED`. Resolving OQ-054 remains required for a
+  stock-compatible signing architecture, not for this persistent development
+  receiver experiment.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

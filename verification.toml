@@ -2280,3 +2280,11 @@ paths = [
 ]
 requires_external = ["gtsplus"]
 modes = ["local"]
+
+[suite.camry_f33_gate2_semantic_patch]
+tests = ["tests/verify_camry_f33_gate2_semantic_patch.py"]
+paths = [
+  "data/generated/secoc_patch_manifest_8965F3307000.json",
+  "exploit/patcher/",
+  "targets/camry-2026/raw-20260901/f33-b6-admission/",
+]

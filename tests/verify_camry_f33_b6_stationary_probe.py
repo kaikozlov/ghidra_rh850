@@ -140,12 +140,33 @@ with tempfile.TemporaryDirectory() as td:
     manifest = builder.build(out, Path("/Users/kai/dev/inspect/repos/kai-openpilot"))
     copied = out / MODULE_PATH.name
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
+    patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest binds exact route", manifest["target"] == {
+    check("kit manifest is self-contained v2 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v2" and manifest["target"] == {
         "eps_f181": "8965F3307000", "eps_diag": "0x7A1->0x7A9 bus0", "b6": "0x0B6/32 FD bus0",
     })
+    check("kit pins cumulative two-stage firmware state", manifest["firmware_patch"]["stage1_installed"] == {
+        "address": "0x8F952", "bytes": "e001", "fixup": "0xD9AF33AF",
+    } and manifest["firmware_patch"]["stage2_candidate"] == {
+        "address": "0x8F948", "bytes": "003a", "final_fixup": "0xD12ADB05",
+    })
+    check("kit carries exact stage1 source and final SHA", manifest["firmware_patch"]["source_image_sha256"] == builder.stage2.EXPECTED_STAGE1_SHA256 and manifest["firmware_patch"]["final_image_sha256"] == builder.stage2.EXPECTED_FINAL_SHA256)
+    check("kit includes preflight/apply/restore/post-apply artifacts", all((out / rel).is_file() for rel in (
+        "firmware_patch/payload-validate-only.bin", "firmware_patch/payload-apply.bin",
+        "firmware_patch/restore/restore.json", "firmware_patch/post-apply/payload-validate-only.bin",
+        "firmware_patch/generic_shellcode_template.bin",
+    )))
+    check("kit includes patch runtime needed on comma", all((out / rel).is_file() for rel in (
+        "runtime/exploit/common/ram_exec.py", "runtime/exploit/common/payload_package.py",
+        "runtime/exploit/patcher/deploy.py", "runtime/exploit/patcher/restore.py",
+        "runtime/exploit/patcher/post_apply_verify.py", "runtime/tools/build_secoc_patch_manifest.py",
+    )))
+    check("kit never materializes standalone secret files", not any("secret" in p.name.lower() for p in out.rglob("*")))
+    check("patch runbook requires zero-write preflight before apply", "Zero-write preflight" in patch_runbook and "If `apply_ready` is not exactly true, **do not APPLY**" in patch_runbook)
+    check("patch runbook pins cumulative CRC and both patch sites", "0x8F948: 1A 38 -> 00 3A" in patch_runbook and "0x8F952 = E001" in patch_runbook and "D12ADB05" in patch_runbook and "both" in patch_runbook)
+    check("patch runbook includes post-power-cycle verify and stage2-only restore", "OFF -> READY" in patch_runbook and "post_apply_verify.py" in patch_runbook and "RESTORE reverses **stage 2 only**" in patch_runbook)
     check("kit manifest pins current opendbc and Panda revisions", len(manifest["repositories"]["opendbc"].get("head", "")) == 40 and len(manifest["repositories"]["panda"].get("head", "")) == 40)
-    check("runbook separates admission and admitted-only offset", "First live run: admission only" in runbook and "--small-offset-deg 0.5" in runbook and "If it is not ADMITTED, stop there" in runbook)
+    check("runbook orders stage2 proof before B6 admission and admitted-only offset", "First follow `FIRMWARE_PATCH.md`" in runbook and "First B6 run after stage-2 persistence proof: admission only" in runbook and "--small-offset-deg 0.5" in runbook and "If it is not ADMITTED, stop there" in runbook)
     check("runbook states the bounded steering ramp", "rate-limits" in runbook and "6 deg/s" in runbook)
     check("runbook pins current bus0 and exclusive Panda ownership", "current post-repin" in runbook and "Panda bus 0" in runbook and "pandad|boardd" in runbook)
 
