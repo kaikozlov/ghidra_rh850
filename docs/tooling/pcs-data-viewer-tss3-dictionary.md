@@ -471,3 +471,21 @@ do not edit this block by hand.
 - Findings with this document as canonical home: [TMS-082](../reference/index.md#finding-tms-082), [TMS-084](../reference/index.md#finding-tms-084)
 - Corrections with this document as canonical home: —
 <!-- knowledge-cross-references:end -->
+
+### Exact Camry live confirmation (2026-09-01)
+
+The release-local Image-FFD protocol above has now been exercised read-only against the exact
+2026 Camry `FRC_P5` endpoint `0x792 -> 0x79A` (F181 `8646F3315000`). Extended session plus
+level-49 SecurityAccess succeeded exactly as recovered: live seed
+`69 0F 82 16 37 10` produced key `E1 FF 87 91 DB 01`, accepted by `27 04` with `67 04`.
+The vehicle reports `22 20 81 -> 62 20 81 01`, so its current stored image payload is in the
+viewer's unencrypted mode.
+
+After unlock, `AB31` enumerated exact stored RoB codes
+`2822,2821,2826,2823,2861`. `AB33 2822 00000201` (occurrence selector
+split1/set1/trigger1) returned a populated `EB33` with six blocks:
+`5101/2`, `0501/7`, `0502/4`, `0507/6`, `0511/4`, and first split-image DID
+`6002/0x00000BCB`. This dynamically confirms the recovered
+`AB33 || RoB_BE16 || frame_BE32` request, byte-8 block count, byte-9 block stream,
+and BE32 `6xxx` length grammar. The live work remained read-only; no RoB deletion or
+vehicle-control routine was invoked.
