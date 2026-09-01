@@ -3691,6 +3691,46 @@ This reopens only the live acceptance status; it does not weaken the static conc
 B6 is a real exact-F33 external cooperative-steering interface. No production steering
 output is authorized by this finding.
 
+### 57.3 Car-ready stationary discriminator and native openpilot path
+
+The VAR-114 live discriminator is now implemented as
+`exploit/behavioral_proof/camry_f33_b6_stationary_probe.py`. It is deliberately a
+single-purpose direct-Panda tool rather than openpilot runtime scaffolding. The current
+post-repin route is hard-bound to EPS `0x7A1 -> 0x7A9` on **Panda bus 0** and B6
+`0x0B6/32` CAN-FD on bus 0. `SafetyModel.allOutput` parameter 1 keeps the normal
+bus0<->bus2 relay forwarding path alive while the tool owns the Panda; the tool itself
+admits only EPS diagnostic `0x7A1` and B6 transmit, and B6 is sent explicitly with
+`fd=True`. Before diagnostics it requires current bus-0 `0x025/0x0AA/0x00F/0x127`, Park,
+zero wheel speed, and a plausible steering angle. It then binds the **full** application
+F181 record `02 || 8965F3307000 || 8A3113303100`, enters extendedDiagnostic only, and
+performs memory-ID-1 SID-0x23 reads of exactly the acceptance cells listed above.
+Programming, SecurityAccess, RequestDownload/TransferData, memory writes, RoutineControl,
+and `0x08A` transmit are absent from the implementation.
+
+The first live invocation is intentionally zero-error lateral input: ID0/current angle,
+then ID11/current angle, at the cleaned 50-Hz zero-MAC28 shape. It records raw Panda RX/TX,
+all RMBA values, and a machine verdict to NDJSON. `ADMITTED` requires the target snapshot,
+healthy B6 status, controller enable, healthy global communication mode, and bank 2 exactly.
+Only after that same run produces `ADMITTED` can the optional causal phase execute; its
+target offset is hard-capped to +/-2 degrees and the field runbook starts at `0.5 deg`.
+A fresh Park/stationary and F181 check precedes that phase. This tooling operationalizes the
+existing VAR-114 discriminator; it is not a new dynamic finding until a live result is
+retained.
+
+The matching native openpilot implementation is pinned at `opendbc@91834530`: exact Camry
+TSS3 uses `CC.latActive`, the ordinary Toyota angle limiter, active B6 ID11 with
+signal265=0 and 100/100 contributions, inactive ID0 release, live `0x00F` reset state plus
+local message freshness/sequence, and the zero-MAC28 development envelope used by cleaned
+route 2D. Toyota continues to own longitudinal control and the existing stock-shaped
+`0x101` cancel remains. Panda Toyota safety whitelists B6 on bus 0 and applies the ordinary
+`steer_angle_cmd_checks` contract; it does not invent companion-field, freshness,
+sequence, or `0x08A` arbitration policy. `0x08A` remains a read-only/forwarded stock
+request-plane object and is not an openpilot Tx object. The current Panda forwarding fix is
+unchanged at `panda@4130c4a9`.
+
+`tools/build_camry_f33_car_kit.py` materializes the standalone probe, exact runbook, hashes,
+and repository revisions under `build/out/camry-f33-car-kit/` for the in-car session.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 

@@ -4,7 +4,8 @@
 **Captured:** 2026-08-26
 **Application F181:** `8965F3307000` / `8A3113303100`
 **ECU serial:** `8965033K9011J2740743`
-**Diagnostic route:** ELM327 parameter 1, logical bus 1, `0x7A1 -> 0x7A9`
+**Initial 2026-08-26 diagnostic route (pre-repin):** ELM327 parameter 1, logical bus 1, `0x7A1 -> 0x7A9`
+**Current post-repin operator route (live-proven 2026-08-30):** Panda bus 0, `0x7A1 -> 0x7A9`
 
 **Project status:** first-class maintained analysis target `camry-8965F3307000`
 **Canonical CodeFlash:** `../../firmware/camry-8965F3307000/CodeFlash.bin`
@@ -71,6 +72,35 @@ The deterministic compact interpretation is
 
 Canonical interpretation lives in
 [`docs/variants/camry-2026-live-baseline.md`](../../../docs/variants/camry-2026-live-baseline.md).
+
+## Current stationary B6 bring-up kit
+
+The old bus-1 diagnostic note above is historical. After the Toyota-B repin, the
+current exact-F33 EPS diagnostic endpoint is on **Panda bus 0**, the same chassis
+side that carries B6. The retained 2026-08-30 Gate-2 preflight and post-reboot
+verification both bind `0x7A1 -> 0x7A9` to bus 0. Do not use the pre-repin bus-1
+route for the current harness.
+
+`exploit/behavioral_proof/camry_f33_b6_stationary_probe.py` is the car-facing
+VAR-114 discriminator. It owns the Panda directly in AllOutput passthrough mode,
+preserves bus0<->bus2 forwarding, verifies Park/zero wheel speed and the complete
+F181 record, sends only `0x0B6/32` CAN-FD on bus 0, and reads only the pinned
+application SID-0x23 acceptance cells. It contains no programming session,
+SecurityAccess, RequestDownload/TransferData, memory-write, RoutineControl, or
+`0x08A` transmit path. The first live run sends ID0/current-angle and then
+ID11/current-angle only. A nonzero target offset is separately requested, capped
+at +/-2 degrees, and refused unless the immediately preceding ID11 phase is
+positively admitted (`ADB9=0`, `ADB0=11`, `CAFF=1`, `ACBD=0`, `CB00=2`).
+
+Build the copy-to-comma bundle with:
+
+```bash
+python3 tools/build_camry_f33_car_kit.py
+```
+
+The generated `build/out/camry-f33-car-kit/` directory contains the standalone
+probe, a revision/hash manifest, and the exact in-car runbook. The source verifier
+is `tests/verify_camry_f33_b6_stationary_probe.py`.
 
 ## NRTD P5/cruise follow-up
 
