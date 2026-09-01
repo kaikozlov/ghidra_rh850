@@ -987,6 +987,15 @@ paths = [
   "docs/status/PRIORITIES.md",
 ]
 
+[suite.camry_2026_bus1_frc_egress_bounds]
+tests = ["tests/verify_camry_2026_bus1_frc_egress_bounds.py"]
+oracle = "dynamic_trace"
+paths = [
+  "targets/camry-2026/raw-20260827/",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/reference/camry-2026-tss3-control-security-participants.md",
+]
+
 [suite.camry_2026_bus4_field_leadlag]
 tests = ["tests/verify_camry_2026_bus4_field_leadlag.py"]
 oracle = "dynamic_trace"

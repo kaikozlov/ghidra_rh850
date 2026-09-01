@@ -25,7 +25,9 @@ Toyota Bus 1: ADAS/request side
         | observed native Bus-1 family = reproducible E2E integrity
         | + alive counter, no secret-bearing MAC
         v
-  private / differently-packed downstream handoff
+  unresolved FRC -> proxy/arbitration handoff
+  (native Bus-1 transformed/multi-field, multiplexed, or private-link
+   transport all remain possible within current evidence bounds)
         |
         v
 
@@ -138,9 +140,13 @@ ordinary-P5 `FV4 || MAC28` structure. Exact F33 EPS neither transmits nor
 receives it. The FRC hosts the matching request object but its observed native
 Bus-1 family uses non-secret E2E integrity/freshness rather than Toyota SecOC. Current topology therefore bounds the
 proxy/transmitter candidates to **Skid Control / Brake Booster / Central
-Gateway**. Do not infer `0x08A -> B6`; that stock transform is disproved.
+Gateway**. The FRC→proxy request handoff itself remains unresolved: the retained
+Bus-1 sweeps exclude several direct single-field/literal encodings only within
+their declared bounds and do not exclude transformed, multi-field, nonlinear,
+multiplexed, or private-link transport. Do not infer `0x08A -> B6`; that stock
+transform is disproved.
 
-Canonical evidence: VAR-091, VAR-094, VAR-101, VAR-107, CORR-149.
+Canonical evidence: VAR-091, VAR-094, VAR-101, VAR-107, VAR-113, CORR-149, CORR-153.
 
 ## Current TSK roster: what is actually known
 

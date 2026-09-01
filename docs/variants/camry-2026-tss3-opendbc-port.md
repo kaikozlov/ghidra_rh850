@@ -306,12 +306,15 @@ The shortest execution path is independent of Toyota's unresolved stock FRC pipe
    unauthorized.
 
 OQ-054 remains valuable for an elegant stock-compatible architecture: synchronized FRC
-Operation FFD `5282/5285/57DE/5265`, matched FRC/Brake firmware, or source-identifying capture
-must still reveal the private request handoff and the exact Brake/Skid/CGW signer. Native Bus 1
-has 22 periodic camera/radar streams; `0x180..0x182` carry recovered perception-object slots,
-but per-ID FRC-versus-radar ownership is not named. The 28-byte `0x08A` application and
-consecutive `5282` layout are absent. We therefore know what FRC computes, not which private
-message carries it out. That attribution does **not** block the independent B6 development
+Operation FFD `5282/5631/5285/57DE/5265/560D`, matched FRC/Brake firmware, or source-identifying
+capture must still reveal the request handoff/encoding and the exact Brake/Skid/CGW signer.
+Native Bus 1 has 22 frequent periodic camera/radar streams; `0x180..0x182` carry recovered
+perception-object slots, but per-ID FRC-versus-radar ownership is not named. The 28-byte `0x08A`
+application and consecutive `5282` layout are absent. VAR-113/CORR-153 bound direct
+single-field linear/monotonic carriers within declared sweeps but leave transformed,
+multi-field, multiplexed, sparse/event, and genuinely private/non-CAN handoffs open. We
+therefore know what FRC computes, not the transport/encoding that carries those semantics to
+the downstream proxy. That attribution does **not** block the independent B6 development
 probe above.
 
 ## 6. Deterministic evidence

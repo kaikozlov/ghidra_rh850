@@ -3416,9 +3416,10 @@ The post-VAR-110 integration recensus corrects one consequence that VAR-104/105 
 backwards. Exact F33's non-reception of `0x08A` proves that `0x08A` is not an F33 CAN
 command; it does **not** make the message irrelevant to controller replacement. The
 relay-open route fixes `0x08A` as the upstream-to-chassis request crossing the accessible
-interception boundary before the still-private chassis authority conversion. `0x081`
+interception boundary before an unresolved chassis-side proxy/arbitration conversion. `0x081`
 crosses back in the other direction. Factory steering with zero B6 independently proves
-that this upstream request can reach physical steering through the private middle.
+that this upstream request can reach physical steering through that unresolved handoff; it
+does not establish that the FRC-side transport before the proxy is private (VAR-113/CORR-153).
 
 Copied route `0000002d--4a4806c524` then exposes the concrete integration defect: the
 final openpilot path transmits protected B6 on Panda bus0 while Panda simultaneously
@@ -3501,12 +3502,79 @@ against the tracked CodeFlash/DataFlash/corpus/LocalRAM inputs, verified by
 `tests/verify_camry_8965F3307000_dataflash_nvm_owners.py` (byte-identical
 regeneration plus all closure pillars).
 
+
+## 56. Native Bus-1 FRC egress bound: direct carriers are negative; absence/private transport is not proved (VAR-113)
+
+The source-side question is narrower than several earlier summaries made it sound. We
+know the FRC hosts Toyota's TSS3 request/arbitration recorder vocabulary, we know the
+observed native Bus-1 periodic family uses exact AUTOSAR E2E Profile 5 rather than
+Toyota SecOC, and we know authenticated `0x08A` is published downstream on the
+Bus-4/chassis side. What the retained CAN alone did **not** justify was the leap from
+"we have not found a simple Bus-1 request field" to "there is no unsigned FRC request
+egress" or "the handoff must be private." A downstream proxy can consume transformed,
+multiple, multiplexed, or state-vector inputs without preserving a large raw correlation
+to the protected output; counter mixing alone is a simple counterexample.
+
+The tracked replacement analysis keeps four evidence tiers separate:
+
+1. **Exhaustive direct lag census.** Across the 22 frequent periodic Bus-1 streams in
+   both relay-correct drives, every contiguous 1..16-bit signed/unsigned BE/LE field in
+   semantic B3..end is tested against same-segment native Panda-bus2 `0x08A`
+   B18:B19, with source and shifted target both in B21=11. The ±300-ms / 25-ms grid
+   covers **541,984 candidate fields per drive** with no candidate-series deduplication.
+   It finds **zero** reproduced positive-lag fields at `|r| >= 0.40`; the strongest is
+   only `0x181/64 big:bit365:u1`, A `r=-0.353526236 @ +150 ms`, B
+   `r=-0.331393092 @ +300 ms`.
+2. **Exhaustive zero-lag/state census.** Every contiguous 1..24-bit and 32-bit
+   whole-frame field, all legal offsets, BE/LE and signed/unsigned variants is screened:
+   **898,104 specs** total. Level, delta, rate, and Target-Lateral-ID indicator screens
+   are retained separately; B0:B1/B2 integrity/freshness hits are explicitly treated as
+   timing/E2E artifacts rather than application identities.
+3. **Stratified wider/nonlinear refinement.** The actual final refinement set is
+   **450 candidates** (not the stale 350-candidate handoff summary). Those candidates
+   are swept through ±1 s and checked with the wider-lag Pearson plus monotonic
+   Spearman/quantile diagnostics. This tier is deliberately **not** called exhaustive;
+   only the tier-2 zero-lag/state census is exhaustive over the 898,104 specs.
+4. **Transition-edge screen.** Activation/clear transitions reproduce 182 Bus-1 bits,
+   but the strongest four-edge margin is only **0.2105**, with no deterministic
+   request/mode bit. Recomputing the transition scan against native bus2 `0x08A`
+   instead of its forwarded bus0 copy gives the same intervals, edge count, and top
+   margins.
+
+The scope matters as much as the negative. Drive A contains **56 total Bus-1 ID/DLC
+streams**, while only 22 are frequent enough for the periodic census; drive B has 22.
+Per-ID FRC-versus-radar Tx ownership is still unknown. Only one continuous ID11 interval
+exists in each retained drive (16.149859330 s in A; 57.203824788 s across segments
+20→21 in B). Therefore sparse/event traffic, fields wider than 16 bits in the exhaustive
+lag tier, multivariate or nonmonotonic transforms, conditional multiplexing, downstream
+synthesis, diagnostic/recorder transport, and genuinely private/non-CAN links all remain
+possible.
+
+The durable statement is consequently exact and intentionally limited: **the retained
+captures reveal no reproduced direct single-field linearly/monotonically related unsigned
+FRC lateral-request carrier within the declared tiers.** That does not establish absence
+of unsigned FRC egress, a private FRC→proxy handoff, or impossibility of upstream source
+replacement. CORR-153 repairs the older overclaims in VAR-093/094, CORR-138, VAR-104,
+and OQ-054.
+
+The decisive next experiment moves upstream instead of doing more blind correlation:
+synchronously capture FRC Operation FFD `5282/5631` request, `5285/57DE` arbitration
+result, `5265` active-steering grant, and `560D` EPS pinion while recording complete
+all-bus CAN. That directly tests whether a native Bus-1 transform tracks the FRC's own
+internal request/result state and gives a physical source-attribution path for the proxy.
+
+Deterministic evidence: `tools/analyze_camry_2026_bus1_frc_egress_bounds.py`,
+`data/generated/camry_2026_bus1_frc_egress_bounds.json`, and
+`tests/verify_camry_2026_bus1_frc_egress_bounds.py`. The fast verifier pins source hashes,
+method/count boundaries, headline results, and independent raw-capture spot checks; it
+does not rerun the full multi-minute four-tier producer on every `tools/test` invocation.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152)
+- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153)
 <!-- knowledge-cross-references:end -->

@@ -1,0 +1,1236 @@
+{
+  "generated_by": "tools/analyze_camry_2026_bus1_frc_egress_bounds.py",
+  "id11_intervals": {
+    "drive_a": [
+      {
+        "duration_s": 16.14985933,
+        "end_segment": 5,
+        "start_segment": 5
+      }
+    ],
+    "drive_b": [
+      {
+        "duration_s": 57.203824788,
+        "end_segment": 21,
+        "start_segment": 20
+      }
+    ]
+  },
+  "interpretation": {
+    "bounded_negative": "Within the declared tiers (exhaustive 1..16-bit semantic-field +/-300 ms Pearson census; exhaustive 898,104-spec zero-lag/state screen; stratified 450-candidate +/-1 s wider/nonlinear refinement; reproduced four-edge transition screen), the retained captures reveal no reproduced direct single-field linearly or monotonically related unsigned FRC lateral request carrier on native Toyota Bus 1; weak positive-lag perception associations and stronger trailing/plant-shaped fields remain.",
+    "does_not_establish": [
+      "absence of unsigned FRC lateral egress",
+      "that the FRC->proxy/arbitration handoff is private",
+      "impossibility of upstream source replacement"
+    ],
+    "next_primary_source": "synchronized FRC Operation FFD (5282/5631 request, 5285/57DE arbitration, 5265 grant, 560D pinion) plus all-bus CAN capture",
+    "not_excluded": [
+      "multivariate encoding",
+      "nonlinear/nonmonotonic transforms",
+      "conditionally multiplexed or event-driven egress",
+      "fields wider than 16 bits in the exhaustive lag tier",
+      "source data outside periodic CAN (sparse diagnostic/event streams; drive A has 56 distinct Bus-1 ID/DLC streams vs the 22 frequent periodic ones)",
+      "private Ethernet/LVDS/internal-gateway handoff",
+      "diagnostic/recorder objects",
+      "an FRC state vector from which the downstream ECU synthesizes the protected target",
+      "effects hidden by having only one ID11 interval per drive"
+    ]
+  },
+  "schema": "camry-2026-bus1-frc-egress-bounds-v1",
+  "sources": {
+    "drives": [
+      {
+        "all_bus1_id_dlc_streams": 56,
+        "batching": {
+          "0x08A_timestamp_buckets_with_any_other_frame": 20618,
+          "boundary": "logMonoTime belongs to an rlog CAN Event publication batch; frames sharing it have no retained within-batch wire order or individual hardware timestamp"
+        },
+        "bus2_0x08a_frames": 20618,
+        "label": "drive_a",
+        "path": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+        "periodic_bus1_streams": 22,
+        "sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5",
+        "total_frames": 1656656
+      },
+      {
+        "all_bus1_id_dlc_streams": 22,
+        "batching": {
+          "0x08A_timestamp_buckets_with_any_other_frame": 23999,
+          "boundary": "logMonoTime belongs to an rlog CAN Event publication batch; frames sharing it have no retained within-batch wire order or individual hardware timestamp"
+        },
+        "bus2_0x08a_frames": 23999,
+        "label": "drive_b",
+        "path": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+        "periodic_bus1_streams": 22,
+        "sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a",
+        "total_frames": 1918047
+      }
+    ],
+    "periodic_stream_set": [
+      "0x020/12",
+      "0x123/16",
+      "0x160/32",
+      "0x180/64",
+      "0x181/64",
+      "0x182/64",
+      "0x183/64",
+      "0x184/64",
+      "0x185/64",
+      "0x186/64",
+      "0x187/64",
+      "0x188/64",
+      "0x189/64",
+      "0x18A/64",
+      "0x18B/64",
+      "0x18C/48",
+      "0x1A0/48",
+      "0x200/64",
+      "0x201/64",
+      "0x230/64",
+      "0x440/32",
+      "0x450/32"
+    ],
+    "periodic_threshold_frames": 50,
+    "target": "native Panda bus-2 0x08A DLC 32 (protected side); forwarded bus-0 copies give identical ID11 intervals and reproduced edges",
+    "tx_ownership": "per-ID FRC-versus-radar transmitter ownership on Bus 1 is unresolved; this census is per-stream, not per-transmitter, so a capture-wide negative cannot be attributed specifically to FRC Tx"
+  },
+  "tiers": {
+    "exhaustive_1_16bit_lag_census": {
+      "candidate_fields_per_drive": 541984,
+      "join": "same-segment nearest native bus2 0x08A DLC32 within 30 ms; source frame and shifted target frame both require B21=11",
+      "lag_convention": "corr(field(t), target(t+lag)); positive lag means Bus-1 field leads protected 0x08A",
+      "lags_ms": [
+        -300,
+        -275,
+        -250,
+        -225,
+        -200,
+        -175,
+        -150,
+        -125,
+        -100,
+        -75,
+        -50,
+        -25,
+        0,
+        25,
+        50,
+        75,
+        100,
+        125,
+        150,
+        175,
+        200,
+        225,
+        250,
+        275,
+        300
+      ],
+      "n_reproduced_positive_leads_abs_r_ge_0_20": 882,
+      "per_drive_sample_counts": {
+        "drive_a": {
+          "0x020/12": 323,
+          "0x123/16": 162,
+          "0x160/32": 646,
+          "0x180/64": 323,
+          "0x181/64": 323,
+          "0x182/64": 323,
+          "0x183/64": 323,
+          "0x184/64": 323,
+          "0x185/64": 323,
+          "0x186/64": 323,
+          "0x187/64": 323,
+          "0x188/64": 323,
+          "0x189/64": 323,
+          "0x18A/64": 323,
+          "0x18B/64": 323,
+          "0x18C/48": 323,
+          "0x1A0/48": 323,
+          "0x200/64": 161,
+          "0x201/64": 161,
+          "0x230/64": 323,
+          "0x440/32": 32,
+          "0x450/32": 33
+        },
+        "drive_b": {
+          "0x020/12": 1144,
+          "0x123/16": 572,
+          "0x160/32": 2289,
+          "0x180/64": 1144,
+          "0x181/64": 1144,
+          "0x182/64": 1144,
+          "0x183/64": 1144,
+          "0x184/64": 1144,
+          "0x185/64": 1144,
+          "0x186/64": 1144,
+          "0x187/64": 1144,
+          "0x188/64": 1144,
+          "0x189/64": 1144,
+          "0x18A/64": 1144,
+          "0x18B/64": 1144,
+          "0x18C/48": 1144,
+          "0x1A0/48": 1144,
+          "0x200/64": 572,
+          "0x201/64": 572,
+          "0x230/64": 1145,
+          "0x440/32": 115,
+          "0x450/32": 114
+        }
+      },
+      "reproduced_positive_leads_abs_r_ge_0_40": [],
+      "scope": "all 22 shared periodic native Bus-1 streams; every contiguous 1..16-bit BE/LE field, signed+unsigned, in semantic B3..end (B0:B1 CRC and B2 alive counter excluded); no candidate-series deduplication",
+      "strongest_reproduced_positive_leads": [
+        {
+          "A": {
+            "field": "big:bit365:u1",
+            "lag_ms": 150,
+            "pearson_r": -0.353526236,
+            "range": [
+              0.0,
+              1.0
+            ],
+            "unique": 2
+          },
+          "B": {
+            "field": "big:bit365:u1",
+            "lag_ms": 300,
+            "pearson_r": -0.331393092,
+            "range": [
+              0.0,
+              1.0
+            ],
+            "unique": 2
+          },
+          "field": "big:bit365:u1",
+          "min_abs_r": 0.331393092,
+          "stream": "0x181/64"
+        },
+        {
+          "A": {
+            "field": "little:bit362:u1",
+            "lag_ms": 150,
+            "pearson_r": -0.353526236,
+            "range": [
+              0.0,
+              1.0
+            ],
+            "unique": 2
+          },
+          "B": {
+            "field": "little:bit362:u1",
+            "lag_ms": 300,
+            "pearson_r": -0.331393092,
+            "range": [
+              0.0,
+              1.0
+            ],
+            "unique": 2
+          },
+          "field": "little:bit362:u1",
+          "min_abs_r": 0.331393092,
+          "stream": "0x181/64"
+        },
+        {
+          "A": {
+            "field": "big:bit365:u2",
+            "lag_ms": 125,
+            "pearson_r": -0.327277554,
+            "range": [
+              0.0,
+              3.0
+            ],
+            "unique": 4
+          },
+          "B": {
+            "field": "big:bit365:u2",
+            "lag_ms": 300,
+            "pearson_r": -0.35668731,
+            "range": [
+              0.0,
+              3.0
+            ],
+            "unique": 4
+          },
+          "field": "big:bit365:u2",
+          "min_abs_r": 0.327277554,
+          "stream": "0x181/64"
+        },
+        {
+          "A": {
+            "field": "little:bit361:u2",
+            "lag_ms": 125,
+            "pearson_r": -0.327277554,
+            "range": [
+              0.0,
+              3.0
+            ],
+            "unique": 4
+          },
+          "B": {
+            "field": "little:bit361:u2",
+            "lag_ms": 300,
+            "pearson_r": -0.35668731,
+            "range": [
+              0.0,
+              3.0
+            ],
+            "unique": 4
+          },
+          "field": "little:bit361:u2",
+          "min_abs_r": 0.327277554,
+          "stream": "0x181/64"
+        },
+        {
+          "A": {
+            "field": "big:bit308:s2",
+            "lag_ms": 300,
+            "pearson_r": -0.52545833,
+            "range": [
+              -2.0,
+              1.0
+            ],
+            "unique": 4
+          },
+          "B": {
+            "field": "big:bit308:s2",
+            "lag_ms": 300,
+            "pearson_r": -0.317116718,
+            "range": [
+              -2.0,
+              1.0
+            ],
+            "unique": 4
+          },
+          "field": "big:bit308:s2",
+          "min_abs_r": 0.317116718,
+          "stream": "0x18A/64"
+        },
+        {
+          "A": {
+            "field": "little:bit306:s2",
+            "lag_ms": 300,
+            "pearson_r": -0.52545833,
+            "range": [
+              -2.0,
+              1.0
+            ],
+            "unique": 4
+          },
+          "B": {
+            "field": "little:bit306:s2",
+            "lag_ms": 300,
+            "pearson_r": -0.317116718,
+            "range": [
+              -2.0,
+              1.0
+            ],
+            "unique": 4
+          },
+          "field": "little:bit306:s2",
+          "min_abs_r": 0.317116718,
+          "stream": "0x18A/64"
+        },
+        {
+          "A": {
+            "field": "little:bit292:s16",
+            "lag_ms": 300,
+            "pearson_r": -0.495088008,
+            "range": [
+              -32656.0,
+              28816.0
+            ],
+            "unique": 62
+          },
+          "B": {
+            "field": "little:bit292:s16",
+            "lag_ms": 150,
+            "pearson_r": -0.311499689,
+            "range": [
+              -32672.0,
+              28816.0
+            ],
+            "unique": 61
+          },
+          "field": "little:bit292:s16",
+          "min_abs_r": 0.311499689,
+          "stream": "0x18A/64"
+        },
+        {
+          "A": {
+            "field": "little:bit293:s15",
+            "lag_ms": 300,
+            "pearson_r": -0.495083877,
+            "range": [
+              -16328.0,
+              14408.0
+            ],
+            "unique": 59
+          },
+          "B": {
+            "field": "little:bit293:s15",
+            "lag_ms": 150,
+            "pearson_r": -0.311499665,
+            "range": [
+              -16336.0,
+              14408.0
+            ],
+            "unique": 59
+          },
+          "field": "little:bit293:s15",
+          "min_abs_r": 0.311499665,
+          "stream": "0x18A/64"
+        },
+        {
+          "A": {
+            "field": "little:bit294:s14",
+            "lag_ms": 300,
+            "pearson_r": -0.495077513,
+            "range": [
+              -8164.0,
+              7204.0
+            ],
+            "unique": 55
+          },
+          "B": {
+            "field": "little:bit294:s14",
+            "lag_ms": 150,
+            "pearson_r": -0.311499638,
+            "range": [
+              -8168.0,
+              7204.0
+            ],
+            "unique": 58
+          },
+          "field": "little:bit294:s14",
+          "min_abs_r": 0.311499638,
+          "stream": "0x18A/64"
+        },
+        {
+          "A": {
+            "field": "little:bit295:s13",
+            "lag_ms": 300,
+            "pearson_r": -0.495077513,
+            "range": [
+              -4082.0,
+              3602.0
+            ],
+            "unique": 55
+          },
+          "B": {
+            "field": "little:bit295:s13",
+            "lag_ms": 150,
+            "pearson_r": -0.311499638,
+            "range": [
+              -4084.0,
+              3602.0
+            ],
+            "unique": 58
+          },
+          "field": "little:bit295:s13",
+          "min_abs_r": 0.311499638,
+          "stream": "0x18A/64"
+        }
+      ]
+    },
+    "exhaustive_zero_lag_state_screen": {
+      "candidate_count_by_stream": {
+        "0x020/12": 8180,
+        "0x123/16": 11316,
+        "0x160/32": 23860,
+        "0x180/64": 48948,
+        "0x181/64": 48948,
+        "0x182/64": 48948,
+        "0x183/64": 48948,
+        "0x184/64": 48948,
+        "0x185/64": 48948,
+        "0x186/64": 48948,
+        "0x187/64": 48948,
+        "0x188/64": 48948,
+        "0x189/64": 48948,
+        "0x18A/64": 48948,
+        "0x18B/64": 48948,
+        "0x18C/48": 36404,
+        "0x1A0/48": 36404,
+        "0x200/64": 48948,
+        "0x201/64": 48948,
+        "0x230/64": 48948,
+        "0x440/32": 23860,
+        "0x450/32": 23860
+      },
+      "candidate_fields": "every contiguous 1..24-bit and 32-bit window at every legal bit offset, serialized MSB-first and LSB-first, unsigned and signed (except 1-bit signed duplicate)",
+      "candidate_specs": 898104,
+      "integrity_note": "B0:B1 CRC and B2 alive counter deliberately included; interpret their hits as E2E/time artifacts, not application fields",
+      "join": "same-segment nearest 0x08A within 40 ms",
+      "scope": "all 22 periodic native bus-1 (id,dlc) streams shared by both drives; no ID/byte prefilter",
+      "screens": {
+        "angle_0": [
+          {
+            "a": 0.885371,
+            "b": 0.886088,
+            "score": 0.885371,
+            "spec": "0x160/32:be:77:8:s"
+          },
+          {
+            "a": 0.885371,
+            "b": 0.886088,
+            "score": 0.885371,
+            "spec": "0x160/32:be:77:9:s"
+          },
+          {
+            "a": 0.88537,
+            "b": 0.886088,
+            "score": 0.88537,
+            "spec": "0x160/32:be:77:10:s"
+          },
+          {
+            "a": 0.88537,
+            "b": 0.886088,
+            "score": 0.88537,
+            "spec": "0x160/32:be:77:11:s"
+          },
+          {
+            "a": 0.88537,
+            "b": 0.886088,
+            "score": 0.88537,
+            "spec": "0x160/32:be:77:12:s"
+          }
+        ],
+        "angle_11": [
+          {
+            "a": -0.547104,
+            "b": -0.672825,
+            "score": 0.547104,
+            "spec": "0x160/32:be:119:23:s"
+          },
+          {
+            "a": -0.547104,
+            "b": -0.672825,
+            "score": 0.547104,
+            "spec": "0x160/32:be:119:23:u"
+          },
+          {
+            "a": -0.547104,
+            "b": -0.672825,
+            "score": 0.547104,
+            "spec": "0x160/32:be:120:22:s"
+          },
+          {
+            "a": -0.547104,
+            "b": -0.672825,
+            "score": 0.547104,
+            "spec": "0x160/32:be:120:22:u"
+          },
+          {
+            "a": 0.835686,
+            "b": 0.506541,
+            "score": 0.506541,
+            "spec": "0x160/32:be:109:8:s"
+          }
+        ],
+        "angle_18": [
+          {
+            "a": -0.795301,
+            "b": -0.803889,
+            "score": 0.795301,
+            "spec": "0x160/32:le:71:2:u"
+          },
+          {
+            "a": 0.923258,
+            "b": 0.775438,
+            "score": 0.775438,
+            "spec": "0x160/32:be:77:7:s"
+          },
+          {
+            "a": 0.923258,
+            "b": 0.775438,
+            "score": 0.775438,
+            "spec": "0x160/32:be:78:6:s"
+          },
+          {
+            "a": 0.923258,
+            "b": 0.775438,
+            "score": 0.775438,
+            "spec": "0x160/32:be:79:5:s"
+          },
+          {
+            "a": 0.771363,
+            "b": 0.780465,
+            "score": 0.771363,
+            "spec": "0x160/32:be:109:9:s"
+          }
+        ],
+        "delta_11": [
+          {
+            "a": -0.108387,
+            "b": 0.107025,
+            "score": 0.107025,
+            "spec": "0x181/64:le:103:5:s"
+          },
+          {
+            "a": -0.106912,
+            "b": 0.108231,
+            "score": 0.106912,
+            "spec": "0x181/64:le:102:6:s"
+          },
+          {
+            "a": -0.105807,
+            "b": 0.108997,
+            "score": 0.105807,
+            "spec": "0x181/64:le:96:12:s"
+          },
+          {
+            "a": -0.105786,
+            "b": 0.109004,
+            "score": 0.105786,
+            "spec": "0x181/64:le:95:13:s"
+          },
+          {
+            "a": -0.105779,
+            "b": 0.109004,
+            "score": 0.105779,
+            "spec": "0x181/64:le:94:14:s"
+          }
+        ],
+        "delta_18": [
+          {
+            "a": -0.169736,
+            "b": -0.16013,
+            "score": 0.16013,
+            "spec": "0x186/64:be:113:1:u"
+          },
+          {
+            "a": 0.195993,
+            "b": 0.16013,
+            "score": 0.16013,
+            "spec": "0x186/64:be:113:2:s"
+          },
+          {
+            "a": 0.195993,
+            "b": 0.16013,
+            "score": 0.16013,
+            "spec": "0x186/64:le:117:2:s"
+          },
+          {
+            "a": -0.169736,
+            "b": -0.16013,
+            "score": 0.16013,
+            "spec": "0x186/64:le:118:1:u"
+          },
+          {
+            "a": -0.142067,
+            "b": -0.156151,
+            "score": 0.142067,
+            "spec": "0x186/64:be:113:12:u"
+          }
+        ],
+        "indicator_11": [
+          {
+            "a": 0.330536,
+            "b": 0.379396,
+            "score": 0.330536,
+            "spec": "0x1A0/48:be:64:9:s"
+          },
+          {
+            "a": 0.330536,
+            "b": 0.379396,
+            "score": 0.330536,
+            "spec": "0x1A0/48:be:64:9:u"
+          },
+          {
+            "a": 0.330536,
+            "b": 0.379396,
+            "score": 0.330536,
+            "spec": "0x1A0/48:be:65:8:s"
+          },
+          {
+            "a": 0.330536,
+            "b": 0.379396,
+            "score": 0.330536,
+            "spec": "0x1A0/48:be:65:8:u"
+          },
+          {
+            "a": 0.330536,
+            "b": 0.379396,
+            "score": 0.330536,
+            "spec": "0x1A0/48:be:66:7:s"
+          }
+        ],
+        "indicator_18": [
+          {
+            "a": 0.409073,
+            "b": 0.318621,
+            "score": 0.318621,
+            "spec": "0x186/64:be:132:9:u"
+          },
+          {
+            "a": 0.409035,
+            "b": 0.318573,
+            "score": 0.318573,
+            "spec": "0x186/64:be:132:11:u"
+          },
+          {
+            "a": 0.409057,
+            "b": 0.318554,
+            "score": 0.318554,
+            "spec": "0x186/64:be:132:10:u"
+          },
+          {
+            "a": 0.409045,
+            "b": 0.318539,
+            "score": 0.318539,
+            "spec": "0x186/64:be:132:12:u"
+          },
+          {
+            "a": 0.409045,
+            "b": 0.318539,
+            "score": 0.318539,
+            "spec": "0x186/64:be:132:13:u"
+          }
+        ],
+        "rate_11": [
+          {
+            "a": -0.325495,
+            "b": -0.210427,
+            "score": 0.210427,
+            "spec": "0x189/64:be:427:1:u"
+          },
+          {
+            "a": -0.325495,
+            "b": -0.210427,
+            "score": 0.210427,
+            "spec": "0x189/64:le:428:1:u"
+          },
+          {
+            "a": -0.221935,
+            "b": -0.194812,
+            "score": 0.194812,
+            "spec": "0x1A0/48:be:94:8:s"
+          },
+          {
+            "a": -0.2213,
+            "b": -0.194526,
+            "score": 0.194526,
+            "spec": "0x1A0/48:be:94:10:s"
+          },
+          {
+            "a": -0.2213,
+            "b": -0.194526,
+            "score": 0.194526,
+            "spec": "0x1A0/48:be:94:11:s"
+          }
+        ],
+        "rate_18": [
+          {
+            "a": -0.238334,
+            "b": -0.235836,
+            "score": 0.235836,
+            "spec": "0x189/64:be:147:1:u"
+          },
+          {
+            "a": -0.238334,
+            "b": -0.235836,
+            "score": 0.235836,
+            "spec": "0x189/64:le:148:1:u"
+          },
+          {
+            "a": -0.233371,
+            "b": 0.24886,
+            "score": 0.233371,
+            "spec": "0x189/64:be:216:5:s"
+          },
+          {
+            "a": -0.233371,
+            "b": 0.24886,
+            "score": 0.233371,
+            "spec": "0x189/64:be:217:4:s"
+          },
+          {
+            "a": -0.233371,
+            "b": 0.24886,
+            "score": 0.233371,
+            "spec": "0x189/64:be:218:3:s"
+          }
+        ]
+      }
+    },
+    "plant_feedback_control": {
+      "entries": [
+        {
+          "drives": {
+            "drive_a": {
+              "measured_angle_best": {
+                "lag_ms": -175,
+                "r": -0.643172
+              },
+              "n_active": 323,
+              "target_best": {
+                "lag_ms": -200,
+                "r": 0.880233
+              }
+            },
+            "drive_b": {
+              "measured_angle_best": {
+                "lag_ms": -225,
+                "r": 0.606262
+              },
+              "n_active": 1144,
+              "target_best": {
+                "lag_ms": -475,
+                "r": 0.710787
+              }
+            }
+          },
+          "field": "be:bit87:s14",
+          "stream": "0x1A0/48"
+        },
+        {
+          "drives": {
+            "drive_a": {
+              "measured_angle_best": {
+                "lag_ms": -75,
+                "r": -0.638754
+              },
+              "n_active": 646,
+              "target_best": {
+                "lag_ms": -75,
+                "r": 0.885854
+              }
+            },
+            "drive_b": {
+              "measured_angle_best": {
+                "lag_ms": -100,
+                "r": 0.549683
+              },
+              "n_active": 2289,
+              "target_best": {
+                "lag_ms": -325,
+                "r": 0.645154
+              }
+            }
+          },
+          "field": "be:bit172:s11",
+          "stream": "0x160/32"
+        },
+        {
+          "drives": {
+            "drive_a": {
+              "measured_angle_best": {
+                "lag_ms": -50,
+                "r": 0.868104
+              },
+              "n_active": 646,
+              "target_best": {
+                "lag_ms": -325,
+                "r": -0.597865
+              }
+            },
+            "drive_b": {
+              "measured_angle_best": {
+                "lag_ms": 75,
+                "r": -0.753058
+              },
+              "n_active": 2289,
+              "target_best": {
+                "lag_ms": -375,
+                "r": -0.344442
+              }
+            }
+          },
+          "field": "be:bit119:s23",
+          "stream": "0x160/32"
+        },
+        {
+          "drives": {
+            "drive_a": {
+              "measured_angle_best": {
+                "lag_ms": 225,
+                "r": -0.574817
+              },
+              "n_active": 646,
+              "target_best": {
+                "lag_ms": -100,
+                "r": 0.83921
+              }
+            },
+            "drive_b": {
+              "measured_angle_best": {
+                "lag_ms": 725,
+                "r": 0.319391
+              },
+              "n_active": 2289,
+              "target_best": {
+                "lag_ms": -275,
+                "r": 0.558692
+              }
+            }
+          },
+          "field": "be:bit109:s8",
+          "stream": "0x160/32"
+        }
+      ],
+      "note": "strong 0x160 candidates correlate with measured 0x025 steering angle at near-zero/negative lag while their best 0x08A target lags are more negative -- plant/feedback-shaped within the active windows, not demonstrated request commands; CORR-138 shows full-drive nonreproduction, so these are not promoted to standing field identities"
+    },
+    "stratified_wider_nonlinear_refinement": {
+      "boundary": "the +/-1 s / 25 ms wider-field nonlinear sweep is a stratified subset (strongest per screen metric), NOT an exhaustive lag search; only the tier-2 zero-lag state screen is exhaustive over all 898,104 specs",
+      "lag_convention": "corr(field(t), target(t+lag)); positive means Bus-1 field leads downstream 0x08A",
+      "lag_sweep_ms": [
+        -1000,
+        1000,
+        25
+      ],
+      "note": "strong selected 0x160/0x1A0 correlations peak at negative lag and/or fail sign reproduction; the strongest positive-lag candidate is weak perception-shaped association, not a demonstrated request carrier",
+      "selection": "stratified: per screen metric (cross/drive_a/drive_b over 9 state screens) top-15 with (id,order,start) support dedup and per-ID cap 3, then filled to the cap by best overall cross-drive screen score",
+      "strongest_positive_lag_selected_candidate": {
+        "A": {
+          "lag_ms": 1000,
+          "pearson_r": 0.327468,
+          "state": 11
+        },
+        "B": {
+          "lag_ms": 300,
+          "pearson_r": 0.223182,
+          "state": 11
+        },
+        "field": "be:bit296:u1",
+        "min_abs_r": 0.223182,
+        "stream": "0x184/64"
+      },
+      "strongest_reproduced_0x160_0x1A0_any_lag": {
+        "A": {
+          "lag_ms": 275,
+          "r": 0.931264
+        },
+        "B": {
+          "lag_ms": 0,
+          "r": 0.886088
+        },
+        "field": "0x160/32:be:77:8:s",
+        "min_abs_r": 0.886088,
+        "stream": "0x160/32"
+      },
+      "strongest_selected_monotonic_at_best_level_lag": {
+        "A": {
+          "lag_ms": 975,
+          "monotonic": {
+            "bin_mean_monotonic_r": 0.90303,
+            "quantile_bin_r2": 0.585437,
+            "spearman": 0.765649
+          },
+          "pearson_r": 0.635731,
+          "state": 11
+        },
+        "B": {
+          "lag_ms": 500,
+          "monotonic": {
+            "bin_mean_monotonic_r": 0.601826,
+            "quantile_bin_r2": 0.069249,
+            "spearman": 0.23304
+          },
+          "pearson_r": 0.189284,
+          "state": 11
+        },
+        "field": "le:bit408:s24",
+        "min_abs_spearman": 0.23304,
+        "stream": "0x181/64"
+      },
+      "tier_size": 450
+    },
+    "transition_edge_screen": {
+      "deterministic_request_mode_bit": false,
+      "n_reproduced_active_edge_bits": 182,
+      "note": "no deterministic request/mode bit: the strongest reproduced four-edge margin is only 0.2105 and the top fields are noisy perception/object-family bits (0x181/0x189), not stable state flags; this bounds a single stable bit synchronized to 0x08A B21, it does not prove absence of egress",
+      "strongest_four_edge_margin": 0.2105,
+      "top_edge_bits": [
+        {
+          "bit_be": 220,
+          "direction": -1,
+          "drives": {
+            "drive_a": {
+              "active_end": 0.2368,
+              "active_start": 0.0,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": 0.2105,
+              "on_delta": -0.8421,
+              "post": 0.4474,
+              "pre": 0.8421
+            },
+            "drive_b": {
+              "active_end": 0.4211,
+              "active_start": 0.0526,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": 0.5789,
+              "on_delta": -0.9474,
+              "post": 1.0,
+              "pre": 1.0
+            }
+          },
+          "id": "0x181",
+          "min_four_edge_margin": 0.2105
+        },
+        {
+          "bit_be": 222,
+          "direction": 1,
+          "drives": {
+            "drive_a": {
+              "active_end": 0.6316,
+              "active_start": 0.6053,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": -0.2105,
+              "on_delta": 0.2105,
+              "post": 0.4211,
+              "pre": 0.3947
+            },
+            "drive_b": {
+              "active_end": 0.5,
+              "active_start": 0.3421,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": -0.4211,
+              "on_delta": 0.2895,
+              "post": 0.0789,
+              "pre": 0.0526
+            }
+          },
+          "id": "0x181",
+          "min_four_edge_margin": 0.2105
+        },
+        {
+          "bit_be": 130,
+          "direction": 1,
+          "drives": {
+            "drive_a": {
+              "active_end": 0.9737,
+              "active_start": 0.8684,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": -0.4737,
+              "on_delta": 0.2895,
+              "post": 0.5,
+              "pre": 0.5789
+            },
+            "drive_b": {
+              "active_end": 0.7632,
+              "active_start": 0.5526,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": -0.5,
+              "on_delta": 0.2105,
+              "post": 0.2632,
+              "pre": 0.3421
+            }
+          },
+          "id": "0x189",
+          "min_four_edge_margin": 0.2105
+        },
+        {
+          "bit_be": 472,
+          "direction": 1,
+          "drives": {
+            "drive_a": {
+              "active_end": 0.4737,
+              "active_start": 0.2368,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": -0.2368,
+              "on_delta": 0.1842,
+              "post": 0.2368,
+              "pre": 0.0526
+            },
+            "drive_b": {
+              "active_end": 0.6842,
+              "active_start": 0.5263,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": -0.5526,
+              "on_delta": 0.2368,
+              "post": 0.1316,
+              "pre": 0.2895
+            }
+          },
+          "id": "0x180",
+          "min_four_edge_margin": 0.1842
+        },
+        {
+          "bit_be": 241,
+          "direction": -1,
+          "drives": {
+            "drive_a": {
+              "active_end": 0.4211,
+              "active_start": 0.6842,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": 0.2368,
+              "on_delta": -0.1842,
+              "post": 0.6579,
+              "pre": 0.8684
+            },
+            "drive_b": {
+              "active_end": 0.7105,
+              "active_start": 0.7105,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": 0.2895,
+              "on_delta": -0.2895,
+              "post": 1.0,
+              "pre": 1.0
+            }
+          },
+          "id": "0x189",
+          "min_four_edge_margin": 0.1842
+        },
+        {
+          "bit_be": 276,
+          "direction": -1,
+          "drives": {
+            "drive_a": {
+              "active_end": 0.4737,
+              "active_start": 0.6842,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": 0.1579,
+              "on_delta": -0.2895,
+              "post": 0.6316,
+              "pre": 0.9737
+            },
+            "drive_b": {
+              "active_end": 0.3158,
+              "active_start": 0.0,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": 0.5789,
+              "on_delta": -0.8947,
+              "post": 0.8947,
+              "pre": 0.8947
+            }
+          },
+          "id": "0x180",
+          "min_four_edge_margin": 0.1579
+        },
+        {
+          "bit_be": 334,
+          "direction": 1,
+          "drives": {
+            "drive_a": {
+              "active_end": 0.5789,
+              "active_start": 0.7895,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": -0.2105,
+              "on_delta": 0.3158,
+              "post": 0.3684,
+              "pre": 0.4737
+            },
+            "drive_b": {
+              "active_end": 0.9211,
+              "active_start": 0.5,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": -0.9211,
+              "on_delta": 0.1579,
+              "post": 0.0,
+              "pre": 0.3421
+            }
+          },
+          "id": "0x189",
+          "min_four_edge_margin": 0.1579
+        },
+        {
+          "bit_be": 437,
+          "direction": -1,
+          "drives": {
+            "drive_a": {
+              "active_end": 0.6053,
+              "active_start": 0.7895,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": 0.2368,
+              "on_delta": -0.2105,
+              "post": 0.8421,
+              "pre": 1.0
+            },
+            "drive_b": {
+              "active_end": 0.5789,
+              "active_start": 0.5526,
+              "counts": [
+                38,
+                38,
+                38,
+                38
+              ],
+              "off_delta": 0.3947,
+              "on_delta": -0.1579,
+              "post": 0.9737,
+              "pre": 0.7105
+            }
+          },
+          "id": "0x189",
+          "min_four_edge_margin": 0.1579
+        }
+      ],
+      "windows": "1.9 s pre/start/end/post band means (100 ms guards) around the single global-monotonic-time ID11 interval per drive; semantic bits 24.. only"
+    }
+  }
+}
