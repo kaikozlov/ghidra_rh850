@@ -1020,3 +1020,25 @@ any vehicle/generation** (per the 0792/07D2 pattern such a key plausibly
 transfers, though 07A1 shows generational rotation is possible); no such
 package exists locally or publicly today. Exact-identity `F152633K0000`
 firmware still requires the authenticated TIS `ECUSupplyChange` route above.
+
+## 2026-09-01 clarification — Panda bus numbers vs Toyota GTS bus names
+
+The relay-open direction evidence is electrically correct, but terminology must remain exact after the Toyota-B CAN0/CAN1 repin.
+
+Official comma Toyota-B topology is:
+
+```text
+camera-side main pair -> harness CAN2 / Panda bus2
+car-side main pair    -> harness CAN0 / Panda bus0
+shared secondary pair -> harness CAN1 / Panda bus1 (unsplit)
+```
+
+The maintainer physically exchanged the Toyota-B CAN0/CAN1 vehicle pairs. After that repin, the formerly stock-CAN1 steering/chassis network is carried by the CAN2<->CAN0 intercept pair. Independent stream/GTS joins identify that repinned network as Toyota GTS **Bus 4** (Brake/EPS/SAS family), while Panda bus1 carries the distinct Toyota GTS **Bus 1** camera/radar family.
+
+Therefore:
+
+- `Panda bus2` means the **camera-connector side of the relay-intercepted Toyota Bus-4 pair** on this installed/repinned harness. It does **not** mean Toyota GTS Bus 1.
+- `Panda bus0` means the **car/chassis side of that same Toyota Bus-4 pair**.
+- `Panda bus1` is the separate unsplit pair and carries the Toyota GTS Bus-1 camera/radar family after repin.
+
+With the relay open, native `0x08A` RX on Panda bus2 and native `0x081` RX on Panda bus0 remain decisive direction evidence at the physical harness boundary. Because the Toyota-B adapter is directly inline at the FRC/camera connector, bus2 is the FRC-side electrical endpoint of the intercepted pair. The earlier wording error was equating that physical **camera-side endpoint** with Toyota's logical **Bus 1** name; the bus numbers/direction themselves were not swapped.
