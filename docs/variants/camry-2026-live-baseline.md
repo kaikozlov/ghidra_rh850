@@ -2404,32 +2404,35 @@ level-1 queue keeps the B6 pending record at `0xFEBE546A + 2*8 =
 solely on the per-PDU new-data inequality `0xFEBE5364 != 0xFEBE80C8`.
 
 `camry_f33_b6_bridge.c` + `build_camry_f33_b6_bridge.py` compile a
-RAM-only scheduler-ownership bridge on the audited toolchain (Sienna
-byte-equivalence gate): it reproduces the exact boot → application-context
-→ startup-JARL transition, **relocates its resident loop into the
-live-proven 524-byte high tail before app-context init** (stock startup
-overwrites the low staging pocket), runs the stock foreground scheduler
-with the comm/SecOC aggregate `0x667E6` in place, snapshots any queued B6
-whose 28 transmitted MAC bits (`B28[3:0]|B29|B30|B31`, mask `0xFFFF0F0F`
-little-endian) are all zero, and re-injects its 28 application bytes into
-the COM window buffer plus new-data toggle after the aggregate rejects the
-frame — so the stock unpacker, mode-2 activation, slew/limit chain, and
-motor funnel run exactly as if SecOC had verified it. No stock code is
-patched and no key is recovered; a reset restores the unmodified path.
+RAM-only scheduler-ownership bridge on the audited toolchain. It reproduces
+the exact boot → application-context → startup-JARL transition, **relocates
+its resident loop into the live-proven 524-byte high tail before app-context
+init**, runs the stock foreground scheduler with the comm/SecOC aggregate
+`0x667E6` intact, and snapshots any queued B6 whose 28 transmitted MAC bits
+(`B28[3:0]|B29|B30|B31`, mask `0xFFFF0F0F` little-endian) are all zero.
+After the aggregate, the current bridge no longer emulates COM bookkeeping:
+it passes the saved **full 32-byte PduInfo** to the firmware's own configured
+PduR44/COM callback `0x7D72C`. That stock callback performs the length cap,
+32-byte COM-window copy, route bookkeeping, and `FEBE5364` new-data advance;
+the stock `0x4BD46` unpacker then owns B3/B4:B5 publication. No stock code is
+patched and reset removes the runtime.
 
-Audited identity: 528-byte staged blob (SHA-256 `ab38df4f…ae576d7`), 428
-bytes resident-inclusive bound vs. the 508-byte budget before the
-`0xFEBFFBEC` heartbeat cell, zero relocations, PIC, entry offset 0. The
-builder re-derives every firmware pin from the pinned CodeFlash image
-before compiling and refuses to emit on drift.
+The bridge also makes the remaining ingress question observable: `FEBFFBF0`
+counts cycles where the profile2 queue record reports 32 bytes, `FEBFFBF4`
+counts eligible zero-MAC snapshots, `FEBFFBF8` counts native route44
+re-injections, and `FEBFFBEC` remains the heartbeat. Current audited identity:
+576-byte staged blob, 476-byte resident-inclusive bound vs. the 508-byte code
+budget, zero relocations, shellcode SHA-256 `f968447a…38084`. The authenticated
+4-KiB live payload is SHA-256 `e83c40e3…a1f04`, CRC residue `FFFFFFFF`, and
+self-verifies its CMAC. The builder re-derives the stock route44 callback/config
+and every other firmware pin before compiling.
 
-Boundary: **static candidate, not live-validated**. Hardware activation
-requires the maintainer-held boot secret, a stationary ID11/zero-angle
-acceptance check, and the fork's dev-only openpilot sender (`ToyotaTss3DevLateral`
-+ exact-F181-bound ephemeral bridge params, ALLOW_DEBUG panda build with
-the B6-only `TSS3_DEV_LATERAL` whitelist). opendbc-side sender, ramp-down
-release semantics, and the real-C-hook acceptance test landed with this
-section (`opendbc.car.toyota.tests.test_tss3_camry`, 27 tests).
+Boundary: **static implementation, live observer/bridge test still pending**.
+Install/attest it once in NRTD, then transition directly to READY without a full
+power cycle and use the stationary probe with `--require-bridge`. A zero queue
+counter localizes the remaining failure before SecOC; positive queue/zero-MAC/
+injection counts test the native PduR44 handoff directly. No nonzero steering
+offset is allowed before the same run reports `ADMITTED`.
 
 Deterministic evidence: `exploit/ephemeral_runtime/camry_f33_b6_bridge.c`,
 `exploit/ephemeral_runtime/build_camry_f33_b6_bridge.py`,
@@ -3614,13 +3617,12 @@ failure), calls `FUN_0008F8D2` **before** the final predicate, and only then rea
 ```
 
 The installed development patch `8F952 e0d1 -> e001` neutralizes only that final compare.
-On a real verification failure the earlier callback still receives freshness ID 2 with the
-high failure bit set. The callback chain reaches `90D6A`, whose failure case copies the
-committed B6 freshness slot (`FEBE55DC + slot*0x0C`) back over the pending candidate slot
-(`FEBE55F4 + slot*0x0C`). The patch then forces execution through the normal verified/
-delivery arm anyway. In other words, it is precisely **deliver despite failed
-authentication**, not a global mutation of the crypto result into success. Failed frames do
-not become authenticated freshness commits merely because the later branch is bypassed.
+The earlier callback is still invoked with a result-dependent boolean before the patched
+final predicate. Stage 1 therefore does **not** globally change the SecOC result into
+success; it only changes the later branch outcome. Subsequent live stage-2 work and the
+full-function recovery in §57.5 supersede the earlier attempt to label the callback's
+internal freshness copy as a simple failure rollback: the decisive exact fact is that the
+root `FEBE5564 != 0` boolean remains true until stage 3 changes its definition.
 
 That distinction is important, but it still does not prove that the application rejects a
 patched frame. The verified/delivery arm reaches the normal PDU delivery path, and F33's
@@ -3792,12 +3794,65 @@ evolve under stock synchronization, so that observation is retained as raw state
 only and is **not** promoted to proof of per-frame freshness or authentication
 admission. The application ladder above remains the decisive live oracle.
 
+### 57.5 2026-09-01: stage 2 remains non-delivering; root-result stage 3
+
+The stage-2 experiment is now live-closed. In NRTD the zero-write preflight matched the exact stage-1 source and returned `apply_ready=true`; APPLY changed `0x8F948 1A38->003A` while retaining `0x8F952=E001`. After a power cycle, NRTD zero-write persistence verification observed the exact cumulative stage-2 state: CRC prefix `0x2ED524FA`, fixup `0xD12ADB05`, residue `0xFFFFFFFF`, and image SHA-256 `6a371a2a17641ee5408777f06d303e34699d65dbde01e94cf89ffece7578d59c`. The programming-session lifecycle itself is now field-bounded: READY returned NRC `0x22` for the application-to-programming transition in this session, while NRTD succeeded, so persistent patch operations use NRTD and B6 behavior is measured separately in READY.
+
+The repeated READY/Park/stationary B6 discriminator still failed before application admission. The active phase sent **84 B6 frames with 84 Panda TX echoes**. All three ID11 snapshots stayed `ADB0=0` and `CB00=7`; sampled `ADB9=0`, `CAFF=1`, and `ACBD=0` remained nominal. No offset phase ran. Stage 2 is therefore disproved as sufficient for the tested zero-MAC28 candidate. Raw preflight/APPLY/post-reboot/admission evidence is retained under `targets/camry-2026/raw-20260901/f33-gate2-stage2/`.
+
+The reason the downstream patch sequence was incomplete is visible in the complete exact-F33 function, not another local branch guess. Stock `FUN_0008F906` decompiles as:
+
+```c
+bVar1 = DAT_febe5564 != 0;
+...
+FUN_0008f8d2(id, bVar2);
+if (bVar1) {
+  uVar4 = FUN_0008f60e(id, 0x200);
+} else {
+  FUN_0008f4d0(id, 0);
+  uVar4 = FUN_0008f546(id, 0);
+}
+return uVar4;
+```
+
+The defining machine sequence is:
+
+```text
+8F92A  84 0F 65 9D   ld.bu  FEBE5564,r1
+8F92E  E0 09         cmp    r0,r1
+8F930  E1 0F 14 D3   cmovne 1,r1,r26
+```
+
+Thus `r26` is the root `result != 0` boolean. Stage 1 changed the later compare; stage 2 changed one callback argument; neither changed the root boolean. On a failed verification they therefore still execute a semantically mixed tail. In particular the forced stage-2 success arm calls `FUN_0008F4D0(id,1)` and `FUN_0008F546(id,1)`, whereas native success passes zero to both. `FUN_0008F546` returns its status argument when its buffer lookup succeeds, so stage 2 also propagates `1` where native success propagates `0`; the immediate higher caller does not simply reject every nonzero result, so that difference is retained as semantics rather than claimed as the sole causal explanation.
+
+The next bounded patch moves to the **definition**, not another consumer. The repository RH850 encoder reproduces stock `cmovne 1,r1,r26` byte-for-byte and derives the same-width forced-zero form:
+
+```text
+0x8F930: E1 0F 14 D3 -> E0 07 14 D3   ; cmovne 0,r0,r26
+```
+
+Stage 3 intentionally starts from the live-proven stage-2 image and changes only that new four-byte site. With `r26=0`, the remaining `FUN_0008F906` path receives the same boolean/status values and takes the same success arm as native verified success; the existing `8F948=003A` and `8F952=E001` edits become outcome-equivalent to the stock instructions for this function but are left present to keep the next experiment one-new-site. The deterministic cumulative image has CRC prefix **`0x13ADA3CC`**, fixup **`0xEC525C33`**, residue `0xFFFFFFFF`, and SHA-256 **`67f4aaa803f9f3df3e5b2bf31d2c8950ebbb3870fa3f5d439f585caae3a8313c`**. RESTORE reverses stage 3 only and returns to the exact reboot-verified stage-2 image. Stage 3 is not a live success claim.
+
+The stationary discriminator is also sharpened before that experiment. `FUN_0004BD46` writes B6 sig261/sig262 directly to generated-COM cells `FEBE80BC/FEBE80B8`; `FUN_00058074` carries them to `FEBEF130/FEBEF1FA`; `FUN_000BCD66` copies those values to `FEBEADB0/FEBEAE90`. The probe now reads `80BC/80B8` as an intermediate rung. A failure there is classified `pdu_not_delivered_to_com`; a successful COM update followed by stale `ADB0/AE90` is `com_delivered_not_snapshot`. Positive `ADMITTED` still requires the complete downstream ladder and bank 2.
+
+The next field sequence is therefore **NRTD zero-write stage-3 preflight -> APPLY only on an exact match -> full OFF -> NRTD zero-write persistence verification -> full OFF -> READY admission-only B6**. The 0.5-degree offset remains forbidden until the admission-only run reports `ADMITTED`.
+
+### 57.6 2026-09-01: stages 3–5 remain non-delivering; receive pipeline is closed and the next test is queue observation
+
+Stage 3 was subsequently applied and reboot-verified exactly, then failed the READY/Park ID11 discriminator at the **direct generated-COM rung**: `FEBE80BC/FEBE80B8` remained the prior ID0/current-angle payload. A relay-open authority-isolation run produced the same result. Stage 4 then forced the profile-2 freshness callback result at `0x8F7E6` to zero and persisted as SHA `2e2f0819…6640e`; direct COM still did not update. Stage 5 finally patched the actual command-7 result compare at `0x8F890 E051->E001`, persisted as SHA `669cedf8…01af`, and again left direct COM unchanged. These are retained negative experiments, not a reason to continue patching result bits.
+
+A function-boundary-independent exact-F33 walk now closes the configured path. RSCFD controller-1 rule39 is B6 and has the same acceptance metadata as healthy protected `0x0D7`; CanIf descriptor39 is FD `0x400000B6/32` and maps to PduR44. The route44 Toyota-checksum hook is disabled for this row. PduR44 enters SecOC profile2, whose level-1 queue is `FEBE547A` with secured buffer `FEBE54D4`. The remaining pre-freshness gates are min-length 4 and selector0. Previously unpromoted callbacks `0x903A0` and `0x90448` were recovered from raw bytes; the latter commits pending freshness through `0x90D6A` but does not dequeue or invalidate the PDU. `8F98C` has no extra success gate after `8F746`. On native success, `8F906 -> 8F546 -> 90204 -> 81CA6` selects previously unpromoted route44 callback `0x7D72C`; it copies 32 bytes into `FEBE4BFF`, performs route bookkeeping, and invokes sole-caller new-data helper `8E772(44)` to advance `FEBE5364`. `4BD46` then unpacks the PDU into `80BC/80B8`. Queue cleanup occurs later. No second local PDU44 producer or post-delivery rejection is recovered.
+
+Therefore the only live edge not yet proved is **whether Panda's transmitted B6 actually entered the F33 SecOC queue**. Route `00000037--dec6fe39cb` contains 18,456 B6 `sendcan` records, 18,447 Panda TX echoes and nine reject-return records, but zero native `src=0/1/2` B6; it validates our sender construction/timing, not EPS receipt or a stock-native transcript.
+
+The next test is not stage 6. The hardened RAM bridge snapshots profile2 before stock `667E6`, exposes heartbeat/queue/zero-MAC/injected counters at `FEBFFBEC/FEBFFBF0/FEBFFBF4/FEBFFBF8`, and after SecOC re-enters the **stock `0x7D72C` route44 callback** with the saved full 32-byte PduInfo. Install it in NRTD, heartbeat-attest the returned application, then move directly to READY without a full OFF cycle and run the existing stationary probe with `--require-bridge`. `queue_present==0` moves the investigation to physical/on-wire ingress; positive queue and injection counts test the SecOC-only bypass and native COM handoff in the same run. No offset before `ADMITTED`.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113), [VAR-114](../reference/index.md#finding-var-114), [VAR-115](../reference/index.md#finding-var-115)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155)
+- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113), [VAR-114](../reference/index.md#finding-var-114), [VAR-115](../reference/index.md#finding-var-115), [VAR-116](../reference/index.md#finding-var-116)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157)
 <!-- knowledge-cross-references:end -->

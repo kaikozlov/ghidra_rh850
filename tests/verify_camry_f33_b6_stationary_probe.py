@@ -33,10 +33,13 @@ check("post-repin EPS diagnostics and B6 are both bus0", probe.DIAG_BUS == probe
 check("AllOutput passthrough parameter is explicit", probe.ALLOUTPUT_PASSTHROUGH_PARAM == 1 and plan["panda_safety"]["relay_forwarding"] == "bus0<->bus2 preserved")
 check("B6 is fixed 32-byte CAN-FD at 50 Hz", probe.B6_ADDR == 0x0B6 and probe.B6_LEN == 32 and abs(probe.B6_PERIOD_S - 0.020) < 1e-12)
 check("only exact acceptance-ladder cells are exposed", [c.address for c in probe.LADDER_CELLS] == [
-    0xFEBE5364, 0xFEBE80C8, 0xFEBE80C9, 0xFEBEF13E, 0xFEBEADB9,
-    0xFEBEADB0, 0xFEBEAE90, 0xFEBECAFF, 0xFEBEACBD, 0xFEBECB00,
+    0xFEBE5364, 0xFEBE80BC, 0xFEBE80B8, 0xFEBE80C8, 0xFEBE80C9, 0xFEBEF13E,
+    0xFEBEADB9, 0xFEBEADB0, 0xFEBEAE90, 0xFEBECAFF, 0xFEBEACBD, 0xFEBECB00,
 ])
 check("all ladder cells validate under existing SID23 RMBA policy", all(probe.validate_read(probe.RAM_ID, c.address, c.length) is None for c in probe.LADDER_CELLS))
+check("RAM bridge telemetry cells are exact and readable", [c.address for c in probe.BRIDGE_TELEMETRY_CELLS] == [
+    0xFEBFFBEC, 0xFEBFFBF0, 0xFEBFFBF4, 0xFEBFFBF8,
+] and all(probe.validate_read(probe.RAM_ID, c.address, c.length) is None for c in probe.BRIDGE_TELEMETRY_CELLS))
 check("plan names forbidden mutation surfaces", all(token in plan["forbidden"] for token in (
     "programming session", "SecurityAccess", "RequestDownload", "TransferData", "memory writes", "RoutineControl", "0x08A TX",
 )))
@@ -70,16 +73,17 @@ check("raw ramp converges without overshoot", [probe.step_toward_raw(v, 5, 2) fo
 print("\n== acceptance discriminator ==")
 target = probe.angle_deg_to_raw(3.0)
 good = {
-    "publication_generation": 7, "consumed_generation": 7,
-    "unpacker_status": 0, "staged_status": 0, "snapshot_status": 0,
+    "publication_generation": 7, "com_target_lateral_id": 11, "com_target_angle_raw": target,
+    "consumed_generation": 7, "unpacker_status": 0, "staged_status": 0, "snapshot_status": 0,
     "target_lateral_id": 11, "target_angle_raw": target,
     "b6_controller_enable": 1, "global_comm_mode": 0, "controller_bank": 2,
 }
 check("positive ladder is ADMITTED", probe.verdict(good, target_id=11, target_raw=target) == {
     "admitted": True, "reason": "ADMITTED", "status_healthy": True,
-    "payload_delivered": True, "controller_enabled": True, "bank_selected": True,
+    "com_payload_delivered": True, "payload_delivered": True, "controller_enabled": True, "bank_selected": True,
 })
-check("payload mismatch is classified before downstream gates", probe.verdict(dict(good, target_lateral_id=0), target_id=11, target_raw=target)["reason"] == "payload_not_delivered")
+check("PduR/COM miss is classified before downstream gates", probe.verdict(dict(good, com_target_lateral_id=0), target_id=11, target_raw=target)["reason"] == "pdu_not_delivered_to_com")
+check("COM-to-snapshot miss is distinguished", probe.verdict(dict(good, target_lateral_id=0), target_id=11, target_raw=target)["reason"] == "com_delivered_not_snapshot")
 check("unhealthy receive status is classified", probe.verdict(dict(good, snapshot_status=0x11), target_id=11, target_raw=target)["reason"] == "receive_status_unhealthy")
 check("CAFF failure is classified", probe.verdict(dict(good, b6_controller_enable=0), target_id=11, target_raw=target)["reason"] == "b6_controller_not_enabled")
 check("ACBD failure is classified", probe.verdict(dict(good, global_comm_mode=1), target_id=11, target_raw=target)["reason"] == "global_comm_mode_blocks_controller")
@@ -124,6 +128,8 @@ check("no download/transfer/write/routine diagnostic API is referenced", all(tok
 )))
 check("small-offset actuation is hard-capped and rate-bounded", probe.SMALL_OFFSET_HARD_CAP_DEG == 2.0 and probe.SMALL_OFFSET_MAX_RATE_DEG_S == 6.0 and "ID11 current-angle was not ADMITTED" in source and "max_step_raw=small_offset_step_raw()" in source)
 check("small-offset target is refreshed from immediate preflight", 'offset_start_raw = angle_deg_to_raw(offset_preflight["steering_angle_deg"])' in source)
+check("bridge-required mode demands heartbeat progression and reports ingress counters", 'RAM bridge heartbeat did not advance' in source and
+      'bridge_after_id0 = snapshot_bridge_telemetry' in source and 'bridge_after_id11 = snapshot_bridge_telemetry' in source)
 
 sim = probe.simulate()
 check("offline simulation reproduces positive/negative verdicts", sim["good_verdict"]["admitted"] is True and sim["bad_verdict"]["admitted"] is False)
@@ -142,15 +148,18 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v2 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v2" and manifest["target"] == {
+    check("kit manifest is self-contained v3 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v3" and manifest["target"] == {
         "eps_f181": "8965F3307000", "eps_diag": "0x7A1->0x7A9 bus0", "b6": "0x0B6/32 FD bus0",
     })
-    check("kit pins cumulative two-stage firmware state", manifest["firmware_patch"]["stage1_installed"] == {
-        "address": "0x8F952", "bytes": "e001", "fixup": "0xD9AF33AF",
-    } and manifest["firmware_patch"]["stage2_candidate"] == {
-        "address": "0x8F948", "bytes": "003a", "final_fixup": "0xD12ADB05",
+    check("kit pins live stage2 source state", manifest["firmware_patch"]["stage2_installed"] == {
+        "sites": [{"address": "0x8F948", "bytes": "003a"}, {"address": "0x8F952", "bytes": "e001"}],
+        "fixup": "0xD12ADB05",
+        "sha256": builder.stage3.EXPECTED_STAGE2_SHA256,
     })
-    check("kit carries exact stage1 source and final SHA", manifest["firmware_patch"]["source_image_sha256"] == builder.stage2.EXPECTED_STAGE1_SHA256 and manifest["firmware_patch"]["final_image_sha256"] == builder.stage2.EXPECTED_FINAL_SHA256)
+    check("kit pins root-result stage3 candidate", manifest["firmware_patch"]["stage3_candidate"] == {
+        "address": "0x8F930", "bytes": "e00714d3", "final_prefix": "0x13ADA3CC", "final_fixup": "0xEC525C33",
+    })
+    check("kit carries exact stage2 source and stage3 final SHA", manifest["firmware_patch"]["source_image_sha256"] == builder.stage3.EXPECTED_STAGE2_SHA256 and manifest["firmware_patch"]["final_image_sha256"] == builder.stage3.EXPECTED_FINAL_SHA256)
     check("kit includes preflight/apply/restore/post-apply artifacts", all((out / rel).is_file() for rel in (
         "firmware_patch/payload-validate-only.bin", "firmware_patch/payload-apply.bin",
         "firmware_patch/restore/restore.json", "firmware_patch/post-apply/payload-validate-only.bin",
@@ -162,11 +171,11 @@ with tempfile.TemporaryDirectory() as td:
         "runtime/exploit/patcher/post_apply_verify.py", "runtime/tools/build_secoc_patch_manifest.py",
     )))
     check("kit never materializes standalone secret files", not any("secret" in p.name.lower() for p in out.rglob("*")))
-    check("patch runbook requires zero-write preflight before apply", "Zero-write preflight" in patch_runbook and "If `apply_ready` is not exactly true, **do not APPLY**" in patch_runbook)
-    check("patch runbook pins cumulative CRC and both patch sites", "0x8F948: 1A 38 -> 00 3A" in patch_runbook and "0x8F952 = E001" in patch_runbook and "D12ADB05" in patch_runbook and "both" in patch_runbook)
-    check("patch runbook includes post-power-cycle verify and stage2-only restore", "OFF -> READY" in patch_runbook and "post_apply_verify.py" in patch_runbook and "RESTORE reverses **stage 2 only**" in patch_runbook)
+    check("patch runbook requires NRTD zero-write preflight before apply", "NRTD zero-write preflight" in patch_runbook and "If `apply_ready` is not exactly true, **do not APPLY**" in patch_runbook)
+    check("patch runbook pins root patch and cumulative CRC", "0x8F930: E1 0F 14 D3 -> E0 07 14 D3" in patch_runbook and "8F948=003A" in patch_runbook and "8F952=E001" in patch_runbook and "EC525C33" in patch_runbook)
+    check("patch runbook encodes proven NRTD lifecycle and stage3-only restore", "NRC `0x22` in READY" in patch_runbook and "Full OFF -> NRTD" in patch_runbook and "RESTORE reverses **stage 3 only**" in patch_runbook)
     check("kit manifest pins current opendbc and Panda revisions", len(manifest["repositories"]["opendbc"].get("head", "")) == 40 and len(manifest["repositories"]["panda"].get("head", "")) == 40)
-    check("runbook orders stage2 proof before B6 admission and admitted-only offset", "First follow `FIRMWARE_PATCH.md`" in runbook and "First B6 run after stage-2 persistence proof: admission only" in runbook and "--small-offset-deg 0.5" in runbook and "If it is not ADMITTED, stop there" in runbook)
+    check("runbook orders stage3 proof before B6 admission and admitted-only offset", "First follow `FIRMWARE_PATCH.md`" in runbook and "First B6 run after stage-3 persistence proof: admission only" in runbook and "--small-offset-deg 0.5" in runbook and "If it is not ADMITTED, stop there" in runbook)
     check("runbook states the bounded steering ramp", "rate-limits" in runbook and "6 deg/s" in runbook)
     check("runbook pins current bus0 and exclusive Panda ownership", "current post-repin" in runbook and "Panda bus 0" in runbook and "pandad|boardd" in runbook)
 

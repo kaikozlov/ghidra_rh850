@@ -2288,3 +2288,24 @@ paths = [
   "exploit/patcher/",
   "targets/camry-2026/raw-20260901/f33-b6-admission/",
 ]
+
+[suite.camry_f33_gate2_root_result_patch]
+tests = ["tests/verify_camry_f33_gate2_root_result_patch.py"]
+paths = [
+  "targets/camry-2026/raw-20260901/f33-gate2-stage2/",
+]
+
+[suite.camry_f33_freshness_result_patch]
+tests = ["tests/verify_camry_f33_freshness_result_patch.py"]
+
+[suite.camry_f33_crypto_result_patch]
+tests = ["tests/verify_camry_f33_crypto_result_patch.py"]
+
+[suite.camry_f33_b6_bridge_install]
+tests = ["tests/verify_camry_f33_b6_bridge_install.py"]
+paths = [
+  "exploit/ephemeral_runtime/camry_f33_b6_bridge.c",
+  "exploit/ephemeral_runtime/build_camry_f33_b6_bridge.py",
+  "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin",
+  "exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json",
+]

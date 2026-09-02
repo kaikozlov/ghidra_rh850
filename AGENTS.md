@@ -34,7 +34,7 @@ invitation to add policy. -- The goal is native openpilot/comma integrattion.
   `pgrep -f 'AnalyzeHeadless.*rh850'` is empty before snapshotting.
 - **Never point a rebuild at `project/` or `projects/`.** Promote only with
   `make snapshot-project` (end of session: `make finalize-project`).
-- **CodeFlash VA = file offset − `0x8000`** (DataFlash prefix).
+- **SIENNA CodeFlash VA = file offset − `0x8000`** (DataFlash prefix).
 - **`build/` is workspace state, never evidence authority.** Portable
   verification must pass without it; promote any input verification depends on
   to a tracked location first.

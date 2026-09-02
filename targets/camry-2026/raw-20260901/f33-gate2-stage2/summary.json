@@ -1,0 +1,115 @@
+{
+  "admission": {
+    "active_b6_echoes": 84,
+    "active_b6_sent": 84,
+    "b6_controller_enable": 1,
+    "controller_bank": 7,
+    "global_comm_mode": 0,
+    "id11_snapshots": 3,
+    "small_offset_run": false,
+    "snapshot_status": 0,
+    "target_lateral_id": 0,
+    "verdict": "payload_not_delivered"
+  },
+  "apply": {
+    "payload_success": true,
+    "write_crc_sequence_complete": true
+  },
+  "date": "2026-09-01",
+  "files": {
+    "b6-admission/camry-f33-b6-stage2-admission.ndjson": {
+      "sha256": "9e23cb687bc75c7363ecf6c83f6f6b7e969ce3bf9af805d5bb87feab3a5597b9",
+      "size": 1399034
+    },
+    "b6-admission/camry-f33-b6-stage2-admission.txt": {
+      "sha256": "11d3955b82f22714c259256150dc4ce60cfd4c16a2dc29006e020ad13573bf8f",
+      "size": 2058
+    },
+    "f33-stage2-apply/payload-apply.bin": {
+      "sha256": "bbe7d7ca247fb351032594c084382af2406f434ef351065321cca271f05b05c1",
+      "size": 4096
+    },
+    "f33-stage2-apply/run.json": {
+      "sha256": "a84c74bb2f794d6b57ddaaa53af0e60c11ddd5aa2728c27b1cf7552b3c3249e3",
+      "size": 10156
+    },
+    "f33-stage2-apply/shellcode-apply.bin": {
+      "sha256": "803c60db3f94ad94dee4f1b889d9158a05d53dce82591ab888f7a242be0ec699",
+      "size": 4048
+    },
+    "f33-stage2-apply/telemetry.ndjson": {
+      "sha256": "38e9fed8618b89d8074899cdb14bc8d4188948aac6c4198fbff838592c936f7c",
+      "size": 7415
+    },
+    "f33-stage2-post/payload-validate-only.bin": {
+      "sha256": "bb7a4a06967033d3ab175515e4af891b0a71d880227d6005f2a6117104b09228",
+      "size": 4096
+    },
+    "f33-stage2-post/run.json": {
+      "sha256": "19cf245b70453f35361cd04d94dfb35398a5dc6a87d527cdf0f8d43e560b8705",
+      "size": 9280
+    },
+    "f33-stage2-post/shellcode-validate-only.bin": {
+      "sha256": "a6c86377ed14f6a07f50941cd3ca977666f46bb65650c4a0f29fe18565e4975c",
+      "size": 4048
+    },
+    "f33-stage2-post/telemetry.ndjson": {
+      "sha256": "6d05a1d855064c677e3e3b9dd4b772e081551b73d5f5c009654e99ed6749758b",
+      "size": 4327
+    },
+    "f33-stage2-preflight/payload-validate-only.bin": {
+      "sha256": "0b59df9a73093cf4a98a8170a0bf58b5c35a5f7db89f11f8b83ba5f0d6bb5a79",
+      "size": 4096
+    },
+    "f33-stage2-preflight/preflight.json": {
+      "sha256": "ef25a696360f3a78631f3891447f33ee01dd42f4315128a874e94abbc5900acd",
+      "size": 2258
+    },
+    "f33-stage2-preflight/run.json": {
+      "sha256": "921cae10ac4a87f19f1dcfa5fb489706673ca8c7e06942486668be054e9b1ce5",
+      "size": 9965
+    },
+    "f33-stage2-preflight/shellcode-validate-only.bin": {
+      "sha256": "de8a74f42891dec8aabd418fc09f02c9473a83299e446c86f856c810dd61117c",
+      "size": 4048
+    },
+    "f33-stage2-preflight/telemetry.ndjson": {
+      "sha256": "02c957709a50a5c2e579b676fb092d77f979110beb767326ef92d029c33067c7",
+      "size": 4327
+    }
+  },
+  "post_reboot": {
+    "config_mismatches": 0,
+    "observation_mismatches": 0,
+    "verified": true
+  },
+  "preflight": {
+    "apply_ready": true,
+    "config_mismatches": 0,
+    "observation_mismatches": 0,
+    "payload_success": true
+  },
+  "schema": "camry-f33-gate2-stage2-live-summary-v1",
+  "source_stage1": {
+    "fixup": "0xD9AF33AF",
+    "sha256": "272843a2c1d179f91105d7f103f213034f850dc476c96dad48067fbf3afd9f65"
+  },
+  "stage2": {
+    "crc_prefix": "0x2ED524FA",
+    "fixup": "0xD12ADB05",
+    "patch": "0x8F948: 1A38 -> 003A",
+    "residue": "0xFFFFFFFF",
+    "sha256": "6a371a2a17641ee5408777f06d303e34699d65dbde01e94cf89ffece7578d59c",
+    "stage1_retained": "0x8F952 = E001"
+  },
+  "target": {
+    "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+    "panda_bus": 0,
+    "secondary_id": "8A3113303100",
+    "software_id": "8965F3307000"
+  },
+  "vehicle_state": {
+    "b6_admission": "READY/Park/stationary",
+    "programming_session": "NRTD required in this field session; READY returned NRC 0x22"
+  }
+}

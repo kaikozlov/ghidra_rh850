@@ -1290,19 +1290,21 @@ def section_b6_receive_bridge() -> int:
     audit = json.loads(BRIDGE_AUDIT.read_text())
     img = IMAGE.read_bytes()
     print('== audited bridge binary ==')
-    check('binary identity exact', audit['shellcode']['size'] == BRIDGE_BIN.stat().st_size == 528 and
-          audit['shellcode']['sha256'] == sha(BRIDGE_BIN.read_bytes()) == 'ab38df4f4b82c00c920ade9c16e2e28116cf9c956a21c85ad9629c103ae576d7')
+    check('binary identity exact', audit['shellcode']['size'] == BRIDGE_BIN.stat().st_size == 576 and
+          audit['shellcode']['sha256'] == sha(BRIDGE_BIN.read_bytes()) == 'f968447af229bdc2c8c8c700fb743f0acfb77063b17348f4c357c97aad238084')
     check('entry/relocations clean', audit['compile_contract']['entry_offset'] == 0 and audit['compile_contract']['relocations'] == 0)
     check('source and builder bound', audit['source']['sha256'] == sha(BRIDGE_SOURCE.read_bytes()) and
           audit['builder']['sha256'] == sha(BRIDGE_BUILDER.read_bytes()))
     print('== retained-tail residency budget ==')
     c = audit['compile_contract']
     check('resident stays inside the verified 524-byte high tail',
-          c['resident_base'] == '0xFEBFF9F0' and c['resident_size_incl_marker_slack'] == 428 and
+          c['resident_base'] == '0xFEBFF9F0' and c['resident_size_incl_marker_slack'] == 476 and
           c['resident_limit'] == 508 and c['staging_limit'] == 776 and
-          0 < c['resident_entry_staging_offset'] < c['resident_tail_marker_staging_offset'] == 526)
-    check('heartbeat cell inside the verified retained span',
-          c['resident_mailbox'] == '0xFEBFFBEC' and 0xFEBFF9F0 <= 0xFEBFFBEC <= 0xFEBFFBFB)
+          0 < c['resident_entry_staging_offset'] < c['resident_tail_marker_staging_offset'] == 574)
+    check('heartbeat + ingress telemetry cells inside the verified retained span',
+          c['resident_mailbox'] == '0xFEBFFBEC' and c['resident_queue_present'] == '0xFEBFFBF0' and
+          c['resident_zero_mac_seen'] == '0xFEBFFBF4' and c['resident_injected'] == '0xFEBFFBF8' and
+          0xFEBFF9F0 <= 0xFEBFFBEC < 0xFEBFFBF0 < 0xFEBFFBF4 < 0xFEBFFBF8 <= 0xFEBFFBFB)
     print('== static pins re-derived from firmware ==')
     def u16(va: int) -> int:
         return struct.unpack_from('<H', img, va)[0]
@@ -1314,13 +1316,40 @@ def section_b6_receive_bridge() -> int:
     check('B6 secured buffer exact (SecOC record idx2)',
           u32(0x2586C + 2 * 0x50) == 32 and u32(0x25870 + 2 * 0x50) == 40 and
           pins['B6_SECURED_BUFFER'] == 0xFEBE54AC + 40 == 0xFEBE54D4)
-    check('B6 queue record + unpacker flags exact',
+    check('B6 queue record + stock route44 new-data counter exact',
           pins['B6_QUEUE_RECORD'] == 0xFEBE546A + 2 * 8 == 0xFEBE547A and
-          pins['B6_IPDU_FLAG'] == 0xFEBE5364 and pins['B6_STAGED_FLAG'] == 0xFEBE80C8)
+          pins['B6_IPDU_FLAG'] == 0xFEBE5364)
+    check('stock route44 COM callback is configuration-derived',
+          pins['B6_COM_RX_CALLBACK'] == 0x0007D72C and
+          u16(0x226C2 + 44 * 8 + 2) == 32 and img[0x226C2 + 44 * 8 + 5] == 0x0C and
+          u32(0x21E08) == 0x0007D72C)
     check('trailer config 2 (asynchronous ICU-S verify) exact', u32(0x25874 + 2 * 0x50) & 0xFFFF == 2)
+    print('== physical ingress through SecOC queue ==')
+    d7_rule = img[0x230B8 + 36 * 16:0x230B8 + 37 * 16]
+    b6_rule = img[0x230B8 + 39 * 16:0x230B8 + 40 * 16]
+    check('RSCFD rule39 is exact B6 peer of healthy protected D7 rule36',
+          d7_rule == bytes.fromhex('d700000000002d000200000000000000') and
+          b6_rule == bytes.fromhex('b6000000000030000200000000000000') and d7_rule[8:] == b6_rule[8:])
+    check('CanIf descriptor39 is FD B6/32 and maps through route base 5 to PduR44',
+          img[0x21FE8 + 39 * 8:0x21FE8 + 40 * 8] == bytes.fromhex('b600004020000000') and
+          img[0x21A48] == 5 and 5 + 39 == 44 and img[0x21FB8 + 44] == 0x10)
+    check('route44 checksum hook is configured but disabled for B6',
+          img[0x290B4:0x290BC] == bytes.fromhex('2c00000bb8010200') and img[0x290BB] == 0)
+    check('B6 pre-freshness gates cannot reject a queued 32-byte frame',
+          u16(0x258EE) == 4 and u16(0x258FE) == 0 and pins['B6_QUEUE_RECORD'] == 0xFEBE547A)
     print('== bridge semantics ==')
     src = BRIDGE_SOURCE.read_text()
     check('MAC28 zero marker mask exact (B28[3:0]|B29|B30|B31)', '#define B6_MAC28_MASK 0xFFFF0F0Fu' in src)
+    check('bridge snapshots full secured PDU and re-enters stock route44 callback',
+          'unsigned char save[B6_SECURED_LENGTH]' in src and
+          'copy_bytes(save, (const volatile unsigned char *)TARGET_B6_SECURED_BUFFER,' in src and
+          '((fn2_t)TARGET_B6_COM_RX_CALLBACK)(B6_PDUR_ROUTE, &pdu);' in src and
+          'TARGET_B6_STAGED_FLAG' not in src)
+    check('bridge exposes queue/zero-MAC/injection discriminators',
+          'TARGET_RESIDENT_QUEUE_PRESENT' in src and 'TARGET_RESIDENT_ZERO_MAC_SEEN' in src and
+          'TARGET_RESIDENT_INJECTED' in src and
+          pins['RESIDENT_QUEUE_PRESENT'] == 0xFEBFFBF0 and
+          pins['RESIDENT_ZERO_MAC_SEEN'] == 0xFEBFFBF4 and pins['RESIDENT_INJECTED'] == 0xFEBFFBF8)
     check('splice wraps the stock comm/SecOC aggregate only',
           src.count('call0(TARGET_FG_AGGREGATE);') == 1 and
           audit['scheduler_transfer']['FG_AGGREGATE'] == '0x000667E6')

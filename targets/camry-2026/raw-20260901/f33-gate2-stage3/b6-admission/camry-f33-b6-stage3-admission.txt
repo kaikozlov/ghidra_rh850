@@ -1,0 +1,96 @@
+INFO: connecting to panda 3a0007000151343435333330
+{
+  "b6_echoes": 96,
+  "b6_sent": 97,
+  "baseline": {
+    "b6_controller_enable": 1,
+    "com_target_angle_raw": 104,
+    "com_target_lateral_id": 0,
+    "consumed_generation": 149,
+    "controller_bank": 7,
+    "global_comm_mode": 0,
+    "publication_generation": 142,
+    "snapshot_status": 0,
+    "staged_status": 0,
+    "target_angle_raw": 104,
+    "target_lateral_id": 0,
+    "unpacker_status": 0
+  },
+  "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+  "id0": {
+    "snapshot": {
+      "b6_controller_enable": 1,
+      "com_target_angle_raw": 104,
+      "com_target_lateral_id": 0,
+      "consumed_generation": 245,
+      "controller_bank": 7,
+      "global_comm_mode": 0,
+      "publication_generation": 239,
+      "snapshot_status": 0,
+      "staged_status": 0,
+      "target_angle_raw": 104,
+      "target_lateral_id": 0,
+      "unpacker_status": 0
+    },
+    "target_raw": 105,
+    "verdict": {
+      "admitted": false,
+      "bank_selected": true,
+      "com_payload_delivered": true,
+      "controller_enabled": true,
+      "payload_delivered": true,
+      "reason": "delivered_inactive",
+      "status_healthy": true
+    }
+  },
+  "id11": {
+    "snapshot": {
+      "b6_controller_enable": 1,
+      "com_target_angle_raw": 104,
+      "com_target_lateral_id": 0,
+      "consumed_generation": 85,
+      "controller_bank": 7,
+      "global_comm_mode": 0,
+      "publication_generation": 79,
+      "snapshot_status": 0,
+      "staged_status": 0,
+      "target_angle_raw": 104,
+      "target_lateral_id": 0,
+      "unpacker_status": 0
+    },
+    "target_raw": 105,
+    "verdict": {
+      "admitted": false,
+      "bank_selected": false,
+      "com_payload_delivered": false,
+      "controller_enabled": true,
+      "payload_delivered": false,
+      "reason": "pdu_not_delivered_to_com",
+      "status_healthy": true
+    }
+  },
+  "initial_preflight": {
+    "gear": 0,
+    "reset_counter": 1129,
+    "steering_angle_deg": 6.0,
+    "wheel_speeds_kph": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "preflight": {
+    "gear": 0,
+    "reset_counter": 1130,
+    "steering_angle_deg": 6.0,
+    "wheel_speeds_kph": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "schema": "camry-f33-b6-stationary-probe-v1",
+  "small_offset": null
+}

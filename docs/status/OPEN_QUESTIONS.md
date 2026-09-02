@@ -1150,16 +1150,19 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   that state into the chassis signer.
 
   This stock-architecture attribution is **not a blocker for the independent
-  development B6 ingress**. VAR-115/CORR-155 now close the first instrumented
-  stage-1 admission run: with the reboot-verified `8F952=E001` patch, 85/85 active
-  B6 frames transmitted but `ADB0/AE90` remained on the previous ID0/current-angle
-  snapshot and `CB00` remained 7, yielding `payload_not_delivered`. The next bounded
-  discriminator is the cumulative stage-2 callback-result patch `8F948 1A38->003A`,
-  executed only after an exact zero-write preflight, followed by OFF->READY
-  persistence verification and the **same admission-only ladder**. No steering
-  offset is justified before `ADMITTED`. Resolving OQ-054 remains required for a
-  stock-compatible signing architecture, not for this persistent development
-  receiver experiment.
+  development B6 ingress**. VAR-117/CORR-157 supersede the stage-by-stage Gate-2
+  patch plan: cumulative stages 3, 4, and 5 were each applied and reboot-verified,
+  yet direct PDU44 COM remained ID0 during stationary ID11 tests. The exact F33
+  receive path is now closed through previously unpromoted CanIf, freshness-commit,
+  and route44 COM callbacks; there is no justified next result/status patch. The
+  remaining live discriminator is whether the transmitted FD/32 B6 ever appears in
+  the EPS SecOC profile2 queue. The RAM-only observer counts queue presence and
+  zero-MAC candidates before the stock SecOC aggregate and, after it, re-enters the
+  firmware's own `7D72C` route44 callback with the saved full 32-byte PduInfo. Run it
+  once in NRTD, then READY without a full power cycle, using the stationary probe's
+  `--require-bridge` telemetry. No steering offset is justified before `ADMITTED`.
+  Resolving OQ-054 remains required for stock architecture, not for this B6 ingress
+  discriminator.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

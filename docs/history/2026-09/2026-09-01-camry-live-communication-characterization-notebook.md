@@ -1263,3 +1263,117 @@ The ID11/current-angle phase sent **85 B6 frames and received 85 Panda TX echoes
 Exact Gate-2 disassembly sharpens the next experiment. One pre-callback path already executes `8F944 003A = mov 0,r7`; the other executes `8F948 1A38 = mov r26,r7` before callback `8F94C`, and only later reaches the stage-1-patched compare at `8F952`. The next bounded persistent stage therefore changes only `8F948 1A38->003A` while preserving `8F952=E001`. The builder reconstructs the source from stock plus stage 1 and resigns the **combined** image: source SHA `272843a2…9f65`, source fixup `D9AF33AF`; two-patch prefix `2ED524FA`, final fixup `D12ADB05`, final residue `FFFFFFFF`, final SHA `6a371a2a…d59c`. The inverse recovery payload reverses stage 2 only.
 
 This is a testable hypothesis, not a live success claim. The next car sequence is zero-write stage-2 preflight, APPLY only on exact preflight, full OFF->READY, zero-write persistence verification, then repeat the same admission-only ID0/ID11 ladder. A steering offset remains gated on `ADMITTED`.
+
+
+## Gate-2 stage-2 live result and root-result correction
+
+The cumulative stage-2 patch was subsequently executed on the exact vehicle. NRTD zero-write preflight returned `apply_ready=true`; APPLY changed `8F948 1A38->003A` while retaining `8F952=E001`; after a full power cycle the NRTD zero-write persistence verifier returned `verified=true` with prefix/fixup/residue `2ED524FA / D12ADB05 / FFFFFFFF` and final SHA `6a371a2a…d59c`. READY rejected programming-session entry with NRC `0x22` during this field session, while NRTD succeeded, so the patch lifecycle is NRTD-only.
+
+The repeated READY/Park admission-only probe sent/echoed **84/84** active ID11 B6 frames and still returned `payload_not_delivered`: three snapshots stayed `ADB0=0`, `CB00=7`, with `ADB9=0`, `CAFF=1`, `ACBD=0`; no offset ran. Raw evidence is under `targets/camry-2026/raw-20260901/f33-gate2-stage2/`.
+
+A complete `FUN_0008F906` audit then corrected the patch model. The function defines `bVar1 = (FEBE5564 != 0)` at `8F930 cmovne 1,r1,r26`; native success calls `8F4D0(id,0)` and `8F546(id,0)`, while native failure calls `8F60E(id,0x200)`. Stage 1/2 changed consumers while leaving the root boolean true. The next one-new-site discriminator is therefore `8F930 E10F14D3->E00714D3` (`cmovne 0,r0,r26`) on the exact live stage-2 source. Its deterministic cumulative prefix/fixup/residue are `13ADA3CC / EC525C33 / FFFFFFFF`, final SHA `67f4aaa8…313c`. This is packaged but not yet live-tested. The stationary probe now also reads direct PDU44 COM cells `FEBE80BC/FEBE80B8` before `ADB0/AE90`.
+
+## B6 receive-pipeline closure after Gate-2 stages 3–5
+
+The later 2026-09-01 stationary work closes the reason to stop adding isolated Gate-2 status patches.
+
+### Live patch outcomes
+
+The cumulative stage-3 root-result patch (`8F930 E10F14D3 -> E00714D3`) was applied in NRTD and persisted with exact final image SHA `67f4aaa803f9f3df3e5b2bf31d2c8950ebbb3870fa3f5d439f585caae3a8313c`. In a valid READY/Park/zero-speed admission run, external ID11 still did not reach direct COM: `80BC` remained 0 and `80B8` remained the prior current-angle value. A relay-open authority-isolation run produced the same result, ruling out forwarded stock `0x08A` coexistence as the blocker.
+
+Stage 4 then forced the result of the profile-2 freshness callback at `8F7E6` to zero (`0AD8 -> 00DA`). It persisted as image SHA `2e2f0819ab328b8733c604eee3952ba4f774e4344a60184b7eea99927236640e` but again did not deliver ID11 to COM.
+
+Stage 5 targeted the later command-7 result gate itself: `8F88C` calls `FUN_8F676`, `8F890 cmp r0,r10` is the exact ordinary ICU-S verification-result comparison, and only zero branches to the native-success continuation at `8F8B6`. The stage-5 patch `8F890 E051 -> E001` makes that comparison unconditionally equal. It persisted as SHA `669cedf8c8465ebfd02318cb7708b897b817bc3b40925c89743b64ce49aa01af`. The subsequent READY/Park probe still produced no ID11 at `80BC/80B8`.
+
+That live negative is important, but it is **not** evidence for another unknown authentication-result branch. A full raw/disassembly pass, including previously unpromoted code, now closes the entire configured B6 receive path.
+
+### Physical CAN -> CanIf -> SecOC queue
+
+Exact F33 RSCFD controller-1 rule 39 is B6. Its raw 16-byte rule is:
+
+```text
+0x23328: b6000000000030000200000000000000
+```
+
+The healthy protected `0x0D7` peer at rule 36 is:
+
+```text
+0x232F8: d700000000002d000200000000000000
+```
+
+The acceptance metadata after the ID/destination fields is identical. CanIf normal descriptor 39 is `b600004020000000`: `0x400000B6` is the configured FD identifier and configured length is 32. The normal-route base is 5, so descriptor 39 maps to PduR route `5+39=44`.
+
+The unowned CanIf receive body at `0x810F2` was manually promoted and decompiled. Its B6 path applies the generic FD/length validator and then the route-flag `0x10` hook before calling PduR. The generic validator permits FD length up to 64 and requires at least the configured 32 bytes. The route-44 hook is Toyota's ordinary additive-checksum table, but B6 row `0x290B4 = 2c00000bb8010200` has its per-route checksum-enable byte clear. Therefore no additive checksum is applied to B6.
+
+PduR route44 selects SecOC Rx callback `0x8EE7C`. The exact profile lookup maps lower PDU 44 to protected profile 2; `8F34A -> 8E9C6` copies a newly accepted 32-byte secured PDU into the level-1 queue:
+
+```text
+profile2 pending record: FEBE547A
+secured frame buffer:    FEBE54D4
+capacity:                32 bytes
+```
+
+`8E8A0` selects the actual level-1 queue head; there is no B6-specific scheduler whitelist.
+
+### Complete SecOC worker
+
+A newly queued profile is state D2. `8F3F2` converts D2 to C3 before verification. The remaining pre-freshness gates are now numerically closed for B6: the configured minimum secured length is 4 and the `8F19A` selector is 0, so a queued 32-byte frame passes both.
+
+The profile-2 freshness callback at `0x903A0` and post-verification callback at `0x90448` were previously hidden behind missing Ghidra function boundaries and were force-promoted from raw bytes. `0x903A0 -> 90B8A` reconstructs/stages candidate freshness. `0x90448 -> 90D6A` commits pending freshness when told verification succeeded. Crucially, `90D6A` only copies freshness state; it does **not** dequeue, invalidate, or clear the secured PDU.
+
+`8F746` then builds the command-7 input and calls `8F676`. Stage 5 neutralizes the exact command-7 result comparison at `8F890`. `8F98C` has no additional result gate: a zero return from `8F746` unconditionally calls `8F906`.
+
+### Native success -> PduR44 -> COM
+
+`8F906` performs the post-auth freshness callback and, on the native-success branch reproduced by the cumulative development patches, calls `8F546`. Queue cleanup is later: `8F70E -> 8EB7E` dequeues only after the attempted delivery.
+
+`8F546` re-resolves the queued PduInfo and calls `90204(route44) -> 81CA6`. Group-0 route44 dispatch selects previously unpromoted callback `0x7D72C`, which was force-promoted and recovered. Route44 config is exactly 32 bytes with flags `0x0C`. `7D72C` caps received length at 32, copies the PduInfo into the configured COM window, performs route bookkeeping, and calls `8E772(44)`.
+
+The PDU44 COM window and new-data path are exact:
+
+```text
+COM window:             FEBE4BFF..FEBE4C1E  (32 bytes)
+route44 new-data cell:  FEBE5364
+unpacker staged cell:   FEBE80C8
+```
+
+`8E772(44)` increments `FEBE5364`. `4BD46` then sees `FEBE5364 != FEBE80C8`, unpacks B3/B4:B5 into `FEBE80BC/FEBE80B8`, and finally acknowledges by copying the generation value into `FEBE80C8`.
+
+There is no separate downstream route44 producer: `8E772` has exactly one caller (`7D72C`), and the callers of `81CA6` are the SecOC delivery/failure-forwarding family. Thus a queued B6 that reaches the patched native-success delivery path must update PDU44 COM. The stage-5 live observation that COM remained ID0 therefore leaves one live edge unproved: **whether the Panda-transmitted B6 actually reached the F33 CanIf/SecOC queue at all**. A Panda TX echo alone does not establish that fact.
+
+### Route-37 log boundary
+
+The exact drive route used by the earlier construction audit is:
+
+```text
+/Users/kai/dev/inspect/logs/camry-2026/2026-09-01/00000037--dec6fe39cb/
+```
+
+Across its seven rlogs, B6 counts are 18,456 `sendcan`, 18,447 Panda TX echoes (`can src=128`), nine rejected-return records (`src=192`), and **zero native B6 on src 0/1/2**. It is valid evidence for our transmitted byte/timing/freshness construction, but it is not a stock-native B6 transcript. The earlier audit remains useful: reset-low2, application sequence, FV4 message-low2, target packing/envelope/slew, companions and cadence all match the exact receiver contract; zero MAC28 is the deliberate invalid field.
+The route-level steering-state analysis remains in [2026-09-01-camry-route37-steering-speed-gate.md](2026-09-01-camry-route37-steering-speed-gate.md); the receive-pipeline conclusion here supersedes only its unresolved EPS-admission boundary.
+
+### Single next discriminator: RAM-only queue observer + native route44 splice
+
+The existing exact-F33 ephemeral B6 bridge has therefore been hardened instead of adding a stage-6 flash patch. It runs from the live-proven retained high tail, snapshots profile2 immediately before stock foreground aggregate `667E6 -> 7A254 -> 6A410 -> 8EFF8`, and exposes three u32 counters:
+
+```text
+FEBFFBF0  queue-present cycles (FEBE547A == 32)
+FEBFFBF4  eligible zero-MAC B6 snapshots
+FEBFFBF8  successful re-injection attempts
+```
+
+After the stock SecOC aggregate, it no longer emulates COM by hand. It passes the saved **full 32-byte PduInfo** directly to the firmware's own configured route44 receive callback `0x7D72C`, so every downstream length/copy/bookkeeping/new-data behavior is native stock code. Heartbeat remains at `FEBFFBEC`.
+
+Audited resident: 476 bytes inside the 508-byte code budget, zero relocations, shellcode SHA `f968447af229bdc2c8c8c700fb743f0acfb77063b17348f4c357c97aad238084`. Authenticated 4-KiB field payload SHA is `e83c40e3332b55571a526c0b45952c3944b3c9c4f65f5f2bb6e566c1aeba1f04`; its package CRC residue is `FFFFFFFF` and CMAC self-verifies. Reset removes the runtime; it performs no persistent flash write.
+
+The next live run is therefore decisive without another persistent patch: install/heartbeat-attest in NRTD, transition directly to READY without a power cycle, then run stationary ID0/current-angle and ID11/current-angle with `--require-bridge`. `queue_present==0` localizes the failure to physical/CanIf ingress. A positive queue counter proves physical ingress; `zero_mac_seen`/`injected` plus `80BC/80B8` then prove the SecOC-only bypass and native PDU44 handoff in the same run.
+
+<!-- knowledge-cross-references:begin -->
+## Knowledge cross-references
+
+Generated by `tools/build_knowledge_index.py` from the status ledgers;
+do not edit this block by hand.
+
+- Findings with this document as canonical home: [VAR-117](../../reference/index.md#finding-var-117)
+- Corrections with this document as canonical home: [CORR-157](../../reference/index.md#correction-corr-157)
+<!-- knowledge-cross-references:end -->

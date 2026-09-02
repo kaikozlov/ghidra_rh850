@@ -1,0 +1,68 @@
+{
+  "apply_ready": true,
+  "boot_crc_valid": true,
+  "boot_f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+  "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+  "config_identity": {
+    "crc_end": 1048048,
+    "crc_fixup_block_base": 1015808,
+    "crc_fixup_va": 1048044,
+    "crc_start": 98304,
+    "expected_residue": 4294967295,
+    "flash_block_size": 32768,
+    "image_base": 0,
+    "image_sha256": "272843a2c1d179f91105d7f103f213034f850dc476c96dad48067fbf3afd9f65",
+    "image_size": 1048576,
+    "original": "1a38",
+    "patch_block_base": 557056,
+    "patch_len": 2,
+    "patch_va": 588104,
+    "replacement": "003a"
+  },
+  "config_identity_sha256": "40c8c526d5bc796f2923c40021604b229dd510882466f3c9a3625aa81a12c9a1",
+  "config_mismatches": [],
+  "created_at": "2026-09-01T22:59:11+00:00",
+  "expected": {
+    "crc_prefix": 642829392,
+    "crc_residue": 4294967295,
+    "fixup_stored": 3652137903,
+    "patch_observed": 14362
+  },
+  "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+  "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+  "image": {
+    "path": "firmware_patch/CodeFlash.gate2-final-only.bin",
+    "sha256": "272843a2c1d179f91105d7f103f213034f850dc476c96dad48067fbf3afd9f65",
+    "size": 1048576
+  },
+  "manifest": {
+    "path": "firmware_patch/secoc_patch_manifest_f33_callback_success.json",
+    "sha256": "065166d1b6bb7c6e06065d08ea7faccdf9037ddb3f4db75a2929947b59c98a03"
+  },
+  "mode": "validate-only",
+  "observation_mismatches": [],
+  "observed": {
+    "crc_prefix": 642829392,
+    "crc_residue": 4294967295,
+    "fixup_stored": 3652137903,
+    "patch_observed": 14362
+  },
+  "payload_success": true,
+  "ram_exec_geometry": {
+    "evidence": "dynamic:camry-8965F3307000-20260826",
+    "load_addr": 4273930240,
+    "load_size": 4096
+  },
+  "route": {
+    "bus": 0,
+    "cpu_index": 0,
+    "elm327_param": 1,
+    "uds_variant": "old"
+  },
+  "schema": "secoc-patch-preflight-v1",
+  "telemetry_sha256": "02c957709a50a5c2e579b676fb092d77f979110beb767326ef92d029c33067c7",
+  "template": {
+    "path": "firmware_patch/generic_shellcode_template.bin",
+    "sha256": "3d6c4e685ad8e6460a624e501948324e989a751a94cfd69f12078ab158e40426"
+  }
+}

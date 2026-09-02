@@ -98,9 +98,7 @@ Build the copy-to-comma bundle with:
 python3 tools/build_camry_f33_car_kit.py
 ```
 
-The generated `build/out/camry-f33-car-kit/` directory contains the standalone
-probe, a revision/hash manifest, and the exact in-car runbook. The source verifier
-is `tests/verify_camry_f33_b6_stationary_probe.py`.
+The current generated `build/out/camry-f33-car-kit/` is **v3**. It starts from the live-proven stage-2 image (`8F948=003A`, `8F952=E001`, fixup `D12ADB05`) and packages the next root-result stage-3 discriminator at `8F930 E10F14D3->E00714D3`, plus deterministic preflight/APPLY/stage-3-only RESTORE/post-apply artifacts. The field lifecycle is NRTD preflight/APPLY -> OFF -> NRTD persistence verify -> OFF -> READY B6 admission. The standalone probe now reads direct PDU44 COM `FEBE80BC/FEBE80B8` before the later application snapshot. Source verification is `tests/verify_camry_f33_gate2_root_result_patch.py` plus `tests/verify_camry_f33_b6_stationary_probe.py`.
 
 ## NRTD P5/cruise follow-up
 
