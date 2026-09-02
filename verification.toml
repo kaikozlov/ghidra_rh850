@@ -2301,6 +2301,9 @@ tests = ["tests/verify_camry_f33_freshness_result_patch.py"]
 [suite.camry_f33_crypto_result_patch]
 tests = ["tests/verify_camry_f33_crypto_result_patch.py"]
 
+[suite.camry_f33_b6_transaction_observer]
+tests = ["tests/verify_camry_f33_b6_transaction_observer.py"]
+
 [suite.camry_f33_b6_bridge_install]
 tests = ["tests/verify_camry_f33_b6_bridge_install.py"]
 paths = [

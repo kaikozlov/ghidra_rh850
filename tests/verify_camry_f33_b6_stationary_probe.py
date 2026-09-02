@@ -40,6 +40,16 @@ check("all ladder cells validate under existing SID23 RMBA policy", all(probe.va
 check("RAM bridge telemetry cells are exact and readable", [c.address for c in probe.BRIDGE_TELEMETRY_CELLS] == [
     0xFEBFFBEC, 0xFEBFFBF0, 0xFEBFFBF4, 0xFEBFFBF8,
 ] and all(probe.validate_read(probe.RAM_ID, c.address, c.length) is None for c in probe.BRIDGE_TELEMETRY_CELLS))
+check("non-bypassing observer telemetry is exact and readable",
+      probe.OBSERVER_TELEMETRY_BASE == 0xFEBFFBE0 and probe.OBSERVER_TELEMETRY_SIZE == 28 and
+      probe.validate_read(probe.RAM_ID, probe.OBSERVER_TELEMETRY_BASE, probe.OBSERVER_TELEMETRY_SIZE) is None)
+check("wide command-funnel trace cells are exact and readable", [c.address for c in probe.TRACE_CELLS] == [
+    0xFEBE5564, 0xFEBEC81A, 0xFEBECB38, 0xFEBECC48, 0xFEBECC50, 0xFEBECC60,
+    0xFEBECC62, 0xFEBECC66, 0xFEBECC64, 0xFEBEAC54, 0xFEBEAC56,
+] and all(probe.validate_read(probe.RAM_ID, c.address, c.length) is None for c in probe.TRACE_CELLS))
+check("all four freshness slots are read in one exact 48-byte block",
+      probe.FRESHNESS_STATE_BASE == 0xFEBE55DC and probe.FRESHNESS_STATE_SIZE == 48 and
+      probe.validate_read(probe.RAM_ID, probe.FRESHNESS_STATE_BASE, probe.FRESHNESS_STATE_SIZE) is None)
 check("plan names forbidden mutation surfaces", all(token in plan["forbidden"] for token in (
     "programming session", "SecurityAccess", "RequestDownload", "TransferData", "memory writes", "RoutineControl", "0x08A TX",
 )))
@@ -130,6 +140,23 @@ check("small-offset actuation is hard-capped and rate-bounded", probe.SMALL_OFFS
 check("small-offset target is refreshed from immediate preflight", 'offset_start_raw = angle_deg_to_raw(offset_preflight["steering_angle_deg"])' in source)
 check("bridge-required mode demands heartbeat progression and reports ingress counters", 'RAM bridge heartbeat did not advance' in source and
       'bridge_after_id0 = snapshot_bridge_telemetry' in source and 'bridge_after_id11 = snapshot_bridge_telemetry' in source)
+check("observer-required mode is mutually exclusive with bridge and reports latched transactions",
+      'resident = parser.add_mutually_exclusive_group()' in source and '--require-observer' in source and
+      'observer_after_id0 = snapshot_observer_telemetry' in source and 'observer_after_id11 = snapshot_observer_telemetry' in source)
+check("phase snapshots include freshness and adjacent Toyota/chassis witnesses",
+      'snapshot_freshness_state(uds_client, uds_mod, log)' in source and
+      'upstream_08a_bus2' in source and 'chassis_081_bus0' in source and 'eps_030_bus0' in source)
+
+observer_raw = bytearray(probe.OBSERVER_TELEMETRY_SIZE)
+observer_raw[0:4] = (0x4F364250).to_bytes(4, "little")
+observer_raw[4] = 1
+observer_raw[8:16] = bytes.fromhex("07100000010a0101")
+observer_raw[16:21] = bytes.fromhex("0bfff0003e")
+observer_raw[24:28] = bytes.fromhex("d1234567")
+observer_dec = probe.decode_observer_telemetry(bytes(observer_raw))
+check("observer decoder recovers queue/security/wire identity",
+      observer_dec["queue_seen"] and observer_dec["b6_target_id"] == 11 and observer_dec["b6_target_raw"] == -16 and
+      observer_dec["b6_sequence"] == 62 and observer_dec["b6_fv4"] == 13 and observer_dec["b6_mac28"] == 0x1234567)
 
 sim = probe.simulate()
 check("offline simulation reproduces positive/negative verdicts", sim["good_verdict"]["admitted"] is True and sim["bad_verdict"]["admitted"] is False)
@@ -148,10 +175,22 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v3 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v3" and manifest["target"] == {
+    check("kit manifest is self-contained v4 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v4" and manifest["target"] == {
         "eps_f181": "8965F3307000", "eps_diag": "0x7A1->0x7A9 bus0", "b6": "0x0B6/32 FD bus0",
     })
-    check("kit pins live stage2 source state", manifest["firmware_patch"]["stage2_installed"] == {
+    check("kit pins live persistence-verified stage5 as current firmware", manifest["current_firmware"] == {
+        "stage": 5,
+        "sha256": "669cedf8c8465ebfd02318cb7708b897b817bc3b40925c89743b64ce49aa01af",
+        "crc_prefix": "0x1960380A", "crc_fixup": "0xE69FC7F5",
+        "note": "live persistence-verified 2026-09-01; no further persistent patch is part of the observer experiment",
+    })
+    check("kit makes observer the first RAM experiment and bridge conditional",
+          manifest["ram_experiments"]["observer"]["bypass"] is False and
+          manifest["ram_experiments"]["observer"]["payload_sha256"] == "29841b4965c7a690d76e641efd2d950ab291cfb6332a8d806fa6930fdaecbbbb" and
+          manifest["ram_experiments"]["bridge"]["payload_sha256"] == "e83c40e3332b55571a526c0b45952c3944b3c9c4f65f5f2bb6e566c1aeba1f04" and
+          manifest["ram_experiments"]["order"][0] == "observer")
+    check("historical flash package is explicitly not the next experiment", manifest["firmware_patch"]["historical_only"] is True)
+    check("kit retains live stage2 source state only as historical patch evidence", manifest["firmware_patch"]["stage2_installed"] == {
         "sites": [{"address": "0x8F948", "bytes": "003a"}, {"address": "0x8F952", "bytes": "e001"}],
         "fixup": "0xD12ADB05",
         "sha256": builder.stage3.EXPECTED_STAGE2_SHA256,
@@ -165,8 +204,13 @@ with tempfile.TemporaryDirectory() as td:
         "firmware_patch/restore/restore.json", "firmware_patch/post-apply/payload-validate-only.bin",
         "firmware_patch/generic_shellcode_template.bin",
     )))
-    check("kit includes patch runtime needed on comma", all((out / rel).is_file() for rel in (
+    check("kit includes observer/bridge payloads and RAM runtime needed on comma", all((out / rel).is_file() for rel in (
+        "ram_payloads/camry_f33_b6_transaction_observer_payload.bin",
+        "ram_payloads/camry_f33_b6_bridge_payload.bin",
         "runtime/exploit/common/ram_exec.py", "runtime/exploit/common/payload_package.py",
+        "runtime/exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.py",
+        "runtime/exploit/ephemeral_runtime/camry_f33_b6_transaction_observer_install.py",
+        "runtime/exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py",
         "runtime/exploit/patcher/deploy.py", "runtime/exploit/patcher/restore.py",
         "runtime/exploit/patcher/post_apply_verify.py", "runtime/tools/build_secoc_patch_manifest.py",
     )))
@@ -175,7 +219,13 @@ with tempfile.TemporaryDirectory() as td:
     check("patch runbook pins root patch and cumulative CRC", "0x8F930: E1 0F 14 D3 -> E0 07 14 D3" in patch_runbook and "8F948=003A" in patch_runbook and "8F952=E001" in patch_runbook and "EC525C33" in patch_runbook)
     check("patch runbook encodes proven NRTD lifecycle and stage3-only restore", "NRC `0x22` in READY" in patch_runbook and "Full OFF -> NRTD" in patch_runbook and "RESTORE reverses **stage 3 only**" in patch_runbook)
     check("kit manifest pins current opendbc and Panda revisions", len(manifest["repositories"]["opendbc"].get("head", "")) == 40 and len(manifest["repositories"]["panda"].get("head", "")) == 40)
-    check("runbook orders stage3 proof before B6 admission and admitted-only offset", "First follow `FIRMWARE_PATCH.md`" in runbook and "First B6 run after stage-3 persistence proof: admission only" in runbook and "--small-offset-deg 0.5" in runbook and "If it is not ADMITTED, stop there" in runbook)
+    check("runbook is observer-first, bridge-second, admitted-only offset",
+          "install the non-bypassing observer" in runbook and "--require-observer" in runbook and
+          "Only after the observer proves B6 queue ingress" in runbook and "--require-bridge" in runbook and
+          "--small-offset-deg 0.5" in runbook and "Only if the immediately preceding ID11 current-angle phase says `ADMITTED`" in runbook)
+    check("runbook explicitly forbids another result-bit flash patch",
+          "do not add another persistent result-bit patch" in runbook and
+          "historical/recovery artifacts" in runbook and "pre-aggregate SecOC queue sample point" in runbook)
     check("runbook states the bounded steering ramp", "rate-limits" in runbook and "6 deg/s" in runbook)
     check("runbook pins current bus0 and exclusive Panda ownership", "current post-repin" in runbook and "Panda bus 0" in runbook and "pandad|boardd" in runbook)
 

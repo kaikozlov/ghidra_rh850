@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 427 · Corrections: 157 · Open questions: 54 · Docs: 117 · Suites: 229
+Findings: 427 · Corrections: 157 · Open questions: 54 · Docs: 117 · Suites: 230
 
 ## Reading this index
 
@@ -445,7 +445,7 @@ Findings: 427 · Corrections: 157 · Open questions: 54 · Docs: 117 · Suites: 
 | <a id="finding-var-114"></a>**VAR-114** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_8965F3307000.py --section b6_acceptance_ladder` | — |
 | <a id="finding-var-115"></a>**VAR-115** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_f33_gate2_semantic_patch.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 | <a id="finding-var-116"></a>**VAR-116** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_f33_gate2_root_result_patch.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
-| <a id="finding-var-117"></a>**VAR-117** | [docs/history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md](../history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000.py --section b6_receive_bridge`, `tests/verify_camry_f33_b6_stationary_probe.py`, `tests/verify_camry_f33_b6_bridge_install.py` | OQ-054 |
+| <a id="finding-var-117"></a>**VAR-117** | [docs/history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md](../history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000.py --section b6_receive_bridge`, `tests/verify_camry_f33_b6_transaction_observer.py`, `tests/verify_camry_f33_b6_stationary_probe.py`, `tests/verify_camry_f33_b6_bridge_install.py` | OQ-054 |
 
 ## Open-questions index
 

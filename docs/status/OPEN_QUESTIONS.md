@@ -1155,12 +1155,18 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   yet direct PDU44 COM remained ID0 during stationary ID11 tests. The exact F33
   receive path is now closed through previously unpromoted CanIf, freshness-commit,
   and route44 COM callbacks; there is no justified next result/status patch. The
-  remaining live discriminator is whether the transmitted FD/32 B6 ever appears in
-  the EPS SecOC profile2 queue. The RAM-only observer counts queue presence and
-  zero-MAC candidates before the stock SecOC aggregate and, after it, re-enters the
-  firmware's own `7D72C` route44 callback with the saved full 32-byte PduInfo. Run it
-  once in NRTD, then READY without a full power cycle, using the stationary probe's
-  `--require-bridge` telemetry. No steering offset is justified before `ADMITTED`.
+  remaining live discriminator is whether the transmitted FD/32 B6 appears at the
+  EPS SecOC profile2 queue immediately before the stock `667E6` aggregate. The first
+  RAM experiment is deliberately **non-bypassing**: it latches queue presence, the
+  receiver-side B3..B7/B28..B31 identity, pre/post `FEBE5564` and publication state,
+  post-aggregate queue length, and ICU-S done/status while leaving stock `667E6`
+  untouched. The host concurrently records all four freshness slots, the COM/application
+  ladder, the `CB38 -> CC48 -> CC60 -> CC62/CC64` command funnel, and raw `0x08A/0x081/0x030`.
+  Install in NRTD, heartbeat-attest, transition directly to READY without OFF, and use
+  `--require-observer`. Only if queue ingress is observed should a second NRTD->READY
+  run install the separate route44 bridge and use `--require-bridge`. A negative observer
+  is bounded to the pre-aggregate sample point; no steering offset is justified before
+  `ADMITTED`.
   Resolving OQ-054 remains required for stock architecture, not for this B6 ingress
   discriminator.
 

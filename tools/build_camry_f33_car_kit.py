@@ -14,12 +14,23 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools import build_camry_f33_gate2_root_result_patch as stage3
+from tools import build_camry_f33_crypto_result_patch as stage5
+from exploit.common.payload_package import package_shellcode
+from exploit.ephemeral_runtime import camry_f33_b6_bridge_install as bridge_install
+from exploit.ephemeral_runtime import camry_f33_b6_transaction_observer_install as observer_install
 
 PROBE = ROOT / "exploit/behavioral_proof/camry_f33_b6_stationary_probe.py"
+RUNBOOK_TEMPLATE = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md"
+F33_IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
+OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_transaction_observer.bin"
+BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
 DEFAULT_OPENPILOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
 RUNTIME_FILES = [
     "exploit/common/payload_package.py",
     "exploit/common/ram_exec.py",
+    "exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.py",
+    "exploit/ephemeral_runtime/camry_f33_b6_transaction_observer_install.py",
+    "exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py",
     "exploit/patcher/patch_config.py",
     "exploit/patcher/build_payload.py",
     "exploit/patcher/deploy.py",
@@ -244,23 +255,62 @@ def build(out: Path, openpilot: Path) -> dict:
     runtime_files = copy_runtime(out)
     (out / "FIRMWARE_PATCH.md").write_text(patch_runbook(), encoding="utf-8")
 
+    ram_dir = out / "ram_payloads"
+    ram_dir.mkdir(parents=True, exist_ok=True)
+    payload_secret = F33_IMAGE.read_bytes()[0xBFD8:0xBFE8]
+    observer_payload = package_shellcode(OBSERVER_BIN.read_bytes(), secret=payload_secret)
+    bridge_payload = package_shellcode(BRIDGE_BIN.read_bytes(), secret=payload_secret)
+    if hashlib.sha256(observer_payload).hexdigest() != observer_install.EXPECTED_PAYLOAD_SHA256:
+        raise RuntimeError("observer authenticated payload identity drift")
+    if hashlib.sha256(bridge_payload).hexdigest() != bridge_install.EXPECTED_PAYLOAD_SHA256:
+        raise RuntimeError("bridge authenticated payload identity drift")
+    (ram_dir / "camry_f33_b6_transaction_observer_payload.bin").write_bytes(observer_payload)
+    (ram_dir / "camry_f33_b6_bridge_payload.bin").write_bytes(bridge_payload)
+
     files = {
         dst.name: {"sha256": sha256(dst)},
         "FIRMWARE_PATCH.md": {"sha256": sha256(out / "FIRMWARE_PATCH.md")},
     }
     files.update(runtime_files)
+    for path in sorted(p for p in ram_dir.rglob("*") if p.is_file()):
+        files[str(path.relative_to(out))] = {"sha256": sha256(path)}
     for path in sorted(p for p in patch_dir.rglob("*") if p.is_file()):
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
 
     manifest = {
-        "schema": "camry-f33-car-kit-v3",
+        "schema": "camry-f33-car-kit-v4",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
             "eps_diag": "0x7A1->0x7A9 bus0",
             "b6": "0x0B6/32 FD bus0",
         },
+        "current_firmware": {
+            "stage": 5,
+            "sha256": stage5.EXPECTED_FINAL_SHA256,
+            "crc_prefix": f"0x{stage5.EXPECTED_STAGE5_PREFIX:08X}",
+            "crc_fixup": f"0x{stage5.EXPECTED_STAGE5_FIXUP:08X}",
+            "note": "live persistence-verified 2026-09-01; no further persistent patch is part of the observer experiment",
+        },
+        "ram_experiments": {
+            "observer": {
+                "payload": "ram_payloads/camry_f33_b6_transaction_observer_payload.bin",
+                "payload_sha256": observer_install.EXPECTED_PAYLOAD_SHA256,
+                "shellcode_sha256": observer_install.OBSERVER_SHELLCODE_SHA256,
+                "telemetry_base": f"0x{observer_install.TELEMETRY_BASE:08X}",
+                "telemetry_size": observer_install.TELEMETRY_SIZE,
+                "bypass": False,
+            },
+            "bridge": {
+                "payload": "ram_payloads/camry_f33_b6_bridge_payload.bin",
+                "payload_sha256": bridge_install.EXPECTED_PAYLOAD_SHA256,
+                "shellcode_sha256": bridge_install.BRIDGE_SHELLCODE_SHA256,
+                "bypass": "SecOC adjudication only; re-enters stock route44 callback",
+            },
+            "order": ["observer", "bridge only if observer proves queue ingress/security rejection"],
+        },
         "firmware_patch": {
+            "historical_only": True,
             "stage2_installed": {
                 "sites": [
                     {"address": "0x8F948", "bytes": "003a"},
@@ -289,71 +339,7 @@ def build(out: Path, openpilot: Path) -> dict:
     }
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
-    runbook = """# 2026 Camry F33 in-car lateral bring-up
-
-Target: `8965F3307000`; **current post-repin** EPS diagnostics `0x7A1 -> 0x7A9` on Panda bus 0; B6 `0x0B6/32` CAN-FD on bus 0.
-
-## Current order of operations
-
-The 2026-09-01 stage-2 image is persistent/CRC-valid but is live-disproved as sufficient: its stationary admission run returned 84/84 B6 TX echoes while `ADB0` remained ID0 and `CB00` remained bank 7. No steering offset was attempted.
-
-Full `FUN_0008F906` recovery now identifies the earlier mistake: stage 1 and stage 2 patched consumers of the authentication-result boolean. Stage 3 instead patches its single definition at `0x8F930` so `r26=0`, reproducing the native verified-success values for the callback, bookkeeping, branch, and PduR/COM delivery tail.
-
-First follow `FIRMWARE_PATCH.md`: **NRTD** zero-write stage-3 preflight, APPLY only if exact, full OFF->NRTD zero-write persistence verification, then full OFF->READY. Only after stage 3 is persistence-verified should the admission probe below be repeated.
-
-## Before touching the Panda
-
-Park the car, keep it stationary, and keep hands clear of the wheel. Stop openpilot so no `pandad`/`boardd` process owns the Panda. The probe refuses to run if either process remains. Do not run the direct-Panda probe while driving.
-
-Use the openpilot virtual environment:
-
-```bash
-export PY=/usr/local/venv/bin/python
-export PYTHONPATH=/data/openpilot:$PWD/runtime
-$PY - <<'PY'
-from panda import Panda
-from opendbc.car import structs
-print('Panda/opendbc imports OK; allOutput=', structs.CarParams.SafetyModel.allOutput)
-PY
-pgrep -af 'pandad|boardd' || true
-```
-
-## Offline/self-check on comma
-
-```bash
-$PY camry_f33_b6_stationary_probe.py
-$PY camry_f33_b6_stationary_probe.py --simulate
-```
-
-The simulation must report `good_verdict.reason = ADMITTED`.
-
-## First B6 run after stage-3 persistence proof: admission only
-
-Vehicle READY/Park/stationary:
-
-```bash
-$PY camry_f33_b6_stationary_probe.py --execute --stationary-confirmed \\
-  --output /tmp/camry-f33-b6-stage3-admission.ndjson | tee /tmp/camry-f33-b6-stage3-admission.txt
-```
-
-Do **not** request a steering offset on the first run. Positive proof is `id11.verdict.reason = ADMITTED`, with `ADB0=11`, the commanded `AE90`, `ADB9=0`, `CAFF=1`, `ACBD=0`, and `CB00=2`. If it is not ADMITTED, stop there and preserve both output files.
-
-## Second B6 run: tiny stationary causal test
-
-Run this only after the admission-only run is ADMITTED:
-
-```bash
-$PY camry_f33_b6_stationary_probe.py --execute --stationary-confirmed --small-offset-deg 0.5 \\
-  --output /tmp/camry-f33-b6-stage3-offset.ndjson | tee /tmp/camry-f33-b6-stage3-offset.txt
-```
-
-The tool hard-caps the offset at +/-2 degrees, refreshes the measured wheel angle immediately before the phase, rate-limits the command to no more than 6 deg/s, and refuses the offset phase unless the immediately preceding ID11 current-angle phase is admitted.
-
-## Normal openpilot after stationary proof
-
-Use the openpilot/opendbc revisions recorded in `manifest.json`. Camry lateral is native `CC.latActive` angle control over B6; Toyota stock DRCC remains longitudinal; `0x08A` is never transmitted by openpilot. Restart openpilot normally only after direct-Panda tooling exits.
-"""
-    (out / "RUNBOOK.md").write_text(runbook, encoding="utf-8")
+    shutil.copy2(RUNBOOK_TEMPLATE, out / "RUNBOOK.md")
     return manifest
 
 
