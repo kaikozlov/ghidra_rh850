@@ -25,11 +25,14 @@ check("field-proven F33 RAM geometry", m.GEOMETRY.load_addr == 0xFEBF0000 and m.
 check("telemetry cells exact", m.TELEMETRY == {"heartbeat":0xFEBFFBEC,"queue_present":0xFEBFFBF0,"zero_mac_seen":0xFEBFFBF4,"injected":0xFEBFFBF8})
 check("payload identity exact", PAYLOAD.is_file() and PAYLOAD.stat().st_size == 0x1000 and hashlib.sha256(PAYLOAD.read_bytes()).hexdigest() == m.EXPECTED_PAYLOAD_SHA256)
 p=m.plan(PAYLOAD)
-check("plan declares RAM-only behavior", p["ram"]["persistent_flash_writes"] is False and p["payload"]["sha256"] == m.EXPECTED_PAYLOAD_SHA256)
+check("plan declares RAM-only behavior and built-in P1M-E root",
+      p["ram"]["persistent_flash_writes"] is False and p["payload"]["sha256"] == m.EXPECTED_PAYLOAD_SHA256 and
+      "built-in Toyota P1M-E boot SecurityAccess root" in p["live_requirements"])
 src=MOD.read_text()
 check("live install requires explicit NRTD confirmation", 'live RAM install requires --nrtd-confirmed' in src)
 check("installer uses authenticated RAM executor only", 'execute_ram_payload(' in src and all(x not in src for x in ('flash_program', 'erase_codeflash', 'RequestDownload(')))
 check("attestation requires application F181 and heartbeat advancement", 'application F181 mismatch after RAM execute' in src and 'bridge heartbeat did not advance' in src)
+check("installer requires no temporary boot-secret file", "--boot-secret-file" not in src)
 check("secret value is never recorded", '"secret_value_recorded": False' in src)
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

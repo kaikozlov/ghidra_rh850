@@ -111,11 +111,14 @@ installer = importlib.util.module_from_spec(spec); sys.modules[spec.name] = inst
 check("installer pins payload/shellcode and exact current route", installer.EXPECTED_PAYLOAD_SHA256 == sha(payload) and
       installer.OBSERVER_SHELLCODE_SHA256 == sha(blob) and installer.ROUTE.bus == 0 and installer.ROUTE.elm327_param == 1)
 plan = installer.plan(Path("/nonexistent/observer.bin"))
-check("installer plan is explicitly RAM-only and non-bypassing", plan["ram"]["persistent_flash_writes"] is False and
-      plan["telemetry"]["bypass"] is False and "NRTD->READY directly" in plan["next_state"])
+check("installer plan is RAM-only, non-bypassing, and uses the built-in P1M-E root",
+      plan["ram"]["persistent_flash_writes"] is False and plan["telemetry"]["bypass"] is False and
+      "built-in Toyota P1M-E boot SecurityAccess root" in plan["live_requirements"] and
+      "NRTD->READY directly" in plan["next_state"])
 installer_src = INSTALLER.read_text()
 check("installer uses authenticated RAM executor only", "execute_ram_payload(" in installer_src and
       all(x not in installer_src for x in ("flash_program", "erase_codeflash", "RequestDownload(")))
+check("installer requires no temporary boot-secret file", "--boot-secret-file" not in installer_src)
 check("installer never records the secret value", '"secret_value_recorded": False' in installer_src)
 
 print(f"\nResults: {passed} passed, {failed} failed")

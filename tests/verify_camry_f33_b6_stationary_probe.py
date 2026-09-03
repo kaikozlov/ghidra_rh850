@@ -262,7 +262,17 @@ with tempfile.TemporaryDirectory() as td:
         "runtime/exploit/patcher/deploy.py", "runtime/exploit/patcher/restore.py",
         "runtime/exploit/patcher/post_apply_verify.py", "runtime/tools/build_secoc_patch_manifest.py",
     )))
-    check("kit never materializes standalone secret files", not any("secret" in p.name.lower() for p in out.rglob("*")))
+    runtime_source = (out / "runtime/exploit/common/ram_exec.py").read_text(encoding="utf-8")
+    check("kit embeds fixed P1M-E roots without standalone secret files",
+          "ba052435f8843f985fd1329d2b6117b0" in runtime_source and
+          "f05f36b7d78c03e24ab4faef2a57d044" in runtime_source and
+          not any("secret" in p.name.lower() for p in out.rglob("*")))
+    check("field runbooks require no secret extraction, files, or environment",
+          all(token not in runbook + patch_runbook for token in (
+              "f33-boot-secret", "f33-payload-secret", "--boot-secret-file",
+              "--security-secret-file", "--payload-secret-file",
+              "TOYOTA_EPS_BOOT_SECRET_HEX", "TOYOTA_EPS_PAYLOAD_SECRET_HEX",
+          )))
     check("patch runbook requires NRTD zero-write preflight before apply", "NRTD zero-write preflight" in patch_runbook and "If `apply_ready` is not exactly true, **do not APPLY**" in patch_runbook)
     check("patch runbook pins root patch and cumulative CRC", "0x8F930: E1 0F 14 D3 -> E0 07 14 D3" in patch_runbook and "8F948=003A" in patch_runbook and "8F952=E001" in patch_runbook and "EC525C33" in patch_runbook)
     check("patch runbook encodes proven NRTD lifecycle and stage3-only restore", "NRC `0x22` in READY" in patch_runbook and "Full OFF -> NRTD" in patch_runbook and "RESTORE reverses **stage 3 only**" in patch_runbook)

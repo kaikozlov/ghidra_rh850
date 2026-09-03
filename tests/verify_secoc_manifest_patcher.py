@@ -6,7 +6,6 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
-import os
 import struct
 import subprocess
 import sys
@@ -29,7 +28,17 @@ from exploit.patcher.patch_config import (
     config_from_manifest,
 )
 from exploit.common.payload_package import PAYLOAD_LOAD_ADDR, PAYLOAD_SIZE, inspect_payload, package_shellcode
-from exploit.common.ram_exec import bootstrap_protocol_values, explicit_ram_exec_geometry, explicit_route
+from exploit.common.ram_exec import (
+    TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET,
+    TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET_SOURCE,
+    TOYOTA_P1ME_PAYLOAD_BUILD_SECRET,
+    TOYOTA_P1ME_PAYLOAD_BUILD_SECRET_SOURCE,
+    bootstrap_protocol_values,
+    explicit_ram_exec_geometry,
+    explicit_route,
+    load_payload_secret,
+    load_security_secret,
+)
 from exploit.patcher.build_payload import (
     CONFIG_OFFSET,
     TEMPLATE_SIZE,
@@ -581,10 +590,20 @@ print("\n== bootstrap/deployer secret and routing discipline ==")
 ram_exec_source = (REPO / "exploit" / "common" / "ram_exec.py").read_text(encoding="utf-8").lower()
 deploy_source = (REPO / "exploit" / "patcher" / "deploy.py").read_text(encoding="utf-8").lower()
 restore_source = (REPO / "exploit" / "patcher" / "restore.py").read_text(encoding="utf-8").lower()
-check("shared bootstrap contains no embedded SecurityAccess secret", "f05f36b7d78c03e24ab4faef2a57d044" not in ram_exec_source)
-check("shared bootstrap contains no embedded payload-build secret", payload_build_secret.hex() not in ram_exec_source)
-check("bootstrap takes SecurityAccess secret from environment/file", "toyota_eps_boot_secret_hex" in ram_exec_source and "security-secret-file" in deploy_source)
-check("bootstrap takes separate payload-build secret from environment/file", "toyota_eps_payload_secret_hex" in ram_exec_source and "payload-secret-file" in deploy_source)
+builtin_boot_secret, builtin_boot_source = load_security_secret()
+builtin_payload_secret, builtin_payload_source = load_payload_secret()
+check("shared bootstrap embeds the public P1M-E SecurityAccess root",
+      builtin_boot_secret == TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET == security_access_secret and
+      builtin_boot_source == TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET_SOURCE)
+check("shared bootstrap embeds the public P1M-E payload-build root",
+      builtin_payload_secret == TOYOTA_P1ME_PAYLOAD_BUILD_SECRET == payload_build_secret and
+      builtin_payload_source == TOYOTA_P1ME_PAYLOAD_BUILD_SECRET_SOURCE)
+check("bootstrap keeps SecurityAccess and payload-build roots distinct", builtin_boot_secret != builtin_payload_secret)
+check("bootstrap and deployer expose no obsolete secret inputs",
+      all(token not in ram_exec_source + deploy_source for token in (
+          "toyota_eps_boot_secret_hex", "toyota_eps_payload_secret_hex",
+          "security-secret-file", "payload-secret-file",
+      )))
 check("bootstrap requires explicit UDS variant", "uds variant must be explicitly 'old' or 'new'" in ram_exec_source)
 check("bootstrap requires field-proven bootloader reappearance before SecurityAccess", "from tsk.lib.programming import enter_programming_bootloader, uds_client" in ram_exec_source and "expected_boot_f181_hex" in ram_exec_source and "bootloader route changed from the preserved route" in ram_exec_source)
 check("bootstrap preserves exact F33 boot probe then clean programming ladder", "boot.read_memory_by_address(0, 0x10)" in ram_exec_source and "boot.diagnostic_session_control(uds_mod.session_type.default)" in ram_exec_source and "boot.diagnostic_session_control(uds_mod.session_type.extended_diagnostic)" in ram_exec_source and "boot.diagnostic_session_control(uds_mod.session_type.programming)" in ram_exec_source)
@@ -619,7 +638,6 @@ with tempfile.TemporaryDirectory() as td:
             "--apply",
         ],
         cwd=REPO,
-        env={**os.environ, "TOYOTA_EPS_PAYLOAD_SECRET_HEX": payload_build_secret.hex()},
         capture_output=True,
         text=True,
         check=False,
