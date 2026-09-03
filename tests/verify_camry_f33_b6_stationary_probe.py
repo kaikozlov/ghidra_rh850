@@ -32,9 +32,10 @@ check("exact-F33 full F181 identity is pinned", probe.EXPECTED_F181_HEX == "0238
 check("post-repin EPS diagnostics and B6 are both bus0", probe.DIAG_BUS == probe.B6_BUS == 0 and probe.EPS_TX == 0x7A1 and probe.EPS_RX == 0x7A9)
 check("AllOutput passthrough parameter is explicit", probe.ALLOUTPUT_PASSTHROUGH_PARAM == 1 and plan["panda_safety"]["relay_forwarding"] == "bus0<->bus2 preserved")
 check("B6 is fixed 32-byte CAN-FD at 50 Hz", probe.B6_ADDR == 0x0B6 and probe.B6_LEN == 32 and abs(probe.B6_PERIOD_S - 0.020) < 1e-12)
-check("only exact acceptance-ladder cells are exposed", [c.address for c in probe.LADDER_CELLS] == [
-    0xFEBE5364, 0xFEBE80BC, 0xFEBE80B8, 0xFEBE80C8, 0xFEBE80C9, 0xFEBEF13E,
-    0xFEBEADB9, 0xFEBEADB0, 0xFEBEAE90, 0xFEBECAFF, 0xFEBEACBD, 0xFEBECB00,
+check("raw COM window and every acceptance-ladder cell are exposed", [c.address for c in probe.LADDER_CELLS] == [
+    0xFEBE5364, 0xFEBE4C02, 0xFEBE4C03, 0xFEBE7F68, 0xFEBE80BC, 0xFEBE80B8,
+    0xFEBE80C8, 0xFEBE80C9, 0xFEBEF13E, 0xFEBEADB9, 0xFEBEADB0, 0xFEBEAE90,
+    0xFEBECAFF, 0xFEBEACBD, 0xFEBECB00,
 ])
 check("all ladder cells validate under existing SID23 RMBA policy", all(probe.validate_read(probe.RAM_ID, c.address, c.length) is None for c in probe.LADDER_CELLS))
 check("RAM bridge telemetry cells are exact and readable", [c.address for c in probe.BRIDGE_TELEMETRY_CELLS] == [
@@ -79,21 +80,42 @@ check("B6 scale is exact fraction", abs(probe.B6_DEG_PER_COUNT - (1024 / 17870))
 step = probe.small_offset_step_raw()
 check("small-offset raw ramp cannot exceed declared rate", step > 0 and (step * probe.B6_DEG_PER_COUNT / probe.B6_PERIOD_S) <= probe.SMALL_OFFSET_MAX_RATE_DEG_S)
 check("raw ramp converges without overshoot", [probe.step_toward_raw(v, 5, 2) for v in (0, 4, 5, 7)] == [2, 5, 5, 5])
+check("raw COM target angle uses wire big-endian", probe.decode_cell(
+    probe.Cell("target", probe.COM_WINDOW_BASE + 4, 2, True, "big"), b"\xff\xf0") == -16)
+check("CAN-health delta keeps physical-bus error and TX witnesses", probe.can_health_delta(
+    {"bus_off_cnt": 1, "transmit_error_cnt": 2, "total_error_cnt": 3, "total_tx_cnt": 10,
+     "last_error": "AckError"},
+    {"bus_off_cnt": 1, "transmit_error_cnt": 4, "total_error_cnt": 6, "total_tx_cnt": 14,
+     "last_error": "No error"},
+) == {"bus_off_cnt": 0, "transmit_error_cnt": 2, "total_error_cnt": 3, "total_tx_cnt": 4})
 
 print("\n== acceptance discriminator ==")
 target = probe.angle_deg_to_raw(3.0)
 good = {
-    "publication_generation": 7, "com_target_lateral_id": 11, "com_target_angle_raw": target,
+    "publication_generation": 7,
+    "com_window_target_lateral_id": 11, "com_window_target_angle_raw": target,
+    "com_rx_group_state": 0, "com_target_lateral_id": 11, "com_target_angle_raw": target,
     "consumed_generation": 7, "unpacker_status": 0, "staged_status": 0, "snapshot_status": 0,
     "target_lateral_id": 11, "target_angle_raw": target,
     "b6_controller_enable": 1, "global_comm_mode": 0, "controller_bank": 2,
 }
 check("positive ladder is ADMITTED", probe.verdict(good, target_id=11, target_raw=target) == {
     "admitted": True, "reason": "ADMITTED", "status_healthy": True,
-    "com_payload_delivered": True, "payload_delivered": True, "controller_enabled": True, "bank_selected": True,
+    "com_window_payload_delivered": True, "com_signals_updated": True,
+    "payload_delivered": True, "controller_enabled": True, "bank_selected": True,
 })
-check("PduR/COM miss is classified before downstream gates", probe.verdict(dict(good, com_target_lateral_id=0), target_id=11, target_raw=target)["reason"] == "pdu_not_delivered_to_com")
-check("COM-to-snapshot miss is distinguished", probe.verdict(dict(good, target_lateral_id=0), target_id=11, target_raw=target)["reason"] == "com_delivered_not_snapshot")
+check("raw PDU44 COM-window miss is classified first",
+      probe.verdict(dict(good, com_window_target_lateral_id=0), target_id=11, target_raw=target)["reason"] ==
+      "pdu_not_copied_to_com_window")
+check("COM receive-group block is distinguished from failed PduR delivery",
+      probe.verdict(dict(good, com_target_lateral_id=0, com_rx_group_state=2),
+                    target_id=11, target_raw=target)["reason"] == "com_unpack_blocked_by_rx_group_state")
+check("raw COM-to-generated-signal miss is distinguished",
+      probe.verdict(dict(good, com_target_lateral_id=0), target_id=11, target_raw=target)["reason"] ==
+      "com_window_not_unpacked")
+check("generated-COM-to-snapshot miss is distinguished",
+      probe.verdict(dict(good, target_lateral_id=0), target_id=11, target_raw=target)["reason"] ==
+      "com_signals_not_snapshotted")
 check("unhealthy receive status is classified", probe.verdict(dict(good, snapshot_status=0x11), target_id=11, target_raw=target)["reason"] == "receive_status_unhealthy")
 check("CAFF failure is classified", probe.verdict(dict(good, b6_controller_enable=0), target_id=11, target_raw=target)["reason"] == "b6_controller_not_enabled")
 check("ACBD failure is classified", probe.verdict(dict(good, global_comm_mode=1), target_id=11, target_raw=target)["reason"] == "global_comm_mode_blocks_controller")
@@ -146,6 +168,10 @@ check("observer-required mode is mutually exclusive with bridge and reports latc
 check("phase snapshots include freshness and adjacent Toyota/chassis witnesses",
       'snapshot_freshness_state(uds_client, uds_mod, log)' in source and
       'upstream_08a_bus2' in source and 'chassis_081_bus0' in source and 'eps_030_bus0' in source)
+check("each phase records Panda CAN health before and after transmission",
+      'boundary="before"' in source and 'boundary="after"' in source and
+      '"can_health": id11_health' in source and
+      "distinguish Panda enqueue/echo from physical-bus ACK" in plan["panda_can_health"]["purpose"])
 
 observer_raw = bytearray(probe.OBSERVER_TELEMETRY_SIZE)
 observer_raw[0:4] = (0x4F364250).to_bytes(4, "little")
@@ -157,6 +183,13 @@ observer_dec = probe.decode_observer_telemetry(bytes(observer_raw))
 check("observer decoder recovers queue/security/wire identity",
       observer_dec["queue_seen"] and observer_dec["b6_target_id"] == 11 and observer_dec["b6_target_raw"] == -16 and
       observer_dec["b6_sequence"] == 62 and observer_dec["b6_fv4"] == 13 and observer_dec["b6_mac28"] == 0x1234567)
+check("observer phase witness requires exact queued target and zero MAC",
+      probe.observer_matches_phase(observer_dec, target_id=11, target_raw=-16) is False)
+observer_zero_mac = dict(observer_dec, b6_mac28=0)
+check("observer phase witness accepts exact queued zero-MAC candidate",
+      probe.observer_matches_phase(observer_zero_mac, target_id=11, target_raw=-16) is True)
+check("sticky prior-phase queue state cannot masquerade as ID11 ingress",
+      probe.observer_matches_phase(dict(observer_zero_mac, b6_target_id=0), target_id=11, target_raw=-16) is False)
 
 sim = probe.simulate()
 check("offline simulation reproduces positive/negative verdicts", sim["good_verdict"]["admitted"] is True and sim["bad_verdict"]["admitted"] is False)
@@ -227,6 +260,10 @@ with tempfile.TemporaryDirectory() as td:
           "do not add another persistent result-bit patch" in runbook and
           "historical/recovery artifacts" in runbook and "pre-aggregate SecOC queue sample point" in runbook)
     check("runbook states the bounded steering ramp", "rate-limits" in runbook and "6 deg/s" in runbook)
+    check("runbook joins observer, raw COM, unpack gate, and physical TX health",
+          "Panda TX echo proves host-to-Panda enqueue, not physical-bus ACK" in runbook and
+          "FEBE4C02/FEBE4C03" in runbook and "FEBE7F68 >= 2" in runbook and
+          "physical TX/ACK/bit-timing problem" in runbook and "matches_phase" in runbook)
     check("runbook pins current bus0 and exclusive Panda ownership", "current post-repin" in runbook and "Panda bus 0" in runbook and "pandad|boardd" in runbook)
 
 print(f"\nResults: {passed} passed, {failed} failed")
