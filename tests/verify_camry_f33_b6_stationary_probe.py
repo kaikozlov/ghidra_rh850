@@ -32,10 +32,12 @@ check("exact-F33 full F181 identity is pinned", probe.EXPECTED_F181_HEX == "0238
 check("post-repin EPS diagnostics and B6 are both bus0", probe.DIAG_BUS == probe.B6_BUS == 0 and probe.EPS_TX == 0x7A1 and probe.EPS_RX == 0x7A9)
 check("AllOutput passthrough parameter is explicit", probe.ALLOUTPUT_PASSTHROUGH_PARAM == 1 and plan["panda_safety"]["relay_forwarding"] == "bus0<->bus2 preserved")
 check("B6 is fixed 32-byte CAN-FD at 50 Hz", probe.B6_ADDR == 0x0B6 and probe.B6_LEN == 32 and abs(probe.B6_PERIOD_S - 0.020) < 1e-12)
-check("raw COM window and every acceptance-ladder cell are exposed", [c.address for c in probe.LADDER_CELLS] == [
-    0xFEBE5364, 0xFEBE4C02, 0xFEBE4C03, 0xFEBE7F68, 0xFEBE80BC, 0xFEBE80B8,
-    0xFEBE80C8, 0xFEBE80C9, 0xFEBEF13E, 0xFEBEADB9, 0xFEBEADB0, 0xFEBEAE90,
-    0xFEBECAFF, 0xFEBEACBD, 0xFEBECB00,
+check("raw COM window is one B3..B31 read", probe.COM_WINDOW_WITNESS.address == 0xFEBE4C02 and
+      probe.COM_WINDOW_WITNESS.length == 29 and plan["raw_com_window"]["length"] == 29)
+check("every post-COM acceptance-ladder cell is exposed", [c.address for c in probe.LADDER_CELLS] == [
+    0xFEBE5364, 0xFEBE7F68, 0xFEBE80BC, 0xFEBE80B8, 0xFEBE80C8, 0xFEBE80C9,
+    0xFEBEF13E, 0xFEBEADB9, 0xFEBEADB0, 0xFEBEAE90, 0xFEBECAFF, 0xFEBEACBD,
+    0xFEBECB00,
 ])
 check("all ladder cells validate under existing SID23 RMBA policy", all(probe.validate_read(probe.RAM_ID, c.address, c.length) is None for c in probe.LADDER_CELLS))
 check("RAM bridge telemetry cells are exact and readable", [c.address for c in probe.BRIDGE_TELEMETRY_CELLS] == [
@@ -80,46 +82,53 @@ check("B6 scale is exact fraction", abs(probe.B6_DEG_PER_COUNT - (1024 / 17870))
 step = probe.small_offset_step_raw()
 check("small-offset raw ramp cannot exceed declared rate", step > 0 and (step * probe.B6_DEG_PER_COUNT / probe.B6_PERIOD_S) <= probe.SMALL_OFFSET_MAX_RATE_DEG_S)
 check("raw ramp converges without overshoot", [probe.step_toward_raw(v, 5, 2) for v in (0, 4, 5, 7)] == [2, 5, 5, 5])
-check("raw COM target angle uses wire big-endian", probe.decode_cell(
-    probe.Cell("target", probe.COM_WINDOW_BASE + 4, 2, True, "big"), b"\xff\xf0") == -16)
-check("CAN-health delta keeps physical-bus error and TX witnesses", probe.can_health_delta(
-    {"bus_off_cnt": 1, "transmit_error_cnt": 2, "total_error_cnt": 3, "total_tx_cnt": 10,
-     "last_error": "AckError"},
-    {"bus_off_cnt": 1, "transmit_error_cnt": 4, "total_error_cnt": 6, "total_tx_cnt": 14,
-     "last_error": "No error"},
-) == {"bus_off_cnt": 0, "transmit_error_cnt": 2, "total_error_cnt": 3, "total_tx_cnt": 4})
+check("exact frame signature includes target, companion, sequence, FV, and MAC",
+      probe.frame_signature(active) == (11, 0x123, 0, 5, 9, 0))
+check("CAN-health delta is modular and cumulative-only", probe.can_health_delta(
+    {"bus_off_cnt": 1, "transmit_error_cnt": 2, "total_error_cnt": 0xFFFFFFFE,
+     "total_tx_cnt": 10, "last_error": "AckError"},
+    {"bus_off_cnt": 1, "transmit_error_cnt": 4, "total_error_cnt": 1,
+     "total_tx_cnt": 14, "last_error": "No error"},
+) == {"bus_off_cnt": 0, "total_error_cnt": 3, "total_tx_cnt": 4})
 
 print("\n== acceptance discriminator ==")
 target = probe.angle_deg_to_raw(3.0)
+phase_frame = probe.build_b6_frame(target_id=11, target_raw=target, sequence=9, message_counter=2, reset_low2=1)
+phase_signature = probe.frame_signature(phase_frame)
+sent_signatures = {phase_signature}
 good = {
-    "publication_generation": 7,
-    "com_window_target_lateral_id": 11, "com_window_target_angle_raw": target,
+    "com_window_target_lateral_id": phase_signature[0], "com_window_target_angle_raw": phase_signature[1],
+    "com_window_companion": phase_signature[2], "com_window_sequence": phase_signature[3],
+    "com_window_fv4": phase_signature[4], "com_window_mac28": phase_signature[5],
     "com_rx_group_state": 0, "com_target_lateral_id": 11, "com_target_angle_raw": target,
     "consumed_generation": 7, "unpacker_status": 0, "staged_status": 0, "snapshot_status": 0,
     "target_lateral_id": 11, "target_angle_raw": target,
     "b6_controller_enable": 1, "global_comm_mode": 0, "controller_bank": 2,
 }
-check("positive ladder is ADMITTED", probe.verdict(good, target_id=11, target_raw=target) == {
+check("positive ladder is ADMITTED", probe.verdict(
+    good, target_id=11, target_raw=target, sent_signatures=sent_signatures) == {
     "admitted": True, "reason": "ADMITTED", "status_healthy": True,
     "com_window_payload_delivered": True, "com_signals_updated": True,
     "payload_delivered": True, "controller_enabled": True, "bank_selected": True,
 })
-check("raw PDU44 COM-window miss is classified first",
-      probe.verdict(dict(good, com_window_target_lateral_id=0), target_id=11, target_raw=target)["reason"] ==
-      "pdu_not_copied_to_com_window")
+def judge(**changes):
+    return probe.verdict(dict(good, **changes), target_id=11, target_raw=target,
+                         sent_signatures=sent_signatures)["reason"]
+check("raw PDU44 signature miss is classified first",
+      judge(com_window_sequence=(phase_signature[3] + 1) & 0x3F) == "pdu_not_copied_to_com_window")
+check("current-angle alias without the phase sequence is rejected",
+      judge(com_window_target_lateral_id=11, com_window_target_angle_raw=target,
+            com_window_sequence=(phase_signature[3] + 1) & 0x3F) == "pdu_not_copied_to_com_window")
 check("COM receive-group block is distinguished from failed PduR delivery",
-      probe.verdict(dict(good, com_target_lateral_id=0, com_rx_group_state=2),
-                    target_id=11, target_raw=target)["reason"] == "com_unpack_blocked_by_rx_group_state")
+      judge(com_target_lateral_id=0, com_rx_group_state=2) == "com_unpack_blocked_by_rx_group_state")
 check("raw COM-to-generated-signal miss is distinguished",
-      probe.verdict(dict(good, com_target_lateral_id=0), target_id=11, target_raw=target)["reason"] ==
-      "com_window_not_unpacked")
+      judge(com_target_lateral_id=0) == "com_window_not_unpacked")
 check("generated-COM-to-snapshot miss is distinguished",
-      probe.verdict(dict(good, target_lateral_id=0), target_id=11, target_raw=target)["reason"] ==
-      "com_signals_not_snapshotted")
-check("unhealthy receive status is classified", probe.verdict(dict(good, snapshot_status=0x11), target_id=11, target_raw=target)["reason"] == "receive_status_unhealthy")
-check("CAFF failure is classified", probe.verdict(dict(good, b6_controller_enable=0), target_id=11, target_raw=target)["reason"] == "b6_controller_not_enabled")
-check("ACBD failure is classified", probe.verdict(dict(good, global_comm_mode=1), target_id=11, target_raw=target)["reason"] == "global_comm_mode_blocks_controller")
-check("ID11 bank failure is classified", probe.verdict(dict(good, controller_bank=7), target_id=11, target_raw=target)["reason"] == "id11_bank_not_selected")
+      judge(target_lateral_id=0) == "com_signals_not_snapshotted")
+check("unhealthy receive status is classified", judge(snapshot_status=0x11) == "receive_status_unhealthy")
+check("CAFF failure is classified", judge(b6_controller_enable=0) == "b6_controller_not_enabled")
+check("ACBD failure is classified", judge(global_comm_mode=1) == "global_comm_mode_blocks_controller")
+check("ID11 bank failure is classified", judge(controller_bank=7) == "id11_bank_not_selected")
 
 print("\n== raw Panda safety envelope ==")
 class FakePanda:
@@ -162,16 +171,18 @@ check("small-offset actuation is hard-capped and rate-bounded", probe.SMALL_OFFS
 check("small-offset target is refreshed from immediate preflight", 'offset_start_raw = angle_deg_to_raw(offset_preflight["steering_angle_deg"])' in source)
 check("bridge-required mode demands heartbeat progression and reports ingress counters", 'RAM bridge heartbeat did not advance' in source and
       'bridge_after_id0 = snapshot_bridge_telemetry' in source and 'bridge_after_id11 = snapshot_bridge_telemetry' in source)
-check("observer-required mode is mutually exclusive with bridge and reports latched transactions",
+check("observer-required mode is mutually exclusive with bridge and samples during each phase",
       'resident = parser.add_mutually_exclusive_group()' in source and '--require-observer' in source and
-      'observer_after_id0 = snapshot_observer_telemetry' in source and 'observer_after_id11 = snapshot_observer_telemetry' in source)
+      'observe_transactions=args.require_observer' in source and 'observer_samples.append' in source)
 check("phase snapshots include freshness and adjacent Toyota/chassis witnesses",
       'snapshot_freshness_state(uds_client, uds_mod, log)' in source and
       'upstream_08a_bus2' in source and 'chassis_081_bus0' in source and 'eps_030_bus0' in source)
-check("each phase records Panda CAN health before and after transmission",
+check("each phase records supporting Panda CAN health without claiming ACK",
       'boundary="before"' in source and 'boundary="after"' in source and
       '"can_health": id11_health' in source and
-      "distinguish Panda enqueue/echo from physical-bus ACK" in plan["panda_can_health"]["purpose"])
+      plan["panda_can_health"]["purpose"].endswith("not a physical-ACK witness"))
+check("offset phase requires the bridge experiment",
+      "small-offset phase requires the RAM route44 bridge experiment" in source)
 
 observer_raw = bytearray(probe.OBSERVER_TELEMETRY_SIZE)
 observer_raw[0:4] = (0x4F364250).to_bytes(4, "little")
@@ -183,13 +194,17 @@ observer_dec = probe.decode_observer_telemetry(bytes(observer_raw))
 check("observer decoder recovers queue/security/wire identity",
       observer_dec["queue_seen"] and observer_dec["b6_target_id"] == 11 and observer_dec["b6_target_raw"] == -16 and
       observer_dec["b6_sequence"] == 62 and observer_dec["b6_fv4"] == 13 and observer_dec["b6_mac28"] == 0x1234567)
-check("observer phase witness requires exact queued target and zero MAC",
-      probe.observer_matches_phase(observer_dec, target_id=11, target_raw=-16) is False)
-observer_zero_mac = dict(observer_dec, b6_mac28=0)
-check("observer phase witness accepts exact queued zero-MAC candidate",
-      probe.observer_matches_phase(observer_zero_mac, target_id=11, target_raw=-16) is True)
-check("sticky prior-phase queue state cannot masquerade as ID11 ingress",
-      probe.observer_matches_phase(dict(observer_zero_mac, b6_target_id=0), target_id=11, target_raw=-16) is False)
+observer_signature = probe.observer_signature(observer_dec)
+assert observer_signature is not None
+matching_observer = dict(observer_dec, b6_mac28=0)
+sent_observer = {probe.observer_signature(matching_observer)}
+before_observer = dict(observer_dec, b6_target_id=0)
+witness = probe.observer_phase_witness(before_observer, [matching_observer], sent_observer)
+check("observer witness requires a new exact phase signature",
+      witness["matches_phase"] is True and witness["baseline_collision"] is False)
+collision = probe.observer_phase_witness(matching_observer, [matching_observer], sent_observer)
+check("sticky matching baseline cannot masquerade as new phase ingress",
+      collision["matches_phase"] is False and collision["baseline_collision"] is True)
 
 sim = probe.simulate()
 check("offline simulation reproduces positive/negative verdicts", sim["good_verdict"]["admitted"] is True and sim["bad_verdict"]["admitted"] is False)
@@ -252,18 +267,19 @@ with tempfile.TemporaryDirectory() as td:
     check("patch runbook pins root patch and cumulative CRC", "0x8F930: E1 0F 14 D3 -> E0 07 14 D3" in patch_runbook and "8F948=003A" in patch_runbook and "8F952=E001" in patch_runbook and "EC525C33" in patch_runbook)
     check("patch runbook encodes proven NRTD lifecycle and stage3-only restore", "NRC `0x22` in READY" in patch_runbook and "Full OFF -> NRTD" in patch_runbook and "RESTORE reverses **stage 3 only**" in patch_runbook)
     check("kit manifest pins current opendbc and Panda revisions", len(manifest["repositories"]["opendbc"].get("head", "")) == 40 and len(manifest["repositories"]["panda"].get("head", "")) == 40)
-    check("runbook is observer-first, bridge-second, admitted-only offset",
+    check("runbook is observer-first, bridge-second, bridge-only offset",
           "install the non-bypassing observer" in runbook and "--require-observer" in runbook and
-          "Only after the observer proves B6 queue ingress" in runbook and "--require-bridge" in runbook and
-          "--small-offset-deg 0.5" in runbook and "Only if the immediately preceding ID11 current-angle phase says `ADMITTED`" in runbook)
+          "Only after `observer.id11_phase.matches_phase == true`" in runbook and "--require-bridge" in runbook and
+          "--small-offset-deg 0.5" in runbook and
+          "Only if the immediately preceding **bridge** ID11/current-angle phase says `ADMITTED`" in runbook)
     check("runbook explicitly forbids another result-bit flash patch",
           "do not add another persistent result-bit patch" in runbook and
-          "historical/recovery artifacts" in runbook and "pre-aggregate SecOC queue sample point" in runbook)
+          "historical/recovery artifacts" in runbook and "pre-`0x667E6` SecOC queue sample point" in runbook)
     check("runbook states the bounded steering ramp", "rate-limits" in runbook and "6 deg/s" in runbook)
-    check("runbook joins observer, raw COM, unpack gate, and physical TX health",
-          "Panda TX echo proves host-to-Panda enqueue, not physical-bus ACK" in runbook and
-          "FEBE4C02/FEBE4C03" in runbook and "FEBE7F68 >= 2" in runbook and
-          "physical TX/ACK/bit-timing problem" in runbook and "matches_phase" in runbook)
+    check("runbook rejects target-angle and CAN-health false proof",
+          "one B3..B31 raw PDU44 COM read" in runbook and "FEBE7F68" in runbook and
+          "supporting evidence, not physical-ACK proof" in runbook and
+          "current-angle alone is no longer accepted" in runbook and "matches_phase" in runbook)
     check("runbook pins current bus0 and exclusive Panda ownership", "current post-repin" in runbook and "Panda bus 0" in runbook and "pandad|boardd" in runbook)
 
 print(f"\nResults: {passed} passed, {failed} failed")

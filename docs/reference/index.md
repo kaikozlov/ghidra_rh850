@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 428 · Corrections: 158 · Open questions: 54 · Docs: 118 · Suites: 230
+Findings: 429 · Corrections: 159 · Open questions: 54 · Docs: 118 · Suites: 230
 
 ## Reading this index
 
@@ -447,6 +447,7 @@ Findings: 428 · Corrections: 158 · Open questions: 54 · Docs: 118 · Suites: 
 | <a id="finding-var-116"></a>**VAR-116** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_f33_gate2_root_result_patch.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 | <a id="finding-var-117"></a>**VAR-117** | [docs/history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md](../history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md) | [2026-09-02-camry-f33-b6-review-handoff](../history/2026-09/2026-09-02-camry-f33-b6-review-handoff.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000.py --section b6_receive_bridge`, `tests/verify_camry_f33_b6_transaction_observer.py`, `tests/verify_camry_f33_b6_stationary_probe.py`, `tests/verify_camry_f33_b6_bridge_install.py` | OQ-054 |
 | <a id="finding-var-118"></a>**VAR-118** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_f33_b6_stationary_probe.py` | — |
+| <a id="finding-var-119"></a>**VAR-119** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 
 ## Open-questions index
 
@@ -669,6 +670,7 @@ Findings: 428 · Corrections: 158 · Open questions: 54 · Docs: 118 · Suites: 
 | <a id="correction-corr-156"></a>**CORR-156** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 | <a id="correction-corr-157"></a>**CORR-157** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md), [docs/history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md](../history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md) | yes |
 | <a id="correction-corr-158"></a>**CORR-158** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
+| <a id="correction-corr-159"></a>**CORR-159** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 
 ## Document registry
 
