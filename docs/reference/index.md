@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 432 · Corrections: 161 · Open questions: 54 · Docs: 119 · Suites: 230
+Findings: 433 · Corrections: 161 · Open questions: 54 · Docs: 119 · Suites: 230
 
 ## Reading this index
 
@@ -451,6 +451,7 @@ Findings: 432 · Corrections: 161 · Open questions: 54 · Docs: 119 · Suites: 
 | <a id="finding-var-120"></a>**VAR-120** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_f33_b6_transaction_observer.py`, `tests/verify_camry_f33_b6_bridge_install.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 | <a id="finding-var-121"></a>**VAR-121** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [camry_f33_b6_observer_runbook](../../exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md) | `tests/verify_camry_8965F3307000.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 | <a id="finding-var-122"></a>**VAR-122** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [camry_f33_b6_observer_runbook](../../exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md) | — | — |
+| <a id="finding-var-123"></a>**VAR-123** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_camry_f33_gate2_root_result_patch.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 
 ## Open-questions index
 
