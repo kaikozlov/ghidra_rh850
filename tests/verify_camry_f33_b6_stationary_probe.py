@@ -35,9 +35,9 @@ check("B6 is fixed 32-byte CAN-FD at 50 Hz", probe.B6_ADDR == 0x0B6 and probe.B6
 check("raw COM window is one B3..B31 read", probe.COM_WINDOW_WITNESS.address == 0xFEBE4C02 and
       probe.COM_WINDOW_WITNESS.length == 29 and plan["raw_com_window"]["length"] == 29)
 check("every post-COM acceptance-ladder cell is exposed", [c.address for c in probe.LADDER_CELLS] == [
-    0xFEBE5364, 0xFEBE7F68, 0xFEBE80BC, 0xFEBE80B8, 0xFEBE80C8, 0xFEBE80C9,
-    0xFEBEF13E, 0xFEBEADB9, 0xFEBEADB0, 0xFEBEAE90, 0xFEBECAFF, 0xFEBEACBD,
-    0xFEBECB00,
+    0xFEBE5364, 0xFEBE5360, 0xFEBE5361, 0xFEBE5365, 0xFEBE7F68, 0xFEBE80BC,
+    0xFEBE80B8, 0xFEBE80C8, 0xFEBE80C9, 0xFEBEF13E, 0xFEBEADB9, 0xFEBEADB0,
+    0xFEBEAE90, 0xFEBECAFF, 0xFEBEACBD, 0xFEBECB00,
 ])
 check("all ladder cells validate under existing SID23 RMBA policy", all(probe.validate_read(probe.RAM_ID, c.address, c.length) is None for c in probe.LADDER_CELLS))
 check("RAM bridge telemetry cells are exact and readable", [c.address for c in probe.BRIDGE_TELEMETRY_CELLS] == [
