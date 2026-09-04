@@ -46,12 +46,14 @@ check("RAM bridge telemetry cells are exact and readable", [c.address for c in p
 check("non-bypassing observer telemetry is exact and readable",
       probe.OBSERVER_TELEMETRY_BASE == 0xFEBFFBE0 and probe.OBSERVER_TELEMETRY_SIZE == 28 and
       probe.validate_read(probe.RAM_ID, probe.OBSERVER_TELEMETRY_BASE, probe.OBSERVER_TELEMETRY_SIZE) is None)
-check("wide command-funnel trace cells are exact and readable", [c.address for c in probe.TRACE_CELLS] == [
-    0xFEBE5564, 0xFEBEC81A, 0xFEBECB38, 0xFEBECC48, 0xFEBECC50, 0xFEBECC60,
-    0xFEBECC62, 0xFEBECC66, 0xFEBECC64, 0xFEBEAC54, 0xFEBEAC56,
+check("freshness and command-funnel trace cells are exact and readable", [c.address for c in probe.TRACE_CELLS] == [
+    0xFEBE5564, 0xFEBE551A, 0xFEBE5526, 0xFEBEC81A, 0xFEBECB38, 0xFEBECC48,
+    0xFEBECC50, 0xFEBECC60, 0xFEBECC62, 0xFEBECC66, 0xFEBECC64, 0xFEBEAC54,
+    0xFEBEAC56,
 ] and all(probe.validate_read(probe.RAM_ID, c.address, c.length) is None for c in probe.TRACE_CELLS))
-check("all four freshness slots are read in one exact 48-byte block",
+check("committed and pending freshness pairs are read in one exact 48-byte block",
       probe.FRESHNESS_STATE_BASE == 0xFEBE55DC and probe.FRESHNESS_STATE_SIZE == 48 and
+      plan["freshness_state"]["layout"] == "committed0[12], committed1[12], pending0[12], pending1[12]" and
       probe.validate_read(probe.RAM_ID, probe.FRESHNESS_STATE_BASE, probe.FRESHNESS_STATE_SIZE) is None)
 check("plan names forbidden mutation surfaces", all(token in plan["forbidden"] for token in (
     "programming session", "SecurityAccess", "RequestDownload", "TransferData", "memory writes", "RoutineControl", "0x08A TX",
@@ -95,8 +97,11 @@ print("\n== acceptance discriminator ==")
 target = probe.angle_deg_to_raw(3.0)
 phase_frame = probe.build_b6_frame(target_id=11, target_raw=target, sequence=9, message_counter=2, reset_low2=1)
 phase_signature = probe.frame_signature(phase_frame)
-sent_signatures = {phase_signature}
+phase_payload = phase_frame[3:]
+sent_payloads = {phase_payload}
+baseline_payload = b"\xff" * probe.COM_WINDOW_WITNESS.length
 good = {
+    "com_window_b3_b31_hex": phase_payload.hex(),
     "com_window_target_lateral_id": phase_signature[0], "com_window_target_angle_raw": phase_signature[1],
     "com_window_companion": phase_signature[2], "com_window_sequence": phase_signature[3],
     "com_window_fv4": phase_signature[4], "com_window_mac28": phase_signature[5],
@@ -106,19 +111,33 @@ good = {
     "b6_controller_enable": 1, "global_comm_mode": 0, "controller_bank": 2,
 }
 check("positive ladder is ADMITTED", probe.verdict(
-    good, target_id=11, target_raw=target, sent_signatures=sent_signatures) == {
+    good, target_id=11, target_raw=target,
+    sent_payloads=sent_payloads, baseline_payload=baseline_payload) == {
     "admitted": True, "reason": "ADMITTED", "status_healthy": True,
-    "com_window_payload_delivered": True, "com_signals_updated": True,
-    "payload_delivered": True, "controller_enabled": True, "bank_selected": True,
+    "com_window_payload_delivered": True, "com_window_baseline_collision": False,
+    "com_signals_updated": True, "payload_delivered": True,
+    "controller_enabled": True, "bank_selected": True,
 })
-def judge(**changes):
-    return probe.verdict(dict(good, **changes), target_id=11, target_raw=target,
-                         sent_signatures=sent_signatures)["reason"]
-check("raw PDU44 signature miss is classified first",
-      judge(com_window_sequence=(phase_signature[3] + 1) & 0x3F) == "pdu_not_copied_to_com_window")
-check("current-angle alias without the phase sequence is rejected",
-      judge(com_window_target_lateral_id=11, com_window_target_angle_raw=target,
-            com_window_sequence=(phase_signature[3] + 1) & 0x3F) == "pdu_not_copied_to_com_window")
+def judge(*, raw_payload=phase_payload, baseline=baseline_payload, **changes):
+    return probe.verdict(
+        dict(good, com_window_b3_b31_hex=raw_payload.hex(), **changes),
+        target_id=11, target_raw=target,
+        sent_payloads=sent_payloads, baseline_payload=baseline,
+    )["reason"]
+sequence_miss = bytearray(phase_payload)
+sequence_miss[4] = (sequence_miss[4] + 1) & 0x3F
+check("raw PDU44 payload miss is classified first",
+      judge(raw_payload=bytes(sequence_miss)) == "pdu_not_copied_to_com_window")
+omitted_field_miss = bytearray(phase_payload)
+omitted_field_miss[5] ^= 0x01
+check("bytes omitted from the compact signature still require exact equality",
+      probe.frame_signature(b"\x00\x00\x00" + bytes(omitted_field_miss)) == phase_signature and
+      judge(raw_payload=bytes(omitted_field_miss)) == "pdu_not_copied_to_com_window")
+check("current-angle alias without the exact phase payload is rejected",
+      judge(raw_payload=bytes(sequence_miss), com_window_target_lateral_id=11,
+            com_window_target_angle_raw=target) == "pdu_not_copied_to_com_window")
+check("a matching stale phase baseline is not delivery proof",
+      judge(baseline=phase_payload) == "pdu_not_copied_to_com_window")
 check("COM receive-group block is distinguished from failed PduR delivery",
       judge(com_target_lateral_id=0, com_rx_group_state=2) == "com_unpack_blocked_by_rx_group_state")
 check("raw COM-to-generated-signal miss is distinguished",
@@ -129,7 +148,6 @@ check("unhealthy receive status is classified", judge(snapshot_status=0x11) == "
 check("CAFF failure is classified", judge(b6_controller_enable=0) == "b6_controller_not_enabled")
 check("ACBD failure is classified", judge(global_comm_mode=1) == "global_comm_mode_blocks_controller")
 check("ID11 bank failure is classified", judge(controller_bank=7) == "id11_bank_not_selected")
-
 print("\n== raw Panda safety envelope ==")
 class FakePanda:
     def __init__(self):
@@ -169,17 +187,23 @@ check("no download/transfer/write/routine diagnostic API is referenced", all(tok
 )))
 check("small-offset actuation is hard-capped and rate-bounded", probe.SMALL_OFFSET_HARD_CAP_DEG == 2.0 and probe.SMALL_OFFSET_MAX_RATE_DEG_S == 6.0 and "ID11 current-angle was not ADMITTED" in source and "max_step_raw=small_offset_step_raw()" in source)
 check("small-offset target is refreshed from immediate preflight", 'offset_start_raw = angle_deg_to_raw(offset_preflight["steering_angle_deg"])' in source)
-check("bridge-required mode demands heartbeat progression and reports ingress counters", 'RAM bridge heartbeat did not advance' in source and
-      'bridge_after_id0 = snapshot_bridge_telemetry' in source and 'bridge_after_id11 = snapshot_bridge_telemetry' in source)
+check("bridge-required mode demands heartbeat progression and reports ingress counters",
+      'RAM bridge heartbeat did not advance' in source and
+      'snapshot_bridge_telemetry(uds_client, uds_mod, log)' in source and
+      '"after_id0": bridge_after["id0"]' in source and '"after_id11": bridge_after["id11"]' in source)
 check("observer-required mode is mutually exclusive with bridge and samples during each phase",
       'resident = parser.add_mutually_exclusive_group()' in source and '--require-observer' in source and
       'observe_transactions=args.require_observer' in source and 'observer_samples.append' in source)
-check("phase snapshots include freshness and adjacent Toyota/chassis witnesses",
+check("phase order is explicit and supports active-first carryover testing",
+      plan["phases"]["default_order"] == "id0-id11" and plan["phases"]["alternate_order"] == "id11-id0" and
+      '"--phase-order", choices=("id0-id11", "id11-id0")' in source)
+check("phase snapshots include freshness, retry/profile state, and adjacent CAN witnesses",
       'snapshot_freshness_state(uds_client, uds_mod, log)' in source and
+      'secoc_freshness_retry_budget' in source and 'b6_profile_state' in source and
       'upstream_08a_bus2' in source and 'chassis_081_bus0' in source and 'eps_030_bus0' in source)
 check("each phase records supporting Panda CAN health without claiming ACK",
       'boundary="before"' in source and 'boundary="after"' in source and
-      '"can_health": id11_health' in source and
+      '"can_health": health' in source and
       plan["panda_can_health"]["purpose"].endswith("not a physical-ACK witness"))
 check("offset phase requires the bridge experiment",
       "small-offset phase requires the RAM route44 bridge experiment" in source)

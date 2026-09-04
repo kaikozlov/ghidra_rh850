@@ -1152,21 +1152,27 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   This stock-architecture attribution is **not a blocker for the independent
   development B6 ingress**. VAR-117/CORR-157 supersede the stage-by-stage Gate-2
   patch plan: cumulative stages 3, 4, and 5 were each applied and reboot-verified,
-  yet direct PDU44 COM remained ID0 during stationary ID11 tests. The exact F33
-  receive path is now closed through previously unpromoted CanIf, freshness-commit,
-  and route44 COM callbacks; there is no justified next result/status patch. The
-  remaining live discriminator is whether the transmitted FD/32 B6 appears at the
-  EPS SecOC profile2 queue immediately before the stock `667E6` aggregate. The first
-  RAM experiment is deliberately **non-bypassing**: it latches queue presence, the
-  receiver-side B3..B7/B28..B31 identity, pre/post `FEBE5564` and publication state,
-  post-aggregate queue length, and ICU-S done/status while leaving stock `667E6`
-  untouched. The host concurrently records all four freshness slots, the COM/application
-  ladder, the `CB38 -> CC48 -> CC60 -> CC62/CC64` command funnel, and raw `0x08A/0x081/0x030`.
-  Install in NRTD, heartbeat-attest, transition directly to READY without OFF, and use
-  `--require-observer`. Only if queue ingress is observed should a second NRTD->READY
-  run install the separate route44 bridge and use `--require-bridge`. A negative observer
-  is bounded to the pre-aggregate sample point; no steering offset is justified before
-  `ADMITTED`.
+  yet their stationary ID11 tests left generated `FEBE80BC/FEBE80B8` stale.
+  Those runs did not read raw PDU44 COM, so CORR-162 leaves delivery and the
+  first rejecting stage open. The exact F33 receive path is closed through
+  previously unpromoted CanIf, freshness, and route44 COM callbacks; there is
+  no justified next result/status patch. The next live discriminator asks
+  whether the transmitted FD/32 B6 appears at the EPS SecOC profile2 queue
+  immediately before the stock `667E6` aggregate, then joins freshness state
+  and the raw COM window in the same run. The first RAM experiment is
+  deliberately **non-bypassing**: it counts queue samples, records the
+  receiver-side B3..B7/B28..B31 identity, pre/post `FEBE5564` and publication
+  state, post-aggregate queue length, and ICU-S done/status while leaving stock
+  `667E6` untouched. The host concurrently records freshness retry budget,
+  profile-2 state, the committed0/committed1/pending0/pending1 records, full
+  raw COM, the application ladder, the
+  `CB38 -> CC48 -> CC60 -> CC62/CC64` command funnel, and raw
+  `0x08A/0x081/0x030`. Install in NRTD, heartbeat-attest, transition directly
+  to READY without OFF, and use `--require-observer --phase-order id11-id0`.
+  Only after exact queue ingress is observed should a second NRTD->READY run
+  install the separate route44 bridge and use `--require-bridge`. A negative
+  observer is bounded to the pre-aggregate sample point; no steering offset is
+  justified before `ADMITTED`.
   Resolving OQ-054 remains required for stock architecture, not for this B6 ingress
   discriminator.
 

@@ -3460,7 +3460,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 
 - **Superseded interpretation:** VAR-116/117 and §57.5/57.6 called `FEBE80BC/FEBE80B8` the direct COM cells and treated their unchanged ID0/current-angle contents as evidence that stage-3-through-stage-5 B6 had not reached route44 COM delivery.
 - **Exact correction:** raw PDU44 storage begins at `FEBE4BFF`; Target Lateral ID and target angle reside at `FEBE4C02` and big-endian `FEBE4C03..04`. `FUN_0004BD46` writes `80BC/80B8` only after testing `FEBE7F68 < 2` and a generation change. The earlier probes sampled neither the raw target fields nor `FEBE7F68`. Stale `80BC/80B8` therefore proves failed generated-signal update, not failed CanIf/PduR/SecOC delivery.
-- **Publication-counter correction:** `FEBE5364` cannot independently fill that gap. Retained stage1/2/3 traces show approximately 100-Hz progression; stage 3 advances six counts over the roughly 64-ms baseline interval before the probe B6 sender starts, and 71 counts across 36 B6 sends between the first/last reads of each phase. Although static code still identifies `7D72C -> 8E772(44)` as the writer, the exact periodic route44 source or stale-queue lifecycle is unresolved, so counter motion is not a unique witness for the newly transmitted frame.
+- **Publication-counter correction:** `FEBE5364` cannot independently fill that gap. CORR-161's raw timeline re-read supersedes the initial approximately-100-Hz/background interpretation: publication generation is unchanged across the retained pre-sender interval (including 46 native `0x090` frames) and moves during B6 phases. The earlier six-count “baseline” delta compared publication with a different consumed-generation cell. Counter movement remains non-unique because the retained probes never sampled raw COM; CORR-162 separately disproves the apparent scalar ID0 delivery.
 - **Cross-target correction:** direct Corolla H/F versus Camry CodeFlash comparison finds the same B6 receive contract, not a Camry-only hidden security field: byte-identical CanIf descriptors, identical RSCFD acceptance metadata outside destination index, profile-2 equality outside relocated callbacks/routes, byte-identical queue dispatch, and the same enqueue/verify/Gate-2 control shape.
 - **Correct discriminator:** sample receiver queue bytes with the non-bypassing observer, raw COM `B3/B4:B5`, `FEBE7F68`, then `80BC/80B8` and the application snapshot in one current-angle-only run. Record Panda CAN health around the phase; a TX return is generated before physical acknowledgement. Do not add another persistent result-bit patch.
 - **Canonical:** VAR-118; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §57.7; `tests/verify_camry_f33_b6_stationary_probe.py`.
@@ -3524,14 +3524,43 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   stock CAN oracle by about 13 minutes.  Its route-44 COM window has no exact
   full-window or bytes-3-through-31 match in that oracle.  Counter values at
   that capture point prove prior activity only.
-- **Current boundary:** route-44 publication movement is transmit-phase
-  locked (about two counts per B6 transmit, quiescent otherwise, including
-  across live `0x090` traffic).  `FEBE5364` is a delivery-activity witness
-  but not an exact-frame witness — on the Gate-2 image it advances for B6
-  transmissions whose bytes never occupy the COM window (see §57.11 /
-  VAR-122).  Route-40/41/45 counters are controls without a causal
-  interpretation.  The exact transaction-queue signature and phase-local
-  deltas remain the discriminator.
+- **Current boundary:** route-44 generation is transmit-phase locked
+  (quiescent before the retained senders, including across live `0x090`
+  traffic, and moving during B6 phases).  It is a route-44 activity witness,
+  not an exact-frame witness: the retained probes never sampled raw COM, and
+  CORR-162 disproves the apparent scalar ID0-delivery result.  Route-40/41/45
+  counters are controls without a causal interpretation.  The phase-local
+  queue count/signature plus exact raw B3..B31 payload is the required
+  discriminator.
 - **Canonical:** VAR-121;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
   §57.10; `tests/verify_camry_8965F3307000.py`.
+
+### CORR-162 — the retained ID0/ID11 delivery split was a stale scalar-baseline alias
+
+- **Superseded claim:** VAR-122 and the first §57.11 said both stage-3
+  inactive-ID phases published exact B3..B31 bytes to the route-44 COM
+  window while active-ID phases were rejected, then VAR-123 attributed that
+  split to freshness machinery.
+- **Exact trace correction:** those retained probes never read the raw
+  29-byte COM window.  Their `com_payload_delivered` field compared only
+  generated Target Lateral ID and angle with a one-count tolerance.  Both
+  stage-3 baselines were ID 0 / raw 104, and every ID0 and ID11 ladder
+  remained ID 0 / raw 104.  The ID0 command was raw 105, so unchanged
+  baseline state satisfied the old tolerance; no injected-frame delivery was
+  observed in either phase.
+- **Preserved static result:** F33 performs profile freshness reconstruction
+  before the patched MAC/Gate-2 stage.  Its 48-byte state block contains
+  committed slots 0/1 followed by pending slots 0/1; profile 2/B6 selects
+  slot 1, not `base + profile*12`.  B6 committed/pending records are
+  `FEBE55E8`/`FEBE5600`.
+- **Current discriminator:** the probe now requires byte-exact membership of
+  the one-block B3..B31 COM read in the phase TX set, rejects a matching
+  pre-phase baseline, captures retry budget/profile state/committed and
+  pending freshness, resets its message counter on every `0x00F` reset
+  change, and supports active-first phase order.  No new live result is
+  claimed.
+- **Canonical:** VAR-122/123;
+  [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
+  §§57.11–57.12; `exploit/behavioral_proof/camry_f33_b6_stationary_probe.py`;
+  `tests/verify_camry_f33_b6_stationary_probe.py`.

@@ -3838,19 +3838,33 @@ The next bounded patch moves to the **definition**, not another consumer. The re
 
 Stage 3 intentionally starts from the live-proven stage-2 image and changes only that new four-byte site. With `r26=0`, the remaining `FUN_0008F906` path receives the same boolean/status values and takes the same success arm as native verified success; the existing `8F948=003A` and `8F952=E001` edits become outcome-equivalent to the stock instructions for this function but are left present to keep the next experiment one-new-site. The deterministic cumulative image has CRC prefix **`0x13ADA3CC`**, fixup **`0xEC525C33`**, residue `0xFFFFFFFF`, and SHA-256 **`67f4aaa803f9f3df3e5b2bf31d2c8950ebbb3870fa3f5d439f585caae3a8313c`**. RESTORE reverses stage 3 only and returns to the exact reboot-verified stage-2 image. Stage 3 is not a live success claim.
 
-The stationary discriminator is also sharpened before that experiment. `FUN_0004BD46` writes B6 sig261/sig262 directly to generated-COM cells `FEBE80BC/FEBE80B8`; `FUN_00058074` carries them to `FEBEF130/FEBEF1FA`; `FUN_000BCD66` copies those values to `FEBEADB0/FEBEAE90`. The probe now reads `80BC/80B8` as an intermediate rung. A failure there is classified `pdu_not_delivered_to_com`; a successful COM update followed by stale `ADB0/AE90` is `com_delivered_not_snapshot`. Positive `ADMITTED` still requires the complete downstream ladder and bank 2.
+At that experiment stage, `FUN_0004BD46` was known to write B6 sig261/sig262 to generated-COM cells `FEBE80BC/FEBE80B8`; `FUN_00058074` carries them to `FEBEF130/FEBEF1FA`, and `FUN_000BCD66` copies those values to `FEBEADB0/FEBEAE90`. The probe added `80BC/80B8` as an intermediate rung and then labeled a miss there `pdu_not_delivered_to_com`. CORR-158/162 later correct that label: these are post-window generated scalars, not raw PDU44, and the retained ID0 result was baseline-confounded. Positive `ADMITTED` still requires the complete downstream ladder and bank 2.
 
 The next field sequence is therefore **NRTD zero-write stage-3 preflight -> APPLY only on an exact match -> full OFF -> NRTD zero-write persistence verification -> full OFF -> READY admission-only B6**. The 0.5-degree offset remains forbidden until the admission-only run reports `ADMITTED`.
 
-### 57.6 2026-09-01: stages 3–5 remain non-delivering; receive pipeline is closed and the next test is queue observation
+### 57.6 2026-09-01: stages 3–5 leave generated B6 scalars stale; receive pipeline is closed and the next test is queue observation
 
-Stage 3 was subsequently applied and reboot-verified exactly, then failed the READY/Park ID11 discriminator at the **direct generated-COM rung**: `FEBE80BC/FEBE80B8` remained the prior ID0/current-angle payload. A relay-open authority-isolation run produced the same result. Stage 4 then forced the profile-2 freshness callback result at `0x8F7E6` to zero and persisted as SHA `2e2f0819…6640e`; direct COM still did not update. Stage 5 finally patched the actual command-7 result compare at `0x8F890 E051->E001`, persisted as SHA `669cedf8…01af`, and again left direct COM unchanged. These are retained negative experiments, not a reason to continue patching result bits.
+Stage 3 was subsequently applied and reboot-verified exactly, then left
+`FEBE80BC/FEBE80B8` at the prior ID0/current-angle values in READY/Park.  A
+relay-open authority-isolation run produced the same result.  Stage 4 forced
+the profile-2 freshness callback result at `0x8F7E6` to zero and persisted as
+SHA `2e2f0819…6640e`; the generated scalars remained stale.  Stage 5 patched
+the command-7 result compare at `0x8F890 E051->E001`, persisted as SHA
+`669cedf8…01af`, and again left those generated scalars unchanged.  Because
+none of these runs sampled raw PDU44 B3..B31, they do not establish
+non-delivery (CORR-158/CORR-162) and are not a reason to keep patching result
+bits.
 
 A function-boundary-independent exact-F33 walk now closes the configured path. RSCFD controller-1 rule39 is B6 and has the same acceptance metadata as healthy protected `0x0D7`; CanIf descriptor39 is FD `0x400000B6/32` and maps to PduR44. The route44 Toyota-checksum hook is disabled for this row. PduR44 enters SecOC profile2, whose level-1 queue is `FEBE547A` with secured buffer `FEBE54D4`. The remaining pre-freshness gates are min-length 4 and selector0. Previously unpromoted callbacks `0x903A0` and `0x90448` were recovered from raw bytes; the latter commits pending freshness through `0x90D6A` but does not dequeue or invalidate the PDU. `8F98C` has no extra success gate after `8F746`. On native success, `8F906 -> 8F546 -> 90204 -> 81CA6` selects previously unpromoted route44 callback `0x7D72C`; it copies 32 bytes into `FEBE4BFF`, performs route bookkeeping, and invokes sole-caller new-data helper `8E772(44)` to advance `FEBE5364`. `4BD46` then unpacks the PDU into `80BC/80B8`. Queue cleanup occurs later. No second local PDU44 producer or post-delivery rejection is recovered.
 
-Therefore the only live edge not yet proved is **whether Panda's transmitted B6 actually entered the F33 SecOC queue**. Route `00000037--dec6fe39cb` contains 18,456 B6 `sendcan` records, 18,447 Panda TX echoes and nine reject-return records, but zero native `src=0/1/2` B6; it validates our sender construction/timing, not EPS receipt or a stock-native transcript.
+The first live edge not yet proved is whether Panda's transmitted B6 entered
+the F33 profile-2 queue; freshness, raw-COM publication, and scalar unpacking
+also remain dynamically unobserved.  Route `00000037--dec6fe39cb` contains
+18,456 B6 `sendcan` records, 18,447 Panda TX echoes and nine reject-return
+records, but zero native `src=0/1/2` B6; it validates sender construction and
+timing, not EPS receipt or a stock-native transcript.
 
-The next test is not stage 6, and it is not a bypass first. A dedicated **non-bypassing transaction observer** now occupies the same live-proven high tail without calling route44: 494 bytes of resident code plus 28 bytes of telemetry, 522/524 bytes total, zero relocations, raw SHA `42af3133…aa3f`, authenticated 4-KiB payload SHA `29841b49…bbbb`. At the exact pre-`667E6` scheduler point it latches whether profile2 is queued, the last receiver-side B3..B7/B28..B31, and pre-SecOC `FEBE5564/FEBE5364`; immediately after the unchanged stock aggregate it latches queue length, post-SecOC result/publication state, and ICU-S `FEBF13BE/BF`, which application SID23 cannot read directly. The stationary probe's `--require-observer` mode concurrently reads all four 12-byte freshness slots, direct COM/application admission state, `C81A`, `CB38`, `CC48`, `CC50`, `CC60`, `CC62`, `CC66`, `CC64`, `AC54`, `AC56`, and raw `0x08A/0x081/0x030`. Install it in NRTD, heartbeat-attest, then transition directly NRTD→READY without OFF. If `queue_seen` remains false, the bounded conclusion is only **not observed at this pre-aggregate queue sample point**; do not invent another SecOC result patch. If queue ingress is observed, the existing RAM bridge becomes the second experiment: install it on a fresh NRTD cycle, then use `--require-bridge` to snapshot the full zero-MAC PDU and re-enter Toyota's stock `0x7D72C` receive callback after SecOC. No offset before `ADMITTED`.
+The next test is not stage 6, and it is not a bypass first. A dedicated **non-bypassing transaction observer** now occupies the same live-proven high tail without calling route44: 494 bytes of resident code plus 28 bytes of telemetry, 522/524 bytes total, zero relocations, raw SHA `42af3133…aa3f`, authenticated 4-KiB payload SHA `29841b49…bbbb`. At the exact pre-`667E6` scheduler point it latches whether profile2 is queued, the last receiver-side B3..B7/B28..B31, and pre-SecOC `FEBE5564/FEBE5364`; immediately after the unchanged stock aggregate it latches queue length, post-SecOC result/publication state, and ICU-S `FEBF13BE/BF`, which application SID23 cannot read directly. The stationary probe's `--require-observer` mode concurrently reads the two committed and two pending 12-byte freshness records, the COM/application ladder, and `CB38 -> CC48 -> CC60 -> CC62/CC64`. Only after a positive queue observation does the separate existing RAM route44 bridge become a justified second experiment. No new flash patch is part of this sequence.
 
 ### 57.7 Independent review: the live probe stopped one rung too late (VAR-118 / CORR-158)
 
@@ -3875,16 +3889,15 @@ the generated B6 scalars did not update; it does **not** distinguish a missing
 CanIf/SecOC enqueue, a zero-length/stale route44 copy, or a copied raw window
 blocked at the `FEBE7F68 < 2` unpacker gate.
 
-The retained traces also show that `FEBE5364` is not an ingress witness by
-itself. In the clean stage-3 READY file, the counter advances by 71 between
-the first and last publication reads in each phase while 36 B6 transmissions
-occur between those reads. Stage 1 and stage 2 show the same approximately
-100-Hz progression, and the stage-3 baseline advances by six during the
-roughly 64 ms between its publication and consumed-generation reads before
-the probe sender starts. Static code still gives `7D72C -> 8E772(44)` as the
-writer, but these traces show periodic route44 publication activity that is
-not uniquely attributable to the newly transmitted B6. Its exact source or
-stale-queue lifecycle remains unresolved.
+The retained traces also show that `FEBE5364` is not an exact-frame witness.
+In both clean stage-3 files it is 39 at the earliest raw read and remains 39
+at the baseline about 224.5 ms later while 46 native `0x090` frames arrive.
+It then moves during each B6 transmit phase.  The earlier claim of six
+pre-sender increments was a cross-cell comparison between publication and
+consumed generation, not two publication samples.  Static code pins
+route-44 generation updates to `7D72C -> 8E772(44)`, but no retained phase
+sampled raw COM, so generation movement cannot identify the newly transmitted
+frame or prove publication of its bytes (VAR-121/CORR-161/CORR-162).
 
 An exact binary comparison does not reveal a Camry-only B6 security contract.
 Corolla H `0x23228` and Camry `0x23328` B6 RSCFD rules differ only in their
@@ -3917,14 +3930,15 @@ false-positive a later phase; a later queued B6 could overwrite a real hit and
 false-negative it. The raw COM check had the same alias: it compared only
 B3/B4:B5 even though `7D72C` copies all 32 bytes into `FEBE4BFF`.
 
-The probe now records every exact transmitted signature as
-`(ID, angle, companion, sequence, FV4, MAC28)`. It reads raw COM B3..B31 in one
-SID23 response and accepts raw delivery only when that full decoded signature
-appeared in the current phase. Observer mode takes a pre-phase baseline and
-during/after-phase samples; a positive `matches_phase` requires an exact
-current-phase signature absent from the baseline. Because the resident still
-has no capture counter and retains only its last queued value, a negative or
-baseline collision remains **inconclusive** and cannot justify a patch.
+The probe now records every transmitted B3..B31 payload as well as its compact
+`(ID, angle, companion, sequence, FV4, MAC28)` signature. It reads raw COM
+B3..B31 in one SID23 response and accepts raw delivery only when all 29 bytes
+equal a payload emitted in the current phase and differ from the immediate
+pre-phase raw-window baseline. Observer mode takes a pre-phase baseline and
+during/after-phase samples; a positive `matches_phase` requires a compact
+current-phase signature absent from that baseline. Because the resident still
+retains only its last queued value, a negative or baseline collision remains
+**inconclusive** and cannot justify a patch.
 
 Panda CAN-health handling is also narrowed. REC/TEC are endpoint gauges, not
 cumulative event counters. Only cumulative counters are differenced modulo
@@ -3977,11 +3991,12 @@ left `ADB0=0`/bank 7. Thus the highest-confidence unresolved failure boundary is
 enqueue/state, or transient route44 publication. It is not a missing downstream
 TSS3 steering-arbitration branch.
 
-The raw stage-3 trace independently makes the old publication counter unusable
-as that discriminator. Consecutive `FEBE5364` samples advance at
-`98.55..102.70 Hz` before and during the 50-Hz injected phases. Static code still
-pins the write to `7D72C -> 8E772(44)`, but the periodic source/default lifecycle
-is unresolved; a generation delta cannot be attributed to the injected B6.
+The corrected raw stage-3 timeline independently makes the publication counter
+insufficient as that discriminator. `FEBE5364` is quiescent before both
+senders, including across native `0x090`, and moves during injected phases.
+Static code pins route-44 generation updates to `7D72C -> 8E772(44)`, but the
+retained runs did not sample raw COM; a generation delta cannot identify the
+frame or prove its payload was published.
 
 The non-bypassing resident is therefore revised rather than adding a flash
 patch. Its 28-byte telemetry now contains modulo-256 counts for pre-`667E6` B6
@@ -4076,100 +4091,94 @@ COM window has no exact full-window or bytes-3-through-31 match in that
 oracle; its zero at byte 3 is non-unique.  It therefore does not identify
 `0x090` as the publication source.
 
-Operational consequence: `FEBE5364` is a transmit-phase-locked delivery
-witness — movement during a B6 phase correlates with protected route-44
-transactions, and pre-phase movement in any future run would be a new
-phenomenon — but it cannot by itself distinguish which exact frame was
-published, because it advances for B6 transmissions whose exact bytes never
-occupy the COM window (see §57.11).  Route-40, route-41, and neighboring
-route-45 generations remain controls without a causal interpretation.  The
-transaction observer's exact queue signature and phase-local deltas remain
-the required discriminator.  No result patch, output authorization, or
+Operational consequence: `FEBE5364` is a transmit-phase-locked route-44
+activity witness — quiescent before both retained stage-3 senders and moving
+during the B6 phases — but it cannot identify the published frame.  None of
+the retained traces sampled the raw PDU44 COM window, and the scalar
+generated-COM reads are baseline-confounded (see §57.11).  Route-40,
+route-41, and neighboring route-45 generations remain controls without a
+causal interpretation.  The transaction observer's phase-local queue count
+plus signature, followed by an exact one-block B3..B31 COM read, is the
+required discriminator.  No result patch, output authorization, or
 driving-path change follows from this correction.
 
-### 57.11 2026-09-04: on the Gate-2 image, inactive-ID B6 frames publish to the route-44 COM window and active-ID frames never do (VAR-122)
+### 57.11 2026-09-04 re-verification: retained stage-3 traces do not prove either B6 phase reached the COM window (VAR-122 / CORR-162)
 
-Re-analysis of the four retained admission traces with the corrected
-dispatcher model splits delivery by the B6 target-lateral-ID byte — the only
-payload difference between the probe's two phase types.  Every trace
-transmits both phases (TX ID bytes `0x00` and `0x0B`).
+The prior inactive-ID-delivered/active-ID-rejected split was an observer
+alias, not a live result.  The four retained admission traces never read the
+29-byte raw PDU44 COM window at `FEBE4C02..FEBE4C1E`.  Their historical
+`com_payload_delivered` field compared only the generated scalars
+`FEBE80BC/FEBE80B8` against the requested target with a one-count angle
+tolerance; it was not an exact B3..B31 payload comparison.
 
-- Stage-1/2 traces (Gate-2 intact): all twelve ladders report
-  `payload_not_delivered` in both phases — the pre-patch MAC rejection.
-- Both stage-3 traces (Gate-2 compare neutralized), three id0 ladders each:
-  `com_payload_delivered == true` — the probe's exact-match check found the
-  transmitted B3..B31 bytes in the route-44 COM window — with verdict
-  `delivered_inactive` (expected: ID 0 requests no active target; the
-  application-side cells stay `target_lateral_id = 0`, angle 104, statuses
-  0, and §57.9's bank selection never fires because it needs ADB0 = 11).
-- The same two traces, three id11 ladders each: `com_payload_delivered ==
-  false`, verdict `pdu_not_delivered_to_com`, while the publication
-  generation still advances ~2 counts per transmit.  The window keeps
-  showing the last-accepted id0 content.
+Both stage-3 traces started with the same stale generated-COM baseline,
+Target Lateral ID 0 and angle raw 104.  Every ID0 ladder and every ID11
+ladder retained those same values.  The ID0 phase requested raw 105, so the
+unchanged raw-104 baseline passed the old one-count predicate and produced
+the misleading `delivered_inactive` label.  The subsequent ID11 phase did
+not match the stale ID0 baseline and was labeled not delivered.  This proves
+neither an ID-dependent acceptance gate nor successful delivery of any
+injected frame.
 
-So on the patched image the zero-MAC B6 pipeline works end-to-end for the
-inactive-ID frame — RX, route-44 SecOC transaction, and COM window
-publication of our exact bytes — and rejects the active-ID frame between
-SecOC verification and window publication.  Because Gate-2 is neutralized
-identically for both phases, the differential rejection must consult the
-payload or its freshness, not the MAC compare result.  Bounded candidates:
-the freshness/message-8 acceptance window (if the two phases carry different
-freshness bytes), an ID-dependent application acceptance that gates the
-COM copy, or a layout/DLC check.  This moves the lateral blocker off RX
-ingress and off generic SecOC operation, onto the active-request acceptance
-path; the next discriminating evidence is a field-by-field diff of the id0
-vs id11 transmitted payloads against the SecOC freshness slots, and the
-bounded patch target is whichever check rejects ID 0x0B.
+Preserved observations are narrower: the Panda returned TX echoes, and
+route-44 publication generation was quiescent before the senders but moved
+during both transmit phases.  Because no retained sample joined a
+phase-unique queued frame to the full COM payload, the first live rejection
+boundary remains open.
 
-### 57.12 2026-09-04: the F33 SecOC freshness verification chain is decoded and sits upstream of the patched Gate-2 compare (VAR-123)
+The corrected stationary probe now reads B3..B31 in one SID23 transaction,
+requires byte-for-byte membership in that phase's transmitted payload set,
+and rejects a value equal to the immediately preceding phase baseline.  It
+also supports active-first `--phase-order id11-id0`, so the next observer run
+does not inherit the old inactive-first interpretation.
 
-Instruction-level recovery of the queue-processor path that decides whether a
-profile-2 (B6) transaction ever reaches the MAC stage:
+### 57.12 2026-09-04: the F33 SecOC freshness verification chain is decoded upstream of the patched Gate-2 compare (VAR-123)
 
-- `8F746` (per-profile queue processor) dequeues via `8EB1C`, snapshots the
-  authenticated sync state via `8F19A` (20 bytes from `FEBE5504`), extracts the
-  trailer via `8F434`, then — for verify-mode 2 (all three profiles) — calls the
-  per-profile freshness verifier at profile-row+0x46 (`0x903A0`) BEFORE the MAC
-  verify `8F676`/`8F906`. Its verdict routing: `0x22` → drop (`0x100`,
-  state `0x5B`), `0x23` → stale → retry via `8F60E` (global budget
-  `FEBE551A` vs per-profile), `0x24` → adopt/reset, `0` → proceed to MAC.
-- `8F434` decodes the wire trailer exactly as the fork's
-  `build_b6_zero_marker_frame` builds it: trailer offset = record length −
-  row+4 (= 4 for the FD-32 profiles), one FV4 byte (high nibble = truncated
-  freshness, copied to the verify record) and 4 MAC bytes (B28-low..B31,
-  shifted into the CMAC staging buffer). The wire layout is NOT the problem.
-- `903A0 → 90248 → 90B8A → 90B1C/909CA/90A48` is the freshness check proper.
-  For fresh-bits 4 (row+0x13 = 4, both FD profiles) `90736` parses the FV4
-  nibble into `mc_low2` (record+2) and `rl2` (record+10). `909CA` scans the
-  global freshness counter `DAT_FEBE55C4` at offsets {0,−1,+1,−2,+2} for a
-  candidate whose low 2 bits equal the frame's `rl2`; `90A48` then compares
-  the chosen candidate against the per-profile slot (`FEBE55DC + p*12`):
-  candidate == slot → advance/accept; candidate < slot (match found at scan
-  index ≥ 3, i.e. rl2 two behind) → `0x22` drop; candidate one behind →
-  `0x23` retry; candidate > slot → adopt-and-accept. A preceding gate in
-  `90B1C` also requires `frame_mc_low2 <= slot_tracked_low2` (2-bit
-  staleness tolerance).
-- Consequence for the bring-up: the stage-2/stage-3 patches (`8F952` compare
-  neutralization, `8F930` result materialization) only affect the MAC stage —
-  a freshness-rejected frame (`0x22`/`0x23`) is dropped or retried BEFORE the
-  patch can matter. The probe's frames carry a 4-bit FV4 whose `rl2` bits are
-  zero for the whole id0 phase (the `0x00F` cache was stale) and live-mirrored
-  for id11; the retained traces show id0 publishing and id11 never
-  (§57.11). The derived candidate explanations for the split, in order:
-  (a) the per-profile retry budget `FEBE551A` is consumed by the first
-  phase's `0x23` retries, so the second phase's stale frames die silently
-  (predicts order-swap flips the outcome); (b) the `rl2`-vs-global alignment
-  plus the `mc_low2 <= slot` gate rejects the second phase's counter stream
-  once the slot has locked to the first phase's cadence. Both are directly
-  splittable by the existing observer (profile state `FEBE5524[2]`, slots
-  `FEBE55DC`, budget `FEBE551A`, result `FEBE5564` per phase) or by swapping
-  the phase order in one stationary run.
-- Fork-side status: `kai-openpilot` opendbc's TSS3 sender
-  (`carcontroller.py` + `tss3.py` + `car/secoc.py`) already builds the
-  correct wire trailer, mirrors live `RESET_CNT` low bits, and resets its
-  message counter on every reset-counter change (a discipline the stationary
-  probe lacks in its id0 phase). The panda TX path is fully cleared — the
-  same path delivered the id0 bytes.
+Instruction-level recovery closes the static queue-processor order that
+decides whether a profile-2 (B6) transaction reaches the MAC stage:
+
+- `8F746` dequeues through `8EB1C`, snapshots authenticated sync state
+  through `8F19A` (20 bytes from `FEBE5504`), extracts the trailer through
+  `8F434`, then calls the per-profile freshness verifier at row+`0x46`
+  (`903A0`) before MAC verification at `8F676/8F906`.  Freshness verdict
+  `0x22` drops with state `0x5B`; `0x23` retries through `8F60E` under the
+  global budget at `FEBE551A`; `0x24` adopts/resets; zero proceeds to MAC.
+- The profile-2 configuration records a 4-byte trailer, 46 reconstructed
+  freshness bits, 4 transmitted freshness bits, and verify mode 2.
+  `8F434` therefore consumes B28..B31 exactly as the fork constructs them:
+  FV4 in B28's high nibble and MAC28 in B28-low plus B29..B31.  It copies
+  the freshness byte and shifts four trailer bytes into MAC staging.  This
+  establishes wire geometry; it does not establish live acceptance.
+- `903A0 -> 90248 -> 90B8A -> 90B1C/909CA/90A48` is the freshness check.
+  `90736` parses FV4 into `mc_low2 = B28>>6` and
+  `rl2 = (B28>>4)&3`.  `909CA` tests global `FEBE55C4` candidates at
+  offsets `{0,-1,+1,-2,+2}` for matching low reset bits.  `90A48` compares
+  the selected candidate against the selected committed freshness record,
+  while `90B1C` includes the `frame_mc_low2 <= tracked_low2` condition.
+- `FEBE55DC..FEBE560B` is not four profile-indexed slots.  `90248` permits
+  only two selected slot indices: profile 0's variant-3 path does not consume
+  one, profile 1 selects slot 0, and profile 2/B6 selects slot 1.  The 48
+  bytes are `committed0`, `committed1`, `pending0`, `pending1`; B6 therefore
+  uses committed slot 1 at `FEBE55E8` and pending slot 1 at `FEBE5600`.
+- The installed stage-2/stage-3 Gate-2 sites (`8F952` compare
+  neutralization and `8F930` result materialization) affect the later MAC
+  stage only.  A freshness verdict of `0x22` or `0x23` exits or retries
+  before either patch can produce delivery.
+
+The retained live data do not show that freshness rejected ID11, because
+§57.11 withdraws the apparent ID0/ID11 delivery split and those runs did not
+sample the raw window, retry budget, profile state, or phase-local freshness
+records.  The corrected observer run now captures `FEBE551A`,
+profile-2 state byte `FEBE5526`, `FEBE5564`, and committed/pending freshness
+before and during each phase, with active ID11 sent first.  Those values can
+locate the next live boundary; they are not a pre-run diagnosis.
+
+Fork-side construction is aligned with the recovered wire contract:
+`carcontroller.py` resets its B6 message counter on every observed
+`RESET_CNT` change, and `tss3.py` emits
+`FV4=(message_counter_low2<<2)|reset_counter_low2`.  This removes a known
+probe/sender mismatch but does not prove that the current zero-MAC candidate
+passes F33 freshness.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
@@ -4178,5 +4187,5 @@ Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
 - Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113), [VAR-114](../reference/index.md#finding-var-114), [VAR-115](../reference/index.md#finding-var-115), [VAR-116](../reference/index.md#finding-var-116), [VAR-118](../reference/index.md#finding-var-118), [VAR-119](../reference/index.md#finding-var-119), [VAR-120](../reference/index.md#finding-var-120), [VAR-121](../reference/index.md#finding-var-121), [VAR-122](../reference/index.md#finding-var-122), [VAR-123](../reference/index.md#finding-var-123)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157), [CORR-158](../reference/index.md#correction-corr-158), [CORR-159](../reference/index.md#correction-corr-159), [CORR-160](../reference/index.md#correction-corr-160), [CORR-161](../reference/index.md#correction-corr-161)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157), [CORR-158](../reference/index.md#correction-corr-158), [CORR-159](../reference/index.md#correction-corr-159), [CORR-160](../reference/index.md#correction-corr-160), [CORR-161](../reference/index.md#correction-corr-161), [CORR-162](../reference/index.md#correction-corr-162)
 <!-- knowledge-cross-references:end -->

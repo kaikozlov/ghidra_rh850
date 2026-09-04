@@ -471,7 +471,7 @@ Relevant RAM/result cells currently used by the observer/probe:
 FEBE5564  SecOC/verification result state consumed around 8F906
 FEBF13BE  ICU-S done/result-adjacent byte
 FEBF13BF  ICU-S status/result-adjacent byte
-FEBE55DC..FEBE560B  four 12-byte freshness-state slots (48 bytes total)
+FEBE55DC..FEBE560B  committed0/committed1/pending0/pending1 (four 12-byte records)
 ```
 
 ### Native-success delivery path
