@@ -1290,17 +1290,17 @@ def section_b6_receive_bridge() -> int:
     audit = json.loads(BRIDGE_AUDIT.read_text())
     img = IMAGE.read_bytes()
     print('== audited bridge binary ==')
-    check('binary identity exact', audit['shellcode']['size'] == BRIDGE_BIN.stat().st_size == 576 and
-          audit['shellcode']['sha256'] == sha(BRIDGE_BIN.read_bytes()) == 'f968447af229bdc2c8c8c700fb743f0acfb77063b17348f4c357c97aad238084')
+    check('binary identity exact', audit['shellcode']['size'] == BRIDGE_BIN.stat().st_size == 608 and
+          audit['shellcode']['sha256'] == sha(BRIDGE_BIN.read_bytes()) == '00111433b1f7c0f9111517d65e130a3743f4a53d52073177920268f068fadbc1')
     check('entry/relocations clean', audit['compile_contract']['entry_offset'] == 0 and audit['compile_contract']['relocations'] == 0)
     check('source and builder bound', audit['source']['sha256'] == sha(BRIDGE_SOURCE.read_bytes()) and
           audit['builder']['sha256'] == sha(BRIDGE_BUILDER.read_bytes()))
     print('== retained-tail residency budget ==')
     c = audit['compile_contract']
     check('resident stays inside the verified 524-byte high tail',
-          c['resident_base'] == '0xFEBFF9F0' and c['resident_size_incl_marker_slack'] == 476 and
+          c['resident_base'] == '0xFEBFF9F0' and c['resident_size_incl_marker_slack'] == 508 and
           c['resident_limit'] == 508 and c['staging_limit'] == 776 and
-          0 < c['resident_entry_staging_offset'] < c['resident_tail_marker_staging_offset'] == 574)
+          0 < c['resident_entry_staging_offset'] < c['resident_tail_marker_staging_offset'] == 606)
     check('heartbeat + ingress telemetry cells inside the verified retained span',
           c['resident_mailbox'] == '0xFEBFFBEC' and c['resident_queue_present'] == '0xFEBFFBF0' and
           c['resident_zero_mac_seen'] == '0xFEBFFBF4' and c['resident_injected'] == '0xFEBFFBF8' and
@@ -1340,9 +1340,10 @@ def section_b6_receive_bridge() -> int:
     print('== bridge semantics ==')
     src = BRIDGE_SOURCE.read_text()
     check('MAC28 zero marker mask exact (B28[3:0]|B29|B30|B31)', '#define B6_MAC28_MASK 0xFFFF0F0Fu' in src)
-    check('bridge snapshots full secured PDU and re-enters stock route44 callback',
+    check('bridge snapshots full secured PDU and re-enters stock route44 only after an exact raw-COM miss',
           'unsigned char save[B6_SECURED_LENGTH]' in src and
           'copy_bytes(save, (const volatile unsigned char *)TARGET_B6_SECURED_BUFFER,' in src and
+          'TARGET_B6_COM_WINDOW + i' in src and 'if (delivered == 0u)' in src and
           '((fn2_t)TARGET_B6_COM_RX_CALLBACK)(B6_PDUR_ROUTE, &pdu);' in src and
           'TARGET_B6_STAGED_FLAG' not in src)
     check('bridge exposes queue/zero-MAC/injection discriminators',

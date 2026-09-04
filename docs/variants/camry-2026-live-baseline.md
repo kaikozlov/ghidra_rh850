@@ -2410,29 +2410,34 @@ its resident loop into the live-proven 524-byte high tail before app-context
 init**, runs the stock foreground scheduler with the comm/SecOC aggregate
 `0x667E6` intact, and snapshots any queued B6 whose 28 transmitted MAC bits
 (`B28[3:0]|B29|B30|B31`, mask `0xFFFF0F0F` little-endian) are all zero.
-After the aggregate, the current bridge no longer emulates COM bookkeeping:
-it passes the saved **full 32-byte PduInfo** to the firmware's own configured
-PduR44/COM callback `0x7D72C`. That stock callback performs the length cap,
-32-byte COM-window copy, route bookkeeping, and `FEBE5364` new-data advance;
-the stock `0x4BD46` unpacker then owns B3/B4:B5 publication. No stock code is
-patched and reset removes the runtime.
+After the aggregate, the bridge compares the saved full 32-byte frame with the
+raw PDU44 COM window. If stock already published the exact frame it does
+nothing; otherwise it passes the saved **full 32-byte PduInfo** to the
+firmware's configured PduR44/COM callback `0x7D72C`. This exact-content
+deduplication prevents a native-success cycle from receiving the command twice.
+The stock callback performs the length cap, 32-byte COM-window copy, route
+bookkeeping, and `FEBE5364` new-data advance; the stock `0x4BD46` unpacker then
+owns B3/B4:B5 publication. No stock code is patched and reset removes the
+runtime.
 
 The bridge also makes the remaining ingress question observable: `FEBFFBF0`
 counts cycles where the profile2 queue record reports 32 bytes, `FEBFFBF4`
 counts eligible zero-MAC snapshots, `FEBFFBF8` counts native route44
 re-injections, and `FEBFFBEC` remains the heartbeat. Current audited identity:
-576-byte staged blob, 476-byte resident-inclusive bound vs. the 508-byte code
-budget, zero relocations, shellcode SHA-256 `f968447a…38084`. The authenticated
-4-KiB live payload is SHA-256 `e83c40e3…a1f04`, CRC residue `FFFFFFFF`, and
-self-verifies its CMAC. The builder re-derives the stock route44 callback/config
-and every other firmware pin before compiling.
+608-byte staged blob, 508-byte resident-inclusive bound equal to the 508-byte
+code budget, zero relocations, shellcode SHA-256 `00111433…fadbc1`. The
+authenticated 4-KiB live payload is SHA-256 `8eec0e29…2d0ef`, CRC residue
+`FFFFFFFF`, and self-verifies its CMAC. The builder re-derives the stock route44
+callback/config and every other firmware pin before compiling.
 
 Boundary: **static implementation, live observer/bridge test still pending**.
-Install/attest it once in NRTD, then transition directly to READY without a full
-power cycle and use the stationary probe with `--require-bridge`. A zero queue
-counter localizes the remaining failure before SecOC; positive queue/zero-MAC/
-injection counts test the native PduR44 handoff directly. No nonzero steering
-offset is allowed before the same run reports `ADMITTED`.
+The bridge is not the ingress detector. First install/attest the non-bypassing
+countered observer once in NRTD, transition directly to READY without a full
+power cycle, and require a phase-local B6 queue delta plus exact wire signature.
+Only then return through NRTD to install the bridge and use the stationary probe
+with `--require-bridge`. Bridge queue/zero-MAC/injection counts test the native
+PduR44 handoff directly. No nonzero steering offset is allowed before the same
+run reports `ADMITTED`.
 
 Deterministic evidence: `exploit/ephemeral_runtime/camry_f33_b6_bridge.c`,
 `exploit/ephemeral_runtime/build_camry_f33_b6_bridge.py`,
@@ -3945,12 +3950,78 @@ exact phase transmission is joined through queue, raw COM, generated signals,
 and the application snapshot, with transport independently witnessed wherever
 the queue result is negative.
 
+### 57.9 Cross-generation review and countered queue discriminator (VAR-120 / CORR-160)
+
+The requested Sienna/Corolla/Camry comparison narrows the failed lateral bring-up
+without inventing another control policy. Exact Sienna `FUN_0008E67A` and exact
+Camry `FUN_0008F906` have the same result-dispatch shape: read the shared
+verification result, call the per-profile commit/status callback, branch on the
+materialized result, deliver on zero, then clean the queue unless it is in retry
+state. Sienna's field-corroborated patch at `0x8E6C6 E0D1->E001` and Camry stage
+1 at `0x8F952 E0D1->E001` are the homologous final result comparisons. The
+reported Sienna/RAV4 success therefore corroborates the **bypass direction**, but
+not the TSS3 command: that openpilot path transmits the established classic
+`0x2E4`/`0x131` SecOC messages, while H/F/F33 replaces those steering profiles
+with FD/32 B6 and a different angle-controller application contract.
+
+The TSS3 comparison is much tighter. Corolla H and Camry F33 have byte-identical
+B6 CanIf descriptors, the same RSCFD acceptance metadata outside destination
+index, the same three-profile `00F/D7/B6` SecOC geometry, and profile-2 records
+equal outside relocated callbacks and application route `42` versus `44`. Their
+queue, freshness, command-7, Gate-2, and verified-delivery control shapes also
+match after relocation. Downstream, exact F33 `CEFFC` selects bank 2 directly
+when `ADB0=11`, `ACBD=0`, and `CAFF=1`; no `0x08A` authority bit participates in
+that selector. The retained live probes already had `ACBD=0` and `CAFF=1` but
+left `ADB0=0`/bank 7. Thus the highest-confidence unresolved failure boundary is
+**before the B6 application snapshot**: physical/CanIf acceptance, profile-2
+enqueue/state, or transient route44 publication. It is not a missing downstream
+TSS3 steering-arbitration branch.
+
+The raw stage-3 trace independently makes the old publication counter unusable
+as that discriminator. Consecutive `FEBE5364` samples advance at
+`98.55..102.70 Hz` before and during the 50-Hz injected phases. Static code still
+pins the write to `7D72C -> 8E772(44)`, but the periodic source/default lifecycle
+is unresolved; a generation delta cannot be attributed to the injected B6.
+
+The non-bypassing resident is therefore revised rather than adding a flash
+patch. Its 28-byte telemetry now contains modulo-256 counts for pre-`667E6` B6
+queue samples and native protected-D7 queue samples, current profile-2 state
+before/after the stock aggregate, post queue length/result, and the last exact
+B3..B7/B28..B31 signature. D7 is the same-controller/same-SecOC-class scheduler
+control. The audited build is 592 staged bytes, 492 resident bytes plus 28
+telemetry bytes (`520/524` retained), relocation-free, SHA-256
+`94cb0b06…74ad0`; its authenticated payload is `5be3e474…2728d`.
+
+This makes the next live split concrete:
+
+1. `D7 delta=0` leaves the observer window invalid.
+2. `D7 delta>0`, `B6 delta=0` proves the scheduler sampled a healthy protected
+   queue but not B6; preserve profile state and obtain an independent physical
+   receiver before separating wire transmission from EPS acceptance.
+3. `B6 delta>0` plus an exact phase signature proves profile-2 ingress. Join it
+   to raw COM, generated signals, and snapshot state.
+4. Only after step 3, use the RAM route44 bridge. It now compares the saved
+   32-byte frame with raw COM after stock `667E6` and calls `7D72C` only when the
+   exact frame was not already published, avoiding duplicate native delivery.
+
+The openpilot comparison exposed one separate sender-state defect: the TSS3
+branch advanced its 8-bit SecOC message counter across `0x00F` reset-epoch
+changes, unlike the established Sienna sender and the recovered H/F replacement
+contract. It now resets that counter when `RESET_CNT` changes while leaving the
+independent B7 modulo-64 application sequence continuous. This is required for
+future valid-CMAC operation, but it does **not** explain the current zero-MAC
+stage-5 result: on a newer authenticated epoch the H/F/F33 receiver seeds B6
+message8 from the transmitted low two bits, and the installed development patch
+discards the final MAC outcome. The immediate path to lateral remains proving
+queue ingress, then bounded route44 bridging—not another result patch or an
+`0x08A` permission system.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113), [VAR-114](../reference/index.md#finding-var-114), [VAR-115](../reference/index.md#finding-var-115), [VAR-116](../reference/index.md#finding-var-116), [VAR-118](../reference/index.md#finding-var-118), [VAR-119](../reference/index.md#finding-var-119)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157), [CORR-158](../reference/index.md#correction-corr-158), [CORR-159](../reference/index.md#correction-corr-159)
+- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113), [VAR-114](../reference/index.md#finding-var-114), [VAR-115](../reference/index.md#finding-var-115), [VAR-116](../reference/index.md#finding-var-116), [VAR-118](../reference/index.md#finding-var-118), [VAR-119](../reference/index.md#finding-var-119), [VAR-120](../reference/index.md#finding-var-120)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157), [CORR-158](../reference/index.md#correction-corr-158), [CORR-159](../reference/index.md#correction-corr-159), [CORR-160](../reference/index.md#correction-corr-160)
 <!-- knowledge-cross-references:end -->

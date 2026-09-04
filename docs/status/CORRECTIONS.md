@@ -3473,3 +3473,23 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Transport correction:** REC/TEC are endpoint gauges and are no longer differenced as event counts. Cumulative Panda counters are differenced modulo 32 bits and remain supporting evidence only; neither clean endpoints nor TX returns prove physical ACK. A negative queue result needs an independent bus receiver or genuine TX-completion witness before transport and EPS ingress can be separated.
 - **Safety correction:** the optional offset phase now requires `--require-bridge`; observer-only and uninstrumented runs cannot request it.
 - **Canonical:** VAR-119; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §57.8; `tests/verify_camry_f33_b6_stationary_probe.py`.
+
+### CORR-160 — the no-counter queue observer has been superseded, not its retained live result
+
+- **Superseded artifact:** CORR-159 correctly described the resident used in the
+  retained stage-3 run as sticky/no-counter telemetry. Its negative or
+  after-phase result could not distinguish “never sampled” from a transient
+  overwritten hit. Those old live results remain unresolved and are **not**
+  retroactively upgraded.
+- **Exact correction:** observer v2 counts B6 queue samples modulo 256, counts
+  native protected-D7 queue samples as a same-scheduler control, records
+  profile-2 state before/after the stock aggregate, and retains the last exact
+  B6 signature. A phase-local B6 delta plus exact signature can now establish
+  queue ingress. Zero B6 is meaningful only while D7 advances and still needs
+  an independent physical receiver to separate absent wire transmission from
+  EPS acceptance.
+- **Canonical:** VAR-120;
+  [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
+  §57.9; `exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md`;
+  `tests/verify_camry_f33_b6_transaction_observer.py`;
+  `tests/verify_camry_f33_b6_stationary_probe.py`. No new live result.

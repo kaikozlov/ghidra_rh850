@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 429 · Corrections: 159 · Open questions: 54 · Docs: 118 · Suites: 230
+Findings: 430 · Corrections: 160 · Open questions: 54 · Docs: 119 · Suites: 230
 
 ## Reading this index
 
@@ -417,7 +417,7 @@ Findings: 429 · Corrections: 159 · Open questions: 54 · Docs: 118 · Suites: 
 | <a id="finding-var-086"></a>**VAR-086** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [techstream](../tooling/techstream.md) | `tests/verify_camry_tss3_request_capture.py` | OQ-052 |
 | <a id="finding-var-087"></a>**VAR-087** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [2026-09-02-camry-f33-b6-review-handoff](../history/2026-09/2026-09-02-camry-f33-b6-review-handoff.md), [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_2026_lta_state_reconciliation.py`, `tests/verify_camry_8965F3307000_internal_assist_oracles.py` | — |
 | <a id="finding-var-088"></a>**VAR-088** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [PRIORITIES](../status/PRIORITIES.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_2026_upstream_request_census.py` | — |
-| <a id="finding-var-089"></a>**VAR-089** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_8965F3307000.py --section b6_receive_bridge` | — |
+| <a id="finding-var-089"></a>**VAR-089** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_camry_8965F3307000.py --section b6_receive_bridge` | — |
 | <a id="finding-var-090"></a>**VAR-090** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CAMRY_GTS_LATERAL_FUNNEL_2026-08-29](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md) | `tests/verify_camry_8965F3307000_command_cone_ingress.py`, `tests/verify_camry_8965F3307000.py` | — |
 | <a id="finding-var-091"></a>**VAR-091** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CAMRY_GTS_LATERAL_FUNNEL_2026-08-29](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md), [camry-2026-tss3-control-security-participants](camry-2026-tss3-control-security-participants.md), [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) (+2) | `tests/verify_camry_2026_08a_producer_bounds.py` | OQ-054 |
 | <a id="finding-var-092"></a>**VAR-092** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CAMRY_GTS_LATERAL_FUNNEL_2026-08-29](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000_command_cone_ingress.py` | — |
@@ -445,9 +445,10 @@ Findings: 429 · Corrections: 159 · Open questions: 54 · Docs: 118 · Suites: 
 | <a id="finding-var-114"></a>**VAR-114** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [2026-09-02-camry-f33-b6-review-handoff](../history/2026-09/2026-09-02-camry-f33-b6-review-handoff.md), [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_8965F3307000.py --section b6_acceptance_ladder` | — |
 | <a id="finding-var-115"></a>**VAR-115** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_f33_gate2_semantic_patch.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 | <a id="finding-var-116"></a>**VAR-116** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_f33_gate2_root_result_patch.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
-| <a id="finding-var-117"></a>**VAR-117** | [docs/history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md](../history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md) | [2026-09-02-camry-f33-b6-review-handoff](../history/2026-09/2026-09-02-camry-f33-b6-review-handoff.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000.py --section b6_receive_bridge`, `tests/verify_camry_f33_b6_transaction_observer.py`, `tests/verify_camry_f33_b6_stationary_probe.py`, `tests/verify_camry_f33_b6_bridge_install.py` | OQ-054 |
+| <a id="finding-var-117"></a>**VAR-117** | [docs/history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md](../history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md) | [2026-09-02-camry-f33-b6-review-handoff](../history/2026-09/2026-09-02-camry-f33-b6-review-handoff.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) | `tests/verify_camry_8965F3307000.py --section b6_receive_bridge`, `tests/verify_camry_f33_b6_transaction_observer.py`, `tests/verify_camry_f33_b6_stationary_probe.py`, `tests/verify_camry_f33_b6_bridge_install.py` | OQ-054 |
 | <a id="finding-var-118"></a>**VAR-118** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 | <a id="finding-var-119"></a>**VAR-119** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_f33_b6_stationary_probe.py` | — |
+| <a id="finding-var-120"></a>**VAR-120** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_f33_b6_transaction_observer.py`, `tests/verify_camry_f33_b6_bridge_install.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 
 ## Open-questions index
 
@@ -671,6 +672,7 @@ Findings: 429 · Corrections: 159 · Open questions: 54 · Docs: 118 · Suites: 
 | <a id="correction-corr-157"></a>**CORR-157** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md), [docs/history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md](../history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md) | yes |
 | <a id="correction-corr-158"></a>**CORR-158** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 | <a id="correction-corr-159"></a>**CORR-159** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
+| <a id="correction-corr-160"></a>**CORR-160** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md), [exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md](../../exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md) | yes |
 
 ## Document registry
 

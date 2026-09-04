@@ -186,24 +186,31 @@ check("offset phase requires the bridge experiment",
 
 observer_raw = bytearray(probe.OBSERVER_TELEMETRY_SIZE)
 observer_raw[0:4] = (0x4F364250).to_bytes(4, "little")
-observer_raw[4] = 1
-observer_raw[8:16] = bytes.fromhex("07100000010a0101")
+observer_raw[4] = 3
+observer_raw[5] = 9
+observer_raw[8:10] = bytes((0xD2, 0xE1))
+observer_raw[10:12] = (0).to_bytes(2, "little")
+observer_raw[12] = 1
 observer_raw[16:21] = bytes.fromhex("0bfff0003e")
 observer_raw[24:28] = bytes.fromhex("d1234567")
 observer_dec = probe.decode_observer_telemetry(bytes(observer_raw))
-check("observer decoder recovers queue/security/wire identity",
-      observer_dec["queue_seen"] and observer_dec["b6_target_id"] == 11 and observer_dec["b6_target_raw"] == -16 and
-      observer_dec["b6_sequence"] == 62 and observer_dec["b6_fv4"] == 13 and observer_dec["b6_mac28"] == 0x1234567)
-observer_signature = probe.observer_signature(observer_dec)
-assert observer_signature is not None
-matching_observer = dict(observer_dec, b6_mac28=0)
+check("observer decoder recovers queue/control/security/wire identity",
+      observer_dec["queue_samples"] == 3 and observer_dec["d7_queue_samples"] == 9 and
+      observer_dec["pre_profile_state"] == 0xD2 and observer_dec["post_profile_state"] == 0xE1 and
+      observer_dec["b6_target_id"] == 11 and observer_dec["b6_target_raw"] == -16 and
+      observer_dec["b6_sequence"] == 62 and observer_dec["b6_fv4"] == 13 and
+      observer_dec["b6_mac28"] == 0x1234567)
+matching_observer = dict(observer_dec, b6_mac28=0, queue_samples=4, d7_queue_samples=10)
 sent_observer = {probe.observer_signature(matching_observer)}
 before_observer = dict(observer_dec, b6_target_id=0)
 witness = probe.observer_phase_witness(before_observer, [matching_observer], sent_observer)
-check("observer witness requires a new exact phase signature",
-      witness["matches_phase"] is True and witness["baseline_collision"] is False)
-collision = probe.observer_phase_witness(matching_observer, [matching_observer], sent_observer)
-check("sticky matching baseline cannot masquerade as new phase ingress",
+check("observer witness requires counter movement plus a new exact phase signature",
+      witness["matches_phase"] is True and witness["queue_activity"] is True and
+      witness["queue_sample_delta_mod256"] == 1 and witness["d7_queue_sample_delta_mod256"] == 1 and
+      witness["baseline_collision"] is False)
+collision_after = dict(matching_observer, queue_samples=5)
+collision = probe.observer_phase_witness(matching_observer, [collision_after], sent_observer)
+check("matching baseline cannot masquerade as new phase ingress",
       collision["matches_phase"] is False and collision["baseline_collision"] is True)
 
 sim = probe.simulate()
@@ -234,8 +241,8 @@ with tempfile.TemporaryDirectory() as td:
     })
     check("kit makes observer the first RAM experiment and bridge conditional",
           manifest["ram_experiments"]["observer"]["bypass"] is False and
-          manifest["ram_experiments"]["observer"]["payload_sha256"] == "29841b4965c7a690d76e641efd2d950ab291cfb6332a8d806fa6930fdaecbbbb" and
-          manifest["ram_experiments"]["bridge"]["payload_sha256"] == "e83c40e3332b55571a526c0b45952c3944b3c9c4f65f5f2bb6e566c1aeba1f04" and
+          manifest["ram_experiments"]["observer"]["payload_sha256"] == "5be3e474c965e3111957227f7db44b30aa2c6eca6ba341a8279ceea043e2728d" and
+          manifest["ram_experiments"]["bridge"]["payload_sha256"] == "8eec0e29fb1110f7865c85199c6b348ab3a69ccfa8f98cec981f2232f9c2d0ef" and
           manifest["ram_experiments"]["order"][0] == "observer")
     check("historical flash package is explicitly not the next experiment", manifest["firmware_patch"]["historical_only"] is True)
     check("kit retains live stage2 source state only as historical patch evidence", manifest["firmware_patch"]["stage2_installed"] == {
@@ -284,12 +291,12 @@ with tempfile.TemporaryDirectory() as td:
           "Only if the immediately preceding **bridge** ID11/current-angle phase says `ADMITTED`" in runbook)
     check("runbook explicitly forbids another result-bit flash patch",
           "do not add another persistent result-bit patch" in runbook and
-          "historical/recovery artifacts" in runbook and "pre-`0x667E6` SecOC queue sample point" in runbook)
+          "historical/recovery artifacts" in runbook and "pre-`0x667E6` B6 queue samples" in runbook)
     check("runbook states the bounded steering ramp", "rate-limits" in runbook and "6 deg/s" in runbook)
     check("runbook rejects target-angle and CAN-health false proof",
           "one B3..B31 raw PDU44 COM read" in runbook and "FEBE7F68" in runbook and
           "supporting evidence, not physical-ACK proof" in runbook and
-          "current-angle alone is no longer accepted" in runbook and "matches_phase" in runbook)
+          "Target/current-angle alone is not accepted" in runbook and "matches_phase" in runbook)
     check("runbook pins current bus0 and exclusive Panda ownership", "current post-repin" in runbook and "Panda bus 0" in runbook and "pandad|boardd" in runbook)
 
 print(f"\nResults: {passed} passed, {failed} failed")

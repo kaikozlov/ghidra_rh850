@@ -5,9 +5,27 @@
 
 **Evidence boundary:** this report closes the exact-F33 generated-COM transmit geometry, the default-passive software integration, and the current development-only B6 sender/safety envelope. It does **not** authorize steering transmission. CORR-129/VAR-081 identify **73.303384 s of retained `0x08A` ID11 LTA/LCA request state with zero B6**; this is not a direct winner/grant oracle. CORR-134 recovers B21 as Target Lateral ID and B18:B19 as the signed request-angle quantity; CORR-135 rejects a presumed `0x08A -> B6` transform. Exact F33 neither accepts `0x08A` nor transmits it, while its B6-inactive internal path reaches physical steering; that makes zero B6 architecturally possible but does not prove the retained request was granted. VAR-091/CORR-136/CORR-149 place authenticated `0x08A` on captured Bus 4, observed E2E-only camera/radar PDUs on Bus 1, and exclude the FRC from the TSK signing role; batched rlog timestamps still cannot identify the downstream physical transmitter/proxy signer. VAR-094 proves consecutive `5282` is absent from native Bus-1 CAN; CORR-138 retracts the former standing-echo interpretation of `0x160[22]`. VAR-101 plus CORR-149 exclude FRC from the TSK key-holder/signing role and bound the always-on downstream proxy signer to Brake/Skid or Central Gateway without identifying which one.
 
-The integration and stock-architecture questions are deliberately separate. OQ-054 still tracks the private FRC request handoff and exact Bus-4 `0x08A` signer. That attribution is **not** a prerequisite for exercising B6 as an independent external EPS angle ingress. Exact-F33 Gate-2 compare neutralization plus CRC repair can admit deliberately zero-MAC28 B6, and VAR-089 supplies the audited reset-to-stock RAM re-admission candidate. The current local forks reintroduce an exact-F181, non-release B6 development path (`opendbc@c98872c6`, parent `kai-openpilot@5fee63cfc`) and harden it with cruise/`controls_allowed` safety plus runtime fixes (`opendbc@8da4bb9b`, parent `kai-openpilot@6dd58cf5e`). Default/release behavior remains `dashcamOnly` / `SafetyModel.noOutput`.
+The integration and stock-architecture questions are deliberately separate.
+OQ-054 still tracks the private FRC request handoff and exact Bus-4 `0x08A`
+signer. That attribution is **not** a prerequisite for exercising B6 as an
+independent external EPS angle ingress. Exact-F33 Gate-2 compare neutralization
+is homologous to the field-proven Sienna result bypass, but the cumulative F33
+stage-5 patch plus zero-MAC B6 did not update the application snapshot. Static
+review now closes the configured Corolla/Camry B6 path and the downstream F33
+ID11/health selector; it does not claim live receiver acceptance. The current
+local forks retain an exact-F181, non-release B6 development path
+(`opendbc@8da4bb9b`, parent `kai-openpilot@6dd58cf5e`). Default/release behavior
+remains `dashcamOnly` / `SafetyModel.noOutput` with zero output.
 
-**Current execution blocker:** install and positively verify one receiver-acceptance option—persistent Gate-2 CodeFlash patch or reset-to-stock RAM bridge—then run bounded stationary inactive/zero/small-angle validation. The sender currently uses an explicit-zero, non-stock 28-byte base plus recovered companion defaults; application semantics, sign/scale, driver override, motor response, timeout/release, source coexistence or suppression, and fault recovery must be measured before leaving the development boundary. For the RAM option, `card.py` consumes exact-F181 bridge-attestation parameters but does not deploy the resident or verify an EPS heartbeat.
+**Current execution blocker:** establish the first live B6 boundary with the
+countered non-bypassing RAM observer. It distinguishes a valid scheduler window
+through native protected-D7 queue activity, then requires a phase-local B6 queue
+count and exact current-phase wire signature. Only proven B6 queue ingress
+authorizes the deduplicating RAM route44 bridge. A further persistent
+SecOC-result patch or nonzero target is unjustified before that split. The
+sender's explicit-zero 28-byte base remains non-stock; application semantics,
+sign/scale, driver override, motor response, timeout/release, source coexistence
+or suppression, and fault recovery remain unmeasured.
 
 **Physical routing decision (CORR-139):** the present Toyota-B repin is correct.
 Current GTS+ places Brake/Skid/SAS/EPS together on Toyota Bus 4; exact F33 has one
@@ -246,30 +264,38 @@ registers `ToyotaTss3DevLateral`. Default/release output remains disabled.
 Once externally attested and armed, the controller:
 
 - sends one `0x0B6`, DLC-32 frame per control cycle on Panda bus 0;
-- reads live `0x00F` trip/reset epoch and owns message8 plus application sequence locally;
+- reads live `0x00F` trip/reset epoch, reanchors message8 to zero when the reset
+  epoch changes, and owns the independent application sequence locally;
 - sends Target Lateral ID 11 while active and ID0 after ramping the target to zero;
 - clamps target angle to ±1745 raw and each transmitted step to ±78 raw;
 - reports the actual slew-limited transmitted angle to controls;
 - preserves the FV4 nibble while deliberately transmitting zero MAC28.
 
-The 28-byte base is explicitly `stock_validated=false`: no stock B6 exists in the retained
-factory-LTA intervals. Recovered command fields are packed exactly. Current bounded companion
-defaults set additive-term suppression to 1 and both percentage contributions to 0; the
-remaining unresolved fields are zero. This is a development candidate to validate against
-the patched/bridged receiver, not a claim about Toyota stock bytes.
+The 28-byte base is explicitly `stock_validated=false`: no stock B6 exists in the
+retained factory-LTA intervals. Recovered command fields are packed exactly.
+Current active companion fields set additive-term suppression to 0 and both
+percentage contributions to 100, matching the recovered F33 selector shape;
+inactive fields remain zero. This is a development candidate to validate
+against an observed/bridged receiver, not a claim about Toyota stock bytes.
 
-### 4.2 Receiver-acceptance options
+### 4.2 Receiver observation and conditional bridge
 
-Two exact-F33 development options are tracked:
+The historical cumulative CodeFlash stage-5 image remains a development
+artifact, not proof of receiver acceptance: zero-MAC B6 left the application
+snapshot stale. The current sequence is RAM-only:
 
-1. **Persistent CodeFlash:** Gate-2 compare neutralization plus deterministic CRC repair.
-   This is frictionless after installation but carries flash-write and persistent-image risk.
-2. **Reset-to-stock RAM bridge:** VAR-089's audited resident re-admits only rejected B6 frames
-   carrying the zero-MAC28 marker. It avoids persistent flash modification, but a reliable
-   application-mode deployment/execution/heartbeat path is not implemented.
+1. **Countered observer:** the audited v2 resident samples without bypassing. It
+   counts B6 and native protected-D7 queue samples, preserves the exact last B6
+   signature, and records profile-2 pre/post state. D7 activity validates that
+   the observer ran across a healthy native SecOC scheduler window.
+2. **Deduplicating route44 bridge:** only after an exact queue-phase match, save
+   the queued zero-MAC B6 before the stock aggregate; afterward call recovered
+   route44 `0x7D72C` only if the raw COM window does not already equal that exact
+   frame.
 
-Neither option recovers or exposes the protected slot-class TSK key. The key remains in
-protected ICU-S storage.
+Neither resident recovers or exposes the protected slot-class TSK key. The key
+remains in protected ICU-S storage. The bridge is a causal receive-path
+experiment, not production architecture.
 
 ### 4.3 Development Panda safety boundary
 
@@ -291,19 +317,27 @@ vehicle-authorized.
 
 ## 5. What remains before lateral output can actually be exercised
 
-The shortest execution path is independent of Toyota's unresolved stock FRC pipeline:
+The shortest bounded execution path is independent of Toyota's unresolved stock
+FRC pipeline:
 
-1. **Install and positively verify receiver acceptance.** Choose the persistent Gate-2 patch
-   or complete RAM deployment/execution/heartbeat. A parameter saying the bridge is installed
-   is not proof that it is running.
-2. **Validate the B6 application candidate stationary.** With the wheels unloaded, test ID0
-   inactive, ID11 zero angle, then one small bounded nonzero step. Establish sign, scale,
-   application companion behavior, motor response, and absence of an EPS fault latch.
-3. **Validate safety transitions.** Prove driver override, slew/rate limits, ramp-to-zero,
-   sender timeout, inactive release, source coexistence or relay suppression, inhibit, fault,
-   and recovery behavior.
-4. **Only then tune and leave the stationary boundary.** Production transmission remains
-   unauthorized.
+1. **Observe B6 ingress without bypass.** Install/heartbeat-attest observer v2 in
+   NRTD, transition directly NRTD→READY without OFF, and run the stationary
+   exact-signature probe. `D7 delta=0` invalidates the window.
+2. **Separate transport from EPS acceptance when B6 remains zero.** With D7
+   advancing, use an independent physical bus receiver; Panda TX returns and
+   REC/TEC endpoints alone do not prove wire acknowledgement.
+3. **Bridge only after exact queue ingress.** Install the deduplicating route44
+   resident and repeat ID0/current-angle phases. Do not request a nonzero offset
+   before the host classifier reports `ADMITTED`.
+4. **Validate the B6 application candidate stationary.** With the wheels
+   unloaded, test ID0 inactive, ID11 zero angle, then one small bounded nonzero
+   step. Establish sign, scale, application companions, motor response, and
+   absence of an EPS fault latch.
+5. **Validate safety transitions.** Prove driver override, slew/rate limits,
+   ramp-to-zero, sender timeout, inactive release, source coexistence or relay
+   suppression, inhibit, fault, and recovery behavior.
+6. **Only then tune and leave the stationary boundary.** Production
+   transmission remains unauthorized.
 
 OQ-054 remains valuable for an elegant stock-compatible architecture: synchronized FRC
 Operation FFD `5282/5631/5285/57DE/5265/560D`, matched FRC/Brake firmware, or source-identifying
