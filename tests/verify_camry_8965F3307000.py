@@ -1333,6 +1333,24 @@ def section_b6_receive_bridge() -> int:
     check('CanIf descriptor39 is FD B6/32 and maps through route base 5 to PduR44',
           img[0x21FE8 + 39 * 8:0x21FE8 + 40 * 8] == bytes.fromhex('b600004020000000') and
           img[0x21A48] == 5 and 5 + 39 == 44 and img[0x21FB8 + 44] == 0x10)
+
+    check(
+        "all normal RX descriptors take the 810F2 path independent of CAN-FD wire format",
+        img[0x219DC:0x219DC + 43] == b"\x01" * 43,
+    )
+    check(
+        "PduR sends protected routes 9/41/44 through SecOC and route 40 directly to COM",
+        [
+            (u16(0x229CE + route * 4), u16(0x229D0 + route * 4))
+            for route in (9, 41, 44)
+        ]
+        == [(9, 9), (41, 41), (44, 44)]
+        and (u16(0x229CE + 40 * 4), u16(0x229D0 + 40 * 4)) == (40, 0xFFFF)
+        and u32(0x21CBC) == 0x21E40
+        and u32(0x21E48) == 0x8EE7C
+        and u32(0x21EE4) == 0x21E00
+        and u32(0x21E08) == 0x7D72C,
+    )
     check('route44 checksum hook is configured but disabled for B6',
           img[0x290B4:0x290BC] == bytes.fromhex('2c00000bb8010200') and img[0x290BB] == 0)
     check('B6 pre-freshness gates cannot reject a queued 32-byte frame',

@@ -3493,3 +3493,45 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   §57.9; `exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md`;
   `tests/verify_camry_f33_b6_transaction_observer.py`;
   `tests/verify_camry_f33_b6_stationary_probe.py`. No new live result.
+
+### CORR-161 — native `0x090` is not proven to feed route-44 publication
+
+- **Superseded claim:** VAR-121 and the first version of Camry live-baseline
+  §57.10 attributed the approximately 100 Hz movement of `FEBE5364` to native
+  `0x090` through a route-label conflation, and described all surviving
+  `81D16 -> 81D30` traffic as direct COM delivery.
+- **Exact static correction:** the real table at `0x229CE` gives routes 9,
+  41, and 44 protected destinations and dispatches them through `0x8EE7C`.
+  Route 40 (`0x090`) has protected destination `0xFFFF` and goes directly to
+  `0x7D72C`.  Successful protected delivery reaches COM through
+  `8F546 -> 90204 -> 81CA6 -> 7D72C`.  The earlier table dump accidentally
+  reread entries 0 through 7 for every displayed block.
+- **Trace correction:** in every retained window the route-44 generation
+  delta is within one count of both twice the B6 TX count and the bus-0
+  `0x090` count — the 100 Hz native stream and the 50 Hz injected phase are
+  frequency-locked, so neither correlation is causation.  The first pair of
+  direct generation samples straddles the first B6 transmit; there is no
+  wholly pre-sender sample pair inside the ladder windows.  The raw RMBA
+  timeline settles it: `publication_generation` was read as 39 and was still
+  39 at the baseline snapshot 224.5 ms later while 46 native `0x090` frames
+  arrived (same freeze in the second stage-3 trace), so the counter is
+  quiescent between B6 transmit phases and there is no background route-44
+  publisher.  The earlier "consumed-generation shadow advance before sender
+  start" is withdrawn as a cross-cell misread: `consumed_generation` equals
+  `publication_generation` plus a constant per-trace offset, and the 39 then
+  45 readings were two different cells.
+- **Snapshot correction:** the programming-session RAM capture followed the
+  stock CAN oracle by about 13 minutes.  Its route-44 COM window has no exact
+  full-window or bytes-3-through-31 match in that oracle.  Counter values at
+  that capture point prove prior activity only.
+- **Current boundary:** route-44 publication movement is transmit-phase
+  locked (about two counts per B6 transmit, quiescent otherwise, including
+  across live `0x090` traffic).  `FEBE5364` is a delivery-activity witness
+  but not an exact-frame witness — on the Gate-2 image it advances for B6
+  transmissions whose bytes never occupy the COM window (see §57.11 /
+  VAR-122).  Route-40/41/45 counters are controls without a causal
+  interpretation.  The exact transaction-queue signature and phase-local
+  deltas remain the discriminator.
+- **Canonical:** VAR-121;
+  [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
+  §57.10; `tests/verify_camry_8965F3307000.py`.

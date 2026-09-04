@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 431 · Corrections: 160 · Open questions: 54 · Docs: 119 · Suites: 230
+Findings: 432 · Corrections: 161 · Open questions: 54 · Docs: 119 · Suites: 230
 
 ## Reading this index
 
@@ -449,7 +449,8 @@ Findings: 431 · Corrections: 160 · Open questions: 54 · Docs: 119 · Suites: 
 | <a id="finding-var-118"></a>**VAR-118** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 | <a id="finding-var-119"></a>**VAR-119** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 | <a id="finding-var-120"></a>**VAR-120** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_f33_b6_transaction_observer.py`, `tests/verify_camry_f33_b6_bridge_install.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
-| <a id="finding-var-121"></a>**VAR-121** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [camry_f33_b6_observer_runbook](../../exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md) | — | — |
+| <a id="finding-var-121"></a>**VAR-121** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [camry_f33_b6_observer_runbook](../../exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md) | `tests/verify_camry_8965F3307000.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
+| <a id="finding-var-122"></a>**VAR-122** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [camry_f33_b6_observer_runbook](../../exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md) | — | — |
 
 ## Open-questions index
 
@@ -674,6 +675,7 @@ Findings: 431 · Corrections: 160 · Open questions: 54 · Docs: 119 · Suites: 
 | <a id="correction-corr-158"></a>**CORR-158** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 | <a id="correction-corr-159"></a>**CORR-159** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 | <a id="correction-corr-160"></a>**CORR-160** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md), [exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md](../../exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md) | yes |
+| <a id="correction-corr-161"></a>**CORR-161** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 
 ## Document registry
 
