@@ -509,6 +509,73 @@ probe above.
 - `tools/decode_camry_tss3_operation_ffd.py`
 - `tests/verify_camry_tss3_operation_ffd_decoder.py`
 
+## 7. Native longitudinal integration consequence of the Bus-1 E2E candidate
+
+A 2026-09-05 comparison against current upstream openpilot
+`0ec3a082c7ca3302c171b03ff5cd43be61309f13` and opendbc
+`3e92d112129507debe45364891954db70238997a` clarifies what a proved Camry
+Bus-1 request carrier would buy. The fork's core longitudinal stack is unchanged
+from that upstream openpilot revision: `LongitudinalPlanner` chooses an acceleration
+trajectory from cruise/model-lead constraints, `controlsd` runs `LongControl` and
+publishes the resulting physical acceleration request as `CC.actuators.accel`, and
+the brand `CarController` converts that generic actuator request into the vehicle's
+native wire command. Toyota's existing upstream native-longitudinal implementation
+does exactly that on older architectures: it enables
+`CarParams.openpilotLongitudinalControl`, retains `pcmCruise=True`, and every third
+controller frame maps `actuators.accel` through Toyota-specific compensation into
+`ACC_CONTROL` (`0x343`) or, on the classic SecOC profile, authenticated
+`ACC_CONTROL_2` (`0x183`). Stock cruise buttons/set-speed remain the engagement and
+speed-selection UI; openpilot does not need to synthesize the RES/SET switch PDU in
+order to own acceleration.
+
+That architecture transfers cleanly to the Camry **if** VAR-106's native-Bus-1
+`0x160 B12` candidate is promoted to an actual request field and the receiver accepts
+synthetic Profile-5 traffic. The implementation should keep the normal ownership
+boundary: `controlsd` still owns `CC.longActive` and `CC.actuators.accel`; the TSS3
+Toyota `CarController` would encode the recovered FRC-side request PDU; Panda would
+apply the ordinary longitudinal command bounds and TX whitelist. `pcmCruise=True`
+can remain initially, so the physical Toyota RES/SET buttons and the already parsed
+`0x08A`/`0x251` stock set-speed state continue to choose `vCruise`. The inability to
+forge authenticated `0x0FE` therefore does **not** by itself block native openpilot
+longitudinal control. The current TSS3 `radarUnavailable=True` setting is likewise
+not a planner blocker: the generic radar interface publishes an empty radar-point
+set and `radard` continues producing model-lead `radarState`, so the existing
+vision-based longitudinal planner remains usable.
+
+The current fork is deliberately not wired this way yet. Camry TSS3 returns
+`openpilotLongitudinalControl=False`, sets Toyota `STOCK_LONGITUDINAL`, and its
+special TSS3 `CarController.update()` returns after the B6/cancel path before the
+ordinary Toyota longitudinal block. Current TSS3 Panda safety whitelists only
+`0x0B6` on bus0 and brake-cancel `0x101` on bus2. A native-long port therefore needs
+an explicit TSS3 longitudinal encoder plus matching Panda TX/safety support; merely
+flipping `openpilotLongitudinalControl=True` would not transmit a longitudinal
+request.
+
+The recovered wire support is already sufficient for an **offline** native-shape
+builder: `0x160` is a 32-byte native-Bus-1 PDU using exact AUTOSAR E2E Profile 5,
+with B0:B1 CRC-16/CCITT, B2 modulo-256 counter, Data ID equal to CAN ID, and no
+secret. `tools/camry_frc_request_poc.py` can clone an observed frame, alter only B12
+and the counter, and recompute the CRC. What is not yet sufficient for a driving
+port is semantics/ownership: B12 is still only a high-value signed-7 candidate, its
+physical command scale and companion request fields are not closed, producer/source
+direction is not proved, and no modified-frame receiver acceptance test exists.
+The two retained drives give a strong B12-to-protected-`0x0CA` result correlation
+(`r=-0.9517/-0.9894`), but that is not a command calibration.
+
+Finally, source suppression is a hard integration requirement. The present Toyota-B
+installation leaves Panda CAN1 unsplit. Stock `0x160` therefore remains present on
+the same network; injecting a second independently countered `0x160` stream would
+produce competing Profile-5 state (and potentially same-ID CAN contention) rather
+than a clean replacement sender. Production native long needs either an inline
+Bus-1 interception/suppression point or a proved later handoff where the stock source
+can be replaced. Once request semantics, receiver acceptance, and suppression are
+closed, this path is sufficient in principle for **native openpilot longitudinal**:
+openpilot chooses desired acceleration, the TSS3 encoder publishes the FRC-style
+request, and Toyota's downstream brake/gateway arbitration remains in the plant.
+Do not reuse the legacy Toyota PCM compensation loop blindly; whether
+`CC.actuators.accel` maps directly or needs vehicle-specific shaping depends on the
+final recovered `0x160` request semantics.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 
