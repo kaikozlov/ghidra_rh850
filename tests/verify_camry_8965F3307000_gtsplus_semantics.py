@@ -55,6 +55,8 @@ check("critical buses belong to Central Gateway", topo["critical_bus_owners"] ==
 f33can = topo["exact_f33_channel_join"]
 check("F33 normal application CAN wrappers are channel1-only", f33can["canif_controller_count_byte"] == {"address":"0x00021970","value":1} and f33can["normal_rx_interrupt_wrapper"]["call"] == "FUN_00083EF2(1)" and f33can["normal_tx_interrupt_wrapper"]["call"] == "FUN_00085800(1)" and f33can["normal_rx_interrupt_wrapper"]["body_hex"] == f33can["normal_tx_interrupt_wrapper"]["body_hex"] == "800721000132bfffbcff40063f00")
 check("F33 B6 is on that same controller1 rule span", f33can["controller1_rule_count"] == 47 and f33can["b6_rule_index"] == 39 and f33can["b6_rule_can_id"] == "0x0B6" and f33can["diagnostic_rule_tail"] == ["0x7A1","0x777","0x7A0"])
+f33_rx_rule_ids = [struct.unpack_from("<I", img, 0x230B8 + 0x10 * i)[0] for i in range(47)]
+check("F33 normal RX rules exclude TSS3 cruise-switch 0x0FE", 0x0FE not in f33_rx_rule_ids)
 check("F33 normal Tx table starts with exact 030 steering-status carrier", f33can["normal_tx_table"] == "0x00021F58" and f33can["normal_tx_ids"] == ["0x030","0x351","0x394","0x4A3","0x4C8"])
 check("CAN-topology interpretation keeps connector boundary", "Skid Control (ABS/VSC/TRAC) and Power Steering (EPS) are co-resident" in topo["interpretation"] and "not Comma/Panda bus numbers" in topo["boundary"])
 check("GTS+ expands type62 222x64 -> 230x80", a["emps_p5_schema_delta"]["v18_type62"] == {"record_count": 222, "record_size": 64} and a["emps_p5_schema_delta"]["gtsplus_type62"] == {"record_count": 230, "record_size": 80})
