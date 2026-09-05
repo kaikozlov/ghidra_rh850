@@ -3063,8 +3063,25 @@ The exact `8965F3307000` EPS independently rules out the proposed "clock spring
 through EPS" explanation at the application-CAN boundary.  Its complete
 47-rule normal RX table does **not** contain `0x0FE`, and its normal TX table is
 exactly `0x030, 0x351, 0x394, 0x4A3, 0x4C8`.  The EPS therefore neither receives
-nor produces the recovered cruise-switch PDU.  The physical `0x0FE` producer is
-still not named here.
+nor produces the recovered cruise-switch PDU.
+
+The current exact-Camry CAN-topology join does expose a much better physical
+producer candidate: component `0xF0`, OEM-labeled **Spiral cable (Steering Angle
+Sensor)**, is a separate Bus-4 node alongside Brake/EPS.  Its generation-20
+`StrAngleSnsr_P5` diagnostic surface directly reports column switch inputs
+(headlamp/high-beam, turn-signal, wiper/washer positions) as well as steering
+angle, and prior target work already identifies this domain as the producer of
+`0x025`.  In the post-repin logs both `0x025` and `0x0FE` are native on the same
+Panda-bus0 side.  That makes the spiral-cable/SAS domain the highest-priority
+`0x0FE` source candidate and strongly places cruise-button acquisition at the
+steering-column boundary rather than in EPS.  It still does **not** prove that
+component `0xF0` itself transmits `0x0FE`, nor whether the steering-pad buttons
+reach it as direct/resistor-ladder wiring or through a local steering-switch
+module/bus.  Current Toyota vocabulary contains both Steering Switch Control
+Module and CXPI steering-switch relationships on adjacent architectures, while
+`StrAngleSnsr_P5` exposes no named RES/SET/CANCEL DID.  Exact 2026 EWD/source
+isolation or source-ECU firmware is therefore still required to close that last
+physical hop.
 
 **Boundary:** this proves that the stock RES+/SET- command representation visible
 to comma is SecOC-shaped and that no literal plaintext duplicate appears in the
