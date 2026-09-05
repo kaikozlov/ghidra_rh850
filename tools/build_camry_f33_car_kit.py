@@ -79,10 +79,19 @@ def patch_runbook() -> str:
   --ram-geometry-evidence dynamic:camry-8965F3307000-20260826 \\
   --expected-f181-hex {f181} \\
   --expected-boot-f181-hex {boot_f181}"""
-    return f"""# F33 Gate-2 root-result stage-3 field sequence
+    return f"""# F33 Gate-2 root-result stage-3 field sequence (historical record)
 
-This package is for the exact `8965F3307000` EPS only. The currently installed,
-reboot-verified source is the stage-2 image:
+This package is for the exact `8965F3307000` EPS only.
+
+**Historical-provenance label.** The sequence below records the historical
+stage-2 -> stage-3 progression as it was performed and reboot-verified at the
+time. It is **not** a fresh live identity measurement of the currently
+installed firmware. The kit manifest's `current_firmware` block is the
+authoritative installed-state record (stage 5, SHA-256
+`{stage5.EXPECTED_FINAL_SHA256}`, persistence-verified 2026-09-01);
+verify the live image against that record before any operation. Earlier kit
+builds described the stage-2 image as "currently installed"; that wording
+referred to the stage-2 image *as it was when this sequence was executed*:
 
 ```text
 0x8F948 = 00 3A
