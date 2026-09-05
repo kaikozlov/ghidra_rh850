@@ -942,6 +942,16 @@ paths = [
   "docs/status/PRIORITIES.md",
 ]
 
+[suite.camry_20260904_stock_steering]
+tests = ["tests/verify_camry_20260904_stock_steering.py"]
+oracle = "dynamic_trace"
+paths = [
+  "tests/fixtures/camry_20260904/",
+  "data/generated/camry_20260904_stock_steering_report.json",
+  "data/generated/camry_20260904_stock_steering_manifest.json",
+  "docs/variants/camry-2026-tss3-opendbc-port.md",
+]
+
 [suite.camry_2026_08a_producer_bounds]
 tests = ["tests/verify_camry_2026_08a_producer_bounds.py"]
 oracle = "dynamic_trace"
@@ -2306,9 +2316,3 @@ tests = ["tests/verify_camry_f33_b6_transaction_observer.py"]
 
 [suite.camry_f33_b6_bridge_install]
 tests = ["tests/verify_camry_f33_b6_bridge_install.py"]
-paths = [
-  "exploit/ephemeral_runtime/camry_f33_b6_bridge.c",
-  "exploit/ephemeral_runtime/build_camry_f33_b6_bridge.py",
-  "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin",
-  "exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json",
-]

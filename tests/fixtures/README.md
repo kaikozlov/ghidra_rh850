@@ -23,3 +23,18 @@ ChannelID, Tx/Rx headers, flags, timestamps, raw address/data bytes, status,
 extra-data boundaries, and the v05 per-message handle. Pinned external shim
 binaries provide the independent format/body evidence when the ignored
 Techstream tree is present.
+
+## camry_20260904/
+
+Compact JSONL excerpts from the 2026-09-04 Camry driving-corpus rlogs (routes
+`0000003b--62262eb7a1`, `0000003c--97b9e7a69a`, `0000003d--0e812cecba`), used
+by `tests/verify_camry_20260904_stock_steering.py`. Each file carries a
+provenance header pinning the original `rlog-<segment>.zst` compressed
+SHA-256, byte size, first-live-event timestamp, and extraction window; only
+the analysis address set (`0x025/0x030/0x081/0x08A/0x0B6`), matching
+`carState`/`controlsState` events, and sendcan frames are retained — no
+GPS, video, or unrelated loggerd services. The excerpts cover the five
+native-ID4 episode windows and the route-3c segment-43 divergent-request
+witness. Full-corpus regeneration requires the external logs at
+`/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/`; these fixtures keep the
+reducer's verification portable.

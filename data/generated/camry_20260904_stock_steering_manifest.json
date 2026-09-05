@@ -1,0 +1,4630 @@
+{
+  "fixtures": [
+    {
+      "events": 3625,
+      "fixture": "tests/fixtures/camry_20260904/3b-seg6.jsonl",
+      "source_sha256": "4395189b7f8f24f4085f978447951a401b34be63907bae180688e57d8e1e0512",
+      "window_s": [
+        26.626414468,
+        30.907376968
+      ]
+    },
+    {
+      "events": 5527,
+      "fixture": "tests/fixtures/camry_20260904/3c-seg40.jsonl",
+      "source_sha256": "73b946a8487c9d8f43d7ffe69287655775beaf595ec1099b6138f885ecb68902",
+      "window_s": [
+        14.210798484000001,
+        20.741437128
+      ]
+    },
+    {
+      "events": 754,
+      "fixture": "tests/fixtures/camry_20260904/3c-seg43.jsonl",
+      "source_sha256": "ab6b4fbe4d14227919a022dbc2c3091467446262d6896d26ea021ecc5d54c356",
+      "window_s": [
+        34.4,
+        35.3
+      ]
+    },
+    {
+      "events": 4633,
+      "fixture": "tests/fixtures/camry_20260904/3c-seg56.jsonl",
+      "source_sha256": "ab3bf83295f653416567b75c770a8af83a847554968015f4fed4f650d6025d15",
+      "window_s": [
+        41.96422217,
+        47.44132118
+      ]
+    },
+    {
+      "events": 2296,
+      "fixture": "tests/fixtures/camry_20260904/3d-seg56.jsonl",
+      "source_sha256": "a02430cf010867fa3486a6d964dc8d832667ad666f2f0c96fe94a2588c8cf3a8",
+      "window_s": [
+        57.294481279,
+        61.969578362
+      ]
+    },
+    {
+      "events": 4332,
+      "fixture": "tests/fixtures/camry_20260904/3d-seg57.jsonl",
+      "source_sha256": "e13dd3880d08c827240017c76119038a65371a7d96149ebc44f4639b5319a793",
+      "window_s": [
+        17.884460305,
+        23.012190461
+      ]
+    }
+  ],
+  "input_quality": {
+    "duplicates": [],
+    "missing_route_dirs": [],
+    "out_of_order_segments": [],
+    "segment_gaps": {
+      "0000003d--0e812cecba": []
+    }
+  },
+  "input_root": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04",
+  "parser": {
+    "logreader": "openpilot.tools.lib.logreader.LogReader",
+    "openpilot_head": "2f7e9e6fd1bd62b96c246e21991e1132fe16e58a",
+    "openpilot_root": "/Users/kai/dev/inspect/repos/kai-openpilot",
+    "sort": "python stable sort by logMonoTime (mirrors LogReader sort_by_time)"
+  },
+  "routes": [
+    {
+      "bytes": 8916743,
+      "duration_s": 61.0,
+      "event_counts": {
+        "can": 196973,
+        "carState": 5042,
+        "controlsState": 5040,
+        "sendcan": 2740
+      },
+      "events_total": 209795,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-0.zst",
+      "first_live_ns": 49583086126,
+      "last_live_ns": 110583263603,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 0,
+      "sha256": "d3ecfb93361134238fcb7f84731e034d39adbf3bfc3d2eaeba05a894eb078bf4"
+    },
+    {
+      "bytes": 10143349,
+      "duration_s": 59.986,
+      "event_counts": {
+        "can": 195093,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 210024,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-1.zst",
+      "first_live_ns": 110584474384,
+      "last_live_ns": 170570838007,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 1,
+      "sha256": "24638329c3417e1698d392f6b5d6335cdb70a5cbc9ba585d71ec2e009b9f4e21"
+    },
+    {
+      "bytes": 10248329,
+      "duration_s": 60.009,
+      "event_counts": {
+        "can": 194519,
+        "carState": 5975,
+        "controlsState": 5975,
+        "sendcan": 2987
+      },
+      "events_total": 209456,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-2.zst",
+      "first_live_ns": 170574187955,
+      "last_live_ns": 230583543974,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 2,
+      "sha256": "d5b76cf4f72c833a61d321843e8947b0171e71590212a9889ee4048062018e3d"
+    },
+    {
+      "bytes": 10367897,
+      "duration_s": 59.992,
+      "event_counts": {
+        "can": 194482,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209414,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-3.zst",
+      "first_live_ns": 230584154547,
+      "last_live_ns": 290575749107,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 3,
+      "sha256": "955ca4959cbae0c97bb1e70cfd93662394964c75c92df173ece655227298809a"
+    },
+    {
+      "bytes": 10470875,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 204542,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 219475,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-4.zst",
+      "first_live_ns": 290580982128,
+      "last_live_ns": 350580927886,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 4,
+      "sha256": "783c6e59a10325c525166845018e3072b8d763188f102bf8aad3513e1f1fd991"
+    },
+    {
+      "bytes": 10122772,
+      "duration_s": 60.001,
+      "event_counts": {
+        "can": 194504,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209438,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-5.zst",
+      "first_live_ns": 350581553615,
+      "last_live_ns": 410582366874,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 5,
+      "sha256": "5462264eb66aba635ee7c6ae160c0cb98a2125be2855eac55147b29e9ad51042"
+    },
+    {
+      "bytes": 10540643,
+      "duration_s": 60.002,
+      "event_counts": {
+        "can": 194817,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209752,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-6.zst",
+      "first_live_ns": 410583726301,
+      "last_live_ns": 470586114403,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 6,
+      "sha256": "4395189b7f8f24f4085f978447951a401b34be63907bae180688e57d8e1e0512"
+    },
+    {
+      "bytes": 10390010,
+      "duration_s": 59.994,
+      "event_counts": {
+        "can": 193997,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2987
+      },
+      "events_total": 208929,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-7.zst",
+      "first_live_ns": 470587580132,
+      "last_live_ns": 530581939380,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 7,
+      "sha256": "d04b70c9ef5a1b103aa8420bdcf8bd7536cae557d408d1d86878f8b8f7b6a78d"
+    },
+    {
+      "bytes": 10379719,
+      "duration_s": 60.003,
+      "event_counts": {
+        "can": 194423,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209358,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-8.zst",
+      "first_live_ns": 530584911099,
+      "last_live_ns": 590587710555,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 8,
+      "sha256": "fe183a8b0cdead5df37df1a460309c61921ff62a741ce0993e45501d1ec088df"
+    },
+    {
+      "bytes": 9774667,
+      "duration_s": 59.995,
+      "event_counts": {
+        "can": 194159,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209091,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-9.zst",
+      "first_live_ns": 590591283420,
+      "last_live_ns": 650585923345,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 9,
+      "sha256": "8542fb754c5e64bcdb28fe0063e84617e14168969a022aa52489733f28683f51"
+    },
+    {
+      "bytes": 10212101,
+      "duration_s": 59.999,
+      "event_counts": {
+        "can": 194772,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209705,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-10.zst",
+      "first_live_ns": 650588982407,
+      "last_live_ns": 710587882905,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 10,
+      "sha256": "ffe54882e5e7abc6ba42796f13221ec322b234d2b4f0d9fdb804d536a05c9b76"
+    },
+    {
+      "bytes": 10521956,
+      "duration_s": 60.009,
+      "event_counts": {
+        "can": 194811,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209746,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-11.zst",
+      "first_live_ns": 710590822801,
+      "last_live_ns": 770600271841,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 11,
+      "sha256": "3dc9bc470d80365301240065e697ffbe61b44bfff3bf556c7b2661d36789b490"
+    },
+    {
+      "bytes": 10169081,
+      "duration_s": 59.987,
+      "event_counts": {
+        "can": 194330,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2986
+      },
+      "events_total": 209263,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-12.zst",
+      "first_live_ns": 770604264757,
+      "last_live_ns": 830591514839,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 12,
+      "sha256": "200b4f88dacdda725cdf87f73cdf2ad54202683df41edca789ef7d954b1ef552"
+    },
+    {
+      "bytes": 10152743,
+      "duration_s": 59.999,
+      "event_counts": {
+        "can": 194112,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209043,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-13.zst",
+      "first_live_ns": 830596646453,
+      "last_live_ns": 890595672941,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 13,
+      "sha256": "bb7ecffe02007d195ddd57b96d3ecc878b8b7edda5621f0c2165ba3c9151602f"
+    },
+    {
+      "bytes": 10293163,
+      "duration_s": 60.013,
+      "event_counts": {
+        "can": 194493,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2989
+      },
+      "events_total": 209430,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-14.zst",
+      "first_live_ns": 890596138357,
+      "last_live_ns": 950609030782,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 14,
+      "sha256": "bd977d659ff8ffd878bb88614995e4dd00037071d7c396121acee090c49b978a"
+    },
+    {
+      "bytes": 10352567,
+      "duration_s": 59.981,
+      "event_counts": {
+        "can": 194659,
+        "carState": 5971,
+        "controlsState": 5971,
+        "sendcan": 2985
+      },
+      "events_total": 209586,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-15.zst",
+      "first_live_ns": 950613504220,
+      "last_live_ns": 1010594861072,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 15,
+      "sha256": "b257ae2716287a468abd40226c141a086f385ef465bb672757674409272e1eb3"
+    },
+    {
+      "bytes": 10114214,
+      "duration_s": 60.002,
+      "event_counts": {
+        "can": 194610,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209542,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-16.zst",
+      "first_live_ns": 1010598175030,
+      "last_live_ns": 1070600264122,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 16,
+      "sha256": "b3eb0822d34e3586969b10a28cdb3fe9ddf8ff3857259dff565137db7cb1307f"
+    },
+    {
+      "bytes": 10272065,
+      "duration_s": 59.998,
+      "event_counts": {
+        "can": 194122,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2987
+      },
+      "events_total": 209053,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-17.zst",
+      "first_live_ns": 1070600732038,
+      "last_live_ns": 1130598411912,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 17,
+      "sha256": "07ed7cd677d8ae77a1abbddfa732c96ab826942a29dd0e5e7e02c5a9bba20e04"
+    },
+    {
+      "bytes": 10150478,
+      "duration_s": 60.011,
+      "event_counts": {
+        "can": 194011,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 208946,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-18.zst",
+      "first_live_ns": 1130601482276,
+      "last_live_ns": 1190612526785,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 18,
+      "sha256": "31adfd09c5099fccd3230ab54ee4d470a5c12e835071475bc7ccbfeb95d29a1c"
+    },
+    {
+      "bytes": 10105007,
+      "duration_s": 59.984,
+      "event_counts": {
+        "can": 193936,
+        "carState": 5971,
+        "controlsState": 5972,
+        "sendcan": 2985
+      },
+      "events_total": 208864,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-19.zst",
+      "first_live_ns": 1190617023712,
+      "last_live_ns": 1250601195355,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 19,
+      "sha256": "aab260243f71f816dd6ec31f4e965ab8b49d5f85584d290f9ce871768a745a82"
+    },
+    {
+      "bytes": 10125530,
+      "duration_s": 60.001,
+      "event_counts": {
+        "can": 194424,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209358,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-20.zst",
+      "first_live_ns": 1250602565407,
+      "last_live_ns": 1310604055124,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 20,
+      "sha256": "10c99d2717caabfb753b95d053a9dce573265891e1c187463b39ceb2fdb3ffe5"
+    },
+    {
+      "bytes": 10085244,
+      "duration_s": 60.016,
+      "event_counts": {
+        "can": 194155,
+        "carState": 5975,
+        "controlsState": 5975,
+        "sendcan": 2987
+      },
+      "events_total": 209092,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-21.zst",
+      "first_live_ns": 1310607421166,
+      "last_live_ns": 1370623761872,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 21,
+      "sha256": "0ed2aba3d9cf34c1aec5758629219e0bb2f31c5bd9ce2953b684e97c8be9da6e"
+    },
+    {
+      "bytes": 10077055,
+      "duration_s": 59.986,
+      "event_counts": {
+        "can": 194128,
+        "carState": 5971,
+        "controlsState": 5971,
+        "sendcan": 2986
+      },
+      "events_total": 209056,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-22.zst",
+      "first_live_ns": 1370624529945,
+      "last_live_ns": 1430610144558,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 22,
+      "sha256": "00178fd2d575f5abf630747190f6bacf907e5ee4af2d1f1ffae0dbb159b1b41e"
+    },
+    {
+      "bytes": 10175214,
+      "duration_s": 60.001,
+      "event_counts": {
+        "can": 194562,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209493,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-23.zst",
+      "first_live_ns": 1430613377318,
+      "last_live_ns": 1490614478649,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 23,
+      "sha256": "ba2c17081cacfc3362cc9f7656200f335b3193df45c0af5f1365b6831c06866e"
+    },
+    {
+      "bytes": 10247456,
+      "duration_s": 59.999,
+      "event_counts": {
+        "can": 194287,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209221,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-24.zst",
+      "first_live_ns": 1490615793545,
+      "last_live_ns": 1550615241751,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 24,
+      "sha256": "d91aaf28888a52504db9554f428c1eb5e7c68741b2b338fc89b244e7d99a52c9"
+    },
+    {
+      "bytes": 10201401,
+      "duration_s": 59.998,
+      "event_counts": {
+        "can": 194293,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209226,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-25.zst",
+      "first_live_ns": 1550618287272,
+      "last_live_ns": 1610616706520,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 25,
+      "sha256": "67fe27b080507a55b8eef8e9cf892410ac36d3454ccc06f32443b3368116e2e6"
+    },
+    {
+      "bytes": 10340026,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194325,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209256,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-26.zst",
+      "first_live_ns": 1610619658083,
+      "last_live_ns": 1670619160768,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 26,
+      "sha256": "d8278f08b549cfcc209b786d050335e337d6d06659b3ab17042f48400a55eb07"
+    },
+    {
+      "bytes": 10112141,
+      "duration_s": 59.995,
+      "event_counts": {
+        "can": 194001,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 208933,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-27.zst",
+      "first_live_ns": 1670620474258,
+      "last_live_ns": 1730615671370,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 27,
+      "sha256": "ad6fd57672e0a82ca280799646c21a5e8c792c1136c490454145b3bffbd5358d"
+    },
+    {
+      "bytes": 10317267,
+      "duration_s": 60.01,
+      "event_counts": {
+        "can": 194238,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2991
+      },
+      "events_total": 209176,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-28.zst",
+      "first_live_ns": 1730619491058,
+      "last_live_ns": 1790629862649,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 28,
+      "sha256": "24b8cba6cb7b08469ce9e4747021284cdd5d9792beb23ce22d67f1e97a3424e9"
+    },
+    {
+      "bytes": 10348026,
+      "duration_s": 59.988,
+      "event_counts": {
+        "can": 194346,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209277,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-29.zst",
+      "first_live_ns": 1790634561608,
+      "last_live_ns": 1850622085908,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 29,
+      "sha256": "428f25cb9319c8e2369e05c25749bd807c6fc550ed6733216219aca671c90baf"
+    },
+    {
+      "bytes": 10348530,
+      "duration_s": 59.996,
+      "event_counts": {
+        "can": 194300,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209233,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-30.zst",
+      "first_live_ns": 1850625291533,
+      "last_live_ns": 1910621770624,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 30,
+      "sha256": "2b80e9d7c15eb158019f138314829e6b2aa39c327144bb0a882522dd78c0a326"
+    },
+    {
+      "bytes": 10299864,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194544,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209476,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-31.zst",
+      "first_live_ns": 1910624872864,
+      "last_live_ns": 1970625275341,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 31,
+      "sha256": "b8039e31ad0c2b50adf65f306812abcf7bc697cf7b275a20020a5efd44304d12"
+    },
+    {
+      "bytes": 10149721,
+      "duration_s": 59.997,
+      "event_counts": {
+        "can": 194115,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209048,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-32.zst",
+      "first_live_ns": 1970628528466,
+      "last_live_ns": 2030625058860,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 32,
+      "sha256": "bd40502476ba644dd77cac04497505c4d95ccf9e6d058496d8d83d6b412b9dc0"
+    },
+    {
+      "bytes": 10282712,
+      "duration_s": 59.997,
+      "event_counts": {
+        "can": 194433,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209365,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-33.zst",
+      "first_live_ns": 2030628106099,
+      "last_live_ns": 2090625160087,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 33,
+      "sha256": "db4400bc277afd08256b1fa16fdb67ac7f8c06f732ddc2858ffe755a3a8912ab"
+    },
+    {
+      "bytes": 10289181,
+      "duration_s": 60.005,
+      "event_counts": {
+        "can": 194451,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209385,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-34.zst",
+      "first_live_ns": 2090628561232,
+      "last_live_ns": 2150633997720,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 34,
+      "sha256": "8c696644f0eb601a87d93f87926781d2ce63a3426394aa671deb7b0c3cdb04c6"
+    },
+    {
+      "bytes": 10206735,
+      "duration_s": 60.006,
+      "event_counts": {
+        "can": 194170,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209104,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-35.zst",
+      "first_live_ns": 2150635465012,
+      "last_live_ns": 2210641321291,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 35,
+      "sha256": "2ee8f338cd48cbdc6bb92150f586eb26d3951c0967e44eb7764dab335c3b0c77"
+    },
+    {
+      "bytes": 10102621,
+      "duration_s": 59.991,
+      "event_counts": {
+        "can": 194257,
+        "carState": 5971,
+        "controlsState": 5972,
+        "sendcan": 2985
+      },
+      "events_total": 209185,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-36.zst",
+      "first_live_ns": 2210645350718,
+      "last_live_ns": 2270636691841,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 36,
+      "sha256": "b02d12aaf38f4080957113a25fea15499cc209bbca14cef26b3895620a61ed71"
+    },
+    {
+      "bytes": 10235824,
+      "duration_s": 59.996,
+      "event_counts": {
+        "can": 194384,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2987
+      },
+      "events_total": 209316,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-37.zst",
+      "first_live_ns": 2270637931112,
+      "last_live_ns": 2330633624579,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 37,
+      "sha256": "5db6d5e2760af653eb2e7bd0de4df66e03fec7395057e6ce187739d0c101dcdf"
+    },
+    {
+      "bytes": 10390813,
+      "duration_s": 59.998,
+      "event_counts": {
+        "can": 194806,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2986
+      },
+      "events_total": 209739,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-38.zst",
+      "first_live_ns": 2330636605829,
+      "last_live_ns": 2390634814608,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 38,
+      "sha256": "86a352966045b22b265df0ee0c51d795580f0e9ebcca4b854a316e12c6a4360b"
+    },
+    {
+      "bytes": 10318965,
+      "duration_s": 60.002,
+      "event_counts": {
+        "can": 194632,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209565,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-39.zst",
+      "first_live_ns": 2390640084087,
+      "last_live_ns": 2450641786877,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 39,
+      "sha256": "1b53649dd3dd831bd1d8f1ff3888c081c4c9d42236c107dbcef70184c08d98c2"
+    },
+    {
+      "bytes": 10353832,
+      "duration_s": 59.995,
+      "event_counts": {
+        "can": 194123,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2989
+      },
+      "events_total": 209058,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-40.zst",
+      "first_live_ns": 2450643221668,
+      "last_live_ns": 2510638511854,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 40,
+      "sha256": "51df741aaba5ccbe9dfa3d8338de087fd3b0bd6771e991d41278f546a2b98218"
+    },
+    {
+      "bytes": 10431247,
+      "duration_s": 59.996,
+      "event_counts": {
+        "can": 194716,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2987
+      },
+      "events_total": 209648,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-41.zst",
+      "first_live_ns": 2510644966802,
+      "last_live_ns": 2570640683810,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 41,
+      "sha256": "44c33c78ad51c28fcd8f11c1dfc24bec3c395116663e232820f1d38bc7f586da"
+    },
+    {
+      "bytes": 10330099,
+      "duration_s": 60.011,
+      "event_counts": {
+        "can": 194418,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209353,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-42.zst",
+      "first_live_ns": 2570643841571,
+      "last_live_ns": 2630654348944,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 42,
+      "sha256": "9839173b1da97607d964fa5b71323694d86d1a4dbf7a9df6a27addd1c4918db4"
+    },
+    {
+      "bytes": 10414807,
+      "duration_s": 59.987,
+      "event_counts": {
+        "can": 194333,
+        "carState": 5971,
+        "controlsState": 5972,
+        "sendcan": 2985
+      },
+      "events_total": 209261,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-43.zst",
+      "first_live_ns": 2630658423006,
+      "last_live_ns": 2690645717462,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 43,
+      "sha256": "7e809689260c01aaedb1db1fd4dfd57f38ffba02d8db8325d00cedf4810d8ee7"
+    },
+    {
+      "bytes": 10423943,
+      "duration_s": 60.004,
+      "event_counts": {
+        "can": 194321,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209252,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-44.zst",
+      "first_live_ns": 2690647149962,
+      "last_live_ns": 2750650881033,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 44,
+      "sha256": "f42a9c2c915d331773149f340709e9298192dd1eecab834595f0b33a106c8c3f"
+    },
+    {
+      "bytes": 10444575,
+      "duration_s": 59.996,
+      "event_counts": {
+        "can": 194587,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2987
+      },
+      "events_total": 209518,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-45.zst",
+      "first_live_ns": 2750651362960,
+      "last_live_ns": 2810647064187,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 45,
+      "sha256": "6e3368995f7cc805c5e3517d944383f15db942c95cb5dbd63f6ba2badb5673cd"
+    },
+    {
+      "bytes": 10256484,
+      "duration_s": 60.007,
+      "event_counts": {
+        "can": 194567,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209502,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-46.zst",
+      "first_live_ns": 2810650284864,
+      "last_live_ns": 2870657166404,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 46,
+      "sha256": "179ad23b29af599bb4ad40468e547a844d29fc5b90d3991719bfec5a57b877fd"
+    },
+    {
+      "bytes": 10079487,
+      "duration_s": 59.994,
+      "event_counts": {
+        "can": 194123,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2985
+      },
+      "events_total": 209052,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-47.zst",
+      "first_live_ns": 2870660534164,
+      "last_live_ns": 2930654292683,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 47,
+      "sha256": "691bcfd33ab9fbb99854467f380fa5063f12fd97db58ed287c228435d6860126"
+    },
+    {
+      "bytes": 10166518,
+      "duration_s": 59.999,
+      "event_counts": {
+        "can": 194374,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209306,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-48.zst",
+      "first_live_ns": 2930654743412,
+      "last_live_ns": 2990653660473,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 48,
+      "sha256": "f456c556d40e6d332e58aa4af864fc2afdd51291d4f505dc2e5d8f7a8cfba7d1"
+    },
+    {
+      "bytes": 10256860,
+      "duration_s": 59.997,
+      "event_counts": {
+        "can": 194627,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209559,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-49.zst",
+      "first_live_ns": 2990658378702,
+      "last_live_ns": 3050655083367,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 49,
+      "sha256": "e4597baf6e76e319e4eca0a4f57998f25a9c5c6504bd777a399468ea2d5c4743"
+    },
+    {
+      "bytes": 10325126,
+      "duration_s": 59.995,
+      "event_counts": {
+        "can": 194427,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2987
+      },
+      "events_total": 209359,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-50.zst",
+      "first_live_ns": 3050660454148,
+      "last_live_ns": 3110655041469,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 50,
+      "sha256": "d4560ac06aa047cc30cafcdc038f5d543cd9bed26ea8576441e2421d3c4b71e6"
+    },
+    {
+      "bytes": 10325467,
+      "duration_s": 59.999,
+      "event_counts": {
+        "can": 194164,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2986
+      },
+      "events_total": 209097,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-51.zst",
+      "first_live_ns": 3110658206885,
+      "last_live_ns": 3170657595925,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 51,
+      "sha256": "15e989b17d28d33925e4efdf841ff5bda07ef70532facc37e70dd1e9180db158"
+    },
+    {
+      "bytes": 10409750,
+      "duration_s": 59.994,
+      "event_counts": {
+        "can": 194870,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2987
+      },
+      "events_total": 209802,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-52.zst",
+      "first_live_ns": 3170664057852,
+      "last_live_ns": 3230657951475,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 52,
+      "sha256": "45d7a0bee75577fae7bb45aff49c5c040c6a6ade7d01499c604edd27361b9504"
+    },
+    {
+      "bytes": 10318326,
+      "duration_s": 60.008,
+      "event_counts": {
+        "can": 194345,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2986
+      },
+      "events_total": 209279,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-53.zst",
+      "first_live_ns": 3230661100798,
+      "last_live_ns": 3290668745619,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 53,
+      "sha256": "bc35f45aa0ef57b43e8a1ad01a4c1733fe3fbd5c08c5651b937e2c39e425558d"
+    },
+    {
+      "bytes": 10370705,
+      "duration_s": 59.998,
+      "event_counts": {
+        "can": 194511,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2991
+      },
+      "events_total": 209447,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-54.zst",
+      "first_live_ns": 3290669339838,
+      "last_live_ns": 3350667299398,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 54,
+      "sha256": "534898db70a83fd9343fd8c65d7bb74e07acbc8acd9528acadc9d6aa4e09b79c"
+    },
+    {
+      "bytes": 10357519,
+      "duration_s": 60.001,
+      "event_counts": {
+        "can": 194311,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209243,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-55.zst",
+      "first_live_ns": 3350668817992,
+      "last_live_ns": 3410669343958,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 55,
+      "sha256": "4e0f125713ca7c978e10ac82e8c38671ec9dbc6a91196d0d00d18c196ef6dd4d"
+    },
+    {
+      "bytes": 10370764,
+      "duration_s": 60.004,
+      "event_counts": {
+        "can": 194401,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2991
+      },
+      "events_total": 209339,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-56.zst",
+      "first_live_ns": 3410670866406,
+      "last_live_ns": 3470674742946,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 56,
+      "sha256": "632e0295eef16618736aea06784fbb630eccb0a677f1b9c9d9473f1c2fd60cb6"
+    },
+    {
+      "bytes": 10394651,
+      "duration_s": 59.99,
+      "event_counts": {
+        "can": 194447,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209379,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-57.zst",
+      "first_live_ns": 3470678908415,
+      "last_live_ns": 3530669068652,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 57,
+      "sha256": "0b447cdd54f8aded81cc431253d8df26ca13fd0bfea1b5fb5840f47bbb86133e"
+    },
+    {
+      "bytes": 10285064,
+      "duration_s": 60.004,
+      "event_counts": {
+        "can": 194465,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209397,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-58.zst",
+      "first_live_ns": 3530669532402,
+      "last_live_ns": 3590673382015,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 58,
+      "sha256": "5decd6113474d0e926850492462a7c681904eb5a339223571535636fb8ea0dfc"
+    },
+    {
+      "bytes": 10325794,
+      "duration_s": 59.992,
+      "event_counts": {
+        "can": 194601,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209533,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-59.zst",
+      "first_live_ns": 3590674916702,
+      "last_live_ns": 3650666736575,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 59,
+      "sha256": "718171cb92c3fdbac159d6cd14756f6b871adb2287de9c59dea0d31401a4c9ee"
+    },
+    {
+      "bytes": 10352321,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194142,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209075,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-60.zst",
+      "first_live_ns": 3650673584544,
+      "last_live_ns": 3710673256552,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 60,
+      "sha256": "05a53039b9197b96079926acbe2a1f37956a6400ed00b0b385a7e26017ab9887"
+    },
+    {
+      "bytes": 10417347,
+      "duration_s": 59.999,
+      "event_counts": {
+        "can": 194501,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209434,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-61.zst",
+      "first_live_ns": 3710678054677,
+      "last_live_ns": 3770676691165,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 61,
+      "sha256": "115b7dd6f7708f49f2206abc22be84680ba51802f58e9ead7eaa8cd5d8d978c9"
+    },
+    {
+      "bytes": 10392766,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194052,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 208984,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-62.zst",
+      "first_live_ns": 3770677182832,
+      "last_live_ns": 3830677354892,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 62,
+      "sha256": "53c78f8268f784e241e801f2d2b83af5d199f068d2241282402116efb53b0ab5"
+    },
+    {
+      "bytes": 10392033,
+      "duration_s": 60.001,
+      "event_counts": {
+        "can": 194427,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209359,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-63.zst",
+      "first_live_ns": 3830682137965,
+      "last_live_ns": 3890683550807,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 63,
+      "sha256": "b5ebd87baec8912c47a96a1693c9969f606da5f391ac0d8080c2b8b40503f373"
+    },
+    {
+      "bytes": 10470958,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194529,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209462,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-64.zst",
+      "first_live_ns": 3890684920911,
+      "last_live_ns": 3950685262294,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 64,
+      "sha256": "f7cf6a28e29666834eace22915e730fa9ed6adca8717799c056dd70dcc2af739"
+    },
+    {
+      "bytes": 10434438,
+      "duration_s": 59.991,
+      "event_counts": {
+        "can": 194489,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209420,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-65.zst",
+      "first_live_ns": 3950686657607,
+      "last_live_ns": 4010677475188,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 65,
+      "sha256": "59b025230c1f9b6a8d93da9bcb594b3ce96740db42a48de06ac75dd2e63b26e9"
+    },
+    {
+      "bytes": 10379640,
+      "duration_s": 60.016,
+      "event_counts": {
+        "can": 195155,
+        "carState": 5975,
+        "controlsState": 5975,
+        "sendcan": 2992
+      },
+      "events_total": 210097,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-66.zst",
+      "first_live_ns": 4010681187167,
+      "last_live_ns": 4070697373342,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 66,
+      "sha256": "6469a7979e2f190e4cdbab36624ed00d779111ea92ab80c42250f20fe53916dd"
+    },
+    {
+      "bytes": 10498397,
+      "duration_s": 59.989,
+      "event_counts": {
+        "can": 194732,
+        "carState": 5971,
+        "controlsState": 5972,
+        "sendcan": 3043
+      },
+      "events_total": 209718,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-67.zst",
+      "first_live_ns": 4070698155530,
+      "last_live_ns": 4130686925090,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 67,
+      "sha256": "305654c1044347877297cd6fa003821a53f45b0e730f41c9ab532645253db718"
+    },
+    {
+      "bytes": 10483285,
+      "duration_s": 60.021,
+      "event_counts": {
+        "can": 194373,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209306,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-68.zst",
+      "first_live_ns": 4130688362955,
+      "last_live_ns": 4190709311994,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 68,
+      "sha256": "e4e09f56df006c22064b5b4a5ee6adb7b86eb1ef6316b2ad7565aabb811d1a94"
+    },
+    {
+      "bytes": 10464082,
+      "duration_s": 60.003,
+      "event_counts": {
+        "can": 194185,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209120,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-69.zst",
+      "first_live_ns": 4190692220015,
+      "last_live_ns": 4250695243221,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 69,
+      "sha256": "51b1f219418f4ebd149e6060d00c64aa1872105787943ba916dfe0e3ac2c3284"
+    },
+    {
+      "bytes": 10519575,
+      "duration_s": 59.989,
+      "event_counts": {
+        "can": 194145,
+        "carState": 5972,
+        "controlsState": 5971,
+        "sendcan": 2986
+      },
+      "events_total": 209074,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-70.zst",
+      "first_live_ns": 4250700734263,
+      "last_live_ns": 4310689422261,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 70,
+      "sha256": "63820b8ff64d0c314f65d97a47c0e613973c86c5f4de955d90f9ab449d235aa5"
+    },
+    {
+      "bytes": 10559854,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194361,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2986
+      },
+      "events_total": 209294,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-71.zst",
+      "first_live_ns": 4310692459292,
+      "last_live_ns": 4370692926196,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 71,
+      "sha256": "b6eeda8d8cd2b2e38bc67a2ddaa9db13de7c6aeaadc1bff4b3d6681dace57367"
+    },
+    {
+      "bytes": 10497582,
+      "duration_s": 59.997,
+      "event_counts": {
+        "can": 194266,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209199,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-72.zst",
+      "first_live_ns": 4370697980155,
+      "last_live_ns": 4430695319663,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 72,
+      "sha256": "dca156da65a75debf5e9bb0811089fa156a4a1b3c7945fc63e75702e67289b80"
+    },
+    {
+      "bytes": 10511022,
+      "duration_s": 60.007,
+      "event_counts": {
+        "can": 194141,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2989
+      },
+      "events_total": 209077,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-73.zst",
+      "first_live_ns": 4430700154351,
+      "last_live_ns": 4490707353338,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 73,
+      "sha256": "3220c75f428dffc4f07dc38c06438e499cfa0fd8c169529730cf9f537d099be0"
+    },
+    {
+      "bytes": 10533888,
+      "duration_s": 59.987,
+      "event_counts": {
+        "can": 194105,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209035,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-74.zst",
+      "first_live_ns": 4490711527765,
+      "last_live_ns": 4550698446753,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 74,
+      "sha256": "6a4e178bec4a94725902bd55f37096c77817d609b25b498db350917738dd4ad6"
+    },
+    {
+      "bytes": 10536059,
+      "duration_s": 60.001,
+      "event_counts": {
+        "can": 194103,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209035,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-75.zst",
+      "first_live_ns": 4550701496336,
+      "last_live_ns": 4610702794438,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 75,
+      "sha256": "c05349ae75e32caabe0188c84959131d722e3f3058206b7548aee99a35f83946"
+    },
+    {
+      "bytes": 10496659,
+      "duration_s": 60.01,
+      "event_counts": {
+        "can": 194777,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2991
+      },
+      "events_total": 209716,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-76.zst",
+      "first_live_ns": 4610706779126,
+      "last_live_ns": 4670717024728,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 76,
+      "sha256": "a87d4e97a5738ee0d349c4b3d0070ef5158ec5f89e13fda0bf7edf9468af5ca8"
+    },
+    {
+      "bytes": 10482476,
+      "duration_s": 59.986,
+      "event_counts": {
+        "can": 193949,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2990
+      },
+      "events_total": 208883,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-77.zst",
+      "first_live_ns": 4670721088894,
+      "last_live_ns": 4730706999549,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 77,
+      "sha256": "50caa8ec01951d0fd063ba8b88a7e9ffe8a081a97c605d676d1af32edace2477"
+    },
+    {
+      "bytes": 10643665,
+      "duration_s": 59.993,
+      "event_counts": {
+        "can": 195187,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2990
+      },
+      "events_total": 210123,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-78.zst",
+      "first_live_ns": 4730711015851,
+      "last_live_ns": 4790704341557,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 78,
+      "sha256": "9544f815b68675e8e1312661b761403205ca95e9362e20bb92e5678e89633c6c"
+    },
+    {
+      "bytes": 10600814,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194703,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2990
+      },
+      "events_total": 209639,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-79.zst",
+      "first_live_ns": 4790707295463,
+      "last_live_ns": 4850707264503,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 79,
+      "sha256": "afcfd8a45b716d285bad60c764b8f89c882b21925d13651330d691aa26d0d2aa"
+    },
+    {
+      "bytes": 10516306,
+      "duration_s": 59.984,
+      "event_counts": {
+        "can": 194882,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 3099
+      },
+      "events_total": 209925,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-80.zst",
+      "first_live_ns": 4850710459867,
+      "last_live_ns": 4910694662501,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 80,
+      "sha256": "189734f785992e01e40c05d87b43b4f94db35f05c849105122caddd8815d3052"
+    },
+    {
+      "bytes": 10495565,
+      "duration_s": 59.999,
+      "event_counts": {
+        "can": 195324,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 210257,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-81.zst",
+      "first_live_ns": 4910697723282,
+      "last_live_ns": 4970696955395,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 81,
+      "sha256": "e17e1e9a157f0404b2aa3fae299f0a0657adfc6baa5f0c5886d28d570b353eb2"
+    },
+    {
+      "bytes": 10231535,
+      "duration_s": 59.998,
+      "event_counts": {
+        "can": 194250,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209182,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-82.zst",
+      "first_live_ns": 4970699685655,
+      "last_live_ns": 5030698006934,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 82,
+      "sha256": "0113a8b7a7d87130b90edcf33da624946566b885596a97cfe64f10949890663d"
+    },
+    {
+      "bytes": 10412890,
+      "duration_s": 60.025,
+      "event_counts": {
+        "can": 194955,
+        "carState": 5975,
+        "controlsState": 5975,
+        "sendcan": 2988
+      },
+      "events_total": 209893,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-83.zst",
+      "first_live_ns": 5030701179851,
+      "last_live_ns": 5090726259672,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 83,
+      "sha256": "cb7577d7febe14b3f5f199f393ecff5f0b06e38cd2a19eafa01acda5e6f793ee"
+    },
+    {
+      "bytes": 10344020,
+      "duration_s": 59.984,
+      "event_counts": {
+        "can": 194351,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209281,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-84.zst",
+      "first_live_ns": 5090730997745,
+      "last_live_ns": 5150715001524,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 84,
+      "sha256": "080687d4b3e2f2f0faf37ee4bf0f5a91b770832dfd7ae96d5ac24eb3640c6ab7"
+    },
+    {
+      "bytes": 10426695,
+      "duration_s": 59.988,
+      "event_counts": {
+        "can": 194302,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209233,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-85.zst",
+      "first_live_ns": 5150717954284,
+      "last_live_ns": 5210706238376,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 85,
+      "sha256": "595368e465d467e526cc03dcbae6ec408c6d6b08089663b042a6f0c7a4cbd48f"
+    },
+    {
+      "bytes": 10401042,
+      "duration_s": 60.017,
+      "event_counts": {
+        "can": 194724,
+        "carState": 5976,
+        "controlsState": 5975,
+        "sendcan": 2988
+      },
+      "events_total": 209663,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-86.zst",
+      "first_live_ns": 5210711567022,
+      "last_live_ns": 5270728902103,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 86,
+      "sha256": "bc37dc66286f0f7060bccd4504a2adc454d44b2221eac15315a94b185350ed31"
+    },
+    {
+      "bytes": 10368027,
+      "duration_s": 59.976,
+      "event_counts": {
+        "can": 194403,
+        "carState": 5971,
+        "controlsState": 5971,
+        "sendcan": 2985
+      },
+      "events_total": 209330,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-87.zst",
+      "first_live_ns": 5270733082936,
+      "last_live_ns": 5330709107653,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 87,
+      "sha256": "99b534551cadd560163d171e8fa713e1d325b1ca8a34103b73866cd7dff27967"
+    },
+    {
+      "bytes": 10346188,
+      "duration_s": 60.024,
+      "event_counts": {
+        "can": 194470,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209404,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-88.zst",
+      "first_live_ns": 5330712226664,
+      "last_live_ns": 5390736025234,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 88,
+      "sha256": "5aa18ae352bc3e715959e1ec75c84a51e971bb632f7f540b469fe5cba5acef75"
+    },
+    {
+      "bytes": 10468097,
+      "duration_s": 59.995,
+      "event_counts": {
+        "can": 194618,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209550,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-89.zst",
+      "first_live_ns": 5390717181693,
+      "last_live_ns": 5450711920107,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 89,
+      "sha256": "305cb6645d13c9500f39248e14cdd625e99c722efa01efdd86d7187de7b6c829"
+    },
+    {
+      "bytes": 10463202,
+      "duration_s": 60.013,
+      "event_counts": {
+        "can": 194628,
+        "carState": 5975,
+        "controlsState": 5974,
+        "sendcan": 2991
+      },
+      "events_total": 209568,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-90.zst",
+      "first_live_ns": 5450717958441,
+      "last_live_ns": 5510730797897,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 90,
+      "sha256": "48c55b274d76f30e1384a3fda15a9b8d5ea51bb96acfdddd57253439dee9ac55"
+    },
+    {
+      "bytes": 10455497,
+      "duration_s": 59.982,
+      "event_counts": {
+        "can": 194845,
+        "carState": 5970,
+        "controlsState": 5971,
+        "sendcan": 2986
+      },
+      "events_total": 209772,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-91.zst",
+      "first_live_ns": 5510731301959,
+      "last_live_ns": 5570713637770,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 91,
+      "sha256": "c92b3d99f5901b8be9acd9bfc5323e5d434c5f812f289f4c4c42f20884d6f458"
+    },
+    {
+      "bytes": 10401032,
+      "duration_s": 60.011,
+      "event_counts": {
+        "can": 194674,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209606,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-92.zst",
+      "first_live_ns": 5570717978916,
+      "last_live_ns": 5630728756237,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 92,
+      "sha256": "cde0cebf4e092e27be15f2e226fbdc35af3908fa8c8346febd81f78cf1d9504b"
+    },
+    {
+      "bytes": 10471593,
+      "duration_s": 60.01,
+      "event_counts": {
+        "can": 194400,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209334,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-93.zst",
+      "first_live_ns": 5630730102070,
+      "last_live_ns": 5690739830745,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 93,
+      "sha256": "edcc518aa1d324322558346d75ee9e8c65d3450c6bd2f1a0594d6cd20fd57401"
+    },
+    {
+      "bytes": 10451021,
+      "duration_s": 59.993,
+      "event_counts": {
+        "can": 194074,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209004,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-94.zst",
+      "first_live_ns": 5690744231995,
+      "last_live_ns": 5750737134055,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 94,
+      "sha256": "e4c632826d26cd9d6c1adba69e9608d13c0de581597b8c7254338b5d407223a5"
+    },
+    {
+      "bytes": 10468420,
+      "duration_s": 59.998,
+      "event_counts": {
+        "can": 194698,
+        "carState": 5971,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209627,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-95.zst",
+      "first_live_ns": 5750740282441,
+      "last_live_ns": 5810737930751,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 95,
+      "sha256": "3fff844675dd7399a6acb396c2d62b4ba834a38ce8d4cc29f2e3ed39d9fcbe74"
+    },
+    {
+      "bytes": 10370231,
+      "duration_s": 60.008,
+      "event_counts": {
+        "can": 194507,
+        "carState": 5971,
+        "controlsState": 5970,
+        "sendcan": 2987
+      },
+      "events_total": 209435,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-96.zst",
+      "first_live_ns": 5810739257887,
+      "last_live_ns": 5870747732708,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 96,
+      "sha256": "c6ceb5bb99ce901ffe0958ff90517ba62278c69dde02bb548883ead337989e6a"
+    },
+    {
+      "bytes": 10583612,
+      "duration_s": 59.986,
+      "event_counts": {
+        "can": 194521,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 3001
+      },
+      "events_total": 209466,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-97.zst",
+      "first_live_ns": 5870752482864,
+      "last_live_ns": 5930738572737,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 97,
+      "sha256": "a349b45ed60980112e4d33ca73bb7f46fb8482f9c0b99e97257f991e4f08247e"
+    },
+    {
+      "bytes": 10342139,
+      "duration_s": 59.985,
+      "event_counts": {
+        "can": 194359,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209289,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-98.zst",
+      "first_live_ns": 5930741856226,
+      "last_live_ns": 5990727011985,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 98,
+      "sha256": "a459efe9642f0cff785c0be57427d837d2c78486b978b029f542b063688187b4"
+    },
+    {
+      "bytes": 10123247,
+      "duration_s": 60.014,
+      "event_counts": {
+        "can": 194514,
+        "carState": 5974,
+        "controlsState": 5975,
+        "sendcan": 2987
+      },
+      "events_total": 209450,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-99.zst",
+      "first_live_ns": 5990729919901,
+      "last_live_ns": 6050743790712,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 99,
+      "sha256": "90b7e0c1f8361e6238ba6df69d2646998887680eb24e95d7d7d5446f55ef348e"
+    },
+    {
+      "bytes": 10428265,
+      "duration_s": 59.998,
+      "event_counts": {
+        "can": 194776,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209709,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-100.zst",
+      "first_live_ns": 6050745126337,
+      "last_live_ns": 6110743300376,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 100,
+      "sha256": "2ffa5df4fc649a8a9534fc060b19fa64d4116d34eea6e471400bf6c535f5aa65"
+    },
+    {
+      "bytes": 10355780,
+      "duration_s": 59.989,
+      "event_counts": {
+        "can": 194262,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209193,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-101.zst",
+      "first_live_ns": 6110744751731,
+      "last_live_ns": 6170734113426,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 101,
+      "sha256": "03ac62fc1fe6b09c08a45f679af496a8434f5a7ed902cef8cbf10554c834ae3d"
+    },
+    {
+      "bytes": 10532115,
+      "duration_s": 60.022,
+      "event_counts": {
+        "can": 194676,
+        "carState": 5976,
+        "controlsState": 5976,
+        "sendcan": 2988
+      },
+      "events_total": 209616,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-102.zst",
+      "first_live_ns": 6170737227281,
+      "last_live_ns": 6230759719133,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 102,
+      "sha256": "bf2f5112569f69239006f4db8b7f73fbe97777129168919362683fc946cb3db9"
+    },
+    {
+      "bytes": 10634738,
+      "duration_s": 59.979,
+      "event_counts": {
+        "can": 194720,
+        "carState": 5971,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209649,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-103.zst",
+      "first_live_ns": 6230763892258,
+      "last_live_ns": 6290742842599,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 103,
+      "sha256": "49c6ffbae79ec172300c8f9819bc2500876dbbf9ae8ee96764c6be8d8cfb8913"
+    },
+    {
+      "bytes": 10446718,
+      "duration_s": 60.024,
+      "event_counts": {
+        "can": 194709,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2988
+      },
+      "events_total": 209645,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-104.zst",
+      "first_live_ns": 6290747876610,
+      "last_live_ns": 6350771819712,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 104,
+      "sha256": "54374169aae73908aba6ac544382befc64c497332590c1e02ff0bf6f81653d5f"
+    },
+    {
+      "bytes": 10660763,
+      "duration_s": 59.995,
+      "event_counts": {
+        "can": 194781,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2985
+      },
+      "events_total": 209712,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-105.zst",
+      "first_live_ns": 6350760957056,
+      "last_live_ns": 6410755627814,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 105,
+      "sha256": "01b039ff4acd88f8c92349c3f5abb5bce295c752853e84d6ef30fc8fb4714835"
+    },
+    {
+      "bytes": 10318881,
+      "duration_s": 59.993,
+      "event_counts": {
+        "can": 194267,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209201,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-106.zst",
+      "first_live_ns": 6410756950314,
+      "last_live_ns": 6470749486489,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 106,
+      "sha256": "03799a73a6521b035519af3bee0e39af020d3dd3e4511fdbb6eb31b9008bc940"
+    },
+    {
+      "bytes": 10306041,
+      "duration_s": 60.012,
+      "event_counts": {
+        "can": 194363,
+        "carState": 5971,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209292,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-107.zst",
+      "first_live_ns": 6470753054197,
+      "last_live_ns": 6530764808081,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 107,
+      "sha256": "3a384047a605ebdc73e7396d8688986f4f1507c988b8bf8cdf6e7168c88ce536"
+    },
+    {
+      "bytes": 10494692,
+      "duration_s": 60.038,
+      "event_counts": {
+        "can": 194648,
+        "carState": 5977,
+        "controlsState": 5976,
+        "sendcan": 2989
+      },
+      "events_total": 209590,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-108.zst",
+      "first_live_ns": 6530741824956,
+      "last_live_ns": 6590780307954,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 108,
+      "sha256": "47e7497b9383b102df0be352ea94280229b5728fab9c08bfa642e4494ab661e4"
+    },
+    {
+      "bytes": 6891115,
+      "duration_s": 41.322,
+      "event_counts": {
+        "can": 133747,
+        "carState": 4111,
+        "controlsState": 4113,
+        "sendcan": 2055
+      },
+      "events_total": 144026,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1/rlog-109.zst",
+      "first_live_ns": 6590772658787,
+      "last_live_ns": 6632094253823,
+      "out_of_order_events": 0,
+      "route": "0000003b--62262eb7a1",
+      "segment": 109,
+      "sha256": "7e67fac9770ecac949333a515e2b434c2adc2ae44c6efefadea14f7d423f317a"
+    },
+    {
+      "bytes": 8320187,
+      "duration_s": 60.96,
+      "event_counts": {
+        "can": 195483,
+        "carState": 5410,
+        "controlsState": 5403,
+        "sendcan": 2817
+      },
+      "events_total": 209113,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-0.zst",
+      "first_live_ns": 7494920427192,
+      "last_live_ns": 7555880120450,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 0,
+      "sha256": "ab303853e526aecffaa10b0b8feb4be8c2d38060caecacedfa2e2647b5d191b0"
+    },
+    {
+      "bytes": 9092679,
+      "duration_s": 59.986,
+      "event_counts": {
+        "can": 194028,
+        "carState": 5970,
+        "controlsState": 5971,
+        "sendcan": 2985
+      },
+      "events_total": 208954,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-1.zst",
+      "first_live_ns": 7555883139513,
+      "last_live_ns": 7615869580063,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 1,
+      "sha256": "d326cfebf7650f3dee93a4322cdf17abc391a487d5451f8053e1c8650beff600"
+    },
+    {
+      "bytes": 9096930,
+      "duration_s": 60.017,
+      "event_counts": {
+        "can": 193638,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 208570,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-2.zst",
+      "first_live_ns": 7615870745531,
+      "last_live_ns": 7675888092175,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 2,
+      "sha256": "76f90c26c39dc6e9513b516249375865c0dfac4bd34f10b2bfa6c4e7f4526c6c"
+    },
+    {
+      "bytes": 9094927,
+      "duration_s": 60.006,
+      "event_counts": {
+        "can": 193589,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2985
+      },
+      "events_total": 208519,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-3.zst",
+      "first_live_ns": 7675889482852,
+      "last_live_ns": 7735895835277,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 3,
+      "sha256": "a0d0531ad8492735e9dca263d4e1ad5e322471a07eb3b4af2202a4bf585c1495"
+    },
+    {
+      "bytes": 9096022,
+      "duration_s": 60.013,
+      "event_counts": {
+        "can": 193764,
+        "carState": 5971,
+        "controlsState": 5972,
+        "sendcan": 2987
+      },
+      "events_total": 208694,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-4.zst",
+      "first_live_ns": 7735876359340,
+      "last_live_ns": 7795889234056,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 4,
+      "sha256": "14f7b4fbf2ec7eed045e4db555de5c76588954af88477348d242d6324c4780fe"
+    },
+    {
+      "bytes": 9153812,
+      "duration_s": 59.985,
+      "event_counts": {
+        "can": 203208,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 218138,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-5.zst",
+      "first_live_ns": 7795890597286,
+      "last_live_ns": 7855875929606,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 5,
+      "sha256": "2b8056eac7b13c6876b15d35f165e8da4cedda8a8e20ec8568d3bc754d885fbb"
+    },
+    {
+      "bytes": 9117795,
+      "duration_s": 60.014,
+      "event_counts": {
+        "can": 193848,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2986
+      },
+      "events_total": 208782,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-6.zst",
+      "first_live_ns": 7855881385284,
+      "last_live_ns": 7915895587552,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 6,
+      "sha256": "13d2ca9c734041fb05189075ad631bfb42a4f2965de9e75d0a0f3b3c8917e75e"
+    },
+    {
+      "bytes": 9114083,
+      "duration_s": 60.01,
+      "event_counts": {
+        "can": 193572,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2988
+      },
+      "events_total": 208505,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-7.zst",
+      "first_live_ns": 7915883108854,
+      "last_live_ns": 7975893214561,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 7,
+      "sha256": "dc4a97e4a650d3f624726cb0d2b438b73044ba543337d32282482dc74a63a188"
+    },
+    {
+      "bytes": 9600332,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194047,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 208978,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-8.zst",
+      "first_live_ns": 7975896220134,
+      "last_live_ns": 8035896390007,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 8,
+      "sha256": "3d7ce9a71b2656f57ef7ba7bc5b85d3e2e5ba9ecc064b41fa815d069313d7fa5"
+    },
+    {
+      "bytes": 10244404,
+      "duration_s": 59.98,
+      "event_counts": {
+        "can": 195016,
+        "carState": 5968,
+        "controlsState": 5968,
+        "sendcan": 2984
+      },
+      "events_total": 209936,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-9.zst",
+      "first_live_ns": 8035901552611,
+      "last_live_ns": 8095881353786,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 9,
+      "sha256": "84ee06081d7528c704cacec5d37fc49fc9fc92b94a26b44b8d01b8b23423226b"
+    },
+    {
+      "bytes": 10162221,
+      "duration_s": 60.013,
+      "event_counts": {
+        "can": 195272,
+        "carState": 5969,
+        "controlsState": 5968,
+        "sendcan": 2984
+      },
+      "events_total": 210193,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-10.zst",
+      "first_live_ns": 8095886285713,
+      "last_live_ns": 8155898802617,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 10,
+      "sha256": "8ecc53811766afbdb2ee8c0ad760cefaa87c6e9bd3b27210dfe8141a40760897"
+    },
+    {
+      "bytes": 9501257,
+      "duration_s": 59.986,
+      "event_counts": {
+        "can": 193887,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 208818,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-11.zst",
+      "first_live_ns": 8155902303138,
+      "last_live_ns": 8215888783947,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 11,
+      "sha256": "53f723617fb7cb9fb359bdad4a97bfcd2218fe4731732c105e329e020c2f7da2"
+    },
+    {
+      "bytes": 10419911,
+      "duration_s": 60.02,
+      "event_counts": {
+        "can": 195342,
+        "carState": 5976,
+        "controlsState": 5975,
+        "sendcan": 2988
+      },
+      "events_total": 210281,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-12.zst",
+      "first_live_ns": 8215894527907,
+      "last_live_ns": 8275914794811,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 12,
+      "sha256": "f68a64156669712f4212f1688a212feff1aca8d6c52368d5e751b6dfc5463e82"
+    },
+    {
+      "bytes": 10637584,
+      "duration_s": 59.984,
+      "event_counts": {
+        "can": 194866,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209797,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-13.zst",
+      "first_live_ns": 8275918935905,
+      "last_live_ns": 8335903192132,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 13,
+      "sha256": "8e1fef1943339ca06f3d25a137a1016077f41a42879c8c284192d6d76da8f377"
+    },
+    {
+      "bytes": 10535378,
+      "duration_s": 60.003,
+      "event_counts": {
+        "can": 194785,
+        "carState": 5974,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209717,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-14.zst",
+      "first_live_ns": 8335908421090,
+      "last_live_ns": 8395911559816,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 14,
+      "sha256": "131911d584d2325a7eecb018c66551503bc6eba0e00a847d28f98ab386dc6291"
+    },
+    {
+      "bytes": 10079379,
+      "duration_s": 60.017,
+      "event_counts": {
+        "can": 193941,
+        "carState": 5973,
+        "controlsState": 5975,
+        "sendcan": 2988
+      },
+      "events_total": 208877,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-15.zst",
+      "first_live_ns": 8395902203984,
+      "last_live_ns": 8455918774951,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 15,
+      "sha256": "ae3f4765fcaa4c304d1cdc80f068d9f037069b8ef6d4808ebd21e0065ea15c4c"
+    },
+    {
+      "bytes": 10416481,
+      "duration_s": 59.987,
+      "event_counts": {
+        "can": 194364,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2989
+      },
+      "events_total": 209298,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-16.zst",
+      "first_live_ns": 8455920149951,
+      "last_live_ns": 8515907318416,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 16,
+      "sha256": "d177afc1fd182b23e90393214f7dc3fe152e6856c8abca58456d5239f5813ca5"
+    },
+    {
+      "bytes": 10436541,
+      "duration_s": 60.001,
+      "event_counts": {
+        "can": 195170,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 210102,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-17.zst",
+      "first_live_ns": 8515910923678,
+      "last_live_ns": 8575911540790,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 17,
+      "sha256": "611486a121a5d863ced70b37dc37cc13f1e69cb130a35987b66c39667575a882"
+    },
+    {
+      "bytes": 10422299,
+      "duration_s": 60.016,
+      "event_counts": {
+        "can": 194630,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209564,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-18.zst",
+      "first_live_ns": 8575912052457,
+      "last_live_ns": 8635927995663,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 18,
+      "sha256": "bd178168b52190332647e46bf55ea7db83bbd4d2107ce16dc76f71732215b052"
+    },
+    {
+      "bytes": 10391029,
+      "duration_s": 59.998,
+      "event_counts": {
+        "can": 194121,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209056,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-19.zst",
+      "first_live_ns": 8635919502016,
+      "last_live_ns": 8695917556994,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 19,
+      "sha256": "f2c1ab1d1cd6d5ca5411248eebf083d06866dfb0577f5cb47706584035deaebe"
+    },
+    {
+      "bytes": 10409312,
+      "duration_s": 59.993,
+      "event_counts": {
+        "can": 194866,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209796,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-20.zst",
+      "first_live_ns": 8695922504546,
+      "last_live_ns": 8755915892701,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 20,
+      "sha256": "12ad99c86ecde5d11d5e04ab2fe7d9ab9a4fcba2cd9a9207d62e036c337ca8a0"
+    },
+    {
+      "bytes": 10421120,
+      "duration_s": 60.016,
+      "event_counts": {
+        "can": 194452,
+        "carState": 5976,
+        "controlsState": 5975,
+        "sendcan": 2988
+      },
+      "events_total": 209391,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-21.zst",
+      "first_live_ns": 8755917176555,
+      "last_live_ns": 8815933655594,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 21,
+      "sha256": "646bc9a8665385959f9505713de00e35c4cd465d713390317e4e5d2f8fa9fb89"
+    },
+    {
+      "bytes": 10446995,
+      "duration_s": 59.987,
+      "event_counts": {
+        "can": 193954,
+        "carState": 5971,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 208883,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-22.zst",
+      "first_live_ns": 8815938609917,
+      "last_live_ns": 8875925866613,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 22,
+      "sha256": "cb38763ad00bf28119f4b78c5594752541fac92f5970f109aa2fe3dd76b3ba99"
+    },
+    {
+      "bytes": 10367050,
+      "duration_s": 59.995,
+      "event_counts": {
+        "can": 194088,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209019,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-23.zst",
+      "first_live_ns": 8875927301301,
+      "last_live_ns": 8935922311903,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 23,
+      "sha256": "e79a7b38eb5934322e8ab92b8d05a51a5cda40236795389b42b8b121bb09f87a"
+    },
+    {
+      "bytes": 10467224,
+      "duration_s": 60.001,
+      "event_counts": {
+        "can": 194151,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209082,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-24.zst",
+      "first_live_ns": 8935925561799,
+      "last_live_ns": 8995926085942,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 24,
+      "sha256": "fea0bfbb17e8d7b89b1959c55d151b89f6c9fe978f52e58973f3abffcb27cbfe"
+    },
+    {
+      "bytes": 10446486,
+      "duration_s": 60.003,
+      "event_counts": {
+        "can": 194321,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209255,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-25.zst",
+      "first_live_ns": 8995927504849,
+      "last_live_ns": 9055930884149,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 25,
+      "sha256": "a862c5864f732782b5a8e3498a0963b407d1f707985d60b61a2af788e99fd5ce"
+    },
+    {
+      "bytes": 10382091,
+      "duration_s": 59.991,
+      "event_counts": {
+        "can": 193929,
+        "carState": 5971,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 208858,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-26.zst",
+      "first_live_ns": 9055934012951,
+      "last_live_ns": 9115924707615,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 26,
+      "sha256": "19705ccc7473dc2aac94b69d6a6ee63185a059f295fabd9d052c1d752535a006"
+    },
+    {
+      "bytes": 10473207,
+      "duration_s": 60.013,
+      "event_counts": {
+        "can": 194228,
+        "carState": 5975,
+        "controlsState": 5975,
+        "sendcan": 2987
+      },
+      "events_total": 209165,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-27.zst",
+      "first_live_ns": 9115915246105,
+      "last_live_ns": 9175928436603,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 27,
+      "sha256": "256f364190e11f4f174c682f3a8beaf35d61d48ffe12a031451166b91501c92d"
+    },
+    {
+      "bytes": 10472461,
+      "duration_s": 59.998,
+      "event_counts": {
+        "can": 194195,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209129,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-28.zst",
+      "first_live_ns": 9175933681915,
+      "last_live_ns": 9235931860903,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 28,
+      "sha256": "bff823bf838d60e4bb2f9d06bc75e2598945bc4d247282d2d749c991823c5cb5"
+    },
+    {
+      "bytes": 10517113,
+      "duration_s": 59.995,
+      "event_counts": {
+        "can": 194623,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209553,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-29.zst",
+      "first_live_ns": 9235935246268,
+      "last_live_ns": 9295930073588,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 29,
+      "sha256": "a658bc3d4a985ddbdc9e9f1a6e29d2246398632c340f1c855e6576630c1afd53"
+    },
+    {
+      "bytes": 10493725,
+      "duration_s": 59.989,
+      "event_counts": {
+        "can": 194295,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209225,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-30.zst",
+      "first_live_ns": 9295933648536,
+      "last_live_ns": 9355922903826,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 30,
+      "sha256": "7c83b09820f201709cb4aa9fa7983224c927e64b52470b5701adf89a4962f39b"
+    },
+    {
+      "bytes": 10501951,
+      "duration_s": 60.014,
+      "event_counts": {
+        "can": 194010,
+        "carState": 5974,
+        "controlsState": 5975,
+        "sendcan": 2987
+      },
+      "events_total": 208946,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-31.zst",
+      "first_live_ns": 9355925911951,
+      "last_live_ns": 9415939745991,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 31,
+      "sha256": "4b4e18fba49767d7d07f71551d4c0b4c9351b01490c483e76c172dc071cb995f"
+    },
+    {
+      "bytes": 10415138,
+      "duration_s": 59.987,
+      "event_counts": {
+        "can": 194171,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209101,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-32.zst",
+      "first_live_ns": 9415944914011,
+      "last_live_ns": 9475932400916,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 32,
+      "sha256": "0a0c3d906e90a634d293ce9cec18c3a577c627049c62fb08da76de2d05f836e5"
+    },
+    {
+      "bytes": 10261256,
+      "duration_s": 59.998,
+      "event_counts": {
+        "can": 194415,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2987
+      },
+      "events_total": 209347,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-33.zst",
+      "first_live_ns": 9475939212999,
+      "last_live_ns": 9535937299486,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 33,
+      "sha256": "ed53f37548eb13f0240d4232d245a5c1d5d49de7daff6266b97cb969050c4a64"
+    },
+    {
+      "bytes": 10413443,
+      "duration_s": 60.002,
+      "event_counts": {
+        "can": 194790,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 3013
+      },
+      "events_total": 209749,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-34.zst",
+      "first_live_ns": 9535940494174,
+      "last_live_ns": 9595942097641,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 34,
+      "sha256": "1f28ce2751abd6bbda1b3c9b68568934200f4df945147dccbabc40c99cb3266f"
+    },
+    {
+      "bytes": 10426321,
+      "duration_s": 60.008,
+      "event_counts": {
+        "can": 194227,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209162,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-35.zst",
+      "first_live_ns": 9595945427120,
+      "last_live_ns": 9655953455795,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 35,
+      "sha256": "a3b9c566942bf57442d63fbd1e77a6b501e0bd4eb414aeacd11d6b73c571a4ef"
+    },
+    {
+      "bytes": 10443967,
+      "duration_s": 59.987,
+      "event_counts": {
+        "can": 194293,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209224,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-36.zst",
+      "first_live_ns": 9655957194545,
+      "last_live_ns": 9715943735303,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 36,
+      "sha256": "b3186a369288134e01bf212d204e8e92a2833a1f6ce444a0b78b7f656917bd3a"
+    },
+    {
+      "bytes": 10526248,
+      "duration_s": 59.998,
+      "event_counts": {
+        "can": 195239,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 210172,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-37.zst",
+      "first_live_ns": 9715948729939,
+      "last_live_ns": 9775946280072,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 37,
+      "sha256": "00d0617e535f1058e70ed9b5132b8ddfb56051624ee95e3cfce2be359e230561"
+    },
+    {
+      "bytes": 10534424,
+      "duration_s": 60.012,
+      "event_counts": {
+        "can": 194827,
+        "carState": 5975,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209763,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-38.zst",
+      "first_live_ns": 9775947638353,
+      "last_live_ns": 9835960112028,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 38,
+      "sha256": "6ef4fed47ecdb0f0a74c9f79705e809cdafef9fe1f5c5c65586d5cf5742cc9ec"
+    },
+    {
+      "bytes": 10579409,
+      "duration_s": 59.99,
+      "event_counts": {
+        "can": 193971,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2990
+      },
+      "events_total": 208907,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-39.zst",
+      "first_live_ns": 9835964712914,
+      "last_live_ns": 9895954729610,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 39,
+      "sha256": "cb17c772732b0a5e1789b3071e09a9e11a18f44b356476635f9613f1defe1fbc"
+    },
+    {
+      "bytes": 10641073,
+      "duration_s": 59.999,
+      "event_counts": {
+        "can": 194652,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209584,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-40.zst",
+      "first_live_ns": 9895955263776,
+      "last_live_ns": 9955954757868,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 40,
+      "sha256": "73b946a8487c9d8f43d7ffe69287655775beaf595ec1099b6138f885ecb68902"
+    },
+    {
+      "bytes": 10535973,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194737,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209672,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-41.zst",
+      "first_live_ns": 9955956302555,
+      "last_live_ns": 10015956797637,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 41,
+      "sha256": "b786ef4e3e5f1ea95603bd020ff4fd4a0cd212b5b3b3ae07f8567867656722b2"
+    },
+    {
+      "bytes": 10459488,
+      "duration_s": 59.98,
+      "event_counts": {
+        "can": 194474,
+        "carState": 5972,
+        "controlsState": 5971,
+        "sendcan": 2994
+      },
+      "events_total": 209411,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-42.zst",
+      "first_live_ns": 10015958353991,
+      "last_live_ns": 10075938408447,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 42,
+      "sha256": "9871f75a7749ca871657ccf76e169742eadb15847500d71c290119f5d6e92b96"
+    },
+    {
+      "bytes": 10464073,
+      "duration_s": 60.017,
+      "event_counts": {
+        "can": 194428,
+        "carState": 5975,
+        "controlsState": 5975,
+        "sendcan": 2987
+      },
+      "events_total": 209365,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-43.zst",
+      "first_live_ns": 10075941284853,
+      "last_live_ns": 10135957804674,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 43,
+      "sha256": "ab6b4fbe4d14227919a022dbc2c3091467446262d6896d26ea021ecc5d54c356"
+    },
+    {
+      "bytes": 10416368,
+      "duration_s": 60.008,
+      "event_counts": {
+        "can": 194065,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209000,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-44.zst",
+      "first_live_ns": 10135961781758,
+      "last_live_ns": 10195969348974,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 44,
+      "sha256": "46a1851ad7d0b06dc48be076db7220994206ad767c70f5e6e6ee624ee97b6b15"
+    },
+    {
+      "bytes": 10388339,
+      "duration_s": 59.987,
+      "event_counts": {
+        "can": 194554,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209484,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-45.zst",
+      "first_live_ns": 10195974021266,
+      "last_live_ns": 10255960559212,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 45,
+      "sha256": "e2b9ff147c5806b7f1dc034915fb6c65b38581e4405d4fd149a887cdaa48ebcf"
+    },
+    {
+      "bytes": 10430785,
+      "duration_s": 59.995,
+      "event_counts": {
+        "can": 194681,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209614,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-46.zst",
+      "first_live_ns": 10255963884264,
+      "last_live_ns": 10315958399345,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 46,
+      "sha256": "1821aa6ff5d08b08aee8c88e39e306e4f7f759029eb33b301e5396246dc4ad2c"
+    },
+    {
+      "bytes": 10376623,
+      "duration_s": 60.014,
+      "event_counts": {
+        "can": 194677,
+        "carState": 5975,
+        "controlsState": 5975,
+        "sendcan": 2987
+      },
+      "events_total": 209614,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-47.zst",
+      "first_live_ns": 10315961553147,
+      "last_live_ns": 10375975074843,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 47,
+      "sha256": "bcc456fbc811b42516fb640c303c80b58fba048c2e83ae81bdc0031e7065a459"
+    },
+    {
+      "bytes": 10403223,
+      "duration_s": 59.984,
+      "event_counts": {
+        "can": 194365,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209295,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-48.zst",
+      "first_live_ns": 10375979641093,
+      "last_live_ns": 10435963772737,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 48,
+      "sha256": "7653436caa47790556227b033b80b176b004d4eb212d0f571fafbc3611bac046"
+    },
+    {
+      "bytes": 10402894,
+      "duration_s": 59.998,
+      "event_counts": {
+        "can": 194004,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 208937,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-49.zst",
+      "first_live_ns": 10435967199508,
+      "last_live_ns": 10495965328756,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 49,
+      "sha256": "0b69f4f3a903d0facf4d6dcdb369c26384e0180c5acef6294fcd0727cbaa2906"
+    },
+    {
+      "bytes": 10461640,
+      "duration_s": 60.016,
+      "event_counts": {
+        "can": 194595,
+        "carState": 5975,
+        "controlsState": 5975,
+        "sendcan": 2988
+      },
+      "events_total": 209533,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-50.zst",
+      "first_live_ns": 10495968392610,
+      "last_live_ns": 10555984506910,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 50,
+      "sha256": "3d29c08fa662a46a23d4ec75748f0e501ef5254ebcf428fd704339fb305078cf"
+    },
+    {
+      "bytes": 10320895,
+      "duration_s": 59.98,
+      "event_counts": {
+        "can": 194230,
+        "carState": 5971,
+        "controlsState": 5971,
+        "sendcan": 2986
+      },
+      "events_total": 209158,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-51.zst",
+      "first_live_ns": 10555987612483,
+      "last_live_ns": 10615967916418,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 51,
+      "sha256": "b792df303931b65af53cce4b65348fbc2028910b87022357c0355e2fb79efc83"
+    },
+    {
+      "bytes": 10356090,
+      "duration_s": 60.003,
+      "event_counts": {
+        "can": 194140,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2986
+      },
+      "events_total": 209073,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-52.zst",
+      "first_live_ns": 10615970865793,
+      "last_live_ns": 10675974254677,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 52,
+      "sha256": "e836d901f5b493279d2073e40dcb94f42f3e7b75d069f1d40d616104e0717ea2"
+    },
+    {
+      "bytes": 10379357,
+      "duration_s": 60.007,
+      "event_counts": {
+        "can": 194236,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2990
+      },
+      "events_total": 209174,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-53.zst",
+      "first_live_ns": 10675975644937,
+      "last_live_ns": 10735982949237,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 53,
+      "sha256": "06a905dcab9e91e709a31bb0de3dbc97b99686921555eb9dfb3dc220f658dd94"
+    },
+    {
+      "bytes": 10206916,
+      "duration_s": 59.991,
+      "event_counts": {
+        "can": 194221,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2990
+      },
+      "events_total": 209156,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-54.zst",
+      "first_live_ns": 10735984408977,
+      "last_live_ns": 10795975414318,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 54,
+      "sha256": "4c99349161399307880cf30bd8bf71813ed19e15b4098a93d4d3acc3ede2f5c8"
+    },
+    {
+      "bytes": 10431448,
+      "duration_s": 59.997,
+      "event_counts": {
+        "can": 194138,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209071,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-55.zst",
+      "first_live_ns": 10795975935464,
+      "last_live_ns": 10855972881900,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 55,
+      "sha256": "6bff182001d445a8cf659021571caedc983b6cff2ad46a69fae31556ec5e07d9"
+    },
+    {
+      "bytes": 10326818,
+      "duration_s": 60.015,
+      "event_counts": {
+        "can": 194529,
+        "carState": 5975,
+        "controlsState": 5976,
+        "sendcan": 2988
+      },
+      "events_total": 209468,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-56.zst",
+      "first_live_ns": 10855976198150,
+      "last_live_ns": 10915991513700,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 56,
+      "sha256": "ab3bf83295f653416567b75c770a8af83a847554968015f4fed4f650d6025d15"
+    },
+    {
+      "bytes": 10568904,
+      "duration_s": 59.99,
+      "event_counts": {
+        "can": 194320,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209253,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-57.zst",
+      "first_live_ns": 10915992894012,
+      "last_live_ns": 10975982487479,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 57,
+      "sha256": "efbb6230ad31a99cdbddfb1bd78b81eda78e283efba58820396a295b3db2cc3f"
+    },
+    {
+      "bytes": 10596118,
+      "duration_s": 59.984,
+      "event_counts": {
+        "can": 194513,
+        "carState": 5971,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209442,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-58.zst",
+      "first_live_ns": 10975983019041,
+      "last_live_ns": 11035967150685,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 58,
+      "sha256": "cf726670fba200be5e9552f4392d43b5fb4ce18bafb11dd6d4a860d7acdf2279"
+    },
+    {
+      "bytes": 10568856,
+      "duration_s": 60.021,
+      "event_counts": {
+        "can": 194799,
+        "carState": 5976,
+        "controlsState": 5975,
+        "sendcan": 2993
+      },
+      "events_total": 209743,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-59.zst",
+      "first_live_ns": 11035972336623,
+      "last_live_ns": 11095993818839,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 59,
+      "sha256": "706b2fd1f5b0452709c14142e57db6658533552f7d4d65d3c9ccff240a34c8de"
+    },
+    {
+      "bytes": 10012156,
+      "duration_s": 59.992,
+      "event_counts": {
+        "can": 194273,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209205,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-60.zst",
+      "first_live_ns": 11095998617537,
+      "last_live_ns": 11155990278973,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 60,
+      "sha256": "8cfb3f0657c25290443bb03024b1736229f0226eb8c65edecae88bb82bbb779a"
+    },
+    {
+      "bytes": 9415053,
+      "duration_s": 59.996,
+      "event_counts": {
+        "can": 193557,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 208489,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-61.zst",
+      "first_live_ns": 11155990808608,
+      "last_live_ns": 11215986313273,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 61,
+      "sha256": "2760f0e9afb87779931f6b059d1d734bd72244f6d5ed7ec066bfb74ba17b0cb6"
+    },
+    {
+      "bytes": 9413257,
+      "duration_s": 60.01,
+      "event_counts": {
+        "can": 193661,
+        "carState": 5975,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 208597,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-62.zst",
+      "first_live_ns": 11215991217596,
+      "last_live_ns": 11276001391687,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 62,
+      "sha256": "df87a7e885057441761f7a6a7928673f0e8a616a54f1a23acee53b435a607a0c"
+    },
+    {
+      "bytes": 9567096,
+      "duration_s": 59.983,
+      "event_counts": {
+        "can": 193548,
+        "carState": 5971,
+        "controlsState": 5971,
+        "sendcan": 2986
+      },
+      "events_total": 208476,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-63.zst",
+      "first_live_ns": 11276005451896,
+      "last_live_ns": 11335988390362,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 63,
+      "sha256": "62d17457bde9db69e1e6849994dccd0e923b2518c01a763f1b662ba7f08d24a4"
+    },
+    {
+      "bytes": 9682277,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 193612,
+        "carState": 5974,
+        "controlsState": 5975,
+        "sendcan": 2987
+      },
+      "events_total": 208548,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-64.zst",
+      "first_live_ns": 11335991436091,
+      "last_live_ns": 11395991351694,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 64,
+      "sha256": "a1fef1a022a4392527302809a67ff9c673edb0a365a898639cf8e96de8ccd5d6"
+    },
+    {
+      "bytes": 9670519,
+      "duration_s": 60.014,
+      "event_counts": {
+        "can": 193723,
+        "carState": 5975,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 208659,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-65.zst",
+      "first_live_ns": 11395996169766,
+      "last_live_ns": 11456009981879,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 65,
+      "sha256": "30f88abf97cae98790e71b03117ec153becc5924130a2fd5f257d02bea157f39"
+    },
+    {
+      "bytes": 9727450,
+      "duration_s": 59.985,
+      "event_counts": {
+        "can": 193671,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 208601,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-66.zst",
+      "first_live_ns": 11456013261827,
+      "last_live_ns": 11515998623835,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 66,
+      "sha256": "f2a60dc660bc2079135f8570cc26e81a5fb4da9059f526c7b7fc08fd2bc2b764"
+    },
+    {
+      "bytes": 9698816,
+      "duration_s": 59.994,
+      "event_counts": {
+        "can": 193566,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 208499,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-67.zst",
+      "first_live_ns": 11516002346387,
+      "last_live_ns": 11575996667198,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 67,
+      "sha256": "c45b1f82eca95022ae4e91bebeec3dcc68f8eb48095c3b07ecbbeb32229ad2f3"
+    },
+    {
+      "bytes": 9725722,
+      "duration_s": 60.01,
+      "event_counts": {
+        "can": 193635,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2986
+      },
+      "events_total": 208568,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-68.zst",
+      "first_live_ns": 11575999565010,
+      "last_live_ns": 11636009097019,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 68,
+      "sha256": "17ea7b8886e4055b06234e38cccfad44e0fe1e2563b54713db858116fc41bd79"
+    },
+    {
+      "bytes": 9703233,
+      "duration_s": 59.988,
+      "event_counts": {
+        "can": 193532,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 208465,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-69.zst",
+      "first_live_ns": 11636010474310,
+      "last_live_ns": 11695998765329,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 69,
+      "sha256": "7e43108ed8b83123846621f526fa8444532a957615a6b0ec24f5164fc877621e"
+    },
+    {
+      "bytes": 9684609,
+      "duration_s": 59.997,
+      "event_counts": {
+        "can": 193604,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 208536,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-70.zst",
+      "first_live_ns": 11696004912256,
+      "last_live_ns": 11756002398067,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 70,
+      "sha256": "d68f66297ec26f5b37733ea9aacfe4433dad287cabdcd096291017d6ce8bbf2c"
+    },
+    {
+      "bytes": 10027947,
+      "duration_s": 60.013,
+      "event_counts": {
+        "can": 194216,
+        "carState": 5976,
+        "controlsState": 5975,
+        "sendcan": 2988
+      },
+      "events_total": 209155,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-71.zst",
+      "first_live_ns": 11756003754317,
+      "last_live_ns": 11816016332523,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 71,
+      "sha256": "c94d7be7136a7a3e7577cbb4b63f886caff7347182216071693dd57dbb306ad8"
+    },
+    {
+      "bytes": 10569657,
+      "duration_s": 59.988,
+      "event_counts": {
+        "can": 194674,
+        "carState": 5971,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209603,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-72.zst",
+      "first_live_ns": 11816020553304,
+      "last_live_ns": 11876008866719,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 72,
+      "sha256": "02349d0e58e5e493e0920c8c51c861edfbc2b0872881a8a035074773ec862d6e"
+    },
+    {
+      "bytes": 9603819,
+      "duration_s": 59.996,
+      "event_counts": {
+        "can": 193867,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 208799,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-73.zst",
+      "first_live_ns": 11876010241146,
+      "last_live_ns": 11936006443831,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 73,
+      "sha256": "07b1fca707f0e08dd8a855c0c36d76a2eb56436ff2d893f5f6bcb708a61a40cd"
+    },
+    {
+      "bytes": 9934151,
+      "duration_s": 59.997,
+      "event_counts": {
+        "can": 194872,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2987
+      },
+      "events_total": 209804,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-74.zst",
+      "first_live_ns": 11936011448519,
+      "last_live_ns": 11996008880319,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 74,
+      "sha256": "abb12a0e96cb36662a87210d0965355f31483c63fc79f5a950a9fe834b14f908"
+    },
+    {
+      "bytes": 10366791,
+      "duration_s": 59.998,
+      "event_counts": {
+        "can": 194988,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209920,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-75.zst",
+      "first_live_ns": 11996011914173,
+      "last_live_ns": 12056009624150,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 75,
+      "sha256": "2615baef3fd9275b87193566c0523725c1750365c1391afbbd221888f19694a4"
+    },
+    {
+      "bytes": 9851797,
+      "duration_s": 59.999,
+      "event_counts": {
+        "can": 193747,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 208682,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-76.zst",
+      "first_live_ns": 12056012869775,
+      "last_live_ns": 12116012025481,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 76,
+      "sha256": "a73c19f96787bd0d5bcbe6b628faeac7f31e38413bedaaba209db7db22f4156e"
+    },
+    {
+      "bytes": 10216198,
+      "duration_s": 60.001,
+      "event_counts": {
+        "can": 194198,
+        "carState": 5974,
+        "controlsState": 5975,
+        "sendcan": 2987
+      },
+      "events_total": 209134,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-77.zst",
+      "first_live_ns": 12116015192148,
+      "last_live_ns": 12176016334104,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 77,
+      "sha256": "22180417038482a59c132da6c20ee2dc372788da2eff285f08f8cb4dbbcc2770"
+    },
+    {
+      "bytes": 9965725,
+      "duration_s": 59.993,
+      "event_counts": {
+        "can": 194296,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209229,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-78.zst",
+      "first_live_ns": 12176022245927,
+      "last_live_ns": 12236015355800,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 78,
+      "sha256": "6bf7804d4417963cda7b6d2d16724d7476fa9cec83eb13b2dd1ab1257dc23e2a"
+    },
+    {
+      "bytes": 10454665,
+      "duration_s": 59.999,
+      "event_counts": {
+        "can": 194223,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209156,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-79.zst",
+      "first_live_ns": 12236020495488,
+      "last_live_ns": 12296019330934,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 79,
+      "sha256": "fbc57e772674506e0821dfc5c090eeac222be4eb8f7b001151103c5ab3c4b417"
+    },
+    {
+      "bytes": 6044596,
+      "duration_s": 34.546,
+      "event_counts": {
+        "can": 111716,
+        "carState": 3438,
+        "controlsState": 3440,
+        "sendcan": 1720
+      },
+      "events_total": 120314,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a/rlog-80.zst",
+      "first_live_ns": 12296019872184,
+      "last_live_ns": 12330565396025,
+      "out_of_order_events": 0,
+      "route": "0000003c--97b9e7a69a",
+      "segment": 80,
+      "sha256": "6e86165f6101998721637c230b59430cb16c013e4dbd421c49d0bd759dc6af6b"
+    },
+    {
+      "bytes": 8611110,
+      "duration_s": 61.005,
+      "event_counts": {
+        "can": 195581,
+        "carState": 5407,
+        "controlsState": 5400,
+        "sendcan": 2798
+      },
+      "events_total": 209186,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-0.zst",
+      "first_live_ns": 21875343658946,
+      "last_live_ns": 21936348159808,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 0,
+      "sha256": "0dc0231ed68a52f5380f2c087fdd2d4c925257e89aff997bcd7d1f529ad2fbd6"
+    },
+    {
+      "bytes": 9569134,
+      "duration_s": 60.001,
+      "event_counts": {
+        "can": 194075,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209010,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-1.zst",
+      "first_live_ns": 21936351117621,
+      "last_live_ns": 21996352110723,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 1,
+      "sha256": "1437f8c6214274348c0be61e453d9c00626da43135b4872a0a1f76b74e54ddc3"
+    },
+    {
+      "bytes": 10483362,
+      "duration_s": 59.997,
+      "event_counts": {
+        "can": 195166,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 210098,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-2.zst",
+      "first_live_ns": 21996355001087,
+      "last_live_ns": 22056351985335,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 2,
+      "sha256": "cd6f153cf7330a1f67b01b5e2c1537a1febbe349f608528c8158c8e331e373cb"
+    },
+    {
+      "bytes": 10446877,
+      "duration_s": 60.004,
+      "event_counts": {
+        "can": 194861,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209796,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-3.zst",
+      "first_live_ns": 22056355066585,
+      "last_live_ns": 22116359226667,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 3,
+      "sha256": "693f9489d001c2c62610b5ee568c6ff448db008e6d75c271a790dcfa720672c7"
+    },
+    {
+      "bytes": 10440231,
+      "duration_s": 59.995,
+      "event_counts": {
+        "can": 194690,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209623,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-4.zst",
+      "first_live_ns": 22116363260156,
+      "last_live_ns": 22176358454821,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 4,
+      "sha256": "df3bafcda7d7e11dc38eca80d41d2053239beaa12b146e87fe8d040e1e89becf"
+    },
+    {
+      "bytes": 9809325,
+      "duration_s": 59.995,
+      "event_counts": {
+        "can": 203620,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 218552,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-5.zst",
+      "first_live_ns": 22176361925394,
+      "last_live_ns": 22236356725787,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 5,
+      "sha256": "c7768fa0879fc646a9a0323428b07ae71079588624e73027c927c07dd281e8d4"
+    },
+    {
+      "bytes": 10035184,
+      "duration_s": 59.999,
+      "event_counts": {
+        "can": 194491,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209426,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-6.zst",
+      "first_live_ns": 22236359843860,
+      "last_live_ns": 22296358739046,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 6,
+      "sha256": "abd74a78493267f25f5b3979d5ab902226787e9c5fde71ed5be6a69aedd42928"
+    },
+    {
+      "bytes": 9882576,
+      "duration_s": 60.002,
+      "event_counts": {
+        "can": 194507,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209442,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-7.zst",
+      "first_live_ns": 22296361885712,
+      "last_live_ns": 22356363710690,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 7,
+      "sha256": "b1e893ace066e8deecaa5b65a648a9be84ceba079a701d30d4c2dd189a5d46f9"
+    },
+    {
+      "bytes": 10603189,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194685,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209620,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-8.zst",
+      "first_live_ns": 22356366880221,
+      "last_live_ns": 22416366854052,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 8,
+      "sha256": "6578118a332c23fe2b6d6702afb35e2421441ca3f16fbf7e6743a95e39b6c02e"
+    },
+    {
+      "bytes": 10403905,
+      "duration_s": 60.004,
+      "event_counts": {
+        "can": 194562,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209497,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-9.zst",
+      "first_live_ns": 22416370513531,
+      "last_live_ns": 22476374790904,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 9,
+      "sha256": "7dd5989ddb171896ed3bc65f7af05b4edf36aed19dfeb007e1039ce8e660f1dd"
+    },
+    {
+      "bytes": 10435675,
+      "duration_s": 59.985,
+      "event_counts": {
+        "can": 194515,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209445,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-10.zst",
+      "first_live_ns": 22476379724758,
+      "last_live_ns": 22536364828642,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 10,
+      "sha256": "19f2a79080c66da2b3973071f628e46a0c295b8a0d1fa3eb803ebfb0e6490505"
+    },
+    {
+      "bytes": 10386754,
+      "duration_s": 59.998,
+      "event_counts": {
+        "can": 194544,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209477,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-11.zst",
+      "first_live_ns": 22536367984631,
+      "last_live_ns": 22596365868879,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 11,
+      "sha256": "94cf76014076321e09eb1daa4cf7fe67830c162ac7a81295ba76f7bdc8c44810"
+    },
+    {
+      "bytes": 10386203,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194255,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2986
+      },
+      "events_total": 209188,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-12.zst",
+      "first_live_ns": 22596368903671,
+      "last_live_ns": 22656368636461,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 12,
+      "sha256": "b80d1bd988a146ebbff4ec6bc79cdc18a1b5d56354ddef14d373fb800025a37f"
+    },
+    {
+      "bytes": 10413418,
+      "duration_s": 59.998,
+      "event_counts": {
+        "can": 194667,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209600,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-13.zst",
+      "first_live_ns": 22656374611513,
+      "last_live_ns": 22716372745084,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 13,
+      "sha256": "f7365ddd9ddcdfa8ebaeb4e4f4130a362f7560e1f520836d74a397d1b7485bb8"
+    },
+    {
+      "bytes": 10325970,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194174,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209106,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-14.zst",
+      "first_live_ns": 22716374187844,
+      "last_live_ns": 22776373880581,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 14,
+      "sha256": "b593544c3373f5a946f5de424169e8bedf462408f4c87f02b503d0cc230ececd"
+    },
+    {
+      "bytes": 10392189,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194022,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 208956,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-15.zst",
+      "first_live_ns": 22776375364956,
+      "last_live_ns": 22836375650350,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 15,
+      "sha256": "cb80b8d6f223924e8a837f851f22812aa460c6822b8216a630678eae4d98077b"
+    },
+    {
+      "bytes": 10380066,
+      "duration_s": 59.997,
+      "event_counts": {
+        "can": 194358,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209292,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-16.zst",
+      "first_live_ns": 22836378928006,
+      "last_live_ns": 22896375990223,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 16,
+      "sha256": "b80d6d3b7ff2bf72b1b1074abad3b6b57b7c71884e507afea8121e5a8cafcee4"
+    },
+    {
+      "bytes": 10412068,
+      "duration_s": 60.001,
+      "event_counts": {
+        "can": 194011,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 208944,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-17.zst",
+      "first_live_ns": 22896380772515,
+      "last_live_ns": 22956381788429,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 17,
+      "sha256": "ab3f8a8a9fd9ce0b52a1f80fcc1a6d3ced5b97862d738e08eef94d3c9d54cfdb"
+    },
+    {
+      "bytes": 10485209,
+      "duration_s": 60.002,
+      "event_counts": {
+        "can": 194144,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2991
+      },
+      "events_total": 209081,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-18.zst",
+      "first_live_ns": 22956382426138,
+      "last_live_ns": 23016384124240,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 18,
+      "sha256": "e6cdc371a14dffd3282915b6b6d8b21d0e28b582cc430a42058d5e343547df35"
+    },
+    {
+      "bytes": 10461282,
+      "duration_s": 59.996,
+      "event_counts": {
+        "can": 194794,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209727,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-19.zst",
+      "first_live_ns": 23016387473511,
+      "last_live_ns": 23076383200155,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 19,
+      "sha256": "de0697741b805f8bfe1c6be201455a9a13b78a7d425a712968feada9d6818274"
+    },
+    {
+      "bytes": 10274839,
+      "duration_s": 59.997,
+      "event_counts": {
+        "can": 194422,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2986
+      },
+      "events_total": 209356,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-20.zst",
+      "first_live_ns": 23076386095936,
+      "last_live_ns": 23136382711069,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 20,
+      "sha256": "cc2c3b00ffb6597b3dbc166128ffd433dd01dfcaf7218d383e572cdfe5571cfb"
+    },
+    {
+      "bytes": 10381837,
+      "duration_s": 60.01,
+      "event_counts": {
+        "can": 194563,
+        "carState": 5974,
+        "controlsState": 5975,
+        "sendcan": 2988
+      },
+      "events_total": 209500,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-21.zst",
+      "first_live_ns": 23136383379767,
+      "last_live_ns": 23196393003182,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 21,
+      "sha256": "872bde703eb190964e42a90298a6b166c8f4c144271c68df528a1188bd8b5842"
+    },
+    {
+      "bytes": 10351065,
+      "duration_s": 59.988,
+      "event_counts": {
+        "can": 194042,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 208973,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-22.zst",
+      "first_live_ns": 23196401424744,
+      "last_live_ns": 23256389665190,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 22,
+      "sha256": "5ef09d8084fa58f4ef0129b6f52650a305dc4e3197f9371081e0d2e90cc579de"
+    },
+    {
+      "bytes": 10301381,
+      "duration_s": 59.994,
+      "event_counts": {
+        "can": 194726,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209659,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-23.zst",
+      "first_live_ns": 23256392807950,
+      "last_live_ns": 23316386823136,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 23,
+      "sha256": "3de9a8ca0572e8b97bdb53534283bd12235aa4701a9cb557dd8fd5ecb681dbb6"
+    },
+    {
+      "bytes": 10198157,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194180,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209112,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-24.zst",
+      "first_live_ns": 23316389882615,
+      "last_live_ns": 23376389423582,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 24,
+      "sha256": "3d7e2aad780f76db10f1e11d457b6a56df90aa00aa226c503cd22dbe9daf5af9"
+    },
+    {
+      "bytes": 10183884,
+      "duration_s": 59.997,
+      "event_counts": {
+        "can": 194594,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209527,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-25.zst",
+      "first_live_ns": 23376392658165,
+      "last_live_ns": 23436389774132,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 25,
+      "sha256": "b0e092716593b0a3a923b7ca8db2394b8e189d4b96c1bcee8d6bed23847998c6"
+    },
+    {
+      "bytes": 10362364,
+      "duration_s": 60.003,
+      "event_counts": {
+        "can": 194259,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209191,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-26.zst",
+      "first_live_ns": 23436392791684,
+      "last_live_ns": 23496396227807,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 26,
+      "sha256": "c91a9f337708677cb6466704aa8d6f62c13f02efcca3f49b5fc8d553a5b9b333"
+    },
+    {
+      "bytes": 10239138,
+      "duration_s": 59.993,
+      "event_counts": {
+        "can": 194225,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209158,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-27.zst",
+      "first_live_ns": 23496399382859,
+      "last_live_ns": 23556392527419,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 27,
+      "sha256": "d4e6155464b368fc73f807bad5b63a0a216194d8dc37d82d449fd3c31c1dd684"
+    },
+    {
+      "bytes": 10338353,
+      "duration_s": 60.008,
+      "event_counts": {
+        "can": 194614,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2986
+      },
+      "events_total": 209547,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-28.zst",
+      "first_live_ns": 23556395619919,
+      "last_live_ns": 23616403265782,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 28,
+      "sha256": "b9829ec4189381fffbbc9de61463f0a364a5635bbc26b0645c89a22dc723ba40"
+    },
+    {
+      "bytes": 10341856,
+      "duration_s": 59.995,
+      "event_counts": {
+        "can": 194367,
+        "carState": 5973,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209298,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-29.zst",
+      "first_live_ns": 23616404581928,
+      "last_live_ns": 23676399392999,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 29,
+      "sha256": "6231304d61001a9be0f3a45e27ae38be51fce91624bbba9b4043420b2a04ff31"
+    },
+    {
+      "bytes": 10359103,
+      "duration_s": 60.004,
+      "event_counts": {
+        "can": 194400,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209333,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-30.zst",
+      "first_live_ns": 23676399896957,
+      "last_live_ns": 23736403768236,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 30,
+      "sha256": "1f3d43d18eb3518342f5566542e54276633b5e920e13fb2366d2730a9bfc33fa"
+    },
+    {
+      "bytes": 10218193,
+      "duration_s": 60.008,
+      "event_counts": {
+        "can": 194203,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209138,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-31.zst",
+      "first_live_ns": 23736406960840,
+      "last_live_ns": 23796414980453,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 31,
+      "sha256": "953e6e1f54e577f1721c00bd3699685748c94b39d3a9cc6fac03b918405006b5"
+    },
+    {
+      "bytes": 10235534,
+      "duration_s": 59.988,
+      "event_counts": {
+        "can": 194359,
+        "carState": 5971,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209288,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-32.zst",
+      "first_live_ns": 23796419769099,
+      "last_live_ns": 23856407361003,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 32,
+      "sha256": "bcef3c51450fb11048e926ce4c52579b61841398e2d4cf602c32f6d8dc238042"
+    },
+    {
+      "bytes": 10197770,
+      "duration_s": 59.997,
+      "event_counts": {
+        "can": 194211,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209145,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-33.zst",
+      "first_live_ns": 23856408793659,
+      "last_live_ns": 23916406132751,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 33,
+      "sha256": "01424108bb79ba8c55b9a9ca3832f4517d506268c293e5c848d80a6a1f5c5472"
+    },
+    {
+      "bytes": 10195329,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194197,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209129,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-34.zst",
+      "first_live_ns": 23916409195563,
+      "last_live_ns": 23976409604030,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 34,
+      "sha256": "ac233a031bdd03c898186f40ec7b251efbd9f1f3e3db7ae5c5779adfb0be5253"
+    },
+    {
+      "bytes": 10127029,
+      "duration_s": 59.996,
+      "event_counts": {
+        "can": 194216,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209149,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-35.zst",
+      "first_live_ns": 23976412722884,
+      "last_live_ns": 24036408684788,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 35,
+      "sha256": "de8bee8c7b8e83d01100594611d8e471834e6b85c1920c526f56f3dc5ee7193a"
+    },
+    {
+      "bytes": 10303532,
+      "duration_s": 59.999,
+      "event_counts": {
+        "can": 194030,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 208962,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-36.zst",
+      "first_live_ns": 24036411831142,
+      "last_live_ns": 24096410404817,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 36,
+      "sha256": "01c2e5364dbdd5e8929ceaf0a8d8285084715e6297a3c7ea5cb025851f297f7a"
+    },
+    {
+      "bytes": 10436585,
+      "duration_s": 59.999,
+      "event_counts": {
+        "can": 194400,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209333,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-37.zst",
+      "first_live_ns": 24096413854765,
+      "last_live_ns": 24156412574482,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 37,
+      "sha256": "6ec058258cb7279c00b4dab6e595b47889e47f7d98e18000416179756e130b27"
+    },
+    {
+      "bytes": 10195932,
+      "duration_s": 60.002,
+      "event_counts": {
+        "can": 194295,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209230,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-38.zst",
+      "first_live_ns": 24156415904222,
+      "last_live_ns": 24216418002115,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 38,
+      "sha256": "8651727edb8a8729ff7e5e513c5a254a454184c18805a7d328f9f49cac94bd11"
+    },
+    {
+      "bytes": 10222388,
+      "duration_s": 59.991,
+      "event_counts": {
+        "can": 194262,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 209192,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-39.zst",
+      "first_live_ns": 24216421389251,
+      "last_live_ns": 24276412748603,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 39,
+      "sha256": "a8376088c27216abc4e2f58155e1cfd21df157ba255feca0180cced3c90fcb99"
+    },
+    {
+      "bytes": 10360025,
+      "duration_s": 60.003,
+      "event_counts": {
+        "can": 194423,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2986
+      },
+      "events_total": 209356,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-40.zst",
+      "first_live_ns": 24276415810218,
+      "last_live_ns": 24336418944986,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 40,
+      "sha256": "e876329054c61414f415b5cf5220c2510c6025608d7ebe1e90a5d9ef006a1ca9"
+    },
+    {
+      "bytes": 10307077,
+      "duration_s": 60.004,
+      "event_counts": {
+        "can": 193994,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 208928,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-41.zst",
+      "first_live_ns": 24336420425195,
+      "last_live_ns": 24396424842828,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 41,
+      "sha256": "8bfb4b5a0ced097d795b038d24b9607c59054e528a9cc1f253a79bfed8619d36"
+    },
+    {
+      "bytes": 10353195,
+      "duration_s": 59.991,
+      "event_counts": {
+        "can": 194220,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209151,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-42.zst",
+      "first_live_ns": 24396429013974,
+      "last_live_ns": 24456420149524,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 42,
+      "sha256": "e42fbe9c3cab0f78680c1ca37134fe77d242bbc8c530dcfe7fcb6bfceb61e58f"
+    },
+    {
+      "bytes": 10317997,
+      "duration_s": 60.0,
+      "event_counts": {
+        "can": 194422,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209357,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-43.zst",
+      "first_live_ns": 24456421443482,
+      "last_live_ns": 24516421176220,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 43,
+      "sha256": "77b8137a97c4476f022fb0e9f85338f52733c6f6f736e200afc51a492db62743"
+    },
+    {
+      "bytes": 10394790,
+      "duration_s": 60.01,
+      "event_counts": {
+        "can": 194698,
+        "carState": 5975,
+        "controlsState": 5974,
+        "sendcan": 2988
+      },
+      "events_total": 209635,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-44.zst",
+      "first_live_ns": 24516426183147,
+      "last_live_ns": 24576436471666,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 44,
+      "sha256": "3f3decac1b50026fc335ea2ea4e2eaebd2c5f36c7b57a657a38deaf7a50beb46"
+    },
+    {
+      "bytes": 10207111,
+      "duration_s": 59.987,
+      "event_counts": {
+        "can": 194001,
+        "carState": 5971,
+        "controlsState": 5972,
+        "sendcan": 2985
+      },
+      "events_total": 208929,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-45.zst",
+      "first_live_ns": 24576440844947,
+      "last_live_ns": 24636428222841,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 45,
+      "sha256": "9337325a9bd6c26b7e5b1a4d7ea9d22e5d6b7444484969604a6695ac87fe16ae"
+    },
+    {
+      "bytes": 10123798,
+      "duration_s": 59.996,
+      "event_counts": {
+        "can": 194141,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209075,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-46.zst",
+      "first_live_ns": 24636429732632,
+      "last_live_ns": 24696425880839,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 46,
+      "sha256": "e2465a58d79d79f3d3e5fa3e10cfabd6111bea855387c534571bc5adc51a3d26"
+    },
+    {
+      "bytes": 10186777,
+      "duration_s": 60.001,
+      "event_counts": {
+        "can": 194705,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209639,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-47.zst",
+      "first_live_ns": 24696429080734,
+      "last_live_ns": 24756430550816,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 47,
+      "sha256": "16a43f41c515b1b334f54b89f3ba090e4f8b96f2a3ea0dd1fbf3c03b1fe6d5be"
+    },
+    {
+      "bytes": 10162076,
+      "duration_s": 59.992,
+      "event_counts": {
+        "can": 194281,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209214,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-48.zst",
+      "first_live_ns": 24756438870920,
+      "last_live_ns": 24816430696626,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 48,
+      "sha256": "5bf7f01458a2c4cc1ebf16d8e21a24fbe4523733585d9ee6868921e9aada4f83"
+    },
+    {
+      "bytes": 10302897,
+      "duration_s": 60.002,
+      "event_counts": {
+        "can": 194459,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2991
+      },
+      "events_total": 209395,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-49.zst",
+      "first_live_ns": 24816431150480,
+      "last_live_ns": 24876433386812,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 49,
+      "sha256": "15371ad9cbaa02c369e2209afda81ea6faaf6c6696d0e24c8ae323c08f9b87a2"
+    },
+    {
+      "bytes": 10457618,
+      "duration_s": 60.01,
+      "event_counts": {
+        "can": 195141,
+        "carState": 5976,
+        "controlsState": 5975,
+        "sendcan": 2988
+      },
+      "events_total": 210080,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-50.zst",
+      "first_live_ns": 24876434787957,
+      "last_live_ns": 24936444673403,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 50,
+      "sha256": "96eebc48194f55458b5983b6abb947d000df6bbaaeabcc1c24a40b9564600625"
+    },
+    {
+      "bytes": 10195234,
+      "duration_s": 59.99,
+      "event_counts": {
+        "can": 194077,
+        "carState": 5972,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209008,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-51.zst",
+      "first_live_ns": 24936448677101,
+      "last_live_ns": 24996438981714,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 51,
+      "sha256": "2c9faaee86e3ee70e2ccfd9be2162d9a2732ea58639edd74b8f817640a8951e1"
+    },
+    {
+      "bytes": 10491952,
+      "duration_s": 59.995,
+      "event_counts": {
+        "can": 194631,
+        "carState": 5974,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209565,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-52.zst",
+      "first_live_ns": 24996440355985,
+      "last_live_ns": 25056434952889,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 52,
+      "sha256": "d8597326c1dbe1104055b0b9cf08d73b0f918aeab93b3cc425d1043183cd5f55"
+    },
+    {
+      "bytes": 10387447,
+      "duration_s": 60.007,
+      "event_counts": {
+        "can": 195461,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 210396,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-53.zst",
+      "first_live_ns": 25056437778774,
+      "last_live_ns": 25116444803855,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 53,
+      "sha256": "28562cf0099e0a19937a9aac7b11a420fff54f86b163c96766e6c436ee6afc03"
+    },
+    {
+      "bytes": 10340057,
+      "duration_s": 59.992,
+      "event_counts": {
+        "can": 194587,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2986
+      },
+      "events_total": 209519,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-54.zst",
+      "first_live_ns": 25116448585314,
+      "last_live_ns": 25176440181801,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 54,
+      "sha256": "c7bf840d3a4fe57d02722cb7f552e524f49dd2199c6d8d82e10f3a9f19ada42a"
+    },
+    {
+      "bytes": 10394459,
+      "duration_s": 59.993,
+      "event_counts": {
+        "can": 194715,
+        "carState": 5973,
+        "controlsState": 5973,
+        "sendcan": 2987
+      },
+      "events_total": 209648,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-55.zst",
+      "first_live_ns": 25176443289458,
+      "last_live_ns": 25236435986414,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 55,
+      "sha256": "e9b55faa741b176273aa213a817cc2bd41a5894743c7d72d8398a5096e82005a"
+    },
+    {
+      "bytes": 10385564,
+      "duration_s": 60.004,
+      "event_counts": {
+        "can": 195271,
+        "carState": 5974,
+        "controlsState": 5975,
+        "sendcan": 2987
+      },
+      "events_total": 210207,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-56.zst",
+      "first_live_ns": 25236439028862,
+      "last_live_ns": 25296443123058,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 56,
+      "sha256": "a02430cf010867fa3486a6d964dc8d832667ad666f2f0c96fe94a2588c8cf3a8"
+    },
+    {
+      "bytes": 10392214,
+      "duration_s": 59.982,
+      "event_counts": {
+        "can": 195164,
+        "carState": 5972,
+        "controlsState": 5972,
+        "sendcan": 2986
+      },
+      "events_total": 210094,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-57.zst",
+      "first_live_ns": 25296448104724,
+      "last_live_ns": 25356430440847,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 57,
+      "sha256": "e13dd3880d08c827240017c76119038a65371a7d96149ebc44f4639b5319a793"
+    },
+    {
+      "bytes": 10396569,
+      "duration_s": 60.011,
+      "event_counts": {
+        "can": 194836,
+        "carState": 5975,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209772,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-58.zst",
+      "first_live_ns": 25356435835170,
+      "last_live_ns": 25416446487856,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 58,
+      "sha256": "a8ab9eb2c44cf0c3246eb281cb8b24080cef0e9b9eb8e6f7b6c24291e86ee3c7"
+    },
+    {
+      "bytes": 10397434,
+      "duration_s": 60.002,
+      "event_counts": {
+        "can": 194515,
+        "carState": 5973,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 209449,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-59.zst",
+      "first_live_ns": 25416449599574,
+      "last_live_ns": 25476451277520,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 59,
+      "sha256": "e4286dc51fd5f63a2143d27fbf59beeee82275b79102c6e42eb518b65cfac04e"
+    },
+    {
+      "bytes": 10436278,
+      "duration_s": 60.002,
+      "event_counts": {
+        "can": 195106,
+        "carState": 5974,
+        "controlsState": 5974,
+        "sendcan": 2987
+      },
+      "events_total": 210041,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-60.zst",
+      "first_live_ns": 25476452543770,
+      "last_live_ns": 25536454120518,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 60,
+      "sha256": "df2659ebd9717023f9c46dc34ef15c5ad09432c0f5d3b74f6c8411b0059006c6"
+    },
+    {
+      "bytes": 8823618,
+      "duration_s": 53.858,
+      "event_counts": {
+        "can": 173970,
+        "carState": 5362,
+        "controlsState": 5362,
+        "sendcan": 2681
+      },
+      "events_total": 187375,
+      "file": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-61.zst",
+      "first_live_ns": 25536455208487,
+      "last_live_ns": 25590312740289,
+      "out_of_order_events": 0,
+      "route": "0000003d--0e812cecba",
+      "segment": 61,
+      "sha256": "1920e57f74fa444d56ac096bfbfabd27fe97938ac75d81dbcca248b5d640ea36"
+    }
+  ],
+  "schema": "camry-20260904-stock-steering-manifest-v1"
+}

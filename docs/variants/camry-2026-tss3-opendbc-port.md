@@ -563,9 +563,21 @@ Compressed source SHA-256 identities:
 
 The route `carParams` records identify the Camry platform and Brake firmware but
 contain no EPS F181 response. Exact EPS identity comes from separate same-car
-evidence, not these rlogs alone. No deterministic regression test is claimed.
-The local comparison JSON, raw-witness projections, and segment-43 CSV/SVG live
-under `build/out/camry-stock-steering-20260904/`; they are disposable review
+evidence, not these rlogs alone. A tracked deterministic reducer now reproduces
+this section from the original rlogs (`tools/analyze_camry_20260904_stock_steering.py`
+→ `data/generated/camry_20260904_stock_steering_report.json`, verified by
+`tests/verify_camry_20260904_stock_steering.py` on tracked
+`tests/fixtures/camry_20260904/` excerpts): the census (27,173,143 native
+records, zero native B6/0x131/0x2E4, 751,664/751,628/33 sendcan/return/reject
+B6), all five ID4 episodes, and the witness medians reproduce; per-route 20-Hz
+correlations match within 8e-5 and sample populations within ±0.15 % (worst
+observed: route 3d clean-ID11 population −0.149 %, 31,560 vs the published
+31,607; 3c p90 shifted 2→1 raw counts) because the original (unlocated)
+reducer's grid phase is not recoverable from any event anchor — the reducer
+anchors its grid at each segment's first live event and declares that
+tolerance explicitly. The local comparison JSON, raw-witness
+projections, and segment-43 CSV/SVG live under
+`build/out/camry-stock-steering-20260904/`; they remain disposable review
 outputs, not replacements for the original source logs.
 
 For integration, retain measured angle and driver validity as measured state,
@@ -614,15 +626,17 @@ multi-field, multiplexed, sparse/event, and genuinely private/non-CAN handoffs o
 therefore know what FRC computes, not the transport/encoding that carries those semantics to
 the downstream proxy. That attribution does **not** block the independent B6 development
 probe above.
-
-## 6. Deterministic evidence
-
 - `data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json`
 - `data/generated/camry_8965F3307000_tss3_opendbc_port.json`
 - `data/generated/camry_8965F3307000_external_lateral_ingress.json`
 - `data/generated/camry_2026_motor_feedback_correlation.json`
 - `data/generated/camry_2026_lta_state_reconciliation.json`
 - `data/generated/camry_2026_08a_producer_bounds.json`
+- `data/generated/camry_20260904_stock_steering_report.json` and
+  `data/generated/camry_20260904_stock_steering_manifest.json`
+  (from `tools/analyze_camry_20260904_stock_steering.py`; external
+  `/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/` inputs)
+- `tests/verify_camry_20260904_stock_steering.py`
 - `tests/verify_camry_8965F3307000.py`
 - `tests/verify_camry_2026_lta_state_reconciliation.py`
 - `tests/verify_camry_2026_08a_producer_bounds.py`
