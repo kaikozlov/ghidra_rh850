@@ -384,6 +384,73 @@ Nothing in these rlogs proves which verdict B6 received. The corrected non-bypas
 freshness observer remains the right discriminator; the wire-consistent FV4 trace is not a
 substitute for receiver acceptance.
 
+### 4.5 2026-09-04 wire-geometry, authority-attribution, and transport audit (VAR-126)
+
+A full-corpus decode of the same three routes closes the three remaining observational
+questions around §4.4: what the sender actually put on the wire, whether the wheel
+tracks the stock or the openpilot request when they diverge, and whether any
+transport-level event could explain the non-response.
+
+**Sender envelope is internally exact.** All 751,664 B6 `sendcan` frames decompose into
+exactly two application shapes: inactive `Target Lateral ID 0` with companion byte
+`B6=0x04` and `B8=B9=0`, and active `ID 11` with `B6=0x00` and `B8=B9=100` (0x64).
+MAC28 is zero on every frame, every other application byte (`B0..B2`, `B10..B27`) is
+zero on every frame, the modulo-64 sequence advances exactly +1 on every consecutive
+pair (the only non-+1 differences are the 253 intra-route segment boundaries), the
+message counter's low2 jumps only at epoch reanchors, and the transmitted reset low2
+equals the current `0x00F RESET_CNT` epoch low2 on 100% of frames that had an observed
+sync (751,664 − 603 segment-start frames). Cadence is a clean 50 Hz: per-segment median
+inter-frame gap 19.84–20.01 ms, worst observed gap 34.6 ms. The sender did not
+misbehave.
+
+**One systematic wire difference from the stock protected sender.** The native protected
+`0x0D7` stream on the same bus shares the FV4+MAC28 trailer and is the only available
+reference for what an accepted protected sender looks like. Its first frame in each
+freshness epoch carries message-low2 = **1** in 95.1–95.5% of epochs (second mode 3,
+4.0–4.2%, race frames), and its reset low2 lags the observed `0x00F` epoch by one on
+~0.2–0.3% of frames. Our reanchoring sender instead emits first-in-epoch message-low2 =
+**0** in 99.6–99.8% of epochs. The stock sender therefore keeps a one-count phase
+difference at every epoch boundary that our sender does not reproduce. VAR-123's
+recovered verifier compares `frame_mc_low2 <= tracked_low2` against offset candidates
+`{0,-1,+1,-2,+2}`, so this phase difference is not proven fatal — but it is the only
+observable wire-geometry divergence from a known-accepted protected sender and is a
+cheap A/B variable (`message_counter` initial phase) for the next stationary observer
+run.
+
+**The wheel tracks the stock request, corpus-level.** Restricting to samples where both
+requests are active ID11 and fresh (≤50 ms), speed > 15 m/s, no blinker, |driver torque|
+< 0.7 N.m, and the two requested angles diverge by ≥ 2.5 deg (181 samples across the
+three routes): median |measured − stock| = **0.79 deg** versus median |measured − B6| =
+**2.02 deg**; the stock request is closer in 134 samples versus 47, and there are 30
+samples where stock tracks within 1 deg while B6 is off by more than 3 deg, against 2 in
+the reverse direction. This generalizes §4.4's single route-`3c` interval to the whole
+corpus. (In the unseparated bulk the B6 error is smaller — median 0.26 deg versus 0.69 —
+but that is the openpilot controller closing the loop on the measured, stock-driven
+plant and is not authority evidence; only the separated subset discriminates.)
+
+**Transport is exonerated during driving.** All of route `3d`'s 56 bus-off events, its
+single CAN core reset, and its receive-error accumulation (REC endpoint 127) fall inside
+the final 100 ms of the route — power-down noise — and `canfdEnabled=false` intervals
+exist only in the first/last ~0.1 s of each route. The four B6 sends in `3d`'s shutdown
+window are the only non-rejected sends without a Panda return. During every driving
+window `canfdEnabled=true`, `busOffCnt=0`, and `transmitErrorCnt=0`, while native
+traffic (`0x00F` at 10 Hz, `0x0D7` at 50 Hz) and stock LTA functioned on the same bus.
+Panda-level transport cannot explain the non-response. (Per CORR-159, Panda TX returns
+still do not prove physical ACK; the same-bus native traffic bounds that residual.)
+
+**The EPS raised no observable objection.** In the `0x030` telemetry nibble
+(`EPS_STATUS_B6_BIT3 / STEERING_FAULT_INHIBIT_STATUS / EPS_STATUS_B6_BIT1 /
+DRIVER_TORQUE_INVALID`), `STEERING_FAULT_INHIBIT_STATUS` and `DRIVER_TORQUE_INVALID`
+(alone) are never asserted; `EPS_STATUS_B6_BIT1` appears in 0.3–1.1% of frames and
+`EPS_STATUS_B6_BIT3` in 269 frames of each of routes `3c`/`3d` (none in `3b`; 72–73 of
+them together with `DRIVER_TORQUE_INVALID`), all transient with the dominant state
+zero. No fault latch, no inhibit, no status transition correlates with the B6 phases.
+Combined with §4.4 this separates the failure cleanly: the receiver neither acts on nor
+visibly rejects three-quarters of a million well-formed frames — silent non-admission
+upstream of any observable application reaction, consistent with the unresolved
+ingress/freshness/first-rejecting-stage boundary, while the lane-change alert is fully
+explained by the `steeringPressed=False` integration bug (VAR-125).
+
 ## 5. What remains before B6 steering authority is established
 
 The 2026-09-04 road logs show why further limit tuning is not the next step. The shortest
@@ -444,6 +511,6 @@ probe above.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061), [VAR-062](../reference/index.md#finding-var-062), [VAR-071](../reference/index.md#finding-var-071), [VAR-102](../reference/index.md#finding-var-102), [VAR-124](../reference/index.md#finding-var-124), [VAR-125](../reference/index.md#finding-var-125)
+- Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061), [VAR-062](../reference/index.md#finding-var-062), [VAR-071](../reference/index.md#finding-var-071), [VAR-102](../reference/index.md#finding-var-102), [VAR-124](../reference/index.md#finding-var-124), [VAR-125](../reference/index.md#finding-var-125), [VAR-126](../reference/index.md#finding-var-126)
 - Corrections with this document as canonical home: [CORR-120](../reference/index.md#correction-corr-120), [CORR-122](../reference/index.md#correction-corr-122), [CORR-139](../reference/index.md#correction-corr-139), [CORR-140](../reference/index.md#correction-corr-140)
 <!-- knowledge-cross-references:end -->

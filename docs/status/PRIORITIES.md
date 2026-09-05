@@ -348,6 +348,17 @@ as an override threshold: the Sept-4 torque distributions overlap substantially 
 normal and pre-lane-change driving. Establish and validate a physical-N.m driver-override
 policy separately. Canonical: [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §4.4.
 
+VAR-126's full-corpus audit of the same routes closes the observational perimeter: the
+sender's wire envelope is exact (two application shapes, zero MAC28, continuous
+sequence, epoch-consistent reset bits, 50-Hz cadence), all bus-off/core-reset activity
+sits in route `3d`'s final 100 ms of power-down, and in every clean both-ID11 window
+where the stock and openpilot requests diverge ≥2.5 deg the wheel tracks the stock
+request (median 0.79 deg vs 2.02 deg; 30 samples stock-within-1°-while-B6->3° against 2
+reverse) while the EPS raises no fault latch. The single observable divergence from the
+known-accepted protected `0x0D7` sender is first-in-epoch message-low2 phase (stock 1,
+ours 0) — carry it into the stationary observer run as an A/B variable. Canonical:
+[../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §4.5.
+
 VAR-081/CORR-134 identify the observed Bus-4 `0x08A` representation; CORR-135 rejects an
 `0x08A -> B6` stock transform. VAR-101/CORR-149 close the FRC as request-side rather than
 a TSK key holder, but do not choose the downstream Brake/Skid versus CGW proxy signer. Native

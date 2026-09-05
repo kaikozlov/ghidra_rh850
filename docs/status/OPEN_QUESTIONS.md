@@ -1176,7 +1176,11 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   successful Panda transmission is not equivalent to B6 authority, and the running
   port's hardcoded `steeringPressed=False` prevents normal torque-nudge lane-change
   entry. Driver-override threshold selection is a separate physical-N.m policy task;
-  do not use it to explain or mask B6 receiver non-response.
+  do not use it to explain or mask B6 receiver non-response. VAR-126's full-corpus
+  audit adds a third: the sender is wire-exact, transport is exonerated during
+  driving, and the only observable divergence from the known-accepted protected `0x0D7`
+  sender is first-in-epoch message-low2 phase (stock starts at 1, ours at 0) — an
+  A/B variable for the next stationary observer run, not a proven rejection cause.
   Resolving OQ-054 remains required for stock architecture, not for this B6 ingress
   discriminator.
 
