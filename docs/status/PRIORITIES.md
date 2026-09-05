@@ -312,26 +312,41 @@ correlate against CAN. Treat generation-22
 
 **Current development-path update (VAR-120/CORR-160):** stop adding persistent SecOC-result patches. Stages 3–5 were each applied and reboot-verified yet the B6 application snapshot remained stale. Exact cross-generation review now closes both sides of that symptom: Corolla H and Camry F33 match from B6 CanIf/RSCFD/profile-2 through Gate-2/route44 after relocation, while F33 `CEFFC` selects command bank 2 directly from delivered `ADB0=11`, healthy `CAFF=1`, and `ACBD=0`—no downstream `0x08A` authority gate exists. The retained trace also shows `FEBE5364` advancing at 98.55–102.70 Hz before/during the 50-Hz injected phase, so it is not a unique ingress counter. The highest-confidence unresolved boundary is therefore physical/CanIf/profile-2 ingress or transient route44 publication, not downstream steering arbitration. The next experiment is **non-bypassing observation first**: install the audited 520/524-byte v2 RAM observer in NRTD, heartbeat-attest, transition directly NRTD→READY without OFF, and run the stationary probe with `--require-observer`. It records phase-local B6 queue-sample counts and exact wire signatures, native protected-D7 queue counts as a same-scheduler control, profile-2 state before/after `667E6`, post queue/result, raw COM, generated signals, and the application snapshot. `D7 delta=0` invalidates the observation window; `D7 delta>0/B6 delta=0` localizes the miss to transport/acceptance but still needs an independent physical receiver; `B6 delta>0` plus an exact current-phase signature proves queue ingress. Only then run the separate deduplicating RAM route44 bridge with `--require-bridge`; no CodeFlash patch and no nonzero offset before `ADMITTED`. OQ-054 stock proxy ownership remains separate. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§40,57.9.
 
-### Exact-F33 openpilot port — passive default + current development path (VAR-058/062/102)
+### Exact-F33 openpilot port — current road-enabled fork state (VAR-058/062/102/124/125)
 
-The passive baseline originated at nested opendbc
-`ab60fd95d8a7b566e10ed1cf59738292f3498932` (parent `kai-openpilot`
-`d7d7dfd7e49961e9d35eb7a7681e8756ceee8d04`). Current exact-F33 integration is
-opendbc `8da4bb9b` / kai-openpilot `6dd58cf5e`: it preserves byte-exact F181 binding,
-source-real state replay, shadow B6 analysis, and passive `0x08A` observation while adding
-an exact-F181, non-release, externally-attested zero-MAC28 B6 sender and B6-only Panda safety
-mode. Default/release CarParams remains `dashcamOnly` / `SafetyModel.noOutput` and output is
-zero CAN.
+The passive baseline remains historical context, but it is no longer the code exercised by
+the maintainer. Current exact-F33 integration is opendbc `78d03ddf -> 91834530 -> c7a62eaf`
+(parent `75779fcdb -> eda738486 -> d1914bbe7`): `0x08A` remains passive and forwarded,
+exact-F33 B6 lateral is enabled with ordinary Toyota `TSS3` safety, and the B6 local message
+counter is reanchored whenever live `0x00F RESET_CNT` changes. `TOYOTA_CAMRY_TSS3` now sets
+`dashcamOnly=False`; the former `ToyotaEphemeralSecOCBridge` / `ToyotaTss3DevLateral`
+attestation gate and debug-only B6 safety mode no longer describe the running fork. Panda's
+current B6 rule is angle safety (ID0/ID11, ±1745 raw, standard Toyota angle-rate checks), not
+a torque-command limiter.
 
-The current development path requires `ToyotaEphemeralSecOCBridge`, exact
-`ToyotaEphemeralSecOCBridgeF181=8965F3307000`, `ToyotaTss3DevLateral`, no preferred
-`SecOCKey`, stock longitudinal control, TSS3 identity, and a non-release build. The sender
-follows live `0x00F`, owns sequence/message progression, clamps ±1745 raw and ±78/step,
-ramps to inactive ID0, and deliberately emits zero MAC28. Panda requires the same-car
-`0x08A B3[3]` cruise latch/`controls_allowed`, steering-rate/sync observations, and exact
-sequence/rate/timeout bounds. `card.py` does not deploy or heartbeat-check a RAM resident;
-the 28-byte base remains an explicit-zero non-stock candidate. Production and ungated
-development output remain disabled.
+**2026-09-04 road result:** do not tune or raise steering limits to explain the current
+non-response. Across three long routes, 751,664 B6 sends produce 751,628 Panda TX-echo-style
+returns and only 33 `src=192` rejected frames; `safetyTxBlocked` rises by only 19.
+Large divergence windows still show B6 requesting +6 deg to +17 deg while measured steering
+stays several to >20 degrees away. This is receiver/authority non-response, not systematic
+Panda clipping. A no-blinker route-`3c` interval at ~25.7 m/s / ~0.45 N.m driver torque is
+particularly clean: measured steering ~3.2 deg tracks stock `0x08A` ~3.1 deg for ~1.25 s
+while B6 requests ~6.36 deg. Stock `0x08A` remains live and frequently ID11-active at the
+same time; although the rlogs cannot prove which source owns every straight-road correction
+when targets co-vary, this interval supports continued stock-path authority while B6 is
+ineffective. Return the actuation investigation to
+the corrected stationary queue/freshness observer before another on-road B6 test.
+
+A separate integration bug explains the repeatable lane-change alert. Exact-F33 `CarState`
+decodes physical steering-wheel torque but still forces `steeringPressed=False`. Openpilot
+therefore cannot leave `preLaneChange` through the normal torque-nudge transition; all three
+Sept-4 routes contain pre-lane-change events and zero `laneChange` events. Manual lane-change
+steering then drives measured angle away from openpilot's old-lane request until the angle
+controller raises `steerSaturated` (“Turn Exceeds Steering Limit”). Do not fix this by copying
+classic Toyota's raw `STEER_THRESHOLD` or by treating F33's unrelated internal 2-N.m predicate
+as an override threshold: the Sept-4 torque distributions overlap substantially between
+normal and pre-lane-change driving. Establish and validate a physical-N.m driver-override
+policy separately. Canonical: [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §4.4.
 
 VAR-081/CORR-134 identify the observed Bus-4 `0x08A` representation; CORR-135 rejects an
 `0x08A -> B6` stock transform. VAR-101/CORR-149 close the FRC as request-side rather than

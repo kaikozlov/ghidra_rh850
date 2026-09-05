@@ -1172,7 +1172,11 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   Only after exact queue ingress is observed should a second NRTD->READY run
   install the separate route44 bridge and use `--require-bridge`. A negative
   observer is bounded to the pre-aggregate sample point; no steering offset is
-  justified before `ADMITTED`.
+  justified before `ADMITTED`. The 2026-09-04 road corpus adds two constraints:
+  successful Panda transmission is not equivalent to B6 authority, and the running
+  port's hardcoded `steeringPressed=False` prevents normal torque-nudge lane-change
+  entry. Driver-override threshold selection is a separate physical-N.m policy task;
+  do not use it to explain or mask B6 receiver non-response.
   Resolving OQ-054 remains required for stock architecture, not for this B6 ingress
   discriminator.
 

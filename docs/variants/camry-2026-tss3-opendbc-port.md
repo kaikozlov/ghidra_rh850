@@ -235,41 +235,52 @@ The passive stack now has deterministic code for the exact known B6 contract:
 The default application template is intentionally marked `stock_validated=false`.
 No zero-filled candidate is represented as Toyota stock behavior.
 
-### 3.4 Passive default and development-only output remain mechanically separate
+### 3.4 Current fork state: exact-F33 output is enabled, not passively gated
 
-The ordinary TSS3 path computes a shadow B6 application/safety decision while returning
-**zero CAN frames**. The platform remains `dashcamOnly` / `SafetyModel.noOutput` unless
-all exact-F181, non-release development gates below are satisfied. Ordinary Toyota safety
-modes do not whitelist `0x0B6`.
+The original passive implementation remains useful history, but it no longer describes the
+code that produced the 2026-09-04 road logs. The current fork moved through three relevant
+opendbc revisions:
 
-The current development path is real but dormant by default. Parent `card.py` requires
-`ToyotaEphemeralSecOCBridge`, exact `ToyotaEphemeralSecOCBridgeF181=8965F3307000`,
-`ToyotaTss3DevLateral`, a byte-match against the current EPS firmware inventory, no preferred
-`SecOCKey`, stock longitudinal control, TSS3 identity, and a non-release build. Only then does
-it clear `dashcamOnly`, select Toyota safety with `TSS3_DEV_LATERAL`, and arm the controller's
-zero-MAC28 B6 sender. `card.py` treats those parameters as external bridge attestation: it does
-not deploy the RAM resident or verify an EPS heartbeat.
+- `78d03ddf` keeps Toyota `0x08A` passive/read-only and forwarded from the camera side;
+- `91834530` restores exact-F33 B6 lateral output through the ordinary Toyota safety model;
+- `c7a62eaf` reanchors the local B6 message counter whenever live `0x00F RESET_CNT` changes.
+
+The corresponding parent `kai-openpilot` revisions are `75779fcdb`, `eda738486`, and
+`d1914bbe7`. For `TOYOTA_CAMRY_TSS3`, current `CarInterface` selects Toyota safety with
+`STOCK_LONGITUDINAL|TSS3`, sets `dashcamOnly=False`, advertises angle control down to zero
+speed, and does **not** require the former `ToyotaEphemeralSecOCBridge` /
+`ToyotaTss3DevLateral` attestation parameters. Panda forwards stock `0x08A`, blocks a
+camera-side stock `0x0B6` replacement source, and permits the controller's bus-0 B6.
+
+One important state-decoding holdover remains: exact physical steering-wheel torque is decoded
+from `0x030`, but `CarState` still hardcodes `steeringPressed=False` because no validated
+physical driver-override threshold had been promoted. Section 4.4 shows that this is no longer
+a harmless passive placeholder once openpilot lateral output is enabled.
 
 ## 4. Current exact-F33 Gate-2 development plumbing (VAR-102)
 
 The first conservative sender was staged in opendbc `dde0fcf0` / parent `15f355036`, then
-removed in `b9e86924` / `abf3ca70a` after the stock-template premise was disproved. The
-current path was deliberately reintroduced without that premise in opendbc `c98872c6` and
-parent `5fee63cfc`; opendbc `8da4bb9b` adds the cruise/`controls_allowed` gate and accurate
-slew-limited output reporting, while parent `6dd58cf5e` fixes controller availability and
-registers `ToyotaTss3DevLateral`. Default/release output remains disabled.
+removed after the stock-template premise was disproved. Later development revisions rebuilt
+the B6 candidate without claiming a stock template. The code exercised on 2026-09-04 is the
+newer ordinary-path implementation at opendbc `78d03ddf -> 91834530 -> c7a62eaf`: stock
+`0x08A` remains passive, B6 lateral is enabled for exact F33, and local freshness progression
+is reanchored on each live reset epoch. This supersedes the former debug-only gating described
+in older history.
 
 ### 4.1 Current sender contract
 
-Once externally attested and armed, the controller:
+For exact F33, the current controller:
 
-- sends one `0x0B6`, DLC-32 frame per control cycle on Panda bus 0;
-- reads live `0x00F` trip/reset epoch, reanchors message8 to zero when the reset
-  epoch changes, and owns the independent application sequence locally;
-- sends Target Lateral ID 11 while active and ID0 after ramping the target to zero;
-- clamps target angle to ±1745 raw and each transmitted step to ±78 raw;
+- sends one `0x0B6`, DLC-32 frame every other 100-Hz control frame (nominal 50 Hz) on
+  Panda bus 0;
+- reads live `0x00F` trip/reset state, resets the local message counter to zero whenever
+  `RESET_CNT` changes, and owns the independent modulo-64 application sequence locally;
+- sends Target Lateral ID 11 while `CC.latActive` and ID0 otherwise;
+- applies the normal Toyota angle-control shaping, including the recovered ±1745-raw
+  (~100-deg) absolute envelope and speed-dependent angle-rate limits;
 - reports the actual slew-limited transmitted angle to controls;
-- preserves the FV4 nibble while deliberately transmitting zero MAC28.
+- preserves the computed FV4 nibble while deliberately transmitting zero MAC28 for the
+  patched exact-F33 receiver experiment.
 
 The 28-byte base is explicitly `stock_validated=false`: no stock B6 exists in the
 retained factory-LTA intervals. Recovered command fields are packed exactly.
@@ -297,47 +308,109 @@ Neither resident recovers or exposes the protected slot-class TSK key. The key
 remains in protected ICU-S storage. The bridge is a causal receive-path
 experiment, not production architecture.
 
-### 4.3 Development Panda safety boundary
+### 4.3 Current Panda safety boundary
 
-`ToyotaSafetyFlags.TSS3_DEV_LATERAL` remains behind Panda `ALLOW_DEBUG`. When selected by the
-exact development gate, it installs a dedicated bus-0 `0x0B6`/DLC-32-only TX whitelist. It
-requires prior `0x025` steering-rate and `0x00F` synchronization observations, consumes
-`0x08A B3[3]` as the same-car cruise operating latch, and requires `controls_allowed` for an
-active ID11 request. Inactive release remains allowed. The hook enforces:
+Current TSS3 Panda safety is no longer the earlier `ALLOW_DEBUG`/`TSS3_DEV_LATERAL`
+sequence-and-timeout experiment. With the ordinary Toyota `TSS3` flag selected, bus-0
+`0x0B6`/DLC-32 is whitelisted and checked as an **angle-steering command**. The B6 hook:
 
-- active Target Lateral ID exactly 11;
-- absolute target ≤1745 raw;
-- absolute steering-rate raw ≤100;
-- modulo-64 sequence exactly +1;
-- target step ≤78 raw;
-- active inter-command timeout ≤35 ms.
+- allows only Target Lateral ID 0 (inactive) or 11 (LTA/LCA active);
+- interprets B4:B5 as signed target steering angle;
+- enforces ±1745 raw (~100 deg); and
+- applies the standard Toyota speed-dependent angle-rate checks against measured `0x025`
+  steering angle.
 
-Ordinary Toyota modes still reject B6. The development implementation is test-verified, not
-vehicle-authorized.
+There is no B6 torque-command limit in this branch. The legacy Toyota
+`MAX_LTA_DRIVER_TORQUE_ALLOWANCE` path is below the TSS3 controller's early return and is not
+what constrains these B6 frames. `safetyTxBlocked` and Panda reject-return evidence therefore
+provide a direct way to distinguish a Panda angle-safety rejection from an EPS that simply
+does not act on a successfully transmitted command.
 
-## 5. What remains before lateral output can actually be exercised
+### 4.4 2026-09-04 highway evidence: B6 non-response and lane-change state failure (VAR-124/125)
 
-The shortest bounded execution path is independent of Toyota's unresolved stock
-FRC pipeline:
+Three long same-day routes were retained under
+`/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/`: `0000003b--62262eb7a1`
+(110 segments), `0000003c--97b9e7a69a` (81), and `0000003d--0e812cecba` (62). Together
+they contain **751,664** openpilot B6 `sendcan` frames. The CAN returns contain **751,628**
+Panda returned/TX-loopback B6 frames and only **33** `src=192` rejected B6 frames; the
+Panda `safetyTxBlocked` counter rises by only **19** over roughly 252 minutes. This rules out
+Panda steering limits as the explanation for the repeated long-duration non-response.
 
-1. **Observe B6 ingress without bypass.** Install/heartbeat-attest observer v2 in
-   NRTD, transition directly NRTD→READY without OFF, and run the stationary
-   exact-signature probe. `D7 delta=0` invalidates the window.
-2. **Separate transport from EPS acceptance when B6 remains zero.** With D7
-   advancing, use an independent physical bus receiver; Panda TX returns and
-   REC/TEC endpoints alone do not prove wire acknowledgement.
-3. **Bridge only after exact queue ingress.** Install the deduplicating route44
-   resident and repeat ID0/current-angle phases. Do not request a nonzero offset
-   before the host classifier reports `ADMITTED`.
-4. **Validate the B6 application candidate stationary.** With the wheels
-   unloaded, test ID0 inactive, ID11 zero angle, then one small bounded nonzero
-   step. Establish sign, scale, application companions, motor response, and
-   absence of an EPS fault latch.
-5. **Validate safety transitions.** Prove driver override, slew/rate limits,
-   ramp-to-zero, sender timeout, inactive release, source coexistence or relay
-   suppression, inhibit, fault, and recovery behavior.
-6. **Only then tune and leave the stationary boundary.** Production
-   transmission remains unauthorized.
+The failure is visible directly in angle space. During route `3d`'s first right-lane-change
+warning, openpilot and its post-controller B6 output command roughly **+6.2 deg** while
+measured steering remains near **-2.5 deg** for long enough to saturate. Route `3c` contains
+an even larger window: B6 commands roughly **+15..+17 deg** while measured steering remains
+near **-9.4 deg**. These are not marginal rate-limit clips. `LatControlAngle` declares
+`saturated` when desired and measured steering differ by more than 2.5 deg for the configured
+0.8-s `steerLimitTimer`; `selfdrived` then emits `steerSaturated` / “Turn Exceeds Steering
+Limit”. The alert is therefore an **angle tracking failure**, not a report that a steering
+torque allowance was too small.
+
+Stock Toyota lateral state remains present at the same time. Native camera-side `0x08A` is
+forwarded, and ID11 is frequent throughout all three routes; in route `3d` alone there are
+226,470 sampled >5-m/s overlaps where openpilot B6 is active ID11 and stock `0x08A` is also
+ID11. Because the two requested angles usually co-vary during straight highway driving, the
+rlog alone cannot prove that Toyota is the *sole* actuator in every straight segment. The
+large-divergence windows do prove the narrower and more important fact: successfully
+transmitted openpilot B6 can fail to produce the commanded wheel motion while the stock
+request plane remains live. A clean non-blinker route-`3c` interval strengthens that
+interpretation: at ~25.7 m/s with only ~0.45 N.m driver torque, measured steering remains
+near **3.2 deg** for ~1.25 s while stock `0x08A` is ~**3.1 deg** and openpilot/B6 is
+~**6.36 deg**. This is directly consistent with the stock request/authority path continuing
+to determine the wheel while B6 is ineffective in that window. It still does not prove sole
+stock ownership when the two targets co-vary. Exact EPS B6 ingress/freshness/acceptance
+therefore remains the primary actuation blocker; raising an openpilot/Panda steering limit is
+not supported.
+
+The lane-change warning has a second, independent software cause. Current exact-F33
+`CarState` decodes physical steering-wheel torque but sets `steeringPressed=False` on every
+sample. Openpilot's `DesireHelper` requires `steeringPressed` plus torque in the indicated
+direction to leave `preLaneChange` and enter `laneChangeStarting`. Across the three routes
+there are thousands of `preLaneChangeLeft/Right` event samples and **zero `laneChange` event
+samples**. The driver can therefore physically steer across the lane boundary while
+openpilot continues requesting the old-lane path; the resulting desired/measured-angle gap
+then triggers the same `steerSaturated` alert. Route `3d` torque distributions also show why
+a threshold should not be guessed from one drive: absolute torque during `preLaneChange` has
+median ~1.30 N.m and p90 ~2.15 N.m, while >10-m/s no-blinker samples still reach median
+~0.37 N.m, p90 ~1.14 N.m, with substantial overlap. A validated driver-override policy
+remains required before replacing the hardcoded false value.
+
+Finally, the Sept-3 freshness change is demonstrably active on the wire but not yet proven
+accepted by F33. Live `0x00F RESET_CNT` advances roughly every 300 ms rather than only at
+ignition; the current sender reanchors its local message counter at each such epoch, and the
+observed B28-high FV4 progression matches that implementation. Exact firmware still verifies
+freshness before the patched Gate-2 MAC-result path and can return drop/retry/adopt verdicts.
+Nothing in these rlogs proves which verdict B6 received. The corrected non-bypassing queue /
+freshness observer remains the right discriminator; the wire-consistent FV4 trace is not a
+substitute for receiver acceptance.
+
+## 5. What remains before B6 steering authority is established
+
+The 2026-09-04 road logs show why further limit tuning is not the next step. The shortest
+bounded execution path is independent of Toyota's unresolved stock FRC pipeline:
+
+1. **Return B6 diagnosis to the stationary boundary.** The road corpus already proves that
+   openpilot can request large angles without getting the expected wheel motion; another road
+   drive cannot localize the receiver failure and adds no useful discriminator.
+2. **Observe B6 ingress without bypass.** Install/heartbeat-attest observer v2 in NRTD,
+   transition directly NRTD→READY without OFF, and run the stationary exact-signature probe.
+   `D7 delta=0` invalidates the window.
+3. **Separate transport from EPS acceptance when B6 remains zero.** With D7 advancing, use an
+   independent physical bus receiver; Panda TX returns and REC/TEC endpoints alone do not
+   prove wire acknowledgement.
+4. **Bridge only after exact queue ingress.** Install the deduplicating route44 resident and
+   repeat ID0/current-angle phases. Do not request a nonzero offset before the host classifier
+   reports `ADMITTED`.
+5. **Validate the B6 application candidate stationary.** With the wheels unloaded, test ID0
+   inactive, ID11 zero angle, then one small bounded nonzero step. Establish sign, scale,
+   application companions, motor response, and absence of an EPS fault latch.
+6. **Fix lane-change driver-state mapping as a separate integration task.** `steeringPressed`
+   must not remain hardcoded false once lateral is enabled, but the physical threshold must be
+   validated rather than copied from classic Toyota raw units or inferred from the F33's
+   unrelated 2-N.m internal predicate.
+7. **Only after receiver acceptance and driver-state policy are closed, validate safety
+   transitions and tune.** Prove slew/rate limits, inactive release, source coexistence or
+   suppression, inhibit, fault, recovery, and driver override before another on-road B6 test.
 
 OQ-054 remains valuable for an elegant stock-compatible architecture: synchronized FRC
 Operation FFD `5282/5631/5285/57DE/5265/560D`, matched FRC/Brake firmware, or source-identifying
@@ -371,6 +444,6 @@ probe above.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061), [VAR-062](../reference/index.md#finding-var-062), [VAR-071](../reference/index.md#finding-var-071), [VAR-102](../reference/index.md#finding-var-102)
+- Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061), [VAR-062](../reference/index.md#finding-var-062), [VAR-071](../reference/index.md#finding-var-071), [VAR-102](../reference/index.md#finding-var-102), [VAR-124](../reference/index.md#finding-var-124), [VAR-125](../reference/index.md#finding-var-125)
 - Corrections with this document as canonical home: [CORR-120](../reference/index.md#correction-corr-120), [CORR-122](../reference/index.md#correction-corr-122), [CORR-139](../reference/index.md#correction-corr-139), [CORR-140](../reference/index.md#correction-corr-140)
 <!-- knowledge-cross-references:end -->
