@@ -455,6 +455,126 @@ ingress/freshness/first-rejecting-stage boundary, while the lane-change alert wa
 explained by the former `steeringPressed=False` integration bug (VAR-125; fixed by fork
 opendbc `e37bab6c`).
 
+### 4.6 September 4 passive stock-steering observables (VAR-129)
+
+**Scope and grade:** observed, dynamic-trace. A separate read-only reduction of
+all **253 segments** from routes `0000003b--62262eb7a1` (110),
+`0000003c--97b9e7a69a` (81), and `0000003d--0e812cecba` (62) covers about
+252 minutes and counts **27,173,143 native `can` records on Panda buses 0/1/2**.
+None is `0x0B6`, `0x131`, or `0x2E4`. Openpilot `sendcan` and Panda TX returns
+are excluded from this native census. This is an absence within the logged buses,
+not proof of complete vehicle-network coverage, EPS admission, or a stock B6 template.
+
+#### Signal roles
+
+Byte offsets are zero-based. These are passive observables, not transmit instructions.
+
+| Carrier | Predominant captured side | Observable | Interpretation boundary |
+|---|---|---|---|
+| `0x08A` | Panda bus 2 | B21 request ID; signed BE16 B18:B19 request angle; B24 request level | Stock lateral-request state, not proved EPS authority or transmitter identity |
+| `0x081` | Panda bus 0 | signed BE16 B16:B17 steering-reference word | Closely mirrors the `0x08A` request; propagation direction and command-versus-feedback role unresolved |
+| `0x025` | Panda bus 0 | existing steering angle/fraction/rate decode | Measured steering, not a requested angle |
+| `0x030` | Panda bus 0 | driver torque and B22:B23 mapped motor-feedback proxy | EPS telemetry; ordinary driver assist also produces motor feedback |
+
+The two reference words use the existing `1024/17870` (~0.057302742)
+deg/count representation. The `0x030` motor-feedback proxy is not commanded
+torque or amperes; its source/scale boundary remains as documented in §1.3.
+Panda bus numbers identify harness sides, not Toyota network-domain numbers or
+CAN transmitter addresses.
+
+#### Reference relationship and discovery scope
+
+In clean native-ID11 samples, `0x081 B16:B17` versus `0x08A B18:B19` gives:
+
+| Route | Samples | Pearson correlation | Median absolute difference | p90 absolute difference |
+|---|---:|---:|---:|---:|
+| `3b` | 40,789 | 0.998655 | 0 raw counts | 1 raw count |
+| `3c` | 21,990 | 0.999381 | 0 raw counts | 2 raw counts |
+| `3d` | 31,607 | 0.996073 | 0 raw counts | 1 raw count |
+
+Method: 20-Hz last-observed samples, signal age at most 75 ms, speed >10 m/s,
+absolute raw-decoded driver torque <0.5 N.m, no blinkers, valid torque, and native
+ID11. The exploratory byte-aligned signed16 BE/LE sweep over native bus-0/1
+payloads, excluding the final four bytes of FD PDUs, ranks `0x081 B16:B17` first
+on every route. `0x090` and bus-1 `0x160` also correlate with steering, but that
+does not establish another command. Bit-aligned, multiplexed, nonlinear, and
+unlogged interfaces remain outside this sweep.
+
+Near-identical references on opposite harness sides do not establish which ECU
+originated either value, which direction information propagated, or whether an
+EPS accepted it. Event timestamps describe logger publication batches, not
+individual CAN arbitration times; no sub-batch causal ordering is claimed.
+
+#### Divergent-request witness
+
+Route `3c`, segment 43, **34.46–35.26 s** contains 17 qualified 20-Hz samples:
+native and openpilot requests both active ID11, no blinkers, driver torque
+absolute maximum 0.46 N.m, and median speed 25.62 m/s.
+
+| Quantity | Median |
+|---|---:|
+| Measured `0x025` steering | 3.20 deg |
+| Native `0x08A` request | 3.2663 deg |
+| Native `0x081` reference | 3.2663 deg |
+| Openpilot transmitted target | 6.5325 deg |
+
+This interval is consistent with stock-reference tracking while the openpilot
+target is ineffective. It does not establish sole stock control throughout the
+drive or localize the EPS acceptance/actuation boundary. Shared road geometry,
+driver intervention, and closed-loop controller response confound whole-drive
+correlations; a lower aggregate tracking error is not evidence of control ownership.
+
+#### Native ID4 episodes
+
+Re-reading the original rlogs confirms **248 native bus-2 `0x08A` frames** with
+the entire B21 byte equal to 4 in five episodes. B24 is 100 in every one.
+The existing Toyota dictionary labels ID4 as LDA; the observed fact is the
+numeric request state, not an independently proved LDA grant.
+
+| Route | Segment | First–last ID4 frame (s) | Frames | Logged openpilot lateral |
+|---|---:|---:|---:|---|
+| `3b` | 6 | 28.626–28.907 | 12 | inactive |
+| `3c` | 40 | 16.211–18.741 | 102 | active |
+| `3c` | 56 | 43.964–45.441 | 60 | inactive |
+| `3d` | 56 | 59.294–59.969 | 28 | inactive |
+| `3d` | 57 | 19.884–21.012 | 46 | inactive |
+
+Four episodes therefore provide stock request activity without simultaneous
+openpilot lateral activation. They are not hands-off experiments: driver torque
+is present, and actual EPS grant/actuation is not identified by these records.
+The older August two-drive `0/11/18` state census remains scoped to those captures;
+it must not be treated as an exhaustive alphabet for this September corpus.
+
+#### Provenance and integration boundary
+
+Times above are seconds from the first live CAN/control/state event in the named
+segment, not from startup metadata repeated in subsequent rlogs. Original inputs:
+`/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/<full-route>/rlog-<segment>.zst`.
+Compressed source SHA-256 identities:
+
+| Route / segment | SHA-256 |
+|---|---|
+| `3b / 6` | `4395189b7f8f24f4085f978447951a401b34be63907bae180688e57d8e1e0512` |
+| `3c / 40` | `73b946a8487c9d8f43d7ffe69287655775beaf595ec1099b6138f885ecb68902` |
+| `3c / 43` | `ab6b4fbe4d14227919a022dbc2c3091467446262d6896d26ea021ecc5d54c356` |
+| `3c / 56` | `ab3bf83295f653416567b75c770a8af83a847554968015f4fed4f650d6025d15` |
+| `3d / 56` | `a02430cf010867fa3486a6d964dc8d832667ad666f2f0c96fe94a2588c8cf3a8` |
+| `3d / 57` | `e13dd3880d08c827240017c76119038a65371a7d96149ebc44f4639b5319a793` |
+
+The route `carParams` records identify the Camry platform and Brake firmware but
+contain no EPS F181 response. Exact EPS identity comes from separate same-car
+evidence, not these rlogs alone. No deterministic regression test is claimed.
+The local comparison JSON, raw-witness projections, and segment-43 CSV/SVG live
+under `build/out/camry-stock-steering-20260904/`; they are disposable review
+outputs, not replacements for the original source logs.
+
+For integration, retain measured angle and driver validity as measured state,
+and request/reference fields as passive observables. Do not promote request IDs
+to engagement/readiness authority or replace measured feedback with a target.
+The unresolved connection is stock request/reference → EPS acceptance and
+actuation. No new steering transmission or message replacement follows from
+this passive analysis.
+
 ## 5. What remains before B6 steering authority is established
 
 The 2026-09-04 road logs show why further limit tuning is not the next step. The shortest
@@ -582,6 +702,6 @@ final recovered `0x160` request semantics.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061), [VAR-062](../reference/index.md#finding-var-062), [VAR-071](../reference/index.md#finding-var-071), [VAR-102](../reference/index.md#finding-var-102), [VAR-124](../reference/index.md#finding-var-124), [VAR-125](../reference/index.md#finding-var-125), [VAR-126](../reference/index.md#finding-var-126)
+- Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061), [VAR-062](../reference/index.md#finding-var-062), [VAR-071](../reference/index.md#finding-var-071), [VAR-102](../reference/index.md#finding-var-102), [VAR-124](../reference/index.md#finding-var-124), [VAR-125](../reference/index.md#finding-var-125), [VAR-126](../reference/index.md#finding-var-126), [VAR-129](../reference/index.md#finding-var-129)
 - Corrections with this document as canonical home: [CORR-120](../reference/index.md#correction-corr-120), [CORR-122](../reference/index.md#correction-corr-122), [CORR-139](../reference/index.md#correction-corr-139), [CORR-140](../reference/index.md#correction-corr-140)
 <!-- knowledge-cross-references:end -->

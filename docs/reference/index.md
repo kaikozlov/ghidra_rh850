@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 438 · Corrections: 162 · Open questions: 54 · Docs: 120 · Suites: 230
+Findings: 439 · Corrections: 162 · Open questions: 54 · Docs: 120 · Suites: 230
 
 ## Reading this index
 
@@ -457,6 +457,7 @@ Findings: 438 · Corrections: 162 · Open questions: 54 · Docs: 120 · Suites: 
 | <a id="finding-var-126"></a>**VAR-126** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | — | OQ-054 |
 | <a id="finding-var-127"></a>**VAR-127** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_camry_8965F3307000_gtsplus_semantics.py` | — |
 | <a id="finding-var-128"></a>**VAR-128** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | — | — |
+| <a id="finding-var-129"></a>**VAR-129** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | — | — |
 
 ## Open-questions index
 
