@@ -2916,13 +2916,14 @@ Panda control policy.
 
 ### 49.2 Standard semantics are mapped only where the target closes them
 
-The port exposes the target's physical steering angle/rate and driver torque.
-The first-class F33 evidence explicitly leaves the **driver-override numeric
-threshold** unresolved (the ~8.238 N.m figure is representation saturation, not
-an override threshold), so `steeringPressed` is not synthesized from a guessed
-number. Likewise, the exact fault/status work does not close openpilot
-`steerFaultTemporary` versus `steerFaultPermanent`; those policy fields remain
-neutral until live asserted/recovery dynamics establish the mapping.
+The port exposes the target's physical steering angle/rate and driver torque. The first-class
+F33 evidence explicitly leaves the **driver-override numeric threshold** unresolved (the
+~8.238 N.m figure is representation saturation, not an override threshold), so the original
+port did not synthesize `steeringPressed` from a guessed number. 2026-09-04 update: fork
+opendbc `e37bab6c` now derives `steeringPressed` from measured `0x030` torque at a provisional
+1.2 N.m (route-3d-derived, validation open); see the port report §4.4. The exact fault/status
+work still does not close openpilot `steerFaultTemporary` versus `steerFaultPermanent`; those
+policy fields remain neutral until live asserted/recovery dynamics establish the mapping.
 
 Cruise engagement follows normal Toyota `pcmCruise` semantics using the recovered
 Camry operating state. Physical MAIN/RES+/SET-/CANCEL are exposed as standard

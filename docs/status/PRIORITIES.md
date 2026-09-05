@@ -337,16 +337,15 @@ when targets co-vary, this interval supports continued stock-path authority whil
 ineffective. Return the actuation investigation to
 the corrected stationary queue/freshness observer before another on-road B6 test.
 
-A separate integration bug explains the repeatable lane-change alert. Exact-F33 `CarState`
-decodes physical steering-wheel torque but still forces `steeringPressed=False`. Openpilot
-therefore cannot leave `preLaneChange` through the normal torque-nudge transition; all three
-Sept-4 routes contain pre-lane-change events and zero `laneChange` events. Manual lane-change
-steering then drives measured angle away from openpilot's old-lane request until the angle
-controller raises `steerSaturated` (“Turn Exceeds Steering Limit”). Do not fix this by copying
-classic Toyota's raw `STEER_THRESHOLD` or by treating F33's unrelated internal 2-N.m predicate
-as an override threshold: the Sept-4 torque distributions overlap substantially between
-normal and pre-lane-change driving. Establish and validate a physical-N.m driver-override
-policy separately. Canonical: [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §4.4.
+A separate integration bug explains the repeatable lane-change alert, now fixed. Exact-F33
+`CarState` used to force `steeringPressed=False`, so openpilot could not leave `preLaneChange`
+through the normal torque-nudge transition; all three Sept-4 routes contain pre-lane-change
+events and zero `laneChange` events. Fork opendbc `e37bab6c` (2026-09-04) replaces the
+placeholder with a provisional 1.2 N.m physical-torque threshold derived from the Sept-4
+distributions — not copied from classic Toyota raw units and not F33's unrelated internal
+2-N.m predicate. Remaining: on-vehicle validation of the threshold and the `0x030` torque
+sign; EPS fault classification stays neutral. Canonical:
+[../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §4.4.
 
 VAR-126's full-corpus audit of the same routes closes the observational perimeter: the
 sender's wire envelope is exact (two application shapes, zero MAC28, continuous

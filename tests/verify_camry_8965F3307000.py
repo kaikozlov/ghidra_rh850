@@ -712,7 +712,7 @@ def section_tss3_opendbc_port() -> int:
     findings = FINDINGS.read_text(encoding="utf-8")
     corrections = CORRECTIONS.read_text(encoding="utf-8")
     priorities = PRIORITIES.read_text(encoding="utf-8")
-    for token in ("ab60fd95", "d7d7dfd7e", "dde0fcf0", "15f355036", "0x4C000", "0x4C7AA", "0x4CED0", "0x4CE08", "SafetyModel.noOutput", "179-ID", "147-ID", "ToyotaTss3DevLateral"):
+    for token in ("ab60fd95", "d7d7dfd7e", "dde0fcf0", "15f355036", "0x4C000", "0x4C7AA", "0x4CED0", "0x4CE08", "179-ID", "147-ID", "ToyotaTss3DevLateral"):
         check(f"dedicated port report contains {token}", token in report)
     check("VAR-058 registered", "| VAR-058 |" in findings and "8965F3307000" in findings and "ab60fd95" in findings)
     check("VAR-062 development staging registered", "| VAR-062 |" in findings and "dde0fcf0" in findings and "15f355036" in findings)

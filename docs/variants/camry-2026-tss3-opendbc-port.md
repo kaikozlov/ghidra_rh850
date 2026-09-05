@@ -13,9 +13,9 @@ is homologous to the field-proven Sienna result bypass, but the cumulative F33
 stage-5 patch plus zero-MAC B6 did not update the application snapshot. Static
 review now closes the configured Corolla/Camry B6 path and the downstream F33
 ID11/health selector; it does not claim live receiver acceptance. The current
-local forks retain an exact-F181, non-release B6 development path
-(`opendbc@8da4bb9b`, parent `kai-openpilot@6dd58cf5e`). Default/release behavior
-remains `dashcamOnly` / `SafetyModel.noOutput` with zero output.
+`kai-openpilot` fork carries the exact-F181 B6 development path: exact-F33 output
+is enabled on its `kai` development branch through the ordinary Toyota safety
+model (§3.4); upstream comma opendbc has no Camry TSS3 platform at all.
 
 **Current execution blocker:** establish the first live B6 boundary with the
 countered non-bypassing RAM observer. It distinguishes a valid scheduler window
@@ -252,10 +252,10 @@ speed, and does **not** require the former `ToyotaEphemeralSecOCBridge` /
 `ToyotaTss3DevLateral` attestation parameters. Panda forwards stock `0x08A`, blocks a
 camera-side stock `0x0B6` replacement source, and permits the controller's bus-0 B6.
 
-One important state-decoding holdover remains: exact physical steering-wheel torque is decoded
-from `0x030`, but `CarState` still hardcodes `steeringPressed=False` because no validated
-physical driver-override threshold had been promoted. Section 4.4 shows that this is no longer
-a harmless passive placeholder once openpilot lateral output is enabled.
+The former state-decoding holdover is resolved: fork opendbc `e37bab6c` (2026-09-04)
+replaces the hardcoded `steeringPressed=False` with the normal driver-state contract — physical
+`0x030` torque above a provisional 1.2 N.m exact-F33 threshold (route-3d-derived; sign and
+final value still need dynamic validation). §4.4 records why the placeholder was not harmless.
 
 ## 4. Current exact-F33 Gate-2 development plumbing (VAR-102)
 
@@ -362,9 +362,10 @@ stock ownership when the two targets co-vary. Exact EPS B6 ingress/freshness/acc
 therefore remains the primary actuation blocker; raising an openpilot/Panda steering limit is
 not supported.
 
-The lane-change warning has a second, independent software cause. Current exact-F33
-`CarState` decodes physical steering-wheel torque but sets `steeringPressed=False` on every
-sample. Openpilot's `DesireHelper` requires `steeringPressed` plus torque in the indicated
+The lane-change warning had a second, independent software cause. The exact-F33
+`CarState` that produced these routes decoded physical steering-wheel torque but set
+`steeringPressed=False` on every sample.
+Openpilot's `DesireHelper` requires `steeringPressed` plus torque in the indicated
 direction to leave `preLaneChange` and enter `laneChangeStarting`. Across the three routes
 there are thousands of `preLaneChangeLeft/Right` event samples and **zero `laneChange` event
 samples**. The driver can therefore physically steer across the lane boundary while
@@ -372,8 +373,10 @@ openpilot continues requesting the old-lane path; the resulting desired/measured
 then triggers the same `steerSaturated` alert. Route `3d` torque distributions also show why
 a threshold should not be guessed from one drive: absolute torque during `preLaneChange` has
 median ~1.30 N.m and p90 ~2.15 N.m, while >10-m/s no-blinker samples still reach median
-~0.37 N.m, p90 ~1.14 N.m, with substantial overlap. A validated driver-override policy
-remains required before replacing the hardcoded false value.
+~0.37 N.m, p90 ~1.14 N.m, with substantial overlap. Resolved 2026-09-04 by fork opendbc
+`e37bab6c`: `steeringPressed` now thresholds physical torque at a provisional 1.2 N.m — just
+above the no-blinker p90 and below the preLaneChange median. On-vehicle validation of the
+threshold and the `0x030` torque sign convention remains required.
 
 Finally, the Sept-3 freshness change is demonstrably active on the wire but not yet proven
 accepted by F33. Live `0x00F RESET_CNT` advances roughly every 300 ms rather than only at
@@ -448,8 +451,9 @@ zero. No fault latch, no inhibit, no status transition correlates with the B6 ph
 Combined with §4.4 this separates the failure cleanly: the receiver neither acts on nor
 visibly rejects three-quarters of a million well-formed frames — silent non-admission
 upstream of any observable application reaction, consistent with the unresolved
-ingress/freshness/first-rejecting-stage boundary, while the lane-change alert is fully
-explained by the `steeringPressed=False` integration bug (VAR-125).
+ingress/freshness/first-rejecting-stage boundary, while the lane-change alert was fully
+explained by the former `steeringPressed=False` integration bug (VAR-125; fixed by fork
+opendbc `e37bab6c`).
 
 ## 5. What remains before B6 steering authority is established
 
@@ -471,10 +475,10 @@ bounded execution path is independent of Toyota's unresolved stock FRC pipeline:
 5. **Validate the B6 application candidate stationary.** With the wheels unloaded, test ID0
    inactive, ID11 zero angle, then one small bounded nonzero step. Establish sign, scale,
    application companions, motor response, and absence of an EPS fault latch.
-6. **Fix lane-change driver-state mapping as a separate integration task.** `steeringPressed`
-   must not remain hardcoded false once lateral is enabled, but the physical threshold must be
-   validated rather than copied from classic Toyota raw units or inferred from the F33's
-   unrelated 2-N.m internal predicate.
+6. **Validate the driver-state mapping on-vehicle.** Fork opendbc `e37bab6c` feeds
+   `steeringPressed` from physical `0x030` torque at a provisional 1.2 N.m; confirm the
+   threshold and torque sign/direction dynamically, and keep the fault mapping neutral
+   until same-car asserted/recovery transitions are proved.
 7. **Only after receiver acceptance and driver-state policy are closed, validate safety
    transitions and tune.** Prove slew/rate limits, inactive release, source coexistence or
    suppression, inhibit, fault, recovery, and driver override before another on-road B6 test.

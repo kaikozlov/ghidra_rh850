@@ -1173,10 +1173,11 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   install the separate route44 bridge and use `--require-bridge`. A negative
   observer is bounded to the pre-aggregate sample point; no steering offset is
   justified before `ADMITTED`. The 2026-09-04 road corpus adds two constraints:
-  successful Panda transmission is not equivalent to B6 authority, and the running
-  port's hardcoded `steeringPressed=False` prevents normal torque-nudge lane-change
-  entry. Driver-override threshold selection is a separate physical-N.m policy task;
-  do not use it to explain or mask B6 receiver non-response. VAR-126's full-corpus
+  successful Panda transmission is not equivalent to B6 authority, and the port that
+  produced these routes had a hardcoded `steeringPressed=False` that blocked normal
+  torque-nudge lane-change entry (fixed 2026-09-04 by fork opendbc `e37bab6c` with a
+  provisional 1.2 N.m physical-torque threshold; validation open). Do not use the
+  driver-state fix to explain or mask B6 receiver non-response. VAR-126's full-corpus
   audit adds a third: the sender is wire-exact, transport is exonerated during
   driving, and the only observable divergence from the known-accepted protected `0x0D7`
   sender is first-in-epoch message-low2 phase (stock starts at 1, ours at 0) — an
