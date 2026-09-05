@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 433 · Corrections: 162 · Open questions: 54 · Docs: 119 · Suites: 230
+Findings: 433 · Corrections: 162 · Open questions: 54 · Docs: 120 · Suites: 230
 
 ## Reading this index
 
@@ -726,6 +726,7 @@ Every tracked document under `docs/` with its owning suite(s) and gate tests.
 | [docs/history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md](../history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/history/2026-09/2026-09-01-camry-route37-steering-speed-gate.md](../history/2026-09/2026-09-01-camry-route37-steering-speed-gate.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/history/2026-09/2026-09-02-camry-f33-b6-review-handoff.md](../history/2026-09/2026-09-02-camry-f33-b6-review-handoff.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
+| [docs/history/2026-09/2026-09-04-camry-route-log-import.md](../history/2026-09/2026-09-04-camry-route-log-import.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/history/README.md](../history/README.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/reference/README.md](README.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/reference/addresses.md](addresses.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
