@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 441 · Corrections: 164 · Open questions: 54 · Docs: 124 · Suites: 234
+Findings: 442 · Corrections: 164 · Open questions: 54 · Docs: 124 · Suites: 235
 
 ## Reading this index
 
@@ -460,6 +460,7 @@ Findings: 441 · Corrections: 164 · Open questions: 54 · Docs: 124 · Suites: 
 | <a id="finding-var-129"></a>**VAR-129** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [CORRECTIONS](../status/CORRECTIONS.md), [camry-2026-bench-validation-spec](../variants/camry-2026-bench-validation-spec.md), [camry-2026-tss3-integration-audit](../variants/camry-2026-tss3-integration-audit.md), [camry_f33_b6_observer_runbook](../../exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md) | — | — |
 | <a id="finding-var-130"></a>**VAR-130** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | `tests/verify_camry_20260906_hands_off_warning.py` | — |
 | <a id="finding-var-131"></a>**VAR-131** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | `tests/verify_camry_2026_pda_sdg.py` | — |
+| <a id="finding-var-132"></a>**VAR-132** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | `tests/verify_camry_2026_lateral_family_census.py` | — |
 
 ## Open-questions index
 
@@ -800,7 +801,7 @@ Every tracked document under `docs/` with its owning suite(s) and gate tests.
 | [docs/variants/camry-2026-longitudinal-evidence.md](../variants/camry-2026-longitudinal-evidence.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/variants/camry-2026-tss3-fault-status.md](../variants/camry-2026-tss3-fault-status.md) | doc_links, camry_8965f3307000_fault_status, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_camry_8965F3307000.py`, `tests/verify_knowledge_index.py` |
 | [docs/variants/camry-2026-tss3-integration-audit.md](../variants/camry-2026-tss3-integration-audit.md) | doc_links, camry_tss3_replay_tool, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_camry_tss3_replay_tool.py`, `tests/verify_knowledge_index.py` |
-| [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | doc_links, camry_2026, camry_20260904_stock_steering, camry_tss3_operation_ffd_decoder, camry_8965f3307000_tss3_opendbc_port, knowledge_index, camry_8965f3307000_external_lateral_ingress, camry_20260906_hands_off_warning | `tests/verify_doc_links.py`, `tests/verify_camry_2026.py`, `tests/verify_camry_20260904_stock_steering.py`, `tests/verify_camry_tss3_operation_ffd_decoder.py`, `tests/verify_camry_8965F3307000.py`, `tests/verify_knowledge_index.py`, `tests/verify_camry_8965F3307000_external_lateral_ingress.py`, `tests/verify_camry_20260906_hands_off_warning.py` |
+| [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | doc_links, camry_2026, camry_20260904_stock_steering, camry_tss3_operation_ffd_decoder, camry_8965f3307000_tss3_opendbc_port, knowledge_index, camry_8965f3307000_external_lateral_ingress, camry_20260906_hands_off_warning, camry_2026_lateral_family_census | `tests/verify_doc_links.py`, `tests/verify_camry_2026.py`, `tests/verify_camry_20260904_stock_steering.py`, `tests/verify_camry_tss3_operation_ffd_decoder.py`, `tests/verify_camry_8965F3307000.py`, `tests/verify_knowledge_index.py`, `tests/verify_camry_8965F3307000_external_lateral_ingress.py`, `tests/verify_camry_20260906_hands_off_warning.py`, `tests/verify_camry_2026_lateral_family_census.py` |
 | [docs/variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) | p1me_product_memory, doc_links, corolla_hf, corolla_h_sienna_secoc_structural_comparison, albinoelephant_corolla_dataflash, albinoelephant_telescope_probe, albinoelephant_corolla_repeatability, albinoelephant_corolla_codeflash, corolla_h, toyota_b_programming_topology, knowledge_index | `tests/verify_p1me_product_memory.py`, `tests/verify_doc_links.py`, `tests/verify_corolla_hf.py`, `tests/verify_corolla_h_sienna_secoc_structural_comparison.py`, `tests/verify_albinoelephant_corolla_dataflash.py`, `tests/verify_albinoelephant_telescope_probe.py`, `tests/verify_albinoelephant_corolla_repeatability.py`, `tests/verify_albinoelephant_corolla_codeflash.py`, `tests/verify_corolla_h.py`, `tests/verify_toyota_b_programming_topology.py`, `tests/verify_knowledge_index.py` |
 | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | doc_links, spanconstant_corolla_codeflash, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_spanconstant_corolla_equivalence.py`, `tests/verify_spanconstant_corolla_cross_variant.py`, `tests/verify_spanconstant_corolla_memory.py`, `tests/verify_spanconstant_low_calibration_delta.py`, `tests/verify_knowledge_index.py` |
 | [docs/variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) | doc_links, corolla_hf, corolla_h, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_corolla_hf.py`, `tests/verify_corolla_h.py`, `tests/verify_knowledge_index.py` |
@@ -841,7 +842,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/function_discovery_reviewed_clusters.csv` | function_discovery | — |
 | `data/generated/21140bbd65e530a9/diagnostic_annotations.json` | diagnostic_vocabulary | — |
 | `data/generated/21140bbd65e530a9/diagnostic_vocabulary.json` | diagnostic_vocabulary, application_wdbi, application_wdbi_surface_live, spanconstant_corolla_codeflash | — |
-| `data/generated/camry-8965F3307000/decompilations.jsonl` | analysis_targets, camry_8965f3307000_gtsplus_semantics, camry_8965f3307000_codeflash, camry_8965f3307000_flash_backend, camry_8965f3307000_b6_acceptance_ladder, camry_8965f3307000_lateral_static, camry_8965f3307000_tss3_opendbc_port, camry_8965f3307000_fault_status, camry_8965f3307000_external_lateral_ingress, camry_8965f3307000_d5_snapshot_provenance, camry_8965f3307000_command_cone_ingress, camry_8965f3307000_hidden_ingress_residuals, camry_8965f3307000_dataflash_nvm_owners | — |
+| `data/generated/camry-8965F3307000/decompilations.jsonl` | analysis_targets, camry_8965f3307000_gtsplus_semantics, camry_8965f3307000_codeflash, camry_8965f3307000_flash_backend, camry_8965f3307000_b6_acceptance_ladder, camry_8965f3307000_lateral_static, camry_8965f3307000_tss3_opendbc_port, camry_8965f3307000_fault_status, camry_8965f3307000_external_lateral_ingress, camry_8965f3307000_d5_snapshot_provenance, camry_8965f3307000_command_cone_ingress, camry_8965f3307000_hidden_ingress_residuals, camry_8965f3307000_dataflash_nvm_owners, camry_2026_lateral_family_census | — |
 | `data/generated/camry_20260904_stock_steering_manifest.json` | camry_20260904_stock_steering | — |
 | `data/generated/camry_20260904_stock_steering_report.json` | camry_20260904_stock_steering | — |
 | `data/generated/camry_20260906_hands_off_warning_audit.json` | camry_20260906_hands_off_warning | — |
@@ -856,6 +857,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/camry_2026_class_l_upstream_correlation.json` | camry_8965f3307000_external_lateral_ingress | — |
 | `data/generated/camry_2026_cruise_lta_edge_census.json` | camry_2026, camry_2026_bus1_field_leadlag, camry_2026_bus4_field_leadlag, camry_2026_baseline_selector, camry_8965f3307000_external_lateral_ingress, camry_2026_stock_steering_witness | — |
 | `data/generated/camry_2026_dtc_clear.json` | toyota_diag_registry, gts_query_cli, camry_2026 | — |
+| `data/generated/camry_2026_lateral_family_census.json` | camry_2026_lateral_family_census | — |
 | `data/generated/camry_2026_lateral_flow_trace.json` | camry_2026_lateral_flow_trace | — |
 | `data/generated/camry_2026_longitudinal_request_plane.json` | camry_2026_longitudinal_request_plane | — |
 | `data/generated/camry_2026_lta_state_reconciliation.json` | camry_2026_lta_state_reconciliation, camry_2026_longitudinal_request_plane | — |
@@ -876,7 +878,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/camry_8965F3307000_dataflash_nvm_owners.json` | camry_8965f3307000_dataflash_nvm_owners | — |
 | `data/generated/camry_8965F3307000_decompiler_evidence.json` | camry_8965f3307000_codeflash | — |
 | `data/generated/camry_8965F3307000_dmac_destination_computed_store_census.json` | camry_8965f3307000_hidden_ingress_residuals | — |
-| `data/generated/camry_8965F3307000_external_lateral_ingress.json` | camry_2026_lta_state_reconciliation, camry_2026_longitudinal_request_plane, camry_8965f3307000_external_lateral_ingress, camry_8965f3307000_command_cone_ingress | — |
+| `data/generated/camry_8965F3307000_external_lateral_ingress.json` | camry_2026_lta_state_reconciliation, camry_2026_longitudinal_request_plane, camry_8965f3307000_external_lateral_ingress, camry_8965f3307000_command_cone_ingress, camry_2026_lateral_family_census | — |
 | `data/generated/camry_8965F3307000_fault_status.json` | camry_8965f3307000_fault_status | — |
 | `data/generated/camry_8965F3307000_fault_status_decompiler_evidence.json` | camry_8965f3307000_fault_status | — |
 | `data/generated/camry_8965F3307000_flash_backend_evidence.json` | camry_8965f3307000_flash_backend | — |

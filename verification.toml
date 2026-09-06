@@ -2327,8 +2327,6 @@ tests = ["tests/verify_camry_20260906_hands_off_warning.py"]
 oracle = "dynamic_trace"
 paths = [
   "tools/analyze_camry_20260906_hands_off_warning.py",
-  "data/generated/camry_20260906_hands_off_warning_audit.json",
-  "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json",
   "docs/history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md",
   "docs/variants/camry-2026-tss3-opendbc-port.md",
 ]
@@ -2336,3 +2334,16 @@ paths = [
 [suite.camry_2026_pda_sdg]
 tests = ["tests/verify_camry_2026_pda_sdg.py"]
 oracle = "dynamic_trace"
+paths = [
+  "tools/analyze_camry_2026_pda_sdg.py",
+]
+
+[suite.camry_2026_lateral_family_census]
+tests = ["tests/verify_camry_2026_lateral_family_census.py"]
+oracle = "dynamic_trace"
+paths = [
+  "tools/analyze_camry_2026_lateral_family_census.py",
+  "data/generated/camry-8965F3307000/decompilations.jsonl",
+  "data/generated/camry_8965F3307000_external_lateral_ingress.json",
+  "docs/variants/camry-2026-tss3-opendbc-port.md",
+]

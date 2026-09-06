@@ -1,0 +1,6575 @@
+{
+  "aggregate": {
+    "b6_same_event_tx_echo_duplicate_id_counts": {
+      "0": 60722,
+      "11": 46078
+    },
+    "b6_src_0_1_2_id_counts_raw": {
+      "0": 60722,
+      "11": 46078
+    },
+    "native_081_latest_08a_match_fraction": 0.9998395891908701,
+    "native_081_latest_08a_pairing": {
+      "0->11": 48,
+      "0->18": 23,
+      "0->4": 1,
+      "11->0": 50,
+      "11->18": 7,
+      "11->4": 1,
+      "18->0": 30,
+      "4->0": 1,
+      "4->11": 2,
+      "eligible": 1016141,
+      "match": 1015978
+    },
+    "native_081_target_lateral_id_counts": {
+      "0": 427400,
+      "11": 544673,
+      "18": 44045,
+      "4": 248
+    },
+    "native_08a_target_lateral_id_counts": {
+      "0": 512847,
+      "11": 653586,
+      "18": 52853,
+      "4": 298
+    },
+    "nonzero_episode_counts_by_id": {
+      "11": 165,
+      "18": 81,
+      "4": 6
+    },
+    "observed_nonzero_ids": [
+      4,
+      11,
+      18
+    ],
+    "observed_target_lateral_ids": [
+      0,
+      4,
+      11,
+      18
+    ],
+    "synthetic_sendcan_b6_id_counts": {
+      "0": 743903,
+      "11": 903303
+    },
+    "unmatched_native_b6_candidate_id_counts": {},
+    "unobserved_exact_f33_profiles": [
+      1,
+      10,
+      19
+    ]
+  },
+  "corpus": {
+    "boundary": "LogReader emits a corrupted-events RuntimeWarning while reading route 1c; its recovered 0x08A population is ID0 only, so it does not create any positive steering-profile witness. The other selected routes reduce without that warning.",
+    "route_count": 12,
+    "segment_count": 513,
+    "selection": "all retained normal-logger road routes whose qlogs showed vehicle motion before Sep-4, plus complete Sep-4/Sep-6 road routes; route 1c retains the marginal-motion case"
+  },
+  "exact_f33": {
+    "boundary": "This does not mean EPS is state-blind: the common controller has SecOC/freshness, PDU health, speed, angle/rate, fault and slew/limit supervision. It means the recovered B6 profile selector has no DRCC/LTA engagement authorization input and no per-profile ownership latch.",
+    "communication_timeout": {
+      "basis": "seven exact-F33 foreground ticks at 5 ms",
+      "nominal_ms": 35,
+      "pdu": 44
+    },
+    "exact_normal_rx_descriptor_count": 43,
+    "known_frc_state_carriers_absent_from_exact_rx": [
+      "0x081",
+      "0x08A",
+      "0x0FE",
+      "0x251",
+      "0x371",
+      "0x412"
+    ],
+    "profile_supervision": {
+      "ce7fe_recomputes_common_readiness": true,
+      "cef26_reads_current_bank": true,
+      "entry": "0x000CEF26",
+      "evidence": "CEF26 indexes the common bank, while CE7FE readiness is separately recomputed and CEFFC continues to select from the current delivered ID",
+      "interpretation": "profile-indexed threshold/persistence supervisor feeding common readiness/fault state; not a Target-Lateral-ID ownership timer",
+      "thresholds_by_bank": {
+        "0_PCS": {
+          "abs_signal_threshold": 1536,
+          "persistence_cycles": 96
+        },
+        "1_LDA": {
+          "abs_signal_threshold": 1280,
+          "persistence_cycles": 96
+        },
+        "2_LTA_LCA": {
+          "abs_signal_threshold": 1280,
+          "persistence_cycles": 96
+        },
+        "3_HandsOffLTA": {
+          "abs_signal_threshold": 1280,
+          "persistence_cycles": 96
+        },
+        "4_PDA": {
+          "abs_signal_threshold": 1280,
+          "persistence_cycles": 96
+        },
+        "5_SDG": {
+          "abs_signal_threshold": 2048,
+          "persistence_cycles": 96
+        }
+      }
+    },
+    "secondary_application_fields": {
+      "261": {
+        "direct_reader_entries": [
+          "0x000CB73A",
+          "0x000CEFFC"
+        ],
+        "exact_oem_name": "Target Lateral ID",
+        "role": "Target Lateral ID; sole ordinary profile selector value",
+        "snapshot": "0xFEBEADB0",
+        "wire": "B3[5:0]"
+      },
+      "262": {
+        "direct_reader_entries": [
+          "0x000CBA80",
+          "0x000CBB66",
+          "0x000CCF0E",
+          "0x000CEE80"
+        ],
+        "exact_oem_name": "Target Steering Angle",
+        "role": "signed target steering-angle command",
+        "snapshot": "0xFEBEAE90",
+        "wire": "B4:B5"
+      },
+      "263": {
+        "direct_reader_entries": [
+          "0x000CB664"
+        ],
+        "exact_oem_name": null,
+        "role": "participant in CB664/C7B4 state; CB73A subsequently requires ID49 Self-Propelled Transport",
+        "snapshot": "0xFEBEADDD",
+        "wire": "B6[7]"
+      },
+      "264": {
+        "direct_reader_entries": [],
+        "exact_oem_name": null,
+        "role": "no recovered downstream direct reader after snapshot",
+        "snapshot": "0xFEBEADB1",
+        "wire": "B6[6:4]"
+      },
+      "265": {
+        "direct_reader_entries": [
+          "0x000CDA20"
+        ],
+        "exact_oem_name": null,
+        "role": "when 1 suppresses one additive controller contribution",
+        "snapshot": "0xFEBEADBB",
+        "wire": "B6[2]"
+      },
+      "266": {
+        "direct_reader_entries": [],
+        "exact_oem_name": null,
+        "role": "staged at FEBEF135 but not propagated into the broad input snapshot; no recovered downstream direct reader",
+        "snapshot": null,
+        "wire": "B6[1:0]"
+      },
+      "267": {
+        "direct_reader_entries": [],
+        "exact_oem_name": null,
+        "role": "no recovered downstream direct reader after snapshot",
+        "snapshot": "0xFEBEADC2",
+        "wire": "B7[7:6]"
+      },
+      "268": {
+        "direct_reader_entries": [
+          "0x000CEC8A"
+        ],
+        "exact_oem_name": null,
+        "role": "application modulo-64 sequence",
+        "snapshot": "0xFEBEADBC",
+        "wire": "B7[5:0]"
+      },
+      "269": {
+        "direct_reader_entries": [
+          "0x000CE3AA"
+        ],
+        "exact_oem_name": null,
+        "role": "percentage contribution divided by 100; special 201/202/203 calibration behavior",
+        "snapshot": "0xFEBEADBD",
+        "wire": "B8"
+      },
+      "270": {
+        "direct_reader_entries": [
+          "0x000CDFF8"
+        ],
+        "exact_oem_name": null,
+        "role": "percentage contribution divided by 100",
+        "snapshot": "0xFEBEADBE",
+        "wire": "B9"
+      },
+      "271": {
+        "direct_reader_entries": [],
+        "exact_oem_name": null,
+        "role": "no recovered downstream direct reader after snapshot",
+        "snapshot": "0xFEBEADC1",
+        "wire": "B10[7]"
+      },
+      "272": {
+        "direct_reader_entries": [],
+        "exact_oem_name": null,
+        "role": "no recovered downstream direct reader after snapshot",
+        "snapshot": "0xFEBEADE0",
+        "wire": "B10[5]"
+      },
+      "273": {
+        "direct_reader_entries": [
+          "0x000CFDA0"
+        ],
+        "exact_oem_name": null,
+        "role": "valid-gated 3-bit status/mode republished through CFDA0/CFDD4; not a profile-selector input",
+        "snapshot": "0xFEBEADD9",
+        "wire": "B10[2:0]"
+      }
+    },
+    "secondary_field_authorization_boundary": {
+      "basis": "CEFFC reads only ACBD, CAFF and Target Lateral ID. ACBD is a staged COM/extraction-status value; CEFA4 builds CAFF from communication-monitor/validity state. No signal263..273 snapshot is a direct CEFFC input, and their complete direct-reader census resolves the live consumers above.",
+      "cefa4_communication_validity_shape": true,
+      "generic_command_enable_recovered": false,
+      "signal263_scope": "CB664 uses signal263 as an inhibit condition in the C7B4 state that CB73A then gates on Target Lateral ID 49 (Self-Propelled Transport); it is not ordinary LTA/LDA/PDA/SDG enablement.",
+      "signal273_scope": "CFDA0 conditionally republishes signal273 into a separate status/mode machine consumed by CFDD4/CFE64; it is not a CEFFC selector input."
+    },
+    "selector_bank_map": {
+      "1": 0,
+      "10": 3,
+      "11": 2,
+      "18": 5,
+      "19": 4,
+      "4": 1
+    },
+    "selector_direct_inputs": [
+      "FEBEACBD",
+      "FEBECAFF",
+      "FEBEADB0(Target Lateral ID snapshot)"
+    ],
+    "selector_entry": "0x000CEFFC",
+    "selector_requires": {
+      "FEBEACBD": 0,
+      "FEBECAFF": 1
+    },
+    "selector_resets_to_default_each_invocation": true,
+    "selector_writer_entries_complete_decompilation_corpus": [
+      "0x000CEFF4",
+      "0x000CEFFC"
+    ],
+    "target_id_snapshot_reader_entries_complete_decompilation_corpus": [
+      "0x000CB73A",
+      "0x000CEFFC"
+    ],
+    "unpacker_has_previous_target_id_comparison": false,
+    "unpacker_new_generation_gate": true
+  },
+  "interpretation": {
+    "eps_ingress": "0x0B6/PDU44 is exact F33 external Target-Lateral-ID/target-angle ingress and is expected from the brake-system source domain. Native B6 absence therefore must not be conflated with absence of FRC steering requests.",
+    "profile_switching": "A newly delivered healthy B6 generation can replace the current Target Lateral ID without a recovered previous-ID ownership check. The common controller retains ordinary filters/slew/supervision state across ticks.",
+    "request_plane": "0x08A is the FRC-side request/reference carrier; it is not accepted by exact F33."
+  },
+  "oem_target_lateral_id_dictionary": {
+    "0": "No Request (Manual Operation)",
+    "1": "PCS",
+    "10": "Hands Off LTA",
+    "11": "LTA/LCA",
+    "13": "DESA (Slow Deceleration Control)",
+    "15": "DESA (Deceleration Stop Control)",
+    "18": "SDG",
+    "19": "PDA",
+    "25": "AP",
+    "27": "Remote Parking",
+    "35": "AD (Lv.3)",
+    "37": "EM (Lv.3)",
+    "39": "DES (Lv.3)",
+    "4": "LDA",
+    "41": "AD (Lv.4)",
+    "43": "EM (Lv.4)",
+    "45": "DES (Lv.4)",
+    "49": "Self-Propelled Transport",
+    "63": "Driver Operation"
+  },
+  "routes": {
+    "1c": {
+      "b6": {
+        "can_src_counts": {
+          "128": 16145,
+          "192": 11174
+        },
+        "panda_tx_echo_id_counts": {
+          "0": 16145
+        },
+        "same_event_tx_echo_duplicate_id_counts": {},
+        "sendcan_id_counts": {
+          "0": 27321
+        },
+        "src_0_1_2_id_counts_raw": {},
+        "unmatched_native_candidate_id_counts": {}
+      },
+      "duration_s": 286.070905,
+      "first_08a_id": 0,
+      "first_mono_s": 41.3156979,
+      "id_transition_counts": {},
+      "last_08a_id": 0,
+      "last_mono_s": 327.386602444,
+      "native_081_id_counts": {
+        "0": 9527
+      },
+      "native_081_latest_08a_pairing": {
+        "eligible": 9523,
+        "match": 9523
+      },
+      "native_08a_frames": 11431,
+      "nonzero_episode_count": 0,
+      "nonzero_episodes": [],
+      "route": "0000001c--574c06b528",
+      "segment_count": 5,
+      "source_dir": "/Users/kai/dev/inspect/logs/camry-2026/archive/0000001c--574c06b528",
+      "target_lateral_ids": {
+        "0": {
+          "b23_counts": {
+            "0x00": 11431
+          },
+          "cruise_latch_counts": {
+            "0": 11431
+          },
+          "frames": 11431,
+          "label": "No Request (Manual Operation)",
+          "request_level_counts": {
+            "0": 11431
+          },
+          "target_angle_deg_equiv_range": [
+            0.0,
+            0.573027
+          ],
+          "target_angle_raw_range": [
+            0,
+            10
+          ]
+        }
+      }
+    },
+    "27": {
+      "b6": {
+        "can_src_counts": {
+          "128": 106800,
+          "192": 78253,
+          "2": 106800
+        },
+        "panda_tx_echo_id_counts": {
+          "0": 60722,
+          "11": 46078
+        },
+        "same_event_tx_echo_duplicate_id_counts": {
+          "0": 60722,
+          "11": 46078
+        },
+        "sendcan_id_counts": {
+          "0": 106966,
+          "11": 78088
+        },
+        "src_0_1_2_id_counts_raw": {
+          "0": 60722,
+          "11": 46078
+        },
+        "unmatched_native_candidate_id_counts": {}
+      },
+      "duration_s": 1871.543264,
+      "first_08a_id": 0,
+      "first_mono_s": 70.717936533,
+      "id_transition_counts": {
+        "0->11": 3,
+        "0->18": 21,
+        "11->0": 9,
+        "18->0": 15,
+        "18->11": 6
+      },
+      "last_08a_id": 0,
+      "last_mono_s": 1942.26120009,
+      "native_081_id_counts": {
+        "0": 26686,
+        "11": 22790,
+        "18": 12892
+      },
+      "native_081_latest_08a_pairing": {
+        "0->11": 3,
+        "0->18": 7,
+        "11->0": 3,
+        "11->18": 2,
+        "18->0": 6,
+        "eligible": 62352,
+        "match": 62331
+      },
+      "native_08a_frames": 74839,
+      "nonzero_episode_count": 30,
+      "nonzero_episodes": [
+        {
+          "b23_counts": {
+            "0x20": 234
+          },
+          "cruise_latch_counts": {
+            "0": 234
+          },
+          "duration_s": 5.828982,
+          "end_s": 107.590123,
+          "frames": 234,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 234
+          },
+          "start_s": 101.761141,
+          "target_angle_raw_max": 526,
+          "target_angle_raw_min": 206,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 444
+          },
+          "cruise_latch_counts": {
+            "0": 444
+          },
+          "duration_s": 11.0703,
+          "end_s": 120.48608,
+          "frames": 444,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 444
+          },
+          "start_s": 109.41578,
+          "target_angle_raw_max": 232,
+          "target_angle_raw_min": -289,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 44
+          },
+          "cruise_latch_counts": {
+            "0": 44
+          },
+          "duration_s": 1.075754,
+          "end_s": 131.637538,
+          "frames": 44,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 44
+          },
+          "start_s": 130.561784,
+          "target_angle_raw_max": -127,
+          "target_angle_raw_min": -162,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 560
+          },
+          "cruise_latch_counts": {
+            "0": 560
+          },
+          "duration_s": 13.985496,
+          "end_s": 156.796682,
+          "frames": 560,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 560
+          },
+          "start_s": 142.811186,
+          "target_angle_raw_max": 42,
+          "target_angle_raw_min": 14,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 1438,
+            "0x20": 108
+          },
+          "cruise_latch_counts": {
+            "1": 1546
+          },
+          "duration_s": 38.630478,
+          "end_s": 195.447056,
+          "frames": 1546,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1546
+          },
+          "start_s": 156.816578,
+          "target_angle_raw_max": 49,
+          "target_angle_raw_min": -7,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 423
+          },
+          "cruise_latch_counts": {
+            "0": 423
+          },
+          "duration_s": 10.54987,
+          "end_s": 208.048139,
+          "frames": 423,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 423
+          },
+          "start_s": 197.498269,
+          "target_angle_raw_max": 56,
+          "target_angle_raw_min": 12,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 352
+          },
+          "cruise_latch_counts": {
+            "0": 352
+          },
+          "duration_s": 8.769608,
+          "end_s": 219.398558,
+          "frames": 352,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 352
+          },
+          "start_s": 210.62895,
+          "target_angle_raw_max": 32,
+          "target_angle_raw_min": 11,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 78,
+            "0x20": 522
+          },
+          "cruise_latch_counts": {
+            "1": 600
+          },
+          "duration_s": 14.967907,
+          "end_s": 234.396132,
+          "frames": 600,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 600
+          },
+          "start_s": 219.428225,
+          "target_angle_raw_max": 36,
+          "target_angle_raw_min": -16,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 318
+          },
+          "cruise_latch_counts": {
+            "0": 318
+          },
+          "duration_s": 7.927403,
+          "end_s": 244.402744,
+          "frames": 318,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 318
+          },
+          "start_s": 236.475341,
+          "target_angle_raw_max": 27,
+          "target_angle_raw_min": 17,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 1387,
+            "0x20": 193
+          },
+          "cruise_latch_counts": {
+            "1": 1580
+          },
+          "duration_s": 39.477862,
+          "end_s": 283.910249,
+          "frames": 1580,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1580
+          },
+          "start_s": 244.432387,
+          "target_angle_raw_max": 33,
+          "target_angle_raw_min": -26,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 476
+          },
+          "cruise_latch_counts": {
+            "0": 476
+          },
+          "duration_s": 11.875202,
+          "end_s": 297.853879,
+          "frames": 476,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 476
+          },
+          "start_s": 285.978677,
+          "target_angle_raw_max": 25,
+          "target_angle_raw_min": 11,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 212
+          },
+          "cruise_latch_counts": {
+            "0": 212
+          },
+          "duration_s": 5.276017,
+          "end_s": 306.011342,
+          "frames": 212,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 212
+          },
+          "start_s": 300.735325,
+          "target_angle_raw_max": 58,
+          "target_angle_raw_min": 7,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 1615,
+            "0x20": 107
+          },
+          "cruise_latch_counts": {
+            "1": 1722
+          },
+          "duration_s": 43.025213,
+          "end_s": 350.963439,
+          "frames": 1722,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1722
+          },
+          "start_s": 307.938226,
+          "target_angle_raw_max": 33,
+          "target_angle_raw_min": -28,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 525
+          },
+          "cruise_latch_counts": {
+            "0": 525
+          },
+          "duration_s": 13.100206,
+          "end_s": 366.142143,
+          "frames": 525,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 525
+          },
+          "start_s": 353.041937,
+          "target_angle_raw_max": 55,
+          "target_angle_raw_min": 7,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 510
+          },
+          "cruise_latch_counts": {
+            "0": 510
+          },
+          "duration_s": 12.723401,
+          "end_s": 383.216906,
+          "frames": 510,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 510
+          },
+          "start_s": 370.493505,
+          "target_angle_raw_max": 39,
+          "target_angle_raw_min": -1,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 1120,
+            "0x20": 152
+          },
+          "cruise_latch_counts": {
+            "1": 1272
+          },
+          "duration_s": 31.776753,
+          "end_s": 415.023657,
+          "frames": 1272,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1272
+          },
+          "start_s": 383.246904,
+          "target_angle_raw_max": 31,
+          "target_angle_raw_min": -32,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 370
+          },
+          "cruise_latch_counts": {
+            "0": 370
+          },
+          "duration_s": 9.227221,
+          "end_s": 480.875363,
+          "frames": 370,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 370
+          },
+          "start_s": 471.648142,
+          "target_angle_raw_max": 39,
+          "target_angle_raw_min": -28,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 8740,
+            "0x20": 884
+          },
+          "cruise_latch_counts": {
+            "1": 9624
+          },
+          "duration_s": 240.602225,
+          "end_s": 721.507498,
+          "frames": 9624,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 9624
+          },
+          "start_s": 480.905273,
+          "target_angle_raw_max": 133,
+          "target_angle_raw_min": -208,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 122
+          },
+          "cruise_latch_counts": {
+            "0": 122
+          },
+          "duration_s": 3.023497,
+          "end_s": 726.580159,
+          "frames": 122,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 122
+          },
+          "start_s": 723.556662,
+          "target_angle_raw_max": 22,
+          "target_angle_raw_min": -15,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 12
+          },
+          "cruise_latch_counts": {
+            "0": 12
+          },
+          "duration_s": 0.270322,
+          "end_s": 748.002694,
+          "frames": 12,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 12
+          },
+          "start_s": 747.732372,
+          "target_angle_raw_max": 13,
+          "target_angle_raw_min": 7,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 79
+          },
+          "cruise_latch_counts": {
+            "0": 79
+          },
+          "duration_s": 1.947827,
+          "end_s": 1006.012555,
+          "frames": 79,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 79
+          },
+          "start_s": 1004.064728,
+          "target_angle_raw_max": 27,
+          "target_angle_raw_min": -15,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 332
+          },
+          "cruise_latch_counts": {
+            "0": 332
+          },
+          "duration_s": 8.276716,
+          "end_s": 1030.984087,
+          "frames": 332,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 332
+          },
+          "start_s": 1022.707371,
+          "target_angle_raw_max": 24,
+          "target_angle_raw_min": 14,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 171,
+            "0x20": 31
+          },
+          "cruise_latch_counts": {
+            "1": 202
+          },
+          "duration_s": 5.022531,
+          "end_s": 1041.884323,
+          "frames": 202,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 202
+          },
+          "start_s": 1036.861792,
+          "target_angle_raw_max": 81,
+          "target_angle_raw_min": -27,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 188
+          },
+          "cruise_latch_counts": {
+            "0": 188
+          },
+          "duration_s": 4.670765,
+          "end_s": 1048.636364,
+          "frames": 188,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 188
+          },
+          "start_s": 1043.965599,
+          "target_angle_raw_max": 24,
+          "target_angle_raw_min": 15,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 7945,
+            "0x20": 1339
+          },
+          "cruise_latch_counts": {
+            "1": 9284
+          },
+          "duration_s": 232.102699,
+          "end_s": 1280.769035,
+          "frames": 9284,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 9284
+          },
+          "start_s": 1048.666336,
+          "target_angle_raw_max": 237,
+          "target_angle_raw_min": -116,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 112
+          },
+          "cruise_latch_counts": {
+            "0": 112
+          },
+          "duration_s": 2.775226,
+          "end_s": 1285.613867,
+          "frames": 112,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 112
+          },
+          "start_s": 1282.838641,
+          "target_angle_raw_max": 28,
+          "target_angle_raw_min": 3,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 160
+          },
+          "cruise_latch_counts": {
+            "0": 160
+          },
+          "duration_s": 3.971892,
+          "end_s": 1307.365487,
+          "frames": 160,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 160
+          },
+          "start_s": 1303.393595,
+          "target_angle_raw_max": 25,
+          "target_angle_raw_min": 17,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 1414,
+            "0x20": 104
+          },
+          "cruise_latch_counts": {
+            "1": 1518
+          },
+          "duration_s": 37.928164,
+          "end_s": 1345.776,
+          "frames": 1518,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1518
+          },
+          "start_s": 1307.847836,
+          "target_angle_raw_max": 46,
+          "target_angle_raw_min": -15,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 9072
+          },
+          "cruise_latch_counts": {
+            "0": 9072
+          },
+          "duration_s": 226.805423,
+          "end_s": 1574.649508,
+          "frames": 9072,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 9072
+          },
+          "start_s": 1347.844085,
+          "target_angle_raw_max": 86,
+          "target_angle_raw_min": -21,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 923
+          },
+          "cruise_latch_counts": {
+            "0": 923
+          },
+          "duration_s": 23.059146,
+          "end_s": 1624.231925,
+          "frames": 923,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 923
+          },
+          "start_s": 1601.172779,
+          "target_angle_raw_max": 67,
+          "target_angle_raw_min": -322,
+          "target_lateral_id": 18
+        }
+      ],
+      "route": "00000027--885099a1d4",
+      "segment_count": 32,
+      "source_dir": "/Users/kai/dev/inspect/logs/camry-2026/archive/00000027--885099a1d4",
+      "target_lateral_ids": {
+        "0": {
+          "b23_counts": {
+            "0x00": 32023
+          },
+          "cruise_latch_counts": {
+            "0": 27985,
+            "1": 4038
+          },
+          "frames": 32023,
+          "label": "No Request (Manual Operation)",
+          "request_level_counts": {
+            "0": 4062,
+            "100": 2918,
+            "50": 25043
+          },
+          "target_angle_deg_equiv_range": [
+            -484.723895,
+            466.960045
+          ],
+          "target_angle_raw_range": [
+            -8459,
+            8149
+          ]
+        },
+        "11": {
+          "b23_counts": {
+            "0x00": 23908,
+            "0x20": 3440
+          },
+          "cruise_latch_counts": {
+            "1": 27348
+          },
+          "frames": 27348,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 27348
+          },
+          "target_angle_deg_equiv_range": [
+            -11.91897,
+            13.58075
+          ],
+          "target_angle_raw_range": [
+            -208,
+            237
+          ]
+        },
+        "18": {
+          "b23_counts": {
+            "0x20": 15468
+          },
+          "cruise_latch_counts": {
+            "0": 15468
+          },
+          "frames": 15468,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 15468
+          },
+          "target_angle_deg_equiv_range": [
+            -18.451483,
+            30.141242
+          ],
+          "target_angle_raw_range": [
+            -322,
+            526
+          ]
+        }
+      }
+    },
+    "29": {
+      "b6": {
+        "can_src_counts": {
+          "128": 39853,
+          "192": 29064
+        },
+        "panda_tx_echo_id_counts": {
+          "0": 39853
+        },
+        "same_event_tx_echo_duplicate_id_counts": {},
+        "sendcan_id_counts": {
+          "0": 68918
+        },
+        "src_0_1_2_id_counts_raw": {},
+        "unmatched_native_candidate_id_counts": {}
+      },
+      "duration_s": 703.346284,
+      "first_08a_id": 0,
+      "first_mono_s": 37.144326077,
+      "id_transition_counts": {
+        "0->18": 1,
+        "11->0": 1,
+        "18->11": 1
+      },
+      "last_08a_id": 0,
+      "last_mono_s": 740.490610336,
+      "native_081_id_counts": {
+        "0": 23206,
+        "11": 63,
+        "18": 172
+      },
+      "native_081_latest_08a_pairing": {
+        "11->18": 1,
+        "eligible": 23433,
+        "match": 23432
+      },
+      "native_08a_frames": 28128,
+      "nonzero_episode_count": 2,
+      "nonzero_episodes": [
+        {
+          "b23_counts": {
+            "0x20": 206
+          },
+          "cruise_latch_counts": {
+            "0": 206
+          },
+          "duration_s": 5.135183,
+          "end_s": 204.733673,
+          "frames": 206,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 206
+          },
+          "start_s": 199.59849,
+          "target_angle_raw_max": 478,
+          "target_angle_raw_min": 318,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 9,
+            "0x20": 67
+          },
+          "cruise_latch_counts": {
+            "1": 76
+          },
+          "duration_s": 1.87583,
+          "end_s": 206.630744,
+          "frames": 76,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 76
+          },
+          "start_s": 204.754914,
+          "target_angle_raw_max": 596,
+          "target_angle_raw_min": 349,
+          "target_lateral_id": 11
+        }
+      ],
+      "route": "00000029--bae47e927f",
+      "segment_count": 12,
+      "source_dir": "/Users/kai/dev/inspect/logs/camry-2026/archive/00000029--bae47e927f",
+      "target_lateral_ids": {
+        "0": {
+          "b23_counts": {
+            "0x00": 27846
+          },
+          "cruise_latch_counts": {
+            "0": 24254,
+            "1": 3592
+          },
+          "frames": 27846,
+          "label": "No Request (Manual Operation)",
+          "request_level_counts": {
+            "0": 7980,
+            "100": 19866
+          },
+          "target_angle_deg_equiv_range": [
+            -480.6554,
+            467.131953
+          ],
+          "target_angle_raw_range": [
+            -8388,
+            8152
+          ]
+        },
+        "11": {
+          "b23_counts": {
+            "0x00": 9,
+            "0x20": 67
+          },
+          "cruise_latch_counts": {
+            "1": 76
+          },
+          "frames": 76,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 76
+          },
+          "target_angle_deg_equiv_range": [
+            19.998657,
+            34.152434
+          ],
+          "target_angle_raw_range": [
+            349,
+            596
+          ]
+        },
+        "18": {
+          "b23_counts": {
+            "0x20": 206
+          },
+          "cruise_latch_counts": {
+            "0": 206
+          },
+          "frames": 206,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 206
+          },
+          "target_angle_deg_equiv_range": [
+            18.222272,
+            27.390711
+          ],
+          "target_angle_raw_range": [
+            318,
+            478
+          ]
+        }
+      }
+    },
+    "2a": {
+      "b6": {
+        "can_src_counts": {
+          "128": 32316,
+          "192": 23307
+        },
+        "panda_tx_echo_id_counts": {
+          "0": 24265,
+          "11": 8051
+        },
+        "same_event_tx_echo_duplicate_id_counts": {},
+        "sendcan_id_counts": {
+          "0": 42214,
+          "11": 13410
+        },
+        "src_0_1_2_id_counts_raw": {},
+        "unmatched_native_candidate_id_counts": {}
+      },
+      "duration_s": 568.841237,
+      "first_08a_id": 0,
+      "first_mono_s": 924.505311623,
+      "id_transition_counts": {
+        "0->18": 2,
+        "18->0": 2
+      },
+      "last_08a_id": 0,
+      "last_mono_s": 1493.346548579,
+      "native_081_id_counts": {
+        "0": 18148,
+        "18": 803
+      },
+      "native_081_latest_08a_pairing": {
+        "18->0": 1,
+        "eligible": 18941,
+        "match": 18940
+      },
+      "native_08a_frames": 22737,
+      "nonzero_episode_count": 2,
+      "nonzero_episodes": [
+        {
+          "b23_counts": {
+            "0x20": 840
+          },
+          "cruise_latch_counts": {
+            "0": 840
+          },
+          "duration_s": 20.977033,
+          "end_s": 337.175933,
+          "frames": 840,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 840
+          },
+          "start_s": 316.1989,
+          "target_angle_raw_max": 62,
+          "target_angle_raw_min": -2,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 124
+          },
+          "cruise_latch_counts": {
+            "0": 124
+          },
+          "duration_s": 3.073164,
+          "end_s": 356.721616,
+          "frames": 124,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 124
+          },
+          "start_s": 353.648452,
+          "target_angle_raw_max": 27,
+          "target_angle_raw_min": 19,
+          "target_lateral_id": 18
+        }
+      ],
+      "route": "0000002a--c5647fd694",
+      "segment_count": 10,
+      "source_dir": "/Users/kai/dev/inspect/logs/camry-2026/archive/0000002a--c5647fd694",
+      "target_lateral_ids": {
+        "0": {
+          "b23_counts": {
+            "0x00": 21773
+          },
+          "cruise_latch_counts": {
+            "0": 16385,
+            "1": 5388
+          },
+          "frames": 21773,
+          "label": "No Request (Manual Operation)",
+          "request_level_counts": {
+            "0": 12637,
+            "50": 9136
+          },
+          "target_angle_deg_equiv_range": [
+            -482.546391,
+            467.876889
+          ],
+          "target_angle_raw_range": [
+            -8421,
+            8165
+          ]
+        },
+        "18": {
+          "b23_counts": {
+            "0x20": 964
+          },
+          "cruise_latch_counts": {
+            "0": 964
+          },
+          "frames": 964,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 964
+          },
+          "target_angle_deg_equiv_range": [
+            -0.114605,
+            3.55277
+          ],
+          "target_angle_raw_range": [
+            -2,
+            62
+          ]
+        }
+      }
+    },
+    "2c": {
+      "b6": {
+        "can_src_counts": {
+          "128": 42995,
+          "192": 2
+        },
+        "panda_tx_echo_id_counts": {
+          "0": 34673,
+          "11": 8322
+        },
+        "same_event_tx_echo_duplicate_id_counts": {},
+        "sendcan_id_counts": {
+          "0": 34674,
+          "11": 8323
+        },
+        "src_0_1_2_id_counts_raw": {},
+        "unmatched_native_candidate_id_counts": {}
+      },
+      "duration_s": 1539.072156,
+      "first_08a_id": 0,
+      "first_mono_s": 53.374322009,
+      "id_transition_counts": {
+        "0->18": 1,
+        "11->0": 1,
+        "18->11": 1
+      },
+      "last_08a_id": 0,
+      "last_mono_s": 1592.446477946,
+      "native_081_id_counts": {
+        "0": 47943,
+        "11": 2883,
+        "18": 198
+      },
+      "native_081_latest_08a_pairing": {
+        "18->0": 1,
+        "eligible": 51008,
+        "match": 51007
+      },
+      "native_08a_frames": 61230,
+      "nonzero_episode_count": 2,
+      "nonzero_episodes": [
+        {
+          "b23_counts": {
+            "0x20": 238
+          },
+          "cruise_latch_counts": {
+            "0": 238
+          },
+          "duration_s": 5.926283,
+          "end_s": 80.770398,
+          "frames": 238,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 238
+          },
+          "start_s": 74.844115,
+          "target_angle_raw_max": 217,
+          "target_angle_raw_min": -103,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 2875,
+            "0x20": 585
+          },
+          "cruise_latch_counts": {
+            "1": 3460
+          },
+          "duration_s": 86.481461,
+          "end_s": 167.271633,
+          "frames": 3460,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 3460
+          },
+          "start_s": 80.790172,
+          "target_angle_raw_max": 73,
+          "target_angle_raw_min": -666,
+          "target_lateral_id": 11
+        }
+      ],
+      "route": "0000002c--c784367b7e",
+      "segment_count": 26,
+      "source_dir": "/Users/kai/dev/inspect/logs/camry-2026/archive/0000002c--c784367b7e",
+      "target_lateral_ids": {
+        "0": {
+          "b23_counts": {
+            "0x00": 57532
+          },
+          "cruise_latch_counts": {
+            "0": 54288,
+            "1": 3244
+          },
+          "frames": 57532,
+          "label": "No Request (Manual Operation)",
+          "request_level_counts": {
+            "0": 2992,
+            "100": 54540
+          },
+          "target_angle_deg_equiv_range": [
+            -443.007499,
+            465.871293
+          ],
+          "target_angle_raw_range": [
+            -7731,
+            8130
+          ]
+        },
+        "11": {
+          "b23_counts": {
+            "0x00": 2875,
+            "0x20": 585
+          },
+          "cruise_latch_counts": {
+            "1": 3460
+          },
+          "frames": 3460,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 3460
+          },
+          "target_angle_deg_equiv_range": [
+            -38.163626,
+            4.1831
+          ],
+          "target_angle_raw_range": [
+            -666,
+            73
+          ]
+        },
+        "18": {
+          "b23_counts": {
+            "0x20": 238
+          },
+          "cruise_latch_counts": {
+            "0": 238
+          },
+          "frames": 238,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 238
+          },
+          "target_angle_deg_equiv_range": [
+            -5.902182,
+            12.434695
+          ],
+          "target_angle_raw_range": [
+            -103,
+            217
+          ]
+        }
+      }
+    },
+    "2d": {
+      "b6": {
+        "can_src_counts": {
+          "128": 15539,
+          "192": 9
+        },
+        "panda_tx_echo_id_counts": {
+          "0": 8176,
+          "11": 7363
+        },
+        "same_event_tx_echo_duplicate_id_counts": {},
+        "sendcan_id_counts": {
+          "0": 8185,
+          "11": 7364
+        },
+        "src_0_1_2_id_counts_raw": {},
+        "unmatched_native_candidate_id_counts": {}
+      },
+      "duration_s": 301.039566,
+      "first_08a_id": 0,
+      "first_mono_s": 59.542857893,
+      "id_transition_counts": {
+        "0->11": 4,
+        "0->18": 1,
+        "11->0": 4,
+        "18->0": 1
+      },
+      "last_08a_id": 0,
+      "last_mono_s": 360.582423554,
+      "native_081_id_counts": {
+        "0": 8472,
+        "11": 2084,
+        "18": 246
+      },
+      "native_081_latest_08a_pairing": {
+        "0->11": 2,
+        "18->0": 1,
+        "eligible": 10798,
+        "match": 10795
+      },
+      "native_08a_frames": 12960,
+      "nonzero_episode_count": 4,
+      "nonzero_episodes": [
+        {
+          "b23_counts": {
+            "0x20": 296
+          },
+          "cruise_latch_counts": {
+            "0": 296
+          },
+          "duration_s": 7.374467,
+          "end_s": 83.50965,
+          "frames": 296,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 296
+          },
+          "start_s": 76.135183,
+          "target_angle_raw_max": 162,
+          "target_angle_raw_min": -69,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 1670,
+            "0x20": 420
+          },
+          "cruise_latch_counts": {
+            "1": 2090
+          },
+          "duration_s": 52.22234,
+          "end_s": 148.259641,
+          "frames": 2090,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2090
+          },
+          "start_s": 96.037301,
+          "target_angle_raw_max": 86,
+          "target_angle_raw_min": -292,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 217,
+            "0x20": 127
+          },
+          "cruise_latch_counts": {
+            "1": 344
+          },
+          "duration_s": 8.570571,
+          "end_s": 174.963467,
+          "frames": 344,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 344
+          },
+          "start_s": 166.392896,
+          "target_angle_raw_max": 301,
+          "target_angle_raw_min": -228,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 14,
+            "0x20": 52
+          },
+          "cruise_latch_counts": {
+            "1": 66
+          },
+          "duration_s": 1.627194,
+          "end_s": 237.417042,
+          "frames": 66,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 66
+          },
+          "start_s": 235.789848,
+          "target_angle_raw_max": 77,
+          "target_angle_raw_min": -36,
+          "target_lateral_id": 11
+        }
+      ],
+      "route": "0000002d--4a4806c524",
+      "segment_count": 6,
+      "source_dir": "/Users/kai/dev/inspect/captures/0000002d--4a4806c524",
+      "target_lateral_ids": {
+        "0": {
+          "b23_counts": {
+            "0x00": 10164
+          },
+          "cruise_latch_counts": {
+            "0": 6746,
+            "1": 3418
+          },
+          "frames": 10164,
+          "label": "No Request (Manual Operation)",
+          "request_level_counts": {
+            "0": 3032,
+            "100": 6632,
+            "50": 500
+          },
+          "target_angle_deg_equiv_range": [
+            -479.509345,
+            468.449916
+          ],
+          "target_angle_raw_range": [
+            -8368,
+            8175
+          ]
+        },
+        "11": {
+          "b23_counts": {
+            "0x00": 1901,
+            "0x20": 599
+          },
+          "cruise_latch_counts": {
+            "1": 2500
+          },
+          "frames": 2500,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2500
+          },
+          "target_angle_deg_equiv_range": [
+            -16.732401,
+            17.248125
+          ],
+          "target_angle_raw_range": [
+            -292,
+            301
+          ]
+        },
+        "18": {
+          "b23_counts": {
+            "0x20": 296
+          },
+          "cruise_latch_counts": {
+            "0": 296
+          },
+          "frames": 296,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 296
+          },
+          "target_angle_deg_equiv_range": [
+            -3.953889,
+            9.283044
+          ],
+          "target_angle_raw_range": [
+            -69,
+            162
+          ]
+        }
+      }
+    },
+    "37": {
+      "b6": {
+        "can_src_counts": {
+          "128": 18447,
+          "192": 9
+        },
+        "panda_tx_echo_id_counts": {
+          "0": 8695,
+          "11": 9752
+        },
+        "same_event_tx_echo_duplicate_id_counts": {},
+        "sendcan_id_counts": {
+          "0": 8701,
+          "11": 9755
+        },
+        "src_0_1_2_id_counts_raw": {},
+        "unmatched_native_candidate_id_counts": {}
+      },
+      "duration_s": 381.80675,
+      "first_08a_id": 0,
+      "first_mono_s": 35.984424724,
+      "id_transition_counts": {
+        "0->11": 2,
+        "0->18": 5,
+        "11->0": 4,
+        "18->0": 3,
+        "18->11": 2
+      },
+      "last_08a_id": 0,
+      "last_mono_s": 417.791174473,
+      "native_081_id_counts": {
+        "0": 7569,
+        "11": 3888,
+        "18": 1260
+      },
+      "native_081_latest_08a_pairing": {
+        "0->11": 1,
+        "18->0": 3,
+        "eligible": 12716,
+        "match": 12712
+      },
+      "native_08a_frames": 15262,
+      "nonzero_episode_count": 9,
+      "nonzero_episodes": [
+        {
+          "b23_counts": {
+            "0x20": 729
+          },
+          "cruise_latch_counts": {
+            "0": 729
+          },
+          "duration_s": 18.22672,
+          "end_s": 23.885204,
+          "frames": 729,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 729
+          },
+          "start_s": 5.658484,
+          "target_angle_raw_max": 328,
+          "target_angle_raw_min": -13,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 46,
+            "0x20": 174
+          },
+          "cruise_latch_counts": {
+            "1": 220
+          },
+          "duration_s": 5.473856,
+          "end_s": 31.137894,
+          "frames": 220,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 220
+          },
+          "start_s": 25.664038,
+          "target_angle_raw_max": -2,
+          "target_angle_raw_min": -146,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 15
+          },
+          "cruise_latch_counts": {
+            "0": 15
+          },
+          "duration_s": 0.350473,
+          "end_s": 33.538706,
+          "frames": 15,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 15
+          },
+          "start_s": 33.188233,
+          "target_angle_raw_max": 152,
+          "target_angle_raw_min": 145,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 338
+          },
+          "cruise_latch_counts": {
+            "0": 338
+          },
+          "duration_s": 8.428101,
+          "end_s": 62.841536,
+          "frames": 338,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 338
+          },
+          "start_s": 54.413435,
+          "target_angle_raw_max": 46,
+          "target_angle_raw_min": 15,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 1703,
+            "0x20": 227
+          },
+          "cruise_latch_counts": {
+            "1": 1930
+          },
+          "duration_s": 48.237197,
+          "end_s": 111.098277,
+          "frames": 1930,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1930
+          },
+          "start_s": 62.86108,
+          "target_angle_raw_max": 57,
+          "target_angle_raw_min": 5,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 112
+          },
+          "cruise_latch_counts": {
+            "0": 112
+          },
+          "duration_s": 2.771027,
+          "end_s": 115.918196,
+          "frames": 112,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 112
+          },
+          "start_s": 113.147169,
+          "target_angle_raw_max": 34,
+          "target_angle_raw_min": 21,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 320
+          },
+          "cruise_latch_counts": {
+            "0": 320
+          },
+          "duration_s": 7.976902,
+          "end_s": 223.006555,
+          "frames": 320,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 320
+          },
+          "start_s": 215.029653,
+          "target_angle_raw_max": 66,
+          "target_angle_raw_min": 8,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 712,
+            "0x20": 506
+          },
+          "cruise_latch_counts": {
+            "1": 1218
+          },
+          "duration_s": 30.423888,
+          "end_s": 253.460986,
+          "frames": 1218,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1218
+          },
+          "start_s": 223.037098,
+          "target_angle_raw_max": 43,
+          "target_angle_raw_min": -22,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 911,
+            "0x20": 387
+          },
+          "cruise_latch_counts": {
+            "1": 1298
+          },
+          "duration_s": 32.429361,
+          "end_s": 287.013611,
+          "frames": 1298,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1298
+          },
+          "start_s": 254.58425,
+          "target_angle_raw_max": 45,
+          "target_angle_raw_min": -11,
+          "target_lateral_id": 11
+        }
+      ],
+      "route": "00000037--dec6fe39cb",
+      "segment_count": 7,
+      "source_dir": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-01/00000037--dec6fe39cb",
+      "target_lateral_ids": {
+        "0": {
+          "b23_counts": {
+            "0x00": 9082
+          },
+          "cruise_latch_counts": {
+            "0": 5900,
+            "1": 3182
+          },
+          "frames": 9082,
+          "label": "No Request (Manual Operation)",
+          "request_level_counts": {
+            "0": 225,
+            "100": 3990,
+            "50": 4867
+          },
+          "target_angle_deg_equiv_range": [
+            -421.347062,
+            243.593956
+          ],
+          "target_angle_raw_range": [
+            -7353,
+            4251
+          ]
+        },
+        "11": {
+          "b23_counts": {
+            "0x00": 3372,
+            "0x20": 1294
+          },
+          "cruise_latch_counts": {
+            "1": 4666
+          },
+          "frames": 4666,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 4666
+          },
+          "target_angle_deg_equiv_range": [
+            -8.3662,
+            3.266256
+          ],
+          "target_angle_raw_range": [
+            -146,
+            57
+          ]
+        },
+        "18": {
+          "b23_counts": {
+            "0x20": 1514
+          },
+          "cruise_latch_counts": {
+            "0": 1514
+          },
+          "frames": 1514,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 1514
+          },
+          "target_angle_deg_equiv_range": [
+            -0.744936,
+            18.795299
+          ],
+          "target_angle_raw_range": [
+            -13,
+            328
+          ]
+        }
+      }
+    },
+    "3b": {
+      "b6": {
+        "can_src_counts": {
+          "128": 326975,
+          "192": 14
+        },
+        "panda_tx_echo_id_counts": {
+          "0": 91026,
+          "11": 235949
+        },
+        "same_event_tx_echo_duplicate_id_counts": {},
+        "sendcan_id_counts": {
+          "0": 91032,
+          "11": 235958
+        },
+        "src_0_1_2_id_counts_raw": {},
+        "unmatched_native_candidate_id_counts": {}
+      },
+      "duration_s": 6582.551449,
+      "first_08a_id": 0,
+      "first_mono_s": 49.575019772,
+      "id_transition_counts": {
+        "0->11": 36,
+        "0->18": 50,
+        "11->0": 54,
+        "18->0": 31,
+        "18->11": 18,
+        "18->4": 1,
+        "4->0": 1
+      },
+      "last_08a_id": 0,
+      "last_mono_s": 6632.126469032,
+      "native_081_id_counts": {
+        "0": 37069,
+        "11": 153844,
+        "18": 28474,
+        "4": 10
+      },
+      "native_081_latest_08a_pairing": {
+        "0->11": 9,
+        "0->18": 16,
+        "11->0": 12,
+        "11->18": 4,
+        "18->0": 18,
+        "eligible": 219353,
+        "match": 219294
+      },
+      "native_08a_frames": 263265,
+      "nonzero_episode_count": 105,
+      "nonzero_episodes": [
+        {
+          "b23_counts": {
+            "0x20": 751
+          },
+          "cruise_latch_counts": {
+            "0": 751
+          },
+          "duration_s": 18.754999,
+          "end_s": 41.065959,
+          "frames": 751,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 751
+          },
+          "start_s": 22.31096,
+          "target_angle_raw_max": 357,
+          "target_angle_raw_min": -217,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 1867
+          },
+          "cruise_latch_counts": {
+            "0": 1867
+          },
+          "duration_s": 46.647206,
+          "end_s": 100.813984,
+          "frames": 1867,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 1867
+          },
+          "start_s": 54.166778,
+          "target_angle_raw_max": 49,
+          "target_angle_raw_min": -14,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 6533
+          },
+          "cruise_latch_counts": {
+            "0": 6533
+          },
+          "duration_s": 163.313812,
+          "end_s": 294.785711,
+          "frames": 6533,
+          "label": "SDG",
+          "request_level_counts": {
+            "50": 6533
+          },
+          "start_s": 131.471899,
+          "target_angle_raw_max": 116,
+          "target_angle_raw_min": -23,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 83
+          },
+          "cruise_latch_counts": {
+            "0": 83
+          },
+          "duration_s": 2.049037,
+          "end_s": 338.538859,
+          "frames": 83,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 83
+          },
+          "start_s": 336.489822,
+          "target_angle_raw_max": 20,
+          "target_angle_raw_min": -57,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 1472
+          },
+          "cruise_latch_counts": {
+            "0": 1472
+          },
+          "duration_s": 36.776916,
+          "end_s": 389.616362,
+          "frames": 1472,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 1472
+          },
+          "start_s": 352.839446,
+          "target_angle_raw_max": 488,
+          "target_angle_raw_min": -669,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 3,
+            "0x20": 9
+          },
+          "cruise_latch_counts": {
+            "0": 12
+          },
+          "duration_s": 0.280962,
+          "end_s": 389.916083,
+          "frames": 12,
+          "label": "LDA",
+          "request_level_counts": {
+            "100": 12
+          },
+          "start_s": 389.635121,
+          "target_angle_raw_max": -20,
+          "target_angle_raw_min": -104,
+          "target_lateral_id": 4
+        },
+        {
+          "b23_counts": {
+            "0x20": 12
+          },
+          "cruise_latch_counts": {
+            "0": 12
+          },
+          "duration_s": 0.269588,
+          "end_s": 392.838018,
+          "frames": 12,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 12
+          },
+          "start_s": 392.56843,
+          "target_angle_raw_max": 29,
+          "target_angle_raw_min": 21,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 491
+          },
+          "cruise_latch_counts": {
+            "0": 491
+          },
+          "duration_s": 12.253192,
+          "end_s": 408.565589,
+          "frames": 491,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 491
+          },
+          "start_s": 396.312397,
+          "target_angle_raw_max": 56,
+          "target_angle_raw_min": -9,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 3338,
+            "0x20": 792
+          },
+          "cruise_latch_counts": {
+            "1": 4130
+          },
+          "duration_s": 103.225033,
+          "end_s": 511.821223,
+          "frames": 4130,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 4130
+          },
+          "start_s": 408.59619,
+          "target_angle_raw_max": 40,
+          "target_angle_raw_min": -9,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 18
+          },
+          "cruise_latch_counts": {
+            "0": 18
+          },
+          "duration_s": 0.423314,
+          "end_s": 514.324108,
+          "frames": 18,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 18
+          },
+          "start_s": 513.900794,
+          "target_angle_raw_max": 24,
+          "target_angle_raw_min": 18,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 577
+          },
+          "cruise_latch_counts": {
+            "0": 577
+          },
+          "duration_s": 14.405499,
+          "end_s": 539.354034,
+          "frames": 577,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 577
+          },
+          "start_s": 524.948535,
+          "target_angle_raw_max": 513,
+          "target_angle_raw_min": -292,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 197
+          },
+          "cruise_latch_counts": {
+            "0": 197
+          },
+          "duration_s": 4.90399,
+          "end_s": 618.861749,
+          "frames": 197,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 197
+          },
+          "start_s": 613.957759,
+          "target_angle_raw_max": 115,
+          "target_angle_raw_min": 15,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 1018
+          },
+          "cruise_latch_counts": {
+            "0": 1018
+          },
+          "duration_s": 25.419486,
+          "end_s": 686.039134,
+          "frames": 1018,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 1018
+          },
+          "start_s": 660.619648,
+          "target_angle_raw_max": 36,
+          "target_angle_raw_min": -187,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 523
+          },
+          "cruise_latch_counts": {
+            "0": 523
+          },
+          "duration_s": 13.048115,
+          "end_s": 703.314487,
+          "frames": 523,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 523
+          },
+          "start_s": 690.266372,
+          "target_angle_raw_max": 56,
+          "target_angle_raw_min": -32,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 965
+          },
+          "cruise_latch_counts": {
+            "0": 965
+          },
+          "duration_s": 24.104994,
+          "end_s": 733.79915,
+          "frames": 965,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 965
+          },
+          "start_s": 709.694156,
+          "target_angle_raw_max": 72,
+          "target_angle_raw_min": -48,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 5999,
+            "0x20": 433
+          },
+          "cruise_latch_counts": {
+            "1": 6432
+          },
+          "duration_s": 160.793451,
+          "end_s": 894.612302,
+          "frames": 6432,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 6432
+          },
+          "start_s": 733.818851,
+          "target_angle_raw_max": 83,
+          "target_angle_raw_min": -27,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 144
+          },
+          "cruise_latch_counts": {
+            "0": 144
+          },
+          "duration_s": 3.575607,
+          "end_s": 900.25723,
+          "frames": 144,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 144
+          },
+          "start_s": 896.681623,
+          "target_angle_raw_max": 115,
+          "target_angle_raw_min": 97,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 328
+          },
+          "cruise_latch_counts": {
+            "1": 328
+          },
+          "duration_s": 8.171281,
+          "end_s": 908.458261,
+          "frames": 328,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 328
+          },
+          "start_s": 900.28698,
+          "target_angle_raw_max": 105,
+          "target_angle_raw_min": 50,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 851,
+            "0x20": 871
+          },
+          "cruise_latch_counts": {
+            "1": 1722
+          },
+          "duration_s": 43.034288,
+          "end_s": 956.518193,
+          "frames": 1722,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1722
+          },
+          "start_s": 913.483905,
+          "target_angle_raw_max": 69,
+          "target_angle_raw_min": -14,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 17196,
+            "0x20": 652
+          },
+          "cruise_latch_counts": {
+            "1": 17848
+          },
+          "duration_s": 446.216136,
+          "end_s": 1409.162695,
+          "frames": 17848,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 17848
+          },
+          "start_s": 962.946559,
+          "target_angle_raw_max": 48,
+          "target_angle_raw_min": -65,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 49,
+            "0x20": 991
+          },
+          "cruise_latch_counts": {
+            "1": 1040
+          },
+          "duration_s": 25.971581,
+          "end_s": 1439.964503,
+          "frames": 1040,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1040
+          },
+          "start_s": 1413.992922,
+          "target_angle_raw_max": 26,
+          "target_angle_raw_min": -12,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 6,
+            "0x20": 2
+          },
+          "cruise_latch_counts": {
+            "1": 8
+          },
+          "duration_s": 0.180159,
+          "end_s": 1447.669086,
+          "frames": 8,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 8
+          },
+          "start_s": 1447.488927,
+          "target_angle_raw_max": 3,
+          "target_angle_raw_min": -4,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 136
+          },
+          "cruise_latch_counts": {
+            "0": 136
+          },
+          "duration_s": 3.375732,
+          "end_s": 1453.114718,
+          "frames": 136,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 136
+          },
+          "start_s": 1449.738986,
+          "target_angle_raw_max": 45,
+          "target_angle_raw_min": 37,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 4493,
+            "0x20": 111
+          },
+          "cruise_latch_counts": {
+            "1": 4604
+          },
+          "duration_s": 115.085852,
+          "end_s": 1568.231729,
+          "frames": 4604,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 4604
+          },
+          "start_s": 1453.145877,
+          "target_angle_raw_max": 26,
+          "target_angle_raw_min": -19,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 791
+          },
+          "cruise_latch_counts": {
+            "0": 791
+          },
+          "duration_s": 19.752417,
+          "end_s": 1597.286387,
+          "frames": 791,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 791
+          },
+          "start_s": 1577.53397,
+          "target_angle_raw_max": 26,
+          "target_angle_raw_min": -2,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 4328,
+            "0x20": 174
+          },
+          "cruise_latch_counts": {
+            "1": 4502
+          },
+          "duration_s": 112.534642,
+          "end_s": 1716.139815,
+          "frames": 4502,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 4502
+          },
+          "start_s": 1603.605173,
+          "target_angle_raw_max": 36,
+          "target_angle_raw_min": -19,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 1934
+          },
+          "cruise_latch_counts": {
+            "0": 1934
+          },
+          "duration_s": 48.326692,
+          "end_s": 1771.770425,
+          "frames": 1934,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 1934
+          },
+          "start_s": 1723.443733,
+          "target_angle_raw_max": 32,
+          "target_angle_raw_min": -14,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 2227,
+            "0x20": 175
+          },
+          "cruise_latch_counts": {
+            "1": 2402
+          },
+          "duration_s": 60.031303,
+          "end_s": 1836.204079,
+          "frames": 2402,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2402
+          },
+          "start_s": 1776.172776,
+          "target_angle_raw_max": 24,
+          "target_angle_raw_min": -14,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 673
+          },
+          "cruise_latch_counts": {
+            "0": 673
+          },
+          "duration_s": 16.797263,
+          "end_s": 1855.058478,
+          "frames": 673,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 673
+          },
+          "start_s": 1838.261215,
+          "target_angle_raw_max": 25,
+          "target_angle_raw_min": 7,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 288,
+            "0x20": 1116
+          },
+          "cruise_latch_counts": {
+            "1": 1404
+          },
+          "duration_s": 35.08304,
+          "end_s": 1895.063177,
+          "frames": 1404,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1404
+          },
+          "start_s": 1859.980137,
+          "target_angle_raw_max": 14,
+          "target_angle_raw_min": -15,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 3067,
+            "0x20": 625
+          },
+          "cruise_latch_counts": {
+            "1": 3692
+          },
+          "duration_s": 92.291433,
+          "end_s": 1992.27686,
+          "frames": 3692,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 3692
+          },
+          "start_s": 1899.985427,
+          "target_angle_raw_max": 30,
+          "target_angle_raw_min": -14,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 781,
+            "0x20": 765
+          },
+          "cruise_latch_counts": {
+            "1": 1546
+          },
+          "duration_s": 38.635792,
+          "end_s": 2034.780061,
+          "frames": 1546,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1546
+          },
+          "start_s": 1996.144269,
+          "target_angle_raw_max": 18,
+          "target_angle_raw_min": -22,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 1920
+          },
+          "cruise_latch_counts": {
+            "1": 1920
+          },
+          "duration_s": 47.984253,
+          "end_s": 2090.188682,
+          "frames": 1920,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1920
+          },
+          "start_s": 2042.204429,
+          "target_angle_raw_max": 35,
+          "target_angle_raw_min": -5,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 354,
+            "0x20": 108
+          },
+          "cruise_latch_counts": {
+            "1": 462
+          },
+          "duration_s": 11.525347,
+          "end_s": 2106.586415,
+          "frames": 462,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 462
+          },
+          "start_s": 2095.061068,
+          "target_angle_raw_max": 8,
+          "target_angle_raw_min": -21,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 6591,
+            "0x20": 503
+          },
+          "cruise_latch_counts": {
+            "1": 7094
+          },
+          "duration_s": 177.345348,
+          "end_s": 2288.009476,
+          "frames": 7094,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 7094
+          },
+          "start_s": 2110.664128,
+          "target_angle_raw_max": 37,
+          "target_angle_raw_min": -46,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 1993,
+            "0x20": 1405
+          },
+          "cruise_latch_counts": {
+            "1": 3398
+          },
+          "duration_s": 84.929012,
+          "end_s": 2376.213342,
+          "frames": 3398,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 3398
+          },
+          "start_s": 2291.28433,
+          "target_angle_raw_max": 19,
+          "target_angle_raw_min": -31,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 2532,
+            "0x20": 520
+          },
+          "cruise_latch_counts": {
+            "1": 3052
+          },
+          "duration_s": 76.278636,
+          "end_s": 2456.972268,
+          "frames": 3052,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 3052
+          },
+          "start_s": 2380.693632,
+          "target_angle_raw_max": 49,
+          "target_angle_raw_min": -24,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 671
+          },
+          "cruise_latch_counts": {
+            "0": 671
+          },
+          "duration_s": 16.755856,
+          "end_s": 2475.776259,
+          "frames": 671,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 671
+          },
+          "start_s": 2459.020403,
+          "target_angle_raw_max": 24,
+          "target_angle_raw_min": 12,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 758
+          },
+          "cruise_latch_counts": {
+            "0": 758
+          },
+          "duration_s": 18.927391,
+          "end_s": 2501.654063,
+          "frames": 758,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 758
+          },
+          "start_s": 2482.726672,
+          "target_angle_raw_max": 38,
+          "target_angle_raw_min": 2,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 57
+          },
+          "cruise_latch_counts": {
+            "0": 57
+          },
+          "duration_s": 1.397162,
+          "end_s": 2508.474719,
+          "frames": 57,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 57
+          },
+          "start_s": 2507.077557,
+          "target_angle_raw_max": 22,
+          "target_angle_raw_min": 16,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 2195,
+            "0x20": 263
+          },
+          "cruise_latch_counts": {
+            "1": 2458
+          },
+          "duration_s": 61.432601,
+          "end_s": 2569.936948,
+          "frames": 2458,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2458
+          },
+          "start_s": 2508.504347,
+          "target_angle_raw_max": 22,
+          "target_angle_raw_min": -5,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 369,
+            "0x20": 1007
+          },
+          "cruise_latch_counts": {
+            "1": 1376
+          },
+          "duration_s": 34.375715,
+          "end_s": 2607.988312,
+          "frames": 1376,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1376
+          },
+          "start_s": 2573.612597,
+          "target_angle_raw_max": 24,
+          "target_angle_raw_min": -28,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 3021,
+            "0x20": 2227
+          },
+          "cruise_latch_counts": {
+            "1": 5248
+          },
+          "duration_s": 131.196578,
+          "end_s": 2743.307815,
+          "frames": 5248,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 5248
+          },
+          "start_s": 2612.111237,
+          "target_angle_raw_max": 67,
+          "target_angle_raw_min": -45,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 380,
+            "0x20": 794
+          },
+          "cruise_latch_counts": {
+            "1": 1174
+          },
+          "duration_s": 29.331376,
+          "end_s": 2777.863575,
+          "frames": 1174,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1174
+          },
+          "start_s": 2748.532199,
+          "target_angle_raw_max": 21,
+          "target_angle_raw_min": -30,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 10865,
+            "0x20": 1567
+          },
+          "cruise_latch_counts": {
+            "1": 12432
+          },
+          "duration_s": 310.811485,
+          "end_s": 3092.894027,
+          "frames": 12432,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 12432
+          },
+          "start_s": 2782.082542,
+          "target_angle_raw_max": 48,
+          "target_angle_raw_min": -27,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 1026,
+            "0x20": 230
+          },
+          "cruise_latch_counts": {
+            "1": 1256
+          },
+          "duration_s": 31.38236,
+          "end_s": 3128.604035,
+          "frames": 1256,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1256
+          },
+          "start_s": 3097.221675,
+          "target_angle_raw_max": 53,
+          "target_angle_raw_min": -5,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 2
+          },
+          "cruise_latch_counts": {
+            "1": 2
+          },
+          "duration_s": 0.020325,
+          "end_s": 3133.597988,
+          "frames": 2,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2
+          },
+          "start_s": 3133.577663,
+          "target_angle_raw_max": -39,
+          "target_angle_raw_min": -41,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 1665,
+            "0x20": 1171
+          },
+          "cruise_latch_counts": {
+            "1": 2836
+          },
+          "duration_s": 70.882026,
+          "end_s": 3205.554356,
+          "frames": 2836,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2836
+          },
+          "start_s": 3134.67233,
+          "target_angle_raw_max": 25,
+          "target_angle_raw_min": -41,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 1522,
+            "0x20": 200
+          },
+          "cruise_latch_counts": {
+            "1": 1722
+          },
+          "duration_s": 43.033481,
+          "end_s": 3252.11276,
+          "frames": 1722,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1722
+          },
+          "start_s": 3209.079279,
+          "target_angle_raw_max": 36,
+          "target_angle_raw_min": -2,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 158
+          },
+          "cruise_latch_counts": {
+            "0": 158
+          },
+          "duration_s": 3.917751,
+          "end_s": 3258.108752,
+          "frames": 158,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 158
+          },
+          "start_s": 3254.191001,
+          "target_angle_raw_max": 22,
+          "target_angle_raw_min": 16,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 2079,
+            "0x20": 305
+          },
+          "cruise_latch_counts": {
+            "1": 2384
+          },
+          "duration_s": 59.579244,
+          "end_s": 3317.717664,
+          "frames": 2384,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2384
+          },
+          "start_s": 3258.13842,
+          "target_angle_raw_max": 38,
+          "target_angle_raw_min": -9,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 2440,
+            "0x20": 424
+          },
+          "cruise_latch_counts": {
+            "1": 2864
+          },
+          "duration_s": 71.583944,
+          "end_s": 3393.181396,
+          "frames": 2864,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2864
+          },
+          "start_s": 3321.597452,
+          "target_angle_raw_max": 28,
+          "target_angle_raw_min": -36,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 2798
+          },
+          "cruise_latch_counts": {
+            "0": 2798
+          },
+          "duration_s": 69.937563,
+          "end_s": 3465.188807,
+          "frames": 2798,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 2798
+          },
+          "start_s": 3395.251244,
+          "target_angle_raw_max": 29,
+          "target_angle_raw_min": -8,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 144,
+            "0x20": 68
+          },
+          "cruise_latch_counts": {
+            "1": 212
+          },
+          "duration_s": 5.274667,
+          "end_s": 3470.483183,
+          "frames": 212,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 212
+          },
+          "start_s": 3465.208516,
+          "target_angle_raw_max": 19,
+          "target_angle_raw_min": -8,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 5647,
+            "0x20": 2285
+          },
+          "cruise_latch_counts": {
+            "1": 7932
+          },
+          "duration_s": 198.30468,
+          "end_s": 3672.664704,
+          "frames": 7932,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 7932
+          },
+          "start_s": 3474.360024,
+          "target_angle_raw_max": 108,
+          "target_angle_raw_min": -28,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 1455,
+            "0x20": 187
+          },
+          "cruise_latch_counts": {
+            "1": 1642
+          },
+          "duration_s": 41.035278,
+          "end_s": 3718.469044,
+          "frames": 1642,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1642
+          },
+          "start_s": 3677.433766,
+          "target_angle_raw_max": 30,
+          "target_angle_raw_min": -39,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 2357,
+            "0x20": 389
+          },
+          "cruise_latch_counts": {
+            "1": 2746
+          },
+          "duration_s": 68.626952,
+          "end_s": 3790.771814,
+          "frames": 2746,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2746
+          },
+          "start_s": 3722.144862,
+          "target_angle_raw_max": 34,
+          "target_angle_raw_min": -43,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 4391,
+            "0x20": 2303
+          },
+          "cruise_latch_counts": {
+            "1": 6694
+          },
+          "duration_s": 167.345447,
+          "end_s": 3961.845558,
+          "frames": 6694,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 6694
+          },
+          "start_s": 3794.500111,
+          "target_angle_raw_max": 103,
+          "target_angle_raw_min": -82,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 97
+          },
+          "cruise_latch_counts": {
+            "0": 97
+          },
+          "duration_s": 2.399972,
+          "end_s": 3966.29613,
+          "frames": 97,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 97
+          },
+          "start_s": 3963.896158,
+          "target_angle_raw_max": 11,
+          "target_angle_raw_min": -3,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 967
+          },
+          "cruise_latch_counts": {
+            "0": 967
+          },
+          "duration_s": 24.158573,
+          "end_s": 3996.551497,
+          "frames": 967,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 967
+          },
+          "start_s": 3972.392924,
+          "target_angle_raw_max": 65,
+          "target_angle_raw_min": -28,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 925,
+            "0x20": 509
+          },
+          "cruise_latch_counts": {
+            "1": 1434
+          },
+          "duration_s": 35.832698,
+          "end_s": 4032.403709,
+          "frames": 1434,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1434
+          },
+          "start_s": 3996.571011,
+          "target_angle_raw_max": 51,
+          "target_angle_raw_min": -31,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 19
+          },
+          "cruise_latch_counts": {
+            "0": 19
+          },
+          "duration_s": 0.441901,
+          "end_s": 4036.400945,
+          "frames": 19,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 19
+          },
+          "start_s": 4035.959044,
+          "target_angle_raw_max": 38,
+          "target_angle_raw_min": 29,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 3336,
+            "0x20": 2454
+          },
+          "cruise_latch_counts": {
+            "1": 5790
+          },
+          "duration_s": 144.734034,
+          "end_s": 4181.165601,
+          "frames": 5790,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 5790
+          },
+          "start_s": 4036.431567,
+          "target_angle_raw_max": 108,
+          "target_angle_raw_min": -11,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 2
+          },
+          "cruise_latch_counts": {
+            "1": 2
+          },
+          "duration_s": 0.020057,
+          "end_s": 4186.067595,
+          "frames": 2,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2
+          },
+          "start_s": 4186.047538,
+          "target_angle_raw_max": -90,
+          "target_angle_raw_min": -95,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 8517,
+            "0x20": 1247
+          },
+          "cruise_latch_counts": {
+            "1": 9764
+          },
+          "duration_s": 244.104548,
+          "end_s": 4431.246691,
+          "frames": 9764,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 9764
+          },
+          "start_s": 4187.142143,
+          "target_angle_raw_max": 115,
+          "target_angle_raw_min": -110,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 41,
+            "0x20": 35
+          },
+          "cruise_latch_counts": {
+            "1": 76
+          },
+          "duration_s": 1.878422,
+          "end_s": 4446.003628,
+          "frames": 76,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 76
+          },
+          "start_s": 4444.125206,
+          "target_angle_raw_max": 53,
+          "target_angle_raw_min": -11,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 2301,
+            "0x20": 2611
+          },
+          "cruise_latch_counts": {
+            "1": 4912
+          },
+          "duration_s": 122.784403,
+          "end_s": 4569.862925,
+          "frames": 4912,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 4912
+          },
+          "start_s": 4447.078522,
+          "target_angle_raw_max": 69,
+          "target_angle_raw_min": -157,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 36,
+            "0x20": 386
+          },
+          "cruise_latch_counts": {
+            "1": 422
+          },
+          "duration_s": 10.529633,
+          "end_s": 4583.868702,
+          "frames": 422,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 422
+          },
+          "start_s": 4573.339069,
+          "target_angle_raw_max": 136,
+          "target_angle_raw_min": 44,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 225,
+            "0x20": 141
+          },
+          "cruise_latch_counts": {
+            "1": 366
+          },
+          "duration_s": 9.130944,
+          "end_s": 4597.321139,
+          "frames": 366,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 366
+          },
+          "start_s": 4588.190195,
+          "target_angle_raw_max": 77,
+          "target_angle_raw_min": -156,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 357
+          },
+          "cruise_latch_counts": {
+            "0": 357
+          },
+          "duration_s": 8.903006,
+          "end_s": 4608.273153,
+          "frames": 357,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 357
+          },
+          "start_s": 4599.370147,
+          "target_angle_raw_max": 32,
+          "target_angle_raw_min": -12,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 2707,
+            "0x20": 143
+          },
+          "cruise_latch_counts": {
+            "1": 2850
+          },
+          "duration_s": 71.23381,
+          "end_s": 4679.525874,
+          "frames": 2850,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2850
+          },
+          "start_s": 4608.292064,
+          "target_angle_raw_max": 197,
+          "target_angle_raw_min": -25,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 704
+          },
+          "cruise_latch_counts": {
+            "0": 704
+          },
+          "duration_s": 17.577624,
+          "end_s": 4699.180973,
+          "frames": 704,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 704
+          },
+          "start_s": 4681.603349,
+          "target_angle_raw_max": 353,
+          "target_angle_raw_min": 2,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 504
+          },
+          "cruise_latch_counts": {
+            "0": 504
+          },
+          "duration_s": 12.567505,
+          "end_s": 4718.82911,
+          "frames": 504,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 504
+          },
+          "start_s": 4706.261605,
+          "target_angle_raw_max": 60,
+          "target_angle_raw_min": 12,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 147,
+            "0x20": 527
+          },
+          "cruise_latch_counts": {
+            "1": 674
+          },
+          "duration_s": 16.824508,
+          "end_s": 4735.683032,
+          "frames": 674,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 674
+          },
+          "start_s": 4718.858524,
+          "target_angle_raw_max": 59,
+          "target_angle_raw_min": -23,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 525
+          },
+          "cruise_latch_counts": {
+            "0": 525
+          },
+          "duration_s": 13.098881,
+          "end_s": 4750.831809,
+          "frames": 525,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 525
+          },
+          "start_s": 4737.732928,
+          "target_angle_raw_max": 51,
+          "target_angle_raw_min": -2,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 132,
+            "0x20": 228
+          },
+          "cruise_latch_counts": {
+            "1": 360
+          },
+          "duration_s": 8.970865,
+          "end_s": 4759.832989,
+          "frames": 360,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 360
+          },
+          "start_s": 4750.862124,
+          "target_angle_raw_max": 46,
+          "target_angle_raw_min": 0,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 337,
+            "0x20": 219
+          },
+          "cruise_latch_counts": {
+            "1": 556
+          },
+          "duration_s": 13.873633,
+          "end_s": 4774.139321,
+          "frames": 556,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 556
+          },
+          "start_s": 4760.265688,
+          "target_angle_raw_max": 87,
+          "target_angle_raw_min": -21,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 45
+          },
+          "cruise_latch_counts": {
+            "0": 45
+          },
+          "duration_s": 1.095662,
+          "end_s": 4779.234501,
+          "frames": 45,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 45
+          },
+          "start_s": 4778.138839,
+          "target_angle_raw_max": 108,
+          "target_angle_raw_min": -23,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 2
+          },
+          "cruise_latch_counts": {
+            "1": 2
+          },
+          "duration_s": 0.020932,
+          "end_s": 4791.487693,
+          "frames": 2,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2
+          },
+          "start_s": 4791.466761,
+          "target_angle_raw_max": 75,
+          "target_angle_raw_min": 74,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 34,
+            "0x20": 80
+          },
+          "cruise_latch_counts": {
+            "1": 114
+          },
+          "duration_s": 2.831082,
+          "end_s": 4795.395738,
+          "frames": 114,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 114
+          },
+          "start_s": 4792.564656,
+          "target_angle_raw_max": 62,
+          "target_angle_raw_min": -19,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 193
+          },
+          "cruise_latch_counts": {
+            "0": 193
+          },
+          "duration_s": 4.802217,
+          "end_s": 4802.246339,
+          "frames": 193,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 193
+          },
+          "start_s": 4797.444122,
+          "target_angle_raw_max": -7,
+          "target_angle_raw_min": -36,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 141
+          },
+          "cruise_latch_counts": {
+            "0": 141
+          },
+          "duration_s": 3.504615,
+          "end_s": 4808.794322,
+          "frames": 141,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 141
+          },
+          "start_s": 4805.289707,
+          "target_angle_raw_max": 65,
+          "target_angle_raw_min": -83,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 446,
+            "0x20": 324
+          },
+          "cruise_latch_counts": {
+            "1": 770
+          },
+          "duration_s": 19.227295,
+          "end_s": 4828.041346,
+          "frames": 770,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 770
+          },
+          "start_s": 4808.814051,
+          "target_angle_raw_max": 100,
+          "target_angle_raw_min": -19,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 703
+          },
+          "cruise_latch_counts": {
+            "0": 703
+          },
+          "duration_s": 17.547103,
+          "end_s": 4849.345567,
+          "frames": 703,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 703
+          },
+          "start_s": 4831.798464,
+          "target_angle_raw_max": 41,
+          "target_angle_raw_min": 7,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 17918,
+            "0x20": 4212
+          },
+          "cruise_latch_counts": {
+            "1": 22130
+          },
+          "duration_s": 553.28575,
+          "end_s": 5402.661101,
+          "frames": 22130,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 22130
+          },
+          "start_s": 4849.375351,
+          "target_angle_raw_max": 121,
+          "target_angle_raw_min": -130,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 246
+          },
+          "cruise_latch_counts": {
+            "0": 246
+          },
+          "duration_s": 6.125561,
+          "end_s": 5413.411009,
+          "frames": 246,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 246
+          },
+          "start_s": 5407.285448,
+          "target_angle_raw_max": 235,
+          "target_angle_raw_min": -259,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 234
+          },
+          "cruise_latch_counts": {
+            "0": 234
+          },
+          "duration_s": 5.825105,
+          "end_s": 5421.264678,
+          "frames": 234,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 234
+          },
+          "start_s": 5415.439573,
+          "target_angle_raw_max": 8,
+          "target_angle_raw_min": -79,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 992,
+            "0x20": 158
+          },
+          "cruise_latch_counts": {
+            "1": 1150
+          },
+          "duration_s": 28.719274,
+          "end_s": 5450.013453,
+          "frames": 1150,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1150
+          },
+          "start_s": 5421.294179,
+          "target_angle_raw_max": -9,
+          "target_angle_raw_min": -110,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 62
+          },
+          "cruise_latch_counts": {
+            "0": 62
+          },
+          "duration_s": 1.526684,
+          "end_s": 5453.618732,
+          "frames": 62,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 62
+          },
+          "start_s": 5452.092048,
+          "target_angle_raw_max": 34,
+          "target_angle_raw_min": 8,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 9195,
+            "0x20": 5237
+          },
+          "cruise_latch_counts": {
+            "1": 14432
+          },
+          "duration_s": 360.820835,
+          "end_s": 5814.460307,
+          "frames": 14432,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 14432
+          },
+          "start_s": 5453.639472,
+          "target_angle_raw_max": 139,
+          "target_angle_raw_min": -128,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 840
+          },
+          "cruise_latch_counts": {
+            "0": 840
+          },
+          "duration_s": 20.97509,
+          "end_s": 5837.514448,
+          "frames": 840,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 840
+          },
+          "start_s": 5816.539358,
+          "target_angle_raw_max": 26,
+          "target_angle_raw_min": -66,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 18
+          },
+          "cruise_latch_counts": {
+            "1": 18
+          },
+          "duration_s": 0.432929,
+          "end_s": 5837.966981,
+          "frames": 18,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 18
+          },
+          "start_s": 5837.534052,
+          "target_angle_raw_max": 22,
+          "target_angle_raw_min": 19,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 48
+          },
+          "cruise_latch_counts": {
+            "0": 48
+          },
+          "duration_s": 1.185147,
+          "end_s": 5841.219205,
+          "frames": 48,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 48
+          },
+          "start_s": 5840.034058,
+          "target_angle_raw_max": 18,
+          "target_angle_raw_min": 14,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x00": 184,
+            "0x20": 42
+          },
+          "cruise_latch_counts": {
+            "1": 226
+          },
+          "duration_s": 5.628232,
+          "end_s": 5846.867136,
+          "frames": 226,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 226
+          },
+          "start_s": 5841.238904,
+          "target_angle_raw_max": 63,
+          "target_angle_raw_min": -27,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x20": 175
+          },
+          "cruise_latch_counts": {
+            "0": 175
+          },
+          "duration_s": 4.349824,
+          "end_s": 5856.812395,
+          "frames": 175,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 175
+          },
+          "start_s": 5852.462571,
+          "target_angle_raw_max": 146,
+          "target_angle_raw_min": -213,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 183
+          },
+          "cruise_latch_counts": {
+            "0": 183
+          },
+          "duration_s": 4.547909,
+          "end_s": 5872.592461,
+          "frames": 183,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 183
+          },
+          "start_s": 5868.044552,
+          "target_angle_raw_max": 139,
+          "target_angle_raw_min": 54,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 547
+          },
+          "cruise_latch_counts": {
+            "0": 547
+          },
+          "duration_s": 13.652277,
+          "end_s": 5940.748569,
+          "frames": 547,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 547
+          },
+          "start_s": 5927.096292,
+          "target_angle_raw_max": 36,
+          "target_angle_raw_min": -127,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 992
+          },
+          "cruise_latch_counts": {
+            "0": 992
+          },
+          "duration_s": 24.780782,
+          "end_s": 5987.106533,
+          "frames": 992,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 992
+          },
+          "start_s": 5962.325751,
+          "target_angle_raw_max": 73,
+          "target_angle_raw_min": -26,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 1092
+          },
+          "cruise_latch_counts": {
+            "0": 1092
+          },
+          "duration_s": 27.272743,
+          "end_s": 6041.087143,
+          "frames": 1092,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 1092
+          },
+          "start_s": 6013.8144,
+          "target_angle_raw_max": 70,
+          "target_angle_raw_min": -190,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 1910
+          },
+          "cruise_latch_counts": {
+            "0": 1910
+          },
+          "duration_s": 47.731966,
+          "end_s": 6167.855207,
+          "frames": 1910,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 1910
+          },
+          "start_s": 6120.123241,
+          "target_angle_raw_max": 215,
+          "target_angle_raw_min": -33,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 138
+          },
+          "cruise_latch_counts": {
+            "0": 138
+          },
+          "duration_s": 3.425204,
+          "end_s": 6195.15601,
+          "frames": 138,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 138
+          },
+          "start_s": 6191.730806,
+          "target_angle_raw_max": 102,
+          "target_angle_raw_min": -249,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 12
+          },
+          "cruise_latch_counts": {
+            "0": 12
+          },
+          "duration_s": 0.270507,
+          "end_s": 6211.408648,
+          "frames": 12,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 12
+          },
+          "start_s": 6211.138141,
+          "target_angle_raw_max": -44,
+          "target_angle_raw_min": -244,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 706
+          },
+          "cruise_latch_counts": {
+            "0": 706
+          },
+          "duration_s": 17.629319,
+          "end_s": 6230.114166,
+          "frames": 706,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 706
+          },
+          "start_s": 6212.484847,
+          "target_angle_raw_max": 32,
+          "target_angle_raw_min": -50,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 3
+          },
+          "cruise_latch_counts": {
+            "0": 3
+          },
+          "duration_s": 0.049702,
+          "end_s": 6234.412908,
+          "frames": 3,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 3
+          },
+          "start_s": 6234.363206,
+          "target_angle_raw_max": 177,
+          "target_angle_raw_min": 55,
+          "target_lateral_id": 18
+        },
+        {
+          "b23_counts": {
+            "0x20": 97
+          },
+          "cruise_latch_counts": {
+            "0": 97
+          },
+          "duration_s": 2.403106,
+          "end_s": 6257.538019,
+          "frames": 97,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 97
+          },
+          "start_s": 6255.134913,
+          "target_angle_raw_max": 22,
+          "target_angle_raw_min": 10,
+          "target_lateral_id": 18
+        }
+      ],
+      "route": "0000003b--62262eb7a1",
+      "segment_count": 110,
+      "source_dir": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1",
+      "target_lateral_ids": {
+        "0": {
+          "b23_counts": {
+            "0x00": 44476
+          },
+          "cruise_latch_counts": {
+            "0": 39292,
+            "1": 5184
+          },
+          "frames": 44476,
+          "label": "No Request (Manual Operation)",
+          "request_level_counts": {
+            "0": 893,
+            "100": 8295,
+            "25": 32450,
+            "50": 2838
+          },
+          "target_angle_deg_equiv_range": [
+            -486.442977,
+            446.617571
+          ],
+          "target_angle_raw_range": [
+            -8489,
+            7794
+          ]
+        },
+        "11": {
+          "b23_counts": {
+            "0x00": 143394,
+            "0x20": 41216
+          },
+          "cruise_latch_counts": {
+            "1": 184610
+          },
+          "frames": 184610,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 184610
+          },
+          "target_angle_deg_equiv_range": [
+            -8.99653,
+            11.28864
+          ],
+          "target_angle_raw_range": [
+            -157,
+            197
+          ]
+        },
+        "18": {
+          "b23_counts": {
+            "0x20": 34167
+          },
+          "cruise_latch_counts": {
+            "0": 34167
+          },
+          "frames": 34167,
+          "label": "SDG",
+          "request_level_counts": {
+            "25": 25016,
+            "50": 9151
+          },
+          "target_angle_deg_equiv_range": [
+            -38.335534,
+            29.396307
+          ],
+          "target_angle_raw_range": [
+            -669,
+            513
+          ]
+        },
+        "4": {
+          "b23_counts": {
+            "0x00": 3,
+            "0x20": 9
+          },
+          "cruise_latch_counts": {
+            "0": 12
+          },
+          "frames": 12,
+          "label": "LDA",
+          "request_level_counts": {
+            "100": 12
+          },
+          "target_angle_deg_equiv_range": [
+            -5.959485,
+            -1.146055
+          ],
+          "target_angle_raw_range": [
+            -104,
+            -20
+          ]
+        }
+      }
+    },
+    "3c": {
+      "b6": {
+        "can_src_counts": {
+          "128": 240223,
+          "192": 9
+        },
+        "panda_tx_echo_id_counts": {
+          "0": 132490,
+          "11": 107733
+        },
+        "same_event_tx_echo_duplicate_id_counts": {},
+        "sendcan_id_counts": {
+          "0": 132498,
+          "11": 107735
+        },
+        "src_0_1_2_id_counts_raw": {},
+        "unmatched_native_candidate_id_counts": {}
+      },
+      "duration_s": 4835.677784,
+      "first_08a_id": 0,
+      "first_mono_s": 7494.917084796,
+      "id_transition_counts": {
+        "0->11": 14,
+        "0->4": 1,
+        "11->0": 14,
+        "11->4": 1,
+        "4->0": 1,
+        "4->11": 1
+      },
+      "last_08a_id": 0,
+      "last_mono_s": 12330.594868577,
+      "native_081_id_counts": {
+        "0": 89729,
+        "11": 71303,
+        "4": 135
+      },
+      "native_081_latest_08a_pairing": {
+        "0->11": 3,
+        "11->0": 4,
+        "11->4": 1,
+        "4->11": 1,
+        "eligible": 161136,
+        "match": 161127
+      },
+      "native_08a_frames": 193390,
+      "nonzero_episode_count": 17,
+      "nonzero_episodes": [
+        {
+          "b23_counts": {
+            "0x00": 606
+          },
+          "cruise_latch_counts": {
+            "1": 606
+          },
+          "duration_s": 15.127805,
+          "end_s": 985.109244,
+          "frames": 606,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 606
+          },
+          "start_s": 969.981439,
+          "target_angle_raw_max": 25,
+          "target_angle_raw_min": -6,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 28912
+          },
+          "cruise_latch_counts": {
+            "1": 28912
+          },
+          "duration_s": 722.857062,
+          "end_s": 1762.000047,
+          "frames": 28912,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 28912
+          },
+          "start_s": 1039.142985,
+          "target_angle_raw_max": 111,
+          "target_angle_raw_min": -127,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 11076,
+            "0x20": 616
+          },
+          "cruise_latch_counts": {
+            "1": 11692
+          },
+          "duration_s": 292.307749,
+          "end_s": 2059.584675,
+          "frames": 11692,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 11692
+          },
+          "start_s": 1767.276926,
+          "target_angle_raw_max": 144,
+          "target_angle_raw_min": -75,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 8041,
+            "0x20": 1257
+          },
+          "cruise_latch_counts": {
+            "1": 9298
+          },
+          "duration_s": 232.452369,
+          "end_s": 2308.913799,
+          "frames": 9298,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 9298
+          },
+          "start_s": 2076.46143,
+          "target_angle_raw_max": 73,
+          "target_angle_raw_min": -92,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 942,
+            "0x20": 236
+          },
+          "cruise_latch_counts": {
+            "1": 1178
+          },
+          "duration_s": 29.4231,
+          "end_s": 2343.811929,
+          "frames": 1178,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1178
+          },
+          "start_s": 2314.388829,
+          "target_angle_raw_max": 103,
+          "target_angle_raw_min": -73,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 2493,
+            "0x20": 133
+          },
+          "cruise_latch_counts": {
+            "1": 2626
+          },
+          "duration_s": 65.640569,
+          "end_s": 2417.229241,
+          "frames": 2626,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2626
+          },
+          "start_s": 2351.588672,
+          "target_angle_raw_max": 98,
+          "target_angle_raw_min": -110,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 94,
+            "0x20": 8
+          },
+          "cruise_latch_counts": {
+            "1": 102
+          },
+          "duration_s": 2.530639,
+          "end_s": 2419.779616,
+          "frames": 102,
+          "label": "LDA",
+          "request_level_counts": {
+            "100": 102
+          },
+          "start_s": 2417.248977,
+          "target_angle_raw_max": -1,
+          "target_angle_raw_min": -107,
+          "target_lateral_id": 4
+        },
+        {
+          "b23_counts": {
+            "0x00": 1641,
+            "0x20": 1165
+          },
+          "cruise_latch_counts": {
+            "1": 2806
+          },
+          "duration_s": 70.133401,
+          "end_s": 2489.93284,
+          "frames": 2806,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2806
+          },
+          "start_s": 2419.799439,
+          "target_angle_raw_max": 77,
+          "target_angle_raw_min": -112,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 63,
+            "0x20": 39
+          },
+          "cruise_latch_counts": {
+            "1": 102
+          },
+          "duration_s": 2.521464,
+          "end_s": 2496.884042,
+          "frames": 102,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 102
+          },
+          "start_s": 2494.362578,
+          "target_angle_raw_max": 68,
+          "target_angle_raw_min": 0,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 858,
+            "0x20": 124
+          },
+          "cruise_latch_counts": {
+            "1": 982
+          },
+          "duration_s": 24.527469,
+          "end_s": 2522.63843,
+          "frames": 982,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 982
+          },
+          "start_s": 2498.110961,
+          "target_angle_raw_max": 38,
+          "target_angle_raw_min": -21,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 13971,
+            "0x20": 3621
+          },
+          "cruise_latch_counts": {
+            "1": 17592
+          },
+          "duration_s": 439.827921,
+          "end_s": 2985.09634,
+          "frames": 17592,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 17592
+          },
+          "start_s": 2545.268419,
+          "target_angle_raw_max": 90,
+          "target_angle_raw_min": -136,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 461,
+            "0x20": 415
+          },
+          "cruise_latch_counts": {
+            "1": 876
+          },
+          "duration_s": 21.87613,
+          "end_s": 3010.597097,
+          "frames": 876,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 876
+          },
+          "start_s": 2988.720967,
+          "target_angle_raw_max": 27,
+          "target_angle_raw_min": -87,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 900
+          },
+          "cruise_latch_counts": {
+            "1": 900
+          },
+          "duration_s": 22.471676,
+          "end_s": 3048.898304,
+          "frames": 900,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 900
+          },
+          "start_s": 3026.426628,
+          "target_angle_raw_max": 35,
+          "target_angle_raw_min": -15,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 6415,
+            "0x20": 217
+          },
+          "cruise_latch_counts": {
+            "1": 6632
+          },
+          "duration_s": 165.797807,
+          "end_s": 3219.127321,
+          "frames": 6632,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 6632
+          },
+          "start_s": 3053.329514,
+          "target_angle_raw_max": 76,
+          "target_angle_raw_min": -21,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 488,
+            "0x20": 204
+          },
+          "cruise_latch_counts": {
+            "1": 692
+          },
+          "duration_s": 17.276949,
+          "end_s": 3245.323717,
+          "frames": 692,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 692
+          },
+          "start_s": 3228.046768,
+          "target_angle_raw_max": 26,
+          "target_angle_raw_min": -6,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 37,
+            "0x20": 23
+          },
+          "cruise_latch_counts": {
+            "0": 60
+          },
+          "duration_s": 1.477099,
+          "end_s": 3406.500435,
+          "frames": 60,
+          "label": "LDA",
+          "request_level_counts": {
+            "100": 60
+          },
+          "start_s": 3405.023336,
+          "target_angle_raw_max": 233,
+          "target_angle_raw_min": 88,
+          "target_lateral_id": 4
+        },
+        {
+          "b23_counts": {
+            "0x00": 444,
+            "0x20": 222
+          },
+          "cruise_latch_counts": {
+            "1": 666
+          },
+          "duration_s": 16.633364,
+          "end_s": 3543.466207,
+          "frames": 666,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 666
+          },
+          "start_s": 3526.832843,
+          "target_angle_raw_max": 24,
+          "target_angle_raw_min": -22,
+          "target_lateral_id": 11
+        }
+      ],
+      "route": "0000003c--97b9e7a69a",
+      "segment_count": 81,
+      "source_dir": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a",
+      "target_lateral_ids": {
+        "0": {
+          "b23_counts": {
+            "0x00": 107668
+          },
+          "cruise_latch_counts": {
+            "0": 106718,
+            "1": 950
+          },
+          "frames": 107668,
+          "label": "No Request (Manual Operation)",
+          "request_level_counts": {
+            "0": 38786,
+            "100": 68882
+          },
+          "target_angle_deg_equiv_range": [
+            -486.901399,
+            467.361164
+          ],
+          "target_angle_raw_range": [
+            -8497,
+            8156
+          ]
+        },
+        "11": {
+          "b23_counts": {
+            "0x00": 77311,
+            "0x20": 8249
+          },
+          "cruise_latch_counts": {
+            "1": 85560
+          },
+          "frames": 85560,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 85560
+          },
+          "target_angle_deg_equiv_range": [
+            -7.793173,
+            8.251595
+          ],
+          "target_angle_raw_range": [
+            -136,
+            144
+          ]
+        },
+        "4": {
+          "b23_counts": {
+            "0x00": 131,
+            "0x20": 31
+          },
+          "cruise_latch_counts": {
+            "0": 60,
+            "1": 102
+          },
+          "frames": 162,
+          "label": "LDA",
+          "request_level_counts": {
+            "100": 162
+          },
+          "target_angle_deg_equiv_range": [
+            -6.131393,
+            13.351539
+          ],
+          "target_angle_raw_range": [
+            -107,
+            233
+          ]
+        }
+      }
+    },
+    "3d": {
+      "b6": {
+        "can_src_counts": {
+          "128": 184430,
+          "192": 10
+        },
+        "panda_tx_echo_id_counts": {
+          "0": 67629,
+          "11": 116801
+        },
+        "same_event_tx_echo_duplicate_id_counts": {},
+        "sendcan_id_counts": {
+          "0": 67640,
+          "11": 116801
+        },
+        "src_0_1_2_id_counts_raw": {},
+        "unmatched_native_candidate_id_counts": {}
+      },
+      "duration_s": 3715.004303,
+      "first_08a_id": 0,
+      "first_mono_s": 21875.337203946,
+      "id_transition_counts": {
+        "0->11": 19,
+        "0->4": 2,
+        "11->0": 19,
+        "4->0": 2
+      },
+      "last_08a_id": 0,
+      "last_mono_s": 25590.341507425,
+      "native_081_id_counts": {
+        "0": 47886,
+        "11": 75864,
+        "4": 62
+      },
+      "native_081_latest_08a_pairing": {
+        "0->11": 6,
+        "0->4": 1,
+        "11->0": 9,
+        "4->0": 1,
+        "eligible": 123790,
+        "match": 123773
+      },
+      "native_08a_frames": 148567,
+      "nonzero_episode_count": 21,
+      "nonzero_episodes": [
+        {
+          "b23_counts": {
+            "0x00": 21237,
+            "0x20": 1603
+          },
+          "cruise_latch_counts": {
+            "1": 22840
+          },
+          "duration_s": 571.044792,
+          "end_s": 1108.891309,
+          "frames": 22840,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 22840
+          },
+          "start_s": 537.846517,
+          "target_angle_raw_max": 75,
+          "target_angle_raw_min": -19,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 3668,
+            "0x20": 212
+          },
+          "cruise_latch_counts": {
+            "1": 3880
+          },
+          "duration_s": 96.989503,
+          "end_s": 1298.965127,
+          "frames": 3880,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 3880
+          },
+          "start_s": 1201.975624,
+          "target_angle_raw_max": 30,
+          "target_angle_raw_min": -39,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 249,
+            "0x20": 251
+          },
+          "cruise_latch_counts": {
+            "1": 500
+          },
+          "duration_s": 12.476413,
+          "end_s": 1315.809143,
+          "frames": 500,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 500
+          },
+          "start_s": 1303.33273,
+          "target_angle_raw_max": 51,
+          "target_angle_raw_min": -1,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 5847,
+            "0x20": 283
+          },
+          "cruise_latch_counts": {
+            "1": 6130
+          },
+          "duration_s": 153.235634,
+          "end_s": 1472.530269,
+          "frames": 6130,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 6130
+          },
+          "start_s": 1319.294635,
+          "target_angle_raw_max": 27,
+          "target_angle_raw_min": -90,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 4800,
+            "0x20": 234
+          },
+          "cruise_latch_counts": {
+            "1": 5034
+          },
+          "duration_s": 125.842662,
+          "end_s": 1602.351195,
+          "frames": 5034,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 5034
+          },
+          "start_s": 1476.508533,
+          "target_angle_raw_max": 62,
+          "target_angle_raw_min": -2,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 1456,
+            "0x20": 138
+          },
+          "cruise_latch_counts": {
+            "1": 1594
+          },
+          "duration_s": 39.823163,
+          "end_s": 1646.149686,
+          "frames": 1594,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1594
+          },
+          "start_s": 1606.326523,
+          "target_angle_raw_max": 23,
+          "target_angle_raw_min": -23,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 3920,
+            "0x20": 134
+          },
+          "cruise_latch_counts": {
+            "1": 4054
+          },
+          "duration_s": 101.339355,
+          "end_s": 1751.6656,
+          "frames": 4054,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 4054
+          },
+          "start_s": 1650.326245,
+          "target_angle_raw_max": 67,
+          "target_angle_raw_min": -27,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 1449,
+            "0x20": 77
+          },
+          "cruise_latch_counts": {
+            "1": 1526
+          },
+          "duration_s": 38.124502,
+          "end_s": 1793.717832,
+          "frames": 1526,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1526
+          },
+          "start_s": 1755.59333,
+          "target_angle_raw_max": 57,
+          "target_angle_raw_min": -14,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 4505,
+            "0x20": 619
+          },
+          "cruise_latch_counts": {
+            "1": 5124
+          },
+          "duration_s": 128.093629,
+          "end_s": 1926.040729,
+          "frames": 5124,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 5124
+          },
+          "start_s": 1797.9471,
+          "target_angle_raw_max": 82,
+          "target_angle_raw_min": 4,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 4683,
+            "0x20": 113
+          },
+          "cruise_latch_counts": {
+            "1": 4796
+          },
+          "duration_s": 119.896279,
+          "end_s": 2050.30645,
+          "frames": 4796,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 4796
+          },
+          "start_s": 1930.410171,
+          "target_angle_raw_max": 38,
+          "target_angle_raw_min": -10,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 7456,
+            "0x20": 208
+          },
+          "cruise_latch_counts": {
+            "1": 7664
+          },
+          "duration_s": 191.604187,
+          "end_s": 2245.879717,
+          "frames": 7664,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 7664
+          },
+          "start_s": 2054.27553,
+          "target_angle_raw_max": 67,
+          "target_angle_raw_min": -74,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 2034
+          },
+          "cruise_latch_counts": {
+            "1": 2034
+          },
+          "duration_s": 50.833736,
+          "end_s": 2300.781946,
+          "frames": 2034,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2034
+          },
+          "start_s": 2249.94821,
+          "target_angle_raw_max": 34,
+          "target_angle_raw_min": -22,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 4752,
+            "0x20": 168
+          },
+          "cruise_latch_counts": {
+            "1": 4920
+          },
+          "duration_s": 122.984632,
+          "end_s": 2428.24714,
+          "frames": 4920,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 4920
+          },
+          "start_s": 2305.262508,
+          "target_angle_raw_max": 65,
+          "target_angle_raw_min": -13,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 4383,
+            "0x20": 605
+          },
+          "cruise_latch_counts": {
+            "1": 4988
+          },
+          "duration_s": 124.692531,
+          "end_s": 2557.370007,
+          "frames": 4988,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 4988
+          },
+          "start_s": 2432.677476,
+          "target_angle_raw_max": 35,
+          "target_angle_raw_min": -29,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 2297,
+            "0x20": 1483
+          },
+          "cruise_latch_counts": {
+            "1": 3780
+          },
+          "duration_s": 94.488433,
+          "end_s": 2655.775669,
+          "frames": 3780,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 3780
+          },
+          "start_s": 2561.287236,
+          "target_angle_raw_max": 30,
+          "target_angle_raw_min": -29,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 238,
+            "0x20": 152
+          },
+          "cruise_latch_counts": {
+            "1": 390
+          },
+          "duration_s": 9.724773,
+          "end_s": 2669.777053,
+          "frames": 390,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 390
+          },
+          "start_s": 2660.05228,
+          "target_angle_raw_max": 57,
+          "target_angle_raw_min": -4,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 709,
+            "0x20": 375
+          },
+          "cruise_latch_counts": {
+            "1": 1084
+          },
+          "duration_s": 27.082791,
+          "end_s": 2701.037199,
+          "frames": 1084,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1084
+          },
+          "start_s": 2673.954408,
+          "target_angle_raw_max": 22,
+          "target_angle_raw_min": -15,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 9497,
+            "0x20": 999
+          },
+          "cruise_latch_counts": {
+            "1": 10496
+          },
+          "duration_s": 262.409651,
+          "end_s": 2967.666332,
+          "frames": 10496,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 10496
+          },
+          "start_s": 2705.256681,
+          "target_angle_raw_max": 87,
+          "target_angle_raw_min": -16,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 202
+          },
+          "cruise_latch_counts": {
+            "1": 202
+          },
+          "duration_s": 5.024794,
+          "end_s": 2977.612679,
+          "frames": 202,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 202
+          },
+          "start_s": 2972.587885,
+          "target_angle_raw_max": 43,
+          "target_angle_raw_min": 5,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 14,
+            "0x20": 14
+          },
+          "cruise_latch_counts": {
+            "0": 28
+          },
+          "duration_s": 0.675097,
+          "end_s": 3421.071403,
+          "frames": 28,
+          "label": "LDA",
+          "request_level_counts": {
+            "100": 28
+          },
+          "start_s": 3420.396306,
+          "target_angle_raw_max": 8,
+          "target_angle_raw_min": -50,
+          "target_lateral_id": 4
+        },
+        {
+          "b23_counts": {
+            "0x00": 27,
+            "0x20": 19
+          },
+          "cruise_latch_counts": {
+            "0": 46
+          },
+          "duration_s": 1.12773,
+          "end_s": 3442.123091,
+          "frames": 46,
+          "label": "LDA",
+          "request_level_counts": {
+            "100": 46
+          },
+          "start_s": 3440.995361,
+          "target_angle_raw_max": 24,
+          "target_angle_raw_min": -1,
+          "target_lateral_id": 4
+        }
+      ],
+      "route": "0000003d--0e812cecba",
+      "segment_count": 62,
+      "source_dir": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba",
+      "target_lateral_ids": {
+        "0": {
+          "b23_counts": {
+            "0x00": 57457
+          },
+          "cruise_latch_counts": {
+            "0": 54635,
+            "1": 2822
+          },
+          "frames": 57457,
+          "label": "No Request (Manual Operation)",
+          "request_level_counts": {
+            "0": 21504,
+            "100": 35953
+          },
+          "target_angle_deg_equiv_range": [
+            -461.401679,
+            465.355568
+          ],
+          "target_angle_raw_range": [
+            -8052,
+            8121
+          ]
+        },
+        "11": {
+          "b23_counts": {
+            "0x00": 83382,
+            "0x20": 7654
+          },
+          "cruise_latch_counts": {
+            "1": 91036
+          },
+          "frames": 91036,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 91036
+          },
+          "target_angle_deg_equiv_range": [
+            -5.157247,
+            4.985339
+          ],
+          "target_angle_raw_range": [
+            -90,
+            87
+          ]
+        },
+        "4": {
+          "b23_counts": {
+            "0x00": 41,
+            "0x20": 33
+          },
+          "cruise_latch_counts": {
+            "0": 74
+          },
+          "frames": 74,
+          "label": "LDA",
+          "request_level_counts": {
+            "100": 74
+          },
+          "target_angle_deg_equiv_range": [
+            -2.865137,
+            1.375266
+          ],
+          "target_angle_raw_range": [
+            -50,
+            24
+          ]
+        }
+      }
+    },
+    "3e": {
+      "b6": {
+        "can_src_counts": {
+          "128": 232548,
+          "192": 9
+        },
+        "panda_tx_echo_id_counts": {
+          "0": 71752,
+          "11": 160796
+        },
+        "same_event_tx_echo_duplicate_id_counts": {},
+        "sendcan_id_counts": {
+          "0": 71759,
+          "11": 160798
+        },
+        "src_0_1_2_id_counts_raw": {},
+        "unmatched_native_candidate_id_counts": {}
+      },
+      "duration_s": 4681.099054,
+      "first_08a_id": 0,
+      "first_mono_s": 71.41295643,
+      "id_transition_counts": {
+        "0->11": 25,
+        "11->0": 25,
+        "11->4": 1,
+        "4->11": 1
+      },
+      "last_08a_id": 0,
+      "last_mono_s": 4752.512010189,
+      "native_081_id_counts": {
+        "0": 51202,
+        "11": 104775,
+        "4": 41
+      },
+      "native_081_latest_08a_pairing": {
+        "0->11": 7,
+        "11->0": 9,
+        "4->11": 1,
+        "eligible": 155982,
+        "match": 155965
+      },
+      "native_08a_frames": 187216,
+      "nonzero_episode_count": 27,
+      "nonzero_episodes": [
+        {
+          "b23_counts": {
+            "0x00": 602
+          },
+          "cruise_latch_counts": {
+            "1": 602
+          },
+          "duration_s": 15.028141,
+          "end_s": 738.388603,
+          "frames": 602,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 602
+          },
+          "start_s": 723.360462,
+          "target_angle_raw_max": 44,
+          "target_angle_raw_min": 15,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 5484
+          },
+          "cruise_latch_counts": {
+            "1": 5484
+          },
+          "duration_s": 137.08764,
+          "end_s": 879.796928,
+          "frames": 5484,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 5484
+          },
+          "start_s": 742.709288,
+          "target_angle_raw_max": 79,
+          "target_angle_raw_min": 21,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 33,
+            "0x20": 155
+          },
+          "cruise_latch_counts": {
+            "1": 188
+          },
+          "duration_s": 4.680339,
+          "end_s": 888.605547,
+          "frames": 188,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 188
+          },
+          "start_s": 883.925208,
+          "target_angle_raw_max": 35,
+          "target_angle_raw_min": -9,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 919,
+            "0x20": 255
+          },
+          "cruise_latch_counts": {
+            "1": 1174
+          },
+          "duration_s": 29.330434,
+          "end_s": 921.952901,
+          "frames": 1174,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1174
+          },
+          "start_s": 892.622467,
+          "target_angle_raw_max": 43,
+          "target_angle_raw_min": -18,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 6,
+            "0x20": 90
+          },
+          "cruise_latch_counts": {
+            "1": 96
+          },
+          "duration_s": 2.368777,
+          "end_s": 928.801135,
+          "frames": 96,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 96
+          },
+          "start_s": 926.432358,
+          "target_angle_raw_max": 54,
+          "target_angle_raw_min": 17,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 922
+          },
+          "cruise_latch_counts": {
+            "1": 922
+          },
+          "duration_s": 23.029921,
+          "end_s": 953.357828,
+          "frames": 922,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 922
+          },
+          "start_s": 930.327907,
+          "target_angle_raw_max": 45,
+          "target_angle_raw_min": 17,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 4511,
+            "0x20": 469
+          },
+          "cruise_latch_counts": {
+            "1": 4980
+          },
+          "duration_s": 124.484536,
+          "end_s": 1083.315235,
+          "frames": 4980,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 4980
+          },
+          "start_s": 958.830699,
+          "target_angle_raw_max": 75,
+          "target_angle_raw_min": -36,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 1207,
+            "0x20": 161
+          },
+          "cruise_latch_counts": {
+            "1": 1368
+          },
+          "duration_s": 34.175814,
+          "end_s": 1121.417738,
+          "frames": 1368,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1368
+          },
+          "start_s": 1087.241924,
+          "target_angle_raw_max": 49,
+          "target_angle_raw_min": -26,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 13086,
+            "0x20": 444
+          },
+          "cruise_latch_counts": {
+            "1": 13530
+          },
+          "duration_s": 338.260188,
+          "end_s": 1463.854764,
+          "frames": 13530,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 13530
+          },
+          "start_s": 1125.594576,
+          "target_angle_raw_max": 77,
+          "target_angle_raw_min": -31,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 506
+          },
+          "cruise_latch_counts": {
+            "1": 506
+          },
+          "duration_s": 12.62148,
+          "end_s": 1477.551998,
+          "frames": 506,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 506
+          },
+          "start_s": 1464.930518,
+          "target_angle_raw_max": 47,
+          "target_angle_raw_min": 7,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 567,
+            "0x20": 161
+          },
+          "cruise_latch_counts": {
+            "1": 728
+          },
+          "duration_s": 18.171217,
+          "end_s": 1499.807666,
+          "frames": 728,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 728
+          },
+          "start_s": 1481.636449,
+          "target_angle_raw_max": 43,
+          "target_angle_raw_min": -16,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 18535,
+            "0x20": 1745
+          },
+          "cruise_latch_counts": {
+            "1": 20280
+          },
+          "duration_s": 507.02357,
+          "end_s": 2010.857612,
+          "frames": 20280,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 20280
+          },
+          "start_s": 1503.834042,
+          "target_angle_raw_max": 84,
+          "target_angle_raw_min": -16,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 214,
+            "0x20": 120
+          },
+          "cruise_latch_counts": {
+            "1": 334
+          },
+          "duration_s": 8.328191,
+          "end_s": 2023.262546,
+          "frames": 334,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 334
+          },
+          "start_s": 2014.934355,
+          "target_angle_raw_max": 43,
+          "target_angle_raw_min": 12,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 572,
+            "0x20": 6
+          },
+          "cruise_latch_counts": {
+            "1": 578
+          },
+          "duration_s": 14.430111,
+          "end_s": 2041.6704,
+          "frames": 578,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 578
+          },
+          "start_s": 2027.240289,
+          "target_angle_raw_max": 73,
+          "target_angle_raw_min": 7,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 340,
+            "0x20": 62
+          },
+          "cruise_latch_counts": {
+            "1": 402
+          },
+          "duration_s": 10.02501,
+          "end_s": 2056.165515,
+          "frames": 402,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 402
+          },
+          "start_s": 2046.140505,
+          "target_angle_raw_max": 36,
+          "target_angle_raw_min": -11,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 3904
+          },
+          "cruise_latch_counts": {
+            "1": 3904
+          },
+          "duration_s": 97.58531,
+          "end_s": 2157.929933,
+          "frames": 3904,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 3904
+          },
+          "start_s": 2060.344623,
+          "target_angle_raw_max": 71,
+          "target_angle_raw_min": 2,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 668,
+            "0x20": 612
+          },
+          "cruise_latch_counts": {
+            "1": 1280
+          },
+          "duration_s": 31.98233,
+          "end_s": 2193.736016,
+          "frames": 1280,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1280
+          },
+          "start_s": 2161.753686,
+          "target_angle_raw_max": 49,
+          "target_angle_raw_min": -1,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 3111,
+            "0x20": 59
+          },
+          "cruise_latch_counts": {
+            "1": 3170
+          },
+          "duration_s": 79.23992,
+          "end_s": 2277.697768,
+          "frames": 3170,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 3170
+          },
+          "start_s": 2198.457848,
+          "target_angle_raw_max": 58,
+          "target_angle_raw_min": 18,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 42,
+            "0x20": 106
+          },
+          "cruise_latch_counts": {
+            "1": 148
+          },
+          "duration_s": 3.677481,
+          "end_s": 2285.743625,
+          "frames": 148,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 148
+          },
+          "start_s": 2282.066144,
+          "target_angle_raw_max": 28,
+          "target_angle_raw_min": 7,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 2822
+          },
+          "cruise_latch_counts": {
+            "1": 2822
+          },
+          "duration_s": 70.533567,
+          "end_s": 2357.150369,
+          "frames": 2822,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2822
+          },
+          "start_s": 2286.616802,
+          "target_angle_raw_max": 71,
+          "target_angle_raw_min": 12,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 3688,
+            "0x20": 414
+          },
+          "cruise_latch_counts": {
+            "1": 4102
+          },
+          "duration_s": 102.541838,
+          "end_s": 2463.216709,
+          "frames": 4102,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 4102
+          },
+          "start_s": 2360.674871,
+          "target_angle_raw_max": 73,
+          "target_angle_raw_min": -14,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 1373,
+            "0x20": 93
+          },
+          "cruise_latch_counts": {
+            "1": 1466
+          },
+          "duration_s": 36.624478,
+          "end_s": 2503.414795,
+          "frames": 1466,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1466
+          },
+          "start_s": 2466.790317,
+          "target_angle_raw_max": 43,
+          "target_angle_raw_min": -17,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 27046,
+            "0x20": 3562
+          },
+          "cruise_latch_counts": {
+            "1": 30608
+          },
+          "duration_s": 765.263681,
+          "end_s": 3273.159115,
+          "frames": 30608,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 30608
+          },
+          "start_s": 2507.895434,
+          "target_angle_raw_max": 86,
+          "target_angle_raw_min": -20,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 33,
+            "0x20": 17
+          },
+          "cruise_latch_counts": {
+            "1": 50
+          },
+          "duration_s": 1.22583,
+          "end_s": 3274.404651,
+          "frames": 50,
+          "label": "LDA",
+          "request_level_counts": {
+            "100": 50
+          },
+          "start_s": 3273.178821,
+          "target_angle_raw_max": 101,
+          "target_angle_raw_min": 22,
+          "target_lateral_id": 4
+        },
+        {
+          "b23_counts": {
+            "0x00": 8467,
+            "0x20": 3325
+          },
+          "cruise_latch_counts": {
+            "1": 11792
+          },
+          "duration_s": 294.808802,
+          "end_s": 3569.242887,
+          "frames": 11792,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 11792
+          },
+          "start_s": 3274.434085,
+          "target_angle_raw_max": 116,
+          "target_angle_raw_min": -54,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 10139,
+            "0x20": 5013
+          },
+          "cruise_latch_counts": {
+            "1": 15152
+          },
+          "duration_s": 378.825749,
+          "end_s": 3949.286132,
+          "frames": 15152,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 15152
+          },
+          "start_s": 3570.460383,
+          "target_angle_raw_max": 152,
+          "target_angle_raw_min": -128,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 6,
+            "0x20": 102
+          },
+          "cruise_latch_counts": {
+            "1": 108
+          },
+          "duration_s": 2.670766,
+          "end_s": 3955.834089,
+          "frames": 108,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 108
+          },
+          "start_s": 3953.163323,
+          "target_angle_raw_max": 130,
+          "target_angle_raw_min": 30,
+          "target_lateral_id": 11
+        }
+      ],
+      "route": "0000003e--1a2f20417d",
+      "segment_count": 78,
+      "source_dir": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-06/0000003e--1a2f20417d",
+      "target_lateral_ids": {
+        "0": {
+          "b23_counts": {
+            "0x00": 61442
+          },
+          "cruise_latch_counts": {
+            "0": 58024,
+            "1": 3418
+          },
+          "frames": 61442,
+          "label": "No Request (Manual Operation)",
+          "request_level_counts": {
+            "0": 28928,
+            "100": 32514
+          },
+          "target_angle_deg_equiv_range": [
+            -482.94751,
+            466.788137
+          ],
+          "target_angle_raw_range": [
+            -8428,
+            8146
+          ]
+        },
+        "11": {
+          "b23_counts": {
+            "0x00": 108770,
+            "0x20": 16954
+          },
+          "cruise_latch_counts": {
+            "1": 125724
+          },
+          "frames": 125724,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 125724
+          },
+          "target_angle_deg_equiv_range": [
+            -7.334751,
+            8.710017
+          ],
+          "target_angle_raw_range": [
+            -128,
+            152
+          ]
+        },
+        "4": {
+          "b23_counts": {
+            "0x00": 33,
+            "0x20": 17
+          },
+          "cruise_latch_counts": {
+            "1": 50
+          },
+          "frames": 50,
+          "label": "LDA",
+          "request_level_counts": {
+            "100": 50
+          },
+          "target_angle_deg_equiv_range": [
+            1.26066,
+            5.787577
+          ],
+          "target_angle_raw_range": [
+            22,
+            101
+          ]
+        }
+      }
+    },
+    "3f": {
+      "b6": {
+        "can_src_counts": {
+          "128": 249059,
+          "192": 7
+        },
+        "panda_tx_echo_id_counts": {
+          "0": 83990,
+          "11": 165069
+        },
+        "same_event_tx_echo_duplicate_id_counts": {},
+        "sendcan_id_counts": {
+          "0": 83995,
+          "11": 165071
+        },
+        "src_0_1_2_id_counts_raw": {},
+        "unmatched_native_candidate_id_counts": {}
+      },
+      "duration_s": 5014.842854,
+      "first_08a_id": 0,
+      "first_mono_s": 4891.680677011,
+      "id_transition_counts": {
+        "0->11": 33,
+        "11->0": 33
+      },
+      "last_08a_id": 0,
+      "last_mono_s": 9906.52353114,
+      "native_081_id_counts": {
+        "0": 59963,
+        "11": 107179
+      },
+      "native_081_latest_08a_pairing": {
+        "0->11": 17,
+        "11->0": 13,
+        "eligible": 167109,
+        "match": 167079
+      },
+      "native_08a_frames": 200559,
+      "nonzero_episode_count": 33,
+      "nonzero_episodes": [
+        {
+          "b23_counts": {
+            "0x00": 802,
+            "0x20": 516
+          },
+          "cruise_latch_counts": {
+            "1": 1318
+          },
+          "duration_s": 32.920127,
+          "end_s": 864.66845,
+          "frames": 1318,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1318
+          },
+          "start_s": 831.748323,
+          "target_angle_raw_max": 98,
+          "target_angle_raw_min": 6,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 169,
+            "0x20": 431
+          },
+          "cruise_latch_counts": {
+            "1": 600
+          },
+          "duration_s": 14.973968,
+          "end_s": 892.377784,
+          "frames": 600,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 600
+          },
+          "start_s": 877.403816,
+          "target_angle_raw_max": 29,
+          "target_angle_raw_min": -19,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 1746,
+            "0x20": 92
+          },
+          "cruise_latch_counts": {
+            "1": 1838
+          },
+          "duration_s": 45.929159,
+          "end_s": 941.88214,
+          "frames": 1838,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1838
+          },
+          "start_s": 895.952981,
+          "target_angle_raw_max": 63,
+          "target_angle_raw_min": -12,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 746
+          },
+          "cruise_latch_counts": {
+            "1": 746
+          },
+          "duration_s": 18.628198,
+          "end_s": 988.440959,
+          "frames": 746,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 746
+          },
+          "start_s": 969.812761,
+          "target_angle_raw_max": 35,
+          "target_angle_raw_min": -13,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 202
+          },
+          "cruise_latch_counts": {
+            "1": 202
+          },
+          "duration_s": 5.020407,
+          "end_s": 1021.686989,
+          "frames": 202,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 202
+          },
+          "start_s": 1016.666582,
+          "target_angle_raw_max": 7,
+          "target_angle_raw_min": -14,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 4291,
+            "0x20": 1043
+          },
+          "cruise_latch_counts": {
+            "1": 5334
+          },
+          "duration_s": 133.339747,
+          "end_s": 1248.863921,
+          "frames": 5334,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 5334
+          },
+          "start_s": 1115.524174,
+          "target_angle_raw_max": 122,
+          "target_angle_raw_min": -132,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 4886,
+            "0x20": 228
+          },
+          "cruise_latch_counts": {
+            "1": 5114
+          },
+          "duration_s": 127.841782,
+          "end_s": 1395.135297,
+          "frames": 5114,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 5114
+          },
+          "start_s": 1267.293515,
+          "target_angle_raw_max": 134,
+          "target_angle_raw_min": -38,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 1429,
+            "0x20": 1085
+          },
+          "cruise_latch_counts": {
+            "1": 2514
+          },
+          "duration_s": 62.829958,
+          "end_s": 1461.691007,
+          "frames": 2514,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2514
+          },
+          "start_s": 1398.861049,
+          "target_angle_raw_max": 101,
+          "target_angle_raw_min": -82,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 270,
+            "0x20": 392
+          },
+          "cruise_latch_counts": {
+            "1": 662
+          },
+          "duration_s": 16.532273,
+          "end_s": 1481.495974,
+          "frames": 662,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 662
+          },
+          "start_s": 1464.963701,
+          "target_angle_raw_max": 71,
+          "target_angle_raw_min": -48,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 5637,
+            "0x20": 1171
+          },
+          "cruise_latch_counts": {
+            "1": 6808
+          },
+          "duration_s": 170.198607,
+          "end_s": 1652.718259,
+          "frames": 6808,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 6808
+          },
+          "start_s": 1482.519652,
+          "target_angle_raw_max": 72,
+          "target_angle_raw_min": -82,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 115,
+            "0x20": 135
+          },
+          "cruise_latch_counts": {
+            "1": 250
+          },
+          "duration_s": 6.227885,
+          "end_s": 1662.570284,
+          "frames": 250,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 250
+          },
+          "start_s": 1656.342399,
+          "target_angle_raw_max": 38,
+          "target_angle_raw_min": 13,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 3254,
+            "0x20": 484
+          },
+          "cruise_latch_counts": {
+            "1": 3738
+          },
+          "duration_s": 93.432691,
+          "end_s": 1759.42497,
+          "frames": 3738,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 3738
+          },
+          "start_s": 1665.992279,
+          "target_angle_raw_max": 52,
+          "target_angle_raw_min": -16,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 6921,
+            "0x20": 1255
+          },
+          "cruise_latch_counts": {
+            "1": 8176
+          },
+          "duration_s": 204.402576,
+          "end_s": 1967.555125,
+          "frames": 8176,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 8176
+          },
+          "start_s": 1763.152549,
+          "target_angle_raw_max": 54,
+          "target_angle_raw_min": -91,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 3458,
+            "0x20": 260
+          },
+          "cruise_latch_counts": {
+            "1": 3718
+          },
+          "duration_s": 92.936996,
+          "end_s": 2064.016465,
+          "frames": 3718,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 3718
+          },
+          "start_s": 1971.079469,
+          "target_angle_raw_max": 51,
+          "target_angle_raw_min": 0,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 6581,
+            "0x20": 323
+          },
+          "cruise_latch_counts": {
+            "1": 6904
+          },
+          "duration_s": 172.603214,
+          "end_s": 2240.939027,
+          "frames": 6904,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 6904
+          },
+          "start_s": 2068.335813,
+          "target_angle_raw_max": 26,
+          "target_angle_raw_min": -50,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 485,
+            "0x20": 497
+          },
+          "cruise_latch_counts": {
+            "1": 982
+          },
+          "duration_s": 24.526848,
+          "end_s": 2269.836493,
+          "frames": 982,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 982
+          },
+          "start_s": 2245.309645,
+          "target_angle_raw_max": 53,
+          "target_angle_raw_min": -20,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 5939,
+            "0x20": 83
+          },
+          "cruise_latch_counts": {
+            "1": 6022
+          },
+          "duration_s": 150.545809,
+          "end_s": 2424.658515,
+          "frames": 6022,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 6022
+          },
+          "start_s": 2274.112706,
+          "target_angle_raw_max": 65,
+          "target_angle_raw_min": -2,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 172,
+            "0x20": 464
+          },
+          "cruise_latch_counts": {
+            "1": 636
+          },
+          "duration_s": 15.875298,
+          "end_s": 2445.305985,
+          "frames": 636,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 636
+          },
+          "start_s": 2429.430687,
+          "target_angle_raw_max": 30,
+          "target_angle_raw_min": -24,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 3874,
+            "0x20": 330
+          },
+          "cruise_latch_counts": {
+            "1": 4204
+          },
+          "duration_s": 105.088047,
+          "end_s": 2553.818968,
+          "frames": 4204,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 4204
+          },
+          "start_s": 2448.730921,
+          "target_angle_raw_max": 52,
+          "target_angle_raw_min": 2,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 1152,
+            "0x20": 250
+          },
+          "cruise_latch_counts": {
+            "1": 1402
+          },
+          "duration_s": 35.027834,
+          "end_s": 2593.276694,
+          "frames": 1402,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1402
+          },
+          "start_s": 2558.24886,
+          "target_angle_raw_max": 26,
+          "target_angle_raw_min": -26,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 6,
+            "0x20": 34
+          },
+          "cruise_latch_counts": {
+            "1": 40
+          },
+          "duration_s": 0.97499,
+          "end_s": 2598.878115,
+          "frames": 40,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 40
+          },
+          "start_s": 2597.903125,
+          "target_angle_raw_max": 66,
+          "target_angle_raw_min": 28,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 1275,
+            "0x20": 265
+          },
+          "cruise_latch_counts": {
+            "1": 1540
+          },
+          "duration_s": 38.487977,
+          "end_s": 2641.736471,
+          "frames": 1540,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1540
+          },
+          "start_s": 2603.248494,
+          "target_angle_raw_max": 51,
+          "target_angle_raw_min": -26,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 5304,
+            "0x20": 50
+          },
+          "cruise_latch_counts": {
+            "1": 5354
+          },
+          "duration_s": 133.833461,
+          "end_s": 2790.845318,
+          "frames": 5354,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 5354
+          },
+          "start_s": 2657.011857,
+          "target_angle_raw_max": 42,
+          "target_angle_raw_min": -47,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 789,
+            "0x20": 447
+          },
+          "cruise_latch_counts": {
+            "1": 1236
+          },
+          "duration_s": 30.871856,
+          "end_s": 2827.199916,
+          "frames": 1236,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1236
+          },
+          "start_s": 2796.32806,
+          "target_angle_raw_max": 22,
+          "target_angle_raw_min": -60,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 5690,
+            "0x20": 340
+          },
+          "cruise_latch_counts": {
+            "1": 6030
+          },
+          "duration_s": 150.753532,
+          "end_s": 2982.228647,
+          "frames": 6030,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 6030
+          },
+          "start_s": 2831.475115,
+          "target_angle_raw_max": 61,
+          "target_angle_raw_min": -6,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 4275,
+            "0x20": 217
+          },
+          "cruise_latch_counts": {
+            "1": 4492
+          },
+          "duration_s": 112.295704,
+          "end_s": 3098.38943,
+          "frames": 4492,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 4492
+          },
+          "start_s": 2986.093726,
+          "target_angle_raw_max": 24,
+          "target_angle_raw_min": -17,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 7368,
+            "0x20": 430
+          },
+          "cruise_latch_counts": {
+            "1": 7798
+          },
+          "duration_s": 194.946091,
+          "end_s": 3297.160567,
+          "frames": 7798,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 7798
+          },
+          "start_s": 3102.214476,
+          "target_angle_raw_max": 55,
+          "target_angle_raw_min": -4,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 12904,
+            "0x20": 1002
+          },
+          "cruise_latch_counts": {
+            "1": 13906
+          },
+          "duration_s": 347.667243,
+          "end_s": 3648.602758,
+          "frames": 13906,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 13906
+          },
+          "start_s": 3300.935515,
+          "target_angle_raw_max": 39,
+          "target_angle_raw_min": -38,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 2109,
+            "0x20": 79
+          },
+          "cruise_latch_counts": {
+            "1": 2188
+          },
+          "duration_s": 54.684344,
+          "end_s": 3708.005887,
+          "frames": 2188,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2188
+          },
+          "start_s": 3653.321543,
+          "target_angle_raw_max": 53,
+          "target_angle_raw_min": 0,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 1728,
+            "0x20": 740
+          },
+          "cruise_latch_counts": {
+            "1": 2468
+          },
+          "duration_s": 61.682009,
+          "end_s": 3773.366067,
+          "frames": 2468,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 2468
+          },
+          "start_s": 3711.684058,
+          "target_angle_raw_max": 33,
+          "target_angle_raw_min": -20,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 4680,
+            "0x20": 146
+          },
+          "cruise_latch_counts": {
+            "1": 4826
+          },
+          "duration_s": 120.633217,
+          "end_s": 3898.326883,
+          "frames": 4826,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 4826
+          },
+          "start_s": 3777.693666,
+          "target_angle_raw_max": 46,
+          "target_angle_raw_min": -6,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 969,
+            "0x20": 299
+          },
+          "cruise_latch_counts": {
+            "1": 1268
+          },
+          "duration_s": 31.685195,
+          "end_s": 3933.737937,
+          "frames": 1268,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 1268
+          },
+          "start_s": 3902.052742,
+          "target_angle_raw_max": 24,
+          "target_angle_raw_min": -25,
+          "target_lateral_id": 11
+        },
+        {
+          "b23_counts": {
+            "0x00": 16013,
+            "0x20": 279
+          },
+          "cruise_latch_counts": {
+            "1": 16292
+          },
+          "duration_s": 407.322845,
+          "end_s": 4345.028105,
+          "frames": 16292,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 16292
+          },
+          "start_s": 3937.70526,
+          "target_angle_raw_max": 72,
+          "target_angle_raw_min": -16,
+          "target_lateral_id": 11
+        }
+      ],
+      "route": "0000003f--36e72f5fdc",
+      "segment_count": 84,
+      "source_dir": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-06/0000003f--36e72f5fdc",
+      "target_lateral_ids": {
+        "0": {
+          "b23_counts": {
+            "0x00": 71953
+          },
+          "cruise_latch_counts": {
+            "0": 67933,
+            "1": 4020
+          },
+          "frames": 71953,
+          "label": "No Request (Manual Operation)",
+          "request_level_counts": {
+            "0": 33260,
+            "100": 38693
+          },
+          "target_angle_deg_equiv_range": [
+            -485.927252,
+            353.844432
+          ],
+          "target_angle_raw_range": [
+            -8480,
+            6175
+          ]
+        },
+        "11": {
+          "b23_counts": {
+            "0x00": 115239,
+            "0x20": 13367
+          },
+          "cruise_latch_counts": {
+            "1": 128606
+          },
+          "frames": 128606,
+          "label": "LTA/LCA",
+          "request_level_counts": {
+            "100": 128606
+          },
+          "target_angle_deg_equiv_range": [
+            -7.563962,
+            7.678567
+          ],
+          "target_angle_raw_range": [
+            -132,
+            134
+          ]
+        }
+      }
+    }
+  },
+  "schema": "camry-2026-lateral-family-census-v1"
+}

@@ -829,6 +829,127 @@ Deterministic evidence: `tools/analyze_camry_2026_pda_sdg.py`,
 `tests/verify_camry_2026_pda_sdg.py`, joined to the exact-F33 target and current TSS3
 managed recorder artifacts.
 
+
+### 4.9 Full road-corpus lateral-family census and exact-F33 profile switching (VAR-132)
+
+The steering investigation is no longer scoped to LTA/ID11. A complete retained-road
+census now treats Toyota's **Target Lateral ID** as one shared request-family selector
+and keeps the three observable planes distinct:
+
+1. native upstream `0x08A/32`, whose B21 low six bits carry the request-side Target
+   Lateral ID and whose B18:B19 carry the request/reference angle;
+2. native chassis-side protected `0x081/32`, whose B13 low six bits mirror the same
+   family identity and whose B16:B17 carry the corresponding reference quantity; and
+3. protected `0x0B6/32` / PDU44, the only positively recovered **external** Target
+   Lateral ID plus target-angle ingress accepted by exact F33 EPS.
+
+The selected corpus contains **12 retained road routes / 513 rlog segments**: archive
+routes `1c/27/29/2a/2c`, relay-open route `2d`, Sep-1 route `37`, all Sep-4 routes
+`3b/3c/3d`, and both Sep-6 routes `3e/3f`. Route `1c` emits LogReader's
+`Corrupted events detected` warning and is retained only as a marginal-motion case; its
+recoverable `0x08A` population is entirely ID0, so it supplies no positive steering-
+profile witness. Across the selected corpus the request-side census is **1,219,584
+native `0x08A` frames** with exactly four observed identities:
+
+| Target Lateral ID | Toyota meaning | Frames | Nonzero episodes | Request-level geometry |
+|---:|---|---:|---:|---|
+| 0 | No Request / manual | 512,847 | — | mixed inactive/reference state |
+| 4 | LDA | 298 | 6 | B24=100 in every frame; 146 cruise-off / 152 cruise-on |
+| 11 | LTA/LCA | 653,586 | 165 | B24=100 and the `0x08A` cruise latch set in every frame |
+| 18 | SDG / PDA-SA | 52,853 | 81 | cruise-off and B23=`0x20` in every frame; B24=50 on 27,837 and 25 on 25,016 |
+
+No road frame in this corpus uses exact-F33 steering profiles `1=PCS`, `10=Hands Off
+LTA`, or `19=PDA`, nor any of the wider generation-20 IDs such as AP/Remote
+Parking/Lv3/Lv4/Self-Propelled Transport. The request plane also switches directly
+between **nonzero** families without publishing ID0 in between: the full census contains
+28 direct `18->11`, one `18->4`, two `11->4`, and two `4->11` transitions. That is an
+FRC/request-plane observation only; it does not by itself prove what any downstream EPS
+accepts.
+
+The chassis-side `0x081` join makes the shared-family interpretation much stronger.
+Across **1,016,141** pairs where a native bus0 `0x081` publication has a latest native
+bus2 `0x08A` no older than 100 ms, the B13/B21 Target-Lateral identities agree in
+**1,015,978 / 1,016,141 = 99.9839589%**. The returned-state population itself is
+`0:427,400`, `4:248`, `11:544,673`, `18:44,045`; the small disagreement set is
+concentrated around family transitions and includes the newly recovered ID4 state.
+This is the first broad road-corpus proof that LDA, LTA/LCA, and SDG/PDA-SA are not
+separate ad-hoc request encodings: they occupy one request/reference identity family on
+both sides of the accessible relay.
+
+The exact-F33 CodeFlash answers the corresponding EPS question. `FUN_000CEFFC` starts
+every invocation with controller bank 7/default and, only when `FEBEACBD==0` and
+`FEBECAFF==1`, maps the **current** B6 Target Lateral ID snapshot directly to a common
+controller bank:
+
+```text
+1  PCS            -> bank 0
+4  LDA            -> bank 1
+11 LTA/LCA        -> bank 2
+10 Hands-Off LTA  -> bank 3
+19 PDA            -> bank 4
+18 SDG            -> bank 5
+```
+
+The selector has no DRCC state, LTA-switch state, cruise-latch state, prior Target
+Lateral ID, or elapsed-time ownership input. The exact raw B6 unpacker
+`FUN_0004BD46` likewise accepts a new PDU44 generation from COM health plus generation
+change and does **not** compare the new Target Lateral ID against the prior one. Across
+the complete exact-F33 decompilation corpus, `FEBECB00` has only the default initializer
+and `CEFFC` as writers. Therefore there is no recovered rule of the form "ID11 was
+accepted, so reject ID18/ID4 for N milliseconds." A valid newly delivered B6 can select
+a different profile on the next controller pass.
+
+This does **not** mean the EPS blindly actuates any received value. The profile selector
+is downstream of the normal protected-PDU admission/health machinery and the common
+controller retains ordinary speed, angle/rate, fault, slew/limit and persistence state.
+PDU44 still has the exact **seven 5-ms foreground-tick / nominal 35-ms communication
+loss supervision**. `FUN_000CEF26` also uses profile-indexed threshold/persistence
+calibrations (96 cycles; threshold 1280 for LDA/LTA/Hands-Off-LTA/PDA, 1536 for PCS,
+2048 for SDG) that feed common readiness/fault state. These are controller supervisors,
+not a Target-Lateral-ID ownership timer: `CEFFC` continues to recompute the selected bank
+from the latest delivered ID every pass.
+
+A complete exact-F33 direct-consumer census of B6 application signals 261..273 also
+rules out the most obvious hidden "DRCC enabled" companion-bit theory. Signal261 is
+Target Lateral ID and signal262 the target angle. Signal265 suppresses one additive
+controller term when set; signal268 is the application modulo-64 sequence; signals
+269/270 scale two contributions by `/100`. Signals264/267/271/272 have no recovered
+downstream direct reader after the broad snapshot, while signal266 is staged but is not
+propagated into that broad snapshot at all. Of the remaining live companions,
+**signal263 B6[7]** feeds `CB664/C7B4`, a state subsequently used by `CB73A` only with
+Target Lateral ID **49=Self-Propelled Transport**; **signal273 B10[2:0]** is conditionally
+republished by `CFDA0` into a separate valid-gated status/mode machine consumed by
+`CFDD4/CFE64`. Neither is an input to `CEFFC`. Under the recovered direct-reference
+surface, no generic B6 secondary "command enabled / DRCC enabled" bit exists.
+Computed aliases/DMA outside the recovered direct-reference model remain a normal proof
+boundary, but they cannot change the explicit `CEFFC` input set.
+
+Finally, the broad B6 road census needed one provenance correction before it could be
+used. Archive route `27` contains **106,800** `src=2` B6 records, but every one has an
+exact same-event, same-payload Panda `src=128` TX echo: `60,722` ID0 and `46,078` ID11.
+The ordered payload sequences are byte-for-byte identical and timestamps are equal on
+106,800/106,800 pairs. Those are our own pre-repin relay-side copies, not stock B6.
+After this deduplication the full selected road corpus contains **zero unmatched
+src0/1/2 native-B6 candidates**, despite 1.65M+ `sendcan` B6 attempts in historical
+bring-up runs. This extends the earlier zero-native-B6 result without conflating our
+sender with factory traffic.
+
+The resulting architectural model is therefore sharper than "find the LTA command":
+Toyota's FRC exposes a **general lateral arbitration/request family** whose road-observed
+clients include LDA, LTA/LCA and SDG/PDA-SA, while exact F33 exposes corresponding
+profiles inside one protected external B6 controller and does not independently
+revalidate DRCC/LTA engagement when choosing that profile. Factory steering still does
+not prove an `0x08A -> B6` transform: exact F33 receives neither `0x08A` nor `0x081`,
+and the retained stock family operates with no unmatched native B6. The unresolved
+factory step remains the generic chassis request/reference arbitration and final
+steering-assembly authority handoff between the protected `0x08A/0x081` family and the
+physical actuator path.
+
+Deterministic reduction and verification:
+`tools/analyze_camry_2026_lateral_family_census.py`,
+`data/generated/camry_2026_lateral_family_census.json`, and
+`tests/verify_camry_2026_lateral_family_census.py`.
+
 ## 5. What remains before B6 steering authority is established
 
 **Qualification boundary:** the modified-firmware observer/bridge work below is
@@ -965,6 +1086,6 @@ final recovered `0x160` request semantics.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061), [VAR-062](../reference/index.md#finding-var-062), [VAR-071](../reference/index.md#finding-var-071), [VAR-102](../reference/index.md#finding-var-102), [VAR-124](../reference/index.md#finding-var-124), [VAR-125](../reference/index.md#finding-var-125), [VAR-126](../reference/index.md#finding-var-126), [VAR-129](../reference/index.md#finding-var-129), [VAR-130](../reference/index.md#finding-var-130), [VAR-131](../reference/index.md#finding-var-131)
+- Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061), [VAR-062](../reference/index.md#finding-var-062), [VAR-071](../reference/index.md#finding-var-071), [VAR-102](../reference/index.md#finding-var-102), [VAR-124](../reference/index.md#finding-var-124), [VAR-125](../reference/index.md#finding-var-125), [VAR-126](../reference/index.md#finding-var-126), [VAR-129](../reference/index.md#finding-var-129), [VAR-130](../reference/index.md#finding-var-130), [VAR-131](../reference/index.md#finding-var-131), [VAR-132](../reference/index.md#finding-var-132)
 - Corrections with this document as canonical home: [CORR-120](../reference/index.md#correction-corr-120), [CORR-122](../reference/index.md#correction-corr-122), [CORR-139](../reference/index.md#correction-corr-139), [CORR-140](../reference/index.md#correction-corr-140), [CORR-163](../reference/index.md#correction-corr-163)
 <!-- knowledge-cross-references:end -->
