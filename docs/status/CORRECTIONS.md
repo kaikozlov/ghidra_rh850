@@ -3564,3 +3564,49 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
   §§57.11–57.12; `exploit/behavioral_proof/camry_f33_b6_stationary_probe.py`;
   `tests/verify_camry_f33_b6_stationary_probe.py`.
+
+### CORR-163 — the September stock-steering grid phase is recoverable exactly
+
+- **Superseded claim:** the first tracked WP1 reducer said the original
+  2026-09-04 reducer could not be located, anchored each segment's 20-Hz grid
+  at its first live event, and accepted small population/median discrepancies
+  as an unrecoverable grid-phase tolerance.
+- **Exact correction:** the original reducer source remained in the disposable
+  `build/tmp/` tree. It uses an absolute monotonic-time 50-ms grid and defines
+  segment zero as the earliest `can`, `sendcan`, `carState`, or `carControl`
+  event. It also uses explicit `carControl.latActive` for dual-active
+  classification. Restoring those semantics reproduces the published clean
+  ID11 populations exactly (40,789 / 21,990 / 31,607), the original
+  correlations/p90 values, all five ID4 episodes, and the 17-sample route-3c
+  segment-43 witness at 34.458562074–35.258562074 s without a phase tolerance.
+- **Additional ingestion correction:** current cereal publishes Panda health as
+  plural `pandaStates`, not the stale singular event assumed by the original
+  and first tracked reducers. The corrected adapter retains all 150,642 health
+  samples and recovers the published `safetyTxBlocked` delta of +19 without
+  changing the steering time base or sample predicates.
+- **Canonical:** VAR-129;
+  [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md)
+  §4.6; `tools/analyze_camry_20260904_stock_steering.py`;
+  `tests/verify_camry_20260904_stock_steering.py`.
+
+### CORR-164 — the provisional Corolla TSS3 census is evidence, not an FPv1 identity
+
+- **Superseded implementation:** the read-only Corolla TSS3 scaffold registered
+  Span's 2025 moving-rlog whole-vehicle census in Toyota `FINGERPRINTS`, despite
+  that source having MOCK `carParams` and no exact F181 identity join.
+- **Exact correction:** that observed Corolla ID/DLC set is a strict subset of
+  the exact same-car 2026 Camry TSS3 census. Registering both leaves the normal
+  FPv1 elimination algorithm with two candidates and makes Corolla's own
+  offline fingerprint test return no unique platform. The Corolla corpus is
+  therefore retained in `TSS3_CAN_CENSUS` for read-only topology evidence but
+  deliberately excluded from `FINGERPRINTS`; exact Camry remains registered
+  because its additional IDs/DLCs disambiguate it and it has exact same-car
+  identity evidence.
+- **Support boundary:** this does not reduce the Corolla research decoder. It
+  remains `dashcamOnly` with Panda `noOutput`, fixed passive bus placement, and
+  its source-real frame tests. It prevents uncertain nearby-variant evidence
+  from becoming an automatic vehicle identity.
+- **Canonical:**
+  [../variants/camry-2026-tss3-integration-audit.md](../variants/camry-2026-tss3-integration-audit.md);
+  opendbc `8c1124fe37f146e2282ba68676ffa82cac4902f8`;
+  `opendbc/car/toyota/tests/test_tss3_corolla.py`.

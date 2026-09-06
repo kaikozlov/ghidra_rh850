@@ -11,23 +11,30 @@ artifact.
 
 Design boundaries:
 
-- Streaming: events are consumed one at a time per segment; no route-level
-  frame retention. Per-segment state is bounded (counters, last-observed
-  signal trackers, a 20-Hz sample grid, and retained rows only for configured
-  witness windows).
-- Provenance: every source file is hashed (compressed bytes; an unreadable
-  file aborts the run) and inventoried with event counts, first/last
-  live-event timestamps, and input-quality flags
-  (missing/duplicate/out-of-order).
+- Streaming reduction: no route-level event corpus is retained. Each compressed
+  segment is materialized by openpilot's LogReader, scanned in source order for
+  provenance/input quality, then consumed by the reducer one normalized event
+  at a time in stable monotonic-time order. Reducer state is counters,
+  last-observed signal trackers, a 20-Hz sample grid, and qualified/review rows.
+  A further iterator pass is used only when emitting a compact source-derived
+  fixture. This is segment-bounded rather than whole-route retention.
+- Provenance: every readable source file is hashed over its compressed bytes
+  and inventoried with parser/schema identity, event counts, first/last
+  live-event timestamps, and input-quality flags. Missing, unreadable,
+  duplicate, and out-of-order inputs are reported explicitly rather than
+  silently disappearing from the corpus.
 - Separation: native vehicle frames (Panda ``src`` 0..2), Panda TX-loopback
   echoes (``src`` 128..191), rejected TX (``src`` 192..255), and openpilot
   ``sendcan`` are counted independently. Forwarding echoes are never counted
   as native producers.
-- Time base: segment-relative seconds are measured from the first *live*
-  event (can/sendcan/carState/controlsState/pandaState) in the segment.
-  Repeated startup metadata never resets the origin. Joins never cross
-  routes, and each segment's grid is independent (segment boundaries are
-  temporal discontinuities).
+- Time base: segment-relative seconds use the exact original September live
+  set: the earliest can/sendcan/carState/carControl event in the segment.
+  controlsState and Panda health are retained review inputs but do not move
+  that origin. The 20-Hz grid exactly reproduces the original reducer:
+  absolute monotonic-time multiples of 50 ms, beginning at the first multiple
+  at or after that live-event origin. Repeated startup metadata never resets
+  the origin. Joins never cross routes or segments, and temporal trackers are
+  explicitly cleared on an in-file timestamp regression.
 - Decode geometry is implemented locally from the pinned evidence
   (byte-aligned Motorola bit numbering; see DECODE_PROVENANCE) and does not
   depend on any DBC parser. Missing, stale (age > MAX_AGE_NS), invalid, and
@@ -48,6 +55,7 @@ Usage (analysis repo root, openpilot environment providing LogReader)::
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import itertools
 import json
@@ -145,7 +153,9 @@ WITNESS_SEGMENT = 43
 WITNESS_WINDOW_S = (34.40, 35.30)
 WITNESS_PUBLISHED_SPAN_S = (34.458562074, 35.258562074)
 
-LIVE_EVENT_TYPES = frozenset({"can", "sendcan", "carState", "controlsState", "pandaState"})
+# Exact live-origin set used by build/tmp/camry_stock_steering_extract.py.
+# controlsState/Panda health are retained but are ancillary to this time base.
+LIVE_EVENT_TYPES = frozenset({"can", "sendcan", "carState", "carControl"})
 
 
 # --- Decode primitives ------------------------------------------------------
@@ -195,8 +205,15 @@ def motor_feedback_proxy(dat: bytes) -> int:
 #   ("can"|"sendcan", t_ns, src, addr, dat_hex)
 #   ("carState", t_ns, vEgo, left_blinker, right_blinker, steering_torque,
 #    steering_pressed, steering_angle_deg)
-#   ("pandaState", t_ns, safety_tx_blocked)
-#   ("controlsState", t_ns)
+#   ("carControl", t_ns, enabled, latActive, longActive,
+#    requested_steering_angle_deg, requested_accel_mps2)
+#   ("pandaState", t_ns, safety_tx_blocked, controls_allowed,
+#    safety_rx_checks_invalid, heartbeat_lost, fault_status, fault_count,
+#    bus0_rec, bus0_tec, bus1_rec, bus1_tec, bus2_rec, bus2_tec,
+#    bus0_busoff_cnt, bus0_core_reset_cnt, bus0_canfd_enabled,
+#    bus1_busoff_cnt, bus1_core_reset_cnt, bus1_canfd_enabled,
+#    bus2_busoff_cnt, bus2_core_reset_cnt, bus2_canfd_enabled)
+#   ("controlsState", t_ns, lateral_state, long_state, ui_accel, uf_accel, up_accel)
 # Only these cross the ingestion boundary, so fixtures and rlogs share one
 # reducer implementation.
 
@@ -222,6 +239,7 @@ class SampleRow:
     torque_valid: bool | None
     motor_proxy: int | None
     native_id: int | None
+    native_id_raw: int | None
     native_req_deg: float | None
     native_req_raw: int | None
     native_level: int | None
@@ -230,6 +248,11 @@ class SampleRow:
     op_id: int | None
     op_target_deg: float | None
     op_target_raw: int | None
+    control_enabled: bool | None
+    control_lat_active: bool | None
+    control_long_active: bool | None
+    requested_steering_angle_deg: float | None
+    requested_accel_mps2: float | None
     v_ego: float | None
     blinker: bool | None
     ages_ns: dict[str, int]
@@ -289,11 +312,12 @@ class SegmentReducer:
         self.unexpected_src: Counter[str] = Counter()
         self.short_frames = 0
         self.safety_tx_blocked: list[tuple[int, int]] = []
+        self.panda_health: list[dict[str, Any]] = []
         # signal trackers
         self.obs: dict[str, Obs] = {
             "measured": Obs(), "torque": Obs(), "torque_invalid": Obs(),
             "motor": Obs(), "native": Obs(), "reference": Obs(),
-            "op": Obs(), "v_ego": Obs(), "blinker": Obs(),
+            "op": Obs(), "control": Obs(), "v_ego": Obs(), "blinker": Obs(),
         }
         # grid state
         self._seg0: int | None = None
@@ -312,16 +336,22 @@ class SegmentReducer:
         self.event_counts[kind] += 1
         if self.last_t is not None and t < self.last_t:
             self.out_of_order += 1
+            # A timestamp regression is a hard temporal discontinuity. Never
+            # allow last-observed values from the pre-regression interval to
+            # satisfy joins after it.
+            for obs in self.obs.values():
+                obs.t, obs.value = -1, None
         self.last_t = t
         if kind in LIVE_EVENT_TYPES:
             if self.first_live is None:
-                self.first_live = t
                 origin = self.anchor_ns if self.anchor_ns is not None else t
+                self.first_live = origin
                 self._seg0 = origin
-                # first grid point at or before t; the excerpt skips earlier
-                # grid points exactly like a full-segment run would sample them
-                self._next_grid = origin + max((t - origin) // GRID_STEP_NS, 0) * GRID_STEP_NS
-            self.last_live = t
+                grid0 = ((origin + GRID_STEP_NS - 1) // GRID_STEP_NS) * GRID_STEP_NS
+                if grid0 < t:
+                    grid0 += ((t - grid0 + GRID_STEP_NS - 1) // GRID_STEP_NS) * GRID_STEP_NS
+                self._next_grid = grid0
+            self.last_live = t if self.last_live is None else max(self.last_live, t)
         # advance the grid past everything strictly before t
         if self._next_grid is not None:
             while self._next_grid < t:
@@ -332,10 +362,21 @@ class SegmentReducer:
             self._frame(kind, t, int(rec[2]), int(rec[3]), bytes.fromhex(rec[4]))
         elif kind == "carState":
             self._car_state(t, float(rec[2]), bool(rec[3]), bool(rec[4]))
+        elif kind == "carControl":
+            self._observe(t, "control", (bool(rec[2]), bool(rec[3]), bool(rec[4]),
+                                         float(rec[5]), float(rec[6])))
         elif kind == "pandaState":
-            self._panda_state(t, int(rec[2]))
-        # controlsState and non-live metadata (initData etc.) count toward the
-        # live origin but carry no reducer fields and never reset it.
+            self._panda_state(
+                t, int(rec[2]), bool(rec[3]), bool(rec[4]), bool(rec[5]), str(rec[6]),
+                int(rec[7]), tuple(int(v) for v in rec[8:14]),
+                (
+                    (int(rec[14]), int(rec[15]), bool(rec[16])),
+                    (int(rec[17]), int(rec[18]), bool(rec[19])),
+                    (int(rec[20]), int(rec[21]), bool(rec[22])),
+                ),
+            )
+        # controlsState is retained in the source/fixture event stream for
+        # review but is not promoted into a steering-authority predicate.
 
     def _frame(self, kind: str, t: int, src: int, addr: int, dat: bytes) -> None:
         min_len = DECODE_MIN_LEN.get(addr)
@@ -363,9 +404,12 @@ class SegmentReducer:
             elif src == 0 and addr == ADDR_REFERENCE:
                 self._observe(t, "reference", signed_be16(dat, 16))
             elif src == 2 and addr == ADDR_LATERAL_REQ:
-                b21 = dat[21]
-                self._observe(t, "native", (b21, signed_be16(dat, 18), dat[24]))
-                if b21 == ID4_BYTE:
+                b21_raw = dat[21]
+                self._observe(t, "native", (b21_raw & 0x3F, b21_raw, signed_be16(dat, 18), dat[24]))
+                # Episode reproduction is deliberately full-byte exact: a raw
+                # 0x84 is not the observed ID4 state even though its low six
+                # bits equal four.
+                if b21_raw == ID4_BYTE:
                     self._id4(t, dat)
         elif 128 <= src <= 191:
             self.returned_by_bus[str(src - 128)] += 1
@@ -383,25 +427,49 @@ class SegmentReducer:
         self._observe(t, "v_ego", v_ego)
         self._observe(t, "blinker", bool(left or right))
 
-    def _panda_state(self, t: int, safety_tx_blocked: int) -> None:
+    def _panda_state(self, t: int, safety_tx_blocked: int, controls_allowed: bool,
+                     safety_rx_checks_invalid: bool, heartbeat_lost: bool,
+                     fault_status: str, fault_count: int,
+                     bus_error_counts: tuple[int, int, int, int, int, int],
+                     bus_transport: tuple[tuple[int, int, bool], tuple[int, int, bool],
+                                          tuple[int, int, bool]]) -> None:
         self.safety_tx_blocked.append((t, safety_tx_blocked))
+        self.panda_health.append({
+            "time_ns": t,
+            "safety_tx_blocked": safety_tx_blocked,
+            "controls_allowed": controls_allowed,
+            "safety_rx_checks_invalid": safety_rx_checks_invalid,
+            "heartbeat_lost": heartbeat_lost,
+            "fault_status": fault_status,
+            "fault_count": fault_count,
+            "bus0_rec": bus_error_counts[0], "bus0_tec": bus_error_counts[1],
+            "bus1_rec": bus_error_counts[2], "bus1_tec": bus_error_counts[3],
+            "bus2_rec": bus_error_counts[4], "bus2_tec": bus_error_counts[5],
+            "bus0_busoff_cnt": bus_transport[0][0], "bus0_core_reset_cnt": bus_transport[0][1],
+            "bus0_canfd_enabled": bus_transport[0][2],
+            "bus1_busoff_cnt": bus_transport[1][0], "bus1_core_reset_cnt": bus_transport[1][1],
+            "bus1_canfd_enabled": bus_transport[1][2],
+            "bus2_busoff_cnt": bus_transport[2][0], "bus2_core_reset_cnt": bus_transport[2][1],
+            "bus2_canfd_enabled": bus_transport[2][2],
+        })
 
     def _observe(self, t: int, name: str, value: Any) -> None:
         self.obs[name].update(t, value)
 
     def _id4(self, t: int, dat: bytes) -> None:
-        op = self.obs["op"]
-        op_id: int | None = None
-        if op.value is not None and 0 <= t - op.t <= OP_LAG_NS_FOR_ID4:
-            op_id = op.value[0]
+        control = self.obs["control"]
+        lat_active = False
+        if control.value is not None and 0 <= t - control.t <= OP_LAG_NS_FOR_ID4:
+            lat_active = bool(control.value[1])
         seg_s = None if self._seg0 is None else round((t - self._seg0) / 1e9, 9)
         self.id4_rows.append({
             "time_ns": t,
             "byte21": dat[21],
+            "target_lateral_id": dat[21] & 0x3F,
             "angle_word_hex": f"{signed_be16(dat, 18) & 0xFFFF:04x}",
             "request_level": dat[24],
             "segment_s": seg_s,
-            "latActive": op_id == NATIVE_ID_ACTIVE,
+            "latActive": lat_active,
         })
 
     def finish(self) -> SegmentResult:
@@ -434,6 +502,43 @@ class SegmentReducer:
                       "delta": stx[-1][1] - stx[0][1]}
         else:
             safety = {"samples": 0, "first": None, "last": None, "delta": None}
+        if self.panda_health:
+            fault_status_counts = Counter(h["fault_status"] for h in self.panda_health)
+            panda_health = {
+                "samples": len(self.panda_health),
+                "controls_allowed_false_samples": sum(not h["controls_allowed"] for h in self.panda_health),
+                "safety_rx_checks_invalid_samples": sum(h["safety_rx_checks_invalid"] for h in self.panda_health),
+                "heartbeat_lost_samples": sum(h["heartbeat_lost"] for h in self.panda_health),
+                "fault_status_counts": dict(sorted(fault_status_counts.items())),
+                "fault_count_max": max(h["fault_count"] for h in self.panda_health),
+                "bus_error_max": {
+                    str(bus): {
+                        "receive_error_cnt": max(h[f"bus{bus}_rec"] for h in self.panda_health),
+                        "transmit_error_cnt": max(h[f"bus{bus}_tec"] for h in self.panda_health),
+                        "bus_off_cnt": max(h[f"bus{bus}_busoff_cnt"] for h in self.panda_health),
+                        "can_core_reset_cnt": max(h[f"bus{bus}_core_reset_cnt"] for h in self.panda_health),
+                        "canfd_disabled_samples": sum(not h[f"bus{bus}_canfd_enabled"] for h in self.panda_health),
+                    }
+                    for bus in range(3)
+                },
+            }
+        else:
+            panda_health = {
+                "samples": 0,
+                "controls_allowed_false_samples": 0,
+                "safety_rx_checks_invalid_samples": 0,
+                "heartbeat_lost_samples": 0,
+                "fault_status_counts": {},
+                "fault_count_max": None,
+                "bus_error_max": {
+                    str(bus): {
+                        "receive_error_cnt": None, "transmit_error_cnt": None,
+                        "bus_off_cnt": None, "can_core_reset_cnt": None,
+                        "canfd_disabled_samples": 0,
+                    }
+                    for bus in range(3)
+                },
+            }
         return {
             "native_by_bus": dict(self.native_by_bus),
             "native_total": sum(self.native_by_bus.values()),
@@ -448,6 +553,7 @@ class SegmentReducer:
             "unexpected_src": dict(sorted(self.unexpected_src.items())),
             "short_frames": self.short_frames,
             "safety_tx_blocked": safety,
+            "panda_health": panda_health,
         }
 
     def _witness_rows(self) -> list[SampleRow]:
@@ -475,10 +581,12 @@ class SegmentReducer:
         native, a_n = self._snapshot(t, "native")
         reference, a_r = self._snapshot(t, "reference")
         op, a_o = self._snapshot(t, "op")
+        control, a_c = self._snapshot(t, "control")
         v_ego, a_v = self._snapshot(t, "v_ego")
         blinker, _a_b = self._snapshot(t, "blinker")
         ages = {k: v for k, v in (("measured", a_m), ("torque", a_t), ("native", a_n),
-                                  ("reference", a_r), ("op", a_o), ("v_ego", a_v)) if v >= 0}
+                                  ("reference", a_r), ("op", a_o), ("control", a_c),
+                                  ("v_ego", a_v)) if v >= 0}
         native_id = native[0] if native is not None else None
         if native is not None:
             self.native_id_counts_fresh[str(native_id)] += 1
@@ -488,10 +596,11 @@ class SegmentReducer:
             torque_valid=(not tinv) if tinv is not None else None,
             motor_proxy=motor,
             native_id=native_id,
-            native_req_raw=native[1] if native is not None else None,
-            native_req_deg=(round(native[1] * REQUEST_SCALE_DEG_PER_COUNT, 9)
+            native_id_raw=native[1] if native is not None else None,
+            native_req_raw=native[2] if native is not None else None,
+            native_req_deg=(round(native[2] * REQUEST_SCALE_DEG_PER_COUNT, 9)
                             if native is not None else None),
-            native_level=native[2] if native is not None else None,
+            native_level=native[3] if native is not None else None,
             reference_raw=reference,
             reference_deg=(round(reference * REQUEST_SCALE_DEG_PER_COUNT, 9)
                            if reference is not None else None),
@@ -499,6 +608,11 @@ class SegmentReducer:
             op_target_raw=op[1] if op is not None else None,
             op_target_deg=(round(op[1] * REQUEST_SCALE_DEG_PER_COUNT, 9)
                            if op is not None else None),
+            control_enabled=control[0] if control is not None else None,
+            control_lat_active=control[1] if control is not None else None,
+            control_long_active=control[2] if control is not None else None,
+            requested_steering_angle_deg=control[3] if control is not None else None,
+            requested_accel_mps2=control[4] if control is not None else None,
             v_ego=v_ego, blinker=blinker, ages_ns=ages,
         )
         # exclusion accounting (a sample may fail several; each is counted)
@@ -527,7 +641,9 @@ class SegmentReducer:
         if measured is None:
             self.exclusions["measured_stale"] += 1
         if op is None:
-            self.exclusions["openpilot_stale"] += 1
+            self.exclusions["openpilot_transmit_stale"] += 1
+        if control is None:
+            self.exclusions["carcontrol_stale"] += 1
         # Base qualification keeps every native request ID (0/4/11/18/...);
         # the published quadrant subsets (manual ID0, stock ID11, dual-active,
         # divergent) are predicates over these rows, never re-filtered here.
@@ -537,7 +653,6 @@ class SegmentReducer:
             and tinv is not None and not tinv
             and blinker is not None and not blinker
             and native is not None and reference is not None and measured is not None
-            and op is not None
         )
         if clean and self.keep_qualified:
             self.qualified.append(row)
@@ -604,12 +719,16 @@ def _f(x: float | None) -> float:
 
 def _subset_stats(rows: list[SampleRow], pred) -> dict[str, Any]:
     sub = [r for r in rows if pred(r)]
+    # VAR-129's stock/manual populations do not require a fresh openpilot B6.
+    # Preserve those exact populations and filter only the metric that actually
+    # depends on the optional openpilot observation.
+    op_sub = [r for r in sub if r.op_target_deg is not None]
     return {
         "reference081_vs_stock_raw": pair_stats(
             [(_f(r.reference_raw), _f(r.native_req_raw)) for r in sub]),
         "stock_vs_measured": pair_stats([(_f(r.native_req_deg), _f(r.measured_deg)) for r in sub]),
         "reference081_vs_measured": pair_stats([(_f(r.reference_deg), _f(r.measured_deg)) for r in sub]),
-        "openpilot_vs_measured": pair_stats([(_f(r.op_target_deg), _f(r.measured_deg)) for r in sub]),
+        "openpilot_vs_measured": pair_stats([(_f(r.op_target_deg), _f(r.measured_deg)) for r in op_sub]),
     }
 
 
@@ -618,6 +737,49 @@ def _sum_maps(maps: Iterable[dict[str, int]]) -> dict[str, int]:
     for m in maps:
         out.update(m)
     return dict(sorted(out.items()))
+
+
+def _aggregate_panda_health(segments: list[SegmentResult]) -> dict[str, Any]:
+    health = [s.census["panda_health"] for s in segments]
+    populated = [h for h in health if h["samples"]]
+    if not populated:
+        return {
+            "samples": 0,
+            "controls_allowed_false_samples": 0,
+            "safety_rx_checks_invalid_samples": 0,
+            "heartbeat_lost_samples": 0,
+            "fault_status_counts": {},
+            "fault_count_max": None,
+            "bus_error_max": {
+                str(bus): {
+                    "receive_error_cnt": None, "transmit_error_cnt": None,
+                    "bus_off_cnt": None, "can_core_reset_cnt": None,
+                    "canfd_disabled_samples": 0,
+                }
+                for bus in range(3)
+            },
+        }
+    fault_counts: Counter[str] = Counter()
+    for h in populated:
+        fault_counts.update(h["fault_status_counts"])
+    return {
+        "samples": sum(h["samples"] for h in populated),
+        "controls_allowed_false_samples": sum(h["controls_allowed_false_samples"] for h in populated),
+        "safety_rx_checks_invalid_samples": sum(h["safety_rx_checks_invalid_samples"] for h in populated),
+        "heartbeat_lost_samples": sum(h["heartbeat_lost_samples"] for h in populated),
+        "fault_status_counts": dict(sorted(fault_counts.items())),
+        "fault_count_max": max(h["fault_count_max"] for h in populated),
+        "bus_error_max": {
+            str(bus): {
+                "receive_error_cnt": max(h["bus_error_max"][str(bus)]["receive_error_cnt"] for h in populated),
+                "transmit_error_cnt": max(h["bus_error_max"][str(bus)]["transmit_error_cnt"] for h in populated),
+                "bus_off_cnt": max(h["bus_error_max"][str(bus)]["bus_off_cnt"] for h in populated),
+                "can_core_reset_cnt": max(h["bus_error_max"][str(bus)]["can_core_reset_cnt"] for h in populated),
+                "canfd_disabled_samples": sum(h["bus_error_max"][str(bus)]["canfd_disabled_samples"] for h in populated),
+            }
+            for bus in range(3)
+        },
+    }
 
 
 def aggregate_route(route: str, segments: list[SegmentResult]) -> dict[str, Any]:
@@ -650,6 +812,7 @@ def aggregate_route(route: str, segments: list[SegmentResult]) -> dict[str, Any]
         "safety_tx_blocked_delta": (sum(s.census["safety_tx_blocked"]["delta"] or 0 for s in segs)
                                     if any_stx else None),
         "safety_tx_blocked_samples": sum(s.census["safety_tx_blocked"]["samples"] for s in segs),
+        "panda_health": _aggregate_panda_health(segs),
     }
     return {
         "route": route,
@@ -664,9 +827,11 @@ def aggregate_route(route: str, segments: list[SegmentResult]) -> dict[str, Any]
             "manual_id0": _subset_stats(clean, lambda r: r.native_id == 0),
             "stock_id11": _subset_stats(clean, lambda r: r.native_id == NATIVE_ID_ACTIVE),
             "dual_active": _subset_stats(clean, lambda r: r.native_id == NATIVE_ID_ACTIVE
+                                         and r.control_lat_active is True
                                          and r.op_id == NATIVE_ID_ACTIVE),
             "divergent": _subset_stats(
-                clean, lambda r: r.native_id == NATIVE_ID_ACTIVE and r.op_id == NATIVE_ID_ACTIVE
+                clean, lambda r: r.native_id == NATIVE_ID_ACTIVE
+                and r.control_lat_active is True and r.op_id == NATIVE_ID_ACTIVE
                 and abs(_f(r.op_target_deg) - _f(r.native_req_deg)) >= DIVERGENCE_DEG),
         },
         "census": census,
@@ -722,15 +887,32 @@ def iter_fixture_events(path: Path) -> Iterator[tuple]:
             if kind == "provenance":
                 continue
             if kind in ("can", "sendcan"):
+                dat = bytes.fromhex(rec["dat"])
+                if rec.get("dlc", len(dat)) != len(dat):
+                    raise ValueError(f"{path}: fixture DLC/payload mismatch")
                 yield (kind, rec["t"], rec["src"], rec["addr"], rec["dat"])
             elif kind == "carState":
                 yield (kind, rec["t"], rec["vEgo"], rec["leftBlinker"], rec["rightBlinker"],
                        rec.get("steeringTorque"), rec.get("steeringPressed"),
                        rec.get("steeringAngleDeg"))
+            elif kind == "carControl":
+                yield (kind, rec["t"], rec["enabled"], rec["latActive"], rec["longActive"],
+                       rec["requestedSteeringAngleDeg"], rec["requestedAccelMps2"])
             elif kind == "pandaState":
-                yield (kind, rec["t"], rec["safetyTxBlocked"])
+                yield (
+                    kind, rec["t"], rec["safetyTxBlocked"], rec.get("controlsAllowed", False),
+                    rec.get("safetyRxChecksInvalid", False), rec.get("heartbeatLost", False),
+                    rec.get("faultStatus", "unknown"), rec.get("faultCount", 0),
+                    rec.get("bus0ReceiveErrorCnt", 0), rec.get("bus0TransmitErrorCnt", 0),
+                    rec.get("bus1ReceiveErrorCnt", 0), rec.get("bus1TransmitErrorCnt", 0),
+                    rec.get("bus2ReceiveErrorCnt", 0), rec.get("bus2TransmitErrorCnt", 0),
+                    rec.get("bus0BusOffCnt", 0), rec.get("bus0CanCoreResetCnt", 0), rec.get("bus0CanfdEnabled", True),
+                    rec.get("bus1BusOffCnt", 0), rec.get("bus1CanCoreResetCnt", 0), rec.get("bus1CanfdEnabled", True),
+                    rec.get("bus2BusOffCnt", 0), rec.get("bus2CanCoreResetCnt", 0), rec.get("bus2CanfdEnabled", True),
+                )
             elif kind == "controlsState":
-                yield (kind, rec["t"])
+                yield (kind, rec["t"], rec.get("lateralState"), rec.get("longState"),
+                       rec.get("uiAccelCmd"), rec.get("ufAccelCmd"), rec.get("upAccelCmd"))
 
 
 def _witness_summary(rows: list[SampleRow]) -> dict[str, Any]:
@@ -775,7 +957,7 @@ def reduce_fixture(path: Path, *, keep_qualified: bool = True,
     red = SegmentReducer(prov["route"], int(prov["segment"]), keep_qualified=keep_qualified,
                          witness=witness, witness_window_s=witness_window_s,
                          anchor_ns=int(prov["first_live_ns"]))
-    for rec in sorted(events, key=lambda r: int(r[1])):
+    for rec in events:
         red.feed(rec)
     return red.finish()
 
@@ -796,9 +978,9 @@ def load_logreader(openpilot_root: str):
     return LogReader
 
 
-def iter_rlog_events(LogReader, path: Path) -> Iterator[tuple]:
-    """Yield normalized event tuples from one rlog (file order; caller sorts)."""
-    for ev in LogReader(str(path), sort_by_time=False):
+def iter_rlog_events(LogReader, path: Path, *, sort_by_time: bool = False) -> Iterator[tuple]:
+    """Yield normalized event tuples from one rlog in the requested parser order."""
+    for ev in LogReader(str(path), sort_by_time=sort_by_time):
         which = ev.which()
         if which in ("can", "sendcan"):
             frames = ev.can if which == "can" else ev.sendcan
@@ -810,12 +992,62 @@ def iter_rlog_events(LogReader, path: Path) -> Iterator[tuple]:
             yield ("carState", int(ev.logMonoTime), float(cs.vEgo), bool(cs.leftBlinker),
                    bool(cs.rightBlinker), float(cs.steeringTorque), bool(cs.steeringPressed),
                    float(cs.steeringAngleDeg))
-        elif which == "pandaState":
-            health = ev.pandaState.health
-            if health is not None:
-                yield ("pandaState", int(ev.logMonoTime), int(health.safetyTxBlocked))
+        elif which == "carControl":
+            cc = ev.carControl
+            yield ("carControl", int(ev.logMonoTime), bool(cc.enabled), bool(cc.latActive),
+                   bool(cc.longActive), float(cc.actuators.steeringAngleDeg),
+                   float(cc.actuators.accel))
+        elif which == "pandaStates":
+            # Current cereal publishes a list because a device may have more
+            # than one Panda. Preserve one normalized health record per Panda;
+            # the Camry corpus has one entry per event.
+            for ps in ev.pandaStates:
+                can_states = (ps.canState0, ps.canState1, ps.canState2)
+                yield (
+                    "pandaState", int(ev.logMonoTime), int(ps.safetyTxBlocked),
+                    bool(ps.controlsAllowed), bool(ps.safetyRxChecksInvalid), bool(ps.heartbeatLost),
+                    str(ps.faultStatus), len(ps.faults),
+                    int(can_states[0].receiveErrorCnt), int(can_states[0].transmitErrorCnt),
+                    int(can_states[1].receiveErrorCnt), int(can_states[1].transmitErrorCnt),
+                    int(can_states[2].receiveErrorCnt), int(can_states[2].transmitErrorCnt),
+                    int(can_states[0].busOffCnt), int(can_states[0].canCoreResetCnt), bool(can_states[0].canfdEnabled),
+                    int(can_states[1].busOffCnt), int(can_states[1].canCoreResetCnt), bool(can_states[1].canfdEnabled),
+                    int(can_states[2].busOffCnt), int(can_states[2].canCoreResetCnt), bool(can_states[2].canfdEnabled),
+                )
         elif which == "controlsState":
-            yield ("controlsState", int(ev.logMonoTime))
+            cs = ev.controlsState
+            yield ("controlsState", int(ev.logMonoTime), cs.lateralControlState.which(),
+                   str(cs.longControlState), float(cs.uiAccelCmd), float(cs.ufAccelCmd),
+                   float(cs.upAccelCmd))
+
+
+def scan_rlog_metadata(LogReader, path: Path) -> dict[str, Any]:
+    """Inventory one rlog in original parser/source order without retaining it."""
+    service_counts: Counter[str] = Counter()
+    first_live: int | None = None
+    last_live: int | None = None
+    previous_live: int | None = None
+    out_of_order = 0
+    max_regression_ns = 0
+    for ev in LogReader(str(path), sort_by_time=False):
+        which = ev.which()
+        service_counts[which] += 1
+        if which not in LIVE_EVENT_TYPES:
+            continue
+        t = int(ev.logMonoTime)
+        first_live = t if first_live is None else min(first_live, t)
+        last_live = t if last_live is None else max(last_live, t)
+        if previous_live is not None and t < previous_live:
+            out_of_order += 1
+            max_regression_ns = max(max_regression_ns, previous_live - t)
+        previous_live = t
+    return {
+        "service_event_counts": dict(sorted(service_counts.items())),
+        "first_live_ns": first_live,
+        "last_live_ns": last_live,
+        "out_of_order_events": out_of_order,
+        "max_timestamp_regression_ns": max_regression_ns,
+    }
 
 
 def sha256_file(path: Path) -> str:
@@ -862,16 +1094,20 @@ def segment_number(path: Path) -> int:
 
 def reduce_segment(route: str, path: Path, events: Iterable[tuple], *, keep_qualified: bool,
                    witness: bool = False,
-                   witness_window_s: tuple[float, float] | None = None) -> SegmentResult:
+                   witness_window_s: tuple[float, float] | None = None,
+                   anchor_ns: int | None = None) -> SegmentResult:
     red = SegmentReducer(route, segment_number(path), keep_qualified=keep_qualified,
-                         witness=witness, witness_window_s=witness_window_s)
-    ordered = sorted(events, key=lambda r: int(r[1]))  # stable; mirrors LogReader sort_by_time
-    for rec in ordered:
+                         witness=witness, witness_window_s=witness_window_s,
+                         anchor_ns=anchor_ns)
+    # Consume the caller-selected order. Full-corpus callers perform a separate
+    # source-order quality scan first, then pass stable monotonic-time events
+    # here so joins reproduce the original September reducer exactly.
+    for rec in events:
         red.feed(rec)
     return red.finish()
 
 
-def emit_fixture(path: Path, route: str, segment: int, events: list[tuple], *,
+def emit_fixture(path: Path, route: str, segment: int, events: Iterable[tuple], *,
                  source_file: Path, source_sha: str, source_bytes: int,
                  window_s: tuple[float, float], first_live_ns: int) -> dict[str, Any]:
     lo_ns = first_live_ns + int(window_s[0] * 1e9)
@@ -891,34 +1127,48 @@ def emit_fixture(path: Path, route: str, segment: int, events: list[tuple], *,
                       "address set; no GPS/video/other loggerd services"),
         "addresses_kept": sorted(f"0x{a:03X}" for a in ANALYSIS_ADDRESSES),
     }
-    kept: list[tuple] = []
-    for rec in events:
-        t = int(rec[1])
-        if not (lo_ns <= t < hi_ns):
-            continue
-        if rec[0] in ("can", "sendcan") and int(rec[3]) not in ANALYSIS_ADDRESSES:
-            continue
-        kept.append(rec)
-    kept.sort(key=lambda r: int(r[1]))
+    kept = 0
     with path.open("w") as f:
         f.write(json.dumps(prov, sort_keys=True) + "\n")
-        for rec in kept:
+        for rec in events:
+            t = int(rec[1])
+            if not (lo_ns <= t < hi_ns):
+                continue
+            if rec[0] in ("can", "sendcan") and int(rec[3]) not in ANALYSIS_ADDRESSES:
+                continue
             kind = rec[0]
             if kind in ("can", "sendcan"):
-                obj: dict[str, Any] = {"type": kind, "t": int(rec[1]), "src": int(rec[2]),
-                                       "addr": int(rec[3]), "dat": rec[4]}
+                dat = bytes.fromhex(rec[4])
+                obj: dict[str, Any] = {"type": kind, "t": t, "src": int(rec[2]),
+                                       "addr": int(rec[3]), "dlc": len(dat), "dat": rec[4]}
             elif kind == "carState":
-                obj = {"type": kind, "t": int(rec[1]), "vEgo": rec[2], "leftBlinker": rec[3],
+                obj = {"type": kind, "t": t, "vEgo": rec[2], "leftBlinker": rec[3],
                        "rightBlinker": rec[4], "steeringTorque": rec[5],
                        "steeringPressed": rec[6], "steeringAngleDeg": rec[7]}
+            elif kind == "carControl":
+                obj = {"type": kind, "t": t, "enabled": rec[2], "latActive": rec[3],
+                       "longActive": rec[4], "requestedSteeringAngleDeg": rec[5],
+                       "requestedAccelMps2": rec[6]}
             elif kind == "controlsState":
-                obj = {"type": kind, "t": int(rec[1])}
+                obj = {"type": kind, "t": t, "lateralState": rec[2], "longState": rec[3],
+                       "uiAccelCmd": rec[4], "ufAccelCmd": rec[5], "upAccelCmd": rec[6]}
             elif kind == "pandaState":
-                obj = {"type": kind, "t": int(rec[1]), "safetyTxBlocked": rec[2]}
+                obj = {
+                    "type": kind, "t": t, "safetyTxBlocked": rec[2],
+                    "controlsAllowed": rec[3], "safetyRxChecksInvalid": rec[4],
+                    "heartbeatLost": rec[5], "faultStatus": rec[6], "faultCount": rec[7],
+                    "bus0ReceiveErrorCnt": rec[8], "bus0TransmitErrorCnt": rec[9],
+                    "bus1ReceiveErrorCnt": rec[10], "bus1TransmitErrorCnt": rec[11],
+                    "bus2ReceiveErrorCnt": rec[12], "bus2TransmitErrorCnt": rec[13],
+                    "bus0BusOffCnt": rec[14], "bus0CanCoreResetCnt": rec[15], "bus0CanfdEnabled": rec[16],
+                    "bus1BusOffCnt": rec[17], "bus1CanCoreResetCnt": rec[18], "bus1CanfdEnabled": rec[19],
+                    "bus2BusOffCnt": rec[20], "bus2CanCoreResetCnt": rec[21], "bus2CanfdEnabled": rec[22],
+                }
             else:
                 raise ValueError(f"emit_fixture: unknown event kind {kind!r}")
             f.write(json.dumps(obj, sort_keys=True) + "\n")
-    return {"fixture": str(path), "events": len(kept), "source_sha256": source_sha,
+            kept += 1
+    return {"fixture": str(path), "events": kept, "source_sha256": source_sha,
             "window_s": list(window_s)}
 
 
@@ -946,11 +1196,20 @@ def main(argv: list[str] | None = None) -> int:
     input_root = Path(args.input_root)
     routes = [r.strip() for r in args.routes.split(",") if r.strip()]
     LogReader = load_logreader(args.openpilot_root)
+    schema_candidates = (
+        Path(args.openpilot_root) / "openpilot/cereal/log.capnp",
+        Path(args.openpilot_root) / "cereal/log.capnp",
+    )
+    schema_path = next((p for p in schema_candidates if p.is_file()), None)
     parser_identity = {
         "logreader": "openpilot.tools.lib.logreader.LogReader",
         "openpilot_root": str(Path(args.openpilot_root).resolve()),
         "openpilot_head": git_head(args.openpilot_root),
-        "sort": "python stable sort by logMonoTime (mirrors LogReader sort_by_time)",
+        "log_schema": str(schema_path.resolve()) if schema_path else None,
+        "log_schema_sha256": sha256_file(schema_path) if schema_path else None,
+        "source_order_scan": "LogReader(sort_by_time=False); timestamp regressions retained and flagged",
+        "reduction_order": "LogReader(sort_by_time=True); stable monotonic-time reduction",
+        "sampling_revision": "original-build-tmp-extractor-compatible:absolute-50ms-grid-v1",
     }
 
     discovered = discover_segments(input_root, routes)
@@ -959,48 +1218,63 @@ def main(argv: list[str] | None = None) -> int:
     fixture_infos: list[dict[str, Any]] = []
     seen_hashes: dict[str, str] = {}
     duplicates: list[str] = []
+    unreadable: list[dict[str, Any]] = []
 
     for route in routes:
         for path in discovered.get(route, []):
             entry: dict[str, Any] = {
                 "route": route, "segment": segment_number(path), "file": str(path),
-                "bytes": path.stat().st_size,
+                "bytes": None, "sha256": None, "status": "unreadable",
             }
-            sha = sha256_file(path)
-            entry["sha256"] = sha
-            if sha in seen_hashes:
-                duplicates.append(f"{path} duplicates {seen_hashes[sha]}")
-            else:
-                seen_hashes[sha] = str(path)
-            is_witness = route == WITNESS_ROUTE and segment_number(path) == WITNESS_SEGMENT
-            events = list(iter_rlog_events(LogReader, path))
-            entry["events_total"] = len(events)
-            res = reduce_segment(route, path, events, keep_qualified=True,
-                                 witness=is_witness,
-                                 witness_window_s=WITNESS_WINDOW_S if is_witness else None)
-            res.source = entry
-            entry["event_counts"] = res.event_counts
-            entry["out_of_order_events"] = res.out_of_order_events
-            entry["first_live_ns"] = res.first_live_ns
-            entry["last_live_ns"] = res.last_live_ns
-            entry["duration_s"] = (round((res.last_live_ns - res.first_live_ns) / 1e9, 3)
-                                   if res.first_live_ns is not None
-                                   and res.last_live_ns is not None else None)
-            manifest_routes.append(entry)
-            seg_results.append(res)
-            if args.emit_fixtures and res.first_live_ns is not None and (is_witness or res.id4_rows):
-                fdir = Path(args.emit_fixtures)
-                fdir.mkdir(parents=True, exist_ok=True)
-                fname = f"{ROUTE_SHORT.get(route, route[:6])}-seg{segment_number(path)}.jsonl"
-                if is_witness:
-                    window = WITNESS_WINDOW_S
+            try:
+                entry["bytes"] = path.stat().st_size
+                sha = sha256_file(path)
+                entry["sha256"] = sha
+                if sha in seen_hashes:
+                    duplicates.append(f"{path} duplicates {seen_hashes[sha]}")
                 else:
-                    seg_s_vals = [r["segment_s"] for r in res.id4_rows if r["segment_s"] is not None]
-                    window = (max(0.0, min(seg_s_vals) - 2.0), max(seg_s_vals) + 2.0)
-                info = emit_fixture(fdir / fname, route, segment_number(path), events,
-                                    source_file=path, source_sha=sha, source_bytes=entry["bytes"],
-                                    window_s=window, first_live_ns=res.first_live_ns)
-                fixture_infos.append(info)
+                    seen_hashes[sha] = str(path)
+                is_witness = route == WITNESS_ROUTE and segment_number(path) == WITNESS_SEGMENT
+                source_meta = scan_rlog_metadata(LogReader, path)
+                if source_meta["first_live_ns"] is None:
+                    raise ValueError("rlog contains no live CAN/control/state event")
+                res = reduce_segment(route, path, iter_rlog_events(LogReader, path, sort_by_time=True),
+                                     keep_qualified=True, witness=is_witness,
+                                     witness_window_s=WITNESS_WINDOW_S if is_witness else None,
+                                     anchor_ns=source_meta["first_live_ns"])
+                res.source = entry
+                res.out_of_order_events = source_meta["out_of_order_events"]
+                entry["status"] = "readable"
+                entry["events_total"] = sum(res.event_counts.values())
+                entry["event_counts"] = res.event_counts
+                entry["service_event_counts"] = source_meta["service_event_counts"]
+                entry["out_of_order_events"] = source_meta["out_of_order_events"]
+                entry["max_timestamp_regression_ns"] = source_meta["max_timestamp_regression_ns"]
+                entry["first_live_ns"] = source_meta["first_live_ns"]
+                entry["last_live_ns"] = source_meta["last_live_ns"]
+                entry["duration_s"] = (round((res.last_live_ns - res.first_live_ns) / 1e9, 3)
+                                       if res.first_live_ns is not None
+                                       and res.last_live_ns is not None else None)
+                manifest_routes.append(entry)
+                seg_results.append(res)
+                if args.emit_fixtures and res.first_live_ns is not None and (is_witness or res.id4_rows):
+                    fdir = Path(args.emit_fixtures)
+                    fdir.mkdir(parents=True, exist_ok=True)
+                    fname = f"{ROUTE_SHORT.get(route, route[:6])}-seg{segment_number(path)}.jsonl"
+                    if is_witness:
+                        window = WITNESS_WINDOW_S
+                    else:
+                        seg_s_vals = [r["segment_s"] for r in res.id4_rows if r["segment_s"] is not None]
+                        window = (max(0.0, min(seg_s_vals) - 2.0), max(seg_s_vals) + 2.0)
+                    info = emit_fixture(fdir / fname, route, segment_number(path),
+                                        iter_rlog_events(LogReader, path, sort_by_time=True),
+                                        source_file=path, source_sha=sha, source_bytes=entry["bytes"],
+                                        window_s=window, first_live_ns=res.first_live_ns)
+                    fixture_infos.append(info)
+            except Exception as exc:
+                entry["error"] = f"{type(exc).__name__}: {exc}"
+                manifest_routes.append(entry)
+                unreadable.append({k: entry[k] for k in ("route", "segment", "file", "error")})
 
     by_route: dict[str, list[SegmentResult]] = {}
     for res in seg_results:
@@ -1019,12 +1293,22 @@ def main(argv: list[str] | None = None) -> int:
         "input_quality": {
             "missing_route_dirs": [r for r in routes if not (input_root / r).is_dir()],
             "segment_gaps": {
-                route: _segment_gaps([e["segment"] for e in manifest_routes if e["route"] == route])
+                r: _segment_gaps([e["segment"] for e in manifest_routes if e["route"] == r])
+                for r in routes
+            },
+            "duplicate_segment_numbers": {
+                r: sorted(seg for seg, count in Counter(
+                    e["segment"] for e in manifest_routes if e["route"] == r
+                ).items() if count > 1)
+                for r in routes
             },
             "duplicates": duplicates,
+            "unreadable": unreadable,
             "out_of_order_segments": [
-                {"route": e["route"], "segment": e["segment"], "events": e["out_of_order_events"]}
-                for e in manifest_routes if e["out_of_order_events"]
+                {"route": e["route"], "segment": e["segment"],
+                 "events": e["out_of_order_events"],
+                 "max_timestamp_regression_ns": e.get("max_timestamp_regression_ns", 0)}
+                for e in manifest_routes if e.get("out_of_order_events", 0)
             ],
         },
         "fixtures": fixture_infos,
@@ -1037,8 +1321,9 @@ def main(argv: list[str] | None = None) -> int:
             "rate_hz": SAMPLE_HZ, "max_age_ns": MAX_AGE_NS,
             "speed_min_mps": SPEED_MIN_MPS, "torque_max_nm": TORQUE_MAX_NM,
             "native_active_id": NATIVE_ID_ACTIVE, "divergence_deg": DIVERGENCE_DEG,
-            "method": ("per-segment 20 Hz grid anchored at first live event; last-observed "
-                       "values at or before each grid time; per-signal ages retained"),
+            "method": ("per-segment absolute-monotonic 20 Hz grid: first 50 ms multiple at/after "
+                       "the earliest can/sendcan/carState/carControl event; last-observed values at "
+                       "or before each grid time after stable timestamp ordering; per-signal ages retained"),
         },
         "decode_provenance": DECODE_PROVENANCE,
         "request_scale_deg_per_count": REQUEST_SCALE_DEG_PER_COUNT,
@@ -1065,7 +1350,7 @@ def main(argv: list[str] | None = None) -> int:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(obj, indent=2, sort_keys=True) + "\n")
 
-    _write_review_aids(Path(args.out_root), report, episodes, witness_rows)
+    _write_review_aids(Path(args.out_root), report, episodes, witness_rows, seg_results)
     print(json.dumps({"manifest": args.manifest, "report": args.report,
                       "segments": report["totals"]["segments"],
                       "native_total": report["totals"]["native_can_records_buses_012"],
@@ -1074,7 +1359,7 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _write_review_aids(out_root: Path, report: dict, episodes: list[dict[str, Any]],
-                       witness_rows: list[SampleRow]) -> None:
+                       witness_rows: list[SampleRow], segments: list[SegmentResult]) -> None:
     out_root.mkdir(parents=True, exist_ok=True)
     csv_path = out_root / "route3c-segment43-witness.csv"
     with csv_path.open("w") as f:
@@ -1091,6 +1376,54 @@ def _write_review_aids(out_root: Path, report: dict, episodes: list[dict[str, An
             f.write(f"{ep['route_short']},{ep['segment']},{ep['first_segment_s']:.6f},"
                     f"{ep['last_segment_s']:.6f},{ep['frames']},{ep['request_level_values']},"
                     f"{ep['openpilot_lateral_active']}\n")
+
+    # Deterministic machine-review table for the full qualification population.
+    # Retain both engineering-unit decodes and their source raw words/IDs; the
+    # compact JSONL fixtures separately preserve full CAN payload bytes.
+    q_path = out_root / "qualified-samples.csv"
+    q_fields = [
+        "route", "segment", "grid_ns", "segment_s", "measured_deg",
+        "driver_torque_nm", "torque_valid", "motor_proxy_raw",
+        "native_id", "native_id_raw", "native_request_raw", "native_request_deg",
+        "native_request_level", "reference081_raw", "reference081_deg",
+        "openpilot_id", "openpilot_target_raw", "openpilot_target_deg",
+        "control_enabled", "control_lat_active", "control_long_active",
+        "requested_steering_angle_deg", "requested_accel_mps2",
+        "speed_mps", "blinker", "ages_ns_json",
+    ]
+    with q_path.open("w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=q_fields, lineterminator="\n")
+        writer.writeheader()
+        for seg in sorted(segments, key=lambda x: (x.route, x.segment)):
+            for r in seg.qualified:
+                writer.writerow({
+                    "route": ROUTE_SHORT.get(seg.route, seg.route),
+                    "segment": seg.segment,
+                    "grid_ns": r.grid_ns,
+                    "segment_s": f"{r.seg_s:.9f}",
+                    "measured_deg": r.measured_deg,
+                    "driver_torque_nm": r.torque_nm,
+                    "torque_valid": r.torque_valid,
+                    "motor_proxy_raw": r.motor_proxy,
+                    "native_id": r.native_id,
+                    "native_id_raw": r.native_id_raw,
+                    "native_request_raw": r.native_req_raw,
+                    "native_request_deg": r.native_req_deg,
+                    "native_request_level": r.native_level,
+                    "reference081_raw": r.reference_raw,
+                    "reference081_deg": r.reference_deg,
+                    "openpilot_id": r.op_id,
+                    "openpilot_target_raw": r.op_target_raw,
+                    "openpilot_target_deg": r.op_target_deg,
+                    "control_enabled": r.control_enabled,
+                    "control_lat_active": r.control_lat_active,
+                    "control_long_active": r.control_long_active,
+                    "requested_steering_angle_deg": r.requested_steering_angle_deg,
+                    "requested_accel_mps2": r.requested_accel_mps2,
+                    "speed_mps": r.v_ego,
+                    "blinker": r.blinker,
+                    "ages_ns_json": json.dumps(r.ages_ns, sort_keys=True, separators=(",", ":")),
+                })
     md = [
         "# 2026-09-04 Camry stock-steering passive reduction",
         "",

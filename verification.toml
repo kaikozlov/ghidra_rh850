@@ -947,9 +947,14 @@ tests = ["tests/verify_camry_20260904_stock_steering.py"]
 oracle = "dynamic_trace"
 paths = [
   "tests/fixtures/camry_20260904/",
-  "data/generated/camry_20260904_stock_steering_report.json",
-  "data/generated/camry_20260904_stock_steering_manifest.json",
   "docs/variants/camry-2026-tss3-opendbc-port.md",
+]
+
+[suite.camry_tss3_replay_tool]
+tests = ["tests/verify_camry_tss3_replay_tool.py"]
+oracle = "dynamic_trace"
+paths = [
+  "docs/variants/camry-2026-tss3-integration-audit.md",
 ]
 
 [suite.camry_2026_08a_producer_bounds]

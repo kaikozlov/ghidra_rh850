@@ -547,8 +547,9 @@ it must not be treated as an exhaustive alphabet for this September corpus.
 
 #### Provenance and integration boundary
 
-Times above are seconds from the first live CAN/control/state event in the named
-segment, not from startup metadata repeated in subsequent rlogs. Original inputs:
+Times above are seconds from the exact September reducer origin: the earliest
+`can`, `sendcan`, `carState`, or `carControl` event in the named segment, not
+from startup metadata or ancillary `controlsState`/Panda-health records. Original inputs:
 `/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/<full-route>/rlog-<segment>.zst`.
 Compressed source SHA-256 identities:
 
@@ -563,22 +564,39 @@ Compressed source SHA-256 identities:
 
 The route `carParams` records identify the Camry platform and Brake firmware but
 contain no EPS F181 response. Exact EPS identity comes from separate same-car
-evidence, not these rlogs alone. A tracked deterministic reducer now reproduces
-this section from the original rlogs (`tools/analyze_camry_20260904_stock_steering.py`
-→ `data/generated/camry_20260904_stock_steering_report.json`, verified by
-`tests/verify_camry_20260904_stock_steering.py` on tracked
-`tests/fixtures/camry_20260904/` excerpts): the census (27,173,143 native
-records, zero native B6/0x131/0x2E4, 751,664/751,628/33 sendcan/return/reject
-B6), all five ID4 episodes, and the witness medians reproduce; per-route 20-Hz
-correlations match within 8e-5 and sample populations within ±0.15 % (worst
-observed: route 3d clean-ID11 population −0.149 %, 31,560 vs the published
-31,607; 3c p90 shifted 2→1 raw counts) because the original (unlocated)
-reducer's grid phase is not recoverable from any event anchor — the reducer
-anchors its grid at each segment's first live event and declares that
-tolerance explicitly. The local comparison JSON, raw-witness
-projections, and segment-43 CSV/SVG live under
-`build/out/camry-stock-steering-20260904/`; they remain disposable review
-outputs, not replacements for the original source logs.
+evidence, not these rlogs alone. The original September reducer source was
+recovered under the disposable `build/tmp/` tree during WP1, which removed the
+previous grid-phase ambiguity. The tracked deterministic implementation
+`tools/analyze_camry_20260904_stock_steering.py` now reproduces its exact
+absolute-monotonic 50 ms grid and stock/dual-active predicates from the original
+rlogs. The tracked report/manifest and independent verifier reproduce the census
+(27,173,143 native records; zero native B6/0x131/0x2E4;
+751,664/751,628/33 sendcan/return/reject B6), the clean native-ID11 populations
+**40,789 / 21,990 / 31,607**, their published 0x081↔0x08A correlations and raw
+p90 differences, all **248** raw-byte-exact ID4 frames in five episodes, and the
+17-sample route-3c segment-43 witness including its exact
+34.458562074–35.258562074 s grid span and medians. The corrected current-cereal
+health adapter additionally retains all **150,642** `pandaStates` samples and
+reproduces the corpus `safetyTxBlocked` delta of **+19**; it preserves
+`controlsAllowed`, RX-check/heartbeat/fault state, and per-bus REC/TEC,
+`busOffCnt`, CAN-core-reset count, and CAN-FD-enable state. In particular the
+route-3d bus-0 maxima reproduce §4.5's REC=127, TEC=0, bus-off count=56 and one
+CAN-core reset. These health observations remain ancillary to the steering
+sample time base and predicates. ID4 table times remain quoted
+to the original published millisecond precision; frame counts, raw request-ID
+bytes, levels, and source timestamps are retained independently.
+
+`data/generated/camry_20260904_stock_steering_manifest.json` additionally pins
+every compressed source SHA-256/byte size, parser/openpilot revision, Cap'n Proto
+schema hash, service/event counts, first/last live timestamps, gaps/duplicates,
+unreadable inputs, and source-publication timestamp regressions. Reduction uses
+stable `logMonoTime` ordering only after that source-order quality scan; those
+logger publication regressions are therefore reported rather than silently
+sorted away. Compact source-derived JSONL fixtures preserve DLC, raw payloads,
+control/activity fields and extraction provenance. Deterministic full-population
+CSV plus witness/ID4 CSV, readable Markdown and SVG review aids are emitted under
+`build/out/camry-20260904-stock-steering/`; they remain disposable review outputs,
+not replacements for the source logs.
 
 For integration, retain measured angle and driver validity as measured state,
 and request/reference fields as passive observables. Do not promote request IDs
@@ -588,6 +606,13 @@ actuation. No new steering transmission or message replacement follows from
 this passive analysis.
 
 ## 5. What remains before B6 steering authority is established
+
+**Qualification boundary:** the modified-firmware observer/bridge work below is
+historical/development RE used to localize receiver behavior. It is **not** the
+supported/legitimate command interface required by the completion plan's WP3
+qualification exit, and no admission result from it can be promoted to deployable
+steering support. The WP3 bench specification therefore remains blocked until a
+supported interface is independently identified.
 
 The 2026-09-04 road logs show why further limit tuning is not the next step. The shortest
 bounded execution path is independent of Toyota's unresolved stock FRC pipeline:
@@ -646,7 +671,7 @@ probe above.
 ## 7. Native longitudinal integration consequence of the Bus-1 E2E candidate
 
 A 2026-09-05 comparison against current upstream openpilot
-`0ec3a082c7ca3302c171b03ff5cd43be61309f13` and opendbc
+`a4f7c50d2a52a5865a40da2ebc5004c82929a0ef` and opendbc
 `3e92d112129507debe45364891954db70238997a` clarifies what a proved Camry
 Bus-1 request carrier would buy. The fork's core longitudinal stack is unchanged
 from that upstream openpilot revision: `LongitudinalPlanner` chooses an acceleration
@@ -717,5 +742,5 @@ Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
 - Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061), [VAR-062](../reference/index.md#finding-var-062), [VAR-071](../reference/index.md#finding-var-071), [VAR-102](../reference/index.md#finding-var-102), [VAR-124](../reference/index.md#finding-var-124), [VAR-125](../reference/index.md#finding-var-125), [VAR-126](../reference/index.md#finding-var-126), [VAR-129](../reference/index.md#finding-var-129)
-- Corrections with this document as canonical home: [CORR-120](../reference/index.md#correction-corr-120), [CORR-122](../reference/index.md#correction-corr-122), [CORR-139](../reference/index.md#correction-corr-139), [CORR-140](../reference/index.md#correction-corr-140)
+- Corrections with this document as canonical home: [CORR-120](../reference/index.md#correction-corr-120), [CORR-122](../reference/index.md#correction-corr-122), [CORR-139](../reference/index.md#correction-corr-139), [CORR-140](../reference/index.md#correction-corr-140), [CORR-163](../reference/index.md#correction-corr-163)
 <!-- knowledge-cross-references:end -->

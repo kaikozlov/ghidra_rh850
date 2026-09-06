@@ -11,6 +11,7 @@ external driving logs; this suite runs entirely on tracked fixtures.
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -153,6 +154,31 @@ check("native 0x0B6 stays zero in census", res.census["native_absent_addresses"]
 check("returned_b6 counted once", res.census["returned_b6"] == 1)
 check("rejected_b6 counted once", res.census["rejected_b6"] == 1)
 
+print("== Panda health/state retention ==")
+red = SegmentReducer("r", 0, keep_qualified=False)
+# Normalized pandaState tuple: blocked, controlsAllowed, rxInvalid, heartbeatLost,
+# faultStatus, faultCount, REC/TEC for buses 0/1/2, then per-bus
+# busOffCnt/coreResetCnt/canfdEnabled.
+red.feed(("pandaState", t0, 3, True, False, False, "none", 0, 1, 2, 3, 4, 5, 6,
+          0, 0, True, 0, 0, True, 0, 0, True))
+red.feed(("pandaState", t0 + 1_000_000_000, 5, False, True, True, "faulted", 2,
+          7, 8, 9, 10, 11, 12, 13, 1, False, 14, 2, True, 15, 3, False))
+res = red.finish()
+health = res.census["panda_health"]
+check("Panda health samples retained", health["samples"] == 2)
+check("Panda controlsAllowed false retained", health["controls_allowed_false_samples"] == 1)
+check("Panda RX-invalid/heartbeat state retained",
+      health["safety_rx_checks_invalid_samples"] == 1 and health["heartbeat_lost_samples"] == 1)
+check("Panda fault status/count retained",
+      health["fault_status_counts"] == {"faulted": 1, "none": 1} and health["fault_count_max"] == 2)
+check("Panda bus health maxima retained",
+      health["bus_error_max"]["2"] == {
+          "receive_error_cnt": 11, "transmit_error_cnt": 12,
+          "bus_off_cnt": 15, "can_core_reset_cnt": 3, "canfd_disabled_samples": 1,
+      })
+check("Panda safetyTxBlocked delta retained",
+      res.census["safety_tx_blocked"] == {"samples": 2, "first": 3, "last": 5, "delta": 2})
+
 print("== segment time origin, staleness, and zero-vs-missing ==")
 red = SegmentReducer("r", 1, keep_qualified=True)
 ev = [
@@ -249,6 +275,7 @@ PINNED_SOURCE_SHA = {
     "3c-seg40": "73b946a8487c9d8f43d7ffe69287655775beaf595ec1099b6138f885ecb68902",
     "3c-seg43": "ab6b4fbe4d14227919a022dbc2c3091467446262d6896d26ea021ecc5d54c356",
     "3c-seg56": "ab3bf83295f653416567b75c770a8af83a847554968015f4fed4f650d6025d15",
+    "3d-seg1-torque": "1437f8c6214274348c0be61e453d9c00626da43135b4872a0a1f76b74e54ddc3",
     "3d-seg56": "a02430cf010867fa3486a6d964dc8d832667ad666f2f0c96fe94a2588c8cf3a8",
     "3d-seg57": "e13dd3880d08c827240017c76119038a65371a7d96149ebc44f4639b5319a793",
 }
@@ -259,32 +286,34 @@ for stem, sha in sorted(PINNED_SOURCE_SHA.items()):
         continue
     prov, _events = load_fixture(path)
     check(f"{stem} provenance pins the original source", prov["source_sha256"] == sha)
+    # The fixture format explicitly preserves payload byte count (DLC-equivalent
+    # for these loggerd CANData records) instead of requiring reviewers to
+    # infer it from a hex string.
+    first_frame = next(obj for obj in path.read_text().splitlines()[1:] if '"dat"' in obj)
+    frame_obj = json.loads(first_frame)
+    check(f"{stem} fixture preserves DLC", frame_obj["dlc"] * 2 == len(frame_obj["dat"]))
 
-# witness reproduction: expected values pinned from the ORIGINAL reducer's
-# published CSV (17 samples, span 34.458562074..35.258562074). The rebuilt grid
-# keeps the documented anchor (first live event) and can differ from the
-# unrecoverable original grid phase; the excerpt also starts at the window
-# edge, so its first grid point has no leading signal history. Both
-# mechanisms cost at most one 20-Hz sample against the published 17, and the
-# median tolerances below are declared empirical bounds for that drift
-# (actual drift: 0.5 count native, 2 counts openpilot), not derived limits.
+# Witness reproduction: every expectation is pinned from the ORIGINAL reducer
+# outputs still present under build/out/camry-stock-steering-20260904. The
+# tracked reducer now reproduces the original absolute-50ms grid and exact
+# live-origin definition, so no grid-phase tolerance is necessary.
 wres = reduce_fixture(FIXTURES / "3c-seg43.jsonl", witness=True, witness_window_s=WITNESS_WINDOW_S)
 rows = wres.witness_rows
-check("witness sample count 16-17", 16 <= len(rows) <= 17, str(len(rows)))
-check("witness span within the published window",
-      all(34.44 <= r.seg_s <= 35.31 for r in rows))
+check("witness sample count exact", len(rows) == 17, str(len(rows)))
+check("witness first timestamp exact", rows[0].seg_s == 34.458562074, str(rows[0].seg_s))
+check("witness last timestamp exact", rows[-1].seg_s == 35.258562074, str(rows[-1].seg_s))
 check("witness measured median exact", med([r.measured_deg for r in rows]) == 3.2)
-check("witness reference median exact",
-      abs(med([r.reference_deg for r in rows]) - 3.266256295467264) < 1e-6,
+check("witness reference median exact", med([r.reference_deg for r in rows]) == 3.266256,
       str(med([r.reference_deg for r in rows])))
-check("witness native-request median within one sample",
-      abs(med([r.native_req_deg for r in rows]) - 3.266256295467264) <= 0.30,
+check("witness native-request median exact", med([r.native_req_deg for r in rows]) == 3.266256,
       str(med([r.native_req_deg for r in rows])))
-check("witness openpilot median within one sample",
-      abs(med([r.op_target_deg for r in rows]) - 6.532512590934528) <= 0.30,
+check("witness openpilot median exact", med([r.op_target_deg for r in rows]) == 6.532513,
       str(med([r.op_target_deg for r in rows])))
 check("witness driver torque maximum exact", max(abs(r.torque_nm) for r in rows) == 0.46)
-check("witness all dual-active ID11", all(r.native_id == 11 and r.op_id == 11 for r in rows))
+check("witness all dual-active ID11",
+      all(r.native_id == 11 and r.op_id == 11 and r.control_lat_active is True for r in rows))
+check("witness requested actuator output retained",
+      all(r.requested_steering_angle_deg is not None for r in rows))
 
 # ID4 episodes: expected values pinned from the published §4.6 table.
 PINNED_ID4 = {
@@ -313,6 +342,94 @@ for ep in eps_all:
           and ep["request_level_values"] == [100])
     check(f"ID4 {key} matches published episode", ok,
           f"frames={ep['frames']} span={ep['first_segment_s']}..{ep['last_segment_s']}")
+
+print("== tracked full-corpus report (independent original-output expectations) ==")
+report_path = REPO / "data/generated/camry_20260904_stock_steering_report.json"
+manifest_path = REPO / "data/generated/camry_20260904_stock_steering_manifest.json"
+report = json.loads(report_path.read_text())
+manifest = json.loads(manifest_path.read_text())
+check("full report covers exactly 253 source segments", report["totals"]["segments"] == 253)
+check("native bus0/1/2 census exact", report["totals"]["native_can_records_buses_012"] == 27_173_143)
+check("B6 send/return/reject census exact",
+      report["totals"]["sendcan_b6"] == 751_664
+      and report["totals"]["returned_b6"] == 751_628
+      and report["totals"]["rejected_b6"] == 33)
+check("native B6/0x131/0x2E4 absent exactly",
+      report["totals"]["native_absent_addresses"] == {"0x0B6": 0, "0x131": 0, "0x2E4": 0})
+check("Panda safetyTxBlocked corpus delta exact", report["totals"]["safety_tx_blocked_delta"] == 19)
+check("all Panda health samples retained",
+      sum(rr["census"]["panda_health"]["samples"] for rr in report["routes"]) == 150_642
+      and [rr["census"]["panda_health"]["samples"] for rr in report["routes"]] == [65_524, 48_136, 36_982])
+check("Panda health has no logged fault/heartbeat/RX-check-invalid samples",
+      all(rr["census"]["panda_health"]["fault_status_counts"] == {"none": rr["census"]["panda_health"]["samples"]}
+              and rr["census"]["panda_health"]["fault_count_max"] == 0
+              and rr["census"]["panda_health"]["heartbeat_lost_samples"] == 0
+              and rr["census"]["panda_health"]["safety_rx_checks_invalid_samples"] == 0
+              for rr in report["routes"]))
+route3d_health = next(rr["census"]["panda_health"] for rr in report["routes"] if rr["route_short"] == "3d")
+check("route 3d bus0 transport endpoint exact",
+      route3d_health["bus_error_max"]["0"] == {
+          "receive_error_cnt": 127, "transmit_error_cnt": 0,
+          "bus_off_cnt": 56, "can_core_reset_cnt": 1, "canfd_disabled_samples": 2,
+      })
+
+PINNED_ROUTE_STATS = {
+    "3b": {"stock": (40_789, 0.998655, 1.0), "dual": 40_782, "divergent": 59},
+    "3c": {"stock": (21_990, 0.999381, 2.0), "dual": 21_980, "divergent": 318},
+    "3d": {"stock": (31_607, 0.996073, 1.0), "dual": 31_606, "divergent": 22},
+}
+for rr in report["routes"]:
+    expected = PINNED_ROUTE_STATS[rr["route_short"]]
+    stock = rr["comparison"]["stock_id11"]["reference081_vs_stock_raw"]
+    dual = rr["comparison"]["dual_active"]["reference081_vs_stock_raw"]
+    divergent = rr["comparison"]["divergent"]["reference081_vs_stock_raw"]
+    check(f"route {rr['route_short']} stock-ID11 population/correlation/p90 exact",
+          (stock["samples"], stock["correlation"], stock["p90_absolute"]) == expected["stock"],
+          str(stock))
+    check(f"route {rr['route_short']} dual-active population exact", dual["samples"] == expected["dual"])
+    check(f"route {rr['route_short']} divergent population exact", divergent["samples"] == expected["divergent"])
+
+w = report["witness"]
+check("full report witness exact",
+      w["samples"] == 17
+      and w["first_sample_s"] == 34.458562074
+      and w["last_sample_s"] == 35.258562074
+      and w["median_measured_deg"] == 3.2
+      and w["median_native_08a_request_deg"] == 3.266256
+      and w["median_native_081_reference_deg"] == 3.266256
+      and w["median_openpilot_target_deg"] == 6.532513)
+check("full report ID4 count exact", report["id4_total_frames"] == 248 and len(report["id4_episodes"]) == 5)
+
+quality = manifest["input_quality"]
+check("manifest inventories exactly 253 source files", len(manifest["routes"]) == 253)
+check("all source files readable", not quality["unreadable"] and all(e["status"] == "readable" for e in manifest["routes"]))
+check("no missing/duplicate/gapped source inputs",
+      not quality["missing_route_dirs"]
+      and not quality["duplicates"]
+      and all(not gaps for gaps in quality["segment_gaps"].values())
+      and all(not dups for dups in quality["duplicate_segment_numbers"].values()))
+check("all three expected route populations inventoried",
+      {r: sum(e["route"] == r for e in manifest["routes"]) for r in (
+          "0000003b--62262eb7a1", "0000003c--97b9e7a69a", "0000003d--0e812cecba"
+      )} == {
+          "0000003b--62262eb7a1": 110,
+          "0000003c--97b9e7a69a": 81,
+          "0000003d--0e812cecba": 62,
+      })
+check("source-order timestamp regressions are explicitly reported",
+      len(quality["out_of_order_segments"]) == 253
+      and all(e["events"] > 0 and e["max_timestamp_regression_ns"] > 0
+              for e in quality["out_of_order_segments"]))
+check("manifest pins parser schema identity",
+      manifest["parser"]["log_schema_sha256"] == "f839ceeb3041dac6aea4b2f68f5afd52db0e8c3367dd1fe53eb83a2be7ad01cc"
+      and manifest["parser"]["sampling_revision"] == "original-build-tmp-extractor-compatible:absolute-50ms-grid-v1")
+check("every source inventory entry has identity and event bounds",
+      all(e["bytes"] > 0 and len(e["sha256"]) == 64 and e["events_total"] > 0
+              and e["first_live_ns"] is not None and e["last_live_ns"] is not None
+              and e["service_event_counts"] for e in manifest["routes"]))
+check("current-cereal pandaStates normalize one-for-one in this corpus",
+      sum(e["event_counts"].get("pandaState", 0) for e in manifest["routes"]) == 150_642
+      == sum(e["service_event_counts"].get("pandaStates", 0) for e in manifest["routes"]))
 
 print(f"\n{passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

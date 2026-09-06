@@ -29,12 +29,16 @@ consumption, physical response, and release/override are all **unobserved** —
 the 2026-09-04 corpus shows silent non-admission of 751,664 well-formed B6
 frames (port report §4.4–§4.5). The corrected non-bypassing queue/freshness
 observer remains the designated discriminator (§5 of the port report).
+Critically, **no supported/legitimate steering command interface is currently
+identified for qualification under the completion plan**. Historical Gate-2
+modified-firmware experiments are a separate RE evidence class and cannot fill
+that requirement.
 
 ## Interface inventory
 
 | Interface | Legitimacy / status | Notes |
 |---|---|---|
-| Panda bus-0 `0x0B6` (DLC 32, CAN FD) | Supported by the installed Gate-2 development patch on the maintainer EPS only | Zero-MAC28 development candidate, `stock_validated=false`; not a stock interface; not deployable |
+| Panda bus-0 `0x0B6` (DLC 32, CAN FD) via Gate-2 | **Modified-firmware development bypass; not a supported qualification interface** | Zero-MAC28 historical development candidate, `stock_validated=false`; outside the plan's legitimate-interface requirement and not deployable |
 | Native `0x08A` request plane (bus 2) | Read-only passive observable | Never a command ingress; OQ-054 signer/handoff still open |
 | `0x081` reference word (bus 0) | Passive observable | Mirror of `0x08A` (VAR-129); direction unresolved |
 | UDS on `0x7A1/0x7A9` (EPS) | Read-only supported (F181 identity, DIDs) | Write/control services not exposed by this plan |
@@ -44,8 +48,11 @@ observer remains the designated discriminator (§5 of the port report).
 
 ## Bench apparatus requirements (to be finalized with a qualified controls engineer)
 
-1. Legitimate command interface: the Gate-2-patched EPS on a bench fixture, or
-   an equivalent supported receiver arrangement; identity recorded per stage.
+1. Legitimate command interface: a documented supported receiver/control
+   arrangement whose authorization and ownership are valid without relying on
+   the historical Gate-2 bypass. **This item is presently missing and is the
+   primary WP3 blocker.** Modified-firmware experiments may be recorded
+   separately for RE, but cannot be promoted into this qualification record.
 2. Independent angle measurement: separate rotary encoder or equivalent on
    the steering output, clock-synchronized to the CAN capture within a stated
    uncertainty budget (target ≤ one 20 ms control period; record actual).
@@ -80,7 +87,10 @@ filters and correlations are not stationary pass/fail criteria. Native ID4 is
 request activity, `0x030` motor feedback can include ordinary assist, and
 neither proves a grant.
 
-**Exit status:** blocked on the bench apparatus and the supported-interface
-confirmation (items 1–2). This document is the specification those runs will
-be judged against; until then, no code patch may be reported as completing
-steering support.
+**Exit status: blocked.** Missing dependencies are (1) documentation/availability
+of a legitimate supported steering command interface satisfying the plan's
+authentication/ownership boundary, and (2) a qualified bench apparatus with an
+independent angle instrument and driver-input measurement. The five evidence
+boundaries therefore remain unfulfilled. This is the precise blocked-interface
+report permitted by WP3; historical Gate-2 modified-firmware behavior does not
+complete steering support.

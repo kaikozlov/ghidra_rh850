@@ -35,10 +35,10 @@
       "segment": 40
     },
     {
-      "first_segment_s": 43.96422217,
+      "first_segment_s": 43.964079098,
       "first_time_ns": 10899940420320,
       "frames": 60,
-      "last_segment_s": 45.44132118,
+      "last_segment_s": 45.441178108,
       "last_time_ns": 10901417519330,
       "openpilot_lateral_active": false,
       "request_level_values": [
@@ -49,10 +49,10 @@
       "segment": 56
     },
     {
-      "first_segment_s": 59.294481279,
+      "first_segment_s": 59.294347008,
       "first_time_ns": 25295733510141,
       "frames": 28,
-      "last_segment_s": 59.969578362,
+      "last_segment_s": 59.969444091,
       "last_time_ns": 25296408607224,
       "openpilot_lateral_active": false,
       "request_level_values": [
@@ -127,6 +127,39 @@
           "2": 1509418
         },
         "native_total": 11821233,
+        "panda_health": {
+          "bus_error_max": {
+            "0": {
+              "bus_off_cnt": 0,
+              "can_core_reset_cnt": 0,
+              "canfd_disabled_samples": 0,
+              "receive_error_cnt": 0,
+              "transmit_error_cnt": 0
+            },
+            "1": {
+              "bus_off_cnt": 0,
+              "can_core_reset_cnt": 7,
+              "canfd_disabled_samples": 6,
+              "receive_error_cnt": 17,
+              "transmit_error_cnt": 0
+            },
+            "2": {
+              "bus_off_cnt": 0,
+              "can_core_reset_cnt": 0,
+              "canfd_disabled_samples": 0,
+              "receive_error_cnt": 0,
+              "transmit_error_cnt": 0
+            }
+          },
+          "controls_allowed_false_samples": 18324,
+          "fault_count_max": 0,
+          "fault_status_counts": {
+            "none": 65524
+          },
+          "heartbeat_lost_samples": 0,
+          "safety_rx_checks_invalid_samples": 0,
+          "samples": 65524
+        },
         "rejected_b6": 14,
         "rejected_by_bus": {
           "0": 14,
@@ -135,8 +168,8 @@
         },
         "returned_b6": 326975,
         "returned_echo_total": 9520470,
-        "safety_tx_blocked_delta": null,
-        "safety_tx_blocked_samples": 0,
+        "safety_tx_blocked_delta": 10,
+        "safety_tx_blocked_samples": 65524,
         "sendcan_b6_total": 326990,
         "sendcan_by_addr": {
           "0x0B6": 326990,
@@ -215,149 +248,150 @@
       "comparison": {
         "divergent": {
           "openpilot_vs_measured": {
-            "correlation": 0.885346,
-            "median_absolute": 2.423559,
-            "p90_absolute": 3.259502,
-            "rmse": 2.468455,
-            "samples": 58
+            "correlation": 0.883512,
+            "median_absolute": 2.408954,
+            "p90_absolute": 3.375713,
+            "rmse": 2.508874,
+            "samples": 59
           },
           "reference081_vs_measured": {
-            "correlation": 0.898904,
-            "median_absolute": 0.65,
-            "p90_absolute": 1.440453,
-            "rmse": 0.974238,
-            "samples": 58
+            "correlation": 0.896417,
+            "median_absolute": 0.512367,
+            "p90_absolute": 1.422272,
+            "rmse": 0.939602,
+            "samples": 59
           },
           "reference081_vs_stock_raw": {
-            "correlation": 0.998798,
+            "correlation": 0.997718,
             "median_absolute": 1.0,
-            "p90_absolute": 4.0,
-            "rmse": 2.109094,
-            "samples": 58
+            "p90_absolute": 3.0,
+            "rmse": 2.347014,
+            "samples": 59
           },
           "stock_vs_measured": {
-            "correlation": 0.890159,
-            "median_absolute": 0.514018,
-            "p90_absolute": 1.400341,
-            "rmse": 0.955821,
-            "samples": 58
+            "correlation": 0.880062,
+            "median_absolute": 0.6,
+            "p90_absolute": 1.531013,
+            "rmse": 0.958842,
+            "samples": 59
           }
         },
         "dual_active": {
           "openpilot_vs_measured": {
-            "correlation": 0.892469,
-            "median_absolute": 0.275266,
+            "correlation": 0.892012,
+            "median_absolute": 0.274147,
             "p90_absolute": 0.771908,
-            "rmse": 0.498499,
-            "samples": 40785
+            "rmse": 0.498997,
+            "samples": 40782
           },
           "reference081_vs_measured": {
-            "correlation": 0.875945,
+            "correlation": 0.875366,
             "median_absolute": 0.713486,
             "p90_absolute": 1.257303,
-            "rmse": 0.836506,
-            "samples": 40785
+            "rmse": 0.836973,
+            "samples": 40782
           },
           "reference081_vs_stock_raw": {
-            "correlation": 0.998606,
+            "correlation": 0.998668,
             "median_absolute": 0.0,
             "p90_absolute": 1.0,
-            "rmse": 0.889369,
-            "samples": 40785
+            "rmse": 0.868591,
+            "samples": 40782
           },
           "stock_vs_measured": {
-            "correlation": 0.87405,
+            "correlation": 0.874056,
             "median_absolute": 0.713486,
             "p90_absolute": 1.257303,
-            "rmse": 0.838606,
-            "samples": 40785
+            "rmse": 0.838218,
+            "samples": 40782
           }
         },
         "manual_id0": {
           "openpilot_vs_measured": {
-            "correlation": 0.709548,
+            "correlation": 0.666804,
             "median_absolute": 0.023615,
-            "p90_absolute": 3.246614,
-            "rmse": 1.991445,
-            "samples": 736
+            "p90_absolute": 3.348293,
+            "rmse": 2.028677,
+            "samples": 731
           },
           "reference081_vs_measured": {
-            "correlation": 0.978889,
-            "median_absolute": 0.843816,
-            "p90_absolute": 1.516872,
-            "rmse": 1.024113,
-            "samples": 736
+            "correlation": 0.976296,
+            "median_absolute": 0.844936,
+            "p90_absolute": 1.53934,
+            "rmse": 1.02919,
+            "samples": 731
           },
           "reference081_vs_stock_raw": {
-            "correlation": 0.998852,
+            "correlation": 0.998728,
             "median_absolute": 0.0,
-            "p90_absolute": 2.5,
-            "rmse": 2.349838,
-            "samples": 736
+            "p90_absolute": 2.0,
+            "rmse": 2.337759,
+            "samples": 731
           },
           "stock_vs_measured": {
-            "correlation": 0.977013,
-            "median_absolute": 0.843816,
-            "p90_absolute": 1.512927,
-            "rmse": 1.014841,
-            "samples": 736
+            "correlation": 0.973529,
+            "median_absolute": 0.874147,
+            "p90_absolute": 1.513486,
+            "rmse": 1.018493,
+            "samples": 731
           }
         },
         "stock_id11": {
           "openpilot_vs_measured": {
-            "correlation": 0.892546,
-            "median_absolute": 0.275266,
-            "p90_absolute": 0.771461,
-            "rmse": 0.498438,
-            "samples": 40795
+            "correlation": 0.892076,
+            "median_absolute": 0.274147,
+            "p90_absolute": 0.771908,
+            "rmse": 0.49896,
+            "samples": 40789
           },
           "reference081_vs_measured": {
-            "correlation": 0.875914,
+            "correlation": 0.875379,
             "median_absolute": 0.713486,
             "p90_absolute": 1.257303,
-            "rmse": 0.836468,
-            "samples": 40795
+            "rmse": 0.836931,
+            "samples": 40789
           },
           "reference081_vs_stock_raw": {
-            "correlation": 0.998576,
+            "correlation": 0.998655,
             "median_absolute": 0.0,
             "p90_absolute": 1.0,
-            "rmse": 0.899251,
-            "samples": 40795
+            "rmse": 0.873134,
+            "samples": 40789
           },
           "stock_vs_measured": {
-            "correlation": 0.874064,
+            "correlation": 0.874088,
             "median_absolute": 0.713486,
             "p90_absolute": 1.257303,
-            "rmse": 0.838567,
-            "samples": 40795
+            "rmse": 0.838175,
+            "samples": 40789
           }
         }
       },
-      "duration_s": 6582.27,
+      "duration_s": 6582.28,
       "exclusions": {
-        "blinker_active": 10580,
-        "blinker_stale": 291,
-        "measured_stale": 92,
-        "native_id_not_11": 39317,
-        "native_request_stale": 103,
-        "openpilot_stale": 356,
-        "reference_stale": 103,
-        "speed_le_10mps": 39120,
-        "speed_stale": 291,
-        "torque_ge_0p5nm": 65074,
-        "torque_stale": 92,
-        "torque_validity_stale": 92
+        "blinker_active": 10585,
+        "blinker_stale": 214,
+        "carcontrol_stale": 214,
+        "measured_stale": 12,
+        "native_id_not_11": 39323,
+        "native_request_stale": 34,
+        "openpilot_transmit_stale": 274,
+        "reference_stale": 37,
+        "speed_le_10mps": 39132,
+        "speed_stale": 214,
+        "torque_ge_0p5nm": 65103,
+        "torque_stale": 12,
+        "torque_validity_stale": 12
       },
       "native_08a_id_counts_fresh": {
-        "0": 22231,
-        "11": 92273,
-        "18": 17080,
+        "0": 22236,
+        "11": 92287,
+        "18": 17081,
         "4": 6
       },
       "route": "0000003b--62262eb7a1",
       "route_short": "3b",
-      "samples": 131693,
+      "samples": 131644,
       "segment_count": 110,
       "segments": [
         0,
@@ -519,6 +553,39 @@
           "2": 1103439
         },
         "native_total": 8676101,
+        "panda_health": {
+          "bus_error_max": {
+            "0": {
+              "bus_off_cnt": 0,
+              "can_core_reset_cnt": 0,
+              "canfd_disabled_samples": 1,
+              "receive_error_cnt": 0,
+              "transmit_error_cnt": 0
+            },
+            "1": {
+              "bus_off_cnt": 0,
+              "can_core_reset_cnt": 12,
+              "canfd_disabled_samples": 5,
+              "receive_error_cnt": 111,
+              "transmit_error_cnt": 0
+            },
+            "2": {
+              "bus_off_cnt": 0,
+              "can_core_reset_cnt": 0,
+              "canfd_disabled_samples": 1,
+              "receive_error_cnt": 0,
+              "transmit_error_cnt": 0
+            }
+          },
+          "controls_allowed_false_samples": 26585,
+          "fault_count_max": 0,
+          "fault_status_counts": {
+            "none": 48136
+          },
+          "heartbeat_lost_samples": 0,
+          "safety_rx_checks_invalid_samples": 0,
+          "samples": 48136
+        },
         "rejected_b6": 9,
         "rejected_by_bus": {
           "0": 9,
@@ -527,8 +594,8 @@
         },
         "returned_b6": 240223,
         "returned_echo_total": 6987043,
-        "safety_tx_blocked_delta": null,
-        "safety_tx_blocked_samples": 0,
+        "safety_tx_blocked_delta": 3,
+        "safety_tx_blocked_samples": 48136,
         "sendcan_b6_total": 240233,
         "sendcan_by_addr": {
           "0x0B6": 240233,
@@ -607,149 +674,150 @@
       "comparison": {
         "divergent": {
           "openpilot_vs_measured": {
-            "correlation": 0.914846,
-            "median_absolute": 2.177448,
-            "p90_absolute": 3.495008,
-            "rmse": 2.462851,
-            "samples": 313
+            "correlation": 0.916476,
+            "median_absolute": 2.170789,
+            "p90_absolute": 3.496586,
+            "rmse": 2.453413,
+            "samples": 318
           },
           "reference081_vs_measured": {
-            "correlation": 0.951935,
-            "median_absolute": 0.611248,
-            "p90_absolute": 1.46357,
-            "rmse": 0.947944,
-            "samples": 313
+            "correlation": 0.953685,
+            "median_absolute": 0.614046,
+            "p90_absolute": 1.469552,
+            "rmse": 0.946275,
+            "samples": 318
           },
           "reference081_vs_stock_raw": {
-            "correlation": 0.999353,
-            "median_absolute": 0.0,
-            "p90_absolute": 2.0,
-            "rmse": 1.386839,
-            "samples": 313
+            "correlation": 0.999094,
+            "median_absolute": 1.0,
+            "p90_absolute": 3.0,
+            "rmse": 1.635879,
+            "samples": 318
           },
           "stock_vs_measured": {
-            "correlation": 0.951958,
-            "median_absolute": 0.611248,
-            "p90_absolute": 1.452132,
-            "rmse": 0.932766,
-            "samples": 313
+            "correlation": 0.952345,
+            "median_absolute": 0.625294,
+            "p90_absolute": 1.469502,
+            "rmse": 0.942467,
+            "samples": 318
           }
         },
         "dual_active": {
           "openpilot_vs_measured": {
-            "correlation": 0.930072,
-            "median_absolute": 0.321321,
-            "p90_absolute": 0.99211,
-            "rmse": 0.651899,
-            "samples": 21989
+            "correlation": 0.930331,
+            "median_absolute": 0.320201,
+            "p90_absolute": 0.989983,
+            "rmse": 0.651871,
+            "samples": 21980
           },
           "reference081_vs_measured": {
-            "correlation": 0.947593,
+            "correlation": 0.947465,
             "median_absolute": 0.742697,
-            "p90_absolute": 1.374147,
-            "rmse": 0.912273,
-            "samples": 21989
+            "p90_absolute": 1.37756,
+            "rmse": 0.91231,
+            "samples": 21980
           },
           "reference081_vs_stock_raw": {
-            "correlation": 0.999452,
+            "correlation": 0.999382,
             "median_absolute": 0.0,
-            "p90_absolute": 1.0,
-            "rmse": 0.964205,
-            "samples": 21989
+            "p90_absolute": 2.0,
+            "rmse": 1.023362,
+            "samples": 21980
           },
           "stock_vs_measured": {
-            "correlation": 0.946471,
+            "correlation": 0.946054,
             "median_absolute": 0.742697,
-            "p90_absolute": 1.378623,
-            "rmse": 0.915543,
-            "samples": 21989
+            "p90_absolute": 1.386514,
+            "rmse": 0.916744,
+            "samples": 21980
           }
         },
         "manual_id0": {
           "openpilot_vs_measured": {
-            "correlation": 0.999708,
-            "median_absolute": 0.0169,
-            "p90_absolute": 0.077504,
-            "rmse": 0.05631,
-            "samples": 2261
+            "correlation": 0.999615,
+            "median_absolute": 0.016844,
+            "p90_absolute": 0.076609,
+            "rmse": 0.066295,
+            "samples": 2269
           },
           "reference081_vs_measured": {
-            "correlation": 0.980899,
-            "median_absolute": 0.797762,
-            "p90_absolute": 1.449468,
-            "rmse": 0.935856,
-            "samples": 2261
+            "correlation": 0.981011,
+            "median_absolute": 0.801119,
+            "p90_absolute": 1.456184,
+            "rmse": 0.937956,
+            "samples": 2269
           },
           "reference081_vs_stock_raw": {
-            "correlation": 0.998375,
+            "correlation": 0.998163,
             "median_absolute": 0.0,
             "p90_absolute": 2.0,
-            "rmse": 2.345066,
-            "samples": 2261
+            "rmse": 2.596146,
+            "samples": 2269
           },
           "stock_vs_measured": {
-            "correlation": 0.978118,
-            "median_absolute": 0.802238,
+            "correlation": 0.977703,
+            "median_absolute": 0.798881,
             "p90_absolute": 1.424734,
-            "rmse": 0.930394,
-            "samples": 2261
+            "rmse": 0.929583,
+            "samples": 2269
           }
         },
         "stock_id11": {
           "openpilot_vs_measured": {
-            "correlation": 0.930076,
-            "median_absolute": 0.320229,
-            "p90_absolute": 0.99211,
-            "rmse": 0.651855,
-            "samples": 21992
+            "correlation": 0.930333,
+            "median_absolute": 0.320201,
+            "p90_absolute": 0.989871,
+            "rmse": 0.651746,
+            "samples": 21989
           },
           "reference081_vs_measured": {
-            "correlation": 0.947587,
+            "correlation": 0.947453,
             "median_absolute": 0.742697,
-            "p90_absolute": 1.374147,
-            "rmse": 0.912335,
-            "samples": 21992
+            "p90_absolute": 1.37756,
+            "rmse": 0.912367,
+            "samples": 21990
           },
           "reference081_vs_stock_raw": {
-            "correlation": 0.999452,
+            "correlation": 0.999381,
             "median_absolute": 0.0,
-            "p90_absolute": 1.0,
-            "rmse": 0.96414,
-            "samples": 21992
+            "p90_absolute": 2.0,
+            "rmse": 1.024351,
+            "samples": 21990
           },
           "stock_vs_measured": {
-            "correlation": 0.946464,
+            "correlation": 0.946035,
             "median_absolute": 0.742697,
-            "p90_absolute": 1.378623,
-            "rmse": 0.915604,
-            "samples": 21992
+            "p90_absolute": 1.386514,
+            "rmse": 0.916813,
+            "samples": 21990
           }
         }
       },
-      "duration_s": 4835.46,
+      "duration_s": 4835.48,
       "exclusions": {
         "blinker_active": 5276,
-        "blinker_stale": 194,
-        "measured_stale": 67,
-        "native_id_not_11": 53905,
-        "native_request_stale": 73,
-        "openpilot_stale": 254,
-        "reference_stale": 79,
-        "speed_le_10mps": 57173,
-        "speed_stale": 194,
-        "torque_ge_0p5nm": 26922,
-        "torque_invalid": 15,
-        "torque_stale": 68,
-        "torque_validity_stale": 68
+        "blinker_stale": 139,
+        "carcontrol_stale": 140,
+        "measured_stale": 11,
+        "native_id_not_11": 53906,
+        "native_request_stale": 20,
+        "openpilot_transmit_stale": 194,
+        "reference_stale": 28,
+        "speed_le_10mps": 57179,
+        "speed_stale": 139,
+        "torque_ge_0p5nm": 26931,
+        "torque_invalid": 14,
+        "torque_stale": 14,
+        "torque_validity_stale": 14
       },
       "native_08a_id_counts_fresh": {
-        "0": 53824,
-        "11": 42767,
+        "0": 53825,
+        "11": 42783,
         "4": 81
       },
       "route": "0000003c--97b9e7a69a",
       "route_short": "3c",
-      "samples": 96745,
+      "samples": 96709,
       "segment_count": 81,
       "segments": [
         0,
@@ -882,6 +950,39 @@
           "2": 853761
         },
         "native_total": 6675809,
+        "panda_health": {
+          "bus_error_max": {
+            "0": {
+              "bus_off_cnt": 56,
+              "can_core_reset_cnt": 1,
+              "canfd_disabled_samples": 2,
+              "receive_error_cnt": 127,
+              "transmit_error_cnt": 0
+            },
+            "1": {
+              "bus_off_cnt": 0,
+              "can_core_reset_cnt": 17,
+              "canfd_disabled_samples": 7,
+              "receive_error_cnt": 118,
+              "transmit_error_cnt": 0
+            },
+            "2": {
+              "bus_off_cnt": 0,
+              "can_core_reset_cnt": 0,
+              "canfd_disabled_samples": 1,
+              "receive_error_cnt": 0,
+              "transmit_error_cnt": 0
+            }
+          },
+          "controls_allowed_false_samples": 13620,
+          "fault_count_max": 0,
+          "fault_status_counts": {
+            "none": 36982
+          },
+          "heartbeat_lost_samples": 0,
+          "safety_rx_checks_invalid_samples": 0,
+          "samples": 36982
+        },
         "rejected_b6": 10,
         "rejected_by_bus": {
           "0": 10,
@@ -890,8 +991,8 @@
         },
         "returned_b6": 184430,
         "returned_echo_total": 5371286,
-        "safety_tx_blocked_delta": null,
-        "safety_tx_blocked_samples": 0,
+        "safety_tx_blocked_delta": 6,
+        "safety_tx_blocked_samples": 36982,
         "sendcan_b6_total": 184441,
         "sendcan_by_addr": {
           "0x0B6": 184441,
@@ -970,149 +1071,150 @@
       "comparison": {
         "divergent": {
           "openpilot_vs_measured": {
-            "correlation": 0.785512,
-            "median_absolute": 2.310073,
-            "p90_absolute": 3.883346,
-            "rmse": 2.572417,
-            "samples": 19
+            "correlation": 0.708123,
+            "median_absolute": 2.043788,
+            "p90_absolute": 4.264018,
+            "rmse": 2.529076,
+            "samples": 22
           },
           "reference081_vs_measured": {
-            "correlation": 0.906652,
-            "median_absolute": 0.497762,
-            "p90_absolute": 1.659552,
-            "rmse": 1.108668,
-            "samples": 19
+            "correlation": 0.860961,
+            "median_absolute": 0.482597,
+            "p90_absolute": 1.871903,
+            "rmse": 1.200551,
+            "samples": 22
           },
           "reference081_vs_stock_raw": {
-            "correlation": 0.99319,
-            "median_absolute": 1.0,
-            "p90_absolute": 4.6,
-            "rmse": 3.187145,
-            "samples": 19
+            "correlation": 0.995975,
+            "median_absolute": 0.5,
+            "p90_absolute": 3.9,
+            "rmse": 1.882938,
+            "samples": 22
           },
           "stock_vs_measured": {
-            "correlation": 0.883145,
-            "median_absolute": 0.462955,
-            "p90_absolute": 1.705395,
-            "rmse": 1.134718,
-            "samples": 19
+            "correlation": 0.833008,
+            "median_absolute": 0.482597,
+            "p90_absolute": 2.078193,
+            "rmse": 1.239184,
+            "samples": 22
           }
         },
         "dual_active": {
           "openpilot_vs_measured": {
-            "correlation": 0.714405,
+            "correlation": 0.712465,
             "median_absolute": 0.233688,
             "p90_absolute": 0.625853,
-            "rmse": 0.396576,
-            "samples": 31560
+            "rmse": 0.397523,
+            "samples": 31606
           },
           "reference081_vs_measured": {
-            "correlation": 0.739092,
+            "correlation": 0.737619,
             "median_absolute": 0.640459,
             "p90_absolute": 1.070789,
-            "rmse": 0.732514,
-            "samples": 31560
+            "rmse": 0.733141,
+            "samples": 31606
           },
           "reference081_vs_stock_raw": {
-            "correlation": 0.99608,
+            "correlation": 0.996074,
             "median_absolute": 0.0,
             "p90_absolute": 1.0,
-            "rmse": 0.832217,
-            "samples": 31560
+            "rmse": 0.833018,
+            "samples": 31606
           },
           "stock_vs_measured": {
-            "correlation": 0.73478,
+            "correlation": 0.733593,
             "median_absolute": 0.640459,
-            "p90_absolute": 1.083156,
-            "rmse": 0.733728,
-            "samples": 31560
+            "p90_absolute": 1.071908,
+            "rmse": 0.734233,
+            "samples": 31606
           }
         },
         "manual_id0": {
           "openpilot_vs_measured": {
-            "correlation": 0.972298,
+            "correlation": 0.970198,
             "median_absolute": 0.017963,
-            "p90_absolute": 0.083106,
-            "rmse": 0.479255,
-            "samples": 4100
+            "p90_absolute": 0.083156,
+            "rmse": 0.502395,
+            "samples": 4091
           },
           "reference081_vs_measured": {
-            "correlation": 0.985326,
-            "median_absolute": 1.06967,
+            "correlation": 0.985782,
+            "median_absolute": 1.071908,
             "p90_absolute": 1.410129,
-            "rmse": 1.069431,
-            "samples": 4100
+            "rmse": 1.071289,
+            "samples": 4092
           },
           "reference081_vs_stock_raw": {
-            "correlation": 0.998496,
+            "correlation": 0.998341,
             "median_absolute": 0.0,
             "p90_absolute": 2.0,
-            "rmse": 2.279013,
-            "samples": 4100
+            "rmse": 2.578437,
+            "samples": 4092
           },
           "stock_vs_measured": {
-            "correlation": 0.98273,
-            "median_absolute": 1.052826,
-            "p90_absolute": 1.394404,
-            "rmse": 1.051346,
-            "samples": 4100
+            "correlation": 0.982514,
+            "median_absolute": 1.053945,
+            "p90_absolute": 1.388467,
+            "rmse": 1.050822,
+            "samples": 4092
           }
         },
         "stock_id11": {
           "openpilot_vs_measured": {
-            "correlation": 0.714405,
+            "correlation": 0.712479,
             "median_absolute": 0.233688,
             "p90_absolute": 0.625853,
-            "rmse": 0.396576,
-            "samples": 31560
+            "rmse": 0.397517,
+            "samples": 31607
           },
           "reference081_vs_measured": {
-            "correlation": 0.739092,
+            "correlation": 0.737641,
             "median_absolute": 0.640459,
             "p90_absolute": 1.070789,
-            "rmse": 0.732514,
-            "samples": 31560
+            "rmse": 0.733148,
+            "samples": 31607
           },
           "reference081_vs_stock_raw": {
-            "correlation": 0.99608,
+            "correlation": 0.996073,
             "median_absolute": 0.0,
             "p90_absolute": 1.0,
-            "rmse": 0.832217,
-            "samples": 31560
+            "rmse": 0.833176,
+            "samples": 31607
           },
           "stock_vs_measured": {
-            "correlation": 0.73478,
+            "correlation": 0.733616,
             "median_absolute": 0.640459,
-            "p90_absolute": 1.083156,
-            "rmse": 0.733728,
-            "samples": 31560
+            "p90_absolute": 1.071908,
+            "rmse": 0.734247,
+            "samples": 31607
           }
         }
       },
       "duration_s": 3714.78,
       "exclusions": {
-        "blinker_active": 7080,
-        "blinker_stale": 184,
-        "measured_stale": 60,
-        "native_id_not_11": 28760,
-        "native_request_stale": 65,
-        "openpilot_stale": 249,
-        "reference_stale": 63,
-        "speed_le_10mps": 12004,
-        "speed_stale": 184,
-        "torque_ge_0p5nm": 30164,
+        "blinker_active": 7073,
+        "blinker_stale": 140,
+        "carcontrol_stale": 138,
+        "measured_stale": 13,
+        "native_id_not_11": 28761,
+        "native_request_stale": 22,
+        "openpilot_transmit_stale": 206,
+        "reference_stale": 26,
+        "speed_le_10mps": 12006,
+        "speed_stale": 140,
+        "torque_ge_0p5nm": 30130,
         "torque_invalid": 15,
-        "torque_stale": 59,
-        "torque_validity_stale": 59
+        "torque_stale": 12,
+        "torque_validity_stale": 12
       },
       "native_08a_id_counts_fresh": {
-        "0": 28723,
-        "11": 45499,
+        "0": 28724,
+        "11": 45515,
         "4": 37
       },
       "route": "0000003d--0e812cecba",
       "route_short": "3d",
-      "samples": 74324,
+      "samples": 74298,
       "segment_count": 62,
       "segments": [
         0,
@@ -1183,7 +1285,7 @@
   "sampling": {
     "divergence_deg": 2.5,
     "max_age_ns": 75000000,
-    "method": "per-segment 20 Hz grid anchored at first live event; last-observed values at or before each grid time; per-signal ages retained",
+    "method": "per-segment absolute-monotonic 20 Hz grid: first 50 ms multiple at/after the earliest can/sendcan/carState/carControl event; last-observed values at or before each grid time after stable timestamp ordering; per-signal ages retained",
     "native_active_id": 11,
     "rate_hz": 20,
     "speed_min_mps": 10.0,
@@ -1200,25 +1302,25 @@
     "rejected_b6": 33,
     "returned_b6": 751628,
     "returned_echoes": 21878799,
-    "safety_tx_blocked_delta": null,
+    "safety_tx_blocked_delta": 19,
     "segments": 253,
     "sendcan_b6": 751664
   },
   "witness": {
-    "first_sample_s": 34.5,
-    "last_sample_s": 35.25,
+    "first_sample_s": 34.458562074,
+    "last_sample_s": 35.258562074,
     "max_abs_driver_torque_nm": 0.46,
     "median_measured_deg": 3.2,
     "median_native_081_reference_deg": 3.266256,
-    "median_native_08a_request_deg": 3.294908,
-    "median_openpilot_target_deg": 6.647118,
-    "median_speed_mps": 25.614023,
+    "median_native_08a_request_deg": 3.266256,
+    "median_openpilot_target_deg": 6.532513,
+    "median_speed_mps": 25.624535,
     "published_span_s": [
       34.458562074,
       35.258562074
     ],
     "route": "0000003c--97b9e7a69a",
-    "samples": 16,
+    "samples": 17,
     "segment": 43,
     "selection_window_s": [
       34.4,

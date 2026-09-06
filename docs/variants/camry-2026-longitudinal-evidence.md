@@ -1,12 +1,14 @@
 # 2026 Camry longitudinal evidence packet and status (WP4)
 
-**Scope:** work package 4 of the Camry openpilot completion plan. Milestone-A
-configuration (stock Toyota ACC retained) is the shipped state; this packet
-assembles the evidence matrix for native openpilot longitudinal control and
-records what remains before any implementation is justified. No injection or
-interception wiring is prescribed.
+**Scope:** work package 4 of the Camry openpilot completion plan. The
+**Milestone-A longitudinal configuration** (stock Toyota ACC retained) is the
+current fork state; this names the longitudinal ownership arrangement only and
+does **not** mean Milestone A itself is accepted (lateral qualification remains
+blocked). This packet assembles the evidence matrix for native openpilot
+longitudinal control and records what remains before any implementation is
+justified. No injection or interception wiring is prescribed.
 
-## Current shipped configuration (Milestone A)
+## Current stock-ACC configuration (Milestone-A longitudinal arrangement)
 
 `TOYOTA_CAMRY_TSS3` sets `openpilotLongitudinalControl=False`,
 `pcmCruise=True`, Toyota `STOCK_LONGITUDINAL`, and the TSS3
