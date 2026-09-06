@@ -39,6 +39,8 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py",
     "exploit/followups/xcp_read_probe.py",
     "exploit/followups/xcp_daq_probe.py",
+    "exploit/followups/xcp_runtime_state_probe.py",
+    "exploit/followups/application_rmba_probe.py",
     "exploit/patcher/patch_config.py",
     "exploit/patcher/build_payload.py",
     "exploit/patcher/deploy.py",
@@ -311,7 +313,7 @@ def build(out: Path, openpilot: Path) -> dict:
                 "route": "0x7F7->0x7F8 bus0 after exact F181 check",
                 "source_memory_write": False,
                 "steering_transmit": False,
-                "live_status": "post-repin XCP reachability not yet measured; parked preflight required",
+                "live_status": "parked preflight first; if CONNECT is silent, use packaged read-only runtime-state probe before any RAM-resident fallback",
             },
         },
         "ram_experiments": {
