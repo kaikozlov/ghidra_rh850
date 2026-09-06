@@ -503,6 +503,54 @@
     "interpretation": "Panda harnessStatus=flipped is USB-C harness orientation, not the Toyota-B physical CAN0/CAN1 repin. ELM327 param=1 keeps logical bus 1/FDCAN2 on the normal harness CAN1 wires, so an unmodified harness can passively observe that unsplit network. The missing physical repin prevents CAN0/CAN2 relay interception and camera-side-vs-car-side producer attribution; it does not by itself make stock CAN1 traffic invisible to logical bus 1.",
     "panda_state_samples": 599
   },
+  "lateral_reference_family": {
+    "request_0x08A": {
+      "b23_counts": {
+        "0x00": 2400
+      },
+      "frame_count": 2400,
+      "reference_word_raw": {
+        "count": 2400,
+        "max": 2117.0,
+        "min": -8846.0,
+        "unique_count": 897
+      },
+      "request_level_counts": {
+        "0": 2400
+      },
+      "target_lateral_id_counts": {
+        "0": 2400
+      }
+    },
+    "request_angle_join": {
+      "boundary": "Nearest rlog-publication join only; high correlation/scale agreement supports common reference geometry but does not establish producer identity or physical command latency.",
+      "exact_h_f_camry_controller_equivalent_deg_per_count": 0.05730274202574147,
+      "fitted_deg_per_count": 0.05748315550808172,
+      "fitted_intercept_deg": 0.21062038171902486,
+      "pair_count": 2400,
+      "pearson_r": 0.9995044475134914,
+      "scale_error_percent": 0.31484266888870405
+    },
+    "return_0x081": {
+      "frame_count": 2000,
+      "reference_word_raw": {
+        "count": 2000,
+        "max": 2117.0,
+        "min": -8846.0,
+        "unique_count": 753
+      },
+      "target_lateral_id_counts": {
+        "0": 2000
+      }
+    },
+    "return_latest_request_join": {
+      "boundary": "Latest <=100-ms rlog-publication state join; loggerd batch timestamps are not wire-order timestamps.",
+      "median_abs_reference_word_delta": 0,
+      "pair_count": 2000,
+      "reference_word_exact_match_count": 1513,
+      "target_lateral_id_match_count": 2000
+    }
+  },
   "moving_vehicle_evidence": {
     "brake_pressed_values": [
       0,
@@ -574,6 +622,32 @@
         }
       ],
       "role": "generation-native EPS FD telemetry"
+    },
+    {
+      "can_id": "0x081",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 2000,
+          "dlc": 32,
+          "first_payload": "00000018fcc3bf1f0000000400000000ff36032d03261139032d1f405dd573e9",
+          "rate_hz": 33.33377404062178
+        }
+      ],
+      "role": "TSS3 chassis-side lateral reference/return family"
+    },
+    {
+      "can_id": "0x08A",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 2400,
+          "dlc": 32,
+          "first_payload": "000000008000001203260003267fff007fffff3600000000000039009064215b",
+          "rate_hz": 39.99679845084951
+        }
+      ],
+      "role": "TSS3 upstream lateral request/reference family"
     },
     {
       "can_id": "0x0AA",

@@ -48,6 +48,24 @@ for cid, dlc, count in (
     i = instance(cid, bus=1, dlc=dlc)
     check(f"{cid}/{dlc} is observed on logical bus 1", i is not None and i["count"] == count)
 
+lateral = ART["lateral_reference_family"]
+check("public route carries 0x08A/0x081 lateral reference family",
+      lateral["request_0x08A"]["frame_count"] == 2355 and
+      lateral["return_0x081"]["frame_count"] == 1961)
+check("public route lateral family stays manual ID0",
+      lateral["request_0x08A"]["target_lateral_id_counts"] == {"0": 2355} and
+      lateral["request_0x08A"]["request_level_counts"] == {"0": 2355} and
+      lateral["return_0x081"]["target_lateral_id_counts"] == {"0": 1961})
+check("public 0x08A reference word is near-unity with measured steering",
+      lateral["request_angle_join"]["pair_count"] == 2355 and
+      lateral["request_angle_join"]["pearson_r"] > 0.9995 and
+      abs(lateral["request_angle_join"]["scale_error_percent"]) < 0.20)
+check("public 0x081 mirrors latest 0x08A state",
+      lateral["return_latest_request_join"]["pair_count"] == 1961 and
+      lateral["return_latest_request_join"]["target_lateral_id_match_count"] == 1961 and
+      lateral["return_latest_request_join"]["reference_word_exact_match_count"] == 1271 and
+      lateral["return_latest_request_join"]["median_abs_reference_word_delta"] == 0)
+
 reuse = ART["direct_reuse_evidence"]
 check("0x030 matches exact H/F additive-byte rule on every frame", reuse["0x030"]["frame_count"] == reuse["0x030"]["rule_matches"] == 5888 and reuse["0x030"]["exact_h_f_additive_rule"] == {"boundary": "recovered exact code behavior; OEM checksum naming/formula lineage is not inferred from the constant alone", "formula": "sum(payload_bytes_0_through_6) + 0x38, low byte", "wire_byte": 7})
 check("0x030 rule match remains a format-family join, not identity", all(x in reuse["0x030"]["boundary"] for x in ("format/producer-family", "not an exact firmware/vehicle identity")))

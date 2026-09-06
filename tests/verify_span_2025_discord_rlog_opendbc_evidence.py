@@ -65,6 +65,25 @@ check("gas is dynamically exercised", move["gas_pedal_user"]["count"] == 2548 an
 check("steering angle is dynamic", move["steering_angle_deg"]["count"] == 6003 and move["steering_angle_deg"]["min"] == -511.5 and move["steering_angle_deg"]["max"] == 123.0 and move["steering_angle_deg"]["unique_count"] == 337)
 check("steering rate is dynamic", move["steering_rate_deg_s"]["count"] == 6003 and move["steering_rate_deg_s"]["min"] == -700 and move["steering_rate_deg_s"]["max"] == 800 and move["steering_rate_deg_s"]["unique_count"] == 186)
 
+print("\n== TSS3 lateral reference family ==")
+lateral = ART["lateral_reference_family"]
+check("Span moving rlog carries 0x08A/0x081 lateral reference family",
+      lateral["request_0x08A"]["frame_count"] == 2400 and
+      lateral["return_0x081"]["frame_count"] == 2000)
+check("Span lateral family stays manual ID0",
+      lateral["request_0x08A"]["target_lateral_id_counts"] == {"0": 2400} and
+      lateral["request_0x08A"]["request_level_counts"] == {"0": 2400} and
+      lateral["return_0x081"]["target_lateral_id_counts"] == {"0": 2000})
+check("Span 0x08A reference word is near-unity with measured steering",
+      lateral["request_angle_join"]["pair_count"] == 2400 and
+      lateral["request_angle_join"]["pearson_r"] > 0.9994 and
+      abs(lateral["request_angle_join"]["scale_error_percent"]) < 0.32)
+check("Span 0x081 mirrors latest 0x08A state",
+      lateral["return_latest_request_join"]["pair_count"] == 2000 and
+      lateral["return_latest_request_join"]["target_lateral_id_match_count"] == 2000 and
+      lateral["return_latest_request_join"]["reference_word_exact_match_count"] == 1513 and
+      lateral["return_latest_request_join"]["median_abs_reference_word_delta"] == 0)
+
 print("\n== prior-art-compatible state carriers ==")
 reuse = ART["direct_reuse_evidence"]
 check("0x025 exact-H-proved fields remain dynamic", reuse["0x025"]["steer_angle_deg"] == move["steering_angle_deg"] and reuse["0x025"]["steer_rate_deg_s"] == move["steering_rate_deg_s"] and reuse["0x025"]["steer_fraction_deg"]["unique_count"] == 15)

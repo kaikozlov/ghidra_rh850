@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from toyota_route_opendbc_common import be_raw, rate_hz, sha256, stats, toyota_checksum
+from toyota_route_opendbc_common import be_raw, lateral_reference_family, rate_hz, sha256, stats, toyota_checksum
 
 REPO = Path(__file__).resolve().parents[1]
 LOCK = REPO / "external-references.lock.json"
@@ -32,6 +32,8 @@ ROLE_IDS = {
     0x00F: "SECOC_SYNCHRONIZATION",
     0x025: "STEER_ANGLE_SENSOR",
     0x030: "generation-native EPS FD telemetry",
+    0x081: "TSS3 chassis-side lateral reference/return family",
+    0x08A: "TSS3 upstream lateral request/reference family",
     0x0AA: "WHEEL_SPEEDS",
     0x0B6: "exact-H/F protected lateral command (visibility check)",
     0x0D7: "exact-H/F protected vehicle-speed carrier (visibility check)",
@@ -211,6 +213,7 @@ def main() -> int:
         return frames.get((bus, addr, dlc), [])
 
     fd25 = rows(0x025, 32)
+    lateral_family = lateral_reference_family(rows(0x08A, 32), rows(0x081, 32), fd25)
     angle = [be_raw(dat, 3, 12, True) * 1.5 for _, dat in fd25]
     fraction = [be_raw(dat, 39, 4, True) * 0.1 for _, dat in fd25]
     steer_rate = [be_raw(dat, 35, 12, True) for _, dat in fd25]
@@ -404,6 +407,7 @@ def main() -> int:
             "interpretation": "Raw vehicle signals are dynamic and wheel speed exceeds zero, so this is a moving/driving CAN capture even though the embedded MOCK CarState remains zeroed. Motion does not by itself prove that stock LTA was active or exercise every READY-state subsystem contract.",
         },
         "role_inventory": role_inventory,
+        "lateral_reference_family": lateral_family,
         "direct_reuse_evidence": {
             "0x025": {
                 "wire": "32-byte CAN-FD; exact H firmware independently proves the older steering angle/fraction/rate positions survive",

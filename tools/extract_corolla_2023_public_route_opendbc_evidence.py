@@ -27,6 +27,8 @@ STATE_IDS = {
     0x00F: "SECOC_SYNCHRONIZATION",
     0x025: "STEER_ANGLE_SENSOR",
     0x030: "generation-native EPS FD telemetry",
+    0x081: "TSS3 chassis-side lateral reference/return family",
+    0x08A: "TSS3 upstream lateral request/reference family",
     0x0AA: "WHEEL_SPEEDS",
     0x0B6: "exact-H/F protected lateral-command carrier (cross-specimen visibility check)",
     0x0D7: "exact-H/F protected vehicle-speed carrier (cross-specimen visibility check)",
@@ -69,7 +71,7 @@ OLD_REQUIRED_IDS = {
 }
 
 
-from toyota_route_opendbc_common import be_raw, rate_hz, sha256, stats, toyota_checksum
+from toyota_route_opendbc_common import be_raw, lateral_reference_family, rate_hz, sha256, stats, toyota_checksum
 
 
 def expected_source() -> dict[str, object]:
@@ -160,6 +162,11 @@ def main() -> int:
     # Exact H firmware independently proves that its 32-byte 0x025 keeps these
     # three older Toyota signal positions. Decode the route at those positions.
     fd25 = frames.get((1, 0x025, 32), [])
+    lateral_family = lateral_reference_family(
+        frames.get((1, 0x08A, 32), []),
+        frames.get((1, 0x081, 32), []),
+        fd25,
+    )
     angle = [be_raw(dat, 3, 12, True) * 1.5 for _, dat in fd25]
     fraction = [be_raw(dat, 39, 4, True) * 0.1 for _, dat in fd25]
     rate = [be_raw(dat, 35, 12, True) * 1.0 for _, dat in fd25]
@@ -258,6 +265,7 @@ def main() -> int:
         },
         "axis_boundary": "TSS generation describes ADAS/control architecture. SecOC/TSK describes security/authentication. Presence of 0x00F or authenticated messages does not classify TSS generation.",
         "incoming_state_inventory": state_rows,
+        "lateral_reference_family": lateral_family,
         "direct_reuse_evidence": {
             "0x030": {
                 "wire": "32-byte CAN-FD generation-native EPS telemetry/status PDU",

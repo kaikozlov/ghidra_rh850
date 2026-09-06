@@ -167,7 +167,8 @@ for line in (REPO / "docs/status/FINDINGS.md").read_text(encoding="utf-8").split
             if grade.startswith("observed"):
                 observed_findings.append(cells[0])
 check("exact verified finding denominator", len(verified_findings) == 92)
-check("dynamic/external observation denominator", observed_findings == ["SECOC-030", "VAR-001", "STORE-007", "VAR-108", "VAR-109", "VAR-110", "TMS-086", "VAR-116", "VAR-124", "VAR-125", "VAR-126", "VAR-128", "VAR-129"])
+check("dynamic/external observation denominator", observed_findings == ["SECOC-030", "VAR-001", "STORE-007", "VAR-108", "VAR-109", "VAR-110", "TMS-086", "VAR-116", "VAR-124", "VAR-125", "VAR-126", "VAR-128", "VAR-129", "VAR-133"])
+check("dynamic/external observation denominator published", f"| Findings dynamically/externally observed | {len(observed_findings)} |" in text)
 
 required_tokens = [
     "114 `passed`, 5 `unavailable`, 0 `failed`",

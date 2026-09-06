@@ -427,6 +427,34 @@
       "required_by_older_toyota_contract": false
     },
     {
+      "can_id": "0x081",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 1961,
+          "dlc": 32,
+          "first_payload": "00000010fed5bf2b00000004000000000000fed5fe610a5efe62000002dd2377",
+          "rate_hz": 32.089329337740025
+        }
+      ],
+      "older_toyota_role": "TSS3 chassis-side lateral reference/return family",
+      "required_by_older_toyota_contract": false
+    },
+    {
+      "can_id": "0x08A",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 2355,
+          "dlc": 32,
+          "first_payload": "0000000080000012fe6000fe607fff007fff000000000000000004008c010475",
+          "rate_hz": 38.53993941889797
+        }
+      ],
+      "older_toyota_role": "TSS3 upstream lateral request/reference family",
+      "required_by_older_toyota_contract": false
+    },
+    {
       "can_id": "0x0AA",
       "instances": [
         {
@@ -725,6 +753,54 @@
       "required_by_older_toyota_contract": true
     }
   ],
+  "lateral_reference_family": {
+    "request_0x08A": {
+      "b23_counts": {
+        "0x00": 2355
+      },
+      "frame_count": 2355,
+      "reference_word_raw": {
+        "count": 2355,
+        "max": 6087.0,
+        "min": -8180.0,
+        "unique_count": 1079
+      },
+      "request_level_counts": {
+        "0": 2355
+      },
+      "target_lateral_id_counts": {
+        "0": 2355
+      }
+    },
+    "request_angle_join": {
+      "boundary": "Nearest rlog-publication join only; high correlation/scale agreement supports common reference geometry but does not establish producer identity or physical command latency.",
+      "exact_h_f_camry_controller_equivalent_deg_per_count": 0.05730274202574147,
+      "fitted_deg_per_count": 0.05740989061617197,
+      "fitted_intercept_deg": 0.4041204085472554,
+      "pair_count": 2355,
+      "pearson_r": 0.9996110309739271,
+      "scale_error_percent": 0.1869868467766711
+    },
+    "return_0x081": {
+      "frame_count": 1961,
+      "reference_word_raw": {
+        "count": 1961,
+        "max": 6087.0,
+        "min": -8180.0,
+        "unique_count": 924
+      },
+      "target_lateral_id_counts": {
+        "0": 1961
+      }
+    },
+    "return_latest_request_join": {
+      "boundary": "Latest <=100-ms rlog-publication state join; loggerd batch timestamps are not wire-order timestamps.",
+      "median_abs_reference_word_delta": 0,
+      "pair_count": 1961,
+      "reference_word_exact_match_count": 1271,
+      "target_lateral_id_match_count": 1961
+    }
+  },
   "route_vs_exact_h_f_visibility": {
     "boundary": "The public route exposes 0x00F and 0x0D7 but no 0x0B6, and only 0x030 from the exact-H/F five-PDU Tx set. Because the route has no carFw/F181 join, this cannot prove B6 is feature-gated or absent on an exact H/F EPS bus; it instead proves the route is not evidence of a complete exact-H/F EPS-bus mirror.",
     "exact_h_f_secoc_rx_search_vocabulary": [
