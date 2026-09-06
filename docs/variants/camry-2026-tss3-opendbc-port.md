@@ -631,6 +631,21 @@ Techstream Operation-FFD vocabulary independently exposes FRC-hosted
 Buzzer Request` (`5615`), and `Hands-Off State` (`5632`), but there is no static
 DID-to-`0x412` bit join.
 
+The Toyota `Hands-Off` vocabulary is **overloaded and must not be treated as one
+state machine**. The same PCS recorder dictionary separately exposes capability
+fields `Hands-Off Exist` and `LTA Driver Monitor Camera Collaboration Exist`, plus
+`Hands-Off Main SW ... Customize` / driver-image-recording customization. Those
+are strong evidence for a distinct driver-camera-backed hands-free LTA feature.
+Likewise the EPS Target-Lateral dictionary's profile **10 = `Hands Off LTA`** is
+a separate cooperative-control mode from ordinary **11 = `LTA/LCA`**. In both
+September-6 routes the warning/escalation occurs while `0x08A` remains ID11 and
+ID10 is never observed (route 3e IDs `{0,4,11}`; route 3f `{0,11}`). Therefore
+`Hands-Off Control Condition` in FRC DID `0x1601` and Target-Lateral ID10 are
+**not evidence for the normal wheel-nag state and must not be used as a proposed
+nag-disable control** without an independent join. For the ordinary Camry LTA
+nag, the relevant Toyota vocabulary is the explicit judgment/message/buzzer/
+cancel-by-hands-off family above.
+
 Current upstream Toyota explains how comma normally removes the wheel-nudge nag.
 `0x412` is a camera-owned replacement message in Toyota Panda safety
 (`TOYOTA_BASE_TX_MSGS`, bus 0, `check_relay=true`), so the stock camera's `0x412`
