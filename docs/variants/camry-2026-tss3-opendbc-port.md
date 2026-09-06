@@ -1017,9 +1017,11 @@ ODTs across lists 0 and 1 during the same event-worker invocation. ODT reads are
 sequential rather than an atomic CPU snapshot; the tool records the assembly span and
 drops incomplete/out-of-order events. It simultaneously records native
 `0x025/0x030/0x081/0x08A/0x0B6/0x0FE/0x371/0x412` Panda receive traffic with host
-monotonic batch timestamps and the raw Panda `busTime` value for each frame/ODT.
-`busTime` is retained as an opaque wrapping hardware timer; no unit conversion is
-assumed. Host timestamps remain correlation aids rather than physical CAN ordering.
+monotonic batch timestamps. Older Panda Python bindings also expose raw `busTime`,
+which the observer retains as an opaque wrapping hardware timer when present. The
+current Comma/Panda binding returns `(address, data, bus)` and therefore exposes no
+`busTime`; the observer records null/empty timing evidence rather than dropping those
+frames. Host timestamps remain correlation aids rather than physical CAN ordering.
 
 Because the default sample emits eight classic-CAN DTOs, the observer exposes an XCP
 DAQ prescaler and reports the actually observed complete-sample rate. Start with a short

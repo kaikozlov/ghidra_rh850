@@ -336,7 +336,7 @@ def plan(profile: Profile, *, prescaler: int = DEFAULT_DAQ_PRESCALER) -> dict[st
         },
         "timing_boundary": (
             "DAQ ODTs are grouped by PID order into ECU-event samples; host monotonic timestamps and "
-            "Panda receive batches are not physical wire timestamps or atomic CPU snapshots; raw Panda busTime is retained without assigning units"
+            "Panda receive batches are not physical wire timestamps or atomic CPU snapshots; raw Panda busTime is retained only when the active Panda Python binding exposes it, otherwise it is null/empty"
         ),
     }
 
@@ -409,11 +409,15 @@ class EventAssembler:
             self._started_ns = None
 
 
-def _panda_row(row: Any) -> tuple[int, int, bytes, int] | None:
-    if len(row) < 4:
+def _panda_row(row: Any) -> tuple[int, int | None, bytes, int] | None:
+    # Current Panda Python returns (address, data, bus). Older bindings returned
+    # a wider tuple with busTime before the payload. Preserve both shapes; raw
+    # busTime is optional evidence and must never be required to see a frame.
+    if len(row) < 3:
         return None
     try:
-        return int(row[0]), int(row[1]), bytes(row[-2]), int(row[-1])
+        bus_time = int(row[1]) if len(row) >= 4 else None
+        return int(row[0]), bus_time, bytes(row[-2]), int(row[-1])
     except (TypeError, ValueError):
         return None
 

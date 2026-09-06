@@ -28,6 +28,7 @@ from tools.camry_f33_steering_state_capture import (  # noqa: E402
     SOURCE_TERMS,
     XCP_REQUEST_ID,
     XCP_RESPONSE_ID,
+    _panda_row,
     camry_configuration_requests,
     decode_profile_bytes,
     plan,
@@ -51,6 +52,11 @@ check("exact F181 is pinned", EXPECTED_F181_HEX == "0238393635463333303730303000
 check("post-repin route is Panda bus0 / ELM327 param1", PANDA_BUS == 0 and ELM327_PARAM == 1)
 check("XCP route IDs are exact", XCP_REQUEST_ID == 0x7F7 and XCP_RESPONSE_ID == 0x7F8)
 check("CAN witness family includes request/reference/EPS state", {0x025,0x030,0x081,0x08A,0x0B6,0x371,0x412} <= CAN_WITNESS_IDS)
+current_row = _panda_row((0x7F8, bytes.fromhex("ff20000808000101"), 0))
+legacy_row = _panda_row((0x7F8, 1234, bytes.fromhex("ff20000808000101"), 0))
+check("current Panda three-field tuple is accepted", current_row == (0x7F8, None, bytes.fromhex("ff20000808000101"), 0))
+check("legacy wider Panda tuple retains raw busTime", legacy_row == (0x7F8, 1234, bytes.fromhex("ff20000808000101"), 0))
+check("malformed short Panda tuple is rejected", _panda_row((0x7F8, b"")) is None)
 
 print("\n== exact one/two-list DAQ profile geometry ==")
 check("three target profiles include one combined full path",

@@ -366,8 +366,8 @@ def _section_xcp_daq_probe():
         def can_send(self, address, data, bus):
             request = bytes(data)
             if request[:2] == bytes.fromhex('de01'):
-                self.queue.append((2040, 0, bytes.fromhex('0001020304050607'), bus))
-            self.queue.append((2040, 0, bytes.fromhex('ff00000000000000'), bus))
+                self.queue.append((2040, bytes.fromhex('0001020304050607'), bus))
+            self.queue.append((2040, bytes.fromhex('ff00000000000000'), bus))
 
         def can_recv(self):
             queued, self.queue = (self.queue, [])
@@ -456,7 +456,7 @@ def _section_xcp_daq_probe():
 
         def can_recv(self):
             self.calls += 1
-            return [(2040, 0, bytes.fromhex('0001020304050607'), 1)]
+            return [(2040, bytes.fromhex('0001020304050607'), 1)]
     from exploit.followups.xcp_daq_probe import capture_dto_frames
     streamed = capture_dto_frames(StreamingDtoPanda(), bus=1, addresses=profile.addresses, duration_seconds=0.05, max_frames=5)
     check('captured DTO frames now carry wall-clock stamps', len(streamed) == 5 and all(('captured_wall_utc' in row and 'captured_monotonic' in row for row in streamed)) and all((row['captured_wall_utc'].startswith('2') for row in streamed)))
