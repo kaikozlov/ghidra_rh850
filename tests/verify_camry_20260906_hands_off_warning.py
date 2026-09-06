@@ -39,3 +39,58 @@ check("3e all qualified 0x371 rises have paired HUD edges",
       hud3e["rise_edges_paired_to_0x371_within_2s"] == routes["3e"]["warning_candidate"]["rising_edges"])
 check("3f all qualified 0x371 rises have paired HUD edges",
       hud3f["rise_edges_paired_to_0x371_within_2s"] == routes["3f"]["warning_candidate"]["rising_edges"])
+
+check("report schema includes state-machine reduction", report["schema_version"] == 2)
+
+for short in ("3e", "3f"):
+  sm = routes[short]["native_state_machine_candidate"]
+  check(f"{short} B17[0] exactly complements B20[4] in clean ID11",
+        sm["b17lsb_equals_not_b20bit4_violations"] == 0)
+  check(f"{short} warning and driver-detect states are mutually exclusive",
+        sm["warning_and_driver_detect_overlap_frames"] == 0)
+  check(f"{short} low torque rarely asserts driver-detect",
+        sm["driver_detect_by_abs_eps_torque_nm"]["0-0.25"]["driver_detect_fraction"] < 0.03)
+  check(f"{short} >=1 N.m strongly asserts driver-detect",
+        sm["driver_detect_by_abs_eps_torque_nm"]["1-1.25"]["driver_detect_fraction"] > 0.90)
+  check(f"{short} detector set transition is higher than release transition",
+        sm["driver_detect_set_abs_eps_torque_nm"]["p50"] > sm["driver_detect_release_abs_eps_torque_nm"]["p50"])
+  counts = routes[short]["native_source_counts"]
+  check(f"{short} EPS torque 0x030 is native chassis-side",
+        counts["0x030/src0"] > 100 * counts["0x030/src2"])
+  check(f"{short} 0x371 is native FRC-side",
+        counts["0x371/src2"] > 100 * counts["0x371/src0"])
+
+sm3d = routes["3d"]["native_state_machine_candidate"]
+sm3f = routes["3f"]["native_state_machine_candidate"]
+check("3d has one ~6 s second-stage escalation episode",
+      sm3d["escalation_episode_count"] == 1 and
+      5.8 <= sm3d["first_escalation_lag_from_warning_s"]["p50"] <= 6.1 and
+      sm3d["escalation_episode_target_lateral_ids"] == [[11]])
+check("3f has three ~6 s second-stage escalation episodes",
+      sm3f["escalation_episode_count"] == 3 and
+      5.8 <= sm3f["first_escalation_lag_from_warning_s"]["p50"] <= 6.1 and
+      sm3f["escalation_episode_target_lateral_ids"] == [[11], [11], [11]])
+
+for short in ("3d", "3e", "3f"):
+  sm = routes[short]["native_state_machine_candidate"]
+  release_timer = sm["warning_onset_time_since_driver_detect_release_s"]
+  last_detect_timer = sm["warning_onset_time_since_last_driver_detect_s"]
+  check(f"{short} Toyota warning follows driver-detect release at ~13 s",
+        12.85 <= release_timer["p10"] <= release_timer["p50"] <= release_timer["p90"] <= 13.10)
+  check(f"{short} last asserted detector sample is one 0x371 interval earlier",
+        13.0 <= last_detect_timer["p10"] <= last_detect_timer["p50"] <= last_detect_timer["p90"] <= 13.30)
+
+# Same-car stored FRC Operation-FFD witness from the retained 2818/0100 EB13
+# response in the 2026-09-01 live communication notebook. This is a feature-
+# capability discriminator, not a CAN-bit mapping.
+same_car_5609 = bytes.fromhex("f8c0")
+pcs = json.loads((REPO / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json").read_text())
+rows_5609 = {row["DataName"]: row for row in pcs["operation_ffd"]["detail_rows"] if row["DataID"] == "5609"}
+check("5609 Hands-Off capability bit position pinned",
+      (rows_5609["Hands-Off Exist"]["BytePosition"], rows_5609["Hands-Off Exist"]["BitPosition"]) == (2, 4))
+check("5609 driver-camera collaboration bit position pinned",
+      (rows_5609["LTA Driver Monitor Camera Collaboration Exist"]["BytePosition"],
+       rows_5609["LTA Driver Monitor Camera Collaboration Exist"]["BitPosition"]) == (2, 3))
+check("same-car FFD says ordinary LTA exists", bool(same_car_5609[1] & 0x80))
+check("same-car FFD says Toyota Hands-Off feature does not exist", not bool(same_car_5609[1] & 0x10))
+check("same-car FFD says LTA driver-camera collaboration does not exist", not bool(same_car_5609[1] & 0x08))

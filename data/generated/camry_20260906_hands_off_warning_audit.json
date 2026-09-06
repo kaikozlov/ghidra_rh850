@@ -11,8 +11,12 @@
   },
   "method": {
     "clean_stock_lta": "carState cruise enabled, vEgo > 15.0 m/s, no blinker, latest native bus2 0x08A B21 low6 == 11",
+    "countdown_reset_candidate": "last native ID11 0x371 B20 bit4 driver-detect state; warning follows detector release at ~13 s",
+    "driver_steering_candidate": "native bus2 0x371 B20 bit4; B17 bit0 is its observed structural complement",
+    "exact_eps_torque": "native bus0 0x030 signed(B8)*0.1 + signed4(B17 low nibble)*0.01 N.m",
     "hud_companion_candidate": "native bus2 0x412 B0=0x14 and B1[3:2]=3",
-    "semantic_boundary": "dynamic timing/edge join only; exact OEM CAN bit names remain unproved",
+    "hud_escalation_candidate": "native bus2 0x412 B2 bit6 while warning active",
+    "semantic_boundary": "dynamic timing/torque/state joins only; exact OEM CAN bit names and exact torque threshold remain unproved",
     "touch_proxy": "abs(carState.steeringTorque) >= 0.9 N.m",
     "warning_candidate": "native bus2 0x371 B19 bit6"
   },
@@ -65,6 +69,113 @@
         "rising_edges": 23
       },
       "label": "pre-fix",
+      "native_source_counts": {
+        "0x030/src0": 658209,
+        "0x030/src130": 656920,
+        "0x030/src2": 1292,
+        "0x08A/src0": 514,
+        "0x08A/src128": 262749,
+        "0x08A/src2": 263265,
+        "0x371/src0": 65,
+        "0x371/src128": 35886,
+        "0x371/src2": 35951,
+        "0x412/src0": 13,
+        "0x412/src128": 7002,
+        "0x412/src2": 7015
+      },
+      "native_state_machine_candidate": {
+        "b17lsb_equals_not_b20bit4_violations": 0,
+        "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate, not a statically joined OEM bit name or exact torque threshold",
+        "driver_detect_by_abs_eps_torque_nm": {
+          "0-0.25": {
+            "driver_detect_fraction": 0.04695623,
+            "driver_detect_frames": 280,
+            "frames": 5963
+          },
+          "0.25-0.5": {
+            "driver_detect_fraction": 0.167118951,
+            "driver_detect_frames": 739,
+            "frames": 4422
+          },
+          "0.5-0.75": {
+            "driver_detect_fraction": 0.56873823,
+            "driver_detect_frames": 1812,
+            "frames": 3186
+          },
+          "0.75-1": {
+            "driver_detect_fraction": 0.846688471,
+            "driver_detect_frames": 2071,
+            "frames": 2446
+          },
+          "1-1.25": {
+            "driver_detect_fraction": 0.91198786,
+            "driver_detect_frames": 1202,
+            "frames": 1318
+          },
+          "1.25-1.5": {
+            "driver_detect_fraction": 0.965630115,
+            "driver_detect_frames": 590,
+            "frames": 611
+          },
+          "1.5-2": {
+            "driver_detect_fraction": 0.953974895,
+            "driver_detect_frames": 228,
+            "frames": 239
+          },
+          "2-99": {
+            "driver_detect_fraction": 1.0,
+            "driver_detect_frames": 4,
+            "frames": 4
+          }
+        },
+        "driver_detect_release_abs_eps_torque_nm": {
+          "p10": 0.06,
+          "p50": 0.33,
+          "p90": 0.66
+        },
+        "driver_detect_set_abs_eps_torque_nm": {
+          "p10": 0.36,
+          "p50": 0.75,
+          "p90": 1.16
+        },
+        "driver_steering_candidate": "native bus2 0x371 B20 bit4",
+        "escalation_episode_count": 0,
+        "escalation_episode_target_lateral_ids": [],
+        "exact_eps_torque_source": "native bus0 0x030: signed(B8)*0.1 + signed4(B17 low nibble)*0.01 N.m",
+        "first_escalation_lag_from_warning_s": null,
+        "state_counts": {
+          "driver_steering_detected": 6926,
+          "no_touch": 11106,
+          "warning": 157
+        },
+        "state_tuples_b17lsb_b19_b20": {
+          "0,0x20,0x11": 13,
+          "0,0x20,0x13": 6913,
+          "1,0x20,0x01": 1,
+          "1,0x20,0x03": 11105,
+          "1,0x40,0x03": 157
+        },
+        "structural_complement": "native bus2 0x371 B17 bit0",
+        "warning_and_driver_detect_overlap_frames": 0,
+        "warning_episode_count": 15,
+        "warning_episode_duration_s": {
+          "p10": 0.805256,
+          "p50": 1.626497,
+          "p90": 2.994198
+        },
+        "warning_falls_with_driver_detect_same_frame": 14,
+        "warning_falls_with_driver_detect_same_or_within_0_35s": 14,
+        "warning_onset_time_since_driver_detect_release_s": {
+          "p10": 12.875948,
+          "p50": 12.996504,
+          "p90": 13.046373
+        },
+        "warning_onset_time_since_last_driver_detect_s": {
+          "p10": 13.038603,
+          "p50": 13.159404,
+          "p90": 13.2068
+        }
+      },
       "openpilot_commit": "d1914bbe7f88b03fd7f59afd97607e873c4bba47",
       "route": "0000003b--62262eb7a1",
       "route_duration_s": 6582.551449,
@@ -142,6 +253,113 @@
         "rising_edges": 35
       },
       "label": "pre-fix",
+      "native_source_counts": {
+        "0x030/src0": 483508,
+        "0x030/src130": 482611,
+        "0x030/src2": 897,
+        "0x08A/src0": 359,
+        "0x08A/src128": 193030,
+        "0x08A/src2": 193390,
+        "0x371/src0": 47,
+        "0x371/src128": 25480,
+        "0x371/src2": 25527,
+        "0x412/src0": 14,
+        "0x412/src128": 5006,
+        "0x412/src2": 5020
+      },
+      "native_state_machine_candidate": {
+        "b17lsb_equals_not_b20bit4_violations": 0,
+        "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate, not a statically joined OEM bit name or exact torque threshold",
+        "driver_detect_by_abs_eps_torque_nm": {
+          "0-0.25": {
+            "driver_detect_fraction": 0.015545792,
+            "driver_detect_frames": 46,
+            "frames": 2959
+          },
+          "0.25-0.5": {
+            "driver_detect_fraction": 0.105915493,
+            "driver_detect_frames": 188,
+            "frames": 1775
+          },
+          "0.5-0.75": {
+            "driver_detect_fraction": 0.54886562,
+            "driver_detect_frames": 629,
+            "frames": 1146
+          },
+          "0.75-1": {
+            "driver_detect_fraction": 0.89869281,
+            "driver_detect_frames": 550,
+            "frames": 612
+          },
+          "1-1.25": {
+            "driver_detect_fraction": 0.940568475,
+            "driver_detect_frames": 364,
+            "frames": 387
+          },
+          "1.25-1.5": {
+            "driver_detect_fraction": 0.977099237,
+            "driver_detect_frames": 128,
+            "frames": 131
+          },
+          "1.5-2": {
+            "driver_detect_fraction": 0.96,
+            "driver_detect_frames": 48,
+            "frames": 50
+          },
+          "2-99": {
+            "driver_detect_fraction": 1.0,
+            "driver_detect_frames": 2,
+            "frames": 2
+          }
+        },
+        "driver_detect_release_abs_eps_torque_nm": {
+          "p10": 0.08,
+          "p50": 0.37,
+          "p90": 0.61
+        },
+        "driver_detect_set_abs_eps_torque_nm": {
+          "p10": 0.39,
+          "p50": 0.68,
+          "p90": 1.11
+        },
+        "driver_steering_candidate": "native bus2 0x371 B20 bit4",
+        "escalation_episode_count": 0,
+        "escalation_episode_target_lateral_ids": [],
+        "exact_eps_torque_source": "native bus0 0x030: signed(B8)*0.1 + signed4(B17 low nibble)*0.01 N.m",
+        "first_escalation_lag_from_warning_s": null,
+        "state_counts": {
+          "driver_steering_detected": 1955,
+          "no_touch": 4963,
+          "warning": 144
+        },
+        "state_tuples_b17lsb_b19_b20": {
+          "0,0x20,0x11": 4,
+          "0,0x20,0x13": 1951,
+          "1,0x20,0x01": 1,
+          "1,0x20,0x03": 4962,
+          "1,0x40,0x03": 144
+        },
+        "structural_complement": "native bus2 0x371 B17 bit0",
+        "warning_and_driver_detect_overlap_frames": 0,
+        "warning_episode_count": 16,
+        "warning_episode_duration_s": {
+          "p10": 0.64217,
+          "p50": 1.617348,
+          "p90": 2.210284
+        },
+        "warning_falls_with_driver_detect_same_frame": 13,
+        "warning_falls_with_driver_detect_same_or_within_0_35s": 14,
+        "warning_onset_time_since_driver_detect_release_s": {
+          "p10": 12.887776,
+          "p50": 13.010113,
+          "p90": 13.076007
+        },
+        "warning_onset_time_since_last_driver_detect_s": {
+          "p10": 13.04825,
+          "p50": 13.190614,
+          "p90": 13.241031
+        }
+      },
       "openpilot_commit": "d1914bbe7f88b03fd7f59afd97607e873c4bba47",
       "route": "0000003c--97b9e7a69a",
       "route_duration_s": 4835.677784,
@@ -221,6 +439,121 @@
         "rising_edges": 31
       },
       "label": "pre-fix",
+      "native_source_counts": {
+        "0x030/src0": 371448,
+        "0x030/src130": 370501,
+        "0x030/src2": 933,
+        "0x08A/src0": 377,
+        "0x08A/src128": 148190,
+        "0x08A/src2": 148567,
+        "0x371/src0": 48,
+        "0x371/src128": 20034,
+        "0x371/src2": 20082,
+        "0x412/src0": 13,
+        "0x412/src128": 3953,
+        "0x412/src2": 3966
+      },
+      "native_state_machine_candidate": {
+        "b17lsb_equals_not_b20bit4_violations": 0,
+        "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate, not a statically joined OEM bit name or exact torque threshold",
+        "driver_detect_by_abs_eps_torque_nm": {
+          "0-0.25": {
+            "driver_detect_fraction": 0.025712577,
+            "driver_detect_frames": 129,
+            "frames": 5017
+          },
+          "0.25-0.5": {
+            "driver_detect_fraction": 0.113651425,
+            "driver_detect_frames": 343,
+            "frames": 3018
+          },
+          "0.5-0.75": {
+            "driver_detect_fraction": 0.555502162,
+            "driver_detect_frames": 1156,
+            "frames": 2081
+          },
+          "0.75-1": {
+            "driver_detect_fraction": 0.845272206,
+            "driver_detect_frames": 885,
+            "frames": 1047
+          },
+          "1-1.25": {
+            "driver_detect_fraction": 0.928416486,
+            "driver_detect_frames": 428,
+            "frames": 461
+          },
+          "1.25-1.5": {
+            "driver_detect_fraction": 0.949152542,
+            "driver_detect_frames": 168,
+            "frames": 177
+          },
+          "1.5-2": {
+            "driver_detect_fraction": 0.956521739,
+            "driver_detect_frames": 44,
+            "frames": 46
+          },
+          "2-99": {
+            "driver_detect_fraction": 1.0,
+            "driver_detect_frames": 3,
+            "frames": 3
+          }
+        },
+        "driver_detect_release_abs_eps_torque_nm": {
+          "p10": 0.06,
+          "p50": 0.35,
+          "p90": 0.62
+        },
+        "driver_detect_set_abs_eps_torque_nm": {
+          "p10": 0.32,
+          "p50": 0.65,
+          "p90": 0.97
+        },
+        "driver_steering_candidate": "native bus2 0x371 B20 bit4",
+        "escalation_episode_count": 1,
+        "escalation_episode_target_lateral_ids": [
+          [
+            11
+          ]
+        ],
+        "exact_eps_torque_source": "native bus0 0x030: signed(B8)*0.1 + signed4(B17 low nibble)*0.01 N.m",
+        "first_escalation_lag_from_warning_s": {
+          "p10": 5.996133,
+          "p50": 5.996133,
+          "p90": 5.996133
+        },
+        "state_counts": {
+          "driver_steering_detected": 3156,
+          "no_touch": 8175,
+          "warning": 519
+        },
+        "state_tuples_b17lsb_b19_b20": {
+          "0,0x20,0x11": 4,
+          "0,0x20,0x13": 3152,
+          "1,0x20,0x01": 2,
+          "1,0x20,0x03": 8173,
+          "1,0x40,0x03": 519
+        },
+        "structural_complement": "native bus2 0x371 B17 bit0",
+        "warning_and_driver_detect_overlap_frames": 0,
+        "warning_episode_count": 30,
+        "warning_episode_duration_s": {
+          "p10": 1.004999,
+          "p50": 2.600684,
+          "p90": 5.605977
+        },
+        "warning_falls_with_driver_detect_same_frame": 26,
+        "warning_falls_with_driver_detect_same_or_within_0_35s": 27,
+        "warning_onset_time_since_driver_detect_release_s": {
+          "p10": 12.875495,
+          "p50": 13.001335,
+          "p90": 13.072146
+        },
+        "warning_onset_time_since_last_driver_detect_s": {
+          "p10": 13.037774,
+          "p50": 13.162628,
+          "p90": 13.229357
+        }
+      },
       "openpilot_commit": "d1914bbe7f88b03fd7f59afd97607e873c4bba47",
       "route": "0000003d--0e812cecba",
       "route_duration_s": 3715.004303,
@@ -295,6 +628,113 @@
         "rising_edges": 43
       },
       "label": "post-fix-outbound",
+      "native_source_counts": {
+        "0x030/src0": 468073,
+        "0x030/src130": 467121,
+        "0x030/src2": 950,
+        "0x08A/src0": 379,
+        "0x08A/src128": 186836,
+        "0x08A/src2": 187216,
+        "0x371/src0": 48,
+        "0x371/src128": 25366,
+        "0x371/src2": 25414,
+        "0x412/src0": 9,
+        "0x412/src128": 5135,
+        "0x412/src2": 5144
+      },
+      "native_state_machine_candidate": {
+        "b17lsb_equals_not_b20bit4_violations": 0,
+        "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate, not a statically joined OEM bit name or exact torque threshold",
+        "driver_detect_by_abs_eps_torque_nm": {
+          "0-0.25": {
+            "driver_detect_fraction": 0.017899572,
+            "driver_detect_frames": 113,
+            "frames": 6313
+          },
+          "0.25-0.5": {
+            "driver_detect_fraction": 0.097402597,
+            "driver_detect_frames": 420,
+            "frames": 4312
+          },
+          "0.5-0.75": {
+            "driver_detect_fraction": 0.597853535,
+            "driver_detect_frames": 1894,
+            "frames": 3168
+          },
+          "0.75-1": {
+            "driver_detect_fraction": 0.900692841,
+            "driver_detect_frames": 1560,
+            "frames": 1732
+          },
+          "1-1.25": {
+            "driver_detect_fraction": 0.957232704,
+            "driver_detect_frames": 761,
+            "frames": 795
+          },
+          "1.25-1.5": {
+            "driver_detect_fraction": 0.980830671,
+            "driver_detect_frames": 307,
+            "frames": 313
+          },
+          "1.5-2": {
+            "driver_detect_fraction": 0.990291262,
+            "driver_detect_frames": 102,
+            "frames": 103
+          },
+          "2-99": {
+            "driver_detect_fraction": 1.0,
+            "driver_detect_frames": 9,
+            "frames": 9
+          }
+        },
+        "driver_detect_release_abs_eps_torque_nm": {
+          "p10": 0.09,
+          "p50": 0.37,
+          "p90": 0.58
+        },
+        "driver_detect_set_abs_eps_torque_nm": {
+          "p10": 0.42,
+          "p50": 0.67,
+          "p90": 1.01
+        },
+        "driver_steering_candidate": "native bus2 0x371 B20 bit4",
+        "escalation_episode_count": 0,
+        "escalation_episode_target_lateral_ids": [],
+        "exact_eps_torque_source": "native bus0 0x030: signed(B8)*0.1 + signed4(B17 low nibble)*0.01 N.m",
+        "first_escalation_lag_from_warning_s": null,
+        "state_counts": {
+          "driver_steering_detected": 5166,
+          "no_touch": 11095,
+          "warning": 484
+        },
+        "state_tuples_b17lsb_b19_b20": {
+          "0,0x20,0x11": 8,
+          "0,0x20,0x13": 5158,
+          "1,0x20,0x01": 3,
+          "1,0x20,0x03": 11092,
+          "1,0x40,0x03": 484
+        },
+        "structural_complement": "native bus2 0x371 B17 bit0",
+        "warning_and_driver_detect_overlap_frames": 0,
+        "warning_episode_count": 43,
+        "warning_episode_duration_s": {
+          "p10": 1.203515,
+          "p50": 1.757387,
+          "p90": 3.204298
+        },
+        "warning_falls_with_driver_detect_same_frame": 38,
+        "warning_falls_with_driver_detect_same_or_within_0_35s": 38,
+        "warning_onset_time_since_driver_detect_release_s": {
+          "p10": 12.876453,
+          "p50": 12.998218,
+          "p90": 13.076696
+        },
+        "warning_onset_time_since_last_driver_detect_s": {
+          "p10": 13.038856,
+          "p50": 13.167613,
+          "p90": 13.236446
+        }
+      },
       "openpilot_commit": "be56d6f688b557c4a2226e402da30ef3597eb5d7",
       "route": "0000003e--1a2f20417d",
       "route_duration_s": 4681.099054,
@@ -370,6 +810,126 @@
         "rising_edges": 66
       },
       "label": "post-fix-return",
+      "native_source_counts": {
+        "0x030/src0": 501427,
+        "0x030/src130": 500243,
+        "0x030/src2": 1185,
+        "0x08A/src0": 474,
+        "0x08A/src128": 200081,
+        "0x08A/src2": 200559,
+        "0x371/src0": 64,
+        "0x371/src128": 26884,
+        "0x371/src2": 26948,
+        "0x412/src0": 16,
+        "0x412/src128": 5373,
+        "0x412/src2": 5389
+      },
+      "native_state_machine_candidate": {
+        "b17lsb_equals_not_b20bit4_violations": 0,
+        "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate, not a statically joined OEM bit name or exact torque threshold",
+        "driver_detect_by_abs_eps_torque_nm": {
+          "0-0.25": {
+            "driver_detect_fraction": 0.020766551,
+            "driver_detect_frames": 149,
+            "frames": 7175
+          },
+          "0.25-0.5": {
+            "driver_detect_fraction": 0.0945155,
+            "driver_detect_frames": 436,
+            "frames": 4613
+          },
+          "0.5-0.75": {
+            "driver_detect_fraction": 0.550174351,
+            "driver_detect_frames": 1420,
+            "frames": 2581
+          },
+          "0.75-1": {
+            "driver_detect_fraction": 0.863973064,
+            "driver_detect_frames": 1283,
+            "frames": 1485
+          },
+          "1-1.25": {
+            "driver_detect_fraction": 0.941775837,
+            "driver_detect_frames": 647,
+            "frames": 687
+          },
+          "1.25-1.5": {
+            "driver_detect_fraction": 0.952380952,
+            "driver_detect_frames": 240,
+            "frames": 252
+          },
+          "1.5-2": {
+            "driver_detect_fraction": 0.938271605,
+            "driver_detect_frames": 76,
+            "frames": 81
+          },
+          "2-99": {
+            "driver_detect_fraction": 1.0,
+            "driver_detect_frames": 2,
+            "frames": 2
+          }
+        },
+        "driver_detect_release_abs_eps_torque_nm": {
+          "p10": 0.07,
+          "p50": 0.34,
+          "p90": 0.62
+        },
+        "driver_detect_set_abs_eps_torque_nm": {
+          "p10": 0.38,
+          "p50": 0.67,
+          "p90": 1.08
+        },
+        "driver_steering_candidate": "native bus2 0x371 B20 bit4",
+        "escalation_episode_count": 3,
+        "escalation_episode_target_lateral_ids": [
+          [
+            11
+          ],
+          [
+            11
+          ],
+          [
+            11
+          ]
+        ],
+        "exact_eps_torque_source": "native bus0 0x030: signed(B8)*0.1 + signed4(B17 low nibble)*0.01 N.m",
+        "first_escalation_lag_from_warning_s": {
+          "p10": 5.876252,
+          "p50": 5.977029,
+          "p90": 5.977029
+        },
+        "state_counts": {
+          "driver_steering_detected": 4253,
+          "no_touch": 11854,
+          "warning": 769
+        },
+        "state_tuples_b17lsb_b19_b20": {
+          "0,0x20,0x11": 13,
+          "0,0x20,0x13": 4240,
+          "1,0x20,0x03": 11854,
+          "1,0x40,0x03": 769
+        },
+        "structural_complement": "native bus2 0x371 B17 bit0",
+        "warning_and_driver_detect_overlap_frames": 0,
+        "warning_episode_count": 63,
+        "warning_episode_duration_s": {
+          "p10": 0.993189,
+          "p50": 1.81692,
+          "p90": 3.958814
+        },
+        "warning_falls_with_driver_detect_same_frame": 51,
+        "warning_falls_with_driver_detect_same_or_within_0_35s": 56,
+        "warning_onset_time_since_driver_detect_release_s": {
+          "p10": 12.88369,
+          "p50": 13.002962,
+          "p90": 13.085821
+        },
+        "warning_onset_time_since_last_driver_detect_s": {
+          "p10": 13.043701,
+          "p50": 13.166057,
+          "p90": 13.238433
+        }
+      },
       "openpilot_commit": "be56d6f688b557c4a2226e402da30ef3597eb5d7",
       "route": "0000003f--36e72f5fdc",
       "route_duration_s": 5014.842854,
@@ -405,5 +965,5 @@
       }
     }
   },
-  "schema_version": 1
+  "schema_version": 2
 }

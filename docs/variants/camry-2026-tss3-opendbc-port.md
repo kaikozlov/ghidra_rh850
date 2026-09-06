@@ -614,8 +614,10 @@ ID11), `0x371/32 B19[6]` enters a short-lived state after a long interval withou
 meaningful driver steering torque. Using `abs(carState.steeringTorque) >= 0.9 N.m`
 as a passive touch proxy, median onset time since the last touch is **15.84 s** on
 route `3e` and **15.60 s** on route `3f`; the same state clears immediately after
-renewed torque. The earlier September-4 route `3d` gives the same ~16.5 s median,
-so this is Toyota-native behavior rather than a consequence of the September-5
+renewed torque. That 0.9-N.m proxy is deliberately conservative and is **not the
+Toyota timer threshold**; the driver-detector reduction below recovers the actual
+countdown reset much more tightly. The earlier September-4 route `3d` gives the
+same ~16.5 s proxy median, so this is Toyota-native behavior rather than a consequence of the September-5
 `steeringPressed` integration fix. All 43/43 route-`3e` and 63/63 route-`3f`
 qualified onsets occur while openpilot remains enabled, `CC.latActive` is true,
 `steeringPressed` is false, and the latest transmitted B6 is active ID11.
@@ -642,9 +644,101 @@ September-6 routes the warning/escalation occurs while `0x08A` remains ID11 and
 ID10 is never observed (route 3e IDs `{0,4,11}`; route 3f `{0,11}`). Therefore
 `Hands-Off Control Condition` in FRC DID `0x1601` and Target-Lateral ID10 are
 **not evidence for the normal wheel-nag state and must not be used as a proposed
-nag-disable control** without an independent join. For the ordinary Camry LTA
-nag, the relevant Toyota vocabulary is the explicit judgment/message/buzzer/
-cancel-by-hands-off family above.
+nag-disable control** without an independent join. The retained same-car FRC
+Operation-FFD `2818/0100` record closes this distinction directly: DID `0x5609`
+is `f8c0`, which decodes through the recovered current PCS schema as **LTA
+Exist=1**, **Hands-Off Exist=0**, and **LTA Driver Monitor Camera Collaboration
+Exist=0**. Thus this exact Camry has ordinary LTA and its wheel-contact warning,
+but not Toyota's driver-camera-backed hands-free LTA capability. For the ordinary
+Camry LTA nag, the relevant Toyota vocabulary is the explicit
+judgment/message/buzzer/cancel-by-hands-off family above.
+
+The September-6 CAN corpus also exposes the reset side of the ordinary nag state
+machine. In clean ID11 LTA, `0x371 B20[4]` is a strong low-sensitivity
+**driver-steering-detected candidate**, while `B17[0]` is its exact structural
+complement. Across **33,621** clean `0x371` samples from routes `3e+3f`, there are
+zero complement violations and zero frames where `B20[4]` and the `B19[6]`
+warning state are simultaneously asserted. The dominant raw tuples are:
+
+| observed state | `B17[0]` | `B19` | `B20` | interpretation boundary |
+|---|---:|---:|---:|---|
+| no-touch / pre-warning | 1 | `0x20` | `0x03` | driver detector clear; warning clear |
+| driver steering detected | 0 | `0x20` | `0x13` | `B20[4]` asserted; warning clear |
+| warning/judgment | 1 | `0x40` | `0x03` | warning asserted; driver detector clear |
+
+The driver-state join is independently anchored to exact-F33 EPS telemetry rather
+than to openpilot's `steeringPressed` policy. Native chassis-side `0x030` carries
+physical driver torque as `signed(B8)*0.1 + signed4(B17[3:0])*0.01 N.m`; native
+`0x371` is published on the FRC side. In route `3e`, `B20[4]` is present in only
+**1.79%** of samples below 0.25 N.m but **95.72%** at 1.0–1.25 N.m; route `3f`
+gives **2.08%** and **94.18%** respectively. Sampled detector-set transitions
+have median absolute EPS torque **0.67 N.m** on both drives, while detector-release
+transitions have medians **0.37/0.34 N.m**. These are dynamic hysteresis-like
+transition distributions, **not an exact Toyota threshold**: `0x371` is slower
+than `0x030` and rlog publication is batched. Current Toyota prior art provides
+conceptual corroboration only: the older 8-byte `0x371 LTA_RELATED` layout names
+a low-sensitivity `STEERING_PRESSED` signal, but that historical bit layout is
+not transferred to this 32-byte TSS3 carrier. The current PCS OEM label
+`560D Driver Steering Control Detection Status` (`保舵検出状態`) is likewise a
+semantic match, not yet a static DID-to-CAN-bit mapping.
+
+Using Toyota's own candidate instead of the 0.9-N.m proxy collapses the countdown
+timing. The warning follows the most recent `B20[4]` **detector-release** transition
+at almost exactly **13.0 s**: routes `3d`, `3e`, and `3f` all have median release-to-
+warning times of ~13.00 s, with the 10th–90th percentile confined to roughly
+**12.88–13.09 s**. The last asserted detector sample precedes warning by ~13.16 s,
+consistent with the ~5-Hz `0x371` publication interval. This is strong evidence
+that the FRC's ordinary-LTA countdown is reset by its low-sensitivity driver-
+steering detector; the earlier ~16-s number reflects the deliberately higher
+0.9-N.m analysis proxy, not Toyota's internal timeout.
+
+Warning recovery follows that candidate directly. Of 43 qualified route-`3e`
+warning clears, 38 already have `B20[4]` asserted on the clearing `0x371` sample;
+route `3f` has 51/63 on the same sample and **56/63 within 0.35 s**. The remaining
+clears include state/eligibility changes and do not establish a second reset
+mechanism. Direction is also consistent with an FRC-derived judgment: on route
+`3f`, `0x030` is overwhelmingly native Panda bus0 (501,427 native vs 1,185
+bus2-side copies), while `0x371` is overwhelmingly native bus2 (26,948 native vs
+64 bus0-side copies). Together with the FRC's `U013187 Lost Communication with
+Power Steering Control Module A / Missing Message` diagnostic dependency, the
+working model is **EPS torque/state -> FRC driver-steering judgment -> FRC
+hands-off state publication**, not a dashboard-local timer.
+
+There is a second timed warning stage. Route `3d` has one episode where
+`0x412 B2[6]` first asserts **5.996 s** after `B19[6]` warning onset. Route `3f`
+has three such episodes; their first escalation appears at 5.876–5.979 s after
+warning onset (median **5.977 s**). Every escalated episode remains Target
+Lateral ID **11** throughout. No retained September-6 episode reaches a Toyota
+LTA-cancel transition; the driver-steering detector asserts first. Therefore the
+current corpus proves `warning -> ~6 s escalation -> driver acknowledgment` but
+not the timing or wire state of the later `Cancel Condition by Hands-Off` stage.
+
+Newer Toyota P6 diagnostics provide a useful **semantic-only successor oracle**:
+ADCU_P6 exposes separate `Hands-Off Duration` (ms), `LTA Driver Hands-On Flag`,
+`Hands-Off Judgment Result`, and `EDSS Request Due to LTA Hands-Off` fields. This
+matches the state decomposition above—duration accumulation, hands-on detection,
+judgment, then later emergency/cancel handling—but no P6 wire position or numeric
+state is transferred to this P5 Camry.
+
+This changes the boundary of the `0x412` replacement. `0x412` is demonstrably a
+presentation output of a deeper FRC state machine. Blocking/replacing it can hide
+the observed cluster presentation fields, but there is **no evidence that doing so
+resets the FRC's internal hands-off duration or prevents its eventual LTA cancel**.
+That distinction matters on this Camry while stock ID11/FRC lateral authority is
+still active. The decisive next observation is a normal warning captured with
+synchronized native `0x030/0x371/0x412` plus read-only FRC Operation FFD,
+prioritizing `560D`, `5601`, `5612`, `5615`, `5632`, and `550D`; a later
+post-warning `AB11/AB12/AB13` read can also reveal whether the cancel/late-hands-on
+RoB families become retained on this calibration.
+
+A tempting workaround would be to replace the FRC-bound `0x030` torque fields
+with a synthetic value above the observed detector transition. The current OEM
+schema is a reason **not to infer that this is equivalent to a harmless hands-on
+acknowledgment**: the same recorder family exposes `LTA Driver Steering Control
+prohibited` (`560D`) and `LDA Warning Inhibition by Driver Steering` (`550D`). A
+synthetic torque value could therefore enter Toyota's driver-override/inhibition
+logic as well as clear the nag. Until a synchronized warning FFD capture separates
+those states, `0x030` spoofing is not a recovered nag-disable interface.
 
 Current upstream Toyota explains how comma normally removes the wheel-nudge nag.
 `0x412` is a camera-owned replacement message in Toyota Panda safety

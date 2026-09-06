@@ -2328,5 +2328,7 @@ oracle = "dynamic_trace"
 paths = [
   "tools/analyze_camry_20260906_hands_off_warning.py",
   "data/generated/camry_20260906_hands_off_warning_audit.json",
+  "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json",
+  "docs/history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md",
   "docs/variants/camry-2026-tss3-opendbc-port.md",
 ]

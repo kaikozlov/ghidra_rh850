@@ -458,7 +458,7 @@ Findings: 440 · Corrections: 164 · Open questions: 54 · Docs: 124 · Suites: 
 | <a id="finding-var-127"></a>**VAR-127** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [camry-2026-longitudinal-evidence](../variants/camry-2026-longitudinal-evidence.md) | `tests/verify_camry_8965F3307000_gtsplus_semantics.py` | — |
 | <a id="finding-var-128"></a>**VAR-128** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | — | — |
 | <a id="finding-var-129"></a>**VAR-129** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [CORRECTIONS](../status/CORRECTIONS.md), [camry-2026-bench-validation-spec](../variants/camry-2026-bench-validation-spec.md), [camry-2026-tss3-integration-audit](../variants/camry-2026-tss3-integration-audit.md), [camry_f33_b6_observer_runbook](../../exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md) | — | — |
-| <a id="finding-var-130"></a>**VAR-130** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | — | — |
+| <a id="finding-var-130"></a>**VAR-130** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | `tests/verify_camry_20260906_hands_off_warning.py` | — |
 
 ## Open-questions index
 
@@ -732,7 +732,7 @@ Every tracked document under `docs/` with its owning suite(s) and gate tests.
 | [docs/history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md](../history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md) | doc_links, techstream_cuw_legacy, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_techstream_cuw_legacy.py`, `tests/verify_knowledge_index.py` |
 | [docs/history/2026-08/TACOMA_VFOREST_CUW_CORPUS_ANALYSIS_2026-08-23.md](../history/2026-08/TACOMA_VFOREST_CUW_CORPUS_ANALYSIS_2026-08-23.md) | doc_links, techstream_cuw_vforest_corpus, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_techstream_cuw_vforest_corpus.py`, `tests/verify_knowledge_index.py` |
 | [docs/history/2026-08/VERIFICATION_ARCHITECTURE_2026-08-23.md](../history/2026-08/VERIFICATION_ARCHITECTURE_2026-08-23.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
-| [docs/history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md](../history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
+| [docs/history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md](../history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md) | doc_links, knowledge_index, camry_20260906_hands_off_warning | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py`, `tests/verify_camry_20260906_hands_off_warning.py` |
 | [docs/history/2026-09/2026-09-01-camry-route37-steering-speed-gate.md](../history/2026-09/2026-09-01-camry-route37-steering-speed-gate.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/history/2026-09/2026-09-02-camry-f33-b6-review-handoff.md](../history/2026-09/2026-09-02-camry-f33-b6-review-handoff.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/history/2026-09/2026-09-04-camry-route-log-import.md](../history/2026-09/2026-09-04-camry-route-log-import.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
@@ -1009,7 +1009,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/gtsplus_2026/p5_adas_p6_migration.json` | gtsplus_tss3_control_ownership, gtsplus_p5_adas_p6_migration | — |
 | `data/generated/gtsplus_2026/pcs_data_viewer_parameter_help.json` | gtsplus_pcs_data_viewer_parameter_help | — |
 | `data/generated/gtsplus_2026/pcs_data_viewer_tss3_dictionary.json` | gtsplus_pcs_data_viewer_tss3_dictionary, gtsplus_pcs_data_viewer_parameter_help, gtsplus_aux_body_recovery | — |
-| `data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json` | gtsplus_tss3_control_ownership, gtsplus_pcs_data_viewer_tss3_managed_semantics, camry_2026_bus1_camera_output, camry_tss3_operation_ffd_decoder, gtsplus_aux_body_recovery | — |
+| `data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json` | gtsplus_tss3_control_ownership, gtsplus_pcs_data_viewer_tss3_managed_semantics, camry_2026_bus1_camera_output, camry_tss3_operation_ffd_decoder, gtsplus_aux_body_recovery, camry_20260906_hands_off_warning | — |
 | `data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json` | toyota_diag_registry, camry_2026_lta_state_reconciliation, camry_2026_longitudinal_request_plane, camry_2026_tss3_request_capture | — |
 | `data/generated/gtsplus_2026/tse_converter_surface.json` | gtsplus_tse_converter, public_techstream_tse_lineage | — |
 | `data/generated/gtsplus_2026/tse_managed_semantics.json` | gtsplus_tse_managed_semantics, public_techstream_tse_lineage, gtsplus_vdas_semantics | — |
