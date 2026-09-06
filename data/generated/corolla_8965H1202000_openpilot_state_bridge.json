@@ -126,7 +126,7 @@
     },
     "remaining_status_contract": {
       "path": "data/generated/corolla_hf_remaining_status_contract.json",
-      "sha256": "997b58b2a4dfb882011878fced3a908329386baebb80a40f6338e80cd9ff89b2"
+      "sha256": "27181bebdf983e237096944383db64368240126fa70cfb3d2a2dbc8f60106938"
     },
     "state_corpus": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json",

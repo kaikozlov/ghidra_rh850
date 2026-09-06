@@ -790,6 +790,15 @@ paths = [
   "docs/status/CORRECTIONS.md",
 ]
 
+[suite.camry_f33_steering_state_capture]
+tests = ["tests/verify_camry_f33_steering_state_capture.py"]
+oracle = "generated_self_check"
+paths = [
+  "docs/variants/camry-2026-tss3-opendbc-port.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "tools/build_camry_f33_car_kit.py",
+]
+
 [suite.xcp]
 tests = ['tests/verify_xcp.py']
 oracle = 'raw_bytes'

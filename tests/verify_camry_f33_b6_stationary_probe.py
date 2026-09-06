@@ -290,9 +290,22 @@ with tempfile.TemporaryDirectory() as td:
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_transaction_observer_install.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py",
+        "runtime/exploit/followups/xcp_read_probe.py", "runtime/exploit/followups/xcp_daq_probe.py",
+        "runtime/tools/camry_f33_steering_state_capture.py",
         "runtime/exploit/patcher/deploy.py", "runtime/exploit/patcher/restore.py",
         "runtime/exploit/patcher/post_apply_verify.py", "runtime/tools/build_secoc_patch_manifest.py",
     )))
+    xcp_observer = manifest["live_observers"]["native_xcp_steering_state"]
+    check("kit prefers native XCP steering observer before another RAM resident",
+          xcp_observer["preferred_before_ephemeral_resident"] is True and
+          xcp_observer["profiles"] == ["full-path", "source-terms", "command-funnel"] and
+          xcp_observer["default_profile"] == "full-path" and
+          xcp_observer["full_path_bytes"] == 52 and
+          xcp_observer["full_path_daq_lists"] == 2 and
+          xcp_observer["default_daq_prescaler"] == 10 and
+          xcp_observer["source_memory_write"] is False and
+          xcp_observer["steering_transmit"] is False and
+          "parked preflight" in xcp_observer["live_status"])
     runtime_source = (out / "runtime/exploit/common/ram_exec.py").read_text(encoding="utf-8")
     check("kit embeds fixed P1M-E roots without standalone secret files",
           "ba052435f8843f985fd1329d2b6117b0" in runtime_source and

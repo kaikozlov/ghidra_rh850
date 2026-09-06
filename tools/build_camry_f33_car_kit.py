@@ -37,6 +37,8 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.py",
     "exploit/ephemeral_runtime/camry_f33_b6_transaction_observer_install.py",
     "exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py",
+    "exploit/followups/xcp_read_probe.py",
+    "exploit/followups/xcp_daq_probe.py",
     "exploit/patcher/patch_config.py",
     "exploit/patcher/build_payload.py",
     "exploit/patcher/deploy.py",
@@ -44,6 +46,7 @@ RUNTIME_FILES = [
     "exploit/patcher/post_apply_verify.py",
     "tools/__init__.py",
     "tools/build_secoc_patch_manifest.py",
+    "tools/camry_f33_steering_state_capture.py",
 ]
 
 
@@ -295,6 +298,21 @@ def build(out: Path, openpilot: Path) -> dict:
             "crc_prefix": f"0x{stage5.EXPECTED_STAGE5_PREFIX:08X}",
             "crc_fixup": f"0x{stage5.EXPECTED_STAGE5_FIXUP:08X}",
             "note": "live persistence-verified 2026-09-01; no further persistent patch is part of the observer experiment",
+        },
+        "live_observers": {
+            "native_xcp_steering_state": {
+                "tool": "runtime/tools/camry_f33_steering_state_capture.py",
+                "preferred_before_ephemeral_resident": True,
+                "profiles": ["full-path", "source-terms", "command-funnel"],
+                "default_profile": "full-path",
+                "full_path_bytes": 52,
+                "full_path_daq_lists": 2,
+                "default_daq_prescaler": 10,
+                "route": "0x7F7->0x7F8 bus0 after exact F181 check",
+                "source_memory_write": False,
+                "steering_transmit": False,
+                "live_status": "post-repin XCP reachability not yet measured; parked preflight required",
+            },
         },
         "ram_experiments": {
             "observer": {

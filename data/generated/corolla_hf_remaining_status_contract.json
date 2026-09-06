@@ -74,7 +74,7 @@
     },
     "fd_control_interface": {
       "path": "data/generated/corolla_8965H1202000_fd_control_interface.json",
-      "sha256": "281c1d5040f0a5308221e65d290d32678c9a522bf5a28bc219e9a21d9a90b829"
+      "sha256": "8d693f50871ccb3987c79c2e2cfd7c34ead2901c5d3e3d58665947aca952ffc2"
     },
     "h_codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -95,7 +95,7 @@
     },
     "span_moving_rlog_evidence": {
       "path": "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
-      "sha256": "28d017590f327964c26b825d1f2de51a61fce241636b6bfcfc054ec4592d8d17"
+      "sha256": "65af33b876067984cdc2d2ab8c900cfeaefae57de67bdf6ab0da634b3c57ee08"
     },
     "techstream_correlations": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",

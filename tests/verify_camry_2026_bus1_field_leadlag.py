@@ -51,7 +51,7 @@ REGENERATE = "--regenerate" in sys.argv[1:]
 EXPECTED_LOGIC_SHA = {
     BUILD: "615742ee5480554726600fe1e4fe62a27d8bc2cd0b064e55009e5bf955d3e931",
     REPO / "tools/analyze_camry_2026_relay_capture.py": "0e979b8e579994ca93457f4c0c0b6240a3b25bbc36fd7c192ef4ec5978cf790f",
-    REPO / "tools/toyota_route_opendbc_common.py": "1eab32c06d22c28305a89e14f8ba4c24af434461f1f2c270770c6d305fde8ec7",
+    REPO / "tools/toyota_route_opendbc_common.py": "a8cfb474b9932a2d9a1f3c258428695eb2ad41e1d285ec26e2627fe4e1f4d259",
 }
 
 EXPECTED_DRIVES = {

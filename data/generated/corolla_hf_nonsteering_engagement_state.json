@@ -642,15 +642,15 @@
     },
     "public_route": {
       "path": "data/generated/corolla_2023_public_route_opendbc_evidence.json",
-      "sha256": "48140f61e5c4c92cae78343d27c9e13b408dd2058ae6deeadd57eb17e194e2c9"
+      "sha256": "bf6a22911fd8f4fff77793a565debc81c48443047e653342d554af6a8e2b592c"
     },
     "span_route": {
       "path": "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
-      "sha256": "28d017590f327964c26b825d1f2de51a61fce241636b6bfcfc054ec4592d8d17"
+      "sha256": "65af33b876067984cdc2d2ab8c900cfeaefae57de67bdf6ab0da634b3c57ee08"
     },
     "state_bridge": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-      "sha256": "5d3d98da91f36da0fb9a82ae297623672fe8a198486dc303d8d9be000ac80b1a"
+      "sha256": "0c6d6efef3f84881248de6f6844ed47b668e06df2af8ab9d3b2f9694cd72dfd6"
     },
     "techstream_cruise": {
       "path": "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json",

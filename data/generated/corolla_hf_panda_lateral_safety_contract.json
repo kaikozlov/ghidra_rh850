@@ -297,7 +297,7 @@
     },
     "full_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
-      "sha256": "ff9c88fc02191335a0010d38eb977f418479b1bf5441937adc49d6fe56327a33"
+      "sha256": "9430cb577237ee1413700115b47793133dfdd91616c010b5c9f99db58df12af0"
     },
     "h_codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -305,19 +305,19 @@
     },
     "receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-      "sha256": "eb549b440e25b55baece66a76479f0afbc53725015222ea80de285c54e7f10aa"
+      "sha256": "5019f19340320b1764af66fa348f9e8ffb5ec6e9c6bff1143ed03d76d8d37dc8"
     },
     "state_bridge": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-      "sha256": "5d3d98da91f36da0fb9a82ae297623672fe8a198486dc303d8d9be000ac80b1a"
+      "sha256": "0c6d6efef3f84881248de6f6844ed47b668e06df2af8ab9d3b2f9694cd72dfd6"
     },
     "steering_limits": {
       "path": "data/generated/corolla_hf_steering_limits.json",
-      "sha256": "ac3cd1effc45ab71a7bfe7f9c0b9815f56f69450af098699441f794129998e1a"
+      "sha256": "791a363130597fab308fd40746d13b4215caabec0d1217a21cb0cae837fd6d57"
     },
     "target_angle_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-      "sha256": "525f575531dd962b60ba75a228befaa4266286e3e2cc8b846f82b8544630f08a"
+      "sha256": "270e2902022b539a5845d74c6ebfa988b96c3e8d164a4a35b434bf6293aebd8f"
     }
   },
   "static_conclusion": {

@@ -950,6 +950,116 @@ Deterministic reduction and verification:
 `data/generated/camry_2026_lateral_family_census.json`, and
 `tests/verify_camry_2026_lateral_family_census.py`.
 
+### 4.10 Preferred live internal observer: native F33 XCP DAQ
+
+The remaining stock-authority question does **not** require another RAM-resident payload
+as the first experiment. Exact F33 already contains an application XCP DAQ measurement
+engine on `0x7F7 -> 0x7F8`. The recovered DAQ contract is measurement/readback only:
+`WRITE_DAQ` stores a tester-selected **source address** in the DAQ pointer table, the
+event worker dereferences that address and copies one byte into DTO staging, and
+`SET_DAQ_LIST_MODE` rejects the STIM/direction mode bits. Exact constants at
+`0x22AE7..0x22AE9` are `04 04 07`: **four DAQ lists, four ODTs/list, seven one-byte
+measurements/ODT** (112 bytes total). `FUN_000823E2(event)` walks active lists in
+ascending index order, filters them by event and prescaler countdown, and calls
+`FUN_00082368(list*4,last_odt)`; `82368` emits that list's ODT PIDs sequentially. Thus
+lists 0 and 1 with equal event/prescaler are serviced as PIDs `0..3` then `4..7` in one
+event-worker invocation. Generic XCP `DOWNLOAD`, `MODIFY_BITS`, and the calibration-page
+copy are absent from the Camry capture tool.
+
+That native mechanism is less invasive than adapting the existing B6 transaction
+observer: the stock application scheduler and steering pipeline remain untouched, there
+is no resident code in the high RAM tail, and the only persistent change is none. DAQ
+configuration itself is volatile and is explicitly stopped in cleanup. The exact F33
+RSCFD table places physical UDS `0x7A1` and application XCP `0x7F7` on controller 1; after
+the harness repin, `0x7A1` is live-proven on Panda bus 0, so the target-specific observer
+uses bus 0 / ELM327 parameter 1 after an exact F181 check. **Post-repin XCP CONNECT/DAQ
+reachability is not yet a live fact**: the first use must therefore be a short parked
+preflight, not an assumption that the old normal-harness timeout has been resolved.
+
+`tools/camry_f33_steering_state_capture.py` defines two 28-byte single-list subsets plus
+a default **52-byte `full-path`** union using lists 0 and 1. The first subset is the
+decisive stock-source discriminator:
+
+| profile `source-terms` | bytes | exact role |
+|---|---:|---|
+| `AC2B`, `C7BF` | 2 | `D0218` diagnostic/B6-active branch gates |
+| `C43C` | 2 | additive short term |
+| `C4C0` | 4 | additive 32-bit term |
+| `C3BA` | 2 | additive short term |
+| `CC2C` | 4 | additive 32-bit term |
+| `BF3C` | 4 | additive 32-bit term |
+| `CB38`, `C5EE` | 4 | bounded paired contribution |
+| `CBE8` | 2 | final short contribution |
+| `CC48` | 4 | complete `D0218` summed output |
+
+This is the exact ordinary B6-inactive sum recovered from `FUN_000D0218`; no candidate
+term is omitted. A stock ID11/ID18 capture synchronized with native `0x08A/0x081/0x030`
+therefore answers whether one of the previously unnamed EPS-internal terms changes with
+Toyota lateral authority, or whether `CC48` changes without a corresponding recovered
+term transition.
+
+The second profile follows the numeric result through the physical command funnel:
+
+| profile `command-funnel` | bytes | exact role |
+|---|---:|---|
+| `CC48` | 4 | `D0218` output |
+| `CC4C`, `CC4E` | 4 | `D0284` bounded/scaled value, then `D02DA` slew result |
+| `AC52`, `CC60` | 4 | `D0382` limit and limited value |
+| `CC50` | 2 | `D039E` pre-scale command |
+| `AC5A`, `AC4C` | 4 | `D042C` scale and symmetric slew/limit inputs |
+| `CC62`, `CC66`, `CC64` | 6 | pre-slew, post-slew/gate, and selected command |
+| `AC54`, `AC56` | 4 | motor-driving `CC64` mirror and diagnostic `CC62` sibling |
+
+`FUN_000D0AF6` calls these stages in order: `D0218 -> D0284 -> D02DA -> D0382 ->
+D039E -> D042C -> D06D6 -> D047C -> D0AAE`. The default `full-path` profile is the
+unique union of the two tables: **52 bytes**, with `CC48` sampled once, emitted as eight
+ODTs across lists 0 and 1 during the same event-worker invocation. ODT reads are still
+sequential rather than an atomic CPU snapshot; the tool records the assembly span and
+drops incomplete/out-of-order events. It simultaneously records native
+`0x025/0x030/0x081/0x08A/0x0B6/0x0FE/0x371/0x412` Panda receive traffic with host
+monotonic batch timestamps and the raw Panda `busTime` value for each frame/ODT.
+`busTime` is retained as an opaque wrapping hardware timer; no unit conversion is
+assumed. Host timestamps remain correlation aids rather than physical CAN ordering.
+
+Because the default sample emits eight classic-CAN DTOs, the observer exposes an XCP
+DAQ prescaler and reports the actually observed complete-sample rate. Start with a short
+**Park/stationary** run and the conservative default prescaler 10; only after
+reachability, DTO assembly, and bus rate are measured should a stock/manual road capture
+be attempted. Openpilot control must remain stopped for the direct-Panda run. The first
+capture is:
+
+```bash
+export PY=/usr/local/venv/bin/python
+export PYTHONPATH=/data/openpilot:$PWD/runtime
+
+# Plan only. `full-path` is also the CLI default.
+$PY runtime/tools/camry_f33_steering_state_capture.py --profile full-path
+
+# Short parked preflight; no steering command is transmitted.
+$PY runtime/tools/camry_f33_steering_state_capture.py \
+  --profile full-path --daq-prescaler 10 \
+  --execute --stock-observation-confirmed --duration-seconds 5 \
+  --capture-output /tmp/f33-full-path-preflight.ndjson \
+  --result-output /tmp/f33-full-path-preflight.json
+```
+
+After a successful parked preflight, run `full-path` during a normal stock ID11/ID18
+interval. One capture can then ask both which source term/gate changes with `0x08A`
+request state and whether the resulting `CC48` propagates through `AC54`, the branch
+already recovered into the motor-current transform. This avoids requiring two road runs
+to reproduce the same stock operating condition.
+
+If native XCP remains unreachable on the post-repin route, the fallback is a **stripped
+RAM-only observer derived from the existing B6 transaction-resident framework**, not a
+new flash patch. The high-tail resident can copy the same target cells (or a bounded
+subset if telemetry space requires it) to telemetry and use the already proven
+authenticated-RAM startup/heartbeat path. That fallback is
+intentionally deferred until XCP fails, because replacing the foreground scheduler is a
+strictly larger perturbation than using the ECU's own DAQ engine.
+
+Verification: `tests/verify_camry_f33_steering_state_capture.py`; the in-car packaging
+path is `tools/build_camry_f33_car_kit.py`.
+
 ## 5. What remains before B6 steering authority is established
 
 **Qualification boundary:** the modified-firmware observer/bridge work below is

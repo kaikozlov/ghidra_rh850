@@ -1134,8 +1134,19 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   terms contain torque/speed/angle/internal phase-calibration state but no external
   lane-target magnitude, so another arbitrary F33 CAN-field search is not the next
   step. Prioritize exact ABS/Brake-Booster firmware, Operation-FFD winner/grant, or
-  a live internal-oracle capture synchronized to the request. Batched rlog timing
-  remains unusable for physical latency/source inference. Canonical §52.
+  a live internal-oracle capture synchronized to the request. The preferred internal
+  oracle is now concrete: `tools/camry_f33_steering_state_capture.py` uses exact-F33's
+  native measurement-only XCP DAQ rather than another resident payload. Exact firmware
+  constants and `823E2 -> 82368` control flow prove four lists x four ODTs x seven bytes
+  and ascending service of active lists bound to the same event. The default 52-byte
+  `full-path` profile therefore joins every `D0218` operand/gate, `CC48`, and
+  `CC48 -> CC4C/CC4E -> CC60 -> CC50 -> CC62/CC66/CC64 -> AC54/AC56` in the same
+  recurring ECU event; 28-byte single-list subsets remain available. The same Panda loop
+  retains `0x025/0x030/0x081/0x08A` context. Post-repin XCP reachability is still
+  unmeasured, so the next action is a short parked CONNECT/DAQ-rate preflight. Only if
+  that fails should the existing authenticated-RAM high-tail observer framework be
+  reduced to the same steering profile. Batched rlog timing remains unusable for physical
+  latency/source inference. Canonical opendbc-port §4.10 and live-baseline §52.
 
   The captured native Bus-1 boundary is now explicit. Both retained relay-correct
   drives contain the same 22 periodic camera/radar-domain streams:
