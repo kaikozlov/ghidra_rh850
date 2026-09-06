@@ -2321,3 +2321,12 @@ tests = ["tests/verify_camry_f33_b6_transaction_observer.py"]
 
 [suite.camry_f33_b6_bridge_install]
 tests = ["tests/verify_camry_f33_b6_bridge_install.py"]
+
+[suite.camry_20260906_hands_off_warning]
+tests = ["tests/verify_camry_20260906_hands_off_warning.py"]
+oracle = "dynamic_trace"
+paths = [
+  "tools/analyze_camry_20260906_hands_off_warning.py",
+  "data/generated/camry_20260906_hands_off_warning_audit.json",
+  "docs/variants/camry-2026-tss3-opendbc-port.md",
+]

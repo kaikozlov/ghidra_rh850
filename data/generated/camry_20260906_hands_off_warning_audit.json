@@ -1,0 +1,409 @@
+{
+  "comparison": {
+    "causality_boundary": "The post-fix warning onsets are observed before steeringPressed becomes true and while latActive and transmitted B6 ID11 remain active; this rules out the new steeringPressed event as the immediate trigger of the native warning onset, not every possible indirect vehicle-policy interaction.",
+    "post_fix_outbound": "3e",
+    "post_fix_return": "3f",
+    "pre_fix_routes": [
+      "3b",
+      "3c",
+      "3d"
+    ]
+  },
+  "method": {
+    "clean_stock_lta": "carState cruise enabled, vEgo > 15.0 m/s, no blinker, latest native bus2 0x08A B21 low6 == 11",
+    "hud_companion_candidate": "native bus2 0x412 B0=0x14 and B1[3:2]=3",
+    "semantic_boundary": "dynamic timing/edge join only; exact OEM CAN bit names remain unproved",
+    "touch_proxy": "abs(carState.steeringTorque) >= 0.9 N.m",
+    "warning_candidate": "native bus2 0x371 B19 bit6"
+  },
+  "routes": {
+    "3b": {
+      "b19_values_in_clean_stock_lta": {
+        "0x20": 18032,
+        "0x40": 157
+      },
+      "clean_stock_lta_371_frames": 18189,
+      "clean_stock_lta_duration_s": 3341.532535,
+      "hud_companion_candidate": {
+        "b2_bit6_frames": 0,
+        "b2_bit6_frames_while_0x371_active": 0,
+        "boundary": "historical 0x412 signal names/layout are not transferred to this TSS3 payload",
+        "carrier": "native Panda bus2 0x412/8 B0=0x14 and B1[3:2]=3",
+        "fall_edges_paired_to_0x371_within_2s": 15,
+        "fall_lag_0x412_minus_0x371_s": {
+          "p10": -0.132487,
+          "p50": -0.07044,
+          "p90": 0.0
+        },
+        "falling_edges": 23,
+        "payload_counts": {
+          "1000042102ee9307": 1,
+          "1200001102ee9307": 53,
+          "1200001102ee930f": 534,
+          "1200001202ee9307": 106,
+          "1200001202ee930f": 55,
+          "1200002102ee9307": 131,
+          "1200002102ee930f": 46,
+          "1200002200ee9307": 1,
+          "1200002202ee9307": 1052,
+          "1200002202ee930f": 349,
+          "1200042202ee9307": 2,
+          "120c001202ee9307": 1,
+          "1400004401ee9307": 4611,
+          "1400042101ee9307": 2,
+          "140c004401ee9307": 65,
+          "2200001401ee9307": 2,
+          "3200002301ee9307": 1,
+          "3200002302ee9307": 3
+        },
+        "rise_edges_paired_to_0x371_within_2s": 15,
+        "rise_lag_0x412_minus_0x371_s": {
+          "p10": -0.120194,
+          "p50": -0.029651,
+          "p90": 0.0
+        },
+        "rising_edges": 23
+      },
+      "label": "pre-fix",
+      "openpilot_commit": "d1914bbe7f88b03fd7f59afd97607e873c4bba47",
+      "route": "0000003b--62262eb7a1",
+      "route_duration_s": 6582.551449,
+      "segments": 110,
+      "warning_candidate": {
+        "carrier": "native Panda bus2 0x371/32 B19 bit6",
+        "fall_time_since_touch_s": {
+          "p10": 0.039146,
+          "p50": 0.148478,
+          "p90": 18.854929
+        },
+        "falling_edges": 15,
+        "onset_abs_torque_nm": {
+          "p10": 0.05,
+          "p50": 0.17,
+          "p90": 0.21
+        },
+        "onset_openpilot_state": {
+          "b6_id11": 15,
+          "lat_active_true": 15,
+          "max_latest_b6_age_s": 0.018833281,
+          "selfdrive_enabled_true": 15,
+          "steering_pressed_true": 0
+        },
+        "onset_time_since_touch_s": {
+          "p10": 13.305146,
+          "p50": 16.273435,
+          "p90": 29.486707
+        },
+        "rate_per_clean_stock_lta_hour": 16.16025,
+        "rate_per_route_hour": 8.203506,
+        "rising_edges": 15
+      }
+    },
+    "3c": {
+      "b19_values_in_clean_stock_lta": {
+        "0x20": 6918,
+        "0x40": 144
+      },
+      "clean_stock_lta_371_frames": 7062,
+      "clean_stock_lta_duration_s": 1322.468169,
+      "hud_companion_candidate": {
+        "b2_bit6_frames": 0,
+        "b2_bit6_frames_while_0x371_active": 0,
+        "boundary": "historical 0x412 signal names/layout are not transferred to this TSS3 payload",
+        "carrier": "native Panda bus2 0x412/8 B0=0x14 and B1[3:2]=3",
+        "fall_edges_paired_to_0x371_within_2s": 18,
+        "fall_lag_0x412_minus_0x371_s": {
+          "p10": -0.12957,
+          "p50": 0.0,
+          "p90": 0.0
+        },
+        "falling_edges": 35,
+        "payload_counts": {
+          "0000000000000000": 1,
+          "00000000006e9303": 1,
+          "0000000000ee9307": 1,
+          "0200002200ee9307": 3,
+          "1200001102ee9307": 196,
+          "1200001202ee9307": 51,
+          "1200002102ee9307": 73,
+          "1200002200ee9307": 3,
+          "1200002202ee9307": 2477,
+          "1400004401ee9307": 2098,
+          "140c004401ee9307": 111,
+          "2200001401ee9307": 3,
+          "2200004101ee9307": 2
+        },
+        "rise_edges_paired_to_0x371_within_2s": 16,
+        "rise_lag_0x412_minus_0x371_s": {
+          "p10": -0.130749,
+          "p50": -0.080435,
+          "p90": 0.0
+        },
+        "rising_edges": 35
+      },
+      "label": "pre-fix",
+      "openpilot_commit": "d1914bbe7f88b03fd7f59afd97607e873c4bba47",
+      "route": "0000003c--97b9e7a69a",
+      "route_duration_s": 4835.677784,
+      "segments": 81,
+      "warning_candidate": {
+        "carrier": "native Panda bus2 0x371/32 B19 bit6",
+        "fall_time_since_touch_s": {
+          "p10": 0.028422,
+          "p50": 0.141139,
+          "p90": 20.190058
+        },
+        "falling_edges": 18,
+        "onset_abs_torque_nm": {
+          "p10": 0.06,
+          "p50": 0.15,
+          "p90": 0.29
+        },
+        "onset_openpilot_state": {
+          "b6_id11": 16,
+          "lat_active_true": 16,
+          "max_latest_b6_age_s": 0.019000886,
+          "selfdrive_enabled_true": 16,
+          "steering_pressed_true": 0
+        },
+        "onset_time_since_touch_s": {
+          "p10": 3.153761,
+          "p50": 16.106275,
+          "p90": 38.572603
+        },
+        "rate_per_clean_stock_lta_hour": 43.554924,
+        "rate_per_route_hour": 11.911464,
+        "rising_edges": 16
+      }
+    },
+    "3d": {
+      "b19_values_in_clean_stock_lta": {
+        "0x20": 11331,
+        "0x40": 519
+      },
+      "clean_stock_lta_371_frames": 11850,
+      "clean_stock_lta_duration_s": 2216.899157,
+      "hud_companion_candidate": {
+        "b2_bit6_frames": 3,
+        "b2_bit6_frames_while_0x371_active": 3,
+        "boundary": "historical 0x412 signal names/layout are not transferred to this TSS3 payload",
+        "carrier": "native Panda bus2 0x412/8 B0=0x14 and B1[3:2]=3",
+        "fall_edges_paired_to_0x371_within_2s": 31,
+        "fall_lag_0x412_minus_0x371_s": {
+          "p10": -0.133058,
+          "p50": -0.088991,
+          "p90": 0.0
+        },
+        "falling_edges": 31,
+        "payload_counts": {
+          "0000000000000000": 1,
+          "00000000006e9303": 1,
+          "0000000000ee9307": 1,
+          "0200002200ee9307": 3,
+          "0200002202ec9307": 15,
+          "1200001102ee9307": 440,
+          "1200001202ee9307": 111,
+          "1200002102ee9307": 112,
+          "1200002200ee9307": 2,
+          "1200002202ee9307": 920,
+          "1400004401ee9307": 2223,
+          "140c004401ee9307": 129,
+          "140c404401ee9307": 3,
+          "2200001401ee9307": 2,
+          "2200004101ee9307": 3
+        },
+        "rise_edges_paired_to_0x371_within_2s": 30,
+        "rise_lag_0x412_minus_0x371_s": {
+          "p10": -0.141799,
+          "p50": -0.039578,
+          "p90": 0.0
+        },
+        "rising_edges": 31
+      },
+      "label": "pre-fix",
+      "openpilot_commit": "d1914bbe7f88b03fd7f59afd97607e873c4bba47",
+      "route": "0000003d--0e812cecba",
+      "route_duration_s": 3715.004303,
+      "segments": 62,
+      "warning_candidate": {
+        "carrier": "native Panda bus2 0x371/32 B19 bit6",
+        "fall_time_since_touch_s": {
+          "p10": 0.008486,
+          "p50": 0.181145,
+          "p90": 30.557785
+        },
+        "falling_edges": 31,
+        "onset_abs_torque_nm": {
+          "p10": 0.01,
+          "p50": 0.16,
+          "p90": 0.42
+        },
+        "onset_openpilot_state": {
+          "b6_id11": 30,
+          "lat_active_true": 30,
+          "max_latest_b6_age_s": 0.020067396,
+          "selfdrive_enabled_true": 30,
+          "steering_pressed_true": 0
+        },
+        "onset_time_since_touch_s": {
+          "p10": 13.246729,
+          "p50": 16.475308,
+          "p90": 33.797216
+        },
+        "rate_per_clean_stock_lta_hour": 48.716695,
+        "rate_per_route_hour": 29.071299,
+        "rising_edges": 30
+      }
+    },
+    "3e": {
+      "b19_values_in_clean_stock_lta": {
+        "0x20": 16261,
+        "0x40": 484
+      },
+      "clean_stock_lta_371_frames": 16745,
+      "clean_stock_lta_duration_s": 3142.291958,
+      "hud_companion_candidate": {
+        "b2_bit6_frames": 0,
+        "b2_bit6_frames_while_0x371_active": 0,
+        "boundary": "historical 0x412 signal names/layout are not transferred to this TSS3 payload",
+        "carrier": "native Panda bus2 0x412/8 B0=0x14 and B1[3:2]=3",
+        "fall_edges_paired_to_0x371_within_2s": 43,
+        "fall_lag_0x412_minus_0x371_s": {
+          "p10": -0.120131,
+          "p50": -0.060267,
+          "p90": 0.0
+        },
+        "falling_edges": 43,
+        "payload_counts": {
+          "1000041202ee9307": 1,
+          "1200001102ee9307": 613,
+          "1200001202ee9307": 216,
+          "1200002102ee9307": 207,
+          "1200002202ee9307": 851,
+          "120c001202ee9307": 1,
+          "1400004401ee9307": 3118,
+          "1400041201ee9307": 2,
+          "140c004401ee9307": 133,
+          "2200004101ee9307": 2
+        },
+        "rise_edges_paired_to_0x371_within_2s": 43,
+        "rise_lag_0x412_minus_0x371_s": {
+          "p10": -0.120656,
+          "p50": -0.029936,
+          "p90": 0.0
+        },
+        "rising_edges": 43
+      },
+      "label": "post-fix-outbound",
+      "openpilot_commit": "be56d6f688b557c4a2226e402da30ef3597eb5d7",
+      "route": "0000003e--1a2f20417d",
+      "route_duration_s": 4681.099054,
+      "segments": 78,
+      "warning_candidate": {
+        "carrier": "native Panda bus2 0x371/32 B19 bit6",
+        "fall_time_since_touch_s": {
+          "p10": 0.008846,
+          "p50": 0.130297,
+          "p90": 30.341632
+        },
+        "falling_edges": 43,
+        "onset_abs_torque_nm": {
+          "p10": 0.02,
+          "p50": 0.14,
+          "p90": 0.31
+        },
+        "onset_openpilot_state": {
+          "b6_id11": 43,
+          "lat_active_true": 43,
+          "max_latest_b6_age_s": 0.019056146,
+          "selfdrive_enabled_true": 43,
+          "steering_pressed_true": 0
+        },
+        "onset_time_since_touch_s": {
+          "p10": 13.27696,
+          "p50": 15.838704,
+          "p90": 47.048023
+        },
+        "rate_per_clean_stock_lta_hour": 49.263405,
+        "rate_per_route_hour": 33.069157,
+        "rising_edges": 43
+      }
+    },
+    "3f": {
+      "b19_values_in_clean_stock_lta": {
+        "0x20": 16107,
+        "0x40": 769
+      },
+      "clean_stock_lta_371_frames": 16876,
+      "clean_stock_lta_duration_s": 3172.015706,
+      "hud_companion_candidate": {
+        "b2_bit6_frames": 6,
+        "b2_bit6_frames_while_0x371_active": 6,
+        "boundary": "historical 0x412 signal names/layout are not transferred to this TSS3 payload",
+        "carrier": "native Panda bus2 0x412/8 B0=0x14 and B1[3:2]=3",
+        "fall_edges_paired_to_0x371_within_2s": 63,
+        "fall_lag_0x412_minus_0x371_s": {
+          "p10": -0.120086,
+          "p50": -0.030746,
+          "p90": 0.0
+        },
+        "falling_edges": 66,
+        "payload_counts": {
+          "0000000000000000": 1,
+          "00000000006e9300": 1,
+          "0200002200ee9307": 3,
+          "1200001102ee9307": 561,
+          "1200001202ee9307": 139,
+          "1200002102ee9307": 131,
+          "1200002200ee9307": 3,
+          "1200002202ee9307": 1175,
+          "1400004401ee9307": 3160,
+          "140c004401ee9307": 209,
+          "140c404401ee9307": 6
+        },
+        "rise_edges_paired_to_0x371_within_2s": 63,
+        "rise_lag_0x412_minus_0x371_s": {
+          "p10": -0.120965,
+          "p50": -0.020758,
+          "p90": 0.0
+        },
+        "rising_edges": 66
+      },
+      "label": "post-fix-return",
+      "openpilot_commit": "be56d6f688b557c4a2226e402da30ef3597eb5d7",
+      "route": "0000003f--36e72f5fdc",
+      "route_duration_s": 5014.842854,
+      "segments": 84,
+      "warning_candidate": {
+        "carrier": "native Panda bus2 0x371/32 B19 bit6",
+        "fall_time_since_touch_s": {
+          "p10": 0.008666,
+          "p50": 0.108823,
+          "p90": 18.972452
+        },
+        "falling_edges": 63,
+        "onset_abs_torque_nm": {
+          "p10": 0.03,
+          "p50": 0.21,
+          "p90": 0.43
+        },
+        "onset_openpilot_state": {
+          "b6_id11": 63,
+          "lat_active_true": 63,
+          "max_latest_b6_age_s": 0.019541771,
+          "selfdrive_enabled_true": 63,
+          "steering_pressed_true": 0
+        },
+        "onset_time_since_touch_s": {
+          "p10": 13.213106,
+          "p50": 15.603712,
+          "p90": 27.478934
+        },
+        "rate_per_clean_stock_lta_hour": 71.500276,
+        "rate_per_route_hour": 45.225744,
+        "rising_edges": 63
+      }
+    }
+  },
+  "schema_version": 1
+}
