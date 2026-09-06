@@ -2332,3 +2332,7 @@ paths = [
   "docs/history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md",
   "docs/variants/camry-2026-tss3-opendbc-port.md",
 ]
+
+[suite.camry_2026_pda_sdg]
+tests = ["tests/verify_camry_2026_pda_sdg.py"]
+oracle = "dynamic_trace"

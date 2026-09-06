@@ -1,0 +1,199 @@
+{
+  "conclusion": {
+    "id19_boundary": "Target Lateral ID 19 is OEM-labeled PDA and exact F33 gives it a distinct bank in the same B6 controller. No native ID19 episode is present in the scanned 2026-09-04/06 corpus, so PDA-OAA->ID19 remains an architectural interpretation rather than a dynamic same-car join.",
+    "other_path": "PDA does not create a second recovered F33 external steering ingress: ID18/ID19 are common B6-controller profiles; the separate target-native snapshot consumer is raw 49 / Self-Propelled Transport.",
+    "pda_sa_to_sdg": "Toyota's TSS3 recorder classifies PDA(SA) under SystemType 6 / SDG; same-car ID18 is therefore the strongest wire identity for PDA-SA/SDG steering."
+  },
+  "exact_f33": {
+    "accepted_controller_values": {
+      "1": "PCS",
+      "10": "Hands Off LTA",
+      "11": "LTA/LCA",
+      "18": "SDG",
+      "19": "PDA",
+      "4": "LDA"
+    },
+    "common_cb00_reader_function_count": 50,
+    "controller_bank_map": {
+      "1": 0,
+      "10": 3,
+      "11": 2,
+      "18": 5,
+      "19": 4,
+      "4": 1
+    },
+    "id19_direct_snapshot_consumers": [
+      "0x000ceffc"
+    ],
+    "oem_name": "Target Lateral ID",
+    "separate_special_snapshot_consumer": {
+      "boundary": "separate transient state machine; not PDA",
+      "entry": "0x000CB73A",
+      "oem_label": "Self-Propelled Transport",
+      "raw_value": 49
+    },
+    "wire": "B3[5:0]"
+  },
+  "gts_tss3": {
+    "arbitration_result_lateral_id_did": "5285",
+    "pda_oaa_request": {
+      "data_ids": [
+        "5A09",
+        "5A0A",
+        "5A0D"
+      ],
+      "field_names": [
+        "ID Request Lateral ID",
+        "PDA(OAA) request pinion angle",
+        "PDA(OAA) Gain for steering support",
+        "PDA(OAA) Damping control gain"
+      ],
+      "layout": "same semantic ingredients but split across three recorder DIDs; lateral ID is 6 bits rather than generic/LDA/LTA 8 bits"
+    },
+    "pda_sa": {
+      "rob_code": "22B4",
+      "rob_name": "PDA(SA)Rapid steering by the customer during control",
+      "rob_system_name": "SDG",
+      "rob_system_type": 6,
+      "status_field_names": [
+        "PDA(SA) ON/OFF Status",
+        "PDA(SA) Control Status",
+        "PDA(SA) Fail Status",
+        "PDA(SA) EPS Fail Status",
+        "PDA(SA) Fail Hold Flag ",
+        "PDA(SA) Exist",
+        "PDA(SA) DDR Control State",
+        "EPS Pinion Angle",
+        "PDA(SA) Cancel Condition"
+      ]
+    }
+  },
+  "routes": {
+    "3b": {
+      "native_08a_frames": 263265,
+      "pda_sa_regime_proxy": {
+        "definition": "fresh CarState <=0.2 s, cruise disabled, 10..140 km/h; operating-regime proxy only",
+        "frames": 52653,
+        "target_lateral_id_counts": {
+          "0": 18916,
+          "11": 22,
+          "18": 33703,
+          "4": 12
+        }
+      },
+      "route": "0000003b--62262eb7a1",
+      "segment_count": 110,
+      "target_lateral_id_counts": {
+        "0": 44476,
+        "11": 184610,
+        "18": 34167,
+        "4": 12
+      }
+    },
+    "3c": {
+      "native_08a_frames": 193390,
+      "pda_sa_regime_proxy": {
+        "definition": "fresh CarState <=0.2 s, cruise disabled, 10..140 km/h; operating-regime proxy only",
+        "frames": 31264,
+        "target_lateral_id_counts": {
+          "0": 31195,
+          "11": 9,
+          "4": 60
+        }
+      },
+      "route": "0000003c--97b9e7a69a",
+      "segment_count": 81,
+      "target_lateral_id_counts": {
+        "0": 107668,
+        "11": 85560,
+        "4": 162
+      }
+    },
+    "3d": {
+      "native_08a_frames": 148567,
+      "pda_sa_regime_proxy": {
+        "definition": "fresh CarState <=0.2 s, cruise disabled, 10..140 km/h; operating-regime proxy only",
+        "frames": 36930,
+        "target_lateral_id_counts": {
+          "0": 36854,
+          "11": 2,
+          "4": 74
+        }
+      },
+      "route": "0000003d--0e812cecba",
+      "segment_count": 62,
+      "target_lateral_id_counts": {
+        "0": 57457,
+        "11": 91036,
+        "4": 74
+      }
+    },
+    "3e": {
+      "native_08a_frames": 187216,
+      "pda_sa_regime_proxy": {
+        "definition": "fresh CarState <=0.2 s, cruise disabled, 10..140 km/h; operating-regime proxy only",
+        "frames": 49137,
+        "target_lateral_id_counts": {
+          "0": 49134,
+          "11": 3
+        }
+      },
+      "route": "0000003e--1a2f20417d",
+      "segment_count": 78,
+      "target_lateral_id_counts": {
+        "0": 61442,
+        "11": 125724,
+        "4": 50
+      }
+    },
+    "3f": {
+      "native_08a_frames": 200559,
+      "pda_sa_regime_proxy": {
+        "definition": "fresh CarState <=0.2 s, cruise disabled, 10..140 km/h; operating-regime proxy only",
+        "frames": 43170,
+        "target_lateral_id_counts": {
+          "0": 43162,
+          "11": 8
+        }
+      },
+      "route": "0000003f--36e72f5fdc",
+      "segment_count": 84,
+      "target_lateral_id_counts": {
+        "0": 71953,
+        "11": 128606
+      }
+    }
+  },
+  "schema": "camry-2026-pda-sdg-attribution-v1",
+  "supplemental_archive_scan": {
+    "aggregate_target_lateral_id_counts": {
+      "0": 139174,
+      "11": 30884,
+      "18": 16876
+    },
+    "boundary": "Supplemental one-time scan of pre-Sep-1 full rlogs retained on the maintainer comma; not required for deterministic regeneration of this artifact.",
+    "id19_frames": 0,
+    "native_08a_frames": 186934,
+    "routes": {
+      "00000027--885099a1d4": {
+        "0": 32023,
+        "11": 27348,
+        "18": 15468
+      },
+      "00000029--bae47e927f": {
+        "0": 27846,
+        "11": 76,
+        "18": 206
+      },
+      "0000002a--c5647fd694": {
+        "0": 21773,
+        "18": 964
+      },
+      "0000002c--c784367b7e": {
+        "0": 57532,
+        "11": 3460,
+        "18": 238
+      }
+    }
+  }
+}

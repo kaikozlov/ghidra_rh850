@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 440 · Corrections: 164 · Open questions: 54 · Docs: 124 · Suites: 233
+Findings: 441 · Corrections: 164 · Open questions: 54 · Docs: 124 · Suites: 234
 
 ## Reading this index
 
@@ -459,6 +459,7 @@ Findings: 440 · Corrections: 164 · Open questions: 54 · Docs: 124 · Suites: 
 | <a id="finding-var-128"></a>**VAR-128** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | — | — |
 | <a id="finding-var-129"></a>**VAR-129** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [CORRECTIONS](../status/CORRECTIONS.md), [camry-2026-bench-validation-spec](../variants/camry-2026-bench-validation-spec.md), [camry-2026-tss3-integration-audit](../variants/camry-2026-tss3-integration-audit.md), [camry_f33_b6_observer_runbook](../../exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md) | — | — |
 | <a id="finding-var-130"></a>**VAR-130** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | `tests/verify_camry_20260906_hands_off_warning.py` | — |
+| <a id="finding-var-131"></a>**VAR-131** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | `tests/verify_camry_2026_pda_sdg.py` | — |
 
 ## Open-questions index
 
@@ -860,6 +861,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/camry_2026_lta_state_reconciliation.json` | camry_2026_lta_state_reconciliation, camry_2026_longitudinal_request_plane | — |
 | `data/generated/camry_2026_motor_feedback_correlation.json` | camry_2026, camry_2026_stock_steering_witness | — |
 | `data/generated/camry_2026_nrtd_p5.json` | toyota_diag_registry, gts_query_cli, camry_2026 | — |
+| `data/generated/camry_2026_pda_sdg_attribution.json` | camry_2026_pda_sdg | — |
 | `data/generated/camry_2026_ready_gear.json` | camry_2026 | — |
 | `data/generated/camry_2026_relay_correct_capture.json` | camry_2026, camry_2026_bus1_field_leadlag, camry_2026_bus4_field_leadlag, camry_2026_longitudinal_request_plane, camry_2026_lateral_flow_trace, camry_8965f3307000_external_lateral_ingress, camry_2026_stock_steering_witness | — |
 | `data/generated/camry_2026_stock_steering_witness.json` | camry_2026_stock_steering_witness | — |
