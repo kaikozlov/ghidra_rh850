@@ -111,8 +111,8 @@
     },
     "source": {
       "path": "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json",
-      "sha256": "c3a8b9a0a0152b4d37486fc5de0a7a2ba53eb4ef8fc62c2614242233a9c19060",
-      "size": 7689111
+      "sha256": "db34c8dc4a8b2153e6c0e7af7533267c2e164fcbd508b43da4cc5856bd674f05",
+      "size": 7689674
     },
     "target_lateral_id": {
       "alternate_did": "0x3CEE",

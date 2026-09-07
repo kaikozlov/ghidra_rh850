@@ -66,27 +66,27 @@
         "record_size": 72
       },
       "72": {
-        "class": "unknown",
+        "class": "CDbRoutineStatusTable",
         "record_count": 4,
         "record_size": 12
       },
       "73": {
-        "class": "unknown",
+        "class": "CDbPatDispVariableTable",
         "record_count": 46,
         "record_size": 20
       },
       "77": {
-        "class": "unknown",
+        "class": "CDbSimpleUtilityTable",
         "record_count": 1,
         "record_size": 52
       },
       "78": {
-        "class": "unknown",
+        "class": "CDbPatDescriptionVariableTable",
         "record_count": 8,
         "record_size": 20
       },
       "79": {
-        "class": "unknown",
+        "class": "CDbPatDispVariableTable",
         "record_count": 2,
         "record_size": 20
       },

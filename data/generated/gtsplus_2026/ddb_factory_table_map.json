@@ -1,0 +1,2441 @@
+{
+  "schema_version": 1,
+  "source": "GTS+ 2026.03.002.02",
+  "artifact": {
+    "relative_path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/KgpDataCtrl.dll",
+    "size": 1824784,
+    "sha256": "19e709e12e53f485a84ccfbf6b226922b88502206c34b767db543c7f3df101f8"
+  },
+  "method": "x86 MakeTable switch target -> direct E8 constructor call -> exact PE constructor export; independent of parse_ddb constants",
+  "make_table": {
+    "va": "0x10081C10",
+    "routing": {
+      "1": "0x10081C80",
+      "2": "0x100845D0",
+      "4": "0x10089080"
+    },
+    "body_sha256": "8060f1d3e6eaa91be5e63a83edfd5ed3877e10855ba6b6cb54b606021bf5e41d"
+  },
+  "factories": [
+    {
+      "format_version": 1,
+      "factory_va": "0x10081C80",
+      "factory_body_size": 10200,
+      "factory_body_sha256": "2086acc6a749114d2f452c003e64184d804bb79beff9b8f166c92d00e561a26e",
+      "jump_table_va": "0x10084458",
+      "jump_table_sha256": "4eda1a0e0b484fae449b6fcd435044125fb5fdba24f7208bcafb7a101be0ec4b",
+      "maximum_type": 93,
+      "constructed_count": 93,
+      "generic_base_count": 1,
+      "records": [
+        {
+          "table_type": 0,
+          "case_va": "0x10081CD3",
+          "constructor_call_va": "0x10081CFE",
+          "constructor_va": "0x10065180",
+          "constructor_export": "??0CDbVariableTable@@QAE@EE@Z",
+          "class_name": "CDbVariableTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 1,
+          "case_va": "0x100843D3",
+          "constructor_call_va": "0x10084410",
+          "constructor_va": "0x10063EC0",
+          "constructor_export": "??0CDbTableBase@@QAE@EE@Z",
+          "class_name": "CDbTableBase",
+          "status": "generic-base/default"
+        },
+        {
+          "table_type": 2,
+          "case_va": "0x10081D36",
+          "constructor_call_va": "0x10081D61",
+          "constructor_va": "0x100C2B80",
+          "constructor_export": "??0CDbProtJudgeTable@@QAE@EE@Z",
+          "class_name": "CDbProtJudgeTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 3,
+          "case_va": "0x10081D99",
+          "constructor_call_va": "0x10081DC4",
+          "constructor_va": "0x100B0560",
+          "constructor_export": "??0CDbExceptionFindIdTable@@QAE@EE@Z",
+          "class_name": "CDbExceptionFindIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 4,
+          "case_va": "0x10081DFC",
+          "constructor_call_va": "0x10081E27",
+          "constructor_va": "0x100B17B0",
+          "constructor_export": "??0CDbExceptionProcessIdTable@@QAE@EE@Z",
+          "class_name": "CDbExceptionProcessIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 5,
+          "case_va": "0x10081E5F",
+          "constructor_call_va": "0x10081E8A",
+          "constructor_va": "0x100AFCA0",
+          "constructor_export": "??0CDbEcuGroupTable@@QAE@EE@Z",
+          "class_name": "CDbEcuGroupTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 6,
+          "case_va": "0x10081EC2",
+          "constructor_call_va": "0x10081EED",
+          "constructor_va": "0x100818D0",
+          "constructor_export": "??0CDbConnCheckSeqTable@@QAE@EE@Z",
+          "class_name": "CDbConnCheckSeqTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 7,
+          "case_va": "0x10081F25",
+          "constructor_call_va": "0x10081F50",
+          "constructor_va": "0x100DE810",
+          "constructor_export": "??0CDbWorkSupDivTable@@QAE@EE@Z",
+          "class_name": "CDbWorkSupDivTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 8,
+          "case_va": "0x10081F88",
+          "constructor_call_va": "0x10081FB3",
+          "constructor_va": "0x100DDF80",
+          "constructor_export": "??0CDbWorkListTable@@QAE@EE@Z",
+          "class_name": "CDbWorkListTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 9,
+          "case_va": "0x10081FEB",
+          "constructor_call_va": "0x10082016",
+          "constructor_va": "0x100DEF00",
+          "constructor_export": "??0CDbWorkSupNameTable@@QAE@EE@Z",
+          "class_name": "CDbWorkSupNameTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 10,
+          "case_va": "0x1008204E",
+          "constructor_call_va": "0x10082079",
+          "constructor_va": "0x100B5870",
+          "constructor_export": "??0CDbIdRegisterTable@@QAE@EE@Z",
+          "class_name": "CDbIdRegisterTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 11,
+          "case_va": "0x100820B1",
+          "constructor_call_va": "0x100820DC",
+          "constructor_va": "0x100C3910",
+          "constructor_export": "??0CDbRegMaskTable@@QAE@EE@Z",
+          "class_name": "CDbRegMaskTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 12,
+          "case_va": "0x10082114",
+          "constructor_call_va": "0x1008213F",
+          "constructor_va": "0x100B5010",
+          "constructor_export": "??0CDbIdRegFuncTable@@QAE@EE@Z",
+          "class_name": "CDbIdRegFuncTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 13,
+          "case_va": "0x10082177",
+          "constructor_call_va": "0x100821A2",
+          "constructor_va": "0x100C2550",
+          "constructor_export": "??0CDbProtInfoTable@@QAE@EE@Z",
+          "class_name": "CDbProtInfoTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 14,
+          "case_va": "0x100821DA",
+          "constructor_call_va": "0x10082205",
+          "constructor_va": "0x1007CEB0",
+          "constructor_export": "??0CDbCommInfoCanTable@@QAE@EE@Z",
+          "class_name": "CDbCommInfoCanTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 15,
+          "case_va": "0x1008223D",
+          "constructor_call_va": "0x10082268",
+          "constructor_va": "0x1007D910",
+          "constructor_export": "??0CDbCommInfoIsoTable@@QAE@EE@Z",
+          "class_name": "CDbCommInfoIsoTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 16,
+          "case_va": "0x100822A0",
+          "constructor_call_va": "0x100822CB",
+          "constructor_va": "0x100AD5F0",
+          "constructor_export": "??0CDbEcuCategoryTable@@QAE@EE@Z",
+          "class_name": "CDbEcuCategoryTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 17,
+          "case_va": "0x10082303",
+          "constructor_call_va": "0x1008232E",
+          "constructor_va": "0x1007C970",
+          "constructor_export": "??0CDbCommFrameTable@@QAE@EE@Z",
+          "class_name": "CDbCommFrameTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 18,
+          "case_va": "0x10082366",
+          "constructor_call_va": "0x10082391",
+          "constructor_va": "0x100B3A30",
+          "constructor_export": "??0CDbFuncCommFrameTable@@QAE@EE@Z",
+          "class_name": "CDbFuncCommFrameTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 19,
+          "case_va": "0x100823C9",
+          "constructor_call_va": "0x100823F4",
+          "constructor_va": "0x100AB0F0",
+          "constructor_export": "??0CDbDllTable@@QAE@EE@Z",
+          "class_name": "CDbDllTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 20,
+          "case_va": "0x1008242C",
+          "constructor_call_va": "0x10082457",
+          "constructor_va": "0x10098D50",
+          "constructor_export": "??0CDbCustSignListTable@@QAE@EE@Z",
+          "class_name": "CDbCustSignListTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 21,
+          "case_va": "0x1008248F",
+          "constructor_call_va": "0x100824BA",
+          "constructor_va": "0x100969F0",
+          "constructor_export": "??0CDbCustItemTable@@QAE@EE@Z",
+          "class_name": "CDbCustItemTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 22,
+          "case_va": "0x100824F2",
+          "constructor_call_va": "0x1008251D",
+          "constructor_va": "0x100C0E80",
+          "constructor_export": "??0CDbPossibleToSetTable@@QAE@EE@Z",
+          "class_name": "CDbPossibleToSetTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 23,
+          "case_va": "0x10082555",
+          "constructor_call_va": "0x10082580",
+          "constructor_va": "0x100CD300",
+          "constructor_export": "??0CDbSubSystemTable@@QAE@EE@Z",
+          "class_name": "CDbSubSystemTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 24,
+          "case_va": "0x100825B8",
+          "constructor_call_va": "0x100825E3",
+          "constructor_va": "0x100D2DD0",
+          "constructor_export": "??0CDbUtilityListTable@@QAE@EE@Z",
+          "class_name": "CDbUtilityListTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 25,
+          "case_va": "0x1008261B",
+          "constructor_call_va": "0x10082646",
+          "constructor_va": "0x100D0010",
+          "constructor_export": "??0CDbTimerTable@@QAE@EE@Z",
+          "class_name": "CDbTimerTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 26,
+          "case_va": "0x1008267E",
+          "constructor_call_va": "0x100826A9",
+          "constructor_va": "0x100AF340",
+          "constructor_export": "??0CDbEcuFuncInfoTable@@QAE@EE@Z",
+          "class_name": "CDbEcuFuncInfoTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 27,
+          "case_va": "0x100826E1",
+          "constructor_call_va": "0x1008270C",
+          "constructor_va": "0x100AE810",
+          "constructor_export": "??0CDbEcuFuncDetailsTable@@QAE@EE@Z",
+          "class_name": "CDbEcuFuncDetailsTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 28,
+          "case_va": "0x10082744",
+          "constructor_call_va": "0x1008276F",
+          "constructor_va": "0x100ACC20",
+          "constructor_export": "??0CDbEcuAddInfoTable@@QAE@EE@Z",
+          "class_name": "CDbEcuAddInfoTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 29,
+          "case_va": "0x100827A7",
+          "constructor_call_va": "0x100827DE",
+          "constructor_va": "0x10081080",
+          "constructor_export": "??0CDbComSetTable@@QAE@EE@Z",
+          "class_name": "CDbComSetTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 30,
+          "case_va": "0x10082816",
+          "constructor_call_va": "0x1008284D",
+          "constructor_va": "0x100CB050",
+          "constructor_export": "??0CDbSleepNgTable@@QAE@EE@Z",
+          "class_name": "CDbSleepNgTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 31,
+          "case_va": "0x10082885",
+          "constructor_call_va": "0x100828BC",
+          "constructor_va": "0x100818D0",
+          "constructor_export": "??0CDbConnCheckSeqTable@@QAE@EE@Z",
+          "class_name": "CDbConnCheckSeqTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 32,
+          "case_va": "0x100828F4",
+          "constructor_call_va": "0x1008292B",
+          "constructor_va": "0x100BB8F0",
+          "constructor_export": "??0CDbNSFTable@@QAE@EE@Z",
+          "class_name": "CDbNSFTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 33,
+          "case_va": "0x10082963",
+          "constructor_call_va": "0x1008299A",
+          "constructor_va": "0x100818D0",
+          "constructor_export": "??0CDbConnCheckSeqTable@@QAE@EE@Z",
+          "class_name": "CDbConnCheckSeqTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 34,
+          "case_va": "0x100829D2",
+          "constructor_call_va": "0x10082A09",
+          "constructor_va": "0x10072D40",
+          "constructor_export": "??0CDbBodyTypeRetrieveTable@@QAE@EE@Z",
+          "class_name": "CDbBodyTypeRetrieveTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 35,
+          "case_va": "0x10082A41",
+          "constructor_call_va": "0x10082A78",
+          "constructor_va": "0x100992A0",
+          "constructor_export": "??0CDbCustSupPidTable@@QAE@EE@Z",
+          "class_name": "CDbCustSupPidTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 36,
+          "case_va": "0x10082AB0",
+          "constructor_call_va": "0x10082AE7",
+          "constructor_va": "0x10097D30",
+          "constructor_export": "??0CDbCustPidTable@@QAE@EE@Z",
+          "class_name": "CDbCustPidTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 37,
+          "case_va": "0x10082B1F",
+          "constructor_call_va": "0x10082B56",
+          "constructor_va": "0x100BA800",
+          "constructor_export": "??0CDbMultiMonListTable@@QAE@EE@Z",
+          "class_name": "CDbMultiMonListTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 38,
+          "case_va": "0x10082B8E",
+          "constructor_call_va": "0x10082BC5",
+          "constructor_va": "0x100C8510",
+          "constructor_export": "??0CDbShortCutListTable@@QAE@EE@Z",
+          "class_name": "CDbShortCutListTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 39,
+          "case_va": "0x10082BFD",
+          "constructor_call_va": "0x10082C34",
+          "constructor_va": "0x100C8AC0",
+          "constructor_export": "??0CDbShortCutRetrievalTable@@QAE@EE@Z",
+          "class_name": "CDbShortCutRetrievalTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 40,
+          "case_va": "0x10082C6C",
+          "constructor_call_va": "0x10082CA3",
+          "constructor_va": "0x100C3030",
+          "constructor_export": "??0CDbRegGroupCheckSeqTable@@QAE@EE@Z",
+          "class_name": "CDbRegGroupCheckSeqTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 41,
+          "case_va": "0x10082CDB",
+          "constructor_call_va": "0x10082D12",
+          "constructor_va": "0x100D4770",
+          "constructor_export": "??0CDbVehicleDecisionTable@@QAE@EE@Z",
+          "class_name": "CDbVehicleDecisionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 42,
+          "case_va": "0x10082D4A",
+          "constructor_call_va": "0x10082D81",
+          "constructor_va": "0x100BCA30",
+          "constructor_export": "??0CDbOptionTable@@QAE@EE@Z",
+          "class_name": "CDbOptionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 43,
+          "case_va": "0x10082DB9",
+          "constructor_call_va": "0x10082DF0",
+          "constructor_va": "0x100D7E40",
+          "constructor_export": "??0CDbVehicleNameTable@@QAE@EE@Z",
+          "class_name": "CDbVehicleNameTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 44,
+          "case_va": "0x10082E28",
+          "constructor_call_va": "0x10082E5F",
+          "constructor_va": "0x100B67C0",
+          "constructor_export": "??0CDbInstallingEcuListTable@@QAE@EE@Z",
+          "class_name": "CDbInstallingEcuListTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 45,
+          "case_va": "0x10082E97",
+          "constructor_call_va": "0x10082ECE",
+          "constructor_va": "0x1007A0F0",
+          "constructor_export": "??0CDbCarConnFindIdTable@@QAE@EE@Z",
+          "class_name": "CDbCarConnFindIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 46,
+          "case_va": "0x10082F06",
+          "constructor_call_va": "0x10082F3D",
+          "constructor_va": "0x100D4160",
+          "constructor_export": "??0CDbVehicleCollectItemTable@@QAE@EE@Z",
+          "class_name": "CDbVehicleCollectItemTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 47,
+          "case_va": "0x10082F75",
+          "constructor_call_va": "0x10082FAC",
+          "constructor_va": "0x1007AEA0",
+          "constructor_export": "??0CDbCategoryMasterTable@@QAE@EE@Z",
+          "class_name": "CDbCategoryMasterTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 48,
+          "case_va": "0x10082FE4",
+          "constructor_call_va": "0x1008301B",
+          "constructor_va": "0x100809E0",
+          "constructor_export": "??0CDbCommSupportBitTable@@QAE@EE@Z",
+          "class_name": "CDbCommSupportBitTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 49,
+          "case_va": "0x10083053",
+          "constructor_call_va": "0x1008308A",
+          "constructor_va": "0x10079410",
+          "constructor_export": "??0CDbCARBInitMethodTable@@QAE@EE@Z",
+          "class_name": "CDbCARBInitMethodTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 50,
+          "case_va": "0x100830C2",
+          "constructor_call_va": "0x100830F9",
+          "constructor_va": "0x10078490",
+          "constructor_export": "??0CDbCARBAddressSeekTable@@QAE@EE@Z",
+          "class_name": "CDbCARBAddressSeekTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 51,
+          "case_va": "0x10083131",
+          "constructor_call_va": "0x10083168",
+          "constructor_va": "0x1007DE50",
+          "constructor_export": "??0CDbCommInfoJ1850Table@@QAE@EE@Z",
+          "class_name": "CDbCommInfoJ1850Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 52,
+          "case_va": "0x100831A0",
+          "constructor_call_va": "0x100831D7",
+          "constructor_va": "0x100CCB20",
+          "constructor_export": "??0CDbSubBusConfirmationTable@@QAE@EE@Z",
+          "class_name": "CDbSubBusConfirmationTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 53,
+          "case_va": "0x1008320F",
+          "constructor_call_va": "0x10083246",
+          "constructor_va": "0x100D2470",
+          "constructor_export": "??0CDbUtilityFunctionIdCheckTable@@QAE@EE@Z",
+          "class_name": "CDbUtilityFunctionIdCheckTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 54,
+          "case_va": "0x1008327E",
+          "constructor_call_va": "0x100832B5",
+          "constructor_va": "0x1007F8E0",
+          "constructor_export": "??0CDbCommPidDataTable@@QAE@EE@Z",
+          "class_name": "CDbCommPidDataTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 55,
+          "case_va": "0x100832ED",
+          "constructor_call_va": "0x10083324",
+          "constructor_va": "0x100755F0",
+          "constructor_export": "??0CDbCanBusListTable@@QAE@EE@Z",
+          "class_name": "CDbCanBusListTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 56,
+          "case_va": "0x1008335C",
+          "constructor_call_va": "0x10083393",
+          "constructor_va": "0x100ADE00",
+          "constructor_export": "??0CDbEcuDescriptionTable@@QAE@EE@Z",
+          "class_name": "CDbEcuDescriptionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 57,
+          "case_va": "0x100833CB",
+          "constructor_call_va": "0x10083402",
+          "constructor_va": "0x100A5980",
+          "constructor_export": "??0CDbDefaultExceptInstallEcuTable@@QAE@EE@Z",
+          "class_name": "CDbDefaultExceptInstallEcuTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 58,
+          "case_va": "0x1008343A",
+          "constructor_call_va": "0x10083471",
+          "constructor_va": "0x100A53E0",
+          "constructor_export": "??0CDbDefaultExceptIdRetrievalTable@@QAE@EE@Z",
+          "class_name": "CDbDefaultExceptIdRetrievalTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 59,
+          "case_va": "0x100834A9",
+          "constructor_call_va": "0x100834E0",
+          "constructor_va": "0x100D8F90",
+          "constructor_export": "??0CDbVinVehicleDecisionTable@@QAE@EE@Z",
+          "class_name": "CDbVinVehicleDecisionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 60,
+          "case_va": "0x10083518",
+          "constructor_call_va": "0x1008354F",
+          "constructor_va": "0x10097330",
+          "constructor_export": "??0CDbCustomListMTable@@QAE@EE@Z",
+          "class_name": "CDbCustomListMTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 61,
+          "case_va": "0x10083587",
+          "constructor_call_va": "0x100835BE",
+          "constructor_va": "0x100AAA80",
+          "constructor_export": "??0CDbDisplayMessageTable@@QAE@EE@Z",
+          "class_name": "CDbDisplayMessageTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 62,
+          "case_va": "0x100835F6",
+          "constructor_call_va": "0x1008362D",
+          "constructor_va": "0x1007B2D0",
+          "constructor_export": "??0CDbCommDidDataTable@@QAE@EE@Z",
+          "class_name": "CDbCommDidDataTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 63,
+          "case_va": "0x10083665",
+          "constructor_call_va": "0x1008369C",
+          "constructor_va": "0x100C3E40",
+          "constructor_export": "??0CDbRemoteProtInfoTable@@QAE@EE@Z",
+          "class_name": "CDbRemoteProtInfoTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 64,
+          "case_va": "0x100836D4",
+          "constructor_call_va": "0x1008370B",
+          "constructor_va": "0x100D8200",
+          "constructor_export": "??0CDbVehicleNSFTable@@QAE@EE@Z",
+          "class_name": "CDbVehicleNSFTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 65,
+          "case_va": "0x10083743",
+          "constructor_call_va": "0x1008377A",
+          "constructor_va": "0x100BB3B0",
+          "constructor_export": "??0CDbNSFDkTable@@QAE@EE@Z",
+          "class_name": "CDbNSFDkTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 66,
+          "case_va": "0x100837B2",
+          "constructor_call_va": "0x100837E9",
+          "constructor_va": "0x100AC380",
+          "constructor_export": "??0CDbDummyEcuListTable@@QAE@EE@Z",
+          "class_name": "CDbDummyEcuListTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 67,
+          "case_va": "0x10083821",
+          "constructor_call_va": "0x10083858",
+          "constructor_va": "0x100D3AD0",
+          "constructor_export": "??0CDbVehicleBrandTable@@QAE@EE@Z",
+          "class_name": "CDbVehicleBrandTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 68,
+          "case_va": "0x10083890",
+          "constructor_call_va": "0x100838C7",
+          "constructor_va": "0x100D19B0",
+          "constructor_export": "??0CDbUnitNameConvertTable@@QAE@EE@Z",
+          "class_name": "CDbUnitNameConvertTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 69,
+          "case_va": "0x100838FF",
+          "constructor_call_va": "0x10083936",
+          "constructor_va": "0x100B6040",
+          "constructor_export": "??0CDbInstallingEcuGroupTable@@QAE@EE@Z",
+          "class_name": "CDbInstallingEcuGroupTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 70,
+          "case_va": "0x1008396E",
+          "constructor_call_va": "0x100839A5",
+          "constructor_va": "0x10077970",
+          "constructor_export": "??0CDbCanMaskJudgeTable@@QAE@EE@Z",
+          "class_name": "CDbCanMaskJudgeTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 71,
+          "case_va": "0x100839DD",
+          "constructor_call_va": "0x10083A14",
+          "constructor_va": "0x10077D90",
+          "constructor_export": "??0CDbCanMaskReleaseJudgeTable@@QAE@EE@Z",
+          "class_name": "CDbCanMaskReleaseJudgeTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 72,
+          "case_va": "0x10083A4C",
+          "constructor_call_va": "0x10083A83",
+          "constructor_va": "0x10079A80",
+          "constructor_export": "??0CDbCARBPhyAddrTable@@QAE@EE@Z",
+          "class_name": "CDbCARBPhyAddrTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 73,
+          "case_va": "0x10083ABB",
+          "constructor_call_va": "0x10083AF2",
+          "constructor_va": "0x10078C40",
+          "constructor_export": "??0CDbCARBInfoTable@@QAE@EE@Z",
+          "class_name": "CDbCARBInfoTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 74,
+          "case_va": "0x10083B2A",
+          "constructor_call_va": "0x10083B61",
+          "constructor_va": "0x100B4980",
+          "constructor_export": "??0CDbIdCodeFuncListTable@@QAE@EE@Z",
+          "class_name": "CDbIdCodeFuncListTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 75,
+          "case_va": "0x10083B99",
+          "constructor_call_va": "0x10083BD0",
+          "constructor_va": "0x100732C0",
+          "constructor_export": "??0CDbCanBusCarIdTable@@QAE@EE@Z",
+          "class_name": "CDbCanBusCarIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 76,
+          "case_va": "0x10083C08",
+          "constructor_call_va": "0x10083C3F",
+          "constructor_va": "0x100CC640",
+          "constructor_export": "??0CDbSubBusConfirmationCGWTable@@QAE@EE@Z",
+          "class_name": "CDbSubBusConfirmationCGWTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 77,
+          "case_va": "0x10083C77",
+          "constructor_call_va": "0x10083CAE",
+          "constructor_va": "0x10076E90",
+          "constructor_export": "??0CDbCanBusOptionTable@@QAE@EE@Z",
+          "class_name": "CDbCanBusOptionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 78,
+          "case_va": "0x10083CE6",
+          "constructor_call_va": "0x10083D1D",
+          "constructor_va": "0x10074800",
+          "constructor_export": "??0CDbCanBusComponentTable@@QAE@EE@Z",
+          "class_name": "CDbCanBusComponentTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 79,
+          "case_va": "0x10083D55",
+          "constructor_call_va": "0x10083D8C",
+          "constructor_va": "0x10075E40",
+          "constructor_export": "??0CDbCanBusNameTable@@QAE@EE@Z",
+          "class_name": "CDbCanBusNameTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 80,
+          "case_va": "0x10083DC4",
+          "constructor_call_va": "0x10083DFB",
+          "constructor_va": "0x100D0670",
+          "constructor_export": "??0CDbTirePressPidIdTable@@QAE@EE@Z",
+          "class_name": "CDbTirePressPidIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 81,
+          "case_va": "0x10083E33",
+          "constructor_call_va": "0x10083E6A",
+          "constructor_va": "0x100C1B00",
+          "constructor_export": "??0CDbPossibleToSetVariableTable@@QAE@EE@Z",
+          "class_name": "CDbPossibleToSetVariableTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 82,
+          "case_va": "0x10083EA2",
+          "constructor_call_va": "0x10083ED9",
+          "constructor_va": "0x100D8B00",
+          "constructor_export": "??0CDbVehicleSetTable@@QAE@EE@Z",
+          "class_name": "CDbVehicleSetTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 83,
+          "case_va": "0x10083F11",
+          "constructor_call_va": "0x10083F48",
+          "constructor_va": "0x100CCB20",
+          "constructor_export": "??0CDbSubBusConfirmationTable@@QAE@EE@Z",
+          "class_name": "CDbSubBusConfirmationTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 84,
+          "case_va": "0x10083F80",
+          "constructor_call_va": "0x10083FB7",
+          "constructor_va": "0x100CC640",
+          "constructor_export": "??0CDbSubBusConfirmationCGWTable@@QAE@EE@Z",
+          "class_name": "CDbSubBusConfirmationCGWTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 85,
+          "case_va": "0x10083FEF",
+          "constructor_call_va": "0x10084026",
+          "constructor_va": "0x1007D3F0",
+          "constructor_export": "??0CDbCommInfoEthernetTable@@QAE@EE@Z",
+          "class_name": "CDbCommInfoEthernetTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 86,
+          "case_va": "0x1008405E",
+          "constructor_call_va": "0x10084095",
+          "constructor_va": "0x1007E370",
+          "constructor_export": "??0CDbCommInfoSwEcuTable@@QAE@EE@Z",
+          "class_name": "CDbCommInfoSwEcuTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 87,
+          "case_va": "0x100840CD",
+          "constructor_call_va": "0x10084104",
+          "constructor_va": "0x10098670",
+          "constructor_export": "??0CDbCustSignListMySetTable@@QAE@EE@Z",
+          "class_name": "CDbCustSignListMySetTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 88,
+          "case_va": "0x1008413C",
+          "constructor_call_va": "0x10084173",
+          "constructor_va": "0x100802D0",
+          "constructor_export": "??0CDbCommRidDataTable@@QAE@EE@Z",
+          "class_name": "CDbCommRidDataTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 89,
+          "case_va": "0x100841AB",
+          "constructor_call_va": "0x100841E2",
+          "constructor_va": "0x10097860",
+          "constructor_export": "??0CDbCustomListPidIdTable@@QAE@EE@Z",
+          "class_name": "CDbCustomListPidIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 90,
+          "case_va": "0x1008421A",
+          "constructor_call_va": "0x10084251",
+          "constructor_va": "0x100B0EC0",
+          "constructor_export": "??0CDbExceptionProcessIdGroupTable@@QAE@EE@Z",
+          "class_name": "CDbExceptionProcessIdGroupTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 91,
+          "case_va": "0x10084289",
+          "constructor_call_va": "0x100842C0",
+          "constructor_va": "0x100D8720",
+          "constructor_export": "??0CDbVehicleOemTable@@QAE@EE@Z",
+          "class_name": "CDbVehicleOemTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 92,
+          "case_va": "0x100842F8",
+          "constructor_call_va": "0x1008432F",
+          "constructor_va": "0x10073C10",
+          "constructor_export": "??0CDbCanBusComponent19PFv3Table@@QAE@EE@Z",
+          "class_name": "CDbCanBusComponent19PFv3Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 93,
+          "case_va": "0x10084367",
+          "constructor_call_va": "0x1008439E",
+          "constructor_va": "0x100CBE80",
+          "constructor_export": "??0CDbSubBusConfirmationCGW19PFv3Table@@QAE@EE@Z",
+          "class_name": "CDbSubBusConfirmationCGW19PFv3Table",
+          "status": "constructed"
+        }
+      ]
+    },
+    {
+      "format_version": 2,
+      "factory_va": "0x100845D0",
+      "factory_body_size": 18428,
+      "factory_body_sha256": "1d917c40c98822aef5ac49b094e5c5d98817c5f332ea7b95f94d97b27c7a76e1",
+      "jump_table_va": "0x10088DCC",
+      "jump_table_sha256": "b309a33eece1c80df4fcf88005661c93c646651fc020c788c63088df5ed3564f",
+      "maximum_type": 171,
+      "constructed_count": 166,
+      "generic_base_count": 6,
+      "records": [
+        {
+          "table_type": 0,
+          "case_va": "0x10084626",
+          "constructor_call_va": "0x10084651",
+          "constructor_va": "0x100C9AC0",
+          "constructor_export": "??0CDbSignalGroupTable@@QAE@EE@Z",
+          "class_name": "CDbSignalGroupTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 1,
+          "case_va": "0x10084689",
+          "constructor_call_va": "0x100846B4",
+          "constructor_va": "0x100C92C0",
+          "constructor_export": "??0CDbSignalCheckTable@@QAE@EE@Z",
+          "class_name": "CDbSignalCheckTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 2,
+          "case_va": "0x100846EC",
+          "constructor_call_va": "0x10084717",
+          "constructor_va": "0x100CE950",
+          "constructor_export": "??0CDbSupFreezeTable@@QAE@EE@Z",
+          "class_name": "CDbSupFreezeTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 3,
+          "case_va": "0x1008474F",
+          "constructor_call_va": "0x1008477A",
+          "constructor_va": "0x100CFB00",
+          "constructor_export": "??0CDbSupPidTable@@QAE@EE@Z",
+          "class_name": "CDbSupPidTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 4,
+          "case_va": "0x100847B2",
+          "constructor_call_va": "0x100847DD",
+          "constructor_va": "0x100CE440",
+          "constructor_export": "??0CDbSupDidTable@@QAE@EE@Z",
+          "class_name": "CDbSupDidTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 5,
+          "case_va": "0x10084815",
+          "constructor_call_va": "0x10084840",
+          "constructor_va": "0x100A89F0",
+          "constructor_export": "??0CDbDiagCodeTable@@QAE@EE@Z",
+          "class_name": "CDbDiagCodeTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 6,
+          "case_va": "0x10084878",
+          "constructor_call_va": "0x100848A3",
+          "constructor_va": "0x100C0690",
+          "constructor_export": "??0CDbPidTable@@QAE@EE@Z",
+          "class_name": "CDbPidTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 7,
+          "case_va": "0x100848DB",
+          "constructor_call_va": "0x10084906",
+          "constructor_va": "0x100AA090",
+          "constructor_export": "??0CDbDidTable@@QAE@EE@Z",
+          "class_name": "CDbDidTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 8,
+          "case_va": "0x1008493E",
+          "constructor_call_va": "0x10084969",
+          "constructor_va": "0x100C0190",
+          "constructor_export": "??0CDbPidBitTable@@QAE@EE@Z",
+          "class_name": "CDbPidBitTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 9,
+          "case_va": "0x100849A1",
+          "constructor_call_va": "0x100849CC",
+          "constructor_va": "0x100A9B90",
+          "constructor_export": "??0CDbDidBitTable@@QAE@EE@Z",
+          "class_name": "CDbDidBitTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 10,
+          "case_va": "0x10084A04",
+          "constructor_call_va": "0x10084A2F",
+          "constructor_va": "0x100B31C0",
+          "constructor_export": "??0CDbFreezeTable@@QAE@EE@Z",
+          "class_name": "CDbFreezeTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 11,
+          "case_va": "0x10084A67",
+          "constructor_call_va": "0x10084A92",
+          "constructor_va": "0x1006DFF0",
+          "constructor_export": "??0CDbActTestTable@@QAE@EE@Z",
+          "class_name": "CDbActTestTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 12,
+          "case_va": "0x10084ACA",
+          "constructor_call_va": "0x10084AF5",
+          "constructor_va": "0x1006D400",
+          "constructor_export": "??0CDbActTestPatternTable@@QAE@EE@Z",
+          "class_name": "CDbActTestPatternTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 13,
+          "case_va": "0x10084B2D",
+          "constructor_call_va": "0x10084B58",
+          "constructor_va": "0x100BF430",
+          "constructor_export": "??0CDbPhyDataTable@@QAE@EE@Z",
+          "class_name": "CDbPhyDataTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 14,
+          "case_va": "0x10084B90",
+          "constructor_call_va": "0x10084BBB",
+          "constructor_va": "0x100BDF60",
+          "constructor_export": "??0CDbPatDispTable@@QAE@EE@Z",
+          "class_name": "CDbPatDispTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 15,
+          "case_va": "0x10084BF3",
+          "constructor_call_va": "0x10084C1E",
+          "constructor_va": "0x100D1F50",
+          "constructor_export": "??0CDbUnitTable@@QAE@EE@Z",
+          "class_name": "CDbUnitTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 16,
+          "case_va": "0x10084C56",
+          "constructor_call_va": "0x10084C81",
+          "constructor_va": "0x100D15B0",
+          "constructor_export": "??0CDbTriggerListTable@@QAE@EE@Z",
+          "class_name": "CDbTriggerListTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 17,
+          "case_va": "0x10084CB9",
+          "constructor_call_va": "0x10084CE4",
+          "constructor_va": "0x100A91E0",
+          "constructor_export": "??0CDbDiagModeRetriveTable@@QAE@EE@Z",
+          "class_name": "CDbDiagModeRetriveTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 18,
+          "case_va": "0x10084D1C",
+          "constructor_call_va": "0x10084D47",
+          "constructor_va": "0x100CB560",
+          "constructor_export": "??0CDbStandardInfoTable@@QAE@EE@Z",
+          "class_name": "CDbStandardInfoTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 19,
+          "case_va": "0x10084D7F",
+          "constructor_call_va": "0x10084DAA",
+          "constructor_va": "0x100D0DE0",
+          "constructor_export": "??0CDbTriggerAnalyzeRetrievalTable@@QAE@EE@Z",
+          "class_name": "CDbTriggerAnalyzeRetrievalTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 20,
+          "case_va": "0x10084DE2",
+          "constructor_call_va": "0x10084E0D",
+          "constructor_va": "0x100B2780",
+          "constructor_export": "??0CDbFreezePidTable@@QAE@EE@Z",
+          "class_name": "CDbFreezePidTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 21,
+          "case_va": "0x10084E45",
+          "constructor_call_va": "0x10084E70",
+          "constructor_va": "0x100BC0E0",
+          "constructor_export": "??0CDbO2SenserListTable@@QAE@EE@Z",
+          "class_name": "CDbO2SenserListTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 22,
+          "case_va": "0x10084EA8",
+          "constructor_call_va": "0x10084ED3",
+          "constructor_va": "0x10069D10",
+          "constructor_export": "??0CDb05TidTable@@QAE@EE@Z",
+          "class_name": "CDb05TidTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 23,
+          "case_va": "0x10084F0B",
+          "constructor_call_va": "0x10084F36",
+          "constructor_va": "0x10069240",
+          "constructor_export": "??0CDb05TidMonitorTable@@QAE@EE@Z",
+          "class_name": "CDb05TidMonitorTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 24,
+          "case_va": "0x10084F6E",
+          "constructor_call_va": "0x10084F99",
+          "constructor_va": "0x1006BA30",
+          "constructor_export": "??0CDb06TidTable@@QAE@EE@Z",
+          "class_name": "CDb06TidTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 25,
+          "case_va": "0x10084FD1",
+          "constructor_call_va": "0x10084FFC",
+          "constructor_va": "0x1006B030",
+          "constructor_export": "??0CDb06TidMonitorTable@@QAE@EE@Z",
+          "class_name": "CDb06TidMonitorTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 26,
+          "case_va": "0x10085034",
+          "constructor_call_va": "0x1008505F",
+          "constructor_va": "0x100BAD40",
+          "constructor_export": "??0CDbMultiPIDIDTable@@QAE@EE@Z",
+          "class_name": "CDbMultiPIDIDTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 27,
+          "case_va": "0x10085097",
+          "constructor_call_va": "0x100850C2",
+          "constructor_va": "0x100B7020",
+          "constructor_export": "??0CDbMonitorResultCanTable@@QAE@EE@Z",
+          "class_name": "CDbMonitorResultCanTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 28,
+          "case_va": "0x100850FA",
+          "constructor_call_va": "0x10085131",
+          "constructor_va": "0x100B83B0",
+          "constructor_export": "??0CDbMonitorResultIsoTable@@QAE@EE@Z",
+          "class_name": "CDbMonitorResultIsoTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 29,
+          "case_va": "0x10085169",
+          "constructor_call_va": "0x100851A0",
+          "constructor_va": "0x100C7850",
+          "constructor_export": "??0CDbScalingTable@@QAE@EE@Z",
+          "class_name": "CDbScalingTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 30,
+          "case_va": "0x100851D8",
+          "constructor_call_va": "0x1008520F",
+          "constructor_va": "0x100B9000",
+          "constructor_export": "??0CDbMonitorStatusTable@@QAE@EE@Z",
+          "class_name": "CDbMonitorStatusTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 31,
+          "case_va": "0x10085247",
+          "constructor_call_va": "0x1008527E",
+          "constructor_va": "0x100A6240",
+          "constructor_export": "??0CDbDetailLinkTable@@QAE@EE@Z",
+          "class_name": "CDbDetailLinkTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 32,
+          "case_va": "0x100852B6",
+          "constructor_call_va": "0x100852ED",
+          "constructor_va": "0x100AB880",
+          "constructor_export": "??0CDbDTCGroupRetrieveTable@@QAE@EE@Z",
+          "class_name": "CDbDTCGroupRetrieveTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 33,
+          "case_va": "0x10085325",
+          "constructor_call_va": "0x1008535C",
+          "constructor_va": "0x100BA080",
+          "constructor_export": "??0CDbMultiDidIdTable@@QAE@EE@Z",
+          "class_name": "CDbMultiDidIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 34,
+          "case_va": "0x10085394",
+          "constructor_call_va": "0x100853CB",
+          "constructor_va": "0x1006A6B0",
+          "constructor_export": "??0CDb06MidTable@@QAE@EE@Z",
+          "class_name": "CDb06MidTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 35,
+          "case_va": "0x10085403",
+          "constructor_call_va": "0x1008543A",
+          "constructor_va": "0x100DDB90",
+          "constructor_export": "??0CDbWorkFactorSignalListTable@@QAE@EE@Z",
+          "class_name": "CDbWorkFactorSignalListTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 36,
+          "case_va": "0x10085472",
+          "constructor_call_va": "0x100854A9",
+          "constructor_va": "0x100DA930",
+          "constructor_export": "??0CDbWorkFactorItemTable@@QAE@EE@Z",
+          "class_name": "CDbWorkFactorItemTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 37,
+          "case_va": "0x100854E1",
+          "constructor_call_va": "0x10085518",
+          "constructor_va": "0x100DC670",
+          "constructor_export": "??0CDbWorkFactorPatternTable@@QAE@EE@Z",
+          "class_name": "CDbWorkFactorPatternTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 38,
+          "case_va": "0x10085550",
+          "constructor_call_va": "0x10085587",
+          "constructor_va": "0x1007B980",
+          "constructor_export": "??0CDbCommEcuDataTable@@QAE@EE@Z",
+          "class_name": "CDbCommEcuDataTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 39,
+          "case_va": "0x100855BF",
+          "constructor_call_va": "0x100855F6",
+          "constructor_va": "0x1007EF20",
+          "constructor_export": "??0CDbCommLsbPidDataTable@@QAE@EE@Z",
+          "class_name": "CDbCommLsbPidDataTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 40,
+          "case_va": "0x1008562E",
+          "constructor_call_va": "0x10085665",
+          "constructor_va": "0x100CF600",
+          "constructor_export": "??0CDbSupPendingFreezeTable@@QAE@EE@Z",
+          "class_name": "CDbSupPendingFreezeTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 41,
+          "case_va": "0x1008569D",
+          "constructor_call_va": "0x100856D4",
+          "constructor_va": "0x1006EF40",
+          "constructor_export": "??0CDbActTstVariableDriveTable@@QAE@EE@Z",
+          "class_name": "CDbActTstVariableDriveTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 42,
+          "case_va": "0x1008570C",
+          "constructor_call_va": "0x10085743",
+          "constructor_va": "0x10070500",
+          "constructor_export": "??0CDbBehaviorCodeTable@@QAE@EE@Z",
+          "class_name": "CDbBehaviorCodeTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 43,
+          "case_va": "0x1008577B",
+          "constructor_call_va": "0x100857B2",
+          "constructor_va": "0x1006F930",
+          "constructor_export": "??0CDbBdidTable@@QAE@EE@Z",
+          "class_name": "CDbBdidTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 44,
+          "case_va": "0x100857EA",
+          "constructor_call_va": "0x10085821",
+          "constructor_va": "0x100CDF30",
+          "constructor_export": "??0CDbSupBdidTable@@QAE@EE@Z",
+          "class_name": "CDbSupBdidTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 45,
+          "case_va": "0x10085859",
+          "constructor_call_va": "0x10085890",
+          "constructor_va": "0x10071CA0",
+          "constructor_export": "??0CDbBehaviorDataRecordTable@@QAE@EE@Z",
+          "class_name": "CDbBehaviorDataRecordTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 46,
+          "case_va": "0x100858C8",
+          "constructor_call_va": "0x100858FF",
+          "constructor_va": "0x10072690",
+          "constructor_export": "??0CDbBehaviorSignalCheckTable@@QAE@EE@Z",
+          "class_name": "CDbBehaviorSignalCheckTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 47,
+          "case_va": "0x10085937",
+          "constructor_call_va": "0x1008596E",
+          "constructor_va": "0x100A5D20",
+          "constructor_export": "??0CDbDetailCodeTable@@QAE@EE@Z",
+          "class_name": "CDbDetailCodeTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 48,
+          "case_va": "0x100859A6",
+          "constructor_call_va": "0x100859DD",
+          "constructor_va": "0x100B40E0",
+          "constructor_export": "??0CDbHighlightingSignalInfoTable@@QAE@EE@Z",
+          "class_name": "CDbHighlightingSignalInfoTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 49,
+          "case_va": "0x10085A15",
+          "constructor_call_va": "0x10085A4C",
+          "constructor_va": "0x100A7340",
+          "constructor_export": "??0CDbDiagCodeExpandTable@@QAE@EE@Z",
+          "class_name": "CDbDiagCodeExpandTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 50,
+          "case_va": "0x10085A84",
+          "constructor_call_va": "0x10085ABB",
+          "constructor_va": "0x100A4100",
+          "constructor_export": "??0CDbDDRMonitorTable@@QAE@EE@Z",
+          "class_name": "CDbDDRMonitorTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 51,
+          "case_va": "0x10085AF3",
+          "constructor_call_va": "0x10085B2A",
+          "constructor_va": "0x100A4AD0",
+          "constructor_export": "??0CDbDDRTriggerTable@@QAE@EE@Z",
+          "class_name": "CDbDDRTriggerTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 52,
+          "case_va": "0x10085B62",
+          "constructor_call_va": "0x10085B99",
+          "constructor_va": "0x1009ECD0",
+          "constructor_export": "??0CDbDDRAddressTable@@QAE@EE@Z",
+          "class_name": "CDbDDRAddressTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 53,
+          "case_va": "0x10085BD1",
+          "constructor_call_va": "0x10085C08",
+          "constructor_va": "0x100A36D0",
+          "constructor_export": "??0CDbDDRInvalidConditionTable@@QAE@EE@Z",
+          "class_name": "CDbDDRInvalidConditionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 54,
+          "case_va": "0x10085C40",
+          "constructor_call_va": "0x10085C77",
+          "constructor_va": "0x100CED50",
+          "constructor_export": "??0CDbSupOperationFreezeTable@@QAE@EE@Z",
+          "class_name": "CDbSupOperationFreezeTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 55,
+          "case_va": "0x10085CAF",
+          "constructor_call_va": "0x10085CE6",
+          "constructor_va": "0x100BF920",
+          "constructor_export": "??0CDbPidAdditionFrameTable@@QAE@EE@Z",
+          "class_name": "CDbPidAdditionFrameTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 56,
+          "case_va": "0x10085D1E",
+          "constructor_call_va": "0x10085D55",
+          "constructor_va": "0x10070500",
+          "constructor_export": "??0CDbBehaviorCodeTable@@QAE@EE@Z",
+          "class_name": "CDbBehaviorCodeTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 57,
+          "case_va": "0x10085D8D",
+          "constructor_call_va": "0x10085DC4",
+          "constructor_va": "0x1006F930",
+          "constructor_export": "??0CDbBdidTable@@QAE@EE@Z",
+          "class_name": "CDbBdidTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 58,
+          "case_va": "0x10085DFC",
+          "constructor_call_va": "0x10085E33",
+          "constructor_va": "0x100CDF30",
+          "constructor_export": "??0CDbSupBdidTable@@QAE@EE@Z",
+          "class_name": "CDbSupBdidTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 59,
+          "case_va": "0x10085E6B",
+          "constructor_call_va": "0x10085EA2",
+          "constructor_va": "0x10071CA0",
+          "constructor_export": "??0CDbBehaviorDataRecordTable@@QAE@EE@Z",
+          "class_name": "CDbBehaviorDataRecordTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 60,
+          "case_va": "0x10085EDA",
+          "constructor_call_va": "0x10085F11",
+          "constructor_va": "0x1006C1E0",
+          "constructor_export": "??0CDbActTestCommModeTable@@QAE@EE@Z",
+          "class_name": "CDbActTestCommModeTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 61,
+          "case_va": "0x10085F49",
+          "constructor_call_va": "0x10085F80",
+          "constructor_va": "0x1009CD90",
+          "constructor_export": "??0CDbDataIdForDmTable@@QAE@EE@Z",
+          "class_name": "CDbDataIdForDmTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 62,
+          "case_va": "0x10085FB8",
+          "constructor_call_va": "0x10085FEF",
+          "constructor_va": "0x1009E7D0",
+          "constructor_export": "??0CDbDatamonitorP5Table@@QAE@EE@Z",
+          "class_name": "CDbDatamonitorP5Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 63,
+          "case_va": "0x10086027",
+          "constructor_call_va": "0x1008605E",
+          "constructor_va": "0x1009A4E0",
+          "constructor_export": "??0CDbDataIdBitForDmTable@@QAE@EE@Z",
+          "class_name": "CDbDataIdBitForDmTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 64,
+          "case_va": "0x10086096",
+          "constructor_call_va": "0x100860CD",
+          "constructor_va": "0x1007E8A0",
+          "constructor_export": "??0CDbCommLsbDataIdDataTable@@QAE@EE@Z",
+          "class_name": "CDbCommLsbDataIdDataTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 65,
+          "case_va": "0x10086105",
+          "constructor_call_va": "0x1008613C",
+          "constructor_va": "0x100A7FB0",
+          "constructor_export": "??0CDbDiagCodeP5Table@@QAE@EE@Z",
+          "class_name": "CDbDiagCodeP5Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 66,
+          "case_va": "0x10086174",
+          "constructor_call_va": "0x100861AB",
+          "constructor_va": "0x100ABE60",
+          "constructor_export": "??0CDbDTCStatusMaskTable@@QAE@EE@Z",
+          "class_name": "CDbDTCStatusMaskTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 67,
+          "case_va": "0x100861E3",
+          "constructor_call_va": "0x1008621A",
+          "constructor_va": "0x1009C320",
+          "constructor_export": "??0CDbDataIdForActTable@@QAE@EE@Z",
+          "class_name": "CDbDataIdForActTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 68,
+          "case_va": "0x10086252",
+          "constructor_call_va": "0x10086289",
+          "constructor_va": "0x1006CD80",
+          "constructor_export": "??0CDbActTestP5Table@@QAE@EE@Z",
+          "class_name": "CDbActTestP5Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 69,
+          "case_va": "0x100862C1",
+          "constructor_call_va": "0x100862F8",
+          "constructor_va": "0x10099C70",
+          "constructor_export": "??0CDbDataIdBitForActTable@@QAE@EE@Z",
+          "class_name": "CDbDataIdBitForActTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 70,
+          "case_va": "0x10086330",
+          "constructor_call_va": "0x10086367",
+          "constructor_va": "0x1009DDC0",
+          "constructor_export": "??0CDbDataIdPanelSupportTable@@QAE@EE@Z",
+          "class_name": "CDbDataIdPanelSupportTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 71,
+          "case_va": "0x1008639F",
+          "constructor_call_va": "0x100863D6",
+          "constructor_va": "0x100C6AA0",
+          "constructor_export": "??0CDbRoutineActTestP5Table@@QAE@EE@Z",
+          "class_name": "CDbRoutineActTestP5Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 72,
+          "case_va": "0x1008640E",
+          "constructor_call_va": "0x10086445",
+          "constructor_va": "0x100C7320",
+          "constructor_export": "??0CDbRoutineStatusTable@@QAE@EE@Z",
+          "class_name": "CDbRoutineStatusTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 73,
+          "case_va": "0x1008647D",
+          "constructor_call_va": "0x100864B4",
+          "constructor_va": "0x100BEEF0",
+          "constructor_export": "??0CDbPatDispVariableTable@@QAE@EE@Z",
+          "class_name": "CDbPatDispVariableTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 74,
+          "case_va": "0x10088D48",
+          "constructor_call_va": "0x10088D85",
+          "constructor_va": "0x10063EC0",
+          "constructor_export": "??0CDbTableBase@@QAE@EE@Z",
+          "class_name": "CDbTableBase",
+          "status": "generic-base/default"
+        },
+        {
+          "table_type": 75,
+          "case_va": "0x10088D48",
+          "constructor_call_va": "0x10088D85",
+          "constructor_va": "0x10063EC0",
+          "constructor_export": "??0CDbTableBase@@QAE@EE@Z",
+          "class_name": "CDbTableBase",
+          "status": "generic-base/default"
+        },
+        {
+          "table_type": 76,
+          "case_va": "0x10088D48",
+          "constructor_call_va": "0x10088D85",
+          "constructor_va": "0x10063EC0",
+          "constructor_export": "??0CDbTableBase@@QAE@EE@Z",
+          "class_name": "CDbTableBase",
+          "status": "generic-base/default"
+        },
+        {
+          "table_type": 77,
+          "case_va": "0x100864EC",
+          "constructor_call_va": "0x10086523",
+          "constructor_va": "0x100CAB50",
+          "constructor_export": "??0CDbSimpleUtilityTable@@QAE@EE@Z",
+          "class_name": "CDbSimpleUtilityTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 78,
+          "case_va": "0x1008655B",
+          "constructor_call_va": "0x10086592",
+          "constructor_va": "0x100BD760",
+          "constructor_export": "??0CDbPatDescriptionVariableTable@@QAE@EE@Z",
+          "class_name": "CDbPatDescriptionVariableTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 79,
+          "case_va": "0x100865CA",
+          "constructor_call_va": "0x10086601",
+          "constructor_va": "0x100BEEF0",
+          "constructor_export": "??0CDbPatDispVariableTable@@QAE@EE@Z",
+          "class_name": "CDbPatDispVariableTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 80,
+          "case_va": "0x10086639",
+          "constructor_call_va": "0x10086670",
+          "constructor_va": "0x1009AD50",
+          "constructor_export": "??0CDbDataIdBitForFfdTable@@QAE@EE@Z",
+          "class_name": "CDbDataIdBitForFfdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 81,
+          "case_va": "0x100866A8",
+          "constructor_call_va": "0x100866DF",
+          "constructor_va": "0x100AC730",
+          "constructor_export": "??0CDbDynamicDataIdTable@@QAE@EE@Z",
+          "class_name": "CDbDynamicDataIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 82,
+          "case_va": "0x10086717",
+          "constructor_call_va": "0x1008674E",
+          "constructor_va": "0x100A4100",
+          "constructor_export": "??0CDbDDRMonitorTable@@QAE@EE@Z",
+          "class_name": "CDbDDRMonitorTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 83,
+          "case_va": "0x10086786",
+          "constructor_call_va": "0x100867BD",
+          "constructor_va": "0x100A4AD0",
+          "constructor_export": "??0CDbDDRTriggerTable@@QAE@EE@Z",
+          "class_name": "CDbDDRTriggerTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 84,
+          "case_va": "0x100867F5",
+          "constructor_call_va": "0x1008682C",
+          "constructor_va": "0x1009ECD0",
+          "constructor_export": "??0CDbDDRAddressTable@@QAE@EE@Z",
+          "class_name": "CDbDDRAddressTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 85,
+          "case_va": "0x10086864",
+          "constructor_call_va": "0x1008689B",
+          "constructor_va": "0x100A36D0",
+          "constructor_export": "??0CDbDDRInvalidConditionTable@@QAE@EE@Z",
+          "class_name": "CDbDDRInvalidConditionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 86,
+          "case_va": "0x100868D3",
+          "constructor_call_va": "0x1008690A",
+          "constructor_va": "0x100CF250",
+          "constructor_export": "??0CDbSupPCSOperationFFDPidTable@@QAE@EE@Z",
+          "class_name": "CDbSupPCSOperationFFDPidTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 87,
+          "case_va": "0x10086942",
+          "constructor_call_va": "0x10086979",
+          "constructor_va": "0x10070500",
+          "constructor_export": "??0CDbBehaviorCodeTable@@QAE@EE@Z",
+          "class_name": "CDbBehaviorCodeTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 88,
+          "case_va": "0x100869B1",
+          "constructor_call_va": "0x100869E8",
+          "constructor_va": "0x100710B0",
+          "constructor_export": "??0CDbBehaviorDataRecordP5Table@@QAE@EE@Z",
+          "class_name": "CDbBehaviorDataRecordP5Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 89,
+          "case_va": "0x10086A20",
+          "constructor_call_va": "0x10086A57",
+          "constructor_va": "0x1009BE30",
+          "constructor_export": "??0CDbDataIdBitForRobTable@@QAE@EE@Z",
+          "class_name": "CDbDataIdBitForRobTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 90,
+          "case_va": "0x10086A8F",
+          "constructor_call_va": "0x10086AC6",
+          "constructor_va": "0x1009D290",
+          "constructor_export": "??0CDbDataIdForRobTable@@QAE@EE@Z",
+          "class_name": "CDbDataIdForRobTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 91,
+          "case_va": "0x10086AFE",
+          "constructor_call_va": "0x10086B35",
+          "constructor_va": "0x10072690",
+          "constructor_export": "??0CDbBehaviorSignalCheckTable@@QAE@EE@Z",
+          "class_name": "CDbBehaviorSignalCheckTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 92,
+          "case_va": "0x10086B6D",
+          "constructor_call_va": "0x10086BA4",
+          "constructor_va": "0x100A4100",
+          "constructor_export": "??0CDbDDRMonitorTable@@QAE@EE@Z",
+          "class_name": "CDbDDRMonitorTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 93,
+          "case_va": "0x10086BDC",
+          "constructor_call_va": "0x10086C13",
+          "constructor_va": "0x100A4AD0",
+          "constructor_export": "??0CDbDDRTriggerTable@@QAE@EE@Z",
+          "class_name": "CDbDDRTriggerTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 94,
+          "case_va": "0x10086C4B",
+          "constructor_call_va": "0x10086C82",
+          "constructor_va": "0x1009ECD0",
+          "constructor_export": "??0CDbDDRAddressTable@@QAE@EE@Z",
+          "class_name": "CDbDDRAddressTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 95,
+          "case_va": "0x10086CBA",
+          "constructor_call_va": "0x10086CF1",
+          "constructor_va": "0x100A36D0",
+          "constructor_export": "??0CDbDDRInvalidConditionTable@@QAE@EE@Z",
+          "class_name": "CDbDDRInvalidConditionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 96,
+          "case_va": "0x10086D29",
+          "constructor_call_va": "0x10086D60",
+          "constructor_va": "0x100A4100",
+          "constructor_export": "??0CDbDDRMonitorTable@@QAE@EE@Z",
+          "class_name": "CDbDDRMonitorTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 97,
+          "case_va": "0x10086D98",
+          "constructor_call_va": "0x10086DCF",
+          "constructor_va": "0x100A4AD0",
+          "constructor_export": "??0CDbDDRTriggerTable@@QAE@EE@Z",
+          "class_name": "CDbDDRTriggerTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 98,
+          "case_va": "0x10086E07",
+          "constructor_call_va": "0x10086E3E",
+          "constructor_va": "0x1009ECD0",
+          "constructor_export": "??0CDbDDRAddressTable@@QAE@EE@Z",
+          "class_name": "CDbDDRAddressTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 99,
+          "case_va": "0x10086E76",
+          "constructor_call_va": "0x10086EAD",
+          "constructor_va": "0x100A36D0",
+          "constructor_export": "??0CDbDDRInvalidConditionTable@@QAE@EE@Z",
+          "class_name": "CDbDDRInvalidConditionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 100,
+          "case_va": "0x10086EE5",
+          "constructor_call_va": "0x10086F1C",
+          "constructor_va": "0x100A4100",
+          "constructor_export": "??0CDbDDRMonitorTable@@QAE@EE@Z",
+          "class_name": "CDbDDRMonitorTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 101,
+          "case_va": "0x10086F54",
+          "constructor_call_va": "0x10086F8B",
+          "constructor_va": "0x100A4AD0",
+          "constructor_export": "??0CDbDDRTriggerTable@@QAE@EE@Z",
+          "class_name": "CDbDDRTriggerTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 102,
+          "case_va": "0x10086FC3",
+          "constructor_call_va": "0x10086FFA",
+          "constructor_va": "0x1009ECD0",
+          "constructor_export": "??0CDbDDRAddressTable@@QAE@EE@Z",
+          "class_name": "CDbDDRAddressTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 103,
+          "case_va": "0x10087032",
+          "constructor_call_va": "0x10087069",
+          "constructor_va": "0x100A36D0",
+          "constructor_export": "??0CDbDDRInvalidConditionTable@@QAE@EE@Z",
+          "class_name": "CDbDDRInvalidConditionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 104,
+          "case_va": "0x100870A1",
+          "constructor_call_va": "0x100870D8",
+          "constructor_va": "0x100A4100",
+          "constructor_export": "??0CDbDDRMonitorTable@@QAE@EE@Z",
+          "class_name": "CDbDDRMonitorTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 105,
+          "case_va": "0x10087110",
+          "constructor_call_va": "0x10087147",
+          "constructor_va": "0x100A4AD0",
+          "constructor_export": "??0CDbDDRTriggerTable@@QAE@EE@Z",
+          "class_name": "CDbDDRTriggerTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 106,
+          "case_va": "0x1008717F",
+          "constructor_call_va": "0x100871B6",
+          "constructor_va": "0x1009ECD0",
+          "constructor_export": "??0CDbDDRAddressTable@@QAE@EE@Z",
+          "class_name": "CDbDDRAddressTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 107,
+          "case_va": "0x100871EE",
+          "constructor_call_va": "0x10087225",
+          "constructor_va": "0x100A36D0",
+          "constructor_export": "??0CDbDDRInvalidConditionTable@@QAE@EE@Z",
+          "class_name": "CDbDDRInvalidConditionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 108,
+          "case_va": "0x1008725D",
+          "constructor_call_va": "0x10087294",
+          "constructor_va": "0x100A31E0",
+          "constructor_export": "??0CDbDDRHeaderInfoDataIdTable@@QAE@EE@Z",
+          "class_name": "CDbDDRHeaderInfoDataIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 109,
+          "case_va": "0x100872CC",
+          "constructor_call_va": "0x10087303",
+          "constructor_va": "0x100A13E0",
+          "constructor_export": "??0CDbDDRCaseInfoDataIdTable@@QAE@EE@Z",
+          "class_name": "CDbDDRCaseInfoDataIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 110,
+          "case_va": "0x1008733B",
+          "constructor_call_va": "0x10087372",
+          "constructor_va": "0x100A4100",
+          "constructor_export": "??0CDbDDRMonitorTable@@QAE@EE@Z",
+          "class_name": "CDbDDRMonitorTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 111,
+          "case_va": "0x100873AA",
+          "constructor_call_va": "0x100873E1",
+          "constructor_va": "0x100A4AD0",
+          "constructor_export": "??0CDbDDRTriggerTable@@QAE@EE@Z",
+          "class_name": "CDbDDRTriggerTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 112,
+          "case_va": "0x10087419",
+          "constructor_call_va": "0x10087450",
+          "constructor_va": "0x1009ECD0",
+          "constructor_export": "??0CDbDDRAddressTable@@QAE@EE@Z",
+          "class_name": "CDbDDRAddressTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 113,
+          "case_va": "0x10087488",
+          "constructor_call_va": "0x100874BF",
+          "constructor_va": "0x100A36D0",
+          "constructor_export": "??0CDbDDRInvalidConditionTable@@QAE@EE@Z",
+          "class_name": "CDbDDRInvalidConditionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 114,
+          "case_va": "0x100874F7",
+          "constructor_call_va": "0x1008752E",
+          "constructor_va": "0x100DD1C0",
+          "constructor_export": "??0CDbWorkFactorSignalListP5Table@@QAE@EE@Z",
+          "class_name": "CDbWorkFactorSignalListP5Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 115,
+          "case_va": "0x10087566",
+          "constructor_call_va": "0x1008759D",
+          "constructor_va": "0x100D9B60",
+          "constructor_export": "??0CDbWorkFactorItemForRoBTable@@QAE@EE@Z",
+          "class_name": "CDbWorkFactorItemForRoBTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 116,
+          "case_va": "0x100875D5",
+          "constructor_call_va": "0x1008760C",
+          "constructor_va": "0x100DBB50",
+          "constructor_export": "??0CDbWorkFactorOperationCodeForDcmP5Table@@QAE@EE@Z",
+          "class_name": "CDbWorkFactorOperationCodeForDcmP5Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 117,
+          "case_va": "0x10087644",
+          "constructor_call_va": "0x1008767B",
+          "constructor_va": "0x100DB150",
+          "constructor_export": "??0CDbWorkFactorNetworkStatusForDcmP5Table@@QAE@EE@Z",
+          "class_name": "CDbWorkFactorNetworkStatusForDcmP5Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 118,
+          "case_va": "0x100876B3",
+          "constructor_call_va": "0x100876EA",
+          "constructor_va": "0x100B2160",
+          "constructor_export": "??0CDbFactorDataTable@@QAE@EE@Z",
+          "class_name": "CDbFactorDataTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 119,
+          "case_va": "0x10087722",
+          "constructor_call_va": "0x10087759",
+          "constructor_va": "0x100A4100",
+          "constructor_export": "??0CDbDDRMonitorTable@@QAE@EE@Z",
+          "class_name": "CDbDDRMonitorTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 120,
+          "case_va": "0x10087791",
+          "constructor_call_va": "0x100877C8",
+          "constructor_va": "0x100A4AD0",
+          "constructor_export": "??0CDbDDRTriggerTable@@QAE@EE@Z",
+          "class_name": "CDbDDRTriggerTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 121,
+          "case_va": "0x10087800",
+          "constructor_call_va": "0x10087837",
+          "constructor_va": "0x1009ECD0",
+          "constructor_export": "??0CDbDDRAddressTable@@QAE@EE@Z",
+          "class_name": "CDbDDRAddressTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 122,
+          "case_va": "0x1008786F",
+          "constructor_call_va": "0x100878A6",
+          "constructor_va": "0x100A36D0",
+          "constructor_export": "??0CDbDDRInvalidConditionTable@@QAE@EE@Z",
+          "class_name": "CDbDDRInvalidConditionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 123,
+          "case_va": "0x100878DE",
+          "constructor_call_va": "0x10087915",
+          "constructor_va": "0x100A4100",
+          "constructor_export": "??0CDbDDRMonitorTable@@QAE@EE@Z",
+          "class_name": "CDbDDRMonitorTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 124,
+          "case_va": "0x1008794D",
+          "constructor_call_va": "0x10087984",
+          "constructor_va": "0x100A4AD0",
+          "constructor_export": "??0CDbDDRTriggerTable@@QAE@EE@Z",
+          "class_name": "CDbDDRTriggerTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 125,
+          "case_va": "0x100879BC",
+          "constructor_call_va": "0x100879F3",
+          "constructor_va": "0x1009ECD0",
+          "constructor_export": "??0CDbDDRAddressTable@@QAE@EE@Z",
+          "class_name": "CDbDDRAddressTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 126,
+          "case_va": "0x10087A2B",
+          "constructor_call_va": "0x10087A62",
+          "constructor_va": "0x100A36D0",
+          "constructor_export": "??0CDbDDRInvalidConditionTable@@QAE@EE@Z",
+          "class_name": "CDbDDRInvalidConditionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 127,
+          "case_va": "0x10087A9A",
+          "constructor_call_va": "0x10087AD1",
+          "constructor_va": "0x100A31E0",
+          "constructor_export": "??0CDbDDRHeaderInfoDataIdTable@@QAE@EE@Z",
+          "class_name": "CDbDDRHeaderInfoDataIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 128,
+          "case_va": "0x10087B09",
+          "constructor_call_va": "0x10087B43",
+          "constructor_va": "0x100A13E0",
+          "constructor_export": "??0CDbDDRCaseInfoDataIdTable@@QAE@EE@Z",
+          "class_name": "CDbDDRCaseInfoDataIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 129,
+          "case_va": "0x10087B7B",
+          "constructor_call_va": "0x10087BB5",
+          "constructor_va": "0x100A4100",
+          "constructor_export": "??0CDbDDRMonitorTable@@QAE@EE@Z",
+          "class_name": "CDbDDRMonitorTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 130,
+          "case_va": "0x10087BED",
+          "constructor_call_va": "0x10087C27",
+          "constructor_va": "0x100A4AD0",
+          "constructor_export": "??0CDbDDRTriggerTable@@QAE@EE@Z",
+          "class_name": "CDbDDRTriggerTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 131,
+          "case_va": "0x10087C5F",
+          "constructor_call_va": "0x10087C99",
+          "constructor_va": "0x1009ECD0",
+          "constructor_export": "??0CDbDDRAddressTable@@QAE@EE@Z",
+          "class_name": "CDbDDRAddressTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 132,
+          "case_va": "0x10087CD1",
+          "constructor_call_va": "0x10087D0B",
+          "constructor_va": "0x100A36D0",
+          "constructor_export": "??0CDbDDRInvalidConditionTable@@QAE@EE@Z",
+          "class_name": "CDbDDRInvalidConditionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 133,
+          "case_va": "0x10087D43",
+          "constructor_call_va": "0x10087D7D",
+          "constructor_va": "0x1009FBA0",
+          "constructor_export": "??0CDbDDRBehaviorCodeP5Table@@QAE@EE@Z",
+          "class_name": "CDbDDRBehaviorCodeP5Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 134,
+          "case_va": "0x10087DB5",
+          "constructor_call_va": "0x10087DEF",
+          "constructor_va": "0x100A0EE0",
+          "constructor_export": "??0CDbDDRBehaviorDataRecordP5Table@@QAE@EE@Z",
+          "class_name": "CDbDDRBehaviorDataRecordP5Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 135,
+          "case_va": "0x10087E27",
+          "constructor_call_va": "0x10087E61",
+          "constructor_va": "0x100A0490",
+          "constructor_export": "??0CDbDDRBehaviorDataInvalidP5Table@@QAE@EE@Z",
+          "class_name": "CDbDDRBehaviorDataInvalidP5Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 136,
+          "case_va": "0x10087E99",
+          "constructor_call_va": "0x10087ED3",
+          "constructor_va": "0x100A31E0",
+          "constructor_export": "??0CDbDDRHeaderInfoDataIdTable@@QAE@EE@Z",
+          "class_name": "CDbDDRHeaderInfoDataIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 137,
+          "case_va": "0x10087F0B",
+          "constructor_call_va": "0x10087F45",
+          "constructor_va": "0x100A13E0",
+          "constructor_export": "??0CDbDDRCaseInfoDataIdTable@@QAE@EE@Z",
+          "class_name": "CDbDDRCaseInfoDataIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 138,
+          "case_va": "0x10087F7D",
+          "constructor_call_va": "0x10087FB7",
+          "constructor_va": "0x100A4100",
+          "constructor_export": "??0CDbDDRMonitorTable@@QAE@EE@Z",
+          "class_name": "CDbDDRMonitorTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 139,
+          "case_va": "0x10087FEF",
+          "constructor_call_va": "0x10088029",
+          "constructor_va": "0x100A4AD0",
+          "constructor_export": "??0CDbDDRTriggerTable@@QAE@EE@Z",
+          "class_name": "CDbDDRTriggerTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 140,
+          "case_va": "0x10088061",
+          "constructor_call_va": "0x1008809B",
+          "constructor_va": "0x1009ECD0",
+          "constructor_export": "??0CDbDDRAddressTable@@QAE@EE@Z",
+          "class_name": "CDbDDRAddressTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 141,
+          "case_va": "0x100880D3",
+          "constructor_call_va": "0x1008810D",
+          "constructor_va": "0x100A36D0",
+          "constructor_export": "??0CDbDDRInvalidConditionTable@@QAE@EE@Z",
+          "class_name": "CDbDDRInvalidConditionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 142,
+          "case_va": "0x10088145",
+          "constructor_call_va": "0x1008817F",
+          "constructor_va": "0x1009B5C0",
+          "constructor_export": "??0CDbDataIdBitForRActTable@@QAE@EE@Z",
+          "class_name": "CDbDataIdBitForRActTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 143,
+          "case_va": "0x100881B7",
+          "constructor_call_va": "0x100881F1",
+          "constructor_va": "0x100B7020",
+          "constructor_export": "??0CDbMonitorResultCanTable@@QAE@EE@Z",
+          "class_name": "CDbMonitorResultCanTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 144,
+          "case_va": "0x10088229",
+          "constructor_call_va": "0x10088263",
+          "constructor_va": "0x100C7850",
+          "constructor_export": "??0CDbScalingTable@@QAE@EE@Z",
+          "class_name": "CDbScalingTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 145,
+          "case_va": "0x1008829B",
+          "constructor_call_va": "0x100882D5",
+          "constructor_va": "0x100A31E0",
+          "constructor_export": "??0CDbDDRHeaderInfoDataIdTable@@QAE@EE@Z",
+          "class_name": "CDbDDRHeaderInfoDataIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 146,
+          "case_va": "0x1008830D",
+          "constructor_call_va": "0x10088347",
+          "constructor_va": "0x100A13E0",
+          "constructor_export": "??0CDbDDRCaseInfoDataIdTable@@QAE@EE@Z",
+          "class_name": "CDbDDRCaseInfoDataIdTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 147,
+          "case_va": "0x1008837F",
+          "constructor_call_va": "0x100883B9",
+          "constructor_va": "0x100A4100",
+          "constructor_export": "??0CDbDDRMonitorTable@@QAE@EE@Z",
+          "class_name": "CDbDDRMonitorTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 148,
+          "case_va": "0x100883F1",
+          "constructor_call_va": "0x1008842B",
+          "constructor_va": "0x100A4AD0",
+          "constructor_export": "??0CDbDDRTriggerTable@@QAE@EE@Z",
+          "class_name": "CDbDDRTriggerTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 149,
+          "case_va": "0x10088463",
+          "constructor_call_va": "0x1008849D",
+          "constructor_va": "0x1009ECD0",
+          "constructor_export": "??0CDbDDRAddressTable@@QAE@EE@Z",
+          "class_name": "CDbDDRAddressTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 150,
+          "case_va": "0x100884D5",
+          "constructor_call_va": "0x1008850F",
+          "constructor_va": "0x100A36D0",
+          "constructor_export": "??0CDbDDRInvalidConditionTable@@QAE@EE@Z",
+          "class_name": "CDbDDRInvalidConditionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 151,
+          "case_va": "0x10088547",
+          "constructor_call_va": "0x10088581",
+          "constructor_va": "0x1009D290",
+          "constructor_export": "??0CDbDataIdForRobTable@@QAE@EE@Z",
+          "class_name": "CDbDataIdForRobTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 152,
+          "case_va": "0x100885B9",
+          "constructor_call_va": "0x100885F3",
+          "constructor_va": "0x10072690",
+          "constructor_export": "??0CDbBehaviorSignalCheckTable@@QAE@EE@Z",
+          "class_name": "CDbBehaviorSignalCheckTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 153,
+          "case_va": "0x1008862B",
+          "constructor_call_va": "0x10088665",
+          "constructor_va": "0x100710B0",
+          "constructor_export": "??0CDbBehaviorDataRecordP5Table@@QAE@EE@Z",
+          "class_name": "CDbBehaviorDataRecordP5Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 154,
+          "case_va": "0x1008869D",
+          "constructor_call_va": "0x100886D7",
+          "constructor_va": "0x100C9AC0",
+          "constructor_export": "??0CDbSignalGroupTable@@QAE@EE@Z",
+          "class_name": "CDbSignalGroupTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 155,
+          "case_va": "0x1008870F",
+          "constructor_call_va": "0x10088749",
+          "constructor_va": "0x100C92C0",
+          "constructor_export": "??0CDbSignalCheckTable@@QAE@EE@Z",
+          "class_name": "CDbSignalCheckTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 156,
+          "case_va": "0x10088781",
+          "constructor_call_va": "0x100887BB",
+          "constructor_va": "0x1009CD90",
+          "constructor_export": "??0CDbDataIdForDmTable@@QAE@EE@Z",
+          "class_name": "CDbDataIdForDmTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 157,
+          "case_va": "0x100887F3",
+          "constructor_call_va": "0x1008882D",
+          "constructor_va": "0x1009E7D0",
+          "constructor_export": "??0CDbDatamonitorP5Table@@QAE@EE@Z",
+          "class_name": "CDbDatamonitorP5Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 158,
+          "case_va": "0x10088D48",
+          "constructor_call_va": "0x10088D85",
+          "constructor_va": "0x10063EC0",
+          "constructor_export": "??0CDbTableBase@@QAE@EE@Z",
+          "class_name": "CDbTableBase",
+          "status": "generic-base/default"
+        },
+        {
+          "table_type": 159,
+          "case_va": "0x10088D48",
+          "constructor_call_va": "0x10088D85",
+          "constructor_va": "0x10063EC0",
+          "constructor_export": "??0CDbTableBase@@QAE@EE@Z",
+          "class_name": "CDbTableBase",
+          "status": "generic-base/default"
+        },
+        {
+          "table_type": 160,
+          "case_va": "0x10088865",
+          "constructor_call_va": "0x1008889F",
+          "constructor_va": "0x100B9910",
+          "constructor_export": "??0CDbMonitorStatus_J1979_2_3_Table@@QAE@EE@Z",
+          "class_name": "CDbMonitorStatus_J1979_2_3_Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 161,
+          "case_va": "0x100888D7",
+          "constructor_call_va": "0x10088911",
+          "constructor_va": "0x100B79C0",
+          "constructor_export": "??0CDbMonitorResultCan_J1979_2_3_Table@@QAE@EE@Z",
+          "class_name": "CDbMonitorResultCan_J1979_2_3_Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 162,
+          "case_va": "0x10088949",
+          "constructor_call_va": "0x10088983",
+          "constructor_va": "0x100A6810",
+          "constructor_export": "??0CDbDetailLink_J1979_2_3_Table@@QAE@EE@Z",
+          "class_name": "CDbDetailLink_J1979_2_3_Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 163,
+          "case_va": "0x100889BB",
+          "constructor_call_va": "0x100889F5",
+          "constructor_va": "0x100C4A90",
+          "constructor_export": "??0CDbRoBDiagCodeTable@@QAE@EE@Z",
+          "class_name": "CDbRoBDiagCodeTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 164,
+          "case_va": "0x10088A2D",
+          "constructor_call_va": "0x10088A67",
+          "constructor_va": "0x100C54B0",
+          "constructor_export": "??0CDbRoBFreezeFrameTable@@QAE@EE@Z",
+          "class_name": "CDbRoBFreezeFrameTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 165,
+          "case_va": "0x10088A9F",
+          "constructor_call_va": "0x10088AD9",
+          "constructor_va": "0x100A1FB0",
+          "constructor_export": "??0CDbDDRDiagCodeTable@@QAE@EE@Z",
+          "class_name": "CDbDDRDiagCodeTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 166,
+          "case_va": "0x10088B11",
+          "constructor_call_va": "0x10088B4B",
+          "constructor_va": "0x1009C8A0",
+          "constructor_export": "??0CDbDataIdForDdrTable@@QAE@EE@Z",
+          "class_name": "CDbDataIdForDdrTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 167,
+          "case_va": "0x10088B83",
+          "constructor_call_va": "0x10088BBD",
+          "constructor_va": "0x100A2CE0",
+          "constructor_export": "??0CDbDDRFreezeFrameTable@@QAE@EE@Z",
+          "class_name": "CDbDDRFreezeFrameTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 168,
+          "case_va": "0x10088BF5",
+          "constructor_call_va": "0x10088C2F",
+          "constructor_va": "0x100A36D0",
+          "constructor_export": "??0CDbDDRInvalidConditionTable@@QAE@EE@Z",
+          "class_name": "CDbDDRInvalidConditionTable",
+          "status": "constructed"
+        },
+        {
+          "table_type": 169,
+          "case_va": "0x10088D48",
+          "constructor_call_va": "0x10088D85",
+          "constructor_va": "0x10063EC0",
+          "constructor_export": "??0CDbTableBase@@QAE@EE@Z",
+          "class_name": "CDbTableBase",
+          "status": "generic-base/default"
+        },
+        {
+          "table_type": 170,
+          "case_va": "0x10088C67",
+          "constructor_call_va": "0x10088CA1",
+          "constructor_va": "0x100C7D40",
+          "constructor_export": "??0CDbScaling_J1979_2_3_Table@@QAE@EE@Z",
+          "class_name": "CDbScaling_J1979_2_3_Table",
+          "status": "constructed"
+        },
+        {
+          "table_type": 171,
+          "case_va": "0x10088CD9",
+          "constructor_call_va": "0x10088D13",
+          "constructor_va": "0x100C2040",
+          "constructor_export": "??0CDbPreFFDVehicleTypePIDIDTable@@QAE@EE@Z",
+          "class_name": "CDbPreFFDVehicleTypePIDIDTable",
+          "status": "constructed"
+        }
+      ]
+    }
+  ]
+}

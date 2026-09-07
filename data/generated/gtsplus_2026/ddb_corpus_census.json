@@ -1,0 +1,5546 @@
+{
+  "schema": "gtsplus-current-ddb-corpus-census-v1",
+  "release": "2026.03.002.02",
+  "source": {
+    "root": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus",
+    "kgp_data_ctrl_sha256": "19e709e12e53f485a84ccfbf6b226922b88502206c34b767db543c7f3df101f8"
+  },
+  "corpus": {
+    "ddb_files": 1805,
+    "ecu_databases": 1703,
+    "non_ecu_ddb_files": 102,
+    "regions": {
+      "NA": {
+        "ddb_files": 546,
+        "ecu_databases": 512,
+        "families": {
+          "Gen": {
+            "ddb_files": 539,
+            "ecu_databases": 507
+          },
+          "Spe": {
+            "ddb_files": 7,
+            "ecu_databases": 5
+          }
+        }
+      },
+      "EU": {
+        "ddb_files": 612,
+        "ecu_databases": 578,
+        "families": {
+          "Gen": {
+            "ddb_files": 605,
+            "ecu_databases": 573
+          },
+          "Spe": {
+            "ddb_files": 7,
+            "ecu_databases": 5
+          }
+        }
+      },
+      "JP": {
+        "ddb_files": 647,
+        "ecu_databases": 613,
+        "families": {
+          "Gen": {
+            "ddb_files": 641,
+            "ecu_databases": 609
+          },
+          "Spe": {
+            "ddb_files": 6,
+            "ecu_databases": 4
+          }
+        }
+      }
+    },
+    "host_pe_files": 485
+  },
+  "table_types": {
+    "used_count": 162,
+    "all_named_by_parser": true,
+    "rows": [
+      {
+        "table_type": 0,
+        "class_name": "CDbSignalGroupTable",
+        "file_occurrences": 1351,
+        "record_count": 16468,
+        "record_sizes": {
+          "12": 1351
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P3.ddb"
+        ]
+      },
+      {
+        "table_type": 1,
+        "class_name": "CDbSignalCheckTable",
+        "file_occurrences": 1351,
+        "record_count": 23116,
+        "record_sizes": {
+          "8": 1351
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P3.ddb"
+        ]
+      },
+      {
+        "table_type": 2,
+        "class_name": "CDbSupFreezeTable",
+        "file_occurrences": 573,
+        "record_count": 3182,
+        "record_sizes": {
+          "4": 573
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P3.ddb",
+          "NA/Gen/ABS_P3DK.ddb",
+          "NA/Gen/ABS_P4.ddb",
+          "NA/Gen/ABS_P4DK.ddb"
+        ]
+      },
+      {
+        "table_type": 3,
+        "class_name": "CDbSupPidTable",
+        "file_occurrences": 904,
+        "record_count": 4886,
+        "record_sizes": {
+          "8": 904
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P3.ddb",
+          "NA/Gen/ABS_P3DK.ddb",
+          "NA/Gen/ABS_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 4,
+        "class_name": "CDbSupDidTable",
+        "file_occurrences": 600,
+        "record_count": 2017,
+        "record_sizes": {
+          "8": 600
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P3.ddb",
+          "NA/Gen/ABS_P3DK.ddb",
+          "NA/Gen/ABS_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 5,
+        "class_name": "CDbDiagCodeTable",
+        "file_occurrences": 867,
+        "record_count": 186743,
+        "record_sizes": {
+          "28": 867
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_DLC2.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P3.ddb",
+          "NA/Gen/ABS_P3DK.ddb"
+        ]
+      },
+      {
+        "table_type": 6,
+        "class_name": "CDbPidTable",
+        "file_occurrences": 944,
+        "record_count": 27263,
+        "record_sizes": {
+          "8": 944
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P3.ddb",
+          "NA/Gen/ABS_P3DK.ddb",
+          "NA/Gen/ABS_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 7,
+        "class_name": "CDbDidTable",
+        "file_occurrences": 626,
+        "record_count": 6178,
+        "record_sizes": {
+          "8": 626
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P3.ddb",
+          "NA/Gen/ABS_P3DK.ddb",
+          "NA/Gen/ABS_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 8,
+        "class_name": "CDbPidBitTable",
+        "file_occurrences": 212,
+        "record_count": 11219,
+        "record_sizes": {
+          "12": 212
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P3.ddb",
+          "NA/Gen/ABS_P3.ddb",
+          "NA/Gen/ABS_P3DK.ddb",
+          "NA/Gen/ACS_P3.ddb",
+          "NA/Gen/AFS_P3.ddb",
+          "NA/Gen/AHC_P3.ddb"
+        ]
+      },
+      {
+        "table_type": 9,
+        "class_name": "CDbDidBitTable",
+        "file_occurrences": 206,
+        "record_count": 6760,
+        "record_sizes": {
+          "12": 206
+        },
+        "sample_databases": [
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P3.ddb",
+          "NA/Gen/ABS_P3DK.ddb",
+          "NA/Gen/ABS_P4.ddb",
+          "NA/Gen/ABS_P4FHI.ddb",
+          "NA/Gen/ACS_P3.ddb"
+        ]
+      },
+      {
+        "table_type": 10,
+        "class_name": "CDbFreezeTable",
+        "file_occurrences": 949,
+        "record_count": 126012,
+        "record_sizes": {
+          "104": 949
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P3.ddb",
+          "NA/Gen/ABS_P3DK.ddb",
+          "NA/Gen/ABS_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 11,
+        "class_name": "CDbActTestTable",
+        "file_occurrences": 607,
+        "record_count": 14152,
+        "record_sizes": {
+          "92": 607
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P3.ddb",
+          "NA/Gen/ABS_P3DK.ddb",
+          "NA/Gen/ABS_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 12,
+        "class_name": "CDbActTestPatternTable",
+        "file_occurrences": 1025,
+        "record_count": 10468,
+        "record_sizes": {
+          "24": 1025
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P3.ddb",
+          "NA/Gen/ABS_P3DK.ddb"
+        ]
+      },
+      {
+        "table_type": 13,
+        "class_name": "CDbPhyDataTable",
+        "file_occurrences": 1662,
+        "record_count": 56397,
+        "record_sizes": {
+          "24": 1662
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P3.ddb",
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 14,
+        "class_name": "CDbPatDispTable",
+        "file_occurrences": 1681,
+        "record_count": 313444,
+        "record_sizes": {
+          "24": 1681
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P3.ddb",
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_DLC2.ddb"
+        ]
+      },
+      {
+        "table_type": 15,
+        "class_name": "CDbUnitTable",
+        "file_occurrences": 1662,
+        "record_count": 29251,
+        "record_sizes": {
+          "12": 1662
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P3.ddb",
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 16,
+        "class_name": "CDbTriggerListTable",
+        "file_occurrences": 1615,
+        "record_count": 4971,
+        "record_sizes": {
+          "24": 1615
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P3.ddb",
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 18,
+        "class_name": "CDbStandardInfoTable",
+        "file_occurrences": 188,
+        "record_count": 18600,
+        "record_sizes": {
+          "12": 188
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/ABS_P3.ddb",
+          "NA/Gen/ABS_P3DK.ddb",
+          "NA/Gen/ABS_P4.ddb",
+          "NA/Gen/AHC_P3.ddb",
+          "NA/Gen/AT_KWPDK.ddb"
+        ]
+      },
+      {
+        "table_type": 19,
+        "class_name": "CDbTriggerAnalyzeRetrievalTable",
+        "file_occurrences": 686,
+        "record_count": 686,
+        "record_sizes": {
+          "8": 686
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 21,
+        "class_name": "CDbO2SenserListTable",
+        "file_occurrences": 6,
+        "record_count": 48,
+        "record_sizes": {
+          "12": 6
+        },
+        "sample_databases": [
+          "NA/Gen/CAN_CARB.ddb",
+          "NA/Gen/PowerTrain_CARB.ddb",
+          "EU/Gen/CAN_CARB.ddb",
+          "EU/Gen/PowerTrain_CARB.ddb",
+          "JP/Gen/CAN_CARB.ddb",
+          "JP/Gen/PowerTrain_CARB.ddb"
+        ]
+      },
+      {
+        "table_type": 22,
+        "class_name": "CDb05TidTable",
+        "file_occurrences": 6,
+        "record_count": 66,
+        "record_sizes": {
+          "8": 6
+        },
+        "sample_databases": [
+          "NA/Gen/CAN_CARB.ddb",
+          "NA/Gen/PowerTrain_CARB.ddb",
+          "EU/Gen/CAN_CARB.ddb",
+          "EU/Gen/PowerTrain_CARB.ddb",
+          "JP/Gen/CAN_CARB.ddb",
+          "JP/Gen/PowerTrain_CARB.ddb"
+        ]
+      },
+      {
+        "table_type": 23,
+        "class_name": "CDb05TidMonitorTable",
+        "file_occurrences": 6,
+        "record_count": 132,
+        "record_sizes": {
+          "84": 6
+        },
+        "sample_databases": [
+          "NA/Gen/CAN_CARB.ddb",
+          "NA/Gen/PowerTrain_CARB.ddb",
+          "EU/Gen/CAN_CARB.ddb",
+          "EU/Gen/PowerTrain_CARB.ddb",
+          "JP/Gen/CAN_CARB.ddb",
+          "JP/Gen/PowerTrain_CARB.ddb"
+        ]
+      },
+      {
+        "table_type": 24,
+        "class_name": "CDb06TidTable",
+        "file_occurrences": 6,
+        "record_count": 36,
+        "record_sizes": {
+          "8": 6
+        },
+        "sample_databases": [
+          "NA/Gen/CAN_CARB.ddb",
+          "NA/Gen/PowerTrain_CARB.ddb",
+          "EU/Gen/CAN_CARB.ddb",
+          "EU/Gen/PowerTrain_CARB.ddb",
+          "JP/Gen/CAN_CARB.ddb",
+          "JP/Gen/PowerTrain_CARB.ddb"
+        ]
+      },
+      {
+        "table_type": 25,
+        "class_name": "CDb06TidMonitorTable",
+        "file_occurrences": 6,
+        "record_count": 84,
+        "record_sizes": {
+          "84": 6
+        },
+        "sample_databases": [
+          "NA/Gen/CAN_CARB.ddb",
+          "NA/Gen/PowerTrain_CARB.ddb",
+          "EU/Gen/CAN_CARB.ddb",
+          "EU/Gen/PowerTrain_CARB.ddb",
+          "JP/Gen/CAN_CARB.ddb",
+          "JP/Gen/PowerTrain_CARB.ddb"
+        ]
+      },
+      {
+        "table_type": 26,
+        "class_name": "CDbMultiPIDIDTable",
+        "file_occurrences": 11,
+        "record_count": 2286,
+        "record_sizes": {
+          "12": 11
+        },
+        "sample_databases": [
+          "NA/Gen/Engine2AdjustP4.ddb",
+          "NA/Gen/Engine_AdjustP4.ddb",
+          "NA/Gen/Engine_P4.ddb",
+          "EU/Gen/Engine2AdjustP4.ddb",
+          "EU/Gen/Engine_AdjustP4.ddb",
+          "EU/Gen/Engine_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 27,
+        "class_name": "CDbMonitorResultCanTable",
+        "file_occurrences": 3,
+        "record_count": 987,
+        "record_sizes": {
+          "20": 3
+        },
+        "sample_databases": [
+          "NA/Gen/RegulateECU.ddb",
+          "EU/Gen/RegulateECU.ddb",
+          "JP/Gen/RegulateECU.ddb"
+        ]
+      },
+      {
+        "table_type": 28,
+        "class_name": "CDbMonitorResultIsoTable",
+        "file_occurrences": 2,
+        "record_count": 132,
+        "record_sizes": {
+          "36": 2
+        },
+        "sample_databases": [
+          "NA/Gen/RegulateECU.ddb",
+          "EU/Gen/RegulateECU.ddb"
+        ]
+      },
+      {
+        "table_type": 29,
+        "class_name": "CDbScalingTable",
+        "file_occurrences": 3,
+        "record_count": 318,
+        "record_sizes": {
+          "20": 3
+        },
+        "sample_databases": [
+          "NA/Gen/RegulateECU.ddb",
+          "EU/Gen/RegulateECU.ddb",
+          "JP/Gen/RegulateECU.ddb"
+        ]
+      },
+      {
+        "table_type": 30,
+        "class_name": "CDbMonitorStatusTable",
+        "file_occurrences": 37,
+        "record_count": 1020,
+        "record_sizes": {
+          "28": 37
+        },
+        "sample_databases": [
+          "NA/Gen/CAN_CARB.ddb",
+          "NA/Gen/Engine2AdjustP4.ddb",
+          "NA/Gen/Engine_AdjustP4.ddb",
+          "NA/Gen/Engine_CM_P6.ddb",
+          "NA/Gen/Engine_P3.ddb",
+          "NA/Gen/Engine_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 31,
+        "class_name": "CDbDetailLinkTable",
+        "file_occurrences": 31,
+        "record_count": 1747,
+        "record_sizes": {
+          "8": 31
+        },
+        "sample_databases": [
+          "NA/Gen/Engine2AdjustP4.ddb",
+          "NA/Gen/Engine_AdjustP4.ddb",
+          "NA/Gen/Engine_CM_P6.ddb",
+          "NA/Gen/Engine_P3.ddb",
+          "NA/Gen/Engine_P4.ddb",
+          "NA/Gen/Engine_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 32,
+        "class_name": "CDbDTCGroupRetrieveTable",
+        "file_occurrences": 10,
+        "record_count": 1109,
+        "record_sizes": {
+          "10": 10
+        },
+        "sample_databases": [
+          "NA/Gen/Engine_PSA.ddb",
+          "EU/Gen/ABS_ESP81_PSA.ddb",
+          "EU/Gen/DSG_PSA.ddb",
+          "EU/Gen/ECT_PSA.ddb",
+          "EU/Gen/ENG_DCM35_PSA.ddb",
+          "EU/Gen/ENG_EDC17_PSA.ddb"
+        ]
+      },
+      {
+        "table_type": 33,
+        "class_name": "CDbMultiDidIdTable",
+        "file_occurrences": 21,
+        "record_count": 184,
+        "record_sizes": {
+          "12": 21
+        },
+        "sample_databases": [
+          "NA/Gen/ECT_Adjust_P4.ddb",
+          "NA/Gen/ECT_P4FHI.ddb",
+          "NA/Gen/Engine2AdjustP4.ddb",
+          "NA/Gen/Engine_AdjustP4.ddb",
+          "NA/Gen/Engine_P4.ddb",
+          "NA/Gen/Engine_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 35,
+        "class_name": "CDbWorkFactorSignalListTable",
+        "file_occurrences": 38,
+        "record_count": 276,
+        "record_sizes": {
+          "28": 38
+        },
+        "sample_databases": [
+          "NA/Gen/B_Door_P4.ddb",
+          "NA/Gen/JBUnity_P4.ddb",
+          "NA/Gen/PowerSup_P4FHI.ddb",
+          "NA/Gen/PowerSupply_P4.ddb",
+          "NA/Gen/RL_Door_P4.ddb",
+          "NA/Gen/RR_Door_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 36,
+        "class_name": "CDbWorkFactorItemTable",
+        "file_occurrences": 38,
+        "record_count": 1262,
+        "record_sizes": {
+          "40": 38
+        },
+        "sample_databases": [
+          "NA/Gen/B_Door_P4.ddb",
+          "NA/Gen/JBUnity_P4.ddb",
+          "NA/Gen/PowerSup_P4FHI.ddb",
+          "NA/Gen/PowerSupply_P4.ddb",
+          "NA/Gen/RL_Door_P4.ddb",
+          "NA/Gen/RR_Door_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 37,
+        "class_name": "CDbWorkFactorPatternTable",
+        "file_occurrences": 48,
+        "record_count": 23146,
+        "record_sizes": {
+          "20": 48
+        },
+        "sample_databases": [
+          "NA/Gen/B_Door_P4.ddb",
+          "NA/Gen/JBUnity_P4.ddb",
+          "NA/Gen/JBUnity_P5.ddb",
+          "NA/Gen/PowerSup_P4FHI.ddb",
+          "NA/Gen/PowerSupply_P4.ddb",
+          "NA/Gen/RL_Door_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 38,
+        "class_name": "CDbCommEcuDataTable",
+        "file_occurrences": 111,
+        "record_count": 335,
+        "record_sizes": {
+          "12": 111
+        },
+        "sample_databases": [
+          "NA/Gen/ASG_P4.ddb",
+          "NA/Gen/CCS_Adjust_P4.ddb",
+          "NA/Gen/CCS_P4.ddb",
+          "NA/Gen/CCS_P4FHI.ddb",
+          "NA/Gen/CSPSensor_P4.ddb",
+          "NA/Gen/ECT_Adjust_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 39,
+        "class_name": "CDbCommLsbPidDataTable",
+        "file_occurrences": 14,
+        "record_count": 215,
+        "record_sizes": {
+          "20": 14
+        },
+        "sample_databases": [
+          "NA/Gen/ECT_Adjust_P4.ddb",
+          "NA/Gen/Engine2AdjustP4.ddb",
+          "NA/Gen/Engine_AdjustP4.ddb",
+          "NA/Gen/Engine_P4.ddb",
+          "EU/Gen/ECT_Adjust_P4.ddb",
+          "EU/Gen/Engine2AdjustP4.ddb"
+        ]
+      },
+      {
+        "table_type": 40,
+        "class_name": "CDbSupPendingFreezeTable",
+        "file_occurrences": 44,
+        "record_count": 44,
+        "record_sizes": {
+          "8": 44
+        },
+        "sample_databases": [
+          "NA/Gen/CCS_BMW_P4.ddb",
+          "NA/Gen/ECT_Adjust_P4.ddb",
+          "NA/Gen/ECT_P4.ddb",
+          "NA/Gen/EFI3_P4DK.ddb",
+          "NA/Gen/EV_Battery_P4.ddb",
+          "NA/Gen/EV_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 41,
+        "class_name": "CDbActTstVariableDriveTable",
+        "file_occurrences": 19,
+        "record_count": 302,
+        "record_sizes": {
+          "92": 19
+        },
+        "sample_databases": [
+          "NA/Gen/CVT_P4DK2.ddb",
+          "EU/Gen/A_C_PSA.ddb",
+          "EU/Gen/AntiSlip_PSA.ddb",
+          "EU/Gen/BSI_PSA.ddb",
+          "EU/Gen/BSM_PSA.ddb",
+          "EU/Gen/BSR_PSA.ddb"
+        ]
+      },
+      {
+        "table_type": 42,
+        "class_name": "CDbBehaviorCodeTable",
+        "file_occurrences": 9,
+        "record_count": 78,
+        "record_sizes": {
+          "28": 9
+        },
+        "sample_databases": [
+          "NA/Gen/EV_P4.ddb",
+          "NA/Gen/Engine_AdjustP4.ddb",
+          "NA/Gen/HV_Adjust_P4.ddb",
+          "EU/Gen/EV_P4.ddb",
+          "EU/Gen/Engine_AdjustP4.ddb",
+          "EU/Gen/HV_Adjust_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 43,
+        "class_name": "CDbBdidTable",
+        "file_occurrences": 671,
+        "record_count": 2193,
+        "record_sizes": {
+          "8": 671
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P4.ddb",
+          "NA/Gen/ABS_P4DK.ddb",
+          "NA/Gen/ABS_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 44,
+        "class_name": "CDbSupBdidTable",
+        "file_occurrences": 671,
+        "record_count": 734,
+        "record_sizes": {
+          "8": 671
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P4.ddb",
+          "NA/Gen/ABS_P4DK.ddb",
+          "NA/Gen/ABS_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 45,
+        "class_name": "CDbBehaviorDataRecordTable",
+        "file_occurrences": 671,
+        "record_count": 6393,
+        "record_sizes": {
+          "96": 671
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P4.ddb",
+          "NA/Gen/ABS_P4DK.ddb",
+          "NA/Gen/ABS_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 46,
+        "class_name": "CDbBehaviorSignalCheckTable",
+        "file_occurrences": 668,
+        "record_count": 6012,
+        "record_sizes": {
+          "12": 668
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P4.ddb",
+          "NA/Gen/ABS_P4DK.ddb",
+          "NA/Gen/ABS_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 47,
+        "class_name": "CDbDetailCodeTable",
+        "file_occurrences": 9,
+        "record_count": 1659,
+        "record_sizes": {
+          "20": 9
+        },
+        "sample_databases": [
+          "NA/Gen/FC2_P4.ddb",
+          "NA/Gen/FC_HV2_P4.ddb",
+          "NA/Gen/HV_Adjust_P4.ddb",
+          "EU/Gen/FC2_P4.ddb",
+          "EU/Gen/FC_HV2_P4.ddb",
+          "EU/Gen/HV_Adjust_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 48,
+        "class_name": "CDbHighlightingSignalInfoTable",
+        "file_occurrences": 3,
+        "record_count": 6,
+        "record_sizes": {
+          "8": 3
+        },
+        "sample_databases": [
+          "NA/Gen/HV_Adjust_P4.ddb",
+          "EU/Gen/HV_Adjust_P4.ddb",
+          "JP/Gen/HV_Adjust_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 49,
+        "class_name": "CDbDiagCodeExpandTable",
+        "file_occurrences": 2,
+        "record_count": 20,
+        "record_sizes": {
+          "36": 2
+        },
+        "sample_databases": [
+          "NA/Gen/EP_System_P4TSL.ddb",
+          "EU/Gen/EP_System_P4TSL.ddb"
+        ]
+      },
+      {
+        "table_type": 50,
+        "class_name": "CDbDDRMonitorTable",
+        "file_occurrences": 6,
+        "record_count": 948,
+        "record_sizes": {
+          "48": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 51,
+        "class_name": "CDbDDRTriggerTable",
+        "file_occurrences": 6,
+        "record_count": 156,
+        "record_sizes": {
+          "36": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 52,
+        "class_name": "CDbDDRAddressTable",
+        "file_occurrences": 6,
+        "record_count": 5322,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 53,
+        "class_name": "CDbDDRInvalidConditionTable",
+        "file_occurrences": 6,
+        "record_count": 1032,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 54,
+        "class_name": "CDbSupOperationFreezeTable",
+        "file_occurrences": 25,
+        "record_count": 558,
+        "record_sizes": {
+          "8": 25
+        },
+        "sample_databases": [
+          "NA/Gen/CSPSensor_P4.ddb",
+          "NA/Gen/PCS2_P4.ddb",
+          "NA/Gen/Sonar_P4.ddb",
+          "NA/Spe/ABS_OBD_P4.ddb",
+          "NA/Spe/ABS_P4.ddb",
+          "NA/Spe/ABS_P4DK.ddb"
+        ]
+      },
+      {
+        "table_type": 55,
+        "class_name": "CDbPidAdditionFrameTable",
+        "file_occurrences": 7,
+        "record_count": 108,
+        "record_sizes": {
+          "8": 7
+        },
+        "sample_databases": [
+          "EU/Gen/ABS_ESP81_PSA.ddb",
+          "EU/Gen/DSG_PSA.ddb",
+          "EU/Gen/ECT_PSA.ddb",
+          "EU/Gen/ENG_DCM35_PSA.ddb",
+          "EU/Gen/ENG_EDC17_PSA.ddb",
+          "EU/Gen/EPS_PSA.ddb"
+        ]
+      },
+      {
+        "table_type": 56,
+        "class_name": "CDbBehaviorCodeTable",
+        "file_occurrences": 26,
+        "record_count": 276,
+        "record_sizes": {
+          "28": 26
+        },
+        "sample_databases": [
+          "NA/Gen/Engine_AdjustP4.ddb",
+          "NA/Gen/FC2_P4.ddb",
+          "NA/Gen/FC_HV2_P4.ddb",
+          "NA/Gen/HV_Adjust_P4.ddb",
+          "NA/Gen/HV_P4.ddb",
+          "NA/Gen/PluginCtrl1_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 57,
+        "class_name": "CDbBdidTable",
+        "file_occurrences": 671,
+        "record_count": 2492,
+        "record_sizes": {
+          "8": 671
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P4.ddb",
+          "NA/Gen/ABS_P4DK.ddb",
+          "NA/Gen/ABS_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 58,
+        "class_name": "CDbSupBdidTable",
+        "file_occurrences": 668,
+        "record_count": 843,
+        "record_sizes": {
+          "8": 668
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P4.ddb",
+          "NA/Gen/ABS_P4DK.ddb",
+          "NA/Gen/ABS_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 59,
+        "class_name": "CDbBehaviorDataRecordTable",
+        "file_occurrences": 671,
+        "record_count": 8559,
+        "record_sizes": {
+          "96": 671
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P4.ddb",
+          "NA/Gen/ABS_P4DK.ddb",
+          "NA/Gen/ABS_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 60,
+        "class_name": "CDbActTestCommModeTable",
+        "file_occurrences": 4,
+        "record_count": 74,
+        "record_sizes": {
+          "8": 4
+        },
+        "sample_databases": [
+          "EU/Gen/A_C_PSA.ddb",
+          "EU/Gen/ENG_DCM35_PSA.ddb",
+          "EU/Gen/ENG_EDC17_PSA.ddb",
+          "EU/Gen/Engine2_PSA.ddb"
+        ]
+      },
+      {
+        "table_type": 61,
+        "class_name": "CDbDataIdForDmTable",
+        "file_occurrences": 702,
+        "record_count": 88463,
+        "record_sizes": {
+          "8": 702
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 62,
+        "class_name": "CDbDatamonitorP5Table",
+        "file_occurrences": 703,
+        "record_count": 190051,
+        "record_sizes": {
+          "80": 703
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 63,
+        "class_name": "CDbDataIdBitForDmTable",
+        "file_occurrences": 468,
+        "record_count": 58724,
+        "record_sizes": {
+          "16": 468
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb",
+          "NA/Gen/ADeU_Eth_P5.ddb",
+          "NA/Gen/AHB_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 65,
+        "class_name": "CDbDiagCodeP5Table",
+        "file_occurrences": 693,
+        "record_count": 101137,
+        "record_sizes": {
+          "68": 693
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 66,
+        "class_name": "CDbDTCStatusMaskTable",
+        "file_occurrences": 687,
+        "record_count": 2118,
+        "record_sizes": {
+          "12": 687
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 67,
+        "class_name": "CDbDataIdForActTable",
+        "file_occurrences": 204,
+        "record_count": 3562,
+        "record_sizes": {
+          "18": 204
+        },
+        "sample_databases": [
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb",
+          "NA/Gen/AHLS_P5FHI.ddb",
+          "NA/Gen/A_C_P5.ddb",
+          "NA/Gen/A_C_P5FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 68,
+        "class_name": "CDbActTestP5Table",
+        "file_occurrences": 204,
+        "record_count": 7358,
+        "record_sizes": {
+          "64": 204
+        },
+        "sample_databases": [
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb",
+          "NA/Gen/AHLS_P5FHI.ddb",
+          "NA/Gen/A_C_P5.ddb",
+          "NA/Gen/A_C_P5FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 69,
+        "class_name": "CDbDataIdBitForActTable",
+        "file_occurrences": 15,
+        "record_count": 189,
+        "record_sizes": {
+          "12": 15
+        },
+        "sample_databases": [
+          "NA/Gen/AHLS_P5FHI.ddb",
+          "NA/Gen/A_C_P5FHI.ddb",
+          "NA/Gen/Engine_P5FHI.ddb",
+          "NA/Gen/FCHV_P5.ddb",
+          "NA/Gen/TCS_P5FHI.ddb",
+          "EU/Gen/AHLS_P5FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 70,
+        "class_name": "CDbDataIdPanelSupportTable",
+        "file_occurrences": 36,
+        "record_count": 1382,
+        "record_sizes": {
+          "16": 36
+        },
+        "sample_databases": [
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/BSCM_A_P6.ddb",
+          "NA/Gen/BSCM_A_P6F.ddb",
+          "NA/Gen/BSCM_B_P6.ddb",
+          "NA/Gen/BSCM_B_P6F.ddb",
+          "NA/Gen/Brk_Bst_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 71,
+        "class_name": "CDbRoutineActTestP5Table",
+        "file_occurrences": 265,
+        "record_count": 2822,
+        "record_sizes": {
+          "72": 265
+        },
+        "sample_databases": [
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/ANC_P6.ddb",
+          "NA/Gen/ANC_P6F.ddb",
+          "NA/Gen/ASCtrl_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 72,
+        "class_name": "CDbRoutineStatusTable",
+        "file_occurrences": 290,
+        "record_count": 1131,
+        "record_sizes": {
+          "12": 290
+        },
+        "sample_databases": [
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb",
+          "NA/Gen/ANC_P6.ddb",
+          "NA/Gen/ANC_P6F.ddb",
+          "NA/Gen/ASCtrl_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 73,
+        "class_name": "CDbPatDispVariableTable",
+        "file_occurrences": 269,
+        "record_count": 4119,
+        "record_sizes": {
+          "20": 269
+        },
+        "sample_databases": [
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb",
+          "NA/Gen/ANC_P6.ddb",
+          "NA/Gen/ANC_P6F.ddb"
+        ]
+      },
+      {
+        "table_type": 77,
+        "class_name": "CDbSimpleUtilityTable",
+        "file_occurrences": 173,
+        "record_count": 340,
+        "record_sizes": {
+          "52": 173
+        },
+        "sample_databases": [
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/BCCM_A_P6.ddb",
+          "NA/Gen/BECM_P6.ddb",
+          "NA/Gen/CCFDRSF_A_P6.ddb",
+          "NA/Gen/CCFDRSF_A_P6F.ddb"
+        ]
+      },
+      {
+        "table_type": 78,
+        "class_name": "CDbPatDescriptionVariableTable",
+        "file_occurrences": 182,
+        "record_count": 1281,
+        "record_sizes": {
+          "20": 182
+        },
+        "sample_databases": [
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/BCCM_A_P6.ddb",
+          "NA/Gen/BECM_P6.ddb",
+          "NA/Gen/CCFDRSF_A_P6.ddb",
+          "NA/Gen/CCFDRSF_A_P6F.ddb"
+        ]
+      },
+      {
+        "table_type": 79,
+        "class_name": "CDbPatDispVariableTable",
+        "file_occurrences": 174,
+        "record_count": 285,
+        "record_sizes": {
+          "20": 174
+        },
+        "sample_databases": [
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/BCCM_A_P6.ddb",
+          "NA/Gen/BECM_P6.ddb",
+          "NA/Gen/CCFDRSF_A_P6.ddb",
+          "NA/Gen/CCFDRSF_A_P6F.ddb"
+        ]
+      },
+      {
+        "table_type": 80,
+        "class_name": "CDbDataIdBitForFfdTable",
+        "file_occurrences": 454,
+        "record_count": 2605,
+        "record_sizes": {
+          "12": 454
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb",
+          "NA/Gen/ADeU_Eth_P5.ddb",
+          "NA/Gen/AHB_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 81,
+        "class_name": "CDbDynamicDataIdTable",
+        "file_occurrences": 101,
+        "record_count": 199,
+        "record_sizes": {
+          "8": 101
+        },
+        "sample_databases": [
+          "NA/Gen/ADS_Eth_P5.ddb",
+          "NA/Gen/ADeU_Eth_P5.ddb",
+          "NA/Gen/BCCM_A_P6.ddb",
+          "NA/Gen/BECM_P6.ddb",
+          "NA/Gen/CCS_P5.ddb",
+          "NA/Gen/DMCM_A_P6.ddb"
+        ]
+      },
+      {
+        "table_type": 82,
+        "class_name": "CDbDDRMonitorTable",
+        "file_occurrences": 6,
+        "record_count": 1194,
+        "record_sizes": {
+          "48": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 83,
+        "class_name": "CDbDDRTriggerTable",
+        "file_occurrences": 6,
+        "record_count": 216,
+        "record_sizes": {
+          "36": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 84,
+        "class_name": "CDbDDRAddressTable",
+        "file_occurrences": 6,
+        "record_count": 5784,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 85,
+        "class_name": "CDbDDRInvalidConditionTable",
+        "file_occurrences": 6,
+        "record_count": 990,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 86,
+        "class_name": "CDbSupPCSOperationFFDPidTable",
+        "file_occurrences": 6,
+        "record_count": 474,
+        "record_sizes": {
+          "4": 6
+        },
+        "sample_databases": [
+          "NA/Gen/CSPSensor_P4.ddb",
+          "NA/Gen/PCS2_P4.ddb",
+          "EU/Gen/CSPSensor_P4.ddb",
+          "EU/Gen/PCS2_P4.ddb",
+          "JP/Gen/CSPSensor_P4.ddb",
+          "JP/Gen/PCS2_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 87,
+        "class_name": "CDbBehaviorCodeTable",
+        "file_occurrences": 253,
+        "record_count": 10422,
+        "record_sizes": {
+          "28": 253
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb",
+          "NA/Gen/ADeU_Eth_P5.ddb",
+          "NA/Gen/AHB_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 88,
+        "class_name": "CDbBehaviorDataRecordP5Table",
+        "file_occurrences": 412,
+        "record_count": 34345,
+        "record_sizes": {
+          "72": 412
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb",
+          "NA/Gen/ADeU_Eth_P5.ddb",
+          "NA/Gen/AHB_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 89,
+        "class_name": "CDbDataIdBitForRobTable",
+        "file_occurrences": 75,
+        "record_count": 1045,
+        "record_sizes": {
+          "12": 75
+        },
+        "sample_databases": [
+          "NA/Gen/AVS_P5.ddb",
+          "NA/Gen/AirSus_P5.ddb",
+          "NA/Gen/BCCM_A_P6.ddb",
+          "NA/Gen/BECM_P6.ddb",
+          "NA/Gen/DMCM_A_P6.ddb",
+          "NA/Gen/DMCM_B_P6.ddb"
+        ]
+      },
+      {
+        "table_type": 90,
+        "class_name": "CDbDataIdForRobTable",
+        "file_occurrences": 662,
+        "record_count": 46592,
+        "record_sizes": {
+          "8": 662
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 91,
+        "class_name": "CDbBehaviorSignalCheckTable",
+        "file_occurrences": 661,
+        "record_count": 7432,
+        "record_sizes": {
+          "12": 661
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 92,
+        "class_name": "CDbDDRMonitorTable",
+        "file_occurrences": 6,
+        "record_count": 2166,
+        "record_sizes": {
+          "48": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 93,
+        "class_name": "CDbDDRTriggerTable",
+        "file_occurrences": 6,
+        "record_count": 264,
+        "record_sizes": {
+          "36": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 94,
+        "class_name": "CDbDDRAddressTable",
+        "file_occurrences": 6,
+        "record_count": 7878,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 95,
+        "class_name": "CDbDDRInvalidConditionTable",
+        "file_occurrences": 6,
+        "record_count": 2568,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 96,
+        "class_name": "CDbDDRMonitorTable",
+        "file_occurrences": 6,
+        "record_count": 2208,
+        "record_sizes": {
+          "48": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 97,
+        "class_name": "CDbDDRTriggerTable",
+        "file_occurrences": 6,
+        "record_count": 264,
+        "record_sizes": {
+          "36": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 98,
+        "class_name": "CDbDDRAddressTable",
+        "file_occurrences": 6,
+        "record_count": 7920,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 99,
+        "class_name": "CDbDDRInvalidConditionTable",
+        "file_occurrences": 6,
+        "record_count": 2610,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 100,
+        "class_name": "CDbDDRMonitorTable",
+        "file_occurrences": 6,
+        "record_count": 2292,
+        "record_sizes": {
+          "48": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 101,
+        "class_name": "CDbDDRTriggerTable",
+        "file_occurrences": 6,
+        "record_count": 300,
+        "record_sizes": {
+          "36": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 102,
+        "class_name": "CDbDDRAddressTable",
+        "file_occurrences": 6,
+        "record_count": 8304,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 103,
+        "class_name": "CDbDDRInvalidConditionTable",
+        "file_occurrences": 6,
+        "record_count": 2610,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 104,
+        "class_name": "CDbDDRMonitorTable",
+        "file_occurrences": 6,
+        "record_count": 2208,
+        "record_sizes": {
+          "48": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 105,
+        "class_name": "CDbDDRTriggerTable",
+        "file_occurrences": 6,
+        "record_count": 264,
+        "record_sizes": {
+          "36": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 106,
+        "class_name": "CDbDDRAddressTable",
+        "file_occurrences": 6,
+        "record_count": 7920,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 107,
+        "class_name": "CDbDDRInvalidConditionTable",
+        "file_occurrences": 6,
+        "record_count": 2610,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 108,
+        "class_name": "CDbDDRHeaderInfoDataIdTable",
+        "file_occurrences": 3,
+        "record_count": 126,
+        "record_sizes": {
+          "8": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 109,
+        "class_name": "CDbDDRCaseInfoDataIdTable",
+        "file_occurrences": 3,
+        "record_count": 2352,
+        "record_sizes": {
+          "12": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 110,
+        "class_name": "CDbDDRMonitorTable",
+        "file_occurrences": 3,
+        "record_count": 1415,
+        "record_sizes": {
+          "48": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 111,
+        "class_name": "CDbDDRTriggerTable",
+        "file_occurrences": 3,
+        "record_count": 156,
+        "record_sizes": {
+          "36": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 112,
+        "class_name": "CDbDDRAddressTable",
+        "file_occurrences": 3,
+        "record_count": 8769,
+        "record_sizes": {
+          "16": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 113,
+        "class_name": "CDbDDRInvalidConditionTable",
+        "file_occurrences": 3,
+        "record_count": 642,
+        "record_sizes": {
+          "16": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 114,
+        "class_name": "CDbWorkFactorSignalListP5Table",
+        "file_occurrences": 10,
+        "record_count": 178,
+        "record_sizes": {
+          "24": 10
+        },
+        "sample_databases": [
+          "NA/Gen/JBUnity_P5.ddb",
+          "NA/Gen/SMART_P5.ddb",
+          "NA/Gen/Telematics_P5.ddb",
+          "EU/Gen/JBUnity_P5.ddb",
+          "EU/Gen/SMART_P5.ddb",
+          "EU/Gen/Telematics_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 115,
+        "class_name": "CDbWorkFactorItemForRoBTable",
+        "file_occurrences": 6,
+        "record_count": 148,
+        "record_sizes": {
+          "20": 6
+        },
+        "sample_databases": [
+          "NA/Gen/JBUnity_P5.ddb",
+          "NA/Gen/SMART_P5.ddb",
+          "EU/Gen/JBUnity_P5.ddb",
+          "EU/Gen/SMART_P5.ddb",
+          "JP/Gen/JBUnity_P5.ddb",
+          "JP/Gen/SMART_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 116,
+        "class_name": "CDbWorkFactorOperationCodeForDcmP5Table",
+        "file_occurrences": 4,
+        "record_count": 1240,
+        "record_sizes": {
+          "16": 4
+        },
+        "sample_databases": [
+          "NA/Gen/Telematics_P5.ddb",
+          "EU/Gen/Telematics_P5.ddb",
+          "EU/Gen/Telematics_P5DK.ddb",
+          "JP/Gen/Telematics_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 117,
+        "class_name": "CDbWorkFactorNetworkStatusForDcmP5Table",
+        "file_occurrences": 4,
+        "record_count": 16,
+        "record_sizes": {
+          "16": 4
+        },
+        "sample_databases": [
+          "NA/Gen/Telematics_P5.ddb",
+          "EU/Gen/Telematics_P5.ddb",
+          "EU/Gen/Telematics_P5DK.ddb",
+          "JP/Gen/Telematics_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 118,
+        "class_name": "CDbFactorDataTable",
+        "file_occurrences": 27,
+        "record_count": 4335,
+        "record_sizes": {
+          "20": 27
+        },
+        "sample_databases": [
+          "NA/Gen/IPA_P5.ddb",
+          "NA/Gen/PBD_P5.ddb",
+          "NA/Gen/PSC_P5.ddb",
+          "NA/Gen/RLD_LH_PSD_P5.ddb",
+          "NA/Gen/RRD_RH_PSD_P5.ddb",
+          "NA/Gen/RemotStat_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 119,
+        "class_name": "CDbDDRMonitorTable",
+        "file_occurrences": 6,
+        "record_count": 2322,
+        "record_sizes": {
+          "48": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 120,
+        "class_name": "CDbDDRTriggerTable",
+        "file_occurrences": 6,
+        "record_count": 300,
+        "record_sizes": {
+          "36": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 121,
+        "class_name": "CDbDDRAddressTable",
+        "file_occurrences": 6,
+        "record_count": 8436,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 122,
+        "class_name": "CDbDDRInvalidConditionTable",
+        "file_occurrences": 6,
+        "record_count": 2640,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 123,
+        "class_name": "CDbDDRMonitorTable",
+        "file_occurrences": 6,
+        "record_count": 2340,
+        "record_sizes": {
+          "48": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 124,
+        "class_name": "CDbDDRTriggerTable",
+        "file_occurrences": 6,
+        "record_count": 306,
+        "record_sizes": {
+          "36": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 125,
+        "class_name": "CDbDDRAddressTable",
+        "file_occurrences": 6,
+        "record_count": 8478,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 126,
+        "class_name": "CDbDDRInvalidConditionTable",
+        "file_occurrences": 6,
+        "record_count": 2658,
+        "record_sizes": {
+          "16": 6
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P4.ddb",
+          "NA/Gen/A_B_CAN_P4FHI.ddb",
+          "EU/Gen/A_B_CAN_P4.ddb",
+          "EU/Gen/A_B_CAN_P4FHI.ddb",
+          "JP/Gen/A_B_CAN_P4.ddb",
+          "JP/Gen/A_B_CAN_P4FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 127,
+        "class_name": "CDbDDRHeaderInfoDataIdTable",
+        "file_occurrences": 3,
+        "record_count": 129,
+        "record_sizes": {
+          "8": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 128,
+        "class_name": "CDbDDRCaseInfoDataIdTable",
+        "file_occurrences": 3,
+        "record_count": 2346,
+        "record_sizes": {
+          "12": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 129,
+        "class_name": "CDbDDRMonitorTable",
+        "file_occurrences": 3,
+        "record_count": 1563,
+        "record_sizes": {
+          "48": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 130,
+        "class_name": "CDbDDRTriggerTable",
+        "file_occurrences": 3,
+        "record_count": 168,
+        "record_sizes": {
+          "36": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 131,
+        "class_name": "CDbDDRAddressTable",
+        "file_occurrences": 3,
+        "record_count": 9387,
+        "record_sizes": {
+          "16": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 132,
+        "class_name": "CDbDDRInvalidConditionTable",
+        "file_occurrences": 3,
+        "record_count": 687,
+        "record_sizes": {
+          "16": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 133,
+        "class_name": "CDbDDRBehaviorCodeP5Table",
+        "file_occurrences": 3,
+        "record_count": 87,
+        "record_sizes": {
+          "44": 3
+        },
+        "sample_databases": [
+          "NA/Gen/ADS_Eth_P5.ddb",
+          "EU/Gen/ADS_Eth_P5.ddb",
+          "JP/Gen/ADS_Eth_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 134,
+        "class_name": "CDbDDRBehaviorDataRecordP5Table",
+        "file_occurrences": 3,
+        "record_count": 1239,
+        "record_sizes": {
+          "72": 3
+        },
+        "sample_databases": [
+          "NA/Gen/ADS_Eth_P5.ddb",
+          "EU/Gen/ADS_Eth_P5.ddb",
+          "JP/Gen/ADS_Eth_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 135,
+        "class_name": "CDbDDRBehaviorDataInvalidP5Table",
+        "file_occurrences": 3,
+        "record_count": 42,
+        "record_sizes": {
+          "24": 3
+        },
+        "sample_databases": [
+          "NA/Gen/ADS_Eth_P5.ddb",
+          "EU/Gen/ADS_Eth_P5.ddb",
+          "JP/Gen/ADS_Eth_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 136,
+        "class_name": "CDbDDRHeaderInfoDataIdTable",
+        "file_occurrences": 3,
+        "record_count": 117,
+        "record_sizes": {
+          "8": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 137,
+        "class_name": "CDbDDRCaseInfoDataIdTable",
+        "file_occurrences": 3,
+        "record_count": 2226,
+        "record_sizes": {
+          "12": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 138,
+        "class_name": "CDbDDRMonitorTable",
+        "file_occurrences": 3,
+        "record_count": 1719,
+        "record_sizes": {
+          "48": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 139,
+        "class_name": "CDbDDRTriggerTable",
+        "file_occurrences": 3,
+        "record_count": 177,
+        "record_sizes": {
+          "36": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 140,
+        "class_name": "CDbDDRAddressTable",
+        "file_occurrences": 3,
+        "record_count": 10521,
+        "record_sizes": {
+          "16": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 141,
+        "class_name": "CDbDDRInvalidConditionTable",
+        "file_occurrences": 3,
+        "record_count": 666,
+        "record_sizes": {
+          "16": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 142,
+        "class_name": "CDbDataIdBitForRActTable",
+        "file_occurrences": 30,
+        "record_count": 450,
+        "record_sizes": {
+          "12": 30
+        },
+        "sample_databases": [
+          "NA/Gen/ActSudCnt_P5FHI.ddb",
+          "NA/Gen/BSR_LH_P5FHI.ddb",
+          "NA/Gen/BSR_RH_P5FHI.ddb",
+          "NA/Gen/BodyItUni_P5FHI.ddb",
+          "NA/Gen/Engine_P5FHI.ddb",
+          "NA/Gen/InfoSys_P5FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 143,
+        "class_name": "CDbMonitorResultCanTable",
+        "file_occurrences": 3,
+        "record_count": 30,
+        "record_sizes": {
+          "20": 3
+        },
+        "sample_databases": [
+          "NA/Gen/Engine_P5FHI.ddb",
+          "EU/Gen/Engine_P5FHI.ddb",
+          "JP/Gen/Engine_P5FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 144,
+        "class_name": "CDbScalingTable",
+        "file_occurrences": 3,
+        "record_count": 6,
+        "record_sizes": {
+          "20": 3
+        },
+        "sample_databases": [
+          "NA/Gen/Engine_P5FHI.ddb",
+          "EU/Gen/Engine_P5FHI.ddb",
+          "JP/Gen/Engine_P5FHI.ddb"
+        ]
+      },
+      {
+        "table_type": 145,
+        "class_name": "CDbDDRHeaderInfoDataIdTable",
+        "file_occurrences": 3,
+        "record_count": 138,
+        "record_sizes": {
+          "8": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 146,
+        "class_name": "CDbDDRCaseInfoDataIdTable",
+        "file_occurrences": 3,
+        "record_count": 2961,
+        "record_sizes": {
+          "12": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 147,
+        "class_name": "CDbDDRMonitorTable",
+        "file_occurrences": 3,
+        "record_count": 1950,
+        "record_sizes": {
+          "48": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 148,
+        "class_name": "CDbDDRTriggerTable",
+        "file_occurrences": 3,
+        "record_count": 189,
+        "record_sizes": {
+          "36": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 149,
+        "class_name": "CDbDDRAddressTable",
+        "file_occurrences": 3,
+        "record_count": 11319,
+        "record_sizes": {
+          "16": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 150,
+        "class_name": "CDbDDRInvalidConditionTable",
+        "file_occurrences": 3,
+        "record_count": 2220,
+        "record_sizes": {
+          "16": 3
+        },
+        "sample_databases": [
+          "NA/Gen/A_B_CAN_P5.ddb",
+          "EU/Gen/A_B_CAN_P5.ddb",
+          "JP/Gen/A_B_CAN_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 151,
+        "class_name": "CDbDataIdForRobTable",
+        "file_occurrences": 471,
+        "record_count": 44678,
+        "record_sizes": {
+          "8": 471
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 152,
+        "class_name": "CDbBehaviorSignalCheckTable",
+        "file_occurrences": 20,
+        "record_count": 160,
+        "record_sizes": {
+          "12": 20
+        },
+        "sample_databases": [
+          "EU/Gen/ABS_ESP_P5SZK.ddb",
+          "EU/Gen/ADM_P5SZK.ddb",
+          "EU/Gen/AHBG_P5SZK.ddb",
+          "EU/Gen/AIRBAG_P5SZK.ddb",
+          "EU/Gen/ALC_P5SZK.ddb",
+          "EU/Gen/AVAS_P5SZK.ddb"
+        ]
+      },
+      {
+        "table_type": 153,
+        "class_name": "CDbBehaviorDataRecordP5Table",
+        "file_occurrences": 272,
+        "record_count": 29573,
+        "record_sizes": {
+          "72": 272
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb",
+          "NA/Gen/ADeU_Eth_P5.ddb",
+          "NA/Gen/AHB_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 154,
+        "class_name": "CDbSignalGroupTable",
+        "file_occurrences": 716,
+        "record_count": 8046,
+        "record_sizes": {
+          "12": 716
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P3.ddb",
+          "NA/Gen/ABS_P3DK.ddb",
+          "NA/Gen/ABS_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 155,
+        "class_name": "CDbSignalCheckTable",
+        "file_occurrences": 716,
+        "record_count": 14310,
+        "record_sizes": {
+          "8": 716
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P4.ddb",
+          "NA/Gen/AA_C_CAN_P4DK.ddb",
+          "NA/Gen/ABS_OBD_P4.ddb",
+          "NA/Gen/ABS_P3.ddb",
+          "NA/Gen/ABS_P3DK.ddb",
+          "NA/Gen/ABS_P4.ddb"
+        ]
+      },
+      {
+        "table_type": 156,
+        "class_name": "CDbDataIdForDmTable",
+        "file_occurrences": 686,
+        "record_count": 85537,
+        "record_sizes": {
+          "8": 686
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 157,
+        "class_name": "CDbDatamonitorP5Table",
+        "file_occurrences": 703,
+        "record_count": 181245,
+        "record_sizes": {
+          "80": 703
+        },
+        "sample_databases": [
+          "NA/Gen/4WDS_P5.ddb",
+          "NA/Gen/4WD_P5.ddb",
+          "NA/Gen/ABS_P5.ddb",
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/ADS_Eth_P5.ddb"
+        ]
+      },
+      {
+        "table_type": 160,
+        "class_name": "CDbMonitorStatus_J1979_2_3_Table",
+        "file_occurrences": 7,
+        "record_count": 70,
+        "record_sizes": {
+          "28": 7
+        },
+        "sample_databases": [
+          "NA/Gen/Engine_CM_P6.ddb",
+          "NA/Gen/Engine_P5FHI.ddb",
+          "EU/Gen/Engine_CM_P6.ddb",
+          "EU/Gen/Engine_P5FHI.ddb",
+          "JP/Gen/Engine_CM_P6.ddb",
+          "JP/Gen/Engine_CM_P6F.ddb"
+        ]
+      },
+      {
+        "table_type": 161,
+        "class_name": "CDbMonitorResultCan_J1979_2_3_Table",
+        "file_occurrences": 6,
+        "record_count": 612,
+        "record_sizes": {
+          "24": 6
+        },
+        "sample_databases": [
+          "NA/Gen/RegulateECU.ddb",
+          "NA/Gen/RegulateSBRECU.ddb",
+          "EU/Gen/RegulateECU.ddb",
+          "EU/Gen/RegulateSBRECU.ddb",
+          "JP/Gen/RegulateECU.ddb",
+          "JP/Gen/RegulateSBRECU.ddb"
+        ]
+      },
+      {
+        "table_type": 162,
+        "class_name": "CDbDetailLink_J1979_2_3_Table",
+        "file_occurrences": 7,
+        "record_count": 886,
+        "record_sizes": {
+          "12": 7
+        },
+        "sample_databases": [
+          "NA/Gen/Engine_CM_P6.ddb",
+          "NA/Gen/Engine_P5FHI.ddb",
+          "EU/Gen/Engine_CM_P6.ddb",
+          "EU/Gen/Engine_P5FHI.ddb",
+          "JP/Gen/Engine_CM_P6.ddb",
+          "JP/Gen/Engine_CM_P6F.ddb"
+        ]
+      },
+      {
+        "table_type": 163,
+        "class_name": "CDbRoBDiagCodeTable",
+        "file_occurrences": 199,
+        "record_count": 9494,
+        "record_sizes": {
+          "68": 199
+        },
+        "sample_databases": [
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/BCCM_A_P6.ddb",
+          "NA/Gen/BECM_P6.ddb",
+          "NA/Gen/BSCM_A_P6.ddb",
+          "NA/Gen/BSCM_A_P6F.ddb"
+        ]
+      },
+      {
+        "table_type": 164,
+        "class_name": "CDbRoBFreezeFrameTable",
+        "file_occurrences": 250,
+        "record_count": 49204,
+        "record_sizes": {
+          "48": 250
+        },
+        "sample_databases": [
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/ANC_P6.ddb",
+          "NA/Gen/ANC_P6F.ddb",
+          "NA/Gen/BCCM_A_P6.ddb",
+          "NA/Gen/BCCM_B_P6.ddb"
+        ]
+      },
+      {
+        "table_type": 165,
+        "class_name": "CDbDDRDiagCodeTable",
+        "file_occurrences": 12,
+        "record_count": 582,
+        "record_sizes": {
+          "20": 12
+        },
+        "sample_databases": [
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/RCM_B_P6.ddb",
+          "NA/Gen/RCM_B_P6F.ddb",
+          "EU/Gen/ADCU_P6.ddb",
+          "EU/Gen/ADCU_P6F.ddb"
+        ]
+      },
+      {
+        "table_type": 166,
+        "class_name": "CDbDataIdForDdrTable",
+        "file_occurrences": 12,
+        "record_count": 2808,
+        "record_sizes": {
+          "8": 12
+        },
+        "sample_databases": [
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/RCM_B_P6.ddb",
+          "NA/Gen/RCM_B_P6F.ddb",
+          "EU/Gen/ADCU_P6.ddb",
+          "EU/Gen/ADCU_P6F.ddb"
+        ]
+      },
+      {
+        "table_type": 167,
+        "class_name": "CDbDDRFreezeFrameTable",
+        "file_occurrences": 12,
+        "record_count": 11700,
+        "record_sizes": {
+          "40": 12
+        },
+        "sample_databases": [
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/RCM_B_P6.ddb",
+          "NA/Gen/RCM_B_P6F.ddb",
+          "EU/Gen/ADCU_P6.ddb",
+          "EU/Gen/ADCU_P6F.ddb"
+        ]
+      },
+      {
+        "table_type": 168,
+        "class_name": "CDbDDRInvalidConditionTable",
+        "file_occurrences": 12,
+        "record_count": 7848,
+        "record_sizes": {
+          "16": 12
+        },
+        "sample_databases": [
+          "NA/Gen/ADCU_P6.ddb",
+          "NA/Gen/ADCU_P6F.ddb",
+          "NA/Gen/RCM_B_P6.ddb",
+          "NA/Gen/RCM_B_P6F.ddb",
+          "EU/Gen/ADCU_P6.ddb",
+          "EU/Gen/ADCU_P6F.ddb"
+        ]
+      },
+      {
+        "table_type": 170,
+        "class_name": "CDbScaling_J1979_2_3_Table",
+        "file_occurrences": 3,
+        "record_count": 321,
+        "record_sizes": {
+          "24": 3
+        },
+        "sample_databases": [
+          "NA/Gen/RegulateECU.ddb",
+          "EU/Gen/RegulateECU.ddb",
+          "JP/Gen/RegulateECU.ddb"
+        ]
+      },
+      {
+        "table_type": 171,
+        "class_name": "CDbPreFFDVehicleTypePIDIDTable",
+        "file_occurrences": 12,
+        "record_count": 11428,
+        "record_sizes": {
+          "8": 12
+        },
+        "sample_databases": [
+          "NA/Gen/DMCM_A_P6.ddb",
+          "NA/Gen/DMCM_B_P6.ddb",
+          "NA/Gen/HE_PCM_A_P6.ddb",
+          "EU/Gen/DMCM_A_P6.ddb",
+          "EU/Gen/DMCM_B_P6.ddb",
+          "EU/Gen/HE_PCM_A_P6.ddb"
+        ]
+      }
+    ]
+  },
+  "active_tests": {
+    "row_count": 24332,
+    "by_table": {
+      "11": 14152,
+      "68": 7358,
+      "71": 2822
+    },
+    "unique_resolved_name_count": 3717,
+    "control_name_matches": [
+      {
+        "source": "NA/Gen/ADCU_P6.ddb",
+        "table": 71,
+        "record": 16,
+        "name": "Activate the BSM Steering Vibration",
+        "routine_id": 5891,
+        "active_test_id": 42016
+      },
+      {
+        "source": "NA/Gen/ADCU_P6F.ddb",
+        "table": 71,
+        "record": 16,
+        "name": "Activate the BSM Steering Vibration",
+        "routine_id": 5891,
+        "active_test_id": 42016
+      },
+      {
+        "source": "JP/Gen/LDA_P4HM.ddb",
+        "table": 11,
+        "record": 2,
+        "name": "Activate the Indicator (LDA Malfunction)",
+        "legacy_primary_key": 8,
+        "legacy_secondary_key": 3
+      },
+      {
+        "source": "JP/Gen/LDA_P4HM.ddb",
+        "table": 11,
+        "record": 1,
+        "name": "Activate the Indicator (LDA OFF)",
+        "legacy_primary_key": 8,
+        "legacy_secondary_key": 2
+      },
+      {
+        "source": "JP/Gen/LDA_P4HM.ddb",
+        "table": 11,
+        "record": 0,
+        "name": "Activate the Indicator/Buzzer (LDA Activation)",
+        "legacy_primary_key": 8,
+        "legacy_secondary_key": 1
+      },
+      {
+        "source": "NA/Gen/ADCU_P6.ddb",
+        "table": 71,
+        "record": 6,
+        "name": "AES Automatic Steering in Control Notification",
+        "routine_id": 4741,
+        "active_test_id": 42006
+      },
+      {
+        "source": "NA/Gen/ADCU_P6F.ddb",
+        "table": 71,
+        "record": 6,
+        "name": "AES Automatic Steering in Control Notification",
+        "routine_id": 4741,
+        "active_test_id": 42006
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 42,
+        "name": "AES Automatic Steering in Control Notification",
+        "routine_id": 5643,
+        "active_test_id": 42043
+      },
+      {
+        "source": "NA/Gen/Meter__P5FHI.ddb",
+        "table": 71,
+        "record": 85,
+        "name": "EPS",
+        "routine_id": 514,
+        "active_test_id": 42085
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6.ddb",
+        "table": 68,
+        "record": 176,
+        "name": "EPS Warning",
+        "active_test_id": 177
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6F.ddb",
+        "table": 68,
+        "record": 176,
+        "name": "EPS Warning",
+        "active_test_id": 177
+      },
+      {
+        "source": "NA/Gen/Meter_P5.ddb",
+        "table": 68,
+        "record": 117,
+        "name": "EPS Warning",
+        "active_test_id": 128
+      },
+      {
+        "source": "NA/Gen/Meter_P3.ddb",
+        "table": 11,
+        "record": 59,
+        "name": "Indicat. EPS",
+        "legacy_primary_key": 12,
+        "legacy_secondary_key": 64
+      },
+      {
+        "source": "NA/Gen/Meter_P4.ddb",
+        "table": 11,
+        "record": 27,
+        "name": "Indicat. EPS",
+        "legacy_primary_key": 11,
+        "legacy_secondary_key": 22
+      },
+      {
+        "source": "NA/Gen/Meter_P4FHI.ddb",
+        "table": 11,
+        "record": 29,
+        "name": "Indicat. EPS",
+        "legacy_primary_key": 11,
+        "legacy_secondary_key": 30
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 33,
+        "name": "LCA Buzzer 1-1",
+        "routine_id": 5574,
+        "active_test_id": 42034
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 34,
+        "name": "LCA Buzzer 1-2",
+        "routine_id": 5574,
+        "active_test_id": 42035
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 35,
+        "name": "LCA Buzzer 2-1",
+        "routine_id": 5574,
+        "active_test_id": 42036
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 25,
+        "name": "LCA Indicator 1",
+        "routine_id": 5571,
+        "active_test_id": 42026
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 26,
+        "name": "LCA Message 1 Display",
+        "routine_id": 5572,
+        "active_test_id": 42027
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 61,
+        "name": "LCA Message 1 Display",
+        "routine_id": 5580,
+        "active_test_id": 42062
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 27,
+        "name": "LCA Message 2 Display",
+        "routine_id": 5572,
+        "active_test_id": 42028
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 28,
+        "name": "LCA MID 1-1 Display",
+        "routine_id": 5573,
+        "active_test_id": 42029
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 62,
+        "name": "LCA MID 1-1 Display",
+        "routine_id": 5581,
+        "active_test_id": 42063
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 29,
+        "name": "LCA MID 1-2 Display",
+        "routine_id": 5573,
+        "active_test_id": 42030
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 64,
+        "name": "LCA MID 1-2 Display",
+        "routine_id": 5581,
+        "active_test_id": 42065
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 30,
+        "name": "LCA MID 2-1 Display",
+        "routine_id": 5573,
+        "active_test_id": 42031
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 65,
+        "name": "LCA MID 2-1 Display",
+        "routine_id": 5581,
+        "active_test_id": 42066
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 31,
+        "name": "LCA MID 2-2 Display",
+        "routine_id": 5573,
+        "active_test_id": 42032
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 66,
+        "name": "LCA MID 2-2 Display",
+        "routine_id": 5581,
+        "active_test_id": 42067
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 32,
+        "name": "LCA MID 3-1 Display",
+        "routine_id": 5573,
+        "active_test_id": 42033
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 67,
+        "name": "LCA MID 3-1 Display",
+        "routine_id": 5581,
+        "active_test_id": 42068
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 36,
+        "name": "LCA Steering Vibration",
+        "routine_id": 5576,
+        "active_test_id": 42037
+      },
+      {
+        "source": "JP/Gen/LDA_P4HM.ddb",
+        "table": 11,
+        "record": 3,
+        "name": "LDA Buzzer",
+        "legacy_primary_key": 8,
+        "legacy_secondary_key": 4
+      },
+      {
+        "source": "NA/Gen/LDA_P4.ddb",
+        "table": 11,
+        "record": 0,
+        "name": "LDA Buzzer",
+        "legacy_primary_key": 8,
+        "legacy_secondary_key": 1
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 10,
+        "name": "LDA Buzzer 1-1",
+        "routine_id": 5382,
+        "active_test_id": 42010
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 11,
+        "name": "LDA Buzzer 1-2",
+        "routine_id": 5382,
+        "active_test_id": 42011
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 12,
+        "name": "LDA Buzzer 2-1",
+        "routine_id": 5382,
+        "active_test_id": 42012
+      },
+      {
+        "source": "NA/Gen/Meter_P4.ddb",
+        "table": 11,
+        "record": 145,
+        "name": "LDA Control Indicator",
+        "legacy_primary_key": 11,
+        "legacy_secondary_key": 151
+      },
+      {
+        "source": "NA/Gen/Meter_P4.ddb",
+        "table": 11,
+        "record": 153,
+        "name": "LDA Control Indicator (Left)",
+        "legacy_primary_key": 11,
+        "legacy_secondary_key": 160
+      },
+      {
+        "source": "NA/Gen/Meter_P4.ddb",
+        "table": 11,
+        "record": 155,
+        "name": "LDA Control Indicator (Right)",
+        "legacy_primary_key": 11,
+        "legacy_secondary_key": 162
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6.ddb",
+        "table": 68,
+        "record": 213,
+        "name": "LDA Indicator",
+        "active_test_id": 214
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6F.ddb",
+        "table": 68,
+        "record": 213,
+        "name": "LDA Indicator",
+        "active_test_id": 214
+      },
+      {
+        "source": "NA/Gen/Meter_P5.ddb",
+        "table": 68,
+        "record": 141,
+        "name": "LDA Indicator",
+        "active_test_id": 152
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6.ddb",
+        "table": 68,
+        "record": 231,
+        "name": "LDA Indicator (White)",
+        "active_test_id": 232
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6F.ddb",
+        "table": 68,
+        "record": 231,
+        "name": "LDA Indicator (White)",
+        "active_test_id": 232
+      },
+      {
+        "source": "NA/Gen/Meter_P4.ddb",
+        "table": 11,
+        "record": 177,
+        "name": "LDA Indicator (White)",
+        "legacy_primary_key": 11,
+        "legacy_secondary_key": 188
+      },
+      {
+        "source": "NA/Gen/Meter_P5.ddb",
+        "table": 68,
+        "record": 312,
+        "name": "LDA Indicator (White)",
+        "active_test_id": 325
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 3,
+        "name": "LDA Indicator 1",
+        "routine_id": 5379,
+        "active_test_id": 42003
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 4,
+        "name": "LDA Indicator 2",
+        "routine_id": 5379,
+        "active_test_id": 42004
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 5,
+        "name": "LDA Message 1 Display",
+        "routine_id": 5380,
+        "active_test_id": 42005
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 6,
+        "name": "LDA Message 2 Display",
+        "routine_id": 5380,
+        "active_test_id": 42006
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 7,
+        "name": "LDA MID 1-1 Display",
+        "routine_id": 5381,
+        "active_test_id": 42007
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 8,
+        "name": "LDA MID 1-2 Display",
+        "routine_id": 5381,
+        "active_test_id": 42008
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 9,
+        "name": "LDA MID 2-1 Display",
+        "routine_id": 5381,
+        "active_test_id": 42009
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6.ddb",
+        "table": 68,
+        "record": 210,
+        "name": "LDA Steering Control Indicator",
+        "active_test_id": 211
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6F.ddb",
+        "table": 68,
+        "record": 210,
+        "name": "LDA Steering Control Indicator",
+        "active_test_id": 211
+      },
+      {
+        "source": "NA/Gen/Meter_P4.ddb",
+        "table": 11,
+        "record": 174,
+        "name": "LDA Steering Control Indicator",
+        "legacy_primary_key": 11,
+        "legacy_secondary_key": 184
+      },
+      {
+        "source": "NA/Gen/Meter_P5.ddb",
+        "table": 68,
+        "record": 138,
+        "name": "LDA Steering Control Indicator",
+        "active_test_id": 149
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 13,
+        "name": "LDA Steering Vibration",
+        "routine_id": 5384,
+        "active_test_id": 42013
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6.ddb",
+        "table": 68,
+        "record": 214,
+        "name": "LDA Warning",
+        "active_test_id": 215
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6F.ddb",
+        "table": 68,
+        "record": 214,
+        "name": "LDA Warning",
+        "active_test_id": 215
+      },
+      {
+        "source": "NA/Gen/Meter_P5.ddb",
+        "table": 68,
+        "record": 142,
+        "name": "LDA Warning",
+        "active_test_id": 153
+      },
+      {
+        "source": "NA/Gen/Meter_P4.ddb",
+        "table": 11,
+        "record": 146,
+        "name": "LDA Warning Indicator",
+        "legacy_primary_key": 11,
+        "legacy_secondary_key": 152
+      },
+      {
+        "source": "NA/Gen/Meter_P4.ddb",
+        "table": 11,
+        "record": 154,
+        "name": "LDA Warning Indicator (Left)",
+        "legacy_primary_key": 11,
+        "legacy_secondary_key": 161
+      },
+      {
+        "source": "NA/Gen/Meter_P4.ddb",
+        "table": 11,
+        "record": 156,
+        "name": "LDA Warning Indicator (Right)",
+        "legacy_primary_key": 11,
+        "legacy_secondary_key": 163
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6.ddb",
+        "table": 68,
+        "record": 215,
+        "name": "Left LDA Indicator",
+        "active_test_id": 216
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6F.ddb",
+        "table": 68,
+        "record": 215,
+        "name": "Left LDA Indicator",
+        "active_test_id": 216
+      },
+      {
+        "source": "NA/Gen/Meter_P5.ddb",
+        "table": 68,
+        "record": 143,
+        "name": "Left LDA Indicator",
+        "active_test_id": 154
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6.ddb",
+        "table": 68,
+        "record": 216,
+        "name": "Left LDA Warning",
+        "active_test_id": 217
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6F.ddb",
+        "table": 68,
+        "record": 216,
+        "name": "Left LDA Warning",
+        "active_test_id": 217
+      },
+      {
+        "source": "NA/Gen/Meter_P5.ddb",
+        "table": 68,
+        "record": 144,
+        "name": "Left LDA Warning",
+        "active_test_id": 155
+      },
+      {
+        "source": "NA/Gen/ABS_P4DK.ddb",
+        "table": 11,
+        "record": 37,
+        "name": "Left steering",
+        "legacy_primary_key": 36,
+        "legacy_secondary_key": 38
+      },
+      {
+        "source": "NA/Gen/AHLS_P5FHI.ddb",
+        "table": 68,
+        "record": 0,
+        "name": "Left Steering Responsive Headlight",
+        "active_test_id": 1
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 22,
+        "name": "LTA Buzzer 1-1",
+        "routine_id": 5510,
+        "active_test_id": 42023
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 14,
+        "name": "LTA Indicator 1",
+        "routine_id": 5507,
+        "active_test_id": 42015
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 15,
+        "name": "LTA Message 1 Display",
+        "routine_id": 5508,
+        "active_test_id": 42016
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 53,
+        "name": "LTA Message 1 Display",
+        "routine_id": 5509,
+        "active_test_id": 42054
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 24,
+        "name": "LTA Steering Vibration",
+        "routine_id": 5512,
+        "active_test_id": 42025
+      },
+      {
+        "source": "NA/Gen/IG_CTRL_P3.ddb",
+        "table": 11,
+        "record": 7,
+        "name": "P Supply for Steering Lock",
+        "legacy_primary_key": 4,
+        "legacy_secondary_key": 8
+      },
+      {
+        "source": "NA/Gen/JBUnity_P4.ddb",
+        "table": 11,
+        "record": 53,
+        "name": "P Supply for Steering Lock",
+        "legacy_primary_key": 22,
+        "legacy_secondary_key": 8
+      },
+      {
+        "source": "NA/Gen/PowerSup_P4FHI.ddb",
+        "table": 11,
+        "record": 0,
+        "name": "P Supply for Steering Lock",
+        "legacy_primary_key": 4,
+        "legacy_secondary_key": 1
+      },
+      {
+        "source": "NA/Gen/PowerSupply_P4.ddb",
+        "table": 11,
+        "record": 6,
+        "name": "P Supply for Steering Lock",
+        "legacy_primary_key": 4,
+        "legacy_secondary_key": 6
+      },
+      {
+        "source": "NA/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 1,
+        "name": "PCS Collision Avoidance Assist",
+        "routine_id": 5636,
+        "active_test_id": 42001
+      },
+      {
+        "source": "NA/Gen/PCS2_P5.ddb",
+        "table": 71,
+        "record": 2,
+        "name": "PCS Collision Avoidance Assist",
+        "routine_id": 4364,
+        "active_test_id": 42002
+      },
+      {
+        "source": "NA/Gen/EPC_P4.ddb",
+        "table": 11,
+        "record": 2,
+        "name": "Request to Limit EPS",
+        "legacy_primary_key": 9,
+        "legacy_secondary_key": 7
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6.ddb",
+        "table": 68,
+        "record": 217,
+        "name": "Right LDA Indicator",
+        "active_test_id": 218
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6F.ddb",
+        "table": 68,
+        "record": 217,
+        "name": "Right LDA Indicator",
+        "active_test_id": 218
+      },
+      {
+        "source": "NA/Gen/Meter_P5.ddb",
+        "table": 68,
+        "record": 145,
+        "name": "Right LDA Indicator",
+        "active_test_id": 156
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6.ddb",
+        "table": 68,
+        "record": 218,
+        "name": "Right LDA Warning",
+        "active_test_id": 219
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6F.ddb",
+        "table": 68,
+        "record": 218,
+        "name": "Right LDA Warning",
+        "active_test_id": 219
+      },
+      {
+        "source": "NA/Gen/Meter_P5.ddb",
+        "table": 68,
+        "record": 146,
+        "name": "Right LDA Warning",
+        "active_test_id": 157
+      },
+      {
+        "source": "NA/Gen/ABS_P4DK.ddb",
+        "table": 11,
+        "record": 38,
+        "name": "Right steering",
+        "legacy_primary_key": 36,
+        "legacy_secondary_key": 39
+      },
+      {
+        "source": "NA/Gen/AHLS_P5FHI.ddb",
+        "table": 68,
+        "record": 1,
+        "name": "Right Steering Responsive Headlight",
+        "active_test_id": 2
+      },
+      {
+        "source": "NA/Gen/ADCU_P6.ddb",
+        "table": 71,
+        "record": 17,
+        "name": "Safe Exit Assist Buzzer",
+        "routine_id": 6017,
+        "active_test_id": 42017
+      },
+      {
+        "source": "NA/Gen/ADCU_P6F.ddb",
+        "table": 71,
+        "record": 17,
+        "name": "Safe Exit Assist Buzzer",
+        "routine_id": 6017,
+        "active_test_id": 42017
+      },
+      {
+        "source": "NA/Gen/ADCU_P6.ddb",
+        "table": 71,
+        "record": 21,
+        "name": "Safe Exit Assist Target Detection LH (Alarm)",
+        "routine_id": 6020,
+        "active_test_id": 42021
+      },
+      {
+        "source": "NA/Gen/ADCU_P6F.ddb",
+        "table": 71,
+        "record": 21,
+        "name": "Safe Exit Assist Target Detection LH (Alarm)",
+        "routine_id": 6020,
+        "active_test_id": 42021
+      },
+      {
+        "source": "NA/Gen/ADCU_P6.ddb",
+        "table": 71,
+        "record": 19,
+        "name": "Safe Exit Assist Target Detection LH (Door Lock)",
+        "routine_id": 6020,
+        "active_test_id": 42019
+      },
+      {
+        "source": "NA/Gen/ADCU_P6F.ddb",
+        "table": 71,
+        "record": 19,
+        "name": "Safe Exit Assist Target Detection LH (Door Lock)",
+        "routine_id": 6020,
+        "active_test_id": 42019
+      },
+      {
+        "source": "NA/Gen/ADCU_P6.ddb",
+        "table": 71,
+        "record": 20,
+        "name": "Safe Exit Assist Target Detection RH (Alarm)",
+        "routine_id": 6020,
+        "active_test_id": 42020
+      },
+      {
+        "source": "NA/Gen/ADCU_P6F.ddb",
+        "table": 71,
+        "record": 20,
+        "name": "Safe Exit Assist Target Detection RH (Alarm)",
+        "routine_id": 6020,
+        "active_test_id": 42020
+      },
+      {
+        "source": "NA/Gen/ADCU_P6.ddb",
+        "table": 71,
+        "record": 18,
+        "name": "Safe Exit Assist Target Detection RH (Door Lock)",
+        "routine_id": 6020,
+        "active_test_id": 42018
+      },
+      {
+        "source": "NA/Gen/ADCU_P6F.ddb",
+        "table": 71,
+        "record": 18,
+        "name": "Safe Exit Assist Target Detection RH (Door Lock)",
+        "routine_id": 6020,
+        "active_test_id": 42018
+      },
+      {
+        "source": "JP/Gen/FRC_P5.ddb",
+        "table": 71,
+        "record": 14,
+        "name": "Sound Message (LDA)",
+        "routine_id": 5385,
+        "active_test_id": 42014
+      },
+      {
+        "source": "JP/Gen/HVAC_CM_P6F.ddb",
+        "table": 68,
+        "record": 7,
+        "name": "Steering Heater",
+        "active_test_id": 8
+      },
+      {
+        "source": "NA/Gen/A_C_P4.ddb",
+        "table": 11,
+        "record": 70,
+        "name": "Steering Heater",
+        "legacy_primary_key": 63,
+        "legacy_secondary_key": 115
+      },
+      {
+        "source": "NA/Gen/A_C_P5.ddb",
+        "table": 68,
+        "record": 14,
+        "name": "Steering Heater",
+        "active_test_id": 15
+      },
+      {
+        "source": "NA/Gen/HVAC_CM_P6.ddb",
+        "table": 68,
+        "record": 7,
+        "name": "Steering Heater",
+        "active_test_id": 8
+      },
+      {
+        "source": "NA/Gen/D_SeetSW_P4.ddb",
+        "table": 11,
+        "record": 17,
+        "name": "Steering Heater Active Request (Direct Line)",
+        "legacy_primary_key": 4,
+        "legacy_secondary_key": 7
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6.ddb",
+        "table": 68,
+        "record": 190,
+        "name": "Steering Heater Indicator (Yellow)",
+        "active_test_id": 191
+      },
+      {
+        "source": "NA/Gen/IPCCM_P6F.ddb",
+        "table": 68,
+        "record": 190,
+        "name": "Steering Heater Indicator (Yellow)",
+        "active_test_id": 191
+      },
+      {
+        "source": "NA/Gen/Meter_P4.ddb",
+        "table": 11,
+        "record": 178,
+        "name": "Steering Heater Indicator (Yellow)",
+        "legacy_primary_key": 11,
+        "legacy_secondary_key": 189
+      },
+      {
+        "source": "NA/Gen/Meter_P5.ddb",
+        "table": 68,
+        "record": 311,
+        "name": "Steering Heater Indicator (Yellow)",
+        "active_test_id": 324
+      },
+      {
+        "source": "NA/Gen/FrCont_P3.ddb",
+        "table": 11,
+        "record": 41,
+        "name": "Steering Light Operation",
+        "legacy_primary_key": 8,
+        "legacy_secondary_key": 44
+      },
+      {
+        "source": "NA/Gen/PJB_New_P3.ddb",
+        "table": 11,
+        "record": 42,
+        "name": "Steering Light Operation",
+        "legacy_primary_key": 8,
+        "legacy_secondary_key": 43
+      },
+      {
+        "source": "NA/Gen/RearJB_P3.ddb",
+        "table": 11,
+        "record": 42,
+        "name": "Steering Light Operation",
+        "legacy_primary_key": 8,
+        "legacy_secondary_key": 46
+      },
+      {
+        "source": "JP/Gen/Immobi_P3.ddb",
+        "table": 11,
+        "record": 8,
+        "name": "Steering Lock Check Warning",
+        "legacy_primary_key": 2,
+        "legacy_secondary_key": 16
+      },
+      {
+        "source": "JP/Gen/Immobi_P3.ddb",
+        "table": 11,
+        "record": 9,
+        "name": "Steering Lock Unreleased Warning",
+        "legacy_primary_key": 2,
+        "legacy_secondary_key": 17
+      },
+      {
+        "source": "NA/Gen/Meter_P4.ddb",
+        "table": 11,
+        "record": 191,
+        "name": "Steering Mark Warning",
+        "legacy_primary_key": 11,
+        "legacy_secondary_key": 203
+      },
+      {
+        "source": "NA/Gen/LDA_P4.ddb",
+        "table": 11,
+        "record": 1,
+        "name": "Steering Wheel Vibration",
+        "legacy_primary_key": 17,
+        "legacy_secondary_key": 2
+      },
+      {
+        "source": "NA/Gen/LDA_P5.ddb",
+        "table": 71,
+        "record": 0,
+        "name": "Steering Wheel Vibration",
+        "routine_id": 4356,
+        "active_test_id": 42000
+      },
+      {
+        "source": "JP/Gen/Immobi_P3.ddb",
+        "table": 11,
+        "record": 2,
+        "name": "Stuck Steering Warning",
+        "legacy_primary_key": 1,
+        "legacy_secondary_key": 10
+      },
+      {
+        "source": "NA/Gen/Immobi_P3.ddb",
+        "table": 11,
+        "record": 6,
+        "name": "Stuck Steering Warning",
+        "legacy_primary_key": 1,
+        "legacy_secondary_key": 7
+      }
+    ],
+    "boundary": "name census only: absence of an angle/torque label is not proof that a routine cannot affect steering; semantic effect must be established separately"
+  },
+  "current_camry_relevant": {
+    "frc_pcs_collision_avoidance_routine": {
+      "source": "FRC_P5.ddb",
+      "table": 71,
+      "record": 1,
+      "name": "PCS Collision Avoidance Assist",
+      "routine_id": 5636,
+      "active_test_id": 42001,
+      "start_request": "31011604",
+      "stop_request": "31021604",
+      "result_request": "31031604",
+      "fixed_request": true,
+      "raw": "0000000000000000f4d701004b2801005128010000000000846e0000041611a400000000010000000000000000000000000001000000000000000000010000005a02000000000000"
+    },
+    "selected_monitors": {
+      "FRC_P5.ddb": [
+        {
+          "kind": "did",
+          "source": "FRC_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 49,
+          "name": "Steering Wheel Information",
+          "monitor_key": 50,
+          "physical_data_key": 1,
+          "bit_start": 0,
+          "bit_end": 7,
+          "pattern_display_key": 17,
+          "primary_did": 4872,
+          "alternate_did": 13064,
+          "sort_key": 4800,
+          "signal_info": {
+            "physical_data_key": 1,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 8,
+            "data_range": [
+              0,
+              3
+            ],
+            "graph_range": [
+              0,
+              3
+            ],
+            "pattern_display": {
+              "0": "Unused",
+              "1": "Left",
+              "2": "Right",
+              "3": "Default Value"
+            }
+          }
+        },
+        {
+          "kind": "did",
+          "source": "FRC_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 152,
+          "name": "PCS Collision Avoidance Assist Function",
+          "monitor_key": 153,
+          "physical_data_key": 1,
+          "bit_start": 8,
+          "bit_end": 8,
+          "pattern_display_key": 24,
+          "primary_did": 8482,
+          "alternate_did": 16674,
+          "sort_key": 15200,
+          "signal_info": {
+            "physical_data_key": 1,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 1,
+            "data_range": [
+              0,
+              1
+            ],
+            "graph_range": [
+              0,
+              1
+            ],
+            "pattern_display": {
+              "0": "OFF",
+              "1": "ON"
+            }
+          }
+        }
+      ],
+      "PCS2_P5.ddb": [
+        {
+          "kind": "did",
+          "source": "PCS2_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 24,
+          "name": "PCS Steering Request",
+          "monitor_key": 25,
+          "physical_data_key": 3,
+          "bit_start": 8,
+          "bit_end": 8,
+          "pattern_display_key": 13,
+          "primary_did": 4119,
+          "alternate_did": 12311,
+          "sort_key": 250,
+          "signal_info": {
+            "physical_data_key": 3,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 1,
+            "data_range": [
+              0,
+              1
+            ],
+            "graph_range": [
+              0,
+              1
+            ],
+            "pattern_display": {
+              "0": "OFF",
+              "1": "ON"
+            }
+          }
+        },
+        {
+          "kind": "did",
+          "source": "PCS2_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 30,
+          "name": "PCS Collision Avoidance Assist Function",
+          "monitor_key": 31,
+          "physical_data_key": 3,
+          "bit_start": 8,
+          "bit_end": 8,
+          "pattern_display_key": 13,
+          "primary_did": 8195,
+          "alternate_did": 16387,
+          "sort_key": 310,
+          "signal_info": {
+            "physical_data_key": 3,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 1,
+            "data_range": [
+              0,
+              1
+            ],
+            "graph_range": [
+              0,
+              1
+            ],
+            "pattern_display": {
+              "0": "OFF",
+              "1": "ON"
+            }
+          }
+        },
+        {
+          "kind": "did",
+          "source": "PCS2_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 32,
+          "name": "Emergency Steering Assist Invalid 1",
+          "monitor_key": 33,
+          "physical_data_key": 3,
+          "bit_start": 25,
+          "bit_end": 25,
+          "pattern_display_key": 13,
+          "primary_did": 4107,
+          "alternate_did": 12299,
+          "sort_key": 212,
+          "signal_info": {
+            "physical_data_key": 3,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 1,
+            "data_range": [
+              0,
+              1
+            ],
+            "graph_range": [
+              0,
+              1
+            ],
+            "pattern_display": {
+              "0": "OFF",
+              "1": "ON"
+            }
+          }
+        },
+        {
+          "kind": "did",
+          "source": "PCS2_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 33,
+          "name": "Emergency Steering Assist Invalid 2",
+          "monitor_key": 34,
+          "physical_data_key": 3,
+          "bit_start": 26,
+          "bit_end": 26,
+          "pattern_display_key": 13,
+          "primary_did": 4107,
+          "alternate_did": 12299,
+          "sort_key": 213,
+          "signal_info": {
+            "physical_data_key": 3,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 1,
+            "data_range": [
+              0,
+              1
+            ],
+            "graph_range": [
+              0,
+              1
+            ],
+            "pattern_display": {
+              "0": "OFF",
+              "1": "ON"
+            }
+          }
+        }
+      ],
+      "DRS_P5.ddb": [
+        {
+          "kind": "did",
+          "source": "DRS_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 36,
+          "name": "Active Steering Control Permission",
+          "monitor_key": 182,
+          "physical_data_key": 1,
+          "bit_start": 128,
+          "bit_end": 135,
+          "pattern_display_key": 2,
+          "primary_did": 4106,
+          "alternate_did": 12298,
+          "sort_key": 182,
+          "signal_info": {
+            "physical_data_key": 1,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 8,
+            "data_range": [
+              0,
+              1
+            ],
+            "graph_range": [
+              0,
+              1
+            ],
+            "pattern_display": {
+              "0": "OFF",
+              "1": "ON"
+            }
+          }
+        }
+      ],
+      "ADCU_P6.ddb": [
+        {
+          "kind": "did",
+          "source": "ADCU_P6.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 823,
+          "name": "Active Steering Status",
+          "monitor_key": 885,
+          "physical_data_key": 3,
+          "bit_start": 16,
+          "bit_end": 23,
+          "pattern_display_key": 576,
+          "primary_did": 7735,
+          "alternate_did": 0,
+          "sort_key": 17700,
+          "signal_info": {
+            "physical_data_key": 3,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 8,
+            "data_range": [
+              0,
+              1
+            ],
+            "graph_range": [
+              0,
+              1
+            ],
+            "pattern_display": {
+              "0": "Inactive",
+              "1": "Active"
+            }
+          }
+        }
+      ],
+      "IPA_P5.ddb": [
+        {
+          "kind": "did",
+          "source": "IPA_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 179,
+          "name": "Power Steering Control Module Malfunction",
+          "monitor_key": 180,
+          "physical_data_key": 1,
+          "bit_start": 8,
+          "bit_end": 8,
+          "pattern_display_key": 86,
+          "primary_did": 6661,
+          "alternate_did": 0,
+          "sort_key": 4910,
+          "signal_info": {
+            "physical_data_key": 1,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 1,
+            "data_range": [
+              0,
+              1
+            ],
+            "graph_range": [
+              0,
+              1
+            ],
+            "pattern_display": {
+              "0": "No",
+              "1": "Yes"
+            }
+          }
+        },
+        {
+          "kind": "did",
+          "source": "IPA_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 187,
+          "name": "Communication Error from Clearance Warning Control Module to Power Steering Control Module",
+          "monitor_key": 188,
+          "physical_data_key": 1,
+          "bit_start": 8,
+          "bit_end": 8,
+          "pattern_display_key": 86,
+          "primary_did": 6667,
+          "alternate_did": 0,
+          "sort_key": 4990,
+          "signal_info": {
+            "physical_data_key": 1,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 1,
+            "data_range": [
+              0,
+              1
+            ],
+            "graph_range": [
+              0,
+              1
+            ],
+            "pattern_display": {
+              "0": "No",
+              "1": "Yes"
+            }
+          }
+        },
+        {
+          "kind": "did",
+          "source": "IPA_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 192,
+          "name": "Advanced Park Perpendicular Parking Control Area",
+          "monitor_key": 193,
+          "physical_data_key": 1,
+          "bit_start": 6,
+          "bit_end": 7,
+          "pattern_display_key": 105,
+          "primary_did": 8978,
+          "alternate_did": 0,
+          "sort_key": 3350,
+          "signal_info": {
+            "physical_data_key": 1,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 2,
+            "data_range": [
+              0,
+              3
+            ],
+            "graph_range": [
+              0,
+              3
+            ],
+            "pattern_display": {
+              "0": "Narrow",
+              "1": "Normal",
+              "2": "Wide1",
+              "3": "Wide2"
+            }
+          }
+        },
+        {
+          "kind": "did",
+          "source": "IPA_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 193,
+          "name": "Advanced Park Parallel Parking Control Area",
+          "monitor_key": 194,
+          "physical_data_key": 1,
+          "bit_start": 14,
+          "bit_end": 15,
+          "pattern_display_key": 105,
+          "primary_did": 8978,
+          "alternate_did": 0,
+          "sort_key": 3360,
+          "signal_info": {
+            "physical_data_key": 1,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 2,
+            "data_range": [
+              0,
+              3
+            ],
+            "graph_range": [
+              0,
+              3
+            ],
+            "pattern_display": {
+              "0": "Narrow",
+              "1": "Normal",
+              "2": "Wide1",
+              "3": "Wide2"
+            }
+          }
+        },
+        {
+          "kind": "did",
+          "source": "IPA_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 194,
+          "name": "Advanced Park Equipped Information",
+          "monitor_key": 195,
+          "physical_data_key": 1,
+          "bit_start": 5,
+          "bit_end": 7,
+          "pattern_display_key": 134,
+          "primary_did": 4103,
+          "alternate_did": 0,
+          "sort_key": 145,
+          "signal_info": {
+            "physical_data_key": 1,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 3,
+            "data_range": [
+              0,
+              7
+            ],
+            "graph_range": [
+              0,
+              7
+            ],
+            "pattern_display": {
+              "0": "Without",
+              "1": "With (Semi-Automatic)",
+              "2": "With (Full-Automatic)",
+              "7": "Unknown"
+            }
+          }
+        },
+        {
+          "kind": "did",
+          "source": "IPA_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 195,
+          "name": "Advanced Park Main Switch Press Status",
+          "monitor_key": 196,
+          "physical_data_key": 1,
+          "bit_start": 8,
+          "bit_end": 8,
+          "pattern_display_key": 4,
+          "primary_did": 5122,
+          "alternate_did": 0,
+          "sort_key": 500,
+          "signal_info": {
+            "physical_data_key": 1,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 1,
+            "data_range": [
+              0,
+              1
+            ],
+            "graph_range": [
+              0,
+              1
+            ],
+            "pattern_display": {
+              "0": "OFF",
+              "1": "ON"
+            }
+          }
+        },
+        {
+          "kind": "did",
+          "source": "IPA_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 197,
+          "name": "Accumulated Time of System Control Maintain Brake (During Advanced Park Control)",
+          "monitor_key": 198,
+          "physical_data_key": 21,
+          "bit_start": 0,
+          "bit_end": 7,
+          "pattern_display_key": 0,
+          "primary_did": 5126,
+          "alternate_did": 0,
+          "sort_key": 520,
+          "signal_info": {
+            "physical_data_key": 21,
+            "mul": 3,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 205,
+            "unit": "min",
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 8,
+            "data_range": [
+              0,
+              255
+            ],
+            "graph_range": [
+              0,
+              765
+            ],
+            "pattern_display": {}
+          }
+        },
+        {
+          "kind": "did",
+          "source": "IPA_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 198,
+          "name": "Detection Count of Get Out the Vehicle (During Advanced Park Control)",
+          "monitor_key": 199,
+          "physical_data_key": 3,
+          "bit_start": 8,
+          "bit_end": 15,
+          "pattern_display_key": 0,
+          "primary_did": 5126,
+          "alternate_did": 0,
+          "sort_key": 530,
+          "signal_info": {
+            "physical_data_key": 3,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 4,
+            "unit": "times",
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 8,
+            "data_range": [
+              0,
+              255
+            ],
+            "graph_range": [
+              0,
+              255
+            ],
+            "pattern_display": {}
+          }
+        },
+        {
+          "kind": "did",
+          "source": "IPA_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 210,
+          "name": "Remote Park Equipped",
+          "monitor_key": 211,
+          "physical_data_key": 1,
+          "bit_start": 6,
+          "bit_end": 7,
+          "pattern_display_key": 162,
+          "primary_did": 4118,
+          "alternate_did": 0,
+          "sort_key": 148,
+          "signal_info": {
+            "physical_data_key": 1,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 2,
+            "data_range": [
+              0,
+              3
+            ],
+            "graph_range": [
+              0,
+              3
+            ],
+            "pattern_display": {
+              "0": "Without",
+              "1": "With",
+              "3": "Unknown"
+            }
+          }
+        },
+        {
+          "kind": "did",
+          "source": "IPA_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 224,
+          "name": "Compatible with AVN (Advanced Park)",
+          "monitor_key": 225,
+          "physical_data_key": 1,
+          "bit_start": 8,
+          "bit_end": 8,
+          "pattern_display_key": 86,
+          "primary_did": 5127,
+          "alternate_did": 0,
+          "sort_key": 540,
+          "signal_info": {
+            "physical_data_key": 1,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 1,
+            "data_range": [
+              0,
+              1
+            ],
+            "graph_range": [
+              0,
+              1
+            ],
+            "pattern_display": {
+              "0": "No",
+              "1": "Yes"
+            }
+          }
+        },
+        {
+          "kind": "did",
+          "source": "IPA_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 257,
+          "name": "Steer-By-Wire Equipped Information",
+          "monitor_key": 258,
+          "physical_data_key": 1,
+          "bit_start": 6,
+          "bit_end": 7,
+          "pattern_display_key": 82,
+          "primary_did": 4133,
+          "alternate_did": 0,
+          "sort_key": 166,
+          "signal_info": {
+            "physical_data_key": 1,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 2,
+            "data_range": [
+              0,
+              2
+            ],
+            "graph_range": [
+              0,
+              2
+            ],
+            "pattern_display": {
+              "0": "Without",
+              "1": "With",
+              "2": "Unknown"
+            }
+          }
+        },
+        {
+          "kind": "did",
+          "source": "IPA_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 258,
+          "name": "Steer-By-Wire Signal Inconsistency",
+          "monitor_key": 259,
+          "physical_data_key": 1,
+          "bit_start": 9,
+          "bit_end": 9,
+          "pattern_display_key": 86,
+          "primary_did": 6151,
+          "alternate_did": 0,
+          "sort_key": 4124,
+          "signal_info": {
+            "physical_data_key": 1,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 1,
+            "data_range": [
+              0,
+              1
+            ],
+            "graph_range": [
+              0,
+              1
+            ],
+            "pattern_display": {
+              "0": "No",
+              "1": "Yes"
+            }
+          }
+        },
+        {
+          "kind": "did",
+          "source": "IPA_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 263,
+          "name": "Power Steering Control Module Equipped",
+          "monitor_key": 264,
+          "physical_data_key": 1,
+          "bit_start": 7,
+          "bit_end": 7,
+          "pattern_display_key": 167,
+          "primary_did": 4136,
+          "alternate_did": 0,
+          "sort_key": 164,
+          "signal_info": {
+            "physical_data_key": 1,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 1,
+            "data_range": [
+              0,
+              1
+            ],
+            "graph_range": [
+              0,
+              1
+            ],
+            "pattern_display": {
+              "0": "Without",
+              "1": "With"
+            }
+          }
+        },
+        {
+          "kind": "did",
+          "source": "IPA_P5.ddb",
+          "table": 62,
+          "tables": [
+            62,
+            157
+          ],
+          "record": 264,
+          "name": "Software Inconsistency with Power Steering Control Module",
+          "monitor_key": 265,
+          "physical_data_key": 1,
+          "bit_start": 11,
+          "bit_end": 11,
+          "pattern_display_key": 86,
+          "primary_did": 6151,
+          "alternate_did": 0,
+          "sort_key": 4127,
+          "signal_info": {
+            "physical_data_key": 1,
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "unit_key": 0,
+            "unit": null,
+            "signed": false,
+            "decimal_point_count": 0,
+            "bit_width": 1,
+            "data_range": [
+              0,
+              1
+            ],
+            "graph_range": [
+              0,
+              1
+            ],
+            "pattern_display": {
+              "0": "No",
+              "1": "Yes"
+            }
+          }
+        }
+      ]
+    },
+    "airbag_ddr_steering_control_names": [
+      {
+        "table": 110,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 224,
+        "name": "Emergency Steering Assist Request Flag",
+        "name_string_index": 144844,
+        "raw": "0a00000000000000000000000100000000000000cc3502005f0401000000000000000000b62b10000000000101000000"
+      },
+      {
+        "table": 110,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 225,
+        "name": "Emergency Steering Assist Request Flag",
+        "name_string_index": 144844,
+        "raw": "0a00000000000000000000000100000000000000cc350200600401000700070000000000c02b10000000000201000000"
+      },
+      {
+        "table": 110,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 230,
+        "name": "Collision Avoidance Assist",
+        "name_string_index": 144838,
+        "raw": "0a00000000000000000000000100000000000000c6350200650401000500050000000000f22b10000000000101000000"
+      },
+      {
+        "table": 129,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 243,
+        "name": "Emergency Steering Assist Request Flag",
+        "name_string_index": 144844,
+        "raw": "0a00000000000000000000000100000000000000cc350200590801000000000000000000b62b10000000000101000000"
+      },
+      {
+        "table": 129,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 244,
+        "name": "Emergency Steering Assist Request Flag",
+        "name_string_index": 144844,
+        "raw": "0a00000000000000000000000100000000000000cc3502005b0801000100010000000000c02b10000000000101000000"
+      },
+      {
+        "table": 129,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 253,
+        "name": "Collision Avoidance Assist",
+        "name_string_index": 144838,
+        "raw": "0a00000000000000000000000100000000000000c6350200640801000500050000000000f22b10000000000101000000"
+      },
+      {
+        "table": 129,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 254,
+        "name": "Collision Avoidance Assist",
+        "name_string_index": 144838,
+        "raw": "0a00000000000000000000000100000000000000c6350200650801000000000000000000f22b10000000000101000000"
+      },
+      {
+        "table": 138,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 231,
+        "name": "Emergency Steering Assist Request Flag",
+        "name_string_index": 144844,
+        "raw": "0a00000000000000000000000100000000000000cc3502001d1001000700070000000000fc2b10000000000101000000"
+      },
+      {
+        "table": 138,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 232,
+        "name": "Emergency Steering Assist Request Flag",
+        "name_string_index": 144844,
+        "raw": "0a00000000000000000000000100000000000000cc3502001f1001000100010000000000102c10000000000101000000"
+      },
+      {
+        "table": 138,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 241,
+        "name": "Collision Avoidance Assist 3",
+        "name_string_index": 168787,
+        "raw": "0a00000000000000000000000100000000000000539302002810010005000500000000006a2c10000000000101000000"
+      },
+      {
+        "table": 138,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 242,
+        "name": "Collision Avoidance Assist 3",
+        "name_string_index": 168787,
+        "raw": "0a0000000000000000000000010000000000000053930200291001000000000000000000742c10000000000101000000"
+      },
+      {
+        "table": 138,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 243,
+        "name": "Collision Avoidance Assist 2",
+        "name_string_index": 168786,
+        "raw": "0a00000000000000000000000100000000000000529302002a10010006000600000000007e2c10000000000101000000"
+      },
+      {
+        "table": 138,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 244,
+        "name": "Collision Avoidance Assist 2",
+        "name_string_index": 168786,
+        "raw": "0a00000000000000000000000100000000000000529302002b1001000100010000000000882c10000000000101000000"
+      },
+      {
+        "table": 138,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 245,
+        "name": "Collision Avoidance Assist 1",
+        "name_string_index": 168785,
+        "raw": "0a00000000000000000000000100000000000000519302002c1001000700070000000000922c10000000000101000000"
+      },
+      {
+        "table": 138,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 246,
+        "name": "Collision Avoidance Assist 1",
+        "name_string_index": 168785,
+        "raw": "0a00000000000000000000000100000000000000519302002d10010002000200000000009c2c10000000000101000000"
+      },
+      {
+        "table": 147,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 231,
+        "name": "Emergency Steering Assist Request Flag",
+        "name_string_index": 144844,
+        "raw": "0a00000000000000000000000100000000000000cc350200051401000700070000000000fc2b10000000000101000000"
+      },
+      {
+        "table": 147,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 232,
+        "name": "Emergency Steering Assist Request Flag",
+        "name_string_index": 144844,
+        "raw": "0a00000000000000000000000100000000000000cc350200071401000100010000000000102c10000000000101000000"
+      },
+      {
+        "table": 147,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 241,
+        "name": "Collision Avoidance Assist 3",
+        "name_string_index": 168787,
+        "raw": "0a00000000000000000000000100000000000000539302001014010005000500000000006a2c10000000000101000000"
+      },
+      {
+        "table": 147,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 242,
+        "name": "Collision Avoidance Assist 3",
+        "name_string_index": 168787,
+        "raw": "0a0000000000000000000000010000000000000053930200111401000000000000000000742c10000000000101000000"
+      },
+      {
+        "table": 147,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 243,
+        "name": "Collision Avoidance Assist 2",
+        "name_string_index": 168786,
+        "raw": "0a00000000000000000000000100000000000000529302001214010006000600000000007e2c10000000000101000000"
+      },
+      {
+        "table": 147,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 244,
+        "name": "Collision Avoidance Assist 2",
+        "name_string_index": 168786,
+        "raw": "0a0000000000000000000000010000000000000052930200131401000100010000000000882c10000000000101000000"
+      },
+      {
+        "table": 147,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 245,
+        "name": "Collision Avoidance Assist 1",
+        "name_string_index": 168785,
+        "raw": "0a0000000000000000000000010000000000000051930200141401000700070000000000922c10000000000101000000"
+      },
+      {
+        "table": 147,
+        "class_name": "CDbDDRMonitorTable",
+        "record": 246,
+        "name": "Collision Avoidance Assist 1",
+        "name_string_index": 168785,
+        "raw": "0a00000000000000000000000100000000000000519302001514010002000200000000009c2c10000000000101000000"
+      }
+    ],
+    "psc_factor_data": {
+      "class_name": "CDbFactorDataTable",
+      "record_count": 396,
+      "record_size": 20,
+      "group_counts": {
+        "301": 31,
+        "401": 19,
+        "501": 13,
+        "601": 111,
+        "701": 111,
+        "801": 111
+      },
+      "selected_rows": [
+        {
+          "record": 0,
+          "factor": "History of no IG on in 49 Days",
+          "help": "History of no IG on in 49 Days",
+          "key_u32": 15,
+          "group_u16": 301,
+          "raw": "b72f0200b83002000f0000002d01000000000000"
+        },
+        {
+          "record": 10,
+          "factor": "Stop Start-up (Steering Lock)",
+          "help": "After operated start-up, a certain period of time had passed with keep depressing brake pedal (or clutch for MT vehicle), however steering lock couldn't be unlocked, so didn't send starter driving demand signal (HV/EV system start-up demand signal).",
+          "key_u32": 131,
+          "group_u16": 301,
+          "raw": "01390100fc300200830000002d01000000000000"
+        },
+        {
+          "record": 40,
+          "factor": "History of no IG on in 49 Days",
+          "help": "History of no IG on in 49 Days",
+          "key_u32": 15,
+          "group_u16": 401,
+          "raw": "b72f0200b83002000f0000009101000000000000"
+        },
+        {
+          "record": 50,
+          "factor": "History of no IG on in 49 Days",
+          "help": "History of no IG on in 49 Days",
+          "key_u32": 15,
+          "group_u16": 501,
+          "raw": "b72f0200b83002000f000000f501000000000000"
+        },
+        {
+          "record": 72,
+          "factor": "History of no IG on in 49 Days",
+          "help": "History of no IG on in 49 Days",
+          "key_u32": 15,
+          "group_u16": 601,
+          "raw": "b72f0200b83002000f0000005902000000000000"
+        },
+        {
+          "record": 132,
+          "factor": "Stop Start-up (Steering Lock)",
+          "help": "After operated start-up, a certain period of time had passed with keep depressing brake pedal (or clutch for MT vehicle), however steering lock couldn't be unlocked, so didn't send starter driving demand signal (HV/EV system start-up demand signal).",
+          "key_u32": 131,
+          "group_u16": 601,
+          "raw": "01390100fc300200830000005902000000000000"
+        },
+        {
+          "record": 183,
+          "factor": "History of no IG on in 49 Days",
+          "help": "History of no IG on in 49 Days",
+          "key_u32": 15,
+          "group_u16": 701,
+          "raw": "b72f0200b83002000f000000bd02000000000000"
+        },
+        {
+          "record": 243,
+          "factor": "Stop Start-up (Steering Lock)",
+          "help": "After operated start-up, a certain period of time had passed with keep depressing brake pedal (or clutch for MT vehicle), however steering lock couldn't be unlocked, so didn't send starter driving demand signal (HV/EV system start-up demand signal).",
+          "key_u32": 131,
+          "group_u16": 701,
+          "raw": "01390100fc30020083000000bd02000000000000"
+        },
+        {
+          "record": 294,
+          "factor": "History of no IG on in 49 Days",
+          "help": "History of no IG on in 49 Days",
+          "key_u32": 15,
+          "group_u16": 801,
+          "raw": "b72f0200b83002000f0000002103000000000000"
+        },
+        {
+          "record": 354,
+          "factor": "Stop Start-up (Steering Lock)",
+          "help": "After operated start-up, a certain period of time had passed with keep depressing brake pedal (or clutch for MT vehicle), however steering lock couldn't be unlocked, so didn't send starter driving demand signal (HV/EV system start-up demand signal).",
+          "key_u32": 131,
+          "group_u16": 801,
+          "raw": "01390100fc300200830000002103000000000000"
+        }
+      ],
+      "host_consumer": "GetRoBP5_DT.dll imports CDbFactorDataResRecords::GetFactorData/GetFactorHelp"
+    }
+  },
+  "req_limit_eps_boundary": {
+    "global_string_entries": [
+      {
+        "string_index": 12494,
+        "text": "Req Limit EPS 1 - Low Vol"
+      },
+      {
+        "string_index": 12533,
+        "text": "Req Limit EPS 2 - Low Vol"
+      },
+      {
+        "string_index": 12534,
+        "text": "Req Limit EPS 2 - Failure"
+      },
+      {
+        "string_index": 12536,
+        "text": "Req Limit EPS - Air Sus ON"
+      },
+      {
+        "string_index": 12539,
+        "text": "Req Limit EPS 3 - Low Vol"
+      }
+    ],
+    "collision_witnesses": [
+      {
+        "database": "EMPS_P5.ddb",
+        "numeric_value": 12533,
+        "same_number_string": "Req Limit EPS 2 - Low Vol",
+        "type61_data_id_records": [
+          {
+            "record": 239,
+            "raw": "0000f53000000000"
+          }
+        ],
+        "type62_monitors_with_same_alternate_did": [
+          {
+            "kind": "did",
+            "source": "EMPS_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 47,
+            "name": "Motor 2 V Phase Duty",
+            "monitor_key": 155,
+            "physical_data_key": 15,
+            "bit_start": 0,
+            "bit_end": 15,
+            "pattern_display_key": 0,
+            "primary_did": 4341,
+            "alternate_did": 12533,
+            "sort_key": 155
+          },
+          {
+            "kind": "did",
+            "source": "EMPS_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 47,
+            "name": "Motor 2 V Phase Duty",
+            "monitor_key": 155,
+            "physical_data_key": 15,
+            "bit_start": 0,
+            "bit_end": 15,
+            "pattern_display_key": 0,
+            "primary_did": 4341,
+            "alternate_did": 12533,
+            "sort_key": 155
+          }
+        ]
+      },
+      {
+        "database": "HV_P5.ddb",
+        "numeric_value": 12494,
+        "same_number_string": "Req Limit EPS 1 - Low Vol",
+        "type61_data_id_records": [
+          {
+            "record": 793,
+            "raw": "0000ce3000000100"
+          }
+        ],
+        "type62_monitors_with_same_alternate_did": [
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 545,
+            "name": "Pressure Control Solenoid \"D\" Actuator Stuck Off",
+            "monitor_key": 546,
+            "physical_data_key": 6,
+            "bit_start": 8,
+            "bit_end": 8,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35500
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 546,
+            "name": "Pressure Control Solenoid \"G\" Actuator Stuck Off",
+            "monitor_key": 547,
+            "physical_data_key": 6,
+            "bit_start": 9,
+            "bit_end": 9,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35510
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 547,
+            "name": "Pressure Control Solenoid \"G\" Actuator Stuck On",
+            "monitor_key": 548,
+            "physical_data_key": 6,
+            "bit_start": 10,
+            "bit_end": 10,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35520
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 548,
+            "name": "Pressure Control Solenoid \"C\" Actuator Stuck Off",
+            "monitor_key": 549,
+            "physical_data_key": 6,
+            "bit_start": 11,
+            "bit_end": 11,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35530
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 549,
+            "name": "Pressure Control Solenoid \"B\" Actuator Stuck Off",
+            "monitor_key": 550,
+            "physical_data_key": 6,
+            "bit_start": 12,
+            "bit_end": 12,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35540
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 550,
+            "name": "Pressure Control Solenoid \"B\" Actuator Stuck On",
+            "monitor_key": 551,
+            "physical_data_key": 6,
+            "bit_start": 13,
+            "bit_end": 13,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35550
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 551,
+            "name": "Pressure Control Solenoid \"A\" Actuator Stuck Off",
+            "monitor_key": 552,
+            "physical_data_key": 6,
+            "bit_start": 14,
+            "bit_end": 14,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35560
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 552,
+            "name": "Pressure Control Solenoid \"A\" Actuator Stuck On",
+            "monitor_key": 553,
+            "physical_data_key": 6,
+            "bit_start": 15,
+            "bit_end": 15,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35570
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 553,
+            "name": "Transmission Fluid Temperature Sensor Stuck on Actual Operation Range",
+            "monitor_key": 554,
+            "physical_data_key": 6,
+            "bit_start": 25,
+            "bit_end": 25,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 32510
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 554,
+            "name": "Transmission Fluid Temperature Sensor Stuck High",
+            "monitor_key": 555,
+            "physical_data_key": 6,
+            "bit_start": 26,
+            "bit_end": 26,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 32520
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 555,
+            "name": "Transmission Fluid Temperature Sensor Stuck Low",
+            "monitor_key": 556,
+            "physical_data_key": 6,
+            "bit_start": 27,
+            "bit_end": 27,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 32530
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 556,
+            "name": "Abnormal Input Shaft Revolution Increasing Detection (Transmission)",
+            "monitor_key": 557,
+            "physical_data_key": 6,
+            "bit_start": 28,
+            "bit_end": 28,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 33070
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 557,
+            "name": "Transmission Fluid Pump Revolution Deviation Abnormal",
+            "monitor_key": 558,
+            "physical_data_key": 6,
+            "bit_start": 29,
+            "bit_end": 29,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 33080
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 558,
+            "name": "Shift Solenoid \"J\" Control Actuator Stuck On",
+            "monitor_key": 559,
+            "physical_data_key": 6,
+            "bit_start": 30,
+            "bit_end": 30,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35580
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 62,
+            "tables": [
+              62
+            ],
+            "record": 559,
+            "name": "Shift Solenoid \"H\" Control Actuator Stuck Off",
+            "monitor_key": 560,
+            "physical_data_key": 6,
+            "bit_start": 31,
+            "bit_end": 31,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35590
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 545,
+            "name": "Pressure Control Solenoid \"D\" Actuator Stuck Off",
+            "monitor_key": 546,
+            "physical_data_key": 6,
+            "bit_start": 8,
+            "bit_end": 8,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35500
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 546,
+            "name": "Pressure Control Solenoid \"G\" Actuator Stuck Off",
+            "monitor_key": 547,
+            "physical_data_key": 6,
+            "bit_start": 9,
+            "bit_end": 9,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35510
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 547,
+            "name": "Pressure Control Solenoid \"G\" Actuator Stuck On",
+            "monitor_key": 548,
+            "physical_data_key": 6,
+            "bit_start": 10,
+            "bit_end": 10,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35520
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 548,
+            "name": "Pressure Control Solenoid \"C\" Actuator Stuck Off",
+            "monitor_key": 549,
+            "physical_data_key": 6,
+            "bit_start": 11,
+            "bit_end": 11,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35530
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 549,
+            "name": "Pressure Control Solenoid \"B\" Actuator Stuck Off",
+            "monitor_key": 550,
+            "physical_data_key": 6,
+            "bit_start": 12,
+            "bit_end": 12,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35540
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 550,
+            "name": "Pressure Control Solenoid \"B\" Actuator Stuck On",
+            "monitor_key": 551,
+            "physical_data_key": 6,
+            "bit_start": 13,
+            "bit_end": 13,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35550
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 551,
+            "name": "Pressure Control Solenoid \"A\" Actuator Stuck Off",
+            "monitor_key": 552,
+            "physical_data_key": 6,
+            "bit_start": 14,
+            "bit_end": 14,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35560
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 552,
+            "name": "Pressure Control Solenoid \"A\" Actuator Stuck On",
+            "monitor_key": 553,
+            "physical_data_key": 6,
+            "bit_start": 15,
+            "bit_end": 15,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35570
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 553,
+            "name": "Transmission Fluid Temperature Sensor Stuck on Actual Operation Range",
+            "monitor_key": 554,
+            "physical_data_key": 6,
+            "bit_start": 25,
+            "bit_end": 25,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 32510
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 554,
+            "name": "Transmission Fluid Temperature Sensor Stuck High",
+            "monitor_key": 555,
+            "physical_data_key": 6,
+            "bit_start": 26,
+            "bit_end": 26,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 32520
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 555,
+            "name": "Transmission Fluid Temperature Sensor Stuck Low",
+            "monitor_key": 556,
+            "physical_data_key": 6,
+            "bit_start": 27,
+            "bit_end": 27,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 32530
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 556,
+            "name": "Abnormal Input Shaft Revolution Increasing Detection (Transmission)",
+            "monitor_key": 557,
+            "physical_data_key": 6,
+            "bit_start": 28,
+            "bit_end": 28,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 33070
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 557,
+            "name": "Transmission Fluid Pump Revolution Deviation Abnormal",
+            "monitor_key": 558,
+            "physical_data_key": 6,
+            "bit_start": 29,
+            "bit_end": 29,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 33080
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 558,
+            "name": "Shift Solenoid \"J\" Control Actuator Stuck On",
+            "monitor_key": 559,
+            "physical_data_key": 6,
+            "bit_start": 30,
+            "bit_end": 30,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35580
+          },
+          {
+            "kind": "did",
+            "source": "HV_P5.ddb",
+            "table": 157,
+            "tables": [
+              157
+            ],
+            "record": 559,
+            "name": "Shift Solenoid \"H\" Control Actuator Stuck Off",
+            "monitor_key": 560,
+            "physical_data_key": 6,
+            "bit_start": 31,
+            "bit_end": 31,
+            "pattern_display_key": 7,
+            "primary_did": 4302,
+            "alternate_did": 12494,
+            "sort_key": 35590
+          }
+        ]
+      }
+    ],
+    "host_boundary": {
+      "table61_class": "CDbDataIdForDmTable",
+      "record_size": 8,
+      "lookup_field": "u16 +0x02",
+      "set_rec_string": "no-op (returns zero without consuming CDbStringTable)",
+      "meaning": "numeric equality between a type-61 data-id/DID and an M_English string index is not a semantic string reference"
+    }
+  }
+}

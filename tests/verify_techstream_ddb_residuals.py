@@ -119,8 +119,14 @@ raw_master_map = independent_factory_map(0x1001EB67, 0x58)
 raw_ecu_map = independent_factory_map(0x100225A2, 0x96)
 check("raw factories resolve all 89 format-1 and 151 format-2 cases",
       len(raw_master_map) == 89 and len(raw_ecu_map) == 151)
-check("parser master names are a strict match to executable constructors",
-      all(raw_master_map[key] == value for key, value in MASTER_TABLE_CLASS_NAMES.items()))
+v18_parser_master_map = {
+    key: value for key, value in MASTER_TABLE_CLASS_NAMES.items() if key in raw_master_map
+}
+current_only_master_ids = set(MASTER_TABLE_CLASS_NAMES) - set(raw_master_map)
+check("parser V18 master names are a strict match to executable constructors",
+      all(raw_master_map[key] == value for key, value in v18_parser_master_map.items()))
+check("current GTS+ master aliases are outside the pinned V18 factory domain",
+      current_only_master_ids == set(range(89, 94)))
 v18_parser_ecu_map = {
     key: value for key, value in ECU_TABLE_CLASS_NAMES.items() if key in raw_ecu_map
 }
