@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 446 · Corrections: 167 · Open questions: 54 · Docs: 124 · Suites: 236
+Findings: 446 · Corrections: 167 · Open questions: 54 · Docs: 125 · Suites: 236
 
 ## Reading this index
 
@@ -695,7 +695,7 @@ Findings: 446 · Corrections: 167 · Open questions: 54 · Docs: 124 · Suites: 
 | <a id="correction-corr-164"></a>**CORR-164** | [docs/variants/camry-2026-tss3-integration-audit.md](../variants/camry-2026-tss3-integration-audit.md) | yes |
 | <a id="correction-corr-165"></a>**CORR-165** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 | <a id="correction-corr-166"></a>**CORR-166** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md), [exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md](../../exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md) | yes |
-| <a id="correction-corr-167"></a>**CORR-167** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
+| <a id="correction-corr-167"></a>**CORR-167** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md), [exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md](../../exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md) | yes |
 
 ## Document registry
 

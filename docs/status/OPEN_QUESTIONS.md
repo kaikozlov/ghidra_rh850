@@ -1034,7 +1034,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 - **OQ-053 — F33 non-disruptive application-mode RAM execution pivot.** **Production-only ordering note:** VAR-060 still closes an exact persistent F33 Gate-2 development patch and deterministic restore, so this question does not block development lateral. The production goal remains a non-persistent signer/control path. Exact `8965F3307000` still has the desired volatile carrier: live evidence proves `FEBFF9F0..FEBFFBFB` (524 bytes) survives stock application startup byte-for-byte and executes, while `FEBF0000` is disproved. **VAR-134/CORR-165 withdraw the former claim that stock XCP supplies the placement half.** Rule46 `GAFLID=0x9FDC0002` is extended CAN `0x1FDC0002` (response `0x1FE00002`), and a Sep-6 non-command marker live-proved ingress through `FEBE4C34` staging with transport state `FEBE4EE6=0x5A`. But `0x821D6` calls `0x830C0 -> 0x98E80` before parsing CONNECT; fixed CodeFlash `0x30D68=0x5A` makes that hook return nonzero, so stock protocol command dispatch is disabled. The XCP `SET_MTA`/`DOWNLOAD` callbacks and write window remain real conditional handler semantics, not a stock-reachable RAM writer. OQ-053 therefore again needs **both** a stock-reachable volatile placement primitive and a safe already-running-application control transfer, or a different stock surface that supplies both.
 
-  Sep-6 resident failures are now corrected by VAR-136/CORR-167: both failed high-tail residents used a C `call0(address)` trampoline that passes the target in RH850 `r6`, unlike Toyota's direct startup `jarl` sequence, so they do not qualify ABI-preserving replay. The next bounded live action is the corrected assembly resident: direct `JARL disp32` calls, zero added application-memory writes through foreground count 223, exact F181 required in that window, then a generation-bracketed D0218 source-term snapshot at `FEBF0000..FEBF0024` plus byte-exact high-tail readback. Only `abi_preserving_runtime_and_source_terms_live` closes the runtime half.
+  Sep-6 resident failures are now corrected by VAR-136/CORR-167: both failed high-tail residents used a C `call0(address)` trampoline that passes the target in RH850 `r6`, unlike Toyota's direct startup `jarl` sequence, so they do not qualify ABI-preserving replay. The next bounded live action is the **generic ABI-preserving runtime monitor**, not another address-specific resident. Its 520-byte high-tail code uses direct `JARL disp32`, adds no application-memory writes through foreground count 223, then accepts only the non-XCP `00 F3 seq opcode arg32-le` control protocol from the already-live-proven extended `0x1FDC0002 -> FEBE4C34` path. Eight host-configurable aligned LocalRAM watch windows can be changed from the comma without rebuilding or another RAM execute; SID23 reads the coherent current snapshot. Only `runtime_monitor_live` closes the runtime/control-plane half, after which the first qualification remains READY/Park/stationary.
 
   The **recovered stock pivot surface is now statically exhausted**, rather than
   merely missing an obvious callback. CORR-123 refreshes that conclusion against
@@ -1125,16 +1125,17 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   Prioritize exact ABS/Brake-Booster firmware, Operation-FFD winner/grant, or a live
   internal-oracle capture synchronized to the request. VAR-134/CORR-165 close stock
   XCP command dispatch disabled before CONNECT, so the former native-DAQ preflight is
-  retired. VAR-136/CORR-167 replace the first RAM fallback too: both Sep-6 residents
-  used a C `call0(address)` trampoline that corrupts RH850 `r6`. The current internal
-  oracle is the corrected 406-byte direct-`JARL disp32` high-tail resident. First
-  qualify it in NRTD with no added application-memory writes through foreground count
-  223; only `abi_preserving_runtime_and_source_terms_live` permits a direct
-  NRTD->READY, no-OFF **read-existing** parked capture. That second mode performs no
-  RAM execute/writes and requires exact F181, READY, Park, <=0.5 km/h wheel speed,
-  byte-exact resident readback, and advancing coherent D0218 source-term generations.
-  It ends with full OFF and does not authorize moving observation. Batched rlog timing
-  remains unusable for physical latency/source inference. Canonical live-baseline §58.
+  retired. VAR-136/CORR-167 replace the failed C RAM fallback too: `call0(address)`
+  corrupted RH850 `r6`. The current internal oracle is the generic 520-byte
+  direct-`JARL disp32` high-tail monitor. Qualify it once in NRTD with no added
+  application-memory writes through foreground count 223; only `runtime_monitor_live`
+  permits direct NRTD->READY reuse without OFF. Thereafter the comma can change eight
+  aligned LocalRAM watch windows through the non-XCP `00 F3 seq opcode arg32-le`
+  protocol on live-proven extended `0x1FDC0002 -> FEBE4C34`, and read coherent current
+  snapshots through SID23 without rebuilding/repackaging/re-executing RAM. The first
+  qualification remains READY/Park/<=0.5-km/h and observation-only; road capture needs
+  a later resident history/trigger or asynchronous telemetry extension. Batched rlog
+  timing remains unusable for physical latency/source inference. Canonical live-baseline §58.
 
   The captured native Bus-1 boundary is now explicit. Both retained relay-correct
   drives contain the same 22 periodic camera/radar-domain streams:

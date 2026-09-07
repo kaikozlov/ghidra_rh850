@@ -4342,43 +4342,19 @@ live register state. The Sep-6 failures therefore did **not** test an ABI-preser
 manual replay. They remain valid failure observations, but they cannot localize the
 problem to high-tail execution, application-context writes, or the stock scheduler.
 
-The corrected discriminator is deliberately assembly-only for the resident call
-path. It links direct RH850 **`JARL disp32`** calls from the high tail to the exact
-F33 CodeFlash targets, preserving data registers across call dispatch. The audited
-v2 build is:
+The corrected runtime remains assembly-only for the stock-call path. It links direct RH850 **`JARL disp32`** calls from the high tail to the exact F33 CodeFlash targets, preserving data registers across call dispatch. The earlier 406-byte source-term discriminator proves the deterministic composition, but the preferred field artifact now generalizes that composition into a host-configured monitor rather than compiling test addresses into the resident.
 
-- staged shell: **534 bytes**, zero relocations, SHA-256
-  `0e0d6cc19c8fe8a4f04d216a1b85d73c41dce6e283d5d18d6a80d9da2937b1e6`;
-- high-tail resident: **406 / 524 bytes**, 118 bytes headroom, zero relocations,
-  SHA-256 `26e13ab455f9580e005cb50fc5ef1bb26d6214f3cbc9ff02056ad6af2ebb7ba9`;
-- authenticated 4-KiB payload SHA-256
-  `48f269aec2c95fbf33217db67a201faad2716985784f5e196ba5ddeade46d8dd`.
+The generic monitor build is:
 
-The builder verifies the exact `0x637EE` startup and `0x66062` foreground anchors,
-all 33 emitted far-call targets, zero relocations, the proven high-tail geometry,
-and the low-mailbox MPU/reference bounds. Through stock foreground counter **223**
-(~1.12 s nominal) the resident performs the stock-equivalent foreground body with
-**zero added application-memory writes**. The host must observe exact F181 during
-that interval. Counts **224..255** then copy the canonical 28-byte D0218
-`source-terms` profile (`AC2B`, `C7BF`, `C43C`, `C3BA`, `CB38`, `C5EE`, `CBE8`,
-`C4C0`, `CC2C`, `BF3C`, `CC48`) into a 37-byte generation-bracketed mailbox at
-`FEBF0000..FEBF0024`. The host subsequently re-reads the full 406-byte resident,
-requires its SHA-256 to remain exact, and accepts the mailbox only when magic and
-start/end generation agree.
+- staged shell: **648 bytes**, zero relocations, SHA-256 `873cae752190d66ba9ca94ba926fd1af3defe50c785cbcf1555659d3f77d91ff`;
+- high-tail resident: **520 / 524 bytes**, 4 bytes headroom, zero relocations, SHA-256 `297a53171b7a643c63cdd1da7884f60bfb208b38449fcda01d15a3f827246e6d`;
+- authenticated 4-KiB payload SHA-256 `a6e3bf4d8efd42446cf3bd0e5e4752eba5a466217257d225c6059e04dd386aa2`.
 
-The machine verdict is now correspondingly narrow. Failure to recover F181 before
-any observer write means the **ABI-preserving** composition itself still failed.
-F181 recovery followed by loss after the first snapshot isolates the new write/
-snapshot phase. Only `abi_preserving_runtime_and_source_terms_live` proves the
-corrected resident, retained code, and one coherent internal steering-state sample.
-Until that live verdict exists, the older C-based B6 observer and route44 bridge
-remain deferred; their scheduler trampoline must not be reused as evidence. A
-positive NRTD discriminator result now leads only to a **same-resident** READY/Park
-read-existing qualification: direct NRTD->READY without OFF, exact F181 plus
-READY/Park/<=0.5-km/h guards, byte-exact high-tail attestation, and at least two
-distinct coherent source-term generations over a bounded parked capture. That host
-mode performs no RAM execute and no writes. It ends with full OFF; it does not
-authorize driving with the resident or executing the legacy B6 observer/bridge.
+Through stock foreground counter **223** (~1.12 s nominal) it performs the corrected stock-equivalent foreground body with **zero added application-memory writes**. From count 224 onward it initializes only `FEBF0000..FEBF0057` as monitor-owned low RAM. The monitor has eight configurable 4-byte aligned LocalRAM watch windows and no hard-coded steering addresses. Its inbound command plane is the already-proven exact-F33 extended-CAN path: stock receive code copies eight bytes from `0x1FDC0002` to `FEBE4C34`, and the resident recognizes only `00 F3 seq opcode arg32-le`. Opcodes `0x10..0x17` set watch slots, `0x20` starts/stops foreground-rate sampling, and `0x21` requests one snapshot. The host validates source addresses to exact-F33 LocalRAM and the resident rejects unaligned stored windows. Results are generation-bracketed in the low-RAM block and read with application SID `0x23`.
+
+This composition intentionally separates **runtime** from **experiment definition**. One positive NRTD install (`runtime_monitor_live`) is followed directly by NRTD->READY without OFF; thereafter `status/watch/run/stop/snapshot/capture/shell` can change hypotheses without rebuilding, repackaging, re-entering the bootloader, or executing another RAM payload. The monitor contains no source-memory writer, dynamic call, steering/B6 transmit, SecOC bypass, command-5 path, or CodeFlash write.
+
+The first generic-monitor qualification remains Park/stationary. Its v1 output is a coherent **current** snapshot polled through SID23, not an on-ECU history ring or asynchronous telemetry stream. That is sufficient to validate the external-control architecture and to iterate rapidly on parked state hypotheses. Road-state work should extend the same command plane with resident history/trigger or response telemetry after this generic monitor is live-proven, rather than returning to address-specific compiled residents. The older C-based B6 observer and route44 bridge remain deferred and must not be executed merely because their artifacts are audited.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

@@ -301,6 +301,60 @@ check("READY parked guard decoders pin zero wheel speed and Park code",
       replay_runner.decode_wheel_speeds_kph(zero_speed) == (0.0, 0.0, 0.0, 0.0) and
       replay_runner.decode_gear(bytes(8)) == 0)
 
+print("\n== generic external-control runtime monitor ==")
+from exploit.ephemeral_runtime import camry_f33_runtime_monitor as monitor
+monitor_source_path = ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor.S"
+monitor_builder_path = ROOT / "exploit/ephemeral_runtime/build_camry_f33_runtime_monitor.py"
+monitor_audit_path = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_runtime_monitor_build.json"
+monitor_stage_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor.bin"
+monitor_source = monitor_source_path.read_text()
+monitor_audit = json.loads(monitor_audit_path.read_text())
+monitor_stage = monitor_stage_path.read_bytes()
+monitor_resident = monitor_stage[0x80:0x80 + monitor.RESIDENT_SIZE]
+check("generic monitor audited binary and source identities exact",
+      monitor_audit["schema"] == "camry-f33-runtime-monitor-build-v1" and
+      monitor_audit["source"]["sha256"] == sha(monitor_source_path.read_bytes()) and
+      monitor_audit["builder"]["sha256"] == sha(monitor_builder_path.read_bytes()) and
+      sha(monitor_stage) == monitor.EXPECTED_STAGING_SHA256 and
+      sha(monitor_resident) == monitor.EXPECTED_RESIDENT_SHA256)
+check("generic monitor fits proven high tail and keeps direct stock-call semantics",
+      monitor.RESIDENT_SIZE == monitor_audit["resident"]["size"] == 520 and
+      monitor_audit["resident"]["headroom"] == 4 and monitor_audit["resident"]["relocations"] == 0 and
+      "call0" not in monitor_source and monitor_source.count("jarl32 ") == 33)
+check("generic monitor control protocol is exact non-XCP extended-CAN shape",
+      monitor.CONTROL_CAN_ID == 0x1FDC0002 and
+      monitor.command_frame(0x23, 0x12, 0xFEBECC48) == bytes.fromhex("00f3231248ccbefe"))
+check("generic monitor host bounds and aligns LocalRAM windows",
+      monitor.validate_window(0xFEBEAC2B) == 0xFEBEAC28 and monitor.validate_window(0) == 0)
+try:
+    monitor.validate_window(0x12345678)
+    monitor_bad_addr_rejected = False
+except monitor.MonitorError:
+    monitor_bad_addr_rejected = True
+check("generic monitor rejects non-LocalRAM host watch addresses", monitor_bad_addr_rejected)
+block_raw = bytearray(monitor.CONTROL_BLOCK_SIZE)
+block_raw[0:4] = monitor.MONITOR_MAGIC.to_bytes(4, "little")
+block_raw[4] = monitor.MONITOR_VERSION
+block_raw[5] = 7
+block_raw[8:12] = (9).to_bytes(4, "little")
+block_raw[0x10:0x14] = (0xFEBECC48).to_bytes(4, "little")
+block_raw[0x30:0x34] = (9).to_bytes(4, "little")
+block_raw[0x34:0x38] = (0x89ABCDEF).to_bytes(4, "little")
+block_raw[0x54:0x58] = (9).to_bytes(4, "little")
+monitor_decoded = monitor.decode_control_block(bytes(block_raw))
+check("generic monitor decoder recovers coherent dynamic watch snapshot",
+      monitor_decoded["magic_ok"] and monitor_decoded["version_ok"] and monitor_decoded["snapshot_coherent"] and
+      monitor_decoded["watch_addresses_raw"][0] == 0xFEBECC48 and
+      monitor_decoded["values"][0]["raw_u32"] == 0x89ABCDEF)
+monitor_payload = package_shellcode(monitor_stage, secret=(ROOT / "firmware/camry-8965F3307000/CodeFlash.bin").read_bytes()[0xBFD8:0xBFE8])
+monitor_inspection = inspect_payload(monitor_payload, secret=(ROOT / "firmware/camry-8965F3307000/CodeFlash.bin").read_bytes()[0xBFD8:0xBFE8])
+check("generic monitor authenticated payload identity exact",
+      len(monitor_payload) == 0x1000 and sha(monitor_payload) == monitor.EXPECTED_PAYLOAD_SHA256 and
+      monitor_inspection.cmac_valid and monitor_inspection.crc_residue == 0xFFFFFFFF)
+check("generic monitor resident has no source-write/dynamic-call primitive and rejects unaligned windows",
+      "st.w r1, 0[r10]" not in monitor_source and "jmp [r10]" not in monitor_source and
+      "andi 3, r9, r10" in monitor_source and "bne .L_sample_gate" in monitor_source)
+
 print("\n== car-kit packaging ==")
 builder_path = ROOT / "tools/build_camry_f33_car_kit.py"
 builder_spec = importlib.util.spec_from_file_location("build_camry_f33_car_kit", builder_path)
@@ -315,7 +369,7 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v5 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v5" and manifest["target"] == {
+    check("kit manifest is self-contained v6 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v6" and manifest["target"] == {
         "eps_f181": "8965F3307000", "eps_diag": "0x7A1->0x7A9 bus0", "b6": "0x0B6/32 FD bus0",
     })
     check("kit pins live persistence-verified stage5 as current firmware", manifest["current_firmware"] == {
@@ -324,8 +378,15 @@ with tempfile.TemporaryDirectory() as td:
         "crc_prefix": "0x1960380A", "crc_fixup": "0xE69FC7F5",
         "note": "live persistence-verified 2026-09-01; no further persistent patch is part of the observer experiment",
     })
+    mon = manifest["ram_experiments"]["runtime_monitor"]
+    check("kit makes generic external-control monitor the primary RAM experiment",
+          mon["payload_sha256"] == monitor.EXPECTED_PAYLOAD_SHA256 and
+          mon["resident_sha256"] == monitor.EXPECTED_RESIDENT_SHA256 and mon["resident_size"] == 520 and
+          mon["watch_slots"] == 8 and mon["control_can_id"] == "0x1FDC0002" and
+          mon["control_frame"] == "00 F3 seq opcode arg32-le" and mon["source_memory_write"] is False and
+          mon["dynamic_call"] is False and manifest["ram_experiments"]["order"][0] == "runtime_monitor install once in NRTD")
     replay = manifest["ram_experiments"]["runtime_replay_discriminator"]
-    check("kit makes ABI-preserving runtime/source observer the first RAM experiment",
+    check("superseded ABI source-term discriminator remains identity-pinned",
           replay["payload_sha256"] == "48f269aec2c95fbf33217db67a201faad2716985784f5e196ba5ddeade46d8dd" and
           replay["staging_sha256"] == "0e0d6cc19c8fe8a4f04d216a1b85d73c41dce6e283d5d18d6a80d9da2937b1e6" and
           replay["resident_sha256"] == "26e13ab455f9580e005cb50fc5ef1bb26d6214f3cbc9ff02056ad6af2ebb7ba9" and
@@ -335,10 +396,7 @@ with tempfile.TemporaryDirectory() as td:
           replay["success_verdict"] == "abi_preserving_runtime_and_source_terms_live" and
           replay["ready_read_existing_success_verdict"] == "ready_parked_source_terms_live" and
           "NRTD->READY without OFF" in replay["next_after_success"] and replay["bypass"] is False and
-          manifest["ram_experiments"]["order"][:2] == [
-              "runtime_replay_discriminator in NRTD",
-              "same corrected resident read-existing source-term capture in READY/Park without OFF",
-          ])
+          replay["live_qualified"] is False and replay["superseded_by"] == "runtime_monitor")
     check("legacy B6 observer and bridge remain packaged but are explicitly not live-qualified",
           manifest["ram_experiments"]["observer"]["bypass"] is False and
           manifest["ram_experiments"]["observer"]["payload_sha256"] == "5be3e474c965e3111957227f7db44b30aa2c6eca6ba341a8279ceea043e2728d" and
@@ -362,6 +420,7 @@ with tempfile.TemporaryDirectory() as td:
         "firmware_patch/generic_shellcode_template.bin",
     )))
     check("kit includes observer/bridge payloads and RAM runtime needed on comma", all((out / rel).is_file() for rel in (
+        "ram_payloads/camry_f33_runtime_monitor_payload.bin",
         "ram_payloads/camry_f33_runtime_replay_discriminator_payload.bin",
         "ram_payloads/camry_f33_b6_transaction_observer_payload.bin",
         "ram_payloads/camry_f33_b6_bridge_payload.bin",
@@ -369,6 +428,7 @@ with tempfile.TemporaryDirectory() as td:
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_transaction_observer_install.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py",
+        "runtime/exploit/ephemeral_runtime/camry_f33_runtime_monitor.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
         "runtime/exploit/followups/xcp_read_probe.py", "runtime/exploit/followups/xcp_daq_probe.py",
         "runtime/tools/camry_f33_steering_state_capture.py",
@@ -402,22 +462,14 @@ with tempfile.TemporaryDirectory() as td:
     check("patch runbook pins root patch and cumulative CRC", "0x8F930: E1 0F 14 D3 -> E0 07 14 D3" in patch_runbook and "8F948=003A" in patch_runbook and "8F952=E001" in patch_runbook and "EC525C33" in patch_runbook)
     check("patch runbook encodes proven NRTD lifecycle and stage3-only restore", "NRC `0x22` in READY" in patch_runbook and "Full OFF -> NRTD" in patch_runbook and "RESTORE reverses **stage 3 only**" in patch_runbook)
     check("kit manifest pins current opendbc and Panda revisions", len(manifest["repositories"]["opendbc"].get("head", "")) == 40 and len(manifest["repositories"]["panda"].get("head", "")) == 40)
-    check("runbook uses corrected resident for both NRTD install and READY read-existing capture",
-          "ABI-preserving resident" in runbook and "abi_preserving_runtime_and_source_terms_live" in runbook and
-          "--read-existing --parked-stationary-confirmed --duration-seconds 5" in runbook and
-          "ready_parked_source_terms_live" in runbook and "NRTD -> READY" in runbook)
-    check("runbook explicitly refuses the superseded legacy observer and bridge payloads",
-          "Do not execute either payload" in runbook and
-          "No current kit command authorizes" in runbook and
-          "camry_f33_b6_transaction_observer_install.py" not in runbook and
-          "--require-bridge" not in runbook and "--small-offset-deg" not in runbook)
-    check("runbook bounds READY follow-up to Park/stationary read-only qualification",
-          "no RAM execute and no writes" in runbook.replace("**", "") and "wheel speeds within 0.5 km/h" in runbook and
-          "authorize driving with the resident" in runbook and "full OFF" in runbook)
-    check("runbook keeps persistent patch history out of the next action",
-          "do not add another persistent result-bit patch" in runbook and
-          "historical/recovery artifacts" in runbook)
-    check("runbook pins current bus0 and exclusive Panda ownership", "current post-repin" in runbook and "Panda bus 0" in runbook and "pandad|boardd" in runbook)
+    check("runbook is generic-monitor-first and externally configurable",
+          "generic runtime monitor" in runbook and "runtime_monitor_live" in runbook and
+          "B2      sequence" in runbook and "B3      opcode" in runbook and "watch SLOT ADDRESS" in runbook and
+          "camry_f33_runtime_monitor.py shell" in runbook and "Do not execute them from this runbook" in runbook)
+    check("runbook preserves observation-only boundary",
+          "no dynamic source-memory writer" in runbook and "steering CAN transmit" in runbook and
+          "current coherent snapshot" in runbook and "on-ECU history ring" in runbook)
+    check("runbook pins current bus0 and exclusive Panda ownership", "post-repin diagnostics" in runbook and "Panda bus 0" in runbook and "pandad|boardd" in runbook)
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

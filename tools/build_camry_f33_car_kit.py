@@ -20,6 +20,7 @@ from exploit.common.ram_exec import (
 )
 from exploit.ephemeral_runtime import camry_f33_b6_bridge_install as bridge_install
 from exploit.ephemeral_runtime import camry_f33_runtime_replay_discriminator as replay_discriminator
+from exploit.ephemeral_runtime import camry_f33_runtime_monitor as runtime_monitor
 from exploit.ephemeral_runtime import (
     camry_f33_b6_transaction_observer_install as observer_install,
 )
@@ -27,11 +28,12 @@ from tools import build_camry_f33_crypto_result_patch as stage5
 from tools import build_camry_f33_gate2_root_result_patch as stage3
 
 PROBE = ROOT / "exploit/behavioral_proof/camry_f33_b6_stationary_probe.py"
-RUNBOOK_TEMPLATE = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md"
+RUNBOOK_TEMPLATE = ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md"
 F33_IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_transaction_observer.bin"
 BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
 REPLAY_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_replay_discriminator.bin"
+MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor.bin"
 DEFAULT_OPENPILOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
 RUNTIME_FILES = [
     "exploit/common/payload_package.py",
@@ -40,6 +42,7 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_b6_transaction_observer_install.py",
     "exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py",
     "exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
+    "exploit/ephemeral_runtime/camry_f33_runtime_monitor.py",
     "exploit/followups/xcp_read_probe.py",
     "exploit/followups/xcp_daq_probe.py",
     "exploit/followups/xcp_runtime_state_probe.py",
@@ -273,15 +276,19 @@ def build(out: Path, openpilot: Path) -> dict:
     observer_payload = package_shellcode(OBSERVER_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     bridge_payload = package_shellcode(BRIDGE_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     replay_payload = package_shellcode(REPLAY_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+    monitor_payload = package_shellcode(MONITOR_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     if hashlib.sha256(observer_payload).hexdigest() != observer_install.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("observer authenticated payload identity drift")
     if hashlib.sha256(bridge_payload).hexdigest() != bridge_install.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("bridge authenticated payload identity drift")
     if hashlib.sha256(replay_payload).hexdigest() != replay_discriminator.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("runtime replay discriminator authenticated payload identity drift")
+    if hashlib.sha256(monitor_payload).hexdigest() != runtime_monitor.EXPECTED_PAYLOAD_SHA256:
+        raise RuntimeError("runtime monitor authenticated payload identity drift")
     (ram_dir / "camry_f33_b6_transaction_observer_payload.bin").write_bytes(observer_payload)
     (ram_dir / "camry_f33_b6_bridge_payload.bin").write_bytes(bridge_payload)
     (ram_dir / "camry_f33_runtime_replay_discriminator_payload.bin").write_bytes(replay_payload)
+    (ram_dir / "camry_f33_runtime_monitor_payload.bin").write_bytes(monitor_payload)
 
     files = {
         dst.name: {"sha256": sha256(dst)},
@@ -294,7 +301,7 @@ def build(out: Path, openpilot: Path) -> dict:
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
 
     manifest = {
-        "schema": "camry-f33-car-kit-v5",
+        "schema": "camry-f33-car-kit-v6",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
@@ -320,10 +327,29 @@ def build(out: Path, openpilot: Path) -> dict:
                 "route": "extended 0x1FDC0002->0x1FE00002 on F33 RSCFD controller1; stock command dispatch disabled",
                 "source_memory_write": False,
                 "steering_transmit": False,
-                "live_status": "stock-native execution disabled: Sep-6 ingress reaches FEBE4C34, but fixed CodeFlash 0x30D68=0x5A blocks CONNECT/DAQ; runtime replay must be qualified before any resident observer",
+                "live_status": "stock-native execution disabled: Sep-6 ingress reaches FEBE4C34, but fixed CodeFlash 0x30D68=0x5A blocks CONNECT/DAQ; the generic runtime monitor reuses only the proven staging transport with a non-XCP control frame",
             },
         },
         "ram_experiments": {
+            "runtime_monitor": {
+                "payload": "ram_payloads/camry_f33_runtime_monitor_payload.bin",
+                "payload_sha256": runtime_monitor.EXPECTED_PAYLOAD_SHA256,
+                "staging_sha256": runtime_monitor.EXPECTED_STAGING_SHA256,
+                "resident_sha256": runtime_monitor.EXPECTED_RESIDENT_SHA256,
+                "resident_base": f"0x{runtime_monitor.RESIDENT_BASE:08X}",
+                "resident_size": runtime_monitor.RESIDENT_SIZE,
+                "control_can_id": f"0x{runtime_monitor.CONTROL_CAN_ID:08X}",
+                "control_frame": "00 F3 seq opcode arg32-le",
+                "watch_slots": runtime_monitor.WATCH_SLOTS,
+                "watch_window_bytes": 4,
+                "success_verdict": "runtime_monitor_live",
+                "next_after_success": "NRTD->READY without OFF; use status/watch/run/stop/snapshot/capture/shell without another RAM execute",
+                "source_memory_write": False,
+                "dynamic_call": False,
+                "steering_transmit": False,
+                "b6_transmit": False,
+                "secoc_bypass": False,
+            },
             "runtime_replay_discriminator": {
                 "payload": "ram_payloads/camry_f33_runtime_replay_discriminator_payload.bin",
                 "payload_sha256": replay_discriminator.EXPECTED_PAYLOAD_SHA256,
@@ -339,6 +365,8 @@ def build(out: Path, openpilot: Path) -> dict:
                 "next_after_success": "NRTD->READY without OFF; run same tool --read-existing --parked-stationary-confirmed for parked source-term liveness",
                 "ready_read_existing_success_verdict": "ready_parked_source_terms_live",
                 "bypass": False,
+                "live_qualified": False,
+                "superseded_by": "runtime_monitor",
             },
             "observer": {
                 "payload": "ram_payloads/camry_f33_b6_transaction_observer_payload.bin",
@@ -359,9 +387,9 @@ def build(out: Path, openpilot: Path) -> dict:
                 "blocked_by": "shares superseded C startup/foreground trampoline; do not execute until rebuilt after corrected resident qualification",
             },
             "order": [
-                "runtime_replay_discriminator in NRTD",
-                "same corrected resident read-existing source-term capture in READY/Park without OFF",
-                "legacy B6 observer/bridge retained as artifacts only until rebuilt with ABI-preserving call semantics",
+                "runtime_monitor install once in NRTD",
+                "runtime_monitor external control/readback in READY/Park without OFF or rebuild",
+                "runtime replay discriminator and legacy B6 observer/bridge retained as artifacts only",
             ],
         },
         "firmware_patch": {
