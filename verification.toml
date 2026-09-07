@@ -1203,9 +1203,7 @@ tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "application_ram_loader"]
 oracle = "raw_bytes"
 paths = [
-  "tools/build_camry_8965F3307000_application_ram_loader_assessment.py",
   "targets/camry-2026/raw-20260826/RAM_RETENTION_MANIFEST.txt",
-  "targets/camry-2026/raw-20260906/xcp-extended-ingress-probe.json",
   "targets/camry-2026/README.md",
   "docs/variants/camry-2026-live-baseline.md",
   "docs/variants/README.md",
@@ -2340,6 +2338,15 @@ paths = [
   "tools/analyze_camry_20260906_hands_off_warning.py",
   "docs/history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md",
   "docs/variants/camry-2026-tss3-opendbc-port.md",
+]
+
+[suite.camry_2026_parser_liveness]
+tests = ["tests/verify_camry_2026_parser_liveness.py"]
+oracle = "dynamic_trace"
+paths = [
+  "tools/analyze_camry_2026_parser_liveness.py",
+  "docs/variants/camry-2026-tss3-opendbc-port.md",
+  "docs/variants/camry-2026-tss3-integration-audit.md",
 ]
 
 [suite.camry_2026_pda_sdg]

@@ -1,0 +1,1050 @@
+{
+  "boundary": "same-segment dynamic timing; parser Hz is a conservative liveness setting, not an exact ECU scheduler claim",
+  "routes": {
+    "3d": {
+      "messages": {
+        "0x00F": {
+          "bus": 0,
+          "frame_count": 37149,
+          "interval_ms": {
+            "max": 205.624792,
+            "p50": 100.074636,
+            "p99": 109.426146
+          },
+          "measured_hz_from_median": 9.992542,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 1000.0,
+          "parser_hz": 10,
+          "same_segment_interval_count": 37087,
+          "timeout_to_worst_gap_ratio": 4.863227,
+          "worst_gap_inside_timeout": true
+        },
+        "0x025": {
+          "bus": 0,
+          "frame_count": 371455,
+          "interval_ms": {
+            "max": 42.041354,
+            "p50": 9.911198,
+            "p99": 19.701718
+          },
+          "measured_hz_from_median": 100.895976,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 100.0,
+          "parser_hz": 100,
+          "same_segment_interval_count": 363121,
+          "timeout_to_worst_gap_ratio": 2.37861,
+          "worst_gap_inside_timeout": true
+        },
+        "0x030": {
+          "bus": 0,
+          "frame_count": 371448,
+          "interval_ms": {
+            "max": 42.041354,
+            "p50": 9.916927,
+            "p99": 19.97
+          },
+          "measured_hz_from_median": 100.837689,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 100.0,
+          "parser_hz": 100,
+          "same_segment_interval_count": 358341,
+          "timeout_to_worst_gap_ratio": 2.37861,
+          "worst_gap_inside_timeout": true
+        },
+        "0x08A": {
+          "bus": 2,
+          "frame_count": 148567,
+          "interval_ms": {
+            "max": 58.792136,
+            "p50": 22.861979,
+            "p99": 32.570521
+          },
+          "measured_hz_from_median": 43.740745,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 250.0,
+          "parser_hz": 40,
+          "same_segment_interval_count": 148501,
+          "timeout_to_worst_gap_ratio": 4.252269,
+          "worst_gap_inside_timeout": true
+        },
+        "0x0AA": {
+          "bus": 0,
+          "frame_count": 371437,
+          "interval_ms": {
+            "max": 42.041354,
+            "p50": 9.91,
+            "p99": 19.653854
+          },
+          "measured_hz_from_median": 100.908174,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 100.0,
+          "parser_hz": 100,
+          "same_segment_interval_count": 363784,
+          "timeout_to_worst_gap_ratio": 2.37861,
+          "worst_gap_inside_timeout": true
+        },
+        "0x0FE": {
+          "bus": 0,
+          "frame_count": 117012,
+          "interval_ms": {
+            "max": 71.280989,
+            "p50": 30.081822,
+            "p99": 40.844427
+          },
+          "measured_hz_from_median": 33.242667,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 333.333333,
+          "parser_hz": 30,
+          "same_segment_interval_count": 116947,
+          "timeout_to_worst_gap_ratio": 4.676329,
+          "worst_gap_inside_timeout": true
+        },
+        "0x101": {
+          "bus": 0,
+          "frame_count": 185719,
+          "interval_ms": {
+            "max": 51.842135,
+            "p50": 19.891719,
+            "p99": 29.69823
+          },
+          "measured_hz_from_median": 50.272176,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 200.0,
+          "parser_hz": 50,
+          "same_segment_interval_count": 185656,
+          "timeout_to_worst_gap_ratio": 3.857866,
+          "worst_gap_inside_timeout": true
+        },
+        "0x116": {
+          "bus": 0,
+          "frame_count": 157708,
+          "interval_ms": {
+            "max": 61.622916,
+            "p50": 20.567812,
+            "p99": 31.937917
+          },
+          "measured_hz_from_median": 48.619659,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 250.0,
+          "parser_hz": 40,
+          "same_segment_interval_count": 157644,
+          "timeout_to_worst_gap_ratio": 4.056932,
+          "worst_gap_inside_timeout": true
+        },
+        "0x127": {
+          "bus": 0,
+          "frame_count": 226707,
+          "interval_ms": {
+            "max": 51.842135,
+            "p50": 19.619219,
+            "p99": 22.799427
+          },
+          "measured_hz_from_median": 50.970429,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 200.0,
+          "parser_hz": 50,
+          "same_segment_interval_count": 226642,
+          "timeout_to_worst_gap_ratio": 3.857866,
+          "worst_gap_inside_timeout": true
+        },
+        "0x251": {
+          "bus": 2,
+          "frame_count": 3974,
+          "interval_ms": {
+            "max": 1006.785677,
+            "p50": 996.020781,
+            "p99": 1006.000573
+          },
+          "measured_hz_from_median": 1.003995,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 3911,
+          "timeout_to_worst_gap_ratio": 9.932601,
+          "worst_gap_inside_timeout": true
+        },
+        "0x3B7": {
+          "bus": 0,
+          "frame_count": 12402,
+          "interval_ms": {
+            "max": 597.23276,
+            "p50": 300.653385,
+            "p99": 308.441614
+          },
+          "measured_hz_from_median": 3.326089,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 3333.333333,
+          "parser_hz": 3,
+          "same_segment_interval_count": 12340,
+          "timeout_to_worst_gap_ratio": 5.581297,
+          "worst_gap_inside_timeout": true
+        },
+        "0x3F6": {
+          "bus": 2,
+          "frame_count": 4507,
+          "interval_ms": {
+            "max": 1008.898802,
+            "p50": 994.7775,
+            "p99": 1005.745312
+          },
+          "measured_hz_from_median": 1.00525,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 4444,
+          "timeout_to_worst_gap_ratio": 9.911797,
+          "worst_gap_inside_timeout": true
+        },
+        "0x412": {
+          "bus": 2,
+          "frame_count": 3966,
+          "interval_ms": {
+            "max": 1758.564427,
+            "p50": 996.246093,
+            "p99": 1005.724896
+          },
+          "measured_hz_from_median": 1.003768,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 3904,
+          "timeout_to_worst_gap_ratio": 5.686456,
+          "worst_gap_inside_timeout": true
+        },
+        "0x51E": {
+          "bus": 0,
+          "frame_count": 3717,
+          "interval_ms": {
+            "max": 1009.60276,
+            "p50": 1003.800885,
+            "p99": 1005.871302
+          },
+          "measured_hz_from_median": 0.996214,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 3655,
+          "timeout_to_worst_gap_ratio": 9.904886,
+          "worst_gap_inside_timeout": true
+        },
+        "0x610": {
+          "bus": 0,
+          "frame_count": 12172,
+          "interval_ms": {
+            "max": 512.882604,
+            "p50": 321.954271,
+            "p99": 503.086719
+          },
+          "measured_hz_from_median": 3.106031,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 3333.333333,
+          "parser_hz": 3,
+          "same_segment_interval_count": 12110,
+          "timeout_to_worst_gap_ratio": 6.499213,
+          "worst_gap_inside_timeout": true
+        },
+        "0x614": {
+          "bus": 0,
+          "frame_count": 4327,
+          "interval_ms": {
+            "max": 1007.611562,
+            "p50": 994.881927,
+            "p99": 1005.867968
+          },
+          "measured_hz_from_median": 1.005144,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 4265,
+          "timeout_to_worst_gap_ratio": 9.924459,
+          "worst_gap_inside_timeout": true
+        },
+        "0x620": {
+          "bus": 0,
+          "frame_count": 12402,
+          "interval_ms": {
+            "max": 312.8225,
+            "p50": 300.504063,
+            "p99": 303.813645
+          },
+          "measured_hz_from_median": 3.327742,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 3333.333333,
+          "parser_hz": 3,
+          "same_segment_interval_count": 12340,
+          "timeout_to_worst_gap_ratio": 10.65567,
+          "worst_gap_inside_timeout": true
+        },
+        "0x622": {
+          "bus": 0,
+          "frame_count": 3722,
+          "interval_ms": {
+            "max": 1007.296874,
+            "p50": 995.603853,
+            "p99": 1005.815313
+          },
+          "measured_hz_from_median": 1.004416,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 3660,
+          "timeout_to_worst_gap_ratio": 9.92756,
+          "worst_gap_inside_timeout": true
+        }
+      },
+      "segments": 62
+    },
+    "3e": {
+      "messages": {
+        "0x00F": {
+          "bus": 0,
+          "frame_count": 46809,
+          "interval_ms": {
+            "max": 203.394062,
+            "p50": 100.083282,
+            "p99": 109.583334
+          },
+          "measured_hz_from_median": 9.991679,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 1000.0,
+          "parser_hz": 10,
+          "same_segment_interval_count": 46731,
+          "timeout_to_worst_gap_ratio": 4.916564,
+          "worst_gap_inside_timeout": true
+        },
+        "0x025": {
+          "bus": 0,
+          "frame_count": 468036,
+          "interval_ms": {
+            "max": 36.970729,
+            "p50": 9.910937,
+            "p99": 19.684792
+          },
+          "measured_hz_from_median": 100.898634,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 100.0,
+          "parser_hz": 100,
+          "same_segment_interval_count": 457855,
+          "timeout_to_worst_gap_ratio": 2.704843,
+          "worst_gap_inside_timeout": true
+        },
+        "0x030": {
+          "bus": 0,
+          "frame_count": 468073,
+          "interval_ms": {
+            "max": 35.197552,
+            "p50": 9.916302,
+            "p99": 19.938438
+          },
+          "measured_hz_from_median": 100.844044,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 100.0,
+          "parser_hz": 100,
+          "same_segment_interval_count": 452850,
+          "timeout_to_worst_gap_ratio": 2.841107,
+          "worst_gap_inside_timeout": true
+        },
+        "0x08A": {
+          "bus": 2,
+          "frame_count": 187216,
+          "interval_ms": {
+            "max": 44.34599,
+            "p50": 22.787917,
+            "p99": 32.50625
+          },
+          "measured_hz_from_median": 43.882905,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 250.0,
+          "parser_hz": 40,
+          "same_segment_interval_count": 187137,
+          "timeout_to_worst_gap_ratio": 5.637488,
+          "worst_gap_inside_timeout": true
+        },
+        "0x0AA": {
+          "bus": 0,
+          "frame_count": 468057,
+          "interval_ms": {
+            "max": 35.197552,
+            "p50": 9.910209,
+            "p99": 19.646511
+          },
+          "measured_hz_from_median": 100.906045,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 100.0,
+          "parser_hz": 100,
+          "same_segment_interval_count": 458294,
+          "timeout_to_worst_gap_ratio": 2.841107,
+          "worst_gap_inside_timeout": true
+        },
+        "0x0FE": {
+          "bus": 0,
+          "frame_count": 147452,
+          "interval_ms": {
+            "max": 66.228854,
+            "p50": 30.08724,
+            "p99": 40.84724
+          },
+          "measured_hz_from_median": 33.236681,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 333.333333,
+          "parser_hz": 30,
+          "same_segment_interval_count": 147374,
+          "timeout_to_worst_gap_ratio": 5.033053,
+          "worst_gap_inside_timeout": true
+        },
+        "0x101": {
+          "bus": 0,
+          "frame_count": 234029,
+          "interval_ms": {
+            "max": 45.145208,
+            "p50": 19.895781,
+            "p99": 29.705468
+          },
+          "measured_hz_from_median": 50.261912,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 200.0,
+          "parser_hz": 50,
+          "same_segment_interval_count": 233950,
+          "timeout_to_worst_gap_ratio": 4.430149,
+          "worst_gap_inside_timeout": true
+        },
+        "0x116": {
+          "bus": 0,
+          "frame_count": 198740,
+          "interval_ms": {
+            "max": 53.15875,
+            "p50": 20.569479,
+            "p99": 31.848438
+          },
+          "measured_hz_from_median": 48.615718,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 250.0,
+          "parser_hz": 40,
+          "same_segment_interval_count": 198661,
+          "timeout_to_worst_gap_ratio": 4.702895,
+          "worst_gap_inside_timeout": true
+        },
+        "0x127": {
+          "bus": 0,
+          "frame_count": 285688,
+          "interval_ms": {
+            "max": 45.145208,
+            "p50": 19.616354,
+            "p99": 22.730678
+          },
+          "measured_hz_from_median": 50.977873,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 200.0,
+          "parser_hz": 50,
+          "same_segment_interval_count": 285608,
+          "timeout_to_worst_gap_ratio": 4.430149,
+          "worst_gap_inside_timeout": true
+        },
+        "0x251": {
+          "bus": 2,
+          "frame_count": 4909,
+          "interval_ms": {
+            "max": 1007.123646,
+            "p50": 1003.24,
+            "p99": 1005.7671
+          },
+          "measured_hz_from_median": 0.99677,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 4829,
+          "timeout_to_worst_gap_ratio": 9.929267,
+          "worst_gap_inside_timeout": true
+        },
+        "0x3B7": {
+          "bus": 0,
+          "frame_count": 15604,
+          "interval_ms": {
+            "max": 313.7675,
+            "p50": 300.745834,
+            "p99": 308.588229
+          },
+          "measured_hz_from_median": 3.325067,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 3333.333333,
+          "parser_hz": 3,
+          "same_segment_interval_count": 15526,
+          "timeout_to_worst_gap_ratio": 10.623577,
+          "worst_gap_inside_timeout": true
+        },
+        "0x3F6": {
+          "bus": 2,
+          "frame_count": 5469,
+          "interval_ms": {
+            "max": 1007.009115,
+            "p50": 994.9725,
+            "p99": 1005.775781
+          },
+          "measured_hz_from_median": 1.005053,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 5390,
+          "timeout_to_worst_gap_ratio": 9.930397,
+          "worst_gap_inside_timeout": true
+        },
+        "0x412": {
+          "bus": 2,
+          "frame_count": 5144,
+          "interval_ms": {
+            "max": 1006.698958,
+            "p50": 995.572499,
+            "p99": 1005.688072
+          },
+          "measured_hz_from_median": 1.004447,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 5066,
+          "timeout_to_worst_gap_ratio": 9.933456,
+          "worst_gap_inside_timeout": true
+        },
+        "0x51E": {
+          "bus": 0,
+          "frame_count": 4679,
+          "interval_ms": {
+            "max": 1006.728385,
+            "p50": 1003.73974,
+            "p99": 1005.808228
+          },
+          "measured_hz_from_median": 0.996274,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 4601,
+          "timeout_to_worst_gap_ratio": 9.933166,
+          "worst_gap_inside_timeout": true
+        },
+        "0x610": {
+          "bus": 0,
+          "frame_count": 16230,
+          "interval_ms": {
+            "max": 512.705365,
+            "p50": 282.456563,
+            "p99": 502.924219
+          },
+          "measured_hz_from_median": 3.540367,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 3333.333333,
+          "parser_hz": 3,
+          "same_segment_interval_count": 16152,
+          "timeout_to_worst_gap_ratio": 6.50146,
+          "worst_gap_inside_timeout": true
+        },
+        "0x614": {
+          "bus": 0,
+          "frame_count": 5529,
+          "interval_ms": {
+            "max": 1013.590104,
+            "p50": 994.70177,
+            "p99": 1005.632604
+          },
+          "measured_hz_from_median": 1.005326,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 5451,
+          "timeout_to_worst_gap_ratio": 9.865921,
+          "worst_gap_inside_timeout": true
+        },
+        "0x620": {
+          "bus": 0,
+          "frame_count": 15624,
+          "interval_ms": {
+            "max": 312.905313,
+            "p50": 300.538281,
+            "p99": 303.5
+          },
+          "measured_hz_from_median": 3.327363,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 3333.333333,
+          "parser_hz": 3,
+          "same_segment_interval_count": 15546,
+          "timeout_to_worst_gap_ratio": 10.65285,
+          "worst_gap_inside_timeout": true
+        },
+        "0x622": {
+          "bus": 0,
+          "frame_count": 4686,
+          "interval_ms": {
+            "max": 1006.947605,
+            "p50": 995.666667,
+            "p99": 1005.699739
+          },
+          "measured_hz_from_median": 1.004352,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 4608,
+          "timeout_to_worst_gap_ratio": 9.931003,
+          "worst_gap_inside_timeout": true
+        }
+      },
+      "segments": 78
+    },
+    "3f": {
+      "messages": {
+        "0x00F": {
+          "bus": 0,
+          "frame_count": 50147,
+          "interval_ms": {
+            "max": 204.43151,
+            "p50": 100.018177,
+            "p99": 109.515417
+          },
+          "measured_hz_from_median": 9.998183,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 1000.0,
+          "parser_hz": 10,
+          "same_segment_interval_count": 50063,
+          "timeout_to_worst_gap_ratio": 4.891614,
+          "worst_gap_inside_timeout": true
+        },
+        "0x025": {
+          "bus": 0,
+          "frame_count": 501414,
+          "interval_ms": {
+            "max": 37.454219,
+            "p50": 9.901875,
+            "p99": 19.689219
+          },
+          "measured_hz_from_median": 100.990974,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 100.0,
+          "parser_hz": 100,
+          "same_segment_interval_count": 490468,
+          "timeout_to_worst_gap_ratio": 2.669926,
+          "worst_gap_inside_timeout": true
+        },
+        "0x030": {
+          "bus": 0,
+          "frame_count": 501427,
+          "interval_ms": {
+            "max": 37.454219,
+            "p50": 9.907656,
+            "p99": 19.956041
+          },
+          "measured_hz_from_median": 100.932047,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 100.0,
+          "parser_hz": 100,
+          "same_segment_interval_count": 483864,
+          "timeout_to_worst_gap_ratio": 2.669926,
+          "worst_gap_inside_timeout": true
+        },
+        "0x08A": {
+          "bus": 2,
+          "frame_count": 200559,
+          "interval_ms": {
+            "max": 56.349688,
+            "p50": 22.75448,
+            "p99": 32.486667
+          },
+          "measured_hz_from_median": 43.94739,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 250.0,
+          "parser_hz": 40,
+          "same_segment_interval_count": 200473,
+          "timeout_to_worst_gap_ratio": 4.436582,
+          "worst_gap_inside_timeout": true
+        },
+        "0x0AA": {
+          "bus": 0,
+          "frame_count": 501425,
+          "interval_ms": {
+            "max": 37.454219,
+            "p50": 9.901354,
+            "p99": 19.656355
+          },
+          "measured_hz_from_median": 100.996288,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 100.0,
+          "parser_hz": 100,
+          "same_segment_interval_count": 491071,
+          "timeout_to_worst_gap_ratio": 2.669926,
+          "worst_gap_inside_timeout": true
+        },
+        "0x0FE": {
+          "bus": 0,
+          "frame_count": 157961,
+          "interval_ms": {
+            "max": 65.999166,
+            "p50": 30.201198,
+            "p99": 40.774636
+          },
+          "measured_hz_from_median": 33.111269,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 333.333333,
+          "parser_hz": 30,
+          "same_segment_interval_count": 157876,
+          "timeout_to_worst_gap_ratio": 5.050569,
+          "worst_gap_inside_timeout": true
+        },
+        "0x101": {
+          "bus": 0,
+          "frame_count": 250713,
+          "interval_ms": {
+            "max": 47.082917,
+            "p50": 19.872031,
+            "p99": 29.695
+          },
+          "measured_hz_from_median": 50.321983,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 200.0,
+          "parser_hz": 50,
+          "same_segment_interval_count": 250627,
+          "timeout_to_worst_gap_ratio": 4.247825,
+          "worst_gap_inside_timeout": true
+        },
+        "0x116": {
+          "bus": 0,
+          "frame_count": 212901,
+          "interval_ms": {
+            "max": 56.836354,
+            "p50": 20.580104,
+            "p99": 31.820677
+          },
+          "measured_hz_from_median": 48.590619,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 250.0,
+          "parser_hz": 40,
+          "same_segment_interval_count": 212814,
+          "timeout_to_worst_gap_ratio": 4.398593,
+          "worst_gap_inside_timeout": true
+        },
+        "0x127": {
+          "bus": 0,
+          "frame_count": 306049,
+          "interval_ms": {
+            "max": 45.650417,
+            "p50": 19.600573,
+            "p99": 22.691093
+          },
+          "measured_hz_from_median": 51.018917,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 200.0,
+          "parser_hz": 50,
+          "same_segment_interval_count": 305960,
+          "timeout_to_worst_gap_ratio": 4.381121,
+          "worst_gap_inside_timeout": true
+        },
+        "0x251": {
+          "bus": 2,
+          "frame_count": 5377,
+          "interval_ms": {
+            "max": 1006.973854,
+            "p50": 1002.93677,
+            "p99": 1005.749062
+          },
+          "measured_hz_from_median": 0.997072,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 5293,
+          "timeout_to_worst_gap_ratio": 9.930744,
+          "worst_gap_inside_timeout": true
+        },
+        "0x3B7": {
+          "bus": 0,
+          "frame_count": 16736,
+          "interval_ms": {
+            "max": 312.87125,
+            "p50": 300.685208,
+            "p99": 303.886354
+          },
+          "measured_hz_from_median": 3.325737,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 3333.333333,
+          "parser_hz": 3,
+          "same_segment_interval_count": 16652,
+          "timeout_to_worst_gap_ratio": 10.65401,
+          "worst_gap_inside_timeout": true
+        },
+        "0x3F6": {
+          "bus": 2,
+          "frame_count": 5929,
+          "interval_ms": {
+            "max": 1006.694063,
+            "p50": 994.832604,
+            "p99": 1005.580417
+          },
+          "measured_hz_from_median": 1.005194,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 5845,
+          "timeout_to_worst_gap_ratio": 9.933504,
+          "worst_gap_inside_timeout": true
+        },
+        "0x412": {
+          "bus": 2,
+          "frame_count": 5389,
+          "interval_ms": {
+            "max": 1006.567865,
+            "p50": 1002.489947,
+            "p99": 1005.567291
+          },
+          "measured_hz_from_median": 0.997516,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 5305,
+          "timeout_to_worst_gap_ratio": 9.93475,
+          "worst_gap_inside_timeout": true
+        },
+        "0x51E": {
+          "bus": 0,
+          "frame_count": 5016,
+          "interval_ms": {
+            "max": 1007.716822,
+            "p50": 1003.70552,
+            "p99": 1005.700625
+          },
+          "measured_hz_from_median": 0.996308,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 4932,
+          "timeout_to_worst_gap_ratio": 9.923423,
+          "worst_gap_inside_timeout": true
+        },
+        "0x610": {
+          "bus": 0,
+          "frame_count": 16658,
+          "interval_ms": {
+            "max": 1006.456979,
+            "p50": 321.136979,
+            "p99": 502.947552
+          },
+          "measured_hz_from_median": 3.113936,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 3333.333333,
+          "parser_hz": 3,
+          "same_segment_interval_count": 16574,
+          "timeout_to_worst_gap_ratio": 3.311948,
+          "worst_gap_inside_timeout": true
+        },
+        "0x614": {
+          "bus": 0,
+          "frame_count": 5873,
+          "interval_ms": {
+            "max": 1008.072656,
+            "p50": 994.703905,
+            "p99": 1005.607448
+          },
+          "measured_hz_from_median": 1.005324,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 5789,
+          "timeout_to_worst_gap_ratio": 9.91992,
+          "worst_gap_inside_timeout": true
+        },
+        "0x620": {
+          "bus": 0,
+          "frame_count": 16746,
+          "interval_ms": {
+            "max": 313.042031,
+            "p50": 300.53177,
+            "p99": 303.512865
+          },
+          "measured_hz_from_median": 3.327435,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 3333.333333,
+          "parser_hz": 3,
+          "same_segment_interval_count": 16662,
+          "timeout_to_worst_gap_ratio": 10.648197,
+          "worst_gap_inside_timeout": true
+        },
+        "0x622": {
+          "bus": 0,
+          "frame_count": 5021,
+          "interval_ms": {
+            "max": 1006.288176,
+            "p50": 995.603385,
+            "p99": 1005.606666
+          },
+          "measured_hz_from_median": 1.004416,
+          "nominal_floor_ok": true,
+          "parser_alive_timeout_ms": 10000.0,
+          "parser_hz": 1,
+          "same_segment_interval_count": 4937,
+          "timeout_to_worst_gap_ratio": 9.937511,
+          "worst_gap_inside_timeout": true
+        }
+      },
+      "segments": 84
+    }
+  },
+  "schema_version": 1,
+  "scope": "2026 Camry exact-F33 relay-correct retained road routes; native Panda src only",
+  "summary": {
+    "0x00F": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 0,
+      "largest_same_segment_gap_ms": 205.624792,
+      "lowest_measured_hz_from_median": 9.991679,
+      "parser_alive_timeout_ms": 1000.0,
+      "parser_hz": 10
+    },
+    "0x025": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 0,
+      "largest_same_segment_gap_ms": 42.041354,
+      "lowest_measured_hz_from_median": 100.895976,
+      "parser_alive_timeout_ms": 100.0,
+      "parser_hz": 100
+    },
+    "0x030": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 0,
+      "largest_same_segment_gap_ms": 42.041354,
+      "lowest_measured_hz_from_median": 100.837689,
+      "parser_alive_timeout_ms": 100.0,
+      "parser_hz": 100
+    },
+    "0x08A": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 2,
+      "largest_same_segment_gap_ms": 58.792136,
+      "lowest_measured_hz_from_median": 43.740745,
+      "parser_alive_timeout_ms": 250.0,
+      "parser_hz": 40
+    },
+    "0x0AA": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 0,
+      "largest_same_segment_gap_ms": 42.041354,
+      "lowest_measured_hz_from_median": 100.906045,
+      "parser_alive_timeout_ms": 100.0,
+      "parser_hz": 100
+    },
+    "0x0FE": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 0,
+      "largest_same_segment_gap_ms": 71.280989,
+      "lowest_measured_hz_from_median": 33.111269,
+      "parser_alive_timeout_ms": 333.333333,
+      "parser_hz": 30
+    },
+    "0x101": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 0,
+      "largest_same_segment_gap_ms": 51.842135,
+      "lowest_measured_hz_from_median": 50.261912,
+      "parser_alive_timeout_ms": 200.0,
+      "parser_hz": 50
+    },
+    "0x116": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 0,
+      "largest_same_segment_gap_ms": 61.622916,
+      "lowest_measured_hz_from_median": 48.590619,
+      "parser_alive_timeout_ms": 250.0,
+      "parser_hz": 40
+    },
+    "0x127": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 0,
+      "largest_same_segment_gap_ms": 51.842135,
+      "lowest_measured_hz_from_median": 50.970429,
+      "parser_alive_timeout_ms": 200.0,
+      "parser_hz": 50
+    },
+    "0x251": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 2,
+      "largest_same_segment_gap_ms": 1007.123646,
+      "lowest_measured_hz_from_median": 0.99677,
+      "parser_alive_timeout_ms": 10000.0,
+      "parser_hz": 1
+    },
+    "0x3B7": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 0,
+      "largest_same_segment_gap_ms": 597.23276,
+      "lowest_measured_hz_from_median": 3.325067,
+      "parser_alive_timeout_ms": 3333.333333,
+      "parser_hz": 3
+    },
+    "0x3F6": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 2,
+      "largest_same_segment_gap_ms": 1008.898802,
+      "lowest_measured_hz_from_median": 1.005053,
+      "parser_alive_timeout_ms": 10000.0,
+      "parser_hz": 1
+    },
+    "0x412": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 2,
+      "largest_same_segment_gap_ms": 1758.564427,
+      "lowest_measured_hz_from_median": 0.997516,
+      "parser_alive_timeout_ms": 10000.0,
+      "parser_hz": 1
+    },
+    "0x51E": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 0,
+      "largest_same_segment_gap_ms": 1009.60276,
+      "lowest_measured_hz_from_median": 0.996214,
+      "parser_alive_timeout_ms": 10000.0,
+      "parser_hz": 1
+    },
+    "0x610": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 0,
+      "largest_same_segment_gap_ms": 1006.456979,
+      "lowest_measured_hz_from_median": 3.106031,
+      "parser_alive_timeout_ms": 3333.333333,
+      "parser_hz": 3
+    },
+    "0x614": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 0,
+      "largest_same_segment_gap_ms": 1013.590104,
+      "lowest_measured_hz_from_median": 1.005144,
+      "parser_alive_timeout_ms": 10000.0,
+      "parser_hz": 1
+    },
+    "0x620": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 0,
+      "largest_same_segment_gap_ms": 313.042031,
+      "lowest_measured_hz_from_median": 3.327363,
+      "parser_alive_timeout_ms": 3333.333333,
+      "parser_hz": 3
+    },
+    "0x622": {
+      "all_routes_nominal_floor_ok": true,
+      "all_routes_worst_gap_inside_timeout": true,
+      "bus": 0,
+      "largest_same_segment_gap_ms": 1007.296874,
+      "lowest_measured_hz_from_median": 1.004352,
+      "parser_alive_timeout_ms": 10000.0,
+      "parser_hz": 1
+    }
+  }
+}
