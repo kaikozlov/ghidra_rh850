@@ -38,72 +38,79 @@ def main() -> int:
         index = json.loads(archive.read("index.json"))
 
         check("bundle schema/release and all three regional masters are pinned",
-              index["schema"] == "toyota-diagnostics-bundle-v1"
+              index["schema"] == "toyota-diagnostics-bundle-v2"
               and index["profile"] == "toyota-current"
               and index["release"] == "2026.03.002.02"
               and set(index["regions"]) == {"NA", "EU", "JP"})
-        check("bundle contains one index plus 439 lazy current-P5 category catalogs",
+        check("bundle keeps lazy decoded catalogs separate from resolver metadata",
               len(names) == 440 and sum(name.startswith("catalogs/") for name in names) == 439)
+        check("P5 and P6 support contracts are independent Toyota families",
+              set(index["support_contracts"]) == {"p5", "p6"}
+              and index["support_contracts"]["p5"]["did_root"]["request"] == "220101"
+              and index["support_contracts"]["p6"]["did_root"]["request"] == "22a100")
 
         expected_counts = {
-            "NA": (2864, 135, 179, 133),
-            "EU": (6057, 161, 179, 150),
-            "JP": (1868, 143, 179, 143),
+            "NA": (2864, 8372, 2136, 135, 82761, 2402, 1869, 479),
+            "EU": (6057, 17656, 2136, 161, 180592, 4621, 938, 554),
+            "JP": (1868, 5583, 2136, 143, 61095, 414, 653, 589),
         }
         for region, expected in expected_counts.items():
             counts = index["regions"][region]["counts"]
-            actual = (
-                counts["vehicle_count"], counts["supported_p5_category_count"],
-                counts["p5_plugin_category_count"], counts["route_count"],
-            )
-            check(f"{region} universal vehicle/P5/route counts are stable", actual == expected)
+            actual = tuple(counts[key] for key in (
+                "vehicle_count", "install_set_count", "category_count", "catalog_count", "install_row_count",
+                "vin_decision_row_count", "vehicle_decision_row_count", "route_count",
+            ))
+            check(f"{region} universal resolver counts are stable", actual == expected)
+            check(f"{region} support-family dispatch covers every Toyota category",
+                  counts["support_family_counts"] == {"p3": 1, "p4": 1859, "p5": 172, "p6": 104}
+                  and sum(counts["support_family_counts"].values()) == counts["category_count"])
 
         for region in ("NA", "EU", "JP"):
-            categories = index["regions"][region]["categories"]
-            check(f"{region} P6 Engine is not projected into the P5 runtime family",
+            regional = index["regions"][region]
+            categories = regional["categories"]
+            check(f"{region} resolver keeps every master category independent of catalog availability",
+                  len(categories) == 2136)
+            check(f"{region} P6 Engine is classified by Toyota plugin dispatch, not projected into P5",
                   categories["6000"]["database"] == "Engine_CM_P6.ddb"
-                  and categories["6000"]["current_p5_supported"] is False
-                  and "catalog_member" not in categories["6000"])
-            for category_id in index["regions"][region]["supported_p5_category_ids"]:
-                catalog = json.loads(archive.read(f"catalogs/{region}/{category_id}.json"))
-                plugins = {row["dll"] for row in catalog["plugins"]}
-                if "GetSupportP5_DT.dll" not in plugins:
-                    check(f"{region} category {category_id} is backed by Toyota GetSupportP5_DT", False)
+                  and categories["6000"]["support_family"] == "p6"
+                  and categories["6000"]["catalog_available"] is False)
+            check(f"{region} representative current TSS3 categories bind literal P5 support plugins",
+                  all(categories[str(cid)]["support_family"] == "p5"
+                      and categories[str(cid)]["support_plugin_single"]["dll"] == "GetSupportP5_DT.dll"
+                      for cid in (372, 397, 405, 435, 498)))
+
+            dispatch = regional["vehicle_resolver_dispatch"]
+            check(f"{region} VIN10 generation dispatch is exact and 5..19 are an unresolved alternate path, not unsupported",
+                  dispatch["vin10_generation_low5"] == {
+                      "3": "phase3", "4": "phase4", "20": "phase5", "21": "phase5", "22": "phase6",
+                  }
+                  and dispatch["vin10_rejected_generation_low5"] == list(range(5, 20))
+                  and dispatch["roles"]["0x45"]["semantic"] == "legacy_select_vehicle"
+                  and dispatch["roles"]["0x45"]["binary_present_in_current_gtsplus"] is False
+                  and dispatch["roles"]["0x7D"]["binary_present_in_current_gtsplus"] is True)
+
+            session = regional["session_control"]
+            check(f"{region} session metadata has no generation/category permission allowlist",
+                  session["kind"] == "toyota-per-category-selector-lifecycle"
+                  and "eligible_generation_low5" not in session
+                  and "wire_proven_categories" not in session)
+            for cid in (372, 397, 405, 435, 498):
+                row = session["per_category"][str(cid)]
+                if not (row["session_executor_supported"] is True
+                        and row["default_session_value"] == 1
+                        and row["extended_session_value"] == 3):
+                    check(f"{region} TSS3 category-local D1/D2 session executor is recovered", False)
                     break
             else:
-                check(f"{region} every shipped P5 catalog is backed by Toyota GetSupportP5_DT", True)
-
-        na_session = index["regions"]["NA"]["session_control"]["per_category"]
-        eu_session = index["regions"]["EU"]["session_control"]["per_category"]
-        jp_session = index["regions"]["JP"]["session_control"]["per_category"]
-        check("current P5 lifecycle keeps Toyota's category-local F186 session-poll family",
-              na_session["372"]["keepalive"]["request"] == "22f186"
-              and eu_session["372"]["keepalive"]["request"] == "22f186"
-              and jp_session["372"]["keepalive"]["request"] == "22f186")
-        check("Mitsubishi-family P5 categories use their recovered D100 DID poll rather than Camry F186",
-              na_session["851"]["keepalive"] == {
-                  "kind": "did_poll", "did": "0xD100", "request": "22d100",
-                  "positive_prefix": "62d100", "interval_s": 2.0,
-              }
-              and eu_session["851"]["keepalive"]["request"] == "22d100")
-        check("EU/JP preserve the category-local 1003 extended-session refresh family",
-              eu_session["471"]["keepalive"] == {
-                  "kind": "extended_session_refresh", "request": "1003", "interval_s": 2.0,
-              }
-              and jp_session["471"]["keepalive"]["request"] == "1003")
+                check(f"{region} TSS3 category-local D1/D2 session executor is recovered", True)
 
         na = index["regions"]["NA"]
-        check("current P5 session generation dispatch is Phase5-only",
-              index["p5_session_generation_low5"] == [20, 21])
-        check("class-0x10D stores legislated physical request IDs",
-              na["routes"]["372:18"]["legislated_request_address"] == 0x7E0
-              and "legislated_response_address" not in na["routes"]["372:18"])
         camry = na["vehicles"]["12704"]
         check("Camry HV remains one Toyota DB vehicle, not the bundle profile",
               camry["name"] == "Camry HV"
               and camry["install_set_ids"] == [8119, 8120, 8121, 27706])
         four_runner = na["vehicles"]["12757"]
-        check("non-Camry current-P5 vehicle is represented by the same resolver",
+        check("non-Camry vehicle is represented by the same resolver",
               four_runner["name"] == "4Runner" and bool(four_runner["install_set_ids"]))
 
         def vehicle_candidates(vehicle: dict[str, object]) -> list[dict[str, object]]:
@@ -119,12 +126,19 @@ def main() -> int:
 
         camry_candidates = vehicle_candidates(camry)
         four_runner_candidates = vehicle_candidates(four_runner)
-        check("Camry resolver has 34 logical candidates with 33 implemented P5 routes",
+        check("Camry resolver preserves all 34 logical candidates and routes",
               len(camry_candidates) == 34
-              and sum(row.get("route_key") is not None for row in camry_candidates) == 33)
-        check("4Runner resolves independently to 35 implemented P5 routes",
+              and all(row.get("route_key") is not None for row in camry_candidates))
+        check("4Runner resolves independently to all 35 routes",
               len(four_runner_candidates) == 35
               and all(row.get("route_key") is not None for row in four_runner_candidates))
+
+        p4 = na["vehicle_decision"]["probe_program"]["phase4"]
+        p4_programs = list(p4["programs_by_k1"].values())
+        check("P4 vehicle decision exports Toyota's complete 0x28..0x39 special-master program",
+              bool(p4_programs)
+              and all(sorted(step["selector"] for step in program["steps"]) == list(range(0x28, 0x3A))
+                      for program in p4_programs))
 
     actual_sha = hashlib.sha256(ART.read_bytes()).hexdigest()
     with tempfile.TemporaryDirectory() as tmp:

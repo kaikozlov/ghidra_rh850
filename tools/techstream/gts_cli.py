@@ -2463,7 +2463,7 @@ def cmd_recover_all_bodies(args: argparse.Namespace) -> int:
     return 0
 
 
-TOYOTA_DIAG_BUNDLE_SCHEMA = "toyota-diagnostics-bundle-v1"
+TOYOTA_DIAG_BUNDLE_SCHEMA = "toyota-diagnostics-bundle-v2"
 TOYOTA_DIAG_BUNDLE_PROFILE = "toyota-current"
 TOYOTA_DIAG_BUNDLE_REGIONS = ("NA", "EU", "JP")
 TOYOTA_CURRENT_P5_GENERATION_LOW5 = (0x14, 0x15)
@@ -3508,8 +3508,159 @@ def _bundle_can_topologies(parser: DDBParser, master: Any, strings: Any, vehicle
     return out
 
 
+def _bundle_support_plugin(rows: list[Any], category_id: int, role: int) -> dict[str, Any] | None:
+    """Apply current CDbDllTable::GetQuery role/category fallback exactly."""
+    role_rows = [row for row in rows if int(row.dll_role_id) == role]
+    if not role_rows:
+        return None
+    selected = next((row for row in role_rows if int(row.category_id) == category_id), role_rows[0])
+    return {
+        "role": role,
+        "requested_category_id": category_id,
+        "binding_category_id": int(selected.category_id),
+        "exact_category_binding": int(selected.category_id) == category_id,
+        "dll": selected.dll_name,
+    }
+
+
+def _bundle_support_family(single: dict[str, Any] | None, multi: dict[str, Any] | None) -> str | None:
+    """Name the family Toyota's selected support plugin actually implements."""
+    for selected in (multi, single):
+        dll = str(selected.get("dll") or "") if selected is not None else ""
+        for family in ("P6", "P5", "P4", "P3"):
+            if family in dll:
+                return family.casefold()
+    return None
+
+
+def _bundle_vehicle_decision_rows(master: Any) -> list[dict[str, Any]]:
+    """Serialize type-41 semantics as clean criteria instead of opaque DDB records."""
+    out = []
+    for raw in ddb_records(master.sections[41]):
+        if len(raw) != 52:
+            raise ValueError(f"type-41 row size drift: {len(raw)}")
+        flags = struct.unpack_from("<I", raw, 0x24)[0]
+        out.append({
+            "category_id": struct.unpack_from("<H", raw, 0x00)[0],
+            "phase_type": raw[0x02],
+            "flags": flags,
+            "text_criteria": [
+                {"value_hex": raw[0x03:0x0A].hex(), "length": raw[0x0A], "operator": raw[0x0B]},
+                {"value_hex": raw[0x0C:0x12].hex(), "length": raw[0x12], "operator": raw[0x13]},
+            ],
+            "scalar_criteria": [
+                {"value": raw[0x14], "operator": raw[0x15]},
+                {"value": raw[0x16], "operator": raw[0x17]},
+                {"value": raw[0x18], "operator": raw[0x19]},
+                {"value": raw[0x1A], "operator": raw[0x1B]},
+                {"value": raw[0x1C], "operator": raw[0x1D]},
+                # Current DecisionKey uses the same operator byte at +0x1D for the +0x1E criterion.
+                {"value": raw[0x1E], "operator": raw[0x1D]},
+                {"value": raw[0x20], "operator": raw[0x21]},
+                {"value": raw[0x22], "operator": raw[0x23]},
+            ],
+            "new_fields": [struct.unpack_from("<H", raw, off)[0] for off in (0x28, 0x2A, 0x2C, 0x2E)],
+            "field_30": struct.unpack_from("<H", raw, 0x30)[0],
+            "vehicle_type": struct.unpack_from("<H", raw, 0x32)[0],
+        })
+    return out
+
+
+_PHASE3_SELECTORS = ((0x1B, 9), (0x1C, 5), (0x1D, 4), (0x1E, 3), (0x1F, 2), (0x20, 2),
+                     (0x21, 2), (0x22, 8), (0x23, 1), (0x24, 1), (0x25, 1), (0x26, 6), (0x27, 7))
+_PHASE4_SELECTORS = ((0x28, 1), (0x29, 1), (0x2A, 1), (0x2B, 1), (0x2C, 1), (0x2D, 1),
+                     (0x2E, 1), (0x2F, 2), (0x30, 2), (0x31, 2), (0x32, 2), (0x33, 2),
+                     (0x34, 2), (0x36, 3), (0x37, 4), (0x38, 5), (0x35, 6), (0x39, 10))
+
+
+def _bundle_special_vehicle_program(gts_root: Path, region: str, parser: DDBParser, gen_master: Any) -> dict[str, Any]:
+    """Resolve P3/P4 SelectCarTypeVin10 probes from Spe FuncCommFrame + Gen CommSet."""
+    spe_root = _db_root(gts_root, region, "Spe")
+    spe_path = spe_root / "Toyota.ddb"
+    spe = parser.parse_master_db(spe_path)
+    func = spe.sections[18]
+    frame = spe.sections[17]
+    frame_rows = {
+        struct.unpack_from("<H", raw, 0)[0]: raw
+        for raw in ddb_records(frame)
+    }
+    by_key: dict[tuple[int, int], list[bytes]] = {}
+    for raw in ddb_records(func):
+        k1, selector = struct.unpack_from("<HH", raw, 0)
+        by_key.setdefault((k1, selector), []).append(raw)
+
+    def programs(selector_map: tuple[tuple[int, int], ...]) -> dict[str, Any]:
+        selectors = {selector for selector, _ in selector_map}
+        k1s = sorted({k1 for k1, selector in by_key if selector in selectors})
+        out: dict[str, Any] = {}
+        for k1 in k1s:
+            steps = []
+            for selector, parser_kind in selector_map:
+                matches = by_key.get((k1, selector), [])
+                if not matches:
+                    continue
+                frames = []
+                for raw in matches:
+                    comm_set_id, frame_id = struct.unpack_from("<HH", raw, 4)
+                    comm_frame = frame_rows.get(frame_id)
+                    if comm_frame is None:
+                        raise ValueError(f"{region} Spe CommFrame {frame_id} is missing")
+                    send_id, mask_id, check_id = struct.unpack_from("<HHH", comm_frame, 2)
+                    frames.append({
+                        "comm_set_id": comm_set_id,
+                        "comm_frame_id": frame_id,
+                        "send": _master_variable(spe, send_id)["bytes"],
+                        "mask": _master_variable(spe, mask_id)["bytes"],
+                        "check": _master_variable(spe, check_id)["bytes"],
+                    })
+                steps.append({
+                    "selector": selector,
+                    "parser_kind": parser_kind,
+                    "frames": frames,
+                })
+            if steps:
+                out[str(k1)] = {"k1": k1, "steps": steps}
+        return out
+
+    phase3 = programs(_PHASE3_SELECTORS)
+    phase4 = programs(_PHASE4_SELECTORS)
+    commset_ids = sorted({
+        frame["comm_set_id"]
+        for programs_by_k1 in (phase3, phase4)
+        for program in programs_by_k1.values()
+        for step in program["steps"]
+        for frame in step["frames"]
+    })
+    gen_commsets = {row["comm_set_id"]: row for row in _master_comm_set_rows(parser, gen_master)}
+    missing = [comm_set_id for comm_set_id in commset_ids if comm_set_id not in gen_commsets]
+    if missing:
+        raise ValueError(f"{region} Spe vehicle program references missing Gen CommSets {missing}")
+    return {
+        "phase3": {
+            "type41_mode": "DecisionKey/DecisionKeyEU according to Toyota region selector",
+            "programs_by_k1": phase3,
+        },
+        "phase4": {
+            "type41_mode": "DecisionKey/DecisionKeyEU according to Toyota region selector",
+            "programs_by_k1": phase4,
+        },
+        "commsets": {str(key): gen_commsets[key] for key in commset_ids},
+        "source_identity": {
+            "special_master": {
+                "path": f"{region}/DB/Spe/Toyota.ddb",
+                "bytes": spe_path.stat().st_size,
+                "sha256": _file_sha256(spe_path),
+            },
+        },
+        "boundary": (
+            "SelectCarTypeVin10 P3/P4 resolves FuncCommFrame/CommFrame/variable records from the Spe master while "
+            "the referenced CommSet is resolved from the Gen master. K1 is Toyota shared-data slot 14; no category heuristic is substituted."
+        ),
+    }
+
+
 def _bundle_session_control(parser: DDBParser, master: Any, categories: list[dict[str, Any]]) -> dict[str, Any]:
-    """Current-P5 lifecycle with each category's actual D1/D2/DD selector frames."""
+    """Per-category lifecycle derived from each category's actual D1/D2/DD selector frames."""
     lifecycle = _execution_model()["gtsplus_continuity"]["dll_role_schema"]["execution_lifecycle"]
     transport = lifecycle["transport_and_session"]
     auto = transport["p5_automatic_session_judgment"]
@@ -3537,7 +3688,15 @@ def _bundle_session_control(parser: DDBParser, master: Any, categories: list[dic
         d1 = frame(category_id, 0xD1)
         d2 = frame(category_id, 0xD2)
         dd = frame(category_id, 0xDD)
-        lifecycle_supported = d1 is not None and d2 is not None and d1["send"] == "1001" and d2["send"] == "1003"
+        def dsc_session(value: dict[str, Any] | None) -> int | None:
+            if value is None:
+                return None
+            send = bytes.fromhex(value["send"])
+            return send[1] if len(send) == 2 and send[0] == 0x10 else None
+
+        default_session = dsc_session(d1)
+        extended_session = dsc_session(d2)
+        session_executor_supported = default_session is not None and extended_session is not None
         keepalive = None
         if dd is not None:
             send = bytes.fromhex(dd["send"])
@@ -3564,25 +3723,27 @@ def _bundle_session_control(parser: DDBParser, master: Any, categories: list[dic
                 }
         per_category[str(category_id)] = {
             "generation_low5": int(category["generation"]) & 0x1F,
-            "lifecycle_supported": lifecycle_supported,
+            "session_executor_supported": session_executor_supported,
+            "session_executor_boundary": (
+                None if session_executor_supported else
+                "D1/D2 are present only as a request shape not implemented by the generic DiagnosticSession executor"
+            ),
             "default_session": d1,
+            "default_session_value": default_session,
             "extended_session": d2,
+            "extended_session_value": extended_session,
             "keepalive_frame": dd,
             "keepalive": keepalive,
         }
 
     return {
-        "generation": "current-p5",
-        "eligible_generation_low5": list(TOYOTA_CURRENT_P5_GENERATION_LOW5),
-        "default_session": 1,
-        "extended_session": 3,
-        "enter_sequence": ["1001", "1003"],
-        "return_default": "1001",
+        "kind": "toyota-per-category-selector-lifecycle",
         "category_gate": auto["category_gate"],
         "per_category": per_category,
         "boundary": (
-            "D1/D2/DD are resolved independently for every current-P5 category. D1/D2 are required to be exact 1001/1003 "
-            "for live lifecycle support; DD is classified from the category's own selector rather than projected from Camry."
+            "D1/D2/DD are resolved independently for every Toyota category. The runtime follows the selected category's actual "
+            "DiagnosticSessionControl bytes when D1/D2 have that wire shape; generation-low5 and category membership are evidence "
+            "metadata, never an allowlist."
         ),
     }
 
@@ -3637,7 +3798,7 @@ def _build_toyota_diag_region(
     region: str,
     part_path: Path,
 ) -> dict[str, Any]:
-    """Build one regional resolver index and compressed current-P5 catalog shard set."""
+    """Build one Toyota-native regional resolver index plus decoded catalog shards."""
     db_root = _db_root(gts_root, region, family)
     parser = DDBParser()
     master_path = db_root / "Toyota.ddb"
@@ -3645,18 +3806,22 @@ def _build_toyota_diag_region(
     master = parser.parse_master_db(master_path)
     strings = _english_strings(parser, db_root)
     category_rows = _master_category_rows(parser, master, strings)
-    p5_plugin_categories = {
+    dll_rows = list(parser.extract_master_dlls(master.sections[19]))
+
+    # Catalog decoding is a tooling capability, not a vehicle/category support policy.
+    # Today the high-fidelity signal catalog extractor is closed for current P5 DDBs.
+    p5_catalog_ids = {
         int(entry.category_id)
-        for entry in parser.extract_master_dlls(master.sections[19])
+        for entry in dll_rows
         if entry.dll_name == "GetSupportP5_DT.dll"
     }
-    supported_categories = [
+    catalog_categories = [
         row for row in category_rows
-        if int(row["category_id"]) in p5_plugin_categories
+        if int(row["category_id"]) in p5_catalog_ids
         and row.get("database")
         and (db_root / str(row["database"])).is_file()
     ]
-    supported_ids = {int(row["category_id"]) for row in supported_categories}
+    catalog_ids = {int(row["category_id"]) for row in catalog_categories}
 
     vehicles: dict[str, dict[str, Any]] = {}
     vehicle_names = {
@@ -3674,17 +3839,36 @@ def _build_toyota_diag_region(
             "install_set_ids": sorted(install_set_ids),
         }
 
+    category_index: dict[str, dict[str, Any]] = {}
+    category_by_id = {int(row["category_id"]): row for row in category_rows}
+    for row in category_rows:
+        category_id = int(row["category_id"])
+        item = dict(row)
+        item["generation_low5"] = int(row["generation"]) & 0x1F
+        single = _bundle_support_plugin(dll_rows, category_id, 0x67)
+        multi = _bundle_support_plugin(dll_rows, category_id, 0xD5)
+        item["support_plugin_single"] = single
+        item["support_plugin_multi"] = multi
+        item["support_family"] = _bundle_support_family(single, multi)
+        item["catalog_available"] = category_id in catalog_ids
+        if category_id in catalog_ids:
+            item["catalog_member"] = f"catalogs/{region}/{category_id}.json"
+        category_index[str(category_id)] = item
+
     install_sets: dict[str, list[dict[str, Any]]] = {}
     routes: dict[str, dict[str, Any]] = {}
-    p5_connection_frame_ids: set[int] = set()
-    vehicle_types_with_p5: set[int] = set()
-    p5_install_row_count = 0
+    connection_frame_ids: set[int] = set()
+    vehicle_types_with_routes: set[int] = set()
+    install_row_count = 0
     for raw in ddb_records(master.sections[44]):
         install_set_id, category_id, frame_id, comm_set_id = struct.unpack_from("<HHHH", raw, 4)
         phase_type = raw[0x13]
-        route_key = f"{category_id}:{phase_type}" if category_id in supported_ids else None
-        if route_key is not None and route_key not in routes:
-            routes[route_key] = _bundle_protocol_route(master, category_id, phase_type)
+        route_key = f"{category_id}:{phase_type}"
+        if route_key not in routes:
+            try:
+                routes[route_key] = _bundle_protocol_route(master, category_id, phase_type)
+            except ValueError:
+                route_key = None
         install_sets.setdefault(str(install_set_id), []).append({
             "category_id": category_id,
             "connection_frame_id": frame_id,
@@ -3692,17 +3876,16 @@ def _build_toyota_diag_region(
             "connection_phase_type": phase_type,
             "route_key": route_key,
         })
-        if category_id in supported_ids:
-            p5_install_row_count += 1
-            p5_connection_frame_ids.add(frame_id)
+        install_row_count += 1
+        connection_frame_ids.add(frame_id)
 
-    set_has_p5 = {
-        int(set_id): any(int(row["category_id"]) in supported_ids for row in rows)
+    set_has_route = {
+        int(set_id): any(row.get("route_key") is not None for row in rows)
         for set_id, rows in install_sets.items()
     }
     for vehicle_type, row in vehicles.items():
-        if any(set_has_p5.get(int(set_id), False) for set_id in row["install_set_ids"]):
-            vehicle_types_with_p5.add(int(vehicle_type))
+        if any(set_has_route.get(int(set_id), False) for set_id in row["install_set_ids"]):
+            vehicle_types_with_routes.add(int(vehicle_type))
 
     vin_rows = [{
         "flags": struct.unpack_from("<I", raw, 0x00)[0],
@@ -3711,45 +3894,75 @@ def _build_toyota_diag_region(
         "phase_type": raw[0x12],
         "vin_prefix_hex": raw[0x13:0x1E].hex(),
     } for raw in ddb_records(master.sections[59])]
+    type41_rows = _bundle_vehicle_decision_rows(master)
+    vehicle_program = _bundle_special_vehicle_program(gts_root, region, parser, master)
+    bin_root = gts_root / "bin"
+    vehicle_roles = {}
+    for role, semantic in ((0x45, "legacy_select_vehicle"), (0x4A, "legacy_select_vehicle_vin"), (0x7D, "vin10_select_vehicle")):
+        selected = _bundle_support_plugin(dll_rows, 0, role)
+        if selected is None:
+            continue
+        dll = str(selected["dll"])
+        vehicle_roles[f"0x{role:02X}"] = {
+            **selected,
+            "semantic": semantic,
+            "binary_present_in_current_gtsplus": (bin_root / dll).is_file(),
+        }
 
-    category_index: dict[str, dict[str, Any]] = {}
-    for row in category_rows:
-        category_id = int(row["category_id"])
-        item = dict(row)
-        item["generation_low5"] = int(row["generation"]) & 0x1F
-        item["current_p5_supported"] = category_id in supported_ids
-        if category_id in supported_ids:
-            item["catalog_member"] = f"catalogs/{region}/{category_id}.json"
-        category_index[str(category_id)] = item
-
+    session_categories = [category_by_id[key] for key in sorted(category_by_id)]
     region_index = {
         "region": region,
         "vehicles": vehicles,
         "vin_decision": {
+            "path": "P5/P6 final resolver; P3/P4 candidate/source stage before type-41",
             "key": "category_id + phase_type + VIN[0:11], with flags bits 0..10 as per-position wildcards",
             "rows": vin_rows,
         },
+        "vehicle_decision": {
+            "path": "P3/P4 live SelectCarTypeVin10 probes followed by CDbVehicleDecisionTable",
+            "rows": type41_rows,
+            "probe_program": vehicle_program,
+        },
+        "vehicle_resolver_dispatch": {
+            "roles": vehicle_roles,
+            "vin10_generation_low5": {
+                "3": "phase3",
+                "4": "phase4",
+                "20": "phase5",
+                "21": "phase5",
+                "22": "phase6",
+            },
+            "vin10_rejected_generation_low5": list(range(5, 20)),
+            "boundary": (
+                "SelectCarTypeVin10 itself rejects low5 5..19 with 0xA0040403. Toyota's master separately binds legacy "
+                "SelectCarType.dll/SelectCarTypeVin.dll roles; those binaries are not present in the current GTS+ payload, so "
+                "their semantics are unresolved here rather than declaring those Toyota generations unsupported."
+            ),
+        },
         "categories": category_index,
-        "supported_p5_category_ids": sorted(supported_ids),
         "install_sets": install_sets,
         "routes": routes,
         "connection_frames": {
             str(frame_id): _bundle_connection_frame(master, frame_id)
-            for frame_id in sorted(p5_connection_frame_ids)
+            for frame_id in sorted(connection_frame_ids)
         },
         "commsets": {str(row["comm_set_id"]): row for row in _master_comm_set_rows(parser, master)},
-        "session_control": _bundle_session_control(parser, master, supported_categories),
+        "session_control": _bundle_session_control(parser, master, session_categories),
         "utilities": _registry_utilities(parser, master),
-        "can_topology": _bundle_can_topologies(parser, master, strings, vehicle_types_with_p5),
+        "can_topology": _bundle_can_topologies(parser, master, strings, vehicle_types_with_routes),
         "counts": {
             "vehicle_count": len(vehicles),
             "install_set_count": len(install_sets),
             "category_count": len(category_index),
-            "p5_plugin_category_count": len(p5_plugin_categories),
-            "supported_p5_category_count": len(supported_ids),
-            "p5_install_row_count": p5_install_row_count,
+            "catalog_count": len(catalog_ids),
+            "install_row_count": install_row_count,
             "vin_decision_row_count": len(vin_rows),
+            "vehicle_decision_row_count": len(type41_rows),
             "route_count": len(routes),
+            "support_family_counts": {
+                family_name: sum(row.get("support_family") == family_name for row in category_index.values())
+                for family_name in ("p3", "p4", "p5", "p6")
+            },
         },
         "source_identity": {
             "master": {
@@ -3762,12 +3975,12 @@ def _build_toyota_diag_region(
                 "bytes": strings_path.stat().st_size,
                 "sha256": _file_sha256(strings_path),
             },
+            "special_master": vehicle_program["source_identity"]["special_master"],
         },
     }
 
-    bin_root = gts_root / "bin"
     with zipfile.ZipFile(part_path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
-        for category in sorted(supported_categories, key=lambda row: int(row["category_id"])):
+        for category in sorted(catalog_categories, key=lambda row: int(row["category_id"])):
             category_id = int(category["category_id"])
             payload = _bundle_category_catalog(parser, master, strings, db_root, bin_root, category)
             _bundle_write_json(archive, f"catalogs/{region}/{category_id}.json", payload)
@@ -3802,13 +4015,19 @@ def write_toyota_diag_bundle(
         "schema": TOYOTA_DIAG_BUNDLE_SCHEMA,
         "profile": TOYOTA_DIAG_BUNDLE_PROFILE,
         "release": resolver_artifact["release"],
-        "p5_session_generation_low5": list(TOYOTA_CURRENT_P5_GENERATION_LOW5),
-        "p5_capability_plugin": "GetSupportP5_DT.dll",
         "default_region": "NA",
         "default_panda_bus": 0,
         "fault_status_mask": 0xAF,
         "mode04_request": "0104000000000000",
-        "p5_support": resolver_artifact["p5_support"],
+        "support_contracts": {
+            "p5": resolver_artifact["p5_support"],
+            "p6": {
+                "options": {"1": "PID", "2": "DID", "3": "RID"},
+                "did_root": {"request": "22a100", "positive_sid": "0x62", "hierarchy": "A1nn selector bitmap -> nn00..nnFF DID bitmap"},
+                "routine_root": {"request": "3101d100", "positive_sid": "0x71", "hierarchy": "D1nn selector bitmap -> routine support bitmap"},
+                "plugin": "GetSupportMultiP6_DT.dll",
+            },
+        },
         "decoders": {
             "p5-linear-msb0-v1": {
                 "payload_origin": "UDS DID value bytes (positive SID/DID echo excluded)",
@@ -3836,10 +4055,9 @@ def write_toyota_diag_bundle(
             },
         },
         "boundary": (
-            "Clean derived metadata only. Vehicle/install/category/route selection comes from the selected Toyota regional master. "
-            "A category is exported as current-P5 only when the master binds it to GetSupportP5_DT.dll and its regional DDB is present; "
-            "generation-low5 is retained separately for Toyota's session dispatch. Live GetSupportP5 filtering remains the per-ECU "
-            "capability criterion. No Toyota binary or database payload is embedded."
+            "Clean derived metadata only. Vehicle/install/category/route/session/support-family selection comes from Toyota Gen/Spe "
+            "masters and role fallback. Catalog availability is an independent tooling capability and is never an ECU-support gate. "
+            "Live family-specific support filtering remains the per-ECU capability criterion. No Toyota binary or opaque DDB payload is embedded."
         ),
     }
 

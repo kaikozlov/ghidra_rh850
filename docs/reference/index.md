@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 452 · Corrections: 173 · Open questions: 54 · Docs: 125 · Suites: 240
+Findings: 452 · Corrections: 174 · Open questions: 54 · Docs: 125 · Suites: 240
 
 ## Reading this index
 
@@ -318,7 +318,7 @@ Findings: 452 · Corrections: 173 · Open questions: 54 · Docs: 125 · Suites: 
 | <a id="finding-tms-075"></a>**TMS-075** | [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | — | `tests/verify_techstream_diagnostic_execution_model.py`, `tests/verify_toyota_diag_registry.py` | — |
 | <a id="finding-tms-076"></a>**TMS-076** | [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | — | `tests/verify_toyota_diag_registry.py` | — |
 | <a id="finding-tms-077"></a>**TMS-077** | [docs/tooling/techstream.md](../tooling/techstream.md) | [gts-query-cli](../tooling/gts-query-cli.md) | `tests/verify_techstream_diagnostic_execution_model.py` | — |
-| <a id="finding-tms-078"></a>**TMS-078** | [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | — | `tests/verify_toyota_diag_registry.py` | — |
+| <a id="finding-tms-078"></a>**TMS-078** | [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_toyota_diag_registry.py` | — |
 | <a id="finding-tms-079"></a>**TMS-079** | [docs/tooling/techstream.md](../tooling/techstream.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_gtsplus_tss3_crossvehicle_surface.py` | OQ-030, OQ-052 |
 | <a id="finding-tms-080"></a>**TMS-080** | [docs/tooling/techstream.md](../tooling/techstream.md) | — | `tests/verify_gtsplus_tss3_crossvehicle_surface.py` | — |
 | <a id="finding-tms-081"></a>**TMS-081** | [docs/tooling/gtsplus-body-recovery.md](../tooling/gtsplus-body-recovery.md) | — | `tests/verify_gtsplus_body_recovery.py` | — |
@@ -329,7 +329,7 @@ Findings: 452 · Corrections: 173 · Open questions: 54 · Docs: 125 · Suites: 
 | <a id="finding-tms-086"></a>**TMS-086** | [docs/tooling/gtsplus-tse-gtse-saved-session.md](../tooling/gtsplus-tse-gtse-saved-session.md) | [CAMRY_GTS_LATERAL_FUNNEL_2026-08-29](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md), [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md), [CORRECTIONS](../status/CORRECTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_public_techstream_tse_lineage.py`, `tests/verify_gtsplus_tse_managed_semantics.py` | — |
 | <a id="finding-tms-087"></a>**TMS-087** | [docs/tooling/gtsplus-vdas-pcs-data.md](../tooling/gtsplus-vdas-pcs-data.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [techstream](../tooling/techstream.md) | `tests/verify_gtsplus_vdas_semantics.py` | OQ-052 |
 | <a id="finding-tms-088"></a>**TMS-088** | [docs/tooling/techstream.md](../tooling/techstream.md) | [camry-2026-tss3-control-security-participants](camry-2026-tss3-control-security-participants.md) | `tests/verify_techstream_cuw_cross_ecu_security_derivations.py` | — |
-| <a id="finding-tms-089"></a>**TMS-089** | [docs/tooling/techstream.md](../tooling/techstream.md) | — | `tests/verify_gtsplus_vehicle_resolver.py`, `tests/verify_toyota_diag_bundle.py` | — |
+| <a id="finding-tms-089"></a>**TMS-089** | [docs/tooling/techstream.md](../tooling/techstream.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_gtsplus_vehicle_resolver.py`, `tests/verify_toyota_diag_bundle.py` | — |
 | <a id="finding-var-001"></a>**VAR-001** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md) | `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-002"></a>**VAR-002** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_spanconstant_corolla_equivalence.py`, `tests/verify_spanconstant_corolla_cross_variant.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
 | <a id="finding-var-003"></a>**VAR-003** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_toyota_eps_variant_matrix.py` | — |
@@ -708,6 +708,7 @@ Findings: 452 · Corrections: 173 · Open questions: 54 · Docs: 125 · Suites: 
 | <a id="correction-corr-171"></a>**CORR-171** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 | <a id="correction-corr-172"></a>**CORR-172** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | yes |
 | <a id="correction-corr-173"></a>**CORR-173** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | yes |
+| <a id="correction-corr-174"></a>**CORR-174** | [docs/tooling/techstream.md](../tooling/techstream.md), [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | yes |
 
 ## Document registry
 
