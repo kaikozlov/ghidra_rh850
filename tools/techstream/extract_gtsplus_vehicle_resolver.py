@@ -104,6 +104,13 @@ def export_addr(path: Path, contains: str) -> int:
     return matches[0][1]
 
 
+def va_bytes(path: Path, va: int, size: int) -> bytes:
+    pe = pefile.PE(str(path), fast_load=False)
+    rva = va - int(pe.OPTIONAL_HEADER.ImageBase)
+    offset = pe.get_offset_from_rva(rva)
+    return path.read_bytes()[offset : offset + size]
+
+
 def analyze_support_bitmap(base: int, bitmap: bytes, shift: int) -> list[int]:
     """Express CCmdSupportDataIdList::AnalyzeFrameData exactly.
 
@@ -208,7 +215,7 @@ def _protocol_route(master: Any, category_id: int, phase_type: int) -> dict[str,
         "address_extension": raw[0x0A],
         "request_mask": u16(raw, 0x0E),
         "response_mask": u16(raw, 0x10),
-        "legislated_response_address": u16(raw, 0x14),
+        "legislated_request_address": u16(raw, 0x14),
         "phase_type": raw[0x18],
     }
 
@@ -406,6 +413,11 @@ def build() -> dict[str, Any]:
         if function_addresses != expected:
             raise ValueError(f"current resolver export drift: {function_addresses!r}")
 
+        phase5_vehicle_decision_va = 0x10004D80
+        phase5_vehicle_decision_bytes = va_bytes(select, phase5_vehicle_decision_va, 8)
+        if phase5_vehicle_decision_bytes != bytes.fromhex("b8010104c0c21400"):
+            raise ValueError(f"current Phase5 vehicle-decision stub drift: {phase5_vehicle_decision_bytes.hex()}")
+
         binaries = {
             "DiagAdaptation.dll": source(diag, display="installer-recovered/bin/DiagAdaptation.dll"),
             "CommandCommon.dll": source(command, display="installer-recovered/bin/CommandCommon.dll"),
@@ -432,9 +444,9 @@ def build() -> dict[str, Any]:
                 "stage": "vehicle-resolution",
                 "api": "CDAExecSelectVehicle -> CSelectCarTypeVin10",
                 "semantics": (
-                    "live communication/protocol identity plus VIN and user/option selections are resolved through "
-                    "CDbVehicleDecisionTable and CDbVinVehicleDecisionTable; results include vehicleId, decisionVin, "
-                    "parentPhaseType, carInfoList and optionInfoList"
+                    "CSelectCarTypeVin10 dispatches by communication generation. P3/P4 use CDbVehicleDecisionTable; "
+                    "current P5 (generation-low5 20/21) uses CDbVinVehicleDecisionTable and its Phase5 vehicle-decision "
+                    "virtual returns 0xC0040101 without querying class 0x129; results feed vehicle/install resolution"
                 ),
             },
             {
@@ -456,6 +468,13 @@ def build() -> dict[str, Any]:
         ],
         "vehicle_decision": {
             "ddb_type": VEHICLE_DECISION_TYPE,
+            "current_p5_boundary": {
+                "generation_low5": [20, 21],
+                "phase5_vehicle_decision_virtual": f"0x{phase5_vehicle_decision_va:08X}",
+                "phase5_vehicle_decision_bytes": phase5_vehicle_decision_bytes.hex(),
+                "return_status": "0xC0040101",
+                "meaning": "current Phase5 does not query class 0x129; type-41 vehicle decision is the P3/P4 path",
+            },
             "db_class_id": f"0x{VEHICLE_DECISION_CLASS:03X}",
             "record_size": 52,
             "mode_dispatch": {
@@ -506,6 +525,10 @@ def build() -> dict[str, Any]:
                 "address_extension": (
                     "u8 +0x0A; consumed by the current P5 frame builder. Current phase-0x22 Camry rows use it "
                     "to distinguish logical categories that share request CAN ID 0x750"
+                ),
+                "legislated_request_address": (
+                    "u16 +0x14; current masters contain standard 0x7E0..0x7E7 physical OBD request IDs here. "
+                    "The corresponding 11-bit response is request+8; +0x14 is not itself the response ID."
                 ),
             },
             "connection_algorithm": {

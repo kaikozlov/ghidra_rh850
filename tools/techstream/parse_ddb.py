@@ -38,6 +38,7 @@ Usage::
 
 from __future__ import annotations
 
+import functools
 import struct
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -263,9 +264,9 @@ class Section:
     data_offset: int      # offset of payload in the file
     raw_data: bytes       # the payload bytes
 
-    @property
+    @functools.cached_property
     def decoded_data(self) -> bytes:
-        """Return the logical table bytes, decompressing a type-1 payload."""
+        """Return immutable logical table bytes, decompressing at most once per parsed section."""
         return lzss_decompress(self.raw_data) if self.header.compression else self.raw_data
 
     @property
@@ -546,9 +547,15 @@ def _records(section: Section, expected_type: int, expected_size: int) -> list[b
 class DDBParser:
     """Parse Techstream .ddb diagnostic database files."""
 
+    def __init__(self) -> None:
+        self._ecu_cache: dict[Path, ECUDataBase] = {}
+
     def parse_ecu_db(self, path: str | Path) -> ECUDataBase:
-        """Parse an ECU .ddb file (uncompressed sections)."""
-        return self._parse_sectioned_db(path, expected_format=0x02, label="ECU")
+        """Parse an ECU .ddb file (uncompressed sections), cached per parser instance/path."""
+        resolved = Path(path).resolve()
+        if resolved not in self._ecu_cache:
+            self._ecu_cache[resolved] = self._parse_sectioned_db(resolved, expected_format=0x02, label="ECU")
+        return self._ecu_cache[resolved]
 
     def parse_master_db(self, path: str | Path) -> ECUDataBase:
         """Parse the structural section directory of type-1 ``Toyota.ddb``.

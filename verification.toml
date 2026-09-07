@@ -105,8 +105,6 @@ oracle = "independent_external_artifact"
 [suite.gtsplus_vehicle_resolver]
 tests = ["tests/verify_gtsplus_vehicle_resolver.py"]
 paths = [
-  "tools/techstream/extract_gtsplus_vehicle_resolver.py",
-  "data/generated/gtsplus_2026/vehicle_resolver_semantics.json",
   "docs/tooling/techstream.md",
 ]
 requires_external = ["gtsplus"]
@@ -916,6 +914,17 @@ modes = ["local"]
 oracle = "generated_self_check"
 paths = [
   "tools/gts",
+  "docs/tooling/gts-query-cli.md",
+]
+
+[suite.toyota_diag_bundle]
+tests = ["tests/verify_toyota_diag_bundle.py"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+oracle = "generated_self_check"
+paths = [
+  "tools/gts",
+  "docs/tooling/techstream.md",
   "docs/tooling/gts-query-cli.md",
 ]
 

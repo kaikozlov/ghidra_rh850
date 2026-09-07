@@ -645,7 +645,7 @@
                 "raw": "4600520043005f00500035002e00640064006200000000000000000000000000000000000000000000000000000000000000000000000000000000009f73020000000000f201000014000000"
               }
             },
-            "category_gate": "SendProc reads CDbEcuCategoryTable/class 0x110 record byte +0x48, masks low 5 bits, and enters the P5-family session path for 0x14/0x15/0x16; current Hybrid397, Brake435, and FRC498 are all 0x14",
+            "category_gate": "SendProc reads CDbEcuCategoryTable/class 0x110 record byte +0x48, masks low 5 bits, and enters this shared automatic-session path for 0x14/0x15/0x16. This is a transport/session gate, not a P5-family classifier: SelectCarTypeVin10 dispatches low5 0x16 to Phase6, while current GetSupportP5_DT-bound categories are low5 0x14/0x15 only. Hybrid397, Brake435, and FRC498 are all 0x14",
             "class_1_default": "for classifier class 1, SendProc uses the DB-backed +0x50 selector 0xD1 path and records software session state 0",
             "classifier": {
               "phase5_function": "0x100292F0",

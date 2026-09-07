@@ -306,8 +306,10 @@ time/chassis/illuminance-style display paths. Each exported DID signal explicitl
 its decoder kind so future non-P5 formats can fail closed instead of inheriting this
 contract implicitly.
 
+`tools/gts registry toyota-current --out FILE.zip` is now the default Comma-side export rather than a vehicle-specific registry. It builds a deterministic, clean three-region bundle from the current NA/EU/JP masters: Toyota vehicle/VIN tables, install sets, category+phase routes, CAN topology, per-category D1/D2/DD lifecycle metadata, and lazy compressed P5 category catalogs. The P5 family is selected by Toyota's literal `GetSupportP5_DT.dll` binding, not by guessing from generation bits; the current release ships 135 NA / 161 EU / 143 JP regional P5 catalogs from 179 P5-bound category identities per master. Within that family, current Toyota Phase5 session dispatch is generation-low5 20/21 only; low5 22 is Phase6. Class-`0x10D +0x14` is exported as the legislated physical request ID (`0x7E0..0x7E7`), with standard 11-bit OBD response IDs derived as request+8 rather than mislabeling that source field. All shipped P5 categories resolve D1/D2 as `10 01` / `10 03`, while DD is category-local (`22 F1 86`, `22 D1 00`, or `10 03` refresh). `tests/verify_toyota_diag_bundle.py` regenerates the ZIP byte-for-byte and also verifies a non-Camry 4Runner resolves through the same install/route machinery. The older Camry registry remains a compatibility/evidence fixture, not the universal runtime model.
+
 Registry schema v3 also carries the current Camry-HV GTS CAN Bus Check topology and
-tracked module identities needed by the Comma-side frontend. Toyota master vehicle type
+tracked module identities needed by the legacy Camry fixture. Toyota master vehicle type
 `12704` (**Camry HV**) resolves `CANBusCarID=0x00A7D910`; all 18 option rows collapse to
 one placement variant. The exact placements put **Front Camera Module** on GTS **Bus 1**
 and **Power Steering (EPS)** plus **Skid Control (ABS/VSC/TRAC)** on GTS **Bus 4**, all
@@ -361,10 +363,11 @@ All earlier catalog sections remain preserved in shape:
   interval_s 2.0}`. The narrow session-judgment exception (`CCommFrameCtrl +0x398`
   one-shot no-wire D1/D2) is retained as documentation metadata with
   `runtime_default: false`, never as a runtime default. The former local
-  `wire_proven_categories` gate is intentionally absent: `SendProc` itself selects
-  the P5-family path from class-`0x110` generation-low5 values `0x14/0x15/0x16`.
-  All eight exported catalog categories are current generation `0x14` and resolve
-  identical D1/D2/0xDD frames from the current master.
+  `wire_proven_categories` gate is intentionally absent. The legacy v6 artifact
+  records the Camry categories' generation-low5/session behavior, but the universal
+  bundle does **not** use those low5 values as a P5-family classifier: Toyota's
+  `GetSupportP5_DT.dll` binding supplies that boundary directly, and D1/D2/DD are
+  resolved independently for each selected category.
 - `catalogs.<id>.plugins` — every category role/plugin binding with a
   `semantic_kind` only where the exact plugin SHA-256 matches a recovered profile
   (for example 0x19 `dtc_clear`, 0x52 `generic_cid`, 0x08 `p5_active_test_init`);

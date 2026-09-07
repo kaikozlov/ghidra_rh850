@@ -1418,8 +1418,10 @@ def gtsplus_execution_lifecycle(parser: DDBParser, master, gts_root: Path) -> di
                 "categories": category_modes,
                 "category_gate": (
                     "SendProc reads CDbEcuCategoryTable/class 0x110 record byte +0x48, masks low 5 bits, "
-                    "and enters the P5-family session path for 0x14/0x15/0x16; current Hybrid397, "
-                    "Brake435, and FRC498 are all 0x14"
+                    "and enters this shared automatic-session path for 0x14/0x15/0x16. This is a transport/session "
+                    "gate, not a P5-family classifier: SelectCarTypeVin10 dispatches low5 0x16 to Phase6, while "
+                    "current GetSupportP5_DT-bound categories are low5 0x14/0x15 only. Hybrid397, Brake435, and "
+                    "FRC498 are all 0x14"
                 ),
                 "classifier": {
                     "vtable_slot": "+0x100",

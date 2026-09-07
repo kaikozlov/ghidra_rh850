@@ -280287,8 +280287,8 @@
     "panda_bus": 0,
     "profile": "camry-2026-f33",
     "session_control": {
-      "boundary": "frames are resolved per category from the current master; SendProc itself gates the P5-family path by CDbEcuCategoryTable/class-0x110 byte +0x48 low5 in 0x14/0x15/0x16. The former local wire_proven_categories subset is intentionally absent: it was an independent-tooling policy, not Toyota resolver semantics. session_judgment_exception is documentation, not a runtime default",
-      "category_gate": "SendProc reads CDbEcuCategoryTable/class 0x110 record byte +0x48, masks low 5 bits, and enters the P5-family session path for 0x14/0x15/0x16; current Hybrid397, Brake435, and FRC498 are all 0x14",
+      "boundary": "frames are resolved per category from the current master; SendProc itself gates a shared automatic-session path by CDbEcuCategoryTable/class-0x110 byte +0x48 low5 in 0x14/0x15/0x16. This raw SendProc gate is not a diagnostic-family classifier: SelectCarTypeVin10 dispatches low5 0x16 to Phase6 and the universal P5 runtime instead follows GetSupportP5_DT bindings. The former local wire_proven_categories subset is intentionally absent: it was an independent-tooling policy, not Toyota resolver semantics. session_judgment_exception is documentation, not a runtime default",
+      "category_gate": "SendProc reads CDbEcuCategoryTable/class 0x110 record byte +0x48, masks low 5 bits, and enters this shared automatic-session path for 0x14/0x15/0x16. This is a transport/session gate, not a P5-family classifier: SelectCarTypeVin10 dispatches low5 0x16 to Phase6, while current GetSupportP5_DT-bound categories are low5 0x14/0x15 only. Hybrid397, Brake435, and FRC498 are all 0x14",
       "class_1_default": "for classifier class 1, SendProc uses the DB-backed +0x50 selector 0xD1 path and records software session state 0",
       "class_2_normal_path": "when the P5 classifier returns 2 and current session CCommFrameCtrl +0x29 is not 3, the normal session-judgment path calls protocol vtable +0x50 with selector 0xD1 then 0xD2 and records software session state 3",
       "default_session": 1,
@@ -280576,7 +280576,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 2015,
-              "legislated_response_address": 2016,
+              "legislated_request_address": 2016,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1792,
@@ -280596,7 +280596,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 2015,
-              "legislated_response_address": 2022,
+              "legislated_request_address": 2022,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1828,
@@ -280616,7 +280616,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 2015,
-              "legislated_response_address": 2018,
+              "legislated_request_address": 2018,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 2002,
@@ -280636,7 +280636,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 2015,
-              "legislated_response_address": 2019,
+              "legislated_request_address": 2019,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1863,
@@ -280656,7 +280656,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1953,
@@ -280676,7 +280676,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 2015,
-              "legislated_response_address": 2021,
+              "legislated_request_address": 2021,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1968,
@@ -280696,7 +280696,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1971,
@@ -280716,7 +280716,7 @@
             "transport_route": {
               "address_extension": 42,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -280736,7 +280736,7 @@
             "transport_route": {
               "address_extension": 41,
               "functional_address": 2015,
-              "legislated_response_address": 2021,
+              "legislated_request_address": 2021,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -280756,7 +280756,7 @@
             "transport_route": {
               "address_extension": 123,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 131,
               "request_address": 1872,
@@ -280776,7 +280776,7 @@
             "transport_route": {
               "address_extension": 150,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -280796,7 +280796,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1938,
@@ -280816,7 +280816,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1954,
@@ -280836,7 +280836,7 @@
             "transport_route": {
               "address_extension": 236,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 124,
               "request_address": 1872,
@@ -280856,7 +280856,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1984,
@@ -280876,7 +280876,7 @@
             "transport_route": {
               "address_extension": 15,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -280896,7 +280896,7 @@
             "transport_route": {
               "address_extension": 103,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -280916,7 +280916,7 @@
             "transport_route": {
               "address_extension": 181,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -280936,7 +280936,7 @@
             "transport_route": {
               "address_extension": 95,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -280956,7 +280956,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1920,
@@ -280976,7 +280976,7 @@
             "transport_route": {
               "address_extension": 64,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -280996,7 +280996,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 2015,
-              "legislated_response_address": 2020,
+              "legislated_request_address": 2020,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1988,
@@ -281016,7 +281016,7 @@
             "transport_route": {
               "address_extension": 233,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -281036,7 +281036,7 @@
             "transport_route": {
               "address_extension": 211,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -281056,7 +281056,7 @@
             "transport_route": {
               "address_extension": 199,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -281076,7 +281076,7 @@
             "transport_route": {
               "address_extension": 65,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -281096,7 +281096,7 @@
             "transport_route": {
               "address_extension": 66,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -281116,7 +281116,7 @@
             "transport_route": {
               "address_extension": 77,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -281136,7 +281136,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 2000,
@@ -281156,7 +281156,7 @@
             "transport_route": {
               "address_extension": 171,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -281176,7 +281176,7 @@
             "transport_route": {
               "address_extension": 129,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -281196,7 +281196,7 @@
             "transport_route": {
               "address_extension": 130,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -281216,7 +281216,7 @@
             "transport_route": {
               "address_extension": 165,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -281236,7 +281236,7 @@
             "transport_route": {
               "address_extension": 166,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -281277,6 +281277,7 @@
           "address_extension": "u8 +0x0A; consumed by the current P5 frame builder. Current phase-0x22 Camry rows use it to distinguish logical categories that share request CAN ID 0x750",
           "api": "CCommFrameCtrl::GetEcuAddr(category, phase)",
           "key": "CDbProtInfoTable +0x00 category_id and +0x18 phase_type",
+          "legislated_request_address": "u16 +0x14; current masters contain standard 0x7E0..0x7E7 physical OBD request IDs here. The corresponding 11-bit response is request+8; +0x14 is not itself the response ID.",
           "protocol_info_db_class_id": "0x10D",
           "protocol_info_ddb_type": 13,
           "request_address": "u16 +0x08; returned directly by GetEcuAddr"
@@ -281338,12 +281339,12 @@
       "sha256": "3a344b6cb2de19edb163e040974955f2d27467dc0a864974b6a5af90659d308f"
     },
     "data/generated/gtsplus_2026/vehicle_resolver_semantics.json": {
-      "bytes": 36412,
-      "sha256": "79f1a8f4f6908fbdc37ca1937b47808ed784c033a2acdcdad904b289870f60c5"
+      "bytes": 36994,
+      "sha256": "5574b77a1a5ec18913f871175bf68b0a2c12bb1bfb7a57403e116e6a50cc8a5d"
     },
     "data/generated/techstream_v18/diagnostic_execution_model.json": {
-      "bytes": 297242,
-      "sha256": "c61d57daf97b14b9c099e3997be0776ef1c7d65009d9b90da91d52ccd408cdc9"
+      "bytes": 297427,
+      "sha256": "158b3125bdb3c620ef7dd39e095301ea0177ef7b7f88b4bfe428d15e0fd33a7c"
     },
     "gtsplus/NA/DB/Gen/ABS_P5.ddb": {
       "bytes": 200474,

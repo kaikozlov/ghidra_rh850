@@ -9,7 +9,11 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "tools/techstream"))
 
-from extract_gtsplus_vehicle_resolver import analyze_support_bitmap, build, vin_decision_matches
+from extract_gtsplus_vehicle_resolver import (
+    analyze_support_bitmap,
+    build,
+    vin_decision_matches,
+)
 
 ARTIFACT = REPO / "data/generated/gtsplus_2026/vehicle_resolver_semantics.json"
 
@@ -32,6 +36,13 @@ check("vehicle decision table/class", artifact["vehicle_decision"]["ddb_type"] =
 check("four vehicle decision modes", artifact["vehicle_decision"]["mode_dispatch"] == {
     "0": "DecisionKey", "1": "DecisionKeyNew", "2": "DecisionKeyEU", "3": "DecisionKeyNewEU",
 })
+check("current P5 bypasses type-41 vehicle decision", artifact["vehicle_decision"]["current_p5_boundary"] == {
+    "generation_low5": [20, 21],
+    "phase5_vehicle_decision_virtual": "0x10004D80",
+    "phase5_vehicle_decision_bytes": "b8010104c0c21400",
+    "return_status": "0xC0040101",
+    "meaning": "current Phase5 does not query class 0x129; type-41 vehicle decision is the P3/P4 path",
+})
 
 na = artifact["regions"]["NA"]
 check("NA table geometry", na["tables"]["vehicle_decision"]["record_count"] == 1869 and na["tables"]["vin_vehicle_decision"]["record_count"] == 2402)
@@ -52,6 +63,9 @@ check("Toyota GetEcuAddr route implementation pinned", artifact["functions"]["mo
     "ProtInfo.FindDbItem1": "0x100C2590",
     "ProtInfo.FindDbItem2": "0x100C2690",
 })
+check("Toyota protocol +0x14 is legislated request, not response",
+      routes[372]["legislated_request_address"] == 0x7E0 and
+      all(route["legislated_request_address"] == 0 or 0x7E0 <= route["legislated_request_address"] <= 0x7E7 for route in routes.values()))
 check("direct current-P5 Toyota route witnesses",
       (routes[372]["request_address"], routes[372]["address_extension"], routes[372]["phase_type"]) == (0x700, 0, 0x12) and
       (routes[445]["request_address"], routes[445]["address_extension"], routes[445]["phase_type"]) == (0x7B3, 0, 0x12) and

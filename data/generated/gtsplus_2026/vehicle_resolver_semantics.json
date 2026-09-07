@@ -113,6 +113,7 @@
       "address_extension": "u8 +0x0A; consumed by the current P5 frame builder. Current phase-0x22 Camry rows use it to distinguish logical categories that share request CAN ID 0x750",
       "api": "CCommFrameCtrl::GetEcuAddr(category, phase)",
       "key": "CDbProtInfoTable +0x00 category_id and +0x18 phase_type",
+      "legislated_request_address": "u16 +0x14; current masters contain standard 0x7E0..0x7E7 physical OBD request IDs here. The corresponding 11-bit response is request+8; +0x14 is not itself the response ID.",
       "protocol_info_db_class_id": "0x10D",
       "protocol_info_ddb_type": 13,
       "request_address": "u16 +0x08; returned directly by GetEcuAddr"
@@ -142,7 +143,7 @@
   "pipeline": [
     {
       "api": "CDAExecSelectVehicle -> CSelectCarTypeVin10",
-      "semantics": "live communication/protocol identity plus VIN and user/option selections are resolved through CDbVehicleDecisionTable and CDbVinVehicleDecisionTable; results include vehicleId, decisionVin, parentPhaseType, carInfoList and optionInfoList",
+      "semantics": "CSelectCarTypeVin10 dispatches by communication generation. P3/P4 use CDbVehicleDecisionTable; current P5 (generation-low5 20/21) uses CDbVinVehicleDecisionTable and its Phase5 vehicle-decision virtual returns 0xC0040101 without querying class 0x129; results feed vehicle/install resolution",
       "stage": "vehicle-resolution"
     },
     {
@@ -326,7 +327,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 2015,
-              "legislated_response_address": 2016,
+              "legislated_request_address": 2016,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1792,
@@ -346,7 +347,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 2015,
-              "legislated_response_address": 2022,
+              "legislated_request_address": 2022,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1828,
@@ -366,7 +367,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 2015,
-              "legislated_response_address": 2018,
+              "legislated_request_address": 2018,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 2002,
@@ -386,7 +387,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 2015,
-              "legislated_response_address": 2019,
+              "legislated_request_address": 2019,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1863,
@@ -406,7 +407,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1953,
@@ -426,7 +427,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 2015,
-              "legislated_response_address": 2021,
+              "legislated_request_address": 2021,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1968,
@@ -446,7 +447,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1971,
@@ -466,7 +467,7 @@
             "transport_route": {
               "address_extension": 42,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -486,7 +487,7 @@
             "transport_route": {
               "address_extension": 41,
               "functional_address": 2015,
-              "legislated_response_address": 2021,
+              "legislated_request_address": 2021,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -506,7 +507,7 @@
             "transport_route": {
               "address_extension": 123,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 131,
               "request_address": 1872,
@@ -526,7 +527,7 @@
             "transport_route": {
               "address_extension": 150,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -546,7 +547,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1938,
@@ -566,7 +567,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1954,
@@ -586,7 +587,7 @@
             "transport_route": {
               "address_extension": 236,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 124,
               "request_address": 1872,
@@ -606,7 +607,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1984,
@@ -626,7 +627,7 @@
             "transport_route": {
               "address_extension": 15,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -646,7 +647,7 @@
             "transport_route": {
               "address_extension": 103,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -666,7 +667,7 @@
             "transport_route": {
               "address_extension": 181,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -686,7 +687,7 @@
             "transport_route": {
               "address_extension": 95,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -706,7 +707,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1920,
@@ -726,7 +727,7 @@
             "transport_route": {
               "address_extension": 64,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -746,7 +747,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 2015,
-              "legislated_response_address": 2020,
+              "legislated_request_address": 2020,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 1988,
@@ -766,7 +767,7 @@
             "transport_route": {
               "address_extension": 233,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -786,7 +787,7 @@
             "transport_route": {
               "address_extension": 211,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -806,7 +807,7 @@
             "transport_route": {
               "address_extension": 199,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -826,7 +827,7 @@
             "transport_route": {
               "address_extension": 65,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -846,7 +847,7 @@
             "transport_route": {
               "address_extension": 66,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -866,7 +867,7 @@
             "transport_route": {
               "address_extension": 77,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -886,7 +887,7 @@
             "transport_route": {
               "address_extension": 0,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 18,
               "protocol_info_id": 131,
               "request_address": 2000,
@@ -906,7 +907,7 @@
             "transport_route": {
               "address_extension": 171,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -926,7 +927,7 @@
             "transport_route": {
               "address_extension": 129,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -946,7 +947,7 @@
             "transport_route": {
               "address_extension": 130,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -966,7 +967,7 @@
             "transport_route": {
               "address_extension": 165,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -986,7 +987,7 @@
             "transport_route": {
               "address_extension": 166,
               "functional_address": 0,
-              "legislated_response_address": 0,
+              "legislated_request_address": 0,
               "phase_type": 34,
               "protocol_info_id": 133,
               "request_address": 1872,
@@ -1051,6 +1052,16 @@
         "3": "record<=key",
         "4": "record>=key"
       }
+    },
+    "current_p5_boundary": {
+      "generation_low5": [
+        20,
+        21
+      ],
+      "meaning": "current Phase5 does not query class 0x129; type-41 vehicle decision is the P3/P4 path",
+      "phase5_vehicle_decision_bytes": "b8010104c0c21400",
+      "phase5_vehicle_decision_virtual": "0x10004D80",
+      "return_status": "0xC0040101"
     },
     "db_class_id": "0x129",
     "ddb_type": 41,
