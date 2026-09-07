@@ -3390,8 +3390,82 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
     }
 
 
+def _bundle_transport_semantics(phase_type: int, request_address: int, functional_address: int) -> dict[str, Any]:
+    """Recover the transport controller selected by CCommFrameCtrl::ChangeCommIF.
+
+    ChangeCommIF switches on the low nibble of phase type. Current P5 phases ending
+    in 2 use the ISO15765 family; 0x18/0x38 select CCommCtrlISO15765_29BitCan;
+    0x78/0x88 select the CAN-FD ISO15765 PS controller; low-nibble 4 selects
+    CCommCtrlISO13400_NDIS. Keep unrecovered cases explicit rather than projecting
+    the transport implemented by our consumer onto Toyota's route.
+    """
+    low = phase_type & 0x0F
+    out: dict[str, Any] = {
+        "change_comm_if_case": low,
+        "request_address_field": request_address,
+        "functional_address_field": functional_address,
+    }
+    if phase_type in {0x18, 0x38}:
+        tx = 0x18DA0000 | ((request_address & 0xFF) << 8) | 0xF1
+        out.update({
+            "transport_kind": "iso15765-29bit-normal-fixed",
+            "controller": "CCommCtrlISO15765_29BitCan",
+            "physical_request_address": tx,
+            "physical_response_address": (tx & 0xFFFF0000) | ((tx << 8) & 0xFF00) | ((tx >> 8) & 0xFF),
+            "functional_request_address": (0x18DB0000 | ((functional_address & 0xFF) << 8) | 0xF1)
+            if functional_address else None,
+            "request_address_field_semantics": "target-address byte (TA); physical normal-fixed request is 0x18DA<ta>F1",
+        })
+    elif phase_type in {0x78, 0x88}:
+        out.update({
+            "transport_kind": "canfd-iso15765-ps",
+            "controller": "CCommCtrl_FD_ISO15765_PS",
+            "physical_request_address": None,
+            "physical_response_address": None,
+            "functional_request_address": None,
+            "request_address_field_semantics": "controller-specific; full wire address not projected by this extractor",
+        })
+    elif low == 0x02:
+        out.update({
+            "transport_kind": "iso15765-phase-family",
+            "controller": "CCommCtrlISO15765 family (generation/mode subdispatch)",
+            "physical_request_address": request_address,
+            "physical_response_address": request_address + 8 if request_address < 0xFFF8 else None,
+            "functional_request_address": None,
+            "request_address_field_semantics": "CAN request ID for the current Toyota P5 routes",
+        })
+    elif low == 0x04:
+        out.update({
+            "transport_kind": "iso13400-ndis",
+            "controller": "CCommCtrlISO13400_NDIS",
+            "physical_request_address": None,
+            "physical_response_address": None,
+            "functional_request_address": None,
+            "request_address_field_semantics": "ISO13400 logical route; not a CAN arbitration ID",
+        })
+    elif low == 0x03:
+        out.update({
+            "transport_kind": "direct-can",
+            "controller": "CCommCtrlDirectCan",
+            "physical_request_address": request_address,
+            "physical_response_address": None,
+            "functional_request_address": None,
+            "request_address_field_semantics": "direct CAN route",
+        })
+    else:
+        out.update({
+            "transport_kind": f"change-comm-if-case-{low}-unrecovered",
+            "controller": None,
+            "physical_request_address": None,
+            "physical_response_address": None,
+            "functional_request_address": None,
+            "request_address_field_semantics": "transport controller semantics not yet recovered",
+        })
+    return out
+
+
 def _bundle_protocol_route(master: Any, category_id: int, phase_type: int) -> dict[str, Any]:
-    """Materialize Toyota's class-0x10D route for one category/phase pair."""
+    """Materialize Toyota's class-0x10D route and recovered transport interpretation."""
     matches = [
         raw for raw in ddb_records(master.sections[13])
         if struct.unpack_from("<H", raw, 0x00)[0] == category_id and raw[0x18] == phase_type
@@ -3403,15 +3477,18 @@ def _bundle_protocol_route(master: Any, category_id: int, phase_type: int) -> di
     raw = matches[0]
     if len(raw) != 28:
         raise ValueError(f"CDbProtInfo row size drift: {len(raw)}")
+    request_address = struct.unpack_from("<H", raw, 0x08)[0]
+    functional_address = struct.unpack_from("<H", raw, 0x06)[0]
     return {
         "protocol_info_id": struct.unpack_from("<H", raw, 0x02)[0],
-        "functional_address": struct.unpack_from("<H", raw, 0x06)[0],
-        "request_address": struct.unpack_from("<H", raw, 0x08)[0],
+        "functional_address": functional_address,
+        "request_address": request_address,
         "address_extension": raw[0x0A],
         "request_mask": struct.unpack_from("<H", raw, 0x0E)[0],
         "response_mask": struct.unpack_from("<H", raw, 0x10)[0],
         "legislated_request_address": struct.unpack_from("<H", raw, 0x14)[0],
         "phase_type": raw[0x18],
+        **_bundle_transport_semantics(raw[0x18], request_address, functional_address),
     }
 
 
@@ -3531,6 +3608,31 @@ def _bundle_support_family(single: dict[str, Any] | None, multi: dict[str, Any] 
             if family in dll:
                 return family.casefold()
     return None
+
+
+def _bundle_support_mode(category_id: int, generation: int, family: str | None) -> str | None:
+    """Mirror the family-local dispatch performed by Toyota's support-list builders.
+
+    `GetSupportP5_DT.dll` is not itself one bitmap protocol. CommandCommon further
+    dispatches current P5 categories by generation mode and three Hino ECU IDs.
+    Export that distinction so consumers never turn a shared DLL name into a local
+    permission/compatibility assumption.
+    """
+    if family == "p6":
+        return "p6-standard"
+    if family != "p5":
+        return family
+    low5 = generation & 0x1F
+    high3 = generation & 0xE0
+    if low5 == 0x15:
+        return "p5-mazda"
+    if high3 == 0x60:
+        return "p5-suzuki"
+    if category_id in {0x13A9, 0x13B9, 0x13BA}:
+        return "p5-hino"
+    if high3 == 0x20:
+        return "p5-subaru"
+    return "p5-standard"
 
 
 def _bundle_vehicle_decision_rows(master: Any) -> list[dict[str, Any]]:
@@ -3850,6 +3952,7 @@ def _build_toyota_diag_region(
         item["support_plugin_single"] = single
         item["support_plugin_multi"] = multi
         item["support_family"] = _bundle_support_family(single, multi)
+        item["support_mode"] = _bundle_support_mode(category_id, int(row["generation"]), item["support_family"])
         item["catalog_available"] = category_id in catalog_ids
         if category_id in catalog_ids:
             item["catalog_member"] = f"catalogs/{region}/{category_id}.json"
@@ -3963,6 +4066,10 @@ def _build_toyota_diag_region(
                 family_name: sum(row.get("support_family") == family_name for row in category_index.values())
                 for family_name in ("p3", "p4", "p5", "p6")
             },
+            "support_mode_counts": {
+                mode: sum(row.get("support_mode") == mode for row in category_index.values())
+                for mode in sorted({str(row.get("support_mode")) for row in category_index.values() if row.get("support_mode")})
+            },
         },
         "source_identity": {
             "master": {
@@ -4016,16 +4123,67 @@ def write_toyota_diag_bundle(
         "profile": TOYOTA_DIAG_BUNDLE_PROFILE,
         "release": resolver_artifact["release"],
         "default_region": "NA",
-        "default_panda_bus": 0,
         "fault_status_mask": 0xAF,
         "mode04_request": "0104000000000000",
         "support_contracts": {
-            "p5": resolver_artifact["p5_support"],
+            "p5": {
+                **resolver_artifact["p5_support"],
+                "did_mode_dispatch": {
+                    "p5-standard": "generic C8 two-level DID bitmap",
+                    "p5-subaru": "CreateEnableDataIdListForSubaruCheckDID path",
+                    "p5-suzuki": "CreateEnableDataIdListForSuzuki path",
+                    "p5-mazda": "CreateEnableDataIdListForMazda path",
+                    "p5-hino": "CreateEnableDataIdListForHino path for category 0x13A9/0x13B9/0x13BA",
+                },
+                "standard_did": {
+                    "root_ids_remain_supported": True,
+                    "selector_excluded": ["0xF300", "0xFD00"],
+                    "member_offset": 1,
+                    "terminal_alias_bit_skipped": True,
+                    "implementation": {
+                        "command_common_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+                        "AnalyzeFrameData": "0x10063660",
+                        "CreateEnableDataIdList": "0x10063890",
+                    },
+                },
+            },
             "p6": {
                 "options": {"1": "PID", "2": "DID", "3": "RID"},
-                "did_root": {"request": "22a100", "positive_sid": "0x62", "hierarchy": "A1nn selector bitmap -> nn00..nnFF DID bitmap"},
-                "routine_root": {"request": "3101d100", "positive_sid": "0x71", "hierarchy": "D1nn selector bitmap -> routine support bitmap"},
+                "did_root": {
+                    "request": "22a100",
+                    "positive_sid": "0x62",
+                    "bitmap_bytes_max": 32,
+                    "bit_numbering": "msb0",
+                    "root_base": "0xA100",
+                    "root_shift": 0,
+                    "selector_request": "22a1NN",
+                    "selector_excluded": ["0xA1FD", "0xA1FE"],
+                    "member_base": "(selector & 0x00FF) << 8",
+                    "member_shift": 0,
+                    "selector_ids_remain_supported": True,
+                    "hierarchy": "A100-root bitmap -> A1nn selector IDs; query A1nn except A1FD/A1FE -> nn00..nnFF DID bitmap",
+                },
+                "routine_root": {
+                    "request": "3101d100",
+                    "positive_sid": "0x71",
+                    "bitmap_bytes_max": 32,
+                    "bit_numbering": "msb0",
+                    "root_base": "0xD100",
+                    "root_shift": 0,
+                    "selector_request": "3101d1NN",
+                    "selector_excluded": ["0xD1F0", "0xD1FE"],
+                    "member_base": "(selector & 0x00FF) << 8",
+                    "member_shift": 0,
+                    "selector_ids_remain_supported": True,
+                    "hierarchy": "D100-root bitmap -> D1nn selector IDs; query D1nn except D1F0/D1FE -> nn00..nnFF RID bitmap",
+                },
                 "plugin": "GetSupportMultiP6_DT.dll",
+                "implementation": {
+                    "command_common_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+                    "AnalyzeFrameData": "0x100678D0",
+                    "CreateEnableDataIdList": "0x100679A0",
+                    "CreateEnableRIdList": "0x10067CF0",
+                },
             },
         },
         "decoders": {

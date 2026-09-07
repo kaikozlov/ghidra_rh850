@@ -44,10 +44,29 @@ def main() -> int:
               and set(index["regions"]) == {"NA", "EU", "JP"})
         check("bundle keeps lazy decoded catalogs separate from resolver metadata",
               len(names) == 440 and sum(name.startswith("catalogs/") for name in names) == 439)
+        check("universal Toyota bundle does not project a Panda wiring default",
+              "default_panda_bus" not in index)
+        p5_contract = index["support_contracts"]["p5"]
+        p6_contract = index["support_contracts"]["p6"]
         check("P5 and P6 support contracts are independent Toyota families",
               set(index["support_contracts"]) == {"p5", "p6"}
-              and index["support_contracts"]["p5"]["did_root"]["request"] == "220101"
-              and index["support_contracts"]["p6"]["did_root"]["request"] == "22a100")
+              and p5_contract["did_root"]["request"] == "220101"
+              and p6_contract["did_root"]["request"] == "22a100")
+        check("ordinary Toyota P5 preserves root IDs and skips Toyota-reserved group queries",
+              p5_contract["standard_did"]["root_ids_remain_supported"] is True
+              and p5_contract["standard_did"]["selector_excluded"] == ["0xF300", "0xFD00"]
+              and p5_contract["standard_did"]["member_offset"] == 1
+              and p5_contract["standard_did"]["implementation"]["CreateEnableDataIdList"] == "0x10063890")
+        check("P6 DID/RID support hierarchy is byte-exact and independently pinned",
+              p6_contract["did_root"]["root_base"] == "0xA100"
+              and p6_contract["did_root"]["root_shift"] == 0
+              and p6_contract["did_root"]["selector_excluded"] == ["0xA1FD", "0xA1FE"]
+              and p6_contract["did_root"]["selector_ids_remain_supported"] is True
+              and p6_contract["routine_root"]["root_base"] == "0xD100"
+              and p6_contract["routine_root"]["selector_excluded"] == ["0xD1F0", "0xD1FE"]
+              and p6_contract["implementation"]["AnalyzeFrameData"] == "0x100678D0"
+              and p6_contract["implementation"]["CreateEnableDataIdList"] == "0x100679A0"
+              and p6_contract["implementation"]["CreateEnableRIdList"] == "0x10067CF0")
 
         expected_counts = {
             "NA": (2864, 8372, 2136, 135, 82761, 2402, 1869, 479),
@@ -64,6 +83,11 @@ def main() -> int:
             check(f"{region} support-family dispatch covers every Toyota category",
                   counts["support_family_counts"] == {"p3": 1, "p4": 1859, "p5": 172, "p6": 104}
                   and sum(counts["support_family_counts"].values()) == counts["category_count"])
+            check(f"{region} P5 family-local support modes remain distinct",
+                  counts["support_mode_counts"] == {
+                      "p3": 1, "p4": 1859, "p5-hino": 3, "p5-mazda": 11, "p5-standard": 114,
+                      "p5-subaru": 24, "p5-suzuki": 20, "p6-standard": 104,
+                  })
 
         for region in ("NA", "EU", "JP"):
             regional = index["regions"][region]
@@ -73,11 +97,32 @@ def main() -> int:
             check(f"{region} P6 Engine is classified by Toyota plugin dispatch, not projected into P5",
                   categories["6000"]["database"] == "Engine_CM_P6.ddb"
                   and categories["6000"]["support_family"] == "p6"
+                  and categories["6000"]["support_mode"] == "p6-standard"
                   and categories["6000"]["catalog_available"] is False)
-            check(f"{region} representative current TSS3 categories bind literal P5 support plugins",
+            check(f"{region} representative current TSS3 categories bind literal ordinary-Toyota P5 mode",
                   all(categories[str(cid)]["support_family"] == "p5"
+                      and categories[str(cid)]["support_mode"] == "p5-standard"
                       and categories[str(cid)]["support_plugin_single"]["dll"] == "GetSupportP5_DT.dll"
                       for cid in (372, 397, 405, 435, 498)))
+            check(f"{region} P5 shared-plugin partner/Hino modes are not collapsed into ordinary Toyota",
+                  categories["722"]["support_mode"] == "p5-subaru"
+                  and categories["8500"]["support_mode"] == "p5-suzuki"
+                  and categories["851"]["support_mode"] == "p5-mazda"
+                  and categories["5033"]["support_mode"] == "p5-hino")
+            routes = regional["routes"]
+            p5_route = routes["498:18"]
+            p6_route = routes["6000:24"]
+            check(f"{region} P5 route remains Toyota Phase5 ISO15765 CAN",
+                  p5_route["transport_kind"] == "iso15765-phase-family"
+                  and p5_route["controller"].startswith("CCommCtrlISO15765")
+                  and p5_route["physical_request_address"] == 0x792)
+            check(f"{region} P6 phase 0x18 selects Toyota 29-bit ISO15765 normal-fixed",
+                  p6_route["transport_kind"] == "iso15765-29bit-normal-fixed"
+                  and p6_route["controller"] == "CCommCtrlISO15765_29BitCan"
+                  and p6_route["request_address_field"] == 0x00
+                  and p6_route["physical_request_address"] == 0x18DA00F1
+                  and p6_route["physical_response_address"] == 0x18DAF100
+                  and p6_route["functional_request_address"] == 0x18DB33F1)
 
             dispatch = regional["vehicle_resolver_dispatch"]
             check(f"{region} VIN10 generation dispatch is exact and 5..19 are an unresolved alternate path, not unsupported",

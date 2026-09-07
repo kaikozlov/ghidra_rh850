@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 452 · Corrections: 174 · Open questions: 54 · Docs: 125 · Suites: 240
+Findings: 452 · Corrections: 175 · Open questions: 54 · Docs: 125 · Suites: 240
 
 ## Reading this index
 
@@ -709,6 +709,7 @@ Findings: 452 · Corrections: 174 · Open questions: 54 · Docs: 125 · Suites: 
 | <a id="correction-corr-172"></a>**CORR-172** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | yes |
 | <a id="correction-corr-173"></a>**CORR-173** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | yes |
 | <a id="correction-corr-174"></a>**CORR-174** | [docs/tooling/techstream.md](../tooling/techstream.md), [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | yes |
+| <a id="correction-corr-175"></a>**CORR-175** | [docs/tooling/techstream.md](../tooling/techstream.md), [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | yes |
 
 ## Document registry
 
