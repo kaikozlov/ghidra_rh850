@@ -219,7 +219,7 @@ def _section_camry_2026_relay_correct_capture():
         check('relay analyzer succeeds', proc.returncode == 0, proc.stderr[-300:])
         check('relay artifact regenerates exactly', proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
     art = json.loads(ART.read_text())
-    check('relay artifact schema v2', art['schema'] == 'camry-2026-relay-correct-capture-v2')
+    check('relay artifact schema v3', art['schema'] == 'camry-2026-relay-correct-capture-v3')
     check('production output stays disabled', art['conclusion']['production_output_authorized'] is False and 'passive incoming CAN only' in art['capture_boundary']['operation'])
 
     print('\n== physical repin topology ==')
@@ -260,6 +260,20 @@ def _section_camry_2026_relay_correct_capture():
     check('segment 5 is D-state and 32.66..42.88 kph', drive['segments'][5]['gear_raw_counts'] == {'3': 3662} and drive['segments'][5]['speed_kph']['min'] == 32.66 and drive['segments'][5]['speed_kph']['max'] == 42.88)
     switches = drive['validated_cruise_switch_events']
     check('same-car 0x0FE join sees MAIN toggles in segments 4/5', len(switches['MAIN']['4']) == 2 and len(switches['MAIN']['5']) == 2)
+    availability = drive['cruise_main_availability_lifecycle']
+    check('0x251 B1[4] has exactly one retained rise and no fall in the relay drive',
+          availability['rising_edges'] == [{'from': 0, 'seconds': 21.147887, 'segment': 4, 'to': 1}] and
+          availability['falling_edges'] == [])
+    check('0x251 B1[4] stays high through the later MAIN-off lifecycle',
+          availability['segments']['4']['last'] == 1 and availability['segments']['5']['first'] == 1 and
+          availability['segments']['5']['last'] == 1)
+    op_edges = availability['main_operation_edges']
+    check('validated MAIN pulses exercise two operation-latch activations and two deactivations',
+          [(x['segment'], x['operation_from'], x['operation_to']) for x in op_edges] ==
+          [(4, 0, 1), (4, 1, 0), (5, 0, 1), (5, 1, 0)])
+    check('0x251 availability remains high at both true MAIN deactivation edges',
+          all(x['availability_at_or_before_operation_edge'] == 1 for x in op_edges if x['operation_from'] == 1 and x['operation_to'] == 0) and
+          'not the physical MAIN switch' in availability['boundary'])
     check('same-car 0x0FE join sees SET- interaction in segment 5', switches['SET_MINUS']['5'] == [
         {'end_s': 19.64854, 'frames': 5, 'start_s': 19.526293},
         {'end_s': 20.159219, 'frames': 3, 'start_s': 20.097979},

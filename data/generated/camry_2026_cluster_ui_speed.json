@@ -1,0 +1,170 @@
+{
+  "all_speed_join": {
+    "absolute_error_kph": {
+      "max": 1.7225,
+      "p50": 0.0,
+      "p95": 0.4675
+    },
+    "samples": 3247,
+    "signed_error_kph": {
+      "p05": -0.1825,
+      "p50": 0.0,
+      "p95": 0.4275
+    }
+  },
+  "moving_over_2kph_join": {
+    "absolute_error_kph": {
+      "max": 1.575,
+      "p50": 0.25,
+      "p95": 0.6525
+    },
+    "samples": 703,
+    "signed_error_kph": {
+      "p05": -0.35,
+      "p50": 0.0875,
+      "p95": 0.6425
+    }
+  },
+  "native_counts": {
+    "0x251_bus2": 1546,
+    "0x610_bus0": 3247
+  },
+  "route": "0000002c--c784367b7e",
+  "schema_version": 1,
+  "segments": 26,
+  "semantic_boundary": "0x610.UI_SPEED is strongly wheel-speed coherent and is suitable as the retained openpilot vEgoCluster carrier, but this reduction does not observe the physical meter display. Toyota Operation-FFD 5235 Vehicle speed meter and 5236 Vehicle speed meter status remain the passive synchronized oracle for literal-dash semantics.",
+  "source_files": [
+    {
+      "name": "0000002c--c784367b7e--0.rlog.zst",
+      "sha256": "ee18cfb4644fc056ff3133f6f10beaf84fb79282e0c5c8edbb254eaeb5f20460",
+      "size": 8822823
+    },
+    {
+      "name": "0000002c--c784367b7e--1.rlog.zst",
+      "sha256": "25280bb30e26abb1d3237596055cae1e19fe788b6bdab3c39ecd54d24a9430cf",
+      "size": 10409900
+    },
+    {
+      "name": "0000002c--c784367b7e--2.rlog.zst",
+      "sha256": "8efb8290df7e6417f2c0b4d1a08e0c24167bb193fcbc83dd73d0e4509b8c8f77",
+      "size": 10353112
+    },
+    {
+      "name": "0000002c--c784367b7e--3.rlog.zst",
+      "sha256": "360d0ebebead8800022969d4cebbae15889800d40ad10b8649604bf681f0f8a2",
+      "size": 10482648
+    },
+    {
+      "name": "0000002c--c784367b7e--4.rlog.zst",
+      "sha256": "22e3b2391a0b821174603c26f0e22f2fdd9849fa2f2c3bea433d5783e914e3c2",
+      "size": 10155854
+    },
+    {
+      "name": "0000002c--c784367b7e--5.rlog.zst",
+      "sha256": "26e25457419b70f091a7761800d304f315e233cc235818482d74c86a599fda2c",
+      "size": 9045519
+    },
+    {
+      "name": "0000002c--c784367b7e--6.rlog.zst",
+      "sha256": "d9e25080b4701f98fa221eeff76d14aebb00ef1c9b542c0fde538acf21e7c2f5",
+      "size": 9035952
+    },
+    {
+      "name": "0000002c--c784367b7e--7.rlog.zst",
+      "sha256": "9c5380217503b38848b7fba7167ffd6380228af2407b38cca2fb5b92a41fef99",
+      "size": 9063720
+    },
+    {
+      "name": "0000002c--c784367b7e--8.rlog.zst",
+      "sha256": "66a0fbc9769186c23916a9bf744a619cb10c5502f4fed56fdc08c821992463e0",
+      "size": 9144032
+    },
+    {
+      "name": "0000002c--c784367b7e--9.rlog.zst",
+      "sha256": "98d450d768345e038c44f0c0ec7d19b1222ac1438d0b2ee839228ef7e5f5e1c1",
+      "size": 9101492
+    },
+    {
+      "name": "0000002c--c784367b7e--10.rlog.zst",
+      "sha256": "6ce039681f9c6eb8e8bc7c4144921adac2569ee9822e1ad0defdc14bfc94d01c",
+      "size": 9084229
+    },
+    {
+      "name": "0000002c--c784367b7e--11.rlog.zst",
+      "sha256": "6f00a892f69c820e766083445ddcb02c0d0bd7294a803c3932cdf020740909fb",
+      "size": 9096432
+    },
+    {
+      "name": "0000002c--c784367b7e--12.rlog.zst",
+      "sha256": "e1a1773bfafa384272cdc0e552b6663238cad8d5fd96f764af10b80a142de82b",
+      "size": 9063951
+    },
+    {
+      "name": "0000002c--c784367b7e--13.rlog.zst",
+      "sha256": "62cfa5445d2cbeae14d3ddfe01e45b96a7d5b015939507287d7abcf5b2fe0019",
+      "size": 9074854
+    },
+    {
+      "name": "0000002c--c784367b7e--14.rlog.zst",
+      "sha256": "d688c4c5d73c60b56da83511e24d35ca3c9a3c822d32d2316ff14fce702869fe",
+      "size": 8992878
+    },
+    {
+      "name": "0000002c--c784367b7e--15.rlog.zst",
+      "sha256": "6605b3cef4ce8c7ef94d12ba9b4e37d546ed15921da725db7a82c631dc823742",
+      "size": 8807803
+    },
+    {
+      "name": "0000002c--c784367b7e--16.rlog.zst",
+      "sha256": "29805c8de67473ab391c1c82dde13c838da9f892b7d4aaebd31dda5c231ead0c",
+      "size": 8780709
+    },
+    {
+      "name": "0000002c--c784367b7e--17.rlog.zst",
+      "sha256": "99f27dad74f2ca65cb7a81e3d4824fc4fc15ef4e357f4ebcbe5d9fe1c53490b7",
+      "size": 8758508
+    },
+    {
+      "name": "0000002c--c784367b7e--18.rlog.zst",
+      "sha256": "b811a4af9f2d34242d7e8246e42c20e92b5e7c229ed188c59c6c3e4fb8050aba",
+      "size": 8848591
+    },
+    {
+      "name": "0000002c--c784367b7e--19.rlog.zst",
+      "sha256": "6a20b36b4b4d9157c0b6236e62b47ce3db3c1685e55bc41268199467fb4902ba",
+      "size": 8870229
+    },
+    {
+      "name": "0000002c--c784367b7e--20.rlog.zst",
+      "sha256": "3742c83a3515fe70f342001f024ccbc9b0cfebfd5e1fbf2f70459c1c6f116b53",
+      "size": 8862870
+    },
+    {
+      "name": "0000002c--c784367b7e--21.rlog.zst",
+      "sha256": "dca5092aeb9aa6fbd8e1995b9248d2de9f026160076dc84cfb400a1b8b94dcd7",
+      "size": 8834500
+    },
+    {
+      "name": "0000002c--c784367b7e--22.rlog.zst",
+      "sha256": "ffed14f64a7e9401f741df299442d0a18ba066b7feb529598cc22c1801975eb0",
+      "size": 8869452
+    },
+    {
+      "name": "0000002c--c784367b7e--23.rlog.zst",
+      "sha256": "2fac7d4f7cd3f3e8c0cb72297e701165adf175b53ae25d44f39d0684cf2cf32a",
+      "size": 8824311
+    },
+    {
+      "name": "0000002c--c784367b7e--24.rlog.zst",
+      "sha256": "5b1b08aa8b0dc32900b9ee744da94d08b7656d8e0ebd4264d915877fa5260d68",
+      "size": 8869189
+    },
+    {
+      "name": "0000002c--c784367b7e--25.rlog.zst",
+      "sha256": "d2a77bdfb6e670f21353eccfe9c5f29d1ac767c303555a409f7e123e9704fd23",
+      "size": 5440395
+    }
+  ],
+  "ui_speed_decode": "0x610 B2 unsigned integer km/h (retained legacy UI_SPEED geometry)",
+  "wheel_reference": "nearest same-segment native bus0 0x0AA four-wheel mean within 100 ms"
+}

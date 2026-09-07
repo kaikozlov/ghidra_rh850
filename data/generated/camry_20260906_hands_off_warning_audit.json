@@ -41,7 +41,7 @@
           "p90": 0.0
         },
         "falling_edges": 23,
-        "lane_nibble_counts_left_high_right_low": {
+        "lane_nibble_counts_high_low": {
           "1,1": 587,
           "1,2": 162,
           "1,4": 2,
@@ -101,7 +101,7 @@
             "right_lane_visible_fraction_gt_0_5": 0.998503
           }
         },
-        "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
+        "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the two B3 nibbles; state value 3 appears in 4 frame(s) on this route and is not synthesized. The modelV2 join does not by itself prove which nibble is left versus right; a synchronized Toyota 5514 Left/Right Lane Display observation would close orientation.",
         "native_timing": {
           "interval_count_same_segment": 6905,
           "interval_max_ms": 1008.497864,
@@ -352,7 +352,7 @@
           11
         ],
         "all_frames_exactly_stopped": true,
-        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and clears on accelerator/resume before motion; B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
         "cruise_substate_pair_counts": {
           "44,102": 4,
           "44,70": 26120,
@@ -450,7 +450,7 @@
           "p90": 0.0
         },
         "falling_edges": 35,
-        "lane_nibble_counts_left_high_right_low": {
+        "lane_nibble_counts_high_low": {
           "0,0": 3,
           "1,1": 196,
           "1,2": 51,
@@ -511,7 +511,7 @@
             "right_lane_visible_fraction_gt_0_5": 0.991852
           }
         },
-        "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
+        "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the two B3 nibbles; state value 3 appears in 0 frame(s) on this route and is not synthesized. The modelV2 join does not by itself prove which nibble is left versus right; a synchronized Toyota 5514 Left/Right Lane Display observation would close orientation.",
         "native_timing": {
           "interval_count_same_segment": 4939,
           "interval_max_ms": 1008.287708,
@@ -757,7 +757,7 @@
           11
         ],
         "all_frames_exactly_stopped": true,
-        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and clears on accelerator/resume before motion; B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
         "cruise_substate_pair_counts": {
           "44,102": 2,
           "44,70": 4430,
@@ -836,7 +836,7 @@
           "p90": 0.0
         },
         "falling_edges": 31,
-        "lane_nibble_counts_left_high_right_low": {
+        "lane_nibble_counts_high_low": {
           "0,0": 3,
           "1,1": 440,
           "1,2": 111,
@@ -897,7 +897,7 @@
             "right_lane_visible_fraction_gt_0_5": 0.999575
           }
         },
-        "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
+        "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the two B3 nibbles; state value 3 appears in 0 frame(s) on this route and is not synthesized. The modelV2 join does not by itself prove which nibble is left versus right; a synchronized Toyota 5514 Left/Right Lane Display observation would close orientation.",
         "native_timing": {
           "interval_count_same_segment": 3904,
           "interval_max_ms": 1758.564427,
@@ -1151,7 +1151,7 @@
       "stock_acc_standstill_candidate": {
         "all_episode_target_lateral_ids": [],
         "all_frames_exactly_stopped": true,
-        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and clears on accelerator/resume before motion; B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
         "cruise_substate_pair_counts": {
           "44,70": 8688,
           "45,71": 85170
@@ -1209,7 +1209,7 @@
           "p90": 0.0
         },
         "falling_edges": 43,
-        "lane_nibble_counts_left_high_right_low": {
+        "lane_nibble_counts_high_low": {
           "1,1": 613,
           "1,2": 220,
           "2,1": 207,
@@ -1261,7 +1261,7 @@
             "right_lane_visible_fraction_gt_0_5": 0.997232
           }
         },
-        "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
+        "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the two B3 nibbles; state value 3 appears in 0 frame(s) on this route and is not synthesized. The modelV2 join does not by itself prove which nibble is left versus right; a synchronized Toyota 5514 Left/Right Lane Display observation would close orientation.",
         "native_timing": {
           "interval_count_same_segment": 5066,
           "interval_max_ms": 1006.698958,
@@ -1663,7 +1663,7 @@
       "stock_acc_standstill_candidate": {
         "all_episode_target_lateral_ids": [],
         "all_frames_exactly_stopped": true,
-        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and clears on accelerator/resume before motion; B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
         "cruise_substate_pair_counts": {
           "44,70": 5798,
           "45,71": 123394
@@ -1721,7 +1721,7 @@
           "p90": 0.0
         },
         "falling_edges": 66,
-        "lane_nibble_counts_left_high_right_low": {
+        "lane_nibble_counts_high_low": {
           "0,0": 2,
           "1,1": 561,
           "1,2": 139,
@@ -1766,7 +1766,7 @@
             "right_lane_visible_fraction_gt_0_5": 0.998519
           }
         },
-        "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
+        "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the two B3 nibbles; state value 3 appears in 0 frame(s) on this route and is not synthesized. The modelV2 join does not by itself prove which nibble is left versus right; a synchronized Toyota 5514 Left/Right Lane Display observation would close orientation.",
         "native_timing": {
           "interval_count_same_segment": 5305,
           "interval_max_ms": 1006.567865,
@@ -2222,7 +2222,7 @@
       "stock_acc_standstill_candidate": {
         "all_episode_target_lateral_ids": [],
         "all_frames_exactly_stopped": true,
-        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and clears on accelerator/resume before motion; B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
         "cruise_substate_pair_counts": {
           "44,70": 9760,
           "45,71": 122866
@@ -2262,5 +2262,5 @@
       }
     }
   },
-  "schema_version": 5
+  "schema_version": 6
 }

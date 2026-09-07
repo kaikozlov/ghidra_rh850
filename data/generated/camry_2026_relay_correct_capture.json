@@ -20,6 +20,114 @@
   "confirmation_drive": {
     "b6_any_bus_any_length_count": 0,
     "b6_examples": [],
+    "cruise_main_availability_lifecycle": {
+      "boundary": "B1[4] is a persistent cruise-availability/latch state, not the physical MAIN switch: it rises after the first retained MAIN activation and remains high through later MAIN deactivation edges. No ignition-off/reset fall is retained, so exact reset semantics and the OEM field name remain unjoined.",
+      "falling_edges": [],
+      "main_operation_edges": [
+        {
+          "availability_at_or_before_operation_edge": 1,
+          "main_start_s": 28.290845,
+          "operation_edge_s": 28.580401,
+          "operation_from": 0,
+          "operation_to": 1,
+          "segment": 18
+        },
+        {
+          "availability_at_or_before_operation_edge": 1,
+          "main_start_s": 34.757975,
+          "operation_edge_s": 34.878069,
+          "operation_from": 1,
+          "operation_to": 0,
+          "segment": 18
+        },
+        {
+          "availability_at_or_before_operation_edge": 1,
+          "main_start_s": 37.870463,
+          "operation_edge_s": 38.080412,
+          "operation_from": 0,
+          "operation_to": 1,
+          "segment": 18
+        },
+        {
+          "availability_at_or_before_operation_edge": 1,
+          "main_start_s": 52.30687,
+          "operation_edge_s": 52.47718,
+          "operation_from": 0,
+          "operation_to": 1,
+          "segment": 19
+        },
+        {
+          "availability_at_or_before_operation_edge": 1,
+          "main_start_s": 59.225802,
+          "operation_edge_s": 59.326167,
+          "operation_from": 1,
+          "operation_to": 0,
+          "segment": 19
+        },
+        {
+          "availability_at_or_before_operation_edge": 1,
+          "main_start_s": 1.324766,
+          "operation_edge_s": 1.535189,
+          "operation_from": 0,
+          "operation_to": 1,
+          "segment": 20
+        }
+      ],
+      "rising_edges": [],
+      "segments": {
+        "16": {
+          "first": 1,
+          "last": 1,
+          "transitions": []
+        },
+        "17": {
+          "first": 1,
+          "last": 1,
+          "transitions": []
+        },
+        "18": {
+          "first": 1,
+          "last": 1,
+          "transitions": []
+        },
+        "19": {
+          "first": 1,
+          "last": 1,
+          "transitions": []
+        },
+        "20": {
+          "first": 1,
+          "last": 1,
+          "transitions": []
+        },
+        "21": {
+          "first": 1,
+          "last": 1,
+          "transitions": []
+        },
+        "22": {
+          "first": 1,
+          "last": 1,
+          "transitions": []
+        },
+        "23": {
+          "first": 1,
+          "last": 1,
+          "transitions": []
+        },
+        "24": {
+          "first": 1,
+          "last": 1,
+          "transitions": []
+        },
+        "25": {
+          "first": 1,
+          "last": 1,
+          "transitions": []
+        }
+      },
+      "wire_state": "native relay-side 0x251 B1[4]"
+    },
     "frame_count": 1918047,
     "interpretation": "The retained route proves a relay-correct moving capture with healthy protected 0x00F/0x0D7 traffic and zero 0x0B6 on every incoming bus/length. Same-car 0x0FE switch decoding and sparse 0x08A cross-ECU state changes provide timing markers, but neither machine-proves an exact factory-LTA-active interval. Accordingly this raw artifact alone treats zero B6 only as a segment-level observation; later synchronized LTA/LCA evidence plus exact F33 firmware proves that stock steering can occur through the B6-independent internal assist path, so a stock-B6 template/cadence is not required to explain these drives.",
     "segment_count": 10,
@@ -579,6 +687,107 @@
   "drive": {
     "b6_any_bus_any_length_count": 0,
     "b6_examples": [],
+    "cruise_main_availability_lifecycle": {
+      "boundary": "B1[4] is a persistent cruise-availability/latch state, not the physical MAIN switch: it rises after the first retained MAIN activation and remains high through later MAIN deactivation edges. No ignition-off/reset fall is retained, so exact reset semantics and the OEM field name remain unjoined.",
+      "falling_edges": [],
+      "main_operation_edges": [
+        {
+          "availability_at_or_before_operation_edge": 1,
+          "main_start_s": 20.947601,
+          "operation_edge_s": 21.147887,
+          "operation_from": 0,
+          "operation_to": 1,
+          "segment": 4
+        },
+        {
+          "availability_at_or_before_operation_edge": 1,
+          "main_start_s": 50.21595,
+          "operation_edge_s": 50.304906,
+          "operation_from": 1,
+          "operation_to": 0,
+          "segment": 4
+        },
+        {
+          "availability_at_or_before_operation_edge": 1,
+          "main_start_s": 16.542327,
+          "operation_edge_s": 16.814823,
+          "operation_from": 0,
+          "operation_to": 1,
+          "segment": 5
+        },
+        {
+          "availability_at_or_before_operation_edge": 1,
+          "main_start_s": 33.396611,
+          "operation_edge_s": 33.515886,
+          "operation_from": 1,
+          "operation_to": 0,
+          "segment": 5
+        }
+      ],
+      "rising_edges": [
+        {
+          "from": 0,
+          "seconds": 21.147887,
+          "segment": 4,
+          "to": 1
+        }
+      ],
+      "segments": {
+        "0": {
+          "first": 0,
+          "last": 0,
+          "transitions": []
+        },
+        "1": {
+          "first": 0,
+          "last": 0,
+          "transitions": []
+        },
+        "2": {
+          "first": 0,
+          "last": 0,
+          "transitions": []
+        },
+        "3": {
+          "first": 0,
+          "last": 0,
+          "transitions": []
+        },
+        "4": {
+          "first": 0,
+          "last": 1,
+          "transitions": [
+            {
+              "from": 0,
+              "seconds": 21.147887,
+              "segment": 4,
+              "to": 1
+            }
+          ]
+        },
+        "5": {
+          "first": 1,
+          "last": 1,
+          "transitions": []
+        },
+        "6": {
+          "first": 1,
+          "last": 1,
+          "transitions": []
+        },
+        "7": {
+          "first": 1,
+          "last": 1,
+          "transitions": []
+        },
+        "8": {
+          "first": 1,
+          "last": 1,
+          "transitions": []
+        }
+      },
+      "wire_state": "native relay-side 0x251 B1[4]"
+    },
     "frame_count": 1656656,
     "interpretation": "The retained route proves a relay-correct moving capture with healthy protected 0x00F/0x0D7 traffic and zero 0x0B6 on every incoming bus/length. Same-car 0x0FE switch decoding and sparse 0x08A cross-ECU state changes provide timing markers, but neither machine-proves an exact factory-LTA-active interval. Accordingly this raw artifact alone treats zero B6 only as a segment-level observation; later synchronized LTA/LCA evidence plus exact F33 firmware proves that stock steering can occur through the B6-independent internal assist path, so a stock-B6 template/cadence is not required to explain these drives.",
     "segment_count": 9,
@@ -1139,7 +1348,7 @@
       }
     }
   },
-  "schema": "camry-2026-relay-correct-capture-v2",
+  "schema": "camry-2026-relay-correct-capture-v3",
   "sources": {
     "camry_post_repin_nrtd_20260827.json.gz": {
       "sha256": "4e061d5ec06b0dee0b208e7bc34d5f8050af565978ef3254ce221ad329b4f74d",

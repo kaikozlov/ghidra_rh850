@@ -259,7 +259,7 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
 
             # Same-car stock-ACC stop/hold state. B7 0x66/0x67 is distinct
             # from generic zero vehicle speed: it appears only after several
-            # seconds stopped and clears on accelerator/resume before motion.
+            # seconds stopped and clears with accelerator input before motion.
             # Keep B6/B7 pair counts as a falsification surface: B7 bit5 alone
             # is insufficient because the moving transition 0x47/0x65 exists.
             if dat[3] & 0x08 and last_cs_t is not None and 0 <= t - last_cs_t <= MAX_STATE_AGE_S:
@@ -492,7 +492,7 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
       "episodes": cruise_hold_episodes_out,
       "all_frames_exactly_stopped": all(episode["max_abs_speed_m_s"] < 1e-6 for episode in cruise_hold_episodes_out),
       "all_episode_target_lateral_ids": sorted({lid for episode in cruise_hold_episodes_out for lid in episode["target_lateral_ids"]}),
-      "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and clears on accelerator/resume before motion; B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+      "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
     },
     "native_state_machine_candidate": {
       "driver_steering_candidate": "native bus2 0x371 B20 bit4",
@@ -568,9 +568,13 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
         "payload_change_interval_min_ms": round(min(hud_change_intervals_ms), 6) if hud_change_intervals_ms else None,
         "stable_heartbeat_interpretation": "~1 Hz periodic heartbeat with bounded event-driven publications; no constant 5 Hz source cadence is observed",
       },
-      "lane_nibble_counts_left_high_right_low": {f"{left},{right}": count for (left, right), count in sorted(hud_lane_nibbles.items())},
+      "lane_nibble_counts_high_low": {f"{high},{low}": count for (high, low), count in sorted(hud_lane_nibbles.items())},
       "lane_nibble_model_join": hud_lane_model_out,
-      "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
+      "lane_state_boundary": (
+        "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the two B3 nibbles; "
+        f"state value 3 appears in {sum(count for (high, low), count in hud_lane_nibbles.items() if high == 3 or low == 3)} frame(s) on this route and is not synthesized. "
+        "The modelV2 join does not by itself prove which nibble is left versus right; a synchronized Toyota 5514 Left/Right Lane Display observation would close orientation."
+      ),
       "b2_bit6_frames": hud_escalation_frames,
       "b2_bit6_frames_while_0x371_active": hud_escalation_while_371_active,
       "boundary": "historical 0x412 signal names/layout are not transferred to this TSS3 payload",
@@ -591,7 +595,7 @@ def main() -> int:
     routes[short] = analyze_route(LogReader, args.log_root / day / route, label)
 
   payload = {
-    "schema_version": 5,
+    "schema_version": 6,
     "method": {
       "touch_proxy": f"abs(carState.steeringTorque) >= {TOUCH_TORQUE_NM} N.m",
       "clean_stock_lta": f"carState cruise enabled, vEgo > {MIN_SPEED_MS} m/s, no blinker, latest native bus2 0x08A B21 low6 == 11",

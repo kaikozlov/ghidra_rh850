@@ -115,6 +115,7 @@ def summarize_route(path: Path, segment_ids: tuple[int, ...], structural_segment
   ready = {seg: Counter() for seg in segment_ids}
   fe_rows = {seg: [] for seg in segment_ids}
   a8_rows = {seg: [] for seg in segment_ids}
+  display251_rows = {seg: [] for seg in segment_ids}
   b6_any = []
   seen_segments = set()
 
@@ -139,6 +140,8 @@ def summarize_route(path: Path, segment_ids: tuple[int, ...], structural_segment
       fe_rows[seg].append((t, dat))
     elif addr == 0x08A and len(dat) == 32:
       a8_rows[seg].append((t, dat))
+    elif addr == 0x251 and len(dat) == 8:
+      display251_rows[seg].append((t, dat))
 
   if seen_segments != segment_set:
     raise ValueError(f"missing segments in {path.name}: {sorted(segment_set - seen_segments)}")
@@ -190,6 +193,73 @@ def summarize_route(path: Path, segment_ids: tuple[int, ...], structural_segment
           for x in ints
         ]
 
+  # Recover the persistent 0x251 B1[4] lifecycle without assigning an OEM
+  # field name. The validated 0x0FE MAIN pulses plus 0x08A operation-latch
+  # transitions let us distinguish actual cruise-main activation/deactivation
+  # events from a button pulse alone. This is intentionally a state-lifecycle
+  # join, not a claim that 0x251 B1[4] is the physical MAIN switch.
+  availability_segments = {}
+  availability_rises = []
+  availability_falls = []
+  main_operation_edges = []
+  for seg in segment_ids:
+    display = display251_rows[seg]
+    if not display:
+      continue
+    base = fe_rows[seg][0][0] if fe_rows[seg] else display[0][0]
+    states = [(t, (dat[1] >> 4) & 1) for t, dat in display]
+    transitions = []
+    prior = states[0][1]
+    for t, value in states[1:]:
+      if value != prior:
+        row = {"segment": seg, "seconds": round((t - base) / 1e9, 6), "from": prior, "to": value}
+        transitions.append(row)
+        (availability_rises if value else availability_falls).append(row)
+        prior = value
+    availability_segments[str(seg)] = {
+      "first": states[0][1],
+      "last": states[-1][1],
+      "transitions": transitions,
+    }
+
+    # Classify each human-scale MAIN pulse by the first 0x08A operation-latch
+    # edge within one second after the pulse starts.
+    main_intervals = [x for x in contiguous_intervals([(t, switch_defs["MAIN"](d)) for t, d in fe_rows[seg]]) if x["frames"] <= 30]
+    operation = [(t, (dat[3] >> 3) & 1) for t, dat in a8_rows[seg]]
+    op_edges = []
+    if operation:
+      op_prior = operation[0][1]
+      for t, value in operation[1:]:
+        if value != op_prior:
+          op_edges.append((t, op_prior, value))
+          op_prior = value
+    for event in main_intervals:
+      edge = next((x for x in op_edges if event["start_ns"] <= x[0] <= event["start_ns"] + int(1e9)), None)
+      if edge is None:
+        continue
+      latest_251 = next((value for t, value in reversed(states) if t <= edge[0]), states[0][1])
+      main_operation_edges.append({
+        "segment": seg,
+        "main_start_s": round((event["start_ns"] - base) / 1e9, 6),
+        "operation_edge_s": round((edge[0] - base) / 1e9, 6),
+        "operation_from": edge[1],
+        "operation_to": edge[2],
+        "availability_at_or_before_operation_edge": latest_251,
+      })
+
+  cruise_main_availability = {
+    "wire_state": "native relay-side 0x251 B1[4]",
+    "rising_edges": availability_rises,
+    "falling_edges": availability_falls,
+    "segments": availability_segments,
+    "main_operation_edges": main_operation_edges,
+    "boundary": (
+      "B1[4] is a persistent cruise-availability/latch state, not the physical MAIN switch: "
+      "it rises after the first retained MAIN activation and remains high through later MAIN deactivation edges. "
+      "No ignition-off/reset fall is retained, so exact reset semantics and the OEM field name remain unjoined."
+    ),
+  }
+
   # This raw relay-capture artifact treats 0x08A structurally; VAR-081/CORR-134
   # subsequently recover its upstream-request semantics. Exact F33 Rx configuration does not
   # accept this ID. Its sparse tuple changes are retained as cross-ECU state markers,
@@ -218,6 +288,7 @@ def summarize_route(path: Path, segment_ids: tuple[int, ...], structural_segment
     "b6_any_bus_any_length_count": len(b6_any),
     "b6_examples": [list(x) for x in b6_any[:5]],
     "validated_cruise_switch_events": switches,
+    "cruise_main_availability_lifecycle": cruise_main_availability,
     "structural_0x08A_transitions": a8_transitions,
     "interpretation": (
       "The retained route proves a relay-correct moving capture with healthy protected 0x00F/0x0D7 traffic and zero 0x0B6 on every incoming bus/length. "
@@ -236,7 +307,7 @@ def build() -> dict:
   combined_frames = drive["frame_count"] + confirmation_drive["frame_count"]
   combined_segments = drive["segment_count"] + confirmation_drive["segment_count"]
   return {
-    "schema": "camry-2026-relay-correct-capture-v2",
+    "schema": "camry-2026-relay-correct-capture-v3",
     "sources": {
       p.name: {"size": p.stat().st_size, "sha256": sha256(p)}
       for p in (nrtd, ready, route, confirmation_route)

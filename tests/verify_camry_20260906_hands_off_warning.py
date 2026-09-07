@@ -45,7 +45,7 @@ check("3f 0x412 native heartbeat is approximately 1 Hz",
 check("3f 0x412 has event-driven publications but no sub-75-ms burst",
       75 <= timing3f["interval_min_ms"] < 100 and timing3f["payload_change_interval_count"] > 300)
 
-check("report schema includes state-machine, HUD timing, and stock-ACC hold reduction", report["schema_version"] == 5)
+check("report schema includes state-machine, HUD timing, stock-ACC hold, and lane-orientation bounds", report["schema_version"] == 6)
 
 hold3b = routes["3b"]["stock_acc_standstill_candidate"]
 hold3c = routes["3c"]["stock_acc_standstill_candidate"]
@@ -63,22 +63,28 @@ check("stock-ACC hold remains native LTA/LCA ID11", hold3b["all_episode_target_l
       hold3c["all_episode_target_lateral_ids"] == [11])
 check("stock-ACC hold appears in three independent stop episodes",
       len(hold3b["episodes"]) == 2 and len(hold3c["episodes"]) == 1)
-check("stock-ACC hold clears on accelerator/resume before motion",
+check("all retained stock-ACC hold episodes clear with accelerator input before motion",
       all(e["clear_gas_pressed"] is True and e["clear_abs_speed_m_s"] < 0.1 for e in hold3b["episodes"] + hold3c["episodes"]))
+check("stock-ACC reducer does not overclaim a RES-button clear join", "no RES-button clear join" in hold3b["boundary"])
 check("stock-ACC hold is delayed after the vehicle first stops",
       all(e["time_since_last_moving_at_start_s"] > 5.0 for e in hold3b["episodes"] + hold3c["episodes"]))
 check("other September highway routes do not spuriously enter stock-ACC hold",
       all(routes[short]["stock_acc_standstill_candidate"]["frames"] == 0 for short in ("3d", "3e", "3f")))
 
-lane_counts = hud3f["lane_nibble_counts_left_high_right_low"]
+lane_counts = hud3f["lane_nibble_counts_high_low"]
 lane_join = hud3f["lane_nibble_model_join"]
 check("3f HUD active recognized-lane state dominates", lane_counts["4,4"] > 3000)
 check("3f HUD inactive recognized and missing states are well populated",
       lane_counts["1,1"] > 500 and lane_counts["2,2"] > 1000)
 check("3f HUD mixed per-side recognition states are observed",
       lane_counts["1,2"] > 100 and lane_counts["2,1"] > 100)
-check("3f HUD has no unobserved departure/color state 3",
+check("3f HUD has no state-3 rows on this route",
       all("3" not in key.split(",") for key in lane_counts))
+check("3b HUD retains the four observed high/low 2,3 rows",
+      routes["3b"]["hud_companion_candidate"]["lane_nibble_counts_high_low"].get("2,3") == 4)
+check("HUD reducer keeps nibble side orientation explicitly unproved",
+      "does not by itself prove which nibble is left versus right" in hud3f["lane_state_boundary"] and
+      "5514" in hud3f["lane_state_boundary"])
 check("3f active HUD 4,4 joins strong model lane visibility",
       lane_join["4,4"]["left_lane_visible_fraction_gt_0_5"] > 0.98 and
       lane_join["4,4"]["right_lane_visible_fraction_gt_0_5"] > 0.98)
@@ -145,7 +151,16 @@ for short in ("3d", "3e", "3f"):
 # capability discriminator, not a CAN-bit mapping.
 same_car_5609 = bytes.fromhex("f8c0")
 pcs = json.loads((REPO / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json").read_text())
-rows_5609 = {row["DataName"]: row for row in pcs["operation_ffd"]["detail_rows"] if row["DataID"] == "5609"}
+operation_rows = pcs["operation_ffd"]["detail_rows"]
+rows_5609 = {row["DataName"]: row for row in operation_rows if row["DataID"] == "5609"}
+rows_5514 = {row["DataName"]: row for row in operation_rows if row["DataID"] == "5514"}
+check("5514 exposes left/right lane and steering-symbol passive oracles",
+      set(rows_5514) == {"Left Lane Display", "Right Lane Display", "Steering Symbol Display"} and
+      [rows_5514[name]["BytePosition"] for name in ("Left Lane Display", "Right Lane Display", "Steering Symbol Display")] == [1, 2, 3] and
+      all(rows_5514[name]["SupportDID"] == 0 for name in rows_5514))
+rows_525e = [row for row in operation_rows if row["DataID"] == "525E" and row["DataName"] == "Stop holding status"]
+check("525E exposes the stop-holding semantic oracle without a SupportDID join",
+      len(rows_525e) == 1 and rows_525e[0]["SupportDID"] == 0)
 check("5609 Hands-Off capability bit position pinned",
       (rows_5609["Hands-Off Exist"]["BytePosition"], rows_5609["Hands-Off Exist"]["BitPosition"]) == (2, 4))
 check("5609 driver-camera collaboration bit position pinned",

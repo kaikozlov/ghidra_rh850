@@ -2349,6 +2349,15 @@ paths = [
   "docs/variants/camry-2026-tss3-integration-audit.md",
 ]
 
+[suite.camry_2026_cluster_ui_speed]
+tests = ["tests/verify_camry_2026_cluster_ui_speed.py"]
+oracle = "dynamic_trace"
+paths = [
+  "tools/analyze_camry_2026_cluster_ui_speed.py",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/variants/camry-2026-tss3-integration-audit.md",
+]
+
 [suite.camry_2026_pda_sdg]
 tests = ["tests/verify_camry_2026_pda_sdg.py"]
 oracle = "dynamic_trace"

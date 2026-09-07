@@ -2986,17 +2986,25 @@ before the first stock-cruise activation, while later values persist/reseed
 across cancel and re-engagement. The route contains 616 native bus2 `0x251`
 frames over about 600 s.
 
-The same `0x251` frame also closes the previously missing **cruise-main /
-availability** state independently of the `0x08A` operating latch. `B1[4]` starts
-clear in both route `0000002c--c784367b7e` and the independent 2026-09-04 route
-`0000003d--0e812cecba`. It rises **129.925 ms** and **160.394 ms** respectively
-after the first effective MAIN pulse, then remains set through all five observed
-CANCEL events across those routes while `0x08A B3[3]` clears. Thus the retained
-wire state separates Toyota's persistent cruise-main/available condition from
-actual cruise operation exactly as openpilot expects `cruiseState.available`
-and `cruiseState.enabled` to differ. A true MAIN-off transition is not present in
-the retained corpus, so `B1[4]` is kept under the structural name
-`CRUISE_MAIN_STATE`; no Toyota diagnostic field name is transferred to the bit.
+The same `0x251` frame also closes the previously missing **persistent cruise
+availability/latch** state independently of the `0x08A` operating latch. `B1[4]`
+starts clear in both route `0000002c--c784367b7e` and the independent 2026-09-04
+route `0000003d--0e812cecba`. It rises **129.925 ms** and **160.394 ms**
+respectively after the first effective MAIN activation, then remains set through
+all five observed CANCEL events across those routes while `0x08A B3[3]` clears.
+
+The tracked relay-correct 2026-08-27 corpus supplies the stronger discriminator
+that those later routes lacked. In drive-A segment 4, `B1[4]` has exactly one
+retained `0->1` edge at **21.147887 s**, after the MAIN pulse beginning at
+**20.947601 s**. It has **zero falling edges** over the nine-segment drive.
+Validated MAIN pulses then drive the independent `0x08A` operation latch `1->0`
+at **50.304906 s** in segment 4 and again at **33.515886 s** in segment 5 while
+`B1[4]` remains high. Thus `B1[4]` is demonstrably **not the physical MAIN switch
+position**; it is a persistent per-ignition availability/latch state (or an
+equivalent retained Toyota state) suitable for `cruiseState.available`. The
+corpus still does not contain its ignition-off/reset fall, so exact reset
+semantics and the OEM field name remain unjoined. `CRUISE_MAIN_STATE` therefore
+remains a structural signal name rather than a transferred Toyota label.
 
 At the isolated RES+ transitions, `0x251 B2` changes about **11 ms before** the
 corresponding `0x08A B10` internal-km/h update (and one transition lands in the
@@ -3012,20 +3020,29 @@ native bus0 `0x610/8 = BODY_CONTROL_STATE_2` is present throughout the TSS3 driv
 as `0` on every retained frame. Upstream Toyota's production CarState contract is
 `UNITS in (1,2) => metric`, otherwise imperial, so the observed `0` independently
 selects the imperial interpretation of `0x251 B2`. This is not merely an ID-name
-transfer: the retained legacy `0x610.UI_SPEED` field also remains physically
-coherent on this Camry, tracking logged cluster/vehicle speed as km/h with about
-0.22 mph median absolute error after conversion. `0x611 UI_SETTING` is likewise
-present and its legacy `UNITS` field also reads zero, but openpilot follows the
-existing upstream `0x610` contract rather than introducing a second authority.
+transfer: the retained legacy `0x610.UI_SPEED` field also remains numerically
+coherent on this Camry, tracking logged wheel/`vEgo` speed as km/h with about
+0.22 mph median absolute error after conversion. That does **not** prove it is the
+literal displayed meter value: the inherited `_toyota_2017.dbc` itself warns
+that `UI_SPEED` "Does not appear to match dash", and no synchronized target-Camry
+meter observation has yet been joined to `0x610`. Current FRC Operation-FFD
+provides the passive oracle `5235 Vehicle speed meter` plus `5236 Vehicle speed
+meter status`; a synchronized capture can close that distinction. `0x611
+UI_SETTING` is likewise present and its legacy `UNITS` field also reads zero, but
+openpilot follows the existing upstream `0x610` unit contract rather than
+introducing a second authority.
 
 The exact maintainer-Camry openpilot mapping therefore uses `0x251 B1[4]` for
 `cruiseState.available`, keeps `0x08A B3[3]` for `cruiseState.enabled`, keeps
 `0x08A B10` as `cruiseState.speed`, uses `0x251 B2` as
 `cruiseState.speedCluster`, maps retained `0x610.UI_SPEED` directly to
-`vEgoCluster`, and interprets the cruise UI set speed through the retained
-`0x610 BODY_CONTROL_STATE_2.UNITS` selector exactly like upstream Toyota. This
-removes both the cruise-display offset and the need for a pre-TSS3 vehicle-speed
-fudge while preserving openpilot's ordinary cluster-speed hysteresis, and removes
+`vEgoCluster` as the best retained wheel-correlated UI-speed carrier, and
+interprets the cruise UI set speed through the retained `0x610
+BODY_CONTROL_STATE_2.UNITS` selector exactly like upstream Toyota. This removes
+both the cruise-set-speed display offset and the need for a pre-TSS3
+vehicle-speed fudge while preserving openpilot's ordinary cluster-speed
+hysteresis; it is not a claim that `0x610.UI_SPEED` has been synchronized to the
+literal dash indication. The mapping also removes
 the implementation's previous imperial-only assumption. A metric-configured TSS3 Camry has not been physically
 captured, so the metric branch is supported by the unchanged upstream Toyota
 carrier/contract rather than a maintainer metric-state observation.
@@ -4386,5 +4403,5 @@ Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
 - Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113), [VAR-114](../reference/index.md#finding-var-114), [VAR-115](../reference/index.md#finding-var-115), [VAR-116](../reference/index.md#finding-var-116), [VAR-118](../reference/index.md#finding-var-118), [VAR-119](../reference/index.md#finding-var-119), [VAR-120](../reference/index.md#finding-var-120), [VAR-121](../reference/index.md#finding-var-121), [VAR-122](../reference/index.md#finding-var-122), [VAR-123](../reference/index.md#finding-var-123), [VAR-127](../reference/index.md#finding-var-127), [VAR-128](../reference/index.md#finding-var-128), [VAR-134](../reference/index.md#finding-var-134), [VAR-135](../reference/index.md#finding-var-135), [VAR-136](../reference/index.md#finding-var-136), [VAR-137](../reference/index.md#finding-var-137)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157), [CORR-158](../reference/index.md#correction-corr-158), [CORR-159](../reference/index.md#correction-corr-159), [CORR-160](../reference/index.md#correction-corr-160), [CORR-161](../reference/index.md#correction-corr-161), [CORR-162](../reference/index.md#correction-corr-162), [CORR-165](../reference/index.md#correction-corr-165), [CORR-166](../reference/index.md#correction-corr-166), [CORR-167](../reference/index.md#correction-corr-167), [CORR-168](../reference/index.md#correction-corr-168)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157), [CORR-158](../reference/index.md#correction-corr-158), [CORR-159](../reference/index.md#correction-corr-159), [CORR-160](../reference/index.md#correction-corr-160), [CORR-161](../reference/index.md#correction-corr-161), [CORR-162](../reference/index.md#correction-corr-162), [CORR-165](../reference/index.md#correction-corr-165), [CORR-166](../reference/index.md#correction-corr-166), [CORR-167](../reference/index.md#correction-corr-167), [CORR-168](../reference/index.md#correction-corr-168), [CORR-171](../reference/index.md#correction-corr-171)
 <!-- knowledge-cross-references:end -->
