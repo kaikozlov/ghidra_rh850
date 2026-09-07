@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
-"""Exact-F33 read-only steering-state capture using the ECU's native XCP DAQ.
+"""Exact-F33 steering-state DAQ profile planner; stock native XCP is disabled.
 
 This tool exists to answer the remaining 2026 Camry stock-lateral question:
 which exact-F33 LocalRAM term/gate changes when Toyota publishes an active
 0x08A request, and how that value propagates through the recovered steering
 command/current funnel?
 
-No ephemeral resident is required for the preferred path. Exact 8965F3307000
-already implements measurement-only XCP DAQ on CAN 0x7F7 -> 0x7F8.  Exact
-firmware constants configure four DAQ lists, four ODTs per list, and seven
-one-byte measurements per ODT.  The target profiles are:
+Exact 8965F3307000 contains measurement-only XCP DAQ machinery, but Sep-6
+closure proved the stock command ingress is disabled: the physical endpoint is
+extended CAN 0x1FDC0002 -> 0x1FE00002, traffic reaches FEBE4C34 staging, and
+fixed CodeFlash 0x30D68=0x5A makes the pre-command hook return nonzero before
+CONNECT/DAQ dispatch.  The profile planner remains useful for an audited
+RAM-resident observer, but live native-XCP execution is intentionally refused.
+The target profiles are:
 
 * ``source-terms``: 28 bytes covering every D0218 input/gate plus CC48;
 * ``command-funnel``: 28 bytes covering CC48 through CC4C/CC4E/CC60/CC50/
@@ -31,9 +34,11 @@ wire timestamps.  Four or eight ODT DTOs (depending on profile) are grouped by
 the firmware's ascending list/PID order into one event sample; that grouping is
 a coherent ECU DAQ event, not an atomic CPU snapshot.
 
-The exact current post-repin route is Panda bus 0, ELM327 param 1.  F33 RSCFD
-controller 1 owns both physical EPS UDS 0x7A1 and application XCP 0x7F7, so the
-live route follows the already live-proven post-repin EPS diagnostic channel.
+The exact current post-repin EPS route is Panda bus 0 for UDS. F33 RSCFD
+controller 1 also owns the application-XCP extended endpoint, but ELM327 safety
+does not whitelist that non-ISO extended ID and, more importantly, stock F33
+blocks protocol dispatch in firmware. This tool therefore does not attempt a
+native live XCP session on the installed calibration.
 """
 from __future__ import annotations
 
@@ -78,13 +83,15 @@ from exploit.followups.xcp_daq_probe import (  # noqa: E402
     write_daq_request,
 )
 
-SCHEMA = "camry-f33-steering-state-capture-v1"
+SCHEMA = "camry-f33-steering-state-capture-v2"
 EXPECTED_F181_HEX = "023839363546333330373030300000000038413331313333303331303000000000"
 PANDA_BUS = 0
 ELM327_PARAM = 1
 DEFAULT_DAQ_PRESCALER = 10
-XCP_REQUEST_ID = 0x7F7
-XCP_RESPONSE_ID = 0x7F8
+XCP_REQUEST_ID = 0x1FDC0002
+XCP_RESPONSE_ID = 0x1FE00002
+STOCK_PROTOCOL_GATE_ADDRESS = 0x00030D68
+STOCK_PROTOCOL_GATE_VALUE = 0x5A
 
 # Keep only the steering/reference/context family needed for offline joins.
 CAN_WITNESS_IDS = frozenset((0x025, 0x030, 0x081, 0x08A, 0x0B6, 0x0FE, 0x371, 0x412))
@@ -318,11 +325,18 @@ def plan(profile: Profile, *, prescaler: int = DEFAULT_DAQ_PRESCALER) -> dict[st
         "route": {
             "panda_bus": PANDA_BUS,
             "elm327_param": ELM327_PARAM,
-            "xcp_request": f"0x{XCP_REQUEST_ID:03X}",
-            "xcp_response": f"0x{XCP_RESPONSE_ID:03X}",
-            "basis": "exact F33 RSCFD controller1 owns both 0x7A1 UDS and 0x7F7 XCP; post-repin EPS UDS is live on Panda bus0",
+            "xcp_request": f"0x{XCP_REQUEST_ID:08X}",
+            "xcp_response": f"0x{XCP_RESPONSE_ID:08X}",
+            "can_format": "classic extended CAN",
+            "basis": "exact F33 rule46/slot5 route maps extended 0x1FDC0002 to XCP staging; Sep-6 marker probe live-verified FEBE4C34 ingress",
         },
-        "operation": "read-only native-XCP-DAQ LocalRAM observation plus passive CAN witnesses",
+        "operation": "DAQ profile plan only; stock native-XCP command execution disabled on exact F33",
+        "stock_protocol_gate": {
+            "address": f"0x{STOCK_PROTOCOL_GATE_ADDRESS:08X}",
+            "value": f"0x{STOCK_PROTOCOL_GATE_VALUE:02X}",
+            "dispatch_required_value": "0x00",
+            "stock_protocol_dispatch_enabled": False,
+        },
         "daq_prescaler": prescaler,
         "profile": profile_manifest(profile),
         "can_witness_ids": [f"0x{x:03X}" for x in sorted(CAN_WITNESS_IDS)],
@@ -581,19 +595,11 @@ def main() -> int:
         live = None
         capture_sha = None
         if args.execute:
-            if not args.stock_observation_confirmed:
-                raise XcpDaqError("--execute requires --stock-observation-confirmed")
-            if args.capture_output is None:
-                raise XcpDaqError("live execution requires --capture-output")
-            records, live = run_live(
-                profile,
-                duration_seconds=args.duration_seconds,
-                max_ram_samples=args.max_ram_samples,
-                timeout=args.timeout,
-                prescaler=args.daq_prescaler,
+            raise XcpDaqError(
+                "exact F33 stock native-XCP execution is disabled: extended ingress reaches staging, "
+                "but fixed CodeFlash gate 0x30D68=0x5A blocks CONNECT/DAQ command dispatch; "
+                "use the audited RAM-resident observer instead"
             )
-            capture_sha = write_records(args.capture_output, records)
-            result["mode"] = "live"
         elif args.stock_observation_confirmed:
             raise XcpDaqError("--stock-observation-confirmed is meaningful only with --execute")
 

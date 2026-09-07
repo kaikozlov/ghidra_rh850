@@ -1203,7 +1203,9 @@ tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "application_ram_loader"]
 oracle = "raw_bytes"
 paths = [
+  "tools/build_camry_8965F3307000_application_ram_loader_assessment.py",
   "targets/camry-2026/raw-20260826/RAM_RETENTION_MANIFEST.txt",
+  "targets/camry-2026/raw-20260906/xcp-extended-ingress-probe.json",
   "targets/camry-2026/README.md",
   "docs/variants/camry-2026-live-baseline.md",
   "docs/variants/README.md",

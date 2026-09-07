@@ -296,8 +296,8 @@ with tempfile.TemporaryDirectory() as td:
         "runtime/exploit/patcher/post_apply_verify.py", "runtime/tools/build_secoc_patch_manifest.py",
     )))
     xcp_observer = manifest["live_observers"]["native_xcp_steering_state"]
-    check("kit prefers native XCP steering observer before another RAM resident",
-          xcp_observer["preferred_before_ephemeral_resident"] is True and
+    check("kit marks native XCP steering observer stock-disabled",
+          xcp_observer["preferred_before_ephemeral_resident"] is False and
           xcp_observer["profiles"] == ["full-path", "source-terms", "command-funnel"] and
           xcp_observer["default_profile"] == "full-path" and
           xcp_observer["full_path_bytes"] == 52 and
@@ -305,7 +305,8 @@ with tempfile.TemporaryDirectory() as td:
           xcp_observer["default_daq_prescaler"] == 10 and
           xcp_observer["source_memory_write"] is False and
           xcp_observer["steering_transmit"] is False and
-          "parked preflight" in xcp_observer["live_status"])
+          "0x30D68=0x5A" in xcp_observer["live_status"] and
+          "stock-native execution disabled" in xcp_observer["live_status"])
     runtime_source = (out / "runtime/exploit/common/ram_exec.py").read_text(encoding="utf-8")
     check("kit embeds fixed P1M-E roots without standalone secret files",
           "ba052435f8843f985fd1329d2b6117b0" in runtime_source and

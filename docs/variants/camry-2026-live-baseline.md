@@ -138,15 +138,30 @@ independently reproduces the transition with the passive logger already active
 before the operator is told to enter READY, closing the remaining causal ambiguity
 for state decoding while still bounding exact button-to-frame latency.
 
-## 6. XCP timed out on the correct normal-harness route (CORR-124)
+## 6. XCP uses an extended endpoint, reaches staging, and is stock-disabled before command dispatch (VAR-134 / CORR-165)
 
-A CONNECT-only probe on `0x7F7` over the identified EPS normal-harness route
-timed out waiting for `0x7F8`; no XCP writes were exposed or attempted. Later
-exact-F33 static routing closes the interpretation that this was a wrong-route
-negative: receive-rule 46 at `0x23398` and transmit handle `0x37` independently
-resolve `0x7F7/0x7F8` to **RSCFD controller 1**, the same EPS channel exposed as
-Panda bus 1 on the identity-bound normal harness. The retained timeout therefore
-bounds live XCP admission/response state, not physical route selection.
+The earlier `0x7F7 -> 0x7F8` interpretation was wrong for exact F33. Rule 46 is
+programmed directly into the P1M-E RSCFD `GAFLID` register. In that register bit 31
+is **IDE**, not a generic packed-ID marker, so `0x9FDC0002` means classic
+**extended CAN ID `0x1FDC0002`**; the response word `0x9FE00002` likewise means
+extended `0x1FE00002`. Rule 46 attaches label `0x37`, routes into receive FIFO 1,
+and the label/slot tables resolve exactly to `0x8312E -> 0x830D0`.
+
+The 2026-09-06 parked live probe closes physical ingress rather than merely inferring it.
+With openpilot stopped, exact F181 reverified, and no steering/XCP-write command sent, a
+single non-command marker `00 11 22 33 44 55 66 77` on extended `0x1FDC0002` changed
+`FEBE4C34` from the prior stale CONNECT bytes to that exact marker. Panda reported zero
+TX blocks; `FEBE5004/5005` remained clear and `FEBE4EE6` remained `0x5A`. Therefore the
+frame passes physical CAN, rule 46, FIFO1, owner-0 receive routing, `0x8312E`, and
+`0x830D0` staging.
+
+The reason CONNECT still cannot run is an independent fixed-CodeFlash gate.
+`0x821D6` calls `0x830C0 -> 0x98E80` before parsing any XCP command. `0x98E80` reads
+CodeFlash byte **`0x30D68`**, which is **`0x5A`** in `8965F3307000`; any nonzero value
+returns `1`, while `0x821D6` enters CONNECT/command parsing only when that return is
+zero. Thus the live transport/owner predicates can all be true and `FEBE4EE6` can be
+`0x5A` while stock protocol dispatch remains disabled. The old standard-ID timeout and
+CORR-124's runtime-admission explanation are superseded by CORR-165.
 
 ## 7. NRTD P5 identities and cruise-control wire joins
 
@@ -622,55 +637,44 @@ already online in the application, accept arbitrary bytes into that tail and the
 transfer control there without the PROGRAMMING handoff? Exact firmware closes the
 **placement** half and leaves the **control-transfer** half open.
 
-### 13.1 Rank 1 — stock application XCP `DOWNLOAD` plus a separate volatile pivot
+### 13.1 XCP write/DAQ callbacks exist, but exact F33 disables their stock CAN command ingress
 
 F33 contains the standard XCP command map at `0x22B24` and callback table at
-`0x22B50`. Exact target-native callbacks include:
+`0x22B50`. Target-native callbacks include `SET_MTA 0x82C62`, `DOWNLOAD 0x81FFE`,
+`MODIFY_BITS 0x820C4`, `SHORT_UPLOAD 0x82B1A`, and measurement-only DAQ. The write
+validator at `0x98F2C` admits `FEBF7C00..FEBFFBFF`, which fully covers the
+live-proven high tail. GET_SEED/UNLOCK are unconfigured. These are real handler
+semantics, but **they are not a stock-reachable placement primitive on this calibration**.
 
-- `SET_MTA` `0x82C62`;
-- `DOWNLOAD` `0x81FFE`;
-- `MODIFY_BITS` `0x820C4`;
-- `SHORT_UPLOAD` `0x82B1A`;
-- write-range validator `0x98F2C`;
-- CAN receive adapter `0x8312E`.
+The physical endpoint is classic extended CAN, not standard diagnostic CAN:
 
-`DOWNLOAD @ 0x81FFE` obtains the current MTA, validates the transfer, enters its
-critical section, performs direct byte stores from tester request data, and advances
-the MTA. F33's configured software window is exactly
-**`FEBF7C00..FEBFFBFF`** (`0x2B21C/0x2B220`), so the full live-proven high tail is
-inside the stock writer. The map has no configured GET_SEED (`0xF8`) or UNLOCK
-(`0xF7`) callback. This is therefore the strongest available application-mode
-loader primitive: if its transport is reachable, bytes can be placed while the
-stock application handler is executing, without `10 02`, a reset, or persistent
-flash modification.
+- request hardware-formatted word `0x9FDC0002` -> extended **`0x1FDC0002`** at
+  `0x21F50` and rule46 `0x23398`;
+- response hardware-formatted word `0x9FE00002` -> extended **`0x1FE00002`** at
+  `0x21F48`.
 
-The physical endpoint also exists in F33. Toyota/Denso stores it in packed CAN
-descriptors rather than plain u32 IDs:
+Rule46 is on RSCFD controller 1, uses mask selector 0 -> `0xC00007FF`, attaches
+label `0x37`, and routes to receive FIFO1. FIFO1's base label `0x09` maps `0x37`
+back to rule index 46. Rule46's owner-0 callback selector is `0x20`, selecting slot5;
+slot5 points to route record `0x21AA4`, whose exact key is `0x9FDC0002` and callback
+is `0x8312E`. Live SID23 observation independently proved FIFO1/owner/transport state
+active and the marker probe proved the request reaches `FEBE4C34`.
 
-- request `0x7F7`: packed `0x9FDC0002` at `0x21F50` and `0x23398`;
-- response `0x7F8`: packed `0x9FE00002` at `0x21F48`.
+Protocol execution stops one layer later. Before CONNECT or any opcode lookup,
+`0x821D6` calls `0x830C0 -> 0x98E80`. Exact CodeFlash `0x30D68=0x5A`; `0x98E80`
+returns nonzero immediately for that value, and `0x821D6` processes XCP only when the
+return is zero. This is a fixed stock-calibration negative, not a remaining session,
+Panda, bus, FIFO, or communication-owner ambiguity. Consequently native XCP DAQ is not
+the next Camry steering observer and XCP DOWNLOAD is not a stock production RAM loader.
+The 52-byte DAQ profile remains useful as an observation specification for the audited
+RAM-resident observer.
 
-The physical route is now target-natively closed. The second `0x7F7` descriptor at
-`0x23398` is receive-rule **46** in the 16-byte rule array at `0x230B8`; exact
-controller-span configuration assigns rules 0..46 to **RSCFD controller 1**. On
-transmit, XCP family 5 resolves through route record `0x21AF4` to hardware handle
-`0x37`; the handle table at `0x22DB8` maps `0x37 -> {controller=1, resource=8}`.
-The transport is classic standard CAN with max receive length 8. Thus RX and TX
-independently bind application XCP to controller 1, which is the identity-bound
-normal-harness Panda bus 1 EPS channel used by the retained CONNECT timeout.
-
-The timeout is therefore reclassified by **CORR-124** as a **correct-route,
-no-response runtime observation**. Exact transport admission explains the remaining
-ambiguity: `FEBE4EE6` is `0x69` disabled / `0x5A` enabled; `0x82F18` promotes it
-only when communication-owner state admits the channel. Owner active predicate
-`0x7F23C` requires `FEBE491B == 0xE1`; source/propagated communication masks use
-bit 4 (`0x10`), and the owner has a configured three-foreground-tick (15-ms) delay.
-The actual online-event byte `FEBE4919` is event-driven, so static initialization
-does not prove what state held during the old live run. `xcp_runtime_state_probe.py`
-now reads only those exact admission cells via application SID `0x23` before a new
-CONNECT attempt. Production viability therefore has two remaining gates: close live
-transport admission/write reachability on the already-proven route, and recover a
-safe application-mode control-transfer object.
+The high-tail carrier itself remains verified: `FEBFF9F0..FEBFFBFB` survives stock
+startup and executes. Production work therefore again needs a **stock-reachable volatile
+byte-placement surface as well as a safe control-transfer primitive**, or a different
+stock mechanism that supplies both. Do not patch `0x30D68` merely to preserve the old
+XCP architecture; that would turn a stock production design into another firmware-patch
+design.
 
 ### 13.2 Why the tail begins exactly at `FEBFF9F0`
 
@@ -867,49 +871,37 @@ guesses a branch target.
 
 ### 13.6 Concrete production disposition and minimum next observations
 
-Ranked disposition:
+Ranked disposition after VAR-134/CORR-165:
 
-1. **Application XCP `DOWNLOAD` + future volatile callback pivot** — best design.
-   Byte placement, tail retention/execution, MPU geometry, zero-persistence lifetime,
-   and exact controller-1 physical routing are closed; live transport admission/write
-   reachability and PC transfer remain open.
+1. **Stock XCP placement architecture — rejected on exact F33.** The callbacks and
+   write window exist, but fixed CodeFlash `0x30D68=0x5A` blocks protocol dispatch
+   before CONNECT. Physical extended ingress and transport admission are already
+   live-proven; repeating CONNECT/DAQ/DOWNLOAD cannot answer a remaining question.
 2. **RID `0x100F` stock command-5 path** — real and non-disruptive, but only an
    internal fixed-16-byte crypto test/oracle, not a general SecOC signing API.
 3. **UDS `34/36/37` / programming loader** — rejected for production because it
    requires the network-visible PROGRAMMING transition.
-4. **Persistent flash hook** — fallback only; current evidence does not justify
-   taking it while the application-mode XCP placement surface remains promising.
+4. **Persistent flash hook** — development/recovery fallback only, not the production
+   non-persistent design.
 
-We do **not** yet have enough evidence to implement the complete installer,
-because the execution half is missing. The recovered static stock surface no longer
-contains an obvious next pivot candidate, so the minimum useful live work separates
-**placement** from **execution discovery**:
+The verified high tail still supplies execution storage, but the production design now
+needs two independently stock-reachable ingredients: a volatile tester-byte placement
+surface and a safe already-running-application control-transfer object, or one stock
+service that supplies both. The recovered static pivot classes remain exhausted.
 
-1. on the statically proven normal-harness bus-1/controller-1 route, snapshot the
-   exact XCP admission state with read-only SID `0x23` (`FEBE3DE5/FEBE3DF2`,
-   `FEBE4914..493A`, `FEBE4EE6`, `FEBE4FAE`) and then repeat CONNECT only if the
-   transport is observed admitted;
-2. if CONNECT responds, use a bounded `SET_MTA + DOWNLOAD + SHORT_UPLOAD` readback
-   inside the already-proven high tail to close actual application-context write
-   reachability without executing those bytes;
-3. for the execution blocker, collect a non-executing runtime RAM/control-flow
-   discriminator capable of exposing a mutable continuation/callback/task object or
-   a previously unrecovered hardware/software trigger. A useful observation is a
-   before/after RAM snapshot plus control-flow/registration trace around benign stock
-   diagnostic/task activity, with special attention to lower-RAM callback/task state;
-4. do **not** attempt an arbitrary PC write or RAM execution until such a concrete
-   mutable object has a known setter, invocation condition, and restore semantics.
+Minimum useful next work:
 
-In other words, additional broad static searching is now lower-value than a targeted
-runtime discriminator. XCP reachability/readback can close the placement transport,
-but it cannot by itself solve the execution half.
+1. do **not** patch `0x30D68` merely to revive XCP; that is a persistent firmware
+   modification and defeats the stock-path objective;
+2. use the audited RAM-resident read-only observer/profile for the immediate steering
+   state question, because the native XCP DAQ profile is specification-only on stock F33;
+3. for production architecture, search for a different stock-reachable volatile writer
+   or a service whose data path reaches the retained high tail without PROGRAMMING;
+4. separately collect a non-executing runtime RAM/control-flow discriminator for a
+   concrete mutable continuation/callback/task object; never guess an arbitrary PC cell.
 
-The deterministic assessment is
-`data/generated/camry_8965F3307000_application_ram_loader_assessment.json`, generated
-by `tools/build_camry_8965F3307000_application_ram_loader_assessment.py` and locked
-by `tests/verify_camry_8965F3307000.py`.
-
-Production steering output remains disabled.
+The Sep-6 XCP work is complete as a negative: the missing response is no longer an
+unresolved bus/session/admission problem.
 
 ## 14. Exact F33 persistent Gate-2 development patch
 
@@ -1224,8 +1216,8 @@ maps, current GTS+ names, and both retained drives.
 The hardware acceptance denominator is also exact, not inferred from the COM table.
 RSCFD controller 1 owns exactly 47 rules at `0x230B8`: rules **0..42** match the 43
 normal Rx descriptors one-for-one and in the same arbitration-ID order; rules 43..45 are
-only physical/functional/secondary diagnostics `0x7A1/0x777/0x7A0`; rule 46 is packed
-application XCP `0x7F7`. Thus there is no hidden direct CAN acceptance ID on the exact
+only physical/functional/secondary diagnostics `0x7A1/0x777/0x7A0`; rule 46 is
+application XCP extended ID `0x1FDC0002` (`GAFLID=0x9FDC0002`). Thus there is no hidden direct CAN acceptance ID on the exact
 steering/diagnostic controller outside the normal-COM denominator.
 
 The receiver also answers the more important source-domain question directly. Exact F33
@@ -4319,6 +4311,6 @@ passes F33 freshness.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113), [VAR-114](../reference/index.md#finding-var-114), [VAR-115](../reference/index.md#finding-var-115), [VAR-116](../reference/index.md#finding-var-116), [VAR-118](../reference/index.md#finding-var-118), [VAR-119](../reference/index.md#finding-var-119), [VAR-120](../reference/index.md#finding-var-120), [VAR-121](../reference/index.md#finding-var-121), [VAR-122](../reference/index.md#finding-var-122), [VAR-123](../reference/index.md#finding-var-123), [VAR-127](../reference/index.md#finding-var-127), [VAR-128](../reference/index.md#finding-var-128)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157), [CORR-158](../reference/index.md#correction-corr-158), [CORR-159](../reference/index.md#correction-corr-159), [CORR-160](../reference/index.md#correction-corr-160), [CORR-161](../reference/index.md#correction-corr-161), [CORR-162](../reference/index.md#correction-corr-162)
+- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113), [VAR-114](../reference/index.md#finding-var-114), [VAR-115](../reference/index.md#finding-var-115), [VAR-116](../reference/index.md#finding-var-116), [VAR-118](../reference/index.md#finding-var-118), [VAR-119](../reference/index.md#finding-var-119), [VAR-120](../reference/index.md#finding-var-120), [VAR-121](../reference/index.md#finding-var-121), [VAR-122](../reference/index.md#finding-var-122), [VAR-123](../reference/index.md#finding-var-123), [VAR-127](../reference/index.md#finding-var-127), [VAR-128](../reference/index.md#finding-var-128), [VAR-134](../reference/index.md#finding-var-134)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157), [CORR-158](../reference/index.md#correction-corr-158), [CORR-159](../reference/index.md#correction-corr-159), [CORR-160](../reference/index.md#correction-corr-160), [CORR-161](../reference/index.md#correction-corr-161), [CORR-162](../reference/index.md#correction-corr-162), [CORR-165](../reference/index.md#correction-corr-165)
 <!-- knowledge-cross-references:end -->

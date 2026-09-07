@@ -1109,7 +1109,7 @@ def section_application_ram_loader() -> int:
     a = json.loads(ART.read_text())
     img = IMAGE.read_bytes()
     print("== deterministic target/evidence binding ==")
-    check("assessment schema exact", a["schema"] == "camry-8965f3307000-application-ram-loader-assessment-v1")
+    check("assessment schema exact", a["schema"] == "camry-8965f3307000-application-ram-loader-assessment-v2")
     check("exact F33 image pinned", len(img) == 0x100000 and sha(img) == a["target"]["codeflash_sha256"] == "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7")
     with tempfile.TemporaryDirectory(prefix="f33-app-loader-") as td:
         out = Path(td) / "assessment.json"
@@ -1128,8 +1128,8 @@ def section_application_ram_loader() -> int:
 
     print("\n== application XCP arbitrary writer ==")
     x = a["application_xcp"]
-    check("packed request descriptors are exact", x["request_can_id"] == "0x7F7" and x["packed_descriptor_hits"]["request"] == ["0x021F50", "0x023398"] and struct.unpack_from("<I", img, 0x21F50)[0] == 0x9FDC0002 and struct.unpack_from("<I", img, 0x23398)[0] == 0x9FDC0002)
-    check("packed response descriptor is exact", x["response_can_id"] == "0x7F8" and x["packed_descriptor_hits"]["response"] == ["0x021F48"] and struct.unpack_from("<I", img, 0x21F48)[0] == 0x9FE00002)
+    check("extended request descriptors are exact", x["request_can_id"] == "0x1FDC0002" and x["hardware_id_word_hits"]["request"] == ["0x021F50", "0x023398"] and struct.unpack_from("<I", img, 0x21F50)[0] == 0x9FDC0002 and struct.unpack_from("<I", img, 0x23398)[0] == 0x9FDC0002)
+    check("extended response descriptor is exact", x["response_can_id"] == "0x1FE00002" and x["hardware_id_word_hits"]["response"] == ["0x021F48"] and struct.unpack_from("<I", img, 0x21F48)[0] == 0x9FE00002)
     opmap = img[0x22B24:0x22B24 + 41]
     callbacks = [struct.unpack_from("<I", img, 0x22B50 + 4*i)[0] for i in range(18)]
     check("GET_SEED/UNLOCK are unconfigured", x["get_seed_configured"] is False and x["unlock_configured"] is False and opmap[0xFF-0xF8] == 0 and opmap[0xFF-0xF7] == 0)
@@ -1145,12 +1145,16 @@ def section_application_ram_loader() -> int:
     route=x["physical_route"]
     check("XCP RX rule is exact RSCFD controller-1 rule 46", route["rscfd_controller"] == 1 and route["rx"]["rule_index"] == 46 and route["rx"]["controller_span"] == {"start_index":0,"count":47} and route["rx"]["rule"] == "0x00023398" and struct.unpack_from("<I",img,0x23398)[0] == 0x9FDC0002)
     check("XCP TX handle 0x37 independently maps to controller1/resource8", route["tx"]["family"] == 5 and route["tx"]["software_route_index"] == 4 and route["tx"]["hardware_tx_handle"] == "0x0037" and route["tx"]["resource"] == 8 and struct.unpack_from("<I",img,0x22E38)[0] == 0x22DB8 and img[0x22E26:0x22E28] == bytes((1,8)))
-    check("XCP wire contract is classic standard CAN DLC8", route["can_format"] == "classic standard CAN" and route["frame_size"] == 8 and (struct.unpack_from("<I",img,0x23398)[0] & 0x40000000) == 0 and img[0x22ABD] == 8)
+    check("XCP wire contract is classic extended CAN DLC8", route["can_format"] == "classic extended CAN" and route["frame_size"] == 8 and route["request_ide"] == route["response_ide"] == 1 and (struct.unpack_from("<I",img,0x23398)[0] & 0x80000000) != 0 and img[0x22ABD] == 8)
+    check("rule46 label/FIFO/slot5 routing is exact", struct.unpack_from("<I",img,0x2339C)[0] == 0x00370000 and struct.unpack_from("<I",img,0x233A0)[0] == 2 and img[0x233A4] == 0 and struct.unpack_from("<I",img,0x22E68)[0] == 0xC00007FF and img[0x21A0A] == 0x20 and struct.unpack_from("<I",img,0x21A20)[0] == 0x21AA4 and struct.unpack_from("<I",img,0x21AA8)[0] == 0x8312E)
     act=x["transport_activation"]
     check("XCP activation uses exact owner/transport state cells", act["transport_state"] == "0xFEBE4EE6" and act["disabled_value"] == "0x69" and act["enabled_value"] == "0x5A" and act["owner_active_state"] == "0xFEBE491B" and act["owner_online_event_state"] == "0xFEBE4919" and act["configured_source_mask"] == "0x10")
     check("XCP owner delay is three exact 5ms foreground ticks", act["configured_delay_foreground_ticks"] == 3 and act["foreground_tick_ms"] == 5.0 and act["configured_delay_ms"] == 15.0 and struct.unpack_from("<H",img,0x21B8C)[0] == 3)
-    check("normal bus1/ELM1 timeout is reclassified on the proven correct route", x["normal_route_live_result"]["status"] == "correct_route_no_response_timeout" and x["normal_route_live_result"]["tested_bus"] == 1 and x["normal_route_live_result"]["elm327_param"] == 1 and x["normal_route_live_result"]["panda_tx_block_counter_recorded"] is False and "statically proven correct" in x["reachability_boundary"])
-    check("read-only state preflight is the next XCP discriminator", act["read_only_preflight"] == "exploit/followups/xcp_runtime_state_probe.py" and any("SID 0x23" in row for row in a["minimum_next_observations"]))
+    gate=x["protocol_precommand_gate"]
+    check("fixed CodeFlash pre-command gate disables stock XCP protocol dispatch", gate["codeflash_byte"] == "0x00030D68" and gate["observed_value"] == "0x5A" and gate["dispatch_required_value"] == "0x00" and gate["stock_protocol_commands_admitted"] is False and img[0x30D68] == 0x5A and img[0x98E84:0x98E90].hex() == "400e0300810f690de009ca2d")
+    check("old standard-ID live probe is superseded", x["normal_route_live_result"]["status"] == "superseded_standard_id_probe")
+    check("extended ingress is live-proven through staging", x["extended_route_live_result"]["status"] == "ingress_to_staging_verified_protocol_blocked" and x["extended_route_live_result"]["request"] == "0x1FDC0002" and x["extended_route_live_result"]["panda_tx_blocked_delta"] == 0 and "FEBE4C34" in x["reachability_boundary"])
+    check("next observation explicitly avoids repeating stock XCP", any("Do not repeat stock XCP" in row for row in a["minimum_next_observations"]))
 
     print("\n== calibration-page shadow is not an execution overlay ==")
     cx = a["custom_xcp"]

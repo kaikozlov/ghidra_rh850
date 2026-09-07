@@ -24,6 +24,7 @@ STOCK_HANDOFF = RAW / "stock-handoff-20260826.json"
 POSTSTARTUP = RAW / "poststartup-canary-20260826.json"
 RETENTION_MANIFEST = RAW / "RAM_RETENTION_MANIFEST.txt"
 XCP_LIVE = RAW / "xcp_probe.json"
+XCP_EXT_LIVE = ROOT / "targets/camry-2026/raw-20260906/xcp-extended-ingress-probe.json"
 OUT = ROOT / "data/generated/camry_8965F3307000_application_ram_loader_assessment.json"
 
 HIGH_BASE, HIGH_END = 0xFEBFF9F0, 0xFEBFFBFB
@@ -187,7 +188,7 @@ def find_ldsr_writers(image: bytes, system_register: int, selector: int) -> list
 def build() -> dict:
     image=IMAGE.read_bytes()
     need(len(image)==0x100000 and sha(image)==IMAGE_SHA, "exact F33 image drift")
-    high,low,handoff,poststartup,xlive=load(HIGH),load(LOW),load(STOCK_HANDOFF),load(POSTSTARTUP),load(XCP_LIVE)
+    high,low,handoff,poststartup,xlive,xext=load(HIGH),load(LOW),load(STOCK_HANDOFF),load(POSTSTARTUP),load(XCP_LIVE),load(XCP_EXT_LIVE)
     need(high["schema"]=="camry-f33-high-tail-exec-retention-v1", "high-tail evidence schema drift")
     need(high["result"]["tail_524_byte_exact"] and high["result"]["tail_marker_executed"], "high-tail retention/exec result drift")
     need(high["result"]["retained_sha256"]=="89ffed31c24e746a57171e6f3e22f99d1e78d57b63bccb8778c7fe715d18800c", "high-tail retained bytes drift")
@@ -198,19 +199,23 @@ def build() -> dict:
     need(poststartup["schema"]=="camry-f33-poststartup-canary-live-v1", "poststartup canary schema drift")
     need(poststartup["payload"]["command5_calls"] is False and poststartup["payload"]["flash_write"] is False and poststartup["payload"]["steering_can_transmit"] is False, "poststartup canary safety boundary drift")
 
-    # Packed Denso/Toyota standard-CAN descriptor encoding used by the F33 image.
-    req_desc=(0x80000000 | (0x7F7 << 18) | 2).to_bytes(4,"little")
-    rsp_desc=(0x80000000 | (0x7F8 << 18) | 2).to_bytes(4,"little")
+    # Exact F33 stores the RSCFD hardware-formatted CAN identifier directly:
+    # bit31 is IDE and bits28:0 are the 29-bit identifier.  These words were
+    # previously misread as a packed standard-ID representation.
+    req_word=0x9FDC0002; rsp_word=0x9FE00002
+    req_id=req_word & 0x1FFFFFFF; rsp_id=rsp_word & 0x1FFFFFFF
+    need(req_id==0x1FDC0002 and rsp_id==0x1FE00002, "extended XCP endpoint decode drift")
+    req_desc=req_word.to_bytes(4,"little"); rsp_desc=rsp_word.to_bytes(4,"little")
     req_hits=find_all(image,req_desc); rsp_hits=find_all(image,rsp_desc)
-    need(req_hits==[0x21F50,0x23398], f"packed 7F7 descriptor drift: {req_hits}")
-    need(rsp_hits==[0x21F48], f"packed 7F8 descriptor drift: {rsp_hits}")
+    need(req_hits==[0x21F50,0x23398], f"extended request descriptor drift: {req_hits}")
+    need(rsp_hits==[0x21F48], f"extended response descriptor drift: {rsp_hits}")
 
     # Exact F33 physical XCP routing. The generated-COM response is family 5,
     # whose sole route record resolves to hardware Tx handle 0x37. The driver
     # handle map sends that handle through RSCFD controller 1/resource 8. On
-    # receive, controller 1 owns acceptance-rule indices 0..46; rule 46 is the
-    # second packed 0x7F7 descriptor at 0x23398. Thus RX and TX independently
-    # bind application XCP to the same exact F33 RSCFD channel.
+    # receive, controller 1 owns acceptance-rule indices 0..46; rule 46 stores
+    # the extended-ID GAFLID word directly at 0x23398. RX and TX independently
+    # bind the extended application-XCP endpoint to the same RSCFD channel.
     family_counts=[u16(image,0x21A48+i*2) for i in range(6)]
     family_routes=list(image[0x2195C:0x21962])
     need(family_counts==[5,0,4,0,0,1], f"generated-COM family counts drift: {family_counts}")
@@ -225,9 +230,25 @@ def build() -> dict:
     rx_rule_base=0x230B8; rx_rule_stride=0x10; xcp_rx_rule_index=46
     need(u16(image,0x22ECE)==0 and image[0x22ED0]==47, "RSCFD controller-1 RX span drift")
     xcp_rx_rule=rx_rule_base+xcp_rx_rule_index*rx_rule_stride
-    need(xcp_rx_rule==0x23398 and u32(image,xcp_rx_rule)==int.from_bytes(req_desc,"little"), "XCP controller-1 acceptance rule drift")
+    need(xcp_rx_rule==0x23398 and u32(image,xcp_rx_rule)==req_word, "XCP controller-1 acceptance rule drift")
     need(u16(image,xcp_rx_rule+6)==0x37, "XCP RX rule hardware label drift")
-    need((int.from_bytes(req_desc,"little") & 0x40000000)==0 and image[0x22ABD]==8, "XCP classic-CAN/DLC8 transport contract drift")
+    need((req_word & 0x80000000)!=0 and (req_word & 0x40000000)==0 and image[0x22ABD]==8, "XCP extended-classic/DLC8 transport contract drift")
+    # Rule46 is routed through receive FIFO1 as hardware label 0x37.  The
+    # common owner-0 callback mask selects slot5, whose route record exact-matches
+    # the hardware-formatted extended ID and calls 0x8312E.
+    need(image[xcp_rx_rule+12]==0 and u32(image,0x22E68)==0xC00007FF, "XCP rule46 GAFL mask-selector drift")
+    need(u32(image,xcp_rx_rule+4)==0x00370000 and u32(image,xcp_rx_rule+8)==0x00000002, "XCP rule46 label/FIFO routing drift")
+    need(image[0x21A0A]==0x20 and u32(image,0x21A20)==0x21AA4, "XCP rule46 callback-slot routing drift")
+    need(u32(image,0x21AA4)==0x21F50 and u32(image,0x21AA8)==0x8312E, "XCP slot5 route record drift")
+    need(u32(image,0x21F50)==req_word and u32(image,0x21924)==0xFFFFFFFF, "XCP route exact-match/mask drift")
+
+    # Independent fixed-CodeFlash protocol gate.  0x821D6 calls 0x830C0 ->
+    # 0x98E80 before parsing CONNECT.  In this calibration, ROM byte 0x30D68
+    # is 0x5A; 0x98E80 returns 1 immediately when it is nonzero, while 0x821D6
+    # processes commands only when that return is zero.  Transport state 0x5A
+    # therefore does not imply protocol-command admission.
+    need(image[0x30D68]==0x5A, "F33 fixed XCP protocol gate drift")
+    need(image[0x98E84:0x98E90].hex()=="400e0300810f690de009ca2d", "F33 XCP pre-command gate body drift")
 
     # Exact transport-admission chain. XCP starts disabled (0x69) and the
     # activation API promotes it to 0x5A only after the communication owner
@@ -432,9 +453,13 @@ def build() -> dict:
     # Exact current dynamic reachability result is only the normal EPS route.
     need(xlive["status"]=="unreachable" and xlive["route"]["eps_bus"]==1 and xlive["route"]["elm327_param"]==1, "XCP live discriminator drift")
     need(xlive["write_commands_implemented"] is False and xlive["source_memory_writes_implemented"] is False, "XCP live probe write guard drift")
+    need(xext["schema"]=="camry-f33-xcp-extended-ingress-probe-v1", "extended XCP live evidence schema drift")
+    need(xext["probe"]["request_extended_can_id"]=="0x1FDC0002" and xext["probe"]["panda_safety_tx_blocked_delta"]==0, "extended XCP live TX evidence drift")
+    need(xext["sid23_before"]["xcp_staging_febe4c34_16"] != xext["sid23_after"]["xcp_staging_febe4c34_16"] and xext["sid23_after"]["xcp_staging_febe4c34_16"].startswith(xext["probe"]["payload_hex"]), "extended XCP live staging evidence drift")
+    need(xext["sid23_after"]["xcp_owner_febe5004_2"]=="0000" and xext["sid23_after"]["xcp_transport_febe4ee6"]=="5a", "extended XCP live owner/transport evidence drift")
 
     return {
-      "schema":"camry-8965f3307000-application-ram-loader-assessment-v1",
+      "schema":"camry-8965f3307000-application-ram-loader-assessment-v2",
       "target":{"software_id":"8965F3307000","secondary":"8A3113303100","codeflash_sha256":IMAGE_SHA,"mcu":"R7F701381"},
       "live_runtime_carrier":{
         "base":f"0x{HIGH_BASE:08X}","end_inclusive":f"0x{HIGH_END:08X}","size":HIGH_END-HIGH_BASE+1,
@@ -444,8 +469,8 @@ def build() -> dict:
         "poststartup_direct_canary_result":"negative/no application reappearance; retained as a failed architecture probe, not evidence against the proven high-tail carrier",
       },
       "application_xcp":{
-        "request_can_id":"0x7F7","response_can_id":"0x7F8",
-        "packed_descriptor_hits":{"request":[f"0x{x:06X}" for x in req_hits],"response":[f"0x{x:06X}" for x in rsp_hits]},
+        "request_can_id":"0x1FDC0002","response_can_id":"0x1FE00002",
+        "hardware_id_word_hits":{"request":[f"0x{x:06X}" for x in req_hits],"response":[f"0x{x:06X}" for x in rsp_hits]},
         "rx_adapter":"0x0008312E","standard_opcode_map":"0x00022B24","standard_callback_table":"0x00022B50",
         "get_seed_configured":False,"unlock_configured":False,
         "set_mta":"0x00082C62","download":"0x00081FFE","modify_bits":"0x000820C4","short_upload":"0x00082B1A",
@@ -460,25 +485,34 @@ def build() -> dict:
         "unconfigured_control_or_transfer_commands":["0xF9 SET_REQUEST","0xF5 UPLOAD","0xF3 BUILD_CHECKSUM (standard)","0xF2 TRANSPORT_LAYER_CMD","0xF1 USER_CMD","0xEF DOWNLOAD_NEXT","0xEE DOWNLOAD_MAX","0xED SHORT_DOWNLOAD","0xDC GET_DAQ_CLOCK","0xDB READ_DAQ"],
         "write_validator":"0x00098F2C","software_write_window":[f"0x{XCP_LO:08X}",f"0x{XCP_HI:08X}"],
         "high_tail_fully_inside_write_window":XCP_LO<=HIGH_BASE<=HIGH_END<=XCP_HI,
-        "placement_static_verdict":"proven: generic XCP DOWNLOAD can directly store tester-controlled bytes into the live-proven high tail while the application handler is executing",
+        "placement_static_verdict":"conditional-only: DOWNLOAD has a direct tester-byte store into the high-tail window if protocol dispatch is enabled, but stock F33 blocks every incoming XCP command before CONNECT/command parsing via fixed CodeFlash gate 0x30D68=0x5A",
         "physical_route":{
-          "can_format":"classic standard CAN","frame_size":8,
+          "can_format":"classic extended CAN","frame_size":8,"request_ide":1,"response_ide":1,
           "rscfd_controller":1,
           "rx":{"rule_array":"0x000230B8","rule_stride":16,"controller_span":{"start_index":0,"count":47},"rule_index":46,"rule":"0x00023398","hardware_label":"0x0037"},
           "tx":{"family":5,"software_route_index":4,"route_record":"0x00021AF4","hardware_tx_handle":"0x0037","handle_map":"0x00022DB8","handle_entry":"0x00022E26","resource":8},
           "normal_harness_join":"exact F33 RSCFD controller 1 is the same EPS channel exposed as Panda bus1 on the identity-bound normal-harness route; relay-correct topologies may number Panda buses differently",
-          "verdict":"RX 0x7F7 and TX 0x7F8 independently resolve to exact F33 RSCFD controller 1; physical-route selection is statically closed",
+          "verdict":"RX extended 0x1FDC0002 and TX extended 0x1FE00002 independently resolve to exact F33 RSCFD controller 1; live marker ingress reaches XCP staging",
+        },
+        "protocol_precommand_gate":{
+          "dispatcher":"0x000821D6","precommand_wrapper":"0x000830C0","gate_function":"0x00098E80",
+          "codeflash_byte":"0x00030D68","observed_value":"0x5A","dispatch_required_value":"0x00",
+          "stock_protocol_commands_admitted":False,
+          "live_staging_evidence":str(XCP_EXT_LIVE.relative_to(ROOT)),
+          "live_staging_evidence_sha256":sha_file(XCP_EXT_LIVE),
+          "verdict":"transport and staging are live, but stock exact-F33 returns nonzero from the fixed pre-command gate before CONNECT or any configured XCP command can execute"
         },
         "transport_activation":{
           "transport_state":"0xFEBE4EE6","disabled_value":"0x69","enabled_value":"0x5A","activation_api":"0x00082F18","rx_gate":"0x00082FEC","tx_gate":"0x00082D6C",
           "communication_manager_state":"0xFEBE3DF2","channel0_state":"0xFEBE3DE5",
           "source_comm_mask":"0xFEBE4FAE","configured_source_mask":"0x10","propagated_comm_mask":"0xFEBE493A","owner_active_state":"0xFEBE491B","owner_online_event_state":"0xFEBE4919",
           "owner_active_predicate":"0x0007F23C","owner_online_setter":"0x0007F030","configured_delay_foreground_ticks":3,"foreground_tick_ms":5.0,"configured_delay_ms":15.0,
-          "dynamic_boundary":"the three-tick delay is target-native, but owner-online FEBE4919 is event-driven; whether the old live probe had reached the online/0x5A state is a runtime observation, not closed by static initialization",
+          "dynamic_boundary":"Sep-6 live SID23 proved the transport/owner predicates active and FEBE4EE6=0x5A; that state is necessary but not sufficient because the independent fixed CodeFlash pre-command gate remains disabled",
           "read_only_preflight":"exploit/followups/xcp_runtime_state_probe.py",
         },
-        "normal_route_live_result":{"status":"correct_route_no_response_timeout","tested_bus":1,"elm327_param":1,"panda_tx_block_counter_recorded":False,"source":str(XCP_LIVE.relative_to(ROOT)),"source_sha256":sha_file(XCP_LIVE)},
-        "reachability_boundary":"The normal-harness bus1 route is now statically proven correct, so the retained timeout is not physical-route falsification. Remaining reachability ambiguity is live transport/communication-owner admission or response behavior; the read-only SID-0x23 state preflight is the next discriminator.",
+        "normal_route_live_result":{"status":"superseded_standard_id_probe","tested_bus":1,"elm327_param":1,"panda_tx_block_counter_recorded":False,"source":str(XCP_LIVE.relative_to(ROOT)),"source_sha256":sha_file(XCP_LIVE)},
+        "extended_route_live_result":{"status":"ingress_to_staging_verified_protocol_blocked","tested_bus":0,"request":"0x1FDC0002","panda_tx_blocked_delta":0,"source":str(XCP_EXT_LIVE.relative_to(ROOT)),"source_sha256":sha_file(XCP_EXT_LIVE)},
+        "reachability_boundary":"Physical extended-CAN ingress is live-proven through FEBE4C34 staging. Stock protocol command reachability is closed negative by the fixed CodeFlash pre-command gate 0x30D68=0x5A; transport/owner state is not the blocker.",
       },
       "application_uds":{
         "service_table":"0x00025C54","configured_sids":[f"0x{r['sid']:02X}" for r in service_rows],
@@ -651,16 +685,16 @@ def build() -> dict:
       "raw_range_evidence":raw_ranges,
       "architectures":[
         {
-          "rank":1,"name":"stock application XCP DOWNLOAD + separate volatile execution pivot",
-          "exact_surface":{"set_mta":"0x00082C62","download":"0x00081FFE","write_validator":"0x00098F2C","request":"0x7F7","response":"0x7F8"},
-          "placement":"proven statically: tester bytes -> MTA -> direct byte stores in FEBF7C00..FEBFFBFF, including the full high tail",
+          "rank":1,"name":"disabled stock XCP writer surface + separate volatile execution pivot",
+          "exact_surface":{"set_mta":"0x00082C62","download":"0x00081FFE","write_validator":"0x00098F2C","request":"0x1FDC0002 extended","response":"0x1FE00002 extended"},
+          "placement":"handler semantics are proven conditionally, but stock ingress cannot reach CONNECT/DOWNLOAD because fixed gate 0x30D68=0x5A returns nonzero before protocol dispatch",
           "execution":"not recovered; requires a separate already-running-application callback/continuation pivot",
           "network_visibility":"no application->PROGRAMMING handoff is inherent; handler executes in the stock application, so no ECU disappearance is expected from the mechanism itself",
           "privilege_mpu_context":"high tail is MPU region1; ctx0 supervisor R/W/X, ctx1 supervisor R/X. Live execution from the tail is independently proven. Actual XCP handler context must still be confirmed dynamically by a harmless write/readback.",
           "lifetime":"volatile LocalRAM only; power loss removes payload/state",
-          "diagnostic_side_effects":"XCP connected/MTA state only under recovered software semantics; no flash/NvM write in DOWNLOAD path. Exact physical RSCFD controller-1 routing is closed; runtime transport-admission state remains to be observed.",
-          "remaining_unknowns":["live communication-owner/XCP transport admission state on the correct route","safe mutable control-transfer object","runtime write context/latency on the live route"],
-          "verdict":"best architecture but incomplete"
+          "diagnostic_side_effects":"stock exact-F33 never reaches XCP connected/MTA state from CAN because the fixed pre-command gate rejects protocol dispatch; no stock live write/readback is authorized",
+          "remaining_unknowns":["safe mutable control-transfer object reachable without altering the stock XCP gate","alternative non-disruptive stock RAM writer"],
+          "verdict":"rejected as a stock production architecture; callbacks exist but the exact calibration disables command dispatch"
         },
         {
           "rank":2,"name":"stock RID 0x100F command-5 service",
@@ -693,11 +727,11 @@ def build() -> dict:
         "reason":"The exact application-mode byte-placement primitive is closed, and the recovered stock execution-pivot classes have been exhausted across callbacks, exception state, CTBP/CALLT, EBASE/INTBP, fixed DMA, calibration paging, full XCP/DAQ, ECUReset, RoutineControl, WDBI, and proprietary AB/BA. No application-mode control-transfer primitive into the high tail is recovered; emitting a vehicle execution PoC would therefore invent an unproved pivot.",
       },
       "minimum_next_observations":[
-        "On the statically proven normal-harness bus1/RSCFD-controller-1 route, use read-only SID 0x23 to snapshot the exact XCP admission state (FEBE3DE5/FEBE3DF2/FEBE4914..493A/FEBE4EE6/FEBE4FAE) before repeating CONNECT; do not infer route failure from the old timeout.",
-        "If and only if the state preflight shows XCP admitted and CONNECT responds, a bounded application-mode DOWNLOAD + SHORT_UPLOAD readback inside the already-live-proven high tail would close transport-to-writer reachability without executing the bytes.",
+        "Do not repeat stock XCP CONNECT/DAQ/DOWNLOAD on exact F33: extended 0x1FDC0002 ingress is already live-proven through FEBE4C34 staging and fixed CodeFlash 0x30D68=0x5A blocks protocol dispatch before CONNECT.",
+        "For further steering-state observation, use the already-audited RAM-resident read-only observer or another independently recovered stock read surface; do not treat the disabled XCP callbacks as a stock writer.",
         "Static analysis has exhausted the recovered stock pivot classes. The next execution-specific observation should be a dynamic RAM/control-flow discriminator that identifies a mutable control-transfer object or a previously unrecovered hardware/software trigger; do not probe arbitrary PC writes without that object.",
       ],
-      "production_answer":"Not yet. F33 has a target-native application XCP writer that can place arbitrary bytes in FEBFF9F0..FEBFFBFB without a programming handoff, and that tail is live-proven retained/executable. The recovered static execution-pivot classes are now exhausted—including full XCP/DAQ, fixed vector bases, all configured RoutineControl/WDBI/AB/BA/reset surfaces, callback/exception/DMA/CALLT/calibration compositions—and none transfers PC to tester-controlled RAM. A complete non-disruptive signer therefore still requires a new runtime control-transfer primitive not present in the recovered static surface."
+      "production_answer":"Not yet. F33 retains XCP command/write callbacks and the FEBF7C00..FEBFFBFF write window, but the exact stock calibration blocks all incoming XCP protocol commands before CONNECT via fixed CodeFlash 0x30D68=0x5A. The high tail remains live-proven retained/executable, but XCP is not a stock placement primitive. A complete non-disruptive signer therefore needs both a stock-reachable volatile byte-placement surface and a safe control-transfer primitive, or a different stock service that supplies both."
     }
 
 

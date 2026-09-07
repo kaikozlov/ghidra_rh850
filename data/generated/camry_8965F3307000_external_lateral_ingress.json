@@ -122,9 +122,10 @@
         "rule": 45
       },
       {
-        "can_id": "0x7F7",
-        "packed_descriptor": "0x9FDC0002",
-        "role": "application XCP",
+        "can_id": "0x1FDC0002",
+        "extended": true,
+        "hardware_id_word": "0x9FDC0002",
+        "role": "application XCP (stock protocol dispatch disabled)",
         "rule": 46
       }
     ],

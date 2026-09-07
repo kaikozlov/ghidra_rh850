@@ -80,7 +80,7 @@
     "end_exclusive": "0xFEBFFBBC",
     "end_inclusive": "0xFEBFFBBB",
     "historical_only": true,
-    "host_read_transport": "application SID 0x23 ALFID 0x15 memory-id 1; Camry XCP 0x7F7/0x7F8 is not assumed",
+    "host_read_transport": "application SID 0x23 ALFID 0x15 memory-id 1; exact-F33 XCP extended 0x1FDC0002/0x1FE00002 is stock protocol-disabled and not assumed",
     "intended_write_context": "ctx0; target-native foreground sequence returns through 0x71398 before canary/signer insertion",
     "mpu_bounds": [
       "0xFEBF7C00",

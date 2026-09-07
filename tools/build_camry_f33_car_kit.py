@@ -304,16 +304,16 @@ def build(out: Path, openpilot: Path) -> dict:
         "live_observers": {
             "native_xcp_steering_state": {
                 "tool": "runtime/tools/camry_f33_steering_state_capture.py",
-                "preferred_before_ephemeral_resident": True,
+                "preferred_before_ephemeral_resident": False,
                 "profiles": ["full-path", "source-terms", "command-funnel"],
                 "default_profile": "full-path",
                 "full_path_bytes": 52,
                 "full_path_daq_lists": 2,
                 "default_daq_prescaler": 10,
-                "route": "0x7F7->0x7F8 bus0 after exact F181 check",
+                "route": "extended 0x1FDC0002->0x1FE00002 on F33 RSCFD controller1; stock command dispatch disabled",
                 "source_memory_write": False,
                 "steering_transmit": False,
-                "live_status": "parked preflight first; if CONNECT is silent, use packaged read-only runtime-state probe before any RAM-resident fallback",
+                "live_status": "stock-native execution disabled: Sep-6 ingress reaches FEBE4C34, but fixed CodeFlash 0x30D68=0x5A blocks CONNECT/DAQ; use packaged RAM-resident read-only observer instead",
             },
         },
         "ram_experiments": {

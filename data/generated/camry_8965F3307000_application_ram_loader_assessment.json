@@ -421,18 +421,16 @@
       "write_daq": "0x00082510"
     },
     "download": "0x00081FFE",
-    "get_seed_configured": false,
-    "high_tail_fully_inside_write_window": true,
-    "modify_bits": "0x000820C4",
-    "normal_route_live_result": {
-      "elm327_param": 1,
-      "panda_tx_block_counter_recorded": false,
-      "source": "targets/camry-2026/raw-20260826/xcp_probe.json",
-      "source_sha256": "b8d96ae5cb97f18d1138196e2a0cb95de5938ec0ff7e512ee9f752f86645e273",
-      "status": "correct_route_no_response_timeout",
-      "tested_bus": 1
+    "extended_route_live_result": {
+      "panda_tx_blocked_delta": 0,
+      "request": "0x1FDC0002",
+      "source": "targets/camry-2026/raw-20260906/xcp-extended-ingress-probe.json",
+      "source_sha256": "999f6b9f6bd906cdeedd999767dd9b31b57bf187c01ee7ae2fd1a4f7762cfbb1",
+      "status": "ingress_to_staging_verified_protocol_blocked",
+      "tested_bus": 0
     },
-    "packed_descriptor_hits": {
+    "get_seed_configured": false,
+    "hardware_id_word_hits": {
       "request": [
         "0x021F50",
         "0x023398"
@@ -441,10 +439,22 @@
         "0x021F48"
       ]
     },
+    "high_tail_fully_inside_write_window": true,
+    "modify_bits": "0x000820C4",
+    "normal_route_live_result": {
+      "elm327_param": 1,
+      "panda_tx_block_counter_recorded": false,
+      "source": "targets/camry-2026/raw-20260826/xcp_probe.json",
+      "source_sha256": "b8d96ae5cb97f18d1138196e2a0cb95de5938ec0ff7e512ee9f752f86645e273",
+      "status": "superseded_standard_id_probe",
+      "tested_bus": 1
+    },
     "physical_route": {
-      "can_format": "classic standard CAN",
+      "can_format": "classic extended CAN",
       "frame_size": 8,
       "normal_harness_join": "exact F33 RSCFD controller 1 is the same EPS channel exposed as Panda bus1 on the identity-bound normal-harness route; relay-correct topologies may number Panda buses differently",
+      "request_ide": 1,
+      "response_ide": 1,
       "rscfd_controller": 1,
       "rx": {
         "controller_span": {
@@ -466,12 +476,24 @@
         "route_record": "0x00021AF4",
         "software_route_index": 4
       },
-      "verdict": "RX 0x7F7 and TX 0x7F8 independently resolve to exact F33 RSCFD controller 1; physical-route selection is statically closed"
+      "verdict": "RX extended 0x1FDC0002 and TX extended 0x1FE00002 independently resolve to exact F33 RSCFD controller 1; live marker ingress reaches XCP staging"
     },
-    "placement_static_verdict": "proven: generic XCP DOWNLOAD can directly store tester-controlled bytes into the live-proven high tail while the application handler is executing",
-    "reachability_boundary": "The normal-harness bus1 route is now statically proven correct, so the retained timeout is not physical-route falsification. Remaining reachability ambiguity is live transport/communication-owner admission or response behavior; the read-only SID-0x23 state preflight is the next discriminator.",
-    "request_can_id": "0x7F7",
-    "response_can_id": "0x7F8",
+    "placement_static_verdict": "conditional-only: DOWNLOAD has a direct tester-byte store into the high-tail window if protocol dispatch is enabled, but stock F33 blocks every incoming XCP command before CONNECT/command parsing via fixed CodeFlash gate 0x30D68=0x5A",
+    "protocol_precommand_gate": {
+      "codeflash_byte": "0x00030D68",
+      "dispatch_required_value": "0x00",
+      "dispatcher": "0x000821D6",
+      "gate_function": "0x00098E80",
+      "live_staging_evidence": "targets/camry-2026/raw-20260906/xcp-extended-ingress-probe.json",
+      "live_staging_evidence_sha256": "999f6b9f6bd906cdeedd999767dd9b31b57bf187c01ee7ae2fd1a4f7762cfbb1",
+      "observed_value": "0x5A",
+      "precommand_wrapper": "0x000830C0",
+      "stock_protocol_commands_admitted": false,
+      "verdict": "transport and staging are live, but stock exact-F33 returns nonzero from the fixed pre-command gate before CONNECT or any configured XCP command can execute"
+    },
+    "reachability_boundary": "Physical extended-CAN ingress is live-proven through FEBE4C34 staging. Stock protocol command reachability is closed negative by the fixed CodeFlash pre-command gate 0x30D68=0x5A; transport/owner state is not the blocker.",
+    "request_can_id": "0x1FDC0002",
+    "response_can_id": "0x1FE00002",
     "rx_adapter": "0x0008312E",
     "set_mta": "0x00082C62",
     "short_upload": "0x00082B1A",
@@ -489,7 +511,7 @@
       "configured_delay_ms": 15.0,
       "configured_source_mask": "0x10",
       "disabled_value": "0x69",
-      "dynamic_boundary": "the three-tick delay is target-native, but owner-online FEBE4919 is event-driven; whether the old live probe had reached the online/0x5A state is a runtime observation, not closed by static initialization",
+      "dynamic_boundary": "Sep-6 live SID23 proved the transport/owner predicates active and FEBE4EE6=0x5A; that state is necessary but not sufficient because the independent fixed CodeFlash pre-command gate remains disabled",
       "enabled_value": "0x5A",
       "foreground_tick_ms": 5.0,
       "owner_active_predicate": "0x0007F23C",
@@ -520,27 +542,26 @@
   },
   "architectures": [
     {
-      "diagnostic_side_effects": "XCP connected/MTA state only under recovered software semantics; no flash/NvM write in DOWNLOAD path. Exact physical RSCFD controller-1 routing is closed; runtime transport-admission state remains to be observed.",
+      "diagnostic_side_effects": "stock exact-F33 never reaches XCP connected/MTA state from CAN because the fixed pre-command gate rejects protocol dispatch; no stock live write/readback is authorized",
       "exact_surface": {
         "download": "0x00081FFE",
-        "request": "0x7F7",
-        "response": "0x7F8",
+        "request": "0x1FDC0002 extended",
+        "response": "0x1FE00002 extended",
         "set_mta": "0x00082C62",
         "write_validator": "0x00098F2C"
       },
       "execution": "not recovered; requires a separate already-running-application callback/continuation pivot",
       "lifetime": "volatile LocalRAM only; power loss removes payload/state",
-      "name": "stock application XCP DOWNLOAD + separate volatile execution pivot",
+      "name": "disabled stock XCP writer surface + separate volatile execution pivot",
       "network_visibility": "no application->PROGRAMMING handoff is inherent; handler executes in the stock application, so no ECU disappearance is expected from the mechanism itself",
-      "placement": "proven statically: tester bytes -> MTA -> direct byte stores in FEBF7C00..FEBFFBFF, including the full high tail",
+      "placement": "handler semantics are proven conditionally, but stock ingress cannot reach CONNECT/DOWNLOAD because fixed gate 0x30D68=0x5A returns nonzero before protocol dispatch",
       "privilege_mpu_context": "high tail is MPU region1; ctx0 supervisor R/W/X, ctx1 supervisor R/X. Live execution from the tail is independently proven. Actual XCP handler context must still be confirmed dynamically by a harmless write/readback.",
       "rank": 1,
       "remaining_unknowns": [
-        "live communication-owner/XCP transport admission state on the correct route",
-        "safe mutable control-transfer object",
-        "runtime write context/latency on the live route"
+        "safe mutable control-transfer object reachable without altering the stock XCP gate",
+        "alternative non-disruptive stock RAM writer"
       ],
-      "verdict": "best architecture but incomplete"
+      "verdict": "rejected as a stock production architecture; callbacks exist but the exact calibration disables command dispatch"
     },
     {
       "diagnostic_side_effects": "starts the stock asynchronous crypto test state machine; exact Toyota-facing semantic name/result exposure is not recovered",
@@ -1412,8 +1433,8 @@
     "stock_application_reappeared": true
   },
   "minimum_next_observations": [
-    "On the statically proven normal-harness bus1/RSCFD-controller-1 route, use read-only SID 0x23 to snapshot the exact XCP admission state (FEBE3DE5/FEBE3DF2/FEBE4914..493A/FEBE4EE6/FEBE4FAE) before repeating CONNECT; do not infer route failure from the old timeout.",
-    "If and only if the state preflight shows XCP admitted and CONNECT responds, a bounded application-mode DOWNLOAD + SHORT_UPLOAD readback inside the already-live-proven high tail would close transport-to-writer reachability without executing the bytes.",
+    "Do not repeat stock XCP CONNECT/DAQ/DOWNLOAD on exact F33: extended 0x1FDC0002 ingress is already live-proven through FEBE4C34 staging and fixed CodeFlash 0x30D68=0x5A blocks protocol dispatch before CONNECT.",
+    "For further steering-state observation, use the already-audited RAM-resident read-only observer or another independently recovered stock read surface; do not treat the disabled XCP callbacks as a stock writer.",
     "Static analysis has exhausted the recovered stock pivot classes. The next execution-specific observation should be a dynamic RAM/control-flow discriminator that identifies a mutable control-transfer object or a previously unrecovered hardware/software trigger; do not probe arbitrary PC writes without that object."
   ],
   "mpu": {
@@ -1428,7 +1449,7 @@
     "live_execution_in_high_tail_proven": true,
     "region_index": 1
   },
-  "production_answer": "Not yet. F33 has a target-native application XCP writer that can place arbitrary bytes in FEBFF9F0..FEBFFBFB without a programming handoff, and that tail is live-proven retained/executable. The recovered static execution-pivot classes are now exhausted\u2014including full XCP/DAQ, fixed vector bases, all configured RoutineControl/WDBI/AB/BA/reset surfaces, callback/exception/DMA/CALLT/calibration compositions\u2014and none transfers PC to tester-controlled RAM. A complete non-disruptive signer therefore still requires a new runtime control-transfer primitive not present in the recovered static surface.",
+  "production_answer": "Not yet. F33 retains XCP command/write callbacks and the FEBF7C00..FEBFFBFF write window, but the exact stock calibration blocks all incoming XCP protocol commands before CONNECT via fixed CodeFlash 0x30D68=0x5A. The high tail remains live-proven retained/executable, but XCP is not a stock placement primitive. A complete non-disruptive signer therefore needs both a stock-reachable volatile byte-placement surface and a safe control-transfer primitive, or a different stock service that supplies both.",
   "raw_range_evidence": {
     "ab_event_catalogue": {
       "address": "0x0002AB70",
@@ -1501,7 +1522,7 @@
       "size": 116
     }
   },
-  "schema": "camry-8965f3307000-application-ram-loader-assessment-v1",
+  "schema": "camry-8965f3307000-application-ram-loader-assessment-v2",
   "stock_command5_routine": {
     "action": "0x0008B872",
     "callback_table": "0x000256DC",

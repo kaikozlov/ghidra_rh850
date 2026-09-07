@@ -37,7 +37,8 @@ check("schema/target exact", art["schema"] == "camry-8965f3307000-external-later
 check("normal Rx/scalar census exact", art["normal_rx"]["descriptor_count"] == 43 and art["normal_rx"]["scalar_receive_call_count"] == 116)
 ctrl = art["controller1_acceptance"]
 check("controller1 acceptance span is exhausted", ctrl["count"] == 47 and ctrl["normal_rule_indices"] == [0,42] and ctrl["normal_rules_equal_descriptor_order"] is True)
-check("only diagnostic/XCP rules follow normal COM", [(x.get("can_id"), x["role"]) for x in ctrl["special_tail"]] == [("0x7A1","physical UDS"),("0x777","functional UDS"),("0x7A0","secondary diagnostics"),("0x7F7","application XCP")])
+check("only diagnostic/XCP rules follow normal COM", [(x.get("can_id"), x["role"]) for x in ctrl["special_tail"]] == [("0x7A1","physical UDS"),("0x777","functional UDS"),("0x7A0","secondary diagnostics"),("0x1FDC0002","application XCP (stock protocol dispatch disabled)")])
+check("XCP tail rule is explicitly extended", ctrl["special_tail"][-1]["extended"] is True and ctrl["special_tail"][-1]["hardware_id_word"] == "0x9FDC0002")
 src = art["b6_receiver_source_expectation"]
 check("F33 communication monitor maps slot1A to PDU44/B6", src["communication_monitor"]["row_index"] == 5 and src["communication_monitor"]["status_slot"] == "0x1A" and src["communication_monitor"]["monitored_pdu"] == 44 and src["communication_monitor"]["can_id"] == "0x0B6")
 check("F33 B6 loss is Brake System Control Module missing-message", src["communication_monitor"]["dem_event"] == "0x0143" and src["communication_monitor"]["dtc_index"] == 82 and src["techstream_dtc"] == {"code":"U012987","description":"Lost Communication with Brake System Control Module","failure":"Missing Message"})

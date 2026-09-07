@@ -246,7 +246,7 @@ def build() -> dict:
             "ctx0_mpat": "0x000000B8",
             "ctx1_mpat": "0x000000A8",
             "intended_write_context": "ctx0; target-native foreground sequence returns through 0x71398 before canary/signer insertion",
-            "host_read_transport": "application SID 0x23 ALFID 0x15 memory-id 1; Camry XCP 0x7F7/0x7F8 is not assumed",
+            "host_read_transport": "application SID 0x23 ALFID 0x15 memory-id 1; exact-F33 XCP extended 0x1FDC0002/0x1FE00002 is stock protocol-disabled and not assumed",
             "historical_only": True,
             "production_note": "This mailbox was paired with low-linked startup-replay candidates. A post-startup high-tail service must allocate its own non-overlapping mailbox layout.",
         },

@@ -1,0 +1,44 @@
+{
+  "schema": "camry-f33-xcp-extended-ingress-probe-v1",
+  "recorded_at_utc": "2026-09-07T00:15:25+00:00",
+  "recorded_local_date": "2026-09-06",
+  "target": {
+    "software_id": "8965F3307000",
+    "secondary_id": "8A3113303100",
+    "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000"
+  },
+  "environment": {
+    "vehicle": "2026 Camry Hybrid",
+    "state": "Park/stationary",
+    "openpilot_service": "stopped",
+    "panda_bus": 0,
+    "uds_setup_safety": "ELM327 param 1",
+    "single_probe_safety": "SAFETY_ALLOUTPUT param 1",
+    "steering_frames_sent": 0,
+    "xcp_write_commands_sent": 0
+  },
+  "probe": {
+    "request_extended_can_id": "0x1FDC0002",
+    "response_extended_can_id": "0x1FE00002",
+    "payload_hex": "0011223344556677",
+    "payload_semantics": "non-command DTO-shaped marker; byte0 0x00 cannot be XCP CONNECT or a configured write command",
+    "panda_safety_tx_blocked_delta": 0,
+    "tx_echo": {
+      "address": "0x1FDC0002",
+      "bus": 128,
+      "data_hex": "0011223344556677"
+    },
+    "response_observed": false
+  },
+  "sid23_before": {
+    "xcp_staging_febe4c34_16": "ff000000000000000000000000000000",
+    "xcp_owner_febe5004_2": "0000",
+    "xcp_transport_febe4ee6": "5a"
+  },
+  "sid23_after": {
+    "xcp_staging_febe4c34_16": "00112233445566770000000000000000",
+    "xcp_owner_febe5004_2": "0000",
+    "xcp_transport_febe4ee6": "5a"
+  },
+  "verdict": "The target-native extended frame reaches exact-F33 XCP staging at FEBE4C34 while protocol ownership remains clear; physical CAN, rule46, FIFO1, common receive routing, 0x8312E, and 0x830D0 are therefore live-proven through staging."
+}

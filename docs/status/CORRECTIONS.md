@@ -2978,14 +2978,13 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   in `data/variant_ram_exec_requirements.json` with retained VMA
   `FEBFF9F0..FEBFFBFC`. The old low-linked audited binaries remain reproducible
   historical/static construction evidence only.
-- **Additional closure:** target-native application XCP maps SET_MTA `0x82C62`
-  and DOWNLOAD `0x81FFE` into the configured `FEBF7C00..FEBFFBFF` software write
-  window, so the verified high tail has a stock application-mode placement
-  primitive if the `0x7F7/0x7F8` transport can be reached. A target-native
-  22-record / 88-endpoint fixed-DMAC census has zero endpoints in the XCP window,
-  closing the obvious recovered DMA composition as a hidden pivot. The remaining
-  production blocker is a safe already-running-application control-transfer pivot,
-  not RAM lifetime.
+- **Additional closure (superseded in part by CORR-165):** target-native XCP still
+  contains SET_MTA `0x82C62`, DOWNLOAD `0x81FFE`, and the configured
+  `FEBF7C00..FEBFFBFF` software write window, but CORR-165 proves exact F33's stock
+  CAN ingress cannot reach those callbacks because fixed CodeFlash `0x30D68=0x5A`
+  blocks protocol dispatch before CONNECT. The high-tail retention result remains
+  valid; the former claim that XCP supplied a stock application-mode placement
+  primitive is withdrawn. The 22-record / 88-endpoint fixed-DMAC negative remains.
 - **Canonical:**
   `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`;
   `tests/verify_camry_8965F3307000.py`;
@@ -3077,6 +3076,8 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.5.
 
 ### CORR-124 — F33 `0x7F7/0x7F8` was already on the correct normal-harness bus1 route; the unresolved timeout is transport admission/response state
+
+> **Superseded by CORR-165.** Controller-1 ownership was right, but the standard-ID decode and runtime-admission explanation were not.
 
 - **Superseded framing:** VAR-051/VAR-057 and OQ-053 treated the retained
   CONNECT timeout on normal-harness `bus1 / ELM-param-1` as a physical-route or
@@ -3610,3 +3611,49 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   [../variants/camry-2026-tss3-integration-audit.md](../variants/camry-2026-tss3-integration-audit.md);
   opendbc `8c1124fe37f146e2282ba68676ffa82cac4902f8`;
   `opendbc/car/toyota/tests/test_tss3_corolla.py`.
+
+### CORR-165 — F33 XCP is extended CAN and stock protocol dispatch is fixed-disabled before CONNECT
+
+- **Superseded framing:** CORR-124 treated `0x9FDC0002/0x9FE00002` as packed
+  standard-CAN `0x7F7/0x7F8` descriptors and correctly joined their route objects to
+  RSCFD controller 1, but then attributed CONNECT silence to unresolved runtime
+  communication-owner/transport admission. VAR-057 consequently treated application
+  XCP DOWNLOAD as the stock placement half of the production RAM-loader design.
+- **Wire-format correction:** exact F33 initialization `0x847A4` writes rule entries
+  directly to P1M-E `RSCFD0CFDGAFLID`. Hardware bit31 is IDE; bits28:0 are the ID.
+  Therefore rule46 `0x9FDC0002` means **classic extended ID `0x1FDC0002`** and the
+  response word `0x9FE00002` means extended `0x1FE00002`. This result is exact-F33
+  scoped; similarly shaped words in other calibrations are not reclassified here
+  unless their hardware programming path is independently verified.
+- **Receive-path closure:** rule46 selects mask-table entry0 `0xC00007FF`, label
+  `0x37`, and receive FIFO1. FIFO1 label translation (`base=0x09`) yields rule index
+  46. Owner0's per-rule callback byte is `0x20`, selecting callback slot5; slot5
+  resolves to route record `0x21AA4`, whose exact match key is `0x9FDC0002` and whose
+  callback is `0x8312E`. `0x8312E` accepts logical RxPdu index1 and calls `0x830D0`,
+  which copies up to eight received bytes into `FEBE4C34` before the transport gate.
+- **Live proof:** parked/stationary with openpilot/Panda ownership stopped, exact F181
+  reverified, a non-command marker `00 11 22 33 44 55 66 77` was sent once on extended
+  `0x1FDC0002` under temporary all-output safety. Panda block delta was zero and
+  `FEBE4C34` changed from stale `ff0000...` to the exact marker while XCP owner
+  `FEBE5004/5005` remained `0000` and transport state `FEBE4EE6` remained `0x5A`.
+  No steering frame or XCP write command was sent. This proves physical CAN through
+  `0x830D0` staging, rather than inferring the route from a missing response.
+- **Actual command blocker:** `0x821D6` calls `0x830C0 -> 0x98E80` before checking
+  CONNECT/opcodes. `0x98E80` reads fixed CodeFlash byte `0x30D68`; exact F33 stores
+  `0x5A`. Any nonzero value takes the immediate return-1 branch, while `0x821D6`
+  parses commands only when the return is zero. The earlier live SID23 snapshot had
+  already shown manager/owner/communication state admitted and `FEBE4EE6=0x5A`, so
+  runtime transport admission is definitively not the unresolved cause.
+- **Consequence:** stock exact-F33 XCP command reachability is a closed negative.
+  SET_MTA/DOWNLOAD/DAQ callback semantics and the write window remain real firmware
+  surfaces, but they are unreachable from the stock CAN command path. Native XCP DAQ
+  is removed as the preferred steering observer; the 52-byte profile remains useful
+  for the audited RAM-resident observer. XCP DOWNLOAD is no longer counted as a stock
+  production placement primitive. Do not patch `0x30D68` merely to preserve that
+  architecture; doing so converts it into another firmware-patch design.
+- **Canonical:**
+  `targets/camry-2026/raw-20260906/xcp-extended-ingress-probe.json`;
+  `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`;
+  `tests/verify_camry_8965F3307000.py`;
+  `exploit/followups/xcp_runtime_state_probe.py`;
+  [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§6,13.1.

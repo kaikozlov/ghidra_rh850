@@ -43,7 +43,7 @@ that requirement.
 | `0x081` reference word (bus 0) | Passive observable | Mirror of `0x08A` (VAR-129); direction unresolved |
 | UDS on `0x7A1/0x7A9` (EPS) | Read-only supported (F181 identity, DIDs) | Write/control services not exposed by this plan |
 | FRC P5 diagnostics `0x792/0x79A` | Read-only oracles validated on this car [live-baseline §7.1] | Observation only; `0x0FE` is SecOC-shaped and not forgeable |
-| XCP `0x7F7/0x7F8` | Route correct, admission untested (CONNECT timed out) | Not an approved control path |
+| XCP extended `0x1FDC0002/0x1FE00002` | Physical ingress through `FEBE4C34` verified; stock protocol dispatch disabled by CodeFlash `0x30D68=0x5A` | Not an approved control path |
 | Bench power/rig | **Not yet defined** | Blocking dependency for physical-response boundaries |
 
 ## Bench apparatus requirements (to be finalized with a qualified controls engineer)

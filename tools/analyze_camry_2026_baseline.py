@@ -195,7 +195,7 @@ def main() -> int:
       "response_id": xcp["xcp_response_id"],
       "connect_response": xcp["connect_response"],
       "message": xcp["message"],
-      "boundary": "No usable 0x7F8 CONNECT response was observed on the tested EPS normal-harness route; this is a route/session observation, not a universal physical absence proof.",
+      "boundary": "Historical probe only: standard 0x7F7 produced no usable 0x7F8. VAR-134/CORR-165 later prove exact F33 uses extended 0x1FDC0002/0x1FE00002, live ingress reaches FEBE4C34, and fixed CodeFlash 0x30D68=0x5A blocks protocol dispatch before CONNECT.",
     },
     "can_capture": {
       "run_id": run_start["run_id"],

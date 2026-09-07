@@ -161,7 +161,8 @@ def build() -> dict:
     # Exhaust the physical steering/diagnostic RSCFD controller-1 acceptance span.
     # Existing target-native routing proves controller 1 owns exactly rules 0..46.
     # Rules 0..42 are the 43 normal descriptors in identical ID order; the only
-    # remaining rules are three UDS addresses and the packed standard-CAN XCP 0x7F7.
+    # remaining rules are three UDS addresses and the extended-CAN XCP rule.
+    # Rule46 GAFLID bit31 is IDE=1; bits28:0 are physical ID 0x1FDC0002.
     rule_base = 0x230B8
     rules = [struct.unpack_from("<IIII", image, rule_base + 0x10 * i) for i in range(47)]
     need(struct.unpack_from("<H", image, 0x22ECE)[0] == 0 and image[0x22ED0] == 47,
@@ -432,7 +433,7 @@ def build() -> dict:
                 {"rule": 43, "can_id": "0x7A1", "role": "physical UDS"},
                 {"rule": 44, "can_id": "0x777", "role": "functional UDS"},
                 {"rule": 45, "can_id": "0x7A0", "role": "secondary diagnostics"},
-                {"rule": 46, "packed_descriptor": "0x9FDC0002", "can_id": "0x7F7", "role": "application XCP"},
+                {"rule": 46, "hardware_id_word": "0x9FDC0002", "can_id": "0x1FDC0002", "extended": True, "role": "application XCP (stock protocol dispatch disabled)"},
             ],
             "classification": "the exact steering/diagnostic RSCFD controller-1 hardware acceptance surface contains no hidden non-COM lateral CAN ID beyond the 43 normal descriptors",
         },

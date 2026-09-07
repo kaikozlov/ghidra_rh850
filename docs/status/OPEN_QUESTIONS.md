@@ -1032,20 +1032,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `data/generated/gtsplus_2026/tss3_control_ownership_surface.json`, and
   [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md) §4.1/§5D.
 
-- **OQ-053 — F33 non-disruptive application-mode RAM execution pivot.** **Production-only ordering note:** VAR-060 now closes an exact persistent F33 Gate-2 development patch and deterministic restore, so this question no longer blocks first development lateral. It remains open because the production goal is still a non-persistent signer/control path. Exact
-  `8965F3307000` has the desired volatile carrier and the placement half of the
-  production loader: live evidence proves `FEBFF9F0..FEBFFBFB` (524 bytes)
-  survives the real stock application startup byte-for-byte and executes, while
-  the former `FEBF0000` carrier is disproved by that same startup. Target-native
-  XCP `SET_MTA 0x82C62` + `DOWNLOAD 0x81FFE` can statically write arbitrary tester
-  bytes throughout `FEBF7C00..FEBFFBFF`; GET_SEED/UNLOCK are unconfigured. The
-  packed `0x7F7/0x7F8` endpoint is present in CodeFlash. CORR-124 now closes its
-  physical route target-natively: RX rule46 at `0x23398` and TX handle `0x37`
-  independently resolve to RSCFD controller 1, the same EPS channel exposed as
-  Panda bus1 on the identity-bound normal harness. The retained CONNECT timeout is
-  therefore a correct-route/no-response runtime observation, not route falsification.
-  The remaining architectural blocker is a safe already-running-application control
-  transfer into the tail.
+- **OQ-053 — F33 non-disruptive application-mode RAM execution pivot.** **Production-only ordering note:** VAR-060 still closes an exact persistent F33 Gate-2 development patch and deterministic restore, so this question does not block development lateral. The production goal remains a non-persistent signer/control path. Exact `8965F3307000` still has the desired volatile carrier: live evidence proves `FEBFF9F0..FEBFFBFB` (524 bytes) survives stock application startup byte-for-byte and executes, while `FEBF0000` is disproved. **VAR-134/CORR-165 withdraw the former claim that stock XCP supplies the placement half.** Rule46 `GAFLID=0x9FDC0002` is extended CAN `0x1FDC0002` (response `0x1FE00002`), and a Sep-6 non-command marker live-proved ingress through `FEBE4C34` staging with transport state `FEBE4EE6=0x5A`. But `0x821D6` calls `0x830C0 -> 0x98E80` before parsing CONNECT; fixed CodeFlash `0x30D68=0x5A` makes that hook return nonzero, so stock protocol command dispatch is disabled. The XCP `SET_MTA`/`DOWNLOAD` callbacks and write window remain real conditional handler semantics, not a stock-reachable RAM writer. OQ-053 therefore again needs **both** a stock-reachable volatile placement primitive and a safe already-running-application control transfer, or a different stock surface that supplies both.
 
   The **recovered stock pivot surface is now statically exhausted**, rather than
   merely missing an obvious callback. CORR-123 refreshes that conclusion against

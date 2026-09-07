@@ -409,7 +409,7 @@ def _section_camry_2026_tsk_baseline():
     check('RAM-exec transfer remains unclaimed', all((x in prog['boundary'] for x in ('not established', 'must not be inferred'))))
     xcp = art['xcp']
     check('tested XCP route is negative', xcp['status'] == 'unreachable' and xcp['request_id'] == '0x7f7' and (xcp['response_id'] == '0x7f8') and (xcp['connect_response'] == ''))
-    check('XCP negative remains route/session bounded', 'not a universal physical absence proof' in xcp['boundary'])
+    check('historical standard-ID XCP probe is marked superseded', 'Historical probe only' in xcp['boundary'] and '0x1FDC0002/0x1FE00002' in xcp['boundary'] and '0x30D68=0x5A' in xcp['boundary'])
     print('\n== TSS3 CAN topology ==')
     can = art['can_capture']
     check('capture is approximately one minute', 59.98 < can['duration_s'] < 60.01)

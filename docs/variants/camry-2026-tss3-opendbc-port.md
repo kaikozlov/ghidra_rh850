@@ -950,31 +950,26 @@ Deterministic reduction and verification:
 `data/generated/camry_2026_lateral_family_census.json`, and
 `tests/verify_camry_2026_lateral_family_census.py`.
 
-### 4.10 Preferred live internal observer: native F33 XCP DAQ
+### 4.10 Internal steering-state profile: stock F33 XCP DAQ is disabled
 
-The remaining stock-authority question does **not** require another RAM-resident payload
-as the first experiment. Exact F33 already contains an application XCP DAQ measurement
-engine on `0x7F7 -> 0x7F8`. The recovered DAQ contract is measurement/readback only:
-`WRITE_DAQ` stores a tester-selected **source address** in the DAQ pointer table, the
-event worker dereferences that address and copies one byte into DTO staging, and
-`SET_DAQ_LIST_MODE` rejects the STIM/direction mode bits. Exact constants at
-`0x22AE7..0x22AE9` are `04 04 07`: **four DAQ lists, four ODTs/list, seven one-byte
-measurements/ODT** (112 bytes total). `FUN_000823E2(event)` walks active lists in
-ascending index order, filters them by event and prescaler countdown, and calls
-`FUN_00082368(list*4,last_odt)`; `82368` emits that list's ODT PIDs sequentially. Thus
-lists 0 and 1 with equal event/prescaler are serviced as PIDs `0..3` then `4..7` in one
-event-worker invocation. Generic XCP `DOWNLOAD`, `MODIFY_BITS`, and the calibration-page
-copy are absent from the Camry capture tool.
+The 52-byte internal steering-state profile recovered for native XCP DAQ remains
+useful, but **the installed exact-F33 application cannot execute XCP commands from
+its stock CAN ingress**. Sep-6 closure corrected the endpoint to classic extended
+CAN `0x1FDC0002 -> 0x1FE00002`; a non-command marker live-updated `FEBE4C34`,
+proving physical CAN, rule46, FIFO1, owner routing, `0x8312E`, and `0x830D0` staging.
+All runtime transport predicates were also active (`FEBE4EE6=0x5A`).
 
-That native mechanism is less invasive than adapting the existing B6 transaction
-observer: the stock application scheduler and steering pipeline remain untouched, there
-is no resident code in the high RAM tail, and the only persistent change is none. DAQ
-configuration itself is volatile and is explicitly stopped in cleanup. The exact F33
-RSCFD table places physical UDS `0x7A1` and application XCP `0x7F7` on controller 1; after
-the harness repin, `0x7A1` is live-proven on Panda bus 0, so the target-specific observer
-uses bus 0 / ELM327 parameter 1 after an exact F181 check. **Post-repin XCP CONNECT/DAQ
-reachability is not yet a live fact**: the first use must therefore be a short parked
-preflight, not an assumption that the old normal-harness timeout has been resolved.
+The remaining silence is fixed in CodeFlash, not runtime state: `0x821D6` invokes
+`0x830C0 -> 0x98E80` before CONNECT/opcode parsing, and exact byte
+`0x30D68=0x5A` makes that hook return nonzero. `0x821D6` processes protocol
+commands only when the hook returns zero. Thus CONNECT, WRITE_DAQ, START, and the
+other configured XCP commands are stock-disabled even though the DAQ machinery
+itself is present. The capture tool now refuses `--execute`; do not patch this
+gate merely to preserve a preferred observer architecture.
+
+For the next live internal observation, use the audited RAM-resident observer with
+the same recovered profile. It sends no steering command and gives the required
+same-event internal terms without pretending the disabled XCP surface is stock-live.
 
 `tools/camry_f33_steering_state_capture.py` defines two 28-byte single-list subsets plus
 a default **52-byte `full-path`** union using lists 0 and 1. The first subset is the
@@ -1023,41 +1018,21 @@ current Comma/Panda binding returns `(address, data, bus)` and therefore exposes
 `busTime`; the observer records null/empty timing evidence rather than dropping those
 frames. Host timestamps remain correlation aids rather than physical CAN ordering.
 
-Because the default sample emits eight classic-CAN DTOs, the observer exposes an XCP
-DAQ prescaler and reports the actually observed complete-sample rate. Start with a short
-**Park/stationary** run and the conservative default prescaler 10; only after
-reachability, DTO assembly, and bus rate are measured should a stock/manual road capture
-be attempted. Openpilot control must remain stopped for the direct-Panda run. The first
-capture is:
+The recovered profile geometry remains deterministic: a full sample would be eight
+classic-CAN DTOs if XCP command dispatch were enabled. On stock exact F33, however,
+`tools/camry_f33_steering_state_capture.py --execute` is deliberately fail-closed because
+CodeFlash `0x30D68=0x5A` blocks CONNECT/DAQ before any list can start. The tool remains
+useful in plan mode:
 
 ```bash
-export PY=/usr/local/venv/bin/python
-export PYTHONPATH=/data/openpilot:$PWD/runtime
-
-# Plan only. `full-path` is also the CLI default.
 $PY runtime/tools/camry_f33_steering_state_capture.py --profile full-path
-
-# Short parked preflight; no steering command is transmitted.
-$PY runtime/tools/camry_f33_steering_state_capture.py \
-  --profile full-path --daq-prescaler 10 \
-  --execute --stock-observation-confirmed --duration-seconds 5 \
-  --capture-output /tmp/f33-full-path-preflight.ndjson \
-  --result-output /tmp/f33-full-path-preflight.json
 ```
 
-After a successful parked preflight, run `full-path` during a normal stock ID11/ID18
-interval. One capture can then ask both which source term/gate changes with `0x08A`
-request state and whether the resulting `CC48` propagates through `AC54`, the branch
-already recovered into the motor-current transform. This avoids requiring two road runs
-to reproduce the same stock operating condition.
-
-If native XCP remains unreachable on the post-repin route, the fallback is a **stripped
-RAM-only observer derived from the existing B6 transaction-resident framework**, not a
-new flash patch. The high-tail resident can copy the same target cells (or a bounded
-subset if telemetry space requires it) to telemetry and use the already proven
-authenticated-RAM startup/heartbeat path. That fallback is
-intentionally deferred until XCP fails, because replacing the foreground scheduler is a
-strictly larger perturbation than using the ECU's own DAQ engine.
+For live collection, use the packaged **stripped RAM-only observer derived from the B6
+transaction-resident framework** with the same target-cell profile. That is now the
+intentional observation path, not a fallback after another XCP attempt. It adds no new
+persistent flash patch; installation/heartbeat semantics remain the already-audited
+RAM-only path.
 
 Verification: `tests/verify_camry_f33_steering_state_capture.py`; the in-car packaging
 path is `tools/build_camry_f33_car_kit.py`.
