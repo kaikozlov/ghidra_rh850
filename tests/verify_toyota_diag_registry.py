@@ -34,7 +34,7 @@ def main() -> int:
 
     profile = actual["profile"]
     check("schema and exact Camry profile are pinned",
-          actual["schema"] == "toyota-diagnostics-registry-v4"
+          actual["schema"] == "toyota-diagnostics-registry-v5"
           and profile["profile"] == "camry-2026-f33"
           and profile["panda_bus"] == 0)
     decoder = actual["decoders"]["p5-linear-msb0-v1"]
@@ -67,8 +67,42 @@ def main() -> int:
     check("registry source identities are checkout-independent logical paths",
           "gtsplus/NA/DB/Gen/Toyota.ddb" in source_keys
           and "gtsplus/NA/DB/Gen/M_English.ddb" in source_keys
+          and "data/generated/gtsplus_2026/vehicle_resolver_semantics.json" in source_keys
           and all(not key.startswith("software/Techstream/") for key in source_keys)
           and all("/Users/" not in key for key in source_keys))
+
+    resolver = profile["vehicle_resolution"]
+    check("Toyota vehicle resolver selects current Camry-HV vehicle type",
+          resolver["generation"] == "current-gtsplus-vehicle-resolver-v1"
+          and resolver["vehicle_type"] == 12704
+          and resolver["vehicle_name"] == "Camry HV"
+          and resolver["install_set_ids"] == [8119, 8120, 8121, 27706])
+    check("Toyota VIN decision matcher is vendored as structured data",
+          resolver["vin_decision"]["source_category_id"] == 372
+          and len(resolver["vin_decision"]["rows"]) == 2
+          and {row["phase_type"] for row in resolver["vin_decision"]["rows"]} == {0x12}
+          and {row["vehicle_type"] for row in resolver["vin_decision"]["rows"]} == {12704})
+    mount = resolver["mount"]
+    check("Toyota mount resolver carries all 34 logical Camry categories",
+          mount["candidate_count"] == 34
+          and len(mount["candidates"]) == 34
+          and len({row["category_id"] for row in mount["candidates"]}) == 34
+          and {row["connection_frame_id"] for row in mount["candidates"]} == {0}
+          and {row["connection_comm_set_id"] for row in mount["candidates"]} == {9}
+          and {row["connection_phase_type"] for row in mount["candidates"]} == {0x12, 0x22})
+    check("Toyota current Camry mount connection frame is transport-only",
+          mount["frame_0"] == {
+              "frame_id": 0, "send_variable_id": 0, "receive_mask_variable_id": 0,
+              "receive_check_variable_id": 0, "empty": True,
+          }
+          and mount["comm_set_9"]["send_parameter"] == 1000
+          and mount["comm_set_9"]["receive_timeout"] == 1020
+          and "null does not mean absent" in mount["direct_address_boundary"])
+    check("Toyota P5 live support resolver is carried independently of DDB presence",
+          resolver["p5_support"]["options"] == {"1": "PID", "2": "DID", "3": "RID"}
+          and resolver["p5_support"]["did_root"]["request"] == "220101"
+          and resolver["p5_support"]["did_root"]["selector"] == "0xC8"
+          and resolver["p5_support"]["routine_root"]["request"] == "31011001")
 
     topology = profile["gts_can_topology"]
     placements = topology["placement_variants"][0]["placements"]
@@ -202,9 +236,9 @@ def main() -> int:
           and "no execution authorization" in actual["boundary"]
           and "no execution authorization" in actual["utilities"]["boundary"])
 
-    # ---- schema v4: execution model, function hierarchy, utilities ----
+    # ---- schema v5: Toyota resolver + execution model, function hierarchy, utilities ----
     hv = actual["catalogs"]["397"]
-    check("v3 loader surface is preserved behind the v4 additions",
+    check("legacy catalog surface is preserved behind the v5 resolver additions",
           all(key in hv for key in ("category", "dids", "dtcs", "active_tests"))
           and hv_test["execution"] == "plan_only"
           and hv_test["start_prefix"] == "2f280103")
@@ -225,8 +259,11 @@ def main() -> int:
           } | {key: session["keepalive"][key] for key in ("selector", "mask", "check", "meaning", "session_state")})
     check("session-judgment exception stays documentation, not runtime default",
           session["session_judgment_exception"]["runtime_default"] is False
-          and session["session_judgment_exception"]["flag"] == "CCommFrameCtrl +0x398"
-          and session["wire_proven_categories"] == [397, 435, 498])
+          and session["session_judgment_exception"]["flag"] == "CCommFrameCtrl +0x398")
+    check("Toyota P5 generation gate replaces the former local wire-proof subset",
+          session["eligible_generation_low5"] == ["0x14", "0x15", "0x16"]
+          and "wire_proven_categories" not in session
+          and "independent-tooling policy" in session["boundary"])
     check("every catalog category resolves identical D1/D2/0xDD session frames",
           set(session["per_category"]) == {str(cid) for cid in profile["catalog_category_ids"]}
           and all(row["generation_low5"] == "0x14"
@@ -241,7 +278,11 @@ def main() -> int:
               "1": {
                   "send_parameter": 1000, "receive_timeout": 1020, "retry_count": 1,
                   "exception_handler_id": 0, "exception_handler_flag": 0,
-              }
+              },
+              "9": {
+                  "send_parameter": 1000, "receive_timeout": 1020, "retry_count": 0,
+                  "exception_handler_id": 0, "exception_handler_flag": 0,
+              },
           }
           and "CheckAndConvertRcvTimeOut" in actual["commsets"]["boundary"])
 

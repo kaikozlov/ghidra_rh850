@@ -61,7 +61,7 @@ check("FRC names are the ISA request vocabulary including the multiframe 0x1B05 
 with tempfile.TemporaryDirectory() as td:
     wrong = Path(td) / "wrong_registry.json"
     wrong.write_text(json.dumps({
-        "schema": "toyota-diagnostics-registry-v4",
+        "schema": "toyota-diagnostics-registry-v5",
         "profile": {"profile": "camry-2026-f33", "panda_bus": 0,
                     "ecus": [{"key": "brake", "address": 0x7B0}, {"key": "frc", "address": 0x7FF}]},
         "catalogs": {},
@@ -72,7 +72,7 @@ with tempfile.TemporaryDirectory() as td:
     except SystemExit as exc:
         check("registry address drift fails closed", "refusing to guess routes" in str(exc))
     wrong.write_text(json.dumps({
-        "schema": "toyota-diagnostics-registry-v4",
+        "schema": "toyota-diagnostics-registry-v5",
         "profile": {"profile": "some-other-car", "panda_bus": 0, "ecus": []},
         "catalogs": {},
     }))
@@ -81,7 +81,7 @@ with tempfile.TemporaryDirectory() as td:
         check("foreign registry profile fails closed", False, "load_registry accepted a foreign profile")
     except SystemExit as exc:
         check("foreign registry profile fails closed",
-              "not toyota-diagnostics-registry-v4/camry-2026-f33" in str(exc))
+              "not toyota-diagnostics-registry-v5/camry-2026-f33" in str(exc))
 
 plan = cap.plan(targets)
 check("plan pins both routes and the live-proven bus-0 route source",

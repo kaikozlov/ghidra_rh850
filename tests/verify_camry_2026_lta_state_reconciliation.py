@@ -232,7 +232,7 @@ check("known protected 0x0D7/0x090 show the same 0x00F reset-low2 boundary behav
 print("\n== current GTS+ and exact-F33 boundaries ==")
 gts = art["current_gtsplus_join"]
 check("current registry identity and exact EMPS source DDB pinned",
-      gts["source"]["sha256"] == "44053e3892e1f489cf8382eba1705735824a804f5952348224ce987438904611" and
+      gts["source"]["sha256"] == "deb4b7c60e369d9854022058b25e1b2240760efffb8bf84ef16d04020a02a846" and
       gts["target_lateral_id"]["source_ddb_sha256"] == "fb7933228bc2f1c5788d1f896c008c5c590ede45ec2e650c07123f94764e329e")
 check("Target Lateral ID exact 0/11/18 dictionary and 8-bit diagnostic width",
       gts["target_lateral_id"]["selected_dictionary"] == {

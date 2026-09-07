@@ -59,7 +59,7 @@ from tools.camry_frc_lta_capture import (
 from ddb_semantics import decode_p5_signal
 
 REGISTRY_PATH = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
-EXPECTED_SCHEMA = "toyota-diagnostics-registry-v4"
+EXPECTED_SCHEMA = "toyota-diagnostics-registry-v5"
 EXPECTED_PROFILE = "camry-2026-f33"
 DIAG_BUS = 0
 DEFAULT_POLL_HZ = 2.0

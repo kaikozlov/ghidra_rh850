@@ -61,6 +61,7 @@ from techstream_paths import (
 DEFAULT_GTS_EXTERNAL = GTSPLUS_EXTERNAL_ROOT
 DEFAULT_CUW_CORPUS = CUW_CORPUS_ROOT
 EXECUTION_MODEL = ROOT / "data/generated/techstream_v18/diagnostic_execution_model.json"
+VEHICLE_RESOLVER = ROOT / "data/generated/gtsplus_2026/vehicle_resolver_semantics.json"
 
 
 def _resolve_gts_root(value: str | Path | None = None) -> Path:
@@ -3085,14 +3086,76 @@ def _registry_session_control(
             "behavior": judgment["phase5_alternate_behavior"],
             "external_importers": judgment["external_importers"],
         },
-        "wire_proven_categories": sorted(int(key) for key in auto["categories"]),
+        "eligible_generation_low5": ["0x14", "0x15", "0x16"],
         "per_category": per_category,
         "boundary": (
-            "frames are resolved per category from the current master; the host lifecycle behavior "
-            "(generation gate, classifier, cadence, session-judgment exception) is instruction-proven "
-            "for the wire-proven categories only; session_judgment_exception is documentation, "
-            "not a runtime default"
+            "frames are resolved per category from the current master; SendProc itself gates the P5-family path "
+            "by CDbEcuCategoryTable/class-0x110 byte +0x48 low5 in 0x14/0x15/0x16. The former local "
+            "wire_proven_categories subset is intentionally absent: it was an independent-tooling policy, not "
+            "Toyota resolver semantics. session_judgment_exception is documentation, not a runtime default"
         ),
+    }
+
+
+def _registry_vehicle_resolver(profile: dict[str, Any], region: str) -> dict[str, Any]:
+    """Portable clean subset of the independently verified current Toyota resolver artifact."""
+    resolver = json.loads(VEHICLE_RESOLVER.read_text())
+    if resolver.get("schema") != "gtsplus-current-vehicle-resolver-v1" or resolver.get("release") != "2026.03.002.02":
+        raise ValueError("current vehicle resolver artifact identity drift")
+    witness = resolver["regions"][region]["camry_hv_witness"]
+    if witness.get("vehicle_type") != 12704 or witness.get("vehicle_name") != "Camry HV":
+        raise ValueError(f"{region}: Camry-HV resolver witness unavailable")
+
+    direct_by_category = {
+        int(ecu["category_id"]): int(ecu["address"])
+        for ecu in profile["ecus"]
+        if ecu.get("category_id") is not None
+    }
+    vin_rows = []
+    for value in witness["vin_rows"]:
+        raw = bytes.fromhex(value)
+        vin_rows.append({
+            "flags": struct.unpack_from("<I", raw, 0x00)[0],
+            "vehicle_type": struct.unpack_from("<H", raw, 0x0E)[0],
+            "category_id": struct.unpack_from("<H", raw, 0x10)[0],
+            "phase_type": raw[0x12],
+            "vin_prefix_hex": raw[0x13:0x1E].hex(),
+        })
+
+    candidates = []
+    for row in witness["mount_candidates"]:
+        category_id = int(row["category_id"])
+        candidates.append({
+            **row,
+            "direct_address": direct_by_category.get(category_id),
+        })
+
+    return {
+        "generation": "current-gtsplus-vehicle-resolver-v1",
+        "vehicle_type": witness["vehicle_type"],
+        "vehicle_name": witness["vehicle_name"],
+        "vin_decision": {
+            "source_category_id": 372,
+            "key": "category_id + phase_type + VIN[0:11], with flags bits 0..10 as per-position wildcards",
+            "rows": vin_rows,
+        },
+        "install_set_ids": witness["install_set_ids"],
+        "mount": {
+            "algorithm": "GetMountEcuListNoCnfm/CEcuConnectCheck::CommConnectionNoBuffer",
+            "candidate_count": witness["mount_candidate_count"],
+            "candidates": candidates,
+            "connection_profiles": witness["connection_profiles"],
+            "frame_0": witness["connection_frame_witness"],
+            "comm_set_9": witness["connection_comm_set_witness"],
+            "direct_address_boundary": (
+                "direct_address is populated only where the maintained post-repin profile has an independently "
+                "validated direct Panda endpoint for that Toyota logical category; null does not mean absent. "
+                "Toyota keeps category identity separate from endpoint identity and multiple logical categories "
+                "may share a gateway-routed endpoint"
+            ),
+        },
+        "p5_support": resolver["p5_support"],
+        "boundary": resolver["boundary"],
     }
 
 
@@ -3179,7 +3242,7 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
         if "category_id" in ecu
     })
     catalogs: dict[str, Any] = {}
-    source_files = [master_path, strings_path, dtc_clear_path, nrtd_p5_path, eps_identity_path, EXECUTION_MODEL]
+    source_files = [master_path, strings_path, dtc_clear_path, nrtd_p5_path, eps_identity_path, EXECUTION_MODEL, VEHICLE_RESOLVER]
     bin_root = gts_root / "bin"
     resolved_categories = []
     for category_id in known_categories:
@@ -3204,6 +3267,7 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
         }
     profile["catalog_category_ids"] = known_categories
     profile["session_control"] = _registry_session_control(parser, master, resolved_categories)
+    profile["vehicle_resolution"] = _registry_vehicle_resolver(profile, region)
 
     referenced_comm_sets = {
         int(row["comm_set"])
@@ -3215,6 +3279,7 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
             frame = session_row[frame_key]
             if frame is not None:
                 referenced_comm_sets.add(int(frame["comm_set"]))
+    referenced_comm_sets.add(int(profile["vehicle_resolution"]["mount"]["comm_set_9"]["comm_set_id"]))
     referenced_comm_sets = sorted(referenced_comm_sets)
     commsets = {}
     for row in _master_comm_set_rows(parser, master):
@@ -3264,7 +3329,7 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
             ecu["observed_identity"] = identity
 
     return {
-        "schema": "toyota-diagnostics-registry-v4",
+        "schema": "toyota-diagnostics-registry-v5",
         "profile": profile,
         "decoders": {
             "p5-linear-msb0-v1": {

@@ -1044,7 +1044,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/generated/gtsplus_2026/tss3_crossvehicle_surface.json` | gtsplus_tss3_crossvehicle_surface, gtsplus_tss3_control_ownership | — |
 | `data/generated/gtsplus_2026/tss3_native_recorder_protocol.json` | gtsplus_tss3_native_recorder | — |
 | `data/generated/gtsplus_2026/vdas_semantics.json` | gtsplus_vdas_semantics | — |
-| `data/generated/gtsplus_2026/vehicle_resolver_semantics.json` | gtsplus_vehicle_resolver | — |
+| `data/generated/gtsplus_2026/vehicle_resolver_semantics.json` | gtsplus_vehicle_resolver, toyota_diag_registry, gts_query_cli | — |
 | `data/generated/p4dk4_template/p4dk4_vocabulary.json` | diagnostic_vocabulary | — |
 | `data/generated/rdbi_emitted_write_audit.json` | application_rdbi | — |
 | `data/generated/response_disclosure_audit.csv` | response_disclosure_audit | — |

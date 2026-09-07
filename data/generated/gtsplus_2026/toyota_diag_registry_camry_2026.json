@@ -279703,6 +279703,13 @@
         "receive_timeout": 1020,
         "retry_count": 1,
         "send_parameter": 1000
+      },
+      "9": {
+        "exception_handler_flag": 0,
+        "exception_handler_id": 0,
+        "receive_timeout": 1020,
+        "retry_count": 0,
+        "send_parameter": 1000
       }
     }
   },
@@ -280280,11 +280287,16 @@
     "panda_bus": 0,
     "profile": "camry-2026-f33",
     "session_control": {
-      "boundary": "frames are resolved per category from the current master; the host lifecycle behavior (generation gate, classifier, cadence, session-judgment exception) is instruction-proven for the wire-proven categories only; session_judgment_exception is documentation, not a runtime default",
+      "boundary": "frames are resolved per category from the current master; SendProc itself gates the P5-family path by CDbEcuCategoryTable/class-0x110 byte +0x48 low5 in 0x14/0x15/0x16. The former local wire_proven_categories subset is intentionally absent: it was an independent-tooling policy, not Toyota resolver semantics. session_judgment_exception is documentation, not a runtime default",
       "category_gate": "SendProc reads CDbEcuCategoryTable/class 0x110 record byte +0x48, masks low 5 bits, and enters the P5-family session path for 0x14/0x15/0x16; current Hybrid397, Brake435, and FRC498 are all 0x14",
       "class_1_default": "for classifier class 1, SendProc uses the DB-backed +0x50 selector 0xD1 path and records software session state 0",
       "class_2_normal_path": "when the P5 classifier returns 2 and current session CCommFrameCtrl +0x29 is not 3, the normal session-judgment path calls protocol vtable +0x50 with selector 0xD1 then 0xD2 and records software session state 3",
       "default_session": 1,
+      "eligible_generation_low5": [
+        "0x14",
+        "0x15",
+        "0x16"
+      ],
       "enter_sequence": [
         "1001",
         "1003"
@@ -280536,16 +280548,472 @@
         "role": "documentation",
         "runtime_default": false,
         "setter": "SetSessionJudgmentFlg @ 0x10039690 writes 1"
-      },
-      "wire_proven_categories": [
-        397,
-        435,
-        498
-      ]
+      }
     },
-    "vehicle": "2026 Toyota Camry Hybrid"
+    "vehicle": "2026 Toyota Camry Hybrid",
+    "vehicle_resolution": {
+      "boundary": "This recovers Toyota's current host-side resolver. DDB membership is candidate metadata; GetMountEcuList and GetSupportP5 are the live/cached filters. It does not imply that every listed operation is safe to execute or that mutation authorization can be skipped.",
+      "generation": "current-gtsplus-vehicle-resolver-v1",
+      "install_set_ids": [
+        8119,
+        8120,
+        8121,
+        27706
+      ],
+      "mount": {
+        "algorithm": "GetMountEcuListNoCnfm/CEcuConnectCheck::CommConnectionNoBuffer",
+        "candidate_count": 34,
+        "candidates": [
+          {
+            "category_id": 372,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 18,
+            "database": "Engine_P5.ddb",
+            "direct_address": 1792,
+            "generation": 20,
+            "install_set_id": 8119,
+            "name": "Engine"
+          },
+          {
+            "category_id": 395,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 18,
+            "database": "MG_P5.ddb",
+            "direct_address": 1828,
+            "generation": 20,
+            "install_set_id": 8119,
+            "name": "Motor Generator"
+          },
+          {
+            "category_id": 397,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 18,
+            "database": "HV_P5.ddb",
+            "direct_address": 2002,
+            "generation": 20,
+            "install_set_id": 8119,
+            "name": "Hybrid Control"
+          },
+          {
+            "category_id": 398,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 18,
+            "database": "HV_Battery_P5.ddb",
+            "direct_address": 1863,
+            "generation": 20,
+            "install_set_id": 8119,
+            "name": "HV Battery"
+          },
+          {
+            "category_id": 405,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 18,
+            "database": "EMPS_P5.ddb",
+            "direct_address": 1953,
+            "generation": 20,
+            "install_set_id": 8120,
+            "name": "EMPS"
+          },
+          {
+            "category_id": 435,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 18,
+            "database": "ABS_P5.ddb",
+            "direct_address": 1968,
+            "generation": 20,
+            "install_set_id": 8120,
+            "name": "Brake/EPB"
+          },
+          {
+            "category_id": 445,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 18,
+            "database": "StrAngleSnsr_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8120,
+            "name": "Steering Angle Sensor"
+          },
+          {
+            "category_id": 452,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "TPM_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8120,
+            "name": "Tire Pressure Monitor"
+          },
+          {
+            "category_id": 466,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "Brk_Bst_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8120,
+            "name": "Brake Booster"
+          },
+          {
+            "category_id": 470,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "CMCCM_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8120,
+            "name": "Circumference Monitoring Camera Control Module"
+          },
+          {
+            "category_id": 492,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "DMC_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8120,
+            "name": "Driver Monitor Camera Control"
+          },
+          {
+            "category_id": 498,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 18,
+            "database": "FRC_P5.ddb",
+            "direct_address": 1938,
+            "generation": 20,
+            "install_set_id": 8120,
+            "name": "Front Recognition Camera 2"
+          },
+          {
+            "category_id": 5005,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 18,
+            "database": "RC_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8120,
+            "name": "Rear Camera"
+          },
+          {
+            "category_id": 148,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "PWS_P4.ddb",
+            "direct_address": null,
+            "generation": 4,
+            "install_set_id": 8121,
+            "name": "Master Switch"
+          },
+          {
+            "category_id": 409,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 18,
+            "database": "Meter_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Combination Meter"
+          },
+          {
+            "category_id": 429,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "Fr_RadSen_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Front Radar Sensor"
+          },
+          {
+            "category_id": 438,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "IPA_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Intuitive P/A"
+          },
+          {
+            "category_id": 440,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "SMART_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Entry&Start"
+          },
+          {
+            "category_id": 443,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "CentralGW_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Central Gateway"
+          },
+          {
+            "category_id": 444,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 18,
+            "database": "A_B_CAN_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "SRS Airbag"
+          },
+          {
+            "category_id": 449,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "JBUnity_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Main Body"
+          },
+          {
+            "category_id": 450,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 18,
+            "database": "A_C_P5.ddb",
+            "direct_address": 1988,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Air Conditioner"
+          },
+          {
+            "category_id": 454,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "PSC_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Power Source Control"
+          },
+          {
+            "category_id": 458,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "VPNS_P5_CAN.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Vehicle Proximity Notification System"
+          },
+          {
+            "category_id": 459,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "Telematics_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Telematics"
+          },
+          {
+            "category_id": 460,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "BSMM_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Blind Spot Monitor \"B\""
+          },
+          {
+            "category_id": 461,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "BSMS_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Blind Spot Monitor \"A\""
+          },
+          {
+            "category_id": 475,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "PowIntegr_4_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Power Distribution Box"
+          },
+          {
+            "category_id": 496,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 18,
+            "database": "NaviSystem_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Navigation System"
+          },
+          {
+            "category_id": 5003,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "D_Seat_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Driver Seat"
+          },
+          {
+            "category_id": 5006,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "FSR_A_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Front Side Radar \"A\""
+          },
+          {
+            "category_id": 5007,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "FSR_B_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Front Side Radar \"B\""
+          },
+          {
+            "category_id": 5015,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "MR_FRD_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Mirror R"
+          },
+          {
+            "category_id": 5016,
+            "connection_comm_set_id": 9,
+            "connection_frame_id": 0,
+            "connection_phase_type": 34,
+            "database": "ML_FLD_P5.ddb",
+            "direct_address": null,
+            "generation": 20,
+            "install_set_id": 8121,
+            "name": "Mirror L"
+          }
+        ],
+        "comm_set_9": {
+          "comm_set_id": 9,
+          "exception_handler_flag": 0,
+          "exception_handler_id": 0,
+          "receive_timeout": 1020,
+          "retry_count": 0,
+          "send_parameter": 1000
+        },
+        "connection_profiles": [
+          {
+            "comm_set_id": 9,
+            "frame_id": 0,
+            "phase_type": 18
+          },
+          {
+            "comm_set_id": 9,
+            "frame_id": 0,
+            "phase_type": 34
+          }
+        ],
+        "direct_address_boundary": "direct_address is populated only where the maintained post-repin profile has an independently validated direct Panda endpoint for that Toyota logical category; null does not mean absent. Toyota keeps category identity separate from endpoint identity and multiple logical categories may share a gateway-routed endpoint",
+        "frame_0": {
+          "empty": true,
+          "frame_id": 0,
+          "receive_check_variable_id": 0,
+          "receive_mask_variable_id": 0,
+          "send_variable_id": 0
+        }
+      },
+      "p5_support": {
+        "did_root": {
+          "group_bitmap": "MSB-first; set bit n means xx01+n; final bit for next xx00 is skipped",
+          "group_request": "replace request DID with supported xx00 group",
+          "positive_sid": "0x62",
+          "request": "220101",
+          "root_bitmap": "MSB-first; set bit n means group (n << 8)",
+          "selector": "0xC8"
+        },
+        "options": {
+          "1": "PID",
+          "2": "DID",
+          "3": "RID"
+        },
+        "plugin": "GetSupportP5_DT.dll",
+        "routine_root": {
+          "positive_sid": "0x71",
+          "request": "31011001",
+          "selector": "0xCC"
+        }
+      },
+      "vehicle_name": "Camry HV",
+      "vehicle_type": 12704,
+      "vin_decision": {
+        "key": "category_id + phase_type + VIN[0:11], with flags bits 0..10 as per-position wildcards",
+        "rows": [
+          {
+            "category_id": 372,
+            "flags": 1391,
+            "phase_type": 18,
+            "vehicle_type": 12704,
+            "vin_prefix_hex": "000000004100004b005300"
+          },
+          {
+            "category_id": 372,
+            "flags": 1391,
+            "phase_type": 18,
+            "vehicle_type": 12704,
+            "vin_prefix_hex": "000000004200004b005300"
+          }
+        ],
+        "source_category_id": 372
+      }
+    }
   },
-  "schema": "toyota-diagnostics-registry-v4",
+  "schema": "toyota-diagnostics-registry-v5",
   "source_identity": {
     "data/generated/camry_2026_dtc_clear.json": {
       "bytes": 4539,
@@ -280554,6 +281022,10 @@
     "data/generated/camry_2026_nrtd_p5.json": {
       "bytes": 13866,
       "sha256": "3a344b6cb2de19edb163e040974955f2d27467dc0a864974b6a5af90659d308f"
+    },
+    "data/generated/gtsplus_2026/vehicle_resolver_semantics.json": {
+      "bytes": 22871,
+      "sha256": "79a4f5091f327e167650073a2bdde37e81c676b59e648773a082309ca3628a49"
     },
     "data/generated/techstream_v18/diagnostic_execution_model.json": {
       "bytes": 297242,

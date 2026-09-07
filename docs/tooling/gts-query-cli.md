@@ -332,18 +332,34 @@ witnesses are Hybrid Active Test `0x0001` (`0x2F`, DID `0x2801`, start prefix
 `0xCA`) and FRC `0xA429` **LTA Steering Vibration** (RID `0x1588`, fixed requests
 `31011588` / `31021588` / `31031588`).
 
-Registry schema **v4** compiles the recovered current-P5 execution model into the same
-clean artifact (all v3 sections are preserved unchanged in shape):
+Registry schema **v5** adds Toyota's recovered current vehicle/mounted-ECU/capability
+resolver to the v4 execution-model surface. All earlier catalog sections remain
+preserved in shape:
 
+- `profile.vehicle_resolution` — clean structured Toyota resolver metadata from
+  `CSelectCarTypeVin10` / `GetMountEcuListNoCnfm` / `GetSupportP5_DT`. The current
+  Camry witness resolves vehicle type `12704` = **Camry HV**, four install sets
+  (`8119`, `8120`, `8121`, `27706`), and **34 Toyota logical ECU categories**. Each
+  candidate preserves its install-set/category identity plus the exact mount-connect
+  inputs: connection frame `0`, CommSet `9`, and phase type `0x12` or `0x22`.
+  Connection frame 0 has no send/mask/check payload, so Toyota's mount stage is a
+  transport/category connectivity check, not an F181 identity probe. A
+  `direct_address` is populated only for categories with an independently validated
+  direct Panda endpoint; `null` does not mean absent, and categories sharing a
+  gateway-routed endpoint are not collapsed into one ECU. The same section carries
+  the P5 PID/DID/RID support resolver contract (`optionId` 1/2/3), including DID
+  selector `0xC8`, root request `22 01 01`, and the two-level MSB-first bitmap.
 - `profile.session_control` — the runtime current-P5 session contract from TMS-077:
   `generation: current-p5`, default session `1` / extended `3`, enter sequence
   `["1001","1003"]`, `return_default: "1001"`, and the keepalive poll
   `{kind: session_did_poll, did: 0xF186, request 22f186, positive_prefix 62f186,
   interval_s 2.0}`. The narrow session-judgment exception (`CCommFrameCtrl +0x398`
   one-shot no-wire D1/D2) is retained as documentation metadata with
-  `runtime_default: false`, never as a runtime default. All eight catalog categories
-  resolve identical D1/D2/0xDD frames from the master; the host-side lifecycle
-  behavior is instruction-proven for 397/435/498 and the boundary says so.
+  `runtime_default: false`, never as a runtime default. The former local
+  `wire_proven_categories` gate is intentionally absent: `SendProc` itself selects
+  the P5-family path from class-`0x110` generation-low5 values `0x14/0x15/0x16`.
+  All eight exported catalog categories are current generation `0x14` and resolve
+  identical D1/D2/0xDD frames from the current master.
 - `catalogs.<id>.plugins` — every category role/plugin binding with a
   `semantic_kind` only where the exact plugin SHA-256 matches a recovered profile
   (for example 0x19 `dtc_clear`, 0x52 `generic_cid`, 0x08 `p5_active_test_init`);
