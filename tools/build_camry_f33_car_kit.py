@@ -19,6 +19,7 @@ from exploit.common.ram_exec import (
     TOYOTA_P1ME_PAYLOAD_BUILD_SECRET,
 )
 from exploit.ephemeral_runtime import camry_f33_b6_bridge_install as bridge_install
+from exploit.ephemeral_runtime import camry_f33_runtime_replay_discriminator as replay_discriminator
 from exploit.ephemeral_runtime import (
     camry_f33_b6_transaction_observer_install as observer_install,
 )
@@ -30,6 +31,7 @@ RUNBOOK_TEMPLATE = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_observer_runbo
 F33_IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_transaction_observer.bin"
 BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
+REPLAY_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_replay_discriminator.bin"
 DEFAULT_OPENPILOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
 RUNTIME_FILES = [
     "exploit/common/payload_package.py",
@@ -37,6 +39,7 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.py",
     "exploit/ephemeral_runtime/camry_f33_b6_transaction_observer_install.py",
     "exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py",
+    "exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
     "exploit/followups/xcp_read_probe.py",
     "exploit/followups/xcp_daq_probe.py",
     "exploit/followups/xcp_runtime_state_probe.py",
@@ -269,12 +272,16 @@ def build(out: Path, openpilot: Path) -> dict:
         raise RuntimeError("F33 boot SecurityAccess root differs from built-in Toyota P1M-E root")
     observer_payload = package_shellcode(OBSERVER_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     bridge_payload = package_shellcode(BRIDGE_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+    replay_payload = package_shellcode(REPLAY_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     if hashlib.sha256(observer_payload).hexdigest() != observer_install.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("observer authenticated payload identity drift")
     if hashlib.sha256(bridge_payload).hexdigest() != bridge_install.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("bridge authenticated payload identity drift")
+    if hashlib.sha256(replay_payload).hexdigest() != replay_discriminator.EXPECTED_PAYLOAD_SHA256:
+        raise RuntimeError("runtime replay discriminator authenticated payload identity drift")
     (ram_dir / "camry_f33_b6_transaction_observer_payload.bin").write_bytes(observer_payload)
     (ram_dir / "camry_f33_b6_bridge_payload.bin").write_bytes(bridge_payload)
+    (ram_dir / "camry_f33_runtime_replay_discriminator_payload.bin").write_bytes(replay_payload)
 
     files = {
         dst.name: {"sha256": sha256(dst)},
@@ -287,7 +294,7 @@ def build(out: Path, openpilot: Path) -> dict:
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
 
     manifest = {
-        "schema": "camry-f33-car-kit-v4",
+        "schema": "camry-f33-car-kit-v5",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
@@ -313,10 +320,25 @@ def build(out: Path, openpilot: Path) -> dict:
                 "route": "extended 0x1FDC0002->0x1FE00002 on F33 RSCFD controller1; stock command dispatch disabled",
                 "source_memory_write": False,
                 "steering_transmit": False,
-                "live_status": "stock-native execution disabled: Sep-6 ingress reaches FEBE4C34, but fixed CodeFlash 0x30D68=0x5A blocks CONNECT/DAQ; use packaged RAM-resident read-only observer instead",
+                "live_status": "stock-native execution disabled: Sep-6 ingress reaches FEBE4C34, but fixed CodeFlash 0x30D68=0x5A blocks CONNECT/DAQ; runtime replay must be qualified before any resident observer",
             },
         },
         "ram_experiments": {
+            "runtime_replay_discriminator": {
+                "payload": "ram_payloads/camry_f33_runtime_replay_discriminator_payload.bin",
+                "payload_sha256": replay_discriminator.EXPECTED_PAYLOAD_SHA256,
+                "staging_sha256": replay_discriminator.EXPECTED_STAGING_SHA256,
+                "resident_sha256": replay_discriminator.EXPECTED_RESIDENT_SHA256,
+                "resident_base": f"0x{replay_discriminator.RESIDENT_BASE:08X}",
+                "resident_size": replay_discriminator.RESIDENT_SIZE,
+                "clean_window_ticks": replay_discriminator.FIRST_SNAPSHOT_TICK,
+                "clean_window_nominal_seconds": replay_discriminator.FIRST_SNAPSHOT_NOMINAL_SECONDS,
+                "source_terms_mailbox": f"0x{replay_discriminator.MAILBOX_BASE:08X}..0x{replay_discriminator.MAILBOX_BASE + replay_discriminator.MAILBOX_SIZE - 1:08X}",
+                "purpose": "qualify ABI-preserving startup/foreground replay and recover the canonical D0218 source-term profile",
+                "success_verdict": "abi_preserving_runtime_and_source_terms_live",
+                "bypass": False,
+                "required_before_legacy_resident_observers": True,
+            },
             "observer": {
                 "payload": "ram_payloads/camry_f33_b6_transaction_observer_payload.bin",
                 "payload_sha256": observer_install.EXPECTED_PAYLOAD_SHA256,
@@ -331,7 +353,7 @@ def build(out: Path, openpilot: Path) -> dict:
                 "shellcode_sha256": bridge_install.BRIDGE_SHELLCODE_SHA256,
                 "bypass": "SecOC adjudication only; re-enters stock route44 callback",
             },
-            "order": ["observer", "bridge only if observer proves queue ingress/security rejection"],
+            "order": ["runtime_replay_discriminator", "observer only if runtime replay discriminator passes", "bridge only if observer later proves queue ingress/security rejection"],
         },
         "firmware_patch": {
             "historical_only": True,

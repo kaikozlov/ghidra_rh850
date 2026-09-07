@@ -105,7 +105,7 @@ Build the copy-to-comma bundle with:
 python3 tools/build_camry_f33_car_kit.py
 ```
 
-The current generated `build/out/camry-f33-car-kit/` is **v3**. It starts from the live-proven stage-2 image (`8F948=003A`, `8F952=E001`, fixup `D12ADB05`) and packages the next root-result stage-3 discriminator at `8F930 E10F14D3->E00714D3`, plus deterministic preflight/APPLY/stage-3-only RESTORE/post-apply artifacts. The field lifecycle is NRTD preflight/APPLY -> OFF -> NRTD persistence verify -> OFF -> READY B6 admission. The standalone probe now reads direct PDU44 COM `FEBE80BC/FEBE80B8` before the later application snapshot. Source verification is `tests/verify_camry_f33_gate2_root_result_patch.py` plus `tests/verify_camry_f33_b6_stationary_probe.py`.
+The current generated `build/out/camry-f33-car-kit/` is **v5**. Its first live RAM action is the ABI-preserving exact-F33 runtime/source-term discriminator: a 534-byte staged shell copies a 406-byte resident into the live-proven `FEBFF9F0..FEBFFBFB` high tail, uses direct RH850 `JARL disp32` for the exact stock startup/foreground target sequence, requires application F181 before any added observer write, then snapshots the canonical D0218 source terms to `FEBF0000..FEBF0024` and SHA-attests the resident. The older C-based B6 observer/bridge remain packaged but are conditional; their shared `call0(address)` startup trampoline is not accepted as ABI-correct evidence. The stage-2/stage-3 flash package remains **historical/recovery only**; current installed firmware is persistence-verified cumulative stage 5. Source verification is `tests/verify_camry_f33_b6_stationary_probe.py` (including the ABI-preserving runtime discriminator contract).
 
 ## NRTD P5/cruise follow-up
 

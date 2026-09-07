@@ -2,12 +2,15 @@
 """Deterministically verify the exact-F33 stationary B6 bring-up probe."""
 from __future__ import annotations
 
+import hashlib
 import importlib.util
+import json
 import sys
 import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 MODULE_PATH = ROOT / "exploit/behavioral_proof/camry_f33_b6_stationary_probe.py"
 SPEC = importlib.util.spec_from_file_location("camry_f33_b6_stationary_probe", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None
@@ -240,6 +243,53 @@ check("matching baseline cannot masquerade as new phase ingress",
 sim = probe.simulate()
 check("offline simulation reproduces positive/negative verdicts", sim["good_verdict"]["admitted"] is True and sim["bad_verdict"]["admitted"] is False)
 
+print("\n== ABI-preserving runtime/source-term discriminator ==")
+from exploit.common.payload_package import inspect_payload, package_shellcode
+from exploit.ephemeral_runtime import build_camry_f33_runtime_replay_discriminator as replay_builder
+from exploit.ephemeral_runtime import camry_f33_runtime_replay_discriminator as replay_runner
+replay_source = (ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.S").read_text()
+replay_builder_path = ROOT / "exploit/ephemeral_runtime/build_camry_f33_runtime_replay_discriminator.py"
+replay_audit = json.loads((ROOT / "exploit/ephemeral_runtime/audited_camry_f33_runtime_replay_discriminator_build.json").read_text())
+replay_staging = (ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_replay_discriminator.bin").read_bytes()
+sha = lambda b: hashlib.sha256(b).hexdigest()
+check("runtime discriminator audited v2 source/builder binding",
+      replay_audit["schema"] == "camry-f33-runtime-replay-discriminator-build-v2" and
+      replay_audit["source"]["sha256"] == sha((ROOT / replay_audit["source"]["path"]).read_bytes()) and
+      replay_audit["builder"]["sha256"] == sha(replay_builder_path.read_bytes()))
+check("runtime discriminator staging/resident identities and tail fit",
+      len(replay_staging) == replay_audit["staging"]["size"] == 534 and
+      sha(replay_staging) == replay_runner.EXPECTED_STAGING_SHA256 and
+      replay_audit["resident"]["size"] == replay_runner.RESIDENT_SIZE == 406 and
+      replay_audit["resident"]["headroom"] == 118 and replay_audit["resident"]["relocations"] == 0 and
+      replay_audit["resident"]["sha256"] == replay_runner.EXPECTED_RESIDENT_SHA256)
+check("runtime discriminator uses exact direct-JARL target order without C trampoline",
+      "call0" not in replay_source and replay_source.count("jarl32 ") == 33 and
+      replay_audit["resident"]["jarl_targets"] == [f"0x{x:08X}" for x in replay_builder.EXPECTED_RESIDENT_JARL_TARGETS])
+check("runtime discriminator first observer write is gated to count 224",
+      replay_source.index("tst1 7, 0[ep]") < replay_source.index("tst1 6, 0[ep]") <
+      replay_source.index("tst1 5, 0[ep]") < replay_source.index("st.w r2, 0[sp]") and
+      replay_runner.FIRST_SNAPSHOT_TICK == 224)
+try:
+    replay_builder.verify_static_contract((ROOT / "firmware/camry-8965F3307000/CodeFlash.bin").read_bytes())
+    replay_static_ok = True
+except Exception as exc:
+    print(f"runtime discriminator static contract error: {exc}")
+    replay_static_ok = False
+check("runtime discriminator exact F33 startup/foreground/MPU/source-term guards", replay_static_ok)
+replay_payload = package_shellcode(replay_staging, secret=(ROOT / "firmware/camry-8965F3307000/CodeFlash.bin").read_bytes()[0xBFD8:0xBFE8])
+replay_inspection = inspect_payload(replay_payload, secret=(ROOT / "firmware/camry-8965F3307000/CodeFlash.bin").read_bytes()[0xBFD8:0xBFE8])
+check("runtime discriminator authenticated payload identity exact",
+      sha(replay_payload) == replay_runner.EXPECTED_PAYLOAD_SHA256 and replay_inspection.cmac_valid and
+      replay_inspection.crc_residue == 0xFFFFFFFF and replay_inspection.callback_address == 0xFEBF0000)
+raw = bytearray(replay_runner.MAILBOX_SIZE)
+raw[0:4] = replay_runner.MAILBOX_MAGIC.to_bytes(4, "little"); raw[4] = raw[0x24] = 0xE7
+for name, offset, width, signed in replay_runner.MAILBOX_FIELDS:
+    value = -3 if signed else 3
+    raw[offset:offset+width] = value.to_bytes(width, "little", signed=signed)
+check("runtime discriminator mailbox decoder fails closed on torn snapshots",
+      replay_runner.decode_mailbox(bytes(raw))["coherent"] is True and
+      replay_runner.decode_mailbox(bytes(raw[:0x24] + bytes((0xE6,))))["coherent"] is False)
+
 print("\n== car-kit packaging ==")
 builder_path = ROOT / "tools/build_camry_f33_car_kit.py"
 builder_spec = importlib.util.spec_from_file_location("build_camry_f33_car_kit", builder_path)
@@ -254,7 +304,7 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v4 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v4" and manifest["target"] == {
+    check("kit manifest is self-contained v5 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v5" and manifest["target"] == {
         "eps_f181": "8965F3307000", "eps_diag": "0x7A1->0x7A9 bus0", "b6": "0x0B6/32 FD bus0",
     })
     check("kit pins live persistence-verified stage5 as current firmware", manifest["current_firmware"] == {
@@ -263,11 +313,20 @@ with tempfile.TemporaryDirectory() as td:
         "crc_prefix": "0x1960380A", "crc_fixup": "0xE69FC7F5",
         "note": "live persistence-verified 2026-09-01; no further persistent patch is part of the observer experiment",
     })
-    check("kit makes observer the first RAM experiment and bridge conditional",
+    replay = manifest["ram_experiments"]["runtime_replay_discriminator"]
+    check("kit makes ABI-preserving runtime/source observer the first RAM experiment",
+          replay["payload_sha256"] == "48f269aec2c95fbf33217db67a201faad2716985784f5e196ba5ddeade46d8dd" and
+          replay["staging_sha256"] == "0e0d6cc19c8fe8a4f04d216a1b85d73c41dce6e283d5d18d6a80d9da2937b1e6" and
+          replay["resident_sha256"] == "26e13ab455f9580e005cb50fc5ef1bb26d6214f3cbc9ff02056ad6af2ebb7ba9" and
+          replay["resident_base"] == "0xFEBFF9F0" and replay["resident_size"] == 406 and
+          replay["clean_window_ticks"] == 224 and replay["clean_window_nominal_seconds"] == 1.12 and
+          replay["source_terms_mailbox"] == "0xFEBF0000..0xFEBF0024" and
+          replay["success_verdict"] == "abi_preserving_runtime_and_source_terms_live" and
+          replay["bypass"] is False and manifest["ram_experiments"]["order"][0] == "runtime_replay_discriminator")
+    check("legacy B6 observer and bridge remain packaged but conditional",
           manifest["ram_experiments"]["observer"]["bypass"] is False and
           manifest["ram_experiments"]["observer"]["payload_sha256"] == "5be3e474c965e3111957227f7db44b30aa2c6eca6ba341a8279ceea043e2728d" and
-          manifest["ram_experiments"]["bridge"]["payload_sha256"] == "8eec0e29fb1110f7865c85199c6b348ab3a69ccfa8f98cec981f2232f9c2d0ef" and
-          manifest["ram_experiments"]["order"][0] == "observer")
+          manifest["ram_experiments"]["bridge"]["payload_sha256"] == "8eec0e29fb1110f7865c85199c6b348ab3a69ccfa8f98cec981f2232f9c2d0ef")
     check("historical flash package is explicitly not the next experiment", manifest["firmware_patch"]["historical_only"] is True)
     check("kit retains live stage2 source state only as historical patch evidence", manifest["firmware_patch"]["stage2_installed"] == {
         "sites": [{"address": "0x8F948", "bytes": "003a"}, {"address": "0x8F952", "bytes": "e001"}],
@@ -284,12 +343,14 @@ with tempfile.TemporaryDirectory() as td:
         "firmware_patch/generic_shellcode_template.bin",
     )))
     check("kit includes observer/bridge payloads and RAM runtime needed on comma", all((out / rel).is_file() for rel in (
+        "ram_payloads/camry_f33_runtime_replay_discriminator_payload.bin",
         "ram_payloads/camry_f33_b6_transaction_observer_payload.bin",
         "ram_payloads/camry_f33_b6_bridge_payload.bin",
         "runtime/exploit/common/ram_exec.py", "runtime/exploit/common/payload_package.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_transaction_observer_install.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py",
+        "runtime/exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
         "runtime/exploit/followups/xcp_read_probe.py", "runtime/exploit/followups/xcp_daq_probe.py",
         "runtime/tools/camry_f33_steering_state_capture.py",
         "runtime/exploit/patcher/deploy.py", "runtime/exploit/patcher/restore.py",
@@ -322,7 +383,8 @@ with tempfile.TemporaryDirectory() as td:
     check("patch runbook pins root patch and cumulative CRC", "0x8F930: E1 0F 14 D3 -> E0 07 14 D3" in patch_runbook and "8F948=003A" in patch_runbook and "8F952=E001" in patch_runbook and "EC525C33" in patch_runbook)
     check("patch runbook encodes proven NRTD lifecycle and stage3-only restore", "NRC `0x22` in READY" in patch_runbook and "Full OFF -> NRTD" in patch_runbook and "RESTORE reverses **stage 3 only**" in patch_runbook)
     check("kit manifest pins current opendbc and Panda revisions", len(manifest["repositories"]["opendbc"].get("head", "")) == 40 and len(manifest["repositories"]["panda"].get("head", "")) == 40)
-    check("runbook is observer-first, bridge-second, bridge-only offset",
+    check("runbook is corrected-runtime-first, then legacy observer/bridge",
+          "ABI-preserving resident" in runbook and "abi_preserving_runtime_and_source_terms_live" in runbook and
           "install the non-bypassing observer" in runbook and "--require-observer" in runbook and
           "Only after `observer.id11_phase.matches_phase == true`" in runbook and "--require-bridge" in runbook and
           "--small-offset-deg 0.5" in runbook and

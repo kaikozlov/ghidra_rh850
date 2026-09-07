@@ -1,0 +1,43 @@
+{
+  "attempts": [
+    {
+      "authenticated_payload_sha256": "6c950e13b9ff6f9c645a5fd9f0954d00c96d3a24c663b279c4a5233c802f9509",
+      "name": "experimental steering source-terms high-tail resident",
+      "recovery": "full vehicle OFF, then return to NRTD restored exact application F181",
+      "resident_model": "copy resident to FEBFF9F0 high tail, replay recovered application startup calls, own recovered foreground loop, publish read-only steering telemetry",
+      "result": "application F181 did not reappear after RAM trigger; quick post-trigger census lacked normal EPS application traffic"
+    },
+    {
+      "authenticated_payload_sha256": "5be3e474c965e3111957227f7db44b30aa2c6eca6ba341a8279ceea043e2728d",
+      "name": "audited B6 transaction high-tail observer",
+      "recovery": "full vehicle OFF, then return to NRTD restored exact application F181",
+      "resident_model": "copy resident to FEBFF9F0 high tail, replay recovered application startup calls, own recovered foreground loop, observe protected-B6 transaction state without bypass",
+      "result": "application F181 did not reappear after RAM trigger",
+      "shellcode_sha256": "94cb0b06ce376a3876d124ef76dacc3e34f00090737988f909de1c8af3674ad0"
+    }
+  ],
+  "environment": {
+    "initial_state": "NRTD / Park / stationary",
+    "openpilot_stopped_before_ram_exec": true,
+    "persistent_flash_write_performed": false
+  },
+  "interpretation": {
+    "not_proved": [
+      "whether an ABI-preserving direct-JARL resident replay succeeds live",
+      "that high-tail execution itself is invalid",
+      "that application-context observer writes are invalid",
+      "that all RAM-resident observation architectures are invalid"
+    ],
+    "observed": "two independently built high-tail residents using the same manual application-startup/foreground-replay architecture failed to restore application diagnostics until power-cycle",
+    "preserved_prior_fact": "the separate 2026-08-26 high-tail retention probe remains valid: code copied to FEBFF9F0..FEBFFBFB executed a marker and then the exact stock application entry 0x20880 reappeared",
+    "retrospective_static_correction": "both failed residents route stock startup/foreground calls through a C call0(address) helper; RH850 ABI passes address in r6, unlike the stock direct JARL sequence, so the failures do not qualify an ABI-preserving resident replay"
+  },
+  "recorded_local_date": "2026-09-06",
+  "schema": "camry-f33-ram-resident-replay-failures-v2",
+  "target": {
+    "eps_f181": "8965F3307000",
+    "route": "0x7A1->0x7A9 Panda bus0 / ELM327 param1",
+    "secondary_id": "8A3113303100",
+    "vehicle": "2026 Camry Hybrid"
+  }
+}

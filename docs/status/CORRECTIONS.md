@@ -3657,3 +3657,21 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `tests/verify_camry_8965F3307000.py`;
   `exploit/followups/xcp_runtime_state_probe.py`;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§6,13.1.
+
+
+### CORR-166 — the audited F33 B6 observer is not a qualified next live action until runtime replay itself passes
+
+- **Superseded:** after XCP was closed by CORR-165, the field runbook and priorities promoted the audited high-tail B6 transaction observer directly to the next live steering-state experiment.
+- **Observed correction:** two 2026-09-06 NRTD high-tail residents using that same manual application-startup/foreground-replay architecture failed to restore exact application F181 until a full power cycle, including the audited B6 observer itself. No persistent flash write was performed.
+- **Preserved fact:** this does not invalidate `FEBFF9F0..FEBFFBFB` as retained/executable RAM. The independent Aug-26 high-tail probe executed there and returned through exact stock application entry `0x20880` successfully.
+- **Historical boundary:** at this checkpoint resident observation was deferred behind a delayed-mailbox replay discriminator. CORR-167 supersedes the proposed 400-tick/8-byte discriminator after identifying the shared ABI-corrupting C trampoline in both failed residents.
+- **Canonical:** [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §58; `targets/camry-2026/raw-20260906/ram-resident-replay-failures.json`; `exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md`.
+
+
+### CORR-167 — the Sep-6 resident failures used an ABI-corrupting C call trampoline; they do not test ABI-preserving replay
+
+- **Superseded:** CORR-166 treated the two resident failures as evidence that the manual startup/foreground replay architecture itself needed to be separated from telemetry writes.
+- **Static correction:** both failed residents route stock calls through `call0(unsigned int address) { ((fn0_t)address)(); }`. RH850 passes the first C argument in `r6`, so every target is entered with `r6=target_address`. Exact Toyota startup at `0x637EE` uses direct `jarl` calls instead; several startup target entries consume `r6` and/or adjacent live register state. The failed residents therefore did not preserve stock ABI/register flow.
+- **Preserved live evidence:** both Sep-6 payloads really did fail to restore F181 until power-cycle, and the Aug-26 high-tail marker + stock-`0x20880` return still proves the 524-byte high tail itself can execute and survive startup. What is withdrawn is the interpretation that those failures meaningfully test an ABI-correct scheduler replay or isolate telemetry writes.
+- **Replacement:** the v2 discriminator is assembly-only for the resident call path and emits direct RH850 `JARL disp32` calls to the exact target sequence. It is 406/524 bytes with zero relocations. It adds no application-memory writes through foreground count 223, then snapshots the canonical D0218 source-term profile to `FEBF0000..FEBF0024`; the host also SHA-attests the resident. Only `abi_preserving_runtime_and_source_terms_live` is a positive live result.
+- **Canonical:** [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §58; `tests/verify_camry_f33_b6_stationary_probe.py`; `exploit/ephemeral_runtime/audited_camry_f33_runtime_replay_discriminator_build.json`.
