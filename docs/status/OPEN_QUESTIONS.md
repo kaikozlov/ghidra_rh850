@@ -1119,23 +1119,22 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   assist/damping; FlexRay/PSI5 have no application references; and the surviving RSENT1
   hardware path feeds steering-torque sensors. Therefore the second half of OQ-054 is no
   longer a generic "find another F33 input" problem. It is a chassis/assembly boundary
-  problem. F33's recovered B6-independent D0218
-  terms contain torque/speed/angle/internal phase-calibration state but no external
-  lane-target magnitude, so another arbitrary F33 CAN-field search is not the next
-  step. Prioritize exact ABS/Brake-Booster firmware, Operation-FFD winner/grant, or
-  a live internal-oracle capture synchronized to the request. The preferred internal
-  oracle is now concrete: `tools/camry_f33_steering_state_capture.py` uses exact-F33's
-  native measurement-only XCP DAQ rather than another resident payload. Exact firmware
-  constants and `823E2 -> 82368` control flow prove four lists x four ODTs x seven bytes
-  and ascending service of active lists bound to the same event. The default 52-byte
-  `full-path` profile therefore joins every `D0218` operand/gate, `CC48`, and
-  `CC48 -> CC4C/CC4E -> CC60 -> CC50 -> CC62/CC66/CC64 -> AC54/AC56` in the same
-  recurring ECU event; 28-byte single-list subsets remain available. The same Panda loop
-  retains `0x025/0x030/0x081/0x08A` context. Post-repin XCP reachability is still
-  unmeasured, so the next action is a short parked CONNECT/DAQ-rate preflight. Only if
-  that fails should the existing authenticated-RAM high-tail observer framework be
-  reduced to the same steering profile. Batched rlog timing remains unusable for physical
-  latency/source inference. Canonical opendbc-port §4.10 and live-baseline §52.
+  problem. F33's recovered B6-independent D0218 terms contain
+  torque/speed/angle/internal phase-calibration state but no external lane-target
+  magnitude, so another arbitrary F33 CAN-field search is not the next step.
+  Prioritize exact ABS/Brake-Booster firmware, Operation-FFD winner/grant, or a live
+  internal-oracle capture synchronized to the request. VAR-134/CORR-165 close stock
+  XCP command dispatch disabled before CONNECT, so the former native-DAQ preflight is
+  retired. VAR-136/CORR-167 replace the first RAM fallback too: both Sep-6 residents
+  used a C `call0(address)` trampoline that corrupts RH850 `r6`. The current internal
+  oracle is the corrected 406-byte direct-`JARL disp32` high-tail resident. First
+  qualify it in NRTD with no added application-memory writes through foreground count
+  223; only `abi_preserving_runtime_and_source_terms_live` permits a direct
+  NRTD->READY, no-OFF **read-existing** parked capture. That second mode performs no
+  RAM execute/writes and requires exact F181, READY, Park, <=0.5 km/h wheel speed,
+  byte-exact resident readback, and advancing coherent D0218 source-term generations.
+  It ends with full OFF and does not authorize moving observation. Batched rlog timing
+  remains unusable for physical latency/source inference. Canonical live-baseline §58.
 
   The captured native Bus-1 boundary is now explicit. Both retained relay-correct
   drives contain the same 22 periodic camera/radar-domain streams:
@@ -1156,23 +1155,15 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   Those runs did not read raw PDU44 COM, so CORR-162 leaves delivery and the
   first rejecting stage open. The exact F33 receive path is closed through
   previously unpromoted CanIf, freshness, and route44 COM callbacks; there is
-  no justified next result/status patch. The next live discriminator asks
-  whether the transmitted FD/32 B6 appears at the EPS SecOC profile2 queue
-  immediately before the stock `667E6` aggregate, then joins freshness state
-  and the raw COM window in the same run. The first RAM experiment is
-  deliberately **non-bypassing**: it counts queue samples, records the
-  receiver-side B3..B7/B28..B31 identity, pre/post `FEBE5564` and publication
-  state, post-aggregate queue length, and ICU-S done/status while leaving stock
-  `667E6` untouched. The host concurrently records freshness retry budget,
-  profile-2 state, the committed0/committed1/pending0/pending1 records, full
-  raw COM, the application ladder, the
-  `CB38 -> CC48 -> CC60 -> CC62/CC64` command funnel, and raw
-  `0x08A/0x081/0x030`. Install in NRTD, heartbeat-attest, transition directly
-  to READY without OFF, and use `--require-observer --phase-order id11-id0`.
-  Only after exact queue ingress is observed should a second NRTD->READY run
-  install the separate route44 bridge and use `--require-bridge`. A negative
-  observer is bounded to the pre-aggregate sample point; no steering offset is
-  justified before `ADMITTED`. The 2026-09-04 road corpus adds two constraints:
+  no justified next result/status patch. The former B6 queue observer/bridge
+  procedure is also **deferred**: both packaged residents share the superseded
+  `call0(address)` startup/foreground trampoline and are explicitly not
+  live-qualified. Their queue/signature/freshness/raw-COM evidence model remains
+  useful for a future rebuild, but no current field sequence runs
+  `--require-observer`, `--require-bridge`, or a steering offset. First complete the
+  corrected same-resident NRTD qualification and READY/Park read-existing capture;
+  only after those pass should a new ABI-preserving B6 observer be designed and
+  independently qualified. The 2026-09-04 road corpus adds two constraints:
   successful Panda transmission is not equivalent to B6 authority, and the port that
   produced these routes had a hardcoded `steeringPressed=False` that blocked normal
   torque-nudge lane-change entry (fixed 2026-09-04 by fork opendbc `e37bab6c` with a

@@ -289,6 +289,17 @@ for name, offset, width, signed in replay_runner.MAILBOX_FIELDS:
 check("runtime discriminator mailbox decoder fails closed on torn snapshots",
       replay_runner.decode_mailbox(bytes(raw))["coherent"] is True and
       replay_runner.decode_mailbox(bytes(raw[:0x24] + bytes((0xE6,))))["coherent"] is False)
+replay_plan = replay_runner.plan(None)
+check("runtime discriminator plan exposes guarded READY read-existing follow-up",
+      replay_plan["schema"] == "camry-f33-runtime-replay-discriminator-run-v3" and
+      replay_plan["ready_read_existing"]["ram_execute"] is False and
+      replay_plan["ready_read_existing"]["writes"] is False and
+      replay_plan["ready_read_existing"]["success_verdict"] == "ready_parked_source_terms_live" and
+      "Park" in replay_plan["live_guards"]["ready_read_existing"])
+zero_speed = bytes.fromhex("1a6f1a6f1a6f1a6f")
+check("READY parked guard decoders pin zero wheel speed and Park code",
+      replay_runner.decode_wheel_speeds_kph(zero_speed) == (0.0, 0.0, 0.0, 0.0) and
+      replay_runner.decode_gear(bytes(8)) == 0)
 
 print("\n== car-kit packaging ==")
 builder_path = ROOT / "tools/build_camry_f33_car_kit.py"
@@ -322,11 +333,19 @@ with tempfile.TemporaryDirectory() as td:
           replay["clean_window_ticks"] == 224 and replay["clean_window_nominal_seconds"] == 1.12 and
           replay["source_terms_mailbox"] == "0xFEBF0000..0xFEBF0024" and
           replay["success_verdict"] == "abi_preserving_runtime_and_source_terms_live" and
-          replay["bypass"] is False and manifest["ram_experiments"]["order"][0] == "runtime_replay_discriminator")
-    check("legacy B6 observer and bridge remain packaged but conditional",
+          replay["ready_read_existing_success_verdict"] == "ready_parked_source_terms_live" and
+          "NRTD->READY without OFF" in replay["next_after_success"] and replay["bypass"] is False and
+          manifest["ram_experiments"]["order"][:2] == [
+              "runtime_replay_discriminator in NRTD",
+              "same corrected resident read-existing source-term capture in READY/Park without OFF",
+          ])
+    check("legacy B6 observer and bridge remain packaged but are explicitly not live-qualified",
           manifest["ram_experiments"]["observer"]["bypass"] is False and
           manifest["ram_experiments"]["observer"]["payload_sha256"] == "5be3e474c965e3111957227f7db44b30aa2c6eca6ba341a8279ceea043e2728d" and
-          manifest["ram_experiments"]["bridge"]["payload_sha256"] == "8eec0e29fb1110f7865c85199c6b348ab3a69ccfa8f98cec981f2232f9c2d0ef")
+          manifest["ram_experiments"]["observer"]["live_qualified"] is False and
+          "call0(address)" in manifest["ram_experiments"]["observer"]["blocked_by"] and
+          manifest["ram_experiments"]["bridge"]["payload_sha256"] == "8eec0e29fb1110f7865c85199c6b348ab3a69ccfa8f98cec981f2232f9c2d0ef" and
+          manifest["ram_experiments"]["bridge"]["live_qualified"] is False)
     check("historical flash package is explicitly not the next experiment", manifest["firmware_patch"]["historical_only"] is True)
     check("kit retains live stage2 source state only as historical patch evidence", manifest["firmware_patch"]["stage2_installed"] == {
         "sites": [{"address": "0x8F948", "bytes": "003a"}, {"address": "0x8F952", "bytes": "e001"}],
@@ -383,20 +402,21 @@ with tempfile.TemporaryDirectory() as td:
     check("patch runbook pins root patch and cumulative CRC", "0x8F930: E1 0F 14 D3 -> E0 07 14 D3" in patch_runbook and "8F948=003A" in patch_runbook and "8F952=E001" in patch_runbook and "EC525C33" in patch_runbook)
     check("patch runbook encodes proven NRTD lifecycle and stage3-only restore", "NRC `0x22` in READY" in patch_runbook and "Full OFF -> NRTD" in patch_runbook and "RESTORE reverses **stage 3 only**" in patch_runbook)
     check("kit manifest pins current opendbc and Panda revisions", len(manifest["repositories"]["opendbc"].get("head", "")) == 40 and len(manifest["repositories"]["panda"].get("head", "")) == 40)
-    check("runbook is corrected-runtime-first, then legacy observer/bridge",
+    check("runbook uses corrected resident for both NRTD install and READY read-existing capture",
           "ABI-preserving resident" in runbook and "abi_preserving_runtime_and_source_terms_live" in runbook and
-          "install the non-bypassing observer" in runbook and "--require-observer" in runbook and
-          "Only after `observer.id11_phase.matches_phase == true`" in runbook and "--require-bridge" in runbook and
-          "--small-offset-deg 0.5" in runbook and
-          "Only if the immediately preceding **bridge** ID11/current-angle phase says `ADMITTED`" in runbook)
-    check("runbook explicitly forbids another result-bit flash patch",
+          "--read-existing --parked-stationary-confirmed --duration-seconds 5" in runbook and
+          "ready_parked_source_terms_live" in runbook and "NRTD -> READY" in runbook)
+    check("runbook explicitly refuses the superseded legacy observer and bridge payloads",
+          "Do not execute either payload" in runbook and
+          "No current kit command authorizes" in runbook and
+          "camry_f33_b6_transaction_observer_install.py" not in runbook and
+          "--require-bridge" not in runbook and "--small-offset-deg" not in runbook)
+    check("runbook bounds READY follow-up to Park/stationary read-only qualification",
+          "no RAM execute and no writes" in runbook.replace("**", "") and "wheel speeds within 0.5 km/h" in runbook and
+          "authorize driving with the resident" in runbook and "full OFF" in runbook)
+    check("runbook keeps persistent patch history out of the next action",
           "do not add another persistent result-bit patch" in runbook and
-          "historical/recovery artifacts" in runbook and "pre-`0x667E6` B6 queue samples" in runbook)
-    check("runbook states the bounded steering ramp", "rate-limits" in runbook and "6 deg/s" in runbook)
-    check("runbook rejects target-angle and CAN-health false proof",
-          "one B3..B31 raw PDU44 COM read" in runbook and "FEBE7F68" in runbook and
-          "supporting evidence, not physical-ACK proof" in runbook and
-          "Target/current-angle alone is not accepted" in runbook and "matches_phase" in runbook)
+          "historical/recovery artifacts" in runbook)
     check("runbook pins current bus0 and exclusive Panda ownership", "current post-repin" in runbook and "Panda bus 0" in runbook and "pandad|boardd" in runbook)
 
 print(f"\nResults: {passed} passed, {failed} failed")

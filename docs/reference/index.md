@@ -449,7 +449,7 @@ Findings: 446 · Corrections: 167 · Open questions: 54 · Docs: 124 · Suites: 
 | <a id="finding-var-118"></a>**VAR-118** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 | <a id="finding-var-119"></a>**VAR-119** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 | <a id="finding-var-120"></a>**VAR-120** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_f33_b6_transaction_observer.py`, `tests/verify_camry_f33_b6_bridge_install.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
-| <a id="finding-var-121"></a>**VAR-121** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [camry_f33_b6_observer_runbook](../../exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md) | `tests/verify_camry_8965F3307000.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
+| <a id="finding-var-121"></a>**VAR-121** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_8965F3307000.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 | <a id="finding-var-122"></a>**VAR-122** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 | <a id="finding-var-123"></a>**VAR-123** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_f33_gate2_root_result_patch.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 | <a id="finding-var-124"></a>**VAR-124** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md), [camry-2026-capability-matrix](../variants/camry-2026-capability-matrix.md), [camry_f33_b6_observer_runbook](../../exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md) | — | — |
@@ -462,9 +462,9 @@ Findings: 446 · Corrections: 167 · Open questions: 54 · Docs: 124 · Suites: 
 | <a id="finding-var-131"></a>**VAR-131** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | `tests/verify_camry_2026_pda_sdg.py` | — |
 | <a id="finding-var-132"></a>**VAR-132** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | — | `tests/verify_camry_2026_lateral_family_census.py` | — |
 | <a id="finding-var-133"></a>**VAR-133** | [docs/variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) | — | `tests/verify_corolla_2023_public_route_opendbc_evidence.py`, `tests/verify_span_2025_discord_rlog_opendbc_evidence.py` | — |
-| <a id="finding-var-134"></a>**VAR-134** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000.py`, `tests/verify_exploit_followups.py` | OQ-053 |
+| <a id="finding-var-134"></a>**VAR-134** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_8965F3307000.py`, `tests/verify_exploit_followups.py` | OQ-053, OQ-054 |
 | <a id="finding-var-135"></a>**VAR-135** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | — | — |
-| <a id="finding-var-136"></a>**VAR-136** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_f33_b6_stationary_probe.py` | OQ-053 |
+| <a id="finding-var-136"></a>**VAR-136** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_f33_b6_stationary_probe.py` | OQ-053, OQ-054 |
 
 ## Open-questions index
 
@@ -523,7 +523,7 @@ Findings: 446 · Corrections: 167 · Open questions: 54 · Docs: 124 · Suites: 
 | <a id="open-question-oq-051"></a>**OQ-051** | Cross-calibration structural triage of future P1M-E images | Tooling | MEM-SAFE-001 |
 | <a id="open-question-oq-052"></a>**OQ-052** | True-TSS3 longitudinal wire/auth/arbitration execution contract | Tooling | TMS-085, TMS-079, VAR-106, VAR-107, VAR-069, VAR-070, VAR-086, TMS-087 |
 | <a id="open-question-oq-053"></a>**OQ-053** | F33 non-disruptive application-mode RAM execution pivot | Tooling | VAR-060, VAR-134, CORR-165, VAR-136, CORR-167, CORR-123 |
-| <a id="open-question-oq-054"></a>**OQ-054** | Identify the downstream `0x08A` proxy/transmitter, request handoff/encoding, and SecOC profile owner | Tooling | VAR-091, CORR-149, VAR-107, VAR-094, VAR-113, VAR-081, CORR-135, VAR-095, CORR-137, VAR-096, VAR-097, VAR-101, VAR-110, VAR-111, VAR-117, CORR-157, CORR-162, VAR-126, CORR-092 |
+| <a id="open-question-oq-054"></a>**OQ-054** | Identify the downstream `0x08A` proxy/transmitter, request handoff/encoding, and SecOC profile owner | Tooling | VAR-091, CORR-149, VAR-107, VAR-094, VAR-113, VAR-081, CORR-135, VAR-095, CORR-137, VAR-096, VAR-097, VAR-101, VAR-110, VAR-111, VAR-134, CORR-165, VAR-136, CORR-167, VAR-117, CORR-157, CORR-162, VAR-126, CORR-092 |
 
 ## Correction index
 

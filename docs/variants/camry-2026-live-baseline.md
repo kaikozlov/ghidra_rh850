@@ -4372,7 +4372,13 @@ F181 recovery followed by loss after the first snapshot isolates the new write/
 snapshot phase. Only `abi_preserving_runtime_and_source_terms_live` proves the
 corrected resident, retained code, and one coherent internal steering-state sample.
 Until that live verdict exists, the older C-based B6 observer and route44 bridge
-remain deferred; their scheduler trampoline must not be reused as evidence.
+remain deferred; their scheduler trampoline must not be reused as evidence. A
+positive NRTD discriminator result now leads only to a **same-resident** READY/Park
+read-existing qualification: direct NRTD->READY without OFF, exact F181 plus
+READY/Park/<=0.5-km/h guards, byte-exact high-tail attestation, and at least two
+distinct coherent source-term generations over a bounded parked capture. That host
+mode performs no RAM execute and no writes. It ends with full OFF; it does not
+authorize driving with the resident or executing the legacy B6 observer/bridge.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
