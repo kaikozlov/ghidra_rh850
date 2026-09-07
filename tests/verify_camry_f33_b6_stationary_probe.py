@@ -5,6 +5,8 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -369,7 +371,7 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v6 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v6" and manifest["target"] == {
+    check("kit manifest is self-contained v7 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v7" and manifest["target"] == {
         "eps_f181": "8965F3307000", "eps_diag": "0x7A1->0x7A9 bus0", "b6": "0x0B6/32 FD bus0",
     })
     check("kit pins live persistence-verified stage5 as current firmware", manifest["current_firmware"] == {
@@ -419,7 +421,8 @@ with tempfile.TemporaryDirectory() as td:
         "firmware_patch/restore/restore.json", "firmware_patch/post-apply/payload-validate-only.bin",
         "firmware_patch/generic_shellcode_template.bin",
     )))
-    check("kit includes observer/bridge payloads and RAM runtime needed on comma", all((out / rel).is_file() for rel in (
+    check("kit includes launcher, monitor/legacy payloads, and RAM runtime needed on comma",
+          (out / "f33").is_file() and (out / "f33").stat().st_mode & 0o111 and all((out / rel).is_file() for rel in (
         "ram_payloads/camry_f33_runtime_monitor_payload.bin",
         "ram_payloads/camry_f33_runtime_replay_discriminator_payload.bin",
         "ram_payloads/camry_f33_b6_transaction_observer_payload.bin",
@@ -462,14 +465,37 @@ with tempfile.TemporaryDirectory() as td:
     check("patch runbook pins root patch and cumulative CRC", "0x8F930: E1 0F 14 D3 -> E0 07 14 D3" in patch_runbook and "8F948=003A" in patch_runbook and "8F952=E001" in patch_runbook and "EC525C33" in patch_runbook)
     check("patch runbook encodes proven NRTD lifecycle and stage3-only restore", "NRC `0x22` in READY" in patch_runbook and "Full OFF -> NRTD" in patch_runbook and "RESTORE reverses **stage 3 only**" in patch_runbook)
     check("kit manifest pins current opendbc and Panda revisions", len(manifest["repositories"]["opendbc"].get("head", "")) == 40 and len(manifest["repositories"]["panda"].get("head", "")) == 40)
-    check("runbook is generic-monitor-first and externally configurable",
+    check("runbook is launcher-first and externally configurable",
           "generic runtime monitor" in runbook and "runtime_monitor_live" in runbook and
-          "B2      sequence" in runbook and "B3      opcode" in runbook and "watch SLOT ADDRESS" in runbook and
-          "camry_f33_runtime_monitor.py shell" in runbook and "Do not execute them from this runbook" in runbook)
+          "./f33 doctor" in runbook and "./f33 install" in runbook and "./f33 shell" in runbook and
+          "watch SLOT ADDRESS" in runbook and "Do not execute them from this runbook" in runbook)
     check("runbook preserves observation-only boundary",
           "no dynamic source-memory writer" in runbook and "steering CAN transmit" in runbook and
           "current coherent snapshot" in runbook and "on-ECU history ring" in runbook)
-    check("runbook pins current bus0 and exclusive Panda ownership", "post-repin diagnostics" in runbook and "Panda bus 0" in runbook and "pandad|boardd" in runbook)
+    check("runbook pins current bus0 and canonical Panda ownership",
+          "post-repin diagnostics" in runbook and "Panda bus 0" in runbook and
+          "manager/manager.py" in runbook and "pandad`/`boardd`" in runbook)
+    launcher = out / "f33"
+    launcher_text = launcher.read_text(encoding="utf-8")
+    check("launcher pins field environment and fixed monitor payload path",
+          "/usr/local/venv/bin/python" in launcher_text and "/data/openpilot" in launcher_text and
+          "ram_payloads/camry_f33_runtime_monitor_payload.bin" in launcher_text and
+          "PYTHONPATH" in launcher_text and "systemctl stop openpilot" in launcher_text and
+          "manager/manager\\.py" in launcher_text and "pandad" in launcher_text and "boardd" in launcher_text)
+    local_openpilot = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
+    local_python = local_openpilot / ".venv/bin/python"
+    env = dict(os.environ, F33_PYTHON=str(local_python), F33_OPENPILOT_ROOT=str(local_openpilot))
+    doctor = subprocess.run([str(launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
+    check("built launcher doctor validates imports and payload without Panda access",
+          doctor.returncode == 0 and "f33 doctor: PASS" in doctor.stdout and monitor.EXPECTED_PAYLOAD_SHA256 in doctor.stdout, doctor.stderr[-300:])
+    launch_plan = subprocess.run([str(launcher), "plan"], cwd=out, env=env, capture_output=True, text=True, check=False)
+    plan_obj = json.loads(launch_plan.stdout) if launch_plan.returncode == 0 else {}
+    check("built launcher plan resolves canonical monitor with no manual arguments",
+          launch_plan.returncode == 0 and plan_obj.get("schema") == "camry-f33-runtime-monitor-plan-v1" and
+          plan_obj.get("payload", {}).get("sha256") == monitor.EXPECTED_PAYLOAD_SHA256, launch_plan.stderr[-300:])
+    check("kit manifest hashes launcher and root runbook",
+          manifest["files"]["f33"]["sha256"] == sha(launcher.read_bytes()) and
+          manifest["files"]["RUNBOOK.md"]["sha256"] == sha((out / "RUNBOOK.md").read_bytes()))
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

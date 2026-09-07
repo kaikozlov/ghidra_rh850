@@ -29,6 +29,7 @@ from tools import build_camry_f33_gate2_root_result_patch as stage3
 
 PROBE = ROOT / "exploit/behavioral_proof/camry_f33_b6_stationary_probe.py"
 RUNBOOK_TEMPLATE = ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md"
+FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_launcher.sh"
 F33_IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_transaction_observer.bin"
 BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
@@ -290,9 +291,16 @@ def build(out: Path, openpilot: Path) -> dict:
     (ram_dir / "camry_f33_runtime_replay_discriminator_payload.bin").write_bytes(replay_payload)
     (ram_dir / "camry_f33_runtime_monitor_payload.bin").write_bytes(monitor_payload)
 
+    shutil.copy2(RUNBOOK_TEMPLATE, out / "RUNBOOK.md")
+    launcher = out / "f33"
+    shutil.copy2(FIELD_LAUNCHER, launcher)
+    launcher.chmod(0o755)
+
     files = {
         dst.name: {"sha256": sha256(dst)},
         "FIRMWARE_PATCH.md": {"sha256": sha256(out / "FIRMWARE_PATCH.md")},
+        "RUNBOOK.md": {"sha256": sha256(out / "RUNBOOK.md")},
+        "f33": {"sha256": sha256(launcher)},
     }
     files.update(runtime_files)
     for path in sorted(p for p in ram_dir.rglob("*") if p.is_file()):
@@ -301,7 +309,7 @@ def build(out: Path, openpilot: Path) -> dict:
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
 
     manifest = {
-        "schema": "camry-f33-car-kit-v6",
+        "schema": "camry-f33-car-kit-v7",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
@@ -422,7 +430,6 @@ def build(out: Path, openpilot: Path) -> dict:
     }
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
-    shutil.copy2(RUNBOOK_TEMPLATE, out / "RUNBOOK.md")
     return manifest
 
 
