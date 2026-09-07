@@ -1145,8 +1145,8 @@ bounded execution path is independent of Toyota's unresolved stock FRC pipeline:
    VAR-139 validates left-positive/right-negative torque on 45/45 post-fix lane-change
    starts and selects the stateless 0.6 N.m threshold against Toyota's native driver-
    steering detector. The richer `0x351/0x394` permanent/recoverable fault policy remains
-   separate; only the exact-F33 immediate `STEERING_FAULT_INHIBIT_STATUS` is currently
-   mapped to `steerFaultTemporary`.
+   separate. `STEERING_FAULT_INHIBIT_STATUS` stays decoded as a raw selected fault/inhibit
+   aggregate but is not promoted to temporary/permanent policy without asserted/recovery evidence.
 7. **Only after receiver acceptance, validate the remaining safety transitions and tune.**
    transitions and tune.** Prove slew/rate limits, inactive release, source coexistence or
    suppression, inhibit, fault, recovery, and driver override before another on-road B6 test.

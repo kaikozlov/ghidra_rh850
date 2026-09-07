@@ -2918,10 +2918,10 @@ negative), and the native `0x030` torque -> `0x371 B20[4]` Toyota driver-detecti
 supports the selected stateless **0.6 N.m** openpilot threshold. This does not assert that
 Toyota itself uses a single 0.6 N.m comparator; its observed detector is hysteretic.
 
-Fault policy remains deliberately narrower than the full `0x351/0x394` status family.
-Exact-F33 `0x030 STEERING_FAULT_INHIBIT_STATUS` is now mapped to ordinary
-`steerFaultTemporary`, while no permanent/recoverable classification is invented for the
-richer status projections without same-car asserted/recovery evidence.
+Fault policy remains deliberately neutral across the full `0x030/0x351/0x394` status family.
+Exact-F33 `0x030 STEERING_FAULT_INHIBIT_STATUS` is retained as a raw selected steering
+fault/inhibit aggregate, but neither it nor the richer status projections are mapped to
+`steerFaultTemporary`/`steerFaultPermanent` without same-car asserted/recovery evidence.
 
 Cruise engagement follows normal Toyota `pcmCruise` semantics using the recovered
 Camry operating state. Physical MAIN/RES+/SET-/CANCEL are exposed as standard
