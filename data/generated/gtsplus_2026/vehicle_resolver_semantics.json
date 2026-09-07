@@ -1,0 +1,258 @@
+{
+  "binaries": {
+    "CommandCommon.dll": {
+      "path": "installer-recovered/bin/CommandCommon.dll",
+      "sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+      "size": 1280016
+    },
+    "DiagAdaptation.dll": {
+      "path": "installer-recovered/bin/DiagAdaptation.dll",
+      "sha256": "eb4b5ffd08bfd1e18b7c5aa5b3679893fb6d3efc2c9bcd655c5e40038fe8531a",
+      "size": 793104
+    },
+    "GetMntEcuLstNoCf_DT.dll": {
+      "path": "bin/GetMntEcuLstNoCf_DT.dll",
+      "sha256": "711bd8965c76081df2a0a7b5a2a4abf1c3f4c94e7cb10b60266c488e8f5cdb10",
+      "size": 116240
+    },
+    "GetSupportP5_DT.dll": {
+      "path": "bin/GetSupportP5_DT.dll",
+      "sha256": "dca12e0c7c743f7b99c34becb7b25dba31d1a85addeebaf5820a2222de9bebfc",
+      "size": 25616
+    },
+    "KgpDataCtrl.dll": {
+      "path": "bin/KgpDataCtrl.dll",
+      "sha256": "19e709e12e53f485a84ccfbf6b226922b88502206c34b767db543c7f3df101f8",
+      "size": 1824784
+    },
+    "SelectCarTypVn10_DT.dll": {
+      "path": "bin/SelectCarTypVn10_DT.dll",
+      "sha256": "d5a0a4095c12e9682c0443d8038e64780a0038ad8fe67b667e9fc46b6975d68e",
+      "size": 83984
+    }
+  },
+  "boundary": "This recovers Toyota's current host-side resolver. DDB membership is candidate metadata; GetMountEcuList and GetSupportP5 are the live/cached filters. It does not imply that every listed operation is safe to execute or that mutation authorization can be skipped.",
+  "functions": {
+    "p5_support": {
+      "AnalyzeFrameData": "0x10063660",
+      "CheckSupportDid": "0x10070DB0",
+      "CheckSupportPid": "0x10072180",
+      "CheckSupportRid": "0x10072F80",
+      "CreateEnableDataIdList": "0x10063890",
+      "CreateEnableRIdList": "0x10066160",
+      "GetSupportP5.Execute": "0x10001630"
+    },
+    "vehicle_decision": {
+      "DecisionKey": "0x100D4AF0",
+      "DecisionKeyEU": "0x100D6130",
+      "DecisionKeyNew": "0x100D54D0",
+      "DecisionKeyNewEU": "0x100D6B90"
+    },
+    "vin_vehicle_decision": {
+      "DecisionKey": "0x100D91D0"
+    }
+  },
+  "mounted_ecu": {
+    "connectivity": "CEcuConnectCheck::CommConnectionNoBuffer / command connection callbacks",
+    "inputs": [
+      "CDbInstallingEcuListResRecords",
+      "CDbEcuCategoryResRecords"
+    ],
+    "output": "CCmdEcuInfo list",
+    "plugin": "GetMntEcuLstNoCf_DT.dll",
+    "source_name": "GetMountEcuListNoCnfm.cpp"
+  },
+  "p5_support": {
+    "did_root": {
+      "group_bitmap": "MSB-first; set bit n means xx01+n; final bit for next xx00 is skipped",
+      "group_request": "replace request DID with supported xx00 group",
+      "positive_sid": "0x62",
+      "request": "220101",
+      "root_bitmap": "MSB-first; set bit n means group (n << 8)",
+      "selector": "0xC8"
+    },
+    "options": {
+      "1": "PID",
+      "2": "DID",
+      "3": "RID"
+    },
+    "plugin": "GetSupportP5_DT.dll",
+    "routine_root": {
+      "positive_sid": "0x71",
+      "request": "31011001",
+      "selector": "0xCC"
+    }
+  },
+  "pipeline": [
+    {
+      "api": "CDAExecSelectVehicle -> CSelectCarTypeVin10",
+      "semantics": "live communication/protocol identity plus VIN and user/option selections are resolved through CDbVehicleDecisionTable and CDbVinVehicleDecisionTable; results include vehicleId, decisionVin, parentPhaseType, carInfoList and optionInfoList",
+      "stage": "vehicle-resolution"
+    },
+    {
+      "api": "CDAExecGetMountEcuList -> GetMountEcuListNoCnfm",
+      "semantics": "selected CDbInstallingEcuListTable candidates are passed through CEcuConnectCheck/CommConnectionNoBuffer and returned as CCmdEcuInfo mounted ECUs",
+      "stage": "mounted-ecu-resolution"
+    },
+    {
+      "api": "GetSupportP5_DT",
+      "semantics": "optionId 1/2/3 dispatches to CCommCachePlusP5::CheckSupportPid/Did/Rid; support is live/cached communication state, not DDB presence alone",
+      "stage": "feature-support-resolution"
+    }
+  ],
+  "regions": {
+    "EU": {
+      "camry_hv_witness": {
+        "install_set_ids": [],
+        "vehicle_decision_row_count": 0,
+        "vehicle_name": null,
+        "vehicle_type": 12704,
+        "vin_decision_row_count": 0,
+        "vin_rows": []
+      },
+      "install_set_count": 17656,
+      "master": {
+        "path": "EU/DB/Gen/Toyota.ddb",
+        "sha256": "8d5e35dc4ddc0e4b1dc73306093af38fce239dfcb16fdcc0bd00f717be23f980",
+        "size": 13318791
+      },
+      "strings": {
+        "path": "EU/DB/Gen/M_English.ddb",
+        "sha256": "d0289b9092762448dde7de72b1735dfd59dca6680b3b3ac24d560384ccd4a38e",
+        "size": 4254372
+      },
+      "tables": {
+        "vehicle_decision": {
+          "db_class_id": "0x129",
+          "ddb_type": 41,
+          "record_count": 938,
+          "record_size": 52
+        },
+        "vin_vehicle_decision": {
+          "db_class_id": "0x13B",
+          "ddb_type": 59,
+          "record_count": 4621,
+          "record_size": 32
+        }
+      },
+      "vehicle_name_count": 6065
+    },
+    "JP": {
+      "camry_hv_witness": {
+        "install_set_ids": [],
+        "vehicle_decision_row_count": 0,
+        "vehicle_name": null,
+        "vehicle_type": 12704,
+        "vin_decision_row_count": 0,
+        "vin_rows": []
+      },
+      "install_set_count": 5583,
+      "master": {
+        "path": "JP/DB/Gen/Toyota.ddb",
+        "sha256": "6a3b9ff870278a4aeef8275f7fd232bc212aa81f14fe83aefb54f1bb00e301fe",
+        "size": 15294731
+      },
+      "strings": {
+        "path": "JP/DB/Gen/M_English.ddb",
+        "sha256": "b4a594b757b2fccf800b3d6e6d5b14d9e4892353bc553a5d339793df9b193201",
+        "size": 4254372
+      },
+      "tables": {
+        "vehicle_decision": {
+          "db_class_id": "0x129",
+          "ddb_type": 41,
+          "record_count": 653,
+          "record_size": 52
+        },
+        "vin_vehicle_decision": {
+          "db_class_id": "0x13B",
+          "ddb_type": 59,
+          "record_count": 414,
+          "record_size": 32
+        }
+      },
+      "vehicle_name_count": 1877
+    },
+    "NA": {
+      "camry_hv_witness": {
+        "install_set_ids": [
+          8119,
+          8120,
+          8121,
+          27706
+        ],
+        "vehicle_decision_row_count": 1,
+        "vehicle_name": "Camry HV",
+        "vehicle_type": 12704,
+        "vin_decision_row_count": 2,
+        "vin_rows": [
+          "6f0500000100050027005c000000a031740112000000004100004b0053000000",
+          "6f0500000100050027005c000000a031740112000000004200004b0053000000"
+        ]
+      },
+      "install_set_count": 8372,
+      "master": {
+        "path": "NA/DB/Gen/Toyota.ddb",
+        "sha256": "f11e820968ac383a8fc5105b65322f0b9c3673df2c8dac46c9847e3d691b39b1",
+        "size": 18967903
+      },
+      "strings": {
+        "path": "NA/DB/Gen/M_English.ddb",
+        "sha256": "458a7039851fc66dc2385fff2efa910337218b8b23985b3c1afc0db7bc5f8014",
+        "size": 4254372
+      },
+      "tables": {
+        "vehicle_decision": {
+          "db_class_id": "0x129",
+          "ddb_type": 41,
+          "record_count": 1869,
+          "record_size": 52
+        },
+        "vin_vehicle_decision": {
+          "db_class_id": "0x13B",
+          "ddb_type": 59,
+          "record_count": 2402,
+          "record_size": 32
+        }
+      },
+      "vehicle_name_count": 2863
+    }
+  },
+  "release": "2026.03.002.02",
+  "schema": "gtsplus-current-vehicle-resolver-v1",
+  "vehicle_decision": {
+    "base_rule": {
+      "dont_care_bits": "bits 0..9 bypass ten decision criteria",
+      "eu_behavior": "EU variants return a specificity score; FindDbItem retains only highest-score matches",
+      "flags_offset": "0x24",
+      "scalar_operators": {
+        "1": "equal",
+        "2": "not-equal",
+        "3": "record<=key",
+        "4": "record>=key"
+      }
+    },
+    "db_class_id": "0x129",
+    "ddb_type": 41,
+    "mode_dispatch": {
+      "0": "DecisionKey",
+      "1": "DecisionKeyNew",
+      "2": "DecisionKeyEU",
+      "3": "DecisionKeyNewEU"
+    },
+    "record_size": 52
+  },
+  "vin_vehicle_decision": {
+    "db_class_id": "0x13B",
+    "ddb_type": 59,
+    "flags": "record +0x00 dword; bits 0..10 wildcard VIN-prefix positions 0..10",
+    "key": {
+      "category_id": "u16; record +0x10",
+      "phase_type": "u8; record +0x12",
+      "vin_prefix": "VIN[0:11]; record +0x13..+0x1D, with per-byte wildcard bits"
+    },
+    "record_size": 32,
+    "select_car_query": "CDiagToolDb::GetDbRecord class 0x13B",
+    "vehicle_type": "record +0x0E u16"
+  }
+}
