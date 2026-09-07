@@ -332,9 +332,9 @@ witnesses are Hybrid Active Test `0x0001` (`0x2F`, DID `0x2801`, start prefix
 `0xCA`) and FRC `0xA429` **LTA Steering Vibration** (RID `0x1588`, fixed requests
 `31011588` / `31021588` / `31031588`).
 
-Registry schema **v5** adds Toyota's recovered current vehicle/mounted-ECU/capability
-resolver to the v4 execution-model surface. All earlier catalog sections remain
-preserved in shape:
+Registry schema **v6** adds Toyota's recovered current vehicle/mounted-ECU/capability
+resolver and Toyota-native category transport routes to the v4 execution-model surface.
+All earlier catalog sections remain preserved in shape:
 
 - `profile.vehicle_resolution` — clean structured Toyota resolver metadata from
   `CSelectCarTypeVin10` / `GetMountEcuListNoCnfm` / `GetSupportP5_DT`. The current
@@ -343,10 +343,15 @@ preserved in shape:
   candidate preserves its install-set/category identity plus the exact mount-connect
   inputs: connection frame `0`, CommSet `9`, and phase type `0x12` or `0x22`.
   Connection frame 0 has no send/mask/check payload, so Toyota's mount stage is a
-  transport/category connectivity check, not an F181 identity probe. A
-  `direct_address` is populated only for categories with an independently validated
-  direct Panda endpoint; `null` does not mean absent, and categories sharing a
-  gateway-routed endpoint are not collapsed into one ECU. The same section carries
+  transport/category connectivity check, not an F181 identity probe. Each candidate
+  also carries `transport_route` resolved **only** through Toyota class `0x10D`
+  `CDbProtInfoTable`, using the same `(category, phase)` key consumed by
+  `CCommFrameCtrl::GetEcuAddr`: u16 `+0x08` is the request address and byte `+0x0A`
+  is the current P5 logical address extension. Thus all 34 Camry candidates have a
+  Toyota-derived route; no maintained-profile endpoint allowlist participates. This
+  includes direct routes absent from the old 17-address sweep (`0x7C0`, `0x780`) and
+  multiple logical categories sharing `0x750` with distinct extensions such as
+  `0x2A`, `0x29`, `0x7B`, and `0x96`. The same section carries
   the P5 PID/DID/RID support resolver contract (`optionId` 1/2/3), including DID
   selector `0xC8`, root request `22 01 01`, and the two-level MSB-first bitmap.
 - `profile.session_control` — the runtime current-P5 session contract from TMS-077:

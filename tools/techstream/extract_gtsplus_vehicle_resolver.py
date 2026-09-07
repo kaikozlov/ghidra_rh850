@@ -44,6 +44,8 @@ VIN_VEHICLE_DECISION_CLASS = 0x13B
 VEHICLE_DECISION_TYPE = 41
 VIN_VEHICLE_DECISION_TYPE = 59
 INSTALLING_ECU_LIST_TYPE = 44
+PROTOCOL_INFO_TYPE = 13
+PROTOCOL_INFO_CLASS = 0x10D
 COMM_FRAME_TYPE = 17
 COMM_SET_TYPE = 29
 COMM_FRAME_CLASS = 0x111
@@ -179,6 +181,38 @@ def _install_rows(master: Any, install_set_ids: set[int]) -> list[dict[str, int]
     return sorted(out, key=lambda row: (row["install_set_id"], row["category_id"]))
 
 
+def _protocol_route(master: Any, category_id: int, phase_type: int) -> dict[str, Any]:
+    """Current CDbProtInfoTable route selected by CCommFrameCtrl::GetEcuAddr(category, phase).
+
+    GetEcuAddr queries class 0x10D with category and phase, then returns the u16
+    record field at +0x08.  The current P5 frame builder independently consumes
+    byte +0x0A from that selected row when constructing the category transport;
+    for phase 0x22 Camry rows it is the logical-address extension that separates
+    multiple categories sharing request CAN ID 0x750.
+    """
+    matches = [
+        raw for raw in records(master.sections[PROTOCOL_INFO_TYPE])
+        if u16(raw, 0x00) == category_id and raw[0x18] == phase_type
+    ]
+    if len(matches) != 1:
+        raise ValueError(
+            f"CDbProtInfo category {category_id} phase 0x{phase_type:02X} resolved {len(matches)} rows"
+        )
+    raw = matches[0]
+    if len(raw) != 28:
+        raise ValueError(f"CDbProtInfo row size drift: {len(raw)}")
+    return {
+        "protocol_info_id": u16(raw, 0x02),
+        "functional_address": u16(raw, 0x06),
+        "request_address": u16(raw, 0x08),
+        "address_extension": raw[0x0A],
+        "request_mask": u16(raw, 0x0E),
+        "response_mask": u16(raw, 0x10),
+        "legislated_response_address": u16(raw, 0x14),
+        "phase_type": raw[0x18],
+    }
+
+
 def _comm_frame_witness(master: Any, frame_id: int) -> dict[str, Any]:
     matches = [raw for raw in records(master.sections[COMM_FRAME_TYPE]) if u16(raw, 0x00) == frame_id]
     if len(matches) != 1:
@@ -244,6 +278,7 @@ def master_region(parser: DDBParser, root: Path, region: str) -> dict[str, Any]:
             "generation": categories[row["category_id"]].generation,
             "database": categories[row["category_id"]].database_name,
             "name": strings.get_string(categories[row["category_id"]].ecu_name_string_index) or "",
+            "transport_route": _protocol_route(master, row["category_id"], row["connection_phase_type"]),
         }
         for row in camry_install_rows
     ]
@@ -267,6 +302,12 @@ def master_region(parser: DDBParser, root: Path, region: str) -> dict[str, Any]:
                 "db_class_id": f"0x{VIN_VEHICLE_DECISION_CLASS:03X}",
                 "record_size": 32,
                 "record_count": len(t59),
+            },
+            "protocol_info": {
+                "ddb_type": PROTOCOL_INFO_TYPE,
+                "db_class_id": f"0x{PROTOCOL_INFO_CLASS:03X}",
+                "record_size": 28,
+                "record_count": master.sections[PROTOCOL_INFO_TYPE].header.record_count,
             },
         },
         "vehicle_name_count": len(vehicle_names),
@@ -306,7 +347,8 @@ def build() -> dict[str, Any]:
         select = root / "bin/SelectCarTypVn10_DT.dll"
         mount = root / "bin/GetMntEcuLstNoCf_DT.dll"
         support = root / "bin/GetSupportP5_DT.dll"
-        for path in (diag, command, kgp, select, mount, support):
+        comm_frame_ctrl = root / "bin/KGP_CommFrameCtrl.dll"
+        for path in (diag, command, kgp, select, mount, support, comm_frame_ctrl):
             if not path.is_file():
                 raise FileNotFoundError(path)
 
@@ -322,6 +364,9 @@ def build() -> dict[str, Any]:
             },
             "mounted_ecu": {
                 "CommConnectionNoBuffer": export_addr(command, "CommConnectionNoBuffer@CEcuConnectCheck"),
+                "GetEcuAddr": export_addr(comm_frame_ctrl, "GetEcuAddr@CCommFrameCtrl"),
+                "ProtInfo.FindDbItem1": export_addr(kgp, "FindDbItem1@CDbProtInfoTable"),
+                "ProtInfo.FindDbItem2": export_addr(kgp, "FindDbItem2@CDbProtInfoTable"),
             },
             "p5_support": {
                 "GetSupportP5.Execute": export_addr(support, "Execute"),
@@ -342,7 +387,12 @@ def build() -> dict[str, Any]:
                 "DecisionKeyNewEU": 0x100D6B90,
             },
             "vin_vehicle_decision": {"DecisionKey": 0x100D91D0},
-            "mounted_ecu": {"CommConnectionNoBuffer": 0x100829C0},
+            "mounted_ecu": {
+                "CommConnectionNoBuffer": 0x100829C0,
+                "GetEcuAddr": 0x10035420,
+                "ProtInfo.FindDbItem1": 0x100C2590,
+                "ProtInfo.FindDbItem2": 0x100C2690,
+            },
             "p5_support": {
                 "GetSupportP5.Execute": 0x10001630,
                 "CheckSupportPid": 0x10072180,
@@ -363,6 +413,7 @@ def build() -> dict[str, Any]:
             "SelectCarTypVn10_DT.dll": source(select, root),
             "GetMntEcuLstNoCf_DT.dll": source(mount, root),
             "GetSupportP5_DT.dll": source(support, root),
+            "KGP_CommFrameCtrl.dll": source(comm_frame_ctrl, root),
         }
 
     regions = {region: master_region(parser, root, region) for region in REGIONS}
@@ -446,6 +497,17 @@ def build() -> dict[str, Any]:
                 "connection_comm_set_id": "u16 +0x0A",
                 "connection_phase_type": "u8 +0x13; passed as CommConnectionNoBuffer arg_10h",
             },
+            "transport_route": {
+                "api": "CCommFrameCtrl::GetEcuAddr(category, phase)",
+                "protocol_info_ddb_type": PROTOCOL_INFO_TYPE,
+                "protocol_info_db_class_id": f"0x{PROTOCOL_INFO_CLASS:03X}",
+                "key": "CDbProtInfoTable +0x00 category_id and +0x18 phase_type",
+                "request_address": "u16 +0x08; returned directly by GetEcuAddr",
+                "address_extension": (
+                    "u8 +0x0A; consumed by the current P5 frame builder. Current phase-0x22 Camry rows use it "
+                    "to distinguish logical categories that share request CAN ID 0x750"
+                ),
+            },
             "connection_algorithm": {
                 "api": "CEcuConnectCheck::CommConnectionNoBuffer",
                 "comm_frame_db_class_id": f"0x{COMM_FRAME_CLASS:03X}",
@@ -464,8 +526,9 @@ def build() -> dict[str, Any]:
                 "connection_profiles": regions["NA"]["camry_hv_witness"]["connection_profiles"],
                 "meaning": (
                     "all current Camry-HV install rows use connection frame 0 / CommSet 9 and phase-type byte "
-                    "0x12 or 0x22; frame 0 has empty send/mask/check variables, so this is category-scoped "
-                    "transport-connectivity resolution, not an identity-DID probe"
+                    "0x12 or 0x22; every one of the 34 candidates independently resolves through Toyota's class-0x10D "
+                    "(category, phase) route table. Frame 0 has empty send/mask/check variables, so mount resolution "
+                    "is category-scoped transport setup/connectivity, not an identity-DID probe"
                 ),
             },
             "output": "CCmdEcuInfo list",

@@ -34,7 +34,7 @@ def main() -> int:
 
     profile = actual["profile"]
     check("schema and exact Camry profile are pinned",
-          actual["schema"] == "toyota-diagnostics-registry-v5"
+          actual["schema"] == "toyota-diagnostics-registry-v6"
           and profile["profile"] == "camry-2026-f33"
           and profile["panda_bus"] == 0)
     decoder = actual["decoders"]["p5-linear-msb0-v1"]
@@ -73,7 +73,7 @@ def main() -> int:
 
     resolver = profile["vehicle_resolution"]
     check("Toyota vehicle resolver selects current Camry-HV vehicle type",
-          resolver["generation"] == "current-gtsplus-vehicle-resolver-v1"
+          resolver["generation"] == "current-gtsplus-vehicle-resolver-v2"
           and resolver["vehicle_type"] == 12704
           and resolver["vehicle_name"] == "Camry HV"
           and resolver["install_set_ids"] == [8119, 8120, 8121, 27706])
@@ -96,8 +96,20 @@ def main() -> int:
               "receive_check_variable_id": 0, "empty": True,
           }
           and mount["comm_set_9"]["send_parameter"] == 1000
-          and mount["comm_set_9"]["receive_timeout"] == 1020
-          and "null does not mean absent" in mount["direct_address_boundary"])
+          and mount["comm_set_9"]["receive_timeout"] == 1020)
+    routes = {row["category_id"]: row["transport_route"] for row in mount["candidates"]}
+    check("registry mount routes are Toyota class-0x10D output, not maintained-profile joins",
+          all(isinstance(row.get("transport_route"), dict) for row in mount["candidates"])
+          and all("direct_address" not in row for row in mount["candidates"])
+          and "Maintained-profile request addresses are not consulted" in mount["route_boundary"]
+          and mount["transport_route"]["protocol_info_db_class_id"] == "0x10D")
+    check("Toyota route contains direct endpoints absent from the old 17-address sweep",
+          routes[409]["request_address"] == 0x7C0 and routes[444]["request_address"] == 0x780)
+    check("Toyota shared 0x750 routes preserve logical address extensions",
+          (routes[452]["request_address"], routes[452]["address_extension"]) == (0x750, 0x2A)
+          and (routes[466]["request_address"], routes[466]["address_extension"]) == (0x750, 0x29)
+          and (routes[470]["request_address"], routes[470]["address_extension"]) == (0x750, 0x7B)
+          and (routes[492]["request_address"], routes[492]["address_extension"]) == (0x750, 0x96))
     check("Toyota P5 live support resolver is carried independently of DDB presence",
           resolver["p5_support"]["options"] == {"1": "PID", "2": "DID", "3": "RID"}
           and resolver["p5_support"]["did_root"]["request"] == "220101"
@@ -236,9 +248,9 @@ def main() -> int:
           and "no execution authorization" in actual["boundary"]
           and "no execution authorization" in actual["utilities"]["boundary"])
 
-    # ---- schema v5: Toyota resolver + execution model, function hierarchy, utilities ----
+    # ---- schema v6: Toyota resolver/routes + execution model, function hierarchy, utilities ----
     hv = actual["catalogs"]["397"]
-    check("legacy catalog surface is preserved behind the v5 resolver additions",
+    check("legacy catalog surface is preserved behind the v6 resolver additions",
           all(key in hv for key in ("category", "dids", "dtcs", "active_tests"))
           and hv_test["execution"] == "plan_only"
           and hv_test["start_prefix"] == "2f280103")

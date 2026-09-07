@@ -280553,7 +280553,7 @@
     "vehicle": "2026 Toyota Camry Hybrid",
     "vehicle_resolution": {
       "boundary": "This recovers Toyota's current host-side resolver. DDB membership is candidate metadata; GetMountEcuList and GetSupportP5 are the live/cached filters. It does not imply that every listed operation is safe to execute or that mutation authorization can be skipped.",
-      "generation": "current-gtsplus-vehicle-resolver-v1",
+      "generation": "current-gtsplus-vehicle-resolver-v2",
       "install_set_ids": [
         8119,
         8120,
@@ -280570,10 +280570,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 18,
             "database": "Engine_P5.ddb",
-            "direct_address": 1792,
             "generation": 20,
             "install_set_id": 8119,
-            "name": "Engine"
+            "name": "Engine",
+            "transport_route": {
+              "address_extension": 0,
+              "functional_address": 2015,
+              "legislated_response_address": 2016,
+              "phase_type": 18,
+              "protocol_info_id": 131,
+              "request_address": 1792,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 395,
@@ -280581,10 +280590,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 18,
             "database": "MG_P5.ddb",
-            "direct_address": 1828,
             "generation": 20,
             "install_set_id": 8119,
-            "name": "Motor Generator"
+            "name": "Motor Generator",
+            "transport_route": {
+              "address_extension": 0,
+              "functional_address": 2015,
+              "legislated_response_address": 2022,
+              "phase_type": 18,
+              "protocol_info_id": 131,
+              "request_address": 1828,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 397,
@@ -280592,10 +280610,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 18,
             "database": "HV_P5.ddb",
-            "direct_address": 2002,
             "generation": 20,
             "install_set_id": 8119,
-            "name": "Hybrid Control"
+            "name": "Hybrid Control",
+            "transport_route": {
+              "address_extension": 0,
+              "functional_address": 2015,
+              "legislated_response_address": 2018,
+              "phase_type": 18,
+              "protocol_info_id": 131,
+              "request_address": 2002,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 398,
@@ -280603,10 +280630,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 18,
             "database": "HV_Battery_P5.ddb",
-            "direct_address": 1863,
             "generation": 20,
             "install_set_id": 8119,
-            "name": "HV Battery"
+            "name": "HV Battery",
+            "transport_route": {
+              "address_extension": 0,
+              "functional_address": 2015,
+              "legislated_response_address": 2019,
+              "phase_type": 18,
+              "protocol_info_id": 131,
+              "request_address": 1863,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 405,
@@ -280614,10 +280650,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 18,
             "database": "EMPS_P5.ddb",
-            "direct_address": 1953,
             "generation": 20,
             "install_set_id": 8120,
-            "name": "EMPS"
+            "name": "EMPS",
+            "transport_route": {
+              "address_extension": 0,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 18,
+              "protocol_info_id": 131,
+              "request_address": 1953,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 435,
@@ -280625,10 +280670,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 18,
             "database": "ABS_P5.ddb",
-            "direct_address": 1968,
             "generation": 20,
             "install_set_id": 8120,
-            "name": "Brake/EPB"
+            "name": "Brake/EPB",
+            "transport_route": {
+              "address_extension": 0,
+              "functional_address": 2015,
+              "legislated_response_address": 2021,
+              "phase_type": 18,
+              "protocol_info_id": 131,
+              "request_address": 1968,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 445,
@@ -280636,10 +280690,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 18,
             "database": "StrAngleSnsr_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8120,
-            "name": "Steering Angle Sensor"
+            "name": "Steering Angle Sensor",
+            "transport_route": {
+              "address_extension": 0,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 18,
+              "protocol_info_id": 131,
+              "request_address": 1971,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 452,
@@ -280647,10 +280710,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "TPM_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8120,
-            "name": "Tire Pressure Monitor"
+            "name": "Tire Pressure Monitor",
+            "transport_route": {
+              "address_extension": 42,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 466,
@@ -280658,10 +280730,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "Brk_Bst_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8120,
-            "name": "Brake Booster"
+            "name": "Brake Booster",
+            "transport_route": {
+              "address_extension": 41,
+              "functional_address": 2015,
+              "legislated_response_address": 2021,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 470,
@@ -280669,10 +280750,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "CMCCM_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8120,
-            "name": "Circumference Monitoring Camera Control Module"
+            "name": "Circumference Monitoring Camera Control Module",
+            "transport_route": {
+              "address_extension": 123,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 131,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 492,
@@ -280680,10 +280770,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "DMC_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8120,
-            "name": "Driver Monitor Camera Control"
+            "name": "Driver Monitor Camera Control",
+            "transport_route": {
+              "address_extension": 150,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 498,
@@ -280691,10 +280790,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 18,
             "database": "FRC_P5.ddb",
-            "direct_address": 1938,
             "generation": 20,
             "install_set_id": 8120,
-            "name": "Front Recognition Camera 2"
+            "name": "Front Recognition Camera 2",
+            "transport_route": {
+              "address_extension": 0,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 18,
+              "protocol_info_id": 131,
+              "request_address": 1938,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 5005,
@@ -280702,10 +280810,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 18,
             "database": "RC_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8120,
-            "name": "Rear Camera"
+            "name": "Rear Camera",
+            "transport_route": {
+              "address_extension": 0,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 18,
+              "protocol_info_id": 131,
+              "request_address": 1954,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 148,
@@ -280713,10 +280830,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "PWS_P4.ddb",
-            "direct_address": null,
             "generation": 4,
             "install_set_id": 8121,
-            "name": "Master Switch"
+            "name": "Master Switch",
+            "transport_route": {
+              "address_extension": 236,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 124,
+              "request_address": 1872,
+              "request_mask": 63,
+              "response_mask": 63
+            }
           },
           {
             "category_id": 409,
@@ -280724,10 +280850,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 18,
             "database": "Meter_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Combination Meter"
+            "name": "Combination Meter",
+            "transport_route": {
+              "address_extension": 0,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 18,
+              "protocol_info_id": 131,
+              "request_address": 1984,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 429,
@@ -280735,10 +280870,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "Fr_RadSen_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Front Radar Sensor"
+            "name": "Front Radar Sensor",
+            "transport_route": {
+              "address_extension": 15,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 438,
@@ -280746,10 +280890,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "IPA_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Intuitive P/A"
+            "name": "Intuitive P/A",
+            "transport_route": {
+              "address_extension": 103,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 440,
@@ -280757,10 +280910,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "SMART_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Entry&Start"
+            "name": "Entry&Start",
+            "transport_route": {
+              "address_extension": 181,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 443,
@@ -280768,10 +280930,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "CentralGW_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Central Gateway"
+            "name": "Central Gateway",
+            "transport_route": {
+              "address_extension": 95,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 444,
@@ -280779,10 +280950,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 18,
             "database": "A_B_CAN_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "SRS Airbag"
+            "name": "SRS Airbag",
+            "transport_route": {
+              "address_extension": 0,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 18,
+              "protocol_info_id": 131,
+              "request_address": 1920,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 449,
@@ -280790,10 +280970,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "JBUnity_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Main Body"
+            "name": "Main Body",
+            "transport_route": {
+              "address_extension": 64,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 450,
@@ -280801,10 +280990,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 18,
             "database": "A_C_P5.ddb",
-            "direct_address": 1988,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Air Conditioner"
+            "name": "Air Conditioner",
+            "transport_route": {
+              "address_extension": 0,
+              "functional_address": 2015,
+              "legislated_response_address": 2020,
+              "phase_type": 18,
+              "protocol_info_id": 131,
+              "request_address": 1988,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 454,
@@ -280812,10 +281010,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "PSC_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Power Source Control"
+            "name": "Power Source Control",
+            "transport_route": {
+              "address_extension": 233,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 458,
@@ -280823,10 +281030,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "VPNS_P5_CAN.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Vehicle Proximity Notification System"
+            "name": "Vehicle Proximity Notification System",
+            "transport_route": {
+              "address_extension": 211,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 459,
@@ -280834,10 +281050,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "Telematics_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Telematics"
+            "name": "Telematics",
+            "transport_route": {
+              "address_extension": 199,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 460,
@@ -280845,10 +281070,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "BSMM_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Blind Spot Monitor \"B\""
+            "name": "Blind Spot Monitor \"B\"",
+            "transport_route": {
+              "address_extension": 65,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 461,
@@ -280856,10 +281090,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "BSMS_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Blind Spot Monitor \"A\""
+            "name": "Blind Spot Monitor \"A\"",
+            "transport_route": {
+              "address_extension": 66,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 475,
@@ -280867,10 +281110,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "PowIntegr_4_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Power Distribution Box"
+            "name": "Power Distribution Box",
+            "transport_route": {
+              "address_extension": 77,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 496,
@@ -280878,10 +281130,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 18,
             "database": "NaviSystem_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Navigation System"
+            "name": "Navigation System",
+            "transport_route": {
+              "address_extension": 0,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 18,
+              "protocol_info_id": 131,
+              "request_address": 2000,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 5003,
@@ -280889,10 +281150,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "D_Seat_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Driver Seat"
+            "name": "Driver Seat",
+            "transport_route": {
+              "address_extension": 171,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 5006,
@@ -280900,10 +281170,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "FSR_A_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Front Side Radar \"A\""
+            "name": "Front Side Radar \"A\"",
+            "transport_route": {
+              "address_extension": 129,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 5007,
@@ -280911,10 +281190,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "FSR_B_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Front Side Radar \"B\""
+            "name": "Front Side Radar \"B\"",
+            "transport_route": {
+              "address_extension": 130,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 5015,
@@ -280922,10 +281210,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "MR_FRD_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Mirror R"
+            "name": "Mirror R",
+            "transport_route": {
+              "address_extension": 165,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           },
           {
             "category_id": 5016,
@@ -280933,10 +281230,19 @@
             "connection_frame_id": 0,
             "connection_phase_type": 34,
             "database": "ML_FLD_P5.ddb",
-            "direct_address": null,
             "generation": 20,
             "install_set_id": 8121,
-            "name": "Mirror L"
+            "name": "Mirror L",
+            "transport_route": {
+              "address_extension": 166,
+              "functional_address": 0,
+              "legislated_response_address": 0,
+              "phase_type": 34,
+              "protocol_info_id": 133,
+              "request_address": 1872,
+              "request_mask": 4095,
+              "response_mask": 4095
+            }
           }
         ],
         "comm_set_9": {
@@ -280959,13 +281265,21 @@
             "phase_type": 34
           }
         ],
-        "direct_address_boundary": "direct_address is populated only where the maintained post-repin profile has an independently validated direct Panda endpoint for that Toyota logical category; null does not mean absent. Toyota keeps category identity separate from endpoint identity and multiple logical categories may share a gateway-routed endpoint",
         "frame_0": {
           "empty": true,
           "frame_id": 0,
           "receive_check_variable_id": 0,
           "receive_mask_variable_id": 0,
           "send_variable_id": 0
+        },
+        "route_boundary": "transport_route is resolved exclusively from Toyota CDbProtInfoTable class 0x10D using the same category+phase key as CCommFrameCtrl::GetEcuAddr. Maintained-profile request addresses are not consulted. Shared request ID 0x750 remains category-specific through Toyota's address-extension field",
+        "transport_route": {
+          "address_extension": "u8 +0x0A; consumed by the current P5 frame builder. Current phase-0x22 Camry rows use it to distinguish logical categories that share request CAN ID 0x750",
+          "api": "CCommFrameCtrl::GetEcuAddr(category, phase)",
+          "key": "CDbProtInfoTable +0x00 category_id and +0x18 phase_type",
+          "protocol_info_db_class_id": "0x10D",
+          "protocol_info_ddb_type": 13,
+          "request_address": "u16 +0x08; returned directly by GetEcuAddr"
         }
       },
       "p5_support": {
@@ -281013,7 +281327,7 @@
       }
     }
   },
-  "schema": "toyota-diagnostics-registry-v5",
+  "schema": "toyota-diagnostics-registry-v6",
   "source_identity": {
     "data/generated/camry_2026_dtc_clear.json": {
       "bytes": 4539,
@@ -281024,8 +281338,8 @@
       "sha256": "3a344b6cb2de19edb163e040974955f2d27467dc0a864974b6a5af90659d308f"
     },
     "data/generated/gtsplus_2026/vehicle_resolver_semantics.json": {
-      "bytes": 22871,
-      "sha256": "79a4f5091f327e167650073a2bdde37e81c676b59e648773a082309ca3628a49"
+      "bytes": 36412,
+      "sha256": "79f1a8f4f6908fbdc37ca1937b47808ed784c033a2acdcdad904b289870f60c5"
     },
     "data/generated/techstream_v18/diagnostic_execution_model.json": {
       "bytes": 297242,

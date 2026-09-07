@@ -40,6 +40,30 @@ check("Camry-HV vehicle type/name join", camry["vehicle_type"] == 12704 and camr
 check("Camry VIN decision rows", len(camry["vin_rows"]) == 2)
 check("Camry install resolver candidate count", camry["mount_candidate_count"] == 34)
 check("Camry mount candidates are Toyota install rows", len({row["category_id"] for row in camry["mount_candidates"]}) == 34)
+check("Camry protocol table/class", na["tables"]["protocol_info"] == {
+    "ddb_type": 13, "db_class_id": "0x10D", "record_size": 28, "record_count": 756,
+})
+check("all Camry mount candidates have Toyota transport routes",
+      len(camry["mount_candidates"]) == 34 and all(isinstance(row.get("transport_route"), dict) for row in camry["mount_candidates"]))
+routes = {row["category_id"]: row["transport_route"] for row in camry["mount_candidates"]}
+check("Toyota GetEcuAddr route implementation pinned", artifact["functions"]["mounted_ecu"] == {
+    "CommConnectionNoBuffer": "0x100829C0",
+    "GetEcuAddr": "0x10035420",
+    "ProtInfo.FindDbItem1": "0x100C2590",
+    "ProtInfo.FindDbItem2": "0x100C2690",
+})
+check("direct current-P5 Toyota route witnesses",
+      (routes[372]["request_address"], routes[372]["address_extension"], routes[372]["phase_type"]) == (0x700, 0, 0x12) and
+      (routes[445]["request_address"], routes[445]["address_extension"], routes[445]["phase_type"]) == (0x7B3, 0, 0x12) and
+      (routes[498]["request_address"], routes[498]["address_extension"], routes[498]["phase_type"]) == (0x792, 0, 0x12) and
+      (routes[5005]["request_address"], routes[5005]["address_extension"], routes[5005]["phase_type"]) == (0x7A2, 0, 0x12))
+check("Toyota route exposes endpoints absent from the old local sweep",
+      routes[409]["request_address"] == 0x7C0 and routes[444]["request_address"] == 0x780)
+check("Toyota 0x750 logical-address-extension witnesses",
+      (routes[452]["request_address"], routes[452]["address_extension"]) == (0x750, 0x2A) and
+      (routes[466]["request_address"], routes[466]["address_extension"]) == (0x750, 0x29) and
+      (routes[470]["request_address"], routes[470]["address_extension"]) == (0x750, 0x7B) and
+      (routes[492]["request_address"], routes[492]["address_extension"]) == (0x750, 0x96))
 check("Camry mount connection profiles", camry["connection_profiles"] == [
     {"frame_id": 0, "comm_set_id": 9, "phase_type": 0x12},
     {"frame_id": 0, "comm_set_id": 9, "phase_type": 0x22},
