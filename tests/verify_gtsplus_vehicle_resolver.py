@@ -38,6 +38,24 @@ check("NA table geometry", na["tables"]["vehicle_decision"]["record_count"] == 1
 camry = na["camry_hv_witness"]
 check("Camry-HV vehicle type/name join", camry["vehicle_type"] == 12704 and camry["vehicle_name"] == "Camry HV")
 check("Camry VIN decision rows", len(camry["vin_rows"]) == 2)
+check("Camry install resolver candidate count", camry["mount_candidate_count"] == 34)
+check("Camry mount candidates are Toyota install rows", len({row["category_id"] for row in camry["mount_candidates"]}) == 34)
+check("Camry mount connection profiles", camry["connection_profiles"] == [
+    {"frame_id": 0, "comm_set_id": 9, "phase_type": 0x12},
+    {"frame_id": 0, "comm_set_id": 9, "phase_type": 0x22},
+])
+check("Camry mount frame 0 is empty", camry["connection_frame_witness"] == {
+    "frame_id": 0, "send_variable_id": 0, "receive_mask_variable_id": 0,
+    "receive_check_variable_id": 0, "empty": True,
+})
+check("Camry mount CommSet 9", camry["connection_comm_set_witness"] == {
+    "comm_set_id": 9, "send_parameter": 1000, "receive_timeout": 1020,
+    "retry_count": 0, "exception_handler_id": 0, "exception_handler_flag": 0,
+})
+check("mount connection implementation pinned", artifact["functions"]["mounted_ecu"]["CommConnectionNoBuffer"] == "0x100829C0")
+check("mount connection DB classes pinned", artifact["mounted_ecu"]["connection_algorithm"]["comm_frame_db_class_id"] == "0x111" and artifact["mounted_ecu"]["connection_algorithm"]["ecu_category_db_class_id"] == "0x110")
+check("mount resolver is not an identity DID probe", "not an identity-DID probe" in artifact["mounted_ecu"]["current_na_camry"]["meaning"])
+check("mount phase types preserved", sorted({row["connection_phase_type"] for row in camry["mount_candidates"]}) == [0x12, 0x22])
 
 # The current Camry rows wildcard every VIN[0:11] position except indexes
 # 4/7/9.  They accept A or B at index4, K at index7, and S at index9.

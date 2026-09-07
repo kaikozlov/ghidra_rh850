@@ -43,6 +43,11 @@ VEHICLE_DECISION_CLASS = 0x129
 VIN_VEHICLE_DECISION_CLASS = 0x13B
 VEHICLE_DECISION_TYPE = 41
 VIN_VEHICLE_DECISION_TYPE = 59
+INSTALLING_ECU_LIST_TYPE = 44
+COMM_FRAME_TYPE = 17
+COMM_SET_TYPE = 29
+COMM_FRAME_CLASS = 0x111
+ECU_CATEGORY_CLASS = 0x110
 
 # Current P5 generic DID-support root.  CCmdSupportDataIdList mutates bytes 1:3
 # to each supported xx00 group for the second-level request.
@@ -150,9 +155,58 @@ def _install_sets(master: Any) -> dict[int, list[int]]:
 
 def _set_categories(master: Any) -> dict[int, list[int]]:
     out: dict[int, set[int]] = {}
-    for raw in records(master.sections[44]):
+    for raw in records(master.sections[INSTALLING_ECU_LIST_TYPE]):
         out.setdefault(u16(raw, 0x04), set()).add(u16(raw, 0x06))
     return {key: sorted(value) for key, value in out.items()}
+
+
+def _install_rows(master: Any, install_set_ids: set[int]) -> list[dict[str, int]]:
+    """Consumer-proven GetMountEcuListNoCnfm fields from type-44 install rows."""
+    out = []
+    for raw in records(master.sections[INSTALLING_ECU_LIST_TYPE]):
+        install_set_id = u16(raw, 0x04)
+        if install_set_id not in install_set_ids:
+            continue
+        if len(raw) != 24:
+            raise ValueError(f"install row size drift: {len(raw)}")
+        out.append({
+            "install_set_id": install_set_id,
+            "category_id": u16(raw, 0x06),
+            "connection_frame_id": u16(raw, 0x08),
+            "connection_comm_set_id": u16(raw, 0x0A),
+            "connection_phase_type": raw[0x13],
+        })
+    return sorted(out, key=lambda row: (row["install_set_id"], row["category_id"]))
+
+
+def _comm_frame_witness(master: Any, frame_id: int) -> dict[str, Any]:
+    matches = [raw for raw in records(master.sections[COMM_FRAME_TYPE]) if u16(raw, 0x00) == frame_id]
+    if len(matches) != 1:
+        raise ValueError(f"CommFrame {frame_id} resolved {len(matches)} rows")
+    raw = matches[0]
+    return {
+        "frame_id": frame_id,
+        "send_variable_id": u16(raw, 0x02),
+        "receive_mask_variable_id": u16(raw, 0x04),
+        "receive_check_variable_id": u16(raw, 0x06),
+        "empty": raw == bytes(len(raw)),
+    }
+
+
+def _comm_set_witness(parser: DDBParser, master: Any, comm_set_id: int) -> dict[str, Any]:
+    matches = [row for row in parser.extract_master_comm_sets(master.sections[COMM_SET_TYPE])
+               if row.comm_set_id == comm_set_id]
+    if len(matches) != 1:
+        raise ValueError(f"CommSet {comm_set_id} resolved {len(matches)} rows")
+    row = matches[0]
+    return {
+        "comm_set_id": row.comm_set_id,
+        "send_parameter": row.send_parameter,
+        "receive_timeout": row.receive_timeout,
+        "retry_count": row.retry_count,
+        "exception_handler_id": row.exception_handler_id,
+        "exception_handler_flag": row.exception_handler_flag,
+    }
 
 
 def master_region(parser: DDBParser, root: Path, region: str) -> dict[str, Any]:
@@ -178,6 +232,25 @@ def master_region(parser: DDBParser, root: Path, region: str) -> dict[str, Any]:
     camry_type = 12704
     camry_vin_rows = [raw for raw in t59 if u16(raw, 0x0E) == camry_type]
     camry_type41_rows = [raw for raw in t41 if u16(raw, 0x32) == camry_type]
+    camry_install_sets = install_sets.get(camry_type, [])
+    camry_install_rows = _install_rows(master, set(camry_install_sets))
+    categories = {
+        row.category_id: row
+        for row in parser.extract_master_ecu_categories(master.sections[16])
+    }
+    camry_mount_candidates = [
+        {
+            **row,
+            "generation": categories[row["category_id"]].generation,
+            "database": categories[row["category_id"]].database_name,
+            "name": strings.get_string(categories[row["category_id"]].ecu_name_string_index) or "",
+        }
+        for row in camry_install_rows
+    ]
+    connection_profiles = sorted({
+        (row["connection_frame_id"], row["connection_comm_set_id"], row["connection_phase_type"])
+        for row in camry_install_rows
+    })
 
     return {
         "master": source(master_path, root),
@@ -201,10 +274,18 @@ def master_region(parser: DDBParser, root: Path, region: str) -> dict[str, Any]:
         "camry_hv_witness": {
             "vehicle_type": camry_type,
             "vehicle_name": vehicle_names.get(camry_type),
-            "install_set_ids": install_sets.get(camry_type, []),
+            "install_set_ids": camry_install_sets,
             "vin_decision_row_count": len(camry_vin_rows),
             "vehicle_decision_row_count": len(camry_type41_rows),
             "vin_rows": [raw.hex() for raw in camry_vin_rows],
+            "mount_candidate_count": len(camry_mount_candidates),
+            "mount_candidates": camry_mount_candidates,
+            "connection_profiles": [
+                {"frame_id": frame_id, "comm_set_id": comm_set_id, "phase_type": phase_type}
+                for frame_id, comm_set_id, phase_type in connection_profiles
+            ],
+            "connection_frame_witness": _comm_frame_witness(master, 0),
+            "connection_comm_set_witness": _comm_set_witness(parser, master, 9),
         },
     }
 
@@ -239,6 +320,9 @@ def build() -> dict[str, Any]:
             "vin_vehicle_decision": {
                 "DecisionKey": export_addr(kgp, "DecisionKey@CDbVinVehicleDecisionTable"),
             },
+            "mounted_ecu": {
+                "CommConnectionNoBuffer": export_addr(command, "CommConnectionNoBuffer@CEcuConnectCheck"),
+            },
             "p5_support": {
                 "GetSupportP5.Execute": export_addr(support, "Execute"),
                 "CheckSupportPid": export_addr(command, "CheckSupportPid@CCommCachePlusP5"),
@@ -258,6 +342,7 @@ def build() -> dict[str, Any]:
                 "DecisionKeyNewEU": 0x100D6B90,
             },
             "vin_vehicle_decision": {"DecisionKey": 0x100D91D0},
+            "mounted_ecu": {"CommConnectionNoBuffer": 0x100829C0},
             "p5_support": {
                 "GetSupportP5.Execute": 0x10001630,
                 "CheckSupportPid": 0x10072180,
@@ -352,7 +437,37 @@ def build() -> dict[str, Any]:
             "plugin": "GetMntEcuLstNoCf_DT.dll",
             "source_name": "GetMountEcuListNoCnfm.cpp",
             "inputs": ["CDbInstallingEcuListResRecords", "CDbEcuCategoryResRecords"],
-            "connectivity": "CEcuConnectCheck::CommConnectionNoBuffer / command connection callbacks",
+            "install_row": {
+                "ddb_type": INSTALLING_ECU_LIST_TYPE,
+                "record_size": 24,
+                "install_set_id": "u16 +0x04",
+                "category_id": "u16 +0x06",
+                "connection_frame_id": "u16 +0x08",
+                "connection_comm_set_id": "u16 +0x0A",
+                "connection_phase_type": "u8 +0x13; passed as CommConnectionNoBuffer arg_10h",
+            },
+            "connection_algorithm": {
+                "api": "CEcuConnectCheck::CommConnectionNoBuffer",
+                "comm_frame_db_class_id": f"0x{COMM_FRAME_CLASS:03X}",
+                "ecu_category_db_class_id": f"0x{ECU_CATEGORY_CLASS:03X}",
+                "steps": [
+                    "resolve connection_frame_id through CDbCommFrameTable",
+                    "apply connection_comm_set_id with CCommFrameData::SetCommSet",
+                    "transmit the database send frame through the common communication cache/direct sender",
+                    "AND returned bytes with the database receive mask",
+                    "compare the masked result byte-for-byte with the database receive-check bytes",
+                    "set the candidate mounted flag only when the communication succeeds and the check matches",
+                ],
+            },
+            "current_na_camry": {
+                "candidate_count": regions["NA"]["camry_hv_witness"]["mount_candidate_count"],
+                "connection_profiles": regions["NA"]["camry_hv_witness"]["connection_profiles"],
+                "meaning": (
+                    "all current Camry-HV install rows use connection frame 0 / CommSet 9 and phase-type byte "
+                    "0x12 or 0x22; frame 0 has empty send/mask/check variables, so this is category-scoped "
+                    "transport-connectivity resolution, not an identity-DID probe"
+                ),
+            },
             "output": "CCmdEcuInfo list",
         },
         "p5_support": {
