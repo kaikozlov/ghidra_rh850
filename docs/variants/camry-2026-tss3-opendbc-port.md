@@ -643,6 +643,19 @@ Techstream Operation-FFD vocabulary independently exposes FRC-hosted
 Buzzer Request` (`5615`), and `Hands-Off State` (`5632`), but there is no static
 DID-to-`0x412` bit join.
 
+The same route also closes the **replacement cadence** rather than borrowing the
+older Toyota controller's 5-Hz UI schedule. On route `3f`, 5,305 same-segment
+`0x412` intervals have median **1002.490 ms** (p10 **701.920 ms**, p90
+**1004.749 ms**) and minimum **79.514 ms**. The 367 intervals whose payload
+changes have median **432.440 ms** and minimum **79.514 ms**. Route `3e`
+independently gives a **995.572-ms** median heartbeat and **82.526-ms** minimum.
+Thus the source is a roughly **1-Hz periodic heartbeat with event-driven
+publications**, not a constant 5-Hz stream. The fork replacement follows that
+shape: stable HUD state is refreshed at 1 Hz, while changed display state is
+rate-bounded to 10 Hz. This timing result describes the observed camera-owned
+HUD surface only; it does not assign an OEM scheduler name or prove the minimum
+permitted receiver interval.
+
 The Toyota `Hands-Off` vocabulary is **overloaded and must not be treated as one
 state machine**. The same PCS recorder dictionary separately exposes capability
 fields `Hands-Off Exist` and `LTA Driver Monitor Camera Collaboration Exist`, plus

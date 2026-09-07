@@ -39,8 +39,13 @@ check("3e all qualified 0x371 rises have paired HUD edges",
       hud3e["rise_edges_paired_to_0x371_within_2s"] == routes["3e"]["warning_candidate"]["rising_edges"])
 check("3f all qualified 0x371 rises have paired HUD edges",
       hud3f["rise_edges_paired_to_0x371_within_2s"] == routes["3f"]["warning_candidate"]["rising_edges"])
+timing3f = hud3f["native_timing"]
+check("3f 0x412 native heartbeat is approximately 1 Hz",
+      990 <= timing3f["interval_ms"]["p50"] <= 1010)
+check("3f 0x412 has event-driven publications but no sub-75-ms burst",
+      75 <= timing3f["interval_min_ms"] < 100 and timing3f["payload_change_interval_count"] > 300)
 
-check("report schema includes state-machine, HUD, and stock-ACC hold reduction", report["schema_version"] == 4)
+check("report schema includes state-machine, HUD timing, and stock-ACC hold reduction", report["schema_version"] == 5)
 
 hold3b = routes["3b"]["stock_acc_standstill_candidate"]
 hold3c = routes["3c"]["stock_acc_standstill_candidate"]

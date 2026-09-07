@@ -102,6 +102,24 @@
           }
         },
         "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
+        "native_timing": {
+          "interval_count_same_segment": 6905,
+          "interval_max_ms": 1008.497864,
+          "interval_min_ms": 79.38125,
+          "interval_ms": {
+            "p10": 844.083593,
+            "p50": 996.081146,
+            "p90": 1005.001145
+          },
+          "payload_change_interval_count": 437,
+          "payload_change_interval_min_ms": 79.38125,
+          "payload_change_interval_ms": {
+            "p10": 90.231458,
+            "p50": 402.456198,
+            "p90": 894.707083
+          },
+          "stable_heartbeat_interpretation": "~1 Hz periodic heartbeat with bounded event-driven publications; no constant 5 Hz source cadence is observed"
+        },
         "payload_counts": {
           "1000042102ee9307": 1,
           "1200001102ee9307": 53,
@@ -494,6 +512,24 @@
           }
         },
         "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
+        "native_timing": {
+          "interval_count_same_segment": 4939,
+          "interval_max_ms": 1008.287708,
+          "interval_min_ms": 83.412396,
+          "interval_ms": {
+            "p10": 993.499375,
+            "p50": 1003.270885,
+            "p90": 1005.027292
+          },
+          "payload_change_interval_count": 183,
+          "payload_change_interval_min_ms": 83.412396,
+          "payload_change_interval_ms": {
+            "p10": 99.440052,
+            "p50": 451.112135,
+            "p90": 864.467656
+          },
+          "stable_heartbeat_interpretation": "~1 Hz periodic heartbeat with bounded event-driven publications; no constant 5 Hz source cadence is observed"
+        },
         "payload_counts": {
           "0000000000000000": 1,
           "00000000006e9303": 1,
@@ -862,6 +898,24 @@
           }
         },
         "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
+        "native_timing": {
+          "interval_count_same_segment": 3904,
+          "interval_max_ms": 1758.564427,
+          "interval_min_ms": 79.096511,
+          "interval_ms": {
+            "p10": 805.866042,
+            "p50": 996.246093,
+            "p90": 1004.898124
+          },
+          "payload_change_interval_count": 249,
+          "payload_change_interval_min_ms": 79.096511,
+          "payload_change_interval_ms": {
+            "p10": 90.920157,
+            "p50": 391.828281,
+            "p90": 853.94151
+          },
+          "stable_heartbeat_interpretation": "~1 Hz periodic heartbeat with bounded event-driven publications; no constant 5 Hz source cadence is observed"
+        },
         "payload_counts": {
           "0000000000000000": 1,
           "00000000006e9303": 1,
@@ -1208,6 +1262,24 @@
           }
         },
         "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
+        "native_timing": {
+          "interval_count_same_segment": 5066,
+          "interval_max_ms": 1006.698958,
+          "interval_min_ms": 82.526302,
+          "interval_ms": {
+            "p10": 533.228958,
+            "p50": 995.572499,
+            "p90": 1004.814584
+          },
+          "payload_change_interval_count": 457,
+          "payload_change_interval_min_ms": 82.830885,
+          "payload_change_interval_ms": {
+            "p10": 90.72625,
+            "p50": 392.223333,
+            "p90": 831.718646
+          },
+          "stable_heartbeat_interpretation": "~1 Hz periodic heartbeat with bounded event-driven publications; no constant 5 Hz source cadence is observed"
+        },
         "payload_counts": {
           "1000041202ee9307": 1,
           "1200001102ee9307": 613,
@@ -1695,6 +1767,24 @@
           }
         },
         "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
+        "native_timing": {
+          "interval_count_same_segment": 5305,
+          "interval_max_ms": 1006.567865,
+          "interval_min_ms": 79.514114,
+          "interval_ms": {
+            "p10": 701.920365,
+            "p50": 1002.489947,
+            "p90": 1004.748802
+          },
+          "payload_change_interval_count": 367,
+          "payload_change_interval_min_ms": 79.514114,
+          "payload_change_interval_ms": {
+            "p10": 99.620833,
+            "p50": 432.439895,
+            "p90": 834.350781
+          },
+          "stable_heartbeat_interpretation": "~1 Hz periodic heartbeat with bounded event-driven publications; no constant 5 Hz source cadence is observed"
+        },
         "payload_counts": {
           "0000000000000000": 1,
           "00000000006e9300": 1,
@@ -2172,5 +2262,5 @@
       }
     }
   },
-  "schema_version": 4
+  "schema_version": 5
 }

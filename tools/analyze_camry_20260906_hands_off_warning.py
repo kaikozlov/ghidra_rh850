@@ -149,6 +149,8 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
   fall_touch_age: list[float] = []
   b19_values: Counter[int] = Counter()
   hud_payloads: Counter[str] = Counter()
+  hud_intervals_ms: list[float] = []
+  hud_change_intervals_ms: list[float] = []
   hud_lane_nibbles: Counter[tuple[int, int]] = Counter()
   hud_lane_model: dict[tuple[int, int], dict[str, float]] = {}
   hud_escalation_frames = 0
@@ -182,6 +184,8 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
   cruise_hold_episodes: list[dict] = []
 
   for path in files:
+    prev_hud_t = None
+    prev_hud_dat = None
     for msg in LogReader(str(path), sort_by_time=True):
       t = msg.logMonoTime / 1e9
       first_t = t if first_t is None else min(first_t, t)
@@ -289,6 +293,13 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
             continue
           if frame.address == 0x412 and len(dat) > 3:
             hud_payloads[dat.hex()] += 1
+            if prev_hud_t is not None and t > prev_hud_t:
+              interval_ms = (t - prev_hud_t) * 1000
+              hud_intervals_ms.append(interval_ms)
+              if dat != prev_hud_dat:
+                hud_change_intervals_ms.append(interval_ms)
+            prev_hud_t = t
+            prev_hud_dat = dat
             lane_key = (dat[3] >> 4, dat[3] & 0x0F)
             hud_lane_nibbles[lane_key] += 1
             if latest_lane_probs is not None and latest_lane_probs_t is not None and 0 <= t - latest_lane_probs_t <= MAX_STATE_AGE_S:
@@ -547,6 +558,16 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
       "rise_lag_0x412_minus_0x371_s": quantiles(rise_lags),
       "fall_lag_0x412_minus_0x371_s": quantiles(fall_lags),
       "payload_counts": dict(sorted(hud_payloads.items())),
+      "native_timing": {
+        "interval_count_same_segment": len(hud_intervals_ms),
+        "interval_ms": quantiles(hud_intervals_ms),
+        "interval_min_ms": round(min(hud_intervals_ms), 6) if hud_intervals_ms else None,
+        "interval_max_ms": round(max(hud_intervals_ms), 6) if hud_intervals_ms else None,
+        "payload_change_interval_count": len(hud_change_intervals_ms),
+        "payload_change_interval_ms": quantiles(hud_change_intervals_ms),
+        "payload_change_interval_min_ms": round(min(hud_change_intervals_ms), 6) if hud_change_intervals_ms else None,
+        "stable_heartbeat_interpretation": "~1 Hz periodic heartbeat with bounded event-driven publications; no constant 5 Hz source cadence is observed",
+      },
       "lane_nibble_counts_left_high_right_low": {f"{left},{right}": count for (left, right), count in sorted(hud_lane_nibbles.items())},
       "lane_nibble_model_join": hud_lane_model_out,
       "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
@@ -570,7 +591,7 @@ def main() -> int:
     routes[short] = analyze_route(LogReader, args.log_root / day / route, label)
 
   payload = {
-    "schema_version": 4,
+    "schema_version": 5,
     "method": {
       "touch_proxy": f"abs(carState.steeringTorque) >= {TOUCH_TORQUE_NM} N.m",
       "clean_stock_lta": f"carState cruise enabled, vEgo > {MIN_SPEED_MS} m/s, no blinker, latest native bus2 0x08A B21 low6 == 11",
