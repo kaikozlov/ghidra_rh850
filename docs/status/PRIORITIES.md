@@ -340,11 +340,15 @@ the corrected stationary queue/freshness observer before another on-road B6 test
 A separate integration bug explains the repeatable lane-change alert, now fixed. Exact-F33
 `CarState` used to force `steeringPressed=False`, so openpilot could not leave `preLaneChange`
 through the normal torque-nudge transition; all three Sept-4 routes contain pre-lane-change
-events and zero `laneChange` events. Fork opendbc `e37bab6c` (2026-09-04) replaces the
+events and zero `laneChange` events. Fork opendbc `e37bab6c` (2026-09-04) first replaced the
 placeholder with a provisional 1.2 N.m physical-torque threshold derived from the Sept-4
 distributions — not copied from classic Toyota raw units and not F33's unrelated internal
-2-N.m predicate. Remaining: on-vehicle validation of the threshold and the `0x030` torque
-sign; EPS fault classification stays neutral. Canonical:
+2-N.m predicate. VAR-139/CORR-169 now supersede that bring-up policy: all 45 post-fix
+lane-change starts validate the `0x030` sign convention (left positive/right negative), and
+same-car `0x030` torque versus Toyota's native `0x371 B20[4]` driver detector supports the
+selected 0.6 N.m openpilot threshold. Richer EPS permanent/recoverable classification remains
+open; the independent `0x030` steering-fault/inhibit aggregate is mapped only to immediate
+temporary-unavailable state. Canonical:
 [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §4.4.
 
 VAR-126's full-corpus audit of the same routes closes the observational perimeter: the

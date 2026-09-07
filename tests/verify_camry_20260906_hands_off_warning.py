@@ -40,10 +40,65 @@ check("3e all qualified 0x371 rises have paired HUD edges",
 check("3f all qualified 0x371 rises have paired HUD edges",
       hud3f["rise_edges_paired_to_0x371_within_2s"] == routes["3f"]["warning_candidate"]["rising_edges"])
 
-check("report schema includes state-machine reduction", report["schema_version"] == 2)
+check("report schema includes state-machine, HUD, and stock-ACC hold reduction", report["schema_version"] == 4)
 
-for short in ("3e", "3f"):
+hold3b = routes["3b"]["stock_acc_standstill_candidate"]
+hold3c = routes["3c"]["stock_acc_standstill_candidate"]
+check("3b stock-ACC standstill state has 152 source-real frames", hold3b["frames"] == 152)
+check("3c stock-ACC standstill state has 46 source-real frames", hold3c["frames"] == 46)
+check("3b stock-ACC standstill states are exactly 45/103 and 44/102",
+      hold3b["cruise_substate_pair_counts"].get("45,103") == 148 and
+      hold3b["cruise_substate_pair_counts"].get("44,102") == 4)
+check("3c stock-ACC standstill states are exactly 45/103 and 44/102",
+      hold3c["cruise_substate_pair_counts"].get("45,103") == 44 and
+      hold3c["cruise_substate_pair_counts"].get("44,102") == 2)
+check("all retained stock-ACC hold frames are exactly stopped",
+      hold3b["all_frames_exactly_stopped"] and hold3c["all_frames_exactly_stopped"])
+check("stock-ACC hold remains native LTA/LCA ID11", hold3b["all_episode_target_lateral_ids"] == [11] and
+      hold3c["all_episode_target_lateral_ids"] == [11])
+check("stock-ACC hold appears in three independent stop episodes",
+      len(hold3b["episodes"]) == 2 and len(hold3c["episodes"]) == 1)
+check("stock-ACC hold clears on accelerator/resume before motion",
+      all(e["clear_gas_pressed"] is True and e["clear_abs_speed_m_s"] < 0.1 for e in hold3b["episodes"] + hold3c["episodes"]))
+check("stock-ACC hold is delayed after the vehicle first stops",
+      all(e["time_since_last_moving_at_start_s"] > 5.0 for e in hold3b["episodes"] + hold3c["episodes"]))
+check("other September highway routes do not spuriously enter stock-ACC hold",
+      all(routes[short]["stock_acc_standstill_candidate"]["frames"] == 0 for short in ("3d", "3e", "3f")))
+
+lane_counts = hud3f["lane_nibble_counts_left_high_right_low"]
+lane_join = hud3f["lane_nibble_model_join"]
+check("3f HUD active recognized-lane state dominates", lane_counts["4,4"] > 3000)
+check("3f HUD inactive recognized and missing states are well populated",
+      lane_counts["1,1"] > 500 and lane_counts["2,2"] > 1000)
+check("3f HUD mixed per-side recognition states are observed",
+      lane_counts["1,2"] > 100 and lane_counts["2,1"] > 100)
+check("3f HUD has no unobserved departure/color state 3",
+      all("3" not in key.split(",") for key in lane_counts))
+check("3f active HUD 4,4 joins strong model lane visibility",
+      lane_join["4,4"]["left_lane_visible_fraction_gt_0_5"] > 0.98 and
+      lane_join["4,4"]["right_lane_visible_fraction_gt_0_5"] > 0.98)
+check("3f inactive HUD 1,1 joins recognized model lanes",
+      lane_join["1,1"]["left_lane_prob_mean"] > 0.85 and
+      lane_join["1,1"]["right_lane_prob_mean"] > 0.85)
+check("3f inactive HUD 2,2 joins weak/missing model lanes",
+      lane_join["2,2"]["left_lane_prob_mean"] < 0.40 and
+      lane_join["2,2"]["right_lane_prob_mean"] < 0.35)
+
+for short, expected_starts in (("3e", 20), ("3f", 25)):
   sm = routes[short]["native_state_machine_candidate"]
+  fit = sm["single_threshold_fit"]
+  sign = sm["lane_change_starting_sign"]
+  selected = fit["selected_threshold_witnesses"]["0.60"]
+  check(f"{short} driver torque policy threshold recorded as 0.6 N.m",
+        fit["selected_policy_threshold_nm"] == 0.6)
+  check(f"{short} 0.6 N.m policy has high Toyota-state specificity",
+        selected["true_negative_rate"] > 0.94)
+  check(f"{short} 0.6 N.m policy retains useful Toyota-state sensitivity",
+        selected["true_positive_rate"] > 0.74)
+  check(f"{short} all post-fix lane-change starts match Toyota torque sign convention",
+        sign["count"] == expected_starts and sign["sign_matches_direction"] == expected_starts)
+  check(f"{short} post-fix lane-change starts exercise both directions",
+        sign["left"] > 0 and sign["right"] > 0)
   check(f"{short} B17[0] exactly complements B20[4] in clean ID11",
         sm["b17lsb_equals_not_b20bit4_violations"] == 0)
   check(f"{short} warning and driver-detect states are mutually exclusive",

@@ -39,7 +39,7 @@ rebuilds. Committed-project promotion is a separate final lifecycle gate.
 | Per-function claim execution status | 114 `passed`, 5 `unavailable`, 0 `failed` | `data/semantic_review_status.csv`; `unavailable` marks manual CFG reviews with no automated execution gate |
 | Strongest independent oracle per reviewed function | 28 CFG/data-flow, 3 instruction semantics, 1 raw-byte oracle, 87 none | The 87 have only a generated self-check, which is recorded separately and confers no semantic grade |
 | Findings with exact `verified` grade | 92 | Exact-grade rows in `FINDINGS.md`; qualified/mixed/partial-grade rows are not included in this scalar |
-| Findings dynamically/externally observed | 15 | Exact `observed...`-grade rows in `FINDINGS.md`: SECOC-030, VAR-001, STORE-007, VAR-108/109/110, TMS-086, VAR-116, VAR-124/125/126/128/129/133/135; observations are not promoted beyond their stated evidence boundary |
+| Findings dynamically/externally observed | 19 | Exact `observed...`-grade rows in `FINDINGS.md`: SECOC-030, VAR-001, STORE-007, VAR-108/109/110, TMS-086, VAR-116, VAR-124/125/126/128/129/133/135/137/138/139/140; observations are not promoted beyond their stated evidence boundary |
 
 For material findings, `FINDINGS.md` identifies the claim-specific gate in its
 `Checked by` column; `verification.toml` supplies that gate's oracle class, and

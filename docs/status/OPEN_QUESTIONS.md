@@ -1167,9 +1167,10 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   independently qualified. The 2026-09-04 road corpus adds two constraints:
   successful Panda transmission is not equivalent to B6 authority, and the port that
   produced these routes had a hardcoded `steeringPressed=False` that blocked normal
-  torque-nudge lane-change entry (fixed 2026-09-04 by fork opendbc `e37bab6c` with a
-  provisional 1.2 N.m physical-torque threshold; validation open). Do not use the
-  driver-state fix to explain or mask B6 receiver non-response. VAR-126's full-corpus
+  torque-nudge lane-change entry. Fork opendbc `e37bab6c` restored the state on
+  2026-09-04; VAR-139/CORR-169 subsequently close the same-car sign convention and
+  replace its provisional 1.2 N.m bring-up threshold with the selected 0.6 N.m policy.
+  Do not use the driver-state fix to explain or mask B6 receiver non-response. VAR-126's full-corpus
   audit adds a third: the sender is wire-exact, transport is exonerated during
   driving, and the only observable divergence from the known-accepted protected `0x0D7`
   sender is first-in-epoch message-low2 phase (stock starts at 1, ours at 0) — an

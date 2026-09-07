@@ -125,9 +125,15 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
   steering_torque = None
   latest_eps_torque = None
   latest_eps_torque_t = None
+  latest_lane_probs = None
+  latest_lane_probs_t = None
   v_ego = 0.0
   cruise = False
+  gas_pressed = False
   blinker = False
+  left_blinker = False
+  right_blinker = False
+  last_moving_cs_t = None
 
   prev_cs_t = None
   prev_cs_eligible = False
@@ -143,6 +149,8 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
   fall_touch_age: list[float] = []
   b19_values: Counter[int] = Counter()
   hud_payloads: Counter[str] = Counter()
+  hud_lane_nibbles: Counter[tuple[int, int]] = Counter()
+  hud_lane_model: dict[tuple[int, int], dict[str, float]] = {}
   hud_escalation_frames = 0
   hud_escalation_while_371_active = 0
   eligible_371_frames = 0
@@ -158,7 +166,10 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
   prev_detect = None
   prev_detect_t = None
   prev_detect_eligible = False
+  driver_detect_samples: list[tuple[float, bool]] = []
   prev_id11_detect = None
+  prev_lane_change_state = None
+  lane_change_starts: list[dict] = []
   last_driver_detect_t = None
   last_driver_detect_release_t = None
   warning_falls_with_detect = 0
@@ -166,6 +177,9 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
   pending_warning_fall_t = None
   warning_episode = None
   warning_episodes: list[dict] = []
+  cruise_substate_pairs: Counter[tuple[int, int]] = Counter()
+  cruise_hold_episode = None
+  cruise_hold_episodes: list[dict] = []
 
   for path in files:
     for msg in LogReader(str(path), sort_by_time=True):
@@ -180,6 +194,24 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
         lat_active = bool(msg.carControl.latActive)
       elif which == "selfdriveState":
         selfdrive_enabled = bool(msg.selfdriveState.enabled)
+      elif which == "modelV2":
+        if len(msg.modelV2.laneLineProbs) >= 3:
+          latest_lane_probs = (float(msg.modelV2.laneLineProbs[1]), float(msg.modelV2.laneLineProbs[2]))
+          latest_lane_probs_t = t
+        lane_change_state = int(msg.modelV2.meta.laneChangeState.raw)
+        lane_change_direction = int(msg.modelV2.meta.laneChangeDirection.raw)
+        if lane_change_state == 2 and prev_lane_change_state != 2 and last_cs_t is not None and abs(t - last_cs_t) <= MAX_STATE_AGE_S:
+          sign_match = ((lane_change_direction == 1 and steering_torque is not None and steering_torque > 0) or
+                        (lane_change_direction == 2 and steering_torque is not None and steering_torque < 0))
+          lane_change_starts.append({
+            "direction": "left" if lane_change_direction == 1 else "right" if lane_change_direction == 2 else f"raw-{lane_change_direction}",
+            "steering_torque_nm": steering_torque,
+            "steering_pressed": steering_pressed,
+            "left_blinker": left_blinker,
+            "right_blinker": right_blinker,
+            "sign_matches_direction": sign_match,
+          })
+        prev_lane_change_state = lane_change_state
       elif which == "sendcan":
         for frame in msg.sendcan:
           if frame.address == 0x0B6 and len(frame.dat) >= 4:
@@ -193,7 +225,12 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
             eligible_s += gap
         v_ego = float(cs.vEgo)
         cruise = bool(cs.cruiseState.enabled)
-        blinker = bool(cs.leftBlinker or cs.rightBlinker)
+        gas_pressed = bool(cs.gasPressed)
+        if abs(v_ego) >= 0.1:
+          last_moving_cs_t = t
+        left_blinker = bool(cs.leftBlinker)
+        right_blinker = bool(cs.rightBlinker)
+        blinker = left_blinker or right_blinker
         steering_pressed = bool(cs.steeringPressed)
         steering_torque = float(cs.steeringTorque)
         if abs(steering_torque) >= TOUCH_TORQUE_NM:
@@ -215,9 +252,58 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
             latest_stock_id = dat[21] & 0x3F
             if warning_episode is not None:
               warning_episode["target_lateral_ids"].add(latest_stock_id)
+
+            # Same-car stock-ACC stop/hold state. B7 0x66/0x67 is distinct
+            # from generic zero vehicle speed: it appears only after several
+            # seconds stopped and clears on accelerator/resume before motion.
+            # Keep B6/B7 pair counts as a falsification surface: B7 bit5 alone
+            # is insufficient because the moving transition 0x47/0x65 exists.
+            if dat[3] & 0x08 and last_cs_t is not None and 0 <= t - last_cs_t <= MAX_STATE_AGE_S:
+              pair = (dat[6], dat[7])
+              cruise_substate_pairs[pair] += 1
+              hold = dat[7] in (0x66, 0x67)
+              if hold:
+                if cruise_hold_episode is None:
+                  cruise_hold_episode = {
+                    "start_s": t,
+                    "end_s": t,
+                    "frames": 0,
+                    "gas_pressed_frames": 0,
+                    "max_abs_speed_m_s": 0.0,
+                    "state_pair_counts": Counter(),
+                    "target_lateral_ids": set(),
+                    "time_since_last_moving_at_start_s": None if last_moving_cs_t is None else t - last_moving_cs_t,
+                  }
+                cruise_hold_episode["end_s"] = t
+                cruise_hold_episode["frames"] += 1
+                cruise_hold_episode["gas_pressed_frames"] += int(gas_pressed)
+                cruise_hold_episode["max_abs_speed_m_s"] = max(cruise_hold_episode["max_abs_speed_m_s"], abs(v_ego))
+                cruise_hold_episode["state_pair_counts"][pair] += 1
+                cruise_hold_episode["target_lateral_ids"].add(latest_stock_id)
+              elif cruise_hold_episode is not None:
+                cruise_hold_episode["duration_s"] = cruise_hold_episode["end_s"] - cruise_hold_episode["start_s"]
+                cruise_hold_episode["clear_gas_pressed"] = gas_pressed
+                cruise_hold_episode["clear_abs_speed_m_s"] = abs(v_ego)
+                cruise_hold_episodes.append(cruise_hold_episode)
+                cruise_hold_episode = None
             continue
-          if frame.address == 0x412 and len(dat) > 1:
+          if frame.address == 0x412 and len(dat) > 3:
             hud_payloads[dat.hex()] += 1
+            lane_key = (dat[3] >> 4, dat[3] & 0x0F)
+            hud_lane_nibbles[lane_key] += 1
+            if latest_lane_probs is not None and latest_lane_probs_t is not None and 0 <= t - latest_lane_probs_t <= MAX_STATE_AGE_S:
+              row = hud_lane_model.setdefault(lane_key, {
+                "frames": 0.0,
+                "left_prob_sum": 0.0,
+                "right_prob_sum": 0.0,
+                "left_visible_gt_0_5": 0.0,
+                "right_visible_gt_0_5": 0.0,
+              })
+              row["frames"] += 1
+              row["left_prob_sum"] += latest_lane_probs[0]
+              row["right_prob_sum"] += latest_lane_probs[1]
+              row["left_visible_gt_0_5"] += float(latest_lane_probs[0] > 0.5)
+              row["right_visible_gt_0_5"] += float(latest_lane_probs[1] > 0.5)
             if len(dat) > 2 and dat[2] & 0x40:
               hud_escalation_frames += 1
               hud_escalation_while_371_active += int(bool(prev_371))
@@ -255,6 +341,7 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
 
             if latest_eps_torque is not None and latest_eps_torque_t is not None and t - latest_eps_torque_t <= MAX_STATE_AGE_S:
               abs_torque = abs(latest_eps_torque)
+              driver_detect_samples.append((abs_torque, driver_detect))
               for low, high in TORQUE_BINS_NM:
                 if low <= abs_torque < high:
                   bin_label = f"{low:g}-{high:g}"
@@ -302,6 +389,27 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
           prev_detect_t = t
           prev_detect_eligible = eligible
 
+  if cruise_hold_episode is not None:
+    cruise_hold_episode["duration_s"] = cruise_hold_episode["end_s"] - cruise_hold_episode["start_s"]
+    cruise_hold_episode["clear_gas_pressed"] = None
+    cruise_hold_episode["clear_abs_speed_m_s"] = None
+    cruise_hold_episodes.append(cruise_hold_episode)
+
+  cruise_hold_episodes_out = []
+  for episode in cruise_hold_episodes:
+    row = dict(episode)
+    row["start_s"] = round(row["start_s"], 6)
+    row["end_s"] = round(row["end_s"], 6)
+    row["duration_s"] = round(row["duration_s"], 6)
+    row["max_abs_speed_m_s"] = round(row["max_abs_speed_m_s"], 9)
+    if row["time_since_last_moving_at_start_s"] is not None:
+      row["time_since_last_moving_at_start_s"] = round(row["time_since_last_moving_at_start_s"], 6)
+    if row["clear_abs_speed_m_s"] is not None:
+      row["clear_abs_speed_m_s"] = round(row["clear_abs_speed_m_s"], 9)
+    row["state_pair_counts"] = {f"{a},{b}": n for (a, b), n in sorted(row["state_pair_counts"].items())}
+    row["target_lateral_ids"] = sorted(row["target_lateral_ids"])
+    cruise_hold_episodes_out.append(row)
+
   rise_lags = pair_lags(rises_371, rises_412)
   fall_lags = pair_lags(falls_371, falls_412)
   route_s = 0.0 if first_t is None or last_t is None else last_t - first_t
@@ -312,6 +420,40 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
   episode_durations = [e["end"] - e["start"] for e in warning_episodes if "end" in e]
   escalation_lags = [e["escalation_times"][0] - e["start"] for e in warning_episodes if e["escalation_times"]]
   escalation_episodes = [e for e in warning_episodes if e["escalation_times"]]
+  hud_lane_model_out = {}
+  for key, row in sorted(hud_lane_model.items()):
+    frames = int(row["frames"])
+    hud_lane_model_out[f"{key[0]},{key[1]}"] = {
+      "frames": frames,
+      "left_lane_prob_mean": round(row["left_prob_sum"] / frames, 6),
+      "right_lane_prob_mean": round(row["right_prob_sum"] / frames, 6),
+      "left_lane_visible_fraction_gt_0_5": round(row["left_visible_gt_0_5"] / frames, 6),
+      "right_lane_visible_fraction_gt_0_5": round(row["right_visible_gt_0_5"] / frames, 6),
+    }
+
+  threshold_sweep = []
+  for i in range(0, 201):
+    threshold = i / 100
+    tp = sum(value >= threshold and detected for value, detected in driver_detect_samples)
+    tn = sum(value < threshold and not detected for value, detected in driver_detect_samples)
+    fp = sum(value >= threshold and not detected for value, detected in driver_detect_samples)
+    fn = sum(value < threshold and detected for value, detected in driver_detect_samples)
+    tpr = tp / (tp + fn) if tp + fn else 0.0
+    tnr = tn / (tn + fp) if tn + fp else 0.0
+    threshold_sweep.append({
+      "threshold_nm": round(threshold, 2),
+      "classification_error": round((fp + fn) / len(driver_detect_samples), 9) if driver_detect_samples else None,
+      "balanced_accuracy": round((tpr + tnr) / 2, 9),
+      "true_positive_rate": round(tpr, 9),
+      "true_negative_rate": round(tnr, 9),
+      "false_positive": fp,
+      "false_negative": fn,
+    })
+  best_threshold = max(threshold_sweep, key=lambda row: (row["balanced_accuracy"], -row["threshold_nm"])) if threshold_sweep else None
+  best_min_error = min(threshold_sweep, key=lambda row: (row["classification_error"], row["threshold_nm"])) if threshold_sweep else None
+  threshold_witnesses = {f"{threshold:.2f}": next(row for row in threshold_sweep if row["threshold_nm"] == threshold)
+                         for threshold in (0.5, 0.6, 0.7, 0.8, 1.0, 1.2)} if threshold_sweep else {}
+
   torque_bins = {}
   for low, high in TORQUE_BINS_NM:
     bin_label = f"{low:g}-{high:g}"
@@ -332,6 +474,15 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
     "clean_stock_lta_371_frames": eligible_371_frames,
     "b19_values_in_clean_stock_lta": {f"0x{k:02X}": v for k, v in sorted(b19_values.items())},
     "native_source_counts": {f"0x{addr:03X}/src{src}": count for (addr, src), count in sorted(source_counts.items())},
+    "stock_acc_standstill_candidate": {
+      "wire_state": "native bus2 0x08A with CRUISE_OPERATING_LATCH=1 and CRUISE_SUBSTATE_2 in {102,103}",
+      "cruise_substate_pair_counts": {f"{a},{b}": n for (a, b), n in sorted(cruise_substate_pairs.items())},
+      "frames": sum(episode["frames"] for episode in cruise_hold_episodes_out),
+      "episodes": cruise_hold_episodes_out,
+      "all_frames_exactly_stopped": all(episode["max_abs_speed_m_s"] < 1e-6 for episode in cruise_hold_episodes_out),
+      "all_episode_target_lateral_ids": sorted({lid for episode in cruise_hold_episodes_out for lid in episode["target_lateral_ids"]}),
+      "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and clears on accelerator/resume before motion; B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+    },
     "native_state_machine_candidate": {
       "driver_steering_candidate": "native bus2 0x371 B20 bit4",
       "structural_complement": "native bus2 0x371 B17 bit0",
@@ -343,6 +494,22 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
       "driver_detect_by_abs_eps_torque_nm": torque_bins,
       "driver_detect_set_abs_eps_torque_nm": quantiles(detect_set_torque),
       "driver_detect_release_abs_eps_torque_nm": quantiles(detect_release_torque),
+      "single_threshold_fit": {
+        "sample_count": len(driver_detect_samples),
+        "best_balanced_accuracy": best_threshold,
+        "best_minimum_classification_error": best_min_error,
+        "selected_policy_threshold_nm": 0.6,
+        "selected_threshold_witnesses": threshold_witnesses,
+        "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold, not to claim Toyota itself uses one static torque comparator",
+      },
+      "lane_change_starting_sign": {
+        "count": len(lane_change_starts),
+        "left": sum(row["direction"] == "left" for row in lane_change_starts),
+        "right": sum(row["direction"] == "right" for row in lane_change_starts),
+        "sign_matches_direction": sum(bool(row["sign_matches_direction"]) for row in lane_change_starts),
+        "samples": lane_change_starts,
+        "boundary": "post-fix openpilot DesireHelper transitions; validates the sign convention used by lane-change nudge logic on these routes",
+      },
       "warning_onset_time_since_last_driver_detect_s": quantiles(onset_driver_detect),
       "warning_onset_time_since_driver_detect_release_s": quantiles(onset_driver_release),
       "warning_falls_with_driver_detect_same_frame": warning_falls_with_detect,
@@ -380,6 +547,9 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
       "rise_lag_0x412_minus_0x371_s": quantiles(rise_lags),
       "fall_lag_0x412_minus_0x371_s": quantiles(fall_lags),
       "payload_counts": dict(sorted(hud_payloads.items())),
+      "lane_nibble_counts_left_high_right_low": {f"{left},{right}": count for (left, right), count in sorted(hud_lane_nibbles.items())},
+      "lane_nibble_model_join": hud_lane_model_out,
+      "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
       "b2_bit6_frames": hud_escalation_frames,
       "b2_bit6_frames_while_0x371_active": hud_escalation_while_371_active,
       "boundary": "historical 0x412 signal names/layout are not transferred to this TSS3 payload",
@@ -400,7 +570,7 @@ def main() -> int:
     routes[short] = analyze_route(LogReader, args.log_root / day / route, label)
 
   payload = {
-    "schema_version": 2,
+    "schema_version": 4,
     "method": {
       "touch_proxy": f"abs(carState.steeringTorque) >= {TOUCH_TORQUE_NM} N.m",
       "clean_stock_lta": f"carState cruise enabled, vEgo > {MIN_SPEED_MS} m/s, no blinker, latest native bus2 0x08A B21 low6 == 11",
@@ -410,6 +580,7 @@ def main() -> int:
       "exact_eps_torque": "native bus0 0x030 signed(B8)*0.1 + signed4(B17 low nibble)*0.01 N.m",
       "hud_companion_candidate": "native bus2 0x412 B0=0x14 and B1[3:2]=3",
       "hud_escalation_candidate": "native bus2 0x412 B2 bit6 while warning active",
+      "stock_acc_standstill_candidate": "native bus2 0x08A B7 in {0x66,0x67} while cruise latch is set; delayed zero-speed hold state, not generic vehicle standstill",
       "semantic_boundary": "dynamic timing/torque/state joins only; exact OEM CAN bit names and exact torque threshold remain unproved",
     },
     "routes": routes,

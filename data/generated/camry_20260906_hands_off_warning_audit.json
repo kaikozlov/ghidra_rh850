@@ -17,6 +17,7 @@
     "hud_companion_candidate": "native bus2 0x412 B0=0x14 and B1[3:2]=3",
     "hud_escalation_candidate": "native bus2 0x412 B2 bit6 while warning active",
     "semantic_boundary": "dynamic timing/torque/state joins only; exact OEM CAN bit names and exact torque threshold remain unproved",
+    "stock_acc_standstill_candidate": "native bus2 0x08A B7 in {0x66,0x67} while cruise latch is set; delayed zero-speed hold state, not generic vehicle standstill",
     "touch_proxy": "abs(carState.steeringTorque) >= 0.9 N.m",
     "warning_candidate": "native bus2 0x371 B19 bit6"
   },
@@ -40,6 +41,67 @@
           "p90": 0.0
         },
         "falling_edges": 23,
+        "lane_nibble_counts_left_high_right_low": {
+          "1,1": 587,
+          "1,2": 162,
+          "1,4": 2,
+          "2,1": 180,
+          "2,2": 1404,
+          "2,3": 4,
+          "4,4": 4676
+        },
+        "lane_nibble_model_join": {
+          "1,1": {
+            "frames": 587,
+            "left_lane_prob_mean": 0.962919,
+            "left_lane_visible_fraction_gt_0_5": 1.0,
+            "right_lane_prob_mean": 0.947939,
+            "right_lane_visible_fraction_gt_0_5": 0.979557
+          },
+          "1,2": {
+            "frames": 162,
+            "left_lane_prob_mean": 0.721307,
+            "left_lane_visible_fraction_gt_0_5": 0.734568,
+            "right_lane_prob_mean": 0.673541,
+            "right_lane_visible_fraction_gt_0_5": 0.691358
+          },
+          "1,4": {
+            "frames": 2,
+            "left_lane_prob_mean": 0.61166,
+            "left_lane_visible_fraction_gt_0_5": 1.0,
+            "right_lane_prob_mean": 0.841976,
+            "right_lane_visible_fraction_gt_0_5": 1.0
+          },
+          "2,1": {
+            "frames": 180,
+            "left_lane_prob_mean": 0.653167,
+            "left_lane_visible_fraction_gt_0_5": 0.666667,
+            "right_lane_prob_mean": 0.671414,
+            "right_lane_visible_fraction_gt_0_5": 0.7
+          },
+          "2,2": {
+            "frames": 1393,
+            "left_lane_prob_mean": 0.47549,
+            "left_lane_visible_fraction_gt_0_5": 0.484566,
+            "right_lane_prob_mean": 0.410841,
+            "right_lane_visible_fraction_gt_0_5": 0.417803
+          },
+          "2,3": {
+            "frames": 4,
+            "left_lane_prob_mean": 0.58401,
+            "left_lane_visible_fraction_gt_0_5": 0.75,
+            "right_lane_prob_mean": 0.938648,
+            "right_lane_visible_fraction_gt_0_5": 1.0
+          },
+          "4,4": {
+            "frames": 4676,
+            "left_lane_prob_mean": 0.984292,
+            "left_lane_visible_fraction_gt_0_5": 0.998931,
+            "right_lane_prob_mean": 0.978273,
+            "right_lane_visible_fraction_gt_0_5": 0.998503
+          }
+        },
+        "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
         "payload_counts": {
           "1000042102ee9307": 1,
           "1200001102ee9307": 53,
@@ -143,6 +205,93 @@
         "escalation_episode_target_lateral_ids": [],
         "exact_eps_torque_source": "native bus0 0x030: signed(B8)*0.1 + signed4(B17 low nibble)*0.01 N.m",
         "first_escalation_lag_from_warning_s": null,
+        "lane_change_starting_sign": {
+          "boundary": "post-fix openpilot DesireHelper transitions; validates the sign convention used by lane-change nudge logic on these routes",
+          "count": 0,
+          "left": 0,
+          "right": 0,
+          "samples": [],
+          "sign_matches_direction": 0
+        },
+        "single_threshold_fit": {
+          "best_balanced_accuracy": {
+            "balanced_accuracy": 0.844784193,
+            "classification_error": 0.152014954,
+            "false_negative": 1168,
+            "false_positive": 1597,
+            "threshold_nm": 0.53,
+            "true_negative_rate": 0.858208293,
+            "true_positive_rate": 0.831360092
+          },
+          "best_minimum_classification_error": {
+            "balanced_accuracy": 0.840453739,
+            "classification_error": 0.148771235,
+            "false_negative": 1418,
+            "false_positive": 1288,
+            "threshold_nm": 0.57,
+            "true_negative_rate": 0.885643257,
+            "true_positive_rate": 0.795264222
+          },
+          "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold, not to claim Toyota itself uses one static torque comparator",
+          "sample_count": 18189,
+          "selected_policy_threshold_nm": 0.6,
+          "selected_threshold_witnesses": {
+            "0.50": {
+              "balanced_accuracy": 0.842222818,
+              "classification_error": 0.160316675,
+              "false_negative": 1019,
+              "false_positive": 1897,
+              "threshold_nm": 0.5,
+              "true_negative_rate": 0.831572405,
+              "true_positive_rate": 0.852873231
+            },
+            "0.60": {
+              "balanced_accuracy": 0.832995473,
+              "classification_error": 0.150640497,
+              "false_negative": 1632,
+              "false_positive": 1108,
+              "threshold_nm": 0.6,
+              "true_negative_rate": 0.901624789,
+              "true_positive_rate": 0.764366157
+            },
+            "0.70": {
+              "balanced_accuracy": 0.792181129,
+              "classification_error": 0.172027049,
+              "false_negative": 2479,
+              "false_positive": 650,
+              "threshold_nm": 0.7,
+              "true_negative_rate": 0.942288911,
+              "true_positive_rate": 0.642073347
+            },
+            "0.80": {
+              "balanced_accuracy": 0.744365141,
+              "classification_error": 0.202979823,
+              "false_negative": 3300,
+              "false_positive": 392,
+              "threshold_nm": 0.8,
+              "true_negative_rate": 0.965195774,
+              "true_positive_rate": 0.523534508
+            },
+            "1.00": {
+              "balanced_accuracy": 0.639545899,
+              "classification_error": 0.277640332,
+              "false_negative": 4902,
+              "false_positive": 148,
+              "threshold_nm": 1.0,
+              "true_negative_rate": 0.986859629,
+              "true_positive_rate": 0.292232169
+            },
+            "1.20": {
+              "balanced_accuracy": 0.57072719,
+              "classification_error": 0.327890483,
+              "false_negative": 5918,
+              "false_positive": 46,
+              "threshold_nm": 1.2,
+              "true_negative_rate": 0.995915831,
+              "true_positive_rate": 0.14553855
+            }
+          }
+        },
         "state_counts": {
           "driver_steering_detected": 6926,
           "no_touch": 11106,
@@ -180,6 +329,60 @@
       "route": "0000003b--62262eb7a1",
       "route_duration_s": 6582.551449,
       "segments": 110,
+      "stock_acc_standstill_candidate": {
+        "all_episode_target_lateral_ids": [
+          11
+        ],
+        "all_frames_exactly_stopped": true,
+        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and clears on accelerator/resume before motion; B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+        "cruise_substate_pair_counts": {
+          "44,102": 4,
+          "44,70": 26120,
+          "45,103": 148,
+          "45,71": 163516,
+          "71,101": 6
+        },
+        "episodes": [
+          {
+            "clear_abs_speed_m_s": 0.0,
+            "clear_gas_pressed": true,
+            "duration_s": 2.973327,
+            "end_s": 5006.829946,
+            "frames": 120,
+            "gas_pressed_frames": 7,
+            "max_abs_speed_m_s": 0.0,
+            "start_s": 5003.856619,
+            "state_pair_counts": {
+              "44,102": 2,
+              "45,103": 118
+            },
+            "target_lateral_ids": [
+              11
+            ],
+            "time_since_last_moving_at_start_s": 9.292621
+          },
+          {
+            "clear_abs_speed_m_s": 0.0,
+            "clear_gas_pressed": true,
+            "duration_s": 0.773708,
+            "end_s": 5299.715803,
+            "frames": 32,
+            "gas_pressed_frames": 7,
+            "max_abs_speed_m_s": 0.0,
+            "start_s": 5298.942095,
+            "state_pair_counts": {
+              "44,102": 2,
+              "45,103": 30
+            },
+            "target_lateral_ids": [
+              11
+            ],
+            "time_since_last_moving_at_start_s": 5.604733
+          }
+        ],
+        "frames": 152,
+        "wire_state": "native bus2 0x08A with CRUISE_OPERATING_LATCH=1 and CRUISE_SUBSTATE_2 in {102,103}"
+      },
       "warning_candidate": {
         "carrier": "native Panda bus2 0x371/32 B19 bit6",
         "fall_time_since_touch_s": {
@@ -229,6 +432,68 @@
           "p90": 0.0
         },
         "falling_edges": 35,
+        "lane_nibble_counts_left_high_right_low": {
+          "0,0": 3,
+          "1,1": 196,
+          "1,2": 51,
+          "1,4": 3,
+          "2,1": 73,
+          "2,2": 2483,
+          "4,1": 2,
+          "4,4": 2209
+        },
+        "lane_nibble_model_join": {
+          "1,1": {
+            "frames": 196,
+            "left_lane_prob_mean": 0.929386,
+            "left_lane_visible_fraction_gt_0_5": 0.984694,
+            "right_lane_prob_mean": 0.922443,
+            "right_lane_visible_fraction_gt_0_5": 0.979592
+          },
+          "1,2": {
+            "frames": 51,
+            "left_lane_prob_mean": 0.704731,
+            "left_lane_visible_fraction_gt_0_5": 0.745098,
+            "right_lane_prob_mean": 0.520833,
+            "right_lane_visible_fraction_gt_0_5": 0.529412
+          },
+          "1,4": {
+            "frames": 3,
+            "left_lane_prob_mean": 0.893118,
+            "left_lane_visible_fraction_gt_0_5": 1.0,
+            "right_lane_prob_mean": 0.896916,
+            "right_lane_visible_fraction_gt_0_5": 1.0
+          },
+          "2,1": {
+            "frames": 73,
+            "left_lane_prob_mean": 0.723314,
+            "left_lane_visible_fraction_gt_0_5": 0.794521,
+            "right_lane_prob_mean": 0.754826,
+            "right_lane_visible_fraction_gt_0_5": 0.808219
+          },
+          "2,2": {
+            "frames": 2473,
+            "left_lane_prob_mean": 0.16399,
+            "left_lane_visible_fraction_gt_0_5": 0.133037,
+            "right_lane_prob_mean": 0.131405,
+            "right_lane_visible_fraction_gt_0_5": 0.100283
+          },
+          "4,1": {
+            "frames": 2,
+            "left_lane_prob_mean": 0.945204,
+            "left_lane_visible_fraction_gt_0_5": 1.0,
+            "right_lane_prob_mean": 0.888336,
+            "right_lane_visible_fraction_gt_0_5": 1.0
+          },
+          "4,4": {
+            "frames": 2209,
+            "left_lane_prob_mean": 0.981938,
+            "left_lane_visible_fraction_gt_0_5": 1.0,
+            "right_lane_prob_mean": 0.969719,
+            "right_lane_visible_fraction_gt_0_5": 0.991852
+          }
+        },
+        "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
         "payload_counts": {
           "0000000000000000": 1,
           "00000000006e9303": 1,
@@ -327,6 +592,93 @@
         "escalation_episode_target_lateral_ids": [],
         "exact_eps_torque_source": "native bus0 0x030: signed(B8)*0.1 + signed4(B17 low nibble)*0.01 N.m",
         "first_escalation_lag_from_warning_s": null,
+        "lane_change_starting_sign": {
+          "boundary": "post-fix openpilot DesireHelper transitions; validates the sign convention used by lane-change nudge logic on these routes",
+          "count": 0,
+          "left": 0,
+          "right": 0,
+          "samples": [],
+          "sign_matches_direction": 0
+        },
+        "single_threshold_fit": {
+          "best_balanced_accuracy": {
+            "balanced_accuracy": 0.881626292,
+            "classification_error": 0.114131974,
+            "false_negative": 250,
+            "false_positive": 556,
+            "threshold_nm": 0.51,
+            "true_negative_rate": 0.891129822,
+            "true_positive_rate": 0.872122762
+          },
+          "best_minimum_classification_error": {
+            "balanced_accuracy": 0.861105689,
+            "classification_error": 0.102945341,
+            "false_negative": 429,
+            "false_positive": 298,
+            "threshold_nm": 0.59,
+            "true_negative_rate": 0.941648717,
+            "true_positive_rate": 0.78056266
+          },
+          "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold, not to claim Toyota itself uses one static torque comparator",
+          "sample_count": 7062,
+          "selected_policy_threshold_nm": 0.6,
+          "selected_threshold_witnesses": {
+            "0.50": {
+              "balanced_accuracy": 0.880725217,
+              "classification_error": 0.119088077,
+              "false_negative": 234,
+              "false_positive": 607,
+              "threshold_nm": 0.5,
+              "true_negative_rate": 0.881143528,
+              "true_positive_rate": 0.880306905
+            },
+            "0.60": {
+              "balanced_accuracy": 0.857774871,
+              "classification_error": 0.103653356,
+              "false_negative": 447,
+              "false_positive": 285,
+              "threshold_nm": 0.6,
+              "true_negative_rate": 0.944194243,
+              "true_positive_rate": 0.771355499
+            },
+            "0.70": {
+              "balanced_accuracy": 0.800179985,
+              "classification_error": 0.122344945,
+              "false_negative": 730,
+              "false_positive": 134,
+              "threshold_nm": 0.7,
+              "true_negative_rate": 0.973761504,
+              "true_positive_rate": 0.626598465
+            },
+            "0.80": {
+              "balanced_accuracy": 0.7380016,
+              "classification_error": 0.151090343,
+              "false_negative": 998,
+              "false_positive": 69,
+              "threshold_nm": 0.8,
+              "true_negative_rate": 0.986489133,
+              "true_positive_rate": 0.489514066
+            },
+            "1.00": {
+              "balanced_accuracy": 0.63587759,
+              "classification_error": 0.204049844,
+              "false_negative": 1413,
+              "false_positive": 28,
+              "threshold_nm": 1.0,
+              "true_negative_rate": 0.994517329,
+              "true_positive_rate": 0.277237852
+            },
+            "1.20": {
+              "balanced_accuracy": 0.559123253,
+              "classification_error": 0.244973095,
+              "false_negative": 1720,
+              "false_positive": 10,
+              "threshold_nm": 1.2,
+              "true_negative_rate": 0.998041903,
+              "true_positive_rate": 0.120204604
+            }
+          }
+        },
         "state_counts": {
           "driver_steering_detected": 1955,
           "no_touch": 4963,
@@ -364,6 +716,41 @@
       "route": "0000003c--97b9e7a69a",
       "route_duration_s": 4835.677784,
       "segments": 81,
+      "stock_acc_standstill_candidate": {
+        "all_episode_target_lateral_ids": [
+          11
+        ],
+        "all_frames_exactly_stopped": true,
+        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and clears on accelerator/resume before motion; B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+        "cruise_substate_pair_counts": {
+          "44,102": 2,
+          "44,70": 4430,
+          "45,103": 44,
+          "45,71": 82136
+        },
+        "episodes": [
+          {
+            "clear_abs_speed_m_s": 0.0,
+            "clear_gas_pressed": true,
+            "duration_s": 1.12633,
+            "end_s": 9205.405801,
+            "frames": 46,
+            "gas_pressed_frames": 5,
+            "max_abs_speed_m_s": 0.0,
+            "start_s": 9204.279471,
+            "state_pair_counts": {
+              "44,102": 2,
+              "45,103": 44
+            },
+            "target_lateral_ids": [
+              11
+            ],
+            "time_since_last_moving_at_start_s": 5.261758
+          }
+        ],
+        "frames": 46,
+        "wire_state": "native bus2 0x08A with CRUISE_OPERATING_LATCH=1 and CRUISE_SUBSTATE_2 in {102,103}"
+      },
       "warning_candidate": {
         "carrier": "native Panda bus2 0x371/32 B19 bit6",
         "fall_time_since_touch_s": {
@@ -413,6 +800,68 @@
           "p90": 0.0
         },
         "falling_edges": 31,
+        "lane_nibble_counts_left_high_right_low": {
+          "0,0": 3,
+          "1,1": 440,
+          "1,2": 111,
+          "1,4": 2,
+          "2,1": 112,
+          "2,2": 940,
+          "4,1": 3,
+          "4,4": 2355
+        },
+        "lane_nibble_model_join": {
+          "1,1": {
+            "frames": 440,
+            "left_lane_prob_mean": 0.96098,
+            "left_lane_visible_fraction_gt_0_5": 0.981818,
+            "right_lane_prob_mean": 0.956906,
+            "right_lane_visible_fraction_gt_0_5": 0.984091
+          },
+          "1,2": {
+            "frames": 111,
+            "left_lane_prob_mean": 0.755899,
+            "left_lane_visible_fraction_gt_0_5": 0.792793,
+            "right_lane_prob_mean": 0.692298,
+            "right_lane_visible_fraction_gt_0_5": 0.711712
+          },
+          "1,4": {
+            "frames": 2,
+            "left_lane_prob_mean": 0.987582,
+            "left_lane_visible_fraction_gt_0_5": 1.0,
+            "right_lane_prob_mean": 0.976892,
+            "right_lane_visible_fraction_gt_0_5": 1.0
+          },
+          "2,1": {
+            "frames": 112,
+            "left_lane_prob_mean": 0.660414,
+            "left_lane_visible_fraction_gt_0_5": 0.660714,
+            "right_lane_prob_mean": 0.711103,
+            "right_lane_visible_fraction_gt_0_5": 0.741071
+          },
+          "2,2": {
+            "frames": 931,
+            "left_lane_prob_mean": 0.406121,
+            "left_lane_visible_fraction_gt_0_5": 0.418904,
+            "right_lane_prob_mean": 0.319976,
+            "right_lane_visible_fraction_gt_0_5": 0.298604
+          },
+          "4,1": {
+            "frames": 3,
+            "left_lane_prob_mean": 0.982772,
+            "left_lane_visible_fraction_gt_0_5": 1.0,
+            "right_lane_prob_mean": 0.875115,
+            "right_lane_visible_fraction_gt_0_5": 1.0
+          },
+          "4,4": {
+            "frames": 2355,
+            "left_lane_prob_mean": 0.988205,
+            "left_lane_visible_fraction_gt_0_5": 0.999575,
+            "right_lane_prob_mean": 0.985946,
+            "right_lane_visible_fraction_gt_0_5": 0.999575
+          }
+        },
+        "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
         "payload_counts": {
           "0000000000000000": 1,
           "00000000006e9303": 1,
@@ -521,6 +970,93 @@
           "p50": 5.996133,
           "p90": 5.996133
         },
+        "lane_change_starting_sign": {
+          "boundary": "post-fix openpilot DesireHelper transitions; validates the sign convention used by lane-change nudge logic on these routes",
+          "count": 0,
+          "left": 0,
+          "right": 0,
+          "samples": [],
+          "sign_matches_direction": 0
+        },
+        "single_threshold_fit": {
+          "best_balanced_accuracy": {
+            "balanced_accuracy": 0.861175182,
+            "classification_error": 0.129367089,
+            "false_negative": 502,
+            "false_positive": 1031,
+            "threshold_nm": 0.51,
+            "true_negative_rate": 0.881412468,
+            "true_positive_rate": 0.840937896
+          },
+          "best_minimum_classification_error": {
+            "balanced_accuracy": 0.842325156,
+            "classification_error": 0.117637131,
+            "false_negative": 768,
+            "false_positive": 626,
+            "threshold_nm": 0.58,
+            "true_negative_rate": 0.927996319,
+            "true_positive_rate": 0.756653992
+          },
+          "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold, not to claim Toyota itself uses one static torque comparator",
+          "sample_count": 11850,
+          "selected_policy_threshold_nm": 0.6,
+          "selected_threshold_witnesses": {
+            "0.50": {
+              "balanced_accuracy": 0.860176941,
+              "classification_error": 0.135274262,
+              "false_negative": 472,
+              "false_positive": 1131,
+              "threshold_nm": 0.5,
+              "true_negative_rate": 0.869910283,
+              "true_positive_rate": 0.850443599
+            },
+            "0.60": {
+              "balanced_accuracy": 0.832695684,
+              "classification_error": 0.11814346,
+              "false_negative": 860,
+              "false_positive": 540,
+              "threshold_nm": 0.6,
+              "true_negative_rate": 0.937888199,
+              "true_positive_rate": 0.727503169
+            },
+            "0.70": {
+              "balanced_accuracy": 0.762269727,
+              "classification_error": 0.141518987,
+              "false_negative": 1400,
+              "false_positive": 277,
+              "threshold_nm": 0.7,
+              "true_negative_rate": 0.968138946,
+              "true_positive_rate": 0.556400507
+            },
+            "0.80": {
+              "balanced_accuracy": 0.69725756,
+              "classification_error": 0.168945148,
+              "false_negative": 1859,
+              "false_positive": 143,
+              "threshold_nm": 0.8,
+              "true_negative_rate": 0.983551875,
+              "true_positive_rate": 0.410963245
+            },
+            "1.00": {
+              "balanced_accuracy": 0.599338974,
+              "classification_error": 0.215780591,
+              "false_negative": 2513,
+              "false_positive": 44,
+              "threshold_nm": 1.0,
+              "true_negative_rate": 0.994939038,
+              "true_positive_rate": 0.20373891
+            },
+            "1.20": {
+              "balanced_accuracy": 0.539594087,
+              "classification_error": 0.245991561,
+              "false_negative": 2901,
+              "false_positive": 14,
+              "threshold_nm": 1.2,
+              "true_negative_rate": 0.998389694,
+              "true_positive_rate": 0.080798479
+            }
+          }
+        },
         "state_counts": {
           "driver_steering_detected": 3156,
           "no_touch": 8175,
@@ -558,6 +1094,18 @@
       "route": "0000003d--0e812cecba",
       "route_duration_s": 3715.004303,
       "segments": 62,
+      "stock_acc_standstill_candidate": {
+        "all_episode_target_lateral_ids": [],
+        "all_frames_exactly_stopped": true,
+        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and clears on accelerator/resume before motion; B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+        "cruise_substate_pair_counts": {
+          "44,70": 8688,
+          "45,71": 85170
+        },
+        "episodes": [],
+        "frames": 0,
+        "wire_state": "native bus2 0x08A with CRUISE_OPERATING_LATCH=1 and CRUISE_SUBSTATE_2 in {102,103}"
+      },
       "warning_candidate": {
         "carrier": "native Panda bus2 0x371/32 B19 bit6",
         "fall_time_since_touch_s": {
@@ -607,6 +1155,59 @@
           "p90": 0.0
         },
         "falling_edges": 43,
+        "lane_nibble_counts_left_high_right_low": {
+          "1,1": 613,
+          "1,2": 220,
+          "2,1": 207,
+          "2,2": 851,
+          "4,1": 2,
+          "4,4": 3251
+        },
+        "lane_nibble_model_join": {
+          "1,1": {
+            "frames": 613,
+            "left_lane_prob_mean": 0.915362,
+            "left_lane_visible_fraction_gt_0_5": 0.982055,
+            "right_lane_prob_mean": 0.83907,
+            "right_lane_visible_fraction_gt_0_5": 0.905383
+          },
+          "1,2": {
+            "frames": 220,
+            "left_lane_prob_mean": 0.740238,
+            "left_lane_visible_fraction_gt_0_5": 0.831818,
+            "right_lane_prob_mean": 0.628135,
+            "right_lane_visible_fraction_gt_0_5": 0.690909
+          },
+          "2,1": {
+            "frames": 207,
+            "left_lane_prob_mean": 0.727827,
+            "left_lane_visible_fraction_gt_0_5": 0.78744,
+            "right_lane_prob_mean": 0.6784,
+            "right_lane_visible_fraction_gt_0_5": 0.7343
+          },
+          "2,2": {
+            "frames": 843,
+            "left_lane_prob_mean": 0.530552,
+            "left_lane_visible_fraction_gt_0_5": 0.578885,
+            "right_lane_prob_mean": 0.449199,
+            "right_lane_visible_fraction_gt_0_5": 0.462633
+          },
+          "4,1": {
+            "frames": 2,
+            "left_lane_prob_mean": 0.981328,
+            "left_lane_visible_fraction_gt_0_5": 1.0,
+            "right_lane_prob_mean": 0.96221,
+            "right_lane_visible_fraction_gt_0_5": 1.0
+          },
+          "4,4": {
+            "frames": 3251,
+            "left_lane_prob_mean": 0.98235,
+            "left_lane_visible_fraction_gt_0_5": 0.999077,
+            "right_lane_prob_mean": 0.973774,
+            "right_lane_visible_fraction_gt_0_5": 0.997232
+          }
+        },
+        "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
         "payload_counts": {
           "1000041202ee9307": 1,
           "1200001102ee9307": 613,
@@ -702,6 +1303,254 @@
         "escalation_episode_target_lateral_ids": [],
         "exact_eps_torque_source": "native bus0 0x030: signed(B8)*0.1 + signed4(B17 low nibble)*0.01 N.m",
         "first_escalation_lag_from_warning_s": null,
+        "lane_change_starting_sign": {
+          "boundary": "post-fix openpilot DesireHelper transitions; validates the sign convention used by lane-change nudge logic on these routes",
+          "count": 20,
+          "left": 9,
+          "right": 11,
+          "samples": [
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.3200000524520874
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.2999999523162842
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.409999966621399
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.25
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.4299999475479126
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.7300000190734863
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.5499999523162842
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.4299999475479126
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.409999966621399
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.3899999856948853
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.3300000429153442
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.4199999570846558
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.3300000429153442
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.340000033378601
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.4600000381469727
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.6200000047683716
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.7200000286102295
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.5800000429153442
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": false,
+              "steering_torque_nm": -1.149999976158142
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.340000033378601
+            }
+          ],
+          "sign_matches_direction": 20
+        },
+        "single_threshold_fit": {
+          "best_balanced_accuracy": {
+            "balanced_accuracy": 0.884749572,
+            "classification_error": 0.116094357,
+            "false_negative": 584,
+            "false_positive": 1360,
+            "threshold_nm": 0.51,
+            "true_negative_rate": 0.882545988,
+            "true_positive_rate": 0.886953155
+          },
+          "best_minimum_classification_error": {
+            "balanced_accuracy": 0.872317628,
+            "classification_error": 0.106598985,
+            "false_negative": 944,
+            "false_positive": 841,
+            "threshold_nm": 0.57,
+            "true_negative_rate": 0.927368512,
+            "true_positive_rate": 0.817266744
+          },
+          "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold, not to claim Toyota itself uses one static torque comparator",
+          "sample_count": 16745,
+          "selected_policy_threshold_nm": 0.6,
+          "selected_threshold_witnesses": {
+            "0.50": {
+              "balanced_accuracy": 0.884201627,
+              "classification_error": 0.120633025,
+              "false_negative": 533,
+              "false_positive": 1487,
+              "threshold_nm": 0.5,
+              "true_negative_rate": 0.871577856,
+              "true_positive_rate": 0.896825397
+            },
+            "0.60": {
+              "balanced_accuracy": 0.85492727,
+              "classification_error": 0.111077934,
+              "false_negative": 1208,
+              "false_positive": 652,
+              "threshold_nm": 0.6,
+              "true_negative_rate": 0.943691165,
+              "true_positive_rate": 0.766163376
+            },
+            "0.70": {
+              "balanced_accuracy": 0.785720279,
+              "classification_error": 0.141773664,
+              "false_negative": 2085,
+              "false_positive": 289,
+              "threshold_nm": 0.7,
+              "true_negative_rate": 0.975041023,
+              "true_positive_rate": 0.596399535
+            },
+            "0.80": {
+              "balanced_accuracy": 0.721809782,
+              "classification_error": 0.176709466,
+              "false_negative": 2806,
+              "false_positive": 153,
+              "threshold_nm": 0.8,
+              "true_negative_rate": 0.986786424,
+              "true_positive_rate": 0.45683314
+            },
+            "1.00": {
+              "balanced_accuracy": 0.612341052,
+              "classification_error": 0.240549418,
+              "false_negative": 3987,
+              "false_positive": 41,
+              "threshold_nm": 1.0,
+              "true_negative_rate": 0.996459107,
+              "true_positive_rate": 0.228222997
+            },
+            "1.20": {
+              "balanced_accuracy": 0.550661129,
+              "classification_error": 0.277515676,
+              "false_negative": 4639,
+              "false_positive": 8,
+              "threshold_nm": 1.2,
+              "true_negative_rate": 0.999309094,
+              "true_positive_rate": 0.102013163
+            }
+          }
+        },
         "state_counts": {
           "driver_steering_detected": 5166,
           "no_touch": 11095,
@@ -739,6 +1588,18 @@
       "route": "0000003e--1a2f20417d",
       "route_duration_s": 4681.099054,
       "segments": 78,
+      "stock_acc_standstill_candidate": {
+        "all_episode_target_lateral_ids": [],
+        "all_frames_exactly_stopped": true,
+        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and clears on accelerator/resume before motion; B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+        "cruise_substate_pair_counts": {
+          "44,70": 5798,
+          "45,71": 123394
+        },
+        "episodes": [],
+        "frames": 0,
+        "wire_state": "native bus2 0x08A with CRUISE_OPERATING_LATCH=1 and CRUISE_SUBSTATE_2 in {102,103}"
+      },
       "warning_candidate": {
         "carrier": "native Panda bus2 0x371/32 B19 bit6",
         "fall_time_since_touch_s": {
@@ -788,6 +1649,52 @@
           "p90": 0.0
         },
         "falling_edges": 66,
+        "lane_nibble_counts_left_high_right_low": {
+          "0,0": 2,
+          "1,1": 561,
+          "1,2": 139,
+          "2,1": 131,
+          "2,2": 1181,
+          "4,4": 3375
+        },
+        "lane_nibble_model_join": {
+          "1,1": {
+            "frames": 561,
+            "left_lane_prob_mean": 0.954731,
+            "left_lane_visible_fraction_gt_0_5": 0.982175,
+            "right_lane_prob_mean": 0.922158,
+            "right_lane_visible_fraction_gt_0_5": 0.951872
+          },
+          "1,2": {
+            "frames": 139,
+            "left_lane_prob_mean": 0.696021,
+            "left_lane_visible_fraction_gt_0_5": 0.719424,
+            "right_lane_prob_mean": 0.607692,
+            "right_lane_visible_fraction_gt_0_5": 0.611511
+          },
+          "2,1": {
+            "frames": 131,
+            "left_lane_prob_mean": 0.612705,
+            "left_lane_visible_fraction_gt_0_5": 0.633588,
+            "right_lane_prob_mean": 0.619993,
+            "right_lane_visible_fraction_gt_0_5": 0.633588
+          },
+          "2,2": {
+            "frames": 1168,
+            "left_lane_prob_mean": 0.32748,
+            "left_lane_visible_fraction_gt_0_5": 0.332192,
+            "right_lane_prob_mean": 0.232422,
+            "right_lane_visible_fraction_gt_0_5": 0.181507
+          },
+          "4,4": {
+            "frames": 3375,
+            "left_lane_prob_mean": 0.988505,
+            "left_lane_visible_fraction_gt_0_5": 0.999704,
+            "right_lane_prob_mean": 0.978302,
+            "right_lane_visible_fraction_gt_0_5": 0.998519
+          }
+        },
+        "lane_state_boundary": "same-car road data supports 1=recognized, 2=not-recognized/faded and 4=active-LTA recognized for the per-side B3 nibbles; value 3/departure is not observed and is not synthesized",
         "payload_counts": {
           "0000000000000000": 1,
           "00000000006e9300": 1,
@@ -898,6 +1805,294 @@
           "p50": 5.977029,
           "p90": 5.977029
         },
+        "lane_change_starting_sign": {
+          "boundary": "post-fix openpilot DesireHelper transitions; validates the sign convention used by lane-change nudge logic on these routes",
+          "count": 25,
+          "left": 11,
+          "right": 14,
+          "samples": [
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.5399999618530273
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.4700000286102295
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.6699999570846558
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.2799999713897705
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.2999999523162842
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.309999942779541
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.350000023841858
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.3899999856948853
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.5
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.4800000190734863
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.399999976158142
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.4299999475479126
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.4800000190734863
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.350000023841858
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.2799999713897705
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.5800000429153442
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.7200000286102295
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.600000023841858
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.2799999713897705
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.5499999523162842
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.559999942779541
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.940000057220459
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.3799999952316284
+            },
+            {
+              "direction": "left",
+              "left_blinker": true,
+              "right_blinker": false,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": 1.690000057220459
+            },
+            {
+              "direction": "right",
+              "left_blinker": false,
+              "right_blinker": true,
+              "sign_matches_direction": true,
+              "steering_pressed": true,
+              "steering_torque_nm": -1.3200000524520874
+            }
+          ],
+          "sign_matches_direction": 25
+        },
+        "single_threshold_fit": {
+          "best_balanced_accuracy": {
+            "balanced_accuracy": 0.875298243,
+            "classification_error": 0.121711306,
+            "false_negative": 556,
+            "false_positive": 1498,
+            "threshold_nm": 0.49,
+            "true_negative_rate": 0.881327735,
+            "true_positive_rate": 0.869268751
+          },
+          "best_minimum_classification_error": {
+            "balanced_accuracy": 0.8646127,
+            "classification_error": 0.100379237,
+            "false_negative": 876,
+            "false_positive": 818,
+            "threshold_nm": 0.57,
+            "true_negative_rate": 0.935197655,
+            "true_positive_rate": 0.794027745
+          },
+          "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold, not to claim Toyota itself uses one static torque comparator",
+          "sample_count": 16876,
+          "selected_policy_threshold_nm": 0.6,
+          "selected_threshold_witnesses": {
+            "0.50": {
+              "balanced_accuracy": 0.874978484,
+              "classification_error": 0.118807774,
+              "false_negative": 585,
+              "false_positive": 1420,
+              "threshold_nm": 0.5,
+              "true_negative_rate": 0.887506932,
+              "true_positive_rate": 0.862450035
+            },
+            "0.60": {
+              "balanced_accuracy": 0.849634164,
+              "classification_error": 0.10144584,
+              "false_negative": 1059,
+              "false_positive": 653,
+              "threshold_nm": 0.6,
+              "true_negative_rate": 0.948269033,
+              "true_positive_rate": 0.750999295
+            },
+            "0.70": {
+              "balanced_accuracy": 0.785452013,
+              "classification_error": 0.122126096,
+              "false_negative": 1705,
+              "false_positive": 356,
+              "threshold_nm": 0.7,
+              "true_negative_rate": 0.971797512,
+              "true_positive_rate": 0.599106513
+            },
+            "0.80": {
+              "balanced_accuracy": 0.718551033,
+              "classification_error": 0.149205973,
+              "false_negative": 2331,
+              "false_positive": 187,
+              "threshold_nm": 0.8,
+              "true_negative_rate": 0.985185772,
+              "true_positive_rate": 0.451916294
+            },
+            "1.00": {
+              "balanced_accuracy": 0.611191546,
+              "classification_error": 0.198210476,
+              "false_negative": 3288,
+              "false_positive": 57,
+              "threshold_nm": 1.0,
+              "true_negative_rate": 0.995484433,
+              "true_positive_rate": 0.22689866
+            },
+            "1.20": {
+              "balanced_accuracy": 0.547056373,
+              "classification_error": 0.229082721,
+              "false_negative": 3846,
+              "false_positive": 20,
+              "threshold_nm": 1.2,
+              "true_negative_rate": 0.998415591,
+              "true_positive_rate": 0.095697155
+            }
+          }
+        },
         "state_counts": {
           "driver_steering_detected": 4253,
           "no_touch": 11854,
@@ -934,6 +2129,18 @@
       "route": "0000003f--36e72f5fdc",
       "route_duration_s": 5014.842854,
       "segments": 84,
+      "stock_acc_standstill_candidate": {
+        "all_episode_target_lateral_ids": [],
+        "all_frames_exactly_stopped": true,
+        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and clears on accelerator/resume before motion; B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+        "cruise_substate_pair_counts": {
+          "44,70": 9760,
+          "45,71": 122866
+        },
+        "episodes": [],
+        "frames": 0,
+        "wire_state": "native bus2 0x08A with CRUISE_OPERATING_LATCH=1 and CRUISE_SUBSTATE_2 in {102,103}"
+      },
       "warning_candidate": {
         "carrier": "native Panda bus2 0x371/32 B19 bit6",
         "fall_time_since_touch_s": {
@@ -965,5 +2172,5 @@
       }
     }
   },
-  "schema_version": 2
+  "schema_version": 4
 }

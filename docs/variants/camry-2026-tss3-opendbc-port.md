@@ -253,9 +253,12 @@ speed, and does **not** require the former `ToyotaEphemeralSecOCBridge` /
 camera-side stock `0x0B6` replacement source, and permits the controller's bus-0 B6.
 
 The former state-decoding holdover is resolved: fork opendbc `e37bab6c` (2026-09-04)
-replaces the hardcoded `steeringPressed=False` with the normal driver-state contract — physical
-`0x030` torque above a provisional 1.2 N.m exact-F33 threshold (route-3d-derived; sign and
-final value still need dynamic validation). §4.4 records why the placeholder was not harmless.
+replaces the hardcoded `steeringPressed=False` with the normal driver-state contract. The
+initial 1.2 N.m bring-up threshold was deliberately provisional; VAR-139 now replaces it
+with `abs(0x030 torque) >= 0.6 N.m`, selected from the same-car Toyota driver-steering
+detector on two independent September-6 drives. Those post-fix routes also validate the
+sign convention used by upstream DesireHelper: left nudge positive, right nudge negative.
+§4.4 records why the original placeholder was not harmless.
 
 ## 4. Current exact-F33 Gate-2 development plumbing (VAR-102)
 
@@ -370,13 +373,20 @@ direction to leave `preLaneChange` and enter `laneChangeStarting`. Across the th
 there are thousands of `preLaneChangeLeft/Right` event samples and **zero `laneChange` event
 samples**. The driver can therefore physically steer across the lane boundary while
 openpilot continues requesting the old-lane path; the resulting desired/measured-angle gap
-then triggers the same `steerSaturated` alert. Route `3d` torque distributions also show why
-a threshold should not be guessed from one drive: absolute torque during `preLaneChange` has
-median ~1.30 N.m and p90 ~2.15 N.m, while >10-m/s no-blinker samples still reach median
-~0.37 N.m, p90 ~1.14 N.m, with substantial overlap. Resolved 2026-09-04 by fork opendbc
-`e37bab6c`: `steeringPressed` now thresholds physical torque at a provisional 1.2 N.m — just
-above the no-blinker p90 and below the preLaneChange median. On-vehicle validation of the
-threshold and the `0x030` torque sign convention remains required.
+then triggers the same `steerSaturated` alert. Route `3d` torque distributions also showed why
+the first threshold could not safely be selected from one drive: absolute torque during
+`preLaneChange` has median ~1.30 N.m and p90 ~2.15 N.m, while >10-m/s no-blinker samples
+still reach median ~0.37 N.m and p90 ~1.14 N.m with substantial overlap. Fork opendbc
+`e37bab6c` therefore restored the missing state with a conservative **provisional** 1.2 N.m
+bring-up threshold. VAR-139 supersedes that numeric policy with independent same-car
+dynamic evidence: routes `3e` and `3f` join exact-F33 torque to Toyota's native
+`0x371 B20[4]` driver-steering state, whose sampled assertion-transition median is
+**0.67 N.m on both routes** and whose release median is 0.37/0.34 N.m. A simple 0.6 N.m
+threshold gives ~94–95% specificity and ~75–77% sensitivity to that slower hysteretic state.
+The fork therefore uses **`abs(torque) >= 0.6 N.m`** as an upstream-style stateless policy;
+this is not a claim that Toyota itself uses one static torque comparator. Direction is
+closed separately by actual post-fix behavior: all 45 observed `laneChangeStarting`
+transitions across `3e+3f` have positive torque for left and negative torque for right.
 
 Finally, the Sept-3 freshness change is demonstrably active on the wire but not yet proven
 accepted by F33. Live `0x00F RESET_CNT` advances roughly every 300 ms rather than only at
@@ -605,7 +615,7 @@ The unresolved connection is stock request/reference → EPS acceptance and
 actuation. No new steering transmission or message replacement follows from
 this passive analysis.
 
-### 4.7 2026-09-06 Toyota hands-off warning carrier and upstream-style HUD replacement (VAR-130)
+### 4.7 2026-09-06 Toyota hands-off warning carrier and upstream-style HUD replacement (VAR-130 / VAR-138)
 
 The September 6 Chicago outbound/return routes isolate the native Toyota
 hands-off warning independently of openpilot driver monitoring. In clean
@@ -749,15 +759,34 @@ is **not** the mechanism: upstream has hardcoded it to zero for years. The nativ
 shape for the Camry is therefore the same message-ownership pattern, not a new
 hands-off permission system.
 
-Fork opendbc now follows that pattern for TSS3 Camry. `TSS3_LKAS_HUD` is parsed
-as a raw eight-byte FRC-side clone; Panda treats `0x412` bus 0 as a replacement
-TX object with `check_relay=true`; and the controller republishes the live stock
-payload with only B1 mask `0x0C` and B2 mask `0x40` cleared. Every other observed
-HUD byte is preserved. There is no engagement-specific or Camry-only policy gate
-beyond the normal requirement that a source HUD sample has actually been
-received. This removes the observed native cluster hands-off display/escalation
-fields while leaving comma's camera-based driver monitoring as the user-facing
-attention system. Post-patch on-car cluster behavior is not yet measured.
+The same September-6 corpus also closes the ordinary **lane-line display** part
+of this replacement instead of requiring an opaque stock clone. Across all
+**5,389** native bus2 `0x412` frames in route `3f`, B3's high/low nibbles form a
+small per-side state alphabet: `(4,4)=3,375`, `(2,2)=1,181`, `(1,1)=561`,
+`(1,2)=139`, `(2,1)=131`, plus two startup `(0,0)` rows. No nibble value `3` is
+observed. Same-route `modelV2.laneLineProbs[1:3]` joined within 200 ms independently
+supports the interpretation: `(4,4)` is nearly always strong bilateral lane
+recognition, `(1,1)` is also strongly recognized, while `(2,2)` is concentrated
+in weak/missing-lane samples. The active stock-LTA tuple is B0=`0x14`, B3=`0x44`,
+B4=`0x01`; the inactive road tuple uses B0=`0x12`, B4=`0x02` and per-side `1`
+versus `2`. This is consistent with historical Toyota `0x412` line-state
+semantics without transferring its old bit layout wholesale: TSS3's observed
+state `4` is generation-specific, and no lane-departure/color state is inferred
+from the unobserved value `3`.
+
+Fork opendbc therefore follows the normal Toyota ownership pattern for TSS3
+Camry while now rendering the subset of HUD semantics actually recovered.
+`TSS3_LKAS_HUD` is parsed as an eight-byte FRC-side source; Panda treats
+`0x412` bus 0 as a replacement TX object with `check_relay=true`; and the
+controller preserves the live frame outside the normal road-state tuple, but on
+canonical road frames writes B3 from openpilot left/right lane visibility,
+selects the observed active/inactive B0/B4 tuple, and clears the Toyota hands-off
+B1 `0x0C` and B2 `0x40` presentation fields. It deliberately does **not**
+synthesize `leftLaneDepart/rightLaneDepart`, because a TSS3 departure state has
+not been observed. There is no second permission state or controller-side
+steering gate. This leaves comma's driver monitoring as the user-facing attention
+system while restoring ordinary openpilot lane visibility on the stock cluster.
+Post-patch on-car cluster behavior is not yet measured.
 
 Evidence and reproduction:
 
@@ -1037,6 +1066,41 @@ RAM-only path.
 Verification: `tests/verify_camry_f33_steering_state_capture.py`; the in-car packaging
 path is `tools/build_camry_f33_car_kit.py`.
 
+### 4.11 Stock ACC standstill / resume-required state (VAR-140)
+
+The September road corpus closes another previously default-valued `CarState` field without
+reusing legacy Toyota PCM status. Native FRC-side `0x08A` has an exact delayed stop/hold
+state in `CRUISE_SUBSTATE_2`: ordinary active cruise uses B7=`0x47` (or `0x46` during
+accelerator override), while the stock-ACC hold state uses **`0x67`** and its
+accelerator-override companion **`0x66`**.
+
+Routes `3b` and `3c` contain three independent hold episodes totaling **198 native bus-2
+frames**: route `3b` has 148 `B6/B7=45/103` plus 4 `44/102` frames across two episodes;
+route `3c` has 44 plus 2 across one episode. Every one of those frames is at effectively
+exactly 0 m/s and remains Target Lateral ID 11. The state is not merely a vehicle-stop bit:
+for roughly five or more seconds before each episode, the vehicle is already stopped while
+`0x08A` remains in ordinary `45/71`. At resume, the hold state clears on accelerator input
+while speed is still zero, before the vehicle starts moving. Routes `3d/3e/3f` contain no
+such hold frames because their retained cruise intervals do not reach the same delayed
+zero-speed state.
+
+A bit-only interpretation is explicitly rejected. Route `3b` contains a moving transition
+`B6/B7=0x47/0x65` at about 12.48 m/s; therefore B7 bit5 by itself is not a standstill flag.
+The exact observed contract is the B7 byte state `{0x66,0x67}` while the cruise-operating
+latch is asserted. Current GTS+ independently exposes FRC Operation-FFD `525E Stop holding
+status`, which corroborates the concept but is not claimed as a static DID-to-wire join.
+
+Fork opendbc therefore maps `CRUISE_OPERATING_LATCH && CRUISE_SUBSTATE_2 in {0x66,0x67}`
+to normal `cruiseState.standstill`. Source-real regression fixtures cover ordinary stopped
+`0x47` (false), held `0x67` (true), held accelerator override `0x66` (true), and the moving
+`0x65` counterexample (false). No RES+/resume command is synthesized from this mapping; it
+only restores the standard stock-ACC state semantic.
+
+Evidence: `tools/analyze_camry_20260906_hands_off_warning.py`,
+`data/generated/camry_20260906_hands_off_warning_audit.json`,
+`tests/verify_camry_20260906_hands_off_warning.py`, and fork
+`opendbc/car/toyota/tests/test_tss3_camry.py`.
+
 ## 5. What remains before B6 steering authority is established
 
 **Qualification boundary:** the modified-firmware observer/bridge work below is
@@ -1064,11 +1128,13 @@ bounded execution path is independent of Toyota's unresolved stock FRC pipeline:
 5. **Validate the B6 application candidate stationary.** With the wheels unloaded, test ID0
    inactive, ID11 zero angle, then one small bounded nonzero step. Establish sign, scale,
    application companions, motor response, and absence of an EPS fault latch.
-6. **Validate the driver-state mapping on-vehicle.** Fork opendbc `e37bab6c` feeds
-   `steeringPressed` from physical `0x030` torque at a provisional 1.2 N.m; confirm the
-   threshold and torque sign/direction dynamically, and keep the fault mapping neutral
-   until same-car asserted/recovery transitions are proved.
-7. **Only after receiver acceptance and driver-state policy are closed, validate safety
+6. **Driver-state mapping is now dynamically closed for the normal openpilot contract.**
+   VAR-139 validates left-positive/right-negative torque on 45/45 post-fix lane-change
+   starts and selects the stateless 0.6 N.m threshold against Toyota's native driver-
+   steering detector. The richer `0x351/0x394` permanent/recoverable fault policy remains
+   separate; only the exact-F33 immediate `STEERING_FAULT_INHIBIT_STATUS` is currently
+   mapped to `steerFaultTemporary`.
+7. **Only after receiver acceptance, validate the remaining safety transitions and tune.**
    transitions and tune.** Prove slew/rate limits, inactive release, source coexistence or
    suppression, inhibit, fault, recovery, and driver override before another on-road B6 test.
 
@@ -1173,6 +1239,6 @@ final recovered `0x160` request semantics.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061), [VAR-062](../reference/index.md#finding-var-062), [VAR-071](../reference/index.md#finding-var-071), [VAR-102](../reference/index.md#finding-var-102), [VAR-124](../reference/index.md#finding-var-124), [VAR-125](../reference/index.md#finding-var-125), [VAR-126](../reference/index.md#finding-var-126), [VAR-129](../reference/index.md#finding-var-129), [VAR-130](../reference/index.md#finding-var-130), [VAR-131](../reference/index.md#finding-var-131), [VAR-132](../reference/index.md#finding-var-132)
-- Corrections with this document as canonical home: [CORR-120](../reference/index.md#correction-corr-120), [CORR-122](../reference/index.md#correction-corr-122), [CORR-139](../reference/index.md#correction-corr-139), [CORR-140](../reference/index.md#correction-corr-140), [CORR-163](../reference/index.md#correction-corr-163)
+- Findings with this document as canonical home: [VAR-058](../reference/index.md#finding-var-058), [VAR-061](../reference/index.md#finding-var-061), [VAR-062](../reference/index.md#finding-var-062), [VAR-071](../reference/index.md#finding-var-071), [VAR-102](../reference/index.md#finding-var-102), [VAR-124](../reference/index.md#finding-var-124), [VAR-125](../reference/index.md#finding-var-125), [VAR-126](../reference/index.md#finding-var-126), [VAR-129](../reference/index.md#finding-var-129), [VAR-130](../reference/index.md#finding-var-130), [VAR-131](../reference/index.md#finding-var-131), [VAR-132](../reference/index.md#finding-var-132), [VAR-138](../reference/index.md#finding-var-138), [VAR-139](../reference/index.md#finding-var-139), [VAR-140](../reference/index.md#finding-var-140)
+- Corrections with this document as canonical home: [CORR-120](../reference/index.md#correction-corr-120), [CORR-122](../reference/index.md#correction-corr-122), [CORR-139](../reference/index.md#correction-corr-139), [CORR-140](../reference/index.md#correction-corr-140), [CORR-163](../reference/index.md#correction-corr-163), [CORR-169](../reference/index.md#correction-corr-169)
 <!-- knowledge-cross-references:end -->

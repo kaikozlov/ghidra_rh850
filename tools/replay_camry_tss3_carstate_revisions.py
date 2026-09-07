@@ -66,7 +66,8 @@ print(json.dumps(rows, separators=(",", ":")))
 # Execute the *actual current openpilot* DesireHelper rather than duplicating
 # its transition rule in this repository. This proves the CarState semantic
 # delta has the downstream consequence described in the WP2 audit while still
-# keeping the physical Camry torque sign/threshold explicitly unvalidated.
+# keeping the replay's software-only scope separate from the later same-car
+# dynamic sign/threshold validation.
 DESIRE_CHILD = r'''
 import json, sys
 from types import SimpleNamespace
@@ -178,9 +179,9 @@ def summarize(recorded: list[dict[str, Any]], proposed: list[dict[str, Any]], fi
         "decode_equal_when_proposed_measurement_valid": decode_equal,
         "semantic_delta": (
             "The recorded revision hardcodes steeringPressed=False. The proposed revision derives "
-            "the ordinary upstream driver-interaction state from physical torque at the provisional "
-            "TSS3 threshold and propagates DRIVER_TORQUE_INVALID; sign/threshold remain physical-"
-            "validation items, not replay-established facts."
+            "the ordinary upstream driver-interaction state from physical torque at the selected "
+            "TSS3 threshold and propagates DRIVER_TORQUE_INVALID. This revision replay establishes "
+            "the software delta only; independent same-car road evidence validates sign and threshold."
         ),
     }
     return summary, diff_rows
