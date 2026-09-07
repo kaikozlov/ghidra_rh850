@@ -92,6 +92,88 @@ Established software defects fixed and regression-pinned:
   and raises `vehicleSensorsInvalid` on `DRIVER_TORQUE_INVALID`; pinned in the
   same test.
 
+## 2026-09-07 failure localization: sender-complete, receiver-unqualified
+
+This section reconciles the current fork, retained road data, exact-F33
+CodeFlash, and GTS+ evidence into one failure diagnosis. It is a synthesis of
+existing VAR-114/118/124/125/126/139 and CORR-158/162/167 evidence, not a new
+firmware finding. The code checkpoint exercised here is opendbc
+`c6c2b6f2a421872bb5a963fbbd3d1f17d7859c3b` with Panda
+`5236f3708bfd833942c0e0f79a7fc6d8255fbe60`.
+
+The current lateral port is **sender-complete but receiver-unqualified**:
+
+| Layer | Established result | Evidence boundary |
+|---|---|---|
+| openpilot lifecycle and controller | `controlsd` supplies `CC.latActive`; the Camry controller sends ID11 while active and ID0 on release, nominally 50 Hz on bus 0 | Current `test_tss3_camry.py` passes all 25 tests, but software construction is not physical authority |
+| Panda safety and transmit path | 751,664 B6 sends, 751,628 Panda returns, 33 rejected; driving windows have CAN FD enabled with no bus-off or transmit-error accumulation | A Panda return is not an EPS queue/admission witness |
+| vehicle response | In request-divergent samples, measured steering follows the stock `0x081/0x08A` reference rather than the openpilot B6 target; no corresponding EPS/FRC objection appears | This localizes non-response downstream of sender/safety and upstream of observable steering authority, not to one receiver instruction |
+| exact-F33 receiver | RSCFD rule39 and CanIf route44 accept `0x0B6/32`; `FUN_0004BD46` unpacks PDU44 only when `FEBE7F68 < 2` and publication generation changes; `FUN_000CEFFC` requires `FEBEACBD=0` and `FEBECAFF=1`, then maps ID11 to bank 2 | Static receiver/control dataflow proves capability, not live admission on the maintainer vehicle |
+| development authentication | The fork sends zero MAC28 and depends on the installed stage-5 Gate-2 development image `669cedf8…01af` | Patch persistence and result neutralization do not prove queue, raw-COM, generated-scalar, or application delivery |
+
+The narrow diagnosis is therefore:
+
+> The normal openpilot command path reaches B6 construction and Panda
+> transmission, but no retained evidence shows that the exact EPS progresses
+> the candidate through PDU44 into controller bank 2. Enabling
+> `dashcamOnly=False` describes a development sender, not validated lateral
+> actuation.
+
+The exact first rejecting rung cannot be recovered from the retained rlogs.
+Stages 1–5 observed generated fields `FEBE80BC/FEBE80B8`, but those fields are
+*after* the raw PDU44 window and the `FEBE7F68` publication gate. Those runs did
+not sample raw B3:B5 at `FEBE4C02..FEBE4C04`; stale generated fields therefore
+cannot distinguish:
+
+1. no rule39/CanIf/SecOC queue delivery;
+2. raw PDU44 delivery followed by a blocked generated-COM publication; or
+3. successful scalar publication followed by a later application-health gate.
+
+Three nearby symptoms must remain separate:
+
+- The recorded `steeringPressed=False` defect did block normal torque-nudge
+  lane-change entry. The fixed replay changes 0/1,001 pressed samples to
+  797/1,001, and VAR-139 validates sign plus the 0.6 N.m openpilot policy.
+  Post-fix warning onsets still occur before `steeringPressed` becomes true
+  while `latActive` and B6 ID11 remain active, so this defect does not explain
+  lateral non-response.
+- Factory LTA/LCA operates in retained intervals with zero native B6.
+  `0x08A` is an upstream request publication and `0x081` its chassis-side
+  reference; exact F33 receives neither. They remain observations, not commands
+  to synthesize or authority gates to add.
+- `openpilotLongitudinalControl=False` is intentional. Stock ACC is the current
+  Milestone-A arrangement; absent native openpilot acceleration is not a
+  failure of the B6 lateral path.
+
+The next experiment is receiver-state localization, not tuning, another road
+drive, a new Panda permission, `0x08A` spoofing, or another persistent result
+patch. First qualify the ABI-preserving generic monitor exactly as specified by
+[the runtime-monitor runbook](../../exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md).
+The older B6 observer and bridge are not valid substitutes: both use the
+ABI-corrupting `call0(address)` trampoline covered by CORR-167.
+
+The generic monitor is observation-only and does not itself send B6. After it
+returns `runtime_monitor_live` in NRTD and remains live through the direct
+NRTD-to-READY transition, extend the host-side stationary experiment to pair
+the same monitor with an ID0/current-angle then ID11/current-angle sender in one
+Panda session. Reconfigure its eight watch slots across bounded phases to
+observe, in order:
+
+1. aligned windows containing raw PDU44 B3:B5
+   (`FEBE4C00` and `FEBE4C04`);
+2. `FEBE7F68`;
+3. `FEBE80BC` and `FEBE80B8`;
+4. `FEBEADB0` and `FEBEAE90`;
+5. `FEBECAFF`, `FEBEACBD`, and `FEBECB00`.
+
+If the raw PDU stays unchanged, investigate physical-format/CanIf/SecOC queue
+delivery. If raw B3:B5 changes but generated fields do not, the boundary is the
+publication generation/`FEBE7F68` gate. If the snapshots change but
+`FEBECAFF`/bank 2 do not, the boundary is application health/arbitration. Only
+after `FEBECB00=2` is observed does downstream companion/control-funnel
+investigation become justified. No nonzero steering offset is authorized before
+that admission-only result.
+
 ## Deviations kept, and unvalidated physical semantics
 
 Bounded, deliberate deviations from upstream shape (all reviewable in the

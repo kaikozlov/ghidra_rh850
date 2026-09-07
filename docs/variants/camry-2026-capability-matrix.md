@@ -19,10 +19,10 @@ accepted / blocked`.
 | Capability | Status | Evidence link | Blocking dependency |
 |---|---|---|---|
 | Platform identification (F181-exact, census fallback) | reviewable | camry-2026-tss3-integration-audit.md; `test_tss3_camry.py` | — |
-| Vehicle state decode (angle/torque/gear/READY/speed) | reviewable | audit doc; real-frame replays; live-baseline §4–§8 | torque sign/direction dynamic confirmation |
+| Vehicle state decode (angle/torque/gear/READY/speed) | reviewable | audit doc; real-frame replays; live-baseline §4–§8; VAR-139 torque sign/threshold validation | — |
 | Stock ACC (Milestone A longitudinal) | reviewable | audit doc; `0x0FE`/`0x08A`/`0x251` replay tests | — |
-| Driver interaction (nudge → lane change) | reviewable (software) / blocked (validation) | VAR-125 fix + replay audit (0 → 171 pressed on identical input) | on-vehicle confirmation of 1.2 N.m threshold and torque sign |
-| Lateral actuation (B6 command path) | blocked | VAR-124/125/126: sender wire-exact, transport exonerated, wheel tracks stock request when divergent; zero `laneChange` events under the recorded bug | EPS receiver admission/ingress (bench spec WP3); Gate-2 dependency makes current path non-deployable |
+| Driver interaction (nudge → lane change) | reviewable | VAR-125 fix + 1,001-frame replay (0 → 797 pressed) + VAR-139 same-car sign/0.6 N.m threshold validation | — |
+| Lateral actuation (B6 command path) | blocked | VAR-114/118/124/126 + integration-audit §2026-09-07: sender/safety complete, wheel tracks stock request when divergent, raw PDU44/receiver admission unobserved | raw PDU44 → generated-COM → application-bank localization; Gate-2 dependency makes the current path non-deployable |
 | Native openpilot longitudinal (Milestone B) | blocked | camry-2026-longitudinal-evidence.md | `0x160` semantics/ownership; receiver acceptance; source suppression |
 | Radar/perception configuration | reviewable | `radarUnavailable=True` (opendbc `interface.py` TSS3 flag) with model-lead `radarState` is the upstream-normal arrangement — port report §7, WP4 doc | none for stock-ACC operation |
 | Reproducible passive evidence (WP1) | accepted | `camry_20260904_stock_steering_report.json` + source manifest + tracked source-derived fixtures + exact original-output/health verifier (**93/93** checks) | external private logs only for regenerating the already-pinned full corpus |
@@ -37,7 +37,7 @@ physical evidence into software success:
 | Deliverable | Owner | Source revision / corpus | Evidence link | Status | Blocking dependency |
 |---|---|---|---|---|---|
 | WP1 — reproducible September report | analysis repository | three 2026-09-04 routes; 253 compressed rlogs individually SHA-pinned in the manifest; parser fork `45b57159…` | `tools/analyze_camry_20260904_stock_steering.py`; generated manifest/report; tracked fixtures; `tests/verify_camry_20260904_stock_steering.py` | **accepted** | External private rlogs are required only to regenerate the already pinned full-corpus result. The previously "unlocated" original reducer was recovered under disposable `build/tmp/` and used to restore its exact grid/predicates. |
-| WP2 — interface replay/upstream review | kai-openpilot/opendbc integration | proposed fork `45b57159…` / opendbc `8c1124fe…` / Panda `5236f370…`; recorded opendbc `c7a62eaf…`; upstream openpilot `a4f7c50d…`, opendbc `3e92d112…` | camry-2026-tss3-integration-audit.md; `tools/replay_camry_tss3_carstate_revisions.py`; Camry/opendbc/libsafety tests | **reviewable** | Physical `0x030` torque sign/direction and final driver threshold remain unvalidated. |
+| WP2 — interface replay/upstream review | kai-openpilot/opendbc integration | proposed fork `45b57159…` / opendbc `8c1124fe…` / Panda `5236f370…`; recorded opendbc `c7a62eaf…`; upstream openpilot `a4f7c50d…`, opendbc `3e92d112…` | camry-2026-tss3-integration-audit.md; `tools/replay_camry_tss3_carstate_revisions.py`; Camry/opendbc/libsafety tests; VAR-139 | **reviewable** | — |
 | WP3 — steering evidence and bench specification | maintainer + qualified controls/bench owner | exact F33/VAR-124–129 evidence; stock and Gate-2-modified firmware explicitly separated | camry-2026-bench-validation-spec.md | **blocked (valid WP3 exit)** | No legitimate supported steering command interface satisfying the plan; qualified bench apparatus, independent output-angle measurement, and calibrated driver-input measurement also missing. |
 | WP4 — native longitudinal milestone | analysis first; kai-openpilot/opendbc only after evidence closes | retained Camry captures + FRC diagnostics; candidate bus-1 `0x160` Profile-5 evidence | camry-2026-longitudinal-evidence.md | **blocked; implementation intentionally withheld** | `0x160` semantics/scale, receiver acceptance, producer/ownership, physical response, and stock-source suppression unresolved. Stock ACC remains the Milestone-A longitudinal arrangement. |
 | WP5 — car-kit documentation/packaging | analysis repository | exact F33 historical stage/observer/bridge artifacts already pinned by the kit manifest | `exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md`; `tools/build_camry_f33_car_kit.py`; stationary-probe verifier | **accepted for packaging scope** | None for documentation/packaging; the package deliberately does not establish physical control or deployability. |
@@ -76,13 +76,13 @@ durable claims go to CORRECTIONS. Generated evidence regenerates from tracked
 or explicitly declared external inputs (the 2026-09-04 corpus path is
 declared in the WP1 manifest).
 
-## Honest support statement (as of 2026-09-05)
+## Honest support statement (as of 2026-09-07)
 
-- **Milestone A (validated lateral + stock ACC): not complete.** The software
-  side is reviewable (identification, state decode, stock ACC, driver-state
-  fix with regression tests), but lateral *actuation* has no receiver
-  acceptance and no bench validation; the lane-change interaction fix is
-  pending physical threshold/sign confirmation.
+- **Milestone A (validated lateral + stock ACC): not complete.** Identification,
+  state decode, stock ACC, and driver interaction are reviewable; VAR-139
+  validates the lane-change torque sign and selected 0.6 N.m policy against
+  same-car road evidence. Lateral *actuation* still has no receiver-admission
+  result and no bench validation.
 - **Milestone B (native longitudinal): not complete; no physical evidence.**
   The candidate carrier is pinned; semantics/ownership/acceptance/suppression
   remain hypotheses per the WP4 matrix.
