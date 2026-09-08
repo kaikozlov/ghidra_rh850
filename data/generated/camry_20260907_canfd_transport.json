@@ -1,0 +1,620 @@
+{
+  "conclusions": {
+    "host_0x101_was_promoted_to_fd_by_canfd_auto": true,
+    "host_0x412_was_promoted_to_fd_by_canfd_auto": true,
+    "matched_timing_new_native_address_length_signatures": 0,
+    "native_0x101_is_classical": true,
+    "native_0x412_is_classical": true,
+    "native_b6_frames": 0
+  },
+  "matched_timing": {
+    "duration_s": 875.440684,
+    "harness_status_counts": {
+      "flipped": 8714
+    },
+    "host_tx": {
+      "0x0B6": {
+        "rejected": [
+          {
+            "bus": 0,
+            "count": 9,
+            "fd": true,
+            "length": 32
+          }
+        ],
+        "returned": [
+          {
+            "bus": 0,
+            "count": 43083,
+            "fd": true,
+            "length": 32
+          }
+        ],
+        "sendcan": [
+          {
+            "bus": 0,
+            "count": 43093,
+            "fd": true,
+            "length": 32
+          }
+        ]
+      },
+      "0x101": {
+        "rejected": [],
+        "returned": [
+          {
+            "bus": 2,
+            "count": 43272,
+            "fd": false,
+            "length": 8
+          },
+          {
+            "bus": 2,
+            "count": 11,
+            "fd": true,
+            "length": 8
+          }
+        ],
+        "sendcan": [
+          {
+            "bus": 2,
+            "count": 11,
+            "fd": false,
+            "length": 8
+          }
+        ]
+      },
+      "0x412": {
+        "rejected": [
+          {
+            "bus": 0,
+            "count": 1,
+            "fd": false,
+            "length": 8
+          }
+        ],
+        "returned": [
+          {
+            "bus": 0,
+            "count": 870,
+            "fd": true,
+            "length": 8
+          }
+        ],
+        "sendcan": [
+          {
+            "bus": 0,
+            "count": 871,
+            "fd": false,
+            "length": 8
+          }
+        ]
+      }
+    },
+    "init_data": {
+      "dirty": false,
+      "gitBranch": "kai",
+      "gitCommit": "f8bd956a4b23eb4992c6abbe899e72b27cd91d80",
+      "version": "0.11.2"
+    },
+    "native_by_bus": {
+      "0": {
+        "address_length_keys": 198,
+        "can_fd": 401136,
+        "classical": 631452,
+        "frames": 1032588
+      },
+      "1": {
+        "address_length_keys": 57,
+        "can_fd": 343678,
+        "classical": 17,
+        "frames": 343695
+      },
+      "2": {
+        "address_length_keys": 224,
+        "can_fd": 91010,
+        "classical": 125771,
+        "frames": 216781
+      }
+    },
+    "panda_health": [
+      {
+        "bus_off_growth": 0,
+        "first": {
+          "brsEnabled": false,
+          "busOffCnt": 0,
+          "canCoreResetCnt": 0,
+          "canDataSpeed": 2000,
+          "canSpeed": 500,
+          "canfdEnabled": false,
+          "lastDataStoredError": "formError",
+          "lastStoredError": "formError",
+          "receiveErrorCnt": 86,
+          "totalErrorCnt": 90,
+          "totalRxLostCnt": 0,
+          "totalTxLostCnt": 0,
+          "transmitErrorCnt": 0
+        },
+        "last": {
+          "brsEnabled": true,
+          "busOffCnt": 0,
+          "canCoreResetCnt": 0,
+          "canDataSpeed": 2000,
+          "canSpeed": 500,
+          "canfdEnabled": true,
+          "lastDataStoredError": "formError",
+          "lastStoredError": "formError",
+          "receiveErrorCnt": 0,
+          "totalErrorCnt": 90,
+          "totalRxLostCnt": 0,
+          "totalTxLostCnt": 0,
+          "transmitErrorCnt": 0
+        },
+        "max": {
+          "busOffCnt": 0,
+          "canCoreResetCnt": 0,
+          "receiveErrorCnt": 86,
+          "totalErrorCnt": 90,
+          "totalRxLostCnt": 0,
+          "totalTxLostCnt": 0,
+          "transmitErrorCnt": 0
+        },
+        "physical_can": 0,
+        "rx_lost_growth": 0,
+        "total_error_growth": 0,
+        "tx_lost_growth": 0
+      },
+      {
+        "bus_off_growth": 0,
+        "first": {
+          "brsEnabled": false,
+          "busOffCnt": 0,
+          "canCoreResetCnt": 1,
+          "canDataSpeed": 2000,
+          "canSpeed": 500,
+          "canfdEnabled": false,
+          "lastDataStoredError": "noError",
+          "lastStoredError": "noError",
+          "receiveErrorCnt": 0,
+          "totalErrorCnt": 0,
+          "totalRxLostCnt": 0,
+          "totalTxLostCnt": 0,
+          "transmitErrorCnt": 0
+        },
+        "last": {
+          "brsEnabled": true,
+          "busOffCnt": 0,
+          "canCoreResetCnt": 5,
+          "canDataSpeed": 2000,
+          "canSpeed": 500,
+          "canfdEnabled": true,
+          "lastDataStoredError": "noError",
+          "lastStoredError": "bit0Error",
+          "receiveErrorCnt": 0,
+          "totalErrorCnt": 0,
+          "totalRxLostCnt": 0,
+          "totalTxLostCnt": 0,
+          "transmitErrorCnt": 0
+        },
+        "max": {
+          "busOffCnt": 0,
+          "canCoreResetCnt": 5,
+          "receiveErrorCnt": 24,
+          "totalErrorCnt": 0,
+          "totalRxLostCnt": 0,
+          "totalTxLostCnt": 0,
+          "transmitErrorCnt": 0
+        },
+        "physical_can": 1,
+        "rx_lost_growth": 0,
+        "total_error_growth": 0,
+        "tx_lost_growth": 0
+      },
+      {
+        "bus_off_growth": 0,
+        "first": {
+          "brsEnabled": false,
+          "busOffCnt": 0,
+          "canCoreResetCnt": 0,
+          "canDataSpeed": 2000,
+          "canSpeed": 500,
+          "canfdEnabled": false,
+          "lastDataStoredError": "noError",
+          "lastStoredError": "noError",
+          "receiveErrorCnt": 0,
+          "totalErrorCnt": 0,
+          "totalRxLostCnt": 0,
+          "totalTxLostCnt": 0,
+          "transmitErrorCnt": 0
+        },
+        "last": {
+          "brsEnabled": true,
+          "busOffCnt": 0,
+          "canCoreResetCnt": 0,
+          "canDataSpeed": 2000,
+          "canSpeed": 500,
+          "canfdEnabled": true,
+          "lastDataStoredError": "noError",
+          "lastStoredError": "noError",
+          "receiveErrorCnt": 0,
+          "totalErrorCnt": 0,
+          "totalRxLostCnt": 0,
+          "totalTxLostCnt": 0,
+          "transmitErrorCnt": 0
+        },
+        "max": {
+          "busOffCnt": 0,
+          "canCoreResetCnt": 0,
+          "receiveErrorCnt": 0,
+          "totalErrorCnt": 0,
+          "totalRxLostCnt": 0,
+          "totalTxLostCnt": 0,
+          "transmitErrorCnt": 0
+        },
+        "physical_can": 2,
+        "rx_lost_growth": 0,
+        "total_error_growth": 0,
+        "tx_lost_growth": 0
+      }
+    ],
+    "segments": [
+      {
+        "bytes": 8695931,
+        "segment": 0,
+        "sha256": "3e9fee791daf7178b29fcf9483e59837c6fa28fb000c036c6bbd4cff03f39607"
+      },
+      {
+        "bytes": 10546971,
+        "segment": 1,
+        "sha256": "c96af76a6391fc6ef83f8433dad06cc6eb24a58166b64cc18fec622c3f6e7a63"
+      },
+      {
+        "bytes": 10401085,
+        "segment": 2,
+        "sha256": "7c1fe7959f352f773bfe64c3ff19f6736dfb4a4252afd27f2dfce00cab11f0d5"
+      },
+      {
+        "bytes": 10324982,
+        "segment": 3,
+        "sha256": "708c61673781ea0623542a8e63039cea5733f2e765565fb776739c3dbc5e2c0d"
+      },
+      {
+        "bytes": 10266284,
+        "segment": 4,
+        "sha256": "8764362872bed1c58c3aef7fb343cb75fbf92d0c8fce1ed61871bed1411a450f"
+      },
+      {
+        "bytes": 10303591,
+        "segment": 5,
+        "sha256": "12e8774fd94a8436d75c52767e27c6a18dd1546278ef0298a5f680eeeb31ead1"
+      },
+      {
+        "bytes": 10381989,
+        "segment": 6,
+        "sha256": "e840d7bafb7d56cf112e930fbeef14b06a80778684e4c2fafe2cde520dabc3a0"
+      },
+      {
+        "bytes": 10557277,
+        "segment": 7,
+        "sha256": "7632083377fe7bd49afa120a700a0b01cf6017924bc09c7ac8a5664354fcd3e4"
+      },
+      {
+        "bytes": 10463077,
+        "segment": 8,
+        "sha256": "8d524a56f7806011d12c9d3faab79747686962d9b0e4b415c1955a8d709a2b2d"
+      },
+      {
+        "bytes": 10351135,
+        "segment": 9,
+        "sha256": "0209a781986143bbaad395dad5fa164ca2f5495dbb02574dacf7a6a498cca1a1"
+      },
+      {
+        "bytes": 10322071,
+        "segment": 10,
+        "sha256": "19e5e6e80165dc4682812a11d77cdaa05fcdfdf8301df2aaa8709f65197ea6d2"
+      },
+      {
+        "bytes": 10380607,
+        "segment": 11,
+        "sha256": "b94b6d03e5a420d4a84b8dd4b048a156e61ffe322854a76fcf815cd350e48764"
+      },
+      {
+        "bytes": 10406492,
+        "segment": 12,
+        "sha256": "8e6256d280ffab2084c88ad94922df36132fa9148ea70ce6c35c78c1b59d6551"
+      },
+      {
+        "bytes": 10506354,
+        "segment": 13,
+        "sha256": "cde032b24eb84065c713f06546e334f0eca61ba045492212533e91776a0085a5"
+      },
+      {
+        "bytes": 5468918,
+        "segment": 14,
+        "sha256": "50895cf0188aea30608df0ad3a3299873ed92e04cf503e33786a31abb3852096"
+      }
+    ],
+    "special_frame_formats": {
+      "0x00F": [
+        {
+          "count": 8753,
+          "fd": false,
+          "length": 8,
+          "src": 0
+        },
+        {
+          "count": 97,
+          "fd": false,
+          "length": 8,
+          "src": 2
+        },
+        {
+          "count": 8656,
+          "fd": false,
+          "length": 8,
+          "src": 130
+        }
+      ],
+      "0x025": [
+        {
+          "count": 87501,
+          "fd": true,
+          "length": 32,
+          "src": 0
+        },
+        {
+          "count": 963,
+          "fd": true,
+          "length": 32,
+          "src": 2
+        },
+        {
+          "count": 86541,
+          "fd": true,
+          "length": 32,
+          "src": 130
+        }
+      ],
+      "0x030": [
+        {
+          "count": 87510,
+          "fd": true,
+          "length": 32,
+          "src": 0
+        },
+        {
+          "count": 956,
+          "fd": true,
+          "length": 32,
+          "src": 2
+        },
+        {
+          "count": 86552,
+          "fd": true,
+          "length": 32,
+          "src": 130
+        }
+      ],
+      "0x08A": [
+        {
+          "count": 383,
+          "fd": true,
+          "length": 32,
+          "src": 0
+        },
+        {
+          "count": 35001,
+          "fd": true,
+          "length": 32,
+          "src": 2
+        },
+        {
+          "count": 34615,
+          "fd": true,
+          "length": 32,
+          "src": 128
+        }
+      ],
+      "0x090": [
+        {
+          "count": 87510,
+          "fd": true,
+          "length": 32,
+          "src": 0
+        },
+        {
+          "count": 972,
+          "fd": true,
+          "length": 32,
+          "src": 2
+        },
+        {
+          "count": 86542,
+          "fd": true,
+          "length": 32,
+          "src": 130
+        }
+      ],
+      "0x0B6": [
+        {
+          "count": 43083,
+          "fd": true,
+          "length": 32,
+          "src": 128
+        },
+        {
+          "count": 9,
+          "fd": true,
+          "length": 32,
+          "src": 192
+        }
+      ],
+      "0x0D7": [
+        {
+          "count": 43755,
+          "fd": true,
+          "length": 32,
+          "src": 0
+        },
+        {
+          "count": 486,
+          "fd": true,
+          "length": 32,
+          "src": 2
+        },
+        {
+          "count": 43272,
+          "fd": true,
+          "length": 32,
+          "src": 130
+        }
+      ],
+      "0x101": [
+        {
+          "count": 43755,
+          "fd": false,
+          "length": 8,
+          "src": 0
+        },
+        {
+          "count": 487,
+          "fd": false,
+          "length": 8,
+          "src": 2
+        },
+        {
+          "count": 43272,
+          "fd": false,
+          "length": 8,
+          "src": 130
+        },
+        {
+          "count": 11,
+          "fd": true,
+          "length": 8,
+          "src": 130
+        }
+      ],
+      "0x251": [
+        {
+          "count": 12,
+          "fd": false,
+          "length": 8,
+          "src": 0
+        },
+        {
+          "count": 926,
+          "fd": false,
+          "length": 8,
+          "src": 2
+        },
+        {
+          "count": 914,
+          "fd": false,
+          "length": 8,
+          "src": 128
+        }
+      ],
+      "0x371": [
+        {
+          "count": 50,
+          "fd": true,
+          "length": 32,
+          "src": 0
+        },
+        {
+          "count": 4682,
+          "fd": true,
+          "length": 32,
+          "src": 2
+        },
+        {
+          "count": 4632,
+          "fd": true,
+          "length": 32,
+          "src": 128
+        }
+      ],
+      "0x412": [
+        {
+          "count": 14,
+          "fd": false,
+          "length": 8,
+          "src": 0
+        },
+        {
+          "count": 939,
+          "fd": false,
+          "length": 8,
+          "src": 2
+        },
+        {
+          "count": 870,
+          "fd": true,
+          "length": 8,
+          "src": 128
+        },
+        {
+          "count": 1,
+          "fd": false,
+          "length": 8,
+          "src": 192
+        }
+      ]
+    }
+  },
+  "native_address_length_comparison": {
+    "0": {
+      "baseline_key_count": 199,
+      "baseline_only": [
+        {
+          "address": "0x7D8",
+          "bus": 0,
+          "count": 2,
+          "length": 8
+        }
+      ],
+      "matched_timing_key_count": 198,
+      "new_only": []
+    },
+    "1": {
+      "baseline_key_count": 58,
+      "baseline_only": [
+        {
+          "address": "0x7D8",
+          "bus": 1,
+          "count": 2,
+          "length": 8
+        }
+      ],
+      "matched_timing_key_count": 57,
+      "new_only": []
+    },
+    "2": {
+      "baseline_key_count": 226,
+      "baseline_only": [
+        {
+          "address": "0x738",
+          "bus": 2,
+          "count": 20,
+          "length": 8
+        },
+        {
+          "address": "0x7D8",
+          "bus": 2,
+          "count": 2,
+          "length": 8
+        }
+      ],
+      "matched_timing_key_count": 224,
+      "new_only": []
+    }
+  },
+  "schema_version": 1,
+  "scope": {
+    "baseline_route": "0000003f--36e72f5fdc",
+    "boundary": "FDF is recorded; BRS is not represented by CanData and remains outside this artifact.",
+    "matched_openpilot_commit": "f8bd956a4b23eb4992c6abbe899e72b27cd91d80",
+    "matched_timing_route": "00000045--805b7ca6ab"
+  }
+}

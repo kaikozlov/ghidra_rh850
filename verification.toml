@@ -2412,3 +2412,11 @@ paths = [
   "data/generated/camry_8965F3307000_external_lateral_ingress.json",
   "docs/variants/camry-2026-tss3-opendbc-port.md",
 ]
+
+[suite.camry_20260907_canfd_transport]
+tests = ["tests/verify_camry_20260907_canfd_transport.py"]
+oracle = "dynamic_trace"
+paths = [
+  "tools/analyze_camry_20260907_canfd_transport.py",
+  "docs/variants/camry-2026-live-baseline.md",
+]

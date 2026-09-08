@@ -4517,9 +4517,10 @@ message policy:
   has yet been observed after startup;
 - the existing three-tuple Python CAN API remains the default, while tooling may
   supply/request an optional fourth FDF boolean; `>8`-byte payloads are always FD;
-- no per-frame BRS exposure or Toyota-ID special case is added by these changes;
-  `canfd_auto` remains enabled by production `pandad` for compatibility with
-  legacy short-FD senders.
+- no per-frame BRS exposure or Toyota-ID special case is added by these changes.
+  Route 45 subsequently proved bus-global `canfd_auto` misformats both Camry
+  short replacements; §60 records the resulting `bfa1352b2` target-specific
+  removal of auto promotion on the two Camry control buses.
 
 
 A current transport-conformance audit therefore separates what is closed from
@@ -4533,30 +4534,16 @@ what is still not representable end-to-end:
 | receive Classical + CAN-FD payloads | **supported** by M_CAN FD mode; exact RX FDF is retained by Panda and `pandad` |
 | software relay/intercept forwarding | **exact for FDF+BRS** after VAR-103/`5236f370`; forwarded frames bypass bus-global auto-format inference |
 | host TX, payload >8 bytes | **explicit FD** after `fad6b81cc` + `53ad20d0`; no startup dependency on observing a native FD frame first |
-| host TX, payload <=8 bytes | **not yet fully explicit**: `canfd_auto` can still promote an FDF=false host frame to FD after any FD traffic is observed |
+| host TX, payload <=8 bytes | **explicit on the Camry control buses after route-45 follow-up**: §60 proves native `0x412/0x101` are Classical and `bfa1352b2` disables `canfd_auto` on Camry logical buses 0/2 after identification; upstream auto remains available elsewhere |
 | per-frame BRS at host boundary | **not represented** in cereal/USB API; Panda RX knows BRS internally and exact forwarding preserves it, but host-created TX still uses bus-global `brs_enabled` |
 | ordinary Python `Panda.can_recv()` tooling | **format-incomplete**: the current tuple API still drops RX FDF/BRS even though production C++ `pandad` now retains FDF |
 | Panda safety for 8-byte replacement frames | **format-agnostic**: address/bus/length are checked, but FDF/BRS are not constrained for `0x412/8` or `0x101/8` |
 
-The last three rows are why the stack should **not yet be called fully wire-format
-complete for arbitrary mixed traffic**.  They do not affect exact relay
-forwarding, and B6/32 is unambiguously FD, but they matter for the two short
-TSS3 replacement frames.  Historical rlogs cannot resolve their native FDF and
-cannot resolve any frame's native BRS.  The first post-`fad6b81cc` passive
-capture can resolve FDF for `0x412`/`0x101`; a complete per-frame BRS audit still
-requires carrying BRS through the Panda/openpilot host protocol rather than only
-preserving it inside the forwarding path.
-
-This deliberately leaves one question open rather than encoding a guess.  The
-current TSS3 controller emits `0x0B6/32` plus 8-byte `0x412` HUD and `0x101`
-brake-cancel replacements.  B6 is unambiguously CAN FD.  The native FDF of the
-two 8-byte source frames was not recoverable from historical rlogs because of
-the old metadata loss.  After deploying the FDF-preserving `pandad`, a short
-passive stock capture can answer that directly.  If those source frames are
-Classical CAN, TSS3 should stop relying on bus-global `canfd_auto` for its
-replacement traffic and use explicit per-frame FDF; if an 8-byte source frame
-is actually CAN FD, that fact can now be represented rather than inferred from
-bus history.
+The remaining rows are why the stack should still not be called completely
+wire-format-descriptive for **arbitrary** mixed traffic: per-frame BRS and the
+ordinary Python receive API remain incomplete.  Route 45 closes the Camry-specific
+FDF question for the two short replacements and §60 records the corresponding
+removal of production `canfd_auto`; historical rlogs still cannot recover BRS.
 
 One diagnostic bookkeeping caveat also matters when interpreting Panda health
 on this car.  The retained September-4 routes report `harnessStatus=flipped`.
@@ -4574,10 +4561,84 @@ the harness orientation first.
 **Boundary.**  The target proves `500 kbit/s @ 80% / 2 Mbit/s @ 70%`, mixed
 Classical+FD operation, and a genuine Panda/openpilot loss of per-frame FDF at
 the host boundary.  The existing forwarding-format bug is already fixed by
-VAR-103.  The new host-side FDF preservation is enough to make the next capture
-discriminating.  Neither the 70/80 data sample-point difference nor the native
-format of Toyota's 8-byte replacement candidates is yet causally assigned to a
-steering failure.
+VAR-103.  Route 45 in §60 supplies the previously missing discriminating road
+result: it closes native FDF for `0x412/0x101`, proves `canfd_auto` misformatted
+both replacements, and finds no new native address/DLC shape under matched
+timing.  Per-frame BRS remains outside the rlog boundary.
+
+## 60. Post-fix road capture closes short-frame FDF and the timing-hidden-frame hypothesis (VAR-143)
+
+The first road capture made with the exact-F33 timing/edge-filter Panda and the
+FDF-preserving `pandad` is route `00000045--805b7ca6ab`, 15 segments / 875.44 s.
+`initData` pins the running openpilot tree to clean commit
+`f8bd956a4b23eb4992c6abbe899e72b27cd91d80`; all 8,714 Panda-health samples
+report the harness `flipped`.  The 15 locally retained `rlog.zst` files total
+149,376,764 bytes and are individually SHA-256 inventoried by
+`data/generated/camry_20260907_canfd_transport.json`.
+
+This capture resolves the two short replacement-PDU formats that historical
+rlogs could not distinguish.  Native `0x412/8` is **Classical CAN** throughout:
+939 source-side frames on bus2 plus 14 startup-side frames on bus0 have
+`fd=false`, with zero native `fd=true` copies.  Native `0x101/8` is likewise
+**Classical CAN**: 43,755 bus0 frames plus 487 startup-side bus2 frames are
+`fd=false`, again with zero native FD copies.  This is not a length inference;
+it is the actual FDF recorded from Panda's RX element after `fad6b81cc`.
+
+The same route directly demonstrates the `canfd_auto` bug rather than merely
+showing that it was possible.  `card` published 871 `0x412/8` replacements with
+`CanData.fd=false`; Panda successfully returned 870 TX echoes and **all 870 have
+FDF=true**.  The 11 bus2 brake-cancel `0x101/8` sends were also published with
+`fd=false`, while exactly 11 bus2 TX echoes have `fd=true`; the 43,272 other
+bus2 echoes of `0x101` remain Classical because they are exact software-forwarded
+native traffic.  Thus the old production `pandad` policy was converting both
+known Classical Toyota replacement PDUs into CAN-FD frames solely because some
+other frame had enabled sticky bus-wide FD state.
+
+The fix is generic transport behavior, not an ID exception.  `kai-openpilot`
+commit `bfa1352b2` (`pandad: preserve Camry mixed CAN frame format`) keeps
+upstream `canfd_auto` enabled for fingerprinting and unrelated platforms, then
+disables it only on logical buses 0 and 2 after `CarParams` identifies the exact
+`TOYOTA_CAMRY_TSS3` platform.  The already-landed host format work makes those
+two buses explicit: payloads longer than eight bytes are marked FD by `pandad`,
+and a short CAN-FD producer can set `CanData.fd=true`, while the proven
+`0x412/0x101` replacements remain Classical.  Panda `53ad20d0` guarantees an
+explicit FD request remains FD even with auto off; follow-up Panda `58a1b6a4`
+indexes the auto-policy bit by **logical bus** while retaining received
+FD/BRS state on the physical FDCAN core, which is required for the flipped
+harness.  The remaining host-format limitation is per-frame **BRS**, which is
+not represented by `CanData`; exact relay forwarding still preserves received
+BRS internally.
+
+The matched-timing run also gives a clean result for the earlier concern that
+Panda's old 80% data sample point might have hidden a native steering stream.
+Comparing the complete native `(bus,address,DLC)` set in route 45 against the
+long pre-change route `0000003f--36e72f5fdc` finds **zero new native signatures
+on all three buses**: bus0 is 198 versus 199 keys, bus1 57 versus 58, and bus2
+224 versus 226.  The only baseline-only shapes are sparse diagnostic-looking
+`0x7D8/8` (two copies on buses0/1/2) and `0x738/8` (20 copies on bus2).  There is
+no newly visible recurrent control/steering PDU.  Native B6 remains exactly
+zero while native `0x08A/32` remains present as CAN FD (35,001 bus2 source-side
+frames plus 383 startup-side bus0 copies).  Consequently the 70% timing + EFBI
+change is correct target conformance, but this capture provides no evidence
+that the old sample point was masking the missing factory steering carrier.
+
+Panda health is consistent with that conclusion.  With the flipped harness,
+physical `canState0` is logical bus2 and physical `canState2` is logical bus0.
+Physical CAN0 enters the recorded route carrying an existing error total of 90
+and REC=86, but its error total never increments, REC decays to zero immediately,
+and bus-off/FIFO-loss remain zero.  Physical CAN2 is zero-error for the complete
+route.  CAN1 has only startup/reset transients in the first few seconds; neither
+split-network controller accumulates a driving-time protocol error.  Thus the
+matched configuration is stable on-road and does not expose a previously
+hidden error/retransmission regime.
+
+**Boundary.**  Route 45 closes native FDF for the two Camry short replacements
+and proves the old host auto-promotion was wrong on this vehicle.  It also
+substantially closes “70% versus 80% hid an otherwise recurrent native steering
+ID” for the observed topology: the exact-timing run exposes no new native
+address/DLC signature and B6 is still host-only.  This does not prove absence on
+an electrically unobserved segment, and the rlog still cannot identify native
+per-frame BRS.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
@@ -4585,6 +4646,6 @@ steering failure.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113), [VAR-114](../reference/index.md#finding-var-114), [VAR-115](../reference/index.md#finding-var-115), [VAR-116](../reference/index.md#finding-var-116), [VAR-118](../reference/index.md#finding-var-118), [VAR-119](../reference/index.md#finding-var-119), [VAR-120](../reference/index.md#finding-var-120), [VAR-121](../reference/index.md#finding-var-121), [VAR-122](../reference/index.md#finding-var-122), [VAR-123](../reference/index.md#finding-var-123), [VAR-127](../reference/index.md#finding-var-127), [VAR-128](../reference/index.md#finding-var-128), [VAR-134](../reference/index.md#finding-var-134), [VAR-135](../reference/index.md#finding-var-135), [VAR-136](../reference/index.md#finding-var-136), [VAR-137](../reference/index.md#finding-var-137), [VAR-142](../reference/index.md#finding-var-142)
+- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113), [VAR-114](../reference/index.md#finding-var-114), [VAR-115](../reference/index.md#finding-var-115), [VAR-116](../reference/index.md#finding-var-116), [VAR-118](../reference/index.md#finding-var-118), [VAR-119](../reference/index.md#finding-var-119), [VAR-120](../reference/index.md#finding-var-120), [VAR-121](../reference/index.md#finding-var-121), [VAR-122](../reference/index.md#finding-var-122), [VAR-123](../reference/index.md#finding-var-123), [VAR-127](../reference/index.md#finding-var-127), [VAR-128](../reference/index.md#finding-var-128), [VAR-134](../reference/index.md#finding-var-134), [VAR-135](../reference/index.md#finding-var-135), [VAR-136](../reference/index.md#finding-var-136), [VAR-137](../reference/index.md#finding-var-137), [VAR-142](../reference/index.md#finding-var-142), [VAR-143](../reference/index.md#finding-var-143)
 - Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157), [CORR-158](../reference/index.md#correction-corr-158), [CORR-159](../reference/index.md#correction-corr-159), [CORR-160](../reference/index.md#correction-corr-160), [CORR-161](../reference/index.md#correction-corr-161), [CORR-162](../reference/index.md#correction-corr-162), [CORR-165](../reference/index.md#correction-corr-165), [CORR-166](../reference/index.md#correction-corr-166), [CORR-167](../reference/index.md#correction-corr-167), [CORR-168](../reference/index.md#correction-corr-168), [CORR-171](../reference/index.md#correction-corr-171)
 <!-- knowledge-cross-references:end -->
