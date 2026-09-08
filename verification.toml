@@ -2420,3 +2420,10 @@ paths = [
   "tools/analyze_camry_20260907_canfd_transport.py",
   "docs/variants/camry-2026-live-baseline.md",
 ]
+
+[suite.camry_20260907_steering_reconciliation]
+tests = ["tests/verify_camry_20260907_steering_reconciliation.py"]
+oracle = "dynamic_trace"
+paths = [
+  "tools/analyze_camry_20260907_steering_reconciliation.py",
+]

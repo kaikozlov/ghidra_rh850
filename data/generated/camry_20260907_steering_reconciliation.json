@@ -1,0 +1,371 @@
+{
+  "evidence": {
+    "angle_contract": {
+      "openpilot_b6_field": "B4:B5 signed BE16; exact-F33 B6 target-angle plane",
+      "scale_deg_per_count": 0.05730274202574147,
+      "shared_numeric_scale_is_not_a_claim_of_identical_processing_stage": true,
+      "stock_08a_field": "B18:B19 signed BE16; Target Steering Angle After Output Compensation plane"
+    },
+    "conclusion": {
+      "b6_wire_angle_matches_openpilot_request": true,
+      "fixed_stock_to_b6_offset_is_supported": false,
+      "high_confidence_model_path_crossed_inner_lane_line": false,
+      "stock_08a_and_b6_are_not_interchangeable_reference_planes": true
+    },
+    "input": {
+      "route": "00000045--805b7ca6ab",
+      "route_init_data": {
+        "dirty": false,
+        "gitBranch": "kai",
+        "gitCommit": "f8bd956a4b23eb4992c6abbe899e72b27cd91d80",
+        "version": "0.11.2"
+      },
+      "segment_count": 15,
+      "segments": [
+        {
+          "bytes": 8695931,
+          "segment": 0,
+          "sha256": "3e9fee791daf7178b29fcf9483e59837c6fa28fb000c036c6bbd4cff03f39607"
+        },
+        {
+          "bytes": 10546971,
+          "segment": 1,
+          "sha256": "c96af76a6391fc6ef83f8433dad06cc6eb24a58166b64cc18fec622c3f6e7a63"
+        },
+        {
+          "bytes": 10401085,
+          "segment": 2,
+          "sha256": "7c1fe7959f352f773bfe64c3ff19f6736dfb4a4252afd27f2dfce00cab11f0d5"
+        },
+        {
+          "bytes": 10324982,
+          "segment": 3,
+          "sha256": "708c61673781ea0623542a8e63039cea5733f2e765565fb776739c3dbc5e2c0d"
+        },
+        {
+          "bytes": 10266284,
+          "segment": 4,
+          "sha256": "8764362872bed1c58c3aef7fb343cb75fbf92d0c8fce1ed61871bed1411a450f"
+        },
+        {
+          "bytes": 10303591,
+          "segment": 5,
+          "sha256": "12e8774fd94a8436d75c52767e27c6a18dd1546278ef0298a5f680eeeb31ead1"
+        },
+        {
+          "bytes": 10381989,
+          "segment": 6,
+          "sha256": "e840d7bafb7d56cf112e930fbeef14b06a80778684e4c2fafe2cde520dabc3a0"
+        },
+        {
+          "bytes": 10557277,
+          "segment": 7,
+          "sha256": "7632083377fe7bd49afa120a700a0b01cf6017924bc09c7ac8a5664354fcd3e4"
+        },
+        {
+          "bytes": 10463077,
+          "segment": 8,
+          "sha256": "8d524a56f7806011d12c9d3faab79747686962d9b0e4b415c1955a8d709a2b2d"
+        },
+        {
+          "bytes": 10351135,
+          "segment": 9,
+          "sha256": "0209a781986143bbaad395dad5fa164ca2f5495dbb02574dacf7a6a498cca1a1"
+        },
+        {
+          "bytes": 10322071,
+          "segment": 10,
+          "sha256": "19e5e6e80165dc4682812a11d77cdaa05fcdfdf8301df2aaa8709f65197ea6d2"
+        },
+        {
+          "bytes": 10380607,
+          "segment": 11,
+          "sha256": "b94b6d03e5a420d4a84b8dd4b048a156e61ffe322854a76fcf815cd350e48764"
+        },
+        {
+          "bytes": 10406492,
+          "segment": 12,
+          "sha256": "8e6256d280ffab2084c88ad94922df36132fa9148ea70ce6c35c78c1b59d6551"
+        },
+        {
+          "bytes": 10506354,
+          "segment": 13,
+          "sha256": "cde032b24eb84065c713f06546e334f0eca61ba045492212533e91776a0085a5"
+        },
+        {
+          "bytes": 5468918,
+          "segment": 14,
+          "sha256": "50895cf0188aea30608df0ad3a3299873ed92e04cf503e33786a31abb3852096"
+        }
+      ],
+      "total_bytes": 149376764
+    },
+    "model_path_vs_inner_lane_lines": {
+      "active_model_rows": 7014,
+      "confidence_rule": "inner laneLineProbs[1] and [2] >= 0.5",
+      "full_rendered_path_0_to_100m_min_margin_m": {
+        "count": 6836,
+        "max": 1.775640845,
+        "mean": 1.51272986,
+        "median": 1.53290868,
+        "median_abs": 1.53290868,
+        "min": 1.013644635,
+        "p90_abs": 1.644886028,
+        "rmse": 1.51746735
+      },
+      "full_rendered_path_0_to_100m_outside_rows": 0,
+      "high_confidence_rows": 6836,
+      "lane_center_y_at_vehicle_m": {
+        "count": 6836,
+        "max": 0.442875028,
+        "mean": 0.025712325,
+        "median": 0.015089124,
+        "median_abs": 0.040760666,
+        "min": -0.359173954,
+        "p90_abs": 0.162011951,
+        "rmse": 0.105183024
+      },
+      "margin_m": {
+        "10": {
+          "count": 6836,
+          "max": 1.826070596,
+          "mean": 1.558786655,
+          "median": 1.578060317,
+          "median_abs": 1.578060317,
+          "min": 1.109805362,
+          "p90_abs": 1.69992116,
+          "rmse": 1.563742314
+        },
+        "20": {
+          "count": 6836,
+          "max": 1.831928995,
+          "mean": 1.564183103,
+          "median": 1.579013163,
+          "median_abs": 1.579013163,
+          "min": 1.153574597,
+          "p90_abs": 1.703586935,
+          "rmse": 1.568634071
+        },
+        "30": {
+          "count": 6836,
+          "max": 1.817358532,
+          "mean": 1.568715415,
+          "median": 1.579737533,
+          "median_abs": 1.579737533,
+          "min": 1.184660876,
+          "p90_abs": 1.701313951,
+          "rmse": 1.572452101
+        }
+      },
+      "offcenter_behavior": {
+        "edge_bias_episode_count": 8,
+        "edge_bias_episode_rule": "abs(vehicle_offset)>=0.30m; 10m path on same edge side and farther from center; gaps<=0.20s",
+        "edge_bias_rows": 103,
+        "longest_low_torque_edge_bias_episode": {
+          "duration_s": 2.00007,
+          "median_b6_error_deg": -1.171908226,
+          "median_driver_torque_nm": 0.0,
+          "median_path10_offset_m": -0.390174455,
+          "median_stock_error_deg": -0.255064354,
+          "median_v_ego_mps": 20.013672829,
+          "median_vehicle_offset_m": -0.375299752,
+          "rows": 40,
+          "segment": 2
+        },
+        "steering_away_definition": "(target_angle - measured_angle) has same sign as vehicle offset from lane center",
+        "threshold_0p1m": {
+          "b6_error_points_away_from_lane_center_count": 760,
+          "b6_error_points_away_from_lane_center_fraction": 0.55596196,
+          "count": 1367,
+          "median_abs_vehicle_offset_m": 0.162080169,
+          "path10_farther_from_center_than_vehicle_count": 525,
+          "path10_farther_from_center_than_vehicle_fraction": 0.38405267,
+          "path10_same_edge_side_count": 1365,
+          "path10_same_edge_side_fraction": 0.998536942,
+          "stock_error_points_away_from_lane_center_count": 833,
+          "stock_error_points_away_from_lane_center_fraction": 0.60936357
+        },
+        "threshold_0p2m": {
+          "b6_error_points_away_from_lane_center_count": 388,
+          "b6_error_points_away_from_lane_center_fraction": 0.756335283,
+          "count": 513,
+          "median_abs_vehicle_offset_m": 0.281394303,
+          "path10_farther_from_center_than_vehicle_count": 238,
+          "path10_farther_from_center_than_vehicle_fraction": 0.463937622,
+          "path10_same_edge_side_count": 513,
+          "path10_same_edge_side_fraction": 1.0,
+          "stock_error_points_away_from_lane_center_count": 296,
+          "stock_error_points_away_from_lane_center_fraction": 0.576998051
+        },
+        "threshold_0p3m": {
+          "b6_error_points_away_from_lane_center_count": 191,
+          "b6_error_points_away_from_lane_center_fraction": 0.830434783,
+          "count": 230,
+          "median_abs_vehicle_offset_m": 0.376258045,
+          "path10_farther_from_center_than_vehicle_count": 103,
+          "path10_farther_from_center_than_vehicle_fraction": 0.447826087,
+          "path10_same_edge_side_count": 230,
+          "path10_same_edge_side_fraction": 1.0,
+          "stock_error_points_away_from_lane_center_count": 156,
+          "stock_error_points_away_from_lane_center_fraction": 0.67826087
+        },
+        "threshold_0p4m": {
+          "b6_error_points_away_from_lane_center_count": 55,
+          "b6_error_points_away_from_lane_center_fraction": 0.964912281,
+          "count": 57,
+          "median_abs_vehicle_offset_m": 0.415942609,
+          "path10_farther_from_center_than_vehicle_count": 16,
+          "path10_farther_from_center_than_vehicle_fraction": 0.280701754,
+          "path10_same_edge_side_count": 57,
+          "path10_same_edge_side_fraction": 1.0,
+          "stock_error_points_away_from_lane_center_count": 46,
+          "stock_error_points_away_from_lane_center_fraction": 0.807017544
+        },
+        "vehicle_offset_definition": "negative of detected inner-lane center y at x=0"
+      },
+      "outside_lane_count": {
+        "10": 0,
+        "20": 0,
+        "30": 0
+      },
+      "path_minus_lane_center_m": {
+        "10": {
+          "count": 6836,
+          "max": 0.354215745,
+          "mean": -0.023968124,
+          "median": -0.013227766,
+          "median_abs": 0.036542335,
+          "min": -0.446228879,
+          "p90_abs": 0.155715356,
+          "rmse": 0.102938006
+        },
+        "20": {
+          "count": 6836,
+          "max": 0.315625555,
+          "mean": -0.022062927,
+          "median": -0.01154615,
+          "median_abs": 0.035289458,
+          "min": -0.423085444,
+          "p90_abs": 0.141213946,
+          "rmse": 0.094560756
+        },
+        "30": {
+          "count": 6836,
+          "max": 0.302177293,
+          "mean": -0.022560313,
+          "median": -0.01528233,
+          "median_abs": 0.034166113,
+          "min": -0.383908621,
+          "p90_abs": 0.127989156,
+          "rmse": 0.082748215
+        }
+      }
+    },
+    "openpilot_to_b6": {
+      "active_b6_events_with_fresh_control": 17461,
+      "b6_minus_car_control_deg": {
+        "count": 17461,
+        "max": 2.966613643,
+        "mean": -0.005635022,
+        "median": -0.000826949,
+        "median_abs": 0.014630508,
+        "min": -4.272267352,
+        "p90_abs": 0.026455391,
+        "rmse": 0.127754389
+      },
+      "b6_minus_car_output_deg": {
+        "count": 17461,
+        "max": 2.963947169,
+        "mean": -0.004817714,
+        "median": -0.000893107,
+        "median_abs": 0.017334886,
+        "min": -3.928750353,
+        "p90_abs": 0.071955967,
+        "rmse": 0.12821196
+      }
+    },
+    "stock_id0_reference_plane": {
+      "b6_from_measured_fit": {
+        "correlation": 0.999987829,
+        "count": 2901,
+        "fit_residual_rmse_deg": 0.036203902,
+        "intercept_deg": -0.001120624,
+        "slope": 1.000220841
+      },
+      "b6_minus_measured_deg": {
+        "count": 2901,
+        "max": 0.318913619,
+        "mean": -0.000912397,
+        "median": 0.001119188,
+        "median_abs": 0.016843896,
+        "min": -0.293284883,
+        "p90_abs": 0.028091777,
+        "rmse": 0.036251618
+      },
+      "count": 2901,
+      "selection": "stock ID0 + B6 ID0; vEgo>10 m/s; abs(measured)<20 deg; abs(rate)<5 deg/s; abs(B6)<30 deg",
+      "stock_08a_from_measured_fit": {
+        "correlation": 0.998417387,
+        "count": 2901,
+        "fit_residual_rmse_deg": 0.39828389,
+        "intercept_deg": -0.767000902,
+        "slope": 0.963838948
+      },
+      "stock_minus_measured_deg": {
+        "count": 2901,
+        "max": 0.816956173,
+        "mean": -0.801096499,
+        "median": -0.785394492,
+        "median_abs": 0.785394492,
+        "min": -2.040571171,
+        "p90_abs": 1.439339723,
+        "rmse": 0.933145882
+      }
+    },
+    "stock_id0_while_openpilot_b6_id11": {
+      "interpretation": "useful non-coincident-request episodes, but not by themselves a causal B6 actuation proof",
+      "model_rows": 416,
+      "rows_with_abs_driver_torque_lt_0p5_nm": 123
+    },
+    "stock_vs_openpilot_when_both_id11": {
+      "b6_minus_live_offset_minus_stock_deg": {
+        "count": 16423,
+        "max": 2.173013323,
+        "mean": 0.270882231,
+        "median": 0.34888733,
+        "median_abs": 0.426641611,
+        "min": -2.729471343,
+        "p90_abs": 0.971042551,
+        "rmse": 0.645960572
+      },
+      "b6_minus_stock_deg": {
+        "count": 16423,
+        "max": 2.750531617,
+        "mean": 0.434908377,
+        "median": 0.458421936,
+        "median_abs": 0.57302742,
+        "min": -2.807834359,
+        "p90_abs": 1.375265809,
+        "rmse": 0.845178549
+      },
+      "b6_minus_stock_vs_live_offset_correlation": 0.613475978,
+      "both_abs_gt_0p5_deg": 6724,
+      "count": 16423,
+      "live_angle_offset_deg": {
+        "count": 16423,
+        "max": 1.19615984,
+        "mean": 0.164026146,
+        "median": 0.135724127,
+        "median_abs": 0.203584209,
+        "min": -0.869022906,
+        "p90_abs": 0.619590461,
+        "rmse": 0.356635138
+      },
+      "opposite_sign_when_both_abs_gt_0p5_deg": 220,
+      "raw_correlation": 0.595025299,
+      "stock_vs_b6_minus_live_offset_correlation": 0.717748383
+    }
+  },
+  "openpilot_parser_commit": "bfa1352b25e64e50e1332d8661af475be9be04a4",
+  "schema": "camry-20260907-steering-reconciliation-v1"
+}
