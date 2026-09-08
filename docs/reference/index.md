@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 453 · Corrections: 175 · Open questions: 54 · Docs: 125 · Suites: 242
+Findings: 454 · Corrections: 175 · Open questions: 54 · Docs: 125 · Suites: 243
 
 ## Reading this index
 
@@ -456,7 +456,7 @@ Findings: 453 · Corrections: 175 · Open questions: 54 · Docs: 125 · Suites: 
 | <a id="finding-var-123"></a>**VAR-123** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_f33_gate2_root_result_patch.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | — |
 | <a id="finding-var-124"></a>**VAR-124** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md), [camry-2026-capability-matrix](../variants/camry-2026-capability-matrix.md), [camry_f33_b6_observer_runbook](../../exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md) | — | — |
 | <a id="finding-var-125"></a>**VAR-125** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [camry-2026-capability-matrix](../variants/camry-2026-capability-matrix.md), [camry-2026-tss3-integration-audit](../variants/camry-2026-tss3-integration-audit.md) | — | — |
-| <a id="finding-var-126"></a>**VAR-126** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [camry-2026-bench-validation-spec](../variants/camry-2026-bench-validation-spec.md) | — | OQ-054 |
+| <a id="finding-var-126"></a>**VAR-126** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [camry-2026-bench-validation-spec](../variants/camry-2026-bench-validation-spec.md), [camry-2026-live-baseline](../variants/camry-2026-live-baseline.md) | — | OQ-054 |
 | <a id="finding-var-127"></a>**VAR-127** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [camry-2026-longitudinal-evidence](../variants/camry-2026-longitudinal-evidence.md) | `tests/verify_camry_8965F3307000_gtsplus_semantics.py` | — |
 | <a id="finding-var-128"></a>**VAR-128** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | — | — |
 | <a id="finding-var-129"></a>**VAR-129** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [CORRECTIONS](../status/CORRECTIONS.md), [camry-2026-bench-validation-spec](../variants/camry-2026-bench-validation-spec.md), [camry-2026-tss3-integration-audit](../variants/camry-2026-tss3-integration-audit.md), [camry_f33_b6_observer_runbook](../../exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md) | — | — |
@@ -472,6 +472,7 @@ Findings: 453 · Corrections: 175 · Open questions: 54 · Docs: 125 · Suites: 
 | <a id="finding-var-139"></a>**VAR-139** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [camry-2026-capability-matrix](../variants/camry-2026-capability-matrix.md) (+2) | `tests/verify_camry_20260906_hands_off_warning.py` | OQ-054 |
 | <a id="finding-var-140"></a>**VAR-140** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [CORRECTIONS](../status/CORRECTIONS.md), [camry-2026-tss3-integration-audit](../variants/camry-2026-tss3-integration-audit.md) | `tests/verify_camry_20260906_hands_off_warning.py` | — |
 | <a id="finding-var-141"></a>**VAR-141** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | [camry-2026-tss3-integration-audit](../variants/camry-2026-tss3-integration-audit.md) | `tests/verify_camry_2026_parser_liveness.py` | — |
+| <a id="finding-var-142"></a>**VAR-142** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_camry_8965F3307000_canfd_timing.py` | — |
 
 ## Open-questions index
 
@@ -864,7 +865,7 @@ coverage performed outside that runner without creating false routing edges.
 | `data/function_discovery_reviewed_clusters.csv` | function_discovery | — |
 | `data/generated/21140bbd65e530a9/diagnostic_annotations.json` | diagnostic_vocabulary | — |
 | `data/generated/21140bbd65e530a9/diagnostic_vocabulary.json` | diagnostic_vocabulary, application_wdbi, application_wdbi_surface_live, spanconstant_corolla_codeflash | — |
-| `data/generated/camry-8965F3307000/decompilations.jsonl` | analysis_targets, camry_8965f3307000_gtsplus_semantics, camry_8965f3307000_codeflash, camry_8965f3307000_flash_backend, camry_8965f3307000_b6_acceptance_ladder, camry_8965f3307000_lateral_static, camry_8965f3307000_tss3_opendbc_port, camry_8965f3307000_fault_status, camry_8965f3307000_external_lateral_ingress, camry_8965f3307000_d5_snapshot_provenance, camry_8965f3307000_command_cone_ingress, camry_8965f3307000_hidden_ingress_residuals, camry_8965f3307000_dataflash_nvm_owners, camry_2026_lateral_family_census | — |
+| `data/generated/camry-8965F3307000/decompilations.jsonl` | analysis_targets, camry_8965f3307000_gtsplus_semantics, camry_8965f3307000_canfd_timing, camry_8965f3307000_codeflash, camry_8965f3307000_flash_backend, camry_8965f3307000_b6_acceptance_ladder, camry_8965f3307000_lateral_static, camry_8965f3307000_tss3_opendbc_port, camry_8965f3307000_fault_status, camry_8965f3307000_external_lateral_ingress, camry_8965f3307000_d5_snapshot_provenance, camry_8965f3307000_command_cone_ingress, camry_8965f3307000_hidden_ingress_residuals, camry_8965f3307000_dataflash_nvm_owners, camry_2026_lateral_family_census | — |
 | `data/generated/camry_20260904_stock_steering_manifest.json` | camry_20260904_stock_steering | — |
 | `data/generated/camry_20260904_stock_steering_report.json` | camry_20260904_stock_steering | — |
 | `data/generated/camry_20260906_hands_off_warning_audit.json` | camry_20260906_hands_off_warning | — |
