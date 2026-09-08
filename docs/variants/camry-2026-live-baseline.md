@@ -4478,10 +4478,17 @@ settle.
 
 For the next on-car discrimination run, the experimental Panda fork now carries
 `0e3f1c92` (`can: match F33 CAN-FD data sample point`), changing only the H7
-2-Mbit data-phase sample-point constant from 80% to **70%**.  With Panda's 80-MHz peripheral clock and divide-by-2 prescaler this produces 20 Tq/bit,
-TSEG1=13, TSEG2=6 and SJW=6, matching the exact F33 wire timing.  This is an
-intentional experiment on the Camry branch, not a proposed upstream/global
-default for other vehicles.
+2-Mbit data-phase sample-point constant from 80% to **70%**.  With Panda's 80-MHz
+peripheral clock and divide-by-2 prescaler this produces 20 Tq/bit, TSEG1=13,
+TSEG2=6 and SJW=6, matching the exact F33 wire timing.  Follow-up Panda commit
+`53ad20d0` also enables M_CAN `CCCR.EFBI`.  Bosch defines EFBI as requiring two
+consecutive dominant Tq before hard synchronization during bus integration,
+which matches the exact F33 `REFE=1` receive-edge-filter behavior used while
+integrating from idle.  Thus the Camry branch now matches the target's nominal
+and data bit timing, SJW, ISO-FD operation, disabled transmitter-delay
+compensation, and idle/bus-integration edge filter.  These are intentional
+Camry-branch transport settings, not a proposed upstream/global default for
+other vehicles.
 
 A more direct Panda/openpilot defect class was found in the frame-format
 transport.  Panda's USB `CANPacket_t` already has a one-bit FDF field, and the
@@ -4503,12 +4510,42 @@ message policy:
 - `CanData` now carries `fd`; received Panda FDF is retained into `can`/rlog;
 - C++ Panda packing writes the USB FDF bit instead of treating it as reserved;
 - payloads longer than 8 bytes are marked FD explicitly even if `canfd_auto` is
-  later disabled, while an explicit short-frame FDF is preserved;
+  later disabled, while an explicit short-frame FDF can be carried by cereal;
+- Panda `53ad20d0` makes an explicit host FDF a lower bound even while auto mode
+  remains enabled, so a `>8`-byte/explicit-FD host frame can no longer be
+  accidentally transmitted as Classical CAN merely because no native FD frame
+  has yet been observed after startup;
 - the existing three-tuple Python CAN API remains the default, while tooling may
   supply/request an optional fourth FDF boolean; `>8`-byte payloads are always FD;
-- no BRS exposure, Toyota-ID special case, or automatic-FD policy change is made
-  by `fad6b81cc`; the separate experimental Panda commit `0e3f1c92` changes the
-  2-Mbit sample point to 70% for the on-car A/B.
+- no per-frame BRS exposure or Toyota-ID special case is added by these changes;
+  `canfd_auto` remains enabled by production `pandad` for compatibility with
+  legacy short-FD senders.
+
+
+A current transport-conformance audit therefore separates what is closed from
+what is still not representable end-to-end:
+
+| layer / operation | Camry mixed Classical + CAN-FD status |
+|---|---|
+| physical nominal timing | **matched**: 500 kbit/s, 80% SP, SJW16 |
+| physical data timing | **matched**: 2 Mbit/s, 70% SP, SJW6 |
+| bus-integration edge filter | **matched in fork**: F33 `REFE=1`, M_CAN `EFBI=1` |
+| receive Classical + CAN-FD payloads | **supported** by M_CAN FD mode; exact RX FDF is retained by Panda and `pandad` |
+| software relay/intercept forwarding | **exact for FDF+BRS** after VAR-103/`5236f370`; forwarded frames bypass bus-global auto-format inference |
+| host TX, payload >8 bytes | **explicit FD** after `fad6b81cc` + `53ad20d0`; no startup dependency on observing a native FD frame first |
+| host TX, payload <=8 bytes | **not yet fully explicit**: `canfd_auto` can still promote an FDF=false host frame to FD after any FD traffic is observed |
+| per-frame BRS at host boundary | **not represented** in cereal/USB API; Panda RX knows BRS internally and exact forwarding preserves it, but host-created TX still uses bus-global `brs_enabled` |
+| ordinary Python `Panda.can_recv()` tooling | **format-incomplete**: the current tuple API still drops RX FDF/BRS even though production C++ `pandad` now retains FDF |
+| Panda safety for 8-byte replacement frames | **format-agnostic**: address/bus/length are checked, but FDF/BRS are not constrained for `0x412/8` or `0x101/8` |
+
+The last three rows are why the stack should **not yet be called fully wire-format
+complete for arbitrary mixed traffic**.  They do not affect exact relay
+forwarding, and B6/32 is unambiguously FD, but they matter for the two short
+TSS3 replacement frames.  Historical rlogs cannot resolve their native FDF and
+cannot resolve any frame's native BRS.  The first post-`fad6b81cc` passive
+capture can resolve FDF for `0x412`/`0x101`; a complete per-frame BRS audit still
+requires carrying BRS through the Panda/openpilot host protocol rather than only
+preserving it inside the forwarding path.
 
 This deliberately leaves one question open rather than encoding a guess.  The
 current TSS3 controller emits `0x0B6/32` plus 8-byte `0x412` HUD and `0x101`
