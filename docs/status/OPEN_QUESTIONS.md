@@ -1178,11 +1178,15 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   an acceptance variable under cumulative stage 5: the tag is opaque until ICU-S and all
   recovered software-visible verification consequences are neutralized before delivery.
   VAR-148/CORR-179 close downstream ID11 composition, and VAR-149/CORR-180 now join
-  the entire recovered software ladder through the motor-current model. The remaining
-  independent-B6 question is **which adjacent live rung first diverges**, not another
-  static acceptance hypothesis: physical/CanIf ingress; SecOC queue; route44 publication;
-  `4BD46` global-state unpack; application health/bank selection; companion/readiness and
-  `CB20/CB38`; `AC2B` D0218 branch; `AC5A` scale; `AC29/AC2A` hard gate;
+  the entire recovered software ladder through the motor-current model. VAR-150 then puts
+  every retained road B6 against that ladder: current-shape application bytes/cadence are
+  clean, and four of `CE772/CE7A6`'s five normal-ID11 readiness inputs are directly healthy
+  in joined road CAN (`ACCD=0`, `ADBF=0`, `CAFC=0`, `CAD9=0`); only `ACCC` remains without
+  a direct road witness. The remaining independent-B6 question is **which adjacent live
+  rung first diverges**, not another static acceptance hypothesis: physical/CanIf ingress;
+  SecOC queue; route44 publication; `4BD46` global-state unpack; application health/bank
+  selection; remaining `ACCC` readiness plus `CB20/CB38`; `AC2B` D0218 branch; `AC5A`
+  scale; `AC29/AC2A` hard gate;
   `CC98/CC94` override; motor-side selection; or current/plant response. One stationary
   internal capture can discriminate these in order. Counter phase, MAC value, packer
   companion guesses, `0x08A` suppression, and another result patch are no longer justified

@@ -97,7 +97,7 @@ check("freshness table independently resolves B6 FreshnessId2 to ordinary slot1"
 checks = j["semantic_checks"]
 check("every exact semantic predicate passes", checks and all(checks.values()))
 for name in (
-  "sig263_zero_is_activation_condition",
+  "sig263_is_special_0x31_transient_condition_not_id11_gate",
   "sig265_one_suppresses_controller_term",
   "app_sequence_is_independent_modulo_counter",
   "sig269_scales_supervisor",
@@ -156,9 +156,12 @@ check("signal266 dies at staging exactly",
       rows[266]["snapshot"] is None and rows[266]["stage"]["readers"] == [])
 for signal in (264, 267, 271, 272):
   check(f"signal{signal} snapshots but has no runtime reader", rows[signal]["snapshot"]["readers"] == [])
-check("command-relevant companion consumers are exact",
+check("signal263 only feeds the special-0x31 transient qualifier",
       rows[263]["snapshot"]["readers"] == ["0x0CB664"]
-      and rows[265]["snapshot"]["readers"] == ["0x0CDA20"]
+      and refs(corpus, 0xFEBEC7B4, "READ") == [0xCB664, 0xCB73A]
+      and refs(corpus, 0xFEBEC7B4, "WRITE") == [0xCB548, 0xCB664])
+check("command-relevant normal-ID11 companion consumers are exact",
+      rows[265]["snapshot"]["readers"] == ["0x0CDA20"]
       and rows[268]["snapshot"]["readers"] == ["0x0CEC8A"]
       and rows[269]["snapshot"]["readers"] == ["0x0CE3AA"]
       and rows[270]["snapshot"]["readers"] == ["0x0CDFF8"]

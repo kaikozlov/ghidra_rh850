@@ -18,7 +18,7 @@
     },
     {
       "raw": "FEBE80CB",
-      "role": "activation companion; zero required by CB664",
+      "role": "special-0x31 transient companion; not a normal ID11 bank-admission requirement",
       "signal": 263,
       "snapshot": "FEBEADDD",
       "stage": "FEBEF155",
@@ -485,7 +485,13 @@
       "body_sha256": "4f271a0bbd5185f192a9e98ecd4199333dfa8caf3e9ecfb39b5c743b9d6cc388",
       "body_size": 214,
       "decompiled_c_sha256": "f2c61c423f6aa079da9ccf3f8d221a3ec86eb3a8301212dd015b3b069db6ca7b",
-      "role": "B6 companion/readiness activation gate"
+      "role": "special-0x31 transient companion qualification"
+    },
+    "0x0CB73A": {
+      "body_sha256": "7f7324938d9d266f3e374ded2f494f0fb7c0366efcc2a39c15ec620e28014cb1",
+      "body_size": 226,
+      "decompiled_c_sha256": "d987954c99f5cf12a2d5fc4f6be9754a18fb7292adedeb2b8dbad0cf0cf3078f",
+      "role": "special-0x31 transient activation state"
     },
     "0x0CBB66": {
       "body_sha256": "ea547c863e4e2ecd9f6001acb26f7eab3d109a91d820a734b3d14ff2da5a19a3",
@@ -856,10 +862,10 @@
       "stage5_bypasses": false
     },
     {
-      "condition": "sig263=0 for activation; sig265=0 permits its term; application sequence is sane; sig269/270 percentages and local readiness/inhibits permit contribution",
+      "condition": "sig265=0 permits its term; application sequence is sane; sig269/270 percentages and local readiness/inhibits permit contribution. sig263/CB664 belongs to the separate ADB0==0x31 transient and is not an ID11 admission gate",
       "failure_effect": "controller can remain unready, suppress a term, attenuate contribution, or ramp down without any SecOC failure",
       "layer": "B6 application companions/readiness",
-      "live_witness": "ADDD/ADBB/ADBC/ADBD/ADBE + readiness state CAB*/CA*",
+      "live_witness": "ADBB/ADBC/ADBD/ADBE + readiness state CAB*/CA*; ADDD only if separately studying the 0x31 transient",
       "order": 9,
       "site": "CB2A2/CB664/CDA20/CEC8A/CE3AA/CDFF8/CE7FE/CE836/...",
       "stage5_bypasses": false
@@ -1636,7 +1642,7 @@
           "0x058C9A"
         ]
       },
-      "role": "activation companion; zero required by CB664",
+      "role": "special-0x31 transient companion; not a normal ID11 bank-admission requirement",
       "signal": 263,
       "snapshot": {
         "address": "0xFEBEADDD",
@@ -2504,7 +2510,7 @@
     "route_status_participates_readiness": true,
     "secoc_ingress_state_and_pointer_checks": true,
     "separate_cyclic_roots": true,
-    "sig263_zero_is_activation_condition": true,
+    "sig263_is_special_0x31_transient_condition_not_id11_gate": true,
     "sig265_one_suppresses_controller_term": true,
     "sig269_scales_supervisor": true,
     "sig270_scales_supervisor": true,
@@ -2715,7 +2721,7 @@
     {
       "first_divergence": "ADB0=11/CAFF=1 with CB00!=2 => bank admission; CB00=2 with CB20/CB38 zero => readiness/gain/controller state",
       "phase": "D",
-      "purpose": "bank selection, B6 companion/readiness, and cooperative contribution",
+      "purpose": "bank selection, normal-ID11 readiness, and cooperative contribution",
       "watch_windows": [
         {
           "address": "0xFEBECAFC",
@@ -2738,9 +2744,9 @@
           ]
         },
         {
-          "address": "0xFEBEADDC",
+          "address": "0xFEBEACCC",
           "covers": [
-            "sig263 activation companion at ADDD"
+            "ACCC/ACCD cooperative readiness inputs"
           ]
         },
         {

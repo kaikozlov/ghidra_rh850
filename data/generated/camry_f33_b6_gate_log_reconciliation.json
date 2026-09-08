@@ -1,0 +1,2225 @@
+{
+  "aggregate": {
+    "active_id11_expected_application_shape": 833730,
+    "active_id11_frames": 925228,
+    "active_id11_unexpected_application_shape": 91498,
+    "b6_cadence_gt35ms_within_retained_sequence": 0,
+    "b6_send_frames": 1696097,
+    "current_shape_active_gate_values_within_25ms": {
+      "ACCD": {
+        "0": 833727
+      },
+      "ADBF": {
+        "0": 833724
+      },
+      "CAD9": {
+        "0": 833724
+      },
+      "CAFC": {
+        "0": 833724
+      }
+    },
+    "current_shape_active_id11_frames": 833730,
+    "current_shape_route_names": [
+      "0000002c--c784367b7e",
+      "00000037--dec6fe39cb",
+      "0000003b--62262eb7a1",
+      "0000003c--97b9e7a69a",
+      "0000003d--0e812cecba",
+      "0000003e--1a2f20417d",
+      "0000003f--36e72f5fdc",
+      "00000045--805b7ca6ab",
+      "00000048--709f22277b"
+    ],
+    "nonzero_mac28_frames": 0,
+    "recent_active_ACCD_latest_within_25ms": {
+      "0": 364911
+    },
+    "recent_active_ADBF_latest_within_25ms": {
+      "0": 364910
+    },
+    "recent_active_CAD9_latest_within_25ms": {
+      "0": 364910
+    },
+    "recent_active_CAFC_latest_within_25ms": {
+      "0": 364910
+    },
+    "recent_active_id11_frames": 364913,
+    "recent_route_names": [
+      "00000037--dec6fe39cb",
+      "0000003e--1a2f20417d",
+      "0000003f--36e72f5fdc",
+      "00000045--805b7ca6ab",
+      "00000048--709f22277b"
+    ],
+    "zero_mac28_frames": 1696097
+  },
+  "conclusions": {
+    "ACCC_is_directly_proven_from_road_CAN": false,
+    "current_application_shape_is_supported_by_recent_road_logs": true,
+    "highest_value_next_witness": "queue -> route44 -> generated COM -> ADB0/CAFF/CB00 before downstream controller/output monitoring",
+    "historical_corpus_active_shape_is_uniform": false,
+    "recent_ACCD_observable_satisfies_zero_when_joined": true,
+    "recent_ADBF_observable_satisfies_lt2_when_joined": true,
+    "recent_B6_cadence_crosses_35ms_loss_threshold": false,
+    "recent_CAD9_observable_satisfies_zero_when_joined": true,
+    "recent_CAFC_observable_satisfies_zero_when_joined": true,
+    "road_logs_prove_F33_internal_B6_admission": false,
+    "sig263_or_CB664_speed_is_normal_ID11_gate": false
+  },
+  "routes": [
+    {
+      "b6": {
+        "active_id11": 9755,
+        "application_pattern_counts": {
+          "0,0,0,1,0,0,0,0,0,0,0": 8701,
+          "11,0,0,0,0,0,100,100,0,0,0": 9755
+        },
+        "cadence": {
+          "count": 18455,
+          "gt_35ms": 0,
+          "max_ms": 30.825834,
+          "median_ms": 19.92375,
+          "min_ms": 17.230156
+        },
+        "expected_active_pattern": "11,0,0,0,0,0,100,100,0,0,0",
+        "expected_active_pattern_count": 9755,
+        "expected_inactive_pattern": "0,0,0,1,0,0,0,0,0,0,0",
+        "expected_inactive_pattern_count": 8701,
+        "inactive_id0": 8701,
+        "max_abs_target_raw_active": 624,
+        "nonzero_mac28": 0,
+        "send_frames": 18456,
+        "sequence_delta_mod64": {
+          "1": 18455
+        },
+        "target_id_counts": {
+          "0": 8701,
+          "11": 9755
+        },
+        "unexpected_active_pattern_count": 0,
+        "unexpected_inactive_pattern_count": 0,
+        "zero_mac28": 18456
+      },
+      "diagnostic_requests": {
+        "non_tester_present_single_frame_requests": 0,
+        "sendcan_0x7A1_payload_counts": {
+          "013e000000000000": 1,
+          "023e000000000000": 2
+        },
+        "single_frame_service_counts": {
+          "0x3E": 3
+        }
+      },
+      "init": {
+        "dirty": false,
+        "gitBranch": "kai",
+        "gitCommit": "eda73848605d3910c86ae112f0fb6587149f46cf",
+        "version": "0.11.2"
+      },
+      "road_gate_observables": {
+        "ACCC": {
+          "direct_road_proxy": false,
+          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+        },
+        "ACCD": {
+          "active_b6_latest_within_25ms": {
+            "0": 9755
+          },
+          "join_age": {
+            "joined": 9755,
+            "max_ms": 22.901355,
+            "median_ms": 10.405469
+          },
+          "native_src0_all_values": {
+            "0": 19076
+          },
+          "native_src0_cadence": {
+            "count": 19075,
+            "gt_35ms": 5,
+            "max_ms": 49.111094,
+            "median_ms": 19.885104,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 19076,
+            "130": 18527,
+            "2": 551
+          },
+          "passing_condition": "ACCD == 0",
+          "static_source": "0x0D7 B0[7] / signal243 -> FEBE80A0 -> FEBEF094 -> FEBEACCD"
+        },
+        "ADBF": {
+          "active_b6_latest_within_25ms": {
+            "0": 9755
+          },
+          "join_age": {
+            "joined": 9755,
+            "max_ms": 12.555938,
+            "median_ms": 1.831459
+          },
+          "native_src0_all_values": {
+            "0": 38159,
+            "2": 7
+          },
+          "native_src0_cadence": {
+            "count": 38165,
+            "gt_35ms": 3,
+            "max_ms": 39.348802,
+            "median_ms": 9.891666,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 38166,
+            "130": 37062,
+            "2": 1101
+          },
+          "passing_condition": "ADBF < 2",
+          "static_source": "FEBE817C -> FEBEF145 -> FEBEADBF; exact F33 0x030 packer signal19 = B13[1:0]"
+        },
+        "CAD9": {
+          "active_b6_latest_within_25ms": {
+            "0": 9755
+          },
+          "join_age": {
+            "joined": 9755,
+            "max_ms": 12.555938,
+            "median_ms": 1.831459
+          },
+          "native_src0_all_values": {
+            "0": 38154,
+            "1": 12
+          },
+          "native_src0_cadence": {
+            "count": 38165,
+            "gt_35ms": 3,
+            "max_ms": 39.348802,
+            "median_ms": 9.891666,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAD9 == 0",
+          "static_source": "CAD9 -> AD4B -> E83A -> 80E0; exact F33 0x030 packer signal31 = B19[0]"
+        },
+        "CAFC": {
+          "active_b6_latest_within_25ms": {
+            "0": 9755
+          },
+          "join_age": {
+            "joined": 9755,
+            "max_ms": 12.555938,
+            "median_ms": 1.831459
+          },
+          "native_src0_all_values": {
+            "0": 38166
+          },
+          "native_src0_cadence": {
+            "count": 38165,
+            "gt_35ms": 3,
+            "max_ms": 39.348802,
+            "median_ms": 9.891666,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAFC == 0",
+          "static_source": "CAFC -> AD42 -> E834 -> 80EC; exact F33 0x030 packer signal25 = B16[0]"
+        }
+      },
+      "route_name": "00000037--dec6fe39cb",
+      "segment_count": 7
+    },
+    {
+      "b6": {
+        "active_id11": 235958,
+        "application_pattern_counts": {
+          "0,0,0,1,0,0,0,0,0,0,0": 91032,
+          "11,0,0,0,0,0,100,100,0,0,0": 235958
+        },
+        "cadence": {
+          "count": 326989,
+          "gt_35ms": 0,
+          "max_ms": 30.613385,
+          "median_ms": 19.942604,
+          "min_ms": 12.551198
+        },
+        "expected_active_pattern": "11,0,0,0,0,0,100,100,0,0,0",
+        "expected_active_pattern_count": 235958,
+        "expected_inactive_pattern": "0,0,0,1,0,0,0,0,0,0,0",
+        "expected_inactive_pattern_count": 91032,
+        "inactive_id0": 91032,
+        "max_abs_target_raw_active": 489,
+        "nonzero_mac28": 0,
+        "send_frames": 326990,
+        "sequence_delta_mod64": {
+          "1": 326989
+        },
+        "target_id_counts": {
+          "0": 91032,
+          "11": 235958
+        },
+        "unexpected_active_pattern_count": 0,
+        "unexpected_inactive_pattern_count": 0,
+        "zero_mac28": 326990
+      },
+      "diagnostic_requests": {
+        "non_tester_present_single_frame_requests": 0,
+        "sendcan_0x7A1_payload_counts": {
+          "013e000000000000": 1,
+          "023e000000000000": 2
+        },
+        "single_frame_service_counts": {
+          "0x3E": 3
+        }
+      },
+      "init": {
+        "dirty": false,
+        "gitBranch": "kai",
+        "gitCommit": "d1914bbe7f88b03fd7f59afd97607e873c4bba47",
+        "version": "0.11.2"
+      },
+      "road_gate_observables": {
+        "ACCC": {
+          "direct_road_proxy": false,
+          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+        },
+        "ACCD": {
+          "active_b6_latest_within_25ms": {
+            "0": 235957
+          },
+          "join_age": {
+            "joined": 235957,
+            "max_ms": 22.97,
+            "median_ms": 10.48151
+          },
+          "native_src0_all_values": {
+            "0": 329096
+          },
+          "native_src0_cadence": {
+            "count": 329095,
+            "gt_35ms": 7,
+            "max_ms": 50.554219,
+            "median_ms": 19.897447,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 329096,
+            "130": 328452,
+            "2": 648
+          },
+          "passing_condition": "ACCD == 0",
+          "static_source": "0x0D7 B0[7] / signal243 -> FEBE80A0 -> FEBEF094 -> FEBEACCD"
+        },
+        "ADBF": {
+          "active_b6_latest_within_25ms": {
+            "0": 235956
+          },
+          "join_age": {
+            "joined": 235956,
+            "max_ms": 13.324844,
+            "median_ms": 1.873594
+          },
+          "native_src0_all_values": {
+            "0": 658203,
+            "2": 6
+          },
+          "native_src0_cadence": {
+            "count": 658208,
+            "gt_35ms": 5,
+            "max_ms": 47.159583,
+            "median_ms": 9.903646,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 658209,
+            "130": 656920,
+            "2": 1292
+          },
+          "passing_condition": "ADBF < 2",
+          "static_source": "FEBE817C -> FEBEF145 -> FEBEADBF; exact F33 0x030 packer signal19 = B13[1:0]"
+        },
+        "CAD9": {
+          "active_b6_latest_within_25ms": {
+            "0": 235956
+          },
+          "join_age": {
+            "joined": 235956,
+            "max_ms": 13.324844,
+            "median_ms": 1.873594
+          },
+          "native_src0_all_values": {
+            "0": 658198,
+            "1": 11
+          },
+          "native_src0_cadence": {
+            "count": 658208,
+            "gt_35ms": 5,
+            "max_ms": 47.159583,
+            "median_ms": 9.903646,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAD9 == 0",
+          "static_source": "CAD9 -> AD4B -> E83A -> 80E0; exact F33 0x030 packer signal31 = B19[0]"
+        },
+        "CAFC": {
+          "active_b6_latest_within_25ms": {
+            "0": 235956
+          },
+          "join_age": {
+            "joined": 235956,
+            "max_ms": 13.324844,
+            "median_ms": 1.873594
+          },
+          "native_src0_all_values": {
+            "0": 658201,
+            "1": 8
+          },
+          "native_src0_cadence": {
+            "count": 658208,
+            "gt_35ms": 5,
+            "max_ms": 47.159583,
+            "median_ms": 9.903646,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAFC == 0",
+          "static_source": "CAFC -> AD42 -> E834 -> 80EC; exact F33 0x030 packer signal25 = B16[0]"
+        }
+      },
+      "route_name": "0000003b--62262eb7a1",
+      "segment_count": 110
+    },
+    {
+      "b6": {
+        "active_id11": 107735,
+        "application_pattern_counts": {
+          "0,0,0,1,0,0,0,0,0,0,0": 132498,
+          "11,0,0,0,0,0,100,100,0,0,0": 107735
+        },
+        "cadence": {
+          "count": 240232,
+          "gt_35ms": 0,
+          "max_ms": 30.64125,
+          "median_ms": 19.895728,
+          "min_ms": 14.399427
+        },
+        "expected_active_pattern": "11,0,0,0,0,0,100,100,0,0,0",
+        "expected_active_pattern_count": 107735,
+        "expected_inactive_pattern": "0,0,0,1,0,0,0,0,0,0,0",
+        "expected_inactive_pattern_count": 132498,
+        "inactive_id0": 132498,
+        "max_abs_target_raw_active": 398,
+        "nonzero_mac28": 0,
+        "send_frames": 240233,
+        "sequence_delta_mod64": {
+          "1": 240232
+        },
+        "target_id_counts": {
+          "0": 132498,
+          "11": 107735
+        },
+        "unexpected_active_pattern_count": 0,
+        "unexpected_inactive_pattern_count": 0,
+        "zero_mac28": 240233
+      },
+      "diagnostic_requests": {
+        "non_tester_present_single_frame_requests": 0,
+        "sendcan_0x7A1_payload_counts": {
+          "013e000000000000": 1,
+          "023e000000000000": 2
+        },
+        "single_frame_service_counts": {
+          "0x3E": 3
+        }
+      },
+      "init": {
+        "dirty": false,
+        "gitBranch": "kai",
+        "gitCommit": "d1914bbe7f88b03fd7f59afd97607e873c4bba47",
+        "version": "0.11.2"
+      },
+      "road_gate_observables": {
+        "ACCC": {
+          "direct_road_proxy": false,
+          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+        },
+        "ACCD": {
+          "active_b6_latest_within_25ms": {
+            "0": 107735
+          },
+          "join_age": {
+            "joined": 107735,
+            "max_ms": 23.092812,
+            "median_ms": 2.293333
+          },
+          "native_src0_all_values": {
+            "0": 241753
+          },
+          "native_src0_cadence": {
+            "count": 241752,
+            "gt_35ms": 5,
+            "max_ms": 61.722396,
+            "median_ms": 19.887291,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 241753,
+            "130": 241298,
+            "2": 457
+          },
+          "passing_condition": "ACCD == 0",
+          "static_source": "0x0D7 B0[7] / signal243 -> FEBE80A0 -> FEBEF094 -> FEBEACCD"
+        },
+        "ADBF": {
+          "active_b6_latest_within_25ms": {
+            "0": 107734
+          },
+          "join_age": {
+            "joined": 107734,
+            "max_ms": 13.330052,
+            "median_ms": 1.921719
+          },
+          "native_src0_all_values": {
+            "0": 483431,
+            "2": 77
+          },
+          "native_src0_cadence": {
+            "count": 483507,
+            "gt_35ms": 1,
+            "max_ms": 52.108177,
+            "median_ms": 9.904375,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 483508,
+            "130": 482611,
+            "2": 897
+          },
+          "passing_condition": "ADBF < 2",
+          "static_source": "FEBE817C -> FEBEF145 -> FEBEADBF; exact F33 0x030 packer signal19 = B13[1:0]"
+        },
+        "CAD9": {
+          "active_b6_latest_within_25ms": {
+            "0": 107734
+          },
+          "join_age": {
+            "joined": 107734,
+            "max_ms": 13.330052,
+            "median_ms": 1.921719
+          },
+          "native_src0_all_values": {
+            "0": 483229,
+            "1": 279
+          },
+          "native_src0_cadence": {
+            "count": 483507,
+            "gt_35ms": 1,
+            "max_ms": 52.108177,
+            "median_ms": 9.904375,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAD9 == 0",
+          "static_source": "CAD9 -> AD4B -> E83A -> 80E0; exact F33 0x030 packer signal31 = B19[0]"
+        },
+        "CAFC": {
+          "active_b6_latest_within_25ms": {
+            "0": 107734
+          },
+          "join_age": {
+            "joined": 107734,
+            "max_ms": 13.330052,
+            "median_ms": 1.921719
+          },
+          "native_src0_all_values": {
+            "0": 483508
+          },
+          "native_src0_cadence": {
+            "count": 483507,
+            "gt_35ms": 1,
+            "max_ms": 52.108177,
+            "median_ms": 9.904375,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAFC == 0",
+          "static_source": "CAFC -> AD42 -> E834 -> 80EC; exact F33 0x030 packer signal25 = B16[0]"
+        }
+      },
+      "route_name": "0000003c--97b9e7a69a",
+      "segment_count": 81
+    },
+    {
+      "b6": {
+        "active_id11": 116801,
+        "application_pattern_counts": {
+          "0,0,0,1,0,0,0,0,0,0,0": 67640,
+          "11,0,0,0,0,0,100,100,0,0,0": 116801
+        },
+        "cadence": {
+          "count": 184440,
+          "gt_35ms": 0,
+          "max_ms": 34.621718,
+          "median_ms": 19.931511,
+          "min_ms": 14.352395
+        },
+        "expected_active_pattern": "11,0,0,0,0,0,100,100,0,0,0",
+        "expected_active_pattern_count": 116801,
+        "expected_inactive_pattern": "0,0,0,1,0,0,0,0,0,0,0",
+        "expected_inactive_pattern_count": 67640,
+        "inactive_id0": 67640,
+        "max_abs_target_raw_active": 201,
+        "nonzero_mac28": 0,
+        "send_frames": 184441,
+        "sequence_delta_mod64": {
+          "1": 184440
+        },
+        "target_id_counts": {
+          "0": 67640,
+          "11": 116801
+        },
+        "unexpected_active_pattern_count": 0,
+        "unexpected_inactive_pattern_count": 0,
+        "zero_mac28": 184441
+      },
+      "diagnostic_requests": {
+        "non_tester_present_single_frame_requests": 0,
+        "sendcan_0x7A1_payload_counts": {
+          "013e000000000000": 1,
+          "023e000000000000": 2
+        },
+        "single_frame_service_counts": {
+          "0x3E": 3
+        }
+      },
+      "init": {
+        "dirty": false,
+        "gitBranch": "kai",
+        "gitCommit": "d1914bbe7f88b03fd7f59afd97607e873c4bba47",
+        "version": "0.11.2"
+      },
+      "road_gate_observables": {
+        "ACCC": {
+          "direct_road_proxy": false,
+          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+        },
+        "ACCD": {
+          "active_b6_latest_within_25ms": {
+            "0": 116801
+          },
+          "join_age": {
+            "joined": 116801,
+            "max_ms": 22.786407,
+            "median_ms": 10.380156
+          },
+          "native_src0_all_values": {
+            "0": 185720
+          },
+          "native_src0_cadence": {
+            "count": 185719,
+            "gt_35ms": 5,
+            "max_ms": 51.842135,
+            "median_ms": 19.89177,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 185720,
+            "130": 185246,
+            "2": 474
+          },
+          "passing_condition": "ACCD == 0",
+          "static_source": "0x0D7 B0[7] / signal243 -> FEBE80A0 -> FEBEF094 -> FEBEACCD"
+        },
+        "ADBF": {
+          "active_b6_latest_within_25ms": {
+            "0": 116801
+          },
+          "join_age": {
+            "joined": 116801,
+            "max_ms": 13.227448,
+            "median_ms": 1.857084
+          },
+          "native_src0_all_values": {
+            "0": 371361,
+            "2": 87
+          },
+          "native_src0_cadence": {
+            "count": 371447,
+            "gt_35ms": 4,
+            "max_ms": 42.041354,
+            "median_ms": 9.902291,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 371448,
+            "130": 370501,
+            "2": 933
+          },
+          "passing_condition": "ADBF < 2",
+          "static_source": "FEBE817C -> FEBEF145 -> FEBEADBF; exact F33 0x030 packer signal19 = B13[1:0]"
+        },
+        "CAD9": {
+          "active_b6_latest_within_25ms": {
+            "0": 116801
+          },
+          "join_age": {
+            "joined": 116801,
+            "max_ms": 13.227448,
+            "median_ms": 1.857084
+          },
+          "native_src0_all_values": {
+            "0": 371161,
+            "1": 287
+          },
+          "native_src0_cadence": {
+            "count": 371447,
+            "gt_35ms": 4,
+            "max_ms": 42.041354,
+            "median_ms": 9.902291,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAD9 == 0",
+          "static_source": "CAD9 -> AD4B -> E83A -> 80E0; exact F33 0x030 packer signal31 = B19[0]"
+        },
+        "CAFC": {
+          "active_b6_latest_within_25ms": {
+            "0": 116801
+          },
+          "join_age": {
+            "joined": 116801,
+            "max_ms": 13.227448,
+            "median_ms": 1.857084
+          },
+          "native_src0_all_values": {
+            "0": 371448
+          },
+          "native_src0_cadence": {
+            "count": 371447,
+            "gt_35ms": 4,
+            "max_ms": 42.041354,
+            "median_ms": 9.902291,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAFC == 0",
+          "static_source": "CAFC -> AD42 -> E834 -> 80EC; exact F33 0x030 packer signal25 = B16[0]"
+        }
+      },
+      "route_name": "0000003d--0e812cecba",
+      "segment_count": 62
+    },
+    {
+      "b6": {
+        "active_id11": 160798,
+        "application_pattern_counts": {
+          "0,0,0,1,0,0,0,0,0,0,0": 71759,
+          "11,0,0,0,0,0,100,100,0,0,0": 160798
+        },
+        "cadence": {
+          "count": 232556,
+          "gt_35ms": 0,
+          "max_ms": 31.227813,
+          "median_ms": 19.948646,
+          "min_ms": 14.194843
+        },
+        "expected_active_pattern": "11,0,0,0,0,0,100,100,0,0,0",
+        "expected_active_pattern_count": 160798,
+        "expected_inactive_pattern": "0,0,0,1,0,0,0,0,0,0,0",
+        "expected_inactive_pattern_count": 71759,
+        "inactive_id0": 71759,
+        "max_abs_target_raw_active": 200,
+        "nonzero_mac28": 0,
+        "send_frames": 232557,
+        "sequence_delta_mod64": {
+          "1": 232556
+        },
+        "target_id_counts": {
+          "0": 71759,
+          "11": 160798
+        },
+        "unexpected_active_pattern_count": 0,
+        "unexpected_inactive_pattern_count": 0,
+        "zero_mac28": 232557
+      },
+      "diagnostic_requests": {
+        "non_tester_present_single_frame_requests": 0,
+        "sendcan_0x7A1_payload_counts": {
+          "013e000000000000": 1,
+          "023e000000000000": 2
+        },
+        "single_frame_service_counts": {
+          "0x3E": 3
+        }
+      },
+      "init": {
+        "dirty": true,
+        "gitBranch": "kai",
+        "gitCommit": "be56d6f688b557c4a2226e402da30ef3597eb5d7",
+        "version": "0.11.2"
+      },
+      "road_gate_observables": {
+        "ACCC": {
+          "direct_road_proxy": false,
+          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+        },
+        "ACCD": {
+          "active_b6_latest_within_25ms": {
+            "0": 160797
+          },
+          "join_age": {
+            "joined": 160797,
+            "max_ms": 22.901667,
+            "median_ms": 10.40375
+          },
+          "native_src0_all_values": {
+            "0": 234030
+          },
+          "native_src0_cadence": {
+            "count": 234029,
+            "gt_35ms": 6,
+            "max_ms": 45.145208,
+            "median_ms": 19.895469,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 234030,
+            "130": 233556,
+            "2": 474
+          },
+          "passing_condition": "ACCD == 0",
+          "static_source": "0x0D7 B0[7] / signal243 -> FEBE80A0 -> FEBEF094 -> FEBEACCD"
+        },
+        "ADBF": {
+          "active_b6_latest_within_25ms": {
+            "0": 160796
+          },
+          "join_age": {
+            "joined": 160796,
+            "max_ms": 13.348438,
+            "median_ms": 1.849582
+          },
+          "native_src0_all_values": {
+            "0": 468070,
+            "2": 3
+          },
+          "native_src0_cadence": {
+            "count": 468072,
+            "gt_35ms": 1,
+            "max_ms": 35.197552,
+            "median_ms": 9.900885,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 468073,
+            "130": 467121,
+            "2": 950
+          },
+          "passing_condition": "ADBF < 2",
+          "static_source": "FEBE817C -> FEBEF145 -> FEBEADBF; exact F33 0x030 packer signal19 = B13[1:0]"
+        },
+        "CAD9": {
+          "active_b6_latest_within_25ms": {
+            "0": 160796
+          },
+          "join_age": {
+            "joined": 160796,
+            "max_ms": 13.348438,
+            "median_ms": 1.849582
+          },
+          "native_src0_all_values": {
+            "0": 468067,
+            "1": 6
+          },
+          "native_src0_cadence": {
+            "count": 468072,
+            "gt_35ms": 1,
+            "max_ms": 35.197552,
+            "median_ms": 9.900885,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAD9 == 0",
+          "static_source": "CAD9 -> AD4B -> E83A -> 80E0; exact F33 0x030 packer signal31 = B19[0]"
+        },
+        "CAFC": {
+          "active_b6_latest_within_25ms": {
+            "0": 160796
+          },
+          "join_age": {
+            "joined": 160796,
+            "max_ms": 13.348438,
+            "median_ms": 1.849582
+          },
+          "native_src0_all_values": {
+            "0": 468073
+          },
+          "native_src0_cadence": {
+            "count": 468072,
+            "gt_35ms": 1,
+            "max_ms": 35.197552,
+            "median_ms": 9.900885,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAFC == 0",
+          "static_source": "CAFC -> AD42 -> E834 -> 80EC; exact F33 0x030 packer signal25 = B16[0]"
+        }
+      },
+      "route_name": "0000003e--1a2f20417d",
+      "segment_count": 78
+    },
+    {
+      "b6": {
+        "active_id11": 165071,
+        "application_pattern_counts": {
+          "0,0,0,1,0,0,0,0,0,0,0": 83995,
+          "11,0,0,0,0,0,100,100,0,0,0": 165071
+        },
+        "cadence": {
+          "count": 249065,
+          "gt_35ms": 0,
+          "max_ms": 32.632656,
+          "median_ms": 19.914739,
+          "min_ms": 11.496718
+        },
+        "expected_active_pattern": "11,0,0,0,0,0,100,100,0,0,0",
+        "expected_active_pattern_count": 165071,
+        "expected_inactive_pattern": "0,0,0,1,0,0,0,0,0,0,0",
+        "expected_inactive_pattern_count": 83995,
+        "inactive_id0": 83995,
+        "max_abs_target_raw_active": 149,
+        "nonzero_mac28": 0,
+        "send_frames": 249066,
+        "sequence_delta_mod64": {
+          "1": 249065
+        },
+        "target_id_counts": {
+          "0": 83995,
+          "11": 165071
+        },
+        "unexpected_active_pattern_count": 0,
+        "unexpected_inactive_pattern_count": 0,
+        "zero_mac28": 249066
+      },
+      "diagnostic_requests": {
+        "non_tester_present_single_frame_requests": 0,
+        "sendcan_0x7A1_payload_counts": {
+          "013e000000000000": 1,
+          "023e000000000000": 2
+        },
+        "single_frame_service_counts": {
+          "0x3E": 3
+        }
+      },
+      "init": {
+        "dirty": true,
+        "gitBranch": "kai",
+        "gitCommit": "be56d6f688b557c4a2226e402da30ef3597eb5d7",
+        "version": "0.11.2"
+      },
+      "road_gate_observables": {
+        "ACCC": {
+          "direct_road_proxy": false,
+          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+        },
+        "ACCD": {
+          "active_b6_latest_within_25ms": {
+            "0": 165070
+          },
+          "join_age": {
+            "joined": 165070,
+            "max_ms": 23.044375,
+            "median_ms": 2.389766
+          },
+          "native_src0_all_values": {
+            "0": 250713
+          },
+          "native_src0_cadence": {
+            "count": 250712,
+            "gt_35ms": 7,
+            "max_ms": 47.082917,
+            "median_ms": 19.872604,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 250713,
+            "130": 250115,
+            "2": 601
+          },
+          "passing_condition": "ACCD == 0",
+          "static_source": "0x0D7 B0[7] / signal243 -> FEBE80A0 -> FEBEF094 -> FEBEACCD"
+        },
+        "ADBF": {
+          "active_b6_latest_within_25ms": {
+            "0": 165070
+          },
+          "join_age": {
+            "joined": 165070,
+            "max_ms": 13.528542,
+            "median_ms": 1.893177
+          },
+          "native_src0_all_values": {
+            "0": 501349,
+            "2": 78
+          },
+          "native_src0_cadence": {
+            "count": 501426,
+            "gt_35ms": 5,
+            "max_ms": 37.454219,
+            "median_ms": 9.893646,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 501427,
+            "130": 500243,
+            "2": 1185
+          },
+          "passing_condition": "ADBF < 2",
+          "static_source": "FEBE817C -> FEBEF145 -> FEBEADBF; exact F33 0x030 packer signal19 = B13[1:0]"
+        },
+        "CAD9": {
+          "active_b6_latest_within_25ms": {
+            "0": 165070
+          },
+          "join_age": {
+            "joined": 165070,
+            "max_ms": 13.528542,
+            "median_ms": 1.893177
+          },
+          "native_src0_all_values": {
+            "0": 501147,
+            "1": 280
+          },
+          "native_src0_cadence": {
+            "count": 501426,
+            "gt_35ms": 5,
+            "max_ms": 37.454219,
+            "median_ms": 9.893646,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAD9 == 0",
+          "static_source": "CAD9 -> AD4B -> E83A -> 80E0; exact F33 0x030 packer signal31 = B19[0]"
+        },
+        "CAFC": {
+          "active_b6_latest_within_25ms": {
+            "0": 165070
+          },
+          "join_age": {
+            "joined": 165070,
+            "max_ms": 13.528542,
+            "median_ms": 1.893177
+          },
+          "native_src0_all_values": {
+            "0": 501427
+          },
+          "native_src0_cadence": {
+            "count": 501426,
+            "gt_35ms": 5,
+            "max_ms": 37.454219,
+            "median_ms": 9.893646,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAFC == 0",
+          "static_source": "CAFC -> AD42 -> E834 -> 80EC; exact F33 0x030 packer signal25 = B16[0]"
+        }
+      },
+      "route_name": "0000003f--36e72f5fdc",
+      "segment_count": 84
+    },
+    {
+      "b6": {
+        "active_id11": 17463,
+        "application_pattern_counts": {
+          "0,0,0,1,0,0,0,0,0,0,0": 25630,
+          "11,0,0,0,0,0,100,100,0,0,0": 17463
+        },
+        "cadence": {
+          "count": 43092,
+          "gt_35ms": 0,
+          "max_ms": 31.314533,
+          "median_ms": 19.889335,
+          "min_ms": 16.075468
+        },
+        "expected_active_pattern": "11,0,0,0,0,0,100,100,0,0,0",
+        "expected_active_pattern_count": 17463,
+        "expected_inactive_pattern": "0,0,0,1,0,0,0,0,0,0,0",
+        "expected_inactive_pattern_count": 25630,
+        "inactive_id0": 25630,
+        "max_abs_target_raw_active": 602,
+        "nonzero_mac28": 0,
+        "send_frames": 43093,
+        "sequence_delta_mod64": {
+          "1": 43092
+        },
+        "target_id_counts": {
+          "0": 25630,
+          "11": 17463
+        },
+        "unexpected_active_pattern_count": 0,
+        "unexpected_inactive_pattern_count": 0,
+        "zero_mac28": 43093
+      },
+      "diagnostic_requests": {
+        "non_tester_present_single_frame_requests": 0,
+        "sendcan_0x7A1_payload_counts": {
+          "013e000000000000": 1,
+          "023e000000000000": 2
+        },
+        "single_frame_service_counts": {
+          "0x3E": 3
+        }
+      },
+      "init": {
+        "dirty": false,
+        "gitBranch": "kai",
+        "gitCommit": "f8bd956a4b23eb4992c6abbe899e72b27cd91d80",
+        "version": "0.11.2"
+      },
+      "road_gate_observables": {
+        "ACCC": {
+          "direct_road_proxy": false,
+          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+        },
+        "ACCD": {
+          "active_b6_latest_within_25ms": {
+            "0": 17463
+          },
+          "join_age": {
+            "joined": 17463,
+            "max_ms": 22.586801,
+            "median_ms": 2.382432
+          },
+          "native_src0_all_values": {
+            "0": 43755
+          },
+          "native_src0_cadence": {
+            "count": 43754,
+            "gt_35ms": 5,
+            "max_ms": 46.45998,
+            "median_ms": 19.891418,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 43755,
+            "130": 43272,
+            "2": 486
+          },
+          "passing_condition": "ACCD == 0",
+          "static_source": "0x0D7 B0[7] / signal243 -> FEBE80A0 -> FEBEF094 -> FEBEACCD"
+        },
+        "ADBF": {
+          "active_b6_latest_within_25ms": {
+            "0": 17463
+          },
+          "join_age": {
+            "joined": 17463,
+            "max_ms": 13.429562,
+            "median_ms": 1.961247
+          },
+          "native_src0_all_values": {
+            "0": 87419,
+            "2": 91
+          },
+          "native_src0_cadence": {
+            "count": 87509,
+            "gt_35ms": 2,
+            "max_ms": 39.624301,
+            "median_ms": 9.909029,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 87510,
+            "130": 86552,
+            "2": 956
+          },
+          "passing_condition": "ADBF < 2",
+          "static_source": "FEBE817C -> FEBEF145 -> FEBEADBF; exact F33 0x030 packer signal19 = B13[1:0]"
+        },
+        "CAD9": {
+          "active_b6_latest_within_25ms": {
+            "0": 17463
+          },
+          "join_age": {
+            "joined": 17463,
+            "max_ms": 13.429562,
+            "median_ms": 1.961247
+          },
+          "native_src0_all_values": {
+            "0": 87227,
+            "1": 283
+          },
+          "native_src0_cadence": {
+            "count": 87509,
+            "gt_35ms": 2,
+            "max_ms": 39.624301,
+            "median_ms": 9.909029,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAD9 == 0",
+          "static_source": "CAD9 -> AD4B -> E83A -> 80E0; exact F33 0x030 packer signal31 = B19[0]"
+        },
+        "CAFC": {
+          "active_b6_latest_within_25ms": {
+            "0": 17463
+          },
+          "join_age": {
+            "joined": 17463,
+            "max_ms": 13.429562,
+            "median_ms": 1.961247
+          },
+          "native_src0_all_values": {
+            "0": 87510
+          },
+          "native_src0_cadence": {
+            "count": 87509,
+            "gt_35ms": 2,
+            "max_ms": 39.624301,
+            "median_ms": 9.909029,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAFC == 0",
+          "static_source": "CAFC -> AD42 -> E834 -> 80EC; exact F33 0x030 packer signal25 = B16[0]"
+        }
+      },
+      "route_name": "00000045--805b7ca6ab",
+      "segment_count": 15
+    },
+    {
+      "b6": {
+        "active_id11": 11826,
+        "application_pattern_counts": {
+          "0,0,0,1,0,0,0,0,0,0,0": 9521,
+          "11,0,0,0,0,0,100,100,0,0,0": 11826
+        },
+        "cadence": {
+          "count": 21346,
+          "gt_35ms": 0,
+          "max_ms": 31.296148,
+          "median_ms": 19.942858,
+          "min_ms": 16.30462
+        },
+        "expected_active_pattern": "11,0,0,0,0,0,100,100,0,0,0",
+        "expected_active_pattern_count": 11826,
+        "expected_inactive_pattern": "0,0,0,1,0,0,0,0,0,0,0",
+        "expected_inactive_pattern_count": 9521,
+        "inactive_id0": 9521,
+        "max_abs_target_raw_active": 502,
+        "nonzero_mac28": 0,
+        "send_frames": 21347,
+        "sequence_delta_mod64": {
+          "1": 21346
+        },
+        "target_id_counts": {
+          "0": 9521,
+          "11": 11826
+        },
+        "unexpected_active_pattern_count": 0,
+        "unexpected_inactive_pattern_count": 0,
+        "zero_mac28": 21347
+      },
+      "diagnostic_requests": {
+        "non_tester_present_single_frame_requests": 0,
+        "sendcan_0x7A1_payload_counts": {
+          "013e000000000000": 1,
+          "023e000000000000": 2
+        },
+        "single_frame_service_counts": {
+          "0x3E": 3
+        }
+      },
+      "init": {
+        "dirty": false,
+        "gitBranch": "kai",
+        "gitCommit": "bfa1352b25e64e50e1332d8661af475be9be04a4",
+        "version": "0.11.2"
+      },
+      "road_gate_observables": {
+        "ACCC": {
+          "direct_road_proxy": false,
+          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+        },
+        "ACCD": {
+          "active_b6_latest_within_25ms": {
+            "0": 11826
+          },
+          "join_age": {
+            "joined": 11826,
+            "max_ms": 22.480853,
+            "median_ms": 2.589765
+          },
+          "native_src0_all_values": {
+            "0": 21919
+          },
+          "native_src0_cadence": {
+            "count": 21918,
+            "gt_35ms": 5,
+            "max_ms": 46.397,
+            "median_ms": 19.890886,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 21919,
+            "130": 21434,
+            "2": 488
+          },
+          "passing_condition": "ACCD == 0",
+          "static_source": "0x0D7 B0[7] / signal243 -> FEBE80A0 -> FEBEF094 -> FEBEACCD"
+        },
+        "ADBF": {
+          "active_b6_latest_within_25ms": {
+            "0": 11826
+          },
+          "join_age": {
+            "joined": 11826,
+            "max_ms": 12.773623,
+            "median_ms": 1.940003
+          },
+          "native_src0_all_values": {
+            "0": 43664,
+            "2": 165
+          },
+          "native_src0_cadence": {
+            "count": 43828,
+            "gt_35ms": 3,
+            "max_ms": 36.822767,
+            "median_ms": 9.893349,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 43829,
+            "130": 42868,
+            "2": 959
+          },
+          "passing_condition": "ADBF < 2",
+          "static_source": "FEBE817C -> FEBEF145 -> FEBEADBF; exact F33 0x030 packer signal19 = B13[1:0]"
+        },
+        "CAD9": {
+          "active_b6_latest_within_25ms": {
+            "0": 11826
+          },
+          "join_age": {
+            "joined": 11826,
+            "max_ms": 12.773623,
+            "median_ms": 1.940003
+          },
+          "native_src0_all_values": {
+            "0": 43553,
+            "1": 276
+          },
+          "native_src0_cadence": {
+            "count": 43828,
+            "gt_35ms": 3,
+            "max_ms": 36.822767,
+            "median_ms": 9.893349,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAD9 == 0",
+          "static_source": "CAD9 -> AD4B -> E83A -> 80E0; exact F33 0x030 packer signal31 = B19[0]"
+        },
+        "CAFC": {
+          "active_b6_latest_within_25ms": {
+            "0": 11826
+          },
+          "join_age": {
+            "joined": 11826,
+            "max_ms": 12.773623,
+            "median_ms": 1.940003
+          },
+          "native_src0_all_values": {
+            "0": 43829
+          },
+          "native_src0_cadence": {
+            "count": 43828,
+            "gt_35ms": 3,
+            "max_ms": 36.822767,
+            "median_ms": 9.893349,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAFC == 0",
+          "static_source": "CAFC -> AD42 -> E834 -> 80EC; exact F33 0x030 packer signal25 = B16[0]"
+        }
+      },
+      "route_name": "00000048--709f22277b",
+      "segment_count": 8
+    },
+    {
+      "b6": {
+        "active_id11": 0,
+        "application_pattern_counts": {
+          "0,0,0,1,0,0,0,0,0,0,0": 27321
+        },
+        "cadence": {
+          "count": 27320,
+          "gt_35ms": 0,
+          "max_ms": 21.431198,
+          "median_ms": 9.918753,
+          "min_ms": 6.613125
+        },
+        "expected_active_pattern": "11,0,0,0,0,0,100,100,0,0,0",
+        "expected_active_pattern_count": 0,
+        "expected_inactive_pattern": "0,0,0,1,0,0,0,0,0,0,0",
+        "expected_inactive_pattern_count": 27321,
+        "inactive_id0": 27321,
+        "max_abs_target_raw_active": null,
+        "nonzero_mac28": 0,
+        "send_frames": 27321,
+        "sequence_delta_mod64": {
+          "1": 26405,
+          "34": 8,
+          "35": 783,
+          "36": 123,
+          "53": 1
+        },
+        "target_id_counts": {
+          "0": 27321
+        },
+        "unexpected_active_pattern_count": 0,
+        "unexpected_inactive_pattern_count": 0,
+        "zero_mac28": 27321
+      },
+      "diagnostic_requests": {
+        "non_tester_present_single_frame_requests": 1,
+        "sendcan_0x7A1_payload_counts": {
+          "013e000000000000": 1,
+          "023e000000000000": 2,
+          "0322f18100000000": 1
+        },
+        "single_frame_service_counts": {
+          "0x22": 1,
+          "0x3E": 3
+        }
+      },
+      "init": {
+        "dirty": true,
+        "gitBranch": "kai",
+        "gitCommit": "8c3139bd32a417fd65a840ecffc5abf4d68b1bbc",
+        "version": "0.11.2"
+      },
+      "road_gate_observables": {
+        "ACCC": {
+          "direct_road_proxy": false,
+          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+        },
+        "ACCD": {
+          "active_b6_latest_within_25ms": {},
+          "join_age": {
+            "joined": 0,
+            "max_ms": null,
+            "median_ms": null
+          },
+          "native_src0_all_values": {
+            "0": 14290
+          },
+          "native_src0_cadence": {
+            "count": 14289,
+            "gt_35ms": 6,
+            "max_ms": 46.938438,
+            "median_ms": 19.888907,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 14290,
+            "130": 13712,
+            "2": 581
+          },
+          "passing_condition": "ACCD == 0",
+          "static_source": "0x0D7 B0[7] / signal243 -> FEBE80A0 -> FEBEF094 -> FEBEACCD"
+        },
+        "ADBF": {
+          "active_b6_latest_within_25ms": {},
+          "join_age": {
+            "joined": 0,
+            "max_ms": null,
+            "median_ms": null
+          },
+          "native_src0_all_values": {
+            "0": 28493,
+            "2": 73
+          },
+          "native_src0_cadence": {
+            "count": 28565,
+            "gt_35ms": 1,
+            "max_ms": 37.108177,
+            "median_ms": 9.90028,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 28566,
+            "130": 27425,
+            "2": 1145
+          },
+          "passing_condition": "ADBF < 2",
+          "static_source": "FEBE817C -> FEBEF145 -> FEBEADBF; exact F33 0x030 packer signal19 = B13[1:0]"
+        },
+        "CAD9": {
+          "active_b6_latest_within_25ms": {},
+          "join_age": {
+            "joined": 0,
+            "max_ms": null,
+            "median_ms": null
+          },
+          "native_src0_all_values": {
+            "0": 28296,
+            "1": 270
+          },
+          "native_src0_cadence": {
+            "count": 28565,
+            "gt_35ms": 1,
+            "max_ms": 37.108177,
+            "median_ms": 9.90028,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAD9 == 0",
+          "static_source": "CAD9 -> AD4B -> E83A -> 80E0; exact F33 0x030 packer signal31 = B19[0]"
+        },
+        "CAFC": {
+          "active_b6_latest_within_25ms": {},
+          "join_age": {
+            "joined": 0,
+            "max_ms": null,
+            "median_ms": null
+          },
+          "native_src0_all_values": {
+            "0": 28566
+          },
+          "native_src0_cadence": {
+            "count": 28565,
+            "gt_35ms": 1,
+            "max_ms": 37.108177,
+            "median_ms": 9.90028,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAFC == 0",
+          "static_source": "CAFC -> AD42 -> E834 -> 80EC; exact F33 0x030 packer signal25 = B16[0]"
+        }
+      },
+      "route_name": "0000001c--574c06b528",
+      "segment_count": 5
+    },
+    {
+      "b6": {
+        "active_id11": 78088,
+        "application_pattern_counts": {
+          "0,0,0,1,0,0,0,0,0,0,0": 106966,
+          "11,0,0,1,0,0,0,0,0,0,0": 78088
+        },
+        "cadence": {
+          "count": 185053,
+          "gt_35ms": 0,
+          "max_ms": 21.437448,
+          "median_ms": 9.975938,
+          "min_ms": 1.534375
+        },
+        "expected_active_pattern": "11,0,0,0,0,0,100,100,0,0,0",
+        "expected_active_pattern_count": 0,
+        "expected_inactive_pattern": "0,0,0,1,0,0,0,0,0,0,0",
+        "expected_inactive_pattern_count": 106966,
+        "inactive_id0": 106966,
+        "max_abs_target_raw_active": 665,
+        "nonzero_mac28": 0,
+        "send_frames": 185054,
+        "sequence_delta_mod64": {
+          "1": 178855,
+          "34": 53,
+          "35": 5212,
+          "36": 932,
+          "53": 1
+        },
+        "target_id_counts": {
+          "0": 106966,
+          "11": 78088
+        },
+        "unexpected_active_pattern_count": 78088,
+        "unexpected_inactive_pattern_count": 0,
+        "zero_mac28": 185054
+      },
+      "diagnostic_requests": {
+        "non_tester_present_single_frame_requests": 1,
+        "sendcan_0x7A1_payload_counts": {
+          "013e000000000000": 1,
+          "023e000000000000": 2,
+          "0322f18100000000": 1
+        },
+        "single_frame_service_counts": {
+          "0x22": 1,
+          "0x3E": 3
+        }
+      },
+      "init": {
+        "dirty": true,
+        "gitBranch": "HEAD",
+        "gitCommit": "e275e6fd852b60fb99d7b51a49462a7486414faf",
+        "version": "0.11.2"
+      },
+      "road_gate_observables": {
+        "ACCC": {
+          "direct_road_proxy": false,
+          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+        },
+        "ACCD": {
+          "active_b6_latest_within_25ms": {
+            "0": 78088
+          },
+          "join_age": {
+            "joined": 78088,
+            "max_ms": 22.385573,
+            "median_ms": 2.095365
+          },
+          "native_src0_all_values": {
+            "0": 93554
+          },
+          "native_src0_cadence": {
+            "count": 93553,
+            "gt_35ms": 8,
+            "max_ms": 49.797552,
+            "median_ms": 19.972188,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 93554,
+            "2": 93557
+          },
+          "passing_condition": "ACCD == 0",
+          "static_source": "0x0D7 B0[7] / signal243 -> FEBE80A0 -> FEBEF094 -> FEBEACCD"
+        },
+        "ADBF": {
+          "active_b6_latest_within_25ms": {
+            "0": 78088
+          },
+          "join_age": {
+            "joined": 78088,
+            "max_ms": 13.148958,
+            "median_ms": 1.694375
+          },
+          "native_src0_all_values": {
+            "0": 187015,
+            "2": 87
+          },
+          "native_src0_cadence": {
+            "count": 187101,
+            "gt_35ms": 6,
+            "max_ms": 39.727136,
+            "median_ms": 9.941406,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 187102,
+            "2": 187104
+          },
+          "passing_condition": "ADBF < 2",
+          "static_source": "FEBE817C -> FEBEF145 -> FEBEADBF; exact F33 0x030 packer signal19 = B13[1:0]"
+        },
+        "CAD9": {
+          "active_b6_latest_within_25ms": {
+            "0": 78088
+          },
+          "join_age": {
+            "joined": 78088,
+            "max_ms": 13.148958,
+            "median_ms": 1.694375
+          },
+          "native_src0_all_values": {
+            "0": 186828,
+            "1": 274
+          },
+          "native_src0_cadence": {
+            "count": 187101,
+            "gt_35ms": 6,
+            "max_ms": 39.727136,
+            "median_ms": 9.941406,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAD9 == 0",
+          "static_source": "CAD9 -> AD4B -> E83A -> 80E0; exact F33 0x030 packer signal31 = B19[0]"
+        },
+        "CAFC": {
+          "active_b6_latest_within_25ms": {
+            "0": 78088
+          },
+          "join_age": {
+            "joined": 78088,
+            "max_ms": 13.148958,
+            "median_ms": 1.694375
+          },
+          "native_src0_all_values": {
+            "0": 187102
+          },
+          "native_src0_cadence": {
+            "count": 187101,
+            "gt_35ms": 6,
+            "max_ms": 39.727136,
+            "median_ms": 9.941406,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAFC == 0",
+          "static_source": "CAFC -> AD42 -> E834 -> 80EC; exact F33 0x030 packer signal25 = B16[0]"
+        }
+      },
+      "route_name": "00000027--885099a1d4",
+      "segment_count": 32
+    },
+    {
+      "b6": {
+        "active_id11": 0,
+        "application_pattern_counts": {
+          "0,0,0,1,0,0,0,0,0,0,0": 68918
+        },
+        "cadence": {
+          "count": 68917,
+          "gt_35ms": 0,
+          "max_ms": 21.513906,
+          "median_ms": 9.927531,
+          "min_ms": 6.190469
+        },
+        "expected_active_pattern": "11,0,0,0,0,0,100,100,0,0,0",
+        "expected_active_pattern_count": 0,
+        "expected_inactive_pattern": "0,0,0,1,0,0,0,0,0,0,0",
+        "expected_inactive_pattern_count": 68918,
+        "inactive_id0": 68918,
+        "max_abs_target_raw_active": null,
+        "nonzero_mac28": 0,
+        "send_frames": 68918,
+        "sequence_delta_mod64": {
+          "1": 66609,
+          "34": 25,
+          "35": 1941,
+          "36": 341,
+          "48": 1
+        },
+        "target_id_counts": {
+          "0": 68918
+        },
+        "unexpected_active_pattern_count": 0,
+        "unexpected_inactive_pattern_count": 0,
+        "zero_mac28": 68918
+      },
+      "diagnostic_requests": {
+        "non_tester_present_single_frame_requests": 1,
+        "sendcan_0x7A1_payload_counts": {
+          "013e000000000000": 1,
+          "023e000000000000": 2,
+          "0322f18100000000": 1
+        },
+        "single_frame_service_counts": {
+          "0x22": 1,
+          "0x3E": 3
+        }
+      },
+      "init": {
+        "dirty": false,
+        "gitBranch": "kai",
+        "gitCommit": "9af32251831a4647aa865dd51dcc941c373d4bb1",
+        "version": "0.11.2"
+      },
+      "road_gate_observables": {
+        "ACCC": {
+          "direct_road_proxy": false,
+          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+        },
+        "ACCD": {
+          "active_b6_latest_within_25ms": {},
+          "join_age": {
+            "joined": 0,
+            "max_ms": null,
+            "median_ms": null
+          },
+          "native_src0_all_values": {
+            "0": 35158
+          },
+          "native_src0_cadence": {
+            "count": 35157,
+            "gt_35ms": 5,
+            "max_ms": 46.818177,
+            "median_ms": 19.880056,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 35158,
+            "130": 34610,
+            "2": 549
+          },
+          "passing_condition": "ACCD == 0",
+          "static_source": "0x0D7 B0[7] / signal243 -> FEBE80A0 -> FEBEF094 -> FEBEACCD"
+        },
+        "ADBF": {
+          "active_b6_latest_within_25ms": {},
+          "join_age": {
+            "joined": 0,
+            "max_ms": null,
+            "median_ms": null
+          },
+          "native_src0_all_values": {
+            "0": 70321,
+            "2": 1
+          },
+          "native_src0_cadence": {
+            "count": 70321,
+            "gt_35ms": 3,
+            "max_ms": 40.715,
+            "median_ms": 9.90276,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 70322,
+            "130": 69223,
+            "2": 1098
+          },
+          "passing_condition": "ADBF < 2",
+          "static_source": "FEBE817C -> FEBEF145 -> FEBEADBF; exact F33 0x030 packer signal19 = B13[1:0]"
+        },
+        "CAD9": {
+          "active_b6_latest_within_25ms": {},
+          "join_age": {
+            "joined": 0,
+            "max_ms": null,
+            "median_ms": null
+          },
+          "native_src0_all_values": {
+            "0": 70318,
+            "1": 4
+          },
+          "native_src0_cadence": {
+            "count": 70321,
+            "gt_35ms": 3,
+            "max_ms": 40.715,
+            "median_ms": 9.90276,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAD9 == 0",
+          "static_source": "CAD9 -> AD4B -> E83A -> 80E0; exact F33 0x030 packer signal31 = B19[0]"
+        },
+        "CAFC": {
+          "active_b6_latest_within_25ms": {},
+          "join_age": {
+            "joined": 0,
+            "max_ms": null,
+            "median_ms": null
+          },
+          "native_src0_all_values": {
+            "0": 70322
+          },
+          "native_src0_cadence": {
+            "count": 70321,
+            "gt_35ms": 3,
+            "max_ms": 40.715,
+            "median_ms": 9.90276,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAFC == 0",
+          "static_source": "CAFC -> AD42 -> E834 -> 80EC; exact F33 0x030 packer signal25 = B16[0]"
+        }
+      },
+      "route_name": "00000029--bae47e927f",
+      "segment_count": 12
+    },
+    {
+      "b6": {
+        "active_id11": 13410,
+        "application_pattern_counts": {
+          "0,0,0,1,0,0,0,0,0,0,0": 42214,
+          "11,0,0,1,0,0,100,100,0,0,0": 13410
+        },
+        "cadence": {
+          "count": 55623,
+          "gt_35ms": 0,
+          "max_ms": 21.921492,
+          "median_ms": 9.938524,
+          "min_ms": 5.553299
+        },
+        "expected_active_pattern": "11,0,0,0,0,0,100,100,0,0,0",
+        "expected_active_pattern_count": 0,
+        "expected_inactive_pattern": "0,0,0,1,0,0,0,0,0,0,0",
+        "expected_inactive_pattern_count": 42214,
+        "inactive_id0": 42214,
+        "max_abs_target_raw_active": 640,
+        "nonzero_mac28": 0,
+        "send_frames": 55624,
+        "sequence_delta_mod64": {
+          "0": 1,
+          "1": 53760,
+          "34": 11,
+          "35": 1579,
+          "36": 272
+        },
+        "target_id_counts": {
+          "0": 42214,
+          "11": 13410
+        },
+        "unexpected_active_pattern_count": 13410,
+        "unexpected_inactive_pattern_count": 0,
+        "zero_mac28": 55624
+      },
+      "diagnostic_requests": {
+        "non_tester_present_single_frame_requests": 1,
+        "sendcan_0x7A1_payload_counts": {
+          "013e000000000000": 1,
+          "023e000000000000": 2,
+          "0322f18100000000": 1
+        },
+        "single_frame_service_counts": {
+          "0x22": 1,
+          "0x3E": 3
+        }
+      },
+      "init": {
+        "dirty": false,
+        "gitBranch": "kai",
+        "gitCommit": "13ca9285c575f828d2bc6dd5d08ed304820ae6c9",
+        "version": "0.11.2"
+      },
+      "road_gate_observables": {
+        "ACCC": {
+          "direct_road_proxy": false,
+          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+        },
+        "ACCD": {
+          "active_b6_latest_within_25ms": {
+            "0": 13410
+          },
+          "join_age": {
+            "joined": 13410,
+            "max_ms": 22.149187,
+            "median_ms": 2.227758
+          },
+          "native_src0_all_values": {
+            "0": 28427
+          },
+          "native_src0_cadence": {
+            "count": 28426,
+            "gt_35ms": 5,
+            "max_ms": 47.642017,
+            "median_ms": 19.891782,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 28427,
+            "130": 27932,
+            "2": 498
+          },
+          "passing_condition": "ACCD == 0",
+          "static_source": "0x0D7 B0[7] / signal243 -> FEBE80A0 -> FEBEF094 -> FEBEACCD"
+        },
+        "ADBF": {
+          "active_b6_latest_within_25ms": {
+            "0": 13410
+          },
+          "join_age": {
+            "joined": 13410,
+            "max_ms": 12.96653,
+            "median_ms": 1.765979
+          },
+          "native_src0_all_values": {
+            "0": 56772,
+            "2": 78
+          },
+          "native_src0_cadence": {
+            "count": 56849,
+            "gt_35ms": 2,
+            "max_ms": 41.941526,
+            "median_ms": 9.904879,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 56850,
+            "130": 55868,
+            "2": 979
+          },
+          "passing_condition": "ADBF < 2",
+          "static_source": "FEBE817C -> FEBEF145 -> FEBEADBF; exact F33 0x030 packer signal19 = B13[1:0]"
+        },
+        "CAD9": {
+          "active_b6_latest_within_25ms": {
+            "0": 13410
+          },
+          "join_age": {
+            "joined": 13410,
+            "max_ms": 12.96653,
+            "median_ms": 1.765979
+          },
+          "native_src0_all_values": {
+            "0": 56572,
+            "1": 278
+          },
+          "native_src0_cadence": {
+            "count": 56849,
+            "gt_35ms": 2,
+            "max_ms": 41.941526,
+            "median_ms": 9.904879,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAD9 == 0",
+          "static_source": "CAD9 -> AD4B -> E83A -> 80E0; exact F33 0x030 packer signal31 = B19[0]"
+        },
+        "CAFC": {
+          "active_b6_latest_within_25ms": {
+            "0": 13410
+          },
+          "join_age": {
+            "joined": 13410,
+            "max_ms": 12.96653,
+            "median_ms": 1.765979
+          },
+          "native_src0_all_values": {
+            "0": 56850
+          },
+          "native_src0_cadence": {
+            "count": 56849,
+            "gt_35ms": 2,
+            "max_ms": 41.941526,
+            "median_ms": 9.904879,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAFC == 0",
+          "static_source": "CAFC -> AD42 -> E834 -> 80EC; exact F33 0x030 packer signal25 = B16[0]"
+        }
+      },
+      "route_name": "0000002a--c5647fd694",
+      "segment_count": 10
+    },
+    {
+      "b6": {
+        "active_id11": 8323,
+        "application_pattern_counts": {
+          "0,0,0,1,0,0,0,0,0,0,0": 34674,
+          "11,0,0,0,0,0,100,100,0,0,0": 8323
+        },
+        "cadence": {
+          "count": 42996,
+          "gt_35ms": 0,
+          "max_ms": 27.400417,
+          "median_ms": 19.902206,
+          "min_ms": 16.529167
+        },
+        "expected_active_pattern": "11,0,0,0,0,0,100,100,0,0,0",
+        "expected_active_pattern_count": 8323,
+        "expected_inactive_pattern": "0,0,0,1,0,0,0,0,0,0,0",
+        "expected_inactive_pattern_count": 34674,
+        "inactive_id0": 34674,
+        "max_abs_target_raw_active": 912,
+        "nonzero_mac28": 0,
+        "send_frames": 42997,
+        "sequence_delta_mod64": {
+          "1": 42996
+        },
+        "target_id_counts": {
+          "0": 34674,
+          "11": 8323
+        },
+        "unexpected_active_pattern_count": 0,
+        "unexpected_inactive_pattern_count": 0,
+        "zero_mac28": 42997
+      },
+      "diagnostic_requests": {
+        "non_tester_present_single_frame_requests": 0,
+        "sendcan_0x7A1_payload_counts": {
+          "013e000000000000": 1,
+          "023e000000000000": 2
+        },
+        "single_frame_service_counts": {
+          "0x3E": 3
+        }
+      },
+      "init": {
+        "dirty": false,
+        "gitBranch": "kai",
+        "gitCommit": "25f6909eaf6130cbb8b6640e895b3d6d7bde8d07",
+        "version": "0.11.2"
+      },
+      "road_gate_observables": {
+        "ACCC": {
+          "direct_road_proxy": false,
+          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+        },
+        "ACCD": {
+          "active_b6_latest_within_25ms": {
+            "0": 8323
+          },
+          "join_age": {
+            "joined": 8323,
+            "max_ms": 23.152291,
+            "median_ms": 2.148953
+          },
+          "native_src0_all_values": {
+            "0": 76537
+          },
+          "native_src0_cadence": {
+            "count": 76536,
+            "gt_35ms": 6,
+            "max_ms": 48.067292,
+            "median_ms": 19.865834,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 76537,
+            "130": 75940,
+            "2": 600
+          },
+          "passing_condition": "ACCD == 0",
+          "static_source": "0x0D7 B0[7] / signal243 -> FEBE80A0 -> FEBEF094 -> FEBEACCD"
+        },
+        "ADBF": {
+          "active_b6_latest_within_25ms": {
+            "0": 8323
+          },
+          "join_age": {
+            "joined": 8323,
+            "max_ms": 12.87005,
+            "median_ms": 1.825104
+          },
+          "native_src0_all_values": {
+            "0": 153077
+          },
+          "native_src0_cadence": {
+            "count": 153076,
+            "gt_35ms": 2,
+            "max_ms": 38.05151,
+            "median_ms": 9.891854,
+            "min_ms": 0.0
+          },
+          "native_src_counts": {
+            "0": 153077,
+            "130": 151885,
+            "2": 1198
+          },
+          "passing_condition": "ADBF < 2",
+          "static_source": "FEBE817C -> FEBEF145 -> FEBEADBF; exact F33 0x030 packer signal19 = B13[1:0]"
+        },
+        "CAD9": {
+          "active_b6_latest_within_25ms": {
+            "0": 8323
+          },
+          "join_age": {
+            "joined": 8323,
+            "max_ms": 12.87005,
+            "median_ms": 1.825104
+          },
+          "native_src0_all_values": {
+            "0": 153077
+          },
+          "native_src0_cadence": {
+            "count": 153076,
+            "gt_35ms": 2,
+            "max_ms": 38.05151,
+            "median_ms": 9.891854,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAD9 == 0",
+          "static_source": "CAD9 -> AD4B -> E83A -> 80E0; exact F33 0x030 packer signal31 = B19[0]"
+        },
+        "CAFC": {
+          "active_b6_latest_within_25ms": {
+            "0": 8323
+          },
+          "join_age": {
+            "joined": 8323,
+            "max_ms": 12.87005,
+            "median_ms": 1.825104
+          },
+          "native_src0_all_values": {
+            "0": 153077
+          },
+          "native_src0_cadence": {
+            "count": 153076,
+            "gt_35ms": 2,
+            "max_ms": 38.05151,
+            "median_ms": 9.891854,
+            "min_ms": 0.0
+          },
+          "passing_condition": "CAFC == 0",
+          "static_source": "CAFC -> AD42 -> E834 -> 80EC; exact F33 0x030 packer signal25 = B16[0]"
+        }
+      },
+      "route_name": "0000002c--c784367b7e",
+      "segment_count": 26
+    }
+  ],
+  "schema": "camry-f33-b6-gate-log-reconciliation-v1",
+  "sources": {
+    "exact_f33_corpus": "data/generated/camry-8965F3307000/decompilations.jsonl",
+    "exact_f33_corpus_sha256": "ba90d46f24b58951bdd975e9b0271f8e6756a34e7bec44041cd798c98b691586",
+    "external_ingress_artifact": "data/generated/camry_8965F3307000_external_lateral_ingress.json",
+    "external_ingress_artifact_sha256": "4b6343a132bf28b3328e32a82aab7c5bad9c5b61619f98b84e8c6be93f365c33",
+    "f33_port_artifact": "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
+    "f33_port_artifact_sha256": "fc4e7ac9a2d3590b1ba1b7962c360fafc29297f4793d5c1a4dcec5eb298bf357",
+    "freshness_artifact": "data/generated/camry_b6_freshness_contract.json",
+    "freshness_artifact_sha256": "097ef2d7cea631f2736e410ccc540d2cd2b56cf2a35ff6aef02b158b0320e30c",
+    "retained_rlog_bytes": 5328786933,
+    "retained_rlogs": 530,
+    "retained_routes": 13
+  },
+  "static_gate_proof": {
+    "ACCD": {
+      "bit_offset": 7,
+      "bits": 1,
+      "byte_offset": 0,
+      "can_fd": true,
+      "can_id": "0x0D7",
+      "classification": "protected-status-gate",
+      "consumers": [
+        "0x000C973A",
+        "0x000CB664",
+        "0x000CE772",
+        "0x000CE7A6"
+      ],
+      "destination_expression": "auStack_9",
+      "length": 32,
+      "pdu": 41,
+      "raw": "0xFEBE80A0",
+      "raw_copy": "0x0004BB62 stack-RMW auStack_9[0]",
+      "signal": 243,
+      "signed": false,
+      "snapshot": "0xFEBEACCD",
+      "snapshot_copy": "0x000BCD62",
+      "stage": "0xFEBEF094",
+      "stage_copy": "0x00058074",
+      "unpacker": "0x0004BB62"
+    },
+    "ADBF": {
+      "packer": "0x0004C97A",
+      "packer_signal": 19,
+      "proof": "4C97A stages FEBE817C at FEBE8C3E then FUN_0007D31E(0x13,0x0D,2,0,&FEBE8C3E)",
+      "raw": "0xFEBE817C",
+      "snapshot": "0xFEBEADBF",
+      "stage": "0xFEBEF145",
+      "wire": "0x030 B13[1:0]"
+    },
+    "CAD9": {
+      "chain": [
+        "0x000D0D7C CAD9->AD4B",
+        "0x000BF3AA AD4B->E83A",
+        "0x0004C2DC E83A->80E0",
+        "0x0004C97A signal31"
+      ],
+      "packer_signal": 31,
+      "wire": "0x030 B19[0]"
+    },
+    "CAFC": {
+      "chain": [
+        "0x000D0D7C CAFC->AD42",
+        "0x000BF3AA AD42->E834",
+        "0x0004C2DC E834->80EC",
+        "0x0004C97A signal25"
+      ],
+      "packer_signal": 25,
+      "wire": "0x030 B16[0]"
+    },
+    "readiness_predicate": {
+      "assert": "CE772 promotes when ACCC==0 && ACCD==0 && ADBF<2 && CAFC==0 && CAD9==0",
+      "withdraw": "CE7A6 withdraws for ACCC!=0, debounced ACCD!=0, ADBF in {2,3}, CAFC==1, or CAD9==1"
+    },
+    "sig263_correction": {
+      "C7B4_only_runtime_consumer": "0x000CB73A",
+      "CB664_output": "FEBEC7B4",
+      "CB73A_arm_id": "0x31",
+      "conclusion": "sig263=0 and CB664 speed qualification belong to the special 0x31 transient, not normal ID11 bank2 admission",
+      "normal_id11": "0x0B",
+      "signal": 263,
+      "snapshot": "0xFEBEADDD",
+      "sole_runtime_reader": "0x000CB664"
+    }
+  }
+}

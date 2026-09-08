@@ -37,12 +37,17 @@ Keep two queues separate:
    persistent cumulative stage-5 exact-F33 image is already the receiver-result bypass;
    VAR-147/CORR-178 prove MAC value is not the remaining discriminator, and
    VAR-149/CORR-180 now close every recovered software gate from B6 ingress through the
-   exact motor-current model. Do **not** add another SecOC-result patch, change freshness
-   phase, guess another B6 companion, or suppress `0x08A`. Use the generic high-tail
+   exact motor-current model, and VAR-150 reconciles the retained road corpus against those
+   gates: the current application shape/cadence is clean and **four of five** normal-ID11
+   `CE772/CE7A6` readiness operands (`ACCD`, `ADBF`, `CAFC`, `CAD9`) are observed in their
+   passing states throughout the joined current-shape routes. Only `ACCC` remains unknown
+   from that five-way readiness predicate. Do **not** add another SecOC-result patch, change
+   freshness phase, guess another B6 companion, or suppress `0x08A`. Use the generic high-tail
    monitor/readback path (qualify the ABI-preserving resident first if it is not already
    live-proven) to run the exact seven eight-slot phases in one READY/Park session:
    **A** SecOC queue/auth -> raw route44, **B** raw route44 -> generated COM, **C** staging
-   -> `ADB0/AE90/ACBD/CAFF`, **D** bank/readiness -> `CB38`, **E** `CB38` -> D0218/shared
+   -> `ADB0/AE90/ACBD/CAFF`, **D** the remaining `ACCC` readiness state plus bank/gain ->
+   `CB38` (road `ACCD/ADBF/CAFC/CAD9` stay external sanity witnesses), **E** `CB38` -> D0218/shared
    command/`AC5A`, **F** hard gate -> internal override -> `EE40C`, and **G** `EE40C` ->
    `6AF4/6E0A/6DEC/6DC8/6DD6`. Adjacent phases deliberately overlap one or two four-byte
    windows, so the first adjacent mismatch is the blocker. Current opendbc
@@ -370,7 +375,10 @@ B6 epoch directly from the received low2 and imposes no fixed start phase. The c
 13-route corpus also finds the latest B6 progression freshness-admissible. VAR-147/
 CORR-178 further prove cumulative stage 5 makes zero MAC28 and wrong-key dummy MAC28
 acceptance-equivalent; do not spend a field run on either a 0-vs-1 freshness A/B or a
-zero-vs-dummy MAC A/B. VAR-149/CORR-180 supersede the shorter "physical receive/queue and raw-COM" next-step
+zero-vs-dummy MAC A/B. VAR-150 further reconciles the complete retained road corpus to the
+normal-ID11 gate operands: among `CE772`'s five conditions, `ACCD==0`, `ADBF<2`, `CAFC==0`,
+and `CAD9==0` are already observed throughout current-shape active B6 joins; only `ACCC`
+remains unobserved there. VAR-149/CORR-180 supersede the shorter "physical receive/queue and raw-COM" next-step
 framing with the complete adjacent-rung discriminator. Physical queue/publication is only
 the front half: after `CB38` the ordinary EPS can still omit the contribution through
 `AC2B`, attenuate it through `AC5A`, hard-zero `CC66` through `AC29/AC2A`, replace the

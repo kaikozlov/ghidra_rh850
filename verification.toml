@@ -2469,6 +2469,16 @@ paths = [
   "exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md",
 ]
 
+[suite.camry_f33_b6_gate_log_reconciliation]
+tests = ["tests/verify_camry_f33_b6_gate_log_reconciliation.py"]
+oracle = "dynamic_trace"
+paths = [
+  "tools/analyze_camry_f33_b6_gate_log_reconciliation.py",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/PRIORITIES.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
+
 [suite.camry_8965f3307000_function_boundaries]
 tests = ["tests/verify_camry_8965F3307000_function_boundaries.py"]
 oracle = "raw_bytes"
