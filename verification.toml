@@ -2443,3 +2443,18 @@ paths = [
   "docs/variants/camry-2026-live-baseline.md",
   "docs/variants/camry-2026-tss3-opendbc-port.md",
 ]
+
+[suite.camry_f33_b6_mac_equivalence]
+tests = ["tests/verify_camry_f33_b6_mac_equivalence.py"]
+oracle = "raw_bytes"
+paths = [
+  "docs/variants/camry-2026-live-baseline.md",
+]
+
+[suite.camry_f33_b6_command_composition]
+tests = ["tests/verify_camry_f33_b6_command_composition.py"]
+oracle = "raw_bytes"
+paths = [
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/variants/camry-2026-tss3-opendbc-port.md",
+]

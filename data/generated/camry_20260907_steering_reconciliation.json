@@ -9,186 +9,12 @@
     "conclusion": {
       "b6_wire_angle_matches_openpilot_request": true,
       "fixed_stock_to_b6_offset_is_supported": false,
+      "forwarded_08a_is_f33_authority_isolation_switch": false,
       "high_confidence_model_path_crossed_inner_lane_line": false,
+      "published_081_is_eps_b6_blend_discriminator": false,
+      "route_observes_eps_side_b6_composition": false,
       "route_proves_b6_only_physical_authority": false,
-      "stock_08a_and_b6_are_not_interchangeable_reference_planes": true,
-      "stock_forwarding_confounds_b6_authority": true
-    },
-    "concurrent_authority_observation": {
-      "divergence_0p5_deg": {
-        "blend_alpha": {
-          "count": 8235,
-          "max": 1.0,
-          "mean": -0.004370622,
-          "median": 0.0,
-          "median_abs": 0.0,
-          "min": -0.555555556,
-          "p90_abs": 0.1,
-          "rmse": 0.070022143
-        },
-        "blend_alpha_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); 0=stock plane, 1=B6 plane",
-        "count": 8235,
-        "reference_closer_to_b6_count": 6,
-        "reference_closer_to_stock_count": 8229,
-        "reference_minus_b6_deg": {
-          "count": 8235,
-          "max": 2.807834359,
-          "mean": -0.645889231,
-          "median": -0.744935646,
-          "median_abs": 0.802238388,
-          "min": -2.750531617,
-          "p90_abs": 1.489871293,
-          "rmse": 1.021202217
-        },
-        "reference_minus_stock_deg": {
-          "count": 8235,
-          "max": 0.630330162,
-          "mean": -0.001670025,
-          "median": 0.0,
-          "median_abs": 0.0,
-          "min": -0.458421936,
-          "p90_abs": 0.057302742,
-          "rmse": 0.053907325
-        }
-      },
-      "divergence_1p0_deg": {
-        "blend_alpha": {
-          "count": 2605,
-          "max": 0.35483871,
-          "mean": -0.004572558,
-          "median": 0.0,
-          "median_abs": 0.0,
-          "min": -0.263157895,
-          "p90_abs": 0.055555556,
-          "rmse": 0.043384177
-        },
-        "blend_alpha_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); 0=stock plane, 1=B6 plane",
-        "count": 2605,
-        "reference_closer_to_b6_count": 0,
-        "reference_closer_to_stock_count": 2605,
-        "reference_minus_b6_deg": {
-          "count": 2605,
-          "max": 2.807834359,
-          "mean": -0.837015983,
-          "median": -1.203357583,
-          "median_abs": 1.317963067,
-          "min": -2.750531617,
-          "p90_abs": 1.948293229,
-          "rmse": 1.471814257
-        },
-        "reference_minus_stock_deg": {
-          "count": 2605,
-          "max": 0.630330162,
-          "mean": -0.002375699,
-          "median": 0.0,
-          "median_abs": 0.0,
-          "min": -0.343816452,
-          "p90_abs": 0.057302742,
-          "rmse": 0.05764269
-        }
-      },
-      "divergence_2p0_deg": {
-        "blend_alpha": {
-          "count": 245,
-          "max": 0.081081081,
-          "mean": -0.010066529,
-          "median": 0.0,
-          "median_abs": 0.0,
-          "min": -0.142857143,
-          "p90_abs": 0.048780488,
-          "rmse": 0.028335592
-        },
-        "blend_alpha_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); 0=stock plane, 1=B6 plane",
-        "count": 245,
-        "reference_closer_to_b6_count": 0,
-        "reference_closer_to_stock_count": 245,
-        "reference_minus_b6_deg": {
-          "count": 245,
-          "max": 2.807834359,
-          "mean": -0.585891301,
-          "median": -2.120201455,
-          "median_abs": 2.406715165,
-          "min": -2.750531617,
-          "p90_abs": 2.635926133,
-          "rmse": 2.366373735
-        },
-        "reference_minus_stock_deg": {
-          "count": 245,
-          "max": 0.229210968,
-          "mean": 0.000233889,
-          "median": 0.0,
-          "median_abs": 0.0,
-          "min": -0.28651371,
-          "p90_abs": 0.114605484,
-          "rmse": 0.064561343
-        }
-      },
-      "divergence_2p5_deg": {
-        "blend_alpha": {
-          "count": 53,
-          "max": 0.022727273,
-          "mean": -0.008418473,
-          "median": 0.0,
-          "median_abs": 0.0,
-          "min": -0.068181818,
-          "p90_abs": 0.039328063,
-          "rmse": 0.021177312
-        },
-        "blend_alpha_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); 0=stock plane, 1=B6 plane",
-        "count": 53,
-        "reference_closer_to_b6_count": 0,
-        "reference_closer_to_stock_count": 53,
-        "reference_minus_b6_deg": {
-          "count": 53,
-          "max": 2.807834359,
-          "mean": -0.335166982,
-          "median": -2.521320649,
-          "median_abs": 2.578623391,
-          "min": -2.750531617,
-          "p90_abs": 2.750531617,
-          "rmse": 2.620154778
-        },
-        "reference_minus_stock_deg": {
-          "count": 53,
-          "max": 0.171908226,
-          "mean": 0.004324735,
-          "median": 0.0,
-          "median_abs": 0.0,
-          "min": -0.114605484,
-          "p90_abs": 0.103144936,
-          "rmse": 0.054532837
-        }
-      },
-      "interpretation": "0x081 remains on the stock request/reference plane rather than a stock/B6 midpoint. Any B6 influence must therefore be downstream of, or separate from, this published reference plane. Because stock 0x08A is still forwarded, this route cannot distinguish B6-only authority from additive/coexisting EPS control or source priority.",
-      "reference_081_role": "chassis-side published reference/result plane; exact F33 does not receive 0x081",
-      "selection": "B6 ID11 + stock 0x08A ID11 + latActive; vEgo>10m/s; abs(driver torque)<0.7Nm; no blinker; <=40/50ms freshness",
-      "stock_id0_b6_id11_low_torque": {
-        "count": 228,
-        "reference_id_counts": {
-          "0": 225,
-          "11": 3
-        },
-        "reference_minus_b6_deg": {
-          "count": 228,
-          "max": 1.031449356,
-          "mean": -1.702997281,
-          "median": -1.661779519,
-          "median_abs": 1.661779519,
-          "min": -4.24040291,
-          "p90_abs": 3.208953553,
-          "rmse": 2.075399303
-        },
-        "reference_minus_stock_deg": {
-          "count": 228,
-          "max": 3.66737549,
-          "mean": 0.02764606,
-          "median": 0.0,
-          "median_abs": 0.0,
-          "min": -0.343816452,
-          "p90_abs": 0.057302742,
-          "rmse": 0.344611405
-        }
-      }
+      "stock_08a_and_b6_are_not_interchangeable_reference_planes": true
     },
     "input": {
       "route": "00000045--805b7ca6ab",
@@ -463,6 +289,182 @@
         "rmse": 0.12821196
       }
     },
+    "request_reference_plane_observation": {
+      "divergence_0p5_deg": {
+        "count": 8235,
+        "reference_closer_to_b6_count": 6,
+        "reference_closer_to_stock_count": 8229,
+        "reference_minus_b6_deg": {
+          "count": 8235,
+          "max": 2.807834359,
+          "mean": -0.645889231,
+          "median": -0.744935646,
+          "median_abs": 0.802238388,
+          "min": -2.750531617,
+          "p90_abs": 1.489871293,
+          "rmse": 1.021202217
+        },
+        "reference_minus_stock_deg": {
+          "count": 8235,
+          "max": 0.630330162,
+          "mean": -0.001670025,
+          "median": 0.0,
+          "median_abs": 0.0,
+          "min": -0.458421936,
+          "p90_abs": 0.057302742,
+          "rmse": 0.053907325
+        },
+        "reference_position_ratio": {
+          "count": 8235,
+          "max": 1.0,
+          "mean": -0.004370622,
+          "median": 0.0,
+          "median_abs": 0.0,
+          "min": -0.555555556,
+          "p90_abs": 0.1,
+          "rmse": 0.070022143
+        },
+        "reference_position_ratio_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); geometric reference-plane ratio only, not an EPS B6 blend fraction"
+      },
+      "divergence_1p0_deg": {
+        "count": 2605,
+        "reference_closer_to_b6_count": 0,
+        "reference_closer_to_stock_count": 2605,
+        "reference_minus_b6_deg": {
+          "count": 2605,
+          "max": 2.807834359,
+          "mean": -0.837015983,
+          "median": -1.203357583,
+          "median_abs": 1.317963067,
+          "min": -2.750531617,
+          "p90_abs": 1.948293229,
+          "rmse": 1.471814257
+        },
+        "reference_minus_stock_deg": {
+          "count": 2605,
+          "max": 0.630330162,
+          "mean": -0.002375699,
+          "median": 0.0,
+          "median_abs": 0.0,
+          "min": -0.343816452,
+          "p90_abs": 0.057302742,
+          "rmse": 0.05764269
+        },
+        "reference_position_ratio": {
+          "count": 2605,
+          "max": 0.35483871,
+          "mean": -0.004572558,
+          "median": 0.0,
+          "median_abs": 0.0,
+          "min": -0.263157895,
+          "p90_abs": 0.055555556,
+          "rmse": 0.043384177
+        },
+        "reference_position_ratio_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); geometric reference-plane ratio only, not an EPS B6 blend fraction"
+      },
+      "divergence_2p0_deg": {
+        "count": 245,
+        "reference_closer_to_b6_count": 0,
+        "reference_closer_to_stock_count": 245,
+        "reference_minus_b6_deg": {
+          "count": 245,
+          "max": 2.807834359,
+          "mean": -0.585891301,
+          "median": -2.120201455,
+          "median_abs": 2.406715165,
+          "min": -2.750531617,
+          "p90_abs": 2.635926133,
+          "rmse": 2.366373735
+        },
+        "reference_minus_stock_deg": {
+          "count": 245,
+          "max": 0.229210968,
+          "mean": 0.000233889,
+          "median": 0.0,
+          "median_abs": 0.0,
+          "min": -0.28651371,
+          "p90_abs": 0.114605484,
+          "rmse": 0.064561343
+        },
+        "reference_position_ratio": {
+          "count": 245,
+          "max": 0.081081081,
+          "mean": -0.010066529,
+          "median": 0.0,
+          "median_abs": 0.0,
+          "min": -0.142857143,
+          "p90_abs": 0.048780488,
+          "rmse": 0.028335592
+        },
+        "reference_position_ratio_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); geometric reference-plane ratio only, not an EPS B6 blend fraction"
+      },
+      "divergence_2p5_deg": {
+        "count": 53,
+        "reference_closer_to_b6_count": 0,
+        "reference_closer_to_stock_count": 53,
+        "reference_minus_b6_deg": {
+          "count": 53,
+          "max": 2.807834359,
+          "mean": -0.335166982,
+          "median": -2.521320649,
+          "median_abs": 2.578623391,
+          "min": -2.750531617,
+          "p90_abs": 2.750531617,
+          "rmse": 2.620154778
+        },
+        "reference_minus_stock_deg": {
+          "count": 53,
+          "max": 0.171908226,
+          "mean": 0.004324735,
+          "median": 0.0,
+          "median_abs": 0.0,
+          "min": -0.114605484,
+          "p90_abs": 0.103144936,
+          "rmse": 0.054532837
+        },
+        "reference_position_ratio": {
+          "count": 53,
+          "max": 0.022727273,
+          "mean": -0.008418473,
+          "median": 0.0,
+          "median_abs": 0.0,
+          "min": -0.068181818,
+          "p90_abs": 0.039328063,
+          "rmse": 0.021177312
+        },
+        "reference_position_ratio_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); geometric reference-plane ratio only, not an EPS B6 blend fraction"
+      },
+      "interpretation": "0x081 remains on Toyota's upstream request/reference plane. Exact F33 receives neither 0x08A nor 0x081, so this observation is not an EPS-side B6 blend or authority discriminator; B6 enters F33 separately.",
+      "reference_081_role": "chassis-side published reference/result plane; exact F33 does not receive 0x081",
+      "selection": "B6 ID11 + stock 0x08A ID11 + latActive; vEgo>10m/s; abs(driver torque)<0.7Nm; no blinker; <=40/50ms freshness",
+      "stock_id0_b6_id11_low_torque": {
+        "count": 228,
+        "reference_id_counts": {
+          "0": 225,
+          "11": 3
+        },
+        "reference_minus_b6_deg": {
+          "count": 228,
+          "max": 1.031449356,
+          "mean": -1.702997281,
+          "median": -1.661779519,
+          "median_abs": 1.661779519,
+          "min": -4.24040291,
+          "p90_abs": 3.208953553,
+          "rmse": 2.075399303
+        },
+        "reference_minus_stock_deg": {
+          "count": 228,
+          "max": 3.66737549,
+          "mean": 0.02764606,
+          "median": 0.0,
+          "median_abs": 0.0,
+          "min": -0.343816452,
+          "p90_abs": 0.057302742,
+          "rmse": 0.344611405
+        }
+      }
+    },
     "stock_id0_reference_plane": {
       "b6_from_measured_fit": {
         "correlation": 0.999987829,
@@ -545,6 +547,6 @@
       "stock_vs_b6_minus_live_offset_correlation": 0.717748383
     }
   },
-  "openpilot_parser_commit": "bfa1352b25e64e50e1332d8661af475be9be04a4",
-  "schema": "camry-20260907-steering-reconciliation-v2"
+  "openpilot_parser_commit": "bb6c03ce707d843e038f4b9510196a029d216d2d",
+  "schema": "camry-20260907-steering-reconciliation-v3"
 }

@@ -317,14 +317,14 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
     "state_census": {
       "fresh_joined_b6_rows": len(rows),
       "stock_b6_state_counts": {f"stock{a}_b6{b}_cruise{int(c)}_lat{int(d)}": n for (a, b, c, d), n in sorted(combos.items())},
-      "stock_lta_off_b6_active_rows": len(suppressed),
-      "stock_lta_off_b6_active_episodes": len(suppressed_runs),
+      "upstream_request_id0_b6_active_rows": len(suppressed),
+      "upstream_request_id0_b6_active_episodes": len(suppressed_runs),
       "episodes_ge_1s": sum((x[-1]["time_ns"] - x[0]["time_ns"]) >= 1_000_000_000 for x in suppressed_runs),
       "episode_duration_sum_s": round(sum((x[-1]["time_ns"] - x[0]["time_ns"]) / 1e9 for x in suppressed_runs), 6),
       "longest_episodes": [summarize_run(x) for x in sorted(suppressed_runs, key=lambda x: x[-1]["time_ns"] - x[0]["time_ns"], reverse=True)[:5]],
     },
-    "isolated_b6_response": {
-      "selection": "stock 0x08A ID0 + 0x081 ID0 + cruise latch on + B6 ID11 + latActive; vEgo>10m/s; no blinker; abs(driver torque)<0.3Nm",
+    "request_plane_off_b6_response": {
+      "selection": "upstream Toyota request/reference plane 0x08A ID0 + 0x081 ID0 + cruise latch on + B6 ID11 + latActive; vEgo>10m/s; no blinker; abs(driver torque)<0.3Nm",
       "large_error_threshold_deg": 3.0,
       "large_error_rows": len(low_torque_large_error),
       "large_error_motor_abs_raw": qstats([abs(float(r["motor_raw"])) for r in low_torque_large_error]),
@@ -341,12 +341,13 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
     },
     "conclusion": {
       "turning_toyota_lta_off_preserved_openpilot_b6_id11": True,
-      "stock_autonomous_request_competition_explains_b6_nonresponse": False,
+      "simultaneous_upstream_stock_id11_required_for_b6_nonresponse": False,
+      "route_proves_all_ordinary_f33_assist_terms_absent": False,
       "route_proves_b6_effective_eps_authority": False,
       "interpretation": (
-        "Route 48 supplies a direct source-off experiment: Toyota 0x08A/0x081 stay ID0 for long intervals while DRCC and openpilot remain active and B6 stays ID11. "
-        "Large comma target errors can persist for seconds with near-zero driver torque, near-zero steering rate, and very small EPS motor-feedback proxy, while same-route stock-ID11 request error produces a much larger motor response. "
-        "This rules out simultaneous stock autonomous lateral request as the explanation for the observed B6 non-response; it does not by itself identify which B6 admission/authentication/controller gate is failing."
+        "Route 48 proves the upstream Toyota 0x08A/0x081 request/reference plane stays ID0 for long intervals while DRCC and openpilot remain active and B6 stays ID11. "
+        "Large comma target errors can persist for seconds with near-zero driver torque, near-zero steering rate, and very small EPS motor-feedback proxy, while same-route upstream stock-ID11 request error produces a much larger motor response. "
+        "Because exact F33 receives neither 0x08A nor 0x081, this is not a full EPS-authority isolation experiment and does not prove ordinary F33 assist/current terms are absent; it localizes the observed non-response without using upstream request-plane state as an EPS arbitration oracle."
       ),
     },
   }
@@ -359,7 +360,7 @@ def main() -> int:
   ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
   args = ap.parse_args()
   result = {
-    "schema": "camry-20260907-lta-off-b6-authority-v1",
+    "schema": "camry-20260907-lta-off-b6-authority-v2",
     "openpilot_parser_commit": subprocess.check_output(
       ["git", "-C", str(args.openpilot_root), "rev-parse", "HEAD"], text=True, timeout=10,
     ).strip(),

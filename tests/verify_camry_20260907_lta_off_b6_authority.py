@@ -10,7 +10,7 @@ ART = ROOT / "data/generated/camry_20260907_lta_off_b6_authority.json"
 DOC = ROOT / "docs/variants/camry-2026-live-baseline.md"
 
 x = json.loads(ART.read_text())
-assert x["schema"] == "camry-20260907-lta-off-b6-authority-v1"
+assert x["schema"] == "camry-20260907-lta-off-b6-authority-v2"
 e = x["evidence"]
 assert e["input"]["route"] == "00000048--709f22277b"
 assert e["input"]["segment_count"] == 8
@@ -45,14 +45,14 @@ for row in transport["panda_health"]["controller_deltas"]:
 
 state = e["state_census"]
 assert state["fresh_joined_b6_rows"] == 21_335
-assert state["stock_lta_off_b6_active_rows"] == 10_017
-assert state["stock_lta_off_b6_active_episodes"] == 15
+assert state["upstream_request_id0_b6_active_rows"] == 10_017
+assert state["upstream_request_id0_b6_active_episodes"] == 15
 assert state["episodes_ge_1s"] == 14
 assert 200.8 < state["episode_duration_sum_s"] < 201.0
 assert state["stock_b6_state_counts"]["stock0_b611_cruise1_lat1"] == 10_021
 assert state["stock_b6_state_counts"]["stock11_b611_cruise1_lat1"] == 1_171
 
-iso = e["isolated_b6_response"]
+iso = e["request_plane_off_b6_response"]
 assert iso["large_error_threshold_deg"] == 3.0
 assert iso["large_error_rows"] == 1_040
 assert iso["large_error_motor_abs_raw"]["median"] == 13.0
@@ -78,7 +78,8 @@ assert positive["motor_sign_toward_stock_fraction"] > 0.95
 
 c = e["conclusion"]
 assert c["turning_toyota_lta_off_preserved_openpilot_b6_id11"] is True
-assert c["stock_autonomous_request_competition_explains_b6_nonresponse"] is False
+assert c["simultaneous_upstream_stock_id11_required_for_b6_nonresponse"] is False
+assert c["route_proves_all_ordinary_f33_assist_terms_absent"] is False
 assert c["route_proves_b6_effective_eps_authority"] is False
 
 text = DOC.read_text()
@@ -90,7 +91,8 @@ for token in (
   "309",
   "21,347/21,347",
   "CAN-FD+BRS",
-  "source-competition question",
+  "upstream Toyota autonomous",
+  "not proof that every ordinary F33",
 ):
   assert token in text, token
 

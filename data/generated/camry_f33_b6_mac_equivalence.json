@@ -1,0 +1,290 @@
+{
+  "b6_secoc_profile": {
+    "authenticator_bits": 28,
+    "authenticator_start_bit_in_trailer": 4,
+    "crypto_command_selector": 0,
+    "data_id": 182,
+    "freshness_callback": "0x0903A0",
+    "freshness_id": 2,
+    "post_crypto_callback": "0x090448",
+    "secured_record": 2,
+    "trailer_extract_bytes": 4,
+    "upper_pdur_destination": 44
+  },
+  "direct_reference_census": {
+    "icu_root_result_byte_FEBE5564": [
+      {
+        "from": "0x0008f6a6",
+        "function": "0x0008f676",
+        "type": "PARAM"
+      },
+      {
+        "from": "0x0008f92a",
+        "function": "0x0008f906",
+        "type": "READ"
+      }
+    ],
+    "received_authenticator_buffer_FEBE5554": [
+      {
+        "from": "0x0008f4a0",
+        "function": "0x0008f434",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x0008f4b0",
+        "function": "0x0008f434",
+        "type": "READ"
+      },
+      {
+        "from": "0x0008f4be",
+        "function": "0x0008f434",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x0008f6a2",
+        "function": "0x0008f676",
+        "type": "PARAM"
+      }
+    ]
+  },
+  "firmware": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "part": "8965F3307000",
+    "stage5": {
+      "final_crc_residue": "0xFFFFFFFF",
+      "final_fixup": "0xE69FC7F5",
+      "final_sha256": "669cedf8c8465ebfd02318cb7708b897b817bc3b40925c89743b64ce49aa01af",
+      "source_stage4_sha256": "2e2f0819ab328b8733c604eee3952ba4f774e4344a60184b7eea99927236640e"
+    }
+  },
+  "function_evidence": {
+    "0x04BD46": {
+      "body_sha256": "db4f6577d4a3250c7277730ee2f3c3e3fb71ffa83c6103ff1cd4c5b982f65b62",
+      "body_size": 390,
+      "decompiled_c_sha256": "6276e8aafdd85f37619cff2c474ffadf71e60dfada9a26a16b39ad04c7c08368",
+      "role": "application B6 signal unpack"
+    },
+    "0x07D800": {
+      "body_sha256": "2fabcd172911f9fb0fa807666c7c851537ee45975d43cd6fef343f9ccd0c25e8",
+      "body_size": 4,
+      "decompiled_c_sha256": "78656bf3701f15883586f8fc9ef7c75b233b7ffcb88ca8e9fc1b47e7071b8939",
+      "role": "route guard: unconditional success"
+    },
+    "0x081CA6": {
+      "body_sha256": "2b7c5736393c68204635d71cf7306a67685445f4451aeae9f29516e75cdbb4f5",
+      "body_size": 112,
+      "decompiled_c_sha256": "456b08d00ee23c39783b4d3cb169fefc641ec40b0edf1b623cc00b59ba76ae91",
+      "role": "PduR upper-route dispatcher"
+    },
+    "0x088FC0": {
+      "body_sha256": "885e8edb09d35f0cedea452efa003b4807344487e6394ba156b32491d6eaabd2",
+      "body_size": 172,
+      "decompiled_c_sha256": "4a0d826093c9281c9f61a5da50b7915e83e04d71559dbd094a0f5f44f24c02f1",
+      "role": "ICU-S command buffer/descriptor builder"
+    },
+    "0x089646": {
+      "body_sha256": "4eec6679c98796dc7414b3706482e4fb6d89d6e503bab1f9a113f8a90879af7d",
+      "body_size": 148,
+      "decompiled_c_sha256": "73937ba34283d1b5966b3b3515eceff00cc857f08ac1e62122bb6068f5f76525",
+      "role": "ICU-S command dispatcher"
+    },
+    "0x089C98": {
+      "body_sha256": "139547a74d2b9affed13921621766da441817167bf42b4d78f0545b3eb9b7965",
+      "body_size": 98,
+      "decompiled_c_sha256": "f5e1f966a6f4772c99fe7dd5e82597c936e6f5ab38a3b0a1340ef007eeef32a4",
+      "role": "ICU-S synchronous command wrapper"
+    },
+    "0x08E772": {
+      "body_sha256": "d216bc64825096ddf60a10f32c6110a939b1cab7ba066c1bf7891e58cbafd46f",
+      "body_size": 30,
+      "decompiled_c_sha256": "6c18ae579750c6955cd7151f3df30c598b4f3db8dcb9062f817552cb8626e1e2",
+      "role": "COM new-data generation update"
+    },
+    "0x08ECB2": {
+      "body_sha256": "d1e16041f8e55bec3173a949a783c8dfe9742447c88a3c737fd23e253c4064eb",
+      "body_size": 98,
+      "decompiled_c_sha256": "114a7cf4b6ad8380b17f528d12b215486587f759357c71259f7b261b2b63ee71",
+      "role": "authentication-input builder"
+    },
+    "0x08F434": {
+      "body_sha256": "23baff101c49428738e2bc8273c7a2fdda32598028fa5665fb8a90d060286bc4",
+      "body_size": 156,
+      "decompiled_c_sha256": "f0df4556e6a2add045ff62f3a4b1298e0cf66deb1d154c38cf42a15d2959c1bd",
+      "role": "secured trailer extractor"
+    },
+    "0x08F546": {
+      "body_sha256": "721f10f71fbf32b5dcada657c963d8034397217950d97088a0af54a6d6a84006",
+      "body_size": 80,
+      "decompiled_c_sha256": "59ad5cdf9e97f151594a2b0f3bd106d3acf8192b72d4f92e3c9929028d2fcc12",
+      "role": "verified PDU upper delivery"
+    },
+    "0x08F676": {
+      "body_sha256": "ce3c560d619403915125698d1dc10f3a8c6c301eb6d8ba32ebb98f9d1bacf68f",
+      "body_size": 60,
+      "decompiled_c_sha256": "f9c51907efd6a219b7517ce52a24c8f587fe500377a06d91e53fd221f2db2c74",
+      "role": "ICU-S verify wrapper"
+    },
+    "0x08F746": {
+      "body_sha256": "4cb7b08ada0b7e058aed4e9f44083b931a920427548e6d29abeb4f523e4fd1b7",
+      "body_size": 396,
+      "decompiled_c_sha256": "93cb772b5edb0033fc06c733ff3d68ec4fa7403a602d6276fbec6b38e30013a9",
+      "role": "secured PDU verify coordinator"
+    },
+    "0x08F8D2": {
+      "body_sha256": "758aab3b401cb94bcb88cd8e04de103fa37c85de872d2ee6b1652ab53a3ab636",
+      "body_size": 52,
+      "decompiled_c_sha256": "fd4afb0035cca7d2ec94236c5970fd159dbd82b18d973c91a3f85ccab690fc84",
+      "role": "post-crypto profile callback dispatcher"
+    },
+    "0x08F906": {
+      "body_sha256": "860fc368a14af6365d6ee17c3bbaa4723a157b9c6f4a14023f888c51b42d3be4",
+      "body_size": 134,
+      "decompiled_c_sha256": "69454108d244fe090fedce77eb5f83eb02aa3bcd922f0772952ed0d3dc4b23f0",
+      "role": "root result / Gate-2 / delivery coordinator"
+    },
+    "0x090204": {
+      "body_sha256": "6386fa98f892fa79d74a4eb150319cbd6572b1649adaa42880b848e32899ce8a",
+      "body_size": 14,
+      "decompiled_c_sha256": "c2c1167f63572db9800a150523157bc673e26210a29f2dc77392e1b797b8ab1a",
+      "role": "upper PduR indication shim"
+    },
+    "0x090A48": {
+      "body_sha256": "bf0be72eb4cef2e510cc57b6b1f1c089aa760cb8f14cb0c6aa1337c91ae8ddd3",
+      "body_size": 212,
+      "decompiled_c_sha256": "08b3d2f95473a65f7e1ca7ab842e1fa019b2aee70851a2f95972927d50c7a0e6",
+      "role": "ordinary freshness reconstruction"
+    },
+    "0x090D6A": {
+      "body_sha256": "35f2d6793551e9624ea98bcad296eda11c060b891faf9e25ec34e6d8ff9a2906",
+      "body_size": 52,
+      "decompiled_c_sha256": "acedfac930d4f5d9b52bea19847347f3754874bddb3f4f2d2474f8e83def8796",
+      "role": "ordinary pending-to-committed freshness commit"
+    }
+  },
+  "installed_patch_sites": [
+    {
+      "address": "0x08F952",
+      "effect": "cmp r0,r26 -> cmp r0,r0: final Gate-2 branch always takes native success tail",
+      "expected_stage5": "e001",
+      "name": "stage1_final_delivery_gate",
+      "stage5": "e001",
+      "stock": "e0d1"
+    },
+    {
+      "address": "0x08F948",
+      "effect": "mov r26,r7 -> mov 0,r7: profile callback is told verification succeeded",
+      "expected_stage5": "003a",
+      "name": "stage2_post_crypto_callback_result",
+      "stage5": "003a",
+      "stock": "1a38"
+    },
+    {
+      "address": "0x08F930",
+      "effect": "cmovne 1,r1,r26 -> cmovne 0,r0,r26: ICU root-result byte cannot assert failure",
+      "expected_stage5": "e00714d3",
+      "name": "stage3_root_result_boolean",
+      "stage5": "e00714d3",
+      "stock": "e10f14d3"
+    },
+    {
+      "address": "0x08F7E6",
+      "effect": "mov r10,r27 -> mov 0,r27: freshness callback return cannot reject the PDU",
+      "expected_stage5": "00da",
+      "name": "stage4_freshness_callback_status",
+      "stage5": "00da",
+      "stock": "0ad8"
+    },
+    {
+      "address": "0x08F890",
+      "effect": "cmp r0,r10 -> cmp r0,r0: ICU command return cannot reject the PDU",
+      "expected_stage5": "e001",
+      "name": "stage5_icu_command_return",
+      "stage5": "e001",
+      "stock": "e051"
+    }
+  ],
+  "proof": {
+    "application_unpack_reads_secoc_trailer": false,
+    "authenticator_treatment_before_icu": "opaque bit extraction/copy; pointer and length validation only",
+    "conclusion": "For the cumulative stage-5 F33 software path, an all-zero invalid MAC28 and a wrong-key/dummy-CMAC invalid MAC28 are acceptance-equivalent. The dummy CMAC preserves native envelope grammar but cannot improve software admission relative to zero MAC.",
+    "final_delivery_gate_forced_success": true,
+    "freshness_callback_still_executes": true,
+    "freshness_status_forced_success_after_callback": true,
+    "icu_command_return_forced_success": true,
+    "icu_root_result_forced_success": true,
+    "only_semantic_authenticator_consumer": "ICU-S command 0 verify operation",
+    "post_crypto_callback_forced_success": true,
+    "post_crypto_success_commits_pending_freshness": true,
+    "pre_icu_authenticator_content_branch_recovered": false,
+    "route44_post_secoc_content_recheck": false,
+    "silicon_boundary": "ICU-S internal cryptographic implementation is not CodeFlash. Both candidate tags are invalid under the real slot-4 key except accidental 1/2^28 truncation matches; every recovered software-visible ICU return/result/callback consequence on this B6 path is neutralized by stage 5."
+  },
+  "raw_function_ranges": {
+    "freshness_callback_0x903A0": {
+      "end_exclusive": "0x0903F6",
+      "sha256": "031775b45fb23dce7c0b12fe8ed8d8bb48db0c3390a98bfb7243783710246cd5",
+      "size": 86,
+      "start": "0x0903A0"
+    },
+    "icu_command0_completion_0x892CC": {
+      "end_exclusive": "0x089386",
+      "sha256": "a5df00bb4c1d63efb0870828b647b2c51d902372b3aecfb15081d1db5f2faba9",
+      "size": 186,
+      "start": "0x0892CC"
+    },
+    "icu_command0_start_0x891CC": {
+      "end_exclusive": "0x0892CC",
+      "sha256": "c321acfe3d13c38a61a189e5876119a4e73698b471916b9e966f83761d586dc5",
+      "size": 256,
+      "start": "0x0891CC"
+    },
+    "post_crypto_callback_0x90448": {
+      "end_exclusive": "0x090482",
+      "sha256": "da3592af256b9d473ab9697f5642b95c4f1d6c47fe32b68479cc50aed958b63a",
+      "size": 58,
+      "start": "0x090448"
+    },
+    "route44_callback_0x7D72C": {
+      "end_exclusive": "0x07D800",
+      "sha256": "ab6c3514c592e1a007d7d38abf723d22b905037b3ae7132cdcc5c1c73ec5b239",
+      "size": 212,
+      "start": "0x07D72C"
+    }
+  },
+  "route44_upper_delivery": {
+    "application_bytes": [
+      439,
+      466
+    ],
+    "application_unpack_max_offset": 449,
+    "application_unpack_offsets": [
+      442,
+      443,
+      445,
+      446,
+      447,
+      448,
+      449
+    ],
+    "com_window_base": 439,
+    "configured_length": 32,
+    "flags": 12,
+    "new_data_update_enabled": true,
+    "optional_precopy_hook_enabled": false,
+    "pass_guard_enabled": true,
+    "record_address": "0x022820",
+    "record_hex": "060000002000000c",
+    "route": 44,
+    "secured_trailer_bytes": [
+      467,
+      470
+    ],
+    "trailer_direct_data_refs": {
+      "0xFEBE4C1B": [],
+      "0xFEBE4C1C": [],
+      "0xFEBE4C1D": [],
+      "0xFEBE4C1E": []
+    }
+  },
+  "schema": "camry-f33-b6-invalid-mac-equivalence-v1"
+}

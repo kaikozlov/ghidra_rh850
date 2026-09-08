@@ -39,8 +39,9 @@ Keep two queues separate:
    exact-F33 receiver-acceptance option—persistent Gate-2 CodeFlash patch or
    reset-to-stock RAM bridge—then run stationary ID0, ID11-zero, and one small
    bounded nonzero command. Validate explicit-zero companion semantics, sign/
-   scale, driver override, motor response, timeout/release, source coexistence or
-   suppression, inhibit, fault, and recovery. For RAM, recover deployment/
+   scale, driver override, motor response, timeout/release, inhibit, fault, and recovery.
+   VAR-148/CORR-179 already close ID11 source composition statically: accepted B6 is
+   co-modulated inside the ordinary EPS sum, not an exclusive replacement mode. For RAM, recover deployment/
    execution/heartbeat; `card.py` only consumes attestation parameters.
 2. **Recover Toyota's stock request/signing architecture.** OQ-054 asks which
    private message carries FRC request/winner/grant state and which always-on
@@ -360,10 +361,13 @@ request (median 0.79 deg vs 2.02 deg; 30 samples stock-within-1°-while-B6->3° 
 reverse) while the EPS raises no fault latch. The previously retained first-in-epoch message-low2 contrast with native `0x0D7`
 (stock commonly 1, B6 0) is now closed by VAR-146/CORR-177: exact F33 seeds a newer
 B6 epoch directly from the received low2 and imposes no fixed start phase. The complete
-13-route corpus also finds the latest B6 progression freshness-admissible. Do not spend
-a field run on a 0-vs-1 A/B; current dummy-CMAC road acceptance and queue/raw-COM /
-downstream authority remain the useful discriminator. Canonical:
-[../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §63.
+13-route corpus also finds the latest B6 progression freshness-admissible. VAR-147/
+CORR-178 further prove cumulative stage 5 makes zero MAC28 and wrong-key dummy MAC28
+acceptance-equivalent; do not spend a field run on either a 0-vs-1 freshness A/B or a
+zero-vs-dummy MAC A/B. The useful discriminator is now physical F33 receive/queue and raw-COM/application
+publication. VAR-148/CORR-179 close the downstream ID11 composition itself: accepted B6
+is co-modulated inside the ordinary EPS sum and no exclusive replacement writer exists. Canonical:
+[../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§63–64.
 
 VAR-081/CORR-134 identify the observed Bus-4 `0x08A` representation; CORR-135 rejects an
 `0x08A -> B6` stock transform. VAR-101/CORR-149 close the FRC as request-side rather than

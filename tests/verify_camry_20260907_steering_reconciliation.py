@@ -12,7 +12,7 @@ DOC = ROOT / "docs/variants/camry-2026-live-baseline.md"
 x = json.loads(ART.read_text(encoding="utf-8"))
 e = x["evidence"]
 
-assert x["schema"] == "camry-20260907-steering-reconciliation-v2"
+assert x["schema"] == "camry-20260907-steering-reconciliation-v3"
 assert e["input"]["route"] == "00000045--805b7ca6ab"
 assert e["input"]["segment_count"] == 15
 assert e["input"]["total_bytes"] == 149_376_764
@@ -37,15 +37,15 @@ assert both["b6_minus_live_offset_minus_stock_deg"]["rmse"] < both["b6_minus_sto
 assert both["opposite_sign_when_both_abs_gt_0p5_deg"] == 220
 assert both["both_abs_gt_0p5_deg"] == 6_724
 
-auth = e["concurrent_authority_observation"]
+auth = e["request_reference_plane_observation"]
 d05 = auth["divergence_0p5_deg"]
 assert d05["count"] == 8_235
 assert d05["reference_closer_to_stock_count"] == 8_229
 assert d05["reference_closer_to_b6_count"] == 6
 assert d05["reference_minus_stock_deg"]["median_abs"] == 0.0
 assert d05["reference_minus_stock_deg"]["p90_abs"] < 0.058
-assert d05["blend_alpha"]["median"] == 0.0
-assert d05["blend_alpha"]["p90_abs"] <= 0.1
+assert d05["reference_position_ratio"]["median"] == 0.0
+assert d05["reference_position_ratio"]["p90_abs"] <= 0.1
 assert auth["divergence_2p5_deg"]["count"] == 53
 assert auth["divergence_2p5_deg"]["reference_closer_to_stock_count"] == 53
 assert auth["divergence_2p5_deg"]["reference_closer_to_b6_count"] == 0
@@ -116,7 +116,9 @@ assert conclusion["stock_08a_and_b6_are_not_interchangeable_reference_planes"] i
 assert conclusion["fixed_stock_to_b6_offset_is_supported"] is False
 assert conclusion["high_confidence_model_path_crossed_inner_lane_line"] is False
 assert conclusion["route_proves_b6_only_physical_authority"] is False
-assert conclusion["stock_forwarding_confounds_b6_authority"] is True
+assert conclusion["published_081_is_eps_b6_blend_discriminator"] is False
+assert conclusion["forwarded_08a_is_f33_authority_isolation_switch"] is False
+assert conclusion["route_observes_eps_side_b6_composition"] is False
 
 text = DOC.read_text(encoding="utf-8")
 for token in (
@@ -129,7 +131,8 @@ for token in (
   "not a stock→B6 transform",
   "8,229/8,235",
   "53/53",
-  "rack response is B6-only",
+  "does **not** identify EPS-side authority",
+  "co-modulated with the ordinary EPS",
 ):
   assert token in text, token
 

@@ -24,8 +24,9 @@ count and exact current-phase wire signature. Only proven B6 queue ingress
 authorizes the deduplicating RAM route44 bridge. A further persistent
 SecOC-result patch or nonzero target is unjustified before that split. The
 sender's explicit-zero 28-byte base remains non-stock; application semantics,
-sign/scale, driver override, motor response, timeout/release, source coexistence
-or suppression, and fault recovery remain unmeasured.
+sign/scale, driver override, motor response, timeout/release, and fault recovery remain
+unmeasured. VAR-148/CORR-179 close the ID11 composition semantics statically: accepted B6
+is co-modulated inside the ordinary EPS sum, not an exclusive replacement mode.
 
 **Physical routing decision (CORR-139):** the present Toyota-B repin is correct.
 Current GTS+ places Brake/Skid/SAS/EPS together on Toyota Bus 4; exact F33 has one
@@ -413,10 +414,14 @@ pair (the only non-+1 differences are the 253 intra-route segment boundaries), t
 message counter's low2 jumps only at epoch reanchors, and the transmitted reset low2
 equals the current `0x00F RESET_CNT` epoch low2 on 100% of frames that had an observed
 sync (751,664 − 603 segment-start frames). Cadence is a clean 50 Hz: per-segment median inter-frame gap 19.84–20.01 ms,
-worst observed gap 34.6 ms. CORR-176 later identifies the separate envelope defect:
+worst observed gap 34.6 ms. CORR-176 later identifies the separate envelope difference:
 these routes use the bridge-only zero-MAC28 marker rather than the now-restored normal
-dummy-CMAC construction. Thus their application/FV4 progression is valid evidence,
-but they are not a road test of the current SecOC authenticator envelope.
+dummy-CMAC construction. They are therefore not byte-identical captures of the current
+sender, but VAR-147/CORR-178 prove that distinction is **not an acceptance variable under
+the cumulative stage-5 F33 image**: both tags are invalid under the real slot-4 key, the
+tag is opaque until ICU-S, and every recovered software-visible verification consequence
+is neutralized before upper delivery. Their application/FV4 progression remains valid
+evidence, and no zero-vs-dummy MAC road A/B is warranted.
 
 **The apparent stock/message-counter phase difference is not a receiver requirement.**
 The native protected `0x0D7` stream shares the FV4+MAC28 trailer and strongly prefers
@@ -1189,8 +1194,9 @@ bounded execution path is independent of Toyota's unresolved stock FRC pipeline:
    separate. `STEERING_FAULT_INHIBIT_STATUS` stays decoded as a raw selected fault/inhibit
    aggregate but is not promoted to temporary/permanent policy without asserted/recovery evidence.
 7. **Only after receiver acceptance, validate the remaining safety transitions and tune.**
-   transitions and tune.** Prove slew/rate limits, inactive release, source coexistence or
-   suppression, inhibit, fault, recovery, and driver override before another on-road B6 test.
+   Prove slew/rate limits, inactive release, inhibit, fault, recovery, and driver override
+   before another on-road B6 test. VAR-148/CORR-179 already close the exact ID11 composition
+   semantics: accepted B6 is co-modulated in the ordinary EPS sum, not made exclusive.
 
 OQ-054 remains valuable for an elegant stock-compatible architecture: synchronized FRC
 Operation FFD `5282/5631/5285/57DE/5265/560D`, matched FRC/Brake firmware, or source-identifying

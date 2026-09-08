@@ -1,0 +1,924 @@
+{
+  "exact_path": [
+    "B6 sig261 ADB0=0x0B -> CEFFC -> CB00=2",
+    "B6 sig262 AE90 -> CBB66/CCF0E/CCFB2 -> CD128 target-minus-measured controller",
+    "CDFD4/CDFF8/CE144 -> CE6F4 -> CCDF8 -> CF22C -> CF2B2 -> CB38",
+    "D0218: ordinary terms + clamp(CB38 + C5EE) -> CC48",
+    "D0284 -> CC4C -> D02DA -> CC4E -> D0382 -> CC60",
+    "D039E: shared CC60/history base + local C81A addend -> CC50",
+    "D042C -> CC62/CC66 -> D047C -> CC64 -> D0AAE -> AC54 -> BF33E -> EE40C",
+    "35C4C consumes EE40C into the physical current-control side"
+  ],
+  "function_evidence": {
+    "0x035C4C": {
+      "body_sha256": "205df4739724fda0b8e0e8c09e44df61b42568bc5c92e9673462d3801db70b2a",
+      "body_size": 156,
+      "decompiled_c_sha256": "3e906dbcd17a61aaae80894070bec3d401728ef663463e967f5c30e7db338df5",
+      "role": "motor-driving EE40C consumer"
+    },
+    "0x05899E": {
+      "body_sha256": "360298ede4783a29bd5efa86937ccc0199571d3283b2116bd2d2601489c636f4",
+      "body_size": 126,
+      "decompiled_c_sha256": "47fd5b4d9018dc19ab4170fc22e345a9f0c590c12a751510711a2b3cd32766d6",
+      "role": "state-transition/steady-state scheduler"
+    },
+    "0x0BCD02": {
+      "body_sha256": "420dc629af9b35e33f7bc62f62f4017eaec7bf5ea470ff5a2d41f7046ec51ccb",
+      "body_size": 20,
+      "decompiled_c_sha256": "7132192e9a15a8135aad2e519714f96a91d8aa724405c22e5ff16bea5efae114",
+      "role": "shared snapshot plus command-composition invocation"
+    },
+    "0x0BCD66": {
+      "body_sha256": "75328c033aabe7ef4772993d82ddc14f9d6652dce200dc295f6b2dcf70e21778",
+      "body_size": 2744,
+      "decompiled_c_sha256": "1137470edc5e95e21173c2d7adee3185f2bc15af1ea56ab3442a15dbd58b6096",
+      "role": "input snapshot plus B6 supervisor invocation"
+    },
+    "0x0BF33E": {
+      "body_sha256": "9b9630058698cbf7e528c55345a3c4b0f51a42549c89d1b21da8da7d6ed6dedd",
+      "body_size": 104,
+      "decompiled_c_sha256": "5439f5f6eaf6f9740389af3fe78e9b0b45cfc805580a1fc45524c22ff43dbeae",
+      "role": "command-model/current mirror"
+    },
+    "0x0C1F7A": {
+      "body_sha256": "fbfb8c51a516c55a44bcf76145bddf955775f8ff571f298cf7cbb6402c80b477",
+      "body_size": 134,
+      "decompiled_c_sha256": "5e7c99529b96d9989e20c62c4659b56ae3378f65bb82968791d64658cc473b25",
+      "role": "state transition command-composition caller"
+    },
+    "0x0C2000": {
+      "body_sha256": "63736037e7ac683ccf6bbf7d8fd393f74e9a88b94c0ae399547f61c66db51002",
+      "body_size": 68,
+      "decompiled_c_sha256": "a0a1bc36b72aa2bff3cfe42f8ed1b95faba0f44a2a7b6fb6e7a62fbab2dc0b06",
+      "role": "steady-state command-composition caller"
+    },
+    "0x0CB73A": {
+      "body_sha256": "7f7324938d9d266f3e374ded2f494f0fb7c0366efcc2a39c15ec620e28014cb1",
+      "body_size": 226,
+      "decompiled_c_sha256": "d987954c99f5cf12a2d5fc4f6be9754a18fb7292adedeb2b8dbad0cf0cf3078f",
+      "role": "special 0x31 transient gate"
+    },
+    "0x0CBB66": {
+      "body_sha256": "ea547c863e4e2ecd9f6001acb26f7eab3d109a91d820a734b3d14ff2da5a19a3",
+      "body_size": 282,
+      "decompiled_c_sha256": "16dd54b7c6aa14364d8627b01cfdb9be2901460ede2b561e998757fc61b7655f",
+      "role": "B6 target-angle input conditioning"
+    },
+    "0x0CBC80": {
+      "body_sha256": "5a1a79943f880d9f649e8a79c60af36521021b94c0d983bafc70f2686876a7ab",
+      "body_size": 56,
+      "decompiled_c_sha256": "36caab1731c239f4232b1b8b66a5c10903426e803c64d093124d632df38542fa",
+      "role": "local measured-angle-rate state"
+    },
+    "0x0CBF9E": {
+      "body_sha256": "8e7e3059ae33cc76049f06c503b2b46d943c9a0e20938cc01d6cc98906a7cf10",
+      "body_size": 154,
+      "decompiled_c_sha256": "230c40ee7e74443760ced374bd68984e50f9ebb3cd722856f07072a912e04c16",
+      "role": "local C81A damping/assist addend"
+    },
+    "0x0CCDF8": {
+      "body_sha256": "45cf097f8be599c362fee1a0ce99620765de7d7f881c8fb5569d7271e05a7468",
+      "body_size": 188,
+      "decompiled_c_sha256": "d4310e412f1d436b394bd7c36a3b5880cd043d30b11faf782f195ecb7bd399f6",
+      "role": "B6 supervisor output conditioning"
+    },
+    "0x0CCF0E": {
+      "body_sha256": "f5a250c7631463c3446661d0084dc80810d9c6ca49609fd334175507f1707cd9",
+      "body_size": 164,
+      "decompiled_c_sha256": "3353830a99610a156f2add53f9778f0411c1435b00f7d02c1b0c0dd7f36cb2f2",
+      "role": "B6 target-angle scale/continuity stage"
+    },
+    "0x0CCFB2": {
+      "body_sha256": "abed576e14cbea0d1fa82f7371efc7bc529debac18474c26348e65f1c0e7030a",
+      "body_size": 4,
+      "decompiled_c_sha256": "3bf2c461409a44ff97396056555fc3544c07221fce6b81859677ad6d2ad87c7f",
+      "role": "B6 target-angle supervisor staging"
+    },
+    "0x0CD128": {
+      "body_sha256": "4ea271ee3c13dee80ee2712b8a82fb23c5c3ef1d3b5fb2e58c3d088e0e2a2671",
+      "body_size": 376,
+      "decompiled_c_sha256": "952052f74ea04eb413dc79cea183b4a8e58a1f8730eedd9fa523d548cb3df2df",
+      "role": "target-minus-measured B6 controller"
+    },
+    "0x0CDFD4": {
+      "body_sha256": "0653e4405a2c317bcf4c21808a7eb30782ea6a48bab33ec6a8d5cc3e8e628199",
+      "body_size": 36,
+      "decompiled_c_sha256": "de2988559579141efcac80ad1437c293161502b353e309db7b763dd061dd3c70",
+      "role": "B6-bank controller aggregate"
+    },
+    "0x0CDFF8": {
+      "body_sha256": "c98e0bccbb22324f1f4d55db3666683ad4b8167f689fa9d7d1e27e92d8a47d25",
+      "body_size": 182,
+      "decompiled_c_sha256": "73c4ac8c1d1187ad2a582c30bf5776b25367ac7c4819e4fa2e6be98208eaa146",
+      "role": "mode-selected B6 supervisor"
+    },
+    "0x0CE144": {
+      "body_sha256": "e8e705ee619f6ba492e9c5f59847dacb914977cf7983c3f7edbcf05e343444e7",
+      "body_size": 298,
+      "decompiled_c_sha256": "a9232a30f639fadbdbf17efae31b44c33ed13a2465a1575e11dbea00fb52e153",
+      "role": "mode-selected B6 supervisor"
+    },
+    "0x0CE384": {
+      "body_sha256": "6fcc846f9218e5aa029f81e8789bcca55d43bdbe5638b3eb27447f38299a862f",
+      "body_size": 38,
+      "decompiled_c_sha256": "de2667e4516eee76d0473b9ec83faa4ef88f0768fb255ebddfc7bff80fbcfbce",
+      "role": "default-bank versus B6-bank controller dispatch"
+    },
+    "0x0CE6F4": {
+      "body_sha256": "48271f642ac3b97a6c69295487439a0fb7addb7f1ee8f3666e3eef03aa8a4748",
+      "body_size": 92,
+      "decompiled_c_sha256": "e443a62f1dbe022903479f3dece020de0a46dcdac3a53e2da04bc5393ab52375",
+      "role": "B6 supervisor consolidation"
+    },
+    "0x0CEFFC": {
+      "body_sha256": "551e4f9d934fa59020839ad2bb9d0019f744cebe580558f3ef5c129b0821f5da",
+      "body_size": 78,
+      "decompiled_c_sha256": "c35a062da1e28ebb5b328de01be83a277a88752390c383e311093881e5a6f5df",
+      "role": "Target Lateral ID to controller bank"
+    },
+    "0x0CF148": {
+      "body_sha256": "69362bbbc374f98398617a91545b147e4b9a0353a40be0205c4a1dff7d7ad197",
+      "body_size": 228,
+      "decompiled_c_sha256": "0be3dbfa40ff6aa704a71536f4e5b6972a23795413d7475bd3c89756342073e8",
+      "role": "B6 supervisor gain state"
+    },
+    "0x0CF22C": {
+      "body_sha256": "a500cacf1aa86c88f8130c5a83cd2afc7a4b23db0ff323c9fa68bca923055aab",
+      "body_size": 74,
+      "decompiled_c_sha256": "562ff7989afad1d4d53ed6a1a1be14beb1596f1f571ae21c5f74191cb3cc910f",
+      "role": "B6 supervisor source selection to CB08"
+    },
+    "0x0CF276": {
+      "body_sha256": "83ee6b6b22ff968c01a943492629725f5952214a305f58b5fe3846424f165060",
+      "body_size": 60,
+      "decompiled_c_sha256": "b505b764a2d728140f9d67f6f6ee2482eb8172d914bc00573beece0a6a6912d0",
+      "role": "mode-bank limits"
+    },
+    "0x0CF2B2": {
+      "body_sha256": "ac1e88a5f7a5620c751302d7b76d9cb7d2f14246cf49349ee429acb33559493b",
+      "body_size": 138,
+      "decompiled_c_sha256": "060a6c27b44d55ecfe834e820b1f76c0bf60c5393aa20b4f6ae10db896f977a6",
+      "role": "B6 supervisor ramp to CB38"
+    },
+    "0x0D0218": {
+      "body_sha256": "a509a296f50e426acede52ea4730ae44322e4d9fe309e8c93c553a5c674307b1",
+      "body_size": 108,
+      "decompiled_c_sha256": "86a83e81391d2644bc90639a1ef1bc3cb68e03daae0a0b7843fa36f25af038dd",
+      "role": "ordinary assist sum including CB38"
+    },
+    "0x0D0284": {
+      "body_sha256": "b4eadcf0a0f2d412955c6ed2776087bccac004c30a96401894801ba943676f71",
+      "body_size": 86,
+      "decompiled_c_sha256": "f578b2443a65f2072829c3b118eb17aea3996e6f2d30d8f1b7081b72279fd6ef",
+      "role": "shared command scale/clamp"
+    },
+    "0x0D02DA": {
+      "body_sha256": "edb65881363e0b33f0a565d075c487c6cf94f785e0a9590e8743eff834eee238",
+      "body_size": 168,
+      "decompiled_c_sha256": "36c913717aa8c7917cd9769b010d77455cfc44d706159504e0b322ff0a701d6d",
+      "role": "shared command slew/filter"
+    },
+    "0x0D0382": {
+      "body_sha256": "96837ab292b7bf15c16a7467e3f0aae870d4d426087f7ce701f1e1ae0ae7dbfe",
+      "body_size": 28,
+      "decompiled_c_sha256": "4c9ef2be0d0fc7633937345b501be1cd2463681b268843ebe2eb675ea93c7302",
+      "role": "shared command saturation"
+    },
+    "0x0D039E": {
+      "body_sha256": "993f8f98ca99f2370ae504726245106eda7443287bea6834ba32b757da35539e",
+      "body_size": 142,
+      "decompiled_c_sha256": "38a0d4bcdca3fbc457399078d19668350a80c2ce1ac84500b5c86d55d36129f4",
+      "role": "shared base plus local addend composition"
+    },
+    "0x0D042C": {
+      "body_sha256": "5cec1b3bd6f5bbbce2832ae7ff417f75db1e11f053d568c143f8a48ee13539e5",
+      "body_size": 80,
+      "decompiled_c_sha256": "6b7e4905113f7ac8dc2d2b95f304ab4b33ea743d3ffa3196c7f3013184689a1e",
+      "role": "shared pre-slew command output"
+    },
+    "0x0D047C": {
+      "body_sha256": "b7995271dcae87283b114788eb9719f086ea7ef78fde1e73ed9fa7336cec3e4c",
+      "body_size": 48,
+      "decompiled_c_sha256": "d327428e65c672f725dbb19125837d7d3346fa997c994d3bb7e15d23c3d7e7ba",
+      "role": "shared post-slew/override output"
+    },
+    "0x0D0674": {
+      "body_sha256": "ec9bcdb10dfd708d8e342efbd4d71e55675463d7147d0b0122a00d7b4b4fc5fc",
+      "body_size": 98,
+      "decompiled_c_sha256": "47996810a46389fc63b0c3944a691fbe3bb375d8bbfe9069834c115db11c603e",
+      "role": "internal CC94/CC98 override writer"
+    },
+    "0x0D06D6": {
+      "body_sha256": "34f08369e95c0db8e107f1ad001b485d08fcaa5c96d084f7537a9f751064aa73",
+      "body_size": 20,
+      "decompiled_c_sha256": "b9b1829769ea6f32b4f67a154d84c2cb1eaa6d1b13aba3ce5ce6370c82c1c545",
+      "role": "internal override aggregate"
+    },
+    "0x0D0AAE": {
+      "body_sha256": "0eda7671aa6175f44503e1b9e6c42e1fb1c255fa4e4c0391269eefe40b61e01a",
+      "body_size": 72,
+      "decompiled_c_sha256": "51d93da1f70ed9e57c8ba1220658f8903420cd64dfda2ebb2a7e01c60335b597",
+      "role": "shared command snapshot"
+    },
+    "0x0D0AF6": {
+      "body_sha256": "2eda8a4e734a3cd248c83c9cd41f906e0191ee48afa5ba72a73640da00823fc9",
+      "body_size": 228,
+      "decompiled_c_sha256": "68fb362fae94cf8a89c3e602ca0a77b0da17dd40794402abfbbbf3b7263eb414",
+      "role": "shared command-composition coordinator"
+    },
+    "0x0D0EEC": {
+      "body_sha256": "e58077923617544434467a6d0279d5037aa2cf1398960ef0fe62126f37e23231",
+      "body_size": 488,
+      "decompiled_c_sha256": "398bde3d9db0aad7c48424f2e21338cdbb2646fd6254c3d58f27809757c96e85",
+      "role": "B6 supervisor cyclic coordinator"
+    },
+    "0x0D1100": {
+      "body_sha256": "c73c370a83bd7615ef8132cd415ed3bdc754e2c2b80da9a86027dacfe4d4476d",
+      "body_size": 12,
+      "decompiled_c_sha256": "0016b809d7b5893fa70a03adf9d669076c377306ef0a887c412c285f6b3092d5",
+      "role": "shared command-composition wrapper"
+    },
+    "0x0D1130": {
+      "body_sha256": "8eae5b4c5639b3c38aba7e7b0b7aa1fd432462c4c0e09990261c9ae8bfe460f8",
+      "body_size": 12,
+      "decompiled_c_sha256": "526319c6c40e4f6754d30f928f71997026d0dd1d27181556932efeb2b589fe5d",
+      "role": "B6 supervisor coordinator wrapper"
+    }
+  },
+  "proof": {
+    "accepted_id11_contributes_via_cb38_inside_ordinary_d0218_sum": true,
+    "accepted_id11_replaces_shared_command_funnel": false,
+    "accepted_id11_selects_exclusive_b6_motor_path": false,
+    "all_cb00_aware_functions_exhausted": true,
+    "all_shared_funnel_direct_writers_exhausted": true,
+    "conclusion": "Accepted B6 Target Lateral ID11 is a co-modulating input to the ordinary EPS command composition, not an exclusive replacement path. ID11 selects bank2, its target-angle controller reaches CB38, and D0218 adds CB38 inside the ordinary assist sum before the single shared CC48->CC64/current funnel. The only special transient that can alter that sum requires ADB0==0x31, not ID11 0x0B. No CB00/ADB0-selected writer exists later in the final command funnel.",
+    "later_id11_specific_final_command_override_recovered": false,
+    "ordinary_eps_terms_remain_in_id11_composition": true,
+    "stock_request_plane_boundary": "This proves EPS-side composition. It does not mean F33 literally adds the upstream 0x08A angle: exact F33 receives neither 0x08A nor 0x081. The Toyota/FRC request-to-chassis authority handoff is a separate upstream/local provenance question."
+  },
+  "schema": "camry-f33-b6-command-composition-v1",
+  "selector_census": {
+    "ADB0_address": "0xFEBEADB0",
+    "ADB0_decompiled_functions": [
+      "0x0CB73A",
+      "0x0CEFFC"
+    ],
+    "ADB0_direct_references": [
+      {
+        "from": "0x000bd67e",
+        "function": "0x0BCD66",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000c09ba",
+        "function": "0x0BF97A",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000cb746",
+        "function": "0x0CB73A",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cf002",
+        "function": "0x0CEFFC",
+        "type": "READ"
+      }
+    ],
+    "AE90_direct_references": [
+      {
+        "from": "0x000bd65c",
+        "function": "0x0BCD66",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000c09b6",
+        "function": "0x0BF97A",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000cba84",
+        "function": "0x0CBA80",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cbb78",
+        "function": "0x0CBB66",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ccf0e",
+        "function": "0x0CCF0E",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cee94",
+        "function": "0x0CEE80",
+        "type": "READ"
+      }
+    ],
+    "CB00_address": "0xFEBECB00",
+    "CB00_decompiled_function_count": 50,
+    "CB00_decompiled_functions": [
+      "0x0C5164",
+      "0x0C666C",
+      "0x0C6C82",
+      "0x0C7A18",
+      "0x0C7D14",
+      "0x0C7DD4",
+      "0x0C890E",
+      "0x0C9058",
+      "0x0CCCC6",
+      "0x0CCDC4",
+      "0x0CCECC",
+      "0x0CCFB2",
+      "0x0CD094",
+      "0x0CD128",
+      "0x0CD2A0",
+      "0x0CD426",
+      "0x0CD538",
+      "0x0CD590",
+      "0x0CD5EA",
+      "0x0CD662",
+      "0x0CD724",
+      "0x0CD84E",
+      "0x0CD932",
+      "0x0CDA20",
+      "0x0CDAE0",
+      "0x0CDB5C",
+      "0x0CDC48",
+      "0x0CDEBC",
+      "0x0CDFF8",
+      "0x0CE144",
+      "0x0CE384",
+      "0x0CE454",
+      "0x0CE4B8",
+      "0x0CE4DA",
+      "0x0CE51C",
+      "0x0CE6CC",
+      "0x0CE836",
+      "0x0CECD6",
+      "0x0CED28",
+      "0x0CEDA4",
+      "0x0CEE46",
+      "0x0CEE7C",
+      "0x0CEE80",
+      "0x0CEF26",
+      "0x0CEFF4",
+      "0x0CEFFC",
+      "0x0CF0EA",
+      "0x0CF22C",
+      "0x0CF276",
+      "0x0CF4A8"
+    ],
+    "CB00_direct_references": [
+      {
+        "from": "0x000c5172",
+        "function": "0x0C5164",
+        "type": "READ"
+      },
+      {
+        "from": "0x000c667a",
+        "function": "0x0C666C",
+        "type": "READ"
+      },
+      {
+        "from": "0x000c6c90",
+        "function": "0x0C6C82",
+        "type": "READ"
+      },
+      {
+        "from": "0x000c7a26",
+        "function": "0x0C7A18",
+        "type": "READ"
+      },
+      {
+        "from": "0x000c7d22",
+        "function": "0x0C7D14",
+        "type": "READ"
+      },
+      {
+        "from": "0x000c7de2",
+        "function": "0x0C7DD4",
+        "type": "READ"
+      },
+      {
+        "from": "0x000c891c",
+        "function": "0x0C890E",
+        "type": "READ"
+      },
+      {
+        "from": "0x000c9066",
+        "function": "0x0C9058",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cccca",
+        "function": "0x0CCCC6",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ccdc4",
+        "function": "0x0CCDC4",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ccecc",
+        "function": "0x0CCECC",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ccfb2",
+        "function": "0x0CCFB2",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cd098",
+        "function": "0x0CD094",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cd15e",
+        "function": "0x0CD128",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cd2be",
+        "function": "0x0CD2A0",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cd3a0",
+        "function": "0x0CD382",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cd42e",
+        "function": "0x0CD426",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cd53c",
+        "function": "0x0CD538",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cd598",
+        "function": "0x0CD590",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cd5f2",
+        "function": "0x0CD5EA",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cd66c",
+        "function": "0x0CD662",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cd72e",
+        "function": "0x0CD724",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cd84e",
+        "function": "0x0CD84E",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cd936",
+        "function": "0x0CD932",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cda28",
+        "function": "0x0CDA20",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cdae0",
+        "function": "0x0CDAE0",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cdb5c",
+        "function": "0x0CDB5C",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cdc48",
+        "function": "0x0CDC48",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cde3a",
+        "function": "0x0CDE26",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cdec0",
+        "function": "0x0CDEBC",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cdf88",
+        "function": "0x0CDEBC",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ce000",
+        "function": "0x0CDFF8",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ce0c2",
+        "function": "0x0CE0AE",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ce148",
+        "function": "0x0CE144",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ce388",
+        "function": "0x0CE384",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ce45c",
+        "function": "0x0CE454",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ce4be",
+        "function": "0x0CE4B8",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ce4f2",
+        "function": "0x0CE4DA",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ce52c",
+        "function": "0x0CE51C",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ce69c",
+        "function": "0x0CE594",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ce6d0",
+        "function": "0x0CE6CC",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ce836",
+        "function": "0x0CE836",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ce93a",
+        "function": "0x0CE912",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cecd6",
+        "function": "0x0CECD6",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ced2c",
+        "function": "0x0CED28",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ceda8",
+        "function": "0x0CEDA4",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cee46",
+        "function": "0x0CEE46",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cee80",
+        "function": "0x0CEE80",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cef2a",
+        "function": "0x0CEF26",
+        "type": "READ"
+      },
+      {
+        "from": "0x000ceff6",
+        "function": "0x0CEFF4",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000cf044",
+        "function": "0x0CEFFC",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000cf0ea",
+        "function": "0x0CF0EA",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cf22c",
+        "function": "0x0CF22C",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cf276",
+        "function": "0x0CF276",
+        "type": "READ"
+      },
+      {
+        "from": "0x000cf4ac",
+        "function": "0x0CF4A8",
+        "type": "READ"
+      }
+    ],
+    "CB00_final_funnel_direct_references": {}
+  },
+  "semantic_checks": {
+    "b6_angle_enters_supervisor": true,
+    "b6_supervisor_and_shared_composition_have_distinct_wrappers": true,
+    "b6_supervisor_reaches_cb38": true,
+    "bank2_uses_b6_controller_not_default_branch": true,
+    "c81a_is_local_not_raw_b6_target": true,
+    "d0218_adds_cb38_to_ordinary_terms": true,
+    "d039e_retains_shared_base_and_local_addend": true,
+    "id11_does_not_arm_special_transient": true,
+    "id11_maps_to_bank2": true,
+    "motor_snapshot_uses_same_cc64": true,
+    "no_cb00_function_directly_writes_or_reads_final_funnel": true,
+    "only_adb0_runtime_readers_are_bank_decode_and_special_transient": true,
+    "post_slew_override_is_internal_not_b6_selected": true,
+    "shared_command_coordinator_always_calls_same_funnel": true
+  },
+  "shared_funnel_direct_references": {
+    "AC54": [
+      {
+        "from": "0x000bf350",
+        "function": "0x0BF33E",
+        "type": "READ"
+      },
+      {
+        "from": "0x000c05c0",
+        "function": "0x0BF97A",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000c0642",
+        "function": "0x0BF97A",
+        "type": "READ"
+      },
+      {
+        "from": "0x000c1be8",
+        "function": "0x0C1BE4",
+        "type": "READ"
+      },
+      {
+        "from": "0x000c1d2a",
+        "function": "0x0C1CFE",
+        "type": "READ"
+      },
+      {
+        "from": "0x000d0ab8",
+        "function": "0x0D0AAE",
+        "type": "WRITE"
+      }
+    ],
+    "CC48": [
+      {
+        "from": "0x000d020e",
+        "function": "0x0D01B4",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000d027e",
+        "function": "0x0D0218",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000d0294",
+        "function": "0x0D0284",
+        "type": "READ"
+      }
+    ],
+    "CC4C": [
+      {
+        "from": "0x000d01b4",
+        "function": "0x0D01B4",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000d02d4",
+        "function": "0x0D0284",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000d02e6",
+        "function": "0x0D02DA",
+        "type": "READ"
+      },
+      {
+        "from": "0x000d0374",
+        "function": "0x0D02DA",
+        "type": "READ"
+      }
+    ],
+    "CC4E": [
+      {
+        "from": "0x000d01cc",
+        "function": "0x0D01B4",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000d0378",
+        "function": "0x0D02DA",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000d0382",
+        "function": "0x0D0382",
+        "type": "READ"
+      }
+    ],
+    "CC50": [
+      {
+        "from": "0x000d01d4",
+        "function": "0x0D01B4",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000d0424",
+        "function": "0x0D039E",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000d042c",
+        "function": "0x0D042C",
+        "type": "READ"
+      }
+    ],
+    "CC60": [
+      {
+        "from": "0x000d01d0",
+        "function": "0x0D01B4",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000d0398",
+        "function": "0x0D0382",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000d03be",
+        "function": "0x0D039E",
+        "type": "READ"
+      },
+      {
+        "from": "0x000d0acc",
+        "function": "0x0D0AAE",
+        "type": "READ"
+      }
+    ],
+    "CC62": [
+      {
+        "from": "0x000c4f0c",
+        "function": "0x0C4F04",
+        "type": "READ"
+      },
+      {
+        "from": "0x000d01d8",
+        "function": "0x0D01B4",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000d0448",
+        "function": "0x0D042C",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000d0ac0",
+        "function": "0x0D0AAE",
+        "type": "READ"
+      }
+    ],
+    "CC64": [
+      {
+        "from": "0x000c2e5c",
+        "function": "0x0C2E2A",
+        "type": "READ"
+      },
+      {
+        "from": "0x000d01e8",
+        "function": "0x0D01B4",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000d04a6",
+        "function": "0x0D047C",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000d0aae",
+        "function": "0x0D0AAE",
+        "type": "READ"
+      }
+    ],
+    "EE40C": [
+      {
+        "from": "0x00035c60",
+        "function": "0x035C4C",
+        "type": "READ"
+      },
+      {
+        "from": "0x0005c6e4",
+        "function": "0x05C6D8",
+        "type": "READ"
+      },
+      {
+        "from": "0x0005d0d0",
+        "function": "0x05CF1C",
+        "type": "READ"
+      },
+      {
+        "from": "0x0005d680",
+        "function": "0x05D5E0",
+        "type": "READ"
+      },
+      {
+        "from": "0x000bf352",
+        "function": "0x0BF33E",
+        "type": "WRITE"
+      },
+      {
+        "from": "0x000c187c",
+        "function": "0x0BF97A",
+        "type": "WRITE"
+      }
+    ]
+  },
+  "shared_funnel_writer_census": {
+    "AC54": [
+      "0x0BF97A",
+      "0x0D0AAE"
+    ],
+    "CC48": [
+      "0x0D01B4",
+      "0x0D0218"
+    ],
+    "CC4C": [
+      "0x0D01B4",
+      "0x0D0284"
+    ],
+    "CC4E": [
+      "0x0D01B4",
+      "0x0D02DA"
+    ],
+    "CC50": [
+      "0x0D01B4",
+      "0x0D039E"
+    ],
+    "CC60": [
+      "0x0D01B4",
+      "0x0D0382"
+    ],
+    "CC62": [
+      "0x0D01B4",
+      "0x0D042C"
+    ],
+    "CC64": [
+      "0x0D01B4",
+      "0x0D047C"
+    ],
+    "EE40C": [
+      "0x0BF33E",
+      "0x0BF97A"
+    ]
+  },
+  "special_transient": {
+    "consequence": "the C7BF special transient that can change the ordinary sum is not the ID11 B6 path",
+    "gate_function": "0x0CB73A",
+    "id11_literal": "0x0B",
+    "required_ADB0_literal": "0x31",
+    "same": false
+  },
+  "target": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "corpus_function_count": 6065,
+    "software_id": "8965F3307000"
+  }
+}

@@ -2858,9 +2858,9 @@ extending §29/§30 rather than transferring from H/F.
 
 ### 48.3 Verdicts and the remaining open state
 
-- **B6 with ID11 co-modulates the ordinary branch**: `CEFFC` banks (`CB00=2`) re-index the `CD094`/`CDFF8` tables whose outputs `CA7A/CA88` feed the supervisor family (`CC9AC/CE144/CE26E`) that drives the `CF2B2` ramp of `CB38` from `CB08/CB20`. No receiver-side exclusion between external B6 and the internal authority state is recovered; the `CA7A/CA88 → CB08` edge is statement-unclosed and the stock authority selector remains the CORR-135 open question. This bounds coexistence as an unresolved receiver behavior; it does not identify a separate openpilot authority signal.
+- **B6 with ID11 co-modulates the ordinary branch**: `CEFFC` maps ID11 to `CB00=2`; VAR-148 later exhausts the complete selector and final-writer surface and closes the rest of this branch. The B6 target-angle controller reaches `CB38`, and `D0218` adds `CB38` inside the ordinary EPS assist sum before the single shared `CC48 -> CC64` current-command funnel. There is no later ID11-selected replacement writer. Thus accepted ID11 is **co-modulation, not exclusive authority**. The still-open question is the unrelated provenance of Toyota's upstream request/reference state into the ordinary local EPS terms; exact F33 itself receives neither `0x08A` nor `0x081`.
 - **`0x08A` ID11 stays request-plane only** (F33's 43-Rx/47-rule/5-Tx surfaces exclude it; grant discriminator remains Operation-FFD `5265`, VAR-095/OQ-054). It therefore must not be promoted into a Panda or `CarController` lateral-permission/interlock signal.
-- **Panda-forwarding suppression: originally none; superseded by CORR-152/§54.** At this evidence stage no suppression frame was justified, and that conclusion held until VAR-110 fixed the relay direction and the retained route exposed B6-on-bus0 beside continuously forwarded stock `0x08A`. The still-valid core is narrower: F33's accepted surface contains no stock-LTA carrier, `0x08A`/`0x081` are not F33 inputs, and `0x08A` must not become an engage veto. The originally feared `CarState`/producer-evidence loss does not occur — Panda RX and CarState consume native bus2 `0x08A` before forwarding, so blocking only the forwarded chassis copy preserves host observation and OQ-054 producer evidence. The stock request still crosses the private middle (VAR-094); the native openpilot integration keeps authority in the normal stack (`controls_allowed`/`CC.latActive`). Passive DID readback (`0x1C02/0x1C38/0x1C3E`) remains useful for observing arbitration behavior without becoming an engagement gate.
+- **Panda forwarding is not an EPS authority switch.** CORR-152 temporarily reversed this conclusion and required blocking bus2 `0x08A`; CORR-179/VAR-148 supersede that policy. Exact F33 receives neither `0x08A` nor `0x081`, B6 enters separately, and accepted ID11 is composed later inside F33. Therefore `0x08A` must remain observation/request-plane state rather than a forwarding veto, engage veto, relay-malfunction proxy, or authority oracle. Current fork opendbc `bf9f7528` removed the bespoke Toyota forwarding hook; `f207c273` forwards `0x08A`/`0x081` normally while refusing host TX of `0x08A`. Passive DID readback (`0x1C02/0x1C38/0x1C3E`) remains useful for observing Toyota state without becoming an engagement gate.
 
 Deterministic evidence: `tests/verify_camry_8965F3307000_command_cone_ingress.py` (VAR-104 corpus-join block) against
 `data/generated/camry-8965F3307000/decompilations.jsonl` and `firmware/camry-8965F3307000/CodeFlash.bin`.
@@ -3588,42 +3588,41 @@ actuation interface.
 
 ## 54. Openpilot takeover boundary: stock `0x08A` must not remain forwarded beside B6
 
-The post-VAR-110 integration recensus corrects one consequence that VAR-104/105 got
-backwards. Exact F33's non-reception of `0x08A` proves that `0x08A` is not an F33 CAN
-command; it does **not** make the message irrelevant to controller replacement. The
-relay-open route fixes `0x08A` as the upstream-to-chassis request crossing the accessible
-interception boundary before an unresolved chassis-side proxy/arbitration conversion. `0x081`
-crosses back in the other direction. Factory steering with zero B6 independently proves
-that this upstream request can reach physical steering through that unresolved handoff; it
-does not establish that the FRC-side transport before the proxy is private (VAR-113/CORR-153).
+**Superseded by CORR-179.** The heading is retained so existing references remain stable;
+the conclusion recorded here was a historical integration experiment, not the current
+Toyota TSS3 forwarding contract.
 
-Copied route `0000002d--4a4806c524` then exposes the concrete integration defect: the
-final openpilot path transmits protected B6 on Panda bus0 while Panda simultaneously
-forwards every native bus2 `0x08A` into bus0. Because openpilot transmits B6 rather than
-`0x08A`, Panda's normal same-address static replacement rule never suppresses the stock
-request. The implementation therefore leaves the stock authority path intact while
-injecting the separate F33 cooperative interface.
+VAR-110's direction result remains exact: native `0x08A` crosses from the upstream/FRC
+side (logical bus2) toward the chassis, while `0x081` crosses from chassis toward the
+upstream side. Route `0000002d--4a4806c524` also genuinely showed comma B6 transmission
+on bus0 at the same time Panda forwarded native `0x08A`. CORR-152 originally interpreted
+that coexistence as a controller-replacement defect and concluded that Panda had to block
+forwarded `0x08A` before B6 could have exclusive authority.
 
-The minimal native-shape correction is selective interception at that proven direction:
-Toyota TSS3 safety blocks bus2 `0x08A` forwarding while preserving chassis-to-upstream
-`0x081`. This is **not** an `0x08A -> B6` transform, an assertion that F33 consumes
-`0x08A`, a controller-side engage veto, or a new permission system. It is the ordinary
-replacement invariant applied across different request and actuator addresses: remove the
-stock command path at the relay boundary when the openpilot B6 controller is installed.
+That authority inference was at the wrong layer. Exact F33 receives neither `0x08A` nor
+`0x081`; those publications belong to Toyota's request/reference processing. Comma B6
+enters F33 separately through protected PDU44 and therefore does not participate in the
+processing that generates `0x081`. VAR-148 then closes the downstream EPS behavior from
+CodeFlash: accepted ID11 maps to `CB00=2`, its target controller reaches `CB38`, and
+`D0218` adds that term inside the ordinary EPS command sum before the one shared final
+current-command funnel. Blocking `0x08A` at the Panda relay cannot establish that those
+ordinary F33 terms disappeared and is not an F33 stock-authority isolation mechanism.
 
-This correction establishes a necessary takeover boundary, not a completed actuation
-proof. The copied full rlog is not tracked repository input, and it cannot prove F33
-accepted the transmitted B6 or that suppressing `0x08A` alone is sufficient. The relay
-boundary now also carries the ordinary hardware-failure backstop: the stock request
-address is registered for chassis-bus relay-malfunction detection (detection only —
-static blocking stays disabled so the upstream host copy flows), `toyota_tx_hook`
-categorically refuses transmitting it, and a detected electrical crossing latches relay
-malfunction, which blocks all B6 TX and both forwarding directions. Deployment must
-therefore remain a bounded validation: verify the Panda image contains the hook,
-confirm native bus2 `0x08A` remains observable but has no returned bus0 TX echo, confirm
-`0x081` still returns outward, and then test inactive release followed by a stationary
-small-angle B6 command before another road test. CORR-152 supersedes only the old
-"no forwarding suppression is justified" conclusion.
+The current fork already has the corrected native shape. Opendbc `bf9f7528` removed the
+bespoke Toyota forwarding hook; current `f207c273` tests require bus2 `0x08A` to forward
+to bus0 and bus0 `0x08A` to forward to bus2, preserve `0x081` in both directions, and
+still reject host transmission of `0x08A`. The TSS3 safety relay-check objects are the
+messages openpilot actually replaces/transmits (`0x0B6` and `0x412`), not the observed
+`0x08A` request plane. Thus there is no special Target-Lateral-ID forwarding rule, no
+`0x08A` relay-malfunction authority proxy, and no second lateral permission system.
+
+Route 48 remains useful, but only with its corrected scope (§62): turning Toyota LTA off
+held the **upstream request/reference plane** at ID0 for long intervals while comma B6
+remained ID11 and the steering plant did not follow B6. That observation rules out a
+simultaneous upstream ID11 request as a prerequisite for the observed non-response; it
+does not isolate all EPS authority. The useful next localization is B6 physical receive /
+SecOC queue / route44 raw-COM / application publication and common controller-health
+state. Repeating an `0x08A` forwarding-block experiment would test the wrong layer.
 
 
 ## 55. DataFlash NvM closure: learned state does not feed the assist funnel (VAR-112)
@@ -3764,8 +3763,9 @@ frames exceed 2 deg, roughly 32% exceed 4 deg, and the route contains errors abo
 Those observations rule out the simple explanations "B6 never left Panda", "the cleaned
 sender still set the known suppress bit", "the sender timed out continuously", and "the
 requested angle was effectively zero". They do **not** prove EPS acceptance. The same
-route also still forwarded stock `0x08A`, so it was not an exclusive-authority experiment
-(CORR-152).
+route also still forwarded stock `0x08A`; CORR-179 now makes the correct inference from that
+fact: forwarding state is a request-plane observation, not an EPS exclusive-authority
+discriminator.
 
 One implementation detail must remain separated from this route. At the pinned cleaned
 port (`opendbc@ae284aaf`), F33 B6 is built with `build_b6_zero_marker_frame`; it does not
@@ -4738,32 +4738,30 @@ near-field path and steering request continued farther toward that same side.
 The path still retained >1 m of detected-line margin, so the display can look
 wrongly edge-seeking without mathematically crossing the lane boundary.
 
-The more important authority reconciliation is **not** a stock-vs-comma decode
-question.  The current TSS3 safety path still forwards native `0x08A` from the
-camera side (logical bus 2) to the chassis side (logical bus 0), so route 45 is a
-simultaneous-source experiment.  Exact F33 independently makes coexistence
-plausible: B6 ID11 selects `CB00=2`, the B6 target/error supervisor reaches
-`CB38`, and ordinary `D0218` sums `CB38` together with multiple B6-independent
-internal-assist terms.  The special branch that drops most ordinary terms is
-`ADB0==0x31`, not ID11.  No exact receiver-side rule says an admitted ID11 B6
-exclusively replaces every pre-existing assist contribution.
+The authority reconciliation is **not** a stock-vs-comma decode question, and CORR-179
+corrects the earlier layer assignment. Exact F33 receives neither `0x08A` nor `0x081`;
+those frames belong to Toyota's upstream request/reference processing. Comma B6 enters
+F33 separately through protected PDU44. The fact that current safety forwards `0x08A`
+therefore does not make `0x08A` an EPS command carrier, and blocking that relay copy is
+not by itself an F33 authority-isolation experiment.
 
-The opposite-direction `0x081` reference plane gives a strong same-drive clue
-about where any mixing can occur.  Restricting to latActive, >10 m/s, no
-blinker, <0.7 N.m driver torque and fresh both-ID11 samples, there are **8,235**
-rows where B6 and stock `0x08A` differ by at least 0.5 deg.  `0x081` is closer
-to stock in **8,229/8,235** and closer to B6 in only 6; median
-`0x081-stock` is exactly 0.000 deg and p90 absolute is one 0.0573-deg count.
-Define an observable blend coordinate
-`alpha=(0x081-stock)/(B6-stock)`, where 0 means the stock plane and 1 means the
-B6 plane: median alpha is **0.000**.  At >=2.5-deg stock/B6 divergence the
-result is even cleaner: **53/53** `0x081` samples are closer to stock and zero
-are closer to B6.  In the natural stock-ID0/B6-ID11 low-torque windows there
-are 228 qualifying sends; `0x081` remains ID0 in **225/228**, with median
-absolute `0x081-stock=0.000 deg` while median absolute `0x081-B6=1.662 deg`.
-Thus the published chassis-side reference/result plane is not visibly taking a
-midpoint between stock and comma.  If B6 has physical effect, that effect is
-downstream of, or separate from, the published `0x081` plane.
+The `0x081` statistics remain useful only as a **reference-plane** result. Restricting
+to latActive, >10 m/s, no blinker, <0.7 N.m driver torque and fresh both-ID11 samples,
+there are **8,235** rows where B6 and stock `0x08A` differ by at least 0.5 deg. `0x081`
+is closer to stock in **8,229/8,235** and closer to B6 in only 6; median
+`0x081-stock` is exactly 0.000 deg. At >=2.5-deg divergence it is stock-closer in
+**53/53**. In stock-ID0/B6-ID11 low-torque windows, `0x081` remains ID0 in **225/228**.
+This proves that `0x081` follows the Toyota request/reference plane. It says nothing
+about whether B6 is later combined inside the EPS, because B6 never participates in the
+processing that generates `0x081`.
+
+VAR-148 now answers that EPS-side question directly from CodeFlash instead. Accepted
+ID11 maps to `CB00=2`, its target-angle controller reaches `CB38`, and `D0218` adds
+`CB38` inside the ordinary EPS assist sum before the single shared `CC48 -> CC64`
+current-command funnel. An exhaustive 6,065-function selector/writer census finds no
+ID11-exclusive replacement writer. Thus the receiver behavior is not merely
+"coexistence plausible": **ID11 B6 is structurally co-modulated with the ordinary EPS
+assist/current terms.**
 
 That distinction matters for the segment-2 edge witness above.  During its
 clean 2.000-s / 0-N.m interval, median `0x081-measured` is **-0.255 deg**, exactly
@@ -4782,33 +4780,28 @@ ID0 itself follows measured angle and the driver/ordinary EPS assist remain in
 the loop.  They therefore do not supersede VAR-124/126's stronger B6
 non-response evidence or prove that this route's wheel motion was caused by B6.
 
-**Consequence.**  There is no evidence here for changing B6 sign, scale, or
-adding a stock-derived steering offset.  The fork is transmitting the steering
-angle that controls requested in the exact-F33 B6 physical-angle domain.  The
-stock `0x08A` value is a useful independent Toyota request/reference oracle, not
-a template that comma should numerically copy.  The reported edge-of-lane feel
-therefore points away from a stock-vs-comma encoding bug, but **it does not
-identify the physical authority split**.  In this capture the model path never
-crosses the detected lane, yet comma genuinely asks farther toward the edge in
-sustained intervals while the stock/`0x081` plane asks less.  Because stock
-`0x08A` is still forwarded and exact F33 permits B6-dependent terms to coexist
-with B6-independent internal assist, the current drive cannot tell whether the
-rack response is B6-only, a weighted/additive coexistence, or source priority.
-The decisive next experiment is to suppress the stock request path upstream and
-leave `0x081` visible as a readback; no steering sign/scale/offset tuning constant
-is changed from this comparison.  Route 48 executes that source-off experiment;
-see §62 / VAR-145.
+**Consequence.** There is no evidence here for changing B6 sign, scale, or adding a
+stock-derived steering offset. The fork is transmitting the steering angle that controls
+requested in the exact-F33 B6 physical-angle domain. The stock `0x08A` value is a useful
+Toyota request/reference oracle, not a B6 template. Route 45's edge-hugging/model result
+remains valid, but its `0x081` comparison does **not** identify EPS-side authority.
+VAR-148 supplies the objective structural answer: accepted ID11 B6 is not sole authority;
+it is a contribution inside the ordinary EPS command sum. The remaining live question is
+therefore whether the transmitted B6 is reaching/being published into that controller at
+all, not whether `0x081` shows a blend. No steering sign/scale/offset tuning constant is
+changed from this comparison.
+
 
 ## 62. Route-48 Toyota-LTA-off B6 isolation (VAR-145)
 
-Route `00000048--709f22277b` is the direct source-off test left open by §61.
-The operator disabled Toyota LTA while keeping DRCC and openpilot engaged.  The
+Route `00000048--709f22277b` is the historical "source-off" test left open by §61.
+CORR-179 narrows that label: the operator disabled the **upstream Toyota LTA request/reference plane** while keeping DRCC and openpilot engaged; this is not proof that every ordinary F33 assist/current term was removed.  The
 8 exact rlogs total **74,680,855 bytes** and identify clean
 `kai-openpilot bfa1352b25e64e50e1332d8661af475be9be04a4`.  The reducer joins
 native upstream `0x08A`, chassis-side `0x081`, comma `sendcan` B6, `carControl`,
 `carState`, exact-F33 `0x030` motor-feedback state, and Panda health.
 
-The requested isolation happened exactly as intended.  There are **10,017**
+The upstream request/reference-plane isolation happened exactly as intended.  There are **10,017**
 fresh B6 samples where all of the following hold simultaneously: Toyota
 `0x08A` Target Lateral ID **0**, chassis-side `0x081` ID **0**, Toyota cruise
 operating latch **on**, openpilot `latActive=true`, and comma B6 Target Lateral
@@ -4835,7 +4828,7 @@ bus-state-derived rather than carried per frame through cereal, so this is a
 route-specific code+state proof rather than a generic per-frame BRS log.  All
 21,347 B6 sends also retain the intentional **zero-MAC28 development marker**;
 therefore this closes Panda/CAN-FD framing, not SecOC authentication or receiver
-admission.  The stock-off result cannot be attributed to a recurrent Panda
+admission.  The request-plane-off result cannot be attributed to a recurrent Panda
 rejection or a CAN protocol-error burst.
 
 A post-drive sender-history audit found an important distinction that route 48
@@ -4857,14 +4850,16 @@ SecOC framing*) replaced the bridge-only zero marker with the normal
 construction using a dummy key.  The September-1 B6 restore `91834530`
 reintroduced the older zero-marker sender while recovering from the temporary
 `0x08A` experiment, without a new receiver-side requirement for that marker.
-That was an integration regression: the persistent Gate-2 development patch is
-intended to make CMAC **validity** irrelevant, not to change the protected-PDU
-wire grammar.  Fork opendbc `f207c273` / parent `kai-openpilot 24e9faa35` now
-restores normal AES-128 dummy-CMAC framing and removes the zero marker from the
-normal controller path; the historical RAM receive bridge retains its own
-zero-MAC marker semantics.  The dummy key is intentionally not the vehicle's
-slot-4 key, so the resulting tag remains cryptographically invalid to stock F33
-but has normal nonzero CMAC shape for the patched receiver.  See CORR-176.
+That was a **wire-grammar/hygiene** regression, not, as VAR-147/CORR-178 now
+prove, an acceptance regression under the cumulative stage-5 image. Fork
+opendbc `f207c273` / parent `kai-openpilot 24e9faa35` restores normal AES-128
+dummy-CMAC framing and removes the zero marker from the normal controller path;
+the historical RAM receive bridge retains its own zero-MAC marker semantics.
+The dummy key is intentionally not the vehicle's slot-4 key, so the resulting
+tag remains cryptographically invalid to stock F33. Exact stage-5 recovery now
+shows that a wrong-key nonzero tag and an all-zero wrong tag have identical
+software admission semantics after the installed result neutralizations. See
+CORR-176 and CORR-178.
 
 The physical response is the important discriminator.  Restrict the source-off
 set further to `vEgo>10 m/s`, no blinker, absolute driver torque `<0.3 N.m`, and
@@ -4888,19 +4883,19 @@ magnitude of the much larger isolated-B6-error population.  The comparison does
 not assign engineering units to the motor proxy; it only uses the exact same EPS
 observable within one route.
 
-**Consequence.**  Route 48 still closes the narrow source-competition question:
-its observed non-response did not require a simultaneous FRC LTA request, because
-Toyota's autonomous request/reference plane is demonstrably ID0 for ~201 s while
-the route's B6 stays ID11.  But the drive must no longer be described as the
-final normal-secured-envelope receiver test: every B6 in this route used the
-Sep-1-regressed zero-MAC marker rather than the restored dummy-CMAC construction.
-The next road/stationary comparison therefore needs the corrected `f207c273`
-sender. VAR-146 subsequently closes first-in-epoch freshness phase and the current
-full-counter construction from exact F33 plus the complete corpus, so a continued
-failure should be localized to queue/raw-COM/application admission or downstream
-cooperative control rather than a 0-vs-1 counter phase. VAR-114..123 remain the
-relevant acceptance-ladder work; there is still no justification for changing
-steering sign, scale, or planner tuning from this experiment.
+**Consequence.** Route 48 proves that the **upstream Toyota autonomous
+request/reference plane** can remain ID0 for ~201 s while comma continues transmitting
+ID11 B6 and the wheel does not follow B6. CORR-179 corrects the stronger historical
+"source-off isolation" interpretation: because exact F33 receives neither `0x08A` nor
+`0x081`, their ID0 state does not prove that every ordinary EPS assist/current term has
+been removed. VAR-148 independently proves the opposite structural fact that matters:
+if ID11 B6 is accepted, it is co-modulated into the ordinary EPS command sum rather than
+made exclusive. VAR-146 closes freshness phase/counter construction and VAR-147 closes
+zero-vs-dummy MAC value under cumulative stage 5. Therefore the unresolved cause of this
+route's non-response is **B6 physical receive/queue/raw-COM/application admission (or an
+earlier common controller-health gate), not source arbitration, counter phase, or MAC
+value**. No steering sign, scale, or planner tuning change follows from this experiment.
+
 
 
 ## 63. Exact-F33 B6 freshness closure and complete retained-corpus audit (VAR-146)
@@ -4992,16 +4987,177 @@ chase counter phase: cumulative stage 5 retains the stage-4
 to the dispatcher to zero, and stage 5 neutralizes the later command-7 result compare
 at `0x8F890`. The stock callback still executes, so native-shape freshness remains the
 right sender contract, but an alleged required `1` start cannot explain the sustained
-stage-5 non-response.
+stage-5 non-response. VAR-147 extends the exact walk through the other cumulative
+result sites and proves the old zero tag and the current wrong-key dummy tag are also
+acceptance-equivalent under this image.
 
 **Consequence.** Do **not** change the current B6 message-counter start from 0 to 1 and
 do not spend another drive on a freshness-phase A/B. The exact receiver accepts either
 phase, the current full counter construction matches the receiver's reconstructed value,
-and the latest road traffic's successful TX progression is freshness-admissible. The
-next road test is still useful because CORR-176's normal dummy-CMAC envelope has never
-been driven, but if B6 remains ineffective the unresolved boundary is queue/raw-COM /
-application admission or downstream cooperative control — not first-in-epoch freshness
-phase.
+and the latest road traffic's successful TX progression is freshness-admissible. Also
+do **not** spend a drive merely to distinguish zero MAC28 from wrong-key dummy MAC28:
+VAR-147/CORR-178 prove that the cumulative stage-5 software path cannot distinguish them
+for admission. The unresolved boundary is physical reception/queue/raw-COM/application
+state or downstream cooperative control.
+
+## 64. Exact-F33 cumulative-stage-5 MAC-value equivalence (VAR-147)
+
+The remaining question from CORR-176 can now be answered from the exact
+`8965F3307000` receive implementation rather than by another road A/B. Under the
+persistence-verified **cumulative stage-5** image, a zero MAC28 and a wrong-key
+nonzero/dummy MAC28 are **acceptance-equivalent in the recovered software path**.
+The dummy-CMAC sender is a better reproduction of Toyota's normal protected-PDU
+wire grammar, but it cannot make this patched EPS admit B6 where the zero tag would
+not.
+
+The proof starts at B6's exact secured-profile record 2. Raw CodeFlash fields pin
+DataID `0x00B6`, authenticator length **28 bits**, authenticator start bit **4** in
+the four-byte trailer, freshness ID **2**, ICU command selector **0**, freshness
+callback `0x903A0`, post-crypto callback `0x90448`, and upper PduR destination
+**44**. `8F434` extracts the configured tag bits into the `FEBE5554` buffer family.
+A complete canonical direct-reference census has only the extractor's own
+read/writes and the parameter pass at `8F676`; there is no other application
+consumer that checks the tag for zero/nonzero or any fixed value.
+
+Before ICU-S, the remaining path is content-blind. `8ECB2` constructs the normal
+authentication input. `8F676` hands the extracted tag/result buffers to the crypto
+wrapper. Command selector 0 traverses `89C98 -> 89646 -> 891CC -> 88FC0`. The exact
+`88FC0` command builder rejects null pointers, the wrong command record type, input
+length above `0x50`, zero tag length, or tag length above `0x80`; after those
+structural checks it copies the received tag bytes into `FEBF1308` and writes the
+ICU descriptor. It never reads the tag contents for a predicate. Thus **ICU-S is
+the first component that semantically interprets the MAC value**. A zero 28-bit
+tag and a wrong-key 28-bit CMAC reach the same hardware verification operation.
+
+Every result of that operation that can influence the recovered F33 software path
+is neutralized by the cumulative stage-5 image. Reconstructing all five patch
+stages from the stock image yields CRC-valid final SHA-256
+`669cedf8c8465ebfd02318cb7708b897b817bc3b40925c89743b64ce49aa01af`
+and residue `0xFFFFFFFF`. The exact edits are:
+
+| Stage | Site | Stock -> stage 5 | Effect |
+|---|---|---|---|
+| 1 | `0x8F952` | `E0D1 -> E001` | `cmp r0,r26 -> cmp r0,r0`; final Gate-2 delivery branch is forced success |
+| 2 | `0x8F948` | `1A38 -> 003A` | `mov r26,r7 -> mov 0,r7`; post-crypto profile callback is explicitly told success |
+| 3 | `0x8F930` | `E10F14D3 -> E00714D3` | root-result boolean cannot become failure from `FEBE5564` |
+| 4 | `0x8F7E6` | `0AD8 -> 00DA` | freshness-callback status is treated as zero/success |
+| 5 | `0x8F890` | `E051 -> E001` | ICU command return compare is forced equal/success |
+
+That is stronger than merely forcing the last `if`. `FEBE5564`, the ICU root
+result byte, has exactly two canonical direct references on this path: the output
+parameter pass in `8F676` and the read in `8F906`. Stage 3 removes that read's
+ability to set the failure boolean. Stage 2 separately forces `8F906` to call
+`8F8D2` with result zero. `8F8D2` therefore invokes B6 callback `0x90448` **without**
+the `0x10000` failure marker; `90448` converts that to `success=true`, and `90D6A`
+copies the pending ordinary freshness slot into the committed slot. Consequently
+an invalid MAC does not survive indirectly as a freshness rollback or stale-state
+penalty on the following frames. Stage 4 independently neutralizes the earlier
+freshness-callback return, and stage 5 neutralizes ICU command-level failure or
+timeout before the root-result path.
+
+The post-SecOC path supplies no second authenticator check. `8F546 -> 90204 ->
+81CA6` resolves B6 to PduR route 44. Its exact eight-byte ROM record is
+`06 00 00 00 20 00 00 0C`: configured length **32**, optional pre-copy hook bit
+`0x10` clear, pass-guard bit `0x08` set, and new-data bit `0x04` set. The enabled
+route guard at `0x7D800` is exactly `return 1`; after the copy, `8E772(44)` advances
+the COM generation. Route44's COM window base is `0x1B7`. The application B6
+unpacker `4BD46` reads only signal offsets `0x1BA..0x1C1`, corresponding to
+application bytes B3..B10. The SecOC trailer lives at offsets `0x1D3..0x1D6`
+(B28..B31); none of those four raw COM addresses has a direct application reference,
+and `4BD46` never requests them. The tag has no post-delivery authority semantics.
+
+The ICU-S silicon implementation itself is, of course, not contained in CodeFlash.
+That does not reopen a useful zero-versus-dummy distinction here. With the true
+slot-4 key absent, both candidates are invalid verification tags except for the
+same accidental **1 in 2^28** truncation match probability. More importantly,
+every recovered software-visible output by which ICU-S can affect this B6 secured
+receive transaction -- command return, root result, profile callback result, final
+Gate-2 branch -- is neutralized or overwritten before upper delivery. There is no
+remaining CodeFlash state transition that branches on whether the wrong tag happened
+to be all zero or pseudorandom-looking.
+
+**Consequence.** The objective answer to the CORR-176 experiment question is
+**no**: there is no stronger receiver-side reason to expect `f207c273`'s dummy-CMAC
+B6 to steer or be admitted than the zero-MAC B6 already exercised in route 48.
+Keeping the dummy CMAC is still reasonable because it preserves native SecOC
+construction and avoids a development marker in the normal sender, but it is
+**wire-shape hygiene, not a functional bypass requirement**. A changed outcome on
+a later build must be attributed to another changed variable unless new evidence
+contradicts this exact-path proof. The next useful localization is physical F33
+receive/queue activity, raw-COM/application publication, and then downstream
+cooperative-control state -- not MAC value, MAC nonzeroness, or freshness phase.
+
+Machine-readable proof is retained in
+`data/generated/camry_f33_b6_mac_equivalence.json`; the reducer and independent
+verifier are `tools/analyze_camry_f33_b6_mac_equivalence.py` and
+`tests/verify_camry_f33_b6_mac_equivalence.py`.
+
+## 65. Exact-F33 B6 ID11 is co-modulation, not exclusive authority (VAR-148)
+
+The exact EPS command code now answers the simultaneous-authority question without using
+`0x081` as a proxy.  Accepted B6 **Target Lateral ID11 is not an exclusive steering
+replacement mode**.  It is one controlled contribution inside the ordinary EPS command
+composition.
+
+The target path is direct.  `CEFFC` initializes `CB00=7` and, when B6 health/enable is
+valid, maps `ADB0=0x0B` to **`CB00=2`**.  B6 target-angle snapshot `AE90` is conditioned by
+`CBB66/CCF0E/CCFB2`; the resulting target state reaches `CD128`, whose mode index contains
+`CB00` and whose exact arithmetic subtracts the same-scaled measured steering angle from
+the selected target.  The selected controller/supervisor chain continues through
+`CDFD4/CDFF8/CE144 -> CE6F4 -> CCDF8 -> CF22C -> CF2B2`, where the final supervised term is
+written to **`CB38`**.
+
+`CB38` is not the final motor request.  `D0218` executes the ordinary assist sum:
+
+```text
+CC48 = C43C + C4C0 + C3BA + CC2C + BF3C
+     + clamp(CB38 + C5EE, +/-B132C/2)
+     + CBE8
+```
+
+subject to its ordinary internal gates.  The important structural fact is that the
+B6-derived `CB38` term is added **inside** that sum.  ID11 does not select another final
+command function.  `D0AF6` then unconditionally runs the same shared chain
+`D0218 -> D0284 -> D02DA -> D0382 -> D039E -> D042C -> D06D6 -> D047C -> D0AAE`.
+The resulting command continues `CC48 -> CC4C -> CC4E -> CC60 -> CC50 -> CC62 -> CC64 ->
+AC54 -> EE40C` and into the motor/current-control side.  `D039E` retains the shared
+`CC60`/history base plus a local `C81A` damping/assist addend; `C81A` itself is generated
+from measured/local rate state, not from the raw B6 target.
+
+The remaining escape hatches were exhaustively checked rather than inferred from this one
+path.  Across the complete **6,065-function** canonical F33 corpus, exactly **50 functions**
+reference `CB00`; none directly reads or writes any of the final command-funnel cells.
+`ADB0` has exactly two runtime readers: `CEFFC` and `CB73A`.  `CB73A` is the one special
+transient capable of changing the ordinary sum, but its literal condition is
+**`ADB0 == 0x31`**, whereas ID11 is **`0x0B`**.  It therefore is not the ID11 path.  A
+complete direct-writer census of `CC48/CC4C/CC4E/CC60/CC50/CC62/CC64/AC54/EE40C` finds one
+runtime writer per stage plus reset/initialization writers and no later `CB00`- or
+`ADB0`-selected replacement writer.
+
+That makes the yes/no answer exact at the EPS layer:
+
+- **Does accepted ID11 B6 make comma the sole EPS steering command? No.**
+- **Does accepted ID11 B6 coexist with the EPS ordinary assist/current terms? Yes.**
+
+This does **not** mean F33 literally adds the upstream `0x08A` target angle to B6.  Exact
+F33 receives neither `0x08A` nor `0x081`.  Those frames belong to the Toyota
+request/reference path before the B6 ingress point.  Consequently the route-45 fact that
+`0x081` tracks `0x08A` is not an EPS-side blend discriminator, and forwarding/blocking
+`0x08A` at Panda is not itself an F33 authority-isolation switch.  CORR-179 supersedes
+that interpretation of VAR-144/145 while retaining their raw road observations.
+
+The current openpilot fork is already consistent with that topology. Opendbc `bf9f7528`
+removed the temporary Toyota-specific forwarding hook; current `f207c273` safety tests
+forward `0x08A`/`0x081` normally while `CarController` never synthesizes `0x08A`. B6
+remains the separate bus0 cooperative-control TX object. No integration change is needed
+to reintroduce `0x08A` suppression; doing so would recreate the superseded policy.
+
+The deterministic proof is
+`data/generated/camry_f33_b6_command_composition.json`, regenerated by
+`tools/analyze_camry_f33_b6_command_composition.py` and checked by
+`tests/verify_camry_f33_b6_command_composition.py`.  The artifact binds every curated
+semantic function to exact CodeFlash body hashes while independently exhausting every
+selector reference and every direct writer of the shared command funnel.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
@@ -5009,6 +5165,6 @@ phase.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113), [VAR-114](../reference/index.md#finding-var-114), [VAR-115](../reference/index.md#finding-var-115), [VAR-116](../reference/index.md#finding-var-116), [VAR-118](../reference/index.md#finding-var-118), [VAR-119](../reference/index.md#finding-var-119), [VAR-120](../reference/index.md#finding-var-120), [VAR-121](../reference/index.md#finding-var-121), [VAR-122](../reference/index.md#finding-var-122), [VAR-123](../reference/index.md#finding-var-123), [VAR-127](../reference/index.md#finding-var-127), [VAR-128](../reference/index.md#finding-var-128), [VAR-134](../reference/index.md#finding-var-134), [VAR-135](../reference/index.md#finding-var-135), [VAR-136](../reference/index.md#finding-var-136), [VAR-137](../reference/index.md#finding-var-137), [VAR-142](../reference/index.md#finding-var-142), [VAR-143](../reference/index.md#finding-var-143), [VAR-144](../reference/index.md#finding-var-144), [VAR-145](../reference/index.md#finding-var-145), [VAR-146](../reference/index.md#finding-var-146)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157), [CORR-158](../reference/index.md#correction-corr-158), [CORR-159](../reference/index.md#correction-corr-159), [CORR-160](../reference/index.md#correction-corr-160), [CORR-161](../reference/index.md#correction-corr-161), [CORR-162](../reference/index.md#correction-corr-162), [CORR-165](../reference/index.md#correction-corr-165), [CORR-166](../reference/index.md#correction-corr-166), [CORR-167](../reference/index.md#correction-corr-167), [CORR-168](../reference/index.md#correction-corr-168), [CORR-171](../reference/index.md#correction-corr-171), [CORR-176](../reference/index.md#correction-corr-176), [CORR-177](../reference/index.md#correction-corr-177)
+- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113), [VAR-114](../reference/index.md#finding-var-114), [VAR-115](../reference/index.md#finding-var-115), [VAR-116](../reference/index.md#finding-var-116), [VAR-118](../reference/index.md#finding-var-118), [VAR-119](../reference/index.md#finding-var-119), [VAR-120](../reference/index.md#finding-var-120), [VAR-121](../reference/index.md#finding-var-121), [VAR-122](../reference/index.md#finding-var-122), [VAR-123](../reference/index.md#finding-var-123), [VAR-127](../reference/index.md#finding-var-127), [VAR-128](../reference/index.md#finding-var-128), [VAR-134](../reference/index.md#finding-var-134), [VAR-135](../reference/index.md#finding-var-135), [VAR-136](../reference/index.md#finding-var-136), [VAR-137](../reference/index.md#finding-var-137), [VAR-142](../reference/index.md#finding-var-142), [VAR-143](../reference/index.md#finding-var-143), [VAR-144](../reference/index.md#finding-var-144), [VAR-145](../reference/index.md#finding-var-145), [VAR-146](../reference/index.md#finding-var-146), [VAR-147](../reference/index.md#finding-var-147), [VAR-148](../reference/index.md#finding-var-148)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157), [CORR-158](../reference/index.md#correction-corr-158), [CORR-159](../reference/index.md#correction-corr-159), [CORR-160](../reference/index.md#correction-corr-160), [CORR-161](../reference/index.md#correction-corr-161), [CORR-162](../reference/index.md#correction-corr-162), [CORR-165](../reference/index.md#correction-corr-165), [CORR-166](../reference/index.md#correction-corr-166), [CORR-167](../reference/index.md#correction-corr-167), [CORR-168](../reference/index.md#correction-corr-168), [CORR-171](../reference/index.md#correction-corr-171), [CORR-176](../reference/index.md#correction-corr-176), [CORR-177](../reference/index.md#correction-corr-177), [CORR-178](../reference/index.md#correction-corr-178), [CORR-179](../reference/index.md#correction-corr-179)
 <!-- knowledge-cross-references:end -->

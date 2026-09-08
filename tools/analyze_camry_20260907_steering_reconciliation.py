@@ -411,7 +411,7 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
   low_torque_episodes = [x for x in episode_summaries if abs(float(x["median_driver_torque_nm"])) < 0.5]
   longest_low_torque = max(low_torque_episodes, key=lambda x: (int(x["rows"]), float(x["duration_s"])), default=None)
 
-  def reference_authority_summary(threshold_deg: float) -> dict[str, Any]:
+  def reference_plane_summary(threshold_deg: float) -> dict[str, Any]:
     rows = [r for r in authority_rows if abs(float(r["b6_deg"]) - float(r["stock_deg"])) >= threshold_deg]
     if not rows:
       return {"count": 0}
@@ -427,8 +427,8 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
       "reference_minus_b6_deg": qstats(ref_b6),
       "reference_closer_to_stock_count": stock_closer,
       "reference_closer_to_b6_count": b6_closer,
-      "blend_alpha_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); 0=stock plane, 1=B6 plane",
-      "blend_alpha": qstats(weights),
+      "reference_position_ratio_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); geometric reference-plane ratio only, not an EPS B6 blend fraction",
+      "reference_position_ratio": qstats(weights),
     }
 
   stock0_ref_ids: dict[str, int] = {}
@@ -470,20 +470,20 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
       "opposite_sign_when_both_abs_gt_0p5_deg": opposite_large,
       "both_abs_gt_0p5_deg": comparable_large,
     },
-    "concurrent_authority_observation": {
+    "request_reference_plane_observation": {
       "selection": "B6 ID11 + stock 0x08A ID11 + latActive; vEgo>10m/s; abs(driver torque)<0.7Nm; no blinker; <=40/50ms freshness",
       "reference_081_role": "chassis-side published reference/result plane; exact F33 does not receive 0x081",
-      "divergence_0p5_deg": reference_authority_summary(0.5),
-      "divergence_1p0_deg": reference_authority_summary(1.0),
-      "divergence_2p0_deg": reference_authority_summary(2.0),
-      "divergence_2p5_deg": reference_authority_summary(2.5),
+      "divergence_0p5_deg": reference_plane_summary(0.5),
+      "divergence_1p0_deg": reference_plane_summary(1.0),
+      "divergence_2p0_deg": reference_plane_summary(2.0),
+      "divergence_2p5_deg": reference_plane_summary(2.5),
       "stock_id0_b6_id11_low_torque": {
         "count": len(stock0_b611_authority_rows),
         "reference_id_counts": stock0_ref_ids,
         "reference_minus_stock_deg": qstats([float(r["reference_deg"]) - float(r["stock_deg"]) for r in stock0_b611_authority_rows]),
         "reference_minus_b6_deg": qstats([float(r["reference_deg"]) - float(r["b6_deg"]) for r in stock0_b611_authority_rows]),
       },
-      "interpretation": "0x081 remains on the stock request/reference plane rather than a stock/B6 midpoint. Any B6 influence must therefore be downstream of, or separate from, this published reference plane. Because stock 0x08A is still forwarded, this route cannot distinguish B6-only authority from additive/coexisting EPS control or source priority.",
+      "interpretation": "0x081 remains on Toyota's upstream request/reference plane. Exact F33 receives neither 0x08A nor 0x081, so this observation is not an EPS-side B6 blend or authority discriminator; B6 enters F33 separately.",
     },
     "stock_id0_reference_plane": {
       "selection": "stock ID0 + B6 ID0; vEgo>10 m/s; abs(measured)<20 deg; abs(rate)<5 deg/s; abs(B6)<30 deg",
@@ -527,7 +527,9 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
       "fixed_stock_to_b6_offset_is_supported": False,
       "high_confidence_model_path_crossed_inner_lane_line": any(path_outside.values()),
       "route_proves_b6_only_physical_authority": False,
-      "stock_forwarding_confounds_b6_authority": True,
+      "published_081_is_eps_b6_blend_discriminator": False,
+      "forwarded_08a_is_f33_authority_isolation_switch": False,
+      "route_observes_eps_side_b6_composition": False,
     },
   }
 
@@ -541,7 +543,7 @@ def main() -> int:
 
   LogReader = load_logreader(args.openpilot_root)
   result = {
-    "schema": "camry-20260907-steering-reconciliation-v2",
+    "schema": "camry-20260907-steering-reconciliation-v3",
     "openpilot_parser_commit": None,
     "evidence": scan(LogReader, args.route),
   }

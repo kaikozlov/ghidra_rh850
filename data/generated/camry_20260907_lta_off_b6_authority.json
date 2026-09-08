@@ -1,9 +1,10 @@
 {
   "evidence": {
     "conclusion": {
-      "interpretation": "Route 48 supplies a direct source-off experiment: Toyota 0x08A/0x081 stay ID0 for long intervals while DRCC and openpilot remain active and B6 stays ID11. Large comma target errors can persist for seconds with near-zero driver torque, near-zero steering rate, and very small EPS motor-feedback proxy, while same-route stock-ID11 request error produces a much larger motor response. This rules out simultaneous stock autonomous lateral request as the explanation for the observed B6 non-response; it does not by itself identify which B6 admission/authentication/controller gate is failing.",
+      "interpretation": "Route 48 proves the upstream Toyota 0x08A/0x081 request/reference plane stays ID0 for long intervals while DRCC and openpilot remain active and B6 stays ID11. Large comma target errors can persist for seconds with near-zero driver torque, near-zero steering rate, and very small EPS motor-feedback proxy, while same-route upstream stock-ID11 request error produces a much larger motor response. Because exact F33 receives neither 0x08A nor 0x081, this is not a full EPS-authority isolation experiment and does not prove ordinary F33 assist/current terms are absent; it localizes the observed non-response without using upstream request-plane state as an EPS arbitration oracle.",
+      "route_proves_all_ordinary_f33_assist_terms_absent": false,
       "route_proves_b6_effective_eps_authority": false,
-      "stock_autonomous_request_competition_explains_b6_nonresponse": false,
+      "simultaneous_upstream_stock_id11_required_for_b6_nonresponse": false,
       "turning_toyota_lta_off_preserved_openpilot_b6_id11": true
     },
     "input": {
@@ -59,7 +60,7 @@
       ],
       "total_bytes": 74680855
     },
-    "isolated_b6_response": {
+    "request_plane_off_b6_response": {
       "large_error_motor_abs_raw": {
         "count": 1040,
         "max": 310.0,
@@ -99,7 +100,7 @@
         "rows": 270,
         "segment": 3
       },
-      "selection": "stock 0x08A ID0 + 0x081 ID0 + cruise latch on + B6 ID11 + latActive; vEgo>10m/s; no blinker; abs(driver torque)<0.3Nm"
+      "selection": "upstream Toyota request/reference plane 0x08A ID0 + 0x081 ID0 + cruise latch on + B6 ID11 + latActive; vEgo>10m/s; no blinker; abs(driver torque)<0.3Nm"
     },
     "same_route_stock_lta_positive_control": {
       "motor_abs_raw": {
@@ -215,8 +216,8 @@
         "stock11_b611_cruise1_lat1": 1171,
         "stock4_b611_cruise1_lat1": 628
       },
-      "stock_lta_off_b6_active_episodes": 15,
-      "stock_lta_off_b6_active_rows": 10017
+      "upstream_request_id0_b6_active_episodes": 15,
+      "upstream_request_id0_b6_active_rows": 10017
     },
     "transport": {
       "b6_frame_format": {
@@ -348,6 +349,6 @@
       }
     }
   },
-  "openpilot_parser_commit": "bfa1352b25e64e50e1332d8661af475be9be04a4",
-  "schema": "camry-20260907-lta-off-b6-authority-v1"
+  "openpilot_parser_commit": "bb6c03ce707d843e038f4b9510196a029d216d2d",
+  "schema": "camry-20260907-lta-off-b6-authority-v2"
 }

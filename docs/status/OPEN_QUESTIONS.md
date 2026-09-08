@@ -1171,12 +1171,17 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   2026-09-04; VAR-139/CORR-169 subsequently close the same-car sign convention and
   replace its provisional 1.2 N.m bring-up threshold with the selected 0.6 N.m policy.
   Do not use the driver-state fix to explain or mask B6 receiver non-response. VAR-146/
-  CORR-177 now remove the former first-in-epoch message-low2 A/B entirely: exact F33
-  accepts any transmitted low2 on a newer B6 trip/reset epoch, and the complete retained
-  corpus shows the current reset-to-zero progression is freshness-admissible. CORR-176
-  separately corrects the historical zero-MAC envelope. The remaining independent-B6
-  question is therefore current dummy-CMAC queue/raw-COM/application admission or
-  downstream cooperative authority, not counter phase. Resolving OQ-054 remains
+  CORR-177 remove the former first-in-epoch message-low2 A/B entirely: exact F33 accepts
+  any transmitted low2 on a newer B6 trip/reset epoch, and the complete retained corpus
+  shows the current reset-to-zero progression is freshness-admissible. VAR-147/CORR-178
+  then close the historical zero-MAC versus current wrong-key dummy-CMAC distinction as
+  an acceptance variable under cumulative stage 5: the tag is opaque until ICU-S and all
+  recovered software-visible verification consequences are neutralized before delivery.
+  VAR-148/CORR-179 now also close downstream ID11 composition: accepted B6 is
+  co-modulated through `CB38` inside the ordinary EPS command sum and no exclusive ID11
+  replacement writer exists. The remaining independent-B6 question is therefore physical
+  reception/queue/raw-COM/application publication into that already-closed controller, not
+  counter phase, MAC value, or an unresolved EPS arbitration mode. Resolving OQ-054 remains
   required for stock architecture, not for this B6 ingress discriminator.
 
 <!-- knowledge-cross-references:begin -->
