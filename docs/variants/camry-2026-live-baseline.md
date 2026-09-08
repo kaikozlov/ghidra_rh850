@@ -4434,12 +4434,47 @@ uses the same effective 80-Tq / 80% nominal timing.  At 2 Mbit/s, upstream
 `board/stm32h7/llfdcan_declarations.h` selects `CAN_SP_DATA_2M=80`, producing
 TSEG1=15, TSEG2=4 and an **80% data-phase sample point**.  The exact Toyota
 receiver instead samples at 70%.  This is a real configuration difference, not
-a decoding artifact.  CAN-FD system-design guidance prefers matched bit timing
-across nodes, so the difference is worth an A/B if receive errors point at the
-data phase.  It is **not currently a proved explanation for B6 non-response**:
-VAR-126's September-4 driving windows have the chassis-side Panda controller
-error-active with zero driving-time bus-off/TEC failure while native protected
-traffic and stock LTA continue to work.
+a decoding artifact.
+
+A follow-up review of Vector KB0011736, NI's equivalent CAN-FD+BRS failure
+example, Renesas CAN-FD guidance, and CiA 601-3 bit-timing guidance narrows the
+failure mechanism.  The dramatic case where the receiver samples the BRS bit
+after the transmitter has already switched to the fast rate is an
+**arbitration/nominal-phase sample-point mismatch**: BRS is sampled with nominal
+bit timing and the transition occurs at that sample point.  That exact mechanism
+does **not** describe the Camry/Panda mismatch, because F33 and Panda both use an
+80% nominal sample point.  At 500 kbit/s both therefore sample BRS at 1.6 us into
+the 2-us nominal bit and enter the 2-Mbit/s phase together.
+
+The data-phase mismatch remains significant rather than harmless.  A 2-Mbit/s
+bit is 500 ns; F33 samples it at 350 ns (70%) while upstream Panda samples at
+400 ns (80%), a **50-ns / 2-Tq shift**.  Upstream Panda also had only 4 data-Tq
+of SJW (100 ns), while exact F33 uses 6 data-Tq (150 ns).  CiA Recommendation 4
+explicitly calls for every node to use the same arbitration SP **and** the same
+data SP; it notes that differing node SPs shorten phase margin by changing the
+BRS/CRC-delimiter geometry and introducing phase error at the rate switches.
+Renesas likewise recommends exactly the same sampling point for all nodes in
+both phases.  Physical-layer asymmetry is communication-pair-specific, so
+successfully receiving one 2-Mbit/s sender does not mathematically prove equal
+margin for a different transmitter/path.
+
+The retained September-4 Panda health makes a *silent, systematic* loss of an
+otherwise-present steering stream less likely than the timing mismatch alone
+suggests.  Re-reading all `pandaStates` from routes `3b/3c/3d` with the M_CAN
+protocol-error fields included shows no driving-time growth of `totalErrorCnt`
+or data-phase `DLEC` errors on either split-network controller after applying
+the flipped-harness mapping (physical `canState0` = logical bus2; physical
+`canState2` = logical bus0).  Route `3b` is zero-error on both; route `3c` has a
+pre-existing physical-0 error count that never increases and physical-2 remains
+zero; route `3d`'s physical-0 errors are the already-bounded final ~100-ms
+shutdown burst, while physical-2 remains zero.  Panda enables M_CAN's protocol
+error-in-data/arbitration interrupts, and M_CAN raises PED/DLEC for a CAN-FD+BRS
+data-phase protocol error.  Thus a high-rate frame physically present on these
+segments but repeatedly undecodable because of the 70%/80% data timing would
+normally leave protocol-error evidence; the retained drives do not show it.
+This does not exclude a frame on an unobserved physical segment, nor a
+transmitter/path with a different margin that only the matched-timing run can
+settle.
 
 For the next on-car discrimination run, the experimental Panda fork now carries
 `0e3f1c92` (`can: match F33 CAN-FD data sample point`), changing only the H7
