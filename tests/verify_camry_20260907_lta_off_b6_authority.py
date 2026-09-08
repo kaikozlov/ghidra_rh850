@@ -90,7 +90,7 @@ for token in (
   "309",
   "21,347/21,347",
   "CAN-FD+BRS",
-  "stock-competition explanation",
+  "source-competition question",
 ):
   assert token in text, token
 

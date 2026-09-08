@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 457 · Corrections: 175 · Open questions: 54 · Docs: 125 · Suites: 246
+Findings: 457 · Corrections: 176 · Open questions: 54 · Docs: 125 · Suites: 246
 
 ## Reading this index
 
@@ -191,7 +191,7 @@ Findings: 457 · Corrections: 175 · Open questions: 54 · Docs: 125 · Suites: 
 | <a id="finding-secoc-046"></a>**SECOC-046** | [docs/security/secoc/application-chain.md](../security/secoc/application-chain.md) | [software-path-assessment](../security/secoc/software-path-assessment.md), [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_command5_dtc_side_channel.py`, `tests/verify_secoc_command5_experiment.py` | — |
 | <a id="finding-secoc-047"></a>**SECOC-047** | [docs/security/secoc/application-chain.md](../security/secoc/application-chain.md) | [README](../../README.md), [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) (+1) | `tests/verify_crypto_test_bank0_composition.py` | OQ-020, OQ-050 |
 | <a id="finding-secoc-048"></a>**SECOC-048** | [docs/security/secoc/application-chain.md](../security/secoc/application-chain.md) | [README](../security/README.md), [README](../security/secoc/README.md), [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_crypto_test_bank0_composition.py` | — |
-| <a id="finding-secoc-049"></a>**SECOC-049** | [docs/variants/rav4-prime-forced-secoc-profile.md](../variants/rav4-prime-forced-secoc-profile.md), [docs/security/secoc/application-chain.md](../security/secoc/application-chain.md) | [LOCHUAN_FW_PATCH_REFRESH_2026-08-20](../history/2026-08/LOCHUAN_FW_PATCH_REFRESH_2026-08-20.md) | `tests/verify_ram_exec_variant_requirements.py` | — |
+| <a id="finding-secoc-049"></a>**SECOC-049** | [docs/variants/rav4-prime-forced-secoc-profile.md](../variants/rav4-prime-forced-secoc-profile.md), [docs/security/secoc/application-chain.md](../security/secoc/application-chain.md) | [LOCHUAN_FW_PATCH_REFRESH_2026-08-20](../history/2026-08/LOCHUAN_FW_PATCH_REFRESH_2026-08-20.md), [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_ram_exec_variant_requirements.py` | — |
 | <a id="finding-secoc-050"></a>**SECOC-050** | [docs/security/secoc/application-chain.md](../security/secoc/application-chain.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_lochuan_patch_semantics.py`, `tests/verify_external_corroboration.py` | — |
 | <a id="finding-secoc-051"></a>**SECOC-051** | [docs/security/secoc/application-chain.md](../security/secoc/application-chain.md) | — | `tests/verify_lochuan_patch_semantics.py`, `tests/verify_motor_actuation_boundary.py` | — |
 | <a id="finding-secoc-052"></a>**SECOC-052** | [docs/security/secoc/application-chain.md](../security/secoc/application-chain.md) | — | `tests/verify_lochuan_patch_semantics.py` | — |
@@ -475,7 +475,7 @@ Findings: 457 · Corrections: 175 · Open questions: 54 · Docs: 125 · Suites: 
 | <a id="finding-var-142"></a>**VAR-142** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_camry_8965F3307000_canfd_timing.py` | — |
 | <a id="finding-var-143"></a>**VAR-143** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_camry_20260907_canfd_transport.py` | — |
 | <a id="finding-var-144"></a>**VAR-144** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_camry_20260907_steering_reconciliation.py` | — |
-| <a id="finding-var-145"></a>**VAR-145** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | — | `tests/verify_camry_20260907_lta_off_b6_authority.py` | — |
+| <a id="finding-var-145"></a>**VAR-145** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_camry_20260907_lta_off_b6_authority.py` | — |
 
 ## Open-questions index
 
@@ -715,6 +715,7 @@ Findings: 457 · Corrections: 175 · Open questions: 54 · Docs: 125 · Suites: 
 | <a id="correction-corr-173"></a>**CORR-173** | [docs/variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) | yes |
 | <a id="correction-corr-174"></a>**CORR-174** | [docs/tooling/techstream.md](../tooling/techstream.md), [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | yes |
 | <a id="correction-corr-175"></a>**CORR-175** | [docs/tooling/techstream.md](../tooling/techstream.md), [docs/tooling/gts-query-cli.md](../tooling/gts-query-cli.md) | yes |
+| <a id="correction-corr-176"></a>**CORR-176** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 
 ## Document registry
 
