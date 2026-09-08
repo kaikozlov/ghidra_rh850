@@ -4429,8 +4429,8 @@ is not an FD-only bus.  That matches the retained road corpus, which contains
 ordinary 8-byte traffic alongside 32-byte protected traffic on the same split
 network.
 
-Panda's STM32H7 timing is close but not identical.  At 500 kbit/s it uses the
-same effective 80-Tq / 80% nominal timing.  At 2 Mbit/s,
+Upstream Panda's STM32H7 timing is close but not identical.  At 500 kbit/s it
+uses the same effective 80-Tq / 80% nominal timing.  At 2 Mbit/s, upstream
 `board/stm32h7/llfdcan_declarations.h` selects `CAN_SP_DATA_2M=80`, producing
 TSEG1=15, TSEG2=4 and an **80% data-phase sample point**.  The exact Toyota
 receiver instead samples at 70%.  This is a real configuration difference, not
@@ -4439,9 +4439,14 @@ across nodes, so the difference is worth an A/B if receive errors point at the
 data phase.  It is **not currently a proved explanation for B6 non-response**:
 VAR-126's September-4 driving windows have the chassis-side Panda controller
 error-active with zero driving-time bus-off/TEC failure while native protected
-traffic and stock LTA continue to work.  Do not globally change Panda's 2-Mbit
-sample point; its 80% default is intentional upstream behavior used by other
-vehicles.
+traffic and stock LTA continue to work.
+
+For the next on-car discrimination run, the experimental Panda fork now carries
+`0e3f1c92` (`can: match F33 CAN-FD data sample point`), changing only the H7
+2-Mbit data-phase sample-point constant from 80% to **70%**.  With Panda's 80-MHz peripheral clock and divide-by-2 prescaler this produces 20 Tq/bit,
+TSEG1=13, TSEG2=6 and SJW=6, matching the exact F33 wire timing.  This is an
+intentional experiment on the Camry branch, not a proposed upstream/global
+default for other vehicles.
 
 A more direct Panda/openpilot defect class was found in the frame-format
 transport.  Panda's USB `CANPacket_t` already has a one-bit FDF field, and the
@@ -4466,8 +4471,9 @@ message policy:
   later disabled, while an explicit short-frame FDF is preserved;
 - the existing three-tuple Python CAN API remains the default, while tooling may
   supply/request an optional fourth FDF boolean; `>8`-byte payloads are always FD;
-- no BRS exposure, Toyota-ID special case, sample-point change, or automatic-FD
-  policy change is made here.
+- no BRS exposure, Toyota-ID special case, or automatic-FD policy change is made
+  by `fad6b81cc`; the separate experimental Panda commit `0e3f1c92` changes the
+  2-Mbit sample point to 70% for the on-car A/B.
 
 This deliberately leaves one question open rather than encoding a guess.  The
 current TSS3 controller emits `0x0B6/32` plus 8-byte `0x412` HUD and `0x101`
