@@ -10,12 +10,15 @@ OQ-054 still tracks the private FRC request handoff and exact Bus-4 `0x08A`
 signer. That attribution is **not** a prerequisite for exercising B6 as an
 independent external EPS angle ingress. Exact-F33 Gate-2 compare neutralization
 is homologous to the field-proven Sienna result bypass, but the cumulative F33
-stage-5 patch plus zero-MAC B6 did not update the application snapshot. Static
-review now closes the configured Corolla/Camry B6 path and the downstream F33
-ID11/health selector; it does not claim live receiver acceptance. The current
-`kai-openpilot` fork carries the exact-F181 B6 development path: exact-F33 output
-is enabled on its `kai` development branch through the ordinary Toyota safety
-model (§3.4); upstream comma opendbc has no Camry TSS3 platform at all.
+stage-5 patch plus the **historical zero-MAC** B6 sender did not update the application
+snapshot. Static review now closes the configured Corolla/Camry B6 path and the downstream
+F33 ID11/health selector; it does not claim live receiver/application admission. Current
+opendbc `f207c273b645` instead emits the normal Toyota FV4+MAC28 SecOC envelope with a fixed
+all-zero dummy AES-128 key. VAR-147/CORR-178 prove that this wrong-key CMAC and the historical
+zero tag are acceptance-equivalent under cumulative stage 5, so the envelope change is
+wire-grammar hygiene rather than an admission fix. The current `kai-openpilot` fork carries
+the exact-F181 B6 development path through the ordinary Toyota safety model (§3.4); upstream
+comma opendbc has no Camry TSS3 platform at all.
 
 **Current execution blocker:** establish the first live B6 boundary with the
 countered non-bypassing RAM observer. It distinguishes a valid scheduler window
@@ -246,8 +249,18 @@ opendbc revisions:
 - `91834530` restores exact-F33 B6 lateral output through the ordinary Toyota safety model;
 - `c7a62eaf` reanchors the local B6 message counter whenever live `0x00F RESET_CNT` changes.
 
-The corresponding parent `kai-openpilot` revisions are `75779fcdb`, `eda738486`, and
-`d1914bbe7`. For `TOYOTA_CAMRY_TSS3`, current `CarInterface` selects Toyota safety with
+The corresponding historical parent `kai-openpilot` revisions are `75779fcdb`, `eda738486`,
+and `d1914bbe7`. The current cross-repo checkpoint is **`kai-openpilot@7aece7f63`**, nested
+**`opendbc@f207c273b645`**, and **`panda@bbc93b17d861`**. Root `60d57a89a` imported the
+exact-F33 "only recovered external target-bearing ingress" result from analysis commit
+`b531ec9`, but its first mirror still described the current sender as zero-MAC and promoted
+B6 to a stock-command/EBU-private-handoff model. Follow-up `7aece7f63` corrects the mirror:
+current B6 is normal-envelope wrong-key dummy-CMAC; exact F33 proves B6's external target
+role but **not** factory use or an `0x08A -> B6` edge; and the `EBU` topology label does not
+reopen a hidden second EPS application bus (VAR-066/CORR-139, VAR-095/CORR-137,
+VAR-111/CORR-151, VAR-147/CORR-178).
+
+For `TOYOTA_CAMRY_TSS3`, current `CarInterface` selects Toyota safety with
 `STOCK_LONGITUDINAL|TSS3`, sets `dashcamOnly=False`, advertises angle control down to zero
 speed, and does **not** require the former `ToyotaEphemeralSecOCBridge` /
 `ToyotaTss3DevLateral` attestation parameters. Panda forwards stock `0x08A`, blocks a
@@ -283,11 +296,14 @@ For exact F33, the current controller:
 - applies the normal Toyota angle-control shaping, including the recovered ±1745-raw
   (~100-deg) absolute envelope and speed-dependent angle-rate limits;
 - reports the actual slew-limited transmitted angle to controls;
-- preserves the computed FV4 nibble while deliberately transmitting zero MAC28 for the
-  patched exact-F33 receiver experiment.
+- emits the normal Toyota DataID/application/full-freshness/AES-CMAC/FV4 envelope using the
+  fixed all-zero **dummy AES-128 key** in `f207c273`; the real slot-4 key remains unknown, so
+  this MAC28 is intentionally not stock-valid. CORR-178 proves that its invalid tag has no
+  stronger stage-5 software acceptance behavior than the historical zero-MAC marker.
 
-The 28-byte base is explicitly `stock_validated=false`: no stock B6 exists in the
-retained factory-LTA intervals. Recovered command fields are packed exactly.
+The 28-byte base is explicitly `stock_validated=false`: no unmatched native B6 exists in the
+retained request/reference-state intervals, and those captures do not contain Toyota's
+explicit winner/grant recorder state. Recovered command fields are packed exactly.
 Current active companion fields set additive-term suppression to 0 and both
 percentage contributions to 100, matching the recovered F33 selector shape;
 inactive fields remain zero. This is a development candidate to validate
@@ -295,22 +311,19 @@ against an observed/bridged receiver, not a claim about Toyota stock bytes.
 
 ### 4.2 Receiver observation and conditional bridge
 
-The historical cumulative CodeFlash stage-5 image remains a development
-artifact, not proof of receiver acceptance: zero-MAC B6 left the application
-snapshot stale. The current sequence is RAM-only:
+The historical cumulative CodeFlash stage-5 image remains a development artifact, not proof
+of receiver/application admission: a stage-5 road run using the then-current zero-MAC sender
+still left the steering response absent. VAR-146/147/149/150 now supersede MAC/counter A/Bs
+and a bridge-first workflow. The next high-value experiment is the **stationary internal
+first-divergence capture**: SecOC queue -> raw route44 -> generated COM -> `ADB0/CAFF/CB00`,
+then only if that handoff passes, the remaining `ACCC` readiness operand, `CB20/CB38`, and
+later common actuator gates.
 
-1. **Countered observer:** the audited v2 resident samples without bypassing. It
-   counts B6 and native protected-D7 queue samples, preserves the exact last B6
-   signature, and records profile-2 pre/post state. D7 activity validates that
-   the observer ran across a healthy native SecOC scheduler window.
-2. **Deduplicating route44 bridge:** only after an exact queue-phase match, save
-   the queued zero-MAC B6 before the stock aggregate; afterward call recovered
-   route44 `0x7D72C` only if the raw COM window does not already equal that exact
-   frame.
-
-Neither resident recovers or exposes the protected slot-class TSK key. The key
-remains in protected ICU-S storage. The bridge is a causal receive-path
-experiment, not production architecture.
+The countered observer and deduplicating zero-MAC route44 bridge remain historical/audited
+research tools; neither recovers or exposes the protected slot-class TSK key, and neither is
+the normal openpilot architecture. The current sender uses the ordinary wrong-key dummy-CMAC
+envelope and the cumulative stage-5 result-path patches are what make MAC validity irrelevant
+at the recovered software layer.
 
 ### 4.3 Current Panda safety boundary
 

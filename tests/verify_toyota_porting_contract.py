@@ -141,7 +141,7 @@ check(
         "-8.23..+2.85 N.m",
     )),
 )
-check("priority queue records the current default-off development cutover", "development B6 path is present but default-off" in priorities)
+check("priority queue records the current ordinary Toyota cutover", "7aece7f63" in priorities and "ordinary Toyota/openpilot ownership shape" in priorities)
 
 for token in (
     "control contract",

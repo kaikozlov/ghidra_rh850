@@ -194,7 +194,7 @@ topo = json.loads(TOPO.read_text())["current_camry_can_topology"]
 crit = topo["critical_placement"]
 f33 = topo["exact_f33_channel_join"]
 capture = json.loads(CAPTURE.read_text())["conclusion"]
-port = json.loads(PORT.read_text())["gate2_development_integration"]
+port = json.loads(PORT.read_text())["current_native_integration"]
 check("GTS+ keeps Brake/Skid and EPS co-resident on Bus 4",
       crit["skid_control_abs_vsc_trac"]["bus_index"] == 32
       and crit["power_steering_eps"]["bus_index"] == 32
@@ -206,9 +206,10 @@ check("exact F33 keeps B6 and diagnostics on its sole application CAN controller
       and f33["diagnostic_rule_tail"] == ["0x7A1", "0x777", "0x7A0"])
 check("physical repin places the steering family on the CAN0/CAN2 relay pair",
       "CAN0/CAN2 pair" in capture["relay_topology"])
-check("the bounded development ingress is B6 DLC32 on relay-correct Panda bus 0",
-      "bus0/CAN0-CAN2 topology" in port["target_binding"]
-      and "bus0/DLC32/0x0B6-only TX whitelist" in port["panda_debug_boundary"]
+check("the current ordinary ingress is checked B6 DLC32 on relay-correct Panda bus 0",
+      "Panda bus0/CAN0-CAN2" in port["target_binding"]
+      and "0x0B6 bus0/DLC32" in port["panda_safety_boundary"]
+      and "no ALLOW_DEBUG" in port["panda_safety_boundary"]
       and port["production_output_authorized"] is False)
 
 print(f"\n{passed} passed, {failed} failed")

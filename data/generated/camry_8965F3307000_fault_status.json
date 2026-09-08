@@ -4046,7 +4046,7 @@
     },
     "tx_contract": {
       "path": "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
-      "sha256": "fc4e7ac9a2d3590b1ba1b7962c360fafc29297f4793d5c1a4dcec5eb298bf357"
+      "sha256": "17ea811472f3d092255222b8b1f22777af60daf50f2a7eb65df969d6aef75548"
     }
   },
   "target": {

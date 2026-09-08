@@ -659,53 +659,65 @@ def section_tss3_opendbc_port() -> int:
     check("DID1151 source census remains distinct", [x["entry"] for x in evid["fixed_gp_census"]["did1151_q_current_source_gp_minus_0x50f2"]] == ["0x0004E394", "0x00052CA0", "0x00054244", "0x000564CE", "0x00059448", "0x0005D12C"])
     check("negative census boundary retained", "computed aliases" in evid["fixed_gp_census"]["boundary"].lower() and "dma" in evid["fixed_gp_census"]["boundary"].lower())
 
-    print("\n== passive opendbc integration boundary ==")
+    print("\n== passive opendbc integration history ==")
     o = art["passive_opendbc_integration"]
-    check("baseline and current implementation commits pinned",
+    check("passive baseline implementation commits pinned",
           o["nested_opendbc_commit"] == "ab60fd95d8a7b566e10ed1cf59738292f3498932" and
           o["parent_kai_openpilot_commit"] == "d7d7dfd7e49961e9d35eb7a7681e8756ceee8d04" and
-          o["current_nested_opendbc_commit"] == "8da4bb9bb62ecbef0a24653e4aecdaedc514b046" and
-          o["current_parent_kai_openpilot_commit"] == "6dd58cf5eb2fd47a568f85ce83542ee6aebf176b" and
-          o["upstream_request_decode_commit"] == "b9e86924b96eac248b6b9e6bcf0d4dfdc95b62d0")
+          o["upstream_request_decode_commit"] == "b9e86924b96eac248b6b9e6bcf0d4dfdc95b62d0" and
+          o["superseded_by"] == "current_native_integration")
     check("exact platform/F181 binding recorded", o["exact_platform"] == "TOYOTA_CAMRY_TSS3" and "byte-exact EPS F181" in o["identity_binding"])
     check("ambiguous legacy fingerprint avoided", "179-ID" in o["can_census"] and "147-ID Corolla" in o["can_census"] and "strict subset" in o["can_census"])
     check("same-car replay coverage recorded", o["carstate_replay"] == ["0x025", "0x030", "0x127 P/R/N/D/B", "0x51E Ready 0/1"])
-    check("default path stays passive while exact-F181 development output is explicit", "default path" in o["controller_boundary"] and "zero CAN" in o["controller_boundary"] and "development gating" in o["controller_boundary"])
     check("passive lateral-request decoder is non-ingress and non-transmit", "passive 0x08A" in o["lateral_request_observation"] and "neither accepts 0x08A as normal Rx nor lists it among the five generated-COM Tx IDs" in o["lateral_request_observation"])
-    check("Panda production path remains disabled and development path bounded", all(tok in o["panda_boundary"] for tok in ("ordinary Toyota modes", "ALLOW_DEBUG", "B6-only", "controls_allowed")))
-    check("current gates prioritize bypass deployment and stationary validation",
-          "receiver-acceptance path" in o["remaining_live_gates"][0] and
-          "explicit-zero B6 application candidate" in o["remaining_live_gates"][1] and
-          "driver override" in o["remaining_live_gates"][2] and
-          "deployment/execution/heartbeat" in o["remaining_live_gates"][3] and
-          "does not block direct development B6 actuation" in o["remaining_live_gates"][4])
-    check("production output remains unauthorized", o["production_output_authorized"] is False and "does not authorize steering transmission" in art["boundary"])
 
-    print("\n== current exact-F33 Gate-2 development integration ==")
-    d = art["gate2_development_integration"]
-    check("development history, removal, and reintroduction commits pinned",
-          d["historical_nested_opendbc_commit"] == "dde0fcf0fbaf875750c54a072b0dcb3857f8829b" and
-          d["historical_parent_kai_openpilot_commit"] == "15f3550365e2eee54ca5645ae9c24d9d41ae4f31" and
-          d["removed_in_nested_opendbc_commit"] == "b9e86924b96eac248b6b9e6bcf0d4dfdc95b62d0" and
-          d["removed_in_parent_kai_openpilot_commit"] == "abf3ca70a713d21b88a0cd0241f0650a3d96db7a" and
-          d["reintroduced_in_nested_opendbc_commit"] == "c98872c61ff9e1657bd3a54a9f2168b1b3d59d7d" and
-          d["reintroduced_in_parent_kai_openpilot_commit"] == "5fee63cfc0d570f3af0add2b2a1e9e66de3bc49d")
-    check("development runtime is present, selectable, default-off and non-release",
-          d["status"] == "development-runtime-present-default-off" and d["runtime_selectable"] is True and
-          d["default_enabled"] is False and d["release_branch_allowed"] is False)
-    check("exact target and attestation gates recorded", "8965F3307000" in d["target_binding"] and
-          any("ToyotaEphemeralSecOCBridgeF181=8965F3307000" in x for x in d["runtime_gates"]) and
-          any("ToyotaTss3DevLateral=true" in x for x in d["runtime_gates"]))
-    check("current sender keeps exact F33 static bounds and release behavior", all(tok in d["sender"] for tok in ("zero-MAC28 B6", "bus0", "+/-1745", "+/-78", "inactive ID0", "slew-limited")))
-    check("explicit-zero application candidate is not promoted to stock", all(tok in d["application_candidate"] for tok in ("explicit-zero", "non-stock", "suppression=1", "stationary")))
-    check("Panda B6 safety envelope includes engagement and inactive release", all(tok in d["panda_debug_boundary"] for tok in ("ALLOW_DEBUG-only", "0x0B6-only", "0x08A B3[3]", "controls_allowed", "inactive release", "strict +1", "35-ms")))
-    check("both receiver-acceptance options and deployment boundary recorded",
-          "Gate-2" in d["acceptance_options"]["persistent_codeflash"] and
-          "reset restores stock" in d["acceptance_options"]["ram_bridge"] and
-          d["deployment_verified_on_exact_vehicle"] is False and "does not deploy" in d["card_deployment_boundary"])
-    check("current blocker is live acceptance/application validation, not OQ-054", d["production_output_authorized"] is False and
-          "Install and positively verify" in d["current_blocker"] and "stationary" in d["current_blocker"] and
-          "does not block" in d["current_blocker"])
+    print("\n== superseded private Gate-2 development history ==")
+    h = art["gate2_development_history"]
+    check("development history, removal, reintroduction and last private-gated revisions pinned",
+          h["historical_nested_opendbc_commit"] == "dde0fcf0fbaf875750c54a072b0dcb3857f8829b" and
+          h["historical_parent_kai_openpilot_commit"] == "15f3550365e2eee54ca5645ae9c24d9d41ae4f31" and
+          h["removed_in_nested_opendbc_commit"] == "b9e86924b96eac248b6b9e6bcf0d4dfdc95b62d0" and
+          h["removed_in_parent_kai_openpilot_commit"] == "abf3ca70a713d21b88a0cd0241f0650a3d96db7a" and
+          h["reintroduced_in_nested_opendbc_commit"] == "c98872c61ff9e1657bd3a54a9f2168b1b3d59d7d" and
+          h["reintroduced_in_parent_kai_openpilot_commit"] == "5fee63cfc0d570f3af0add2b2a1e9e66de3bc49d" and
+          h["last_hardened_nested_opendbc_commit"] == "8da4bb9bb62ecbef0a24653e4aecdaedc514b046" and
+          h["last_hardened_parent_kai_openpilot_commit"] == "6dd58cf5eb2fd47a568f85ce83542ee6aebf176b")
+    check("historical private runtime is explicitly superseded",
+          h["status"] == "superseded-private-gated-development-runtime" and h["runtime_selectable"] is True and
+          h["default_enabled"] is False and h["release_branch_allowed"] is False)
+    check("historical attestation gates retained", "8965F3307000" in h["target_binding"] and
+          any("ToyotaEphemeralSecOCBridgeF181=8965F3307000" in x for x in h["runtime_gates"]) and
+          any("ToyotaTss3DevLateral=true" in x for x in h["runtime_gates"]))
+    check("historical zero-MAC sender and debug safety preserved as history",
+          "Historical private-gated sender" in h["sender"] and "zero-MAC28" in h["sender"] and
+          all(tok in h["panda_debug_boundary"] for tok in ("Historical ALLOW_DEBUG-only", "0x0B6-only", "35-ms", "Superseded")))
+
+    print("\n== current ordinary Toyota exact-F33 integration ==")
+    n = art["current_native_integration"]
+    check("current implementation commits pinned",
+          n["current_nested_opendbc_commit"] == "f207c273b645f6a7a6860cb436564df69a8d5c2a" and
+          n["current_parent_kai_openpilot_commit"] == "7aece7f630b8c56e9b56fb0422e9b007e0c15547" and
+          n["current_panda_commit"] == "bbc93b17d8612c60c10b43553b37adce53817bf4" and
+          n["documentation_import_parent_commit"] == "60d57a89a839c95bf214b2ce0fd1914ef2c430f3")
+    check("current path is ordinary CC.latActive with no private runtime gates",
+          n["status"] == "ordinary-toyota-runtime-b6-admission-unproven" and
+          n["ordinary_lateral_activation"] == "CC.latActive" and n["private_runtime_gates"] == [])
+    check("current sender records native-shaped wrong-key dummy-CMAC envelope",
+          all(tok in n["sender"] for tok in ("0x0B6/DLC32", "nominal 50 Hz", "message8", "modulo64", "ID11", "ID0", "dummy AES-128 key", "AES-CMAC/FV4", "intentionally wrong")))
+    check("current active application fields match recovered normal-ID11 direction",
+          all(tok in n["application_candidate"] for tok in ("signal265=0", "+1 modulo64", "100/100", "signal263", "ADB0==0x31", "No stock B6 template")))
+    check("ordinary Panda TSS3 safety replaces ALLOW_DEBUG policy",
+          all(tok in n["panda_safety_boundary"] for tok in ("SafetyModel.toyota", "0x0B6 bus0/DLC32", "0x412 bus0", "0x101 brake-cancel bus2", "controls_allowed", "steer_angle_cmd_checks", "no ALLOW_DEBUG")))
+    check("stage5 MAC-value equivalence and admission boundary recorded",
+          "acceptance behavior" in n["secoc_result_boundary"] and "not an admission fix" in n["secoc_result_boundary"] and
+          n["application_admission_verified"] is False and n["causal_steering_verified"] is False)
+    check("road gate reconciliation records four passing readiness operands and ACCC residue",
+          all(tok in n["road_gate_reconciliation"] for tok in ("ACCD==0", "ADBF<2", "CAFC==0", "CAD9==0", "35-ms", "ACCC")))
+    check("current blocker is ordered stationary first-divergence localization",
+          all(tok in n["current_blocker"] for tok in ("SecOC queue", "raw route44", "generated COM", "ADB0/CAFF/CB00", "ACCC", "CB20/CB38", "Do not spend another run")))
+    check("factory architecture boundary does not promote B6 to stock or reopen EBU-private bus",
+          all(tok in n["factory_architecture_boundary"] for tok in ("only recovered external target-bearing", "does not prove factory", "0x08A->B6", "winner/grant", "does not establish a hidden second EPS application bus")))
+    check("production output remains unauthorized", n["production_output_authorized"] is False and "does not authorize steering transmission" in art["boundary"])
 
     print("\n== canonical documentation ==")
     report = REPORT.read_text(encoding="utf-8")
@@ -718,7 +730,7 @@ def section_tss3_opendbc_port() -> int:
     check("VAR-062 development staging registered", "| VAR-062 |" in findings and "dde0fcf0" in findings and "15f355036" in findings)
     check("CORR-120 historical step retained", "### CORR-120" in corrections and "0x4C000" in corrections and "VAR-056" in corrections and "five" in corrections.lower())
     check("CORR-122 canonical census registered", "### CORR-122" in corrections and "6,062" in corrections and "FEBE66A8" in corrections and "FEBE670E" in corrections and "9" in corrections)
-    check("priorities record current default-off development cutover", "8da4bb9b" in priorities and "6dd58cf5e" in priorities and "development B6 path is present but default-off" in priorities)
+    check("priorities record current ordinary Toyota integration", "7aece7f63" in priorities and "f207c273b645" in priorities and "bbc93b17d861" in priorities and "ordinary Toyota/openpilot ownership shape" in priorities)
 
     print(f"\nResults: {p} passed, {f} failed")
     return 1 if f else 0
