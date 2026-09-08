@@ -12,7 +12,7 @@ DOC = ROOT / "docs/variants/camry-2026-live-baseline.md"
 x = json.loads(ART.read_text(encoding="utf-8"))
 e = x["evidence"]
 
-assert x["schema"] == "camry-20260907-steering-reconciliation-v1"
+assert x["schema"] == "camry-20260907-steering-reconciliation-v2"
 assert e["input"]["route"] == "00000045--805b7ca6ab"
 assert e["input"]["segment_count"] == 15
 assert e["input"]["total_bytes"] == 149_376_764
@@ -36,6 +36,24 @@ assert 0.70 < both["stock_vs_b6_minus_live_offset_correlation"] < 0.73
 assert both["b6_minus_live_offset_minus_stock_deg"]["rmse"] < both["b6_minus_stock_deg"]["rmse"]
 assert both["opposite_sign_when_both_abs_gt_0p5_deg"] == 220
 assert both["both_abs_gt_0p5_deg"] == 6_724
+
+auth = e["concurrent_authority_observation"]
+d05 = auth["divergence_0p5_deg"]
+assert d05["count"] == 8_235
+assert d05["reference_closer_to_stock_count"] == 8_229
+assert d05["reference_closer_to_b6_count"] == 6
+assert d05["reference_minus_stock_deg"]["median_abs"] == 0.0
+assert d05["reference_minus_stock_deg"]["p90_abs"] < 0.058
+assert d05["blend_alpha"]["median"] == 0.0
+assert d05["blend_alpha"]["p90_abs"] <= 0.1
+assert auth["divergence_2p5_deg"]["count"] == 53
+assert auth["divergence_2p5_deg"]["reference_closer_to_stock_count"] == 53
+assert auth["divergence_2p5_deg"]["reference_closer_to_b6_count"] == 0
+stock0 = auth["stock_id0_b6_id11_low_torque"]
+assert stock0["count"] == 228
+assert stock0["reference_id_counts"] == {"0": 225, "11": 3}
+assert stock0["reference_minus_stock_deg"]["median_abs"] == 0.0
+assert 1.64 < stock0["reference_minus_b6_deg"]["median_abs"] < 1.68
 
 manual = e["stock_id0_reference_plane"]
 assert manual["count"] == 2_901
@@ -84,6 +102,7 @@ assert -0.39 < w["median_vehicle_offset_m"] < -0.36
 assert -0.41 < w["median_path10_offset_m"] < -0.37
 assert -1.20 < w["median_b6_error_deg"] < -1.14
 assert -0.28 < w["median_stock_error_deg"] < -0.23
+assert -0.28 < w["median_reference_error_deg"] < -0.23
 assert abs(w["median_driver_torque_nm"]) < 0.05
 assert 19.9 < w["median_v_ego_mps"] < 20.1
 
@@ -96,6 +115,8 @@ assert conclusion["b6_wire_angle_matches_openpilot_request"] is True
 assert conclusion["stock_08a_and_b6_are_not_interchangeable_reference_planes"] is True
 assert conclusion["fixed_stock_to_b6_offset_is_supported"] is False
 assert conclusion["high_confidence_model_path_crossed_inner_lane_line"] is False
+assert conclusion["route_proves_b6_only_physical_authority"] is False
+assert conclusion["stock_forwarding_confounds_b6_authority"] is True
 
 text = DOC.read_text(encoding="utf-8")
 for token in (
@@ -106,6 +127,9 @@ for token in (
   "191/230",
   "2.000 s",
   "not a stock→B6 transform",
+  "8,229/8,235",
+  "53/53",
+  "rack response is B6-only",
 ):
   assert token in text, token
 

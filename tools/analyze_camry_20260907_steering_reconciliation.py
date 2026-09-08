@@ -70,6 +70,11 @@ def decode_08a(dat: bytes) -> tuple[int, int, float]:
   return dat[21] & 0x3F, raw, raw * ANGLE_SCALE
 
 
+def decode_081(dat: bytes) -> tuple[int, int, float]:
+  raw = int.from_bytes(dat[16:18], "big", signed=True)
+  return dat[13] & 0x3F, raw, raw * ANGLE_SCALE
+
+
 def decode_b6(dat: bytes) -> tuple[int, int, float]:
   raw = int.from_bytes(dat[4:6], "big", signed=True)
   return dat[3] & 0x3F, raw, raw * ANGLE_SCALE
@@ -139,6 +144,8 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
   both_active_offset: list[float] = []
   opposite_large = 0
   comparable_large = 0
+  authority_rows: list[dict[str, float | int]] = []
+  stock0_b611_authority_rows: list[dict[str, float | int]] = []
 
   manual_measured: list[float] = []
   manual_stock: list[float] = []
@@ -175,6 +182,8 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
           addr, src, dat = int(fr.address), int(fr.src), bytes(fr.dat)
           if addr == 0x08A and src == 2 and len(dat) >= 22:
             latest["stock"] = (t, *decode_08a(dat))
+          elif addr == 0x081 and src == 0 and len(dat) >= 18:
+            latest["reference"] = (t, *decode_081(dat))
           elif addr == 0x030 and src == 0 and len(dat) >= 24:
             latest["motor"] = (t, int.from_bytes(dat[22:24], "big", signed=True))
 
@@ -189,6 +198,7 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
         cs = e.carState
         latest["state"] = (
           t, float(cs.steeringAngleDeg), float(cs.steeringRateDeg), float(cs.steeringTorque), float(cs.vEgo),
+          bool(cs.leftBlinker or cs.rightBlinker),
         )
 
       elif which == "vehicleParameters":
@@ -223,6 +233,29 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
                 comparable_large += 1
                 if stock_angle * b6_angle < 0:
                   opposite_large += 1
+
+              reference = latest.get("reference")
+              state = latest.get("state")
+              if (reference and state and 0 <= t - reference[0] <= 40_000_000 and
+                  0 <= t - state[0] <= 50_000_000 and float(state[4]) > 10.0 and
+                  abs(float(state[3])) < 0.7 and not bool(state[5])):
+                authority_rows.append({
+                  "stock_deg": stock_angle,
+                  "b6_deg": b6_angle,
+                  "reference_deg": float(reference[3]),
+                })
+
+            reference = latest.get("reference")
+            state = latest.get("state")
+            if (stock and stock[1] == 0 and reference and state and
+                0 <= t - stock[0] <= 40_000_000 and 0 <= t - reference[0] <= 40_000_000 and
+                0 <= t - state[0] <= 50_000_000 and float(state[4]) > 10.0 and
+                abs(float(state[3])) < 0.5 and not bool(state[5])):
+              stock0_b611_authority_rows.append({
+                "stock_id": int(stock[1]), "stock_deg": float(stock[3]),
+                "reference_id": int(reference[1]), "reference_deg": float(reference[3]),
+                "b6_deg": float(b6[3]),
+              })
 
       elif which == "modelV2":
         b6 = latest.get("b6")
@@ -313,12 +346,16 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
             path10_offset = probe_errors[10]
             b6_error = float(b6[3]) - float(state[1])
             stock_error = float(stock[3]) - float(state[1])
-            offcenter_rows.append({
+            row: dict[str, float | int] = {
               "segment": _seg, "time_ns": t,
               "v_ego_mps": float(state[4]), "driver_torque_nm": float(state[3]),
               "vehicle_offset_m": vehicle_offset, "path10_offset_m": path10_offset,
               "b6_error_deg": b6_error, "stock_error_deg": stock_error,
-            })
+            }
+            reference = latest.get("reference")
+            if reference and 0 <= t - reference[0] <= 50_000_000:
+              row["reference_error_deg"] = float(reference[3]) - float(state[1])
+            offcenter_rows.append(row)
 
   def offcenter_summary(threshold_m: float) -> dict[str, Any]:
     rows = [r for r in offcenter_rows if abs(float(r["vehicle_offset_m"])) >= threshold_m]
@@ -365,6 +402,7 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
       "median_path10_offset_m": round(float(np.median([float(r["path10_offset_m"]) for r in rows])), 9),
       "median_b6_error_deg": round(float(np.median([float(r["b6_error_deg"]) for r in rows])), 9),
       "median_stock_error_deg": round(float(np.median([float(r["stock_error_deg"]) for r in rows])), 9),
+      "median_reference_error_deg": round(float(np.median([float(r["reference_error_deg"]) for r in rows if "reference_error_deg" in r])), 9),
       "median_driver_torque_nm": round(float(np.median([float(r["driver_torque_nm"]) for r in rows])), 9),
       "median_v_ego_mps": round(float(np.median([float(r["v_ego_mps"]) for r in rows])), 9),
     }
@@ -372,6 +410,31 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
   episode_summaries = [episode_summary(rows) for rows in episodes]
   low_torque_episodes = [x for x in episode_summaries if abs(float(x["median_driver_torque_nm"])) < 0.5]
   longest_low_torque = max(low_torque_episodes, key=lambda x: (int(x["rows"]), float(x["duration_s"])), default=None)
+
+  def reference_authority_summary(threshold_deg: float) -> dict[str, Any]:
+    rows = [r for r in authority_rows if abs(float(r["b6_deg"]) - float(r["stock_deg"])) >= threshold_deg]
+    if not rows:
+      return {"count": 0}
+    ref_stock = [float(r["reference_deg"]) - float(r["stock_deg"]) for r in rows]
+    ref_b6 = [float(r["reference_deg"]) - float(r["b6_deg"]) for r in rows]
+    weights = [(float(r["reference_deg"]) - float(r["stock_deg"])) /
+               (float(r["b6_deg"]) - float(r["stock_deg"])) for r in rows]
+    stock_closer = sum(abs(a) < abs(b) for a, b in zip(ref_stock, ref_b6, strict=True))
+    b6_closer = sum(abs(b) < abs(a) for a, b in zip(ref_stock, ref_b6, strict=True))
+    return {
+      "count": len(rows),
+      "reference_minus_stock_deg": qstats(ref_stock),
+      "reference_minus_b6_deg": qstats(ref_b6),
+      "reference_closer_to_stock_count": stock_closer,
+      "reference_closer_to_b6_count": b6_closer,
+      "blend_alpha_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); 0=stock plane, 1=B6 plane",
+      "blend_alpha": qstats(weights),
+    }
+
+  stock0_ref_ids: dict[str, int] = {}
+  for row in stock0_b611_authority_rows:
+    key = str(int(row["reference_id"]))
+    stock0_ref_ids[key] = stock0_ref_ids.get(key, 0) + 1
 
   raw_diff = [b - s for b, s in zip(both_active_b6, both_active_stock, strict=True)]
   no_live_offset = [b - o for b, o in zip(both_active_b6, both_active_offset, strict=True)]
@@ -406,6 +469,21 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
       "b6_minus_stock_vs_live_offset_correlation": correlation(raw_diff, both_active_offset),
       "opposite_sign_when_both_abs_gt_0p5_deg": opposite_large,
       "both_abs_gt_0p5_deg": comparable_large,
+    },
+    "concurrent_authority_observation": {
+      "selection": "B6 ID11 + stock 0x08A ID11 + latActive; vEgo>10m/s; abs(driver torque)<0.7Nm; no blinker; <=40/50ms freshness",
+      "reference_081_role": "chassis-side published reference/result plane; exact F33 does not receive 0x081",
+      "divergence_0p5_deg": reference_authority_summary(0.5),
+      "divergence_1p0_deg": reference_authority_summary(1.0),
+      "divergence_2p0_deg": reference_authority_summary(2.0),
+      "divergence_2p5_deg": reference_authority_summary(2.5),
+      "stock_id0_b6_id11_low_torque": {
+        "count": len(stock0_b611_authority_rows),
+        "reference_id_counts": stock0_ref_ids,
+        "reference_minus_stock_deg": qstats([float(r["reference_deg"]) - float(r["stock_deg"]) for r in stock0_b611_authority_rows]),
+        "reference_minus_b6_deg": qstats([float(r["reference_deg"]) - float(r["b6_deg"]) for r in stock0_b611_authority_rows]),
+      },
+      "interpretation": "0x081 remains on the stock request/reference plane rather than a stock/B6 midpoint. Any B6 influence must therefore be downstream of, or separate from, this published reference plane. Because stock 0x08A is still forwarded, this route cannot distinguish B6-only authority from additive/coexisting EPS control or source priority.",
     },
     "stock_id0_reference_plane": {
       "selection": "stock ID0 + B6 ID0; vEgo>10 m/s; abs(measured)<20 deg; abs(rate)<5 deg/s; abs(B6)<30 deg",
@@ -448,6 +526,8 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
       "stock_08a_and_b6_are_not_interchangeable_reference_planes": True,
       "fixed_stock_to_b6_offset_is_supported": False,
       "high_confidence_model_path_crossed_inner_lane_line": any(path_outside.values()),
+      "route_proves_b6_only_physical_authority": False,
+      "stock_forwarding_confounds_b6_authority": True,
     },
   }
 
@@ -461,7 +541,7 @@ def main() -> int:
 
   LogReader = load_logreader(args.openpilot_root)
   result = {
-    "schema": "camry-20260907-steering-reconciliation-v1",
+    "schema": "camry-20260907-steering-reconciliation-v2",
     "openpilot_parser_commit": None,
     "evidence": scan(LogReader, args.route),
   }

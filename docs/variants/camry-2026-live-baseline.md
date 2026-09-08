@@ -4738,6 +4738,42 @@ near-field path and steering request continued farther toward that same side.
 The path still retained >1 m of detected-line margin, so the display can look
 wrongly edge-seeking without mathematically crossing the lane boundary.
 
+The more important authority reconciliation is **not** a stock-vs-comma decode
+question.  The current TSS3 safety path still forwards native `0x08A` from the
+camera side (logical bus 2) to the chassis side (logical bus 0), so route 45 is a
+simultaneous-source experiment.  Exact F33 independently makes coexistence
+plausible: B6 ID11 selects `CB00=2`, the B6 target/error supervisor reaches
+`CB38`, and ordinary `D0218` sums `CB38` together with multiple B6-independent
+internal-assist terms.  The special branch that drops most ordinary terms is
+`ADB0==0x31`, not ID11.  No exact receiver-side rule says an admitted ID11 B6
+exclusively replaces every pre-existing assist contribution.
+
+The opposite-direction `0x081` reference plane gives a strong same-drive clue
+about where any mixing can occur.  Restricting to latActive, >10 m/s, no
+blinker, <0.7 N.m driver torque and fresh both-ID11 samples, there are **8,235**
+rows where B6 and stock `0x08A` differ by at least 0.5 deg.  `0x081` is closer
+to stock in **8,229/8,235** and closer to B6 in only 6; median
+`0x081-stock` is exactly 0.000 deg and p90 absolute is one 0.0573-deg count.
+Define an observable blend coordinate
+`alpha=(0x081-stock)/(B6-stock)`, where 0 means the stock plane and 1 means the
+B6 plane: median alpha is **0.000**.  At >=2.5-deg stock/B6 divergence the
+result is even cleaner: **53/53** `0x081` samples are closer to stock and zero
+are closer to B6.  In the natural stock-ID0/B6-ID11 low-torque windows there
+are 228 qualifying sends; `0x081` remains ID0 in **225/228**, with median
+absolute `0x081-stock=0.000 deg` while median absolute `0x081-B6=1.662 deg`.
+Thus the published chassis-side reference/result plane is not visibly taking a
+midpoint between stock and comma.  If B6 has physical effect, that effect is
+downstream of, or separate from, the published `0x081` plane.
+
+That distinction matters for the segment-2 edge witness above.  During its
+clean 2.000-s / 0-N.m interval, median `0x081-measured` is **-0.255 deg**, exactly
+the same median error as stock `0x08A`, while comma/B6 asks **-1.172 deg**.  The
+physical steering barely changes across the interval.  Those facts are
+compatible with several receiver behaviors that the present route cannot
+separate: B6 could be ignored, partially/additively accepted against existing
+EPS authority, or accepted but subordinate to another source.  They do **not**
+show that comma was steering alone.
+
 There are also 416 synchronized model rows where openpilot publishes B6 ID11
 while stock `0x08A` is ID0, including 123 rows with absolute physical driver
 torque below 0.5 N.m.  Those non-coincident-request windows are useful future
@@ -4751,14 +4787,16 @@ adding a stock-derived steering offset.  The fork is transmitting the steering
 angle that controls requested in the exact-F33 B6 physical-angle domain.  The
 stock `0x08A` value is a useful independent Toyota request/reference oracle, not
 a template that comma should numerically copy.  The reported edge-of-lane feel
-therefore points away from a stock-vs-comma encoding reconciliation bug.  In this
-capture the model path never crosses the detected lane, but there are sustained
-periods where the vehicle is already ~0.3--0.4 m off center and comma's near-field
-path plus B6 request continue toward that same edge.  Separately, the previously
-established authority/non-response problem can leave the physical car away from
-where that counterfactual comma path says it should go.  A future road run should
-evaluate physical B6 authority separately; no steering sign/scale/offset tuning
-constant is changed from this comparison.
+therefore points away from a stock-vs-comma encoding bug, but **it does not
+identify the physical authority split**.  In this capture the model path never
+crosses the detected lane, yet comma genuinely asks farther toward the edge in
+sustained intervals while the stock/`0x081` plane asks less.  Because stock
+`0x08A` is still forwarded and exact F33 permits B6-dependent terms to coexist
+with B6-independent internal assist, the current drive cannot tell whether the
+rack response is B6-only, a weighted/additive coexistence, or source priority.
+The decisive next experiment is to suppress the stock request path upstream and
+leave `0x081` visible as a readback; no steering sign/scale/offset tuning constant
+is changed from this comparison.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
