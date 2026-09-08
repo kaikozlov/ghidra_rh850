@@ -1,0 +1,305 @@
+{
+  "evidence": {
+    "conclusion": {
+      "interpretation": "Route 48 supplies a direct source-off experiment: Toyota 0x08A/0x081 stay ID0 for long intervals while DRCC and openpilot remain active and B6 stays ID11. Large comma target errors can persist for seconds with near-zero driver torque, near-zero steering rate, and very small EPS motor-feedback proxy, while same-route stock-ID11 request error produces a much larger motor response. This rules out simultaneous stock autonomous lateral request as the explanation for the observed B6 non-response; it does not by itself identify which B6 admission/authentication/controller gate is failing.",
+      "route_proves_b6_effective_eps_authority": false,
+      "stock_autonomous_request_competition_explains_b6_nonresponse": false,
+      "turning_toyota_lta_off_preserved_openpilot_b6_id11": true
+    },
+    "input": {
+      "route": "00000048--709f22277b",
+      "route_init_data": {
+        "dirty": false,
+        "gitBranch": "kai",
+        "gitCommit": "bfa1352b25e64e50e1332d8661af475be9be04a4",
+        "version": "0.11.2"
+      },
+      "segment_count": 8,
+      "segments": [
+        {
+          "bytes": 9444824,
+          "segment": 0,
+          "sha256": "441639bcf23bf3835b3bf171fb1deb527154b5408c7dfc266f3d9769bce13dac"
+        },
+        {
+          "bytes": 10483169,
+          "segment": 1,
+          "sha256": "658858a05cb6411bc99105526f0744560f3316467cd68901ff1bedd567aaaf13"
+        },
+        {
+          "bytes": 10365208,
+          "segment": 2,
+          "sha256": "b0f40c38941e4b92e89c549cbc7e692730fcea3cd345c236f08bc203a6acb82c"
+        },
+        {
+          "bytes": 10383180,
+          "segment": 3,
+          "sha256": "0fa15a5d1db36a0518357fcdfbe56e93e5a1e6ca5619f724cd22e45f1299b0d2"
+        },
+        {
+          "bytes": 10334891,
+          "segment": 4,
+          "sha256": "e33c894a8741906c810f2309b314e0a2b0a1d8876957259ce689f5c74ec66c4a"
+        },
+        {
+          "bytes": 10457245,
+          "segment": 5,
+          "sha256": "5697dbb235f1b9303b5cee30580eb80f536a5e4e4507be35027fbce3dde71fb4"
+        },
+        {
+          "bytes": 10435833,
+          "segment": 6,
+          "sha256": "61b31463a086483d49857e2d952dca6d82a0115e3bee804c032719a28b797548"
+        },
+        {
+          "bytes": 2776505,
+          "segment": 7,
+          "sha256": "550bc9de4a0eb884b471d9bb068159fce3efa3c04ae1025bd63fbe94c8109590"
+        }
+      ],
+      "total_bytes": 74680855
+    },
+    "isolated_b6_response": {
+      "large_error_motor_abs_raw": {
+        "count": 1040,
+        "max": 310.0,
+        "mean": 28.083653846,
+        "median": 13.0,
+        "median_abs": 13.0,
+        "min": 0.0,
+        "p90_abs": 56.1,
+        "rmse": 54.72479223
+      },
+      "large_error_rows": 1040,
+      "large_error_steering_rate_abs_deg_s": {
+        "count": 1040,
+        "max": 41.0,
+        "mean": 0.559615385,
+        "median": 0.0,
+        "median_abs": 0.0,
+        "min": 0.0,
+        "p90_abs": 1.0,
+        "rmse": 2.639201511
+      },
+      "large_error_threshold_deg": 3.0,
+      "longest_continuous_large_error_witness": {
+        "b6_end_deg": -2.406715165,
+        "b6_start_deg": -2.349412423,
+        "duration_s": 5.401805,
+        "measured_end_deg": 0.600000024,
+        "measured_start_deg": 0.800000012,
+        "median_abs_b6_error_deg": 5.126916644,
+        "median_b6_error_deg": -5.126916644,
+        "median_driver_torque_nm": 0.01,
+        "median_motor_feedback_raw": 1.0,
+        "median_steering_rate_deg_s": 0.0,
+        "median_v_ego_mps": 17.613201141,
+        "minimum_abs_b6_error_deg": 3.006715189,
+        "motor_sign_toward_b6_fraction": 0.425925926,
+        "rows": 270,
+        "segment": 3
+      },
+      "selection": "stock 0x08A ID0 + 0x081 ID0 + cruise latch on + B6 ID11 + latActive; vEgo>10m/s; no blinker; abs(driver torque)<0.3Nm"
+    },
+    "same_route_stock_lta_positive_control": {
+      "motor_abs_raw": {
+        "count": 383,
+        "max": 589.0,
+        "mean": 287.992167102,
+        "median": 309.0,
+        "median_abs": 309.0,
+        "min": 0.0,
+        "p90_abs": 421.8,
+        "rmse": 311.067827349
+      },
+      "motor_sign_toward_stock_fraction": 0.958224543,
+      "rows": 383,
+      "selection": "stock 0x08A ID11 + 0x081 ID11 + B6 ID11 + latActive; vEgo>10m/s; no blinker; abs(driver torque)<0.3Nm; abs(stock-measured)>=0.5deg"
+    },
+    "state_census": {
+      "episode_duration_sum_s": 200.891021,
+      "episodes_ge_1s": 14,
+      "fresh_joined_b6_rows": 21335,
+      "longest_episodes": [
+        {
+          "b6_end_deg": -5.157246782,
+          "b6_start_deg": 1.317963067,
+          "duration_s": 47.161537,
+          "measured_end_deg": 2.400000095,
+          "measured_start_deg": 1.600000024,
+          "median_abs_b6_error_deg": 1.200000048,
+          "median_b6_error_deg": -0.505651835,
+          "median_driver_torque_nm": 0.02,
+          "median_motor_feedback_raw": 4.0,
+          "median_steering_rate_deg_s": 0.0,
+          "median_v_ego_mps": 17.922245026,
+          "minimum_abs_b6_error_deg": 0.003357535,
+          "motor_sign_toward_b6_fraction": 0.638143891,
+          "rows": 2349,
+          "segment": 4
+        },
+        {
+          "b6_end_deg": 14.554896475,
+          "b6_start_deg": 1.776385003,
+          "duration_s": 33.483281,
+          "measured_end_deg": 15.399999619,
+          "measured_start_deg": 3.599999905,
+          "median_abs_b6_error_deg": 1.942697258,
+          "median_b6_error_deg": -1.14045887,
+          "median_driver_torque_nm": 0.119999997,
+          "median_motor_feedback_raw": 20.0,
+          "median_steering_rate_deg_s": 0.0,
+          "median_v_ego_mps": 11.361332893,
+          "minimum_abs_b6_error_deg": 0.001006893,
+          "motor_sign_toward_b6_fraction": 0.458633094,
+          "rows": 1668,
+          "segment": 6
+        },
+        {
+          "b6_end_deg": -2.406715165,
+          "b6_start_deg": 1.719082261,
+          "duration_s": 30.670982,
+          "measured_end_deg": -1.200000048,
+          "measured_start_deg": 0.5,
+          "median_abs_b6_error_deg": 0.955064342,
+          "median_b6_error_deg": -0.5,
+          "median_driver_torque_nm": 0.02,
+          "median_motor_feedback_raw": 0.0,
+          "median_steering_rate_deg_s": 0.0,
+          "median_v_ego_mps": 17.107462883,
+          "minimum_abs_b6_error_deg": 0.005595971,
+          "motor_sign_toward_b6_fraction": 0.518324607,
+          "rows": 1528,
+          "segment": 3
+        },
+        {
+          "b6_end_deg": 6.188696139,
+          "b6_start_deg": -18.909904868,
+          "duration_s": 17.276877,
+          "measured_end_deg": 7.0,
+          "measured_start_deg": -17.899999619,
+          "median_abs_b6_error_deg": 2.175209658,
+          "median_b6_error_deg": 1.295355726,
+          "median_driver_torque_nm": 0.189999998,
+          "median_motor_feedback_raw": 145.0,
+          "median_steering_rate_deg_s": 0.0,
+          "median_v_ego_mps": 8.172178268,
+          "minimum_abs_b6_error_deg": 0.00805858,
+          "motor_sign_toward_b6_fraction": 0.403019744,
+          "rows": 861,
+          "segment": 1
+        },
+        {
+          "b6_end_deg": -19.311024063,
+          "b6_start_deg": -9.856071628,
+          "duration_s": 15.884216,
+          "measured_end_deg": -17.899999619,
+          "measured_start_deg": -10.0,
+          "median_abs_b6_error_deg": 6.077532463,
+          "median_b6_error_deg": -3.697090095,
+          "median_driver_torque_nm": -0.660000026,
+          "median_motor_feedback_raw": 152.5,
+          "median_steering_rate_deg_s": 0.0,
+          "median_v_ego_mps": 7.943847418,
+          "minimum_abs_b6_error_deg": 0.015780543,
+          "motor_sign_toward_b6_fraction": 0.450757576,
+          "rows": 792,
+          "segment": 0
+        }
+      ],
+      "stock_b6_state_counts": {
+        "stock0_b60_cruise0_lat0": 9499,
+        "stock0_b60_cruise1_lat0": 12,
+        "stock0_b611_cruise1_lat1": 10021,
+        "stock11_b60_cruise1_lat0": 4,
+        "stock11_b611_cruise1_lat1": 1171,
+        "stock4_b611_cruise1_lat1": 628
+      },
+      "stock_lta_off_b6_active_episodes": 15,
+      "stock_lta_off_b6_active_rows": 10017
+    },
+    "transport": {
+      "b6_rejected_src192": 8,
+      "b6_sendcan": 21347,
+      "b6_tx_echo_src128": 21339,
+      "panda_health": {
+        "controller_deltas": [
+          {
+            "bus_off_delta": 0,
+            "physical_controller": 0,
+            "total_error_cnt_delta": 0
+          },
+          {
+            "bus_off_delta": 0,
+            "physical_controller": 1,
+            "total_error_cnt_delta": 0
+          },
+          {
+            "bus_off_delta": 0,
+            "physical_controller": 2,
+            "total_error_cnt_delta": 0
+          }
+        ],
+        "first": {
+          "can_state": [
+            {
+              "bus_off": 0,
+              "physical_controller": 0,
+              "receive_error_cnt": 79,
+              "total_error_cnt": 166,
+              "transmit_error_cnt": 0
+            },
+            {
+              "bus_off": 0,
+              "physical_controller": 1,
+              "receive_error_cnt": 0,
+              "total_error_cnt": 0,
+              "transmit_error_cnt": 0
+            },
+            {
+              "bus_off": 0,
+              "physical_controller": 2,
+              "receive_error_cnt": 0,
+              "total_error_cnt": 0,
+              "transmit_error_cnt": 0
+            }
+          ],
+          "safety_tx_blocked": 0,
+          "segment": 0,
+          "time_ns": 298850448205
+        },
+        "last": {
+          "can_state": [
+            {
+              "bus_off": 0,
+              "physical_controller": 0,
+              "receive_error_cnt": 0,
+              "total_error_cnt": 166,
+              "transmit_error_cnt": 0
+            },
+            {
+              "bus_off": 0,
+              "physical_controller": 1,
+              "receive_error_cnt": 0,
+              "total_error_cnt": 0,
+              "transmit_error_cnt": 0
+            },
+            {
+              "bus_off": 0,
+              "physical_controller": 2,
+              "receive_error_cnt": 0,
+              "total_error_cnt": 0,
+              "transmit_error_cnt": 0
+            }
+          ],
+          "safety_tx_blocked": 1,
+          "segment": 7,
+          "time_ns": 737286811478
+        },
+        "safety_tx_blocked_delta": 1
+      }
+    }
+  },
+  "openpilot_parser_commit": "bfa1352b25e64e50e1332d8661af475be9be04a4",
+  "schema": "camry-20260907-lta-off-b6-authority-v1"
+}

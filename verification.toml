@@ -2427,3 +2427,10 @@ oracle = "dynamic_trace"
 paths = [
   "tools/analyze_camry_20260907_steering_reconciliation.py",
 ]
+
+[suite.camry_20260907_lta_off_b6_authority]
+tests = ["tests/verify_camry_20260907_lta_off_b6_authority.py"]
+oracle = "dynamic_trace"
+paths = [
+  "tools/analyze_camry_20260907_lta_off_b6_authority.py",
+]
