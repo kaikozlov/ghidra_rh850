@@ -328,6 +328,14 @@ check("generic monitor control protocol is exact non-XCP extended-CAN shape",
       monitor.command_frame(0x23, 0x12, 0xFEBECC48) == bytes.fromhex("00f3231248ccbefe"))
 check("generic monitor host bounds and aligns LocalRAM windows",
       monitor.validate_window(0xFEBEAC2B) == 0xFEBEAC28 and monitor.validate_window(0) == 0)
+e2e = json.loads((ROOT / "data/generated/camry_f33_b6_end_to_end.json").read_text())
+expected_phases = {row["phase"]: tuple(int(w["address"], 16) for w in row["watch_windows"]) for row in e2e["stationary_monitor_phases"]}
+check("generic monitor phase presets are byte-for-byte the verified A-G ladder",
+      monitor.MONITOR_PHASES == expected_phases and set(monitor.MONITOR_PHASES) == set("ABCDEFG") and
+      all(len(v) == 8 for v in monitor.MONITOR_PHASES.values()))
+check("generic monitor decodes the live 0x00F/0x025 inputs used by the host B6 phase sender",
+      monitor.decode_secoc_sync(bytes.fromhex("1234abcde0000000")) == {"trip_counter": 0x1234, "reset_counter": 0xABCDE} and
+      monitor.decode_steering_angle_deg(bytes.fromhex("0000000000000000000000000000000000000000000000000000000000000000")) == 0.0)
 try:
     monitor.validate_window(0x12345678)
     monitor_bad_addr_rejected = False
@@ -386,7 +394,10 @@ with tempfile.TemporaryDirectory() as td:
           mon["resident_sha256"] == monitor.EXPECTED_RESIDENT_SHA256 and mon["resident_size"] == 520 and
           mon["watch_slots"] == 8 and mon["control_can_id"] == "0x1FDC0002" and
           mon["control_frame"] == "00 F3 seq opcode arg32-le" and mon["source_memory_write"] is False and
-          mon["dynamic_call"] is False and manifest["ram_experiments"]["order"][0] == "runtime_monitor install once in NRTD")
+          mon["dynamic_call"] is False and mon["resident_b6_transmit"] is False and mon["host_phase_b6_transmit"] is True and
+          mon["stationary_monitor_phases"] == {k: [f"0x{x:08X}" for x in v] for k, v in monitor.MONITOR_PHASES.items()} and
+          "current /data/openpilot opendbc" in mon["host_phase_b6_construction"] and
+          manifest["ram_experiments"]["order"][0] == "runtime_monitor install once in NRTD")
     replay = manifest["ram_experiments"]["runtime_replay_discriminator"]
     check("superseded ABI source-term discriminator remains identity-pinned",
           replay["payload_sha256"] == "48f269aec2c95fbf33217db67a201faad2716985784f5e196ba5ddeade46d8dd" and
@@ -468,7 +479,8 @@ with tempfile.TemporaryDirectory() as td:
     check("runbook is launcher-first and externally configurable",
           "generic runtime monitor" in runbook and "runtime_monitor_live" in runbook and
           "./f33 doctor" in runbook and "./f33 install" in runbook and "./f33 shell" in runbook and
-          "watch SLOT ADDRESS" in runbook and "Do not execute them from this runbook" in runbook)
+          "watch SLOT ADDRESS" in runbook and "./f33 phase A" in runbook and "current opendbc" in runbook and
+          "Do not execute them from this runbook" in runbook)
     check("runbook preserves observation-only boundary",
           "no dynamic source-memory writer" in runbook and "steering CAN transmit" in runbook and
           "current coherent snapshot" in runbook and "on-ECU history ring" in runbook)
@@ -481,7 +493,8 @@ with tempfile.TemporaryDirectory() as td:
           "/usr/local/venv/bin/python" in launcher_text and "/data/openpilot" in launcher_text and
           "ram_payloads/camry_f33_runtime_monitor_payload.bin" in launcher_text and
           "PYTHONPATH" in launcher_text and "systemctl stop openpilot" in launcher_text and
-          "manager/manager\\.py" in launcher_text and "pandad" in launcher_text and "boardd" in launcher_text)
+          "manager/manager\\.py" in launcher_text and "pandad" in launcher_text and "boardd" in launcher_text and
+          "phase requires A..G" in launcher_text and 'monitor phase "$@" --execute' in launcher_text)
     local_openpilot = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
     local_python = local_openpilot / ".venv/bin/python"
     env = dict(os.environ, F33_PYTHON=str(local_python), F33_OPENPILOT_ROOT=str(local_openpilot))
