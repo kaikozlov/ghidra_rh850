@@ -219,6 +219,24 @@
       "stock_lta_off_b6_active_rows": 10017
     },
     "transport": {
+      "b6_frame_format": {
+        "interpretation": "Every route-48 B6 send is explicitly FDF=1 in sendcan. Every successful/rejected Panda return also has FDF=1. A preceding physical-controller-2 Panda state exists for every B6 send and reports CAN-FD+BRS enabled at 500/2000 kbit/s in ISO mode. Given Panda 58a1b6a4 host-TX construction, those B6 frames are therefore emitted as 32-byte CAN-FD+BRS; BRS remains bus-state-derived rather than carried per frame through cereal. All B6 sends still carry the development zero-MAC28 marker, so transport framing is closed separately from SecOC authentication/admission.",
+        "preceding_physical2_brs_enabled": 21347,
+        "preceding_physical2_canfd_enabled": 21347,
+        "preceding_physical2_speed_mode_counts": [
+          {
+            "can_data_speed_kbps": 2000,
+            "can_speed_kbps": 500,
+            "canfd_non_iso": false,
+            "count": 21347
+          }
+        ],
+        "rejected_fd_true": 8,
+        "sendcan_fd_true": 21347,
+        "sendcan_with_preceding_panda_state": 21347,
+        "sendcan_zero_mac28": 21347,
+        "tx_echo_fd_true": 21339
+      },
       "b6_rejected_src192": 8,
       "b6_sendcan": 21347,
       "b6_tx_echo_src128": 21339,
@@ -243,21 +261,36 @@
         "first": {
           "can_state": [
             {
+              "brs_enabled": true,
               "bus_off": 0,
+              "can_data_speed_kbps": 2000,
+              "can_speed_kbps": 500,
+              "canfd_enabled": true,
+              "canfd_non_iso": false,
               "physical_controller": 0,
               "receive_error_cnt": 79,
               "total_error_cnt": 166,
               "transmit_error_cnt": 0
             },
             {
+              "brs_enabled": false,
               "bus_off": 0,
+              "can_data_speed_kbps": 2000,
+              "can_speed_kbps": 500,
+              "canfd_enabled": false,
+              "canfd_non_iso": false,
               "physical_controller": 1,
               "receive_error_cnt": 0,
               "total_error_cnt": 0,
               "transmit_error_cnt": 0
             },
             {
+              "brs_enabled": true,
               "bus_off": 0,
+              "can_data_speed_kbps": 2000,
+              "can_speed_kbps": 500,
+              "canfd_enabled": true,
+              "canfd_non_iso": false,
               "physical_controller": 2,
               "receive_error_cnt": 0,
               "total_error_cnt": 0,
@@ -271,21 +304,36 @@
         "last": {
           "can_state": [
             {
+              "brs_enabled": true,
               "bus_off": 0,
+              "can_data_speed_kbps": 2000,
+              "can_speed_kbps": 500,
+              "canfd_enabled": true,
+              "canfd_non_iso": false,
               "physical_controller": 0,
               "receive_error_cnt": 0,
               "total_error_cnt": 166,
               "transmit_error_cnt": 0
             },
             {
+              "brs_enabled": true,
               "bus_off": 0,
+              "can_data_speed_kbps": 2000,
+              "can_speed_kbps": 500,
+              "canfd_enabled": true,
+              "canfd_non_iso": false,
               "physical_controller": 1,
               "receive_error_cnt": 0,
               "total_error_cnt": 0,
               "transmit_error_cnt": 0
             },
             {
+              "brs_enabled": true,
               "bus_off": 0,
+              "can_data_speed_kbps": 2000,
+              "can_speed_kbps": 500,
+              "canfd_enabled": true,
+              "canfd_non_iso": false,
               "physical_controller": 2,
               "receive_error_cnt": 0,
               "total_error_cnt": 0,

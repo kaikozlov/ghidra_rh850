@@ -27,6 +27,17 @@ transport = e["transport"]
 assert transport["b6_sendcan"] == 21_347
 assert transport["b6_tx_echo_src128"] == 21_339
 assert transport["b6_rejected_src192"] == 8
+fmt = transport["b6_frame_format"]
+assert fmt["sendcan_fd_true"] == 21_347
+assert fmt["sendcan_zero_mac28"] == 21_347
+assert fmt["tx_echo_fd_true"] == 21_339
+assert fmt["rejected_fd_true"] == 8
+assert fmt["sendcan_with_preceding_panda_state"] == 21_347
+assert fmt["preceding_physical2_canfd_enabled"] == 21_347
+assert fmt["preceding_physical2_brs_enabled"] == 21_347
+assert fmt["preceding_physical2_speed_mode_counts"] == [{
+  "can_speed_kbps": 500, "can_data_speed_kbps": 2000, "canfd_non_iso": False, "count": 21_347,
+}]
 assert transport["panda_health"]["safety_tx_blocked_delta"] == 1
 for row in transport["panda_health"]["controller_deltas"]:
   assert row["total_error_cnt_delta"] == 0
@@ -77,6 +88,8 @@ for token in (
   "200.891",
   "5.402 s",
   "309",
+  "21,347/21,347",
+  "CAN-FD+BRS",
   "stock-competition explanation",
 ):
   assert token in text, token

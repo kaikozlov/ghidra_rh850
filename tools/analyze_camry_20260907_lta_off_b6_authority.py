@@ -128,8 +128,17 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
   init_data: dict[str, Any] = {}
   rows: list[dict[str, Any]] = []
   b6_sendcan = 0
+  b6_sendcan_fd = 0
+  b6_sendcan_zero_mac28 = 0
   b6_tx_echo = 0
+  b6_tx_echo_fd = 0
   b6_rejected = 0
+  b6_rejected_fd = 0
+  b6_with_preceding_panda = 0
+  b6_with_phys2_canfd = 0
+  b6_with_phys2_brs = 0
+  b6_phys2_speed_pairs: Counter[tuple[int, int, bool]] = Counter()
+  latest_panda_states: list[dict[str, Any]] | None = None
   panda_samples: list[dict[str, Any]] = []
 
   for segment, path in segments:
@@ -155,8 +164,10 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
           elif addr == 0x0B6 and len(dat) == 32:
             if src == 128:
               b6_tx_echo += 1
+              b6_tx_echo_fd += int(bool(fr.fd))
             elif src == 192:
               b6_rejected += 1
+              b6_rejected_fd += int(bool(fr.fd))
       elif which == "pandaStates" and len(e.pandaStates):
         ps = e.pandaStates[0]
         states = []
@@ -168,7 +179,13 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
             "bus_off": int(c.busOff),
             "receive_error_cnt": int(c.receiveErrorCnt),
             "transmit_error_cnt": int(c.transmitErrorCnt),
+            "can_speed_kbps": int(c.canSpeed),
+            "can_data_speed_kbps": int(c.canDataSpeed),
+            "canfd_enabled": bool(c.canfdEnabled),
+            "brs_enabled": bool(c.brsEnabled),
+            "canfd_non_iso": bool(c.canfdNonIso),
           })
+        latest_panda_states = states
         panda_samples.append({
           "segment": segment, "time_ns": t,
           "safety_tx_blocked": int(ps.safetyTxBlocked), "can_state": states,
@@ -187,6 +204,19 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
           if int(fr.address) != 0x0B6 or int(fr.src) != 0 or len(dat) != 32:
             continue
           b6_sendcan += 1
+          b6_sendcan_fd += int(bool(fr.fd))
+          b6_sendcan_zero_mac28 += int((int.from_bytes(dat[28:32], "big") & 0x0FFFFFFF) == 0)
+          if latest_panda_states is not None:
+            b6_with_preceding_panda += 1
+            # Route 48 is harnessStatus=flipped, so logical bus0 (B6 TX) maps
+            # to physical FDCAN controller 2. Host-created BRS follows that
+            # controller's sticky/configured brs_enabled state.
+            phys2 = latest_panda_states[2]
+            b6_with_phys2_canfd += int(bool(phys2["canfd_enabled"]))
+            b6_with_phys2_brs += int(bool(phys2["brs_enabled"]))
+            b6_phys2_speed_pairs[(
+              int(phys2["can_speed_kbps"]), int(phys2["can_data_speed_kbps"]), bool(phys2["canfd_non_iso"]),
+            )] += 1
           bid, b6_angle = decode_b6(dat)
           stock, reference, state, motor, control = (
             latest.get("stock"), latest.get("reference"), latest.get("state"), latest.get("motor"), latest.get("control")
@@ -263,6 +293,25 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
       "b6_sendcan": b6_sendcan,
       "b6_tx_echo_src128": b6_tx_echo,
       "b6_rejected_src192": b6_rejected,
+      "b6_frame_format": {
+        "sendcan_fd_true": b6_sendcan_fd,
+        "sendcan_zero_mac28": b6_sendcan_zero_mac28,
+        "tx_echo_fd_true": b6_tx_echo_fd,
+        "rejected_fd_true": b6_rejected_fd,
+        "sendcan_with_preceding_panda_state": b6_with_preceding_panda,
+        "preceding_physical2_canfd_enabled": b6_with_phys2_canfd,
+        "preceding_physical2_brs_enabled": b6_with_phys2_brs,
+        "preceding_physical2_speed_mode_counts": [
+          {"can_speed_kbps": a, "can_data_speed_kbps": b, "canfd_non_iso": non_iso, "count": n}
+          for (a, b, non_iso), n in sorted(b6_phys2_speed_pairs.items())
+        ],
+        "interpretation": (
+          "Every route-48 B6 send is explicitly FDF=1 in sendcan. Every successful/rejected Panda return also has FDF=1. "
+          "A preceding physical-controller-2 Panda state exists for every B6 send and reports CAN-FD+BRS enabled at 500/2000 kbit/s in ISO mode. "
+          "Given Panda 58a1b6a4 host-TX construction, those B6 frames are therefore emitted as 32-byte CAN-FD+BRS; BRS remains bus-state-derived rather than carried per frame through cereal. "
+          "All B6 sends still carry the development zero-MAC28 marker, so transport framing is closed separately from SecOC authentication/admission."
+        ),
+      },
       "panda_health": panda_health,
     },
     "state_census": {

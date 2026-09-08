@@ -4822,9 +4822,21 @@ really was withdrawn for long intervals.
 Transport remains exonerated.  The route contains **21,347** B6 `sendcan`
 frames, **21,339** Panda TX echoes and only **8** `src=192` rejects.  Across the
 recorded route every Panda physical controller has zero `totalErrorCnt` growth
-and zero bus-off growth; `safetyTxBlocked` rises by only one.  The stock-off
-result therefore cannot be attributed to a recurrent Panda rejection or a CAN
-protocol-error burst.
+and zero bus-off growth; `safetyTxBlocked` rises by only one.  Post-format-fix
+metadata closes the actual wire framing more tightly: **21,347/21,347** B6
+`sendcan` frames have `CanData.fd=true`, and every successful or rejected Panda
+return is also FDF=true.  With the flipped harness, every B6 send has a preceding
+physical-controller-2 Panda state reporting `canfdEnabled=true`,
+`brsEnabled=true`, `canSpeed=500`, `canDataSpeed=2000`, and ISO mode
+(`canfdNonIso=false`).  Panda `58a1b6a4` writes host-created BRS directly from
+that physical controller's `brs_enabled` state, so route 48's B6 was emitted as
+**32-byte CAN-FD+BRS at 500 kbit/s nominal / 2 Mbit/s data**.  BRS is still
+bus-state-derived rather than carried per frame through cereal, so this is a
+route-specific code+state proof rather than a generic per-frame BRS log.  All
+21,347 B6 sends also retain the intentional **zero-MAC28 development marker**;
+therefore this closes Panda/CAN-FD framing, not SecOC authentication or receiver
+admission.  The stock-off result cannot be attributed to a recurrent Panda
+rejection or a CAN protocol-error burst.
 
 The physical response is the important discriminator.  Restrict the source-off
 set further to `vEgo>10 m/s`, no blinker, absolute driver torque `<0.3 N.m`, and
