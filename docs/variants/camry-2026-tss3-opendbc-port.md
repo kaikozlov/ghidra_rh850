@@ -404,31 +404,33 @@ questions around §4.4: what the sender actually put on the wire, whether the wh
 tracks the stock or the openpilot request when they diverge, and whether any
 transport-level event could explain the non-response.
 
-**Sender envelope is internally exact.** All 751,664 B6 `sendcan` frames decompose into
-exactly two application shapes: inactive `Target Lateral ID 0` with companion byte
+**Historical sender application/FV4 progression is internally consistent.** All 751,664
+B6 `sendcan` frames decompose into exactly two application shapes: inactive `Target Lateral ID 0` with companion byte
 `B6=0x04` and `B8=B9=0`, and active `ID 11` with `B6=0x00` and `B8=B9=100` (0x64).
 MAC28 is zero on every frame, every other application byte (`B0..B2`, `B10..B27`) is
 zero on every frame, the modulo-64 sequence advances exactly +1 on every consecutive
 pair (the only non-+1 differences are the 253 intra-route segment boundaries), the
 message counter's low2 jumps only at epoch reanchors, and the transmitted reset low2
 equals the current `0x00F RESET_CNT` epoch low2 on 100% of frames that had an observed
-sync (751,664 − 603 segment-start frames). Cadence is a clean 50 Hz: per-segment median
-inter-frame gap 19.84–20.01 ms, worst observed gap 34.6 ms. The sender did not
-misbehave.
+sync (751,664 − 603 segment-start frames). Cadence is a clean 50 Hz: per-segment median inter-frame gap 19.84–20.01 ms,
+worst observed gap 34.6 ms. CORR-176 later identifies the separate envelope defect:
+these routes use the bridge-only zero-MAC28 marker rather than the now-restored normal
+dummy-CMAC construction. Thus their application/FV4 progression is valid evidence,
+but they are not a road test of the current SecOC authenticator envelope.
 
-**One systematic wire difference from the stock protected sender.** The native protected
-`0x0D7` stream on the same bus shares the FV4+MAC28 trailer and is the only available
-reference for what an accepted protected sender looks like. Its first frame in each
-freshness epoch carries message-low2 = **1** in 95.1–95.5% of epochs (second mode 3,
-4.0–4.2%, race frames), and its reset low2 lags the observed `0x00F` epoch by one on
-~0.2–0.3% of frames. Our reanchoring sender instead emits first-in-epoch message-low2 =
-**0** in 99.6–99.8% of epochs. The stock sender therefore keeps a one-count phase
-difference at every epoch boundary that our sender does not reproduce. VAR-123's
-recovered verifier compares `frame_mc_low2 <= tracked_low2` against offset candidates
-`{0,-1,+1,-2,+2}`, so this phase difference is not proven fatal — but it is the only
-observable wire-geometry divergence from a known-accepted protected sender and is a
-cheap A/B variable (`message_counter` initial phase) for the next stationary observer
-run.
+**The apparent stock/message-counter phase difference is not a receiver requirement.**
+The native protected `0x0D7` stream shares the FV4+MAC28 trailer and strongly prefers
+first-in-epoch message-low2 **1**, while the later Camry B6 sender reanchors at **0**.
+That contrast remains a real sender-policy observation, but VAR-146/CORR-177 close its
+relevance to B6 admission from exact F33. `90A48` seeds a newer B6 trip/reset epoch by
+copying the *received* message-low bits directly into pending message8; it does not
+compare them with a fixed 0/1 phase. In the same epoch it reconstructs the next
+strictly-forward congruent message8, accepting ordinary gaps +1..+4. The complete
+13-route / 530-rlog Camry corpus then shows all 1,696,097 historical B6 sends and all
+1,554,213 successful Panda TX echoes have FV4 progressions reconstructable by that
+exact algorithm. Routes 45 and 48 start every observed B6 epoch at 0 and remain fully
+freshness-admissible. Therefore there is no justified 0-vs-1 A/B test; D7's phase is a
+sender convention, not a hidden EPS B6 permission rule. See live-baseline §63.
 
 **The wheel tracks the stock request, corpus-level.** Restricting to samples where both
 requests are active ID11 and fresh (≤50 ms), speed > 15 m/s, no blinker, |driver torque|

@@ -220,8 +220,9 @@ these; they stay provisional by code comment and here):
 - B6 receiver admission/ingress semantics — §4.4/§4.5 of the port report
   stand: 751,664 well-formed frames produced no measurable wheel response or
   observable receiver objection; the wire-geometry divergence from the stock
-  protected sender (first-in-epoch message-low2 phase) remains the one cheap
-  A/B variable for the next stationary run.
+  protected sender's first-in-epoch message-low2 phase is no longer an A/B:
+  VAR-146/CORR-177 prove exact F33 seeds any received low2 on a newer epoch and
+  the current reset-to-zero/+1 sender matches that reconstruction.
 
 Final integration-side verification at opendbc `ca52a67f…`: `./test.sh`
 passes ruff, ty, codespell, cpplint, MISRA and all **4,011** unit tests

@@ -1170,13 +1170,14 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   torque-nudge lane-change entry. Fork opendbc `e37bab6c` restored the state on
   2026-09-04; VAR-139/CORR-169 subsequently close the same-car sign convention and
   replace its provisional 1.2 N.m bring-up threshold with the selected 0.6 N.m policy.
-  Do not use the driver-state fix to explain or mask B6 receiver non-response. VAR-126's full-corpus
-  audit adds a third: the sender is wire-exact, transport is exonerated during
-  driving, and the only observable divergence from the known-accepted protected `0x0D7`
-  sender is first-in-epoch message-low2 phase (stock starts at 1, ours at 0) — an
-  A/B variable for the next stationary observer run, not a proven rejection cause.
-  Resolving OQ-054 remains required for stock architecture, not for this B6 ingress
-  discriminator.
+  Do not use the driver-state fix to explain or mask B6 receiver non-response. VAR-146/
+  CORR-177 now remove the former first-in-epoch message-low2 A/B entirely: exact F33
+  accepts any transmitted low2 on a newer B6 trip/reset epoch, and the complete retained
+  corpus shows the current reset-to-zero progression is freshness-admissible. CORR-176
+  separately corrects the historical zero-MAC envelope. The remaining independent-B6
+  question is therefore current dummy-CMAC queue/raw-COM/application admission or
+  downstream cooperative authority, not counter phase. Resolving OQ-054 remains
+  required for stock architecture, not for this B6 ingress discriminator.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

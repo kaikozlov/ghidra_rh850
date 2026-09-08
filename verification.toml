@@ -2434,3 +2434,12 @@ oracle = "dynamic_trace"
 paths = [
   "tools/analyze_camry_20260907_lta_off_b6_authority.py",
 ]
+
+[suite.camry_b6_freshness_contract]
+tests = ["tests/verify_camry_b6_freshness_contract.py"]
+oracle = "raw_bytes"
+paths = [
+  "tools/analyze_camry_b6_freshness_contract.py",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/variants/camry-2026-tss3-opendbc-port.md",
+]

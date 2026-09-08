@@ -80,7 +80,7 @@ allowable tracking error is invented here.
 | Driver override | Apply column torque during active command | Command yields / degrades as specified |
 | Power transitions | Ignition-cycle during active/inactive states | State restored or safely defaulted |
 | Fault recovery | Inject loss/restart after a faulted condition | Recovery per specification |
-| Freshness A/B | First-in-epoch message-low2 = 0 vs = 1 (stock phase) | Admission difference recorded (VAR-126 cheap A/B variable) |
+| Freshness progression | Use current receiver-derived reset-to-zero/+1 construction; do not vary 0 vs 1 | Exact F33 already proves any first low2 is valid on a newer epoch (VAR-146/CORR-177); record transmitted freshness only as a regression check |
 
 VAR-129's passive witnesses supply reference baselines only; its highway
 filters and correlations are not stationary pass/fail criteria. Native ID4 is
