@@ -74,7 +74,7 @@
         ]
       }
     ],
-    "boundary": "Whole 6,065-function canonical Ghidra data-reference census to exact GP-resolved RAM addresses. Computed aliases without a Ghidra data reference, value-set pointer recovery, DMA, and unrecovered code remain outside the negative proof.",
+    "boundary": "Whole 6,062-function canonical Ghidra data-reference census to exact GP-resolved RAM addresses. Computed aliases without a Ghidra data reference, value-set pointer recovery, DMA, and unrecovered code remain outside the negative proof.",
     "did1151_q_current_source_gp_minus_0x50f2": [
       {
         "body_ranges": [
@@ -3026,8 +3026,8 @@
   "software_id": "8965F3307000",
   "source_corpus": {
     "boundary": "Disposable Ghidra corpus used only to recover the selected functions and a bounded direct/fixed-GP reference census. Every promoted row is independently body-hash-bound to the exact normalized F33 image.",
-    "function_count": 6065,
+    "function_count": 6062,
     "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "sha256": "f33efdbecac7d2d8ee8589ae8492d828451f5f1523aa43c72f672597c77fa8d1"
+    "sha256": "ba90d46f24b58951bdd975e9b0271f8e6756a34e7bec44041cd798c98b691586"
   }
 }

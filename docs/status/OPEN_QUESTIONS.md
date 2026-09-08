@@ -1038,7 +1038,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
   The **recovered stock pivot surface is now statically exhausted**, rather than
   merely missing an obvious callback. CORR-123 refreshes that conclusion against
-  the current first-class 6,065-function graph: **496 decoded indirect transfers**
+  the current first-class 6,062-function graph: **496 decoded indirect transfers**
   exist in total (403 `jarl` / 93 `jmp`), **487 in application CodeFlash**
   (395 / 92). The function-owned classifier covers 495 total and **all 487
   application sites**; among its direct target-definition references, 152 resolve
@@ -1177,12 +1177,17 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   then close the historical zero-MAC versus current wrong-key dummy-CMAC distinction as
   an acceptance variable under cumulative stage 5: the tag is opaque until ICU-S and all
   recovered software-visible verification consequences are neutralized before delivery.
-  VAR-148/CORR-179 now also close downstream ID11 composition: accepted B6 is
-  co-modulated through `CB38` inside the ordinary EPS command sum and no exclusive ID11
-  replacement writer exists. The remaining independent-B6 question is therefore physical
-  reception/queue/raw-COM/application publication into that already-closed controller, not
-  counter phase, MAC value, or an unresolved EPS arbitration mode. Resolving OQ-054 remains
-  required for stock architecture, not for this B6 ingress discriminator.
+  VAR-148/CORR-179 close downstream ID11 composition, and VAR-149/CORR-180 now join
+  the entire recovered software ladder through the motor-current model. The remaining
+  independent-B6 question is **which adjacent live rung first diverges**, not another
+  static acceptance hypothesis: physical/CanIf ingress; SecOC queue; route44 publication;
+  `4BD46` global-state unpack; application health/bank selection; companion/readiness and
+  `CB20/CB38`; `AC2B` D0218 branch; `AC5A` scale; `AC29/AC2A` hard gate;
+  `CC98/CC94` override; motor-side selection; or current/plant response. One stationary
+  internal capture can discriminate these in order. Counter phase, MAC value, packer
+  companion guesses, `0x08A` suppression, and another result patch are no longer justified
+  next steps. Resolving OQ-054 remains required for stock architecture, not for this B6
+  ingress discriminator.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

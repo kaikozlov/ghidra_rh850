@@ -40,7 +40,7 @@ check(
     "schema/target exact",
     art["schema"] == "camry-8965f3307000-d5-snapshot-provenance-v1"
     and art["target"]["software_id"] == "8965F3307000"
-    and art["target"]["corpus_function_count"] == 6065,
+    and art["target"]["corpus_function_count"] == 6062,
 )
 
 drv = art["driver"]

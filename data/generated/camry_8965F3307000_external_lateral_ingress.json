@@ -674,7 +674,7 @@
         "signal": 130,
         "signed": true,
         "snapshot": "0xFEBEAE0A",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF192",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004B0B0"
@@ -697,7 +697,7 @@
         "signal": 141,
         "signed": true,
         "snapshot": "0xFEBEAE08",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF196",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004B1F6"
@@ -722,7 +722,7 @@
         "signal": 186,
         "signed": false,
         "snapshot": "0xFEBEACC4",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF06B",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004B59E"
@@ -746,7 +746,7 @@
         "signal": 187,
         "signed": true,
         "snapshot": "0xFEBEADFE",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF1A0",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004B59E"
@@ -770,7 +770,7 @@
         "signal": 188,
         "signed": true,
         "snapshot": "0xFEBEACC5",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF06F",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004B59E"
@@ -795,7 +795,7 @@
         "signal": 189,
         "signed": true,
         "snapshot": "0xFEBEAE22",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF19E",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004B59E"
@@ -819,7 +819,7 @@
         "signal": 211,
         "signed": false,
         "snapshot": "0xFEBEACCE",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF097",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004B86E"
@@ -843,7 +843,7 @@
         "signal": 212,
         "signed": true,
         "snapshot": "0xFEBEAE04",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF1BC",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004B86E"
@@ -867,7 +867,7 @@
         "signal": 213,
         "signed": true,
         "snapshot": "0xFEBEAE06",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF1BE",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004B86E"
@@ -891,7 +891,7 @@
         "signal": 223,
         "signed": false,
         "snapshot": "0xFEBEACD6",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF091",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004B8F4"
@@ -917,7 +917,7 @@
         "signal": 243,
         "signed": false,
         "snapshot": "0xFEBEACCD",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF094",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004BB62"
@@ -941,7 +941,7 @@
         "signal": 261,
         "signed": false,
         "snapshot": "0xFEBEADB0",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF130",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004BD46"
@@ -957,7 +957,7 @@
           "0x000CBA80",
           "0x000CBB66",
           "0x000CCF0E",
-          "0x000CEE80"
+          "0x000CEE7C"
         ],
         "destination_expression": "puVar2 + -0x3748",
         "length": 32,
@@ -967,7 +967,7 @@
         "signal": 262,
         "signed": true,
         "snapshot": "0xFEBEAE90",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF1FA",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004BD46"
@@ -990,7 +990,7 @@
         "signal": 263,
         "signed": false,
         "snapshot": "0xFEBEADDD",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF155",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004BD46"
@@ -1013,7 +1013,7 @@
         "signal": 265,
         "signed": false,
         "snapshot": "0xFEBEADBB",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF134",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004BD46"
@@ -1036,7 +1036,7 @@
         "signal": 268,
         "signed": false,
         "snapshot": "0xFEBEADBC",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF137",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004BD46"
@@ -1059,7 +1059,7 @@
         "signal": 269,
         "signed": false,
         "snapshot": "0xFEBEADBD",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF138",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004BD46"
@@ -1082,7 +1082,7 @@
         "signal": 270,
         "signed": false,
         "snapshot": "0xFEBEADBE",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF139",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004BD46"
@@ -1105,7 +1105,7 @@
         "signal": 273,
         "signed": false,
         "snapshot": "0xFEBEADD9",
-        "snapshot_copy": "0x000BCD66",
+        "snapshot_copy": "0x000BCD62",
         "stage": "0xFEBEF14D",
         "stage_copy": "0x00058074",
         "unpacker": "0x0004BD46"
@@ -1211,7 +1211,7 @@
       281,
       282
     ],
-    "model": "pinned raw -> stage@0x00058074 -> snapshot@0x000BCD66 copy edges with exact snapshot consumers",
+    "model": "pinned raw -> stage@0x00058074 -> snapshot@0x000BCD62 copy edges with exact snapshot consumers",
     "nonempty_count": 19,
     "nonempty_signal_ids": [
       130,
@@ -1245,7 +1245,7 @@
   "sources": {
     "b6_static": {
       "path": "data/generated/camry_8965F3307000_codeflash.json",
-      "sha256": "495960de20bafbff2d4e3354e5c9069f80ff8bf4e868e78038c1448cfc3f8d80"
+      "sha256": "9419206b5f00566de1113c1c4f7f92cc6e4b219c93dcdb111e562ebd38fe6d7e"
     },
     "drive_artifacts": [
       {
@@ -1261,11 +1261,11 @@
     ],
     "fault_status": {
       "path": "data/generated/camry_8965F3307000_fault_status.json",
-      "sha256": "1f00a3c5424eac2ddc007444f74e4a8dc17d0e4df2e202ea6eab20c6f3b79f3f"
+      "sha256": "44a831769ef1bcb58c20630c343d99e52645c71700d10917e4106e52670b8c0f"
     },
     "gtsplus_semantics": {
       "path": "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
-      "sha256": "02e532d20fb4fad5e6fdac51dace7b4fa08040ca47344a320f1c9f9dd572b235"
+      "sha256": "f5c90193f54f97727d22a97aa253e1261e76ff1dc7831b5397cf0e87a729bcf0"
     }
   },
   "special_paths": {
@@ -1367,7 +1367,7 @@
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 6065,
+    "corpus_function_count": 6062,
     "software_id": "8965F3307000"
   }
 }

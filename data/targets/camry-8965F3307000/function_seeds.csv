@@ -52,10 +52,10 @@ address,provenance,note
 0x0008F746,data/generated/camry_8965F3307000_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x000B39D8,data/generated/camry_8965F3307000_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x000B3B06,data/generated/camry_8965F3307000_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
-0x000BCD66,data/generated/camry_8965F3307000_decompiler_evidence.json;data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
+0x000BCD62,data/generated/camry_8965F3307000_decompiler_evidence.json;data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 fallthrough function start; supersedes erroneous +4 seed 0x000BCD66
 0x000CB73A,data/generated/camry_8965F3307000_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x000CCF0E,data/generated/camry_8965F3307000_decompiler_evidence.json;data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
-0x000CCFB6,data/generated/camry_8965F3307000_decompiler_evidence.json;data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
+0x000CCFB2,data/generated/camry_8965F3307000_decompiler_evidence.json;data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 fallthrough function start; supersedes erroneous +4 seed 0x000CCFB6
 0x000CD128,data/generated/camry_8965F3307000_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x000CDA20,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x000CDFF8,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
@@ -67,6 +67,6 @@ address,provenance,note
 0x000CEDA4,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x000CEE20,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x000CEE46,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
-0x000CEE80,data/generated/camry_8965F3307000_decompiler_evidence.json;data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
+0x000CEE7C,data/generated/camry_8965F3307000_decompiler_evidence.json;data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 fallthrough function start; supersedes erroneous +4 seed 0x000CEE80
 0x000CEF26,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x000CEFFC,data/generated/camry_8965F3307000_decompiler_evidence.json;data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence

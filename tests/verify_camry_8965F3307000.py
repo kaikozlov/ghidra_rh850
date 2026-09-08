@@ -153,11 +153,11 @@ def section_codeflash() -> int:
     check('B6 unpacker target-native calls exact selector extraction', 'FUN_0007d12a(0x105,0x1ba,6,0,0,&DAT_febe80bc);' in funcs[0x4BD46]['decompiled_c'])
     check('B6 unpacker target-native calls exact signed16 extraction', 'FUN_0007d12a(0x106,0x1bb,0x10,0,1,puVar2 + -0x3748);' in funcs[0x4BD46]['decompiled_c'])
     check('signed16 raw -> staging', 'DAT_febef1fa = DAT_febe80b8;' in funcs[0x58074]['decompiled_c'])
-    check('signed16 staging -> snapshot', '*(undefined2 *)(puVar15 + -0x970) = *(undefined2 *)(puVar15 + 0x39fa);' in funcs[0xBCD66]['decompiled_c'])
-    check('selector raw -> staging -> snapshot', 'DAT_febef130 = DAT_febe80bc;' in funcs[0x58074]['decompiled_c'] and 'puVar15[-0xa50] = puVar15[0x3930];' in funcs[0xBCD66]['decompiled_c'])
+    check('signed16 staging -> snapshot', '*(undefined2 *)(puVar38 + -0x970) = *(undefined2 *)(puVar38 + 0x39fa);' in funcs[0xBCD62]['decompiled_c'])
+    check('selector raw -> staging -> snapshot', 'DAT_febef130 = DAT_febe80bc;' in funcs[0x58074]['decompiled_c'] and 'puVar38[-0xa50] = puVar38[0x3930];' in funcs[0xBCD62]['decompiled_c'])
     check('signed target doubles in target conditioner', 'iVar1 = DAT_febeae90 * 2;' in funcs[0xCCF0E]['decompiled_c'])
     check('target conditioner saturates symmetric int16 domain', '0x7fff' in funcs[0xCCF0E]['decompiled_c'] and '-0x7fff' in funcs[0xCCF0E]['decompiled_c'])
-    check('independent plausibility path consumes same snapshot', 'sVar3 = *(short *)(puVar11 + -0x970);' in funcs[0xCEE80]['decompiled_c'] and 'FUN_000d0970((int)sVar3)' in funcs[0xCEE80]['decompiled_c'])
+    check('independent plausibility path consumes same snapshot', 'sVar4 = *(short *)(puVar12 + -0x970);' in funcs[0xCEE7C]['decompiled_c'] and 'FUN_000d0970((int)sVar4)' in funcs[0xCEE7C]['decompiled_c'])
     cmd = art['b6_steering_command']
     check('B3 closes as Toyota Target Lateral ID', cmd['selector_signal']['oem_name'] == 'Target Lateral ID' and cmd['selector_signal']['accepted_controller_values'] == {'1':'PCS','4':'LDA','10':'Hands Off LTA','11':'LTA/LCA','18':'SDG','19':'PDA'} and cmd['selector_signal']['additional_target_native_value'] == {'49':'Self-Propelled Transport'})
     check('target-native selector decoder consumes B3 snapshot', all(tok in funcs[0xCEFFC]['decompiled_c'] for tok in ("DAT_febeadb0", "DAT_febeadb0 == '\\x01'", "DAT_febeadb0 == '\\x04'", "DAT_febeadb0 == '\\n'", "DAT_febeadb0 == '\\v'", "DAT_febeadb0 == '\\x12'", "DAT_febeadb0 == '\\x13'")))
@@ -717,7 +717,7 @@ def section_tss3_opendbc_port() -> int:
     check("VAR-058 registered", "| VAR-058 |" in findings and "8965F3307000" in findings and "ab60fd95" in findings)
     check("VAR-062 development staging registered", "| VAR-062 |" in findings and "dde0fcf0" in findings and "15f355036" in findings)
     check("CORR-120 historical step retained", "### CORR-120" in corrections and "0x4C000" in corrections and "VAR-056" in corrections and "five" in corrections.lower())
-    check("CORR-122 canonical census registered", "### CORR-122" in corrections and "6,065" in corrections and "FEBE66A8" in corrections and "FEBE670E" in corrections and "9" in corrections)
+    check("CORR-122 canonical census registered", "### CORR-122" in corrections and "6,062" in corrections and "FEBE66A8" in corrections and "FEBE670E" in corrections and "9" in corrections)
     check("priorities record current default-off development cutover", "8da4bb9b" in priorities and "6dd58cf5e" in priorities and "development B6 path is present but default-off" in priorities)
 
     print(f"\nResults: {p} passed, {f} failed")
@@ -1408,7 +1408,7 @@ def section_b6_acceptance_ladder() -> int:
     image = IMAGE.read_bytes()
     wanted = {
         0x4975C, 0x498E0, 0x4BD46, 0x58074, 0x8E772,
-        0x90A48, 0x90B8A, 0x90D6A, 0xBCD66, 0xCEFA4, 0xCEFFC,
+        0x90A48, 0x90B8A, 0x90D6A, 0xBCD62, 0xCEFA4, 0xCEFFC,
     }
     funcs: dict[int, dict] = {}
     with CORPUS.open(encoding="utf-8") as fh:
@@ -1464,10 +1464,10 @@ def section_b6_acceptance_ladder() -> int:
           ("READ", "0xfebe80c9") in refs(0x58074) and
           ("WRITE", "0xfebef13e") in refs(0x58074))
     check("B6 snapshot copies status and application target fields",
-          ("READ", "0xfebef13e") in refs(0xBCD66) and
-          ("WRITE", "0xfebeadb9") in refs(0xBCD66) and
-          ("WRITE", "0xfebeadb0") in refs(0xBCD66) and
-          ("WRITE", "0xfebeae90") in refs(0xBCD66))
+          ("READ", "0xfebef13e") in refs(0xBCD62) and
+          ("WRITE", "0xfebeadb9") in refs(0xBCD62) and
+          ("WRITE", "0xfebeadb0") in refs(0xBCD62) and
+          ("WRITE", "0xfebeae90") in refs(0xBCD62))
 
     print("\n== controller-enable and ID11 bank selection ==")
     cefa4 = funcs[0xCEFA4]["decompiled_c"]

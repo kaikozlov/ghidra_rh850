@@ -34,7 +34,7 @@ art = json.loads(ART.read_text())
 check("schema/target exact",
       art["schema"] == "camry-8965f3307000-command-cone-ingress-v3"
       and art["target"]["software_id"] == "8965F3307000"
-      and art["target"]["corpus_function_count"] == 6065)
+      and art["target"]["corpus_function_count"] == 6062)
 
 den = art["ingress_denominator"]
 check("extract denominator is 116 literal + 14 table-driven",
@@ -58,9 +58,9 @@ check("L2 unstaged raw cells are consumer-free",
       pipe["L2_unstaged_raw_closure"]["unstaged_count"] == 18
       and "no consumer exists" in pipe["L2_unstaged_raw_closure"]["evidence"])
 census = pipe["L3_stage_reader_census"]
-check("stage-reader census is 52 readers, 15 in-cluster",
-      census["total"] == 52 and census["in_cluster"] == 15 and census["max_reader"] == "0xBF0EC"
-      and len(census["readers"]) == 52)
+check("stage-reader census is 51 readers, 15 in-cluster",
+      census["total"] == 51 and census["in_cluster"] == 15 and census["max_reader"] == "0xBF0EC"
+      and len(census["readers"]) == 51)
 check("no C/D-family compute reads stages directly",
       all(int(r, 16) <= 0xBF0EC for r in census["readers"])
       and "consume the L4 snapshot bank instead" in census["structural_claim"])
@@ -69,11 +69,11 @@ check("group API callers are exactly the two qualifiers",
 check("L2 init-only stage cells have no runtime writer",
       pipe["L2_stage"]["init_only_stage_cells"] == {
           "0xFEBEF098": 0, "0xFEBEF099": 0, "0xFEBEF09C": 1, "0xFEBEF0AA": 0, "0xFEBEF1C0": 0})
-check("L4 has six snapshot copiers totalling 306 destinations",
+check("L4 has five snapshot copiers totalling 306 destinations",
       pipe["L4_unique_snapshot_destinations"] == 306
       and pipe["L4_snapshot_copiers"] == {"0xBC96A": {"exact_pairs": 1}, "0xBCA08": {"exact_pairs": 13},
                                           "0xBCAA6": {"exact_pairs": 1}, "0xBCBD8": {"exact_pairs": 46},
-                                          "0xBCD62": {"exact_pairs": 245}, "0xBCD66": {"exact_pairs": 245}})
+                                          "0xBCD62": {"exact_pairs": 245}})
 
 blk = art["command_block_map"]
 check("command block writer is 0xBF33E with 17 statement-mapped bytes",
@@ -224,7 +224,7 @@ bca08 = _camry_decompiled(0xBCA08)
 c1be4 = _camry_decompiled(0xC1BE4)
 d0674 = _camry_decompiled(0xD0674)
 cf2b2 = _camry_decompiled(0xCF2B2)
-bcd66 = _camry_decompiled(0xBCD66)
+bcd62 = _camry_decompiled(0xBCD62)
 
 check("stock state passes CC60 through CC50 unchanged (guard fallbacks 0x100/0x0)",
       "DAT_000b04c4" in cb9c8 and "0xffff" in cb9c8
@@ -256,8 +256,8 @@ check("C797 latch self-terminates the pulse (5 ticks, 0x280 magnitude gate)",
 check("AC10 base-swap payload is internal AC68, not B6-derived",
       "DAT_febeac10 = DAT_febeafa8;" in bca08
       and "DAT_febeafa8 = DAT_febeac68;" in c1be4)
-check("ADB0 snapshot copies staged FEBEF130 via BCD66",
-      "puVar15[-0xa50] = puVar15[0x3930];" in bcd66)
+check("ADB0 snapshot copies staged FEBEF130 via BCD62",
+      "puVar38[-0xa50] = puVar38[0x3930];" in bcd62)
 check("CC94/CC98 override writer is internal-only (no B6 references)",
       "DAT_febecc94 = -DAT_febecc80;" in d0674 and "DAT_febeadb0" not in d0674)
 check("CB38 ramp target comes from CB08/CB20 supervisor state",

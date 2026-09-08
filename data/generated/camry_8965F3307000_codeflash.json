@@ -342,7 +342,7 @@
   },
   "b6_steering_command": {
     "clamp": {
-      "entry": "0x000CCFB6",
+      "entry": "0x000CCFB2",
       "role": "mode-dependent delta/absolute clamp of the preprocessed target-angle domain"
     },
     "classification": "target-native protected B6 Target Lateral ID plus signed16 target steering angle command, closed by the Camry 0x025/DID1037 measured-angle feedback and same-gain target-minus-measured comparator.",
@@ -357,7 +357,7 @@
       "mrad_per_b6_count": 1.0001215187701138
     },
     "independent_plausibility_consumer": {
-      "entry": "0x000CEE80",
+      "entry": "0x000CEE7C",
       "role": "target-angle magnitude/threshold plausibility path",
       "source": "gp-0x970"
     },
@@ -439,7 +439,7 @@
   "decompiler_evidence": {
     "function_count": 27,
     "path": "data/generated/camry_8965F3307000_decompiler_evidence.json",
-    "sha256": "622079f68231cd3521db0ba15f5c57528a436ccb2a5a0ad17229db45db064f6b"
+    "sha256": "fdea37b2d614fa2fa46de7b26e1bedfd724fc3f54a3de3a5505e9850906b1cd3"
   },
   "schema": "camry-8965f3307000-codeflash-static-v1",
   "secoc_receive": {

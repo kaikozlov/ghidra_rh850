@@ -13,7 +13,7 @@
     },
     "corpus": {
       "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-      "functions": 6065
+      "functions": 6062
     },
     "local_ram_ready": {
       "path": "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin",

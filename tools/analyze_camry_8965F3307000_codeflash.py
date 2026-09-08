@@ -176,15 +176,15 @@ def main() -> int:
         raise ValueError('Camry B6 signal 261/262 destination reference drift')
 
     # Raw -> staging -> snapshot -> target-conditioning/plausibility consumers.
-    stage = funcs[0x58074]['decompiled_c']; snap = funcs[0xBCD66]['decompiled_c']
-    preprocess = funcs[0xCCF0E]['decompiled_c']; clamp = funcs[0xCCFB6]['decompiled_c']; plaus = funcs[0xCEE80]['decompiled_c']
+    stage = funcs[0x58074]['decompiled_c']; snap = funcs[0xBCD62]['decompiled_c']
+    preprocess = funcs[0xCCF0E]['decompiled_c']; clamp = funcs[0xCCFB2]['decompiled_c']; plaus = funcs[0xCEE7C]['decompiled_c']
     selector_decode = funcs[0xCEFFC]['decompiled_c']; selector_aux = funcs[0xCB73A]['decompiled_c']
     need(stage, 'DAT_febef130 = DAT_febe80bc;', 'DAT_febef1fa = DAT_febe80b8;')
-    need(snap, '*(undefined2 *)(puVar15 + -0x970) = *(undefined2 *)(puVar15 + 0x39fa);',
-         'puVar15[-0xa50] = puVar15[0x3930];')
+    need(snap, '*(undefined2 *)(puVar38 + -0x970) = *(undefined2 *)(puVar38 + 0x39fa);',
+         'puVar38[-0xa50] = puVar38[0x3930];')
     need(preprocess, 'iVar1 = DAT_febeae90 * 2;', '0x7fff', '-0x7fff', 'DAT_febec8b4')
     need(clamp, 'DAT_febec8b4', 'DAT_febec9fe', 'DAT_febeca00', 'DAT_febec8b8')
-    need(plaus, 'sVar3 = *(short *)(puVar11 + -0x970);', 'FUN_000d0970((int)sVar3)')
+    need(plaus, 'sVar4 = *(short *)(puVar12 + -0x970);', 'FUN_000d0970((int)sVar4)')
     need(selector_decode, "DAT_febeadb0 == '\\x01'", "DAT_febeadb0 == '\\x04'", "DAT_febeadb0 == '\\n'", "DAT_febeadb0 == '\\v'", "DAT_febeadb0 == '\\x12'", "DAT_febeadb0 == '\\x13'")
     need(selector_aux, "DAT_febeadb0 == '1'")
 
@@ -211,8 +211,8 @@ def main() -> int:
     need(did1037, 'asStack_a[0] = DAT_febe7d46;', 'FUN_00070110', 'FUN_0006a5ac')
     need(stage, 'DAT_febef1a0 = DAT_febe8048;', 'DAT_febef06f = DAT_febe804f;')
     need(snap,
-         '*(undefined2 *)(puVar15 + -0xa02) = *(undefined2 *)(puVar15 + 0x39a0);',
-         'puVar15[-0xb3b] = puVar15[0x386f];')
+         '*(undefined2 *)(puVar38 + -0xa02) = *(undefined2 *)(puVar38 + 0x39a0);',
+         'puVar38[-0xb3b] = puVar38[0x386f];')
     need(measured_combine, 'DAT_febeb16c = DAT_febef1a0 * 0xf + (short)DAT_febef06f;')
     need(measured_condition, '((int)DAT_febeacc5 + DAT_febeadfe * 0xf) * 0x6fb) / 0x200;',
          'iVar13 = iVar12 * 2 - iVar1;')
@@ -317,8 +317,8 @@ def main() -> int:
                 'classification': 'target steering angle command',
             },
             'preprocessor': {'entry': '0x000CCF0E', 'operation': 'saturate(2 * signed16(B4:B5)) followed by interpolation/history'},
-            'clamp': {'entry': '0x000CCFB6', 'role': 'mode-dependent delta/absolute clamp of the preprocessed target-angle domain'},
-            'independent_plausibility_consumer': {'entry': '0x000CEE80', 'source': 'gp-0x970', 'role': 'target-angle magnitude/threshold plausibility path'},
+            'clamp': {'entry': '0x000CCFB2', 'role': 'mode-dependent delta/absolute clamp of the preprocessed target-angle domain'},
+            'independent_plausibility_consumer': {'entry': '0x000CEE7C', 'source': 'gp-0x970', 'role': 'target-angle magnitude/threshold plausibility path'},
             'measured_steering_angle_feedback': {
                 'can_id': '0x025', 'pdu_id': 35, 'buffer_offset': '0x127',
                 'coarse_signal': {'signal_id': 187, 'wire': 'B0..B1 signed12', 'raw': 'gp-0x37B8', 'techstream_did': '0x1037', 'techstream_name': steering_conv['name'], 'scale_deg_per_count': 1.5},

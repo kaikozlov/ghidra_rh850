@@ -101,6 +101,55 @@ def literal_call_args(rows: dict[int, dict], callee: int) -> list[int]:
     return sorted(vals)
 
 
+def refresh_census(path: Path, audit_output: Path) -> None:
+    """Regenerate one computed-store census from AuditComputedStoreTargets output."""
+    wrapped = audit_output.read_text()
+    try:
+        parsed = json.loads(wrapped)
+    except json.JSONDecodeError:
+        stdout = wrapped
+    else:
+        if not isinstance(parsed, list) or len(parsed) != 1 or "stdout" not in parsed[0]:
+            raise ValueError(f"unexpected Ghidra script output wrapper: {audit_output}")
+        stdout = str(parsed[0]["stdout"])
+
+    old = load_json(path)
+    rows: list[dict] = []
+    summary: dict[str, int] | None = None
+    candidate_functions: list[str] | None = None
+    for line in stdout.splitlines():
+        if line.startswith("CAND|"):
+            parts = line.split("|", 6)
+            if len(parts) != 7:
+                raise ValueError(f"malformed CAND row: {line}")
+            _, function, store, lo, hi, hits, expr = parts
+            def hx8(v: str) -> str:
+                return f"0x{int(v, 16):08X}"
+            rows.append({
+                "function": hx8(function),
+                "store": hx8(store),
+                "lo": hx8(lo.split("=", 1)[1]),
+                "hi": hx8(hi.split("=", 1)[1]),
+                "hits": [hx8(x) for x in hits.split("=", 1)[1].split(",") if x],
+                "pointer_expression": expr.split("=", 1)[1],
+            })
+        elif line.startswith("SUMMARY|"):
+            summary = {}
+            for item in line.split("|")[1:]:
+                k, v = item.split("=", 1)
+                summary[k] = int(v)
+        elif line.startswith("FUNCS|"):
+            raw = line.split("|", 1)[1]
+            candidate_functions = [f"0x{int(x, 16):08X}" for x in raw.split(",") if x]
+    need(summary is not None and candidate_functions is not None, f"audit summary missing: {audit_output}")
+    need(summary["candidates"] == len(rows), "audit candidate count/output mismatch")
+    need(summary["candidateFunctions"] == len(candidate_functions), "audit candidate-function count/output mismatch")
+    old["candidates"] = rows
+    old["candidate_functions"] = candidate_functions
+    old["summary"] = summary
+    path.write_text(json.dumps(old, indent=2, sort_keys=True) + "\n")
+
+
 def census_summary(c: dict, *, candidates: int, functions: int) -> None:
     need(c["schema"] == "camry-8965f3307000-computed-store-target-census-v1", "computed-store schema drift")
     need(c["target"] == {"software_id": "8965F3307000", "codeflash_sha256": IMAGE_SHA256}, "computed-store target drift")
@@ -109,9 +158,9 @@ def census_summary(c: dict, *, candidates: int, functions: int) -> None:
     need(c["summary"] == {
         "candidateFunctions": functions,
         "candidates": candidates,
-        "functions": 6065,
-        "knownRangeStores": 5011,
-        "stores": 13493,
+        "functions": 6062,
+        "knownRangeStores": 4701,
+        "stores": 13183,
     }, "computed-store census denominator drift")
 
 
@@ -119,7 +168,7 @@ def build() -> dict:
     image = IMAGE.read_bytes()
     need(len(image) == 0x100000 and sha(image) == IMAGE_SHA256, "exact F33 image drift")
     rows, total = load_function_corpus(CORPUS)
-    need(total == 6065, f"F33 corpus denominator drift: {total}")
+    need(total == 6062, f"F33 corpus denominator drift: {total}")
 
     e1 = load_json(E1)
     e2 = load_json(E2)
@@ -299,7 +348,14 @@ def build() -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, default=OUT)
+    ap.add_argument("--refresh-e1-output", type=Path)
+    ap.add_argument("--refresh-e2-output", type=Path)
     args = ap.parse_args()
+    if (args.refresh_e1_output is None) != (args.refresh_e2_output is None):
+        ap.error("--refresh-e1-output and --refresh-e2-output must be supplied together")
+    if args.refresh_e1_output is not None:
+        refresh_census(E1, args.refresh_e1_output)
+        refresh_census(E2, args.refresh_e2_output)
     result = build()
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")

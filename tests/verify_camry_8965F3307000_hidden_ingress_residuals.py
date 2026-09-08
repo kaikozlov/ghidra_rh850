@@ -35,10 +35,10 @@ e2 = json.loads(E2.read_text())
 check("schema and exact target pinned",
       art["schema"] == "camry-8965f3307000-hidden-ingress-residuals-v1"
       and art["target"]["software_id"] == "8965F3307000"
-      and art["target"]["corpus_function_count"] == 6065)
+      and art["target"]["corpus_function_count"] == 6062)
 check("E1 promoted target-native denominator pinned",
       art["e1_register_arithmetic_store_targets"]["census"] == {
-          "candidateFunctions":46,"candidates":100,"functions":6065,"knownRangeStores":5011,"stores":13493,
+          "candidateFunctions":46,"candidates":100,"functions":6062,"knownRangeStores":4701,"stores":13183,
       }
       and e1["summary"] == art["e1_register_arithmetic_store_targets"]["census"])
 check("E1 exact candidate-function denominator pinned",
@@ -68,7 +68,7 @@ em = art["e2_dmac_destination_reprogramming"]
 check("E2 destination-register geometry pinned",
       em["destination_registers"] == {"channel_base":"0xFFFF8400","channel_stride":64,"offsets":["0x04","0x14"],"channels":16})
 check("E2 target-native computed STORE denominator pinned",
-      em["computed_store_census"] == {"candidateFunctions":3,"candidates":5,"functions":6065,"knownRangeStores":5011,"stores":13493}
+      em["computed_store_census"] == {"candidateFunctions":3,"candidates":5,"functions":6062,"knownRangeStores":4701,"stores":13183}
       and e2["summary"] == em["computed_store_census"])
 check("E2 computed candidates are control-register false positives",
       em["computed_false_positive_functions"] == ["0x000607FE","0x0006080E","0x000609B0"]

@@ -9,8 +9,8 @@ REPO=Path(__file__).resolve().parents[1]
 OUT=REPO/'data/generated/camry_8965F3307000_lateral_decompiler_evidence.json'
 ENTRIES=[
   0x34C56,0x35A06,0x46994,0x47AE0,0x484D2,0x48684,0x4B59E,0x4BD46,0x4DB70,0x4DBBC,0x4E394,0x54244,0x564CE,0x58074,
-  0x66062,0x6639C,0x66512,0xBCD66,0xCDA20,0xCCF0E,0xCCFB6,0xCDFF8,0xCE3AA,
-  0xCEC8A,0xCED28,0xCEDA4,0xCEE20,0xCEE46,0xCEE80,0xCEF26,0xCEFFC,
+  0x66062,0x6639C,0x66512,0xBCD62,0xCDA20,0xCCF0E,0xCCFB2,0xCDFF8,0xCE3AA,
+  0xCEC8A,0xCED28,0xCEDA4,0xCEE20,0xCEE46,0xCEE7C,0xCEF26,0xCEFFC,
 ]
 IMAGE_SHA=IMAGE_SHA256
 
@@ -39,7 +39,7 @@ def main()->int:
   'fixed_gp_census':{
     'driver_torque_source':{'gp_offset':'-0x5158','resolved_address':'0xFEBE66A8','entries':torque,'read_entries':[x for x in torque if 'READ' in x['reference_types']],'write_entries':[x for x in torque if 'WRITE' in x['reference_types']],'cooperative_c8_d1_intersection':[x for x in torque if 0xC8000 <= int(x['entry'],16) < 0xD2000]},
     'q_current_source':{'gp_offset':'-0x50F2','resolved_address':'0xFEBE670E','entries':qcur,'read_entries':[x for x in qcur if 'READ' in x['reference_types']],'write_entries':[x for x in qcur if 'WRITE' in x['reference_types']],'cooperative_c8_d1_intersection':[x for x in qcur if 0xC8000 <= int(x['entry'],16) < 0xD2000]},
-    'boundary':'Whole 6,065-function canonical Ghidra data-reference census to exact GP-resolved RAM addresses. Computed aliases without a Ghidra data reference, value-set pointer recovery, DMA/peripheral mutation, and unrecovered code remain outside this negative proof.'
+    'boundary':'Whole 6,062-function canonical Ghidra data-reference census to exact GP-resolved RAM addresses. Computed aliases without a Ghidra data reference, value-set pointer recovery, DMA/peripheral mutation, and unrecovered code remain outside this negative proof.'
   },
  }
  a.out.parent.mkdir(parents=True,exist_ok=True); a.out.write_text(json.dumps(obj,indent=2,sort_keys=True)+'\n'); print(f'wrote {a.out}: {len(funcs)} functions, corpus={total}')

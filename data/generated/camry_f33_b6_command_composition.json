@@ -28,10 +28,10 @@
       "decompiled_c_sha256": "7132192e9a15a8135aad2e519714f96a91d8aa724405c22e5ff16bea5efae114",
       "role": "shared snapshot plus command-composition invocation"
     },
-    "0x0BCD66": {
-      "body_sha256": "75328c033aabe7ef4772993d82ddc14f9d6652dce200dc295f6b2dcf70e21778",
-      "body_size": 2744,
-      "decompiled_c_sha256": "1137470edc5e95e21173c2d7adee3185f2bc15af1ea56ab3442a15dbd58b6096",
+    "0x0BCD62": {
+      "body_sha256": "76d78c2605f902e96eb723f662d9fba543b1d1db85aedf62b9b3894b8c0220aa",
+      "body_size": 2748,
+      "decompiled_c_sha256": "19bf7567411c639b46708348553e5183d492431751af42f570855b4661508793",
       "role": "input snapshot plus B6 supervisor invocation"
     },
     "0x0BF33E": {
@@ -89,8 +89,8 @@
       "role": "B6 target-angle scale/continuity stage"
     },
     "0x0CCFB2": {
-      "body_sha256": "abed576e14cbea0d1fa82f7371efc7bc529debac18474c26348e65f1c0e7030a",
-      "body_size": 4,
+      "body_sha256": "1d89d80f813fba9da521a9984ce9b335200b66832f371b620a92053b4c100047",
+      "body_size": 128,
       "decompiled_c_sha256": "3bf2c461409a44ff97396056555fc3544c07221fce6b81859677ad6d2ad87c7f",
       "role": "B6 target-angle supervisor staging"
     },
@@ -250,6 +250,7 @@
     "accepted_id11_replaces_shared_command_funnel": false,
     "accepted_id11_selects_exclusive_b6_motor_path": false,
     "all_cb00_aware_functions_exhausted": true,
+    "all_cb00_aware_functions_partitioned_nonoverlapping": true,
     "all_shared_funnel_direct_writers_exhausted": true,
     "conclusion": "Accepted B6 Target Lateral ID11 is a co-modulating input to the ordinary EPS command composition, not an exclusive replacement path. ID11 selects bank2, its target-angle controller reaches CB38, and D0218 adds CB38 inside the ordinary assist sum before the single shared CC48->CC64/current funnel. The only special transient that can alter that sum requires ADB0==0x31, not ID11 0x0B. No CB00/ADB0-selected writer exists later in the final command funnel.",
     "later_id11_specific_final_command_override_recovered": false,
@@ -266,7 +267,7 @@
     "ADB0_direct_references": [
       {
         "from": "0x000bd67e",
-        "function": "0x0BCD66",
+        "function": "0x0BCD62",
         "type": "WRITE"
       },
       {
@@ -288,7 +289,7 @@
     "AE90_direct_references": [
       {
         "from": "0x000bd65c",
-        "function": "0x0BCD66",
+        "function": "0x0BCD62",
         "type": "WRITE"
       },
       {
@@ -313,12 +314,12 @@
       },
       {
         "from": "0x000cee94",
-        "function": "0x0CEE80",
+        "function": "0x0CEE7C",
         "type": "READ"
       }
     ],
     "CB00_address": "0xFEBECB00",
-    "CB00_decompiled_function_count": 50,
+    "CB00_decompiled_function_count": 49,
     "CB00_decompiled_functions": [
       "0x0C5164",
       "0x0C666C",
@@ -362,7 +363,6 @@
       "0x0CEDA4",
       "0x0CEE46",
       "0x0CEE7C",
-      "0x0CEE80",
       "0x0CEF26",
       "0x0CEFF4",
       "0x0CEFFC",
@@ -609,7 +609,7 @@
       },
       {
         "from": "0x000cee80",
-        "function": "0x0CEE80",
+        "function": "0x0CEE7C",
         "type": "READ"
       },
       {
@@ -648,7 +648,75 @@
         "type": "READ"
       }
     ],
-    "CB00_final_funnel_direct_references": {}
+    "CB00_final_funnel_direct_references": {},
+    "CB00_semantic_partition": {
+      "bank_selection": [
+        "0x0CEFF4",
+        "0x0CEFFC"
+      ],
+      "controller_calibration_supervision": [
+        "0x0CCCC6",
+        "0x0CCDC4",
+        "0x0CCECC",
+        "0x0CCFB2",
+        "0x0CD094",
+        "0x0CD128",
+        "0x0CD2A0",
+        "0x0CD426",
+        "0x0CD538",
+        "0x0CD590",
+        "0x0CD5EA",
+        "0x0CD662",
+        "0x0CD724",
+        "0x0CD84E",
+        "0x0CD932",
+        "0x0CDA20",
+        "0x0CDAE0",
+        "0x0CDB5C",
+        "0x0CDC48",
+        "0x0CDEBC",
+        "0x0CDFF8",
+        "0x0CE144",
+        "0x0CE384",
+        "0x0CE454",
+        "0x0CE4B8",
+        "0x0CE4DA",
+        "0x0CE51C",
+        "0x0CE6CC"
+      ],
+      "gain_output_shaping": [
+        "0x0CF0EA",
+        "0x0CF22C",
+        "0x0CF276"
+      ],
+      "mode_mirror_status": [
+        "0x0C5164",
+        "0x0C666C",
+        "0x0C6C82",
+        "0x0C7A18",
+        "0x0C7D14",
+        "0x0C7DD4",
+        "0x0C890E",
+        "0x0C9058",
+        "0x0CF4A8"
+      ],
+      "readiness_fault_supervision": [
+        "0x0CE836",
+        "0x0CECD6",
+        "0x0CED28",
+        "0x0CEDA4",
+        "0x0CEE46",
+        "0x0CEE7C",
+        "0x0CEF26"
+      ]
+    },
+    "CB00_semantic_partition_counts": {
+      "bank_selection": 2,
+      "controller_calibration_supervision": 28,
+      "gain_output_shaping": 3,
+      "mode_mirror_status": 9,
+      "readiness_fault_supervision": 7
+    }
   },
   "semantic_checks": {
     "b6_angle_enters_supervisor": true,
@@ -918,7 +986,7 @@
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 6065,
+    "corpus_function_count": 6062,
     "software_id": "8965F3307000"
   }
 }

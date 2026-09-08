@@ -28,6 +28,28 @@ ADB0 = 0xFEBEADB0  # B6 sig261 / Target Lateral ID snapshot
 AE90 = 0xFEBEAE90  # B6 sig262 / target steering angle snapshot
 CB00 = 0xFEBECB00  # decoded target-lateral mode bank
 CB38 = 0xFEBECB38  # B6 supervisor contribution into ordinary assist sum
+
+# Exhaustive, non-overlapping semantic partition of every function that reads or
+# writes the target-lateral controller-bank selector.  The sets are checked
+# against the complete corpus at runtime so a new CB00 consumer cannot silently
+# fall outside the analysis.
+CB00_PARTITION = {
+  "mode_mirror_status": {
+    0x0C5164, 0x0C666C, 0x0C6C82, 0x0C7A18, 0x0C7D14, 0x0C7DD4, 0x0C890E, 0x0C9058, 0x0CF4A8,
+  },
+  "controller_calibration_supervision": {
+    0x0CCCC6, 0x0CCDC4, 0x0CCECC, 0x0CCFB2, 0x0CD094, 0x0CD128, 0x0CD2A0, 0x0CD426,
+    0x0CD538, 0x0CD590, 0x0CD5EA, 0x0CD662, 0x0CD724, 0x0CD84E, 0x0CD932, 0x0CDA20,
+    0x0CDAE0, 0x0CDB5C, 0x0CDC48, 0x0CDEBC, 0x0CDFF8, 0x0CE144, 0x0CE384, 0x0CE454,
+    0x0CE4B8, 0x0CE4DA, 0x0CE51C, 0x0CE6CC,
+  },
+  "readiness_fault_supervision": {
+    0x0CE836, 0x0CECD6, 0x0CED28, 0x0CEDA4, 0x0CEE46, 0x0CEE7C, 0x0CEF26,
+  },
+  "bank_selection": {0x0CEFF4, 0x0CEFFC},
+  "gain_output_shaping": {0x0CF0EA, 0x0CF22C, 0x0CF276},
+}
+
 FINAL_CELLS = {
   "CC48": 0xFEBECC48,
   "CC4C": 0xFEBECC4C,
@@ -74,7 +96,7 @@ FUNCTIONS = {
   0x0BF33E: "command-model/current mirror",
   0x0D0EEC: "B6 supervisor cyclic coordinator",
   0x0D1130: "B6 supervisor coordinator wrapper",
-  0x0BCD66: "input snapshot plus B6 supervisor invocation",
+  0x0BCD62: "input snapshot plus B6 supervisor invocation",
   0x0D0AF6: "shared command-composition coordinator",
   0x0D1100: "shared command-composition wrapper",
   0x0BCD02: "shared snapshot plus command-composition invocation",
@@ -137,7 +159,7 @@ def analyze() -> dict[str, Any]:
   if image_sha != EXPECTED_SHA256:
     raise RuntimeError(f"exact F33 CodeFlash SHA mismatch: {image_sha}")
   corpus = load_corpus()
-  if len(corpus) != 6065:
+  if len(corpus) != 6062:
     raise RuntimeError(f"canonical corpus function count drift: {len(corpus)}")
   missing = set(FUNCTIONS) - set(corpus)
   if missing:
@@ -145,7 +167,7 @@ def analyze() -> dict[str, Any]:
 
   f = {entry: corpus[entry]["decompiled_c"] for entry in FUNCTIONS}
 
-  # Exhaustive selector census: every function in the complete 6065-function
+  # Exhaustive selector census: every function in the complete 6062-function
   # corpus containing CB00/ADB0, plus exact direct references.
   cb00_funcs = funcs_referencing(corpus, "DAT_febecb00")
   adb0_funcs = funcs_referencing(corpus, "DAT_febeadb0")
@@ -162,9 +184,22 @@ def analyze() -> dict[str, Any]:
     for name, refs in funnel_refs.items()
   }
 
-  # Check whether any of the 50 CB00-aware functions directly touches the
+  # Exhaustively classify all CB00-aware functions, then check whether any directly touches the
   # shared final command cells.  None should: CB00 terminates in the B6
   # supervisor, which contributes via CB38 before D0218.
+  partition_flat = set().union(*CB00_PARTITION.values())
+  partition_overlap = sum(len(v) for v in CB00_PARTITION.values()) - len(partition_flat)
+  if partition_overlap or partition_flat != set(cb00_funcs):
+    raise RuntimeError(
+      f"CB00 semantic partition drift: overlap={partition_overlap} "
+      f"missing={[hex(x) for x in sorted(set(cb00_funcs) - partition_flat)]} "
+      f"extra={[hex(x) for x in sorted(partition_flat - set(cb00_funcs))]}"
+    )
+  cb00_partition = {
+    name: [f"0x{x:06X}" for x in sorted(entries)]
+    for name, entries in CB00_PARTITION.items()
+  }
+
   cb00_final_refs: dict[str, list[str]] = {}
   for entry in cb00_funcs:
     rec = corpus[entry]
@@ -263,7 +298,7 @@ def analyze() -> dict[str, Any]:
     ),
     "b6_supervisor_and_shared_composition_have_distinct_wrappers": (
       "FUN_000d0eec();" in f[0xD1130]
-      and "FUN_000d1130();" in f[0xBCD66]
+      and "FUN_000d1130();" in f[0xBCD62]
       and "FUN_000d0af6();" in f[0xD1100]
       and "FUN_000d1100();" in f[0xBCD02]
     ),
@@ -298,6 +333,8 @@ def analyze() -> dict[str, Any]:
       "CB00_address": f"0x{CB00:08X}",
       "CB00_decompiled_function_count": len(cb00_funcs),
       "CB00_decompiled_functions": [f"0x{x:06X}" for x in cb00_funcs],
+      "CB00_semantic_partition": cb00_partition,
+      "CB00_semantic_partition_counts": {name: len(entries) for name, entries in cb00_partition.items()},
       "CB00_direct_references": cb00_refs,
       "ADB0_address": f"0x{ADB0:08X}",
       "ADB0_decompiled_functions": [f"0x{x:06X}" for x in adb0_funcs],
@@ -332,6 +369,7 @@ def analyze() -> dict[str, Any]:
       "ordinary_eps_terms_remain_in_id11_composition": True,
       "later_id11_specific_final_command_override_recovered": False,
       "all_cb00_aware_functions_exhausted": True,
+      "all_cb00_aware_functions_partitioned_nonoverlapping": True,
       "all_shared_funnel_direct_writers_exhausted": True,
       "conclusion": (
         "Accepted B6 Target Lateral ID11 is a co-modulating input to the ordinary EPS command composition, not an exclusive replacement path. "

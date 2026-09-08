@@ -329,12 +329,12 @@
   "shared_proxy_scale": {
     "boundary": "The returned DID value is a scaled/clamped proxy, not the raw D0218 term and not an OEM-named engineering unit.",
     "intermediate_clamp": "+/-0x569A",
-    "intermediate_scale_cell": "FEBEAE3C <- FEBEB140 via BCD66",
+    "intermediate_scale_cell": "FEBEAE3C <- FEBEB140 via BCD62",
     "rdbi_post_scale": "*100/0x80"
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 6065,
+    "corpus_function_count": 6062,
     "software_id": "8965F3307000"
   }
 }

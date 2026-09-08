@@ -16,7 +16,7 @@ STATIC = REPO / "data/generated/camry_8965F3307000_command_cone_ingress.json"
 CENSUS = REPO / "data/generated/camry_2026_cruise_lta_edge_census.json"
 RAW = REPO / "targets/camry-2026/raw-20260827"
 
-STATIC_SHA = "01858fab5510b6302de9a57fa27ce09b3228670bd06ba8af082f7833ff5c1034"
+STATIC_SHA = "440815cd8263676d012861cd526c2f053a821a358ec255336a0710074681e040"
 CENSUS_SHA = "355ea5b408442a541bd946d21c3e85b0fa4d9e924474d3223189cb37894ee9fc"
 DRIVE_SHA = {
     "drive_a": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5",

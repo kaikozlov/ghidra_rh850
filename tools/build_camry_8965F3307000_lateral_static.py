@@ -110,9 +110,9 @@ def build() -> dict:
     # Exact mode-2 command envelope and application-sequence behavior.
     require_tokens(functions, 0xCEFFC, "DAT_febeadb0 == '\\v'", "DAT_febecb00 = 2;")
     require_tokens(functions, 0xCEC8A, "DAT_febeadbc", "DAT_000b0620", "DAT_000b0622")
-    require_tokens(functions, 0xCEE80, "puVar11 + 0x12de", "puVar11 + 0x12ec")
+    require_tokens(functions, 0xCEE7C, "puVar12 + 0x12de", "puVar12 + 0x12ec")
     require_tokens(functions, 0xCCF0E, "* 2")
-    require_tokens(functions, 0xCCFB6, "DAT_febec8b4", "DAT_febec9fe", "DAT_febeca00")
+    require_tokens(functions, 0xCCFB2, "DAT_febec8b4", "DAT_febec9fe", "DAT_febeca00")
     for off in (0x12978, 0x1A978):
         need(u16(image, off) == 1745 and u16(image, off + 2) == 78, f"mode2 envelope calibration drift at 0x{off:X}")
     need(u16(image, 0xB061C) == 87, "target delta deadband drift")

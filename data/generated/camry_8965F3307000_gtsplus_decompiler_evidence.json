@@ -48,8 +48,8 @@
   "software_id": "8965F3307000",
   "source_corpus": {
     "boundary": "Tracked first-class exact-F33 Ghidra corpus; promoted function body and canonical data references remain independently image-bound.",
-    "function_count": 6065,
+    "function_count": 6062,
     "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "sha256": "f33efdbecac7d2d8ee8589ae8492d828451f5f1523aa43c72f672597c77fa8d1"
+    "sha256": "ba90d46f24b58951bdd975e9b0271f8e6756a34e7bec44041cd798c98b691586"
   }
 }

@@ -2458,3 +2458,21 @@ paths = [
   "docs/variants/camry-2026-live-baseline.md",
   "docs/variants/camry-2026-tss3-opendbc-port.md",
 ]
+
+[suite.camry_f33_b6_end_to_end]
+tests = ["tests/verify_camry_f33_b6_end_to_end.py"]
+oracle = "raw_bytes"
+paths = [
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/PRIORITIES.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md",
+]
+
+[suite.camry_8965f3307000_function_boundaries]
+tests = ["tests/verify_camry_8965F3307000_function_boundaries.py"]
+oracle = "raw_bytes"
+paths = [
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/CORRECTIONS.md",
+]

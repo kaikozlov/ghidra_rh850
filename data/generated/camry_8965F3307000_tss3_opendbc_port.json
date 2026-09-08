@@ -18,7 +18,7 @@
     "new_recovered_count": 9,
     "new_write_count": 2,
     "old_recovered_count": 5,
-    "reason": "The first-class 6,065-function project resolves GP and exposes a canonical Ghidra data-reference graph. It finds seven readers and two writers of FEBE66A8, including previously unrecovered 0x4C490/0x52CA0 and source writers, while preserving zero direct references inside the cooperative C8xxx-D1xxx control cone.",
+    "reason": "The first-class 6,062-function project resolves GP and exposes a canonical Ghidra data-reference graph. It finds seven readers and two writers of FEBE66A8, including previously unrecovered 0x4C490/0x52CA0 and source writers, while preserving zero direct references inside the cooperative C8xxx-D1xxx control cone.",
     "supersedes": "VAR-056/VAR-058 scratch-corpus direct/fixed-GP torque-source counts"
   },
   "gate2_development_integration": {
@@ -259,7 +259,7 @@
     },
     "decompiler_evidence": {
       "path": "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json",
-      "sha256": "cc589dbe1a13aabf6aae18befa72de9a392a45ca3c005c159c1bcab83a76b4b4"
+      "sha256": "988b7bb1a3526b3915e7759a157fac3b93cf328ac9e884cce8d9cf6ffafb81df"
     }
   },
   "status_carriers": {

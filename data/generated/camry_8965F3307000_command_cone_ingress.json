@@ -169,7 +169,7 @@
   },
   "boundary": [
     "statement-level closure: 0xBF97A holds WRITE refs into FEBEE400..418 whose stores the decompiler elides; 0xBF33E is the statement-verified block writer and BF97A's block refs are treated as a second (runtime/reset) writer with unchanged sourcing",
-    "FEBEACC0 (0xC2F26 integrator-enable input) is computed inside 0xBCD66 rather than copied; its exact inputs remain bounded",
+    "FEBEACC0 (0xC2F26 integrator-enable input) is computed inside 0xBCD62 rather than copied; its exact inputs remain bounded",
     "FEBEB3FC/FEBEB3FE/FEBEB400/FEBEB354 (command block bytes 406/407/416/418) come from 0xB7xxx/0xB8xxx internal qualification not traced byte-exhaustively here",
     "no live vehicle I/O was performed; live context is re-read from retained artifacts"
   ],
@@ -195,7 +195,7 @@
       "FEBE7C58"
     ],
     "range": [
-      "0xBCD66",
+      "0xBCD62",
       "0xCEFFC"
     ]
   },
@@ -478,7 +478,7 @@
       "unstaged_count": 18
     },
     "L3_qualification": {
-      "0xB34xx-B4Dxx": "per-signal qualification records into FEBEB1xx/FEBEB2xx/FEBEB4xx..B9xx (values+flags consumed by 0xBCD66/0xBCD62/0xBCBD8 snapshots, 0xBF3AA telemetry, 0xBE070 diagnostic status)",
+      "0xB34xx-B4Dxx": "per-signal qualification records into FEBEB1xx/FEBEB2xx/FEBEB4xx..B9xx (values+flags consumed by 0xBCD62/0xBCBD8 snapshots, 0xBF3AA telemetry, 0xBE070 diagnostic status)",
       "0xB93AA": "reads 14 stage cells (0x0AA wheel family 194-201, 0x13B, 0x116, 0x090, 0x0D7) and writes only status cell FEBEB49E",
       "0xB95xx-B9Dxx/0xBA0xx": "sig246 (0x0D7) statistics/records into FEBEB4A3/7xx/Bxx family; 0xD8 sigs 251-254 and 0x64F sig257 qualification records"
     },
@@ -523,7 +523,6 @@
         "0xBBD02",
         "0xBBD9C",
         "0xBCD62",
-        "0xBCD66",
         "0xBE326",
         "0xBE3C4",
         "0xBE43A",
@@ -540,7 +539,7 @@
         "0xBF0EC"
       ],
       "structural_claim": "no function above 0xBF0EC (no C/D-family cluster compute or composition function) reads stage cells directly; the C/D families consume the L4 snapshot bank instead",
-      "total": 52
+      "total": 51
     },
     "L4_snapshot_copiers": {
       "0xBC96A": {
@@ -557,9 +556,6 @@
       },
       "0xBCD62": {
         "exact_pairs": 245
-      },
-      "0xBCD66": {
-        "exact_pairs": 245
       }
     },
     "L4_unique_snapshot_destinations": 306,
@@ -572,7 +568,7 @@
     {
       "can_id": "0x090",
       "chains": [
-        "sig232t*0x931/0x10 (FEBEF1C8) + sig229t branch -> 0xBE846 -> FEBEBE96 -> snapshot FEBEAE0C (0xBCD66)",
+        "sig232t*0x931/0x10 (FEBEF1C8) + sig229t branch -> 0xBE846 -> FEBEBE96 -> snapshot FEBEAE0C (0xBCD62)",
         "0xC310E integrator: FEBEBF58 += FEBEAE0C - FEBEBFA0; FEBEBFA0 = FEBEBF58*0x400/ROM_0AF564, gated by FEBEBFB1",
         "sig235t*0x3E77/0x100 (FEBEF1CA) -> 0xBEFD6 -> FEBEBF00 -> snapshot FEBEAF00 -> 0xC310E integrator FEBEBF54/FEBEBF80",
         "sig233|sig228|sig231 -> 0xBE80E -> FEBEBE8C/FEBEBE8D; 0xBEF9C -> FEBEBF4C/FEBEBF4D",
@@ -581,7 +577,7 @@
       ],
       "classification": "observer/plausibility: 0x090-derived values are integrated and cross-checked but never reach FEBECC50/FEBECC62/FEBEE400..418 as magnitudes",
       "consumers": [
-        "0xBCD66",
+        "0xBCD62",
         "0xBE80E",
         "0xBE846",
         "0xBEF9C",
@@ -663,7 +659,7 @@
     {
       "can_id": "0x0D7",
       "chains": [
-        "sig246 u16 B1:B2 -> clamp(30000)*0x147B>>12 -> 0xBECF4 -> FEBEBEDE -> snapshot FEBEAE02 (0xBCD66)",
+        "sig246 u16 B1:B2 -> clamp(30000)*0x147B>>12 -> 0xBECF4 -> FEBEBEDE -> snapshot FEBEAE02 (0xBCD62)",
         "FEBEAE02 consumers: CB664 (B6 sig263 command-gate consumer), CB73A assist-activation speed threshold, CBD64, CD2A0, CD426, CD45C, CD590, CDE26, CDFF8 (sig270 percentage-contribution consumer), CE0AE, CE144, CE51C",
         "sig244 -> stage FEBEF095 -> qualification 0xB7728/0xBECD0 -> FEBEB37C 'Z' flag -> 0xBB7FA handler-branch select -> FEBEAF40",
         "FEBEAF40 -> snapshot FEBEAC4C (0xBCBD8) -> D042C -> FEBECC66/FEBECC68 -> FEBEAC76/FEBEAC7E -> FEBEE410/FEBEE414"
@@ -762,12 +758,12 @@
     {
       "can_id": "0x13B",
       "chains": [
-        "sig219 stages FEBEF04A/FEBEF04B/FEBEF0A2 -> 0xBCD66 snapshots; sig223 -> FEBEF091 -> snapshot (gate family)",
+        "sig219 stages FEBEF04A/FEBEF04B/FEBEF0A2 -> 0xBCD62 snapshots; sig223 -> FEBEF091 -> snapshot (gate family)",
         "0xB7728 reads FEBEF094 = B6 signal 243 (staged at 0x58074) and FEBEF093 = FEBE80A5 (raw cell with no extractor anywhere in the corpus, structurally 0): the 0x0D7 sig244 qualifier FEBEB37C is invalidated by B6 sig243 != 0"
       ],
       "classification": "gate family whose 0x0D7-qualifier branch is B6-sig243-gated; no magnitude path",
       "consumers": [
-        "0xBCD66",
+        "0xBCD62",
         "0xB93AA",
         "0xB7728"
       ],
@@ -804,7 +800,7 @@
   "schema": "camry-8965f3307000-command-cone-ingress-v3",
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 6065,
+    "corpus_function_count": 6062,
     "software_id": "8965F3307000"
   }
 }

@@ -1,0 +1,2949 @@
+{
+  "application_field_map": [
+    {
+      "raw": "FEBE80BC",
+      "role": "Target Lateral ID",
+      "signal": 261,
+      "snapshot": "FEBEADB0",
+      "stage": "FEBEF130",
+      "wire": "B3[5:0]"
+    },
+    {
+      "raw": "FEBE80B8",
+      "role": "target steering angle",
+      "signal": 262,
+      "snapshot": "FEBEAE90",
+      "stage": "FEBEF1FA",
+      "wire": "B4:B5 s16BE"
+    },
+    {
+      "raw": "FEBE80CB",
+      "role": "activation companion; zero required by CB664",
+      "signal": 263,
+      "snapshot": "FEBEADDD",
+      "stage": "FEBEF155",
+      "wire": "B6[7]"
+    },
+    {
+      "raw": "FEBE80BE",
+      "role": "snapshotted companion; no runtime reader recovered",
+      "signal": 264,
+      "snapshot": "FEBEADB1",
+      "stage": "FEBEF132",
+      "wire": "B6[6:4]"
+    },
+    {
+      "raw": "FEBE80C0",
+      "role": "additive-term suppression companion",
+      "signal": 265,
+      "snapshot": "FEBEADBB",
+      "stage": "FEBEF134",
+      "wire": "B6[2]"
+    },
+    {
+      "raw": "FEBE80C1",
+      "role": "companion state",
+      "signal": 266,
+      "snapshot": null,
+      "stage": "FEBEF135",
+      "wire": "B6[1:0]"
+    },
+    {
+      "raw": "FEBE80C2",
+      "role": "snapshotted companion; no runtime reader recovered",
+      "signal": 267,
+      "snapshot": "FEBEADC2",
+      "stage": "FEBEF136",
+      "wire": "B7[7:6]"
+    },
+    {
+      "raw": "FEBE80C3",
+      "role": "application modulo-64 sequence",
+      "signal": 268,
+      "snapshot": "FEBEADBC",
+      "stage": "FEBEF137",
+      "wire": "B7[5:0]"
+    },
+    {
+      "raw": "FEBE80C4",
+      "role": "cooperative supervisor percentage",
+      "signal": 269,
+      "snapshot": "FEBEADBD",
+      "stage": "FEBEF138",
+      "wire": "B8"
+    },
+    {
+      "raw": "FEBE80C5",
+      "role": "cooperative supervisor percentage",
+      "signal": 270,
+      "snapshot": "FEBEADBE",
+      "stage": "FEBEF139",
+      "wire": "B9"
+    },
+    {
+      "raw": "FEBE80C6",
+      "role": "snapshotted companion; no runtime reader recovered",
+      "signal": 271,
+      "snapshot": "FEBEADC1",
+      "stage": "FEBEF13A",
+      "wire": "B10[7]"
+    },
+    {
+      "raw": "FEBE80C7",
+      "role": "snapshotted companion; no runtime reader recovered",
+      "signal": 272,
+      "snapshot": "FEBEADE5",
+      "stage": "FEBEF13C",
+      "wire": "B10[5]"
+    },
+    {
+      "raw": "FEBE80CA",
+      "role": "health-qualified publication companion",
+      "signal": 273,
+      "snapshot": "FEBEADD9",
+      "stage": "FEBEF14D",
+      "wire": "B10[2:0]"
+    }
+  ],
+  "b6_freshness_slot": 1,
+  "exact_config": {
+    "canif_descriptor_hex": "b600004020000000",
+    "canif_descriptor_index": 39,
+    "canif_id": "0x400000B6",
+    "canif_length": 32,
+    "pdur_route": 44,
+    "pdur_route_base": 5,
+    "pdur_route_selector": 16,
+    "route44_flags": 12,
+    "route44_guard_ptr": "0x07D72C",
+    "route44_length": 32,
+    "route44_raw_window_offset": "0x1B7",
+    "route44_record_hex": "060000002000000c",
+    "rscfd_controller1_rule": 39,
+    "secoc_min_trailer_bytes": 4,
+    "secoc_profile": 2,
+    "secoc_queue_record": "0xFEBE547A",
+    "secoc_secured_buffer": "0xFEBE54D4",
+    "secoc_selector": 0
+  },
+  "execution_path": [
+    "RSCFD controller1 rule39 -> CanIf descriptor39 (0x400000B6/32 FD) -> PduR44",
+    "8EE7C -> 8F34A -> 8E9C6 -> profile2 queue FEBE547A / secured bytes FEBE54D4",
+    "8F746 -> 8F434 -> 903A0 freshness -> 8ECB2 -> 8F676 -> ICU-S command7/slot4 -> 8F906",
+    "stage5 forces all recovered freshness/ICU/result consequences to software success",
+    "8F546 -> 90204 -> 81CA6 -> 7D72C -> raw COM FEBE4BFF..4C1E + generation FEBE5364",
+    "4BD46 -> generated B6 scalars -> 58074 stage -> BCD62 snapshots",
+    "CEFA4 health + ACBD global state + CEFFC: ADB0=11 -> CB00=2",
+    "CBB66/CCF0E/CCFB2/CD128 + companion/sequence/readiness supervisors -> CF2B2 -> CB38",
+    "B330A/B338C -> B112 -> AC2B chooses whether D0218 includes CB38 at all",
+    "D0218 normal branch adds CB38 inside ordinary EPS sum -> shared CC48/CC60/CC50",
+    "B4B6C/B4EF4 -> B1F8 -> AC5A scales CC50 -> CC62",
+    "572E6 -> 8B28 -> FCC00/EEF90 -> BCAA6 -> AC29/AC2A hard-gates CC66",
+    "D05B4/D0528/D064C/D0674 -> CC98/CC94; D047C can replace CC66 -> CC64",
+    "D0AAE -> AC54 -> BF33E -> EE40C -> 35C4C motor-side selection -> 6AF4 -> 387BA -> 6E0A -> motor-current stages"
+  ],
+  "freshness_profile_records": [
+    {
+      "address": "0x02583C",
+      "freshness_id": 0,
+      "index": 0,
+      "ordinary_slot": null,
+      "sha256": "ebb216bf59750e0de7cb9bbd5fa56149814978f121de41c2abb263275a7cb405",
+      "special": 1
+    },
+    {
+      "address": "0x02588C",
+      "freshness_id": 1,
+      "index": 1,
+      "ordinary_slot": 0,
+      "sha256": "c7ebdfa27ca94e47be5ef381316c64e00ad3eac9482731a61aa6b7b1ef6c835a",
+      "special": 0
+    },
+    {
+      "address": "0x0258DC",
+      "freshness_id": 2,
+      "index": 2,
+      "ordinary_slot": 1,
+      "sha256": "e93e4c41486df4979e8af87b09b8f706432df65bc10076193fd5b7575720531d",
+      "special": 0
+    }
+  ],
+  "function_evidence": {
+    "0x035C4C": {
+      "body_sha256": "205df4739724fda0b8e0e8c09e44df61b42568bc5c92e9673462d3801db70b2a",
+      "body_size": 156,
+      "decompiled_c_sha256": "3e906dbcd17a61aaae80894070bec3d401728ef663463e967f5c30e7db338df5",
+      "role": "EE40C motor-side selection"
+    },
+    "0x038162": {
+      "body_sha256": "fe6b7eff71c8177b1441e1db3851e074a6c6536bfe54267c36ba4054407d8037",
+      "body_size": 504,
+      "decompiled_c_sha256": "f15fae519bc0235c162a2963228c0e7b6567018f76b7aa8c8545acd107af231c",
+      "role": "downstream motor-current processing"
+    },
+    "0x03835E": {
+      "body_sha256": "5b3e60f24a390be1019d3b7028211c3cdec2c69f45596d0e9e02b52672055f2e",
+      "body_size": 52,
+      "decompiled_c_sha256": "ac88022150252864e408f16260310d49058d068efcb6ba859dcfb46101261455",
+      "role": "motor-current bound stage"
+    },
+    "0x0384D8": {
+      "body_sha256": "91c5e85b853c58aec231c10bd3e185c3550c72ae2f3190632fa5f54d1d105696",
+      "body_size": 38,
+      "decompiled_c_sha256": "e04359f9266b1d47f6fa43190e60727d34e1c4ea3a9a55f881809063820b3423",
+      "role": "signed motor-current command stage"
+    },
+    "0x038502": {
+      "body_sha256": "41eb9c6e202e6d80cb9d353888696fb3a1a5ebff1323ed4fab2b3c7be3dc04cc",
+      "body_size": 124,
+      "decompiled_c_sha256": "d5cf9fd345075fd9ddf0f0f285c9a6144a36ad01b8538bf1205dccb82512dc6b",
+      "role": "motor-current command magnitude map"
+    },
+    "0x0387BA": {
+      "body_sha256": "3905e9a7baf70cab8a7217a0bc4393dc9337d792f3f58f73841492ad3b4c1f14",
+      "body_size": 16,
+      "decompiled_c_sha256": "0fdc170735f93ffc368da7c83be1dcc69774701636efbf8e3c83c468d4ecac31",
+      "role": "selected command to motor current model"
+    },
+    "0x04BD46": {
+      "body_sha256": "db4f6577d4a3250c7277730ee2f3c3e3fb71ffa83c6103ff1cd4c5b982f65b62",
+      "body_size": 390,
+      "decompiled_c_sha256": "6276e8aafdd85f37619cff2c474ffadf71e60dfada9a26a16b39ad04c7c08368",
+      "role": "generated-COM PDU44 application unpacker"
+    },
+    "0x0572E6": {
+      "body_sha256": "bf123243292fe77411ac6e24c10610435382ba3d1e215a9a5c2625c1798962f6",
+      "body_size": 148,
+      "decompiled_c_sha256": "bde8bee5eb094bcbcc8114871b55329dbe928b4d0c9b6ca7606949595922b867",
+      "role": "internal steering actuator-state aggregate producer"
+    },
+    "0x058074": {
+      "body_sha256": "0c4d0104e4c90a5679e8a9fc567485460ce8a0710d4cbb61518d5e6498880057",
+      "body_size": 1934,
+      "decompiled_c_sha256": "b3e729c48f7dcd290cc53ab4cec63dc8da88265b50056ec0589d2ab9d44d5807",
+      "role": "generated-COM stage copier"
+    },
+    "0x05899E": {
+      "body_sha256": "360298ede4783a29bd5efa86937ccc0199571d3283b2116bd2d2601489c636f4",
+      "body_size": 126,
+      "decompiled_c_sha256": "47fd5b4d9018dc19ab4170fc22e345a9f0c590c12a751510711a2b3cd32766d6",
+      "role": "shared command task coordinator"
+    },
+    "0x058B5E": {
+      "body_sha256": "0c6eb6b596dfffdc298158d0ae8928ae17ba244ba1716fcd7119b357170351d9",
+      "body_size": 294,
+      "decompiled_c_sha256": "d59eaefb795deaf43e04c8ca2ff7757d6ee6150ab7967020be1ca0f3ed00cd55",
+      "role": "generated-COM/application task coordinator"
+    },
+    "0x05DF5C": {
+      "body_sha256": "c496bf67475b688190f244ba164ea1535d676539ef21bb7bce020729b4c7546f",
+      "body_size": 676,
+      "decompiled_c_sha256": "eec4675aa33566e18a7f27569013f0bff0e51ae642b62c79e998593c3b80ee84",
+      "role": "motor-model scheduler aggregate"
+    },
+    "0x065FEA": {
+      "body_sha256": "8f9ddeeee60d272e09d956ba8c3cd1ddfd8040d55da5a6cce030408375b2fa03",
+      "body_size": 60,
+      "decompiled_c_sha256": "0f155fa512b11312975b36065cffed5a2409048474f05644fe711836d3dd0b6c",
+      "role": "shared command cyclic task root"
+    },
+    "0x066062": {
+      "body_sha256": "b08f13a1f1d02c86eb0f461268b1ffd0ee6196907e31201c4b045bf8990f83dc",
+      "body_size": 92,
+      "decompiled_c_sha256": "cd44d3f72399c607435cb5a8840bc2152c8f0b15c868da34a7133a6db2bd5200",
+      "role": "communications/application cyclic task root"
+    },
+    "0x06679E": {
+      "body_sha256": "2799dc80b6170e177b6728d658bf5d9d35bcfa4bafcbacc65056df2f26cca134",
+      "body_size": 24,
+      "decompiled_c_sha256": "d65e47f0ed4f5bd3f51c52105d8a29644ecf6500ba8af0d735ad1eadb9bcfc06",
+      "role": "shared command task wrapper"
+    },
+    "0x0667E6": {
+      "body_sha256": "96d89859e02738c11ddd556d055628f6e75a1e0b88c8f129e2dba902a34a5307",
+      "body_size": 32,
+      "decompiled_c_sha256": "4c93b2b1eac009afbe06ba81cfb0e025fc2ee98c2afb2be84867c13692ecf16c",
+      "role": "communications/application aggregate"
+    },
+    "0x07D800": {
+      "body_sha256": "2fabcd172911f9fb0fa807666c7c851537ee45975d43cd6fef343f9ccd0c25e8",
+      "body_size": 4,
+      "decompiled_c_sha256": "78656bf3701f15883586f8fc9ef7c75b233b7ffcb88ca8e9fc1b47e7071b8939",
+      "role": "route44 configured guard"
+    },
+    "0x081CA6": {
+      "body_sha256": "2b7c5736393c68204635d71cf7306a67685445f4451aeae9f29516e75cdbb4f5",
+      "body_size": 112,
+      "decompiled_c_sha256": "456b08d00ee23c39783b4d3cb169fefc641ec40b0edf1b623cc00b59ba76ae91",
+      "role": "PduR upper-route dispatcher"
+    },
+    "0x088FC0": {
+      "body_sha256": "885e8edb09d35f0cedea452efa003b4807344487e6394ba156b32491d6eaabd2",
+      "body_size": 172,
+      "decompiled_c_sha256": "4a0d826093c9281c9f61a5da50b7915e83e04d71559dbd094a0f5f44f24c02f1",
+      "role": "ICU-S operation descriptor builder"
+    },
+    "0x089646": {
+      "body_sha256": "4eec6679c98796dc7414b3706482e4fb6d89d6e503bab1f9a113f8a90879af7d",
+      "body_size": 148,
+      "decompiled_c_sha256": "73937ba34283d1b5966b3b3515eceff00cc857f08ac1e62122bb6068f5f76525",
+      "role": "ICU-S command dispatcher"
+    },
+    "0x089C98": {
+      "body_sha256": "139547a74d2b9affed13921621766da441817167bf42b4d78f0545b3eb9b7965",
+      "body_size": 98,
+      "decompiled_c_sha256": "f5e1f966a6f4772c99fe7dd5e82597c936e6f5ab38a3b0a1340ef007eeef32a4",
+      "role": "ICU-S synchronous operation wrapper"
+    },
+    "0x08E772": {
+      "body_sha256": "d216bc64825096ddf60a10f32c6110a939b1cab7ba066c1bf7891e58cbafd46f",
+      "body_size": 30,
+      "decompiled_c_sha256": "6c18ae579750c6955cd7151f3df30c598b4f3db8dcb9062f817552cb8626e1e2",
+      "role": "COM route generation/age update"
+    },
+    "0x08E9C6": {
+      "body_sha256": "6b400bd052e65702face2c4b5322f5015806d14f350e1a4789d9cadc98a56864",
+      "body_size": 218,
+      "decompiled_c_sha256": "8f1b7f81dc3d8bdf83d9b868a5aa7a8e37fd09a15bae905172ccdd154851f6e9",
+      "role": "SecOC level-1 queue insert/copy"
+    },
+    "0x08ECB2": {
+      "body_sha256": "d1e16041f8e55bec3173a949a783c8dfe9742447c88a3c737fd23e253c4064eb",
+      "body_size": 98,
+      "decompiled_c_sha256": "114a7cf4b6ad8380b17f528d12b215486587f759357c71259f7b261b2b63ee71",
+      "role": "SecOC authentication-input builder"
+    },
+    "0x08EE7C": {
+      "body_sha256": "3e113bff721b8ff9bd851cf58707757fd44b31943ad56b6265ba93e4cdfe6690",
+      "body_size": 62,
+      "decompiled_c_sha256": "3a45ab77ef32f118861141ba7e401a9c6e620e3234811e3b63fd2bdc9732e777",
+      "role": "SecOC secured-PDU ingress"
+    },
+    "0x08F19A": {
+      "body_sha256": "4493ed372daab2a3ebe3f1b3db0711dccba925a90a30c22f24f6f907a0822311",
+      "body_size": 54,
+      "decompiled_c_sha256": "21a551ef96105320b0d8f41c1354d047dbc211d7b11f2dc5cf2f694766b09871",
+      "role": "authenticated sync snapshot"
+    },
+    "0x08F34A": {
+      "body_sha256": "50c9e2538c46e5bdc9dbbae5e48cdfc248536b9ee3439765b240a81e1c38d0b4",
+      "body_size": 128,
+      "decompiled_c_sha256": "e36612358290af98f3d9dfae795686fd93d0787dd22dc3225b5910e8e12790bb",
+      "role": "SecOC receive-state/queue wrapper"
+    },
+    "0x08F434": {
+      "body_sha256": "23baff101c49428738e2bc8273c7a2fdda32598028fa5665fb8a90d060286bc4",
+      "body_size": 156,
+      "decompiled_c_sha256": "f0df4556e6a2add045ff62f3a4b1298e0cf66deb1d154c38cf42a15d2959c1bd",
+      "role": "FV4/MAC28 extractor"
+    },
+    "0x08F546": {
+      "body_sha256": "721f10f71fbf32b5dcada657c963d8034397217950d97088a0af54a6d6a84006",
+      "body_size": 80,
+      "decompiled_c_sha256": "59ad5cdf9e97f151594a2b0f3bd106d3acf8192b72d4f92e3c9929028d2fcc12",
+      "role": "verified upper-PDU delivery"
+    },
+    "0x08F676": {
+      "body_sha256": "ce3c560d619403915125698d1dc10f3a8c6c301eb6d8ba32ebb98f9d1bacf68f",
+      "body_size": 60,
+      "decompiled_c_sha256": "f9c51907efd6a219b7517ce52a24c8f587fe500377a06d91e53fd221f2db2c74",
+      "role": "ICU-S verify wrapper"
+    },
+    "0x08F746": {
+      "body_sha256": "4cb7b08ada0b7e058aed4e9f44083b931a920427548e6d29abeb4f523e4fd1b7",
+      "body_size": 396,
+      "decompiled_c_sha256": "93cb772b5edb0033fc06c733ff3d68ec4fa7403a602d6276fbec6b38e30013a9",
+      "role": "SecOC verification coordinator"
+    },
+    "0x08F8D2": {
+      "body_sha256": "758aab3b401cb94bcb88cd8e04de103fa37c85de872d2ee6b1652ab53a3ab636",
+      "body_size": 52,
+      "decompiled_c_sha256": "fd4afb0035cca7d2ec94236c5970fd159dbd82b18d973c91a3f85ccab690fc84",
+      "role": "post-crypto profile callback dispatcher"
+    },
+    "0x08F906": {
+      "body_sha256": "860fc368a14af6365d6ee17c3bbaa4723a157b9c6f4a14023f888c51b42d3be4",
+      "body_size": 134,
+      "decompiled_c_sha256": "69454108d244fe090fedce77eb5f83eb02aa3bcd922f0772952ed0d3dc4b23f0",
+      "role": "root result / Gate-2 coordinator"
+    },
+    "0x090204": {
+      "body_sha256": "6386fa98f892fa79d74a4eb150319cbd6572b1649adaa42880b848e32899ce8a",
+      "body_size": 14,
+      "decompiled_c_sha256": "c2c1167f63572db9800a150523157bc673e26210a29f2dc77392e1b797b8ab1a",
+      "role": "upper PduR indication shim"
+    },
+    "0x090248": {
+      "body_sha256": "45bf715e450ba5263edaf86b14822b07f5fe49a8bd318198f9a4dbd75ea2ac45",
+      "body_size": 104,
+      "decompiled_c_sha256": "46aec1c727e44f372b20e4c54723d3a434980eb6e5c66e1359a30c5f5d442d1d",
+      "role": "freshness slot resolver"
+    },
+    "0x0909CA": {
+      "body_sha256": "d1cb5ad7edcb0043ea74dae46a90015a6eadeb58199dff3c06cfa56c65252f7f",
+      "body_size": 126,
+      "decompiled_c_sha256": "c884df4bb8cabb41a22e40d3eab6b18ba7cace9cc4ba71afc263aa3d1b0865c6",
+      "role": "reset-counter candidate search"
+    },
+    "0x090A48": {
+      "body_sha256": "bf0be72eb4cef2e510cc57b6b1f1c089aa760cb8f14cb0c6aa1337c91ae8ddd3",
+      "body_size": 212,
+      "decompiled_c_sha256": "08b3d2f95473a65f7e1ca7ab842e1fa019b2aee70851a2f95972927d50c7a0e6",
+      "role": "message-counter/freshness reconstruction"
+    },
+    "0x090B1C": {
+      "body_sha256": "2204f55e2a6c3d524c76e245c298df39306401d179e92274c7bd5adec0c61fca",
+      "body_size": 110,
+      "decompiled_c_sha256": "50b5e1db07d9cda862e948fbb07206c5f21009cc447826e0479e39d746024bc8",
+      "role": "same-epoch freshness comparison"
+    },
+    "0x090B8A": {
+      "body_sha256": "cbf0a4dbcfd4ac88cfe0d54f2657f2874d1fbea48b872404743d3b86e99eccd4",
+      "body_size": 212,
+      "decompiled_c_sha256": "9ced5df0817bffb4b54a395a144222db40edc6a85b1b424db399c71d6e5b2c6d",
+      "role": "freshness candidate selector"
+    },
+    "0x090D6A": {
+      "body_sha256": "35f2d6793551e9624ea98bcad296eda11c060b891faf9e25ec34e6d8ff9a2906",
+      "body_size": 52,
+      "decompiled_c_sha256": "acedfac930d4f5d9b52bea19847347f3754874bddb3f4f2d2474f8e83def8796",
+      "role": "pending-to-committed freshness commit"
+    },
+    "0x0B330A": {
+      "body_sha256": "0616f518f2d8594271e86e6b631ec5fab47fdfe3da04c612e3039da862c67a60",
+      "body_size": 8,
+      "decompiled_c_sha256": "3a7be01a4e622b203d1f1410526ef2a2414724d820930e780b5e0f33c30ce66f",
+      "role": "diagnostic/service branch clear API"
+    },
+    "0x0B338C": {
+      "body_sha256": "ee0c05615ba42f59d658e590937b6ce94201a200a42a191f5e0964f017116e6e",
+      "body_size": 48,
+      "decompiled_c_sha256": "8d9cf5a2ff23529cbfdb11853524e33990ef0382c64f20884b505efe07c727a7",
+      "role": "diagnostic/service branch set API"
+    },
+    "0x0B4B6C": {
+      "body_sha256": "e6e3002b373546a633c97a259f34b9c7c027926f686ae75507f11b4ab1792419",
+      "body_size": 224,
+      "decompiled_c_sha256": "be3197ebd36b68a2ffea422ef84480ee4cbd8b6b4666c49f4695694d3d740a22",
+      "role": "common command output-scale ramp"
+    },
+    "0x0B4EF4": {
+      "body_sha256": "b20256b5c4e34da3169f00396359e8e974760b6411e29781a2860192458dabac",
+      "body_size": 94,
+      "decompiled_c_sha256": "0b5896c514fedb4abff5b6f2220be073542513cd79eee59627301331e8bbe0b4",
+      "role": "common command output-scale coordinator"
+    },
+    "0x0BCAA6": {
+      "body_sha256": "971f50c0bd3fc1a62def879d53093851a798307343cd4ad2118ead06f2975d20",
+      "body_size": 306,
+      "decompiled_c_sha256": "bf6e096cf30e51000eb9136574f7d837e336abb8cd1b718803a72227dabf2386",
+      "role": "common steering actuator-enable/inhibit decoder"
+    },
+    "0x0BCBD8": {
+      "body_sha256": "22b33f44a6db046970510e99d0930a0c744f6783850eac8c7ad362d12b6ac35a",
+      "body_size": 298,
+      "decompiled_c_sha256": "4165a85346733c02cfa15b159a2862747fd497c98f3a64a0bcb8a38e7330184f",
+      "role": "common command-state snapshot"
+    },
+    "0x0BCD02": {
+      "body_sha256": "420dc629af9b35e33f7bc62f62f4017eaec7bf5ea470ff5a2d41f7046ec51ccb",
+      "body_size": 20,
+      "decompiled_c_sha256": "7132192e9a15a8135aad2e519714f96a91d8aa724405c22e5ff16bea5efae114",
+      "role": "shared command snapshot/coordinator wrapper"
+    },
+    "0x0BCD62": {
+      "body_sha256": "76d78c2605f902e96eb723f662d9fba543b1d1db85aedf62b9b3894b8c0220aa",
+      "body_size": 2748,
+      "decompiled_c_sha256": "19bf7567411c639b46708348553e5183d492431751af42f570855b4661508793",
+      "role": "application snapshot + cooperative-controller wrapper"
+    },
+    "0x0BF33E": {
+      "body_sha256": "9b9630058698cbf7e528c55345a3c4b0f51a42549c89d1b21da8da7d6ed6dedd",
+      "body_size": 104,
+      "decompiled_c_sha256": "5439f5f6eaf6f9740389af3fe78e9b0b45cfc805580a1fc45524c22ff43dbeae",
+      "role": "command/current mirror"
+    },
+    "0x0C1F7A": {
+      "body_sha256": "fbfb8c51a516c55a44bcf76145bddf955775f8ff571f298cf7cbb6402c80b477",
+      "body_size": 134,
+      "decompiled_c_sha256": "5e7c99529b96d9989e20c62c4659b56ae3378f65bb82968791d64658cc473b25",
+      "role": "transition-mode command task"
+    },
+    "0x0C2000": {
+      "body_sha256": "63736037e7ac683ccf6bbf7d8fd393f74e9a88b94c0ae399547f61c66db51002",
+      "body_size": 68,
+      "decompiled_c_sha256": "a0a1bc36b72aa2bff3cfe42f8ed1b95faba0f44a2a7b6fb6e7a62fbab2dc0b06",
+      "role": "steady-mode command task"
+    },
+    "0x0CB2A2": {
+      "body_sha256": "47e9e6d34d89dbc5acf04e9d944a274745c7ece794ce514024cfd9a471460c26",
+      "body_size": 86,
+      "decompiled_c_sha256": "c3931e8c7d01853ff2f923b97c60935aedc4e007ad06994da4c9591d247350b0",
+      "role": "B6 route-health readiness flags"
+    },
+    "0x0CB664": {
+      "body_sha256": "4f271a0bbd5185f192a9e98ecd4199333dfa8caf3e9ecfb39b5c743b9d6cc388",
+      "body_size": 214,
+      "decompiled_c_sha256": "f2c61c423f6aa079da9ccf3f8d221a3ec86eb3a8301212dd015b3b069db6ca7b",
+      "role": "B6 companion/readiness activation gate"
+    },
+    "0x0CBB66": {
+      "body_sha256": "ea547c863e4e2ecd9f6001acb26f7eab3d109a91d820a734b3d14ff2da5a19a3",
+      "body_size": 282,
+      "decompiled_c_sha256": "16dd54b7c6aa14364d8627b01cfdb9be2901460ede2b561e998757fc61b7655f",
+      "role": "B6 target-angle conditioning"
+    },
+    "0x0CCDF8": {
+      "body_sha256": "45cf097f8be599c362fee1a0ce99620765de7d7f881c8fb5569d7271e05a7468",
+      "body_size": 188,
+      "decompiled_c_sha256": "d4310e412f1d436b394bd7c36a3b5880cd043d30b11faf782f195ecb7bd399f6",
+      "role": "cooperative supervisor output conditioning"
+    },
+    "0x0CCF0E": {
+      "body_sha256": "f5a250c7631463c3446661d0084dc80810d9c6ca49609fd334175507f1707cd9",
+      "body_size": 164,
+      "decompiled_c_sha256": "3353830a99610a156f2add53f9778f0411c1435b00f7d02c1b0c0dd7f36cb2f2",
+      "role": "B6 target-angle scale/continuity"
+    },
+    "0x0CCFB2": {
+      "body_sha256": "1d89d80f813fba9da521a9984ce9b335200b66832f371b620a92053b4c100047",
+      "body_size": 128,
+      "decompiled_c_sha256": "3bf2c461409a44ff97396056555fc3544c07221fce6b81859677ad6d2ad87c7f",
+      "role": "B6 target-angle per-step limiter"
+    },
+    "0x0CD128": {
+      "body_sha256": "4ea271ee3c13dee80ee2712b8a82fb23c5c3ef1d3b5fb2e58c3d088e0e2a2671",
+      "body_size": 376,
+      "decompiled_c_sha256": "952052f74ea04eb413dc79cea183b4a8e58a1f8730eedd9fa523d548cb3df2df",
+      "role": "target-minus-measured controller"
+    },
+    "0x0CDA20": {
+      "body_sha256": "5544519f0d68f69e32f1aa6e1a0ce56a487cf29aa8288239746b79ff9418f5be",
+      "body_size": 192,
+      "decompiled_c_sha256": "924c1f7d902e3e63d5562ca90debe9b9bf6b7abce8d482a98877a8c627ea1243",
+      "role": "B6 sig265-controlled supervisor term"
+    },
+    "0x0CDFF8": {
+      "body_sha256": "c98e0bccbb22324f1f4d55db3666683ad4b8167f689fa9d7d1e27e92d8a47d25",
+      "body_size": 182,
+      "decompiled_c_sha256": "73c4ac8c1d1187ad2a582c30bf5776b25367ac7c4819e4fa2e6be98208eaa146",
+      "role": "B6 sig270-weighted supervisor"
+    },
+    "0x0CE144": {
+      "body_sha256": "e8e705ee619f6ba492e9c5f59847dacb914977cf7983c3f7edbcf05e343444e7",
+      "body_size": 298,
+      "decompiled_c_sha256": "a9232a30f639fadbdbf17efae31b44c33ed13a2465a1575e11dbea00fb52e153",
+      "role": "bank-selected cooperative supervisor"
+    },
+    "0x0CE3AA": {
+      "body_sha256": "79982dca675d0187026a4e6ee2ddb3cbba818c98981d1edb6a1d218ecfe0e676",
+      "body_size": 170,
+      "decompiled_c_sha256": "9761eaf338d450c65b4da3c2977e12792f25ddd640e6c2ea2f55c9a386adc3f3",
+      "role": "B6 sig269-weighted supervisor"
+    },
+    "0x0CE51C": {
+      "body_sha256": "0e8a4638af7a265c554d0ed8530de554fe4d38abe5613c9ce924cd2457a64463",
+      "body_size": 120,
+      "decompiled_c_sha256": "89aea7b6a237f7b44e972696d40fa13de746ad848e26fa39b6e7db46a1d6548d",
+      "role": "cooperative supervisor limit selection"
+    },
+    "0x0CE594": {
+      "body_sha256": "3f65c2dfea68424ed95624e3797e8a0c478def774a781e6bcbe9a14ba2fcfc4e",
+      "body_size": 312,
+      "decompiled_c_sha256": "d123e3197850497f1f65f1967da804f42d651aa9ab2f114adf997efe26f82945",
+      "role": "cooperative supervisor shaping"
+    },
+    "0x0CE6F4": {
+      "body_sha256": "48271f642ac3b97a6c69295487439a0fb7addb7f1ee8f3666e3eef03aa8a4748",
+      "body_size": 92,
+      "decompiled_c_sha256": "e443a62f1dbe022903479f3dece020de0a46dcdac3a53e2da04bc5393ab52375",
+      "role": "cooperative supervisor consolidation"
+    },
+    "0x0CE772": {
+      "body_sha256": "d3cdbb8206cae1180c9cc820d78961ec53ea626983ffd83c207c98f69ccbdc1d",
+      "body_size": 52,
+      "decompiled_c_sha256": "887705b7182d561de671c1265d8fa39aa150205f6975a01332b94b97162750f5",
+      "role": "cooperative readiness permissive helper"
+    },
+    "0x0CE7A6": {
+      "body_sha256": "8c8dda296e9d91a2e5a60393df54e1f05e37e1647684d290318af90772e359d7",
+      "body_size": 88,
+      "decompiled_c_sha256": "3cfe2b2b19c62d81ff57c383a7cde99d59febc5841f8d3ce3e699e9f5a9db81e",
+      "role": "cooperative readiness inhibit helper"
+    },
+    "0x0CE7FE": {
+      "body_sha256": "65c2dd052a03003e44355e3c92b61bd850bcf52ab5561abc88de608dc5e648c0",
+      "body_size": 56,
+      "decompiled_c_sha256": "7c36d609a5404797da80bb82189e62d02b1832121ce969a17b906271420ffbc2",
+      "role": "cooperative readiness state"
+    },
+    "0x0CE836": {
+      "body_sha256": "344dd77c2dee1b130540b35adedcbb9512b587c6e0f7f0d0782a0b1e9f12bf41",
+      "body_size": 148,
+      "decompiled_c_sha256": "26c010e32ac6933820b3b69946b71e4b5ac98a0a0b66ed82672897bd5e7b866c",
+      "role": "cooperative activation/ramp state"
+    },
+    "0x0CEC8A": {
+      "body_sha256": "49d4f14976a242d282134f651b9c964617806e46150deaeaf8cec94c27938163",
+      "body_size": 76,
+      "decompiled_c_sha256": "0d014f0744a3b09b7c0111bb62283e9969bf36c58e2a71a6fa1342dc18aacbd9",
+      "role": "B6 application sequence delta"
+    },
+    "0x0CECD6": {
+      "body_sha256": "2aed8a7ce1ca39769c97c1b473bff1e02176889c637212fb17dff78ad2b4dd43",
+      "body_size": 82,
+      "decompiled_c_sha256": "98cfd7198e708788e086563fc9945c9a8de3671c0aa057dfe3fc85e2cf208406",
+      "role": "sequence-dependent persistence state"
+    },
+    "0x0CEE20": {
+      "body_sha256": "4189bb45f70adcf3eab8c0da0cb3526e226818fde134156bc84949ab00f46873",
+      "body_size": 38,
+      "decompiled_c_sha256": "06f6fd50e77a39bed681fe97b143695a7339242dc12ddd003a6a52db6ec36fee",
+      "role": "cooperative threshold dwell aggregate"
+    },
+    "0x0CEE7C": {
+      "body_sha256": "6daac14656be82660ae0a31d48004351866f760162b7f5b1b1af77c22ee340ce",
+      "body_size": 146,
+      "decompiled_c_sha256": "e4d6595b804b0d02fe7ffb45808618bf4635d09eac166c1265b9e2020108c193",
+      "role": "cooperative target-angle inhibit synthesis"
+    },
+    "0x0CEF26": {
+      "body_sha256": "2e0335c9f729c98cbfcce664ee8ac94ea94f8d0c654763b96d572dc9e3082b8f",
+      "body_size": 126,
+      "decompiled_c_sha256": "5eff30b62bd6aff2be7d6298f788fccc3575799002b8c0de23534b901788f594",
+      "role": "cooperative persistence/fault supervisor"
+    },
+    "0x0CEFA4": {
+      "body_sha256": "685ba14acb09eef538bdee93aff263b5945e80ed70df7be0bd712b9e348eaed2",
+      "body_size": 68,
+      "decompiled_c_sha256": "c267a73afc30ad26badbdda24d56cb5ae6b70cc20b63cfb276d7837cae643d46",
+      "role": "B6 profile health synthesis"
+    },
+    "0x0CEFFC": {
+      "body_sha256": "551e4f9d934fa59020839ad2bb9d0019f744cebe580558f3ef5c129b0821f5da",
+      "body_size": 78,
+      "decompiled_c_sha256": "c35a062da1e28ebb5b328de01be83a277a88752390c383e311093881e5a6f5df",
+      "role": "Target Lateral ID to cooperative bank"
+    },
+    "0x0CF0B6": {
+      "body_sha256": "2ab99fe2bb17a21fe93bf8b598061bcd35434a334c5ff4a186aa1b835d74d2c7",
+      "body_size": 52,
+      "decompiled_c_sha256": "7509fd187b8bf5a76a143e82d4e20e7831aad39a9919f9ea1df60e4b816e38f3",
+      "role": "cooperative gain-state selector"
+    },
+    "0x0CF0EA": {
+      "body_sha256": "7877ddc6853710214edd1fd93e12f51a08dbde900dc541acc286e0bad96916db",
+      "body_size": 94,
+      "decompiled_c_sha256": "9c04a4d5cdbda0a632f9b84bc90dbc745a62536d0c0eedc948e7c84f15533cbe",
+      "role": "cooperative gain-rate calibration load"
+    },
+    "0x0CF148": {
+      "body_sha256": "69362bbbc374f98398617a91545b147e4b9a0353a40be0205c4a1dff7d7ad197",
+      "body_size": 228,
+      "decompiled_c_sha256": "0be3dbfa40ff6aa704a71536f4e5b6972a23795413d7475bd3c89756342073e8",
+      "role": "cooperative gain ramp CB20"
+    },
+    "0x0CF22C": {
+      "body_sha256": "a500cacf1aa86c88f8130c5a83cd2afc7a4b23db0ff323c9fa68bca923055aab",
+      "body_size": 74,
+      "decompiled_c_sha256": "562ff7989afad1d4d53ed6a1a1be14beb1596f1f571ae21c5f74191cb3cc910f",
+      "role": "cooperative controller output select CB08"
+    },
+    "0x0CF276": {
+      "body_sha256": "83ee6b6b22ff968c01a943492629725f5952214a305f58b5fe3846424f165060",
+      "body_size": 60,
+      "decompiled_c_sha256": "b505b764a2d728140f9d67f6f6ee2482eb8172d914bc00573beece0a6a6912d0",
+      "role": "cooperative output slew/magnitude limits"
+    },
+    "0x0CF2B2": {
+      "body_sha256": "ac1e88a5f7a5620c751302d7b76d9cb7d2f14246cf49349ee429acb33559493b",
+      "body_size": 138,
+      "decompiled_c_sha256": "060a6c27b44d55ecfe834e820b1f76c0bf60c5393aa20b4f6ae10db896f977a6",
+      "role": "final cooperative contribution CB38"
+    },
+    "0x0CFDA0": {
+      "body_sha256": "2d5e966e707fef202903503c886141ff941709accacf879c09f8186f7650a328",
+      "body_size": 52,
+      "decompiled_c_sha256": "5e10b8020e3e40cbb52a60648fb1de3999b457c0c84571724284ab114bc72f90",
+      "role": "B6 sig273 health-qualified publication"
+    },
+    "0x0D0218": {
+      "body_sha256": "a509a296f50e426acede52ea4730ae44322e4d9fe309e8c93c553a5c674307b1",
+      "body_size": 108,
+      "decompiled_c_sha256": "86a83e81391d2644bc90639a1ef1bc3cb68e03daae0a0b7843fa36f25af038dd",
+      "role": "ordinary EPS command sum"
+    },
+    "0x0D0284": {
+      "body_sha256": "b4eadcf0a0f2d412955c6ed2776087bccac004c30a96401894801ba943676f71",
+      "body_size": 86,
+      "decompiled_c_sha256": "f578b2443a65f2072829c3b118eb17aea3996e6f2d30d8f1b7081b72279fd6ef",
+      "role": "shared command scale/clamp"
+    },
+    "0x0D02DA": {
+      "body_sha256": "edb65881363e0b33f0a565d075c487c6cf94f785e0a9590e8743eff834eee238",
+      "body_size": 168,
+      "decompiled_c_sha256": "36c913717aa8c7917cd9769b010d77455cfc44d706159504e0b322ff0a701d6d",
+      "role": "shared command filter/slew"
+    },
+    "0x0D0382": {
+      "body_sha256": "96837ab292b7bf15c16a7467e3f0aae870d4d426087f7ce701f1e1ae0ae7dbfe",
+      "body_size": 28,
+      "decompiled_c_sha256": "4c9ef2be0d0fc7633937345b501be1cd2463681b268843ebe2eb675ea93c7302",
+      "role": "shared command saturation"
+    },
+    "0x0D039E": {
+      "body_sha256": "993f8f98ca99f2370ae504726245106eda7443287bea6834ba32b757da35539e",
+      "body_size": 142,
+      "decompiled_c_sha256": "38a0d4bcdca3fbc457399078d19668350a80c2ce1ac84500b5c86d55d36129f4",
+      "role": "shared command + local damping composition"
+    },
+    "0x0D042C": {
+      "body_sha256": "5cec1b3bd6f5bbbce2832ae7ff417f75db1e11f053d568c143f8a48ee13539e5",
+      "body_size": 80,
+      "decompiled_c_sha256": "6b7e4905113f7ac8dc2d2b95f304ab4b33ea743d3ffa3196c7f3013184689a1e",
+      "role": "shared output scaling + common actuator gate"
+    },
+    "0x0D047C": {
+      "body_sha256": "b7995271dcae87283b114788eb9719f086ea7ef78fde1e73ed9fa7336cec3e4c",
+      "body_size": 48,
+      "decompiled_c_sha256": "d327428e65c672f725dbb19125837d7d3346fa997c994d3bb7e15d23c3d7e7ba",
+      "role": "internal post-gate override"
+    },
+    "0x0D04F0": {
+      "body_sha256": "66c5d3774e93ea762c7f16544ca7dd8901473a35c13159f996d69d2e8e2a057f",
+      "body_size": 56,
+      "decompiled_c_sha256": "a54c1319d08ce159d0ba8bbabdc5485d1d3b8c86613ab16055eeaac4560cd44d",
+      "role": "internal override state initialization"
+    },
+    "0x0D0528": {
+      "body_sha256": "d8f7a4ec12e908abaff3e0e9fb747a53cf772142dce8e38a33f5108766b86954",
+      "body_size": 140,
+      "decompiled_c_sha256": "09788ef0313f71d793260c0b13e5c59254f315e0b03a82d2ab7aeb163e589f13",
+      "role": "internal override trigger"
+    },
+    "0x0D05B4": {
+      "body_sha256": "cdd7c7c6a94461b1b04b880018c912a48feaafa2edd1bbd27d36f510ba5f65d9",
+      "body_size": 152,
+      "decompiled_c_sha256": "32bac49366c506eca566a661de691c14b7c4db8f7b2f8b710703e9b3c2c7313d",
+      "role": "internal override monitor"
+    },
+    "0x0D064C": {
+      "body_sha256": "ef8152a5716ee1d9ff78b4449a1deb6963602c148d3aeec1ea4bb98925d6f764",
+      "body_size": 40,
+      "decompiled_c_sha256": "671d5357f2f470538c167c5fff52737fa5f27a8b32be64d28e424ab84ae3aff9",
+      "role": "internal override debounce"
+    },
+    "0x0D0674": {
+      "body_sha256": "ec9bcdb10dfd708d8e342efbd4d71e55675463d7147d0b0122a00d7b4b4fc5fc",
+      "body_size": 98,
+      "decompiled_c_sha256": "47996810a46389fc63b0c3944a691fbe3bb375d8bbfe9069834c115db11c603e",
+      "role": "internal override output construction"
+    },
+    "0x0D06D6": {
+      "body_sha256": "34f08369e95c0db8e107f1ad001b485d08fcaa5c96d084f7537a9f751064aa73",
+      "body_size": 20,
+      "decompiled_c_sha256": "b9b1829769ea6f32b4f67a154d84c2cb1eaa6d1b13aba3ce5ce6370c82c1c545",
+      "role": "internal override aggregate"
+    },
+    "0x0D0AAE": {
+      "body_sha256": "0eda7671aa6175f44503e1b9e6c42e1fb1c255fa4e4c0391269eefe40b61e01a",
+      "body_size": 72,
+      "decompiled_c_sha256": "51d93da1f70ed9e57c8ba1220658f8903420cd64dfda2ebb2a7e01c60335b597",
+      "role": "shared command snapshot"
+    },
+    "0x0D0AF6": {
+      "body_sha256": "2eda8a4e734a3cd248c83c9cd41f906e0191ee48afa5ba72a73640da00823fc9",
+      "body_size": 228,
+      "decompiled_c_sha256": "68fb362fae94cf8a89c3e602ca0a77b0da17dd40794402abfbbbf3b7263eb414",
+      "role": "shared command aggregate"
+    },
+    "0x0D0EEC": {
+      "body_sha256": "e58077923617544434467a6d0279d5037aa2cf1398960ef0fe62126f37e23231",
+      "body_size": 488,
+      "decompiled_c_sha256": "398bde3d9db0aad7c48424f2e21338cdbb2646fd6254c3d58f27809757c96e85",
+      "role": "cooperative-controller aggregate"
+    },
+    "0x0D1100": {
+      "body_sha256": "c73c370a83bd7615ef8132cd415ed3bdc754e2c2b80da9a86027dacfe4d4476d",
+      "body_size": 12,
+      "decompiled_c_sha256": "0016b809d7b5893fa70a03adf9d669076c377306ef0a887c412c285f6b3092d5",
+      "role": "shared command wrapper"
+    },
+    "0x0D1130": {
+      "body_sha256": "8eae5b4c5639b3c38aba7e7b0b7aa1fd432462c4c0e09990261c9ae8bfe460f8",
+      "body_size": 12,
+      "decompiled_c_sha256": "526319c6c40e4f6754d30f928f71997026d0dd1d27181556932efeb2b589fe5d",
+      "role": "cooperative-controller wrapper"
+    },
+    "0x0FCC00": {
+      "body_sha256": "aa16c246aab1e45e5ab0c548e641efbd18e508de7ebf6811c181acac7f4382e9",
+      "body_size": 78,
+      "decompiled_c_sha256": "a463ef04dd237b4e2fa451bc9cf6333bdedb318978d2bd19354bc4c917a0b11f",
+      "role": "internal system-state snapshot to EEF90"
+    }
+  },
+  "gate_matrix": [
+    {
+      "condition": "0x0B6 is physically decoded as the configured 32-byte FD PDU and descriptor/rule match",
+      "failure_effect": "no PduR44/SecOC ingress",
+      "layer": "physical CAN / CanIf",
+      "live_witness": "ECU-side SecOC queue; Panda TX echo alone is insufficient",
+      "order": 1,
+      "site": "RSCFD controller1 rule39 / CanIf descriptor39",
+      "stage5_bypasses": false
+    },
+    {
+      "condition": "SecOC initialized; PduInfo/data/length valid; queue/link geometry accepts and copies the frame",
+      "failure_effect": "profile2 queue/secured bytes do not change",
+      "layer": "SecOC ingress/queue",
+      "live_witness": "FEBE547A + FEBE54D4",
+      "order": 2,
+      "site": "8EE7C -> 8F34A -> 8E9C6",
+      "stage5_bypasses": false
+    },
+    {
+      "condition": "stock: FV4 reconstructs an acceptable profile2 slot1 candidate",
+      "failure_effect": "stock hard-fail/retry; cumulative stage4/5 neutralizes the recovered callback/result failure",
+      "layer": "freshness transaction",
+      "live_witness": "FEBE55E8 committed / FEBE5600 pending + result/budget",
+      "order": 3,
+      "site": "8F746/903A0/90248/909CA/90A48",
+      "stage5_bypasses": true
+    },
+    {
+      "condition": "stock: command submission/completion and CMAC result succeed",
+      "failure_effect": "stock rejects; cumulative stage1/2/3/5 neutralizes every recovered software-visible auth-result consequence",
+      "layer": "ICU-S authentication result",
+      "live_witness": "FEBE5564 + ICU command completion state",
+      "order": 4,
+      "site": "8F676/89C98/89646/891CC/88FC0 -> ICU-S -> 8F906",
+      "stage5_bypasses": true
+    },
+    {
+      "condition": "delivery callback executes; route44 copy/guard/new-data bookkeeping succeeds",
+      "failure_effect": "raw route44 application window/generation remains stale",
+      "layer": "upper PduR/COM publication",
+      "live_witness": "FEBE4BFF..FEBE4C1E + FEBE5364",
+      "order": 5,
+      "site": "8F546 -> 90204 -> 81CA6 -> 7D72C/7D800 -> 8E772",
+      "stage5_bypasses": false
+    },
+    {
+      "condition": "FEBE7F68 < 2 and route generation FEBE5364 != local FEBE80C8",
+      "failure_effect": "all B6 generated scalars remain stale even if raw COM changed",
+      "layer": "generated COM unpack",
+      "live_witness": "FEBE7F68/FEBE5364/FEBE80C8 + FEBE80BC/80B8/...",
+      "order": 6,
+      "site": "4BD46",
+      "stage5_bypasses": false
+    },
+    {
+      "condition": "normal cyclic task staging/snapshot runs",
+      "failure_effect": "controller sees stale ADB0/AE90/companions despite updated generated COM",
+      "layer": "generated stage / task snapshot",
+      "live_witness": "F130/F1FA/F155/F134/F137/F138/F139/F13E -> ADB0/AE90/ADDD/ADBB/ADBC/ADBD/ADBE/ADB9",
+      "order": 7,
+      "site": "58074 -> BCD62",
+      "stage5_bypasses": false
+    },
+    {
+      "condition": "ACBD=0, route-family health good, ADB9=0 => CAFF=1, and Target Lateral ID ADB0=11",
+      "failure_effect": "CB00 remains default7 instead of B6 LTA/LCA bank2",
+      "layer": "B6 route health + bank admission",
+      "live_witness": "ACBD/ADB9/CAFF/ADB0/CB00",
+      "order": 8,
+      "site": "CEFA4 -> CEFFC",
+      "stage5_bypasses": false
+    },
+    {
+      "condition": "sig263=0 for activation; sig265=0 permits its term; application sequence is sane; sig269/270 percentages and local readiness/inhibits permit contribution",
+      "failure_effect": "controller can remain unready, suppress a term, attenuate contribution, or ramp down without any SecOC failure",
+      "layer": "B6 application companions/readiness",
+      "live_witness": "ADDD/ADBB/ADBC/ADBD/ADBE + readiness state CAB*/CA*",
+      "order": 9,
+      "site": "CB2A2/CB664/CDA20/CEC8A/CE3AA/CDFF8/CE7FE/CE836/...",
+      "stage5_bypasses": false
+    },
+    {
+      "condition": "target passes profile target/rate/magnitude and supervisor bounds",
+      "failure_effect": "internal cooperative controller result is clipped/held/attenuated",
+      "layer": "target-angle controller",
+      "live_witness": "AE90 + C8B8/C8E0/controller intermediates",
+      "order": 10,
+      "site": "CBB66/CCF0E/CCFB2/CD128/CDFF8/CE144/CE594",
+      "stage5_bypasses": false
+    },
+    {
+      "condition": "activation state produces nonzero CB20 and bank-specific output limits admit a command",
+      "failure_effect": "CB38 remains zero, ramps, or is bounded despite admitted ID11",
+      "layer": "cooperative gain/output",
+      "live_witness": "CB20/CB08/CB2C/CB2E/CB38",
+      "order": 11,
+      "site": "CF0B6/CF0EA/CF148/CF22C/CF276/CF2B2",
+      "stage5_bypasses": false
+    },
+    {
+      "condition": "AC2B != 0x5A for the normal branch containing CB38",
+      "failure_effect": "AC2B==0x5A selects reduced C4C0+C3BA+BF3C branch and omits CB38 entirely",
+      "layer": "D0218 diagnostic/service branch",
+      "live_witness": "B112/AC2B/CB38/CC48",
+      "order": 12,
+      "site": "B330A/B338C -> B112 -> BCBD8/AC2B -> D0218",
+      "stage5_bypasses": false
+    },
+    {
+      "condition": "ordinary internal terms, AC64 scale, AC52 limit, slew/filter, and local damping produce a shared CC50",
+      "failure_effect": "B6 is mixed with/limited by ordinary EPS state; it is never exclusive authority",
+      "layer": "ordinary EPS composition/limits",
+      "live_witness": "CC48/CC4C/CC4E/AC52/CC60/CC50",
+      "order": 13,
+      "site": "D0218 -> D0284 -> D02DA -> D0382 -> D039E",
+      "stage5_bypasses": false
+    },
+    {
+      "condition": "internal AC5A scale is nonzero (0x400 is unity)",
+      "failure_effect": "CC62 = CC50*AC5A/0x400 can be attenuated all the way to zero before the hard actuator gate",
+      "layer": "common output scale",
+      "live_witness": "B1F8/AC5A/CC50/CC62",
+      "order": 14,
+      "site": "B4B6C/B4EF4 -> B1F8 -> BCBD8/AC5A -> D042C",
+      "stage5_bypasses": false
+    },
+    {
+      "condition": "AC29 != 0 and AC2A == 0",
+      "failure_effect": "D042C forces CC66=0 after computing/slew-limiting CC62",
+      "layer": "common actuator hard inhibit",
+      "live_witness": "8B28/EEF90/AC29/AC2A/CC62/CC66",
+      "order": 15,
+      "site": "572E6 -> 8B28 -> FCC00/EEF90 -> BCAA6/AC29,AC2A -> D042C",
+      "stage5_bypasses": false
+    },
+    {
+      "condition": "CC98==0 for ordinary CC66 pass-through",
+      "failure_effect": "CC94 replaces/bounds CC64 independently of B6",
+      "layer": "common internal override",
+      "live_witness": "CC98/CC94/CC66/CC64",
+      "order": 16,
+      "site": "D05B4/D0528/D064C/D0674 -> CC98/CC94 -> D047C",
+      "stage5_bypasses": false
+    },
+    {
+      "condition": "normal motor-side branch uses EE40C; service/status branches can substitute bounded internal EE416/EE418/EEB10-derived value",
+      "failure_effect": "B6-containing command can be replaced before 6AF4 while staying in the same downstream motor model",
+      "layer": "motor-side service/limit selection",
+      "live_witness": "AC54/EE40C + EEB1E/EE780/EE406 + 6AF4",
+      "order": 17,
+      "site": "D0AAE -> BF33E -> 35C4C",
+      "stage5_bypasses": false
+    },
+    {
+      "condition": "current-command magnitude/sign/bounds and downstream motor-control state permit response",
+      "failure_effect": "command is transformed/limited before physical motor response",
+      "layer": "motor-current model",
+      "live_witness": "6E0A/6DEC/6DC8/6DD6 + 0x030 motor feedback",
+      "order": 18,
+      "site": "387BA -> 38502 -> 3835E/384D8 -> 38162",
+      "stage5_bypasses": false
+    }
+  ],
+  "gate_source_census": {
+    "8B28_internal_status": {
+      "address": "0xFEBE8B28",
+      "readers": [
+        "0x0369E4",
+        "0x036CF0",
+        "0x0370E6",
+        "0x037228",
+        "0x037538",
+        "0x03777E",
+        "0x037E48",
+        "0x03C310",
+        "0x0423BC",
+        "0x04337A",
+        "0x0571B4",
+        "0x057F00",
+        "0x059448",
+        "0x05D6DC",
+        "0x0FCC00"
+      ],
+      "writers": [
+        "0x0572E6",
+        "0x059448"
+      ]
+    },
+    "AC29_enable": {
+      "address": "0xFEBEAC29",
+      "readers": [
+        "0x0D042C"
+      ],
+      "writers": [
+        "0x0BCAA6",
+        "0x0BF97A"
+      ]
+    },
+    "AC2A_inhibit": {
+      "address": "0xFEBEAC2A",
+      "readers": [
+        "0x0D042C"
+      ],
+      "writers": [
+        "0x0BCAA6",
+        "0x0BF97A"
+      ]
+    },
+    "AC2B_diag_gate": {
+      "address": "0xFEBEAC2B",
+      "readers": [
+        "0x0C51F0",
+        "0x0C54A2",
+        "0x0C7F44",
+        "0x0D0218"
+      ],
+      "writers": [
+        "0x0BCBD8",
+        "0x0BF97A"
+      ]
+    },
+    "AC5A_output_scale": {
+      "address": "0xFEBEAC5A",
+      "readers": [
+        "0x0D042C"
+      ],
+      "writers": [
+        "0x0BCBD8",
+        "0x0BF97A"
+      ]
+    },
+    "B112_diag_source": {
+      "address": "0xFEBEB112",
+      "readers": [
+        "0x0BAF3E",
+        "0x0BCBD8",
+        "0x0BCD62",
+        "0x0BF3AA",
+        "0x0FD456"
+      ],
+      "writers": [
+        "0x0B3314",
+        "0x0B338C",
+        "0x0BF97A"
+      ]
+    },
+    "B1F8_output_scale_source": {
+      "address": "0xFEBEB1F8",
+      "readers": [
+        "0x0B4B6C",
+        "0x0BCBD8"
+      ],
+      "writers": [
+        "0x0B4B6C",
+        "0x0B4EF4",
+        "0x0BF97A"
+      ]
+    },
+    "CC94_override_value": {
+      "address": "0xFEBECC94",
+      "readers": [
+        "0x0D047C"
+      ],
+      "writers": [
+        "0x0D0674"
+      ]
+    },
+    "CC98_override_mode": {
+      "address": "0xFEBECC98",
+      "readers": [
+        "0x0D047C",
+        "0x0D05B4",
+        "0x0D0674",
+        "0x0D0AAE"
+      ],
+      "writers": [
+        "0x0D04F0",
+        "0x0D0528",
+        "0x0D0674"
+      ]
+    },
+    "EEF90_internal_status_snapshot": {
+      "address": "0xFEBEEF90",
+      "readers": [
+        "0x0BCAA6"
+      ],
+      "writers": [
+        "0x0FCC00"
+      ]
+    }
+  },
+  "key_writer_census": {
+    "6AF4_motor_selected": [
+      "0x035C4C",
+      "0x059448"
+    ],
+    "6DC8_current_component": [
+      "0x03835E",
+      "0x059448"
+    ],
+    "6DD6_signed_current_component": [
+      "0x0384D8",
+      "0x059448"
+    ],
+    "6DEC_current_bound": [
+      "0x038502",
+      "0x059448"
+    ],
+    "6E0A_motor_model_input": [
+      "0x0387BA",
+      "0x059448"
+    ],
+    "AC54_motor_snapshot": [
+      "0x0BF97A",
+      "0x0D0AAE"
+    ],
+    "CB00_bank": [
+      "0x0CEFF4",
+      "0x0CEFFC"
+    ],
+    "CB20_gain": [
+      "0x0CF056",
+      "0x0CF148"
+    ],
+    "CB38_b6_contribution": [
+      "0x0CF056",
+      "0x0CF2B2"
+    ],
+    "CC48_sum": [
+      "0x0D01B4",
+      "0x0D0218"
+    ],
+    "CC4C_scaled": [
+      "0x0D01B4",
+      "0x0D0284"
+    ],
+    "CC4E_filtered": [
+      "0x0D01B4",
+      "0x0D02DA"
+    ],
+    "CC50_pre_scale": [
+      "0x0D01B4",
+      "0x0D039E"
+    ],
+    "CC60_limited": [
+      "0x0D01B4",
+      "0x0D0382"
+    ],
+    "CC62_scaled": [
+      "0x0D01B4",
+      "0x0D042C"
+    ],
+    "CC64_selected": [
+      "0x0D01B4",
+      "0x0D047C"
+    ],
+    "CC66_gated": [
+      "0x0D01B4",
+      "0x0D042C"
+    ],
+    "EE40C_motor_mirror": [
+      "0x0BF33E",
+      "0x0BF97A"
+    ]
+  },
+  "live_witness_ladder": [
+    {
+      "cells": [
+        "sendcan B6",
+        "Panda src=128 TX echo"
+      ],
+      "n": 1,
+      "name": "host_send",
+      "proves": "host/Panda emitted candidate; does not prove F33 reception"
+    },
+    {
+      "cells": [
+        "FEBE547A",
+        "FEBE54D4"
+      ],
+      "n": 2,
+      "name": "secoc_queue",
+      "proves": "F33 CanIf/PduR/SecOC ingress copied B6"
+    },
+    {
+      "cells": [
+        "FEBE55E8",
+        "FEBE5600",
+        "FEBE5564"
+      ],
+      "n": 3,
+      "name": "freshness_auth",
+      "proves": "profile2 freshness/auth transaction state"
+    },
+    {
+      "cells": [
+        "FEBE4BFF..FEBE4C1E",
+        "FEBE5364"
+      ],
+      "n": 4,
+      "name": "raw_com",
+      "proves": "upper route44 publication"
+    },
+    {
+      "cells": [
+        "FEBE7F68",
+        "FEBE80C8",
+        "FEBE80BC",
+        "FEBE80B8",
+        "FEBE80CB",
+        "FEBE80C0",
+        "FEBE80C3",
+        "FEBE80C4",
+        "FEBE80C5",
+        "FEBE80C9"
+      ],
+      "n": 5,
+      "name": "generated_com",
+      "proves": "4BD46 unpacked the new PDU under the global state gate"
+    },
+    {
+      "cells": [
+        "FEBEF130",
+        "FEBEF1FA",
+        "FEBEF155",
+        "FEBEF134",
+        "FEBEF137",
+        "FEBEF138",
+        "FEBEF139",
+        "FEBEF13E",
+        "FEBEADB0",
+        "FEBEAE90",
+        "FEBEADDD",
+        "FEBEADBB",
+        "FEBEADBC",
+        "FEBEADBD",
+        "FEBEADBE",
+        "FEBEADB9"
+      ],
+      "n": 6,
+      "name": "stage_snapshot",
+      "proves": "application task staged/snapshotted all command-relevant B6 fields"
+    },
+    {
+      "cells": [
+        "FEBEACBD",
+        "FEBECAFF",
+        "FEBEADB0",
+        "FEBECB00"
+      ],
+      "n": 7,
+      "name": "bank_health",
+      "proves": "ID11 reached cooperative bank2"
+    },
+    {
+      "cells": [
+        "FEBEADDD",
+        "FEBEADBB",
+        "FEBEADBC",
+        "FEBEADBD",
+        "FEBEADBE",
+        "FEBECAB5",
+        "FEBECAB6",
+        "FEBECAB7",
+        "FEBECAFC",
+        "FEBECAFD"
+      ],
+      "n": 8,
+      "name": "application_supervision",
+      "proves": "B6 companion/sequence/readiness state"
+    },
+    {
+      "cells": [
+        "FEBECB20",
+        "FEBECB08",
+        "FEBECB38"
+      ],
+      "n": 9,
+      "name": "cooperative_contribution",
+      "proves": "supervised B6 contribution became nonzero"
+    },
+    {
+      "cells": [
+        "FEBEB112",
+        "FEBEAC2B",
+        "FEBECB38",
+        "FEBECC48"
+      ],
+      "n": 10,
+      "name": "d0218_branch",
+      "proves": "normal D0218 branch actually included B6 rather than diagnostic/service reduction"
+    },
+    {
+      "cells": [
+        "FEBECC48",
+        "FEBECC4C",
+        "FEBECC4E",
+        "FEBEAC52",
+        "FEBECC60",
+        "FEBECC50"
+      ],
+      "n": 11,
+      "name": "ordinary_funnel",
+      "proves": "B6-containing ordinary command survived common scaling/limits to CC50"
+    },
+    {
+      "cells": [
+        "FEBEB1F8",
+        "FEBEAC5A",
+        "FEBECC50",
+        "FEBECC62"
+      ],
+      "n": 12,
+      "name": "output_scale",
+      "proves": "common AC5A output scaling retained command"
+    },
+    {
+      "cells": [
+        "FEBE8B28",
+        "FEBEEF90",
+        "FEBEAC29",
+        "FEBEAC2A",
+        "FEBECC62",
+        "FEBECC66"
+      ],
+      "n": 13,
+      "name": "hard_actuator_gate",
+      "proves": "common actuator gate did/did not force command to zero"
+    },
+    {
+      "cells": [
+        "FEBECC98",
+        "FEBECC94",
+        "FEBECC66",
+        "FEBECC64"
+      ],
+      "n": 14,
+      "name": "internal_override",
+      "proves": "ordinary pass-through versus internal replacement"
+    },
+    {
+      "cells": [
+        "FEBEAC54",
+        "FEBEE40C",
+        "FEBEEB1E",
+        "FEBEE780",
+        "FEBEE406",
+        "FEBE6AF4"
+      ],
+      "n": 15,
+      "name": "motor_side_selection",
+      "proves": "motor-side branch selected the shared command or substituted another bounded internal source"
+    },
+    {
+      "cells": [
+        "FEBE6E0A",
+        "FEBE6DEC",
+        "FEBE6DC8",
+        "FEBE6DD6",
+        "0x030 B22:B23 motor proxy"
+      ],
+      "n": 16,
+      "name": "motor_current_model",
+      "proves": "command reached downstream current model and exposes physical-response proxy"
+    },
+    {
+      "cells": [
+        "measured steering angle/rate",
+        "driver torque"
+      ],
+      "n": 17,
+      "name": "plant_response",
+      "proves": "physical rack response"
+    }
+  ],
+  "objective_conclusions": {
+    "accepted_id11_guarantees_nonzero_cb38": false,
+    "accepted_id11_is_a_co_modulated_input": true,
+    "accepted_id11_is_exclusive_eps_authority": false,
+    "all_recovered_software_gates_on_b6_to_motor_current_path_are_mapped": true,
+    "final_hardware_pwm_commit_recovered_exact_f33_here": false,
+    "next_runtime_question": "At which adjacent rung of the 17-step witness ladder does the injected B6 first diverge?",
+    "nonzero_cb38_guarantees_nonzero_motor_command": false,
+    "proof_boundary": "Complete canonical direct-reference/writer closure for the recovered B6 scalar and shared-command path. Computed aliases, DMA/peripheral mutation, ICU-S silicon internals, and final hardware PWM commit remain outside this exact-F33 proof where separately noted.",
+    "remaining_live_nonresponse_can_be_localized_with_adjacent_internal_witnesses": true,
+    "stage5_forces_noncrypto_queue_pdur_com_or_controller_gates": false,
+    "stage5_removes_recovered_freshness_and_auth_result_rejection_after_valid_secoc_ingress": true,
+    "successful_panda_tx_echo_proves_eps_application_delivery": false
+  },
+  "raw_boundary_evidence": {
+    "CanIf_RxIndication": {
+      "end_exclusive": "0x0048FC",
+      "sha256": "994cac5ec8165c0fde3b4fb1d682c16f0ce73db7ab2dbe13bfcec04e9fb8f39d",
+      "size": 644,
+      "start": "0x004678"
+    },
+    "freshness_callback_0x903A0": {
+      "end_exclusive": "0x0903F6",
+      "sha256": "031775b45fb23dce7c0b12fe8ed8d8bb48db0c3390a98bfb7243783710246cd5",
+      "size": 86,
+      "start": "0x0903A0"
+    },
+    "icu_command0_completion_0x892CC": {
+      "end_exclusive": "0x089386",
+      "sha256": "a5df00bb4c1d63efb0870828b647b2c51d902372b3aecfb15081d1db5f2faba9",
+      "size": 186,
+      "start": "0x0892CC"
+    },
+    "icu_command0_start_0x891CC": {
+      "end_exclusive": "0x0892CC",
+      "sha256": "c321acfe3d13c38a61a189e5876119a4e73698b471916b9e966f83761d586dc5",
+      "size": 256,
+      "start": "0x0891CC"
+    },
+    "post_crypto_callback_0x90448": {
+      "end_exclusive": "0x090482",
+      "sha256": "da3592af256b9d473ab9697f5642b95c4f1d6c47fe32b68479cc50aed958b63a",
+      "size": 58,
+      "start": "0x090448"
+    },
+    "route44_callback_0x7D72C": {
+      "end_exclusive": "0x07D800",
+      "sha256": "ab6c3514c592e1a007d7d38abf723d22b905037b3ae7132cdcc5c1c73ec5b239",
+      "size": 212,
+      "start": "0x07D72C"
+    },
+    "rscfd_common_fifo_rx_callback": {
+      "end_exclusive": "0x004060",
+      "sha256": "f705040c7772ea263e5ffed791abcb4dc10cd2f5936bde5fc7f6136c98ca9c5f",
+      "size": 86,
+      "start": "0x00400A"
+    }
+  },
+  "raw_stage_snapshot_census": [
+    {
+      "raw": {
+        "address": "0xFEBE80BC",
+        "readers": [
+          "0x058074"
+        ],
+        "references": [
+          {
+            "from": "0x0004bd6e",
+            "function": "0x04BD46",
+            "type": "DATA"
+          },
+          {
+            "from": "0x0005864e",
+            "function": "0x058074",
+            "type": "READ"
+          },
+          {
+            "from": "0x00058e66",
+            "function": "0x058C9A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x058C9A"
+        ]
+      },
+      "role": "Target Lateral ID",
+      "signal": 261,
+      "snapshot": {
+        "address": "0xFEBEADB0",
+        "readers": [
+          "0x0CB73A",
+          "0x0CEFFC"
+        ],
+        "references": [
+          {
+            "from": "0x000bd67e",
+            "function": "0x0BCD62",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000c09ba",
+            "function": "0x0BF97A",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000cb746",
+            "function": "0x0CB73A",
+            "type": "READ"
+          },
+          {
+            "from": "0x000cf002",
+            "function": "0x0CEFFC",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x0BCD62",
+          "0x0BF97A"
+        ]
+      },
+      "stage": {
+        "address": "0xFEBEF130",
+        "readers": [
+          "0x0BCD62"
+        ],
+        "references": [
+          {
+            "from": "0x0005867e",
+            "function": "0x058074",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x0005c618",
+            "function": "0x059448",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000bd67a",
+            "function": "0x0BCD62",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x058074",
+          "0x059448"
+        ]
+      }
+    },
+    {
+      "raw": {
+        "address": "0xFEBE80B8",
+        "readers": [
+          "0x058074"
+        ],
+        "references": [
+          {
+            "from": "0x0004bd8e",
+            "function": "0x04BD46",
+            "type": "DATA"
+          },
+          {
+            "from": "0x0005868c",
+            "function": "0x058074",
+            "type": "READ"
+          },
+          {
+            "from": "0x00058e5e",
+            "function": "0x058C9A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x058C9A"
+        ]
+      },
+      "role": "target steering angle",
+      "signal": 262,
+      "snapshot": {
+        "address": "0xFEBEAE90",
+        "readers": [
+          "0x0CBA80",
+          "0x0CBB66",
+          "0x0CCF0E",
+          "0x0CEE7C"
+        ],
+        "references": [
+          {
+            "from": "0x000bd65c",
+            "function": "0x0BCD62",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000c09b6",
+            "function": "0x0BF97A",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000cba84",
+            "function": "0x0CBA80",
+            "type": "READ"
+          },
+          {
+            "from": "0x000cbb78",
+            "function": "0x0CBB66",
+            "type": "READ"
+          },
+          {
+            "from": "0x000ccf0e",
+            "function": "0x0CCF0E",
+            "type": "READ"
+          },
+          {
+            "from": "0x000cee94",
+            "function": "0x0CEE7C",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x0BCD62",
+          "0x0BF97A"
+        ]
+      },
+      "stage": {
+        "address": "0xFEBEF1FA",
+        "readers": [
+          "0x0BCD62"
+        ],
+        "references": [
+          {
+            "from": "0x000586b4",
+            "function": "0x058074",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x0005c67e",
+            "function": "0x059448",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000bd658",
+            "function": "0x0BCD62",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x058074",
+          "0x059448"
+        ]
+      }
+    },
+    {
+      "raw": {
+        "address": "0xFEBE80CB",
+        "readers": [
+          "0x058074"
+        ],
+        "references": [
+          {
+            "from": "0x0004bda6",
+            "function": "0x04BD46",
+            "type": "DATA"
+          },
+          {
+            "from": "0x00058774",
+            "function": "0x058074",
+            "type": "READ"
+          },
+          {
+            "from": "0x00058e26",
+            "function": "0x058C9A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x058C9A"
+        ]
+      },
+      "role": "activation companion; zero required by CB664",
+      "signal": 263,
+      "snapshot": {
+        "address": "0xFEBEADDD",
+        "readers": [
+          "0x0CB664"
+        ],
+        "references": [
+          {
+            "from": "0x000bd66c",
+            "function": "0x0BCD62",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000c0a76",
+            "function": "0x0BF97A",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000cb674",
+            "function": "0x0CB664",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x0BCD62",
+          "0x0BF97A"
+        ]
+      },
+      "stage": {
+        "address": "0xFEBEF155",
+        "readers": [
+          "0x0BCD62"
+        ],
+        "references": [
+          {
+            "from": "0x00058780",
+            "function": "0x058074",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x0005c69a",
+            "function": "0x059448",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000bd668",
+            "function": "0x0BCD62",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x058074",
+          "0x059448"
+        ]
+      }
+    },
+    {
+      "raw": {
+        "address": "0xFEBE80BE",
+        "readers": [
+          "0x058074"
+        ],
+        "references": [
+          {
+            "from": "0x0004bdc0",
+            "function": "0x04BD46",
+            "type": "DATA"
+          },
+          {
+            "from": "0x000586c2",
+            "function": "0x058074",
+            "type": "READ"
+          },
+          {
+            "from": "0x00058e56",
+            "function": "0x058C9A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x058C9A"
+        ]
+      },
+      "role": "snapshotted companion; no runtime reader recovered",
+      "signal": 264,
+      "snapshot": {
+        "address": "0xFEBEADB1",
+        "readers": [],
+        "references": [
+          {
+            "from": "0x000bd68a",
+            "function": "0x0BCD62",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000c09bc",
+            "function": "0x0BF97A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x0BCD62",
+          "0x0BF97A"
+        ]
+      },
+      "stage": {
+        "address": "0xFEBEF132",
+        "readers": [
+          "0x0BCD62"
+        ],
+        "references": [
+          {
+            "from": "0x000586c8",
+            "function": "0x058074",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x0005c67a",
+            "function": "0x059448",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000bd686",
+            "function": "0x0BCD62",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x058074",
+          "0x059448"
+        ]
+      }
+    },
+    {
+      "raw": {
+        "address": "0xFEBE80C0",
+        "readers": [
+          "0x058074"
+        ],
+        "references": [
+          {
+            "from": "0x0004bdda",
+            "function": "0x04BD46",
+            "type": "DATA"
+          },
+          {
+            "from": "0x000586d0",
+            "function": "0x058074",
+            "type": "READ"
+          },
+          {
+            "from": "0x00058e4e",
+            "function": "0x058C9A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x058C9A"
+        ]
+      },
+      "role": "additive-term suppression companion",
+      "signal": 265,
+      "snapshot": {
+        "address": "0xFEBEADBB",
+        "readers": [
+          "0x0CDA20"
+        ],
+        "references": [
+          {
+            "from": "0x000bd696",
+            "function": "0x0BCD62",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000c09e4",
+            "function": "0x0BF97A",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000cda30",
+            "function": "0x0CDA20",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x0BCD62",
+          "0x0BF97A"
+        ]
+      },
+      "stage": {
+        "address": "0xFEBEF134",
+        "readers": [
+          "0x0BCD62"
+        ],
+        "references": [
+          {
+            "from": "0x000586d4",
+            "function": "0x058074",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x0005c676",
+            "function": "0x059448",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000bd692",
+            "function": "0x0BCD62",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x058074",
+          "0x059448"
+        ]
+      }
+    },
+    {
+      "raw": {
+        "address": "0xFEBE80C1",
+        "readers": [
+          "0x058074"
+        ],
+        "references": [
+          {
+            "from": "0x0004bdf4",
+            "function": "0x04BD46",
+            "type": "DATA"
+          },
+          {
+            "from": "0x000586d6",
+            "function": "0x058074",
+            "type": "READ"
+          },
+          {
+            "from": "0x00058e4a",
+            "function": "0x058C9A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x058C9A"
+        ]
+      },
+      "role": "companion state",
+      "signal": 266,
+      "snapshot": null,
+      "stage": {
+        "address": "0xFEBEF135",
+        "readers": [],
+        "references": [
+          {
+            "from": "0x000586da",
+            "function": "0x058074",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x0005c674",
+            "function": "0x059448",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x058074",
+          "0x059448"
+        ]
+      }
+    },
+    {
+      "raw": {
+        "address": "0xFEBE80C2",
+        "readers": [
+          "0x058074"
+        ],
+        "references": [
+          {
+            "from": "0x0004be0e",
+            "function": "0x04BD46",
+            "type": "DATA"
+          },
+          {
+            "from": "0x000586dc",
+            "function": "0x058074",
+            "type": "READ"
+          },
+          {
+            "from": "0x00058e46",
+            "function": "0x058C9A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x058C9A"
+        ]
+      },
+      "role": "snapshotted companion; no runtime reader recovered",
+      "signal": 267,
+      "snapshot": {
+        "address": "0xFEBEADC2",
+        "readers": [],
+        "references": [
+          {
+            "from": "0x000bd6b4",
+            "function": "0x0BCD62",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000c09f4",
+            "function": "0x0BF97A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x0BCD62",
+          "0x0BF97A"
+        ]
+      },
+      "stage": {
+        "address": "0xFEBEF136",
+        "readers": [
+          "0x0BCD62"
+        ],
+        "references": [
+          {
+            "from": "0x000586e0",
+            "function": "0x058074",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x0005c672",
+            "function": "0x059448",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000bd6b0",
+            "function": "0x0BCD62",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x058074",
+          "0x059448"
+        ]
+      }
+    },
+    {
+      "raw": {
+        "address": "0xFEBE80C3",
+        "readers": [
+          "0x058074"
+        ],
+        "references": [
+          {
+            "from": "0x0004be28",
+            "function": "0x04BD46",
+            "type": "DATA"
+          },
+          {
+            "from": "0x000586e2",
+            "function": "0x058074",
+            "type": "READ"
+          },
+          {
+            "from": "0x00058e42",
+            "function": "0x058C9A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x058C9A"
+        ]
+      },
+      "role": "application modulo-64 sequence",
+      "signal": 268,
+      "snapshot": {
+        "address": "0xFEBEADBC",
+        "readers": [
+          "0x0CEC8A"
+        ],
+        "references": [
+          {
+            "from": "0x000bd69c",
+            "function": "0x0BCD62",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000c09e6",
+            "function": "0x0BF97A",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000cec8e",
+            "function": "0x0CEC8A",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x0BCD62",
+          "0x0BF97A"
+        ]
+      },
+      "stage": {
+        "address": "0xFEBEF137",
+        "readers": [
+          "0x0BCD62"
+        ],
+        "references": [
+          {
+            "from": "0x000586e6",
+            "function": "0x058074",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x0005c670",
+            "function": "0x059448",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000bd698",
+            "function": "0x0BCD62",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x058074",
+          "0x059448"
+        ]
+      }
+    },
+    {
+      "raw": {
+        "address": "0xFEBE80C4",
+        "readers": [
+          "0x058074"
+        ],
+        "references": [
+          {
+            "from": "0x0004be42",
+            "function": "0x04BD46",
+            "type": "DATA"
+          },
+          {
+            "from": "0x000586e8",
+            "function": "0x058074",
+            "type": "READ"
+          },
+          {
+            "from": "0x00058e3e",
+            "function": "0x058C9A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x058C9A"
+        ]
+      },
+      "role": "cooperative supervisor percentage",
+      "signal": 269,
+      "snapshot": {
+        "address": "0xFEBEADBD",
+        "readers": [
+          "0x0CE3AA"
+        ],
+        "references": [
+          {
+            "from": "0x000bd6a2",
+            "function": "0x0BCD62",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000c09e8",
+            "function": "0x0BF97A",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000ce3ca",
+            "function": "0x0CE3AA",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x0BCD62",
+          "0x0BF97A"
+        ]
+      },
+      "stage": {
+        "address": "0xFEBEF138",
+        "readers": [
+          "0x0BCD62"
+        ],
+        "references": [
+          {
+            "from": "0x000586ec",
+            "function": "0x058074",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x0005c66e",
+            "function": "0x059448",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000bd69e",
+            "function": "0x0BCD62",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x058074",
+          "0x059448"
+        ]
+      }
+    },
+    {
+      "raw": {
+        "address": "0xFEBE80C5",
+        "readers": [
+          "0x058074"
+        ],
+        "references": [
+          {
+            "from": "0x0004be5c",
+            "function": "0x04BD46",
+            "type": "DATA"
+          },
+          {
+            "from": "0x000586ee",
+            "function": "0x058074",
+            "type": "READ"
+          },
+          {
+            "from": "0x00058e3a",
+            "function": "0x058C9A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x058C9A"
+        ]
+      },
+      "role": "cooperative supervisor percentage",
+      "signal": 270,
+      "snapshot": {
+        "address": "0xFEBEADBE",
+        "readers": [
+          "0x0CDFF8"
+        ],
+        "references": [
+          {
+            "from": "0x000bd6a8",
+            "function": "0x0BCD62",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000c09ea",
+            "function": "0x0BF97A",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000ce008",
+            "function": "0x0CDFF8",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x0BCD62",
+          "0x0BF97A"
+        ]
+      },
+      "stage": {
+        "address": "0xFEBEF139",
+        "readers": [
+          "0x0BCD62"
+        ],
+        "references": [
+          {
+            "from": "0x000586f2",
+            "function": "0x058074",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x0005c66c",
+            "function": "0x059448",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000bd6a4",
+            "function": "0x0BCD62",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x058074",
+          "0x059448"
+        ]
+      }
+    },
+    {
+      "raw": {
+        "address": "0xFEBE80C6",
+        "readers": [
+          "0x058074"
+        ],
+        "references": [
+          {
+            "from": "0x0004be76",
+            "function": "0x04BD46",
+            "type": "DATA"
+          },
+          {
+            "from": "0x000586f4",
+            "function": "0x058074",
+            "type": "READ"
+          },
+          {
+            "from": "0x00058e36",
+            "function": "0x058C9A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x058C9A"
+        ]
+      },
+      "role": "snapshotted companion; no runtime reader recovered",
+      "signal": 271,
+      "snapshot": {
+        "address": "0xFEBEADC1",
+        "readers": [],
+        "references": [
+          {
+            "from": "0x000bd6ae",
+            "function": "0x0BCD62",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000c09f2",
+            "function": "0x0BF97A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x0BCD62",
+          "0x0BF97A"
+        ]
+      },
+      "stage": {
+        "address": "0xFEBEF13A",
+        "readers": [
+          "0x0BCD62"
+        ],
+        "references": [
+          {
+            "from": "0x000586f8",
+            "function": "0x058074",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x0005c66a",
+            "function": "0x059448",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000bd6aa",
+            "function": "0x0BCD62",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x058074",
+          "0x059448"
+        ]
+      }
+    },
+    {
+      "raw": {
+        "address": "0xFEBE80C7",
+        "readers": [
+          "0x058074"
+        ],
+        "references": [
+          {
+            "from": "0x000586fa",
+            "function": "0x058074",
+            "type": "READ"
+          },
+          {
+            "from": "0x00058e32",
+            "function": "0x058C9A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x058C9A"
+        ]
+      },
+      "role": "snapshotted companion; no runtime reader recovered",
+      "signal": 272,
+      "snapshot": {
+        "address": "0xFEBEADE5",
+        "readers": [],
+        "references": [
+          {
+            "from": "0x000bd678",
+            "function": "0x0BCD62",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000c0a88",
+            "function": "0x0BF97A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x0BCD62",
+          "0x0BF97A"
+        ]
+      },
+      "stage": {
+        "address": "0xFEBEF13C",
+        "readers": [
+          "0x0BCD62"
+        ],
+        "references": [
+          {
+            "from": "0x000586fe",
+            "function": "0x058074",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x0005c666",
+            "function": "0x059448",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000bd674",
+            "function": "0x0BCD62",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x058074",
+          "0x059448"
+        ]
+      }
+    },
+    {
+      "raw": {
+        "address": "0xFEBE80CA",
+        "readers": [
+          "0x058074"
+        ],
+        "references": [
+          {
+            "from": "0x0004beaa",
+            "function": "0x04BD46",
+            "type": "DATA"
+          },
+          {
+            "from": "0x0005877a",
+            "function": "0x058074",
+            "type": "READ"
+          },
+          {
+            "from": "0x00058e2a",
+            "function": "0x058C9A",
+            "type": "WRITE"
+          }
+        ],
+        "writers": [
+          "0x058C9A"
+        ]
+      },
+      "role": "health-qualified publication companion",
+      "signal": 273,
+      "snapshot": {
+        "address": "0xFEBEADD9",
+        "readers": [
+          "0x0CFDA0"
+        ],
+        "references": [
+          {
+            "from": "0x000bd6ba",
+            "function": "0x0BCD62",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000c0a68",
+            "function": "0x0BF97A",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000cfdc8",
+            "function": "0x0CFDA0",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x0BCD62",
+          "0x0BF97A"
+        ]
+      },
+      "stage": {
+        "address": "0xFEBEF14D",
+        "readers": [
+          "0x0BCD62"
+        ],
+        "references": [
+          {
+            "from": "0x00058786",
+            "function": "0x058074",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x0005c688",
+            "function": "0x059448",
+            "type": "WRITE"
+          },
+          {
+            "from": "0x000bd6b6",
+            "function": "0x0BCD62",
+            "type": "READ"
+          }
+        ],
+        "writers": [
+          "0x058074",
+          "0x059448"
+        ]
+      }
+    }
+  ],
+  "scheduler": {
+    "boundary": "The two cyclic roots share snapshot RAM; exact within-task ordering is recovered. Absolute inter-task phase is scheduler/runtime state, not one direct call chain.",
+    "communications_application_root": "66062 -> 667E6 -> 58B5E -> 5EC24/5F610 -> 4BD46 -> 58074 -> BCD62 -> D1130 -> D0EEC",
+    "shared_command_root": "65FEA -> 6679E -> 5899E -> C1F7A/C2000 -> BCD02 -> BCAA6/BCBD8 -> D1100 -> D0AF6 -> BF33E"
+  },
+  "schema": "camry-f33-b6-end-to-end-v1",
+  "semantic_checks": {
+    "8b28_is_computed_internal_status_aggregate": true,
+    "ac29_ac2a_derive_internal_system_state": true,
+    "ac2b_is_internal_diagnostic_service_gate": true,
+    "ac5a_is_internal_ramped_scale": true,
+    "app_sequence_is_independent_modulo_counter": true,
+    "app_unpack_requires_new_generation_and_global_state": true,
+    "application_task_contains_unpack_stage_snapshot_controller": true,
+    "b6_health_requires_status_zero": true,
+    "command_task_contains_common_gate_and_motor_mirror": true,
+    "common_actuator_gate_can_zero_command": true,
+    "d042c_multiplies_by_ac5a": true,
+    "final_b6_term_is_gain_slew_magnitude_limited": true,
+    "freshness_candidate_search_has_plus_minus_two": true,
+    "freshness_profile2_slot1": true,
+    "gain_ramp_exists": true,
+    "global_com_state_normalizes_to_acbd": true,
+    "id11_maps_bank2_only_when_health_and_acbd_allow": true,
+    "internal_override_trigger_and_replacement_are_exact": true,
+    "motor_mirror_path": true,
+    "motor_scheduler_runs_current_chain_in_order": true,
+    "motor_side_can_substitute_internal_bounded_source": true,
+    "ordinary_sum_adds_b6_term_only_in_normal_branch": true,
+    "queue_insert_copies_secured_payload": true,
+    "queue_wrapper_calls_insert": true,
+    "route44_guard_unconditional": true,
+    "route_generation_update": true,
+    "route_status_participates_readiness": true,
+    "secoc_ingress_state_and_pointer_checks": true,
+    "separate_cyclic_roots": true,
+    "sig263_zero_is_activation_condition": true,
+    "sig265_one_suppresses_controller_term": true,
+    "sig269_scales_supervisor": true,
+    "sig270_scales_supervisor": true,
+    "sig273_is_health_qualified_publication": true,
+    "snapshot_maps_b6_fields": true,
+    "stage_maps_b6_core_fields": true,
+    "target_controller_is_target_minus_measured": true,
+    "upper_delivery_reaches_pdur": true,
+    "worker_extracts_auth_then_freshness_then_crypto": true
+  },
+  "stage5_boundary": {
+    "bypassed": [
+      "freshness callback result",
+      "ICU command return",
+      "ICU root verification result",
+      "post-crypto callback result",
+      "final Gate-2 delivery predicate"
+    ],
+    "icu_black_box": "Only ICU-S cryptographic silicon internals are unavailable. Every software-visible consequence used by the recovered B6 verification path is mapped and neutralized by cumulative stage5.",
+    "not_bypassed": [
+      "physical CAN/CanIf reception",
+      "SecOC queue integrity/geometry",
+      "upper PduR/COM copy",
+      "generated-COM new-data/global-state gate",
+      "application staging/snapshot",
+      "application bank/health/readiness",
+      "B6 companion/sequence supervision",
+      "target/supervisor gain and limits",
+      "D0218 diagnostic/service branch",
+      "ordinary EPS composition",
+      "common AC5A output scale",
+      "common AC29/AC2A hard inhibit",
+      "common CC98/CC94 internal override",
+      "motor-side service/limit selection",
+      "motor/current limits"
+    ]
+  },
+  "stationary_monitor_phases": [
+    {
+      "first_divergence": "TX echo with no queue change => before/at F33 ingress; queue changes with no route44 generation/raw change => SecOC/upper-publication transaction",
+      "phase": "A",
+      "purpose": "SecOC queue through raw route44 publication",
+      "watch_windows": [
+        {
+          "address": "0xFEBE5478",
+          "covers": [
+            "FEBE547A queue metadata"
+          ]
+        },
+        {
+          "address": "0xFEBE54D4",
+          "covers": [
+            "secured B0..B3 / ID byte"
+          ]
+        },
+        {
+          "address": "0xFEBE54D8",
+          "covers": [
+            "secured B4..B7 / target bytes"
+          ]
+        },
+        {
+          "address": "0xFEBE55E8",
+          "covers": [
+            "profile2 committed freshness"
+          ]
+        },
+        {
+          "address": "0xFEBE5564",
+          "covers": [
+            "authentication result state"
+          ]
+        },
+        {
+          "address": "0xFEBE4C00",
+          "covers": [
+            "route44 raw B1..B4"
+          ]
+        },
+        {
+          "address": "0xFEBE4C04",
+          "covers": [
+            "route44 raw B5..B8"
+          ]
+        },
+        {
+          "address": "0xFEBE5364",
+          "covers": [
+            "route44 generation"
+          ]
+        }
+      ]
+    },
+    {
+      "first_divergence": "route44 generation/raw changes with stale generated scalars => 4BD46/global-state gate; generated target changes with stale F1FA => 58074 staging",
+      "phase": "B",
+      "purpose": "raw route44 publication through generated COM",
+      "watch_windows": [
+        {
+          "address": "0xFEBE5364",
+          "covers": [
+            "route44 generation"
+          ]
+        },
+        {
+          "address": "0xFEBE7F68",
+          "covers": [
+            "global COM state gate"
+          ]
+        },
+        {
+          "address": "0xFEBE80C8",
+          "covers": [
+            "local route generation latch",
+            "generated sig272/273 neighborhood"
+          ]
+        },
+        {
+          "address": "0xFEBE80B8",
+          "covers": [
+            "generated target angle sig262"
+          ]
+        },
+        {
+          "address": "0xFEBE80BC",
+          "covers": [
+            "generated Target Lateral ID sig261"
+          ]
+        },
+        {
+          "address": "0xFEBE80C0",
+          "covers": [
+            "generated sig265..268 neighborhood"
+          ]
+        },
+        {
+          "address": "0xFEBE80C4",
+          "covers": [
+            "generated sig269..272 neighborhood"
+          ]
+        },
+        {
+          "address": "0xFEBEF1F8",
+          "covers": [
+            "staged target angle at F1FA"
+          ]
+        }
+      ]
+    },
+    {
+      "first_divergence": "stages change but ADB0/AE90 stay stale => BCD62 snapshot task; snapshots change with bad ACBD/CAFF => bank prerequisite failure",
+      "phase": "C",
+      "purpose": "generated staging through application snapshot and bank prerequisites",
+      "watch_windows": [
+        {
+          "address": "0xFEBEF130",
+          "covers": [
+            "staged sig261",
+            "staged sig264"
+          ]
+        },
+        {
+          "address": "0xFEBEF134",
+          "covers": [
+            "staged sig265..268"
+          ]
+        },
+        {
+          "address": "0xFEBEF138",
+          "covers": [
+            "staged sig269/270 neighborhood"
+          ]
+        },
+        {
+          "address": "0xFEBEF1F8",
+          "covers": [
+            "staged sig262 at F1FA"
+          ]
+        },
+        {
+          "address": "0xFEBEADB0",
+          "covers": [
+            "Target Lateral ID snapshot",
+            "companion snapshot neighborhood"
+          ]
+        },
+        {
+          "address": "0xFEBEAE90",
+          "covers": [
+            "target angle snapshot"
+          ]
+        },
+        {
+          "address": "0xFEBEACBC",
+          "covers": [
+            "ACBD normalized global COM state"
+          ]
+        },
+        {
+          "address": "0xFEBECAFC",
+          "covers": [
+            "CAFC/CAFD readiness",
+            "CAFF route health"
+          ]
+        }
+      ]
+    },
+    {
+      "first_divergence": "ADB0=11/CAFF=1 with CB00!=2 => bank admission; CB00=2 with CB20/CB38 zero => readiness/gain/controller state",
+      "phase": "D",
+      "purpose": "bank selection, B6 companion/readiness, and cooperative contribution",
+      "watch_windows": [
+        {
+          "address": "0xFEBECAFC",
+          "covers": [
+            "CAFC/CAFD readiness",
+            "CAFF route health"
+          ]
+        },
+        {
+          "address": "0xFEBECB00",
+          "covers": [
+            "CB00 selected bank"
+          ]
+        },
+        {
+          "address": "0xFEBEADBC",
+          "covers": [
+            "sig268 sequence",
+            "sig269/270 percentages"
+          ]
+        },
+        {
+          "address": "0xFEBEADDC",
+          "covers": [
+            "sig263 activation companion at ADDD"
+          ]
+        },
+        {
+          "address": "0xFEBECAB4",
+          "covers": [
+            "CAB5/CAB6/CAB7 readiness"
+          ]
+        },
+        {
+          "address": "0xFEBECB20",
+          "covers": [
+            "cooperative gain CB20"
+          ]
+        },
+        {
+          "address": "0xFEBECB08",
+          "covers": [
+            "cooperative controller source CB08"
+          ]
+        },
+        {
+          "address": "0xFEBECB38",
+          "covers": [
+            "final cooperative contribution CB38"
+          ]
+        }
+      ]
+    },
+    {
+      "first_divergence": "CB38 nonzero but CC48 lacks it => AC2B branch; CC50 nonzero but CC62 zero => AC5A scaling; AC29/AC2A are captured in the same phase",
+      "phase": "E",
+      "purpose": "D0218 branch through shared command and common output scale",
+      "watch_windows": [
+        {
+          "address": "0xFEBECB38",
+          "covers": [
+            "cooperative contribution CB38"
+          ]
+        },
+        {
+          "address": "0xFEBEB110",
+          "covers": [
+            "B112 diagnostic/service branch source"
+          ]
+        },
+        {
+          "address": "0xFEBEAC28",
+          "covers": [
+            "AC29 actuator enable",
+            "AC2A actuator inhibit",
+            "AC2B D0218 branch selector"
+          ]
+        },
+        {
+          "address": "0xFEBECC48",
+          "covers": [
+            "D0218 output CC48"
+          ]
+        },
+        {
+          "address": "0xFEBECC4C",
+          "covers": [
+            "CC4C",
+            "CC4E"
+          ]
+        },
+        {
+          "address": "0xFEBECC50",
+          "covers": [
+            "CC50 shared command"
+          ]
+        },
+        {
+          "address": "0xFEBECC60",
+          "covers": [
+            "CC60",
+            "CC62 scaled output"
+          ]
+        },
+        {
+          "address": "0xFEBEAC58",
+          "covers": [
+            "AC5A common output scale"
+          ]
+        }
+      ]
+    },
+    {
+      "first_divergence": "CC62 nonzero with CC66 zero => AC29/AC2A gate; CC66 nonzero with CC64 different => CC98/CC94 override; CC64 differs from AC54/EE40C => snapshot/mirror path",
+      "phase": "F",
+      "purpose": "hard actuator gate, internal override, and motor mirror",
+      "watch_windows": [
+        {
+          "address": "0xFEBECC60",
+          "covers": [
+            "CC62 before hard gate"
+          ]
+        },
+        {
+          "address": "0xFEBECC64",
+          "covers": [
+            "CC64 post-override",
+            "CC66 hard-gated command"
+          ]
+        },
+        {
+          "address": "0xFEBEAC28",
+          "covers": [
+            "AC29 actuator enable",
+            "AC2A actuator inhibit"
+          ]
+        },
+        {
+          "address": "0xFEBEEF90",
+          "covers": [
+            "internal status snapshot feeding AC29/AC2A"
+          ]
+        },
+        {
+          "address": "0xFEBECC94",
+          "covers": [
+            "CC94 override value"
+          ]
+        },
+        {
+          "address": "0xFEBECC98",
+          "covers": [
+            "CC98 override mode"
+          ]
+        },
+        {
+          "address": "0xFEBEAC54",
+          "covers": [
+            "motor snapshot AC54"
+          ]
+        },
+        {
+          "address": "0xFEBEE40C",
+          "covers": [
+            "motor mirror EE40C"
+          ]
+        }
+      ]
+    },
+    {
+      "first_divergence": "EE40C differs from selected 6AF4 => motor-side substitution; nonzero 6AF4 with stale/zero 6E0A/current stages => current-model boundary; current-model output without CAN/plant response moves beyond this RAM ladder",
+      "phase": "G",
+      "purpose": "motor-side selection through current model",
+      "watch_windows": [
+        {
+          "address": "0xFEBEE40C",
+          "covers": [
+            "shared-command motor mirror"
+          ]
+        },
+        {
+          "address": "0xFEBE6AF4",
+          "covers": [
+            "selected motor-side command"
+          ]
+        },
+        {
+          "address": "0xFEBE6E08",
+          "covers": [
+            "motor-model input 6E0A"
+          ]
+        },
+        {
+          "address": "0xFEBE6DEC",
+          "covers": [
+            "current bound stage"
+          ]
+        },
+        {
+          "address": "0xFEBE6DC8",
+          "covers": [
+            "current component stage"
+          ]
+        },
+        {
+          "address": "0xFEBE6DD4",
+          "covers": [
+            "signed current component at 6DD6"
+          ]
+        },
+        {
+          "address": "0xFEBEE780",
+          "covers": [
+            "35C4C service/status selector state"
+          ]
+        },
+        {
+          "address": "0xFEBEE404",
+          "covers": [
+            "35C4C EE406 selector neighborhood"
+          ]
+        }
+      ]
+    }
+  ],
+  "target": {
+    "canonical_function_count": 6062,
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "software_id": "8965F3307000"
+  }
+}

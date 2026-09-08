@@ -33,14 +33,24 @@ check("schema and exact firmware are pinned",
       and j["target"] == {
         "software_id": "8965F3307000",
         "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-        "corpus_function_count": 6065,
+        "corpus_function_count": 6062,
       })
 
 sel = j["selector_census"]
 check("all CB00-aware functions are exhausted",
-      sel["CB00_decompiled_function_count"] == 50
-      and len(sel["CB00_decompiled_functions"]) == 50
+      sel["CB00_decompiled_function_count"] == 49
+      and len(sel["CB00_decompiled_functions"]) == 49
       and sel["CB00_final_funnel_direct_references"] == {})
+check("all 49 CB00-aware functions have one non-overlapping semantic category",
+      sel["CB00_semantic_partition_counts"] == {
+        "mode_mirror_status": 9,
+        "controller_calibration_supervision": 28,
+        "readiness_fault_supervision": 7,
+        "bank_selection": 2,
+        "gain_output_shaping": 3,
+      }
+      and set().union(*(set(v) for v in sel["CB00_semantic_partition"].values())) == set(sel["CB00_decompiled_functions"])
+      and sum(len(v) for v in sel["CB00_semantic_partition"].values()) == 49)
 check("ADB0 has only the two semantic runtime readers",
       sel["ADB0_decompiled_functions"] == ["0x0CB73A", "0x0CEFFC"]
       and sorted({r["function"] for r in sel["ADB0_direct_references"] if r["type"] == "READ"})

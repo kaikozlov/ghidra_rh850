@@ -132,7 +132,7 @@
           "0x000CBA80",
           "0x000CBB66",
           "0x000CCF0E",
-          "0x000CEE80"
+          "0x000CEE7C"
         ],
         "exact_oem_name": "Target Steering Angle",
         "role": "signed target steering-angle command",
@@ -1509,17 +1509,17 @@
         "src_0_1_2_id_counts_raw": {},
         "unmatched_native_candidate_id_counts": {}
       },
-      "duration_s": 301.039566,
+      "duration_s": 121.032537,
       "first_08a_id": 0,
       "first_mono_s": 59.542857893,
       "id_transition_counts": {
         "0->11": 4,
         "0->18": 1,
-        "11->0": 4,
+        "11->0": 3,
         "18->0": 1
       },
-      "last_08a_id": 0,
-      "last_mono_s": 360.582423554,
+      "last_08a_id": 11,
+      "last_mono_s": 180.575394821,
       "native_081_id_counts": {
         "0": 8472,
         "11": 2084,

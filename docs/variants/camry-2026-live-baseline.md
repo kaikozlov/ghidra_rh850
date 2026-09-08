@@ -360,7 +360,7 @@ fields:
 - B28..B31 remain the SecOC trailer rather than application fields.
 
 Signal 261 is now nameable rather than merely structurally analogous to H.
-`0x58074` stages B3 and `0xBCD66` snapshots it; target-native `0xCEFFC` consumes
+`0x58074` stages B3 and `0xBCD62` snapshots it; target-native `0xCEFFC` consumes
 that snapshot and recognizes values `1/4/10/11/18/19`. Toyota's P5 EMPS
 **Target Lateral ID** dictionary assigns those exact values
 `PCS/LDA/Hands Off LTA/LTA-LCA/SDG/PDA`. A second target-native consumer
@@ -370,8 +370,8 @@ that snapshot and recognizes values `1/4/10/11/18/19`. Toyota's P5 EMPS
 
 Signal 262 is staged `gp-0x3748 -> gp+0x39FA -> gp-0x970` and consumed by
 **`0xCCF0E`**, which computes a saturated `2 * signed16(B4:B5)` target followed
-by interpolation/history; `0xCCFB6` applies mode-dependent target limits and
-`0xCEE80` independently supervises the same target snapshot. The remaining
+by interpolation/history; `0xCCFB2` applies mode-dependent target limits and
+`0xCEE7C` independently supervises the same target snapshot. The remaining
 question was whether this target quantity was specifically steering angle or a
 more generic steering-domain scalar. The Camry's own feedback path closes that
 question.
@@ -581,7 +581,7 @@ Exact F33 diagnostic joins close the feedback side:
   with validity magic `0xA5AA5AA5`. The **±2109 raw (~±8.238 N.m)** bound is an
   **acquisition/representation clamp, not an override threshold**.
 - DID1151 **Motor Actual Current Q Axis** callback `0x4E394` computes
-  **(raw*100)/0x80**. The first-class 6,065-function Ghidra graph resolves
+  **(raw*100)/0x80**. The first-class 6,062-function Ghidra graph resolves
   `GP-0x5158` to `FEBE66A8` and finds **9 direct driver-torque references
   (7 reads / 2 writes)**; it resolves `GP-0x50F2` to `FEBE670E` and finds
   **6 direct Q-current references (4 reads / 2 writes)**. **Neither exact
@@ -781,7 +781,7 @@ function; the F33 firmware bytes above remain the authority for that write path.
 
 ### 13.5 Control-transfer audit: the missing primitive
 
-CORR-123 refreshes this audit against the current first-class **6,065-function**
+CORR-123 refreshes this audit against the current first-class **6,062-function**
 F33 project. `ExportIndirectControlTransfers.java` now reports **496** decoded
 indirect transfers total (**403 `jarl` + 93 `jmp`**) and **487** in application
 CodeFlash (**395 `jarl` + 92 `jmp`**). `ClassifyComputedCallTargets.java` classifies
@@ -1210,7 +1210,7 @@ stock steering CAN ID, start from the exact F33 steering-command implementation 
 which external generated-COM fields can reach it, then intersect those candidates with
 the retained relay-correct traffic. This pass uses the exact 43-record application Rx
 table at `0x21FE8`, all **116** scalar `FUN_0007D12A` receive extractions, the
-signal-to-PDU and PDU-offset tables, the GP-relative `0x58074 -> 0xBCD66` staging/snapshot
+signal-to-PDU and PDU-offset tables, the GP-relative `0x58074 -> 0xBCD62` staging/snapshot
 maps, current GTS+ names, and both retained drives.
 
 The hardware acceptance denominator is also exact, not inferred from the COM table.
@@ -1236,7 +1236,7 @@ sensor domain is on Bus 1. The DTC therefore identifies the immediate logical so
 domain, not by itself the ECU that computes, transforms, or signs the lane target.
 
 The corrected pinned copy-edge census starts from all **116** exact scalar extracts and
-follows only exact raw→`0x58074` stage→`0xBCD66` snapshot edges and their consumers. It
+follows only exact raw→`0x58074` stage→`0xBCD62` snapshot edges and their consumers. It
 has exactly **19 nonempty signals**:
 `{130,141,186,187,188,189,211,212,213,223,243,261,262,263,265,268,269,270,273}`;
 the remaining **97 are empty under this model**. B6 signal261 is the sole recovered mode
@@ -1930,7 +1930,7 @@ six flags staged at `FEBEF0A4..FEBEF0AE`. Runtime constants in this image pin
 `FEBEF098=FEBEF099=0`, `FEBEF09C=1`, and `FEBEF0AA=0`. Under those constants,
 `FUN_000BE846`'s active combination reduces to the **sig232** branch:
 `FEBEBE96 = clamp((sig232-512)*0x931/0x100, +/-3763)`; the sig229 contribution is
-suppressed by the `FEBEF0AA&2` branch. `FUN_000BCD66` copies `FEBEBE96 -> FEBEAE0C`, and
+suppressed by the `FEBEF0AA&2` branch. `FUN_000BCD62` copies `FEBEBE96 -> FEBEAE0C`, and
 `FUN_000C310E` leak-integrates that value (`FEBEBF58 += FEBEAE0C - FEBEBFA0`, then
 `FEBEBFA0 = FEBEBF58*0x400/8672` when its validity gate is open). Thus the previously
 posed `FEBEBE96 -> FEBEAE0C -> C310E` chain is exact, but its source is **sig232**, not
@@ -1973,7 +1973,7 @@ CORR-127 closes the denominator question raised by the broader `0x58074` staging
 
 **L1/L2 denominator.** Exact `FUN_0007D12A` literal calls provide **116 scalar raw cells** (including signal243's stack-RMW path `0x4BB62 -> FEBE80A0`). The table-driven callers `0x693FE/0x697F4` add **14 configured extracts**, signals 90..103, spanning CAN `0x013..0x01F`; their qualification/forwarding state remains inside the communications-manager family and does not become a lateral magnitude. `FUN_00058074` stages **98 of the 116 scalar raw cells over 105 exact copy edges**. The other 18 raw cells have no consumer beyond their unpacker/staging/init machinery.
 
-**Stage/snapshot denominator.** The exact COM-derived stage-space has **52 reader functions**; **15** sit inside the recovered steering cluster and the highest direct stage reader is `0xBF0EC`. No C/D-family command-composition function reads those stage cells directly: it consumes the later snapshot bank. Six exact copiers — `0xBC96A`, `0xBCA08`, `0xBCAA6`, `0xBCBD8`, `0xBCD62`, `0xBCD66` — account for **306 unique snapshot destinations**. This is the denominator the old 19-signal shortcut omitted.
+**Stage/snapshot denominator.** The exact COM-derived stage-space has **51 reader functions**; **15** sit inside the recovered steering cluster and the highest direct stage reader is `0xBF0EC`. No C/D-family command-composition function reads those stage cells directly: it consumes the later snapshot bank. Five exact copiers — `0xBC96A`, `0xBCA08`, `0xBCAA6`, `0xBCBD8`, `0xBCD62` — account for **306 unique snapshot destinations**. This is the denominator the old 19-signal shortcut omitted.
 
 **What reaches the steering cluster without B6.** Four non-B6 COM families survive far enough to matter, but none is an external command magnitude: `0x090` is the observer/plausibility family closed in §28; `0x0D7` contributes speed-class gating and a handler-pointer selector; `0x675` contributes configuration/telemetry/plausibility cells; and `0x13B` contributes gate state whose relevant qualifier branch is itself invalidated/gated by B6 signal243. These are real inputs and are why the old “empty” wording was too strong.
 
@@ -1997,11 +1997,11 @@ The direct runtime writers are all internal C/D-family algorithm state: `CF2B2 -
 
 This also bounds the retained-drive interpretation. VAR-075 pins the `FEBEC5EE` moving-mode contribution to zero in both retained drives because its `0x0D5` s213 source is identically zero; the other `D0218` terms remain live and, through the now-verified `CC62 -> CC66/CC64 -> AC54/EE40C` chain, can have a real current-control consequence with B6 absent. But semantic closure of all eight terms finds no independently recovered **lane-target** magnitude: they reduce to measured torque, torque+speed maps, internal aggregation/ROM state, `|torque|` curves, and angle return/dither/excitation. VAR-081 identifies the interval as LTA/LCA active. The unresolved question is therefore what upstream state/value gives this shared funnel factory lane-centering authority with B6 absent, not whether `CC62` reaches the motor. Nothing here authorizes output.
 
-**`CEFFC` / `CB00` is the recovered D0218 map-bank selector, and it is B6-fed.** Exact `FUN_000CEFFC` writes `FEBECB00`. Default is `7`. When `FEBEACBD==0` and `FEBECAFF==1`, B6 signal 261 snapshot `FEBEADB0` (Target Lateral ID, B3[5:0]) maps `1→0`, `4→1`, `0x0A→3`, `0x0B→2` (LTA/LCA), `0x12→5` (SDG), `0x13→4`. `CD094` and `CDFF8` then index return/dither tables as `(CB00&7)+(AC3C&1)*8`. That is how F33 would change D0218 angle-domain maps **if B6 carried ID 11/18**. Runtime writers of `FEBEADB0` are only snapshot copier `BCD66` and reset `BF97A`; `0x08A` is not a source. In the retained drives B6 is absent, so `ADB0` stays 0 and `CB00` stays **7**. The ID11/18 D0218 banks therefore do not run. `CEFFC` does not import the `0x08A` milliradian target; it only switches internal maps from B6's copy of the same Target Lateral ID dictionary. Hands-light motor tracking of `0x08A` error remains a separate plant observation, not this selector. VAR-090.
+**`CEFFC` / `CB00` is the recovered D0218 map-bank selector, and it is B6-fed.** Exact `FUN_000CEFFC` writes `FEBECB00`. Default is `7`. When `FEBEACBD==0` and `FEBECAFF==1`, B6 signal 261 snapshot `FEBEADB0` (Target Lateral ID, B3[5:0]) maps `1→0`, `4→1`, `0x0A→3`, `0x0B→2` (LTA/LCA), `0x12→5` (SDG), `0x13→4`. `CD094` and `CDFF8` then index return/dither tables as `(CB00&7)+(AC3C&1)*8`. That is how F33 would change D0218 angle-domain maps **if B6 carried ID 11/18**. Runtime writers of `FEBEADB0` are only snapshot copier `BCD62` and reset `BF97A`; `0x08A` is not a source. In the retained drives B6 is absent, so `ADB0` stays 0 and `CB00` stays **7**. The ID11/18 D0218 banks therefore do not run. `CEFFC` does not import the `0x08A` milliradian target; it only switches internal maps from B6's copy of the same Target Lateral ID dictionary. Hands-light motor tracking of `0x08A` error remains a separate plant observation, not this selector. VAR-090.
 
 **Default-bank terms themselves have no unpublished milliradian.** With `CB00=7`, `C43C` is `clamp(C472+C45A+C44C)` from driver-torque snapshot `AC44`, speed `ADF6`, and filtered measured-angle rate `C172` (delta of `AC88`). `C4C0` is a torque×speed map. `C3BA`/`CC2C`/`BF3C` stay inside the torque family. `CD094` blends return state `CA36` toward `C172` under that default bank; dither/return copies peripheral `EC14`/`EC18`. None of the eight term writers reads B6 `ADB0` or the B6 COM window. Combined with VAR-077 (only B6 supplies COM value/mode into `CC50/CC62`), the retained hands-light motor correlation with published `0x08A` error is **not an F33 COM input** (VAR-092). The command is adjacent to EPS, not into it.
 
-Deterministic evidence is the `baseline_internal_assist_path` section of `data/generated/camry_8965F3307000_command_cone_ingress.json`, generated from the exact 6,065-function F33 corpus and verified by `tests/verify_camry_8965F3307000_command_cone_ingress.py`.
+Deterministic evidence is the `baseline_internal_assist_path` section of `data/generated/camry_8965F3307000_command_cone_ingress.json`, generated from the exact 6,062-function F33 corpus and verified by `tests/verify_camry_8965F3307000_command_cone_ingress.py`.
 
 ## 31. Baseline-assist parameter-bank selector: ordinary COM selector inputs are route-wide zero/absent in both retained Class-L drives
 
@@ -2096,7 +2096,7 @@ same-function `CC62 -> CC66` value-flow. The physical command/current chain is:
 → `3835E/FEBE6DC8` + `384D8/FEBE6DD6`
 → downstream motor-control transform `38162`.
 
-The writer sets are narrow and mechanically pinned in the exact 6,065-function corpus.
+The writer sets are narrow and mechanically pinned in the exact 6,062-function corpus.
 `CC64` is written by `D047C` plus reset/clear `D01B4`; `AC54` by `D0AAE` plus reset;
 `EE40C` by `BF33E` plus reset; `6AF4` by `35C4C` plus the common state consolidator;
 `6E0A` by `387BA` plus consolidator; `6DEC` by `38502` plus consolidator; `6DC8` by
@@ -2196,7 +2196,7 @@ The direct vehicle observation remains evidence to explain, but it no longer dem
 ## 36. E1/E2 closure: computed STORE arithmetic and runtime DMAC destination provenance are clean
 
 VAR-085 executes the two falsifiers left open by §35 against the exact F33 image and the
-canonical **6,065-function** decompiler corpus. The reusable target-native resolver is
+canonical **6,062-function** decompiler corpus. The reusable target-native resolver is
 `ghidra/scripts/investigate/AuditComputedStoreTargets.java`. It works on HighFunction STORE
 pointer expressions, recovers conservative unsigned-32 address ranges through constants,
 casts, adds/subtracts, masks, shifts, multiplies, `PTRADD/PTRSUB`, and bounded PHIs, and
@@ -2204,8 +2204,8 @@ reports only target intersections that are not already represented by a canonica
 reference. Unknown/unbounded pointers are deliberately not converted into false certainty;
 that general memory-corruption class remains separate from E1/E2.
 
-**E1 — register-arithmetic STORE targets.** Across **13,493** recovered STORE operations,
-**5,011** have a statically bounded target range. Scanning the command/current/D0218 target
+**E1 — register-arithmetic STORE targets.** Across **13,183** recovered STORE operations,
+**4,701** have a statically bounded target range. Scanning the command/current/D0218 target
 set produces **100 candidate STORE rows in 46 functions** before exact runtime/configuration
 bounds are applied. Every candidate collapses outside the target cell it only overlapped
 under the coarse range analysis:
@@ -3652,7 +3652,7 @@ Live READY-state values from the retained 2026-08-26 PE1 LocalRAM dump:
   the consistency checkers (`FUN_00035532` family) report clean;
 - the `A55A5AA5` marker family is intact at `FEBE6AAA`.
 
-The decisive census: over the 6,065-function canonical corpus, **45 functions
+The decisive census: over the 6,062-function canonical corpus, **45 functions
 touch learned `FEBE6Axx` cells, 17 touch the `D0218` assist-funnel cells
 (`C43C/C4C0/C3BA/CC2C/BF3C/CB08/CB20/CC50/CC60`), and exactly zero touch
 both.** The learned-adaptation machinery and the assist funnel are disjoint
@@ -3816,7 +3816,7 @@ FUN_4BD46
         |
 FUN_58074 -> FEBEF13E
         |
-FUN_BCD66 -> FEBEADB9    B6 receive-status snapshot
+FUN_BCD62 -> FEBEADB9    B6 receive-status snapshot
 
 B6 application values in parallel:
   sig261 -> FEBEADB0     Target Lateral ID
@@ -4003,7 +4003,7 @@ The next bounded patch moves to the **definition**, not another consumer. The re
 
 Stage 3 intentionally starts from the live-proven stage-2 image and changes only that new four-byte site. With `r26=0`, the remaining `FUN_0008F906` path receives the same boolean/status values and takes the same success arm as native verified success; the existing `8F948=003A` and `8F952=E001` edits become outcome-equivalent to the stock instructions for this function but are left present to keep the next experiment one-new-site. The deterministic cumulative image has CRC prefix **`0x13ADA3CC`**, fixup **`0xEC525C33`**, residue `0xFFFFFFFF`, and SHA-256 **`67f4aaa803f9f3df3e5b2bf31d2c8950ebbb3870fa3f5d439f585caae3a8313c`**. RESTORE reverses stage 3 only and returns to the exact reboot-verified stage-2 image. Stage 3 is not a live success claim.
 
-At that experiment stage, `FUN_0004BD46` was known to write B6 sig261/sig262 to generated-COM cells `FEBE80BC/FEBE80B8`; `FUN_00058074` carries them to `FEBEF130/FEBEF1FA`, and `FUN_000BCD66` copies those values to `FEBEADB0/FEBEAE90`. The probe added `80BC/80B8` as an intermediate rung and then labeled a miss there `pdu_not_delivered_to_com`. CORR-158/162 later correct that label: these are post-window generated scalars, not raw PDU44, and the retained ID0 result was baseline-confounded. Positive `ADMITTED` still requires the complete downstream ladder and bank 2.
+At that experiment stage, `FUN_0004BD46` was known to write B6 sig261/sig262 to generated-COM cells `FEBE80BC/FEBE80B8`; `FUN_00058074` carries them to `FEBEF130/FEBEF1FA`, and `FUN_000BCD62` copies those values to `FEBEADB0/FEBEAE90`. The probe added `80BC/80B8` as an intermediate rung and then labeled a miss there `pdu_not_delivered_to_com`. CORR-158/162 later correct that label: these are post-window generated scalars, not raw PDU44, and the retained ID0 result was baseline-confounded. Positive `ADMITTED` still requires the complete downstream ladder and bank 2.
 
 The next field sequence is therefore **NRTD zero-write stage-3 preflight -> APPLY only on an exact match -> full OFF -> NRTD zero-write persistence verification -> full OFF -> READY admission-only B6**. The 0.5-degree offset remains forbidden until the admission-only run reports `ADMITTED`.
 
@@ -4416,7 +4416,7 @@ writers:
 Using the bit-field definitions in Renesas `R01UH0585EJ0120` Rev.1.20 §§17.4.3,
 17.4.4 and 17.11.1 gives the exact timing below.  The test
 `tests/verify_camry_8965F3307000_canfd_timing.py` re-derives the constants from
-the canonical 6,065-function F33 corpus and verifies the arithmetic.
+the canonical 6,062-function F33 corpus and verifies the arithmetic.
 
 | phase | F33 clock/divider | TSEG1 | TSEG2 | SJW | Tq/bit | bit rate | sample point |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -4758,7 +4758,7 @@ processing that generates `0x081`.
 VAR-148 now answers that EPS-side question directly from CodeFlash instead. Accepted
 ID11 maps to `CB00=2`, its target-angle controller reaches `CB38`, and `D0218` adds
 `CB38` inside the ordinary EPS assist sum before the single shared `CC48 -> CC64`
-current-command funnel. An exhaustive 6,065-function selector/writer census finds no
+current-command funnel. An exhaustive 6,062-function selector/writer census finds no
 ID11-exclusive replacement writer. Thus the receiver behavior is not merely
 "coexistence plausible": **ID11 B6 is structurally co-modulated with the ordinary EPS
 assist/current terms.**
@@ -5125,8 +5125,11 @@ AC54 -> EE40C` and into the motor/current-control side.  `D039E` retains the sha
 from measured/local rate state, not from the raw B6 target.
 
 The remaining escape hatches were exhaustively checked rather than inferred from this one
-path.  Across the complete **6,065-function** canonical F33 corpus, exactly **50 functions**
-reference `CB00`; none directly reads or writes any of the final command-funnel cells.
+path.  Across the complete **6,062-function** canonical F33 corpus, exactly **49 functions**
+reference `CB00`. They are exhaustively partitioned, with no overlap or remainder, into
+**9 mode/mirror-status**, **28 controller/calibration/supervision**, **7 readiness/fault-supervision**,
+**2 bank-selection**, and **3 gain/output-shaping** functions. None directly reads or writes
+any of the final command-funnel cells.
 `ADB0` has exactly two runtime readers: `CEFFC` and `CB73A`.  `CB73A` is the one special
 transient capable of changing the ordinary sum, but its literal condition is
 **`ADB0 == 0x31`**, whereas ID11 is **`0x0B`**.  It therefore is not the ID11 path.  A
@@ -5159,12 +5162,267 @@ The deterministic proof is
 semantic function to exact CodeFlash body hashes while independently exhausting every
 selector reference and every direct writer of the shared command funnel.
 
+## 66. Exact-F33 B6 end-to-end software gate closure: one 17-rung live discriminator (VAR-149)
+
+The remaining development-B6 problem is no longer usefully described as a single
+"SecOC acceptance" question.  Exact `8965F3307000` CodeFlash plus the complete
+6,062-function canonical corpus now close the recovered software path from the
+physical B6 receive descriptor through the motor-current model, including the
+common EPS gates *after* the cooperative B6 controller.  This section joins the
+previously separate transport, SecOC, COM, controller-composition, and current-path
+proofs into one ordered execution map.
+
+### 66.1 The complete recovered software path
+
+The configured ingress is exact: RSCFD controller-1 rule 39 reaches CanIf descriptor
+39 (`0x400000B6`, length 32), PduR route 44, and SecOC profile 2.  `8EE7C -> 8F34A
+-> 8E9C6` copies the secured PDU into profile-2 queue record `FEBE547A` / secured
+buffer `FEBE54D4`.  `8F746` extracts FV4/MAC28, invokes freshness callback `903A0`,
+builds the authentication input, submits the ICU-S operation, and reaches `8F906`.
+The raw freshness table independently proves profile 2 / FreshnessId 2 is ordinary
+freshness slot 1: its three records are `(special,id,slot) = (1,0,-), (0,1,0),
+(0,2,1)`.
+
+Under the persistence-verified cumulative stage-5 image, only the recovered
+**freshness/authentication result semantics** are neutralized.  Stage 5 does not
+manufacture a receive frame, repair a queue, copy PduR data, run COM, select the
+cooperative bank, create controller gain, or bypass any common EPS actuator gate.
+Given a structurally valid queued transaction, the recovered freshness/ICU result
+failures cannot prevent the stock success arm; everything after that remains stock
+logic.
+
+Native success continues:
+
+```text
+0x0B6 FD/32
+  -> RSCFD rule39 -> CanIf39 -> PduR44
+  -> 8EE7C/8F34A/8E9C6 -> SecOC profile2 queue
+  -> 8F746 -> freshness -> ICU-S -> 8F906
+  -> 8F546 -> 90204 -> 81CA6 -> 7D72C
+  -> raw route44 COM FEBE4BFF..FEBE4C1E + generation FEBE5364
+  -> 4BD46 generated-COM unpack
+  -> 58074 staging
+  -> BCD62 application snapshot
+  -> CEFA4 route health -> CEFFC cooperative bank
+  -> B6 target/companion/readiness/supervisor controller
+  -> CF2B2 / FEBECB38
+  -> D0218 ordinary EPS command composition
+  -> D0284 -> D02DA -> D0382 -> D039E
+  -> D042C common scale + hard actuator gate
+  -> D047C internal override
+  -> D0AAE -> BF33E -> 35C4C motor-side selection
+  -> 387BA -> 38502 -> 3835E/384D8 -> 38162 motor-current model
+```
+
+The generated-COM edge has its own hard precondition that is unrelated to SecOC.
+`4BD46` updates B6 scalars only when **`FEBE7F68 < 2`** and route generation
+`FEBE5364` differs from its local `FEBE80C8` generation latch.  `58074` then stages
+that global state as `FEBEF000`; `BCD62` normalizes it to `FEBEACBD` as
+`0->0`, `2->2`, `3->4`, and other nonzero values to `1`.  Thus `7F68>=2` prevents a
+new B6 from being unpacked at all, while `7F68==1` can allow an unpack but still makes
+`ACBD!=0`; `CEFFC` requires `ACBD==0` before ID11 can select bank 2.  The equivalent
+H/F state has a Techstream-backed power-supply receive-validity/freeze role
+(TMS-055); this section uses only the exact-F33 mapping/gating behavior and does not
+transfer a literal F33 OEM label.
+
+### 66.2 Every B3..B10 B6 scalar now has a bounded application fate
+
+`4BD46` extracts all thirteen scalar signals 261..273.  The complete direct-reference
+census distinguishes command-relevant companions from fields that simply die after
+staging/snapshot:
+
+| signal | wire bits | snapshot / fate | exact downstream role |
+|---|---|---|---|
+| 261 | B3[5:0] | `ADB0` -> `CEFFC/CB73A` | **Target Lateral ID**; ID11 maps to `CB00=2` |
+| 262 | B4:B5 s16BE | `AE90` -> `CBA80/CBB66/CCF0E/CEE7C` | target steering angle/controller input |
+| 263 | B6[7] | `ADDD` -> `CB664` | **must be zero for cooperative activation/retention** |
+| 264 | B6[6:4] | `ADB1` | snapshotted; zero runtime readers recovered |
+| 265 | B6[2] | `ADBB` -> `CDA20` | value `1` suppresses one controller term; `0` permits it |
+| 266 | B6[1:0] | stops at `F135` | no application snapshot/runtime reader recovered |
+| 267 | B7[7:6] | `ADC2` | snapshotted; zero runtime readers recovered |
+| 268 | B7[5:0] | `ADBC` -> `CEC8A` | independent modulo-64 application sequence |
+| 269 | B8 | `ADBD` -> `CE3AA` | `/100` cooperative contribution percentage |
+| 270 | B9 | `ADBE` -> `CDFF8` | `/100` cooperative contribution percentage |
+| 271 | B10[7] | `ADC1` | snapshotted; zero runtime readers recovered |
+| 272 | B10[5] | `ADE5` | snapshotted; zero runtime readers recovered |
+| 273 | B10[2:0] | `ADD9` -> `CFDA0` | health-qualified publication companion; no command-magnitude role recovered |
+
+Route status `ADB9` is separate from those thirteen application fields. `CEFA4` combines
+route-family health with `ADB9==0` to produce `CAFF`; `CEFFC` requires both `CAFF==1`
+and `ACBD==0`. `CB2A2` also uses `ADB9` in cooperative readiness. Consequently
+"the payload decoded correctly" and "ID11 selected the cooperative controller" are
+separate observable facts.
+
+The current fork's active sender is consistent with every recovered application-side
+requirement at opendbc `f207c273b645`: ID11; signed target angle in B4:B5; signal263=0;
+signal265=0; modulo-64 signal268; signals269/270=`100/100`; and the currently
+unconsumed/health-publication companions left zero.  The 28-byte zero template also
+keeps the non-extracted B3..B10 residual bits zero.  Its B6 application cadence is one
+frame every second CarController cycle (nominal 50 Hz / 20 ms), inside exact F33's
+seven-5-ms / nominal 35-ms receive-loss window.  VAR-146 already proves its SecOC
+message-counter progression is freshness-reconstructable; VAR-147 proves the dummy
+wrong-key MAC is acceptance-equivalent to the historical zero MAC under stage 5.
+**No recovered B6 wire/application-field mismatch remains that justifies another
+packer guess.**
+
+### 66.3 Four independent post-B6 gates can erase or replace a valid cooperative command
+
+The critical closure is downstream of `CB38`.
+
+First, the cooperative controller itself does not guarantee a nonzero contribution.
+`CEFFC` can select bank2 while readiness/ramp machinery still leaves `CB20` zero;
+`CF2B2` computes `CB38` only after gain, slew, and magnitude limits.  An admitted ID11
+therefore does not imply `CB38!=0`.
+
+Second, **`D0218` can omit `CB38` entirely**.  `BCBD8` snapshots internal
+`FEBEB112 -> FEBEAC2B`; exact internal APIs `B338C` and `B330A/B3314` set/clear that
+state.  When `AC2B==0x5A`, `D0218` takes its reduced diagnostic/service branch
+`C4C0+C3BA+BF3C`.  Only the normal `AC2B!=0x5A`, `C7BF!=1` branch contains
+`clamp(CB38+C5EE)`.  The special `C7BF` transient is separately bound to literal
+`ADB0==0x31`, not ID11 `0x0B`.
+
+Third, **`D042C` can attenuate or hard-zero a perfectly good shared command**.
+`BCBD8` snapshots internal `FEBEB1F8 -> AC5A`; `B4B6C/B4EF4` own that state and ramp it
+between bounded endpoints. `D042C` computes:
+
+```text
+CC62 = CC50 * AC5A / 0x400
+```
+
+so `AC5A=0x400` is unity and `AC5A=0` erases the command before the actuator gate.
+It then forms `CC66`, but finally executes:
+
+```text
+if AC29 == 0 or AC2A != 0:
+    CC66 = 0
+```
+
+`AC29/AC2A` are not B6 fields. `572E6` computes aggregate internal status `FEBE8B28`;
+`FCC00` snapshots it to `FEBEEF90`; `BCAA6` derives:
+
+```text
+AC29 = ((EEF90 & 0x70017001) != 0x70017001)
+AC2A = ((EEF90 & 0x00040004) != 0)
+```
+
+The complete writer census has no other runtime source for either actuator gate.
+
+Fourth, **`D047C` can replace the post-gate command**. `D05B4/D0528/D064C/D0674`
+produce internal mode `CC98` and bounded replacement value `CC94`; ordinary behavior is
+`CC98==0 -> CC64=CC66`, while nonzero `CC98` selects/clamps the internal `CC94` path.
+Again, no B6 selector writes those states.
+
+There is one more common selection on the motor side. `D0AAE -> BF33E` places `CC64`
+at `EE40C`. `35C4C` normally uses it as `6AF4=-EE40C`, but its internal
+service/status branches can substitute bounded `EEB10/EE416/EE418` state before the
+same `6AF4 -> 6E0A` current model. The recovered exact-F33 chain then reaches
+`6DEC`, `6DC8`, `6DD6`, and `38162`.  VAR-083's boundary remains explicit: this is an
+exact target-native **motor-current-model convergence**, not a new claim that the final
+TSG3 hardware PWM commit has been recovered target-natively for F33.
+
+The 6,062-function direct-writer census is exact from `CB00/CB20/CB38` through
+`CC48/CC4C/CC4E/CC60/CC50/CC62/CC66/CC64`, `AC54/EE40C`, and
+`6AF4/6E0A/6DEC/6DC8/6DD6`: each state has only the recovered runtime writer plus the
+known reset/init writer(s).  The gate-source censuses similarly close `AC2B/B112`,
+`AC5A/B1F8`, `AC29/AC2A`, `8B28/EEF90`, and `CC98/CC94`.  This is why another generic
+xref sweep of the same CodeFlash is no longer the correct next action. Computed aliases,
+DMA/peripheral mutation, ICU-S silicon internals, and final F33 hardware-PWM commit are
+kept outside that direct-reference proof instead of silently declared impossible.
+
+### 66.4 One stationary capture can now identify the first failing rung
+
+The useful experiment is an adjacent-rung capture, not another road A/B and not another
+SecOC-result patch.  Record, in order:
+
+1. host `sendcan` B6 and Panda successful-TX echo;
+2. `FEBE547A/FEBE54D4` (F33 SecOC queue + exact secured bytes);
+3. `FEBE55E8/FEBE5600/FEBE5564` (profile2 freshness/auth transaction);
+4. `FEBE4BFF..FEBE4C1E/FEBE5364` (raw route44 publication);
+5. `FEBE7F68/FEBE80C8/80BC/80B8/80CB/80C0/80C3/80C4/80C5/80C9` (generated COM);
+6. `F130/F1FA/F155/F134/F137/F138/F139/F13E` and their `ADB*/AE90` snapshots;
+7. `ACBD/CAFF/ADB0/CB00` (route health + bank selection);
+8. command-relevant companions/readiness (`ADDD/ADBB/ADBC/ADBD/ADBE`, `CAB*/CA*`);
+9. `CB20/CB08/CB38` (actual cooperative contribution);
+10. `B112/AC2B/CB38/CC48` (which D0218 branch ran);
+11. `CC48/CC4C/CC4E/AC52/CC60/CC50` (ordinary shared funnel);
+12. `B1F8/AC5A/CC50/CC62` (common output scale);
+13. `8B28/EEF90/AC29/AC2A/CC62/CC66` (hard actuator gate);
+14. `CC98/CC94/CC66/CC64` (internal override);
+15. `AC54/EE40C/EEB1E/EE780/EE406/6AF4` (motor-side source selection);
+16. `6E0A/6DEC/6DC8/6DD6` plus `0x030` motor-current proxy;
+17. measured steering/rate/driver torque (physical plant).
+
+The eight-window generic runtime monitor can cover the ladder without rebuilding the
+resident by using seven **adjacent-overlap phases**. Phase A covers SecOC queue/auth and
+raw route44 publication; B covers raw route44 through generated COM; C covers generated
+staging through `ADB0/AE90` plus `ACBD/CAFF`; D covers bank/readiness through `CB38`; E
+covers `CB38` through `D0218`, `CC50`, and `AC5A`; F covers the hard actuator gate,
+`CC98/CC94` override, and `EE40C`; G covers `EE40C -> 6AF4 -> 6E0A/6DEC/6DC8/6DD6`.
+The boundary windows deliberately repeat across adjacent phases (`5364`, `F1F8`, `CAFC`,
+`CB38`, `AC28/CC60`, `EE40C`) so a phase change does not create an observational gap.
+Exact aligned watch addresses and first-divergence interpretations are generated in
+`stationary_monitor_phases` of `data/generated/camry_f33_b6_end_to_end.json` and copied to
+`exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md`.
+
+That makes the next failure classification mechanical.  Queue unchanged means the
+problem is before/at F33 ingress. Queue changes but route44 does not means the remaining
+problem is inside the SecOC/upper-publication transaction. Raw COM changes but generated
+COM does not means `4BD46`/global state. `ADB0=11` with `CB00=7` means route-health/global
+bank admission. `CB00=2` with `CB38=0` means cooperative readiness/gain/controller state.
+`CB38!=0` but `CC48` omits it means the `AC2B` branch. `CC50!=0` with `CC62==0` means
+`AC5A` scaling. `CC62!=0` with `CC66==0` means the `AC29/AC2A` hard gate. `CC66!=0` but
+`CC64` differs means the internal override. `EE40C` differing from the `6AF4` source
+means motor-side substitution. A nonzero downstream current-model command with no motor
+feedback/motion finally moves the question to the motor/plant boundary.
+
+**Objective answer:** yes, the recovered software gates outside ICU-S on the B6-to-current
+path are now mapped tightly enough to stop guessing. No, static CodeFlash does not tell us
+which runtime gate was asserted during route 48 because that route did not capture these
+internal witnesses. And no, "SecOC accepted B6" is not equivalent to "the EPS must steer":
+there are multiple ordinary, independently sourced EPS gates after authentication and after
+`CB38` generation.  The next car session should answer *which one*, in one stationary run.
+
+### 66.5 Canonical target function boundaries corrected (CORR-181)
+
+A full rebuild audit found that the first-class target seed list had forced three false
+function starts exactly four bytes into real functions: `BCD66` inside `BCD62`, `CCFB6`
+inside `CCFB2`, and `CEE80` inside `CEE7C`. The false +4 entries had **zero callers**;
+the real entries had callers and artificial four-byte bodies because the forced child
+function truncated them. Removing the three false seeds and seeding the real starts
+produces `BCD62` = 2748 bytes, `CCFB2` = 128 bytes, and `CEE7C` = 146 bytes, with no
+separate child functions.
+
+Two independent four-stage rebuilds from empty state produce **byte-identical normalized
+inventories**. The corrected canonical inventory SHA-256 is
+`423f5e584548f984bc5b447d9975ac378fdcba4a3a00b3a4c6d0c33660320f99`, with **6,062
+functions**. A whole-corpus check finds no remaining analogous callerless +4 child split.
+The boundary correction removes duplicate HighFunction accounting as expected: STORE
+operations fall `13,493 -> 13,183`, known-range STOREs `5,011 -> 4,701`; the actual E1
+and E2 candidate sets stay **100/46** and **5/3**, respectively. Generated-COM stage
+readers become `52 -> 51`; the two formerly counted `BCD62/BCD66` snapshot functions
+collapse to one, so snapshot copiers become `6 -> 5` while the actual **306 unique
+snapshot destinations are unchanged**; `CB00`-aware functions become `50 -> 49`.
+
+This changes evidence attribution and denominators, not the steering result. The same
+statements formerly attributed to `BCD66`, `CCFB6`, and `CEE80` are inside their real
+parents `BCD62`, `CCFB2`, and `CEE7C`; the B6 target still snapshots to `ADB0/AE90`, ID11
+still selects bank2, the target controller still reaches `CB38`, and `D0218` still
+co-modulates that contribution into the shared command/current funnel. CORR-181
+supersedes current canonical uses of the old three child labels and the old 6,065-function
+denominator; historical conclusions are otherwise retained at their original evidence
+grade.
+
+Machine-readable proof is
+`data/generated/camry_f33_b6_end_to_end.json`; deterministic reducer/verifier are
+`tools/analyze_camry_f33_b6_end_to_end.py` and
+`tests/verify_camry_f33_b6_end_to_end.py`.
+
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
 
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113), [VAR-114](../reference/index.md#finding-var-114), [VAR-115](../reference/index.md#finding-var-115), [VAR-116](../reference/index.md#finding-var-116), [VAR-118](../reference/index.md#finding-var-118), [VAR-119](../reference/index.md#finding-var-119), [VAR-120](../reference/index.md#finding-var-120), [VAR-121](../reference/index.md#finding-var-121), [VAR-122](../reference/index.md#finding-var-122), [VAR-123](../reference/index.md#finding-var-123), [VAR-127](../reference/index.md#finding-var-127), [VAR-128](../reference/index.md#finding-var-128), [VAR-134](../reference/index.md#finding-var-134), [VAR-135](../reference/index.md#finding-var-135), [VAR-136](../reference/index.md#finding-var-136), [VAR-137](../reference/index.md#finding-var-137), [VAR-142](../reference/index.md#finding-var-142), [VAR-143](../reference/index.md#finding-var-143), [VAR-144](../reference/index.md#finding-var-144), [VAR-145](../reference/index.md#finding-var-145), [VAR-146](../reference/index.md#finding-var-146), [VAR-147](../reference/index.md#finding-var-147), [VAR-148](../reference/index.md#finding-var-148)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157), [CORR-158](../reference/index.md#correction-corr-158), [CORR-159](../reference/index.md#correction-corr-159), [CORR-160](../reference/index.md#correction-corr-160), [CORR-161](../reference/index.md#correction-corr-161), [CORR-162](../reference/index.md#correction-corr-162), [CORR-165](../reference/index.md#correction-corr-165), [CORR-166](../reference/index.md#correction-corr-166), [CORR-167](../reference/index.md#correction-corr-167), [CORR-168](../reference/index.md#correction-corr-168), [CORR-171](../reference/index.md#correction-corr-171), [CORR-176](../reference/index.md#correction-corr-176), [CORR-177](../reference/index.md#correction-corr-177), [CORR-178](../reference/index.md#correction-corr-178), [CORR-179](../reference/index.md#correction-corr-179)
+- Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113), [VAR-114](../reference/index.md#finding-var-114), [VAR-115](../reference/index.md#finding-var-115), [VAR-116](../reference/index.md#finding-var-116), [VAR-118](../reference/index.md#finding-var-118), [VAR-119](../reference/index.md#finding-var-119), [VAR-120](../reference/index.md#finding-var-120), [VAR-121](../reference/index.md#finding-var-121), [VAR-122](../reference/index.md#finding-var-122), [VAR-123](../reference/index.md#finding-var-123), [VAR-127](../reference/index.md#finding-var-127), [VAR-128](../reference/index.md#finding-var-128), [VAR-134](../reference/index.md#finding-var-134), [VAR-135](../reference/index.md#finding-var-135), [VAR-136](../reference/index.md#finding-var-136), [VAR-137](../reference/index.md#finding-var-137), [VAR-142](../reference/index.md#finding-var-142), [VAR-143](../reference/index.md#finding-var-143), [VAR-144](../reference/index.md#finding-var-144), [VAR-145](../reference/index.md#finding-var-145), [VAR-146](../reference/index.md#finding-var-146), [VAR-147](../reference/index.md#finding-var-147), [VAR-148](../reference/index.md#finding-var-148), [VAR-149](../reference/index.md#finding-var-149)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157), [CORR-158](../reference/index.md#correction-corr-158), [CORR-159](../reference/index.md#correction-corr-159), [CORR-160](../reference/index.md#correction-corr-160), [CORR-161](../reference/index.md#correction-corr-161), [CORR-162](../reference/index.md#correction-corr-162), [CORR-165](../reference/index.md#correction-corr-165), [CORR-166](../reference/index.md#correction-corr-166), [CORR-167](../reference/index.md#correction-corr-167), [CORR-168](../reference/index.md#correction-corr-168), [CORR-171](../reference/index.md#correction-corr-171), [CORR-176](../reference/index.md#correction-corr-176), [CORR-177](../reference/index.md#correction-corr-177), [CORR-178](../reference/index.md#correction-corr-178), [CORR-179](../reference/index.md#correction-corr-179), [CORR-180](../reference/index.md#correction-corr-180), [CORR-181](../reference/index.md#correction-corr-181)
 <!-- knowledge-cross-references:end -->

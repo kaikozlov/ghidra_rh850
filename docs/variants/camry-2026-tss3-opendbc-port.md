@@ -147,7 +147,7 @@ The earlier scratch-project census evolved in two steps: VAR-056 initially found
 direct/fixed-GP driver-torque users, and CORR-120 added `0x4C000` as a fifth after
 recovering the `0x4A3` telemetry producer. Both counts are now historical. The
 first-class F33 project seeds the target-native GP from `0x715B4` and exports the
-canonical Ghidra data-reference graph across **6,065 recovered functions**, so the
+canonical Ghidra data-reference graph across **6,062 recovered functions**, so the
 source census no longer depends on textual `unaff_gp` spelling.
 
 For driver torque `GP-0x5158 = FEBE66A8`, the exact direct-reference set is **nine**:

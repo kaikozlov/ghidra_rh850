@@ -4,7 +4,7 @@
 "D5" names the 0x5Dxxx snapshot-mirror trio (0x5D12C/0x5D5E0/0x5D6DC, driven by
 0x58B1A under selector switches) plus the acquisition staging FEBE822C..FEBE8260
 that feeds it.  This builder deterministically re-derives, from the canonical
-6,065-function decompiler corpus and the exact CodeFlash image:
+6,062-function decompiler corpus and the exact CodeFlash image:
 
 * the staging writer/reader census and per-writer copy edges,
 * the group-input consume API over hardware-fed GlobalRAM rings,

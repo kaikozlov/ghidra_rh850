@@ -50,7 +50,7 @@ COMMAND_CONE = {
     223: (0xFEBE807F, 0xFEBEF091, 0xFEBEACD6, [0xC3008, 0xCECD6], "gate"),
     243: (0xFEBE80A0, 0xFEBEF094, 0xFEBEACCD, [0xC973A, 0xCB664, 0xCE772, 0xCE7A6], "protected-status-gate"),
     261: (0xFEBE80BC, 0xFEBEF130, 0xFEBEADB0, [0xCB73A, 0xCEFFC], "sole-mode-selector"),
-    262: (0xFEBE80B8, 0xFEBEF1FA, 0xFEBEAE90, [0xCBA80, 0xCBB66, 0xCCF0E, 0xCEE80], "sole-command-magnitude"),
+    262: (0xFEBE80B8, 0xFEBEF1FA, 0xFEBEAE90, [0xCBA80, 0xCBB66, 0xCCF0E, 0xCEE7C], "sole-command-magnitude"),
     263: (0xFEBE80CB, 0xFEBEF155, 0xFEBEADDD, [0xCB664], "command-gate"),
     265: (0xFEBE80C0, 0xFEBEF134, 0xFEBEADBB, [0xCDA20], "command-composition-gate"),
     268: (0xFEBE80C3, 0xFEBEF137, 0xFEBEADBC, [0xCEC8A], "sequence-state"),
@@ -145,7 +145,7 @@ def build() -> dict:
     image = IMAGE.read_bytes()
     need(len(image) == 0x100000 and hashlib.sha256(image).hexdigest() == IMAGE_SHA256, "F33 image drift")
     funcs = corpus_map()
-    need(len(funcs) == 6065, "F33 corpus function count drift")
+    need(len(funcs) == 6062, "F33 corpus function count drift")
     gts = json.loads(GTS.read_text())
     b6 = json.loads(B6.read_text())
     fault = json.loads(FAULT.read_text())
@@ -273,8 +273,8 @@ def build() -> dict:
             raw_edge = row["unpacker"]
         need_ref(funcs, 0x58074, raw, "READ")
         need_ref(funcs, 0x58074, stage, "WRITE")
-        need_ref(funcs, 0xBCD66, stage, "READ")
-        need_ref(funcs, 0xBCD66, snapshot, "WRITE")
+        need_ref(funcs, 0xBCD62, stage, "READ")
+        need_ref(funcs, 0xBCD62, snapshot, "WRITE")
         for consumer in consumers:
             need_ref(funcs, consumer, snapshot, "READ")
         cone_rows.append({
@@ -285,7 +285,7 @@ def build() -> dict:
             "stage": f"0x{stage:08X}",
             "stage_copy": "0x00058074",
             "snapshot": f"0x{snapshot:08X}",
-            "snapshot_copy": "0x000BCD66",
+            "snapshot_copy": "0x000BCD62",
             "consumers": [f"0x{x:08X}" for x in consumers],
             "classification": classification,
         })
@@ -313,7 +313,7 @@ def build() -> dict:
           "FUN_0007d12a(0xd4,0x158,0x10,0,1,&DAT_febe8072);",
           "FUN_0007d12a(0xd5,0x15a,0x10,0,1,puVar2 + -0x378c);")
     token(funcs, 0x58074, "DAT_febef1bc = DAT_febe8072", "DAT_febef1be = DAT_febe8074")
-    snap = token(funcs, 0xBCD66, "puVar15 + 0x39bc", "puVar15 + -0x9fc", "puVar15 + 0x39be", "puVar15 + -0x9fa")
+    snap = token(funcs, 0xBCD62, "puVar38 + 0x39bc", "puVar38 + -0x9fc", "puVar38 + 0x39be", "puVar38 + -0x9fa")
     need("0x7fff" in snap and "-0x7fff" in snap, "D5 saturating snapshot clamp drift")
     token(funcs, 0xC9D18, "DAT_febeae04", "DAT_000b044c", "FUN_000bdb64(0xc9)")
     token(funcs, 0xC9CAA, "DAT_febeae06", "DAT_000b044a", "FUN_000bdb64(200)")
@@ -394,7 +394,7 @@ def build() -> dict:
             "signed_12plus_candidates": candidates,
         },
         "scalar_command_cone_census": {
-            "model": "pinned raw -> stage@0x00058074 -> snapshot@0x000BCD66 copy edges with exact snapshot consumers",
+            "model": "pinned raw -> stage@0x00058074 -> snapshot@0x000BCD62 copy edges with exact snapshot consumers",
             "scalar_receive_call_count": len(scalar),
             "nonempty_count": len(cone_rows),
             "empty_count": len(empty_cone_ids),

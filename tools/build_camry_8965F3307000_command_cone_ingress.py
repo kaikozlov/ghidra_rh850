@@ -2,14 +2,14 @@
 """Build the exact-F33 command-cone ingress census from the canonical corpus.
 
 Closes the denominator of scalar generated-COM inputs into the cooperative/
-lateral cluster (0xBCD66..0xCEFFC) and the command/actuation cone
+lateral cluster (0xBCD62..0xCEFFC) and the command/actuation cone
 (FEBECC62 -> FEBEAC56 -> FEBE6772 / command-current cells) beyond the pinned
 19-signal copy-edge model of VAR-065.  The prior census stopped at one
-snapshot copier (0xBCD66) and a fixed consumer list; this builder enumerates:
+snapshot copier (0xBCD62) and a fixed consumer list; this builder enumerates:
 
   * every literal and table-driven scalar extract (FUN_0007D12A/FUN_0007E72A),
   * the stage copy 0x58074 including init-constant cells,
-  * all six snapshot copiers 0xBC96A/0xBCA08/0xBCAA6/0xBCBD8/0xBCD62/0xBCD66,
+  * all five snapshot copiers 0xBC96A/0xBCA08/0xBCAA6/0xBCBD8/0xBCD62,
   * the qualification layer that turns stages into FEBEBxxx values/flags,
   * statement-level composition provenance for every FEBEE400..418 byte,
   * the gain/selector machinery (0xCB516/0xCB548/0xCB82C/0xCB9E2/0xCB73A),
@@ -38,7 +38,7 @@ FRAME_BASE = GP - 0x6DB8      # 0xFEBE4A48 COM frame block
 STATUS_BASE = GP - 0x6EC2     # 0xFEBE493E per-PDU status bytes
 RX_TABLE, RX_COUNT = 0x21FE8, 43
 SIGNAL_TO_PDU, SIGNAL_COUNT, PDU_OFFSETS = 0x22488, 284, 0x22840
-CLUSTER_LO, CLUSTER_HI = 0xBCD66, 0xCEFFC
+CLUSTER_LO, CLUSTER_HI = 0xBCD62, 0xCEFFC
 
 # table-driven extract configuration (indirect call sites)
 INDIRECT_TABLES = {
@@ -146,7 +146,7 @@ def build() -> dict:
     need(len(image) == 0x100000 and hashlib.sha256(image).hexdigest() == IMAGE_SHA256,
          "F33 image drift")
     funcs = corpus_map()
-    need(len(funcs) == 6065, "F33 corpus function count drift")
+    need(len(funcs) == 6062, "F33 corpus function count drift")
 
     rx: dict[int, dict] = {}
     for i in range(RX_COUNT):
@@ -289,7 +289,7 @@ def build() -> dict:
             if cell_tokens(m.group(1), bases_of(row["decompiled_c"])) & all_stages:
                 stage_readers.add(e)
                 break
-    need(len(stage_readers) == 52, f"stage-reader census drift: {len(stage_readers)}")
+    need(len(stage_readers) == 51, f"stage-reader census drift: {len(stage_readers)}")
     in_cluster = sorted(e for e in stage_readers if CLUSTER_LO <= e <= CLUSTER_HI)
     need(len(in_cluster) == 15, f"cluster stage-reader drift: {len(in_cluster)}")
     need(max(stage_readers) == 0xBF0EC,
@@ -309,7 +309,7 @@ def build() -> dict:
     need(gcallers == [0x693FE, 0x697F4], f"group caller drift: {gcallers}")
 
     # ---- L4: snapshot copiers ---------------------------------------------
-    COPIERS = [0xBC96A, 0xBCA08, 0xBCAA6, 0xBCBD8, 0xBCD62, 0xBCD66]
+    COPIERS = [0xBC96A, 0xBCA08, 0xBCAA6, 0xBCBD8, 0xBCD62]
     copiers = {}
     pair_map: dict[int, int] = {}
     for e in COPIERS:
@@ -318,7 +318,7 @@ def build() -> dict:
         for r, w in prs:
             pair_map[w] = r
     need(copiers == {"0xBC96A": 1, "0xBCA08": 13, "0xBCAA6": 1,
-                     "0xBCBD8": 46, "0xBCD62": 245, "0xBCD66": 245},
+                     "0xBCBD8": 46, "0xBCD62": 245},
          f"copier pair census drift: {copiers}")
     need(len(pair_map) == 306, f"unique snapshot dest drift: {len(pair_map)}")
 
@@ -566,7 +566,7 @@ def build() -> dict:
         },
     }
     token(0xCBA80, funcs, "DAT_febeae90", "DAT_febec7dc")
-    token(0xBCD66, funcs, "*(undefined2 *)(puVar15 + -0x9f4) = *(undefined2 *)(puVar15 + 0x696);")
+    token(0xBCD62, funcs, "*(undefined2 *)(puVar38 + -0x9f4) = *(undefined2 *)(puVar38 + 0x696);")
     token(0xC1BE4, funcs, "DAT_febeafa8 = DAT_febeac68;")
     token(0xFCC00, funcs, "DAT_febeef8e = DAT_febe71f2;")
     token(0x57F00, funcs, "DAT_febeee02 = DAT_febe686c;", "DAT_febeee12 = DAT_febe8a24;")
@@ -582,7 +582,7 @@ def build() -> dict:
     token(0xCB73A, funcs, "DAT_febec7bf == '\\0'", "(DAT_febeadb0 == '1')",
           "DAT_febeae02 < *(ushort *)((&PTR_DAT_000b1464)[DAT_febeac3c & 1] + 0x24)",
           "DAT_febec7b5 = 1;")
-    # FEBEADB0 <- stage FEBEF130 (sig261) via 0xBCD66 pair
+    # FEBEADB0 <- stage FEBEF130 (sig261) via 0xBCD62 pair
     need(pair_map.get(0xFEBEADB0) == 0xFEBEF130, "FEBEADB0 snapshot pair drift")
     need(dict(raw_stage).get(0xFEBE80BC) == 0xFEBEF130 or
          any(r == 0xFEBE80BC and w == 0xFEBEF130 for r, w in raw_stage),
@@ -608,14 +608,14 @@ def build() -> dict:
                 {"signal": 241, "byte": 28, "bits": 4, "bit": 4},
             ],
             "chains": [
-                "sig232t*0x931/0x10 (FEBEF1C8) + sig229t branch -> 0xBE846 -> FEBEBE96 -> snapshot FEBEAE0C (0xBCD66)",
+                "sig232t*0x931/0x10 (FEBEF1C8) + sig229t branch -> 0xBE846 -> FEBEBE96 -> snapshot FEBEAE0C (0xBCD62)",
                 "0xC310E integrator: FEBEBF58 += FEBEAE0C - FEBEBFA0; FEBEBFA0 = FEBEBF58*0x400/ROM_0AF564, gated by FEBEBFB1",
                 "sig235t*0x3E77/0x100 (FEBEF1CA) -> 0xBEFD6 -> FEBEBF00 -> snapshot FEBEAF00 -> 0xC310E integrator FEBEBF54/FEBEBF80",
                 "sig233|sig228|sig231 -> 0xBE80E -> FEBEBE8C/FEBEBE8D; 0xBEF9C -> FEBEBF4C/FEBEBF4D",
                 "validity snapshots FEBEACE7/E8/DF/E0/E1 -> 0xC2F26 -> integrator-enable gate FEBEBFB1 (requires FEBEACC0==1, FEBEBF4B==0)",
                 "0xC3C12/0xC3E44 plausibility aggregation -> FEBEC02C/FEBEC043/FEBEC045 flags",
             ],
-            "consumers": ["0xBCD66", "0xBE80E", "0xBE846", "0xBEF9C", "0xBEFD6", "0xB93AA",
+            "consumers": ["0xBCD62", "0xBE80E", "0xBE846", "0xBEF9C", "0xBEFD6", "0xB93AA",
                           "0xC2F26", "0xC310E", "0xC3C12", "0xC3E44"],
             "classification": "observer/plausibility: 0x090-derived values are integrated and "
                               "cross-checked but never reach FEBECC50/FEBECC62/FEBEE400..418 as magnitudes",
@@ -628,7 +628,7 @@ def build() -> dict:
                 {"signal": 247, "byte": 3, "bits": 16, "bit": 0},
             ],
             "chains": [
-                "sig246 u16 B1:B2 -> clamp(30000)*0x147B>>12 -> 0xBECF4 -> FEBEBEDE -> snapshot FEBEAE02 (0xBCD66)",
+                "sig246 u16 B1:B2 -> clamp(30000)*0x147B>>12 -> 0xBECF4 -> FEBEBEDE -> snapshot FEBEAE02 (0xBCD62)",
                 "FEBEAE02 consumers: CB664 (B6 sig263 command-gate consumer), CB73A assist-activation speed threshold, "
                 "CBD64, CD2A0, CD426, CD45C, CD590, CDE26, CDFF8 (sig270 percentage-contribution consumer), CE0AE, CE144, CE51C",
                 "sig244 -> stage FEBEF095 -> qualification 0xB7728/0xBECD0 -> FEBEB37C 'Z' flag -> 0xBB7FA handler-branch select -> FEBEAF40",
@@ -660,12 +660,12 @@ def build() -> dict:
                 {"signal": 224, "byte": 5, "bits": 1, "bit": 7},
             ],
             "chains": [
-                "sig219 stages FEBEF04A/FEBEF04B/FEBEF0A2 -> 0xBCD66 snapshots; sig223 -> FEBEF091 -> snapshot (gate family)",
+                "sig219 stages FEBEF04A/FEBEF04B/FEBEF0A2 -> 0xBCD62 snapshots; sig223 -> FEBEF091 -> snapshot (gate family)",
                 "0xB7728 reads FEBEF094 = B6 signal 243 (staged at 0x58074) and FEBEF093 = FEBE80A5 "
                 "(raw cell with no extractor anywhere in the corpus, structurally 0): the 0x0D7 "
                 "sig244 qualifier FEBEB37C is invalidated by B6 sig243 != 0",
             ],
-            "consumers": ["0xBCD66", "0xB93AA", "0xB7728"],
+            "consumers": ["0xBCD62", "0xB93AA", "0xB7728"],
             "classification": "gate family whose 0x0D7-qualifier branch is B6-sig243-gated; no magnitude path",
         },
     ]
@@ -706,7 +706,7 @@ def build() -> dict:
     # remaining stage readers -> qualification/telemetry only (bounded sweep)
     qual_readers = {
         "0xB34xx-B4Dxx": "per-signal qualification records into FEBEB1xx/FEBEB2xx/FEBEB4xx..B9xx "
-                         "(values+flags consumed by 0xBCD66/0xBCD62/0xBCBD8 snapshots, 0xBF3AA telemetry, "
+                         "(values+flags consumed by 0xBCD62/0xBCBD8 snapshots, 0xBF3AA telemetry, "
                          "0xBE070 diagnostic status)",
         "0xB93AA": "reads 14 stage cells (0x0AA wheel family 194-201, 0x13B, 0x116, 0x090, 0x0D7) "
                    "and writes only status cell FEBEB49E",
@@ -820,7 +820,7 @@ def build() -> dict:
             "statement-level closure: 0xBF97A holds WRITE refs into FEBEE400..418 whose stores the "
             "decompiler elides; 0xBF33E is the statement-verified block writer and BF97A's block refs "
             "are treated as a second (runtime/reset) writer with unchanged sourcing",
-            "FEBEACC0 (0xC2F26 integrator-enable input) is computed inside 0xBCD66 rather than copied; "
+            "FEBEACC0 (0xC2F26 integrator-enable input) is computed inside 0xBCD62 rather than copied; "
             "its exact inputs remain bounded",
             "FEBEB3FC/FEBEB3FE/FEBEB400/FEBEB354 (command block bytes 406/407/416/418) come from "
             "0xB7xxx/0xB8xxx internal qualification not traced byte-exhaustively here",

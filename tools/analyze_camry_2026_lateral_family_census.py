@@ -362,7 +362,7 @@ def exact_f33() -> dict:
   # Exact F33 signal261..273 application fields as unpacked by 0x4BD46.  The
   # standard generated-COM -> stage -> broad-snapshot propagation is explicit
   # for every entry below except signal266, whose staged F135 byte is never
-  # copied into the broad BCD66 snapshot.  This is a bounded direct-reference
+  # copied into the broad BCD62 snapshot.  This is a bounded direct-reference
   # consumer census, not an OEM naming claim for the unnamed fields.
   secondary_specs = {
     261: ('B3[5:0]', 0xFEBEADB0, 'Target Lateral ID; sole ordinary profile selector value'),
@@ -391,7 +391,7 @@ def exact_f33() -> dict:
 
   expected_readers = {
     '261': ['0x000CB73A', '0x000CEFFC'],
-    '262': ['0x000CBA80', '0x000CBB66', '0x000CCF0E', '0x000CEE80'],
+    '262': ['0x000CBA80', '0x000CBB66', '0x000CCF0E', '0x000CEE7C'],
     '263': ['0x000CB664'],
     '264': [], '265': ['0x000CDA20'], '266': [], '267': [],
     '268': ['0x000CEC8A'], '269': ['0x000CE3AA'], '270': ['0x000CDFF8'],

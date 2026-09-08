@@ -33,16 +33,22 @@ and unresolved static/dynamic boundaries remain in
 
 Keep two queues separate:
 
-1. **Get development lateral moving through B6.** The software path is present and
-   default-off at opendbc `8da4bb9b` / parent `6dd58cf5e` (VAR-102). The next
-   blocker is not OQ-054 and not key recovery. Install and positively verify one
-   exact-F33 receiver-acceptance option—persistent Gate-2 CodeFlash patch or
-   reset-to-stock RAM bridge—then run stationary ID0, ID11-zero, and one small
-   bounded nonzero command. Validate explicit-zero companion semantics, sign/
-   scale, driver override, motor response, timeout/release, inhibit, fault, and recovery.
-   VAR-148/CORR-179 already close ID11 source composition statically: accepted B6 is
-   co-modulated inside the ordinary EPS sum, not an exclusive replacement mode. For RAM, recover deployment/
-   execution/heartbeat; `card.py` only consumes attestation parameters.
+1. **Localize the development-B6 first divergence in one stationary run.** The
+   persistent cumulative stage-5 exact-F33 image is already the receiver-result bypass;
+   VAR-147/CORR-178 prove MAC value is not the remaining discriminator, and
+   VAR-149/CORR-180 now close every recovered software gate from B6 ingress through the
+   exact motor-current model. Do **not** add another SecOC-result patch, change freshness
+   phase, guess another B6 companion, or suppress `0x08A`. Use the generic high-tail
+   monitor/readback path (qualify the ABI-preserving resident first if it is not already
+   live-proven) to run the exact seven eight-slot phases in one READY/Park session:
+   **A** SecOC queue/auth -> raw route44, **B** raw route44 -> generated COM, **C** staging
+   -> `ADB0/AE90/ACBD/CAFF`, **D** bank/readiness -> `CB38`, **E** `CB38` -> D0218/shared
+   command/`AC5A`, **F** hard gate -> internal override -> `EE40C`, and **G** `EE40C` ->
+   `6AF4/6E0A/6DEC/6DC8/6DD6`. Adjacent phases deliberately overlap one or two four-byte
+   windows, so the first adjacent mismatch is the blocker. Current opendbc
+   `f207c273b645` already satisfies every recovered active B6 application field and the
+   exact 35-ms receiver-loss timing bound. OQ-054 and stock signer ownership remain a
+   separate architecture queue.
 2. **Recover Toyota's stock request/signing architecture.** OQ-054 asks which
    private message carries FRC request/winner/grant state and which always-on
    Brake/Skid/CGW node signs Bus-4 `0x08A`. Native Bus 1 exposes 22 camera/radar
@@ -311,7 +317,7 @@ correlate against CAN. Treat generation-22
 
 **Current exact live target (VAR-051/052/053/054/055/056/057):** the maintainer's 2026 Camry now has both identity-bound live evidence and exact target-native EPS firmware. EPS F181 is `8965F3307000 / 8A3113303100` on normal-harness `(bus1,param1)`; FRC is `0x792→0x79A / 8646F3315000`; Brake/EPB is `0x7B0→0x7B8 / F152633K0000`. VAR-053 closes `0x51E` Ready plus **P=0, R=1, N=2, D=3, B=4**; VAR-054/056 close the target-native B6 receiver, timing, limits, feedback and runtime anchors. VAR-057 supersedes the old low-RAM carrier assumption: the real stock startup overwrites `FEBF0000`, while **`FEBFF9F0..FEBFFBFB` (524 bytes) is live-proven retained and executable** with stock application return and zero Panda TX-block delta. VAR-134/CORR-165 now reject exact F33 application XCP as the stock placement half of the production loader. The handler table still contains `SET_MTA 0x82C62`, `DOWNLOAD 0x81FFE`, DAQ and the `FEBF7C00..FEBFFBFF` write window, but the endpoint is extended `0x1FDC0002 -> 0x1FE00002`, not standard `0x7F7/0x7F8`. Sep-6 live work proves the extended frame reaches `FEBE4C34` staging with admitted transport state, then fixed CodeFlash `0x30D68=0x5A` makes `0x98E80` return nonzero before CONNECT/opcode parsing. **Do not repeat CONNECT/DAQ/DOWNLOAD or patch that gate merely to recover the old production architecture.** A target-native 22-record / 88-endpoint fixed-DMAC census still has zero endpoints in the XCP window. OQ-053 now needs a stock-reachable volatile byte-placement primitive **and** a safe already-running-application PC pivot, or a different stock surface that provides both. The recovered pivot classes remain statically exhausted. Two Sep-6 high-tail residents then failed to restore application F181, but VAR-136/CORR-167 now identify their shared ABI defect: the C `call0(address)` trampoline injects the target address into RH850 `r6`, unlike Toyota's direct startup `jarl`. The next live action is therefore the corrected 406-byte assembly resident, not the old observer: direct `JARL disp32`, zero added application-memory writes through foreground count 223, exact F181 required in that window, then a coherent D0218 source-term snapshot plus byte-exact resident readback. Only `abi_preserving_runtime_and_source_terms_live` is positive; after that, reuse the same resident in READY/Park with `--read-existing`, and do not execute the legacy B6 observer/bridge. Slot-4 command-5 permission/latency remains a possible signer-architecture question, but CORR-135 separates it from the stock-LTA explanation. OQ-054 now asks two independent questions: identify the observed Bus-4 `0x08A`/`0x081` proxy/SecOC ownership, and identify the chassis/reference-to-steering-assembly authority handoff outside the recovered F33 external-command surface (VAR-110/111, CORR-151). Do not assume an `0x08A -> B6` transform. Production output remains disabled. Canonical baseline: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§12–13.
 
-**Current development-path update (VAR-120/CORR-160):** stop adding persistent SecOC-result patches. Stages 3–5 were each applied and reboot-verified yet the B6 application snapshot remained stale. The next runtime step is no longer another compiled observer. VAR-136/CORR-167 identify the Sep-6 resident ABI defect (`call0(address)` clobbering `r6`), and the corrected direct-`JARL disp32` composition is now packaged as a **generic external-control monitor**. Install the 520-byte high-tail monitor once in NRTD; it adds no application-memory write before count 224, then accepts only the non-XCP `00 F3 seq opcode arg32-le` control protocol on the live-proven extended `0x1FDC0002 -> FEBE4C34` path. Eight host-configurable aligned LocalRAM watch windows, RUN/STOP, one-shot SNAPSHOT, SID23 readback, and an interactive host shell move experiment definition outside the ECU binary. Only `runtime_monitor_live` permits direct NRTD->READY reuse without OFF. The current v1 field flow remains Park/stationary and observation-only; no legacy B6 observer/bridge or steering offset is authorized. Once the generic monitor is live-proven, add history/trigger or asynchronous telemetry for road-state capture rather than recompiling address-specific residents. OQ-054 stock proxy ownership remains separate. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §58 and the monitor runbook.
+**Current development-path update (VAR-120/CORR-160, refined by VAR-149/CORR-180):** stop adding persistent SecOC-result patches. Stages 3–5 were each applied and reboot-verified yet the prior stationary tests did not capture enough adjacent internal state to localize the non-response. VAR-136/CORR-167 identify the Sep-6 resident ABI defect (`call0(address)` clobbering `r6`), and the corrected direct-`JARL disp32` composition is packaged as a **generic external-control monitor**. Install/qualify the 520-byte high-tail monitor once in NRTD; it adds no application-memory write before count 224, then accepts only the non-XCP `00 F3 seq opcode arg32-le` control protocol on the live-proven extended `0x1FDC0002 -> FEBE4C34` path. Eight host-configurable aligned LocalRAM watch windows, RUN/STOP, one-shot SNAPSHOT, SID23 readback, and an interactive host shell move experiment definition outside the ECU binary. Only `runtime_monitor_live` permits direct NRTD->READY reuse without OFF. After qualification, the monitor's purpose is now concrete: walk VAR-149's adjacent B6 ladder from queue/raw-COM through `CB38`, `AC2B`, `AC5A`, `AC29/AC2A`, `CC98/CC94`, and the motor-current model in READY/Park. Reconfigure watch windows between bounded stationary phases rather than recompiling address-specific residents. The current v1 flow remains observation-only; no legacy B6 observer/bridge or steering offset is authorized. Road-state history/trigger telemetry is only needed after the stationary first-divergence is known. OQ-054 stock proxy ownership remains separate. Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§58,66 and the monitor runbook.
 
 ### Exact-F33 openpilot port — current road-enabled fork state (VAR-058/062/102/124/125)
 
@@ -364,10 +370,15 @@ B6 epoch directly from the received low2 and imposes no fixed start phase. The c
 13-route corpus also finds the latest B6 progression freshness-admissible. VAR-147/
 CORR-178 further prove cumulative stage 5 makes zero MAC28 and wrong-key dummy MAC28
 acceptance-equivalent; do not spend a field run on either a 0-vs-1 freshness A/B or a
-zero-vs-dummy MAC A/B. The useful discriminator is now physical F33 receive/queue and raw-COM/application
-publication. VAR-148/CORR-179 close the downstream ID11 composition itself: accepted B6
-is co-modulated inside the ordinary EPS sum and no exclusive replacement writer exists. Canonical:
-[../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§63–64.
+zero-vs-dummy MAC A/B. VAR-149/CORR-180 supersede the shorter "physical receive/queue and raw-COM" next-step
+framing with the complete adjacent-rung discriminator. Physical queue/publication is only
+the front half: after `CB38` the ordinary EPS can still omit the contribution through
+`AC2B`, attenuate it through `AC5A`, hard-zero `CC66` through `AC29/AC2A`, replace the
+post-gate command through `CC98/CC94`, or substitute a bounded motor-side source in
+`35C4C`. Capture those states in the same stationary run rather than stopping after COM
+publication. VAR-148/CORR-179 still close the authority topology: accepted B6 is
+co-modulated inside the ordinary EPS sum and no ID11-exclusive replacement writer exists.
+Canonical: [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§63–66.
 
 VAR-081/CORR-134 identify the observed Bus-4 `0x08A` representation; CORR-135 rejects an
 `0x08A -> B6` stock transform. VAR-101/CORR-149 close the FRC as request-side rather than
@@ -532,7 +543,7 @@ cruise-generic (0x0D5 s211 is set in 100% of both cruise and Class-L strata) and
 live magnitude source s213 is identically zero. Exact `0x090` is feedback/status: sig235
 lags measured angle by 60/70 ms and sig232's motor correlation also peaks at -120 ms in
 both drives. CORR-127 replaces VAR-065's old `19/116 nonempty, 97 empty` shortcut with
-the full denominator: 98/116 scalar raws staged, 52 stage readers, six snapshot copiers,
+the full denominator: 98/116 scalar raws staged, 51 stage readers, five snapshot copiers,
 306 snapshot destinations, plus the 14 table-driven `0x013..0x01F` extracts. Even under
 that stronger census, **B6 sig261/262 are still the only generated-COM mode/magnitude
 inputs recovered in the shared `CC50/CC62` command funnel**. CORR-128/VAR-078 also close the former
