@@ -802,9 +802,9 @@ check("command-5 plan is non-actuating and ephemeral", command5_probe.plan(None)
 
 print("\n== inline B6 signer host-visible state ==")
 from exploit.ephemeral_runtime import camry_f33_b6_inline_signer as inline_signer
-check("inline signer state reuses the proven SID23-readable low-RAM pattern",
-      inline_signer.STATE_BASE == 0xFEBF0248 and inline_signer.STATE_SIZE == 12 and
-      inline_signer.STATE_BASE + inline_signer.STATE_SIZE <= 0xFEBF0288 and
+check("inline signer state remains wholly SID23-readable below the protected boundary",
+      inline_signer.STATE_BASE == 0xFEBF025C and inline_signer.STATE_SIZE == 12 and
+      inline_signer.STATE_BASE + inline_signer.STATE_SIZE == inline_signer.TELEMETRY_BASE and
       probe.validate_read(probe.RAM_ID, inline_signer.STATE_BASE, inline_signer.STATE_SIZE) is None)
 state_raw = inline_signer.STATE_MAGIC.to_bytes(4, "little") + bytes((7, 1, 0, 0)) + (9).to_bytes(4, "little")
 state_decoded = inline_signer.decode_state(state_raw)
@@ -812,38 +812,46 @@ check("inline signer state decoder requires both magic and initialized byte",
       state_decoded["initialized"] is True and state_decoded["initialized_raw"] == 1 and
       state_decoded["next_index"] == 7 and state_decoded["signed_count"] == 9 and
       inline_signer.decode_state(state_raw[:5] + b"\x00" + state_raw[6:])["initialized"] is False)
-check("inline signer scratch is wholly SID23-readable below the protected boundary",
-      inline_signer.SCRATCH_BASE == 0xFEBF0200 and inline_signer.SCRATCH_SIZE == 0x48 and
-      inline_signer.SCRATCH_BASE + inline_signer.SCRATCH_SIZE == inline_signer.STATE_BASE and
-      probe.validate_read(probe.RAM_ID, inline_signer.SCRATCH_BASE, inline_signer.SCRATCH_SIZE) is None)
-telemetry_application = bytes(range(28))
+scratch_read_rejected = False
+try:
+    probe.validate_read(probe.RAM_ID, inline_signer.SCRATCH_BASE, inline_signer.SCRATCH_SIZE)
+except probe.ProbeError:
+    scratch_read_rejected = True
+check("inline signer command5 scratch intentionally begins at the SID23 exclusion",
+      inline_signer.SCRATCH_BASE == 0xFEBF0288 and inline_signer.SCRATCH_SIZE == 0x48 and
+      inline_signer.SCRATCH_BASE == inline_signer.APPLICATION_RMBA_PROTECTED_START and scratch_read_rejected)
 telemetry_raw = (
-    (11).to_bytes(4, "little") + (7).to_bytes(4, "little") + (5).to_bytes(4, "little") +
-    (3).to_bytes(4, "little") + (32).to_bytes(2, "little") + bytes((1, 0)) + bytes.fromhex("a1b2c3d4") +
-    telemetry_application
+    (11).to_bytes(4, "little") + (3).to_bytes(4, "little") +
+    bytes.fromhex("a1b2c3d4") + bytes.fromhex("a1b2c3d4") + bytes((9, 1, 1, 0))
 )
 telemetry_decoded = inline_signer.decode_signer_telemetry(telemetry_raw)
-check("inline signer telemetry is readable and preserves every helper gate",
-      inline_signer.TELEMETRY_BASE == inline_signer.STATE_BASE + inline_signer.STATE_SIZE and
+check("inline signer telemetry exposes native-frame/signing equality gates",
+      inline_signer.TELEMETRY_BASE == 0xFEBF0268 and inline_signer.TELEMETRY_SIZE == 0x14 and
       inline_signer.TELEMETRY_BASE + inline_signer.TELEMETRY_SIZE <= inline_signer.APPLICATION_RMBA_PROTECTED_START and
       probe.validate_read(probe.RAM_ID, inline_signer.TELEMETRY_BASE, inline_signer.TELEMETRY_SIZE) is None and
-      telemetry_decoded["helper_invocations"] == 11 and telemetry_decoded["queue32_hits"] == 7 and
-      telemetry_decoded["zero_trailer_hits"] == 5 and telemetry_decoded["command5_attempts"] == 3 and
-      telemetry_decoded["last_queue_length"] == 32 and telemetry_decoded["last_done_flag"] == 1 and
-      telemetry_decoded["last_command_status"] == 0 and telemetry_decoded["last_trailer_hex"] == "a1b2c3d4" and
-      telemetry_decoded["last_application_b0_b27_hex"] == telemetry_application.hex())
+      telemetry_decoded["native_frame_count"] == 11 and telemetry_decoded["command5_attempts"] == 3 and
+      telemetry_decoded["last_native_trailer_hex"] == "a1b2c3d4" and
+      telemetry_decoded["last_computed_trailer_hex"] == "a1b2c3d4" and
+      telemetry_decoded["last_control_seq"] == 9 and telemetry_decoded["native_verified"] is True and
+      telemetry_decoded["native_signature_match"] is True and telemetry_decoded["last_done_flag"] == 1 and
+      telemetry_decoded["last_command_status"] == 0)
+check("inline signer telemetry refuses equality without completed native verification",
+      inline_signer.decode_signer_telemetry(telemetry_raw[:17] + b"\x00" + telemetry_raw[18:])["native_signature_match"] is False and
+      inline_signer.decode_signer_telemetry(telemetry_raw[:12] + bytes.fromhex("11223344") + telemetry_raw[16:])["native_signature_match"] is False)
+check("inline signer replacement control is exact one-shot C7 signed16 big-endian",
+      inline_signer.replacement_frame(sequence=0x2A, target_angle_raw=-13) == bytes.fromhex("00c72a00fff30000"))
 check("inline signer exposes exact profile2 queue and full secured buffer through SID23",
       inline_signer.B6_QUEUE_RECORD_BASE == 0xFEBE547A and inline_signer.B6_QUEUE_RECORD_SIZE == 8 and
       inline_signer.B6_SECURED_BUFFER_BASE == 0xFEBE54D4 and inline_signer.B6_SECURED_BUFFER_SIZE == 32 and
       probe.validate_read(probe.RAM_ID, inline_signer.B6_QUEUE_RECORD_BASE, inline_signer.B6_QUEUE_RECORD_SIZE) is None and
       probe.validate_read(probe.RAM_ID, inline_signer.B6_SECURED_BUFFER_BASE, inline_signer.B6_SECURED_BUFFER_SIZE) is None)
 
-# quiet-source is a read-only counter window used after the launcher has proven
-# READY/Park/stationary and cooperatively removed the normal host B6 producer.
-def _telem_blob(invocations: int, queue_hits: int) -> bytes:
+# quiet-source now counts distinct native B6 frames by frame-unique protected
+# trailer, rather than scheduler ticks during which the queue remains occupied.
+def _telem_blob(native_frames: int, command5_attempts: int) -> bytes:
     return (
-        invocations.to_bytes(4, "little") + queue_hits.to_bytes(4, "little") + bytes(8) +
-        bytes(4) + bytes(4) + bytes(28)
+        native_frames.to_bytes(4, "little") + command5_attempts.to_bytes(4, "little") +
+        bytes.fromhex("01020304") + bytes.fromhex("01020304") + bytes((0, 1, 1, 0))
     )
 
 class _FakeQuietSession:
@@ -854,7 +862,7 @@ class _FakeQuietSession:
     def read_state(self):
         return {"initialized": True, "armed": True, "signed_count": 0}
 
-_quiet_blobs = iter((_telem_blob(0xFFFFFFFE, 10), _telem_blob(1, 15)))
+_quiet_blobs = iter((_telem_blob(0xFFFFFFFE, 7), _telem_blob(1, 7)))
 _orig_inline_session = inline_signer.InlineSignerSession
 _orig_inline_read = inline_signer._read_memory
 _orig_inline_sleep = inline_signer.time.sleep
@@ -871,10 +879,10 @@ finally:
     inline_signer._read_memory = _orig_inline_read
     inline_signer.time.sleep = _orig_inline_sleep
     inline_signer.time.monotonic = _orig_inline_monotonic
-check("inline signer quiet-source measures modular queue movement without CAN transmit",
+check("inline signer quiet-source measures modular native-frame movement without CAN transmit",
       quiet["host_b6_producer_quiesced"] is True and quiet["can_transmit"] is False and
-      quiet["delta"]["helper_invocations"] == 3 and quiet["delta"]["queue32_hits"] == 5 and
-      quiet["rates"]["queue32_hits_per_second"] == 5.0)
+      quiet["delta"]["native_frame_count"] == 3 and quiet["delta"]["command5_attempts"] == 0 and
+      quiet["rates"]["native_frame_count_per_second"] == 3.0)
 
 # The loader mailbox stores only the latest 8-byte control frame. Prove that a
 # completely missed first transfer pass is retried rather than aborting, and
@@ -936,20 +944,23 @@ with tempfile.TemporaryDirectory() as td:
         "note": "live persistence-verified 2026-09-01; no further persistent patch is part of the observer experiment",
     })
     inline = manifest["ram_experiments"]["b6_inline_signer"]
-    check("kit packages autonomous inline B6 signer as the primary fast path",
+    check("kit packages native-B6 verify/replace signer as the primary fast path",
           inline["launcher"] == "f33-secoc" and
           inline["resident_base"] == "0xFEBFF9F0" and inline["resident_size"] == 520 and
-          inline["resident_sha256"] == "cb1caad3520d392f94acd45e46ba66b972132b80ef08a9457b93e3783e8c9549" and
-          inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 468 and
-          inline["helper_word_count"] == 117 and
-          inline["helper_padded_sha256"] == "53494b4358d7a6423874c501c3b0232f49652cf5d01ccb340a3f5a61aacf8866" and
-          inline["state"]["base"] == "0xFEBF0248" and inline["state"]["magic"] == "0x53364249" and
-          inline["telemetry"]["base"] == "0xFEBF0254" and inline["telemetry"]["size"] == 0x34 and
+          inline["resident_sha256"] == "38cd55db115456bfe72b747b509becf12916f633108a1073af48917ea44cad83" and
+          inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 604 and
+          inline["helper_word_count"] == 151 and
+          inline["helper_padded_sha256"] == "44b5f04d350b7d5c384559ac1f6a1585416f9fcf6866b5dbdcc1cbd86fbbd0bd" and
+          inline["state"]["base"] == "0xFEBF025C" and inline["state"]["magic"] == "0x53364249" and
+          inline["telemetry"]["base"] == "0xFEBF0268" and inline["telemetry"]["size"] == 0x14 and
+          inline["scratch"] == {"base": "0xFEBF0288", "size": 0x48, "sid23_readable": False} and
           probe.validate_read(probe.RAM_ID, int(inline["state"]["base"], 0), inline["state"]["size"]) is None and
           probe.validate_read(probe.RAM_ID, int(inline["telemetry"]["base"], 0), inline["telemetry"]["size"]) is None and
-          inline["control_can_id"] == "0x1FDC0002" and
-          "00000000" in inline["trigger"] and "EPS" in inline["freshness_owner"] and
-          inline["mutation_boundary"]["application_bytes_b0_b27_unchanged"] is True and
+          inline["control_can_id"] == "0x1FDC0002" and "00 C7" in inline["runtime_control_frame"] and
+          "native" in inline["native_oracle"].lower() and "B3..B9" in inline["replacement"] and
+          inline["mutation_boundary"]["native_oracle_mutates_queue"] is False and
+          inline["mutation_boundary"]["replacement_requires_native_mac_equality"] is True and
+          inline["mutation_boundary"]["command5_failure_leaves_queue_unchanged"] is True and
           inline["mutation_boundary"]["secoc_result_override"] is False and
           inline["mutation_boundary"]["can_transmit"] is False and
           inline["persistent_flash_write"] is False and inline["live_qualified"] is False and
@@ -1135,14 +1146,14 @@ with tempfile.TemporaryDirectory() as td:
           "phase requires a phase name" in launcher_text and 'monitor phase "$@" --execute' in launcher_text)
     secoc_launcher = out / "f33-secoc"
     secoc_launcher_text = secoc_launcher.read_text(encoding="utf-8")
-    check("inline signer launcher preserves manager lifecycle and exposes install/load-arm/status/quiet-source",
+    check("inline signer launcher preserves manager lifecycle and exposes install/load-arm/status/quiet-source/replace-once",
           "systemctl stop openpilot" not in secoc_launcher_text and
           'kill -STOP "$PANDAD_WRAPPER_PID"' not in secoc_launcher_text and
           'kill -CONT "$PANDAD_WRAPPER_PID"' not in secoc_launcher_text and
           "start_power_watchdog_keeper" not in secoc_launcher_text and
           "f33_panda_lease.sh" in secoc_launcher_text and
           "source \"$PANDA_LEASE_LIB\"" in secoc_launcher_text and
-          "load-arm" in secoc_launcher_text and "quiet-source" in secoc_launcher_text and
+          "load-arm" in secoc_launcher_text and "quiet-source" in secoc_launcher_text and "replace-once" in secoc_launcher_text and
           "verify_openpilot_ready_parked" in secoc_launcher_text and
           secoc_launcher_text.index("verify_openpilot_ready_parked") < secoc_launcher_text.rindex("quiesce_panda_owner") and
           "camry_f33_b6_inline_signer_helper_padded.bin" in secoc_launcher_text)
@@ -1156,8 +1167,9 @@ with tempfile.TemporaryDirectory() as td:
     secoc_plan_obj = json.loads(secoc_plan.stdout) if secoc_plan.returncode == 0 else {}
     check("built inline signer launcher plan is no-roundtrip architecture",
           secoc_plan.returncode == 0 and secoc_plan_obj.get("schema") == "camry-f33-b6-inline-signer-plan-v1" and
-          secoc_plan_obj.get("resident", {}).get("size") == 520 and secoc_plan_obj.get("helper", {}).get("word_count") == 117 and
-          secoc_plan_obj.get("telemetry", {}).get("base") == "0xFEBF0254" and secoc_plan_obj.get("telemetry", {}).get("size") == 0x34,
+          secoc_plan_obj.get("resident", {}).get("size") == 520 and secoc_plan_obj.get("helper", {}).get("word_count") == 151 and
+          secoc_plan_obj.get("telemetry", {}).get("base") == "0xFEBF0268" and secoc_plan_obj.get("telemetry", {}).get("size") == 0x14 and
+          any("native B6" in row for row in secoc_plan_obj.get("sequence", [])),
           secoc_plan.stderr[-300:])
     doctor = subprocess.run([str(launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
     check("built launcher doctor validates imports and payload without Panda access",
