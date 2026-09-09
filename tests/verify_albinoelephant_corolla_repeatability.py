@@ -16,7 +16,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.analyze_toyota_dataflash import analyze  # noqa: E402
+from tools.toyota_support.analyze_toyota_dataflash import analyze  # noqa: E402
 
 RAW = REPO / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023"
 DF = sorted(RAW.glob("dump_dataflash_ff200000_ff210000_*.bin"))

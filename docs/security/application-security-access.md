@@ -177,10 +177,10 @@ send `27 03` followed by 16 zero bytes.
 
 ### Standalone keygen
 
-`tools/sienna_application_sa_keygen.py` computes the expected key:
+`tools/targets/sienna/sienna_application_sa_keygen.py` computes the expected key:
 
 ```
-python3 tools/sienna_application_sa_keygen.py <seed_hex> [data_record_hex]
+python3 tools/targets/sienna/sienna_application_sa_keygen.py <seed_hex> [data_record_hex]
 ```
 
 ## 4. Seed generation
@@ -409,7 +409,7 @@ the first UDS request or include explicit padding bytes.
 ## 8.1 Cross-security-state composition audit (SEC-APP-008)
 
 An explicit composition model
-(`tools/generate_security_state_composition.py`, verified by
+(`tools/security/generate_security_state_composition.py`, verified by
 `tests/verify_security_state_composition.py`) composes the firmware-proven
 state machines — UDS sessions (both contexts), application SA level 2, the BA
 persistent authorization (SEC-APP-007), the programming handoff phase,

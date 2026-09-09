@@ -12,12 +12,12 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.camry_frc_request_poc import (
+from tools.targets.camry.live.camry_frc_request_poc import (
     build_0x160_request,
     decode_signed7,
     encode_signed7,
 )
-from tools.toyota_e2e_p05 import (
+from tools.toyota_support.toyota_e2e_p05 import (
     crc16_ccitt,
     e2e_p05_check,
     e2e_p05_protect,
@@ -44,7 +44,7 @@ def check(name: str, condition, detail: str = "") -> None:
 print("== exact Profile-5 primitive ==")
 check("CRC-16/CCITT-FALSE standard check vector", crc16_ccitt(b"123456789") == 0x29B1)
 
-poc_source = (REPO / "tools/camry_frc_request_poc.py").read_text()
+poc_source = (REPO / "tools/targets/camry/live/camry_frc_request_poc.py").read_text()
 check("PoC documents AUTOSAR Profile-5 standard and recovered wire parameters",
       "AUTOSAR_PRS_E2EProtocol" in poc_source
       and "poly=0x1021" in poc_source
@@ -104,7 +104,7 @@ print("== CLI is offline-only and deterministic ==")
 proc = subprocess.run(
     [
         sys.executable,
-        str(REPO / "tools/camry_frc_request_poc.py"),
+        str(REPO / "tools/targets/camry/live/camry_frc_request_poc.py"),
         "--template-hex",
         a.hex(),
         "--request",

@@ -12,14 +12,14 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.analyze_toyota_dataflash import (  # noqa: E402
+from tools.toyota_support.analyze_toyota_dataflash import (  # noqa: E402
     DEFAULT_BASE,
     analyze,
     load_layout,
     record_bytes,
     scan_key_domains,
 )
-from tools.toyota_secoc_oracle import load_capture  # noqa: E402
+from tools.toyota_support.toyota_secoc_oracle import load_capture  # noqa: E402
 
 COMMUNITY = REPO / "community" / "albinoelephant"
 DUMP = COMMUNITY / "dump_ff200000_ff208000.bin"

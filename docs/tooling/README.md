@@ -44,13 +44,14 @@ The small command surface to remember is:
 | Discover / preview | `tools/test list [word]`, `tools/test plan` |
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
 | GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
+| Toyota platform capabilities / target workflows | `tools/toyota capabilities`, `tools/toyota target list camry` |
 | Repository knowledge / findings / corrections / open questions | `tools/know QUERY` |
 | Generated artifacts / producers | `tools/artifact list`, `show`, `regen` |
-| Broad gates | `tools/test core` / `full` / `branch` |
+| Broad gates | `tools/test core` / `full` / `local` |
 | Discover/query configured targets | `tools/gtarget list`, `tools/gtarget show TARGET`, `tools/gtarget TARGET ...` |
-| Discover Corolla-H evidence-compaction profiles | `uv run --locked python tools/extract_corolla_h_evidence.py list` |
-| Discover cross-variant evidence modes | `uv run --locked python tools/extract_variant_evidence.py list` |
-| Discover working-project export profiles | `tools/export_ghidra_project.sh list` |
+| Discover Corolla target workflows | `tools/toyota target list corolla` |
+| Discover cross-variant evidence modes | `tools/toyota variant list` |
+| Discover working-project export profiles | `tools/project/export_ghidra_project.sh list` |
 
 Generated artifacts are discoverable without remembering their implementation filenames:
 
@@ -60,7 +61,7 @@ tools/artifact show camry_8965F3307000_fault_status.json
 tools/artifact regen camry_8965F3307000_fault_status.json
 ```
 
-The catalog is derived from tracked artifact paths, exact path references in `tools/`, and verification dependencies; it is not another manually maintained builder registry. `regen` exposes the selected producer before execution and requires an explicit `--producer` when discovery is ambiguous.
+The catalog is derived from tracked artifact paths and source references; it is not another manually maintained builder registry. `regen` exposes the selected producer before execution and requires an explicit `--producer` when discovery is ambiguous.
 
 Repository memory has the same task-shaped surface:
 
@@ -95,9 +96,9 @@ The repeated Corolla-H corpus-compaction scripts are consolidated behind one
 profile-driven command:
 
 ```bash
-uv run --locked python tools/extract_corolla_h_evidence.py list
-uv run --locked python tools/extract_corolla_h_evidence.py extract can-com
-uv run --locked python tools/extract_corolla_h_evidence.py extract xcp
+tools/toyota target run corolla extract/h-evidence list
+tools/toyota target run corolla extract/h-evidence extract can-com
+tools/toyota target run corolla extract/h-evidence extract xcp
 ```
 
 `list` is the discovery surface: it reports each profile's purpose, tracked
@@ -117,15 +118,15 @@ those distinctions.
 Cross-variant image-bound evidence extraction uses one subcommand runner:
 
 ```bash
-uv run --locked python tools/extract_variant_evidence.py list
-uv run --locked python tools/extract_variant_evidence.py structural --image ... --fingerprints ... \
+tools/toyota variant list
+tools/toyota variant structural --image ... --fingerprints ... \
   --software-id 8965H1202000 --address 0xCEDAE ... --out data/generated/...json
-uv run --locked python tools/extract_variant_evidence.py function --image ... --corpus ... \
+tools/toyota variant function --image ... --corpus ... \
   --software-id 8965H1202000 --address 0xB6 ... --out data/generated/...json
-uv run --locked python tools/extract_variant_evidence.py application-diagnostics --image ... \
+tools/toyota variant application-diagnostics --image ... \
   --corpus ... --did-table 0x... --did-count 180 --routine-callback-table 0x... \
   --software-id 8965H1202000 --out data/generated/...json
-uv run --locked python tools/extract_variant_evidence.py reference-census --image ... \
+tools/toyota variant reference-census --image ... \
   --corpus ... --software-id 8965H1202000 --term B6=... --out data/generated/...json
 ```
 
@@ -138,71 +139,25 @@ names its own image, corpus, and output path: the same mode serves both the
 Sienna and Corolla calibrations, so baking per-artifact profiles here would just
 duplicate the generated-artifacts table.
 
-## Deliberate non-consolidations
+## Internal implementation boundaries
 
-Several tool families *look* consolidatable but are not, because they only share
-incidental boilerplate, not one operation. Each of these carries distinct proof
-logic, fail-closed boundaries, or safety contracts that a shared runner would
-hide:
+The public surface is consolidated even when the underlying proof logic is not.
+A target-specific extractor or builder may remain a separate implementation when
+it genuinely encodes a different analysis, but it lives under the target/domain
+namespace and is discoverable through `tools/toyota target list ...` or
+`tools/artifact`. Do not promote those implementation filenames back into the
+root command surface.
 
-- **Techstream CUW inspectors and writer generators.** `tools/gts` now provides
-  one interactive discovery surface over their shared parsers (including CUW
-  descriptor -> current GTS+ writer-route lookup), but it intentionally does
-  not merge their proof logic. `parse_cuw_container.py` owns both full-container
-  validation and the bounded streaming first-member fast path;
-  `tools/techstream/cuw_attach.py` owns the shared attach grammar;
-  `tools/techstream/cuw_parameter.py` owns both the common parameter-INI decoder
-  and contact-type -> writer route extraction. `generate_cuw_writer_inventory.py`
-  keeps only its tracked inventory-schema adapter. The remaining
-  per-tool code encodes distinct evidence boundaries and proof outputs
-  (whole-repro vs delta corpus invariants, per-family route verdicts, timing
-  recovery, calibration schema), each pinned by its own deterministic test
-  suite. Merging them would bury fail-closed boundary contracts, and their
-  shared mechanics are already factored where genuinely common.
-- **Corolla-H semantic extractors and builders.** The remaining
-  `extract_corolla_h_*_evidence.py` tools each embed distinct discovery logic:
-  whole-corpus literal-call closure (`direct_call_surface`), image-resolved
-  callback tables (`deadline_monitor_surface`, `diagnostic_residue`),
-  artifact-derived cohort joins (`structural_residue`), a seven-corpus
-  reference-pair join with fragmented-body pinning (`secoc_surface`), and a
-  dual-image Sienna/H fingerprint join (`final_named_residue`). The
-  `build_corolla_h_*` semantic builders likewise encode subsystem-specific
-  proof logic (routing tables, selector policies, supervisor alignment,
-  diagnostic joins). These are different operations, not variants of one.
-- **Arbitrary-image resolver wrappers.** `resolve_secoc_patch_image.sh` and
-  `resolve_ephemeral_runtime_image.sh` both import a disposable Ghidra project,
-  but their input contracts (bare 1 MiB only vs 2 MiB range-dumper
-  normalization), fail-closed gates (CRC-geometry ambiguity vs
-  geometry-unresolved/steering-unsupported outcomes), resolvers, and output
-  manifests are distinct safety pipelines. A merged CLI would hide which
-  fail-closed contract is being enforced; they stay separate. The
-  working-project variant `resolve_secoc_patch.sh` is lifecycle-adjacent
-  (drives `tools/g`) and is likewise untouched.
+The same rule applies to Techstream: parsers/extractors remain separate where
+the formats or evidence boundaries differ, while `tools/gts` / `tools/toyota gts`
+is the capability surface. Shared parsing, routing, crypto, or container mechanics
+belong in reusable modules and should be consumed by every implementation that
+needs them.
 
-Do not add a helper that merely centralizes `sha256`/`load_jsonl` boilerplate
-across these families: that moves code without strengthening any invariant. The
-consolidation test (`tests/verify_tooling_consolidation.py`) pins this taxonomy
-in both directions — retired files must stay gone, and the deliberately
-separate tools must stay present.
-
-Read-only exports from `build/work/project` use a second shared profile runner:
-
-```bash
-tools/export_ghidra_project.sh list
-tools/export_ghidra_project.sh application-rx-signals
-tools/export_ghidra_project.sh application-rx-consumers
-tools/export_ghidra_project.sh application-tx-producers
-tools/export_ghidra_project.sh outside-functions
-tools/export_ghidra_project.sh semantic-coverage
-tools/export_ghidra_project.sh project-inventory
-```
-
-This replaces the former one-shell-wrapper-per-export pattern. The profile
-runner owns artifact defaults and deterministic postprocessing; the existing
-`tools/run_headless` remains the single owner of committed-project rejection,
-Ghidra environment bootstrap, controlled script paths, logging, and headless
-failure detection. Keep new read-only project exports in this profile runner
-unless their lifecycle or safety semantics are genuinely different.
+Resolver and live-experiment code can keep distinct fail-closed contracts when
+those contracts are materially different. Consolidation means one place to
+*discover and invoke* what we know how to do, plus shared mechanics underneath;
+it does not mean forcing unrelated analyses through one giant function.
 
 ## Vendored processor module
 

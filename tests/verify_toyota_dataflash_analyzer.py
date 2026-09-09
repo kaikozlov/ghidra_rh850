@@ -12,7 +12,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.analyze_toyota_dataflash import (  # noqa: E402
+from tools.toyota_support.analyze_toyota_dataflash import (  # noqa: E402
     DEFAULT_BASE,
     REFERENCE_DUMP,
     REFERENCE_OUTPUT,
@@ -23,8 +23,8 @@ from tools.analyze_toyota_dataflash import (  # noqa: E402
     sha256,
     short_block_additive_checksum,
 )
-from tools.toyota_secoc_oracle import load_capture  # noqa: E402
-from tools.toyota_secoc_signer import sign_classic_frame, sign_sync_frame  # noqa: E402
+from tools.toyota_support.toyota_secoc_oracle import load_capture  # noqa: E402
+from tools.toyota_support.toyota_secoc_signer import sign_classic_frame, sign_sync_frame  # noqa: E402
 
 passed = failed = 0
 

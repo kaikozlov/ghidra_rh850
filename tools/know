@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from artifact_catalog import rows as artifact_rows  # noqa: E402
+from catalog.artifact_catalog import rows as artifact_rows  # noqa: E402
 
 FINDINGS = ROOT / "docs/status/FINDINGS.md"
 CORRECTIONS = ROOT / "docs/status/CORRECTIONS.md"

@@ -207,7 +207,7 @@ ledger context is useful.
 
 - **OQ-006 — Cross-calibration ephemeral runtime transfer.** The Sienna fresh-import
   resolver is now deterministic and the RH850 runtime sources are target-driven.
-  What remains is external evidence: run `tools/resolve_ephemeral_runtime_image.sh`
+  What remains is external evidence: run `tools/security/resolve_ephemeral_runtime_image.sh`
   unchanged on the first foreign CodeFlash. A `semantic-resolved-geometry-unresolved`
   result is useful and must remain non-buildable until that image's authenticated
   download/callback/retention MPU geometry is proven. A build-ready foreign
@@ -246,7 +246,7 @@ ledger context is useful.
   `T-0035-22.cuw` from TSB `T-SB-0069-22` contains the `8965F3401200/2200`
   images plus the CUW erase routine; the retained community decryptor can emit
   the body/erase plaintext once the package is acquired. Run
-  `tools/resolve_secoc_patch_image.sh` unchanged on the recovered CodeFlash and compare its unique semantic
+  `tools/security/resolve_secoc_patch_image.sh` unchanged on the recovered CodeFlash and compare its unique semantic
   target, if any, with the community egg location. Zero candidates means the
   Level-1 machine shape must be lifted to p-code/CFG data-flow; multiple
   candidates require stronger crypto-result provenance. Do **not** add a
@@ -694,7 +694,7 @@ ledger context is useful.
   `0x1010`; selector `01` starts the 64-byte M1–M3 update and selector `03`
   reads status `01/02/FF` plus M4/M5 on success. Capture a legitimate
   provisioning/rekey session and process it with
-  `tools/decode_icus_key_update_trace.py` to determine whether Toyota/Denso
+  `tools/security/decode_icus_key_update_trace.py` to determine whether Toyota/Denso
   actually invokes this DID, whether M1 targets slot 4, observed polling
   cadence/deadlines, and which lifecycle preconditions exist beyond the
   recovered extended-session/no-Dcm-SA policy. Techstream V18 MACKey
@@ -904,7 +904,7 @@ ledger context is useful.
   manually consumed cohorts remain valid review input and are not absence
   claims (CORR-101).
 - **OQ-051 — Cross-calibration structural triage of future P1M-E images.** The offline
-  structural fingerprint scanner (`tools/analyze_rh850_codeflash_structure.py`)
+  structural fingerprint scanner (`tools/firmware/analyze_rh850_codeflash_structure.py`)
   now flags boot-CRC geometry, RAM-exec/MEM-SAFE-001 package anchors, and XCP
   `0x7F7/0x7F8` route/command-map constants in arbitrary images. Every match is
   a triage candidate only; whether each mechanism transfers must be verified
@@ -995,11 +995,11 @@ ledger context is useful.
   new read-only Camry oracle is therefore Brake `0x7B0`: `22 10 A1`..`22 10 A4`
   (**live support unmeasured**), synchronized with FRC `0x792` `22 1B 03`..`22 1B 07`,
   stock DRCC engagement, Operation FFD and all-bus capture. That synchronized read-only
-  discriminator is now turnkey: `tools/camry_tss3_request_capture.py` polls the nine
+  discriminator is now turnkey: `tools/targets/camry/live/camry_tss3_request_capture.py` polls the nine
   pinned reads on one monotonic clock with registry-driven decoding, one unresolved
   request maximum per responder, multiframe response assembly, safe negative-response
   request association, timeout/assembly-error responder quarantine, and passive all-bus capture, while
-  `tools/analyze_camry_tss3_request_capture.py` summarizes the artifact deterministically
+  `tools/targets/camry/analysis/analyze_camry_tss3_request_capture.py` summarizes the artifact deterministically
   (VAR-086; no live run claimed yet — the remaining step is the vehicle capture itself
   during stock DRCC). TMS-087 adds a second host artifact worth preserving during that
   run: PCS Vehicle Data Analysis `.vdas` is a standard ZIP whose UTF-8 `json.log`

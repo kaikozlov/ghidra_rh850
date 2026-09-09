@@ -19,7 +19,7 @@ REPO = Path(__file__).resolve().parents[1]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-from tools.analyze_camry_20260904_stock_steering import (
+from tools.targets.camry.analysis.analyze_camry_20260904_stock_steering import (
     WITNESS_WINDOW_S,
     SegmentReducer,
     be_signal,

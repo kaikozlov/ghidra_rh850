@@ -10,12 +10,12 @@ BUILD_TMP ?= $(BUILD_ROOT)/tmp
 export BUILD_ROOT BUILD_CACHE BUILD_WORK BUILD_OUT BUILD_LOGS BUILD_TMP
 TARGET ?= sienna-8965B4512000
 DEFAULT_TARGET := sienna-8965B4512000
-TARGET_WORK_DIR := $(shell python3 tools/analysis_target.py "$(TARGET)" --field work_dir)
-TARGET_SNAPSHOT_DIR := $(shell python3 tools/analysis_target.py "$(TARGET)" --field snapshot_dir)
-TARGET_INVENTORY_BASELINE := $(shell python3 tools/analysis_target.py "$(TARGET)" --field inventory_baseline)
-TARGET_DECOMPILER_CORPUS := $(shell python3 tools/analysis_target.py "$(TARGET)" --field decompiler_corpus)
-PROJECT_NAME := $(shell python3 tools/analysis_target.py "$(TARGET)" --field project_name)
-PROGRAM_NAME := $(shell python3 tools/analysis_target.py "$(TARGET)" --field program_name)
+TARGET_WORK_DIR := $(shell python3 tools/project/analysis_target.py "$(TARGET)" --field work_dir)
+TARGET_SNAPSHOT_DIR := $(shell python3 tools/project/analysis_target.py "$(TARGET)" --field snapshot_dir)
+TARGET_INVENTORY_BASELINE := $(shell python3 tools/project/analysis_target.py "$(TARGET)" --field inventory_baseline)
+TARGET_DECOMPILER_CORPUS := $(shell python3 tools/project/analysis_target.py "$(TARGET)" --field decompiler_corpus)
+PROJECT_NAME := $(shell python3 tools/project/analysis_target.py "$(TARGET)" --field project_name)
+PROGRAM_NAME := $(shell python3 tools/project/analysis_target.py "$(TARGET)" --field program_name)
 TARGET_WORK_SUFFIX := $(patsubst build/work/%,%,$(TARGET_WORK_DIR))
 PROJECT_DIR ?= $(BUILD_WORK)/$(TARGET_WORK_SUFFIX)
 SNAPSHOT_DIR ?= $(CURDIR)/$(TARGET_SNAPSHOT_DIR)
@@ -41,19 +41,19 @@ sync:
 	$(UV) sync --locked
 
 build-init:
-	$(PYTHON) tools/build_layout.py init
+	$(PYTHON) tools/project/build_layout.py init
 
 build-status:
-	$(PYTHON) tools/build_layout.py status
+	$(PYTHON) tools/project/build_layout.py status
 
 # Safe default cleanup: transient logs and tmp only. Work/cache require an
-# explicit tools/build_layout.py clean ... --force invocation.
+# explicit tools/project/build_layout.py clean ... --force invocation.
 clean-build:
-	$(PYTHON) tools/build_layout.py clean logs tmp
+	$(PYTHON) tools/project/build_layout.py clean logs tmp
 
 # Build the vendored ghidra-cli (ghidra/ghidra-cli) into build/cache/ghidra-cli/.
 ghidra-cli:
-	tools/build_ghidra_cli.sh
+	tools/project/build_ghidra_cli.sh
 
 # Complete portable verification for the vendored CLI. `--no-run` compile-checks
 # every integration target; the remaining commands execute all Ghidra-free tests,
@@ -91,10 +91,10 @@ verify-rfp:
 	$(PYTHON) tests/verify_renesas_rfp.py --require-package
 
 verify-sleigh:
-	tools/verify_sleigh.sh
+	tools/testing/processor/verify_sleigh.sh
 
 verify-processor:
-	tools/verify_processor.sh
+	tools/testing/processor/verify_processor.sh
 
 # Full local gate: firmware suites + SLEIGH + processor audits + exact parity.
 verify-semantic-coverage-live:
@@ -103,12 +103,11 @@ verify-semantic-coverage-live:
 verify-ghidra: verify-full verify-sleigh verify-processor verify-semantic-coverage-live verify-project-parity
 
 generate-dataflash:
-	$(PYTHON) tools/generate_dataflash_layout.py
-	$(PYTHON) tools/generate_checkpoint_payload_map.py
+	$(PYTHON) tools/firmware/generate_dataflash_layout.py
+	$(PYTHON) tools/firmware/generate_checkpoint_payload_map.py
 
 generate-application-diagnostics:
-	$(PYTHON) tools/generate_application_diagnostic_map.py
-	$(PYTHON) tools/generate_application_wdbi_surface.py
+	$(PYTHON) tools/firmware/generate_application_diagnostic_map.py
 
 generate-techstream-corpus:
 	cd tools/techstream && $(PYTHON) extract_steering_corpus.py
@@ -123,31 +122,31 @@ generate-diagnostic-vocabulary: generate-techstream-corpus
 	cd tools/diagnostics && $(PYTHON) correlate_vocabulary.py
 
 generate-application-receive-evidence:
-	tools/export_ghidra_project.sh application-rx-signals
+	tools/project/export_ghidra_project.sh application-rx-signals
 
 generate-application-receive: generate-application-receive-evidence
-	$(PYTHON) tools/generate_application_rx_map.py
+	$(PYTHON) tools/firmware/generate_application_rx_map.py
 
 generate-application-transmit:
-	$(PYTHON) tools/generate_application_tx_map.py
+	$(PYTHON) tools/firmware/generate_application_tx_map.py
 
 generate-processor-fixture:
-	$(PYTHON) tools/build_processor_fixture.py
+	$(PYTHON) tools/testing/processor/build_processor_fixture.py
 
 generate-function-discovery:
-	tools/export_ghidra_project.sh outside-functions
+	tools/project/export_ghidra_project.sh outside-functions
 
 generate-semantic-coverage:
-	tools/export_ghidra_project.sh semantic-coverage
+	tools/project/export_ghidra_project.sh semantic-coverage
 
 generate-semantic-sweep:
-	$(PYTHON) tools/generate_semantic_sweep.py --project-dir "$(PROJECT_DIR)"
+	$(PYTHON) tools/project/generate_semantic_sweep.py --project-dir "$(PROJECT_DIR)"
 
 generate-decompiler-corpus:
 ifeq ($(TARGET),$(DEFAULT_TARGET))
-	$(PYTHON) tools/generate_decompiler_corpus.py --project-dir "$(PROJECT_DIR)"
+	$(PYTHON) tools/project/generate_decompiler_corpus.py --project-dir "$(PROJECT_DIR)"
 else
-	$(PYTHON) tools/generate_target_decompiler_corpus.py --target "$(TARGET)" --project-dir "$(PROJECT_DIR)" --output "$(CURDIR)/$(TARGET_DECOMPILER_CORPUS)"
+	$(PYTHON) tools/project/generate_target_decompiler_corpus.py --target "$(TARGET)" --project-dir "$(PROJECT_DIR)" --output "$(CURDIR)/$(TARGET_DECOMPILER_CORPUS)"
 endif
 
 pseudocode:
@@ -155,20 +154,20 @@ pseudocode:
 
 generate-project-inventory:
 ifeq ($(TARGET),$(DEFAULT_TARGET))
-	tools/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
+	tools/project/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
 else
-	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR)" tools/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
+	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR)" tools/project/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
 endif
 
 # Exact normalized parity: aggregate floors remain the fast collapse detector;
 # this catches substitutions and metadata drift that equal totals cannot.
 verify-project-parity:
 ifeq ($(TARGET),$(DEFAULT_TARGET))
-	tools/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
+	tools/project/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
 else
-	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR)" tools/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
+	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR)" tools/project/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
 endif
-	$(PYTHON) tools/project_inventory.py compare \
+	$(PYTHON) tools/project/project_inventory.py compare \
 		"$(PROJECT_INVENTORY_BASELINE)" "$(PROJECT_INVENTORY)"
 
 # Deliberately separate from ordinary verification. The baseline can only move
@@ -184,21 +183,21 @@ update-project-baseline:
 		exit 2; \
 	fi
 ifeq ($(TARGET),$(DEFAULT_TARGET))
-	PROJECT_DIR="$(PROJECT_DIR_A)" tools/export_ghidra_project.sh project-inventory \
+	PROJECT_DIR="$(PROJECT_DIR_A)" tools/project/export_ghidra_project.sh project-inventory \
 		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-a.jsonl"
-	PROJECT_DIR="$(PROJECT_DIR_B)" tools/export_ghidra_project.sh project-inventory \
+	PROJECT_DIR="$(PROJECT_DIR_B)" tools/project/export_ghidra_project.sh project-inventory \
 		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-b.jsonl"
-	$(PYTHON) tools/project_inventory.py update \
+	$(PYTHON) tools/project/project_inventory.py update \
 		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-a.jsonl" \
 		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-b.jsonl" \
 		"$(PROJECT_INVENTORY_BASELINE)"
 else
 	@mkdir -p "$(BUILD_OUT)/targets/$(TARGET)"
-	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR_A)" tools/export_ghidra_project.sh project-inventory \
+	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR_A)" tools/project/export_ghidra_project.sh project-inventory \
 		"$(BUILD_OUT)/targets/$(TARGET)/project_inventory.rebuild-a.jsonl"
-	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR_B)" tools/export_ghidra_project.sh project-inventory \
+	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR_B)" tools/project/export_ghidra_project.sh project-inventory \
 		"$(BUILD_OUT)/targets/$(TARGET)/project_inventory.rebuild-b.jsonl"
-	$(PYTHON) tools/project_inventory.py update \
+	$(PYTHON) tools/project/project_inventory.py update \
 		"$(BUILD_OUT)/targets/$(TARGET)/project_inventory.rebuild-a.jsonl" \
 		"$(BUILD_OUT)/targets/$(TARGET)/project_inventory.rebuild-b.jsonl" \
 		"$(PROJECT_INVENTORY_BASELINE)"
@@ -207,9 +206,9 @@ endif
 
 rebuild-project:
 ifeq ($(TARGET),$(DEFAULT_TARGET))
-	tools/rebuild_project.sh --project-dir "$(PROJECT_DIR)"
+	tools/project/rebuild_project.sh --project-dir "$(PROJECT_DIR)"
 else
-	tools/rebuild_target_project.sh --target "$(TARGET)" --project-dir "$(PROJECT_DIR)"
+	tools/project/rebuild_target_project.sh --target "$(TARGET)" --project-dir "$(PROJECT_DIR)"
 endif
 
 # Materialize a gitignored working project from the registered committed snapshot.
@@ -220,25 +219,25 @@ work-project:
 		echo "Working project already exists: $(PROJECT_DIR)"; \
 	else \
 		echo "Materializing $(TARGET) working project from committed snapshot..."; \
-		$(PYTHON) tools/project_layout.py materialize \
+		$(PYTHON) tools/project/project_layout.py materialize \
 			--snapshot-dir "$(SNAPSHOT_DIR)" \
 			--project-dir "$(PROJECT_DIR)" \
 			--project-name "$(PROJECT_NAME)"; \
 		echo "Ready: $(PROJECT_DIR)"; \
 	fi
 	@if [ -f "$(PROJECT_DIR)/processor_manifest.json" ]; then \
-		$(PYTHON) tools/fingerprint_processor.py --source-only --expect "$(PROJECT_DIR)/processor_manifest.json"; \
+		$(PYTHON) tools/project/fingerprint_processor.py --source-only --expect "$(PROJECT_DIR)/processor_manifest.json"; \
 	elif [ -f "$(SNAPSHOT_DIR)/processor_manifest.json" ]; then \
-		$(PYTHON) tools/fingerprint_processor.py --source-only --expect "$(SNAPSHOT_DIR)/processor_manifest.json"; \
+		$(PYTHON) tools/project/fingerprint_processor.py --source-only --expect "$(SNAPSHOT_DIR)/processor_manifest.json"; \
 	else \
 		echo "NOTE: no processor_manifest.json yet; run rebuild-project to create one"; \
 	fi
 
 snapshot-project:
 ifeq ($(TARGET),$(DEFAULT_TARGET))
-	tools/snapshot_project.sh --project-dir "$(PROJECT_DIR)" --snapshot-dir "$(SNAPSHOT_DIR)"
+	tools/project/snapshot_project.sh --project-dir "$(PROJECT_DIR)" --snapshot-dir "$(SNAPSHOT_DIR)"
 else
-	tools/snapshot_target_project.sh --target "$(TARGET)" --project-dir "$(PROJECT_DIR)" $(if $(PARITY_PROJECT_DIR),--parity-project-dir "$(PARITY_PROJECT_DIR)",)
+	tools/project/snapshot_target_project.sh --target "$(TARGET)" --project-dir "$(PROJECT_DIR)" $(if $(PARITY_PROJECT_DIR),--parity-project-dir "$(PARITY_PROJECT_DIR)",)
 endif
 
 # Deliberate end-of-session promotion. The default Sienna preserves the mature
@@ -246,8 +245,8 @@ endif
 # then run target parity/corpus/snapshot promotion.
 finalize-project:
 ifeq ($(TARGET),$(DEFAULT_TARGET))
-	tools/finalize_project.sh
+	tools/project/finalize_project.sh
 else
 	GHIDRA_ANALYSIS_TARGET="$(TARGET)" GHIDRA_PROJECT="$(PROJECT_DIR)" tools/g stop || true
-	tools/snapshot_target_project.sh --target "$(TARGET)" --project-dir "$(PROJECT_DIR)" $(if $(PARITY_PROJECT_DIR),--parity-project-dir "$(PARITY_PROJECT_DIR)",)
+	tools/project/snapshot_target_project.sh --target "$(TARGET)" --project-dir "$(PROJECT_DIR)" $(if $(PARITY_PROJECT_DIR),--parity-project-dir "$(PARITY_PROJECT_DIR)",)
 endif

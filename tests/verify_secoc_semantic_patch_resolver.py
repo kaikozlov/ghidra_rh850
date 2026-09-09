@@ -13,7 +13,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.build_secoc_patch_manifest import (
+from tools.security.build_secoc_patch_manifest import (
     CONCATENATED_DUMP_SIZE,
     EXPECTED_CRC_RESIDUE,
     P1M_E_CODEFLASH_SIZE,

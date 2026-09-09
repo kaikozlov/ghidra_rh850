@@ -13,7 +13,7 @@
 > **Confidence:** readiness statement only — it binds provenance, it does not
 > validate any mechanism on the target
 >
-> **Tool:** `tools/check_variant_acquisition.py`
+> **Tool:** `tools/variants/check_variant_acquisition.py`
 >
 > **Verification:** `tests/verify_variant_acquisition_readiness.py`
 > (`tools/test variant_acquisition_readiness`)
@@ -27,7 +27,7 @@ acquisition→triage→resolver handoff into one command and one machine-readabl
 artifact:
 
 ```sh
-uv run --locked python tools/check_variant_acquisition.py CodeFlash.bin \
+uv run --locked python tools/variants/check_variant_acquisition.py CodeFlash.bin \
   --run-json CodeFlash.bin.run.json --notes "target X, bench Y" \
   -o build/out/target-evidence/acquisition-readiness.json
 ```
@@ -42,7 +42,7 @@ never requires hardware.
 |---|---|---|
 | **acquisition** | exact bare 1 MiB geometry via the shared `validate_codeflash_geometry` gate (rejects the `0x108000` DataFlash+CodeFlash concatenation and truncated/oversized images with the strip-prefix instruction); recomputed SHA-256/size; optional binding of the dumper `.run.json` (`p1me-codeflash-live-acquisition-v1`): run-record SHA must equal the bytes on disk, and the run must report a complete, non-interrupted acquisition | exit `1`, `problems[]` names each disagreement |
 | **structure triage** | runs the calibration-independent structural scanner ([rh850-codeflash-structure-scanner.md](rh850-codeflash-structure-scanner.md)) and summarizes boot-CRC descriptors, RAM-exec gate anchors, XCP `0x7F7/0x7F8` route/map anchors, and SecOC resolver prefilter site counts | informational — absence is weak evidence only |
-| **resolver readiness** | whether `tools/resolve_secoc_patch_image.sh` will accept the image in its current state, plus optional patch-manifest (`toyota-secoc-patch-manifest-v1`) SHA binding; emits the exact next command | `ready: false` with the blocking reason |
+| **resolver readiness** | whether `tools/security/resolve_secoc_patch_image.sh` will accept the image in its current state, plus optional patch-manifest (`toyota-secoc-patch-manifest-v1`) SHA binding; emits the exact next command | `ready: false` with the blocking reason |
 
 ## Output contract
 

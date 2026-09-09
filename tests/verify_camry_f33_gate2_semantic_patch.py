@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILDER_PATH = ROOT / "tools/build_camry_f33_gate2_semantic_patch.py"
+BUILDER_PATH = ROOT / "tools/targets/camry/builders/build_camry_f33_gate2_semantic_patch.py"
 SPEC = importlib.util.spec_from_file_location("build_camry_f33_gate2_semantic_patch", BUILDER_PATH)
 assert SPEC is not None and SPEC.loader is not None
 builder = importlib.util.module_from_spec(SPEC)
@@ -19,7 +19,7 @@ SPEC.loader.exec_module(builder)
 
 from exploit.patcher.build_payload import simulate_apply
 from exploit.patcher.patch_config import config_from_manifest
-from tools.build_secoc_patch_manifest import crc32
+from tools.security.build_secoc_patch_manifest import crc32
 
 LIVE = ROOT / "targets/camry-2026/raw-20260901/f33-b6-admission"
 

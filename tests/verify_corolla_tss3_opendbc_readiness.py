@@ -24,7 +24,7 @@ print("== reproducibility ==")
 check("schema is v1", ART["schema"] == "corolla-tss3-opendbc-readiness-v1")
 with tempfile.TemporaryDirectory(prefix="tss3-opendbc-") as td:
     out = Path(td) / "readiness.json"
-    proc = subprocess.run([sys.executable, str(REPO / "tools/build_corolla_tss3_opendbc_readiness.py"), "--output", str(out)], cwd=REPO, capture_output=True, text=True, check=False)
+    proc = subprocess.run([sys.executable, str(REPO / "tools/targets/corolla/builders/build_corolla_tss3_opendbc_readiness.py"), "--output", str(out)], cwd=REPO, capture_output=True, text=True, check=False)
     check("builder succeeds", proc.returncode == 0, proc.stderr.strip()[:200])
     if out.exists():
         check("tracked artifact is generator-drift free", json.loads(out.read_text()) == ART)

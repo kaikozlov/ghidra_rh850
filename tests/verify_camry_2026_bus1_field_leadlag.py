@@ -40,7 +40,7 @@ RAW = REPO / "targets/camry-2026/raw-20260827"
 CENSUS_SHA = "355ea5b408442a541bd946d21c3e85b0fa4d9e924474d3223189cb37894ee9fc"
 ART = REPO / "data/generated/camry_2026_bus1_field_leadlag.json"
 ART_SHA = "75a8f2a3c1758499c6c66a938c48d810991a8f28f4d87a8aaf0c0b4ddc7e1b55"
-BUILD = REPO / "tools/analyze_camry_2026_bus1_field_leadlag.py"
+BUILD = REPO / "tools/targets/camry/analysis/analyze_camry_2026_bus1_field_leadlag.py"
 CENSUS = REPO / "data/generated/camry_2026_cruise_lta_edge_census.json"
 REGENERATE = "--regenerate" in sys.argv[1:]
 
@@ -50,8 +50,8 @@ REGENERATE = "--regenerate" in sys.argv[1:]
 # every unrelated test run.  ``--regenerate`` remains the byte-exact proof path.
 EXPECTED_LOGIC_SHA = {
     BUILD: "615742ee5480554726600fe1e4fe62a27d8bc2cd0b064e55009e5bf955d3e931",
-    REPO / "tools/analyze_camry_2026_relay_capture.py": "de7be0be4e114ca06a051e3a28bebaa880fa54c29e10e9279724107cd991f5d8",
-    REPO / "tools/toyota_route_opendbc_common.py": "a8cfb474b9932a2d9a1f3c258428695eb2ad41e1d285ec26e2627fe4e1f4d259",
+    REPO / "tools/targets/camry/analysis/analyze_camry_2026_relay_capture.py": "de7be0be4e114ca06a051e3a28bebaa880fa54c29e10e9279724107cd991f5d8",
+    REPO / "tools/toyota_support/toyota_route_opendbc_common.py": "a8cfb474b9932a2d9a1f3c258428695eb2ad41e1d285ec26e2627fe4e1f4d259",
 }
 
 EXPECTED_DRIVES = {

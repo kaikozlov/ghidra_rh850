@@ -270,12 +270,12 @@ firmware acquisition is already deterministically bounded by VAR-069: `0x7B0`, F
 the full raw/recognized-decoded CUW census, no retained local package/session cache, and a
 Toyota/TIS exact-VIN ECU-supply-change query as the only provenance-safe external route. VAR-070 already rejects
 `0x107E` live on this Camry. The synchronized read-only poll itself is now turnkey
-(VAR-086): run `tools/camry_tss3_request_capture.py --execute` during stock DRCC to poll
+(VAR-086): run `tools/targets/camry/live/camry_tss3_request_capture.py --execute` during stock DRCC to poll
 Brake `0x7B0` `22 10 A1..A4` (currently unmeasured for live support) together with FRC
 `0x792` `22 1B 03..1B 07` with all-bus CAN retained. The poller permits only one unresolved
 RDBI per responder and quarantines a responder after query/assembly timeout, preventing
 late negative responses from being assigned to a later DID. Then summarize with
-`tools/analyze_camry_tss3_request_capture.py`; add Operation FFD alongside. That can close
+`tools/targets/camry/analysis/analyze_camry_tss3_request_capture.py`; add Operation FFD alongside. That can close
 the vehicle-network frame, transformation, cadence, arbitration executor, SecOC/integrity owner
 and suppression/fallback point. Separately, TMS-086 closes **generic real-TSE framing validation** with four public legacy
 Toyota Techstream specimens: the current-template header family, 12-byte-key/DWORD FAT and
@@ -406,7 +406,7 @@ operating context, not direct steering-torque measurement. `kai-openpilot@248777
 now implements the read-only acquisition shape inside passive exact-F33 `card`, using its
 existing `sendcan` publisher with normal `pandad`/`loggerd`, fixed post-repin Panda-bus0 `0x792` SID22
 reads, ELM327-param1/controls-disallowed gating, and per-DID two-second stale-stop.
-`tools/extract_camry_frc_lta_rlog.py` converts the resulting explicit rlog segments into
+`tools/targets/camry/extract/extract_camry_frc_lta_rlog.py` converts the resulting explicit rlog segments into
 the analyzer's privacy-minimized capture format. This is tooling readiness only; the live
 synchronized artifact is still missing. It remains valuable as an independent official
 live-state corroboration and B6-sender experiment, not as a prerequisite for naming the
@@ -767,7 +767,7 @@ chosen for **applicability**, not merely foreignness.
 The first command for any acquired EPS image remains:
 
 ```bash
-tools/resolve_ephemeral_runtime_image.sh path/to/CodeFlash.bin \
+tools/security/resolve_ephemeral_runtime_image.sh path/to/CodeFlash.bin \
   build/out/target-ephemeral-runtime.json
 ```
 
@@ -795,7 +795,7 @@ provisioning comparisons.
 Ready now:
 
 - read-only dumper under `exploit/dumper/`;
-- `tools/check_variant_acquisition.py` for geometry/SHA/provenance/readiness;
+- `tools/variants/check_variant_acquisition.py` for geometry/SHA/provenance/readiness;
 - structural scanner and semantic patch resolver.
 
 Canonical:

@@ -9,7 +9,6 @@ from pathlib import Path
 
 ROOT = REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
-from artifact_catalog import suite_builder_pairs  # noqa: E402
 passed = failed = 0
 
 
@@ -22,10 +21,17 @@ def check(name, cond, detail=""):
     print(f"[{'PASS' if ok else 'FAIL'}] {name}{suffix}")
 
 
-BUILDERS = [
-    (Path(artifact).stem, builder, artifact)
-    for builder, artifact in suite_builder_pairs("corolla_hf_regen")
-]
+def builder_pairs() -> list[tuple[str, str]]:
+    pairs = []
+    for tool in sorted((ROOT / "tools/targets/corolla/build").glob("build_corolla_hf_*.py")):
+        suffix = tool.stem.removeprefix("build_corolla_hf_")
+        artifact = ROOT / "data/generated/corolla_hf_{suffix}.json"
+        if artifact.is_file():
+            pairs.append((tool.relative_to(ROOT).as_posix(), artifact.relative_to(ROOT).as_posix()))
+    return pairs
+
+
+BUILDERS = [(Path(artifact).stem, builder, artifact) for builder, artifact in builder_pairs()]
 
 
 for title, builder, artifact in BUILDERS:

@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "data/generated/camry_f33_b6_end_to_end.json"
-TOOL = ROOT / "tools/analyze_camry_f33_b6_end_to_end.py"
+TOOL = ROOT / "tools/targets/camry/analysis/analyze_camry_f33_b6_end_to_end.py"
 IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 CORPUS = ROOT / "data/generated/camry-8965F3307000/decompilations.jsonl"
 EXPECTED_SHA = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"

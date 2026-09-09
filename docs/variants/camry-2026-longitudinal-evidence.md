@@ -23,7 +23,7 @@ diff.
 
 | Question | Status | Evidence |
 |---|---|---|
-| Wire geometry | **established** (firmware-static + captures) | 32-byte PDU; B0:B1 CRC-16/CCITT, B2 mod-256 counter, Data ID = CAN ID, no secret; `tools/camry_frc_request_poc.py` clones/recomputes offline |
+| Wire geometry | **established** (firmware-static + captures) | 32-byte PDU; B0:B1 CRC-16/CCITT, B2 mod-256 counter, Data ID = CAN ID, no secret; `tools/targets/camry/live/camry_frc_request_poc.py` clones/recomputes offline |
 | Command semantics | **hypothesis** | B12 is a high-value signed-7 candidate; physical command scale and companion request fields not closed |
 | Scale/sign | **unvalidated** | No independently labeled acceleration joins; correlation ≠ calibration |
 | Validity/counter rules | partially bounded | Profile-5 counter/CRC observed; receiver behavior on synthetic frames unknown |

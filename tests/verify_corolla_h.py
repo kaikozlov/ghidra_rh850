@@ -169,7 +169,7 @@ def _section_b6_full_receiver_contract():
     F_RAW = REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
     LTA = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance.json"
     KEYS = REPO / "data/generated/corolla_8965H1202000_secoc_key_provenance.json"
-    EXTRACTOR = REPO / "tools/extract_corolla_h_b6_full_receiver_evidence.py"
+    EXTRACTOR = REPO / "tools/targets/corolla/extract/extract_corolla_h_b6_full_receiver_evidence.py"
 
 
     art = json.loads(ART.read_text())
@@ -185,7 +185,7 @@ def _section_b6_full_receiver_contract():
     check("H image pinned", len(h) == 0x100000 and sha(h) == "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f")
     check("15 promoted SecOC/delivery functions", ev["function_count"] == len(funcs) == 15)
     check("evidence generator source-bound",
-          ev["generator"] == {"path": "tools/extract_corolla_h_b6_full_receiver_evidence.py", "sha256": sha(EXTRACTOR.read_bytes())})
+          ev["generator"] == {"path": "tools/targets/corolla/extract/extract_corolla_h_b6_full_receiver_evidence.py", "sha256": sha(EXTRACTOR.read_bytes())})
     check("whole application corpus source identity pinned",
           ev["source_corpus"]["sha256"] == "5cc79174e8ea917356b9d4758d086df1209c85c9665f122782cff7d88261c387")
     check("all promoted functions raw-bound",
@@ -417,7 +417,7 @@ def _section_b6_secoc_verification():
     FULL = REPO / "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json"
     BASE = REPO / "data/generated/corolla_8965H1202000_b6_receiver_contract.json"
     KEYS = REPO / "data/generated/corolla_8965H1202000_secoc_key_provenance.json"
-    EXTRACTOR = REPO / "tools/extract_corolla_h_b6_secoc_verification_evidence.py"
+    EXTRACTOR = REPO / "tools/targets/corolla/extract/extract_corolla_h_b6_secoc_verification_evidence.py"
 
 
     def reset_trials(current: int) -> list[tuple[int, int]]:
@@ -460,7 +460,7 @@ def _section_b6_secoc_verification():
     check("schema exact", art["schema"] == "corolla-8965H1202000-b6-secoc-verification-v1")
     check("H image exact", len(h) == 0x100000 and sha(h) == "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f")
     check("44 target-native functions promoted", ev["function_count"] == len(funcs) == 44)
-    check("extractor source pinned", ev["generator"] == {"path": "tools/extract_corolla_h_b6_secoc_verification_evidence.py", "sha256": sha(EXTRACTOR.read_bytes())})
+    check("extractor source pinned", ev["generator"] == {"path": "tools/targets/corolla/extract/extract_corolla_h_b6_secoc_verification_evidence.py", "sha256": sha(EXTRACTOR.read_bytes())})
     check("whole forced H source corpus pinned", ev["source_corpus"]["sha256"] == "5cc79174e8ea917356b9d4758d086df1209c85c9665f122782cff7d88261c387")
     check("all promoted H bodies raw-bound",
           all(sha(h[a:a + row["body_size"]]) == row["body_sha256"] for a, row in funcs.items()))

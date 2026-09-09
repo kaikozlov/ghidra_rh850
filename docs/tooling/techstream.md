@@ -3298,10 +3298,10 @@ longitudinal oracle is Brake `0x7B0` RDBI `22 10 A1`..`22 10 A4` (live support c
 Operation FFD and all-bus capture.
 
 That synchronized read-only oracle now has turnkey acquisition tooling (VAR-086):
-`tools/camry_tss3_request_capture.py` polls all nine pinned reads on one clock with
+`tools/targets/camry/live/camry_tss3_request_capture.py` polls all nine pinned reads on one clock with
 registry-driven decoding, one unresolved request maximum per responder, timeout/ISO-TP
 error quarantine, and passive all-bus capture, and
-`tools/analyze_camry_tss3_request_capture.py` summarizes the artifact; the live run
+`tools/targets/camry/analysis/analyze_camry_tss3_request_capture.py` summarizes the artifact; the live run
 itself is the only remaining step. Canonical tooling narrative:
 [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §37.
 

@@ -30,7 +30,7 @@ PROJECT_NAME="${PE_PROJECT:-pe_dlls}"
 PROJECT_DIR="$BUILD_WORK/pe-project"
 mkdir -p "$PROJECT_DIR"
 
-GHIDRA_CLI=$("$ROOT/tools/resolve_ghidra_cli.sh" --ensure-vendored)
+GHIDRA_CLI=$("$ROOT/tools/project/resolve_ghidra_cli.sh" --ensure-vendored)
 
 # --- Subcommand dispatch ------------------------------------------------------
 #
@@ -49,7 +49,7 @@ if [[ "${1:-}" == "import" ]]; then
   shift
   PROGRAM_NAME="$(basename "$BINARY")"
 
-  GHIDRA_HOME="$("$ROOT/tools/resolve_ghidra_home.sh")"
+  GHIDRA_HOME="$("$ROOT/tools/project/resolve_ghidra_home.sh")"
   ANALYZE_HEADLESS="$GHIDRA_HOME/support/analyzeHeadless"
   [[ -x "$ANALYZE_HEADLESS" ]] || { echo "missing analyzeHeadless: $ANALYZE_HEADLESS" >&2; exit 1; }
 

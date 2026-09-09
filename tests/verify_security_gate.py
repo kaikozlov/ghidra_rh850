@@ -28,7 +28,7 @@ import sys
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "tools"))
-from sienna_application_sa_keygen import (  # noqa: E402
+from tools.targets.sienna.sienna_application_sa_keygen import (  # noqa: E402
     APPLICATION_LEVEL2_SA_SECRET,
     derive_application_sa_key,
 )

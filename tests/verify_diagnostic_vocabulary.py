@@ -153,7 +153,7 @@ consumer_source = (
 assertion_source = (
     REPO / "ghidra/scripts/verify/AssertDiagnosticVocabulary.java"
 ).read_text()
-rebuild_source = (REPO / "tools/rebuild_project.sh").read_text()
+rebuild_source = (REPO / "tools/project/rebuild_project.sh").read_text()
 seed_source = (
     REPO / "ghidra" / "scripts" / "seed" / "SeedDidCallbacks.java"
 ).read_text()

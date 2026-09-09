@@ -11,7 +11,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.toyota_secoc_signer import (
+from tools.toyota_support.toyota_secoc_signer import (
     build_normal_authenticated_input,
     build_sync_authenticated_input,
     pack_normal_freshness,
@@ -104,11 +104,11 @@ rejects("message counter is unsigned 8-bit", lambda: sign_classic_frame(KEY, 0x2
 print("\n== command-line interface ==")
 environment = os.environ.copy()
 environment["TOYOTA_SECOC_KEY"] = KEY.hex()
-signer = REPO / "tools" / "toyota_secoc_signer.py"
+signer = REPO / "tools" / "toyota"
 normal_cli = subprocess.run(
     [
-        sys.executable,
         str(signer),
+        "secoc",
         "sign",
         "--can-id", "0x2e4",
         "--payload", PAYLOAD.hex(),
@@ -129,7 +129,7 @@ check(
 )
 
 sync_cli = subprocess.run(
-    [sys.executable, str(signer), "sync", "--trip", hex(TRIP), "--reset", hex(RESET)],
+    [str(signer), "secoc", "sync", "--trip", hex(TRIP), "--reset", hex(RESET)],
     check=False,
     capture_output=True,
     text=True,

@@ -1006,7 +1006,7 @@ an update package:
 
 1. Record diagnostic session transitions, control-type-`01` RoutineControl RID `0x1010`
    starts, and selector-`03` result reads. Run the capture through
-   `tools/decode_icus_key_update_trace.py`; it reassembles ISO-TP and redacts
+   `tools/security/decode_icus_key_update_trace.py`; it reassembles ISO-TP and redacts
    package bytes by default.
 2. Correlate entry through `0x96354 → 0x68E16 → 0x6823C → 0x88936 →
    0x870A8 → 0x86E62 → 0x8997A`.

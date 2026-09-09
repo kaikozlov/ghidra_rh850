@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / "data/analysis_targets.json"
-RESOLVER = ROOT / "tools/analysis_target.py"
+RESOLVER = ROOT / "tools/project/analysis_target.py"
 
 passed = failed = 0
 
@@ -92,12 +92,12 @@ for target, snap in [("sienna-8965B4512000", ROOT / "project"), ("camry-8965F330
     r = subprocess.run([str(ROOT / "tools/g"), "session-status"], cwd=ROOT, env=env, capture_output=True, text=True)
     check(f"{target} committed snapshot guard", r.returncode != 0 and "REFUSING" in r.stderr)
 
-rebuild = (ROOT / "tools/rebuild_target_project.sh").read_text()
+rebuild = (ROOT / "tools/project/rebuild_target_project.sh").read_text()
 check("Camry rebuild preserves four-stage analysis", all(x in rebuild for x in ("1/4", "2/4", "3/4", "4/4", "4b")))
 check("target rebuild resolves registered stage scripts", all(token in rebuild for token in ("field function_seeds", "field device_profile_script", "field entry_seed_script", "field diagnostic_seed_script", "field recovered_seed_script")))
 check("target rebuild has no Camry path/profile coupling", "data/targets/camry-8965F3307000" not in rebuild and "camry_f33_v1" not in rebuild)
 check("Camry destructive rebuild is build/work bounded", "refusing target rebuild destination outside dedicated build/work descendant" in rebuild and "is_symlink" in rebuild)
-snapshot = (ROOT / "tools/snapshot_target_project.sh").read_text()
+snapshot = (ROOT / "tools/project/snapshot_target_project.sh").read_text()
 check("first promotion requires independent parity build", "first target promotion requires --parity-project-dir" in snapshot and "independent target rebuild inventories differ" in snapshot)
 check("canonical corpus rechecks tracked baseline", "generate_target_decompiler_corpus.py" in snapshot)
 check("target snapshot has no Camry profile coupling", "camry_f33_v1" not in snapshot)

@@ -1179,10 +1179,10 @@ is enabled.
 ## Cross-calibration runtime transfer
 
 The Sienna implementation is no longer an address-hard-coded payload.
-`tools/resolve_ephemeral_runtime_image.sh` performs a fresh disposable CodeFlash
+`tools/security/resolve_ephemeral_runtime_image.sh` performs a fresh disposable CodeFlash
 import, resolves Gate 2 plus the callback-free startup/scheduler skeleton, then
 completes the pointer-table/RAM anchors from raw RH850 signatures and GP/TP-relative
-displacements. `tools/build_ephemeral_runtime_manifest.py` derives the target's
+displacements. `tools/security/build_ephemeral_runtime_manifest.py` derives the target's
 queue-1 record count and Gate-2 table base from machine structure, validates each
 configured SecOC record, and only then asks whether the current steering bridge's
 `0x2E4/0x131` profiles exist. RAM execution/retention geometry remains a separate

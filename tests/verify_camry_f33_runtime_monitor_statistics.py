@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data/generated/camry_f33_runtime_monitor_statistics.json"
-subprocess.run(["python3", str(ROOT / "tools/analyze_camry_f33_runtime_monitor_statistics.py")], check=True)
+subprocess.run(["python3", str(ROOT / "tools/targets/camry/analysis/analyze_camry_f33_runtime_monitor_statistics.py")], check=True)
 d = json.loads(OUT.read_text())
 i = d["retained_idle_control"]
 assert d["target"] == "8965F3307000"

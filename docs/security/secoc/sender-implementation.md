@@ -10,7 +10,7 @@
 > **Evidence source:** mixed — firmware-static for the accepted wire format;
 > external-source for opendbc's sender integration
 >
-> **Canonical artifacts:** `tools/toyota_secoc_signer.py`,
+> **Canonical artifacts:** `tools/toyota_support/toyota_secoc_signer.py`,
 > `external-references.lock.json`
 >
 > **Verification:** `tests/verify_toyota_secoc_signer.py`; optional pinned-source
@@ -184,7 +184,7 @@ obtain the existing key.
 
 ## 2. Independent repository signer
 
-`tools/toyota_secoc_signer.py` is an independent implementation written from the
+`tools/toyota_support/toyota_secoc_signer.py` is an independent implementation written from the
 firmware-derived format above; it is not a copy of opendbc's source. It exposes:
 
 ```python
@@ -213,7 +213,7 @@ line:
 ```bash
 export TOYOTA_SECOC_KEY=000102030405060708090a0b0c0d0e0f
 
-uv run --locked python tools/toyota_secoc_signer.py sign \
+tools/toyota secoc sign \
   --can-id 0x2e4 \
   --payload 11223344 \
   --trip 0x1234 \
@@ -226,7 +226,7 @@ uv run --locked python tools/toyota_secoc_signer.py sign \
 A synchronization-frame known answer for the same test key is:
 
 ```bash
-uv run --locked python tools/toyota_secoc_signer.py sync \
+tools/toyota secoc sync \
   --trip 0x1234 \
   --reset 0x56789
 
@@ -238,7 +238,7 @@ The tool prints candump-compatible text but does not send it.
 
 ## 3. Generic capture and DataFlash oracle
 
-`tools/toyota_secoc_oracle.py` extends the independent implementation from frame
+`tools/toyota_support/toyota_secoc_oracle.py` extends the independent implementation from frame
 construction into offline verification. Unlike the current pinned community
 DataFlash verifier, it does not assume steering IDs or Panda buses 0/2. It:
 

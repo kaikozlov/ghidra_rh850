@@ -46,7 +46,7 @@ fields, source/destination pointers, controlling table rows, reachability
 chain, exploitability assumptions, negative boundary, and verifier. The two
 verification layers are deliberately independent:
 
-- `tools/memory_safety_semantics.py` reads the committed firmware directly and
+- `tools/security/memory_safety_semantics.py` reads the committed firmware directly and
   pins only decisive instruction encodings and table values—not whole-body
   hashes or generated Ghidra artifacts.
 - `AssertMemorySafetyPaths.java` independently checks live Ghidra instruction

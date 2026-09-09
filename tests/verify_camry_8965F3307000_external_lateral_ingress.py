@@ -11,9 +11,9 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 ART = REPO / "data/generated/camry_8965F3307000_external_lateral_ingress.json"
-BUILD = REPO / "tools/build_camry_8965F3307000_external_lateral_ingress.py"
+BUILD = REPO / "tools/targets/camry/builders/build_camry_8965F3307000_external_lateral_ingress.py"
 CLASS_ART = REPO / "data/generated/camry_2026_class_l_upstream_correlation.json"
-CLASS_BUILD = REPO / "tools/analyze_camry_2026_class_l_upstream.py"
+CLASS_BUILD = REPO / "tools/targets/camry/analysis/analyze_camry_2026_class_l_upstream.py"
 
 passed = failed = 0
 

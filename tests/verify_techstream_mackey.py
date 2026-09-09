@@ -271,7 +271,7 @@ check("shared-memory reader starts payload at offset 2",
 
 
 print("\n== generated native vehicle protocol ==")
-generator = REPO / "tools/generate_techstream_mackey_protocol.py"
+generator = REPO / "tools/techstream/generate_techstream_mackey_protocol.py"
 generated_json = REPO / "data/generated/techstream_v18/mackey_vehicle_protocol.json"
 generated_csv = REPO / "data/generated/techstream_v18/mackey_state_machine.csv"
 result = subprocess.run(

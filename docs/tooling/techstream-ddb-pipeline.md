@@ -477,7 +477,7 @@ SHA prefixes.
 `tools/pe import` previously used the Ghidra CLI bridge's built-in import,
 which runs a shallow analysis pass that resolves 0 functions and 0 instructions
 in MSVC-compiled C++ PEs. The fix routes `import` through `analyzeHeadless`
-directly (the same approach `tools/rebuild_project.sh` uses for the RH850
+directly (the same approach `tools/project/rebuild_project.sh` uses for the RH850
 project), then all other subcommands use the bridge for interactive queries.
 
 Before: `DataCompress_DT.DLL` — 0 functions, 0 instructions.

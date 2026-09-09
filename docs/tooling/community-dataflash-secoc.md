@@ -11,7 +11,7 @@
 > **Verification:** `tests/verify_toyota_secoc_oracle.py`; optional pinned-source
 > verification `tests/verify_external_corroboration.py`
 >
-> **Canonical local tool:** `tools/toyota_secoc_oracle.py`
+> **Canonical surface:** `tools/toyota secoc oracle` (implementation: `tools/toyota_support/toyota_secoc_oracle.py`)
 
 The community DataFlash extractor is valuable because it reuses the solved
 Toyota/Denso authenticated-RAM-execution bootstrap and can recover a complete
@@ -82,7 +82,7 @@ The machine-readable repository profile is
 
 ## 3. Repository-local generic oracle
 
-`tools/toyota_secoc_oracle.py` removes the Sienna-specific analytical
+`tools/toyota_support/toyota_secoc_oracle.py` removes the Sienna-specific analytical
 assumptions without modifying the pinned external checkout.
 
 It:
@@ -109,7 +109,7 @@ orphan `0x2E4` frame from bus 2.
 ### Example
 
 ```bash
-uv run --locked python tools/toyota_secoc_oracle.py scan \
+tools/toyota secoc oracle scan \
   --capture can.ndjson \
   --dump dump_ff200000_ff208000.bin
 ```
@@ -126,7 +126,7 @@ rather than another heuristic entropy search.
 
 ## 4. Explicit cross-variant research session
 
-`tools/toyota_secoc_session.py` turns the remaining implicit workflow
+`tools/toyota_support/toyota_secoc_session.py` turns the remaining implicit workflow
 assumptions into durable session state without performing ECU mutation. It
 records:
 
@@ -149,14 +149,14 @@ profile across any selected buses, and hand the resulting oracle to
 Example:
 
 ```bash
-uv run --locked python tools/toyota_secoc_session.py init session \
+tools/toyota secoc session init session \
   --target-car CAR.TOYOTA_COROLLA_TSS2
 
-uv run --locked python tools/toyota_eps_bus_probe.py --execute > probe.json
-uv run --locked python tools/toyota_secoc_session.py record-probe session probe.json
-uv run --locked python tools/toyota_secoc_session.py ingest-can session all_can.ndjson
-uv run --locked python tools/toyota_secoc_session.py fingerprint-plan session
-uv run --locked python tools/toyota_secoc_session.py oracle-plan session --dump dump.bin
+tools/toyota eps-probe --execute > probe.json
+tools/toyota secoc session record-probe session probe.json
+tools/toyota secoc session ingest-can session all_can.ndjson
+tools/toyota secoc session fingerprint-plan session
+tools/toyota secoc session oracle-plan session --dump dump.bin
 ```
 
 The fingerprint step is deliberately a **plan**, not an automatic source patch:
@@ -183,7 +183,7 @@ contributor's already-pinned public route adds the genuine bus-1 protected
 traffic (`0x116` and `0x24D`) without retaining route metadata.
 
 The complete 32 KiB DataFlash dump was then scanned with
-`tools/analyze_toyota_dataflash.py --domain-scan --min-entropy 0`. All 32,753
+`tools/toyota_support/analyze_toyota_dataflash.py --domain-scan --min-entropy 0`. All 32,753
 overlapping 16-byte positions are considered (23,277 unique raw windows after
 deduplication), and no candidate passes the synchronization, `0x116`, or
 `0x24D` cryptographic probe.

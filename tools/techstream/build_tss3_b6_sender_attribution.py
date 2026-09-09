@@ -22,7 +22,7 @@ from typing import Any
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "tools"))
-from corolla_h_constants import CODEFLASH as H_CODE  # noqa: E402
+from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODE  # noqa: E402
 
 DEFAULT_OUT = REPO / "data/generated/techstream_v18/tss3_b6_sender_attribution.json"
 P5 = REPO / "data/generated/techstream_v18/p5_lateral_control_semantics.json"

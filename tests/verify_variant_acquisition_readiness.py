@@ -12,8 +12,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.build_secoc_patch_manifest import P1M_E_CODEFLASH_SIZE, validate_codeflash_geometry  # noqa: E402
-from tools.check_variant_acquisition import (  # noqa: E402
+from tools.security.build_secoc_patch_manifest import P1M_E_CODEFLASH_SIZE, validate_codeflash_geometry  # noqa: E402
+from tools.variants.check_variant_acquisition import (  # noqa: E402
     MANIFEST_SCHEMA,
     RUN_SCHEMA,
     SCHEMA,
@@ -86,7 +86,7 @@ check("triage stage keeps the no-transfer disclaimer", "does not prove" in struc
 print("\n== resolver readiness stage ==")
 resolver = check_resolver_readiness(acq, None)
 check("geometry-valid acquisition is resolver-ready without a manifest", resolver["ready"] is True and resolver["manifest_bound"] is None)
-check("ready result names the exact next command", "tools/resolve_secoc_patch_image.sh" in resolver["next_step"])
+check("ready result names the exact next command", "tools/security/resolve_secoc_patch_image.sh" in resolver["next_step"])
 blocked = check_resolver_readiness(short, None)
 check("geometry-invalid acquisition is not resolver-ready", blocked["ready"] is False and "fix acquisition problems" in blocked["next_step"])
 
@@ -109,7 +109,7 @@ with tempfile.TemporaryDirectory() as td:
     image.write_bytes(BLOB)
     out = temp / "readiness.json"
     cli = subprocess.run(
-        [sys.executable, str(REPO / "tools/check_variant_acquisition.py"), str(image), "-o", str(out), "--notes", "cli"],
+        [sys.executable, str(REPO / "tools/variants/check_variant_acquisition.py"), str(image), "-o", str(out), "--notes", "cli"],
         cwd=REPO, capture_output=True, text=True, check=False,
     )
     check("CLI exits 0 on a ready artifact", cli.returncode == 0)
@@ -119,7 +119,7 @@ with tempfile.TemporaryDirectory() as td:
     partial = temp / "partial.bin"
     partial.write_bytes(BLOB[:0x1000])
     bad = subprocess.run(
-        [sys.executable, str(REPO / "tools/check_variant_acquisition.py"), str(partial)],
+        [sys.executable, str(REPO / "tools/variants/check_variant_acquisition.py"), str(partial)],
         cwd=REPO, capture_output=True, text=True, check=False,
     )
     check("CLI exits nonzero on a non-ready artifact", bad.returncode != 0 and "reject truncated or oversized" in bad.stdout)
@@ -127,14 +127,14 @@ with tempfile.TemporaryDirectory() as td:
     bad_run_path = temp / "run.json"
     bad_run_path.write_text(json.dumps(bad_run))
     schema_refusal = subprocess.run(
-        [sys.executable, str(REPO / "tools/check_variant_acquisition.py"), str(image), "--run-json", str(bad_run_path)],
+        [sys.executable, str(REPO / "tools/variants/check_variant_acquisition.py"), str(image), "--run-json", str(bad_run_path)],
         cwd=REPO, capture_output=True, text=True, check=False,
     )
     check("CLI still reports run-record problems through the exit code", schema_refusal.returncode == 1)
     foreign = temp / "foreign.json"
     foreign.write_text(json.dumps({"schema": "something-else"}))
     try:
-        from tools.check_variant_acquisition import _load_json
+        from tools.variants.check_variant_acquisition import _load_json
         _load_json(foreign, RUN_SCHEMA, "dumper run record")
     except AcquisitionReadinessError:
         check("foreign run-record schema is rejected", True)

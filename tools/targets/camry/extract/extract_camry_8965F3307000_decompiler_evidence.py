@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+"""Promote exact 8965F3307000 target-native decompiler evidence."""
+from __future__ import annotations
+import argparse, json
+from pathlib import Path
+from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, body_bytes, display_path
+from tools.project.decompiler_evidence import bind_entries, bind_function, load_function_corpus, require_function, sha256_bytes
+
+REPO = Path(__file__).resolve().parents[4]
+OUT = REPO / "data/generated/camry_8965F3307000_decompiler_evidence.json"
+ENTRIES = [
+    # Target-native COM/diagnostic steering-angle ingress.
+    0x47AE0, 0x4B59E, 0x4BD46, 0x4DBF8, 0x58074, 0x6A5FA, 0x7D12A,
+    # Target-native SecOC receive/ICU-S verify path.
+    0x8A8E4, 0x8ECB2, 0x8ED14, 0x8EE7C, 0x8F2B0, 0x8F34A, 0x8F434, 0x8F676, 0x8F746,
+    # Measured-angle reconstruction, B6 staging, target conditioner/comparator.
+    0xB39D8, 0xB3B06, 0xBCD62, 0xCB73A, 0xCCF0E, 0xCCFB2, 0xCD128, 0xCE9EA, 0xCEADA, 0xCEE7C, 0xCEFFC,
+]
+
+def sha(b: bytes) -> str:
+    return sha256_bytes(b)
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument('--image', type=Path, default=IMAGE)
+    ap.add_argument('--corpus', type=Path, default=CORPUS, help='first-class exact-F33 canonical decompiler corpus')
+    ap.add_argument('--out', type=Path, default=OUT)
+    a = ap.parse_args()
+    image = a.image.read_bytes()
+    if len(image) != 0x100000:
+        raise SystemExit(f'expected 1 MiB normalized CodeFlash, got {len(image):#x}')
+    rows, _ = load_function_corpus(a.corpus)
+    funcs = bind_entries(image, rows, ENTRIES)
+    out = {
+        'schema': 'camry-8965f3307000-decompiler-evidence-v1',
+        'software_id': '8965F3307000',
+        'image': {
+            'path': str(a.image.resolve().relative_to(REPO.resolve())) if a.image.resolve().is_relative_to(REPO.resolve()) else str(a.image),
+            'size': len(image),
+            'sha256': sha(image),
+        },
+        'source_corpus': {
+            'path': display_path(a.corpus),
+            'sha256': sha(a.corpus.read_bytes()),
+        },
+        'function_count': len(funcs),
+        'functions': funcs,
+        'boundary': (
+            'Target-native Camry decompiler observations for protected 00F/D7/B6 receive verification, '
+            'B6 COM extraction/staging, target-native 0x025/DID1037 measured steering-angle feedback, and the signed B4:B5 target-angle controller chain. '
+            'Raw body hashes bind every pseudocode row to exact 8965F3307000 bytes; OEM signal names are '
+            'assigned only where the target-native consumer semantics close them.'
+        ),
+    }
+    a.out.parent.mkdir(parents=True, exist_ok=True)
+    a.out.write_text(json.dumps(out, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+    print(f'wrote {a.out}: {len(funcs)} functions')
+    return 0
+
+if __name__ == '__main__':
+    raise SystemExit(main())

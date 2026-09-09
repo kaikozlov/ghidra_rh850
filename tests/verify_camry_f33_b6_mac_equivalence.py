@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from tools.analyze_camry_f33_b6_mac_equivalence import analyze
+from tools.targets.camry.analysis.analyze_camry_f33_b6_mac_equivalence import analyze
 
 IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 CORPUS = ROOT / "data/generated/camry-8965F3307000/decompilations.jsonl"

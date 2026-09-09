@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 CF=(ROOT/'firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
 CSV=ROOT/'data/application_proprietary_ba_surface.csv'
-GEN=ROOT/'tools/generate_application_proprietary_ba_surface.py'
+GEN=ROOT/'tools/firmware/generate_application_proprietary_ba_surface.py'
 passed=failed=0
 def check(name,cond,detail=''):
  global passed,failed

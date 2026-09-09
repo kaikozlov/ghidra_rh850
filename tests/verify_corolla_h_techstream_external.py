@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "data/generated/corolla_8965H1202000_techstream_correlations.json"
-BUILD = ROOT / "tools/build_corolla_h_techstream_correlations.py"
+BUILD = ROOT / "tools/targets/corolla/builders/build_corolla_h_techstream_correlations.py"
 DIAG_ROOT = Path(
     os.environ.get(
         "TECHSTREAM_UNPACKED_ROOT",

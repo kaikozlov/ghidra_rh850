@@ -48,7 +48,7 @@ from exploit.command5.stimulus import (
     parse_bank1_activation_response,
     parse_control_type3_response,
 )
-from tools.build_secoc_patch_manifest import crc32, discover_crc_descriptors
+from tools.security.build_secoc_patch_manifest import crc32, discover_crc_descriptors
 
 passed = failed = 0
 

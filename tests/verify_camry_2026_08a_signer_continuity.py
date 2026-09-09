@@ -10,7 +10,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 ART = REPO / "data/generated/camry_2026_08a_signer_continuity.json"
-BUILD = REPO / "tools/analyze_camry_2026_08a_signer_continuity.py"
+BUILD = REPO / "tools/targets/camry/analysis/analyze_camry_2026_08a_signer_continuity.py"
 
 passed = failed = 0
 

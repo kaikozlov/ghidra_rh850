@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-TOOL = REPO / "tools/project_inventory.py"
+TOOL = REPO / "tools/project/project_inventory.py"
 
 passed = 0
 failed = 0

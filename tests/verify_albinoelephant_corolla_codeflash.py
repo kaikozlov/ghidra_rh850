@@ -14,12 +14,12 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.build_ephemeral_runtime_manifest import load_codeflash  # noqa: E402
-from tools.build_secoc_patch_manifest import build_manifest as build_patch_manifest  # noqa: E402
-from tools.compare_variant_function_bodies import compare as compare_function_bodies  # noqa: E402
-from tools.compare_variant_application_rx import compare as compare_application_rx  # noqa: E402
-from tools.build_variant_named_transfer_ledger import build as build_named_transfer_ledger  # noqa: E402
-from tools.analyze_rh850_codeflash_structure import analyze as analyze_codeflash_structure  # noqa: E402
+from tools.security.build_ephemeral_runtime_manifest import load_codeflash  # noqa: E402
+from tools.security.build_secoc_patch_manifest import build_manifest as build_patch_manifest  # noqa: E402
+from tools.variants.compare_variant_function_bodies import compare as compare_function_bodies  # noqa: E402
+from tools.variants.compare_variant_application_rx import compare as compare_application_rx  # noqa: E402
+from tools.variants.build_variant_named_transfer_ledger import build as build_named_transfer_ledger  # noqa: E402
+from tools.firmware.analyze_rh850_codeflash_structure import analyze as analyze_codeflash_structure  # noqa: E402
 
 RAW_DIR = REPO / "community/albinoelephant/raw-20260818"
 SESSION = RAW_DIR / "albinoelephant-corolla-2023.20260814-0023"

@@ -13,7 +13,7 @@ PYTHON = OPENPILOT / ".venv/bin/python"
 SPAN = REPO / "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst"
 PUBLIC = REPO / "REFERENCE/public_route_corolla_2023_segment0_rlog.zst"
 ALBINO = REPO / "community/albinoelephant/can_oracle.ndjson"
-BUILDER = REPO / "tools/build_corolla_hf_secoc_00f_freshness_bridge.py"
+BUILDER = REPO / "tools/targets/corolla/builders/build_corolla_hf_secoc_00f_freshness_bridge.py"
 TRACKED = REPO / "data/generated/corolla_hf_secoc_00f_freshness_bridge.json"
 
 passed = failed = 0

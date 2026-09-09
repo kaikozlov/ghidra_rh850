@@ -12,7 +12,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.analyze_secoc_patch_target import (
+from tools.security.analyze_secoc_patch_target import (
     EGG,
     KNOWN_SIENNA_EGG_VA,
     KNOWN_SIENNA_SECOC_WORKER,

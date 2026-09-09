@@ -53,7 +53,7 @@ Method: identical native-CAN fixture input (tracked
 `tests/fixtures/camry_20260904/3c-seg43.jsonl` witness window and tracked
 `tests/fixtures/camry_20260904/3d-seg1-torque.jsonl`, source SHA-256
 `1437f8c6...e54ddc3`, 4.0–14.0 s) replayed through `CarInterface.update()`
-from both opendbc revisions. `tools/replay_camry_tss3_carstate_revisions.py`
+from both opendbc revisions. `tools/targets/camry/utilities/replay_camry_tss3_carstate_revisions.py`
 materializes the recorded revision in a temporary clean git worktree and refuses
 a caller-pinned proposed-revision mismatch. It also executes the current fork's
 actual `DesireHelper` implementation as a downstream semantic check: with an

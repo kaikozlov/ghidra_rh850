@@ -3,12 +3,12 @@ from __future__ import annotations
 import hashlib, importlib.util, json, struct, sys, tempfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-P=ROOT/'tools/build_camry_f33_crypto_result_patch.py'
+P=ROOT/'tools/targets/camry/builders/build_camry_f33_crypto_result_patch.py'
 s=importlib.util.spec_from_file_location('stage5',P); assert s and s.loader
 b=importlib.util.module_from_spec(s); sys.modules[s.name]=b; s.loader.exec_module(b)
 from exploit.patcher.patch_config import config_from_manifest
 from exploit.patcher.build_payload import simulate_apply
-from tools.build_secoc_patch_manifest import crc32
+from tools.security.build_secoc_patch_manifest import crc32
 
 passed=failed=0
 def check(n,c):

@@ -347,7 +347,7 @@ def _section_secoc_freshness_trials():
     REPO = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(REPO))
     from exploit.followups.secoc_freshness_trials import FreshnessTrialError, TAG_MASK, build_fd_suffix_alias, build_future_sync, build_reset_replay, build_tag_guesses, parse_protected_frame, parse_sync_frame, replace_tag, sync_candidate_is_forward
-    from tools.toyota_secoc_signer import sign_classic_frame, sign_sync_frame
+    from tools.toyota_support.toyota_secoc_signer import sign_classic_frame, sign_sync_frame
     KEY = bytes(range(16))
 
     def rejects(fn) -> bool:

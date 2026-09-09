@@ -11,7 +11,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 ART = REPO / "data/generated/camry_2026_baseline_selector_live.json"
-BUILD = REPO / "tools/analyze_camry_2026_baseline_selector.py"
+BUILD = REPO / "tools/targets/camry/analysis/analyze_camry_2026_baseline_selector.py"
 STATIC = REPO / "data/generated/camry_8965F3307000_command_cone_ingress.json"
 CENSUS = REPO / "data/generated/camry_2026_cruise_lta_edge_census.json"
 RAW = REPO / "targets/camry-2026/raw-20260827"

@@ -17,7 +17,7 @@ from techstream_paths import GTSPLUS_EXTERNAL_ROOT, V18_TECHSTREAM_ROOT, resolve
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "tools"))
-from analysis_target import target, verified_file  # noqa: E402
+from tools.project.analysis_target import target, verified_file  # noqa: E402
 
 DEFAULT_GTS = resolve_gts_root(GTSPLUS_EXTERNAL_ROOT)
 DEFAULT_V18 = V18_TECHSTREAM_ROOT

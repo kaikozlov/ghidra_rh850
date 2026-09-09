@@ -10,7 +10,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 ART = REPO / "data/generated/camry_8965F3307000_internal_assist_oracles.json"
-BUILD = REPO / "tools/build_camry_8965F3307000_internal_assist_oracles.py"
+BUILD = REPO / "tools/targets/camry/builders/build_camry_8965F3307000_internal_assist_oracles.py"
 passed = failed = 0
 
 

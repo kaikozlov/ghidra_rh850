@@ -234,7 +234,7 @@ Two invariants are important:
 - ELM parameter 1 means the **normal harness semantic path** in either cable
   orientation, while parameter 0 means the **OBD semantic path**.
 
-`tools/toyota_eps_bus_probe.py` now emits this truth table for the selected
+`tools/toyota_support/toyota_eps_bus_probe.py` now emits this truth table for the selected
 ELM parameter, and `tests/verify_toyota_eps_bus_probe.py` pins the model.
 
 ## 7. Official Toyota-B / harness-box topology
@@ -410,7 +410,7 @@ C is the correct static software replacement **for direct diagnostics**. It is
 not a replacement for B when the objective is ordinary openpilot interception
 through the CAN0/CAN2 relay.
 
-`tools/toyota_eps_bus_probe.py` now reports this distinction explicitly and marks
+`tools/toyota_support/toyota_eps_bus_probe.py` now reports this distinction explicitly and marks
 its `param=1,bus=1` candidate as `relay_topology_equivalent=false`.
 
 ## 11. The real Corolla firmware eliminates an EPS-side bus switch

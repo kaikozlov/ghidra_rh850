@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TOOL = ROOT / "tools/annotations"
 LEDGER = ROOT / "data/annotations/annotation_ledger.jsonl"
 APPLIER = ROOT / "ghidra/scripts/annotate/ApplyAnnotationLedger.java"
-REBUILD = ROOT / "tools/rebuild_project.sh"
+REBUILD = ROOT / "tools/project/rebuild_project.sh"
 ANNOTATE_PAYLOAD = ROOT / "ghidra/scripts/annotate/AnnotatePayloadGate.java"
 
 passed = 0

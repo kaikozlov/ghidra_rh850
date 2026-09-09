@@ -9,7 +9,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.decode_icus_key_update_trace import decode_trace
+from tools.security.decode_icus_key_update_trace import decode_trace
 
 passed = failed = 0
 

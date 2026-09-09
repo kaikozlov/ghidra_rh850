@@ -9,7 +9,7 @@ recomputation of the headline numbers directly from the retained captures.
 This verifier deliberately does NOT rerun the ~minutes four-tier producer; it is
 not a byte-identical regeneration proof. Full deterministic regeneration of the
 committed artifact is performed manually with the tracked producer:
-``uv run python tools/analyze_camry_2026_bus1_frc_egress_bounds.py``. The
+``uv run python tools/targets/camry/analysis/analyze_camry_2026_bus1_frc_egress_bounds.py``. The
 fast-path guards here (input hashes + schema/method/counts/key results + spot
 recomputations) fail closed if the retained captures or any pinned method/result
 changes without a deliberate regeneration and review.
@@ -25,7 +25,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 RAW = REPO / "targets/camry-2026/raw-20260827"
 ART = REPO / "data/generated/camry_2026_bus1_frc_egress_bounds.json"
-TOOL = REPO / "tools/analyze_camry_2026_bus1_frc_egress_bounds.py"
+TOOL = REPO / "tools/targets/camry/analysis/analyze_camry_2026_bus1_frc_egress_bounds.py"
 
 passed = failed = 0
 
@@ -100,7 +100,7 @@ art = json.loads(ART.read_text())
 print("== provenance ==")
 check("schema pinned", art["schema"] == "camry-2026-bus1-frc-egress-bounds-v1")
 src = art["sources"]
-check("producer recorded", art.get("generated_by") == "tools/analyze_camry_2026_bus1_frc_egress_bounds.py")
+check("producer recorded", art.get("generated_by") == "tools/targets/camry/analysis/analyze_camry_2026_bus1_frc_egress_bounds.py")
 for entry in src["drives"]:
     label = entry["label"]
     path, digest, frames, all_streams = EXPECTED_DRIVES[label]

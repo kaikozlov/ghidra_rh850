@@ -208,7 +208,7 @@ queue/table assumptions.
 The contributor's TSKM oracle contains synchronization `0x00F` only, explaining
 the original matcher failure. The derived public-route oracle adds the genuine
 bus-1 `0x116` and `0x24D` protected-family traffic already established in the
-variant report. `tools/analyze_toyota_dataflash.py` can therefore test the
+variant report. `tools/toyota_support/analyze_toyota_dataflash.py` can therefore test the
 actual dump against all three observed domains offline. See
 [`albinoelephant/README.md`](albinoelephant/README.md) and
 [`docs/variants/corolla-2023-us-public-route.md`](../docs/variants/corolla-2023-us-public-route.md).

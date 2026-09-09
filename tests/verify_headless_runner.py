@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Behavioral tests for tools/run_headless."""
+"""Behavioral tests for tools/project/run_headless."""
 from __future__ import annotations
 
 import json

@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from generate_decompiler_corpus import DEFAULT_OUTPUT, DEFAULT_VIEW, materialize_view
+from project.generate_decompiler_corpus import DEFAULT_OUTPUT, DEFAULT_VIEW, materialize_view
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INVENTORY = ROOT / "data/ghidra_project_inventory.baseline.jsonl"

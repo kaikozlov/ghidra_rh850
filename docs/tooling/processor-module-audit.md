@@ -321,7 +321,7 @@ installed into `build/cache/ghidra-home/.../Extensions/Renesas_v850/` (via
 mutated. A conflicting install-tree copy causes an actionable failure, and a
 clean `analyzeHeadless` subprocess proves that the isolated language resolves.
 
-`tools/fingerprint_processor.py` hashes every `.slaspec` / `.sinc` / `.cspec` /
+`tools/project/fingerprint_processor.py` hashes every `.slaspec` / `.sinc` / `.cspec` /
 `.pspec` / `.ldefs` / metadata file plus the compiled SLA and Ghidra versions.
 Rebuilds write `processor_manifest.json` beside `build/work/project/`.
 `make work-project` performs a Ghidra-free source check. Processor audits and
@@ -369,7 +369,7 @@ Whole-image structural function inventory (not full semantic understanding):
 - Exporter: `ghidra/scripts/verify/ExportSemanticCoverageLedger.java`
   (read-only headless against `build/work/project/` only).
 - Generator: `make generate-semantic-coverage` /
-  `tools/export_ghidra_project.sh semantic-coverage`
+  `tools/project/export_ghidra_project.sh semantic-coverage`
 - Artifacts: `data/semantic_coverage_ledger.csv` and
   `data/semantic_coverage_summary.json`
 - Gate: `tests/verify_semantic_coverage.py` (registered in `make verify`)
@@ -426,7 +426,7 @@ pointer shape.
 
 ## Why auto-analysis options are left on defaults
 
-The rebuild (`tools/rebuild_project.sh`) runs Ghidra's default analyzers and does
+The rebuild (`tools/project/rebuild_project.sh`) runs Ghidra's default analyzers and does
 not disable "Address Tables" or "Non-Returning Functions" (a recommendation
 sometimes given for raw automotive images). This is deliberate for this image:
 

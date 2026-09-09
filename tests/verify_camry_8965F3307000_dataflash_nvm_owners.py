@@ -16,7 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "data/generated/camry_8965F3307000_dataflash_nvm_owners.json"
-TOOL = ROOT / "tools/analyze_camry_8965F3307000_dataflash_nvm_owners.py"
+TOOL = ROOT / "tools/targets/camry/analysis/analyze_camry_8965F3307000_dataflash_nvm_owners.py"
 D = json.loads(ART.read_text())
 failures = []
 

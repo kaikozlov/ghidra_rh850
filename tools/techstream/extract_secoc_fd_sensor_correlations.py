@@ -21,7 +21,7 @@ sys.path.insert(0, str(REPO / "tools"))
 from parse_ddb import DDBParser  # noqa: E402
 from ddb_strings import load_string_db
 from techstream_paths import V18_TECHSTREAM_ROOT  # noqa: E402
-from sienna_target import CODEFLASH as FW  # noqa: E402
+from tools.targets.sienna.sienna_target import CODEFLASH as FW  # noqa: E402
 
 ROOT = V18_TECHSTREAM_ROOT
 OUT = REPO / "data/generated/techstream_v18/secoc_fd_sensor_correlations.json"

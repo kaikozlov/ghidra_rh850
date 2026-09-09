@@ -19,7 +19,7 @@ the firmware *is*, see [OVERVIEW.md](OVERVIEW.md).
   `14c1b5be32b8ec741ee626c8bca9885c58f7a473`; see
   `ghidra/ghidra_v850/README.md` and `PROVENANCE.json`).
 
-There is no separate install step. `tools/install_v850_extension.sh` (invoked
+There is no separate install step. `tools/project/install_v850_extension.sh` (invoked
 by `make verify-sleigh` and every project rebuild) compiles the vendored
 `.slaspec` sources from a disposable copy under `build/cache/processor-extension-src/`
 and installs into an isolated Ghidra user-home under `build/cache/ghidra-home/` via
@@ -55,7 +55,7 @@ Only five top-level namespaces are valid:
 
 Use `make build-status` to see category sizes and any legacy pre-layout
 entries. `make clean-build` removes only `logs/` and `tmp/`; deleting `work/` or
-`cache/` requires the explicit `tools/build_layout.py clean ... --force` path,
+`cache/` requires the explicit `tools/project/build_layout.py clean ... --force` path,
 and destructive layout operations are restricted to this repository's own
 `build/` root. `work/` and `cache/` cleanup refuse to run while an RH850 Ghidra
 daemon is active.
@@ -110,14 +110,14 @@ durable on disk until the daemon shuts down cleanly**.
    why the committed snapshot must never be daemon-opened.
 4. **The `analyze` command's save is silently swallowed** by the bridge
    (the teardown commit races the JVM kill). Treat `stop` as the only reliable
-   persist. For a guaranteed-durable rebuild, use a `tools/run_headless`
+   persist. For a guaranteed-durable rebuild, use a `tools/project/run_headless`
    `-process -commit` one-shot instead of the daemon.
    The persistent bridge itself owns an outer Ghidra transaction, so direct
    in-bridge `program save` is not an authoritative persistence boundary. Clean
    `stop` is authoritative. The vendored `script run --save` and compatibility
    `stop --save` spellings therefore persist by clean bridge teardown rather than
    calling `Program.save()` inside that transaction. One-shot headless jobs that
-   need an explicit commit use `tools/run_headless ... -commit` instead.
+   need an explicit commit use `tools/project/run_headless ... -commit` instead.
 
 ## Working copy vs. committed snapshot
 
@@ -171,7 +171,7 @@ tools/g decompile 0x8db22
 
 # First-class Camry F33
 make work-project TARGET=camry-8965F3307000
-tools/gcamry decompile 0x4e848
+tools/gtarget camry-8965F3307000 decompile 0x4e848
 make verify-project-parity TARGET=camry-8965F3307000
 make generate-decompiler-corpus TARGET=camry-8965F3307000
 
@@ -271,9 +271,9 @@ belong there rather than in a new top-level file:
 
 | Operation | Entry point |
 |---|---|
-| Corolla-H surface evidence compaction (fixed known targets, one/two JSONL corpora) | `uv run --locked python tools/extract_corolla_h_evidence.py list` |
-| Read-only exports from `build/work/project` (signals/consumers/producers/coverage/inventory) | `tools/export_ghidra_project.sh list` |
-| Cross-variant image-bound evidence (structural fingerprints, decompilation, callback-table selection, substring census) | `uv run --locked python tools/extract_variant_evidence.py list` |
+| Corolla target workflow discovery | `tools/toyota target list corolla` |
+| Read-only exports from `build/work/project` (signals/consumers/producers/coverage/inventory) | `tools/project/export_ghidra_project.sh list` |
+| Cross-variant image-bound evidence | `tools/toyota variant list` |
 | Interactive GTS+ OEM vocabulary / DID / DTC / CUW route / PE lookup | `tools/gts` |
 | Repository knowledge across findings/corrections/OQs/artifacts/suites/docs | `tools/know QUERY` |
 
@@ -403,7 +403,7 @@ make rebuild-project PROJECT_DIR="$PWD/build/work/parity-project"  # disposable 
 Rebuild destinations are deliberately constrained to dedicated directories
 below `build/work/`; this keeps `--force` incapable of deleting committed or
 unrelated trees. To replace an existing disposable working build:
-`tools/rebuild_project.sh --project-dir "$PWD/build/work/project" --force`.
+`tools/project/rebuild_project.sh --project-dir "$PWD/build/work/project" --force`.
 Never point the rebuild at committed `project/`; promote only with
 `make snapshot-project`.
 
@@ -412,7 +412,7 @@ ignored local Techstream tree is never an implicit input. To deliberately
 refresh that artifact first, pass `--refresh-diagnostic-vocabulary` and review
 its tracked diff before promotion.
 
-All repository one-shot Ghidra jobs go through `tools/run_headless`. It owns
+All repository one-shot Ghidra jobs go through `tools/project/run_headless`. It owns
 the isolated environment, canonical project-path guard, canonical script path,
 CPU/time limits, logs, and `REPORT SCRIPT ERROR` detection. Do not duplicate a
 raw `analyzeHeadless` command in another script. The canonical script path
@@ -479,7 +479,7 @@ the reproducible review cohort from a disposable project:
 
 ```bash
 PROJECT_DIR=build/work/rebuild-a make generate-semantic-coverage
-uv run --locked python tools/generate_semantic_interest_ranking.py
+uv run --locked python tools/project/generate_semantic_interest_ranking.py
 make generate-semantic-sweep PROJECT_DIR=build/work/rebuild-a
 uv run --locked python tests/verify_semantic_sweep.py
 ```

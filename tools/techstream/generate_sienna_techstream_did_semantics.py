@@ -16,7 +16,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "tools"))
-from sienna_target import CODEFLASH as FW  # noqa: E402
+from tools.targets.sienna.sienna_target import CODEFLASH as FW  # noqa: E402
 H_JOIN = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
 OUT = REPO / "data/generated/sienna_8965B4512000_techstream_did_semantics.json"
 

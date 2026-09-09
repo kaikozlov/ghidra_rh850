@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from tools.analyze_camry_f33_runtime_monitor_20260908 import build
+from tools.targets.camry.analysis.analyze_camry_f33_runtime_monitor_20260908 import build
 
 TRACKED = ROOT / "data/generated/camry_f33_runtime_monitor_20260908.json"
 

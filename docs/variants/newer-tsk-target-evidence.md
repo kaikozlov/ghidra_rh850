@@ -81,7 +81,7 @@ labeled official Techstream capture is present. Therefore:
 ## Ephemeral runtime transfer boundary
 
 The reported newer-EPS `FEBE0000` shellcode link VMA is not sufficient to
-transfer the Sienna RAM scheduler. `tools/resolve_ephemeral_runtime_image.sh`
+transfer the Sienna RAM scheduler. `tools/security/resolve_ephemeral_runtime_image.sh`
 separates the application/SecOC semantic contract from authenticated-download and
 application-retention geometry. Until a specific foreign CodeFlash SHA has
 verified callback/download bounds plus retained application-RWX memory, the target

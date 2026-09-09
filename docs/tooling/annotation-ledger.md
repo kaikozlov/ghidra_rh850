@@ -61,7 +61,7 @@ The Ghidra applier parses and preflights the complete ledger before making any
 program mutation. This is intentional: the persistent Ghidra bridge owns an outer
 transaction, so nested transaction rollback is not an isolation boundary. Missing
 functions, invalid targets, symbol collisions, and unsupported operations are
-therefore rejected during pass 1; pass 2 applies only a fully validated plan. `tools/rebuild_project.sh`
+therefore rejected during pass 1; pass 2 applies only a fully validated plan. `tools/project/rebuild_project.sh`
 validates the tracked ledger before starting stage 4, then runs the applier after
 the existing annotation and calling-convention scripts so these mechanical edits
 cannot perturb discovery or analysis staging.

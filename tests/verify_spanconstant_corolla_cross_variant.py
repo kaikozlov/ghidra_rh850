@@ -9,9 +9,9 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.compare_variant_application_rx import compare as compare_rx  # noqa: E402
-from tools.compare_variant_function_bodies import compare as compare_bodies  # noqa: E402
-from tools.compare_variant_function_bodies import load_codeflash  # noqa: E402
+from tools.variants.compare_variant_application_rx import compare as compare_rx  # noqa: E402
+from tools.variants.compare_variant_function_bodies import compare as compare_bodies  # noqa: E402
+from tools.variants.compare_variant_function_bodies import load_codeflash  # noqa: E402
 
 SPAN_RAW = REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
 SIENNA = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"

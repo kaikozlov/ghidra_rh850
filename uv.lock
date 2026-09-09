@@ -28,7 +28,7 @@ wheels = [
 ]
 
 [[package]]
-name = "ghidra-rh850-analysis-verification"
+name = "ghidra-rh850-analysis-tooling"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

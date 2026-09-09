@@ -10,7 +10,7 @@ exact tagged source against Ghidra 12.1.3.
 - `ghidra_12.1.3_PUBLIC_20260822_GhidraFindcrypt.zip` — local rebuild of the
   pinned upstream v3.1.9 source. Its `GhidraFindcrypt.jar` is byte-identical to
   the official upstream 12.1.2 v3.1.9 build; only Ghidra extension-version
-  packaging differs. Installed by `tools/install_findcrypt_extension.sh` into
+  packaging differs. Installed by `tools/project/install_findcrypt_extension.sh` into
   the isolated user-home Extensions directory during rebuild.
 - `data/database.json` — 130 cryptographic constant signatures (AES S-boxes,
   Rijndael T-tables, SHA/MD constants, DES S-boxes, CRC32 table, Blowfish,
@@ -22,7 +22,7 @@ exact tagged source against Ghidra 12.1.3.
 Two complementary paths:
 
 1. **Auto-analyzer (Ghidra extension)** — installed by
-   `tools/install_findcrypt_extension.sh` during `tools/rebuild_project.sh`.
+   `tools/project/install_findcrypt_extension.sh` during `tools/project/rebuild_project.sh`.
    Runs automatically during Ghidra auto-analysis, labeling crypto constants
    in the listing with plate comments. No manual invocation needed.
 

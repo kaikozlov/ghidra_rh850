@@ -1,0 +1,290 @@
+#!/usr/bin/env python3
+"""Unified Toyota reverse-engineering tool surface.
+
+Use this command to discover capabilities before reaching for implementation
+filenames. Target-specific analyses live under tools/targets/* and are exposed
+here automatically when they are runnable scripts.
+"""
+from __future__ import annotations
+
+import argparse
+import ast
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+TOOLS = ROOT / "tools"
+TARGETS = {
+    "camry": TOOLS / "targets/camry",
+    "corolla": TOOLS / "targets/corolla",
+    "sienna": TOOLS / "targets/sienna",
+}
+
+
+def _env() -> dict[str, str]:
+    env = dict(os.environ)
+    prior = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = str(ROOT) + (os.pathsep + prior if prior else "")
+    return env
+
+
+def _run_path(path: Path, args: list[str]) -> int:
+    command = ["uv", "run", "--project", str(ROOT), "--locked", "python", str(path), *args]
+    return subprocess.run(command, cwd=ROOT, env=_env(), check=False).returncode
+
+
+def _run_exec(path: Path, args: list[str]) -> int:
+    return subprocess.run([str(path), *args], cwd=ROOT, env=_env(), check=False).returncode
+
+
+def _summary(path: Path) -> str:
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        doc = ast.get_docstring(tree) or ""
+    except (OSError, SyntaxError, UnicodeDecodeError):
+        return ""
+    return doc.strip().splitlines()[0] if doc.strip() else ""
+
+
+def _runnable(path: Path) -> bool:
+    if path.name == "__init__.py" or path.suffix != ".py":
+        return False
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    return '__name__ == "__main__"' in text or "__name__ == '__main__'" in text
+
+
+def _capability_key(target: str, path: Path) -> str:
+    rel = path.relative_to(TARGETS[target])
+    category = rel.parts[0] if len(rel.parts) > 1 else "workflow"
+    if category == "builders":
+        category = "build"
+    stem = path.stem
+    for prefix in ("analyze_", "build_", "extract_", "decode_", "replay_", "check_", "compare_"):
+        if stem.startswith(prefix):
+            stem = stem[len(prefix):]
+            break
+    for target_prefix in ("camry_", "corolla_", "spanconstant_", "albino_"):
+        if stem.startswith(target_prefix):
+            stem = stem[len(target_prefix):]
+            break
+    if category == "live":
+        if "capture" in stem:
+            category = "capture"
+        elif "probe" in stem:
+            category = "probe"
+    return f"{category}/{stem.replace('_', '-')}"
+
+
+def target_capabilities(target: str) -> dict[str, Path]:
+    directory = TARGETS[target]
+    out: dict[str, Path] = {}
+    for path in sorted(directory.rglob("*.py")):
+        if not _runnable(path):
+            continue
+        key = _capability_key(target, path)
+        if key in out:
+            # Stable fallback if two historical scripts normalize to one name.
+            key = f"{key}@{path.stem}"
+        out[key] = path
+    return out
+
+
+def cmd_capabilities(_args: argparse.Namespace) -> int:
+    payload = {
+        "gts": "official GTS+/Techstream discovery and Toyota vocabulary",
+        "secoc": ["oracle", "session", "sign", "sync"],
+        "dataflash": "Toyota EPS DataFlash/NvM + SecOC-domain analysis",
+        "eps-probe": "non-destructive Toyota EPS diagnostic-bus discovery",
+        "e2e-p05": ["crc", "check", "protect", "recover-data-id"],
+        "variant": "cross-calibration image/corpus evidence extraction",
+        "targets": {name: len(target_capabilities(name)) for name in TARGETS},
+    }
+    print(json.dumps(payload, indent=2, sort_keys=True))
+    return 0
+
+
+def cmd_gts(args: argparse.Namespace) -> int:
+    return _run_exec(TOOLS / "gts", args.args)
+
+
+def cmd_secoc(args: argparse.Namespace) -> int:
+    if args.surface in {"sign", "sync"}:
+        return _run_path(
+            TOOLS / "toyota_support/toyota_secoc_signer.py",
+            [args.surface, *args.args],
+        )
+    module = {
+        "oracle": "toyota_secoc_oracle.py",
+        "session": "toyota_secoc_session.py",
+    }[args.surface]
+    return _run_path(TOOLS / "toyota_support" / module, args.args)
+
+
+def cmd_dataflash(args: argparse.Namespace) -> int:
+    return _run_path(TOOLS / "toyota_support/analyze_toyota_dataflash.py", args.args)
+
+
+def cmd_eps_probe(args: argparse.Namespace) -> int:
+    return _run_path(TOOLS / "toyota_support/toyota_eps_bus_probe.py", args.args)
+
+
+def cmd_variant(args: argparse.Namespace) -> int:
+    return _run_path(TOOLS / "variants/extract_variant_evidence.py", args.args)
+
+
+def cmd_target_list(args: argparse.Namespace) -> int:
+    caps = target_capabilities(args.target)
+    query = (args.query or "").casefold()
+    for key, path in caps.items():
+        summary = _summary(path)
+        if query and query not in key.casefold() and query not in summary.casefold():
+            continue
+        print(f"{key}\t{summary}\t{path.relative_to(ROOT)}")
+    return 0
+
+
+def cmd_target_run(args: argparse.Namespace) -> int:
+    caps = target_capabilities(args.target)
+    path = caps.get(args.capability)
+    if path is None:
+        matches = [key for key in caps if args.capability.casefold() in key.casefold()]
+        if len(matches) == 1:
+            path = caps[matches[0]]
+        else:
+            message = "unknown capability"
+            if matches:
+                message += "; matches: " + ", ".join(matches[:20])
+            raise SystemExit(message)
+    passthrough = list(args.args)
+    if passthrough[:1] == ["--"]:
+        passthrough = passthrough[1:]
+    return _run_path(path, passthrough)
+
+
+def _parse_int(value: str) -> int:
+    return int(value, 0)
+
+
+def cmd_e2e(args: argparse.Namespace) -> int:
+    from toyota_support.toyota_e2e_p05 import (
+        e2e_p05_check,
+        e2e_p05_crc,
+        e2e_p05_protect,
+        e2e_p05_recover_data_id,
+    )
+
+    data = bytes.fromhex(args.data)
+    if args.operation == "recover-data-id":
+        print(f"0x{e2e_p05_recover_data_id(data, offset=args.offset):04X}")
+        return 0
+    data_id = args.data_id
+    if data_id is None:
+        raise SystemExit("--data-id is required for this operation")
+    if args.operation == "crc":
+        print(f"0x{e2e_p05_crc(data, data_id, offset=args.offset):04X}")
+    elif args.operation == "check":
+        ok = e2e_p05_check(data, data_id, offset=args.offset)
+        print("valid" if ok else "invalid")
+        return 0 if ok else 1
+    elif args.operation == "protect":
+        print(e2e_p05_protect(data, data_id, offset=args.offset).hex())
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(description=__doc__)
+    sub = p.add_subparsers(dest="command", required=True)
+
+    q = sub.add_parser("capabilities", help="show the durable Toyota capability surface")
+    q.set_defaults(func=cmd_capabilities)
+
+    q = sub.add_parser("gts", help="official GTS+/Techstream discovery")
+    q.add_argument("args", nargs=argparse.REMAINDER)
+    q.set_defaults(func=cmd_gts)
+
+    q = sub.add_parser("secoc", help="Toyota classic-CAN SecOC tools")
+    q.add_argument("surface", choices=("oracle", "session", "sign", "sync"))
+    q.add_argument("args", nargs=argparse.REMAINDER)
+    q.set_defaults(func=cmd_secoc)
+
+    q = sub.add_parser("dataflash", help="analyze Toyota EPS DataFlash/NvM")
+    q.add_argument("args", nargs=argparse.REMAINDER)
+    q.set_defaults(func=cmd_dataflash)
+
+    q = sub.add_parser("eps-probe", help="discover the Toyota EPS diagnostic bus")
+    q.add_argument("args", nargs=argparse.REMAINDER)
+    q.set_defaults(func=cmd_eps_probe)
+
+    q = sub.add_parser("variant", help="cross-variant evidence extraction")
+    q.add_argument("args", nargs=argparse.REMAINDER)
+    q.set_defaults(func=cmd_variant)
+
+    q = sub.add_parser("e2e-p05", help="AUTOSAR E2E Profile-5 CRC utilities")
+    q.add_argument("operation", choices=("crc", "check", "protect", "recover-data-id"))
+    q.add_argument("--data", required=True, help="complete PDU bytes as hex")
+    q.add_argument("--data-id", type=_parse_int)
+    q.add_argument("--offset", type=int, default=0)
+    q.set_defaults(func=cmd_e2e)
+
+    q = sub.add_parser("target", help="discover/run target-specific workflows")
+    qs = q.add_subparsers(dest="target_command", required=True)
+    l = qs.add_parser("list", help="list target-specific capabilities")
+    l.add_argument("target", choices=tuple(TARGETS))
+    l.add_argument("query", nargs="?")
+    l.set_defaults(func=cmd_target_list)
+    r = qs.add_parser("run", help="run one target-specific capability")
+    r.add_argument("target", choices=tuple(TARGETS))
+    r.add_argument("capability")
+    r.add_argument("args", nargs=argparse.REMAINDER)
+    r.set_defaults(func=cmd_target_run)
+    return p
+
+
+def main() -> int:
+    argv = sys.argv[1:]
+    parser = build_parser()
+    if not argv or argv[0] in {"-h", "--help"}:
+        args = parser.parse_args(argv)
+        return int(args.func(args))
+
+    command = argv[0]
+    # Pass-through surfaces intentionally preserve every argument byte-for-byte;
+    # their implementation parsers own the option grammar.
+    if command == "gts":
+        return cmd_gts(argparse.Namespace(args=argv[1:]))
+    if command == "secoc" and len(argv) >= 2 and argv[1] not in {"-h", "--help"}:
+        surface = argv[1]
+        if surface not in {"oracle", "session", "sign", "sync"}:
+            parser.error(f"unknown SecOC surface: {surface}")
+        return cmd_secoc(argparse.Namespace(surface=surface, args=argv[2:]))
+    if command == "dataflash":
+        return cmd_dataflash(argparse.Namespace(args=argv[1:]))
+    if command == "eps-probe":
+        return cmd_eps_probe(argparse.Namespace(args=argv[1:]))
+    if command == "variant":
+        return cmd_variant(argparse.Namespace(args=argv[1:]))
+    if command == "target" and len(argv) >= 2:
+        action = argv[1]
+        if action == "list" and len(argv) >= 3:
+            target = argv[2]
+            if target not in TARGETS:
+                parser.error(f"unknown target: {target}")
+            query = argv[3] if len(argv) >= 4 else None
+            if len(argv) > 4:
+                parser.error("target list accepts at most one query")
+            return cmd_target_list(argparse.Namespace(target=target, query=query))
+        if action == "run" and len(argv) >= 4:
+            target = argv[2]
+            if target not in TARGETS:
+                parser.error(f"unknown target: {target}")
+            return cmd_target_run(argparse.Namespace(target=target, capability=argv[3], args=argv[4:]))
+
+    args = parser.parse_args(argv)
+    return int(args.func(args))
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -437,5 +437,5 @@ separate.
 - `ghidra/scripts/verify/AssertMotorActuationBoundary.java` pins the exact
   service-state reference censuses alongside the independent d/q-current
   reference censuses.
-- `tools/generate_application_routine_control_surface.py` deterministically regenerates
+- `tools/firmware/generate_application_routine_control_surface.py` deterministically regenerates
   `data/application_routine_control_surface.csv` from the committed CodeFlash image.

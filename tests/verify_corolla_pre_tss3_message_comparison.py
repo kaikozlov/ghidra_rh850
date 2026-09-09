@@ -32,7 +32,7 @@ check("canonical upstream revision matches repository lock", contract["canonical
 check("current upstream revision was explicitly checked", contract["current_upstream_commit"] == "7343a66d46213d5f73528afc6c6db713ebd88a9d")
 with tempfile.TemporaryDirectory(prefix="corolla-pre-tss3-") as td:
     out=Path(td)/"comparison.json"
-    proc=subprocess.run([sys.executable,str(REPO/"tools/build_corolla_pre_tss3_message_comparison.py"),"--output",str(out)],cwd=REPO,capture_output=True,text=True)
+    proc=subprocess.run([sys.executable,str(REPO/"tools/targets/corolla/builders/build_corolla_pre_tss3_message_comparison.py"),"--output",str(out)],cwd=REPO,capture_output=True,text=True)
     check("comparison regenerates successfully", proc.returncode == 0, proc.stderr.strip()[:200])
     if out.exists():
         check("tracked comparison is generator-drift free", json.loads(out.read_text()) == report)

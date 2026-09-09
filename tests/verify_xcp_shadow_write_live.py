@@ -13,7 +13,7 @@ def main()->int:
         print(f'[FAIL] XCP shadow write live: missing project {project}'); return 1
     with tempfile.TemporaryDirectory(prefix='xcp-shadow-write-') as d:
         log=Path(d)/'headless.log'
-        r=subprocess.run([str(ROOT/'tools/run_headless'),'--project-dir',str(project),'--project','rh850_p1me_mapped','--label','xcp-shadow-write','--log',str(log),'--quiet','--','-process',PROGRAM,'-noanalysis','-readOnly','-postScript','AssertXcpShadowWriteBoundary.java'],cwd=ROOT,text=True,capture_output=True)
+        r=subprocess.run([str(ROOT/'tools/project/run_headless'),'--project-dir',str(project),'--project','rh850_p1me_mapped','--label','xcp-shadow-write','--log',str(log),'--quiet','--','-process',PROGRAM,'-noanalysis','-readOnly','-postScript','AssertXcpShadowWriteBoundary.java'],cwd=ROOT,text=True,capture_output=True)
         out=log.read_text(errors='replace') if log.exists() else ''
         if r.returncode or EXPECTED not in out:
             print('[FAIL] XCP shadow write live'); print((r.stdout or '')+(r.stderr or '')+out[-10000:]); return 1

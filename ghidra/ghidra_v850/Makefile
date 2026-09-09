@@ -10,7 +10,7 @@ ROOT := $(abspath ../..)
 .PHONY: all clean install
 
 all install:
-	$(ROOT)/tools/install_v850_extension.sh
+	$(ROOT)/tools/project/install_v850_extension.sh
 
 clean:
 	rm -f data/languages/*.sla

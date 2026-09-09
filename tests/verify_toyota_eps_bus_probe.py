@@ -12,7 +12,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.toyota_eps_bus_probe import (
+from tools.toyota_support.toyota_eps_bus_probe import (
     APPLICATION_SOFTWARE_ID_DID,
     DEFAULT_BUSES,
     DEFAULT_ELM327_PARAM,
@@ -61,9 +61,9 @@ check("flipped orientation reverses the implementing FDCAN2 GPIO/transceiver", (
 check("orientation never changes normal-vs-OBD semantic route", normal.can_mode == normal_flipped.can_mode == "CAN_MODE_NORMAL" and obd.can_mode == obd_flipped.can_mode == "CAN_MODE_OBD_CAN2")
 
 print("\n== CLI dry-run ==")
-script = REPO / "tools" / "toyota_eps_bus_probe.py"
+script = REPO / "tools" / "toyota"
 run = subprocess.run(
-    [sys.executable, str(script)],
+    [str(script), "eps-probe"],
     cwd=REPO,
     capture_output=True,
     text=True,
@@ -82,7 +82,7 @@ check("dry-run does not call that candidate relay-topology equivalent", output["
 check("dry-run keeps candidate dynamically unconfirmed", "confirmation required" in output["toyota_b_repin_candidate"]["status"])
 
 custom = subprocess.run(
-    [sys.executable, str(script), "--bus", "1", "--elm327-param", "0"],
+    [str(script), "eps-probe", "--bus", "1", "--elm327-param", "0"],
     cwd=REPO,
     capture_output=True,
     text=True,
@@ -94,7 +94,7 @@ check("explicit bus selection is preserved", custom_output["plan"]["buses"] == [
 check("explicit ELM327 param 0 is preserved", custom_output["plan"]["elm327_param"] == 0)
 
 invalid = subprocess.run(
-    [sys.executable, str(script), "--bus", "3"],
+    [str(script), "eps-probe", "--bus", "3"],
     cwd=REPO,
     capture_output=True,
     text=True,

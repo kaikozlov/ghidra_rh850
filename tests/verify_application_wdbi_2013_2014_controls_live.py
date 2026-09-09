@@ -17,7 +17,7 @@ def main()->int:
     with tempfile.TemporaryDirectory(prefix='wdbi-2013-2014-') as d:
         log=Path(d)/'headless.log'
         r=subprocess.run([
-            str(REPO/'tools/run_headless'),'--project-dir',str(project),'--project','rh850_p1me_mapped',
+            str(REPO/'tools/project/run_headless'),'--project-dir',str(project),'--project','rh850_p1me_mapped',
             '--label','application-wdbi-2013-2014-controls','--log',str(log),'--quiet','--',
             '-process',PROGRAM,'-noanalysis','-readOnly','-postScript','AssertApplicationWdbi2013And2014Controls.java'],
             cwd=REPO,text=True,capture_output=True)

@@ -1,6 +1,6 @@
 # Toyota EPS DataFlash structural and key-domain analyzer
 
-> **Tool:** `tools/analyze_toyota_dataflash.py`
+> **Tool surface:** `tools/toyota dataflash` (implementation: `tools/toyota_support/analyze_toyota_dataflash.py`)
 >
 > **Reference geometry:** `8965B4512000` 32 KiB DataFlash +
 > `data/dataflash_nvm_records.csv`
@@ -184,7 +184,7 @@ is available, the intended offline sequence is:
 
 ```bash
 # Export/ingest public CAN into the session/oracle NDJSON first.
-uv run --locked python tools/analyze_toyota_dataflash.py \
+tools/toyota dataflash \
   corolla_dataflash.bin \
   --capture corolla_oracle.ndjson \
   --domain-scan \

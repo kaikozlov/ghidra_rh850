@@ -32,7 +32,7 @@ check("external openpilot logreader environment exists", PYTHON.is_file())
 with tempfile.TemporaryDirectory(prefix="corolla-route-opendbc-") as td:
     out = Path(td) / "evidence.json"
     proc = subprocess.run([
-        str(PYTHON), str(REPO / "tools/extract_corolla_2023_public_route_opendbc_evidence.py"),
+        str(PYTHON), str(REPO / "tools/targets/corolla/extract/extract_corolla_2023_public_route_opendbc_evidence.py"),
         "--rlog", str(RLOG), "--openpilot-root", str(OPENPILOT), "--output", str(out),
     ], cwd=REPO, capture_output=True, text=True, timeout=120)
     check("raw-route extraction succeeds", proc.returncode == 0, proc.stderr.strip()[:200])

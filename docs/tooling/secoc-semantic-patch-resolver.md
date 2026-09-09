@@ -121,7 +121,7 @@ corpus and interpretation are in
 
 ## 2. Manifest and semantic rejection of the old patch
 
-`tools/build_secoc_patch_manifest.py` accepts only resolver schema v2 and the
+`tools/security/build_secoc_patch_manifest.py` accepts only resolver schema v2 and the
 operation `cmp-second-register-to-first-force-fallthrough`. Before checking the
 image preimage it independently verifies that:
 
@@ -177,7 +177,7 @@ superseded wrong-direction branch patch.
 ## 4. Arbitrary-image workflow
 
 ```bash
-tools/resolve_secoc_patch_image.sh \
+tools/security/resolve_secoc_patch_image.sh \
   /path/to/CodeFlash.bin \
   build/out/secoc_patch_manifest.json
 ```
@@ -192,7 +192,7 @@ Zero/multiple semantic candidates, an incompatible branch polarity, SHA
 mismatch, invalid CMP transform, wrong BNE provenance, patch preimage mismatch,
 or ambiguous CRC geometry all fail closed.
 
-For the already imported working project, `tools/resolve_secoc_patch.sh` is the
+For the already imported working project, `tools/security/resolve_secoc_patch.sh` is the
 faster developer path and retains the same SHA/image join.
 
 ## 5. Transfer boundary

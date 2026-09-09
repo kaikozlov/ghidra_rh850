@@ -13,7 +13,7 @@ ART = REPO / "data/generated/camry_2026_lateral_flow_trace.json"
 TOPO = REPO / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
 CAPTURE = REPO / "data/generated/camry_2026_relay_correct_capture.json"
 PORT = REPO / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
-BUILD = REPO / "tools/analyze_camry_2026_lateral_flow_trace.py"
+BUILD = REPO / "tools/targets/camry/analysis/analyze_camry_2026_lateral_flow_trace.py"
 
 passed = failed = 0
 

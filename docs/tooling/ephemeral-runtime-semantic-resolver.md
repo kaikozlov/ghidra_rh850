@@ -6,9 +6,9 @@
 > **Canonical runtime analysis:**
 > [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md)
 >
-> **Resolver:** `tools/resolve_ephemeral_runtime_image.sh`
+> **Resolver:** `tools/security/resolve_ephemeral_runtime_image.sh`
 >
-> **Manifest builder:** `tools/build_ephemeral_runtime_manifest.py`
+> **Manifest builder:** `tools/security/build_ephemeral_runtime_manifest.py`
 
 ## Goal
 
@@ -36,7 +36,7 @@ explicitly **not runtime-build-ready**. Missing steering records are reported as
 ## One-command fresh-image workflow
 
 ```bash
-tools/resolve_ephemeral_runtime_image.sh path/to/CodeFlash.bin \
+tools/security/resolve_ephemeral_runtime_image.sh path/to/CodeFlash.bin \
   build/out/new_eps_ephemeral_runtime.json
 ```
 

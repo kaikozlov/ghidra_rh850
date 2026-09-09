@@ -20,7 +20,7 @@ built from the vendored `src/` by `make ghidra-cli`:
 make ghidra-cli    # cargo build --release into build/cache/ghidra-cli/
 ```
 
-`tools/build_ghidra_cli.sh` runs the isolated release build and emits
+`tools/project/build_ghidra_cli.sh` runs the isolated release build and emits
 `build/cache/ghidra-cli.env`, which the repo's tool scripts source to find the
 binary. When the vendored build is present, it is preferred over any `ghidra`
 on `PATH`; otherwise the PATH binary is used with a version check.

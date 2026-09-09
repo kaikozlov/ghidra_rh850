@@ -26,7 +26,7 @@ from Crypto.Hash import CMAC
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "tools"))
-from sienna_target import CODEFLASH as SIENNA_CODEFLASH  # noqa: E402
+from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH  # noqa: E402
 
 DEFAULT_CUW = CUW_CORPUS_ROOT / "T-0035-22.cuw"
 DEFAULT_REFERENCE = SIENNA_CODEFLASH

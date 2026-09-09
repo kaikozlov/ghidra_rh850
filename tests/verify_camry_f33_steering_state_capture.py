@@ -15,7 +15,7 @@ from exploit.followups.xcp_daq_probe import (  # noqa: E402
     FORBIDDEN_COMMANDS,
     MAX_ENTRIES,
 )
-from tools.camry_f33_steering_state_capture import (  # noqa: E402
+from tools.targets.camry.live.camry_f33_steering_state_capture import (  # noqa: E402
     CAN_WITNESS_IDS,
     COMMAND_FUNNEL,
     ELM327_PARAM,
@@ -213,7 +213,7 @@ bad.feed(bytes([0])+bytes(7), 3)
 check("new PID0 drops prior partial sample", bad.dropped_partial == 1)
 
 print("\n== CLI fail-closed behavior ==")
-tool = REPO / "tools/camry_f33_steering_state_capture.py"
+tool = REPO / "tools/targets/camry/live/camry_f33_steering_state_capture.py"
 plan_cli = subprocess.run([sys.executable, str(tool), "--profile", "full-path"], cwd=REPO, capture_output=True, text=True, check=False)
 check("CLI defaults to plan mode", plan_cli.returncode == 0 and '"mode": "plan"' in plan_cli.stdout)
 check("CLI exposes exact 52-byte/two-list full path", '"byte_count": 52' in plan_cli.stdout and '"daq_list_count": 2' in plan_cli.stdout and '"AC54_motor_branch"' in plan_cli.stdout)

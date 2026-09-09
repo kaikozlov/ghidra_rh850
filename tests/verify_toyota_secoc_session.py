@@ -12,7 +12,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.toyota_secoc_session import (
+from tools.toyota_support.toyota_secoc_session import (
     DEFAULT_BUSES,
     DEFAULT_ELM327_PARAM,
     ingest_capture,
@@ -23,7 +23,7 @@ from tools.toyota_secoc_session import (
     record_probe,
     save_state,
 )
-from tools.toyota_secoc_signer import sign_classic_frame, sign_sync_frame
+from tools.toyota_support.toyota_secoc_signer import sign_classic_frame, sign_sync_frame
 
 passed = failed = 0
 
@@ -117,14 +117,15 @@ with tempfile.TemporaryDirectory() as td:
     dump = root / "dump.bin"
     dump.write_bytes(b"\x00" * 32768)
     command = oracle_command(session, dump)
-    check("oracle plan delegates to generic scanner", "tools/toyota_secoc_oracle.py" in command and "scan" in command)
+    check("oracle plan delegates to generic scanner", command[:3] == ["tools/toyota", "secoc", "oracle"] and "scan" in command)
     check("oracle plan passes all three buses", all(str(bus) in command for bus in (0, 1, 2)))
     check("oracle plan passes 0x116", "0x116" in command)
     check("oracle plan passes 0x24d", "0x24d" in command)
 
     print("\n== CLI is dry/offline by construction ==")
-    script = REPO / "tools/toyota_secoc_session.py"
-    show = subprocess.run([sys.executable, str(script), "show", str(session)], cwd=REPO, text=True, capture_output=True)
+    script = REPO / "tools/toyota_support/toyota_secoc_session.py"
+    surface = REPO / "tools/toyota"
+    show = subprocess.run([str(surface), "secoc", "session", "show", str(session)], cwd=REPO, text=True, capture_output=True)
     check("show CLI succeeds", show.returncode == 0, show.stderr.strip())
     cli_state = json.loads(show.stdout)
     check("show CLI preserves diagnostic bus", cli_state["routing"]["diagnostic_bus"] == 1)

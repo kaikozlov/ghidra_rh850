@@ -4,16 +4,16 @@ ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 case "${1:-}" in
   list)
     shift
-    exec python3 "$ROOT/tools/analysis_target.py" --list "$@"
+    exec python3 "$ROOT/tools/project/analysis_target.py" --list "$@"
     ;;
   show)
     TARGET=${2:?usage: tools/gtarget show TARGET}
     shift 2
-    exec python3 "$ROOT/tools/analysis_target.py" "$TARGET" --json "$@"
+    exec python3 "$ROOT/tools/project/analysis_target.py" "$TARGET" --json "$@"
     ;;
 esac
 TARGET=${1:?usage: tools/gtarget TARGET <ghidra-command...>}
 shift
-python3 "$ROOT/tools/analysis_target.py" "$TARGET" --field project_name >/dev/null
+python3 "$ROOT/tools/project/analysis_target.py" "$TARGET" --field project_name >/dev/null
 export GHIDRA_ANALYSIS_TARGET="$TARGET"
 exec "$ROOT/tools/g" "$@"

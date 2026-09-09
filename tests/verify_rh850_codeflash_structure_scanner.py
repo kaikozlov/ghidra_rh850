@@ -21,7 +21,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.analyze_rh850_codeflash_structure import analyze  # noqa: E402
+from tools.firmware.analyze_rh850_codeflash_structure import analyze  # noqa: E402
 
 cf_path = REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin"
 dataflash_path = REPO / "firmware" / "RH850_P1M-E_DataFlash.bin"

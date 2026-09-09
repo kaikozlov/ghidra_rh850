@@ -11,7 +11,7 @@
 >
 > **Confidence:** triage only — every match is a candidate, never a transfer claim
 >
-> **Tool:** `tools/analyze_rh850_codeflash_structure.py`
+> **Tool:** `tools/firmware/analyze_rh850_codeflash_structure.py`
 >
 > **Verification:** `tests/verify_rh850_codeflash_structure_scanner.py`
 

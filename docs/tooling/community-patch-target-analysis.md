@@ -51,10 +51,10 @@ actual SecOC receive-verify worker is at `0x8E4BA`.
 
 ## 1. Raw-byte triage
 
-`tools/analyze_secoc_patch_target.py` is the first pass for any future image:
+`tools/security/analyze_secoc_patch_target.py` is the first pass for any future image:
 
 ```bash
-uv run --locked python tools/analyze_secoc_patch_target.py \
+uv run --locked python tools/security/analyze_secoc_patch_target.py \
   /path/to/CodeFlash.bin \
   --output patch-target.json
 ```

@@ -75,13 +75,13 @@ Remember task commands, not implementation files:
 | Discover / preview suites | `tools/test list [query]`, `tools/test plan <suite-or-prefix>` |
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
 | GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
+| Toyota platform capabilities (SecOC, E2E, DataFlash, EPS probe, target workflows) | `tools/toyota capabilities` |
 | Repository knowledge (findings, corrections, open questions) | `tools/know QUERY` |
 | Generated artifacts / producers | `tools/artifact list/show/regen` |
 | Registered analysis targets | `tools/gtarget list`, `tools/gtarget show TARGET` |
-| Evidence compaction / variant extraction / project exports | `tools/extract_corolla_h_evidence.py list`, `tools/extract_variant_evidence.py list`, `tools/export_ghidra_project.sh list` |
+| Target / cross-variant workflow discovery | `tools/toyota target list camry`, `tools/toyota target list corolla`, `tools/toyota variant list` |
 
-`tools/gtarget TARGET ...` (and wrappers such as `tools/gcamry`) run Ghidra
-commands against a configured target. Registered rebuild inputs, stage
+`tools/gtarget TARGET ...` runs Ghidra commands against a configured target. Registered rebuild inputs, stage
 scripts, image identities, and corpus paths live in
 `data/analysis_targets.json`; generic target tooling must not bake in
 vehicle-specific paths.
@@ -132,7 +132,7 @@ spelling. After any graph, naming, type, calling-convention, or processor
 semantic change, regenerate with `make generate-decompiler-corpus` against a
 fresh rebuilt project that exactly matches the canonical inventory.
 
-All one-shot Ghidra execution goes through `tools/run_headless`.
+All one-shot Ghidra execution goes through `tools/project/run_headless`.
 
 ## Evidence language
 

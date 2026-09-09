@@ -298,7 +298,7 @@ firmware does not identify their TSS3 wire messages.
 
 ## 8. Evidence and verification
 
-- `tools/build_corolla_pre_tss3_message_comparison.py` rebuilds the exact H/F
+- `tools/targets/corolla/builders/build_corolla_pre_tss3_message_comparison.py` rebuilds the exact H/F
   application identity, normal-Rx table, Tx table, and role migration report.
 - `tests/verify_corolla_pre_tss3_message_comparison.py` enforces the upstream
   Corolla baseline and target-native migration conclusions.

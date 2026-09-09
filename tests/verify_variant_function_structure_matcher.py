@@ -11,7 +11,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.match_variant_function_structure import match  # noqa: E402
+from tools.variants.match_variant_function_structure import match  # noqa: E402
 
 passed = failed = 0
 

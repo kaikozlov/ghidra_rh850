@@ -10,7 +10,7 @@ import tomllib
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-RUNNER = REPO / "tools/fast_verify.py"
+RUNNER = REPO / "tools/testing/fast_verify.py"
 MANIFEST = REPO / "verification.toml"
 passed = failed = 0
 
@@ -38,9 +38,9 @@ check("runner explicitly rejects changed/branch auto-plans", "Automatic changed-
 
 with tempfile.TemporaryDirectory(prefix="explicit-verify-") as td:
     root = Path(td)
-    (root / "tools").mkdir()
+    (root / "tools/testing").mkdir(parents=True)
     (root / "tests").mkdir()
-    runner = root / "tools/fast_verify.py"
+    runner = root / "tools/testing/fast_verify.py"
     runner.write_text(RUNNER.read_text(encoding="utf-8"), encoding="utf-8")
     runner.chmod(0o755)
     (root / "tests/pass.py").write_text("print('[PASS] pass')\n", encoding="utf-8")

@@ -16,7 +16,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 RAW = REPO / "targets/camry-2026/raw-20260827"
 ART = REPO / "data/generated/camry_2026_bus4_field_leadlag.json"
-BUILD = REPO / "tools/analyze_camry_2026_bus4_field_leadlag.py"
+BUILD = REPO / "tools/targets/camry/analysis/analyze_camry_2026_bus4_field_leadlag.py"
 CENSUS = REPO / "data/generated/camry_2026_cruise_lta_edge_census.json"
 REGENERATE = "--regenerate" in sys.argv[1:]
 passed = failed = 0
@@ -42,8 +42,8 @@ def sha(path: Path) -> str:
 EXPECTED = {
     ART: "25d625ca2c5d1aeedcd06c3d1fe5647b3425e2470ff1ef806e98e9b7b77eaea0",
     BUILD: "e53e30ed28fac057459e32e7bf6615908aaf4dfb6faee6d80142d04653fd29ec",
-    REPO / "tools/analyze_camry_2026_relay_capture.py": "de7be0be4e114ca06a051e3a28bebaa880fa54c29e10e9279724107cd991f5d8",
-    REPO / "tools/toyota_route_opendbc_common.py": "a8cfb474b9932a2d9a1f3c258428695eb2ad41e1d285ec26e2627fe4e1f4d259",
+    REPO / "tools/targets/camry/analysis/analyze_camry_2026_relay_capture.py": "de7be0be4e114ca06a051e3a28bebaa880fa54c29e10e9279724107cd991f5d8",
+    REPO / "tools/toyota_support/toyota_route_opendbc_common.py": "a8cfb474b9932a2d9a1f3c258428695eb2ad41e1d285ec26e2627fe4e1f4d259",
     CENSUS: "355ea5b408442a541bd946d21c3e85b0fa4d9e924474d3223189cb37894ee9fc",
 }
 DRIVES = {

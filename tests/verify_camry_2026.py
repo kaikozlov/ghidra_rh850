@@ -33,7 +33,7 @@ def _section_camry_2026_nrtd_p5():
     REPO = Path(__file__).resolve().parents[1]
     RAW = REPO / 'targets/camry-2026/raw-20260826'
     ART = REPO / 'data/generated/camry_2026_nrtd_p5.json'
-    BUILD = REPO / 'tools/analyze_camry_2026_nrtd_p5.py'
+    BUILD = REPO / 'tools/targets/camry/analysis/analyze_camry_2026_nrtd_p5.py'
 
     def sha(path: Path) -> str:
         return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -119,7 +119,7 @@ def _section_camry_2026_ready_gear():
     REPO = Path(__file__).resolve().parents[1]
     RAW = REPO / 'targets/camry-2026/raw-20260826'
     ART = REPO / 'data/generated/camry_2026_ready_gear.json'
-    BUILD = REPO / 'tools/analyze_camry_2026_ready_gear.py'
+    BUILD = REPO / 'tools/targets/camry/analysis/analyze_camry_2026_ready_gear.py'
 
     def sha(path: Path) -> str:
         return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -184,7 +184,7 @@ def _section_camry_2026_relay_correct_capture():
     RAW = REPO / 'targets/camry-2026/raw-20260827'
     ART = REPO / 'data/generated/camry_2026_relay_correct_capture.json'
     GTS_TOPOLOGY = REPO / 'data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json'
-    BUILD = REPO / 'tools/analyze_camry_2026_relay_capture.py'
+    BUILD = REPO / 'tools/targets/camry/analysis/analyze_camry_2026_relay_capture.py'
 
     def sha(path: Path) -> str:
         return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -305,7 +305,7 @@ def _section_camry_2026_cruise_lta_edges():
     from pathlib import Path
     REPO = Path(__file__).resolve().parents[1]
     ART = REPO / 'data/generated/camry_2026_cruise_lta_edge_census.json'
-    BUILD = REPO / 'tools/analyze_camry_2026_cruise_lta_edges.py'
+    BUILD = REPO / 'tools/targets/camry/analysis/analyze_camry_2026_cruise_lta_edges.py'
 
     with tempfile.TemporaryDirectory() as td:
         out = Path(td) / 'edges.json'
@@ -377,7 +377,7 @@ def _section_camry_2026_tsk_baseline():
     REPO = Path(__file__).resolve().parents[1]
     RAW = REPO / 'targets/camry-2026/raw-20260826'
     ART = REPO / 'data/generated/camry_2026_tsk_baseline.json'
-    BUILD = REPO / 'tools/analyze_camry_2026_baseline.py'
+    BUILD = REPO / 'tools/targets/camry/analysis/analyze_camry_2026_baseline.py'
 
     def sha(path: Path) -> str:
         return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -461,7 +461,7 @@ def _section_camry_2026_dtc_clear():
     REPO = Path(__file__).resolve().parents[1]
     RAW = REPO / 'targets/camry-2026/raw-20260827/dtc-clear'
     ART = REPO / 'data/generated/camry_2026_dtc_clear.json'
-    BUILD = REPO / 'tools/analyze_camry_2026_dtc_clear.py'
+    BUILD = REPO / 'tools/targets/camry/analysis/analyze_camry_2026_dtc_clear.py'
 
     def sha(path: Path) -> str:
         return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -548,9 +548,9 @@ def _section_camry_frc_lta_capture_tool():
     from pathlib import Path
     from types import SimpleNamespace
 
-    import tools.analyze_camry_frc_lta_capture as analyze
-    import tools.camry_frc_lta_capture as cap
-    import tools.extract_camry_frc_lta_rlog as rlog_extract
+    import tools.targets.camry.analysis.analyze_camry_frc_lta_capture as analyze
+    import tools.targets.camry.live.camry_frc_lta_capture as cap
+    import tools.targets.camry.extract.extract_camry_frc_lta_rlog as rlog_extract
 
     p = cap.plan()
     check('FRC LTA tool is read-only and pins exact 1601 request',
@@ -586,7 +586,7 @@ def _section_camry_frc_lta_capture_tool():
     ])
     check('direct-Panda fallback pins already-proved FRC route instead of probing unrelated buses',
           p['diag_bus'] == 0 and 'post-repin FRC 0x792 live response on Panda bus 0' in p['route_source'] and
-          'auto_probe_diag_bus' not in (REPO / 'tools/camry_frc_lta_capture.py').read_text())
+          'auto_probe_diag_bus' not in (REPO / 'tools/targets/camry/live/camry_frc_lta_capture.py').read_text())
     with tempfile.TemporaryDirectory() as td:
         capture = Path(td)
         (capture / 'metadata.json').write_text(json.dumps({
@@ -678,8 +678,8 @@ def _section_camry_frc_lta_capture_tool():
     check('pandad process guard recognizes manager Python module and native process forms',
           cap.cmdline_is_pandad('/usr/bin/python3 -m openpilot.selfdrive.pandad.pandad') and
           cap.cmdline_is_pandad('/data/openpilot/openpilot/selfdrive/pandad/pandad') and
-          not cap.cmdline_is_pandad('/usr/bin/python3 tools/camry_frc_lta_capture.py'))
-    source = (REPO / 'tools/camry_frc_lta_capture.py').read_text()
+          not cap.cmdline_is_pandad('/usr/bin/python3 tools/targets/camry/live/camry_frc_lta_capture.py'))
+    source = (REPO / 'tools/targets/camry/live/camry_frc_lta_capture.py').read_text()
     check('capture tool hard-refuses pandad USB contention',
           'refusing Panda USB collision: pandad is running' in source and
           'pandad appeared during capture; aborting' in source)
@@ -696,7 +696,7 @@ def _section_camry_2026_motor_feedback():
     from pathlib import Path
 
     ART = REPO / "data/generated/camry_2026_motor_feedback_correlation.json"
-    TOOL = REPO / "tools/analyze_camry_2026_motor_feedback.py"
+    TOOL = REPO / "tools/targets/camry/analysis/analyze_camry_2026_motor_feedback.py"
     PORT = REPO / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
 
     def sha(path):

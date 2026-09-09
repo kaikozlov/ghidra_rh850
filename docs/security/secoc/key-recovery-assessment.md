@@ -407,7 +407,7 @@ family that may differ in flash controller geometry or callback layout.
 
 A fail-closed pre-acquisition workflow is now tracked in
 [community-patch-target-analysis.md](../../tooling/community-patch-target-analysis.md).
-`tools/analyze_secoc_patch_target.py` performs raw egg/context triage only;
+`tools/security/analyze_secoc_patch_target.py` performs raw egg/context triage only;
 `AnalyzeCommunityPatchTarget.java` owns instruction-aware caller/callee/ICU-S
 classification after a future F3/F4 image is imported. Raw halfword scanning is
 explicitly not used for caller attribution because it overcounted the known
@@ -720,7 +720,7 @@ leakage.
 
 Passively capture complete ISO-TP requests and responses around DID `0x1010`
 whenever dealer or factory reprogramming is available. Preserve M1-M5 securely
-and decode the operation with `tools/decode_icus_key_update_trace.py`.
+and decode the operation with `tools/security/decode_icus_key_update_trace.py`.
 
 The most valuable follow-up targets are:
 

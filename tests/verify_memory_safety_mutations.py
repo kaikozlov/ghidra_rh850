@@ -8,7 +8,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "tools"))
-from memory_safety_semantics import analyze  # noqa: E402
+from tools.security.memory_safety_semantics import analyze  # noqa: E402
 
 BASE = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 passed = failed = 0

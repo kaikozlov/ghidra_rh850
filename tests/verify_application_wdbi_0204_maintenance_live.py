@@ -23,7 +23,7 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="wdbi-0204-") as directory:
         log = Path(directory) / "headless.log"
         result = subprocess.run([
-            str(REPO / "tools/run_headless"), "--project-dir", str(project),
+            str(REPO / "tools/project/run_headless"), "--project-dir", str(project),
             "--project", "rh850_p1me_mapped", "--label", "application-wdbi-0204-maintenance",
             "--log", str(log), "--quiet", "--", "-process", PROGRAM, "-noanalysis", "-readOnly",
             "-postScript", "AssertApplicationWdbi0204Maintenance.java",

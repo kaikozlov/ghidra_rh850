@@ -10,7 +10,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.analyze_toyota_dataflash import analyze  # noqa: E402
+from tools.toyota_support.analyze_toyota_dataflash import analyze  # noqa: E402
 
 SPAN = REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511"
 ALBINO = REPO / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023"

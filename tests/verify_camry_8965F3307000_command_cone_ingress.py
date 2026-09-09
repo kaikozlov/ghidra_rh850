@@ -10,7 +10,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 ART = REPO / "data/generated/camry_8965F3307000_command_cone_ingress.json"
-BUILD = REPO / "tools/build_camry_8965F3307000_command_cone_ingress.py"
+BUILD = REPO / "tools/targets/camry/builders/build_camry_8965F3307000_command_cone_ingress.py"
 PRIOR = REPO / "data/generated/camry_8965F3307000_external_lateral_ingress.json"
 
 passed = failed = 0

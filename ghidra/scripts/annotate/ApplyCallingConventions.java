@@ -8,7 +8,7 @@
 //
 // Run AFTER RecoverVectorHandlers so true ISR wrappers keep __interrupt.
 // Rebuild also re-runs this under -noanalysis after the annotate-stage commit
-// (see tools/rebuild_project.sh): two ordinary bodies at 0x3b0be/0x6f0d0 are
+// (see tools/project/rebuild_project.sh): two ordinary bodies at 0x3b0be/0x6f0d0 are
 // absent from the function iterator until that reopen, and would otherwise
 // remain unknown for project/decompiler invariants.
 // Idempotent: already-correct conventions are left alone.

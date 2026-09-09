@@ -11,7 +11,7 @@ REPO = Path(__file__).resolve().parents[1]
 RANKING = REPO / "data/generated/semantic_interest_ranking.csv"
 INVENTORY = REPO / "data/ghidra_project_inventory.baseline.jsonl"
 ARTIFACT = REPO / "data/generated/semantic_sweep_decompilations.jsonl"
-GENERATOR = REPO / "tools/generate_semantic_sweep.py"
+GENERATOR = REPO / "tools/project/generate_semantic_sweep.py"
 REVIEWS = REPO / "data/semantic_review_status.csv"
 passed = failed = 0
 

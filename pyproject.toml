@@ -1,7 +1,7 @@
 [project]
-name = "ghidra-rh850-analysis-verification"
+name = "ghidra-rh850-analysis-tooling"
 version = "0.1.0"
-description = "Reproducible verification tooling for the RH850/P1M-E firmware analysis"
+description = "RH850/Toyota firmware reverse-engineering and analysis tooling"
 requires-python = ">=3.11"
 dependencies = [
     "dncil==1.0.2",

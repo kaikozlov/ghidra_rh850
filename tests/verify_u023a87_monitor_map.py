@@ -10,7 +10,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.generate_u023a87_monitor_map import build  # noqa: E402
+from tools.firmware.generate_u023a87_monitor_map import build  # noqa: E402
 
 ARTIFACT = REPO / "data/generated/u023a87_monitor_map.json"
 

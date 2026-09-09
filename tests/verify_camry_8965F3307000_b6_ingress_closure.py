@@ -15,7 +15,7 @@ IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 CORPUS = ROOT / "data/generated/camry-8965F3307000/decompilations.jsonl"
 INVENTORY = ROOT / "data/targets/camry-8965F3307000/ghidra_project_inventory.baseline.jsonl"
 ART = ROOT / "data/generated/camry_8965F3307000_b6_ingress_closure.json"
-BUILD = ROOT / "tools/analyze_camry_8965F3307000_b6_ingress_closure.py"
+BUILD = ROOT / "tools/targets/camry/analysis/analyze_camry_8965F3307000_b6_ingress_closure.py"
 IMAGE_SHA = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
 INVENTORY_SHA = "ccbf09df3807942b67f21789c1068b2be2bc2eb12d71bc2bf349f06b8386496d"
 

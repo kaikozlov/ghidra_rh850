@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-TOOL = ROOT / "tools/extract_corolla_h_evidence.py"
+TOOL = ROOT / "tools/targets/corolla/extract/extract_corolla_h_evidence.py"
 
 spec = importlib.util.spec_from_file_location("corolla_h_evidence", TOOL)
 assert spec and spec.loader
@@ -72,7 +72,7 @@ check(pe_tool.is_file() and os.access(pe_tool, os.X_OK), "PE analysis wrapper is
 check(
     'source "$ROOT/tools/lib/build_paths.sh"' in pe_source
     and 'PROJECT_DIR="$BUILD_WORK/pe-project"' in pe_source
-    and '"$ROOT/tools/resolve_ghidra_home.sh"' in pe_source
+    and '"$ROOT/tools/project/resolve_ghidra_home.sh"' in pe_source
     and 'exec "$GHIDRA_CLI"' in pe_source,
     "PE analysis wrapper preserves isolated build and Ghidra routing",
 )
@@ -98,7 +98,7 @@ with tempfile.TemporaryDirectory(prefix="gts-wrapper-cwd-") as td:
         "GTS+ query wrapper preserves caller-relative artifact paths",
     )
 artifact_tool = ROOT / "tools/artifact"
-artifact_catalog = ROOT / "tools/artifact_catalog.py"
+artifact_catalog = ROOT / "tools/catalog/artifact_catalog.py"
 check(artifact_tool.is_file() and os.access(artifact_tool, os.X_OK), "artifact catalog is an executable task entry point")
 check(artifact_catalog.is_file(), "artifact producer catalog lives in one shared module")
 proc = subprocess.run(
@@ -108,7 +108,7 @@ proc = subprocess.run(
 artifact_row = json.loads(proc.stdout) if proc.returncode == 0 else {}
 check(
     proc.returncode == 0
-    and artifact_row.get("producers") == ["tools/build_camry_8965F3307000_fault_status.py"],
+    and artifact_row.get("producers") == ["tools/targets/camry/builders/build_camry_8965F3307000_fault_status.py"],
     "artifact catalog derives producer without a hand-maintained builder list",
 )
 proc = subprocess.run([str(artifact_tool), "list", "fault_status"], cwd=ROOT, text=True, capture_output=True)
@@ -123,9 +123,9 @@ check(proc.returncode == 0 and "usage:" in proc.stdout.lower(), "repository know
 # remains in its existing producer/verifier. Pin the ownership modules and the
 # critical consumers so copy-paste implementations cannot silently return.
 shared_modules = {
-    "tools/decompiler_evidence.py",
-    "tools/corolla_h_constants.py",
-    "tools/sienna_target.py",
+    "tools/project/decompiler_evidence.py",
+    "tools/targets/corolla/support/corolla_h_constants.py",
+    "tools/targets/sienna/sienna_target.py",
     "tools/techstream/techstream_paths.py",
     "tools/techstream/ddb_strings.py",
     "tools/techstream/ddb_semantics.py",
@@ -229,7 +229,7 @@ for _name, (stem, *_rest) in EXPECTED.items():
     )
     check(proc.returncode == 1, f"no stale tracked references: {stem}")
 
-EXPORTER = ROOT / "tools/export_ghidra_project.sh"
+EXPORTER = ROOT / "tools/project/export_ghidra_project.sh"
 EXPORT_PROFILES = [
     "application-rx-signals",
     "application-rx-consumers",
@@ -241,7 +241,7 @@ EXPORT_PROFILES = [
 export_list = subprocess.check_output([str(EXPORTER), "list"], cwd=ROOT, text=True).splitlines()
 check(export_list == EXPORT_PROFILES, "working-project exporter lists the six semantic profiles")
 export_source = EXPORTER.read_text()
-check("tools/run_headless" in export_source, "working-project exporter delegates headless safety")
+check("tools/project/run_headless" in export_source, "working-project exporter delegates headless safety")
 check("-noanalysis" in export_source and "-readOnly" in export_source, "all shared exports are read-only/no-analysis")
 check("lib/ghidra_env.sh" not in export_source, "export profiles do not duplicate environment bootstrap")
 check("refusing inventory output outside" in export_source, "project inventory retains build-owned output guard")
@@ -309,7 +309,7 @@ for stem in retired_exporters:
 # one subcommand runner. The four modes must remain enumerated, each must keep
 # its selection contract, and no tracked reference to the retired files may
 # survive.
-VARIANT_TOOL = ROOT / "tools/extract_variant_evidence.py"
+VARIANT_TOOL = ROOT / "tools/variants/extract_variant_evidence.py"
 variant_spec = importlib.util.spec_from_file_location("variant_evidence", VARIANT_TOOL)
 assert variant_spec and variant_spec.loader
 variant_mod = importlib.util.module_from_spec(variant_spec)
@@ -456,12 +456,12 @@ for stem in [
     check(proc.returncode == 1, f"no stale variant-extractor references: {stem}")
 # Distinct semantic variant tools that deliberately stay separate.
 for separate in [
-    "tools/check_variant_acquisition.py",
-    "tools/compare_variant_application_diagnostics.py",
-    "tools/compare_variant_application_rx.py",
-    "tools/compare_variant_function_bodies.py",
-    "tools/match_variant_function_structure.py",
-    "tools/build_variant_named_transfer_ledger.py",
+    "tools/variants/check_variant_acquisition.py",
+    "tools/variants/compare_variant_application_diagnostics.py",
+    "tools/variants/compare_variant_application_rx.py",
+    "tools/variants/compare_variant_function_bodies.py",
+    "tools/variants/match_variant_function_structure.py",
+    "tools/variants/build_variant_named_transfer_ledger.py",
 ]:
     check((ROOT / separate).exists(), f"semantic variant tool stays separate: {separate}")
 
@@ -477,15 +477,15 @@ for separate in [
     "tools/techstream/generate_cuw_writer_inventory.py",
     "tools/techstream/generate_cuw_writer_protocol_grammar.py",
     "tools/techstream/generate_cuw_writer_family_matrix.py",
-    "tools/extract_corolla_h_direct_call_surface_evidence.py",
-    "tools/extract_corolla_h_deadline_monitor_surface_evidence.py",
-    "tools/extract_corolla_h_diagnostic_residue_evidence.py",
-    "tools/extract_corolla_h_structural_residue_evidence.py",
-    "tools/extract_corolla_h_secoc_surface_evidence.py",
-    "tools/extract_corolla_h_final_named_residue_evidence.py",
-    "tools/resolve_secoc_patch_image.sh",
-    "tools/resolve_ephemeral_runtime_image.sh",
-    "tools/resolve_secoc_patch.sh",
+    "tools/targets/corolla/extract/extract_corolla_h_direct_call_surface_evidence.py",
+    "tools/targets/corolla/extract/extract_corolla_h_deadline_monitor_surface_evidence.py",
+    "tools/targets/corolla/extract/extract_corolla_h_diagnostic_residue_evidence.py",
+    "tools/targets/corolla/extract/extract_corolla_h_structural_residue_evidence.py",
+    "tools/targets/corolla/extract/extract_corolla_h_secoc_surface_evidence.py",
+    "tools/targets/corolla/extract/extract_corolla_h_final_named_residue_evidence.py",
+    "tools/security/resolve_secoc_patch_image.sh",
+    "tools/security/resolve_ephemeral_runtime_image.sh",
+    "tools/security/resolve_secoc_patch.sh",
 ]:
     check((ROOT / separate).exists(), f"documented distinct tool stays separate: {separate}")
 

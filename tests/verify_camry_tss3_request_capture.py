@@ -20,9 +20,9 @@ REPO = Path(__file__).resolve().parents[1]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-import tools.analyze_camry_tss3_request_capture as analyze_mod
-import tools.camry_frc_lta_capture as lta
-import tools.camry_tss3_request_capture as cap
+import tools.targets.camry.analysis.analyze_camry_tss3_request_capture as analyze_mod
+import tools.targets.camry.live.camry_frc_lta_capture as lta
+import tools.targets.camry.live.camry_tss3_request_capture as cap
 
 passed = failed = 0
 
@@ -352,7 +352,7 @@ check("canbin writer and pandad guard are reused from the LTA capture tool",
       and cap.ELM327_SAFETY_MODEL == lta.ELM327_SAFETY_MODEL)
 check("decode path is the canonical ddb_semantics decoder",
       analyze_mod.build_did_table is cap.build_did_table)
-source = (REPO / "tools/camry_tss3_request_capture.py").read_text()
+source = (REPO / "tools/targets/camry/live/camry_tss3_request_capture.py").read_text()
 check("capture tool hard-refuses pandad USB contention",
       "refusing Panda USB collision: pandad is running" in source
       and "pandad appeared during capture; aborting" in source)
@@ -427,13 +427,13 @@ with tempfile.TemporaryDirectory() as td:
           "not a transform proof" in json.dumps(summary) or
           "SecOC/integrity ownership remain open" in summary["interpretation"]["proof_boundary"])
     proc = subprocess.run(
-        [sys.executable, str(REPO / "tools/analyze_camry_tss3_request_capture.py"), str(capture)],
+        [sys.executable, str(REPO / "tools/targets/camry/analysis/analyze_camry_tss3_request_capture.py"), str(capture)],
         capture_output=True, text=True, check=False)
     check("analyzer CLI reproduces the library summary byte-for-byte",
           proc.returncode == 0 and json.loads(proc.stdout) == json.loads(json.dumps(summary)))
 
 print("\n== capture CLI is turnkey without a vehicle ==")
-proc = subprocess.run([sys.executable, str(REPO / "tools/camry_tss3_request_capture.py")],
+proc = subprocess.run([sys.executable, str(REPO / "tools/targets/camry/live/camry_tss3_request_capture.py")],
                       capture_output=True, text=True, check=False)
 plan_only = json.loads(proc.stdout) if proc.returncode == 0 else {}
 check("plan-only CLI prints the validated plan and exits zero",
@@ -443,7 +443,7 @@ check("plan-only CLI prints the validated plan and exits zero",
       and plan_only.get("poll_order", []) == [target.key for target in poll_targets]
       and "cannot donate its slot" in plan_only.get("pacing", "")
       and len(plan_only.get("requests", [])) == 9)
-proc = subprocess.run([sys.executable, str(REPO / "tools/camry_tss3_request_capture.py"), "--execute"],
+proc = subprocess.run([sys.executable, str(REPO / "tools/targets/camry/live/camry_tss3_request_capture.py"), "--execute"],
                       capture_output=True, text=True, check=False)
 check("--execute without --out fails fast", proc.returncode != 0 and "--out is required" in proc.stderr)
 

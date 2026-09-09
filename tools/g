@@ -32,7 +32,7 @@ ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/build_paths.sh"
 ANALYSIS_TARGET="${GHIDRA_ANALYSIS_TARGET:-$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["default_target"])' "$ROOT/data/analysis_targets.json")}"
-TARGET_FIELD() { python3 "$ROOT/tools/analysis_target.py" "$ANALYSIS_TARGET" --field "$1"; }
+TARGET_FIELD() { python3 "$ROOT/tools/project/analysis_target.py" "$ANALYSIS_TARGET" --field "$1"; }
 PROJECT_NAME=$(TARGET_FIELD project_name)
 PROGRAM_NAME=$(TARGET_FIELD program_name)
 SNAPSHOT_DIR="$ROOT/$(TARGET_FIELD snapshot_dir)"
@@ -158,7 +158,7 @@ RESOLVE_ARGS=(--ensure-vendored)
 if [[ "${GHIDRA_ALLOW_SYSTEM_CLI:-0}" == "1" ]]; then
   RESOLVE_ARGS+=(--allow-system)
 fi
-GHIDRA_CLI=$("$ROOT/tools/resolve_ghidra_cli.sh" "${RESOLVE_ARGS[@]}")
+GHIDRA_CLI=$("$ROOT/tools/project/resolve_ghidra_cli.sh" "${RESOLVE_ARGS[@]}")
 
 # --- Bootstrap the isolated Ghidra environment --------------------------------
 #
@@ -200,7 +200,7 @@ cmd_session_status() {
     manifest="$SNAPSHOT_DIR/processor_manifest.json"
   fi
   if [[ -n "$manifest" && -n "${GHIDRA_HOME:-}" ]]; then
-    if python3 "$ROOT/tools/fingerprint_processor.py" \
+    if python3 "$ROOT/tools/project/fingerprint_processor.py" \
          --source-only --expect "$manifest" >/dev/null 2>&1; then
       fingerprint_state="matching"
     else
@@ -288,7 +288,7 @@ if ((NEEDS_PROJECT)) && [[ ! -d "$ABS_PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
     exit 1
   fi
   echo "Materializing working project from committed snapshot..." >&2
-  python3 "$ROOT/tools/project_layout.py" materialize \
+  python3 "$ROOT/tools/project/project_layout.py" materialize \
     --snapshot-dir "$SNAPSHOT_DIR" \
     --project-dir "$ABS_PROJECT_DIR" \
     --project-name "$PROJECT_NAME"
@@ -303,7 +303,7 @@ if ((NEEDS_PROJECT)) && [[ ! -d "$ABS_PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
     MANIFEST=""
   fi
   if [[ -n "$MANIFEST" ]]; then
-    if ! python3 "$ROOT/tools/fingerprint_processor.py" --source-only --expect "$MANIFEST" >&2; then
+    if ! python3 "$ROOT/tools/project/fingerprint_processor.py" --source-only --expect "$MANIFEST" >&2; then
       echo "ERROR: processor manifest fingerprint mismatch after materializing working project." >&2
       echo "The vendored processor sources do not match the committed snapshot." >&2
       exit 1

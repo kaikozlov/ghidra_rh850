@@ -315,7 +315,7 @@ check("generic payload C embeds no known Sienna patch/CRC addresses", all(token 
 check("generic payload C contains no automatic reset target", "0x157e" not in all_generic_c and "reset(" not in all_generic_c)
 
 print("\n== offline Sienna APPLY algorithm ==")
-from tools.build_secoc_patch_manifest import crc32
+from tools.security.build_secoc_patch_manifest import crc32
 blob = bytearray((REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes())
 image_off = validate.patch_va - validate.image_base
 check("offline fixture starts at configured preimage", bytes(blob[image_off:image_off + validate.patch_len]) == validate.original)

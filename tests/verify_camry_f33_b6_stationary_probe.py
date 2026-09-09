@@ -595,7 +595,7 @@ check("command-5 plan is non-actuating and ephemeral", command5_probe.plan(None)
 })
 
 print("\n== car-kit packaging ==")
-builder_path = ROOT / "tools/build_camry_f33_car_kit.py"
+builder_path = ROOT / "tools/targets/camry/builders/build_camry_f33_car_kit.py"
 builder_spec = importlib.util.spec_from_file_location("build_camry_f33_car_kit", builder_path)
 assert builder_spec is not None and builder_spec.loader is not None
 builder = importlib.util.module_from_spec(builder_spec)
@@ -726,9 +726,9 @@ with tempfile.TemporaryDirectory() as td:
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
         "runtime/exploit/followups/xcp_read_probe.py", "runtime/exploit/followups/xcp_daq_probe.py",
-        "runtime/tools/camry_f33_steering_state_capture.py",
+        "runtime/tools/targets/camry/live/camry_f33_steering_state_capture.py",
         "runtime/exploit/patcher/deploy.py", "runtime/exploit/patcher/restore.py",
-        "runtime/exploit/patcher/post_apply_verify.py", "runtime/tools/build_secoc_patch_manifest.py",
+        "runtime/exploit/patcher/post_apply_verify.py", "runtime/tools/security/build_secoc_patch_manifest.py",
     )))
     xcp_observer = manifest["live_observers"]["native_xcp_steering_state"]
     check("kit marks native XCP steering observer stock-disabled",

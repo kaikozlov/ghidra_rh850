@@ -33,7 +33,7 @@ check("external openpilot logreader environment exists", PYTHON.is_file())
 with tempfile.TemporaryDirectory(prefix="span-rlog-opendbc-") as td:
     out = Path(td) / "evidence.json"
     proc = subprocess.run([
-        str(PYTHON), str(REPO / "tools/extract_span_2025_discord_rlog_opendbc_evidence.py"),
+        str(PYTHON), str(REPO / "tools/targets/corolla/extract/extract_span_2025_discord_rlog_opendbc_evidence.py"),
         "--rlog", str(RLOG), "--openpilot-root", str(OPENPILOT), "--output", str(out),
     ], cwd=REPO, capture_output=True, text=True, timeout=180, check=False)
     check("raw Span-rlog extraction succeeds", proc.returncode == 0, proc.stderr.strip()[:200])

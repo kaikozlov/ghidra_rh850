@@ -13,7 +13,7 @@ from Crypto.Cipher import AES
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
-from generate_candidate_f05_semantics import build_report  # noqa: E402
+from tools.security.generate_candidate_f05_semantics import build_report  # noqa: E402
 
 
 passed = failed = 0

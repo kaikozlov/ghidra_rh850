@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools.replay_camry_tss3_carstate_revisions import fixture_provenance, summarize
+from tools.targets.camry.utilities.replay_camry_tss3_carstate_revisions import fixture_provenance, summarize
 
 passed = failed = 0
 

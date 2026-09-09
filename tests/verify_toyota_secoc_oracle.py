@@ -12,7 +12,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.toyota_secoc_oracle import (
+from tools.toyota_support.toyota_secoc_oracle import (
     ProtectedSample,
     SyncSample,
     candidate_message_counters,
@@ -26,7 +26,7 @@ from tools.toyota_secoc_oracle import (
     verify_protected_sample,
     verify_sync_sample,
 )
-from tools.toyota_secoc_signer import sign_classic_frame, sign_sync_frame
+from tools.toyota_support.toyota_secoc_signer import sign_classic_frame, sign_sync_frame
 
 passed = failed = 0
 
@@ -126,7 +126,7 @@ with tempfile.TemporaryDirectory() as td:
 
     print("\n== command-line profile ==")
     cli = subprocess.run(
-        [sys.executable, str(REPO / "tools" / "toyota_secoc_oracle.py"), "profile"],
+        [str(REPO / "tools" / "toyota"), "secoc", "oracle", "profile"],
         capture_output=True,
         text=True,
         check=False,

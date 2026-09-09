@@ -440,7 +440,7 @@ The passive decoder implements this exact contract and reassembles normal
 ISO-TP on the Sienna diagnostic IDs:
 
 ```bash
-uv run --locked python tools/decode_icus_key_update_trace.py capture.log --json
+uv run --locked python tools/security/decode_icus_key_update_trace.py capture.log --json
 ```
 
 It defaults to request `0x7A1` and response `0x7A9`, accepts compact and

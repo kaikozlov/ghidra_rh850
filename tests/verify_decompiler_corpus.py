@@ -11,7 +11,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 CORPUS = REPO / "data/generated/decompilations.jsonl"
 INVENTORY = REPO / "data/ghidra_project_inventory.baseline.jsonl"
-GENERATOR = REPO / "tools/generate_decompiler_corpus.py"
+GENERATOR = REPO / "tools/project/generate_decompiler_corpus.py"
 EXPORTER = REPO / "ghidra/scripts/verify/ExportDecompilerCorpus.java"
 PSEUDO = REPO / "tools/pseudo"
 passed = failed = 0
@@ -56,7 +56,7 @@ expected_metadata = {
     "decompiler_timeout_seconds": 60,
     "project_inventory_path": "data/ghidra_project_inventory.baseline.jsonl",
     "project_inventory_sha256": sha256(INVENTORY),
-    "generator_path": "tools/generate_decompiler_corpus.py",
+    "generator_path": "tools/project/generate_decompiler_corpus.py",
     "generator_sha256": sha256(GENERATOR),
     "exporter_path": "ghidra/scripts/verify/ExportDecompilerCorpus.java",
     "exporter_sha256": sha256(EXPORTER),

@@ -474,11 +474,11 @@ check(
 
 # --- Test 10: All scripts that previously sourced env now use the helper ------
 scripts_that_should_use_helper = [
-    "tools/rebuild_project.sh",
-    "tools/verify_processor.sh",
-    "tools/verify_sleigh.sh",
-    "tools/snapshot_project.sh",
-    "tools/run_headless",
+    "tools/project/rebuild_project.sh",
+    "tools/testing/processor/verify_processor.sh",
+    "tools/testing/processor/verify_sleigh.sh",
+    "tools/project/snapshot_project.sh",
+    "tools/project/run_headless",
     "tools/g",
 ]
 for script_rel in scripts_that_should_use_helper:
@@ -530,8 +530,8 @@ check(
     "finalize-project" in makefile_content,
 )
 check(
-    "Makefile finalize-project calls tools/finalize_project.sh",
-    "tools/finalize_project.sh" in makefile_content,
+    "Makefile finalize-project calls tools/project/finalize_project.sh",
+    "tools/project/finalize_project.sh" in makefile_content,
 )
 check(
     "work-project never recursively deletes PROJECT_DIR",

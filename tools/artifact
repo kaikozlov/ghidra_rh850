@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from artifact_catalog import REPO, consumers, producer_candidates, rows, tracked_artifacts
+from catalog.artifact_catalog import REPO, consumers, producer_candidates, rows, tracked_artifacts
 
 
 def resolve_artifact(query: str) -> str:
@@ -88,9 +88,12 @@ def cmd_regen(args: argparse.Namespace) -> int:
     passthrough = list(args.generator_args)
     if passthrough[:1] == ["--"]:
         passthrough = passthrough[1:]
-    command = [sys.executable, str(REPO / producer), *passthrough]
+    command = ["uv", "run", "--project", str(REPO), "--locked", "python", str(REPO / producer), *passthrough]
+    env = dict(__import__("os").environ)
+    current_pythonpath = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = str(REPO) + (__import__("os").pathsep + current_pythonpath if current_pythonpath else "")
     print("+ " + " ".join(command), file=sys.stderr)
-    return subprocess.run(command, cwd=REPO, check=False).returncode
+    return subprocess.run(command, cwd=REPO, env=env, check=False).returncode
 
 
 def build_parser() -> argparse.ArgumentParser:

@@ -12,7 +12,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 ART = REPO / "data/generated/corolla_h_sienna_secoc_structural_comparison.json"
-TOOL = REPO / "tools/build_corolla_h_sienna_secoc_structural_comparison.py"
+TOOL = REPO / "tools/targets/corolla/builders/build_corolla_h_sienna_secoc_structural_comparison.py"
 SIENNA = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
 H = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
 F_RAW = REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"

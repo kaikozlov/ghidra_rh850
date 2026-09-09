@@ -9,7 +9,7 @@ def main():
  p=argparse.ArgumentParser();p.add_argument('--project-dir',type=Path,default=ROOT/'build/work/project');a=p.parse_args();project=a.project_dir.resolve()
  if not (project/'rh850_p1me_mapped.rep').is_dir(): print(f'[FAIL] live BA surface: missing project {project}');return 1
  with tempfile.TemporaryDirectory(prefix='ba-surface-') as d:
-  log=Path(d)/'headless.log';r=subprocess.run([str(ROOT/'tools/run_headless'),'--project-dir',str(project),'--project','rh850_p1me_mapped','--label','application-proprietary-ba','--log',str(log),'--quiet','--','-process',PROGRAM,'-noanalysis','-readOnly','-postScript','AssertApplicationProprietaryBaSurface.java'],cwd=ROOT,text=True,capture_output=True)
+  log=Path(d)/'headless.log';r=subprocess.run([str(ROOT/'tools/project/run_headless'),'--project-dir',str(project),'--project','rh850_p1me_mapped','--label','application-proprietary-ba','--log',str(log),'--quiet','--','-process',PROGRAM,'-noanalysis','-readOnly','-postScript','AssertApplicationProprietaryBaSurface.java'],cwd=ROOT,text=True,capture_output=True)
   out=log.read_text(errors='replace') if log.exists() else ''
   if r.returncode or EXPECTED not in out:
    print('[FAIL] live BA surface');print((r.stdout or '')+(r.stderr or '')+out[-8000:]);return 1

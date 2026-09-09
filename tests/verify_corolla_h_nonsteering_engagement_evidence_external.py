@@ -10,7 +10,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 CORPUS = REPO / "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl"
-TOOL = REPO / "tools/extract_corolla_h_nonsteering_engagement_evidence.py"
+TOOL = REPO / "tools/targets/corolla/extract/extract_corolla_h_nonsteering_engagement_evidence.py"
 TRACKED = REPO / "data/generated/corolla_8965H1202000_nonsteering_engagement_decompiler_evidence.json"
 passed = failed = 0
 

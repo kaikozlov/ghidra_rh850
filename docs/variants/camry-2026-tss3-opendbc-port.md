@@ -597,7 +597,7 @@ contain no EPS F181 response. Exact EPS identity comes from separate same-car
 evidence, not these rlogs alone. The original September reducer source was
 recovered under the disposable `build/tmp/` tree during WP1, which removed the
 previous grid-phase ambiguity. The tracked deterministic implementation
-`tools/analyze_camry_20260904_stock_steering.py` now reproduces its exact
+`tools/targets/camry/analysis/analyze_camry_20260904_stock_steering.py` now reproduces its exact
 absolute-monotonic 50 ms grid and stock/dual-active predicates from the original
 rlogs. The tracked report/manifest and independent verifier reproduce the census
 (27,173,143 native records; zero native B6/0x131/0x2E4;
@@ -832,7 +832,7 @@ controller-side steering gate. Post-patch on-car cluster behavior and the
 
 Evidence and reproduction:
 
-- `tools/analyze_camry_20260906_hands_off_warning.py`
+- `tools/targets/camry/analysis/analyze_camry_20260906_hands_off_warning.py`
 - `data/generated/camry_20260906_hands_off_warning_audit.json`
 - source routes `2026-09-04/{3b,3c,3d}` and `2026-09-06/{3e,3f}` under the
   maintainer Camry rlog archive
@@ -895,7 +895,7 @@ ID19 episode has yet been captured, however, so that subfeature-to-wire join rem
 unproved dynamically. Nothing in this finding authorizes selecting ID18 or ID19 from
 openpilot; the normal openpilot profile remains ID11/LTA-LCA.
 
-Deterministic evidence: `tools/analyze_camry_2026_pda_sdg.py`,
+Deterministic evidence: `tools/targets/camry/analysis/analyze_camry_2026_pda_sdg.py`,
 `data/generated/camry_2026_pda_sdg_attribution.json`, and
 `tests/verify_camry_2026_pda_sdg.py`, joined to the exact-F33 target and current TSS3
 managed recorder artifacts.
@@ -1017,7 +1017,7 @@ steering-assembly authority handoff between the protected `0x08A/0x081` family a
 physical actuator path.
 
 Deterministic reduction and verification:
-`tools/analyze_camry_2026_lateral_family_census.py`,
+`tools/targets/camry/analysis/analyze_camry_2026_lateral_family_census.py`,
 `data/generated/camry_2026_lateral_family_census.json`, and
 `tests/verify_camry_2026_lateral_family_census.py`.
 
@@ -1042,7 +1042,7 @@ For the next live internal observation, use the audited RAM-resident observer wi
 the same recovered profile. It sends no steering command and gives the required
 same-event internal terms without pretending the disabled XCP surface is stock-live.
 
-`tools/camry_f33_steering_state_capture.py` defines two 28-byte single-list subsets plus
+`tools/targets/camry/live/camry_f33_steering_state_capture.py` defines two 28-byte single-list subsets plus
 a default **52-byte `full-path`** union using lists 0 and 1. The first subset is the
 decisive stock-source discriminator:
 
@@ -1091,12 +1091,12 @@ frames. Host timestamps remain correlation aids rather than physical CAN orderin
 
 The recovered profile geometry remains deterministic: a full sample would be eight
 classic-CAN DTOs if XCP command dispatch were enabled. On stock exact F33, however,
-`tools/camry_f33_steering_state_capture.py --execute` is deliberately fail-closed because
+`tools/targets/camry/live/camry_f33_steering_state_capture.py --execute` is deliberately fail-closed because
 CodeFlash `0x30D68=0x5A` blocks CONNECT/DAQ before any list can start. The tool remains
 useful in plan mode:
 
 ```bash
-$PY runtime/tools/camry_f33_steering_state_capture.py --profile full-path
+$PY runtime/tools/targets/camry/live/camry_f33_steering_state_capture.py --profile full-path
 ```
 
 For live collection, use the packaged **stripped RAM-only observer derived from the B6
@@ -1106,7 +1106,7 @@ persistent flash patch; installation/heartbeat semantics remain the already-audi
 RAM-only path.
 
 Verification: `tests/verify_camry_f33_steering_state_capture.py`; the in-car packaging
-path is `tools/build_camry_f33_car_kit.py`.
+path is `tools/targets/camry/builders/build_camry_f33_car_kit.py`.
 
 ### 4.11 Stock ACC standstill / resume-required state (VAR-140)
 
@@ -1138,7 +1138,7 @@ to normal `cruiseState.standstill`. Source-real regression fixtures cover ordina
 `0x65` counterexample (false). No RES+/resume command is synthesized from this mapping; it
 only restores the standard stock-ACC state semantic.
 
-Evidence: `tools/analyze_camry_20260906_hands_off_warning.py`,
+Evidence: `tools/targets/camry/analysis/analyze_camry_20260906_hands_off_warning.py`,
 `data/generated/camry_20260906_hands_off_warning_audit.json`,
 `tests/verify_camry_20260906_hands_off_warning.py`, and fork
 `opendbc/car/toyota/tests/test_tss3_camry.py`.
@@ -1168,7 +1168,7 @@ CAN invalidation followed by recovery; the helper is explicitly described as syn
 scheduling at measured native cadence, not as an original-capture replay. This separates the
 software timeout test from the dynamic evidence that supplies its rates.
 
-Evidence: `tools/analyze_camry_2026_parser_liveness.py`,
+Evidence: `tools/targets/camry/analysis/analyze_camry_2026_parser_liveness.py`,
 `data/generated/camry_2026_parser_liveness.json`,
 `tests/verify_camry_2026_parser_liveness.py`, and fork
 `opendbc/car/toyota/tests/test_tss3_camry.py`.
@@ -1230,13 +1230,13 @@ probe above.
 - `data/generated/camry_2026_08a_producer_bounds.json`
 - `data/generated/camry_20260904_stock_steering_report.json` and
   `data/generated/camry_20260904_stock_steering_manifest.json`
-  (from `tools/analyze_camry_20260904_stock_steering.py`; external
+  (from `tools/targets/camry/analysis/analyze_camry_20260904_stock_steering.py`; external
   `/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/` inputs)
 - `tests/verify_camry_20260904_stock_steering.py`
 - `tests/verify_camry_8965F3307000.py`
 - `tests/verify_camry_2026_lta_state_reconciliation.py`
 - `tests/verify_camry_2026_08a_producer_bounds.py`
-- `tools/decode_camry_tss3_operation_ffd.py`
+- `tools/targets/camry/utilities/decode_camry_tss3_operation_ffd.py`
 - `tests/verify_camry_tss3_operation_ffd_decoder.py`
 
 ## 7. Native longitudinal integration consequence of the Bus-1 E2E candidate
@@ -1284,7 +1284,7 @@ request.
 The recovered wire support is already sufficient for an **offline** native-shape
 builder: `0x160` is a 32-byte native-Bus-1 PDU using exact AUTOSAR E2E Profile 5,
 with B0:B1 CRC-16/CCITT, B2 modulo-256 counter, Data ID equal to CAN ID, and no
-secret. `tools/camry_frc_request_poc.py` can clone an observed frame, alter only B12
+secret. `tools/targets/camry/live/camry_frc_request_poc.py` can clone an observed frame, alter only B12
 and the counter, and recompute the CRC. What is not yet sufficient for a driving
 port is semantics/ownership: B12 is still only a high-value signed-7 candidate, its
 physical command scale and companion request fields are not closed, producer/source

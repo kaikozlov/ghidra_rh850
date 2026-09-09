@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "data/generated/camry_f33_b6_command_composition.json"
-TOOL = ROOT / "tools/analyze_camry_f33_b6_command_composition.py"
+TOOL = ROOT / "tools/targets/camry/analysis/analyze_camry_f33_b6_command_composition.py"
 
 passed = failed = 0
 

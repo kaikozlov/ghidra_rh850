@@ -29,8 +29,8 @@ def _section_corolla_hf_command5_runtime_carrier():
     ROOT = Path(__file__).resolve().parents[1]
     ART = ROOT / 'data/generated/corolla_hf_command5_runtime_carrier.json'
     EVID = ROOT / 'data/generated/corolla_hf_command5_runtime_carrier_evidence.json'
-    EXTRACTOR = ROOT / 'tools/extract_corolla_hf_command5_runtime_carrier_evidence.py'
-    BUILDER = ROOT / 'tools/build_corolla_hf_command5_runtime_carrier.py'
+    EXTRACTOR = ROOT / 'tools/targets/corolla/extract/extract_corolla_hf_command5_runtime_carrier_evidence.py'
+    BUILDER = ROOT / 'tools/targets/corolla/builders/build_corolla_hf_command5_runtime_carrier.py'
     RUNTIME_BUILDER = ROOT / 'exploit/ephemeral_runtime/build_corolla_hf_command5_carrier.py'
     PROXY_SOURCE = ROOT / 'exploit/ephemeral_runtime/corolla_hf_command5_proxy.c'
     CANARY_SOURCE = ROOT / 'exploit/ephemeral_runtime/corolla_hf_canary.c'
@@ -118,7 +118,7 @@ def _section_corolla_hf_steering_limits():
     from pathlib import Path
     ROOT = Path(__file__).resolve().parents[1]
     ART = ROOT / 'data/generated/corolla_hf_steering_limits.json'
-    BUILDER = ROOT / 'tools/build_corolla_hf_steering_limits.py'
+    BUILDER = ROOT / 'tools/targets/corolla/builders/build_corolla_hf_steering_limits.py'
     PANDA = ROOT / 'data/generated/corolla_hf_panda_lateral_safety_contract.json'
     d = json.loads(ART.read_text())
     check('schema', d['schema'] == 'corolla-hf-steering-limits-v1')
@@ -203,7 +203,7 @@ def _section_corolla_hf_nonsteering_engagement_state():
     from pathlib import Path
     REPO = Path(__file__).resolve().parents[1]
     ART = REPO / 'data/generated/corolla_hf_nonsteering_engagement_state.json'
-    BUILD = REPO / 'tools/build_corolla_hf_nonsteering_engagement_state.py'
+    BUILD = REPO / 'tools/targets/corolla/builders/build_corolla_hf_nonsteering_engagement_state.py'
     IMAGE = REPO / 'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin'
     ENG = REPO / 'data/generated/corolla_8965H1202000_nonsteering_engagement_decompiler_evidence.json'
     TECH = REPO / 'data/generated/techstream_v18/tss3_cruise_engagement_semantics.json'
@@ -450,7 +450,7 @@ def _section_corolla_hf_cooperative_authority_wire_visibility():
     ROOT = Path(__file__).resolve().parents[1]
     ART = ROOT / 'data/generated/corolla_hf_cooperative_authority_wire_visibility.json'
     EVID = ROOT / 'data/generated/corolla_8965H1202000_cooperative_authority_wire_decompiler_evidence.json'
-    BUILDER = ROOT / 'tools/build_corolla_hf_cooperative_authority_wire_visibility.py'
+    BUILDER = ROOT / 'tools/targets/corolla/builders/build_corolla_hf_cooperative_authority_wire_visibility.py'
     H = ROOT / 'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin'
     H_RAW = ROOT / 'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     F_RAW = ROOT / 'community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin'
@@ -526,8 +526,8 @@ def _section_corolla_hf_b6_competing_sender_arbitration():
     ROOT = Path(__file__).resolve().parents[1]
     ART = ROOT / 'data/generated/corolla_hf_b6_competing_sender_arbitration.json'
     EVID = ROOT / 'data/generated/corolla_8965H1202000_b6_competing_sender_decompiler_evidence.json'
-    EXTRACTOR = ROOT / 'tools/extract_corolla_h_b6_competing_sender_evidence.py'
-    BUILDER = ROOT / 'tools/build_corolla_hf_b6_competing_sender_arbitration.py'
+    EXTRACTOR = ROOT / 'tools/targets/corolla/extract/extract_corolla_h_b6_competing_sender_evidence.py'
+    BUILDER = ROOT / 'tools/targets/corolla/builders/build_corolla_hf_b6_competing_sender_arbitration.py'
     H = ROOT / 'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin'
 
     def sha(data: bytes) -> str:
@@ -617,7 +617,7 @@ def _section_corolla_hf_fault_state_contract():
     from pathlib import Path
     REPO = Path(__file__).resolve().parents[1]
     ART = REPO / 'data/generated/corolla_hf_fault_state_contract.json'
-    TOOL = REPO / 'tools/build_corolla_hf_fault_state_contract.py'
+    TOOL = REPO / 'tools/targets/corolla/builders/build_corolla_hf_fault_state_contract.py'
     d = json.loads(ART.read_text())
     check('schema/software family exact', d['schema'] == 'corolla-hf-0x394-fault-state-contract-v1' and d['software_ids'] == ['8965H1202000', '8965F1208000'])
     check('0x394 geometry exact', d['wire']['can_id'] == '0x394' and d['wire']['length'] == 3 and (len(d['wire']['state_table_rows']) == 17))
@@ -647,7 +647,7 @@ def _section_corolla_hf_panda_lateral_safety_contract():
     from pathlib import Path
     ROOT = Path(__file__).resolve().parents[1]
     ART = ROOT / 'data/generated/corolla_hf_panda_lateral_safety_contract.json'
-    BUILDER = ROOT / 'tools/build_corolla_hf_panda_lateral_safety_contract.py'
+    BUILDER = ROOT / 'tools/targets/corolla/builders/build_corolla_hf_panda_lateral_safety_contract.py'
 
     def candidate_tx_ok(*, controls_allowed: bool, request_id: int, target_raw: int, seq: int, previous_target: int | None, previous_seq: int | None, steer_rate_raw: int, driver_torque_invalid: int=0, fault_inhibit: int=0, driver_torque_nm: float=0.0, driver_override_abs_nm: float | None=None) -> bool:
         """Reference implementation of the deliberately strict policy encoded by the artifact."""
@@ -962,7 +962,7 @@ def _section_corolla_hf_remaining_status_contract():
     REPO = Path(__file__).resolve().parents[1]
     ART = REPO / 'data/generated/corolla_hf_remaining_status_contract.json'
     EVID = REPO / 'data/generated/corolla_8965H1202000_remaining_status_decompiler_evidence.json'
-    TOOL = REPO / 'tools/build_corolla_hf_remaining_status_contract.py'
+    TOOL = REPO / 'tools/targets/corolla/builders/build_corolla_hf_remaining_status_contract.py'
     IMAGE = REPO / 'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin'
     d = json.loads(ART.read_text())
     e = json.loads(EVID.read_text())
@@ -991,7 +991,7 @@ def _section_corolla_hf_command5_portability():
     from pathlib import Path
     REPO = Path(__file__).resolve().parents[1]
     ART = REPO / 'data/generated/corolla_hf_command5_portability.json'
-    BUILDER = REPO / 'tools/build_corolla_hf_command5_portability.py'
+    BUILDER = REPO / 'tools/targets/corolla/builders/build_corolla_hf_command5_portability.py'
     H = REPO / 'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin'
 
     def sha(b):

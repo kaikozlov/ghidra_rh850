@@ -24,7 +24,7 @@ def section_codeflash() -> int:
     PAYLOAD = REPO / 'targets/camry-2026/raw-20260826/calvin_payload_codeflash_00000000_00200000.bin'
     EVID = REPO / 'data/generated/camry_8965F3307000_decompiler_evidence.json'
     ART = REPO / 'data/generated/camry_8965F3307000_codeflash.json'
-    BUILD = REPO / 'tools/analyze_camry_8965F3307000_codeflash.py'
+    BUILD = REPO / 'tools/targets/camry/analysis/analyze_camry_8965F3307000_codeflash.py'
     passed = failed = 0
 
     def check(name: str, condition: object, detail: str = '') -> None:
@@ -258,7 +258,7 @@ def section_secoc_patch() -> int:
 
     from exploit.patcher.build_payload import make_restore_config, simulate_apply  # noqa: E402
     from exploit.patcher.patch_config import config_from_manifest  # noqa: E402
-    from tools.build_secoc_patch_manifest import build_manifest, crc32  # noqa: E402
+    from tools.security.build_secoc_patch_manifest import build_manifest, crc32  # noqa: E402
 
     IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
     SIENNA = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
@@ -394,7 +394,7 @@ def section_lateral_static() -> int:
     IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
     EVID = ROOT / "data/generated/camry_8965F3307000_lateral_decompiler_evidence.json"
     ART = ROOT / "data/generated/camry_8965F3307000_lateral_static.json"
-    BUILD = ROOT / "tools/build_camry_8965F3307000_lateral_static.py"
+    BUILD = ROOT / "tools/targets/camry/builders/build_camry_8965F3307000_lateral_static.py"
     CODEFLASH = ROOT / "data/generated/camry_8965F3307000_codeflash.json"
     PRODUCT = ROOT / "data/p1me_product_memory.json"
     RUNTIME = ROOT / "data/generated/camry_8965F3307000_command5_runtime_carrier.json"
@@ -538,7 +538,7 @@ def section_tss3_opendbc_port() -> int:
     IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
     EVID = ROOT / "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json"
     ART = ROOT / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
-    BUILD = ROOT / "tools/build_camry_8965F3307000_tss3_opendbc_port.py"
+    BUILD = ROOT / "tools/targets/camry/builders/build_camry_8965F3307000_tss3_opendbc_port.py"
 
     p = f = 0
 
@@ -716,7 +716,7 @@ def section_fault_status() -> int:
     IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
     EVID = ROOT / "data/generated/camry_8965F3307000_fault_status_decompiler_evidence.json"
     ART = ROOT / "data/generated/camry_8965F3307000_fault_status.json"
-    BUILD = ROOT / "tools/build_camry_8965F3307000_fault_status.py"
+    BUILD = ROOT / "tools/targets/camry/builders/build_camry_8965F3307000_fault_status.py"
 
     passed = failed = 0
 
@@ -829,7 +829,7 @@ def section_secoc_recovery() -> int:
     REPO = Path(__file__).resolve().parents[1]
     ROOT = REPO / "targets/camry-2026/raw-20260826/secoc-recovery"
     ART = REPO / "data/generated/camry_8965F3307000_secoc_recovery.json"
-    BUILD = REPO / "tools/analyze_camry_8965F3307000_secoc_recovery.py"
+    BUILD = REPO / "tools/targets/camry/analysis/analyze_camry_8965F3307000_secoc_recovery.py"
 
     passed = failed = 0
 
@@ -946,7 +946,7 @@ def section_command5_runtime_carrier() -> int:
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]
     ART=ROOT/'data/generated/camry_8965F3307000_command5_runtime_carrier.json'
-    BUILD=ROOT/'tools/build_camry_8965F3307000_command5_runtime_carrier.py'
+    BUILD=ROOT/'tools/targets/camry/builders/build_camry_8965F3307000_command5_runtime_carrier.py'
     IMAGE=ROOT/'firmware/camry-8965F3307000/CodeFlash.bin'
     RUNTIME_BUILDER=ROOT/'exploit/ephemeral_runtime/build_camry_f33_command5_carrier.py'
     PROXY_AUDIT=ROOT/'exploit/ephemeral_runtime/audited_camry_f33_command5_proxy_build.json'
@@ -1030,7 +1030,7 @@ def section_application_ram_loader() -> int:
 
     ROOT = Path(__file__).resolve().parents[1]
     ART = ROOT / "data/generated/camry_8965F3307000_application_ram_loader_assessment.json"
-    BUILD = ROOT / "tools/build_camry_8965F3307000_application_ram_loader_assessment.py"
+    BUILD = ROOT / "tools/targets/camry/builders/build_camry_8965F3307000_application_ram_loader_assessment.py"
     IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
     RAW = ROOT / "targets/camry-2026/raw-20260826"
     RAMREQ = ROOT / "data/variant_ram_exec_requirements.json"

@@ -13,12 +13,12 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-decoder = import_module("tools.decode_camry_tss3_operation_ffd")
+decoder = import_module("tools.targets.camry.utilities.decode_camry_tss3_operation_ffd")
 decode_eb13 = decoder.decode_eb13
 load_semantics = decoder.load_semantics
 parse_eb13 = decoder.parse_eb13
 
-TOOL = REPO / "tools/decode_camry_tss3_operation_ffd.py"
+TOOL = REPO / "tools/targets/camry/utilities/decode_camry_tss3_operation_ffd.py"
 
 passed = failed = 0
 

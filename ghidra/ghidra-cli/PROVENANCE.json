@@ -28,7 +28,7 @@
   "binary": {
     "crate_name": "ghidra-cli",
     "bin_name": "ghidra",
-    "build_command": "tools/build_ghidra_cli.sh",
+    "build_command": "tools/project/build_ghidra_cli.sh",
     "output_dir": "build/cache/ghidra-cli"
   },
   "ghidra": {

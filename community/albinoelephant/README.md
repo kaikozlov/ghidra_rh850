@@ -157,7 +157,7 @@ compact oracle.
 `data/generated/corolla_2023_albino_dataflash_analysis.json` is generated with:
 
 ```bash
-uv run python tools/analyze_toyota_dataflash.py \
+tools/toyota dataflash \
   community/albinoelephant/dump_ff200000_ff208000.bin \
   --capture community/albinoelephant/public_route_secoc_oracle.ndjson \
   --domain-scan --min-entropy 0 \

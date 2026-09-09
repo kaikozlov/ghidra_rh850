@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "data/generated/camry_2026_stock_steering_witness.json"
-TOOL = ROOT / "tools/analyze_camry_2026_stock_steering_witness.py"
+TOOL = ROOT / "tools/targets/camry/analysis/analyze_camry_2026_stock_steering_witness.py"
 D = json.loads(ART.read_text())
 failures = []
 

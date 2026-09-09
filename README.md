@@ -59,6 +59,7 @@ picture, read **[docs/OVERVIEW.md](docs/OVERVIEW.md)**.
 | Open/rebuild/use the Ghidra project | [docs/WORKFLOW.md](docs/WORKFLOW.md) |
 | Understand the documentation structure | [docs/README.md](docs/README.md) |
 | Use exploit / bench tooling | [exploit/README.md](exploit/README.md) |
+| Discover Toyota RE capabilities | `tools/toyota capabilities` |
 
 Verification is explicit, not part of every edit:
 

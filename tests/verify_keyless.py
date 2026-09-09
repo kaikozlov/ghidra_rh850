@@ -34,7 +34,7 @@ def _section_keyless_application_event_formatter():
     EV = json.loads(EVP.read_text())
     ARTP = ROOT / 'data/generated/corolla_8965H1202000_keyless_event_formatter.json'
     ART = json.loads(ARTP.read_text())
-    BUILD = ROOT / 'tools/build_corolla_h_keyless_event_formatter.py'
+    BUILD = ROOT / 'tools/targets/corolla/builders/build_corolla_h_keyless_event_formatter.py'
     SC = {}
     for line in (ROOT / 'data/generated/decompilations.jsonl').read_text().splitlines():
         r = json.loads(line)

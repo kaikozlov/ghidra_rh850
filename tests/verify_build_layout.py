@@ -27,9 +27,9 @@ make = (REPO / "Makefile").read_text()
 for name in ("BUILD_ROOT", "BUILD_CACHE", "BUILD_WORK", "BUILD_OUT", "BUILD_LOGS", "BUILD_TMP"):
     check(f"Makefile defines {name}", f"{name} ?=" in make)
 check("working Ghidra project lives under BUILD_WORK", "TARGET_WORK_SUFFIX := $(patsubst build/work/%,%,$(TARGET_WORK_DIR))" in make and "PROJECT_DIR ?= $(BUILD_WORK)/$(TARGET_WORK_SUFFIX)" in make)
-check("safe clean target only removes logs/tmp", "tools/build_layout.py clean logs tmp" in make)
+check("safe clean target only removes logs/tmp", "tools/project/build_layout.py clean logs tmp" in make)
 
-build_cli = (REPO / "tools/build_ghidra_cli.sh").read_text(encoding="utf-8")
+build_cli = (REPO / "tools/project/build_ghidra_cli.sh").read_text(encoding="utf-8")
 check(
     "vendored CLI Cargo target stays under BUILD_CACHE",
     'CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$BUILD_CACHE/ghidra-cli-target}"' in build_cli
@@ -87,7 +87,7 @@ with tempfile.TemporaryDirectory(prefix="rh850-build-layout-clean-") as td:
     sentinel.parent.mkdir(parents=True)
     sentinel.write_text("preserve")
     env = dict(os.environ, BUILD_ROOT=str(external_root))
-    cp = subprocess.run([sys.executable, str(REPO / "tools/build_layout.py"), "clean", "tmp"], cwd=REPO, env=env, capture_output=True, text=True, timeout=15)
+    cp = subprocess.run([sys.executable, str(REPO / "tools/project/build_layout.py"), "clean", "tmp"], cwd=REPO, env=env, capture_output=True, text=True, timeout=15)
     check("destructive layout operations reject BUILD_ROOT overrides", cp.returncode != 0 and sentinel.read_text() == "preserve", cp.stderr)
 
 print("\n== side-effect-free status path ==")
