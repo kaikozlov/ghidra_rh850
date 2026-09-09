@@ -811,6 +811,42 @@ check("inline signer state decoder requires both magic and initialized byte",
       state_decoded["next_index"] == 7 and state_decoded["signed_count"] == 9 and
       inline_signer.decode_state(state_raw[:5] + b"\x00" + state_raw[6:])["initialized"] is False)
 
+# The loader mailbox stores only the latest 8-byte control frame. Prove that a
+# completely missed first transfer pass is retried rather than aborting, and
+# that each sequential word is held across multiple nominal foreground ticks.
+class _FakePanda:
+    def __init__(self):
+        self.frames = []
+    def can_send(self, address, data, bus):
+        self.frames.append((address, bytes(data), bus))
+
+fake_bundle = type("FakeBundle", (), {
+    "helper": bytes.fromhex("1122334455667788"),
+    "helper_words": 2,
+    "meta": {"helper": {"padded_sha256": hashlib.sha256(bytes.fromhex("1122334455667788")).hexdigest()}},
+})()
+fake_session = object.__new__(inline_signer.InlineSignerSession)
+fake_session.bundle = fake_bundle
+fake_session.panda = _FakePanda()
+base_state = {"initialized": True, "armed": False, "armed_raw": 0, "last_command5_rc": 0, "signed_count": 0}
+fake_session.wait_initialized = lambda timeout=2.0: dict(base_state, next_index=0)
+_state_reads = iter((dict(base_state, next_index=0), dict(base_state, next_index=2)))
+fake_session.read_state = lambda: next(_state_reads)
+fake_session.read_helper = lambda: fake_bundle.helper
+_orig_sleep = inline_signer.time.sleep
+inline_signer.time.sleep = lambda _: None
+try:
+    fake_load = inline_signer.InlineSignerSession.load_helper(fake_session)
+finally:
+    inline_signer.time.sleep = _orig_sleep
+check("inline signer loader retries a zero-progress mailbox pass",
+      len(fake_load["passes"]) == 2 and fake_load["passes"][0]["state_after"]["next_index"] == 0 and
+      fake_load["passes"][1]["state_after"]["next_index"] == 2)
+check("inline signer holds every sequential word across multiple foreground ticks",
+      inline_signer.WORD_REPEAT_COUNT >= 3 and
+      inline_signer.WORD_REPEAT_INTERVAL_SECONDS >= inline_signer.CONTROL_TICK_SECONDS and
+      len(fake_session.panda.frames) == 2 * 2 * inline_signer.WORD_REPEAT_COUNT)
+
 print("\n== car-kit packaging ==")
 builder_path = ROOT / "tools/targets/camry/builders/build_camry_f33_car_kit.py"
 builder_spec = importlib.util.spec_from_file_location("build_camry_f33_car_kit", builder_path)
