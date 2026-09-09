@@ -1,0 +1,32 @@
+# 2026-09-08 exact-F33 runtime-monitor field session
+# Pulled from comma /tmp before vehicle restart; raw files below are preserved byte-exact.
+322c5f2d99f3fe2c29585e8fcd4721419ab8936c792292d6fadd451f6b5d7768  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_busmap.py
+4827b656d88eb07986414861bf570113c1b22a9ea4f1e6dbc27575a6098bf851  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_control_echo.py
+3a508e51f7dbbec201118bfac3796ac28117e62b9e9146d3e81ea43db36852df  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_id0marker.py
+ce4e24a249e77bebf620222f88e0888e25a179bffbfcdb2513673e6dbae34e38  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_marker.out
+0e3b20bfcdabd66a5285fc9b549ad8528fe9c2835a703cd92456ffa4e503d1a4  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_marker.py
+9e9d9c2e8acd9b14fe3dc2326703a8486be1c09e3683fb169cadb3b58fd21356  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_queue_overload.py
+2ad5b073e8dfa596caa9e717dade112e9ac6f648d8f4d24a957f2d18fcf8ea79  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_queue_overload2.py
+d45544514772ffb1e31020c2b2d12a86cad2cc856c043cd9337eb43e4b0f32e2  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_rate.out
+dae6e0daafcc454e21e6b493e8538d68dbdb1e1a419aafa05fa85c5336cb5933  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_rate.py
+5a1f3debb313f5a9c3e4fd2fbd2a25fb2c5769b7d1acd1ad081efc44aa0b00c2  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_rscfd_freeze.py
+500512a49235c2627963cafa43d9e65ec6227bfc7aa86d39cbe7b25086483dde  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_rscfd_freeze2.py
+e2996e5f4c76e64c168254940e4d911d3c573f4027f731e87cd1ddd77f15f263  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_rscfd_watch.py
+d9e85a8a00285de5c7da80c82141211c2f7a2ca69ffd04a926c82e40e5cda273  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_stopdebug.py
+864519d24ccc3dc0a4780957dd8ef770c1dfd03afa9c98aa4847ecad7e09b0ab  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_stopdebug2.py
+2a95c884646003e858d21b548f79523f7c5e556e44e0be81f5fe6af32493b552  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-idle-raw.json
+ad4d7bbc3c7350326c18b2d6c0d9066fff8beff6848ce2ec0c154930a5522f11  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-idle-raw.ndjson
+deaebf0ef01af602b389e7dfe7a973e2fe5c64bf54edbbcc7cf6e61a0d0c3d75  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-A-corrected.json
+a0df0e7837a53bb6922ce977a2adbbdd2e759b901e9bc532675d0b454c18d064  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-A-corrected.ndjson
+7883d18be7929f87b887b57789fd832a98fe64c74eae73b6bf60522808e37aa8  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-B-echo.ndjson
+068d7506140796ec299b72b1cd78e865c5050f312676e01645330fb0bc7b364a  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-B.json
+3c84579d8fc82b071d20c4ce20fec03546455a40308776b8fb5dee2c9dc69cf5  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-B.ndjson
+5731771d9bdb6b1327b7575a755e5c4e17642156d3160235a2a1c8bd1bee9f25  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-C.json
+0379a0227bcbbe657251a1d74258a0386455fe534c0ae2b609d614a836b3dae7  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-C.ndjson
+a5c55e90ab72a21b4e62849d4b419b1805a1447d8d7107a9a9d15443fc581a6c  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-H.json
+7136ff8ec4804b6bb534c1b8b8e059528d2da649a0eb26afa27235fba3bdf6cb  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-H.ndjson
+bd63713982250653b10960107339a3511381a30a6646820b2bfee60fdeca2b04  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-J.json
+efd91fed4043ef3da5ff5c8354d9596a611a12171236398863065860f7fb21ee  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-J.ndjson
+1d9fc04e536de9c596e78e36982d79752df0f3fb8ae556d7921c220d4ac296b8  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-K.json
+b7e17175dd2ba1e5635ff4cf5775613a1cceded0487359143bbd844242192cdb  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-K.ndjson
+4bc9c5f978fe8182d00b658d51aced9ff024ca023778f6d444b8870b11153873  targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-stop-recover.json

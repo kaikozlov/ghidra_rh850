@@ -338,3 +338,20 @@ flow-control frame for an expected multiframe response; a 500-ms query timeout o
 assembly error quarantines that responder for the rest of the capture rather than risking
 late-response mis-association. Live PID support is unmeasured until the first retained artifact; no
 live result is claimed by the tooling itself (§37 of the live baseline).
+
+## Exact-F33 generic runtime-monitor session (2026-09-08)
+
+`raw-20260908/runtime-monitor-session/` retains the first live-qualified generic high-tail
+monitor session before the vehicle was restarted. The raw files were copied from comma
+`/tmp/f33*` byte-for-byte and SHA-256 inventoried in `MANIFEST.txt`; they include the
+corrected A/B/C ladder captures, fuller raw-route44 captures, controlled idle/send/idle
+rate and marker experiments, and the host scripts used for those bounded live probes.
+
+The deterministic reducer is `tools/analyze_camry_f33_runtime_monitor_20260908.py` and
+its tracked output is `data/generated/camry_f33_runtime_monitor_20260908.json`. The
+canonical interpretation is live-baseline §68 / VAR-151: route44 publication activity is
+associated with host B6 injection on the relay-correct EPS segment and quiescent without
+it, while the post-aggregate route44/application Target Lateral ID remains zero despite a
+current-shape ID11 Panda echo. These files do **not** identify the first pre-route44 byte
+identity edge because the normal monitor samples the SecOC queue after stock aggregate
+cleanup. The next field discriminator is the separate sticky pre-aggregate phase P resident.

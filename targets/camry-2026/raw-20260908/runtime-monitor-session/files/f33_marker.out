@@ -1,0 +1,6 @@
+INFO: connecting to panda 3a0007000151343435333330
+target_raw 47
+idle bus None elapsed 1.171 sent 0 echo 0 route_delta 128 raw63_reads 0 genID63_reads 0 ADB63_reads 0 reads 12 b3uniq {0: 12} err []
+marker100 bus 0 elapsed 1.1 sent 102 echo 102 route_delta 128 raw63_reads 0 genID63_reads 0 ADB63_reads 0 reads 11 b3uniq {0: 11} err []
+marker100 bus 2 elapsed 1.162 sent 109 echo 109 route_delta 128 raw63_reads 0 genID63_reads 0 ADB63_reads 0 reads 12 b3uniq {0: 12} err []
+marker100 bus 1 elapsed 1.173 sent 109 echo 109 route_delta 11 raw63_reads 0 genID63_reads 0 ADB63_reads 0 reads 12 b3uniq {0: 12} err []

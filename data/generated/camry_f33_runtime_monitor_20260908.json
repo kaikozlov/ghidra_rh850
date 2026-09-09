@@ -1,0 +1,207 @@
+{
+  "boundary": {
+    "closed": "the earlier apparent background/native route44 publisher is disproved by controlled idle/send/idle timing; route44 activity is injection-associated on bus0/bus2, while generated/application state faithfully follows the zero-ID route44 image",
+    "next": "sticky pre-aggregate monitor: latch FEBE547A/FEBE54D4..54DC/FEBE54F0 immediately before fg_aggregate and compare the queued signature against every transmitted phase frame",
+    "open": "the first byte-identity divergence between Panda TX and F33 route44 remains before/at profile-2 queue publication; post-aggregate sampling cannot observe FEBE54D4 before cleanup"
+  },
+  "controlled_route44_activity": {
+    "bus0_and_bus2_injection_associated_with_generation": true,
+    "bus1_injection_not_associated_with_generation": true,
+    "idle_segments_quiescent": true,
+    "scope": "causal association between host B6 injection on the relay-correct EPS segment and route44 publication generation; not proof that a particular echoed frame is the published PDU",
+    "segments": [
+      {
+        "adb0_after": 0,
+        "adb0_before": 0,
+        "apparent_generation_rate_hz": 0.0,
+        "bus": null,
+        "duration_s": 0.6842,
+        "echo": 0,
+        "raw_target_id_after": 0,
+        "raw_target_id_before": 0,
+        "route44_generation_delta_mod256": 0,
+        "sent": 0
+      },
+      {
+        "adb0_after": 0,
+        "adb0_before": 0,
+        "apparent_generation_rate_hz": 0.0,
+        "bus": null,
+        "duration_s": 0.6856,
+        "echo": 0,
+        "raw_target_id_after": 0,
+        "raw_target_id_before": 0,
+        "route44_generation_delta_mod256": 0,
+        "sent": 0
+      },
+      {
+        "adb0_after": 0,
+        "adb0_before": 0,
+        "apparent_generation_rate_hz": 201.4,
+        "bus": 0,
+        "duration_s": 0.6356,
+        "echo": 56,
+        "raw_target_id_after": 0,
+        "raw_target_id_before": 0,
+        "route44_generation_delta_mod256": 128,
+        "sent": 56
+      },
+      {
+        "adb0_after": 0,
+        "adb0_before": 0,
+        "apparent_generation_rate_hz": 199.9,
+        "bus": 2,
+        "duration_s": 0.6403,
+        "echo": 56,
+        "raw_target_id_after": 0,
+        "raw_target_id_before": 0,
+        "route44_generation_delta_mod256": 128,
+        "sent": 56
+      },
+      {
+        "adb0_after": 0,
+        "adb0_before": 0,
+        "apparent_generation_rate_hz": 0.0,
+        "bus": 1,
+        "duration_s": 0.6401,
+        "echo": 56,
+        "raw_target_id_after": 0,
+        "raw_target_id_before": 0,
+        "route44_generation_delta_mod256": 0,
+        "sent": 56
+      },
+      {
+        "adb0_after": 0,
+        "adb0_before": 0,
+        "apparent_generation_rate_hz": 0.0,
+        "bus": null,
+        "duration_s": 0.6898,
+        "echo": 0,
+        "raw_target_id_after": 0,
+        "raw_target_id_before": 0,
+        "route44_generation_delta_mod256": 0,
+        "sent": 0
+      }
+    ]
+  },
+  "current_shape_phase_a": {
+    "first_frame_hex": "0000000b002f000064640000000000000000000000000000000000000f1456b7",
+    "raw_route44_post": {
+      "b1_b12_hex": "000000002f00260000000000",
+      "companion_b6": 0,
+      "contribution_pct_1": 0,
+      "contribution_pct_2": 0,
+      "sequence": 38,
+      "target_angle_raw": 47,
+      "target_lateral_id": 0
+    },
+    "sent_contribution_pct_1": 100,
+    "sent_contribution_pct_2": 100,
+    "sent_target_angle_raw": 47,
+    "sent_target_lateral_id": 11,
+    "tx_count": 106,
+    "tx_echo_delta": 106
+  },
+  "downstream_post": {
+    "acbd": 0,
+    "adb0": 0,
+    "ae90": 47,
+    "cafc": 0,
+    "cafd": 0,
+    "cafe": 1,
+    "caff": 1,
+    "generated_target_angle_raw": 47,
+    "generated_target_lateral_id": 0
+  },
+  "full_raw_phase_k_post": {
+    "b1_b12_hex": "000000002e00160000000000",
+    "companion_b6": 0,
+    "contribution_pct_1": 0,
+    "contribution_pct_2": 0,
+    "sequence": 22,
+    "target_angle_raw": 46,
+    "target_lateral_id": 0
+  },
+  "id63_marker": {
+    "all_sampled_raw_generated_snapshot_ids_remained_zero": true,
+    "segments": [
+      {
+        "adb63": 0,
+        "bus": 0,
+        "delta": 128,
+        "dt": 1.1,
+        "echo": 102,
+        "gen63": 0,
+        "raw63": 0,
+        "reads": 11,
+        "sent": 102,
+        "zero_reads": 11
+      },
+      {
+        "adb63": 0,
+        "bus": 2,
+        "delta": 128,
+        "dt": 1.162,
+        "echo": 109,
+        "gen63": 0,
+        "raw63": 0,
+        "reads": 12,
+        "sent": 109,
+        "zero_reads": 12
+      },
+      {
+        "adb63": 0,
+        "bus": 1,
+        "delta": 11,
+        "dt": 1.173,
+        "echo": 109,
+        "gen63": 0,
+        "raw63": 0,
+        "reads": 12,
+        "sent": 109,
+        "zero_reads": 12
+      }
+    ]
+  },
+  "inputs": {
+    "marker": {
+      "path": "targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_marker.out",
+      "sha256": "ce4e24a249e77bebf620222f88e0888e25a179bffbfcdb2513673e6dbae34e38"
+    },
+    "phase_a": {
+      "path": "targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-A-corrected.json",
+      "sha256": "deaebf0ef01af602b389e7dfe7a973e2fe5c64bf54edbbcc7cf6e61a0d0c3d75"
+    },
+    "phase_b": {
+      "path": "targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-B.json",
+      "sha256": "068d7506140796ec299b72b1cd78e865c5050f312676e01645330fb0bc7b364a"
+    },
+    "phase_c": {
+      "path": "targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-C.json",
+      "sha256": "5731771d9bdb6b1327b7575a755e5c4e17642156d3160235a2a1c8bd1bee9f25"
+    },
+    "phase_k": {
+      "path": "targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-K.json",
+      "sha256": "1d9fc04e536de9c596e78e36982d79752df0f3fb8ae556d7921c220d4ac296b8"
+    },
+    "rate": {
+      "path": "targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_rate.out",
+      "sha256": "d45544514772ffb1e31020c2b2d12a86cad2cc856c043cd9337eb43e4b0f32e2"
+    }
+  },
+  "observations": {
+    "generated_and_snapshot_target_id_zero": true,
+    "host_current_shape_id11_echoed": true,
+    "route44_contribution_percentages_zero_in_full_raw_capture": true,
+    "route44_target_id_remained_zero": true,
+    "route_health_snapshot": {
+      "acbd": 0,
+      "cafc": 0,
+      "cafd": 0,
+      "cafe": 1,
+      "caff": 1
+    }
+  },
+  "schema": "camry-f33-runtime-monitor-20260908-v1",
+  "target": "8965F3307000"
+}

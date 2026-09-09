@@ -33,27 +33,27 @@ and unresolved static/dynamic boundaries remain in
 
 Keep two queues separate:
 
-1. **Localize the development-B6 first divergence in one stationary run.** The
-   persistent cumulative stage-5 exact-F33 image is already the receiver-result bypass;
-   VAR-147/CORR-178 prove MAC value is not the remaining discriminator, and
-   VAR-149/CORR-180 now close every recovered software gate from B6 ingress through the
-   exact motor-current model, and VAR-150 reconciles the retained road corpus against those
-   gates: the current application shape/cadence is clean and **four of five** normal-ID11
-   `CE772/CE7A6` readiness operands (`ACCD`, `ADBF`, `CAFC`, `CAD9`) are observed in their
-   passing states throughout the joined current-shape routes. Only `ACCC` remains unknown
-   from that five-way readiness predicate. Do **not** add another SecOC-result patch, change
-   freshness phase, guess another B6 companion, or suppress `0x08A`. Use the generic high-tail
-   monitor/readback path (qualify the ABI-preserving resident first if it is not already
-   live-proven) to run the exact seven eight-slot phases in one READY/Park session:
-   **A** SecOC queue/auth -> raw route44, **B** raw route44 -> generated COM, **C** staging
-   -> `ADB0/AE90/ACBD/CAFF`, **D** the remaining `ACCC` readiness state plus bank/gain ->
-   `CB38` (road `ACCD/ADBF/CAFC/CAD9` stay external sanity witnesses), **E** `CB38` -> D0218/shared
-   command/`AC5A`, **F** hard gate -> internal override -> `EE40C`, and **G** `EE40C` ->
-   `6AF4/6E0A/6DEC/6DC8/6DD6`. Adjacent phases deliberately overlap one or two four-byte
-   windows, so the first adjacent mismatch is the blocker. Current opendbc
-   `f207c273b645` already satisfies every recovered active B6 application field and the
-   exact 35-ms receiver-loss timing bound. OQ-054 and stock signer ownership remain a
-   separate architecture queue.
+1. **Settle TX-echo -> profile-2 queue identity before going farther downstream.** The
+   generic 520-byte ABI-preserving monitor is now **live-qualified** on exact F33: it installed
+   with `runtime_monitor_live`, survived a comma reboot while EPS power stayed up, and exposed
+   the expected A/B/C ladder. VAR-151 materially narrows the failure. Controlled idle/send/idle
+   timing makes route44 generation quiescent with no host B6, active for injected B6 on the
+   relay-correct EPS segment (logical buses 0/2), and quiescent for unrelated bus1, disproving
+   the earlier background/native-route44 explanation in this stationary state. Yet current-shape
+   Panda echoes carry ID11 / 100/100 while sampled route44 carries ID0 / 0/0 with the target
+   angle still present; generated COM and `ADB0` faithfully remain ID0 while `ACBD=0` and
+   `CAFF=1`. The normal post-aggregate monitor is too late to decide whether the exact echoed
+   frame occupied `FEBE547A/FEBE54D4` before stock cleanup. Therefore **do not proceed to D-G
+   yet** and do not add another SecOC-result patch, change freshness, guess B6 companions, or
+   suppress `0x08A`. The next single discriminator is the audited **522-byte sticky
+   pre-aggregate monitor**: full OFF -> NRTD, `./f33-pre install`, direct NRTD->READY, then
+   `./f33-pre phase P`. It samples immediately before `fg_aggregate`, latches only when
+   profile-2 queue length `FEBE547A != 0`, captures secured B0..B11 plus FV4/MAC28, and joins
+   that signature against every transmitted phase frame. `exact_phase_b6_queued_preaggregate`
+   moves the unexplained transformation downstream of enqueue; no queue hit leaves
+   physical/RSCFD/CanIf acceptance open; a nonmatching queue hit proves profile2 activity but
+   not this phase's frame. Current opendbc `f207c273b645` remains the sender baseline. OQ-054
+   and stock signer ownership remain a separate architecture queue.
 2. **Recover Toyota's stock request/signing architecture.** OQ-054 asks which
    private message carries FRC request/winner/grant state and which always-on
    Brake/Skid/CGW node signs Bus-4 `0x08A`. Native Bus 1 exposes 22 camera/radar

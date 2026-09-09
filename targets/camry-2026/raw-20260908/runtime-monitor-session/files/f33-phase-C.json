@@ -1,0 +1,1409 @@
+INFO: connecting to panda 3a0007000151343435333330
+{
+  "b6": {
+    "construction": "current opendbc TSS3B6Template + active companions 0/100/100 + TSS3_B6_DUMMY_SECOC_KEY",
+    "first_frame_hex": "0000000b002f0000646400000000000000000000000000000000000004668fd3",
+    "first_reset_counter": 2616,
+    "freshness_reset_reanchors": 9,
+    "last_frame_hex": "0000000b002f002c6464000000000000000000000000000000000000083894be",
+    "last_reset_counter": 2624,
+    "max_sync_age_ms": 106.48,
+    "period_seconds": 0.02,
+    "target_angle_deg": 2.7,
+    "target_angle_raw": 47,
+    "target_lateral_id": 11,
+    "tx_count": 109,
+    "tx_echo_delta": 109
+  },
+  "baseline": {
+    "argument": "0x00000000",
+    "frame_hex": "00f33c2100000000",
+    "opcode": "0x21",
+    "sequence": 60,
+    "state": {
+      "last_sequence": 60,
+      "magic": "0x4D333346",
+      "magic_ok": true,
+      "raw_hex": "4633334d013c0000680100000000000030f1befe34f1befe38f1befef8f1befeb0adbefe90aebefebcacbefefccabefe6801000000000000000000330000000000002f00000000002f000000010001000000010168010000",
+      "running": false,
+      "sample_generation": 360,
+      "snapshot_coherent": true,
+      "snapshot_generation_end": 360,
+      "snapshot_generation_start": 360,
+      "snapshot_pending": false,
+      "values": [
+        {
+          "address": "0xFEBEF130",
+          "bytes_le": "00000000",
+          "raw_hex": "0x00000000",
+          "raw_i32": 0,
+          "raw_u32": 0,
+          "slot": 0
+        },
+        {
+          "address": "0xFEBEF134",
+          "bytes_le": "00000033",
+          "raw_hex": "0x33000000",
+          "raw_i32": 855638016,
+          "raw_u32": 855638016,
+          "slot": 1
+        },
+        {
+          "address": "0xFEBEF138",
+          "bytes_le": "00000000",
+          "raw_hex": "0x00000000",
+          "raw_i32": 0,
+          "raw_u32": 0,
+          "slot": 2
+        },
+        {
+          "address": "0xFEBEF1F8",
+          "bytes_le": "00002f00",
+          "raw_hex": "0x002F0000",
+          "raw_i32": 3080192,
+          "raw_u32": 3080192,
+          "slot": 3
+        },
+        {
+          "address": "0xFEBEADB0",
+          "bytes_le": "00000000",
+          "raw_hex": "0x00000000",
+          "raw_i32": 0,
+          "raw_u32": 0,
+          "slot": 4
+        },
+        {
+          "address": "0xFEBEAE90",
+          "bytes_le": "2f000000",
+          "raw_hex": "0x0000002F",
+          "raw_i32": 47,
+          "raw_u32": 47,
+          "slot": 5
+        },
+        {
+          "address": "0xFEBEACBC",
+          "bytes_le": "01000100",
+          "raw_hex": "0x00010001",
+          "raw_i32": 65537,
+          "raw_u32": 65537,
+          "slot": 6
+        },
+        {
+          "address": "0xFEBECAFC",
+          "bytes_le": "00000101",
+          "raw_hex": "0x01010000",
+          "raw_i32": 16842752,
+          "raw_u32": 16842752,
+          "slot": 7
+        }
+      ],
+      "version": 1,
+      "version_ok": true,
+      "watch_addresses": [
+        "0xFEBEF130",
+        "0xFEBEF134",
+        "0xFEBEF138",
+        "0xFEBEF1F8",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEACBC",
+        "0xFEBECAFC"
+      ],
+      "watch_addresses_raw": [
+        4273926448,
+        4273926452,
+        4273926456,
+        4273926648,
+        4273909168,
+        4273909392,
+        4273908924,
+        4273916668
+      ]
+    }
+  },
+  "capture": {
+    "coherent_host_reads": 17,
+    "distinct_generations": 4,
+    "duration_seconds": 2.0,
+    "first": {
+      "last_sequence": 61,
+      "magic": "0x4D333346",
+      "magic_ok": true,
+      "raw_hex": "4633334d013d0100820100000000000030f1befe34f1befe38f1befef8f1befeb0adbefe90aebefebcacbefefccabefe82010000000000000000002b0000000000002f00000000002f000000030001000000010182010000",
+      "running": true,
+      "sample_generation": 386,
+      "snapshot_coherent": true,
+      "snapshot_generation_end": 386,
+      "snapshot_generation_start": 386,
+      "snapshot_pending": false,
+      "t_monotonic_ns": 264673786351,
+      "values": [
+        {
+          "address": "0xFEBEF130",
+          "bytes_le": "00000000",
+          "raw_hex": "0x00000000",
+          "raw_i32": 0,
+          "raw_u32": 0,
+          "slot": 0
+        },
+        {
+          "address": "0xFEBEF134",
+          "bytes_le": "0000002b",
+          "raw_hex": "0x2B000000",
+          "raw_i32": 721420288,
+          "raw_u32": 721420288,
+          "slot": 1
+        },
+        {
+          "address": "0xFEBEF138",
+          "bytes_le": "00000000",
+          "raw_hex": "0x00000000",
+          "raw_i32": 0,
+          "raw_u32": 0,
+          "slot": 2
+        },
+        {
+          "address": "0xFEBEF1F8",
+          "bytes_le": "00002f00",
+          "raw_hex": "0x002F0000",
+          "raw_i32": 3080192,
+          "raw_u32": 3080192,
+          "slot": 3
+        },
+        {
+          "address": "0xFEBEADB0",
+          "bytes_le": "00000000",
+          "raw_hex": "0x00000000",
+          "raw_i32": 0,
+          "raw_u32": 0,
+          "slot": 4
+        },
+        {
+          "address": "0xFEBEAE90",
+          "bytes_le": "2f000000",
+          "raw_hex": "0x0000002F",
+          "raw_i32": 47,
+          "raw_u32": 47,
+          "slot": 5
+        },
+        {
+          "address": "0xFEBEACBC",
+          "bytes_le": "03000100",
+          "raw_hex": "0x00010003",
+          "raw_i32": 65539,
+          "raw_u32": 65539,
+          "slot": 6
+        },
+        {
+          "address": "0xFEBECAFC",
+          "bytes_le": "00000101",
+          "raw_hex": "0x01010000",
+          "raw_i32": 16842752,
+          "raw_u32": 16842752,
+          "slot": 7
+        }
+      ],
+      "version": 1,
+      "version_ok": true,
+      "watch_addresses": [
+        "0xFEBEF130",
+        "0xFEBEF134",
+        "0xFEBEF138",
+        "0xFEBEF1F8",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEACBC",
+        "0xFEBECAFC"
+      ],
+      "watch_addresses_raw": [
+        4273926448,
+        4273926452,
+        4273926456,
+        4273926648,
+        4273909168,
+        4273909392,
+        4273908924,
+        4273916668
+      ]
+    },
+    "generation_first": 386,
+    "generation_last": 424,
+    "last": {
+      "last_sequence": 61,
+      "magic": "0x4D333346",
+      "magic_ok": true,
+      "raw_hex": "4633334d013d0100a80100000000000030f1befe34f1befe38f1befef8f1befeb0adbefe90aebefebcacbefefccabefea8010000000000000000001f0000000000002f00000000002f0000000300010000000101a8010000",
+      "running": true,
+      "sample_generation": 424,
+      "snapshot_coherent": true,
+      "snapshot_generation_end": 424,
+      "snapshot_generation_start": 424,
+      "snapshot_pending": false,
+      "t_monotonic_ns": 266590270986,
+      "values": [
+        {
+          "address": "0xFEBEF130",
+          "bytes_le": "00000000",
+          "raw_hex": "0x00000000",
+          "raw_i32": 0,
+          "raw_u32": 0,
+          "slot": 0
+        },
+        {
+          "address": "0xFEBEF134",
+          "bytes_le": "0000001f",
+          "raw_hex": "0x1F000000",
+          "raw_i32": 520093696,
+          "raw_u32": 520093696,
+          "slot": 1
+        },
+        {
+          "address": "0xFEBEF138",
+          "bytes_le": "00000000",
+          "raw_hex": "0x00000000",
+          "raw_i32": 0,
+          "raw_u32": 0,
+          "slot": 2
+        },
+        {
+          "address": "0xFEBEF1F8",
+          "bytes_le": "00002f00",
+          "raw_hex": "0x002F0000",
+          "raw_i32": 3080192,
+          "raw_u32": 3080192,
+          "slot": 3
+        },
+        {
+          "address": "0xFEBEADB0",
+          "bytes_le": "00000000",
+          "raw_hex": "0x00000000",
+          "raw_i32": 0,
+          "raw_u32": 0,
+          "slot": 4
+        },
+        {
+          "address": "0xFEBEAE90",
+          "bytes_le": "2f000000",
+          "raw_hex": "0x0000002F",
+          "raw_i32": 47,
+          "raw_u32": 47,
+          "slot": 5
+        },
+        {
+          "address": "0xFEBEACBC",
+          "bytes_le": "03000100",
+          "raw_hex": "0x00010003",
+          "raw_i32": 65539,
+          "raw_u32": 65539,
+          "slot": 6
+        },
+        {
+          "address": "0xFEBECAFC",
+          "bytes_le": "00000101",
+          "raw_hex": "0x01010000",
+          "raw_i32": 16842752,
+          "raw_u32": 16842752,
+          "slot": 7
+        }
+      ],
+      "version": 1,
+      "version_ok": true,
+      "watch_addresses": [
+        "0xFEBEF130",
+        "0xFEBEF134",
+        "0xFEBEF138",
+        "0xFEBEF1F8",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEACBC",
+        "0xFEBECAFC"
+      ],
+      "watch_addresses_raw": [
+        4273926448,
+        4273926452,
+        4273926456,
+        4273926648,
+        4273909168,
+        4273909392,
+        4273908924,
+        4273916668
+      ]
+    },
+    "output": "/tmp/f33-phase-C.ndjson",
+    "poll_seconds": 0.03,
+    "schema": "camry-f33-runtime-monitor-capture-v1",
+    "torn_host_reads": 0,
+    "vehicle_guard_after": {
+      "gear": 0,
+      "ready_samples": [
+        {
+          "address": "0x51E",
+          "bus": 0,
+          "data_hex": "8000810000000000",
+          "ready": 1
+        }
+      ],
+      "ready_values": [
+        1
+      ],
+      "wheel_speeds_kph": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "vehicle_guard_before": {
+      "gear": 0,
+      "ready_samples": [
+        {
+          "address": "0x51E",
+          "bus": 0,
+          "data_hex": "8000800000000000",
+          "ready": 1
+        }
+      ],
+      "ready_values": [
+        1
+      ],
+      "wheel_speeds_kph": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "configured": [
+    {
+      "argument": "0xFEBEF130",
+      "frame_hex": "00f3341030f1befe",
+      "opcode": "0x10",
+      "sequence": 52,
+      "state": {
+        "last_sequence": 52,
+        "magic": "0x4D333346",
+        "magic_ok": true,
+        "raw_hex": "4633334d01340000670100000000000030f1befe687fbefec880befeb880befebc80befec080befec480befef8f1befe67010000ed00737500000000ed0000002f00000000000000000000190000000000002f0067010000",
+        "running": false,
+        "sample_generation": 359,
+        "snapshot_coherent": true,
+        "snapshot_generation_end": 359,
+        "snapshot_generation_start": 359,
+        "snapshot_pending": false,
+        "values": [
+          {
+            "address": "0xFEBEF130",
+            "bytes_le": "ed007375",
+            "raw_hex": "0x757300ED",
+            "raw_i32": 1970471149,
+            "raw_u32": 1970471149,
+            "slot": 0
+          },
+          {
+            "address": "0xFEBE7F68",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 1
+          },
+          {
+            "address": "0xFEBE80C8",
+            "bytes_le": "ed000000",
+            "raw_hex": "0x000000ED",
+            "raw_i32": 237,
+            "raw_u32": 237,
+            "slot": 2
+          },
+          {
+            "address": "0xFEBE80B8",
+            "bytes_le": "2f000000",
+            "raw_hex": "0x0000002F",
+            "raw_i32": 47,
+            "raw_u32": 47,
+            "slot": 3
+          },
+          {
+            "address": "0xFEBE80BC",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 4
+          },
+          {
+            "address": "0xFEBE80C0",
+            "bytes_le": "00000019",
+            "raw_hex": "0x19000000",
+            "raw_i32": 419430400,
+            "raw_u32": 419430400,
+            "slot": 5
+          },
+          {
+            "address": "0xFEBE80C4",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 6
+          },
+          {
+            "address": "0xFEBEF1F8",
+            "bytes_le": "00002f00",
+            "raw_hex": "0x002F0000",
+            "raw_i32": 3080192,
+            "raw_u32": 3080192,
+            "slot": 7
+          }
+        ],
+        "version": 1,
+        "version_ok": true,
+        "watch_addresses": [
+          "0xFEBEF130",
+          "0xFEBE7F68",
+          "0xFEBE80C8",
+          "0xFEBE80B8",
+          "0xFEBE80BC",
+          "0xFEBE80C0",
+          "0xFEBE80C4",
+          "0xFEBEF1F8"
+        ],
+        "watch_addresses_raw": [
+          4273926448,
+          4273897320,
+          4273897672,
+          4273897656,
+          4273897660,
+          4273897664,
+          4273897668,
+          4273926648
+        ]
+      },
+      "watch": {
+        "byte_offset": 0,
+        "requested_address": "0xFEBEF130",
+        "slot": 0,
+        "window_address": "0xFEBEF130"
+      }
+    },
+    {
+      "argument": "0xFEBEF134",
+      "frame_hex": "00f3351134f1befe",
+      "opcode": "0x11",
+      "sequence": 53,
+      "state": {
+        "last_sequence": 53,
+        "magic": "0x4D333346",
+        "magic_ok": true,
+        "raw_hex": "4633334d01350000670100000000000030f1befe34f1befec880befeb880befebc80befec080befec480befef8f1befe67010000ed00737500000000ed0000002f00000000000000000000190000000000002f0067010000",
+        "running": false,
+        "sample_generation": 359,
+        "snapshot_coherent": true,
+        "snapshot_generation_end": 359,
+        "snapshot_generation_start": 359,
+        "snapshot_pending": false,
+        "values": [
+          {
+            "address": "0xFEBEF130",
+            "bytes_le": "ed007375",
+            "raw_hex": "0x757300ED",
+            "raw_i32": 1970471149,
+            "raw_u32": 1970471149,
+            "slot": 0
+          },
+          {
+            "address": "0xFEBEF134",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 1
+          },
+          {
+            "address": "0xFEBE80C8",
+            "bytes_le": "ed000000",
+            "raw_hex": "0x000000ED",
+            "raw_i32": 237,
+            "raw_u32": 237,
+            "slot": 2
+          },
+          {
+            "address": "0xFEBE80B8",
+            "bytes_le": "2f000000",
+            "raw_hex": "0x0000002F",
+            "raw_i32": 47,
+            "raw_u32": 47,
+            "slot": 3
+          },
+          {
+            "address": "0xFEBE80BC",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 4
+          },
+          {
+            "address": "0xFEBE80C0",
+            "bytes_le": "00000019",
+            "raw_hex": "0x19000000",
+            "raw_i32": 419430400,
+            "raw_u32": 419430400,
+            "slot": 5
+          },
+          {
+            "address": "0xFEBE80C4",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 6
+          },
+          {
+            "address": "0xFEBEF1F8",
+            "bytes_le": "00002f00",
+            "raw_hex": "0x002F0000",
+            "raw_i32": 3080192,
+            "raw_u32": 3080192,
+            "slot": 7
+          }
+        ],
+        "version": 1,
+        "version_ok": true,
+        "watch_addresses": [
+          "0xFEBEF130",
+          "0xFEBEF134",
+          "0xFEBE80C8",
+          "0xFEBE80B8",
+          "0xFEBE80BC",
+          "0xFEBE80C0",
+          "0xFEBE80C4",
+          "0xFEBEF1F8"
+        ],
+        "watch_addresses_raw": [
+          4273926448,
+          4273926452,
+          4273897672,
+          4273897656,
+          4273897660,
+          4273897664,
+          4273897668,
+          4273926648
+        ]
+      },
+      "watch": {
+        "byte_offset": 0,
+        "requested_address": "0xFEBEF134",
+        "slot": 1,
+        "window_address": "0xFEBEF134"
+      }
+    },
+    {
+      "argument": "0xFEBEF138",
+      "frame_hex": "00f3361238f1befe",
+      "opcode": "0x12",
+      "sequence": 54,
+      "state": {
+        "last_sequence": 54,
+        "magic": "0x4D333346",
+        "magic_ok": true,
+        "raw_hex": "4633334d01360000670100000000000030f1befe34f1befe38f1befeb880befebc80befec080befec480befef8f1befe67010000ed00737500000000ed0000002f00000000000000000000190000000000002f0067010000",
+        "running": false,
+        "sample_generation": 359,
+        "snapshot_coherent": true,
+        "snapshot_generation_end": 359,
+        "snapshot_generation_start": 359,
+        "snapshot_pending": false,
+        "values": [
+          {
+            "address": "0xFEBEF130",
+            "bytes_le": "ed007375",
+            "raw_hex": "0x757300ED",
+            "raw_i32": 1970471149,
+            "raw_u32": 1970471149,
+            "slot": 0
+          },
+          {
+            "address": "0xFEBEF134",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 1
+          },
+          {
+            "address": "0xFEBEF138",
+            "bytes_le": "ed000000",
+            "raw_hex": "0x000000ED",
+            "raw_i32": 237,
+            "raw_u32": 237,
+            "slot": 2
+          },
+          {
+            "address": "0xFEBE80B8",
+            "bytes_le": "2f000000",
+            "raw_hex": "0x0000002F",
+            "raw_i32": 47,
+            "raw_u32": 47,
+            "slot": 3
+          },
+          {
+            "address": "0xFEBE80BC",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 4
+          },
+          {
+            "address": "0xFEBE80C0",
+            "bytes_le": "00000019",
+            "raw_hex": "0x19000000",
+            "raw_i32": 419430400,
+            "raw_u32": 419430400,
+            "slot": 5
+          },
+          {
+            "address": "0xFEBE80C4",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 6
+          },
+          {
+            "address": "0xFEBEF1F8",
+            "bytes_le": "00002f00",
+            "raw_hex": "0x002F0000",
+            "raw_i32": 3080192,
+            "raw_u32": 3080192,
+            "slot": 7
+          }
+        ],
+        "version": 1,
+        "version_ok": true,
+        "watch_addresses": [
+          "0xFEBEF130",
+          "0xFEBEF134",
+          "0xFEBEF138",
+          "0xFEBE80B8",
+          "0xFEBE80BC",
+          "0xFEBE80C0",
+          "0xFEBE80C4",
+          "0xFEBEF1F8"
+        ],
+        "watch_addresses_raw": [
+          4273926448,
+          4273926452,
+          4273926456,
+          4273897656,
+          4273897660,
+          4273897664,
+          4273897668,
+          4273926648
+        ]
+      },
+      "watch": {
+        "byte_offset": 0,
+        "requested_address": "0xFEBEF138",
+        "slot": 2,
+        "window_address": "0xFEBEF138"
+      }
+    },
+    {
+      "argument": "0xFEBEF1F8",
+      "frame_hex": "00f33713f8f1befe",
+      "opcode": "0x13",
+      "sequence": 55,
+      "state": {
+        "last_sequence": 55,
+        "magic": "0x4D333346",
+        "magic_ok": true,
+        "raw_hex": "4633334d01370000670100000000000030f1befe34f1befe38f1befef8f1befebc80befec080befec480befef8f1befe67010000ed00737500000000ed0000002f00000000000000000000190000000000002f0067010000",
+        "running": false,
+        "sample_generation": 359,
+        "snapshot_coherent": true,
+        "snapshot_generation_end": 359,
+        "snapshot_generation_start": 359,
+        "snapshot_pending": false,
+        "values": [
+          {
+            "address": "0xFEBEF130",
+            "bytes_le": "ed007375",
+            "raw_hex": "0x757300ED",
+            "raw_i32": 1970471149,
+            "raw_u32": 1970471149,
+            "slot": 0
+          },
+          {
+            "address": "0xFEBEF134",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 1
+          },
+          {
+            "address": "0xFEBEF138",
+            "bytes_le": "ed000000",
+            "raw_hex": "0x000000ED",
+            "raw_i32": 237,
+            "raw_u32": 237,
+            "slot": 2
+          },
+          {
+            "address": "0xFEBEF1F8",
+            "bytes_le": "2f000000",
+            "raw_hex": "0x0000002F",
+            "raw_i32": 47,
+            "raw_u32": 47,
+            "slot": 3
+          },
+          {
+            "address": "0xFEBE80BC",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 4
+          },
+          {
+            "address": "0xFEBE80C0",
+            "bytes_le": "00000019",
+            "raw_hex": "0x19000000",
+            "raw_i32": 419430400,
+            "raw_u32": 419430400,
+            "slot": 5
+          },
+          {
+            "address": "0xFEBE80C4",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 6
+          },
+          {
+            "address": "0xFEBEF1F8",
+            "bytes_le": "00002f00",
+            "raw_hex": "0x002F0000",
+            "raw_i32": 3080192,
+            "raw_u32": 3080192,
+            "slot": 7
+          }
+        ],
+        "version": 1,
+        "version_ok": true,
+        "watch_addresses": [
+          "0xFEBEF130",
+          "0xFEBEF134",
+          "0xFEBEF138",
+          "0xFEBEF1F8",
+          "0xFEBE80BC",
+          "0xFEBE80C0",
+          "0xFEBE80C4",
+          "0xFEBEF1F8"
+        ],
+        "watch_addresses_raw": [
+          4273926448,
+          4273926452,
+          4273926456,
+          4273926648,
+          4273897660,
+          4273897664,
+          4273897668,
+          4273926648
+        ]
+      },
+      "watch": {
+        "byte_offset": 0,
+        "requested_address": "0xFEBEF1F8",
+        "slot": 3,
+        "window_address": "0xFEBEF1F8"
+      }
+    },
+    {
+      "argument": "0xFEBEADB0",
+      "frame_hex": "00f33814b0adbefe",
+      "opcode": "0x14",
+      "sequence": 56,
+      "state": {
+        "last_sequence": 56,
+        "magic": "0x4D333346",
+        "magic_ok": true,
+        "raw_hex": "4633334d01380000670100000000000030f1befe34f1befe38f1befef8f1befeb0adbefec080befec480befef8f1befe67010000ed00737500000000ed0000002f00000000000000000000190000000000002f0067010000",
+        "running": false,
+        "sample_generation": 359,
+        "snapshot_coherent": true,
+        "snapshot_generation_end": 359,
+        "snapshot_generation_start": 359,
+        "snapshot_pending": false,
+        "values": [
+          {
+            "address": "0xFEBEF130",
+            "bytes_le": "ed007375",
+            "raw_hex": "0x757300ED",
+            "raw_i32": 1970471149,
+            "raw_u32": 1970471149,
+            "slot": 0
+          },
+          {
+            "address": "0xFEBEF134",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 1
+          },
+          {
+            "address": "0xFEBEF138",
+            "bytes_le": "ed000000",
+            "raw_hex": "0x000000ED",
+            "raw_i32": 237,
+            "raw_u32": 237,
+            "slot": 2
+          },
+          {
+            "address": "0xFEBEF1F8",
+            "bytes_le": "2f000000",
+            "raw_hex": "0x0000002F",
+            "raw_i32": 47,
+            "raw_u32": 47,
+            "slot": 3
+          },
+          {
+            "address": "0xFEBEADB0",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 4
+          },
+          {
+            "address": "0xFEBE80C0",
+            "bytes_le": "00000019",
+            "raw_hex": "0x19000000",
+            "raw_i32": 419430400,
+            "raw_u32": 419430400,
+            "slot": 5
+          },
+          {
+            "address": "0xFEBE80C4",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 6
+          },
+          {
+            "address": "0xFEBEF1F8",
+            "bytes_le": "00002f00",
+            "raw_hex": "0x002F0000",
+            "raw_i32": 3080192,
+            "raw_u32": 3080192,
+            "slot": 7
+          }
+        ],
+        "version": 1,
+        "version_ok": true,
+        "watch_addresses": [
+          "0xFEBEF130",
+          "0xFEBEF134",
+          "0xFEBEF138",
+          "0xFEBEF1F8",
+          "0xFEBEADB0",
+          "0xFEBE80C0",
+          "0xFEBE80C4",
+          "0xFEBEF1F8"
+        ],
+        "watch_addresses_raw": [
+          4273926448,
+          4273926452,
+          4273926456,
+          4273926648,
+          4273909168,
+          4273897664,
+          4273897668,
+          4273926648
+        ]
+      },
+      "watch": {
+        "byte_offset": 0,
+        "requested_address": "0xFEBEADB0",
+        "slot": 4,
+        "window_address": "0xFEBEADB0"
+      }
+    },
+    {
+      "argument": "0xFEBEAE90",
+      "frame_hex": "00f3391590aebefe",
+      "opcode": "0x15",
+      "sequence": 57,
+      "state": {
+        "last_sequence": 57,
+        "magic": "0x4D333346",
+        "magic_ok": true,
+        "raw_hex": "4633334d01390000670100000000000030f1befe34f1befe38f1befef8f1befeb0adbefe90aebefec480befef8f1befe67010000ed00737500000000ed0000002f00000000000000000000190000000000002f0067010000",
+        "running": false,
+        "sample_generation": 359,
+        "snapshot_coherent": true,
+        "snapshot_generation_end": 359,
+        "snapshot_generation_start": 359,
+        "snapshot_pending": false,
+        "values": [
+          {
+            "address": "0xFEBEF130",
+            "bytes_le": "ed007375",
+            "raw_hex": "0x757300ED",
+            "raw_i32": 1970471149,
+            "raw_u32": 1970471149,
+            "slot": 0
+          },
+          {
+            "address": "0xFEBEF134",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 1
+          },
+          {
+            "address": "0xFEBEF138",
+            "bytes_le": "ed000000",
+            "raw_hex": "0x000000ED",
+            "raw_i32": 237,
+            "raw_u32": 237,
+            "slot": 2
+          },
+          {
+            "address": "0xFEBEF1F8",
+            "bytes_le": "2f000000",
+            "raw_hex": "0x0000002F",
+            "raw_i32": 47,
+            "raw_u32": 47,
+            "slot": 3
+          },
+          {
+            "address": "0xFEBEADB0",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 4
+          },
+          {
+            "address": "0xFEBEAE90",
+            "bytes_le": "00000019",
+            "raw_hex": "0x19000000",
+            "raw_i32": 419430400,
+            "raw_u32": 419430400,
+            "slot": 5
+          },
+          {
+            "address": "0xFEBE80C4",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 6
+          },
+          {
+            "address": "0xFEBEF1F8",
+            "bytes_le": "00002f00",
+            "raw_hex": "0x002F0000",
+            "raw_i32": 3080192,
+            "raw_u32": 3080192,
+            "slot": 7
+          }
+        ],
+        "version": 1,
+        "version_ok": true,
+        "watch_addresses": [
+          "0xFEBEF130",
+          "0xFEBEF134",
+          "0xFEBEF138",
+          "0xFEBEF1F8",
+          "0xFEBEADB0",
+          "0xFEBEAE90",
+          "0xFEBE80C4",
+          "0xFEBEF1F8"
+        ],
+        "watch_addresses_raw": [
+          4273926448,
+          4273926452,
+          4273926456,
+          4273926648,
+          4273909168,
+          4273909392,
+          4273897668,
+          4273926648
+        ]
+      },
+      "watch": {
+        "byte_offset": 0,
+        "requested_address": "0xFEBEAE90",
+        "slot": 5,
+        "window_address": "0xFEBEAE90"
+      }
+    },
+    {
+      "argument": "0xFEBEACBC",
+      "frame_hex": "00f33a16bcacbefe",
+      "opcode": "0x16",
+      "sequence": 58,
+      "state": {
+        "last_sequence": 58,
+        "magic": "0x4D333346",
+        "magic_ok": true,
+        "raw_hex": "4633334d013a0000670100000000000030f1befe34f1befe38f1befef8f1befeb0adbefe90aebefebcacbefef8f1befe67010000ed00737500000000ed0000002f00000000000000000000190000000000002f0067010000",
+        "running": false,
+        "sample_generation": 359,
+        "snapshot_coherent": true,
+        "snapshot_generation_end": 359,
+        "snapshot_generation_start": 359,
+        "snapshot_pending": false,
+        "values": [
+          {
+            "address": "0xFEBEF130",
+            "bytes_le": "ed007375",
+            "raw_hex": "0x757300ED",
+            "raw_i32": 1970471149,
+            "raw_u32": 1970471149,
+            "slot": 0
+          },
+          {
+            "address": "0xFEBEF134",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 1
+          },
+          {
+            "address": "0xFEBEF138",
+            "bytes_le": "ed000000",
+            "raw_hex": "0x000000ED",
+            "raw_i32": 237,
+            "raw_u32": 237,
+            "slot": 2
+          },
+          {
+            "address": "0xFEBEF1F8",
+            "bytes_le": "2f000000",
+            "raw_hex": "0x0000002F",
+            "raw_i32": 47,
+            "raw_u32": 47,
+            "slot": 3
+          },
+          {
+            "address": "0xFEBEADB0",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 4
+          },
+          {
+            "address": "0xFEBEAE90",
+            "bytes_le": "00000019",
+            "raw_hex": "0x19000000",
+            "raw_i32": 419430400,
+            "raw_u32": 419430400,
+            "slot": 5
+          },
+          {
+            "address": "0xFEBEACBC",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 6
+          },
+          {
+            "address": "0xFEBEF1F8",
+            "bytes_le": "00002f00",
+            "raw_hex": "0x002F0000",
+            "raw_i32": 3080192,
+            "raw_u32": 3080192,
+            "slot": 7
+          }
+        ],
+        "version": 1,
+        "version_ok": true,
+        "watch_addresses": [
+          "0xFEBEF130",
+          "0xFEBEF134",
+          "0xFEBEF138",
+          "0xFEBEF1F8",
+          "0xFEBEADB0",
+          "0xFEBEAE90",
+          "0xFEBEACBC",
+          "0xFEBEF1F8"
+        ],
+        "watch_addresses_raw": [
+          4273926448,
+          4273926452,
+          4273926456,
+          4273926648,
+          4273909168,
+          4273909392,
+          4273908924,
+          4273926648
+        ]
+      },
+      "watch": {
+        "byte_offset": 0,
+        "requested_address": "0xFEBEACBC",
+        "slot": 6,
+        "window_address": "0xFEBEACBC"
+      }
+    },
+    {
+      "argument": "0xFEBECAFC",
+      "frame_hex": "00f33b17fccabefe",
+      "opcode": "0x17",
+      "sequence": 59,
+      "state": {
+        "last_sequence": 59,
+        "magic": "0x4D333346",
+        "magic_ok": true,
+        "raw_hex": "4633334d013b0000670100000000000030f1befe34f1befe38f1befef8f1befeb0adbefe90aebefebcacbefefccabefe67010000ed00737500000000ed0000002f00000000000000000000190000000000002f0067010000",
+        "running": false,
+        "sample_generation": 359,
+        "snapshot_coherent": true,
+        "snapshot_generation_end": 359,
+        "snapshot_generation_start": 359,
+        "snapshot_pending": false,
+        "values": [
+          {
+            "address": "0xFEBEF130",
+            "bytes_le": "ed007375",
+            "raw_hex": "0x757300ED",
+            "raw_i32": 1970471149,
+            "raw_u32": 1970471149,
+            "slot": 0
+          },
+          {
+            "address": "0xFEBEF134",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 1
+          },
+          {
+            "address": "0xFEBEF138",
+            "bytes_le": "ed000000",
+            "raw_hex": "0x000000ED",
+            "raw_i32": 237,
+            "raw_u32": 237,
+            "slot": 2
+          },
+          {
+            "address": "0xFEBEF1F8",
+            "bytes_le": "2f000000",
+            "raw_hex": "0x0000002F",
+            "raw_i32": 47,
+            "raw_u32": 47,
+            "slot": 3
+          },
+          {
+            "address": "0xFEBEADB0",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 4
+          },
+          {
+            "address": "0xFEBEAE90",
+            "bytes_le": "00000019",
+            "raw_hex": "0x19000000",
+            "raw_i32": 419430400,
+            "raw_u32": 419430400,
+            "slot": 5
+          },
+          {
+            "address": "0xFEBEACBC",
+            "bytes_le": "00000000",
+            "raw_hex": "0x00000000",
+            "raw_i32": 0,
+            "raw_u32": 0,
+            "slot": 6
+          },
+          {
+            "address": "0xFEBECAFC",
+            "bytes_le": "00002f00",
+            "raw_hex": "0x002F0000",
+            "raw_i32": 3080192,
+            "raw_u32": 3080192,
+            "slot": 7
+          }
+        ],
+        "version": 1,
+        "version_ok": true,
+        "watch_addresses": [
+          "0xFEBEF130",
+          "0xFEBEF134",
+          "0xFEBEF138",
+          "0xFEBEF1F8",
+          "0xFEBEADB0",
+          "0xFEBEAE90",
+          "0xFEBEACBC",
+          "0xFEBECAFC"
+        ],
+        "watch_addresses_raw": [
+          4273926448,
+          4273926452,
+          4273926456,
+          4273926648,
+          4273909168,
+          4273909392,
+          4273908924,
+          4273916668
+        ]
+      },
+      "watch": {
+        "byte_offset": 0,
+        "requested_address": "0xFEBECAFC",
+        "slot": 7,
+        "window_address": "0xFEBECAFC"
+      }
+    }
+  ],
+  "freshness_epoch_stable": false,
+  "native_after": {
+    "angle_age_ms": 0.16,
+    "reset_counter": 2625,
+    "steering_angle_deg": 2.7,
+    "sync_age_ms": 27.167,
+    "trip_counter": 509
+  },
+  "native_before": {
+    "angle_age_ms": 3.232,
+    "reset_counter": 2612,
+    "steering_angle_deg": 2.7,
+    "sync_age_ms": 77.172,
+    "trip_counter": 509
+  },
+  "phase": "C",
+  "post": {
+    "argument": "0x00000000",
+    "frame_hex": "00f33f2100000000",
+    "opcode": "0x21",
+    "sequence": 63,
+    "state": {
+      "last_sequence": 63,
+      "magic": "0x4D333346",
+      "magic_ok": true,
+      "raw_hex": "4633334d013f0000a90100000000000030f1befe34f1befe38f1befef8f1befeb0adbefe90aebefebcacbefefccabefea9010000000000000000003f0000000000002f00000000002f0000000100010000000101a9010000",
+      "running": false,
+      "sample_generation": 425,
+      "snapshot_coherent": true,
+      "snapshot_generation_end": 425,
+      "snapshot_generation_start": 425,
+      "snapshot_pending": false,
+      "values": [
+        {
+          "address": "0xFEBEF130",
+          "bytes_le": "00000000",
+          "raw_hex": "0x00000000",
+          "raw_i32": 0,
+          "raw_u32": 0,
+          "slot": 0
+        },
+        {
+          "address": "0xFEBEF134",
+          "bytes_le": "0000003f",
+          "raw_hex": "0x3F000000",
+          "raw_i32": 1056964608,
+          "raw_u32": 1056964608,
+          "slot": 1
+        },
+        {
+          "address": "0xFEBEF138",
+          "bytes_le": "00000000",
+          "raw_hex": "0x00000000",
+          "raw_i32": 0,
+          "raw_u32": 0,
+          "slot": 2
+        },
+        {
+          "address": "0xFEBEF1F8",
+          "bytes_le": "00002f00",
+          "raw_hex": "0x002F0000",
+          "raw_i32": 3080192,
+          "raw_u32": 3080192,
+          "slot": 3
+        },
+        {
+          "address": "0xFEBEADB0",
+          "bytes_le": "00000000",
+          "raw_hex": "0x00000000",
+          "raw_i32": 0,
+          "raw_u32": 0,
+          "slot": 4
+        },
+        {
+          "address": "0xFEBEAE90",
+          "bytes_le": "2f000000",
+          "raw_hex": "0x0000002F",
+          "raw_i32": 47,
+          "raw_u32": 47,
+          "slot": 5
+        },
+        {
+          "address": "0xFEBEACBC",
+          "bytes_le": "01000100",
+          "raw_hex": "0x00010001",
+          "raw_i32": 65537,
+          "raw_u32": 65537,
+          "slot": 6
+        },
+        {
+          "address": "0xFEBECAFC",
+          "bytes_le": "00000101",
+          "raw_hex": "0x01010000",
+          "raw_i32": 16842752,
+          "raw_u32": 16842752,
+          "slot": 7
+        }
+      ],
+      "version": 1,
+      "version_ok": true,
+      "watch_addresses": [
+        "0xFEBEF130",
+        "0xFEBEF134",
+        "0xFEBEF138",
+        "0xFEBEF1F8",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEACBC",
+        "0xFEBECAFC"
+      ],
+      "watch_addresses_raw": [
+        4273926448,
+        4273926452,
+        4273926456,
+        4273926648,
+        4273909168,
+        4273909392,
+        4273908924,
+        4273916668
+      ]
+    }
+  },
+  "schema": "camry-f33-runtime-monitor-b6-phase-v1",
+  "verdict": "phase_complete",
+  "watch_windows": [
+    "0xFEBEF130",
+    "0xFEBEF134",
+    "0xFEBEF138",
+    "0xFEBEF1F8",
+    "0xFEBEADB0",
+    "0xFEBEAE90",
+    "0xFEBEACBC",
+    "0xFEBECAFC"
+  ]
+}

@@ -1,0 +1,107 @@
+INFO: connecting to panda 3a0007000151343435333330
+{
+  "argument": "0x00000000",
+  "frame_hex": "00f3032000000000",
+  "opcode": "0x20",
+  "sequence": 3,
+  "state": {
+    "last_sequence": 3,
+    "magic": "0x4D333346",
+    "magic_ok": true,
+    "raw_hex": "4633334d01030000000f0000000000007854befed454befed854befedc54befef054befe2455befe6453befe004cbefe000f00000000000000000000000000000000000000000000e1e1e100f4000d0f00000000000f0000",
+    "running": false,
+    "sample_generation": 3840,
+    "snapshot_coherent": true,
+    "snapshot_generation_end": 3840,
+    "snapshot_generation_start": 3840,
+    "snapshot_pending": false,
+    "values": [
+      {
+        "address": "0xFEBE5478",
+        "bytes_le": "00000000",
+        "raw_hex": "0x00000000",
+        "raw_i32": 0,
+        "raw_u32": 0,
+        "slot": 0
+      },
+      {
+        "address": "0xFEBE54D4",
+        "bytes_le": "00000000",
+        "raw_hex": "0x00000000",
+        "raw_i32": 0,
+        "raw_u32": 0,
+        "slot": 1
+      },
+      {
+        "address": "0xFEBE54D8",
+        "bytes_le": "00000000",
+        "raw_hex": "0x00000000",
+        "raw_i32": 0,
+        "raw_u32": 0,
+        "slot": 2
+      },
+      {
+        "address": "0xFEBE54DC",
+        "bytes_le": "00000000",
+        "raw_hex": "0x00000000",
+        "raw_i32": 0,
+        "raw_u32": 0,
+        "slot": 3
+      },
+      {
+        "address": "0xFEBE54F0",
+        "bytes_le": "00000000",
+        "raw_hex": "0x00000000",
+        "raw_i32": 0,
+        "raw_u32": 0,
+        "slot": 4
+      },
+      {
+        "address": "0xFEBE5524",
+        "bytes_le": "e1e1e100",
+        "raw_hex": "0x00E1E1E1",
+        "raw_i32": 14803425,
+        "raw_u32": 14803425,
+        "slot": 5
+      },
+      {
+        "address": "0xFEBE5364",
+        "bytes_le": "f4000d0f",
+        "raw_hex": "0x0F0D00F4",
+        "raw_i32": 252510452,
+        "raw_u32": 252510452,
+        "slot": 6
+      },
+      {
+        "address": "0xFEBE4C00",
+        "bytes_le": "00000000",
+        "raw_hex": "0x00000000",
+        "raw_i32": 0,
+        "raw_u32": 0,
+        "slot": 7
+      }
+    ],
+    "version": 1,
+    "version_ok": true,
+    "watch_addresses": [
+      "0xFEBE5478",
+      "0xFEBE54D4",
+      "0xFEBE54D8",
+      "0xFEBE54DC",
+      "0xFEBE54F0",
+      "0xFEBE5524",
+      "0xFEBE5364",
+      "0xFEBE4C00"
+    ],
+    "watch_addresses_raw": [
+      4273886328,
+      4273886420,
+      4273886424,
+      4273886428,
+      4273886448,
+      4273886500,
+      4273886052,
+      4273884160
+    ]
+  }
+}

@@ -1177,21 +1177,24 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   then close the historical zero-MAC versus current wrong-key dummy-CMAC distinction as
   an acceptance variable under cumulative stage 5: the tag is opaque until ICU-S and all
   recovered software-visible verification consequences are neutralized before delivery.
-  VAR-148/CORR-179 close downstream ID11 composition, and VAR-149/CORR-180 now join
-  the entire recovered software ladder through the motor-current model. VAR-150 then puts
-  every retained road B6 against that ladder: current-shape application bytes/cadence are
-  clean, and four of `CE772/CE7A6`'s five normal-ID11 readiness inputs are directly healthy
-  in joined road CAN (`ACCD=0`, `ADBF=0`, `CAFC=0`, `CAD9=0`); only `ACCC` remains without
-  a direct road witness. The remaining independent-B6 question is **which adjacent live
-  rung first diverges**, not another static acceptance hypothesis: physical/CanIf ingress;
-  SecOC queue; route44 publication; `4BD46` global-state unpack; application health/bank
-  selection; remaining `ACCC` readiness plus `CB20/CB38`; `AC2B` D0218 branch; `AC5A`
-  scale; `AC29/AC2A` hard gate;
-  `CC98/CC94` override; motor-side selection; or current/plant response. One stationary
-  internal capture can discriminate these in order. Counter phase, MAC value, packer
-  companion guesses, `0x08A` suppression, and another result patch are no longer justified
-  next steps. Resolving OQ-054 remains required for stock architecture, not for this B6
-  ingress discriminator.
+  VAR-148/CORR-179 close downstream ID11 composition, VAR-149/CORR-180 join the
+  recovered software ladder through the motor-current model, and VAR-150 removes four of
+  the five normal-ID11 readiness predicates from the serious-suspect set. VAR-151 now adds
+  the first qualified internal live result. Controlled idle/send/idle timing proves route44
+  publication activity is associated with injected B6 on the relay-correct EPS segment and
+  is quiescent without that injection, but the post-aggregate route44 image carries ID0 and
+  zero contribution percentages while Panda's current-shape echo carries ID11 and 100/100;
+  generated COM and `ADB0` faithfully remain ID0 with `ACBD=0` and `CAFF=1`. Post-aggregate
+  reads of `FEBE547A/FEBE54D4` occur after transaction cleanup and cannot say whether the
+  echoed frame was ever queued. The immediate independent-B6 question is therefore narrower:
+  **does one exact transmitted phase frame appear byte-for-byte in the profile-2 secured
+  queue before `fg_aggregate`?** The built 522-byte sticky pre-aggregate resident latches
+  only when `FEBE547A != 0` and captures secured B0..B11 plus FV4/MAC28 for an exact join.
+  Only after that queue-identity result should localization continue to freshness/delivery,
+  route44, remaining `ACCC`/`CB20/CB38`, and common actuator gates. Counter phase, MAC value,
+  packer companion guesses, `0x08A` suppression, and another result patch remain unjustified.
+  Resolving OQ-054 remains required for stock architecture, not for this B6 ingress
+  discriminator.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

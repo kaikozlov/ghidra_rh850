@@ -21,6 +21,7 @@ from exploit.common.ram_exec import (
 from exploit.ephemeral_runtime import camry_f33_b6_bridge_install as bridge_install
 from exploit.ephemeral_runtime import camry_f33_runtime_replay_discriminator as replay_discriminator
 from exploit.ephemeral_runtime import camry_f33_runtime_monitor as runtime_monitor
+from exploit.ephemeral_runtime import camry_f33_runtime_monitor_preaggregate as preaggregate_monitor
 from exploit.ephemeral_runtime import (
     camry_f33_b6_transaction_observer_install as observer_install,
 )
@@ -30,11 +31,13 @@ from tools import build_camry_f33_gate2_root_result_patch as stage3
 PROBE = ROOT / "exploit/behavioral_proof/camry_f33_b6_stationary_probe.py"
 RUNBOOK_TEMPLATE = ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md"
 FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_launcher.sh"
+PREAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_preaggregate_launcher.sh"
 F33_IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_transaction_observer.bin"
 BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
 REPLAY_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_replay_discriminator.bin"
 MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor.bin"
+PREAGG_MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor_preaggregate.bin"
 DEFAULT_OPENPILOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
 RUNTIME_FILES = [
     "exploit/common/payload_package.py",
@@ -44,6 +47,7 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py",
     "exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
     "exploit/ephemeral_runtime/camry_f33_runtime_monitor.py",
+    "exploit/ephemeral_runtime/camry_f33_runtime_monitor_preaggregate.py",
     "exploit/followups/xcp_read_probe.py",
     "exploit/followups/xcp_daq_probe.py",
     "exploit/followups/xcp_runtime_state_probe.py",
@@ -278,6 +282,7 @@ def build(out: Path, openpilot: Path) -> dict:
     bridge_payload = package_shellcode(BRIDGE_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     replay_payload = package_shellcode(REPLAY_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     monitor_payload = package_shellcode(MONITOR_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+    preaggregate_monitor_payload = package_shellcode(PREAGG_MONITOR_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     if hashlib.sha256(observer_payload).hexdigest() != observer_install.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("observer authenticated payload identity drift")
     if hashlib.sha256(bridge_payload).hexdigest() != bridge_install.EXPECTED_PAYLOAD_SHA256:
@@ -286,21 +291,28 @@ def build(out: Path, openpilot: Path) -> dict:
         raise RuntimeError("runtime replay discriminator authenticated payload identity drift")
     if hashlib.sha256(monitor_payload).hexdigest() != runtime_monitor.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("runtime monitor authenticated payload identity drift")
+    if hashlib.sha256(preaggregate_monitor_payload).hexdigest() != preaggregate_monitor.EXPECTED_PAYLOAD_SHA256:
+        raise RuntimeError("pre-aggregate runtime monitor authenticated payload identity drift")
     (ram_dir / "camry_f33_b6_transaction_observer_payload.bin").write_bytes(observer_payload)
     (ram_dir / "camry_f33_b6_bridge_payload.bin").write_bytes(bridge_payload)
     (ram_dir / "camry_f33_runtime_replay_discriminator_payload.bin").write_bytes(replay_payload)
     (ram_dir / "camry_f33_runtime_monitor_payload.bin").write_bytes(monitor_payload)
+    (ram_dir / "camry_f33_runtime_monitor_preaggregate_payload.bin").write_bytes(preaggregate_monitor_payload)
 
     shutil.copy2(RUNBOOK_TEMPLATE, out / "RUNBOOK.md")
     launcher = out / "f33"
     shutil.copy2(FIELD_LAUNCHER, launcher)
     launcher.chmod(0o755)
+    preagg_launcher = out / "f33-pre"
+    shutil.copy2(PREAGG_FIELD_LAUNCHER, preagg_launcher)
+    preagg_launcher.chmod(0o755)
 
     files = {
         dst.name: {"sha256": sha256(dst)},
         "FIRMWARE_PATCH.md": {"sha256": sha256(out / "FIRMWARE_PATCH.md")},
         "RUNBOOK.md": {"sha256": sha256(out / "RUNBOOK.md")},
         "f33": {"sha256": sha256(launcher)},
+        "f33-pre": {"sha256": sha256(preagg_launcher)},
     }
     files.update(runtime_files)
     for path in sorted(p for p in ram_dir.rglob("*") if p.is_file()):
@@ -309,7 +321,7 @@ def build(out: Path, openpilot: Path) -> dict:
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
 
     manifest = {
-        "schema": "camry-f33-car-kit-v7",
+        "schema": "camry-f33-car-kit-v8",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
@@ -361,6 +373,27 @@ def build(out: Path, openpilot: Path) -> dict:
                 "stationary_monitor_phases": {k: [f"0x{x:08X}" for x in v] for k, v in runtime_monitor.MONITOR_PHASES.items()},
                 "secoc_bypass": False,
             },
+            "runtime_monitor_preaggregate": {
+                "payload": "ram_payloads/camry_f33_runtime_monitor_preaggregate_payload.bin",
+                "payload_sha256": preaggregate_monitor.EXPECTED_PAYLOAD_SHA256,
+                "staging_sha256": preaggregate_monitor.EXPECTED_STAGING_SHA256,
+                "resident_sha256": preaggregate_monitor.EXPECTED_RESIDENT_SHA256,
+                "resident_base": f"0x{runtime_monitor.RESIDENT_BASE:08X}",
+                "resident_size": preaggregate_monitor.RESIDENT_SIZE,
+                "control_can_id": f"0x{runtime_monitor.CONTROL_CAN_ID:08X}",
+                "sample_point": "after fg_pre_3, immediately before stock fg_aggregate",
+                "run_trigger": "sticky snapshot only when exact profile-2 queue length FEBE547A is nonzero",
+                "phase": {k: [f"0x{x:08X}" for x in v] for k, v in preaggregate_monitor.PREAGGREGATE_PHASES.items()},
+                "success_verdict": "runtime_monitor_live",
+                "next_after_success": "NRTD->READY without OFF; run ./f33-pre phase P and require exact_phase_b6_queued_preaggregate before interpreting route44 transformation",
+                "source_memory_write": False,
+                "dynamic_call": False,
+                "resident_steering_transmit": False,
+                "resident_b6_transmit": False,
+                "host_phase_b6_transmit": True,
+                "secoc_bypass": False,
+                "live_qualified": False,
+            },
             "runtime_replay_discriminator": {
                 "payload": "ram_payloads/camry_f33_runtime_replay_discriminator_payload.bin",
                 "payload_sha256": replay_discriminator.EXPECTED_PAYLOAD_SHA256,
@@ -398,8 +431,9 @@ def build(out: Path, openpilot: Path) -> dict:
                 "blocked_by": "shares superseded C startup/foreground trampoline; do not execute until rebuilt after corrected resident qualification",
             },
             "order": [
-                "runtime_monitor install once in NRTD",
-                "runtime_monitor external control/readback in READY/Park without OFF or rebuild",
+                "runtime_monitor_preaggregate install in NRTD for the next profile-2 queue-ingress discriminator",
+                "runtime_monitor_preaggregate phase P in READY/Park; stop at queue identity result",
+                "runtime_monitor remains the general post-aggregate A-G gate monitor for later downstream localization",
                 "runtime replay discriminator and legacy B6 observer/bridge retained as artifacts only",
             ],
         },

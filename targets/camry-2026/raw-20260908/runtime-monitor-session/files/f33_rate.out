@@ -1,0 +1,7 @@
+INFO: connecting to panda 3a0007000151343435333330
+bus None dt 0.6842 sent 0 echo 0 route_delta 0 rate 0.0 b3 0 -> 0 adb 0 -> 0 err []
+bus None dt 0.6856 sent 0 echo 0 route_delta 0 rate 0.0 b3 0 -> 0 adb 0 -> 0 err []
+bus 0 dt 0.6356 sent 56 echo 56 route_delta 128 rate 201.4 b3 0 -> 0 adb 0 -> 0 err []
+bus 2 dt 0.6403 sent 56 echo 56 route_delta 128 rate 199.9 b3 0 -> 0 adb 0 -> 0 err []
+bus 1 dt 0.6401 sent 56 echo 56 route_delta 0 rate 0.0 b3 0 -> 0 adb 0 -> 0 err []
+bus None dt 0.6898 sent 0 echo 0 route_delta 0 rate 0.0 b3 0 -> 0 adb 0 -> 0 err []
