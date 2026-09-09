@@ -226,6 +226,31 @@ volatile `ep` model. Compatibility is not compiler provenance: no compiler ID
 string or byte-identical runtime-library match has been recovered, so the exact
 Toyota compiler vendor/version remains **bounded**, not identified.
 
+A **known-working public GCC payload** independently validates our payload
+compiler family without changing that provenance boundary. Pinned
+`I-CAN-hack/secoc @ 4ce19cc31ff5` builds its RH850 key-dumper with Ubuntu 22.04,
+binutils `2_41-release`, GCC `13.2.0`, target `v850-elf`, and
+`v850-elf-gcc -fPIC -ffreestanding -c main.c`. The current
+`v850-gcc-scratch` image history is the same recipe and GCC configure command;
+GCC reports `-mghs`/`-mrh850-abi` enabled and `-mgcc-abi` disabled by default.
+The published encrypted payload is already pinned as
+`tests/fixtures/payloads/ram_dump_payload.bin` (SHA-256 `d972d4bf…b2`). After
+normal Toyota payload decryption it contains a 438-byte executable prefix,
+SHA-256 `8b3f55e3950ca59e5175f6356df9ab96a34cb4515df11c6fd8c73f8f17bfc5eb`,
+followed by zeros to the callback slot. Recompiling Willem's pinned
+`shellcode/main.c` with that source-equivalent image and his exact build command
+reproduces those **438 bytes byte-for-byte**.
+
+That public payload also shows why a working GCC shellcode is not evidence that
+ordinary C calls can replay arbitrary Toyota internals. Willem's dump loop is
+self-contained RSCFD MMIO. Its only stock call occurs after extraction, when it
+invokes boot reset `0x157E`; GCC materializes that constant in `r10` and emits a
+small indirect veneer before `jmp [r10]`. It therefore never creates the
+`r6=target_address` state that broke our later `call0(address)` startup replay,
+and the reset target is a terminal no-argument path. This is strong validation
+of GCC 13.2 for **standalone RH850 payloads**, not of C as an exact stock-call
+replay abstraction and not of Toyota's original compiler vendor.
+
 Practical consequence: do not switch target-native payloads to CC-RH merely
 because its switch/prologue output looks Toyota-like. More importantly, this ABI
 result does not make a C trampoline such as `call0(address)` equivalent to a

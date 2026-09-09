@@ -66,7 +66,20 @@
     {
       "path": "shellcode/main.c",
       "repository": "icanhack_secoc",
-      "sha256": "bfa673dda68292505ee6be6e34f8ddf5b3f3c7595529400543ad66d64869eea7"
+      "sha256": "bfa673dda68292505ee6be6e34f8ddf5b3f3c7595529400543ad66d64869eea7",
+      "size": 1354
+    },
+    {
+      "path": "shellcode/Dockerfile",
+      "repository": "icanhack_secoc",
+      "sha256": "f26d4544ea92290856159c473018c5c24cbb35c05cb79989e4205e3b3db214e9",
+      "size": 1211
+    },
+    {
+      "path": "shellcode/build.sh",
+      "repository": "icanhack_secoc",
+      "sha256": "d4102622de9b5e17b6aa8b3d4837ffe88575b0c79c4eef6c3cc04e30d2351dcb",
+      "size": 134
     },
     {
       "path": "extract_keys.py",
