@@ -798,6 +798,19 @@ check("command-5 plan is non-actuating and ephemeral", command5_probe.plan(None)
     "arbitrary_length_or_selector": False,
 })
 
+print("\n== inline B6 signer host-visible state ==")
+from exploit.ephemeral_runtime import camry_f33_b6_inline_signer as inline_signer
+check("inline signer state reuses the proven SID23-readable low-RAM pattern",
+      inline_signer.STATE_BASE == 0xFEBF0248 and inline_signer.STATE_SIZE == 12 and
+      inline_signer.STATE_BASE + inline_signer.STATE_SIZE <= 0xFEBF0288 and
+      probe.validate_read(probe.RAM_ID, inline_signer.STATE_BASE, inline_signer.STATE_SIZE) is None)
+state_raw = inline_signer.STATE_MAGIC.to_bytes(4, "little") + bytes((7, 1, 0, 0)) + (9).to_bytes(4, "little")
+state_decoded = inline_signer.decode_state(state_raw)
+check("inline signer state decoder requires both magic and initialized byte",
+      state_decoded["initialized"] is True and state_decoded["initialized_raw"] == 1 and
+      state_decoded["next_index"] == 7 and state_decoded["signed_count"] == 9 and
+      inline_signer.decode_state(state_raw[:5] + b"\x00" + state_raw[6:])["initialized"] is False)
+
 print("\n== car-kit packaging ==")
 builder_path = ROOT / "tools/targets/camry/builders/build_camry_f33_car_kit.py"
 builder_spec = importlib.util.spec_from_file_location("build_camry_f33_car_kit", builder_path)
@@ -825,11 +838,12 @@ with tempfile.TemporaryDirectory() as td:
     check("kit packages autonomous inline B6 signer as the primary fast path",
           inline["launcher"] == "f33-secoc" and
           inline["resident_base"] == "0xFEBFF9F0" and inline["resident_size"] == 498 and
-          inline["resident_sha256"] == "228e000234235f11dbc532c325cfe042e30fdf9c28858387892b27c1f0dbd177" and
+          inline["resident_sha256"] == "310935485241da2d931bd2b6b2272239ea11f11d85156978001e73de97ecab00" and
           inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 356 and
           inline["helper_word_count"] == 89 and
-          inline["helper_padded_sha256"] == "0180338d8c835e40aee2d4ac233136ca9901349ad54ecdb6362b4369f4ec0982" and
-          inline["state"]["base"] == "0xFEBF02FC" and inline["state"]["magic"] == "0x53364249" and
+          inline["helper_padded_sha256"] == "afae1543e57a8f3555500eb624b8fd2385dff6165b4995b4f26bca1abb344d11" and
+          inline["state"]["base"] == "0xFEBF0248" and inline["state"]["magic"] == "0x53364249" and
+          probe.validate_read(probe.RAM_ID, int(inline["state"]["base"], 0), inline["state"]["size"]) is None and
           inline["control_can_id"] == "0x1FDC0002" and
           "00000000" in inline["trigger"] and "EPS" in inline["freshness_owner"] and
           inline["mutation_boundary"]["application_bytes_b0_b27_unchanged"] is True and
