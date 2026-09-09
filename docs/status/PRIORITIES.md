@@ -33,32 +33,9 @@ and unresolved static/dynamic boundaries remain in
 
 Keep two queues separate:
 
-1. **Settle TX-echo -> profile-2 queue identity before going farther downstream.** The
-   generic 520-byte ABI-preserving monitor is live-qualified, but VAR-151/CORR-184 correct
-   its first causal interpretation: a longer stationary control has zero host B6 echoes
-   while route44 generation changes repeatedly with sampled ID0, so native/background
-   route44 publication exists independently of injection. The sampled post-aggregate ID0
-   image therefore cannot identify our ID11 frame. The live 522-byte Phase-P predecessor
-   also saw queue length zero while 188/188 host frames were echoed, but CORR-183 proves that
-   immediately-pre-`0x667E6` instant can miss asynchronous enqueue followed by consumption
-   inside the next aggregate. Therefore **do not proceed to D-G** and do not change SecOC
-   results, freshness, B6 companions, or `0x08A`.
+1. **Settle the host-B6 -> normal CanIf/PduR/profile2 boundary with the deterministic mid-aggregate observer before going farther downstream.** VAR-151/CORR-185 correct both the causal/statistical interpretation and the sampling point. The retained zero-host-B6 control proves route44 activity occurred during that session, but does not identify a producer or exact cadence; the short `f33_rate` 0/~200-Hz values were only modulo-256 endpoint residues. Phase P and the already-run inter-tick Phase-Q-v1 are timing-blind because exact `7A254` drains the foreground software RX ring through `79EDE -> 809FE -> 808D6 -> 80884 -> 810F2` and later reaches `6A410` SecOC consumption in the **same invocation**. The marker-filtered inter-tick Q-v2 is therefore superseded before live use. Do **not** proceed to D-G and do not change SecOC results, freshness, B6 companions, or `0x08A`.
 
-   The next single discriminator is the audited **518-byte marker-filtered inter-tick
-   monitor**: full OFF -> NRTD, `./f33-ingress install`, direct NRTD -> READY/Park, then
-   `./f33-ingress phase Q`. Phase Q sends non-command Target Lateral ID63 with additive
-   contribution suppressed. The resident latches only when exact profile-2 queue length
-   `FEBE547A==32` **and** secured `FEBE54D7 & 0x3F == 63`, before the subsequent foreground
-   `0x667E6` consumer. Native/background ID0 cannot steal the sticky sample.
-   `exact_phase_b6_queued_intertick` proves the marked frame reached the profile-2 queue and
-   moves localization downstream of admission. A no-marker result is a bounded negative and
-   makes an interrupt/CanIf/PduR/queue-admission probe next. Do not use the discarded
-   foreground RSCFD draft: exact controller-1 receive drain runs through interrupt context
-   `71508 -> 66026 -> 667B6 -> 7A232 -> 79EBA -> 83CE4 -> 83E0C`, so foreground polling is
-   not proven to beat the hardware drain. The ABI-safe v3 route44 bridge is a later parked
-   experiment only after marker ingress is proven. Current opendbc `f207c273b645` remains
-   the ordinary driving sender baseline. OQ-054 and stock signer ownership remain separate.
-
+   The next single discriminator is VAR-152's **498/524-byte deterministic mid-aggregate observer** (26 bytes headroom). It reproduces the exact stock prefixes, observes immediately after `79EDE` returns, and tail-jumps into untouched stock `0x7A272` before `6A410`; the outer aggregate likewise rejoins untouched stock at `0x667F2`. It autonomously counts profile-1 D7 queue32, profile-2 B6 queue32, and an out-of-dictionary ID63 B6 marker with exact `B0..B11 || B28..B31` signature. NRTD install attests resident SHA plus mailbox magic/version only; counters are deliberately preserved and every treatment decision uses modulo-u32 before/after deltas, so receive-gated liveness is deferred to the READY selfcheck rather than smuggled into install. The host performs one SID23 mailbox read before and one after each block and **none during the treatment window**. First run an idle selfcheck and require native protected D7 as a same-scheduler positive control. Only if that passes, send ID63 with additive contribution suppressed at the non-5-ms-locked `[11,17,23,13,19]`-ms cadence on bus0. Exact signature match proves the host frame reached normal CanIf/PduR/profile2 before SecOC; D7-positive/no-marker is a bounded negative at that deterministic boundary; no D7 is inconclusive. The ABI-safe v3 route44 bridge remains deferred until this identity question is closed. Current opendbc `f207c273b645` remains the ordinary driving sender baseline. OQ-054 and stock signer ownership remain separate.
 2. **Recover Toyota's stock request/signing architecture.** OQ-054 asks which
    private message carries FRC request/winner/grant state and which always-on
    Brake/Skid/CGW node signs Bus-4 `0x08A`. Native Bus 1 exposes 22 camera/radar

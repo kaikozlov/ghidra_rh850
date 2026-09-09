@@ -1,0 +1,243 @@
+{
+  "decision": {
+    "reason": "the retained data and exact scheduler are sufficient to redesign the observer and analysis before another ignition cycle",
+    "vehicle_needed_now": false
+  },
+  "design_requirements_before_next_vehicle_run": [
+    "Do not poll SID23 during the treatment window; latch/count internally and read once after the block.",
+    "Observe the deterministic boundary after foreground receive dispatch (79EDE and its peers) and immediately before 6A410/8EFF8 SecOC consumption inside exact 7A254, rather than between foreground ticks.",
+    "Record an event count, exact B3/B4:B5/B7/B8:B9/B28:B31 marker signature, and a same-scheduler positive control; do not use only an 8-bit generation residue.",
+    "Use out-of-dictionary ID63 with additive contribution suppressed as the treatment marker.",
+    "Jitter marker send intervals across scheduler phase instead of a frequency-locked 50/100-Hz treatment when estimating a negative detection bound.",
+    "Treat Panda TX echoes as sender-side evidence only; add an F33-side receive/dispatch witness before calling a transport negative.",
+    "Randomize/repeat idle, valid-segment treatment, and unrelated-bus negative-control blocks only after the observer itself has a validated positive-control detection rate."
+  ],
+  "id63_postaggregate_reaudit": {
+    "correction": "11-12 host reads per ~1.1-s block are sparse post-aggregate observations, not independent opportunities to observe a short-lived ingress transaction. Zero observed ID63 at route44/generated/ADB0 does not bound queue admission without a proven observation duty cycle.",
+    "segments": [
+      {
+        "bus": null,
+        "compatible_event_counts": "128 + 256*k, k>=0",
+        "duration_s": 1.171,
+        "echo": 0,
+        "host_read_rate_hz": 10.247651579846284,
+        "host_reads": 12,
+        "one_extra_wrap_rate_step_hz": 218.61656703672074,
+        "residue_rate_hz": 109.30828351836037,
+        "route44_generation_residue_mod256": 128,
+        "sent": 0
+      },
+      {
+        "bus": 0,
+        "compatible_event_counts": "128 + 256*k, k>=0",
+        "duration_s": 1.1,
+        "echo": 102,
+        "host_read_rate_hz": 10.0,
+        "host_reads": 11,
+        "one_extra_wrap_rate_step_hz": 232.72727272727272,
+        "residue_rate_hz": 116.36363636363636,
+        "route44_generation_residue_mod256": 128,
+        "sent": 102
+      },
+      {
+        "bus": 2,
+        "compatible_event_counts": "128 + 256*k, k>=0",
+        "duration_s": 1.162,
+        "echo": 109,
+        "host_read_rate_hz": 10.327022375215147,
+        "host_reads": 12,
+        "one_extra_wrap_rate_step_hz": 220.30981067125646,
+        "residue_rate_hz": 110.15490533562823,
+        "route44_generation_residue_mod256": 128,
+        "sent": 109
+      },
+      {
+        "bus": 1,
+        "compatible_event_counts": "11 + 256*k, k>=0",
+        "duration_s": 1.173,
+        "echo": 109,
+        "host_read_rate_hz": 10.230179028132993,
+        "host_reads": 12,
+        "one_extra_wrap_rate_step_hz": 218.24381926683716,
+        "residue_rate_hz": 9.377664109121909,
+        "route44_generation_residue_mod256": 11,
+        "sent": 109
+      }
+    ]
+  },
+  "retained_idle_control": {
+    "actual_host_read_interval_median_s": 0.119941958,
+    "actual_host_read_rate_hz": 8.335574605411761,
+    "all_sampled_target_lateral_ids_zero": true,
+    "application_sequence_minimum_steps": 103,
+    "application_sequence_mod64_distinct_samples": [
+      53,
+      38,
+      40,
+      22,
+      27,
+      28
+    ],
+    "capture_span_s": 2.999193359,
+    "diagnostic_read_load_boundary": "under repeated SID23 host reads, retained monitor snapshot generation advanced far below the 200-Hz nominal foreground timer and host reads frequently duplicated stale snapshots. The capture therefore cannot be modeled as independent passive 30-ms observations; this does not by itself identify which execution context was slowed or coalesced.",
+    "distinct_resident_snapshots": 6,
+    "distinct_snapshot_generations": [
+      786,
+      807,
+      818,
+      823,
+      847,
+      850
+    ],
+    "distinct_trailer_values": 6,
+    "host_b6_tx_echoes": 0,
+    "host_reads": 26,
+    "modulo_boundary": "the u8 generation only identifies event count modulo 256; minimum_publications assumes zero additional wraps and is therefore a lower bound, not an exact rate",
+    "nominal_foreground_rate_hz_from_static_timer": 200.0,
+    "requested_poll_interval_s": 0.03,
+    "resident_sample_generation_delta": 64,
+    "resident_sample_generation_rate_hz": 21.33907098985411,
+    "route44_distinct_span_s": 2.639830594,
+    "route44_fragment_samples": [
+      {
+        "application_sequence_mod64": 53,
+        "route44_generation_u8": 121,
+        "sample_generation": 786,
+        "t_monotonic_ns": 1658664015429,
+        "target_angle_be_hex": "002e",
+        "target_lateral_id": 0,
+        "trailer_b28_b31_hex": "b1718c7f"
+      },
+      {
+        "application_sequence_mod64": 38,
+        "route44_generation_u8": 243,
+        "sample_generation": 807,
+        "t_monotonic_ns": 1659863211501,
+        "target_angle_be_hex": "002e",
+        "target_lateral_id": 0,
+        "trailer_b28_b31_hex": "3872ed7f"
+      },
+      {
+        "application_sequence_mod64": 40,
+        "route44_generation_u8": 249,
+        "sample_generation": 818,
+        "t_monotonic_ns": 1659983486004,
+        "target_angle_be_hex": "002e",
+        "target_lateral_id": 0,
+        "trailer_b28_b31_hex": "be876c9c"
+      },
+      {
+        "application_sequence_mod64": 22,
+        "route44_generation_u8": 107,
+        "sample_generation": 823,
+        "t_monotonic_ns": 1661063852834,
+        "target_angle_be_hex": "002e",
+        "target_lateral_id": 0,
+        "trailer_b28_b31_hex": "32ed28dd"
+      },
+      {
+        "application_sequence_mod64": 27,
+        "route44_generation_u8": 119,
+        "sample_generation": 847,
+        "t_monotonic_ns": 1661183667088,
+        "target_angle_be_hex": "002e",
+        "target_lateral_id": 0,
+        "trailer_b28_b31_hex": "81770295"
+      },
+      {
+        "application_sequence_mod64": 28,
+        "route44_generation_u8": 121,
+        "sample_generation": 850,
+        "t_monotonic_ns": 1661303846023,
+        "target_angle_be_hex": "002e",
+        "target_lateral_id": 0,
+        "trailer_b28_b31_hex": "0017f15e"
+      }
+    ],
+    "route44_generation_mod256_deltas": [
+      122,
+      6,
+      114,
+      12,
+      2
+    ],
+    "route44_generation_u8_distinct_samples": [
+      121,
+      243,
+      249,
+      107,
+      119,
+      121
+    ],
+    "route44_minimum_publication_rate_hz": 96.97591981161803,
+    "route44_minimum_publications_between_first_last_distinct_snapshot": 256,
+    "strongest_supported_statement": "with zero host B6 TX echoes, the retained control contains repeated route44 publication-counter movement plus changing route44 application-sequence/trailer content; route44 activity therefore occurred without host B6 transmission, but the source and exact cadence are not identified by this capture"
+  },
+  "schema": "camry-f33-runtime-monitor-statistics-v1",
+  "short_window_rate_reaudit": {
+    "correction": "the printed 0-Hz/~200-Hz values are modulo-256 endpoint residues, not statistically valid publication-rate estimates. Each endpoint can also be a stale resident snapshot under diagnostic load. Preserve only the raw residue/duration/sender condition.",
+    "segments": [
+      {
+        "bus": null,
+        "compatible_event_counts": "0 + 256*k, k>=0",
+        "duration_s": 0.6842,
+        "echo": 0,
+        "one_extra_wrap_rate_step_hz": 374.1596024554224,
+        "residue_rate_hz": 0.0,
+        "route44_generation_residue_mod256": 0,
+        "sent": 0
+      },
+      {
+        "bus": null,
+        "compatible_event_counts": "0 + 256*k, k>=0",
+        "duration_s": 0.6856,
+        "echo": 0,
+        "one_extra_wrap_rate_step_hz": 373.3955659276546,
+        "residue_rate_hz": 0.0,
+        "route44_generation_residue_mod256": 0,
+        "sent": 0
+      },
+      {
+        "bus": 0,
+        "compatible_event_counts": "128 + 256*k, k>=0",
+        "duration_s": 0.6356,
+        "echo": 56,
+        "one_extra_wrap_rate_step_hz": 402.7690371302706,
+        "residue_rate_hz": 201.3845185651353,
+        "route44_generation_residue_mod256": 128,
+        "sent": 56
+      },
+      {
+        "bus": 2,
+        "compatible_event_counts": "128 + 256*k, k>=0",
+        "duration_s": 0.6403,
+        "echo": 56,
+        "one_extra_wrap_rate_step_hz": 399.8125878494456,
+        "residue_rate_hz": 199.9062939247228,
+        "route44_generation_residue_mod256": 128,
+        "sent": 56
+      },
+      {
+        "bus": 1,
+        "compatible_event_counts": "0 + 256*k, k>=0",
+        "duration_s": 0.6401,
+        "echo": 56,
+        "one_extra_wrap_rate_step_hz": 399.93750976409933,
+        "residue_rate_hz": 0.0,
+        "route44_generation_residue_mod256": 0,
+        "sent": 56
+      },
+      {
+        "bus": null,
+        "compatible_event_counts": "0 + 256*k, k>=0",
+        "duration_s": 0.6898,
+        "echo": 0,
+        "one_extra_wrap_rate_step_hz": 371.1220643664831,
+        "residue_rate_hz": 0.0,
+        "route44_generation_residue_mod256": 0,
+        "sent": 0
+      }
+    ]
+  },
+  "target": "8965F3307000"
+}

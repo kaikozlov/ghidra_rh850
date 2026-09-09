@@ -1157,35 +1157,47 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   predicates. The live question is now strictly earlier: **does the distinctive host frame
   reach exact profile-2 queue `FEBE547A/FEBE54D4` before SecOC consumes it?**
 
-  VAR-151/CORR-184 correct the first generic-monitor interpretation. A longer stationary idle
-  capture has zero Panda B6 TX echoes while route44 generation changes repeatedly and every
-  sampled raw route44 Target Lateral ID remains ID0. Native/background route44 publication
-  therefore exists independently of host injection; the earlier short idle/send timing
-  correlation cannot identify the host frame. Post-aggregate route44/generated-COM/`ADB0`
-  ID0 remains a real observation but not a proven ID11->ID0 transformation. The live 522-byte
-  Phase-P predecessor likewise saw queue zero while 188/188 host frames were echoed, but
-  CORR-183 bounds that to one immediately-pre-aggregate instant because asynchronous enqueue
-  can begin after that sample and be consumed inside the next `0x667E6`.
+  VAR-151/CORR-185 now bound the Sep-8 monitor evidence more tightly. The retained
+  three-second control has zero Panda B6 TX echoes and changing route44 generation/content,
+  but its 26 SID23 reads collapse to only six distinct resident snapshots. Their generation
+  residues `121->243->249->107->119->121` imply at least 256 route44 publications over
+  2.640 s (>=96.98/s), while additional modulo-256 wraps remain possible. This proves
+  route44 activity occurred without host B6 transmission during that interval; it does not
+  identify a transmitter, prove a universal background publisher, or provide exact cadence.
+  The earlier short-window `0/~200 Hz` values were modulo-256 endpoint residues, not rate
+  estimates. Post-aggregate ID0 therefore remains a real observation but not a host-frame
+  identity witness.
 
-  The immediate field discriminator is the audited **518/524-byte marker-filtered inter-tick
-  monitor**. After full OFF -> NRTD `./f33-ingress install` and direct NRTD -> READY/Park,
-  run `./f33-ingress phase Q`. Phase Q sends non-command Target Lateral ID63 with additive
-  contribution suppressed. The resident latches only when `FEBE547A==32` **and** secured
-  `FEBE54D7 & 0x3F == 63`, so the observed native/background ID0 publisher cannot steal the
-  sample. `exact_phase_b6_queued_intertick` moves localization downstream of queue admission;
-  a no-marker result is bounded to that interval and moves the next instrument toward the
-  interrupt/CanIf/PduR/queue-admission boundary.
+  Exact scheduler recovery also supersedes both old queue probes. `79EDE` is the unique
+  direct caller of `809FE`, which drains configured software RX rings through
+  `808D6 -> 80884`; controller-0 normal callback0 is exact CanIf `810F2`. Later in the same
+  `0x7A254` invocation, `6A410 -> 8EFF8 -> 8EF84 -> 8F98C -> 8F746` consumes protected
+  profiles. Consequently a B6 queue transaction may be created and consumed inside one
+  foreground invocation and never exist at Phase P's immediately-pre-aggregate point or in
+  the between-tick interval used by the already-run Phase-Q-v1. The marker-filtered inter-tick
+  Q-v2 artifact is superseded before live use.
 
-  Do **not** substitute the abandoned foreground RSCFD poll: exact controller-1 receive drain
-  runs in interrupt context `71508 -> 66026 -> 667B6 -> 7A232 -> 79EBA -> 83CE4 -> 83E0C`,
-  so foreground `66062` is not proven to observe `FFD23080` before the interrupt drains it.
-  The old C observer remains ABI-blocked. The separately rebuilt v3 assembly route44 bridge
-  uses direct JARL and is no longer blocked by `call0(address)`, but it is intentionally not
-  live-qualified or next in sequence; first prove exact marker ingress, then use the bridge
-  only if a controlled queue->route44 transformation experiment is warranted. Counter phase,
-  MAC value, B6 companion guesses, `0x08A` suppression, and another result patch remain
-  unjustified. Resolving OQ-054 remains required for stock architecture, not for this B6
-  ingress discriminator.
+  The immediate field discriminator is VAR-152's deterministic **498/524-byte mid-aggregate
+  observer** with 26 bytes headroom. It observes after `79EDE` returns and before untouched
+  stock `0x7A272` reaches `6A410`, while preserving the original stock suffixes and `DISPOSE`
+  behavior. NRTD install attests the resident identity plus mailbox magic/version without
+  requiring receive-gated counter progress; the observer preserves arbitrary counter
+  baselines and the host uses modulo-u32 deltas. During each treatment block the host performs
+  **zero SID23 reads**; it reads the mailbox only before and after. Native protected D7
+  (`FEBE5472`) is the same-scheduler positive control. Only after
+  D7 proves the observer can see the protected-queue lifetime does the host send non-command
+  ID63 with additive contribution suppressed, using `[11,17,23,13,19]`-ms intervals to avoid
+  5-ms phase lock. Success requires resident `ID63_marker_count` advancement plus exact
+  `B0..B11 || B28..B31` equality with one transmitted marker frame. D7-positive/no-marker is
+  a bounded post-CanIf/pre-SecOC negative; no D7 remains inconclusive.
+
+  Do **not** substitute the abandoned foreground RSCFD poll: the lower-level hardware receive
+  path still drains under interrupt context `71508 -> 66026 -> 667B6 -> 7A232 -> 79EBA ->
+  83CE4 -> 83E0C`. The old C observer remains ABI-blocked. The assembly v3 route44 bridge is
+  ABI-safe but intentionally not next; use it only after exact ingress identity is settled.
+  Counter phase, MAC value, B6 companion guesses, `0x08A` suppression, and another result
+  patch remain unjustified. Resolving OQ-054 remains required for stock architecture, not for
+  this independent B6 ingress discriminator.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

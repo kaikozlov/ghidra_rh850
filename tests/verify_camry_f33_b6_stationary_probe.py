@@ -473,6 +473,43 @@ check("inter-tick monitor authenticated payload identity exact",
       len(intertick_payload) == 0x1000 and sha(intertick_payload) == intertick.EXPECTED_PAYLOAD_SHA256 and
       intertick_inspection.cmac_valid and intertick_inspection.crc_residue == 0xFFFFFFFF)
 
+print("\n== deterministic mid-aggregate B6 ingress observer ==")
+from exploit.ephemeral_runtime import camry_f33_b6_midaggregate_observer as midagg
+midagg_source_path = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.S"
+midagg_builder_path = ROOT / "exploit/ephemeral_runtime/build_camry_f33_b6_midaggregate_observer.py"
+midagg_audit_path = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_midaggregate_observer_build.json"
+midagg_stage_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_midaggregate_observer.bin"
+midagg_source = midagg_source_path.read_text()
+midagg_audit = json.loads(midagg_audit_path.read_text())
+midagg_stage = midagg_stage_path.read_bytes()
+midagg_resident = midagg_stage[0x80:0x80 + midagg.RESIDENT_SIZE]
+check("mid-aggregate observer audited binary/source/builder identities exact",
+      midagg_audit["schema"] == "camry-f33-b6-midaggregate-observer-build-v1" and
+      midagg_audit["source"]["sha256"] == sha(midagg_source_path.read_bytes()) and
+      midagg_audit["builder"]["sha256"] == sha(midagg_builder_path.read_bytes()) and
+      sha(midagg_stage) == midagg.EXPECTED_STAGING_SHA256 and
+      sha(midagg_resident) == midagg.EXPECTED_RESIDENT_SHA256 and
+      midagg_audit["authenticated_payload"]["sha256"] == midagg.EXPECTED_PAYLOAD_SHA256)
+check("mid-aggregate observer fits tail with deterministic receive-to-SecOC boundary",
+      midagg.RESIDENT_SIZE == midagg_audit["resident"]["size"] == 498 and
+      midagg_audit["resident"]["headroom"] == 26 and midagg_audit["resident"]["relocations"] == 0 and
+      midagg_audit["resident"]["external_tail_jumps"] == ["0x000667F2", "0x0007A272"] and
+      "0x79EDE" in midagg_audit["static_pins"]["observation_boundary"] and
+      "0x6A410" in midagg_audit["static_pins"]["observation_boundary"])
+check("mid-aggregate statistics contract has D7 control, exact marker identity, and no treatment SID23",
+      midagg_audit["statistics_contract"]["no_sid23_during_treatment"] is True and
+      "0x0D7" in midagg_audit["statistics_contract"]["same_scheduler_positive_control"] and
+      midagg_audit["statistics_contract"]["marker_signature"] == "B0..B11 || B28..B31" and
+      midagg.JITTER_MS == (11, 17, 23, 13, 19))
+check("mid-aggregate mailbox preserves arbitrary baselines and only added mailbox writes",
+      "Counters are deliberately not zeroed" in midagg_source and ".L_clear_mailbox" not in midagg_source and
+      midagg_audit["mutation_boundary"]["added_write_regions"] == ["FEBF0000..FEBF0027 observer mailbox"])
+midagg_payload = package_shellcode(midagg_stage, secret=(ROOT / "firmware/camry-8965F3307000/CodeFlash.bin").read_bytes()[0xBFD8:0xBFE8])
+midagg_inspection = inspect_payload(midagg_payload, secret=(ROOT / "firmware/camry-8965F3307000/CodeFlash.bin").read_bytes()[0xBFD8:0xBFE8])
+check("mid-aggregate observer authenticated payload identity exact",
+      len(midagg_payload) == 0x1000 and sha(midagg_payload) == midagg.EXPECTED_PAYLOAD_SHA256 and
+      midagg_inspection.cmac_valid and midagg_inspection.crc_residue == 0xFFFFFFFF)
+
 print("\n== car-kit packaging ==")
 builder_path = ROOT / "tools/build_camry_f33_car_kit.py"
 builder_spec = importlib.util.spec_from_file_location("build_camry_f33_car_kit", builder_path)
@@ -487,7 +524,7 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v9 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v9" and manifest["target"] == {
+    check("kit manifest is self-contained v10 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v10" and manifest["target"] == {
         "eps_f181": "8965F3307000", "eps_diag": "0x7A1->0x7A9 bus0", "b6": "0x0B6/32 FD bus0",
     })
     check("kit pins live persistence-verified stage5 as current firmware", manifest["current_firmware"] == {
@@ -496,34 +533,48 @@ with tempfile.TemporaryDirectory() as td:
         "crc_prefix": "0x1960380A", "crc_fixup": "0xE69FC7F5",
         "note": "live persistence-verified 2026-09-01; no further persistent patch is part of the observer experiment",
     })
+    mid = manifest["ram_experiments"]["b6_midaggregate_observer"]
+    check("kit makes deterministic mid-aggregate observer the immediate ingress experiment",
+          mid["payload_sha256"] == midagg.EXPECTED_PAYLOAD_SHA256 and
+          mid["staging_sha256"] == midagg.EXPECTED_STAGING_SHA256 and
+          mid["resident_sha256"] == midagg.EXPECTED_RESIDENT_SHA256 and mid["resident_size"] == 498 and
+          mid["mailbox"] == "0xFEBF0000..0xFEBF0027" and
+          mid["install_success_verdict"] == "runtime_midaggregate_observer_live" and
+          mid["selfcheck_success_verdict"] == "midaggregate_observer_selfcheck_pass" and
+          mid["marker_success_verdict"] == "exact_id63_b6_seen_after_canif_before_secoc" and
+          mid["marker_negative_verdict"] == "id63_not_seen_at_midaggregate_boundary" and
+          "0x79EDE" in mid["observation_boundary"] and "0x6A410" in mid["observation_boundary"] and
+          "0x0D7" in mid["same_scheduler_positive_control"] and mid["marker_jitter_ms"] == [11,17,23,13,19] and
+          mid["sid23_reads_during_treatment"] == 0 and mid["source_memory_write"] is False and
+          mid["secoc_bypass"] is False and mid["route44_publish"] is False and mid["live_qualified"] is False and
+          manifest["ram_experiments"]["order"][0].startswith("b6_midaggregate_observer install in NRTD"))
     mon = manifest["ram_experiments"]["runtime_monitor"]
-    check("kit makes generic external-control monitor the primary RAM experiment",
+    check("kit retains generic external-control monitor for downstream A-G localization",
           mon["payload_sha256"] == monitor.EXPECTED_PAYLOAD_SHA256 and
           mon["resident_sha256"] == monitor.EXPECTED_RESIDENT_SHA256 and mon["resident_size"] == 520 and
           mon["watch_slots"] == 8 and mon["control_can_id"] == "0x1FDC0002" and
           mon["control_frame"] == "00 F3 seq opcode arg32-le" and mon["source_memory_write"] is False and
           mon["dynamic_call"] is False and mon["resident_b6_transmit"] is False and mon["host_phase_b6_transmit"] is True and
           mon["stationary_monitor_phases"] == {k: [f"0x{x:08X}" for x in v] for k, v in monitor.MONITOR_PHASES.items()} and
-          "current /data/openpilot opendbc" in mon["host_phase_b6_construction"] and
-          manifest["ram_experiments"]["order"][0] == "runtime_monitor_intertick install in NRTD for the marker-filtered profile-2 queue-ingress discriminator")
+          "current /data/openpilot opendbc" in mon["host_phase_b6_construction"])
     pre = manifest["ram_experiments"]["runtime_monitor_preaggregate"]
-    check("kit packages sticky pre-aggregate monitor as the immediate ingress discriminator",
+    check("kit retains live-tested pre-aggregate predecessor as timing-insufficient",
           pre["payload_sha256"] == preagg.EXPECTED_PAYLOAD_SHA256 and
           pre["staging_sha256"] == preagg.EXPECTED_STAGING_SHA256 and
           pre["resident_sha256"] == preagg.EXPECTED_RESIDENT_SHA256 and pre["resident_size"] == 522 and
           pre["sample_point"] == "after fg_pre_3, immediately before stock fg_aggregate" and
           "FEBE547A" in pre["run_trigger"] and pre["phase"] == {"P": [f"0x{x:08X}" for x in preagg.PREAGGREGATE_PHASES["P"]]} and
-          pre["source_memory_write"] is False and pre["secoc_bypass"] is False and pre["live_qualified"] is True and pre["superseded_by"] == "runtime_monitor_intertick")
+          pre["source_memory_write"] is False and pre["secoc_bypass"] is False and pre["live_qualified"] is True and
+          pre["superseded_by"] == "b6_midaggregate_observer")
     ingress = manifest["ram_experiments"]["runtime_monitor_intertick"]
-    check("kit packages inter-tick monitor as immediate queue discriminator",
+    check("kit retains inter-tick monitor only as superseded pre-live predecessor",
           ingress["payload_sha256"] == intertick.EXPECTED_PAYLOAD_SHA256 and
           ingress["staging_sha256"] == intertick.EXPECTED_STAGING_SHA256 and
           ingress["resident_sha256"] == intertick.EXPECTED_RESIDENT_SHA256 and ingress["resident_size"] == 518 and
           "before the tick test" in ingress["sample_point"] and "FEBE547A == 32" in ingress["run_trigger"] and
-          "B3 low6 == ID63" in ingress["run_trigger"] and "Target Lateral ID63" in ingress["host_phase_b6_construction"] and
-          "additive contribution suppressed" in ingress["host_phase_b6_construction"] and
           ingress["success_verdict"] == "exact_phase_b6_queued_intertick" and ingress["source_memory_write"] is False and
-          ingress["secoc_bypass"] is False and ingress["live_qualified"] is False)
+          ingress["secoc_bypass"] is False and ingress["live_qualified"] is False and
+          ingress["superseded_by"] == "b6_midaggregate_observer" and ingress["superseded_before_live_use"] is True)
     replay = manifest["ram_experiments"]["runtime_replay_discriminator"]
     check("superseded ABI source-term discriminator remains identity-pinned",
           replay["payload_sha256"] == "48f269aec2c95fbf33217db67a201faad2716985784f5e196ba5ddeade46d8dd" and
@@ -568,6 +619,7 @@ with tempfile.TemporaryDirectory() as td:
         "ram_payloads/camry_f33_runtime_monitor_payload.bin",
         "ram_payloads/camry_f33_runtime_monitor_preaggregate_payload.bin",
         "ram_payloads/camry_f33_runtime_monitor_intertick_payload.bin",
+        "ram_payloads/camry_f33_b6_midaggregate_observer_payload.bin",
         "ram_payloads/camry_f33_runtime_replay_discriminator_payload.bin",
         "ram_payloads/camry_f33_b6_transaction_observer_payload.bin",
         "ram_payloads/camry_f33_b6_bridge_payload.bin",
@@ -578,6 +630,7 @@ with tempfile.TemporaryDirectory() as td:
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_monitor.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_monitor_preaggregate.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.py",
+        "runtime/exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
         "runtime/exploit/followups/xcp_read_probe.py", "runtime/exploit/followups/xcp_daq_probe.py",
         "runtime/tools/camry_f33_steering_state_capture.py",
@@ -611,13 +664,15 @@ with tempfile.TemporaryDirectory() as td:
     check("patch runbook pins root patch and cumulative CRC", "0x8F930: E1 0F 14 D3 -> E0 07 14 D3" in patch_runbook and "8F948=003A" in patch_runbook and "8F952=E001" in patch_runbook and "EC525C33" in patch_runbook)
     check("patch runbook encodes proven NRTD lifecycle and stage3-only restore", "NRC `0x22` in READY" in patch_runbook and "Full OFF -> NRTD" in patch_runbook and "RESTORE reverses **stage 3 only**" in patch_runbook)
     check("kit manifest pins current opendbc and Panda revisions", len(manifest["repositories"]["opendbc"].get("head", "")) == 40 and len(manifest["repositories"]["panda"].get("head", "")) == 40)
-    check("runbook is launcher-first and externally configurable",
+    check("runbook is launcher-first and pins deterministic ingress before legacy monitors",
           "generic runtime monitor" in runbook and "runtime_monitor_live" in runbook and
           "./f33 doctor" in runbook and "./f33 install" in runbook and "./f33 shell" in runbook and
-          "./f33-ingress install" in runbook and "./f33-ingress phase Q" in runbook and
-          "./f33-pre install" in runbook and "./f33-pre phase P" in runbook and
+          "./f33-ingress install" in runbook and "./f33-ingress selfcheck" in runbook and
+          "./f33-ingress marker" in runbook and "runtime_midaggregate_observer_live" in runbook and
+          "midaggregate_observer_selfcheck_pass" in runbook and
+          "./f33-pre phase P" in runbook and
           "watch SLOT ADDRESS" in runbook and "./f33 phase A" in runbook and "current opendbc" in runbook and
-          "not part of the immediate sequence below" in runbook)
+          "superseded" in runbook)
     check("runbook preserves observation-only boundary",
           "no dynamic source-memory writer" in runbook and "steering CAN transmit" in runbook and
           "current coherent snapshot" in runbook and "on-ECU history ring" in runbook)
@@ -655,14 +710,22 @@ with tempfile.TemporaryDirectory() as td:
           preagg.EXPECTED_PAYLOAD_SHA256 in pre_doctor.stdout, pre_doctor.stderr[-300:])
     ingress_launcher = out / "f33-ingress"
     ingress_launcher_text = ingress_launcher.read_text(encoding="utf-8")
-    check("inter-tick launcher pins separate host/payload identities",
-          "camry_f33_runtime_monitor_intertick.py" in ingress_launcher_text and
-          "camry_f33_runtime_monitor_intertick_payload.bin" in ingress_launcher_text and
-          intertick.EXPECTED_PAYLOAD_SHA256 in ingress_launcher_text)
+    check("mid-aggregate ingress launcher pins separate host/payload identities",
+          "camry_f33_b6_midaggregate_observer.py" in ingress_launcher_text and
+          "camry_f33_b6_midaggregate_observer_payload.bin" in ingress_launcher_text and
+          midagg.EXPECTED_PAYLOAD_SHA256 in ingress_launcher_text and
+          "selfcheck" in ingress_launcher_text and "marker" in ingress_launcher_text)
     ingress_doctor = subprocess.run([str(ingress_launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
-    check("built inter-tick launcher doctor validates exact payload without Panda access",
-          ingress_doctor.returncode == 0 and "f33 doctor: PASS" in ingress_doctor.stdout and
-          intertick.EXPECTED_PAYLOAD_SHA256 in ingress_doctor.stdout, ingress_doctor.stderr[-300:])
+    check("built mid-aggregate launcher doctor validates exact payload without Panda access",
+          ingress_doctor.returncode == 0 and "f33-ingress doctor: PASS" in ingress_doctor.stdout and
+          midagg.EXPECTED_PAYLOAD_SHA256 in ingress_doctor.stdout, ingress_doctor.stderr[-300:])
+    ingress_plan = subprocess.run([str(ingress_launcher), "plan"], cwd=out, env=env, capture_output=True, text=True, check=False)
+    ingress_plan_obj = json.loads(ingress_plan.stdout) if ingress_plan.returncode == 0 else {}
+    check("built mid-aggregate launcher plan resolves exact deterministic observer",
+          ingress_plan.returncode == 0 and ingress_plan_obj.get("schema") == "camry-f33-b6-midaggregate-plan-v1" and
+          ingress_plan_obj.get("payload", {}).get("sha256") == midagg.EXPECTED_PAYLOAD_SHA256 and
+          ingress_plan_obj.get("treatment_statistics", {}).get("sid23_reads_during_block") == 0,
+          ingress_plan.stderr[-300:])
     check("kit manifest hashes launchers and root runbook",
           manifest["files"]["f33"]["sha256"] == sha(launcher.read_bytes()) and
           manifest["files"]["f33-pre"]["sha256"] == sha(pre_launcher.read_bytes()) and

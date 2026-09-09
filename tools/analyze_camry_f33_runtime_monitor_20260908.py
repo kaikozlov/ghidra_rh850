@@ -148,11 +148,11 @@ def build() -> dict:
     acbd = cpost[0xFEBEACBC][1]
     cafc, cafd, cafe, caff = cpost[0xFEBECAFC]
 
-    # The retained three-second idle capture is the decisive control for route44
-    # background activity. It contains no Panda B6 TX echoes, yet the exact
-    # route44 generation byte changes repeatedly while raw Target Lateral ID
-    # remains zero. This supersedes the earlier inference from two much shorter
-    # rate-test idle windows whose host-visible snapshot happened not to move.
+    # The retained three-second idle capture is the strongest no-host-B6 control,
+    # but it is not a passive high-rate sample and does not identify a producer.
+    # It contains no Panda B6 TX echoes while the exact route44 generation byte
+    # and raw PDU content move.  Deduplicate repeated SID23 reads of the same
+    # resident snapshot before quantifying that activity.
     if idle_raw.get("b6_echo_delta") != 0 or not idle_rows:
         raise ValueError("idle raw control is not a zero-host-B6 capture")
     idle_generation = []
@@ -163,8 +163,16 @@ def build() -> dict:
         raw_b1_b4 = vals[0xFEBE4C00]
         idle_target_ids.append(raw_b1_b4[2] & 0x3F)  # route44 base is FEBE4BFF, so +4C00 byte2 == B3
     idle_transitions = sum(a != b for a, b in zip(idle_generation, idle_generation[1:]))
+    distinct_idle = []
+    for row in idle_rows:
+        if not distinct_idle or row["sample_generation"] != distinct_idle[-1]["sample_generation"]:
+            distinct_idle.append(row)
+    distinct_generation = [state_value_map(row)[0xFEBE5364][0] for row in distinct_idle]
+    distinct_deltas = [(b - a) & 0xFF for a, b in zip(distinct_generation, distinct_generation[1:])]
+    distinct_span_s = (distinct_idle[-1]["t_monotonic_ns"] - distinct_idle[0]["t_monotonic_ns"]) / 1e9
+    minimum_publications = sum(distinct_deltas)
     if len(set(idle_generation)) <= 1 or idle_transitions == 0 or any(idle_target_ids):
-        raise ValueError("native/background route44 idle observation drift")
+        raise ValueError("no-host-B6 route44 control observation drift")
 
     if not all(x["raw63"] == x["gen63"] == x["adb63"] == 0 and x["zero_reads"] == x["reads"] for x in markers):
         raise ValueError("ID63 marker observation drift")
@@ -173,7 +181,7 @@ def build() -> dict:
         "schema": "camry-f33-runtime-monitor-20260908-v1",
         "target": "8965F3307000",
         "inputs": {name: {"path": str(path.relative_to(ROOT)), "sha256": sha(path)} for name, path in paths.items()},
-        "route44_background_control": {
+        "route44_no_host_b6_control": {
             "host_b6_echo_delta": idle_raw["b6_echo_delta"],
             "capture_samples": len(idle_rows),
             "capture_generation_low_unique": sorted(set(idle_generation)),
@@ -181,11 +189,16 @@ def build() -> dict:
             "all_sampled_target_lateral_ids_zero": all(v == 0 for v in idle_target_ids),
             "baseline_generation_window_hex": value_map(idle_raw["baseline"])[0xFEBE5364].hex(),
             "post_generation_window_hex": value_map(idle_raw["post"])[0xFEBE5364].hex(),
-            "observation": "exact route44 publishes changing ID0 data while Panda reports zero B6 TX echoes; a native/background route44 producer exists in the stationary state",
+            "distinct_resident_snapshots": len(distinct_idle),
+            "distinct_generation_low": distinct_generation,
+            "generation_mod256_deltas": distinct_deltas,
+            "minimum_route44_publications": minimum_publications,
+            "minimum_route44_publication_rate_hz": minimum_publications / distinct_span_s,
+            "observation": "route44 publication activity occurred during this retained stationary control with zero host B6 TX echoes; the source and exact cadence are not identified by the capture",
         },
         "short_window_rate_segments": {
             "segments": rate,
-            "interpretation": "retained as raw timing observations only; zero/nonzero modulo-256 deltas in these short host-sampled windows do not establish injection causality because the longer zero-echo idle control independently shows background route44 publication and resident snapshots can remain stale between foreground updates",
+            "interpretation": "retained as raw endpoint residues only; the u8 route44 generation value wraps modulo 256, so the printed zero/~200-Hz values are not publication-rate estimates. Host SID23 reads also frequently returned the same resident snapshot. These short windows do not establish injection causality.",
         },
         "current_shape_phase_a": {
             "tx_count": a["b6"]["tx_count"], "tx_echo_delta": a["b6"]["tx_echo_delta"],
@@ -204,7 +217,7 @@ def build() -> dict:
         "id63_marker": {
             "segments": markers,
             "all_sampled_raw_generated_snapshot_ids_remained_zero": True,
-            "interpretation": "post-aggregate snapshots remained on the native/background ID0 image; this does not prove the injected ID63 frame failed to reach an earlier hardware/CanIf stage",
+            "interpretation": "sparse post-aggregate host reads remained on an ID0 image; they are not independent ingress observations and do not bound whether the injected ID63 frame reached CanIf/PduR/SecOC earlier in the same foreground invocation",
         },
         "preaggregate_phase_p": {
             "tx_count": phase_p["b6"]["tx_count"],
@@ -218,21 +231,22 @@ def build() -> dict:
         "exact_scheduler_correction": {
             "foreground_loop": "0x66062",
             "foreground_aggregate": "0x667E6",
-            "aggregate_contains_secoc_consumer_chain": "0x667E6 -> 0x7A254 -> 0x6A410 -> 0x8EFF8 -> 0x8EF84 -> 0x8F98C -> 0x8F746",
-            "implication": "a queue-positive interval can begin after one foreground sample and end inside the next aggregate; one sample immediately before aggregate is not a proof of no enqueue",
+            "receive_ring_drain": "0x667E6 -> 0x7A254 -> 0x79EDE -> 0x809FE -> 0x808D6 -> 0x80884 -> configured CanIf callback 0x810F2",
+            "aggregate_contains_secoc_consumer_chain": "same 0x7A254 invocation later reaches 0x6A410 -> 0x8EFF8 -> 0x8EF84 -> 0x8F98C -> 0x8F746",
+            "implication": "normal CAN reception can be promoted into the protected queue by the foreground receive-ring drain and consumed later in the same 0x7A254 invocation; both immediately-pre-aggregate and between-tick queue polling are timing-blind to that lifetime",
         },
         "observations": {
             "host_current_shape_id11_echoed": True,
             "route44_target_id_remained_zero_in_host_phase_snapshots": a_post["target_lateral_id"] == k_post["target_lateral_id"] == 0,
             "route44_contribution_percentages_zero_in_full_raw_capture": k_post["contribution_pct_1"] == k_post["contribution_pct_2"] == 0,
             "generated_and_snapshot_target_id_zero": generated_id == adb0 == 0,
-            "native_background_route44_present_without_host_b6": True,
+            "route44_activity_observed_without_host_b6_in_retained_control": True,
             "route_health_snapshot": {"acbd": acbd, "cafc": cafc, "cafd": cafd, "cafe": cafe, "caff": caff},
         },
         "boundary": {
-            "closed": "the sampled route44/generated/ADB0 ID0 image is a real native/background publication state and cannot be attributed to transformation of the Panda ID11 frame merely because it was observed during injection",
-            "open": "whether the Panda-transmitted marker reaches the exact profile-2 secured queue after physical/CanIf/PduR admission and before SecOC consumption",
-            "next": "marker-filtered inter-tick Phase Q: send non-command Target Lateral ID63 with additive contribution suppressed and latch only when FEBE547A == 32 and FEBE54D7 low6 == 63; native/background stationary ID0 cannot satisfy the marker filter",
+            "closed": "post-aggregate ID0 samples cannot be assigned to the host frame, and short modulo-256 endpoint residues cannot establish injection causality or publication rate",
+            "open": "whether an exact host ID63 marker reaches profile-2 during the deterministic foreground interval after CanIf receive-ring drain and before same-cycle SecOC consumption",
+            "next": "deterministic mid-aggregate observer: internally count D7/B6 after 0x79EDE/0x809FE and before the untouched 0x7A272 tail reaches 0x6A410; issue no SID23 reads during the treatment block; require native D7 as same-scheduler positive control and exact ID63 B0..B11||B28..B31 signature match for success",
             "rejected_probe": {
                 "candidate": "foreground active-RSCFD polling at controller1 FFD200DC/FFD23080/FFD2308C",
                 "reason": "exact receive drain is interrupt-context 0x71508 -> 0x66026 -> 0x667B6 -> 0x7A232 -> 0x79EBA -> 0x83CE4 -> 0x83E0C, not the 0x66062 foreground loop; a foreground poll is not proven to run before the interrupt drains the hardware head",
