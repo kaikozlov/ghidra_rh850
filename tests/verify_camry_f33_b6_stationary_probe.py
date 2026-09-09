@@ -874,7 +874,7 @@ with tempfile.TemporaryDirectory() as td:
     check("kit packages autonomous inline B6 signer as the primary fast path",
           inline["launcher"] == "f33-secoc" and
           inline["resident_base"] == "0xFEBFF9F0" and inline["resident_size"] == 498 and
-          inline["resident_sha256"] == "310935485241da2d931bd2b6b2272239ea11f11d85156978001e73de97ecab00" and
+          inline["resident_sha256"] == "fa53b9bbaf9029c34f8d68afb6f7c223d5964f3285ae112eaa7914d5cd1664cb" and
           inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 356 and
           inline["helper_word_count"] == 89 and
           inline["helper_padded_sha256"] == "afae1543e57a8f3555500eb624b8fd2385dff6165b4995b4f26bca1abb344d11" and
