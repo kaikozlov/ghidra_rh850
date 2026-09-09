@@ -532,8 +532,8 @@ check("command-5 audited stage and metadata are exact",
       command5_stage_path.read_bytes() == command5_stage and
       json.loads(command5_audit_path.read_text()) == command5_meta)
 check("command-5 resident exactly fits live-proven high tail",
-      len(command5_resident) == command5_probe.RESIDENT_SIZE == 522 and
-      command5_meta["resident"]["headroom"] == 2 and command5_meta["resident"]["end_limit"] == "0xFEBFFBFC" and
+      len(command5_resident) == command5_probe.RESIDENT_SIZE == 524 and
+      command5_meta["resident"]["headroom"] == 0 and command5_meta["resident"]["end_limit"] == "0xFEBFFBFC" and
       command5_meta["resident"]["relocations"] == 0)
 check("command-5 only extra stock call is synchronous wrapper",
       command5_meta["resident"]["jarl_targets"][-1] == "0x00089BC2" and
@@ -541,9 +541,14 @@ check("command-5 only extra stock call is synchronous wrapper",
 check("command-5 fixed wrapper contract and corrected output ABI", command5_meta["command5"] == {
     "synchronous_wrapper": "0x00089BC2", "dispatcher": "0x00089440", "engine": "0x0008A720",
     "driver_record": 0, "key_selector": 4, "input_length": 36, "output_length": 16,
+    "config_type": 1, "config_type_address": "0xFEBF0048",
+    "config_selector_offset": 4, "config_selector_address": "0xFEBF004C",
     "output_buffer": "0xFEBF0034", "output_length_cell": "0xFEBF000C",
     "done_flag": "0xFEBF13BC", "status_flag": "0xFEBF13BD",
 } and "movea 0x24, r6, r7" in command5_build.SOURCE.read_text(encoding="utf-8") and
+      "st.w r6, 0x4848[gp]" in command5_build.SOURCE.read_text(encoding="utf-8") and
+      "st.w r8, 0x484c[gp]" in command5_build.SOURCE.read_text(encoding="utf-8") and
+      "0x00040001" not in command5_build.SOURCE.read_text(encoding="utf-8") and
       "movea 0x4824, r6, r7" not in command5_build.SOURCE.read_text(encoding="utf-8"))
 check("command-5 mutation boundary excludes actuation and extraction",
       command5_meta["mutation_boundary"]["chosen_input_lengths"] == [36] and
@@ -569,13 +574,70 @@ command5_domain = bytes(range(36))
 command5_cmac = bytes(range(0xA0, 0xB0))
 command5_raw[0x10:0x34] = command5_domain
 command5_raw[0x34:0x44] = command5_cmac
+command5_raw[0x48:0x4C] = (1).to_bytes(4, "little")
+command5_raw[0x4C:0x50] = (4).to_bytes(4, "little")
 command5_decoded = command5_probe.decode_mailbox(bytes(command5_raw))
 check("command-5 mailbox distinguishes wrapper/done/status/output",
       command5_decoded["magic_ok"] and command5_decoded["version_ok"] and command5_decoded["state_name"] == "complete" and
       command5_decoded["wrapper_return_code"] == 0 and command5_decoded["input_complete"] and
       command5_decoded["command_status"] == 0 and command5_decoded["done_flag"] == 1 and
       command5_decoded["output_length"] == 16 and command5_decoded["input_hex"] == command5_domain.hex() and
-      command5_decoded["output_hex"] == command5_cmac.hex())
+      command5_decoded["output_hex"] == command5_cmac.hex() and command5_decoded["config_type"] == 1 and
+      command5_decoded["config_selector"] == 4 and command5_decoded["config_valid"] is True)
+
+generated = command5_probe.classify_command5_result(command5_decoded)
+busy_state = {**command5_decoded, "wrapper_return_code": 2, "done_flag": 0, "command_status": 1}
+terminal_state = {**command5_decoded, "wrapper_return_code": 1, "done_flag": 0, "command_status": 1}
+bad_config_state = {**command5_decoded, "config_valid": False, "config_selector": 0}
+bad_completion_state = {**command5_decoded, "done_flag": 0}
+check("command-5 result classification preserves permission uncertainty",
+      generated[:3] == ("generated", True, False) and
+      command5_probe.classify_command5_result(busy_state)[:3] == ("transient_busy_or_timeout", None, True) and
+      command5_probe.classify_command5_result(terminal_state)[:3] == ("terminal_driver_error", None, False) and
+      command5_probe.classify_command5_result(bad_config_state)[:3] == ("resident_config_contract_error", None, False) and
+      command5_probe.classify_command5_result(bad_completion_state)[:3] == ("completion_contract_error", None, False))
+
+retry_session = object.__new__(command5_probe.ProbeSession)
+retry_input = bytearray(36)
+retry_bitmap = 0
+retry_exec_count = 0
+
+def _retry_state() -> dict:
+    return {
+        **command5_decoded,
+        "input_bitmap": retry_bitmap,
+        "input_complete": retry_bitmap == 0x1FF,
+        "input_hex": bytes(retry_input).hex(),
+    }
+
+def _retry_read_state() -> dict:
+    return _retry_state()
+
+def _retry_send(opcode: int, argument: int, predicate) -> dict:
+    global retry_bitmap, retry_exec_count
+    if command5_probe.OP_WORD_BASE <= opcode < command5_probe.OP_WORD_BASE + 9:
+        word = opcode - command5_probe.OP_WORD_BASE
+        retry_input[word * 4:(word + 1) * 4] = argument.to_bytes(4, "little")
+        retry_bitmap |= 1 << word
+        state = _retry_state()
+    else:
+        retry_exec_count += 1
+        state = {
+            **_retry_state(), "state": 2,
+            "wrapper_return_code": 2 if retry_exec_count == 1 else 0,
+            "done_flag": 0 if retry_exec_count == 1 else 1,
+            "command_status": 1 if retry_exec_count == 1 else 0,
+        }
+    assert predicate(state)
+    return {"sequence": opcode, "opcode": f"0x{opcode:02X}", "frame_hex": "", "state": state}
+
+retry_session.read_state = _retry_read_state
+retry_session._send = _retry_send
+retry_result = retry_session.generate(bytes.fromhex("00b6") + bytes(range(34)))
+check("command-5 host retries only ambiguous busy/timeout and preserves attempt evidence",
+      retry_result["outcome"] == "generated" and retry_result["slot4_command5_permitted"] is True and
+      len(retry_result["execute_attempts"]) == 2 and
+      [row["outcome"] for row in retry_result["execute_attempts"]] == ["transient_busy_or_timeout", "generated"])
 
 def _command5_rejects(candidate: bytes) -> bool:
     session = object.__new__(command5_probe.ProbeSession)
@@ -623,7 +685,10 @@ with tempfile.TemporaryDirectory() as td:
           signer["payload_sha256"] == command5_probe.EXPECTED_PAYLOAD_SHA256 and
           signer["staging_sha256"] == command5_probe.EXPECTED_STAGING_SHA256 and
           signer["resident_sha256"] == command5_probe.EXPECTED_RESIDENT_SHA256 and
-          signer["resident_size"] == 522 and signer["mailbox"] == "0xFEBF0000..0xFEBF004B" and
+          signer["resident_size"] == 524 and signer["mailbox"] == "0xFEBF0000..0xFEBF004F" and
+          signer["config_layout"] == "u32 type=1 at config+0; u32 selector=4 at config+4" and
+          signer["transient_retry"] == "wrapper rc2 only; at most 3 total execute attempts" and
+          "does not prove slot 4 is forbidden" in signer["negative_semantics"] and
           signer["persistent_flash_write"] is False and signer["key_extraction"] is False and
           signer["resident_b6_transmit"] is False and signer["secoc_bypass"] is False and
           manifest["ram_experiments"]["order"][0].startswith("command5_probe is an independent"))
@@ -832,7 +897,7 @@ with tempfile.TemporaryDirectory() as td:
     sign_plan = subprocess.run([str(sign_launcher), "plan"], cwd=out, env=env, capture_output=True, text=True, check=False)
     sign_plan_obj = json.loads(sign_plan.stdout) if sign_plan.returncode == 0 else {}
     check("built command-5 launcher plan resolves bounded non-actuating probe",
-          sign_plan.returncode == 0 and sign_plan_obj.get("schema") == "camry-f33-command5-probe-plan-v1" and
+          sign_plan.returncode == 0 and sign_plan_obj.get("schema") == "camry-f33-command5-probe-plan-v2" and
           sign_plan_obj.get("payload", {}).get("sha256") == command5_probe.EXPECTED_PAYLOAD_SHA256 and
           sign_plan_obj.get("boundaries", {}).get("b6_transmit") is False and
           sign_plan_obj.get("boundaries", {}).get("key_extraction") is False, sign_plan.stderr[-300:])

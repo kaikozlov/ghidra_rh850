@@ -33,7 +33,7 @@ from exploit.patcher.build_payload import (
 )
 from exploit.patcher.patch_config import PatchConfigV1, config_from_manifest
 from exploit.patcher.post_apply_verify import build_post_apply_validate_config
-from tools import build_camry_f33_gate2_semantic_patch as stage2
+from tools.targets.camry.builders import build_camry_f33_gate2_semantic_patch as stage2
 from tools.security.build_secoc_patch_manifest import crc32
 
 STOCK_IMAGE = stage2.STOCK_IMAGE

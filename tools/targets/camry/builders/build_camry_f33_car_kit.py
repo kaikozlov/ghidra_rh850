@@ -28,8 +28,8 @@ from exploit.ephemeral_runtime import camry_f33_command5_probe as command5_probe
 from exploit.ephemeral_runtime import (
     camry_f33_b6_transaction_observer_install as observer_install,
 )
-from tools import build_camry_f33_crypto_result_patch as stage5
-from tools import build_camry_f33_gate2_root_result_patch as stage3
+from tools.targets.camry.builders import build_camry_f33_crypto_result_patch as stage5
+from tools.targets.camry.builders import build_camry_f33_gate2_root_result_patch as stage3
 
 PROBE = ROOT / "exploit/behavioral_proof/camry_f33_b6_stationary_probe.py"
 RUNBOOK_TEMPLATE = ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md"
@@ -391,6 +391,9 @@ def build(out: Path, openpilot: Path) -> dict:
                 "resident_size": command5_probe.RESIDENT_SIZE,
                 "mailbox": f"0x{command5_probe.MAILBOX_BASE:08X}..0x{command5_probe.MAILBOX_BASE + command5_probe.MAILBOX_SIZE - 1:08X}",
                 "operation": "stock synchronous command-5 wrapper, driver record 0, selector 4, exactly 36 input bytes and 16 output bytes",
+                "config_layout": "u32 type=1 at config+0; u32 selector=4 at config+4",
+                "transient_retry": "wrapper rc2 only; at most 3 total execute attempts",
+                "negative_semantics": "a failed/ambiguous result does not prove slot 4 is forbidden",
                 "input_domain": "DataID 00B6 || B6 application B0..B27 || full 6-byte freshness",
                 "success_verdict": "slot4_command5_permitted=true with wrapper rc=0, done=1, status=0, output_length=16",
                 "next_after_success": "use the returned MSB28 in one separately reviewed stock-EPS stationary B6 discriminator; this probe itself never transmits B6",
@@ -543,7 +546,7 @@ def build(out: Path, openpilot: Path) -> dict:
                 "requires_before_arm": "first prove the exact injected ID63 frame reaches profile2 with b6_midaggregate_observer; bridge is a later controlled transformation experiment",
             },
             "order": [
-                "command5_probe is an independent non-actuating discriminator: install in NRTD, run exactly one 36-byte selector-4 request in READY/Park/stationary, then power OFF",
+                "command5_probe is an independent non-actuating discriminator: install in NRTD, run one 36-byte selector-4 domain in READY/Park/stationary (up to three automatic retries only for ambiguous busy/timeout), then power OFF",
                 "b6_midaggregate_observer install in NRTD; attestation is resident SHA plus mailbox magic/version and does not require receive-gated counter progress",
                 "direct NRTD->READY without OFF; run b6_midaggregate_observer selfcheck and require native D7 same-scheduler positive control",
                 "only after selfcheck passes, run b6_midaggregate_observer ID63 marker on bus0 and stop at exact signature-match or bounded D7-positive no-marker verdict",

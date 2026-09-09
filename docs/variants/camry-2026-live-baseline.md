@@ -5900,13 +5900,16 @@ dynamic question; symmetric CMAC does not override a nonstandard slot/lifecycle 
 
 The live-proven application high tail is only 524 bytes, while the prior 464-byte C proxy
 was linked for the startup-overwritten low carrier and used the now-disproved
-`call0(address)` ABI pattern. The replacement is a 522-byte assembly resident with two
-bytes headroom and zero relocations. It preserves the exact direct-JARL startup and
+`call0(address)` ABI pattern. The corrected replacement is a 524-byte assembly resident
+that exactly fills the live-proven high tail with zero relocations. It preserves the exact direct-JARL startup and
 foreground sequence. After the same 224-tick qualification it accepts only nine 4-byte
 chunks and one execute opcode through `0x1FDC0002 -> FEBE4C34`. Input is fixed to the B6
 authenticated-domain size and the host additionally requires the first two bytes to be
 DataID `00B6`; selector and lengths are not host-selectable. Results are read through the
-existing SID23 surface at `FEBF0000..FEBF004B`.
+existing SID23 surface at `FEBF0000..FEBF004F`. Its firmware-native configuration is two
+words, `{1, 4}`: lower prepare requires word zero to equal exactly one and reads the selector
+byte at configuration offset four. The former packed word `0x00040001` failed that gate and
+could only produce a false negative; it was never live-run.
 
 The positive verdict is mechanical: wrapper return 0, done 1, command status 0, output
 length 16. It proves that this EPS's provisioned slot 4 generated a full CMAC over the exact
@@ -5920,8 +5923,10 @@ frame after restoring stock receiver authentication. On the currently recorded s
 F33 image, recovered authentication results are already forced successful, so comparing a
 valid tag against the dummy tag on that same patched image cannot establish that SecOC was
 the remaining steering blocker. The slot-permission result is still independently useful:
-success closes the protected signing primitive; failure localizes the obstacle to ICU-S
-policy/lifecycle rather than B6 construction.
+success closes the protected signing primitive. Wrapper return 2 can mean either serialized
+dispatcher contention or expiry of the synchronous polling window, so the host retries it
+at most twice and reports it as transient/ambiguous. Any negative result leaves slot
+permission unresolved; it does not by itself localize failure to ICU-S policy/lifecycle.
 
 The deterministic builder, audited stage, host client, and field launcher are
 `exploit/ephemeral_runtime/build_camry_f33_command5_probe.py`,
