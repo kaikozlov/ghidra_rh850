@@ -651,6 +651,10 @@ check("command-5 launcher exposes only one bounded signed ID0 B6 discriminator",
       "./f33-sign signed-id0 [OUTPUT_JSON]" in command5_launcher_text and
       'run_probe_bounded 30 signed-id0 --execute --parked-stationary-confirmed' in command5_launcher_text and
       command5_launcher_text.count("signed-id0)") == 1)
+check("command-5 launcher exposes non-transmitting paced-burst timing probe",
+      "./f33-sign generate-fast 72_HEX_DIGITS [OUTPUT_JSON]" in command5_launcher_text and
+      'run_probe_bounded 10 generate-fast --input-hex' in command5_launcher_text and
+      "pacing changed input" not in command5_launcher_text)
 check("command-5 launcher matches the actual Python pandad supervisor command line",
       r"pgrep -f '^openpilot\\.selfdrive\\.pandad\\.pandad$'" not in command5_launcher_text and
       r"pgrep -f '^openpilot\.selfdrive\.pandad\.pandad$'" in command5_launcher_text)
@@ -713,6 +717,69 @@ check("command-5 host reuses all unchanged resident input words",
       retry_result_reused["outcome"] == "generated" and
       retry_result_reused["reused_input_words"] == list(range(9)) and
       retry_result_reused["chunk_commands"] == [])
+
+class _BurstPanda:
+    def __init__(self, state: dict, *, drop_word_once: int | None = None):
+        self.state = state
+        self.sent: list[tuple[int, bytes, int]] = []
+        self.drop_word_once = drop_word_once
+
+    def can_send(self, addr: int, dat: bytes, bus: int, **_kwargs) -> None:
+        self.sent.append((addr, bytes(dat), bus))
+        sequence, opcode = dat[2], dat[3]
+        self.state["last_sequence"] = sequence
+        if command5_probe.OP_WORD_BASE <= opcode < command5_probe.OP_WORD_BASE + 9:
+            word = opcode - command5_probe.OP_WORD_BASE
+            if self.drop_word_once == word:
+                self.drop_word_once = None
+                return
+            raw = bytearray.fromhex(self.state["input_hex"])
+            raw[word * 4:(word + 1) * 4] = dat[4:8]
+            self.state["input_hex"] = bytes(raw).hex()
+            self.state["input_bitmap"] = int(self.state["input_bitmap"]) | (1 << word)
+            self.state["input_complete"] = int(self.state["input_bitmap"]) == 0x1FF
+            self.state["state"] = 0
+        elif opcode == command5_probe.OP_EXECUTE:
+            self.state.update({
+                "state": 2, "wrapper_return_code": 0, "done_flag": 1, "command_status": 0,
+                "output_length": 16, "output_hex": command5_cmac.hex(),
+                "config_type": 1, "config_selector": 4, "config_valid": True,
+            })
+
+burst_domain = bytes.fromhex("00b6") + bytes(range(34))
+burst_state = {
+    **command5_decoded,
+    "last_sequence": 200,
+    "state": 0,
+    "input_bitmap": 0,
+    "input_complete": False,
+    "input_hex": (bytes(36)).hex(),
+    "config_valid": False,
+}
+burst_session = object.__new__(command5_probe.ProbeSession)
+burst_session.panda = _BurstPanda(burst_state, drop_word_once=4)
+burst_session.read_state = lambda: dict(burst_state)
+burst_result = burst_session.generate_fast(burst_domain)
+check("command-5 fast host path tick-paces words and repairs a missed word before execute",
+      burst_result["outcome"] == "generated" and
+      burst_result["transport"] == "foreground-tick-paced-burst" and
+      len(burst_result["chunk_commands"]) == 10 and
+      [row["word"] for row in burst_result["chunk_commands"]].count(4) == 2 and
+      burst_result["execute_attempts"][0]["completion_observation_reads"] == 1 and
+      burst_result["final_state"]["input_hex"] == burst_domain.hex() and
+      burst_result["timing"]["foreground_tick_s"] == 0.005 and
+      burst_result["timing"]["word_interval_s"] == 0.010)
+burst_sent_before = len(burst_session.panda.sent)
+burst_result_reused = burst_session.generate_fast(burst_domain)
+check("command-5 fast host path reuses stable resident words and sends only execute",
+      burst_result_reused["outcome"] == "generated" and
+      burst_result_reused["reused_input_words"] == list(range(9)) and
+      burst_result_reused["chunk_commands"] == [] and
+      len(burst_session.panda.sent) == burst_sent_before + 1 and
+      burst_session.panda.sent[-1][1][3] == command5_probe.OP_EXECUTE)
+check("command-5 fast path remains observation-only",
+      burst_result["boundaries"]["transmitted_b6"] is False and
+      burst_result["boundaries"]["persistent_flash_write"] is False)
 
 def _command5_rejects(candidate: bytes) -> bool:
     session = object.__new__(command5_probe.ProbeSession)

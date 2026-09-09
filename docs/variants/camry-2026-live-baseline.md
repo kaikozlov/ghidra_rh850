@@ -5959,3 +5959,18 @@ SecOC/domain reconstruction pass: capture the Panda TX echo and every vehicle-si
 first ~120 ms after the one signed transmission, timestamped relative to the host send. If a
 new B6 stream starts only after the injection, its first payload/timing can be compared with
 the exact transmitted frame before later COM/freshness state overwrites attribution.
+
+
+The first live timing (`2.841 s` for the signed request) is **not ICU-S command-5
+latency**. The original host `generate` path performed a SID23 mailbox read before/after
+each changed 4-byte word and again around EXECUTE. The resident itself samples the one-frame
+control staging cell once per exact 5-ms foreground tick. A second host path,
+`f33-sign generate-fast`, therefore leaves the audited resident unchanged: it sends changed
+input words 10 ms apart (two foreground ticks), performs no SID23 read between words, then
+reads the mailbox once and requires the exact 36-byte input plus bitmap `0x1FF` before it can
+send EXECUTE. If a word was missed it retransmits only the missing/mismatched words, again
+verifies exact assembly, and still refuses to execute on a mismatch. EXECUTE similarly avoids
+the redundant pre-send mailbox read. This path never transmits B6 and is intended to measure
+the real remaining command-5/observation latency on the next live READY session. Its live
+timing is not yet qualified, so no 50-Hz signer claim is made from the static transport
+reduction alone.
