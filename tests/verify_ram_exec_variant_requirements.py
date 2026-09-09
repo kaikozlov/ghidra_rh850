@@ -6,6 +6,7 @@ import json
 import os
 import struct
 import sys
+import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -271,6 +272,51 @@ finally:
         os.environ["DIRECT_PANDA_PAUSED_SUPERVISOR_PID"] = original_paused
 check("host guard permits only the explicitly stopped pandad supervisor PID",
       paused_supervisor_allowed and seen_process_checks == [
+          ("pgrep", "-f", r"selfdrive\.pandad\.pandad"), ("pidof", "pandad"), ("pidof", "boardd"),
+      ])
+
+original_lease_supervisor = os.environ.get("DIRECT_PANDA_LEASE_SUPERVISOR_PID")
+original_lease_id = os.environ.get("DIRECT_PANDA_LEASE_ID")
+original_lease_path = ram_exec.DIRECT_PANDA_LEASE_PATH
+original_ready_path = ram_exec.DIRECT_PANDA_LEASE_READY_PATH
+original_process_state = ram_exec._process_state
+with tempfile.TemporaryDirectory() as td:
+    ram_exec.DIRECT_PANDA_LEASE_PATH = Path(td) / "lease"
+    ram_exec.DIRECT_PANDA_LEASE_READY_PATH = Path(td) / "ready"
+    lease_id = "1234 exact-test-token"
+    ram_exec.DIRECT_PANDA_LEASE_PATH.write_text(lease_id + "\n")
+    ram_exec.DIRECT_PANDA_LEASE_READY_PATH.write_text(lease_id + "\n")
+    os.environ["DIRECT_PANDA_LEASE_SUPERVISOR_PID"] = "1234"
+    os.environ["DIRECT_PANDA_LEASE_ID"] = lease_id
+    ram_exec._process_state = lambda pid: "S"
+    seen_process_checks = []
+    ram_exec.subprocess.run = _fake_pandad_running
+    try:
+        ram_exec.ensure_boardd_stopped()
+        cooperative_lease_allowed = True
+    except ram_exec.RamExecError:
+        cooperative_lease_allowed = False
+    ram_exec.DIRECT_PANDA_LEASE_READY_PATH.write_text("1234 wrong-token\n")
+    try:
+        ram_exec.ensure_boardd_stopped()
+        wrong_lease_rejected = False
+    except ram_exec.RamExecError as exc:
+        wrong_lease_rejected = "not acknowledged" in str(exc)
+    finally:
+        ram_exec.subprocess.run = original_run
+        ram_exec._process_state = original_process_state
+        ram_exec.DIRECT_PANDA_LEASE_PATH = original_lease_path
+        ram_exec.DIRECT_PANDA_LEASE_READY_PATH = original_ready_path
+        if original_lease_supervisor is None:
+            os.environ.pop("DIRECT_PANDA_LEASE_SUPERVISOR_PID", None)
+        else:
+            os.environ["DIRECT_PANDA_LEASE_SUPERVISOR_PID"] = original_lease_supervisor
+        if original_lease_id is None:
+            os.environ.pop("DIRECT_PANDA_LEASE_ID", None)
+        else:
+            os.environ["DIRECT_PANDA_LEASE_ID"] = original_lease_id
+check("host guard accepts only an exact acknowledged cooperative pandad lease",
+      cooperative_lease_allowed and wrong_lease_rejected and seen_process_checks == [
           ("pgrep", "-f", r"selfdrive\.pandad\.pandad"), ("pidof", "pandad"), ("pidof", "boardd"),
       ])
 check("deployer exposes explicit RAM-load hook", "--ram-load-addr" in deploy_source)

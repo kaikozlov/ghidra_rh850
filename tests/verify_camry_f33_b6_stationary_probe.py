@@ -655,18 +655,20 @@ check("command-5 launcher exposes non-transmitting paced-burst timing probe",
       "./f33-sign generate-fast 72_HEX_DIGITS [OUTPUT_JSON]" in command5_launcher_text and
       'run_probe_bounded 10 generate-fast --input-hex' in command5_launcher_text and
       "pacing changed input" not in command5_launcher_text)
-check("command-5 launcher matches the actual Python pandad supervisor command line",
-      r"pgrep -f '^openpilot\\.selfdrive\\.pandad\\.pandad$'" not in command5_launcher_text and
-      r"pgrep -f '^openpilot\.selfdrive\.pandad\.pandad$'" in command5_launcher_text)
-check("command-5 launcher preserves the device watchdog across a bounded Panda lease",
+panda_lease_text = (
+    ROOT / "exploit/ephemeral_runtime/f33_panda_lease.sh"
+).read_text(encoding="utf-8")
+check("shared Panda lease helper matches the actual Python pandad supervisor command line",
+      r"pgrep -f '^openpilot\\.selfdrive\\.pandad\\.pandad$'" not in panda_lease_text and
+      r"pgrep -f '^openpilot\.selfdrive\.pandad\.pandad$'" in panda_lease_text)
+check("command-5 launcher uses cooperative Panda lease without stopping manager/pandad wrapper",
       "pkill -TERM -f '/openpilot/system/manager" not in command5_launcher_text and
       "systemctl stop openpilot" not in command5_launcher_text and
-      'kill -STOP "$PANDAD_WRAPPER_PID"' in command5_launcher_text and
-      'kill -CONT "$PANDAD_WRAPPER_PID"' in command5_launcher_text and
-      "start_power_watchdog_keeper" in command5_launcher_text and
-      'Path("/var/tmp/power_watchdog")' in command5_launcher_text and
-      "time.monotonic()" in command5_launcher_text and
-      "trap restore_panda_owner EXIT INT TERM" in command5_launcher_text and
+      'kill -STOP "$PANDAD_WRAPPER_PID"' not in command5_launcher_text and
+      'kill -CONT "$PANDAD_WRAPPER_PID"' not in command5_launcher_text and
+      "start_power_watchdog_keeper" not in command5_launcher_text and
+      "f33_panda_lease.sh" in command5_launcher_text and
+      "source \"$PANDA_LEASE_LIB\"" in command5_launcher_text and
       'timeout --signal=TERM --kill-after=2 "${seconds}s"' in command5_launcher_text)
 
 retry_session = object.__new__(command5_probe.ProbeSession)
@@ -814,6 +816,19 @@ check("inline signer scratch is wholly SID23-readable below the protected bounda
       inline_signer.SCRATCH_BASE == 0xFEBF0200 and inline_signer.SCRATCH_SIZE == 0x48 and
       inline_signer.SCRATCH_BASE + inline_signer.SCRATCH_SIZE == inline_signer.STATE_BASE and
       probe.validate_read(probe.RAM_ID, inline_signer.SCRATCH_BASE, inline_signer.SCRATCH_SIZE) is None)
+telemetry_raw = (
+    (11).to_bytes(4, "little") + (7).to_bytes(4, "little") + (5).to_bytes(4, "little") +
+    (3).to_bytes(4, "little") + (32).to_bytes(2, "little") + bytes((1, 0)) + bytes.fromhex("a1b2c3d4")
+)
+telemetry_decoded = inline_signer.decode_signer_telemetry(telemetry_raw)
+check("inline signer telemetry is readable and preserves every helper gate",
+      inline_signer.TELEMETRY_BASE == inline_signer.STATE_BASE + inline_signer.STATE_SIZE and
+      inline_signer.TELEMETRY_BASE + inline_signer.TELEMETRY_SIZE <= inline_signer.APPLICATION_RMBA_PROTECTED_START and
+      probe.validate_read(probe.RAM_ID, inline_signer.TELEMETRY_BASE, inline_signer.TELEMETRY_SIZE) is None and
+      telemetry_decoded["helper_invocations"] == 11 and telemetry_decoded["queue32_hits"] == 7 and
+      telemetry_decoded["zero_trailer_hits"] == 5 and telemetry_decoded["command5_attempts"] == 3 and
+      telemetry_decoded["last_queue_length"] == 32 and telemetry_decoded["last_done_flag"] == 1 and
+      telemetry_decoded["last_command_status"] == 0 and telemetry_decoded["last_trailer_hex"] == "a1b2c3d4")
 
 # The loader mailbox stores only the latest 8-byte control frame. Prove that a
 # completely missed first transfer pass is retried rather than aborting, and
@@ -877,13 +892,15 @@ with tempfile.TemporaryDirectory() as td:
     inline = manifest["ram_experiments"]["b6_inline_signer"]
     check("kit packages autonomous inline B6 signer as the primary fast path",
           inline["launcher"] == "f33-secoc" and
-          inline["resident_base"] == "0xFEBFF9F0" and inline["resident_size"] == 498 and
-          inline["resident_sha256"] == "fa53b9bbaf9029c34f8d68afb6f7c223d5964f3285ae112eaa7914d5cd1664cb" and
-          inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 356 and
-          inline["helper_word_count"] == 89 and
-          inline["helper_padded_sha256"] == "afae1543e57a8f3555500eb624b8fd2385dff6165b4995b4f26bca1abb344d11" and
+          inline["resident_base"] == "0xFEBFF9F0" and inline["resident_size"] == 520 and
+          inline["resident_sha256"] == "d2d071f8caf50c6bcd3d4815aa4e040a145ac1f3f2f00c72e4c36046f8b3576e" and
+          inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 412 and
+          inline["helper_word_count"] == 103 and
+          inline["helper_padded_sha256"] == "bdb182d7dc27b7a824bd10b445a688e09a2a8555952da71db2e525beb28c5811" and
           inline["state"]["base"] == "0xFEBF0248" and inline["state"]["magic"] == "0x53364249" and
+          inline["telemetry"]["base"] == "0xFEBF0254" and inline["telemetry"]["size"] == 0x18 and
           probe.validate_read(probe.RAM_ID, int(inline["state"]["base"], 0), inline["state"]["size"]) is None and
+          probe.validate_read(probe.RAM_ID, int(inline["telemetry"]["base"], 0), inline["telemetry"]["size"]) is None and
           inline["control_can_id"] == "0x1FDC0002" and
           "00000000" in inline["trigger"] and "EPS" in inline["freshness_owner"] and
           inline["mutation_boundary"]["application_bytes_b0_b27_unchanged"] is True and
@@ -903,6 +920,8 @@ with tempfile.TemporaryDirectory() as td:
           "does not prove slot 4 is forbidden" in signer["negative_semantics"] and
           signer["persistent_flash_write"] is False and signer["key_extraction"] is False and
           signer["resident_b6_transmit"] is False and signer["secoc_bypass"] is False and
+          "cooperative exact-token lease" in signer["panda_ownership"] and
+          "without reset/recovery/flash" in signer["panda_ownership"] and
           manifest["ram_experiments"]["order"][1].startswith("command5_probe is retained as the already-live-qualified"))
     check("kit makes deterministic mid-aggregate observer the immediate ingress experiment",
           mid["payload_sha256"] == midagg.EXPECTED_PAYLOAD_SHA256 and
@@ -1006,6 +1025,7 @@ with tempfile.TemporaryDirectory() as td:
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
+        "runtime/exploit/ephemeral_runtime/f33_panda_lease.sh",
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
         "runtime/exploit/followups/xcp_read_probe.py", "runtime/exploit/followups/xcp_daq_probe.py",
         "runtime/tools/targets/camry/live/camry_f33_steering_state_capture.py",
@@ -1025,6 +1045,11 @@ with tempfile.TemporaryDirectory() as td:
           "0x30D68=0x5A" in xcp_observer["live_status"] and
           "stock-native execution disabled" in xcp_observer["live_status"])
     runtime_source = (out / "runtime/exploit/common/ram_exec.py").read_text(encoding="utf-8")
+    lease_source = (out / "runtime/exploit/ephemeral_runtime/f33_panda_lease.sh").read_text(encoding="utf-8")
+    check("kit packages exact-token cooperative pandad lease helper",
+          "kill -WINCH" in lease_source and "openpilot-pandad-direct-ready" in lease_source and
+          "DIRECT_PANDA_LEASE_ID" in lease_source and 'kill -STOP "$PANDAD_WRAPPER_PID"' not in lease_source and
+          (out / "runtime/exploit/ephemeral_runtime/f33_panda_lease.sh").stat().st_mode & 0o111)
     check("kit embeds fixed P1M-E roots without standalone secret files",
           "ba052435f8843f985fd1329d2b6117b0" in runtime_source and
           "f05f36b7d78c03e24ab4faef2a57d044" in runtime_source and
@@ -1066,9 +1091,11 @@ with tempfile.TemporaryDirectory() as td:
     secoc_launcher_text = secoc_launcher.read_text(encoding="utf-8")
     check("inline signer launcher preserves manager lifecycle and exposes install/load-arm/status",
           "systemctl stop openpilot" not in secoc_launcher_text and
-          'kill -STOP "$PANDAD_WRAPPER_PID"' in secoc_launcher_text and
-          'kill -CONT "$PANDAD_WRAPPER_PID"' in secoc_launcher_text and
-          "start_power_watchdog_keeper" in secoc_launcher_text and
+          'kill -STOP "$PANDAD_WRAPPER_PID"' not in secoc_launcher_text and
+          'kill -CONT "$PANDAD_WRAPPER_PID"' not in secoc_launcher_text and
+          "start_power_watchdog_keeper" not in secoc_launcher_text and
+          "f33_panda_lease.sh" in secoc_launcher_text and
+          "source \"$PANDA_LEASE_LIB\"" in secoc_launcher_text and
           "load-arm" in secoc_launcher_text and "camry_f33_b6_inline_signer_helper_padded.bin" in secoc_launcher_text)
     local_openpilot = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
     local_python = local_openpilot / ".venv/bin/python"
@@ -1080,7 +1107,8 @@ with tempfile.TemporaryDirectory() as td:
     secoc_plan_obj = json.loads(secoc_plan.stdout) if secoc_plan.returncode == 0 else {}
     check("built inline signer launcher plan is no-roundtrip architecture",
           secoc_plan.returncode == 0 and secoc_plan_obj.get("schema") == "camry-f33-b6-inline-signer-plan-v1" and
-          secoc_plan_obj.get("resident", {}).get("size") == 498 and secoc_plan_obj.get("helper", {}).get("word_count") == 89,
+          secoc_plan_obj.get("resident", {}).get("size") == 520 and secoc_plan_obj.get("helper", {}).get("word_count") == 103 and
+          secoc_plan_obj.get("telemetry", {}).get("base") == "0xFEBF0254",
           secoc_plan.stderr[-300:])
     doctor = subprocess.run([str(launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
     check("built launcher doctor validates imports and payload without Panda access",
