@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import struct
 import sys
 from pathlib import Path
@@ -249,6 +250,29 @@ except ram_exec.RamExecError:
 finally:
     ram_exec.subprocess.run = original_run
 check("host guard allows direct access only after checking all known owners", no_owner_allowed and seen_process_checks == [("pgrep", "-f", r"selfdrive\.pandad\.pandad"), ("pidof", "pandad"), ("pidof", "boardd")])
+
+original_process_state = ram_exec._process_state
+original_paused = os.environ.get("DIRECT_PANDA_PAUSED_SUPERVISOR_PID")
+os.environ["DIRECT_PANDA_PAUSED_SUPERVISOR_PID"] = "1234"
+ram_exec._process_state = lambda pid: "T"
+seen_process_checks = []
+ram_exec.subprocess.run = _fake_pandad_running
+try:
+    ram_exec.ensure_boardd_stopped()
+    paused_supervisor_allowed = True
+except ram_exec.RamExecError:
+    paused_supervisor_allowed = False
+finally:
+    ram_exec.subprocess.run = original_run
+    ram_exec._process_state = original_process_state
+    if original_paused is None:
+        os.environ.pop("DIRECT_PANDA_PAUSED_SUPERVISOR_PID", None)
+    else:
+        os.environ["DIRECT_PANDA_PAUSED_SUPERVISOR_PID"] = original_paused
+check("host guard permits only the explicitly stopped pandad supervisor PID",
+      paused_supervisor_allowed and seen_process_checks == [
+          ("pgrep", "-f", r"selfdrive\.pandad\.pandad"), ("pidof", "pandad"), ("pidof", "boardd"),
+      ])
 check("deployer exposes explicit RAM-load hook", "--ram-load-addr" in deploy_source)
 check(
     "deployer requires provenance for non-default RAM geometry",

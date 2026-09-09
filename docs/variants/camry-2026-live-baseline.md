@@ -5934,3 +5934,28 @@ The deterministic builder, audited stage, host client, and field launcher are
 `exploit/ephemeral_runtime/camry_f33_command5_probe.py`, and packaged `f33-sign`.
 `tests/verify_camry_f33_b6_stationary_probe.py` pins the firmware records, call targets, linked
 identities, mailbox decoder, and opendbc-compatible authenticated-domain construction.
+
+### 70.1 Live slot-4 generation succeeds; first signed B6 requires immediate attribution
+
+The exact-F33 resident was installed and exercised on the maintainer Camry on 2026-09-09.
+A 36-byte all-zero B6 domain (`00B6 || application28 || freshness48`) completed on the
+first command-5 attempt with wrapper return 0, done 1, status 0, output length 16, and
+CMAC `00d0b1eca59d0760eddc5efb5b58d1d5`. This closes the live permission question for
+this EPS: provisioned selector 4 permits command-5 CMAC generation over a production-size
+B6 authenticated domain.
+
+A later one-frame inactive discriminator signed reset 5703/message 0 and transmitted
+exactly one bus-0 FD B6 at the signed reset epoch. Panda returned one TX echo. The frame
+was ID0, current-angle (`-5` raw), additive-suppressed, and carried CMAC
+`079a2a17780b04a281827d768d11c20a` / MAC28 `079a2a1`. The later SID23 witness did not
+contain that exact frame: its B6 COM window had the same target angle but a different
+application sequence/companion/trailer, while the committed B6 freshness record had already
+advanced to message 17. Those reads are therefore too late to classify the signed frame as
+accepted or rejected.
+
+A transmission-free two-second control while openpilot's Panda owner was quiesced observed
+zero vehicle-side B6 frames. The next discriminator is consequently timing-local, not another
+SecOC/domain reconstruction pass: capture the Panda TX echo and every vehicle-side B6 in the
+first ~120 ms after the one signed transmission, timestamped relative to the host send. If a
+new B6 stream starts only after the injection, its first payload/timing can be compared with
+the exact transmitted frame before later COM/freshness state overwrites attribution.

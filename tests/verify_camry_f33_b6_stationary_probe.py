@@ -563,6 +563,54 @@ command5_app = bytes(range(28))
 check("command-5 B6 domain matches opendbc DataID/application/freshness framing",
       command5_probe.build_b6_domain(command5_app, 0x1234, 0x56789, 0xAB) ==
       bytes.fromhex("00b6") + command5_app + bytes.fromhex("123456789ab4"))
+freshness_record = (
+    (0x1234).to_bytes(4, "little") + (0x56789).to_bytes(4, "little") +
+    (0xAB).to_bytes(2, "little") + bytes.fromhex("5a00")
+)
+check("command-5 host decodes exact 12-byte ordinary freshness record",
+      command5_probe.decode_freshness_record(freshness_record) == {
+          "raw_hex": freshness_record.hex(), "trip_counter": 0x1234,
+          "reset_counter": 0x56789, "message_counter": 0xAB, "aux_hex": "5a00",
+      })
+check("command-5 host chooses a strictly-forward same-epoch message counter",
+      command5_probe.next_b6_message_counter(
+          live_trip=0x1234, live_reset=0x56789,
+          committed=command5_probe.decode_freshness_record(freshness_record),
+      ) == (0xAC, "strictly_forward_same_epoch"))
+older_record = command5_probe.decode_freshness_record(bytes(12))
+check("command-5 host seeds any newer live epoch at message zero",
+      command5_probe.next_b6_message_counter(
+          live_trip=0x1234, live_reset=0x56789, committed=older_record,
+      ) == (0, "newer_live_epoch_seed_zero"))
+check("command-5 host advances and mirrors F33 +/-2 reset candidate window",
+      command5_probe.advance_reset_epoch(0x1234, 0xFFFFF, 1) == (0x1235, 0) and
+      [command5_probe.receiver_candidate_offset(
+          signed_trip=0x1234, signed_reset=0x56789 + delta,
+          current_trip=0x1234, current_reset=0x56789,
+      ) for delta in range(4)] == [0, 1, 2, None] and
+      command5_probe.receiver_candidate_offset(
+          signed_trip=0x1234, signed_reset=0xFFFFF,
+          current_trip=0x1235, current_reset=0,
+      ) == -1)
+signed_id0_app = command5_probe.build_inactive_b6_application(target_angle_raw=-2, sequence=63)
+signed_id0_frame = command5_probe.build_signed_b6_frame(
+    application=signed_id0_app, reset_counter=0x56789, message_counter=0xAB,
+    cmac=bytes(range(0xA0, 0xB0)),
+)
+check("command-5 post-permission frame is exact ID0/current-angle suppressed shape",
+      signed_id0_app.hex() == "00000000fffe043f" + "00" * 20 and
+      signed_id0_frame.hex() == signed_id0_app.hex() + "da0a1a2a" and
+      signed_id0_frame[3] == 0 and signed_id0_frame[6] == 4 and signed_id0_frame[8:10] == bytes(2))
+check("command-5 post-permission trailer packs FV4 plus CMAC MSB28",
+      signed_id0_frame[28] >> 4 == 0xD and
+      (int.from_bytes(signed_id0_frame[28:32], "big") & 0x0FFFFFFF) == 0x0A0A1A2A)
+check("command-5 signed discriminator binds the exact authenticated-sync and B6 state windows",
+      command5_probe.AUTHENTICATED_SYNC_BASE == 0xFEBE55C0 and
+      command5_probe.AUTHENTICATED_SYNC_SIZE == 8 and
+      command5_probe.FRESHNESS_STATE_BASE == 0xFEBE55DC and
+      command5_probe.FRESHNESS_STATE_SIZE == 48 and
+      command5_probe.B6_COM_WINDOW == 0xFEBE4C02 and
+      command5_probe.B6_COM_WINDOW_SIZE == 29)
 command5_raw = bytearray(command5_probe.MAILBOX_SIZE)
 command5_raw[0:4] = command5_probe.MAILBOX_MAGIC.to_bytes(4, "little")
 command5_raw[4] = command5_probe.MAILBOX_VERSION
@@ -596,6 +644,26 @@ check("command-5 result classification preserves permission uncertainty",
       command5_probe.classify_command5_result(terminal_state)[:3] == ("terminal_driver_error", None, False) and
       command5_probe.classify_command5_result(bad_config_state)[:3] == ("resident_config_contract_error", None, False) and
       command5_probe.classify_command5_result(bad_completion_state)[:3] == ("completion_contract_error", None, False))
+command5_launcher_text = (
+    ROOT / "exploit/ephemeral_runtime/camry_f33_command5_launcher.sh"
+).read_text(encoding="utf-8")
+check("command-5 launcher exposes only one bounded signed ID0 B6 discriminator",
+      "./f33-sign signed-id0 [OUTPUT_JSON]" in command5_launcher_text and
+      'run_probe_bounded 30 signed-id0 --execute --parked-stationary-confirmed' in command5_launcher_text and
+      command5_launcher_text.count("signed-id0)") == 1)
+check("command-5 launcher matches the actual Python pandad supervisor command line",
+      r"pgrep -f '^openpilot\\.selfdrive\\.pandad\\.pandad$'" not in command5_launcher_text and
+      r"pgrep -f '^openpilot\.selfdrive\.pandad\.pandad$'" in command5_launcher_text)
+check("command-5 launcher preserves the device watchdog across a bounded Panda lease",
+      "pkill -TERM -f '/openpilot/system/manager" not in command5_launcher_text and
+      "systemctl stop openpilot" not in command5_launcher_text and
+      'kill -STOP "$PANDAD_WRAPPER_PID"' in command5_launcher_text and
+      'kill -CONT "$PANDAD_WRAPPER_PID"' in command5_launcher_text and
+      "start_power_watchdog_keeper" in command5_launcher_text and
+      'Path("/var/tmp/power_watchdog")' in command5_launcher_text and
+      "time.monotonic()" in command5_launcher_text and
+      "trap restore_panda_owner EXIT INT TERM" in command5_launcher_text and
+      'timeout --signal=TERM --kill-after=2 "${seconds}s"' in command5_launcher_text)
 
 retry_session = object.__new__(command5_probe.ProbeSession)
 retry_input = bytearray(36)
@@ -636,8 +704,15 @@ retry_session._send = _retry_send
 retry_result = retry_session.generate(bytes.fromhex("00b6") + bytes(range(34)))
 check("command-5 host retries only ambiguous busy/timeout and preserves attempt evidence",
       retry_result["outcome"] == "generated" and retry_result["slot4_command5_permitted"] is True and
+      retry_result["reused_input_words"] == [] and
       len(retry_result["execute_attempts"]) == 2 and
       [row["outcome"] for row in retry_result["execute_attempts"]] == ["transient_busy_or_timeout", "generated"])
+retry_exec_count = 0
+retry_result_reused = retry_session.generate(bytes.fromhex("00b6") + bytes(range(34)))
+check("command-5 host reuses all unchanged resident input words",
+      retry_result_reused["outcome"] == "generated" and
+      retry_result_reused["reused_input_words"] == list(range(9)) and
+      retry_result_reused["chunk_commands"] == [])
 
 def _command5_rejects(candidate: bytes) -> bool:
     session = object.__new__(command5_probe.ProbeSession)
