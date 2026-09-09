@@ -440,6 +440,13 @@ surface and a safe control-transfer mechanism (or another stock service that sup
 both), all without a persistent firmware modification. Canonical target report:
 `../variants/camry-2026-live-baseline.md` §13 / VAR-057.
 
+That production boundary does not prevent a bounded ephemeral hardware test. VAR-154
+uses the already-live-proven authenticated boot transition to place a 522-byte
+direct-JARL resident in the high tail. It fixes command 5 to record 0, selector 4,
+and the 36-byte B6 domain, returns the 16-byte result through SID23, and transmits no
+B6. The probe tests slot permission only; it is not a production openpilot signing
+architecture and disappears on full EPS power-off. See the canonical Camry report §70.
+
 ### 5.4 Freshness state for `0x2E4` and `0x131`
 
 A stateful proxy cannot sign arbitrary payloads with a stateless CMAC call. It

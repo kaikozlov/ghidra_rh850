@@ -475,6 +475,8 @@ check("inter-tick monitor authenticated payload identity exact",
 
 print("\n== deterministic mid-aggregate B6 ingress observer ==")
 from exploit.ephemeral_runtime import camry_f33_b6_midaggregate_observer as midagg
+from exploit.ephemeral_runtime import build_camry_f33_command5_probe as command5_build
+from exploit.ephemeral_runtime import camry_f33_command5_probe as command5_probe
 midagg_source_path = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.S"
 midagg_builder_path = ROOT / "exploit/ephemeral_runtime/build_camry_f33_b6_midaggregate_observer.py"
 midagg_audit_path = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_midaggregate_observer_build.json"
@@ -510,6 +512,88 @@ check("mid-aggregate observer authenticated payload identity exact",
       len(midagg_payload) == 0x1000 and sha(midagg_payload) == midagg.EXPECTED_PAYLOAD_SHA256 and
       midagg_inspection.cmac_valid and midagg_inspection.crc_residue == 0xFFFFFFFF)
 
+print("\n== bounded exact-F33 command-5 permission probe ==")
+command5_out = ROOT / "build/out/ephemeral-runtime/camry-f33-command5-probe"
+command5_audit_path = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_command5_probe_build.json"
+command5_stage_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_command5_probe.bin"
+command5_build_run = subprocess.run(
+    [sys.executable, str(command5_build.BUILDER)], cwd=ROOT, capture_output=True, text=True, check=False)
+check("command-5 probe deterministic builder succeeds", command5_build_run.returncode == 0, command5_build_run.stderr[-300:])
+command5_meta = json.loads((command5_out / "camry_f33_command5_probe.json").read_text()) if command5_build_run.returncode == 0 else {}
+command5_resident = (command5_out / command5_meta["resident"]["path"]).read_bytes() if command5_meta else b""
+command5_stage = (command5_out / command5_meta["staging"]["path"]).read_bytes() if command5_meta else b""
+command5_payload = (command5_out / command5_meta["authenticated_payload"]["path"]).read_bytes() if command5_meta else b""
+check("command-5 exact target and deterministic identities",
+      command5_meta.get("target") == {"software_id": "8965F3307000", "codeflash_sha256": command5_build.IMAGE_SHA256} and
+      sha(command5_resident) == command5_probe.EXPECTED_RESIDENT_SHA256 == command5_meta["resident"]["sha256"] and
+      sha(command5_stage) == command5_probe.EXPECTED_STAGING_SHA256 == command5_meta["staging"]["sha256"] and
+      sha(command5_payload) == command5_probe.EXPECTED_PAYLOAD_SHA256 == command5_meta["authenticated_payload"]["sha256"])
+check("command-5 audited stage and metadata are exact",
+      command5_stage_path.read_bytes() == command5_stage and
+      json.loads(command5_audit_path.read_text()) == command5_meta)
+check("command-5 resident exactly fits live-proven high tail",
+      len(command5_resident) == command5_probe.RESIDENT_SIZE == 522 and
+      command5_meta["resident"]["headroom"] == 2 and command5_meta["resident"]["end_limit"] == "0xFEBFFBFC" and
+      command5_meta["resident"]["relocations"] == 0)
+check("command-5 only extra stock call is synchronous wrapper",
+      command5_meta["resident"]["jarl_targets"][-1] == "0x00089BC2" and
+      command5_meta["resident"]["jarl_targets"][:-1] == [f"0x{x:08X}" for x in command5_build.EXPECTED_RESIDENT_JARL_TARGETS])
+check("command-5 fixed wrapper contract and corrected output ABI", command5_meta["command5"] == {
+    "synchronous_wrapper": "0x00089BC2", "dispatcher": "0x00089440", "engine": "0x0008A720",
+    "driver_record": 0, "key_selector": 4, "input_length": 36, "output_length": 16,
+    "output_buffer": "0xFEBF0034", "output_length_cell": "0xFEBF000C",
+    "done_flag": "0xFEBF13BC", "status_flag": "0xFEBF13BD",
+} and "movea 0x24, r6, r7" in command5_build.SOURCE.read_text(encoding="utf-8") and
+      "movea 0x4824, r6, r7" not in command5_build.SOURCE.read_text(encoding="utf-8"))
+check("command-5 mutation boundary excludes actuation and extraction",
+      command5_meta["mutation_boundary"]["chosen_input_lengths"] == [36] and
+      command5_meta["mutation_boundary"]["key_selector_mutable"] is False and
+      command5_meta["mutation_boundary"]["key_extraction"] is False and
+      command5_meta["mutation_boundary"]["steering_can_transmit"] is False and
+      command5_meta["mutation_boundary"]["b6_transmit"] is False and
+      command5_meta["mutation_boundary"]["secoc_bypass"] is False and
+      command5_meta["mutation_boundary"]["codeflash_write"] is False)
+check("command-5 control frame is exact", command5_probe.command_frame(0x23, 0x35, 0x44332211) == bytes.fromhex("00c5233511223344"))
+command5_app = bytes(range(28))
+check("command-5 B6 domain matches opendbc DataID/application/freshness framing",
+      command5_probe.build_b6_domain(command5_app, 0x1234, 0x56789, 0xAB) ==
+      bytes.fromhex("00b6") + command5_app + bytes.fromhex("123456789ab4"))
+command5_raw = bytearray(command5_probe.MAILBOX_SIZE)
+command5_raw[0:4] = command5_probe.MAILBOX_MAGIC.to_bytes(4, "little")
+command5_raw[4] = command5_probe.MAILBOX_VERSION
+command5_raw[5:8] = bytes((0x23, 2, 0))
+command5_raw[8:10] = (0x1FF).to_bytes(2, "little")
+command5_raw[0x0A:0x0C] = bytes((0, 1))
+command5_raw[0x0C:0x10] = (16).to_bytes(4, "little")
+command5_domain = bytes(range(36))
+command5_cmac = bytes(range(0xA0, 0xB0))
+command5_raw[0x10:0x34] = command5_domain
+command5_raw[0x34:0x44] = command5_cmac
+command5_decoded = command5_probe.decode_mailbox(bytes(command5_raw))
+check("command-5 mailbox distinguishes wrapper/done/status/output",
+      command5_decoded["magic_ok"] and command5_decoded["version_ok"] and command5_decoded["state_name"] == "complete" and
+      command5_decoded["wrapper_return_code"] == 0 and command5_decoded["input_complete"] and
+      command5_decoded["command_status"] == 0 and command5_decoded["done_flag"] == 1 and
+      command5_decoded["output_length"] == 16 and command5_decoded["input_hex"] == command5_domain.hex() and
+      command5_decoded["output_hex"] == command5_cmac.hex())
+
+def _command5_rejects(candidate: bytes) -> bool:
+    session = object.__new__(command5_probe.ProbeSession)
+    try:
+        session.generate(candidate)
+    except command5_probe.Command5ProbeError:
+        return True
+    return False
+
+check("command-5 host rejects invalid lengths and non-B6 domains",
+      all(_command5_rejects(bytes(n)) for n in (0, 7, 12, 35, 37, 80)) and
+      _command5_rejects(b"\x00\xB7" + bytes(34)))
+check("command-5 plan is non-actuating and ephemeral", command5_probe.plan(None)["boundaries"] == {
+    "persistent_flash_write": False, "b6_transmit": False,
+    "steering_can_transmit": False, "key_extraction": False,
+    "arbitrary_length_or_selector": False,
+})
+
 print("\n== car-kit packaging ==")
 builder_path = ROOT / "tools/build_camry_f33_car_kit.py"
 builder_spec = importlib.util.spec_from_file_location("build_camry_f33_car_kit", builder_path)
@@ -524,7 +608,7 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v10 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v10" and manifest["target"] == {
+    check("kit manifest is self-contained v11 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v11" and manifest["target"] == {
         "eps_f181": "8965F3307000", "eps_diag": "0x7A1->0x7A9 bus0", "b6": "0x0B6/32 FD bus0",
     })
     check("kit pins live persistence-verified stage5 as current firmware", manifest["current_firmware"] == {
@@ -534,6 +618,15 @@ with tempfile.TemporaryDirectory() as td:
         "note": "live persistence-verified 2026-09-01; no further persistent patch is part of the observer experiment",
     })
     mid = manifest["ram_experiments"]["b6_midaggregate_observer"]
+    signer = manifest["ram_experiments"]["command5_probe"]
+    check("kit packages bounded high-tail command5 permission probe",
+          signer["payload_sha256"] == command5_probe.EXPECTED_PAYLOAD_SHA256 and
+          signer["staging_sha256"] == command5_probe.EXPECTED_STAGING_SHA256 and
+          signer["resident_sha256"] == command5_probe.EXPECTED_RESIDENT_SHA256 and
+          signer["resident_size"] == 522 and signer["mailbox"] == "0xFEBF0000..0xFEBF004B" and
+          signer["persistent_flash_write"] is False and signer["key_extraction"] is False and
+          signer["resident_b6_transmit"] is False and signer["secoc_bypass"] is False and
+          manifest["ram_experiments"]["order"][0].startswith("command5_probe is an independent"))
     check("kit makes deterministic mid-aggregate observer the immediate ingress experiment",
           mid["payload_sha256"] == midagg.EXPECTED_PAYLOAD_SHA256 and
           mid["staging_sha256"] == midagg.EXPECTED_STAGING_SHA256 and
@@ -547,7 +640,7 @@ with tempfile.TemporaryDirectory() as td:
           "0x0D7" in mid["same_scheduler_positive_control"] and mid["marker_jitter_ms"] == [11,17,23,13,19] and
           mid["sid23_reads_during_treatment"] == 0 and mid["source_memory_write"] is False and
           mid["secoc_bypass"] is False and mid["route44_publish"] is False and mid["live_qualified"] is False and
-          manifest["ram_experiments"]["order"][0].startswith("b6_midaggregate_observer install in NRTD"))
+          manifest["ram_experiments"]["order"][1].startswith("b6_midaggregate_observer install in NRTD"))
     mon = manifest["ram_experiments"]["runtime_monitor"]
     check("kit retains generic external-control monitor for downstream A-G localization",
           mon["payload_sha256"] == monitor.EXPECTED_PAYLOAD_SHA256 and
@@ -726,10 +819,28 @@ with tempfile.TemporaryDirectory() as td:
           ingress_plan_obj.get("payload", {}).get("sha256") == midagg.EXPECTED_PAYLOAD_SHA256 and
           ingress_plan_obj.get("treatment_statistics", {}).get("sid23_reads_during_block") == 0,
           ingress_plan.stderr[-300:])
+    sign_launcher = out / "f33-sign"
+    sign_launcher_text = sign_launcher.read_text(encoding="utf-8")
+    check("command-5 launcher pins host/payload identities",
+          "camry_f33_command5_probe.py" in sign_launcher_text and
+          "camry_f33_command5_probe_payload.bin" in sign_launcher_text and
+          command5_probe.EXPECTED_PAYLOAD_SHA256 in sign_launcher_text)
+    sign_doctor = subprocess.run([str(sign_launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
+    check("built command-5 launcher doctor validates exact payload without Panda access",
+          sign_doctor.returncode == 0 and "f33-sign doctor: PASS" in sign_doctor.stdout and
+          command5_probe.EXPECTED_PAYLOAD_SHA256 in sign_doctor.stdout, sign_doctor.stderr[-300:])
+    sign_plan = subprocess.run([str(sign_launcher), "plan"], cwd=out, env=env, capture_output=True, text=True, check=False)
+    sign_plan_obj = json.loads(sign_plan.stdout) if sign_plan.returncode == 0 else {}
+    check("built command-5 launcher plan resolves bounded non-actuating probe",
+          sign_plan.returncode == 0 and sign_plan_obj.get("schema") == "camry-f33-command5-probe-plan-v1" and
+          sign_plan_obj.get("payload", {}).get("sha256") == command5_probe.EXPECTED_PAYLOAD_SHA256 and
+          sign_plan_obj.get("boundaries", {}).get("b6_transmit") is False and
+          sign_plan_obj.get("boundaries", {}).get("key_extraction") is False, sign_plan.stderr[-300:])
     check("kit manifest hashes launchers and root runbook",
           manifest["files"]["f33"]["sha256"] == sha(launcher.read_bytes()) and
           manifest["files"]["f33-pre"]["sha256"] == sha(pre_launcher.read_bytes()) and
           manifest["files"]["f33-ingress"]["sha256"] == sha(ingress_launcher.read_bytes()) and
+          manifest["files"]["f33-sign"]["sha256"] == sha(sign_launcher.read_bytes()) and
           manifest["files"]["RUNBOOK.md"]["sha256"] == sha((out / "RUNBOOK.md").read_bytes()))
 
 print(f"\nResults: {passed} passed, {failed} failed")

@@ -24,6 +24,7 @@ from exploit.ephemeral_runtime import camry_f33_runtime_monitor as runtime_monit
 from exploit.ephemeral_runtime import camry_f33_runtime_monitor_preaggregate as preaggregate_monitor
 from exploit.ephemeral_runtime import camry_f33_runtime_monitor_intertick as intertick_monitor
 from exploit.ephemeral_runtime import camry_f33_b6_midaggregate_observer as midaggregate_observer
+from exploit.ephemeral_runtime import camry_f33_command5_probe as command5_probe
 from exploit.ephemeral_runtime import (
     camry_f33_b6_transaction_observer_install as observer_install,
 )
@@ -35,6 +36,7 @@ RUNBOOK_TEMPLATE = ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor_r
 FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_launcher.sh"
 PREAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_preaggregate_launcher.sh"
 MIDAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_midaggregate_launcher.sh"
+COMMAND5_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_command5_launcher.sh"
 F33_IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_transaction_observer.bin"
 BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
@@ -43,6 +45,7 @@ MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monito
 PREAGG_MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor_preaggregate.bin"
 INTERTICK_MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor_intertick.bin"
 MIDAGG_OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_midaggregate_observer.bin"
+COMMAND5_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_command5_probe.bin"
 DEFAULT_OPENPILOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
 RUNTIME_FILES = [
     "exploit/common/payload_package.py",
@@ -55,6 +58,7 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_runtime_monitor_preaggregate.py",
     "exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.py",
     "exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.py",
+    "exploit/ephemeral_runtime/camry_f33_command5_probe.py",
     "exploit/followups/xcp_read_probe.py",
     "exploit/followups/xcp_daq_probe.py",
     "exploit/followups/xcp_runtime_state_probe.py",
@@ -292,6 +296,7 @@ def build(out: Path, openpilot: Path) -> dict:
     preaggregate_monitor_payload = package_shellcode(PREAGG_MONITOR_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     intertick_monitor_payload = package_shellcode(INTERTICK_MONITOR_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     midaggregate_observer_payload = package_shellcode(MIDAGG_OBSERVER_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+    command5_probe_payload = package_shellcode(COMMAND5_PROBE_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     if hashlib.sha256(observer_payload).hexdigest() != observer_install.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("observer authenticated payload identity drift")
     if hashlib.sha256(bridge_payload).hexdigest() != bridge_install.EXPECTED_PAYLOAD_SHA256:
@@ -306,6 +311,8 @@ def build(out: Path, openpilot: Path) -> dict:
         raise RuntimeError("inter-tick runtime monitor authenticated payload identity drift")
     if hashlib.sha256(midaggregate_observer_payload).hexdigest() != midaggregate_observer.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("mid-aggregate observer authenticated payload identity drift")
+    if hashlib.sha256(command5_probe_payload).hexdigest() != command5_probe.EXPECTED_PAYLOAD_SHA256:
+        raise RuntimeError("command-5 probe authenticated payload identity drift")
     (ram_dir / "camry_f33_b6_transaction_observer_payload.bin").write_bytes(observer_payload)
     (ram_dir / "camry_f33_b6_bridge_payload.bin").write_bytes(bridge_payload)
     (ram_dir / "camry_f33_runtime_replay_discriminator_payload.bin").write_bytes(replay_payload)
@@ -313,6 +320,7 @@ def build(out: Path, openpilot: Path) -> dict:
     (ram_dir / "camry_f33_runtime_monitor_preaggregate_payload.bin").write_bytes(preaggregate_monitor_payload)
     (ram_dir / "camry_f33_runtime_monitor_intertick_payload.bin").write_bytes(intertick_monitor_payload)
     (ram_dir / "camry_f33_b6_midaggregate_observer_payload.bin").write_bytes(midaggregate_observer_payload)
+    (ram_dir / "camry_f33_command5_probe_payload.bin").write_bytes(command5_probe_payload)
 
     shutil.copy2(RUNBOOK_TEMPLATE, out / "RUNBOOK.md")
     launcher = out / "f33"
@@ -324,6 +332,9 @@ def build(out: Path, openpilot: Path) -> dict:
     ingress_launcher = out / "f33-ingress"
     shutil.copy2(MIDAGG_FIELD_LAUNCHER, ingress_launcher)
     ingress_launcher.chmod(0o755)
+    command5_launcher = out / "f33-sign"
+    shutil.copy2(COMMAND5_LAUNCHER, command5_launcher)
+    command5_launcher.chmod(0o755)
 
     files = {
         dst.name: {"sha256": sha256(dst)},
@@ -332,6 +343,7 @@ def build(out: Path, openpilot: Path) -> dict:
         "f33": {"sha256": sha256(launcher)},
         "f33-pre": {"sha256": sha256(preagg_launcher)},
         "f33-ingress": {"sha256": sha256(ingress_launcher)},
+        "f33-sign": {"sha256": sha256(command5_launcher)},
     }
     files.update(runtime_files)
     for path in sorted(p for p in ram_dir.rglob("*") if p.is_file()):
@@ -340,7 +352,7 @@ def build(out: Path, openpilot: Path) -> dict:
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
 
     manifest = {
-        "schema": "camry-f33-car-kit-v10",
+        "schema": "camry-f33-car-kit-v11",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
@@ -370,6 +382,26 @@ def build(out: Path, openpilot: Path) -> dict:
             },
         },
         "ram_experiments": {
+            "command5_probe": {
+                "payload": "ram_payloads/camry_f33_command5_probe_payload.bin",
+                "payload_sha256": command5_probe.EXPECTED_PAYLOAD_SHA256,
+                "staging_sha256": command5_probe.EXPECTED_STAGING_SHA256,
+                "resident_sha256": command5_probe.EXPECTED_RESIDENT_SHA256,
+                "resident_base": f"0x{command5_probe.RESIDENT_BASE:08X}",
+                "resident_size": command5_probe.RESIDENT_SIZE,
+                "mailbox": f"0x{command5_probe.MAILBOX_BASE:08X}..0x{command5_probe.MAILBOX_BASE + command5_probe.MAILBOX_SIZE - 1:08X}",
+                "operation": "stock synchronous command-5 wrapper, driver record 0, selector 4, exactly 36 input bytes and 16 output bytes",
+                "input_domain": "DataID 00B6 || B6 application B0..B27 || full 6-byte freshness",
+                "success_verdict": "slot4_command5_permitted=true with wrapper rc=0, done=1, status=0, output_length=16",
+                "next_after_success": "use the returned MSB28 in one separately reviewed stock-EPS stationary B6 discriminator; this probe itself never transmits B6",
+                "persistent_flash_write": False,
+                "dynamic_call": False,
+                "key_extraction": False,
+                "resident_steering_transmit": False,
+                "resident_b6_transmit": False,
+                "secoc_bypass": False,
+                "live_qualified": False,
+            },
             "b6_midaggregate_observer": {
                 "payload": "ram_payloads/camry_f33_b6_midaggregate_observer_payload.bin",
                 "payload_sha256": midaggregate_observer.EXPECTED_PAYLOAD_SHA256,
@@ -511,6 +543,7 @@ def build(out: Path, openpilot: Path) -> dict:
                 "requires_before_arm": "first prove the exact injected ID63 frame reaches profile2 with b6_midaggregate_observer; bridge is a later controlled transformation experiment",
             },
             "order": [
+                "command5_probe is an independent non-actuating discriminator: install in NRTD, run exactly one 36-byte selector-4 request in READY/Park/stationary, then power OFF",
                 "b6_midaggregate_observer install in NRTD; attestation is resident SHA plus mailbox magic/version and does not require receive-gated counter progress",
                 "direct NRTD->READY without OFF; run b6_midaggregate_observer selfcheck and require native D7 same-scheduler positive control",
                 "only after selfcheck passes, run b6_midaggregate_observer ID63 marker on bus0 and stop at exact signature-match or bounded D7-positive no-marker verdict",
