@@ -1038,7 +1038,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
   The **recovered stock pivot surface is now statically exhausted**, rather than
   merely missing an obvious callback. CORR-123 refreshes that conclusion against
-  the current first-class 6,062-function graph: **496 decoded indirect transfers**
+  the current first-class 6,065-function graph: **496 decoded indirect transfers**
   exist in total (403 `jarl` / 93 `jmp`), **487 in application CodeFlash**
   (395 / 92). The function-owned classifier covers 495 total and **all 487
   application sites**; among its direct target-definition references, 152 resolve
@@ -1177,8 +1177,9 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   the between-tick interval used by the already-run Phase-Q-v1. The marker-filtered inter-tick
   Q-v2 artifact is superseded before live use.
 
-  The immediate field discriminator is VAR-152's deterministic **498/524-byte mid-aggregate
-  observer** with 26 bytes headroom. It observes after `79EDE` returns and before untouched
+  If physical Panda-to-F33 admission must be distinguished for harness design, the correct
+  field discriminator is VAR-152's deterministic **498/524-byte mid-aggregate observer**
+  with 26 bytes headroom. It observes after `79EDE` returns and before untouched
   stock `0x7A272` reaches `6A410`, while preserving the original stock suffixes and `DISPOSE`
   behavior. NRTD install attests the resident identity plus mailbox magic/version without
   requiring receive-gated counter progress; the observer preserves arbitrary counter
@@ -1194,10 +1195,22 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   Do **not** substitute the abandoned foreground RSCFD poll: the lower-level hardware receive
   path still drains under interrupt context `71508 -> 66026 -> 667B6 -> 7A232 -> 79EBA ->
   83CE4 -> 83E0C`. The old C observer remains ABI-blocked. The assembly v3 route44 bridge is
-  ABI-safe but intentionally not next; use it only after exact ingress identity is settled.
+  ABI-safe but its current between-aggregate queue snapshot is timing-blind to the now-proven
+  same-invocation lifetime; it is an ephemeral diagnostic intervention, not production design.
   Counter phase, MAC value, B6 companion guesses, `0x08A` suppression, and another result
-  patch remain unjustified. Resolving OQ-054 remains required for stock architecture, not for
-  this independent B6 ingress discriminator.
+  patch remain unjustified.
+
+  VAR-153/CORR-186 now close the EPS-side source question. The promoted `810F2` and `7D72C`
+  functions join rule39/PDU44 through family1/profile2 delivery into route44, where `7D72C`
+  copies the received 32 bytes unchanged and solely invokes `8E772(44)`. No local B6
+  constructor, sanitizer, replacement path, or autonomous route44 ticker is recovered. The
+  retained zero-host-TX route44 activity is therefore an independent successful protected
+  receive stream (or an unrecovered mechanism), not evidence that Panda ID11 was rewritten to
+  ID0. Toyota diagnostics associate the immediate missing-message peer with the Brake System
+  Control Module/category-435 domain. OQ-054 must now recover the exact external B6 physical
+  transmitter/link, stock request handoff, signing owner, and source-suppression mechanism,
+  alongside the already-open `0x08A/0x081` proxy contract. The mid-aggregate observer is
+  optional topology evidence; it is no longer needed to rediscover EPS software routing.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

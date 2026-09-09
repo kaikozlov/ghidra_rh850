@@ -62,8 +62,8 @@ corpus = load_corpus()
 j = json.loads(ART.read_text())
 check("exact firmware and complete canonical corpus pinned",
       hashlib.sha256(image).hexdigest() == EXPECTED_SHA
-      and j["target"] == {"software_id": "8965F3307000", "codeflash_sha256": EXPECTED_SHA, "canonical_function_count": 6062}
-      and len(corpus) == 6062)
+      and j["target"] == {"software_id": "8965F3307000", "codeflash_sha256": EXPECTED_SHA, "canonical_function_count": 6065}
+      and len(corpus) == 6065)
 
 # Independently decode the two raw configuration records used before any decompiler semantics.
 canif = 0x21FE8 + 39 * 8

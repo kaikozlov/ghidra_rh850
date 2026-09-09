@@ -1,0 +1,459 @@
+{
+  "canif_pdur": {
+    "controller0_descriptor_range": [
+      0,
+      43
+    ],
+    "foreground_ring_drain_path": [
+      "0x000667E6",
+      "0x0007A254",
+      "0x00079EDE",
+      "0x000809FE",
+      "0x000808D6",
+      "0x00080884"
+    ],
+    "legacy_checksum_enforced_for_pdu44": false,
+    "legacy_checksum_hook_executes": true,
+    "legacy_checksum_record_hex": "2c00000bb8010200",
+    "lower_dispatcher": "0x00081D30",
+    "lower_route44": [
+      44,
+      44
+    ],
+    "normal_callback_table": [
+      "0x000810F2",
+      "0x00081072",
+      "0x00081200",
+      "0x00081072",
+      "0x00081072",
+      "0x00081072"
+    ],
+    "pdu44_flags": "0x10",
+    "secured_ingress_callback": "0x0008EE7C"
+  },
+  "canonical_graph_repair": {
+    "added_real_entries": [
+      "0x00071508",
+      "0x0007D72C",
+      "0x000810F2"
+    ],
+    "distinction": "These are three real omitted entries, not a reversal of CORR-181's three false +4 child splits at BCD66/CCFB6/CEE80.",
+    "function_count_after": 6065,
+    "function_count_before": 6062
+  },
+  "function_evidence": {
+    "0x0004BD46": {
+      "body_sha256": "db4f6577d4a3250c7277730ee2f3c3e3fb71ffa83c6103ff1cd4c5b982f65b62",
+      "body_size": 390,
+      "decompiled_c_sha256": "6276e8aafdd85f37619cff2c474ffadf71e60dfada9a26a16b39ad04c7c08368",
+      "role": "generated-COM route44 unpacker"
+    },
+    "0x00066026": {
+      "body_sha256": "da415cc00b1daa8fceb5e10e2c6ee095d54d03a4906e24bbbd0678b360fb386f",
+      "body_size": 60,
+      "decompiled_c_sha256": "3c4ca6ecc2f9155e9aa295c5808ec4659376e3d95b21621a010f75359e74ea53",
+      "role": "interrupt dispatch aggregate"
+    },
+    "0x000667B6": {
+      "body_sha256": "14f79d49ceb6a6eb8b9089f4ca4416a08dafcb623822a33cf9529cd24fce730c",
+      "body_size": 48,
+      "decompiled_c_sha256": "8908e3d8c76c00691d7da6e3491b101390776c626b0f3a8e48ba972ae5068224",
+      "role": "CAN receive interrupt task"
+    },
+    "0x000667E6": {
+      "body_sha256": "96d89859e02738c11ddd556d055628f6e75a1e0b88c8f129e2dba902a34a5307",
+      "body_size": 32,
+      "decompiled_c_sha256": "4c93b2b1eac009afbe06ba81cfb0e025fc2ee98c2afb2be84867c13692ecf16c",
+      "role": "foreground communications/application aggregate"
+    },
+    "0x0006A32C": {
+      "body_sha256": "ea189420fd5f497573b1a378591da15abe3e6e1eecfd8bd3da5d357eff618352",
+      "body_size": 146,
+      "decompiled_c_sha256": "73c13e10230fb7b4799093b809fd033cc8723de43eb61b84249a79cfeb287b2a",
+      "role": "legacy Toyota checksum evaluator"
+    },
+    "0x0006A3BE": {
+      "body_sha256": "227c8ab097ee8448e441c6a8c8095396e122c250996dc20b07fb2439646514b9",
+      "body_size": 50,
+      "decompiled_c_sha256": "c936262574cf1980de74b136f1773cf7c705c9c0a49f60622ca98272d5a3a418",
+      "role": "legacy Toyota checksum dispatcher"
+    },
+    "0x0006A410": {
+      "body_sha256": "9883350c72f1aece48249802b83b4672b54508971b3f131f8378bfb1f4b31bb1",
+      "body_size": 16,
+      "decompiled_c_sha256": "809e3caef3613e00f814a8adaca9ddbca1a9f72417e20ca7fbccd9e2aee927ec",
+      "role": "foreground SecOC aggregate wrapper"
+    },
+    "0x00071508": {
+      "body_sha256": "0a68ffc255d72f4c3429e63355652dbedd2857d6961910d52be1d635a85a0691",
+      "body_size": 170,
+      "decompiled_c_sha256": "7a6015b78384b6c65f9c050de59e617bba3b52bd166e9befbd53d4addff3f7ba",
+      "role": "controller-1 receive interrupt wrapper"
+    },
+    "0x00079EBA": {
+      "body_sha256": "9d46b1b7ef07a544237e026c51240a7a9a09486ce282e499007c79d11d051655",
+      "body_size": 16,
+      "decompiled_c_sha256": "a7d1f4f7669fc6d1b568821e757e10de7be286e767b8bd48bf928addefe189e6",
+      "role": "RSCFD hardware receive aggregate"
+    },
+    "0x00079EDE": {
+      "body_sha256": "c13bd6248633f1b6e69410a75cf6eef47fba52fb322f9723a3461d818df70383",
+      "body_size": 56,
+      "decompiled_c_sha256": "1ee21db74bfb4654f8eb21d8ae7e171492ed4f6956471b22a5d08254a7962e86",
+      "role": "software Rx ring foreground drain aggregate"
+    },
+    "0x0007A232": {
+      "body_sha256": "453a4c503a8e55bdd237d403628b8431d0860462006b9d290ec506583a8881a1",
+      "body_size": 34,
+      "decompiled_c_sha256": "5a7968f5f4385183e6f40976f60eb78eae823a22c60359ff554d5101f968665c",
+      "role": "CAN receive interrupt state gate"
+    },
+    "0x0007A254": {
+      "body_sha256": "30a60286baf7fbc844f1fcd156ead38429f9cbcc9a4e412d94fdf0b58ca06ef8",
+      "body_size": 116,
+      "decompiled_c_sha256": "4be26d36568622ffb8bb90b640f096e4706d391d6961380b016c72cd2ffdce95",
+      "role": "foreground CAN/PduR/SecOC aggregate"
+    },
+    "0x0007D72C": {
+      "body_sha256": "ab6c3514c592e1a007d7d38abf723d22b905037b3ae7132cdcc5c1c73ec5b239",
+      "body_size": 212,
+      "decompiled_c_sha256": "2298e822ae2f6a42ba8d93c596af4c73201d673b78313b5e5e9482ad430780dc",
+      "role": "generated-COM receive callback"
+    },
+    "0x00080884": {
+      "body_sha256": "c0de6567d5050a5e20668ab20d35fc09b6858402f6313512122a466d388ce7a7",
+      "body_size": 82,
+      "decompiled_c_sha256": "15c3d5f89dd74d56672d6bf4257b8d4e1753f5aa24aad17efe064ba6e5c25bc5",
+      "role": "software Rx callback fanout"
+    },
+    "0x000808D6": {
+      "body_sha256": "32d2a5120a17b88d913a27eb0458c8143cd62f3f663304dbd4bdf590c4865a7c",
+      "body_size": 296,
+      "decompiled_c_sha256": "b57bff1416b958e4630441be8630a37c5b4fba3adf1825d8adc562892a171b72",
+      "role": "software Rx ring drain"
+    },
+    "0x000809FE": {
+      "body_sha256": "ef763eddd79af93b61cb6d2ced5bfc34aa1dd6d23e97701d1e3b83606657e1ed",
+      "body_size": 76,
+      "decompiled_c_sha256": "a90f76dfd6b5016839615a74d335f9630b64971eeaf97a089fd1f1a5b53ac6be",
+      "role": "software Rx ring controller loop"
+    },
+    "0x00080A4A": {
+      "body_sha256": "1766a98c93308777908f3ae71f2753385a001f094f7fe92475ebe91173269543",
+      "body_size": 248,
+      "decompiled_c_sha256": "c17fa84be25e576de2ed5c8280407c505015d0d44aa9f75619ff10992409a25c",
+      "role": "software Rx ring writer"
+    },
+    "0x00080B42": {
+      "body_sha256": "d2ae5e4e46d9f7437fb93fc98c0482ed417b10c1bab71a59cea54bc44f131696",
+      "body_size": 128,
+      "decompiled_c_sha256": "a42386b7fbac077a546bf07b8221d6077b127812fb083333049bb0cd2d84117d",
+      "role": "generic Rx admission/ring writer"
+    },
+    "0x000810F2": {
+      "body_sha256": "b5cfa2ca048a5c88f3e0379d5c0b0288b58e3e30366d95d00355ec41ea37a452",
+      "body_size": 204,
+      "decompiled_c_sha256": "8b750f991aa5fc6926cd40b3c67d9cf10cb12529b686bfaeebc4ce18c294ad65",
+      "role": "normal CanIf Rx callback"
+    },
+    "0x00081CA6": {
+      "body_sha256": "2b7c5736393c68204635d71cf7306a67685445f4451aeae9f29516e75cdbb4f5",
+      "body_size": 112,
+      "decompiled_c_sha256": "456b08d00ee23c39783b4d3cb169fefc641ec40b0edf1b623cc00b59ba76ae91",
+      "role": "PduR upper-route dispatcher"
+    },
+    "0x00081D16": {
+      "body_sha256": "97953f7a164485d9b8b58aa74121e3e37e735fc864e907778084d3b021d28929",
+      "body_size": 24,
+      "decompiled_c_sha256": "29bf9e34b41877d16cb54d6e5e0d343ab9695ba5e756a0f35dfafef4fa3097e5",
+      "role": "PduR lower-route shim"
+    },
+    "0x00081D30": {
+      "body_sha256": "10182dc0838fac121551d4dea3a9d10f19781b00a8d790c38c3e689f995154a7",
+      "body_size": 172,
+      "decompiled_c_sha256": "a3691e5c637b257d16067bb003ee6df6182c8793d13dbea7171682397ee93515",
+      "role": "PduR lower-route dispatcher"
+    },
+    "0x00083CE4": {
+      "body_sha256": "204492f084aaab604d5a9c3cec289be492dcb5bfb67aaaf98d986d06f596f4a2",
+      "body_size": 48,
+      "decompiled_c_sha256": "674a6d96f144ca1ac0f7121a2eaeafeda81c6bc619cdc5f98ca9f081e97c99ec",
+      "role": "RSCFD group receive loop"
+    },
+    "0x00083D14": {
+      "body_sha256": "69ec2adb5816e5ed4723c9dd9dbafa71f1ee1e005a3f2d823c3889e033589324",
+      "body_size": 44,
+      "decompiled_c_sha256": "6708a6374bf15347314ba16472c6495cf62173865a6e66da2d894edefb38eb0a",
+      "role": "RSCFD rule-to-generic-Rx adapter"
+    },
+    "0x00083E0C": {
+      "body_sha256": "4be598c25cb77a04f365b0285d4f77255bb0e39d499b6df171f48223357049f3",
+      "body_size": 206,
+      "decompiled_c_sha256": "493acad25a3c9526885edec2ab130c2a7e15c960f326325575e2e6a2f9cb1879",
+      "role": "RSCFD FIFO drain"
+    },
+    "0x00083EDA": {
+      "body_sha256": "1fadb1ab277e22a8f906d430cd26b5c897cff0459461578654da9a2ad02e7263",
+      "body_size": 24,
+      "decompiled_c_sha256": "51f2dcc81a7967f29a7cb0c0892812d28844ef9711dad2efdb760f1f1106c614",
+      "role": "RSCFD group receive wrapper"
+    },
+    "0x0008E772": {
+      "body_sha256": "d216bc64825096ddf60a10f32c6110a939b1cab7ba066c1bf7891e58cbafd46f",
+      "body_size": 30,
+      "decompiled_c_sha256": "6c18ae579750c6955cd7151f3df30c598b4f3db8dcb9062f817552cb8626e1e2",
+      "role": "generated-COM generation update"
+    },
+    "0x0008E862": {
+      "body_sha256": "05ecc3e9977835b273ea0b2434788b8d8b5f7af2d3313052145bb376eb32ee56",
+      "body_size": 62,
+      "decompiled_c_sha256": "42d884ff6732dabf4dedd526ca283b582c5d73b0b51df7b9142f41d940a4ccc5",
+      "role": "SecOC queue-family resolver"
+    },
+    "0x0008E8A0": {
+      "body_sha256": "d10a3216d91ed3c5b692b7efc3796426165932fdd47988417a9d0f4d8398e329",
+      "body_size": 114,
+      "decompiled_c_sha256": "93bc425b9f991a549a6a1bf4e30b1a145ded5d90b2eab3cd474093cd1d293aa0",
+      "role": "SecOC queue head selector"
+    },
+    "0x0008E912": {
+      "body_sha256": "2e1cf22d14565fc959eb39709a8e1c7d8e9e23f9af5cd802b50f954ae75ffd38",
+      "body_size": 66,
+      "decompiled_c_sha256": "45e30f43ee6034b7f35de1c7749b654932a22c9ef0cde100fecb0dcff4efcd4b",
+      "role": "SecOC profile queue geometry resolver"
+    },
+    "0x0008E9C6": {
+      "body_sha256": "6b400bd052e65702face2c4b5322f5015806d14f350e1a4789d9cadc98a56864",
+      "body_size": 218,
+      "decompiled_c_sha256": "8f1b7f81dc3d8bdf83d9b868a5aa7a8e37fd09a15bae905172ccdd154851f6e9",
+      "role": "SecOC queue insert/copy"
+    },
+    "0x0008ED8E": {
+      "body_sha256": "e6c911e4b184c893852edc5bdb6d4def70c576e874c9ad9882dbe9e03ca58697",
+      "body_size": 88,
+      "decompiled_c_sha256": "18c75c67e26409b64a3b6705c8639b2fdfba114b03f3172e6bbbba123032cbba",
+      "role": "opposite queue-family public ingress"
+    },
+    "0x0008EE7C": {
+      "body_sha256": "3e113bff721b8ff9bd851cf58707757fd44b31943ad56b6265ba93e4cdfe6690",
+      "body_size": 62,
+      "decompiled_c_sha256": "3a45ab77ef32f118861141ba7e401a9c6e620e3234811e3b63fd2bdc9732e777",
+      "role": "SecOC secured-PDU ingress"
+    },
+    "0x0008EF84": {
+      "body_sha256": "5e77a544e80caf61935cef232d3c1bbbb5bb89a1fb1dfa6ede4cde694629fbcc",
+      "body_size": 66,
+      "decompiled_c_sha256": "c00f5e037bf587dbb28b17acf93e426510041f1b1569eac7420e0dd1d9b77e8e",
+      "role": "SecOC receive queue consumer loop"
+    },
+    "0x0008EFF8": {
+      "body_sha256": "4c8105aaa818faa8723ec89a090f6811ab388f88e937190499d7bd9547e7fb88",
+      "body_size": 70,
+      "decompiled_c_sha256": "9d8635dd22b779777dcfaad7b476cc527e60c356455f090b9b99bece1e06ac34",
+      "role": "SecOC foreground receive aggregate"
+    },
+    "0x0008F2B0": {
+      "body_sha256": "8c4628c36ed7162aa08be34f83bf2950b8f784c7071ea6765e58297342410d6d",
+      "body_size": 76,
+      "decompiled_c_sha256": "0c8e4f6cb72b72675e2442c16b87ff9c43f7db8d51761f61fe006fec2914621b",
+      "role": "SecOC route-to-profile resolver"
+    },
+    "0x0008F34A": {
+      "body_sha256": "50c9e2538c46e5bdc9dbbae5e48cdfc248536b9ee3439765b240a81e1c38d0b4",
+      "body_size": 128,
+      "decompiled_c_sha256": "e36612358290af98f3d9dfae795686fd93d0787dd22dc3225b5910e8e12790bb",
+      "role": "SecOC receive queue wrapper"
+    },
+    "0x0008F546": {
+      "body_sha256": "721f10f71fbf32b5dcada657c963d8034397217950d97088a0af54a6d6a84006",
+      "body_size": 80,
+      "decompiled_c_sha256": "59ad5cdf9e97f151594a2b0f3bd106d3acf8192b72d4f92e3c9929028d2fcc12",
+      "role": "verified upper-PDU delivery"
+    },
+    "0x0008F746": {
+      "body_sha256": "4cb7b08ada0b7e058aed4e9f44083b931a920427548e6d29abeb4f523e4fd1b7",
+      "body_size": 396,
+      "decompiled_c_sha256": "93cb772b5edb0033fc06c733ff3d68ec4fa7403a602d6276fbec6b38e30013a9",
+      "role": "SecOC freshness/auth verification coordinator"
+    },
+    "0x0008F906": {
+      "body_sha256": "860fc368a14af6365d6ee17c3bbaa4723a157b9c6f4a14023f888c51b42d3be4",
+      "body_size": 134,
+      "decompiled_c_sha256": "69454108d244fe090fedce77eb5f83eb02aa3bcd922f0772952ed0d3dc4b23f0",
+      "role": "SecOC post-verify delivery gate"
+    },
+    "0x0008F98C": {
+      "body_sha256": "f05b334c3f7b1a28cd80a4cd04acde7cd7d726a65ae427b2fd47c30d5108ed7b",
+      "body_size": 58,
+      "decompiled_c_sha256": "43650ebe23d12efa6f695801bcf2911f75d30a48e621974350b1b16295a8427b",
+      "role": "SecOC one-PDU verify/deliver transaction"
+    },
+    "0x0008FABA": {
+      "body_sha256": "e937244dfdbef8ec132299da455ddf9d6f5ff5cad5defed1b0485592a3b4aefd",
+      "body_size": 152,
+      "decompiled_c_sha256": "4de42c4237abe4911dd800b2bd85feca410e7f47d131ccae5240faae2c872e8c",
+      "role": "opposite queue-family insertion helper"
+    },
+    "0x00090204": {
+      "body_sha256": "6386fa98f892fa79d74a4eb150319cbd6572b1649adaa42880b848e32899ce8a",
+      "body_size": 14,
+      "decompiled_c_sha256": "c2c1167f63572db9800a150523157bc673e26210a29f2dc77392e1b797b8ab1a",
+      "role": "upper PduR indication shim"
+    }
+  },
+  "next_experiment_policy": "Do not return to the car merely to rediscover software routing. Only a receiver-side observation ordered inside 7A254 (after the software-ring drain and before SecOC consume), or an earlier interrupt/CanIf witness with equivalent proven ordering, can answer TX-echo -> exact receiver admission. Re-audit static open questions first.",
+  "physical_ingress": {
+    "all_generic_rx_objects_to_software_controller0": true,
+    "all_normal_rules_equal_descriptor_order": true,
+    "b6_descriptor": {
+      "can_id": 182,
+      "fd": true,
+      "index": 39,
+      "length": 32,
+      "pdu": 44,
+      "raw": 1073742006
+    },
+    "b6_rule_hex": "b6000000000030000200000000000000",
+    "b6_rule_index": 39,
+    "controller1_rule_count": 47,
+    "hardware_to_ring_path": [
+      "0x00071508",
+      "0x00066026",
+      "0x000667B6",
+      "0x0007A232",
+      "0x00079EBA",
+      "0x00083CE4",
+      "0x00083EDA",
+      "0x00083E0C",
+      "0x00083D14",
+      "0x00080B42",
+      "0x00080A4A"
+    ],
+    "normal_rule_count": 43
+  },
+  "route44_publication": {
+    "autonomous_software_route44_ticker_recovered": false,
+    "com_callback_direct_callers": [],
+    "com_offset": "0x1B7",
+    "com_window": "0xFEBE4BFF",
+    "generation": "0xFEBE5364",
+    "generation_helper_direct_callers": [
+      "0x0007D72C"
+    ],
+    "route44_record_hex": "060000002000000c",
+    "upper_caller_census": {
+      "0x0008EE7C": [],
+      "0x0008F34A": [
+        "0x0008EE7C"
+      ],
+      "0x0008F546": [
+        "0x0008F596",
+        "0x0008F906"
+      ],
+      "0x0008F906": [
+        "0x0008F98C"
+      ],
+      "0x00090204": [
+        "0x0008F546"
+      ]
+    },
+    "upper_path": [
+      "0x0008F906",
+      "0x0008F546",
+      "0x00090204",
+      "0x00081CA6",
+      "table 0x21E08 -> 0x0007D72C",
+      "0x0008E772"
+    ]
+  },
+  "runtime_only_boundaries": [
+    "Whether a particular Panda-transmitted B6 is physically observed by F33 rule39 on the installed harness/topology. Panda TX echo proves local transmission, not receiver admission.",
+    "The physical provenance of the profile2 deliveries that advanced route44 during the retained zero-host-B6-TX control. Static software proves their route, not which external node/link produced the received frame.",
+    "ICU-S silicon-internal cryptographic behavior beyond the recovered software-visible command/result contract.",
+    "Final motor/PWM/plant response after the already-recovered software command/current funnel."
+  ],
+  "scheduler": {
+    "aggregate": "0x0007A254",
+    "consequence": "between-tick and immediately-before-next-aggregate queue polling cannot exclude a complete same-invocation queue transaction",
+    "consumer_path": [
+      "0x0006A410",
+      "0x0008EFF8",
+      "0x0008EF84",
+      "0x0008F98C",
+      "0x0008E8A0(family1)",
+      "0x0008F746",
+      "0x0008F906"
+    ],
+    "foreground_root": "0x000667E6",
+    "ring_drain_call_site": "0x0007A26E",
+    "same_invocation_order": "ring drain/enqueue precedes SecOC consumer",
+    "secoc_consumer_call_site": "0x0007A2B4"
+  },
+  "schema": "camry-8965f3307000-b6-ingress-closure-v1",
+  "secoc_receive": {
+    "b6_profile": 2,
+    "enqueue_path": [
+      "0x0008EE7C",
+      "0x0008F34A",
+      "0x0008E9C6"
+    ],
+    "opposite_family_insert_path": [
+      "0x0008ED8E",
+      "0x0008FABA",
+      "0x0008E9C6(family0)"
+    ],
+    "payload_copy_precedes_length_publication": true,
+    "profiles": [
+      {
+        "address": "0x02586C",
+        "index": 0,
+        "input_route": 9,
+        "max_length": 8,
+        "min_length": 4,
+        "output_route": 9,
+        "raw_sha256": "95d567041b474a1dd3cfb1b51aa46ec2c4f02e4eeddb08a49dcab9a8c790263e",
+        "secured_buffer_displacement": 0,
+        "selector": 1
+      },
+      {
+        "address": "0x0258BC",
+        "index": 1,
+        "input_route": 41,
+        "max_length": 32,
+        "min_length": 4,
+        "output_route": 41,
+        "raw_sha256": "ecf8d6c5f4f414c221fbfeaa34ac295dabdfb5a6a91a03febb1f26367295c24a",
+        "secured_buffer_displacement": 8,
+        "selector": 1
+      },
+      {
+        "address": "0x02590C",
+        "index": 2,
+        "input_route": 44,
+        "max_length": 32,
+        "min_length": 4,
+        "output_route": 44,
+        "raw_sha256": "6b50d3737ed5e8e8cb366259d51a5fdbada717df618d74a8e36643c45ad5963c",
+        "secured_buffer_displacement": 40,
+        "selector": 0
+      }
+    ],
+    "queue_family": 1,
+    "queue_record": "0xFEBE547A",
+    "secured_buffer": "0xFEBE54D4"
+  },
+  "static_conclusions": [
+    "Exact F33 contains one configured normal B6 receive chain: controller-1 rule39 -> normal descriptor39 -> PDU44 -> protected SecOC profile2 -> generated COM route44.",
+    "The B6 receive queue is family1/profile2: pending record FEBE547A and secured buffer FEBE54D4; 8E9C6 copies payload bytes before publishing queue length.",
+    "The software Rx drain that can enqueue B6 occurs before the SecOC receive consumer inside the same 7A254 foreground invocation, so a monitor that samples only between foreground invocations can miss a complete 0->32->0 queue lifetime.",
+    "Successful profile2 delivery re-resolves the same family1/profile2 secured buffer and publishes output route44 through 90204 -> 81CA6 -> table-selected 7D72C, which copies into FEBE4BFF and advances FEBE5364.",
+    "No autonomous software route44 generation path was recovered: 8E772 has only 7D72C as a direct caller, and upper route publication is rooted in SecOC receive delivery. The observed no-host-TX route44 activity therefore implies an actual profile2 delivery source or an unrecovered mechanism; generation activity alone does not identify the physical source.",
+    "The separate 8ED8E/8FABA insertion path uses SecOC queue family0 and cannot by itself explain family1/profile2 B6 receive-queue contents."
+  ],
+  "target": {
+    "canonical_function_count": 6065,
+    "canonical_inventory_sha256": "ccbf09df3807942b67f21789c1068b2be2bc2eb12d71bc2bf349f06b8386496d",
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "software_id": "8965F3307000"
+  }
+}

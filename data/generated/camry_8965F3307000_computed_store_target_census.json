@@ -2725,9 +2725,9 @@
   "summary": {
     "candidateFunctions": 46,
     "candidates": 100,
-    "functions": 6062,
+    "functions": 6065,
     "knownRangeStores": 4701,
-    "stores": 13183
+    "stores": 13185
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",

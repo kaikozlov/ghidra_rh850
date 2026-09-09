@@ -33,7 +33,7 @@ with tempfile.TemporaryDirectory() as td:
     check("Class-L/upstream artifact regenerates byte-exact", p.returncode == 0 and class_out.read_bytes() == CLASS_ART.read_bytes())
 
 art = json.loads(ART.read_text())
-check("schema/target exact", art["schema"] == "camry-8965f3307000-external-lateral-ingress-v1" and art["target"]["software_id"] == "8965F3307000" and art["target"]["corpus_function_count"] == 6062)
+check("schema/target exact", art["schema"] == "camry-8965f3307000-external-lateral-ingress-v1" and art["target"]["software_id"] == "8965F3307000" and art["target"]["corpus_function_count"] == 6065)
 check("normal Rx/scalar census exact", art["normal_rx"]["descriptor_count"] == 43 and art["normal_rx"]["scalar_receive_call_count"] == 116)
 ctrl = art["controller1_acceptance"]
 check("controller1 acceptance span is exhausted", ctrl["count"] == 47 and ctrl["normal_rule_indices"] == [0,42] and ctrl["normal_rules_equal_descriptor_order"] is True)

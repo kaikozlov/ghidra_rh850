@@ -3122,7 +3122,7 @@
   },
   "sources": {
     "corpus": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "corpus_sha256": "ba90d46f24b58951bdd975e9b0271f8e6756a34e7bec44041cd798c98b691586",
+    "corpus_sha256": "760d19ce641e3e73b89bfc65185ffa08f16e563cc7a83a07f0594a42889c001d",
     "image": "firmware/camry-8965F3307000/CodeFlash.bin"
   },
   "staging": {
@@ -3296,7 +3296,7 @@
   },
   "target": {
     "analysis_target": "camry-8965F3307000",
-    "corpus_function_count": 6062,
+    "corpus_function_count": 6065,
     "image_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "mcu": "R7F701381 (RH850/P1M-E)",
     "software_id": "8965F3307000"

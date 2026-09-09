@@ -1,6 +1,6 @@
 {
   "fixed_gp_census": {
-    "boundary": "Whole 6,062-function canonical Ghidra data-reference census to exact GP-resolved RAM addresses. Computed aliases without a Ghidra data reference, value-set pointer recovery, DMA/peripheral mutation, and unrecovered code remain outside this negative proof.",
+    "boundary": "Whole 6,065-function canonical Ghidra data-reference census to exact GP-resolved RAM addresses. Computed aliases without a Ghidra data reference, value-set pointer recovery, DMA/peripheral mutation, and unrecovered code remain outside this negative proof.",
     "driver_torque_source": {
       "cooperative_c8_d1_intersection": [],
       "entries": [
@@ -12643,8 +12643,8 @@
   "software_id": "8965F3307000",
   "source_corpus": {
     "boundary": "First-class exact-F33 canonical Ghidra corpus; every promoted function/reference row is independently exact-body-range-hash-bound to the image.",
-    "function_count": 6062,
+    "function_count": 6065,
     "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "sha256": "ba90d46f24b58951bdd975e9b0271f8e6756a34e7bec44041cd798c98b691586"
+    "sha256": "760d19ce641e3e73b89bfc65185ffa08f16e563cc7a83a07f0594a42889c001d"
   }
 }

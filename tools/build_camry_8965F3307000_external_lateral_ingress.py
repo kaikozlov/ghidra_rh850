@@ -145,7 +145,7 @@ def build() -> dict:
     image = IMAGE.read_bytes()
     need(len(image) == 0x100000 and hashlib.sha256(image).hexdigest() == IMAGE_SHA256, "F33 image drift")
     funcs = corpus_map()
-    need(len(funcs) == 6062, "F33 corpus function count drift")
+    need(len(funcs) == 6065, "F33 corpus function count drift")
     gts = json.loads(GTS.read_text())
     b6 = json.loads(B6.read_text())
     fault = json.loads(FAULT.read_text())

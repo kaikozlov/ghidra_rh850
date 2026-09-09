@@ -90,7 +90,7 @@ def main() -> int:
             "mapped_current_feedback_gp_minus_0x4a00": refs(0xFEBE6E00),
             "tx030_current_scale_gp_plus_0x30d8": refs(0xFEBEE8D8),
             "boundary": (
-                "Whole 6,062-function canonical Ghidra data-reference census to exact GP-resolved RAM addresses. Computed aliases "
+                "Whole 6,065-function canonical Ghidra data-reference census to exact GP-resolved RAM addresses. Computed aliases "
                 "without a Ghidra data reference, value-set pointer recovery, DMA, and unrecovered code remain outside the negative proof."
             ),
         },

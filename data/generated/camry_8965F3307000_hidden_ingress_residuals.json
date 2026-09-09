@@ -54,9 +54,9 @@
     "census": {
       "candidateFunctions": 46,
       "candidates": 100,
-      "functions": 6062,
+      "functions": 6065,
       "knownRangeStores": 4701,
-      "stores": 13183
+      "stores": 13185
     },
     "closure_groups": [
       {
@@ -166,9 +166,9 @@
     "computed_store_census": {
       "candidateFunctions": 3,
       "candidates": 5,
-      "functions": 6062,
+      "functions": 6065,
       "knownRangeStores": 4701,
-      "stores": 13183
+      "stores": 13185
     },
     "destination_field_count": 44,
     "destination_registers": {
@@ -893,11 +893,11 @@
   "inputs": {
     "computed_store_target_census": {
       "path": "data/generated/camry_8965F3307000_computed_store_target_census.json",
-      "sha256": "15f24a545bfe7ace7d339efdf9b5d73728409079da3185e6c7f86b9c9063820d"
+      "sha256": "d9586a2184be52977b8d1a9448a10206098d8bdd43e7d8da9d3f106f8c8013b5"
     },
     "dmac_destination_computed_store_census": {
       "path": "data/generated/camry_8965F3307000_dmac_destination_computed_store_census.json",
-      "sha256": "5ec3ac548f9dafaafcdefc0c57859c522461c4a047423885dd6fe12a2812fc59"
+      "sha256": "85f0465a657613c7e8a523a30f7be0cfb9ce1a24f4f1e6860f333e084705f7bf"
     },
     "resolver_script": {
       "path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java",
@@ -908,7 +908,7 @@
   "schema": "camry-8965f3307000-hidden-ingress-residuals-v1",
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 6062,
+    "corpus_function_count": 6065,
     "software_id": "8965F3307000"
   }
 }

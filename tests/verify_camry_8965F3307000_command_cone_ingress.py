@@ -34,7 +34,7 @@ art = json.loads(ART.read_text())
 check("schema/target exact",
       art["schema"] == "camry-8965f3307000-command-cone-ingress-v3"
       and art["target"]["software_id"] == "8965F3307000"
-      and art["target"]["corpus_function_count"] == 6062)
+      and art["target"]["corpus_function_count"] == 6065)
 
 den = art["ingress_denominator"]
 check("extract denominator is 116 literal + 14 table-driven",

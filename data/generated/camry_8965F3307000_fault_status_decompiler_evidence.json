@@ -1571,8 +1571,8 @@
   "software_id": "8965F3307000",
   "source_corpus": {
     "boundary": "Disposable exact-F33 Ghidra corpus. Promoted functions are independently raw-body-hash-bound to the normalized 8965F3307000 image; the disposable project/corpus is not required at verification time.",
-    "function_count": 6062,
+    "function_count": 6065,
     "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "sha256": "ba90d46f24b58951bdd975e9b0271f8e6756a34e7bec44041cd798c98b691586"
+    "sha256": "760d19ce641e3e73b89bfc65185ffa08f16e563cc7a83a07f0594a42889c001d"
   }
 }

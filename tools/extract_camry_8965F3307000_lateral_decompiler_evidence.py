@@ -39,7 +39,7 @@ def main()->int:
   'fixed_gp_census':{
     'driver_torque_source':{'gp_offset':'-0x5158','resolved_address':'0xFEBE66A8','entries':torque,'read_entries':[x for x in torque if 'READ' in x['reference_types']],'write_entries':[x for x in torque if 'WRITE' in x['reference_types']],'cooperative_c8_d1_intersection':[x for x in torque if 0xC8000 <= int(x['entry'],16) < 0xD2000]},
     'q_current_source':{'gp_offset':'-0x50F2','resolved_address':'0xFEBE670E','entries':qcur,'read_entries':[x for x in qcur if 'READ' in x['reference_types']],'write_entries':[x for x in qcur if 'WRITE' in x['reference_types']],'cooperative_c8_d1_intersection':[x for x in qcur if 0xC8000 <= int(x['entry'],16) < 0xD2000]},
-    'boundary':'Whole 6,062-function canonical Ghidra data-reference census to exact GP-resolved RAM addresses. Computed aliases without a Ghidra data reference, value-set pointer recovery, DMA/peripheral mutation, and unrecovered code remain outside this negative proof.'
+    'boundary':'Whole 6,065-function canonical Ghidra data-reference census to exact GP-resolved RAM addresses. Computed aliases without a Ghidra data reference, value-set pointer recovery, DMA/peripheral mutation, and unrecovered code remain outside this negative proof.'
   },
  }
  a.out.parent.mkdir(parents=True,exist_ok=True); a.out.write_text(json.dumps(obj,indent=2,sort_keys=True)+'\n'); print(f'wrote {a.out}: {len(funcs)} functions, corpus={total}')

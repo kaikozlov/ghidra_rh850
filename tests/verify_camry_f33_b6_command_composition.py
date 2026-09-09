@@ -33,7 +33,7 @@ check("schema and exact firmware are pinned",
       and j["target"] == {
         "software_id": "8965F3307000",
         "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-        "corpus_function_count": 6062,
+        "corpus_function_count": 6065,
       })
 
 sel = j["selector_census"]

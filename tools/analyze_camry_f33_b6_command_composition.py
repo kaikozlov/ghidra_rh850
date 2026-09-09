@@ -159,7 +159,7 @@ def analyze() -> dict[str, Any]:
   if image_sha != EXPECTED_SHA256:
     raise RuntimeError(f"exact F33 CodeFlash SHA mismatch: {image_sha}")
   corpus = load_corpus()
-  if len(corpus) != 6062:
+  if len(corpus) != 6065:
     raise RuntimeError(f"canonical corpus function count drift: {len(corpus)}")
   missing = set(FUNCTIONS) - set(corpus)
   if missing:
@@ -167,7 +167,7 @@ def analyze() -> dict[str, Any]:
 
   f = {entry: corpus[entry]["decompiled_c"] for entry in FUNCTIONS}
 
-  # Exhaustive selector census: every function in the complete 6062-function
+  # Exhaustive selector census: every function in the complete 6065-function
   # corpus containing CB00/ADB0, plus exact direct references.
   cb00_funcs = funcs_referencing(corpus, "DAT_febecb00")
   adb0_funcs = funcs_referencing(corpus, "DAT_febeadb0")

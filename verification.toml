@@ -2508,3 +2508,15 @@ paths = [
   "docs/variants/camry-2026-live-baseline.md",
   "docs/status/CORRECTIONS.md",
 ]
+
+[suite.camry_8965f3307000_b6_ingress_closure]
+tests = ["tests/verify_camry_8965F3307000_b6_ingress_closure.py"]
+oracle = "raw_bytes"
+paths = [
+  "data/targets/camry-8965F3307000/function_seeds.csv",
+  "ghidra/scripts/seed/SeedCamryF33RecoveredFunctions.java",
+  "docs/variants/camry-2026-live-baseline.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+]

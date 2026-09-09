@@ -158,9 +158,9 @@ def census_summary(c: dict, *, candidates: int, functions: int) -> None:
     need(c["summary"] == {
         "candidateFunctions": functions,
         "candidates": candidates,
-        "functions": 6062,
+        "functions": 6065,
         "knownRangeStores": 4701,
-        "stores": 13183,
+        "stores": 13185,
     }, "computed-store census denominator drift")
 
 
@@ -168,7 +168,7 @@ def build() -> dict:
     image = IMAGE.read_bytes()
     need(len(image) == 0x100000 and sha(image) == IMAGE_SHA256, "exact F33 image drift")
     rows, total = load_function_corpus(CORPUS)
-    need(total == 6062, f"F33 corpus denominator drift: {total}")
+    need(total == 6065, f"F33 corpus denominator drift: {total}")
 
     e1 = load_json(E1)
     e2 = load_json(E2)

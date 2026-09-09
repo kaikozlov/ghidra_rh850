@@ -146,7 +146,7 @@ def build() -> dict:
     need(len(image) == 0x100000 and hashlib.sha256(image).hexdigest() == IMAGE_SHA256,
          "F33 image drift")
     funcs = corpus_map()
-    need(len(funcs) == 6062, "F33 corpus function count drift")
+    need(len(funcs) == 6065, "F33 corpus function count drift")
 
     rx: dict[int, dict] = {}
     for i in range(RX_COUNT):

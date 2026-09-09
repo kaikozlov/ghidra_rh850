@@ -37,10 +37,13 @@ address,provenance,note
 0x0006639C,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x00066512,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x0006A5FA,data/generated/camry_8965F3307000_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
+0x00071508,firmware/camry-8965F3307000/CodeFlash.bin,exact-F33 interrupt wrapper; raw entry begins syncp and returns with eiret; required by B6 hardware-RX ingress closure
 0x0007D0EA,data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x0007D12A,data/generated/camry_8965F3307000_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x0007D1DC,data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x0007D31E,data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
+0x0007D72C,firmware/camry-8965F3307000/CodeFlash.bin,exact-F33 generated-COM receive callback; table-selected by protected PduR delivery and directly calls 0x8E772
+0x000810F2,firmware/camry-8965F3307000/CodeFlash.bin,exact-F33 normal CanIf receive callback; callback-table entry 0 and required by B6 route44 ingress closure
 0x0008A8E4,data/generated/camry_8965F3307000_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x0008ECB2,data/generated/camry_8965F3307000_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x0008ED14,data/generated/camry_8965F3307000_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence

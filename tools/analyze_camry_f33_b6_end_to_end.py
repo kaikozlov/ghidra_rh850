@@ -218,7 +218,7 @@ def analyze() -> dict[str, Any]:
   if h(image) != EXPECTED_SHA256:
     raise RuntimeError("exact F33 CodeFlash identity drift")
   corpus = load_corpus()
-  if len(corpus) != 6062:
+  if len(corpus) != 6065:
     raise RuntimeError(f"canonical corpus function count drift: {len(corpus)}")
   missing = sorted(set(FUNCTIONS) - set(corpus))
   if missing:

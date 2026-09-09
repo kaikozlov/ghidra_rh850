@@ -28,7 +28,7 @@ with tempfile.TemporaryDirectory() as td:
 
 art = json.loads(ART.read_text())
 check("schema/target exact", art["schema"] == "camry-8965f3307000-internal-assist-oracles-v1"
-      and art["target"]["software_id"] == "8965F3307000" and art["target"]["corpus_function_count"] == 6062)
+      and art["target"]["software_id"] == "8965F3307000" and art["target"]["corpus_function_count"] == 6065)
 check("exact RDBI table denominator pinned", art["exact_rdbi_table"] == {"offset":"0x2928C", "record_count":241})
 sel = art["selector_state_direct_rdbi"]
 check("selector cells have no direct exact-F33 RDBI callback", sel["cells"] == {"FEBEC156":[], "FEBEC158":[]}

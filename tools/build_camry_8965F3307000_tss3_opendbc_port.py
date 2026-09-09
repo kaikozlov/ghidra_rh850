@@ -277,7 +277,7 @@ def build() -> dict:
             "driver_torque_direct_fixed_gp_entries": torque_refs,
             "control_cone_conclusion_changed": False,
             "reason": (
-                "The first-class 6,062-function project resolves GP and exposes a canonical Ghidra data-reference graph. It finds seven readers and two writers of FEBE66A8, including previously unrecovered 0x4C490/0x52CA0 and source writers, while preserving zero direct references inside the cooperative C8xxx-D1xxx control cone."
+                "The first-class 6,065-function project resolves GP and exposes a canonical Ghidra data-reference graph. It finds seven readers and two writers of FEBE66A8, including previously unrecovered 0x4C490/0x52CA0 and source writers, while preserving zero direct references inside the cooperative C8xxx-D1xxx control cone."
             ),
         },
         "passive_opendbc_integration": {
