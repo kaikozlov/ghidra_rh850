@@ -816,9 +816,11 @@ check("inline signer scratch is wholly SID23-readable below the protected bounda
       inline_signer.SCRATCH_BASE == 0xFEBF0200 and inline_signer.SCRATCH_SIZE == 0x48 and
       inline_signer.SCRATCH_BASE + inline_signer.SCRATCH_SIZE == inline_signer.STATE_BASE and
       probe.validate_read(probe.RAM_ID, inline_signer.SCRATCH_BASE, inline_signer.SCRATCH_SIZE) is None)
+telemetry_application = bytes(range(28))
 telemetry_raw = (
     (11).to_bytes(4, "little") + (7).to_bytes(4, "little") + (5).to_bytes(4, "little") +
-    (3).to_bytes(4, "little") + (32).to_bytes(2, "little") + bytes((1, 0)) + bytes.fromhex("a1b2c3d4")
+    (3).to_bytes(4, "little") + (32).to_bytes(2, "little") + bytes((1, 0)) + bytes.fromhex("a1b2c3d4") +
+    telemetry_application
 )
 telemetry_decoded = inline_signer.decode_signer_telemetry(telemetry_raw)
 check("inline signer telemetry is readable and preserves every helper gate",
@@ -828,12 +830,51 @@ check("inline signer telemetry is readable and preserves every helper gate",
       telemetry_decoded["helper_invocations"] == 11 and telemetry_decoded["queue32_hits"] == 7 and
       telemetry_decoded["zero_trailer_hits"] == 5 and telemetry_decoded["command5_attempts"] == 3 and
       telemetry_decoded["last_queue_length"] == 32 and telemetry_decoded["last_done_flag"] == 1 and
-      telemetry_decoded["last_command_status"] == 0 and telemetry_decoded["last_trailer_hex"] == "a1b2c3d4")
+      telemetry_decoded["last_command_status"] == 0 and telemetry_decoded["last_trailer_hex"] == "a1b2c3d4" and
+      telemetry_decoded["last_application_b0_b27_hex"] == telemetry_application.hex())
 check("inline signer exposes exact profile2 queue and full secured buffer through SID23",
       inline_signer.B6_QUEUE_RECORD_BASE == 0xFEBE547A and inline_signer.B6_QUEUE_RECORD_SIZE == 8 and
       inline_signer.B6_SECURED_BUFFER_BASE == 0xFEBE54D4 and inline_signer.B6_SECURED_BUFFER_SIZE == 32 and
       probe.validate_read(probe.RAM_ID, inline_signer.B6_QUEUE_RECORD_BASE, inline_signer.B6_QUEUE_RECORD_SIZE) is None and
       probe.validate_read(probe.RAM_ID, inline_signer.B6_SECURED_BUFFER_BASE, inline_signer.B6_SECURED_BUFFER_SIZE) is None)
+
+# quiet-source is a read-only counter window used after the launcher has proven
+# READY/Park/stationary and cooperatively removed the normal host B6 producer.
+def _telem_blob(invocations: int, queue_hits: int) -> bytes:
+    return (
+        invocations.to_bytes(4, "little") + queue_hits.to_bytes(4, "little") + bytes(8) +
+        bytes(4) + bytes(4) + bytes(28)
+    )
+
+class _FakeQuietSession:
+    client = object()
+    uds_mod = object()
+    def __init__(self, bundle, *, require_ready_parked):
+        assert require_ready_parked is False
+    def read_state(self):
+        return {"initialized": True, "armed": True, "signed_count": 0}
+
+_quiet_blobs = iter((_telem_blob(0xFFFFFFFE, 10), _telem_blob(1, 15)))
+_orig_inline_session = inline_signer.InlineSignerSession
+_orig_inline_read = inline_signer._read_memory
+_orig_inline_sleep = inline_signer.time.sleep
+_orig_inline_monotonic = inline_signer.time.monotonic
+inline_signer.InlineSignerSession = _FakeQuietSession
+inline_signer._read_memory = lambda client, uds_mod, address, size: next(_quiet_blobs)
+_times = iter((10.0, 11.0))
+inline_signer.time.sleep = lambda _: None
+inline_signer.time.monotonic = lambda: next(_times)
+try:
+    quiet = inline_signer.quiet_source_rate(object(), duration=1.0)
+finally:
+    inline_signer.InlineSignerSession = _orig_inline_session
+    inline_signer._read_memory = _orig_inline_read
+    inline_signer.time.sleep = _orig_inline_sleep
+    inline_signer.time.monotonic = _orig_inline_monotonic
+check("inline signer quiet-source measures modular queue movement without CAN transmit",
+      quiet["host_b6_producer_quiesced"] is True and quiet["can_transmit"] is False and
+      quiet["delta"]["helper_invocations"] == 3 and quiet["delta"]["queue32_hits"] == 5 and
+      quiet["rates"]["queue32_hits_per_second"] == 5.0)
 
 # The loader mailbox stores only the latest 8-byte control frame. Prove that a
 # completely missed first transfer pass is retried rather than aborting, and
@@ -898,12 +939,12 @@ with tempfile.TemporaryDirectory() as td:
     check("kit packages autonomous inline B6 signer as the primary fast path",
           inline["launcher"] == "f33-secoc" and
           inline["resident_base"] == "0xFEBFF9F0" and inline["resident_size"] == 520 and
-          inline["resident_sha256"] == "d2d071f8caf50c6bcd3d4815aa4e040a145ac1f3f2f00c72e4c36046f8b3576e" and
-          inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 412 and
-          inline["helper_word_count"] == 103 and
-          inline["helper_padded_sha256"] == "bdb182d7dc27b7a824bd10b445a688e09a2a8555952da71db2e525beb28c5811" and
+          inline["resident_sha256"] == "cb1caad3520d392f94acd45e46ba66b972132b80ef08a9457b93e3783e8c9549" and
+          inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 468 and
+          inline["helper_word_count"] == 117 and
+          inline["helper_padded_sha256"] == "53494b4358d7a6423874c501c3b0232f49652cf5d01ccb340a3f5a61aacf8866" and
           inline["state"]["base"] == "0xFEBF0248" and inline["state"]["magic"] == "0x53364249" and
-          inline["telemetry"]["base"] == "0xFEBF0254" and inline["telemetry"]["size"] == 0x18 and
+          inline["telemetry"]["base"] == "0xFEBF0254" and inline["telemetry"]["size"] == 0x34 and
           probe.validate_read(probe.RAM_ID, int(inline["state"]["base"], 0), inline["state"]["size"]) is None and
           probe.validate_read(probe.RAM_ID, int(inline["telemetry"]["base"], 0), inline["telemetry"]["size"]) is None and
           inline["control_can_id"] == "0x1FDC0002" and
@@ -1094,14 +1135,17 @@ with tempfile.TemporaryDirectory() as td:
           "phase requires a phase name" in launcher_text and 'monitor phase "$@" --execute' in launcher_text)
     secoc_launcher = out / "f33-secoc"
     secoc_launcher_text = secoc_launcher.read_text(encoding="utf-8")
-    check("inline signer launcher preserves manager lifecycle and exposes install/load-arm/status",
+    check("inline signer launcher preserves manager lifecycle and exposes install/load-arm/status/quiet-source",
           "systemctl stop openpilot" not in secoc_launcher_text and
           'kill -STOP "$PANDAD_WRAPPER_PID"' not in secoc_launcher_text and
           'kill -CONT "$PANDAD_WRAPPER_PID"' not in secoc_launcher_text and
           "start_power_watchdog_keeper" not in secoc_launcher_text and
           "f33_panda_lease.sh" in secoc_launcher_text and
           "source \"$PANDA_LEASE_LIB\"" in secoc_launcher_text and
-          "load-arm" in secoc_launcher_text and "camry_f33_b6_inline_signer_helper_padded.bin" in secoc_launcher_text)
+          "load-arm" in secoc_launcher_text and "quiet-source" in secoc_launcher_text and
+          "verify_openpilot_ready_parked" in secoc_launcher_text and
+          secoc_launcher_text.index("verify_openpilot_ready_parked") < secoc_launcher_text.rindex("quiesce_panda_owner") and
+          "camry_f33_b6_inline_signer_helper_padded.bin" in secoc_launcher_text)
     local_openpilot = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
     local_python = local_openpilot / ".venv/bin/python"
     env = dict(os.environ, F33_PYTHON=str(local_python), F33_OPENPILOT_ROOT=str(local_openpilot))
@@ -1112,8 +1156,8 @@ with tempfile.TemporaryDirectory() as td:
     secoc_plan_obj = json.loads(secoc_plan.stdout) if secoc_plan.returncode == 0 else {}
     check("built inline signer launcher plan is no-roundtrip architecture",
           secoc_plan.returncode == 0 and secoc_plan_obj.get("schema") == "camry-f33-b6-inline-signer-plan-v1" and
-          secoc_plan_obj.get("resident", {}).get("size") == 520 and secoc_plan_obj.get("helper", {}).get("word_count") == 103 and
-          secoc_plan_obj.get("telemetry", {}).get("base") == "0xFEBF0254",
+          secoc_plan_obj.get("resident", {}).get("size") == 520 and secoc_plan_obj.get("helper", {}).get("word_count") == 117 and
+          secoc_plan_obj.get("telemetry", {}).get("base") == "0xFEBF0254" and secoc_plan_obj.get("telemetry", {}).get("size") == 0x34,
           secoc_plan.stderr[-300:])
     doctor = subprocess.run([str(launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
     check("built launcher doctor validates imports and payload without Panda access",
