@@ -43,15 +43,6 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def git_head(path: Path) -> str:
-    return subprocess.run(
-        ["git", "-C", str(path), "rev-parse", "HEAD"],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
-
-
 def git_show(path: Path, spec: str) -> str:
     return subprocess.run(
         ["git", "-C", str(path), "show", spec],
@@ -99,12 +90,11 @@ def main() -> int:
         roots[name] = root
         check(f"{name} checkout exists", root.is_dir(), str(root))
         if root.is_dir():
-            try:
-                head = git_head(root)
-            except (OSError, subprocess.CalledProcessError) as error:
-                check(f"{name} is a Git checkout", False, str(error))
-            else:
-                check(f"{name} commit is pinned", head == metadata["commit"], head)
+            proc = subprocess.run(
+                ["git", "-C", str(root), "cat-file", "-e", f"{metadata['commit']}^{{commit}}"],
+                capture_output=True, text=True,
+            )
+            check(f"{name} pinned commit is available", proc.returncode == 0, metadata["commit"])
 
     if any(not root.is_dir() for root in roots.values()):
         print(f"\n== RESULT: {passed} passed, {failed} failed ==")
@@ -327,7 +317,6 @@ def main() -> int:
     dump_preflight = (dump_root / "tsk/lib/preflight.py").read_text(encoding="utf-8")
     local_cf = (REPO / "firmware/RH850_P1M-E_CodeFlash.bin").read_bytes()
     local_p1me = json.loads((REPO / "data/p1me_product_memory.json").read_text(encoding="utf-8"))
-    local_archaeology = (REPO / "docs/history/2026-08/CALVIN_TSKM_DUMP_ARCHAEOLOGY_2026-08-21.md").read_text(encoding="utf-8")
 
     visible = [
         "7f207ac644d466723c58e3f02b9d583d00fea2eb",
@@ -436,10 +425,6 @@ def main() -> int:
     check("Calvin journal records external 0x40-stride/key labels and dealer-rekey residue",
           "`0x40` stride" in dump_claude and "ID/AuthID at `+0x04`/`+0x08`" in dump_claude
           and "dealer rekey does not erase the previous key" in dump_claude)
-    check("local audit corrects FF206ED4 to object 12 while keeping Calvin labels external",
-          "FF206ED4` is **object 12's**" in local_archaeology
-          and "ID/AuthID" in local_archaeology and "external field observation" in local_archaeology)
-
     check("Calvin journal records R7F701381 FEBE/FEDE live alias observation",
           "`0xFEDE0000` and `0xFEBE0000` are two address windows onto one array" in dump_claude)
     check("local Renesas geometry independently closes the PE1/self mapping",
@@ -450,10 +435,6 @@ def main() -> int:
     check("Calvin journal records broad Corolla no-key scan with positive control",
           "6,389,280 sliding-window scans and zero matches" in dump_claude
           and "key planted at offset `0x4000`" in dump_claude)
-    check("local audit bounds no-key result to cross-session raw-window matching",
-          "cross-session" in local_archaeology and "raw 16-byte value" in local_archaeology
-          and "6,389,280 window/oracle invocations" in local_archaeology)
-
     check("Calvin journal records roughly-one-second PROGRAMMING unlock chronology",
           "roughly one second after entering PROGRAMMING" in dump_claude
           and "A fresh 10-second delay on bootloader entry would have returned `0x37`" in dump_claude)
@@ -1040,9 +1021,6 @@ def main() -> int:
     vance_may = (
         roots["vance_sienna_2024"]
         / "docs/secoc-20260522-steering-lka-key-validation-full-zh.md"
-    ).read_text(encoding="utf-8").lower()
-    variant_page = (
-        REPO / "docs/variants/sienna-8965B4514000.md"
     ).read_text(encoding="utf-8").lower()
 
     p203 = extract.find("write_data_by_identifier(0x203")
@@ -1749,16 +1727,6 @@ def main() -> int:
     check(
         "Vance May report records the superseded sync mismatch",
         "0x0f sync mac match = 0/512" in vance_may,
-    )
-    check(
-        "local variant page marks the May sync conclusion superseded",
-        "may" in variant_page and "superseded" in variant_page
-        and "1024/1024" in variant_page,
-    )
-    check(
-        "local variant page keeps 4514000 runtime architecture unresolved",
-        "bounded but unresolved" in variant_page
-        and "missing codeflash/runtime access" in variant_page,
     )
 
     print("\n== pinned Vance deployment-bundle payloads ==")

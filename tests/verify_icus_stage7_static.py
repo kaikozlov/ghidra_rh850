@@ -9,9 +9,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CF = (ROOT / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
-SOFTWARE_REPORT = ROOT / "docs/security/secoc/software-path-assessment.md"
-SENDER_REPORT = ROOT / "docs/security/secoc/sender-implementation.md"
-CANDIDATE_REPORT = ROOT / "docs/security/secoc/candidate-f05-payload.md"
 passed = failed = 0
 
 
@@ -79,11 +76,6 @@ check("command 8 clears 48-byte result staging",
 check("abort replacement clears input/output callbacks", CF[0x89BEC:0x89BF4] == bytes.fromhex("6407215b64071d5b"))
 check("abort/replacement submits command 0x3f", bytes.fromhex("3f") in CF[0x89BE0:0x89C10])
 
-# No caller-controlled output length reaches the lower FIFO count: wrapper-side
-# contracts are 16 / 16 / one result byte / 48 bytes respectively.
-for token in ("status-zero gated", "16 bytes", "48 bytes", "command replacement", "hardware sequencing"):
-    check(f"software-path report records {token}", token.lower() in SOFTWARE_REPORT.read_text(encoding="utf-8").lower())
-
 print("\n== crypto-test activator reachability closure ==")
 ACT_START, ACT_END = 0x69018, 0x69042
 check("activator body remains pinned", body_hash(ACT_START, ACT_END - ACT_START) == "12088375d109e4753b8e88ffeb0edef82691229791ab8505f4ffab62e106f1fd")
@@ -123,19 +115,5 @@ check("stock harness requests 16-byte command-5 result", CF[0x68B8A:0x68B92] == 
 check("stock harness dispatches generation driver", decode_long_branch(0x68BAC) == ("jarl", 0x88350))
 check("foreground slot calls dormant step and finalize pair",
       decode_long_branch(0x65754) == ("jarl", 0x68C0C) and decode_long_branch(0x65760) == ("jarl", 0x68DE6))
-for token in ("selector 4", "0x68b42", "record 0", "febffb80", "0x7f8", "command-7 contention", "teardown"):
-    check(f"sender design records {token}", token.lower() in SENDER_REPORT.read_text(encoding="utf-8").lower())
-
-print("\n== candidate-f05 provenance boundary ==")
-for token in (
-    "97ba3d1d9e77a6e047887da04767538fe81fc674",
-    "2026-05-31 20:26:27 +0800",
-    "296d87d2e89b9c7e800122e4c7f6d3b9c876362e52586530cdd53c86ba1116f5",
-    "db453752beeb7cdd024a1a9c38c6711c981e75ad",
-    "2026-07-11",
-    "cannot establish",
-):
-    check(f"candidate provenance records {token}", token.lower() in CANDIDATE_REPORT.read_text(encoding="utf-8").lower())
-
 print(f"\nSummary: {passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

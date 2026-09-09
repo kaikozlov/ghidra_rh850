@@ -151,7 +151,7 @@ print("\n== physical source separation contract ==")
 dumper_sources = "\n".join(
     path.read_text(encoding="utf-8").lower()
     for path in (REPO / "exploit" / "dumper").rglob("*")
-    if path.is_file() and path.suffix in {".py", ".c", ".h", ".md"}
+    if path.is_file() and path.suffix in {".py", ".c", ".h"}
 )
 check("dumper workstream contains no FACI symbol", "faci_" not in dumper_sources)
 check("dumper workstream does not import flash backend", "flash_backend" not in dumper_sources)

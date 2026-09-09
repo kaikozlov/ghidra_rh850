@@ -66,7 +66,7 @@ owned through explicit `requires_external` gates rather than `REFERENCE/` paths.
 
 ### Artifact, target, and repository-memory discovery
 
-Use `tools/artifact list/show` instead of grepping for generator filenames. `tools/artifact regen` runs a derived producer and `tools/artifact check` runs the verification suite(s) that own the artifact. The catalog is derived from tracked repository references and `verification.toml`, so adding a generated artifact does not require maintaining a second command registry.
+Use `tools/artifact list/show` instead of grepping for generator filenames. `tools/artifact regen` runs a derived producer. The catalog derives producers from tracked source references and declared outputs; it has no verification-ownership role.
 
 Use `tools/know QUERY` when the question is "what did we already establish?" or "where is this owned?" It searches findings, corrections, open questions, generated artifacts, suites, and tracked docs in one pass. It is only a navigation layer; firmware/Ghidra and deterministic verification remain the evidence authority.
 
@@ -334,122 +334,47 @@ pointers and collapses disassembly.
 
 ## Verification
 
+Verification is intentionally explicit. There is no changed-file ownership
+planner and no requirement that every repository file map to a test.
+
 ```bash
 uv sync --locked                  # one-time
-tools/test                        # dirty + untracked vs HEAD; clean tree exits 0
-tools/test branch                 # PR-shaped: all work since upstream merge-base
-tools/test <suite-or-prefix>      # exact suite or prefix family
-tools/test @exploit               # manifest-defined cross-family bundle
-tools/test list [query]           # discover suites/families/groups, counts, and modes
-tools/test plan [changed|branch|query] # preview without execution
-tools/test core                   # fast repository-integrity smoke; also full or local
-make verify                       # alias for tools/test
-make verify-core                  # fast repository-integrity smoke
-make verify-full                  # exhaustive portable/tracked-repository gate
-make verify-local                 # full + available proprietary/external + live-project suites
-make verify-required-external     # require every pinned external prerequisite
-make verify-agent                 # core smoke as compact JSON with timings/oracle counts
+tools/test                        # runs nothing; prints explicit-use guidance
+tools/test <suite-or-prefix>      # run the smallest relevant suite
+tools/test @exploit               # deliberate multi-suite bundle
+tools/test list [query]           # discover suites
+tools/test plan <query>           # preview an explicit selector
+tools/test core                   # small repository-mechanics smoke
+tools/test full                   # deliberate exhaustive portable sweep
+tools/test local                  # deliberate local/external/live-project sweep
+make verify                       # alias for explicit core smoke
 make verify-sleigh                # SLEIGH compile + isolated install
-make verify-processor             # fixtures + working-project audits
+make verify-processor             # processor fixtures + working-project audits
 make verify-project-parity        # exact working-project inventory vs baseline
-make verify-ghidra                # portable full + Ghidra gates
 ```
 
-`verification.toml` is the sole suite manifest. It owns each
-`tests/verify_*.py` gate exactly once, records changed-file routing, suite tier,
-external prerequisites, and the default evidence-oracle class. Statically resolvable
-Python file dependencies are not copied into the manifest: `tools/verification_deps.py`
-derives repository `Path` reads, literal glob roots, local imports, and executed
-Python helpers (including exact transitive helper inputs) directly from verifier
-source. `suite.*.paths` is reserved for non-obvious semantic/dynamic invalidators
-and dependencies hidden behind string tables, shell indirection, or other forms that
-source inspection intentionally does not infer. Portable suites without an explicit `modes`
-entry default to `full` and `local`; the deliberately small
-`verification.core_suites` list names the repository-integrity smoke tier.
-A suite does not need to be in `core` to run during focused work: changed-file
-routing selects its actual owners directly. Cross-family deliberate bundles live in
-`verification.groups` and are invoked as `tools/test @name`, keeping Make free of
-hand-maintained suite lists. Suites backed by ignored or proprietary corpora are
-`local` only. `--required-external` selects every suite with a declared external
-prerequisite independently of tier.
+`verification.toml` is a **suite registry**, not a dependency/ownership graph.
+Suites name tests, modes, groups, and external prerequisites only; Git paths do
+not select tests. Documentation, status ledgers, provenance files, and files
+with no corresponding test are normal repository edits and trigger nothing
+automatically.
 
-The normal edit loop is the working tree versus HEAD: dirty and untracked
-paths only. A clean tree reports zero selected suites and exits 0. No
-upstream is required; detached HEAD is fine. `tools/test branch` is the
-PR-shaped gate (merge-base with the configured upstream). `tools/test ...
---base <ref>` remains the explicit override. If `branch` cannot find an
-upstream, it refuses to guess and requires `--base <ref>`.
-File patterns match exactly, while manifest paths ending in `/` match directory
-descendants. Rename detection retains both the old and new paths. Every changed
-path that still exists must have a suite owner (or a declared broad-invalidator
-policy); a mixed owned/unowned diff fails instead of running a partial plan.
-Deleted `tests/verify_*.py` files that left the manifest are treated as retired
-gates, not ownership misses. Changes under `firmware/` invalidate the complete portable `full` tier. Changes to
-the verification control plane (`tools/fast_verify.py`,
-`tools/verification_deps.py`, `tools/test`, `verification.toml`, `pyproject.toml`,
-or `uv.lock`) also invalidate the complete portable tier: those files can change
-test selection or execution itself, so narrow changed-file routing would be
-unsound. Ordinary RE/data/document edits remain strictly owner-routed. Mechanical
-Python dependencies are derived automatically; explicit `suite.*.paths` therefore
-means "can invalidate this gate but is not mechanically obvious from the verifier,"
-not merely "is related to this evidence." Tracked data artifacts checked outside
-`tools/test` use top-level `catalog.*` entries instead; a catalog-only edit exits the
-runner cleanly with the external gate it requires (for example `make verify-processor`)
-rather than inventing a suite dependency or failing as unowned.
+The normal RE loop is therefore: investigate, implement, run the one or two
+relevant tests if the work actually has executable or binary invariants worth
+checking, and continue. Do not run `full`, `local`, Ghidra-wide, or external
+corpus sweeps merely because files changed. Those are milestone/release tools or
+explicit diagnostics after a suspicious failure.
 
-The aggregate status ledgers use content-aware routing instead of treating each
-whole file as a subsystem input. Changed FINDINGS rows route through their
-`Checked by` verifier references and stable finding IDs; OPEN_QUESTIONS,
-CORRECTIONS, and PRIORITIES entries route through stable IDs found in suite-owned
-tests and documents. Ledger/document infrastructure suites are always included.
-If a changed header or other structural text lacks a stable ID, selection falls
-back to the prior broad file routing. This is a selection optimization only.
-Portable tests run concurrently (default: CPU count). Live Ghidra,
-`requires_external`, and explicitly `serial` suites stay serial so they cannot
-share `build/work/` or poison the pool.
+Tests should assert implementation behavior, raw firmware facts, generated
+artifact reproducibility, or other technical invariants. They should not assert
+that narrative docs mention tokens, that FINDINGS/CORRECTIONS contain IDs, that
+a generated cross-reference index is current, or that unrelated sibling Git
+checkouts happen to have a particular HEAD.
 
-An explicitly requested external suite or prefix fails when its declared input
-is absent. The same fail-closed prerequisite rule applies when changed-mode
-routing selects an external-backed suite. Use `--allow-skips` only when an
-intentional optional result is desired; `local` mode retains its normal
-optional-prerequisite behavior. Positional `tools/test <query>` supports prefix
-families; compatibility `--suite` remains exact. The Makefile intentionally does
-not duplicate `tools/test` with changed/single-suite/family aliases.
-
-The core and full modes deliberately set `RH850_VERIFY_EXTERNAL=0` in verifier
-children. This prevents a nominally portable gate from silently doing extra work
-just because an ignored `software/` corpus happens to exist on one developer
-machine. Local and required-external modes enable those optional
-raw-source cross-checks. Exit code 77 remains the explicit artifact-level skip
-code; required-external mode turns the same absence into a concise failure.
-Runner summaries keep pass/fail/skip separate, report assertion counts by
-evidence oracle, and print the slowest test durations.
-
-The explicit core tier is intentionally small: it checks repository structure,
-manifest/runner behavior, documentation/index integrity, analysis-target layout, and
-other control-plane invariants. Expensive domain proofs stay in `full`/`local`; for
-example, the 32-KiB Corolla DataFlash all-window cryptographic scan tests 23,277
-unique 16-byte candidates and is useful evidence, but it should not run after
-unrelated edits. The working-tree default still routes directly to any such suite
-when an owned input or verifier changes, so tiering does not hide relevant failures
-during focused work. `tools/test core` is a fast smoke button, not the edit loop or a
-substitute for CI's exhaustive `full` gate.
-
-The machine summary keeps `identity_hash`, `documentation_lint`, and
-`generated_self_check` counts separate from `raw_bytes`, `instruction_semantics`,
-`cfg_dataflow`, `dynamic_trace`, and `independent_external_artifact`, so a drift or
-report-only gate cannot be reported as semantic verification.
-
-Optional checks against pinned public repositories remain separate:
-
-```bash
-make verify-external EXTERNAL_REPOS_DIR=/path/containing/the/checkouts
-```
-
-`external-references.lock.json` records exact commits, expected checkout
-directory names, artifact hashes, and payload-fixture provenance. The optional
-suite fails on a missing checkout, a commit mismatch, or changed artifact
-bytes.
+External sources are checked when the analysis actually depends on them.
+`external-references.lock.json` may retain exact artifact identities for
+reproducibility, but checking every pinned repository is never part of ordinary
+verification.
 
 ## Rebuilding the complete project from firmware
 
@@ -564,12 +489,11 @@ Rows that remain `reviewed_unknown` carry no evidence grade.
 
 ## CI
 
-CI (`.github/workflows/ci.yml`) always runs `make verify-full`, so moving a slow
-portable check out of the edit-loop core does not reduce CI evidence coverage.
-Processor-path changes run SLEIGH, synthetic fixtures, and committed-project
-audits on macOS with pinned Ghidra 12.1.3 / ghidra CLI 0.2.1. Processor, script,
-and snapshot changes — plus `main`, manual, and nightly runs — execute the full
-four-stage rebuild (plus convention finalizer), project invariants, and exact
-normalized inventory comparison. The 12.1.2 -> 12.1.3 migration was verified by
+Normal push/PR CI runs only the small `make verify` core smoke. The exhaustive
+portable `make verify-full` sweep is scheduled/manual. Processor-path PRs run
+SLEIGH, synthetic fixtures, and committed-project audits on macOS with pinned
+Ghidra 12.1.3 / ghidra CLI 0.2.1; the processor/rebuild/CLI jobs also remain
+available on scheduled/manual runs. Ordinary source, evidence, and documentation
+commits do not trigger the four-stage Ghidra rebuild. The 12.1.2 -> 12.1.3 migration was verified by
 two independent clean rebuilds and changed no canonical semantic record; see
 [the migration journal](history/2026-08/GHIDRA_12_1_3_MIGRATION_2026-08-22.md).

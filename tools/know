@@ -6,16 +6,18 @@ import argparse
 import json
 import re
 import sys
+import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from artifact_catalog import manifest, rows as artifact_rows  # noqa: E402
+from artifact_catalog import rows as artifact_rows  # noqa: E402
 
 FINDINGS = ROOT / "docs/status/FINDINGS.md"
 CORRECTIONS = ROOT / "docs/status/CORRECTIONS.md"
 OPEN_QUESTIONS = ROOT / "docs/status/OPEN_QUESTIONS.md"
+MANIFEST = ROOT / "verification.toml"
 
 
 def matches(query: str, *values: object) -> bool:
@@ -96,7 +98,9 @@ def artifacts(query: str) -> list[dict]:
 
 def suites(query: str) -> list[dict]:
     out = []
-    for name, row in manifest().get("suite", {}).items():
+    with MANIFEST.open("rb") as handle:
+        suite_rows = tomllib.load(handle).get("suite", {})
+    for name, row in suite_rows.items():
         tests = row.get("tests", [])
         paths = row.get("paths", [])
         if matches(query, name, *tests, *paths):
@@ -140,7 +144,7 @@ def format_result(row: dict) -> str:
     if kind == "open_question":
         return f"open\t{row['id']}\t{row['title']}"
     if kind == "artifact":
-        return f"artifact\t{row['artifact']}\tproducer={','.join(row['producers']) or '—'}\tsuites={','.join(row['suites']) or '—'}"
+        return f"artifact\t{row['artifact']}\tproducer={','.join(row['producers']) or '—'}"
     if kind == "suite":
         return f"suite\t{row['name']}\ttests={','.join(row['tests'])}\tmodes={','.join(row['modes'])}"
     if kind == "doc":

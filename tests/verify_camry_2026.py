@@ -104,10 +104,6 @@ def _section_camry_2026_nrtd_p5():
     check('0x5AF distance candidate exact', c5af['bus'] == 1 and c5af['byte_index'] == 24 and (c5af['before'] == 240) and (c5af['after'] == 228) and (c5af['xor'] == 20) and (0 < c5af['latency_from_1912_change_ms'] < 20))
     check('distance ordinary-CAN semantics remain bounded', all(('candidate only' in x['boundary'] for x in (c251, c5af))) and 'pending an independent repeat/enum sweep' in dist['interpretation'])
     check('production boundary remains observation-only', all((x in art['production_boundary'] for x in ('identities and observation carriers only', 'does not establish Camry B6', 'production safety policy'))))
-    print('\n== documentation ==')
-    doc = (REPO / 'docs/variants/camry-2026-live-baseline.md').read_text()
-    for token in ('8646F3315000', 'F152633K0000', '0x0FE', '0x1906', '0x1912', '0x251', '0x5AF', '0x107E'):
-        check(f'Camry report preserves {token}', token in doc)
 _section_camry_2026_nrtd_p5()
 print()
 
@@ -173,11 +169,6 @@ def _section_camry_2026_ready_gear():
     for name, count in (('nrtd_to_ready_gear', 6187), ('ready_b', 2677)):
         wheels = art['captures'][name]['0x0AA_stationary_corroboration']
         check(f'{name} stationary wheel carrier exact', wheels['frame_count'] == count and wheels['unique_payloads'] == ['1a6f1a6f1a6f1a6f'])
-    print('\n== documentation ==')
-    doc = (REPO / 'docs/variants/camry-2026-live-baseline.md').read_text()
-    for token in ('VAR-053', 'P=0', 'R=1', 'N=2', 'D=3', 'B=4', '5.213083', '9.480908'):
-        check(f'Camry report preserves {token}', token in doc)
-    check('production boundary remains read-only', 'Production output remains disabled' in doc and 'does not authorize' in doc)
 _section_camry_2026_ready_gear()
 print()
 
@@ -302,10 +293,6 @@ def _section_camry_2026_relay_correct_capture():
     check('two drives total 19 segments / 3.574M incoming frames / zero B6', combined == {'b6_any_bus_any_length_count': 0, 'frame_count': 3574703, 'segment_count': 19})
     check('raw relay artifact defers semantic interval classification to VAR-081', 'artifact alone does not semantically classify' in art['capture_boundary']['operator_report_boundary'] and 'VAR-081' in art['capture_boundary']['operator_report_boundary'])
 
-    print('\n== documentation ==')
-    doc = (REPO / 'docs/variants/camry-2026-live-baseline.md').read_text()
-    for token in ('relay-correct', '1,656,656', '1,918,047', '3,574,703', 'zero `0x0B6`', '0x0FE', 'CHECKSUM_ERROR', 'Bus 4', '0x00A7D910'):
-        check(f'Camry report preserves relay result {token}', token in doc)
 _section_camry_2026_relay_correct_capture()
 print()
 
@@ -454,11 +441,6 @@ def _section_camry_2026_tsk_baseline():
     check('51E Ready wire exercises 0->1', ready['ready_values'] == [0, 1] and [x['value'] for x in ready['transition_timeline'][:2]] == [0, 1])
     check('51E Ready transition timing is exact', ready['transition_timeline'][0] == {'payload': '0000610000000000', 'seconds': 0.01764, 'value': 0} and ready['transition_timeline'][1] == {'payload': '8000610000000000', 'seconds': 0.994317, 'value': 1})
     check('Ready interpretation retains causal boundary', 'strongly corroborating' in ready['interpretation'] and 'not independently recorded' in ready['interpretation'])
-    print('\n== documentation ==')
-    doc = (REPO / 'docs/variants/camry-2026-live-baseline.md').read_text()
-    for token in ('8965F3307000', '8A3113303100', '0x7A1', '0x7A9', '0x030', '0x51E', '0x0B6', 'Ready Status'):
-        check(f'variant report preserves {token}', token in doc)
-    check('report preserves firmware-transfer boundary', 'not a Camry CodeFlash analysis' in doc and 'Production output remains disabled' in doc)
 _section_camry_2026_tsk_baseline()
 print()
 
@@ -554,9 +536,6 @@ def _section_camry_2026_dtc_clear():
     check('V18 category 435 selector 1 resolves to 04 -> 44', resolve_selector(435, 1) == (b'\x04', b'', b'\x44'))
     check('V18 Hybrid/Brake fallback resolves to 14FFFFFF -> 54', resolve_selector(397, 0x102) == (bytes.fromhex('14ffffff'), b'', b'\x54') and resolve_selector(435, 0x102) == (bytes.fromhex('14ffffff'), b'', b'\x54'))
 
-    doc = (REPO / 'docs/variants/camry-2026-live-baseline.md').read_text()
-    for token in ('U0131-87', '0x7DF', 'Mode 04', '0x7ED', '0xAF'):
-        check(f'Camry DTC-clear report preserves {token}', token in doc)
 _section_camry_2026_dtc_clear()
 print()
 
@@ -704,9 +683,6 @@ def _section_camry_frc_lta_capture_tool():
     check('capture tool hard-refuses pandad USB contention',
           'refusing Panda USB collision: pandad is running' in source and
           'pandad appeared during capture; aborting' in source)
-    readme = (REPO / 'targets/camry-2026/README.md').read_text()
-    check('Camry target docs preserve synchronized 1601 capture helper',
-          'tools/camry_frc_lta_capture.py' in readme and '0x1601' in readme and 'pandad' in readme)
 _section_camry_frc_lta_capture_tool()
 print()
 
@@ -722,9 +698,6 @@ def _section_camry_2026_motor_feedback():
     ART = REPO / "data/generated/camry_2026_motor_feedback_correlation.json"
     TOOL = REPO / "tools/analyze_camry_2026_motor_feedback.py"
     PORT = REPO / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
-    REPORT = REPO / "docs/variants/camry-2026-live-baseline.md"
-    PORT_REPORT = REPO / "docs/variants/camry-2026-tss3-opendbc-port.md"
-    FINDINGS = REPO / "docs/status/FINDINGS.md"
 
     def sha(path):
         return hashlib.sha256(Path(path).read_bytes()).hexdigest()
@@ -796,15 +769,6 @@ def _section_camry_2026_motor_feedback():
     check("opposition interpretation denies LTA authority proof", "not proof of LTA authority" in interp["bounded_opposing_runs"] and "B6 absent" in interp["bounded_opposing_runs"])
     check("production remains unauthorized", interp["production_output_authorized"] is False)
 
-    doc = REPORT.read_text()
-    for token in ("B22:B23", "0x37E48", "0x38678", "VAR-071", "VAR-072"):
-        check(f"live baseline preserves {token}", token in doc)
-    port_doc = PORT_REPORT.read_text()
-    for token in ("B22:B23", "0x22840", "0x4C490", "0x4C97A", "0x58C9A"):
-        check(f"port report preserves {token}", token in port_doc)
-    findings = FINDINGS.read_text()
-    check("VAR-071 registered", "| VAR-071 |" in findings and "B22:B23" in findings)
-    check("VAR-072 registered", "| VAR-072 |" in findings and "Class-L" in findings)
 _section_camry_2026_motor_feedback()
 print()
 

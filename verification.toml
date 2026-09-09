@@ -1,41 +1,20 @@
-# Verification ownership map.
+# Explicit verification suite registry.
 #
-# Maps verification suites to the files that can invalidate them, enabling:
-#   tools/test                     — dirty + untracked vs HEAD
-#   tools/test branch              — PR-shaped: merge-base with upstream
-#   tools/test <suite-or-prefix>   — run one suite or a prefix family
-#   tools/test list [query]        — discover suite ownership and modes
-#   make verify-agent              — compact core summary, full logs on failure
+# This file names runnable suites and optional external prerequisites. It is NOT
+# a changed-file ownership graph. `tools/test` never infers a test plan from the
+# working tree, documentation, status ledgers, or provenance metadata.
 #
-# `suite.*.paths` records only non-obvious invalidation edges. Statically resolvable
-# Python dependencies are derived from verifier file access/import/subprocess expressions
-# by `tools/verification_deps.py`; keep string-table/shell-indirection dependencies here
-# explicitly instead of teaching the scanner to guess. Non-routing artifact
-# ownership belongs under `catalog.*` instead. This is the authoritative suite manifest:
-# add each gate exactly once.
 
 [verification]
-default_oracle = "raw_bytes"
-skip_exit_code = 77
-gate_glob = "tests/verify_*.py"
 # Portable proofs default to the exhaustive full/local tiers.  The small core
 # smoke tier is centralized here so new evidence suites do not silently bloat it.
 default_modes = ["full", "local"]
 core_suites = [
-  "analysis_status",
   "analysis_targets",
   "annotation_ledger",
-  "architecture",
   "build_layout",
-  "control_partition",
-  "doc_links",
   "fast_verify",
-  "knowledge_index",
-  "software_layout",
-  "target_artifact_manifest",
-  "tooling_consolidation",
 ]
-aggregate_infrastructure_suites = ["analysis_status", "doc_links", "knowledge_index"]
 
 [verification.groups]
 # Cross-family deliberate bundles live here rather than growing Make wrappers.
@@ -51,8 +30,7 @@ exploit = [
   "variant_acquisition_readiness",
 ]
 
-# Repository artifacts checked outside tools/test. These paths remain visible in
-# the knowledge index without polluting changed-file suite selection.
+# Repository artifacts checked outside tools/test.
 [catalog.processor_audit]
 gate = "make verify-processor"
 paths = [
@@ -80,504 +58,218 @@ description = "Pinned proprietary GTS+ distribution and derived local reconstruc
 
 [suite.software_layout]
 tests = ["tests/verify_software_layout.py"]
-oracle = "documentation_lint"
-paths = ["software/README.md", "software/locks/"]
 
 [suite.gtsplus_artifact_lock]
 tests = ["tests/verify_gtsplus_artifact_lock.py"]
-paths = ["software/README.md"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "identity_hash"
 
 [suite.gtsplus_tss3_crossvehicle_surface]
 tests = ["tests/verify_gtsplus_tss3_crossvehicle_surface.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
 
 [suite.gtsplus_tss3_control_ownership]
 tests = ["tests/verify_gtsplus_tss3_control_ownership.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
 
 [suite.gtsplus_vehicle_resolver]
 tests = ["tests/verify_gtsplus_vehicle_resolver.py"]
-paths = [
-  "docs/tooling/techstream.md",
-]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
 
 [suite.gtsplus_ddb_factory_table_map]
 tests = ["tests/verify_gtsplus_ddb_factory_table_map.py"]
-paths = ["docs/tooling/techstream-ddb-pipeline.md"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
 
 [suite.gtsplus_ddb_corpus_census]
 tests = ["tests/verify_gtsplus_ddb_corpus_census.py"]
-paths = ["docs/tooling/techstream-ddb-pipeline.md"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
 
 [suite.gtsplus_pcs_data_viewer_tss3_dictionary]
 tests = ["tests/verify_gtsplus_pcs_data_viewer_tss3_dictionary.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
 
 [suite.gtsplus_pcs_data_viewer_tss3_managed_semantics]
 tests = ["tests/verify_gtsplus_pcs_data_viewer_tss3_managed_semantics.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "generated_self_check"
-paths = [
-  "tools/techstream/extract_pcs_data_viewer_tss3_managed_semantics.py",
-  "docs/tooling/pcs-data-viewer-tss3-dictionary.md",
-]
 
 [suite.gtsplus_pcs_data_viewer_parameter_help]
 tests = ["tests/verify_gtsplus_pcs_data_viewer_parameter_help.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
 
 [suite.gtsplus_tse_converter]
 tests = ["tests/verify_gtsplus_tse_converter.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
 
 [suite.gtsplus_tse_managed_semantics]
 tests = ["tests/verify_gtsplus_tse_managed_semantics.py"]
-paths = ["docs/tooling/gtsplus-tse-gtse-saved-session.md"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "dynamic_trace"
 
 [suite.public_techstream_tse_lineage]
 tests = ["tests/verify_public_techstream_tse_lineage.py"]
-oracle = "independent_external_artifact"
 
 [suite.gtsplus_vdas_semantics]
 tests = ["tests/verify_gtsplus_vdas_semantics.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
 
 [suite.gtsplus_p5_adas_p6_migration]
 tests = ["tests/verify_gtsplus_p5_adas_p6_migration.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
 
 [suite.gtsplus_body_recovery]
 tests = ["tests/verify_gtsplus_body_recovery.py"]
-paths = ["tools/techstream/gts_cli.py", "docs/tooling/techstream.md", "docs/tooling/gtsplus-body-recovery.md"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
 
 [suite.gtsplus_managed_exe_recovery]
 tests = ["tests/verify_gtsplus_managed_exe_recovery.py"]
-paths = [
-  "tools/techstream/cp_body_decode.py",
-  "docs/tooling/cuwplus-body-recovery.md",
-]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
 
 [suite.gtsplus_tss3_native_recorder]
 tests = ["tests/verify_gtsplus_tss3_native_recorder.py"]
-paths = ["docs/tooling/techstream.md", "docs/tooling/pcs-data-viewer-tss3-dictionary.md"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
 
 [suite.toyota_cuw_corpus_lock]
 tests = ["tests/verify_toyota_cuw_corpus_lock.py"]
-paths = ["software/README.md"]
 requires_external = ["cuw_reference_corpus"]
 modes = ["local"]
-oracle = "identity_hash"
 
 [suite.architecture]
 tests = ["tests/verify_architecture.py"]
-paths = [
-  "docs/architecture/firmware-architecture.md",
-  "data/ram_overlay_map.csv",
-  "data/control_partition.csv",
-]
 
 [suite.rh850_compiler_abi]
 tests = ["tests/verify_rh850_compiler_abi.py"]
-oracle = "raw_bytes"
-
-[suite.analysis_status]
-tests = ["tests/verify_analysis_status.py"]
-oracle = "generated_self_check"
-paths = [
-  "docs/status/FINDINGS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.boot_trust]
 tests = [
   "tests/verify_boot_trust.py",
   "tests/verify_codeflash_crc_reconstruction.py",
 ]
-paths = [
-  "docs/security/bootloader-payload-gate.md",
-]
 
 [suite.bootloader_diagnostics]
 tests = ["tests/verify_bootloader_diagnostics.py"]
-paths = ["docs/diagnostics/bootloader.md", "docs/diagnostics/bootloader-dids.md"]
 
 [suite.p1me_product_memory]
 tests = ["tests/verify_p1me_product_memory.py"]
-paths = [
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/tooling/community-dataflash-secoc.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
-oracle = "raw_bytes"
 
 [suite.bootloader_secrets]
 tests = ["tests/verify_findings.py"]
 
 [suite.findcrypt_database]
 tests = ["tests/verify_findcrypt_database.py"]
-paths = [
-  "ghidra/ghidra-findcrypt/README.md",
-  "tools/install_findcrypt_extension.sh",
-]
 
 [suite.can_transport]
 tests = ["tests/verify_can_transport.py"]
-paths = ["docs/communications/diagnostic-transport.md"]
 
 [suite.deadline_monitor_dispatch_tables]
 tests = ["tests/verify_deadline_monitor_dispatch_tables.py"]
-paths = [
-  "docs/communications/application-rx.md",
-  "ghidra/scripts/seed/SeedDispatchProvenFunctionTables.java",
-  "ghidra/scripts/verify/AssertFunctionDiscoveryFloor.java",
-]
 
 [suite.control_partition]
 tests = ["tests/verify_control_partition.py"]
-paths = [
-  "ghidra/scripts/annotate/AnnotateControlPartition.java",
-]
 
 [suite.dataflash_layout]
 tests = ["tests/verify_dataflash_layout.py"]
-paths = [
-  "docs/storage/dataflash.md",
-  "tools/generate_dataflash_layout.py",
-]
 
 [suite.dataflash_semantics]
 tests = ["tests/verify_dataflash_semantics.py"]
-paths = ["docs/storage/dataflash.md"]
 
 [suite.did_model]
 tests = ["tests/verify_did_model.py"]
-paths = ["docs/diagnostics/bootloader-dids.md"]
-
-[suite.doc_links]
-tests = ["tests/verify_doc_links.py"]
-paths = [
-  "README.md",
-  "AGENTS.md",
-  "exploit/README.md",
-  "community/README.md",
-  "data/README.md",
-  "ghidra/README.md",
-]
-oracle = "documentation_lint"
 
 [suite.application_ab_service]
 tests = ["tests/verify_application_ab_service.py"]
-paths = ["docs/diagnostics/application.md"]
 
 [suite.application_proprietary_ba]
 tests = ["tests/verify_application_proprietary_ba.py"]
-oracle = "cfg_dataflow"
-paths = [
-  "data/application_diagnostic_map.csv",
-  "tools/generate_application_diagnostic_map.py",
-  "docs/diagnostics/application-proprietary-ba.md",
-  "docs/diagnostics/application.md",
-  "docs/security/secoc/key-recovery-assessment.md",
-  "docs/security/secoc/software-path-assessment.md",
-  "docs/tooling/community-patch-target-analysis.md",
-  "community/README.md",
-  "docs/status/CORRECTIONS.md",
-]
 
 [suite.application_proprietary_ba_live]
 tests = ["tests/verify_application_proprietary_ba_live.py"]
-oracle = "cfg_dataflow"
 modes = ["local"]
-paths = [
-  "ghidra/scripts/verify/AssertApplicationProprietaryBaSurface.java",
-  "data/application_proprietary_ba_surface.csv",
-  "docs/diagnostics/application-proprietary-ba.md",
-]
 
 [suite.application_diagnostics]
 tests = ["tests/verify_application_diagnostics.py"]
-paths = [
-  "docs/diagnostics/application.md",
-]
 
 [suite.application_routine_control]
 tests = ["tests/verify_application_routine_control.py"]
-oracle = "raw_bytes"
-paths = [
-  "docs/diagnostics/application-routine-control-surface.md",
-  "docs/storage/dataflash.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-  "ghidra/scripts/verify/AssertApplicationRoutine1004EventHistory.java",
-  "ghidra/scripts/verify/AssertApplicationRoutineRemainingControls.java",
-]
 
 [suite.application_routine_control_1004_event_history_live]
 tests = ["tests/verify_application_routine_control_1004_event_history_live.py"]
 modes = ["local"]
-oracle = "cfg_dataflow"
-paths = [
-  "tools/generate_application_routine_control_surface.py",
-  "data/application_routine_control_surface.csv",
-  "data/checkpoint_payload_map.csv",
-  "data/object15_reachability.csv",
-  "tests/verify_application_routine_control.py",
-  "ghidra/scripts/verify/AssertApplicationRoutine1004EventHistory.java",
-  "tests/verify_motor_actuation_boundary.py",
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-  "docs/diagnostics/application-routine-control-surface.md",
-  "docs/storage/dataflash.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.application_routine_control_remaining_controls_live]
 tests = ["tests/verify_application_routine_control_remaining_controls_live.py"]
 modes = ["local"]
-oracle = "cfg_dataflow"
-paths = [
-  "tools/generate_application_routine_control_surface.py",
-  "data/application_routine_control_surface.csv",
-  "data/object15_reachability.csv",
-  "tests/verify_application_routine_control.py",
-  "ghidra/scripts/verify/AssertApplicationRoutineRemainingControls.java",
-  "tests/verify_motor_actuation_boundary.py",
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-  "docs/diagnostics/application-routine-control-surface.md",
-  "docs/storage/dataflash.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.application_async_operation_queue]
 tests = [
   "tests/verify_application_async_operation_queue.py",
 ]
-oracle = "cfg_dataflow"
-paths = [
-  "ghidra/scripts/verify/AssertApplicationAsyncOperationQueue.java",
-  "docs/diagnostics/application-async-operation-queue.md",
-  "docs/diagnostics/README.md",
-]
 
 [suite.application_async_operation_queue_live]
 tests = ["tests/verify_application_async_operation_queue_live.py"]
 modes = ["local"]
-oracle = "cfg_dataflow"
-paths = [
-  "data/application_async_operation_queue.csv",
-  "tests/verify_application_async_operation_queue.py",
-  "ghidra/scripts/verify/AssertApplicationAsyncOperationQueue.java",
-  "docs/diagnostics/application-async-operation-queue.md",
-  "docs/diagnostics/README.md",
-]
 
 [suite.application_read_memory_by_address]
 tests = ["tests/verify_application_read_memory_by_address.py"]
-paths = [
-  "docs/security/secoc/software-path-assessment.md",
-  "docs/status/CORRECTIONS.md",
-  "exploit/followups/application_rmba_probe.py",
-]
 
 [suite.application_rmba_memory_safety]
 tests = ["tests/verify_application_rmba_memory_safety.py"]
-paths = [
-  "docs/security/secoc/software-path-assessment.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.diagnostic_vocabulary]
 tests = ["tests/verify_diagnostic_vocabulary.py"]
-oracle = "generated_self_check"
-paths = [
-  "ghidra/scripts/verify/AssertDecompilerInvariants.java",
-  "data/generated/21140bbd65e530a9/",
-  "data/generated/p4dk4_template/",
-  "data/generated/techstream_v18/",
-  "docs/tooling/techstream-ddb-pipeline.md",
-]
 
 [suite.application_receive]
 tests = [
   "tests/verify_application_receive.py",
   "tests/verify_application_rx_consumer_audit.py",
 ]
-paths = [
-  "docs/communications/application-rx.md",
-  "tools/export_ghidra_project.sh",
-  "ghidra/scripts/verify/ExportApplicationRxSignalEvidence.java",
-  "ghidra/scripts/verify/ExportApplicationRxConsumerAudit.java",
-  "ghidra/scripts/verify/AssertApplicationReceiveMap.java",
-  "ghidra/scripts/annotate/AnnotateApplicationReceive.java",
-]
 
 [suite.application_wdbi]
 tests = ["tests/verify_application_wdbi.py"]
-oracle = "raw_bytes"
-paths = [
-  "data/application_diagnostic_map.csv",
-  "data/generated/21140bbd65e530a9/diagnostic_vocabulary.json",
-  "tests/verify_application_routine_control.py",
-  "ghidra/scripts/verify/AssertApplicationWdbiSurface.java",
-  "ghidra/scripts/verify/AssertApplicationWdbi0204Maintenance.java",
-  "ghidra/scripts/verify/AssertApplicationWdbi2010DeadState.java",
-  "ghidra/scripts/verify/AssertApplicationWdbi2012Lifecycle.java",
-  "ghidra/scripts/verify/AssertApplicationWdbi2013And2014Controls.java",
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-  "ghidra/scripts/verify/AssertProjectInvariants.java",
-  "ghidra/scripts/annotate/AnnotateApplicationDiagnostics.java",
-  "ghidra/scripts/seed/SeedApplicationDiagnosticFunctions.java",
-  "tools/generate_application_diagnostic_map.py",
-  "tools/diagnostics/firmware_tables.py",
-  "tools/diagnostics/correlate_vocabulary.py",
-  "docs/diagnostics/application.md",
-  "docs/diagnostics/application-routine-control-surface.md",
-  "docs/storage/dataflash.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.application_wdbi_surface_live]
 tests = ["tests/verify_application_wdbi_surface_live.py"]
 modes = ["local"]
-oracle = "cfg_dataflow"
-paths = [
-  "data/application_wdbi_surface.csv",
-  "tests/verify_application_wdbi.py",
-  "ghidra/scripts/verify/AssertApplicationWdbiSurface.java",
-  "ghidra/scripts/annotate/AnnotateApplicationDiagnostics.java",
-  "ghidra/scripts/seed/SeedApplicationDiagnosticFunctions.java",
-  "ghidra/scripts/verify/AssertProjectInvariants.java",
-  "tools/generate_application_diagnostic_map.py",
-  "tools/diagnostics/firmware_tables.py",
-  "tools/diagnostics/correlate_vocabulary.py",
-  "data/application_diagnostic_map.csv",
-  "data/generated/21140bbd65e530a9/diagnostic_vocabulary.json",
-  "docs/diagnostics/application.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.application_wdbi_0204_maintenance_live]
 tests = ["tests/verify_application_wdbi_0204_maintenance_live.py"]
 modes = ["local"]
-oracle = "cfg_dataflow"
-paths = [
-  "data/application_wdbi_surface.csv",
-  "data/object15_reachability.csv",
-  "tests/verify_application_wdbi.py",
-  "ghidra/scripts/verify/AssertApplicationWdbi0204Maintenance.java",
-  "tests/verify_motor_actuation_boundary.py",
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-  "docs/storage/dataflash.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.application_wdbi_2010_dead_state_live]
 tests = ["tests/verify_application_wdbi_2010_dead_state_live.py"]
 modes = ["local"]
-oracle = "cfg_dataflow"
-paths = [
-  "data/application_wdbi_surface.csv",
-  "tests/verify_application_wdbi.py",
-  "ghidra/scripts/verify/AssertApplicationWdbi2010DeadState.java",
-  "tests/verify_motor_actuation_boundary.py",
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-  "docs/status/CORRECTIONS.md",
-]
 
 [suite.application_wdbi_2012_lifecycle_live]
 tests = ["tests/verify_application_wdbi_2012_lifecycle_live.py"]
 modes = ["local"]
-oracle = "cfg_dataflow"
-paths = [
-  "data/application_wdbi_surface.csv",
-  "tests/verify_application_wdbi.py",
-  "ghidra/scripts/verify/AssertApplicationWdbi2012Lifecycle.java",
-  "tests/verify_motor_actuation_boundary.py",
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.application_wdbi_2013_2014_controls_live]
 tests = ["tests/verify_application_wdbi_2013_2014_controls_live.py"]
 modes = ["local"]
-oracle = "cfg_dataflow"
-paths = [
-  "data/application_wdbi_surface.csv",
-  "data/application_routine_control_surface.csv",
-  "tests/verify_application_wdbi.py",
-  "ghidra/scripts/verify/AssertApplicationWdbi2013And2014Controls.java",
-  "tests/verify_motor_actuation_boundary.py",
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-  "tests/verify_application_routine_control.py",
-  "docs/diagnostics/application-routine-control-surface.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.application_security_access]
 tests = ["tests/verify_security_gate.py"]
 
 [suite.application_interface]
 tests = ["tests/verify_application_interface_state_joins.py"]
-paths = [
-  "data/control_partition.csv",
-  "docs/architecture/control-partition.md",
-  "docs/communications/application-rx.md",
-  "docs/communications/application-tx.md",
-  "ghidra/scripts/verify/AssertApplicationInterfaceStateJoins.java",
-]
 
 [suite.application_interface_correlation]
 tests = ["tests/verify_application_interface_correlations.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "instruction_semantics"
-paths = [
-  "docs/architecture/control-partition.md",
-  "docs/communications/application-tx.md",
-  "docs/tooling/techstream-ddb-pipeline.md",
-  "docs/status/CORRECTIONS.md",
-]
 
 
 
@@ -586,13 +278,6 @@ tests = [
   "tests/verify_application_transmit.py",
   "tests/verify_application_tx_producer_evidence.py",
   "tests/verify_application_tx.py",
-]
-paths = [
-  "docs/communications/application-tx.md",
-  "tools/generate_application_tx_producer_evidence.py",
-  "tools/export_ghidra_project.sh",
-  "ghidra/scripts/verify/ExportApplicationTxProducerRefs.java",
-  "ghidra/scripts/verify/AssertApplicationTransmitSemantics.java",
 ]
 
 [suite.icus_key_recovery_surface]
@@ -606,109 +291,45 @@ tests = ["tests/verify_icus_software_paths.py"]
 
 [suite.icus_stage7_static]
 tests = ["tests/verify_icus_stage7_static.py"]
-paths = [
-  "docs/status/OPEN_QUESTIONS.md",
-  "ghidra/scripts/verify/AssertIcusStage7Static.java",
-]
 
 [suite.icus_trace_decoder]
 tests = ["tests/verify_icus_trace_decoder.py"]
 
 [suite.motor_actuation_boundary]
 tests = ["tests/verify_motor_actuation_boundary.py"]
-paths = [
-  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
-]
 
 [suite.motor_safety_monitors]
 tests = ["tests/verify_motor_safety_monitors.py"]
-paths = [
-  "docs/architecture/firmware-architecture.md",
-]
 
 [suite.motor_calibration_handlers]
 tests = ["tests/verify_motor_calibration_handlers.py"]
-paths = [
-  "docs/communications/application-rx.md",
-  "ghidra/scripts/annotate/AnnotateLargeFunctions.java",
-]
 
 [suite.p1m_device_profile]
 tests = ["tests/verify_p1m_device_profile.py"]
-paths = [
-  "ghidra/scripts/import/ApplyP1MDeviceProfile.java",
-  "tools/verify_ghidra_stats.py",
-]
 
 [suite.payload_gate]
 tests = ["tests/verify_payload_gate.py"]
-paths = ["docs/security/bootloader-payload-gate.md"]
 
 [suite.candidate_f05]
 tests = ["tests/verify_candidate_f05_payload.py"]
-paths = [
-  "docs/security/secoc/candidate-f05-payload.md",
-  "docs/variants/sienna-8965B4514000.md",
-]
 
 [suite.memory_safety]
 tests = [
   "tests/verify_memory_safety.py",
   "tests/verify_memory_safety_mutations.py",
 ]
-paths = [
-  "docs/security/memory-safety-audit.md",
-  "docs/status/CORRECTIONS.md",
-  "data/memory_safety_proof_matrix.csv",
-  "ghidra/scripts/verify/AssertMemorySafetyPaths.java",
-]
-oracle = "cfg_dataflow"
 
 [suite.ephemeral_secoc_bypass]
 tests = ["tests/verify_ephemeral_secoc_bypass.py"]
-oracle = "raw_bytes"
-paths = [
-  "docs/security/ephemeral-secoc-bypass.md",
-  "docs/security/README.md",
-  "docs/communications/xcp-command-dispatch.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.ephemeral_runtime_live_installer]
 tests = ["tests/verify_ephemeral_runtime_live_installer.py"]
-paths = [
-  "exploit/ephemeral_runtime/README.md",
-  "docs/security/ephemeral-secoc-bypass.md",
-]
-oracle = "generated_self_check"
 
 [suite.ephemeral_runtime]
 tests = ["tests/verify_ephemeral_runtime.py"]
-oracle = "raw_bytes"
-paths = [
-  "exploit/ephemeral_runtime/",
-  "exploit/README.md",
-  "docs/security/ephemeral-secoc-bypass.md",
-  "docs/security/README.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.ephemeral_runtime_resolver]
 tests = ["tests/verify_ephemeral_runtime_resolver.py"]
-oracle = "raw_bytes"
-paths = [
-  "ghidra/scripts/import/ApplyRecoveredGpTpContext.java",
-  "community/albinoelephant/raw-20260818/",
-  "exploit/ephemeral_runtime/",
-  "docs/security/ephemeral-secoc-bypass.md",
-  "docs/tooling/ephemeral-runtime-semantic-resolver.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.ram_overlays]
 tests = ["tests/verify_ram_overlays.py"]
@@ -721,142 +342,49 @@ tests = ["tests/verify_scheduler_timing.py"]
 
 [suite.semantic_coverage]
 tests = ["tests/verify_semantic_coverage.py"]
-oracle = "generated_self_check"
-paths = [
-  "ghidra/scripts/verify/ExportSemanticCoverageLedger.java",
-  "tools/export_ghidra_project.sh",
-]
 
 [suite.semantic_coverage_live]
 tests = ["tests/verify_semantic_coverage_live.py"]
 modes = ["local"]
 args = ["--project-dir", "build/work/project"]
-oracle = "cfg_dataflow"
-paths = [
-  "data/semantic_review_status.csv",
-  "ghidra/scripts/verify/ExportSemanticCoverageLedger.java",
-  "tools/apply_semantic_review_status.py",
-]
 
 [suite.semantic_review_promotions]
 tests = ["tests/verify_semantic_review_promotions.py"]
-oracle = "cfg_dataflow"
-paths = [
-  "data/semantic_review_status.csv",
-]
 
 [suite.semantic_interest_ranking]
 tests = ["tests/verify_semantic_interest_ranking.py"]
-oracle = "generated_self_check"
-paths = [
-  "data/semantic_review_status.csv",
-  "docs/history/2026-08/STATIC_ANALYSIS_SWEEP_2026-08-10.md",
-]
 
 [suite.semantic_sweep]
 tests = ["tests/verify_semantic_sweep.py"]
-oracle = "generated_self_check"
 
 [suite.decompiler_corpus]
 tests = ["tests/verify_decompiler_corpus.py"]
-oracle = "generated_self_check"
-paths = [
-  "docs/WORKFLOW.md",
-  "AGENTS.md",
-]
 
 [suite.function_discovery]
 tests = ["tests/verify_function_discovery.py"]
-paths = [
-  "data/function_discovery_reviewed_clusters.csv",
-  "data/recovered_callback_tables.csv",
-  "ghidra/scripts/seed/SeedRecoveredCallbackTables.java",
-  "ghidra/scripts/seed/SeedDispatchProvenFunctionTables.java",
-  "ghidra/scripts/seed/SeedBoundedPointerWrappers.java",
-  "ghidra/scripts/seed/SeedDirectCallTargets.java",
-  "ghidra/scripts/seed/SeedUdsServiceTable.java",
-  "ghidra/scripts/verify/AssertRecoveredCallbackTables.java",
-  "ghidra/scripts/verify/AssertFunctionDiscoveryFloor.java",
-  "ghidra/scripts/verify/AssertApplicationRdbiDisclosureBoundary.java",
-  "ghidra/scripts/verify/AssertReviewedPointerClusters.java",
-  "ghidra/scripts/verify/ExportOutsideFunctionCandidates.java",
-  "tools/apply_function_discovery_adjudications.py",
-  "tools/export_ghidra_project.sh",
-  "tools/rebuild_project.sh",
-]
 
 [suite.application_rdbi_disclosure_boundary]
 tests = ["tests/verify_application_rdbi_disclosure_boundary.py"]
-oracle = "cfg_dataflow"
 modes = ["local"]
-paths = [
-  "ghidra/scripts/verify/AssertApplicationRdbiDisclosureBoundary.java",
-]
 
 [suite.application_rdbi]
 tests = ["tests/verify_application_rdbi.py"]
-oracle = "raw_bytes"
-paths = [
-  "ghidra/scripts/verify/AssertApplicationRdbiStaleResponse.java",
-  "exploit/followups/application_rdbi_stale_probe.py",
-  "exploit/followups/README.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/CORRECTIONS.md",
-]
 
 [suite.application_rdbi_stale_response_live]
 tests = ["tests/verify_application_rdbi_stale_response_live.py"]
 modes = ["local"]
-oracle = "cfg_dataflow"
-paths = [
-  "tests/verify_application_rdbi.py",
-  "ghidra/scripts/verify/AssertApplicationRdbiStaleResponse.java",
-  "exploit/followups/application_rdbi_stale_probe.py",
-  "exploit/followups/README.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/CORRECTIONS.md",
-]
 
 [suite.camry_f33_steering_state_capture]
 tests = ["tests/verify_camry_f33_steering_state_capture.py"]
-oracle = "generated_self_check"
-paths = [
-  "docs/variants/camry-2026-tss3-opendbc-port.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.xcp]
 tests = ['tests/verify_xcp.py']
-oracle = 'raw_bytes'
-paths = [
-  'docs/communications/xcp-command-dispatch.md',
-  'docs/status/OPEN_QUESTIONS.md',
-  'docs/status/CORRECTIONS.md',
-  'docs/architecture/boot-validity-and-flash-lifecycle.md',
-  'docs/security/ephemeral-secoc-bypass.md',
-  'tests/verify_xcp_shadow_write_live.py',
-  'exploit/followups/README.md',
-  'exploit/followups/',
-]
 [suite.xcp_shadow_write_live]
 tests = ["tests/verify_xcp_shadow_write_live.py"]
-oracle = "cfg_dataflow"
 modes = ["local"]
-paths = [
-  "ghidra/scripts/verify/AssertXcpShadowWriteBoundary.java",
-  "docs/communications/xcp-command-dispatch.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/CORRECTIONS.md",
-]
 
 [suite.secoc]
 tests = ['tests/verify_secoc.py']
-oracle = 'raw_bytes'
-paths = [
-  'docs/communications/application-rx.md',
-  'ghidra/scripts/verify/AssertSecocRxControlSurface.java',
-  'docs/security/secoc/key-storage-and-lifecycle.md',
-]
 [suite.security_consumers]
 tests = ["tests/verify_security_consumers.py"]
 
@@ -868,541 +396,179 @@ tests = ["tests/verify_toyota_eps_variant_matrix.py"]
 
 [suite.toyota_porting_contract]
 tests = ["tests/verify_toyota_porting_contract.py"]
-oracle = "documentation_lint"
-paths = [
-  "docs/architecture/README.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.corolla_2023_public_route_opendbc_evidence]
 tests = ["tests/verify_corolla_2023_public_route_opendbc_evidence.py"]
-oracle = "generated_self_check"
-paths = [
-  "tools/extract_corolla_2023_public_route_opendbc_evidence.py",
-  "tools/toyota_route_opendbc_common.py",
-  "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-  "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json",
-]
 
 [suite.analysis_targets]
 tests = ["tests/verify_analysis_targets.py"]
-oracle = "generated_self_check"
-paths = [
-  "tools/gcamry",
-  "tools/generate_target_decompiler_corpus.py",
-  "tools/export_ghidra_project.sh",
-  "tools/camry_f33_corpus.py",
-  "ghidra/scripts/import/ApplyCamryF33DeviceProfile.java",
-  "ghidra/scripts/seed/SeedCamryF33Entries.java",
-  "ghidra/scripts/seed/SeedCamryF33Diagnostics.java",
-  "ghidra/scripts/seed/SeedCamryF33RecoveredFunctions.java",
-  "data/targets/camry-8965F3307000/",
-  "data/generated/camry-8965F3307000/decompilations.jsonl",
-  "projects/",
-  "targets/camry-2026/",
-  "docs/WORKFLOW.md",
-  "AGENTS.md",
-]
 
 [suite.camry_8965f3307000_gtsplus_semantics]
 tests = ["tests/verify_camry_8965F3307000_gtsplus_semantics.py"]
-oracle = "generated_self_check"
-paths = [
-  "tools/techstream/extract_gtsplus_camry_emps_semantics.py",
-  "tools/extract_camry_8965F3307000_gtsplus_decompiler_evidence.py",
-  "tools/techstream/parse_ddb.py",
-  "tools/camry_f33_corpus.py",
-  "data/generated/camry-8965F3307000/decompilations.jsonl",
-  "software/locks/gtsplus.json",
-  "docs/variants/camry-2026-live-baseline.md",
-]
 
 [suite.camry_8965f3307000_gtsplus_external]
 tests = ["tests/verify_camry_8965F3307000_gtsplus_external.py"]
 requires_external = ["techstream_v18", "gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
 
 [suite.toyota_diag_registry]
 tests = ["tests/verify_toyota_diag_registry.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "generated_self_check"
-paths = [
-  "tools/gts",
-  "docs/tooling/gts-query-cli.md",
-]
 
 [suite.toyota_diag_bundle]
 tests = ["tests/verify_toyota_diag_bundle.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "generated_self_check"
-paths = [
-  "tools/gts",
-  "docs/tooling/techstream.md",
-  "docs/tooling/gts-query-cli.md",
-]
 
 [suite.gts_query_cli]
 tests = ["tests/verify_gts_query_cli.py"]
 requires_external = ["gtsplus", "cuw_reference_corpus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
-paths = [
-  "tools/gts",
-  "docs/tooling/gts-query-cli.md",
-  "docs/tooling/README.md",
-  "docs/WORKFLOW.md",
-  "AGENTS.md",
-]
 
 [suite.camry_2026]
 tests = ['tests/verify_camry_2026.py']
-oracle = 'dynamic_trace'
-paths = [
-  'targets/camry-2026/',
-  'data/toyota_eps_variant_matrix.csv',
-  'docs/status/PRIORITIES.md',
-  'targets/camry-2026/raw-20260826/camry_ready_gear_capture.py',
-  'targets/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz',
-  'targets/camry-2026/raw-20260826/camry_b_capture.py',
-  'targets/camry-2026/raw-20260826/camry_ready_b_20260826.json.gz',
-]
 
 [suite.camry_2026_lta_state_reconciliation]
 tests = ["tests/verify_camry_2026_lta_state_reconciliation.py"]
-oracle = "dynamic_trace"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/PRIORITIES.md",
-]
 
 
 [suite.camry_2026_upstream_request_census]
 tests = ["tests/verify_camry_2026_upstream_request_census.py"]
-oracle = "dynamic_trace"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.camry_20260904_stock_steering]
 tests = ["tests/verify_camry_20260904_stock_steering.py"]
-oracle = "dynamic_trace"
-paths = [
-  "tests/fixtures/camry_20260904/",
-  "docs/variants/camry-2026-tss3-opendbc-port.md",
-]
 
 [suite.camry_tss3_replay_tool]
 tests = ["tests/verify_camry_tss3_replay_tool.py"]
-oracle = "dynamic_trace"
-paths = [
-  "docs/variants/camry-2026-tss3-integration-audit.md",
-]
 
 [suite.camry_2026_08a_producer_bounds]
 tests = ["tests/verify_camry_2026_08a_producer_bounds.py"]
-oracle = "dynamic_trace"
-paths = [
-  "targets/camry-2026/raw-20260827/",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/PRIORITIES.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.camry_2026_bus1_camera_output]
 tests = ["tests/verify_camry_2026_bus1_camera_output.py"]
-oracle = "dynamic_trace"
-paths = [
-  "targets/camry-2026/raw-20260827/",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/PRIORITIES.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.camry_2026_bus1_e2e]
 tests = ["tests/verify_camry_2026_bus1_e2e.py"]
-oracle = "dynamic_trace"
-paths = [
-  "targets/camry-2026/raw-20260827/",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.camry_frc_request_poc]
 tests = ["tests/verify_camry_frc_request_poc.py"]
-oracle = "dynamic_trace"
-paths = [
-  "targets/camry-2026/raw-20260827/",
-  "docs/variants/camry-2026-live-baseline.md",
-]
 
 [suite.camry_2026_bus1_field_leadlag]
 tests = ["tests/verify_camry_2026_bus1_field_leadlag.py"]
-oracle = "dynamic_trace"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.camry_2026_bus1_frc_egress_bounds]
 tests = ["tests/verify_camry_2026_bus1_frc_egress_bounds.py"]
-oracle = "dynamic_trace"
-paths = [
-  "targets/camry-2026/raw-20260827/",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/reference/camry-2026-tss3-control-security-participants.md",
-]
 
 [suite.camry_2026_bus4_field_leadlag]
 tests = ["tests/verify_camry_2026_bus4_field_leadlag.py"]
-oracle = "dynamic_trace"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/PRIORITIES.md",
-  "docs/status/CORRECTIONS.md",
-]
 
 [suite.camry_2026_longitudinal_request_plane]
 tests = ["tests/verify_camry_2026_longitudinal_request_plane.py"]
-oracle = "dynamic_trace"
-paths = [
-  "targets/camry-2026/raw-20260827/",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.camry_2026_baseline_selector]
 tests = ["tests/verify_camry_2026_baseline_selector.py"]
-oracle = "dynamic_trace"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/PRIORITIES.md",
-]
 [suite.camry_2026_lateral_flow_trace]
 tests = ["tests/verify_camry_2026_lateral_flow_trace.py"]
-oracle = "dynamic_trace"
-paths = [
-  "targets/camry-2026/raw-20260827/",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/PRIORITIES.md",
-  "docs/status/CORRECTIONS.md",
-]
 
 [suite.camry_2026_08a_signer_continuity]
 tests = ["tests/verify_camry_2026_08a_signer_continuity.py"]
-oracle = "dynamic_trace"
-paths = [
-  "targets/camry-2026/raw-20260826/",
-  "targets/camry-2026/raw-20260827/",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 [suite.camry_2026_tss3_request_capture]
 tests = ["tests/verify_camry_tss3_request_capture.py"]
-oracle = "generated_self_check"
-paths = [
-  "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "targets/camry-2026/README.md",
-]
 
 [suite.camry_tss3_operation_ffd_decoder]
 tests = ["tests/verify_camry_tss3_operation_ffd_decoder.py"]
-oracle = "generated_self_check"
-paths = [
-  "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/variants/camry-2026-tss3-opendbc-port.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 [suite.camry_8965f3307000_canfd_timing]
 tests = ["tests/verify_camry_8965F3307000_canfd_timing.py"]
-oracle = "raw_bytes"
 
 [suite.camry_8965f3307000_codeflash]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "codeflash"]
-oracle = "raw_bytes"
-paths = [
-  "data/generated/camry-8965F3307000/decompilations.jsonl",
-  "tools/extract_camry_8965F3307000_decompiler_evidence.py",
-  "targets/camry-2026/raw-20260826/CODEFLASH_MANIFEST.txt",
-  "targets/camry-2026/raw-20260826/camry_codeflash_dump.py",
-  "targets/camry-2026/raw-20260826/codeflash/",
-  "targets/camry-2026/README.md",
-  "data/toyota_eps_variant_matrix.csv",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.camry_8965f3307000_flash_backend]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "flash_backend"]
-oracle = "raw_bytes"
-paths = [
-  "tools/camry_f33_corpus.py",
-  "data/generated/camry-8965F3307000/decompilations.jsonl",
-  "tools/extract_camry_8965F3307000_flash_backend_evidence.py",
-  "exploit/patcher/README.md",
-  "docs/status/CORRECTIONS.md",
-  "community/README.md",
-]
 
 [suite.t0035_faci_backend_external]
 tests = ["tests/verify_t0035_faci_backend_external.py"]
 requires_external = ["cuw_reference_corpus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
-paths = [
-  "ghidra/scripts/investigate/SeedLoadedImageDirectCalls.java",
-  "software/locks/toyota-cuw-corpus.json",
-  "exploit/patcher/flash_backend.c",
-]
 
 [suite.camry_8965f3307000_secoc_patch]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "secoc_patch"]
-oracle = "raw_bytes"
-paths = [
-  "ghidra/scripts/investigate/SeedSecocAcceptanceGateCandidates.java",
-  "ghidra/scripts/investigate/ResolveSecocAcceptanceGate.java",
-  "exploit/patcher/",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/PRIORITIES.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.camry_8965f3307000_b6_acceptance_ladder]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "b6_acceptance_ladder"]
-oracle = "raw_bytes"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.camry_8965f3307000_lateral_static]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "lateral_static"]
-oracle = "raw_bytes"
-paths = [
-  "data/generated/camry-8965F3307000/decompilations.jsonl",
-  "tools/extract_camry_8965F3307000_lateral_decompiler_evidence.py",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.camry_8965f3307000_tss3_opendbc_port]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "tss3_opendbc_port"]
-oracle = "raw_bytes"
-paths = [
-  "data/generated/camry-8965F3307000/decompilations.jsonl",
-  "tools/extract_camry_8965F3307000_tss3_tx_decompiler_evidence.py",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.camry_8965f3307000_fault_status]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "fault_status"]
-oracle = "raw_bytes"
-paths = [
-  "data/generated/camry-8965F3307000/decompilations.jsonl",
-  "tools/extract_camry_8965F3307000_fault_status_decompiler_evidence.py",
-  "docs/variants/README.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.camry_8965f3307000_secoc_recovery]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "secoc_recovery"]
-oracle = "raw_bytes"
-paths = [
-  "targets/camry-2026/raw-20260826/secoc-recovery/",
-]
 
 [suite.camry_8965f3307000_command5_runtime_carrier]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "command5_runtime_carrier"]
-oracle = "raw_bytes"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-  "exploit/ephemeral_runtime/README.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.camry_8965f3307000_application_ram_loader]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "application_ram_loader"]
-oracle = "raw_bytes"
-paths = [
-  "targets/camry-2026/raw-20260826/RAM_RETENTION_MANIFEST.txt",
-  "targets/camry-2026/README.md",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/variants/README.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.span_2025_discord_rlog_opendbc_evidence]
 tests = ["tests/verify_span_2025_discord_rlog_opendbc_evidence.py"]
-oracle = "generated_self_check"
-paths = [
-  "tools/extract_span_2025_discord_rlog_opendbc_evidence.py",
-  "tools/toyota_route_opendbc_common.py",
-  "community/spanconstant/README.md",
-  "community/README.md",
-]
 
 [suite.corolla_tss3_opendbc_readiness]
 tests = ["tests/verify_corolla_tss3_opendbc_readiness.py"]
-oracle = "generated_self_check"
-paths = [
-  "data/generated/techstream_v18/tss3_cruise_live_transport.json",
-  "data/generated/corolla_hf_command5_runtime_carrier_evidence.json",
-  "data/generated/corolla_2023_albino_telescope_analysis.json",
-  "data/toyota_eps_variant_matrix.csv",
-  "docs/variants/toyota-eps-variant-comparison.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.corolla_hf]
 tests = ['tests/verify_corolla_hf.py']
-oracle = 'raw_bytes'
-paths = [
-  'tools/build_corolla_hf_nonsteering_engagement_state.py',
-  'tools/extract_corolla_h_nonsteering_engagement_evidence.py',
-  'tools/techstream/extract_tss3_cruise_engagement_semantics.py',
-  'tools/techstream/extract_tss3_cruise_live_transport.py',
-  'data/generated/techstream_v18/tss3_cruise_live_transport.json',
-  'data/generated/corolla_8965H1202000_openpilot_state_bridge.json',
-  'data/generated/corolla_8965H1202000_application_rx_diff.json',
-  'data/generated/corolla_8965H1202000_techstream_correlations.json',
-  'data/generated/corolla_2023_public_route_opendbc_evidence.json',
-  'data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json',
-  'data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json',
-  'docs/status/CORRECTIONS.md',
-  'docs/status/OPEN_QUESTIONS.md',
-  'docs/status/PRIORITIES.md',
-  'tools/extract_corolla_h_cooperative_authority_wire_evidence.py',
-  'tools/build_corolla_hf_cooperative_authority_wire_visibility.py',
-  'data/generated/corolla_8965H1202000_fd_control_interface.json',
-  'tools/build_corolla_hf_secoc_00f_freshness_bridge.py',
-  'community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst',
-  'external-references.lock.json',
-  'docs/variants/corolla-2023-us-public-route.md',
-  'tools/build_corolla_hf_fault_state_contract.py',
-  'tools/build_corolla_h_techstream_correlations.py',
-  'data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json',
-  'tools/extract_corolla_h_remaining_status_evidence.py',
-  'tools/build_corolla_hf_remaining_status_contract.py',
-  'tools/build_corolla_hf_steering_limits.py',
-  'tools/extract_corolla_h_tms053_followup_evidence.py',
-  'data/generated/corolla_8965H1202000_steering_limits_decompiler_evidence.json',
-  'data/generated/corolla_8965H1202000_steering_limits_reference_census.json',
-  'data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json',
-  'data/generated/corolla_8965H1202000_panda_lateral_safety_decompiler_evidence.json',
-  'data/generated/corolla_8965H1202000_b6_target_angle_ingress.json',
-  'data/generated/corolla_8965F1208000_low_calibration_delta.json',
-  'tools/build_corolla_hf_b6_competing_sender_arbitration.py',
-  'data/generated/corolla_8965H1202000_b6_full_receiver_contract.json',
-  'data/generated/corolla_8965H1202000_b6_receiver_contract.json',
-  'tools/build_corolla_hf_command5_portability.py',
-  'data/generated/corolla_8965H1202000_xcp.json',
-  'community/albinoelephant/telescope/probe.json',
-  'exploit/ephemeral_runtime/README.md',
-  'tools/build_corolla_hf_command5_runtime_carrier.py',
-  'tools/build_corolla_hf_panda_lateral_safety_contract.py',
-]
 
 [suite.tss3_cruise_live_transport_external]
 tests = ["tests/verify_tss3_cruise_live_transport_external.py"]
-oracle = "independent_external_artifact"
 modes = ["local"]
-paths = [
-  "tools/techstream/extract_tss3_cruise_engagement_semantics.py",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.corolla_2023_public_route_opendbc_evidence_external]
 tests = ["tests/verify_corolla_2023_public_route_opendbc_evidence_external.py"]
-oracle = "independent_external_artifact"
 modes = ["local"]
 
 [suite.span_2025_discord_rlog_opendbc_evidence_external]
 tests = ["tests/verify_span_2025_discord_rlog_opendbc_evidence_external.py"]
-oracle = "independent_external_artifact"
 modes = ["local"]
 
 [suite.corolla_h_nonsteering_engagement_evidence_external]
 tests = ["tests/verify_corolla_h_nonsteering_engagement_evidence_external.py"]
-oracle = "independent_external_artifact"
 modes = ["local"]
 
 [suite.tss3_cruise_engagement_semantics_external]
 tests = ["tests/verify_tss3_cruise_engagement_semantics_external.py"]
-oracle = "independent_external_artifact"
 modes = ["local"]
 
 [suite.corolla_hf_regen]
 tests = ["tests/verify_corolla_hf_regen.py"]
 modes = ["full", "local"]
-oracle = "raw_bytes"
-paths = [
-  "tools/build_corolla_hf_command5_runtime_carrier.py",
-  "data/generated/corolla_hf_command5_runtime_carrier.json",
-  "tools/build_corolla_hf_steering_limits.py",
-  "data/generated/corolla_hf_steering_limits.json",
-  "tools/build_corolla_hf_nonsteering_engagement_state.py",
-  "data/generated/corolla_hf_nonsteering_engagement_state.json",
-  "tools/build_corolla_hf_cooperative_authority_wire_visibility.py",
-  "data/generated/corolla_hf_cooperative_authority_wire_visibility.json",
-  "tools/build_corolla_hf_b6_competing_sender_arbitration.py",
-  "data/generated/corolla_hf_b6_competing_sender_arbitration.json",
-  "tools/build_corolla_hf_fault_state_contract.py",
-  "data/generated/corolla_hf_fault_state_contract.json",
-  "tools/build_corolla_hf_panda_lateral_safety_contract.py",
-  "data/generated/corolla_hf_panda_lateral_safety_contract.json",
-  "tools/build_corolla_hf_remaining_status_contract.py",
-  "data/generated/corolla_hf_remaining_status_contract.json",
-  "tools/build_corolla_hf_command5_portability.py",
-  "data/generated/corolla_hf_command5_portability.json",
-]
 
 [suite.corolla_hf_secoc_00f_freshness_bridge_external]
 tests = ["tests/verify_corolla_hf_secoc_00f_freshness_bridge_external.py"]
-oracle = "independent_external_artifact"
 modes = ["local"]
 
 [suite.corolla_tss3_opendbc_readonly_external]
 tests = ["tests/verify_corolla_tss3_opendbc_readonly_external.py"]
-oracle = "independent_external_artifact"
 modes = ["local"]
-paths = [
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.corolla_pre_tss3_message_comparison]
 tests = ["tests/verify_corolla_pre_tss3_message_comparison.py"]
-oracle = "raw_bytes"
-paths = [
-  "docs/variants/README.md",
-  "docs/status/PRIORITIES.md",
-  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-]
 
 
 
@@ -1410,27 +576,15 @@ paths = [
 
 [suite.corolla_h_sienna_secoc_structural_comparison]
 tests = ["tests/verify_corolla_h_sienna_secoc_structural_comparison.py"]
-oracle = "raw_bytes"
-paths = [
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 
 [suite.target_artifact_manifest]
 tests = ["tests/verify_target_artifact_manifest.py"]
-oracle = "documentation_lint"
-paths = [
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.techstream_rks]
 tests = ["tests/verify_techstream_rks.py"]
-paths = ["docs/tooling/techstream.md", "software/locks/techstream-v18.json"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "cfg_dataflow"
 # External-tree suite: verifies TMS-009 (CUW RKS / two-layer reflash
 # authorization). The runner skips it in optional local mode when the gitignored
 # Techstream tree is absent; an explicit invocation fails closed unless
@@ -1438,23 +592,16 @@ oracle = "cfg_dataflow"
 
 [suite.techstream_ptshim]
 tests = ["tests/verify_techstream_ptshim.py"]
-paths = ["docs/tooling/techstream.md", "tests/fixtures/techstream/", "software/locks/techstream-v18.json"]
 # Synthetic fixtures always exercise the parser; binary body/path/timestamp
 # locks are additionally checked when the gitignored Techstream tree is present.
 
 [suite.techstream_ddb_header_families]
 tests = ["tests/verify_techstream_ddb_header_families.py"]
-oracle = "raw_bytes"
 
 [suite.techstream_ddb_residuals]
 tests = ["tests/verify_techstream_ddb_residuals.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "raw_bytes"
-paths = [
-  "docs/tooling/techstream-ddb-pipeline.md",
-  "software/locks/techstream-v18.json",
-]
 # Bounded current-state audit: Security_P4 high-value unknowns plus the separate
 # Toyota.ddb type-1 master-enumeration schema. SKIPs when the external tree is absent.
 
@@ -1462,28 +609,16 @@ paths = [
 tests = ["tests/verify_techstream_master_routes.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "raw_bytes"
-paths = [
-  "docs/tooling/techstream-ddb-pipeline.md",
-]
 
 [suite.techstream_diagnostic_execution_model]
 tests = ["tests/verify_techstream_diagnostic_execution_model.py"]
 requires_external = ["techstream_v18", "gtsplus"]
 modes = ["local"]
-oracle = "instruction_semantics"
-paths = [
-  "docs/tooling/techstream.md",
-]
 
 [suite.techstream_priority_ddb_semantics]
 tests = ["tests/verify_techstream_priority_ddb_semantics.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "instruction_semantics"
-paths = [
-  "docs/tooling/techstream-ddb-pipeline.md",
-]
 
 [suite.techstream_p5_lateral_control]
 tests = [
@@ -1491,102 +626,49 @@ tests = [
 ]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "independent_external_artifact"
-paths = [
-  "tools/techstream/extract_p5_lateral_control_semantics.py",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.tss3_b6_sender_attribution]
 tests = ["tests/verify_tss3_b6_sender_attribution.py"]
-oracle = "generated_self_check"
-paths = [
-  "data/generated/techstream_v18/p5_lateral_control_semantics.json",
-  "data/generated/techstream_v18/cuw_frc_corpus.json",
-  "data/generated/corolla_8965H1202000_techstream_correlations.json",
-  "data/generated/corolla_8965H1202000_secoc_key_provenance.json",
-  "data/generated/corolla_8965H1202000_b6_secoc_verification.json",
-  "data/generated/corolla_8965H1202000_lta_command_provenance.json",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.corolla_2023_calibration_acquisition]
 tests = ["tests/verify_corolla_2023_calibration_acquisition.py"]
 requires_external = ["cuw_reference_corpus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
-paths = [
-  "data/generated/techstream_v18/cuw_frc_corpus.json",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.techstream_searchcal]
 tests = ["tests/verify_techstream_searchcal.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "independent_external_artifact"
-paths = [
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.camry_f152633k0000_brake_acquisition]
 tests = ["tests/verify_camry_f152633k0000_brake_acquisition.py"]
 requires_external = ["cuw_reference_corpus", "gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-]
 
 [suite.camry_brake_observer_vocabulary]
 tests = ["tests/verify_camry_brake_observer_vocabulary.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
-oracle = "generated_self_check"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-]
 
 [suite.techstream_tis_calibration_acquisition]
 tests = ["tests/verify_techstream_tis_calibration_acquisition.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "independent_external_artifact"
-paths = [
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.techstream_tis_calibration_selection]
 tests = ["tests/verify_techstream_tis_calibration_selection.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "independent_external_artifact"
-paths = [
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.techstream_dtc_failure_types]
 tests = ["tests/verify_techstream_dtc_failure_types.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "instruction_semantics"
-paths = [
-  "docs/tooling/techstream-ddb-pipeline.md",
-  "docs/status/CORRECTIONS.md",
-]
 
 [suite.techstream_mackey]
 tests = ["tests/verify_techstream_mackey.py"]
-paths = ["docs/security/mackey-registration.md", "docs/tooling/techstream.md"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "cfg_dataflow"
 # External-tree suite: verifies TMS-011 against native exports/imports and the
 # managed IT3UtilityRevNK IL. Exits 77 when software/Techstream/v18/unpacked is absent.
 
@@ -1594,32 +676,21 @@ oracle = "cfg_dataflow"
 tests = ["tests/verify_techstream_crypto_inventory.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "generated_self_check"
-paths = [
-  "docs/status/CORRECTIONS.md",
-  "software/locks/techstream-v18.json",
-]
 
 [suite.techstream_srp]
 tests = ["tests/verify_techstream_srp.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "independent_external_artifact"
 
 [suite.techstream_artifact_lock]
 tests = ["tests/verify_techstream_artifact_lock.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "identity_hash"
 
 [suite.techstream_cuw_writer_routes]
 tests = ["tests/verify_techstream_cuw_writer_routes.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "cfg_dataflow"
-paths = [
-  "software/locks/techstream-v18.json",
-]
 
 [suite.techstream_pre_gts_static_closure]
 tests = [
@@ -1632,80 +703,41 @@ tests = [
 ]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "cfg_dataflow"
-paths = [
-  "docs/tooling/techstream-capture-procedure.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.techstream_cuw_legacy]
 tests = ["tests/verify_techstream_cuw_legacy.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "independent_external_artifact"
-paths = [
-  "docs/history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.techstream_cuw_vforest]
 tests = ["tests/verify_techstream_cuw_vforest.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "independent_external_artifact"
-paths = [
-  "docs/history/2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.techstream_cuw_vforest_corpus]
 tests = ["tests/verify_techstream_cuw_vforest_corpus.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "independent_external_artifact"
-paths = [
-  "tools/techstream/inspect_cuw_vforest_corpus.py",
-  "docs/history/2026-08/TACOMA_VFOREST_CUW_CORPUS_ANALYSIS_2026-08-23.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.techstream_cuw_frc_corpus]
 tests = ["tests/verify_techstream_cuw_frc_corpus.py"]
 requires_external = ["techstream_v18", "cuw_reference_corpus", "gtsplus"]
 modes = ["local"]
-oracle = "independent_external_artifact"
-paths = [
-  "tools/techstream/inspect_cuw_frc_corpus.py",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.techstream_cuw_security_up]
 tests = ["tests/verify_techstream_cuw_security_up.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "instruction_semantics"
-paths = [
-  "software/locks/techstream-v18.json",
-]
 
 [suite.techstream_cuw_cross_ecu_security_derivations]
 tests = ["tests/verify_techstream_cuw_cross_ecu_security_derivations.py"]
 requires_external = ["cuw_reference_corpus"]
 modes = ["local"]
-oracle = "generated_self_check"
-paths = [
-  "docs/tooling/techstream.md",
-]
 
 [suite.techstream_layerb]
 tests = ["tests/verify_techstream_layerb.py"]
-paths = ["docs/tooling/techstream.md"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
-oracle = "instruction_semantics"
 # External-tree suite: verifies TMS-010 (VFOREST flash-writer SA transmission /
 # SendNonceAndSeedKey; no static AES in the CUW reflash toolchain). The runner skips
 # it in optional local mode when the gitignored Techstream tree is absent; an
@@ -1714,7 +746,6 @@ oracle = "instruction_semantics"
 
 [suite.community_tooling]
 tests = ["tests/verify_community_tooling.py"]
-paths = ["community/"]
 # Cross-validates community exploit tooling (blurbdust/@yc flash patcher,
 # egg-hunter shellcode, CUW decryptor) against repository findings SEC-BOOT-002..007,
 # SECOC-024/028/044, including live CRC resigning. Verifies SHA-256 integrity
@@ -1722,91 +753,36 @@ paths = ["community/"]
 
 [suite.lochuan_patch_semantics]
 tests = ["tests/verify_lochuan_patch_semantics.py"]
-oracle = "raw_bytes"
-paths = [
-  "docs/status/CORRECTIONS.md",
-  "community/README.md",
-  "docs/tooling/community-patch-target-analysis.md",
-]
 
 [suite.secoc_semantic_patch_resolver]
 tests = ["tests/verify_secoc_semantic_patch_resolver.py"]
-paths = [
-  "tools/resolve_secoc_patch.sh",
-  "tools/run_headless",
-  "docs/tooling/secoc-semantic-patch-resolver.md",
-  "docs/tooling/community-patch-target-analysis.md",
-  "docs/tooling/README.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.exploit_interest_ranking]
 tests = ["tests/verify_exploit_interest_ranking.py"]
-oracle = "generated_self_check"
-paths = [
-  "exploit/pipeline/",
-  "docs/tooling/exploit-interest-ranking.md",
-  "data/application_diagnostic_map.csv",
-  "data/application_rx_map.csv",
-  "data/recovered_callback_tables.csv",
-  "data/application_async_operation_queue.csv",
-  "data/application_wdbi_callbacks.csv",
-  "data/application_routine_control_surface.csv",
-]
 
 [suite.exploit_interest_reviewed_candidates]
 tests = ["tests/verify_exploit_interest_reviewed_candidates.py"]
-oracle = "generated_self_check"
-paths = [
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.security_state_composition]
 tests = ["tests/verify_security_state_composition.py"]
-oracle = "generated_self_check"
 
 [suite.response_disclosure_audit]
 tests = ["tests/verify_response_disclosure_audit.py"]
-oracle = "generated_self_check"
-paths = [
-  "data/application_routine_control_surface.csv",
-  "docs/diagnostics/application.md",
-]
 
 [suite.boot_noauth_pc_pivot_assessment]
 tests = ["tests/verify_boot_noauth_pc_pivot_assessment.py"]
-paths = [
-  "docs/security/bootloader-noauth-pc-pivot-assessment.md",
-  "docs/security/README.md",
-]
-oracle = "raw_bytes"
 
 [suite.codeflash_structure_scanner]
 tests = ["tests/verify_rh850_codeflash_structure_scanner.py"]
-paths = [
-  "docs/tooling/rh850-codeflash-structure-scanner.md",
-  "docs/tooling/README.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.variant_function_structure_matcher]
 tests = ["tests/verify_variant_function_structure_matcher.py"]
 
 [suite.exploit_surface]
 tests = ["tests/verify_exploit_surface.py"]
-oracle = "generated_self_check"
-paths = [
-  "Makefile",
-]
 
 [suite.exploit_predicate_semantics]
 tests = ["tests/verify_exploit_predicate_semantics.py"]
-oracle = "raw_bytes"
-paths = [
-  "docs/tooling/exploit-predicate-semantics.md",
-  "docs/communications/diagnostic-transport.md",
-  "docs/status/CORRECTIONS.md",
-]
 
 [suite.secoc_manifest_patcher]
 tests = [
@@ -1819,106 +795,35 @@ tests = ["tests/verify_codeflash_dumper.py"]
 
 [suite.crypto_test_bank0_composition]
 tests = ["tests/verify_crypto_test_bank0_composition.py"]
-paths = [
-  "docs/security/secoc/key-storage-and-lifecycle.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.secoc_command5_experiment]
 tests = ["tests/verify_secoc_command5_experiment.py"]
-paths = [
-  "exploit/command5/",
-  "docs/communications/application-rx.md",
-  "docs/security/secoc/software-path-assessment.md",
-  "docs/security/secoc/sender-implementation.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.secoc_command5_oracle_assessment]
 tests = ["tests/verify_secoc_command5_oracle_assessment.py"]
-oracle = "raw_bytes"
-paths = [
-  "tests/verify_secoc_command5_experiment.py",
-  "exploit/command5/",
-  "docs/security/secoc/key-recovery-assessment.md",
-  "docs/security/secoc/sender-implementation.md",
-  "docs/security/memory-safety-audit.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.secoc_command5_ram_proxy]
 tests = ["tests/verify_secoc_command5_ram_proxy.py"]
-oracle = "raw_bytes"
-paths = [
-  "data/variant_ram_exec_requirements.json",
-  "tools/build_ephemeral_runtime_manifest.py",
-  "exploit/ephemeral_runtime/",
-  "docs/security/secoc/command5-oracle-assessment.md",
-  "docs/security/secoc/sender-implementation.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.command5_dtc_side_channel]
 tests = ["tests/verify_command5_dtc_side_channel.py"]
-oracle = "raw_bytes"
-paths = [
-  "exploit/command5/stimulus.py",
-  "tests/verify_secoc_command5_experiment.py",
-  "docs/security/secoc/software-path-assessment.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.secoc_mac28_behavioral_proof]
 tests = ["tests/verify_secoc_mac28_behavioral_proof.py"]
-paths = [
-  "exploit/behavioral_proof/",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.camry_f33_b6_stationary_probe]
 tests = [
   "tests/verify_camry_f33_b6_stationary_probe.py",
   "tests/verify_camry_f33_b6_midaggregate_observer.py",
 ]
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-  "targets/camry-2026/README.md",
-  "exploit/ephemeral_runtime/camry_f33_runtime_monitor.py",
-  "exploit/ephemeral_runtime/camry_f33_runtime_monitor_preaggregate.py",
-  "exploit/ephemeral_runtime/camry_f33_field_launcher.sh",
-  "exploit/ephemeral_runtime/camry_f33_field_preaggregate_launcher.sh",
-  "exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.py",
-  "exploit/ephemeral_runtime/camry_f33_field_midaggregate_launcher.sh",
-]
 
 [suite.exploit_followups]
 tests = [
   "tests/verify_exploit_followups.py",
 ]
-paths = [
-  "tests/verify_secoc.py",
-  "tests/verify_xcp.py",
-  "exploit/followups/",
-  "docs/communications/xcp-command-dispatch.md",
-  "docs/security/memory-safety-audit.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.variant_acquisition_readiness]
 tests = ["tests/verify_variant_acquisition_readiness.py"]
-paths = [
-  "docs/tooling/variant-acquisition-readiness.md",
-  "docs/tooling/README.md",
-  "docs/variants/newer-tsk-target-evidence.md",
-]
 
 [suite.lifecycle]
 serial = true
@@ -1928,23 +833,6 @@ tests = [
   "tests/verify_headless_runner.py",
   "tests/verify_ghidra_env.py",
   "tests/verify_project_inventory.py",
-]
-paths = [
-  "tools/lib/",
-  "tools/build_processor_fixture.py",
-  "tools/fingerprint_processor.py",
-  "tools/install_v850_extension.sh",
-  "tools/resolve_ghidra_cli.sh",
-  "tools/resolve_ghidra_home.sh",
-  "tools/verify_processor.sh",
-  "tools/verify_sleigh.sh",
-  "ghidra/ghidra-cli/",
-  "ghidra/scripts/verify/ExportProjectInventory.java",
-  "docs/WORKFLOW.md",
-  "AGENTS.md",
-  "project/",
-  "verification.toml",
-  ".github/workflows/ci.yml",
 ]
 
 [suite.community_patch_target_analyzer]
@@ -1956,49 +844,15 @@ tests = ["tests/verify_corolla_2023_public_route_summary.py"]
 [suite.albinoelephant_corolla_dataflash]
 modes = ["full", "local"]
 tests = ["tests/verify_albinoelephant_corolla_dataflash.py"]
-paths = [
-  "community/albinoelephant/",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/tooling/community-dataflash-secoc.md",
-]
-oracle = "raw_bytes"
 
 [suite.albinoelephant_telescope_probe]
 tests = ["tests/verify_albinoelephant_telescope_probe.py"]
-paths = [
-  "community/albinoelephant/telescope/",
-  "community/albinoelephant/raw-20260818/",
-  "data/toyota_eps_variant_matrix.csv",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/CORRECTIONS.md",
-]
-oracle = "dynamic_trace"
 
 [suite.albinoelephant_corolla_repeatability]
 tests = ["tests/verify_albinoelephant_corolla_repeatability.py"]
-paths = [
-  "community/albinoelephant/raw-20260818/",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/tooling/community-dataflash-secoc.md",
-]
 
 [suite.albinoelephant_corolla_codeflash]
 tests = ["tests/verify_albinoelephant_corolla_codeflash.py"]
-paths = [
-  "community/albinoelephant/raw-20260818/",
-  "data/generated/ephemeral_runtime_resolution_8965H1202000_minimal.json",
-  "ghidra/scripts/verify/ExportFunctionStructuralFingerprints.java",
-  "ghidra/scripts/import/ApplyRecoveredGpTpContext.java",
-  "ghidra/scripts/import/ApplyVariantGpTpContext.java",
-  "ghidra/scripts/investigate/FindGpTpWrites.java",
-  "ghidra/scripts/investigate/InspectAddressReferences.java",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/tooling/ephemeral-runtime-semantic-resolver.md",
-  "docs/tooling/secoc-semantic-patch-resolver.md",
-  "docs/status/CORRECTIONS.md",
-  "community/README.md",
-]
-oracle = "raw_bytes"
 
 [suite.spanconstant_corolla_codeflash]
 tests = [
@@ -2008,19 +862,6 @@ tests = [
   "tests/verify_spanconstant_corolla_memory.py",
   "tests/verify_spanconstant_low_calibration_delta.py",
 ]
-paths = [
-  "tools/match_variant_function_structure.py",
-  "tools/build_variant_named_transfer_ledger.py",
-  "community/spanconstant/",
-  "community/albinoelephant/raw-20260818/",
-  "data/toyota_eps_variant_matrix.csv",
-  "docs/variants/corolla-8965F1208000.md",
-  "docs/architecture/boot-validity-and-flash-lifecycle.md",
-  "docs/communications/xcp-command-dispatch.md",
-  "docs/status/CORRECTIONS.md",
-  "community/README.md",
-]
-oracle = "raw_bytes"
 
 
 
@@ -2052,130 +893,25 @@ oracle = "raw_bytes"
 tests = ["tests/verify_external_corroboration.py"]
 modes = ["local"]
 args = ["--repos-dir", "../"]
-oracle = "independent_external_artifact"
 
 [suite.build_layout]
 tests = ["tests/verify_build_layout.py"]
-oracle = "raw_bytes"
-paths = [
-  ".gitignore",
-  "tools/lib/build_paths.sh",
-  "community/albinoelephant/normalized/README.md",
-  "exploit/ephemeral_runtime/audited/README.md",
-  "exploit/ephemeral_runtime/audited/ephemeral_secoc_runtime.bin",
-  "exploit/ephemeral_runtime/audited/ephemeral_scheduler_canary.bin",
-  "exploit/ephemeral_runtime/audited/ephemeral_command5_proxy.bin",
-  "docs/WORKFLOW.md",
-]
 
 
 [suite.corolla_h]
 tests = ["tests/verify_corolla_h.py"]
-oracle = "raw_bytes"
-paths = [
-  "community/albinoelephant/raw-20260818/",
-  "data/external/opendbc/toyota_corolla_pre_tss3_contract.json",
-  "data/external/opendbc/toyota_dbc_facts.json",
-  "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
-  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
-  "data/generated/corolla_8965H1202000_application_rx_diff.json",
-  "data/generated/corolla_8965H1202000_cooperative_authority_wire_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_lta_command_provenance_census.json",
-  "data/generated/corolla_8965H1202000_named_function_transfer_ledger.json",
-  "data/generated/corolla_8965H1202000_remaining_status_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_steering_limits_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_steering_supervisor_insertions_decompiler_evidence.json",
-  "data/generated/corolla_8965H1202000_steering_supervisor_structural_evidence.json",
-  "data/generated/corolla_hf_fault_state_contract.json",
-  "data/generated/corolla_hf_remaining_status_contract.json",
-  "data/generated/decompilations.jsonl",
-  "data/generated/response_disclosure_audit.json",
-  "data/generated/sienna_8965B4512000_steering_supervisor_structural_evidence.json",
-  "data/generated/techstream_v18/application_interface_correlations.json",
-  "data/generated/techstream_v18/p5_lateral_control_semantics.json",
-  "data/generated/techstream_v18/priority_steering_ddb_semantics.json",
-  "data/generated/techstream_v18/toyota_master_routes.json",
-  "data/generated/u023a87_monitor_map.json",
-  "docs/architecture/control-partition.md",
-  "docs/communications/xcp-command-dispatch.md",
-  "docs/security/secoc/key-storage-and-lifecycle.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-  "docs/variants/README.md",
-  "docs/variants/corolla-pre-tss3-openpilot-message-comparison.md",
-  "tests/verify_deadline_monitor_dispatch_tables.py",
-  "tools/extract_corolla_h_b6_receiver_contract_evidence.py",
-  "tools/extract_corolla_h_b6_target_angle_evidence.py",
-  "tools/extract_corolla_h_deadline_monitor_surface_evidence.py",
-  "tools/extract_corolla_h_diagnostic_residue_evidence.py",
-  "tools/extract_corolla_h_direct_call_surface_evidence.py",
-  "tools/extract_corolla_h_evidence.py",
-  "tools/extract_corolla_h_final_named_residue_evidence.py",
-  "tools/extract_corolla_h_lta_census.py",
-  "tools/extract_corolla_h_lta_command_provenance_evidence.py",
-  "tools/extract_corolla_h_openpilot_state_bridge_evidence.py",
-  "tools/extract_corolla_h_power_supply_monitor_evidence.py",
-  "tools/extract_corolla_h_secoc_surface_evidence.py",
-  "tools/extract_corolla_h_structural_residue_evidence.py",
-  "tools/extract_corolla_h_supervisor_external_ingress_census.py",
-  "tools/extract_corolla_h_system_orchestration_evidence.py",
-  "tools/extract_corolla_h_techstream_steering_evidence.py",
-  "tools/extract_corolla_h_tms053_followup_evidence.py",
-  "tools/extract_variant_evidence.py",
-]
 
 [suite.corolla_h_regen]
 tests = ["tests/verify_corolla_h_regen.py"]
 modes = ["full", "local"]
-oracle = "raw_bytes"
-paths = [
-  "tools/build_corolla_h_application_callback_tables.py",
-  "tools/build_corolla_h_application_interrupt_bodies.py",
-  "tools/build_corolla_h_application_interrupt_vectors.py",
-  "tools/build_corolla_h_application_transport_residue.py",
-  "tools/build_corolla_h_b6_full_receiver_contract.py",
-  "tools/build_corolla_h_b6_receiver_contract.py",
-  "tools/build_corolla_h_b6_secoc_verification.py",
-  "tools/build_corolla_h_b6_target_angle_ingress.py",
-  "tools/build_corolla_h_can_com.py",
-  "tools/build_corolla_h_crypto_residue.py",
-  "tools/build_corolla_h_deadline_monitor_surface.py",
-  "tools/build_corolla_h_diagnostic_residue.py",
-  "tools/build_corolla_h_direct_call_surface.py",
-  "tools/build_corolla_h_fd_control_interface.py",
-  "tools/build_corolla_h_final_named_residue.py",
-  "tools/build_corolla_h_lta_command_provenance.py",
-  "tools/build_corolla_h_motor_control.py",
-  "tools/build_corolla_h_openpilot_state_bridge.py",
-  "tools/build_corolla_h_plausibility_monitor.py",
-  "tools/build_corolla_h_power_supply_monitor_gate.py",
-  "tools/build_corolla_h_secoc_key_provenance.py",
-  "tools/build_corolla_h_secoc_surface.py",
-  "tools/build_corolla_h_small_adapters.py",
-  "tools/build_corolla_h_static_coverage_matrix.py",
-  "tools/build_corolla_h_steering_nested.py",
-  "tools/build_corolla_h_steering_supervisor_stage_ledger.py",
-  "tools/build_corolla_h_storage_nvm.py",
-  "tools/build_corolla_h_system_orchestration.py",
-  "tools/build_corolla_h_veneer_bank.py",
-  "tools/build_corolla_h_xcp.py",
-  "tools/compare_variant_application_diagnostics.py",
-]
 
 [suite.corolla_h_techstream_external]
 tests = ["tests/verify_corolla_h_techstream_external.py"]
 modes = ["local"]
 requires_external = ["techstream_v18"]
-oracle = "independent_external_artifact"
 
 [suite.fast_verify]
 tests = ["tests/verify_fast_verify.py"]
-paths = [
-  "pyproject.toml",
-  "uv.lock",
-]
-oracle = "raw_bytes"
 
 [suite.icus_register_footprint]
 tests = ["tests/verify_icus_register_footprint.py"]
@@ -2185,189 +921,69 @@ tests = ["tests/verify_rav4_prime_forced_profile_matrix.py"]
 
 [suite.toyota_dataflash_analyzer]
 tests = ["tests/verify_toyota_dataflash_analyzer.py"]
-paths = [
-  "data/generated/dataflash_structural_analysis_4512000.json",
-  "tests/fixtures/",
-]
 
 [suite.toyota_b_programming_topology]
 tests = ["tests/verify_toyota_b_programming_topology.py"]
-paths = [
-  "community/albinoelephant/raw-20260818/",
-  "docs/tooling/panda-toyota-routing.md",
-  "docs/variants/corolla-2023-us-public-route.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
-oracle = "raw_bytes"
 
 [suite.toyota_eps_bus_probe]
 tests = ["tests/verify_toyota_eps_bus_probe.py"]
-paths = ["tests/fixtures/"]
 
 [suite.toyota_secoc_oracle]
 tests = ["tests/verify_toyota_secoc_oracle.py"]
-paths = ["tests/fixtures/"]
 
 [suite.toyota_secoc_session]
 tests = ["tests/verify_toyota_secoc_session.py"]
-paths = ["tests/fixtures/"]
 
 [suite.u023a87_monitor_map]
 tests = ["tests/verify_u023a87_monitor_map.py"]
 
 [suite.keyless]
 tests = ['tests/verify_keyless.py']
-oracle = 'raw_bytes'
-paths = [
-  'docs/security/keyless-exec-surface-assessment.md',
-  'docs/security/bootloader-noauth-pc-pivot-assessment.md',
-  'ghidra/scripts/investigate/FindExceptionAndXcpFlowOps.java',
-  'ghidra/scripts/investigate/FindStackPointerOps.java',
-  'community/spanconstant/raw-20260821/MANIFEST.txt',
-  'docs/status/CORRECTIONS.md',
-  'tools/extract_corolla_h_evidence.py',
-]
 [suite.keyless_live_handoff_dma]
 tests = ["tests/verify_keyless_live_handoff_dma.py"]
-paths = [
-  "docs/security/keyless-exec-surface-assessment.md",
-]
-oracle = "cfg_dataflow"
 
 [suite.tooling_consolidation]
 tests = ["tests/verify_tooling_consolidation.py"]
-oracle = "generated_self_check"
-paths = [
-  "tools/decompiler_evidence.py",
-  "tools/sienna_target.py",
-  "tools/techstream/techstream_paths.py",
-  "tools/techstream/ddb_strings.py",
-  "tools/techstream/ddb_semantics.py",
-  "tools/techstream/pe_utils.py",
-  "tools/techstream/cuw_attach.py",
-  "tools/resolve_ghidra_cli.sh",
-  "docs/tooling/README.md",
-  "docs/WORKFLOW.md",
-  "AGENTS.md",
-]
 
 [suite.annotation_ledger]
 tests = ["tests/verify_annotation_ledger.py"]
-oracle = "generated_self_check"
-paths = [
-  "data/annotations/",
-  "docs/tooling/annotation-ledger.md",
-  "docs/tooling/README.md",
-  "docs/WORKFLOW.md",
-  "AGENTS.md",
-]
-
-[suite.knowledge_index]
-tests = ["tests/verify_knowledge_index.py"]
-oracle = "documentation_lint"
 
 [suite.camry_8965f3307000_external_lateral_ingress]
 tests = ["tests/verify_camry_8965F3307000_external_lateral_ingress.py"]
-oracle = "dynamic_trace"
-paths = [
-  "data/generated/camry-8965F3307000/decompilations.jsonl",
-  "data/generated/camry_8965F3307000_codeflash.json",
-  "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
-  "targets/camry-2026/raw-20260827/",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/variants/camry-2026-tss3-opendbc-port.md",
-  "docs/status/PRIORITIES.md",
-  "docs/status/CORRECTIONS.md",
-]
 
 [suite.camry_8965f3307000_d5_snapshot_provenance]
 tests = ["tests/verify_camry_8965F3307000_d5_snapshot_provenance.py"]
-oracle = "generated_self_check"
-paths = [
-  "data/generated/camry-8965F3307000/decompilations.jsonl",
-  "docs/variants/camry-2026-live-baseline.md",
-]
 
 [suite.camry_8965f3307000_command_cone_ingress]
 tests = ["tests/verify_camry_8965F3307000_command_cone_ingress.py"]
-oracle = "generated_self_check"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-]
 
 [suite.camry_8965f3307000_internal_assist_oracles]
 tests = ["tests/verify_camry_8965F3307000_internal_assist_oracles.py"]
-oracle = "generated_self_check"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.camry_8965f3307000_hidden_ingress_residuals]
 tests = ["tests/verify_camry_8965F3307000_hidden_ingress_residuals.py"]
-oracle = "generated_self_check"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.camry_2026_stock_steering_witness]
 tests = ["tests/verify_camry_2026_stock_steering_witness.py"]
-oracle = "dynamic_trace"
-paths = [
-  "targets/camry-2026/raw-20260827/",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]
 
 [suite.camry_8965f3307000_dataflash_nvm_owners]
 tests = ["tests/verify_camry_8965F3307000_dataflash_nvm_owners.py"]
-oracle = "generated_self_check"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-]
 
 [suite.cuwplus_body_recovery]
 tests = ["tests/verify_cuwplus_body_recovery.py"]
-oracle = "dynamic_trace"
-paths = [
-  "tools/techstream/cp_body_decode.py",
-  "tools/techstream/recover_all_gtsplus_bodies.py",
-  "tools/techstream/gts_cli.py",
-  "docs/tooling/cuwplus-body-recovery.md",
-]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_aux_body_recovery]
 tests = ["tests/verify_gtsplus_aux_body_recovery.py"]
-oracle = "dynamic_trace"
-paths = [
-  "tools/techstream/cp_body_decode.py",
-  "tools/techstream/recover_all_gtsplus_bodies.py",
-  "tools/techstream/gts_cli.py",
-  "docs/tooling/cuwplus-body-recovery.md",
-]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.camry_f33_gate2_semantic_patch]
 tests = ["tests/verify_camry_f33_gate2_semantic_patch.py"]
-paths = [
-  "data/generated/secoc_patch_manifest_8965F3307000.json",
-  "exploit/patcher/",
-  "targets/camry-2026/raw-20260901/f33-b6-admission/",
-]
 
 [suite.camry_f33_gate2_root_result_patch]
 tests = ["tests/verify_camry_f33_gate2_root_result_patch.py"]
-paths = [
-  "targets/camry-2026/raw-20260901/f33-gate2-stage2/",
-]
 
 [suite.camry_f33_freshness_result_patch]
 tests = ["tests/verify_camry_f33_freshness_result_patch.py"]
@@ -2383,144 +999,51 @@ tests = ["tests/verify_camry_f33_b6_bridge_install.py"]
 
 [suite.camry_20260906_hands_off_warning]
 tests = ["tests/verify_camry_20260906_hands_off_warning.py"]
-oracle = "dynamic_trace"
-paths = [
-  "tools/analyze_camry_20260906_hands_off_warning.py",
-  "docs/history/2026-09/2026-09-01-camry-live-communication-characterization-notebook.md",
-  "docs/variants/camry-2026-tss3-opendbc-port.md",
-]
 
 [suite.camry_2026_parser_liveness]
 tests = ["tests/verify_camry_2026_parser_liveness.py"]
-oracle = "dynamic_trace"
-paths = [
-  "tools/analyze_camry_2026_parser_liveness.py",
-  "docs/variants/camry-2026-tss3-opendbc-port.md",
-  "docs/variants/camry-2026-tss3-integration-audit.md",
-]
 
 [suite.camry_2026_cluster_ui_speed]
 tests = ["tests/verify_camry_2026_cluster_ui_speed.py"]
-oracle = "dynamic_trace"
-paths = [
-  "tools/analyze_camry_2026_cluster_ui_speed.py",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/variants/camry-2026-tss3-integration-audit.md",
-]
 
 [suite.camry_2026_pda_sdg]
 tests = ["tests/verify_camry_2026_pda_sdg.py"]
-oracle = "dynamic_trace"
-paths = [
-  "tools/analyze_camry_2026_pda_sdg.py",
-]
 
 [suite.camry_2026_lateral_family_census]
 tests = ["tests/verify_camry_2026_lateral_family_census.py"]
-oracle = "dynamic_trace"
-paths = [
-  "tools/analyze_camry_2026_lateral_family_census.py",
-  "data/generated/camry-8965F3307000/decompilations.jsonl",
-  "data/generated/camry_8965F3307000_external_lateral_ingress.json",
-  "docs/variants/camry-2026-tss3-opendbc-port.md",
-]
 
 [suite.camry_20260907_canfd_transport]
 tests = ["tests/verify_camry_20260907_canfd_transport.py"]
-oracle = "dynamic_trace"
-paths = [
-  "tools/analyze_camry_20260907_canfd_transport.py",
-  "docs/variants/camry-2026-live-baseline.md",
-]
 
 [suite.camry_20260907_steering_reconciliation]
 tests = ["tests/verify_camry_20260907_steering_reconciliation.py"]
-oracle = "dynamic_trace"
-paths = [
-  "tools/analyze_camry_20260907_steering_reconciliation.py",
-]
 
 [suite.camry_20260907_lta_off_b6_authority]
 tests = ["tests/verify_camry_20260907_lta_off_b6_authority.py"]
-oracle = "dynamic_trace"
-paths = [
-  "tools/analyze_camry_20260907_lta_off_b6_authority.py",
-]
 
 [suite.camry_b6_freshness_contract]
 tests = ["tests/verify_camry_b6_freshness_contract.py"]
-oracle = "raw_bytes"
-paths = [
-  "tools/analyze_camry_b6_freshness_contract.py",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/variants/camry-2026-tss3-opendbc-port.md",
-]
 
 [suite.camry_f33_b6_mac_equivalence]
 tests = ["tests/verify_camry_f33_b6_mac_equivalence.py"]
-oracle = "raw_bytes"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-]
 
 [suite.camry_f33_b6_command_composition]
 tests = ["tests/verify_camry_f33_b6_command_composition.py"]
-oracle = "raw_bytes"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/variants/camry-2026-tss3-opendbc-port.md",
-]
 
 [suite.camry_f33_b6_end_to_end]
 tests = ["tests/verify_camry_f33_b6_end_to_end.py"]
-oracle = "raw_bytes"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/PRIORITIES.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md",
-]
 
 [suite.camry_f33_b6_gate_log_reconciliation]
 tests = ["tests/verify_camry_f33_b6_gate_log_reconciliation.py"]
-oracle = "dynamic_trace"
-paths = [
-  "tools/analyze_camry_f33_b6_gate_log_reconciliation.py",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/PRIORITIES.md",
-  "docs/status/OPEN_QUESTIONS.md",
-]
 
 [suite.camry_f33_runtime_monitor_20260908]
 tests = [
   "tests/verify_camry_f33_runtime_monitor_20260908.py",
   "tests/verify_camry_f33_runtime_monitor_statistics.py",
 ]
-oracle = "dynamic_trace"
-paths = [
-  "targets/camry-2026/raw-20260908/runtime-monitor-session/",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/PRIORITIES.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md",
-]
 
 [suite.camry_8965f3307000_function_boundaries]
 tests = ["tests/verify_camry_8965F3307000_function_boundaries.py"]
-oracle = "raw_bytes"
-paths = [
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/CORRECTIONS.md",
-]
 
 [suite.camry_8965f3307000_b6_ingress_closure]
 tests = ["tests/verify_camry_8965F3307000_b6_ingress_closure.py"]
-oracle = "raw_bytes"
-paths = [
-  "data/targets/camry-8965F3307000/function_seeds.csv",
-  "ghidra/scripts/seed/SeedCamryF33RecoveredFunctions.java",
-  "docs/variants/camry-2026-live-baseline.md",
-  "docs/status/CORRECTIONS.md",
-  "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/PRIORITIES.md",
-]

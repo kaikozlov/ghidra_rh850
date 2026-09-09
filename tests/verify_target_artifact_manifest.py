@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify target-evidence schema, redacted example, and capture contract."""
+"""Verify the machine-readable target-evidence schema and redacted example."""
 from __future__ import annotations
 
 import json
@@ -8,8 +8,6 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 SCHEMA = REPO / "docs/variants/target-artifact-manifest.schema.json"
 EXAMPLE = REPO / "docs/variants/target-artifact-manifest.example.json"
-VARIANT = REPO / "docs/variants/newer-tsk-target-evidence.md"
-CAPTURE = REPO / "docs/tooling/techstream-capture-procedure.md"
 CAPTURES = {
     "health_check", "data_list", "active_test_customization",
     "mackey_registration", "cuw_preparation",
@@ -47,29 +45,6 @@ check("committed privacy flags fail closed",
 check("example contains no VIN/account/server fields",
       not ({"vin", "account_id", "server_session_id", "license_key"}
            & set(example["target"])))
-
-capture_text = CAPTURE.read_text()
-capture_words = " ".join(capture_text.split())
-check("procedure names every operation", all(f"`{name}`" in capture_text for name in CAPTURES))
-check("procedure retains decisive transport dimensions",
-      all(token in capture_words for token in [
-          "Tx/Rx direction", "elapsed timing", "ChannelID", "J2534 protocol",
-          "four address bytes", "exact payload bytes",
-      ]))
-check("procedure requires hashing and redaction",
-      "Hash the normalized JSON" in capture_text
-      and "Raw Techstream logs and proprietary artifacts are never committed" in capture_text)
-check("procedure uses locked parser command",
-      "uv run --locked python tools/techstream/parse_ptshim_log.py" in capture_text)
-check("runtime SecOC claim remains bounded",
-      "no named/static `SecOC` or `VehSec` path was recovered" in capture_text)
-
-variant_text = VARIANT.read_text()
-check("variant report preserves hypothesis transfer grade",
-      variant_text.count("| hypothesis |") >= 8)
-check("variant report records zero exact artifacts/captures",
-      "No exact newer-TSK part number" in variant_text
-      and "labeled official Techstream capture is present" in variant_text)
 
 print(f"\nSummary: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

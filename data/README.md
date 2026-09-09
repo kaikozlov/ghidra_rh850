@@ -15,11 +15,11 @@ Do not infer authority from directory depth. The source-of-truth order is in
 [`../AGENTS.md`](../AGENTS.md): firmware/tests first, then generated artifacts,
 then curated tables, then the Ghidra snapshot and narrative docs.
 
-## Finding the owner of a file
+## Finding the producer of a file
 
-Start with [the generated-artifact inventory](../docs/reference/generated-artifacts.md)
-and `verification.toml`. Generator outputs normally have a corresponding
-`tools/generate_*` or analysis tool plus a `tests/verify_*` gate.
+Use `tools/artifact list [query]` and `tools/artifact show ARTIFACT` for tracked
+generated artifacts. The catalog derives producers/consumers from repository
+source; generated files do not need a verification owner.
 
 Examples of generated top-level compatibility paths include
 `application_rx_map.csv`, `application_diagnostic_map.csv`, and

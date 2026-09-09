@@ -7,7 +7,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "data/generated/camry_20260907_steering_reconciliation.json"
-DOC = ROOT / "docs/variants/camry-2026-live-baseline.md"
 
 x = json.loads(ART.read_text(encoding="utf-8"))
 e = x["evidence"]
@@ -119,21 +118,3 @@ assert conclusion["route_proves_b6_only_physical_authority"] is False
 assert conclusion["published_081_is_eps_b6_blend_discriminator"] is False
 assert conclusion["forwarded_08a_is_f33_authority_isolation_switch"] is False
 assert conclusion["route_observes_eps_side_b6_composition"] is False
-
-text = DOC.read_text(encoding="utf-8")
-for token in (
-  "## 61. Route-45 stock/comma steering reconciliation (VAR-144)",
-  "17,461",
-  "16,423",
-  "6,836/6,836",
-  "191/230",
-  "2.000 s",
-  "not a stock→B6 transform",
-  "8,229/8,235",
-  "53/53",
-  "does **not** identify EPS-side authority",
-  "co-modulated with the ordinary EPS",
-):
-  assert token in text, token
-
-print("camry 2026-09-07 steering reconciliation: PASS")

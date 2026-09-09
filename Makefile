@@ -28,7 +28,7 @@ else
 override PROJECT_INVENTORY := $(BUILD_OUT)/targets/$(TARGET)/project_inventory.jsonl
 endif
 
-.PHONY: sync knowledge-index verify verify-core verify-full verify-local verify-agent verify-required-external verify-external verify-corroboration verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
+.PHONY: sync verify verify-core verify-full verify-local verify-agent verify-required-external verify-external verify-corroboration verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
 	ghidra-cli test-ghidra-cli \
 	generate-dataflash generate-application-diagnostics generate-diagnostic-vocabulary generate-techstream-corpus \
 	generate-application-receive-evidence generate-application-receive generate-application-transmit \
@@ -39,9 +39,6 @@ endif
 
 sync:
 	$(UV) sync --locked
-
-knowledge-index:
-	$(PYTHON) tools/build_knowledge_index.py
 
 build-init:
 	$(PYTHON) tools/build_layout.py init
@@ -68,7 +65,7 @@ test-ghidra-cli:
 	cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --test batch_tests
 
 verify:
-	tools/test
+	tools/test core
 
 verify-core:
 	tools/test core

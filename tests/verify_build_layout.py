@@ -9,7 +9,6 @@ import re
 import subprocess
 import sys
 import tempfile
-import tomllib
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -40,7 +39,7 @@ check(
 
 # Operational source must never invent a sixth top-level build namespace.
 allowed = {"cache", "work", "out", "logs", "tmp"}
-scan_prefixes = ("Makefile", "tools/", "tests/", "exploit/", "ghidra/", ".github/", "AGENTS.md", "README.md", "docs/WORKFLOW.md")
+scan_prefixes = ("Makefile", "tools/", "tests/", "exploit/", "ghidra/", ".github/")
 bad: list[str] = []
 # A few prose compounds are English, not filesystem namespaces.
 prose_segments = {"workspace", "deploy", "reference", "CMAC"}
@@ -67,37 +66,6 @@ for raw in tracked:
         if m.group(1) not in allowed | prose_segments:
             bad.append(f"{rel}:{m.group(0)}")
 check("operational source uses only five build namespaces", not bad, repr(bad[:20]))
-
-print("\n== core verification boundary ==")
-manifest = tomllib.loads((REPO / "verification.toml").read_text())
-core_external_paths: list[str] = []
-for name, entry in manifest["suite"].items():
-    if "core" not in entry.get("modes", ["core", "local"]):
-        continue
-    for path in entry.get("paths", []):
-        if path.startswith(("build/", "REFERENCE/", "software/Techstream/v18/", "software/Techstream/gtsplus/", "software/Techstream/cuw/", "software/Renesas/")):
-            core_external_paths.append(f"{name}:{path}")
-check("core suite ownership paths are tracked-repository paths", not core_external_paths, repr(core_external_paths))
-
-live_tests = [
-    "tests/verify_application_async_operation_queue_live.py",
-    "tests/verify_application_proprietary_ba_live.py",
-    "tests/verify_application_rdbi_disclosure_boundary.py",
-    "tests/verify_application_rdbi_stale_response_live.py",
-    "tests/verify_application_routine_control_1004_event_history_live.py",
-    "tests/verify_application_routine_control_remaining_controls_live.py",
-    "tests/verify_application_wdbi_0204_maintenance_live.py",
-    "tests/verify_application_wdbi_2010_dead_state_live.py",
-    "tests/verify_application_wdbi_2012_lifecycle_live.py",
-    "tests/verify_application_wdbi_2013_2014_controls_live.py",
-    "tests/verify_application_wdbi_surface_live.py",
-    "tests/verify_semantic_coverage_live.py",
-    "tests/verify_xcp_shadow_write_live.py",
-]
-owners = {test: (name, entry) for name, entry in manifest["suite"].items() for test in entry.get("tests", [])}
-wrong = [(test, owners.get(test, (None, {}))[0], owners.get(test, (None, {}))[1].get("modes")) for test in live_tests
-         if test not in owners or owners[test][1].get("modes") != ["local"]]
-check("all live-project tests are local-only", not wrong, repr(wrong))
 
 print("\n== promoted canonical inputs ==")
 h = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"

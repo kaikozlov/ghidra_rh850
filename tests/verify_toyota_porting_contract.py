@@ -12,11 +12,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 CONTRACT = REPO / "data/external/opendbc/toyota_porting_contract.json"
-REPORT = REPO / "docs/architecture/toyota-openpilot-porting-contract.md"
 LOCK = REPO / "external-references.lock.json"
 MATRIX = REPO / "data/toyota_eps_variant_matrix.csv"
-FINDINGS = REPO / "docs/status/FINDINGS.md"
-PRIORITIES = REPO / "docs/status/PRIORITIES.md"
 
 passed = failed = 0
 
@@ -27,18 +24,14 @@ def check(name: str, condition: object, detail: str = "") -> None:
     passed += int(ok)
     failed += int(not ok)
     suffix = f" ({detail})" if detail else ""
-    print(f"[{'PASS' if ok else 'FAIL'}][documentation_lint] {name}{suffix}")
+    print(f"[{'PASS' if ok else 'FAIL'}][generated_self_check] {name}{suffix}")
 
 
 print("== Toyota/openpilot porting contract ==")
 check("machine-readable contract exists", CONTRACT.is_file())
-check("canonical report exists", REPORT.is_file())
 
 contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
 lock = json.loads(LOCK.read_text(encoding="utf-8"))
-report = REPORT.read_text(encoding="utf-8")
-findings = FINDINGS.read_text(encoding="utf-8")
-priorities = PRIORITIES.read_text(encoding="utf-8")
 
 check("contract schema is v1", contract["schema"] == "opendbc-toyota-porting-contract-v1")
 check(
@@ -120,44 +113,5 @@ with MATRIX.open(newline="", encoding="utf-8") as fh:
 corolla_h = next(r for r in rows if "albinoelephant" in r["vehicle"].lower())
 check("tracked historical-H Corolla remains a direct old-steering-ID counterexample", corolla_h["application_software_id"] == "8965F1208000" and "8965H-12020" in corolla_h["eps_part_number"] and "no 0x2E4/0x131" in corolla_h["secured_can_ids"])
 check("variant matrix separates ADAS and security axes", all(k in corolla_h for k in ("adas_generation", "security_architecture")) and "SecOC/TSK" in corolla_h["security_architecture"])
-check("report explicitly separates TSS generation from SecOC/TSK", all(x in report for x in ("Two orthogonal axes", "TSS generation", "SecOC/TSK")))
-
-check(
-    "report records the passive TSS3 implementation checkpoint",
-    all(token in report for token in (
-        "6b124c546381350b8c7285980ffed3f14aef8f53",
-        "263b339480eabf8be242b486bd76f1df835241b2",
-        "non-actuating TSS3 scaffold landed",
-        "fa1847d7ee66a221f2960ec5cf7a840e737ca521",
-        "ddc6e532ecb8640d5771234b0017d84839e28ae2",
-        "adds incoming `0x51E B0[7]`",
-        "advances the submodule to that revision",
-        "SafetyModel.noOutput",
-        "5,900/5,900",
-        "147-message CAN fingerprint",
-        "STEERING_FAULT_INHIBIT_STATUS",
-        "not an exhaustive EPS-fault",
-        "Steering Wheel Torque",
-        "-8.23..+2.85 N.m",
-    )),
-)
-check("priority queue records the current ordinary Toyota cutover", "7aece7f63" in priorities and "ordinary Toyota/openpilot ownership shape" in priorities)
-
-for token in (
-    "control contract",
-    "FRC_P5",
-    "0x18A",
-    "64-byte CAN-FD",
-    "stock producer safely suppressed",
-    "When the target command is SecOC-protected, SecOC makes that command deliverable",
-):
-    check(f"report preserves roadmap token {token}", token in report)
-
-check("ARCH-016 points at the contract report", "| ARCH-016 |" in findings and "toyota-openpilot-porting-contract.md" in findings)
-open_questions = (REPO / "docs/status/OPEN_QUESTIONS.md").read_text(encoding="utf-8")
-check("TSS3 longitudinal ownership is independently tracked", "OQ-052" in open_questions and "True-TSS3 longitudinal wire/auth/arbitration execution contract" in open_questions)
-check("priority queue links the porting contract", "toyota-openpilot-porting-contract.md" in priorities)
-check("priority queue preserves separate longitudinal work", "OQ-052" in priorities)
-
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 raise SystemExit(1 if failed else 0)

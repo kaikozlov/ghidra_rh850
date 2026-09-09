@@ -1,20 +1,14 @@
 #!/usr/bin/env python3
-"""Derived catalog for tracked generated artifacts, producers, and verification owners."""
+"""Derived catalog for tracked generated artifacts and their producers."""
 from __future__ import annotations
 
 import ast
-import collections
 import subprocess
-import tomllib
 from functools import lru_cache
 from pathlib import Path
 from typing import Iterable
 
-from verification_deps import repository_paths, suite_dependency_map
-
 REPO = Path(__file__).resolve().parents[1]
-MANIFEST = REPO / "verification.toml"
-
 
 def _git_files(*pathspecs: str) -> list[str]:
     proc = subprocess.run(
@@ -34,32 +28,6 @@ def _tracked_artifacts() -> tuple[str, ...]:
 
 def tracked_artifacts() -> list[str]:
     return list(_tracked_artifacts())
-
-
-@lru_cache(maxsize=1)
-def manifest() -> dict:
-    return tomllib.loads(MANIFEST.read_text(encoding="utf-8"))
-
-
-@lru_cache(maxsize=1)
-def _suite_owners() -> dict[str, list[str]]:
-    obj = manifest()
-    deps = suite_dependency_map(REPO, obj, repository_paths(REPO))
-    out: dict[str, list[str]] = collections.defaultdict(list)
-    for suite, paths in deps.items():
-        for path in paths:
-            if path.startswith("data/generated/"):
-                out[path].append(suite)
-    # Keep explicit manifest paths as semantic/dynamic invalidators too.
-    for suite, row in obj.get("suite", {}).items():
-        for path in row.get("paths", []):
-            if isinstance(path, str) and path.startswith("data/generated/") and "*" not in path:
-                out[path].append(suite)
-    return {path: list(dict.fromkeys(names)) for path, names in out.items()}
-
-
-def suite_owners() -> dict[str, list[str]]:
-    return {path: list(names) for path, names in _suite_owners().items()}
 
 
 @lru_cache(maxsize=1)
@@ -182,7 +150,7 @@ def _producer_candidates(path: str) -> tuple[str, ...]:
     named = _naming_producer(path)
     if named:
         return (named,)
-    ignore = {"tools/artifact_catalog.py", "tools/build_knowledge_index.py"}
+    ignore = {"tools/artifact_catalog.py"}
     mentioned = [p for p in _mentions(path, _source_files()) if p not in ignore]
     ranked = [
         p for p in mentioned
@@ -199,12 +167,11 @@ def consumers(path: str) -> list[str]:
     candidates = _git_files("tools", "tests")
     return [
         p for p in _mentions(path, candidates)
-        if p not in {"tools/artifact_catalog.py", "tools/build_knowledge_index.py"}
+        if p not in {"tools/artifact_catalog.py"}
     ]
 
 
 def rows(query: str | None = None) -> list[dict]:
-    owners = suite_owners()
     q = query.casefold() if query else None
     out = []
     for path in tracked_artifacts():
@@ -213,7 +180,6 @@ def rows(query: str | None = None) -> list[dict]:
         out.append({
             "artifact": path,
             "producers": producer_candidates(path),
-            "suites": owners.get(path, []),
         })
     return out
 

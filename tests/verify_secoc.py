@@ -188,11 +188,7 @@ def _section_secoc_application():
     check('both lower records target ICU verify adapter 0x880DC', all((u32(a + 20) == 557276 for a in lower_records)))
     check('SecOC handle 0 resolves to lower ICU driver record 0', set(expected_handles) == {0} and 0 in lower_ids)
     check('SecOC worker loads handle from record+0x20', CF[583160:583168] == bytes.fromhex('fd372100233e1c00'))
-    print('\n== CORR-017 regression: SHE slot-4 usage determination ==')
-    _kr = (REPO / 'docs' / 'security' / 'secoc' / 'key-recovery-assessment.md').read_text(encoding='utf-8').lower()
-    check('key-recovery §1.3 records the SHE binary KEY_USAGE flag', 'key_usage' in _kr and 'no verify-only bit exists' in _kr)
-    check('key-recovery §1.3 retracts the verify-only generation-disabled claim', 'is retracted' in _kr and 'not supported by the' in _kr)
-    check('key-recovery §1.3 names command 5 as the spec-permitted slot-4 oracle', 'spec-permitted primitive' in _kr)
+
 _section_secoc_application()
 print()
 

@@ -6,7 +6,6 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 CF=(ROOT/'firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
 CSV=ROOT/'data/motor_calibration_handlers.csv'
-REPORT=ROOT/'docs/architecture/control-partition.md'
 passed=failed=0
 
 def check(name,cond,detail=''):
@@ -51,8 +50,5 @@ check('outer CH2 dispatcher body pinned',sha(0x579B4,136)=='91b364232b930841c0ae
 check('transition wrapper body pinned',sha(0xBEB44,178)=='d57a00df7543e90c9cbddaeec02ed78b52412706ce50f6c451697a10370f0de6')
 check('steady wrapper body pinned',sha(0xBEBF6,86)=='ac38a1b4315e205b4dbb98d1e865d72adad5629e577682fc693db94e6c0e6faf')
 
-text=REPORT.read_text(encoding='utf-8') if REPORT.exists() else ''
-for token in ('0x32B80','0x33198','0x512','0x600','0xB98BC','0xBEB44','0xBEBF6','0x200..0x522','data/motor_calibration_handlers.csv'):
-    check(f'report contains {token}',token.lower() in text.lower())
 print(f'\nSummary: {passed} passed, {failed} failed')
 sys.exit(1 if failed else 0)

@@ -180,13 +180,6 @@ def section_codeflash() -> int:
     check('controller-equivalent scale is ~1.00012 mrad/count', abs(scale['mrad_per_b6_count'] - 1.000121519) < 1e-9 and 'does not literally name' in scale['boundary'])
     check('Corolla wall-clock timing not transferred', 'does not transfer Corolla H' in art['b6_com']['boundary'])
 
-    print('\n== documentation ==')
-    doc = (REPO / 'docs/variants/camry-2026-live-baseline.md').read_text()
-    for tok in ('b588c7258699beee', '42dce8efc42f6ae3', '0x25848', 'PDU44', 'signal 262', 'B4:B5', '0xCCF0E'):
-        check(f'variant report contains {tok}', tok in doc)
-    findings = (REPO / 'docs/status/FINDINGS.md').read_text()
-    check('VAR-054 retained', '| VAR-054 |' in findings and '8965F3307000' in findings)
-
     print(f'\nResults: {passed} passed, {failed} failed')
     return 1 if failed else 0
 
@@ -405,8 +398,6 @@ def section_lateral_static() -> int:
     CODEFLASH = ROOT / "data/generated/camry_8965F3307000_codeflash.json"
     PRODUCT = ROOT / "data/p1me_product_memory.json"
     RUNTIME = ROOT / "data/generated/camry_8965F3307000_command5_runtime_carrier.json"
-    BASELINE = ROOT / "docs/variants/camry-2026-live-baseline.md"
-    FINDINGS = ROOT / "docs/status/FINDINGS.md"
 
     p = f = 0
 
@@ -529,14 +520,6 @@ def section_lateral_static() -> int:
           not b["relay_suppression_live_closed"] and not b["production_lateral_output_authorized"])
     check("runtime carrier itself forbids actuation", runtime["boundary"]["vehicle_actuation_authorized"] is False and runtime["boundary"]["steering_can_transmit_used"] is False)
 
-    print("\n== canonical docs ==")
-    doc = BASELINE.read_text(encoding="utf-8")
-    for token in ("5.000-ms", "35 ms", "±1745", "78 counts", "signal 265", "Steering Angle Velocity", "±2109", "0x637EE", "FEBF0307"):
-        check(f"Camry §12 contains {token}", token in doc)
-    findings = FINDINGS.read_text(encoding="utf-8")
-    check("VAR-056 registered", "| VAR-056 |" in findings and "8965F3307000" in findings)
-    check("VAR-056 verifier family named", "verify_camry_8965F3307000.py" in findings)
-
     print(f"\nResults: {p} passed, {f} failed")
     return 1 if f else 0
 
@@ -556,10 +539,6 @@ def section_tss3_opendbc_port() -> int:
     EVID = ROOT / "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json"
     ART = ROOT / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
     BUILD = ROOT / "tools/build_camry_8965F3307000_tss3_opendbc_port.py"
-    REPORT = ROOT / "docs/variants/camry-2026-tss3-opendbc-port.md"
-    FINDINGS = ROOT / "docs/status/FINDINGS.md"
-    CORRECTIONS = ROOT / "docs/status/CORRECTIONS.md"
-    PRIORITIES = ROOT / "docs/status/PRIORITIES.md"
 
     p = f = 0
 
@@ -719,19 +698,6 @@ def section_tss3_opendbc_port() -> int:
           all(tok in n["factory_architecture_boundary"] for tok in ("only recovered external target-bearing", "does not prove factory", "0x08A->B6", "winner/grant", "does not establish a hidden second EPS application bus")))
     check("production output remains unauthorized", n["production_output_authorized"] is False and "does not authorize steering transmission" in art["boundary"])
 
-    print("\n== canonical documentation ==")
-    report = REPORT.read_text(encoding="utf-8")
-    findings = FINDINGS.read_text(encoding="utf-8")
-    corrections = CORRECTIONS.read_text(encoding="utf-8")
-    priorities = PRIORITIES.read_text(encoding="utf-8")
-    for token in ("ab60fd95", "d7d7dfd7e", "dde0fcf0", "15f355036", "0x4C000", "0x4C7AA", "0x4CED0", "0x4CE08", "179-ID", "147-ID", "ToyotaTss3DevLateral"):
-        check(f"dedicated port report contains {token}", token in report)
-    check("VAR-058 registered", "| VAR-058 |" in findings and "8965F3307000" in findings and "ab60fd95" in findings)
-    check("VAR-062 development staging registered", "| VAR-062 |" in findings and "dde0fcf0" in findings and "15f355036" in findings)
-    check("CORR-120 historical step retained", "### CORR-120" in corrections and "0x4C000" in corrections and "VAR-056" in corrections and "five" in corrections.lower())
-    check("CORR-122 canonical census registered", "### CORR-122" in corrections and "6,062" in corrections and "FEBE66A8" in corrections and "FEBE670E" in corrections and "9" in corrections)
-    check("priorities record current ordinary Toyota integration", "7aece7f63" in priorities and "f207c273b645" in priorities and "bbc93b17d861" in priorities and "ordinary Toyota/openpilot ownership shape" in priorities)
-
     print(f"\nResults: {p} passed, {f} failed")
     return 1 if f else 0
 
@@ -751,9 +717,6 @@ def section_fault_status() -> int:
     EVID = ROOT / "data/generated/camry_8965F3307000_fault_status_decompiler_evidence.json"
     ART = ROOT / "data/generated/camry_8965F3307000_fault_status.json"
     BUILD = ROOT / "tools/build_camry_8965F3307000_fault_status.py"
-    REPORT = ROOT / "docs/variants/camry-2026-tss3-fault-status.md"
-    FINDINGS = ROOT / "docs/status/FINDINGS.md"
-    PRIORITIES = ROOT / "docs/status/PRIORITIES.md"
 
     passed = failed = 0
 
@@ -847,15 +810,6 @@ def section_fault_status() -> int:
     check("passive implementation hashes pinned", integ["nested_opendbc_commit"] == "0d5773bd393bbf3d4109728171d2390b60fcde16" and integ["parent_kai_openpilot_commit"] == "191aeb43df3fb72f3264209be1aad57b9ca42e2d")
     check("public fault flags remain unchanged", integ["public_fault_flags_changed"] is False)
     check("full nested gate recorded", "4077 passed / 719 skipped" in integ["full_gate"] and "MISRA" in integ["full_gate"])
-
-    print("\n== documentation integration ==")
-    report = REPORT.read_text(encoding="utf-8")
-    findings = FINDINGS.read_text(encoding="utf-8")
-    priorities = PRIORITIES.read_text(encoding="utf-8")
-    for tok in ("0x512E4", "0x2A19C", "0x2FC50", "0x30850", "22,170", "240", "C10051C", "C10001C", "steerFaultTemporary", "steerFaultPermanent"):
-        check(f"report contains {tok}", tok in report)
-    check("VAR-059 registered", "| VAR-059 |" in findings and "0x512E4" in findings and "240" in findings)
-    check("priorities consume F33 fault-status closure", "VAR-059" in priorities and "0x394" in priorities and "asserted/recovery" in priorities)
 
     print(f"\nResults: {passed} passed, {failed} failed")
     return 1 if failed else 0
@@ -981,15 +935,6 @@ def section_secoc_recovery() -> int:
         check(f"{name} scan exhausted every eligible window", row["status"] == "not_found" and row["windows_scanned"] == windows and row["windows_eligible"] == eligible and row["survivors"] == 0 and row["matches"] == 0)
         check(f"{name} scan saw the full capped oracle", row["sync"] == "0/208" and row["protected"] == "0/813")
     check("LocalRAM matcher excluded the payload span", scan["scans"]["local_ram_pe1"]["excluded_clobber"] == ["0xFEBF0000", "0xFEBF1000"] and scan["scans"]["local_ram_pe1"]["coverage_known"])
-
-    print("\n== documentation ==")
-    doc = (REPO / "docs/variants/camry-2026-live-baseline.md").read_text()
-    findings = (REPO / "docs/status/FINDINGS.md").read_text()
-    readme = (REPO / "targets/camry-2026/README.md").read_text()
-    for token in ("231fbdde4ef31793", "0xFF206E14", "0xFEBF7B80", "126,946", "65,521"):
-        check(f"canonical report contains {token}", token in doc)
-    check("VAR-055 retained", "| VAR-055 |" in findings and "8965F3307000" in findings)
-    check("community README points to SecOC recovery evidence", "secoc-recovery" in readme and "LocalRAM" in readme and "GlobalRAM" in readme)
 
     print(f"\nResults: {passed} passed, {failed} failed")
     return 1 if failed else 0

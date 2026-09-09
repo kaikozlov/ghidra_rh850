@@ -196,12 +196,6 @@ def verify_committed_model(lock: dict[str, object]) -> None:
     check("lock records 61-symbol BootRV40F surface", scope["bootrv40f_symbol_count"] == 61)
     check("pinned RFP package version", package["package_version"] == "V3.24.00")
     check("pinned package platform", package["platform"] == "macos-arm64")
-    report = (REPO / "docs/tooling/renesas-rfp-rv40f.md").read_text(encoding="utf-8")
-    open_questions = (REPO / "docs/status/OPEN_QUESTIONS.md").read_text(encoding="utf-8")
-    check("P1M-E all-FF ID remains explicitly hypothesis-grade",
-          "reasonable **probe hypothesis**" in report
-          and "no specific P1M-E device record" in report
-          and "**only as a target-transfer hypothesis**" in open_questions)
 
 
 def verify_package(root: Path, lock: dict[str, object]) -> None:
@@ -219,15 +213,10 @@ def verify_package(root: Path, lock: dict[str, object]) -> None:
 
     library_path = root / "libRFP.dylib"
     devices_path = root / "Devices.xml"
-    cli_docs_path = root / "docs/rfp-cli.md"
     if not library_path.is_file() or not devices_path.is_file():
         return
 
     library = library_path.read_bytes()
-    if cli_docs_path.is_file():
-        cli_docs = cli_docs_path.read_text(encoding="utf-8", errors="replace")
-        check("shipped CLI has a generic all-FF ID-code example",
-              "-auth id FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" in cli_docs)
     check("library retains generic UserID=0xFFFFFFFF configuration strings",
           b"E01_RFP.ncd;UserID=0xFFFFFFFF" in library
           and b"E20_RFP.ncd;UserID=0xFFFFFFFF" in library)
@@ -345,8 +334,6 @@ def verify_package(root: Path, lock: dict[str, object]) -> None:
     check("RH850/E2x entry is separate", "<DisplayName>RH850/E2x</DisplayName>" in devices)
     check("RH850/U2x entry is separate", "<DisplayName>RH850/U2x</DisplayName>" in devices)
 
-    cli_doc = (root / "docs" / "rfp-cli.md").read_text(encoding="utf-8")
-    check("CLI documents ICU-S enable flag", "|icus|Enable ICU-S|" in cli_doc)
 
 
 def main() -> int:

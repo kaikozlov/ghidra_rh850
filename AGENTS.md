@@ -43,10 +43,19 @@ invitation to add policy. -- The goal is native openpilot/comma integrattion.
 
 ## Testing
 
-Do not write tests for reversible, low-impact changes that mirror the implementation. If you do
-choose to verify your work with tests, make sure that the tests are meaningful and necessary to verify implementation.
+Verification is **explicit and narrow**. `tools/test` with no selector runs
+nothing. Run the smallest suite that exercises code or evidence you actually
+changed, e.g. `tools/test camry_f33_b6_stationary_probe`. Documentation-only,
+status-ledger, provenance-metadata, and research-note edits require **no tests**.
 
-Run tests appropriate to the change and complete required checks. Once those pass, broaden or repeat testing only when new changes, failures, or unresolved concerns justify it; otherwise, continue toward completing the task.
+Do not create tests whose purpose is to prove that Markdown, FINDINGS,
+CORRECTIONS, generated indexes, or provenance locks contain particular prose or
+IDs. Tests should protect executable behavior, critical binary invariants,
+artifact regeneration, or a genuinely fragile recovered machine-level fact.
+
+`tools/test full`, `local`, processor/SLEIGH gates, and external-corpus sweeps are
+manual milestone/release tools. They are not an edit loop and must not be run
+after unrelated RE/documentation work.
 
 ## Snapshot policy
 
@@ -62,12 +71,12 @@ Remember task commands, not implementation files:
 
 | Task | Command |
 |---|---|
-| Edit-loop tests | `tools/test` (dirty + untracked vs HEAD; clean tree exits 0) |
-| Discover / preview suites | `tools/test list [query]`, `tools/test plan [changed\|branch\|query]` |
+| Verification | `tools/test <suite-or-prefix>` (explicit only; no selector runs nothing) |
+| Discover / preview suites | `tools/test list [query]`, `tools/test plan <suite-or-prefix>` |
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
 | GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
 | Repository knowledge (findings, corrections, open questions) | `tools/know QUERY` |
-| Generated artifacts / producers / owners | `tools/artifact list/show/regen/check` |
+| Generated artifacts / producers | `tools/artifact list/show/regen` |
 | Registered analysis targets | `tools/gtarget list`, `tools/gtarget show TARGET` |
 | Evidence compaction / variant extraction / project exports | `tools/extract_corolla_h_evidence.py list`, `tools/extract_variant_evidence.py list`, `tools/export_ghidra_project.sh list` |
 
@@ -77,9 +86,10 @@ scripts, image identities, and corpus paths live in
 `data/analysis_targets.json`; generic target tooling must not bake in
 vehicle-specific paths.
 
-Daily commands: `uv sync --locked` (one-time), `tools/test`, `tools/test core`,
-`make verify-core`. The full gate surface (`branch`, `@exploit`,
-`verify-full`, `verify-local`, `verify-sleigh`, `verify-processor`, …) is
+Daily commands: `uv sync --locked` (one-time), an explicit `tools/test <suite>`
+when needed, and optionally `tools/test core` / `make verify-core`. The broader
+gate surface (`@exploit`, `verify-full`, `verify-local`, `verify-sleigh`,
+`verify-processor`, …) is
 enumerated in `docs/WORKFLOW.md` §Verification — don't recreate it as Make
 wrappers or new registries; `verification.toml` and the discovery commands
 above are the source of truth.
@@ -167,17 +177,16 @@ works, use it.
 
 ## Documentation
 
-A **material new RE conclusion** (firmware, vehicle protocol, observed target
-behavior) gets exactly one home: update the canonical subsystem report, and
-record the claim — scope, grade, verifying test when established — in
-`docs/status/FINDINGS.md`. Disproved prior durable claims go to
-`docs/status/CORRECTIONS.md`. Add a deterministic test only when it protects
-a real recovered fact worth preserving.
+Write down conclusions where they are useful to future work, usually in the
+existing subsystem/variant report. **Do not stop active RE to manufacture a
+FINDINGS row, CORRECTIONS row, verification owner, cross-reference footer, or
+provenance record.** The status ledgers are historical/navigation aids, not a
+transaction log and not a completeness requirement. Batch ledger cleanup at
+meaningful milestones if it provides value.
 
-Routine work — refactors, upstream-shape alignment, deleting experimental
-scaffolding, ordinary fixes — requires no manufactured finding or proof
-artifact. Document it where normal software work would be: code, tests that
-protect actual behavior, and the commit message.
+Record exact hashes/commits only when an external artifact is directly required
+to reproduce a technical result. Do not pin incidental files just so they can be
+verified later. Routine fixes belong in code and the commit message.
 
 ## Scope discipline
 
@@ -196,5 +205,4 @@ protect actual behavior, and the commit message.
 - Documentation map: [docs/README.md](docs/README.md)
 - Current priorities: [docs/status/PRIORITIES.md](docs/status/PRIORITIES.md)
 - Ledgers: [docs/status/FINDINGS.md](docs/status/FINDINGS.md) · [docs/status/CORRECTIONS.md](docs/status/CORRECTIONS.md) · [docs/status/OPEN_QUESTIONS.md](docs/status/OPEN_QUESTIONS.md)
-- Cross-reference index: [docs/reference/index.md](docs/reference/index.md)
 - Historical journals: [docs/history/README.md](docs/history/README.md)

@@ -157,9 +157,6 @@ The repo now separates a firmware finding from a runnable experiment. The
 - RMBA/RDBI/CommunicationControl/SecOC freshness follow-ups;
 - XCP CONNECT/read/DAQ observation.
 
-`exploit/findings_coverage.json` dispositions every canonical finding so new
-analysis cannot silently fail to reach the exploit-engineering layer.
-
 See [../exploit/README.md](../exploit/README.md).
 
 ## What is actually blocking progress

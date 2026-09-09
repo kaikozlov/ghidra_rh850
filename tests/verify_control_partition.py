@@ -6,8 +6,7 @@ Checks that:
 - all six cyclic callees under 0x65750 are represented;
 - the 0x7F7 special RX demux row is present;
 - each row has a bounded subsystem name and evidence grade;
-- docs/architecture/control-partition.md references the CSV and all six functions;
-- the Tx signal closure for signals 9, 37, 57 is documented.
+- the Tx signal closure for signals 9, 37, 57 is machine-checked.
 """
 from __future__ import annotations
 
@@ -18,7 +17,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CSV_PATH = ROOT / "data" / "control_partition.csv"
-REPORT_PATH = ROOT / "docs" / "architecture" / "control-partition.md"
 TX_MAP_PATH = ROOT / "data" / "application_tx_map.csv"
 RX_MAP_PATH = ROOT / "data" / "application_rx_map.csv"
 CODEFLASH_PATH = ROOT / "firmware" / "RH850_P1M-E_CodeFlash.bin"
@@ -129,31 +127,6 @@ def main() -> int:
         check(f"{addr} evidence_grade allowed",
               row["evidence_grade"] in ALLOWED_GRADES, row["evidence_grade"])
         check(f"{addr} role non-empty", bool(row["role"].strip()))
-
-    print("\n== control partition report ==")
-    check("report exists", REPORT_PATH.is_file(), str(REPORT_PATH))
-    if not REPORT_PATH.is_file():
-        print(f"\nSummary: {passed} passed, {failed} failed")
-        return 1
-
-    report = REPORT_PATH.read_text(encoding="utf-8")
-
-    # Report references the CSV.
-    check("report references control_partition.csv",
-          "data/control_partition.csv" in report)
-
-    # Report references all six functions.
-    for addr in CYCLIC_CALLEES:
-        # Match with or without leading zeros: 0x68c0c or 0x00068c0c
-        short = addr
-        check(f"report references {short}", short.lower() in report.lower(),
-              short)
-
-    # Report references the 0x7F7 demux.
-    check("report references 0x7ff86", "0x7ff86" in report.lower())
-
-    # Report references 0x65750 dispatcher.
-    check("report references 0x65750", "0x65750" in report.lower())
 
     print("\n== periodic-domain call graph ==")
     codeflash = CODEFLASH_PATH.read_bytes()

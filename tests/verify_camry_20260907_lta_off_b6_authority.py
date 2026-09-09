@@ -7,7 +7,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "data/generated/camry_20260907_lta_off_b6_authority.json"
-DOC = ROOT / "docs/variants/camry-2026-live-baseline.md"
 
 x = json.loads(ART.read_text())
 assert x["schema"] == "camry-20260907-lta-off-b6-authority-v2"
@@ -81,19 +80,3 @@ assert c["turning_toyota_lta_off_preserved_openpilot_b6_id11"] is True
 assert c["simultaneous_upstream_stock_id11_required_for_b6_nonresponse"] is False
 assert c["route_proves_all_ordinary_f33_assist_terms_absent"] is False
 assert c["route_proves_b6_effective_eps_authority"] is False
-
-text = DOC.read_text()
-for token in (
-  "## 62. Route-48 Toyota-LTA-off B6 isolation (VAR-145)",
-  "10,017",
-  "200.891",
-  "5.402 s",
-  "309",
-  "21,347/21,347",
-  "CAN-FD+BRS",
-  "upstream Toyota autonomous",
-  "not proof that every ordinary F33",
-):
-  assert token in text, token
-
-print("camry 2026-09-07 Toyota-LTA-off B6 authority: PASS")

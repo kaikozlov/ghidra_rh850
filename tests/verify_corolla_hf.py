@@ -41,11 +41,6 @@ def _section_corolla_hf_command5_runtime_carrier():
     H = ROOT / 'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin'
     F = ROOT / 'community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin'
     RAMREQ = ROOT / 'data/variant_ram_exec_requirements.json'
-    DOC = ROOT / 'docs/variants/corolla-h-f-openpilot-state-bridge.md'
-    FINDINGS = ROOT / 'docs/status/FINDINGS.md'
-    PRIORITIES = ROOT / 'docs/status/PRIORITIES.md'
-    OPEN = ROOT / 'docs/status/OPEN_QUESTIONS.md'
-    SENDER = ROOT / 'docs/security/secoc/sender-implementation.md'
 
     def sha(data: bytes) -> str:
         return hashlib.sha256(data).hexdigest()
@@ -110,18 +105,6 @@ def _section_corolla_hf_command5_runtime_carrier():
     stages = a['validation_sequence']
     check('canary is mandatory first live stage', [r['stage'] for r in stages] == [1, 2, 3, 4] and stages[0]['name'] == 'inert carrier canary' and ('before exposing command-5' in stages[0]['purpose']))
     check('slot4 permission precedes timing', stages[1]['name'] == 'known-input slot4 command5 permission' and stages[3]['name'] == 'latency and contention characterization')
-    print('\n== canonical documentation ==')
-    doc = DOC.read_text()
-    findings = FINDINGS.read_text()
-    priorities = PRIORITIES.read_text()
-    oq = OPEN.read_text()
-    sender = SENDER.read_text()
-    check('canonical report records target-native pocket', 'FEBF0000..FEBF01CF' in doc and '462-byte' in doc and ('332-byte' in doc))
-    check('canonical report preserves live-canary boundary', 'required first live payload' in doc.lower() and 'canary' in doc.lower() and ('2 bytes' in doc))
-    check('TMS-054 registered', '| TMS-054 |' in findings and '462 bytes' in findings and ('332-byte' in findings))
-    check('priority now asks for canary before command5', 'inert H/F carrier canary' in priorities and 'FEBFFB80' in priorities)
-    check('OQ-021 reflects static carrier closure', '462-byte' in oq and '332-byte' in oq and ('live retention' in oq.lower()))
-    check('sender design separates H/F static carrier from Sienna live runtime', 'Corolla H/F target-native carrier candidate' in sender and 'not verified RAM geometry' in sender and ('live_installer.py' in sender))
     print('\n== deterministic artifact builder ==')
 _section_corolla_hf_command5_runtime_carrier()
 print()
@@ -224,8 +207,6 @@ def _section_corolla_hf_nonsteering_engagement_state():
     IMAGE = REPO / 'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin'
     ENG = REPO / 'data/generated/corolla_8965H1202000_nonsteering_engagement_decompiler_evidence.json'
     TECH = REPO / 'data/generated/techstream_v18/tss3_cruise_engagement_semantics.json'
-    DOC = REPO / 'docs/architecture/toyota-openpilot-porting-contract.md'
-    STATE_DOC = REPO / 'docs/variants/corolla-h-f-openpilot-state-bridge.md'
 
     def sha(data: bytes) -> str:
         return hashlib.sha256(data).hexdigest()
@@ -283,17 +264,7 @@ def _section_corolla_hf_nonsteering_engagement_state():
     check('P/R/N/B promotion explicitly prohibited', any(('P/R/N/B' in x for x in unsafe)))
     check('capture recipe is concrete and directly pollable', all((any((data_id in x for x in cruise['capture_recipe'])) for data_id in ('0x1905', '0x1906', '0x1914', '0x1901', '0x1912'))) and all(('UDS 22' in x and 'require 62' in x for x in cruise['capture_recipe'])))
     check('P5 selected Data IDs are proved as direct UDS RDBI', all((x in cruise['diagnostic_transport_boundary'] for x in ('ordinary SID 0x22 ReadDataByIdentifier', 'matching 0x62', 'outer DiagnosticSessionControl', 'not statically proved'))))
-    print('\n== documentation/status integration ==')
-    doc = DOC.read_text() if DOC.exists() else ''
-    state_doc = STATE_DOC.read_text() if STATE_DOC.exists() else ''
-    findings = (REPO / 'docs/status/FINDINGS.md').read_text()
-    priorities = (REPO / 'docs/status/PRIORITIES.md').read_text()
-    for token in ('0x51E', 'Ready Status', '0x1905', '0x1906', '0x1914', '0x24D'):
-        check(f'porting doc preserves {token}', token in doc)
-    check('porting doc preserves Memory Vehicle Speed oracle', 'Memory' in doc and 'Vehicle Speed' in doc and ('Data ID `0x1901`' in doc))
-    check('state-bridge doc closes 0x51E Ready input', all((x in state_doc for x in ('0x51E', 'B0[7]', 'Ready Status', 'DID `0x1033`'))))
-    check('COM-017 integrated', '| COM-017 |' in findings and 'nonsteering_engagement_state' in findings)
-    check('priority consumes engagement-state contract', 'corolla_hf_nonsteering_engagement_state.json' in priorities)
+
 _section_corolla_hf_nonsteering_engagement_state()
 print()
 print('== corolla hf direct canary ==')
@@ -540,11 +511,7 @@ def _section_corolla_hf_cooperative_authority_wire_visibility():
     conclusion = artifact['static_conclusion']
     check('positive and negative both explicit', conclusion['coarse_mode_aggregate_bits_recovered'] is True and conclusion['coarse_mode_wire_can_id'] == '0x030' and (conclusion['exact_wire_visible_cooperative_authority_bit_recovered'] is False))
     check('negative boundary names excluded mechanisms', all((term in artifact['evidence_boundary'] for term in ['mutable runtime pointers', 'DMA/peripheral', 'physical actuator', 'No live authority transition'])))
-    print('\n== documentation/status integration ==')
-    state_doc = (ROOT / 'docs/variants/corolla-h-f-openpilot-state-bridge.md').read_text()
-    findings = (ROOT / 'docs/status/FINDINGS.md').read_text()
-    check('canonical report records coarse-not-exact authority boundary', all((x in state_doc for x in ('### 6.6', 'FEBEF000 < 2', 'B6[3]', 'B10[3]', 'B13[4]', 'cannot be used as an exact cooperative-authority signal'))))
-    check('TMS-056 integrated', '| TMS-056 |' in findings and 'cooperative_authority_wire_visibility.json' in findings)
+
 _section_corolla_hf_cooperative_authority_wire_visibility()
 print()
 print('== corolla hf b6 competing sender arbitration ==')
@@ -562,9 +529,6 @@ def _section_corolla_hf_b6_competing_sender_arbitration():
     EXTRACTOR = ROOT / 'tools/extract_corolla_h_b6_competing_sender_evidence.py'
     BUILDER = ROOT / 'tools/build_corolla_hf_b6_competing_sender_arbitration.py'
     H = ROOT / 'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin'
-    DOC = ROOT / 'docs/variants/corolla-h-f-openpilot-state-bridge.md'
-    FINDINGS = ROOT / 'docs/status/FINDINGS.md'
-    CORRECTIONS = ROOT / 'docs/status/CORRECTIONS.md'
 
     def sha(data: bytes) -> str:
         return hashlib.sha256(data).hexdigest()
@@ -643,15 +607,6 @@ def _section_corolla_hf_b6_competing_sender_arbitration():
     check('production policy requires stock suppression or proved quiescence', 'Suppress/isolate' in policy['production_policy'] and 'quiescent' in policy['production_policy'])
     check('freshness racing explicitly forbidden as coexistence', 'Do not use freshness racing' in policy['production_policy'])
     check('physical relay-side identity remains dynamic', 'Static receiver logic cannot identify' in policy['physical_topology_boundary'])
-    print('\n== canonical documentation ==')
-    doc = DOC.read_text()
-    findings = FINDINGS.read_text()
-    corrections = CORRECTIONS.read_text()
-    check('canonical report records competing-sender arbitration', 'Competing valid B6 senders: receiver arbitration and suppression requirement' in doc)
-    check('canonical report forbids freshness racing', 'Freshness racing or' in doc and 'not a safe coexistence/fallback mechanism' in doc)
-    check('canonical report keeps physical suppression point dynamic', 'Static receiver logic cannot identify which physical relay side' in doc)
-    check('COM-016 finding registered', '| COM-016 |' in findings and 'competing-sender arbitration is source-agnostic' in findings)
-    check('CORR-111 failure-forward correction registered', '### CORR-111' in corrections and 'not universally non-delivering' in corrections)
     print('\n== builder reproducibility ==')
 _section_corolla_hf_b6_competing_sender_arbitration()
 print()
@@ -680,10 +635,6 @@ def _section_corolla_hf_fault_state_contract():
     check('class10 includes Brake missing-message DTC', any((x['code'] == 'U012987' and x['failure'] == 'Missing Message' for x in n['class_0x10_state_10'])))
     check('class20 includes steering-angle comm incompatibility family', any((x['code'] == 'U012687' for x in n['class_0x20_state_11'])) and any((x['code'] == 'U032857' for x in n['class_0x20_state_11'])))
     check('openpilot temporary/permanent remains bounded', d['openpilot_boundary']['steerFaultTemporary'] == 'unresolved policy mapping' and d['openpilot_boundary']['steerFaultPermanent'] == 'unresolved policy mapping')
-    doc = (REPO / 'docs/variants/corolla-h-f-openpilot-state-bridge.md').read_text()
-    findings = (REPO / 'docs/status/FINDINGS.md').read_text()
-    check('canonical doc records 242-event class closure', '### 6.7' in doc and '242' in doc and ('200' in doc) and ('600' in doc))
-    check('TMS-058 integrated', '| TMS-058 |' in findings and 'corolla_hf_fault_state_contract.json' in findings)
 _section_corolla_hf_fault_state_contract()
 print()
 print('== corolla hf panda lateral safety contract ==')
@@ -1031,10 +982,6 @@ def _section_corolla_hf_remaining_status_contract():
     check('force7 24-record aggregate bit exact', f['record_aggregate_side']['record_count'] == 24 and f['record_aggregate_side']['bit_used'] == 15)
     check('force7 remains semantically bounded', 'does not assign Toyota names' in f['status_bitmap_side']['boundary'] and 'not recovered' in f['record_aggregate_side']['boundary'])
     check('force7 separated from C159B49', 'distinct from the C159B49' in f['classification'])
-    doc = (REPO / 'docs/variants/corolla-h-f-openpilot-state-bridge.md').read_text()
-    findings = (REPO / 'docs/status/FINDINGS.md').read_text()
-    check('canonical doc records B6[1]/force7 closures', '### 6.8' in doc and 'Q-axis-current-derived' in doc and ('24' in doc) and ('bit **15**' in doc))
-    check('TMS-059 integrated', '| TMS-059 |' in findings and 'corolla_hf_remaining_status_contract.json' in findings)
 _section_corolla_hf_remaining_status_contract()
 print()
 print('== corolla hf command5 portability ==')

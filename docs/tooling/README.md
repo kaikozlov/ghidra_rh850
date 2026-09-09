@@ -45,7 +45,7 @@ The small command surface to remember is:
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
 | GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
 | Repository knowledge / findings / corrections / open questions | `tools/know QUERY` |
-| Generated artifacts / producers / owning suites | `tools/artifact list`, `show`, `regen`, `check` |
+| Generated artifacts / producers | `tools/artifact list`, `show`, `regen` |
 | Broad gates | `tools/test core` / `full` / `branch` |
 | Discover/query configured targets | `tools/gtarget list`, `tools/gtarget show TARGET`, `tools/gtarget TARGET ...` |
 | Discover Corolla-H evidence-compaction profiles | `uv run --locked python tools/extract_corolla_h_evidence.py list` |
@@ -58,7 +58,6 @@ Generated artifacts are discoverable without remembering their implementation fi
 tools/artifact list camry
 tools/artifact show camry_8965F3307000_fault_status.json
 tools/artifact regen camry_8965F3307000_fault_status.json
-tools/artifact check camry_8965F3307000_fault_status.json
 ```
 
 The catalog is derived from tracked artifact paths, exact path references in `tools/`, and verification dependencies; it is not another manually maintained builder registry. `regen` exposes the selected producer before execution and requires an explicit `--producer` when discovery is ambiguous.
@@ -85,13 +84,12 @@ tools/gtarget camry-8965F3307000 stats
 Generic rebuild/snapshot tooling resolves target-specific seed tables and Ghidra stage scripts from `data/analysis_targets.json`; adding a target must not require editing the generic shell scripts.
 
 Family modules (`tests/verify_application_wdbi.py`, `tests/verify_corolla_h.py`,
-and so on) group same-mode same-family portable proofs. Exact F33 portable proofs
-use `tests/verify_camry_8965F3307000.py` with per-suite `--section` dispatch;
-`tools/verification_deps.py` scans only the requested section, so one physical
-family module does not turn an edit to fault-status evidence into all nine F33
-proofs. Prefix queries are the memory: `tools/test list application` / `corolla` /
-`camry_8965f3307000` / `techstream`. Keep live, external, and distinct safety
-pipelines as separate files.
+and so on) group related proofs. Exact F33 proofs use
+`tests/verify_camry_8965F3307000.py` with per-suite `--section` dispatch. Tests
+are selected explicitly; Git changes do not route into suites. Prefix discovery
+remains available with `tools/test list application` / `corolla` /
+`camry_8965f3307000` / `techstream`. Generated-artifact producer discovery is
+handled directly by `tools/artifact` and is independent of verification suites.
 
 The repeated Corolla-H corpus-compaction scripts are consolidated behind one
 profile-driven command:

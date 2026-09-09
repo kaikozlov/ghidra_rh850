@@ -9,7 +9,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CSV_PATH = ROOT / "data" / "motor_actuation_path.csv"
-REPORT_PATH = ROOT / "docs" / "architecture" / "control-partition.md"
 CODEFLASH_PATH = ROOT / "firmware" / "RH850_P1M-E_CodeFlash.bin"
 SFR_PATH = ROOT / "data" / "p1m_sfr_labels.csv"
 
@@ -179,19 +178,6 @@ def main() -> int:
     for address, name in expected_sfrs.items():
         row = sfr_rows.get(address)
         check(f"{address} labeled {name}", row is not None and row["name"] == name)
-
-    print("\n== documented stopping boundary ==")
-    report = REPORT_PATH.read_text(encoding="utf-8")
-    for token in (
-        "0x60DDC", "TSG30CMPWE", "0x35960", "0x36902", "0x36A44",
-        "0xFEBEAE16", "0xFEBEE8CA", "command-to-current",
-        "data/motor_actuation_path.csv",
-        "0x37712", "producer cone", "0xB8C1A",
-        "ADCG0DIR00", "ADCG1DIR00", "Global RAM", "0xFEEF81E0", "0xFEEF8A20",
-        "0xCA6B8", "FEBEC170", "STEERING_LTA_2", "0xC8DE0",
-        "0xFEBEC0D6", "0xFEBEC1D4", "0xFEBEB788", "0xFEBEB87E", "0x132",
-    ):
-        check(f"report contains {token}", token.lower() in report.lower())
 
     print("\n== d/q reference producer cone (command-to-current gap) ==")
     # The d/q current references FEBE6D28/FEBE6D2A are the FOC torque/flux

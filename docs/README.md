@@ -14,10 +14,9 @@ to make the evidence legible.
 3. **[status/README.md](status/README.md)** — how to use the live status ledgers.
 4. **[WORKFLOW.md](WORKFLOW.md)** — how to operate the Ghidra/tooling stack.
 
-If you are looking up one specific assertion, skip the prose and go straight to
-[status/FINDINGS.md](status/FINDINGS.md). If you are following a lead, open question,
-or the relationship between a finding, its canonical report, and the tests that
-assert it, use the generated [reference/index.md](reference/index.md).
+If you are looking up prior research by ID or keyword, use `tools/know QUERY` or
+read [status/FINDINGS.md](status/FINDINGS.md) directly. The status ledgers are
+navigation/history aids; they are not required to mirror every report or test.
 
 ## Document classes
 

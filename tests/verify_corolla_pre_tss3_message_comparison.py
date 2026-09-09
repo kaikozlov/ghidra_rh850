@@ -12,7 +12,6 @@ REPO = Path(__file__).resolve().parents[1]
 REPORT = REPO / "data/generated/corolla_pre_tss3_opendbc_message_comparison.json"
 CONTRACT = REPO / "data/external/opendbc/toyota_corolla_pre_tss3_contract.json"
 LOCK = REPO / "external-references.lock.json"
-DOC = REPO / "docs/variants/corolla-pre-tss3-openpilot-message-comparison.md"
 
 passed = failed = 0
 
@@ -90,15 +89,6 @@ check("B6 OEM unit label remains open", cmd["corolla_h_f"]["replacement"]["oem_w
 check("TSS2 0x191 disappearance is not treated as lost active actuation", roles["tss2_lta_coexistence_frame"]["classification"] == "old_neutral_tss2_replacement_removed")
 check("0x343 absence remains whole-vehicle/non-diagnostic", roles["longitudinal_command_and_stock_source_replacement"]["classification"] == "not_eps_local_absence_non_diagnostic")
 check("0x412 absence remains whole-vehicle/non-diagnostic", roles["lkas_hud_and_lane_ui_replacement"]["classification"] == "not_eps_local_absence_non_diagnostic")
-
-print("\n== documentation integration ==")
-doc=DOC.read_text()
-for token in ("0x2E4", "0x025", "0x0AA", "0x030", "0x260", "0x262", "0x191", "0x343", "0x412", "0x131", "0x183", "0x0B6", "signal 255", "byte-identical"):
-    check(f"report preserves {token}", token in doc)
-findings=(REPO/"docs/status/FINDINGS.md").read_text()
-check("COM-008 records the comparison", "| COM-008 |" in findings and "corolla-pre-tss3-openpilot-message-comparison.md" in findings)
-priorities=(REPO/"docs/status/PRIORITIES.md").read_text()
-check("Corolla command-provenance priority consumes comparison", "corolla-pre-tss3-openpilot-message-comparison.md" in priorities)
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 raise SystemExit(1 if failed else 0)

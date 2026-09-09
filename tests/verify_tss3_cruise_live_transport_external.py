@@ -65,13 +65,5 @@ check("outer session remains explicitly bounded", "does not prove a named outer 
 check("host DID-response validation weakness is not hidden", "does not compare response bytes 1/2" in art["transport"]["returned_did_validation_boundary"] and "stricter conventional" in art["transport"]["returned_did_validation_boundary"])
 check("capture recipe directly pollable", art["capture_recipe"]["poll"] == ["221901", "221905", "221906", "221912", "221914"])
 
-print("\n== documentation/status integration ==")
-tech_doc = (REPO / "docs/tooling/techstream.md").read_text()
-findings = (REPO / "docs/status/FINDINGS.md").read_text()
-corrections = (REPO / "docs/status/CORRECTIONS.md").read_text()
-check("canonical Techstream report records direct cruise RDBI transport", all(x in tech_doc for x in ("### 6.3", "22 19 01", "22 19 05", "22 19 06", "22 19 12", "22 19 14", "stricter than GTS+")))
-check("TMS-057 integrated", "| TMS-057 |" in findings and "tss3_cruise_live_transport.json" in findings)
-check("CORR-117 integrated", "### CORR-117" in corrections and "direct SID-0x22 RDBI" in corrections)
-
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 raise SystemExit(1 if failed else 0)

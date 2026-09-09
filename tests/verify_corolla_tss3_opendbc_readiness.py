@@ -11,10 +11,6 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 ART_PATH = REPO / "data/generated/corolla_tss3_opendbc_readiness.json"
 ART = json.loads(ART_PATH.read_text())
-DOC = (REPO / "docs/architecture/toyota-openpilot-porting-contract.md").read_text()
-FINDINGS = (REPO / "docs/status/FINDINGS.md").read_text()
-PRIORITIES = (REPO / "docs/status/PRIORITIES.md").read_text()
-QUESTIONS = (REPO / "docs/status/OPEN_QUESTIONS.md").read_text()
 
 passed = failed = 0
 
@@ -129,13 +125,6 @@ check("readiness operationalizes guarded exact-H/F command5 second stage", direc
 check("highest-value evidence sequences canary then guarded command5", "corolla_hf_direct_canary.py" in ART["highest_value_next_evidence"][0] and "corolla_hf_direct_command5.py" in ART["highest_value_next_evidence"][0] and "FEBFFB80" in ART["highest_value_next_evidence"][0] and "without vehicle actuation" in ART["highest_value_next_evidence"][0])
 check("radar requires new FD semantics", any("0x123/16" in x for x in impl["blocks_radar"]))
 check("longitudinal remains OQ-052", any("OQ-052" in x for x in impl["blocks_longitudinal"]))
-
-print("\n== documentation integration ==")
-for token in ("TSS generation", "SecOC/TSK", "corolla_tss3_opendbc_readiness.json", "0x123/16", "0x18A", "canValid=false", "0x127", "ELM327 param=1", "physical CAN0/CAN1"):
-    check(f"canonical report records {token}", token in DOC)
-check("COM-013 records readiness finding", "| COM-013 |" in FINDINGS and "corolla_tss3_opendbc_readiness.json" in FINDINGS)
-check("priority queue consumes readiness artifact", "corolla_tss3_opendbc_readiness.json" in PRIORITIES)
-check("OQ-030 consumes readiness artifact", "corolla_tss3_opendbc_readiness.json" in QUESTIONS)
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 raise SystemExit(1 if failed else 0)

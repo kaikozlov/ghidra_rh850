@@ -11,7 +11,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CF = (ROOT / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 CSV_PATH = ROOT / "data" / "motor_safety_monitors.csv"
-REPORT = ROOT / "docs" / "architecture" / "control-partition.md"
 
 passed = failed = 0
 
@@ -91,10 +90,6 @@ for start,end,name in [(0x43F28,0x440DC,"aggregate"),(0xB9D36,0xB9E94,"downstrea
     targets={t for a in range(start,end,2) if (t:=branch_target(a)) is not None}
     check(f"{name} has no direct call/jump to proved motor d/q/PWM stages", not (targets & motor),
           repr(sorted(hex(x) for x in targets & motor)))
-
-text = REPORT.read_text(encoding="utf-8") if REPORT.exists() else ""
-for token in ("nine-channel", "0x289EC", "0x43F28", "0xB9D36", "data/motor_safety_monitors.csv"):
-    check(f"canonical report contains {token}", token.lower() in text.lower())
 
 print(f"\nSummary: {passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

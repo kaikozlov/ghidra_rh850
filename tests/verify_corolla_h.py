@@ -1100,16 +1100,6 @@ def _section_lta_command_provenance():
     check("B6 receiver request/loss/sequence contract promoted", s["request_selection_identified"] is True and s["receiver_loss_cutout_ticks"] == 7 and s["wall_clock_timeout_identified"] is True and s["sequence_counter_identified"] is True and s["sequence_modulus"] == 64 and s["sequence_gap_cap"] == 8)
     check("broad static search remains closed", s["broad_static_search_closed"] is True)
 
-    print("\n== correction/documentation integration ==")
-    corrections=(REPO / "docs/status/CORRECTIONS.md").read_text()
-    findings=(REPO / "docs/status/FINDINGS.md").read_text()
-    variant=(REPO / "docs/variants/corolla-2023-us-public-route.md").read_text()
-    priorities=(REPO / "docs/status/PRIORITIES.md").read_text()
-    check("CORR-107 records GP-relative target-angle correction", "### CORR-107" in corrections and "CC7F8" in corrections and "CAD62" in corrections and "signal255" in corrections and "signals262/263" in corrections and "FEBEAE82" in corrections)
-    check("CORR-078 is explicitly superseded", "**Superseded:** CORR-107" in corrections)
-    check("VAR-036 current finding is corrected", "| VAR-036 | **Correction" in findings and "CC2EC -> CAD62" in findings)
-    check("canonical Corolla report carries corrected B6 target-angle branch", "protected B6 carries target steering angle" in variant and "FEBEF1CC -> FEBEAE82" in variant and "CA138" in variant and "CAD62" in variant)
-    check("priority promotes recovered B6 target-angle command", "B6 signal255" in priorities and "target-minus-measured" in priorities and "1024/17870" in priorities and "signed16 scalar is staged-only" not in priorities)
 
 
 def _section_motor_control():
@@ -1150,7 +1140,6 @@ def _section_openpilot_state_bridge():
     EVID = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json"
     FD = REPO / "data/generated/corolla_8965H1202000_fd_control_interface.json"
     IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
-    DOC = REPO / "docs/variants/corolla-h-f-openpilot-state-bridge.md"
 
 
     art = json.loads(ART.read_text())
@@ -1244,14 +1233,6 @@ def _section_openpilot_state_bridge():
     check("B6 target-angle command remains exact", c["b6_target_angle"]["signal_id"] == 255 and c["b6_target_angle"]["wire_byte"] == 4 and c["b6_target_angle"]["signed"] and c["b6_target_angle"]["snapshot"] == "0xFEBEAE82")
     check("B6 receiver contract retained", c["b6_target_angle"]["request_selection_closed"] is True and c["b6_target_angle"]["receiver_loss_cutout_ticks"] == 7 and c["b6_target_angle"]["sequence_modulus"] == 64 and c["b6_target_angle"]["sequence_gap_cap"] == 8)
 
-    print("\n== documentation integration ==")
-    doc = DOC.read_text() if DOC.exists() else ""
-    for token in ("0x4A3", "0x351", "0x394", "0x030", "0x1035", "0x1037", "0x1151", "0x0B6", "Target Steering Angle", "FRC_P5"):
-        check(f"doc preserves {token}", token in doc)
-    findings = (REPO / "docs/status/FINDINGS.md").read_text()
-    priorities = (REPO / "docs/status/PRIORITIES.md").read_text()
-    check("COM-009 integrated", "| COM-009 |" in findings and "corolla-h-f-openpilot-state-bridge.md" in findings)
-    check("priority consumes state bridge", "corolla-h-f-openpilot-state-bridge.md" in priorities)
 
 
 def _section_plausibility_monitor():
@@ -1331,11 +1312,6 @@ def _section_power_supply_monitor_gate():
     check("confidence boundary explicit", classification["not_established"] == ["literal OEM name for any of the three state bytes", "physical units of the raw supply cells", "wall-clock debounce durations", "a wire-visible FEBEACBD feedback field", "arbitrary computed-pointer aliases outside the census"])
 
 
-    print("\n== documentation/status integration ==")
-    state_doc = (REPO / "docs/variants/corolla-h-f-openpilot-state-bridge.md").read_text()
-    findings = (REPO / "docs/status/FINDINGS.md").read_text()
-    check("canonical report records power-supply gate semantics", all(x in state_doc for x in ("### 6.5", "FEBE7C58", "FEBEF000", "FEBEACBD", "power-supply receive-validity/freeze state", "FEBEADB9 -> FEBEC26D")))
-    check("TMS-055 integrated", "| TMS-055 |" in findings and "power_supply_monitor_gate.json" in findings)
 
 
 def _section_secoc_key_provenance():

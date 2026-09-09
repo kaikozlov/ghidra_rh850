@@ -30,7 +30,7 @@ def check(name: str, condition: object, detail: str = "") -> None:
     passed += int(ok)
     failed += int(not ok)
     print(
-        f"[{'PASS' if ok else 'FAIL'}][documentation_lint] {name}"
+        f"[{'PASS' if ok else 'FAIL'}] {name}"
         + (f" ({detail})" if detail else "")
     )
 
@@ -42,7 +42,6 @@ raw_tracked = sorted(path for path in tracked if path.startswith(RAW_PREFIXES))
 check(
     "no vendor/source corpus bytes are tracked", not raw_tracked, repr(raw_tracked[:20])
 )
-check("software policy is tracked", "software/README.md" in tracked)
 check(
     "all source identity locks are tracked",
     EXPECTED_LOCKS <= tracked,

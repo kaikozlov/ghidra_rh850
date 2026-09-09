@@ -12,7 +12,6 @@ from Crypto.Hash import CMAC
 
 REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
-REPORT = REPO / "docs" / "security" / "secoc" / "command5-oracle-assessment.md"
 SLEIGH_ARITH = REPO / "ghidra" / "ghidra_v850" / "data" / "languages" / "v850_arithmetic.sinc"
 passed = failed = 0
 
@@ -145,24 +144,6 @@ mode1_disp = int.from_bytes(bytes.fromhex("aa99"), "little", signed=True)
 check("mode-0 observation displacement 0x999A resolves to FEBE519A", gp + mode0_disp == 0xFEBE519A)
 check("existing command-5 observer displacement 0x99AA resolves to FEBE51AA", gp + mode1_disp == 0xFEBE51AA)
 check("mode-0 observer source instruction is 24 96 9A 99", bytes.fromhex("24969a99")[2:] == bytes.fromhex("9a99"))
-
-print("\n== documentation boundary ==")
-text = REPORT.read_text(encoding="utf-8") if REPORT.exists() else ""
-for token in (
-    "not a production secoc signing oracle",
-    "exactly 16 bytes",
-    "12 bytes",
-    "36 bytes",
-    "0x68b8a",
-    "0x87a94",
-    "cmac usage",
-    "vendor extension",
-    "freshness",
-    "command 1/3",
-    "length-smuggling",
-    "writememorybyaddress",
-):
-    check(f"assessment records {token}", token in text.lower())
 
 print(f"\nSummary: {passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

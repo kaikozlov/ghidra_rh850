@@ -147,20 +147,6 @@ known = {item["rva"]: item for item in analysis["known_constants"]}
 check("IT3ACNK constant inventory distinguishes all direct/unreferenced pools",
       set(known) == {0x8020, 0x8030, 0x82FC, 0x8310, 0x8324, 0x834C})
 
-print("\n== publication regression language ==")
-report = (REPO / "docs/tooling/techstream.md").read_text(encoding="utf-8")
-findings = (REPO / "docs/status/FINDINGS.md").read_text(encoding="utf-8")
-check("keyless IT3ACNK claim is absent",
-      "IT3ACNK.dll` has an AES S-box but no recoverable key" not in report)
-check("report names direct EncryptAds reference",
-      "RVA `0x2BE1`" in report and "representation-bounded" in report.lower())
-check("NeoNK report keeps AES-256 result and rejects old PKCS7-gate wording",
-      "AES-256-ECB keyed by the full 32-character string" in report
-      and "not a strict PKCS#7 padding validator" in report
-      and "with PKCS#7 gating at `0x10023F26`" not in report)
-check("TMS-012 no longer claims complete absence or exhaustive search",
-      "TMS-012 | Full-tree binary sweep" not in findings
-      and "recovered (bounded negative)" in findings)
 
 
 if TREE.is_dir():

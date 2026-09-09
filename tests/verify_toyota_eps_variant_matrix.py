@@ -101,11 +101,6 @@ if sienna_4512000:
     }
     check("Sienna SID set matches the 17 firmware SIDs", sids_in_csv == expected_sids)
 
-    # Cross-check: sync ID 0x0F is confirmed by secoc/application-chain.md
-    secoc_doc = (REPO / "docs" / "security" / "secoc" / "application-chain.md").read_text()
-    check("Sienna sync ID 0x0F corroborated by SECOC doc",
-          "0x00F" in secoc_doc or "0x0F" in secoc_doc)
-
 # ── Sienna 4514000 row: external field evidence only ────────────
 check("Sienna 4514000 row present", sienna_4514000 is not None)
 if sienna_4514000:
