@@ -824,8 +824,8 @@ with tempfile.TemporaryDirectory() as td:
     inline = manifest["ram_experiments"]["b6_inline_signer"]
     check("kit packages autonomous inline B6 signer as the primary fast path",
           inline["launcher"] == "f33-secoc" and
-          inline["resident_base"] == "0xFEBFF9F0" and inline["resident_size"] == 486 and
-          inline["resident_sha256"] == "b6a312dd0ea92c70ec662ba3da682ed6977ef15cfed6c8fb47f2aa1bd4c4751d" and
+          inline["resident_base"] == "0xFEBFF9F0" and inline["resident_size"] == 498 and
+          inline["resident_sha256"] == "228e000234235f11dbc532c325cfe042e30fdf9c28858387892b27c1f0dbd177" and
           inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 356 and
           inline["helper_word_count"] == 89 and
           inline["helper_padded_sha256"] == "0180338d8c835e40aee2d4ac233136ca9901349ad54ecdb6362b4369f4ec0982" and
@@ -1026,7 +1026,7 @@ with tempfile.TemporaryDirectory() as td:
     secoc_plan_obj = json.loads(secoc_plan.stdout) if secoc_plan.returncode == 0 else {}
     check("built inline signer launcher plan is no-roundtrip architecture",
           secoc_plan.returncode == 0 and secoc_plan_obj.get("schema") == "camry-f33-b6-inline-signer-plan-v1" and
-          secoc_plan_obj.get("resident", {}).get("size") == 486 and secoc_plan_obj.get("helper", {}).get("word_count") == 89,
+          secoc_plan_obj.get("resident", {}).get("size") == 498 and secoc_plan_obj.get("helper", {}).get("word_count") == 89,
           secoc_plan.stderr[-300:])
     doctor = subprocess.run([str(launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
     check("built launcher doctor validates imports and payload without Panda access",

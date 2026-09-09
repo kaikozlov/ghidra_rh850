@@ -417,7 +417,7 @@ def build(out: Path, openpilot: Path) -> dict:
                 "helper_padded_sha256": inline_meta["helper"]["padded_sha256"],
                 "control_can_id": inline_meta["loader"]["can_id"],
                 "state": inline_meta["loader"]["state"],
-                "operation": "post-startup helper load, byte-exact SID23 readback, then local command-5 B6 signing before untouched stock SecOC verification",
+                "operation": "post-startup helper load, byte-exact SID23 readback, then local command-5 B6 signing before the existing receiver SecOC path",
                 "trigger": inline_meta["signer"]["trigger"],
                 "domain": inline_meta["signer"]["domain"],
                 "freshness_owner": inline_meta["signer"]["freshness_owner"],
