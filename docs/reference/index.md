@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 466 · Corrections: 186 · Open questions: 54 · Docs: 125 · Suites: 254
+Findings: 467 · Corrections: 187 · Open questions: 54 · Docs: 125 · Suites: 255
 
 ## Reading this index
 
@@ -35,6 +35,7 @@ Findings: 466 · Corrections: 186 · Open questions: 54 · Docs: 125 · Suites: 
 | <a id="finding-arch-014"></a>**ARCH-014** | [docs/security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_ephemeral_runtime.py`, `tests/verify_ephemeral_runtime_live_installer.py` | — |
 | <a id="finding-arch-015"></a>**ARCH-015** | [docs/tooling/ephemeral-runtime-semantic-resolver.md](../tooling/ephemeral-runtime-semantic-resolver.md), [docs/security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md) | — | `tests/verify_ephemeral_runtime_resolver.py`, `tests/verify_albinoelephant_corolla_codeflash.py` | — |
 | <a id="finding-arch-016"></a>**ARCH-016** | [docs/architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md) | — | `tests/verify_toyota_porting_contract.py`, `tests/verify_external_corroboration.py` | — |
+| <a id="finding-arch-017"></a>**ARCH-017** | [docs/tooling/processor-module-audit.md](../tooling/processor-module-audit.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_rh850_compiler_abi.py` | — |
 | <a id="finding-com-001"></a>**COM-001** | [docs/communications/application-rx.md](../communications/application-rx.md) | [STATIC_ANALYSIS_SWEEP_2026-08-10](../history/2026-08/STATIC_ANALYSIS_SWEEP_2026-08-10.md) | `tests/verify_architecture.py`, `tests/verify_application_receive.py` | — |
 | <a id="finding-com-002"></a>**COM-002** | [docs/communications/application-rx.md](../communications/application-rx.md) | [STATIC_ANALYSIS_SWEEP_2026-08-10](../history/2026-08/STATIC_ANALYSIS_SWEEP_2026-08-10.md), [exploit-interest-ranking](../tooling/exploit-interest-ranking.md) | `tests/verify_application_receive.py`, `tests/verify_application_rx_consumer_audit.py` | — |
 | <a id="finding-com-003"></a>**COM-003** | [docs/communications/application-tx.md](../communications/application-tx.md) | [control-partition](../architecture/control-partition.md), [STATIC_ANALYSIS_SWEEP_2026-08-10](../history/2026-08/STATIC_ANALYSIS_SWEEP_2026-08-10.md) | `tests/verify_application_transmit.py`, `tests/verify_application_tx_producer_evidence.py`, `tests/verify_application_tx.py` | — |
@@ -735,6 +736,7 @@ Findings: 466 · Corrections: 186 · Open questions: 54 · Docs: 125 · Suites: 
 | <a id="correction-corr-184"></a>**CORR-184** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 | <a id="correction-corr-185"></a>**CORR-185** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 | <a id="correction-corr-186"></a>**CORR-186** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
+| <a id="correction-corr-187"></a>**CORR-187** | [docs/tooling/processor-module-audit.md](../tooling/processor-module-audit.md) | yes |
 
 ## Document registry
 
@@ -831,7 +833,7 @@ Every tracked document under `docs/` with its owning suite(s) and gate tests.
 | [docs/tooling/gtsplus-vdas-pcs-data.md](../tooling/gtsplus-vdas-pcs-data.md) | doc_links, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md) | doc_links, toyota_b_programming_topology, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_toyota_b_programming_topology.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/pcs-data-viewer-tss3-dictionary.md](../tooling/pcs-data-viewer-tss3-dictionary.md) | gtsplus_pcs_data_viewer_tss3_managed_semantics, gtsplus_tss3_native_recorder, doc_links, knowledge_index | `tests/verify_gtsplus_pcs_data_viewer_tss3_managed_semantics.py`, `tests/verify_gtsplus_tss3_native_recorder.py`, `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
-| [docs/tooling/processor-module-audit.md](../tooling/processor-module-audit.md) | analysis_status, doc_links, knowledge_index | `tests/verify_analysis_status.py`, `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
+| [docs/tooling/processor-module-audit.md](../tooling/processor-module-audit.md) | rh850_compiler_abi, analysis_status, doc_links, knowledge_index | `tests/verify_rh850_compiler_abi.py`, `tests/verify_analysis_status.py`, `tests/verify_doc_links.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md) | doc_links, renesas_rfp, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_renesas_rfp.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/rh850-codeflash-structure-scanner.md](../tooling/rh850-codeflash-structure-scanner.md) | doc_links, codeflash_structure_scanner, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_rh850_codeflash_structure_scanner.py`, `tests/verify_knowledge_index.py` |
 | [docs/tooling/secoc-semantic-patch-resolver.md](../tooling/secoc-semantic-patch-resolver.md) | doc_links, secoc_semantic_patch_resolver, albinoelephant_corolla_codeflash, knowledge_index | `tests/verify_doc_links.py`, `tests/verify_secoc_semantic_patch_resolver.py`, `tests/verify_albinoelephant_corolla_codeflash.py`, `tests/verify_knowledge_index.py` |

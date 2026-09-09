@@ -215,6 +215,10 @@ paths = [
   "data/control_partition.csv",
 ]
 
+[suite.rh850_compiler_abi]
+tests = ["tests/verify_rh850_compiler_abi.py"]
+oracle = "raw_bytes"
+
 [suite.analysis_status]
 tests = ["tests/verify_analysis_status.py"]
 oracle = "generated_self_check"

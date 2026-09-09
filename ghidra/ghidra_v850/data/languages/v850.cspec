@@ -3,10 +3,13 @@
 <!--
   Renesas V850 / RH850 compiler specification.
 
-  Calling convention matches the G3-family software ABI shared by the Renesas
-  CC-RH and GCC v850 toolchains. Register classification (verified against GCC
-  v850 CALL_USED_REGISTERS and against the firmware's own prepare/dispose save
-  set r20..r29 + ep + lp):
+  Calling convention models the firmware-observed RH850/G3 ABI used by the
+  analyzed P1M-E images. It is compatible with the Green-Hills-style RH850 ABI
+  exposed by GCC's -mghs mode, but it is NOT the standard Renesas CC-RH ABI:
+  exact Sienna and Camry F33 both have normally called leaf 0x1478 that starts
+  `mov r6,ep` and returns without restoring ep, while CC-RH V2.08 documents r30
+  as fixed or callee-saved. Register classification is therefore pinned from
+  firmware call/prologue behavior rather than inferred from a compiler name:
 
     r0        reads-as-zero (see v850_common.sinc); volatile
     r1,r2     volatile (assembler temporary)

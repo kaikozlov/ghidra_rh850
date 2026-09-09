@@ -26,9 +26,12 @@ and installs into an isolated Ghidra user-home under `build/cache/ghidra-home/` 
 `-Duser.home`. It does **not** generate files in the vendored tree or mutate
 `$GHIDRA_HOME/Ghidra/Extensions`.
 
-The in-tree `v850.cspec` models the RH850/G3 calling convention (r6–r9 args,
-r10 return, callee-saved r20–r29, lp link register, `__interrupt` prototype).
-Processor audits: [tooling/processor-module-audit.md](tooling/processor-module-audit.md).
+The in-tree `v850.cspec` models the firmware-observed RH850/G3 calling
+convention (r6–r9 args, r10 return, callee-saved r20–r29, **volatile r30/ep**,
+lp link register, `__interrupt` prototype). Exact Sienna/F33 code disproves the
+standard CC-RH ep-preservation rule; the model is GHS-compatible without
+claiming a specific Toyota compiler vendor/version. Processor audits:
+[tooling/processor-module-audit.md](tooling/processor-module-audit.md).
 
 ## Build workspace contract
 

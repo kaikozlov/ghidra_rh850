@@ -2,7 +2,7 @@
 //@category Investigation
 // Inspect candidate switch sites: for each address report inbound references
 // (is the site reachable code at all?), the preceding instruction sequence
-// (a real GHS switch is always preceded by a range bound check), the table's
+// (a real compiler switch is preceded by a range bound check), the table's
 // first entries with their computed targets, and whether each target lands on
 // an instruction start. Read-only. Pass addresses as hex args, e.g.
 //   InspectSwitchSites.java 0x18484 0x1b374
