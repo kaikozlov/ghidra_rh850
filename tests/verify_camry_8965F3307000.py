@@ -1288,114 +1288,101 @@ def section_application_ram_loader() -> int:
 
 
 def section_b6_receive_bridge() -> int:
-    """Verify the exact-F33 zero-MAC28 protected-B6 receive-bridge candidate."""
-    import hashlib, json, struct
+    """Verify the exact-F33 ABI-preserving protected-B6 receive bridge."""
+    import hashlib, json, struct, sys
     from pathlib import Path
+
     ROOT = Path(__file__).resolve().parents[1]
-    BRIDGE_BIN = ROOT / 'exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin'
-    BRIDGE_AUDIT = ROOT / 'exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json'
-    BRIDGE_SOURCE = ROOT / 'exploit/ephemeral_runtime/camry_f33_b6_bridge.c'
-    BRIDGE_BUILDER = ROOT / 'exploit/ephemeral_runtime/build_camry_f33_b6_bridge.py'
-    IMAGE = ROOT / 'firmware/camry-8965F3307000/CodeFlash.bin'
+    sys.path.insert(0, str(ROOT))
+    from exploit.ephemeral_runtime import build_camry_f33_b6_bridge as bridge_builder
+    BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
+    BRIDGE_AUDIT = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json"
+    BRIDGE_SOURCE = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_bridge.S"
+    BRIDGE_BUILDER = ROOT / "exploit/ephemeral_runtime/build_camry_f33_b6_bridge.py"
+    IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
     p = f = 0
+
     def sha(b: bytes) -> str:
         return hashlib.sha256(b).hexdigest()
+
     def check(name: str, cond: object) -> None:
         nonlocal p, f
         ok = bool(cond); p += int(ok); f += int(not ok); print(f"[{'PASS' if ok else 'FAIL'}] {name}")
+
     audit = json.loads(BRIDGE_AUDIT.read_text())
     img = IMAGE.read_bytes()
-    print('== audited bridge binary ==')
-    check('binary identity exact', audit['shellcode']['size'] == BRIDGE_BIN.stat().st_size == 608 and
-          audit['shellcode']['sha256'] == sha(BRIDGE_BIN.read_bytes()) == '00111433b1f7c0f9111517d65e130a3743f4a53d52073177920268f068fadbc1')
-    check('entry/relocations clean', audit['compile_contract']['entry_offset'] == 0 and audit['compile_contract']['relocations'] == 0)
-    check('source and builder bound', audit['source']['sha256'] == sha(BRIDGE_SOURCE.read_bytes()) and
-          audit['builder']['sha256'] == sha(BRIDGE_BUILDER.read_bytes()))
-    print('== retained-tail residency budget ==')
-    c = audit['compile_contract']
-    check('resident stays inside the verified 524-byte high tail',
-          c['resident_base'] == '0xFEBFF9F0' and c['resident_size_incl_marker_slack'] == 508 and
-          c['resident_limit'] == 508 and c['staging_limit'] == 776 and
-          0 < c['resident_entry_staging_offset'] < c['resident_tail_marker_staging_offset'] == 606)
-    check('heartbeat + ingress telemetry cells inside the verified retained span',
-          c['resident_mailbox'] == '0xFEBFFBEC' and c['resident_queue_present'] == '0xFEBFFBF0' and
-          c['resident_zero_mac_seen'] == '0xFEBFFBF4' and c['resident_injected'] == '0xFEBFFBF8' and
-          0xFEBFF9F0 <= 0xFEBFFBEC < 0xFEBFFBF0 < 0xFEBFFBF4 < 0xFEBFFBF8 <= 0xFEBFFBFB)
-    print('== static pins re-derived from firmware ==')
+    blob = BRIDGE_BIN.read_bytes()
+    src = BRIDGE_SOURCE.read_text()
+
+    print("== audited ABI-preserving bridge ==")
+    check("audited bridge identities exact",
+          audit["schema"] == "camry-f33-b6-bridge-build-v3" and
+          audit["source"]["path"] == "exploit/ephemeral_runtime/camry_f33_b6_bridge.S" and
+          audit["source"]["sha256"] == sha(BRIDGE_SOURCE.read_bytes()) and
+          audit["builder"]["sha256"] == sha(BRIDGE_BUILDER.read_bytes()))
+    check("staging/resident fit exact retained geometry",
+          audit["staging"]["size"] == len(blob) == 648 and
+          audit["staging"]["sha256"] == sha(blob) and audit["staging"]["relocations"] == 0 and
+          audit["resident"]["base"] == "0xFEBFF9F0" and audit["resident"]["size"] == 520 and
+          audit["resident"]["headroom"] == 4 and audit["resident"]["relocations"] == 0 and
+          audit["resident"]["end_limit"] == "0xFEBFFBFC")
+    expected_targets = [
+        *bridge_builder.EXPECTED_RESIDENT_JARL_TARGETS[:29],
+        bridge_builder.B6_COM_RX_CALLBACK,
+        *bridge_builder.EXPECTED_RESIDENT_JARL_TARGETS[29:],
+    ]
+    check("direct JARL sequence preserves ABI and inserts route44 after aggregate",
+          audit["resident"]["jarl_targets"] == [f"0x{x:08X}" for x in expected_targets] and
+          audit["resident"]["jarl_targets"][28:31] == ["0x000667E6", "0x0007D72C", "0x00071378"] and
+          src.index("movea -0x632c, gp, r6") < src.index("jarl32 fg_aggregate, lp") <
+          src.index("ld.bu 0x4813[gp], r6") < src.index("jarl32 b6_com_rx, lp") and
+          "ld.bu -0x6bfe[gp], r7" in src and "be .L_clear_pending" in src and
+          "call0(" not in src and "jmp [r" not in src and "jarl [r" not in src)
+    check("mailbox is low-RAM v3 and bridge has no CAN/flash/dynamic-call mutation",
+          audit["mailbox"]["base"] == "0xFEBF0000" and audit["mailbox"]["size"] == 0x30 and
+          audit["mailbox"]["magic"] == "0x42364252" and audit["mailbox"]["version"] == 3 and
+          audit["mutation_boundary"]["dynamic_call"] is False and
+          audit["mutation_boundary"]["can_transmit_call"] is False and
+          audit["mutation_boundary"]["stock_code_patch"] is False and
+          audit["mutation_boundary"]["codeflash_write"] is False)
+
+    print("== static pins re-derived from firmware ==")
     def u16(va: int) -> int:
-        return struct.unpack_from('<H', img, va)[0]
+        return struct.unpack_from("<H", img, va)[0]
     def u32(va: int) -> int:
-        return struct.unpack_from('<I', img, va)[0]
-    pins = {k: int(v, 16) for k, v in audit['static_pins'].items()}
-    check('PDU44 COM window exact (0x22840 table -> FEBE4BFF)',
-          u16(0x22840 + 44 * 2) == 0x1B7 and pins['B6_COM_WINDOW'] == 0xFEBEB800 - 0x6DB8 + 0x1B7 == 0xFEBE4BFF)
-    check('B6 secured buffer exact (SecOC record idx2)',
+        return struct.unpack_from("<I", img, va)[0]
+    pins = {k: int(v, 16) for k, v in audit["static_pins"].items()}
+    check("builder re-derives every audited pin", bridge_builder.verify_static_pins(img) == pins)
+    check("PDU44 COM window exact",
+          u16(0x22840 + 44 * 2) == 0x1B7 and pins["B6_COM_WINDOW"] == 0xFEBE4BFF)
+    check("B6 secured buffer/profile geometry exact",
           u32(0x2586C + 2 * 0x50) == 32 and u32(0x25870 + 2 * 0x50) == 40 and
-          pins['B6_SECURED_BUFFER'] == 0xFEBE54AC + 40 == 0xFEBE54D4)
-    check('B6 queue record + stock route44 new-data counter exact',
-          pins['B6_QUEUE_RECORD'] == 0xFEBE546A + 2 * 8 == 0xFEBE547A and
-          pins['B6_IPDU_FLAG'] == 0xFEBE5364)
-    check('stock route44 COM callback is configuration-derived',
-          pins['B6_COM_RX_CALLBACK'] == 0x0007D72C and
-          u16(0x226C2 + 44 * 8 + 2) == 32 and img[0x226C2 + 44 * 8 + 5] == 0x0C and
-          u32(0x21E08) == 0x0007D72C)
-    check('trailer config 2 (asynchronous ICU-S verify) exact', u32(0x25874 + 2 * 0x50) & 0xFFFF == 2)
-    print('== physical ingress through SecOC queue ==')
+          (u32(0x25874 + 2 * 0x50) & 0xFFFF) == 2 and pins["B6_SECURED_BUFFER"] == 0xFEBE54D4)
+    check("B6 queue and native route44 callback exact",
+          pins["B6_QUEUE_RECORD"] == 0xFEBE547A and pins["B6_IPDU_FLAG"] == 0xFEBE5364 and
+          pins["B6_COM_RX_CALLBACK"] == 0x0007D72C and u32(0x21E08) == 0x0007D72C)
+
+    print("== physical ingress through protected route ==")
     d7_rule = img[0x230B8 + 36 * 16:0x230B8 + 37 * 16]
     b6_rule = img[0x230B8 + 39 * 16:0x230B8 + 40 * 16]
-    check('RSCFD rule39 is exact B6 peer of healthy protected D7 rule36',
-          d7_rule == bytes.fromhex('d700000000002d000200000000000000') and
-          b6_rule == bytes.fromhex('b6000000000030000200000000000000') and d7_rule[8:] == b6_rule[8:])
-    check('CanIf descriptor39 is FD B6/32 and maps through route base 5 to PduR44',
-          img[0x21FE8 + 39 * 8:0x21FE8 + 40 * 8] == bytes.fromhex('b600004020000000') and
+    check("RSCFD rule39 is exact B6 peer of protected D7 rule36",
+          d7_rule == bytes.fromhex("d700000000002d000200000000000000") and
+          b6_rule == bytes.fromhex("b6000000000030000200000000000000") and d7_rule[8:] == b6_rule[8:])
+    check("CanIf descriptor39 is FD B6/32 and maps route 44",
+          img[0x21FE8 + 39 * 8:0x21FE8 + 40 * 8] == bytes.fromhex("b600004020000000") and
           img[0x21A48] == 5 and 5 + 39 == 44 and img[0x21FB8 + 44] == 0x10)
+    check("normal RX descriptors share the same CanIf path",
+          img[0x219DC:0x219DC + 43] == b"\x01" * 43)
+    check("protected routes 9/41/44 pass through SecOC while route40 is direct COM",
+          [(u16(0x229CE + route * 4), u16(0x229D0 + route * 4)) for route in (9, 41, 44)] ==
+          [(9, 9), (41, 41), (44, 44)] and
+          (u16(0x229CE + 40 * 4), u16(0x229D0 + 40 * 4)) == (40, 0xFFFF) and
+          u32(0x21E48) == 0x8EE7C and u32(0x21E08) == 0x7D72C)
+    check("bridge remains static-only pending live qualification",
+          audit["review_status"] == "static-abi-preserving-bridge-ready-for-live-qualification")
 
-    check(
-        "all normal RX descriptors take the 810F2 path independent of CAN-FD wire format",
-        img[0x219DC:0x219DC + 43] == b"\x01" * 43,
-    )
-    check(
-        "PduR sends protected routes 9/41/44 through SecOC and route 40 directly to COM",
-        [
-            (u16(0x229CE + route * 4), u16(0x229D0 + route * 4))
-            for route in (9, 41, 44)
-        ]
-        == [(9, 9), (41, 41), (44, 44)]
-        and (u16(0x229CE + 40 * 4), u16(0x229D0 + 40 * 4)) == (40, 0xFFFF)
-        and u32(0x21CBC) == 0x21E40
-        and u32(0x21E48) == 0x8EE7C
-        and u32(0x21EE4) == 0x21E00
-        and u32(0x21E08) == 0x7D72C,
-    )
-    check('route44 checksum hook is configured but disabled for B6',
-          img[0x290B4:0x290BC] == bytes.fromhex('2c00000bb8010200') and img[0x290BB] == 0)
-    check('B6 pre-freshness gates cannot reject a queued 32-byte frame',
-          u16(0x258EE) == 4 and u16(0x258FE) == 0 and pins['B6_QUEUE_RECORD'] == 0xFEBE547A)
-    print('== bridge semantics ==')
-    src = BRIDGE_SOURCE.read_text()
-    check('MAC28 zero marker mask exact (B28[3:0]|B29|B30|B31)', '#define B6_MAC28_MASK 0xFFFF0F0Fu' in src)
-    check('bridge snapshots full secured PDU and re-enters stock route44 only after an exact raw-COM miss',
-          'unsigned char save[B6_SECURED_LENGTH]' in src and
-          'copy_bytes(save, (const volatile unsigned char *)TARGET_B6_SECURED_BUFFER,' in src and
-          'TARGET_B6_COM_WINDOW + i' in src and 'if (delivered == 0u)' in src and
-          '((fn2_t)TARGET_B6_COM_RX_CALLBACK)(B6_PDUR_ROUTE, &pdu);' in src and
-          'TARGET_B6_STAGED_FLAG' not in src)
-    check('bridge exposes queue/zero-MAC/injection discriminators',
-          'TARGET_RESIDENT_QUEUE_PRESENT' in src and 'TARGET_RESIDENT_ZERO_MAC_SEEN' in src and
-          'TARGET_RESIDENT_INJECTED' in src and
-          pins['RESIDENT_QUEUE_PRESENT'] == 0xFEBFFBF0 and
-          pins['RESIDENT_ZERO_MAC_SEEN'] == 0xFEBFFBF4 and pins['RESIDENT_INJECTED'] == 0xFEBFFBF8)
-    check('splice wraps the stock comm/SecOC aggregate only',
-          src.count('call0(TARGET_FG_AGGREGATE);') == 1 and
-          audit['scheduler_transfer']['FG_AGGREGATE'] == '0x000667E6')
-    check('scheduler transfer matches the audited F33 carrier schedule',
-          audit['scheduler_transfer']['BOOT_INIT_0'] == '0x00000C9A' and
-          audit['scheduler_transfer']['APP_CPU_CONTEXT_INIT'] == '0x000715B4' and
-          audit['scheduler_transfer']['FOREGROUND_TIMING_FLAG'] == '0x00031910')
-    check('candidate stays non-live', audit['review_status'] == 'static-carrier-candidate-not-live-validated')
-    print(f'\nResults: {p} passed, {f} failed')
+    print(f"\nResults: {p} passed, {f} failed")
     return 1 if f else 0
-
 
 def section_b6_acceptance_ladder() -> int:
     """Verify the exact-F33 B6 delivery/receive-health/controller-selection ladder."""

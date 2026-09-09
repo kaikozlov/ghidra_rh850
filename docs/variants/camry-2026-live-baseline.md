@@ -2384,6 +2384,12 @@ Deterministic evidence: `tools/analyze_camry_2026_upstream_request_census.py`,
 
 ## 40. Zero-MAC28 receive-bridge candidate: F33 COM splice geometry pinned and audited (VAR-089)
 
+> **Historical checkpoint.** The C implementation and identities in this section are retained
+> as the original VAR-089 result. CORR-167 later proved its generic `call0(address)` trampoline
+> ABI-unsafe. CORR-184 / §68.5 supersede the executable bridge with the assembly-only v3
+> direct-JARL resident; do not use the hashes, telemetry cells, or field sequence below as the
+> current bridge contract.
+
 The exact-F33 static path to a replacement B6 sender is now closed as an
 audited build-time candidate. The stock generated-COM receive plane was
 decoded end-to-end: the PDU44 window base table at `0x22840` places B6
@@ -5569,48 +5575,40 @@ Machine-readable evidence is
 `data/generated/camry_f33_b6_gate_log_reconciliation.json`; deterministic verification is
 `tests/verify_camry_f33_b6_gate_log_reconciliation.py`.
 
-## 68. Live generic-monitor localization: route44 is injection-associated, but its published B6 is not the Panda-echoed payload (VAR-151)
+## 68. Live generic-monitor localization: route44 has native/background publication; TX -> profile-2 identity remains open (VAR-151)
 
-The 2026-09-08 stationary session finally qualified the corrected assembly-only generic
-runtime monitor on the exact `8965F3307000` EPS. The 520-byte resident installed from
-NRTD with verdict `runtime_monitor_live`, returned exact application F181, exposed the
-`F33M` control block, and remained live across a comma-device reboot while the vehicle/EPS
-stayed powered. This validates the external monitor architecture itself: one RAM install,
-then host-configured watch windows over the live-proven `0x1FDC0002 -> FEBE4C34` control
-plane with no source-memory writer, SecOC bypass, steering transmit, or persistent flash
-write.
+The 2026-09-08 stationary session qualified the corrected assembly-only generic runtime
+monitor on exact EPS `8965F3307000`. The 520-byte resident installed from NRTD with verdict
+`runtime_monitor_live`, returned exact application F181, exposed the `F33M` control block,
+and remained live across a comma-device reboot while the vehicle/EPS stayed powered. This
+validates the external monitor architecture itself: one RAM install, then host-configured
+watch windows over the live-proven `0x1FDC0002 -> FEBE4C34` control plane with no
+source-memory writer, SecOC bypass, steering transmit, or persistent flash write.
 
-The first useful correction is operational rather than an EPS conclusion. The initial
-READY guard exited on a transitional `0x51E=0` sample instead of waiting for the latest
-READY state, the control ACK timeout was too short for live diagnostic latency, and the
-first phase sender held one `0x00F RESET_CNT` across the run. Those host defects were
-corrected before the retained A/B/C phases: the phase sender now follows live `0x00F`,
-reanchors message8 to zero whenever RESET_CNT changes exactly like current opendbc, and
-records every transmitted frame/signature. The retained corrected phase A sent **106/106**
-frames/echoes with the current active application shape.
+The retained host also fixes three operational defects from the first attempt: READY now
+waits for current state instead of accepting a transitional `0x51E=0`, control ACK timing is
+long enough for live diagnostic latency, and each B6 phase follows live `0x00F RESET_CNT`
+and reanchors message8 exactly like current opendbc. Corrected phase A sent and Panda-echoed
+**106/106** current-shape ID11 frames.
 
-### 68.1 Controlled idle/send/idle timing disproves a background route44 publisher
+### 68.1 A longer zero-echo idle control disproves the initial injection-causality claim (CORR-184)
 
-A bounded rate experiment watched the low byte of exact route44 publication generation
-`FEBE5364`, raw route44 Target Lateral ID, and `ADB0` while alternating idle and marked B6
-segments. Two idle controls of 0.6842/0.6856 s produced generation delta **0/0**. Sending
-56 marked B6 frames on logical bus0 produced 56 Panda echoes and nonzero route44 movement;
-the same test on the relay mate bus2 again produced 56/56 and movement. Sending the same
-56/56 frames on unrelated logical bus1 produced generation delta **0**, and the final
-0.6898-s idle control again produced **0**.
+The first short idle/send/idle experiment appeared suggestive: two ~0.685-s idle windows had
+zero route44 generation delta, bus0 and bus2 marked-B6 windows had nonzero deltas, unrelated
+bus1 had zero, and the final short idle again had zero. That timing correlation was promoted
+too far. The retained longer idle control is decisive against that interpretation.
 
-The observed bus0/bus2 generation delta is modulo-256 and its apparent rate must not be
-promoted into a one-frame/one-publication count: relay duplication/coalescing and the
-neighboring foreground cadence are not resolved by this experiment. The valid conclusion
-is narrower and stronger than the earlier ambiguous correlation: **route44 publication
-activity is causally associated with our injected B6 on the relay-correct EPS segment and
-is quiescent when that injection stops.** There is no continuously running native/background
-route44 publisher in this stationary state that can explain the earlier samples. This does
-not yet prove that the particular Panda-echoed frame is the PDU that route44 publishes.
+During the longer stationary capture Panda reports **zero B6 TX echoes**, while 26 exact
+runtime samples show route44 generation `FEBE5364` taking five distinct low-byte values with
+**five observed transitions**. Every sampled raw route44 Target Lateral ID is **0**. Therefore
+an exact native/background route44 publisher exists while the host sends no B6. The short
+window deltas remain raw timing observations only; they do **not** establish that injected B6
+caused route44 publication. In particular, a route44 ID0 image sampled during a host B6 phase
+cannot be called a transformed copy of that host frame merely because the timestamps overlap.
 
-### 68.2 The route44 application image does not equal the current openpilot B6 echo
+### 68.2 The sampled post-aggregate image is ID0 and is not an ingress witness for the host frame
 
-Corrected phase A transmitted the current openpilot-shaped active frame beginning:
+Corrected phase A transmitted the current openpilot-shaped active application fields:
 
 ```text
 B3 ID       = 0x0B
@@ -5620,122 +5618,107 @@ B7 sequence = varying modulo64
 B8/B9       = 0x64 / 0x64
 ```
 
-with a live FV4/wrong-key dummy-CMAC trailer. The retained post-aggregate route44 image
-instead contained:
+with the current wrong-key dummy-CMAC/FV4 envelope. The sampled post-aggregate route44 image
+instead had ID0, the same current-angle-scale target, and zero contribution percentages. The
+full phase-K window independently had `B3=0`, target angle 46 raw, `B8=0`, `B9=0`, with
+late secured bytes/trailer activity present. Generated COM and the application snapshot are
+internally consistent with that image: `FEBE80BC=0`, `ADB0=0`, `ACBD=0`, and `CAFF=1`.
+Thus `CEFFC` does not select bank2 in those snapshots because the application-visible mode is
+ID0.
 
-```text
-B3 ID       = 0x00
-B4:B5 angle = 0x002F
-B6          = 0x00
-B7          = varying
-B8          = 0x00
-```
+What changed is the attribution. Because §68.1 proves background route44 publication, these
+post-aggregate samples do **not** establish a host-ID11 -> route44-ID0 transformation. The
+same limitation applies to the earlier out-of-dictionary ID63 host marker: post-aggregate raw
+route44, generated COM, and `ADB0` remained ID0, but that result does not say whether ID63
+reached an earlier RSCFD/CanIf/PduR/profile-2 stage before a different/background publication
+was sampled.
 
-and the fuller phase-K raw-window capture independently had `B3=0`, target angle 46 raw,
-`B8=0`, `B9=0`, while the end-of-frame trailer bytes changed over time. The result is not
-a simple short-frame/truncation symptom: late-frame secured data are present, but the
-command-relevant mode/percentage fields seen after the aggregate are not the values in the
-Panda echo.
+### 68.3 Phase P is live-qualified but its immediately-pre-aggregate zero is only an instant
 
-The downstream application is internally consistent with that route44 image. Phase B
-observed generated Target Lateral ID `FEBE80BC=0` while generated target angle remained 47;
-phase C observed `ADB0=0`, `AE90=47`, `ACBD=0`, `CAFC=0`, `CAFD=0`, `CAFE=1`, and
-`CAFF=1`. Thus the application-side reason `CEFFC` never selects bank2 is now direct:
-**the application snapshot is ID0 because generated COM is ID0 because the sampled raw
-route44 image is ID0.** Healthy `ACBD/CAFF` cannot convert that to `CB00=2`.
+The generic resident reads `FEBE547A/FEBE54D4` after stock `fg_aggregate`, too late to witness
+a short profile-2 transaction because normal cleanup occurs after processing. A dedicated
+522/524-byte pre-aggregate resident therefore sampled immediately before stock `0x667E6`.
+Live Phase P transmitted and Panda-echoed **188/188** current-shape B6 frames and still
+reported queue length zero at that sample point.
 
-A deliberately out-of-dictionary ID63 marker adds an independent discriminator. Across
-102/102 bus0 and 109/109 bus2 marked transmissions, every sampled raw-route44,
-generated-COM, and `ADB0` Target Lateral ID remained zero; the unrelated bus1 marker also
-remained zero and did not cause the controlled route44 activity seen on buses0/2. This
-rules out an ID11-only bank-selector explanation for the observed post-aggregate ID0 state.
-It still does **not** identify which pre-route44 stage produced the zero-ID/current-angle
-image.
-
-### 68.3 Post-aggregate queue reads are intrinsically too late; the next resident samples before `fg_aggregate`
-
-The generic resident can read `FEBE547A/FEBE54D4`, but its normal RUN snapshot occurs after
-stock `fg_aggregate`. During high-rate marked B6 tests the secured buffer and queue record
-were already cleared at every host-visible post-aggregate sample. That is inconclusive:
-`8F70E -> 8EB7E` cleans the transaction after attempted delivery, so zero after the
-aggregate does not say whether the incoming phase frame occupied the profile-2 queue before
-processing.
-
-The remaining first edge is therefore exact byte identity **before** the aggregate:
-
-```text
-Panda TX echo
-  -> RSCFD / CanIf
-  -> 8E9C6 profile-2 queue FEBE547A / secured buffer FEBE54D4
-  -> [freshness / ICU / stage-5 result path]
-  -> route44 raw COM
-```
-
-A separate ABI-preserving pre-aggregate monitor is now built for this one discriminator.
-It reuses the same 33 direct Toyota `JARL` calls and same monitor control block, fits the
-proven high tail at **522/524 bytes**, and moves the existing sampler after `fg_pre_3` but
-immediately before stock `fg_aggregate`. RUN is a sticky queue trigger: it latches only
-when exact profile-2 queue length `FEBE547A` is nonzero, so slow SID23 polling cannot miss
-the short-lived queued transaction. Phase P captures the queue record, secured B0..B11,
-FV4/MAC28 trailer, prior route44 B1..B8, and route44 generation; the host records every
-transmitted phase signature and classifies an exact match as
-`exact_phase_b6_queued_preaggregate`.
-
-That resident is now **live-qualified**, but its result also exposed a timing error in the
-premise. Phase P transmitted and Panda-echoed **188/188** current-shape B6 frames and reported
-`no_profile2_queue_hit_latched`, with queue length zero at the immediately-pre-aggregate
-sample. That proves only that the queue was zero at that sampling instant.
-
-### 68.4 Exact scheduler order invalidates the Phase-P no-miss claim; poll during the inter-tick wait (CORR-183)
-
-Exact-F33 scheduler recovery places the queue consumer *inside* the aggregate that follows the
-Phase-P sample:
+CORR-183 bounds that result. Exact foreground order is:
 
 ```text
 0x66062 foreground tick loop
-  -> 0x65442
-  -> 0x71378
-  -> 0x66FF2
-  -> 0x71398
+  -> 0x65442 -> 0x71378 -> 0x66FF2 -> 0x71398
   -> 0x667E6 aggregate
-       -> 0x7A254
-       -> 0x6A410
-       -> 0x8EFF8
-       -> 0x8EF84
-       -> 0x8F98C
-       -> 0x8F746 protected verification worker
+       -> 0x7A254 -> 0x6A410 -> 0x8EFF8 -> 0x8EF84 -> 0x8F98C -> 0x8F746
 ```
 
-Receive enqueue through `8EE7C -> 8F34A -> 8E9C6` is asynchronous with respect to that
-5-ms foreground schedule. A B6 can therefore enter `FEBE547A/FEBE54D4` after one foreground
-sample and be consumed inside the next `0x667E6`. Sampling only once immediately before the
-aggregate does not cover that lifetime. CORR-183 supersedes the earlier claim that the
-pre-aggregate sticky trigger could not miss such a transaction.
+Receive enqueue through `8EE7C -> 8F34A -> 8E9C6` can occur asynchronously between
+foreground samples, while the protected consumer is inside the next aggregate. A queue
+interval can therefore begin after the Phase-P observation and end inside `0x667E6`. Phase P
+proves only **queue zero at its chosen instant**, not “never enqueued.”
 
-The replacement is a dedicated **494/524-byte inter-tick resident**. It keeps the same
-live-qualified ABI-preserving startup and exact stock foreground call sequence, but after the
-224-tick startup qualification its RUN path polls `FEBE547A==32` in the foreground
-**tick-wait loop before the tick test itself**. It latches once per queue occupancy and stores
-fixed identity windows for the queue record, secured B0..B11, and B28..B31 trailer. In exact
-`8E9C6`, the payload copy through `89F2E` occurs before the queue-record length is published,
-so a latched length 32 post-dates the secured-buffer copy. Only then can the next tick proceed
-to unchanged stock `0x667E6`. The resident has 30 bytes of tail
-headroom, zero relocations, no source-memory writer or dynamic call, no resident B6/steering
-transmit, no SecOC bypass, and no flash mutation.
+### 68.4 The next discriminator is marker-filtered profile-2 capture, not a foreground RSCFD race (CORR-183/184)
 
-The next live command is therefore `./f33-ingress phase Q`, not another Phase P and not
-phases D-G. `exact_phase_b6_queued_intertick` proves byte identity at F33 SecOC ingress and
-moves the mismatch downstream to queue processing/publication. A queue hit with a different
-signature proves profile-2 activity but not our frame identity. No inter-tick queue hit makes
-RSCFD/CanIf/PduR callback ingress the next probe; it remains a tightly bounded no-hit, not a
-proof that no single enqueue could ever fall inside the final polling race.
+The revised inter-tick resident closes the native/background ambiguity directly at the
+profile-2 queue. It is **518/524 bytes**, leaving 6 bytes of verified high-tail headroom, has
+zero relocations, and preserves the exact 33 stock direct-`JARL` targets. After startup
+qualification its RUN loop checks queue length `FEBE547A==32`, then reads secured B3 at
+`FEBE54D7` and latches **only if `B3 & 0x3F == 63`**. Exact `8E9C6` copies the secured payload
+before publishing the queue length, so the positive predicate observes a completed secured
+buffer copy before SecOC consumption.
+
+Phase Q deliberately sends **Target Lateral ID63** with additive contribution suppressed.
+ID63 is outside the recovered normal F33 command-mode dictionary, while native/background
+stationary route44 traffic observed here is ID0. Native ID0 can therefore no longer steal the
+sticky queue sample. The resident itself transmits no B6 or steering frame and performs no
+source-memory/MMIO write, dynamic call, SecOC bypass, or flash mutation.
+
+A tempting alternative was to poll controller-1 active RSCFD registers
+`FFD200DC/FFD23080/FFD2308C...` from the foreground wait loop. The register geometry is real,
+but the timing premise is not: exact F33 drains that receive path under the interrupt-context
+chain
+`0x71508 -> 0x66026 -> 0x667B6 -> 0x7A232 -> 0x79EBA -> 0x83CE4 -> 0x83E0C`, not under
+foreground `0x66062`. A foreground reader is therefore not proven to run before the interrupt
+consumes/acknowledges the active hardware head. That draft is rejected rather than shipped.
+
+The next live command remains:
+
+```bash
+./f33-ingress phase Q --duration-seconds 3 --output /tmp/f33-intertick-Q.ndjson
+```
+
+`exact_phase_b6_queued_intertick` proves that the distinctive host frame reached the exact
+profile-2 secured queue after physical/CanIf/PduR admission and moves localization downstream
+to SecOC/route44 publication. `no_profile2_queue_hit_intertick` is a bounded negative for the
+marker during the captured interval; it does not prove physical impossibility and would move
+the next instrumentation toward interrupt/CanIf/queue-admission boundaries. The old
+“signature mismatch due to native ID0 stealing the latch” ambiguity is removed by the ID63
+filter.
+
+### 68.5 The route44 bridge is rebuilt ABI-safe, but remains a later parked experiment
+
+The older C bridge/observer family used `call0(address)` and corrupted RH850 argument register
+state. The current bridge is a separate assembly-only v3 artifact: **520/524-byte** resident,
+4 bytes headroom, zero relocations, and linker-resolved direct `JARL32` calls. It snapshots the
+exact 32-byte secured B6 while `FEBE547A==32`, executes the unchanged stock aggregate, and
+compares saved B3 with post-aggregate raw-route44 B3 before any reinjection. Exact native success
+necessarily matches and is not published twice; an unrelated same-B3 publication can only make
+the bridge conservatively skip that test frame. Otherwise it republishes the saved PDU through
+the native route44 callback `0x7D72C`. Its low-RAM mailbox is
+`FEBF0000`, magic `0x42364252`, version 3; liveness is attested by the stock foreground tick,
+not by the obsolete C heartbeat cells. Arming requires explicit `--arm-bridge` and
+`--parked-stationary-confirmed`.
+
+This is **not** the next experiment and it is not live-qualified. First prove exact ID63
+marker ingress with Phase Q. Only after that result would the bridge be useful as a controlled
+queue -> route44 transformation experiment. The legacy C non-bypassing observer remains
+blocked; the new bridge itself no longer shares that ABI defect.
 
 Machine-readable reduction is
 `data/generated/camry_f33_runtime_monitor_20260908.json`; raw generic-monitor field files are
 under `targets/camry-2026/raw-20260908/runtime-monitor-session/` and the live Phase-P console
 record is under `targets/camry-2026/raw-20260908/preaggregate-phase-p/`. Deterministic
-verification is `tests/verify_camry_f33_runtime_monitor_20260908.py` plus the inter-tick build,
-classifier, and packaging checks in `tests/verify_camry_f33_b6_stationary_probe.py`.
+verification is `tests/verify_camry_f33_runtime_monitor_20260908.py` plus the inter-tick/bridge
+build and packaging checks in `tests/verify_camry_f33_b6_stationary_probe.py` and
+`tests/verify_camry_f33_b6_bridge_install.py`.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
@@ -5744,5 +5727,5 @@ Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
 - Findings with this document as canonical home: [SECOC-075](../reference/index.md#finding-secoc-075), [SECOC-076](../reference/index.md#finding-secoc-076), [SECOC-077](../reference/index.md#finding-secoc-077), [SECOC-078](../reference/index.md#finding-secoc-078), [SECOC-079](../reference/index.md#finding-secoc-079), [SECOC-080](../reference/index.md#finding-secoc-080), [SECOC-081](../reference/index.md#finding-secoc-081), [SECOC-082](../reference/index.md#finding-secoc-082), [SECOC-083](../reference/index.md#finding-secoc-083), [TMS-060](../reference/index.md#finding-tms-060), [VAR-051](../reference/index.md#finding-var-051), [VAR-052](../reference/index.md#finding-var-052), [VAR-053](../reference/index.md#finding-var-053), [VAR-054](../reference/index.md#finding-var-054), [VAR-055](../reference/index.md#finding-var-055), [VAR-056](../reference/index.md#finding-var-056), [VAR-057](../reference/index.md#finding-var-057), [VAR-060](../reference/index.md#finding-var-060), [VAR-061](../reference/index.md#finding-var-061), [VAR-063](../reference/index.md#finding-var-063), [VAR-064](../reference/index.md#finding-var-064), [VAR-065](../reference/index.md#finding-var-065), [VAR-066](../reference/index.md#finding-var-066), [VAR-067](../reference/index.md#finding-var-067), [VAR-068](../reference/index.md#finding-var-068), [VAR-069](../reference/index.md#finding-var-069), [VAR-070](../reference/index.md#finding-var-070), [VAR-072](../reference/index.md#finding-var-072), [VAR-073](../reference/index.md#finding-var-073), [VAR-074](../reference/index.md#finding-var-074), [VAR-075](../reference/index.md#finding-var-075), [VAR-076](../reference/index.md#finding-var-076), [VAR-077](../reference/index.md#finding-var-077), [VAR-078](../reference/index.md#finding-var-078), [VAR-079](../reference/index.md#finding-var-079), [VAR-080](../reference/index.md#finding-var-080), [VAR-081](../reference/index.md#finding-var-081), [VAR-082](../reference/index.md#finding-var-082), [VAR-083](../reference/index.md#finding-var-083), [VAR-084](../reference/index.md#finding-var-084), [VAR-085](../reference/index.md#finding-var-085), [VAR-086](../reference/index.md#finding-var-086), [VAR-087](../reference/index.md#finding-var-087), [VAR-088](../reference/index.md#finding-var-088), [VAR-089](../reference/index.md#finding-var-089), [VAR-090](../reference/index.md#finding-var-090), [VAR-091](../reference/index.md#finding-var-091), [VAR-092](../reference/index.md#finding-var-092), [VAR-093](../reference/index.md#finding-var-093), [VAR-094](../reference/index.md#finding-var-094), [VAR-095](../reference/index.md#finding-var-095), [VAR-096](../reference/index.md#finding-var-096), [VAR-097](../reference/index.md#finding-var-097), [VAR-098](../reference/index.md#finding-var-098), [VAR-099](../reference/index.md#finding-var-099), [VAR-100](../reference/index.md#finding-var-100), [VAR-101](../reference/index.md#finding-var-101), [VAR-103](../reference/index.md#finding-var-103), [VAR-104](../reference/index.md#finding-var-104), [VAR-105](../reference/index.md#finding-var-105), [VAR-106](../reference/index.md#finding-var-106), [VAR-107](../reference/index.md#finding-var-107), [VAR-108](../reference/index.md#finding-var-108), [VAR-109](../reference/index.md#finding-var-109), [VAR-110](../reference/index.md#finding-var-110), [VAR-111](../reference/index.md#finding-var-111), [VAR-112](../reference/index.md#finding-var-112), [VAR-113](../reference/index.md#finding-var-113), [VAR-114](../reference/index.md#finding-var-114), [VAR-115](../reference/index.md#finding-var-115), [VAR-116](../reference/index.md#finding-var-116), [VAR-118](../reference/index.md#finding-var-118), [VAR-119](../reference/index.md#finding-var-119), [VAR-120](../reference/index.md#finding-var-120), [VAR-121](../reference/index.md#finding-var-121), [VAR-122](../reference/index.md#finding-var-122), [VAR-123](../reference/index.md#finding-var-123), [VAR-127](../reference/index.md#finding-var-127), [VAR-128](../reference/index.md#finding-var-128), [VAR-134](../reference/index.md#finding-var-134), [VAR-135](../reference/index.md#finding-var-135), [VAR-136](../reference/index.md#finding-var-136), [VAR-137](../reference/index.md#finding-var-137), [VAR-142](../reference/index.md#finding-var-142), [VAR-143](../reference/index.md#finding-var-143), [VAR-144](../reference/index.md#finding-var-144), [VAR-145](../reference/index.md#finding-var-145), [VAR-146](../reference/index.md#finding-var-146), [VAR-147](../reference/index.md#finding-var-147), [VAR-148](../reference/index.md#finding-var-148), [VAR-149](../reference/index.md#finding-var-149), [VAR-150](../reference/index.md#finding-var-150), [VAR-151](../reference/index.md#finding-var-151)
-- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157), [CORR-158](../reference/index.md#correction-corr-158), [CORR-159](../reference/index.md#correction-corr-159), [CORR-160](../reference/index.md#correction-corr-160), [CORR-161](../reference/index.md#correction-corr-161), [CORR-162](../reference/index.md#correction-corr-162), [CORR-165](../reference/index.md#correction-corr-165), [CORR-166](../reference/index.md#correction-corr-166), [CORR-167](../reference/index.md#correction-corr-167), [CORR-168](../reference/index.md#correction-corr-168), [CORR-171](../reference/index.md#correction-corr-171), [CORR-176](../reference/index.md#correction-corr-176), [CORR-177](../reference/index.md#correction-corr-177), [CORR-178](../reference/index.md#correction-corr-178), [CORR-179](../reference/index.md#correction-corr-179), [CORR-180](../reference/index.md#correction-corr-180), [CORR-181](../reference/index.md#correction-corr-181), [CORR-182](../reference/index.md#correction-corr-182), [CORR-183](../reference/index.md#correction-corr-183)
+- Corrections with this document as canonical home: [CORR-119](../reference/index.md#correction-corr-119), [CORR-123](../reference/index.md#correction-corr-123), [CORR-124](../reference/index.md#correction-corr-124), [CORR-125](../reference/index.md#correction-corr-125), [CORR-126](../reference/index.md#correction-corr-126), [CORR-127](../reference/index.md#correction-corr-127), [CORR-128](../reference/index.md#correction-corr-128), [CORR-129](../reference/index.md#correction-corr-129), [CORR-130](../reference/index.md#correction-corr-130), [CORR-131](../reference/index.md#correction-corr-131), [CORR-134](../reference/index.md#correction-corr-134), [CORR-135](../reference/index.md#correction-corr-135), [CORR-136](../reference/index.md#correction-corr-136), [CORR-137](../reference/index.md#correction-corr-137), [CORR-138](../reference/index.md#correction-corr-138), [CORR-139](../reference/index.md#correction-corr-139), [CORR-141](../reference/index.md#correction-corr-141), [CORR-142](../reference/index.md#correction-corr-142), [CORR-143](../reference/index.md#correction-corr-143), [CORR-144](../reference/index.md#correction-corr-144), [CORR-145](../reference/index.md#correction-corr-145), [CORR-146](../reference/index.md#correction-corr-146), [CORR-147](../reference/index.md#correction-corr-147), [CORR-148](../reference/index.md#correction-corr-148), [CORR-149](../reference/index.md#correction-corr-149), [CORR-150](../reference/index.md#correction-corr-150), [CORR-151](../reference/index.md#correction-corr-151), [CORR-152](../reference/index.md#correction-corr-152), [CORR-153](../reference/index.md#correction-corr-153), [CORR-154](../reference/index.md#correction-corr-154), [CORR-155](../reference/index.md#correction-corr-155), [CORR-156](../reference/index.md#correction-corr-156), [CORR-157](../reference/index.md#correction-corr-157), [CORR-158](../reference/index.md#correction-corr-158), [CORR-159](../reference/index.md#correction-corr-159), [CORR-160](../reference/index.md#correction-corr-160), [CORR-161](../reference/index.md#correction-corr-161), [CORR-162](../reference/index.md#correction-corr-162), [CORR-165](../reference/index.md#correction-corr-165), [CORR-166](../reference/index.md#correction-corr-166), [CORR-167](../reference/index.md#correction-corr-167), [CORR-168](../reference/index.md#correction-corr-168), [CORR-171](../reference/index.md#correction-corr-171), [CORR-176](../reference/index.md#correction-corr-176), [CORR-177](../reference/index.md#correction-corr-177), [CORR-178](../reference/index.md#correction-corr-178), [CORR-179](../reference/index.md#correction-corr-179), [CORR-180](../reference/index.md#correction-corr-180), [CORR-181](../reference/index.md#correction-corr-181), [CORR-182](../reference/index.md#correction-corr-182), [CORR-183](../reference/index.md#correction-corr-183), [CORR-184](../reference/index.md#correction-corr-184)
 <!-- knowledge-cross-references:end -->

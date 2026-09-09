@@ -25,9 +25,12 @@ def prefixed_json(path: Path) -> dict:
     return json.JSONDecoder().raw_decode(text[start:])[0]
 
 
-def value_map(command_result: dict) -> dict[int, bytes]:
-    state = command_result["state"]
+def state_value_map(state: dict) -> dict[int, bytes]:
     return {int(row["address"], 16): bytes.fromhex(row["bytes_le"]) for row in state["values"]}
+
+
+def value_map(command_result: dict) -> dict[int, bytes]:
+    return state_value_map(command_result["state"])
 
 
 def raw_route_core(command_result: dict) -> dict:
@@ -78,6 +81,15 @@ def parse_rate(path: Path) -> list[dict]:
     return out
 
 
+def parse_ndjson(path: Path) -> list[dict]:
+    rows = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line:
+            rows.append(json.loads(line))
+    return rows
+
+
 def parse_markers(path: Path) -> list[dict]:
     out = []
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -99,6 +111,8 @@ def build() -> dict:
         "phase_k": RAW / "f33-phase-K.json",
         "rate": RAW / "f33_rate.out",
         "marker": RAW / "f33_marker.out",
+        "idle_raw": RAW / "f33-idle-raw.json",
+        "idle_raw_ndjson": RAW / "f33-idle-raw.ndjson",
         "preaggregate_phase_p": ROOT / "targets/camry-2026/raw-20260908/preaggregate-phase-p/f33-preaggregate-P2-console.log",
     }
     for p in paths.values():
@@ -107,6 +121,8 @@ def build() -> dict:
 
     a, b, c, k = (prefixed_json(paths[x]) for x in ("phase_a", "phase_b", "phase_c", "phase_k"))
     phase_p = prefixed_json(paths["preaggregate_phase_p"])
+    idle_raw = prefixed_json(paths["idle_raw"])
+    idle_rows = parse_ndjson(paths["idle_raw_ndjson"])
     rate = parse_rate(paths["rate"])
     markers = parse_markers(paths["marker"])
     if not (phase_p["verdict"] == "phase_complete" and phase_p["b6"]["tx_count"] == phase_p["b6"]["tx_echo_delta"] == 188 and
@@ -132,14 +148,24 @@ def build() -> dict:
     acbd = cpost[0xFEBEACBC][1]
     cafc, cafd, cafe, caff = cpost[0xFEBECAFC]
 
-    idle = [x for x in rate if x["bus"] is None]
-    b0 = next(x for x in rate if x["bus"] == 0)
-    b2 = next(x for x in rate if x["bus"] == 2)
-    b1 = next(x for x in rate if x["bus"] == 1)
-    if not (all(x["route44_generation_delta_mod256"] == 0 for x in idle) and
-            b0["route44_generation_delta_mod256"] != 0 and b2["route44_generation_delta_mod256"] != 0 and
-            b1["route44_generation_delta_mod256"] == 0):
-        raise ValueError("controlled route44 causal/bus discriminator drift")
+    # The retained three-second idle capture is the decisive control for route44
+    # background activity. It contains no Panda B6 TX echoes, yet the exact
+    # route44 generation byte changes repeatedly while raw Target Lateral ID
+    # remains zero. This supersedes the earlier inference from two much shorter
+    # rate-test idle windows whose host-visible snapshot happened not to move.
+    if idle_raw.get("b6_echo_delta") != 0 or not idle_rows:
+        raise ValueError("idle raw control is not a zero-host-B6 capture")
+    idle_generation = []
+    idle_target_ids = []
+    for row in idle_rows:
+        vals = state_value_map(row)
+        idle_generation.append(vals[0xFEBE5364][0])
+        raw_b1_b4 = vals[0xFEBE4C00]
+        idle_target_ids.append(raw_b1_b4[2] & 0x3F)  # route44 base is FEBE4BFF, so +4C00 byte2 == B3
+    idle_transitions = sum(a != b for a, b in zip(idle_generation, idle_generation[1:]))
+    if len(set(idle_generation)) <= 1 or idle_transitions == 0 or any(idle_target_ids):
+        raise ValueError("native/background route44 idle observation drift")
+
     if not all(x["raw63"] == x["gen63"] == x["adb63"] == 0 and x["zero_reads"] == x["reads"] for x in markers):
         raise ValueError("ID63 marker observation drift")
 
@@ -147,12 +173,19 @@ def build() -> dict:
         "schema": "camry-f33-runtime-monitor-20260908-v1",
         "target": "8965F3307000",
         "inputs": {name: {"path": str(path.relative_to(ROOT)), "sha256": sha(path)} for name, path in paths.items()},
-        "controlled_route44_activity": {
+        "route44_background_control": {
+            "host_b6_echo_delta": idle_raw["b6_echo_delta"],
+            "capture_samples": len(idle_rows),
+            "capture_generation_low_unique": sorted(set(idle_generation)),
+            "capture_generation_low_transitions": idle_transitions,
+            "all_sampled_target_lateral_ids_zero": all(v == 0 for v in idle_target_ids),
+            "baseline_generation_window_hex": value_map(idle_raw["baseline"])[0xFEBE5364].hex(),
+            "post_generation_window_hex": value_map(idle_raw["post"])[0xFEBE5364].hex(),
+            "observation": "exact route44 publishes changing ID0 data while Panda reports zero B6 TX echoes; a native/background route44 producer exists in the stationary state",
+        },
+        "short_window_rate_segments": {
             "segments": rate,
-            "idle_segments_quiescent": True,
-            "bus0_and_bus2_injection_associated_with_generation": True,
-            "bus1_injection_not_associated_with_generation": True,
-            "scope": "causal association between host B6 injection on the relay-correct EPS segment and route44 publication generation; not proof that a particular echoed frame is the published PDU",
+            "interpretation": "retained as raw timing observations only; zero/nonzero modulo-256 deltas in these short host-sampled windows do not establish injection causality because the longer zero-echo idle control independently shows background route44 publication and resident snapshots can remain stale between foreground updates",
         },
         "current_shape_phase_a": {
             "tx_count": a["b6"]["tx_count"], "tx_echo_delta": a["b6"]["tx_echo_delta"],
@@ -171,6 +204,7 @@ def build() -> dict:
         "id63_marker": {
             "segments": markers,
             "all_sampled_raw_generated_snapshot_ids_remained_zero": True,
+            "interpretation": "post-aggregate snapshots remained on the native/background ID0 image; this does not prove the injected ID63 frame failed to reach an earlier hardware/CanIf stage",
         },
         "preaggregate_phase_p": {
             "tx_count": phase_p["b6"]["tx_count"],
@@ -189,15 +223,20 @@ def build() -> dict:
         },
         "observations": {
             "host_current_shape_id11_echoed": True,
-            "route44_target_id_remained_zero": a_post["target_lateral_id"] == k_post["target_lateral_id"] == 0,
+            "route44_target_id_remained_zero_in_host_phase_snapshots": a_post["target_lateral_id"] == k_post["target_lateral_id"] == 0,
             "route44_contribution_percentages_zero_in_full_raw_capture": k_post["contribution_pct_1"] == k_post["contribution_pct_2"] == 0,
             "generated_and_snapshot_target_id_zero": generated_id == adb0 == 0,
+            "native_background_route44_present_without_host_b6": True,
             "route_health_snapshot": {"acbd": acbd, "cafc": cafc, "cafd": cafd, "cafe": cafe, "caff": caff},
         },
         "boundary": {
-            "closed": "the earlier apparent background/native route44 publisher is disproved by controlled idle/send/idle timing; route44 activity is injection-associated on bus0/bus2, while generated/application state faithfully follows the zero-ID route44 image",
-            "open": "the first byte-identity divergence between Panda TX and F33 route44 remains before/at profile-2 queue publication; live Phase P saw queue zero at one immediately-pre-aggregate sample point but exact scheduler order makes that insufficient to exclude an asynchronous inter-tick enqueue",
-            "next": "inter-tick queue monitor: poll FEBE547A continuously while waiting for the next foreground tick and latch FEBE54D4..54DC/FEBE54F0 before 0x667E6 can consume the transaction",
+            "closed": "the sampled route44/generated/ADB0 ID0 image is a real native/background publication state and cannot be attributed to transformation of the Panda ID11 frame merely because it was observed during injection",
+            "open": "whether the Panda-transmitted marker reaches the exact profile-2 secured queue after physical/CanIf/PduR admission and before SecOC consumption",
+            "next": "marker-filtered inter-tick Phase Q: send non-command Target Lateral ID63 with additive contribution suppressed and latch only when FEBE547A == 32 and FEBE54D7 low6 == 63; native/background stationary ID0 cannot satisfy the marker filter",
+            "rejected_probe": {
+                "candidate": "foreground active-RSCFD polling at controller1 FFD200DC/FFD23080/FFD2308C",
+                "reason": "exact receive drain is interrupt-context 0x71508 -> 0x66026 -> 0x667B6 -> 0x7A232 -> 0x79EBA -> 0x83CE4 -> 0x83E0C, not the 0x66062 foreground loop; a foreground poll is not proven to run before the interrupt drains the hardware head",
+            },
         },
     }
 

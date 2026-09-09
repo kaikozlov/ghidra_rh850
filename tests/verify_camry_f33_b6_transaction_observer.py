@@ -25,6 +25,7 @@ SOURCE = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.c"
 BUILDER = ROOT / "exploit/ephemeral_runtime/build_camry_f33_b6_transaction_observer.py"
 INSTALLER = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_transaction_observer_install.py"
 BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
+BRIDGE_AUDIT = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json"
 IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 
 
@@ -78,10 +79,11 @@ check("observer executes stock aggregate exactly once and never calls route44 it
 check("observer counts B6 queue samples and a native D7 control without changing either path",
       "t[T_QUEUE_SAMPLES]++" in src and "t[T_D7_QUEUE_SAMPLES]++" in src and
       "TARGET_B6_PROFILE_STATE" in src)
-check("observer binary has stock aggregate/profile/D7 pins but no route44 callback immediate",
+bridge_audit = json.loads(BRIDGE_AUDIT.read_text())
+check("observer binary has stock aggregate/profile/D7 pins while only the ABI-safe bridge calls route44",
       bytes.fromhex("e6670600") in blob and bytes.fromhex("2655befe") in blob and
       bytes.fromhex("7254befe") in blob and bytes.fromhex("2cd70700") not in blob and
-      bytes.fromhex("2cd70700") in BRIDGE_BIN.read_bytes())
+      bridge_audit["resident"]["jarl_targets"][28:31] == ["0x000667E6", "0x0007D72C", "0x00071378"])
 
 print("\n== telemetry decode contract ==")
 raw = bytearray(TELEMETRY_SIZE)

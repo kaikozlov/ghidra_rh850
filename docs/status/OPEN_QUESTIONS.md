@@ -1150,55 +1150,42 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   that state into the chassis signer.
 
   This stock-architecture attribution is **not a blocker for the independent
-  development B6 ingress**. VAR-117/CORR-157 supersede the stage-by-stage Gate-2
-  patch plan: cumulative stages 3, 4, and 5 were each applied and reboot-verified,
-  yet their stationary ID11 tests left generated `FEBE80BC/FEBE80B8` stale.
-  Those runs did not read raw PDU44 COM, so CORR-162 leaves delivery and the
-  first rejecting stage open. The exact F33 receive path is closed through
-  previously unpromoted CanIf, freshness, and route44 COM callbacks; there is
-  no justified next result/status patch. The former B6 queue observer/bridge
-  procedure is also **deferred**: both packaged residents share the superseded
-  `call0(address)` startup/foreground trampoline and are explicitly not
-  live-qualified. Their queue/signature/freshness/raw-COM evidence model remains
-  useful for a future rebuild, but no current field sequence runs
-  `--require-observer`, `--require-bridge`, or a steering offset. First complete the
-  corrected same-resident NRTD qualification and READY/Park read-existing capture;
-  only after those pass should a new ABI-preserving B6 observer be designed and
-  independently qualified. The 2026-09-04 road corpus adds two constraints:
-  successful Panda transmission is not equivalent to B6 authority, and the port that
-  produced these routes had a hardcoded `steeringPressed=False` that blocked normal
-  torque-nudge lane-change entry. Fork opendbc `e37bab6c` restored the state on
-  2026-09-04; VAR-139/CORR-169 subsequently close the same-car sign convention and
-  replace its provisional 1.2 N.m bring-up threshold with the selected 0.6 N.m policy.
-  Do not use the driver-state fix to explain or mask B6 receiver non-response. VAR-146/
-  CORR-177 remove the former first-in-epoch message-low2 A/B entirely: exact F33 accepts
-  any transmitted low2 on a newer B6 trip/reset epoch, and the complete retained corpus
-  shows the current reset-to-zero progression is freshness-admissible. VAR-147/CORR-178
-  then close the historical zero-MAC versus current wrong-key dummy-CMAC distinction as
-  an acceptance variable under cumulative stage 5: the tag is opaque until ICU-S and all
-  recovered software-visible verification consequences are neutralized before delivery.
-  VAR-148/CORR-179 close downstream ID11 composition, VAR-149/CORR-180 join the
-  recovered software ladder through the motor-current model, and VAR-150 removes four of
-  the five normal-ID11 readiness predicates from the serious-suspect set. VAR-151 now adds
-  the first qualified internal live result. Controlled idle/send/idle timing proves route44
-  publication activity is associated with injected B6 on the relay-correct EPS segment and
-  is quiescent without that injection, but the post-aggregate route44 image carries ID0 and
-  zero contribution percentages while Panda's current-shape echo carries ID11 and 100/100;
-  generated COM and `ADB0` faithfully remain ID0 with `ACBD=0` and `CAFF=1`. Post-aggregate
-  reads of `FEBE547A/FEBE54D4` occur after transaction cleanup and cannot say whether the
-  echoed frame was ever queued. The first 522-byte pre-aggregate Phase-P resident was live-
-  qualified with 188/188 echoed frames and queue length zero at its chosen sample point, but
-  CORR-183 shows that point is temporally insufficient: receive enqueue is asynchronous and
-  the queue consumer lies inside the next `0x667E6` aggregate. The immediate independent-B6
-  question is therefore narrower: **does one exact transmitted phase frame appear byte-for-
-  byte in the profile-2 secured queue at any point between foreground ticks?** The audited
-  494-byte inter-tick resident polls `FEBE547A==32` before the tick test and latches secured
-  B0..B11 plus FV4/MAC28 once per queue occupancy. Only after that queue-identity result should
-  localization continue to freshness/delivery,
-  route44, remaining `ACCC`/`CB20/CB38`, and common actuator gates. Counter phase, MAC value,
-  packer companion guesses, `0x08A` suppression, and another result patch remain unjustified.
-  Resolving OQ-054 remains required for stock architecture, not for this B6 ingress
-  discriminator.
+  development B6 ingress**. Cumulative SecOC stages 3/4/5 remain persistence-verified,
+  exact F33 closes the software receive/control ladder, and VAR-146/147 remove counter phase
+  and zero-vs-dummy MAC as remaining acceptance A/Bs. VAR-148/149 close ID11 composition and
+  the downstream command funnel; VAR-150 removes four of the five road-observable readiness
+  predicates. The live question is now strictly earlier: **does the distinctive host frame
+  reach exact profile-2 queue `FEBE547A/FEBE54D4` before SecOC consumes it?**
+
+  VAR-151/CORR-184 correct the first generic-monitor interpretation. A longer stationary idle
+  capture has zero Panda B6 TX echoes while route44 generation changes repeatedly and every
+  sampled raw route44 Target Lateral ID remains ID0. Native/background route44 publication
+  therefore exists independently of host injection; the earlier short idle/send timing
+  correlation cannot identify the host frame. Post-aggregate route44/generated-COM/`ADB0`
+  ID0 remains a real observation but not a proven ID11->ID0 transformation. The live 522-byte
+  Phase-P predecessor likewise saw queue zero while 188/188 host frames were echoed, but
+  CORR-183 bounds that to one immediately-pre-aggregate instant because asynchronous enqueue
+  can begin after that sample and be consumed inside the next `0x667E6`.
+
+  The immediate field discriminator is the audited **518/524-byte marker-filtered inter-tick
+  monitor**. After full OFF -> NRTD `./f33-ingress install` and direct NRTD -> READY/Park,
+  run `./f33-ingress phase Q`. Phase Q sends non-command Target Lateral ID63 with additive
+  contribution suppressed. The resident latches only when `FEBE547A==32` **and** secured
+  `FEBE54D7 & 0x3F == 63`, so the observed native/background ID0 publisher cannot steal the
+  sample. `exact_phase_b6_queued_intertick` moves localization downstream of queue admission;
+  a no-marker result is bounded to that interval and moves the next instrument toward the
+  interrupt/CanIf/PduR/queue-admission boundary.
+
+  Do **not** substitute the abandoned foreground RSCFD poll: exact controller-1 receive drain
+  runs in interrupt context `71508 -> 66026 -> 667B6 -> 7A232 -> 79EBA -> 83CE4 -> 83E0C`,
+  so foreground `66062` is not proven to observe `FFD23080` before the interrupt drains it.
+  The old C observer remains ABI-blocked. The separately rebuilt v3 assembly route44 bridge
+  uses direct JARL and is no longer blocked by `call0(address)`, but it is intentionally not
+  live-qualified or next in sequence; first prove exact marker ingress, then use the bridge
+  only if a controlled queue->route44 transformation experiment is warranted. Counter phase,
+  MAC value, B6 companion guesses, `0x08A` suppression, and another result patch remain
+  unjustified. Resolving OQ-054 remains required for stock architecture, not for this B6
+  ingress discriminator.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

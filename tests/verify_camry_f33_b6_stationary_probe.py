@@ -45,9 +45,11 @@ check("every post-COM acceptance-ladder cell is exposed", [c.address for c in pr
     0xFEBEAE90, 0xFEBECAFF, 0xFEBEACBD, 0xFEBECB00,
 ])
 check("all ladder cells validate under existing SID23 RMBA policy", all(probe.validate_read(probe.RAM_ID, c.address, c.length) is None for c in probe.LADDER_CELLS))
-check("RAM bridge telemetry cells are exact and readable", [c.address for c in probe.BRIDGE_TELEMETRY_CELLS] == [
-    0xFEBFFBEC, 0xFEBFFBF0, 0xFEBFFBF4, 0xFEBFFBF8,
-] and all(probe.validate_read(probe.RAM_ID, c.address, c.length) is None for c in probe.BRIDGE_TELEMETRY_CELLS))
+check("ABI-safe RAM bridge v3 mailbox and stock-tick witness are exact and readable",
+      (probe.BRIDGE_MAILBOX.address, probe.BRIDGE_MAILBOX.length, probe.BRIDGE_MAILBOX_MAGIC, probe.BRIDGE_MAILBOX_VERSION) ==
+      (0xFEBF0000, 0x30, 0x42364252, 3) and probe.BRIDGE_FOREGROUND_TICK.address == 0xFEBE39DB and
+      probe.validate_read(probe.RAM_ID, probe.BRIDGE_MAILBOX.address, probe.BRIDGE_MAILBOX.length) is None and
+      probe.validate_read(probe.RAM_ID, probe.BRIDGE_FOREGROUND_TICK.address, probe.BRIDGE_FOREGROUND_TICK.length) is None)
 check("non-bypassing observer telemetry is exact and readable",
       probe.OBSERVER_TELEMETRY_BASE == 0xFEBFFBE0 and probe.OBSERVER_TELEMETRY_SIZE == 28 and
       probe.validate_read(probe.RAM_ID, probe.OBSERVER_TELEMETRY_BASE, probe.OBSERVER_TELEMETRY_SIZE) is None)
@@ -192,10 +194,12 @@ check("no download/transfer/write/routine diagnostic API is referenced", all(tok
 )))
 check("small-offset actuation is hard-capped and rate-bounded", probe.SMALL_OFFSET_HARD_CAP_DEG == 2.0 and probe.SMALL_OFFSET_MAX_RATE_DEG_S == 6.0 and "ID11 current-angle was not ADMITTED" in source and "max_step_raw=small_offset_step_raw()" in source)
 check("small-offset target is refreshed from immediate preflight", 'offset_start_raw = angle_deg_to_raw(offset_preflight["steering_angle_deg"])' in source)
-check("bridge-required mode demands heartbeat progression and reports ingress counters",
-      'RAM bridge heartbeat did not advance' in source and
+check("bridge-required mode verifies v3 mailbox, armed state, and stock-tick liveness",
+      'RAM bridge v3 mailbox identity mismatch' in source and
+      'RAM bridge is installed but not armed' in source and 'stock foreground tick did not advance' in source and
       'snapshot_bridge_telemetry(uds_client, uds_mod, log)' in source and
-      '"after_id0": bridge_after["id0"]' in source and '"after_id11": bridge_after["id11"]' in source)
+      '"after_id0": bridge_after["id0"]' in source and '"after_id11": bridge_after["id11"]' in source and
+      plan["bridge_mailbox"]["fields"] == {"last_sequence": 5, "running": 6, "bridged": 8, "pending": 12, "saved_b6": 16})
 check("observer-required mode is mutually exclusive with bridge and samples during each phase",
       'resident = parser.add_mutually_exclusive_group()' in source and '--require-observer' in source and
       'observe_transactions=args.require_observer' in source and 'observer_samples.append' in source)
@@ -426,29 +430,40 @@ intertick_audit = json.loads(intertick_audit_path.read_text())
 intertick_stage = intertick_stage_path.read_bytes()
 intertick_resident = intertick_stage[0x80:0x80 + intertick.RESIDENT_SIZE]
 check("inter-tick monitor audited binary/source/builder identities exact",
-      intertick_audit["schema"] == "camry-f33-runtime-monitor-intertick-build-v1" and
+      intertick_audit["schema"] == "camry-f33-runtime-monitor-intertick-build-v2" and
       intertick_audit["source"]["sha256"] == sha(intertick_source_path.read_bytes()) and
       intertick_audit["builder"]["sha256"] == sha(intertick_builder_path.read_bytes()) and
       sha(intertick_stage) == intertick.EXPECTED_STAGING_SHA256 and
       sha(intertick_resident) == intertick.EXPECTED_RESIDENT_SHA256 and
       intertick_audit["authenticated_payload"]["sha256"] == intertick.EXPECTED_PAYLOAD_SHA256)
-check("inter-tick monitor fits tail and polls queue before foreground tick/aggregate",
-      intertick.RESIDENT_SIZE == intertick_audit["resident"]["size"] == 494 and
-      intertick_audit["resident"]["headroom"] == 30 and intertick_audit["resident"]["relocations"] == 0 and
-      intertick_audit["observation"]["trigger"] == {"address": "0xFEBE547A", "condition": "u16 == 32"} and
+check("inter-tick monitor fits tail and marker-filters before foreground tick/aggregate",
+      intertick.RESIDENT_SIZE == intertick_audit["resident"]["size"] == 518 and
+      intertick_audit["resident"]["headroom"] == 6 and intertick_audit["resident"]["relocations"] == 0 and
+      intertick_audit["observation"]["trigger"] == {
+          "queue_length": {"address": "0xFEBE547A", "condition": "u16 == 32"},
+          "marker": {"address": "0xFEBE54D7", "condition": "B3 low6 == 63"},
+      } and
+      "outside the recovered F33 command-mode decoder" in intertick_audit["observation"]["marker_semantics"] and
+      "native/background route44/B6 is ID0" in intertick_audit["observation"]["native_stationary_disambiguation"] and
       "copies payload" in intertick_audit["observation"]["queue_publication_order"] and
-      intertick_source.index("ld.hu -0x6386[gp], r6") < intertick_source.index("tst1 4, -0x4eef[r0]") < intertick_source.index("jarl32 fg_aggregate, lp"))
+      intertick_source.index("ld.hu -0x6386[gp], r6") < intertick_source.index("ld.bu -0x6329[gp], r6") <
+      intertick_source.index("tst1 4, -0x4eef[r0]") < intertick_source.index("jarl32 fg_aggregate, lp"))
 check("inter-tick monitor has fixed ingress-only phase Q",
       intertick.INTERTICK_PHASES == {"Q": (0xFEBE5478,0xFEBE54D4,0xFEBE54D8,0xFEBE54DC,0xFEBE54F0,0,0,0)})
 synthetic_it_values=[]
-for i,hx in enumerate(("00002000","0000000b","002f0007","64640000","a1234567","00000000","00000000","00000000")):
+queued_marker_sig = "0000003f002f040700000000a1234567"
+for i,hx in enumerate(("00002000","0000003f","002f0407","00000000","a1234567","00000000","00000000","00000000")):
     synthetic_it_values.append({"slot":i,"bytes_le":hx})
-it_result={"capture":{"last":{"values":synthetic_it_values,"sample_generation":7}},"b6":{"phase_signatures_hex":[queued_sig]}}
-check("inter-tick host classifies exact queued phase frame deterministically",
+it_result={"capture":{"last":{"values":synthetic_it_values,"sample_generation":7}},"b6":{"phase_signatures_hex":[queued_marker_sig]}}
+check("inter-tick host classifies exact queued ID63 marker deterministically",
       intertick.classify_ingress(it_result)["verdict"] == "exact_phase_b6_queued_intertick" and
-      intertick.classify_ingress(it_result)["matched_phase_frame_indices"] == [0])
+      intertick.classify_ingress(it_result)["matched_phase_frame_indices"] == [0] and
+      "marker-filtered" in intertick.classify_ingress(it_result)["sample_point"])
+check("inter-tick Phase Q sender is non-command ID63 with additive contribution suppressed",
+      "target_lateral_id=63" in (ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.py").read_text() and
+      "suppress_additive=True" in (ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.py").read_text())
 it_zero_values=[{"slot":i,"bytes_le":"00000000"} for i in range(8)]
-it_nohit={"capture":{"last":None},"post":{"state":{"values":it_zero_values,"sample_generation":0}},"b6":{"phase_signatures_hex":[queued_sig]}}
+it_nohit={"capture":{"last":None},"post":{"state":{"values":it_zero_values,"sample_generation":0}},"b6":{"phase_signatures_hex":[queued_marker_sig]}}
 check("inter-tick no-hit remains a valid classified result with generation zero",
       intertick.classify_ingress(it_nohit)["verdict"] == "no_profile2_queue_hit_intertick" and
       intertick.classify_ingress(it_nohit)["sample_generation"] == 0)
@@ -490,7 +505,7 @@ with tempfile.TemporaryDirectory() as td:
           mon["dynamic_call"] is False and mon["resident_b6_transmit"] is False and mon["host_phase_b6_transmit"] is True and
           mon["stationary_monitor_phases"] == {k: [f"0x{x:08X}" for x in v] for k, v in monitor.MONITOR_PHASES.items()} and
           "current /data/openpilot opendbc" in mon["host_phase_b6_construction"] and
-          manifest["ram_experiments"]["order"][0] == "runtime_monitor_intertick install in NRTD for the exact profile-2 queue-ingress discriminator")
+          manifest["ram_experiments"]["order"][0] == "runtime_monitor_intertick install in NRTD for the marker-filtered profile-2 queue-ingress discriminator")
     pre = manifest["ram_experiments"]["runtime_monitor_preaggregate"]
     check("kit packages sticky pre-aggregate monitor as the immediate ingress discriminator",
           pre["payload_sha256"] == preagg.EXPECTED_PAYLOAD_SHA256 and
@@ -503,8 +518,10 @@ with tempfile.TemporaryDirectory() as td:
     check("kit packages inter-tick monitor as immediate queue discriminator",
           ingress["payload_sha256"] == intertick.EXPECTED_PAYLOAD_SHA256 and
           ingress["staging_sha256"] == intertick.EXPECTED_STAGING_SHA256 and
-          ingress["resident_sha256"] == intertick.EXPECTED_RESIDENT_SHA256 and ingress["resident_size"] == 494 and
+          ingress["resident_sha256"] == intertick.EXPECTED_RESIDENT_SHA256 and ingress["resident_size"] == 518 and
           "before the tick test" in ingress["sample_point"] and "FEBE547A == 32" in ingress["run_trigger"] and
+          "B3 low6 == ID63" in ingress["run_trigger"] and "Target Lateral ID63" in ingress["host_phase_b6_construction"] and
+          "additive contribution suppressed" in ingress["host_phase_b6_construction"] and
           ingress["success_verdict"] == "exact_phase_b6_queued_intertick" and ingress["source_memory_write"] is False and
           ingress["secoc_bypass"] is False and ingress["live_qualified"] is False)
     replay = manifest["ram_experiments"]["runtime_replay_discriminator"]
@@ -519,12 +536,15 @@ with tempfile.TemporaryDirectory() as td:
           replay["ready_read_existing_success_verdict"] == "ready_parked_source_terms_live" and
           "NRTD->READY without OFF" in replay["next_after_success"] and replay["bypass"] is False and
           replay["live_qualified"] is False and replay["superseded_by"] == "runtime_monitor")
-    check("legacy B6 observer and bridge remain packaged but are explicitly not live-qualified",
+    check("legacy C observer stays blocked while ABI-safe bridge is packaged but not live-qualified",
           manifest["ram_experiments"]["observer"]["bypass"] is False and
           manifest["ram_experiments"]["observer"]["payload_sha256"] == "5be3e474c965e3111957227f7db44b30aa2c6eca6ba341a8279ceea043e2728d" and
           manifest["ram_experiments"]["observer"]["live_qualified"] is False and
           "call0(address)" in manifest["ram_experiments"]["observer"]["blocked_by"] and
-          manifest["ram_experiments"]["bridge"]["payload_sha256"] == "8eec0e29fb1110f7865c85199c6b348ab3a69ccfa8f98cec981f2232f9c2d0ef" and
+          manifest["ram_experiments"]["bridge"]["payload_sha256"] == "6d605013f1868295df6b998874e54f6c07ba8af2e9b839fc1243d1ac5a0126cd" and
+          manifest["ram_experiments"]["bridge"]["call_abi"].startswith("direct linker-resolved JARL32") and
+          "conservatively skip" in manifest["ram_experiments"]["bridge"]["behavior"] and
+          "exact injected ID63 frame" in manifest["ram_experiments"]["bridge"]["requires_before_arm"] and
           manifest["ram_experiments"]["bridge"]["live_qualified"] is False)
     check("historical flash package is explicitly not the next experiment", manifest["firmware_patch"]["historical_only"] is True)
     check("kit retains live stage2 source state only as historical patch evidence", manifest["firmware_patch"]["stage2_installed"] == {
@@ -597,7 +617,7 @@ with tempfile.TemporaryDirectory() as td:
           "./f33-ingress install" in runbook and "./f33-ingress phase Q" in runbook and
           "./f33-pre install" in runbook and "./f33-pre phase P" in runbook and
           "watch SLOT ADDRESS" in runbook and "./f33 phase A" in runbook and "current opendbc" in runbook and
-          "Do not execute them from this runbook" in runbook)
+          "not part of the immediate sequence below" in runbook)
     check("runbook preserves observation-only boundary",
           "no dynamic source-memory writer" in runbook and "steering CAN transmit" in runbook and
           "current coherent snapshot" in runbook and "on-ECU history ring" in runbook)
