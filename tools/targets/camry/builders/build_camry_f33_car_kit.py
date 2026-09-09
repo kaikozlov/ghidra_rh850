@@ -37,6 +37,7 @@ FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_launcher.sh"
 PREAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_preaggregate_launcher.sh"
 MIDAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_midaggregate_launcher.sh"
 COMMAND5_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_command5_launcher.sh"
+INLINE_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_inline_signer_launcher.sh"
 F33_IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_transaction_observer.bin"
 BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
@@ -46,6 +47,9 @@ PREAGG_MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime
 INTERTICK_MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor_intertick.bin"
 MIDAGG_OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_midaggregate_observer.bin"
 COMMAND5_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_command5_probe.bin"
+INLINE_SIGNER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer.bin"
+INLINE_SIGNER_HELPER = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer_helper_padded.bin"
+INLINE_SIGNER_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_inline_signer_build.json"
 DEFAULT_OPENPILOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
 RUNTIME_FILES = [
     "exploit/common/payload_package.py",
@@ -59,6 +63,7 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.py",
     "exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.py",
     "exploit/ephemeral_runtime/camry_f33_command5_probe.py",
+    "exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
     "exploit/followups/xcp_read_probe.py",
     "exploit/followups/xcp_daq_probe.py",
     "exploit/followups/xcp_runtime_state_probe.py",
@@ -297,6 +302,14 @@ def build(out: Path, openpilot: Path) -> dict:
     intertick_monitor_payload = package_shellcode(INTERTICK_MONITOR_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     midaggregate_observer_payload = package_shellcode(MIDAGG_OBSERVER_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     command5_probe_payload = package_shellcode(COMMAND5_PROBE_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+    inline_meta = json.loads(INLINE_SIGNER_META.read_text(encoding="utf-8"))
+    inline_staging = INLINE_SIGNER_BIN.read_bytes()
+    inline_helper = INLINE_SIGNER_HELPER.read_bytes()
+    if hashlib.sha256(inline_staging).hexdigest() != inline_meta["staging"]["sha256"]:
+        raise RuntimeError("inline signer audited staging identity drift")
+    if hashlib.sha256(inline_helper).hexdigest() != inline_meta["helper"]["padded_sha256"]:
+        raise RuntimeError("inline signer audited helper identity drift")
+    inline_signer_payload = package_shellcode(inline_staging, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     if hashlib.sha256(observer_payload).hexdigest() != observer_install.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("observer authenticated payload identity drift")
     if hashlib.sha256(bridge_payload).hexdigest() != bridge_install.EXPECTED_PAYLOAD_SHA256:
@@ -313,6 +326,8 @@ def build(out: Path, openpilot: Path) -> dict:
         raise RuntimeError("mid-aggregate observer authenticated payload identity drift")
     if hashlib.sha256(command5_probe_payload).hexdigest() != command5_probe.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("command-5 probe authenticated payload identity drift")
+    if hashlib.sha256(inline_signer_payload).hexdigest() != inline_meta["authenticated_payload"]["sha256"]:
+        raise RuntimeError("inline signer authenticated payload identity drift")
     (ram_dir / "camry_f33_b6_transaction_observer_payload.bin").write_bytes(observer_payload)
     (ram_dir / "camry_f33_b6_bridge_payload.bin").write_bytes(bridge_payload)
     (ram_dir / "camry_f33_runtime_replay_discriminator_payload.bin").write_bytes(replay_payload)
@@ -321,6 +336,9 @@ def build(out: Path, openpilot: Path) -> dict:
     (ram_dir / "camry_f33_runtime_monitor_intertick_payload.bin").write_bytes(intertick_monitor_payload)
     (ram_dir / "camry_f33_b6_midaggregate_observer_payload.bin").write_bytes(midaggregate_observer_payload)
     (ram_dir / "camry_f33_command5_probe_payload.bin").write_bytes(command5_probe_payload)
+    (ram_dir / "camry_f33_b6_inline_signer_payload.bin").write_bytes(inline_signer_payload)
+    (ram_dir / "camry_f33_b6_inline_signer_helper_padded.bin").write_bytes(inline_helper)
+    (ram_dir / "camry_f33_b6_inline_signer.json").write_text(json.dumps(inline_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     shutil.copy2(RUNBOOK_TEMPLATE, out / "RUNBOOK.md")
     launcher = out / "f33"
@@ -335,6 +353,9 @@ def build(out: Path, openpilot: Path) -> dict:
     command5_launcher = out / "f33-sign"
     shutil.copy2(COMMAND5_LAUNCHER, command5_launcher)
     command5_launcher.chmod(0o755)
+    inline_signer_launcher = out / "f33-secoc"
+    shutil.copy2(INLINE_SIGNER_LAUNCHER, inline_signer_launcher)
+    inline_signer_launcher.chmod(0o755)
 
     files = {
         dst.name: {"sha256": sha256(dst)},
@@ -344,6 +365,7 @@ def build(out: Path, openpilot: Path) -> dict:
         "f33-pre": {"sha256": sha256(preagg_launcher)},
         "f33-ingress": {"sha256": sha256(ingress_launcher)},
         "f33-sign": {"sha256": sha256(command5_launcher)},
+        "f33-secoc": {"sha256": sha256(inline_signer_launcher)},
     }
     files.update(runtime_files)
     for path in sorted(p for p in ram_dir.rglob("*") if p.is_file()):
@@ -352,7 +374,7 @@ def build(out: Path, openpilot: Path) -> dict:
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
 
     manifest = {
-        "schema": "camry-f33-car-kit-v11",
+        "schema": "camry-f33-car-kit-v12",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
@@ -382,6 +404,34 @@ def build(out: Path, openpilot: Path) -> dict:
             },
         },
         "ram_experiments": {
+            "b6_inline_signer": {
+                "launcher": "f33-secoc",
+                "payload": "ram_payloads/camry_f33_b6_inline_signer_payload.bin",
+                "payload_sha256": inline_meta["authenticated_payload"]["sha256"],
+                "resident_base": inline_meta["resident"]["base"],
+                "resident_size": inline_meta["resident"]["size"],
+                "resident_sha256": inline_meta["resident"]["sha256"],
+                "helper_base": inline_meta["helper"]["base"],
+                "helper_padded_size": inline_meta["helper"]["padded_size"],
+                "helper_word_count": inline_meta["helper"]["word_count"],
+                "helper_padded_sha256": inline_meta["helper"]["padded_sha256"],
+                "control_can_id": inline_meta["loader"]["can_id"],
+                "state": inline_meta["loader"]["state"],
+                "operation": "post-startup helper load, byte-exact SID23 readback, then local command-5 B6 signing before untouched stock SecOC verification",
+                "trigger": inline_meta["signer"]["trigger"],
+                "domain": inline_meta["signer"]["domain"],
+                "freshness_owner": inline_meta["signer"]["freshness_owner"],
+                "mutation": inline_meta["signer"]["mutation"],
+                "mutation_boundary": inline_meta["mutation_boundary"],
+                "field_sequence": [
+                    "./f33-secoc install in NRTD/Park/stationary",
+                    "direct NRTD->READY without OFF",
+                    "./f33-secoc load-arm in READY/Park/stationary",
+                    "resume openpilot; ./f33-secoc status later to inspect signed_count and committed B6 freshness",
+                ],
+                "persistent_flash_write": False,
+                "live_qualified": False,
+            },
             "command5_probe": {
                 "payload": "ram_payloads/camry_f33_command5_probe_payload.bin",
                 "payload_sha256": command5_probe.EXPECTED_PAYLOAD_SHA256,
@@ -568,7 +618,8 @@ def build(out: Path, openpilot: Path) -> dict:
                 "requires_before_arm": "first prove the exact injected ID63 frame reaches profile2 with b6_midaggregate_observer; bridge is a later controlled transformation experiment",
             },
             "order": [
-                "command5_probe is an independent non-actuating discriminator: install in NRTD, run one 36-byte selector-4 domain in READY/Park/stationary (up to three automatic retries only for ambiguous busy/timeout), then power OFF",
+                "b6_inline_signer is the production-shaped fast path: install retained resident in NRTD, direct transition to READY, load/readback/arm helper, then let openpilot zero-trailer B6 be signed locally inside EPS",
+                "command5_probe is retained as the already-live-qualified diagnostic oracle and is no longer the continuous signing architecture",
                 "b6_midaggregate_observer install in NRTD; attestation is resident SHA plus mailbox magic/version and does not require receive-gated counter progress",
                 "direct NRTD->READY without OFF; run b6_midaggregate_observer selfcheck and require native D7 same-scheduler positive control",
                 "only after selfcheck passes, run b6_midaggregate_observer ID63 marker on bus0 and stop at exact signature-match or bounded D7-positive no-marker verdict",

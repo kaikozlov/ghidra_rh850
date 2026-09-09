@@ -812,7 +812,7 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v11 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v11" and manifest["target"] == {
+    check("kit manifest is self-contained v12 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v12" and manifest["target"] == {
         "eps_f181": "8965F3307000", "eps_diag": "0x7A1->0x7A9 bus0", "b6": "0x0B6/32 FD bus0",
     })
     check("kit pins live persistence-verified stage5 as current firmware", manifest["current_firmware"] == {
@@ -821,6 +821,22 @@ with tempfile.TemporaryDirectory() as td:
         "crc_prefix": "0x1960380A", "crc_fixup": "0xE69FC7F5",
         "note": "live persistence-verified 2026-09-01; no further persistent patch is part of the observer experiment",
     })
+    inline = manifest["ram_experiments"]["b6_inline_signer"]
+    check("kit packages autonomous inline B6 signer as the primary fast path",
+          inline["launcher"] == "f33-secoc" and
+          inline["resident_base"] == "0xFEBFF9F0" and inline["resident_size"] == 486 and
+          inline["resident_sha256"] == "b6a312dd0ea92c70ec662ba3da682ed6977ef15cfed6c8fb47f2aa1bd4c4751d" and
+          inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 356 and
+          inline["helper_word_count"] == 89 and
+          inline["helper_padded_sha256"] == "0180338d8c835e40aee2d4ac233136ca9901349ad54ecdb6362b4369f4ec0982" and
+          inline["state"]["base"] == "0xFEBF02FC" and inline["state"]["magic"] == "0x53364249" and
+          inline["control_can_id"] == "0x1FDC0002" and
+          "00000000" in inline["trigger"] and "EPS" in inline["freshness_owner"] and
+          inline["mutation_boundary"]["application_bytes_b0_b27_unchanged"] is True and
+          inline["mutation_boundary"]["secoc_result_override"] is False and
+          inline["mutation_boundary"]["can_transmit"] is False and
+          inline["persistent_flash_write"] is False and inline["live_qualified"] is False and
+          manifest["ram_experiments"]["order"][0].startswith("b6_inline_signer is the production-shaped fast path"))
     mid = manifest["ram_experiments"]["b6_midaggregate_observer"]
     signer = manifest["ram_experiments"]["command5_probe"]
     check("kit packages bounded high-tail command5 permission probe",
@@ -833,7 +849,7 @@ with tempfile.TemporaryDirectory() as td:
           "does not prove slot 4 is forbidden" in signer["negative_semantics"] and
           signer["persistent_flash_write"] is False and signer["key_extraction"] is False and
           signer["resident_b6_transmit"] is False and signer["secoc_bypass"] is False and
-          manifest["ram_experiments"]["order"][0].startswith("command5_probe is an independent"))
+          manifest["ram_experiments"]["order"][1].startswith("command5_probe is retained as the already-live-qualified"))
     check("kit makes deterministic mid-aggregate observer the immediate ingress experiment",
           mid["payload_sha256"] == midagg.EXPECTED_PAYLOAD_SHA256 and
           mid["staging_sha256"] == midagg.EXPECTED_STAGING_SHA256 and
@@ -847,7 +863,7 @@ with tempfile.TemporaryDirectory() as td:
           "0x0D7" in mid["same_scheduler_positive_control"] and mid["marker_jitter_ms"] == [11,17,23,13,19] and
           mid["sid23_reads_during_treatment"] == 0 and mid["source_memory_write"] is False and
           mid["secoc_bypass"] is False and mid["route44_publish"] is False and mid["live_qualified"] is False and
-          manifest["ram_experiments"]["order"][1].startswith("b6_midaggregate_observer install in NRTD"))
+          manifest["ram_experiments"]["order"][2].startswith("b6_midaggregate_observer install in NRTD"))
     mon = manifest["ram_experiments"]["runtime_monitor"]
     check("kit retains generic external-control monitor for downstream A-G localization",
           mon["payload_sha256"] == monitor.EXPECTED_PAYLOAD_SHA256 and
@@ -915,11 +931,15 @@ with tempfile.TemporaryDirectory() as td:
     check("kit includes launcher, monitor/legacy payloads, and RAM runtime needed on comma",
           (out / "f33").is_file() and (out / "f33").stat().st_mode & 0o111 and
           (out / "f33-pre").is_file() and (out / "f33-pre").stat().st_mode & 0o111 and
-          (out / "f33-ingress").is_file() and (out / "f33-ingress").stat().st_mode & 0o111 and all((out / rel).is_file() for rel in (
+          (out / "f33-ingress").is_file() and (out / "f33-ingress").stat().st_mode & 0o111 and
+          (out / "f33-secoc").is_file() and (out / "f33-secoc").stat().st_mode & 0o111 and all((out / rel).is_file() for rel in (
         "ram_payloads/camry_f33_runtime_monitor_payload.bin",
         "ram_payloads/camry_f33_runtime_monitor_preaggregate_payload.bin",
         "ram_payloads/camry_f33_runtime_monitor_intertick_payload.bin",
         "ram_payloads/camry_f33_b6_midaggregate_observer_payload.bin",
+        "ram_payloads/camry_f33_b6_inline_signer_payload.bin",
+        "ram_payloads/camry_f33_b6_inline_signer_helper_padded.bin",
+        "ram_payloads/camry_f33_b6_inline_signer.json",
         "ram_payloads/camry_f33_runtime_replay_discriminator_payload.bin",
         "ram_payloads/camry_f33_b6_transaction_observer_payload.bin",
         "ram_payloads/camry_f33_b6_bridge_payload.bin",
@@ -931,6 +951,7 @@ with tempfile.TemporaryDirectory() as td:
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_monitor_preaggregate.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.py",
+        "runtime/exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
         "runtime/exploit/followups/xcp_read_probe.py", "runtime/exploit/followups/xcp_daq_probe.py",
         "runtime/tools/targets/camry/live/camry_f33_steering_state_capture.py",
@@ -987,9 +1008,26 @@ with tempfile.TemporaryDirectory() as td:
           "PYTHONPATH" in launcher_text and "systemctl stop openpilot" in launcher_text and
           "manager/manager\\.py" in launcher_text and "pandad" in launcher_text and "boardd" in launcher_text and
           "phase requires a phase name" in launcher_text and 'monitor phase "$@" --execute' in launcher_text)
+    secoc_launcher = out / "f33-secoc"
+    secoc_launcher_text = secoc_launcher.read_text(encoding="utf-8")
+    check("inline signer launcher preserves manager lifecycle and exposes install/load-arm/status",
+          "systemctl stop openpilot" not in secoc_launcher_text and
+          'kill -STOP "$PANDAD_WRAPPER_PID"' in secoc_launcher_text and
+          'kill -CONT "$PANDAD_WRAPPER_PID"' in secoc_launcher_text and
+          "start_power_watchdog_keeper" in secoc_launcher_text and
+          "load-arm" in secoc_launcher_text and "camry_f33_b6_inline_signer_helper_padded.bin" in secoc_launcher_text)
     local_openpilot = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
     local_python = local_openpilot / ".venv/bin/python"
     env = dict(os.environ, F33_PYTHON=str(local_python), F33_OPENPILOT_ROOT=str(local_openpilot))
+    secoc_doctor = subprocess.run([str(secoc_launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
+    check("built inline signer launcher doctor validates payload/helper/metadata without Panda access",
+          secoc_doctor.returncode == 0 and "f33-secoc doctor: PASS" in secoc_doctor.stdout, secoc_doctor.stderr[-300:])
+    secoc_plan = subprocess.run([str(secoc_launcher), "plan"], cwd=out, env=env, capture_output=True, text=True, check=False)
+    secoc_plan_obj = json.loads(secoc_plan.stdout) if secoc_plan.returncode == 0 else {}
+    check("built inline signer launcher plan is no-roundtrip architecture",
+          secoc_plan.returncode == 0 and secoc_plan_obj.get("schema") == "camry-f33-b6-inline-signer-plan-v1" and
+          secoc_plan_obj.get("resident", {}).get("size") == 486 and secoc_plan_obj.get("helper", {}).get("word_count") == 89,
+          secoc_plan.stderr[-300:])
     doctor = subprocess.run([str(launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
     check("built launcher doctor validates imports and payload without Panda access",
           doctor.returncode == 0 and "f33 doctor: PASS" in doctor.stdout and monitor.EXPECTED_PAYLOAD_SHA256 in doctor.stdout, doctor.stderr[-300:])
