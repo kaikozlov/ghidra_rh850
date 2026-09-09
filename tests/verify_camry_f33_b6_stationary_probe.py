@@ -810,6 +810,10 @@ check("inline signer state decoder requires both magic and initialized byte",
       state_decoded["initialized"] is True and state_decoded["initialized_raw"] == 1 and
       state_decoded["next_index"] == 7 and state_decoded["signed_count"] == 9 and
       inline_signer.decode_state(state_raw[:5] + b"\x00" + state_raw[6:])["initialized"] is False)
+check("inline signer scratch is wholly SID23-readable below the protected boundary",
+      inline_signer.SCRATCH_BASE == 0xFEBF0200 and inline_signer.SCRATCH_SIZE == 0x48 and
+      inline_signer.SCRATCH_BASE + inline_signer.SCRATCH_SIZE == inline_signer.STATE_BASE and
+      probe.validate_read(probe.RAM_ID, inline_signer.SCRATCH_BASE, inline_signer.SCRATCH_SIZE) is None)
 
 # The loader mailbox stores only the latest 8-byte control frame. Prove that a
 # completely missed first transfer pass is retried rather than aborting, and
