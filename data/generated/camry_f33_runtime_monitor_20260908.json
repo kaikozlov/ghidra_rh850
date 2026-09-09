@@ -1,8 +1,8 @@
 {
   "boundary": {
     "closed": "the earlier apparent background/native route44 publisher is disproved by controlled idle/send/idle timing; route44 activity is injection-associated on bus0/bus2, while generated/application state faithfully follows the zero-ID route44 image",
-    "next": "sticky pre-aggregate monitor: latch FEBE547A/FEBE54D4..54DC/FEBE54F0 immediately before fg_aggregate and compare the queued signature against every transmitted phase frame",
-    "open": "the first byte-identity divergence between Panda TX and F33 route44 remains before/at profile-2 queue publication; post-aggregate sampling cannot observe FEBE54D4 before cleanup"
+    "next": "inter-tick queue monitor: poll FEBE547A continuously while waiting for the next foreground tick and latch FEBE54D4..54DC/FEBE54F0 before 0x667E6 can consume the transaction",
+    "open": "the first byte-identity divergence between Panda TX and F33 route44 remains before/at profile-2 queue publication; live Phase P saw queue zero at one immediately-pre-aggregate sample point but exact scheduler order makes that insufficient to exclude an asynchronous inter-tick enqueue"
   },
   "controlled_route44_activity": {
     "bus0_and_bus2_injection_associated_with_generation": true,
@@ -113,6 +113,12 @@
     "generated_target_angle_raw": 47,
     "generated_target_lateral_id": 0
   },
+  "exact_scheduler_correction": {
+    "aggregate_contains_secoc_consumer_chain": "0x667E6 -> 0x7A254 -> 0x6A410 -> 0x8EFF8 -> 0x8EF84 -> 0x8F98C -> 0x8F746",
+    "foreground_aggregate": "0x667E6",
+    "foreground_loop": "0x66062",
+    "implication": "a queue-positive interval can begin after one foreground sample and end inside the next aggregate; one sample immediately before aggregate is not a proof of no enqueue"
+  },
   "full_raw_phase_k_post": {
     "b1_b12_hex": "000000002e00160000000000",
     "companion_b6": 0,
@@ -184,6 +190,10 @@
       "path": "targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33-phase-K.json",
       "sha256": "1d9fc04e536de9c596e78e36982d79752df0f3fb8ae556d7921c220d4ac296b8"
     },
+    "preaggregate_phase_p": {
+      "path": "targets/camry-2026/raw-20260908/preaggregate-phase-p/f33-preaggregate-P2-console.log",
+      "sha256": "6558b9fb2a604b2fef062e6fb403a4d4299e9919214793136a2d1359ded758b2"
+    },
     "rate": {
       "path": "targets/camry-2026/raw-20260908/runtime-monitor-session/files/f33_rate.out",
       "sha256": "d45544514772ffb1e31020c2b2d12a86cad2cc856c043cd9337eb43e4b0f32e2"
@@ -201,6 +211,15 @@
       "cafe": 1,
       "caff": 1
     }
+  },
+  "preaggregate_phase_p": {
+    "freshness_reset_reanchors": 13,
+    "interpretation": "queue was zero at the immediately-pre-0x667E6 foreground sample point; this does not exclude asynchronous enqueue between foreground samples followed by consumption inside 0x667E6",
+    "preaggregate_verdict": "no_profile2_queue_hit_latched",
+    "queue_length_at_latched_sample": 0,
+    "sample_generation": 3,
+    "tx_count": 188,
+    "tx_echo_delta": 188
   },
   "schema": "camry-f33-runtime-monitor-20260908-v1",
   "target": "8965F3307000"

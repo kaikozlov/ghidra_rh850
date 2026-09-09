@@ -29,6 +29,10 @@ assert actual["downstream_post"]["adb0"] == 0
 assert actual["downstream_post"]["acbd"] == 0
 assert actual["downstream_post"]["caff"] == 1
 assert actual["id63_marker"]["all_sampled_raw_generated_snapshot_ids_remained_zero"] is True
-assert "pre-aggregate" in actual["boundary"]["next"]
+assert actual["preaggregate_phase_p"]["tx_count"] == actual["preaggregate_phase_p"]["tx_echo_delta"] == 188
+assert actual["preaggregate_phase_p"]["preaggregate_verdict"] == "no_profile2_queue_hit_latched"
+assert actual["preaggregate_phase_p"]["queue_length_at_latched_sample"] == 0
+assert "0x8F746" in actual["exact_scheduler_correction"]["aggregate_contains_secoc_consumer_chain"]
+assert "inter-tick" in actual["boundary"]["next"]
 
 print("camry F33 2026-09-08 runtime-monitor evidence: PASS")

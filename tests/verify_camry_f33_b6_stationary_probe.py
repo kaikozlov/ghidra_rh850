@@ -415,6 +415,49 @@ check("pre-aggregate monitor authenticated payload identity exact",
       len(preagg_payload) == 0x1000 and sha(preagg_payload) == preagg.EXPECTED_PAYLOAD_SHA256 and
       preagg_inspection.cmac_valid and preagg_inspection.crc_residue == 0xFFFFFFFF)
 
+print("\n== inter-tick B6 ingress monitor ==")
+from exploit.ephemeral_runtime import camry_f33_runtime_monitor_intertick as intertick
+intertick_source_path = ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.S"
+intertick_builder_path = ROOT / "exploit/ephemeral_runtime/build_camry_f33_runtime_monitor_intertick.py"
+intertick_audit_path = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_runtime_monitor_intertick_build.json"
+intertick_stage_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor_intertick.bin"
+intertick_source = intertick_source_path.read_text()
+intertick_audit = json.loads(intertick_audit_path.read_text())
+intertick_stage = intertick_stage_path.read_bytes()
+intertick_resident = intertick_stage[0x80:0x80 + intertick.RESIDENT_SIZE]
+check("inter-tick monitor audited binary/source/builder identities exact",
+      intertick_audit["schema"] == "camry-f33-runtime-monitor-intertick-build-v1" and
+      intertick_audit["source"]["sha256"] == sha(intertick_source_path.read_bytes()) and
+      intertick_audit["builder"]["sha256"] == sha(intertick_builder_path.read_bytes()) and
+      sha(intertick_stage) == intertick.EXPECTED_STAGING_SHA256 and
+      sha(intertick_resident) == intertick.EXPECTED_RESIDENT_SHA256 and
+      intertick_audit["authenticated_payload"]["sha256"] == intertick.EXPECTED_PAYLOAD_SHA256)
+check("inter-tick monitor fits tail and polls queue before foreground tick/aggregate",
+      intertick.RESIDENT_SIZE == intertick_audit["resident"]["size"] == 494 and
+      intertick_audit["resident"]["headroom"] == 30 and intertick_audit["resident"]["relocations"] == 0 and
+      intertick_audit["observation"]["trigger"] == {"address": "0xFEBE547A", "condition": "u16 == 32"} and
+      "copies payload" in intertick_audit["observation"]["queue_publication_order"] and
+      intertick_source.index("ld.hu -0x6386[gp], r6") < intertick_source.index("tst1 4, -0x4eef[r0]") < intertick_source.index("jarl32 fg_aggregate, lp"))
+check("inter-tick monitor has fixed ingress-only phase Q",
+      intertick.INTERTICK_PHASES == {"Q": (0xFEBE5478,0xFEBE54D4,0xFEBE54D8,0xFEBE54DC,0xFEBE54F0,0,0,0)})
+synthetic_it_values=[]
+for i,hx in enumerate(("00002000","0000000b","002f0007","64640000","a1234567","00000000","00000000","00000000")):
+    synthetic_it_values.append({"slot":i,"bytes_le":hx})
+it_result={"capture":{"last":{"values":synthetic_it_values,"sample_generation":7}},"b6":{"phase_signatures_hex":[queued_sig]}}
+check("inter-tick host classifies exact queued phase frame deterministically",
+      intertick.classify_ingress(it_result)["verdict"] == "exact_phase_b6_queued_intertick" and
+      intertick.classify_ingress(it_result)["matched_phase_frame_indices"] == [0])
+it_zero_values=[{"slot":i,"bytes_le":"00000000"} for i in range(8)]
+it_nohit={"capture":{"last":None},"post":{"state":{"values":it_zero_values,"sample_generation":0}},"b6":{"phase_signatures_hex":[queued_sig]}}
+check("inter-tick no-hit remains a valid classified result with generation zero",
+      intertick.classify_ingress(it_nohit)["verdict"] == "no_profile2_queue_hit_intertick" and
+      intertick.classify_ingress(it_nohit)["sample_generation"] == 0)
+intertick_payload = package_shellcode(intertick_stage, secret=(ROOT / "firmware/camry-8965F3307000/CodeFlash.bin").read_bytes()[0xBFD8:0xBFE8])
+intertick_inspection = inspect_payload(intertick_payload, secret=(ROOT / "firmware/camry-8965F3307000/CodeFlash.bin").read_bytes()[0xBFD8:0xBFE8])
+check("inter-tick monitor authenticated payload identity exact",
+      len(intertick_payload) == 0x1000 and sha(intertick_payload) == intertick.EXPECTED_PAYLOAD_SHA256 and
+      intertick_inspection.cmac_valid and intertick_inspection.crc_residue == 0xFFFFFFFF)
+
 print("\n== car-kit packaging ==")
 builder_path = ROOT / "tools/build_camry_f33_car_kit.py"
 builder_spec = importlib.util.spec_from_file_location("build_camry_f33_car_kit", builder_path)
@@ -429,7 +472,7 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v8 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v8" and manifest["target"] == {
+    check("kit manifest is self-contained v9 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v9" and manifest["target"] == {
         "eps_f181": "8965F3307000", "eps_diag": "0x7A1->0x7A9 bus0", "b6": "0x0B6/32 FD bus0",
     })
     check("kit pins live persistence-verified stage5 as current firmware", manifest["current_firmware"] == {
@@ -447,7 +490,7 @@ with tempfile.TemporaryDirectory() as td:
           mon["dynamic_call"] is False and mon["resident_b6_transmit"] is False and mon["host_phase_b6_transmit"] is True and
           mon["stationary_monitor_phases"] == {k: [f"0x{x:08X}" for x in v] for k, v in monitor.MONITOR_PHASES.items()} and
           "current /data/openpilot opendbc" in mon["host_phase_b6_construction"] and
-          manifest["ram_experiments"]["order"][0] == "runtime_monitor_preaggregate install in NRTD for the next profile-2 queue-ingress discriminator")
+          manifest["ram_experiments"]["order"][0] == "runtime_monitor_intertick install in NRTD for the exact profile-2 queue-ingress discriminator")
     pre = manifest["ram_experiments"]["runtime_monitor_preaggregate"]
     check("kit packages sticky pre-aggregate monitor as the immediate ingress discriminator",
           pre["payload_sha256"] == preagg.EXPECTED_PAYLOAD_SHA256 and
@@ -455,7 +498,15 @@ with tempfile.TemporaryDirectory() as td:
           pre["resident_sha256"] == preagg.EXPECTED_RESIDENT_SHA256 and pre["resident_size"] == 522 and
           pre["sample_point"] == "after fg_pre_3, immediately before stock fg_aggregate" and
           "FEBE547A" in pre["run_trigger"] and pre["phase"] == {"P": [f"0x{x:08X}" for x in preagg.PREAGGREGATE_PHASES["P"]]} and
-          pre["source_memory_write"] is False and pre["secoc_bypass"] is False and pre["live_qualified"] is False)
+          pre["source_memory_write"] is False and pre["secoc_bypass"] is False and pre["live_qualified"] is True and pre["superseded_by"] == "runtime_monitor_intertick")
+    ingress = manifest["ram_experiments"]["runtime_monitor_intertick"]
+    check("kit packages inter-tick monitor as immediate queue discriminator",
+          ingress["payload_sha256"] == intertick.EXPECTED_PAYLOAD_SHA256 and
+          ingress["staging_sha256"] == intertick.EXPECTED_STAGING_SHA256 and
+          ingress["resident_sha256"] == intertick.EXPECTED_RESIDENT_SHA256 and ingress["resident_size"] == 494 and
+          "before the tick test" in ingress["sample_point"] and "FEBE547A == 32" in ingress["run_trigger"] and
+          ingress["success_verdict"] == "exact_phase_b6_queued_intertick" and ingress["source_memory_write"] is False and
+          ingress["secoc_bypass"] is False and ingress["live_qualified"] is False)
     replay = manifest["ram_experiments"]["runtime_replay_discriminator"]
     check("superseded ABI source-term discriminator remains identity-pinned",
           replay["payload_sha256"] == "48f269aec2c95fbf33217db67a201faad2716985784f5e196ba5ddeade46d8dd" and
@@ -492,9 +543,11 @@ with tempfile.TemporaryDirectory() as td:
     )))
     check("kit includes launcher, monitor/legacy payloads, and RAM runtime needed on comma",
           (out / "f33").is_file() and (out / "f33").stat().st_mode & 0o111 and
-          (out / "f33-pre").is_file() and (out / "f33-pre").stat().st_mode & 0o111 and all((out / rel).is_file() for rel in (
+          (out / "f33-pre").is_file() and (out / "f33-pre").stat().st_mode & 0o111 and
+          (out / "f33-ingress").is_file() and (out / "f33-ingress").stat().st_mode & 0o111 and all((out / rel).is_file() for rel in (
         "ram_payloads/camry_f33_runtime_monitor_payload.bin",
         "ram_payloads/camry_f33_runtime_monitor_preaggregate_payload.bin",
+        "ram_payloads/camry_f33_runtime_monitor_intertick_payload.bin",
         "ram_payloads/camry_f33_runtime_replay_discriminator_payload.bin",
         "ram_payloads/camry_f33_b6_transaction_observer_payload.bin",
         "ram_payloads/camry_f33_b6_bridge_payload.bin",
@@ -504,6 +557,7 @@ with tempfile.TemporaryDirectory() as td:
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_monitor.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_monitor_preaggregate.py",
+        "runtime/exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
         "runtime/exploit/followups/xcp_read_probe.py", "runtime/exploit/followups/xcp_daq_probe.py",
         "runtime/tools/camry_f33_steering_state_capture.py",
@@ -540,6 +594,7 @@ with tempfile.TemporaryDirectory() as td:
     check("runbook is launcher-first and externally configurable",
           "generic runtime monitor" in runbook and "runtime_monitor_live" in runbook and
           "./f33 doctor" in runbook and "./f33 install" in runbook and "./f33 shell" in runbook and
+          "./f33-ingress install" in runbook and "./f33-ingress phase Q" in runbook and
           "./f33-pre install" in runbook and "./f33-pre phase P" in runbook and
           "watch SLOT ADDRESS" in runbook and "./f33 phase A" in runbook and "current opendbc" in runbook and
           "Do not execute them from this runbook" in runbook)
@@ -578,9 +633,20 @@ with tempfile.TemporaryDirectory() as td:
     check("built pre-aggregate launcher doctor validates exact payload without Panda access",
           pre_doctor.returncode == 0 and "f33 doctor: PASS" in pre_doctor.stdout and
           preagg.EXPECTED_PAYLOAD_SHA256 in pre_doctor.stdout, pre_doctor.stderr[-300:])
+    ingress_launcher = out / "f33-ingress"
+    ingress_launcher_text = ingress_launcher.read_text(encoding="utf-8")
+    check("inter-tick launcher pins separate host/payload identities",
+          "camry_f33_runtime_monitor_intertick.py" in ingress_launcher_text and
+          "camry_f33_runtime_monitor_intertick_payload.bin" in ingress_launcher_text and
+          intertick.EXPECTED_PAYLOAD_SHA256 in ingress_launcher_text)
+    ingress_doctor = subprocess.run([str(ingress_launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
+    check("built inter-tick launcher doctor validates exact payload without Panda access",
+          ingress_doctor.returncode == 0 and "f33 doctor: PASS" in ingress_doctor.stdout and
+          intertick.EXPECTED_PAYLOAD_SHA256 in ingress_doctor.stdout, ingress_doctor.stderr[-300:])
     check("kit manifest hashes launchers and root runbook",
           manifest["files"]["f33"]["sha256"] == sha(launcher.read_bytes()) and
           manifest["files"]["f33-pre"]["sha256"] == sha(pre_launcher.read_bytes()) and
+          manifest["files"]["f33-ingress"]["sha256"] == sha(ingress_launcher.read_bytes()) and
           manifest["files"]["RUNBOOK.md"]["sha256"] == sha((out / "RUNBOOK.md").read_bytes()))
 
 print(f"\nResults: {passed} passed, {failed} failed")

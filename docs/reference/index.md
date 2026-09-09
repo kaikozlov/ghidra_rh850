@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 463 · Corrections: 182 · Open questions: 54 · Docs: 125 · Suites: 253
+Findings: 463 · Corrections: 183 · Open questions: 54 · Docs: 125 · Suites: 253
 
 ## Reading this index
 
@@ -481,7 +481,7 @@ Findings: 463 · Corrections: 182 · Open questions: 54 · Docs: 125 · Suites: 
 | <a id="finding-var-148"></a>**VAR-148** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [camry-2026-tss3-opendbc-port](../variants/camry-2026-tss3-opendbc-port.md) | `tests/verify_camry_f33_b6_command_composition.py` | OQ-054 |
 | <a id="finding-var-149"></a>**VAR-149** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [camry_f33_runtime_monitor_runbook](../../exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md) | `tests/verify_camry_f33_b6_end_to_end.py` | OQ-054 |
 | <a id="finding-var-150"></a>**VAR-150** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_f33_b6_gate_log_reconciliation.py` | OQ-054 |
-| <a id="finding-var-151"></a>**VAR-151** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_f33_runtime_monitor_20260908.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | OQ-054 |
+| <a id="finding-var-151"></a>**VAR-151** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_camry_f33_runtime_monitor_20260908.py`, `tests/verify_camry_f33_b6_stationary_probe.py` | OQ-054 |
 
 ## Open-questions index
 
@@ -540,7 +540,7 @@ Findings: 463 · Corrections: 182 · Open questions: 54 · Docs: 125 · Suites: 
 | <a id="open-question-oq-051"></a>**OQ-051** | Cross-calibration structural triage of future P1M-E images | Tooling | MEM-SAFE-001 |
 | <a id="open-question-oq-052"></a>**OQ-052** | True-TSS3 longitudinal wire/auth/arbitration execution contract | Tooling | TMS-085, TMS-079, VAR-106, VAR-107, VAR-069, VAR-070, VAR-086, TMS-087 |
 | <a id="open-question-oq-053"></a>**OQ-053** | F33 non-disruptive application-mode RAM execution pivot | Tooling | VAR-060, VAR-134, CORR-165, VAR-136, CORR-167, CORR-123 |
-| <a id="open-question-oq-054"></a>**OQ-054** | Identify the downstream `0x08A` proxy/transmitter, request handoff/encoding, and SecOC profile owner | Tooling | VAR-091, CORR-149, VAR-107, VAR-094, VAR-113, VAR-081, CORR-135, VAR-095, CORR-137, VAR-096, VAR-097, VAR-101, VAR-110, VAR-111, VAR-134, CORR-165, VAR-136, CORR-167, VAR-117, CORR-157, CORR-162, VAR-139, CORR-169, VAR-146, CORR-177, VAR-147, CORR-178, VAR-148, CORR-179, VAR-149, CORR-180, VAR-150, VAR-151, CORR-092 |
+| <a id="open-question-oq-054"></a>**OQ-054** | Identify the downstream `0x08A` proxy/transmitter, request handoff/encoding, and SecOC profile owner | Tooling | VAR-091, CORR-149, VAR-107, VAR-094, VAR-113, VAR-081, CORR-135, VAR-095, CORR-137, VAR-096, VAR-097, VAR-101, VAR-110, VAR-111, VAR-134, CORR-165, VAR-136, CORR-167, VAR-117, CORR-157, CORR-162, VAR-139, CORR-169, VAR-146, CORR-177, VAR-147, CORR-178, VAR-148, CORR-179, VAR-149, CORR-180, VAR-150, VAR-151, CORR-183, CORR-092 |
 
 ## Correction index
 
@@ -728,6 +728,7 @@ Findings: 463 · Corrections: 182 · Open questions: 54 · Docs: 125 · Suites: 
 | <a id="correction-corr-180"></a>**CORR-180** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 | <a id="correction-corr-181"></a>**CORR-181** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 | <a id="correction-corr-182"></a>**CORR-182** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
+| <a id="correction-corr-183"></a>**CORR-183** | [docs/variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) | yes |
 
 ## Document registry
 

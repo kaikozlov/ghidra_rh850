@@ -22,7 +22,7 @@ def prefixed_json(path: Path) -> dict:
     start = text.find("{")
     if start < 0:
         raise ValueError(f"no JSON object in {path}")
-    return json.loads(text[start:])
+    return json.JSONDecoder().raw_decode(text[start:])[0]
 
 
 def value_map(command_result: dict) -> dict[int, bytes]:
@@ -99,14 +99,19 @@ def build() -> dict:
         "phase_k": RAW / "f33-phase-K.json",
         "rate": RAW / "f33_rate.out",
         "marker": RAW / "f33_marker.out",
+        "preaggregate_phase_p": ROOT / "targets/camry-2026/raw-20260908/preaggregate-phase-p/f33-preaggregate-P2-console.log",
     }
     for p in paths.values():
         if not p.is_file():
             raise FileNotFoundError(p)
 
     a, b, c, k = (prefixed_json(paths[x]) for x in ("phase_a", "phase_b", "phase_c", "phase_k"))
+    phase_p = prefixed_json(paths["preaggregate_phase_p"])
     rate = parse_rate(paths["rate"])
     markers = parse_markers(paths["marker"])
+    if not (phase_p["verdict"] == "phase_complete" and phase_p["b6"]["tx_count"] == phase_p["b6"]["tx_echo_delta"] == 188 and
+            phase_p["preaggregate_ingress"]["verdict"] == "no_profile2_queue_hit_latched"):
+        raise ValueError("live pre-aggregate Phase P result drift")
 
     for row, name in ((a, "A"), (b, "B"), (c, "C"), (k, "K")):
         if row["verdict"] != "phase_complete" or row["b6"]["tx_count"] != row["b6"]["tx_echo_delta"]:
@@ -167,6 +172,21 @@ def build() -> dict:
             "segments": markers,
             "all_sampled_raw_generated_snapshot_ids_remained_zero": True,
         },
+        "preaggregate_phase_p": {
+            "tx_count": phase_p["b6"]["tx_count"],
+            "tx_echo_delta": phase_p["b6"]["tx_echo_delta"],
+            "freshness_reset_reanchors": phase_p["b6"]["freshness_reset_reanchors"],
+            "queue_length_at_latched_sample": phase_p["preaggregate_ingress"]["queue_length"],
+            "preaggregate_verdict": phase_p["preaggregate_ingress"]["verdict"],
+            "sample_generation": phase_p["preaggregate_ingress"]["sample_generation"],
+            "interpretation": "queue was zero at the immediately-pre-0x667E6 foreground sample point; this does not exclude asynchronous enqueue between foreground samples followed by consumption inside 0x667E6",
+        },
+        "exact_scheduler_correction": {
+            "foreground_loop": "0x66062",
+            "foreground_aggregate": "0x667E6",
+            "aggregate_contains_secoc_consumer_chain": "0x667E6 -> 0x7A254 -> 0x6A410 -> 0x8EFF8 -> 0x8EF84 -> 0x8F98C -> 0x8F746",
+            "implication": "a queue-positive interval can begin after one foreground sample and end inside the next aggregate; one sample immediately before aggregate is not a proof of no enqueue",
+        },
         "observations": {
             "host_current_shape_id11_echoed": True,
             "route44_target_id_remained_zero": a_post["target_lateral_id"] == k_post["target_lateral_id"] == 0,
@@ -176,8 +196,8 @@ def build() -> dict:
         },
         "boundary": {
             "closed": "the earlier apparent background/native route44 publisher is disproved by controlled idle/send/idle timing; route44 activity is injection-associated on bus0/bus2, while generated/application state faithfully follows the zero-ID route44 image",
-            "open": "the first byte-identity divergence between Panda TX and F33 route44 remains before/at profile-2 queue publication; post-aggregate sampling cannot observe FEBE54D4 before cleanup",
-            "next": "sticky pre-aggregate monitor: latch FEBE547A/FEBE54D4..54DC/FEBE54F0 immediately before fg_aggregate and compare the queued signature against every transmitted phase frame",
+            "open": "the first byte-identity divergence between Panda TX and F33 route44 remains before/at profile-2 queue publication; live Phase P saw queue zero at one immediately-pre-aggregate sample point but exact scheduler order makes that insufficient to exclude an asynchronous inter-tick enqueue",
+            "next": "inter-tick queue monitor: poll FEBE547A continuously while waiting for the next foreground tick and latch FEBE54D4..54DC/FEBE54F0 before 0x667E6 can consume the transaction",
         },
     }
 

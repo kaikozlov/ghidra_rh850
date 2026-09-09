@@ -1186,11 +1186,15 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   zero contribution percentages while Panda's current-shape echo carries ID11 and 100/100;
   generated COM and `ADB0` faithfully remain ID0 with `ACBD=0` and `CAFF=1`. Post-aggregate
   reads of `FEBE547A/FEBE54D4` occur after transaction cleanup and cannot say whether the
-  echoed frame was ever queued. The immediate independent-B6 question is therefore narrower:
-  **does one exact transmitted phase frame appear byte-for-byte in the profile-2 secured
-  queue before `fg_aggregate`?** The built 522-byte sticky pre-aggregate resident latches
-  only when `FEBE547A != 0` and captures secured B0..B11 plus FV4/MAC28 for an exact join.
-  Only after that queue-identity result should localization continue to freshness/delivery,
+  echoed frame was ever queued. The first 522-byte pre-aggregate Phase-P resident was live-
+  qualified with 188/188 echoed frames and queue length zero at its chosen sample point, but
+  CORR-183 shows that point is temporally insufficient: receive enqueue is asynchronous and
+  the queue consumer lies inside the next `0x667E6` aggregate. The immediate independent-B6
+  question is therefore narrower: **does one exact transmitted phase frame appear byte-for-
+  byte in the profile-2 secured queue at any point between foreground ticks?** The audited
+  494-byte inter-tick resident polls `FEBE547A==32` before the tick test and latches secured
+  B0..B11 plus FV4/MAC28 once per queue occupancy. Only after that queue-identity result should
+  localization continue to freshness/delivery,
   route44, remaining `ACCC`/`CB20/CB38`, and common actuator gates. Counter phase, MAC value,
   packer companion guesses, `0x08A` suppression, and another result patch remain unjustified.
   Resolving OQ-054 remains required for stock architecture, not for this B6 ingress

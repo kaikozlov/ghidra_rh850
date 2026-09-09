@@ -34,26 +34,23 @@ and unresolved static/dynamic boundaries remain in
 Keep two queues separate:
 
 1. **Settle TX-echo -> profile-2 queue identity before going farther downstream.** The
-   generic 520-byte ABI-preserving monitor is now **live-qualified** on exact F33: it installed
-   with `runtime_monitor_live`, survived a comma reboot while EPS power stayed up, and exposed
-   the expected A/B/C ladder. VAR-151 materially narrows the failure. Controlled idle/send/idle
-   timing makes route44 generation quiescent with no host B6, active for injected B6 on the
-   relay-correct EPS segment (logical buses 0/2), and quiescent for unrelated bus1, disproving
-   the earlier background/native-route44 explanation in this stationary state. Yet current-shape
-   Panda echoes carry ID11 / 100/100 while sampled route44 carries ID0 / 0/0 with the target
-   angle still present; generated COM and `ADB0` faithfully remain ID0 while `ACBD=0` and
-   `CAFF=1`. The normal post-aggregate monitor is too late to decide whether the exact echoed
-   frame occupied `FEBE547A/FEBE54D4` before stock cleanup. Therefore **do not proceed to D-G
-   yet** and do not add another SecOC-result patch, change freshness, guess B6 companions, or
-   suppress `0x08A`. The next single discriminator is the audited **522-byte sticky
-   pre-aggregate monitor**: full OFF -> NRTD, `./f33-pre install`, direct NRTD->READY, then
-   `./f33-pre phase P`. It samples immediately before `fg_aggregate`, latches only when
-   profile-2 queue length `FEBE547A != 0`, captures secured B0..B11 plus FV4/MAC28, and joins
-   that signature against every transmitted phase frame. `exact_phase_b6_queued_preaggregate`
-   moves the unexplained transformation downstream of enqueue; no queue hit leaves
-   physical/RSCFD/CanIf acceptance open; a nonmatching queue hit proves profile2 activity but
-   not this phase's frame. Current opendbc `f207c273b645` remains the sender baseline. OQ-054
-   and stock signer ownership remain a separate architecture queue.
+   generic 520-byte ABI-preserving monitor is live-qualified and VAR-151 proves route44
+   publication is associated with injected B6 on the relay-correct EPS segment while its
+   published ID/percentage fields differ from Panda's current-shape echo. The first 522-byte
+   pre-aggregate Phase-P resident is also now live-qualified: 188/188 B6 frames were echoed,
+   but its immediately-pre-`0x667E6` sample saw queue length zero. CORR-183 prevents the
+   invalid inference that this means no enqueue: exact F33's SecOC consumer is inside
+   `0x667E6`, and asynchronous receive can enqueue between foreground samples. Therefore
+   **do not proceed to D-G** and do not change SecOC results, freshness, B6 companions, or
+   `0x08A`. The next single discriminator is the audited **494-byte inter-tick monitor**:
+   full OFF -> NRTD, `./f33-ingress install`, direct NRTD->READY, then
+   `./f33-ingress phase Q`. It polls exact profile-2 queue length `FEBE547A==32` while
+   waiting for the next foreground tick, before the tick test and thus before the subsequent
+   `0x667E6` consumer, and latches secured B0..B11 plus FV4/MAC28 once per queue occupancy.
+   `exact_phase_b6_queued_intertick` moves the unexplained transformation downstream of
+   enqueue; no inter-tick queue hit makes RSCFD/CanIf/PduR the next probe while remaining a bounded no-hit rather than a proof of impossible enqueue.
+   Current opendbc `f207c273b645` remains the sender baseline. OQ-054 and stock signer
+   ownership remain a separate architecture queue.
 2. **Recover Toyota's stock request/signing architecture.** OQ-054 asks which
    private message carries FRC request/winner/grant state and which always-on
    Brake/Skid/CGW node signs Bus-4 `0x08A`. Native Bus 1 exposes 22 camera/radar
