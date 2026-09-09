@@ -829,6 +829,11 @@ check("inline signer telemetry is readable and preserves every helper gate",
       telemetry_decoded["zero_trailer_hits"] == 5 and telemetry_decoded["command5_attempts"] == 3 and
       telemetry_decoded["last_queue_length"] == 32 and telemetry_decoded["last_done_flag"] == 1 and
       telemetry_decoded["last_command_status"] == 0 and telemetry_decoded["last_trailer_hex"] == "a1b2c3d4")
+check("inline signer exposes exact profile2 queue and full secured buffer through SID23",
+      inline_signer.B6_QUEUE_RECORD_BASE == 0xFEBE547A and inline_signer.B6_QUEUE_RECORD_SIZE == 8 and
+      inline_signer.B6_SECURED_BUFFER_BASE == 0xFEBE54D4 and inline_signer.B6_SECURED_BUFFER_SIZE == 32 and
+      probe.validate_read(probe.RAM_ID, inline_signer.B6_QUEUE_RECORD_BASE, inline_signer.B6_QUEUE_RECORD_SIZE) is None and
+      probe.validate_read(probe.RAM_ID, inline_signer.B6_SECURED_BUFFER_BASE, inline_signer.B6_SECURED_BUFFER_SIZE) is None)
 
 # The loader mailbox stores only the latest 8-byte control frame. Prove that a
 # completely missed first transfer pass is retried rather than aborting, and
