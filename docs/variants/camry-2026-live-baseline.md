@@ -5974,3 +5974,36 @@ the redundant pre-send mailbox read. This path never transmits B6 and is intende
 the real remaining command-5/observation latency on the next live READY session. Its live
 timing is not yet qualified, so no 50-Hz signer claim is made from the static transport
 reduction alone.
+
+### 70.2 EPS-resident native-B6 signing and distinct replacement succeed (VAR-155)
+
+The 2026-09-09/10 inline experiment closes the signer construction without depending on a
+host-timed future epoch. A 524-byte retained scheduler loads a byte-read-back 150-word helper
+after the NRTD-to-READY transition. The helper observes native profile-2 B6 inside F33,
+reconstructs ordinary freshness using the exact arithmetic recovered from `0x909CA/0x90A48`,
+packs freshness48 through stock `0x90566`, and invokes the qualified record-0 command-5
+wrapper with `{type=1, selector=4}`.
+
+The final no-mutation oracle produced native/computed trailer `8b099f70` with wrapper return
+0, done 1, status 0. Its reconstructed trip/reset/message was `527/7228/10`. An independent
+one-second control, with the host B6 producer cooperatively quiesced, counted 119 distinct
+native trailers in 1.000102 s (118.99/s). This proves the internal native source continues
+while the comma producer is absent and corrects the earlier ~50-Hz estimate derived from an
+application byte rather than distinct protected trailers.
+
+The subsequent parked one-frame discriminator changed the native application to ID11,
+target raw `17`, signal265 clear, contributions 100/100, and re-signed freshness
+`527/7295/21`. The preserved incoming trailer was `747bbd5b`; command 5 generated distinct
+trailer `75023488`; `signed_count` advanced `0 -> 1`. The car remained READY/Park at 0 m/s
+with valid CAN, no timeout, and no temporary or permanent steering fault. No persistent flash
+write or CAN transmission was performed by the resident: it replaced the already queued
+native B6 before stock SecOC consumption.
+
+This is direct dynamic proof of native-B6 capture, target-application construction, local
+slot-4 signing, and queue replacement. It is not yet a post-verifier application-adoption
+witness. Host SID23 reads occur after later ~119-Hz native frames have advanced committed
+freshness, so a post-verifier latch or bounded downstream control-state sample is still
+required to classify that exact replacement as adopted versus rejected. An earlier helper
+overwrote the readable native-trailer witness with the computed replacement; equal trailers
+from those preliminary replacements are discarded. Final helper SHA-256 is
+`4719c4f27563180359445724eaefd594e3051ea545f75d69efb9bbede8f1965a`.

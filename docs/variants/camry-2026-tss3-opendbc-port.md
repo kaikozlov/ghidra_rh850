@@ -20,16 +20,15 @@ wire-grammar hygiene rather than an admission fix. The current `kai-openpilot` f
 the exact-F181 B6 development path through the ordinary Toyota safety model (§3.4); upstream
 comma opendbc has no Camry TSS3 platform at all.
 
-**Current execution blocker:** establish the first live B6 boundary with the
-countered non-bypassing RAM observer. It distinguishes a valid scheduler window
-through native protected-D7 queue activity, then requires a phase-local B6 queue
-count and exact current-phase wire signature. Only proven B6 queue ingress
-authorizes the deduplicating RAM route44 bridge. A further persistent
-SecOC-result patch or nonzero target is unjustified before that split. The
-sender's explicit-zero 28-byte base remains non-stock; application semantics,
-sign/scale, driver override, motor response, timeout/release, and fault recovery remain
-unmeasured. VAR-148/CORR-179 close the ID11 composition semantics statically: accepted B6
-is co-modulated inside the ordinary EPS sum, not an exclusive replacement mode.
+**Current execution boundary:** VAR-155 proves the live native profile-2 B6 boundary,
+byte-exact local slot-4 signing, and one distinct parked queue replacement. The replaced
+frame produced no CAN or steering fault, but the host witness occurs after later native
+frames advance committed freshness and therefore does not yet prove downstream application
+adoption. The next experiment is a post-verifier acceptance latch or bounded control-state
+witness using the current openpilot B6 application construction. Driver override, sustained
+motor response, timeout/release, and fault recovery remain unmeasured. VAR-148/CORR-179 close
+the ID11 composition semantics statically: accepted B6 is co-modulated inside the ordinary
+EPS sum, not an exclusive replacement mode.
 
 **Physical routing decision (CORR-139):** the present Toyota-B repin is correct.
 Current GTS+ places Brake/Skid/SAS/EPS together on Toyota Bus 4; exact F33 has one

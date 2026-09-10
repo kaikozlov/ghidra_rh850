@@ -822,11 +822,13 @@ check("inline signer command5 scratch intentionally begins at the SID23 exclusio
       inline_signer.SCRATCH_BASE == inline_signer.APPLICATION_RMBA_PROTECTED_START and scratch_read_rejected)
 telemetry_raw = (
     (11).to_bytes(4, "little") + (3).to_bytes(4, "little") +
-    bytes.fromhex("a1b2c3d4") + bytes.fromhex("a1b2c3d4") + bytes((9, 1, 1, 0))
+    bytes.fromhex("a1b2c3d4") + bytes.fromhex("a1b2c3d4") + bytes((9, 1, 1, 0)) +
+    (0x1234).to_bytes(4, "little") + (0x56789).to_bytes(4, "little") +
+    (0xAB).to_bytes(2, "little") + bytes((1, 0x2E))
 )
 telemetry_decoded = inline_signer.decode_signer_telemetry(telemetry_raw)
 check("inline signer telemetry exposes native-frame/signing equality gates",
-      inline_signer.TELEMETRY_BASE == 0xFEBF0268 and inline_signer.TELEMETRY_SIZE == 0x14 and
+      inline_signer.TELEMETRY_BASE == 0xFEBF0268 and inline_signer.TELEMETRY_SIZE == 0x20 and
       inline_signer.TELEMETRY_BASE + inline_signer.TELEMETRY_SIZE <= inline_signer.APPLICATION_RMBA_PROTECTED_START and
       probe.validate_read(probe.RAM_ID, inline_signer.TELEMETRY_BASE, inline_signer.TELEMETRY_SIZE) is None and
       telemetry_decoded["native_frame_count"] == 11 and telemetry_decoded["command5_attempts"] == 3 and
@@ -834,7 +836,12 @@ check("inline signer telemetry exposes native-frame/signing equality gates",
       telemetry_decoded["last_computed_trailer_hex"] == "a1b2c3d4" and
       telemetry_decoded["last_control_seq"] == 9 and telemetry_decoded["native_verified"] is True and
       telemetry_decoded["native_signature_match"] is True and telemetry_decoded["last_done_flag"] == 1 and
-      telemetry_decoded["last_command_status"] == 0)
+      telemetry_decoded["last_command_status"] == 0 and
+      telemetry_decoded["reconstructed_freshness"] == {
+          "raw_hex": "3412000089670500ab00012e", "trip_counter": 0x1234,
+          "reset_counter": 0x56789, "message_counter": 0xAB,
+          "reset_low2": 1, "encoded_length": 0x2E,
+      })
 check("inline signer telemetry refuses equality without completed native verification",
       inline_signer.decode_signer_telemetry(telemetry_raw[:17] + b"\x00" + telemetry_raw[18:])["native_signature_match"] is False and
       inline_signer.decode_signer_telemetry(telemetry_raw[:12] + bytes.fromhex("11223344") + telemetry_raw[16:])["native_signature_match"] is False)
@@ -851,7 +858,7 @@ check("inline signer exposes exact profile2 queue and full secured buffer throug
 def _telem_blob(native_frames: int, command5_attempts: int) -> bytes:
     return (
         native_frames.to_bytes(4, "little") + command5_attempts.to_bytes(4, "little") +
-        bytes.fromhex("01020304") + bytes.fromhex("01020304") + bytes((0, 1, 1, 0))
+        bytes.fromhex("01020304") + bytes.fromhex("01020304") + bytes((0, 1, 1, 0)) + bytes(12)
     )
 
 class _FakeQuietSession:
@@ -946,13 +953,13 @@ with tempfile.TemporaryDirectory() as td:
     inline = manifest["ram_experiments"]["b6_inline_signer"]
     check("kit packages native-B6 verify/replace signer as the primary fast path",
           inline["launcher"] == "f33-secoc" and
-          inline["resident_base"] == "0xFEBFF9F0" and inline["resident_size"] == 520 and
-          inline["resident_sha256"] == "38cd55db115456bfe72b747b509becf12916f633108a1073af48917ea44cad83" and
-          inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 604 and
-          inline["helper_word_count"] == 151 and
-          inline["helper_padded_sha256"] == "44b5f04d350b7d5c384559ac1f6a1585416f9fcf6866b5dbdcc1cbd86fbbd0bd" and
+          inline["resident_base"] == "0xFEBFF9F0" and inline["resident_size"] == 524 and
+          inline["resident_sha256"] == "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a" and
+          inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 600 and
+          inline["helper_word_count"] == 150 and
+          inline["helper_padded_sha256"] == "4719c4f27563180359445724eaefd594e3051ea545f75d69efb9bbede8f1965a" and
           inline["state"]["base"] == "0xFEBF025C" and inline["state"]["magic"] == "0x53364249" and
-          inline["telemetry"]["base"] == "0xFEBF0268" and inline["telemetry"]["size"] == 0x14 and
+          inline["telemetry"]["base"] == "0xFEBF0268" and inline["telemetry"]["size"] == 0x20 and
           inline["scratch"] == {"base": "0xFEBF0288", "size": 0x48, "sid23_readable": False} and
           probe.validate_read(probe.RAM_ID, int(inline["state"]["base"], 0), inline["state"]["size"]) is None and
           probe.validate_read(probe.RAM_ID, int(inline["telemetry"]["base"], 0), inline["telemetry"]["size"]) is None and
@@ -1167,8 +1174,8 @@ with tempfile.TemporaryDirectory() as td:
     secoc_plan_obj = json.loads(secoc_plan.stdout) if secoc_plan.returncode == 0 else {}
     check("built inline signer launcher plan is no-roundtrip architecture",
           secoc_plan.returncode == 0 and secoc_plan_obj.get("schema") == "camry-f33-b6-inline-signer-plan-v1" and
-          secoc_plan_obj.get("resident", {}).get("size") == 520 and secoc_plan_obj.get("helper", {}).get("word_count") == 151 and
-          secoc_plan_obj.get("telemetry", {}).get("base") == "0xFEBF0268" and secoc_plan_obj.get("telemetry", {}).get("size") == 0x14 and
+          secoc_plan_obj.get("resident", {}).get("size") == 524 and secoc_plan_obj.get("helper", {}).get("word_count") == 150 and
+          secoc_plan_obj.get("telemetry", {}).get("base") == "0xFEBF0268" and secoc_plan_obj.get("telemetry", {}).get("size") == 0x20 and
           any("native B6" in row for row in secoc_plan_obj.get("sequence", [])),
           secoc_plan.stderr[-300:])
     doctor = subprocess.run([str(launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
