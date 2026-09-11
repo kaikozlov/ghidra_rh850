@@ -20,6 +20,7 @@ from tools.targets.camry.live.camry_frc_request_poc import (
 from tools.toyota_support.toyota_e2e_p05 import (
     crc16_ccitt,
     e2e_p05_check,
+    e2e_p05_crc,
     e2e_p05_protect,
     e2e_p05_recover_data_id,
 )
@@ -58,6 +59,24 @@ print("== fixed retained witnesses ==")
 a = bytes.fromhex("f13bf182800040034de80b0000a80080012f80c0000000140000000000000000")
 b = bytes.fromhex("8420b582800040034de80b007fa80080012f80c0000000140000000000000000")
 check("retained 0x160 independently recovers implicit DataID 0x0160", e2e_p05_recover_data_id(a) == 0x160)
+
+# The contributor's Corolla implementation expresses this same fixed-length
+# transform as init=0 plus Data ID 0x444A.  Equality on one base and every
+# payload-bit basis vector proves the two affine CRC maps are identical for all
+# 30-byte 0x160 application payloads; this is nomenclature, not a wire split.
+def contributor_0x160_crc(frame: bytes) -> int:
+    return crc16_ccitt(frame[2:] + bytes.fromhex("4a44"), start=0)
+
+
+crc_basis = [a]
+for byte_index in range(2, 32):
+    for bit_index in range(8):
+        mutated = bytearray(a)
+        mutated[byte_index] ^= 1 << bit_index
+        crc_basis.append(bytes(mutated))
+check("Camry and contributor Corolla CRC parameterizations are wire-equivalent",
+      all(e2e_p05_crc(frame, 0x160) == contributor_0x160_crc(frame) for frame in crc_basis))
+
 r = build_0x160_request(a, request_signed7=-1, counter=0xB5)
 check("combined counter+B12 mutation reproduces retained frame byte-exact", r.frame == b)
 check("only header/counter/request changed", r.frame[3:12] == a[3:12] and r.frame[13:] == a[13:])

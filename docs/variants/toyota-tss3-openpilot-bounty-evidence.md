@@ -211,11 +211,14 @@ camera request so Toyota retains its native standstill/hold path. The note repor
 follow, speed, stop-and-go to zero/hold/resume as validated, with the deployed
 1-mph floor still awaiting a confirming drive at its 2026-09-10 status cutoff.
 
-The same note reports Corolla-specific wire details that must not be generalized to
-the Camry: acceleration is a signed 15-bit B4:B5 quantity at 0.001 m/s²/count and
-the CRC-16/CCITT Data ID is `0x444A`. That differs from the retained Camry `0x160`
-B12/Data-ID contract and is direct evidence that the normal openpilot ownership
-shape is reusable while the exact request encoding remains target-specific.
+The same note causally establishes the Corolla acceleration command as signed-15
+B4:B5 at 0.001 m/s²/count; that must not be promoted to a validated Camry command
+without a Camry injection result. Its CRC is expressed as init=`0` with Data ID
+`0x444A`. Deterministic basis-vector comparison shows that this is wire-equivalent,
+for the fixed 32-byte `0x160`, to the repository's recovered init=`0xFFFF` with
+Data ID `0x0160`; the parameter labels differ, but the transmitted CRC does not.
+The reusable result is therefore the normal openpilot ownership/handoff shape,
+while command-field causality remains target-bounded.
 
 Evidence boundary: this remains attributed external field evidence. The original
 road result arrived as a Discord screenshot, and the later architecture/change
@@ -230,12 +233,12 @@ transition without inventing a second longitudinal permission system.
 Before that field report, this repository already contained the bare offline
 message generator:
 [`camry_frc_request_poc.py`](../../tools/targets/camry/live/camry_frc_request_poc.py)
-constructs the observed Camry-family 32-byte `0x160` request by changing B2/B12
+constructs the observed Camry-family 32-byte `0x160` candidate by changing B2/B12
 and recomputing its exact Profile-5 CRC. Its verifier reconstructs fixed wire
 witnesses and more than 20,000 retained counter/request pairs byte-for-byte.
 That is repository-verified prior proof of message generation, not proof of the
-later Corolla road result or a license to transfer Camry B12 scaling to
-Corolla.
+later Corolla road result or evidence that B12 is the actuation field selected
+by the working Corolla controller.
 
 ## 4. What is universal and what is target-specific
 

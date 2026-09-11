@@ -1,13 +1,10 @@
 # 2026 Camry longitudinal evidence packet and status (WP4)
 
-**Scope:** work package 4 of the Camry openpilot completion plan. The
-**Milestone-A longitudinal configuration** (stock Toyota ACC retained) is the
-current fork state; this names the longitudinal ownership arrangement only and
-does **not** mean Milestone A itself is accepted (lateral qualification remains
-blocked). This packet assembles the Camry-specific evidence matrix for native
-openpilot longitudinal control. The offline wire encoder is implemented; the
-remaining rows govern promotion into a live Camry controller. No injection or
-interception wiring is prescribed.
+**Scope:** work package 4 of the Camry openpilot completion plan. The `tss3`
+integration branch now contains a native-shape `0x160` controller and Panda
+handoff for bench/vehicle testing. Corolla establishes the selected B4:B5
+command mapping causally; Camry receiver acceptance remains unobserved, so the
+branch is a test candidate rather than a validated Camry longitudinal port.
 
 ## Discovery record
 
@@ -25,22 +22,31 @@ post-fault handoff design, but the exact source checkout and rlog are still
 external.
 
 
-## Current stock-ACC configuration (Milestone-A longitudinal arrangement)
+## Historical stock-ACC configuration (Milestone-A longitudinal arrangement)
 
-`TOYOTA_CAMRY_TSS3` sets `openpilotLongitudinalControl=False`,
+Before the current test branch, `TOYOTA_CAMRY_TSS3` set `openpilotLongitudinalControl=False`,
 `pcmCruise=True`, Toyota `STOCK_LONGITUDINAL`, and `autoResumeSng=False`; the
 current TSS3 `CarController.update()` emits only the exact-F33 C7 lateral
 sideband and returns, so Toyota still owns acceleration. Physical RES/SET
 buttons and the parsed `0x08A`/`0x251` set-speed state choose `vCruise`;
 `radarUnavailable=True` is not a planner blocker (generic radar interface
 publishes an empty set; model-lead `radarState` continues). Verified in the WP2
-audit replay and current stock-harness opendbc `3c79d935`.
+audit replay and stock-harness opendbc `3c79d935`.
 
-## Evidence matrix (candidate: native bus-1 `0x160` E2E Profile-5 B12)
+The current branch instead uses the ordinary openpilot ownership shape: it
+captures the camera-side 32-byte `0x160`, emits at most once per new camera B2
+counter, modifies only signed-15 B4:B5 at 0.001 m/s²/count while actively
+controlling above 0.45 m/s, and otherwise relays the camera request byte-exact.
+Panda blocks the camera copy only while its normal longitudinal-allowed state
+authorizes the replacement and enforces the ordinary −3.5/+2.0 m/s² bounds.
+The controller self-limits active requests to ±1.5 m/s².
+
+## Evidence matrix (native bus-1 `0x160` request plane)
 
 | Question | Status | Evidence |
 |---|---|---|
-| Wire geometry | **established** (firmware-static + captures) | 32-byte PDU; B0:B1 CRC-16/CCITT, B2 mod-256 counter, Data ID = CAN ID, no secret; `tools/targets/camry/live/camry_frc_request_poc.py` clones/recomputes offline |
+| Wire geometry | **established** (firmware-static + captures) | 32-byte PDU; B0:B1 CRC-16/CCITT, B2 mod-256 counter, no secret; `tools/targets/camry/live/camry_frc_request_poc.py` clones/recomputes offline. The recovered init=`0xFFFF`/Data-ID=`0x0160` expression and the contributor's init=`0`/Data-ID=`0x444A` expression are deterministically wire-equivalent for this fixed PDU length. |
+| Selected controller field | **Corolla-validated transfer hypothesis for Camry** | The independent Corolla road implementation causally establishes signed-15 B4:B5 at 0.001 m/s²/count. A direct re-read of both retained Camry drives confirms the same fine-grained field is dynamic and acceleration-related, but no modified-B4:B5 Camry response has been tested. |
 | Command semantics | **strong observed candidate; synthetic causality open** | In three no-driver-input stock auto-resumes, B12 leaves its stopped baseline and ramps in the acceleration direction 351–433 ms before ego motion while the main stopped `0x160` template remains stable; the protected `0x0CA` result simultaneously rises positive. This is substantially stronger than whole-drive correlation, but a stock trace still cannot prove that modifying B12 alone controls the receiver. |
 | Scale/sign | **sign strongly observed; absolute mapping unvalidated** | More-negative B12 accompanies larger positive protected `0x0CA` result and vehicle acceleration, consistent with the earlier r=−0.9517/−0.9894 cross-plane join. Exact B12-count→m/s² calibration and any shaping/nonlinearity remain open. |
 | Validity/counter rules | partially bounded | Profile-5 counter/CRC observed; receiver behavior on synthetic frames unknown. |
@@ -122,19 +128,15 @@ application/context fields and B2 counter, modify only the request field(s) that
 are positively recovered, recompute E2E Profile 5, and leave Toyota's downstream
 arbitration/SecOC participants untouched.
 
-## Architecture agreed for the eventual implementation (upstream shape)
+## Branch implementation and validation boundary
 
-When — and only when — semantics, receiver acceptance, and suppression are
-closed: `controlsd` keeps owning `CC.longActive`/`CC.actuators.accel`; the
-TSS3 Toyota `CarController` encodes the recovered FRC-side request PDU;
-Panda applies ordinary longitudinal command bounds and the TX whitelist;
-`pcmCruise` can remain initially. Capability flags, encoder coverage, and
-safety coverage must agree. Do not reuse the legacy Toyota PCM compensation
-loop blindly; direct-versus-shaped `actuators.accel` mapping depends on the
-final recovered `0x160` semantics. Flipping
-`openpilotLongitudinalControl=True` alone transmits nothing: current exact-F33
-Toyota safety whitelists only the C7 sideband `0x1FDC0002/8` on unsplit bus 1,
-and the TSS3 controller has no `0x160` sender yet.
+`controlsd` owns `CC.longActive`/`CC.actuators.accel`; Toyota `CarController`
+owns encoding and camera-counter pacing; Panda owns the TX whitelist, normal
+longitudinal bounds, and selective forwarding. No second permission state or
+legacy Toyota PCM compensation loop was added. Corolla can exercise the
+road-proven field and handoff. Camry must first validate modified-B4:B5 receiver
+acceptance, then stop/hold release and PCS/AEB coexistence, before this branch
+can be described as a working Camry longitudinal port.
 
 ## Next evidence steps
 
@@ -159,10 +161,8 @@ and the TSS3 controller has no `0x160` sender yet.
    behavior, but they do not contain a PCS event that proves emergency authority
    survives request replacement.
 
-**Exit status:** the byte-exact offline message generator is implemented and
-verified; retained stock logs now strongly identify B12 as request-related and
-prove native short-stop auto-resume plus a distinct delayed long-stop hold.
-Absolute request calibration, modified-frame receiver acceptance, delayed-hold
-release semantics, and PCS/AEB coexistence under replacement remain the main
-Camry-specific longitudinal gates. The stock-Toyota-B replacement topology is
-implemented in software but still awaits parked vehicle validation.
+**Exit status:** the historical B12 offline generator remains verified evidence,
+and the test branch now implements the Corolla-validated B4:B5 request plus the
+gap-free stock-Toyota-B replacement topology. For Camry, B4:B5 is an observed
+transfer hypothesis: modified-frame receiver acceptance, delayed-hold release,
+and PCS/AEB coexistence remain open vehicle tests.
