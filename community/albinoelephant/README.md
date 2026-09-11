@@ -1,7 +1,7 @@
 # albinoelephant Corolla field artifacts
 
 **Contributor:** albinoelephant (`@albinoelephant`, comma Discord)
-**Received:** initial DataFlash/oracle 2026-08-12; complete memory corpus 2026-08-18; eps-telescope probe 2026-08-26
+**Received:** initial DataFlash/oracle 2026-08-12; complete memory corpus 2026-08-18; eps-telescope probe 2026-08-26; TSS3 longitudinal field report 2026-09-10
 **Vehicle attribution:** reported by the contributor as a 2023 US Toyota Corolla
 **Direct application F181:** `8965F1208000` / `8A3111202000` (retained eps-telescope transcript)
 **Auxiliary one-record identity:** `8965H1202000` (DID `0x2032`, CodeFlash `0x17D80`)
@@ -23,6 +23,35 @@ separate one-record DID `0x2032` path. The historic `8965H1202000` filenames are
 kept as stable corpus labels, not as a claim about the wire-visible F181 primary.
 This remains a distinct physical specimen from Span's Corolla despite sharing the
 same F181 primary software record.
+
+
+## 2026-09-10 openpilot-longitudinal field report
+
+The contributor reported a live TSS3 openpilot-longitudinal run from a local
+opendbc + sunnypilot implementation. The path uses the unprotected/checksummed
+FRC `0x160` command on the stock Toyota-B network; it is separate from the
+SecOC-protected EPS B6 lateral path and does not require the Camry lateral repin.
+
+The contributor-supplied Discord screenshot reports:
+
+- Panda `safetyModel=toyota` for the full drive rather than shadow/no-output;
+- 23,683 transmitted `0x160` frames at 40 Hz, where shadow mode would transmit
+  none;
+- real acceleration commands in about 80% of the frames, with clean frame-rate
+  and counter behavior;
+- observed truck following and vehicle-speed control;
+- a later complete-standstill handoff that triggered Toyota System Malfunction,
+  after which the contributor explicitly reverted `TSS3LongMode` to `OFF` while
+  parked.
+
+This is retained as an **observed external-source longitudinal proof of concept**.
+It proves substantially more than a shadow implementation, while the standstill
+transition remains a known control-handoff defect. The raw rlog, exact route ID,
+and local-fork revision have not yet been supplied to this repository; do not
+upgrade the exact counts to repository-verified evidence until those inputs are
+retained and reduced. The combined lateral/longitudinal bounty case and the
+requested future reduction are documented in
+[Toyota TSS3 openpilot bounty evidence](../../docs/variants/toyota-tss3-openpilot-bounty-evidence.md).
 
 
 ## 2026-08-26 eps-telescope live probe

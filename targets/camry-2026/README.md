@@ -359,6 +359,10 @@ That sentence records the Sep-8 checkpoint; the Sep-10 ingress section below sup
 
 ## Working steering configuration (2026-09-10)
 
+The issue-ready interpretation of this route, including direct verification that
+Toyota LTA remained off throughout the steering interval, is in
+[`docs/variants/toyota-tss3-openpilot-bounty-evidence.md`](../../docs/variants/toyota-tss3-openpilot-bounty-evidence.md).
+
 Route `00000093--4066e7ae51` retains the first operator-observed openpilot steering
 configuration. It did not send B6 from the camera. The controller sent C7 sideband commands
 on extended `0x1FDC0002` bus0; an ephemeral EPS resident used each fresh nonzero C7 sequence

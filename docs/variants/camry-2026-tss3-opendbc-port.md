@@ -1,9 +1,22 @@
-# 2026 Camry TSS3 passive + historical-development openpilot/opendbc port
+# 2026 Camry TSS3 openpilot/opendbc port
 
 **Target:** maintainer 2026 Toyota Camry Hybrid, EPS application F181
 `8965F3307000 / 8A3113303100`.
 
-**Evidence boundary:** this report closes the exact-F33 generated-COM transmit geometry, the default-passive software integration, and the current development-only B6 sender/safety envelope. It does **not** authorize steering transmission. CORR-129/VAR-081 identify **73.303384 s of retained `0x08A` ID11 LTA/LCA request state with zero B6**; this is not a direct winner/grant oracle. CORR-134 recovers B21 as Target Lateral ID and B18:B19 as the signed request-angle quantity; CORR-135 rejects a presumed `0x08A -> B6` transform. Exact F33 neither accepts `0x08A` nor transmits it, while its B6-inactive internal path reaches physical steering; that makes zero B6 architecturally possible but does not prove the retained request was granted. VAR-091/CORR-136/CORR-149 place authenticated `0x08A` on captured Bus 4, observed E2E-only camera/radar PDUs on Bus 1, and exclude the FRC from the TSK signing role; batched rlog timestamps still cannot identify the downstream physical transmitter/proxy signer. VAR-094 proves consecutive `5282` is absent from native Bus-1 CAN; CORR-138 retracts the former standing-echo interpretation of `0x160[22]`. VAR-101 plus CORR-149 exclude FRC from the TSK key-holder/signing role and bound the always-on downstream proxy signer to Brake/Skid or Central Gateway without identifying which one.
+**Current control result:** the September 10 development configuration produced
+observed openpilot lateral control on route `00000093--4066e7ae51` while the
+native `0x08A` and `0x081` request/result planes remained Target Lateral ID 0
+(Toyota LTA off). The direct route evidence, exact software/RAM identities, and
+the independent TSS3 Corolla longitudinal proof of concept are summarized in
+[toyota-tss3-openpilot-bounty-evidence.md](toyota-tss3-openpilot-bounty-evidence.md).
+Earlier passive/direct-B6 checkpoints below remain useful history, but they do
+not supersede that working result.
+
+**Evidence boundary:** this report closes the exact-F33 generated-COM transmit
+geometry, the software integration, and the development B6 sender/safety envelope.
+The September 10 route establishes steering for the exact C7/RAM configuration;
+it does not qualify direct host-B6 transmission or make the Camry adapter a
+universal TSS3 interface. CORR-129/VAR-081 identify **73.303384 s of retained `0x08A` ID11 LTA/LCA request state with zero B6**; this is not a direct winner/grant oracle. CORR-134 recovers B21 as Target Lateral ID and B18:B19 as the signed request-angle quantity; CORR-135 rejects a presumed `0x08A -> B6` transform. Exact F33 neither accepts `0x08A` nor transmits it, while its B6-inactive internal path reaches physical steering; that makes zero B6 architecturally possible but does not prove the retained request was granted. VAR-091/CORR-136/CORR-149 place authenticated `0x08A` on captured Bus 4, observed E2E-only camera/radar PDUs on Bus 1, and exclude the FRC from the TSK signing role; batched rlog timestamps still cannot identify the downstream physical transmitter/proxy signer. VAR-094 proves consecutive `5282` is absent from native Bus-1 CAN; CORR-138 retracts the former standing-echo interpretation of `0x160[22]`. VAR-101 plus CORR-149 exclude FRC from the TSK key-holder/signing role and bound the always-on downstream proxy signer to Brake/Skid or Central Gateway without identifying which one.
 
 The integration and stock-architecture questions are deliberately separate.
 OQ-054 still tracks the private FRC request handoff and exact Bus-4 `0x08A`
@@ -25,12 +38,14 @@ byte-exact local slot-4 signing. VAR-156 then deliberately installed the preserv
 native-application trailer on the modified ID11/target/100/100 application: all six samples
 reached raw PDU44, generated COM, and the application snapshot. Cumulative stage 5 is
 therefore dynamically valid, and the tested application construction is accepted; the old
-stage-5 miss was before EPS queue ingress. The remaining implementation gap is the normal
-runtime handoff: `kai-openpilot` currently emits a zero-trailer B6 marker, while the resident
-experiment consumes a separate C7 control mailbox and reconstructs B3..B9 on a native
-template. Driver override, sustained motor response, timeout/release, and fault recovery
-remain unmeasured. VAR-148/CORR-179 close the ID11 composition semantics statically: accepted
-B6 is co-modulated inside the ordinary EPS sum, not an exclusive replacement mode.
+stage-5 miss was before EPS queue ingress. The later C7 runtime handoff closed the road-control
+boundary: route `00000093--4066e7ae51` contains 893 active angle commands with 893 successful
+Panda returns, a 17.92-second commanded/measured steering response (`r=0.997` at the tested
+400-ms lag), low driver torque, no EPS steering faults, and native `0x08A/0x081` ID0 throughout.
+The remaining work is upstream cleanup and broader release/fault qualification, not proof
+that the exact development path can steer. VAR-148/CORR-179 close the ID11 composition
+semantics statically: accepted B6 is co-modulated inside the ordinary EPS sum, not an
+exclusive replacement mode.
 
 **Physical routing decision (CORR-139):** the present Toyota-B repin is correct.
 Current GTS+ places Brake/Skid/SAS/EPS together on Toyota Bus 4; exact F33 has one
@@ -41,7 +56,8 @@ DLC 32, on **Panda bus 0 across the current CAN0/CAN2 relay pair**. Panda bus 1
 remains the native FRC/camera-radar plane. Do not send `0x08A` to EPS, do not infer
 an `0x08A -> B6` transform, and do not repin again in search of an EBU-private EPS
 stub: the telemetry/carrier absences in VAR-099 are not a routing discriminator.
-Production transmission remains unauthorized.
+Direct host-B6 transmission remains unqualified for production; the demonstrated C7/RAM
+development adapter is documented separately and must remain exact-F33-specific.
 
 Working session notes for the GTS+ vehicle-type → install-set → family-`.ddb` → GetSupport funnel (not a claim ledger): [../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md).
 
@@ -1174,14 +1190,23 @@ Evidence: `tools/targets/camry/analysis/analyze_camry_2026_parser_liveness.py`,
 `tests/verify_camry_2026_parser_liveness.py`, and fork
 `opendbc/car/toyota/tests/test_tss3_camry.py`.
 
-## 5. What remains before B6 steering authority is established
+## 5. Demonstrated B6 steering authority and remaining qualification
+
+**2026-09-10 supersession:** the exact development path has established steering
+authority. The working resident consumes a fresh C7 target, modifies and signs one
+already-admitted native B6, and the route shows the corresponding lagged wheel-angle
+response while Toyota LTA is off. See the dedicated
+[bounty evidence report](toyota-tss3-openpilot-bounty-evidence.md). The older
+direct-host-B6 localization plan below is retained to explain why that sender failed
+and why the working adapter uses an internal native B6; it is no longer the current
+control-status conclusion.
 
 **Qualification boundary:** the modified-firmware observer/bridge work below is
 historical/development RE used to localize receiver behavior. It is **not** the
-supported/legitimate command interface required by the completion plan's WP3
-qualification exit, and no admission result from it can be promoted to deployable
-steering support. The WP3 bench specification therefore remains blocked until a
-supported interface is independently identified.
+upstream interface. Its successful road result proves the exact development path,
+while general support still requires isolating the signer behind an exact platform
+capability and preserving the normal `controlsd`/`CarInterface`/`CarState`/
+`CarController`/Panda ownership boundaries.
 
 The 2026-09-04 road logs show why further limit tuning is not the next step. The shortest
 bounded execution path is independent of Toyota's unresolved stock FRC pipeline:
