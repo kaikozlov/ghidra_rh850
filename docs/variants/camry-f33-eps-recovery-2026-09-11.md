@@ -582,6 +582,64 @@ Canonical structural evidence is included in
 `data/generated/camry_f33_recovery_structure.json` and verified by
 `tests/verify_f33_recovery_structure.py`.
 
+## 10. P4_5 is a free-running EXTCLK1O supervisor clock, not a software watchdog kick
+
+The exact reset-time collective PORT table begins at `0x87A0`.  Its Port-4
+record at `0x8860` configures bit 5 with `PMC=1`, `PM=0`, and
+`PFCAE/PFCE/PFC = 0/1/0`.  Under the P1M-E Port-4 mux table, that is the
+third-alternative output **`EXTCLK1O`**.  This also closes a tempting CAN-pin
+misidentification: exact F33 configures P2_0/P2_1 as its first-alternative
+`RSCAN0RX0/RSCAN0TX0` pair, while P4_5 is reserved for the clock-controller
+output.
+
+The low boot initializer `0x10C6`, called unconditionally from `0x13B0`, sets
+`CKSC3C @ FFF890C0 = 4` and then `CLKD3DIV @ FFF88818 = 0x50`.  Renesas defines
+selector 4 as `CLK_LSB`, which is 40 MHz on P1M-E, and defines nonzero
+`CLKD3DIV` as the direct EXTCLK1O divide ratio.  The resulting healthy-state
+output is therefore **40 MHz / 80 = 500 kHz**.  The independent periodic EIINT
+path `0x667B6 -> 0x619C0` does not toggle a watchdog GPIO; it merely checks that
+`CLKD3DIV` still equals `0x50` and rewrites `0x50` if it drifted.
+
+The terminal reset path is deliberately the inverse.  `0x61940` calls
+`0x61906(0xFF)`, which maps to divider zero; P1M-E documents zero as
+`EXTCLK1O stopped (low level)`.  It then writes the set/reset-register mask
+`0x00200000` to `PSR4`, `PMSR4`, and `PMCSR4`, atomically forcing P4_5 low,
+output, and port mode, and finally enters its non-returning terminal path.  The
+low boot reset routine at `0x1560` performs the same P4_5 teardown by ordinary
+read/modify/write before spinning.  That low sequence is byte-identical in the
+retained Camry, Sienna, and Corolla P1M-E images; Willem Melching's public
+R7F701381 EPS shellcode independently uses the homologous boot routine as its
+post-dump reboot primitive.  This is strong cross-variant evidence for an
+external reset/supervisor relationship, but the exact F33 PCB net from P4_5 to
+that external device has not been physically traced.
+
+This changes the incident interpretation.  The malformed hook's predicted
+SYSERR does **not** execute `0x61940`, does not write `CLKD3DIV=0`, and does not
+remux P4_5.  No recovered post-SYSERR path changes the clock-controller state.
+Therefore the MCU can remain trapped in the FE-level exception while the
+independently generated 500-kHz EXTCLK1O continues.  A board supervisor that
+uses this clock as its liveness input would continue to see a healthy clock even
+though foreground software is dead.  This is consistent with the observed
+nonresponsive state and explains why waiting for a watchdog is not an evidence-
+based recovery strategy.
+
+The same investigation also identified the external EPS ASIC programming
+handshake: boot initialization sends CRC-protected command `0x88` over CSIH1
+CS0 until `FPMON.FWE` reports physical FLMD0 high.  That command is issued only
+after `0x1398` bootloader selection and therefore enables CodeFlash P/E; it does
+**not** select bootloader.  The application CSIH1 command set is separately
+bounded to compile-time `0x80/0x82/0x8210/0x8250/0x8380` families, and no
+pre-fault CAN path was recovered that can synthesize boot-only `0x88` or stop
+EXTCLK1O.
+
+The practical remaining boundary is correspondingly sharp: a network-only
+recovery needs an independent vehicle-side mechanism that can alter the external
+supervisor/FLMD/reset state, or a new executor before the malformed branch.
+Neither is present in the retained F33 CAN software.  Serial-programming UART/CSI
+uses dedicated JP0 pins, not the P2_0/P2_1 vehicle CAN pins, so merely forcing a
+serial boot mode would still not turn the five-wire CAN interface into a Renesas
+programmer.
+
 ## What is established, and what would actually change the answer
 
 The direct, functional, and subaddressed diagnostic paths examined here do not

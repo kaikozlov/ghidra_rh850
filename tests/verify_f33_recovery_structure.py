@@ -69,5 +69,41 @@ check(
     and errout["ecmemk2"]["value"] == "0x3FFFFFFF",
 )
 
+# The board-level reset/supervisor clock is exported on P4_5 as EXTCLK1O.
+sup = report["external_supervisor_clock"]
+p45 = sup["p4_5"]
+check(
+    "reset-time port table selects P4_5 third-alternative output",
+    p45["p"] == 0
+    and p45["pmc"] == 1
+    and p45["pm"] == 0
+    and p45["pfc"] == 0
+    and p45["pfce"] == 1
+    and p45["pfcae"] == 0
+    and p45["selector_bits_pfcae_pfce_pfc"] == "010",
+)
+clock_init = sup["boot_clock_init"]
+check(
+    "boot initializes EXTCLK1O source selector and 0x50 divider",
+    clock_init["function"] == "0x000010C6"
+    and clock_init["source_select_register"] == "0xFFF890C0"
+    and clock_init["source_select_value"] == 4
+    and clock_init["divider_register"] == "0xFFF88818"
+    and clock_init["divider_value"] == "0x00000050",
+)
+check(
+    "periodic supervisor repairs divider to 0x50",
+    sup["periodic_repair"]["function"] == "0x000619C0"
+    and sup["periodic_repair"]["caller"] == "0x000667B6"
+    and sup["periodic_repair"]["expected_divider"] == "0x00000050",
+)
+check(
+    "terminal reset explicitly stops clock and forces P4_5 low port mode",
+    sup["terminal_reset"]["function"] == "0x00061940"
+    and sup["terminal_reset"]["clock_stop_via"] == "0x00061906"
+    and sup["terminal_reset"]["clock_stop_mode"] == "0xFF"
+    and sup["terminal_reset"]["p4_5_update_mask"] == "0x00200000",
+)
+
 print(f"Results: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

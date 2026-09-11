@@ -232,6 +232,78 @@
       "vtable": "0x00021E20"
     }
   ],
+  "external_supervisor_clock": {
+    "boot_clock_init": {
+      "divider_enable_sequence": {
+        "address": "0x00001122",
+        "bytes": "200e50001ef658f7010d000d1f00b505",
+        "size": 16
+      },
+      "divider_register": "0xFFF88818",
+      "divider_value": "0x00000050",
+      "function": "0x000010C6",
+      "source_select_register": "0xFFF890C0",
+      "source_select_sequence": {
+        "address": "0x000010CA",
+        "bytes": "3e06c090f8ff000a80078f0910f1040a010d000d1f00",
+        "size": 22
+      },
+      "source_select_value": 4
+    },
+    "boot_reset": {
+      "function": "0x00001560",
+      "p4_bit": 5,
+      "sequence": {
+        "address": "0x00001560",
+        "bytes": "e00760018007c90910f1c10e0200620afa053e061888f8ff0105000d1f003e060001c1ff7008c10edfff800c7a08c10edfff8a0c7808c10edfff880c",
+        "size": 60
+      }
+    },
+    "collective_port_table_base": "0x000087A0",
+    "p4_5": {
+      "bit": 5,
+      "manual_decode": "third-alternative output EXTCLK1O",
+      "p": 0,
+      "pbdc": 1,
+      "pfc": 0,
+      "pfcae": 0,
+      "pfce": 1,
+      "pibc": 1,
+      "pm": 0,
+      "pmc": 1,
+      "selector_bits_pfcae_pfce_pfc": "010"
+    },
+    "periodic_repair": {
+      "caller": "0x000667B6",
+      "expected_divider": "0x00000050",
+      "function": "0x000619C0",
+      "sequence": {
+        "address": "0x000619C0",
+        "bytes": "800761008007890910f10106b0ffd20d8036ffff80fff0e70ae820365000bfff96fe1d3080ff06e84006",
+        "size": 42
+      }
+    },
+    "port4_record": {
+      "address": "0x00008860",
+      "bytes": "ffff0000000000000b0000000000000000000000000000000000000000002000000003000b002f001480200020000000",
+      "size": 48
+    },
+    "scope": "raw exact-F33 clock/port/reset geometry; EXTCLK1O and clock-frequency semantics are interpreted from the P1M-E hardware manual",
+    "terminal_reset": {
+      "clock_stop_mode": "0xFF",
+      "clock_stop_via": "0x00061906",
+      "function": "0x00061940",
+      "p4_5_update_mask": "0x00200000",
+      "p4_function_set_reset_register": "0xFFC10120",
+      "p4_mode_set_reset_register": "0xFFC10124",
+      "p4_set_reset_register": "0xFFC10104",
+      "sequence": {
+        "address": "0x00061982",
+        "bytes": "2036ff00bfff80ff3e060401c1ff400e2000010d110d0f0d2036500081ff",
+        "size": 30
+      }
+    }
+  },
   "foreground_mpu_context_selector": 0,
   "foreground_order": [
     {

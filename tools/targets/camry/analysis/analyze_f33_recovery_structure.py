@@ -210,6 +210,57 @@ def analyze(image: bytes) -> dict[str, object]:
             "ecmemk2": {"register": "0xFFD62030", "value": "0x3FFFFFFF",
                         "program_sequence": span(0x633B2, 0x20)},
         },
+        "external_supervisor_clock": {
+            "collective_port_table_base": address(0x87A0),
+            "port4_record": span(0x8860, 0x30),
+            "p4_5": {
+                "bit": 5,
+                "p": (u16(0x8860 + 0x24) >> 5) & 1,
+                "pmc": (u16(0x8860 + 0x26) >> 5) & 1,
+                "pm": (u16(0x8860 + 0x28) >> 5) & 1,
+                "pfc": (u16(0x8860 + 0x1C) >> 5) & 1,
+                "pfce": (u16(0x8860 + 0x1E) >> 5) & 1,
+                "pfcae": (u16(0x8860 + 0x20) >> 5) & 1,
+                "pibc": (u16(0x8860 + 0x2A) >> 5) & 1,
+                "pbdc": (u16(0x8860 + 0x2C) >> 5) & 1,
+                "selector_bits_pfcae_pfce_pfc": "010",
+                "manual_decode": "third-alternative output EXTCLK1O",
+            },
+            "boot_clock_init": {
+                "function": address(0x10C6),
+                "source_select_register": "0xFFF890C0",
+                "source_select_value": 4,
+                "divider_register": "0xFFF88818",
+                "divider_value": "0x00000050",
+                "source_select_sequence": span(0x10CA, 0x16),
+                "divider_enable_sequence": span(0x1122, 0x10),
+            },
+            "periodic_repair": {
+                "function": address(0x619C0),
+                "caller": address(0x667B6),
+                "expected_divider": "0x00000050",
+                "sequence": span(0x619C0, 0x2A),
+            },
+            "terminal_reset": {
+                "function": address(0x61940),
+                "clock_stop_via": address(0x61906),
+                "clock_stop_mode": "0xFF",
+                "p4_set_reset_register": "0xFFC10104",
+                "p4_mode_set_reset_register": "0xFFC10124",
+                "p4_function_set_reset_register": "0xFFC10120",
+                "p4_5_update_mask": "0x00200000",
+                "sequence": span(0x61982, 0x1E),
+            },
+            "boot_reset": {
+                "function": address(0x1560),
+                "p4_bit": 5,
+                "sequence": span(0x1560, 0x3C),
+            },
+            "scope": (
+                "raw exact-F33 clock/port/reset geometry; EXTCLK1O and clock-frequency semantics "
+                "are interpreted from the P1M-E hardware manual"
+            ),
+        },
         "application_to_boot_call": call(0x65F82),
     }
 
