@@ -1,0 +1,348 @@
+{
+  "application_direct_vectors": [
+    {
+      "address": "0x00020010",
+      "bytes": "1f00e0061e2e0600",
+      "size": 8,
+      "target": "0x00062E1E"
+    },
+    {
+      "address": "0x00020020",
+      "bytes": "1f00e0061e2e0600",
+      "size": 8,
+      "target": "0x00062E1E"
+    },
+    {
+      "address": "0x00020030",
+      "bytes": "1f00e0061e2e0600",
+      "size": 8,
+      "target": "0x00062E1E"
+    },
+    {
+      "address": "0x00020040",
+      "bytes": "1f00e0061e2e0600",
+      "size": 8,
+      "target": "0x00062E1E"
+    },
+    {
+      "address": "0x00020050",
+      "bytes": "1f00e0061e2e0600",
+      "size": 8,
+      "target": "0x00062E1E"
+    },
+    {
+      "address": "0x00020060",
+      "bytes": "1f00e0061e2e0600",
+      "size": 8,
+      "target": "0x00062E1E"
+    },
+    {
+      "address": "0x00020070",
+      "bytes": "1f00e0061e2e0600",
+      "size": 8,
+      "target": "0x00062E1E"
+    },
+    {
+      "address": "0x00020080",
+      "bytes": "1f00e0061e2e0600",
+      "size": 8,
+      "target": "0x00062E1E"
+    },
+    {
+      "address": "0x00020090",
+      "bytes": "1f00e006d45b0600",
+      "size": 8,
+      "target": "0x00065BD4"
+    },
+    {
+      "address": "0x000200A0",
+      "bytes": "1f00e0061e2e0600",
+      "size": 8,
+      "target": "0x00062E1E"
+    },
+    {
+      "address": "0x000200B0",
+      "bytes": "1f00e0061e2e0600",
+      "size": 8,
+      "target": "0x00062E1E"
+    },
+    {
+      "address": "0x000200C0",
+      "bytes": "1f00e0061e2e0600",
+      "size": 8,
+      "target": "0x00062E1E"
+    },
+    {
+      "address": "0x000200E0",
+      "bytes": "1f00e0061e2e0600",
+      "size": 8,
+      "target": "0x00062E1E"
+    },
+    {
+      "address": "0x000200F0",
+      "bytes": "1f00e0061e2e0600",
+      "size": 8,
+      "target": "0x00062E1E"
+    }
+  ],
+  "application_to_boot_call": {
+    "address": "0x00065F82",
+    "bytes": "baff7e3f",
+    "size": 4,
+    "target": "0x00009F00"
+  },
+  "boot_application_entry_cell": {
+    "address": "0x000FFDB8",
+    "value": "0x00020880"
+  },
+  "boot_hardware_error_check": {
+    "address": "0x0000115A",
+    "bytes": "3e060820c6ff140d019a019d0052009d1f00209ea5003e063420d6ff079d409e0800019d3206fffff7ff0195019da007459c40ac1f000198819ab105830aa90501527f00",
+    "size": 68
+  },
+  "boot_marker_words": [
+    {
+      "address": "0x000FFE00",
+      "bytes": "5aa5a55a",
+      "size": 4
+    },
+    {
+      "address": "0x00017E00",
+      "bytes": "5aa5a55a",
+      "size": 4
+    }
+  ],
+  "boot_validity_call": {
+    "address": "0x000013C4",
+    "bytes": "bfffdafd",
+    "size": 4,
+    "target": "0x0000119E"
+  },
+  "comm_initialized_guard": {
+    "read_compare_branch": {
+      "address": "0x0007A258",
+      "bytes": "e40ff385a10601feaa35",
+      "size": 10
+    },
+    "startup_terminal_assignment": {
+      "address": "0x0007A180",
+      "bytes": "200e01fe640ff285",
+      "size": 8
+    }
+  },
+  "default_exception": {
+    "address": "0x00062E1E",
+    "bytes": "031e94ff63f71d0003f035fde1ff40000dfde0ff40000bfde0876001630f210080ff90e48505",
+    "size": 38
+  },
+  "diagnostic_callback": "0x00079DB0",
+  "diagnostic_can_ids": [
+    "0x000007A1",
+    "0x00000777",
+    "0x000007A0"
+  ],
+  "diagnostic_transport_to_upper_routes": [
+    {
+      "copy_receive_data": "0x0007BE6C",
+      "lower_handle": "0x00000804",
+      "receive_completion": "0x0007BE90",
+      "route_row": "0x00022956",
+      "start_of_reception": "0x0007BE58",
+      "transport_record": "0x00022BDE",
+      "upper_handle": "0x00000802",
+      "vtable": "0x00021E20"
+    },
+    {
+      "copy_receive_data": "0x0007BE6C",
+      "lower_handle": "0x00000805",
+      "receive_completion": "0x0007BE90",
+      "route_row": "0x0002295A",
+      "start_of_reception": "0x0007BE58",
+      "transport_record": "0x00022BFE",
+      "upper_handle": "0x00000803",
+      "vtable": "0x00021E20"
+    },
+    {
+      "copy_receive_data": "0x0007BE6C",
+      "lower_handle": "0x00000806",
+      "receive_completion": "0x0007BE90",
+      "route_row": "0x0002295E",
+      "start_of_reception": "0x0007BE58",
+      "transport_record": "0x00022C1E",
+      "upper_handle": "0x00000804",
+      "vtable": "0x00021E20"
+    }
+  ],
+  "foreground_mpu_context_selector": 0,
+  "foreground_order": [
+    {
+      "address": "0x000667EA",
+      "bytes": "80ffb834",
+      "size": 4,
+      "target": "0x00069CA2"
+    },
+    {
+      "address": "0x000667EE",
+      "bytes": "81ff663a",
+      "size": 4,
+      "target": "0x0007A254"
+    },
+    {
+      "address": "0x000667F2",
+      "bytes": "83ffd020",
+      "size": 4,
+      "target": "0x000988C2"
+    },
+    {
+      "address": "0x000667F6",
+      "bytes": "80ff8636",
+      "size": 4,
+      "target": "0x00069E7C"
+    },
+    {
+      "address": "0x000667FA",
+      "bytes": "bfff6423",
+      "size": 4,
+      "target": "0x00058B5E"
+    },
+    {
+      "address": "0x000667FE",
+      "bytes": "bfff14fd",
+      "size": 4,
+      "target": "0x00066512"
+    }
+  ],
+  "incident": {
+    "decoded_bad_target": "0x362BFE04",
+    "hook_address": "0x0007A272",
+    "instruction_with_stock_successor": "ff02925b2436",
+    "live_exception_registers_observed": false,
+    "recorded_bad_four_bytes": "ff02925b",
+    "stock_instruction": {
+      "address": "0x0007A272",
+      "bytes": "80ffee1c",
+      "size": 4,
+      "target": "0x0007BF60"
+    }
+  },
+  "mpu_region_zero": {
+    "attributes_context_0": "0x000000B8",
+    "attributes_context_1": "0x000000B8",
+    "lower": "0x00000000",
+    "upper_inclusive": "0xFEBDFFFF"
+  },
+  "pre_hook_calls": [
+    {
+      "address": "0x0007A262",
+      "bytes": "80ffda1b",
+      "size": 4,
+      "target": "0x0007BE3C"
+    },
+    {
+      "address": "0x0007A266",
+      "bytes": "80ff5c19",
+      "size": 4,
+      "target": "0x0007BBC2"
+    },
+    {
+      "address": "0x0007A26A",
+      "bytes": "80ffd221",
+      "size": 4,
+      "target": "0x0007C43C"
+    },
+    {
+      "address": "0x0007A26E",
+      "bytes": "bfff70fc",
+      "size": 4,
+      "target": "0x00079EDE"
+    }
+  ],
+  "receive_owner_callbacks": [
+    "0x000810F2",
+    "0x00081072",
+    "0x00081200",
+    "0x00081072",
+    "0x00081072",
+    "0x00081072"
+  ],
+  "reviewed_nondefault_interrupt_entries": [
+    {
+      "entry_bytes": "1f002026b800e4d720301c00",
+      "slot": "0x00020220",
+      "target": "0x00071AE4"
+    },
+    {
+      "entry_bytes": "1f00031ee4ff63571900e057",
+      "slot": "0x00020414",
+      "target": "0x000713B0"
+    },
+    {
+      "entry_bytes": "00001f00031ee4ff63571900",
+      "slot": "0x00020418",
+      "target": "0x0007145A"
+    },
+    {
+      "entry_bytes": "00001f00031ee4ff63571900",
+      "slot": "0x0002041C",
+      "target": "0x00071506"
+    },
+    {
+      "entry_bytes": "031e94ff63f71d0003f035fd",
+      "slot": "0x000204EC",
+      "target": "0x00066100"
+    },
+    {
+      "entry_bytes": "031e94ff63f71d0003f035fd",
+      "slot": "0x000204F0",
+      "target": "0x000660BE"
+    },
+    {
+      "entry_bytes": "031e94ff63f71d0003f035fd",
+      "slot": "0x00020690",
+      "target": "0x00066142"
+    },
+    {
+      "entry_bytes": "031e94ff63f71d0003f035fd",
+      "slot": "0x00020694",
+      "target": "0x00066184"
+    },
+    {
+      "entry_bytes": "031e94ff63f71d0003f035fd",
+      "slot": "0x000207EC",
+      "target": "0x000661C6"
+    }
+  ],
+  "schema": "f33-offline-recovery-structure-v1",
+  "scope": "Raw structural evidence; no ECU access, flash output, or complete execution proof",
+  "source": {
+    "image": "firmware/camry-8965F3307000/CodeFlash.bin",
+    "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "size": 1048576,
+    "va_equals_file_offset": true
+  },
+  "stock_xcp_dispatch_gate": {
+    "address": "0x00030D68",
+    "bytes": "5a",
+    "size": 1
+  },
+  "unused_special_callback": {
+    "address": "0x000814AC",
+    "bytes": "7f00",
+    "size": 2
+  },
+  "upper_adapter_targets": {
+    "copy_receive_data": "0x00092152",
+    "receive_completion": "0x000921D2",
+    "start_of_reception": "0x000920BE"
+  },
+  "vector_90_return": {
+    "address": "0x00065C50",
+    "bytes": "23570d00ea17200023571100031e1400e0074a01",
+    "size": 20
+  },
+  "vector_90_saved_pc_adjustment": {
+    "address": "0x00065BDC",
+    "bytes": "e25740000a56040063570d00",
+    "size": 12
+  }
+}

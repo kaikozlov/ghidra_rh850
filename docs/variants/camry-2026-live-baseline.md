@@ -6249,12 +6249,12 @@ The first live stage-7 package is withdrawn. Its builder requested a six-byte
 `jarl32 persistent_entry,lp`, asserted that six-byte geometry, and then wrote
 only its first four bytes. The resulting replacement at `0x7A272` was
 `ff02925b`, not a complete instruction. With the following untouched stock
-halfword `2436`, the CPU decodes `ff02925b2436` as a six-byte JARL to unmapped
-`0x362BFE04`. The wrapper at `0xFFE04` is therefore never entered. The affected
+halfword `2436`, the instruction decodes as a six-byte JARL to reserved
+`0x362BFE04`, not a call to the wrapper at `0xFFE04`. The reconstructed affected
 stage-7 image is SHA-256
 `aba6867f244dda42b754d6f455f25a226ee95025dee6a2d98b07b3ac550f2d74`.
-Its application CRC is nevertheless valid, so the failure is repeatable on
-every cold start.
+Its application CRC is nevertheless valid, consistent with the successful
+final write telemetry; resetting does not remove the malformed flash bytes.
 
 Exact reset-path analysis explains the recovery behavior. Cold reset reaches
 `0x13B0`; validity processing at `0x119E` accepts the CRC-valid application and
@@ -6262,17 +6262,19 @@ loads its entry at `0xFFDB8` (`0x20880`). It does not leave a bootloader DCM
 window. The application normally owns DiagnosticSessionControl and performs
 the programming handoff through its sole direct application-to-low-boot call:
 `0x65F5E -> 0x9F00 -> 0x148E -> 0x1398`. The malformed foreground hook executes
-before the application CAN/DCM service becomes functional, so neither physical
-`0x7A1 -> 0x7A9` nor Toyota functional/subaddress requests can reach that
-handoff. Startup captures across Panda buses 0 and 2 saw no EPS `0x7A9`; broad
+before the ordinary foreground DCM worker and system-mode handoff run.
+The deeper offline audit below corrects the broader CAN-liveness claim: receive
+processing can occur before the hook, but the reviewed receive-completion paths
+prepare pending requests rather than entering boot directly. Startup captures across Panda buses 0 and 2 saw no EPS `0x7A9`; broad
 physical/functional programming ladders likewise produced no EPS response.
 
 The installed GTS profiles were also audited for a second-ECU active test that
 could independently cycle EPS power or reset it. Central Gateway, Power Source
 Control, and Power Distribution Box expose no applicable active test; Main Body
-relay tests do not control EPS supply. This bounds the currently demonstrated
-network-only recovery surface as closed: the target DCM is not alive, valid CRC
-skips the boot DCM, and no verified peer-ECU EPS reset/power control exists.
+relay tests do not control EPS supply. No network-only repair was demonstrated: the normal diagnostic worker is
+blocked, the successful boot-validity path skips boot DCM, and no verified
+peer-ECU EPS reset/power control was found in those profiles. This is not proof
+that every undocumented or assembly-level recovery mechanism is absent.
 Speculative gateway resets, bus flooding, voltage glitching, and deliberate
 flash corruption are not recovery procedures.
 
@@ -6315,3 +6317,27 @@ undocumented recovery modes are not established by these observations.
 The identity report and the preceding catcher/conditional-restore logs are
 retained in
 [`targets/camry-2026/raw-20260911/eps-recovery/`](../../targets/camry-2026/raw-20260911/eps-recovery/).
+
+### 70.8 Offline recovery follow-up: receive/execute split and missing vectors
+
+The [focused offline recovery audit](camry-f33-eps-recovery-2026-09-11.md)
+traces the raw interrupt entries and table-driven receive callbacks omitted
+from the canonical function list. Receive work `79EDE -> 809FE -> 808D6`
+precedes the malformed hook; the configured `7A1/777/7A0` channels converge
+through `79DB0` and upper adapters to `920BE/92152/921D2`. Reception completion
+prepares pending DCM state; normal execution `988C2` and actual system-mode
+handoff `58B5E -> 5F464/5F91C -> 56CF6 -> 65F5E -> 9F00` remain later
+foreground work. A faster request ladder therefore has no recovered independent
+boot entry. No CAN-only repair was demonstrated.
+
+The same pass distinguishes default exception halt `62E42` from vector-90
+`65BD4`'s saved-`FEPC+4` return, while leaving the actual post-incident exception
+unobserved. The boot check at `115A` reads CodeFlash ECC/parity status
+`FFC62030/UCFDERSTR`, not a failed-boot latch. Manufacturer normal/serial mode
+selection and the lockstep master/checker architecture do not supply a second
+independent CAN server. The exact fault state and undocumented assembly-level
+mechanisms remain unknown, not claimed recovery methods or proven absent.
+
+`tools/targets/camry/analysis/analyze_f33_recovery_structure.py` regenerates
+`data/generated/camry_f33_recovery_structure.json` from the exact stock image;
+it makes no ECU connection and emits no flash image or executable payload.
