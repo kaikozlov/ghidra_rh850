@@ -35,19 +35,25 @@ inhibits the relevant EI/FE exception acknowledgements; `ei` clears ID, not NP.
 Thus, **for an FE-level fault, `ei` alone does not prove that ordinary CAN/timer
 interrupts remain serviceable**. The PSW table was visually checked in the PDF.
 
-The exact incident exception remains unobserved. At `7A272`, the recorded four
-bytes and next stock halfword form `FF 02 92 5B 24 36`, a six-byte JARL to
-`362BFE04`. Hardware Table 4.1 (p.257) marks that address reserved, but the
-firmware's MPU region 0 spans `00000000..FEBDFFFF` and has attribute `B8` in both
-recovered contexts. It permits supervisor execution when its ASID condition
-matches. Therefore an out-of-CodeFlash address alone does not establish a
-specific MPU instruction-protection exception. Reserved-region fetch behavior,
-privilege/ASID state, and live FEIC/FEPC must not be conflated.
+The exact live incident exception remains unobserved. At `7A272`, the recorded
+four bytes and next stock halfword form `FF 02 92 5B 24 36`, a six-byte JARL to
+`362BFE04`. Hardware Table 4.1 (p.257) marks `20000000..FEBDFFFF` reserved and
+Section 4.2.1 limits instruction fetch to CodeFlash, LocalRAM-self, and
+GlobalRAM. Table 3.80 assigns FEIC `13H` to a SYSERR caused by an instruction
+fetch from other than CodeFlash. Section 3.2.3.3 classifies SYSERR as an FE-level
+exception from which return or recovery is not possible. These facts make
+SYSERR `13H` the bounded hardware-static interpretation of the malformed call;
+the missing live FEIC observation should still be kept distinct from that
+interpretation.
+
+The broad firmware MPU region spanning `00000000..FEBDFFFF` does not map the
+reserved system address range or make it a valid instruction source. Its
+supervisor-execute permission is therefore not a competing recovery mechanism.
 
 Sources: raw `62E1E..62E43`, `712CE`; MPU loader `6586A/65984`, bounds `31688`,
-attributes `31708/31748`; manual pp.198, 215, 219–220, 244, 257. The separate
-vector-90 handler `65BD4` returning through saved `FEPC+4` is not evidence that
-this fault returns through the malformed call's `LP`.
+attributes `31708/31748`; manual pp.198, 215, 219–220, 244, 247, 257–259. The
+separate vector-90 handler `65BD4` returning through saved `FEPC+4` is not
+evidence that this fault returns through the malformed call's `LP`.
 
 ## 2. A receive callback can run without executing its diagnostic request
 
@@ -184,9 +190,11 @@ connector side. The retained identity check
 `targets/camry-2026/raw-20260911/eps-recovery/nrtd-identity-check-20260911T054713Z.json`
 records `0x7A1 -> 0x7A9` timeouts on both bus 0 and bus 2. Another Panda logical
 bus selection is therefore not an untried route around the central gateway.
-Toyota's topology still labels EPS “via EBU,” so a physically downstream tap
-could distinguish an unverified assembly-level relay boundary; no GTS/CUW
-command was recovered that makes EBU execute or proxy the EPS flash writer.
+The earlier inference that “via EBU” implied a second EBU-private CAN segment
+was disproved: exact F33 has one CAN controller, and the successful repinned
+diagnostic path reaches the same Bus-4 segment represented on both sides of the
+camera relay. A supposed downstream EBU tap is therefore not a supported
+software or wiring recovery route.
 
 Current CUW recovery APIs restore host-side retry/CID state and then invoke the
 ordinary writer. They do not provide a target-independent CAN recovery listener.
@@ -195,6 +203,89 @@ control-transfer census in
 `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`, no
 stock camera-side CAN command is presently recovered that can rewrite `7A272`
 while execution is trapped there. A software/network answer would require new
-evidence of an independent EBU/manufacturer recovery executor or a concrete
+evidence of an independent manufacturer recovery executor or a concrete
 pre-fault control-transfer vulnerability; neither is present in the acquired
 firmware and tooling.
+
+## 7. Reusing the intact resident signer
+
+The stage-7 incident image changes only the hook after stage 6. The two resident
+spans are byte-identical between the stage-6 and incident reconstructions:
+
+| Resident span | Length | SHA-256 |
+|---|---:|---|
+| `FFE04..FFEF3` | 240 | `723eb074c632ce0397a798f8c4c9ff305eacb6a264860ec050cf5ccabeb308c4` |
+| `FFF04..FFFFD` | 250 | `5725dabdcbd7c27f3ceaa5dea20295d56f420a8469e3312c56f8c2aef68ad0cd` |
+
+Raw marker bytes `FFE00=5A A5 A5 5A` and `FFF00=01 00 00 00` remain around the
+spans. The resident entry at `FFE04` initializes its fixed private state,
+invokes the signer body, invokes displaced stock call `7BF60`, and returns. The body reads
+fixed native B6/C7/freshness locations, constructs the fixed 36-byte command-5
+domain, calls the fixed ICU-S/freshness helpers, and conditionally replaces the
+fixed B6 queue fields. Its copies have constant lengths 28 and 7. It contains no
+FACI erase/program sequence, arbitrary-address write, transport parser, loader,
+or request-derived return/callback target. Executing it is therefore not itself
+a flash repair primitive.
+
+The stock exact-target image has no recovered reference into either resident
+span. An exhaustive current control-transfer assessment reports 496 decoded
+indirect transfers (487 in the application); all directly referenced RAM call
+cells are below the former XCP window, and the residual computed calls resolve
+to fixed, guarded CodeFlash callbacks. The image contains no decoded SYSCALL or
+TRAP instruction, no SCCFG/SCBP writer, and only fixed EBASE/INTBP setup. Thus no
+recovered diagnostic, callback, saved-PC, syscall-vector, DMA, or scheduler path
+can be retargeted to `FFE04` by a tester before the bad call.
+
+The hook guard does not create a network-controlled clean pass. `7A254` reads
+`FEBE3DF2` and enters the bad sequence only when it equals `FE01`; the complete
+direct-reference set contains two initialization writes in `7A132` (`FD02`,
+then terminal `FE01`) and reads in `7A232/7A254`. `667E6` calls `7A254`
+unconditionally before DCM worker `988C2` and mode/handoff worker `58B5E`.
+Ordinary CAN receive can queue a request before the fault, but no recovered
+request path writes this guard or services the queued request before the hook.
+
+The application fixes `EBASE=20000` at `715C8`. Its raw `+10` vector decodes as
+`syncp; jmp 62E1E; feret`; `62E1E` saves EI state, enables EI, records context,
+and loops forever. The raw `+90` vector decodes as
+`syncp; jmp 65BD4; feret`, and only that separate handler advances `FEPC` by
+four before FERET. The hardware SYSERR classification above therefore does not
+provide a resumable skip of the malformed JARL or a path into the resident.
+
+Result: the intact resident is a useful known executable landing pad **only if
+a separate pre-fault PC-transfer primitive is first recovered**. It would then
+still need to be paired with an independently callable flash erase/program
+chain to restore `7A272`. Neither prerequisite is present in the recovered
+network-reachable surface. This is a bounded static negative, not a claim that
+no undocumented manufacturer executor or unrecovered vulnerability exists.
+
+## 8. P5 gateway preparation is not target-side execution
+
+The current CP-unprotected GTS+ DLLs under `build/out/cuwplus-unprotected/` were
+checked rather than relying only on the route INI. P5 Unified writer
+`TCUWCanUnifiedPrepareWriter.dll` imports `JudgeReproGWNode`,
+`GetCentralGWReqCanID`, `ChangeModeForCentralGW`, and
+`RoutineControlForP5CentralGW`. `TCUWUnifiedUtils.dll` implements the gateway
+mode request over extended IDs `0x750/0x758`, node byte `0x5F`, with request
+`10 60` and expected response `50 60`. Its P5 gateway routines use these
+request/response pairs:
+
+| Routine type | Request | Expected response |
+|---:|---|---|
+| 0 | `31 01 10 11` | `71 01 10 11` |
+| 1 | `31 03 10 11` | `71 03 10 11` |
+| 2 | `31 01 10 12` | `71 01 10 12` |
+| 3 | `31 03 10 12` | `71 03 10 12` |
+
+This corrects the narrower earlier observation based on route metadata: current
+GTS+ does contain P5 central-gateway preparation behavior. The writer then
+continues with ordinary physical target UDS, including `10 02`, an 18-byte
+SecurityAccess exchange (`27 01 || tester-data16`, then `27 02 || key16`), and
+the target programming sequence. No gateway-side payload execution, proxy
+FACI writer, or response synthesis for an absent target was recovered.
+
+The available current Camry CUW descriptor used to exercise this DLL is for a
+different ECU and must not be projected onto the EPS. The meaningful bounded
+result is in the generic DLL flow: central-gateway preparation opens the route
+and controls network conditions, but the selected ECU still has to answer and
+run its own programming services. It therefore does not supply the missing
+independent executor for a faulted F33 application.
