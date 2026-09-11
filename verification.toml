@@ -535,6 +535,9 @@ tests = ["tests/verify_corolla_tss3_opendbc_readiness.py"]
 [suite.corolla_hf]
 tests = ['tests/verify_corolla_hf.py']
 
+[suite.corolla_hf_b6_inline_signer]
+tests = ["tests/verify_corolla_hf_b6_inline_signer.py"]
+
 [suite.tss3_cruise_live_transport_external]
 tests = ["tests/verify_tss3_cruise_live_transport_external.py"]
 modes = ["local"]
