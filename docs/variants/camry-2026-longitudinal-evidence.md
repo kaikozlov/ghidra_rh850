@@ -22,34 +22,99 @@ is independent live validation, not the original discovery or generator.
 ## Current stock-ACC configuration (Milestone-A longitudinal arrangement)
 
 `TOYOTA_CAMRY_TSS3` sets `openpilotLongitudinalControl=False`,
-`pcmCruise=True`, Toyota `STOCK_LONGITUDINAL`, and the TSS3
-`CarController.update()` returns after the B6/brake-cancel path — Toyota owns
-acceleration. Physical RES/SET buttons and the parsed `0x08A`/`0x251`
-set-speed state choose `vCruise`; `radarUnavailable=True` is not a planner
-blocker (generic radar interface publishes an empty set; model-lead
-`radarState` continues). Verified in the WP2 audit replay and the upstream
-diff.
+`pcmCruise=True`, Toyota `STOCK_LONGITUDINAL`, and `autoResumeSng=False`; the
+current TSS3 `CarController.update()` emits only the exact-F33 C7 lateral
+sideband and returns, so Toyota still owns acceleration. Physical RES/SET
+buttons and the parsed `0x08A`/`0x251` set-speed state choose `vCruise`;
+`radarUnavailable=True` is not a planner blocker (generic radar interface
+publishes an empty set; model-lead `radarState` continues). Verified in the WP2
+audit replay and current stock-harness opendbc `3c79d935`.
 
 ## Evidence matrix (candidate: native bus-1 `0x160` E2E Profile-5 B12)
 
 | Question | Status | Evidence |
 |---|---|---|
 | Wire geometry | **established** (firmware-static + captures) | 32-byte PDU; B0:B1 CRC-16/CCITT, B2 mod-256 counter, Data ID = CAN ID, no secret; `tools/targets/camry/live/camry_frc_request_poc.py` clones/recomputes offline |
-| Command semantics | **hypothesis** | B12 is a high-value signed-7 candidate; physical command scale and companion request fields not closed |
-| Scale/sign | **unvalidated** | No independently labeled acceleration joins; correlation ≠ calibration |
-| Validity/counter rules | partially bounded | Profile-5 counter/CRC observed; receiver behavior on synthetic frames unknown |
-| Receiver acceptance | **unobserved** | No modified-frame acceptance test exists |
-| Source ownership | **unresolved** | Producer/source direction not proved; competing interpretations retained (port report §7) |
-| Physical response | **unobserved** | No bench evidence |
-| Release/override | **unobserved** | — |
-| Fault behavior | **unobserved** | — |
-| Source suppression | **architecture identified; live validation pending** | The current lateral-development repin leaves Toyota Bus-1 on unsplit Panda CAN1. Undoing that repin restores Toyota Bus-1/`0x160` to the stock Toyota-B CAN0/CAN2 relay pair, allowing a bus-0 replacement to block the stock bus-2 copy. No added split is proposed; verify sides and forwarding after restoring the stock pin mapping. |
+| Command semantics | **strong observed candidate; synthetic causality open** | In three no-driver-input stock auto-resumes, B12 leaves its stopped baseline and ramps in the acceleration direction 351–433 ms before ego motion while the main stopped `0x160` template remains stable; the protected `0x0CA` result simultaneously rises positive. This is substantially stronger than whole-drive correlation, but a stock trace still cannot prove that modifying B12 alone controls the receiver. |
+| Scale/sign | **sign strongly observed; absolute mapping unvalidated** | More-negative B12 accompanies larger positive protected `0x0CA` result and vehicle acceleration, consistent with the earlier r=−0.9517/−0.9894 cross-plane join. Exact B12-count→m/s² calibration and any shaping/nonlinearity remain open. |
+| Validity/counter rules | partially bounded | Profile-5 counter/CRC observed; receiver behavior on synthetic frames unknown. |
+| Receiver acceptance | **unobserved** | No modified-frame acceptance test exists on this Camry. |
+| Source ownership | **FRC transmit side observed; downstream receiver unresolved** | The 2026-09-01 selective normal-Tx suppression run isolates `0x160` as a 40-Hz FRC normal-Tx PDU. Which downstream participant accepts/transforms it, and its exact replacement/fallback contract, remain open. |
+| Physical response | **stock causal ordering observed; synthetic response open** | Four captured short stock stops auto-resume without gas/brake/RES/SET; in three instrumented examples B12 ramps before motion and protected `0x0CA` result exceeds +0.5 m/s² 413–503 ms before motion. No modified-`0x160` Camry response has yet been tested. |
+| Release/override | **partially closed** | Short-stop auto-resume works natively. After ~5.2–9.3 s stopped, Toyota enters a delayed hold state (`0x08A` B7 `0x67`, `0x66` on accelerator override); all three retained long-hold exits require accelerator input, and hold clears before motion. The command-side hold/release semantic is not yet mapped. |
+| Fault behavior | **unobserved for synthetic Camry long** | No Camry modified-`0x160` fault experiment exists; the independent Corolla field report faults at complete standstill and therefore reinforces the need to close the hold/release contract. |
+| Source suppression | **architecture identified; live validation pending** | The stock Toyota-B mapping puts Toyota Bus-1/`0x160` on the CAN0/CAN2 relay pair, permitting ordinary stock-source blocking/replacement while the exact-F33 C7 lateral sideband uses unsplit bus 1. The software remap is implemented; parked vehicle validation is still pending. |
 
 Supporting bounds: the two retained drives give B12↔protected-`0x0CA`
 correlation r = −0.9517/−0.9894 — strong association, explicitly **not** a
 command calibration. Plain set-speed state (`0x08A B10`, `0x251 B2`) is
 insufficient evidence of a writable cruise command. `0x0FE` is the
 SecOC-shaped switch PDU (VAR-127) and cannot be forged without the key story.
+
+### 2026-09-11 retained stop/resume audit
+
+The long 2026-09-04 routes contain more longitudinal state than the original WP4
+matrix used. A direct rlog reduction of routes `0000003b--62262eb7a1` and
+`0000003c--97b9e7a69a` finds seven cruise-enabled stops longer than 0.4 s. Four
+short stops, lasting **2.893–4.288 s**, resume with cruise still enabled and
+with **no gas, brake, RES+, or SET- input within one second of motion**. Three
+longer stops, lasting **6.941–13.079 s**, enter Toyota's delayed stock-ACC hold
+state after **5.223–9.254 s** stopped. Those are the already-source-real
+`0x08A` `CRUISE_SUBSTATE_2=0x67` episodes (`0x66` during accelerator override).
+All three long-hold exits clear on accelerator input before ego motion; none has
+a RES+/SET- edge.
+
+The short no-input resumes are especially useful for `0x160`. In three examples
+with complete local context:
+
+| route / motion time | stopped B12 baseline | first persistent B12 departure | protected `0x0CA` result > +0.5 m/s² | driver input |
+|---|---:|---:|---:|---|
+| `3b` / 5122.256 s | −1 | **351 ms before motion** | **463 ms before motion** | none |
+| `3c` / 9068.054 s | +1 | **404 ms before motion** | **413 ms before motion** | none |
+| `3c` / 9147.517 s | 0 | **433 ms before motion** | **503 ms before motion** | none |
+
+In each case B12 ramps more negative as the protected result rises positive and
+the vehicle starts. During the last roughly one second stopped, the primary
+`0x160` application template is otherwise stable (`B3=0x82`, `B4:B5=0x8000`,
+`B6=0x40`, `B7=0x03`, `B8:B9=0x4DE8`, `B11=0`, `B15=0x80`, `B16=2`; B10
+is route/state dependent, and B13/B14 continue their independent dynamic
+pattern). This does not turn a stock correlation into a modified-frame receiver
+proof, but it materially strengthens B12 as the request-related scalar: the
+change precedes physical motion without any driver resume command.
+
+The delayed-hold transition is a separate state boundary. At the exact
+`0x08A` B7 `0x47 -> 0x67` edge, two of the three episodes have no `0x160`
+application-byte change at all; the third changes only already-dynamic/cyclic
+fields. The protected `0x0CA` result is already zero before hold and remains
+zero through it, with the other two acceleration-like words settled near
+`+3.75` and `+0.665 m/s²`. An all-Bus-4 bit sweep finds no one ordinary CAN bit
+that makes a repeatable high-confidence transition at all three hold onsets.
+Likewise, the apparent Bus-1 `0x230` candidates are ramps/counters rather than a
+discrete hold edge. The captured hold therefore is not presently encoded as a
+simple newly identified `0x160` or `0x0CA` flag; it may be downstream/local or
+carried in a still-unmapped/request-side field.
+
+That distinction matters to openpilot stop-and-go. Current `LongControl` will
+stay in its stopping state while `CarState.cruiseState.standstill` remains true.
+The current Camry parser intentionally maps the delayed Toyota hold state to
+that standard field. The retained logs prove that ordinary **short-stop
+stop-and-go is already compatible with the stock request pipeline**, because
+four stops restart automatically before delayed hold. They do **not** yet prove
+openpilot can automatically release Toyota's delayed long-stop hold. Current
+GTS+ gives the exact semantic leads to close that gap: FRC DID `0x1B07` exposes
+Brake-Hold Control Prohibited, Stop Control Permission, and Brake-Usage-Limit
+Permission, while PCS request record `5280` additionally carries EPB, accelerator-
+override-prohibition, low-priority, shift-range, and braking/driving-force
+fields.
+
+The retained normal rlogs do not contain synchronized `0x1B03..0x1B07` /
+Brake `0x10A1..0x10A4` reads, nor a PCS/AEB intervention suitable for proving
+that PCS wins over a replaced cruise request. Those remain targeted-live
+questions. For implementation, the least-destructive candidate is therefore a
+1:1 relay replacement of each live FRC `0x160`: preserve the current stock
+application/context fields and B2 counter, modify only the request field(s) that
+are positively recovered, recompute E2E Profile 5, and leave Toyota's downstream
+arbitration/SecOC participants untouched.
 
 ## Architecture agreed for the eventual implementation (upstream shape)
 
@@ -61,26 +126,37 @@ Panda applies ordinary longitudinal command bounds and the TX whitelist;
 safety coverage must agree. Do not reuse the legacy Toyota PCM compensation
 loop blindly; direct-versus-shaped `actuators.accel` mapping depends on the
 final recovered `0x160` semantics. Flipping
-`openpilotLongitudinalControl=True` alone transmits nothing (current TSS3
-safety whitelists only `0x0B6` bus0 and `0x101` bus2).
+`openpilotLongitudinalControl=True` alone transmits nothing: current exact-F33
+Toyota safety whitelists only the C7 sideband `0x1FDC0002/8` on unsplit bus 1,
+and the TSS3 controller has no `0x160` sender yet.
 
-## Next evidence steps (passive, no vehicle-control transmission)
+## Next evidence steps
 
-1. Passive stock captures joined with driver events, cruise state, candidate
-   values, measured speed/acceleration, braking state, and FRC diagnostic
-   labels (`0x1905/0x1914` engagement oracles already validated on this car),
-   with explicit timing uncertainty.
-2. Record which competing interpretations remain live after each join; a
-   down-gradient correlation must not silently promote B12 to "command".
-3. A supported receiver interface and documented ownership arrangement are
-   prerequisites for physical validation.
-4. Restore the normal Toyota-B pin mapping and verify that `0x160` appears on
-   both sides of the CAN0/CAN2 relay while the F33 signer sideband reaches EPS
-   on unsplit Panda bus 1.
+1. Run the existing synchronized FRC/Brake request capture during stock DRCC,
+   including a short stop, delayed hold, release, and (if naturally observed)
+   PCS intervention: FRC `0x792` `1B03..1B07`, Brake `0x7B0` `10A1..10A4`,
+   `0x160`, protected `0x0CA`, and all ordinary state on one clock. This should
+   bind the stop/hold permissions and request ID/acceleration to the wire without
+   guessing from correlation.
+2. On restored stock Toyota-B, verify parked that FRC `0x160` appears on both
+   sides of the CAN0/CAN2 relay, that the exact-F33 C7 signer sideband still
+   reaches EPS on unsplit bus 1, and that ordinary software forwarding preserves
+   the native FD format.
+3. Once the target-native request field(s) are closed, perform the smallest
+   receiver-acceptance test: mutate only those fields in an intercepted live
+   stock `0x160`, preserve the stock counter/context, recompute E2E Profile 5,
+   and confirm the expected downstream request/result change. Do not make the
+   standstill behavior a new openpilot permission system; map only the native
+   vehicle semantics required by the normal longitudinal state machine.
+4. Explicitly validate PCS/AEB coexistence before calling the path complete.
+   The current logs show the OEM arbitration stack and ordinary stop/resume
+   behavior, but they do not contain a PCS event that proves emergency authority
+   survives request replacement.
 
 **Exit status:** the byte-exact offline message generator is implemented and
-verified. Camry semantics and ownership remain hypotheses, and live Camry
-controller integration is intentionally not wired. The replacement topology is
-identified but not yet live-validated. Milestone B is blocked on the remaining
-Camry-specific matrix rows, not on CRC/message-construction work or a need for
-custom harness hardware.
+verified; retained stock logs now strongly identify B12 as request-related and
+prove native short-stop auto-resume plus a distinct delayed long-stop hold.
+Absolute request calibration, modified-frame receiver acceptance, delayed-hold
+release semantics, and PCS/AEB coexistence under replacement remain the main
+Camry-specific longitudinal gates. The stock-Toyota-B replacement topology is
+implemented in software but still awaits parked vehicle validation.
