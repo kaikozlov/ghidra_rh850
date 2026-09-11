@@ -31,7 +31,13 @@ obj = json.loads(REGISTRY.read_text())
 check("registry schema exact", obj.get("schema") == "ghidra-rh850-analysis-targets-v1")
 check("Sienna remains default", obj.get("default_target") == "sienna-8965B4512000")
 targets = obj.get("targets", {})
-check("exact registered target set", set(targets) == {"sienna-8965B4512000", "camry-8965F3307000"})
+expected_targets = {
+    "sienna-8965B4512000",
+    "camry-8965F3307000",
+    "corolla-8965H1202000",
+    "corolla-8965F1208000",
+}
+check("exact registered target set", set(targets) == expected_targets)
 
 required = {
     "status", "vehicle", "software_id", "codeflash", "codeflash_sha256", "codeflash_size", "codeflash_base",
@@ -50,7 +56,8 @@ for name, row in targets.items():
     check(f"{name} DataFlash exists/size", df.is_file() and df.stat().st_size == row["dataflash_size"])
     check(f"{name} DataFlash hash", df.is_file() and sha(df) == row["dataflash_sha256"])
     check(f"{name} bases exact", row["codeflash_base"] == "0x00000000" and row["dataflash_base"] == "0xFF200000")
-    check(f"{name} RH850 target exact", row["mcu"] == "R7F701381" and row["processor"] == "v850e3:LE:32:default")
+    expected_mcu = "R7F701383" if name.startswith("corolla-") else "R7F701381"
+    check(f"{name} RH850 target exact", row["mcu"] == expected_mcu and row["processor"] == "v850e3:LE:32:default")
     check(f"{name} safe Ghidra names", bool(name_re.fullmatch(row["project_name"])) and bool(name_re.fullmatch(row["program_name"])))
     work = ROOT / row["work_dir"]; snap = ROOT / row["snapshot_dir"]
     work_paths.append(work); snapshot_paths.append(snap)
@@ -68,14 +75,34 @@ check("snapshot roots unique and non-nested", len(set(resolved_snaps)) == len(re
 
 camry = targets["camry-8965F3307000"]
 check("Camry is first-class", camry["status"] == "first_class" and camry["capture_root"] == "targets/camry-2026")
-for field in ("function_seeds", "device_profile_script", "entry_seed_script", "diagnostic_seed_script", "recovered_seed_script"):
-    check(f"Camry target rebuild metadata has {field}", bool(camry.get(field)))
+stage_fields = ("function_seeds", "device_profile_script", "entry_seed_script", "diagnostic_seed_script", "recovered_seed_script")
+for name, row in targets.items():
+    if name == obj["default_target"]:
+        continue
+    check(f"{name} is first-class", row["status"] == "first_class")
+    for field in stage_fields:
+        check(f"{name} target rebuild metadata has {field}", bool(row.get(field)))
 check("Camry registered function seeds exist", (ROOT / camry["function_seeds"]).is_file())
 raw_cf = ROOT / "targets/camry-2026/raw-20260826/codeflash/camry_8965F3307000_codeflash_20260826T213719Z.bin"
 check("Camry canonical CodeFlash equals acquired lower MiB", raw_cf.is_file() and raw_cf.read_bytes()[:0x100000] == (ROOT / camry["codeflash"]).read_bytes())
 raw_df = ROOT / "targets/camry-2026/raw-20260826/secoc-recovery/dataflash/dump_ff200000_ff208000.bin"
 check("Camry canonical DataFlash equals acquired evidence", raw_df.is_file() and raw_df.read_bytes() == (ROOT / camry["dataflash"]).read_bytes())
 check("Camry identity pair embedded", (ROOT / camry["codeflash"]).read_bytes()[0x20860:0x2086C] == b"8965F3307000" and (ROOT / camry["codeflash"]).read_bytes()[0x17DC0:0x17DCC] == b"8A3113303100")
+
+h = targets["corolla-8965H1202000"]
+f = targets["corolla-8965F1208000"]
+check("Corolla targets share only application rebuild inputs", all(h[field] == f[field] for field in stage_fields))
+check("Corolla H historical label is not conflated with direct F181", h["identity_role"] == "historical auxiliary DID 0x2032 image label" and h["direct_f181_primary_id"] == "8965F1208000")
+h_cf = (ROOT / h["codeflash"]).read_bytes(); f_cf = (ROOT / f["codeflash"]).read_bytes()
+check("Corolla H/F application is byte-identical", h_cf[0x20000:] == f_cf[0x20000:])
+check("Corolla H identities embedded", h_cf[0x20860:0x2086C] == b"8965F1208000" and h_cf[0x17DC0:0x17DCC] == b"8A3111202000" and h_cf[0x17D80:0x17D8C] == b"8965H1202000")
+check("Corolla F identities embedded", f_cf[0x20860:0x2086C] == b"8965F1208000" and f_cf[0x17DC0:0x17DCC] == b"8A3111213000" and f_cf[0x17D80:0x17D8C] == b"8965H1213000")
+for producer in (
+    "tools/targets/corolla/builders/promote_corolla_analysis_inputs.py",
+    "tools/targets/corolla/builders/build_corolla_hf_function_seeds.py",
+):
+    r = subprocess.run([sys.executable, str(ROOT / producer), "--check"], cwd=ROOT, capture_output=True, text=True)
+    check(f"{Path(producer).name} reproduces tracked outputs", r.returncode == 0, r.stderr.strip())
 
 # Resolver owns registry lookup only. Runtime wrappers select their target via
 # GHIDRA_ANALYSIS_TARGET and resolve individual fields; there is no second shell-
@@ -87,16 +114,17 @@ r = subprocess.run([sys.executable, str(RESOLVER), "definitely-not-a-target", "-
 check("unknown target fails closed", r.returncode != 0 and "unknown analysis target" in (r.stderr + r.stdout))
 
 # Guard checks are toolchain-free: tools/g rejects committed snapshots before CLI bootstrap.
-for target, snap in [("sienna-8965B4512000", ROOT / "project"), ("camry-8965F3307000", ROOT / camry["snapshot_dir"])]:
+for target, row in targets.items():
+    snap = ROOT / row["snapshot_dir"]
     env = dict(__import__("os").environ, GHIDRA_ANALYSIS_TARGET=target, GHIDRA_PROJECT=str(snap))
     r = subprocess.run([str(ROOT / "tools/g"), "session-status"], cwd=ROOT, env=env, capture_output=True, text=True)
     check(f"{target} committed snapshot guard", r.returncode != 0 and "REFUSING" in r.stderr)
 
 rebuild = (ROOT / "tools/project/rebuild_target_project.sh").read_text()
-check("Camry rebuild preserves four-stage analysis", all(x in rebuild for x in ("1/4", "2/4", "3/4", "4/4", "4b")))
+check("non-default rebuild preserves four-stage analysis", all(x in rebuild for x in ("1/4", "2/4", "3/4", "4/4", "4b")))
 check("target rebuild resolves registered stage scripts", all(token in rebuild for token in ("field function_seeds", "field device_profile_script", "field entry_seed_script", "field diagnostic_seed_script", "field recovered_seed_script")))
 check("target rebuild has no Camry path/profile coupling", "data/targets/camry-8965F3307000" not in rebuild and "camry_f33_v1" not in rebuild)
-check("Camry destructive rebuild is build/work bounded", "refusing target rebuild destination outside dedicated build/work descendant" in rebuild and "is_symlink" in rebuild)
+check("non-default destructive rebuild is build/work bounded", "refusing target rebuild destination outside dedicated build/work descendant" in rebuild and "is_symlink" in rebuild)
 snapshot = (ROOT / "tools/project/snapshot_target_project.sh").read_text()
 check("first promotion requires independent parity build", "first target promotion requires --parity-project-dir" in snapshot and "independent target rebuild inventories differ" in snapshot)
 check("canonical corpus rechecks tracked baseline", "generate_target_decompiler_corpus.py" in snapshot)
@@ -112,7 +140,7 @@ check(
     and 'PROGRAM_NAME := RH850_P1M-E_CodeFlash.bin' not in makefile,
 )
 r = subprocess.run([str(ROOT / "tools/gtarget"), "list"], cwd=ROOT, capture_output=True, text=True)
-check("gtarget lists configured targets", r.returncode == 0 and "camry-8965F3307000" in r.stdout and "sienna-8965B4512000" in r.stdout)
+check("gtarget lists configured targets", r.returncode == 0 and all(name in r.stdout for name in expected_targets))
 r = subprocess.run([str(ROOT / "tools/gtarget"), "show", "camry-8965F3307000"], cwd=ROOT, capture_output=True, text=True)
 check("gtarget shows registry metadata", r.returncode == 0 and json.loads(r.stdout)["function_seeds"] == camry["function_seeds"])
 

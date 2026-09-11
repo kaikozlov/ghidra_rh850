@@ -80,6 +80,8 @@ Configured firmware targets likewise have one registry-backed discovery surface:
 tools/gtarget list
 tools/gtarget show camry-8965F3307000
 tools/gtarget camry-8965F3307000 stats
+tools/gtarget show corolla-8965H1202000
+tools/gtarget show corolla-8965F1208000
 ```
 
 Generic rebuild/snapshot tooling resolves target-specific seed tables and Ghidra stage scripts from `data/analysis_targets.json`; adding a target must not require editing the generic shell scripts.
