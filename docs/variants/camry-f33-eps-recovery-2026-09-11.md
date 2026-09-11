@@ -242,10 +242,23 @@ incorrect control flow.
 
 The separate check at `0x115A` reads `FFC62030` and tests bits 0 and 2. Renesas
 identifies that register as **UCFDERSTR**, the CodeFlash double-bit-ECC/address-
-parity status register; it is cleared through `FFC62008`. It is **not RESF**, a
-failed-start counter, or a software-selected recovery flag. An erroneous branch
-is not evidence of a flash ECC/parity fault. No recovered normal CAN request
-sets a boot recovery latch before the malformed call.
+parity status register: bit 0 is `DEDF` (ECC 2-bit error) and bit 2 is `APEF`
+(address-parity error). It is cleared through `FFC62008`. Exact cold startup
+`0x802` writes `UCFSERSTCLR=0x0F` and `UCFDERSTCLR=1` before `0x13B0`; the P1M-E
+register table also gives `UCFDERSTR` reset value zero for every listed reset
+source (power-on, System Reset 1/2, and Application Reset 1). Thus `0x115A` can
+reject an image only for a **fresh CodeFlash ECC/parity failure observed during
+the boot reads themselves**. It is not RESF, a failed-start counter, a retained
+application-crash flag, or a software-selected recovery flag. The incident jump
+to non-CodeFlash space is not evidence of CodeFlash ECC/parity failure, and its
+status cannot be carried across an ordinary reset to force `0x1398`.
+
+The retained reset words at `FFC0A000/4/8` do have a boot-side reader: `0x13B0`
+calls `0xE54` before `0x119E`. That reader validates the complement-coded record,
+snapshots ECM status into `FEBFFCxx`, clears ECM status, and returns. There is no
+branch on the retained signature into `0x1398`; the next boot-selection operation
+is still the ordinary `0x119E` validity call. The retained record is therefore
+boot telemetry/status preservation, not a recovery selector.
 
 ## 6. Independent ROM, core, and XCP alternatives
 
@@ -520,6 +533,54 @@ Canonical evidence:
 - `data/generated/camry_8965F3307000_prefault_control_flow_ops.json`
 - `ghidra/scripts/investigate/AuditCallConeMemoryOps.java`
 - `tests/verify_camry_8965F3307000_prefault_control_flow.py`
+
+## 9. External safety outputs and flash-bank selection do not add a network boot path
+
+The application configures the ECM physical `ERROROUT` masks explicitly during
+`f33_startup_coordinator -> 0x63338`. The final programmed values are:
+
+- `ECMEMK0 = 0xFFFFFFE1`, leaving only ECM sources **1–4** unmasked to `ERROROUT`;
+- `ECMEMK1 = 0xFFFFFFFF`, masking sources 32–63;
+- `ECMEMK2 = 0x3FFFFFFF`, masking every defined source in the upper bank.
+
+The P1M-E ECM table identifies sources 1–4 as lockstep/PFSS/bus-bridge/redundancy
+safety failures. Source 28, which the application separately enables in
+`MICFG0`, is **bus ECC DED**, not a generic illegal-address or SYSERR indication.
+The incident's predicted `FEIC 0x13` non-CodeFlash instruction-fetch SYSERR is a
+CPU exception and is not one of the ECM error sources routed to `ERROROUT` by
+this configuration. Therefore the malformed jump does not provide a recovered
+`SYSERR -> ERROROUT -> external reset` path. A real source-1..4 hardware failure
+would be a different event, not something produced by the CAN/UDS paths audited
+here.
+
+`P0_10/RESETOUT` also points outward rather than back into the MCU. P1M-E starts
+that pin as active-low `RESETOUT`; F33 subsequently configures P0_10 as ordinary
+GPIO and drives it through the paired safety-output manager (`0x569DA/0x56AD2`).
+The hardware manual specifies that an actual MCU reset returns P0_10 to
+`RESETOUT` low. A SYSERR by itself is not a reset, so no independent hardware
+self-reset follows merely from this output. No exact-F33 evidence has been found
+that loops P0_10 back into `RESET` or `FLMD0`.
+
+Finally, the flash-area selector does not supply a software bank swap.
+`BFASELR @ FFC59008` is documented as **0 when booted in normal operating mode**
+and **1 when booted in serial programming mode**. Exact F33 has no recovered
+reference to `BFASELR`; the boot/application validity code uses fixed descriptor
+tables. The variable reset vector for the extended user area is a persistent
+flash configuration setting, not an automatic crash fallback. Therefore selecting
+an alternate flash area still requires entering an independent hardware/serial
+programming context or changing flash configuration with an already-running
+executor.
+
+Together with §§4–8, the remaining boot-side escape is now narrow: make the
+normal CodeFlash validity check genuinely fail, or enter the documented hardware
+programming mode. The retained CAN software supplies neither mechanism. A
+physical/assembly-level reset-mode controller, debug/programming connection, or
+other independent silicon executor would change that conclusion; ordinary CAN
+traffic through this F33 image does not.
+
+Canonical structural evidence is included in
+`data/generated/camry_f33_recovery_structure.json` and verified by
+`tests/verify_f33_recovery_structure.py`.
 
 ## What is established, and what would actually change the answer
 

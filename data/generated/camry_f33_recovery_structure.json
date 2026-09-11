@@ -85,6 +85,41 @@
       "target": "0x00062E1E"
     }
   ],
+  "application_errorout_mask_init": {
+    "ecmemk0": {
+      "program_sequence": {
+        "address": "0x00063354",
+        "bytes": "209e1e003e062820d6ff0d0d41ea200ee1ff9d00010d019d010d",
+        "size": 26
+      },
+      "register": "0xFFD62028",
+      "value": "0xFFFFFFE1"
+    },
+    "ecmemk1": {
+      "program_sequence": {
+        "address": "0x00063384",
+        "bytes": "200ea50041ea3e062c20d6ff0b0d9d001f0a010d0105010d",
+        "size": 24
+      },
+      "register": "0xFFD6202C",
+      "value": "0xFFFFFFFF"
+    },
+    "ecmemk2": {
+      "program_sequence": {
+        "address": "0x000633B2",
+        "bytes": "200ea500409e00c03e063020d6ff090d41ea1f0a820a010d9d00019d010da007",
+        "size": 32
+      },
+      "register": "0xFFD62030",
+      "value": "0x3FFFFFFF"
+    },
+    "startup_call": {
+      "address": "0x0006380E",
+      "bytes": "bfff2afb",
+      "size": 4,
+      "target": "0x00063338"
+    }
+  },
   "application_to_boot_call": {
     "address": "0x00065F82",
     "bytes": "baff7e3f",
@@ -94,6 +129,11 @@
   "boot_application_entry_cell": {
     "address": "0x000FFDB8",
     "value": "0x00020880"
+  },
+  "boot_cold_flash_error_clear": {
+    "address": "0x00000802",
+    "bytes": "3e060420c6ff0f0a010d010a030d020d1f00",
+    "size": 18
   },
   "boot_hardware_error_check": {
     "address": "0x0000115A",
@@ -112,6 +152,25 @@
       "size": 4
     }
   ],
+  "boot_retained_reset_record": {
+    "reader": {
+      "address": "0x00000E54",
+      "bytes": "3e0600a0c0ff000d008a0255118010780f7033065555555501580e6833590d60044deb513206aaaaaaaaaa153209e149fa0d40f6d6ff048d8007898020ac067d8007c97020ac086d8007096120ac3e063420d6ff2056a500260600fcbffe07551f5a015d0105015da007454c40ac1f000755035d0305035da007454c40ac1f001f5a0755815a055d405600800555055da007454c40ac06f01f000b65096d405ec0fe07751108057d3309",
+      "size": 170
+    },
+    "reader_call": {
+      "address": "0x000013B8",
+      "bytes": "bfff9cfa",
+      "size": 4,
+      "target": "0x00000E54"
+    },
+    "validity_call_after_reader": {
+      "address": "0x000013C4",
+      "bytes": "bfffdafd",
+      "size": 4,
+      "target": "0x0000119E"
+    }
+  },
   "boot_validity_call": {
     "address": "0x000013C4",
     "bytes": "bfffdafd",

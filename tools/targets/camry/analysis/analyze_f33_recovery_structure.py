@@ -195,6 +195,21 @@ def analyze(image: bytes) -> dict[str, object]:
                                         "value": address(u32(0xFFDB8))},
         "boot_marker_words": [span(pc, 4) for pc in (0xFFE00, 0x17E00)],
         "boot_hardware_error_check": span(0x115A, 68),
+        "boot_cold_flash_error_clear": span(0x802, 0x12),
+        "boot_retained_reset_record": {
+            "reader": span(0xE54, 170),
+            "reader_call": call(0x13B8),
+            "validity_call_after_reader": call(0x13C4),
+        },
+        "application_errorout_mask_init": {
+            "startup_call": call(0x6380E),
+            "ecmemk0": {"register": "0xFFD62028", "value": "0xFFFFFFE1",
+                        "program_sequence": span(0x63354, 0x1A)},
+            "ecmemk1": {"register": "0xFFD6202C", "value": "0xFFFFFFFF",
+                        "program_sequence": span(0x63384, 0x18)},
+            "ecmemk2": {"register": "0xFFD62030", "value": "0x3FFFFFFF",
+                        "program_sequence": span(0x633B2, 0x20)},
+        },
         "application_to_boot_call": call(0x65F82),
     }
 

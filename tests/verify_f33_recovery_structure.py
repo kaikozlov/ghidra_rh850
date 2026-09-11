@@ -46,5 +46,28 @@ check(
 check("displacement-subset census is exact", geometry["subset_displacement_count"] == 16384)
 check("no clear-bits displacement reaches resident signer", geometry["resident_subset_targets"] == [])
 
+# Boot/reset/safety outputs relevant to post-incident recovery.
+clear = report["boot_cold_flash_error_clear"]
+check(
+    "cold startup clears CodeFlash ECC status before validity",
+    clear["address"] == "0x00000802"
+    and clear["bytes"].startswith("3e060420c6ff0f0a010d010a030d"),
+)
+retained = report["boot_retained_reset_record"]
+check(
+    "retained reset record is read before ordinary validity call",
+    retained["reader_call"]["target"] == "0x00000E54"
+    and retained["validity_call_after_reader"]["target"] == "0x0000119E"
+    and int(retained["reader_call"]["address"], 16) < int(retained["validity_call_after_reader"]["address"], 16),
+)
+errout = report["application_errorout_mask_init"]
+check(
+    "application programs bounded ECM ERROROUT masks",
+    errout["startup_call"]["target"] == "0x00063338"
+    and errout["ecmemk0"]["value"] == "0xFFFFFFE1"
+    and errout["ecmemk1"]["value"] == "0xFFFFFFFF"
+    and errout["ecmemk2"]["value"] == "0x3FFFFFFF",
+)
+
 print(f"Results: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)
