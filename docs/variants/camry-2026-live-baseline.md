@@ -6292,3 +6292,26 @@ rejecting any other length or relocation, checking the exact decoded target,
 and requiring the package launcher to reject the withdrawn hook and bind every
 hook preflight to the exact package identity. This corrected future package
 does not repair an already-installed malformed hook over a dead DCM.
+
+#### Follow-up NRTD identity check, 00:47 CDT
+
+After the operator confirmed NRTD, the 2026-09-11 05:47:12 UTC check sent only
+`22 F1 81` identity reads: no ECU session change, SecurityAccess, RAM upload,
+erase, or flash write. Physical EPS `0x7A1 -> 0x7A9` timed out on buses 0 and 2.
+A separate endpoint `0x7A2 -> 0x7AA` on bus 0 returned software identity
+`867BF0601001`; this is not an EPS bootloader response. Both sampled Panda CAN
+controllers reported no current bus-off, zero current transmit/receive error
+counters, and zero safety-TX blocks. This supports a working diagnostic transport
+to that other endpoint, not recovery or liveness of the EPS.
+
+The preceding cold-start catcher had finished at 05:44:08 UTC with `timeout`;
+its conditional restore log contains only `catcher-did-not-catch`. No restore
+ran. The follow-up read-only probe released its cooperative Panda lease, and
+normal `pandad` ownership was confirmed afterward. The operator was told to
+power the vehicle fully OFF; another power cycle was not represented as a
+verified recovery procedure. Physical hardware damage and the absence of all
+undocumented recovery modes are not established by these observations.
+
+The identity report and the preceding catcher/conditional-restore logs are
+retained in
+[`targets/camry-2026/raw-20260911/eps-recovery/`](../../targets/camry-2026/raw-20260911/eps-recovery/).

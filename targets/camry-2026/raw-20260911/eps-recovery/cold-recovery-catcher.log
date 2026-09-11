@@ -1,0 +1,2 @@
+INFO: connecting to panda 3a0007000151343435333330
+{"buses": [0], "phase": "extended", "responses": ["bus0:0x7aa:027e000000000000", "bus0:0x7aa:027e000000000000", "bus0:0x7aa:027e000000000000", "bus0:0x7aa:027e000000000000"], "sent": 110611, "status": "timeout", "tx_errors": 0}

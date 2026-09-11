@@ -1,0 +1,109 @@
+{
+  "created_at": "2026-09-11T05:47:12.442183+00:00",
+  "operation": "read_identity_only",
+  "ecu_services_sent": [
+    "22 F1 81"
+  ],
+  "probes": [
+    {
+      "tx": "0x7a1",
+      "rx": "0x7a9",
+      "bus": 0,
+      "status": "error",
+      "error": "MessageTimeoutError",
+      "detail": "timeout waiting for response"
+    },
+    {
+      "tx": "0x7a1",
+      "rx": "0x7a9",
+      "bus": 2,
+      "status": "error",
+      "error": "MessageTimeoutError",
+      "detail": "timeout waiting for response"
+    },
+    {
+      "tx": "0x7a2",
+      "rx": "0x7aa",
+      "bus": 0,
+      "status": "response",
+      "data_hex": "0138363742463036303130303100000000",
+      "data_ascii": "\u0001867BF0601001\u0000\u0000\u0000\u0000"
+    }
+  ],
+  "health_before": {
+    "voltage": 11473,
+    "ignition_line": true,
+    "ignition_can": false,
+    "safety_tx_blocked": 0,
+    "fault_status": 0,
+    "heartbeat_lost": false,
+    "car_harness_status": 2
+  },
+  "health_after": {
+    "voltage": 11561,
+    "ignition_line": true,
+    "ignition_can": false,
+    "safety_tx_blocked": 0,
+    "fault_status": 0,
+    "heartbeat_lost": false,
+    "car_harness_status": 2
+  },
+  "can_health": {
+    "0": {
+      "bus_off": 0,
+      "bus_off_cnt": 0,
+      "error_warning": 0,
+      "error_passive": 0,
+      "last_error": "No error",
+      "last_stored_error": "Bit0Error",
+      "last_data_error": "No error",
+      "last_data_stored_error": "No error",
+      "receive_error_cnt": 0,
+      "transmit_error_cnt": 0,
+      "total_error_cnt": 121,
+      "total_tx_lost_cnt": 0,
+      "total_rx_lost_cnt": 1,
+      "total_tx_cnt": 296079,
+      "total_rx_cnt": 95613,
+      "total_fwd_cnt": 60835,
+      "total_tx_checksum_error_cnt": 0,
+      "can_speed": 500,
+      "can_data_speed": 2000,
+      "canfd_enabled": 1,
+      "brs_enabled": 1,
+      "canfd_non_iso": 0,
+      "irq0_call_rate": 872,
+      "irq1_call_rate": 1,
+      "irq2_call_rate": 0,
+      "can_core_reset_count": 0
+    },
+    "2": {
+      "bus_off": 0,
+      "bus_off_cnt": 0,
+      "error_warning": 0,
+      "error_passive": 0,
+      "last_error": "No error",
+      "last_stored_error": "Form error",
+      "last_data_error": "No error",
+      "last_data_stored_error": "No error",
+      "receive_error_cnt": 0,
+      "transmit_error_cnt": 0,
+      "total_error_cnt": 17,
+      "total_tx_lost_cnt": 0,
+      "total_rx_lost_cnt": 0,
+      "total_tx_cnt": 83451,
+      "total_rx_cnt": 321661,
+      "total_fwd_cnt": 296078,
+      "total_tx_checksum_error_cnt": 0,
+      "can_speed": 500,
+      "can_data_speed": 2000,
+      "canfd_enabled": 1,
+      "brs_enabled": 1,
+      "canfd_non_iso": 0,
+      "irq0_call_rate": 871,
+      "irq1_call_rate": 1,
+      "irq2_call_rate": 0,
+      "can_core_reset_count": 0
+    }
+  }
+}
