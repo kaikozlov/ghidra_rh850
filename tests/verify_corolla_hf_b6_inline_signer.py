@@ -35,13 +35,31 @@ with tempfile.TemporaryDirectory(prefix="verify-corolla-hf-inline-signer-") as t
     f = build("8965F1208000", root)
 
     check("H/F schemas", h["schema"] == f["schema"] == "corolla-hf-b6-inline-signer-build-v1")
-    check("static-only review boundary", h["review_status"] == "static-candidate-not-live-validated")
+    check("startup survival review boundary", h["review_status"] == "firmware-verified-startup-survival-live-command5-unvalidated")
     check("exact target identities differ", h["target"]["codeflash_sha256"] != f["target"]["codeflash_sha256"])
     check("application-identical H/F resident", h["resident"]["sha256"] == f["resident"]["sha256"])
     check("application-identical H/F helper", h["helper"]["sha256"] == f["helper"]["sha256"])
     check("application-identical H/F payload", h["authenticated_payload"]["sha256"] == f["authenticated_payload"]["sha256"])
+    check("H/F startup-survival contract identical", h["startup_survival"] == f["startup_survival"])
     check("resident fits exact post-shadow tail", h["resident"]["size"] == 522 and h["resident"]["headroom"] == 2)
     check("helper fits exact low candidate", h["helper"]["size"] == 456 and h["helper"]["headroom"] == 8)
+    survival = h["startup_survival"]
+    check("startup survival is firmware-verified", survival["classification"] == "firmware-verified-startup-survival")
+    check("low helper ends before first startup writer", survival["low_helper"] == {
+        "range": ["0xFEBF0000", "0xFEBF01CF"],
+        "first_recovered_startup_write": "0xFEBF0200",
+        "startup_clear_gap": 48,
+        "localram_initializer": "0x0006149A",
+        "normalized_reference_count": 0,
+    })
+    check("high resident begins after exact shadow copy", survival["high_resident"] == {
+        "range": ["0xFEBFF9F0", "0xFEBFFBFB"],
+        "shadow_copy_function": "0x0005C992",
+        "shadow_source": ["0x00010000", "0x00017DEF"],
+        "shadow_destination": ["0xFEBF7C00", "0xFEBFF9EF"],
+        "normalized_reference_count": 0,
+    })
+    check("runtime ownership boundary stays explicit", all(x in survival["boundary"] for x in ("computed pointers", "external XCP", "hardware writers")))
     mailbox = h["mailbox"]
     check("mailbox ends before recurring foreground", int(mailbox["base"], 16) + mailbox["size"] <= int(mailbox["foreground_entry"], 16))
     check("hook is after drain and before SecOC", h["hook"] == {"receive_drain": "0x0007744A", "helper": "0xFEBF0000", "secoc_periodic": "0x000636C0"})
