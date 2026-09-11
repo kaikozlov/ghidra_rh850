@@ -1,0 +1,165 @@
+{
+  "architecture_prediction": {
+    "boundary": "FEIC/FEPC/FEPSW were never captured after the live incident; exact silicon response is therefore predicted from the matching Renesas architecture, not observed",
+    "g3m_acknowledgement_effects": {
+      "PSW.EBV": "retained",
+      "PSW.EP": 1,
+      "PSW.ID": 1,
+      "PSW.NP": 1
+    },
+    "g3m_exception_class": "resumable FE-level SYSERR due error input during instruction fetch",
+    "g3m_vector_rule": "PSW.EBV=1 selects EBASE; SYSERR offset is +0x10",
+    "grade": "architecture-predicted; not dynamically observed in this incident",
+    "p1m_e_feic": "0x13 = instruction fetch from other than Code Flash",
+    "p1m_e_fetch_space": "PE1 instruction fetch is supported from CodeFlash, local RAM self, and global RAM; 0x362BFE04 is access-prohibited"
+  },
+  "evidence": {
+    "codeflash": "firmware/camry-8965F3307000/CodeFlash.bin",
+    "incident_reconstruction": "data/generated/camry_f33_recovery_structure.json",
+    "prefault_control_flow": "data/generated/camry_8965F3307000_prefault_control_flow.json"
+  },
+  "incident_instruction": {
+    "address": "0x0007A272",
+    "decoded": "JARL 0x362BFE04,LP",
+    "exception_registers_observed_live": false,
+    "link_register_after_jarl": "0x0007A278",
+    "reconstructed_bytes": "ff02925b2436",
+    "recorded_write_bytes": "ff02925b",
+    "stock_replaced_instruction": {
+      "address": "0x0007A272",
+      "bytes": "80ffee1c",
+      "size": 4,
+      "target": "0x0007BF60"
+    },
+    "target": "0x362BFE04",
+    "target_address_space": "P1M-E PE1 access-prohibited range 0x20000000..0xFEBDFFFF",
+    "target_observed_live": false
+  },
+  "manual_evidence": {
+    "g3m": "RH850G3M User's Manual: Software R01US0123EJ0140 Rev.1.40: Table 4-1 exception class/ack conditions and Table 4-4 SYSERR +0x10 vector",
+    "p1m_e": "RH850/P1M-E Hardware User's Manual R01UH0585EJ0120 Rev.1.20: CPU/PSW, SEG Table 3.80, address space Figure 4.1"
+  },
+  "post_fault_network_surface": {
+    "can_eiint_after_predicted_syserr": false,
+    "implication": "ordinary CAN RX/TX and periodic maskable service cannot run after the predicted SYSERR fault; any network-only recovery must act before 0x7A272 or use an unrecovered non-EIINT hardware/reset path",
+    "network_fenmi_route_recovered": false,
+    "network_internal_reset_route_recovered": false,
+    "reason": "G3M EIINT acknowledgement requires ID=0 and NP=0; handler EI only clears ID while FE-level SYSERR has NP=1",
+    "timer_eiint_after_predicted_syserr": false
+  },
+  "schema": "camry-8965f3307000-incident-fault-model-v1",
+  "target": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "software_id": "8965F3307000"
+  },
+  "terminal_handler": {
+    "bytes_sha256": "487dbbad9e4dcc90fe3fdf935b7513d17bacedb99a75fdc9a2e1e209bbc596d5",
+    "does_not_copy_to_ram": [
+      "FEPC",
+      "FEPSW",
+      "FEIC"
+    ],
+    "entry": "0x00062E1E",
+    "executes_ei": true,
+    "important_np_effect": "EI clears ID but does not clear NP; SYSERR leaves NP=1, so maskable EIINTs remain unacknowledgeable",
+    "saved_lp_predicted_value": "0x0007A278",
+    "saves": [
+      "ordinary register frame",
+      "EIPC",
+      "EIPSW",
+      "CTPC/CTPSW via 0x712CE"
+    ],
+    "stack_frame": {
+      "end_inclusive": "0xFEBE1FFF",
+      "saved_lp": "0xFEBE1FFC",
+      "start": "0xFEBE1F94"
+    },
+    "terminal": "self-loop at 0x62E42; no FERET/EIRET"
+  },
+  "vector_selection": {
+    "application_ebase": "0x00020000",
+    "classification": "raw-image proof: EBV is set before the valid application and no recovered application path reselects another EBASE before the incident",
+    "low_ebase_setter_direct_calls": [
+      {
+        "bytes": "bfff80ff",
+        "callsite": "0x00008578",
+        "link_register": 31,
+        "target": "0x000084F8"
+      },
+      {
+        "bytes": "bfffe0fe",
+        "callsite": "0x00008618",
+        "link_register": 31,
+        "target": "0x000084F8"
+      },
+      {
+        "bytes": "bfffbcfe",
+        "callsite": "0x0000863C",
+        "link_register": 31,
+        "target": "0x000084F8"
+      },
+      {
+        "bytes": "bfff6afe",
+        "callsite": "0x0000868E",
+        "link_register": 31,
+        "target": "0x000084F8"
+      }
+    ],
+    "low_ebase_setter_fixed_pointer_literals": 0,
+    "predicted_vector": "0x00020010",
+    "raw_ebase_ldsr_writers": [
+      {
+        "address": "0x0000026E",
+        "bytes": "ea1f2008",
+        "source_register": 10
+      },
+      {
+        "address": "0x00008508",
+        "bytes": "e61f2008",
+        "source_register": 6
+      },
+      {
+        "address": "0x00008514",
+        "bytes": "e61f2008",
+        "source_register": 6
+      },
+      {
+        "address": "0x00009F38",
+        "bytes": "ea1f2008",
+        "source_register": 10
+      },
+      {
+        "address": "0x000715C8",
+        "bytes": "eb1f2008",
+        "source_register": 11
+      }
+    ],
+    "raw_psw_ldsr_writers": [
+      {
+        "address": "0x00000204",
+        "bytes": "ea2f2000",
+        "source_register": 10
+      },
+      {
+        "address": "0x00009F28",
+        "bytes": "ea2f2000",
+        "source_register": 10
+      }
+    ],
+    "raw_rbase_ldsr_writers": [],
+    "reset_core_init_ebv": 1,
+    "reset_core_init_psw": "0x00018020",
+    "syserr_vector_offset": "0x10",
+    "vector_bytes": "1f00e0061e2e0600e0074a0100000000",
+    "vector_target": "0x00062E1E"
+  },
+  "verdict": {
+    "architecture_predicted_fault": "instruction-fetch SYSERR, FEIC 0x13",
+    "architecture_predicted_terminal_handler": "0x00062E1E -> 0x00062E42 self-loop",
+    "combined_with_prefault_audit": "no recovered CAN-only software recovery route remains: pre-fault synchronous ingress cannot alter the guard/reset/control flow, and the predicted post-fault SYSERR blocks maskable CAN service",
+    "exact_live_fault_registers_known": false,
+    "maskable_can_service_survives_predicted_fault": false,
+    "post_fault_can_recovery_primitive_recovered": false,
+    "remaining_boundary": "a live FEIC/FEPC/FEPSW capture or board-level/non-maskable reset/debug mechanism could refine or change the predicted post-fault model"
+  }
+}

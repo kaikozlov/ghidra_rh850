@@ -1065,3 +1065,6 @@ tests = ["tests/verify_camry_8965F3307000_prefault_memory_safety.py"]
 
 [suite.camry_8965f3307000_prefault_control_flow]
 tests = ["tests/verify_camry_8965F3307000_prefault_control_flow.py"]
+
+[suite.camry_8965f3307000_incident_fault_model]
+tests = ["tests/verify_camry_8965F3307000_incident_fault_model.py"]

@@ -143,39 +143,87 @@ specific dependency; it does not prove absence of arbitrary computed aliases
 or unmodeled execution. Adjacent non-vector data was not counted as interrupt
 handlers.
 
-## 4. The exact post-branch exception was not captured
+## 4. The post-branch fault is architecture-predicted, not live-captured
 
-The recorded four bytes plus the untouched next halfword decode as:
+The incident bytes remain distinct from the stock image.  The recorded four-byte
+write plus the untouched stock successor halfword decode as:
 
 ```text
 7A272: FF 02 92 5B 24 36   JARL 362BFE04, LP
 ```
 
-Hardware manual Table 4.1 places that destination in reserved address space.
-It is not the intended resident address. However, a reserved address alone is
-not sufficient to declare a specific live exception vector or reset cadence.
-There is no post-incident PC/FEIC/FEPC capture.
+The six-byte `JARL` sets `LP=0x7A278` and transfers to `0x362BFE04`.  P1M-E uses
+the full 32-bit PC (`PC31..1`; only PC0 is fixed), so no 512-MiB sign-extension
+changes that target.  Figure 4.1 places `0x362BFE04` inside PE1's
+`0x20000000..0xFEBDFFFF` **Access prohibited** range; supported PE1 instruction
+fetches are CodeFlash, self LocalRAM, and GlobalRAM.
 
-The exception paths are not all identical. Most application direct vectors
-point to `0x62E1E`, which saves context, enables EI interrupts, calls the save
-helper `0x712CE`, and loops at `0x62E42`; it does not start boot diagnostics.
-The direct vector at `0x20090` instead targets `0x65BD4`, which restores saved
-`FEPC + 4` and returns with `FERET`, rather than returning through `LP` or
-entering the bootloader. Neither should be described as an automatic return to
-the instruction after the malformed call.
+The manufacturer exception tables now give a concrete expected fault instead of
+an unspecified reserved-address outcome.  P1M-E Table 3.80 assigns **FEIC 0x13**
+to `Instruction fetch from other than Code Flash`.  The matching RH850G3M
+software manual (R01US0123EJ0140 Rev.1.40) classifies an error input during
+instruction fetch as a **resumable FE-level SYSERR** and assigns SYSERR direct
+vector offset `+0x10`.  This remains an architecture prediction, not a dynamic
+observation: the incident did not capture `FEIC`, `FEPC`, or `FEPSW`.
 
-In particular, the firmware's MPU region 0 spans `00000000..FEBDFFFF` and has
-attribute `B8` in both recovered contexts. It geometrically includes the bad
-destination and grants supervisor execution for the matching ASID. An
-out-of-CodeFlash address therefore does not by itself prove an MPU instruction
-violation. Physical reserved-region behavior, privilege/ASID state, and the
-actual exception remain distinct questions.
+The vector-base selection can nevertheless be pinned from exact F33 bytes.  A
+whole-image raw `LDSR` census, rather than the canonical function graph, finds
+only two PSW writes.  The hidden reset/core-init stub loads `PSW=0x00018020` at
+`0x1FE` and writes it at `0x204`; bit 15 (`EBV`) is therefore **1** before the
+valid application is entered.  The only other PSW write is `0x9F28`, inside the
+normal application-to-boot handoff `65F5E -> 9F00`, not cold valid-app startup.
+There are zero RBASE writes.  Application context initialization at `0x715C8`
+sets `EBASE=0x00020000`.  The two other EBASE stores at `0x8508/0x8514` belong to
+a low boot helper rooted at `0x84F8`; its only direct callers are
+`0x8578/0x8618/0x863C/0x868E`, all in the low boot region, and `0x84F8` has no
+fixed pointer literal in CodeFlash.  No recovered application path reselects the
+exception base before the incident.
 
-**Consequence:** hardware activity or an interrupt can survive a foreground
-failure without supplying an operational diagnostic server. Conversely, the
-failed identity requests alone do not prove every peripheral or interrupt is
-dead. An exact fault-state model remains a legitimate unresolved part of the
-incident, not an established recovery route.
+Therefore the architecture-predicted SYSERR vector is exactly **`0x20010`**.
+Those bytes are:
+
+```text
+20010: 1F 00                  SYNCP
+20012: E0 06 1E 2E 06 00     JMP 0x62E1E, R0
+```
+
+The target `0x62E1E` is terminal.  It allocates a 0x6C-byte frame
+(`FEBE1F94..FEBE1FFF` from the application `SP=FEBE2000`), saves ordinary
+registers plus `EIPC/EIPSW`, executes `EI`, calls the common register-frame
+helper `0x712CE`, and then self-branches forever at `0x62E42`.  It contains no
+`FERET` or `EIRET`.  `0x712CE` saves ordinary state plus `CTPC/CTPSW`; neither
+piece copies `FEPC/FEPSW/FEIC` into that RAM frame.  If the predicted path is the
+one taken, the `JARL`-written `LP=0x7A278` is saved at `FEBE1FFC`, while the live
+FE exception registers remain hardware state unless another FE exception
+overwrites them.
+
+A crucial consequence is that the `EI` instruction does **not** restore the CAN
+interrupt surface.  Fetch-SYSERR acknowledgement sets `PSW.ID=1`, `NP=1`, and
+`EP=1` while retaining EBV.  `EI` clears ID but does not clear NP.  G3M EIINT
+acknowledgement requires both `ID=0` and `NP=0`, so with `NP=1` the normal CAN
+RX/TX and periodic maskable EIINTs remain pending and cannot preempt the fault
+loop.  Earlier reasoning that `0x62E1E`'s `EI` allowed post-fault CAN/timer
+service was therefore incorrect; that is true only when the same body is entered
+from an EI-level context that does not leave NP asserted.
+
+The direct vector at `0x20090 -> 0x65BD4 -> FERET` is a different FE exception
+class and is not the predicted SYSERR path.  Likewise, the MPU region geometry
+does not convert the physically access-prohibited `0x362BFE04` region into a
+valid instruction-fetch target.
+
+**Consequence:** under the matching Renesas architecture, the recorded incident
+instruction is expected to enter a permanent application SYSERR handler in which
+ordinary maskable CAN service cannot run.  The exact live `FEIC/FEPC/FEPSW`
+values remain unobserved, so this is retained as a strongly pinned architecture
+model rather than mislabeled as a captured fact.  A contrary live exception
+register capture would supersede it.
+
+Canonical evidence:
+
+- `data/generated/camry_8965F3307000_incident_fault_model.json`
+- `data/generated/camry_f33_recovery_structure.json`
+- `tools/targets/camry/builders/build_camry_8965F3307000_incident_fault_model.py`
+- `tests/verify_camry_8965F3307000_incident_fault_model.py`
 
 ## 5. Boot selection is more than CRC, but not a crash counter
 
@@ -374,9 +422,12 @@ ECC address-overflow, including RS-CANFD), and 54 (correctable CAN RAM ECC) are
 therefore not routed to the application ECM EIINT, NMI, or ECM internal reset.
 
 The interrupt table contains a useful-looking default CAN error entry at
-`0x62E1E`: it saves context, enables nested EIINTs, calls `712CE`, and ends in a
-permanent self-loop at `62E42`.  But exact interrupt-controller configuration
-makes it unreachable from ordinary CAN errors.  CAN1 error EIINT186 and global
+`0x62E1E`: it saves context, executes `EI`, calls `712CE`, and ends in a
+permanent self-loop at `62E42`.  When reached from an ordinary EIINT this can
+permit higher-priority nesting; §4 shows that the incident fetch-SYSERR instead
+keeps `NP=1`, so that same `EI` does not admit maskable EIINTs.  Exact
+interrupt-controller configuration also makes it unreachable from ordinary CAN
+errors.  CAN1 error EIINT186 and global
 CAN error/RFIFO EIINT189/190 are masked (`0x80CF`); only CAN1 RX/TX EIINT187/188
 are enabled as table-reference priority-8 interrupts (`0x8048`).
 
@@ -454,11 +505,13 @@ is selected.
 The combined result is stronger than §7 alone: **no recovered network event can
 write the guard, invoke an attacker-selected synchronous callback, route a CAN
 error into reset/fault handling, trigger CAN DMA, starve a recovered watchdog reset,
-or hold the stock bootloader before the CRC-valid application starts.**  The exact
-post-`7A272` exception context remains unobserved, and mechanisms outside the
-retained firmware/hardware configuration (board-level reset/debug/serial paths,
-unrecovered silicon behavior, or undiscovered hardware state) remain the honest
-boundary.
+or hold the stock bootloader before the CRC-valid application starts.**  Section 4
+now additionally pins the architecture-predicted post-fault path to
+`SYSERR/FEIC 0x13 -> 0x20010 -> 0x62E1E -> 0x62E42`, with `NP=1` blocking ordinary
+CAN/timer EIINTs.  The live FE exception registers were not captured, so that
+post-fault result remains architecture-predicted rather than dynamically observed;
+board-level reset/debug/serial paths and unrecovered silicon behavior remain the
+honest boundary.
 
 Canonical evidence:
 
@@ -480,9 +533,9 @@ A useful new lead must establish an entry that **does not depend on returning
 from the corrupted foreground call**: an actual independently operating
 manufacturer recovery mechanism, or concrete evidence that the post-fault
 execution model differs in a way that reaches a legitimate recovery service.
-The unknown precise fault state, unacquired on-chip ROM/extended-region content,
-and unverified assembly-level connections must remain explicit unknowns; they
-are neither working recovery methods nor grounds for an absolute impossibility
+The live FE exception-register values, unacquired on-chip ROM/extended-region
+content, and unverified assembly-level connections must remain explicit unknowns;
+they are neither working recovery methods nor grounds for an absolute impossibility
 claim.
 
 The inverse hook operation and the last pre-hook image are already known, but
