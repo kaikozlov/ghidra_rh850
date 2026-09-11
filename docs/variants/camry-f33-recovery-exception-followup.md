@@ -258,7 +258,118 @@ chain to restore `7A272`. Neither prerequisite is present in the recovered
 network-reachable surface. This is a bounded static negative, not a claim that
 no undocumented manufacturer executor or unrecovered vulnerability exists.
 
-## 8. P5 gateway preparation is not target-side execution
+## 8. CUW `BlankECU` and recovery state are host modes, not alternate executors
+
+The current CUWPlus managed/native boundary was inspected rather than treating
+the names as protocol evidence. `CuwBackendService.dll` copies its
+`IsBlankECUOnlyFlag` into the native CUW configuration member which
+`ConfigureCUWDLL` stores at native address `1008C460`. The recovered native
+uses are orchestration and package-validation decisions. In particular,
+`10034490` bypasses a calibration/CID eligibility path when the flag is set; it
+does not select another J2534 transport or emit a target-independent repair
+request.
+
+CUW packages separately carry `[KindOfCal] IsBlankECU`. The native calibration
+file reader parses and validates that package property into the CPU descriptor.
+All 26 locally acquired CUWs have `IsBlankECU=0`; there is no blank-target
+package in the retained corpus from which a different wire contract could be
+recovered. `JudgeFlashable` consumes the blank-only host flag, but the selected
+writer remains the ordinary contact-type writer.
+
+The exported `ReadRecoveryInfoFile`, `GetNumberOfReceivedCIDForRecovery`,
+`GetReceivedCIDForRecovery`, and `JudgeKindOfVehicleForRecovery` names also do
+not establish an ECU recovery listener. Managed IL shows that they restore
+host-side interrupted-flash state: J2534 device identity, VIN, calibration
+metadata, flags, and the previously collected CID list. The subsequent job
+still enters the configured CID getter/prepare writer/flash writer. This
+explains Toyota's “recovery” terminology without supplying execution in the
+faulted F33.
+
+For `P5-Unified`, `TCUWCanUnifiedCIDGetter.dll!StartGetCID` connects through
+J2534 protocol 6, installs ordinary flow-control filters, waits the package's
+wake delay, and queries each package node through its diagnostic address. Its
+object vtable at `1000524C` contains the normal destructor/contact operation
+plus periodic-message helpers. The main contact operation at `100019D0` builds
+the request/response addresses from the node descriptor and performs ordinary
+P5 UDS exchanges. It is not a functional-address discovery request capable of
+extracting a CID from an otherwise silent processor.
+
+The relevant acquired package `T-0051-26.cuw` selects node diagnostic ID
+`0724`, gateway descriptor `07505F`, `P5-Unified`, and
+`ChargeLocalBusEcuReprogrammingFlow=00`. Its current route selects the ordinary
+unified CID/prepare/flash DLLs and `PrepareRetryFlag=0`. These are package facts,
+not evidence that `0724` is the F33 EPS diagnostic address.
+
+## 9. “Charge local bus” controls another ECU; it is not a byte proxy
+
+The one remaining suggestive P5-Unified mechanism was traced to its exact wire
+construction. `TCUWUnifiedUtils.dll!RoutineControlForChargeLocalBus` addresses
+the package-declared **controlling ECU**, optionally installs an ISO-TP flow
+filter, and sends UDS RoutineControl request `31 01 11 7E` to start or
+`31 02 11 7E` to stop. It expects the corresponding `71` response. The Phase-6
+variant constructs the same routine around its fixed Phase-6 target address.
+The CID getter uses this only for package flow values `01`/`02`, surrounding a
+normal diagnostic contact with a power-on delay; it does not forward arbitrary
+diagnostic bytes to the target node and does not invoke code inside a silent
+node.
+
+No locally acquired CUW declares a nonzero charge-local-bus flow, and the
+Camry package above explicitly declares `00`. Exact F33 static topology also
+recovers one CAN controller rather than a separate software-addressable EPS
+local CAN. Consequently this facility is evidence of a controller-mediated
+power/wake operation used by other package geometries, not presently a route
+to call the resident at `FFE04` or rewrite `7A272`. Even if an external ECU
+could power-cycle the F33, the valid incident image would make the same fixed
+application jump and fault at the malformed call again.
+
+The hook-reuse target is therefore precise: a new lead must either (a) transfer
+the F33 PC to intact `FFE04` before `7A272`, or (b) independently enter a flash
+executor able to repair the two hook bytes. Blank-only selection, interrupted-
+job recovery, CID collection, and local-bus power control do neither. The
+resident remains valuable because it removes the need to upload a signer after
+such a transfer primitive is found; it does not by itself provide that
+primitive.
+
+## 10. The stock crypto oracle is ordered before the hook, but cannot be newly armed
+
+The first outer foreground call before `7A254` is `69CA2`, which is the stock
+ICU-S crypto-test state machine previously used as the command-5 oracle. This is
+the strongest apparent resident-reuse lead because it is real target code with
+CAN-derived inputs and it executes before the malformed instruction. Its exact
+scheduling boundary nevertheless prevents a post-incident command from using
+it.
+
+Startup `666BC` calls `6914C`, `69064`, and then `7A132`. `6914C/69064` reset the
+crypto-test modes and working state; `7A132` finishes communication
+initialization by writing the `FE01` gate which admits `7A254`. In the foreground
+aggregate, the order is fixed:
+
+```text
+667E6 -> 69CA2        crypto-test state machine, consuming prior collected state
+      -> 7A254
+           -> 79EDE   drain hardware/software CAN RX into normal COM
+           -> 7A272   malformed resident call; FE/SYSERR before the suffix
+      -> 988C2        DCM worker (unreached)
+      -> 69E7C        crypto-test input/result maintenance (unreached)
+      -> 58B5E        system-mode/programming worker (unreached)
+```
+
+The stock bank is not armed by CAN `01B..01F` alone. Its activation is the DCM
+RoutineControl path for RID `100F`, and the DCM worker is after the malformed
+call. The CAN RX drain can accept the control/input frames during the doomed
+first iteration, but `69CA2` has already run, while the later crypto maintenance
+and next `69CA2` invocation are never reached. Repeated resets do not accumulate
+an armed state because the startup functions clear it each time.
+
+This also bounds an exploit interpretation of the prior oracle: its CAN key
+selector and message bytes feed fixed crypto buffers and guarded ICU-S command
+dispatch only after diagnostic activation. The reviewed target-native indirect
+transfer census found no unguarded selector-derived PC at this boundary. Thus
+the oracle demonstrates that useful code exists before the hook, but it is not
+a network-armable one-shot call or PC-transfer primitive in the incident boot
+lifecycle.
+
+## 11. P5 gateway preparation is not target-side execution
 
 The current CP-unprotected GTS+ DLLs under `build/out/cuwplus-unprotected/` were
 checked rather than relying only on the route INI. P5 Unified writer
@@ -289,3 +400,68 @@ result is in the generic DLL flow: central-gateway preparation opens the route
 and controls network conditions, but the selected ECU still has to answer and
 run its own programming services. It therefore does not supply the missing
 independent executor for a faulted F33 application.
+
+## 12. Malformed CAN/CAN-FD before the fault does not expose an overflow landing
+
+Because `79EDE` can drain a frame before the malformed call, the exact-target
+receive path was rechecked specifically as a possible PC-transfer primitive,
+including CAN-FD lengths rather than only ordinary eight-byte frames. The lower
+record carries a four-bit DLC. Its decoded payload length is bounded to the
+CAN-FD maximum of 64 bytes; `7FD46` additionally clamps the local FD copy to
+`0x40` before copying into its 64-byte staging buffer. Route/controller indices
+are checked against fixed table counts before callback lookup.
+
+At the next boundary, `7FEF8/7FF52` decomposes the encoded controller/route ID,
+rejects an unknown controller class (`0xFF`), checks the route index against the
+per-controller count at `21A48`, and only then derives the fixed descriptor and
+callback. The queue writer in `7FD46` checks the configured cursor/capacity
+relations before copying the payload. The normal COM path subsequently bounds
+delivery by the configured PDU length. The ISO-TP route separately caps DCM
+reassembly and checks copy capacity.
+
+No wire-derived destination pointer, callback pointer, length above 64, or
+unchecked route index was recovered in this pre-hook chain. Oversize FD DLCs
+can produce configured-length truncation or ignored suffixes, but not a write
+past the reviewed workspaces. Thus flooding, unknown CAN IDs, short classic
+frames, and 12/16/20/24/32/48/64-byte FD shapes do not currently provide a
+write into the saved FE context, a callback cell, or a resident entry address.
+This is a bounded negative for the exact reviewed receive and ISO-TP paths, not
+a proof against every undiscovered peripheral defect.
+
+## 13. The malformed JARL has a clean epilogue re-encoding, but no flash shortcut
+
+The malformed six-byte stream was also treated as an encoding problem rather
+than only as a fixed bad destination. It is `FF 02 || 92 5B 24 36`, where the
+last four bytes are the signed JARL32 displacement. The displacement has 14 set
+bits, so there are exactly 16,384 values obtainable by clearing a subset of
+those bits while leaving the `FF 02` JARL32 prefix intact. None lands in either
+intact resident span at `FFE04..FFEF3` or `FFF04..FFFFD`.
+
+One encoding does have exact stack-compatible behavior:
+
+```text
+current     FF 02 92 5B 24 36  -> JARL32 362BFE04, LP
+candidate   FF 02 12 01 00 00  -> JARL32 0007A384, LP
+cleared             80 5A 24 36
+```
+
+`7A254` enters with `prepare {lp},0`. Target `7A384` is the independently used
+`dispose 0,{lp},lp` epilogue of the neighboring one-LP wrapper `7A376`. A call
+there would restore the original saved LP from `7A254`'s frame and return to
+the outer foreground aggregate, skipping the poisoned suffix cleanly. That
+would let later DCM and system-mode work run; it is better behavior than simply
+branching to an arbitrary interior instruction.
+
+This encoding relation is **not an in-place repair procedure**. P1M-E Hardware
+Rev.1.20 §35.12 explicitly prohibits additional writing to an already
+programmed flash area and requires erasure before overwriting it. CodeFlash is
+programmed in 256-byte units and the containing erase block must be preserved
+and rebuilt. An executor capable of that erase/RMW can already restore the
+known stock call or install the correct resident call directly, so the
+clear-bits encoding does not remove the missing-executor requirement.
+
+The deterministic byte/subset result is generated by
+`analyze_f33_recovery_structure.py` and protected by the
+`f33_recovery_structure` verification suite. It closes a tempting low-level
+shortcut while retaining `FFE04` as a valid landing pad if a genuine pre-fault
+PC-transfer primitive is later recovered.

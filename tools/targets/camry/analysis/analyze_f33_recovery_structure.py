@@ -36,6 +36,15 @@ def jarl22_target(raw: bytes, pc: int) -> int:
     return (pc + displacement) & 0xFFFFFFFF
 
 
+def subset_displacements(value: int) -> list[int]:
+    """Return every unsigned value obtainable by clearing bits in *value*."""
+    bits = [bit for bit in range(32) if value & (1 << bit)]
+    return [
+        sum(1 << bit for index, bit in enumerate(bits) if selector & (1 << index))
+        for selector in range(1 << len(bits))
+    ]
+
+
 def analyze(image: bytes) -> dict[str, object]:
     digest = hashlib.sha256(image).hexdigest()
     if len(image) != 0x100000 or digest != IMAGE_SHA256:
@@ -58,7 +67,37 @@ def analyze(image: bytes) -> dict[str, object]:
     # Incident record, not a generated replacement image. Include the following
     # stock halfword: the defect cannot be decoded from its four stored bytes alone.
     incident_stream = bytes.fromhex("ff02925b") + image[0x7A276:0x7A278]
+    incident_displacement = struct.unpack_from("<I", incident_stream, 2)[0]
     incident_target = (0x7A272 + struct.unpack_from("<i", incident_stream, 2)[0]) & 0xFFFFFFFF
+
+    # Encoding geometry only: the P1M-E manual prohibits programming the same
+    # CodeFlash range twice after erasure.  This does not assert that a
+    # clear-bits-only write is executable on the device.  It records that, if a
+    # proper erase/RMW executor is obtained, the malformed JARL32 has one useful
+    # same-prefix re-encoding whose destination is a matching one-LP epilogue.
+    epilogue_stream = bytes.fromhex("ff0212010000")
+    if any(
+        after & ~before
+        for before, after in zip(incident_stream, epilogue_stream, strict=True)
+    ):
+        raise ValueError("recovery epilogue encoding requires setting a programmed bit")
+    epilogue_target = (
+        0x7A272 + struct.unpack_from("<i", epilogue_stream, 2)[0]
+    ) & 0xFFFFFFFF
+    if (
+        epilogue_target != 0x7A384
+        or image[epilogue_target:epilogue_target + 4] != bytes.fromhex("40063f00")
+    ):
+        raise ValueError("recovery epilogue geometry drift")
+    subset_targets = {
+        (0x7A272 + displacement) & 0xFFFFFFFF
+        for displacement in subset_displacements(incident_displacement)
+    }
+    resident_spans = ((0xFFE04, 0xFFEF4), (0xFFF04, 0xFFFFE))
+    resident_subset_targets = sorted(
+        target for target in subset_targets
+        if any(start <= target < end for start, end in resident_spans)
+    )
 
     # Restrict this census to the reviewed interrupt slots. Adjacent data words
     # must not be promoted to vector targets merely because they look address-like.
@@ -109,6 +148,22 @@ def analyze(image: bytes) -> dict[str, object]:
                      "recorded_bad_four_bytes": "ff02925b",
                      "instruction_with_stock_successor": incident_stream.hex(),
                      "decoded_bad_target": address(incident_target),
+                     "clear_bits_encoding_geometry": {
+                         "candidate_instruction": epilogue_stream.hex(),
+                         "cleared_bit_mask": bytes(
+                             before ^ after
+                             for before, after in zip(incident_stream, epilogue_stream, strict=True)
+                         ).hex(),
+                         "candidate_target": address(epilogue_target),
+                         "candidate_target_bytes": image[epilogue_target:epilogue_target + 4].hex(),
+                         "matching_entry_prologue": span(0x7A254, 4),
+                         "subset_displacement_count": len(subset_targets),
+                         "resident_subset_targets": [address(target) for target in resident_subset_targets],
+                         "scope": (
+                             "encoding relation only; does not assert that CodeFlash "
+                             "can be overwritten without erase"
+                         ),
+                     },
                      "live_exception_registers_observed": False},
         "foreground_order": [call(pc) for pc in range(0x667EA, 0x66802, 4)],
         "pre_hook_calls": [call(pc) for pc in (0x7A262, 0x7A266, 0x7A26A, 0x7A26E)],

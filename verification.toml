@@ -997,6 +997,9 @@ tests = ["tests/verify_camry_f33_crypto_result_patch.py"]
 [suite.camry_f33_persistent_signer]
 tests = ["tests/verify_camry_f33_persistent_signer.py"]
 
+[suite.f33_recovery_structure]
+tests = ["tests/verify_f33_recovery_structure.py"]
+
 [suite.camry_f33_b6_transaction_observer]
 tests = ["tests/verify_camry_f33_b6_transaction_observer.py"]
 

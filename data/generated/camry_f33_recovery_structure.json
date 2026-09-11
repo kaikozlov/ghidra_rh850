@@ -213,6 +213,20 @@
     }
   ],
   "incident": {
+    "clear_bits_encoding_geometry": {
+      "candidate_instruction": "ff0212010000",
+      "candidate_target": "0x0007A384",
+      "candidate_target_bytes": "40063f00",
+      "cleared_bit_mask": "0000805a2436",
+      "matching_entry_prologue": {
+        "address": "0x0007A254",
+        "bytes": "80072100",
+        "size": 4
+      },
+      "resident_subset_targets": [],
+      "scope": "encoding relation only; does not assert that CodeFlash can be overwritten without erase",
+      "subset_displacement_count": 16384
+    },
     "decoded_bad_target": "0x362BFE04",
     "hook_address": "0x0007A272",
     "instruction_with_stock_successor": "ff02925b2436",
