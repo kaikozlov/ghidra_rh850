@@ -363,8 +363,9 @@ The issue-ready interpretation of this route, including direct verification that
 Toyota LTA remained off throughout the steering interval, is in
 [`docs/variants/toyota-tss3-openpilot-bounty-evidence.md`](../../docs/variants/toyota-tss3-openpilot-bounty-evidence.md).
 
-Route `00000093--4066e7ae51` retains the first operator-observed openpilot steering
-configuration. It did not send B6 from the camera. The controller sent C7 sideband commands
+Route `0000008d--a9f348691a` is the primary operator-observed openpilot steering
+record; later route `00000093--4066e7ae51` is a shorter same-build corroboration. Neither
+sent B6 from the camera. The controller sent C7 sideband commands
 on extended `0x1FDC0002` bus0; an ephemeral EPS resident used each fresh nonzero C7 sequence
 to replace B3..B9 of one already-admitted native B6 and used ICU-S command 5 selector 4 to
 generate the valid replacement trailer before stock SecOC consumption.
@@ -382,8 +383,12 @@ This configuration depends on all of the following identities and lifecycle deta
   against opendbc `baec01c15ac3`. The base commit alone emitted direct zero-trailer B6 and is
   not sufficient.
 
-The reduced route contains 20,939 C7 commands, 20,930 Panda TX returns, 893 active nonzero
-commands, zero host B6, and one 17.94-second `latActive` episode at 10.61..10.94 m/s. Entering
+The primary route contains 31,943 C7 commands, 31,824 successful Panda TX returns,
+8,333 active nonzero commands, zero host B6, and eight `latActive` episodes totaling
+167.289 seconds. A clean 36.105-second segment-6 witness has 1,799/1,799 successful
+active returns, target/measured correlation 0.989 at 400 ms, low driver torque, no EPS
+steering faults, and Toyota `0x08A/0x081` ID0 throughout. Route `93` independently repeats
+the result with 893/893 successful active commands over 17.94 seconds. Entering
 EPS programming mode leaves Toyota TSS/DRCC unavailable for that ignition cycle, so this
 drive engaged openpilot using normal non-adaptive cruise. A full restart restores DRCC but
 also removes the RAM signer. Exact route-segment hashes, deployed source hashes, command

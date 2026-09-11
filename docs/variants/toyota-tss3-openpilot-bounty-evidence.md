@@ -23,60 +23,56 @@ separates the control result from the development mechanism used to obtain it:
 
 ## 1. Camry lateral: direct route evidence
 
-### Result
+### Primary result
 
-Route `00000093--4066e7ae51`, segment 3 contains a continuous 17.92-second
-openpilot lateral-active interval at 10.61..10.94 m/s. The controller sent 893
-fresh active C7 angle commands at nominal 50 Hz. All 893 have successful Panda
-TX returns and none is returned as rejected. Measured steering follows the
-command from negative angle through a sustained positive-angle turn with no EPS
-temporary or permanent fault.
+Route `0000008d--a9f348691a` is the primary working-lateral record. Across 11
+segments it contains eight lateral-active episodes totaling 167.289 seconds and
+8,333 fresh active C7 angle commands at nominal 50 Hz. Panda returned 8,332 as
+successfully transmitted and rejected one. The route spans repeated positive and
+negative commands, with active C7 target angle covering -26.990..21.890 degrees
+and measured steering covering -26.5..23.1 degrees. No EPS temporary or permanent
+steering fault asserted during lateral-active state.
 
-This is not an inference from the operator's impression alone. The same interval
-contains the following independent witnesses:
+The cleanest low-driver-input witness is the 36.105-second lateral-active portion
+of segment 6:
 
-| Witness | Direct segment-3 result |
+| Witness | Direct segment-6 result |
 |---|---:|
-| `carControl.latActive` samples | 1,787 |
-| Active C7 `sendcan` frames | 893 |
-| Active C7 successful Panda returns | 893 |
+| `carControl.latActive` samples | 3,596 |
+| Active C7 `sendcan` frames | 1,799 |
+| Active C7 successful Panda returns | 1,799 |
 | Active C7 rejected returns | 0 |
-| C7 target-angle range | -3.954..20.228 deg |
-| Measured steering-angle range | -4.0..17.8 deg |
-| Target/measured Pearson correlation | 0.997 at 400 ms tested lag |
-| Target/measured mean absolute error | 0.994 deg at that lag |
-| `carState` samples in interval | 1,784 |
-| Driver `steeringPressed` samples | 11 (0.62%) |
-| Absolute driver torque | 0.23 N.m median; 0.47 N.m p95; 0.67 N.m max |
+| C7 target-angle range | -11.690..17.420 deg |
+| Measured steering-angle range | -9.4..15.6 deg |
+| Target/measured Pearson correlation | 0.989 at 400 ms tested lag |
+| Target/measured mean absolute error | 0.873 deg at that lag |
+| `carState` samples in interval | 3,595 |
+| Driver `steeringPressed` samples | 38 (1.06%) |
+| Absolute driver torque | 0.15 N.m median; 0.42 N.m p95; 0.97 N.m max |
 | EPS temporary/permanent fault samples | 0 / 0 |
 
-The two-second means show the target leading a physical steering response rather
-than a single coincident endpoint:
+This is not an inference from the operator's impression alone. The command lead,
+repeated target/measured response, low driver torque, clean EPS state, and inactive
+Toyota request plane make this **observed openpilot lateral control**, not merely a
+successful transmit test.
 
-| Seconds from activation | Mean C7 target | Mean measured angle |
-|---:|---:|---:|
-| 0 | -1.90 deg | -2.66 deg |
-| 2 | 0.05 deg | -0.80 deg |
-| 4 | 4.71 deg | 2.95 deg |
-| 6 | 8.31 deg | 7.03 deg |
-| 8 | 10.58 deg | 8.81 deg |
-| 10 | 16.77 deg | 14.34 deg |
-| 12 | 18.83 deg | 16.87 deg |
-| 14 | 17.32 deg | 16.33 deg |
-| 16 | 16.60 deg | 15.97 deg |
+### Corroborating result
 
-The operator independently reported that openpilot steering was physically
-apparent. The direct route response, low driver torque, clean EPS state, command
-lead, and inactive Toyota request plane make this **observed openpilot lateral
-control**, not merely a successful transmit test.
+The later route `00000093--4066e7ae51`, segment 3 independently repeats the result
+over one continuous 17.92-second interval at 10.61..10.94 m/s: 893/893 active C7
+commands have successful Panda returns, target/measured correlation is 0.997 at the
+tested 400-ms lag with 0.994-degree mean absolute error, driver torque is 0.23 N.m
+median / 0.47 N.m p95 / 0.67 N.m max, and no EPS steering fault asserts. Its target
+spans -3.954..20.228 degrees and measured steering spans -4.0..17.8 degrees.
 
 ### Toyota LTA was off
 
-The active interval contains 717 native bus-2 `0x08A` request frames and 597
-native bus-0 `0x081` result/reference frames. Every `0x08A` and every `0x081`
-has Target Lateral ID `0`, which Toyota's recovered dictionary defines as **No
-Request (Manual Operation)**. There are no native ID11 LTA/LCA requests or
-results during the openpilot steering interval.
+Across all eight primary-route lateral-active episodes, all 6,689 native bus-2
+`0x08A` request frames and all 5,577 native bus-0 `0x081` result/reference frames
+have Target Lateral ID `0`, which Toyota's recovered dictionary defines as **No
+Request (Manual Operation)**. There are no native ID11 LTA/LCA requests or results
+during the openpilot steering intervals. The corroborating route independently
+repeats this with 717 `0x08A` and 597 `0x081` ID0 frames during its active interval.
 
 This matters because the wheel response cannot be assigned to simultaneous
 factory LTA. Openpilot was engaged from normal non-adaptive cruise after EPS
@@ -84,24 +80,24 @@ programming had made stock TSS/DRCC unavailable for that ignition cycle.
 
 ### Source integrity and scope
 
-The active interval is wholly inside segment 3, SHA-256
-`65bc4e824580628cb8409d92b72e15e0626b92e1a2553b304d3e81db209ca2ad`,
-which matches the contemporaneously recorded inventory byte-for-byte. The local
-copy is intentionally outside git under
-`/Users/kai/dev/inspect/logs/camry-2026/2026-09-10/00000093--4066e7ae51/`.
+All 11 primary-route rlogs were copied from the comma on 2026-09-11 and SHA-256
+inventoried in the retained session summary. The clean segment-6 witness is
+`87ec47f75bf4ab45463cd70dbc0ba79e5aa339f9ec55493629931499c6fb4832`.
+The local copy is intentionally outside git under
+`/Users/kai/dev/inspect/logs/camry-2026/2026-09-10/0000008d--a9f348691a/`.
 
-Segments 0..5 pulled from the comma on 2026-09-11 match the retained hashes.
-The comma's current segment 6 is a valid Zstandard stream but has SHA-256
-`78f96db6bdc11d73c63e09c43f3c4cfde7033d579a215b9111a3eb5658aa9c84`,
-not the contemporaneously inventoried `4a0646ae...`. Full-route totals from the
-original reduction must therefore not be silently mixed with a new seven-file
-reduction. This discrepancy does not affect the lateral claim because all of
-its inputs and witnesses are in byte-identical segment 3.
+Both routes record openpilot parent
+`ddd1f6fac47e636c6b5ec470849350587ee04272`, branch `kai`, version `0.11.2`,
+and `dirty=true`. Their captured `GitDiff` is byte-identical, SHA-256
+`e1caaf8276900c7aa64bb44e7f7e1a272e6026d432d7e654e1e530d4a6b6a705`, so the
+later `93` route is a same-build corroboration rather than a different steering
+configuration. The dirty state is material: the working C7 opendbc delta was not
+part of base commit `baec01c15ac3fdf7361f862a483ad3a06e1f985a`.
 
-The route records openpilot parent `ddd1f6fac47e636c6b5ec470849350587ee04272`,
-branch `kai`, version `0.11.2`, and `dirty=true`. The dirty state is material:
-the working C7 opendbc delta was not part of base commit
-`baec01c15ac3fdf7361f862a483ad3a06e1f985a`.
+The corroborating route's segment-3 evidence remains byte-identical to its retained
+inventory. Its current comma segment 6 differs from the contemporaneously inventoried
+copy, so its historical full-route totals remain pinned rather than recomputed; that
+does not affect the segment-3 corroboration.
 
 ## 2. Exact Camry development mechanism
 

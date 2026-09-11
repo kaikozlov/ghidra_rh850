@@ -15,9 +15,11 @@ no new vehicle claim is made.
 
 **2026-09-10 supersession note.** The revision table and sender-complete diagnosis below are
 the Sep-7 audit checkpoint, not the current working-tree identity. A later development
-configuration produced operator-observed steering on route `00000093--4066e7ae51` by sending
-C7 sideband control on extended `0x1FDC0002` and replacing/re-signing already-admitted native
-B6 inside the EPS. Exact RAM identities, deployed source hashes, route hashes, and lifecycle
+configuration produced operator-observed steering primarily on route
+`0000008d--a9f348691a`, with later same-build route `00000093--4066e7ae51` as a shorter
+corroboration, by sending C7 sideband control on extended `0x1FDC0002` and
+replacing/re-signing already-admitted native B6 inside the EPS. Exact RAM identities,
+deployed source hashes, route hashes, and lifecycle
 are preserved in
 `targets/camry-2026/raw-20260910/working-steering/summary.json` and live-baseline §70.4.
 The opendbc base commit in that record is not sufficient by itself because the working C7

@@ -4,7 +4,8 @@
 `8965F3307000 / 8A3113303100`.
 
 **Current control result:** the September 10 development configuration produced
-observed openpilot lateral control on route `00000093--4066e7ae51` while the
+observed openpilot lateral control primarily on route `0000008d--a9f348691a`, with
+later same-build route `00000093--4066e7ae51` as a shorter corroboration, while the
 native `0x08A` and `0x081` request/result planes remained Target Lateral ID 0
 (Toyota LTA off). The direct route evidence, exact software/RAM identities, and
 the independent TSS3 Corolla longitudinal proof of concept are summarized in
@@ -39,9 +40,12 @@ native-application trailer on the modified ID11/target/100/100 application: all 
 reached raw PDU44, generated COM, and the application snapshot. Cumulative stage 5 is
 therefore dynamically valid, and the tested application construction is accepted; the old
 stage-5 miss was before EPS queue ingress. The later C7 runtime handoff closed the road-control
-boundary: route `00000093--4066e7ae51` contains 893 active angle commands with 893 successful
-Panda returns, a 17.92-second commanded/measured steering response (`r=0.997` at the tested
-400-ms lag), low driver torque, no EPS steering faults, and native `0x08A/0x081` ID0 throughout.
+boundary: primary route `0000008d--a9f348691a` contains 8,333 active angle commands with
+8,332 successful Panda returns over 167.289 lateral-active seconds. Its clean 36.105-second
+segment-6 witness has 1,799/1,799 successful active returns, commanded/measured response
+`r=0.989` at the tested 400-ms lag, low driver torque, no EPS steering faults, and native
+`0x08A/0x081` ID0 throughout. Route `00000093--4066e7ae51` independently corroborates the
+same build with 893/893 successful active returns and `r=0.997` over 17.92 seconds.
 The remaining work is upstream cleanup and broader release/fault qualification, not proof
 that the exact development path can steer. VAR-148/CORR-179 close the ID11 composition
 semantics statically: accepted B6 is co-modulated inside the ordinary EPS sum, not an

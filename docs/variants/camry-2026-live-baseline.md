@@ -6058,8 +6058,11 @@ application into the resident without adding a second engagement or safety polic
 
 ### 70.4 Exact development configuration that produced observed steering
 
-The first observed openpilot steering drive is retained as route
-`00000093--4066e7ae51`; the contemporaneously reduced segments 0..6 span 379.1 s.
+The primary observed openpilot steering drive is route
+`0000008d--a9f348691a`; its 11 retained segments span 647.255 seconds of
+`carControl` and contain eight lateral-active episodes totaling 167.289 seconds.
+Later same-build route `00000093--4066e7ae51` is a shorter independent
+corroboration; its contemporaneously reduced segments 0..6 span 379.1 seconds.
 This result did **not** use camera-originated B6. It used the already-qualified
 two-stage EPS resident and the later C7 sideband integration:
 
@@ -6082,11 +6085,22 @@ development CodeFlash remained cumulative stage 5
 not a substitute for the valid signer. Full EPS power-off removes the resident
 and helper.
 
-The analyzed route contains 20,939 C7 frames and 20,930 Panda TX returns, with
-893 nonzero active sequences and 20,046 neutral sequence-zero frames; it contains
-zero host B6. One `latActive` episode lasted 17.94 s at 10.61..10.94 m/s. The
-desired steering angle spanned -3.98..20.55 degrees and measured angle spanned
--4.0..17.8 degrees. The operator reported physically apparent openpilot steering.
+The primary route contains 31,943 C7 frames and 31,824 successful Panda TX returns,
+with 8,333 nonzero active sequences and 23,610 neutral sequence-zero frames; it
+contains zero host B6. Panda successfully returned 8,332 active frames and rejected
+one. The clean 36.105-second segment-6 witness has 1,799/1,799 successful active
+returns, desired target -11.690..17.420 degrees, measured angle -9.4..15.6 degrees,
+and target/measured `r=0.989` with 0.873-degree mean absolute error at the tested
+400-ms lag. Driver torque is 0.15 N.m median / 0.42 N.m p95 / 0.97 N.m max, only
+38/3,595 `carState` samples report `steeringPressed`, neither EPS steering fault
+asserts, and all 1,444 native `0x08A` plus 1,203 native `0x081` frames remain ID0.
+The operator reported physically apparent openpilot steering.
+
+Route `00000093--4066e7ae51` independently repeats the same result with 893/893
+successful active C7 returns over 17.94 seconds at 10.61..10.94 m/s and
+target/measured `r=0.997` at 400 ms. Both routes record the same parent commit and
+byte-identical captured `GitDiff`; route `93` is therefore corroboration rather than
+a different steering configuration.
 This is graded **observed**, not a deterministic actuator attribution proof.
 
 The exact lifecycle is part of the result: full OFF -> NRTD, `./f33-secoc
