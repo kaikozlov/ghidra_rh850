@@ -6204,6 +6204,13 @@ pairs native bus-2 `0x08A` with live bus-0 `0x00F`, matching the already-
 established VAR-110 direction rather than treating either Panda TX echo as a
 source frame.
 
+The corrected capture then reached command 5 but exposed a second host timing
+bug: the burst assembler could complete one candidate and then miss all three
+retries before the resident's next tick-224--255 parser window. A direct
+single-word witness showed Panda TX unblocked, the C5 echo present, and the EPS
+mailbox accepting the next sequence once that window opened. Native `0x08A`
+candidate iteration now uses the acknowledged word-at-a-time command path.
+
 This design does not interpose on the hypothesized `0x08A -> arbitrator -> B6`
 path and does not require that hidden link to carry camera-originated B6. Stock
 0x08A and 0x081 remain intact. Future longitudinal remains a separate native

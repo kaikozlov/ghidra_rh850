@@ -591,7 +591,7 @@ class Fake08AOracleSession:
             "sync_hex": "00" * 8, "frame_hex": native_08a.hex(),
             "sync_age_ms": 1.0, "frame_age_ms": 1.0,
         }
-    def generate_fast(self, domain, *, expected_data_id):
+    def generate(self, domain, *, expected_data_id):
         self.calls.append((bytes(domain), bytes(expected_data_id)))
         matched = bytes(domain) == native_08a_domain
         return {
