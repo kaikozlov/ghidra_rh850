@@ -476,6 +476,9 @@ tests = ["tests/verify_camry_2026_08a_signer_continuity.py"]
 [suite.camry_2026_tss3_request_capture]
 tests = ["tests/verify_camry_tss3_request_capture.py"]
 
+[suite.camry_frc_drcc_gate_probe]
+tests = ["tests/verify_camry_frc_drcc_gate_probe.py"]
+
 [suite.camry_tss3_operation_ffd_decoder]
 tests = ["tests/verify_camry_tss3_operation_ffd_decoder.py"]
 [suite.camry_8965f3307000_canfd_timing]
