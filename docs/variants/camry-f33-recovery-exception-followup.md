@@ -156,3 +156,45 @@ unacquired ROM/extended-region contents, and complete assembly-level wiring
 remain unknown. They are neither demonstrated recovery routes nor evidence
 for an absolute impossibility claim. Known inverse bytes alone do not supply
 an accessible way to perform the repair. No new vehicle job was left running.
+
+## 6. Network-only route closure after exact-target recheck
+
+The exact F33 cold-start selector was rechecked with
+`tools/gtarget camry-8965F3307000`: `13B0` calls `119E`, and a valid image goes
+directly through the fixed application-entry pointer at `FFDB8` to `20880`.
+Only a failed validity check reaches `1398`. The only recovered application
+handoff into that boot runtime remains `65F5E -> 9F00 -> 148E -> 1398`, and the
+normal DCM/system-mode workers which reach it execute after the malformed call.
+No boot-request polling window precedes the valid-image jump.
+
+Enabling EI interrupts inside an interrupt or exception path does not create an
+unbounded CAN-controlled stack pivot. Renesas Hardware Rev.1.20 pp.209-212
+states that an acknowledged EIINT priority is recorded in `ISPR`; while its bit
+is set, interrupts at the same and every lower priority are masked. The same CAN
+receive source therefore cannot recursively nest. Higher-priority nesting is
+finite, and the target-native saved-PC/callback/DMAC census found no tester-
+controlled return-PC or indirect-call cell. This closes the proposed CAN-flood
+nested-return route within the recovered hardware/software model; it is not a
+general proof against every undiscovered implementation flaw.
+
+The physical-route ambiguity is also narrower than “camera side versus Bus 4.”
+On the installed repinned Toyota-B harness, Panda bus 0 is the car/chassis side
+of the relay-intercepted **Toyota Bus 4** pair and Panda bus 2 is its camera-
+connector side. The retained identity check
+`targets/camry-2026/raw-20260911/eps-recovery/nrtd-identity-check-20260911T054713Z.json`
+records `0x7A1 -> 0x7A9` timeouts on both bus 0 and bus 2. Another Panda logical
+bus selection is therefore not an untried route around the central gateway.
+Toyota's topology still labels EPS “via EBU,” so a physically downstream tap
+could distinguish an unverified assembly-level relay boundary; no GTS/CUW
+command was recovered that makes EBU execute or proxy the EPS flash writer.
+
+Current CUW recovery APIs restore host-side retry/CID state and then invoke the
+ordinary writer. They do not provide a target-independent CAN recovery listener.
+Together with the fixed XCP gate (`30D68 = 5A`) and the target-native negative
+control-transfer census in
+`data/generated/camry_8965F3307000_application_ram_loader_assessment.json`, no
+stock camera-side CAN command is presently recovered that can rewrite `7A272`
+while execution is trapped there. A software/network answer would require new
+evidence of an independent EBU/manufacturer recovery executor or a concrete
+pre-fault control-transfer vulnerability; neither is present in the acquired
+firmware and tooling.
