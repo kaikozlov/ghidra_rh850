@@ -5778,10 +5778,13 @@ D7 advances + complete host TX returns + no ID63 marker
   -> bounded negative at the post-CanIf/pre-SecOC observation boundary
 ```
 
-This observer is static-ready and **not yet live-qualified**. The build is pinned by
+At this historical checkpoint the observer was static-ready and **not yet live-qualified**. The build is pinned by
 `exploit/ephemeral_runtime/build_camry_f33_b6_midaggregate_observer.py`; deterministic static,
 ABI, statistics, and classification checks are in
 `tests/verify_camry_f33_b6_midaggregate_observer.py`.
+Section 70.5 records the completed live experiment and the replacement of this
+full-runtime artifact with the already-qualified two-stage high-tail loader plus
+a 120-byte non-mutating observer helper.
 
 ### 68.5 The route44 bridge remains deferred
 
@@ -5790,10 +5793,9 @@ experiment. Queue/CanIf identity must first be settled by VAR-152's observer. Th
 not be used to turn an unresolved ingress question into another mixed intervention/observation
 run.
 
-### 68.6 Next vehicle work is intentionally only a selfcheck and one marker block
+### 68.6 Completed vehicle work was intentionally only a selfcheck and one marker block
 
-No additional vehicle work is justified until the VAR-152 artifact, package, docs, and
-statistics tests are clean. Once they are, the first future ignition cycle should do only:
+The planned vehicle cycle was deliberately limited to:
 
 ```text
 OFF -> NRTD/Park -> install deterministic mid-aggregate observer
@@ -5804,9 +5806,9 @@ marker: ID63/suppressed contribution on bus0 with jittered cadence
 read mailbox once after treatment and stop at the verdict
 ```
 
-Do not proceed to downstream D-G state, route44 bridge injection, SecOC changes, `0x08A`
-suppression, or another bus sweep in the same session. The point of the next car run is one
-unambiguous boundary decision, not another discovery pass.
+No downstream D-G state, route44 bridge injection, SecOC change, `0x08A`
+suppression, or bus sweep was performed in that session. Section 70.5 records its
+bounded-negative result.
 
 Machine-readable retained-session reductions are
 `data/generated/camry_f33_runtime_monitor_20260908.json` and
@@ -6043,3 +6045,109 @@ handoff: current `kai-openpilot` emits a zero-trailer B6 marker, whereas the qua
 resident consumes the separate extended-CAN C7 control mailbox and currently reconstructs
 only B3..B9 on the native template. Production integration must carry the controller-owned
 application into the resident without adding a second engagement or safety policy.
+
+### 70.4 Exact development configuration that produced observed steering
+
+The first observed openpilot steering drive is retained as route
+`00000093--4066e7ae51`; the contemporaneously reduced segments 0..6 span 379.1 s.
+This result did **not** use camera-originated B6. It used the already-qualified
+two-stage EPS resident and the later C7 sideband integration:
+
+```text
+openpilot CarController, while latActive
+  -> 0x1FDC0002 bus0: 00 C7 seq 00 target_hi target_lo 00 00
+  -> exact-F33 extended-CAN staging FEBE4C34
+  -> armed high-tail resident calls the low-RAM helper after 79EDE
+  -> helper selects one already-admitted native B6
+  -> replace B3..B9 with ID11/target/signal265=0/contribution=100/100
+  -> reconstruct freshness from native FV4 + authenticated sync + committed slot1
+  -> ICU-S command 5, selector 4
+  -> install the valid generated trailer before untouched stock SecOC consumption
+```
+
+The exact RAM identities were payload `01ce9934...fc6c`, resident
+`31b1b2c3...3a3a`, and padded helper `4719c4f2...965a`. The persistent
+development CodeFlash remained cumulative stage 5
+`669cedf8...aa01af`, although the later bad-MAC A/B proves that stage 5 alone is
+not a substitute for the valid signer. Full EPS power-off removes the resident
+and helper.
+
+The analyzed route contains 20,939 C7 frames and 20,930 Panda TX returns, with
+893 nonzero active sequences and 20,046 neutral sequence-zero frames; it contains
+zero host B6. One `latActive` episode lasted 17.94 s at 10.61..10.94 m/s. The
+desired steering angle spanned -3.98..20.55 degrees and measured angle spanned
+-4.0..17.8 degrees. The operator reported physically apparent openpilot steering.
+This is graded **observed**, not a deterministic actuator attribution proof.
+
+The exact lifecycle is part of the result: full OFF -> NRTD, `./f33-secoc
+install`, direct NRTD -> READY without OFF, then `./f33-secoc load-arm`; the
+last step must require byte-exact helper readback and equality between one native
+Toyota trailer and the locally generated trailer. Only after returning Panda
+ownership to one clean manager/pandad tree may openpilot run. A duplicate stale
+manager tree previously deprived `sensord` of IMU ownership and produced `Sensor
+Data Invalid`. Entering EPS programming mode also left Toyota TSS/DRCC unavailable
+for the ignition cycle; the observed drive used normal non-adaptive cruise for
+openpilot engagement. Full vehicle restart restored DRCC but removed the RAM
+resident.
+
+The parent openpilot tree was `ddd1f6fac47e`, with opendbc base
+`baec01c15ac3`; critically, the working C7 integration was an uncommitted delta
+on top of that base. The base commit alone still emitted direct zero-trailer B6
+and is **not** the working configuration. Exact deployed source hashes, route
+segment hashes, command format, lifecycle, and operational caveats are retained
+in `targets/camry-2026/raw-20260910/working-steering/summary.json`. This setup is
+the reproducible development fallback, not the preferred native integration. The exact
+five-file opendbc worktree delta is retained beside the summary as
+`kai-opendbc-c7-working-tree.patch`, SHA-256
+`3f798940f439f329ebade4e342325f951e1b0725dba801565708df9bbc610081`.
+
+### 70.5 Deterministic ingress observer closes the direct-Panda marker boundary
+
+The first Sep-10 install used VAR-152's original 498-byte full replacement
+runtime and failed before observer initialization. Its verdict
+`abi_preserving_runtime_failed_before_observer_initialization` is an
+instrumentation failure and carries no ingress conclusion. Repeating that
+unqualified runtime was rejected. Instead, the same observation logic was moved
+onto the exact high-tail loader already live-qualified by the signer: the boot
+payload and 524-byte resident remained byte-identical to §70.2, while a 120-byte
+call-free helper used the resident's existing post-`79EDE`/pre-SecOC call point.
+The helper writes only `FEBF0268..FEBF0287`: four counters plus the last exact
+ID63 `B0..B11 || B28..B31` signature.
+
+The corrected install returned `inline_signer_resident_live_loader_ready`; the
+150-word padded helper read back byte-exact and armed. The two-second READY/Park
+selfcheck had zero SID23 reads during treatment and advanced observation/D7/B6
+by `409/102/205`, returning `midaggregate_observer_selfcheck_pass`.
+
+The one authorized marker block then sent 121 ID63/current-angle/additive-
+suppressed B6 frames on Panda bus0, the car/chassis side of the repinned Toyota-B
+Bus-4 relay pair. Panda returned all 121 transmissions, rejected none, and ended
+with zero bus-off, RX error, TX error, or TX loss. During the same two-second
+jittered block the resident advanced observation/D7/native-B6 by `434/109/217`,
+but ID63 advanced **zero** and no transmitted signature was stored. The verdict
+is therefore `id63_not_seen_at_midaggregate_boundary`.
+
+This is a **bounded dynamic negative** for that exact treatment: the
+Panda-transmitted ID63 B6 did not reach exact-F33's normal post-CanIf/pre-SecOC
+boundary. SecOC rejection and EPS post-ingress rewriting cannot explain its
+absence there. The result does not distinguish an upstream gateway/proxy filter,
+a non-exposed physical B6 delivery segment, or loss below the observer in
+hardware/low-level receive admission. It also does not prove that an
+application-valid ID11 with a valid MAC would receive identical upstream
+treatment.
+
+Joined with §70.2's continuing internal native B6 source and the established
+request/result fields, the leading architecture hypothesis is now:
+
+```text
+0x08A Target Lateral ID + target angle request
+  -> Brake/Skid/CGW-domain arbitration/proxy
+       -> 0x081 selected/result feedback
+       -> separately constructed/authenticated B6 on a non-observed path to F33
+```
+
+`0x08A`/`0x081` request/result identity is supported by the retained field joins;
+the final `0x08A -> B6` edge remains a **hypothesis** until a synchronized stock-
+LTA run observes internal native B6 ID/target content. Exact field results and
+artifact identities are retained in
+`targets/camry-2026/raw-20260910/f33-ingress/session-summary.json`.

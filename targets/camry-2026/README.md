@@ -355,3 +355,48 @@ it, while the post-aggregate route44/application Target Lateral ID remains zero 
 current-shape ID11 Panda echo. These files do **not** identify the first pre-route44 byte
 identity edge because the normal monitor samples the SecOC queue after stock aggregate
 cleanup. The next field discriminator is the separate sticky pre-aggregate phase P resident.
+That sentence records the Sep-8 checkpoint; the Sep-10 ingress section below supersedes it.
+
+## Working steering configuration (2026-09-10)
+
+Route `00000093--4066e7ae51` retains the first operator-observed openpilot steering
+configuration. It did not send B6 from the camera. The controller sent C7 sideband commands
+on extended `0x1FDC0002` bus0; an ephemeral EPS resident used each fresh nonzero C7 sequence
+to replace B3..B9 of one already-admitted native B6 and used ICU-S command 5 selector 4 to
+generate the valid replacement trailer before stock SecOC consumption.
+
+This configuration depends on all of the following identities and lifecycle details:
+
+- cumulative persistent stage-5 image SHA-256 `669cedf8c8465ebfd02318cb7708b897b817bc3b40925c89743b64ce49aa01af`;
+- RAM payload/resident/padded-helper SHA-256 values `01ce9934...fc6c`,
+  `31b1b2c3...3a3a`, and `4719c4f2...965a`;
+- full EPS OFF, NRTD `./f33-secoc install`, direct transition to READY without OFF,
+  then `./f33-secoc load-arm` with byte-exact helper readback and native-trailer oracle;
+- exactly one normal openpilot manager/pandad tree after the Panda lease is returned;
+- the C7-enabled openpilot worktree files pinned by SHA-256 in the retained summary and
+  reconstructable from `raw-20260910/working-steering/kai-opendbc-c7-working-tree.patch`
+  against opendbc `baec01c15ac3`. The base commit alone emitted direct zero-trailer B6 and is
+  not sufficient.
+
+The reduced route contains 20,939 C7 commands, 20,930 Panda TX returns, 893 active nonzero
+commands, zero host B6, and one 17.94-second `latActive` episode at 10.61..10.94 m/s. Entering
+EPS programming mode leaves Toyota TSS/DRCC unavailable for that ignition cycle, so this
+drive engaged openpilot using normal non-adaptive cruise. A full restart restores DRCC but
+also removes the RAM signer. Exact route-segment hashes, deployed source hashes, command
+format, and operational caveats are in `raw-20260910/working-steering/summary.json`.
+
+## Direct-B6 ingress discriminator (2026-09-10)
+
+The original 498-byte full-runtime observer failed before initialization and produced no
+ingress conclusion. A corrected two-stage observer reused the live-qualified 524-byte
+resident and loaded a 120-byte call-free helper. In READY/Park it saw D7 and native B6 at
+the post-CanIf/pre-SecOC boundary. During the authorized treatment Panda returned all 121
+ID63 B6 transmissions, while the observer advanced by 434 foreground observations, 109 D7
+queue hits, and 217 native-B6 queue hits but zero ID63 hits.
+
+That bounded result excludes EPS SecOC rejection and EPS post-ingress rewriting as the reason
+the exact marker was absent. It does not distinguish an upstream gateway/proxy filter, a
+private B6 physical segment, or low-level admission loss below the observer. The leading
+architecture hypothesis is `0x08A` request -> Brake/Skid/CGW-domain arbitration -> `0x081`
+result plus separately authenticated B6 to F33. The final transform remains unproven. Exact
+artifact identities and counters are in `raw-20260910/f33-ingress/session-summary.json`.

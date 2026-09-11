@@ -802,6 +802,7 @@ check("command-5 plan is non-actuating and ephemeral", command5_probe.plan(None)
 
 print("\n== inline B6 signer host-visible state ==")
 from exploit.ephemeral_runtime import camry_f33_b6_inline_signer as inline_signer
+from exploit.ephemeral_runtime import camry_f33_b6_ingress_helper as ingress_helper
 check("inline signer state remains wholly SID23-readable below the protected boundary",
       inline_signer.STATE_BASE == 0xFEBF025C and inline_signer.STATE_SIZE == 12 and
       inline_signer.STATE_BASE + inline_signer.STATE_SIZE == inline_signer.TELEMETRY_BASE and
@@ -852,6 +853,19 @@ check("inline signer exposes exact profile2 queue and full secured buffer throug
       inline_signer.B6_SECURED_BUFFER_BASE == 0xFEBE54D4 and inline_signer.B6_SECURED_BUFFER_SIZE == 32 and
       probe.validate_read(probe.RAM_ID, inline_signer.B6_QUEUE_RECORD_BASE, inline_signer.B6_QUEUE_RECORD_SIZE) is None and
       probe.validate_read(probe.RAM_ID, inline_signer.B6_SECURED_BUFFER_BASE, inline_signer.B6_SECURED_BUFFER_SIZE) is None)
+ingress_raw = (
+    (409).to_bytes(4, "little") + (102).to_bytes(4, "little") +
+    (205).to_bytes(4, "little") + (1).to_bytes(4, "little") +
+    bytes.fromhex("0000003f000000000000000011223344")
+)
+ingress_decoded = ingress_helper.decode_telemetry(ingress_raw)
+check("two-stage ingress telemetry decodes counters and exact marker signature",
+      ingress_decoded["observation_count"] == 409 and
+      ingress_decoded["d7_queue32_count"] == 102 and
+      ingress_decoded["b6_queue32_count"] == 205 and
+      ingress_decoded["id63_marker_count"] == 1 and
+      ingress_decoded["last_id63_target_lateral_id"] == 63 and
+      ingress_decoded["last_id63_trailer_hex"] == "11223344")
 
 # quiet-source now counts distinct native B6 frames by frame-unique protected
 # trailer, rather than scheduler ticks during which the queue remains occupied.
@@ -941,7 +955,7 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v12 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v12" and manifest["target"] == {
+    check("kit manifest is self-contained v13 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v13" and manifest["target"] == {
         "eps_f181": "8965F3307000", "eps_diag": "0x7A1->0x7A9 bus0", "b6": "0x0B6/32 FD bus0",
     })
     check("kit pins live persistence-verified stage5 as current firmware", manifest["current_firmware"] == {
@@ -987,7 +1001,7 @@ with tempfile.TemporaryDirectory() as td:
           "cooperative exact-token lease" in signer["panda_ownership"] and
           "without reset/recovery/flash" in signer["panda_ownership"] and
           manifest["ram_experiments"]["order"][1].startswith("command5_probe is retained as the already-live-qualified"))
-    check("kit makes deterministic mid-aggregate observer the immediate ingress experiment",
+    check("kit retains failed full-runtime observer only as a superseded artifact",
           mid["payload_sha256"] == midagg.EXPECTED_PAYLOAD_SHA256 and
           mid["staging_sha256"] == midagg.EXPECTED_STAGING_SHA256 and
           mid["resident_sha256"] == midagg.EXPECTED_RESIDENT_SHA256 and mid["resident_size"] == 498 and
@@ -1000,7 +1014,20 @@ with tempfile.TemporaryDirectory() as td:
           "0x0D7" in mid["same_scheduler_positive_control"] and mid["marker_jitter_ms"] == [11,17,23,13,19] and
           mid["sid23_reads_during_treatment"] == 0 and mid["source_memory_write"] is False and
           mid["secoc_bypass"] is False and mid["route44_publish"] is False and mid["live_qualified"] is False and
-          manifest["ram_experiments"]["order"][2].startswith("b6_midaggregate_observer install in NRTD"))
+          mid["superseded_by"] == "b6_ingress_observer" and "failed before observer initialization" in mid["live_result"])
+    live_ingress = manifest["ram_experiments"]["b6_ingress_observer"]
+    check("kit packages the live-qualified two-stage ingress observer",
+          live_ingress["launcher"] == "f33-ingress" and
+          live_ingress["payload_sha256"] == "01ce993425e910a6ea37473580adb6e641bdff56a3568492d4c9e0388e02fc6c" and
+          live_ingress["resident_sha256"] == "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a" and
+          live_ingress["helper_size"] == 120 and live_ingress["helper_padded_size"] == 600 and
+          live_ingress["helper_padded_sha256"] == "a964e816010a0ee6485877ac31006d77d6dbf3591ac5a22e8044ca7783cbb28c" and
+          live_ingress["telemetry"]["base"] == "0xFEBF0268" and
+          "0x79EDE" in live_ingress["observation_boundary"] and
+          live_ingress["mutation_boundary"]["receive_state_write"] is False and
+          live_ingress["live_qualified"] is True and
+          "id63_not_seen_at_midaggregate_boundary" in live_ingress["live_result"] and
+          manifest["ram_experiments"]["order"][2].startswith("b6_ingress_observer is the live-qualified"))
     mon = manifest["ram_experiments"]["runtime_monitor"]
     check("kit retains generic external-control monitor for downstream A-G localization",
           mon["payload_sha256"] == monitor.EXPECTED_PAYLOAD_SHA256 and
@@ -1077,6 +1104,9 @@ with tempfile.TemporaryDirectory() as td:
         "ram_payloads/camry_f33_b6_inline_signer_payload.bin",
         "ram_payloads/camry_f33_b6_inline_signer_helper_padded.bin",
         "ram_payloads/camry_f33_b6_inline_signer.json",
+        "ram_payloads/camry_f33_b6_ingress_helper_payload.bin",
+        "ram_payloads/camry_f33_b6_ingress_helper_helper_padded.bin",
+        "ram_payloads/camry_f33_b6_ingress_helper.json",
         "ram_payloads/camry_f33_runtime_replay_discriminator_payload.bin",
         "ram_payloads/camry_f33_b6_transaction_observer_payload.bin",
         "ram_payloads/camry_f33_b6_bridge_payload.bin",
@@ -1088,6 +1118,7 @@ with tempfile.TemporaryDirectory() as td:
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_monitor_preaggregate.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.py",
+        "runtime/exploit/ephemeral_runtime/camry_f33_b6_ingress_helper.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
         "runtime/exploit/ephemeral_runtime/f33_panda_lease.sh",
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
@@ -1132,7 +1163,8 @@ with tempfile.TemporaryDirectory() as td:
           "generic runtime monitor" in runbook and "runtime_monitor_live" in runbook and
           "./f33 doctor" in runbook and "./f33 install" in runbook and "./f33 shell" in runbook and
           "./f33-ingress install" in runbook and "./f33-ingress selfcheck" in runbook and
-          "./f33-ingress marker" in runbook and "runtime_midaggregate_observer_live" in runbook and
+          "./f33-ingress load-arm" in runbook and "./f33-ingress marker" in runbook and
+          "inline_signer_resident_live_loader_ready" in runbook and
           "midaggregate_observer_selfcheck_pass" in runbook and
           "./f33-pre phase P" in runbook and
           "watch SLOT ADDRESS" in runbook and "./f33 phase A" in runbook and "current opendbc" in runbook and
@@ -1198,22 +1230,17 @@ with tempfile.TemporaryDirectory() as td:
           preagg.EXPECTED_PAYLOAD_SHA256 in pre_doctor.stdout, pre_doctor.stderr[-300:])
     ingress_launcher = out / "f33-ingress"
     ingress_launcher_text = ingress_launcher.read_text(encoding="utf-8")
-    check("mid-aggregate ingress launcher pins separate host/payload identities",
-          "camry_f33_b6_midaggregate_observer.py" in ingress_launcher_text and
-          "camry_f33_b6_midaggregate_observer_payload.bin" in ingress_launcher_text and
-          midagg.EXPECTED_PAYLOAD_SHA256 in ingress_launcher_text and
-          "selfcheck" in ingress_launcher_text and "marker" in ingress_launcher_text)
+    check("two-stage ingress launcher pins separate host/payload/helper identities",
+          "camry_f33_b6_ingress_helper.py" in ingress_launcher_text and
+          "camry_f33_b6_ingress_helper_payload.bin" in ingress_launcher_text and
+          "camry_f33_b6_ingress_helper_helper_padded.bin" in ingress_launcher_text and
+          "load-arm" in ingress_launcher_text and "selfcheck" in ingress_launcher_text and "marker" in ingress_launcher_text)
     ingress_doctor = subprocess.run([str(ingress_launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
-    check("built mid-aggregate launcher doctor validates exact payload without Panda access",
+    check("built two-stage ingress launcher doctor validates exact bundle without Panda access",
           ingress_doctor.returncode == 0 and "f33-ingress doctor: PASS" in ingress_doctor.stdout and
-          midagg.EXPECTED_PAYLOAD_SHA256 in ingress_doctor.stdout, ingress_doctor.stderr[-300:])
-    ingress_plan = subprocess.run([str(ingress_launcher), "plan"], cwd=out, env=env, capture_output=True, text=True, check=False)
-    ingress_plan_obj = json.loads(ingress_plan.stdout) if ingress_plan.returncode == 0 else {}
-    check("built mid-aggregate launcher plan resolves exact deterministic observer",
-          ingress_plan.returncode == 0 and ingress_plan_obj.get("schema") == "camry-f33-b6-midaggregate-plan-v1" and
-          ingress_plan_obj.get("payload", {}).get("sha256") == midagg.EXPECTED_PAYLOAD_SHA256 and
-          ingress_plan_obj.get("treatment_statistics", {}).get("sid23_reads_during_block") == 0,
-          ingress_plan.stderr[-300:])
+          "01ce993425e910a6ea37473580adb6e641bdff56a3568492d4c9e0388e02fc6c" in ingress_doctor.stdout and
+          "a964e816010a0ee6485877ac31006d77d6dbf3591ac5a22e8044ca7783cbb28c" in ingress_doctor.stdout,
+          ingress_doctor.stderr[-300:])
     sign_launcher = out / "f33-sign"
     sign_launcher_text = sign_launcher.read_text(encoding="utf-8")
     check("command-5 launcher pins host/payload identities",

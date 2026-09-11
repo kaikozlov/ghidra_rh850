@@ -50,6 +50,8 @@ COMMAND5_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_command
 INLINE_SIGNER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer.bin"
 INLINE_SIGNER_HELPER = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer_helper_padded.bin"
 INLINE_SIGNER_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_inline_signer_build.json"
+INGRESS_HELPER = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_ingress_helper_helper_padded.bin"
+INGRESS_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_ingress_helper_build.json"
 DEFAULT_OPENPILOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
 RUNTIME_FILES = [
     "exploit/common/payload_package.py",
@@ -62,6 +64,7 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_runtime_monitor_preaggregate.py",
     "exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.py",
     "exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.py",
+    "exploit/ephemeral_runtime/camry_f33_b6_ingress_helper.py",
     "exploit/ephemeral_runtime/camry_f33_command5_probe.py",
     "exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
     "exploit/ephemeral_runtime/f33_panda_lease.sh",
@@ -311,6 +314,17 @@ def build(out: Path, openpilot: Path) -> dict:
     if hashlib.sha256(inline_helper).hexdigest() != inline_meta["helper"]["padded_sha256"]:
         raise RuntimeError("inline signer audited helper identity drift")
     inline_signer_payload = package_shellcode(inline_staging, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+    ingress_meta = json.loads(INGRESS_META.read_text(encoding="utf-8"))
+    ingress_padded_helper = INGRESS_HELPER.read_bytes()
+    if ingress_meta.get("mode") != "ingress-observer":
+        raise RuntimeError("ingress observer audited metadata mode drift")
+    if hashlib.sha256(inline_staging).hexdigest() != ingress_meta["staging"]["sha256"]:
+        raise RuntimeError("ingress observer audited staging identity drift")
+    if hashlib.sha256(ingress_padded_helper).hexdigest() != ingress_meta["helper"]["padded_sha256"]:
+        raise RuntimeError("ingress observer audited helper identity drift")
+    ingress_payload = package_shellcode(inline_staging, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+    if hashlib.sha256(ingress_payload).hexdigest() != ingress_meta["authenticated_payload"]["sha256"]:
+        raise RuntimeError("ingress observer authenticated payload identity drift")
     if hashlib.sha256(observer_payload).hexdigest() != observer_install.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("observer authenticated payload identity drift")
     if hashlib.sha256(bridge_payload).hexdigest() != bridge_install.EXPECTED_PAYLOAD_SHA256:
@@ -340,6 +354,9 @@ def build(out: Path, openpilot: Path) -> dict:
     (ram_dir / "camry_f33_b6_inline_signer_payload.bin").write_bytes(inline_signer_payload)
     (ram_dir / "camry_f33_b6_inline_signer_helper_padded.bin").write_bytes(inline_helper)
     (ram_dir / "camry_f33_b6_inline_signer.json").write_text(json.dumps(inline_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (ram_dir / "camry_f33_b6_ingress_helper_payload.bin").write_bytes(ingress_payload)
+    (ram_dir / "camry_f33_b6_ingress_helper_helper_padded.bin").write_bytes(ingress_padded_helper)
+    (ram_dir / "camry_f33_b6_ingress_helper.json").write_text(json.dumps(ingress_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     shutil.copy2(RUNBOOK_TEMPLATE, out / "RUNBOOK.md")
     launcher = out / "f33"
@@ -375,7 +392,7 @@ def build(out: Path, openpilot: Path) -> dict:
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
 
     manifest = {
-        "schema": "camry-f33-car-kit-v12",
+        "schema": "camry-f33-car-kit-v13",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
@@ -513,6 +530,33 @@ def build(out: Path, openpilot: Path) -> dict:
                 "codeflash_write": False,
                 "live_qualified": False,
                 "next_after_install": "direct NRTD->READY without OFF; run ./f33-ingress selfcheck and require D7 positive control before ./f33-ingress marker",
+                "superseded_by": "b6_ingress_observer",
+                "live_result": "2026-09-10 full-runtime install failed before observer initialization; no ingress conclusion",
+            },
+            "b6_ingress_observer": {
+                "launcher": "f33-ingress",
+                "payload": "ram_payloads/camry_f33_b6_ingress_helper_payload.bin",
+                "payload_sha256": ingress_meta["authenticated_payload"]["sha256"],
+                "resident_base": ingress_meta["resident"]["base"],
+                "resident_size": ingress_meta["resident"]["size"],
+                "resident_sha256": ingress_meta["resident"]["sha256"],
+                "helper_base": ingress_meta["helper"]["base"],
+                "helper_size": ingress_meta["helper"]["size"],
+                "helper_padded_size": ingress_meta["helper"]["padded_size"],
+                "helper_padded_sha256": ingress_meta["helper"]["padded_sha256"],
+                "telemetry": ingress_meta["loader"]["telemetry"],
+                "observation_boundary": ingress_meta["static_pins"]["midaggregate_boundary"],
+                "mutation_boundary": ingress_meta["mutation_boundary"],
+                "field_sequence": [
+                    "./f33-ingress install in NRTD/Park/stationary; require inline_signer_resident_live_loader_ready",
+                    "direct NRTD->READY without OFF",
+                    "./f33-ingress load-arm; require exact padded helper readback",
+                    "./f33-ingress selfcheck; require midaggregate_observer_selfcheck_pass",
+                    "./f33-ingress marker --bus 0; interpret exact signature match or bounded D7-positive no-marker verdict",
+                ],
+                "live_qualified": True,
+                "live_result": "2026-09-10 selfcheck deltas observation/D7/B6=409/102/205; marker sent/returned 121/121, observer deltas=434/109/217, ID63 delta=0; verdict id63_not_seen_at_midaggregate_boundary",
+                "persistent_flash_write": False,
             },
             "runtime_monitor": {
                 "payload": "ram_payloads/camry_f33_runtime_monitor_payload.bin",
@@ -626,9 +670,8 @@ def build(out: Path, openpilot: Path) -> dict:
             "order": [
                 "b6_inline_signer is the production-shaped fast path: install retained resident in NRTD, direct transition to READY, load/readback/arm helper, prove the local signer by reproducing one untouched Toyota B6 trailer, then use one-shot native-B6 replacement for the parked causal test",
                 "command5_probe is retained as the already-live-qualified diagnostic oracle and is no longer the continuous signing architecture",
-                "b6_midaggregate_observer install in NRTD; attestation is resident SHA plus mailbox magic/version and does not require receive-gated counter progress",
-                "direct NRTD->READY without OFF; run b6_midaggregate_observer selfcheck and require native D7 same-scheduler positive control",
-                "only after selfcheck passes, run b6_midaggregate_observer ID63 marker on bus0 and stop at exact signature-match or bounded D7-positive no-marker verdict",
+                "b6_ingress_observer is the live-qualified two-stage topology discriminator; its 2026-09-10 D7-positive marker run closed bounded negative for direct Panda ID63 at post-CanIf/pre-SecOC",
+                "the original b6_midaggregate_observer full-runtime install failed before initialization and is retained only as a superseded artifact",
                 "runtime_monitor_preaggregate and runtime_monitor_intertick are retained only as timing-insufficient/superseded predecessors and should not be rerun",
                 "runtime_monitor remains the general post-aggregate A-G gate monitor for later downstream localization after ingress identity is settled",
                 "ABI-safe bridge is available only as a later parked/stationary queue->route44 transformation experiment after exact marker ingress is proven",

@@ -1,0 +1,99 @@
+{
+  "schema": "camry-f33-working-steering-session-summary-v1",
+  "captured_date": "2026-09-10",
+  "evidence_grade": "observed",
+  "route": {
+    "id": "00000093--4066e7ae51",
+    "analyzed_segments": [0, 1, 2, 3, 4, 5, 6],
+    "duration_seconds": 379.1,
+    "source_sha256": {
+      "0": "61f5c9412fe4b9625c54497117756efff40e22609b81e32c019731efa494a5aa",
+      "1": "05cee9e2bf85bda4c65cca54f9a3c52c605c5319cc84dca785fb803f99fa9dba",
+      "2": "d5a33cc38bc38f28df11d1b07aedfe080e334645de037129bc04f7508cba070b",
+      "3": "65bc4e824580628cb8409d92b72e15e0626b92e1a2553b304d3e81db209ca2ad",
+      "4": "e8384118fd4e83adcfdd18fe6cfc066021a6a8f0a1b46c8b7786204d1ae122df",
+      "5": "a1eb4d9e3fca8ede33211f367e221882392935aa5cd8d462f3890ba79d46c5f8",
+      "6": "4a0646ae87f3b379567aa495f3e34928efa9901858902dea23bb6813c19bdab5"
+    }
+  },
+  "eps": {
+    "f181": "8965F3307000",
+    "calibration": "8A3113303100",
+    "persistent_development_image": {
+      "stage": 5,
+      "sha256": "669cedf8c8465ebfd02318cb7708b897b817bc3b40925c89743b64ce49aa01af"
+    },
+    "ephemeral_inline_signer": {
+      "payload_sha256": "01ce993425e910a6ea37473580adb6e641bdff56a3568492d4c9e0388e02fc6c",
+      "resident_sha256": "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a",
+      "helper_padded_sha256": "4719c4f27563180359445724eaefd594e3051ea545f75d69efb9bbede8f1965a",
+      "metadata_sha256": "f7407d38923e1d70bbaa8e6de6339abf4f37d0b96c42877f96d3c15651ab3d02",
+      "launcher_sha256": "9d236e74489fcee4c7167000a2332008f35c7a6702b083f4afc61901627ea851",
+      "native_oracle_required": true,
+      "behavior": "After exact helper readback and arming, reproduce one untouched native B6 trailer through ICU-S command 5; for each fresh nonzero C7 control sequence, replace B3..B9 of one already-admitted native B6 and install the locally generated valid trailer before stock SecOC consumption."
+    }
+  },
+  "openpilot": {
+    "parent_commit": "ddd1f6fac47e636c6b5ec470849350587ee04272",
+    "opendbc_base_commit": "baec01c15ac3fdf7361f862a483ad3a06e1f985a",
+    "warning": "The working C7 integration was an uncommitted worktree delta on top of the listed opendbc base commit; the base commit by itself emitted direct zero-trailer B6 and is not the working configuration.",
+    "reconstruction_patch": {
+      "path": "kai-opendbc-c7-working-tree.patch",
+      "sha256": "3f798940f439f329ebade4e342325f951e1b0725dba801565708df9bbc610081",
+      "base_commit": "baec01c15ac3fdf7361f862a483ad3a06e1f985a",
+      "files": [
+        "opendbc/car/toyota/carcontroller.py",
+        "opendbc/car/toyota/tests/test_tss3_camry.py",
+        "opendbc/car/toyota/tss3.py",
+        "opendbc/safety/modes/toyota.h",
+        "opendbc/safety/tests/test_toyota.py"
+      ],
+      "reverse_apply_check_against_captured_worktree": true
+    },
+    "deployed_file_sha256": {
+      "opendbc/car/toyota/carcontroller.py": "39e282eeea8f1eb7f60f0c48957cfbae027f06e3d91474ed0d427e6f90975230",
+      "opendbc/car/toyota/tss3.py": "aade5b4182bbc02d4ef1caa2d6df95e70f5ac0f207268fa87e32c061cc700e2a",
+      "opendbc/safety/modes/toyota.h": "2c1a54825ffb8cd0ec0ff1027847e28a69e58d0dff851894c753e5d29b2874df",
+      "openpilot/selfdrive/pandad/pandad.py": "d93aa14137db767e4abeafa68ff43c661dd4eff8d474d531e7960b13553422c2"
+    },
+    "control_contract": {
+      "can_id": "0x1FDC0002",
+      "bus": 0,
+      "length": 8,
+      "frame": "00 C7 sequence 00 target_hi target_lo 00 00",
+      "active_sequence": "1..255, incremented for each latActive command; each value is consumed once",
+      "inactive_sequence": "0; resident leaves native B6 untouched",
+      "panda_safety": "Whitelist 0x1FDC0002/8 on bus0 and apply ordinary Toyota angle-command checks to B4:B5; reject malformed C7 headers."
+    }
+  },
+  "route_reduction": {
+    "host_b6_frames": 0,
+    "c7_frames": 20939,
+    "c7_panda_tx_returns": 20930,
+    "active_c7_frames": 893,
+    "inactive_c7_frames": 20046,
+    "lat_active_episodes": 1,
+    "lat_active_duration_seconds": 17.94,
+    "speed_mps_range": [10.61, 10.94],
+    "desired_steering_angle_deg_range": [-3.98, 20.55],
+    "measured_steering_angle_deg_range": [-4.0, 17.8],
+    "operator_report": "openpilot steering was physically apparent"
+  },
+  "required_lifecycle": [
+    "Start from full EPS OFF, then enter NRTD/Park/stationary.",
+    "Run ./f33-secoc install and require inline_signer_resident_live_loader_ready.",
+    "Transition directly NRTD to READY without OFF.",
+    "Run ./f33-secoc load-arm and require exact helper readback plus native Toyota trailer equality.",
+    "Return Panda ownership to one clean openpilot manager/pandad tree before driving.",
+    "Use the C7-enabled CarController and Panda safety files whose hashes are pinned above.",
+    "Full EPS OFF removes the resident and helper; repeat install/load-arm after every full power cycle."
+  ],
+  "operational_caveats": [
+    "Entering EPS programming mode causes a Toyota system-malfunction state for the ignition cycle and disables TSS/DRCC longitudinal engagement.",
+    "The successful drive engaged openpilot after selecting normal non-adaptive cruise; stock TSS3 longitudinal was unavailable during that cycle.",
+    "A full vehicle restart restores DRCC but also removes the RAM resident.",
+    "A stale duplicate openpilot manager/pandad tree can leave sensord without IMU ownership and produce Sensor Data Invalid; run exactly one clean launch tree after returning the Panda lease.",
+    "The later bad-MAC stage-5 carrier admitted application data but did not produce steering; preserve the valid command-5 signer in the working fallback."
+  ],
+  "scope": "This is the exact reproducible development fallback that produced observed steering. It is not the preferred native openpilot architecture and does not prove a stock 0x08A-to-B6 transform."
+}

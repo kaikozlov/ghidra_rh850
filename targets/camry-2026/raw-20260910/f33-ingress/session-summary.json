@@ -1,0 +1,95 @@
+{
+  "schema": "camry-f33-b6-ingress-session-summary-v1",
+  "captured_date": "2026-09-10",
+  "target": {
+    "vehicle": "maintainer 2026 Toyota Camry Hybrid",
+    "eps_f181": "8965F3307000",
+    "eps_calibration": "8A3113303100",
+    "panda_bus": 0,
+    "panda_bus_semantics": "car/chassis side of the repinned Toyota-B Bus-4 relay pair",
+    "vehicle_state": "READY, Park, stationary"
+  },
+  "provenance": {
+    "kind": "contemporaneous-console-reduction",
+    "commands": [
+      "./f33-ingress install",
+      "./f33-ingress load-arm",
+      "./f33-ingress selfcheck --duration-seconds 2",
+      "./f33-ingress marker --duration-seconds 2 --bus 0"
+    ],
+    "persistent_flash_writes": false
+  },
+  "superseded_full_runtime_attempt": {
+    "payload_sha256": "806eb4c5d0dd9ccabf957e3177aedf7be44ba1813439a1bd0d6fe91fbb891c82",
+    "resident_sha256": "b2c93ba983351c4954d85fc1d46235a2d89a857a443fa8609e540ae3806a3ad3",
+    "verdict": "abi_preserving_runtime_failed_before_observer_initialization",
+    "interpretation": "instrumentation failure before observation; no ingress conclusion"
+  },
+  "live_qualified_two_stage_observer": {
+    "payload_sha256": "01ce993425e910a6ea37473580adb6e641bdff56a3568492d4c9e0388e02fc6c",
+    "resident_sha256": "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a",
+    "helper_sha256": "071fa37331bdde607ba04b5dbff5c9eaa4cc68be055536fd33457eef728d931d",
+    "helper_padded_sha256": "a964e816010a0ee6485877ac31006d77d6dbf3591ac5a22e8044ca7783cbb28c",
+    "helper_size": 120,
+    "helper_padded_size": 600,
+    "install_verdict": "inline_signer_resident_live_loader_ready",
+    "loader_final_state_raw_hex": "494236539601010000000000",
+    "helper_byte_exact": true,
+    "observation_boundary": "after 0x79EDE/0x809FE receive-ring drain and before the untouched 0x7A272 tail reaches 0x6A410 SecOC"
+  },
+  "selfcheck": {
+    "duration_actual_seconds": 2.000635611,
+    "sid23_reads_during_treatment": 0,
+    "counter_deltas": {
+      "observation_count": 409,
+      "d7_queue32_count": 102,
+      "b6_queue32_count": 205,
+      "id63_marker_count": 0
+    },
+    "verdict": "midaggregate_observer_selfcheck_pass"
+  },
+  "marker": {
+    "duration_requested_seconds": 2.0,
+    "jitter_pattern_ms": [11, 17, 23, 13, 19],
+    "target_lateral_id": 63,
+    "target_angle_degrees": 3.6,
+    "target_angle_raw": 63,
+    "additive_contribution_suppressed": true,
+    "tx_count": 121,
+    "accepted_return_count": 121,
+    "rejected_return_count": 0,
+    "max_sync_age_ms": 98.655,
+    "freshness_reset_reanchors": 8,
+    "counter_deltas": {
+      "observation_count": 434,
+      "d7_queue32_count": 109,
+      "b6_queue32_count": 217,
+      "id63_marker_count": 0
+    },
+    "stored_signature_hex": null,
+    "matched_frame_indices": [],
+    "can_health": {
+      "bus_off": 0,
+      "receive_error_count": 0,
+      "transmit_error_count": 0,
+      "tx_lost_count": 0
+    },
+    "verdict": "id63_not_seen_at_midaggregate_boundary"
+  },
+  "conclusion": {
+    "grade": "bounded",
+    "source": "dynamic-probe",
+    "statement": "The exact Panda-transmitted ID63 B6 treatment did not appear at F33's deterministic post-CanIf/pre-SecOC boundary despite complete Panda TX returns and live same-scheduler D7 and native-B6 positive controls.",
+    "excluded": [
+      "EPS SecOC rejection as the reason this exact marker was absent",
+      "EPS post-ingress rewriting of this exact marker",
+      "observer lifetime or scheduler inactivity"
+    ],
+    "not_distinguished": [
+      "upstream gateway or proxy filtering",
+      "a non-exposed physical B6 delivery segment",
+      "loss below the observer boundary in EPS hardware or low-level receive admission"
+    ],
+    "leading_architecture_hypothesis": "0x08A carries the upstream lateral request, 0x081 carries arbitration/result feedback, and a Brake/Skid/CGW-domain participant may independently construct and authenticate a private B6 delivered to F33; the 0x08A-to-B6 transform remains unproven until synchronized internal B6 content is observed."
+  }
+}

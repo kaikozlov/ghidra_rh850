@@ -13,6 +13,25 @@ no new vehicle claim is made.
 | Upstream opendbc (design reference) | commaai/opendbc | `3e92d112129507debe45364891954db70238997a` |
 | Recorded (produced the 2026-09-04 routes) | kai-openpilot / opendbc `kai` | parent `d1914bbe7`… / opendbc `c7a62eaf` |
 
+**2026-09-10 supersession note.** The revision table and sender-complete diagnosis below are
+the Sep-7 audit checkpoint, not the current working-tree identity. A later development
+configuration produced operator-observed steering on route `00000093--4066e7ae51` by sending
+C7 sideband control on extended `0x1FDC0002` and replacing/re-signing already-admitted native
+B6 inside the EPS. Exact RAM identities, deployed source hashes, route hashes, and lifecycle
+are preserved in
+`targets/camry-2026/raw-20260910/working-steering/summary.json` and live-baseline §70.4.
+The opendbc base commit in that record is not sufficient by itself because the working C7
+delta was uncommitted.
+
+A corrected two-stage ingress observer then established a bounded negative for the older
+direct-B6 sender: 121/121 Panda-returned ID63 markers produced zero ID63 observations at the
+live post-CanIf/pre-SecOC boundary while D7 and native B6 advanced. Therefore the current
+native-integration problem is upstream topology/source ownership, not merely EPS SecOC
+acceptance. The leading hypothesis is `0x08A` request -> Brake/Skid/CGW-domain arbitration ->
+`0x081` result plus independently authenticated B6 on a non-observed path to F33. The final
+transform remains unproven; see live-baseline §70.5 and
+`targets/camry-2026/raw-20260910/f33-ingress/session-summary.json`.
+
 All three fork trees were clean at the final audit point. Upstream has **no** Toyota TSS3
 platform, no `0x025/0x030/0x08A/0x0B6` Toyota CAN-FD messages, and no
 angle-command `0x0B6` safety path, so the comparison baseline is upstream's
