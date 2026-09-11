@@ -85,6 +85,65 @@
       "target": "0x00062E1E"
     }
   ],
+  "application_ecm_maskable_interrupt": {
+    "enabled_sources": [
+      1,
+      2,
+      3,
+      4,
+      16,
+      17,
+      19,
+      28
+    ],
+    "handler": {
+      "checker_status_register": "0xFFD61008",
+      "dispatch_sequence": {
+        "address": "0x00071AE4",
+        "bytes": "1f002026b800e4d720301c001f0025060800d6ff25270100c42e1e00aa5d25060810d6ff25270100c42e1e00aa5525060800d6ff25270100402e01004429ca4d25060810d6ff25270100402e01004429ba4525060800d6ff25270100402e02004429aa3d25060810d6ff25270100402e020044299a3525060800d6ff25270100402e08004429ca3d25060810d6ff25270100402e08004429ba3525060800d6ff25270100402e00104429ea3d25060810d6ff252701000000402e00104429ca35240600b8befe2506fc3d0200beff90fd",
+        "size": 208
+      },
+      "entry": "0x00071AE4",
+      "master_status_register": "0xFFD60008",
+      "source_16_17_target": "0x00065CDA",
+      "source_19_target": "0x00065DD6",
+      "source_1_to_4_target": "0x0007162E",
+      "source_28_target": "0x00065F24",
+      "unclassified_fallback_reset": {
+        "address": "0x00071BB0",
+        "bytes": "beff90fd",
+        "size": 4,
+        "target": "0x00061940"
+      }
+    },
+    "intbp_slot": "0x00020220",
+    "intbp_target": "0x00071AE4",
+    "interrupt_number": 8,
+    "manual_interrupt_name": "INTECM",
+    "manual_source_semantics": {
+      "1": "CPU DCLS compare error",
+      "16": "local-RAM uncorrectable ECC",
+      "17": "global-RAM uncorrectable ECC",
+      "19": "CodeFlash uncorrectable ECC/address parity",
+      "2": "DMA/GRAM PFSS compare error",
+      "28": "internal System-Interconnect/P-Bus ECC DED",
+      "3": "internal bus-bridge arbitration error",
+      "4": "redundant functional-block compare error"
+    },
+    "micfg0_program_sequence": {
+      "address": "0x00063760",
+      "bytes": "3e060420d6ff1f0d21061e000b10010d3306e1fff4ef019d010d000d1f00a007450c40ace009dae5",
+      "size": 40
+    },
+    "micfg0_register": "0xFFD62004",
+    "micfg0_value": "0x100B001E",
+    "rscanfd_ecm_sources_not_enabled": [
+      22,
+      37,
+      54
+    ],
+    "scope": "exact F33 vector/mask/dispatch bytes plus P1M-E ECM source names; does not claim that a physical silicon fault is impossible to induce"
+  },
   "application_errorout_mask_init": {
     "ecmemk0": {
       "program_sequence": {

@@ -115,6 +115,16 @@ def analyze(image: bytes) -> dict[str, object]:
             raise ValueError(f"unexpected direct-vector form at {address(pc)}")
         direct_vectors.append({**span(pc, 8), "target": address(u32(pc + 4))})
 
+    # INTECM is EIINT8 on P1M-E. Exact F33 uses an orphan/table-driven handler
+    # at INTBP[8], so preserve it explicitly rather than relying only on
+    # Ghidra's direct-call function closure.
+    ecm_mask = 0x100B001E
+    if image[0x6376A:0x6376E] != struct.pack("<I", ecm_mask):
+        raise ValueError("exact F33 ECM mask immediate drift")
+    ecm_enabled_sources = [bit for bit in range(32) if ecm_mask & (1 << bit)]
+    if ecm_enabled_sources != [1, 2, 3, 4, 16, 17, 19, 28]:
+        raise ValueError("unexpected exact F33 ECM mask source set")
+
     # Owner 0, class 2 is the real 7A1 / 777 / 7A0 diagnostic route.
     diagnostic_ids = [address(u32(0x21FA0 + 8 * n)) for n in range(3)]
     upper_routes = []
@@ -209,6 +219,42 @@ def analyze(image: bytes) -> dict[str, object]:
                         "program_sequence": span(0x63384, 0x18)},
             "ecmemk2": {"register": "0xFFD62030", "value": "0x3FFFFFFF",
                         "program_sequence": span(0x633B2, 0x20)},
+        },
+        "application_ecm_maskable_interrupt": {
+            "interrupt_number": 8,
+            "manual_interrupt_name": "INTECM",
+            "intbp_slot": address(0x20220),
+            "intbp_target": address(u32(0x20220)),
+            "micfg0_register": "0xFFD62004",
+            "micfg0_value": address(ecm_mask),
+            "micfg0_program_sequence": span(0x63760, 0x28),
+            "enabled_sources": ecm_enabled_sources,
+            "handler": {
+                "entry": address(0x71AE4),
+                "master_status_register": "0xFFD60008",
+                "checker_status_register": "0xFFD61008",
+                "dispatch_sequence": span(0x71AE4, 0xD0),
+                "source_1_to_4_target": address(0x7162E),
+                "source_16_17_target": address(0x65CDA),
+                "source_19_target": address(0x65DD6),
+                "source_28_target": address(0x65F24),
+                "unclassified_fallback_reset": call(0x71BB0),
+            },
+            "manual_source_semantics": {
+                "1": "CPU DCLS compare error",
+                "2": "DMA/GRAM PFSS compare error",
+                "3": "internal bus-bridge arbitration error",
+                "4": "redundant functional-block compare error",
+                "16": "local-RAM uncorrectable ECC",
+                "17": "global-RAM uncorrectable ECC",
+                "19": "CodeFlash uncorrectable ECC/address parity",
+                "28": "internal System-Interconnect/P-Bus ECC DED",
+            },
+            "rscanfd_ecm_sources_not_enabled": [22, 37, 54],
+            "scope": (
+                "exact F33 vector/mask/dispatch bytes plus P1M-E ECM source names; "
+                "does not claim that a physical silicon fault is impossible to induce"
+            ),
         },
         "external_supervisor_clock": {
             "collective_port_table_base": address(0x87A0),

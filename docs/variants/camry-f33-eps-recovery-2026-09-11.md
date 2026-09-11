@@ -640,6 +640,46 @@ uses dedicated JP0 pins, not the P2_0/P2_1 vehicle CAN pins, so merely forcing a
 serial boot mode would still not turn the five-wire CAN interface into a Renesas
 programmer.
 
+## 11. The orphan INTECM reset trampoline is real, but it is not a CAN error path
+
+A raw-vector census found one reset route that the earlier direct-call closure did
+not model.  P1M-E defines **EIINT8 as `INTECM`**, the ECM maskable interrupt,
+and exact F33 `INTBP[8] @ 0x20220` points to the orphan handler at `0x71AE4`.
+That handler reads the ECM-master/checker status banks (`FFD60008` /
+`FFD61008`), ORs the status, and dispatches exactly the source groups that the
+application enabled through `ECMMICFG0 = 0x100B001E`:
+
+- sources **1..4** -> the lockstep/redundancy safety handler at `0x7162E`;
+- sources **16/17** -> RAM-ECC retry handler `0x65CDA`;
+- source **19** -> CodeFlash ECC/address-parity handler `0x65DD6`;
+- source **28** -> internal bus-ECC DED handler `0x65F24`.
+
+If INTECM arrives without one of those recognized enabled bits, `0x71BB0` calls
+the terminal reset routine `0x61940`.  The RAM/CodeFlash/bus-ECC handlers can
+also escalate to `0x61940` after their configured retry/counter limits.  This is
+a real table-driven hard-reset surface and corrects the narrower direct-call-only
+view of the reset graph.
+
+It still does not provide a recovered network trigger.  The P1M-E ECM source
+table defines the enabled set as internal CPU/redundancy or silicon ECC/parity
+failures: DCLS compare, PFSS compare, internal bus-bridge arbitration, redundant
+functional-block compare, Local/Global RAM uncorrectable ECC, CodeFlash
+uncorrectable ECC/address parity, and System-Interconnect/P-Bus ECC DED.  The
+RS-CANFD-specific ECM sources are **22** (uncorrectable RS-CANFD RAM ECC),
+**37** (peripheral-RAM ECC-address overflow, including RS-CANFD), and **54**
+(correctable RS-CANFD RAM ECC).  None is present in `0x100B001E`.  Ordinary
+received CAN data is encoded into the internal peripheral/bus ECC domains by the
+silicon; no audited CAN/UDS path supplies or selects those ECC bits.  Therefore
+malformed or erroring CAN traffic is not evidence for an `INTECM -> 0x61940`
+reset primitive.
+
+This result is deliberately narrower than an impossibility claim about physical
+fault injection.  A real silicon ECC/redundancy fault can take this path.  What
+is closed is the proposed **vehicle-CAN protocol** route to it under the exact
+F33 ECM configuration.  Canonical bytes/source-mask evidence is preserved in
+`data/generated/camry_f33_recovery_structure.json` and verified by
+`tests/verify_f33_recovery_structure.py`.
+
 ## What is established, and what would actually change the answer
 
 The direct, functional, and subaddressed diagnostic paths examined here do not

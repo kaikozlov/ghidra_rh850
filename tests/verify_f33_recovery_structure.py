@@ -69,6 +69,30 @@ check(
     and errout["ecmemk2"]["value"] == "0x3FFFFFFF",
 )
 
+ecm = report["application_ecm_maskable_interrupt"]
+check(
+    "INTECM vector and exact enabled-source set are recovered",
+    ecm["interrupt_number"] == 8
+    and ecm["manual_interrupt_name"] == "INTECM"
+    and ecm["intbp_slot"] == "0x00020220"
+    and ecm["intbp_target"] == "0x00071AE4"
+    and ecm["micfg0_value"] == "0x100B001E"
+    and ecm["enabled_sources"] == [1, 2, 3, 4, 16, 17, 19, 28],
+)
+check(
+    "INTECM handler reset fallback and dedicated source handlers are exact",
+    ecm["handler"]["source_1_to_4_target"] == "0x0007162E"
+    and ecm["handler"]["source_16_17_target"] == "0x00065CDA"
+    and ecm["handler"]["source_19_target"] == "0x00065DD6"
+    and ecm["handler"]["source_28_target"] == "0x00065F24"
+    and ecm["handler"]["unclassified_fallback_reset"]["target"] == "0x00061940",
+)
+check(
+    "RS-CANFD ECM sources are outside exact F33 INTECM mask",
+    ecm["rscanfd_ecm_sources_not_enabled"] == [22, 37, 54]
+    and not ({22, 37, 54} & set(ecm["enabled_sources"])),
+)
+
 # The board-level reset/supervisor clock is exported on P4_5 as EXTCLK1O.
 sup = report["external_supervisor_clock"]
 p45 = sup["p4_5"]
