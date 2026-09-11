@@ -241,10 +241,10 @@ def build() -> dict:
     for i in range(3):
         cap = u32(image, 0x25E90 + i * 8)
         ptr = u32(image, 0x25E94 + i * 8)
-        route = u16(image, 0x25EF2 + i * 6)
+        route = u16(image, 0x25EF2 + i * 12)
         dcm.append({"channel": i, "route": route, "capacity": cap, "start": ptr, "end_exclusive": ptr + cap})
     need([(x["route"],x["capacity"],x["start"]) for x in dcm] == [
-        (2,0x100,0xFEBE5651),(1,0x100,0xFEBE5751),(3,0x100,0xFEBE5851)
+        (2,0x100,0xFEBE5651),(3,0x100,0xFEBE5751),(4,0x100,0xFEBE5851)
     ], f"DCM buffer geometry drift: {dcm}")
 
     # RSCFD pointer parameters in 0x83xxx..0x85xxx resolve through this exact

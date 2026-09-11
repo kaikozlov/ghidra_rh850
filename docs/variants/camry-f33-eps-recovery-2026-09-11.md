@@ -336,6 +336,137 @@ Canonical evidence:
 - `ghidra/scripts/investigate/AuditCallConeStores.java`
 - `tests/verify_camry_8965F3307000_prefault_memory_safety.py`
 
+## 8. Expanded pre-fault control-flow/reset audit: synchronous CAN ingress is bounded
+
+The memory-safety pass in §7 attacked wire-controlled **STORE destinations**.  A
+second pass widened the question to every other way a network event could avoid
+the poisoned foreground: immediate reset, ECM/NMI routing, CAN error interrupts,
+watchdog starvation, RSCFD DMA/DTS, payload-dependent indirect calls, synchronous
+upper-layer callbacks, a legitimate communication-state transition, or a cold-boot
+CAN race.
+
+The executable denominator is now larger than the first store audit.  In addition
+to the normal/XCP receive paths and CAN1 RX/TX/periodic service, the Ghidra closure
+is rooted at all six resolved DCM transport callbacks (`920BE`, `92152`, `926D2`,
+`921D2`, `92836`, `92946`).  The resulting cone contains **307 functions / 412
+STOREs**; 366 STOREs are computed and 283 have a destination that is
+intraprocedurally parameter-dependent.  A companion operation census sees **854
+LOADs**, 20 indirect transfers, and exactly **five** parameter-dependent indirect
+call sites.  There are **zero** integer divide/remainder operations in the cone.
+
+The larger STORE census introduces coarse false positives in the DCM state family
+(`93C6C/93C9A/93DE8/93E5C/93EF6/93F4E/9405C`) because a local range solver sees a
+16-bit index multiplied by a stride.  The index is not arbitrary.  Exact `93F0E`
+searches three configured external routes and returns only internal channel
+`0/1/2` or `FFFF`; callers reject `FFFF` before using the strided helpers.  The
+three external route IDs are **2, 3, and 4**.  This also corrects the previous
+generated VAR-155 artifact's route labels, which had accidentally read the
+ushort-stride table as a six-byte-stride table; the three 0x100-byte destination
+buffers themselves were already correct (`FEBE5651`, `FEBE5751`, `FEBE5851`).
+
+### 8.1 CAN/ECM errors do not provide a reset interrupt
+
+Application ECM initialization first clears all three maskable-interrupt, NMI,
+and internal-reset configuration words (`63338`).  `63738` then enables exactly
+`ECMMICFG0 = 0x100B001E`, i.e. sources `{1,2,3,4,16,17,19,28}`.  P1M-E's
+RS-CANFD-related ECM sources 22 (uncorrectable CAN RAM ECC), 37 (peripheral RAM
+ECC address-overflow, including RS-CANFD), and 54 (correctable CAN RAM ECC) are
+therefore not routed to the application ECM EIINT, NMI, or ECM internal reset.
+
+The interrupt table contains a useful-looking default CAN error entry at
+`0x62E1E`: it saves context, enables nested EIINTs, calls `712CE`, and ends in a
+permanent self-loop at `62E42`.  But exact interrupt-controller configuration
+makes it unreachable from ordinary CAN errors.  CAN1 error EIINT186 and global
+CAN error/RFIFO EIINT189/190 are masked (`0x80CF`); only CAN1 RX/TX EIINT187/188
+are enabled as table-reference priority-8 interrupts (`0x8048`).
+
+The controller settings independently agree.  CAN1 enters operation with
+`CCTR=0x00A00001`: `BOM=01`, so bus-off entry autonomously places the channel in
+halt mode, but `BEIE/EWIE/EPIE/BOEIE/BORIE/OLIE/BLIE/ALIE/TAIE` and the remaining
+channel-error interrupt enables are all zero.  Global `GCTR=0x00010001` likewise
+has `DEIE/MEIE/THLEIE/CMPOFIE=0`.  A hostile bus participant can therefore force
+bus-off/halt, but not the default non-returning CAN error ISR.  The software
+channel-recovery state machine is reached only later at `7A254 -> 79F16`, **after**
+the malformed transfer, while the independent `7A232` service path does not
+restart the halted channel.  Transmit-abort does not create a side door either: its
+interrupt is gated by `TAIE=0`.
+
+### 8.2 Watchdog starvation and RSCFD DMA do not bridge the gap
+
+The exact 1-MiB CodeFlash corpus has **zero references** to WDTA0's MMIO block
+`FFD74000..FFD7400C`.  `WDTA0TERR` is ECM source 0, and source 0 is absent after
+the application clears IRCFG/NMICFG/MICFG and installs `0x100B001E`.  The flash
+option bit controlling automatic WDTA startup is outside the retained
+CodeFlash/DataFlash dumps, so its boot value remains explicitly unknown; the
+running application nevertheless exposes no recovered watchdog-service/starvation
+reset path.
+
+Hardware-initiated memory transfer is also closed for CAN.  RS-CANFD's DMA/DTS
+request control is `CFDCDTCT @ FFD20490`, pointed to by exact configuration at
+`2309C`.  Its only application writers are `8488C` and `84E16`, and both write
+zero; `84C2C` treats a nonzero low16 value as a configuration mismatch.  CAN FIFO
+events therefore cannot bypass the CPU STORE bounds by triggering an RSCFD DMA/DTS
+transfer.
+
+### 8.3 Every synchronous accepted-frame callback is bounded
+
+The five parameter-dependent indirect call sites are finite and configuration
+bounded.  Three are the already-closed CanIf callback selectors at
+`80884/810F2`.  `81938` and `81D30` split a 16-bit PduR ID into
+`group=id>>11` and `index=id&0x7FF`, require `group < 12`, and then require the
+index below that group's configured count before reading the callback.  No payload
+byte becomes an unchecked function-pointer selector.
+
+The normal receive map can now be stated exhaustively.  Rules 0..42 feed PduR IDs
+5..47.  Exactly three accepted protected IDs enter SecOC synchronously:
+`0x00F` (rule4), `0x0D7` (rule36), and `0x0B6` (rule39).  The other **40 accepted
+CAN IDs** all select raw-COM callback `7D72C`.  Every configured PDU record 5..47
+has selector 0 and flags `0x0C`; none sets the `0x10` optional pre-copy-hook bit.
+Consequently raw COM performs only its bounded copy/state update and calls
+`8E772`, which for `PDU<0x60` clears one status byte and increments one generation
+byte.  Signal unpacking and application control state machines occur later in the
+foreground and never execute synchronously from ingress.
+
+The other accepted classes stop even earlier: protected traffic is queued for the
+later SecOC consumer, diagnostics mutate only the bounded DCM transport/event
+state, and XCP reaches its staging buffer but not command dispatch before the
+poisoned foreground call.
+
+### 8.4 The guard has no runtime off writer, and valid cold boot has no CAN race
+
+`FEBE3DF2` has exactly **two writers in the image**, both in one-time startup
+`7A132`: `FD02` at `7A13A`, then `FE01` at `7A184`.  `7A232` and `7A254` only
+read it.  Thus there is no legitimate asynchronous communication-disable state
+transition we can provoke after startup.  At `7A254`, the sole guard branch at
+`7A260` skips the whole aggregate when the value is not `FE01`; once it is `FE01`,
+`79EDE` returns directly into the malformed six-byte sequence at `7A272`
+(`80 FF EE 1C 24 36`) with no intervening conditional branch.
+
+A power-cycle CAN race is unavailable for the same structural reason.  `13B0` runs
+the descriptor/CRC/marker decision first.  A valid application result calls the
+entry pointer at `FFDB8` (`0x20880`) directly.  The bootloader CAN stack
+`1398 -> 1338 -> 3B3C` is initialized only on the validation-failure branch.
+Continuously transmitting programming/session traffic during an ordinary power
+cycle therefore has no listener to catch while the current CRC-valid application
+is selected.
+
+The combined result is stronger than §7 alone: **no recovered network event can
+write the guard, invoke an attacker-selected synchronous callback, route a CAN
+error into reset/fault handling, trigger CAN DMA, starve a recovered watchdog reset,
+or hold the stock bootloader before the CRC-valid application starts.**  The exact
+post-`7A272` exception context remains unobserved, and mechanisms outside the
+retained firmware/hardware configuration (board-level reset/debug/serial paths,
+unrecovered silicon behavior, or undiscovered hardware state) remain the honest
+boundary.
+
+Canonical evidence:
+
+- `data/generated/camry_8965F3307000_prefault_control_flow.json`
+- `data/generated/camry_8965F3307000_prefault_control_flow_store_audit.json`
+- `data/generated/camry_8965F3307000_prefault_control_flow_ops.json`
+- `ghidra/scripts/investigate/AuditCallConeMemoryOps.java`
+- `tests/verify_camry_8965F3307000_prefault_control_flow.py`
+
 ## What is established, and what would actually change the answer
 
 The direct, functional, and subaddressed diagnostic paths examined here do not

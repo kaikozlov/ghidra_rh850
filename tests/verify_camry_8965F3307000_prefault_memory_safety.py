@@ -130,7 +130,7 @@ check("route-slot writers remain above guard", cs["route_slot_writer_range"] == 
 check("RSCFD pointer row is MMIO-only", len(cs["rscfd_pointer_row"]) == 28 and all(x.startswith("0xFFD2") for x in cs["rscfd_pointer_row"]))
 
 buffers = art["dcm_copy"]["buffers"]
-check("DCM destinations fixed to three 0x100 buffers", [(x["route"],x["capacity"],x["start"]) for x in buffers] == [(2,"0x100","0xFEBE5651"),(1,"0x100","0xFEBE5751"),(3,"0x100","0xFEBE5851")])
+check("DCM destinations fixed to three 0x100 buffers", [(x["route"],x["capacity"],x["start"]) for x in buffers] == [(2,"0x100","0xFEBE5651"),(3,"0x100","0xFEBE5751"),(4,"0x100","0xFEBE5851")])
 
 v = art["verdict"]
 check("real defect but no recovery primitive", v["real_memory_safety_defect_found"] and not v["controlled_write_primitive_recovered"] and not v["control_flow_pivot_recovered"] and not v["guard_write_recovered"] and not v["saved_pc_overwrite_recovered"])

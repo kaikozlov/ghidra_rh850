@@ -1,0 +1,545 @@
+{
+  "can_interrupt_error_surface": {
+    "bus_off_effect": "hardware automatically enters CAN1 channel halt; the software channel recovery state machine is later in the poisoned foreground",
+    "bus_off_mode": 1,
+    "can1_cctr": "0x00A00001",
+    "channel_error_interrupt_enables": {
+      "ALIE": 0,
+      "BEIE": 0,
+      "BLIE": 0,
+      "BOEIE": 0,
+      "BORIE": 0,
+      "EOCOIE": 0,
+      "EPIE": 0,
+      "EWIE": 0,
+      "OLIE": 0,
+      "SOCOIE": 0,
+      "TAIE": 0,
+      "TDCVFIE": 0
+    },
+    "default_handler": {
+      "entry": "0x00062E1E",
+      "sha256": "487dbbad9e4dcc90fe3fdf935b7513d17bacedb99a75fdc9a2e1e209bbc596d5",
+      "terminal": "self-loop at 0x62E42"
+    },
+    "eic": {
+      "183": "masked 0x80CF",
+      "184": "masked 0x80CF",
+      "185": "masked 0x80CF",
+      "186": "masked 0x80CF",
+      "187": "enabled table-reference priority8 0x8048",
+      "188": "enabled table-reference priority8 0x8048",
+      "189": "masked 0x80CF",
+      "190": "masked 0x80CF"
+    },
+    "global_error_interrupt_enables": {
+      "CMPOFIE": 0,
+      "DEIE": 0,
+      "MEIE": 0,
+      "THLEIE": 0
+    },
+    "global_gctr": "0x00010001",
+    "intbp_entries": {
+      "183": "0x00062E1E",
+      "184": "0x00062E1E",
+      "185": "0x00062E1E",
+      "186": "0x00062E1E",
+      "187": "0x00066100",
+      "188": "0x000660BE",
+      "189": "0x00062E1E",
+      "190": "0x00062E1E"
+    }
+  },
+  "ecm_reset_routing": {
+    "classification": "RS-CANFD ECC sources are not routed to application maskable ECM, NMI, or ECM internal reset",
+    "initial_clear": "0x63338 clears MICFG0..2, NMICFG0..2, IRCFG0..2",
+    "maskable_sources": [
+      1,
+      2,
+      3,
+      4,
+      16,
+      17,
+      19,
+      28
+    ],
+    "rscfd_ecm_sources": {
+      "22": "RS-CANFD RAM uncorrectable ECC",
+      "37": "peripheral RAM ECC-address overflow including RS-CANFD",
+      "54": "RS-CANFD RAM correctable ECC"
+    },
+    "rscfd_sources_routed": [],
+    "runtime_micfg0": "0x100B001E"
+  },
+  "evidence": {
+    "manual": "REFERENCE/r01uh0585ej0120_manual.pdf (ECM, RS-CANFD CCTR/GCTR, EIC, WDTA sections)",
+    "memory_ops": "data/generated/camry_8965F3307000_prefault_control_flow_ops.json",
+    "memory_ops_script": "ghidra/scripts/investigate/AuditCallConeMemoryOps.java",
+    "store_audit": "data/generated/camry_8965F3307000_prefault_control_flow_store_audit.json",
+    "store_script": "ghidra/scripts/investigate/AuditCallConeStores.java"
+  },
+  "expanded_cone": {
+    "classification": "original receive/interrupt cone plus all six resolved DCM transport callbacks",
+    "critical_known_range_functions": [
+      "0x0008E7BA",
+      "0x00093C6C",
+      "0x00093C9A",
+      "0x00093DE8",
+      "0x00093E5C",
+      "0x00093EF6",
+      "0x00093F4E",
+      "0x0009405C"
+    ],
+    "critical_known_range_rows": 15,
+    "dcm_route_domain": [
+      0,
+      1,
+      2
+    ],
+    "memory_op_summary": {
+      "arith": 0,
+      "functions": 307,
+      "indirects": 20,
+      "loads": 854,
+      "param_arith": 0,
+      "param_indirects": 5,
+      "param_loads": 620
+    },
+    "pointer_parameter_store_count": 283,
+    "roots": [
+      "0x0007BBC2",
+      "0x0007C43C",
+      "0x00079EDE",
+      "0x0007A232",
+      "0x00066806",
+      "0x00066812",
+      "0x00079DA2",
+      "0x00083156",
+      "0x000810F2",
+      "0x000920BE",
+      "0x00092152",
+      "0x000926D2",
+      "0x000921D2",
+      "0x00092836",
+      "0x00092946"
+    ],
+    "store_summary": {
+      "computed": 366,
+      "functions": 307,
+      "ranged": 56,
+      "stores": 412,
+      "unknown": 307
+    }
+  },
+  "guard_and_boot": {
+    "aggregate_skip": "0x7A260 skips entire aggregate only when guard != FE01",
+    "bad_bytes": "80 FF EE 1C 24 36",
+    "bad_callsite": "0x0007A272",
+    "cold_boot": "valid 0x119E result calls FFDB8/0x20880 directly; 0x1398 bootloader CAN init is reached only on validation failure",
+    "cold_boot_can_race": false,
+    "conditional_bypass_between_79EDE_and_bad_call": false,
+    "guard": "0xFEBE3DF2",
+    "guard_writers": [
+      {
+        "function": "0x0007A132",
+        "site": "0x0007A13A",
+        "value": "0xFD02"
+      },
+      {
+        "function": "0x0007A132",
+        "site": "0x0007A184",
+        "value": "0xFE01"
+      }
+    ],
+    "post_startup_guard_writer": false
+  },
+  "indirect_control_flow": {
+    "classification": "no payload-controlled indirect call or divide/remainder fault recovered in the expanded cone",
+    "integer_divide_or_remainder_ops": 0,
+    "parameter_dependent_sites": [
+      {
+        "function": "0x00080884",
+        "site": "0x000808BE"
+      },
+      {
+        "function": "0x000810F2",
+        "site": "0x0008115C"
+      },
+      {
+        "function": "0x000810F2",
+        "site": "0x0008117A"
+      },
+      {
+        "function": "0x00081938",
+        "site": "0x00081988"
+      },
+      {
+        "function": "0x00081D30",
+        "site": "0x00081DD4"
+      }
+    ],
+    "pdur_bounds": "0x81938 and 0x81D30 require group<12 and index<configured_count[group] before callback lookup"
+  },
+  "rscfd_dma": {
+    "cdtct": "0xFFD20490",
+    "classification": "RS-CANFD DMA/DTS request generation is disabled; CAN ingress cannot bypass CPU store bounds through CFDCDTCT",
+    "pointer_source": "CodeFlash[0x2309C]",
+    "reference_functions": [
+      "0x0008488C",
+      "0x00084C2C",
+      "0x00084E16"
+    ],
+    "writers": "0x8488C and 0x84E16 write zero; 0x84C2C requires low16 == 0"
+  },
+  "schema": "camry-8965f3307000-prefault-control-flow-v1",
+  "synchronous_ingress": {
+    "diagnostics": "bounded DCM transport/event state; internal channel domain 0..2",
+    "normal_rule_count": 43,
+    "protected_can_ids": [
+      "0x00F",
+      "0x0D7",
+      "0x0B6"
+    ],
+    "protected_rules": [
+      4,
+      36,
+      39
+    ],
+    "raw_com_effect": "bounded copy plus state bookkeeping and 0x8E772 generation-byte update only; application signal unpack/control logic is deferred",
+    "raw_com_pdu_records": {
+      "flags": "0x0C",
+      "ids": "5..47",
+      "pre_copy_hook_enabled": false,
+      "selector": 0
+    },
+    "raw_com_rule_count": 40,
+    "rule_map": [
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x3B0",
+        "kind": "raw_com",
+        "pdur_id": 5,
+        "rule": 0
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x63B",
+        "kind": "raw_com",
+        "pdur_id": 6,
+        "rule": 1
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x624",
+        "kind": "raw_com",
+        "pdur_id": 7,
+        "rule": 2
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x63D",
+        "kind": "raw_com",
+        "pdur_id": 8,
+        "rule": 3
+      },
+      {
+        "callback": "0x0008EE7C",
+        "can_id": "0x00F",
+        "kind": "secoc",
+        "pdur_id": 9,
+        "rule": 4
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x013",
+        "kind": "raw_com",
+        "pdur_id": 10,
+        "rule": 5
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x014",
+        "kind": "raw_com",
+        "pdur_id": 11,
+        "rule": 6
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x015",
+        "kind": "raw_com",
+        "pdur_id": 12,
+        "rule": 7
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x016",
+        "kind": "raw_com",
+        "pdur_id": 13,
+        "rule": 8
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x017",
+        "kind": "raw_com",
+        "pdur_id": 14,
+        "rule": 9
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x018",
+        "kind": "raw_com",
+        "pdur_id": 15,
+        "rule": 10
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x019",
+        "kind": "raw_com",
+        "pdur_id": 16,
+        "rule": 11
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x01A",
+        "kind": "raw_com",
+        "pdur_id": 17,
+        "rule": 12
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x01B",
+        "kind": "raw_com",
+        "pdur_id": 18,
+        "rule": 13
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x01C",
+        "kind": "raw_com",
+        "pdur_id": 19,
+        "rule": 14
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x01D",
+        "kind": "raw_com",
+        "pdur_id": 20,
+        "rule": 15
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x01E",
+        "kind": "raw_com",
+        "pdur_id": 21,
+        "rule": 16
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x01F",
+        "kind": "raw_com",
+        "pdur_id": 22,
+        "rule": 17
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x0D0",
+        "kind": "raw_com",
+        "pdur_id": 23,
+        "rule": 18
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x3BF",
+        "kind": "raw_com",
+        "pdur_id": 24,
+        "rule": 19
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x127",
+        "kind": "raw_com",
+        "pdur_id": 25,
+        "rule": 20
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x115",
+        "kind": "raw_com",
+        "pdur_id": 26,
+        "rule": 21
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x116",
+        "kind": "raw_com",
+        "pdur_id": 27,
+        "rule": 22
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x1C5",
+        "kind": "raw_com",
+        "pdur_id": 28,
+        "rule": 23
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x294",
+        "kind": "raw_com",
+        "pdur_id": 29,
+        "rule": 24
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x51E",
+        "kind": "raw_com",
+        "pdur_id": 30,
+        "rule": 25
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x611",
+        "kind": "raw_com",
+        "pdur_id": 31,
+        "rule": 26
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x2D1",
+        "kind": "raw_com",
+        "pdur_id": 32,
+        "rule": 27
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x675",
+        "kind": "raw_com",
+        "pdur_id": 33,
+        "rule": 28
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x2E8",
+        "kind": "raw_com",
+        "pdur_id": 34,
+        "rule": 29
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x025",
+        "kind": "raw_com",
+        "pdur_id": 35,
+        "rule": 30
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x0AA",
+        "kind": "raw_com",
+        "pdur_id": 36,
+        "rule": 31
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x101",
+        "kind": "raw_com",
+        "pdur_id": 37,
+        "rule": 32
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x0D5",
+        "kind": "raw_com",
+        "pdur_id": 38,
+        "rule": 33
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x13B",
+        "kind": "raw_com",
+        "pdur_id": 39,
+        "rule": 34
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x090",
+        "kind": "raw_com",
+        "pdur_id": 40,
+        "rule": 35
+      },
+      {
+        "callback": "0x0008EE7C",
+        "can_id": "0x0D7",
+        "kind": "secoc",
+        "pdur_id": 41,
+        "rule": 36
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x0D8",
+        "kind": "raw_com",
+        "pdur_id": 42,
+        "rule": 37
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x64F",
+        "kind": "raw_com",
+        "pdur_id": 43,
+        "rule": 38
+      },
+      {
+        "callback": "0x0008EE7C",
+        "can_id": "0x0B6",
+        "kind": "secoc",
+        "pdur_id": 44,
+        "rule": 39
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x403",
+        "kind": "raw_com",
+        "pdur_id": 45,
+        "rule": 40
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x490",
+        "kind": "raw_com",
+        "pdur_id": 46,
+        "rule": 41
+      },
+      {
+        "callback": "0x0007D72C",
+        "can_id": "0x1DA",
+        "kind": "raw_com",
+        "pdur_id": 47,
+        "rule": 42
+      }
+    ],
+    "xcp": "staging only before the dead foreground protocol dispatch"
+  },
+  "target": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "software_id": "8965F3307000"
+  },
+  "verdict": {
+    "bootloader_can_catch_with_valid_application": false,
+    "network_control_flow_pivot_recovered": false,
+    "network_guard_transition_recovered": false,
+    "network_reset_recovered": false,
+    "remaining_boundary": "exact post-0x7A272 fault context remains unobserved; unrecovered hardware/debug/board-level paths and mechanisms outside the retained software/hardware configuration remain open"
+  },
+  "watchdog_boundary": {
+    "classification": "no recovered watchdog-service/starvation reset primitive in the running application",
+    "codeflash_reference_count": 0,
+    "ecm_source": 0,
+    "option_byte_startup": "unknown: OPWDRUN option storage is outside the retained CodeFlash/DataFlash dumps",
+    "runtime_ecm_routed": false,
+    "wdta0_mmio": [
+      "0xFFD74000",
+      "0xFFD74004",
+      "0xFFD74008",
+      "0xFFD7400C"
+    ]
+  }
+}

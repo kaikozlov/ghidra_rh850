@@ -1,0 +1,42 @@
+{
+  "ghidra_script": "ghidra/scripts/investigate/AuditCallConeMemoryOps.java",
+  "parameter_dependent_arithmetic_rows_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+  "parameter_dependent_indirect_rows": [
+    "IND|CALLIND|00080884|000808be|target=LOAD(0x1a1,CAST(PTRADD(MULTIEQUAL(PTRSUB(0x0,0x23dfc),MULTIEQUAL((register, 0x14, 4),INDIRECT((register, 0x14, 4),0xb8))),INT_ADD(INT_MULT(INT_ADD(INT_MULT(INT_SEXT(SUBPIECE(INT_AND((register, 0x18, 4),0xff),0x0)),0x6),MULTIEQUAL(COPY(0x0),INT_ADD((register, 0x70, 4),0x1))),0x4),0xffffdc28),0x1)))",
+    "IND|CALLIND|000810f2|0008115c|target=CAST(LOAD(0x1a1,PTRADD(PTRSUB(0x0,0x21950),INT_AND((register, 0x18, 4),0xff),0x4)))",
+    "IND|CALLIND|000810f2|0008117a|target=LOAD(0x1a1,CAST(PTRADD(MULTIEQUAL(PTRSUB(0x0,0x23dfc),INDIRECT(COPY(PTRSUB(0x0,0x23dfc)),0x21f),INDIRECT(INDIRECT(COPY(PTRSUB(0x0,0x23dfc)),0x21f),0x243)),INT_ADD(INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0xffffdb58),0x1)))",
+    "IND|CALLIND|00081938|00081988|target=LOAD(0x1a1,CAST(PTRADD(MULTIEQUAL(COPY(LOAD(0x1a1,PTRADD(PTRSUB(0x0,0x21ee4),INT_SRIGHT(CAST(INT_ZEXT(LOAD(0x1a1,CAST(PTRADD(LOAD(0x1a1,PTRADD((unique, 0x10000037, 4),(register, 0x18, 4),0x4)),INT_MULT(INT_AND((register, 0x18, 4),0x7ff),0x4),0x1))))),0xb),0x4))),COPY((ram, 0x21cbc, 4))),0x1c,0x1)))",
+    "IND|CALLIND|00081d30|00081dd4|target=MULTIEQUAL(COPY(LOAD(0x1a1,CAST(PTRADD(MULTIEQUAL(COPY(LOAD(0x1a1,PTRADD(PTRSUB(0x0,0x21ee4),INT_SRIGHT(CAST(INT_ZEXT(LOAD(0x1a1,CAST(PTRADD((register, 0x48, 4),(register, 0x78, 4),0x1))))),0xb),0x4))),COPY((ram, 0x21cbc, 4))),0x8,0x1)))),COPY(CAST((ram, 0x21e6c, 4))),COPY(CAST((ram, 0x21f24, 4))))"
+  ],
+  "parameter_dependent_indirect_rows_sha256": "9fc3ba83c50d42e88136574f95ed595c5d8af7b8088a6e4789e8c8096f062989",
+  "parameter_dependent_load_rows_sha256": "edea48093092a5b73d1d4b29b4756eb7d52df978ca697292a3f570d7a91c3eaf",
+  "roots": [
+    "0x0007BBC2",
+    "0x0007C43C",
+    "0x00079EDE",
+    "0x0007A232",
+    "0x00066806",
+    "0x00066812",
+    "0x00079DA2",
+    "0x00083156",
+    "0x000810F2",
+    "0x000920BE",
+    "0x00092152",
+    "0x000926D2",
+    "0x000921D2",
+    "0x00092836",
+    "0x00092946"
+  ],
+  "schema": "camry-8965f3307000-prefault-control-flow-ops-v1",
+  "scope": "Same expanded 15-root pre-fault cone. Intraprocedural parameter dependence is an over-approximation; the five indirect sites are resolved by exact configuration/route bounds.",
+  "summary": {
+    "arith": 0,
+    "functions": 307,
+    "indirects": 20,
+    "loads": 854,
+    "param_arith": 0,
+    "param_indirects": 5,
+    "param_loads": 620
+  },
+  "target": "camry-8965F3307000"
+}

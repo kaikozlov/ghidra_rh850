@@ -233,14 +233,14 @@
         "capacity": "0x100",
         "channel": 1,
         "end_exclusive": "0xFEBE5851",
-        "route": 1,
+        "route": 3,
         "start": "0xFEBE5751"
       },
       {
         "capacity": "0x100",
         "channel": 2,
         "end_exclusive": "0xFEBE5951",
-        "route": 3,
+        "route": 4,
         "start": "0xFEBE5851"
       }
     ],
