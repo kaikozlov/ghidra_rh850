@@ -13,8 +13,10 @@ separates the control result from the development mechanism used to obtain it:
 
 - the maintainer's 2026 Camry demonstrates openpilot lateral control while
   Toyota LTA is off;
-- albinoelephant's 2023 Corolla TSS3 field run demonstrates the unprotected
-  `0x160` openpilot-longitudinal proof of concept on the stock Toyota-B network;
+- the maintainer's Camry work had already discovered the unprotected `0x160`
+  request plane and produced a verified offline generator; albinoelephant's
+  later 2023 Corolla TSS3 field run independently validates it under live
+  openpilot longitudinal control on the stock Toyota-B network;
 - SecOC is not a TSS3-generation requirement. The Camry's RAM-resident B6 signer
   is an exact-EPS development adapter, not architecture that should be imposed
   on every TSS3 platform.
@@ -152,6 +154,25 @@ are the reproduction sources.
 
 ## 3. Corolla TSS3 longitudinal proof of concept
 
+### Chronology and attribution
+
+The unprotected request-plane discovery and message-generation PoC predate the
+Corolla field report. Git author dates provide the repository record:
+
+| Date (America/Chicago) | Repository result |
+|---|---|
+| 2026-08-31 12:12 | `6d02fc4` documented the Camry plaintext/protected longitudinal join and identified native Bus-1 `0x160 B12` as the high-value non-SecOC request candidate. |
+| 2026-08-31 14:28 | `4bd9ccb` recovered the Bus-1 E2E framing. |
+| 2026-08-31 14:48 | `d73baf5` added the offline Camry FRC `0x160` request generator and deterministic verifier. |
+| 2026-08-31 15:13 | `1661e5c` recovered the exact AUTOSAR E2E Profile-5 CRC/counter/Data-ID contract and upgraded the generator. |
+| 2026-09-05 14:28 | `198d8da` documented the native openpilot longitudinal integration path. |
+| 2026-09-10 | albinoelephant reported the independent live Corolla controller result. |
+
+Thus the Camry work established the non-SecOC `0x160` path and proof-of-concept
+message generation ten days before the reported Corolla run. The Corolla
+result's distinct contribution is independent live closed-loop validation and
+a working opendbc/sunnypilot integration on another TSS3 target.
+
 On 2026-09-10, contributor albinoelephant reported a live openpilot-longitudinal
 run on the 2023 Corolla TSS3 target. The contributor's local opendbc + sunnypilot
 implementation uses the ordinary, non-SecOC FRC `0x160` command on the stock
@@ -189,6 +210,16 @@ route inventory and reduce `safetyModel`, `sendcan 0x160`, counter continuity,
 requested acceleration, lead distance, speed response, and the standstill fault
 transition without inventing a second longitudinal permission system.
 
+Before that field report, this repository already contained the bare offline
+message generator:
+[`camry_frc_request_poc.py`](../../tools/targets/camry/live/camry_frc_request_poc.py)
+constructs the observed Camry-family 32-byte `0x160` request by changing B2/B12
+and recomputing its exact Profile-5 CRC. Its verifier reconstructs fixed wire
+witnesses and more than 20,000 retained counter/request pairs byte-for-byte.
+That is repository-verified prior proof of message generation, not proof of the
+later Corolla road result or a license to transfer Camry B12 scaling to
+Corolla.
+
 ## 4. What is universal and what is target-specific
 
 The cleanup should preserve ordinary openpilot ownership and make vehicle
@@ -203,6 +234,13 @@ capabilities explicit:
 | Safety | Panda uses ordinary Toyota angle/acceleration limits and an explicit TX whitelist | Exact address, length, bus, checksum and counter |
 | Authentication | Optional transport/signing provider for a platform that actually requires it | Camry F33 C7/RAM/ICU-S adapter; user-provided key on a native SecOC sender |
 | Harness | Use the stock Toyota-B topology whenever the native command is already exposed there | Camry lateral's current Bus-4 intercept; Corolla longitudinal needs no repin |
+
+For the combined Camry cleanup, “stock Toyota-B” means undoing the temporary
+lateral-development CAN0/CAN1 repin: Toyota Bus-1/`0x160` returns to the
+CAN0/CAN2 relay pair for normal stock suppression/replacement, while the F33 C7
+signer sideband moves to unsplit Panda bus 1 to reach Bus-4/EPS. The successful
+lateral route proves the old post-repin assignment; the combined assignment is
+the next parked transport validation, not yet a road-proven fact.
 
 The following must not become global TSS3 policy: F181
 `8965F3307000/8A3113303100`, extended `0x1FDC0002`, C7, ICU-S selector 4, the
@@ -227,11 +265,12 @@ The evidence now covers both control requirements named by issue #3695:
   unprotected `0x160` on stock Toyota-B, with Toyota safety active, 40-Hz command
   transmission, real acceleration requests, and reported lead following.
 
-What remains is reviewability rather than discovery: reduce the fork to a
-generation-capable Toyota implementation, keep the Camry signer behind an exact
-platform boundary, import or link albinoelephant's longitudinal revision and
-rlog reduction, and submit the smallest upstream-shaped opendbc change. The
-standstill transition is a known longitudinal follow-up and should remain an
+What remains is reviewability rather than discovery: promote the existing
+offline `0x160` primitive through the normal controller/safety boundaries,
+keep the Camry signer behind an exact platform boundary, import or link
+albinoelephant's longitudinal revision and rlog reduction, and submit the
+smallest upstream-shaped opendbc change. The standstill transition is a known
+longitudinal follow-up and should remain an
 ordinary controller/state issue, not become a speculative global safety gate.
 
 ### Issue-ready progress summary
@@ -242,7 +281,7 @@ ordinary controller/state issue, not become a speculative global safety gate.
 > low driver torque, no EPS faults, and Toyota `0x08A`/`0x081` remaining ID0
 > (LTA off) for the entire interval. The Camry used an exact-EPS RAM-resident
 > signer, while controlsd, CarController, and Panda retained normal ownership.
-> Independently, a 2023 Corolla TSS3 openpilot-longitudinal run transmitted
+> Independently and later, a 2023 Corolla TSS3 openpilot-longitudinal run transmitted
 > 23,683 unprotected `0x160` commands at 40 Hz under `safetyModel=toyota`, with
 > real acceleration requests in about 80% of frames and reported closed-loop
 > lead following. We are now cleaning the implementation into a reusable TSS3

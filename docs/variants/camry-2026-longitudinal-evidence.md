@@ -4,9 +4,20 @@
 **Milestone-A longitudinal configuration** (stock Toyota ACC retained) is the
 current fork state; this names the longitudinal ownership arrangement only and
 does **not** mean Milestone A itself is accepted (lateral qualification remains
-blocked). This packet assembles the evidence matrix for native openpilot
-longitudinal control and records what remains before any implementation is
-justified. No injection or interception wiring is prescribed.
+blocked). This packet assembles the Camry-specific evidence matrix for native
+openpilot longitudinal control. The offline wire encoder is implemented; the
+remaining rows govern promotion into a live Camry controller. No injection or
+interception wiring is prescribed.
+
+## Discovery record
+
+This Camry work predates the independent Corolla live report. Commit `6d02fc4`
+documented the non-SecOC `0x160` request-plane candidate on 2026-08-31;
+`d73baf5` added the offline generator later that day; `1661e5c` then recovered
+and implemented the exact Profile-5 integrity contract. Commit `198d8da`
+documented the native openpilot integration path on 2026-09-05. The attributed
+albinoelephant Corolla field run was reported on 2026-09-10. Its contribution
+is independent live validation, not the original discovery or generator.
 
 ## Current stock-ACC configuration (Milestone-A longitudinal arrangement)
 
@@ -32,7 +43,7 @@ diff.
 | Physical response | **unobserved** | No bench evidence |
 | Release/override | **unobserved** | — |
 | Fault behavior | **unobserved** | — |
-| Source suppression | **hard requirement, unsolved** | Toyota-B install leaves Panda CAN1 unsplit; a second independently countered `0x160` stream would contend with stock Profile-5 state — needs an inline interception/suppression point or a proved later handoff |
+| Source suppression | **architecture identified; live validation pending** | The current lateral-development repin leaves Toyota Bus-1 on unsplit Panda CAN1. Undoing that repin restores Toyota Bus-1/`0x160` to the stock Toyota-B CAN0/CAN2 relay pair, allowing a bus-0 replacement to block the stock bus-2 copy. No added split is proposed; verify sides and forwarding after restoring the stock pin mapping. |
 
 Supporting bounds: the two retained drives give B12↔protected-`0x0CA`
 correlation r = −0.9517/−0.9894 — strong association, explicitly **not** a
@@ -63,7 +74,13 @@ safety whitelists only `0x0B6` bus0 and `0x101` bus2).
    down-gradient correlation must not silently promote B12 to "command".
 3. A supported receiver interface and documented ownership arrangement are
    prerequisites for physical validation.
+4. Restore the normal Toyota-B pin mapping and verify that `0x160` appears on
+   both sides of the CAN0/CAN2 relay while the F33 signer sideband reaches EPS
+   on unsplit Panda bus 1.
 
-**Exit status:** semantics and ownership are hypotheses; offline integration
-is intentionally not implemented. Milestone B is blocked on the matrix rows
-above, not on software work.
+**Exit status:** the byte-exact offline message generator is implemented and
+verified. Camry semantics and ownership remain hypotheses, and live Camry
+controller integration is intentionally not wired. The replacement topology is
+identified but not yet live-validated. Milestone B is blocked on the remaining
+Camry-specific matrix rows, not on CRC/message-construction work or a need for
+custom harness hardware.
