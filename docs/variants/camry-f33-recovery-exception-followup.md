@@ -379,8 +379,11 @@ lifecycle.
 
 ## 11. P5 gateway preparation is not target-side execution
 
-The current CP-unprotected GTS+ DLLs under `build/out/cuwplus-unprotected/` were
-checked rather than relying only on the route INI. P5 Unified writer
+The current CP-unprotected GTS+ DLLs were checked rather than relying only on
+the route INI. The tracked static analysis copies are under
+`software/Techstream/gtsplus/cuwplus/CUWPlus/unpack/`; the current protected
+`TCUWUnifiedUtils.dll`/`TCUWDHUtils.dll` bodies independently recover to the
+same executable surface with `recover_cp_bodies.py`. P5 Unified writer
 `TCUWCanUnifiedPrepareWriter.dll` imports `JudgeReproGWNode`,
 `GetCentralGWReqCanID`, `ChangeModeForCentralGW`, and
 `RoutineControlForP5CentralGW`. `TCUWUnifiedUtils.dll` implements the gateway
@@ -396,11 +399,17 @@ request/response pairs:
 | 3 | `31 03 10 12` | `71 03 10 12` |
 
 This corrects the narrower earlier observation based on route metadata: current
-GTS+ does contain P5 central-gateway preparation behavior. The writer then
-continues with ordinary physical target UDS, including `10 02`, an 18-byte
-SecurityAccess exchange (`27 01 || tester-data16`, then `27 02 || key16`), and
-the target programming sequence. No gateway-side payload execution, proxy
-FACI writer, or response synthesis for an absent target was recovered.
+GTS+ does contain P5 central-gateway preparation behavior. The current ReproStd
+prepare writer makes the target dependency explicit in its vtable at
+`0x10005260`: virtual `+0x04 -> 0x10001990` builds direct target Diagnostic
+Session Control `10 03` with expected `50 03`; virtual `+0x10 -> 0x10002D20`
+builds direct target Programming Session `10 02` with expected `50 02`; and
+virtual `+0x14 -> 0x100014D0` performs target SecurityAccess `27 01/02`. The
+state machine performs the central-gateway `0x1011` preparation and then still
+calls the target `10 02` method before target SecurityAccess. The post-transition
+gateway `0x1012` work likewise surrounds rather than replaces the target UDS
+exchange. No gateway-side payload execution, proxy FACI writer, or response
+synthesis for an absent target was recovered.
 
 The available current Camry CUW descriptor used to exercise this DLL is for a
 different ECU and must not be projected onto the EPS. The meaningful bounded
