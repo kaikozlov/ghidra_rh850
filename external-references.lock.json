@@ -561,6 +561,14 @@
       "source": "albinoelephant, comma Discord, 2026-08-18"
     },
     {
+      "notes": "Contributor-authored TSS 3.0 Corolla port architecture/change reference. Preserved verbatim; code snippets and road-status claims remain external-source evidence until the corresponding source checkout/patch and rlog are retained.",
+      "path": "community/albinoelephant/albinoelephant_discord_PORT_ARCHITECTURE.md",
+      "provenance": "Discord attachment from albinoelephant describing the local opendbc + sunnypilot + Panda TSS3 Corolla port and the post-standstill-fault 0x160 handoff design",
+      "sha256": "760143f4f8fe53518eaa30af4de58a13c3ab2564acc5f7b7b010b545649aefe0",
+      "size": 16816,
+      "source": "albinoelephant, comma Discord, received 2026-09-11"
+    },
+    {
       "notes": "Full source bundle including macOS metadata and large UDS sweep captures; normalized analysis subset is under community/spanconstant/raw-20260821.",
       "path": "community/spanconstant/spanconstant_tsk.zip",
       "provenance": "Original Span TSKM acquisition bundle; retained byte-for-byte before normalization",

@@ -17,7 +17,13 @@ documented the non-SecOC `0x160` request-plane candidate on 2026-08-31;
 and implemented the exact Profile-5 integrity contract. Commit `198d8da`
 documented the native openpilot integration path on 2026-09-05. The attributed
 albinoelephant Corolla field run was reported on 2026-09-10. Its contribution
-is independent live validation, not the original discovery or generator.
+is independent live validation, not the original discovery or generator. The
+contributor's 2026-09-11 architecture/change reference is now retained under
+`community/albinoelephant/`;
+it documents the Corolla-specific B4:B5 request, Data ID `0x444A`, and the
+post-fault handoff design, but the exact source checkout and rlog are still
+external.
+
 
 ## Current stock-ACC configuration (Milestone-A longitudinal arrangement)
 
@@ -42,7 +48,7 @@ audit replay and current stock-harness opendbc `3c79d935`.
 | Source ownership | **FRC transmit side observed; downstream receiver unresolved** | The 2026-09-01 selective normal-Tx suppression run isolates `0x160` as a 40-Hz FRC normal-Tx PDU. Which downstream participant accepts/transforms it, and its exact replacement/fallback contract, remain open. |
 | Physical response | **stock causal ordering observed; synthetic response open** | Four captured short stock stops auto-resume without gas/brake/RES/SET; in three instrumented examples B12 ramps before motion and protected `0x0CA` result exceeds +0.5 m/s² 413–503 ms before motion. No modified-`0x160` Camry response has yet been tested. |
 | Release/override | **partially closed** | Short-stop auto-resume works natively. After ~5.2–9.3 s stopped, Toyota enters a delayed hold state (`0x08A` B7 `0x67`, `0x66` on accelerator override); all three retained long-hold exits require accelerator input, and hold clears before motion. The command-side hold/release semantic is not yet mapped. |
-| Fault behavior | **unobserved for synthetic Camry long** | No Camry modified-`0x160` fault experiment exists; the independent Corolla field report faults at complete standstill and therefore reinforces the need to close the hold/release contract. |
+| Fault behavior | **unobserved for synthetic Camry long** | No Camry modified-`0x160` fault experiment exists. The Corolla port initially faulted at complete standstill; its 2026-09-11 contributor architecture note reports a successor frame-for-frame/camera-counter handoff plus <~1 mph stock relay that validates stop/go externally. That does not close the distinct Camry hold/release contract. |
 | Source suppression | **architecture identified; live validation pending** | The stock Toyota-B mapping puts Toyota Bus-1/`0x160` on the CAN0/CAN2 relay pair, permitting ordinary stock-source blocking/replacement while the exact-F33 C7 lateral sideband uses unsplit bus 1. The software remap is implemented; parked vehicle validation is still pending. |
 
 Supporting bounds: the two retained drives give B12↔protected-`0x0CA`

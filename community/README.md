@@ -182,7 +182,7 @@ provenance link remains an inference.
 
 ## `albinoelephant/`
 
-**Contributor:** albinoelephant, comma Discord, 2026-08-12 through 2026-08-26
+**Contributor:** albinoelephant, comma Discord, 2026-08-12 through 2026-09-11
 
 **Vehicle attribution:** reported 2023 US Corolla. The 2026-08-26 same-car
 `eps-telescope` probe directly captures application F181 as
@@ -191,9 +191,11 @@ separate one-record DID `0x2032` identity retained as the historical corpus labe
 
 This directory preserves the contributor's complete 2026-08-18 memory corpus
 under `albinoelephant/raw-20260818/` (CodeFlash, DataFlash, global/local RAM,
-and the earlier TSKM oracle), the 2026-08-26 `eps-telescope` probe, plus a compact
-CAN-only oracle derived from the already-pinned public route. The contributor-supplied `MANIFEST.txt` pins every
-raw file hash and acquisition note; the artifacts are immutable evidence inputs
+and the earlier TSKM oracle), the 2026-08-26 `eps-telescope` probe, the
+2026-09-11 contributor-authored TSS3 port architecture/change reference, plus a
+compact CAN-only oracle derived from the already-pinned public route. The
+contributor-supplied `MANIFEST.txt` pins every raw file hash and acquisition note;
+the artifacts are immutable evidence inputs
 rather than tooling.
 
 The CodeFlash range dump normalizes to a one-megabyte image with SHA-256
@@ -204,6 +206,14 @@ Lochuan patch. Its Gate-2 queue is nevertheless variant-specific: exactly
 `0x00F/0x0D7/0x0B6`, with no `0x2E4/0x131` steering profiles. This foreign
 image exposed and now regression-tests the resolver's former Sienna-specific
 queue/table assumptions.
+
+The later [`albinoelephant_discord_PORT_ARCHITECTURE.md`](albinoelephant/albinoelephant_discord_PORT_ARCHITECTURE.md)
+is a byte-preserved external-source implementation reference for the contributor's
+Corolla longitudinal port. It reports the exact Corolla `0x160` E2E/acceleration
+layout and a successor stock/openpilot handoff that reuses the camera frame/counter
+and falls back to Toyota's standstill behavior below roughly 1 mph. Its hard-coded
+mode, forced-fingerprint, sunnypilot, and `ALLOW_DEBUG` pieces are reproduction
+scaffolding, not repository-wide TSS3 policy.
 
 The contributor's TSKM oracle contains synchronization `0x00F` only, explaining
 the original matcher failure. The derived public-route oracle adds the genuine

@@ -193,15 +193,36 @@ then explicitly reverted to `TSS3LongMode.OFF` while parked.
 
 This is sufficient as the issue's **longitudinal proof of concept**: the native
 command is implemented, transmitted under Toyota safety rather than shadowing,
-and produces reported closed-loop lead following. The known standstill handoff
-defect is follow-up engineering, not evidence that the longitudinal controller
-was absent.
+and produces reported closed-loop lead following. The initial standstill fault
+identified a stock/openpilot handoff defect; it is not evidence that the
+longitudinal controller was absent.
 
-Evidence boundary: this is an attributed external field report supplied as a
-Discord screenshot. The contributor explicitly described the result as new and
-requested that it initially be taken with caution. The raw rlog, exact route ID,
-and local-fork revision are not yet in this repository, so exact counts are
-**observed/external-source**, not repository-verified. When supplied, retain the
+### 2026-09-11 contributor architecture snapshot
+
+The contributor subsequently supplied
+[`community/albinoelephant/albinoelephant_discord_PORT_ARCHITECTURE.md`](../../community/albinoelephant/albinoelephant_discord_PORT_ARCHITECTURE.md),
+a hash-pinned architecture/change reference for the local Corolla port. It reports
+the concrete successor design used after the early standstill fault: each transmitted
+`0x160` is derived from the live camera frame, keeps the camera's B2 counter, is
+emitted at most once per newly observed camera frame, and is paired with Panda
+forwarding that blocks the stock bus-2 copy only while the same longitudinal-allowed
+state authorizes openpilot output. Below roughly 1 mph the controller relays the
+camera request so Toyota retains its native standstill/hold path. The note reports
+follow, speed, stop-and-go to zero/hold/resume as validated, with the deployed
+1-mph floor still awaiting a confirming drive at its 2026-09-10 status cutoff.
+
+The same note reports Corolla-specific wire details that must not be generalized to
+the Camry: acceleration is a signed 15-bit B4:B5 quantity at 0.001 m/s²/count and
+the CRC-16/CCITT Data ID is `0x444A`. That differs from the retained Camry `0x160`
+B12/Data-ID contract and is direct evidence that the normal openpilot ownership
+shape is reusable while the exact request encoding remains target-specific.
+
+Evidence boundary: this remains attributed external field evidence. The original
+road result arrived as a Discord screenshot, and the later architecture/change
+reference is now retained verbatim and hash-pinned. The raw rlog, exact route ID,
+and exact source checkout/patch are still not in this repository, so road counts
+and code-behavior claims remain **observed/external-source**, not
+repository-verified. When supplied, retain the
 route inventory and reduce `safetyModel`, `sendcan 0x160`, counter continuity,
 requested acceleration, lead distance, speed response, and the standstill fault
 transition without inventing a second longitudinal permission system.
@@ -264,11 +285,13 @@ The evidence now covers both control requirements named by issue #3695:
 
 What remains is reviewability rather than discovery: promote the existing
 offline `0x160` primitive through the normal controller/safety boundaries,
-keep the Camry signer behind an exact platform boundary, import or link
-albinoelephant's longitudinal revision and rlog reduction, and submit the
-smallest upstream-shaped opendbc change. The standstill transition is a known
-longitudinal follow-up and should remain an
-ordinary controller/state issue, not become a speculative global safety gate.
+keep the Camry signer behind an exact platform boundary, retain the now-supplied
+Corolla architecture reference while obtaining its exact source revision and rlog
+reduction, and submit the
+smallest upstream-shaped opendbc change. Corolla standstill behavior is now a
+source/rlog verification follow-up rather than an unexplained architecture gap;
+the distinct Camry hold/release contract remains open. Neither should become a
+speculative global safety gate.
 
 ### Issue-ready progress summary
 
@@ -281,6 +304,9 @@ ordinary controller/state issue, not become a speculative global safety gate.
 > Independently and later, a 2023 Corolla TSS3 openpilot-longitudinal run transmitted
 > 23,683 unprotected `0x160` commands at 40 Hz under `safetyModel=toyota`, with
 > real acceleration requests in about 80% of frames and reported closed-loop
-> lead following. We are now cleaning the implementation into a reusable TSS3
+> lead following. A subsequent contributor architecture note records the
+> frame-for-frame/camera-counter handoff used after the early standstill fault and
+> reports stop-and-go through zero/hold/resume, while the source checkout and rlog
+> remain outstanding. We are now cleaning the implementation into a reusable TSS3
 > port while keeping the Camry signer/repin and Corolla wire details strictly
 > platform-specific.

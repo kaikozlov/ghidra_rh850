@@ -1,7 +1,7 @@
 # albinoelephant Corolla field artifacts
 
 **Contributor:** albinoelephant (`@albinoelephant`, comma Discord)
-**Received:** initial DataFlash/oracle 2026-08-12; complete memory corpus 2026-08-18; eps-telescope probe 2026-08-26; TSS3 longitudinal field report 2026-09-10
+**Received:** initial DataFlash/oracle 2026-08-12; complete memory corpus 2026-08-18; eps-telescope probe 2026-08-26; TSS3 longitudinal field report 2026-09-10; port architecture/change reference 2026-09-11
 **Vehicle attribution:** reported by the contributor as a 2023 US Toyota Corolla
 **Direct application F181:** `8965F1208000` / `8A3111202000` (retained eps-telescope transcript)
 **Auxiliary one-record identity:** `8965H1202000` (DID `0x2032`, CodeFlash `0x17D80`)
@@ -9,8 +9,9 @@
 
 This directory preserves the raw field artifacts supplied from the contributor's
 TSK Manager investigation, the contributor-supplied `eps-telescope` output under
-`telescope/`, plus one repository-derived CAN-only oracle from the contributor's
-already-public comma route. The complete 2026-08-18 bundle is preserved byte-for-byte
+`telescope/`, the contributor-authored TSS3 port architecture/change reference,
+plus one repository-derived CAN-only oracle from the contributor's already-public
+comma route. The complete 2026-08-18 bundle is preserved byte-for-byte
 under `raw-20260818/`, including its contributor-supplied `MANIFEST.txt`.
 
 The model-year/vehicle attribution remains external field evidence. The public
@@ -23,6 +24,38 @@ separate one-record DID `0x2032` path. The historic `8965H1202000` filenames are
 kept as stable corpus labels, not as a claim about the wire-visible F181 primary.
 This remains a distinct physical specimen from Span's Corolla despite sharing the
 same F181 primary software record.
+
+
+## 2026-09-11 TSS3 port architecture/change reference
+
+[`albinoelephant_discord_PORT_ARCHITECTURE.md`](albinoelephant_discord_PORT_ARCHITECTURE.md)
+is the contributor-authored follow-up describing the exact shape of the local
+opendbc + sunnypilot + Panda Corolla port. It is preserved verbatim and hash-pinned
+in `external-references.lock.json`; repository prose intentionally does not rewrite
+the attachment in place. The note supplies substantially more implementation detail
+than the 2026-09-10 screenshot report:
+
+- stock Toyota-B topology is described as powertrain/state on unrelayed Panda bus 1
+  and the camera-side 32-byte `0x160` request on the relayed bus-2 -> bus-0 path;
+- the Corolla `0x160` contract is reported as a signed 15-bit acceleration request
+  in B4:B5 at 0.001 m/s²/count, B2 counter, and CRC-16/CCITT with Data ID `0x444A`;
+- the post-fault handoff design derives each replacement from the live camera frame,
+  reuses the camera counter, emits at most one replacement per observed camera frame,
+  and blocks the stock forwarded copy only while the same longitudinal-allowed state
+  authorizes openpilot output;
+- below roughly 1 mph the implementation relays the camera request and lets Toyota
+  retain its native standstill/hold behavior; the note reports follow, speed control,
+  stop-and-go to zero/hold/resume as validated, while a 1-mph floor still awaited a
+  confirming drive at the note's 2026-09-10 status cutoff;
+- the implementation uses contributor/fork-specific `TSS3LongMode`, forced-platform,
+  sunnypilot second-pass, and `ALLOW_DEBUG` Panda plumbing. Those are retained as a
+  reproduction reference, not promoted to the repository's upstream architecture.
+
+The note does **not** include the contributor's source checkout, a complete patch,
+or the road rlog, so its exact code and road-status statements remain
+**external-source / observed** rather than repository-verified. Its references to a
+companion contributor `README.md` and `NOTES.md` come from the author's source
+context; no contributor `NOTES.md` accompanied this attachment.
 
 
 ## 2026-09-10 openpilot-longitudinal field report

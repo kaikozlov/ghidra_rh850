@@ -71,8 +71,15 @@ The native openpilot-shaped driving layer should therefore add only:
 No longitudinal planner, `controlsd`, or second permission-system change is
 indicated. The Corolla field result establishes that a TSS3 target can use the
 unprotected `0x160` command on stock Toyota-B without the Camry lateral repin.
-Its exact opendbc/sunnypilot revision and raw rlog are still external, so its
-field mapping must not be silently substituted for the Camry B12 hypothesis.
+The contributor's now-retained
+[`PORT_ARCHITECTURE`](../../community/albinoelephant/albinoelephant_discord_PORT_ARCHITECTURE.md)
+reference reports the concrete Corolla mapping: signed 15-bit B4:B5 at
+0.001 m/s²/count, B2 counter, CRC-16/CCITT Data ID `0x444A`, camera template on
+bus 2, replacement on bus 0, and a frame-for-frame/camera-counter handoff with
+stock relay below roughly 1 mph. The exact source checkout/patch and road rlog
+remain external. More importantly, these Corolla wire details differ from the
+retained Camry B12/Data-ID contract, so they are evidence for the reusable
+ownership pattern, not values to substitute into the Camry encoder.
 
 For the maintainer Camry, the prior session also closed the intended harness
 shape. The successful lateral drive used a development CAN0/CAN1 repin. Undoing
@@ -174,7 +181,8 @@ result from this host.
    across CAN0/CAN2.
 4. Promote the existing offline `0x160` builder into the normal opendbc
    controller/safety path only after binding its request semantics to the
-   target. Import the Corolla field revision and reduce its rlog when they are
+   target. Use the retained Corolla architecture reference as an implementation
+   comparison, and obtain/reduce its exact source revision and rlog when they are
    available. Emit the replacement on bus 0 and block the stock bus-2 copy
    through normal relay ownership. This path is independent of the
    SecOC-protected B6 lateral carrier and must remain separately reviewable.
