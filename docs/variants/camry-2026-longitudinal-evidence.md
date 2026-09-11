@@ -3,10 +3,11 @@
 **Scope:** work package 4 of the Camry openpilot completion plan. The `tss3`
 integration branch now contains a native-shape `0x160` controller and Panda
 handoff for bench/vehicle testing. Corolla establishes the selected B4:B5
-command mapping causally. The September 11 dead-EPS drive now establishes that
-the Camry downstream arbitration plane accepts the combined Camry B4:B5+B12
-replacement while stock DRCC is unavailable; isolated physical-response,
-standstill-release, and PCS-coexistence validation remain open.
+command mapping causally. The September 11 dead-EPS drive establishes that the
+protected Camry longitudinal plane responds partially to combined B4:B5+B12
+replacement while stock DRCC is unavailable, but the response is clamped and
+does not track the requested stopping deceleration. A downstream DRCC-mode gate
+therefore remains a live explanation rather than a closed negative.
 
 ## Discovery record
 
@@ -44,21 +45,22 @@ relaying the camera request byte-exact. Panda blocks the camera copy only while
 its normal longitudinal-allowed state authorizes the replacement and bounds
 both Camry request quantities independently. The 2026-09-11 trial below proved
 the transport path and disproved B4:B5 alone as a sufficient Camry mapping; the
-later dead-EPS trial then observed the protected downstream result following the
-combined encoder under conventional cruise, without stock DRCC operation.
+later dead-EPS trial then observed a limited protected-result response to the
+combined encoder under conventional cruise, without the requested physical
+stopping behavior.
 
 ## Evidence matrix (FRC `0x160` request plane)
 
 | Question | Status | Evidence |
 |---|---|---|
 | Wire geometry | **established** (firmware-static + captures) | 32-byte PDU; B0:B1 CRC-16/CCITT, B2 mod-256 counter, no secret; `tools/targets/camry/live/camry_frc_request_poc.py` clones/recomputes offline. The recovered init=`0xFFFF`/Data-ID=`0x0160` expression and the contributor's init=`0`/Data-ID=`0x444A` expression are deterministically wire-equivalent for this fixed PDU length. |
-| Selected controller field | **B4:B5-alone disproved; combined B4:B5+B12 accepted downstream** | The independent Corolla road implementation causally establishes signed-15 B4:B5 at 0.001 m/s²/count. Route `000000d1--ad906be282` replaced 10,228 Camry frames with B4:B5 modifications while leaving B12 stock; the protected result continued tracking B12. In route `000000d4--327b2c4bb8`, 1,249 combined replacements changed B4:B5 and inverse signed-7 B12; protected `0x0CA` followed the synthetic B12 request while stock DRCC was unavailable. |
-| Command semantics | **synthetic downstream causality observed; isolated physical causality open** | In three no-driver-input stock auto-resumes, B12 ramps in the acceleration direction 351–433 ms before ego motion. In the combined synthetic trial, openpilot's B12 swept +5→−4 counts as requested acceleration swept −0.542→+0.360 m/s², followed by protected `0x0CA` result −0.320→+0.397 m/s². |
-| Scale/sign | **sign accepted downstream; absolute calibration bounded** | During the combined replacement windows, synthetic B12 and protected `0x0CA` result correlate negatively (`r=−0.705` nearest-time; `r=−0.730` at +100 ms). The result is shaped by the downstream arbitration/control stack, so this does not independently prove a literal 0.1 m/s²/count physical scale. |
-| Validity/counter rules | **combined synthetic frames accepted** | Profile-5 counter/CRC are observed; the receiver accepted one-for-one synthetic frames paced from the live camera counter. Gap, replay, and fault thresholds remain untested. |
-| Receiver acceptance | **observed for combined B4:B5+B12 without stock DRCC** | In the dead-EPS route, FRC DRCC attempts were rejected and the successful cruise latch was conventional (`0x251` B0=`0x90`). Panda nevertheless suppressed the stock downstream copy during control, transmitted the combined replacements, and protected `0x0CA` followed the synthetic B12 request. No forged EPS/FRC health or DRCC-status frame was present. |
+| Selected controller field | **B4:B5-alone disproved; combined B4:B5+B12 reaches the protected plane but is insufficient without DRCC** | The independent Corolla road implementation causally establishes signed-15 B4:B5 at 0.001 m/s²/count. Route `000000d1--ad906be282` replaced 10,228 Camry frames with B4:B5 modifications while leaving B12 stock; the protected result continued tracking B12. In route `000000d4--327b2c4bb8`, 1,249 combined replacements changed B4:B5 and inverse signed-7 B12. Protected `0x0CA` responded, but strong requested braking was clamped and did not produce the requested stop-sign response while stock DRCC was unavailable. |
+| Command semantics | **partial protected-result influence observed; full command authority open** | In three no-driver-input stock auto-resumes, B12 ramps in the acceleration direction 351–433 ms before ego motion. At the start of the combined trial, openpilot's B12 and protected `0x0CA` moved in the expected direction, but across strong-braking samples requested acceleration correlated only `r=0.276` with the protected result and `r=0.176` with measured acceleration. |
+| Scale/sign | **sign supported; conventional-mode shaping/gating unresolved** | Synthetic B12 and protected `0x0CA` result correlate negatively across the complete replacement windows, but when openpilot requested as much as −1.2 m/s² under conventional cruise, the protected result remained roughly −0.15 to −0.34 m/s². This does not prove a literal 0.1 m/s²/count physical scale or full authority. |
+| Validity/counter rules | **synthetic frames reach downstream processing** | Profile-5 counter/CRC are observed; one-for-one synthetic frames paced from the live camera counter influence the protected plane without an integrity fault. Gap, replay, authority, and fault thresholds remain untested. |
+| Receiver acceptance | **partial processing observed; DRCC-mode gate remains open** | FRC DRCC attempts were rejected and the successful cruise latch was conventional (`0x251` B0=`0x90`). Panda suppressed the stock downstream copy and transmitted the combined replacements, but the requested stopping deceleration was not applied. The explicit observed mode states are `0x251` B0 `0x88/0x90` for conventional available/active versus `0xA0/0xC0` for DRCC available/active. |
 | Source ownership | **FRC transmit side observed; downstream receiver unresolved** | The 2026-09-01 selective normal-Tx suppression run isolates `0x160` as a 40-Hz FRC normal-Tx PDU. Which downstream participant accepts/transforms it, and its exact replacement/fallback contract, remain open. |
-| Physical response | **stock B12 ordering observed; combined synthetic response not isolated** | Four captured short stock stops auto-resume without gas/brake/RES/SET; in three examples B12 ramps before motion and protected `0x0CA` exceeds +0.5 m/s² 413–503 ms before motion. The combined trial ran during moving conventional cruise and produced the expected downstream result, but the driver reported no obvious behavioral difference and the drive did not include a designed A/B step that isolates physical response from grade/speed control. |
+| Physical response | **combined synthetic stopping response negative without DRCC** | Four captured short stock stops auto-resume without gas/brake/RES/SET; in three examples B12 ramps before motion and protected `0x0CA` exceeds +0.5 m/s² 413–503 ms before motion. In the combined trial, measured acceleration closely followed the limited protected result (`r=0.912` over strong-braking samples), not openpilot's substantially stronger requested deceleration; the driver directly observed that the car did not slow for the modeled stop sign. |
 | Release/override | **partially closed** | Short-stop auto-resume works natively. After ~5.2–9.3 s stopped, Toyota enters a delayed hold state (`0x08A` B7 `0x67`, `0x66` on accelerator override); all three retained long-hold exits require accelerator input, and hold clears before motion. The command-side hold/release semantic is not yet mapped. |
 | Fault behavior | **no request-path fault observed; standstill remains open** | The moving combined-request trial completed without an observed request-integrity/system-malfunction fault. The Corolla port initially faulted at complete standstill; its 2026-09-11 contributor architecture note reports a successor frame-for-frame/camera-counter handoff plus <~1 mph stock relay that validates stop/go externally. That does not close the distinct Camry hold/release contract. |
 | Source suppression | **live transport validated** | Route `000000d1--ad906be282` retained all camera-side bus-2 templates while the active replacement windows had no competing native bus-0 copy. Across segments 3–6 and 9–12, openpilot emitted 10,259 bus-0 `0x160` frames paced by the camera counter; 10,228 carried modified B4:B5, and only 13 transient Panda rejects occurred at control transitions. Route `000000d4--327b2c4bb8` repeats the one-for-one handoff for 1,249 combined replacements. |
@@ -114,9 +116,9 @@ normal `0x030` traffic. MAIN attempts first produced the already-observed
 DRCC-unavailable/rejection state; the later successful latch was conventional
 cruise (`0x251` B0=`0x90`), not stock DRCC. This makes the route a direct test
 of whether the downstream longitudinal stack requires the FRC's healthy-DRCC
-state before accepting a replaced request.
+state before granting full authority to a replaced request.
 
-It did not. During two `CC.longActive` windows, openpilot emitted **1,249**
+During two `CC.longActive` windows, openpilot emitted **1,249**
 combined B4:B5+B12 `0x160` frames at the camera-counter rate. The Panda relay
 continued to expose the live camera-side `0x160` template and made the
 replacement the sole downstream copy while longitudinal control was allowed.
@@ -132,19 +134,23 @@ protected 0x0CA result          -0.320  ...  +0.397 m/s²
 ```
 
 Across both windows, synthetic B12 versus the protected result gives
-`r=-0.705` at nearest time and `r=-0.730` at +100 ms. This is the missing
-receiver acknowledgement for the combined encoder: the downstream
-arbitration/protection path consumed the replacement even though stock DRCC
-could not engage. It also narrows the minimal architecture. Conventional
-cruise can supply the ordinary OEM engagement/controls-allowed latch while
-openpilot owns following and acceleration through the intercepted `0x160`;
-there is no evidence-based reason to fabricate EPS health or make the FRC
-believe DRCC is healthy.
+`r=-0.705` at nearest time and `r=-0.730` at +100 ms. That proves influence on
+the protected plane, not full authority. Over the strong-braking subset,
+openpilot requested as much as `-1.2 m/s²`, while the protected result remained
+roughly `-0.15..-0.34 m/s²`; requested acceleration correlates only `r=0.276`
+with the protected result and `r=0.176` with measured acceleration. Measured
+acceleration instead tracks the limited protected result at `r=0.912`. The
+driver's direct observation closes the practical consequence: the car did not
+perform the modeled stop-sign deceleration.
 
-The route was not a deliberately stepped physical A/B experiment, and the
-driver did not perceive an obvious behavior change. Treat downstream request
-acceptance as observed, but retain isolated physical actuation as the next
-vehicle test.
+The explicit normal-CAN mode discriminator is `0x251` B0: retained healthy
+DRCC uses `0xA0/0xC0` for available/active, while the dead-EPS route uses
+`0x88/0x90` for conventional available/active. The next middleman experiment
+therefore preserves the live conventional operating latch and request context,
+but follows each live `0x251` with a byte-exact clone changing only
+`0x88 -> 0xA0` or `0x90 -> 0xC0`. A positive result would identify downstream
+DRCC mode as the missing authority gate without requiring the faulted FRC to
+change its internal state.
 
 ### 2026-09-11 retained stop/resume audit
 
@@ -217,16 +223,20 @@ arbitration/SecOC participants untouched.
 owns encoding and camera-counter pacing; Panda owns the TX whitelist, normal
 longitudinal bounds, and selective forwarding. No second permission state or
 legacy Toyota PCM compensation loop was added. Corolla can exercise the
-road-proven field and handoff. Camry combined-request acceptance is now observed
-at the protected downstream result under conventional cruise. Physical response,
-stop/hold release, and PCS/AEB coexistence remain the vehicle-validation boundary.
+road-proven field and handoff. Camry combined-request influence is observed at
+the protected plane under conventional cruise, but full requested authority is
+not. The exact-Camry/dead-EPS test branch now adds a bounded `0x251` middleman:
+one follow-up per live stock display frame, only the observed conventional-to-
+DRCC B0 mapping, and active state permitted by Panda only while the genuine
+`0x08A` operating latch authorizes longitudinal control.
 
 ## Next evidence steps
 
-1. With conventional cruise latched, perform a short, unmistakable, bounded A/B
-   request step on a safe closed course and join synthetic `0x160`, protected
-   `0x0CA`, wheel-speed acceleration, pedals, and grade. This isolates physical
-   response without requiring stock DRCC or healthy EPS traffic.
+1. Parked first, engage conventional cruise and verify that each native
+   `0x251 0x88/0x90` is followed by the synthetic `0xA0/0xC0` state without a
+   system fault. Then repeat the bounded moving test and join synthetic `0x251`,
+   synthetic `0x160`, protected `0x0CA`, wheel-speed acceleration, and pedals.
+   The discriminator is whether the prior conventional-mode braking clamp clears.
 2. Run the existing synchronized FRC/Brake request capture during stock DRCC,
    including a short stop, delayed hold, release, and (if naturally observed)
    PCS intervention: FRC `0x792` `1B03..1B07`, Brake `0x7B0` `10A1..10A4`,
@@ -241,6 +251,6 @@ stop/hold release, and PCS/AEB coexistence remain the vehicle-validation boundar
 **Exit status:** the historical B12 offline generator remains verified evidence,
 and the test branch now implements the Corolla-validated B4:B5 request plus the
 gap-free stock-Toyota-B replacement topology. For Camry, combined B4:B5+B12
-acceptance is observed at the downstream protected-result plane without stock
-DRCC. Isolated physical response, delayed-hold release, and PCS/AEB coexistence
-remain open vehicle tests.
+influence is observed at the downstream protected plane, but the requested
+stopping authority is absent without DRCC. The bounded `0x251` mode-middleman,
+delayed-hold release, and PCS/AEB coexistence remain open vehicle tests.
