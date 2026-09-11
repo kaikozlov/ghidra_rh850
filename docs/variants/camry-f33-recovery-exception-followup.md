@@ -282,7 +282,22 @@ file reader parses and validates that package property into the CPU descriptor.
 All 26 locally acquired CUWs have `IsBlankECU=0`; there is no blank-target
 package in the retained corpus from which a different wire contract could be
 recovered. `JudgeFlashable` consumes the blank-only host flag, but the selected
-writer remains the ordinary contact-type writer.
+writer remains the ordinary contact-type writer. Current CP-recovered
+`CuwBackendService.dll` independently confirms the managed/native boundary:
+`ConfigureCuwDll` copies `IsBlankECUOnlyFlag` into
+`TypConfiguration.mblnTargetIsBlankECUOnlyFlag` and then calls the same native
+`ConfigureCUWDLL`; managed `StartReprogramming` has no blank-specific branch
+and directly calls the same native `StartReprogramming` entrypoint.
+
+This is consistent with Toyota's first-class "Blank ECU Calibration Download"
+workflow without making it a dead-target rescue primitive. The current
+ReproStd P5 prepare writer still requires a direct target `10 02 -> 50 02`
+before target SecurityAccess. A factory/replacement blank ECU can satisfy that
+contract if its own validity state leaves its boot diagnostic listener active;
+the incident F33 cannot, because `119E` accepts the CRC-valid bad image and
+jumps to the application before boot CAN is initialized. The host blank flag
+therefore does not make a silent, validity-passing target equivalent to a
+factory blank target.
 
 The exported `ReadRecoveryInfoFile`, `GetNumberOfReceivedCIDForRecovery`,
 `GetReceivedCIDForRecovery`, and `JudgeKindOfVehicleForRecovery` names also do
