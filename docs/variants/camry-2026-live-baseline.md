@@ -6184,7 +6184,9 @@ call at `0x7BF60`; the same-width hook is covered by the ordinary application
 CRC repair. Offline construction yields exact stage-6 SHA-256
 `818338cc3e3dc23f1cf466c72f497699adc9ff33767e67b81fb65bccfab09010`
 and activated stage-7 SHA-256
-`aba6867f244dda42b754d6f455f25a226ee95025dee6a2d98b07b3ac550f2d74`.
+`51ef92ee4d4445d43cf42bb1fe29f146623f03541d792f37f60f8e8270560e3a`.
+The exact hook bytes are the complete independently decoded four-byte JARL
+`88ff925b`; see the incident correction below.
 Inverse operations restore stage 7 -> exact stage 6 -> exact cumulative stage 5.
 
 This is **verified generated-artifact construction**, not yet a live persistent
@@ -6220,6 +6222,16 @@ no `0x08A`, B6, steering request, or persistent write was transmitted. This is
 tested domains. The complete result is retained as
 `targets/camry-2026/raw-20260910/working-steering/native-08a-slot4-verification.json`.
 
+The first stage-6 zero-write preflight subsequently passed with exact stage-5
+identity, original hook preimage, 490 erased tail bytes, and CRC residue
+`FFFFFFFF`. Its RAM payload then remained halted in the boot context, so the
+immediately-following APPLY invocation observed no application F181 and refused
+before RAM upload; **no persistent write began**. Persistent preflight records
+are now package-bound under `/data/camry-f33-car-kit-state`, and the field
+lifecycle explicitly requires full OFF -> NRTD between each RAM preflight and
+its corresponding write. Each write payload still independently checks its
+complete live preimage before flash RMW.
+
 This design does not interpose on the hypothesized `0x08A -> arbitrator -> B6`
 path and does not require that hidden link to carry camera-originated B6. Stock
 0x08A and 0x081 remain intact. Future longitudinal remains a separate native
@@ -6230,3 +6242,53 @@ signer. The exact historical steering patch remains unchanged beside §70.4;
 this package, removing the unused dummy-key residue and naming the C7 helper by
 its actual role. It remains the controller-side input shape until reduced into
 the normal upstream port.
+
+### 70.7 2026-09-11 malformed-hook incident and recovery boundary
+
+The first live stage-7 package is withdrawn. Its builder requested a six-byte
+`jarl32 persistent_entry,lp`, asserted that six-byte geometry, and then wrote
+only its first four bytes. The resulting replacement at `0x7A272` was
+`ff02925b`, not a complete instruction. With the following untouched stock
+halfword `2436`, the CPU decodes `ff02925b2436` as a six-byte JARL to unmapped
+`0x362BFE04`. The wrapper at `0xFFE04` is therefore never entered. The affected
+stage-7 image is SHA-256
+`aba6867f244dda42b754d6f455f25a226ee95025dee6a2d98b07b3ac550f2d74`.
+Its application CRC is nevertheless valid, so the failure is repeatable on
+every cold start.
+
+Exact reset-path analysis explains the recovery behavior. Cold reset reaches
+`0x13B0`; validity processing at `0x119E` accepts the CRC-valid application and
+loads its entry at `0xFFDB8` (`0x20880`). It does not leave a bootloader DCM
+window. The application normally owns DiagnosticSessionControl and performs
+the programming handoff through its sole direct application-to-low-boot call:
+`0x65F5E -> 0x9F00 -> 0x148E -> 0x1398`. The malformed foreground hook executes
+before the application CAN/DCM service becomes functional, so neither physical
+`0x7A1 -> 0x7A9` nor Toyota functional/subaddress requests can reach that
+handoff. Startup captures across Panda buses 0 and 2 saw no EPS `0x7A9`; broad
+physical/functional programming ladders likewise produced no EPS response.
+
+The installed GTS profiles were also audited for a second-ECU active test that
+could independently cycle EPS power or reset it. Central Gateway, Power Source
+Control, and Power Distribution Box expose no applicable active test; Main Body
+relay tests do not control EPS supply. This bounds the currently demonstrated
+network-only recovery surface as closed: the target DCM is not alive, valid CRC
+skips the boot DCM, and no verified peer-ECU EPS reset/power control exists.
+Speculative gateway resets, bus flooding, voltage glitching, and deliberate
+flash corruption are not recovery procedures.
+
+The deterministic repair is exact stage 7 -> stage 6 restoration through an
+independent programming/debug channel. The known-good stage-6 image is SHA-256
+`818338cc3e3dc23f1cf466c72f497699adc9ff33767e67b81fb65bccfab09010`;
+only the four-byte hook and application CRC fixup differ materially from the
+affected stage 7. The archived bad-package artifacts remain on the comma at
+`/data/camry-f33-car-kit-incident-bad-hook-20260911` for exact inverse/preimage
+evidence, with `f33-persist` made non-executable. The active filesystem package
+at `/data/camry-f33-car-kit` contains corrected hook `88ff925b`, stage-6 hash
+`818338cc...9010`, and corrected stage-7 hash `51ef92ee...0e3a`; replacing these
+files did not contact or write the vehicle.
+
+The construction defect is fixed by emitting ordinary four-byte `jarl`,
+rejecting any other length or relocation, checking the exact decoded target,
+and requiring the package launcher to reject the withdrawn hook and bind every
+hook preflight to the exact package identity. This corrected future package
+does not repair an already-installed malformed hook over a dead DCM.

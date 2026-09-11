@@ -71,8 +71,13 @@ with tempfile.TemporaryDirectory(prefix="verify-f33-persistent-") as td:
     check("resident removal restores exact stage 5", restored == stage5)
 
     hook_diff = {i for i, (a, b) in enumerate(zip(stage6, stage7, strict=True)) if a != b}
-    check("hook stage changes only hook and CRC fixup", hook_diff <= set(range(0x7A272, 0x7A276)) | set(range(0xFFDEC, 0xFFDF0)) and set(range(0x7A272, 0x7A276)) <= hook_diff)
+    check("hook stage changes only hook and CRC fixup",
+          hook_diff <= set(range(0x7A272, 0x7A276)) | set(range(0xFFDEC, 0xFFDF0)) and
+          stage7[0x7A272:0x7A276] != stage6[0x7A272:0x7A276])
     check("hook stage has valid CRC", crc32(stage7[0x18000:0xFFDF0]) == 0xFFFFFFFF)
+    check("hook is exact independently-decodable 4-byte JARL to resident",
+          metadata["hook"]["replacement_hex"] == "88ff925b" and
+          stage7[0x7A272:0x7A276] == bytes.fromhex("88ff925b"))
     check("hook replays stock call through wrapper", metadata["behavior"]["displaced_stock_call_preserved"] is True and metadata["hook"]["displaced_target"] == "0x0007BF60")
     check("runtime failure is native pass-through", metadata["behavior"]["no_control_or_stale_sequence"] == "native B6 untouched" and metadata["behavior"]["command5_failure"] == "native B6 untouched")
 
@@ -112,6 +117,15 @@ source = signer.SOURCE.read_text()
 launcher = (ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_launcher.sh").read_text()
 check("resident has no CAN transmitter", "can_send" not in source and "transmit" not in source.lower())
 check("launcher makes passive native verification an explicit prerequisite", "verify-native-08a" in launcher)
+check("launcher persists package-bound preflights across required OFF cycles",
+      "/data/camry-f33-car-kit-state" in launcher and
+      "resident preflight belongs to a different package" in launcher and
+      "hook preflight belongs to a different package manifest" in launcher and
+      "hook preflight config identity belongs to a different package" in launcher and
+      "hook preflight record is older than 30 minutes" in launcher)
+check("launcher rejects the withdrawn truncated hook artifact",
+      'bytes.fromhex("88ff925b")' in launcher and
+      "refusing withdrawn/malformed hook artifact" in launcher)
 check("launcher enforces reverse removal order in operator help",
       launcher.index("  ./f33-persist hook-remove") <
       launcher.index("  ./f33-persist resident-remove-preflight") <

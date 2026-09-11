@@ -191,7 +191,7 @@ def make_stage7_manifest(stage6: bytes, stage6_fixup: int, hook: bytes,
         },
         "invariants": [
             "stage-6 source is CRC-valid and contains an inert signer blob",
-            "one same-width JARL32 changes", "wrapper replays the displaced stock call",
+            "one same-width JARL changes", "wrapper replays the displaced stock call",
             "no-control and every signer failure leave native B6 untouched",
         ],
     }
