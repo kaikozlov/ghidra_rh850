@@ -6151,3 +6151,58 @@ the final `0x08A -> B6` edge remains a **hypothesis** until a synchronized stock
 LTA run observes internal native B6 ID/target content. Exact field results and
 artifact identities are retained in
 `targets/camry-2026/raw-20260910/f33-ingress/session-summary.json`.
+
+### 70.6 Normal-boot development signer construction
+
+The working §70.4 topology can now be retained across an ignition cycle without
+changing its control contract. The normal-boot resident consumes the same fresh
+nonzero C7 sideband at `FEBE4C34`, waits for the same internal native profile-2
+B6, replaces only B3..B9, reconstructs freshness from the native FV4 plus the
+authenticated/committed slot-1 state, invokes synchronous ICU-S command 5 with
+`{type=1, selector=4}`, and installs the generated trailer before the untouched
+stock SecOC consumer. It transmits no CAN frame itself. Missing, zero, stale, or
+repeated C7 and every recovered runtime failure path leave native B6 untouched.
+
+The resident is 490 bytes and fits without reclaiming code or bootloader space:
+
+```text
+0x000FFE04..0x000FFEF3  240 bytes
+0x000FFF04..0x000FFFFD  250 bytes
+```
+
+The exact stock spans are erased. OEM marker words at `0xFFE00` and `0xFFF00`
+remain byte-identical. An exhaustive per-byte Ghidra reference query over all
+504 erased-tail bytes found no reference in either used span; the only result
+was a numeric/data reference to terminal address `0xFFFFF`, which is outside the
+resident's second segment. The spans are also beyond the exact protected CRC
+end `0xFFDF0`, so inserting/removing the inert resident preserves stage-5 fixup
+`0xE69FC7F5` and residue `0xFFFFFFFF`.
+
+The activation stage replaces only the stock JARL at `0x7A272` with a JARL to
+`0xFFE04`. The wrapper calls the resident and then replays the displaced stock
+call at `0x7BF60`; the same-width hook is covered by the ordinary application
+CRC repair. Offline construction yields exact stage-6 SHA-256
+`818338cc3e3dc23f1cf466c72f497699adc9ff33767e67b81fb65bccfab09010`
+and activated stage-7 SHA-256
+`aba6867f244dda42b754d6f455f25a226ee95025dee6a2d98b07b3ac550f2d74`.
+Inverse operations restore stage 7 -> exact stage 6 -> exact cumulative stage 5.
+
+This is **verified generated-artifact construction**, not yet a live persistent
+result. The installer is deliberately two-stage so resident bytes are inert
+before the hook exists, and removal is hook-first. No bootloader byte changes;
+nevertheless an interrupted 32-KiB block rewrite requires exact full-image CUW/
+bootloader recovery rather than the small inverse payload. The field prerequisite
+is the passive `f33-sign verify-native-08a` result
+`native_08a_mac_reproduced` for all three samples. That probe transmits neither
+0x08A nor B6 and bounds selector/key compatibility before any persistent write.
+
+This design does not interpose on the hypothesized `0x08A -> arbitrator -> B6`
+path and does not require that hidden link to carry camera-originated B6. Stock
+0x08A and 0x081 remain intact. Future longitudinal remains a separate native
+openpilot integration through the upstream TSS3 transmit shape (currently the
+recovered `0x0CA` path); no longitudinal policy or permission is added to the
+signer. The exact historical steering patch remains unchanged beside §70.4;
+`kai-opendbc-c7-current.patch` (`43683fba...003b`) is its tested cleanup for
+this package, removing the unused dummy-key residue and naming the C7 helper by
+its actual role. It remains the controller-side input shape until reduced into
+the normal upstream port.

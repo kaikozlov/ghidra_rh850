@@ -563,6 +563,49 @@ command5_app = bytes(range(28))
 check("command-5 B6 domain matches opendbc DataID/application/freshness framing",
       command5_probe.build_b6_domain(command5_app, 0x1234, 0x56789, 0xAB) ==
       bytes.fromhex("00b6") + command5_app + bytes.fromhex("123456789ab4"))
+native_08a = command5_app + bytes.fromhex("d1234567")
+native_08a_domain = command5_probe.build_secoc_domain(
+    bytes.fromhex("008a"), command5_app, 0x1234, 0x56789, 0xAB,
+)
+check("native 0x08A oracle domain uses the same exact ordinary-P5 framing",
+      native_08a_domain == bytes.fromhex("008a") + command5_app + bytes.fromhex("123456789ab4") and
+      command5_probe.native_mac28_hex(native_08a) == "1234567")
+native_08a_candidates = command5_probe.native_08a_freshness_candidates(
+    native_08a, sync_trip=0x1234, sync_reset=0x56789,
+)
+check("native 0x08A freshness search is FV4-bounded and covers the exact candidate",
+      len(native_08a_candidates) == 64 and
+      all((message & 3) == 3 and (reset & 3) == 1 for _, reset, message in native_08a_candidates) and
+      (0x1234, 0x56789, 0xAB) in native_08a_candidates and
+      command5_probe.shift_reset_epoch(0x1234, 0, -1) == (0x1233, 0xFFFFF))
+
+class Fake08AOracleSession:
+    def __init__(self):
+        self.calls = []
+    def capture_native_08a(self):
+        return {
+            "trip_counter": 0x1234, "reset_counter": 0x56789,
+            "sync_hex": "00" * 8, "frame_hex": native_08a.hex(),
+            "sync_age_ms": 1.0, "frame_age_ms": 1.0,
+        }
+    def generate_fast(self, domain, *, expected_data_id):
+        self.calls.append((bytes(domain), bytes(expected_data_id)))
+        matched = bytes(domain) == native_08a_domain
+        return {
+            "outcome": "generated",
+            "output_mac28_hex": "1234567" if matched else "7654321",
+            "timing": {"total_wall_s": 0.001},
+        }
+
+fake_08a = Fake08AOracleSession()
+native_08a_result = command5_probe.verify_native_08a(fake_08a, samples=1)
+check("native 0x08A oracle verifier stops on the matching freshness without transmitting",
+      native_08a_result["outcome"] == "native_08a_mac_reproduced" and
+      native_08a_result["samples_matched"] == 1 and
+      native_08a_result["samples"][0]["match"]["domain_hex"] == native_08a_domain.hex() and
+      all(data_id == bytes.fromhex("008a") for _, data_id in fake_08a.calls) and
+      native_08a_result["boundaries"]["transmitted_08a"] is False and
+      native_08a_result["boundaries"]["proves_realtime_08a_replacement"] is False)
 freshness_record = (
     (0x1234).to_bytes(4, "little") + (0x56789).to_bytes(4, "little") +
     (0xAB).to_bytes(2, "little") + bytes.fromhex("5a00")
@@ -655,6 +698,10 @@ check("command-5 launcher exposes non-transmitting paced-burst timing probe",
       "./f33-sign generate-fast 72_HEX_DIGITS [OUTPUT_JSON]" in command5_launcher_text and
       'run_probe_bounded 10 generate-fast --input-hex' in command5_launcher_text and
       "pacing changed input" not in command5_launcher_text)
+check("command-5 launcher exposes bounded non-transmitting native 0x08A verification",
+      "./f33-sign verify-native-08a [OUTPUT_JSON]" in command5_launcher_text and
+      "run_probe_bounded 180 verify-native-08a --execute --parked-stationary-confirmed --samples 3" in command5_launcher_text and
+      command5_launcher_text.count("verify-native-08a)") == 1)
 panda_lease_text = (
     ROOT / "exploit/ephemeral_runtime/f33_panda_lease.sh"
 ).read_text(encoding="utf-8")
@@ -955,7 +1002,7 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v13 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v13" and manifest["target"] == {
+    check("kit manifest is self-contained v14 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v14" and manifest["target"] == {
         "eps_f181": "8965F3307000", "eps_diag": "0x7A1->0x7A9 bus0", "b6": "0x0B6/32 FD bus0",
     })
     check("kit pins live persistence-verified stage5 as current firmware", manifest["current_firmware"] == {

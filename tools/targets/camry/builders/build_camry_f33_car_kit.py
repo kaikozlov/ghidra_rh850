@@ -30,14 +30,17 @@ from exploit.ephemeral_runtime import (
 )
 from tools.targets.camry.builders import build_camry_f33_crypto_result_patch as stage5
 from tools.targets.camry.builders import build_camry_f33_gate2_root_result_patch as stage3
+from tools.targets.camry.builders import build_camry_f33_persistent_signer_patch as persistent_patch
 
 PROBE = ROOT / "exploit/behavioral_proof/camry_f33_b6_stationary_probe.py"
 RUNBOOK_TEMPLATE = ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md"
+PERSISTENT_RUNBOOK = ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_runbook.md"
 FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_launcher.sh"
 PREAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_preaggregate_launcher.sh"
 MIDAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_midaggregate_launcher.sh"
 COMMAND5_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_command5_launcher.sh"
 INLINE_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_inline_signer_launcher.sh"
+PERSISTENT_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_launcher.sh"
 F33_IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_transaction_observer.bin"
 BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
@@ -53,6 +56,7 @@ INLINE_SIGNER_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_inli
 INGRESS_HELPER = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_ingress_helper_helper_padded.bin"
 INGRESS_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_ingress_helper_build.json"
 DEFAULT_OPENPILOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
+C7_INTEGRATION_PATCH = ROOT / "targets/camry-2026/raw-20260910/working-steering/kai-opendbc-c7-current.patch"
 RUNTIME_FILES = [
     "exploit/common/payload_package.py",
     "exploit/common/ram_exec.py",
@@ -67,6 +71,7 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_b6_ingress_helper.py",
     "exploit/ephemeral_runtime/camry_f33_command5_probe.py",
     "exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
+    "exploit/ephemeral_runtime/camry_f33_persistent_signer.py",
     "exploit/ephemeral_runtime/f33_panda_lease.sh",
     "exploit/followups/xcp_read_probe.py",
     "exploit/followups/xcp_daq_probe.py",
@@ -288,6 +293,8 @@ def build(out: Path, openpilot: Path) -> dict:
 
     patch_dir = out / "firmware_patch"
     patch_package = stage3.build(patch_dir, build_payloads=True)
+    persistent_dir = out / "persistent_patch"
+    persistent_package = persistent_patch.build(persistent_dir)
     runtime_files = copy_runtime(out)
     (out / "FIRMWARE_PATCH.md").write_text(patch_runbook(), encoding="utf-8")
 
@@ -359,6 +366,7 @@ def build(out: Path, openpilot: Path) -> dict:
     (ram_dir / "camry_f33_b6_ingress_helper.json").write_text(json.dumps(ingress_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     shutil.copy2(RUNBOOK_TEMPLATE, out / "RUNBOOK.md")
+    shutil.copy2(PERSISTENT_RUNBOOK, out / "PERSISTENT_SIGNER.md")
     launcher = out / "f33"
     shutil.copy2(FIELD_LAUNCHER, launcher)
     launcher.chmod(0o755)
@@ -374,25 +382,37 @@ def build(out: Path, openpilot: Path) -> dict:
     inline_signer_launcher = out / "f33-secoc"
     shutil.copy2(INLINE_SIGNER_LAUNCHER, inline_signer_launcher)
     inline_signer_launcher.chmod(0o755)
+    persistent_signer_launcher = out / "f33-persist"
+    shutil.copy2(PERSISTENT_SIGNER_LAUNCHER, persistent_signer_launcher)
+    persistent_signer_launcher.chmod(0o755)
+    integration_dir = out / "openpilot_integration"
+    integration_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(C7_INTEGRATION_PATCH, integration_dir / C7_INTEGRATION_PATCH.name)
 
     files = {
         dst.name: {"sha256": sha256(dst)},
         "FIRMWARE_PATCH.md": {"sha256": sha256(out / "FIRMWARE_PATCH.md")},
         "RUNBOOK.md": {"sha256": sha256(out / "RUNBOOK.md")},
+        "PERSISTENT_SIGNER.md": {"sha256": sha256(out / "PERSISTENT_SIGNER.md")},
         "f33": {"sha256": sha256(launcher)},
         "f33-pre": {"sha256": sha256(preagg_launcher)},
         "f33-ingress": {"sha256": sha256(ingress_launcher)},
         "f33-sign": {"sha256": sha256(command5_launcher)},
         "f33-secoc": {"sha256": sha256(inline_signer_launcher)},
+        "f33-persist": {"sha256": sha256(persistent_signer_launcher)},
     }
     files.update(runtime_files)
     for path in sorted(p for p in ram_dir.rglob("*") if p.is_file()):
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
     for path in sorted(p for p in patch_dir.rglob("*") if p.is_file()):
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
+    for path in sorted(p for p in persistent_dir.rglob("*") if p.is_file()):
+        files[str(path.relative_to(out))] = {"sha256": sha256(path)}
+    for path in sorted(p for p in integration_dir.rglob("*") if p.is_file()):
+        files[str(path.relative_to(out))] = {"sha256": sha256(path)}
 
     manifest = {
-        "schema": "camry-f33-car-kit-v13",
+        "schema": "camry-f33-car-kit-v14",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
@@ -405,6 +425,25 @@ def build(out: Path, openpilot: Path) -> dict:
             "crc_prefix": f"0x{stage5.EXPECTED_STAGE5_PREFIX:08X}",
             "crc_fixup": f"0x{stage5.EXPECTED_STAGE5_FIXUP:08X}",
             "note": "live persistence-verified 2026-09-01; no further persistent patch is part of the observer experiment",
+        },
+        "persistent_b6_signer": {
+            "launcher": "f33-persist",
+            "package": "persistent_patch/package.json",
+            "stage6_sha256": persistent_package["stage6_resident"]["sha256"],
+            "stage7_sha256": persistent_package["stage7_hook"]["sha256"],
+            "segments": persistent_package["stage6_resident"]["segments"],
+            "hook_address": persistent_package["stage7_hook"]["hook_address"],
+            "input": "fresh 0x1FDC0002 C7 sideband; sequence zero/inactive or repeated is ignored",
+            "output": "replace B3..B9 in one internally generated native B6 and sign with EPS ICU-S selector 4",
+            "stock_08a_modified": False,
+            "stock_081_modified": False,
+            "longitudinal_0ca_modified": False,
+            "normal_boot_programming_session": False,
+            "required_preflight": "f33-sign verify-native-08a must match every captured native sample",
+            "install_order": persistent_package["ordering"]["install"],
+            "remove_order": persistent_package["ordering"]["remove"],
+            "openpilot_c7_patch": "openpilot_integration/kai-opendbc-c7-current.patch",
+            "development_only": True,
         },
         "live_observers": {
             "native_xcp_steering_state": {
