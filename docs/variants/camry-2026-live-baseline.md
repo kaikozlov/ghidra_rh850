@@ -6196,6 +6196,14 @@ is the passive `f33-sign verify-native-08a` result
 `native_08a_mac_reproduced` for all three samples. That probe transmits neither
 0x08A nor B6 and bounds selector/key compatibility before any persistent write.
 
+The first 2026-09-10 live run exposed and corrected a host-capture routing bug:
+sampling `0x08A` on bus 0 found only the startup burst and then refused stale,
+while a four-second direct-Panda witness measured sustained native `0x08A` on
+bus 2 and sustained native `0x081`/`0x00F` on bus 0. The verifier therefore
+pairs native bus-2 `0x08A` with live bus-0 `0x00F`, matching the already-
+established VAR-110 direction rather than treating either Panda TX echo as a
+source frame.
+
 This design does not interpose on the hypothesized `0x08A -> arbitrator -> B6`
 path and does not require that hidden link to carry camera-originated B6. Stock
 0x08A and 0x081 remain intact. Future longitudinal remains a separate native
