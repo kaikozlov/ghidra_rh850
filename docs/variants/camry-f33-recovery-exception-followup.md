@@ -140,6 +140,16 @@ for both `P5-Unified` and `P5-Unified10`, with no configured repro-gateway-mode
 writer in those rows. This is a configuration observation, not an exhaustive
 current-DLL or assembly-level proof.
 
+A subsequent read-only check of the shipped current
+`software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/CUWPlus/TCUWCanUnifiedPrepareWriter.dll`
+found a single export, `StartPrepareWrite`, and no `PrepareRetry` export. Use
+that absolute DLL path with `tools/gts pe`; the default CUWPlus evidence root
+in this checkout locates route INIs but did not resolve this DLL by basename.
+This confirms the export surface only, not every internal function or any
+undocumented manufacturer recovery mechanism. The exact F33 binary was also
+rechecked at `13B0/119E`, `7A254/667E6`, `65F5E`, and `98E80`; those checks do
+not establish an additional recovery entry. No vehicle access occurred.
+
 An actual recovery lead must provide legitimate recovery execution independent
 of returning from the corrupted foreground call. The exact live fault state,
 unacquired ROM/extended-region contents, and complete assembly-level wiring
