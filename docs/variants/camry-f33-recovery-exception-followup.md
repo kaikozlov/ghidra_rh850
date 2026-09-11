@@ -40,11 +40,14 @@ four bytes and next stock halfword form `FF 02 92 5B 24 36`, a six-byte JARL to
 `362BFE04`. Hardware Table 4.1 (p.257) marks `20000000..FEBDFFFF` reserved and
 Section 4.2.1 limits instruction fetch to CodeFlash, LocalRAM-self, and
 GlobalRAM. Table 3.80 assigns FEIC `13H` to a SYSERR caused by an instruction
-fetch from other than CodeFlash. Section 3.2.3.3 classifies SYSERR as an FE-level
-exception from which return or recovery is not possible. These facts make
-SYSERR `13H` the bounded hardware-static interpretation of the malformed call;
-the missing live FEIC observation should still be kept distinct from that
-interpretation.
+fetch from other than CodeFlash.  The product manual's broad SYSERR wording is
+not the final architectural classification for this subcase: matching
+RH850G3M Software Rev.1.40 Table 4-1 classifies **instruction-fetch SYSERR as a
+resumable FE exception**.  Exact F33 nevertheless makes it operationally
+terminal because its selected SYSERR handler never executes `FERET`.  These
+facts make SYSERR `13H` the bounded architecture-predicted interpretation of
+the malformed call; the missing live FEIC observation remains distinct from
+that interpretation.
 
 The broad firmware MPU region spanning `00000000..FEBDFFFF` does not map the
 reserved system address range or make it a valid instruction source. Its
@@ -157,7 +160,7 @@ rechecked at `13B0/119E`, `7A254/667E6`, `65F5E`, and `98E80`; those checks do
 not establish an additional recovery entry. No vehicle access occurred.
 
 An actual recovery lead must provide legitimate recovery execution independent
-of returning from the corrupted foreground call. The exact live fault state,
+of returning from the corrupted foreground call. The exact live FE exception-register values,
 unacquired ROM/extended-region contents, and complete assembly-level wiring
 remain unknown. They are neither demonstrated recovery routes nor evidence
 for an absolute impossibility claim. Known inverse bytes alone do not supply
@@ -173,15 +176,15 @@ handoff into that boot runtime remains `65F5E -> 9F00 -> 148E -> 1398`, and the
 normal DCM/system-mode workers which reach it execute after the malformed call.
 No boot-request polling window precedes the valid-image jump.
 
-Enabling EI interrupts inside an interrupt or exception path does not create an
-unbounded CAN-controlled stack pivot. Renesas Hardware Rev.1.20 pp.209-212
-states that an acknowledged EIINT priority is recorded in `ISPR`; while its bit
-is set, interrupts at the same and every lower priority are masked. The same CAN
-receive source therefore cannot recursively nest. Higher-priority nesting is
-finite, and the target-native saved-PC/callback/DMAC census found no tester-
-controlled return-PC or indirect-call cell. This closes the proposed CAN-flood
-nested-return route within the recovered hardware/software model; it is not a
-general proof against every undiscovered implementation flaw.
+The incident fault model now closes the proposed CAN-flood nested-return route
+more strongly than the earlier ISPR-only argument.  Whole-image raw system-
+register scanning proves cold startup sets `PSW.EBV=1`, application startup sets
+`EBASE=0x20000`, and the predicted SYSERR therefore vectors through `0x20010 ->
+0x62E1E`.  Fetch-SYSERR sets `PSW.NP=1`; the `EI` inside `62E1E` clears ID but
+not NP, while ordinary EIINT acknowledgement requires `ID=0 && NP=0`.  CAN RX/TX
+and periodic maskable EIINTs therefore cannot execute at all after the predicted
+incident fault.  ISPR still bounds recursion for ordinary EI-level handlers, but
+it is no longer the decisive post-incident argument.
 
 The physical-route ambiguity is also narrower than “camera side versus Bus 4.”
 On the installed repinned Toyota-B harness, Panda bus 0 is the car/chassis side
@@ -244,12 +247,17 @@ unconditionally before DCM worker `988C2` and mode/handoff worker `58B5E`.
 Ordinary CAN receive can queue a request before the fault, but no recovered
 request path writes this guard or services the queued request before the hook.
 
-The application fixes `EBASE=20000` at `715C8`. Its raw `+10` vector decodes as
-`syncp; jmp 62E1E; feret`; `62E1E` saves EI state, enables EI, records context,
-and loops forever. The raw `+90` vector decodes as
-`syncp; jmp 65BD4; feret`, and only that separate handler advances `FEPC` by
-four before FERET. The hardware SYSERR classification above therefore does not
-provide a resumable skip of the malformed JARL or a path into the resident.
+Whole-image raw scanning additionally proves the vector selection that was only
+partly recovered in the first pass.  Hidden reset core-init writes
+`PSW=0x00018020` at `0x204`, setting `EBV=1`; application startup then fixes
+`EBASE=0x20000` at `0x715C8`.  The raw `+0x10` SYSERR vector is exactly
+`syncp; jmp 0x62E1E`.  The jump is terminal: `62E1E` saves an EI-shaped RAM
+frame, executes `EI`, calls `712CE`, and self-loops at `62E42`; there is **no
+FERET after that jump**.  The raw `+0x90` vector instead jumps to the separate
+`65BD4` handler which advances `FEPC` and executes `FERET`.  Matching G3M
+architecture calls fetch-SYSERR resumable/precise, but Toyota's selected
+`+0x10` handler deliberately does not return, so it provides neither a skip of
+the malformed JARL nor a path into the resident.
 
 Result: the intact resident is a useful known executable landing pad **only if
 a separate pre-fault PC-transfer primitive is first recovered**. It would then
