@@ -1,0 +1,199 @@
+{
+  "boundaries": {
+    "active_steering_request": false,
+    "persistent_flash_write": false,
+    "proves_brake_acceptance": false,
+    "proves_realtime_08a_replacement": false,
+    "transmitted_08a": false,
+    "transmitted_b6": false
+  },
+  "generated_candidates": 8,
+  "interpretation": "EPS ICU-S slot 4 reproduced every captured native 0x08A MAC28; this supports a shared key/profile for the exact tested domains",
+  "outcome": "native_08a_mac_reproduced",
+  "reset_radius": 2,
+  "samples": [
+    {
+      "attempt_count": 4,
+      "attempts": [
+        {
+          "computed_mac28_hex": "b45bbde",
+          "domain_hex": "008a0000000080000012ffae00ffae7fff007fff00400000000000003500021501311004",
+          "matches_native_mac28": false,
+          "message_counter": 0,
+          "outcome": "generated",
+          "reset_counter": 4881,
+          "timing": null,
+          "trip_counter": 533
+        },
+        {
+          "computed_mac28_hex": "49d94fc",
+          "domain_hex": "008a0000000080000012ffae00ffae7fff007fff00400000000000003500021501311044",
+          "matches_native_mac28": false,
+          "message_counter": 4,
+          "outcome": "generated",
+          "reset_counter": 4881,
+          "timing": null,
+          "trip_counter": 533
+        },
+        {
+          "computed_mac28_hex": "3115da3",
+          "domain_hex": "008a0000000080000012ffae00ffae7fff007fff00400000000000003500021501311084",
+          "matches_native_mac28": false,
+          "message_counter": 8,
+          "outcome": "generated",
+          "reset_counter": 4881,
+          "timing": null,
+          "trip_counter": 533
+        },
+        {
+          "computed_mac28_hex": "195d9c5",
+          "domain_hex": "008a0000000080000012ffae00ffae7fff007fff004000000000000035000215013110c4",
+          "matches_native_mac28": true,
+          "message_counter": 12,
+          "outcome": "generated",
+          "reset_counter": 4881,
+          "timing": null,
+          "trip_counter": 533
+        }
+      ],
+      "candidate_count": 64,
+      "capture": {
+        "frame_age_ms": 10.633,
+        "frame_bus": 2,
+        "frame_hex": "0000000080000012ffae00ffae7fff007fff004000000000000035001195d9c5",
+        "reset_counter": 4882,
+        "sync_age_ms": 10.62,
+        "sync_bus": 0,
+        "sync_hex": "0215013129d52c5f",
+        "trip_counter": 533
+      },
+      "fv4": 1,
+      "match": {
+        "computed_mac28_hex": "195d9c5",
+        "domain_hex": "008a0000000080000012ffae00ffae7fff007fff004000000000000035000215013110c4",
+        "matches_native_mac28": true,
+        "message_counter": 12,
+        "outcome": "generated",
+        "reset_counter": 4881,
+        "timing": null,
+        "trip_counter": 533
+      },
+      "matched": true,
+      "message_low2": 0,
+      "native_mac28_hex": "195d9c5",
+      "reset_low2": 1,
+      "sample": 1,
+      "terminal_error": null
+    },
+    {
+      "attempt_count": 2,
+      "attempts": [
+        {
+          "computed_mac28_hex": "734f494",
+          "domain_hex": "008a0000000080000012ffae00ffae7fff007fff0040000000000000350002150133700c",
+          "matches_native_mac28": false,
+          "message_counter": 0,
+          "outcome": "generated",
+          "reset_counter": 4919,
+          "timing": null,
+          "trip_counter": 533
+        },
+        {
+          "computed_mac28_hex": "b51cf88",
+          "domain_hex": "008a0000000080000012ffae00ffae7fff007fff0040000000000000350002150133704c",
+          "matches_native_mac28": true,
+          "message_counter": 4,
+          "outcome": "generated",
+          "reset_counter": 4919,
+          "timing": null,
+          "trip_counter": 533
+        }
+      ],
+      "candidate_count": 64,
+      "capture": {
+        "frame_age_ms": 20.765,
+        "frame_bus": 2,
+        "frame_hex": "0000000080000012ffae00ffae7fff007fff004000000000000035003b51cf88",
+        "reset_counter": 4919,
+        "sync_age_ms": 20.044,
+        "sync_bus": 0,
+        "sync_hex": "0215013375061470",
+        "trip_counter": 533
+      },
+      "fv4": 3,
+      "match": {
+        "computed_mac28_hex": "b51cf88",
+        "domain_hex": "008a0000000080000012ffae00ffae7fff007fff0040000000000000350002150133704c",
+        "matches_native_mac28": true,
+        "message_counter": 4,
+        "outcome": "generated",
+        "reset_counter": 4919,
+        "timing": null,
+        "trip_counter": 533
+      },
+      "matched": true,
+      "message_low2": 0,
+      "native_mac28_hex": "b51cf88",
+      "reset_low2": 3,
+      "sample": 2,
+      "terminal_error": null
+    },
+    {
+      "attempt_count": 2,
+      "attempts": [
+        {
+          "computed_mac28_hex": "28b8319",
+          "domain_hex": "008a0000000080000012ffae00ffae7fff007fff00400000000000000200021501348010",
+          "matches_native_mac28": false,
+          "message_counter": 1,
+          "outcome": "generated",
+          "reset_counter": 4936,
+          "timing": null,
+          "trip_counter": 533
+        },
+        {
+          "computed_mac28_hex": "1abc3d0",
+          "domain_hex": "008a0000000080000012ffae00ffae7fff007fff00400000000000000200021501348050",
+          "matches_native_mac28": true,
+          "message_counter": 5,
+          "outcome": "generated",
+          "reset_counter": 4936,
+          "timing": null,
+          "trip_counter": 533
+        }
+      ],
+      "candidate_count": 64,
+      "capture": {
+        "frame_age_ms": 12.292,
+        "frame_bus": 2,
+        "frame_hex": "0000000080000012ffae00ffae7fff007fff0040000000000000020041abc3d0",
+        "reset_counter": 4936,
+        "sync_age_ms": 36.755,
+        "sync_bus": 0,
+        "sync_hex": "021501348fc2c10e",
+        "trip_counter": 533
+      },
+      "fv4": 4,
+      "match": {
+        "computed_mac28_hex": "1abc3d0",
+        "domain_hex": "008a0000000080000012ffae00ffae7fff007fff00400000000000000200021501348050",
+        "matches_native_mac28": true,
+        "message_counter": 5,
+        "outcome": "generated",
+        "reset_counter": 4936,
+        "timing": null,
+        "trip_counter": 533
+      },
+      "matched": true,
+      "message_low2": 1,
+      "native_mac28_hex": "1abc3d0",
+      "reset_low2": 0,
+      "sample": 3,
+      "terminal_error": null
+    }
+  ],
+  "samples_completed": 3,
+  "samples_matched": 3,
+  "samples_requested": 3,
+  "schema": "camry-f33-command5-native-08a-verification-v1"
+}

@@ -6211,6 +6211,15 @@ single-word witness showed Panda TX unblocked, the C5 echo present, and the EPS
 mailbox accepting the next sequence once that window opened. Native `0x08A`
 candidate iteration now uses the acknowledged word-at-a-time command path.
 
+The corrected 2026-09-10 READY run then passed the persistent-install
+precondition: all **3/3** captured native bus-2 `0x08A` trailers were reproduced
+exactly by EPS ICU-S selector 4 using live bus-0 `0x00F` synchronization. Eight
+bounded freshness candidates were generated in total; every sample matched and
+no `0x08A`, B6, steering request, or persistent write was transmitted. This is
+**observed dynamic-probe evidence** for the shared key/profile on the exact
+tested domains. The complete result is retained as
+`targets/camry-2026/raw-20260910/working-steering/native-08a-slot4-verification.json`.
+
 This design does not interpose on the hypothesized `0x08A -> arbitrator -> B6`
 path and does not require that hidden link to carry camera-originated B6. Stock
 0x08A and 0x081 remain intact. Future longitudinal remains a separate native
