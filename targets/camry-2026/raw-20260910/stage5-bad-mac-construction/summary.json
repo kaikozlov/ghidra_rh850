@@ -1,0 +1,81 @@
+{
+  "schema": "camry-f33-stage5-live-bad-mac-construction-summary-v1",
+  "date": "2026-09-10",
+  "target": {
+    "application_f181": "8965F3307000 / 8A3113303100",
+    "installed_firmware": "persistence-verified cumulative stage 5",
+    "state": "READY / Park / four wheel speeds 0.0 km/h"
+  },
+  "ephemeral_helper": {
+    "padded_sha256": "02815a832ed8e21580375141916f3a8d904dd6ab12d809ce52eda5d6ea5ed2b0",
+    "resident_sha256": "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a",
+    "authenticated_payload_sha256": "01ce993425e910a6ea37473580adb6e641bdff56a3568492d4c9e0388e02fc6c",
+    "changes_from_qualified_signer": [
+      "a nonzero C7 token remains active for every distinct native B6 until explicitly cleared",
+      "the helper computes the correct replacement trailer but installs the preserved native-application trailer"
+    ],
+    "persistent_flash_writes": false,
+    "can_transmit": false
+  },
+  "native_oracle": {
+    "native_trailer": "6bd9e068",
+    "computed_trailer": "6bd9e068",
+    "command5_return": 0,
+    "done": 1,
+    "status": 0,
+    "trip_counter": 531,
+    "reset_counter": 2594,
+    "message_counter": 29
+  },
+  "treatment": {
+    "control_frame": "00c70100fffd0000",
+    "neutral_frame": "00c7000000000000",
+    "target_lateral_id": 11,
+    "target_raw": -3,
+    "target_degrees_approx": -0.172,
+    "signal265": 0,
+    "contributions": [100, 100],
+    "application_sequence": "retained from each native B6",
+    "replacement_count": 125,
+    "command5_attempt_delta": 125,
+    "last_native_trailer": "49375a48",
+    "last_correct_computed_trailer": "45888031",
+    "mac_relationship": "provably distinct: the native-app trailer was installed on the modified application while command 5 independently computed the correct modified-application trailer"
+  },
+  "witnesses": {
+    "sample_count": 6,
+    "raw_route44_matches": 6,
+    "generated_com_matches": 6,
+    "application_snapshot_matches": 6,
+    "raw_sequences": [24, 32, 41, 52, 59, 2],
+    "raw_trailers": ["86375925", "8d0b4382", "9b8c325f", "e2dd62d8", "b3a316fc", "775573b3"],
+    "raw_route44_generations": ["d7002e30", "ec002e30", "06002e30", "1b002e30", "2c002e31", "40002f31"]
+  },
+  "postcheck": {
+    "replacement_count_first": 125,
+    "replacement_count_second": 125,
+    "command5_attempts_first": 126,
+    "command5_attempts_second": 126,
+    "native_frame_count_first": 7801,
+    "native_frame_count_second": 7926,
+    "raw_id_first": 0,
+    "raw_id_second": 0,
+    "raw_contributions_first": [0, 0],
+    "raw_contributions_second": [0, 0],
+    "neutralization_verified": true,
+    "pandad_reacquired": true,
+    "carstate": {
+      "gear": "park",
+      "vEgo": 0.0,
+      "steering_angle_deg": 3.9,
+      "steering_torque_nm": -0.05,
+      "steer_fault_temporary": false,
+      "steer_fault_permanent": false,
+      "can_valid": true,
+      "can_timeout": false,
+      "interpretation": "no same-session pre-treatment steering-angle sample was retained, so no movement is attributed to this test"
+    }
+  },
+  "verdict": "cumulative stage 5 admitted the deliberately bad-MAC openpilot-shaped B6 through raw route44 publication, generated COM, and the application snapshot",
+  "remaining_boundary": "the production kai-openpilot sender emits a zero-trailer B6 marker, while the qualified resident currently consumes the separate 0x1FDC0002 C7 mailbox; that handoff is not implemented by this test"
+}

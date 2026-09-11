@@ -6007,3 +6007,39 @@ required to classify that exact replacement as adopted versus rejected. An earli
 overwrote the readable native-trailer witness with the computed replacement; equal trailers
 from those preliminary replacements are discarded. Final helper SHA-256 is
 `4719c4f27563180359445724eaefd594e3051ea545f75d69efb9bbede8f1965a`.
+
+### 70.3 Cumulative stage 5 admits the bad-MAC openpilot-shaped application (VAR-156)
+
+The 2026-09-10 discriminator turns the native source into a controlled test of the installed
+persistent patch. A reviewed ephemeral helper variant first repeated the untouched-native
+oracle: native and locally computed trailer were both `6bd9e068`, with command-5 return 0,
+done 1, status 0, and reconstructed freshness `trip=531/reset=2594/message=29`. During the
+treatment it constructed ID11, target raw `-3` (~`-0.172 deg`), signal265 clear, and
+contributions 100/100 on each native zero template while retaining that frame's native
+application sequence. Command 5 still independently computed the correct modified-domain
+trailer, but the helper deliberately installed the preserved native-application trailer.
+The installed tag was therefore invalid for the modified application while FV4 remained
+native/current; the last paired native/correct trailers were `49375a48/45888031`.
+
+All six bounded samples observed ID11/target `-3` at the actual raw PDU44 window, generated
+COM, and `ADB0/AE90` application snapshot. Raw application sequences were
+`24,32,41,52,59,2`; the six distinct preserved trailers were
+`86375925,8d0b4382,9b8c325f,e2dd62d8,b3a316fc,775573b3`. Thus cumulative stage 5 does what
+the static gate proof predicts: it admits this deliberately bad-MAC B6 through upper PduR/COM
+publication and application snapshot. The earlier stage-5 field miss was transport/ingress,
+not failure of the patched receive-result path and not rejection of the ID11/target/percentage
+construction.
+
+The control token was then cleared five times. A one-second postcheck held replacement count
+at 125 and command-5 attempts at 126 while native-frame count advanced `7801 -> 7926`; raw
+COM returned to ID0, contributions 0/0. Panda ownership returned to the native child, CAN
+remained valid, and neither steering fault asserted. The later steering angle was `+3.9 deg`,
+but no same-session pre-treatment angle was retained, so no motion is attributed to this run.
+The retained summary is
+`targets/camry-2026/raw-20260910/stage5-bad-mac-construction/summary.json`.
+
+This closes patch validity and the tested application fields. It does not close the runtime
+handoff: current `kai-openpilot` emits a zero-trailer B6 marker, whereas the qualified
+resident consumes the separate extended-CAN C7 control mailbox and currently reconstructs
+only B3..B9 on the native template. Production integration must carry the controller-owned
+application into the resident without adding a second engagement or safety policy.

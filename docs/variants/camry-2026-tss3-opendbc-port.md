@@ -20,15 +20,17 @@ wire-grammar hygiene rather than an admission fix. The current `kai-openpilot` f
 the exact-F181 B6 development path through the ordinary Toyota safety model (§3.4); upstream
 comma opendbc has no Camry TSS3 platform at all.
 
-**Current execution boundary:** VAR-155 proves the live native profile-2 B6 boundary,
-byte-exact local slot-4 signing, and one distinct parked queue replacement. The replaced
-frame produced no CAN or steering fault, but the host witness occurs after later native
-frames advance committed freshness and therefore does not yet prove downstream application
-adoption. The next experiment is a post-verifier acceptance latch or bounded control-state
-witness using the current openpilot B6 application construction. Driver override, sustained
-motor response, timeout/release, and fault recovery remain unmeasured. VAR-148/CORR-179 close
-the ID11 composition semantics statically: accepted B6 is co-modulated inside the ordinary
-EPS sum, not an exclusive replacement mode.
+**Current execution boundary:** VAR-155 proves the live native profile-2 B6 boundary and
+byte-exact local slot-4 signing. VAR-156 then deliberately installed the preserved
+native-application trailer on the modified ID11/target/100/100 application: all six samples
+reached raw PDU44, generated COM, and the application snapshot. Cumulative stage 5 is
+therefore dynamically valid, and the tested application construction is accepted; the old
+stage-5 miss was before EPS queue ingress. The remaining implementation gap is the normal
+runtime handoff: `kai-openpilot` currently emits a zero-trailer B6 marker, while the resident
+experiment consumes a separate C7 control mailbox and reconstructs B3..B9 on a native
+template. Driver override, sustained motor response, timeout/release, and fault recovery
+remain unmeasured. VAR-148/CORR-179 close the ID11 composition semantics statically: accepted
+B6 is co-modulated inside the ordinary EPS sum, not an exclusive replacement mode.
 
 **Physical routing decision (CORR-139):** the present Toyota-B repin is correct.
 Current GTS+ places Brake/Skid/SAS/EPS together on Toyota Bus 4; exact F33 has one
