@@ -97,14 +97,17 @@ The `ghidra` CLI runs a long-lived bridge (TCP server inside Ghidra) that keeps
 the program **in memory**. Edits from `analyze` / `script run` are **not
 durable on disk until the daemon shuts down cleanly**.
 
-1. **Always `stop` before copying or committing the working project.**
+1. **Always `stop` before copying, staging, or committing the working project.**
    `ghidra ... stop` triggers the teardown commit that writes the durable
    snapshot. Copying or `git add` while a daemon runs captures an empty/stale
    DB. If a fresh daemon opens the project and reports 0 functions, this is
    why — `stop`, then re-copy.
-2. **Never commit while a daemon is running.** It holds transient `.lock` /
-   `*.lock~` / `tmp*` files (git-ignored). Confirm
-   `pgrep -f 'AnalyzeHeadless.*rh850'` is empty before snapshotting.
+2. **Ordinary repository commits may proceed while a daemon is running.** Live
+   projects and their transient `.lock` / `*.lock~` / `tmp*` files are confined
+   to git-ignored `build/` state. Before promoting a working project, stop that
+   project's daemon and verify it is gone. Use the global
+   `pgrep -f 'AnalyzeHeadless.*rh850'` check only when promoting multiple/default
+   projects whose ownership is ambiguous.
 3. **Opening compacts the DB** (`db.N.gbf` → `db.N+1`) on each clean stop.
    Harmless and expected; don't be alarmed the filename changes. It is also
    why the committed snapshot must never be daemon-opened.

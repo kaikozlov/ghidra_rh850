@@ -28,10 +28,13 @@ invitation to add policy. -- The goal is native openpilot/comma integrattion.
 - **Never open committed `project/` or `projects/` with a Ghidra daemon** — any
   open compacts the DB and dirties the tree. Work in `build/work/project/`
   (`make work-project`).
-- **Never commit while a daemon runs** (it holds transient `.lock`/`tmp*`
-  files), and always `tools/g stop` before copying or snapshotting the working
-  project — only clean teardown persists edits durably. Confirm
-  `pgrep -f 'AnalyzeHeadless.*rh850'` is empty before snapshotting.
+- **Stop the relevant daemon before copying, staging, or snapshotting its
+  working project** — only clean teardown persists in-memory edits durably.
+  Ordinary source/documentation commits are safe while daemons run because
+  working projects and their transient `.lock`/`tmp*` files live under ignored
+  `build/`. Confirm the daemon for every project being promoted is stopped;
+  use the global `pgrep -f 'AnalyzeHeadless.*rh850'` check only when promoting
+  multiple/default projects whose ownership is ambiguous.
 - **Never point a rebuild at `project/` or `projects/`.** Promote only with
   `make snapshot-project` (end of session: `make finalize-project`).
 - **SIENNA CodeFlash VA = file offset − `0x8000`** (DataFlash prefix).
