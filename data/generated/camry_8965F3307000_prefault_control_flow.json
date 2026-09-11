@@ -133,8 +133,9 @@
   },
   "guard_and_boot": {
     "aggregate_skip": "0x7A260 skips entire aggregate only when guard != FE01",
-    "bad_bytes": "80 FF EE 1C 24 36",
     "bad_callsite": "0x0007A272",
+    "bad_instruction_with_stock_successor": "FF 02 92 5B 24 36",
+    "bad_target": "0x362BFE04",
     "cold_boot": "valid 0x119E result calls FFDB8/0x20880 directly; 0x1398 bootloader CAN init is reached only on validation failure",
     "cold_boot_can_race": false,
     "conditional_bypass_between_79EDE_and_bad_call": false,
@@ -151,7 +152,12 @@
         "value": "0xFE01"
       }
     ],
-    "post_startup_guard_writer": false
+    "post_startup_guard_writer": false,
+    "recorded_bad_four_bytes": "FF 02 92 5B",
+    "stock_replaced_instruction": {
+      "bytes": "80 FF EE 1C",
+      "target": "0x0007BF60"
+    }
   },
   "indirect_control_flow": {
     "classification": "no payload-controlled indirect call or divide/remainder fault recovered in the expanded cone",

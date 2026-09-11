@@ -16,6 +16,7 @@ STORE_AUDIT = ROOT / "data/generated/camry_8965F3307000_prefault_control_flow_st
 OPS_AUDIT = ROOT / "data/generated/camry_8965F3307000_prefault_control_flow_ops.json"
 STORE_CENSUS = ROOT / "data/generated/camry_8965F3307000_computed_store_target_census.json"
 DECOMP = ROOT / "data/generated/camry-8965F3307000/decompilations.jsonl"
+RECOVERY_STRUCTURE = ROOT / "data/generated/camry_f33_recovery_structure.json"
 
 CRITICAL_CELLS = [
     0xFEBE3DF0,0xFEBE3DF1,0xFEBE3DF2,0xFEBE3DF3,0xFEBE3DF4,0xFEBE3DF5,
@@ -50,6 +51,7 @@ def build() -> dict:
     store = json.loads(STORE_AUDIT.read_text())
     ops = json.loads(OPS_AUDIT.read_text())
     census = json.loads(STORE_CENSUS.read_text())
+    recovery = json.loads(RECOVERY_STRUCTURE.read_text())
     need(store["schema"] == "camry-8965f3307000-prefault-control-flow-store-audit-v1", "expanded store audit schema drift")
     need(store["summary"] == {"computed":366,"functions":307,"ranged":56,"stores":412,"unknown":307}, "expanded store denominator drift")
     need(store["pointer_parameter_dependent"]["store_count"] == 283 and store["pointer_parameter_dependent"]["function_count"] == 76, "expanded pointer-store denominator drift")
@@ -115,7 +117,11 @@ def build() -> dict:
     need(not any(global_error_enables.values()), f"global CAN error IRQ unexpectedly enabled: {global_error_enables}")
     agg = fn(0x7A254)
     need(agg.index("FUN_00079ede") < agg.index("FUN_00079f16"), "foreground CAN recovery order drift")
-    need(image[0x7A272:0x7A278] == bytes.fromhex("80ffee1c2436"), "incident malformed JARL bytes drift")
+    incident = recovery["incident"]
+    need(incident["hook_address"] == "0x0007A272", "incident hook address drift")
+    need(incident["recorded_bad_four_bytes"] == "ff02925b", "recorded incident write drift")
+    need(incident["instruction_with_stock_successor"] == "ff02925b2436" and incident["decoded_bad_target"] == "0x362BFE04", "incident malformed JARL reconstruction drift")
+    need(incident["stock_instruction"] == {"address":"0x0007A272","bytes":"80ffee1c","size":4,"target":"0x0007BF60"}, "stock replaced instruction drift")
 
     # WDTA0 is not referenced by exact CodeFlash. OPWDRUN is outside the retained
     # CodeFlash/DataFlash dumps, so automatic-start remains explicitly unknown.
@@ -253,7 +259,8 @@ def build() -> dict:
         "guard_and_boot":{
             "guard":"0xFEBE3DF2","guard_writers":[{"function":"0x0007A132","site":"0x0007A13A","value":"0xFD02"},{"function":"0x0007A132","site":"0x0007A184","value":"0xFE01"}],
             "post_startup_guard_writer":False,"aggregate_skip":"0x7A260 skips entire aggregate only when guard != FE01",
-            "bad_callsite":"0x0007A272","bad_bytes":"80 FF EE 1C 24 36","conditional_bypass_between_79EDE_and_bad_call":False,
+            "bad_callsite":"0x0007A272","recorded_bad_four_bytes":"FF 02 92 5B","bad_instruction_with_stock_successor":"FF 02 92 5B 24 36","bad_target":"0x362BFE04",
+            "stock_replaced_instruction":{"bytes":"80 FF EE 1C","target":"0x0007BF60"},"conditional_bypass_between_79EDE_and_bad_call":False,
             "cold_boot":"valid 0x119E result calls FFDB8/0x20880 directly; 0x1398 bootloader CAN init is reached only on validation failure",
             "cold_boot_can_race":False,
         },

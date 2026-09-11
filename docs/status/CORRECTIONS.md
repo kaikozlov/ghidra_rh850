@@ -3849,3 +3849,9 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Superseded generated detail:** the first VAR-155 artifact read `0x25EF2 + i*6` bytes and labeled the three fixed DCM buffers with external route IDs `2/1/3`.
 - **Exact correction:** `93F0E` indexes `(&DAT_25EF2)[i*6]` as 16-bit elements, so the byte stride is 12 and the route IDs are **2/3/4**. The internal channel domain remains exactly `0/1/2`, and the three 0x100-byte buffers remain `FEBE5651`, `FEBE5751`, and `FEBE5851`; no memory-safety or recovery conclusion changes.
 - **Canonical:** VAR-155/VAR-156; `data/generated/camry_8965F3307000_prefault_memory_safety.json`; `data/generated/camry_8965F3307000_prefault_control_flow.json`; `tests/verify_camry_8965F3307000_prefault_memory_safety.py`.
+
+### CORR-190 — VAR-156 initially conflated stock bytes at `0x7A272` with the recorded incident write
+
+- **Superseded detail:** the first VAR-156 control-flow artifact described stock CodeFlash bytes `80 FF EE 1C` (the replaced `JARL 0x7BF60,LP`) plus the next halfword as though they were the malformed incident instruction.
+- **Exact incident correction:** the retained recovery structure distinguishes the stock image from the recorded write. The incident changed the four bytes at `0x7A272` to `FF 02 92 5B`; with untouched successor halfword `24 36`, RH850 decoding is the six-byte **`JARL 0x362BFE04,LP`** already established in recovery §4. No post-incident whole-flash readback exists, so all fault semantics must use this reconstructed instruction rather than stock `CodeFlash.bin` bytes.
+- **Canonical:** `data/generated/camry_f33_recovery_structure.json`; VAR-156; [../variants/camry-f33-eps-recovery-2026-09-11.md](../variants/camry-f33-eps-recovery-2026-09-11.md) §§4,8; `tests/verify_camry_8965F3307000_prefault_control_flow.py`.

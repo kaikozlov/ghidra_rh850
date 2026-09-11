@@ -439,8 +439,9 @@ poisoned foreground call.
 read it.  Thus there is no legitimate asynchronous communication-disable state
 transition we can provoke after startup.  At `7A254`, the sole guard branch at
 `7A260` skips the whole aggregate when the value is not `FE01`; once it is `FE01`,
-`79EDE` returns directly into the malformed six-byte sequence at `7A272`
-(`80 FF EE 1C 24 36`) with no intervening conditional branch.
+`79EDE` returns directly into the recorded malformed instruction at `7A272`
+(`FF 02 92 5B` plus untouched successor halfword `24 36`, decoding as
+`JARL 0x362BFE04, LP`) with no intervening conditional branch.
 
 A power-cycle CAN race is unavailable for the same structural reason.  `13B0` runs
 the descriptor/CRC/marker decision first.  A valid application result calls the

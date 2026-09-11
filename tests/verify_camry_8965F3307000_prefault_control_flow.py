@@ -59,7 +59,7 @@ check("raw COM has no enabled pre-copy hooks",sync["raw_com_pdu_records"]=={"fla
 check("raw COM synchronous effect is bookkeeping only","generation-byte" in sync["raw_com_effect"] and "deferred" in sync["raw_com_effect"])
 gb=art["guard_and_boot"]
 check("FE01 guard has no post-startup writer",not gb["post_startup_guard_writer"] and gb["guard_writers"]==[{"function":"0x0007A132","site":"0x0007A13A","value":"0xFD02"},{"function":"0x0007A132","site":"0x0007A184","value":"0xFE01"}])
-check("bad JARL cannot be conditionally skipped inside aggregate",gb["bad_callsite"]=="0x0007A272" and gb["bad_bytes"]=="80 FF EE 1C 24 36" and not gb["conditional_bypass_between_79EDE_and_bad_call"])
+check("bad JARL cannot be conditionally skipped inside aggregate",gb["bad_callsite"]=="0x0007A272" and gb["recorded_bad_four_bytes"]=="FF 02 92 5B" and gb["bad_instruction_with_stock_successor"]=="FF 02 92 5B 24 36" and gb["bad_target"]=="0x362BFE04" and gb["stock_replaced_instruction"]=={"bytes":"80 FF EE 1C","target":"0x0007BF60"} and not gb["conditional_bypass_between_79EDE_and_bad_call"])
 check("valid cold boot has no CAN catch window",not gb["cold_boot_can_race"] and "FFDB8/0x20880 directly" in gb["cold_boot"])
 v=art["verdict"]
 check("no recovered network reset/pivot/guard transition",not v["network_guard_transition_recovered"] and not v["network_reset_recovered"] and not v["network_control_flow_pivot_recovered"] and not v["bootloader_can_catch_with_valid_application"])
