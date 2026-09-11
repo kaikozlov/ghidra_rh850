@@ -4409,15 +4409,25 @@ The exact `8965F3307000` EPS firmware closes the target-side CAN-FD controller
 configuration far enough to compare it directly with Panda rather than assuming
 that `500/2000 kbps` means identical wire timing.
 
-The startup coordinator `0x3B3C` enters RS-CANFD mode through four small register
-writers:
+Exact F33 contains **two distinct RS-CANFD initializers**, and the distinction is
+material.  The older fixed writer `0x3B3C -> 0x3908/396C/3978/3A8E` belongs to
+the bootloader: `0x1398 -> 0x1338 -> 0x3B3C`.  It writes boot GCFG
+`0xFFFF0000`.  The normal application instead initializes RSCFD during
+`0x666BC -> 0x7A132 -> 0x79DFA -> 0x83F3E -> 0x84652 -> 0x84570`, before
+`0x7A132` commits its final communication-manager state `FEBE3DF2=0xFE01`.
+The application driver is table-driven and writes the following live values:
 
-| F33 function | exact write | P1M-E register / meaning |
+| F33 application source | exact write/value | P1M-E register / meaning |
 |---|---|---|
-| `0x3908` | `FFD204FC = 0x00000001` | `RSCFD0CFDGRMCFG.RCMC=1`: CAN-FD interface mode |
-| `0x396C` | `FFD20084 = 0xFFFF0000` | `RSCFD0CFDGCFG`; `DCS=0`, selecting 40-MHz `clkc` |
-| `0x3978(ch)` | `NCFG=0x0F3E7800`, `DCFG=0x055C0000` | per-channel nominal/data bit timing |
-| `0x3A8E(ch)` | `FDCFG=0x20000000` | `REFE=1`, `FDOE=0`; receive-edge filter on, FD-only mode off |
+| `0x84570`, config `0x22E84` | `FFD204FC = 0x00000001` | `RSCFD0CFDGRMCFG.RCMC=1`: CAN-FD interface mode |
+| `0x84570`, config `0x22E80` | `FFD20084 = 0xFFFF0020` | `RSCFD0CFDGCFG`; `DCS=0`; additionally `CMPOC=1`, `DRE=0`, `DCE=0` |
+| `0x84570`, channel-1 row `0x233EC` | `NCFG=0x0F3E7800`, `DCFG=0x055C0000` | application channel-1 nominal/data bit timing |
+| `0x84570`, channel-1 row `0x233EC` | `FDCFG=0x280D0200` | includes `REFE=1`, `FDOE=0`; receive-edge filter on, FD-only mode off |
+
+The boot constants remain useful corroboration for the timing, but they are not the
+authority for application-mode receive semantics.  In particular, the application
+`CMPOC=1/DRE=0/DCE=0` distinction is the basis of the recovery-specific oversized-
+DLC audit in VAR-155.
 
 Using the bit-field definitions in Renesas `R01UH0585EJ0120` Rev.1.20 §§17.4.3,
 17.4.4 and 17.11.1 gives the exact timing below.  The test

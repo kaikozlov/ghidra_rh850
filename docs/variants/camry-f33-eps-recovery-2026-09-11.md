@@ -220,6 +220,122 @@ protocol dispatch (`821D6 → 830C0 → 98E80`). Receiving bytes through `8312E 
 also lies after the corrupted foreground call. It is not a recovery writer in
 this state.
 
+## 7. Pre-fault memory-safety audit: one real stale-DLC defect, no recovered write primitive
+
+The recovery-specific memory-safety pass widened the executable surface beyond the
+foreground `79EDE` drain.  Exact F33 has a real RSCFD interrupt path that can run
+independently of the doomed `667E6 -> 7A254` foreground aggregate:
+
+- RFIFO receive: `71508 -> 66026 -> 667B6 -> 7A232 -> 79EBA -> 83CE4 -> 83EDA -> 83E0C`;
+- diagnostic CFIFO receive: the `66812 -> 83F30 -> 83EF2 -> 83EDA -> 83D40` path;
+- RSCFD error handling also has a separate interrupt stub at `66806`.
+
+That matters because a corruption primitive in these paths would not need the DCM
+foreground worker to run first.
+
+The audit found one genuine low-level memory-safety defect.  F33 writes
+`RSCFD0CFDGCFG = 0xFFFF0020`.  P1M-E `RSCFDnCFDGCFG` semantics decode bit 5
+`CMPOC=1`, bit 2 `DRE=0`, and bit 1 `DCE=0`: an oversized receive is stored while
+payload bytes beyond the configured FIFO storage are discarded, the received DLC
+is retained, and DLC checking is disabled.  F33's exact DLC table at `22E28` is
+`0,1,2,3,4,5,6,7,8,12,16,20,24,32,48,64`.
+
+This composes badly with Toyota's receive helpers:
+
+- ordinary/XCP rule traffic routed to RFIFO1 uses eight 32-bit payload words, or
+  32 physical bytes, but can propagate logical DLC 64 through `83E0C`;
+- the diagnostic CFIFO reader `83D40` initializes only two 32-bit payload words,
+  or 8 physical bytes, while likewise propagating logical DLC 64.
+
+A DLC64 frame can therefore cause the software queue producer to read stale,
+uninitialized bytes from the ISR's 64-byte local payload object: up to 32 bytes on
+RFIFO1 and up to 56 bytes on the diagnostic CFIFO.  This is a **verified stale
+ISR-stack ingestion/source-over-read condition**.  The present evidence does not
+prove tester control of those stale bytes; RFIFO and CFIFO reach their leaf readers
+through different call depths, so equal local layouts do not establish a reusable
+physical stack slot.
+
+The defect does **not** currently cross a recovery-relevant consumer boundary:
+
+- the exact 48-entry class-0 COM table has maximum configured PDU length 32, and
+  `7D72C` copies `min(received_len, configured_len)`;
+- `830D0` rejects XCP input lengths above its configured 8-byte staging cap before
+  copying to `FEBE4C34`;
+- ISO-TP dispatch reads PCI byte 0 before selecting a handler; SF/FF/CF validation
+  rejects oversized diagnostic descriptors before phantom bytes are consumed, and
+  FlowControl accepts `len >= 8` but only reads bytes 0..2;
+- `92152 -> 93DE8` copies into one of three fixed 0x100-byte DCM buffers only after
+  `chunk_len <= remaining` succeeds; `93C9A` reloads those pointers/capacities from
+  fixed CodeFlash configuration (`FEBE5651`, `FEBE5751`, `FEBE5851`).
+
+The software RX ring does not turn the over-read into an overwrite.  Controller 0
+has `DAT_21966 = 0x228` **words** of capacity; its fixed backing store is
+`FEBE4038..FEBE48D7`, and a logical 64-byte record consumes 19 words.  The ring
+uses 16-bit word indices and its mutation is wrapped by
+`7A2DA -> 98B8A -> 6A45E`, which saves IMSR and installs mask `0xFF00`, with
+`7A2E8 -> 6A4C4` restoring the prior mask.  The outer RSCFD ISR may enable nested
+interrupts, but these queue updates are explicitly serialized.
+
+Two additional write/pivot-looking cases also close under exact configuration:
+
+- `85112 -> 8549E` indexes byte-length tables at `2345A/2349B` before copying to
+  a 64-byte local.  The complete reachable input domain is 0..64; `2349B` rounds
+  each length to a four-byte boundary and has maximum 64.  There is no valid-RX
+  stack overflow here.
+- `80884`'s six-way indirect callback mask is not supplied by payload bytes.
+  `80B42` loads it from the fixed 47-byte per-acceptance-label table at `219DC`;
+  the masks are `1` for normal rules 0..42, `4` for diagnostic rules 43..45, and
+  `0x20` for XCP rule46.  The six callback targets themselves are the fixed
+  CodeFlash vector at `21A24`.
+
+The remaining transport/route pointer stores likewise reduce to small fixed RAM
+islands.  `7A5C2/7A620` can return only exact configured 0x20-byte transport
+records whose `record[1]` state indices are `{0,2}` inside a three-slot state
+block; therefore the strided `7B18A/7BB0E` destinations are configuration-derived,
+not CAN-payload indexed.  Controller 0 has five exact route records at `21ACC`
+with state indices `{0,1,2,3,4}`, confining `803B0/8043C/806A4/807D8` mutable
+state to `FEBE48DA..48F5`, `FEBE4909..490D`, and `FEBE3E94..3E98`.
+
+A separate computed-store audit then attacked the recovery targets directly.  The
+Ghidra direct-call closure rooted at the pre-fault receive path plus RSCFD RX/error
+interrupt stubs contains **151 functions / 275 STOREs** (268 computed STORE rows,
+37 with statically recovered ranges).  The whole-image known-range store census
+has 62 unique rows whose coarse ranges can touch `FEBE3DF0..3DF5` or any of the
+recovered lower-RAM indirect-call source cells (`FEBE5628`, `FEBF0FD0`,
+`FEBF117C/1180`, `FEBF1194/1198`, `FEBF131C/1320/1324`, `FEBF6B04`).
+Intersecting those with the executable pre-fault cone still leaves exactly one
+function, `8E7BA`; its real code checks `(index & 0xffff) < 0x60` and writes only
+`FEBE5398..FEBE53F7`.  Thus the negative covers known RAM control objects as well
+as the hook guard itself.
+
+The coarse communication-manager hits that looked capable of reaching `FEBE3DF2`
+also collapse under exact calibration dimensions: `DAT_2183C=1`, `DAT_2183D=0`,
+`DAT_21864=2`, `DAT_21865=1`, and `DAT_21BE1=1`.  The route-slot writer base is
+`FEBE3E80`; even an unrestricted u8 slot would end at `FEBE407E`, above the hook
+guard and far below the `FEBF` callback cells.  The RSCFD pointer row used by the
+parameterized `83xxx..85xxx` driver helpers resolves entirely to `FFD2....` MMIO
+for the one configured controller.
+
+Finally, the whole-image statically ranged STORE census has **zero** intervals
+intersecting `FEBE1700..FEBE2020` (the dedicated interrupt/saved-context region
+through the initial application stack), and zero through the broader
+`FEBE0000..FEBE2200` lower-LocalRAM interval.  Combined with the bounded 64-byte
+ISR locals, no recovered receive copy reaches the saved `EIPC/FEPC/lp` frames.
+
+The result is therefore narrower than "the parser is safe": **we found a real
+pre-fault memory-safety defect, but not the write primitive needed to recover the
+ECU.**  The remaining software route must be an unrecovered destination-write or
+control-flow side effect, not the obvious CAN-FD DLC/FIFO mismatch, standard
+ISO-TP length handling, normal COM copy, XCP staging, or the recovered software
+ring.
+
+Canonical evidence:
+
+- `data/generated/camry_8965F3307000_prefault_store_audit.json`
+- `data/generated/camry_8965F3307000_prefault_memory_safety.json`
+- `ghidra/scripts/investigate/AuditCallConeStores.java`
+- `tests/verify_camry_8965F3307000_prefault_memory_safety.py`
+
 ## What is established, and what would actually change the answer
 
 The direct, functional, and subaddressed diagnostic paths examined here do not

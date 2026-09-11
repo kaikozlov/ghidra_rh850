@@ -1059,3 +1059,6 @@ tests = ["tests/verify_camry_8965F3307000_function_boundaries.py"]
 
 [suite.camry_8965f3307000_b6_ingress_closure]
 tests = ["tests/verify_camry_8965F3307000_b6_ingress_closure.py"]
+
+[suite.camry_8965f3307000_prefault_memory_safety]
+tests = ["tests/verify_camry_8965F3307000_prefault_memory_safety.py"]

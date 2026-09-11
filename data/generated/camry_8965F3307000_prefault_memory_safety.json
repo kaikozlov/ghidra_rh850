@@ -1,0 +1,524 @@
+{
+  "acceptance_routing": {
+    "diagnostic_rules": [
+      {
+        "can_id": "0x7A1",
+        "gaflp1": "0x00002000",
+        "rule": 43
+      },
+      {
+        "can_id": "0x777",
+        "gaflp1": "0x00002000",
+        "rule": 44
+      },
+      {
+        "can_id": "0x7A0",
+        "gaflp1": "0x00002000",
+        "rule": 45
+      }
+    ],
+    "rule_count": 47,
+    "xcp_rule": {
+      "can_id": "0x1FDC0002",
+      "gaflp1": "0x00000002",
+      "raw_gaflid": "0x9FDC0002",
+      "rule": 46
+    }
+  },
+  "active_rscfd_configuration": {
+    "application_chain": [
+      "0x000666BC",
+      "0x0007A132",
+      "0x00079DFA",
+      "0x00083F3E",
+      "0x00084652",
+      "0x00084570",
+      "0xFFD20084"
+    ],
+    "application_gcfg": "0xFFFF0020",
+    "application_gcfg_source": "CodeFlash[0x22E80]",
+    "application_order": "0x7A132 reaches 0x84570 during startup before its final FEBE3DF2=FE01 write",
+    "bootloader_chain": [
+      "0x00001398",
+      "0x00001338",
+      "0x00003B3C",
+      "0x0000396C",
+      "0xFFD20084"
+    ],
+    "bootloader_gcfg": "0xFFFF0000",
+    "boundary": "the old 0x39xx fixed writer is bootloader-only; application-mode receive behavior uses the 0x22E80 table value"
+  },
+  "callback_selector_provenance": {
+    "callback_vector": [
+      "0x000810F2",
+      "0x00081072",
+      "0x00081200",
+      "0x00081072",
+      "0x00081072",
+      "0x00081072"
+    ],
+    "callback_vector_table": "0x00021A24",
+    "classification": "six-way indirect-call selector is fixed per acceptance label; CAN payload bytes do not supply the mask or callback target",
+    "consumer": "0x80884",
+    "mask_count": 47,
+    "mask_table": "0x000219DC",
+    "masks": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      4,
+      4,
+      4,
+      32
+    ],
+    "producer": "0x80B42"
+  },
+  "computed_store_audit": {
+    "call_cone": {
+      "computed": 268,
+      "functions": 151,
+      "ranged": 37,
+      "stores": 275,
+      "unknown": 231
+    },
+    "communication_dimensions": {
+      "DAT_2183C": 1,
+      "DAT_2183D": 0,
+      "DAT_21864": 2,
+      "DAT_21865": 1,
+      "DAT_21BE1": 1
+    },
+    "critical_cells": [
+      "0xFEBE3DF0",
+      "0xFEBE3DF1",
+      "0xFEBE3DF2",
+      "0xFEBE3DF3",
+      "0xFEBE3DF4",
+      "0xFEBE3DF5",
+      "0xFEBE5628",
+      "0xFEBF0FD0",
+      "0xFEBF117C",
+      "0xFEBF1180",
+      "0xFEBF1194",
+      "0xFEBF1198",
+      "0xFEBF131C",
+      "0xFEBF1320",
+      "0xFEBF1324",
+      "0xFEBF6B04"
+    ],
+    "intersection_closure": "0x8E7BA enforces index < 0x60 and writes FEBE5398..FEBE53F7, not a recovery cell",
+    "pointer_parameter_dependent": {
+      "functions": 52,
+      "interpretation": "over-approximation; caller/configuration provenance resolves the relevant route/controller/state pointers to fixed objects or RSCFD MMIO",
+      "stores": 209
+    },
+    "prefault_critical_intersection_functions": [
+      "0x0008E7BA"
+    ],
+    "route_slot_writer_range": {
+      "base": "0xFEBE3E80",
+      "max_if_slot_is_full_u8": "0xFEBE407E"
+    },
+    "rscfd_pointer_row": [
+      "0xFFD20390",
+      "0xFFD20350",
+      "0xFFD20360",
+      "0xFFD20370",
+      "0xFFD20380",
+      "0xFFD20000",
+      "0xFFD20004",
+      "0xFFD20008",
+      "0xFFD2000C",
+      "0xFFD20500",
+      "0xFFD20504",
+      "0xFFD20508",
+      "0xFFD2050C",
+      "0xFFD20510",
+      "0xFFD203A0",
+      "0xFFD203C0",
+      "0xFFD203E0",
+      "0xFFD20400",
+      "0xFFD20420",
+      "0xFFD20440",
+      "0xFFD20178",
+      "0xFFD202D0",
+      "0xFFD20118",
+      "0xFFD201D8",
+      "0xFFD20250",
+      "0xFFD23400",
+      "0xFFD24000",
+      "0xFFD24000"
+    ],
+    "stack_ranges": [
+      {
+        "hi": "0xFEBE2020",
+        "known_range_store_count": 0,
+        "label": "saved-context / IRQ + initial application stack",
+        "lo": "0xFEBE1700"
+      },
+      {
+        "hi": "0xFEBE2200",
+        "known_range_store_count": 0,
+        "label": "lower LocalRAM through initial application stack",
+        "lo": "0xFEBE0000"
+      }
+    ],
+    "whole_image_critical_candidate_rows": 62
+  },
+  "consumer_closure": {
+    "class0_com": {
+      "effect": "0x7D72C copies min(received_len, configured_len), so RFIFO phantom bytes 32..63 are never imported",
+      "length32_count": 5,
+      "max_configured_length": 32,
+      "pdu_count": 48
+    },
+    "isotp": {
+      "effect": "upstream dispatch reads PCI byte0 only; SF/FF/CF length validation rejects oversized descriptors before phantom bytes are consumed; FC accepts len>=8 but reads only bytes0..2"
+    },
+    "xcp": {
+      "effect": "0x830D0 rejects length > 8 before copying to FEBE4C34",
+      "staging_cap": 8
+    }
+  },
+  "dcm_copy": {
+    "buffers": [
+      {
+        "capacity": "0x100",
+        "channel": 0,
+        "end_exclusive": "0xFEBE5751",
+        "route": 2,
+        "start": "0xFEBE5651"
+      },
+      {
+        "capacity": "0x100",
+        "channel": 1,
+        "end_exclusive": "0xFEBE5851",
+        "route": 1,
+        "start": "0xFEBE5751"
+      },
+      {
+        "capacity": "0x100",
+        "channel": 2,
+        "end_exclusive": "0xFEBE5951",
+        "route": 3,
+        "start": "0xFEBE5851"
+      }
+    ],
+    "classification": "0x92152 requires chunk_len <= remaining before 0x93DE8 advances fixed configured destination pointer"
+  },
+  "evidence": {
+    "call_cone_store_audit": "data/generated/camry_8965F3307000_prefault_store_audit.json",
+    "ghidra_script": "ghidra/scripts/investigate/AuditCallConeStores.java",
+    "manual": "REFERENCE/r01uh0585ej0120_manual.pdf \u00a717.4.4.1 / \u00a717 receive storage behavior",
+    "whole_image_computed_store_census": "data/generated/camry_8965F3307000_computed_store_target_census.json"
+  },
+  "fd_length_normalization": {
+    "classification": "complete 0..64 table domain; no stack overwrite from a valid RX record length",
+    "length_to_dlc": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      9,
+      9,
+      9,
+      10,
+      10,
+      10,
+      10,
+      11,
+      11,
+      11,
+      11,
+      12,
+      12,
+      12,
+      12,
+      13,
+      13,
+      13,
+      13,
+      13,
+      13,
+      13,
+      13,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      15,
+      15,
+      15,
+      15,
+      15,
+      15,
+      15,
+      15,
+      15,
+      15,
+      15,
+      15,
+      15,
+      15,
+      15,
+      15
+    ],
+    "length_to_dlc_table": "0x0002345A",
+    "local_buffer_bytes": 64,
+    "max_copy_bytes": 64,
+    "producer_domain": "0..64 bytes from the exact hardware DLC decode / 0x80A4A RX record",
+    "rounded_copy_bytes": [
+      0,
+      4,
+      4,
+      4,
+      4,
+      8,
+      8,
+      8,
+      8,
+      12,
+      12,
+      12,
+      12,
+      16,
+      16,
+      16,
+      16,
+      20,
+      20,
+      20,
+      20,
+      24,
+      24,
+      24,
+      24,
+      28,
+      28,
+      28,
+      28,
+      32,
+      32,
+      32,
+      32,
+      36,
+      36,
+      36,
+      36,
+      40,
+      40,
+      40,
+      40,
+      44,
+      44,
+      44,
+      44,
+      48,
+      48,
+      48,
+      48,
+      52,
+      52,
+      52,
+      52,
+      56,
+      56,
+      56,
+      56,
+      60,
+      60,
+      60,
+      60,
+      64,
+      64,
+      64,
+      64
+    ],
+    "rounded_copy_table": "0x0002349B",
+    "sink": "0x8549E local_54[64] before 0x85286/0x852FE"
+  },
+  "recovery_target": {
+    "bad_hook_callsite": "0x0007A272",
+    "goal": "obtain a write/control-flow primitive before or independently of the poisoned foreground transfer",
+    "hook_guard": "0xFEBE3DF2"
+  },
+  "route_manager_provenance": {
+    "classification": "route-manager computed destinations are configuration-indexed 0..4",
+    "route_byte_state_base": "0xFEBE3E94",
+    "route_config_base": "0x00021ACC",
+    "route_count": 5,
+    "state_flag_range": "0xFEBE4909..0xFEBE490D",
+    "state_indices": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "state_word_range": "0xFEBE48DA..0xFEBE48F5"
+  },
+  "rscfd_oversized_fd": {
+    "classification": "verified source over-read / stale ISR-stack ingestion into software RX records; attacker control of stale bytes is not established",
+    "diagnostic_cfifo": {
+      "max_reported_bytes": 64,
+      "max_stale_bytes": 56,
+      "payload_words": 2,
+      "physical_bytes": 8
+    },
+    "dlc_table": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      12,
+      16,
+      20,
+      24,
+      32,
+      48,
+      64
+    ],
+    "gcfg": "0xFFFF0020",
+    "gcfg_source": "0x00022E80",
+    "manual_decode": {
+      "CMPOC": 1,
+      "DCE": 0,
+      "DRE": 0
+    },
+    "manual_semantics": "oversized message is stored with excess payload discarded; received DLC is retained; DLC filtering disabled",
+    "rfifo1": {
+      "max_reported_bytes": 64,
+      "max_stale_bytes": 32,
+      "payload_words": 8,
+      "physical_bytes": 32
+    }
+  },
+  "schema": "camry-8965f3307000-prefault-memory-safety-v1",
+  "software_queue": {
+    "base": "0xFEBE4038",
+    "capacity_bytes": 2208,
+    "capacity_words": 552,
+    "classification": "bounded 16-bit word-index ring; no wrap/next-record overwrite recovered",
+    "critical_section": "0x7A2DA -> 0x98B8A -> 0x6A45E installs IMSR 0xFF00; 0x7A2E8 -> 0x6A4C4 restores",
+    "end_inclusive": "0xFEBE48D7",
+    "fd_record_words_for_len64": 19
+  },
+  "target": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "software_id": "8965F3307000"
+  },
+  "transport_state_provenance": {
+    "classification": "0x7B18A/0x7BB0E state-slot index comes from fixed transport record[1], not CAN payload",
+    "descriptor_base": "0x00022C4C",
+    "descriptor_count": 3,
+    "descriptor_root": "0x00022C70",
+    "reachable_records": [
+      {
+        "address": "0x00022BDE",
+        "descriptor": 0,
+        "role": "p0",
+        "state_index": 0
+      },
+      {
+        "address": "0x00022B9E",
+        "descriptor": 0,
+        "role": "p1",
+        "state_index": 0
+      },
+      {
+        "address": "0x00022BBE",
+        "descriptor": 1,
+        "role": "p1",
+        "state_index": 2
+      },
+      {
+        "address": "0x00022C1E",
+        "descriptor": 2,
+        "role": "p0",
+        "state_index": 2
+      },
+      {
+        "address": "0x00022BBE",
+        "descriptor": 2,
+        "role": "p1",
+        "state_index": 2
+      }
+    ],
+    "state_indices": [
+      0,
+      2
+    ],
+    "state_slot_count": 3
+  },
+  "verdict": {
+    "control_flow_pivot_recovered": false,
+    "controlled_write_primitive_recovered": false,
+    "guard_write_recovered": false,
+    "next_boundary": "A network-only recovery still requires an unrecovered write/control-flow side effect; the oversized-FD stale-byte condition does not cross any currently recovered consumer bound.",
+    "real_memory_safety_defect_found": true,
+    "saved_pc_overwrite_recovered": false
+  }
+}
