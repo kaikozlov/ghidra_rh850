@@ -6078,8 +6078,25 @@ openpilot CarController, while latActive
   -> install the valid generated trailer before untouched stock SecOC consumption
 ```
 
-The exact RAM identities were payload `01ce9934...fc6c`, resident
-`31b1b2c3...3a3a`, and padded helper `4719c4f2...965a`. The persistent
+The retained records contain two distinct helper identities that must not be
+conflated. The earlier audited one-shot setup used payload `01ce9934...fc6c`,
+resident `31b1b2c3...3a3a`, and padded helper `4719c4f2...965a`. The final live
+handoff immediately preceding the operator's next-day steering report used the
+same payload and resident but padded helper **`b417e12d...159a`**. That 588-byte
+helper (600 bytes after fixed-transfer padding) is the continuous diagnostic
+variant: the sequence-equality `be .L_return` is replaced by an RH850 `nop`, so every
+distinct native B6 is replaced and re-signed while C7 sequence is nonzero; sequence
+zero returns immediately to native B6. The four-byte branch becomes a two-byte NOP,
+making the continuous helper 588 rather than 590 bytes. Rebuilding that single
+source-instruction substitution reproduces the complete recorded helper SHA-256 exactly.
+The source, verbatim binaries, hashes, metadata, and explicit replay selection are
+preserved under
+`targets/camry-2026/raw-20260910/working-steering/runtime/`.
+
+The CAN route records C7 and the vehicle response but not EPS LocalRAM contents, so
+the rlog alone cannot choose between helper identities. The `b417...` identity comes
+from the contemporaneous live install/status handoff and parked signer witnesses; it
+is not inferred from the route. The persistent
 development CodeFlash remained cumulative stage 5
 `669cedf8...aa01af`, although the later bad-MAC A/B proves that stage 5 alone is
 not a substitute for the valid signer. Full EPS power-off removes the resident
@@ -6103,8 +6120,10 @@ byte-identical captured `GitDiff`; route `93` is therefore corroboration rather 
 a different steering configuration.
 This is graded **observed**, not a deterministic actuator attribution proof.
 
-The exact lifecycle is part of the result: full OFF -> NRTD, `./f33-secoc
-install`, direct NRTD -> READY without OFF, then `./f33-secoc load-arm`; the
+The exact lifecycle is part of the result: explicitly select the retained continuous
+payload/helper/metadata through `F33_INLINE_PAYLOAD_PATH`, `F33_INLINE_HELPER_PATH`,
+and `F33_INLINE_META_PATH`; then full OFF -> NRTD, `./f33-secoc install`, direct
+NRTD -> READY without OFF, then `./f33-secoc load-arm`. The
 last step must require byte-exact helper readback and equality between one native
 Toyota trailer and the locally generated trailer. Only after returning Panda
 ownership to one clean manager/pandad tree may openpilot run. A duplicate stale
@@ -6113,6 +6132,15 @@ Data Invalid`. Entering EPS programming mode also left Toyota TSS/DRCC unavailab
 for the ignition cycle; the observed drive used normal non-adaptive cruise for
 openpilot engagement. Full vehicle restart restored DRCC but removed the RAM
 resident.
+
+The dash warning can be addressed without necessarily sacrificing the RAM signer.
+The exact-car parked/READY result in §17 cleared the historical U0131 state with
+physical UDS `14 FF FF FF` on the six supported physical addresses followed by
+functional `0x7DF` OBD Mode 04. Exact-F33 SID 14 dispatches DTC-clear machinery; it
+is not an ECU-reset or flash operation and does not target the helper/resident RAM
+ranges. Same-cycle warning removal is therefore supported without EPS power-off.
+Whether Toyota DRCC availability unlatches in that same cycle is **not** established;
+the known successful steering drive used normal non-adaptive cruise.
 
 The parent openpilot tree was `ddd1f6fac47e`, with opendbc base
 `baec01c15ac3`; critically, the working C7 integration was an uncommitted delta

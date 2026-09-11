@@ -1,5 +1,5 @@
 {
-  "schema": "camry-f33-working-steering-session-summary-v2",
+  "schema": "camry-f33-working-steering-session-summary-v3",
   "captured_date": "2026-09-10",
   "evidence_grade": "observed",
   "route": {
@@ -45,11 +45,25 @@
     "ephemeral_inline_signer": {
       "payload_sha256": "01ce993425e910a6ea37473580adb6e641bdff56a3568492d4c9e0388e02fc6c",
       "resident_sha256": "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a",
-      "helper_padded_sha256": "4719c4f27563180359445724eaefd594e3051ea545f75d69efb9bbede8f1965a",
+      "one_shot_helper_padded_sha256": "4719c4f27563180359445724eaefd594e3051ea545f75d69efb9bbede8f1965a",
       "metadata_sha256": "f7407d38923e1d70bbaa8e6de6339abf4f37d0b96c42877f96d3c15651ab3d02",
       "launcher_sha256": "9d236e74489fcee4c7167000a2332008f35c7a6702b083f4afc61901627ea851",
       "native_oracle_required": true,
-      "behavior": "After exact helper readback and arming, reproduce one untouched native B6 trailer through ICU-S command 5; for each fresh nonzero C7 control sequence, replace B3..B9 of one already-admitted native B6 and install the locally generated valid trailer before stock SecOC consumption."
+      "one_shot_behavior": "After exact helper readback and arming, reproduce one untouched native B6 trailer through ICU-S command 5; for each fresh nonzero C7 control sequence, replace B3..B9 of one already-admitted native B6 and install the locally generated valid trailer before stock SecOC consumption.",
+      "latest_live_handoff": {
+        "variant": "continuous-signed diagnostic helper",
+        "source": "exploit/ephemeral_runtime/camry_f33_b6_inline_signer_continuous_helper.S",
+        "artifact_directory": "runtime",
+        "staging_sha256": "2b6fa690f3ea1ece5f301e976e2f4f781f802ff92c1a6667b8a61ae4d18deb45",
+        "payload_sha256": "01ce993425e910a6ea37473580adb6e641bdff56a3568492d4c9e0388e02fc6c",
+        "resident_sha256": "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a",
+        "helper_sha256": "74315a067cfe457c945cbeadb0e1432e70765bbe36ef022fc57ffad272cb4469",
+        "helper_padded_sha256": "b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28",
+        "build_metadata_sha256": "8161cb0b769a1af860a3761423e8d0db5152ce5a3d23ee1a754205c8738d0d83",
+        "behavior": "After the same native-MAC oracle, every distinct native B6 is replaced and re-signed while the current C7 sequence is nonzero; sequence zero immediately returns to untouched native B6.",
+        "recovery_basis": "The live handoff recorded b417e12d... as the exact loaded helper. Replacing only the one-shot helper's sequence-equality branch source instruction with an RH850 NOP reproduced that complete SHA-256 exactly; the four-byte branch becomes a two-byte NOP, making this helper 588 rather than 590 bytes.",
+        "route_join_boundary": "The rlog records C7 and vehicle response but not EPS LocalRAM identity. The exact b417... helper identity is joined from the contemporaneous install/status and parked-validity witnesses, not inferred from CAN."
+      }
     }
   },
   "openpilot": {
@@ -140,6 +154,7 @@
   },
   "required_lifecycle": [
     "Start from full EPS OFF, then enter NRTD/Park/stationary.",
+    "Explicitly select the retained continuous payload, padded helper, and matching metadata through F33_INLINE_PAYLOAD_PATH, F33_INLINE_HELPER_PATH, and F33_INLINE_META_PATH; launcher defaults may select the later one-shot helper.",
     "Run ./f33-secoc install and require inline_signer_resident_live_loader_ready.",
     "Transition directly NRTD to READY without OFF.",
     "Run ./f33-secoc load-arm and require exact helper readback plus native Toyota trailer equality.",
@@ -150,6 +165,7 @@
   "operational_caveats": [
     "Entering EPS programming mode causes a Toyota system-malfunction state for the ignition cycle and disables TSS/DRCC longitudinal engagement.",
     "The successful drive engaged openpilot after selecting normal non-adaptive cruise; stock TSS3 longitudinal was unavailable during that cycle.",
+    "On this exact car, a parked/READY physical-UDS plus functional-OBD clear previously removed the historical U0131 warning state without an ignition cycle. EPS SID 14 is an application DTC-clear operation, not an ECU reset, so it does not inherently remove the LocalRAM signer; same-cycle DRCC recovery remains unproven.",
     "A full vehicle restart restores DRCC but also removes the RAM resident.",
     "A stale duplicate openpilot manager/pandad tree can leave sensord without IMU ownership and produce Sensor Data Invalid; run exactly one clean launch tree after returning the Panda lease.",
     "The later bad-MAC stage-5 carrier admitted application data but did not produce steering; preserve the valid command-5 signer in the working fallback."
