@@ -233,14 +233,15 @@ capabilities explicit:
 | Control | `CarController` encodes angle and acceleration from ordinary actuator requests | B6 application fields; Corolla `0x160` command |
 | Safety | Panda uses ordinary Toyota angle/acceleration limits and an explicit TX whitelist | Exact address, length, bus, checksum and counter |
 | Authentication | Optional transport/signing provider for a platform that actually requires it | Camry F33 C7/RAM/ICU-S adapter; user-provided key on a native SecOC sender |
-| Harness | Use the stock Toyota-B topology whenever the native command is already exposed there | Camry lateral's current Bus-4 intercept; Corolla longitudinal needs no repin |
+| Harness | Use the stock Toyota-B topology whenever the native command is already exposed there | Camry C7 lateral on unsplit Panda bus 1; Corolla longitudinal needs no repin |
 
 For the combined Camry cleanup, “stock Toyota-B” means undoing the temporary
 lateral-development CAN0/CAN1 repin: Toyota Bus-1/`0x160` returns to the
 CAN0/CAN2 relay pair for normal stock suppression/replacement, while the F33 C7
 signer sideband moves to unsplit Panda bus 1 to reach Bus-4/EPS. The successful
-lateral route proves the old post-repin assignment; the combined assignment is
-the next parked transport validation, not yet a road-proven fact.
+lateral route proves the old post-repin assignment. The stock-topology software
+assignment is now implemented; it still requires parked transport validation
+and is not yet a road-proven fact.
 
 The following must not become global TSS3 policy: F181
 `8965F3307000/8A3113303100`, extended `0x1FDC0002`, C7, ICU-S selector 4, the

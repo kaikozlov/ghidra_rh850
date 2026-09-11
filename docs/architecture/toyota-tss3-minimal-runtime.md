@@ -28,14 +28,16 @@ The active path is:
 5. the exact-F33 EPS-resident signer consumes C7, edits the native B6
    application fields, and lets the stock EPS SecOC path produce the trailer.
 
-The resident signer is a target prerequisite, not a replacement openpilot
-controller or permission system. Full EPS power loss removes it.
+The exact-F33 signer is a target prerequisite, not a replacement openpilot
+controller or permission system. The current normal-boot form is installed in
+CodeFlash and survives full EPS power loss; its installation payload and the
+earlier bring-up signer execute from RAM.
 
 ## Minimum by repository
 
 | repository | required for the demonstrated lateral path | not required by that path |
 |---|---|---|
-| openpilot | After CarParams identifies the F33 safety profile, disable Panda `canfd_auto` on Toyota-B buses 0 and 2. No controls/model changes. | direct-Panda lease; `CanData.fd` schema/logging; SecOC-key Params; controller arming Params; changes to `card.py` or `controlsd` |
+| openpilot | After CarParams identifies the F33 safety profile, disable Panda `canfd_auto` on unsplit Toyota-B bus 1. No controls/model changes. | direct-Panda lease; `CanData.fd` schema/logging; SecOC-key Params; controller arming Params; changes to `card.py` or `controlsd` |
 | opendbc | F33 platform identity and DBC; TSS3 state decoding; F33 CarParams; direct C7 angle encoder; Toyota F33 safety RX state, angle checks, TX whitelist, and normal relay blocking | host construction or signing of B6; host freshness/MAC state; diagnostic/oracle arming; controller-side permission vetoes; Corolla actuation assumptions |
 | Panda | Preserve the received FDF and BRS attributes when software-forwarding across the relay; sanitize the queue-private forwarding markers on host input and validate the original host checksum | relay-close/debug exceptions; F33-specific safety state outside opendbc; global 70% data sample point; global EFBI; logging the per-frame FDF bit to cereal |
 
@@ -77,10 +79,11 @@ shape. The successful lateral drive used a development CAN0/CAN1 repin. Undoing
 that repin returns Toyota Bus-1 and `0x160` to Panda's CAN0/CAN2 relay pair, so
 the stock frame can be blocked and replaced. Toyota Bus-4/EPS returns to the
 unsplit Panda bus 1, which had already reached the EPS directly before the
-repin; the F33 C7 signer sideband should move there. The combined candidate is
+repin; the F33 C7 signer sideband now moves there. The combined candidate is
 therefore ordinary Toyota-B hardware, with `0x160` replacement on bus 0 and C7
-lateral control on bus 1. This remapping still needs a parked transport check
-before it replaces the post-repin road-proven configuration.
+lateral control on bus 1. This software remapping is implemented; it still
+needs a parked transport check before it replaces the post-repin road-proven
+configuration.
 
 ### Why one openpilot transport exception remains
 
@@ -139,23 +142,24 @@ new evidence.
 
 ## First cleanup checkpoints
 
-- `opendbc@4b41113d` removes 168 lines of retired host B6/SecOC construction;
-  the controller now emits C7 directly from the limited angle and
-  `CC.latActive` sequence.
-- `opendbc@9140dd13` separates generic TSS3 state from exact-F33 safety.
-- `kai-openpilot@7cde01353` advances the known-working branch to those opendbc
-  cleanups.
-- upstream-based `openpilot` branch `tss3-minimal` at `17e8a6557` contains one
-  runtime-file change: the F33-scoped `canfd_auto` setting.
-- upstream-based `Panda` branch `tss3-minimal` at `cafc5fe6` contains three
-  runtime-file changes for exact software-forwarded frame format and safe host
-  ingestion.
+- `opendbc@3c79d935` is the current upstream-shaped stock-harness port. It
+  retains the GTS resolver, adds the exact firmware identity and bus-1 state
+  parsing, emits only C7, and selects exact-F33 Toyota safety.
+- `openpilot@de6b14669` contains the sole openpilot runtime exception: disable
+  sticky FD auto-promotion on exact-F33 bus 1. Integration commit
+  `openpilot@dbdf44a23` records the matching opendbc and Panda revisions.
+- `Panda@5bc72a28..c89d14a6` contains the three generic transport corrections:
+  preserve forwarded FDF, preserve forwarded frame format, and validate host
+  checksums before clearing queue-private flags.
 
-The two upstream-based branches are reduced candidates, not road-verified
-replacements for the successful stack. Panda's focused USB protocol suite
-passes (8 tests / 199 subtests), and the openpilot source passes a standalone
-C++ syntax check against the current generated cereal headers. The opendbc
-Camry plus F33 safety selection passes 29 focused tests.
+These stock-topology revisions are test-verified but not yet vehicle-verified
+replacements for the successful post-repin stack. Panda's focused USB protocol
+suite passes (8 tests / 199 subtests). The opendbc targeted Toyota/parser/safety
+set passes 254 tests (120 skipped / 200 subtests), its broader interface and
+fingerprinting set passes 270 tests (141 skipped / 7,889 subtests), and its DBC
+parser set passes 20 tests (194 subtests). The openpilot pandad target is not
+defined by the Darwin SCons build, so that repository has no local compile
+result from this host.
 
 ## Build-up order
 
@@ -164,9 +168,10 @@ Camry plus F33 safety selection passes 29 focused tests.
 2. Replay the retained route and prove expected CarState, C7 cadence, inactive
    sequence behavior, safety acceptance/rejection, and no controller-side
    permission layer.
-3. Restore the normal Toyota-B pin mapping and remap the C7 controller and
-   safety entry from bus 0 to unsplit bus 1. Prove parked that EPS/C7 remains
-   reachable and that Toyota Bus-1 is split across CAN0/CAN2.
+3. With the normal Toyota-B pin mapping restored, validate the implemented C7
+   controller, state parsers, signer tooling, and safety entry on unsplit bus
+   1. Prove parked that EPS/C7 remains reachable and that Toyota Bus-1 is split
+   across CAN0/CAN2.
 4. Promote the existing offline `0x160` builder into the normal opendbc
    controller/safety path only after binding its request semantics to the
    target. Import the Corolla field revision and reduce its rlog when they are

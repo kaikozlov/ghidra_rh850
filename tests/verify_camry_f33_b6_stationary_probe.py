@@ -570,8 +570,10 @@ native_08a_domain = command5_probe.build_secoc_domain(
 check("native 0x08A oracle domain uses the same exact ordinary-P5 framing",
       native_08a_domain == bytes.fromhex("008a") + command5_app + bytes.fromhex("123456789ab4") and
       command5_probe.native_mac28_hex(native_08a) == "1234567" and
-      command5_probe.LATERAL_REQUEST_BUS == 2 and
-      command5_probe.LATERAL_REQUEST_SYNC_BUS == 0)
+      command5_probe.LATERAL_REQUEST_BUS == 1 and
+      command5_probe.LATERAL_REQUEST_SYNC_BUS == 1 and
+      command5_probe.CONTROL_CAN_BUS == 1 and command5_probe.B6_BUS == 1 and
+      command5_probe.ROUTE.bus == 1)
 native_08a_candidates = command5_probe.native_08a_freshness_candidates(
     native_08a, sync_trip=0x1234, sync_reset=0x56789,
 )
@@ -587,7 +589,7 @@ class Fake08AOracleSession:
     def capture_native_08a(self):
         return {
             "trip_counter": 0x1234, "reset_counter": 0x56789,
-            "sync_bus": 0, "frame_bus": 2,
+            "sync_bus": 1, "frame_bus": 1,
             "sync_hex": "00" * 8, "frame_hex": native_08a.hex(),
             "sync_age_ms": 1.0, "frame_age_ms": 1.0,
         }

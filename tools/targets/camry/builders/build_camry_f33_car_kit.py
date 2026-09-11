@@ -59,7 +59,6 @@ ICUS13_META = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus13_probe.j
 INGRESS_HELPER = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_ingress_helper_helper_padded.bin"
 INGRESS_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_ingress_helper_build.json"
 DEFAULT_OPENPILOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
-C7_INTEGRATION_PATCH = ROOT / "targets/camry-2026/raw-20260910/working-steering/kai-opendbc-c7-current.patch"
 RUNTIME_FILES = [
     "exploit/common/payload_package.py",
     "exploit/common/ram_exec.py",
@@ -405,10 +404,6 @@ def build(out: Path, openpilot: Path) -> dict:
     persistent_signer_launcher = out / "f33-persist"
     shutil.copy2(PERSISTENT_SIGNER_LAUNCHER, persistent_signer_launcher)
     persistent_signer_launcher.chmod(0o755)
-    integration_dir = out / "openpilot_integration"
-    integration_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(C7_INTEGRATION_PATCH, integration_dir / C7_INTEGRATION_PATCH.name)
-
     files = {
         dst.name: {"sha256": sha256(dst)},
         "FIRMWARE_PATCH.md": {"sha256": sha256(out / "FIRMWARE_PATCH.md")},
@@ -429,9 +424,6 @@ def build(out: Path, openpilot: Path) -> dict:
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
     for path in sorted(p for p in persistent_dir.rglob("*") if p.is_file()):
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
-    for path in sorted(p for p in integration_dir.rglob("*") if p.is_file()):
-        files[str(path.relative_to(out))] = {"sha256": sha256(path)}
-
     manifest = {
         "schema": "camry-f33-car-kit-v14",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -463,7 +455,9 @@ def build(out: Path, openpilot: Path) -> dict:
             "required_preflight": "f33-sign verify-native-08a must match every captured native sample",
             "install_order": persistent_package["ordering"]["install"],
             "remove_order": persistent_package["ordering"]["remove"],
-            "openpilot_c7_patch": "openpilot_integration/kai-opendbc-c7-current.patch",
+            "diagnostic_route": "0x7A1->0x7A9 on unsplit Panda bus 1, ELM327 param 1",
+            "control_route": "extended 0x1FDC0002 C7 sideband on unsplit Panda bus 1",
+            "openpilot_requirement": "exact-F33 stock-Toyota-B support with Classical C7 on Panda bus 1",
             "development_only": True,
         },
         "live_observers": {

@@ -116,7 +116,14 @@ with tempfile.TemporaryDirectory(prefix="verify-f33-persistent-") as td:
 source = signer.SOURCE.read_text()
 launcher = (ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_launcher.sh").read_text()
 check("resident has no CAN transmitter", "can_send" not in source and "transmit" not in source.lower())
+check("persistent installer uses stock Toyota-B EPS diagnostics on bus 1", host.ROUTE.bus == 1)
+check("persistent runbook binds C7 to unsplit Panda bus 1", "C7 sideband on unsplit Panda bus 1" in (ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_runbook.md").read_text())
+kit_builder = (ROOT / "tools/targets/camry/builders/build_camry_f33_car_kit.py").read_text()
+check("car kit no longer bundles the stale post-repin C7 patch",
+      "kai-opendbc-c7-current.patch" not in kit_builder and
+      '"control_route": "extended 0x1FDC0002 C7 sideband on unsplit Panda bus 1"' in kit_builder)
 check("launcher makes passive native verification an explicit prerequisite", "verify-native-08a" in launcher)
+check("launcher programs exact F33 through stock Toyota-B bus 1", "--bus 1 --elm327-param 1" in launcher)
 check("launcher persists package-bound preflights across required OFF cycles",
       "/data/camry-f33-car-kit-state" in launcher and
       "resident preflight belongs to a different package" in launcher and
