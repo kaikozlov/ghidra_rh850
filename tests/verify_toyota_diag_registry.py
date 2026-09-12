@@ -270,6 +270,15 @@ def main() -> int:
           and hv_ffd["requests"][0]["check"] == "5904"
           and hv_ffd["execution"] == "read_only")
 
+    hv_rob = next(row for row in hv["commands"] if row["kind"] == "p5_rob_code_inventory")
+    check("ordinary P5 RoB behavior-code inventory is exported only from exact role-0xA0 binding",
+          hv_rob["role"] == 0xA0
+          and hv_rob["plugin_binding"]["binding_category_id"] == 397
+          and hv_rob["plugin_binding"]["exact_category_binding"] is True
+          and hv_rob["plugin_binding"]["dll"] == "GetRoBP5_DT.dll"
+          and [(row["send"], row["check"]) for row in hv_rob["requests"]] == [("ab01", "eb01"), ("ab11", "eb11")]
+          and hv_rob["execution"] == "read_only")
+
     session = profile["session_control"]
     check("session_control carries the runtime current-P5 contract",
           session["generation"] == "current-p5"

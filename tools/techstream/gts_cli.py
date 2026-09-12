@@ -2972,17 +2972,7 @@ def _registry_active_test_groups(parser: DDBParser, category: dict[str, Any], db
     }
 
 
-def _registry_request_row(
-    parser: DDBParser,
-    master: Any,
-    category_id: int,
-    selector: int,
-    name: str,
-) -> dict[str, Any]:
-    matches = _master_frame_rows(parser, master, category_id, selector)
-    if len(matches) != 1:
-        return {"name": name, "selector": f"0x{selector:X}", "resolved": False}
-    row = matches[0]
+def _registry_request_from_frame(row: dict[str, Any], name: str) -> dict[str, Any]:
     comm_set = row["comm_set_metadata"]
     return {
         "name": name,
@@ -2996,6 +2986,19 @@ def _registry_request_row(
         "session_requirement": _session_requirement(row["send"]["bytes"]),
         "resolved": True,
     }
+
+
+def _registry_request_row(
+    parser: DDBParser,
+    master: Any,
+    category_id: int,
+    selector: int,
+    name: str,
+) -> dict[str, Any]:
+    matches = _master_frame_rows(parser, master, category_id, selector)
+    if len(matches) != 1:
+        return {"name": name, "selector": f"0x{selector:X}", "resolved": False}
+    return _registry_request_from_frame(matches[0], name)
 
 
 def _registry_command_rows(
@@ -3094,6 +3097,34 @@ def _registry_command_rows(
                     "snapshot_records_offset": 6,
                     "identifier_length_source": "explicit u8 immediately after each DID",
                     "boundary": "raw snapshot DID blocks are exact; signal-level freeze-frame decoding is not projected from Data Monitor metadata",
+                },
+                "execution": "read_only",
+            })
+
+    rob_binding = _bundle_support_plugin(dll_rows, category_id, 0xA0)
+    if (mode == "p5-standard" and rob_binding is not None
+            and rob_binding["exact_category_binding"] is True
+            and rob_binding["dll"] == "GetRoBP5_DT.dll"):
+        rob_frames = _master_frame_rows(parser, master, category_id, 0xF3)
+        rob_shape = sorted((row["send"]["bytes"], row["receive_check"]["bytes"]) for row in rob_frames)
+        if rob_shape == [("ab01", "eb01"), ("ab11", "eb11")]:
+            rob_frames = sorted(rob_frames, key=lambda row: row["send"]["bytes"])
+            rows.append({
+                "role": 0xA0,
+                "kind": "p5_rob_code_inventory",
+                "plugin_binding": rob_binding,
+                "requests": [
+                    _registry_request_from_frame(row, f"behavior_codes_{row['send']['bytes'][2:]}")
+                    for row in rob_frames
+                ],
+                "response_model": {
+                    "positive_prefix_matches_request_subfunction": True,
+                    "layout": "EB | subfunction | repeated(behavior_code:be16)",
+                    "payload_offset": 2,
+                    "element_width": 2,
+                    "endianness": "big",
+                    "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+                    "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
                 },
                 "execution": "read_only",
             })

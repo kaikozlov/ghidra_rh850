@@ -5775,6 +5775,53 @@
         },
         {
           "execution": "read_only",
+          "kind": "p5_rob_code_inventory",
+          "plugin_binding": {
+            "binding_category_id": 372,
+            "dll": "GetRoBP5_DT.dll",
+            "exact_category_binding": true,
+            "requested_category_id": 372,
+            "role": 160
+          },
+          "requests": [
+            {
+              "check": "eb01",
+              "comm_set": 1,
+              "mask": "ffff",
+              "name": "behavior_codes_01",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xF3",
+              "send": "ab01",
+              "session_requirement": "extended"
+            },
+            {
+              "check": "eb11",
+              "comm_set": 1,
+              "mask": "ffff",
+              "name": "behavior_codes_11",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xF3",
+              "send": "ab11",
+              "session_requirement": "extended"
+            }
+          ],
+          "response_model": {
+            "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
+            "element_width": 2,
+            "endianness": "big",
+            "layout": "EB | subfunction | repeated(behavior_code:be16)",
+            "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+            "payload_offset": 2,
+            "positive_prefix_matches_request_subfunction": true
+          },
+          "role": 160
+        },
+        {
+          "execution": "read_only",
           "kind": "p5_dtc_snapshot",
           "plugin_binding": {
             "binding_category_id": 0,
@@ -118959,6 +119006,53 @@
         },
         {
           "execution": "read_only",
+          "kind": "p5_rob_code_inventory",
+          "plugin_binding": {
+            "binding_category_id": 397,
+            "dll": "GetRoBP5_DT.dll",
+            "exact_category_binding": true,
+            "requested_category_id": 397,
+            "role": 160
+          },
+          "requests": [
+            {
+              "check": "eb01",
+              "comm_set": 1,
+              "mask": "ffff",
+              "name": "behavior_codes_01",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xF3",
+              "send": "ab01",
+              "session_requirement": "extended"
+            },
+            {
+              "check": "eb11",
+              "comm_set": 1,
+              "mask": "ffff",
+              "name": "behavior_codes_11",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xF3",
+              "send": "ab11",
+              "session_requirement": "extended"
+            }
+          ],
+          "response_model": {
+            "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
+            "element_width": 2,
+            "endianness": "big",
+            "layout": "EB | subfunction | repeated(behavior_code:be16)",
+            "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+            "payload_offset": 2,
+            "positive_prefix_matches_request_subfunction": true
+          },
+          "role": 160
+        },
+        {
+          "execution": "read_only",
           "kind": "p5_dtc_snapshot",
           "plugin_binding": {
             "binding_category_id": 0,
@@ -177781,6 +177875,53 @@
         },
         {
           "execution": "read_only",
+          "kind": "p5_rob_code_inventory",
+          "plugin_binding": {
+            "binding_category_id": 398,
+            "dll": "GetRoBP5_DT.dll",
+            "exact_category_binding": true,
+            "requested_category_id": 398,
+            "role": 160
+          },
+          "requests": [
+            {
+              "check": "eb01",
+              "comm_set": 1,
+              "mask": "ffff",
+              "name": "behavior_codes_01",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xF3",
+              "send": "ab01",
+              "session_requirement": "extended"
+            },
+            {
+              "check": "eb11",
+              "comm_set": 1,
+              "mask": "ffff",
+              "name": "behavior_codes_11",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xF3",
+              "send": "ab11",
+              "session_requirement": "extended"
+            }
+          ],
+          "response_model": {
+            "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
+            "element_width": 2,
+            "endianness": "big",
+            "layout": "EB | subfunction | repeated(behavior_code:be16)",
+            "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+            "payload_offset": 2,
+            "positive_prefix_matches_request_subfunction": true
+          },
+          "role": 160
+        },
+        {
+          "execution": "read_only",
           "kind": "p5_dtc_snapshot",
           "plugin_binding": {
             "binding_category_id": 0,
@@ -217362,6 +217503,53 @@
         },
         {
           "execution": "read_only",
+          "kind": "p5_rob_code_inventory",
+          "plugin_binding": {
+            "binding_category_id": 405,
+            "dll": "GetRoBP5_DT.dll",
+            "exact_category_binding": true,
+            "requested_category_id": 405,
+            "role": 160
+          },
+          "requests": [
+            {
+              "check": "eb01",
+              "comm_set": 1,
+              "mask": "ffff",
+              "name": "behavior_codes_01",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xF3",
+              "send": "ab01",
+              "session_requirement": "extended"
+            },
+            {
+              "check": "eb11",
+              "comm_set": 1,
+              "mask": "ffff",
+              "name": "behavior_codes_11",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xF3",
+              "send": "ab11",
+              "session_requirement": "extended"
+            }
+          ],
+          "response_model": {
+            "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
+            "element_width": 2,
+            "endianness": "big",
+            "layout": "EB | subfunction | repeated(behavior_code:be16)",
+            "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+            "payload_offset": 2,
+            "positive_prefix_matches_request_subfunction": true
+          },
+          "role": 160
+        },
+        {
+          "execution": "read_only",
           "kind": "p5_dtc_snapshot",
           "plugin_binding": {
             "binding_category_id": 0,
@@ -227647,6 +227835,53 @@
             "delay_ms": 0,
             "timer_id": 1
           }
+        },
+        {
+          "execution": "read_only",
+          "kind": "p5_rob_code_inventory",
+          "plugin_binding": {
+            "binding_category_id": 435,
+            "dll": "GetRoBP5_DT.dll",
+            "exact_category_binding": true,
+            "requested_category_id": 435,
+            "role": 160
+          },
+          "requests": [
+            {
+              "check": "eb01",
+              "comm_set": 1,
+              "mask": "ffff",
+              "name": "behavior_codes_01",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xF3",
+              "send": "ab01",
+              "session_requirement": "extended"
+            },
+            {
+              "check": "eb11",
+              "comm_set": 1,
+              "mask": "ffff",
+              "name": "behavior_codes_11",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xF3",
+              "send": "ab11",
+              "session_requirement": "extended"
+            }
+          ],
+          "response_model": {
+            "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
+            "element_width": 2,
+            "endianness": "big",
+            "layout": "EB | subfunction | repeated(behavior_code:be16)",
+            "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+            "payload_offset": 2,
+            "positive_prefix_matches_request_subfunction": true
+          },
+          "role": 160
         },
         {
           "execution": "read_only",
@@ -254944,6 +255179,53 @@
         },
         {
           "execution": "read_only",
+          "kind": "p5_rob_code_inventory",
+          "plugin_binding": {
+            "binding_category_id": 450,
+            "dll": "GetRoBP5_DT.dll",
+            "exact_category_binding": true,
+            "requested_category_id": 450,
+            "role": 160
+          },
+          "requests": [
+            {
+              "check": "eb01",
+              "comm_set": 1,
+              "mask": "ffff",
+              "name": "behavior_codes_01",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xF3",
+              "send": "ab01",
+              "session_requirement": "extended"
+            },
+            {
+              "check": "eb11",
+              "comm_set": 1,
+              "mask": "ffff",
+              "name": "behavior_codes_11",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xF3",
+              "send": "ab11",
+              "session_requirement": "extended"
+            }
+          ],
+          "response_model": {
+            "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
+            "element_width": 2,
+            "endianness": "big",
+            "layout": "EB | subfunction | repeated(behavior_code:be16)",
+            "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+            "payload_offset": 2,
+            "positive_prefix_matches_request_subfunction": true
+          },
+          "role": 160
+        },
+        {
+          "execution": "read_only",
           "kind": "p5_dtc_snapshot",
           "plugin_binding": {
             "binding_category_id": 0,
@@ -271680,6 +271962,53 @@
             "value_capacity_chars": 17
           },
           "role": 82
+        },
+        {
+          "execution": "read_only",
+          "kind": "p5_rob_code_inventory",
+          "plugin_binding": {
+            "binding_category_id": 498,
+            "dll": "GetRoBP5_DT.dll",
+            "exact_category_binding": true,
+            "requested_category_id": 498,
+            "role": 160
+          },
+          "requests": [
+            {
+              "check": "eb01",
+              "comm_set": 1,
+              "mask": "ffff",
+              "name": "behavior_codes_01",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xF3",
+              "send": "ab01",
+              "session_requirement": "extended"
+            },
+            {
+              "check": "eb11",
+              "comm_set": 1,
+              "mask": "ffff",
+              "name": "behavior_codes_11",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xF3",
+              "send": "ab11",
+              "session_requirement": "extended"
+            }
+          ],
+          "response_model": {
+            "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
+            "element_width": 2,
+            "endianness": "big",
+            "layout": "EB | subfunction | repeated(behavior_code:be16)",
+            "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+            "payload_offset": 2,
+            "positive_prefix_matches_request_subfunction": true
+          },
+          "role": 160
         },
         {
           "execution": "read_only",
