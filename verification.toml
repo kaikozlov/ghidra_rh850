@@ -937,6 +937,9 @@ tests = ["tests/verify_toyota_b_programming_topology.py"]
 [suite.toyota_eps_bus_probe]
 tests = ["tests/verify_toyota_eps_bus_probe.py"]
 
+[suite.toyota_eps_isolated_can_probe]
+tests = ["tests/verify_toyota_eps_isolated_can_probe.py"]
+
 [suite.toyota_secoc_oracle]
 tests = ["tests/verify_toyota_secoc_oracle.py"]
 

@@ -1146,3 +1146,139 @@ pre-transition F181 read means initial EPS silence does not prevent that host
 path from advancing. That is a real difference from another identical EPS
 request. It is still a test of a routing-hidden surviving listener, not an
 independent flash executor, a way to clear the CPU fault, or a verified repair.
+
+
+## 18. Alternate diagnostic sessions and network modes, from the actual tables
+
+2026-09-12. This pass investigated ordinary network mechanisms other than a
+repeat of the primary programming-session request: the separately configured
+manufacturer session `40`, protocol preemption, and CommunicationControl's
+subnetwork/subnode modes. It was offline; no vehicle connection, transmission,
+session change, reset, RAM upload, or flash operation occurred. It did not
+establish a working network-only repair.
+
+### Three service profiles, not one primary service list
+
+The exact F33 service selector at `90F98` reads ROM **indices**, not a function
+inventory. Its object table starts at `25C54`, with 24-byte objects. Three
+8-byte descriptors at `25C0C/25C14/25C1C` select:
+
+| External DCM source key | Selected service-object indices | Session-Control subfunctions |
+|---|---|---|
+| `2` | `0..16` (17 objects) | `01`, `02`, `03` |
+| `3` | `17,2,7,9,13,14` (6 objects) | `01`, `03` |
+| `4` | `18,19,20,21,22` (5 objects) | `01`, `40` |
+
+These are the source keys that `93F0E` maps to the three internal receive
+channels. The third profile contains SID `10/19/22/3E/AB`; it is not the
+primary programming profile and does not select the download/transfer services.
+An object appearing in a selected list is not, on its own, a claim that its
+callback is non-null or available in the current session.
+
+The third profile's `40` entry at `25B5C` points to **`95D3C`**. That callback
+is absent from the canonical 6,065-function inventory, but its raw instructions
+are real: the 18-byte wrapper supplies `r8=40` and calls **`95C52`**. Several
+ordinary `10`/`28` wrappers are likewise not separately defined in that inventory.
+Consequently a name/direct-caller census was insufficient to exclude these
+configured modes. They were checked from ROM entries and independent RH850
+instructions instead.
+
+### Session `40` does not select the programming handoff
+
+`95C52` routes an initial request to `95A3E`, cancellation to `95B48`, and
+asynchronous polling to `95B88`. The initial handler looks up the requested
+session in five 10-byte rows at `26122`. Relevant exact rows are:
+
+| Row | Session | Transition-kind byte |
+|---|---:|---:|
+| `26122` | `01` | `00` |
+| `2612C` | `02` | `02` |
+| `26136` | `03` | `00` |
+| `26140` | `40` | `00` |
+
+Kind zero uses the ordinary session-state update and timing response. The
+nonzero row for session `02` instead sets the asynchronous transition state
+and enters the handoff-related processing. Session `40` therefore does **not**
+select that boot-transition branch just because its numeric value is
+manufacturer-specific.
+
+The ordinary session notifications were also followed. `92518` invokes the
+fixed `968CC/9704E` callbacks and `92044 -> 9202A -> 8B0DE`.
+`8B0DE -> 4D582/6A156` resets application diagnostic bookkeeping and requests
+cleanup of an already-active crypto test. The apparent `88` in
+`4D582 -> thunk_B9320(88)` is only a write to `FEBEAF47`; it must not be
+confused with the unrelated boot ASIC's SPI programming command. None of these
+reviewed session-40 notifications supplies a new boot jump.
+
+### The missing dispatcher callback is queued event zero, not an interrupt server
+
+The ordinary service entry `91566` is called by `91C0A`. Its caller at `922CE`
+was outside a recovered function, so `inspect --callers` misleadingly returned
+zero callers for `91C0A`. Raw instructions recover **`922AA..922E7`**: it checks
+DCM state `2`, then invokes `91C0A` for the selected receive channel.
+
+The exact fixed pointer to `922AA` is **`26B18`**, event-zero slot in the DCM
+callback array consumed by **`98946`**. This closes the actual scheduled entry:
+
+```text
+988C2 -> 98946 -> event[0] = 922AA -> 91C0A -> 91566
+                                           -> ROM service-profile selection
+```
+
+Receive completion still uses `91F72 -> 92B4A -> 92A86` to prepare state;
+`92A86` only writes the requested DCM state under its normal critical section.
+`98B3A` only arms a timer, while `98AE4` consumes timer callbacks later in the
+same `988C2` foreground worker. The timer callback at `922EA` enqueues event
+zero through `989EC`; it does not invoke `922AA` inline.
+
+Protocol preemption was checked separately rather than assuming all protocol
+starts were deferred. `93978 -> 937B0` contains a synchronous protocol-change
+approval callback, **`92040`**. In this exact image it is a literal
+`return 0` stub. The other reviewed preemption work prepares state, cancellation,
+and queued events. Thus the real alternate profile and its protocol approval
+callback do not remove the dependency on the worker after the damaged call.
+
+This is a reconstruction of the configured ordinary paths, not a proof that
+every arbitrary computed transfer or undiscovered firmware defect is absent.
+
+### Enhanced-address CommunicationControl is compiled but not configured here
+
+The common `96E6A/96BFC` implementation contains handling for subfunctions
+`04/05` and a node identifier. That is a legitimate reason to inspect it as a
+possible alternate network-management path rather than stopping at the menu.
+Exact ROM configuration nevertheless differs from the generic implementation:
+
+- Both service profiles that select SID `28` select only callbacks for
+  **`00`, `01`, and `03`**. The third profile does not select SID `28`.
+- At `261C8..261D7`, there is one enabled all-channel entry (channel `0`),
+  **zero specific-channel entries**, and **zero subnode entries**, with null
+  specific-channel and subnode table pointers.
+- `96BFC` consults these actual counts and tables when validating an enhanced
+  node request. The presence of a generic node-processing branch is not a
+  configured second programmer or downstream control channel in this F33.
+
+No unsupported request was sent to test the unused branches. These results
+apply to the **EPS image**, not to an unacquired brake/gateway firmware image.
+
+### Reproduction and confidence
+
+`tools/targets/camry/analysis/analyze_f33_recovery_structure.py` now extracts
+these ROM-selected profiles, session rows, dispatcher slot, and channel counts
+into `network_diagnostic_modes` in the existing generated report. The narrow
+`f33_recovery_structure` suite verifies the indices, callback call targets,
+transition-kind distinction, and absence of configured enhanced subnodes from
+tracked firmware bytes. It does not test Markdown or require an external ECU.
+
+The relevant service tables, ordinary-mode code, and event table were also
+compared with the complete retained incident reconstruction
+`aba6867f...50f2d74`; they are byte-identical. The raw table/call facts are
+**verified** by the deterministic checks, and their execution interpretation is
+**recovered**, not a new live capture. Temporary function recovery was limited
+to the working project; the three extra function entries left after nested
+transaction rollback were explicitly removed, and the resulting set of all
+6,065 function entry addresses matches the original inventory. No committed
+project snapshot was changed or promoted.
+
+The alternative session exists, but its complete configured path still does
+not execute a repair before the bad hook. This narrows a genuine inventory gap;
+it is not a recovered unbrick sequence.

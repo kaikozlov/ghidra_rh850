@@ -98,6 +98,7 @@ def cmd_capabilities(_args: argparse.Namespace) -> int:
         "secoc": ["oracle", "session", "sign", "sync"],
         "dataflash": "Toyota EPS DataFlash/NvM + SecOC-domain analysis",
         "eps-probe": "non-destructive Toyota EPS diagnostic-bus discovery",
+        "eps-isolated-probe": "identity/liveness probe of an isolated EPS-side CAN segment",
         "e2e-p05": ["crc", "check", "protect", "recover-data-id"],
         "variant": "cross-calibration image/corpus evidence extraction",
         "targets": {name: len(target_capabilities(name)) for name in TARGETS},
@@ -129,6 +130,10 @@ def cmd_dataflash(args: argparse.Namespace) -> int:
 
 def cmd_eps_probe(args: argparse.Namespace) -> int:
     return _run_path(TOOLS / "toyota_support/toyota_eps_bus_probe.py", args.args)
+
+
+def cmd_eps_isolated_probe(args: argparse.Namespace) -> int:
+    return _run_path(TOOLS / "toyota_support/toyota_eps_isolated_can_probe.py", args.args)
 
 
 def cmd_variant(args: argparse.Namespace) -> int:
@@ -218,6 +223,10 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("args", nargs=argparse.REMAINDER)
     q.set_defaults(func=cmd_eps_probe)
 
+    q = sub.add_parser("eps-isolated-probe", help="identity/liveness probe of an isolated EPS-side CAN segment")
+    q.add_argument("args", nargs=argparse.REMAINDER)
+    q.set_defaults(func=cmd_eps_isolated_probe)
+
     q = sub.add_parser("variant", help="cross-variant evidence extraction")
     q.add_argument("args", nargs=argparse.REMAINDER)
     q.set_defaults(func=cmd_variant)
@@ -264,6 +273,8 @@ def main() -> int:
         return cmd_dataflash(argparse.Namespace(args=argv[1:]))
     if command == "eps-probe":
         return cmd_eps_probe(argparse.Namespace(args=argv[1:]))
+    if command == "eps-isolated-probe":
+        return cmd_eps_isolated_probe(argparse.Namespace(args=argv[1:]))
     if command == "variant":
         return cmd_variant(argparse.Namespace(args=argv[1:]))
     if command == "target" and len(argv) >= 2:

@@ -148,6 +148,86 @@ def analyze(image: bytes) -> dict[str, object]:
                 "receive_completion": address(u32(vtable + 24)),
             })
 
+    # Recover the configured service lists from their ROM descriptors rather
+    # than assuming that the Ghidra function inventory contains every callback.
+    # Some objects are shared by multiple lists; table presence alone does not
+    # assert that a service has a non-null implementation or is reachable now.
+    service_struct = struct.Struct("<IIIIBBBBB3x")
+    subfunction_struct = struct.Struct("<IIIHH")
+    service_lists = []
+    for n in range(3):
+        descriptor = 0x25C0C + n * 8
+        source_key, count, indices = struct.unpack_from("<HHI", image, descriptor)
+        selected = []
+        for i in range(count):
+            index = u16(indices + i * 2)
+            if index >= 23:
+                raise ValueError("service-list index exceeds reviewed F33 object table")
+            record = 0x25C54 + index * service_struct.size
+            callback, _security, _sessions, subfunctions, sid, has_subfunction, _, _, subcount = (
+                service_struct.unpack_from(image, record)
+            )
+            modes = []
+            if sid in (0x10, 0x28):
+                for j in range(subcount):
+                    row = subfunctions + j * subfunction_struct.size
+                    fn, _, _, subfunction, _ = subfunction_struct.unpack_from(image, row)
+                    modes.append({"address": address(row), "subfunction": subfunction,
+                                  "callback": address(fn)})
+            selected.append({
+                "index": index, "address": address(record), "service": f"0x{sid:02X}",
+                "callback": address(callback), "has_subfunction": bool(has_subfunction),
+                "subfunction_count": subcount, "mode_subfunctions": modes,
+            })
+        service_lists.append({
+            "address": address(descriptor), "source_key": source_key,
+            "index_table": address(indices), "services": selected,
+        })
+
+    session_definitions = []
+    for n in range(5):
+        record = 0x26122 + n * 10
+        transition, session, p2, p2_star, _, response_p2_star = struct.unpack_from(
+            "<BBHHHH", image, record
+        )
+        session_definitions.append({
+            **span(record, 10), "session": session, "transition_kind": transition,
+            "p2_field": p2, "p2_star_field": p2_star,
+            "response_p2_star_field": response_p2_star,
+        })
+    all_channels = u32(0x261CC)
+    network_modes = {
+        "scope": "ROM-selected ordinary diagnostic modes; no claim of live availability or repair",
+        "service_lists": service_lists,
+        "session_definitions": session_definitions,
+        "session_40_wrapper": {
+            "body": span(0x95D3C, 18), "common_handler_call": call(0x95D46),
+        },
+        "session_02_wrapper": {
+            "body": span(0x95D1C, 16), "common_handler_call": call(0x95D24),
+        },
+        "ordinary_dispatch_event": {
+            "slot": address(0x26B18), "handler": address(u32(0x26B18)),
+            "handler_body": span(0x922AA, 62),
+            "dispatcher_adapter_call": call(0x922CE),
+            "service_dispatcher_call": call(0x91C7A),
+        },
+        "communication_control_configuration": {
+            "all_channel_count": image[0x261C8],
+            "all_channel_table": address(all_channels),
+            "all_channels": [
+                {"enabled": image[all_channels + n * 2],
+                 "channel": image[all_channels + n * 2 + 1]}
+                for n in range(image[0x261C8])
+            ],
+            "specific_channel_count": image[0x261C9],
+            "specific_channel_table": address(u32(0x261D0)),
+            "subnode_count": u16(0x261CA),
+            "subnode_table": address(u32(0x261D4)),
+            "raw": span(0x261C4, 20),
+        },
+    }
+
     return {
         "schema": "f33-offline-recovery-structure-v1",
         "source": {"image": str(IMAGE.relative_to(ROOT)), "sha256": digest,
@@ -190,6 +270,7 @@ def analyze(image: bytes) -> dict[str, object]:
             "receive_completion": address(u32(0x21898))},
         "unused_special_callback": span(0x814AC, 2),
         "stock_xcp_dispatch_gate": span(0x30D68, 1),
+        "network_diagnostic_modes": network_modes,
         "reviewed_nondefault_interrupt_entries": vectors,
         "application_direct_vectors": direct_vectors,
         "default_exception": span(0x62E1E, 38),
