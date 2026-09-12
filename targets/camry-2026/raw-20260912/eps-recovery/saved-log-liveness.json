@@ -1,0 +1,5916 @@
+{
+  "scope": "offline saved-log observation only; CAN spans exclude repeated initData metadata; CAN IDs are not independently authenticated source identity; no EPS supply-terminal measurement or live fault-register capture",
+  "format_scope": "Address, source, payload length and timing only. Short-frame FDF/BRS are not inferred from length or from a newer reader schema. logger_build identifies the producer revision for a separate schema/plumbing audit.",
+  "eps_generated_tx_ids": [
+    "0x030",
+    "0x351",
+    "0x394",
+    "0x4A3",
+    "0x4C8"
+  ],
+  "files": [
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-10.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "be25deb6e99b59a62aee22b23bbca8c7b07de191",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:03:32.413374+00:00",
+      "wall_end_utc": "2026-09-11T19:04:32.406484+00:00",
+      "duration_s": 59.99311,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 12738,
+        "median_mV": 13002,
+        "max_mV": 13178,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 5990,
+        "can": 5974,
+        "carControl": 5973,
+        "carOutput": 5974,
+        "carState": 5974,
+        "controlsState": 5973,
+        "deviceMotion": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "gyroscope": 5937,
+        "logMessage": 156,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarTracks": 1195,
+        "selfdriveState": 5973,
+        "sendcan": 5974,
+        "soundPressure": 600,
+        "ubloxGnss": 1051,
+        "ubloxRaw": 940,
+        "uiDebug": 3566,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "drivingModelData": 1200,
+        "modelV2": 1200,
+        "extrinsicsCalibration": 240,
+        "cabinEncodeIdx": 1200,
+        "longitudinalPlan": 1199,
+        "driverAssistance": 1199,
+        "radarState": 1199,
+        "pandaStates": 597,
+        "peripheralState": 120,
+        "lateralDelay": 240,
+        "deviceState": 120,
+        "managerState": 120,
+        "gpsLocationExternal": 316,
+        "lateralTorqueParameters": 240,
+        "operatingSystemLog": 227,
+        "temperatureSensor": 120,
+        "onroadEvents": 60,
+        "errorLogMessage": 2,
+        "procLog": 30,
+        "clocks": 6,
+        "thumbnail": 1,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 78149,
+        "can/src2": 4920,
+        "can/src128": 4920,
+        "can/src129": 2987,
+        "can/src130": 18720,
+        "can/src0": 18720,
+        "sendcan/src1": 2987,
+        "sendcan/src0": 2400
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.99311
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.972912
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.009695,
+          "last_relative_s": 59.984333
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.99311
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-11.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "be25deb6e99b59a62aee22b23bbca8c7b07de191",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:04:32.416406+00:00",
+      "wall_end_utc": "2026-09-11T19:05:32.411680+00:00",
+      "duration_s": 59.995274,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 12771,
+        "median_mV": 13013,
+        "max_mV": 13189,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "cabinEncodeIdx": 1200,
+        "selfdriveState": 5974,
+        "uiDebug": 3577,
+        "accelerometer": 5992,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5974,
+        "carControl": 5974,
+        "carOutput": 5974,
+        "carState": 5974,
+        "controlsState": 5974,
+        "deviceMotion": 1200,
+        "driverAssistance": 1201,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "drivingModelData": 1200,
+        "extrinsicsCalibration": 240,
+        "gpsLocationExternal": 360,
+        "gyroscope": 5959,
+        "logMessage": 142,
+        "longitudinalPlan": 1201,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "pandaStates": 597,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1201,
+        "radarTracks": 1195,
+        "sendcan": 5974,
+        "soundPressure": 600,
+        "ubloxGnss": 1094,
+        "ubloxRaw": 922,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "lateralDelay": 240,
+        "lateralTorqueParameters": 240,
+        "procLog": 30,
+        "peripheralState": 119,
+        "deviceState": 119,
+        "managerState": 119,
+        "temperatureSensor": 120,
+        "onroadEvents": 66,
+        "clocks": 6,
+        "carParams": 2,
+        "thumbnail": 1,
+        "operatingSystemLog": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 78176,
+        "can/src2": 4920,
+        "can/src128": 4920,
+        "can/src129": 2987,
+        "can/src130": 18720,
+        "can/src0": 18720,
+        "sendcan/src1": 2987,
+        "sendcan/src0": 2030,
+        "can/src192": 2
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.995274
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.975209
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.010721,
+          "last_relative_s": 59.986553
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.995274
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-12.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "be25deb6e99b59a62aee22b23bbca8c7b07de191",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:05:32.421579+00:00",
+      "wall_end_utc": "2026-09-11T19:06:32.413542+00:00",
+      "duration_s": 59.991963,
+      "panda_supply": {
+        "samples": 598,
+        "min_mV": 12804,
+        "median_mV": 12991,
+        "max_mV": 13189,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 598
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 5992,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5974,
+        "carControl": 5974,
+        "carOutput": 5974,
+        "carState": 5974,
+        "controlsState": 5974,
+        "deviceMotion": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "drivingModelData": 1200,
+        "extrinsicsCalibration": 240,
+        "gyroscope": 5948,
+        "logMessage": 146,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "pandaStates": 598,
+        "qNarrowRoadEncodeIdx": 1200,
+        "selfdriveState": 5974,
+        "sendcan": 5974,
+        "soundPressure": 600,
+        "ubloxGnss": 1139,
+        "ubloxRaw": 942,
+        "uiDebug": 3578,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinEncodeIdx": 1200,
+        "driverAssistance": 1200,
+        "longitudinalPlan": 1200,
+        "radarState": 1200,
+        "radarTracks": 1194,
+        "lateralDelay": 240,
+        "gpsLocationExternal": 415,
+        "peripheralState": 120,
+        "deviceState": 120,
+        "managerState": 120,
+        "lateralTorqueParameters": 240,
+        "onroadEvents": 69,
+        "temperatureSensor": 120,
+        "procLog": 30,
+        "clocks": 6,
+        "thumbnail": 1,
+        "operatingSystemLog": 11,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src2": 4920,
+        "can/src128": 4919,
+        "can/src1": 78210,
+        "can/src129": 2987,
+        "can/src130": 18720,
+        "can/src0": 18720,
+        "sendcan/src1": 2987,
+        "sendcan/src0": 2183,
+        "can/src192": 4
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.983114
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.971892
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.010821,
+          "last_relative_s": 59.991963
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.991963
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-3.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "be25deb6e99b59a62aee22b23bbca8c7b07de191",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T18:56:32.407358+00:00",
+      "wall_end_utc": "2026-09-11T18:57:32.399347+00:00",
+      "duration_s": 59.991989,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 12804,
+        "median_mV": 13035,
+        "max_mV": 13266,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 5986,
+        "cameraOdometry": 1200,
+        "can": 5974,
+        "carControl": 5974,
+        "carOutput": 5974,
+        "carState": 5974,
+        "controlsState": 5974,
+        "deviceMotion": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "drivingModelData": 1200,
+        "extrinsicsCalibration": 240,
+        "gyroscope": 5924,
+        "logMessage": 164,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarTracks": 1195,
+        "selfdriveState": 5973,
+        "sendcan": 5974,
+        "soundPressure": 600,
+        "ubloxGnss": 1033,
+        "ubloxRaw": 1108,
+        "uiDebug": 3590,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinCameraState": 1200,
+        "longitudinalPlan": 1199,
+        "driverAssistance": 1199,
+        "radarState": 1199,
+        "pandaStates": 597,
+        "cabinEncodeIdx": 1200,
+        "lateralDelay": 240,
+        "gpsLocationExternal": 300,
+        "lateralTorqueParameters": 240,
+        "peripheralState": 119,
+        "deviceState": 119,
+        "procLog": 30,
+        "managerState": 119,
+        "temperatureSensor": 120,
+        "onroadEvents": 75,
+        "operatingSystemLog": 236,
+        "clocks": 6,
+        "thumbnail": 1,
+        "carParams": 1,
+        "errorLogMessage": 1
+      },
+      "frame_counts_by_source": {
+        "can/src130": 18719,
+        "can/src0": 18719,
+        "can/src1": 78140,
+        "can/src128": 4920,
+        "can/src2": 4920,
+        "can/src129": 2987,
+        "sendcan/src1": 2987,
+        "sendcan/src0": 775
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.991989
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.01853,
+          "last_relative_s": 59.991989
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.981131
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.991989
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-4.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "be25deb6e99b59a62aee22b23bbca8c7b07de191",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T18:57:32.410208+00:00",
+      "wall_end_utc": "2026-09-11T18:58:32.402383+00:00",
+      "duration_s": 59.992175,
+      "panda_supply": {
+        "samples": 598,
+        "min_mV": 12804,
+        "median_mV": 13035,
+        "max_mV": 13255,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 598
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 6002,
+        "cabinCameraState": 1200,
+        "can": 5973,
+        "carControl": 5973,
+        "carOutput": 5973,
+        "carState": 5973,
+        "controlsState": 5973,
+        "deviceMotion": 1200,
+        "deviceState": 120,
+        "driverAssistance": 1201,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "gyroscope": 5945,
+        "logMessage": 149,
+        "longitudinalPlan": 1201,
+        "managerState": 120,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "pandaStates": 598,
+        "peripheralState": 120,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1200,
+        "radarTracks": 1194,
+        "selfdriveState": 5974,
+        "sendcan": 5973,
+        "soundPressure": 600,
+        "ubloxRaw": 1095,
+        "uiDebug": 3581,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinEncodeIdx": 1200,
+        "cameraOdometry": 1200,
+        "drivingModelData": 1200,
+        "extrinsicsCalibration": 240,
+        "modelV2": 1200,
+        "ubloxGnss": 1042,
+        "onroadEvents": 64,
+        "lateralDelay": 240,
+        "gpsLocationExternal": 300,
+        "lateralTorqueParameters": 240,
+        "temperatureSensor": 120,
+        "procLog": 30,
+        "clocks": 6,
+        "operatingSystemLog": 14,
+        "thumbnail": 1,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src130": 18719,
+        "can/src0": 18719,
+        "can/src1": 78165,
+        "can/src2": 4920,
+        "can/src129": 2987,
+        "can/src128": 4919,
+        "sendcan/src0": 1856,
+        "sendcan/src1": 2986,
+        "can/src192": 1
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.992175
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.021793,
+          "last_relative_s": 59.992175
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.013127,
+          "last_relative_s": 59.98247
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.992175
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-5.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "be25deb6e99b59a62aee22b23bbca8c7b07de191",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T18:58:32.411991+00:00",
+      "wall_end_utc": "2026-09-11T18:59:32.405571+00:00",
+      "duration_s": 59.99358,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 12672,
+        "median_mV": 13046,
+        "max_mV": 13244,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 6004,
+        "can": 5974,
+        "carControl": 5974,
+        "carOutput": 5974,
+        "carState": 5974,
+        "controlsState": 5974,
+        "deviceMotion": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "gyroscope": 5945,
+        "logMessage": 143,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1201,
+        "radarTracks": 1195,
+        "selfdriveState": 5973,
+        "sendcan": 5974,
+        "soundPressure": 600,
+        "ubloxGnss": 1034,
+        "ubloxRaw": 1034,
+        "uiDebug": 3595,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinCameraState": 1200,
+        "cabinEncodeIdx": 1200,
+        "cameraOdometry": 1200,
+        "drivingModelData": 1200,
+        "extrinsicsCalibration": 240,
+        "modelV2": 1200,
+        "longitudinalPlan": 1200,
+        "driverAssistance": 1200,
+        "pandaStates": 597,
+        "lateralDelay": 240,
+        "gpsLocationExternal": 300,
+        "lateralTorqueParameters": 240,
+        "procLog": 30,
+        "peripheralState": 119,
+        "deviceState": 119,
+        "managerState": 119,
+        "onroadEvents": 71,
+        "temperatureSensor": 120,
+        "errorLogMessage": 2,
+        "clocks": 6,
+        "thumbnail": 1,
+        "carParams": 1,
+        "operatingSystemLog": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 78230,
+        "can/src130": 18720,
+        "can/src0": 18720,
+        "can/src2": 4920,
+        "can/src129": 2987,
+        "can/src128": 4920,
+        "sendcan/src1": 2987,
+        "sendcan/src0": 406,
+        "can/src192": 2
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.99358
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.020167,
+          "last_relative_s": 59.99358
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.010392,
+          "last_relative_s": 59.983907
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.99358
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-6.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "be25deb6e99b59a62aee22b23bbca8c7b07de191",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T18:59:32.415719+00:00",
+      "wall_end_utc": "2026-09-11T19:00:32.399718+00:00",
+      "duration_s": 59.983999,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 12804,
+        "median_mV": 13046,
+        "max_mV": 13222,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 5997,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5973,
+        "carControl": 5973,
+        "carOutput": 5973,
+        "carState": 5973,
+        "controlsState": 5973,
+        "deviceMotion": 1200,
+        "driverAssistance": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "drivingModelData": 1200,
+        "extrinsicsCalibration": 240,
+        "gyroscope": 5940,
+        "logMessage": 144,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "pandaStates": 597,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarTracks": 1195,
+        "selfdriveState": 5974,
+        "sendcan": 5973,
+        "soundPressure": 600,
+        "ubloxGnss": 1029,
+        "ubloxRaw": 1010,
+        "uiDebug": 3600,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "peripheralState": 120,
+        "radarState": 1200,
+        "cabinEncodeIdx": 1200,
+        "deviceState": 120,
+        "managerState": 120,
+        "lateralDelay": 240,
+        "gpsLocationExternal": 300,
+        "lateralTorqueParameters": 240,
+        "temperatureSensor": 120,
+        "onroadEvents": 72,
+        "procLog": 30,
+        "carParams": 2,
+        "clocks": 6,
+        "thumbnail": 1,
+        "operatingSystemLog": 12
+      },
+      "frame_counts_by_source": {
+        "can/src1": 78239,
+        "can/src130": 18720,
+        "can/src0": 18720,
+        "can/src128": 4920,
+        "can/src2": 4920,
+        "can/src129": 2986,
+        "sendcan/src1": 2987,
+        "sendcan/src0": 580,
+        "can/src192": 4
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.983999
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 1999,
+          "first_relative_s": 0.020127,
+          "last_relative_s": 59.964525
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.010294,
+          "last_relative_s": 59.983999
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.983999
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-9.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "be25deb6e99b59a62aee22b23bbca8c7b07de191",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:02:32.410857+00:00",
+      "wall_end_utc": "2026-09-11T19:03:32.402651+00:00",
+      "duration_s": 59.991794,
+      "panda_supply": {
+        "samples": 598,
+        "min_mV": 12782,
+        "median_mV": 13002,
+        "max_mV": 13222,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 598
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "cabinEncodeIdx": 1200,
+        "accelerometer": 5989,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5974,
+        "carControl": 5974,
+        "carOutput": 5974,
+        "carState": 5974,
+        "controlsState": 5974,
+        "deviceMotion": 1200,
+        "driverAssistance": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "drivingModelData": 1200,
+        "extrinsicsCalibration": 240,
+        "gyroscope": 5955,
+        "logMessage": 174,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "pandaStates": 598,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1200,
+        "radarTracks": 1195,
+        "selfdriveState": 5974,
+        "sendcan": 5974,
+        "soundPressure": 600,
+        "ubloxGnss": 1028,
+        "ubloxRaw": 1022,
+        "uiDebug": 3597,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "lateralDelay": 240,
+        "gpsLocationExternal": 301,
+        "lateralTorqueParameters": 240,
+        "procLog": 30,
+        "peripheralState": 119,
+        "deviceState": 119,
+        "managerState": 119,
+        "onroadEvents": 83,
+        "temperatureSensor": 120,
+        "clocks": 6,
+        "thumbnail": 1,
+        "operatingSystemLog": 130,
+        "carParams": 1,
+        "errorLogMessage": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 77921,
+        "can/src128": 4918,
+        "can/src2": 4918,
+        "can/src129": 2987,
+        "can/src130": 18720,
+        "can/src0": 18720,
+        "sendcan/src1": 2987,
+        "sendcan/src0": 29
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.991794
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.972936
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.982121
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.991794
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-0.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:34:06.478791+00:00",
+      "wall_end_utc": "2026-09-11T19:35:07.435910+00:00",
+      "duration_s": 60.957119,
+      "panda_supply": {
+        "samples": 607,
+        "min_mV": 13409,
+        "median_mV": 13673,
+        "max_mV": 13926,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 607
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "can": 6066,
+        "deviceState": 122,
+        "logMessage": 562,
+        "pandaStates": 607,
+        "peripheralState": 122,
+        "uiDebug": 3656,
+        "operatingSystemLog": 368,
+        "managerState": 123,
+        "soundPressure": 606,
+        "temperatureSensor": 121,
+        "accelerometer": 6019,
+        "gyroscope": 5961,
+        "wideRoadCameraState": 1204,
+        "narrowRoadCameraState": 1203,
+        "cabinCameraState": 1203,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinEncodeIdx": 1200,
+        "touch": 18,
+        "procLog": 30,
+        "ubloxGnss": 1237,
+        "ubloxRaw": 1227,
+        "gpsLocationExternal": 525,
+        "errorLogMessage": 2,
+        "carOutput": 5829,
+        "carParams": 2,
+        "carState": 5829,
+        "selfdriveState": 5829,
+        "onroadEvents": 69,
+        "radarTracks": 1165,
+        "extrinsicsCalibration": 231,
+        "controlsState": 5820,
+        "carControl": 5820,
+        "radarState": 1149,
+        "lateralDelay": 230,
+        "lateralTorqueParameters": 230,
+        "modelV2": 1129,
+        "cameraOdometry": 1129,
+        "drivingModelData": 1129,
+        "deviceMotion": 1129,
+        "vehicleParameters": 1129,
+        "driverAssistance": 1129,
+        "longitudinalPlan": 1129,
+        "thumbnail": 1,
+        "driverMonitoringState": 1092,
+        "driverStateV2": 1092,
+        "sendcan": 5354,
+        "clocks": 6
+      },
+      "frame_counts_by_source": {
+        "can/src0": 19613,
+        "can/src1": 78719,
+        "can/src2": 7261,
+        "sendcan/src1": 2677,
+        "can/src193": 4,
+        "can/src130": 16754,
+        "can/src129": 2673,
+        "can/src128": 4402
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 6095,
+          "first_relative_s": 0.0,
+          "last_relative_s": 60.957119
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2031,
+          "first_relative_s": 0.046604,
+          "last_relative_s": 60.948479
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2436,
+          "first_relative_s": 0.046604,
+          "last_relative_s": 60.948479
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6094,
+          "first_relative_s": 0.0,
+          "last_relative_s": 60.957119
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-1.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:35:07.447328+00:00",
+      "wall_end_utc": "2026-09-11T19:36:07.428783+00:00",
+      "duration_s": 59.981455,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 13409,
+        "median_mV": 13662,
+        "max_mV": 13926,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "cabinEncodeIdx": 1200,
+        "accelerometer": 5983,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5972,
+        "carControl": 5972,
+        "carOutput": 5972,
+        "carState": 5972,
+        "controlsState": 5972,
+        "deviceMotion": 1199,
+        "driverAssistance": 1200,
+        "driverStateV2": 1199,
+        "drivingModelData": 1200,
+        "gyroscope": 5911,
+        "logMessage": 167,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1200,
+        "radarTracks": 1195,
+        "selfdriveState": 5972,
+        "sendcan": 5972,
+        "soundPressure": 600,
+        "uiDebug": 3591,
+        "vehicleParameters": 1199,
+        "wideRoadCameraState": 1199,
+        "wideRoadEncodeIdx": 1200,
+        "driverMonitoringState": 1199,
+        "pandaStates": 597,
+        "ubloxRaw": 1298,
+        "gpsLocationExternal": 577,
+        "ubloxGnss": 1307,
+        "lateralTorqueParameters": 240,
+        "lateralDelay": 240,
+        "extrinsicsCalibration": 240,
+        "procLog": 30,
+        "temperatureSensor": 120,
+        "operatingSystemLog": 481,
+        "peripheralState": 119,
+        "deviceState": 119,
+        "managerState": 119,
+        "onroadEvents": 82,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1,
+        "errorLogMessage": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 78055,
+        "can/src128": 4918,
+        "can/src2": 4917,
+        "can/src129": 2986,
+        "can/src130": 18716,
+        "can/src0": 18716,
+        "sendcan/src1": 2986,
+        "sendcan/src0": 749,
+        "can/src192": 2
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5998,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.981455
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.00975,
+          "last_relative_s": 59.981455
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2399,
+          "first_relative_s": 0.00975,
+          "last_relative_s": 59.960498
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.981455
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-10.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:44:07.456595+00:00",
+      "wall_end_utc": "2026-09-11T19:45:07.458404+00:00",
+      "duration_s": 60.001809,
+      "panda_supply": {
+        "samples": 598,
+        "min_mV": 13409,
+        "median_mV": 13640,
+        "max_mV": 13805,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 598
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "cabinEncodeIdx": 1200,
+        "carOutput": 5974,
+        "carState": 5974,
+        "sendcan": 5974,
+        "accelerometer": 5968,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5973,
+        "carControl": 5973,
+        "controlsState": 5973,
+        "deviceMotion": 1201,
+        "driverAssistance": 1200,
+        "driverMonitoringState": 1201,
+        "driverStateV2": 1201,
+        "drivingModelData": 1200,
+        "gpsLocationExternal": 569,
+        "gyroscope": 5904,
+        "logMessage": 152,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1201,
+        "narrowRoadEncodeIdx": 1200,
+        "pandaStates": 598,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1200,
+        "radarTracks": 1195,
+        "selfdriveState": 5973,
+        "soundPressure": 600,
+        "ubloxGnss": 1309,
+        "ubloxRaw": 1276,
+        "uiDebug": 3590,
+        "vehicleParameters": 1201,
+        "wideRoadCameraState": 1201,
+        "wideRoadEncodeIdx": 1200,
+        "lateralTorqueParameters": 240,
+        "lateralDelay": 240,
+        "onroadEvents": 60,
+        "extrinsicsCalibration": 240,
+        "temperatureSensor": 120,
+        "operatingSystemLog": 156,
+        "errorLogMessage": 2,
+        "peripheralState": 119,
+        "deviceState": 119,
+        "managerState": 119,
+        "procLog": 30,
+        "carParams": 2,
+        "thumbnail": 1,
+        "clocks": 6
+      },
+      "frame_counts_by_source": {
+        "sendcan/src1": 2987,
+        "can/src1": 77494,
+        "can/src128": 4922,
+        "can/src2": 4922,
+        "can/src129": 2986,
+        "can/src130": 18720,
+        "can/src0": 18720
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 6001,
+          "first_relative_s": 0.0,
+          "last_relative_s": 60.001809
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.009755,
+          "last_relative_s": 59.98291
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.98291
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 60.001809
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-11.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:45:07.467968+00:00",
+      "wall_end_utc": "2026-09-11T19:46:07.449923+00:00",
+      "duration_s": 59.981955,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 13387,
+        "median_mV": 13651,
+        "max_mV": 13805,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "cabinEncodeIdx": 1200,
+        "accelerometer": 5966,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5971,
+        "carControl": 5971,
+        "carOutput": 5971,
+        "carState": 5971,
+        "controlsState": 5971,
+        "deviceMotion": 1199,
+        "driverAssistance": 1200,
+        "driverMonitoringState": 1199,
+        "driverStateV2": 1199,
+        "drivingModelData": 1200,
+        "gpsLocationExternal": 542,
+        "gyroscope": 5901,
+        "logMessage": 151,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1199,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1200,
+        "radarTracks": 1194,
+        "selfdriveState": 5972,
+        "sendcan": 5971,
+        "soundPressure": 600,
+        "ubloxGnss": 1276,
+        "ubloxRaw": 1219,
+        "uiDebug": 3583,
+        "vehicleParameters": 1199,
+        "wideRoadCameraState": 1199,
+        "wideRoadEncodeIdx": 1200,
+        "lateralTorqueParameters": 240,
+        "pandaStates": 597,
+        "operatingSystemLog": 181,
+        "lateralDelay": 240,
+        "peripheralState": 120,
+        "deviceState": 119,
+        "extrinsicsCalibration": 240,
+        "managerState": 119,
+        "procLog": 30,
+        "temperatureSensor": 120,
+        "onroadEvents": 60,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 77465,
+        "can/src129": 2986,
+        "can/src130": 18719,
+        "can/src0": 18719,
+        "can/src128": 4918,
+        "can/src2": 4918,
+        "sendcan/src1": 2986
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5998,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.975134
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.975134
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.975134
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.975134
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-12.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:46:07.459998+00:00",
+      "wall_end_utc": "2026-09-11T19:47:07.446528+00:00",
+      "duration_s": 59.98653,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 13343,
+        "median_mV": 13651,
+        "max_mV": 13816,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "carControl": 5971,
+        "controlsState": 5971,
+        "deviceMotion": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "accelerometer": 5958,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5971,
+        "carOutput": 5971,
+        "carState": 5971,
+        "driverAssistance": 1200,
+        "drivingModelData": 1200,
+        "gyroscope": 5883,
+        "logMessage": 152,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1200,
+        "radarTracks": 1194,
+        "selfdriveState": 5970,
+        "sendcan": 5971,
+        "soundPressure": 600,
+        "ubloxGnss": 1277,
+        "uiDebug": 3592,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinEncodeIdx": 1200,
+        "pandaStates": 597,
+        "ubloxRaw": 1235,
+        "deviceState": 120,
+        "gpsLocationExternal": 541,
+        "lateralTorqueParameters": 240,
+        "operatingSystemLog": 499,
+        "managerState": 120,
+        "lateralDelay": 240,
+        "extrinsicsCalibration": 240,
+        "temperatureSensor": 120,
+        "peripheralState": 119,
+        "onroadEvents": 59,
+        "procLog": 30,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 77480,
+        "can/src129": 2986,
+        "can/src130": 18712,
+        "can/src0": 18712,
+        "can/src128": 4920,
+        "can/src2": 4920,
+        "sendcan/src1": 2985
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.98653
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.010792,
+          "last_relative_s": 59.98653
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2399,
+          "first_relative_s": 0.010792,
+          "last_relative_s": 59.966826
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.98653
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-13.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:47:07.455715+00:00",
+      "wall_end_utc": "2026-09-11T19:48:07.438212+00:00",
+      "duration_s": 59.982497,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 13409,
+        "median_mV": 13673,
+        "max_mV": 13827,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 5973,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5972,
+        "carControl": 5973,
+        "carOutput": 5972,
+        "carState": 5972,
+        "controlsState": 5973,
+        "deviceMotion": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "drivingModelData": 1200,
+        "gyroscope": 5908,
+        "logMessage": 150,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "onroadEvents": 60,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1200,
+        "radarTracks": 1194,
+        "selfdriveState": 5973,
+        "sendcan": 5972,
+        "soundPressure": 600,
+        "ubloxGnss": 1206,
+        "uiDebug": 3598,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinEncodeIdx": 1200,
+        "driverAssistance": 1200,
+        "pandaStates": 597,
+        "ubloxRaw": 1135,
+        "gpsLocationExternal": 471,
+        "lateralTorqueParameters": 240,
+        "operatingSystemLog": 173,
+        "lateralDelay": 240,
+        "extrinsicsCalibration": 240,
+        "peripheralState": 119,
+        "temperatureSensor": 120,
+        "procLog": 30,
+        "deviceState": 119,
+        "managerState": 119,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 77468,
+        "can/src130": 18712,
+        "can/src0": 18712,
+        "can/src129": 2986,
+        "can/src128": 4918,
+        "can/src2": 4918,
+        "sendcan/src1": 2986
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.982497
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 1999,
+          "first_relative_s": 0.019483,
+          "last_relative_s": 59.963116
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.972873
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.982497
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-14.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:48:07.449283+00:00",
+      "wall_end_utc": "2026-09-11T19:49:07.322030+00:00",
+      "duration_s": 59.872747,
+      "panda_supply": {
+        "samples": 596,
+        "min_mV": 13321,
+        "median_mV": 13662,
+        "max_mV": 13838,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 595,
+        "(False, False)": 1
+      },
+      "bus_error_samples": {
+        "bus0": 1
+      },
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "cabinEncodeIdx": 1198,
+        "can": 5960,
+        "carOutput": 5961,
+        "carState": 5961,
+        "ubloxRaw": 1139,
+        "accelerometer": 5987,
+        "cabinCameraState": 1197,
+        "cameraOdometry": 1197,
+        "carControl": 5962,
+        "controlsState": 5962,
+        "deviceMotion": 1198,
+        "driverAssistance": 1197,
+        "driverMonitoringState": 1198,
+        "driverStateV2": 1198,
+        "drivingModelData": 1197,
+        "gyroscope": 5918,
+        "logMessage": 151,
+        "longitudinalPlan": 1197,
+        "modelV2": 1197,
+        "narrowRoadCameraState": 1198,
+        "narrowRoadEncodeIdx": 1199,
+        "pandaStates": 596,
+        "peripheralState": 120,
+        "qNarrowRoadEncodeIdx": 1199,
+        "radarState": 1197,
+        "radarTracks": 1193,
+        "selfdriveState": 5961,
+        "sendcan": 5961,
+        "soundPressure": 599,
+        "ubloxGnss": 1230,
+        "uiDebug": 3591,
+        "vehicleParameters": 1198,
+        "wideRoadCameraState": 1198,
+        "wideRoadEncodeIdx": 1199,
+        "gpsLocationExternal": 499,
+        "lateralTorqueParameters": 240,
+        "operatingSystemLog": 301,
+        "lateralDelay": 240,
+        "deviceState": 120,
+        "managerState": 119,
+        "extrinsicsCalibration": 239,
+        "onroadEvents": 62,
+        "temperatureSensor": 120,
+        "procLog": 30,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 77193,
+        "can/src130": 18639,
+        "can/src0": 18639,
+        "can/src128": 4898,
+        "can/src2": 4898,
+        "can/src129": 2977,
+        "sendcan/src1": 2981,
+        "can/src193": 3
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5978,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.772697
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 1991,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.703125
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2389,
+          "first_relative_s": 0.01024,
+          "last_relative_s": 59.713737
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 5974,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.732841
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-2.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:36:07.438251+00:00",
+      "wall_end_utc": "2026-09-11T19:37:07.445928+00:00",
+      "duration_s": 60.007677,
+      "panda_supply": {
+        "samples": 598,
+        "min_mV": 13354,
+        "median_mV": 13662,
+        "max_mV": 13860,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 598
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 5979,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5974,
+        "carControl": 5974,
+        "carOutput": 5974,
+        "carState": 5974,
+        "controlsState": 5974,
+        "deviceMotion": 1201,
+        "driverAssistance": 1200,
+        "driverMonitoringState": 1201,
+        "driverStateV2": 1201,
+        "drivingModelData": 1200,
+        "gyroscope": 5920,
+        "logMessage": 145,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1201,
+        "narrowRoadEncodeIdx": 1200,
+        "pandaStates": 598,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1200,
+        "radarTracks": 1195,
+        "selfdriveState": 5973,
+        "sendcan": 5974,
+        "ubloxGnss": 1303,
+        "uiDebug": 3593,
+        "vehicleParameters": 1201,
+        "wideRoadCameraState": 1201,
+        "wideRoadEncodeIdx": 1200,
+        "cabinEncodeIdx": 1200,
+        "soundPressure": 600,
+        "ubloxRaw": 1273,
+        "gpsLocationExternal": 564,
+        "lateralTorqueParameters": 240,
+        "lateralDelay": 240,
+        "operatingSystemLog": 183,
+        "peripheralState": 120,
+        "extrinsicsCalibration": 240,
+        "deviceState": 119,
+        "managerState": 119,
+        "temperatureSensor": 120,
+        "onroadEvents": 68,
+        "procLog": 30,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 78193,
+        "can/src2": 4923,
+        "can/src130": 18724,
+        "can/src0": 18724,
+        "can/src128": 4921,
+        "can/src129": 2986,
+        "sendcan/src1": 2987,
+        "sendcan/src0": 1957,
+        "can/src192": 20
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 6002,
+          "first_relative_s": 0.0,
+          "last_relative_s": 60.007677
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.019457,
+          "last_relative_s": 59.994348
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2401,
+          "first_relative_s": 0.0,
+          "last_relative_s": 60.007677
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6001,
+          "first_relative_s": 0.0,
+          "last_relative_s": 60.007677
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-3.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:37:07.454676+00:00",
+      "wall_end_utc": "2026-09-11T19:38:07.431742+00:00",
+      "duration_s": 59.977066,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 13376,
+        "median_mV": 13673,
+        "max_mV": 13882,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 5980,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5971,
+        "carControl": 5971,
+        "carOutput": 5971,
+        "carState": 5971,
+        "controlsState": 5971,
+        "deviceState": 120,
+        "drivingModelData": 1200,
+        "gyroscope": 5911,
+        "logMessage": 144,
+        "managerState": 120,
+        "modelV2": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "selfdriveState": 5971,
+        "sendcan": 5971,
+        "uiDebug": 3589,
+        "wideRoadEncodeIdx": 1200,
+        "driverAssistance": 1200,
+        "longitudinalPlan": 1200,
+        "radarState": 1200,
+        "cabinEncodeIdx": 1200,
+        "soundPressure": 600,
+        "driverStateV2": 1199,
+        "driverMonitoringState": 1199,
+        "narrowRoadCameraState": 1199,
+        "deviceMotion": 1199,
+        "radarTracks": 1194,
+        "wideRoadCameraState": 1199,
+        "vehicleParameters": 1199,
+        "ubloxRaw": 1224,
+        "pandaStates": 597,
+        "lateralTorqueParameters": 240,
+        "ubloxGnss": 1272,
+        "lateralDelay": 240,
+        "gpsLocationExternal": 541,
+        "extrinsicsCalibration": 240,
+        "onroadEvents": 66,
+        "temperatureSensor": 120,
+        "procLog": 30,
+        "operatingSystemLog": 128,
+        "peripheralState": 119,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 78148,
+        "can/src129": 2986,
+        "can/src128": 4918,
+        "can/src2": 4917,
+        "sendcan/src1": 2986,
+        "sendcan/src0": 2022,
+        "can/src130": 18707,
+        "can/src0": 18707,
+        "can/src192": 2
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5998,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.977066
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 1999,
+          "first_relative_s": 0.009747,
+          "last_relative_s": 59.95722
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2399,
+          "first_relative_s": 0.009747,
+          "last_relative_s": 59.967128
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.977066
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-4.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:38:07.442299+00:00",
+      "wall_end_utc": "2026-09-11T19:39:07.437790+00:00",
+      "duration_s": 59.995491,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 13431,
+        "median_mV": 13662,
+        "max_mV": 13849,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 5981,
+        "can": 5973,
+        "carControl": 5973,
+        "carOutput": 5973,
+        "carState": 5973,
+        "controlsState": 5973,
+        "deviceMotion": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "gyroscope": 5909,
+        "logMessage": 144,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "selfdriveState": 5973,
+        "sendcan": 5973,
+        "ubloxGnss": 1289,
+        "uiDebug": 3591,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "driverAssistance": 1200,
+        "drivingModelData": 1200,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "radarState": 1200,
+        "radarTracks": 1194,
+        "cabinEncodeIdx": 1200,
+        "soundPressure": 600,
+        "ubloxRaw": 1242,
+        "gpsLocationExternal": 560,
+        "pandaStates": 597,
+        "lateralDelay": 240,
+        "lateralTorqueParameters": 240,
+        "operatingSystemLog": 230,
+        "extrinsicsCalibration": 240,
+        "peripheralState": 119,
+        "deviceState": 119,
+        "managerState": 119,
+        "temperatureSensor": 120,
+        "onroadEvents": 74,
+        "procLog": 30,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 78205,
+        "can/src130": 18719,
+        "can/src0": 18719,
+        "can/src129": 2987,
+        "can/src128": 4920,
+        "can/src2": 4920,
+        "sendcan/src1": 2986,
+        "sendcan/src0": 1259,
+        "can/src192": 2
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.995491
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.975103
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.985862
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.995491
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-5.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:39:07.449769+00:00",
+      "wall_end_utc": "2026-09-11T19:40:07.439185+00:00",
+      "duration_s": 59.989416,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 13354,
+        "median_mV": 13662,
+        "max_mV": 13827,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 5992,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5972,
+        "carControl": 5972,
+        "carOutput": 5972,
+        "carState": 5972,
+        "controlsState": 5972,
+        "deviceMotion": 1200,
+        "driverAssistance": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "drivingModelData": 1200,
+        "gyroscope": 5933,
+        "logMessage": 184,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1200,
+        "radarTracks": 1195,
+        "selfdriveState": 5972,
+        "sendcan": 5972,
+        "ubloxGnss": 1326,
+        "ubloxRaw": 1330,
+        "uiDebug": 3599,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "pandaStates": 597,
+        "soundPressure": 600,
+        "peripheralState": 120,
+        "cabinEncodeIdx": 1200,
+        "deviceState": 120,
+        "managerState": 120,
+        "gpsLocationExternal": 595,
+        "lateralTorqueParameters": 240,
+        "lateralDelay": 240,
+        "extrinsicsCalibration": 240,
+        "procLog": 30,
+        "temperatureSensor": 120,
+        "operatingSystemLog": 225,
+        "errorLogMessage": 2,
+        "onroadEvents": 74,
+        "carParams": 2,
+        "thumbnail": 1,
+        "clocks": 6
+      },
+      "frame_counts_by_source": {
+        "can/src130": 18720,
+        "can/src0": 18720,
+        "can/src1": 77748,
+        "can/src128": 4920,
+        "can/src2": 4920,
+        "can/src129": 2986,
+        "sendcan/src1": 2986
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.989416
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.970041
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.979765
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.989416
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-6.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:40:07.449204+00:00",
+      "wall_end_utc": "2026-09-11T19:41:07.444956+00:00",
+      "duration_s": 59.995752,
+      "panda_supply": {
+        "samples": 598,
+        "min_mV": 13409,
+        "median_mV": 13673,
+        "max_mV": 13838,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 598
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 5986,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5974,
+        "carControl": 5974,
+        "carOutput": 5973,
+        "carState": 5973,
+        "controlsState": 5974,
+        "deviceMotion": 1200,
+        "driverAssistance": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "drivingModelData": 1200,
+        "gyroscope": 5925,
+        "logMessage": 151,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "pandaStates": 598,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1200,
+        "radarTracks": 1194,
+        "selfdriveState": 5974,
+        "sendcan": 5973,
+        "ubloxGnss": 1333,
+        "uiDebug": 3600,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinEncodeIdx": 1200,
+        "soundPressure": 600,
+        "ubloxRaw": 1332,
+        "gpsLocationExternal": 591,
+        "onroadEvents": 60,
+        "lateralTorqueParameters": 240,
+        "lateralDelay": 240,
+        "operatingSystemLog": 373,
+        "extrinsicsCalibration": 240,
+        "temperatureSensor": 120,
+        "peripheralState": 119,
+        "deviceState": 119,
+        "managerState": 119,
+        "procLog": 30,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 77604,
+        "can/src130": 18720,
+        "can/src0": 18720,
+        "can/src128": 4920,
+        "can/src2": 4920,
+        "can/src129": 2986,
+        "sendcan/src1": 2987
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 6001,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.995752
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.968447
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.010463,
+          "last_relative_s": 59.995752
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.995752
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-7.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:41:07.455180+00:00",
+      "wall_end_utc": "2026-09-11T19:42:07.443692+00:00",
+      "duration_s": 59.988512,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 13354,
+        "median_mV": 13662,
+        "max_mV": 13838,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "cabinEncodeIdx": 1200,
+        "carOutput": 5974,
+        "carState": 5974,
+        "deviceMotion": 1200,
+        "driverStateV2": 1200,
+        "radarTracks": 1195,
+        "sendcan": 5973,
+        "uiDebug": 3599,
+        "vehicleParameters": 1200,
+        "accelerometer": 5985,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5973,
+        "carControl": 5973,
+        "controlsState": 5973,
+        "driverAssistance": 1200,
+        "driverMonitoringState": 1200,
+        "drivingModelData": 1200,
+        "gyroscope": 5926,
+        "logMessage": 151,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1200,
+        "selfdriveState": 5973,
+        "soundPressure": 600,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "gpsLocationExternal": 580,
+        "ubloxGnss": 1322,
+        "ubloxRaw": 1340,
+        "pandaStates": 597,
+        "lateralTorqueParameters": 240,
+        "peripheralState": 120,
+        "lateralDelay": 240,
+        "operatingSystemLog": 246,
+        "deviceState": 120,
+        "managerState": 120,
+        "extrinsicsCalibration": 240,
+        "procLog": 30,
+        "temperatureSensor": 120,
+        "onroadEvents": 60,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "sendcan/src1": 2986,
+        "can/src1": 77516,
+        "can/src129": 2987,
+        "can/src130": 18720,
+        "can/src0": 18720,
+        "can/src128": 4920,
+        "can/src2": 4920
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.010507,
+          "last_relative_s": 59.988512
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.969138
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.010507,
+          "last_relative_s": 59.988512
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.988512
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-8.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:42:07.453438+00:00",
+      "wall_end_utc": "2026-09-11T19:43:07.436848+00:00",
+      "duration_s": 59.98341,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 13387,
+        "median_mV": 13651,
+        "max_mV": 13827,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "cabinEncodeIdx": 1200,
+        "accelerometer": 5988,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5971,
+        "carControl": 5972,
+        "carOutput": 5971,
+        "carState": 5971,
+        "controlsState": 5972,
+        "deviceMotion": 1200,
+        "driverAssistance": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "drivingModelData": 1200,
+        "gyroscope": 5927,
+        "logMessage": 151,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "pandaStates": 597,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1200,
+        "radarTracks": 1194,
+        "selfdriveState": 5972,
+        "sendcan": 5972,
+        "soundPressure": 600,
+        "uiDebug": 3597,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "ubloxRaw": 1298,
+        "gpsLocationExternal": 567,
+        "ubloxGnss": 1306,
+        "lateralTorqueParameters": 240,
+        "lateralDelay": 240,
+        "extrinsicsCalibration": 240,
+        "temperatureSensor": 120,
+        "operatingSystemLog": 160,
+        "peripheralState": 119,
+        "deviceState": 119,
+        "managerState": 119,
+        "onroadEvents": 60,
+        "procLog": 30,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 77469,
+        "can/src129": 2986,
+        "can/src130": 18719,
+        "can/src0": 18719,
+        "can/src128": 4918,
+        "can/src2": 4918,
+        "sendcan/src1": 2986
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.98341
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.974901
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2399,
+          "first_relative_s": 0.020278,
+          "last_relative_s": 59.974901
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.98341
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-9.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T19:43:07.447626+00:00",
+      "wall_end_utc": "2026-09-11T19:44:07.445833+00:00",
+      "duration_s": 59.998207,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 13321,
+        "median_mV": 13651,
+        "max_mV": 13805,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "ubloxRaw": 1261,
+        "accelerometer": 5976,
+        "can": 5973,
+        "carControl": 5972,
+        "carOutput": 5972,
+        "carState": 5972,
+        "controlsState": 5972,
+        "deviceMotion": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "gyroscope": 5923,
+        "logMessage": 150,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarTracks": 1195,
+        "selfdriveState": 5972,
+        "sendcan": 5972,
+        "ubloxGnss": 1289,
+        "uiDebug": 3597,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "driverAssistance": 1200,
+        "drivingModelData": 1200,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "radarState": 1200,
+        "soundPressure": 600,
+        "pandaStates": 597,
+        "cabinEncodeIdx": 1200,
+        "gpsLocationExternal": 550,
+        "lateralTorqueParameters": 240,
+        "lateralDelay": 240,
+        "operatingSystemLog": 192,
+        "peripheralState": 120,
+        "deviceState": 120,
+        "managerState": 120,
+        "extrinsicsCalibration": 240,
+        "temperatureSensor": 120,
+        "procLog": 30,
+        "onroadEvents": 59,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src130": 18721,
+        "can/src0": 18721,
+        "can/src1": 77492,
+        "can/src128": 4920,
+        "can/src2": 4920,
+        "can/src129": 2986,
+        "sendcan/src1": 2986
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.998207
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.009776,
+          "last_relative_s": 59.988506
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.988506
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6001,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.998207
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d4--327b2c4bb8/rlog-0.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T20:31:47.111267+00:00",
+      "wall_end_utc": "2026-09-11T20:32:48.696100+00:00",
+      "duration_s": 61.584834,
+      "panda_supply": {
+        "samples": 613,
+        "min_mV": 11473,
+        "median_mV": 13750,
+        "max_mV": 13937,
+        "below_12000_mV": 3
+      },
+      "ignition_line_can": {
+        "(True, False)": 613
+      },
+      "bus_error_samples": {
+        "bus0": 1
+      },
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "can": 6130,
+        "clocks": 37,
+        "deviceState": 121,
+        "logMessage": 584,
+        "operatingSystemLog": 335,
+        "pandaStates": 613,
+        "peripheralState": 123,
+        "procLog": 31,
+        "uiDebug": 3690,
+        "accelerometer": 6055,
+        "gyroscope": 5984,
+        "soundPressure": 608,
+        "temperatureSensor": 122,
+        "managerState": 122,
+        "wideRoadCameraState": 1205,
+        "narrowRoadCameraState": 1205,
+        "cabinCameraState": 1205,
+        "wideRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "cabinEncodeIdx": 1200,
+        "ubloxGnss": 1235,
+        "ubloxRaw": 1217,
+        "gpsLocationExternal": 517,
+        "errorLogMessage": 2,
+        "carOutput": 5832,
+        "carParams": 2,
+        "carState": 5832,
+        "extrinsicsCalibration": 228,
+        "onroadEvents": 60,
+        "selfdriveState": 5831,
+        "radarTracks": 1166,
+        "carControl": 5826,
+        "controlsState": 5826,
+        "radarState": 1136,
+        "lateralDelay": 227,
+        "lateralTorqueParameters": 227,
+        "thumbnail": 1,
+        "drivingModelData": 1100,
+        "modelV2": 1100,
+        "cameraOdometry": 1100,
+        "deviceMotion": 1099,
+        "driverAssistance": 1100,
+        "longitudinalPlan": 1100,
+        "vehicleParameters": 1099,
+        "driverStateV2": 1074,
+        "driverMonitoringState": 1074,
+        "sendcan": 5278
+      },
+      "frame_counts_by_source": {
+        "can/src1": 79557,
+        "can/src0": 19881,
+        "can/src2": 7693,
+        "sendcan/src1": 2639,
+        "can/src193": 3,
+        "can/src130": 16530,
+        "can/src128": 4342,
+        "can/src129": 2636
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 6145,
+          "first_relative_s": 0.132359,
+          "last_relative_s": 61.584834
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2051,
+          "first_relative_s": 0.060712,
+          "last_relative_s": 61.564081
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2457,
+          "first_relative_s": 0.162408,
+          "last_relative_s": 61.584834
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6152,
+          "first_relative_s": 0.060712,
+          "last_relative_s": 61.584834
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d4--327b2c4bb8/rlog-1.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T20:32:48.705945+00:00",
+      "wall_end_utc": "2026-09-11T20:33:48.689226+00:00",
+      "duration_s": 59.983281,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 13486,
+        "median_mV": 13728,
+        "max_mV": 13893,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "cabinEncodeIdx": 1200,
+        "sendcan": 5971,
+        "accelerometer": 5971,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5971,
+        "carControl": 5971,
+        "carOutput": 5971,
+        "carState": 5970,
+        "controlsState": 5971,
+        "deviceMotion": 1200,
+        "deviceState": 120,
+        "driverAssistance": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "drivingModelData": 1200,
+        "gyroscope": 5883,
+        "lateralDelay": 240,
+        "lateralTorqueParameters": 240,
+        "logMessage": 151,
+        "longitudinalPlan": 1200,
+        "managerState": 120,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1200,
+        "radarTracks": 1194,
+        "selfdriveState": 5971,
+        "soundPressure": 600,
+        "uiDebug": 3599,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "ubloxGnss": 1136,
+        "ubloxRaw": 1019,
+        "gpsLocationExternal": 400,
+        "pandaStates": 597,
+        "temperatureSensor": 120,
+        "extrinsicsCalibration": 240,
+        "peripheralState": 119,
+        "operatingSystemLog": 358,
+        "onroadEvents": 60,
+        "procLog": 30,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "sendcan/src1": 2986,
+        "can/src1": 77669,
+        "can/src129": 2986,
+        "can/src128": 4920,
+        "can/src2": 4920,
+        "can/src130": 18720,
+        "can/src0": 18720
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.983281
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.97003
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.009772,
+          "last_relative_s": 59.983281
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.983281
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d4--327b2c4bb8/rlog-2.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T20:33:48.695487+00:00",
+      "wall_end_utc": "2026-09-11T20:34:48.688776+00:00",
+      "duration_s": 59.99329,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 12892,
+        "median_mV": 13189,
+        "max_mV": 13552,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "carState": 5974,
+        "accelerometer": 5959,
+        "can": 5972,
+        "carControl": 5974,
+        "carOutput": 5973,
+        "controlsState": 5974,
+        "deviceMotion": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "gyroscope": 5877,
+        "logMessage": 151,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarTracks": 1195,
+        "selfdriveState": 5973,
+        "sendcan": 5973,
+        "soundPressure": 600,
+        "uiDebug": 3597,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cameraOdometry": 1200,
+        "drivingModelData": 1200,
+        "modelV2": 1200,
+        "cabinCameraState": 1200,
+        "longitudinalPlan": 1200,
+        "driverAssistance": 1200,
+        "radarState": 1200,
+        "cabinEncodeIdx": 1200,
+        "lateralTorqueParameters": 240,
+        "lateralDelay": 240,
+        "ubloxRaw": 1092,
+        "pandaStates": 597,
+        "ubloxGnss": 1203,
+        "gpsLocationExternal": 470,
+        "peripheralState": 120,
+        "operatingSystemLog": 318,
+        "temperatureSensor": 120,
+        "extrinsicsCalibration": 240,
+        "deviceState": 119,
+        "managerState": 119,
+        "onroadEvents": 69,
+        "procLog": 30,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 77511,
+        "can/src129": 2986,
+        "can/src128": 4920,
+        "can/src2": 4920,
+        "sendcan/src1": 2986,
+        "can/src130": 18719,
+        "can/src0": 18719
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.010796,
+          "last_relative_s": 59.99329
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.010796,
+          "last_relative_s": 59.982889
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.020459,
+          "last_relative_s": 59.99329
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.982889
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d4--327b2c4bb8/rlog-3.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T20:34:48.698720+00:00",
+      "wall_end_utc": "2026-09-11T20:35:48.677554+00:00",
+      "duration_s": 59.978834,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 11979,
+        "median_mV": 13112,
+        "max_mV": 13365,
+        "below_12000_mV": 2
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "gyroscope": 5899,
+        "sendcan": 5972,
+        "accelerometer": 5985,
+        "can": 5971,
+        "carControl": 5972,
+        "carOutput": 5971,
+        "carState": 5971,
+        "controlsState": 5972,
+        "deviceMotion": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "logMessage": 169,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "selfdriveState": 5972,
+        "soundPressure": 600,
+        "uiDebug": 3596,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cameraOdometry": 1200,
+        "drivingModelData": 1200,
+        "modelV2": 1200,
+        "cabinCameraState": 1200,
+        "longitudinalPlan": 1200,
+        "driverAssistance": 1200,
+        "radarState": 1200,
+        "radarTracks": 1194,
+        "cabinEncodeIdx": 1200,
+        "lateralTorqueParameters": 240,
+        "pandaStates": 597,
+        "ubloxRaw": 909,
+        "lateralDelay": 240,
+        "ubloxGnss": 1049,
+        "deviceState": 120,
+        "managerState": 120,
+        "gpsLocationExternal": 312,
+        "temperatureSensor": 120,
+        "extrinsicsCalibration": 240,
+        "onroadEvents": 91,
+        "peripheralState": 119,
+        "operatingSystemLog": 370,
+        "procLog": 30,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1,
+        "errorLogMessage": 1
+      },
+      "frame_counts_by_source": {
+        "sendcan/src1": 2986,
+        "can/src130": 18709,
+        "can/src0": 18709,
+        "can/src1": 78071,
+        "can/src129": 2986,
+        "can/src128": 4917,
+        "can/src2": 4917
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.978834
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.009724,
+          "last_relative_s": 59.978834
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2399,
+          "first_relative_s": 0.019459,
+          "last_relative_s": 59.968998
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.978834
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d4--327b2c4bb8/rlog-4.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T20:35:48.688114+00:00",
+      "wall_end_utc": "2026-09-11T20:36:48.671138+00:00",
+      "duration_s": 59.983024,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 12056,
+        "median_mV": 12298,
+        "max_mV": 12518,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 5972,
+        "can": 5972,
+        "carControl": 5972,
+        "carOutput": 5972,
+        "carState": 5972,
+        "controlsState": 5972,
+        "deviceMotion": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "gyroscope": 5888,
+        "logMessage": 145,
+        "narrowRoadCameraState": 1200,
+        "selfdriveState": 5972,
+        "sendcan": 5972,
+        "soundPressure": 600,
+        "uiDebug": 3585,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "radarTracks": 1194,
+        "drivingModelData": 1200,
+        "modelV2": 1200,
+        "cameraOdometry": 1200,
+        "pandaStates": 597,
+        "cabinCameraState": 1200,
+        "longitudinalPlan": 1200,
+        "driverAssistance": 1200,
+        "radarState": 1200,
+        "cabinEncodeIdx": 1200,
+        "lateralTorqueParameters": 240,
+        "ubloxRaw": 885,
+        "lateralDelay": 240,
+        "gpsLocationExternal": 320,
+        "ubloxGnss": 1059,
+        "operatingSystemLog": 131,
+        "peripheralState": 120,
+        "temperatureSensor": 120,
+        "extrinsicsCalibration": 240,
+        "deviceState": 119,
+        "managerState": 119,
+        "onroadEvents": 84,
+        "procLog": 30,
+        "thumbnail": 1,
+        "clocks": 6,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src128": 4920,
+        "can/src2": 4920,
+        "can/src130": 18718,
+        "can/src0": 18718,
+        "can/src1": 78175,
+        "can/src129": 2986,
+        "sendcan/src1": 2986,
+        "sendcan/src0": 1249
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.983024
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 1999,
+          "first_relative_s": 0.019598,
+          "last_relative_s": 59.963526
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.973324
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.983024
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d4--327b2c4bb8/rlog-5.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T20:36:48.682032+00:00",
+      "wall_end_utc": "2026-09-11T20:37:48.671762+00:00",
+      "duration_s": 59.98973,
+      "panda_supply": {
+        "samples": 598,
+        "min_mV": 11979,
+        "median_mV": 12309,
+        "max_mV": 12573,
+        "below_12000_mV": 1
+      },
+      "ignition_line_can": {
+        "(True, False)": 598
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 5974,
+        "can": 5973,
+        "carControl": 5972,
+        "carOutput": 5973,
+        "carState": 5973,
+        "controlsState": 5972,
+        "deviceMotion": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "gyroscope": 5896,
+        "logMessage": 145,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "pandaStates": 598,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarTracks": 1195,
+        "selfdriveState": 5972,
+        "sendcan": 5973,
+        "soundPressure": 600,
+        "uiDebug": 3598,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cameraOdometry": 1200,
+        "drivingModelData": 1200,
+        "modelV2": 1200,
+        "cabinCameraState": 1200,
+        "longitudinalPlan": 1200,
+        "driverAssistance": 1200,
+        "radarState": 1200,
+        "cabinEncodeIdx": 1200,
+        "lateralTorqueParameters": 240,
+        "lateralDelay": 240,
+        "ubloxRaw": 851,
+        "ubloxGnss": 1052,
+        "gpsLocationExternal": 330,
+        "errorLogMessage": 2,
+        "operatingSystemLog": 157,
+        "deviceState": 120,
+        "managerState": 120,
+        "temperatureSensor": 120,
+        "extrinsicsCalibration": 240,
+        "peripheralState": 119,
+        "onroadEvents": 71,
+        "procLog": 30,
+        "carParams": 2,
+        "thumbnail": 1,
+        "clocks": 6
+      },
+      "frame_counts_by_source": {
+        "can/src1": 82535,
+        "can/src130": 18720,
+        "can/src0": 18720,
+        "can/src128": 4920,
+        "can/src2": 4920,
+        "can/src129": 2986,
+        "sendcan/src1": 2987
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.98973
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2001,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.98973
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.009176,
+          "last_relative_s": 59.979893
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.98973
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d4--327b2c4bb8/rlog-6.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "7603684127486383bc3a8a70109995380e14fe59",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T20:37:48.681986+00:00",
+      "wall_end_utc": "2026-09-11T20:38:35.844681+00:00",
+      "duration_s": 47.162695,
+      "panda_supply": {
+        "samples": 469,
+        "min_mV": 11990,
+        "median_mV": 12452,
+        "max_mV": 13332,
+        "below_12000_mV": 1
+      },
+      "ignition_line_can": {
+        "(True, False)": 468,
+        "(False, False)": 1
+      },
+      "bus_error_samples": {
+        "bus2": 1
+      },
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "cabinEncodeIdx": 944,
+        "can": 4695,
+        "carControl": 4698,
+        "carOutput": 4696,
+        "carState": 4696,
+        "controlsState": 4698,
+        "deviceMotion": 944,
+        "driverMonitoringState": 944,
+        "driverStateV2": 944,
+        "gyroscope": 4609,
+        "narrowRoadCameraState": 944,
+        "narrowRoadEncodeIdx": 945,
+        "qNarrowRoadEncodeIdx": 945,
+        "radarTracks": 939,
+        "selfdriveState": 4697,
+        "sendcan": 4696,
+        "soundPressure": 472,
+        "uiDebug": 2830,
+        "vehicleParameters": 944,
+        "wideRoadCameraState": 944,
+        "wideRoadEncodeIdx": 945,
+        "accelerometer": 4684,
+        "cabinCameraState": 943,
+        "cameraOdometry": 943,
+        "driverAssistance": 943,
+        "drivingModelData": 943,
+        "lateralDelay": 189,
+        "lateralTorqueParameters": 189,
+        "logMessage": 113,
+        "longitudinalPlan": 943,
+        "modelV2": 943,
+        "radarState": 943,
+        "ubloxGnss": 818,
+        "ubloxRaw": 674,
+        "onroadEvents": 72,
+        "pandaStates": 469,
+        "gpsLocationExternal": 245,
+        "extrinsicsCalibration": 188,
+        "temperatureSensor": 94,
+        "peripheralState": 94,
+        "operatingSystemLog": 104,
+        "deviceState": 94,
+        "managerState": 93,
+        "procLog": 24,
+        "thumbnail": 1,
+        "clocks": 4,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 61419,
+        "can/src129": 2345,
+        "can/src130": 14685,
+        "can/src0": 14685,
+        "can/src128": 3861,
+        "can/src2": 3861,
+        "sendcan/src1": 2348,
+        "can/src193": 3
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 4711,
+          "first_relative_s": 0.0,
+          "last_relative_s": 47.113819
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 1569,
+          "first_relative_s": 0.020005,
+          "last_relative_s": 47.061191
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 1882,
+          "first_relative_s": 0.010309,
+          "last_relative_s": 47.03822
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 4707,
+          "first_relative_s": 0.0,
+          "last_relative_s": 47.061191
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d8--bc414c7e01/rlog-0.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": [
+          {
+            "mode": [
+              "elm327",
+              0
+            ],
+            "event": "can",
+            "src": 128,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              0
+            ],
+            "event": "can",
+            "src": 128,
+            "address": "0x7A2",
+            "data": "023e000000000000",
+            "count": 2
+          },
+          {
+            "mode": [
+              "elm327",
+              0
+            ],
+            "event": "can",
+            "src": 2,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              0
+            ],
+            "event": "can",
+            "src": 2,
+            "address": "0x7A2",
+            "data": "023e000000000000",
+            "count": 2
+          },
+          {
+            "mode": [
+              "elm327",
+              0
+            ],
+            "event": "sendcan",
+            "src": 0,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              0
+            ],
+            "event": "sendcan",
+            "src": 0,
+            "address": "0x7A2",
+            "data": "023e000000000000",
+            "count": 2
+          },
+          {
+            "mode": [
+              "elm327",
+              0
+            ],
+            "event": "sendcan",
+            "src": 1,
+            "address": "0x7A2",
+            "data": "023e000000000000",
+            "count": 2
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "can",
+            "src": 128,
+            "address": "0x7A1",
+            "data": "013e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "can",
+            "src": 128,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "can",
+            "src": 129,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "can",
+            "src": 2,
+            "address": "0x7A1",
+            "data": "013e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "can",
+            "src": 2,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "sendcan",
+            "src": 0,
+            "address": "0x7A1",
+            "data": "013e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "sendcan",
+            "src": 0,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "sendcan",
+            "src": 1,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": null,
+            "event": "can",
+            "src": 1,
+            "address": "0x7AA",
+            "data": "027e000000000000",
+            "count": 2
+          },
+          {
+            "mode": null,
+            "event": "can",
+            "src": 1,
+            "address": "0x7AA",
+            "data": "037f223100000000",
+            "count": 1
+          },
+          {
+            "mode": null,
+            "event": "can",
+            "src": 129,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": null,
+            "event": "can",
+            "src": 129,
+            "address": "0x7A2",
+            "data": "023e000000000000",
+            "count": 2
+          },
+          {
+            "mode": null,
+            "event": "can",
+            "src": 129,
+            "address": "0x7A2",
+            "data": "0322f18200000000",
+            "count": 1
+          },
+          {
+            "mode": null,
+            "event": "sendcan",
+            "src": 1,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": null,
+            "event": "sendcan",
+            "src": 1,
+            "address": "0x7A2",
+            "data": "023e000000000000",
+            "count": 2
+          },
+          {
+            "mode": null,
+            "event": "sendcan",
+            "src": 1,
+            "address": "0x7A2",
+            "data": "0322f18200000000",
+            "count": 1
+          }
+        ]
+      },
+      "logger_build": {
+        "git_commit": "e00d4ede69b7c2119f784e0beda26ebe15e0c6f2",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T22:14:53.169275+00:00",
+      "wall_end_utc": "2026-09-11T22:15:54.129192+00:00",
+      "duration_s": 60.959917,
+      "panda_supply": {
+        "samples": 606,
+        "min_mV": 12243,
+        "median_mV": 12463,
+        "max_mV": 12705,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 606
+      },
+      "bus_error_samples": {
+        "bus1": 29
+      },
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "can": 6057,
+        "clocks": 35,
+        "logMessage": 596,
+        "pandaStates": 606,
+        "uiDebug": 3537,
+        "peripheralState": 121,
+        "deviceState": 121,
+        "managerState": 122,
+        "operatingSystemLog": 448,
+        "procLog": 31,
+        "narrowRoadCameraState": 1203,
+        "wideRoadCameraState": 1203,
+        "temperatureSensor": 121,
+        "accelerometer": 6030,
+        "gyroscope": 6001,
+        "cabinCameraState": 1203,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinEncodeIdx": 1200,
+        "sendcan": 5215,
+        "ubloxRaw": 1110,
+        "ubloxGnss": 1192,
+        "gpsLocationExternal": 477,
+        "errorLogMessage": 6,
+        "soundPressure": 577,
+        "driverStateV2": 1103,
+        "driverMonitoringState": 1103,
+        "thumbnail": 1,
+        "carOutput": 5407,
+        "carParams": 2,
+        "carState": 5407,
+        "radarTracks": 1081,
+        "extrinsicsCalibration": 215,
+        "lateralDelay": 214,
+        "selfdriveState": 5395,
+        "onroadEvents": 58,
+        "lateralTorqueParameters": 214,
+        "controlsState": 5396,
+        "carControl": 5396,
+        "radarState": 1070,
+        "cameraOdometry": 1055,
+        "drivingModelData": 1055,
+        "modelV2": 1055,
+        "deviceMotion": 1054,
+        "driverAssistance": 1055,
+        "longitudinalPlan": 1055,
+        "vehicleParameters": 1054
+      },
+      "frame_counts_by_source": {
+        "can/src0": 19804,
+        "can/src1": 74840,
+        "can/src2": 8084,
+        "sendcan/src0": 272,
+        "can/src128": 4336,
+        "sendcan/src1": 2726,
+        "can/src129": 2617,
+        "can/src193": 52,
+        "can/src130": 16036
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5795,
+          "first_relative_s": 0.0,
+          "last_relative_s": 60.959917
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 1932,
+          "first_relative_s": 0.0,
+          "last_relative_s": 60.959917
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2319,
+          "first_relative_s": 0.0,
+          "last_relative_s": 60.959917
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 5797,
+          "first_relative_s": 0.0,
+          "last_relative_s": 60.959917
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x7AA",
+          "length": 8,
+          "count": 3,
+          "first_relative_s": 3.619084,
+          "last_relative_s": 4.598017
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x7A1",
+          "length": 8,
+          "count": 3,
+          "first_relative_s": 3.17948,
+          "last_relative_s": 4.928802
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x7A2",
+          "length": 8,
+          "count": 2,
+          "first_relative_s": 3.17948,
+          "last_relative_s": 4.367333
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x7A1",
+          "length": 8,
+          "count": 3,
+          "first_relative_s": 3.17948,
+          "last_relative_s": 4.928802
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x7A2",
+          "length": 8,
+          "count": 2,
+          "first_relative_s": 3.17948,
+          "last_relative_s": 4.367333
+        },
+        {
+          "event": "can",
+          "src": 129,
+          "address": "0x7A1",
+          "length": 8,
+          "count": 2,
+          "first_relative_s": 3.610371,
+          "last_relative_s": 5.024158
+        },
+        {
+          "event": "can",
+          "src": 129,
+          "address": "0x7A2",
+          "length": 8,
+          "count": 3,
+          "first_relative_s": 3.619084,
+          "last_relative_s": 4.587904
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x7A1",
+          "length": 8,
+          "count": 3,
+          "first_relative_s": 3.167087,
+          "last_relative_s": 4.910151
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x7A2",
+          "length": 8,
+          "count": 2,
+          "first_relative_s": 3.167087,
+          "last_relative_s": 4.355826
+        },
+        {
+          "event": "sendcan",
+          "src": 1,
+          "address": "0x7A1",
+          "length": 8,
+          "count": 2,
+          "first_relative_s": 3.599268,
+          "last_relative_s": 5.014219
+        },
+        {
+          "event": "sendcan",
+          "src": 1,
+          "address": "0x7A2",
+          "length": 8,
+          "count": 5,
+          "first_relative_s": 3.167087,
+          "last_relative_s": 4.583847
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d8--bc414c7e01/rlog-1.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "e00d4ede69b7c2119f784e0beda26ebe15e0c6f2",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T22:15:54.137492+00:00",
+      "wall_end_utc": "2026-09-11T22:16:44.963499+00:00",
+      "duration_s": 50.826006,
+      "panda_supply": {
+        "samples": 506,
+        "min_mV": 12265,
+        "median_mV": 12463,
+        "max_mV": 12639,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 506
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 1,
+        "cabinEncodeIdx": 1017,
+        "accelerometer": 5089,
+        "cabinCameraState": 1016,
+        "cameraOdometry": 1016,
+        "can": 5062,
+        "carControl": 5062,
+        "carOutput": 5062,
+        "carState": 5062,
+        "controlsState": 5062,
+        "deviceMotion": 1017,
+        "driverAssistance": 1016,
+        "driverMonitoringState": 1017,
+        "driverStateV2": 1017,
+        "drivingModelData": 1016,
+        "gpsLocationExternal": 397,
+        "gyroscope": 5053,
+        "lateralDelay": 204,
+        "lateralTorqueParameters": 204,
+        "logMessage": 125,
+        "longitudinalPlan": 1016,
+        "modelV2": 1016,
+        "narrowRoadCameraState": 1017,
+        "narrowRoadEncodeIdx": 1018,
+        "onroadEvents": 59,
+        "pandaStates": 506,
+        "qNarrowRoadEncodeIdx": 1018,
+        "radarState": 1016,
+        "radarTracks": 1012,
+        "selfdriveState": 5063,
+        "sendcan": 5063,
+        "ubloxGnss": 1019,
+        "ubloxRaw": 897,
+        "uiDebug": 3050,
+        "vehicleParameters": 1017,
+        "wideRoadCameraState": 1017,
+        "wideRoadEncodeIdx": 1018,
+        "soundPressure": 508,
+        "extrinsicsCalibration": 203,
+        "operatingSystemLog": 241,
+        "peripheralState": 101,
+        "temperatureSensor": 101,
+        "deviceState": 101,
+        "managerState": 101,
+        "procLog": 25,
+        "thumbnail": 1,
+        "clocks": 5,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 65678,
+        "can/src2": 4168,
+        "can/src130": 15851,
+        "can/src0": 15851,
+        "can/src129": 2582,
+        "can/src128": 4168,
+        "sendcan/src1": 2582,
+        "sendcan/src0": 2033
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5083,
+          "first_relative_s": 0.0,
+          "last_relative_s": 50.826006
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 1694,
+          "first_relative_s": 0.02037,
+          "last_relative_s": 50.815389
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2033,
+          "first_relative_s": 0.01074,
+          "last_relative_s": 50.815389
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 5083,
+          "first_relative_s": 0.0,
+          "last_relative_s": 50.826006
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": [
+        "Corrupted events detected"
+      ]
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/000000d9--a1a459c5b5--0/rlog.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": [
+          {
+            "mode": [
+              "elm327",
+              0
+            ],
+            "event": "can",
+            "src": 128,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              0
+            ],
+            "event": "can",
+            "src": 128,
+            "address": "0x7A2",
+            "data": "023e000000000000",
+            "count": 2
+          },
+          {
+            "mode": [
+              "elm327",
+              0
+            ],
+            "event": "can",
+            "src": 2,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              0
+            ],
+            "event": "can",
+            "src": 2,
+            "address": "0x7A2",
+            "data": "023e000000000000",
+            "count": 2
+          },
+          {
+            "mode": [
+              "elm327",
+              0
+            ],
+            "event": "sendcan",
+            "src": 0,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              0
+            ],
+            "event": "sendcan",
+            "src": 0,
+            "address": "0x7A2",
+            "data": "023e000000000000",
+            "count": 2
+          },
+          {
+            "mode": [
+              "elm327",
+              0
+            ],
+            "event": "sendcan",
+            "src": 1,
+            "address": "0x7A2",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "can",
+            "src": 128,
+            "address": "0x7A1",
+            "data": "013e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "can",
+            "src": 128,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "can",
+            "src": 129,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "can",
+            "src": 2,
+            "address": "0x7A1",
+            "data": "013e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "can",
+            "src": 2,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "sendcan",
+            "src": 0,
+            "address": "0x7A1",
+            "data": "013e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "sendcan",
+            "src": 0,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": [
+              "elm327",
+              1
+            ],
+            "event": "sendcan",
+            "src": 1,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": null,
+            "event": "can",
+            "src": 1,
+            "address": "0x7AA",
+            "data": "027e000000000000",
+            "count": 2
+          },
+          {
+            "mode": null,
+            "event": "can",
+            "src": 1,
+            "address": "0x7AA",
+            "data": "037f223100000000",
+            "count": 1
+          },
+          {
+            "mode": null,
+            "event": "can",
+            "src": 129,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": null,
+            "event": "can",
+            "src": 129,
+            "address": "0x7A2",
+            "data": "023e000000000000",
+            "count": 2
+          },
+          {
+            "mode": null,
+            "event": "can",
+            "src": 129,
+            "address": "0x7A2",
+            "data": "0322f18200000000",
+            "count": 1
+          },
+          {
+            "mode": null,
+            "event": "sendcan",
+            "src": 1,
+            "address": "0x7A1",
+            "data": "023e000000000000",
+            "count": 1
+          },
+          {
+            "mode": null,
+            "event": "sendcan",
+            "src": 1,
+            "address": "0x7A2",
+            "data": "023e000000000000",
+            "count": 3
+          },
+          {
+            "mode": null,
+            "event": "sendcan",
+            "src": 1,
+            "address": "0x7A2",
+            "data": "0322f18200000000",
+            "count": 1
+          }
+        ]
+      },
+      "logger_build": {
+        "git_commit": "e00d4ede69b7c2119f784e0beda26ebe15e0c6f2",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T22:22:14.267426+00:00",
+      "wall_end_utc": "2026-09-11T22:23:15.273060+00:00",
+      "duration_s": 61.005634,
+      "panda_supply": {
+        "samples": 606,
+        "min_mV": 12738,
+        "median_mV": 13002,
+        "max_mV": 13211,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 606
+      },
+      "bus_error_samples": {
+        "bus1": 28
+      },
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "can": 6061,
+        "clocks": 436,
+        "deviceState": 121,
+        "logMessage": 477,
+        "pandaStates": 606,
+        "peripheralState": 121,
+        "uiDebug": 3652,
+        "narrowRoadCameraState": 1203,
+        "operatingSystemLog": 346,
+        "soundPressure": 602,
+        "wideRoadCameraState": 1203,
+        "temperatureSensor": 121,
+        "cabinCameraState": 1202,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "accelerometer": 5999,
+        "gyroscope": 5968,
+        "cabinEncodeIdx": 1200,
+        "managerState": 120,
+        "procLog": 30,
+        "ubloxGnss": 1293,
+        "ubloxRaw": 1294,
+        "gpsLocationExternal": 584,
+        "sendcan": 4969,
+        "errorLogMessage": 6,
+        "thumbnail": 1,
+        "driverStateV2": 1018,
+        "driverMonitoringState": 1018,
+        "carOutput": 5167,
+        "carParams": 2,
+        "carState": 5167,
+        "radarTracks": 1033,
+        "extrinsicsCalibration": 205,
+        "selfdriveState": 5162,
+        "onroadEvents": 69,
+        "radarState": 1021,
+        "lateralDelay": 205,
+        "controlsState": 5157,
+        "carControl": 5157,
+        "lateralTorqueParameters": 204,
+        "modelV2": 1006,
+        "cameraOdometry": 1006,
+        "drivingModelData": 1006,
+        "deviceMotion": 1005,
+        "driverAssistance": 1005,
+        "longitudinalPlan": 1005,
+        "vehicleParameters": 1005
+      },
+      "frame_counts_by_source": {
+        "can/src1": 76063,
+        "can/src0": 20028,
+        "can/src2": 8898,
+        "sendcan/src0": 1739,
+        "can/src128": 4129,
+        "sendcan/src1": 2604,
+        "can/src129": 2522,
+        "can/src193": 24,
+        "can/src130": 15243,
+        "can/src192": 1
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5810,
+          "first_relative_s": 0.0,
+          "last_relative_s": 61.005634
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 1937,
+          "first_relative_s": 0.019367,
+          "last_relative_s": 60.985593
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2325,
+          "first_relative_s": 0.009833,
+          "last_relative_s": 60.995881
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 5810,
+          "first_relative_s": 0.0,
+          "last_relative_s": 61.005634
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x7AA",
+          "length": 8,
+          "count": 3,
+          "first_relative_s": 6.108512,
+          "last_relative_s": 6.980306
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x7A1",
+          "length": 8,
+          "count": 3,
+          "first_relative_s": 5.670673,
+          "last_relative_s": 7.302274
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x7A2",
+          "length": 8,
+          "count": 2,
+          "first_relative_s": 5.670673,
+          "last_relative_s": 6.743981
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x7A1",
+          "length": 8,
+          "count": 3,
+          "first_relative_s": 5.670673,
+          "last_relative_s": 7.302274
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x7A2",
+          "length": 8,
+          "count": 2,
+          "first_relative_s": 5.670673,
+          "last_relative_s": 6.743981
+        },
+        {
+          "event": "can",
+          "src": 129,
+          "address": "0x7A1",
+          "length": 8,
+          "count": 2,
+          "first_relative_s": 6.098708,
+          "last_relative_s": 7.394792
+        },
+        {
+          "event": "can",
+          "src": 129,
+          "address": "0x7A2",
+          "length": 8,
+          "count": 3,
+          "first_relative_s": 6.098708,
+          "last_relative_s": 6.980306
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x7A1",
+          "length": 8,
+          "count": 3,
+          "first_relative_s": 5.658132,
+          "last_relative_s": 7.2816
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x7A2",
+          "length": 8,
+          "count": 2,
+          "first_relative_s": 5.658132,
+          "last_relative_s": 6.732273
+        },
+        {
+          "event": "sendcan",
+          "src": 1,
+          "address": "0x7A1",
+          "length": 8,
+          "count": 2,
+          "first_relative_s": 6.088479,
+          "last_relative_s": 7.388256
+        },
+        {
+          "event": "sendcan",
+          "src": 1,
+          "address": "0x7A2",
+          "length": 8,
+          "count": 5,
+          "first_relative_s": 5.658132,
+          "last_relative_s": 6.971417
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/000000d9--a1a459c5b5--1/rlog.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "e00d4ede69b7c2119f784e0beda26ebe15e0c6f2",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T22:23:15.282843+00:00",
+      "wall_end_utc": "2026-09-11T22:24:15.282089+00:00",
+      "duration_s": 59.999246,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 11374,
+        "median_mV": 12485,
+        "max_mV": 13156,
+        "below_12000_mV": 131
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "cabinEncodeIdx": 1200,
+        "selfdriveState": 5974,
+        "accelerometer": 5997,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5974,
+        "carControl": 5974,
+        "carOutput": 5974,
+        "carState": 5974,
+        "controlsState": 5974,
+        "deviceMotion": 1200,
+        "driverAssistance": 1201,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "drivingModelData": 1200,
+        "gpsLocationExternal": 600,
+        "gyroscope": 5937,
+        "lateralTorqueParameters": 240,
+        "logMessage": 144,
+        "longitudinalPlan": 1201,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "pandaStates": 597,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1201,
+        "radarTracks": 1195,
+        "sendcan": 5973,
+        "soundPressure": 600,
+        "ubloxGnss": 1333,
+        "ubloxRaw": 1337,
+        "uiDebug": 3596,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "extrinsicsCalibration": 240,
+        "peripheralState": 120,
+        "lateralDelay": 240,
+        "deviceState": 119,
+        "managerState": 119,
+        "onroadEvents": 73,
+        "temperatureSensor": 120,
+        "procLog": 30,
+        "operatingSystemLog": 12,
+        "clocks": 6,
+        "thumbnail": 1,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 78067,
+        "can/src2": 4921,
+        "can/src129": 3034,
+        "can/src128": 4920,
+        "can/src130": 18720,
+        "can/src0": 18720,
+        "sendcan/src0": 2400,
+        "sendcan/src1": 3054,
+        "can/src193": 21
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.999246
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2001,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.999246
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.989468
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.999246
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/000000d9--a1a459c5b5--2/rlog.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "e00d4ede69b7c2119f784e0beda26ebe15e0c6f2",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T22:24:15.292062+00:00",
+      "wall_end_utc": "2026-09-11T22:25:15.281960+00:00",
+      "duration_s": 59.989898,
+      "panda_supply": {
+        "samples": 598,
+        "min_mV": 11286,
+        "median_mV": 11583,
+        "max_mV": 12628,
+        "below_12000_mV": 556
+      },
+      "ignition_line_can": {
+        "(True, False)": 598
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "cabinEncodeIdx": 1200,
+        "accelerometer": 5999,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5973,
+        "carControl": 5974,
+        "carOutput": 5973,
+        "carState": 5973,
+        "controlsState": 5974,
+        "deviceMotion": 1201,
+        "driverAssistance": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1201,
+        "drivingModelData": 1200,
+        "gyroscope": 5954,
+        "lateralTorqueParameters": 241,
+        "logMessage": 142,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1201,
+        "narrowRoadEncodeIdx": 1200,
+        "pandaStates": 598,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1200,
+        "radarTracks": 1194,
+        "selfdriveState": 5974,
+        "sendcan": 5974,
+        "soundPressure": 600,
+        "ubloxGnss": 1330,
+        "ubloxRaw": 1294,
+        "uiDebug": 3592,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "deviceState": 120,
+        "onroadEvents": 86,
+        "managerState": 120,
+        "gpsLocationExternal": 599,
+        "extrinsicsCalibration": 240,
+        "lateralDelay": 240,
+        "temperatureSensor": 120,
+        "peripheralState": 119,
+        "procLog": 30,
+        "clocks": 6,
+        "thumbnail": 1,
+        "operatingSystemLog": 2,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 78187,
+        "can/src128": 4919,
+        "can/src2": 4919,
+        "can/src129": 3036,
+        "can/src130": 18719,
+        "can/src0": 18719,
+        "sendcan/src1": 3054,
+        "sendcan/src0": 2400,
+        "can/src193": 18,
+        "can/src192": 1
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.989898
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 1999,
+          "first_relative_s": 0.021126,
+          "last_relative_s": 59.970862
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.98114
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.989898
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/000000d9--a1a459c5b5--3/rlog.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "e00d4ede69b7c2119f784e0beda26ebe15e0c6f2",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T22:25:15.292424+00:00",
+      "wall_end_utc": "2026-09-11T22:26:15.279501+00:00",
+      "duration_s": 59.987077,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 11341,
+        "median_mV": 11726,
+        "max_mV": 12650,
+        "below_12000_mV": 311
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "driverMonitoringState": 1200,
+        "ubloxRaw": 1287,
+        "accelerometer": 6001,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5973,
+        "carControl": 5972,
+        "carOutput": 5973,
+        "carState": 5973,
+        "controlsState": 5972,
+        "drivingModelData": 1200,
+        "gpsLocationExternal": 591,
+        "gyroscope": 5965,
+        "logMessage": 142,
+        "modelV2": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarTracks": 1195,
+        "selfdriveState": 5972,
+        "sendcan": 5973,
+        "ubloxGnss": 1323,
+        "uiDebug": 3597,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinEncodeIdx": 1200,
+        "driverAssistance": 1200,
+        "longitudinalPlan": 1200,
+        "radarState": 1200,
+        "soundPressure": 600,
+        "deviceMotion": 1199,
+        "driverStateV2": 1199,
+        "narrowRoadCameraState": 1199,
+        "pandaStates": 597,
+        "extrinsicsCalibration": 240,
+        "peripheralState": 120,
+        "lateralDelay": 240,
+        "lateralTorqueParameters": 239,
+        "deviceState": 119,
+        "managerState": 119,
+        "temperatureSensor": 120,
+        "onroadEvents": 81,
+        "procLog": 30,
+        "clocks": 6,
+        "thumbnail": 1,
+        "carParams": 1,
+        "operatingSystemLog": 19
+      },
+      "frame_counts_by_source": {
+        "can/src1": 78047,
+        "can/src130": 18718,
+        "can/src0": 18718,
+        "can/src2": 4920,
+        "can/src128": 4919,
+        "can/src129": 3049,
+        "sendcan/src1": 3050,
+        "sendcan/src0": 2400,
+        "can/src192": 1
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.987077
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.966901
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.009714,
+          "last_relative_s": 59.987077
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.987077
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/000000d9--a1a459c5b5--4/rlog.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "e00d4ede69b7c2119f784e0beda26ebe15e0c6f2",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T22:26:15.288301+00:00",
+      "wall_end_utc": "2026-09-11T22:27:15.276392+00:00",
+      "duration_s": 59.988092,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 12254,
+        "median_mV": 12452,
+        "max_mV": 12650,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 6002,
+        "can": 5973,
+        "carControl": 5974,
+        "carOutput": 5974,
+        "carState": 5974,
+        "controlsState": 5974,
+        "deviceMotion": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "gpsLocationExternal": 585,
+        "gyroscope": 5959,
+        "lateralTorqueParameters": 240,
+        "logMessage": 211,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarTracks": 1195,
+        "selfdriveState": 5974,
+        "sendcan": 5974,
+        "ubloxGnss": 1323,
+        "ubloxRaw": 1289,
+        "uiDebug": 3592,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "drivingModelData": 1200,
+        "modelV2": 1200,
+        "soundPressure": 600,
+        "cabinEncodeIdx": 1200,
+        "longitudinalPlan": 1200,
+        "driverAssistance": 1200,
+        "radarState": 1200,
+        "pandaStates": 597,
+        "deviceState": 120,
+        "managerState": 120,
+        "extrinsicsCalibration": 240,
+        "onroadEvents": 60,
+        "lateralDelay": 240,
+        "temperatureSensor": 120,
+        "peripheralState": 119,
+        "procLog": 30,
+        "clocks": 6,
+        "thumbnail": 1,
+        "operatingSystemLog": 196,
+        "carParams": 1,
+        "touch": 95
+      },
+      "frame_counts_by_source": {
+        "can/src130": 18709,
+        "can/src0": 18709,
+        "can/src1": 79067,
+        "can/src129": 3047,
+        "can/src2": 4920,
+        "can/src128": 4919,
+        "sendcan/src1": 3047,
+        "sendcan/src0": 2400
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.988092
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.978128
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2399,
+          "first_relative_s": 0.020468,
+          "last_relative_s": 59.978128
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 5999,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.988092
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/000000d9--a1a459c5b5--5/rlog.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "e00d4ede69b7c2119f784e0beda26ebe15e0c6f2",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T22:27:15.286853+00:00",
+      "wall_end_utc": "2026-09-11T22:28:15.363276+00:00",
+      "duration_s": 60.076424,
+      "panda_supply": {
+        "samples": 598,
+        "min_mV": 12144,
+        "median_mV": 12452,
+        "max_mV": 12617,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 598
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "can": 5982,
+        "accelerometer": 5999,
+        "cameraOdometry": 1200,
+        "carControl": 5981,
+        "carOutput": 5981,
+        "carState": 5981,
+        "controlsState": 5981,
+        "deviceMotion": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "drivingModelData": 1200,
+        "gpsLocationExternal": 318,
+        "gyroscope": 5963,
+        "lateralTorqueParameters": 240,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "pandaStates": 598,
+        "qNarrowRoadEncodeIdx": 1200,
+        "selfdriveState": 5981,
+        "sendcan": 5981,
+        "soundPressure": 601,
+        "ubloxGnss": 1046,
+        "ubloxRaw": 979,
+        "uiDebug": 3600,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinCameraState": 1200,
+        "cabinEncodeIdx": 1200,
+        "driverAssistance": 1200,
+        "logMessage": 308,
+        "longitudinalPlan": 1200,
+        "radarState": 1200,
+        "radarTracks": 1196,
+        "operatingSystemLog": 424,
+        "extrinsicsCalibration": 240,
+        "lateralDelay": 240,
+        "peripheralState": 120,
+        "deviceState": 119,
+        "managerState": 119,
+        "temperatureSensor": 120,
+        "onroadEvents": 60,
+        "errorLogMessage": 2,
+        "procLog": 30,
+        "clocks": 6,
+        "thumbnail": 1,
+        "carParams": 2
+      },
+      "frame_counts_by_source": {
+        "can/src130": 18723,
+        "can/src0": 18723,
+        "can/src1": 80222,
+        "can/src128": 4920,
+        "can/src129": 3051,
+        "can/src2": 4920,
+        "sendcan/src1": 3050,
+        "sendcan/src0": 2400
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 6001,
+          "first_relative_s": 0.0,
+          "last_relative_s": 60.076424
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.010019,
+          "last_relative_s": 60.065386
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.0,
+          "last_relative_s": 60.055722
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 60.076424
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/000000d9--a1a459c5b5--6/rlog.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "e00d4ede69b7c2119f784e0beda26ebe15e0c6f2",
+        "git_branch": "tss3",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-11T22:28:15.373509+00:00",
+      "wall_end_utc": "2026-09-11T22:29:15.375131+00:00",
+      "duration_s": 60.001621,
+      "panda_supply": {
+        "samples": 598,
+        "min_mV": 12144,
+        "median_mV": 12397,
+        "max_mV": 13233,
+        "below_12000_mV": 0
+      },
+      "ignition_line_can": {
+        "(True, False)": 598
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "accelerometer": 6003,
+        "cameraOdometry": 1200,
+        "can": 5975,
+        "carControl": 5975,
+        "carOutput": 5974,
+        "carState": 5974,
+        "controlsState": 5975,
+        "deviceMotion": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "drivingModelData": 1200,
+        "gyroscope": 5962,
+        "lateralTorqueParameters": 240,
+        "logMessage": 185,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "pandaStates": 598,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarTracks": 1195,
+        "selfdriveState": 5975,
+        "sendcan": 5974,
+        "ubloxGnss": 1111,
+        "ubloxRaw": 1009,
+        "uiDebug": 3600,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "cabinCameraState": 1200,
+        "deviceState": 120,
+        "driverAssistance": 1200,
+        "longitudinalPlan": 1200,
+        "radarState": 1200,
+        "cabinEncodeIdx": 1200,
+        "managerState": 120,
+        "soundPressure": 600,
+        "extrinsicsCalibration": 240,
+        "gpsLocationExternal": 375,
+        "lateralDelay": 240,
+        "temperatureSensor": 120,
+        "peripheralState": 119,
+        "onroadEvents": 60,
+        "procLog": 30,
+        "operatingSystemLog": 122,
+        "clocks": 6,
+        "thumbnail": 1,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 77481,
+        "can/src130": 18719,
+        "can/src0": 18719,
+        "can/src128": 4920,
+        "can/src129": 3047,
+        "can/src2": 4920,
+        "sendcan/src1": 3047,
+        "sendcan/src0": 2399
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x025",
+          "length": 32,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 60.001621
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.008766,
+          "last_relative_s": 59.991627
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.981928
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.991627
+        }
+      ],
+      "eps_generated_tx_native_rx": 0,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    },
+    {
+      "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-8.zst",
+      "diagnostic_transport": {
+        "boundary": "Offline mode association, not electrical frame-format proof. Only agreeing adjacent single-Panda states <=250 ms apart are assigned; mode transitions, gaps, multiple Pandas, and missing states remain unassigned. Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",
+        "observations": []
+      },
+      "logger_build": {
+        "git_commit": "d1914bbe7f88b03fd7f59afd97607e873c4bba47",
+        "git_branch": "kai",
+        "dirty": false,
+        "version": "0.11.2"
+      },
+      "wall_start_utc": "2026-09-04T20:29:37.600841+00:00",
+      "wall_end_utc": "2026-09-04T20:30:37.594267+00:00",
+      "duration_s": 59.993426,
+      "panda_supply": {
+        "samples": 597,
+        "min_mV": 11990,
+        "median_mV": 12287,
+        "max_mV": 12529,
+        "below_12000_mV": 1
+      },
+      "ignition_line_can": {
+        "(True, False)": 597
+      },
+      "bus_error_samples": {},
+      "event_counts": {
+        "initData": 1,
+        "sentinel": 2,
+        "cabinEncodeIdx": 1200,
+        "gyroscope": 5923,
+        "accelerometer": 5982,
+        "cabinCameraState": 1200,
+        "cameraOdometry": 1200,
+        "can": 5974,
+        "carControl": 5974,
+        "carOutput": 5974,
+        "carState": 5974,
+        "controlsState": 5974,
+        "deviceMotion": 1200,
+        "driverAssistance": 1200,
+        "driverMonitoringState": 1200,
+        "driverStateV2": 1200,
+        "drivingModelData": 1200,
+        "gpsLocationExternal": 585,
+        "lateralTorqueParameters": 240,
+        "logMessage": 142,
+        "longitudinalPlan": 1200,
+        "modelV2": 1200,
+        "narrowRoadCameraState": 1200,
+        "narrowRoadEncodeIdx": 1200,
+        "qNarrowRoadEncodeIdx": 1200,
+        "radarState": 1200,
+        "radarTracks": 1195,
+        "selfdriveState": 5974,
+        "sendcan": 5974,
+        "soundPressure": 601,
+        "ubloxGnss": 1323,
+        "ubloxRaw": 1364,
+        "uiDebug": 3598,
+        "vehicleParameters": 1200,
+        "wideRoadCameraState": 1200,
+        "wideRoadEncodeIdx": 1200,
+        "lateralDelay": 240,
+        "pandaStates": 597,
+        "extrinsicsCalibration": 240,
+        "temperatureSensor": 120,
+        "peripheralState": 119,
+        "operatingSystemLog": 120,
+        "deviceState": 119,
+        "managerState": 119,
+        "procLog": 31,
+        "onroadEvents": 72,
+        "clocks": 6,
+        "thumbnail": 1,
+        "carParams": 1
+      },
+      "frame_counts_by_source": {
+        "can/src1": 23640,
+        "can/src130": 70345,
+        "can/src0": 70345,
+        "can/src128": 16671,
+        "can/src2": 13684,
+        "sendcan/src0": 2987
+      },
+      "watched_frames": [
+        {
+          "event": "can",
+          "src": 0,
+          "address": "0x025",
+          "length": 32,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.993426
+        },
+        {
+          "event": "can",
+          "src": 0,
+          "address": "0x030",
+          "length": 32,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.993426
+        },
+        {
+          "event": "can",
+          "src": 0,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.97352
+        },
+        {
+          "event": "can",
+          "src": 0,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.993426
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.010769,
+          "last_relative_s": 59.983506
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x08A",
+          "length": 32,
+          "count": 2400,
+          "first_relative_s": 0.010769,
+          "last_relative_s": 59.983506
+        },
+        {
+          "event": "can",
+          "src": 130,
+          "address": "0x025",
+          "length": 32,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.993426
+        },
+        {
+          "event": "can",
+          "src": 130,
+          "address": "0x030",
+          "length": 32,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.993426
+        },
+        {
+          "event": "can",
+          "src": 130,
+          "address": "0x081",
+          "length": 32,
+          "count": 2000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.97352
+        },
+        {
+          "event": "can",
+          "src": 130,
+          "address": "0x0AA",
+          "length": 8,
+          "count": 6000,
+          "first_relative_s": 0.0,
+          "last_relative_s": 59.993426
+        }
+      ],
+      "eps_generated_tx_native_rx": 6000,
+      "eps_diagnostic_response_native_rx": 0,
+      "parse_warnings": []
+    }
+  ]
+}

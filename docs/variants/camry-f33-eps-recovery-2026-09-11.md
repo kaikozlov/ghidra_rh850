@@ -680,6 +680,76 @@ F33 ECM configuration.  Canonical bytes/source-mask evidence is preserved in
 `data/generated/camry_f33_recovery_structure.json` and verified by
 `tests/verify_f33_recovery_structure.py`.
 
+## 12. Connector-accessible recovery checkpoint (2026-09-12)
+
+The owner's constraint is broader than CAN-only but excludes lifting the car,
+removing wheels, removing/opening the rack, and direct chip programming. A
+manufacturer service connection would qualify only if it is actually accessible
+with the vehicle on the ground and the assembly closed. Its existence or
+accessibility has **not** been established. No vehicle connection, CAN request,
+reset, RAM upload, or flash operation was performed in this follow-up.
+
+Exact-target Ghidra rechecks of `13B0`, `119E`, and `667E6` reproduce the critical
+dependency: a validity-passing image is entered without bootloader CAN service,
+and normal DCM/system-mode processing follows the corrupted foreground call.
+This independently supports the existing root-cause explanation; it is not a
+new live observation of the reconstructed incident instruction or FE registers.
+
+Two diagnostic qualifications should not become speculative repair claims:
+
+- The retained 05:47 UTC identity check recorded Panda supply readings of
+  **11.473 V before / 11.561 V after**, not a present-day voltage measurement.
+  That is a power-quality qualification for future diagnostics/programming, not
+  evidence that charging repairs the malformed CodeFlash instruction. Toyota's
+  user-provided **T-SB-0034-26**, p.5, specifies supported power-supply operation
+  for its 2025–2026 Camry MG-ECU reflash procedure. That bulletin is **not an EPS
+  calibration or EPS recovery procedure**.
+- Buses 0/2 were not simply the wrong choice because the old stock-harness route
+  used bus 1. The documented physical repin moved the steering network onto
+  the relay pair (live baseline §16). Repeating bus 1 is not a new recovery
+  mechanism. The responding `7A2/7AA` endpoint remains a different ECU.
+
+### Manufacturer replacement-configuration evidence
+
+The original Toyota **T-SB-0015-25**, January 29, 2025, was acquired from NHTSA:
+`https://static.nhtsa.gov/odi/tsbs/2025/MC-11014209-0001.pdf`.
+The working download is `build/work/f33-external-recovery/T-SB-0015-25.pdf`;
+the manufacturer document, not that disposable working path, is the source.
+Page 2 was also rendered and visually checked. Its **2025 Camry HV** row
+explicitly includes **EMPS** among ECUs requiring replacement configuration.
+This is useful model-family evidence, not an exact 2026/F33 package match.
+
+Procedure A, pp.7–14, begins after ECU replacement, detects the replacement ECU
+through Health Check, identifies/downloads the required calibration, and then
+refers to the ordinary signed ECU reprogramming procedure. It documents no
+independent entry for a silent, CRC-valid, crashing application. It therefore
+supports pursuing the actual Camry EMPS configuration package, but does not
+supersede the target-execution dependency or make the incident ECU equivalent
+to a factory blank ECU. The already-acquired `T-0051-26.cuw` remains an MG/inverter
+package, not this missing EPS package.
+
+### Remaining evidence that can change the recovery decision
+
+1. **Exact 2026/F33 service documentation and package:** EPS terminal/connector
+   diagrams, accessible connector locations, and the applicable replacement or
+   noncommunicating-ECU procedure. The bounded Project/Library/local-reference
+   and public-document searches did not acquire these exact documents. No
+   unidentified terminal should be treated as a boot/programming input.
+2. **A contrary target-specific liveness observation:** a bounded read-only
+   check under known power/routing conditions, with raw responses retained.
+   A response from another ECU, a Panda TX echo, or bus activity alone is not
+   such an observation. A fresh EPS response would justify re-evaluating the
+   incident model; another timeout would not prove every assembly-level path
+   absent.
+3. **Documented independent service entry:** an externally reachable OEM or
+   supplier mechanism that actually runs a programmer without the blocked
+   application worker. Reset/power control alone is insufficient. No such
+   mechanism has yet been demonstrated within the owner's access constraints.
+
+No working non-invasive repair is established. The useful next work is to close
+these specific evidence gaps, not to repeat the failed catcher or assume that a
+replacement-configuration menu supplies a programmer in an unresponsive ECU.
+
 ## What is established, and what would actually change the answer
 
 The direct, functional, and subaddressed diagnostic paths examined here do not
@@ -702,3 +772,227 @@ having repair bytes does not establish a way to execute the repair. The
 pre-hook stage-6 image contains earlier modifications and is not an untouched
 factory image. Removing this one hook would not, by itself, certify the
 steering software or the vehicle as safe to drive.
+
+## 13. Saved-log liveness cross-check, 2026-09-12
+
+This pass tested the incident model against existing post-incident rlogs rather
+than repeating the session catcher. No vehicle connection, transmission, ECU
+reset, upload, or flash operation was performed. The fresh exact-target
+`13B0`, `119E`, `667E6`, `7A254`, and `10C6` decompilations agree with the
+startup/scheduling account above, and the `camry_8965f3307000_incident_fault_model`
+verification suite passes. This still does not measure live exception registers.
+
+### Observed output, not inferred from openpilot's CarState
+
+The offline reducer read all 32 complete-named rlogs retained under
+`logs/camry-2026/2026-09-11` plus seven top-level `d9` rlogs: 39 files from
+routes `d1`, `d3`, `d4`, `d8`, and `d9`. Partial `.live.zst` copies were excluded.
+Their recovered native CAN events contain **3,943,841 frames across Panda
+sources 0/1/2**, with **zero** frames for the exact-F33 generated-COM Tx IDs
+`030/351/394/4A3/4C8`, and **zero** diagnostic-response frames at `7A9`.
+The Tx set comes from exact firmware table `21F58` and generated-COM descriptors
+`226C0`; `4C97A` was freshly decompiled as the PDU0/030 packer.
+
+`d8/rlog-1.zst` produces a `Corrupted events detected` warning. Excluding that
+file completely still leaves **38 cleanly parsed segments / 3,858,144 native
+CAN frames**, with the same zero counts. The recovered per-file CAN time spans
+sum to about 38.7 minutes including the partial file, or 37.9 minutes excluding
+it; these are not continuous coverage of the whole afternoon. Span calculation
+uses CAN-event times, not repeated route `initData` timestamps in later segments.
+
+The same reducer finds **6,000 native bus0 `030/32` frames** in the 59.99-second
+pre-incident control `2026-09-04/0000003d--0e812cecba/rlog-8.zst`, plus the
+separate bus2 forwarding echoes. Thus the negative is not simply a reader that
+cannot recognize the normal EPS output. The four other configured EPS IDs are
+not asserted to publish continuously in this vehicle mode.
+
+### Low supply is not a sufficient explanation for the later silence
+
+The earlier identity-only probe recorded Panda voltage 11.473–11.561 V. That
+is a real diagnostic confound, but the later `d3` route provides 15 clean
+segments, approximately 14:34–14:49 America/Chicago on September 11, with Panda
+supply samples **13.321–13.926 V throughout** and still no EPS generated-COM
+output or `7A9` response. Other chassis frames remain present. Raising the
+vehicle-side voltage therefore cannot be represented as an evidenced fix for
+the CRC-valid bad firmware. Panda voltage is not a measurement at the EPS
+connector; a separate EPS power/ground fault is not excluded by this observation.
+
+### Bus attribution and remaining limits
+
+In these later logs, native `025`, `0AA`, `081`, and `08A` are on **Panda source
+1**. The older repinned bus0/bus2 assignment must not be carried forward without
+checking the actual captured configuration. The census checks all three native
+sources and keeps forwarding echoes, rejected returns, and `sendcan` separate.
+`081` and `08A` are not counted as EPS-origin output: exact F33 excludes them
+from its Tx set. Their continued presence does not establish surviving EPS code.
+
+This strengthens the observation of an EPS-specific communication loss at
+adequate Panda-side voltage. It does **not** prove the live SYSERR registers,
+rack-terminal power, the first microseconds of EPS startup, or absence of an
+undocumented independent service interface. Logger startup is not proof of a
+synchronized EPS reset. CAN-ID attribution is firmware-supported but is not
+cryptographic identification of the physical sender.
+
+No new working non-invasive recovery method was found. Exact-F33 external
+connector/EWD and any manufacturer procedure that enters recovery without a
+running application remain evidence gaps; generic CUW retry/blank-target wording
+and another ECU's Camry calibration package do not fill them. The local repo,
+available Library results, and publicly accessible material reviewed in this
+pass did not supply those exact-rack documents.
+
+Reproducer: `tools/targets/camry/analysis/analyze_camry_eps_recovery_liveness.py`.
+Observation report and input paths:
+`targets/camry-2026/raw-20260912/eps-recovery/saved-log-liveness.json`.
+
+A focused read of `d9--0/rlog.zst` also confirms actual diagnostic transmission
+on that later bus-1 path: two `7A1` TesterPresent requests appear in `sendcan`
+and as source-129 TX echoes, with no `7A9` response. The neighboring `7A2`
+node produces two positive TesterPresent replies at source-1 `7AA`, plus a
+negative response to a normal identification read. Those are replies from the
+neighbor, not the EPS. The zero `7A9` count is not being inferred solely from a
+log containing no tester traffic; conversely, zero diagnostic replies in other
+segments without EPS-directed queries are only absence-of-traffic observations.
+
+
+## 14. Saved short-frame format is unknown; the bootloader is not Classical-only
+
+The saved-log reducer now retains each producer's `initData` build identity.
+Regeneration of all 40 observations (39 incident segments plus the positive
+control) leaves every source count, CAN time span, and parse warning unchanged.
+The three post-incident producer builds are:
+
+| Producer commit | Segments | Branch |
+|---|---:|---|
+| `be25deb6e99b59a62aee22b23bbca8c7b07de191` | 8 | `tss3` |
+| `7603684127486383bc3a8a70109995380e14fe59` | 22 | `tss3` |
+| `e00d4ede69b7c2119f784e0beda26ebe15e0c6f2` | 9 | `tss3` |
+
+Their exact `openpilot/cereal/log.capnp` definitions have `address`, `dat`, and
+`src` but **no per-frame FDF/BRS field**. They cannot establish the wire format
+of an eight-byte request or TX echo. Loading a newer schema that adds `fd`
+would supply its default value, not recover an unrecorded bit. Earlier
+format-preserving work on a different branch is not evidence that these
+producers recorded it. The reducer intentionally makes no short-frame-format
+claim.
+
+The exact `e00d4ede6` `openpilot/selfdrive/pandad/pandad.cc` also enables
+CAN-FD auto mode on all three buses during connection. That is configuration
+potential, not proof of the format of an individual transmitted request. The
+separate direct-Python Panda interface defaults auto mode off; without the
+frozen catcher source/configuration, do not transfer this later pandad behavior
+to the earlier 05:47 identity-only probe.
+
+A fresh target-native boot configuration check does **not** reveal a
+Classical-only listener that this could trivially repair:
+
+- `3908` writes `FFD204FC = 1`: P1M-E `RCMC=1`, CAN-FD interface mode.
+- `3978` sets the nominal/data timing values `0F3E7800` / `055C0000`, the
+  previously recovered 500-kbit/s / 2-Mbit/s geometry.
+- `3A8E` writes channel FDCFG `20000000`: `REFE=1`, `FDOE=0` (FD-only mode
+  disabled). This is not a Classical-only controller configuration.
+
+Manufacturer tables 17.94 and 17.100 in **R01UH0585EJ0120**, pp.920 and 938,
+were rendered and visually checked, as well as read in extracted text. These
+mode bits do not prove that every DLC/format passes software acceptance. The
+bounded result is that the recorded negative probes have a framing-observation
+gap, but neither that gap nor switching frame format establishes an independent
+programming entry before the application fault.
+
+The narrow `camry_eps_recovery_liveness` suite exercises native-vs-TX/rejected
+source separation, positive controls, repeated metadata timing, per-length time
+ranges, producer metadata, and empty/send-only logs without a vehicle or capnp.
+
+## 15. Same-part exterior connector photograph: populated contacts are not a pinout
+
+The previous shorthand about a five-wire vehicle interface must not be read as
+proof that every externally exposed terminal is assigned. Original photographs
+from a 2025 Camry donor listing provide a more specific physical lead:
+
+- Source listing: `https://www.ebay.com/itm/298258723181` (ADVAutoParts).
+- Photograph 19 visibly labels the controller **89650-33K90**, JTEKT
+  **JJ501-016640**, DENSO **210600-3912**.
+- Photograph 18 labels the rack **44250-06490**, JTEKT **JG402-006840**.
+- Photograph 17 exposes the main external socket: two large blade contacts and
+  an array of small contacts, with visibly more than three small contacts.
+  This is an observation of contacts, not a verified count of electrically
+  connected circuits or an assignment of terminal numbers.
+
+Original photographic sources:
+
+- Connector: `https://i.ebayimg.com/images/g/QX8AAeSwANdp604g/s-l1600.webp`
+- Rack label: `https://i.ebayimg.com/images/g/joQAAeSw~adp604g/s-l1600.webp`
+- ECU label: `https://i.ebayimg.com/images/g/idcAAeSw2Cpp604g/s-l1600.webp`
+
+The retained vehicle F18C in `targets/camry-2026/raw-20260826/identity.json`
+begins with the matching **8965033K90** component prefix. The donor's software
+calibration and hardware revision have not been read; this is same-labeled-part
+photographic evidence, not a second verified `8965F3307000` firmware target.
+The images were acquired and visually checked in the disposable
+`build/work/f33-external-recovery/` workspace, not treated as OEM electrical
+schematics.
+
+**What changes:** absence of a CAN-only recovery path does not establish that
+an installed, closed assembly has no other usable external contacts. Accounting
+for the socket is a concrete unresolved task, rather than an unspecified hope
+for a hidden message.
+
+**What does not change:** none of these contacts has been identified as reset,
+mode select, UART, a diagnostic input, or a working recovery interface. Extra
+contacts may be unused, share a connector across variants, or serve unrelated
+functions. A service EWD showing only vehicle-used wires could still leave the
+other contacts electrically unexplained. The photos also do not show whether
+the socket can be reached on this car without lifting it or removing prohibited
+components. Do not assign old-Camry terminal numbers, apply voltage, short pins,
+or manufacture a programming sequence from these pictures.
+
+The relevant alternative is a **documented independent service interface through
+an externally accessible connector**, if one exists and is enabled. Establishing
+that interface would require an exact pinout/board-to-connector mapping,
+installed-access evidence, and the supported entry/authorization procedure.
+Serial/debug enablement is not implied by physical pin access. The published
+2021 RAV4 Prime RH850 hardware study, for comparison, used an opened PCB and
+reported serial programming prohibited; it is not an unopened-F33 recovery
+procedure or proof of the F33's own security configuration.
+
+## 16. External service-tool evidence and the remaining information boundary
+
+Public manufacturer sources were checked for a target-specific, closed-assembly
+service operation rather than treating a generic “EPS programming” label as
+support for this part:
+
+- **OBDSTAR DC706:** the official September-1-2026 coverage archive linked from
+  `https://www.obdstar.com/Products_327.html` was read, including all five
+  workbook files. In `BODY.xlsx`, the listed EPS entries are two GM/Bosch
+  targets and a Volvo/XC164CS target; no Toyota/JTEKT/F33 EPS entry was found.
+  Toyota RH850 entries in the separate ECM workbook are engine controllers,
+  not this EPS. This bounds that published coverage only; it does not prove
+  every commercial tool lacks a method. Archive source:
+  `https://www.obdstar.com/Private/Files/6392393826584678411094158040.zip`.
+- **MSG Equipment MS561 PRO:** the manufacturer explicitly describes an
+  OEM-number-indexed unit database with connector pinouts and unit-dependent
+  software-recovery functions. Its public page and 2026-08-06 user manual do
+  **not** establish recovery support for `89650-33K90`. The manual directs
+  users to technical support for software and puts unit procedures in its
+  built-in manual. The public universal-cable Camry year range is not an exact
+  calibration/support match. Sources:
+  `https://msg.equipment/en/equipment/electric-power-steering-eps/592991` and
+  `https://msg.equipment/storage/files/260806-ms561-pro-user-manual-multi.pdf`,
+  pp.4 and 12. These identify a possible source of the missing connector
+  documentation, not a recommendation to purchase a tester.
+- The existing adjacent RH850/P1M-E, EPS-telescope, and Sienna analysis
+  repositories supplied no external F33 connector mapping in the bounded
+  hardware/reference-file pass. Their working-CAN diagnostic tools require a
+  responsive target; they are not independent recovery executors.
+
+An actionable documentation request is now part-specific: **for Toyota
+89650-33K90 / JTEKT JJ501-016640 / DENSO 210600-3912, identify every populated
+main-connector terminal, any supported recovery entry independent of the normal
+application, whether that entry is enabled on supplied units, and whether it
+can be used with the rack installed and closed.** A bench test that merely
+supplies ignition and CAN to a healthy rack does not answer that question.
+
+No independent external service entry has yet been verified. This pass produced
+a narrower physical lead and corrected the saved-wire-format boundary; it did
+not repair the ECU, perform a live test, or establish that another ordinary CAN
+request will work. The exact installed-access/pin-function evidence remains the
+missing input needed to turn the connector lead into a recovery procedure.

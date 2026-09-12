@@ -1006,6 +1006,9 @@ tests = ["tests/verify_camry_f33_persistent_signer.py"]
 [suite.f33_recovery_structure]
 tests = ["tests/verify_f33_recovery_structure.py"]
 
+[suite.camry_eps_recovery_liveness]
+tests = ["tests/verify_camry_eps_recovery_liveness.py"]
+
 [suite.camry_f33_b6_transaction_observer]
 tests = ["tests/verify_camry_f33_b6_transaction_observer.py"]
 
