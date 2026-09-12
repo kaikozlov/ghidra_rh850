@@ -380,6 +380,35 @@ rows_1cee = [row for row in rows if row["primary_did"] == 0x1CEE]
 names_1cee = {row["name"] for row in rows_1cee}
 check("Advanced Drive Target Steering Angle" in names_1cee, "DID 0x1CEE resolves Advanced Drive Target Steering Angle")
 check("Target Steering Angle After Output Compensation" in names_1cee, "DID 0x1CEE retains the second Toyota interpretation")
+ffd = gts_cli._generic_ffd_rows(emps, strings, "EMPS_P5.ddb", master)
+ffd_steering = next(row for row in ffd["signals"] if row["name"] == "Steering Angle")
+check(
+    ffd_steering["snapshot_did"] == 0x3037
+    and ffd_steering["primary_did"] == 0x1037
+    and [ffd_steering["bit_start"], ffd_steering["bit_end"]] == [0, 15]
+    and ffd_steering["local_support_mode"] == 0
+    and ffd_steering["support_condition"] is None
+    and ffd_steering["signal_info"]["mul"] == 15
+    and ffd_steering["signal_info"]["signed"] is True
+    and ffd_steering["signal_info"]["unit"] == "deg",
+    "current EPS generic FFD maps SSR DID 0x3037 to the exact Steering Angle signal schema",
+)
+ffd_odo_km = next(row for row in ffd["signals"] if row["monitor_key"] == 9905)
+check(
+    ffd_odo_km["snapshot_did"] == 0x0403
+    and ffd_odo_km["support_condition"] == {
+        "key": 10001, "variable_id": 11290, "referenced_did": 0x0403,
+        "bit_start": 7, "bit_end": 7, "condition_type": 7,
+    }
+    and ffd_odo_km["signal_info"]["unit"] == "km",
+    "current EPS generic FFD resolves type-80 variable 0x2C1A to DID 0x0403 bit7 condition",
+)
+check(
+    len(ffd["signals"]) == 163 and ffd["condition_count"] == 2
+    and ffd["dynamic_lsb_table_present"] is False,
+    "current EPS generic FFD aliases collapse to 163 unique signals with two exact support conditions",
+)
+
 rob = gts_cli._rob_rows(emps, strings, "EMPS_P5.ddb")
 rob_steering = next(row for row in rob["signals"] if row["name"] == "Steering Angle")
 check(

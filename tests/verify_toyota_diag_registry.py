@@ -261,6 +261,25 @@ def main() -> int:
     check("initial-read request is materialized per direct Active Test",
           hv_test["initial_read"] == {"mode": 0, "selector": "0xCA", "request": "222801", "check": "62"}
           and hv_test["session_requirement"] == "extended")
+    eps_ffd_meta = actual["catalogs"]["405"]["generic_ffd"]
+    eps_ffd_steering = next(row for row in eps_ffd_meta["signals"] if row["name"] == "Steering Angle")
+    check("EPS generic P5 FFD signal selection and scaling are exported from current host semantics",
+          eps_ffd_steering["snapshot_did"] == 0x3037
+          and eps_ffd_steering["primary_did"] == 0x1037
+          and eps_ffd_steering["flags"] & 0x02
+          and eps_ffd_steering["local_support_mode"] == 0
+          and eps_ffd_steering["support_condition"] is None
+          and eps_ffd_steering["signal_info"]["mul"] == 15
+          and eps_ffd_steering["signal_info"]["unit"] == "deg")
+    eps_ffd_odo = next(row for row in eps_ffd_meta["signals"] if row["monitor_key"] == 9905)
+    check("EPS generic P5 FFD cross-DID condition resolves through the master variable table",
+          eps_ffd_odo["snapshot_did"] == 0x0403
+          and eps_ffd_odo["support_condition"] == {
+              "key": 10001, "variable_id": 11290, "referenced_did": 0x0403,
+              "bit_start": 7, "bit_end": 7, "condition_type": 7,
+          }
+          and eps_ffd_meta["dynamic_lsb_table_present"] is False)
+
     hv_ffd = next(row for row in hv["commands"] if row["kind"] == "p5_dtc_snapshot")
     check("ordinary P5 generic DTC snapshot request is exported from role-0xB5 fallback",
           hv_ffd["role"] == 0xB5

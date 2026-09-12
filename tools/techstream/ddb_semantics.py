@@ -5,7 +5,7 @@ from __future__ import annotations
 import struct
 from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Callable
 
 from parse_ddb import DDBParser
 
@@ -28,7 +28,9 @@ class MonitorRecord:
     table: int
     index: int
     name_string_index: int
+    flags: int
     monitor_key: int
+    ffd_support_condition_key: int
     physical_data_key: int
     bit_start: int
     bit_end: int
@@ -164,7 +166,9 @@ def extract_monitor_records(section: Any) -> list[MonitorRecord]:
             table=table,
             index=index,
             name_string_index=u32(0x18 + shift),
+            flags=raw[0x20 + shift],
             monitor_key=u16(0x24 + shift),
+            ffd_support_condition_key=u16(0x28 + shift),
             physical_data_key=u16(0x2A + shift),
             bit_start=u16(0x2C + shift),
             bit_end=u16(0x2E + shift),
@@ -306,7 +310,9 @@ def monitor_rows(
                 "tables": [table],
                 "record": record.index,
                 "name": strings.get_string(record.name_string_index),
+                "flags": record.flags,
                 "monitor_key": record.monitor_key,
+                "ffd_support_condition_key": record.ffd_support_condition_key,
                 "physical_data_key": record.physical_data_key,
                 "bit_start": record.bit_start,
                 "bit_end": record.bit_end,
@@ -330,6 +336,122 @@ def monitor_rows(
         elif row["table"] not in existing["tables"]:
             existing["tables"].append(row["table"])
     return list(by_identity.values())
+
+
+def _data_id_modes(section: Any | None) -> dict[int, int]:
+    out: dict[int, int] = {}
+    if section is None:
+        return out
+    for raw in records(section):
+        if len(raw) >= 7:
+            out[struct.unpack_from("<H", raw, 0x02)[0]] = raw[0x06]
+    return out
+
+
+def _ffd_conditions(
+    section: Any | None,
+    resolve_variable: Callable[[int], bytes],
+) -> dict[int, dict[str, Any]]:
+    out: dict[int, dict[str, Any]] = {}
+    if section is None:
+        return out
+    for raw in records(section):
+        if len(raw) < 12:
+            raise ValueError(f"FFD condition table 80 row too small: {len(raw)}")
+        key = struct.unpack_from("<H", raw, 0x00)[0]
+        variable_id = struct.unpack_from("<H", raw, 0x02)[0]
+        variable = resolve_variable(variable_id)
+        if len(variable) < 2:
+            raise ValueError(f"FFD condition {key} variable {variable_id} has no referenced DID")
+        if key in out:
+            raise ValueError(f"duplicate FFD condition key {key}")
+        out[key] = {
+            "key": key,
+            "variable_id": variable_id,
+            "referenced_did": int.from_bytes(variable[:2], "big"),
+            "bit_start": struct.unpack_from("<H", raw, 0x06)[0],
+            "bit_end": struct.unpack_from("<H", raw, 0x08)[0],
+            "condition_type": raw[0x0B],
+        }
+    return out
+
+
+def ffd_rows(
+    db: Any,
+    strings: Any,
+    source: str,
+    *,
+    resolve_variable: Callable[[int], bytes],
+    include_signal_info: bool = False,
+) -> dict[str, Any]:
+    """Current ordinary-P5 generic FFD signal schema used by GetEachFrzFrmDatP5.
+
+    The host selects monitor rows whose FFD-membership bit (+0x30 & 0x02 in the
+    current 80-byte row) is set and whose alternate/SSR DID (+0x48) matches the
+    returned snapshot DID. Type 61 supplies the local support mode. A nonzero
+    +0x38 support key resolves through type 80 to another DID/bit condition from
+    the same snapshot record.
+    """
+    did_modes = _data_id_modes(db.sections.get(61))
+    conditions = _ffd_conditions(db.sections.get(80), resolve_variable)
+    dynamic_lsb = 64 in db.sections
+    rows: list[dict[str, Any]] = []
+    for table in (62, 157):
+        section = db.sections.get(table)
+        if section is None:
+            continue
+        for record in extract_monitor_records(section):
+            if not (record.flags & 0x02):
+                continue
+            condition = None
+            if record.ffd_support_condition_key:
+                condition = conditions.get(record.ffd_support_condition_key)
+                if condition is None:
+                    raise ValueError(
+                        f"FFD monitor key {record.monitor_key} references missing condition "
+                        f"{record.ffd_support_condition_key}"
+                    )
+            row: dict[str, Any] = {
+                "source": source,
+                "table": table,
+                "record": record.index,
+                "name": strings.get_string(record.name_string_index),
+                "monitor_key": record.monitor_key,
+                "flags": record.flags,
+                "snapshot_did": record.alternate_did,
+                "primary_did": record.primary_did,
+                "physical_data_key": record.physical_data_key,
+                "bit_start": record.bit_start,
+                "bit_end": record.bit_end,
+                "sort_key": record.sort_key,
+                "pattern_display_key": record.pattern_display_key,
+                "local_support_mode": did_modes.get(record.alternate_did),
+                "support_condition": condition,
+                "dynamic_lsb_possible": dynamic_lsb,
+                "raw": record.raw,
+            }
+            if include_signal_info:
+                row["signal_info"] = _physical_info(
+                    db, strings,
+                    physical_data_key=record.physical_data_key,
+                    bit_start=record.bit_start,
+                    bit_end=record.bit_end,
+                    pattern_display_key=record.pattern_display_key,
+                )
+            rows.append(row)
+    by_identity: dict[tuple[Any, ...], dict[str, Any]] = {}
+    for row in rows:
+        identity = (row["name"], row["snapshot_did"], row["monitor_key"])
+        existing = by_identity.get(identity)
+        if existing is None:
+            by_identity[identity] = row
+        elif row["table"] != existing["table"]:
+            existing.setdefault("tables", [existing["table"]]).append(row["table"])
+    return {
+        "signals": list(by_identity.values()),
+        "condition_count": len(conditions),
+        "dynamic_lsb_table_present": dynamic_lsb,
+    }
 
 
 def dtc_rows(parser: DDBParser, db: Any, strings: Any, source: str) -> list[dict[str, Any]]:

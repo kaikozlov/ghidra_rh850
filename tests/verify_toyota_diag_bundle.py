@@ -158,6 +158,14 @@ def main() -> int:
               and hybrid_ffd["plugin_binding"]["dll"] == "GetEachFrzFrmDatP5_DT.dll"
               and hybrid_ffd["requests"][0]["send"] == "1904000000ff"
               and hybrid_ffd["requests"][0]["check"] == "5904")
+        eps_catalog = json.loads(archive.read("catalogs/NA/405.json"))
+        eps_ffd_meta = eps_catalog["generic_ffd"]
+        eps_ffd_steering = next(row for row in eps_ffd_meta["signals"] if row["name"] == "Steering Angle")
+        check("universal EPS catalog exports generic P5 FFD signal/condition semantics",
+              eps_ffd_steering["snapshot_did"] == 0x3037
+              and eps_ffd_steering["signal_info"]["unit"] == "deg"
+              and eps_ffd_meta["condition_count"] == 2
+              and eps_ffd_meta["dynamic_lsb_table_present"] is False)
         hybrid_rob_meta = hybrid_catalog["rob"]
         hybrid_behavior = next(row for row in hybrid_rob_meta["behavior_codes"] if row["behavior_code"] == 0x0450)
         check("universal Hybrid catalog exports current RoB behavior semantics",

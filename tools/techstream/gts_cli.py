@@ -32,6 +32,7 @@ from cuw_parameter import factory_routes_from_ini_root
 from ddb_semantics import behavior_rows as semantic_behavior_rows
 from ddb_semantics import dtc_rows as semantic_dtc_rows
 from ddb_semantics import extract_monitor_records
+from ddb_semantics import ffd_rows as semantic_ffd_rows
 from ddb_semantics import monitor_rows as semantic_monitor_rows
 from ddb_semantics import rob_rows as semantic_rob_rows
 from ddb_semantics import records as ddb_records
@@ -173,6 +174,20 @@ def _rob_rows(db: Any, strings: Any, source: str) -> dict[str, Any]:
         "behavior_codes": _without_raw(payload["behavior_codes"]),
         "signals": signals,
     }
+
+
+def _generic_ffd_rows(db: Any, strings: Any, source: str, master: Any) -> dict[str, Any]:
+    payload = semantic_ffd_rows(
+        db, strings, source,
+        resolve_variable=lambda variable_id: bytes.fromhex(_master_variable(master, variable_id)["bytes"]),
+        include_signal_info=True,
+    )
+    signals = _without_raw(payload["signals"])
+    for row in signals:
+        info = row.get("signal_info")
+        if isinstance(info, dict) and isinstance(info.get("pattern_display"), dict):
+            info["pattern_display"] = {str(key): value for key, value in info["pattern_display"].items()}
+    return {**{key: value for key, value in payload.items() if key != "signals"}, "signals": signals}
 
 
 def _format_row(row: dict[str, Any]) -> str:
@@ -3446,6 +3461,7 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
             "commands": _registry_command_rows(parser, master, category, bin_root, bindings),
             "selectors": _registry_selector_rows(parser, master, category_id),
             "data_list": _registry_data_list(db, strings),
+            "generic_ffd": _generic_ffd_rows(db, strings, db_path.name, master),
             "rob": _rob_rows(db, strings, db_path.name),
             "active_test_groups": _registry_active_test_groups(parser, category, db_root),
         }
@@ -4039,6 +4055,7 @@ def _bundle_category_catalog(
         "commands": _registry_command_rows(parser, master, category, bin_root, bindings),
         "selectors": _registry_selector_rows(parser, master, int(category["category_id"])),
         "data_list": _registry_data_list(db, strings),
+        "generic_ffd": _generic_ffd_rows(db, strings, db_path.name, master),
         "rob": _rob_rows(db, strings, db_path.name),
         "active_test_groups": _registry_active_test_groups(parser, category, db_root),
         "source_identity": {
