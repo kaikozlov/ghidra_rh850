@@ -531,3 +531,227 @@ This is a host-route negative, not an electrical claim about every Toyota VCI
 or DLC implementation. A future F33-specific package selecting a different
 system/protocol row would need to be evaluated on its own. The current P5 EPS
 package evidence, however, does not exercise this physical pin-control path.
+
+
+## 15. Network-only recheck: the frozen RAM writer is not a recovery server
+
+2026-09-12. This follow-up stayed with existing vehicle-network services and
+performed no connector work, ECU requests, ECU resets, RAM upload, or flash
+write. It rechecked the actual retained incident reconstruction and the exact
+RAM writer rather than assuming that current corrected package files describe
+the code used during the incident.
+
+### 15.1 The reviewed stock recovery code really is unchanged in the incident
+
+The surviving old image is
+`build/out/f33-persistent-b6-signer-tail/CodeFlash.stage7-persistent-signer.bin`,
+SHA-256 `aba6867f244dda42b754d6f455f25a226ee95025dee6a2d98b07b3ac550f2d74`.
+Its stage-6 predecessor hashes to
+`818338cc3e3dc23f1cf466c72f497699adc9ff33767e67b81fb65bccfab09010`.
+The complete byte comparison finds exactly **eight** stage-6-to-incident byte
+changes: the four-byte call site at `7A272..7A275` and four-byte CRC fixup at
+`FFDEC..FFDEF`. This remains reconstructed write evidence, not live readback.
+
+The earlier stock-to-incident unchanged-range comparison in the opening
+image-state check was repeated successfully. Whole-image raw PSW, EBASE, RBASE
+and ASID writer censuses are also unchanged; the added flash-tail resident does
+not introduce a new writer to those registers. Thus using the exact stock
+startup/diagnostic code for those specific unchanged regions is justified.
+
+An independent `v850-elf-objdump -m v850e3v5` decode of the incident image
+confirms the malformed destination. A raw direct-transfer census finds only
+`65F82 -> 9F00` as an application-to-low-boot transfer inside a recovered
+function. Seven other apparent low-target branches lie outside the recovered
+functions in configuration/table regions and are not established code paths.
+The survey does not prove absence of every unrecognized computed transfer.
+The direct calls into `988C2` and `58B5E` remain at `667F2` and `667FA`, after
+the corrupted aggregate. Fresh Ghidra decompilation of the supported boot
+selection and handoff functions agrees with that ordering.
+
+### 15.2 The alternative MPU exception does not supply a normal return path
+
+The `20090 -> 65BD4` handler is real: raw instructions save `FEPC+4`, perform
+its bounded protection bookkeeping, restore the FE context, and execute
+`FERET`. It must not be confused with the terminal SYSERR handler. The question
+was whether the incident's invalid fetch could enter this returning path instead.
+
+Exact MPU setup does not support that explanation. `71398` restores attribute
+profile **0** before `667E6`; region 0 has minimum `00000000` and effective
+inclusive maximum `FEBDFFFF`. Its `MPAT0=B8` in both profiles enables supervisor
+execution, read and write. The attributes require ASID 0, and the only raw ASID
+writer in either stock or reconstructed incident is `LDSR r0,ASID` at `27A`.
+MPM initialization at `65954` sets `MPE=1` and `SVP=1`. The incident destination
+`362BFE04` is therefore inside an enabled supervisor-executable MPU region,
+while still physically access-prohibited by the product memory map. The MPU
+permission does not make that physical address valid, and it does not turn the
+predicted fetch SYSERR into the returning protection exception.
+
+Manufacturer evidence is **R01UH0585EJ0120**, CPU register table for ASID,
+Table 3.39 (p.215), Tables 3.47/3.48 (p.219), and Table 3.49 (p.220). The MPAT
+page was rendered and visually checked. The existing
+`camry_8965f3307000_incident_fault_model` test passes. Live FE registers remain
+unobserved; this result strengthens the existing model, not a claim of live
+exception capture.
+
+### 15.3 A still-running post-write payload would also be diagnostically silent
+
+It was necessary to distinguish a crashed application from a RAM writer that
+never returned: ignition transitions alone do not identify which code currently
+runs. The frozen configured stage-7 writer is 4,048 bytes, SHA-256
+`fe2c46b16096260fa6d438a43d0fc662f444648815058fbe60ee7ea0d12c893a`, retained as
+`stage7-apply-payload.bin.shellcode.bin` alongside its metadata in the same old
+package directory. Its code before the config slot equals the retained template
+(`3d6c4e685ad8e6460a624e501948324e989a751a94cfd69f12078ab158e40426`).
+These archived binaries, not a rebuilt/corrected package, were independently
+decoded at their recorded load VMA `FEBF0000`.
+
+The target lifecycle is explicit:
+
+- `FEBF0004` executes `DI` before preflight or writing.
+- The apply success path emits `SUCCESS` and then enters the same terminal
+  helper as preflight/error completion.
+- `FEBF00F2` loads stage `FF`, calls the telemetry transmitter, and reaches
+  `FEBF00FE: BR FEBF00FE` after emitting `DONE`.
+- That terminal path has no CAN receive polling, input parser, acknowledgment
+  request, bootloader call, `EI`, `EIRET`, or `FERET`. The only waits in the
+  telemetry sender concern its transmit-buffer status, not tester commands.
+
+This agrees with `exploit/patcher/main.c` and
+`exploit/common/runtime.c::runtime_halt`, but the frozen bytes are the evidence
+for this incident. `DONE` reports completion; it does **not** mean the boot UDS
+server has resumed. Therefore leaving the writer powered cannot expose a
+network continuation or abort command that this payload does not implement.
+A genuine reset would leave this RAM execution state, but the already-recorded
+CRC-valid malformed application remains the separate cold-start problem.
+
+### 15.4 Remaining live evidence limitation
+
+A read-only attempt to reach the configured comma SSH endpoint timed out before
+any remote command ran. The existing overlay-network record for a comma-named
+peer was also offline and stale, so it was not treated as a substitute target.
+Consequently this pass could not inspect the on-device incident transcript or
+observe a new target response. No fresh transmission to the vehicle was made.
+
+The archive to inspect when the device is reachable is
+`/data/camry-f33-car-kit-incident-bad-hook-20260911` and its associated run/state
+records. The immediate purpose is to recover the actual write/return/reset
+sequence, not to execute its withdrawn scripts. A target-native diagnostic
+response through an existing network route would override the present silent-
+executor model and must be identified as application or boot before recovery
+is considered. No such new response or working network-only repair was
+established by this offline pass.
+
+
+## 15. Network-only recheck: current Unified writer and pre-foreground work
+
+2026-09-12. This pass addresses recovery over the vehicle network, not hidden
+connector contacts, rack removal, or direct programming. It performed no
+vehicle connection, transmission, session change, reset, RAM upload or flash
+operation. No working network repair was established.
+
+### The selected Unified writer itself requires the target response
+
+The earlier ReproStd trace must not stand in for every P5 contact type.
+`tools/gts route P5-Unified --json` selects
+`TCUWCanUnifiedPrepareWriter.dll` for the ordinary P5-Unified row. The current
+protected input, its `._` sidecar, and the previously recovered native body
+were freshly matched against the recovery manifest. The ordinary imported
+P5 exchange helper was independently bound to its current protected inputs
+in the same way. These are observations of the current host implementation,
+not an exact-F33 CUW package acquisition or a vehicle run.
+
+Native instructions establish the following dependency without relying on
+RetDec's incomplete reconstruction of local packet stores:
+
+| Current native location | Recovered behavior |
+|---|---|
+| Unified writer `10002B50 -> 10001C00` | Exported `StartPrepareWrite` constructs the writer and enters its preparation state machine. |
+| Unified writer `10002363 -> 10002550` | Calls the target programming-session exchange after gateway/periodic-message preparation. |
+| Unified writer `100025C4`, `100025EA` | Stores little-endian words `0210` and `0250`, constructing request `10 02` and expected response prefix `50 02`. |
+| Unified writer `10002654` | Calls `SendRequMsgAndReceiveRespMsgForP5Can` with that non-null expected response. |
+| `TCUWCanDiagCommUtils!100019D0` | Writes the request, receives the specified CAN response (`10001BC1`), enforces the minimum size (`10001D23`), and compares the expected bytes (`10001D3A..10001DA4`). |
+| Same exchange helper `10001F9A`, `10001FC4`, `10001FFD..10002046` | Short/mismatched responses and receive exceptions take error/throw paths, not a synthesized successful programming reply. |
+
+The helper separately recognizes response-pending `7F <service> 78`; pending
+is still a response from a running target, not permission to program an absent
+one. In the Unified writer, the ordinary error handler translates target
+`7F 10 22` into its preparation error; it does not supply another target-side
+executor. The ordinary main preparation path calls `10002550` regardless of
+which side of its emissions-related delay branch was taken. Object member
+`+2C` comes from `GetEmissionsRelatedSystem` in the constructor; it is not
+identified here as a blank-ECU recovery flag.
+
+Thus the **actual current Unified flow**, not only the related ReproStd flow,
+still needs the selected ECU to run programming-session service. Its network
+preparation can affect delivery, but does not itself repair the missing
+execution dependency in the reconstructed F33 incident. This does not prove
+that every unacquired target package or supplier recovery implementation uses
+this flow.
+
+Reproduction inputs are the current `TCUWCanUnifiedPrepareWriter.dll` and
+`TCUWCanDiagCommUtils.dll` plus their `._` files under the installed CUWPlus
+tree. `tools/gts recover-cuw-bodies --only <filename>` recovers their analysis
+bodies. For this pass the existing manifests matched all current inputs and
+outputs: Unified recovered SHA-256
+`797b15b8ae8049717c1f5ec2692b923dcea9abb52bd2add6415cf295281db1dc`;
+P5 exchange-library recovered SHA-256
+`dbdc60dfb92b88d572c5eb70278fb430f459242029a3b752a6598abdb6823fcb`.
+The disposable raw disassemblies are under
+`build/work/f33-network-recovery-20260912/`; that directory is not evidence
+required by the committed tests.
+
+### Earlier foreground work does exist, but is not another recovered UDS server
+
+Fresh exact-target decompilation of `637EE`, `66062`, `65442`, `66FF2`, and
+`68318` checks the work before the familiar `667E6` aggregate. The outer loop
+waits for its scheduler flag, performs supervision and the
+`66FF2 -> 68318 -> 79C60 -> 74164` worker, and then calls `667E6` without a
+network-mode branch around that call.
+
+`74164` operates on the internal job state rooted at `FEBF6102/6104`, rather
+than directly interpreting UDS input. Its worker `72EEA` polls the current job;
+`723D6 -> 73A5C` resolves its state key through the fixed ROM map at `27400`,
+and `72342` dispatches the configured job operation. The mode helper `73EEE`
+selects fixed internal callbacks `766F4`/`767EA`. None of the reviewed
+entry/dispatch functions is the normal DCM worker or an independently identified
+network programming listener. This is a specific preamble/dispatcher result,
+not a new claim that every computed descendant has been exhaustively proven.
+
+The startup and preamble observations were also checked against the **complete
+cumulative incident reconstruction**, not only stock plus an imagined hook.
+Its SHA-256 is the retained `aba6867f...50f2d74`; it differs from stock in 492
+bytes across 22 contiguous intervals. The reviewed low boot (`00000..0FFFF`),
+network tables (`21000..2BFFF`), startup/scheduler/vectors (`60000..71FFF`),
+additional preamble/job-driver span (`72100..7A12F`), and diagnostic workers
+(`90000..98E7F`) are byte-identical. Earlier modifications therefore do not
+invalidate these particular stock-code traces. The reconstruction remains
+**not a new live readback**.
+
+### OEM labels and peer observations are not recovery commands
+
+The suggestive GTS+ text about putting an ECU into reprogramming mode before
+an ignition cycle resolves to `U_English.ddb` entry **4035**, resource identifier
+**`IDS_BSM_20_004_TEXT`**. Its BSM-associated identifier is not evidence of an
+EPS recovery procedure. The generic M_English labels “ECU Reprogramming” and
+“ECU Reprogramming (Part#:89650-*****)” likewise do not, by themselves, identify
+an independently running F33 programming service.
+
+There is a concrete **read-only peer-side observer**, distinct from a repair:
+current `Brk_Bst_P5.ddb` category **466** defines
+`EPS/Steering Control Actuator ECU Communication Open` at primary DID **102F**,
+bit **74**, with labels `0=Normal`, `1=Under intermittent`. This can be resolved
+with `tools/gts search 'Communication' --kind did --ecu Brk_Bst_P5 --json`.
+It is a status definition, not a writable communications-enable control, an
+EPS acknowledgement counter, or proof of present EPS execution. Runtime
+support and actual values were not measured in this pass. The sibling EPS
+pinion-angle and zero-point labels are likewise observers, not programming
+routes. Do not project P6 ADCU CAN-status labels onto this P5 brake module.
+
+**Result:** the current normal host route still requires the target service
+that the incident model leaves unexecuted. A network repair needs evidence of
+an independently running recovery service, or a contrary target response that
+invalidates that execution model. No such entry or response was obtained here.
+Neither a new name in the diagnostic catalog nor another retry is a demonstrated
+repair. The exact live fault registers and an exact-F33 recovery package remain
+unobserved; the conclusion is not an absolute proof against every undocumented
+implementation.
