@@ -4302,6 +4302,133 @@ def _bundle_write_json(archive: zipfile.ZipFile, member: str, payload: Any) -> N
     archive.writestr(info, _bundle_json_bytes(payload))
 
 
+def _bundle_customize_catalog(
+    master: Any,
+    strings: Any,
+    category_by_id: dict[int, dict[str, Any]],
+) -> dict[str, Any]:
+    """Recover current regional Toyota Customize catalog from master tables 20/21/22/34.
+
+    These are master tables, not ECU-DDB tables. GetCustomSupportList selects a
+    body type and then table-20 groups. GetCustomItemList resolves table-21 by
+    group id and table-22 by choice-list id; each item names the live target ECU.
+    """
+    def u16(raw: bytes, off: int) -> int:
+        return struct.unpack_from("<H", raw, off)[0]
+
+    def u32(raw: bytes, off: int) -> int:
+        return struct.unpack_from("<I", raw, off)[0]
+
+    choice_rows: dict[int, list[dict[str, Any]]] = {}
+    for raw in ddb_records(master.sections[22]):
+        key = u16(raw, 0x04)
+        choice_rows.setdefault(key, []).append({
+            "value": u16(raw, 0x06),
+            "name": strings.get_string(u32(raw, 0x00)) or "",
+            "name_string_index": u32(raw, 0x00),
+            "exception_flag": raw[0x08],
+            "exception_id": u16(raw, 0x0A),
+        })
+    for rows in choice_rows.values():
+        rows.sort(key=lambda row: int(row["value"]))
+
+    groups = []
+    for raw in ddb_records(master.sections[20]):
+        groups.append({
+            "body_type": raw[0x08],
+            "group_id": u16(raw, 0x04),
+            "name": strings.get_string(u32(raw, 0x00)) or "",
+            "name_string_index": u32(raw, 0x00),
+            "exception_flag": raw[0x09],
+            "exception_id": u16(raw, 0x0A),
+        })
+    groups.sort(key=lambda row: (int(row["body_type"]), int(row["group_id"])))
+
+    items = []
+    for raw in ddb_records(master.sections[21]):
+        group_id = u16(raw, 0x08)
+        item_id = u16(raw, 0x0A)
+        target_category_id = u16(raw, 0x0C)
+        choice_key = u16(raw, 0x20)
+        all_default_gate = u16(raw, 0x22)
+        target = category_by_id.get(target_category_id)
+        items.append({
+            "group_id": group_id,
+            "item_id": item_id,
+            "name": strings.get_string(u32(raw, 0x00)) or "",
+            "name_string_index": u32(raw, 0x00),
+            "metadata_dword_04": u32(raw, 0x04),
+            "target_category_id": target_category_id,
+            "target_category_name": str(target.get("name") or "") if target else "",
+            "target_generation": int(target["generation"]) if target and target.get("generation") is not None else None,
+            "item_aux_u16_0e": u16(raw, 0x0E),
+            "support_bit_start": u16(raw, 0x10),
+            "support_bit_end": u16(raw, 0x12),
+            "current_bit_start": u16(raw, 0x14),
+            "current_bit_end": u16(raw, 0x16),
+            "p4_support_bit_start": u16(raw, 0x18),
+            "p4_support_bit_end": u16(raw, 0x1A),
+            "data_id": u16(raw, 0x1C),
+            "raw_u16_1e": u16(raw, 0x1E),
+            "choice_list_key": choice_key,
+            "choices": choice_rows.get(choice_key, []),
+            "all_default_gate_u16_22": all_default_gate,
+            "raw_u32_24": u32(raw, 0x24),
+            "raw_u16_28": u16(raw, 0x28),
+            "write_group_id": u16(raw, 0x2A),
+            "target_selector": raw[0x2C],
+            "support_bit_mode": raw[0x2D],
+            "support_selector": raw[0x2E],
+            "read_current": raw[0x2F],
+            "current_data_mode": raw[0x30],
+            "write_variant": raw[0x31],
+            "support_mode": raw[0x32],
+            "raw_u8_33": raw[0x33],
+        })
+    items.sort(key=lambda row: (int(row["group_id"]), int(row["item_id"]), int(row["target_category_id"])))
+
+    probes = []
+    for raw in ddb_records(master.sections[34]):
+        probes.append({
+            "target_category_id": u16(raw, 0x00),
+            "second_connect_argument": u16(raw, 0x02),
+            "connect_frame_id": u16(raw, 0x04),
+            "raw_u16_06": u16(raw, 0x06),
+            "lookup_key": u16(raw, 0x08),
+            "raw_u16_0a": u16(raw, 0x0A),
+            "connect_argument_0c": raw[0x0C],
+            "body_type": raw[0x0D],
+            "raw_u16_0e": u16(raw, 0x0E),
+        })
+
+    return {
+        "schema": "toyota-customize-catalog-v1",
+        "groups": groups,
+        "items": items,
+        "body_type_probes": probes,
+        "counts": {
+            "group_rows": len(groups),
+            "item_rows": len(items),
+            "choice_rows": sum(len(rows) for rows in choice_rows.values()),
+            "body_type_probe_rows": len(probes),
+        },
+        "semantics": {
+            "group_key": "body_type:u8 + group_id:u16 (CDbCustSignListTable)",
+            "item_key": "group_id:u16 + item_id:u16 (CDbCustItemTable)",
+            "choice_key": "choice_list_key:u16 + value:u16 (CDbPossibleToSetTable)",
+            "all_default_gate": (
+                "SetCustomizeAllDefault checks CustItem +0x22 before its per-row default path; this field is zero in every "
+                "current NA/EU/JP CustItem row, so no OEM default value is inferred from the current master"
+            ),
+            "target": "CustItem +0x0C is the live target ECU/category id",
+        },
+        "boundary": (
+            "Static OEM Customize catalog and item geometry only. Body-type selection still requires the recovered live "
+            "GetCustomSupportList connection checks; current-value acquisition and SetCustom write execution are separate runtime stages."
+        ),
+    }
+
+
 def _build_toyota_diag_region(
     gts_root: Path,
     family: str,
@@ -4466,6 +4593,7 @@ def _build_toyota_diag_region(
         "commsets": {str(row["comm_set_id"]): row for row in _master_comm_set_rows(parser, master)},
         "session_control": _bundle_session_control(parser, master, session_categories),
         "utilities": _registry_utilities(parser, master),
+        "customize_member": f"customize/{region}/0.json",
         "can_topology": _bundle_can_topologies(parser, master, strings, vehicle_types_with_routes),
         "counts": {
             "vehicle_count": len(vehicles),
@@ -4501,6 +4629,11 @@ def _build_toyota_diag_region(
     }
 
     with zipfile.ZipFile(part_path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
+        _bundle_write_json(
+            archive,
+            f"customize/{region}/0.json",
+            _bundle_customize_catalog(master, strings, category_by_id),
+        )
         for category in sorted(catalog_categories, key=lambda row: int(row["category_id"])):
             category_id = int(category["category_id"])
             payload = _bundle_category_catalog(parser, master, strings, db_root, bin_root, category)

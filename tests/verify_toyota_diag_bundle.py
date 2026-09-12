@@ -42,8 +42,10 @@ def main() -> int:
               and index["profile"] == "toyota-current"
               and index["release"] == "2026.03.002.02"
               and set(index["regions"]) == {"NA", "EU", "JP"})
-        check("bundle keeps lazy decoded catalogs separate from resolver metadata",
-              len(names) == 683 and sum(name.startswith("catalogs/") for name in names) == 682)
+        check("bundle keeps lazy decoded catalogs/customize data separate from resolver metadata",
+              len(names) == 686
+              and sum(name.startswith("catalogs/") for name in names) == 682
+              and sum(name.startswith("customize/") for name in names) == 3)
         check("universal Toyota bundle does not project a Panda wiring default",
               "default_panda_bus" not in index)
         p5_contract = index["support_contracts"]["p5"]
@@ -88,6 +90,34 @@ def main() -> int:
                       "p3": 1, "p4": 1859, "p5-hino": 3, "p5-mazda": 11, "p5-standard": 114,
                       "p5-subaru": 24, "p5-suzuki": 20, "p6-standard": 104,
                   })
+
+        expected_customize_counts = {
+            "NA": {"group_rows": 79, "item_rows": 3431, "choice_rows": 2444, "body_type_probe_rows": 4},
+            "EU": {"group_rows": 77, "item_rows": 3440, "choice_rows": 2444, "body_type_probe_rows": 4},
+            "JP": {"group_rows": 81, "item_rows": 3121, "choice_rows": 2444, "body_type_probe_rows": 10},
+        }
+        for region in ("NA", "EU", "JP"):
+            customize = json.loads(archive.read(f"customize/{region}/0.json"))
+            check(f"{region} Customize catalog is master-derived and stable",
+                  index["regions"][region]["customize_member"] == f"customize/{region}/0.json"
+                  and customize["schema"] == "toyota-customize-catalog-v1"
+                  and customize["counts"] == expected_customize_counts[region]
+                  and all(row["all_default_gate_u16_22"] == 0 for row in customize["items"]))
+        na_customize = json.loads(archive.read("customize/NA/0.json"))
+        wireless = next(row for row in na_customize["groups"]
+                        if row["body_type"] == 0 and row["group_id"] == 1)
+        open_door = next(row for row in na_customize["items"]
+                         if row["group_id"] == 1 and row["item_id"] == 23)
+        check("NA Customize witness preserves OEM group/item/choice and target geometry",
+              wireless["name"] == "Wireless Door Lock"
+              and open_door["name"] == "Open Door Warn"
+              and open_door["target_category_id"] == 26
+              and open_door["target_category_name"] == "Theft Deterrent"
+              and open_door["data_id"] == 1009
+              and [row["name"] for row in open_door["choices"]] == ["OFF", "ON"]
+              and [row["value"] for row in open_door["choices"]] == [0, 1]
+              and open_door["current_bit_start"] == 7
+              and open_door["current_bit_end"] == 7)
 
         for region in ("NA", "EU", "JP"):
             regional = index["regions"][region]

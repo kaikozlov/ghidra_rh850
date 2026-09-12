@@ -3643,3 +3643,11 @@ Techstream on a vehicle or bench. The findings describe the *capability* and
   capture behavior against a live vehicle/bench remains unobserved.
 - No live UDS transcript has been captured to validate against firmware
   findings.
+
+### Current GTS+ Customize master catalog
+
+Current GTS+ keeps Toyota Customize metadata in the **regional master**, not in the target ECU's ordinary P5/P6 DDB. The current master factory identifies type 20 `CDbCustSignListTable`, type 21 `CDbCustItemTable`, type 22 `CDbPossibleToSetTable`, and type 34 `CDbBodyTypeRetrieveTable`. `GetCustomSupportList.dll` selects a body type through the type-34 connection-check program and then reads type-20 groups keyed by `(body_type:u8 @ +0x08, group_id:u16 @ +0x04)`. `GetCustomItemList.dll` reads type-21 by `(group_id:u16 @ +0x08, item_id:u16 @ +0x0A)` and type-22 choices by `(choice_list_key:u16 @ +0x04, value:u16 @ +0x06)`. OEM names are the first `u32` string indices in all three tables. The type-21 item target is `u16 +0x0C`; current-value/support geometry is carried in the same 52-byte row and is evaluated against that live target ECU through `CCommCurrentData`.
+
+The current NA master contains 79 group rows, 3,431 item rows, 2,444 possible-value rows, and four body-type probe rows; EU has 77/3,440/2,444/4 and JP 81/3,121/2,444/10. Concrete NA witness: body-type-0 group 1 is **Wireless Door Lock**; item `(group 1, item 23)` is **Open Door Warn**, targets category 26 `Theft Deterrent`, uses data id 1009 with current bits 7..7, and has OEM choices `OFF=0` / `ON=1`. `SetCustomizeAllDefault` checks item `u16 +0x22` before one default path, but that field is zero in every current NA/EU/JP item row; no default value is therefore inferred from the first choice or any other heuristic.
+
+The universal clean diagnostic bundle exports this metadata as a lazy regional `customize/<region>/0.json` member. This is a static catalog boundary only: `GetCustomSupportList` live body-type selection, current-value acquisition, and `SetCustom` write execution remain separate runtime stages.
