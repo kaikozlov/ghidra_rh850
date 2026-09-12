@@ -642,7 +642,7 @@ is considered. No such new response or working network-only repair was
 established by this offline pass.
 
 
-## 15. Network-only recheck: current Unified writer and pre-foreground work
+## 16. Network-only recheck: current Unified writer and pre-foreground work
 
 2026-09-12. This pass addresses recovery over the vehicle network, not hidden
 connector contacts, rack removal, or direct programming. It performed no
