@@ -30,3 +30,23 @@ checked unchanged when the metadata was added.
 The synthetic `tools/test camry_eps_recovery_liveness` suite checks counting
 and metadata/timing behavior without loading any private rlog or opening any
 vehicle interface.
+
+
+`gateway-preparation-observation.json` is the separate offline census of the
+OEM shared gateway address in the same 39 post-incident files. It distinguishes
+logged native frames, echoes/mirrors, and sendcan; its 184 selected records are
+not 184 unique wire transmissions. All 36 shared 750/758 records belong to
+extensions 0F or 6D, not 5F. The partial coverage does not prove no preparation
+was attempted outside these logs. The artifact also retains the matching
+current CUW source identities and the optional F181 read's decoded C++
+exception-table witness. These facts establish neither a live gateway type nor
+a working EPS recovery path.
+
+`reproduce_gateway_observation.py` is a historical offline extractor using the
+local input paths in `saved-log-liveness.json` and the same local openpilot
+LogReader. Run it with the existing openpilot Python environment. It writes
+only `build/work/f33-network-gateway-20260912/reproduced-saved-gateway-observation.json`;
+it does not overwrite the curated interpretation, send network traffic, or
+contact a Panda. Counts, message summaries, and per-file warnings were compared
+identically on a second run. Interpretation is in §18 of
+`docs/variants/camry-f33-recovery-exception-followup.md`.

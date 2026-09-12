@@ -812,3 +812,233 @@ the choice to initialize the boot diagnostic runtime. The reviewed alternative
 XCP entry does not change that decision or provide a running repair handler
 in the reconstructed incident state. These are target-execution results,
 not conclusions drawn from an error message or from an unreachable host.
+
+
+## 18. Network gateway preparation: an untested precondition, not an independent EPS programmer
+
+2026-09-12. This pass follows only the existing diagnostic network. It does
+not require lifting the car, a new physical connection, rack access, or another
+ECU's DTC as its recovery mechanism. No vehicle request, reset, memory upload,
+or flash write was performed.
+
+### Correction to the earlier negative conclusion
+
+The required final EPS `10 02 -> 50 02` exchange proves that the programming
+executor must run on the EPS. It does **not** prove that completing the OEM
+gateway preparation cannot restore access to an already-running EPS diagnostic
+service which is hidden by routing state. Those are different questions.
+The exact incident model still predicts no working EPS diagnostic worker after
+the malformed call; gateway preparation is not a way around that instruction.
+Its remaining relevance is the unproven distinction between a hidden surviving
+listener and the reconstructed CPU-fault state.
+
+The 39 retained post-incident segments were reread for the actual OEM gateway
+traffic, with TX echoes/mirrors kept distinct from native reception. Among 184
+selected diagnostic records (not unique wire transmissions), all 36 shared
+`750/758` records decode to address extensions **0F or 6D**. There are no
+`750/758` extension-**5F** records, and therefore no recorded gateway-preparation
+exchange on that route. The same partially corrupted segment as in the liveness
+census remains explicitly marked. These sparse captured spans do not establish
+what was attempted outside them or inside the earlier unrecorded catcher.
+
+Observation and producer identities:
+`targets/camry-2026/raw-20260912/eps-recovery/gateway-preparation-observation.json`.
+The sibling `reproduce_gateway_observation.py` is an offline-only historical
+extractor against the same retained input paths; it never opens a vehicle
+connection and writes only an ignored workspace report.
+
+### The target identity read is optional before the gateway transition
+
+Current `TCUWCanUnifiedPrepareWriter.dll!100026E0` wraps the direct target
+`ReadSoftwareID` call at `10002778`. `TCUWUnifiedUtils.dll!100047F0` constructs
+**F181**, not a programming-session request. The wrapper's exception metadata
+is decisive: FuncInfo `10004B1C` has one try block over state2 and one
+catch-all handler (`adjectives=40`, null type descriptor) at `100027AE`.
+That handler's exact bytes `B8 7E 27 00 10 C3` select continuation `1000277E`,
+the cleanup/return path. It does not rethrow or set a target-failed flag.
+
+Consequently a failed **pre-transition identity read** does not, by itself,
+stop this DLL before it performs the subsequent gateway transition. This is a
+positive host-side control-flow result, not merely another timeout observation.
+It corrects any interpretation that a responding EPS is required *before every
+part* of OEM gateway preparation. The later EPS programming acknowledgement
+at `10002363 -> 10002550` remains mandatory.
+
+This is local to the prepare DLL. It does not prove that every GTS frontend,
+Health Check, CID getter, or calibration-eligibility step will launch that DLL
+for a silent target. The exact F33 calibration package and an end-to-end live
+prepared-state transcript are still missing. Do not turn this local exception
+handling result into a claim that the normal GUI has a verified dead-EPS mode.
+
+### The gateway generation is selected, not guessed from the vehicle year
+
+The current `CCanCommonPrepareWriter::JudgeReproGWNode` implementation is
+`10001810 -> 10001820`. It uses the same `000007505F/000007585F` address pair
+for its two protocol tests. The one-byte TesterPresent form selects internal
+enum2; the two-byte UDS form selects enum1. They feed distinct authorization
+and transition branches in the Unified writer. A guessed `10 60` must not be
+presented as the universally correct Camry gateway preparation.
+
+For the selected P5-style branch, the writer uses its ordinary gateway
+SecurityAccess followed by the start/result pairs for routines **1011** and
+**1012**, surrounding the ordinary network preparation and optional F181 read.
+`TCUWUnifiedUtils.dll!10004E90` constructs all four messages. The result-query
+expectations additionally require the trailing result byte **01**; receipt of
+just a `71` service response is not its success condition. The actual last
+transition pair occurs before the target's mandatory programming-session
+exchange.
+
+For the P4-style branch, the final gateway transition is
+`ChangeModeForCentralGW` at `10001FB0`, followed by the target programming
+exchange. This addresses **11-bit CAN 750/758 with ISO-TP address extension
+5F**, not 29-bit CAN identifiers. The host constructs `10 60`; its recovered
+response template explicitly checks the positive-service prefix `50`, not a
+separately pinned `60` byte. The broader `50 60` shorthand must not be mistaken
+for the exact matcher.
+
+Both branches use normal manufacturer authorization. No seed/key derivation,
+authentication bypass, parser corruption, or steering-control injection was
+developed in this pass.
+
+### Exit handling and two non-transferring alternatives
+
+The reviewed prepare writer's failure cleanup stops its tester-periodic work
+and removes host J2534 filters. Removing a host filter is **not** restoring
+gateway or EPS state. The normal flash-writer finish path contains a gateway
+DefaultSessionControl call only for its enum2 branch; the current helper
+`DefaultSessionControlForP4CentralGW` constructs `10 01` for the shared 5F
+route. It is not evidence that an arbitrarily aborted P5 preparation has a
+fully recovered, state-restoring exit. This is why the extracted sequence is
+not being shipped as a blind live-send script or advertised as an approved
+recovery runbook.
+
+`StopOTAReprogramming` was traced past its suggestive name. The reviewed
+function constructs a Phase-6 operation addressed through logical target1C,
+and the only import consumer in the recovered CUWPlus DLL set is
+`TCUWP6CanReprostdPrepareWriter.dll`. No call from the selected P5-Unified EPS
+prepare writer was recovered. It must not be presented as a Toyota-wide
+command that restores this EPS or selects an alternate EPS firmware bank.
+
+Similarly, the final target reset in the ordinary Unified flash-writer path
+is a request serviced by the target. It supplies no hardware reset to an EPS
+whose processor is not executing its diagnostic server.
+
+### Recovery decision
+
+The newly supported candidate is **complete, correctly selected OEM gateway
+preparation followed by an EPS-specific programming/liveness exchange**, not a
+peer error-code read. The preparation could distinguish a routing-hidden
+listener from the currently reconstructed failure, and its absence from the
+retained recordings prevents calling this network precondition live-exhausted.
+It cannot repair a genuinely faulted EPS by proxy. No response proving such a
+surviving listener, and no working network repair, has been observed.
+
+The next action cannot be promoted to flash repair on the strength of a
+gateway acknowledgement alone. It needs an actual EPS response in the prepared
+state, correct target identity and image compatibility, and normal authorization.
+Until then, the result remains a specific untested network avenue rather than
+a recovery success. The exact current protected stubs/sidecars and recovered
+bodies for all five involved CUW libraries were hash-matched against the
+recovery manifest; their identities are retained in the observation artifact.
+
+
+## 18. Network-selected startup state versus gateway routing
+
+2026-09-12. This pass tested two alternatives to another EPS-directed diagnostic
+retry: a retained programming request that could select a different startup
+state, and a host-controlled intermediary routing mode. All work was offline.
+There was no vehicle connection, traffic generation, session change, ECU reset,
+RAM upload, flash write, or physical connector operation. No working recovery
+route was established.
+
+### 18.1 The normal programming handoff is not a next-reset request
+
+Fresh target-native decompilation of `65F5E`, `9F00`, `148E`, and `1478`
+establishes a direct transition rather than a persistent boot-request flag:
+
+```text
+normal application system-mode worker
+  -> 65F5E: mask service; clear FFC0A000/4/8/C; call 9F00(31788)
+  -> 9F00: disable interrupts/reset application context; call 148E
+  -> 148E: copy nine configuration words through 1478; enter 1398
+  -> boot diagnostic runtime
+```
+
+The nine ROM words at `31788` are `00000000, 000007A1, 00000000, 00000000,
+00000002, 00000000, 00000000, 00000000, 00000000`. They are fixed handoff
+configuration; this pass does not assign undocumented field names to them.
+There is no reset between setting this configuration and entering `1398`.
+
+The separate cold path was rechecked through `C9A`, `E54`, `F80`, `10C6`,
+`119E`, `481A`, `3438`, and `344C`. The initializers set ports/ECM/clock state;
+`E54` conditionally preserves error status from a complement-coded record, not
+a boot request. The descriptor selectors are ROM-based. The boot decision still
+uses descriptor/CRC/validity conditions and does not consume the live-handoff
+configuration as a next-reset request. `7A132` independently initializes the
+application communication state and ends with the unconditional `FE01` value.
+
+Exact stock-to-complete-incident byte comparisons passed for `00C9A..0149B`,
+`09F00..09F53`, `31788..317AB`, `65F5E..65F8D`, and `7A132..7A187`. The
+incident reconstruction is the retained `aba6867f...50f2d74` image, and both
+validity words remain `5AA5A55A`. This is a reconstruction check, not a new live
+readback. It rules out using the *normal handoff's configuration* as evidence
+for a CAN-selectable warm-reset recovery flag; it does not prove every unseen
+hardware startup mechanism absent.
+
+### 18.2 A package gateway list is not a generic intermediate-ECU programmer
+
+The installed P5-Unified preparation module was checked at its gateway loop,
+not merely at the later target `10 02` exchange. Current protected inputs,
+sidecars, and recovered output hashes all matched the existing manifest for
+`TCUWCanUnifiedPrepareWriter.dll`, `TCUWCanReproStdPrepareWriter.dll`,
+`TCUWUnifiedUtils.dll`, and `TCUWDHUtils.dll`.
+
+The decisive Unified preparation region is `10002230..10002310`:
+
+- `10002234` obtains the number of package-declared gateways.
+- `10002247` reads each gateway's diagnostic-ID string.
+- Its first comparison uses `100041C8 = "07505F"`, selecting the central
+  gateway routines already described in sections 11/16.
+- Its second comparison uses `1000425C = "0751"`. A match invokes
+  `RoutineControlForSMCCentralGW` at `100022FE` with routine type 2.
+- A gateway matching neither string advances the loop at `1000230F`; this
+  region does not invoke a generic routing-mode operation on arbitrary
+  intermediaries. Afterward, the ordinary target transition is still called
+  at `10002363`.
+
+These literal identifiers describe the host dispatch. They are not proof that
+both gateway variants are installed on this Camry, that `0751` is the brake
+intermediary, or that such a routine runs a programmer inside the EPS.
+
+The distinction from the related writer matters: Unified imports
+`GetNumGateway` and `GetGatewayDiagID` but not `GetGatewayMode`. The current
+ReproStd writer *does* call `GetGatewayMode` at `100022A0` for the first declared
+gateway. That API's existence in a related module is not evidence that Unified
+accepts an arbitrary replacement gateway-mode byte, or that the missing exact
+EPS package selects ReproStd. No guessed gateway command was emitted.
+
+### 18.3 Keep the delivery and execution hypotheses separate
+
+A target instruction fault and an intermediary forwarding failure are different
+explanations for diagnostic silence. Upstream traffic, a tester TX echo, or a
+reply from a neighboring ECU cannot on its own establish the downstream EPS's
+execution state. Conversely, opening a forwarding route would not repair the
+malformed instruction if the reconstructed application is actually running and
+faulting as predicted. A gateway-only recovery hypothesis therefore needs
+independent evidence of an EPS recovery service that is alive but unreachable,
+not merely evidence that some gateway mode exists.
+
+The inspected host flow does not establish a network command for controlling
+an additional brake-side forwarding hop. The exact intermediary firmware is
+not in the registered firmware corpus. The known `7B0` / `F152633K0000` identity
+is category-435 Brake/EPB; the separate category-466 Brake Booster catalog must
+not be assigned that identity without a target match. Existing package-acquisition
+evidence records no local exact `07B0` image and no validated download URL.
+These are explicit evidence gaps, not proof that a supplier-level routing or
+recovery facility cannot exist.
+
+The outcome is narrower than declaring all network recovery impossible: the
+normal direct handoff does not create a retained next-boot selector, and the
+selected Unified gateway list does not provide arbitrary intermediate-node
+mode control. Neither result supports another ordinary EPS request as a new
+recovery technique, and neither is a completed repair.

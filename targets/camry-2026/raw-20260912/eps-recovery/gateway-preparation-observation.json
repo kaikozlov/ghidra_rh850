@@ -1,0 +1,1322 @@
+{
+  "scope": "Offline 39 retained post-incident segments only; missing transactions outside captured spans remain unknown. No wire-format inference; no requests transmitted. Only well-formed single-frame UDS is decoded. These are 184 logged records including TX echoes and mirrored frames, not 184 unique wire transmissions.",
+  "counts": [
+    {
+      "event": "can",
+      "src": 1,
+      "address": "0x7a0",
+      "length": 8,
+      "count": 10
+    },
+    {
+      "event": "can",
+      "src": 1,
+      "address": "0x7b8",
+      "length": 8,
+      "count": 18
+    },
+    {
+      "event": "can",
+      "src": 2,
+      "address": "0x750",
+      "length": 8,
+      "count": 12
+    },
+    {
+      "event": "can",
+      "src": 2,
+      "address": "0x7a1",
+      "length": 8,
+      "count": 6
+    },
+    {
+      "event": "can",
+      "src": 2,
+      "address": "0x7b0",
+      "length": 8,
+      "count": 8
+    },
+    {
+      "event": "can",
+      "src": 2,
+      "address": "0x7df",
+      "length": 8,
+      "count": 8
+    },
+    {
+      "event": "can",
+      "src": 128,
+      "address": "0x750",
+      "length": 8,
+      "count": 12
+    },
+    {
+      "event": "can",
+      "src": 128,
+      "address": "0x7a1",
+      "length": 8,
+      "count": 6
+    },
+    {
+      "event": "can",
+      "src": 128,
+      "address": "0x7b0",
+      "length": 8,
+      "count": 8
+    },
+    {
+      "event": "can",
+      "src": 128,
+      "address": "0x7df",
+      "length": 8,
+      "count": 8
+    },
+    {
+      "event": "can",
+      "src": 129,
+      "address": "0x7a1",
+      "length": 8,
+      "count": 4
+    },
+    {
+      "event": "can",
+      "src": 129,
+      "address": "0x7b0",
+      "length": 8,
+      "count": 16
+    },
+    {
+      "event": "can",
+      "src": 129,
+      "address": "0x7df",
+      "length": 8,
+      "count": 2
+    },
+    {
+      "event": "sendcan",
+      "src": 0,
+      "address": "0x750",
+      "length": 8,
+      "count": 12
+    },
+    {
+      "event": "sendcan",
+      "src": 0,
+      "address": "0x7a1",
+      "length": 8,
+      "count": 6
+    },
+    {
+      "event": "sendcan",
+      "src": 0,
+      "address": "0x7b0",
+      "length": 8,
+      "count": 8
+    },
+    {
+      "event": "sendcan",
+      "src": 0,
+      "address": "0x7df",
+      "length": 8,
+      "count": 8
+    },
+    {
+      "event": "sendcan",
+      "src": 1,
+      "address": "0x7a1",
+      "length": 8,
+      "count": 4
+    },
+    {
+      "event": "sendcan",
+      "src": 1,
+      "address": "0x7b0",
+      "length": 8,
+      "count": 20
+    },
+    {
+      "event": "sendcan",
+      "src": 1,
+      "address": "0x7df",
+      "length": 8,
+      "count": 8
+    }
+  ],
+  "messages": [
+    {
+      "event": "can",
+      "src": 1,
+      "address": "0x7a0",
+      "node": null,
+      "uds": "1040",
+      "count": 8
+    },
+    {
+      "event": "can",
+      "src": 1,
+      "address": "0x7a0",
+      "node": null,
+      "uds": "3e00",
+      "count": 2
+    },
+    {
+      "event": "can",
+      "src": 1,
+      "address": "0x7b8",
+      "node": null,
+      "uds": "5001003201f4",
+      "count": 2
+    },
+    {
+      "event": "can",
+      "src": 1,
+      "address": "0x7b8",
+      "node": null,
+      "uds": "5003003201f4",
+      "count": 2
+    },
+    {
+      "event": "can",
+      "src": 1,
+      "address": "0x7b8",
+      "node": null,
+      "uds": "7e00",
+      "count": 6
+    },
+    {
+      "event": "can",
+      "src": 128,
+      "address": "0x750",
+      "node": "0x6d",
+      "uds": "3e",
+      "count": 2
+    },
+    {
+      "event": "can",
+      "src": 128,
+      "address": "0x750",
+      "node": "0x6d",
+      "uds": "3e00",
+      "count": 4
+    },
+    {
+      "event": "can",
+      "src": 128,
+      "address": "0x750",
+      "node": "0xf",
+      "uds": "3e",
+      "count": 2
+    },
+    {
+      "event": "can",
+      "src": 128,
+      "address": "0x750",
+      "node": "0xf",
+      "uds": "3e00",
+      "count": 4
+    },
+    {
+      "event": "can",
+      "src": 128,
+      "address": "0x7a1",
+      "node": null,
+      "uds": "3e",
+      "count": 2
+    },
+    {
+      "event": "can",
+      "src": 128,
+      "address": "0x7a1",
+      "node": null,
+      "uds": "3e00",
+      "count": 4
+    },
+    {
+      "event": "can",
+      "src": 128,
+      "address": "0x7b0",
+      "node": null,
+      "uds": "3e",
+      "count": 2
+    },
+    {
+      "event": "can",
+      "src": 128,
+      "address": "0x7b0",
+      "node": null,
+      "uds": "3e00",
+      "count": 6
+    },
+    {
+      "event": "can",
+      "src": 129,
+      "address": "0x7a1",
+      "node": null,
+      "uds": "3e00",
+      "count": 4
+    },
+    {
+      "event": "can",
+      "src": 129,
+      "address": "0x7b0",
+      "node": null,
+      "uds": "1001",
+      "count": 2
+    },
+    {
+      "event": "can",
+      "src": 129,
+      "address": "0x7b0",
+      "node": null,
+      "uds": "1003",
+      "count": 2
+    },
+    {
+      "event": "can",
+      "src": 129,
+      "address": "0x7b0",
+      "node": null,
+      "uds": "3e00",
+      "count": 6
+    },
+    {
+      "event": "can",
+      "src": 2,
+      "address": "0x750",
+      "node": "0x6d",
+      "uds": "3e",
+      "count": 2
+    },
+    {
+      "event": "can",
+      "src": 2,
+      "address": "0x750",
+      "node": "0x6d",
+      "uds": "3e00",
+      "count": 4
+    },
+    {
+      "event": "can",
+      "src": 2,
+      "address": "0x750",
+      "node": "0xf",
+      "uds": "3e",
+      "count": 2
+    },
+    {
+      "event": "can",
+      "src": 2,
+      "address": "0x750",
+      "node": "0xf",
+      "uds": "3e00",
+      "count": 4
+    },
+    {
+      "event": "can",
+      "src": 2,
+      "address": "0x7a1",
+      "node": null,
+      "uds": "3e",
+      "count": 2
+    },
+    {
+      "event": "can",
+      "src": 2,
+      "address": "0x7a1",
+      "node": null,
+      "uds": "3e00",
+      "count": 4
+    },
+    {
+      "event": "can",
+      "src": 2,
+      "address": "0x7b0",
+      "node": null,
+      "uds": "3e",
+      "count": 2
+    },
+    {
+      "event": "can",
+      "src": 2,
+      "address": "0x7b0",
+      "node": null,
+      "uds": "3e00",
+      "count": 6
+    },
+    {
+      "event": "sendcan",
+      "src": 0,
+      "address": "0x750",
+      "node": "0x6d",
+      "uds": "3e",
+      "count": 2
+    },
+    {
+      "event": "sendcan",
+      "src": 0,
+      "address": "0x750",
+      "node": "0x6d",
+      "uds": "3e00",
+      "count": 4
+    },
+    {
+      "event": "sendcan",
+      "src": 0,
+      "address": "0x750",
+      "node": "0xf",
+      "uds": "3e",
+      "count": 2
+    },
+    {
+      "event": "sendcan",
+      "src": 0,
+      "address": "0x750",
+      "node": "0xf",
+      "uds": "3e00",
+      "count": 4
+    },
+    {
+      "event": "sendcan",
+      "src": 0,
+      "address": "0x7a1",
+      "node": null,
+      "uds": "3e",
+      "count": 2
+    },
+    {
+      "event": "sendcan",
+      "src": 0,
+      "address": "0x7a1",
+      "node": null,
+      "uds": "3e00",
+      "count": 4
+    },
+    {
+      "event": "sendcan",
+      "src": 0,
+      "address": "0x7b0",
+      "node": null,
+      "uds": "3e",
+      "count": 2
+    },
+    {
+      "event": "sendcan",
+      "src": 0,
+      "address": "0x7b0",
+      "node": null,
+      "uds": "3e00",
+      "count": 6
+    },
+    {
+      "event": "sendcan",
+      "src": 1,
+      "address": "0x7a1",
+      "node": null,
+      "uds": "3e00",
+      "count": 4
+    },
+    {
+      "event": "sendcan",
+      "src": 1,
+      "address": "0x7b0",
+      "node": null,
+      "uds": "1001",
+      "count": 2
+    },
+    {
+      "event": "sendcan",
+      "src": 1,
+      "address": "0x7b0",
+      "node": null,
+      "uds": "1003",
+      "count": 2
+    },
+    {
+      "event": "sendcan",
+      "src": 1,
+      "address": "0x7b0",
+      "node": null,
+      "uds": "3e00",
+      "count": 10
+    }
+  ],
+  "files": [
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-10.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-11.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-12.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-3.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-4.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-5.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-6.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d1--ad906be282/rlog-9.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-0.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-1.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-10.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-11.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-12.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-13.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-14.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-2.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-3.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-4.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-5.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-6.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-7.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-8.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d3--fbe9fcf816/rlog-9.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d4--327b2c4bb8/rlog-0.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d4--327b2c4bb8/rlog-1.zst",
+      "warnings": [],
+      "messages": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x7a0",
+          "node": null,
+          "uds": "3e00",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d4--327b2c4bb8/rlog-2.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d4--327b2c4bb8/rlog-3.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d4--327b2c4bb8/rlog-4.zst",
+      "warnings": [],
+      "messages": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x7a0",
+          "node": null,
+          "uds": "1040",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d4--327b2c4bb8/rlog-5.zst",
+      "warnings": [],
+      "messages": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x7a0",
+          "node": null,
+          "uds": "1040",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d4--327b2c4bb8/rlog-6.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d8--bc414c7e01/rlog-0.zst",
+      "warnings": [],
+      "messages": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x7b8",
+          "node": null,
+          "uds": "5001003201f4",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x7b8",
+          "node": null,
+          "uds": "5003003201f4",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x7b8",
+          "node": null,
+          "uds": "7e00",
+          "count": 3
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x750",
+          "node": "0x6d",
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x750",
+          "node": "0x6d",
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x750",
+          "node": "0xf",
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x750",
+          "node": "0xf",
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e00",
+          "count": 3
+        },
+        {
+          "event": "can",
+          "src": 129,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "can",
+          "src": 129,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "1001",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 129,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "1003",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 129,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e00",
+          "count": 3
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x750",
+          "node": "0x6d",
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x750",
+          "node": "0x6d",
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x750",
+          "node": "0xf",
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x750",
+          "node": "0xf",
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e00",
+          "count": 3
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x750",
+          "node": "0x6d",
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x750",
+          "node": "0x6d",
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x750",
+          "node": "0xf",
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x750",
+          "node": "0xf",
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e00",
+          "count": 3
+        },
+        {
+          "event": "sendcan",
+          "src": 1,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "sendcan",
+          "src": 1,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "1001",
+          "count": 1
+        },
+        {
+          "event": "sendcan",
+          "src": 1,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "1003",
+          "count": 1
+        },
+        {
+          "event": "sendcan",
+          "src": 1,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e00",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-11/000000d8--bc414c7e01/rlog-1.zst",
+      "warnings": [
+        "Corrupted events detected"
+      ],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/000000d9--a1a459c5b5--0/rlog.zst",
+      "warnings": [],
+      "messages": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x7a0",
+          "node": null,
+          "uds": "3e00",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x7b8",
+          "node": null,
+          "uds": "5001003201f4",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x7b8",
+          "node": null,
+          "uds": "5003003201f4",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x7b8",
+          "node": null,
+          "uds": "7e00",
+          "count": 3
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x750",
+          "node": "0x6d",
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x750",
+          "node": "0x6d",
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x750",
+          "node": "0xf",
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x750",
+          "node": "0xf",
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 128,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e00",
+          "count": 3
+        },
+        {
+          "event": "can",
+          "src": 129,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "can",
+          "src": 129,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "1001",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 129,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "1003",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 129,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e00",
+          "count": 3
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x750",
+          "node": "0x6d",
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x750",
+          "node": "0x6d",
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x750",
+          "node": "0xf",
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x750",
+          "node": "0xf",
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "can",
+          "src": 2,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e00",
+          "count": 3
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x750",
+          "node": "0x6d",
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x750",
+          "node": "0x6d",
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x750",
+          "node": "0xf",
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x750",
+          "node": "0xf",
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e",
+          "count": 1
+        },
+        {
+          "event": "sendcan",
+          "src": 0,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e00",
+          "count": 3
+        },
+        {
+          "event": "sendcan",
+          "src": 1,
+          "address": "0x7a1",
+          "node": null,
+          "uds": "3e00",
+          "count": 2
+        },
+        {
+          "event": "sendcan",
+          "src": 1,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "1001",
+          "count": 1
+        },
+        {
+          "event": "sendcan",
+          "src": 1,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "1003",
+          "count": 1
+        },
+        {
+          "event": "sendcan",
+          "src": 1,
+          "address": "0x7b0",
+          "node": null,
+          "uds": "3e00",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/000000d9--a1a459c5b5--1/rlog.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/000000d9--a1a459c5b5--2/rlog.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/000000d9--a1a459c5b5--3/rlog.zst",
+      "warnings": [],
+      "messages": []
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/000000d9--a1a459c5b5--4/rlog.zst",
+      "warnings": [],
+      "messages": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x7a0",
+          "node": null,
+          "uds": "1040",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/000000d9--a1a459c5b5--5/rlog.zst",
+      "warnings": [],
+      "messages": [
+        {
+          "event": "can",
+          "src": 1,
+          "address": "0x7a0",
+          "node": null,
+          "uds": "1040",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "input": "/Users/kai/dev/inspect/logs/camry-2026/000000d9--a1a459c5b5--6/rlog.zst",
+      "warnings": [],
+      "messages": []
+    }
+  ],
+  "sources": [
+    {
+      "relative_path": "TCUWCanCommonPrepareWriter.dll",
+      "stub_sha256": "8cdcf0c20a2784a3f3fa14b1cbd125f6f2d9029bdba6c555123de750fff6f49f",
+      "sidecar_sha256": "1e6cfcf52d4983febca3267476dbfce2b9f3aa69d2d133530f57e1fdb8a6caf7",
+      "output_sha256": "cf71cdeeef6639a6689211d5d2d3c6051acc9e766aed934d21bf10538963a823"
+    },
+    {
+      "relative_path": "TCUWCanDiagCommUtils.dll",
+      "stub_sha256": "fad19258376207b6faa3a8c00e697557b1db7df32cf887242e3740eb693ada9f",
+      "sidecar_sha256": "821688e4193932dc9ba0336da250e30a3d8f41bd6b2ede1307b2c06f232bb9ee",
+      "output_sha256": "dbdc60dfb92b88d572c5eb70278fb430f459242029a3b752a6598abdb6823fcb"
+    },
+    {
+      "relative_path": "TCUWCanUnifiedFlashWriter.dll",
+      "stub_sha256": "48fdabe8eb8e171456dbcf16c7f79312e1aa1671d561456a8c19ee775df49b96",
+      "sidecar_sha256": "17da115f8c5092393319faf8f7adb66ba319194130cb2a2bceb8ccf6efbc6e55",
+      "output_sha256": "97cdba7f5cc57a555df27893479141632e48a41276e73c54f9c36de3e6e16647"
+    },
+    {
+      "relative_path": "TCUWCanUnifiedPrepareWriter.dll",
+      "stub_sha256": "e0e8d117439716ebc68d6d6252df9b1af8391d17756c52e3e4c1318139299eb9",
+      "sidecar_sha256": "36f0ca0689d17695c176131daf9007d894d44b06399c7774cb51b9d3170de168",
+      "output_sha256": "797b15b8ae8049717c1f5ec2692b923dcea9abb52bd2add6415cf295281db1dc"
+    },
+    {
+      "relative_path": "TCUWUnifiedUtils.dll",
+      "stub_sha256": "3afa2734504f8a324d96ddee04673ab34867c7019b3aa13d5d1b92df52aedee6",
+      "sidecar_sha256": "92d55ba60dcbfcbc534cb8cf4df8e8839b9cc976e19e03ce0dfdbfae0c10b86a",
+      "output_sha256": "fed628ec4c9ca0d6905c96c68e3bdfd574f9c64d2fd76b50de6eba4206579672"
+    }
+  ],
+  "derived_observations": {
+    "post_incident_files": 39,
+    "all_selected_logged_records": 184,
+    "shared_750_758_logged_records": 36,
+    "all_shared_records_decoded": true,
+    "shared_address_extensions_observed": [
+      "0x0F",
+      "0x6D"
+    ],
+    "shared_5f_logged_records": 0,
+    "gateway_preparation_seen_in_retained_spans": false,
+    "absence_outside_retained_spans_established": false,
+    "live_gateway_type_known_from_this_observation": false,
+    "live_eps_fault_context_captured": false,
+    "working_recovery_demonstrated": false
+  },
+  "optional_target_identity_read": {
+    "file": "TCUWCanUnifiedPrepareWriter.dll",
+    "wrapper": "0x100026E0",
+    "ReadSoftwareID_call": "0x10002778",
+    "func_info": "0x10004B1C",
+    "try_range_states": [
+      2,
+      2,
+      3
+    ],
+    "catch_adjectives": "0x40",
+    "catch_type_descriptor": "0x00000000",
+    "catch_handler": "0x100027AE",
+    "catch_handler_bytes": "B8 7E 27 00 10 C3",
+    "continuation": "0x1000277E",
+    "interpretation": "The optional pre-transition target F181 read has a catch-all continuation to cleanup/return, so its failure alone does not abort subsequent gateway preparation. This does not make the later target programming-session acknowledgement optional."
+  }
+}
