@@ -151,6 +151,13 @@ def main() -> int:
 
         hybrid_catalog = json.loads(archive.read("catalogs/NA/397.json"))
         hybrid_test = next(row for row in hybrid_catalog["active_tests"] if row["id"] == 1)
+        hybrid_ffd = next(row for row in hybrid_catalog["commands"] if row["kind"] == "p5_dtc_snapshot")
+        check("universal Hybrid catalog exports generic P5 DTC snapshot request",
+              hybrid_ffd["role"] == 0xB5
+              and hybrid_ffd["plugin_binding"]["binding_category_id"] == 0
+              and hybrid_ffd["plugin_binding"]["dll"] == "GetEachFrzFrmDatP5_DT.dll"
+              and hybrid_ffd["requests"][0]["send"] == "1904000000ff"
+              and hybrid_ffd["requests"][0]["check"] == "5904")
         check("universal Hybrid direct Active Test exports exact live runtime-length probe",
               hybrid_test["name"] == "Activate the Inverter Water Pump"
               and hybrid_test["runtime_length_probe"]["kind"] == "read_data_by_identifier_value_length"

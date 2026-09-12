@@ -261,6 +261,14 @@ def main() -> int:
     check("initial-read request is materialized per direct Active Test",
           hv_test["initial_read"] == {"mode": 0, "selector": "0xCA", "request": "222801", "check": "62"}
           and hv_test["session_requirement"] == "extended")
+    hv_ffd = next(row for row in hv["commands"] if row["kind"] == "p5_dtc_snapshot")
+    check("ordinary P5 generic DTC snapshot request is exported from role-0xB5 fallback",
+          hv_ffd["role"] == 0xB5
+          and hv_ffd["plugin_binding"]["binding_category_id"] == 0
+          and hv_ffd["plugin_binding"]["dll"] == "GetEachFrzFrmDatP5_DT.dll"
+          and hv_ffd["requests"][0]["send"] == "1904000000ff"
+          and hv_ffd["requests"][0]["check"] == "5904"
+          and hv_ffd["execution"] == "read_only")
 
     session = profile["session_control"]
     check("session_control carries the runtime current-P5 contract",

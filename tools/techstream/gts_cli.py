@@ -3056,6 +3056,47 @@ def _registry_command_rows(
                 },
                 "execution": "plan_only",
             })
+
+    # Role 0xB5 is a generic/default P5 binding in the current master. CommandExecute's
+    # CDbDllTable fallback selects the first role row (category 0) when a current P5
+    # category has no exact 0xB5 row. Export only ordinary Toyota P5 here: partner/Hino
+    # branches inside the same DLL have distinct orchestration and remain separate work.
+    dll_rows = list(parser.extract_master_dlls(master.sections[19]))
+    single = _bundle_support_plugin(dll_rows, category_id, 0x67)
+    multi = _bundle_support_plugin(dll_rows, category_id, 0xD5)
+    family = _bundle_support_family(single, multi)
+    mode = _bundle_support_mode(category_id, int(category["generation"]), family)
+    ffd_binding = _bundle_support_plugin(dll_rows, category_id, 0xB5)
+    if mode == "p5-standard" and ffd_binding is not None and ffd_binding["dll"] == "GetEachFrzFrmDatP5_DT.dll":
+        request = _registry_request_row(parser, master, category_id, 0xCF, "all_snapshot_records")
+        if request.get("resolved"):
+            if request.get("send") != "1904000000ff" or request.get("check") != "5904":
+                raise ValueError(
+                    f"category {category_id}: selector 0xCF DTC snapshot frame drifted: "
+                    f"{request.get('send')} -> {request.get('check')}"
+                )
+            rows.append({
+                "role": 0xB5,
+                "kind": "p5_dtc_snapshot",
+                "plugin_binding": ffd_binding,
+                "requests": [request],
+                "request_model": {
+                    "service": "0x19",
+                    "subfunction": "0x04 reportDTCSnapshotRecordByDTCNumber",
+                    "dtc_substitution": "request bytes 2/3/4 take the selected 24-bit DTC",
+                    "snapshot_record_number": "0xFF (all snapshot records)",
+                },
+                "response_model": {
+                    "positive_prefix": "5904",
+                    "layout_after_prefix": "DTC[3] | status | repeated(snapshot_record:u8 | identifier_count:u8 | repeated(DID:be16 | length:u8 | data[length]))",
+                    "dtc_echo_offset": 2,
+                    "status_offset": 5,
+                    "snapshot_records_offset": 6,
+                    "identifier_length_source": "explicit u8 immediately after each DID",
+                    "boundary": "raw snapshot DID blocks are exact; signal-level freeze-frame decoding is not projected from Data Monitor metadata",
+                },
+                "execution": "read_only",
+            })
     return sorted(rows, key=lambda row: row["role"])
 
 

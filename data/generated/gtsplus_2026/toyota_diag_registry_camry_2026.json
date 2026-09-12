@@ -5772,6 +5772,47 @@
             "value_capacity_chars": 17
           },
           "role": 82
+        },
+        {
+          "execution": "read_only",
+          "kind": "p5_dtc_snapshot",
+          "plugin_binding": {
+            "binding_category_id": 0,
+            "dll": "GetEachFrzFrmDatP5_DT.dll",
+            "exact_category_binding": false,
+            "requested_category_id": 372,
+            "role": 181
+          },
+          "request_model": {
+            "dtc_substitution": "request bytes 2/3/4 take the selected 24-bit DTC",
+            "service": "0x19",
+            "snapshot_record_number": "0xFF (all snapshot records)",
+            "subfunction": "0x04 reportDTCSnapshotRecordByDTCNumber"
+          },
+          "requests": [
+            {
+              "check": "5904",
+              "comm_set": 1,
+              "mask": "",
+              "name": "all_snapshot_records",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xCF",
+              "send": "1904000000ff",
+              "session_requirement": "extended"
+            }
+          ],
+          "response_model": {
+            "boundary": "raw snapshot DID blocks are exact; signal-level freeze-frame decoding is not projected from Data Monitor metadata",
+            "dtc_echo_offset": 2,
+            "identifier_length_source": "explicit u8 immediately after each DID",
+            "layout_after_prefix": "DTC[3] | status | repeated(snapshot_record:u8 | identifier_count:u8 | repeated(DID:be16 | length:u8 | data[length]))",
+            "positive_prefix": "5904",
+            "snapshot_records_offset": 6,
+            "status_offset": 5
+          },
+          "role": 181
         }
       ],
       "data_list": {
@@ -102783,6 +102824,47 @@
             "value_capacity_chars": 17
           },
           "role": 82
+        },
+        {
+          "execution": "read_only",
+          "kind": "p5_dtc_snapshot",
+          "plugin_binding": {
+            "binding_category_id": 0,
+            "dll": "GetEachFrzFrmDatP5_DT.dll",
+            "exact_category_binding": false,
+            "requested_category_id": 395,
+            "role": 181
+          },
+          "request_model": {
+            "dtc_substitution": "request bytes 2/3/4 take the selected 24-bit DTC",
+            "service": "0x19",
+            "snapshot_record_number": "0xFF (all snapshot records)",
+            "subfunction": "0x04 reportDTCSnapshotRecordByDTCNumber"
+          },
+          "requests": [
+            {
+              "check": "5904",
+              "comm_set": 1,
+              "mask": "",
+              "name": "all_snapshot_records",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xCF",
+              "send": "1904000000ff",
+              "session_requirement": "extended"
+            }
+          ],
+          "response_model": {
+            "boundary": "raw snapshot DID blocks are exact; signal-level freeze-frame decoding is not projected from Data Monitor metadata",
+            "dtc_echo_offset": 2,
+            "identifier_length_source": "explicit u8 immediately after each DID",
+            "layout_after_prefix": "DTC[3] | status | repeated(snapshot_record:u8 | identifier_count:u8 | repeated(DID:be16 | length:u8 | data[length]))",
+            "positive_prefix": "5904",
+            "snapshot_records_offset": 6,
+            "status_offset": 5
+          },
+          "role": 181
         }
       ],
       "data_list": {
@@ -118874,6 +118956,47 @@
             "delay_ms": 0,
             "timer_id": 1
           }
+        },
+        {
+          "execution": "read_only",
+          "kind": "p5_dtc_snapshot",
+          "plugin_binding": {
+            "binding_category_id": 0,
+            "dll": "GetEachFrzFrmDatP5_DT.dll",
+            "exact_category_binding": false,
+            "requested_category_id": 397,
+            "role": 181
+          },
+          "request_model": {
+            "dtc_substitution": "request bytes 2/3/4 take the selected 24-bit DTC",
+            "service": "0x19",
+            "snapshot_record_number": "0xFF (all snapshot records)",
+            "subfunction": "0x04 reportDTCSnapshotRecordByDTCNumber"
+          },
+          "requests": [
+            {
+              "check": "5904",
+              "comm_set": 1,
+              "mask": "",
+              "name": "all_snapshot_records",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xCF",
+              "send": "1904000000ff",
+              "session_requirement": "extended"
+            }
+          ],
+          "response_model": {
+            "boundary": "raw snapshot DID blocks are exact; signal-level freeze-frame decoding is not projected from Data Monitor metadata",
+            "dtc_echo_offset": 2,
+            "identifier_length_source": "explicit u8 immediately after each DID",
+            "layout_after_prefix": "DTC[3] | status | repeated(snapshot_record:u8 | identifier_count:u8 | repeated(DID:be16 | length:u8 | data[length]))",
+            "positive_prefix": "5904",
+            "snapshot_records_offset": 6,
+            "status_offset": 5
+          },
+          "role": 181
         }
       ],
       "data_list": {
@@ -177655,6 +177778,47 @@
             "value_capacity_chars": 17
           },
           "role": 82
+        },
+        {
+          "execution": "read_only",
+          "kind": "p5_dtc_snapshot",
+          "plugin_binding": {
+            "binding_category_id": 0,
+            "dll": "GetEachFrzFrmDatP5_DT.dll",
+            "exact_category_binding": false,
+            "requested_category_id": 398,
+            "role": 181
+          },
+          "request_model": {
+            "dtc_substitution": "request bytes 2/3/4 take the selected 24-bit DTC",
+            "service": "0x19",
+            "snapshot_record_number": "0xFF (all snapshot records)",
+            "subfunction": "0x04 reportDTCSnapshotRecordByDTCNumber"
+          },
+          "requests": [
+            {
+              "check": "5904",
+              "comm_set": 1,
+              "mask": "",
+              "name": "all_snapshot_records",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xCF",
+              "send": "1904000000ff",
+              "session_requirement": "extended"
+            }
+          ],
+          "response_model": {
+            "boundary": "raw snapshot DID blocks are exact; signal-level freeze-frame decoding is not projected from Data Monitor metadata",
+            "dtc_echo_offset": 2,
+            "identifier_length_source": "explicit u8 immediately after each DID",
+            "layout_after_prefix": "DTC[3] | status | repeated(snapshot_record:u8 | identifier_count:u8 | repeated(DID:be16 | length:u8 | data[length]))",
+            "positive_prefix": "5904",
+            "snapshot_records_offset": 6,
+            "status_offset": 5
+          },
+          "role": 181
         }
       ],
       "data_list": {
@@ -217195,6 +217359,47 @@
             "value_capacity_chars": 17
           },
           "role": 82
+        },
+        {
+          "execution": "read_only",
+          "kind": "p5_dtc_snapshot",
+          "plugin_binding": {
+            "binding_category_id": 0,
+            "dll": "GetEachFrzFrmDatP5_DT.dll",
+            "exact_category_binding": false,
+            "requested_category_id": 405,
+            "role": 181
+          },
+          "request_model": {
+            "dtc_substitution": "request bytes 2/3/4 take the selected 24-bit DTC",
+            "service": "0x19",
+            "snapshot_record_number": "0xFF (all snapshot records)",
+            "subfunction": "0x04 reportDTCSnapshotRecordByDTCNumber"
+          },
+          "requests": [
+            {
+              "check": "5904",
+              "comm_set": 1,
+              "mask": "",
+              "name": "all_snapshot_records",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xCF",
+              "send": "1904000000ff",
+              "session_requirement": "extended"
+            }
+          ],
+          "response_model": {
+            "boundary": "raw snapshot DID blocks are exact; signal-level freeze-frame decoding is not projected from Data Monitor metadata",
+            "dtc_echo_offset": 2,
+            "identifier_length_source": "explicit u8 immediately after each DID",
+            "layout_after_prefix": "DTC[3] | status | repeated(snapshot_record:u8 | identifier_count:u8 | repeated(DID:be16 | length:u8 | data[length]))",
+            "positive_prefix": "5904",
+            "snapshot_records_offset": 6,
+            "status_offset": 5
+          },
+          "role": 181
         }
       ],
       "data_list": {
@@ -227442,6 +227647,47 @@
             "delay_ms": 0,
             "timer_id": 1
           }
+        },
+        {
+          "execution": "read_only",
+          "kind": "p5_dtc_snapshot",
+          "plugin_binding": {
+            "binding_category_id": 0,
+            "dll": "GetEachFrzFrmDatP5_DT.dll",
+            "exact_category_binding": false,
+            "requested_category_id": 435,
+            "role": 181
+          },
+          "request_model": {
+            "dtc_substitution": "request bytes 2/3/4 take the selected 24-bit DTC",
+            "service": "0x19",
+            "snapshot_record_number": "0xFF (all snapshot records)",
+            "subfunction": "0x04 reportDTCSnapshotRecordByDTCNumber"
+          },
+          "requests": [
+            {
+              "check": "5904",
+              "comm_set": 1,
+              "mask": "",
+              "name": "all_snapshot_records",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xCF",
+              "send": "1904000000ff",
+              "session_requirement": "extended"
+            }
+          ],
+          "response_model": {
+            "boundary": "raw snapshot DID blocks are exact; signal-level freeze-frame decoding is not projected from Data Monitor metadata",
+            "dtc_echo_offset": 2,
+            "identifier_length_source": "explicit u8 immediately after each DID",
+            "layout_after_prefix": "DTC[3] | status | repeated(snapshot_record:u8 | identifier_count:u8 | repeated(DID:be16 | length:u8 | data[length]))",
+            "positive_prefix": "5904",
+            "snapshot_records_offset": 6,
+            "status_offset": 5
+          },
+          "role": 181
         }
       ],
       "data_list": {
@@ -254695,6 +254941,47 @@
             "value_capacity_chars": 17
           },
           "role": 82
+        },
+        {
+          "execution": "read_only",
+          "kind": "p5_dtc_snapshot",
+          "plugin_binding": {
+            "binding_category_id": 0,
+            "dll": "GetEachFrzFrmDatP5_DT.dll",
+            "exact_category_binding": false,
+            "requested_category_id": 450,
+            "role": 181
+          },
+          "request_model": {
+            "dtc_substitution": "request bytes 2/3/4 take the selected 24-bit DTC",
+            "service": "0x19",
+            "snapshot_record_number": "0xFF (all snapshot records)",
+            "subfunction": "0x04 reportDTCSnapshotRecordByDTCNumber"
+          },
+          "requests": [
+            {
+              "check": "5904",
+              "comm_set": 1,
+              "mask": "",
+              "name": "all_snapshot_records",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xCF",
+              "send": "1904000000ff",
+              "session_requirement": "extended"
+            }
+          ],
+          "response_model": {
+            "boundary": "raw snapshot DID blocks are exact; signal-level freeze-frame decoding is not projected from Data Monitor metadata",
+            "dtc_echo_offset": 2,
+            "identifier_length_source": "explicit u8 immediately after each DID",
+            "layout_after_prefix": "DTC[3] | status | repeated(snapshot_record:u8 | identifier_count:u8 | repeated(DID:be16 | length:u8 | data[length]))",
+            "positive_prefix": "5904",
+            "snapshot_records_offset": 6,
+            "status_offset": 5
+          },
+          "role": 181
         }
       ],
       "data_list": {
@@ -271393,6 +271680,47 @@
             "value_capacity_chars": 17
           },
           "role": 82
+        },
+        {
+          "execution": "read_only",
+          "kind": "p5_dtc_snapshot",
+          "plugin_binding": {
+            "binding_category_id": 0,
+            "dll": "GetEachFrzFrmDatP5_DT.dll",
+            "exact_category_binding": false,
+            "requested_category_id": 498,
+            "role": 181
+          },
+          "request_model": {
+            "dtc_substitution": "request bytes 2/3/4 take the selected 24-bit DTC",
+            "service": "0x19",
+            "snapshot_record_number": "0xFF (all snapshot records)",
+            "subfunction": "0x04 reportDTCSnapshotRecordByDTCNumber"
+          },
+          "requests": [
+            {
+              "check": "5904",
+              "comm_set": 1,
+              "mask": "",
+              "name": "all_snapshot_records",
+              "receive_timeout": 1020,
+              "resolved": true,
+              "retry_count": 1,
+              "selector": "0xCF",
+              "send": "1904000000ff",
+              "session_requirement": "extended"
+            }
+          ],
+          "response_model": {
+            "boundary": "raw snapshot DID blocks are exact; signal-level freeze-frame decoding is not projected from Data Monitor metadata",
+            "dtc_echo_offset": 2,
+            "identifier_length_source": "explicit u8 immediately after each DID",
+            "layout_after_prefix": "DTC[3] | status | repeated(snapshot_record:u8 | identifier_count:u8 | repeated(DID:be16 | length:u8 | data[length]))",
+            "positive_prefix": "5904",
+            "snapshot_records_offset": 6,
+            "status_offset": 5
+          },
+          "role": 181
         }
       ],
       "data_list": {
