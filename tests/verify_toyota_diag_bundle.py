@@ -158,6 +158,22 @@ def main() -> int:
               and hybrid_ffd["plugin_binding"]["dll"] == "GetEachFrzFrmDatP5_DT.dll"
               and hybrid_ffd["requests"][0]["send"] == "1904000000ff"
               and hybrid_ffd["requests"][0]["check"] == "5904")
+        hybrid_rob_meta = hybrid_catalog["rob"]
+        hybrid_behavior = next(row for row in hybrid_rob_meta["behavior_codes"] if row["behavior_code"] == 0x0450)
+        check("universal Hybrid catalog exports current RoB behavior semantics",
+              hybrid_behavior["signature"] == "X0450"
+              and hybrid_behavior["name"] == "Hybrid/EV Battery Pack Sensor Module Mismatch"
+              and hybrid_rob_meta["dynamic_lsb_table_present"] is False)
+        eps_catalog = json.loads(archive.read("catalogs/NA/405.json"))
+        eps_steering = next(row for row in eps_catalog["rob"]["signals"] if row["name"] == "Steering Angle")
+        check("universal EPS catalog exports current RoB Steering Angle decoder metadata",
+              eps_steering["did"] == 0x5037
+              and eps_steering["bit_start"] == 0 and eps_steering["bit_end"] == 15
+              and eps_steering["support_condition_key"] == 0
+              and eps_steering["local_support_mode"] == 0
+              and eps_steering["dynamic_lsb_possible"] is False
+              and eps_steering["signal_info"]["mul"] == 15
+              and eps_steering["signal_info"]["unit"] == "deg")
         hybrid_rob = next(row for row in hybrid_catalog["commands"] if row["kind"] == "p5_rob")
         check("universal Hybrid catalog exports exact P5 RoB inventory/frame/record triplets",
               hybrid_rob["role"] == 0xA0

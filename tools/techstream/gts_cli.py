@@ -33,6 +33,7 @@ from ddb_semantics import behavior_rows as semantic_behavior_rows
 from ddb_semantics import dtc_rows as semantic_dtc_rows
 from ddb_semantics import extract_monitor_records
 from ddb_semantics import monitor_rows as semantic_monitor_rows
+from ddb_semantics import rob_rows as semantic_rob_rows
 from ddb_semantics import records as ddb_records
 from ddb_strings import load_string_db as cached_string_db
 from diagnostic_role_model import plugin_operation_signature, role_operation_catalog
@@ -158,6 +159,20 @@ def _dtc_rows(parser: DDBParser, db: Any, strings: Any, source: str) -> list[dic
 
 def _behavior_rows(db: Any, strings: Any, source: str) -> list[dict[str, Any]]:
     return _without_raw(semantic_behavior_rows(db, strings, source))
+
+
+def _rob_rows(db: Any, strings: Any, source: str) -> dict[str, Any]:
+    payload = semantic_rob_rows(db, strings, source, include_signal_info=True)
+    signals = _without_raw(payload["signals"])
+    for row in signals:
+        info = row.get("signal_info")
+        if isinstance(info, dict) and isinstance(info.get("pattern_display"), dict):
+            info["pattern_display"] = {str(key): value for key, value in info["pattern_display"].items()}
+    return {
+        **{key: value for key, value in payload.items() if key not in {"behavior_codes", "signals"}},
+        "behavior_codes": _without_raw(payload["behavior_codes"]),
+        "signals": signals,
+    }
 
 
 def _format_row(row: dict[str, Any]) -> str:
@@ -3431,6 +3446,7 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
             "commands": _registry_command_rows(parser, master, category, bin_root, bindings),
             "selectors": _registry_selector_rows(parser, master, category_id),
             "data_list": _registry_data_list(db, strings),
+            "rob": _rob_rows(db, strings, db_path.name),
             "active_test_groups": _registry_active_test_groups(parser, category, db_root),
         }
     profile["catalog_category_ids"] = known_categories
@@ -4023,6 +4039,7 @@ def _bundle_category_catalog(
         "commands": _registry_command_rows(parser, master, category, bin_root, bindings),
         "selectors": _registry_selector_rows(parser, master, int(category["category_id"])),
         "data_list": _registry_data_list(db, strings),
+        "rob": _rob_rows(db, strings, db_path.name),
         "active_test_groups": _registry_active_test_groups(parser, category, db_root),
         "source_identity": {
             "database": {

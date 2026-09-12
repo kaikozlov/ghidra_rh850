@@ -270,6 +270,33 @@ def main() -> int:
           and hv_ffd["requests"][0]["check"] == "5904"
           and hv_ffd["execution"] == "read_only")
 
+    hv_rob_meta = hv["rob"]
+    hv_behavior = next(row for row in hv_rob_meta["behavior_codes"] if row["behavior_code"] == 0x0450)
+    check("Hybrid RoB behavior metadata carries current OEM code/name identity",
+          hv_behavior["signature"] == "X0450"
+          and hv_behavior["name"] == "Hybrid/EV Battery Pack Sensor Module Mismatch"
+          and hv_rob_meta["dynamic_lsb_table_present"] is False)
+
+    eps_rob_meta = actual["catalogs"]["405"]["rob"]
+    eps_steering = next(row for row in eps_rob_meta["signals"] if row["name"] == "Steering Angle")
+    eps_info = eps_steering["signal_info"]
+    check("EPS RoB Steering Angle current type-88 geometry and physical metadata are exact",
+          eps_steering["did"] == 0x5037
+          and (eps_steering["bit_start"], eps_steering["bit_end"]) == (0, 15)
+          and eps_steering["local_support_mode"] == 0
+          and eps_steering["support_condition_key"] == 0
+          and eps_steering["dynamic_lsb_possible"] is False
+          and (eps_info["mul"], eps_info["div"], eps_info["offset"]) == (15, 1, 0)
+          and eps_info["signed"] is True
+          and eps_info["decimal_point_count"] == 1
+          and eps_info["unit"] == "deg")
+    eps_pos = decode_p5_signal(bytes.fromhex("0001"), bit_start=0, bit_end=15,
+                               mul=15, div=1, offset=0, signed=True, decimal_point_count=1)
+    eps_neg = decode_p5_signal(bytes.fromhex("ffff"), bit_start=0, bit_end=15,
+                               mul=15, div=1, offset=0, signed=True, decimal_point_count=1)
+    check("EPS RoB Steering Angle uses canonical signed P5 conversion",
+          eps_pos["value"] == "1.5" and eps_neg["value"] == "-1.5")
+
     hv_rob = next(row for row in hv["commands"] if row["kind"] == "p5_rob")
     check("ordinary P5 RoB transport is exported only from exact role-0xA0 binding",
           hv_rob["role"] == 0xA0

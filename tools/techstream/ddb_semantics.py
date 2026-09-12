@@ -46,6 +46,27 @@ class BehaviorRecord:
     signature: str
     name_string_index: int
     comment_string_index: int
+    behavior_code: int
+    raw: bytes
+
+
+@dataclass(frozen=True)
+class RobSignalRecord:
+    table: int
+    index: int
+    name_string_index: int
+    record_key: int
+    support_condition_key: int
+    physical_data_key: int
+    bit_start: int
+    bit_end: int
+    sort_key: int
+    pattern_display_key: int
+    exception_handler_id: int
+    did: int
+    extraction_mode: int
+    presentation_mode: int
+    exception_handler_flag: int
     raw: bytes
 
 
@@ -168,47 +189,66 @@ def extract_behavior_records(section: Any) -> list[BehaviorRecord]:
             signature=raw[:12].decode("utf-16-le", errors="replace").split("\x00", 1)[0],
             name_string_index=struct.unpack_from("<I", raw, 0x0C)[0],
             comment_string_index=struct.unpack_from("<I", raw, 0x10)[0],
+            behavior_code=struct.unpack_from("<H", raw, 0x14)[0],
             raw=raw,
         ))
     return out
 
 
-def _signal_info(db: Any, strings: Any, record: MonitorRecord) -> dict[str, Any] | None:
+def extract_rob_signal_records(section: Any) -> list[RobSignalRecord]:
+    table = int(section.header.table_type)
+    size = int(section.decoded_record_size)
+    if table != 88 or size < 0x43:
+        raise ValueError(f"expected current behavior-data table 88 with >=0x43-byte rows, got {table}/0x{size:X}")
+    out = []
+    for index, raw in enumerate(records(section)):
+        u16 = lambda off: struct.unpack_from("<H", raw, off)[0]
+        u32 = lambda off: struct.unpack_from("<I", raw, off)[0]
+        out.append(RobSignalRecord(
+            table=88,
+            index=index,
+            name_string_index=u32(0x20),
+            record_key=u16(0x2C),
+            support_condition_key=u16(0x2E),
+            physical_data_key=u16(0x30),
+            bit_start=u16(0x32),
+            bit_end=u16(0x34),
+            sort_key=u16(0x36),
+            pattern_display_key=u16(0x38),
+            exception_handler_id=u16(0x3A),
+            did=u16(0x3C),
+            extraction_mode=raw[0x3E],
+            presentation_mode=raw[0x3F],
+            exception_handler_flag=raw[0x42],
+            raw=raw,
+        ))
+    return out
+
+
+def _physical_info(
+    db: Any, strings: Any, *, physical_data_key: int, bit_start: int, bit_end: int,
+    pattern_display_key: int,
+) -> dict[str, Any] | None:
     physical_section = db.sections.get(13)
     unit_section = db.sections.get(15)
     if physical_section is None or unit_section is None:
         return None
-    physical = None
-    for raw in records(physical_section):
-        if len(raw) >= 0x16 and struct.unpack_from("<H", raw, 0x0C)[0] == record.physical_data_key:
-            physical = raw
-            break
+    physical = next((raw for raw in records(physical_section)
+                     if len(raw) >= 0x16 and struct.unpack_from("<H", raw, 0x0C)[0] == physical_data_key), None)
     if physical is None:
         return None
     unit_key = struct.unpack_from("<H", physical, 0x0E)[0]
-    unit = None
-    for raw in records(unit_section):
-        if len(raw) >= 8 and struct.unpack_from("<H", raw, 0x04)[0] == unit_key:
-            unit = raw
-            break
+    unit = next((raw for raw in records(unit_section)
+                 if len(raw) >= 8 and struct.unpack_from("<H", raw, 0x04)[0] == unit_key), None)
     unit_text = None if unit is None else strings.get_string(struct.unpack_from("<I", unit, 0x00)[0])
     patterns: dict[int, str | None] = {}
     pattern_section = db.sections.get(14)
-    if pattern_section is not None and record.pattern_display_key:
+    if pattern_section is not None and pattern_display_key:
         for raw in records(pattern_section):
-            if len(raw) >= 0x0E and struct.unpack_from("<H", raw, 0x0C)[0] == record.pattern_display_key:
+            if len(raw) >= 0x0E and struct.unpack_from("<H", raw, 0x0C)[0] == pattern_display_key:
                 patterns[struct.unpack_from("<I", raw, 0x04)[0]] = strings.get_string(struct.unpack_from("<I", raw, 0x00)[0])
-    shift = 0x10 if len(record.raw) >= 0x50 else 0
-    data_range = [
-        struct.unpack_from("<i", record.raw, 0x10 + shift)[0],
-        struct.unpack_from("<i", record.raw, 0x0C + shift)[0],
-    ]
-    graph_range = [
-        struct.unpack_from("<i", record.raw, 0x08 + shift)[0],
-        struct.unpack_from("<i", record.raw, 0x04 + shift)[0],
-    ]
     return {
-        "physical_data_key": record.physical_data_key,
+        "physical_data_key": physical_data_key,
         "mul": struct.unpack_from("<i", physical, 0x00)[0],
         "div": struct.unpack_from("<i", physical, 0x04)[0],
         "offset": struct.unpack_from("<i", physical, 0x08)[0],
@@ -216,11 +256,33 @@ def _signal_info(db: Any, strings: Any, record: MonitorRecord) -> dict[str, Any]
         "unit": unit_text,
         "signed": bool(physical[0x14]),
         "decimal_point_count": physical[0x15],
-        "bit_width": record.bit_end - record.bit_start + 1,
-        "data_range": data_range,
-        "graph_range": graph_range,
+        "bit_width": bit_end - bit_start + 1,
         "pattern_display": dict(sorted(patterns.items())),
     }
+
+
+def _signal_info(db: Any, strings: Any, record: MonitorRecord) -> dict[str, Any] | None:
+    info = _physical_info(
+        db, strings,
+        physical_data_key=record.physical_data_key,
+        bit_start=record.bit_start,
+        bit_end=record.bit_end,
+        pattern_display_key=record.pattern_display_key,
+    )
+    if info is None:
+        return None
+    shift = 0x10 if len(record.raw) >= 0x50 else 0
+    info.update({
+        "data_range": [
+            struct.unpack_from("<i", record.raw, 0x10 + shift)[0],
+            struct.unpack_from("<i", record.raw, 0x0C + shift)[0],
+        ],
+        "graph_range": [
+            struct.unpack_from("<i", record.raw, 0x08 + shift)[0],
+            struct.unpack_from("<i", record.raw, 0x04 + shift)[0],
+        ],
+    })
+    return info
 
 
 def monitor_rows(
@@ -299,5 +361,75 @@ def behavior_rows(db: Any, strings: Any, source: str) -> list[dict[str, Any]]:
         "signature": record.signature,
         "name": strings.get_string(record.name_string_index),
         "comment": strings.get_string(record.comment_string_index),
+        "behavior_code": record.behavior_code,
         "raw": record.raw,
     } for record in extract_behavior_records(section)]
+
+
+
+def rob_rows(db: Any, strings: Any, source: str, *, include_signal_info: bool = False) -> dict[str, Any]:
+    """Decode current ordinary-P5 RoB behavior names and DID-scoped signal schemas.
+
+    Type-88 rows are selected by returned DID at runtime. Type-90 supplies the local
+    support mode; type-89 is represented as an explicit unresolved cross-DID key when
+    present. Dynamic LSB table-64 membership is exported rather than silently applying
+    V18-only behavior to current GTS+.
+    """
+    behavior = behavior_rows(db, strings, source)
+    signal_section = db.sections.get(88)
+    if signal_section is None:
+        return {"behavior_codes": behavior, "signals": [], "dynamic_lsb_table_present": 64 in db.sections}
+
+    did_modes: dict[int, int] = {}
+    section90 = db.sections.get(90)
+    if section90 is not None:
+        for raw in records(section90):
+            if len(raw) >= 7:
+                did_modes[struct.unpack_from("<H", raw, 0x02)[0]] = raw[0x06]
+
+    dynamic_keys: set[int] = set()
+    section64 = db.sections.get(64)
+    if section64 is not None:
+        # Current table-64 key position is intentionally not named here until its
+        # current consumer is independently pinned. Presence alone means the runtime
+        # ChangeSignalLSB path may alter base physical coefficients.
+        dynamic_keys = {-1}
+
+    signals = []
+    for record in extract_rob_signal_records(signal_section):
+        row: dict[str, Any] = {
+            "source": source,
+            "table": 88,
+            "record": record.index,
+            "name": strings.get_string(record.name_string_index),
+            "record_key": record.record_key,
+            "support_condition_key": record.support_condition_key,
+            "physical_data_key": record.physical_data_key,
+            "bit_start": record.bit_start,
+            "bit_end": record.bit_end,
+            "sort_key": record.sort_key,
+            "pattern_display_key": record.pattern_display_key,
+            "exception_handler_id": record.exception_handler_id,
+            "did": record.did,
+            "extraction_mode": record.extraction_mode,
+            "presentation_mode": record.presentation_mode,
+            "exception_handler_flag": record.exception_handler_flag,
+            "local_support_mode": did_modes.get(record.did),
+            "dynamic_lsb_possible": bool(dynamic_keys),
+            "raw": record.raw,
+        }
+        if include_signal_info:
+            row["signal_info"] = _physical_info(
+                db, strings,
+                physical_data_key=record.physical_data_key,
+                bit_start=record.bit_start,
+                bit_end=record.bit_end,
+                pattern_display_key=record.pattern_display_key,
+            )
+        signals.append(row)
+    return {
+        "behavior_codes": behavior,
+        "signals": signals,
+        "dynamic_lsb_table_present": 64 in db.sections,
+        "cross_did_condition_rows": db.sections[89].header.record_count if 89 in db.sections else 0,
+    }

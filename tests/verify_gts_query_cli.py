@@ -380,6 +380,26 @@ rows_1cee = [row for row in rows if row["primary_did"] == 0x1CEE]
 names_1cee = {row["name"] for row in rows_1cee}
 check("Advanced Drive Target Steering Angle" in names_1cee, "DID 0x1CEE resolves Advanced Drive Target Steering Angle")
 check("Target Steering Angle After Output Compensation" in names_1cee, "DID 0x1CEE retains the second Toyota interpretation")
+rob = gts_cli._rob_rows(emps, strings, "EMPS_P5.ddb")
+rob_steering = next(row for row in rob["signals"] if row["name"] == "Steering Angle")
+check(
+    rob_steering["did"] == 0x5037
+    and [rob_steering["bit_start"], rob_steering["bit_end"]] == [0, 15]
+    and rob_steering["local_support_mode"] == 0
+    and rob_steering["support_condition_key"] == 0
+    and rob_steering["dynamic_lsb_possible"] is False
+    and rob_steering["signal_info"]["unit"] == "deg"
+    and rob_steering["signal_info"]["mul"] == 15
+    and rob_steering["signal_info"]["signed"] is True,
+    "current EPS RoB signal grammar joins type-88 DID/bit geometry to physical/unit metadata",
+)
+rob_behavior = next(row for row in rob["behavior_codes"] if row["behavior_code"] == 0x0455)
+check(
+    rob_behavior["signature"] == "X0455"
+    and rob_behavior["name"] == "Steering Angle Sensor Incorrect Installation",
+    "current EPS RoB behavior-code grammar recovers OEM code/name identity",
+)
+
 steering = next(row for row in rows if row["monitor_key"] == 17)
 check(
     steering["name"] == "Steering Angle"
