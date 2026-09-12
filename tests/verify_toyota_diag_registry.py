@@ -230,6 +230,18 @@ def main() -> int:
           and hv_test["runtime_length_probe"]["response_prefix_length"] == 3
           and hv_test["execution"] == "plan_only")
 
+    hybrid_water_pump = next(row for row in actual["catalogs"]["397"]["active_tests"] if row["id"] == 1)
+    check("direct Active Test exports exact role-0x70 physical conversion and OEM choice text",
+          hybrid_water_pump["signal_info"]["physical"]["mul"] == 1
+          and hybrid_water_pump["signal_info"]["physical"]["div"] == 1
+          and hybrid_water_pump["signal_info"]["physical"]["offset"] == 0
+          and hybrid_water_pump["signal_info"]["choices"] == [{"value": 1, "text": "ON"}]
+          and "trunc_toward_zero" in hybrid_water_pump["signal_info"]["engineering_to_raw"]["formula"])
+    engine_vvt = next(row for row in actual["catalogs"]["372"]["active_tests"] if row["id"] == 4)
+    check("Engine direct Active Test retains engineering offset/unit for inverse conversion",
+          engine_vvt["signal_info"]["physical"]["offset"] == -128
+          and engine_vvt["signal_info"]["physical"]["unit"] == "%")
+
     engine_shared_direct = next(row for row in actual["catalogs"]["372"]["active_tests"] if row["id"] == 77)
     check("shared-DID direct Active Test preserves the full one-to-many type-67 control geometry",
           engine_shared_direct["name"] == "Pilot Injection Volume Select Cylinder"

@@ -1145,17 +1145,13 @@ def _active_test_init_selected_plan(
     }
 
 
-def _active_test_signal_info_selected_plan(
-    parser: DDBParser,
-    category: dict[str, Any],
-    db_root: Path,
-    active_test_id: int,
+def _direct_active_test_signal_info(
+    db: Any,
+    db_path: Path,
+    selected: dict[str, Any],
     strings: StringDataBase,
 ) -> dict[str, Any]:
-    db, db_path, selected = _direct_active_test_selected_row(
-        parser, category, db_root, active_test_id, strings
-    )
-
+    """Resolve current role-0x70 signal metadata for one selected type-68 row."""
     def unique_record(table: int, key_offset: int, key: int) -> tuple[int, bytes]:
         section = db.sections.get(table)
         if section is None:
@@ -1193,7 +1189,6 @@ def _active_test_signal_info_selected_plan(
             })
 
     return {
-        "selected_test": selected,
         "active_test_pattern": {
             "record": pattern_index,
             "key": selected["active_test_pattern_key"],
@@ -1221,6 +1216,23 @@ def _active_test_signal_info_selected_plan(
             "raw": physical.hex(),
         },
         "display_info": display,
+    }
+
+
+def _active_test_signal_info_selected_plan(
+    parser: DDBParser,
+    category: dict[str, Any],
+    db_root: Path,
+    active_test_id: int,
+    strings: StringDataBase,
+) -> dict[str, Any]:
+    db, db_path, selected = _direct_active_test_selected_row(
+        parser, category, db_root, active_test_id, strings
+    )
+    resolved = _direct_active_test_signal_info(db, db_path, selected, strings)
+    return {
+        "selected_test": selected,
+        **resolved,
         "runtime_boundary": (
             "role-0x70 is metadata-only for the exact plugin identity; this selected-item plan does not execute "
             "transport or prove role-0x06 live availability"
@@ -2684,6 +2696,7 @@ def _compact_direct_active_test(
     executor: dict[str, Any],
     monitor_rows: list[dict[str, Any]],
     init_frame: dict[str, Any] | None = None,
+    signal_info: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     linked = [
         row for row in monitor_rows
@@ -2720,6 +2733,7 @@ def _compact_direct_active_test(
         "initial_read": _direct_initial_read_plan(selected, init_frame),
         "monitor_key": monitor.get("monitor_key"),
         "monitor_name": monitor.get("name") or "",
+        "signal_info": signal_info,
         "session_requirement": _session_requirement(executor["start"]["materialized_prefix"]),
         "execution": "plan_only",
     }
@@ -2777,11 +2791,19 @@ def _registry_active_tests(
     db_root: Path,
     strings: StringDataBase,
     monitor_rows: list[dict[str, Any]],
+    bindings: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     db_path = db_root / str(category["database"])
     db = parser.parse_ecu_db(db_path)
     init_frames = _master_frame_rows(parser, master, int(category["category_id"]), 0xCA)
     init_frame = init_frames[0] if len(init_frames) == 1 else None
+    signal_info_enabled = any(
+        int(binding.get("role", -1)) == 0x70
+        and binding.get("dll") == "GetATSignalInfoP5_DT.dll"
+        and binding.get("semantic_kind") == "p5_active_test_signal_info"
+        and binding.get("semantic_status") == "exact_plugin_identity"
+        for binding in bindings
+    )
     rows: list[dict[str, Any]] = []
     direct = db.sections.get(68)
     if direct is not None:
@@ -2813,7 +2835,31 @@ def _registry_active_tests(
                 executor = _direct_active_test_executor_plan(
                     parser, master, category, db_obj, selected_db_path, selected
                 )
-                rows.append(_compact_direct_active_test(selected, executor, monitor_rows, init_frame))
+                signal_info = None
+                if signal_info_enabled:
+                    resolved_info = _direct_active_test_signal_info(db_obj, selected_db_path, selected, strings)
+                    signal_info = {
+                        "physical": {
+                            key: value for key, value in resolved_info["physical"].items()
+                            if key not in {"record", "raw", "unit_record"}
+                        },
+                        "choices": [
+                            {"value": row["value"], "text": row["text"]}
+                            for row in resolved_info["display_info"]
+                        ],
+                        "pattern": {
+                            key: value for key, value in resolved_info["active_test_pattern"].items()
+                            if key not in {"record", "raw"}
+                        },
+                        "engineering_to_raw": {
+                            "formula": "raw8 = trunc_toward_zero((value_integer - offset) * div / mul) & 0xFF",
+                            "value_integer": "engineering display value scaled by 10^decimal_point_count",
+                            "source": "CommandDataLib.dll CStartActTstSnd::SetValue",
+                        },
+                    }
+                rows.append(_compact_direct_active_test(
+                    selected, executor, monitor_rows, init_frame, signal_info=signal_info
+                ))
             except ValueError as exc:
                 rows.append({
                     "id": active_test_id,
@@ -3495,7 +3541,7 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
             "category": category,
             "dids": _registry_did_catalog(monitor_rows),
             "dtcs": _registry_dtc_catalog(parser, db, strings, db_path.name),
-            "active_tests": _registry_active_tests(parser, master, category, db_root, strings, monitor_rows),
+            "active_tests": _registry_active_tests(parser, master, category, db_root, strings, monitor_rows, bindings),
             "functions": _registry_function_hierarchy(parser, master, strings, category_id),
             "plugins": bindings,
             "commands": _registry_command_rows(parser, master, category, bin_root, bindings),
@@ -4089,7 +4135,7 @@ def _bundle_category_catalog(
         "category": category,
         "dids": _registry_did_catalog(monitor_rows),
         "dtcs": _registry_dtc_catalog(parser, db, strings, db_path.name),
-        "active_tests": _registry_active_tests(parser, master, category, db_root, strings, monitor_rows),
+        "active_tests": _registry_active_tests(parser, master, category, db_root, strings, monitor_rows, bindings),
         "functions": _registry_function_hierarchy(parser, master, strings, int(category["category_id"])),
         "plugins": bindings,
         "commands": _registry_command_rows(parser, master, category, bin_root, bindings),

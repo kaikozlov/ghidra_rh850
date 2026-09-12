@@ -164,6 +164,11 @@ def main() -> int:
               and engine_static_routine["routine_command"]["bytes"] == "00"
               and engine_static_routine["fixed_request"] is True
               and engine_static_routine["execution"] == "executable")
+        hybrid_engineering = next(row for row in hybrid_catalog["active_tests"] if row["id"] == 1)
+        check("universal Hybrid direct Active Test carries clean role-0x70 engineering metadata",
+              hybrid_engineering["signal_info"]["physical"]["decimal_point_count"] == 0
+              and hybrid_engineering["signal_info"]["choices"] == [{"value": 1, "text": "ON"}]
+              and hybrid_engineering["signal_info"]["engineering_to_raw"]["source"].endswith("CStartActTstSnd::SetValue"))
         hybrid_test = next(row for row in hybrid_catalog["active_tests"] if row["id"] == 1)
         hybrid_ffd = next(row for row in hybrid_catalog["commands"] if row["kind"] == "p5_dtc_snapshot")
         check("universal Hybrid catalog exports generic P5 DTC snapshot request",
