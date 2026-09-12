@@ -1284,7 +1284,7 @@ not execute a repair before the bad hook. This narrows a genuine inventory gap;
 it is not a recovered unbrick sequence.
 
 
-## 20. Corrected procedure ownership and the OTA alternative
+## 22. Corrected procedure ownership and the OTA alternative
 
 2026-09-12. This network-only pass first checked whether the actual OEM update
 coordinator provides an independent programming route. It found a material
@@ -1356,7 +1356,7 @@ another ECU's error status. It could establish that a surviving listener is
 being hidden by routing; it cannot fix the malformed instruction by proxy.
 No such prepared-state EPS response has been obtained.
 
-## 21. Cold-fallback boot addressing was checked separately from live handoff
+## 23. Cold-fallback boot addressing was checked separately from live handoff
 
 A cold validity-failure path does not inherit the live application's nine-word
 programming request. `13B0` installs mode `FF` followed by sentinel words,
