@@ -755,3 +755,60 @@ Neither a new name in the diagnostic catalog nor another retry is a demonstrated
 repair. The exact live fault registers and an exact-F33 recovery package remain
 unobserved; the conclusion is not an absolute proof against every undocumented
 implementation.
+
+
+## 17. Network executor recheck: inline XCP and fixed-call alternatives
+
+2026-09-12. This pass stayed entirely with the existing vehicle-network entry
+paths and offline artifacts. It made no vehicle connection or request and did
+not depend on a peer-ECU fault status, comma SSH, or a physical connector test.
+No working recovery entry was found.
+
+The XCP receive path was independently rechecked from exact-target Ghidra
+instructions and the archived incident image. This **confirms the distinction
+already recorded in section 4**; it is not a newly discovered listener. Any
+broader statement that all XCP input merely waits for later foreground service
+is inaccurate:
+
+```text
+8312E -> 830D0 -> 82FEC
+                   -> [22B14 = 821D6], subject to interface-ready state
+                   -> 830C0 -> 98E80
+```
+
+`830D0` copies a length-bounded frame and then calls `82FEC`; the latter can
+invoke `821D6` synchronously. The interface-ready byte at `FEBE4EE6 + channel`
+is separate: `82C9E` initializes it to `69`, and `82F18` writes `5A` only for
+its enabled state. Granting that state does not open the command gate.
+
+At `98E84..98E8E`, exact instructions load the **absolute CodeFlash byte at
+30D68** and branch to `98EE6` when it is nonzero. At `98EE6..98EED`, the
+function returns `1`. The dispatcher checks that result at `821E8..821EA` and
+returns before its CONNECT case or normal command dispatch. Both stock and the
+complete retained incident reconstruction contain `30D68 = 5A`. This is not a
+session's RAM lock bit or an XCP seed/key negotiation that a different request
+can satisfy; the rejection precedes those normal command handlers.
+
+The full recovered function bodies of `79EDE`, `7A132`, `821D6`, `82C9E`,
+`82F18`, `82FEC`, `830D0`, `830C0`, and `98E80` are byte-identical in stock
+and the retained incident reconstruction `aba6867f...50f2d74`. The protocol
+pointer block `22B00..22B1F` is also identical. `7A254` differs only in the
+four recorded hook bytes in that comparison. The archived image remains a
+reconstruction, not a live EPS readback.
+
+A complementary check examined whether fixed CALLT/software-exception
+instructions supplied a normal call path missed by ordinary direct-call
+references. Linear disassembly of the archived image contains 490 CALLT-like
+patterns and 30 FETRAP-like patterns, but **none is inside the body ranges of
+the 6,065-function exact-target corpus**. It contains no CTRET, SYSCALL or TRAP
+instruction in those ranges either. The observed patterns outside known code
+must not be promoted from table bytes into executable recovery paths. This
+result is bounded by the recovered code inventory; it does not claim that no
+unrecognized executable region or computed call exists.
+
+The earlier bootstrap result was also freshly checked through `481A`, `6C5A`,
+`119E`, `13B0`, and `1398`: the normal CRC/descriptor/marker checks precede
+the choice to initialize the boot diagnostic runtime. The reviewed alternative
+XCP entry does not change that decision or provide a running repair handler
+in the reconstructed incident state. These are target-execution results,
+not conclusions drawn from an error message or from an unreachable host.
