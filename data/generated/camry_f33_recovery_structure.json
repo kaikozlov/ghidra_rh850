@@ -435,6 +435,472 @@
     "lower": "0x00000000",
     "upper_inclusive": "0xFEBDFFFF"
   },
+  "network_diagnostic_modes": {
+    "communication_control_configuration": {
+      "all_channel_count": 1,
+      "all_channel_table": "0x000261C0",
+      "all_channels": [
+        {
+          "channel": 0,
+          "enabled": 1
+        }
+      ],
+      "raw": {
+        "address": "0x000261C4",
+        "bytes": "0001000001000000c06102000000000000000000",
+        "size": 20
+      },
+      "specific_channel_count": 0,
+      "specific_channel_table": "0x00000000",
+      "subnode_count": 0,
+      "subnode_table": "0x00000000"
+    },
+    "ordinary_dispatch_event": {
+      "dispatcher_adapter_call": {
+        "address": "0x000922CE",
+        "bytes": "bfff3cf9",
+        "size": 4,
+        "target": "0x00091C0A"
+      },
+      "handler": "0x000922AA",
+      "handler_body": {
+        "address": "0x000922AA",
+        "bytes": "8007e10080fffc6980ff5c1d0ae880ff6c030ae080fff86962e28a0d1d3080ff9e191d30bfff3cf9950d80ffd6691d30013a80ffbe1980ffd6694006ff00",
+        "size": 62
+      },
+      "service_dispatcher_call": {
+        "address": "0x00091C7A",
+        "bytes": "bfffecf8",
+        "size": 4,
+        "target": "0x00091566"
+      },
+      "slot": "0x00026B18"
+    },
+    "scope": "ROM-selected ordinary diagnostic modes; no claim of live availability or repair",
+    "service_lists": [
+      {
+        "address": "0x00025C0C",
+        "index_table": "0x00025C24",
+        "services": [
+          {
+            "address": "0x00025C54",
+            "callback": "0x00000000",
+            "has_subfunction": true,
+            "index": 0,
+            "mode_subfunctions": [
+              {
+                "address": "0x000259EC",
+                "callback": "0x00095D0C",
+                "subfunction": 1
+              },
+              {
+                "address": "0x000259FC",
+                "callback": "0x00095D1C",
+                "subfunction": 2
+              },
+              {
+                "address": "0x00025A0C",
+                "callback": "0x00095D2C",
+                "subfunction": 3
+              }
+            ],
+            "service": "0x10",
+            "subfunction_count": 3
+          },
+          {
+            "address": "0x00025C6C",
+            "callback": "0x00000000",
+            "has_subfunction": false,
+            "index": 1,
+            "mode_subfunctions": [],
+            "service": "0x11",
+            "subfunction_count": 0
+          },
+          {
+            "address": "0x00025C84",
+            "callback": "0x0008C2E0",
+            "has_subfunction": false,
+            "index": 2,
+            "mode_subfunctions": [],
+            "service": "0x14",
+            "subfunction_count": 0
+          },
+          {
+            "address": "0x00025C9C",
+            "callback": "0x00000000",
+            "has_subfunction": true,
+            "index": 3,
+            "mode_subfunctions": [],
+            "service": "0x19",
+            "subfunction_count": 4
+          },
+          {
+            "address": "0x00025CB4",
+            "callback": "0x000962F2",
+            "has_subfunction": false,
+            "index": 4,
+            "mode_subfunctions": [],
+            "service": "0x22",
+            "subfunction_count": 0
+          },
+          {
+            "address": "0x00025CCC",
+            "callback": "0x000965C0",
+            "has_subfunction": false,
+            "index": 5,
+            "mode_subfunctions": [],
+            "service": "0x23",
+            "subfunction_count": 0
+          },
+          {
+            "address": "0x00025CE4",
+            "callback": "0x00000000",
+            "has_subfunction": true,
+            "index": 6,
+            "mode_subfunctions": [],
+            "service": "0x27",
+            "subfunction_count": 4
+          },
+          {
+            "address": "0x00025CFC",
+            "callback": "0x00000000",
+            "has_subfunction": true,
+            "index": 7,
+            "mode_subfunctions": [
+              {
+                "address": "0x00025A9C",
+                "callback": "0x00097142",
+                "subfunction": 0
+              },
+              {
+                "address": "0x00025AAC",
+                "callback": "0x00097152",
+                "subfunction": 1
+              },
+              {
+                "address": "0x00025ABC",
+                "callback": "0x00097162",
+                "subfunction": 3
+              }
+            ],
+            "service": "0x28",
+            "subfunction_count": 3
+          },
+          {
+            "address": "0x00025D14",
+            "callback": "0x00095978",
+            "has_subfunction": false,
+            "index": 8,
+            "mode_subfunctions": [],
+            "service": "0x2E",
+            "subfunction_count": 0
+          },
+          {
+            "address": "0x00025D2C",
+            "callback": "0x00097AE4",
+            "has_subfunction": false,
+            "index": 9,
+            "mode_subfunctions": [],
+            "service": "0x31",
+            "subfunction_count": 0
+          },
+          {
+            "address": "0x00025D44",
+            "callback": "0x00000000",
+            "has_subfunction": false,
+            "index": 10,
+            "mode_subfunctions": [],
+            "service": "0x34",
+            "subfunction_count": 0
+          },
+          {
+            "address": "0x00025D5C",
+            "callback": "0x00000000",
+            "has_subfunction": false,
+            "index": 11,
+            "mode_subfunctions": [],
+            "service": "0x36",
+            "subfunction_count": 0
+          },
+          {
+            "address": "0x00025D74",
+            "callback": "0x00000000",
+            "has_subfunction": false,
+            "index": 12,
+            "mode_subfunctions": [],
+            "service": "0x37",
+            "subfunction_count": 0
+          },
+          {
+            "address": "0x00025D8C",
+            "callback": "0x00000000",
+            "has_subfunction": true,
+            "index": 13,
+            "mode_subfunctions": [],
+            "service": "0x3E",
+            "subfunction_count": 1
+          },
+          {
+            "address": "0x00025DA4",
+            "callback": "0x00000000",
+            "has_subfunction": true,
+            "index": 14,
+            "mode_subfunctions": [],
+            "service": "0x85",
+            "subfunction_count": 2
+          },
+          {
+            "address": "0x00025DBC",
+            "callback": "0x00000000",
+            "has_subfunction": true,
+            "index": 15,
+            "mode_subfunctions": [],
+            "service": "0xAB",
+            "subfunction_count": 3
+          },
+          {
+            "address": "0x00025DD4",
+            "callback": "0x0008E434",
+            "has_subfunction": false,
+            "index": 16,
+            "mode_subfunctions": [],
+            "service": "0xBA",
+            "subfunction_count": 0
+          }
+        ],
+        "source_key": 2
+      },
+      {
+        "address": "0x00025C14",
+        "index_table": "0x00025BEC",
+        "services": [
+          {
+            "address": "0x00025DEC",
+            "callback": "0x00000000",
+            "has_subfunction": true,
+            "index": 17,
+            "mode_subfunctions": [
+              {
+                "address": "0x00025B2C",
+                "callback": "0x00095D0C",
+                "subfunction": 1
+              },
+              {
+                "address": "0x00025B3C",
+                "callback": "0x00095D2C",
+                "subfunction": 3
+              }
+            ],
+            "service": "0x10",
+            "subfunction_count": 2
+          },
+          {
+            "address": "0x00025C84",
+            "callback": "0x0008C2E0",
+            "has_subfunction": false,
+            "index": 2,
+            "mode_subfunctions": [],
+            "service": "0x14",
+            "subfunction_count": 0
+          },
+          {
+            "address": "0x00025CFC",
+            "callback": "0x00000000",
+            "has_subfunction": true,
+            "index": 7,
+            "mode_subfunctions": [
+              {
+                "address": "0x00025A9C",
+                "callback": "0x00097142",
+                "subfunction": 0
+              },
+              {
+                "address": "0x00025AAC",
+                "callback": "0x00097152",
+                "subfunction": 1
+              },
+              {
+                "address": "0x00025ABC",
+                "callback": "0x00097162",
+                "subfunction": 3
+              }
+            ],
+            "service": "0x28",
+            "subfunction_count": 3
+          },
+          {
+            "address": "0x00025D2C",
+            "callback": "0x00097AE4",
+            "has_subfunction": false,
+            "index": 9,
+            "mode_subfunctions": [],
+            "service": "0x31",
+            "subfunction_count": 0
+          },
+          {
+            "address": "0x00025D8C",
+            "callback": "0x00000000",
+            "has_subfunction": true,
+            "index": 13,
+            "mode_subfunctions": [],
+            "service": "0x3E",
+            "subfunction_count": 1
+          },
+          {
+            "address": "0x00025DA4",
+            "callback": "0x00000000",
+            "has_subfunction": true,
+            "index": 14,
+            "mode_subfunctions": [],
+            "service": "0x85",
+            "subfunction_count": 2
+          }
+        ],
+        "source_key": 3
+      },
+      {
+        "address": "0x00025C1C",
+        "index_table": "0x00025C48",
+        "services": [
+          {
+            "address": "0x00025E04",
+            "callback": "0x00000000",
+            "has_subfunction": true,
+            "index": 18,
+            "mode_subfunctions": [
+              {
+                "address": "0x00025B4C",
+                "callback": "0x00095D0C",
+                "subfunction": 1
+              },
+              {
+                "address": "0x00025B5C",
+                "callback": "0x00095D3C",
+                "subfunction": 64
+              }
+            ],
+            "service": "0x10",
+            "subfunction_count": 2
+          },
+          {
+            "address": "0x00025E1C",
+            "callback": "0x00000000",
+            "has_subfunction": true,
+            "index": 19,
+            "mode_subfunctions": [],
+            "service": "0x19",
+            "subfunction_count": 4
+          },
+          {
+            "address": "0x00025E34",
+            "callback": "0x000962F2",
+            "has_subfunction": false,
+            "index": 20,
+            "mode_subfunctions": [],
+            "service": "0x22",
+            "subfunction_count": 0
+          },
+          {
+            "address": "0x00025E4C",
+            "callback": "0x00000000",
+            "has_subfunction": true,
+            "index": 21,
+            "mode_subfunctions": [],
+            "service": "0x3E",
+            "subfunction_count": 1
+          },
+          {
+            "address": "0x00025E64",
+            "callback": "0x00000000",
+            "has_subfunction": true,
+            "index": 22,
+            "mode_subfunctions": [],
+            "service": "0xAB",
+            "subfunction_count": 3
+          }
+        ],
+        "source_key": 4
+      }
+    ],
+    "session_02_wrapper": {
+      "body": {
+        "address": "0x00095D1C",
+        "bytes": "8007210086000242bfff2eff40063f00",
+        "size": 16
+      },
+      "common_handler_call": {
+        "address": "0x00095D24",
+        "bytes": "bfff2eff",
+        "size": 4,
+        "target": "0x00095C52"
+      }
+    },
+    "session_40_wrapper": {
+      "body": {
+        "address": "0x00095D3C",
+        "bytes": "80072100860020464000bfff0cff40063f00",
+        "size": 18
+      },
+      "common_handler_call": {
+        "address": "0x00095D46",
+        "bytes": "bfff0cff",
+        "size": 4,
+        "target": "0x00095C52"
+      }
+    },
+    "session_definitions": [
+      {
+        "address": "0x00026122",
+        "bytes": "000132008813d007f401",
+        "p2_field": 50,
+        "p2_star_field": 5000,
+        "response_p2_star_field": 500,
+        "session": 1,
+        "size": 10,
+        "transition_kind": 0
+      },
+      {
+        "address": "0x0002612C",
+        "bytes": "020232008813d007f401",
+        "p2_field": 50,
+        "p2_star_field": 5000,
+        "response_p2_star_field": 500,
+        "session": 2,
+        "size": 10,
+        "transition_kind": 2
+      },
+      {
+        "address": "0x00026136",
+        "bytes": "000332008813d007f401",
+        "p2_field": 50,
+        "p2_star_field": 5000,
+        "response_p2_star_field": 500,
+        "session": 3,
+        "size": 10,
+        "transition_kind": 0
+      },
+      {
+        "address": "0x00026140",
+        "bytes": "004032008813d007f401",
+        "p2_field": 50,
+        "p2_star_field": 5000,
+        "response_p2_star_field": 500,
+        "session": 64,
+        "size": 10,
+        "transition_kind": 0
+      },
+      {
+        "address": "0x0002614A",
+        "bytes": "00000000000000000000",
+        "p2_field": 0,
+        "p2_star_field": 0,
+        "response_p2_star_field": 0,
+        "session": 0,
+        "size": 10,
+        "transition_kind": 0
+      }
+    ]
+  },
   "pre_hook_calls": [
     {
       "address": "0x0007A262",

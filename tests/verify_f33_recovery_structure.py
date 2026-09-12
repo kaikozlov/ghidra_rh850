@@ -129,5 +129,62 @@ check(
     and sup["terminal_reset"]["p4_5_update_mask"] == "0x00200000",
 )
 
+# Ordinary alternate sessions are selected through ROM lists, including a
+# callback absent from the canonical function inventory. Do not infer absence
+# of a service or an executor merely from a direct-call/function-name census.
+modes = report["network_diagnostic_modes"]
+service_lists = {row["source_key"]: row for row in modes["service_lists"]}
+check("all three runtime service-list selectors are represented", set(service_lists) == {2, 3, 4})
+check(
+    "runtime list sizes and shared-object counts are exact",
+    [len(service_lists[key]["services"]) for key in (2, 3, 4)] == [17, 6, 5]
+    and {s["index"] for row in service_lists.values() for s in row["services"]} == set(range(23)),
+)
+
+def configured_modes(key: int, service: str) -> list[int]:
+    selected = [row for row in service_lists[key]["services"] if row["service"] == service]
+    return [s["subfunction"] for row in selected for s in row["mode_subfunctions"]]
+
+check(
+    "alternate 0x40 session belongs to the third list, not the primary programming list",
+    configured_modes(2, "0x10") == [1, 2, 3]
+    and configured_modes(3, "0x10") == [1, 3]
+    and configured_modes(4, "0x10") == [1, 0x40],
+)
+sessions = {row["session"]: row for row in modes["session_definitions"]}
+check(
+    "0x40 uses immediate-session kind, not the programming handoff kind",
+    sessions[0x40]["transition_kind"] == 0
+    and sessions[2]["transition_kind"] == 2
+    and sessions[0x40]["address"] == "0x00026140",
+)
+check(
+    "0x40 and programming wrappers call the same ordinary session processor",
+    modes["session_40_wrapper"]["body"]["bytes"] == "80072100860020464000bfff0cff40063f00"
+    and modes["session_40_wrapper"]["common_handler_call"]["target"] == "0x00095C52"
+    and modes["session_02_wrapper"]["common_handler_call"]["target"] == "0x00095C52",
+)
+event = modes["ordinary_dispatch_event"]
+check(
+    "event zero reaches the shared dispatcher through the previously unnamed callback",
+    event["handler"] == "0x000922AA"
+    and event["dispatcher_adapter_call"]["target"] == "0x00091C0A"
+    and event["service_dispatcher_call"]["target"] == "0x00091566",
+)
+check(
+    "enhanced-address CommunicationControl subfunctions are not in any selected list",
+    configured_modes(2, "0x28") == [0, 1, 3]
+    and configured_modes(3, "0x28") == [0, 1, 3]
+    and configured_modes(4, "0x28") == [],
+)
+comm = modes["communication_control_configuration"]
+check(
+    "one ordinary communication channel, no configured specific subnet or subnode",
+    comm["all_channel_count"] == 1
+    and comm["all_channels"] == [{"enabled": 1, "channel": 0}]
+    and comm["specific_channel_count"] == comm["subnode_count"] == 0
+    and comm["specific_channel_table"] == comm["subnode_table"] == "0x00000000",
+)
+
 print(f"Results: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)
