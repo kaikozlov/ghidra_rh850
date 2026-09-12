@@ -1080,3 +1080,61 @@ at `10002115..10002227` performs this network preparation and the optional
 identity wrapper before the final recognized-gateway loop. This supports the
 local host-flow ordering only; it neither proves successful gateway preparation
 on the vehicle nor permits borrowing an unverified abort procedure.
+
+
+## 20. The current writer selects two distinct gateway-address families
+
+The section-18 hypothesis was extended to the other gateway helper actually
+imported by the current Unified writer, rather than treating every function
+named “central gateway” as the same route. This was an offline pass: no network
+mode change, vehicle request, flash write, or new physical connection occurred.
+
+Fresh import/export, literal, vtable and instruction checks establish:
+
+- `TCUWCanUnifiedPrepareWriter.dll!10001C00` first recognizes package gateway
+  **07505F**. That selects the `JudgeReproGWNode`-qualified P4/P5 cases already
+  described in section 18. Both forms use 11-bit CAN **750/758** with address
+  extension **5F**; the number is not a 29-bit CAN arbitration ID.
+- The separate branch compares the first package gateway against
+  `TCUWDHUtils.dll!GetCentralGWReqCanID`, whose export at **10003FF0** constructs
+  the two bytes **07 86** from the literal at **1000B204**. This family's
+  default request/response strings at **1000B3C4/1000B3D0** are **00000786** /
+  **0000078E**. Only the matching branch calls
+  `StartCentralGWReprogGWModeForMultiTypes` at the writer's **10001E2C** callsite.
+- The DH helper at **10007190** selects its own specification-dependent
+  single-/two-CPU preparation. The constructor's vtable at **1000B290** binds
+  the calls to the named gateway-session, normal authorization, and default-
+  session helpers. Its `CheckConnectionWithCentralGW` at **10002470** is a
+  gateway TesterPresent check, not a request for the EPS to run code. This is
+  another manufacturer-defined gateway family, not an arbitrary substitute
+  address for a silent EPS.
+
+The current protected stub, sidecar and recovered output for `TCUWDHUtils.dll`
+were hash-matched to the existing recovery manifest, as were the current
+CommonPrepareWriter/UnifiedUtils/UnifiedPrepareWriter inputs. The additional
+helper's identity is preserved in the section-18 observation artifact. The
+unprotected DLL is the actual source of these control-flow facts; its name or a
+past narrative was not used as proof.
+
+The saved-log extractor now explicitly watches **786/78E** as well as the
+previous address set and publishes that set in `watched_addresses`. All **39**
+per-file observations, previously selected **184** logged records, decoded
+messages and parse warnings reproduced unchanged. There are **zero 786/78E
+records**, just as there are no **750/758 node-5F records**, in those captured
+spans. The independent address-only census agrees. Neither negative proves what
+happened outside those spans; neither identifies the installed gateway family.
+No authentication exchanges or memory contents were retained by the reducer.
+
+The acquired **T-0035-22** EPS-family package selects **07505F**, but is for
+Tundra calibrations, not F33. The acquired Camry **T-0051-26** package also
+selects **07505F**, but is an MG/inverter update, not an EPS update. These are
+specific package-selection examples, not permission to guess the F33 package
+or select the DH family merely because the car is new.
+
+The useful network-only test remains completing the **correct OEM gateway
+preparation**, with its real acknowledgement/result checks, before assessing
+the EPS listener. The independently checked catch-all around the optional
+pre-transition F181 read means initial EPS silence does not prevent that host
+path from advancing. That is a real difference from another identical EPS
+request. It is still a test of a routing-hidden surviving listener, not an
+independent flash executor, a way to clear the CPU fault, or a verified repair.

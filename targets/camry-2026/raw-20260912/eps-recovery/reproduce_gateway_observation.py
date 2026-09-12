@@ -16,7 +16,8 @@ files = [
     for r in json.loads(source.read_text())["files"]
     if "/2026-09-04/" not in r["path"]
 ]
-addresses = {0x750, 0x758, 0x777, 0x7A0, 0x7A1, 0x7A9, 0x7B0, 0x7B8, 0x7DF}
+# Both are manufacturer-defined gateway families, not interchangeable EPS IDs.
+addresses = {0x750, 0x758, 0x777, 0x786, 0x78E, 0x7A0, 0x7A1, 0x7A9, 0x7B0, 0x7B8, 0x7DF}
 counts = collections.Counter()
 messages = collections.Counter()
 observations = []
@@ -78,6 +79,7 @@ for p in files:
         {"input": p, "warnings": [str(w.message) for w in ws], "messages": rows}
     )
 result = {
+    "watched_addresses": [f"0x{address:03X}" for address in sorted(addresses)],
     "scope": "Offline 39 retained post-incident segments only; missing transactions outside captured spans remain unknown. No wire-format inference; no requests transmitted. Only well-formed single-frame UDS is decoded.",
     "counts": [
         {"event": k, "src": s, "address": hex(a), "length": n, "count": v}

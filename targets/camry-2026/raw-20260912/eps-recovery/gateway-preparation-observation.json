@@ -1284,6 +1284,12 @@
       "stub_sha256": "3afa2734504f8a324d96ddee04673ab34867c7019b3aa13d5d1b92df52aedee6",
       "sidecar_sha256": "92d55ba60dcbfcbc534cb8cf4df8e8839b9cc976e19e03ce0dfdbfae0c10b86a",
       "output_sha256": "fed628ec4c9ca0d6905c96c68e3bdfd574f9c64d2fd76b50de6eba4206579672"
+    },
+    {
+      "relative_path": "TCUWDHUtils.dll",
+      "stub_sha256": "7b836da0a460ef92de40b901b6aeea42687ea0ded5eb4f7bcc9eddd94550257a",
+      "sidecar_sha256": "e74a81d24ea282a9443d142101ed2c43a6f984dbd78d6bd2834778f9eb3dee58",
+      "output_sha256": "5fe7fb3599572718d7d12f55cccd4912634f65ce82481881b69a426f3bcad504"
     }
   ],
   "derived_observations": {
@@ -1300,7 +1306,8 @@
     "absence_outside_retained_spans_established": false,
     "live_gateway_type_known_from_this_observation": false,
     "live_eps_fault_context_captured": false,
-    "working_recovery_demonstrated": false
+    "working_recovery_demonstrated": false,
+    "dh_786_78e_logged_records": 0
   },
   "optional_target_identity_read": {
     "file": "TCUWCanUnifiedPrepareWriter.dll",
@@ -1318,5 +1325,18 @@
     "catch_handler_bytes": "B8 7E 27 00 10 C3",
     "continuation": "0x1000277E",
     "interpretation": "The optional pre-transition target F181 read has a catch-all continuation to cleanup/return, so its failure alone does not abort subsequent gateway preparation. This does not make the later target programming-session acknowledgement optional."
-  }
+  },
+  "watched_addresses": [
+    "0x750",
+    "0x758",
+    "0x777",
+    "0x786",
+    "0x78E",
+    "0x7A0",
+    "0x7A1",
+    "0x7A9",
+    "0x7B0",
+    "0x7B8",
+    "0x7DF"
+  ]
 }
