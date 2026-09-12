@@ -898,6 +898,29 @@ bounded result is that the recorded negative probes have a framing-observation
 gap, but neither that gap nor switching frame format establishes an independent
 programming entry before the application fault.
 
+A further exact-target check follows the boot acceptance and receive path, not
+only the controller mode bits. `3B3C` installs rules through `39D6`, which writes
+the ID/IDE selection, ID/IDE/RTR comparison mask, zero pointer-0/DLC criterion,
+and fixed FIFO destination. Manufacturer tables 17.115/17.116 (pp.966/968)
+contain no FDF/BRS comparison bit in those ID/mask words. The actual boot FIFO
+reader `3F96` reads the ID/IDE word at `FFD23400 + 0x80*k`, DLC at `+4`, and
+two payload words at `+0xC/+0x10`; it does **not** read the `+8` CAN-FD status
+word. Table 17.137 (p.1002) identifies that skipped word as `CFFDCSTS`, with
+FDF/BRS/ESI in bits 2/1/0. `400A -> 4678` then matches the configured ID/IDE and
+passes route, DLC, and those eight payload bytes into the upper event path,
+without a frame-format argument. All three manufacturer pages were rendered
+and visually checked; the exact receive loads and target-native decompilation
+were reviewed against the stock image.
+
+The bounded consequence is that **once an eight-byte frame reaches this boot
+FIFO, the reviewed software path does not reject it merely for being FD rather
+than Classical**. This does not prove a particular prior transmission's wire
+format, physical/timing compatibility, or the existence of a running boot
+listener. It removes a software-format-filter hypothesis, not the blocked
+boot-entry dependency. No format-controlled live probe was performed. A
+read-only attempt to retrieve the frozen catcher configuration from the comma's
+filesystem could not connect, so that historical configuration remains unknown.
+
 The narrow `camry_eps_recovery_liveness` suite exercises native-vs-TX/rejected
 source separation, positive controls, repeated metadata timing, per-length time
 ranges, producer metadata, and empty/send-only logs without a vehicle or capnp.
@@ -979,10 +1002,40 @@ support for this part:
   `https://msg.equipment/storage/files/260806-ms561-pro-user-manual-multi.pdf`,
   pp.4 and 12. These identify a possible source of the missing connector
   documentation, not a recommendation to purchase a tester.
+- **MSG MS-36055 (100R) cable:** the manufacturer's page explicitly lists
+  Camry **2017–2026**, but describes power/data connection for diagnostics and
+  does not list `44250-06490` or `89650-33K90` among its OEM references. The
+  separate **2023-03-17** software announcement adds diagnostics for
+  `Camry (17-)`. Neither source identifies a recovery entry for this F33 part
+  with a nonresponding, validity-passing application. The broad year-range
+  listing is consequently not an exact-target programming qualification;
+  conversely, omission from the public OEM list does not prove that MSG's
+  internal unit database lacks this part. Sources:
+  `https://msg.equipment/en/cables/cables-electric-power-steering-eps/501967`
+  and `https://msg.equipment/en/blog/updates/new-software-for-ms561`.
+- **JTEKT EPS programming/settings:** the supplier's **2025-06-24** article
+  links a two-page sheet distinguishing plug-and-play units, telecoding, and
+  calibration download plus telecoding. Both pages were visually checked.
+  The examples are other vehicle families; no F33-specific terminal assignment
+  or entry for an unresponsive application is given. This supports ordinary
+  replacement configuration, not an independent recovery mechanism. Sources:
+  `https://www.jtekt.eu/eps-programming-settings/` and
+  `https://www.jtekt.eu/app/uploads/2025/06/Steering-tuning-data-sheet-1.pdf`.
+- **ABRITES RR031:** the manufacturer's **2026-09-01** announcement does
+  explicitly advertise JTEKT EPS recovery from Fail-Safe Mode. Its stated
+  target is supported **Renault/Dacia** modules associated with a UCH
+  “Dongle” condition; neither Toyota/F33 coverage nor recovery from this
+  CRC-valid application instruction fault is established. The shared JTEKT
+  supplier name does not transfer the method across controllers. Source:
+  `https://abrites.com/news/new-rr031-license-electronic-module-recovery-and-navigation-adaptation-for-renault-and-dacia`.
 - The existing adjacent RH850/P1M-E, EPS-telescope, and Sienna analysis
   repositories supplied no external F33 connector mapping in the bounded
   hardware/reference-file pass. Their working-CAN diagnostic tools require a
-  responsive target; they are not independent recovery executors.
+  responsive target; they are not independent recovery executors. A further
+  read-only inspection of the installed GTS+ DataSync database found only
+  hash/process/logging tables, not a cached repair-manual/EWD corpus. Searching
+  the readable installed UI/configuration files did not supply an exact-rack
+  service document either; this is a bounded source-location negative.
 
 An actionable documentation request is now part-specific: **for Toyota
 89650-33K90 / JTEKT JJ501-016640 / DENSO 210600-3912, identify every populated
