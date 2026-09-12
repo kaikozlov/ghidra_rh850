@@ -149,6 +149,16 @@ def main() -> int:
             else:
                 check(f"{region} TSS3 category-local D1/D2 session executor is recovered", True)
 
+        hybrid_catalog = json.loads(archive.read("catalogs/NA/397.json"))
+        hybrid_test = next(row for row in hybrid_catalog["active_tests"] if row["id"] == 1)
+        check("universal Hybrid direct Active Test exports exact live runtime-length probe",
+              hybrid_test["name"] == "Activate the Inverter Water Pump"
+              and hybrid_test["runtime_length_probe"]["kind"] == "read_data_by_identifier_value_length"
+              and hybrid_test["runtime_length_probe"]["selector"] == "0xCA"
+              and hybrid_test["runtime_length_probe"]["request"] == "222801"
+              and hybrid_test["runtime_length_probe"]["check"] == "62"
+              and hybrid_test["runtime_length_probe"]["response_prefix_length"] == 3)
+
         na = index["regions"]["NA"]
         camry = na["vehicles"]["12704"]
         check("Camry HV remains one Toyota DB vehicle, not the bundle profile",

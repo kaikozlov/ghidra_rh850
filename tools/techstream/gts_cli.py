@@ -877,12 +877,16 @@ def _direct_active_test_executor_plan(
 
     start_frame = frame(0x9D, bytes.fromhex("2fffff03"))
     stop_frame = frame(0x64, bytes.fromhex("2fffff00"))
+    length_frame = frame(0xCA, bytes.fromhex("22ffff"))
     if start_frame["receive_check"]["bytes"] != "6f" or stop_frame["receive_check"]["bytes"] != "6f":
         raise ValueError(f"category {category['category_id']}: Active-Test positive response is no longer 0x6F")
+    if length_frame["receive_check"]["bytes"] != "62":
+        raise ValueError(f"category {category['category_id']}: Active-Test DID-length probe positive response is no longer 0x62")
 
     start_prefix = bytearray.fromhex(start_frame["send"]["bytes"])
     stop_prefix = bytearray.fromhex(stop_frame["send"]["bytes"])
-    for buf in (start_prefix, stop_prefix):
+    length_request = bytearray.fromhex(length_frame["send"]["bytes"])
+    for buf in (start_prefix, stop_prefix, length_request):
         buf[1] = (did >> 8) & 0xFF
         buf[2] = did & 0xFF
     bit_start = selected["bit_start"]
@@ -921,7 +925,21 @@ def _direct_active_test_executor_plan(
             "symbol": "N",
             "source": "CCmdDataIdLengthList runtime support cache",
             "minimum_from_bit_geometry": minimum_length,
-            "boundary": "static DDB geometry does not prove the runtime cached Data-ID length",
+            "probe": {
+                "kind": "read_data_by_identifier_value_length",
+                "selector": "0xCA",
+                "base_frame": length_frame,
+                "materialized_request": length_request.hex(),
+                "positive_check": "62",
+                "response_prefix_length": 3,
+                "received_length_formula": "N = received UDS payload length - 3 (positive SID 0x62 + echoed DID)",
+                "decoded_value_formula": "N = len(ReadDataByIdentifier value bytes after stripping 0x62 || DID)",
+                "cache_population": (
+                    "CCommCachePlusP5::CheckSupportDid reads selector 0xCA, then appends DID and "
+                    "received_length-3 to the per-ECU CCmdDataIdLengthList cache"
+                ),
+            },
+            "boundary": "static DDB geometry gives only a minimum; the exact length is materialized from the live 0x22 response",
         },
         "bit_range": {"start": bit_start, "end": bit_end},
         "encoding": (
@@ -1672,6 +1690,11 @@ def cmd_active_test(args: argparse.Namespace) -> int:
             f"start={executor['start']['materialized_prefix']}+N\tstop={executor['stop']['materialized_prefix']}+N\t"
             f"runtime_length=N\tminimum={length['minimum_from_bit_geometry']}"
         )
+        probe = length["probe"]
+        print(
+            f"runtime-length-probe\tselector={probe['selector']}\tsend={probe['materialized_request']}\t"
+            f"expect={probe['positive_check']}\tformula=received_length-{probe['response_prefix_length']}"
+        )
         examples = executor.get("minimum_length_examples")
         if examples is not None:
             print(
@@ -1835,6 +1858,11 @@ def cmd_command(args: argparse.Namespace) -> int:
                 f"encoding_mode={executor['data_id_for_act']['encoding_mode']}\t"
                 f"start={executor['start']['materialized_prefix']}+N\tstop={executor['stop']['materialized_prefix']}+N\t"
                 f"runtime_length=N\tminimum={length['minimum_from_bit_geometry']}"
+            )
+            probe = length["probe"]
+            print(
+                f"runtime-length-probe\tselector={probe['selector']}\tsend={probe['materialized_request']}\t"
+                f"expect={probe['positive_check']}\tformula=received_length-{probe['response_prefix_length']}"
             )
             examples = executor.get("minimum_length_examples")
             if examples is not None:
@@ -2613,6 +2641,15 @@ def _compact_direct_active_test(
         "start_prefix": executor["start"]["materialized_prefix"],
         "stop_prefix": executor["stop"]["materialized_prefix"],
         "runtime_length_minimum": executor["runtime_data_length"]["minimum_from_bit_geometry"],
+        "runtime_length_probe": {
+            "kind": executor["runtime_data_length"]["probe"]["kind"],
+            "selector": executor["runtime_data_length"]["probe"]["selector"],
+            "request": executor["runtime_data_length"]["probe"]["materialized_request"],
+            "check": executor["runtime_data_length"]["probe"]["positive_check"],
+            "response_prefix_length": executor["runtime_data_length"]["probe"]["response_prefix_length"],
+            "received_length_formula": executor["runtime_data_length"]["probe"]["received_length_formula"],
+            "decoded_value_formula": executor["runtime_data_length"]["probe"]["decoded_value_formula"],
+        },
         "minimum_examples": executor.get("minimum_length_examples"),
         "initial_read": _direct_initial_read_plan(selected, init_frame),
         "monitor_key": monitor.get("monitor_key"),

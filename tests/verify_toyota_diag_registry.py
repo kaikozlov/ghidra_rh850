@@ -224,6 +224,10 @@ def main() -> int:
           and hv_test["did"] == 0x2801
           and hv_test["start_prefix"] == "2f280103"
           and hv_test["stop_prefix"] == "2f280100"
+          and hv_test["runtime_length_probe"]["kind"] == "read_data_by_identifier_value_length"
+          and hv_test["runtime_length_probe"]["request"] == "222801"
+          and hv_test["runtime_length_probe"]["check"] == "62"
+          and hv_test["runtime_length_probe"]["response_prefix_length"] == 3
           and hv_test["execution"] == "plan_only")
 
     frc_test = next(row for row in actual["catalogs"]["498"]["active_tests"] if row["id"] == 0xA429)

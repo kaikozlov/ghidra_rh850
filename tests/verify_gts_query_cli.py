@@ -198,6 +198,11 @@ check(
     and hybrid_init_selected["executor"]["start"]["materialized_prefix"] == "2f280103"
     and hybrid_init_selected["executor"]["stop"]["materialized_prefix"] == "2f280100"
     and hybrid_init_selected["executor"]["runtime_data_length"]["minimum_from_bit_geometry"] == 2
+    and hybrid_init_selected["executor"]["runtime_data_length"]["probe"]["kind"] == "read_data_by_identifier_value_length"
+    and hybrid_init_selected["executor"]["runtime_data_length"]["probe"]["selector"] == "0xCA"
+    and hybrid_init_selected["executor"]["runtime_data_length"]["probe"]["materialized_request"] == "222801"
+    and hybrid_init_selected["executor"]["runtime_data_length"]["probe"]["positive_check"] == "62"
+    and hybrid_init_selected["executor"]["runtime_data_length"]["probe"]["response_prefix_length"] == 3
     and hybrid_init_selected["executor"]["minimum_length_examples"] == {
         "raw_0": "2f2801030000",
         "raw_1": "2f2801030001",
