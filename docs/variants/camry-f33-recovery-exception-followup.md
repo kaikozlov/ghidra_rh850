@@ -1069,3 +1069,14 @@ not Unified; the former builds suppressed-response default-session requests,
 and the latter builds communication-control requests. Their names and presence
 in a shared library do not by themselves establish the selected Unified P5
 preparation's target-specific state-restoring exit.
+
+
+The adjacent pre-transition helpers were also checked to avoid mistaking the
+optional F181 wrapper for the whole preparation path: `100019A0` builds
+TesterPresent transmissions, and `10002980` builds CommunicationControl
+transmissions with positive-response suppression. Both use the J2534
+`WriteMsgs` import rather than a mandatory EPS response matcher. The caller
+at `10002115..10002227` performs this network preparation and the optional
+identity wrapper before the final recognized-gateway loop. This supports the
+local host-flow ordering only; it neither proves successful gateway preparation
+on the vehicle nor permits borrowing an unverified abort procedure.
