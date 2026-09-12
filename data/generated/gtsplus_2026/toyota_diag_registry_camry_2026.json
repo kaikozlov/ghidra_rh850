@@ -5775,7 +5775,7 @@
         },
         {
           "execution": "read_only",
-          "kind": "p5_rob_code_inventory",
+          "kind": "p5_rob",
           "plugin_binding": {
             "binding_category_id": 372,
             "dll": "GetRoBP5_DT.dll",
@@ -5783,40 +5783,114 @@
             "requested_category_id": 372,
             "role": 160
           },
-          "requests": [
+          "protocols": [
             {
-              "check": "eb01",
-              "comm_set": 1,
-              "mask": "ffff",
-              "name": "behavior_codes_01",
-              "receive_timeout": 1020,
-              "resolved": true,
-              "retry_count": 1,
-              "selector": "0xF3",
-              "send": "ab01",
-              "session_requirement": "extended"
+              "frames": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb02",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_frames",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF4",
+                "send": "ab020000",
+                "session_requirement": "extended"
+              },
+              "inventory": {
+                "check": "eb01",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_codes",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF3",
+                "send": "ab01",
+                "session_requirement": "extended"
+              },
+              "record": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb03",
+                "comm_set": 1,
+                "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+                "mask": "ffff",
+                "name": "behavior_record",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF5",
+                "send": "ab0300000000",
+                "session_requirement": "extended"
+              }
             },
             {
-              "check": "eb11",
-              "comm_set": 1,
-              "mask": "ffff",
-              "name": "behavior_codes_11",
-              "receive_timeout": 1020,
-              "resolved": true,
-              "retry_count": 1,
-              "selector": "0xF3",
-              "send": "ab11",
-              "session_requirement": "extended"
+              "frames": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb12",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_frames",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF4",
+                "send": "ab120000",
+                "session_requirement": "extended"
+              },
+              "inventory": {
+                "check": "eb11",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_codes",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF3",
+                "send": "ab11",
+                "session_requirement": "extended"
+              },
+              "record": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb13",
+                "comm_set": 1,
+                "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+                "mask": "ffff",
+                "name": "behavior_record",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF5",
+                "send": "ab1300000000",
+                "session_requirement": "extended"
+              }
             }
           ],
           "response_model": {
-            "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
-            "element_width": 2,
+            "boundary": "raw RoB inventory/frame/body transport is exact; behavior-record signal conversion/presentation remains separate",
             "endianness": "big",
-            "layout": "EB | subfunction | repeated(behavior_code:be16)",
-            "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
-            "payload_offset": 2,
-            "positive_prefix_matches_request_subfunction": true
+            "frames": {
+              "echo_validation": "current host does not validate behavior_echo before parsing",
+              "layout": "EB | frame_subfunction | behavior_echo:be16 | repeated(frame_id:be16)",
+              "parser": "FUN_100047A0 parses BE16 frame IDs from offset 4, sorts them, and removes duplicates",
+              "payload_offset": 4
+            },
+            "inventory": {
+              "layout": "EB | inventory_subfunction | repeated(behavior_code:be16)",
+              "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+              "payload_offset": 2
+            },
+            "record": {
+              "block_count_offset": 6,
+              "block_layout": "DID:be16 | length | data[length]",
+              "count_zero_policy": "FUN_10002A60 derives block count by scanning valid blocks from offset 7 to response end",
+              "echo_validation": "current host does not validate behavior_echo/frame_echo before parsing",
+              "layout": "EB | record_subfunction | behavior_echo:be16 | frame_echo:be16 | block_count:u8 | blocks",
+              "length_rule": "DID 0x6000..0x6FFF uses length:be32; every other DID uses length:u8",
+              "parser": "FUN_100016F0 parses unique DID blocks then passes them to behavior-data conversion",
+              "payload_offset": 6
+            }
           },
           "role": 160
         },
@@ -119006,7 +119080,7 @@
         },
         {
           "execution": "read_only",
-          "kind": "p5_rob_code_inventory",
+          "kind": "p5_rob",
           "plugin_binding": {
             "binding_category_id": 397,
             "dll": "GetRoBP5_DT.dll",
@@ -119014,40 +119088,114 @@
             "requested_category_id": 397,
             "role": 160
           },
-          "requests": [
+          "protocols": [
             {
-              "check": "eb01",
-              "comm_set": 1,
-              "mask": "ffff",
-              "name": "behavior_codes_01",
-              "receive_timeout": 1020,
-              "resolved": true,
-              "retry_count": 1,
-              "selector": "0xF3",
-              "send": "ab01",
-              "session_requirement": "extended"
+              "frames": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb02",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_frames",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF4",
+                "send": "ab020000",
+                "session_requirement": "extended"
+              },
+              "inventory": {
+                "check": "eb01",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_codes",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF3",
+                "send": "ab01",
+                "session_requirement": "extended"
+              },
+              "record": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb03",
+                "comm_set": 1,
+                "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+                "mask": "ffff",
+                "name": "behavior_record",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF5",
+                "send": "ab0300000000",
+                "session_requirement": "extended"
+              }
             },
             {
-              "check": "eb11",
-              "comm_set": 1,
-              "mask": "ffff",
-              "name": "behavior_codes_11",
-              "receive_timeout": 1020,
-              "resolved": true,
-              "retry_count": 1,
-              "selector": "0xF3",
-              "send": "ab11",
-              "session_requirement": "extended"
+              "frames": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb12",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_frames",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF4",
+                "send": "ab120000",
+                "session_requirement": "extended"
+              },
+              "inventory": {
+                "check": "eb11",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_codes",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF3",
+                "send": "ab11",
+                "session_requirement": "extended"
+              },
+              "record": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb13",
+                "comm_set": 1,
+                "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+                "mask": "ffff",
+                "name": "behavior_record",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF5",
+                "send": "ab1300000000",
+                "session_requirement": "extended"
+              }
             }
           ],
           "response_model": {
-            "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
-            "element_width": 2,
+            "boundary": "raw RoB inventory/frame/body transport is exact; behavior-record signal conversion/presentation remains separate",
             "endianness": "big",
-            "layout": "EB | subfunction | repeated(behavior_code:be16)",
-            "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
-            "payload_offset": 2,
-            "positive_prefix_matches_request_subfunction": true
+            "frames": {
+              "echo_validation": "current host does not validate behavior_echo before parsing",
+              "layout": "EB | frame_subfunction | behavior_echo:be16 | repeated(frame_id:be16)",
+              "parser": "FUN_100047A0 parses BE16 frame IDs from offset 4, sorts them, and removes duplicates",
+              "payload_offset": 4
+            },
+            "inventory": {
+              "layout": "EB | inventory_subfunction | repeated(behavior_code:be16)",
+              "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+              "payload_offset": 2
+            },
+            "record": {
+              "block_count_offset": 6,
+              "block_layout": "DID:be16 | length | data[length]",
+              "count_zero_policy": "FUN_10002A60 derives block count by scanning valid blocks from offset 7 to response end",
+              "echo_validation": "current host does not validate behavior_echo/frame_echo before parsing",
+              "layout": "EB | record_subfunction | behavior_echo:be16 | frame_echo:be16 | block_count:u8 | blocks",
+              "length_rule": "DID 0x6000..0x6FFF uses length:be32; every other DID uses length:u8",
+              "parser": "FUN_100016F0 parses unique DID blocks then passes them to behavior-data conversion",
+              "payload_offset": 6
+            }
           },
           "role": 160
         },
@@ -177875,7 +178023,7 @@
         },
         {
           "execution": "read_only",
-          "kind": "p5_rob_code_inventory",
+          "kind": "p5_rob",
           "plugin_binding": {
             "binding_category_id": 398,
             "dll": "GetRoBP5_DT.dll",
@@ -177883,40 +178031,114 @@
             "requested_category_id": 398,
             "role": 160
           },
-          "requests": [
+          "protocols": [
             {
-              "check": "eb01",
-              "comm_set": 1,
-              "mask": "ffff",
-              "name": "behavior_codes_01",
-              "receive_timeout": 1020,
-              "resolved": true,
-              "retry_count": 1,
-              "selector": "0xF3",
-              "send": "ab01",
-              "session_requirement": "extended"
+              "frames": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb02",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_frames",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF4",
+                "send": "ab020000",
+                "session_requirement": "extended"
+              },
+              "inventory": {
+                "check": "eb01",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_codes",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF3",
+                "send": "ab01",
+                "session_requirement": "extended"
+              },
+              "record": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb03",
+                "comm_set": 1,
+                "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+                "mask": "ffff",
+                "name": "behavior_record",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF5",
+                "send": "ab0300000000",
+                "session_requirement": "extended"
+              }
             },
             {
-              "check": "eb11",
-              "comm_set": 1,
-              "mask": "ffff",
-              "name": "behavior_codes_11",
-              "receive_timeout": 1020,
-              "resolved": true,
-              "retry_count": 1,
-              "selector": "0xF3",
-              "send": "ab11",
-              "session_requirement": "extended"
+              "frames": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb12",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_frames",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF4",
+                "send": "ab120000",
+                "session_requirement": "extended"
+              },
+              "inventory": {
+                "check": "eb11",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_codes",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF3",
+                "send": "ab11",
+                "session_requirement": "extended"
+              },
+              "record": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb13",
+                "comm_set": 1,
+                "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+                "mask": "ffff",
+                "name": "behavior_record",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF5",
+                "send": "ab1300000000",
+                "session_requirement": "extended"
+              }
             }
           ],
           "response_model": {
-            "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
-            "element_width": 2,
+            "boundary": "raw RoB inventory/frame/body transport is exact; behavior-record signal conversion/presentation remains separate",
             "endianness": "big",
-            "layout": "EB | subfunction | repeated(behavior_code:be16)",
-            "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
-            "payload_offset": 2,
-            "positive_prefix_matches_request_subfunction": true
+            "frames": {
+              "echo_validation": "current host does not validate behavior_echo before parsing",
+              "layout": "EB | frame_subfunction | behavior_echo:be16 | repeated(frame_id:be16)",
+              "parser": "FUN_100047A0 parses BE16 frame IDs from offset 4, sorts them, and removes duplicates",
+              "payload_offset": 4
+            },
+            "inventory": {
+              "layout": "EB | inventory_subfunction | repeated(behavior_code:be16)",
+              "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+              "payload_offset": 2
+            },
+            "record": {
+              "block_count_offset": 6,
+              "block_layout": "DID:be16 | length | data[length]",
+              "count_zero_policy": "FUN_10002A60 derives block count by scanning valid blocks from offset 7 to response end",
+              "echo_validation": "current host does not validate behavior_echo/frame_echo before parsing",
+              "layout": "EB | record_subfunction | behavior_echo:be16 | frame_echo:be16 | block_count:u8 | blocks",
+              "length_rule": "DID 0x6000..0x6FFF uses length:be32; every other DID uses length:u8",
+              "parser": "FUN_100016F0 parses unique DID blocks then passes them to behavior-data conversion",
+              "payload_offset": 6
+            }
           },
           "role": 160
         },
@@ -217503,7 +217725,7 @@
         },
         {
           "execution": "read_only",
-          "kind": "p5_rob_code_inventory",
+          "kind": "p5_rob",
           "plugin_binding": {
             "binding_category_id": 405,
             "dll": "GetRoBP5_DT.dll",
@@ -217511,40 +217733,114 @@
             "requested_category_id": 405,
             "role": 160
           },
-          "requests": [
+          "protocols": [
             {
-              "check": "eb01",
-              "comm_set": 1,
-              "mask": "ffff",
-              "name": "behavior_codes_01",
-              "receive_timeout": 1020,
-              "resolved": true,
-              "retry_count": 1,
-              "selector": "0xF3",
-              "send": "ab01",
-              "session_requirement": "extended"
+              "frames": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb02",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_frames",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF4",
+                "send": "ab020000",
+                "session_requirement": "extended"
+              },
+              "inventory": {
+                "check": "eb01",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_codes",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF3",
+                "send": "ab01",
+                "session_requirement": "extended"
+              },
+              "record": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb03",
+                "comm_set": 1,
+                "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+                "mask": "ffff",
+                "name": "behavior_record",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF5",
+                "send": "ab0300000000",
+                "session_requirement": "extended"
+              }
             },
             {
-              "check": "eb11",
-              "comm_set": 1,
-              "mask": "ffff",
-              "name": "behavior_codes_11",
-              "receive_timeout": 1020,
-              "resolved": true,
-              "retry_count": 1,
-              "selector": "0xF3",
-              "send": "ab11",
-              "session_requirement": "extended"
+              "frames": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb12",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_frames",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF4",
+                "send": "ab120000",
+                "session_requirement": "extended"
+              },
+              "inventory": {
+                "check": "eb11",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_codes",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF3",
+                "send": "ab11",
+                "session_requirement": "extended"
+              },
+              "record": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb13",
+                "comm_set": 1,
+                "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+                "mask": "ffff",
+                "name": "behavior_record",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF5",
+                "send": "ab1300000000",
+                "session_requirement": "extended"
+              }
             }
           ],
           "response_model": {
-            "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
-            "element_width": 2,
+            "boundary": "raw RoB inventory/frame/body transport is exact; behavior-record signal conversion/presentation remains separate",
             "endianness": "big",
-            "layout": "EB | subfunction | repeated(behavior_code:be16)",
-            "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
-            "payload_offset": 2,
-            "positive_prefix_matches_request_subfunction": true
+            "frames": {
+              "echo_validation": "current host does not validate behavior_echo before parsing",
+              "layout": "EB | frame_subfunction | behavior_echo:be16 | repeated(frame_id:be16)",
+              "parser": "FUN_100047A0 parses BE16 frame IDs from offset 4, sorts them, and removes duplicates",
+              "payload_offset": 4
+            },
+            "inventory": {
+              "layout": "EB | inventory_subfunction | repeated(behavior_code:be16)",
+              "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+              "payload_offset": 2
+            },
+            "record": {
+              "block_count_offset": 6,
+              "block_layout": "DID:be16 | length | data[length]",
+              "count_zero_policy": "FUN_10002A60 derives block count by scanning valid blocks from offset 7 to response end",
+              "echo_validation": "current host does not validate behavior_echo/frame_echo before parsing",
+              "layout": "EB | record_subfunction | behavior_echo:be16 | frame_echo:be16 | block_count:u8 | blocks",
+              "length_rule": "DID 0x6000..0x6FFF uses length:be32; every other DID uses length:u8",
+              "parser": "FUN_100016F0 parses unique DID blocks then passes them to behavior-data conversion",
+              "payload_offset": 6
+            }
           },
           "role": 160
         },
@@ -227838,7 +228134,7 @@
         },
         {
           "execution": "read_only",
-          "kind": "p5_rob_code_inventory",
+          "kind": "p5_rob",
           "plugin_binding": {
             "binding_category_id": 435,
             "dll": "GetRoBP5_DT.dll",
@@ -227846,40 +228142,114 @@
             "requested_category_id": 435,
             "role": 160
           },
-          "requests": [
+          "protocols": [
             {
-              "check": "eb01",
-              "comm_set": 1,
-              "mask": "ffff",
-              "name": "behavior_codes_01",
-              "receive_timeout": 1020,
-              "resolved": true,
-              "retry_count": 1,
-              "selector": "0xF3",
-              "send": "ab01",
-              "session_requirement": "extended"
+              "frames": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb02",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_frames",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF4",
+                "send": "ab020000",
+                "session_requirement": "extended"
+              },
+              "inventory": {
+                "check": "eb01",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_codes",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF3",
+                "send": "ab01",
+                "session_requirement": "extended"
+              },
+              "record": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb03",
+                "comm_set": 1,
+                "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+                "mask": "ffff",
+                "name": "behavior_record",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF5",
+                "send": "ab0300000000",
+                "session_requirement": "extended"
+              }
             },
             {
-              "check": "eb11",
-              "comm_set": 1,
-              "mask": "ffff",
-              "name": "behavior_codes_11",
-              "receive_timeout": 1020,
-              "resolved": true,
-              "retry_count": 1,
-              "selector": "0xF3",
-              "send": "ab11",
-              "session_requirement": "extended"
+              "frames": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb12",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_frames",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF4",
+                "send": "ab120000",
+                "session_requirement": "extended"
+              },
+              "inventory": {
+                "check": "eb11",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_codes",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF3",
+                "send": "ab11",
+                "session_requirement": "extended"
+              },
+              "record": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb13",
+                "comm_set": 1,
+                "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+                "mask": "ffff",
+                "name": "behavior_record",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF5",
+                "send": "ab1300000000",
+                "session_requirement": "extended"
+              }
             }
           ],
           "response_model": {
-            "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
-            "element_width": 2,
+            "boundary": "raw RoB inventory/frame/body transport is exact; behavior-record signal conversion/presentation remains separate",
             "endianness": "big",
-            "layout": "EB | subfunction | repeated(behavior_code:be16)",
-            "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
-            "payload_offset": 2,
-            "positive_prefix_matches_request_subfunction": true
+            "frames": {
+              "echo_validation": "current host does not validate behavior_echo before parsing",
+              "layout": "EB | frame_subfunction | behavior_echo:be16 | repeated(frame_id:be16)",
+              "parser": "FUN_100047A0 parses BE16 frame IDs from offset 4, sorts them, and removes duplicates",
+              "payload_offset": 4
+            },
+            "inventory": {
+              "layout": "EB | inventory_subfunction | repeated(behavior_code:be16)",
+              "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+              "payload_offset": 2
+            },
+            "record": {
+              "block_count_offset": 6,
+              "block_layout": "DID:be16 | length | data[length]",
+              "count_zero_policy": "FUN_10002A60 derives block count by scanning valid blocks from offset 7 to response end",
+              "echo_validation": "current host does not validate behavior_echo/frame_echo before parsing",
+              "layout": "EB | record_subfunction | behavior_echo:be16 | frame_echo:be16 | block_count:u8 | blocks",
+              "length_rule": "DID 0x6000..0x6FFF uses length:be32; every other DID uses length:u8",
+              "parser": "FUN_100016F0 parses unique DID blocks then passes them to behavior-data conversion",
+              "payload_offset": 6
+            }
           },
           "role": 160
         },
@@ -255179,7 +255549,7 @@
         },
         {
           "execution": "read_only",
-          "kind": "p5_rob_code_inventory",
+          "kind": "p5_rob",
           "plugin_binding": {
             "binding_category_id": 450,
             "dll": "GetRoBP5_DT.dll",
@@ -255187,40 +255557,114 @@
             "requested_category_id": 450,
             "role": 160
           },
-          "requests": [
+          "protocols": [
             {
-              "check": "eb01",
-              "comm_set": 1,
-              "mask": "ffff",
-              "name": "behavior_codes_01",
-              "receive_timeout": 1020,
-              "resolved": true,
-              "retry_count": 1,
-              "selector": "0xF3",
-              "send": "ab01",
-              "session_requirement": "extended"
+              "frames": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb02",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_frames",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF4",
+                "send": "ab020000",
+                "session_requirement": "extended"
+              },
+              "inventory": {
+                "check": "eb01",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_codes",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF3",
+                "send": "ab01",
+                "session_requirement": "extended"
+              },
+              "record": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb03",
+                "comm_set": 1,
+                "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+                "mask": "ffff",
+                "name": "behavior_record",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF5",
+                "send": "ab0300000000",
+                "session_requirement": "extended"
+              }
             },
             {
-              "check": "eb11",
-              "comm_set": 1,
-              "mask": "ffff",
-              "name": "behavior_codes_11",
-              "receive_timeout": 1020,
-              "resolved": true,
-              "retry_count": 1,
-              "selector": "0xF3",
-              "send": "ab11",
-              "session_requirement": "extended"
+              "frames": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb12",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_frames",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF4",
+                "send": "ab120000",
+                "session_requirement": "extended"
+              },
+              "inventory": {
+                "check": "eb11",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_codes",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF3",
+                "send": "ab11",
+                "session_requirement": "extended"
+              },
+              "record": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb13",
+                "comm_set": 1,
+                "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+                "mask": "ffff",
+                "name": "behavior_record",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF5",
+                "send": "ab1300000000",
+                "session_requirement": "extended"
+              }
             }
           ],
           "response_model": {
-            "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
-            "element_width": 2,
+            "boundary": "raw RoB inventory/frame/body transport is exact; behavior-record signal conversion/presentation remains separate",
             "endianness": "big",
-            "layout": "EB | subfunction | repeated(behavior_code:be16)",
-            "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
-            "payload_offset": 2,
-            "positive_prefix_matches_request_subfunction": true
+            "frames": {
+              "echo_validation": "current host does not validate behavior_echo before parsing",
+              "layout": "EB | frame_subfunction | behavior_echo:be16 | repeated(frame_id:be16)",
+              "parser": "FUN_100047A0 parses BE16 frame IDs from offset 4, sorts them, and removes duplicates",
+              "payload_offset": 4
+            },
+            "inventory": {
+              "layout": "EB | inventory_subfunction | repeated(behavior_code:be16)",
+              "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+              "payload_offset": 2
+            },
+            "record": {
+              "block_count_offset": 6,
+              "block_layout": "DID:be16 | length | data[length]",
+              "count_zero_policy": "FUN_10002A60 derives block count by scanning valid blocks from offset 7 to response end",
+              "echo_validation": "current host does not validate behavior_echo/frame_echo before parsing",
+              "layout": "EB | record_subfunction | behavior_echo:be16 | frame_echo:be16 | block_count:u8 | blocks",
+              "length_rule": "DID 0x6000..0x6FFF uses length:be32; every other DID uses length:u8",
+              "parser": "FUN_100016F0 parses unique DID blocks then passes them to behavior-data conversion",
+              "payload_offset": 6
+            }
           },
           "role": 160
         },
@@ -271965,7 +272409,7 @@
         },
         {
           "execution": "read_only",
-          "kind": "p5_rob_code_inventory",
+          "kind": "p5_rob",
           "plugin_binding": {
             "binding_category_id": 498,
             "dll": "GetRoBP5_DT.dll",
@@ -271973,40 +272417,114 @@
             "requested_category_id": 498,
             "role": 160
           },
-          "requests": [
+          "protocols": [
             {
-              "check": "eb01",
-              "comm_set": 1,
-              "mask": "ffff",
-              "name": "behavior_codes_01",
-              "receive_timeout": 1020,
-              "resolved": true,
-              "retry_count": 1,
-              "selector": "0xF3",
-              "send": "ab01",
-              "session_requirement": "extended"
+              "frames": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb02",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_frames",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF4",
+                "send": "ab020000",
+                "session_requirement": "extended"
+              },
+              "inventory": {
+                "check": "eb01",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_codes",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF3",
+                "send": "ab01",
+                "session_requirement": "extended"
+              },
+              "record": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb03",
+                "comm_set": 1,
+                "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+                "mask": "ffff",
+                "name": "behavior_record",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF5",
+                "send": "ab0300000000",
+                "session_requirement": "extended"
+              }
             },
             {
-              "check": "eb11",
-              "comm_set": 1,
-              "mask": "ffff",
-              "name": "behavior_codes_11",
-              "receive_timeout": 1020,
-              "resolved": true,
-              "retry_count": 1,
-              "selector": "0xF3",
-              "send": "ab11",
-              "session_requirement": "extended"
+              "frames": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb12",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_frames",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF4",
+                "send": "ab120000",
+                "session_requirement": "extended"
+              },
+              "inventory": {
+                "check": "eb11",
+                "comm_set": 1,
+                "mask": "ffff",
+                "name": "behavior_codes",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF3",
+                "send": "ab11",
+                "session_requirement": "extended"
+              },
+              "record": {
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "check": "eb13",
+                "comm_set": 1,
+                "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+                "mask": "ffff",
+                "name": "behavior_record",
+                "receive_timeout": 1020,
+                "resolved": true,
+                "retry_count": 1,
+                "selector": "0xF5",
+                "send": "ab1300000000",
+                "session_requirement": "extended"
+              }
             }
           ],
           "response_model": {
-            "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
-            "element_width": 2,
+            "boundary": "raw RoB inventory/frame/body transport is exact; behavior-record signal conversion/presentation remains separate",
             "endianness": "big",
-            "layout": "EB | subfunction | repeated(behavior_code:be16)",
-            "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
-            "payload_offset": 2,
-            "positive_prefix_matches_request_subfunction": true
+            "frames": {
+              "echo_validation": "current host does not validate behavior_echo before parsing",
+              "layout": "EB | frame_subfunction | behavior_echo:be16 | repeated(frame_id:be16)",
+              "parser": "FUN_100047A0 parses BE16 frame IDs from offset 4, sorts them, and removes duplicates",
+              "payload_offset": 4
+            },
+            "inventory": {
+              "layout": "EB | inventory_subfunction | repeated(behavior_code:be16)",
+              "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+              "payload_offset": 2
+            },
+            "record": {
+              "block_count_offset": 6,
+              "block_layout": "DID:be16 | length | data[length]",
+              "count_zero_policy": "FUN_10002A60 derives block count by scanning valid blocks from offset 7 to response end",
+              "echo_validation": "current host does not validate behavior_echo/frame_echo before parsing",
+              "layout": "EB | record_subfunction | behavior_echo:be16 | frame_echo:be16 | block_count:u8 | blocks",
+              "length_rule": "DID 0x6000..0x6FFF uses length:be32; every other DID uses length:u8",
+              "parser": "FUN_100016F0 parses unique DID blocks then passes them to behavior-data conversion",
+              "payload_offset": 6
+            }
           },
           "role": 160
         },

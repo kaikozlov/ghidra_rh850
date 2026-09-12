@@ -158,12 +158,18 @@ def main() -> int:
               and hybrid_ffd["plugin_binding"]["dll"] == "GetEachFrzFrmDatP5_DT.dll"
               and hybrid_ffd["requests"][0]["send"] == "1904000000ff"
               and hybrid_ffd["requests"][0]["check"] == "5904")
-        hybrid_rob = next(row for row in hybrid_catalog["commands"] if row["kind"] == "p5_rob_code_inventory")
-        check("universal Hybrid catalog exports exact P5 RoB behavior-code inventory frames",
+        hybrid_rob = next(row for row in hybrid_catalog["commands"] if row["kind"] == "p5_rob")
+        check("universal Hybrid catalog exports exact P5 RoB inventory/frame/record triplets",
               hybrid_rob["role"] == 0xA0
               and hybrid_rob["plugin_binding"]["binding_category_id"] == 397
               and hybrid_rob["plugin_binding"]["exact_category_binding"] is True
-              and [(row["send"], row["check"]) for row in hybrid_rob["requests"]] == [("ab01", "eb01"), ("ab11", "eb11")])
+              and [[phase["send"] for phase in (protocol["inventory"], protocol["frames"], protocol["record"])]
+                   for protocol in hybrid_rob["protocols"]] == [
+                      ["ab01", "ab020000", "ab0300000000"],
+                      ["ab11", "ab120000", "ab1300000000"],
+                   ]
+              and hybrid_rob["response_model"]["frames"]["payload_offset"] == 4
+              and hybrid_rob["response_model"]["record"]["payload_offset"] == 6)
         check("universal Hybrid direct Active Test exports exact live runtime-length probe",
               hybrid_test["name"] == "Activate the Inverter Water Pump"
               and hybrid_test["runtime_length_probe"]["kind"] == "read_data_by_identifier_value_length"

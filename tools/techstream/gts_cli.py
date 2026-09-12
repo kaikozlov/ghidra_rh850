@@ -3105,26 +3105,68 @@ def _registry_command_rows(
     if (mode == "p5-standard" and rob_binding is not None
             and rob_binding["exact_category_binding"] is True
             and rob_binding["dll"] == "GetRoBP5_DT.dll"):
-        rob_frames = _master_frame_rows(parser, master, category_id, 0xF3)
-        rob_shape = sorted((row["send"]["bytes"], row["receive_check"]["bytes"]) for row in rob_frames)
-        if rob_shape == [("ab01", "eb01"), ("ab11", "eb11")]:
-            rob_frames = sorted(rob_frames, key=lambda row: row["send"]["bytes"])
+        by_selector = {
+            selector: _master_frame_rows(parser, master, category_id, selector)
+            for selector in (0xF3, 0xF4, 0xF5)
+        }
+
+        def exact_frame(selector: int, send: str, check: str) -> dict[str, Any] | None:
+            matches = [
+                row for row in by_selector[selector]
+                if row["send"]["bytes"] == send and row["receive_check"]["bytes"] == check
+            ]
+            return matches[0] if len(matches) == 1 else None
+
+        protocols = []
+        for base in (0x01, 0x11):
+            inventory = exact_frame(0xF3, f"ab{base:02x}", f"eb{base:02x}")
+            frames = exact_frame(0xF4, f"ab{base + 1:02x}0000", f"eb{base + 1:02x}")
+            record = exact_frame(0xF5, f"ab{base + 2:02x}00000000", f"eb{base + 2:02x}")
+            if inventory is None or frames is None or record is None:
+                protocols = []
+                break
+            protocols.append({
+                "inventory": _registry_request_from_frame(inventory, "behavior_codes"),
+                "frames": {
+                    **_registry_request_from_frame(frames, "behavior_frames"),
+                    "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                },
+                "record": {
+                    **_registry_request_from_frame(record, "behavior_record"),
+                    "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                    "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+                },
+            })
+        if len(protocols) == 2:
             rows.append({
                 "role": 0xA0,
-                "kind": "p5_rob_code_inventory",
+                "kind": "p5_rob",
                 "plugin_binding": rob_binding,
-                "requests": [
-                    _registry_request_from_frame(row, f"behavior_codes_{row['send']['bytes'][2:]}")
-                    for row in rob_frames
-                ],
+                "protocols": protocols,
                 "response_model": {
-                    "positive_prefix_matches_request_subfunction": True,
-                    "layout": "EB | subfunction | repeated(behavior_code:be16)",
-                    "payload_offset": 2,
-                    "element_width": 2,
+                    "inventory": {
+                        "layout": "EB | inventory_subfunction | repeated(behavior_code:be16)",
+                        "payload_offset": 2,
+                        "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
+                    },
+                    "frames": {
+                        "layout": "EB | frame_subfunction | behavior_echo:be16 | repeated(frame_id:be16)",
+                        "payload_offset": 4,
+                        "parser": "FUN_100047A0 parses BE16 frame IDs from offset 4, sorts them, and removes duplicates",
+                        "echo_validation": "current host does not validate behavior_echo before parsing",
+                    },
+                    "record": {
+                        "layout": "EB | record_subfunction | behavior_echo:be16 | frame_echo:be16 | block_count:u8 | blocks",
+                        "payload_offset": 6,
+                        "block_count_offset": 6,
+                        "count_zero_policy": "FUN_10002A60 derives block count by scanning valid blocks from offset 7 to response end",
+                        "block_layout": "DID:be16 | length | data[length]",
+                        "length_rule": "DID 0x6000..0x6FFF uses length:be32; every other DID uses length:u8",
+                        "echo_validation": "current host does not validate behavior_echo/frame_echo before parsing",
+                        "parser": "FUN_100016F0 parses unique DID blocks then passes them to behavior-data conversion",
+                    },
                     "endianness": "big",
-                    "parser": "GetRoBP5_DT FUN_100010C0 computes (received_length-2)/2 and appends each BE16 word",
-                    "boundary": "behavior-code inventory only; per-behavior record-body acquisition remains a separate second-stage protocol",
+                    "boundary": "raw RoB inventory/frame/body transport is exact; behavior-record signal conversion/presentation remains separate",
                 },
                 "execution": "read_only",
             })

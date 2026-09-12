@@ -270,13 +270,19 @@ def main() -> int:
           and hv_ffd["requests"][0]["check"] == "5904"
           and hv_ffd["execution"] == "read_only")
 
-    hv_rob = next(row for row in hv["commands"] if row["kind"] == "p5_rob_code_inventory")
-    check("ordinary P5 RoB behavior-code inventory is exported only from exact role-0xA0 binding",
+    hv_rob = next(row for row in hv["commands"] if row["kind"] == "p5_rob")
+    check("ordinary P5 RoB transport is exported only from exact role-0xA0 binding",
           hv_rob["role"] == 0xA0
           and hv_rob["plugin_binding"]["binding_category_id"] == 397
           and hv_rob["plugin_binding"]["exact_category_binding"] is True
           and hv_rob["plugin_binding"]["dll"] == "GetRoBP5_DT.dll"
-          and [(row["send"], row["check"]) for row in hv_rob["requests"]] == [("ab01", "eb01"), ("ab11", "eb11")]
+          and [[(phase["send"], phase["check"]) for phase in (protocol["inventory"], protocol["frames"], protocol["record"])]
+               for protocol in hv_rob["protocols"]] == [
+                  [("ab01", "eb01"), ("ab020000", "eb02"), ("ab0300000000", "eb03")],
+                  [("ab11", "eb11"), ("ab120000", "eb12"), ("ab1300000000", "eb13")],
+               ]
+          and hv_rob["response_model"]["record"]["count_zero_policy"].startswith("FUN_10002A60")
+          and hv_rob["response_model"]["record"]["length_rule"].startswith("DID 0x6000..0x6FFF")
           and hv_rob["execution"] == "read_only")
 
     session = profile["session_control"]
