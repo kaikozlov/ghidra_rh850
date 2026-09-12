@@ -371,9 +371,10 @@ def rob_rows(db: Any, strings: Any, source: str, *, include_signal_info: bool = 
     """Decode current ordinary-P5 RoB behavior names and DID-scoped signal schemas.
 
     Type-88 rows are selected by returned DID at runtime. Type-90 supplies the local
-    support mode; type-89 is represented as an explicit unresolved cross-DID key when
-    present. Dynamic LSB table-64 membership is exported rather than silently applying
-    V18-only behavior to current GTS+.
+    support mode; type-89 is represented as an explicit cross-DID key when present.
+    Type-64 presence is exported explicitly. The same-release unprotected 2026
+    CommandCommon body closes ChangeSignalLSB; ordinary current-P5 RoB catalogs in
+    NA/EU/JP do not carry type 64, so their base physical coefficients are final.
     """
     behavior = behavior_rows(db, strings, source)
     signal_section = db.sections.get(88)
@@ -390,9 +391,9 @@ def rob_rows(db: Any, strings: Any, source: str, *, include_signal_info: bool = 
     dynamic_keys: set[int] = set()
     section64 = db.sections.get(64)
     if section64 is not None:
-        # Current table-64 key position is intentionally not named here until its
-        # current consumer is independently pinned. Presence alone means the runtime
-        # ChangeSignalLSB path may alter base physical coefficients.
+        # Same-release 2026 CommandCommon closes ChangeSignalLSB. Current ordinary
+        # P5 RoB catalogs have no type-64 rows, but preserve this flag for categories
+        # outside that presently observed surface.
         dynamic_keys = {-1}
 
     signals = []
