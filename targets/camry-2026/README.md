@@ -366,15 +366,19 @@ Toyota LTA remained off throughout the steering interval, is in
 Route `0000008d--a9f348691a` is the primary operator-observed openpilot steering
 record; later route `00000093--4066e7ae51` is a shorter same-build corroboration. Neither
 sent B6 from the camera. The controller sent C7 sideband commands
-on extended `0x1FDC0002` bus0; an ephemeral EPS resident used each fresh nonzero C7 sequence
-to replace B3..B9 of one already-admitted native B6 and used ICU-S command 5 selector 4 to
-generate the valid replacement trailer before stock SecOC consumption.
+on extended `0x1FDC0002` bus0; the exact live continuous EPS helper retained the
+latest nonzero C7 target, replaced B3..B9 in every distinct already-admitted native
+B6, and used ICU-S command 5 selector 4 to generate each valid replacement trailer
+before stock SecOC consumption. Sequence zero restored untouched native B6.
 
 This configuration depends on all of the following identities and lifecycle details:
 
 - cumulative persistent stage-5 image SHA-256 `669cedf8c8465ebfd02318cb7708b897b817bc3b40925c89743b64ce49aa01af`;
-- RAM payload/resident/padded-helper SHA-256 values `01ce9934...fc6c`,
-  `31b1b2c3...3a3a`, and `4719c4f2...965a`;
+- RAM payload/resident/live padded-helper SHA-256 values `01ce9934...fc6c`,
+  `31b1b2c3...3a3a`, and `b417e12d...159a`; the distinct `4719c4f2...965a`
+  helper is the later one-shot variant, not the final live steering handoff;
+- exact continuous source, binaries, checksums, and replay selection retained in
+  `raw-20260910/working-steering/runtime/`;
 - full EPS OFF, NRTD `./f33-secoc install`, direct transition to READY without OFF,
   then `./f33-secoc load-arm` with byte-exact helper readback and native-trailer oracle;
 - exactly one normal openpilot manager/pandad tree after the Panda lease is returned;
@@ -390,9 +394,12 @@ active returns, target/measured correlation 0.989 at 400 ms, low driver torque, 
 steering faults, and Toyota `0x08A/0x081` ID0 throughout. Route `93` independently repeats
 the result with 893/893 successful active commands over 17.94 seconds. Entering
 EPS programming mode leaves Toyota TSS/DRCC unavailable for that ignition cycle, so this
-drive engaged openpilot using normal non-adaptive cruise. A full restart restores DRCC but
-also removes the RAM signer. Exact route-segment hashes, deployed source hashes, command
-format, and operational caveats are in `raw-20260910/working-steering/summary.json`.
+drive engaged openpilot using normal non-adaptive cruise. The exact-car parked/READY DTC
+clear can remove the historical U0131 warning without resetting the EPS or inherently
+removing the RAM signer, but same-cycle DRCC restoration is unproven. A full restart restores
+DRCC but also removes the RAM signer. Exact route-segment hashes, deployed source hashes,
+command format, and operational caveats are in
+`raw-20260910/working-steering/summary.json`.
 
 ## Direct-B6 ingress discriminator (2026-09-10)
 

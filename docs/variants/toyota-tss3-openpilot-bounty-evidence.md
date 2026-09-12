@@ -2,7 +2,8 @@
 
 **Issue:** [commaai/opendbc#3695 — Toyota TSS3 car port](https://github.com/commaai/opendbc/issues/3695)
 
-**Status:** bounty-level control evidence assembled; upstream cleanup and review packaging remain.
+**Status:** bounty-level control evidence assembled; exact working Camry runtime
+preserved; upstream cleanup and review packaging remain.
 
 **Evidence sources:** direct same-car rlog (`firmware-static` is used only for the
 target-specific F33 wire/security boundary) plus an independent Corolla field
@@ -117,9 +118,10 @@ controlsd / CC.latActive
 ```
 
 Sequence zero is neutral and leaves the native B6 untouched. While
-`CC.latActive`, the controller advances 1..255 and the resident consumes each
-fresh value at most once. Panda applies its normal Toyota angle-command checks
-to the requested angle and rejects malformed C7 frames.
+`CC.latActive`, the controller advances 1..255. The exact live-loaded continuous
+helper retains the latest nonzero C7 target and replaces every distinct native
+B6 until sequence zero is observed. Panda applies its normal Toyota angle-command
+checks to the requested angle and rejects malformed C7 frames.
 
 The exact reproduction identity is:
 
@@ -129,13 +131,25 @@ The exact reproduction identity is:
   `01ce993425e910a6ea37473580adb6e641bdff56a3568492d4c9e0388e02fc6c`;
 - retained high-tail resident:
   `31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a`;
-- padded post-startup helper:
-  `4719c4f27563180359445724eaefd594e3051ea545f75d69efb9bbede8f1965a`;
+- exact live-loaded continuous helper, 588 bytes unpadded / 600 bytes padded:
+  `74315a067cfe457c945cbeadb0e1432e70765bbe36ef022fc57ffad272cb4469` /
+  `b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28`;
 - exact five-file working opendbc delta:
   `kai-opendbc-c7-working-tree.patch`, SHA-256
   `3f798940f439f329ebade4e342325f951e1b0725dba801565708df9bbc610081`.
 
-The required volatile lifecycle was full EPS OFF, NRTD/Park/stationary
+The `b417...` helper is the live experimental image used in the final steering
+handoff. The later packaged/audited one-shot helper
+`4719c4f27563180359445724eaefd594e3051ea545f75d69efb9bbede8f1965a`
+is a distinct artifact and must not be substituted when reproducing that handoff.
+Its source-level difference is one sequence-equality instruction: the continuous
+helper replaces `be .L_return` with `nop`. Because the branch encodes to four bytes
+and the NOP to two, the continuous helper is 588 rather than 590 bytes.
+
+The required volatile lifecycle explicitly selected the retained continuous
+payload, helper, and matching metadata through `F33_INLINE_PAYLOAD_PATH`,
+`F33_INLINE_HELPER_PATH`, and `F33_INLINE_META_PATH`; launcher defaults may select
+the one-shot artifact. It then used full EPS OFF, NRTD/Park/stationary
 `./f33-secoc install`, direct NRTD-to-READY without OFF, then
 `./f33-secoc load-arm`. The last step required byte-exact helper readback and
 equality between one untouched Toyota B6 trailer and the locally generated
@@ -144,9 +158,27 @@ openpilot manager/pandad tree. Full EPS OFF removed the resident and required
 repeating the install/arm sequence.
 
 The retained [session summary](../../targets/camry-2026/raw-20260910/working-steering/summary.json),
+[verbatim runtime artifacts, hashes, and replay procedure](../../targets/camry-2026/raw-20260910/working-steering/runtime/README.md),
 [exact working delta](../../targets/camry-2026/raw-20260910/working-steering/kai-opendbc-c7-working-tree.patch),
 and [field runbook](../../exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md#known-working-openpilot-steering-fallback)
 are the reproduction sources.
+
+The rlog records C7 commands, Panda returns, vehicle state, and wheel response;
+it does not expose EPS LocalRAM. The exact `b417...` identity is joined from the
+contemporaneous live install/status handoff and parked native-oracle witnesses,
+not inferred from CAN. The original Comma `/tmp/f33-valid-helper.bin` was no
+longer reachable at preservation time, but rebuilding the recovered source emits
+the complete recorded SHA-256 exactly; the retained binary is therefore the same
+recorded identity under the ordinary SHA-256 collision assumption.
+
+Entering EPS programming recorded historical U0131-87 faults and disabled Toyota
+TSS/DRCC for the demonstrated ignition cycle, so normal non-adaptive cruise was
+used for engagement. On this exact car, the already-proven parked/READY DTC-clear
+sequence can remove that dash-warning state without cycling EPS power: physical
+UDS `14 FF FF FF` on `0x7A1`, `0x7B3`, `0x7C4`, `0x7D0`, `0x792`, and `0x7A2`,
+then functional OBD Mode 04 on `0x7DF`. Exact-F33 SID 14 is DTC-clear processing,
+not ECU reset or flash programming, so it does not inherently remove the RAM
+signer. Same-cycle DRCC restoration remains unproven.
 
 ## 3. Corolla TSS3 longitudinal proof of concept
 
@@ -303,7 +335,10 @@ speculative global safety gate.
 > commands returned by Panda, commanded/measured angle correlation of 0.997,
 > low driver torque, no EPS faults, and Toyota `0x08A`/`0x081` remaining ID0
 > (LTA off) for the entire interval. The Camry used an exact-EPS RAM-resident
-> signer, while controlsd, CarController, and Panda retained normal ownership.
+> signer—authenticated payload `01ce9934...fc6c`, resident `31b1b2c3...3a3a`,
+> and exact live continuous helper `b417e12d...159a`—while controlsd,
+> CarController, and Panda retained normal ownership. The complete binaries,
+> source, hashes, and replay procedure are retained in the repository.
 > Independently and later, a 2023 Corolla TSS3 openpilot-longitudinal run transmitted
 > 23,683 unprotected `0x160` commands at 40 Hz under `safetyModel=toyota`, with
 > real acceleration requests in about 80% of frames and reported closed-loop
