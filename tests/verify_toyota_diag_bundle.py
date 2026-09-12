@@ -151,6 +151,15 @@ def main() -> int:
 
         hybrid_catalog = json.loads(archive.read("catalogs/NA/397.json"))
         engine_catalog = json.loads(archive.read("catalogs/NA/372.json"))
+        engine_groups = engine_catalog["active_test_groups"]
+        group76 = next(row for row in engine_groups["groups"] if row["group_id"] == 76)
+        group102 = next(row for row in engine_groups["groups"] if row["group_id"] == 102)
+        check("universal Engine catalog exports four composable type-33 groups and one mixed-DID blocked group",
+              engine_groups["materializable_group_count"] == 4
+              and engine_groups["blocked_group_count"] == 1
+              and group76["did"] == 0x284A
+              and [row["input_slot"] for row in group76["member_inputs"]] == [1, 2]
+              and group102["execution"] == "blocked")
         engine_shared_direct = next(row for row in engine_catalog["active_tests"] if row["id"] == 77)
         check("universal Engine catalog exports one-to-many type-67 geometry for shared-DID direct controls",
               engine_shared_direct["did"] == 0x284A

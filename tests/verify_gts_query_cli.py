@@ -154,9 +154,9 @@ check(
     and engine_multi["category_plan"]["membership_count"] == 10
     and engine_group["group"]["name"] == "Pilot Injection Volume"
     and engine_group["group"]["member_count"] == 2
-    and [(m["sort_order"], m["selected_test"]["active_test_id"], m["selected_test"]["name"]) for m in engine_group["members"]] == [
-        (1, 0x4D, "Pilot Injection Volume Select Cylinder"),
-        (2, 0x4E, "Pilot Injection Volume Value"),
+    and [(m["sort_order"], m["input_slot"], m["selected_test"]["active_test_id"], m["selected_test"]["name"]) for m in engine_group["members"]] == [
+        (1, 1, 0x4D, "Pilot Injection Volume Select Cylinder"),
+        (2, 2, 0x4E, "Pilot Injection Volume Value"),
     ]
     and [(m["selected_test"]["initial_read_did"], m["selected_test"]["bit_start"], m["selected_test"]["bit_end"], m["initial_transaction"]["materialized_send"]) for m in engine_group["members"]] == [
         (0x284A, 0, 7, "22284a"),

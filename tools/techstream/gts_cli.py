@@ -1264,15 +1264,18 @@ def _multi_active_test_category_plan(
         groups.setdefault(group_id, []).append({
             "record": index,
             "member_active_test_id": struct.unpack_from("<H", raw, 0x02)[0],
+            "unknown_word_04": struct.unpack_from("<H", raw, 0x04)[0],
+            "input_slot": struct.unpack_from("<H", raw, 0x06)[0],
             "sort_order": struct.unpack_from("<I", raw, 0x06)[0],
-            "auxiliary_byte": raw[0x0B],
+            "unknown_word_08": struct.unpack_from("<H", raw, 0x08)[0],
+            "unknown_word_0A": struct.unpack_from("<H", raw, 0x0A)[0],
             "raw": raw.hex(),
         })
     rows = [
         {
             "group_id": group_id,
             "group_id_hex": f"0x{group_id:X}",
-            "members": sorted(members, key=lambda row: (row["sort_order"], row["member_active_test_id"])),
+            "members": sorted(members, key=lambda row: (row["input_slot"], row["member_active_test_id"])),
         }
         for group_id, members in sorted(groups.items())
     ]
@@ -1283,7 +1286,11 @@ def _multi_active_test_category_plan(
         "group_count": len(rows),
         "membership_count": section.header.record_count,
         "groups": rows,
-        "boundary": "type-33 rows are static multi-control expansion; each member still follows its type-68 initialization path",
+        "boundary": (
+            "type-33 +0x00 is group ID, +0x02 member Active-Test ID, and +0x06 is the current "
+            "runtime input-slot selector (1 -> CStartActTstSnd +0x24, 2 -> +0x28); each member "
+            "then follows the ordinary type-68 direct materializer"
+        ),
     }
 
 
@@ -2857,9 +2864,21 @@ def _registry_active_tests(
                             "source": "CommandDataLib.dll CStartActTstSnd::SetValue",
                         },
                     }
-                rows.append(_compact_direct_active_test(
+                compact = _compact_direct_active_test(
                     selected, executor, monitor_rows, init_frame, signal_info=signal_info
-                ))
+                )
+                multi_section = db_obj.sections.get(33)
+                if multi_section is not None and multi_section.decoded_record_size == 12:
+                    group_ids = {
+                        struct.unpack_from("<H", multi_section.decoded_data, row_index * 12)[0]
+                        for row_index in range(multi_section.header.record_count)
+                    }
+                    if int(selected["active_test_id"]) in group_ids:
+                        compact["multi_control_group"] = True
+                        compact["reason"] = (
+                            "selected Active-Test ID is a type-33 group parent; current GTS enters the multi composer"
+                        )
+                rows.append(compact)
             except ValueError as exc:
                 rows.append({
                     "id": active_test_id,
@@ -3066,23 +3085,68 @@ def _registry_data_list(db: Any, strings: StringDataBase) -> dict[str, Any]:
     }
 
 
-def _registry_active_test_groups(parser: DDBParser, category: dict[str, Any], db_root: Path) -> dict[str, Any]:
-    """Compact type-33 multi-control Active-Test group geometry."""
+def _registry_active_test_groups(
+    parser: DDBParser,
+    category: dict[str, Any],
+    db_root: Path,
+    strings: StringDataBase,
+) -> dict[str, Any]:
+    """Compact current type-33 multi-control geometry plus composer executability."""
     plan = _multi_active_test_category_plan(parser, category, db_root)
+    groups = []
+    for group in plan["groups"]:
+        parent = _direct_active_test_selected_row(
+            parser, category, db_root, int(group["group_id"]), strings
+        )[2]
+        member_inputs = []
+        member_dids = []
+        input_slots = []
+        for membership in group["members"]:
+            selected = _direct_active_test_selected_row(
+                parser, category, db_root, int(membership["member_active_test_id"]), strings
+            )[2]
+            did = int(selected["initial_read_did"])
+            slot = int(membership["input_slot"])
+            member_dids.append(did)
+            input_slots.append(slot)
+            member_inputs.append({
+                "active_test_id": int(membership["member_active_test_id"]),
+                "input_slot": slot,
+                "did": did,
+                "bit_start": int(selected["bit_start"]),
+                "bit_end": int(selected["bit_end"]),
+                "name": selected.get("name") or "",
+            })
+        same_did = len(set(member_dids)) == 1
+        slots_valid = len(set(input_slots)) == len(input_slots) and all(slot in {1, 2} for slot in input_slots)
+        composable = bool(member_inputs) and same_did and slots_valid
+        reason = None
+        if not same_did:
+            reason = (
+                "current DataMonitorPhase5 multi composer ORs member frames and rejects when DID bytes differ"
+            )
+        elif not slots_valid:
+            reason = "current type-33 input slots are not a unique subset of {1,2}"
+        groups.append({
+            "group_id": int(group["group_id"]),
+            "name": parent.get("name") or "",
+            "members": [row["active_test_id"] for row in member_inputs],
+            "member_inputs": member_inputs,
+            "did": member_dids[0] if same_did and member_dids else None,
+            "composer": "or_member_start_stop_frames",
+            "execution": "materializable" if composable else "blocked",
+            "reason": reason,
+        })
     return {
         "group_count": plan["group_count"],
         "membership_count": plan["membership_count"],
-        "groups": [
-            {
-                "group_id": group["group_id"],
-                "members": [member["member_active_test_id"] for member in group["members"]],
-            }
-            for group in plan["groups"]
-        ],
+        "materializable_group_count": sum(group["execution"] == "materializable" for group in groups),
+        "blocked_group_count": sum(group["execution"] == "blocked" for group in groups),
+        "groups": groups,
         "boundary": (
-            "type-33 rows are static multi-control expansion; each member still follows its type-68 "
-            "initialization path via role 0x63"
-            if plan["group_count"]
+            "current DataMonitorPhase5 FUN_10014440 materializes each type-33 member through the ordinary "
+            "direct executor, OR-composes complete start/stop frames, and requires all member DID bytes to match"
+            if groups
             else "category has no type-33 multi-control membership rows"
         ),
     }
@@ -3549,7 +3613,7 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
             "data_list": _registry_data_list(db, strings),
             "generic_ffd": _generic_ffd_rows(db, strings, db_path.name, master),
             "rob": _rob_rows(db, strings, db_path.name),
-            "active_test_groups": _registry_active_test_groups(parser, category, db_root),
+            "active_test_groups": _registry_active_test_groups(parser, category, db_root, strings),
         }
     profile["catalog_category_ids"] = known_categories
     profile["session_control"] = _registry_session_control(parser, master, resolved_categories)
@@ -4143,7 +4207,7 @@ def _bundle_category_catalog(
         "data_list": _registry_data_list(db, strings),
         "generic_ffd": _generic_ffd_rows(db, strings, db_path.name, master),
         "rob": _rob_rows(db, strings, db_path.name),
-        "active_test_groups": _registry_active_test_groups(parser, category, db_root),
+        "active_test_groups": _registry_active_test_groups(parser, category, db_root, strings),
         "source_identity": {
             "database": {
                 "path": f"{db_root.parent.parent.name}/DB/{db_root.name}/{db_path.name}",

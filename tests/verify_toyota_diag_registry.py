@@ -474,9 +474,19 @@ def main() -> int:
           == sorted(row["sort_key"] for row in hv_data_list["rows"]))
 
     engine_groups = actual["catalogs"]["372"]["active_test_groups"]
-    check("multi-control Active-Test group geometry is carried without manufacturing groups",
+    group76 = next(row for row in engine_groups["groups"] if row["group_id"] == 76)
+    group102 = next(row for row in engine_groups["groups"] if row["group_id"] == 102)
+    check("multi-control Active-Test group geometry carries runtime input slots and composer boundary",
           engine_groups["group_count"] == 5 and engine_groups["membership_count"] == 10
-          and engine_groups["groups"][0] == {"group_id": 76, "members": [77, 78]}
+          and engine_groups["materializable_group_count"] == 4
+          and engine_groups["blocked_group_count"] == 1
+          and group76["members"] == [77, 78]
+          and [(row["active_test_id"], row["input_slot"], row["did"]) for row in group76["member_inputs"]]
+              == [(77, 1, 0x284A), (78, 2, 0x284A)]
+          and group76["execution"] == "materializable" and group76["did"] == 0x284A
+          and group102["members"] == [103, 104]
+          and group102["execution"] == "blocked" and group102["did"] is None
+          and "DID bytes differ" in group102["reason"]
           and actual["catalogs"]["397"]["active_test_groups"]["group_count"] == 0)
 
     utilities = actual["utilities"]

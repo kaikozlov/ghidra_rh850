@@ -3,45 +3,162 @@
   "catalogs": {
     "372": {
       "active_test_groups": {
-        "boundary": "type-33 rows are static multi-control expansion; each member still follows its type-68 initialization path via role 0x63",
+        "blocked_group_count": 1,
+        "boundary": "current DataMonitorPhase5 FUN_10014440 materializes each type-33 member through the ordinary direct executor, OR-composes complete start/stop frames, and requires all member DID bytes to match",
         "group_count": 5,
         "groups": [
           {
+            "composer": "or_member_start_stop_frames",
+            "did": 10314,
+            "execution": "materializable",
             "group_id": 76,
+            "member_inputs": [
+              {
+                "active_test_id": 77,
+                "bit_end": 7,
+                "bit_start": 0,
+                "did": 10314,
+                "input_slot": 1,
+                "name": "Pilot Injection Volume Select Cylinder"
+              },
+              {
+                "active_test_id": 78,
+                "bit_end": 15,
+                "bit_start": 8,
+                "did": 10314,
+                "input_slot": 2,
+                "name": "Pilot Injection Volume Value"
+              }
+            ],
             "members": [
               77,
               78
-            ]
+            ],
+            "name": "Pilot Injection Volume",
+            "reason": null
           },
           {
+            "composer": "or_member_start_stop_frames",
+            "did": 10316,
+            "execution": "materializable",
             "group_id": 79,
+            "member_inputs": [
+              {
+                "active_test_id": 80,
+                "bit_end": 7,
+                "bit_start": 0,
+                "did": 10316,
+                "input_slot": 1,
+                "name": "Injection Timing Select Cylinder"
+              },
+              {
+                "active_test_id": 81,
+                "bit_end": 15,
+                "bit_start": 8,
+                "did": 10316,
+                "input_slot": 2,
+                "name": "Injection Timing Value"
+              }
+            ],
             "members": [
               80,
               81
-            ]
+            ],
+            "name": "Injection Timing",
+            "reason": null
           },
           {
+            "composer": "or_member_start_stop_frames",
+            "did": 10326,
+            "execution": "materializable",
             "group_id": 93,
+            "member_inputs": [
+              {
+                "active_test_id": 94,
+                "bit_end": 7,
+                "bit_start": 0,
+                "did": 10326,
+                "input_slot": 1,
+                "name": "Pilot Injection Volume Select Cylinder"
+              },
+              {
+                "active_test_id": 95,
+                "bit_end": 15,
+                "bit_start": 8,
+                "did": 10326,
+                "input_slot": 2,
+                "name": "Pilot Injection Volume Value"
+              }
+            ],
             "members": [
               94,
               95
-            ]
+            ],
+            "name": "Pilot Injection Volume",
+            "reason": null
           },
           {
+            "composer": "or_member_start_stop_frames",
+            "did": 10327,
+            "execution": "materializable",
             "group_id": 96,
+            "member_inputs": [
+              {
+                "active_test_id": 97,
+                "bit_end": 7,
+                "bit_start": 0,
+                "did": 10327,
+                "input_slot": 1,
+                "name": "Injection Timing Select Cylinder"
+              },
+              {
+                "active_test_id": 98,
+                "bit_end": 15,
+                "bit_start": 8,
+                "did": 10327,
+                "input_slot": 2,
+                "name": "Injection Timing Value"
+              }
+            ],
             "members": [
               97,
               98
-            ]
+            ],
+            "name": "Injection Timing",
+            "reason": null
           },
           {
+            "composer": "or_member_start_stop_frames",
+            "did": null,
+            "execution": "blocked",
             "group_id": 102,
+            "member_inputs": [
+              {
+                "active_test_id": 103,
+                "bit_end": 7,
+                "bit_start": 0,
+                "did": 10296,
+                "input_slot": 1,
+                "name": "Activate the VN Turbo 1 Open"
+              },
+              {
+                "active_test_id": 104,
+                "bit_end": 7,
+                "bit_start": 0,
+                "did": 10329,
+                "input_slot": 2,
+                "name": "Activate the VN Turbo 2 Open"
+              }
+            ],
             "members": [
               103,
               104
-            ]
+            ],
+            "name": "Activate the VN Turbo 1 and 2 Open",
+            "reason": "current DataMonitorPhase5 multi composer ORs member frames and rejects when DID bytes differ"
           }
         ],
+        "materializable_group_count": 4,
         "membership_count": 10
       },
       "active_tests": [
@@ -6865,8 +6982,10 @@
           "minimum_examples": null,
           "monitor_key": 60004,
           "monitor_name": "Pilot Injection Volume Select Cylinder",
+          "multi_control_group": true,
           "name": "Pilot Injection Volume",
           "positive_response": 111,
+          "reason": "selected Active-Test ID is a type-33 group parent; current GTS enters the multi composer",
           "runtime_length_minimum": 1,
           "runtime_length_probe": {
             "check": "62",
@@ -7243,8 +7362,10 @@
           "minimum_examples": null,
           "monitor_key": 60006,
           "monitor_name": "Injection Timing Select Cylinder",
+          "multi_control_group": true,
           "name": "Injection Timing",
           "positive_response": 111,
+          "reason": "selected Active-Test ID is a type-33 group parent; current GTS enters the multi composer",
           "runtime_length_minimum": 1,
           "runtime_length_probe": {
             "check": "62",
@@ -8784,8 +8905,10 @@
           "minimum_examples": null,
           "monitor_key": 60008,
           "monitor_name": "Pilot Injection Volume Select Cylinder",
+          "multi_control_group": true,
           "name": "Pilot Injection Volume",
           "positive_response": 111,
+          "reason": "selected Active-Test ID is a type-33 group parent; current GTS enters the multi composer",
           "runtime_length_minimum": 1,
           "runtime_length_probe": {
             "check": "62",
@@ -9170,8 +9293,10 @@
           "minimum_examples": null,
           "monitor_key": 60010,
           "monitor_name": "Injection Timing Select Cylinder",
+          "multi_control_group": true,
           "name": "Injection Timing",
           "positive_response": 111,
+          "reason": "selected Active-Test ID is a type-33 group parent; current GTS enters the multi composer",
           "runtime_length_minimum": 1,
           "runtime_length_probe": {
             "check": "62",
@@ -9925,8 +10050,10 @@
           "minimum_examples": null,
           "monitor_key": 1175,
           "monitor_name": "Turbo Charger Step Motor Bank 1",
+          "multi_control_group": true,
           "name": "Activate the VN Turbo 1 and 2 Open",
           "positive_response": 111,
+          "reason": "selected Active-Test ID is a type-33 group parent; current GTS enters the multi composer",
           "runtime_length_minimum": 1,
           "runtime_length_probe": {
             "check": "62",
@@ -199988,9 +200115,11 @@
     },
     "395": {
       "active_test_groups": {
+        "blocked_group_count": 0,
         "boundary": "category has no type-33 multi-control membership rows",
         "group_count": 0,
         "groups": [],
+        "materializable_group_count": 0,
         "membership_count": 0
       },
       "active_tests": [
@@ -225169,9 +225298,11 @@
     },
     "397": {
       "active_test_groups": {
+        "blocked_group_count": 0,
         "boundary": "category has no type-33 multi-control membership rows",
         "group_count": 0,
         "groups": [],
+        "materializable_group_count": 0,
         "membership_count": 0
       },
       "active_tests": [
@@ -360112,9 +360243,11 @@
     },
     "398": {
       "active_test_groups": {
+        "blocked_group_count": 0,
         "boundary": "category has no type-33 multi-control membership rows",
         "group_count": 0,
         "groups": [],
+        "materializable_group_count": 0,
         "membership_count": 0
       },
       "active_tests": [
@@ -442382,9 +442515,11 @@
     },
     "405": {
       "active_test_groups": {
+        "blocked_group_count": 0,
         "boundary": "category has no type-33 multi-control membership rows",
         "group_count": 0,
         "groups": [],
+        "materializable_group_count": 0,
         "membership_count": 0
       },
       "active_tests": [],
@@ -463895,9 +464030,11 @@
     },
     "435": {
       "active_test_groups": {
+        "blocked_group_count": 0,
         "boundary": "category has no type-33 multi-control membership rows",
         "group_count": 0,
         "groups": [],
+        "materializable_group_count": 0,
         "membership_count": 0
       },
       "active_tests": [
@@ -512712,9 +512849,11 @@
     },
     "450": {
       "active_test_groups": {
+        "blocked_group_count": 0,
         "boundary": "category has no type-33 multi-control membership rows",
         "group_count": 0,
         "groups": [],
+        "materializable_group_count": 0,
         "membership_count": 0
       },
       "active_tests": [
@@ -538842,9 +538981,11 @@
     },
     "498": {
       "active_test_groups": {
+        "blocked_group_count": 0,
         "boundary": "category has no type-33 multi-control membership rows",
         "group_count": 0,
         "groups": [],
+        "materializable_group_count": 0,
         "membership_count": 0
       },
       "active_tests": [
