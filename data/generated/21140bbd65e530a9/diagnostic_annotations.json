@@ -4736,8 +4736,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_ABS_09_002_TEXT",
-      "resource_auxiliary_value": 439
+      "resource_identifier": "IDS_ABS_18_005_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4746,8 +4746,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_ADS_02_003_001LISTTEXT1",
-      "resource_auxiliary_value": 1784
+      "resource_identifier": "IDS_AFS_01_003_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4756,8 +4756,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_ADS_02_003_001LISTTEXT3",
-      "resource_auxiliary_value": 1786
+      "resource_identifier": "IDS_AFS_01_005_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4766,8 +4766,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_ADS_02_003_001LISTTEXT4",
-      "resource_auxiliary_value": 1787
+      "resource_identifier": "IDS_AFS_01_006_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4776,8 +4776,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_ADS_02_003_003LISTTEXT1",
-      "resource_auxiliary_value": 1789
+      "resource_identifier": "IDS_AFS_01_001_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4786,8 +4786,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_02_003_TITLE",
-      "resource_auxiliary_value": 6490
+      "resource_identifier": "IDS_D_EPS_01_007_TITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4796,8 +4796,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_02_004_TEXT",
-      "resource_auxiliary_value": 6499
+      "resource_identifier": "IDS_D_EPS_01_005_TITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4806,8 +4806,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_02_DLGTITLE1",
-      "resource_auxiliary_value": 6488
+      "resource_identifier": "IDS_D_EPS_01_006_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4817,8 +4817,8 @@
         "\\btorque sensor\\b",
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_02_DLGTITLE2",
-      "resource_auxiliary_value": 6495
+      "resource_identifier": "IDS_D_EPS_01_007_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4827,8 +4827,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_02_SUBTITLE",
-      "resource_auxiliary_value": 6497
+      "resource_identifier": "IDS_D_EPS_01_008_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4838,8 +4838,8 @@
         "\\btorque sensor\\b",
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_04_004_TEXT",
-      "resource_auxiliary_value": 6507
+      "resource_identifier": "IDS_D_EPS_01_009_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4848,8 +4848,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_04_005_TEXT",
-      "resource_auxiliary_value": 6509
+      "resource_identifier": "IDS_D_EPS_01_ERRTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4858,8 +4858,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_04_006_TEXT",
-      "resource_auxiliary_value": 6510
+      "resource_identifier": "IDS_D_EPS_01_004_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4868,8 +4868,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_04_007_TEXT",
-      "resource_auxiliary_value": 6511
+      "resource_identifier": "IDS_D_EPS_01_SUBTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4879,8 +4879,8 @@
         "\\btorque sensor\\b",
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_04_DLGTITLE2",
-      "resource_auxiliary_value": 6503
+      "resource_identifier": "IDS_D_EPS_01_001_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4889,8 +4889,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_04_SUBTITLE",
-      "resource_auxiliary_value": 6512
+      "resource_identifier": "IDS_D_EPS_01_002_TITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4899,8 +4899,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_06_001_OPERATIONTEXT",
-      "resource_auxiliary_value": 6519
+      "resource_identifier": "IDS_D_EPS_01_002_OPERATIONTEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4909,8 +4909,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_06_001_TEXT",
-      "resource_auxiliary_value": 6518
+      "resource_identifier": "IDS_D_EPS_01_003_TITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4919,8 +4919,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_06_002_TEXT",
-      "resource_auxiliary_value": 6520
+      "resource_identifier": "IDS_D_EPS_01_003_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4929,8 +4929,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_06_003_TEXT",
-      "resource_auxiliary_value": 6521
+      "resource_identifier": "IDS_D_EPS_01_004_TITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4939,8 +4939,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_06_005_TEXT",
-      "resource_auxiliary_value": 6524
+      "resource_identifier": "IDS_D_EPS_01_DLGTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4949,8 +4949,8 @@
       "matched_patterns": [
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_12_002_TEXT",
-      "resource_auxiliary_value": 6564
+      "resource_identifier": "IDS_D_EPS_03_005_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4959,8 +4959,8 @@
       "matched_patterns": [
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_13_001_TEXT",
-      "resource_auxiliary_value": 6577
+      "resource_identifier": "IDS_D_EPS_03_004_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4969,8 +4969,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_13_002_WHITEAREATEXT",
-      "resource_auxiliary_value": 6582
+      "resource_identifier": "IDS_D_EPS_05_008_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4979,8 +4979,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_13_004_BUTTONTEXT",
-      "resource_auxiliary_value": 6572
+      "resource_identifier": "IDS_D_EPS_05_006_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -4989,8 +4989,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_13_004_TEXT",
-      "resource_auxiliary_value": 6573
+      "resource_identifier": "IDS_D_EPS_05_007_TITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5000,8 +5000,8 @@
         "\\btorque sensor\\b",
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_13_007_TEXT",
-      "resource_auxiliary_value": 6569
+      "resource_identifier": "IDS_D_EPS_05_009_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5010,8 +5010,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_13_009_TEXT",
-      "resource_auxiliary_value": 6567
+      "resource_identifier": "IDS_D_EPS_05_005_TITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5020,8 +5020,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_13_010_TEXT",
-      "resource_auxiliary_value": 6568
+      "resource_identifier": "IDS_D_EPS_05_002_TITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5031,8 +5031,8 @@
         "\\btorque sensor\\b",
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_13_DLGTITLE",
-      "resource_auxiliary_value": 6575
+      "resource_identifier": "IDS_D_EPS_05_007_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5041,8 +5041,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_13_ERRTITLE",
-      "resource_auxiliary_value": 6576
+      "resource_identifier": "IDS_D_EPS_05_DLGTITLE1",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5051,8 +5051,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EFI_13_SUBTITLE",
-      "resource_auxiliary_value": 6566
+      "resource_identifier": "IDS_D_EPS_05_002_OPERATIONTEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5061,8 +5061,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EPS_01_001_OPERATIONTEXT",
-      "resource_auxiliary_value": 6603
+      "resource_identifier": "IDS_D_EPS_05_SUBTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5072,8 +5072,8 @@
         "\\btorque sensor\\b",
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_D_EPS_01_002_TEXT",
-      "resource_auxiliary_value": 6610
+      "resource_identifier": "IDS_D_EPS_05_001_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5082,8 +5082,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EPS_01_003_TEXT",
-      "resource_auxiliary_value": 6607
+      "resource_identifier": "IDS_D_EPS_05_003_TITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5092,8 +5092,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_D_EPS_01_003_TITLE",
-      "resource_auxiliary_value": 6606
+      "resource_identifier": "IDS_D_EPS_05_003_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5102,8 +5102,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_D_T_HV_09_012_001LISTTEXT1",
-      "resource_auxiliary_value": 7495
+      "resource_identifier": "IDS_D_TPW_02_007_002LISTTEXT147",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5112,8 +5112,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_54_DLGTITLE",
-      "resource_auxiliary_value": 11937
+      "resource_identifier": "IDS_EMPS_01_001_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5122,8 +5122,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_54_ERRTITLE",
-      "resource_auxiliary_value": 11943
+      "resource_identifier": "IDS_EMPS_01_011_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5132,8 +5132,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_55_001_TEXT",
-      "resource_auxiliary_value": 11952
+      "resource_identifier": "IDS_EMPS_01_009_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5142,8 +5142,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_55_002_TEXT",
-      "resource_auxiliary_value": 11951
+      "resource_identifier": "IDS_EMPS_01_008_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5152,8 +5152,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_55_003_OPERATIONTEXT",
-      "resource_auxiliary_value": 11947
+      "resource_identifier": "IDS_EMPS_01_007_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5162,8 +5162,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_55_003_TEXT",
-      "resource_auxiliary_value": 11950
+      "resource_identifier": "IDS_EMPS_01_006_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5172,8 +5172,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_55_DLGTITLE",
-      "resource_auxiliary_value": 11954
+      "resource_identifier": "IDS_EMPS_01_ERRTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5182,8 +5182,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_55_ERRTITLE",
-      "resource_auxiliary_value": 11953
+      "resource_identifier": "IDS_EMPS_01_DLGTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5192,8 +5192,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_55_SUBTITLE",
-      "resource_auxiliary_value": 11955
+      "resource_identifier": "IDS_EMPS_01_SUBTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5202,8 +5202,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_57_GR1_01WHITEAREATEXT4",
-      "resource_auxiliary_value": 11982
+      "resource_identifier": "IDS_EMPS_04_014_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5212,8 +5212,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_001_TEXT",
-      "resource_auxiliary_value": 12015
+      "resource_identifier": "IDS_EMPS_04_011_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5222,8 +5222,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_002_TEXT",
-      "resource_auxiliary_value": 12033
+      "resource_identifier": "IDS_EMPS_04_012_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5232,8 +5232,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_003_OPERATIONTEXT",
-      "resource_auxiliary_value": 12011
+      "resource_identifier": "IDS_EMPS_04_013_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5242,8 +5242,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_003_RADIOTEXT1",
-      "resource_auxiliary_value": 12019
+      "resource_identifier": "IDS_EMPS_04_016_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5252,8 +5252,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_003_RADIOTEXT2",
-      "resource_auxiliary_value": 12020
+      "resource_identifier": "IDS_EMPS_04_017_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5262,8 +5262,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_003_TEXT",
-      "resource_auxiliary_value": 12017
+      "resource_identifier": "IDS_EMPS_04_018_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5273,8 +5273,8 @@
         "\\btorque sensor\\b",
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_011_COLORTEXT1",
-      "resource_auxiliary_value": 12024
+      "resource_identifier": "IDS_EMPS_04_001_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5283,8 +5283,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_011_COLORTEXT2",
-      "resource_auxiliary_value": 12026
+      "resource_identifier": "IDS_EMPS_04_009_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5293,8 +5293,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_011_TEXT2",
-      "resource_auxiliary_value": 12027
+      "resource_identifier": "IDS_EMPS_04_SUBTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5303,8 +5303,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_012_OPERATIONTEXT",
-      "resource_auxiliary_value": 12031
+      "resource_identifier": "IDS_EMPS_04_ERRTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5313,8 +5313,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_014_TEXT",
-      "resource_auxiliary_value": 11991
+      "resource_identifier": "IDS_EMPS_04_DLGTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5323,8 +5323,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_020_COLORTEXT",
-      "resource_auxiliary_value": 11997
+      "resource_identifier": "IDS_EMPS_05_022_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5333,8 +5333,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_021_TEXT",
-      "resource_auxiliary_value": 12005
+      "resource_identifier": "IDS_EMPS_05_012_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5343,8 +5343,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_022_TEXT",
-      "resource_auxiliary_value": 11999
+      "resource_identifier": "IDS_EMPS_05_013_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5353,8 +5353,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_023_TEXT",
-      "resource_auxiliary_value": 12016
+      "resource_identifier": "IDS_EMPS_05_014_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5363,8 +5363,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_024_TEXT",
-      "resource_auxiliary_value": 12002
+      "resource_identifier": "IDS_EMPS_05_015_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5373,8 +5373,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_025_TEXT",
-      "resource_auxiliary_value": 12010
+      "resource_identifier": "IDS_EMPS_05_016_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5383,8 +5383,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_026_TEXT",
-      "resource_auxiliary_value": 12004
+      "resource_identifier": "IDS_EMPS_05_011_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5393,8 +5393,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_58_027_TEXT",
-      "resource_auxiliary_value": 11998
+      "resource_identifier": "IDS_EMPS_05_017_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5403,8 +5403,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_59_001_TEXT",
-      "resource_auxiliary_value": 12052
+      "resource_identifier": "IDS_EMPS_05_DLGTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5413,8 +5413,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_59_002_TEXT1",
-      "resource_auxiliary_value": 12061
+      "resource_identifier": "IDS_EMPS_05_009_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5423,8 +5423,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_59_003_TEXT1",
-      "resource_auxiliary_value": 12037
+      "resource_identifier": "IDS_EMPS_05_SUBTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5433,8 +5433,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_59_004_TEXT",
-      "resource_auxiliary_value": 12041
+      "resource_identifier": "IDS_EMPS_05_ERRTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5444,8 +5444,8 @@
         "\\btorque sensor\\b",
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_EFI_59_005_TEXT",
-      "resource_auxiliary_value": 12042
+      "resource_identifier": "IDS_EMPS_05_001_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5454,8 +5454,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_59_GR1_LISTTEXT6",
-      "resource_auxiliary_value": 12057
+      "resource_identifier": "IDS_EMPS_06_006_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5464,8 +5464,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_59_GR1_LISTTEXT8",
-      "resource_auxiliary_value": 12059
+      "resource_identifier": "IDS_EMPS_06_008_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5475,8 +5475,8 @@
         "\\btorque sensor\\b",
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_EFI_59_GR1_LISTTEXT9",
-      "resource_auxiliary_value": 12060
+      "resource_identifier": "IDS_EMPS_06_009_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5485,8 +5485,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_59_GR1_STATUSTEXT1",
-      "resource_auxiliary_value": 12046
+      "resource_identifier": "IDS_EMPS_06_010_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5495,8 +5495,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_59_GR1_STATUSTEXT2",
-      "resource_auxiliary_value": 12038
+      "resource_identifier": "IDS_EMPS_06_011_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5505,8 +5505,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_59_GR1_STATUSTEXT3",
-      "resource_auxiliary_value": 12039
+      "resource_identifier": "IDS_EMPS_06_012_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5515,8 +5515,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_59_GR1_STATUSTEXT4",
-      "resource_auxiliary_value": 12036
+      "resource_identifier": "IDS_EMPS_06_014_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5525,8 +5525,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_59_SUBTITLE",
-      "resource_auxiliary_value": 12054
+      "resource_identifier": "IDS_EMPS_06_013_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5535,8 +5535,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_61_001_TEXT",
-      "resource_auxiliary_value": 12071
+      "resource_identifier": "IDS_EMPS_06_ERRTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5545,8 +5545,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_61_003_TEXT",
-      "resource_auxiliary_value": 12064
+      "resource_identifier": "IDS_EMPS_06_DLGTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5556,8 +5556,8 @@
         "\\btorque sensor\\b",
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_EFI_61_005_LISTTEXT1",
-      "resource_auxiliary_value": 12063
+      "resource_identifier": "IDS_EMPS_06_001_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5566,8 +5566,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_EFI_62_001_TEXT",
-      "resource_auxiliary_value": 12084
+      "resource_identifier": "IDS_EMPS_06_SUBTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5576,8 +5576,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_EFI_62_002_RADIOTEXT1",
-      "resource_auxiliary_value": 12082
+      "resource_identifier": "IDS_EMPS_07_008_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5586,8 +5586,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_EFI_62_002_TEXT",
-      "resource_auxiliary_value": 12083
+      "resource_identifier": "IDS_EMPS_07_009_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5596,8 +5596,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_EFI_62_003_TEXT",
-      "resource_auxiliary_value": 12072
+      "resource_identifier": "IDS_EMPS_07_007_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5606,8 +5606,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_EFI_62_004_TEXT",
-      "resource_auxiliary_value": 12078
+      "resource_identifier": "IDS_EMPS_07_003_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5616,8 +5616,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_EFI_62_005_COLORTEXT",
-      "resource_auxiliary_value": 12077
+      "resource_identifier": "IDS_EMPS_07_006_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5626,8 +5626,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_EFI_62_005_TEXT",
-      "resource_auxiliary_value": 12076
+      "resource_identifier": "IDS_EMPS_07_004_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5636,8 +5636,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_EFI_62_008_TEXT",
-      "resource_auxiliary_value": 12080
+      "resource_identifier": "IDS_EMPS_07_001_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5646,8 +5646,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_EFI_62_DLGTITLE",
-      "resource_auxiliary_value": 12085
+      "resource_identifier": "IDS_EMPS_07_DLGTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5656,8 +5656,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_EFI_62_ERRTITLE",
-      "resource_auxiliary_value": 12087
+      "resource_identifier": "IDS_EMPS_07_ERRTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5666,8 +5666,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_EKDSS_01_001_TEXT",
-      "resource_auxiliary_value": 12102
+      "resource_identifier": "IDS_EMPS_07_002_RADIOTEXT1",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5676,8 +5676,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_EKDSS_01_002_CHECKTEXT1",
-      "resource_auxiliary_value": 12103
+      "resource_identifier": "IDS_EMPS_07_002_RADIOTEXT2",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5686,8 +5686,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_EKDSS_01_002_TEXT",
-      "resource_auxiliary_value": 12099
+      "resource_identifier": "IDS_EMPS_07_SUBTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5696,8 +5696,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_EKDSS_01_003_BUTTONTEXT1",
-      "resource_auxiliary_value": 12092
+      "resource_identifier": "IDS_EMPS_09_006_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5706,8 +5706,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_EKDSS_01_003_OPERATIONTEXT",
-      "resource_auxiliary_value": 12094
+      "resource_identifier": "IDS_EMPS_09_SUBTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5716,8 +5716,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_EKDSS_01_003_TEXT",
-      "resource_auxiliary_value": 12089
+      "resource_identifier": "IDS_EMPS_09_007_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5726,8 +5726,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_EKDSS_01_003_WHITEAREATEXT2",
-      "resource_auxiliary_value": 12100
+      "resource_identifier": "IDS_EMPS_09_004_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5736,8 +5736,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_EKDSS_01_003_WHITEAREATEXT5",
-      "resource_auxiliary_value": 12090
+      "resource_identifier": "IDS_EMPS_09_001_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5746,8 +5746,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_EKDSS_01_003_WHITEAREATEXT6",
-      "resource_auxiliary_value": 12091
+      "resource_identifier": "IDS_EMPS_09_DLGTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5756,8 +5756,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_EKDSS_01_004_TEXT",
-      "resource_auxiliary_value": 12098
+      "resource_identifier": "IDS_EMPS_09_ERRTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5766,8 +5766,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_LDR_02_005_TEXT",
-      "resource_auxiliary_value": 16018
+      "resource_identifier": "IDS_MAC_01_014_001LISTTEXT14",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5776,8 +5776,8 @@
       "matched_patterns": [
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_LDR_02_006_TEXT1",
-      "resource_auxiliary_value": 16019
+      "resource_identifier": "IDS_MAC_01_014_001LISTTEXT6",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5786,8 +5786,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_LDR_05_007_TEXT",
-      "resource_auxiliary_value": 16047
+      "resource_identifier": "IDS_MAC_01_013_001LISTTEXT14",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5796,8 +5796,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_LDR_06_006_003LISTTEXT1",
-      "resource_auxiliary_value": 16074
+      "resource_identifier": "IDS_MAC_01_032_001LISTTEXT5",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5806,8 +5806,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_LDR_06_006_TEXT1",
-      "resource_auxiliary_value": 16082
+      "resource_identifier": "IDS_MAC_01_035_001LISTTEXT5",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5816,8 +5816,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_LDR_06_006_TEXT2",
-      "resource_auxiliary_value": 16079
+      "resource_identifier": "IDS_MAC_01_035_001LISTTEXT4",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5826,8 +5826,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_LDR_06_008_TEXT2",
-      "resource_auxiliary_value": 16078
+      "resource_identifier": "IDS_MAC_01_032_001LISTTEXT4",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5836,8 +5836,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_LDR_12_003_TEXT",
-      "resource_auxiliary_value": 16133
+      "resource_identifier": "IDS_MAC_01_024_001LISTTEXT5",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5846,8 +5846,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_LDR_12_004_TEXT",
-      "resource_auxiliary_value": 16136
+      "resource_identifier": "IDS_MAC_01_024_001LISTTEXT4",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5856,8 +5856,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_LKA_02_010_TEXT",
-      "resource_auxiliary_value": 16168
+      "resource_identifier": "IDS_MAC_01_003_001LISTTEXT14",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5866,8 +5866,8 @@
       "matched_patterns": [
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_MAC_01_001B_RADIOTEXT3",
-      "resource_auxiliary_value": 16355
+      "resource_identifier": "IDS_MAC_01_003_001LISTTEXT6",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5876,8 +5876,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_MAC_01_003_001LISTTEXT8",
-      "resource_auxiliary_value": 16373
+      "resource_identifier": "IDS_MAC_01_033_001LISTTEXT4",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5886,8 +5886,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_MAC_01_003_001LISTTEXT9",
-      "resource_auxiliary_value": 16372
+      "resource_identifier": "IDS_MAC_01_033_001LISTTEXT5",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5896,8 +5896,8 @@
       "matched_patterns": [
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_MAC_01_007_TITLE",
-      "resource_auxiliary_value": 16338
+      "resource_identifier": "IDS_MAC_01_013_001LISTTEXT6",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5906,8 +5906,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_MMT_06_015_COLORTEXT",
-      "resource_auxiliary_value": 17684
+      "resource_identifier": "IDS_MS2ABS_03_005_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5916,8 +5916,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_REASON",
-      "resource_auxiliary_value": 18237
+      "resource_identifier": "IDS_MS2EMPS_01_004_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5926,8 +5926,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_0_0_22",
-      "resource_auxiliary_value": 18220
+      "resource_identifier": "IDS_MS2EMPS_01_002_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5936,8 +5936,8 @@
       "matched_patterns": [
         "\\btorque sensor\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_0_1_21",
-      "resource_auxiliary_value": 18209
+      "resource_identifier": "IDS_MS2EMPS_01_001_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5946,8 +5946,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_0_6_12",
-      "resource_auxiliary_value": 18204
+      "resource_identifier": "IDS_MS2EMPS_02_001_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5956,8 +5956,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_1_0_35",
-      "resource_auxiliary_value": 18218
+      "resource_identifier": "IDS_MS2EMPS_02_004_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5968,8 +5968,8 @@
         "\\belectric power steering\\b",
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_1_2_33",
-      "resource_auxiliary_value": 18216
+      "resource_identifier": "IDS_MS2EMPS_02_007_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5978,8 +5978,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_1_3_32",
-      "resource_auxiliary_value": 18215
+      "resource_identifier": "IDS_MS2EMPS_02_009_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -5990,8 +5990,8 @@
         "\\belectric power steering\\b",
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_1_4_31",
-      "resource_auxiliary_value": 18214
+      "resource_identifier": "IDS_MS2EMPS_02_010_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6000,8 +6000,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_1_7_23",
-      "resource_auxiliary_value": 18211
+      "resource_identifier": "IDS_MS2EMPS_02_014_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6011,8 +6011,8 @@
         "\\bassist map\\b",
         "\\bEPS\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_2_0_52",
-      "resource_auxiliary_value": 18222
+      "resource_identifier": "IDS_MS2EMPS_02_008_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6021,8 +6021,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_2_1_51",
-      "resource_auxiliary_value": 18190
+      "resource_identifier": "IDS_MS2EMPS_02_013_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6031,8 +6031,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_2_2_46",
-      "resource_auxiliary_value": 18189
+      "resource_identifier": "IDS_MS2EMPS_02_ERRTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6041,8 +6041,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_2_4_44",
-      "resource_auxiliary_value": 18187
+      "resource_identifier": "IDS_MS2EMPS_02_002_RADIOTEXT1",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6051,8 +6051,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_2_5_43",
-      "resource_auxiliary_value": 18210
+      "resource_identifier": "IDS_MS2EMPS_02_DLGTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6061,8 +6061,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_2_7_41",
-      "resource_auxiliary_value": 18194
+      "resource_identifier": "IDS_MS2EMPS_02_002_RADIOTEXT2",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6071,8 +6071,8 @@
       "matched_patterns": [
         "\\bassist map\\b"
       ],
-      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_3_4_63",
-      "resource_auxiliary_value": 18193
+      "resource_identifier": "IDS_MS2EMPS_02_SUBTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6081,8 +6081,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_PCM_05_003_002LISTTEXT156",
-      "resource_auxiliary_value": 19890
+      "resource_identifier": "IDS_PCM_05_003_002LISTTEXT193",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6091,8 +6091,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_PCM_05_003_002LISTTEXT165",
-      "resource_auxiliary_value": 19953
+      "resource_identifier": "IDS_PCM_05_003_002LISTTEXT204",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6101,8 +6101,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_PSAABS_02_001_TEXT",
-      "resource_auxiliary_value": 20205
+      "resource_identifier": "IDS_PSAABS_02_005_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6111,8 +6111,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_PSAABS_02_002_TEXT",
-      "resource_auxiliary_value": 20207
+      "resource_identifier": "IDS_PSAABS_02_SUBTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6121,8 +6121,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_PSAABS_02_003_TEXT",
-      "resource_auxiliary_value": 20204
+      "resource_identifier": "IDS_PSAABS_02_006_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6132,7 +6132,7 @@
         "\\bsteering angle sensor\\b"
       ],
       "resource_identifier": "IDS_PSAABS_02_004_TEXT",
-      "resource_auxiliary_value": 20203
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6141,8 +6141,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_PSAABS_02_006_TEXT",
-      "resource_auxiliary_value": 20202
+      "resource_identifier": "IDS_PSAABS_02_001_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6152,7 +6152,7 @@
         "\\bsteering angle sensor\\b"
       ],
       "resource_identifier": "IDS_PSAABS_02_DLGTITLE",
-      "resource_auxiliary_value": 20206
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6161,8 +6161,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_PSAABS_02_SUBTITLE",
-      "resource_auxiliary_value": 20201
+      "resource_identifier": "IDS_PSAABS_02_ERRTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6171,8 +6171,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_02_002_TEXT",
-      "resource_auxiliary_value": 24059
+      "resource_identifier": "IDS_STRACT_02_005_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6181,8 +6181,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_02_003_OPERATIONTEXT",
-      "resource_auxiliary_value": 24062
+      "resource_identifier": "IDS_STRACT_02_011_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6191,8 +6191,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_02_003_TEXT",
-      "resource_auxiliary_value": 24047
+      "resource_identifier": "IDS_STRACT_02_010_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6201,8 +6201,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_02_003_TITLE",
-      "resource_auxiliary_value": 24060
+      "resource_identifier": "IDS_STRACT_02_009_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6211,8 +6211,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_02_007_TEXT",
-      "resource_auxiliary_value": 24053
+      "resource_identifier": "IDS_STRACT_02_DLGTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6221,8 +6221,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_02_008_TEXT",
-      "resource_auxiliary_value": 24052
+      "resource_identifier": "IDS_STRACT_02_004_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6231,8 +6231,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_02_009_TEXT",
-      "resource_auxiliary_value": 24051
+      "resource_identifier": "IDS_STRACT_02_ERRTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6241,8 +6241,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_02_010_TEXT",
-      "resource_auxiliary_value": 24050
+      "resource_identifier": "IDS_STRACT_02_001_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6251,8 +6251,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_02_ERRTITLE",
-      "resource_auxiliary_value": 24057
+      "resource_identifier": "IDS_STRACT_02_SUBTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6261,8 +6261,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_03_003_TEXT",
-      "resource_auxiliary_value": 24069
+      "resource_identifier": "IDS_STRACT_03_007_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6271,8 +6271,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_03_007_TEXT",
-      "resource_auxiliary_value": 24065
+      "resource_identifier": "IDS_STRACT_03_003_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6282,7 +6282,7 @@
         "\\bsteering torque\\b"
       ],
       "resource_identifier": "IDS_STRACT_03_008_TEXT",
-      "resource_auxiliary_value": 24070
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6291,8 +6291,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_03_009_TEXT",
-      "resource_auxiliary_value": 24073
+      "resource_identifier": "IDS_STRACT_03_002_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6301,8 +6301,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_03_013_TEXT",
-      "resource_auxiliary_value": 24078
+      "resource_identifier": "IDS_STRACT_03_001_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6311,8 +6311,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_03_014_TEXT",
-      "resource_auxiliary_value": 24064
+      "resource_identifier": "IDS_STRACT_03_ERRTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6322,7 +6322,7 @@
         "\\bsteering torque\\b"
       ],
       "resource_identifier": "IDS_STRACT_03_DLGTITLE",
-      "resource_auxiliary_value": 24076
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6331,8 +6331,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_03_ERRTITLE",
-      "resource_auxiliary_value": 24075
+      "resource_identifier": "IDS_STRACT_03_SUBTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6341,8 +6341,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_03_SUBTITLE",
-      "resource_auxiliary_value": 24077
+      "resource_identifier": "IDS_STRACT_03_013_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6352,7 +6352,7 @@
         "\\bsteering torque\\b"
       ],
       "resource_identifier": "IDS_STRACT_04_002_TEXT",
-      "resource_auxiliary_value": 24080
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6361,8 +6361,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_04_003_TEXT",
-      "resource_auxiliary_value": 24089
+      "resource_identifier": "IDS_STRACT_04_008_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6371,8 +6371,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_04_004_TEXT",
-      "resource_auxiliary_value": 24084
+      "resource_identifier": "IDS_STRACT_04_007_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6381,8 +6381,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_04_007_TEXT",
-      "resource_auxiliary_value": 24082
+      "resource_identifier": "IDS_STRACT_04_001_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6391,8 +6391,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_04_008_TEXT",
-      "resource_auxiliary_value": 24081
+      "resource_identifier": "IDS_STRACT_04_ERRTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6402,7 +6402,7 @@
         "\\bsteering torque\\b"
       ],
       "resource_identifier": "IDS_STRACT_04_DLGTITLE",
-      "resource_auxiliary_value": 24087
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6411,8 +6411,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_04_ERRTITLE",
-      "resource_auxiliary_value": 24086
+      "resource_identifier": "IDS_STRACT_04_SUBTITLE",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6421,8 +6421,8 @@
       "matched_patterns": [
         "\\bsteering torque\\b"
       ],
-      "resource_identifier": "IDS_STRACT_04_SUBTITLE",
-      "resource_auxiliary_value": 24088
+      "resource_identifier": "IDS_STRACT_04_003_TEXT",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6431,8 +6431,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_UT_08_004_002LISTTEXT278",
-      "resource_auxiliary_value": 25462
+      "resource_identifier": "IDS_UT_08_004_002LISTTEXT709",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6441,8 +6441,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_UT_08_004_002LISTTEXT285",
-      "resource_auxiliary_value": 25517
+      "resource_identifier": "IDS_UT_08_004_002LISTTEXT717",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6451,8 +6451,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_UT_08_004_002LISTTEXT611",
-      "resource_auxiliary_value": 25147
+      "resource_identifier": "IDS_UT_08_004_002LISTTEXT482",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6461,8 +6461,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_UT_08_004_002LISTTEXT691",
-      "resource_auxiliary_value": 25089
+      "resource_identifier": "IDS_UT_08_004_002LISTTEXT284",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6471,8 +6471,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_UT_08_004_002LISTTEXT707",
-      "resource_auxiliary_value": 25055
+      "resource_identifier": "IDS_UT_08_004_002LISTTEXT302",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6481,8 +6481,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_UT_08_004_002LISTTEXT92",
-      "resource_auxiliary_value": 25324
+      "resource_identifier": "IDS_UT_08_004_002LISTTEXT193",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6491,8 +6491,8 @@
       "matched_patterns": [
         "\\bpower steering\\b"
       ],
-      "resource_identifier": "IDS_UT_08_ERRTITLE",
-      "resource_auxiliary_value": 25436
+      "resource_identifier": "IDS_UT_08_004_002LISTTEXT204",
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6502,7 +6502,7 @@
         "\\bsteering angle sensor\\b"
       ],
       "resource_identifier": "IDS_VGRS_01_001_TEXT",
-      "resource_auxiliary_value": 25832
+      "resource_secondary_identifier": ""
     },
     {
       "kind": "utility_string",
@@ -6511,8 +6511,8 @@
       "matched_patterns": [
         "\\bsteering angle sensor\\b"
       ],
-      "resource_identifier": "IDS_VGRS_03_DLGTITLE",
-      "resource_auxiliary_value": 25884
+      "resource_identifier": "IDS_VGRS_03_001_TEXT",
+      "resource_secondary_identifier": ""
     }
   ]
 }

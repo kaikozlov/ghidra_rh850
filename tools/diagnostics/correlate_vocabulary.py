@@ -524,7 +524,7 @@ def correlate_utility_strings(
             "string_index": proc.get("string_index"),
             "matched_patterns": proc.get("matched_patterns", []),
             "resource_identifier": proc.get("resource_identifier"),
-            "resource_auxiliary_value": proc.get("resource_auxiliary_value"),
+            "resource_secondary_identifier": proc.get("resource_secondary_identifier"),
             "source_db": "U_English",
             "annotation_action": "vocabulary",
             "note": "Steering-anchored text from U_English.ddb. Resource IDs "

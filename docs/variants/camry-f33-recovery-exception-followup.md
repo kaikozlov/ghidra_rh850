@@ -730,11 +730,19 @@ invalidate these particular stock-code traces. The reconstruction remains
 ### OEM labels and peer observations are not recovery commands
 
 The suggestive GTS+ text about putting an ECU into reprogramming mode before
-an ignition cycle resolves to `U_English.ddb` entry **4035**, resource identifier
-**`IDS_BSM_20_004_TEXT`**. Its BSM-associated identifier is not evidence of an
-EPS recovery procedure. The generic M_English labels “ECU Reprogramming” and
+an ignition cycle is `U_English.ddb` text entry **4035**. The original BSM
+attribution here was wrong: the resource table was joined by row ordinal instead
+of its explicit text index. Current `UtilityDB.dll` consumes resource-record
+`+0xA0` as that index; the corrected identifier is **`IDS_CCU_01_011_TEXT1`**,
+part of the **Cable Check Utility**. Its neighboring pages test the engine's
+SIL/L-line rather than describe an EPS recovery flow. Current
+`UtilityExNK2.dll!Ex2CCU_01_SetProgrammingVoltage @ 10021E50` calls the physical
+programming-voltage helper for DLC pin 15; the paired release is `10021D90`.
+This is not a CAN request. The generic M_English labels “ECU Reprogramming” and
 “ECU Reprogramming (Part#:89650-*****)” likewise do not, by themselves, identify
-an independently running F33 programming service.
+an independently running F33 programming service. See the corrected resource
+layout in `docs/tooling/techstream.md` §6.2.1; source conclusions must not retain
+the former BSM interpretation.
 
 There is a concrete **read-only peer-side observer**, distinct from a repair:
 current `Brk_Bst_P5.ddb` category **466** defines

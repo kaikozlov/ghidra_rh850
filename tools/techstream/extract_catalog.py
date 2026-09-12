@@ -207,8 +207,8 @@ def extract_utility_strings(
                 "resource_identifier": (
                     metadata.identifier if metadata is not None else None
                 ),
-                "resource_auxiliary_value": (
-                    metadata.auxiliary_value if metadata is not None else None
+                "resource_secondary_identifier": (
+                    metadata.secondary_identifier if metadata is not None else None
                 ),
             })
     return entries

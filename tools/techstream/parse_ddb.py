@@ -620,12 +620,13 @@ class ECUDataBase:
         return self.path.stem
 
 
-@dataclass
+@dataclass(frozen=True)
 class StringMetadataEntry:
-    """One U_English type-1 identifier record, aligned by string index."""
+    """A type-1 resource row: two 40-wchar keys and an explicit text index."""
 
     identifier: str
-    auxiliary_value: int
+    string_index: int
+    secondary_identifier: str = ""
 
 
 @dataclass
@@ -636,6 +637,19 @@ class StringDataBase:
     decompressed: bytes
     pool_offset: int      # byte offset where string data begins (after offset table)
     metadata: list[StringMetadataEntry] | None = None
+    _metadata_by_string_index: dict[int, StringMetadataEntry] = field(
+        init=False, repr=False, compare=False, default_factory=dict
+    )
+
+    def __post_init__(self) -> None:
+        # UtilityDB!SetRecString consumes the row's +0xA0 u32, not its ordinal.
+        # Preserve raw row order in metadata while indexing the explicit link.
+        for entry in self.metadata or ():
+            if not 1 <= entry.string_index <= self.entry_count:
+                raise ValueError(f"resource text index out of range: {entry.string_index}")
+            if entry.string_index in self._metadata_by_string_index:
+                raise ValueError(f"ambiguous resource text index: {entry.string_index}")
+            self._metadata_by_string_index[entry.string_index] = entry
 
     def get_string(self, index: int) -> str | None:
         """Resolve a 1-based string index to text.
@@ -645,7 +659,7 @@ class StringDataBase:
         offset table is ``[u32 offset_in_pool][u16 byte_length]``.  The string
         lives at ``pool_offset + entry.offset``, encoded UTF-16LE.
         """
-        if index == 0 or index > self.entry_count:
+        if index <= 0 or index > self.entry_count:
             return None
         entry_off = (index - 1) * 6
         if entry_off + 6 > len(self.decompressed):
@@ -663,9 +677,7 @@ class StringDataBase:
 
     def get_metadata(self, index: int) -> StringMetadataEntry | None:
         """Return the U_English identifier record for a 1-based string index."""
-        if self.metadata is None or index == 0 or index > len(self.metadata):
-            return None
-        return self.metadata[index - 1]
+        return self._metadata_by_string_index.get(index)
 
     def search(self, term: str, limit: int = 20) -> list[tuple[int, str]]:
         """Full-text search for a term in the string pool (case-insensitive)."""
@@ -883,13 +895,11 @@ class DDBParser:
             metadata = []
             for index in range(entry_count):
                 record = metadata_data[index * record_size : (index + 1) * record_size]
-                identifier = record[:160].decode(
-                    "utf-16-le", errors="strict"
-                ).split("\x00", 1)[0]
                 metadata.append(
                     StringMetadataEntry(
-                        identifier=identifier,
-                        auxiliary_value=struct.unpack_from("<I", record, 160)[0],
+                        identifier=_fixed_utf16le(record[:80]),
+                        secondary_identifier=_fixed_utf16le(record[80:160]),
+                        string_index=struct.unpack_from("<I", record, 160)[0],
                     )
                 )
 

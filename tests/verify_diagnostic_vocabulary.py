@@ -98,6 +98,35 @@ mappings = vocab["mappings"]
 tables = extract_all()
 
 
+# A deliberately reordered resource table must not pair row1 with string1.
+# This is synthetic format behavior, independent of proprietary inputs.
+from parse_ddb import StringDataBase, StringMetadataEntry  # noqa: E402
+
+resource_rows = [
+    StringMetadataEntry("IDS_SECOND", 2, "IDS_SHARED"),
+    StringMetadataEntry("IDS_FIRST", 1),
+]
+resource_db = StringDataBase(Path("synthetic"), 2, b"", 0, resource_rows)
+check("shuffled resource table resolves by its explicit text index",
+      resource_db.get_metadata(1) == resource_rows[1]
+      and resource_db.get_metadata(2) == resource_rows[0]
+      and resource_db.get_metadata(2).secondary_identifier == "IDS_SHARED")
+check("missing and invalid resource/string indices do not alias the last row",
+      all(resource_db.get_metadata(i) is None for i in (-1, 0, 3))
+      and resource_db.get_string(-1) is None)
+for bad_rows, label in (
+    ([StringMetadataEntry("IDS_BAD", 3)], "out-of-range"),
+    ([StringMetadataEntry("IDS_A", 1), StringMetadataEntry("IDS_B", 1)], "duplicate"),
+):
+    try:
+        StringDataBase(Path("synthetic"), 2, b"", 0, bad_rows)
+    except ValueError:
+        rejected = True
+    else:
+        rejected = False
+    check(f"{label} resource text mapping is rejected rather than misattributed", rejected)
+
+
 print("== vocabulary artifact structure ==")
 check("vocabulary has firmware_sha256", "firmware_sha256" in vocab)
 check("vocabulary firmware SHA256 matches actual firmware",
@@ -724,10 +753,11 @@ u_strings = parser.load_string_db(DB_PATH / "U_English.ddb")
 check("U_English type-1 metadata section has all 25,957 records",
       u_strings.metadata is not None and len(u_strings.metadata) == 25_957)
 torque_metadata = u_strings.get_metadata(6585)
-check("U_English metadata aligns resource ID with string index 6585",
+check("U_English resource follows explicit text index, not resource row ordinal",
       torque_metadata is not None
-      and torque_metadata.identifier == "IDS_D_EFI_02_003_TITLE"
-      and torque_metadata.auxiliary_value == 6490
+      and torque_metadata.identifier == "IDS_D_EPS_01_007_TITLE"
+      and torque_metadata.string_index == 6585
+      and u_strings.metadata[6584].identifier == "IDS_D_EFI_02_003_TITLE"
       and u_strings.get_string(6585) == "Torque Sensor Writing")
 
 # Verify entries carry multi-DB resolutions

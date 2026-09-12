@@ -2584,9 +2584,34 @@ silently omitted 10,659 of 25,361 type-2 sections.
 The generated artifacts are deterministic. Tests compare committed JSON to a
 fresh in-memory rebuild, reject malformed LZSS streams, wrong format dispatch,
 bad format-6 magic, and fractional record layouts, and independently verify all
-raw section-directory entries. `U_English.ddb` also carries 25,957 aligned
-resource identifiers; those group UI text but do not encode ECU ownership or
-firmware routine linkage. Its former 122
+raw section-directory entries. V18 `U_English.ddb` carries 25,957 resource
+records, but their row order is **not** the string-index order. Each 164-byte
+record contains two 40-wchar resource keys at `+0x00`/`+0x50` and an explicit
+1-based text index at `+0xA0`. Current `UtilityDB.dll` proves the join:
+`CDbViewerResourceTable::FindDbItem @ 10009E20` selects the first or second key;
+`CDbViewerResourceResRecords::SetRecString @ 10009C40` loads the u32 at `+0xA0`
+(`10009D14`/`10009D84`) and passes it to `CDbStringTable::GetString @ 10005480`.
+`GetUtilityString_DT.dll` uses this table via class `0x601` for both resource-key
+lookup exports. The decoder preserves record order but `get_metadata(text_index)`
+now follows that explicit index, not a zipped/ordinal association.
+
+This corrects real misattributions: V18 text 6585, **Torque Sensor Writing**,
+belongs to `IDS_D_EPS_01_007_TITLE`, not the unrelated diesel-EFI resource at raw
+row 6585. Current GTS+ text 4035, the pre-ignition-cycle reprogramming message,
+belongs to `IDS_CCU_01_011_TEXT1` in the cable-check utility, not BSM. The current
+NAD-firmware wizard is `DCM_19`, not the resource family returned by the earlier
+ordinal join. All 30 current regional/language U databases have 26,291 explicit
+links and 190 nonempty secondary keys; the corresponding V18 language joins and
+synthetic shuffled-index regressions pass the narrow vocabulary suite. Both
+calibration-focused generated artifacts are regenerated; utility text and all
+nonutility/firmware mappings are unchanged. Resource keys group UI text but
+still do not independently establish an exact ECU or firmware routine binding.
+
+Primary current inputs are installed `UtilityDB.dll` (SHA-256
+`bc0682cf47b604a25a0591b8887be31cc06206d1e4caaba4d38556a4e8f35876`) and
+`GetUtilityString_DT.dll` (`5ae4252d9f9d9a8ce16c9db0111f8e215529945ec47a1e2af307228cfc2e11c0`),
+plus each original U-language database. No protected-body reconstruction is
+needed for those two installed native readers. Its former 122
 "utility procedure" records were produced by substring search (including
 `eps` inside `steps`) and per-term truncation. They are now explicitly labeled
 steering-anchored `utility_string` vocabulary, never recovered procedures.
