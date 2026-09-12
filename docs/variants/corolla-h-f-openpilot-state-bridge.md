@@ -774,12 +774,14 @@ actuator-response policy. The third is no longer framed as an undiscovered OEM
 Q-current threshold: static H/F evidence did not recover one in the cooperative
 supervisor. Secondary B6 fields 258/260/262/263/264/265 are **not free safety
 parameters**: the EPS-consumer-derived minimal ID11 candidate is
-`1/0/0/0/0/0`, but production TX remains disabled until its cross-ECU effects and
-stock-LTA behavior are validated on the isolated relay-correct path and the result is
-whitelisted. Relay-side ownership/suppression and stock sender cadence remain open.
-Receiver-valid replacement freshness construction is now closed; the remaining SecOC
-deployment blocker is the actual slot-4 signing primitive/key (or a completed H/F
-command-5 runtime carrier with live permission/latency).
+`1/0/0/0/0/0`. The current inline helper does not synthesize that tuple: it
+changes only B3..B5 and retains the exact car's native secondary fields and
+signal261. SID23 status exposes those persistent scalar destinations so the
+native tuple can be reviewed before any stationary C7 experiment. Because this
+design mutates an EPS-local native B6 in place, it introduces no competing B6
+sender and needs no relay-side suppression. It does require the native carrier
+to exist, and production TX remains disabled until the local native-MAC oracle,
+slot-4 permission/latency, native tuple, and stock-LTA behavior are validated.
 
 #### Competing valid B6 senders: receiver arbitration and suppression requirement
 
@@ -869,6 +871,19 @@ decompiler evidence:
 `data/generated/corolla_8965H1202000_panda_lateral_safety_decompiler_evidence.json`.
 
 ### H/F command-5 portability and target-native carrier candidate
+
+**2026-09-11 supersession.** The earlier 462-byte direct command-5 probe below
+depended on an XCP mailbox and is not the current Corolla steering workflow.
+The current split resident uses extended `0x1FDC0002` C7 frames on Toyota-B bus
+1 for control and application UDS SID `0x23` RMBA for attestation/status. Its
+copyable car kit contains no XCP client. The 522-byte high resident and 460-byte
+low helper are built by
+`exploit/ephemeral_runtime/build_corolla_hf_b6_inline_signer.py`; live Corolla
+command-5/MAC/timing qualification remains open. The helper mutates only ID and
+target (B3..B5), retaining the native H/F secondary fields and signal261 rather
+than copying Camry's target-specific B6/B8/B9 values. The retained native tuple
+must be captured and compared with the firmware-derived minimal ID11 candidate
+before interpreting a steering result.
 
 The useful **software** part of the Sienna command-5 signing work transfers to
 H/F. Exact H record 0 at `0x27C88` selects completion `0x82F5C`, adapter
@@ -1033,9 +1048,15 @@ actuation. Before a real H/F openpilot port, recover and validate:
 - dynamic validation of the now-closed incoming `0x51E B0[7]` Ready Status through
   value `0`, plus temporary/permanent steering-fault semantics; no EPS-Tx Ready
   duplicate is required for basic observation;
-- stock B6 wall-clock cadence and the active-LTA template for the bounded secondary B6 fields. The replacement sender's SecOC message8 start/progression is statically closed by `0x00F` re-anchoring and no longer requires recovery of Toyota's B6-local counter-start policy;
-- relay-correct **physical stock-B6 producer isolation/suppression point** and dynamic confirmation of the statically closed nominal **35 ms** seven-tick loss behavior (receiver-side competing-stream arbitration is already closed above);
-- live proof that the audited 332-byte H/F carrier canary survives into healthy application scheduling, then confirmation that provisioned slot4 permits command 5 with acceptable latency using the audited 462-byte signer (or recover the slot4 secret/another approved MAC path); and
+- live confirmation that an EPS-local native B6 reaches the inline hook, plus
+  its wall-clock cadence and persistent secondary-field tuple. The helper
+  retains native signal261 and secondary fields, and `awaiting-native-b6` is a
+  hard carrier failure for this construction rather than permission to create a
+  second B6 sender;
+- live proof that the split 522-byte resident / 460-byte helper survives into
+  healthy application scheduling, then confirmation that provisioned slot4
+  permits command 5 with acceptable latency through the C7/SID23 workflow (or
+  recover the slot4 secret/another approved MAC path); and
 - fallback/coexistence behavior with brake/AEB and stock LTA/LDA/LCA functions.
 
 The machine-readable evidence is

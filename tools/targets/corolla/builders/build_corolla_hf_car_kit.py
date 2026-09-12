@@ -19,7 +19,6 @@ RUNTIME_FILES = (
     "exploit/common/ram_exec.py",
     "exploit/ephemeral_runtime/corolla_hf_b6_inline_signer.py",
     "exploit/ephemeral_runtime/f33_panda_lease.sh",
-    "exploit/followups/xcp_read_probe.py",
 )
 
 
@@ -33,6 +32,16 @@ def copy(src: Path, dst: Path) -> None:
 
 
 def build(target: str, out: Path) -> dict:
+    if out.exists():
+        retained = sorted(path for path in out.rglob("*") if path.is_file())
+        if retained:
+            names = ", ".join(str(path.relative_to(out)) for path in retained[:5])
+            if len(retained) > 5:
+                names += f", ... ({len(retained)} files total)"
+            raise RuntimeError(
+                f"refusing to mix a new kit with retained output files in {out}: {names}; "
+                "choose a new empty --out directory"
+            )
     with tempfile.TemporaryDirectory(prefix="corolla-hf-kit-") as td:
         built = Path(td)
         subprocess.run(
@@ -71,6 +80,7 @@ def build(target: str, out: Path) -> dict:
             "./corolla-tss3-signer doctor",
             "NRTD: ./corolla-tss3-signer install /tmp/corolla-signer-install.json",
             "READY/Park: ./corolla-tss3-signer status /tmp/corolla-signer-status.json",
+            "proceed only when qualification.ready_for_stationary_c7 is true",
             "full EPS power cycle removes the resident",
         ],
     }

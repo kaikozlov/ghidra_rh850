@@ -25,6 +25,39 @@ kept as stable corpus labels, not as a claim about the wire-visible F181 primary
 This remains a distinct physical specimen from Span's Corolla despite sharing the
 same F181 primary software record.
 
+## Exact lateral qualification path
+
+Albino's physical EPS selects the repository's `8965H1202000` car-kit target:
+that target name follows the retained CodeFlash/corpus identity, while the
+installer independently requires the same car's complete application F181
+`8965F1208000 / 8A3111202000`. It must not be substituted with Span's
+`8965F1208000` target, whose secondary F181 is `8A3111213000` and whose complete
+CodeFlash hash differs.
+
+The current Corolla payload is a minimal address-and-hook adaptation of the
+Camry-proven EPS-local construction. It waits for a native B6, verifies that
+unchanged frame with the EPS's slot-4 command-5 path, then permits a fresh
+bus-1 C7 request to alter only B6 Target Lateral ID and target angle. It neither
+constructs nor transmits an independent B6 and deliberately preserves Corolla's
+native secondary fields.
+
+After building into a new empty directory and copying the resulting kit to the
+comma, the bounded first run is:
+
+```text
+NRTD:       ./corolla-tss3-signer doctor
+NRTD:       ./corolla-tss3-signer install /tmp/corolla-signer-install.json
+READY/Park: ./corolla-tss3-signer status /tmp/corolla-signer-status.json
+```
+
+Do not send an active C7 unless status reports
+`qualification.ready_for_stationary_c7=true`. `awaiting-native-b6` means no
+carrier has reached the helper yet; `native-mac-or-command5-failed` means the
+local cryptographic path failed; `native-b6-secondary-tuple-needs-review` means
+the exact car's retained fields differ from the statically derived minimal ID11
+candidate. Each result is actionable without road motion. A full EPS power
+cycle removes the volatile resident.
+
 
 ## 2026-09-11 TSS3 port architecture/change reference
 
